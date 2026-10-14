@@ -1,0 +1,57 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm install)",
+      "Bash(pnpm lint*)",
+      "Bash(pnpm typecheck*)",
+      "Bash(pnpm test*)",
+      "Bash(pnpm format*)",
+      "Bash(pnpm --filter *)",
+      "Bash(git status)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git add*)",
+      "Bash(git commit*)",
+      "Bash(docker compose*)"
+    ],
+    "ask": [
+      "Bash(pnpm add*)",
+      "Bash(pnpm remove*)",
+      "Bash(*db:migrate*)",
+      "Bash(git push*)",
+      "Bash(git checkout*)",
+      "Bash(git reset*)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./**/.env)",
+      "Read(./**/.env.*)",
+      "Read(./**/secrets/**)",
+      "Read(./**/node_modules/**)",
+      "Read(./**/dist/**)",
+      "Read(./**/.medusa/**)",
+      "Read(./pnpm-lock.yaml)",
+      "Bash(rm -rf*)",
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(npm publish*)",
+      "Bash(pnpm publish*)",
+      "Bash(curl*)",
+      "Bash(wget*)"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // empty' | xargs -r pnpm exec prettier --write --ignore-unknown >/dev/null 2>&1 || true"
+          }
+        ]
+      }
+    ]
+  }
+}

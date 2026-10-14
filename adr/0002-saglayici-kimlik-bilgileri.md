@@ -1,0 +1,25 @@
+# ADR-0002: Sağlayıcı kimlik bilgilerinin yönetimi
+
+- **Durum:** Önerildi
+- **Tarih:** —
+
+## Bağlam
+Her tenant kendi iyzico/PayTR/Geliver/e-fatura hesabını kullanır. Medusa module provider'ları izoledir:
+kendi modüllerinin container'ı dışındaki özel modüllere (ör. bir settings modülü) erişemez.
+Ayrıca secret'ların uygulama DB'sinde tutulması saldırı yüzeyini büyütür.
+
+## Karar
+- Sağlayıcı kimlik bilgileri instance'a **ortam değişkeni / secret** olarak enjekte edilir; provider'lar options/env'den okur.
+- Doğruluk kaynağı: secret store (F12'de Control Plane arayüzüyle yönetilir; öncesinde provisioning script'i).
+- Anahtar değişikliği → secret güncelle → rolling restart.
+- Instance admin'indeki "Entegrasyonlar" sayfası secret göstermez/düzenlemez; durum, bağlantı testi ve son hata gösterir.
+
+## Alternatifler
+| Seçenek | Artı | Eksi |
+|---|---|---|
+| Admin'den girilip DB'de şifreli saklama | Anlık değişiklik | Provider izolasyonuyla çatışır; DB sızıntısında anahtarlar risk altında |
+| **Env/secret store + restart** | Basit, güvenli, Medusa ile uyumlu | Değişiklik restart gerektirir |
+
+## Sonuçlar
+- F12 Control Plane'de tenant'ın anahtar girdiği güvenli bir form gerekir.
+- Provider'lar açılışta anahtar formatını ve sandbox/prod tutarlılığını doğrular.
