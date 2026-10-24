@@ -100,7 +100,7 @@ F17 öncesinde tenant'lar F16 script'leriyle elle açılır.
   upload validator (magic bytes, boyut, piksel), CSV/Excel hücre kaçışlama, güvenli XML parser (DTD/entity kapalı), zip çıkarma sınırları
 - F2.10 İstek katmanı güvenliği: Redis tabanlı rate limit middleware (uç bazlı profiller), güvenlik header'ları, CORS allowlist, hata yanıtı sanitizasyonu,
   pino yapılandırılmış log + redaksiyon listesi, CSRF (adr/0004'e göre), sayfalama üst sınırı
-- F2.11 `lib/seo`: Türkçe slug üretici, `url-registry` (locale + path unique), başlık/meta şablon motoru, piksel genişliği tahmini — F3 bunu kullanır
+- F2.11 `lib/seo`: Türkçe slug üretici, başlık/meta şablon motoru, piksel genişliği tahmini; `url-registry` modülü (locale + path unique; tablo gerektirdiği için lib değil modül) — F3 bunu kullanır
 
 **KK:**
 - [ ] Feature flag kapalıyken ilgili endpoint/akış devreye girmiyor (testli)

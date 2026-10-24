@@ -63,3 +63,14 @@ varsayılan olarak bearer JWT döndürür; cookie/session desteği de vardır (d
 - **`Secure` cookie varsayılan olarak açık:** Yalnızca `NODE_ENV` açıkça `development` veya `test` ise kapanır. Env şemasında `NODE_ENV`'in varsayılanı yok; NODE_ENV'i ayarlanmamış bir dağıtım güvenli ayarlarla açılır. Yerelde `medusa develop` ve jest NODE_ENV'i kendisi ayarlar.
 - **Session ömrü açık yazıldı:** `sessionOptions.ttl` = 10 saat (Medusa varsayılanı), bearer token'ın 1 günlük ömründen kısa. Testte cookie'nin `Expires` değeri kontrol edilir.
 - **F16 için not:** Üretim imajı `NODE_ENV=production` ayarlamalıdır. `REDIS_URL` zorunluluğu NODE_ENV'e bağlıdır.
+
+## F2.10 için doğrulananlar (2026-10-24, F2 planlaması)
+- **Sıra:** `middlewares.ts`'teki middleware'ler şunlardan **sonra** çalışır: body parser, `/admin` auth, `/store` publishable key ve customer auth. `/auth/*` route'larında yalnızca CORS vardır, auth yoktur.
+- **Yöntem ayrımı:**
+  - `req.auth_context` isteğin cookie ile mi bearer ile mi doğrulandığını göstermez.
+  - Cookie ve bearer birlikte gelirse session öncelikli olur. `req.session?.auth_context` doluysa istek cookie ile doğrulanmıştır.
+  - Secret API key ile gelen istekte `actor_type: "api-key"` olur.
+- **CSRF middleware'inin kapsamı:**
+  - Cookie taşıyan her mutasyon (POST/PUT/PATCH/DELETE): `/store/*`, `/auth/*` ve **`/admin/*`**. Admin dashboard da session cookie kullanır.
+  - Origin (yoksa Referer) ilgili CORS allowlist'inde olmalıdır. Yoksa 403 döner.
+  - Custom header şartı: Storefront (F18) için zorunludur. Admin dashboard'un kendi isteklerinde ayırt edici bir header gönderip göndermediği S3'te Playwright ile doğrulanır. Göndermiyorsa admin'de Origin kontrolü ve `Content-Type: application/json` şartı uygulanır.

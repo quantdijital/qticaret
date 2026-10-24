@@ -20,12 +20,14 @@
 | LLM/AI sağlayıcısıyla veri işleme sözleşmesi ve yerleşim (yalnızca ürün verisi gönderilse de) | KVKK danışmanı | F10.13, ADR-0005 |
 | Ters ibraz (chargeback) süreçleri ve belge gereksinimleri | Ödeme sağlayıcı + avukat | F6.7 |
 | Adres referans verisi (il/ilçe/mahalle/posta kodu) kaynağı ve kullanım lisansı: PTT/TÜİK verisinin ticari kullanımı ve tenant'lara dağıtımı | Avukat | F1.3, F16 (ADR-0008) |
+| Denetim kaydı ve erişim bilgisi (IP, user agent, okuma kayıtları) saklama süresi; öneri 2 yıl | KVKK danışmanı | F2.5, F13 (ADR-0011) |
 
 ## Mali ve vergi
 | Kalem | Sorumlu / danışılacak | Etkilediği faz |
 |---|---|---|
 | E-fatura/e-arşiv kuralları: bireysel alıcıda TCKN yoksa uygulama, iade faturası | Mali müşavir | F8 |
 | KDV oran grupları (%20/%10/%1) ve kargo bedelinin KDV oranı; tenant ürün gruplarının hangi orana düştüğü | Mali müşavir | F1.2 (ADR-0007) |
+| Kuruş yuvarlama kuralı (yarım yukarı) ve sepet indiriminin kalemlere dağıtımının faturadaki karşılığı | Mali müşavir | F2.7, F4.7, F8 (ADR-0010) |
 | İndirim ve kargo bedelinin faturada gösterimi | Mali müşavir | F4.7, F8 |
 | Kapıda ödeme tahsilat mutabakatı ve muhasebeleştirme | Mali müşavir | F6.6, F11.3 |
 | Platformun kendi abonelik faturası ve e-fatura mükellefiyeti | Mali müşavir | F17.3 |
