@@ -1,5 +1,8 @@
 {
   "qticaret": {
+    "common": {
+      "loading": "Loading"
+    },
     "billingProfile": {
       "title": "Billing details",
       "empty": "The customer has not entered billing details yet.",

@@ -1,5 +1,8 @@
 {
   "qticaret": {
+    "common": {
+      "loading": "Yükleniyor"
+    },
     "billingProfile": {
       "title": "Fatura bilgileri",
       "empty": "Müşteri henüz fatura bilgisi girmedi.",

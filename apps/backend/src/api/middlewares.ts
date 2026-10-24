@@ -1,4 +1,10 @@
-import { defineMiddlewares, validateAndTransformQuery } from "@medusajs/framework/http"
+import {
+  authenticate,
+  defineMiddlewares,
+  validateAndTransformBody,
+  validateAndTransformQuery,
+} from "@medusajs/framework/http"
+import { StorePostBillingProfile } from "./store/customers/me/billing-profile/validators"
 import {
   StoreGetTrDistricts,
   StoreGetTrNeighborhoods,
@@ -46,6 +52,21 @@ export default defineMiddlewares({
       matcher: "/store/carts",
       methods: ["POST"],
       middlewares: [validateTrAddresses([...CART_ADDRESSES])],
+    },
+    // F1.5: billing profile; the explicit authenticate keeps the route
+    // protected even if core matchers for /store/customers/me change.
+    {
+      matcher: "/store/customers/me/billing-profile",
+      methods: ["GET"],
+      middlewares: [authenticate("customer", ["session", "bearer"])],
+    },
+    {
+      matcher: "/store/customers/me/billing-profile",
+      methods: ["POST"],
+      middlewares: [
+        authenticate("customer", ["session", "bearer"]),
+        validateAndTransformBody(StorePostBillingProfile),
+      ],
     },
     {
       matcher: "/store/carts/:id",

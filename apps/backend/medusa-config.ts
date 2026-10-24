@@ -16,5 +16,11 @@ module.exports = defineConfig({
       cookieSecret: env.COOKIE_SECRET,
     },
   },
-  modules: [{ resolve: "./src/modules/tr-address" }],
+  modules: [
+    { resolve: "./src/modules/tr-address" },
+    {
+      resolve: "./src/modules/billing-profile",
+      options: { encryptionKey: env.PII_ENCRYPTION_KEY, hashKey: env.PII_HASH_KEY },
+    },
+  ],
 })

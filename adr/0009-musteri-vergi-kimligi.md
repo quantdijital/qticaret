@@ -1,6 +1,6 @@
 # ADR-0009: Müşteri vergi kimliği (TCKN / VKN) saklama ve gösterimi
 
-- **Durum:** Önerildi (F1.5 oturumunda kabul edilecek)
+- **Durum:** Kabul edildi (2026-10-24, F1 S7)
 - **Tarih:** 2026-10-24
 
 ## Bağlam
@@ -18,7 +18,7 @@ Medusa 2.21.2'de doğrulananlar:
 - **Admin müşteri listesi:** Sütunları genişletilemiyor; detay sayfasında `customer.details.*` widget bölgeleri var.
 - **Bağlantı:** Müşteriye `defineLink` ile özel bir modül bağlanabilir.
 
-## Karar (öneri)
+## Karar
 - **Ayrı modül:** `billing-profile` modülü kurulur. Müşteri ile 1-1 link kurulur, `metadata` kullanılmaz.
   - Alanlar: `type` (bireysel/kurumsal), `legal_name`, `tax_office`, `tax_id_encrypted`, `tax_id_hash`, `tax_id_last4`.
 - **Şifreleme:**
@@ -45,3 +45,15 @@ Medusa 2.21.2'de doğrulananlar:
   - F8 e-fatura tam değeri yalnızca fatura oluşturma adımında çözer.
   - F2.5 audit log okuma kaydını ekler.
   - F12 "tam değeri göster" yetkisini ekler.
+
+## Uygulama (F1 S7)
+- **Modül:** `src/modules/billing-profile`.
+  - Anahtarlar modül seçeneği olarak verilir (`PII_ENCRYPTION_KEY`, `PII_HASH_KEY`; env şemasında 64 hex karakter zorunlu). Anahtara yalnızca modül erişir.
+  - `prepareProfileData` doğrular, şifreler (AES-256-GCM, alana bağlı AAD) ve HMAC'ler. `revealTaxId` yalnızca F8 içindir.
+- **Kurumsal profil:** VKN veya TCKN kabul eder (şahıs şirketi). Bireysel profil yalnızca TCKN kabul eder.
+- **Workflow:** `billing-profile-upsert-for-customer`. Oluşturma veya güncelleme ve link adımlarının hepsinde compensation var. Girdide düz TCKN taşındığı için workflow `store` ile çalıştırılmamalı.
+- **Store API:** `GET/POST /store/customers/me/billing-profile` (session veya bearer). Hata mesajları i18n anahtarıdır (`billing_profile.tax_id_invalid`, `billing_profile.tax_office_required`) ve numarayı tekrar etmez.
+- **Admin:** `GET /admin/customers/:id/billing-profile` (maskeli) ve `customer.details.after` widget'ı.
+- **Silme:** Medusa'nın müşteri silme workflow'u link'leri kaldırmadığı için link'in `deleteCascade`'i tetiklenmiyor. `deleteCustomersWorkflow.hooks.customersDeleted` profili soft-delete eder (compensation ile).
+- **Kabul edilen risk:** Admin, `GET /admin/customers?fields=*billing_profile` ile şifreli değeri ve HMAC'i görebilir; açık değeri göremez. HMAC anahtarsız kaba kuvvete dayanıklıdır. Alan bazlı admin yetkisi F12'de ele alınır.
+- **Kanıt:** `integration-tests/http/billing-profile.spec.ts`. TCKN yanıtlarda, `billing_profile` ve `workflow_execution` tablolarında ve stdout/stderr loglarında açık metin olarak yok.

@@ -8,6 +8,7 @@
     "*_CORS",
     "JWT_SECRET",
     "COOKIE_SECRET",
+    "PII_*",
     "DB_*",
     "MEDUSA_*",
     "S3_*",

@@ -23,6 +23,9 @@ const secret = z
   .string()
   .min(SECRET_MIN_LENGTH, `must be at least ${String(SECRET_MIN_LENGTH)} characters`)
 
+// 32 random bytes as hex, the form `openssl rand -hex 32` produces (adr/0009)
+const key256 = z.string().regex(/^[0-9a-fA-F]{64}$/, "must be 64 hex characters (32 bytes)")
+
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "staging", "production"]).default("development"),
   DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/, error: "must be a postgres:// URL" }),
@@ -32,6 +35,8 @@ const envSchema = z.object({
   AUTH_CORS: originList,
   JWT_SECRET: secret,
   COOKIE_SECRET: secret,
+  PII_ENCRYPTION_KEY: key256,
+  PII_HASH_KEY: key256,
 })
 
 export type Env = z.infer<typeof envSchema>

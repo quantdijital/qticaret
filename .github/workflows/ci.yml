@@ -44,7 +44,7 @@ jobs:
       # printed and need no masking
       - name: Generate throwaway secrets
         run: |
-          for name in JWT_SECRET COOKIE_SECRET; do
+          for name in JWT_SECRET COOKIE_SECRET PII_ENCRYPTION_KEY PII_HASH_KEY; do
             echo "$name=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
           done
       - run: pnpm install --frozen-lockfile
@@ -87,7 +87,7 @@ jobs:
       # printed and need no masking
       - name: Generate throwaway secrets
         run: |
-          for name in JWT_SECRET COOKIE_SECRET; do
+          for name in JWT_SECRET COOKIE_SECRET PII_ENCRYPTION_KEY PII_HASH_KEY; do
             echo "$name=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
           done
       - run: pnpm install --frozen-lockfile

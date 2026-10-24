@@ -1,8 +1,10 @@
+import { randomBytes } from "node:crypto"
 import { EnvValidationError, parseEnv } from "../env"
 
 // Test-only values, generated per run so no fixed secret lives in the repo (docs/04)
 const jwtSecret = "j".repeat(16) + Math.random().toString(36).padEnd(16, "x")
 const cookieSecret = "c".repeat(16) + Math.random().toString(36).padEnd(16, "x")
+const hexKey = () => randomBytes(32).toString("hex")
 
 const validEnv = {
   DATABASE_URL: "postgres://postgres:pw@localhost:55432/qticaret",
@@ -12,6 +14,8 @@ const validEnv = {
   AUTH_CORS: "http://localhost:9000,http://localhost:8000",
   JWT_SECRET: jwtSecret,
   COOKIE_SECRET: cookieSecret,
+  PII_ENCRYPTION_KEY: hexKey(),
+  PII_HASH_KEY: hexKey(),
 }
 
 function errorOf(source: Record<string, string | undefined>): string {
@@ -59,6 +63,15 @@ describe("parseEnv", () => {
     expect(
       errorOf({ ...validEnv, STORE_CORS: "http://localhost:8000,javascript:alert(1)" })
     ).toContain("STORE_CORS: must be a comma-separated list of http(s) origins")
+  })
+
+  it("requires 32-byte hex PII keys", () => {
+    expect(errorOf({ ...validEnv, PII_ENCRYPTION_KEY: undefined })).toContain(
+      "PII_ENCRYPTION_KEY: is missing"
+    )
+    expect(errorOf({ ...validEnv, PII_HASH_KEY: "ab".repeat(16) })).toContain(
+      "PII_HASH_KEY: must be 64 hex characters (32 bytes)"
+    )
   })
 
   it("lists every problem in a single error", () => {
