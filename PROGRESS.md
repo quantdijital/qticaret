@@ -3,9 +3,33 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**F2 — Platform çekirdek modülleri + güvenlik tabanı** (devam; S1, S2 /13 bitti). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
+**F2 — Platform çekirdek modülleri + güvenlik tabanı** (devam; S1, S2, S4 /13 bitti; S7 ve S6 commit bekliyor). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
 
 ## Son oturum özeti
+2026-10-24 (akşam, F2 S4): F2.9a. `safe-fetch` (SSRF) ve timing-safe karşılaştırma. Aynı otonom oturum; plan `/Users/deniz/.claude/plans/f2-s4-safe-fetch.md`.
+- **`lib/security/safe-fetch`:**
+  - Yalnızca http/https; URL'de kimlik bilgisi yok; port allowlist 80/443.
+  - Adres DNS'ten sonra kontrol edilir. IPv4'te IANA özel aralıkları; IPv6'da yalnızca `2000::/3` ve onun içindeki özel aralıklar hariç. Tek bir yasaklı DNS yanıtı isteği reddettirir.
+  - Bağlantı `lookup` ile doğrulanan IP'ye sabitlenir (rebinding).
+  - DNS c-ares ile yapılır ve iptal edilebilir; getaddrinfo libuv thread havuzunu bloke ederdi.
+  - Yönlendirme modları `same-origin` (varsayılan), `follow` ve `error`. https→http inişi ve başka origin'e giden 307/308 gövdesi reddedilir.
+  - Hatalar yalnızca bir neden kodu taşır, URL taşımaz.
+- **`safeEqual`:** SHA-256 özetlerini sabit zamanda karşılaştırır; boş beklenen değer eşleşmez.
+- **Doğrulanan (Node 24):**
+  - `http.request` özel `lookup`'ı `all: true` ile çağırıyor.
+  - WHATWG URL sayısal host biçimlerini normalize ediyor.
+  - `net.BlockList` IPv4'ü IPv4-mapped biçimde karşılaştırıyor; `::ffff:0:0/96` ana listeye konursa her IPv4 adresi reddediliyor. Adres tablosu testi bunu yakaladı, kural ayrı listeye alındı.
+- **İnceleme:** Güvenlik incelemesi yapıldı; kritik ya da yüksek bulgu yok. Düzeltilenler:
+  - başka origin'e secret header taşınması
+  - DNS'in thread havuzunu tüketmesi
+  - eksik IPv6 aralıkları
+  - NaN limitlerin sınırı kaldırması
+  - `invalid_url` hatasının `cause`'unda URL'nin kalması
+  - public API'de güvenliği kapatan test kancası
+  - HEAD/204/304 yanıtları
+- **Testler:** 118 birim testi, yerel HTTP ve TLS sunucularıyla; HTTPS'te SNI ve sabitleme testi `openssl` gerektiriyor, CI imajında var. Commit: `4e504f7`.
+- **KK:** "safe-fetch iç IP'ye ve DNS rebinding'e giden isteği reddediyor" kısmı karşılandı; aynı satırdaki SVG ve MIME kısmı S5'te.
+
 2026-10-24 (akşam, F2 S2): F2.10a. Pino logger, redaksiyon, istek ID'si, hata yanıtı sanitizasyonu. Kullanıcı dışarıdayken, açık yetkiyle plan onayı beklemeden yürütüldü (kapsam S2 → S4 → S7 → S6; belirsizlikte muhafazakâr seçenek + not).
 - **`lib/logging`:**
   - Tek logger: pino 10.4.0, stdout'a JSON. `request_id` AsyncLocalStorage'dan geliyor.
@@ -72,7 +96,7 @@
 | S1 ✅ | F2.2 + F2.7 | `lib/errors` ve `lib/money`. Birim testleri | — | 0010 ✅ |
 | S2 ✅ | F2.10a | Pino logger, redaksiyon, istek ID'si, hata yanıtı sanitizasyonu | S1 | — |
 | S3 | F2.10b | Güvenlik header'ları, Redis rate limit, CSRF, sayfalama sınırı, upload boyut kapısı. KK: login 429, header'lar | S2 | 0004 eki |
-| S4 | F2.9a | `safe-fetch` (SSRF) + timing-safe yardımcıları. KK: iç IP / rebinding reddi | S1 | — |
+| S4 ✅ | F2.9a | `safe-fetch` (SSRF) + timing-safe yardımcıları. KK: iç IP / rebinding reddi | S1 | — |
 | S5 | F2.9b | Upload validator + `/admin/uploads` kapısı, CSV kaçışlama, güvenli XML, zip sınırları. KK: SVG / sahte MIME reddi | S3, S4 | — |
 | S6 | F2.1 + F2.6 | HTTP istemcisi + `/admin/integrations/health` deseni. KK: logda Authorization yok | S2, S4 | — |
 | S7 | F2.11 | `lib/seo` + `url-registry` modülü. KK: slug tablosu, path tekilliği | S1 | — |
@@ -108,7 +132,7 @@ Görev ayrıntıları:
   - **Sayfalama:** `/store/*`'da `limit > 100` 400 döner. Admin dashboard'un kullandığı limitler Playwright ile ölçülür, ardından admin'e de uygulanır.
   - **Upload:** `/admin/uploads` için multer öncesi Content-Length üst sınırı.
   - **CORS:** Allowlist dışı origin için regresyon testi.
-- **S4:**
+- **S4:** Tamamlandı (bkz. "Son oturum özeti"). İlk plan:
   - `node:http(s)` istekleri özel bir `lookup` ile yapılır. DNS çözümünden sonra adres `net.BlockList` ile kontrol edilir:
     - özel, loopback, link-local/metadata, CGNAT, multicast, ayrılmış aralıklar
     - IPv6 ULA, IPv4-mapped, NAT64
