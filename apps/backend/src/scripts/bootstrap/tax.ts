@@ -5,6 +5,7 @@ import {
   createTaxRatesWorkflow,
   createTaxRegionsWorkflow,
 } from "@medusajs/medusa/core-flows"
+import { logger } from "../../lib/logging"
 import {
   DEFAULT_VAT_RATE,
   REDUCED_VAT_RATES,
@@ -19,14 +20,12 @@ import {
  * are.
  */
 export async function ensureVatRates(container: MedusaContainer): Promise<void> {
-  const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
-
   const productTypeIds = await ensureVatProductTypes(container)
   const taxRegion = await ensureTrTaxRegion(container)
 
   const missing = REDUCED_VAT_RATES.filter((vat) => !taxRegion.rateCodes.has(vat.code))
   if (missing.length === 0) {
-    logger.info("bootstrap: reduced KDV rates exist, keeping them")
+    logger.info({ event: "bootstrap.vat_rates_kept" }, "reduced KDV rates exist, keeping them")
     return
   }
 
@@ -41,7 +40,10 @@ export async function ensureVatRates(container: MedusaContainer): Promise<void> 
       ],
     })),
   })
-  logger.info(`bootstrap: created KDV rates ${missing.map((vat) => vat.code).join(", ")}`)
+  logger.info(
+    { event: "bootstrap.vat_rates_created", codes: missing.map((vat) => vat.code) },
+    "created KDV rates"
+  )
 }
 
 /** Returns product type ids keyed by value, creating the missing VAT types. */
@@ -75,7 +77,6 @@ interface TrTaxRegion {
 
 async function ensureTrTaxRegion(container: MedusaContainer): Promise<TrTaxRegion> {
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
-  const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
 
   const { data: regions } = await query.graph({
     entity: "tax_region",
@@ -91,7 +92,14 @@ async function ensureTrTaxRegion(container: MedusaContainer): Promise<TrTaxRegio
       await createTaxRatesWorkflow(container).run({
         input: [{ tax_region_id: region.id, ...DEFAULT_VAT_RATE, is_default: true }],
       })
-      logger.info(`bootstrap: added default rate ${DEFAULT_VAT_RATE.code}`)
+      logger.info(
+        {
+          event: "bootstrap.default_vat_rate_added",
+          taxRegionId: region.id,
+          code: DEFAULT_VAT_RATE.code,
+        },
+        "added default KDV rate"
+      )
     }
     return { id: region.id, rateCodes: new Set(rates.map((rate) => rate.code)) }
   }
@@ -109,7 +117,10 @@ async function ensureTrTaxRegion(container: MedusaContainer): Promise<TrTaxRegio
   if (!created) {
     throw new Error("bootstrap: createTaxRegionsWorkflow returned no tax region")
   }
-  logger.info(`bootstrap: created tax region ${created.id} with ${DEFAULT_VAT_RATE.code}`)
+  logger.info(
+    { event: "bootstrap.tax_region_created", taxRegionId: created.id, code: DEFAULT_VAT_RATE.code },
+    "created tax region"
+  )
   return { id: created.id, rateCodes: new Set([DEFAULT_VAT_RATE.code]) }
 }
 

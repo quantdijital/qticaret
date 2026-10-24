@@ -1,5 +1,5 @@
 import type { ExecArgs } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { logger } from "../lib/logging"
 import { TR_ADDRESS_MODULE } from "../modules/tr-address"
 import type TrAddressModuleService from "../modules/tr-address/service"
 import { readAddressRows } from "./tr-address/read-rows"
@@ -14,7 +14,6 @@ import { readAddressRows } from "./tr-address/read-rows"
  * only with a complete national dataset.
  */
 export default async function run({ container, args }: ExecArgs): Promise<void> {
-  const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
   const filePath = args.find((arg) => !arg.startsWith("--"))
   if (!filePath) {
     throw new Error("tr-address import: pass the data file path")
@@ -28,11 +27,21 @@ export default async function run({ container, args }: ExecArgs): Promise<void> 
   })
 
   logger.info(
-    `tr-address import: ${String(rows.length)} rows in ${String(Date.now() - startedAt)} ms; ` +
-      `provinces ${JSON.stringify(report.provinces)}, districts ${JSON.stringify(report.districts)}, ` +
-      `neighborhoods ${JSON.stringify(report.neighborhoods)}, rejected ${String(report.rejected.length)}`
+    {
+      event: "tr_address.import_completed",
+      rows: rows.length,
+      durationMs: Date.now() - startedAt,
+      provinces: report.provinces,
+      districts: report.districts,
+      neighborhoods: report.neighborhoods,
+      rejected: report.rejected.length,
+    },
+    "tr-address import completed"
   )
   for (const rejected of report.rejected.slice(0, 50)) {
-    logger.warn(`tr-address import: row ${String(rejected.row)} rejected (${rejected.reason})`)
+    logger.warn(
+      { event: "tr_address.row_rejected", row: rejected.row, reason: rejected.reason },
+      "row rejected"
+    )
   }
 }

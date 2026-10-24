@@ -1,6 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { createRegionsWorkflow } from "@medusajs/medusa/core-flows"
+import { logger } from "../../lib/logging"
 import {
   SYSTEM_PAYMENT_PROVIDER_ID,
   TRY_CURRENCY_CODE,
@@ -15,7 +16,6 @@ import {
  */
 export async function ensureTrRegion(container: MedusaContainer): Promise<string> {
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
-  const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
 
   const { data: countries } = await query.graph({
     entity: "country",
@@ -24,7 +24,10 @@ export async function ensureTrRegion(container: MedusaContainer): Promise<string
   })
   const existingId = countries[0]?.region_id
   if (existingId) {
-    logger.info(`bootstrap: region for ${TR_COUNTRY_CODE} exists, keeping it`)
+    logger.info(
+      { event: "bootstrap.region_kept", countryCode: TR_COUNTRY_CODE, regionId: existingId },
+      "region exists, keeping it"
+    )
     return existingId
   }
 
@@ -46,6 +49,6 @@ export async function ensureTrRegion(container: MedusaContainer): Promise<string
   if (!region) {
     throw new Error("bootstrap: createRegionsWorkflow returned no region")
   }
-  logger.info(`bootstrap: created region ${region.id}`)
+  logger.info({ event: "bootstrap.region_created", regionId: region.id }, "created region")
   return region.id
 }

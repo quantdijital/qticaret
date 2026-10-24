@@ -1,6 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { updateStoresWorkflow } from "@medusajs/medusa/core-flows"
+import { logger } from "../../lib/logging"
 import { TRY_CURRENCY_CODE } from "./constants"
 
 interface StoreCurrency {
@@ -22,7 +23,6 @@ export async function ensureStoreDefaults(
   regionId: string
 ): Promise<void> {
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
-  const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
 
   const { data: stores } = await query.graph({
     entity: "store",
@@ -39,7 +39,10 @@ export async function ensureStoreDefaults(
   const hasTry = codes.includes(TRY_CURRENCY_CODE)
   const hasDefaultRegion = !!store.default_region_id
   if (hasTry && hasDefaultRegion) {
-    logger.info(`bootstrap: store ${store.id} already has ${TRY_CURRENCY_CODE}, keeping it`)
+    logger.info(
+      { event: "bootstrap.store_kept", storeId: store.id, currencyCode: TRY_CURRENCY_CODE },
+      "store already has the currency, keeping it"
+    )
     return
   }
 
@@ -53,7 +56,15 @@ export async function ensureStoreDefaults(
       },
     },
   })
-  logger.info(`bootstrap: store ${store.id} defaults to ${TRY_CURRENCY_CODE}, tax inclusive`)
+  logger.info(
+    {
+      event: "bootstrap.store_defaults_set",
+      storeId: store.id,
+      currencyCode: TRY_CURRENCY_CODE,
+      isTaxInclusive: true,
+    },
+    "store defaults set"
+  )
 }
 
 /** TRY first as default; existing currencies keep their tax-inclusive flag. */

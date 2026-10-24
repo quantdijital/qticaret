@@ -5,6 +5,7 @@ import {
   createProductCategoriesWorkflow,
   createProductsWorkflow,
 } from "@medusajs/medusa/core-flows"
+import { logger } from "../../lib/logging"
 import { TRY_CURRENCY_CODE } from "../bootstrap/constants"
 import type { DemoProduct } from "./data"
 import { DEMO_CATEGORIES, DEMO_PRODUCTS, DEMO_STOCKED_QUANTITY } from "./data"
@@ -20,7 +21,6 @@ export async function ensureDemoCatalog(
   container: MedusaContainer,
   context: CatalogContext
 ): Promise<void> {
-  const logger = container.resolve(ContainerRegistrationKeys.LOGGER)
   const categoryIds = await ensureCategories(container)
   const productTypeIds = await vatProductTypeIds(container)
 
@@ -40,9 +40,9 @@ export async function ensureDemoCatalog(
         ),
       },
     })
-    logger.info(`seed: created ${String(missing.length)} demo products`)
+    logger.info({ event: "seed.products_created", count: missing.length }, "created demo products")
   } else {
-    logger.info("seed: demo products exist, keeping them")
+    logger.info({ event: "seed.products_kept" }, "demo products exist, keeping them")
   }
   // Also on reruns: a run that failed after creating products left them unstocked
   await stockDemoVariants(container, context.stockLocationId)
