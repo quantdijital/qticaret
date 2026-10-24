@@ -2,6 +2,8 @@ import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { currentRequestId, logger } from "../../lib/logging"
 import type { ErrorBody } from "./error-response"
 import { ensureRequestId } from "./request-id"
+import { requestPath } from "./request-path"
+import { applySecurityHeaders } from "./security-headers"
 
 export interface Rejection {
   status: number
@@ -19,7 +21,7 @@ export function logRejection(req: MedusaRequest, requestId: string, rejection: R
       // before `requestContext` ran (body parsing, auth) need it here
       ...(currentRequestId() === undefined ? { request_id: requestId } : {}),
       method: req.method,
-      path: req.path,
+      path: requestPath(req),
       ...rejection,
     },
     "request rejected"
@@ -39,6 +41,7 @@ export function rejectRequest(
   reason: string
 ): void {
   const requestId = ensureRequestId(req, res)
+  applySecurityHeaders(res)
   logRejection(req, requestId, { status, type: body.type, reason })
   res.status(status).json({ ...body, request_id: requestId })
 }

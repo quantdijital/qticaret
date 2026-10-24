@@ -11,6 +11,7 @@ export interface FakeResponse {
 export function fakeRequest(fields: { path?: string; method?: string; requestId?: unknown } = {}) {
   return {
     path: fields.path ?? "/store/customers",
+    originalUrl: fields.path ?? "/store/customers",
     method: fields.method ?? "POST",
     requestId: fields.requestId,
   } as unknown as MedusaRequest
@@ -26,6 +27,10 @@ export function fakeResponse(headersSent = false): FakeResponse {
     setHeader(name: string, value: string) {
       headers[name.toLowerCase()] = value
       return res
+    },
+    removeHeader(name: string) {
+      // Recorded as removed, so tests can tell it from "never set"
+      headers[name.toLowerCase()] = "<removed>"
     },
     status(code: number) {
       statusCode = code

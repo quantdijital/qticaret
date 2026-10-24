@@ -21,3 +21,6 @@ dist/
 # Test & build artifacts
 coverage/
 *.tsbuildinfo
+
+# Local file provider uploads (dev and test)
+apps/backend/static/

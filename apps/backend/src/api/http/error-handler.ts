@@ -6,6 +6,7 @@ import { INTERNAL_ERROR_BODY, sanitizeErrorResponse } from "./error-response"
 import type { ErrorBody } from "./error-response"
 import { logRejection } from "./reject"
 import { ensureRequestId } from "./request-id"
+import { applySecurityHeaders } from "./security-headers"
 
 /**
  * Replaces Medusa's error handler (`defineMiddlewares({ errorHandler })`):
@@ -132,6 +133,8 @@ export function platformErrorHandler(
   _next: MedusaNextFunction
 ): void {
   const requestId = ensureRequestId(req, res)
+  // Errors raised before the header middleware ran (body parsing) get them here
+  applySecurityHeaders(res)
   // Express's own fallback would print the raw stack to stderr; a response
   // that is already streaming can only be cut off
   if (res.headersSent) {

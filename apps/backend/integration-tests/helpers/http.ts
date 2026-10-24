@@ -16,6 +16,7 @@ export interface HttpClient {
   get<T = unknown>(url: string, config?: RequestConfig): Promise<HttpResponse<T>>
   post<T = unknown>(url: string, body?: unknown, config?: RequestConfig): Promise<HttpResponse<T>>
   delete<T = unknown>(url: string, config?: RequestConfig): Promise<HttpResponse<T>>
+  options<T = unknown>(url: string, config?: RequestConfig): Promise<HttpResponse<T>>
 }
 
 /** Resolves with the response for 4xx/5xx too, so tests can assert on it. */

@@ -70,7 +70,11 @@ medusaIntegrationTestRunner({
       const created = await http.post("/auth/session", {}, { headers: customer.headers })
       const cookie = { ...storefront.headers, cookie: sessionCookie(created).split(";")[0] ?? "" }
 
-      const loggedOut = await settle(http.delete("/auth/session", { headers: cookie }))
+      // A browser sends its origin; CSRF protection (F2.10) requires an allowed one
+      const origin = new URL((process.env["AUTH_CORS"] ?? "").split(",")[0]?.trim() ?? "").origin
+      const loggedOut = await settle(
+        http.delete("/auth/session", { headers: { ...cookie, origin } })
+      )
       expect(loggedOut.status).toBe(200)
 
       expect((await me(cookie)).status).toBe(401)

@@ -4,8 +4,14 @@ import {
   validateAndTransformBody,
   validateAndTransformQuery,
 } from "@medusajs/framework/http"
+import { RATE_LIMIT_PROFILES } from "../lib/security/rate-limit"
+import { csrfProtection } from "./http/csrf"
 import { platformErrorHandler } from "./http/error-handler"
+import { authIdentity, authProfile, rateLimit } from "./http/rate-limit"
 import { requestContext } from "./http/request-id"
+import { storeLimitGuard, uploadSizeGate } from "./http/request-limits"
+import { securityHeaders } from "./http/security-headers"
+import { uploadValidator } from "./http/upload-validator"
 import { StorePostBillingProfile } from "./store/customers/me/billing-profile/validators"
 import {
   StoreGetTrDistricts,
@@ -26,15 +32,35 @@ export default defineMiddlewares({
   // F2.10: sanitized error bodies with request_id, logged with redaction
   errorHandler: platformErrorHandler,
   routes: [
-    // F2.10: validated request ID and the log context for the request;
-    // runs after Medusa's body parser, CORS and authentication
+    // F2.10: validated request ID and log context, security headers, CSRF;
+    // these run after Medusa's body parser, CORS and authentication
     {
       matcher: "/*",
-      middlewares: [requestContext],
+      middlewares: [requestContext, securityHeaders, csrfProtection, uploadSizeGate],
+    },
+    // F2.10: rate limits per area; login, registration and reset per identity too
+    {
+      matcher: "/auth/*",
+      methods: ["POST"],
+      middlewares: [rateLimit(authProfile, { identity: authIdentity })],
     },
     {
       matcher: "/store/*",
-      middlewares: [rejectSensitiveStoreFields],
+      middlewares: [
+        rateLimit(() => RATE_LIMIT_PROFILES.store_default),
+        storeLimitGuard,
+        rejectSensitiveStoreFields,
+      ],
+    },
+    {
+      matcher: "/admin/*",
+      middlewares: [rateLimit(() => RATE_LIMIT_PROFILES.admin_default)],
+    },
+    // F2.9b: uploaded files checked by their bytes, after Medusa's multer
+    {
+      matcher: "/admin/uploads",
+      methods: ["POST"],
+      middlewares: [uploadValidator],
     },
     {
       matcher: "/store/tr-address/provinces",

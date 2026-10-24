@@ -52,8 +52,13 @@
 - Görsel yükleme: izinli türler (jpeg, png, webp, avif); SVG varsayılan kapalı, açılırsa sanitize edilir.
   Tür, uzantıdan değil içerikten (magic bytes) doğrulanır. Görsel worker'da yeniden kodlanır (EXIF/konum verisi silinir).
 - Boyut ve piksel sınırı; sınır aşımı açıklayıcı hata.
-- CSV/Excel dışa aktarımda `=`, `+`, `-`, `@`, tab, CR ile başlayan hücreler kaçışlanır (formül enjeksiyonu).
-- XML okuma (geçiş, feed, UBL): DTD ve external entity kapalı, boyut sınırı, zip çıkarmada toplam boyut ve dosya sayısı sınırı.
+- Uygulama (F2 S5, `lib/security/upload`, `src/api/http/upload-validator.ts`):
+  - `POST /admin/uploads`'ta her dosya baytlarından okunur. Kabul edilen dosya, içeriğinin türüne göre yeniden adlandırılır (`<slug>.<png|jpg|webp|avif|csv>`) ve MIME türü yeniden yazılır. Gerekçe: depolama dosyayı uzantısına göre servis eder; PNG başlıklı ama `.html` adlı bir dosya backend origin'inde stored XSS olurdu.
+  - İstek başına en fazla 20 dosya. Bir dosya reddedilirse hiçbir dosya saklanmaz.
+  - Medusa'nın `/static` dosyaları bizim header'larımızı almaz. F16'da proxy `/static` için nosniff ve `Content-Security-Policy: default-src 'none'; sandbox` ekler; uzun vadede yüklemeler cookie'siz ayrı bir origin'den servis edilir.
+  - S13'te file-s3 ile gelecek `POST /admin/uploads/presigned-urls` bu doğrulamadan geçmez; S13 uzantı/MIME allowlist'i, private erişim ve worker'da doğrulama ekler.
+- CSV/Excel dışa aktarımda `=`, `+`, `-`, `@`, tab, CR (ve tam genişlik biçimleri) ile başlayan metinler kaçışlanır (formül enjeksiyonu). Türkçe Excel satırı `;` ile böldüğü için hücre içinde `,`, `;` ya da tab'dan sonra başlayan formüller de kaçışlanır. Dışa aktarımın ayırıcısı ve BOM'u ilk dışa aktarım işiyle (S13) kararlaştırılır.
+- XML okuma (geçiş, feed, UBL): DTD ve external entity kapalı, boyut sınırı (5 MB), iç içe derinlik sınırı (64), değerler metin olarak kalır (`06100` posta kodudur). Zip çıkarmada toplam boyut, dosya sayısı ve sıkıştırma oranı sınırı; yol aşımı, symlink, kontrol karakteri ve aynı ada (büyük/küçük harf ve Unicode biçimi dahil) sahip girdiler reddedilir.
 - İçe aktarma dosyaları işlenmeden önce virüs taraması (ClamAV, worker'da) — hosting kararıyla birlikte (ADR-0003).
 - Fatura, etiket ve rapor PDF'leri kişisel veri içerir: obje depolamada private; erişim kısa süreli presigned URL + rol kontrolüyle; URL'ler loglanmaz.
 
@@ -95,9 +100,29 @@
 
 ### API
 - Tüm girdiler Zod ile doğrulanır (`validateAndTransformBody`, `validateAndTransformQuery`).
-- Rate limiting: Redis tabanlı; login, kayıt, şifre sıfırlama, checkout, taksit sorgusu, kupon denemesi, SMS tetikleyen uçlar, webhook için ayrı limitler.
+- Rate limiting: Redis tabanlı; login, kayıt, şifre sıfırlama, checkout, taksit sorgusu, kupon denemesi, SMS tetikleyen uçlar, webhook için ayrı limitler. Uygulama (F2 S3, `lib/security/rate-limit`, `src/api/http/rate-limit.ts`):
+  - Profiller `RATE_LIMIT_PROFILES`'ta tanımlı. Her profilin IP başına ve (IP + kimlik) başına sınırı olabilir. Kimlik, e-posta ya da telefonun `PII_HASH_KEY` ile HMAC'idir; düz değer ya da sözlükle çözülebilecek düz özet saklanmaz.
+  - IP doğrulanır; IPv6 istemci /64 ağıyla, IPv4-mapped adres IPv4 olarak sayılır. Böylece bir istemci adres değiştirerek limitleri aşamaz.
+  - Yol, Express'in rotaladığı biçimde değerlendirilir (`routePath`: küçük harf, sondaki `/` yok, absolute-form hedefin yolu). `/AUTH/customer/emailpass/` login limitine takılır. `/auth` altında tanınmayan yol en sıkı profili (login) alır.
+  - Kimlik, rotanın okuduğu alandan alınır: login ve kayıtta `email`, şifre sıfırlamada `identifier`.
+  - Bağlı profiller: login, kayıt, şifre sıfırlama, token yenileme, varsayılan auth/store/admin. Checkout, kupon, taksit, SMS ve webhook profilleri tanımlı; uçları kendi fazlarında bağlanır.
+  - Sabit pencere sayacı kullanılır: Redis'te atomik Lua script'i (EVALSHA), REDIS_URL yoksa bellek (LRU, 50 bin anahtar). Yerel ortam dışında REDIS_URL yoksa uyarı loglanır. Anahtarlar veritabanı sunucusu ve adıyla ad alanına ayrılır; Redis'i paylaşan tenant'lar ve dev/test birbirini saymaz.
+  - Limit aşılınca 429 ve `Retry-After` döner. Redis hata verirse sayım 30 saniye boyunca süreç belleğine geçer (limitler instance başına sürer) ve hata dakikada bir loglanır; logda yalnızca hata adı ve mesajı vardır (komut argümanlarındaki IP yazılmaz). Sayaç tamamen çalışmazsa istek geçer (fail open).
+  - Güven modeli: `trust proxy = 1`, yani `req.ip` X-Forwarded-For'un son girdisidir. Önde XFF ekleyen tam bir proxy olmalıdır (F16 şartı, docs/08). Proxy'siz açılan bir ortamda istemci IP'sini kendisi yazabilir; iki hop'ta (CDN + LB) herkes edge IP'sini paylaşır. F16'da `TRUSTED_PROXY_HOPS` değerlendirilir. F18'de sunucudan login proxy'leyen storefront için imzalı istemci-IP header'ı ADR'si gerekir.
+  - Tek hesaba çok adresten (botnet) deneme, IP'den bağımsız kimlik sınırı ve hesap kilidiyle (yukarıdaki "artan gecikme + kilit") ele alınır; henüz yok.
+  - `RATE_LIMIT_RELAXED=1` yalnızca `NODE_ENV=test`'te IP başına sınırları 100 kat büyütür (entegrasyon testleri tek IP'den çok hesap açar).
+- CSRF (F2 S3, `src/api/http/csrf.ts`, adr/0004):
+  - Kapsam: session cookie (`connect.sid`) taşıyan, GET/HEAD/OPTIONS dışındaki her istek. Alan `routePath` ile belirlenir (`/ADMIN/...` admin sayılır).
+  - Origin ilgili CORS listesinde olmalıdır; değilse 403 döner. Referer yalnızca Origin header'ı hiç yoksa kullanılır; `Origin: null` reddedilir (redirect ve sandbox'lı iframe durumları).
+  - `/store`, `/auth`, `/admin` dışındaki bir yolda cookie'li mutasyon, üç CORS listesinden birindeki origin'den gelmelidir.
+  - Admin'de gövde JSON olmalıdır. Multipart yalnızca upload ve ürün içe aktarma yollarında kabul edilir.
+  - Store'da Medusa `x-publishable-api-key` header'ını zaten zorunlu tuttuğu için ayrıca header şartı yoktur.
+- İstek sınırları: `/store/*`'da `limit` yalnızca rakam ve en fazla 100 (`1000abc` ya da `-1` 400 döner; Medusa `parseInt` ile okur). Multipart her istekte multer öncesi bildirilen boyut en fazla 25 MB; uzunluk yoksa 411. Bu kontrol yola değil içerik türüne bağlıdır. Admin `limit` üst sınırı, dashboard'un kullandığı değerler ölçülünce eklenecek.
 - CORS: sadece tenant'ın storefront ve admin origin'leri.
 - Güvenlik header'ları: HSTS, X-Content-Type-Options, X-Frame-Options/frame-ancestors, Referrer-Policy, CSP (admin), Permissions-Policy.
+  - API yanıtlarında `src/api/http/security-headers.ts` uygulanır: `default-src 'none'; frame-ancestors 'none'`, nosniff, DENY, `no-referrer`, Permissions-Policy, yerel ortam dışında HSTS. `X-Powered-By` kaldırılır.
+  - Medusa'nın bizim middleware'lerimizden önce yazdığı yanıtlar (admin auth 401, CORS preflight, `/app` ve `/static` dosyaları) bu header'ları alamaz. Admin CSP dahil hepsi F16'da reverse proxy'de eklenir.
+  - Medusa, store preflight'ında da publishable key ister; izinli origin bile 400 alır ve allow header'ı dönmez. Tarayıcıdan doğrudan store çağrısı yapacak storefront (F18) için bu doğrulanıp çözülmelidir.
 - Hata yanıtları iç detay sızdırmaz (stack trace, SQL, sağlayıcı ham yanıtı).
 - Toplu sorgularda sayfalama limiti zorunlu (max 100). Store API'de `fields` ile hassas alan sızdırmama testi.
 
