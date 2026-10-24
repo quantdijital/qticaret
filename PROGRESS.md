@@ -6,14 +6,15 @@
 **F0 — Repo ve araç zinciri**
 
 ## Son oturum özeti
-2026-10-22 — Doküman genişletmesi (kod yok): güvenlik tabanı F0–F2'ye çekildi ve docs/04 genişletildi (upload, SSRF, CSV/XML, SMS kotası, ihlal müdahalesi);
-SEO çekirdek özellik yapıldı (docs/13 mimari, docs/14 advisor kural seti; F3 yeniden yapılandırıldı, F10/F12/F14/F18 SEO görevleri);
-rakip analizi docs/15; adr/0004 (Store auth modeli), adr/0005 (içerik önerileri: kural motoru + opsiyonel LLM);
-F6.7 ters ibraz, F7.11–F7.14 değişim/sipariş düzenleme/müşteri iptali/doğrudan taşıyıcı, F8 UBL+mükellef listesi bizde, F13.10 ihlal runbook'u eklendi.
-medusa-researcher ajanının Context7 araç adı düzeltildi.
+2026-10-24 — F0.1 tamamlandı. Ürün adı **Quant Ticaret** (kodda `@qticaret/*`), repo klasörü `qticaret`.
+- pnpm 11 + Turborepo 2.11 monorepo; Node 22; tam sürüm sabitleme, 14 gün `minimumReleaseAge`, bağımlılık build script'leri varsayılan kapalı (`allowBuilds`).
+- `@qticaret/config`: strict tsconfig (noUncheckedIndexedAccess, exactOptionalPropertyTypes), type-checked ESLint flat config (any/console/floating promise/boş catch/eksik switch yasak), Prettier (Markdown hariç).
+- `@qticaret/types`: locale/para birimi sözleşmeleri (Node tiplerinden bağımsız; storefront da kullanacak).
+- install, lint, typecheck, format:check yeşil; kasıtlı ihlallerle kuralların kırdığı doğrulandı. TypeScript 5.9.3 seçildi (typescript-eslint <6.1; Medusa uyumu F0.2'de doğrulanacak).
+- Önceki oturum (2026-10-22): SEO/güvenlik/rakip dokümanları ve ADR-0003/4/5 — commit `ce4a784`.
 
 ## Sıradaki görev
-- [ ] F0.1 Monorepo iskeleti (pnpm + Turborepo)
+- [ ] F0.2 Medusa v2 kurulumu `apps/backend` (14 günden eski kararlı sürüm; şu an 2.21.2 aday) → adr/0001
 
 ## Açık sorular / bloklayıcılar
 - [ ] Hedef Medusa sürümü Context7 ile doğrulanacak ve `adr/0001` olarak kaydedilecek
@@ -23,7 +24,9 @@ medusa-researcher ajanının Context7 araç adı düzeltildi.
 - [ ] `adr/0005` içerik önerileri: kural motoru + opsiyonel LLM (kabul bekliyor; LLM sağlayıcı seçimi F10.13 öncesi)
 - [ ] Admin 2FA yöntemi ADR (F12.6 öncesi; Medusa'da yerleşik mi doğrulanacak)
 - [ ] docs/15 açık doğrulamalar: ikas headless/API, Shopify B2B changelog, Google TR ücretsiz listeleme (tenant hesabında)
-- [ ] Bekleyen doküman değişiklikleri commit edilmedi (kullanıcı onayı bekleniyor)
+- [ ] Docker kurulu değil — F0.2 çalıştırma ve F0.3 için gerekli (Docker Desktop veya OrbStack)
+- [ ] TypeScript sürümü: 5.9.3 ile başlandı; Medusa'nın TS 6 desteği F0.2'de doğrulanacak
+- [ ] `f0-foundation` dalı main'e henüz birleştirilmedi
 
 ## Faz durumu
 | Faz | Durum |
