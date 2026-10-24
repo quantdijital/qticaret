@@ -3,10 +3,32 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**F2 — Platform çekirdek modülleri + güvenlik tabanı** (planlandı, kod yok). F1 tamamlandı; `f1-tr-localization` için push ve PR bekleniyor.
+**F2 — Platform çekirdek modülleri + güvenlik tabanı** (devam; S1/13 bitti). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
 
 ## Son oturum özeti
-2026-10-24 (gece, devam): F2 planlandı (`/faz-baslat F2`).
+2026-10-24 (gece, F2 S1): `lib/errors` + `lib/money` (F2.2 + F2.7). ADR-0010 kabul edildi.
+- **`lib/errors`:**
+  - `ValidationError`, `ProviderError { provider, providerCode, retryable, safeMessage }`, `RetryableError`.
+  - `toHttpError` 400/502/503 döner ve S2'deki errorHandler'ın eşleme noktasıdır. İstemciye yalnızca i18n anahtarı biçimindeki `safeMessage` gider; değilse varsayılan anahtar kullanılır.
+- **Doğrulanan (2.21.2):**
+  - Workflow'dan geçen hata düz nesneye dönüşüyor ve `instanceof` tutmuyor. Türler yapısal işaretle (`qtErrorKind`) tanınıyor; kural docs/10'da.
+  - JSON gidiş-dönüşü `message`'ı düşürüyor; guard'lar ona dayanmıyor.
+  - Medusa'nın error handler'ı `error.code`'u yanıta kopyalıyor; bu yüzden alanın adı `providerCode`.
+- **`lib/money`:**
+  - Kuruş tam sayı. Oran (bps) hesabı BigInt'le yapılıyor; yarım yukarı ve sıfırdan uzağa yuvarlanıyor.
+  - En büyük kalan dağıtımı: toplam korunuyor, eşitlik kuralları deterministik.
+  - `fromMedusaAmount`, MathBN'in sessizce yanlış okuduğu girdileri reddediyor: `null`/`undefined` → 0, `"0x10"` → 16, `"1e2"` → 100.
+- **İnceleme:** Bağımsız kod incelemesi yapıldı.
+  - Düzeltilen bulgular:
+    - eksik tutarın 0 okunması
+    - `code` alanından sızıntı
+    - doğrulanmayan `safeMessage`
+    - iddiasını kanıtlamayan iki test
+    - geçersiz `retryAfterMs`
+  - Ardışık kısmi iadelerde satır payının aşılabilmesi tasarım notu olarak ADR-0010'a yazıldı (F4.7/F6).
+- **Testler:** 186 birim (+78). Lint ve typecheck temiz. Commit'ler: `c665bcb`, `4faf669`, `449ead7` (+ plan `2bf7605`).
+
+2026-10-24 (gece): F2 planlandı (`/faz-baslat F2`).
 - Medusa 2.21.2 API'leri üç araştırma ajanıyla doğrulandı (Context7 + v2.21.2 kaynağı): HTTP katmanı, modül/link/admin, asenkron iş/dosya/para. Planı değiştiren bulgular:
   - **HTTP katmanı:** Yerleşik rate limit, güvenlik header'ı ve `limit` üst sınırı yok. Varsayılan error handler unique/FK ihlalinde kolon ve değeri yanıta yazıyor. `/admin/uploads` multer'ı sınırsız ve bellek içi çalışıyor. `x-request-id` doğrulanmadan kabul ediliyor.
   - **Logger:** `defineConfig({ logger })` ile değiştirilebiliyor; arayüz yalnızca string mesaj alıyor.
@@ -17,38 +39,20 @@
 - ADR taslakları yazıldı (hepsi "Önerildi"): 0010 para/yuvarlama, 0011 denetim kaydı, 0012 ayarlar/bayraklar, 0013 ürün özellikleri, 0014 asenkron işler. ADR-0004'e CSRF için doğrulanan gerçekler eklendi.
 - docs/12'ye iki kalem eklendi: denetim kaydı saklama süresi ve kuruş yuvarlama kuralı. docs/03'te F2.11 `url-registry` modül olarak netleştirildi.
 
-2026-10-24 (gece): F1'in sekiz görevi (S1–S8) tek oturumda bitirildi. Kullanıcı önerilen seçeneklerin uygulanmasını istedi. ADR 0004, 0007, 0008 ve 0009 kabul edildi.
-- **S1–S2:**
-  - İdempotent tenant bootstrap: TR region/TRY, KDV dahil fiyat, KDV20 varsayılan, KDV10 ve KDV1 ürün tipine bağlı.
-  - Sektörsüz demo seed: 4 ürün, 3 kategori, TR kargo seçenekleri.
-  - Script'ler: `tenant:bootstrap`, `seed:demo` (`--allow-non-local` olmadan yalnızca development/test'te çalışır).
-- **S3–S5:**
-  - `tr-address` modülü: Türkçe eşleştirme ve sıralama anahtarları, ASCII'ye katlanmış yedek eşleştirme.
-  - Tek transaction'lı import (`tr-address:import`). 32.076 mahalle ilk yüklemede ~4,3 sn, yeniden yüklemede ~1,6 sn.
-  - Store route'ları: limit ≤100, `Vary` başlığı.
-  - Adres doğrulama: store middleware'i, sepet ve müşteri adresi workflow hook'ları. Hata kodları i18n anahtarı. Alan eşlemesi adr/0008 ekinde.
-- **S6–S7:**
-  - Admin i18n (tr/en). Login widget'ı admin'i ilk ziyarette bir kez Türkçe'ye çevirir.
-  - `billing-profile` modülü: TCKN/VKN kontrol hanesi doğrulaması, AES-256-GCM (AAD müşteriye bağlı) ve HMAC, route sınırında şifreleme, müşteri bazlı kilit, maskeli store/admin API ve widget, müşteri silinince soft delete.
-- **S8:** Cookie `HttpOnly`, `SameSite=Lax`, NODE_ENV açıkça local değilse `Secure`. Session ömrü 10 saat. Redis session store; staging/prod'da `REDIS_URL` zorunlu.
-- **Kalite:**
-  - Testler: 108 birim, 24 modül entegrasyon, 62 HTTP entegrasyon. CI artık modül testlerini de çalıştırıyor.
-  - Bağımsız güvenlik ve kod incelemesi yapıldı; kritik veya yüksek bulgu yok. Orta ve düşük bulgular düzeltildi.
-  - Dev sunucusunda Playwright ile doğrulandı: admin Türkçe açılıyor, müşteri detayında maskeli fatura widget'ı görünüyor.
-
-Önceki oturumlar: F1 planlaması ve F0.2–F0.8 (2026-10-24), F0.1 monorepo (2026-10-24 sabahı), SEO ve güvenlik dokümanları (2026-10-22).
+Önceki oturumlar:
+- **F1 S1–S8 (2026-10-24 gece):** tenant bootstrap, demo seed, `tr-address`, admin i18n, `billing-profile`, auth cookie/session. ADR 0004, 0007, 0008, 0009 kabul edildi. Testler: 108 birim, 24 modül, 62 HTTP.
+- **Daha önce:** F1 planlaması ve F0.2–F0.8 (2026-10-24), F0.1 monorepo (2026-10-24 sabahı), SEO ve güvenlik dokümanları (2026-10-22).
 
 ## Sıradaki görev
 1. **Kullanıcı:**
-   - `f1-tr-localization`'ı push edip PR açmak (CI'da modül testleri ilk kez çalışacak).
+   - `f1-tr-localization` için PR açmak (dal push edildi; CI'da modül testleri ilk kez çalışacak). F1 merge edilince `f2-platform-core` `main`'e rebase edilir.
    - Yerel dev DB'deki doğrulama verisini isterse silmek: "Deneme Müşteri" ve demo seed. Ortam `pnpm db:down -v` ile sıfırlanabilir.
-2. **S1: F2.2 + F2.7** (`lib/errors` + `lib/money`). Önce ADR-0010 onaylanır.
-   - Dal `f2-platform-core`: F1 PR'ı merge edildiyse `main`'den, edilmediyse `f1-tr-localization` üzerinden açılır.
+2. **S2: F2.10a** (pino logger, redaksiyon, istek ID'si, hata yanıtı sanitizasyonu). Oturum başında `pino` bağımlılığı onaya sunulur.
 
 ### F2 görev planı (oturum büyüklüğünde, önerilen sıra)
 | # | Görev | Kapsam | Bağımlılık | ADR |
 |---|---|---|---|---|
-| S1 | F2.2 + F2.7 | `lib/errors` ve `lib/money` (detay aşağıda). Birim testleri | — | 0010 |
+| S1 ✅ | F2.2 + F2.7 | `lib/errors` ve `lib/money`. Birim testleri | — | 0010 ✅ |
 | S2 | F2.10a | Pino logger, redaksiyon, istek ID'si, hata yanıtı sanitizasyonu | S1 | — |
 | S3 | F2.10b | Güvenlik header'ları, Redis rate limit, CSRF, sayfalama sınırı, upload boyut kapısı. KK: login 429, header'lar | S2 | 0004 eki |
 | S4 | F2.9a | `safe-fetch` (SSRF) + timing-safe yardımcıları. KK: iç IP / rebinding reddi | S1 | — |
@@ -63,11 +67,9 @@
 | S13 | F2.8 | `async-job` modülü, file-s3, "İşler" sayfası; ilk tip denetim kaydı CSV dışa aktarma | S5, S8 | 0014 |
 
 Görev ayrıntıları:
-- **S1:**
-  - `ProviderError { provider, code, retryable, safeMessageKey }`, `ValidationError`, `RetryableError`.
-  - Medusa hata tiplerine eşleme tablosu. 502/503 gibi Medusa'da karşılığı olmayan durumlar S2'deki errorHandler'da üretilir.
-  - `lib/money`: ADR-0010'a göre kuruş tipi, Medusa sınır dönüşümü, ROUND_HALF_UP, en büyük kalan dağıtımı.
+- **S1:** Tamamlandı (bkz. "Son oturum özeti" ve ADR-0010 "Uygulama").
 - **S2:**
+  - errorHandler önce `lib/errors` `toHttpError`'ı uygular. Bizim tipimiz değilse sanitize edilmiş Medusa varsayılanına düşer; varsa `Retry-After` header'ını yazar.
   - Medusa logger'ı `defineConfig({ logger })` ile pino adaptörüne geçer. Modül container'larına da geçtiği doğrulanır.
   - `lib/logging`: `{ event, ... }` alanlı yapılandırılmış logger, docs/10 ve adr/0009 redaksiyon listesi (+ `cookie`, `set-cookie`), AsyncLocalStorage istek bağlamı.
   - İstek ID'si: gelen `x-request-id` biçim kontrolünden geçer; yoksa veya geçersizse UUID üretilir. Yanıta `X-Request-Id` yazılır.
@@ -167,8 +169,7 @@ Paralel zincirler:
   - body-parser → 1.20.9 ve multer → 2.5.0: 2026-11-05'ten itibaren uygun.
   - @graphql-tools/utils 10.x: kabul edilmiş risk (yalnızca build sırasında).
 - [ ] Medusa 2.22.x yükseltmesi: en erken 2026-11-06 (2.22.1 için 14 gün); ayrı PR.
-- [ ] **F2 kararları** (ilgili oturumda onaylanacak):
-  - ADR-0010 (S1): kuruş tam sayı, yarım yukarı yuvarlama, en büyük kalan dağıtımı.
+- [ ] **F2 kararları** (ilgili oturumda onaylanacak; ADR-0010 S1'de kabul edildi):
   - ADR-0011 (S8): denetim kaydı HTTP sınırında; okuma kaydı yazılamazsa istek reddedilir (fail closed).
   - ADR-0012 (S9): bayraklar kodda tanımlı, DB'de yalnızca farklar; kapalı bayrakta 404.
   - ADR-0013 (S11): tipli EAV satırları ve ürün ↔ şablon/değer link'leri.
@@ -184,6 +185,8 @@ Paralel zincirler:
   - **trust proxy (F16):** Medusa `trust proxy = 1` ayarlıyor. Rate limit IP'si doğru olsun diye prod'da tam bir reverse proxy katmanı olmalı.
   - **Handle (F3.1):** Ürün, kategori ve koleksiyon handle'ları `lib/seo` slug üreticisinden verilir; Medusa'nın `toHandle`'ı Türkçe karakterleri ASCII'ye çevirmiyor.
   - **İçe aktarma (F3.9):** Medusa'nın ürün içe aktarması dosyayı presigned URL ile doğrudan depoya yükleyebiliyor. Bu yol `/admin/uploads` doğrulamasından geçmez; F3.9'da ele alınacak.
+  - **Kısmi iade dağıtımı (F4.7, F6):** `allocateKurus` her çağrıda bağımsız yuvarlar. Ardışık kısmi iadelerde bir satırın iadesi o satırın payını aşabilir. Satır başına kalan tutarı tavan alan bir dağıtım ve docs/07 testi gerekir (ADR-0010 "Sonuçlar").
+  - **Storefront hata anahtarları (F18):** `errors.*`, `billing_profile.*`, `tr_address.*` gibi i18n anahtarları henüz bir çeviri kataloğunda değil. Storefront'la birlikte `packages/types`'a taşınır.
 - [ ] **F1'den devreden işler:**
   - Kargo KDV oranı için `shipping_option` vergi kuralı, mali müşavir onayından sonra (docs/12).
   - Soft-delete edilmiş fatura profillerini kalıcı silme / KVKK imha işi (F13).

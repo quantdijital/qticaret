@@ -107,7 +107,7 @@ F17 öncesinde tenant'lar F16 script'leriyle elle açılır.
 - [ ] Attribute şablonu tanımlayıp ürüne değer atanabiliyor, Store API'de görünüyor
 - [ ] Ürün fiyatı değişikliği audit log'da görünüyor; müşteri TCKN görüntüleme okuma kaydı düşüyor
 - [ ] HTTP istemci logunda Authorization/API key görünmüyor (testli)
-- [ ] `lib/money` oransal dağıtımda kuruş kaybı/fazlası olmuyor (testli, uç durumlar dahil)
+- [x] `lib/money` oransal dağıtımda kuruş kaybı/fazlası olmuyor (testli, uç durumlar dahil) — F2 S1
 - [ ] `safe-fetch` iç IP'ye ve DNS rebinding'e giden isteği reddediyor (testli); SVG ve sahte MIME yükleme reddediliyor
 - [ ] Login ucunda limit aşımı 429 dönüyor; güvenlik header'ları tüm yanıtlarda (testli)
 - [ ] Slug üretici transliterasyon tablosunu geçiyor; aynı path ikinci varlığa verilemiyor
