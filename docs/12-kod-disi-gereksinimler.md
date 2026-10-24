@@ -19,11 +19,13 @@
 | Veri ihlali bildirimi: 72 saat Kurul bildirimi, ilgili kişi bildirimi, platform/tenant sorumluluk paylaşımı (veri işleyen sözleşmesinde) | KVKK danışmanı | F13.10 |
 | LLM/AI sağlayıcısıyla veri işleme sözleşmesi ve yerleşim (yalnızca ürün verisi gönderilse de) | KVKK danışmanı | F10.13, ADR-0005 |
 | Ters ibraz (chargeback) süreçleri ve belge gereksinimleri | Ödeme sağlayıcı + avukat | F6.7 |
+| Adres referans verisi (il/ilçe/mahalle/posta kodu) kaynağı ve kullanım lisansı: PTT/TÜİK verisinin ticari kullanımı ve tenant'lara dağıtımı | Avukat | F1.3, F16 (ADR-0008) |
 
 ## Mali ve vergi
 | Kalem | Sorumlu / danışılacak | Etkilediği faz |
 |---|---|---|
 | E-fatura/e-arşiv kuralları: bireysel alıcıda TCKN yoksa uygulama, iade faturası | Mali müşavir | F8 |
+| KDV oran grupları (%20/%10/%1) ve kargo bedelinin KDV oranı; tenant ürün gruplarının hangi orana düştüğü | Mali müşavir | F1.2 (ADR-0007) |
 | İndirim ve kargo bedelinin faturada gösterimi | Mali müşavir | F4.7, F8 |
 | Kapıda ödeme tahsilat mutabakatı ve muhasebeleştirme | Mali müşavir | F6.6, F11.3 |
 | Platformun kendi abonelik faturası ve e-fatura mükellefiyeti | Mali müşavir | F17.3 |

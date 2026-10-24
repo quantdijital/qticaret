@@ -71,7 +71,7 @@ F17 öncesinde tenant'lar F16 script'leriyle elle açılır.
   (`GET /store/tr-address/provinces`, `.../districts?province=`, `.../neighborhoods?district=`)
 - F1.4 Adres doğrulama: telefon (TR formatı), posta kodu, il-ilçe tutarlılığı (Zod)
 - F1.5 Müşteri alanları: bireysel/kurumsal ayrımı, TCKN / VKN + vergi dairesi (fatura için), maskeleme
-- F1.6 Seed script: demo ürünler, kategoriler, markalar, kargo seçenekleri (sektörsüz, genel demo)
+- F1.6 Seed script: demo ürünler, kategoriler, kargo seçenekleri (sektörsüz, genel demo). Markalar F3'teki `brands` modülüyle seed'e eklenir; Medusa çekirdeğinde marka modeli yok.
 - F1.7 Admin dili Türkçe, i18n altyapısı (`src/admin/i18n`)
 - F1.8 Store API kimlik doğrulama modeli: Medusa auth modülünün session/JWT seçenekleri Context7 ile doğrulanır → adr/0004 kabul edilir
 
