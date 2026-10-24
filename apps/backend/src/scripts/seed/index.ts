@@ -52,7 +52,7 @@ async function ensurePublishableKey(
   })
 
   let keyId = data[0]?.id
-  const linked = (data[0]?.sales_channels ?? []).some((channel) => channel?.id === salesChannelId)
+  const isLinked = (data[0]?.sales_channels ?? []).some((channel) => channel?.id === salesChannelId)
   if (!keyId) {
     const { result } = await createApiKeysWorkflow(container).run({
       input: {
@@ -64,7 +64,7 @@ async function ensurePublishableKey(
       throw new Error("seed: createApiKeysWorkflow returned no key")
     }
   }
-  if (!linked) {
+  if (!isLinked) {
     await linkSalesChannelsToApiKeyWorkflow(container).run({
       input: { id: keyId, add: [salesChannelId] },
     })

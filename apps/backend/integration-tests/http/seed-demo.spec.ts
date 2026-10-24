@@ -1,5 +1,5 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { seedDemo } from "../../src/scripts/seed"
 import { DEMO_PRODUCTS, DEMO_SHIPPING_OPTIONS } from "../../src/scripts/seed/data"
@@ -84,6 +84,25 @@ medusaIntegrationTestRunner({
         expect(await count("inventory_level")).toBe(
           DEMO_PRODUCTS.reduce((sum, product) => sum + product.option.values.length, 0)
         )
+      })
+
+      it("restocks demo variants a failed earlier run left without stock", async () => {
+        const container = getContainer()
+        const query = container.resolve(ContainerRegistrationKeys.QUERY)
+        await seedDemo(container)
+        const { data: levels } = await query.graph({ entity: "inventory_level", fields: ["id"] })
+        await container
+          .resolve(Modules.INVENTORY)
+          .deleteInventoryLevels(levels.map((level) => level.id))
+
+        await seedDemo(container)
+
+        const { data: restocked } = await query.graph({
+          entity: "inventory_level",
+          fields: ["stocked_quantity"],
+        })
+        expect(restocked).toHaveLength(levels.length)
+        expect(restocked.every((level) => level.stocked_quantity === 100)).toBe(true)
       })
 
       it("offers the TRY shipping options to a cart shipping to Turkey", async () => {

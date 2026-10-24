@@ -1,5 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { updateStoresWorkflow } from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { bootstrapTenant } from "../../src/scripts/bootstrap"
 import { REDUCED_VAT_RATES } from "../../src/scripts/bootstrap/constants"
@@ -129,6 +130,11 @@ medusaIntegrationTestRunner({
           price: 110,
           typeId: await vatProductTypeId(container, "KDV %10"),
         })
+        const basicVariant = await createTestProduct(container, storefront.salesChannelId, {
+          handle: "temel-gida-urunu",
+          price: 101,
+          typeId: await vatProductTypeId(container, "KDV %1"),
+        })
 
         const created = await http.post<CartResponse>(
           "/store/carts",
@@ -138,6 +144,7 @@ medusaIntegrationTestRunner({
             items: [
               { variant_id: standardVariant, quantity: 1 },
               { variant_id: reducedVariant, quantity: 1 },
+              { variant_id: basicVariant, quantity: 1 },
             ],
           },
           { headers: storefront.headers }
@@ -162,6 +169,48 @@ medusaIntegrationTestRunner({
           tax_total: 10,
           tax_lines: [expect.objectContaining({ code: "KDV10", rate: 10 })],
         })
+        expect(byVariant(basicVariant)).toMatchObject({
+          is_tax_inclusive: true,
+          total: 101,
+          tax_total: 1,
+          tax_lines: [expect.objectContaining({ code: "KDV1", rate: 1 })],
+        })
+      })
+
+      it("keeps the tenant's currency choices and default region on a rerun", async () => {
+        const container = getContainer()
+        const query = container.resolve(ContainerRegistrationKeys.QUERY)
+        await bootstrapTenant(container)
+        const { data: before } = await query.graph({ entity: "store", fields: ["id"] })
+        const storeId = before[0]?.id ?? ""
+        await updateStoresWorkflow(container).run({
+          input: {
+            selector: { id: storeId },
+            update: {
+              supported_currencies: [
+                { currency_code: "try", is_default: false, is_tax_inclusive: true },
+                { currency_code: "eur", is_default: true },
+              ],
+            },
+          },
+        })
+
+        await bootstrapTenant(container)
+
+        const { data: after } = await query.graph({
+          entity: "store",
+          fields: ["supported_currencies.currency_code", "supported_currencies.is_default"],
+        })
+        const currencies = after[0]?.supported_currencies.map((currency) => ({
+          code: currency?.currency_code,
+          isDefault: currency?.is_default,
+        }))
+        expect(currencies).toEqual(
+          expect.arrayContaining([
+            { code: "eur", isDefault: true },
+            { code: "try", isDefault: false },
+          ])
+        )
       })
     })
   },

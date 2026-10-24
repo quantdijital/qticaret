@@ -10,12 +10,12 @@ interface StoreCurrency {
 }
 
 /**
- * Makes TRY the store's default currency with tax-inclusive prices and points
- * the store at the TR region. `updateStoresWorkflow` writes the currency
- * price preferences; `updateStoresStep` alone would not (adr/0007).
+ * Adds TRY as the store's default, tax-inclusive currency and points the
+ * store at the TR region, each only when not set yet. Once TRY is there,
+ * the tenant's currency choices and default region are left as they are.
  *
- * Other currencies the tenant added are kept with their current
- * tax-inclusive flag, so running this again changes nothing.
+ * `updateStoresWorkflow` writes the currency price preferences;
+ * `updateStoresStep` alone would not (adr/0007).
  */
 export async function ensureStoreDefaults(
   container: MedusaContainer,
@@ -26,19 +26,43 @@ export async function ensureStoreDefaults(
 
   const { data: stores } = await query.graph({
     entity: "store",
-    fields: ["id", "supported_currencies.currency_code"],
+    fields: ["id", "default_region_id", "supported_currencies.currency_code"],
   })
   const store = stores[0]
   if (!store) {
     throw new Error("bootstrap: no store found; start the server once so Medusa creates it")
   }
 
-  const otherCodes = store.supported_currencies
+  const codes = store.supported_currencies
     .map((currency) => currency?.currency_code)
-    .filter((code): code is string => !!code && code !== TRY_CURRENCY_CODE)
+    .filter((code): code is string => !!code)
+  const hasTry = codes.includes(TRY_CURRENCY_CODE)
+  const hasDefaultRegion = !!store.default_region_id
+  if (hasTry && hasDefaultRegion) {
+    logger.info(`bootstrap: store ${store.id} already has ${TRY_CURRENCY_CODE}, keeping it`)
+    return
+  }
 
+  const currencies = hasTry ? undefined : await withTryAsDefault(container, codes)
+  await updateStoresWorkflow(container).run({
+    input: {
+      selector: { id: store.id },
+      update: {
+        ...(currencies ? { supported_currencies: currencies } : {}),
+        ...(hasDefaultRegion ? {} : { default_region_id: regionId }),
+      },
+    },
+  })
+  logger.info(`bootstrap: store ${store.id} defaults to ${TRY_CURRENCY_CODE}, tax inclusive`)
+}
+
+/** TRY first as default; existing currencies keep their tax-inclusive flag. */
+async function withTryAsDefault(
+  container: MedusaContainer,
+  otherCodes: string[]
+): Promise<StoreCurrency[]> {
   const taxInclusive = await taxInclusiveCurrencies(container, otherCodes)
-  const currencies: StoreCurrency[] = [
+  return [
     { currency_code: TRY_CURRENCY_CODE, is_default: true, is_tax_inclusive: true },
     ...otherCodes.map((code) => ({
       currency_code: code,
@@ -46,14 +70,6 @@ export async function ensureStoreDefaults(
       is_tax_inclusive: taxInclusive.has(code),
     })),
   ]
-
-  await updateStoresWorkflow(container).run({
-    input: {
-      selector: { id: store.id },
-      update: { supported_currencies: currencies, default_region_id: regionId },
-    },
-  })
-  logger.info(`bootstrap: store ${store.id} defaults to ${TRY_CURRENCY_CODE}, tax inclusive`)
 }
 
 async function taxInclusiveCurrencies(

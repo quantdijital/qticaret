@@ -32,24 +32,20 @@ export async function ensureDemoCatalog(
   })
   const existingHandles = new Set(existing.map((product) => product.handle))
   const missing = DEMO_PRODUCTS.filter((product) => !existingHandles.has(product.handle))
-  if (missing.length === 0) {
+  if (missing.length > 0) {
+    await createProductsWorkflow(container).run({
+      input: {
+        products: missing.map((product) =>
+          toProductInput(product, { ...context, categoryIds, productTypeIds })
+        ),
+      },
+    })
+    logger.info(`seed: created ${String(missing.length)} demo products`)
+  } else {
     logger.info("seed: demo products exist, keeping them")
-    return
   }
-
-  const { result } = await createProductsWorkflow(container).run({
-    input: {
-      products: missing.map((product) =>
-        toProductInput(product, { ...context, categoryIds, productTypeIds })
-      ),
-    },
-  })
-  await stockVariants(
-    container,
-    result.flatMap((product) => product.variants.map((variant) => variant.id)),
-    context.stockLocationId
-  )
-  logger.info(`seed: created ${String(result.length)} demo products`)
+  // Also on reruns: a run that failed after creating products left them unstocked
+  await stockDemoVariants(container, context.stockLocationId)
 }
 
 function toProductInput(
@@ -119,25 +115,35 @@ async function vatProductTypeIds(container: MedusaContainer): Promise<Map<string
   return new Map(data.map((type) => [type.value, type.id]))
 }
 
-async function stockVariants(
+/** Adds stock at the location for demo variants that have none there yet. */
+async function stockDemoVariants(
   container: MedusaContainer,
-  variantIds: string[],
   stockLocationId: string
 ): Promise<void> {
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
   const { data: variants } = await query.graph({
     entity: "product_variant",
-    fields: ["inventory_items.inventory_item_id"],
-    filters: { id: variantIds },
+    fields: [
+      "inventory_items.inventory_item_id",
+      "inventory_items.inventory.location_levels.location_id",
+    ],
+    filters: { product: { handle: DEMO_PRODUCTS.map((product) => product.handle) } },
   })
-  const inventoryItemIds = variants.flatMap((variant) =>
+  const unstocked = variants.flatMap((variant) =>
     (variant.inventory_items ?? [])
+      .filter(
+        (item) =>
+          !item?.inventory?.location_levels?.some((level) => level?.location_id === stockLocationId)
+      )
       .map((item) => item?.inventory_item_id)
       .filter((id): id is string => !!id)
   )
+  if (unstocked.length === 0) {
+    return
+  }
   await createInventoryLevelsWorkflow(container).run({
     input: {
-      inventory_levels: inventoryItemIds.map((inventoryItemId) => ({
+      inventory_levels: unstocked.map((inventoryItemId) => ({
         inventory_item_id: inventoryItemId,
         location_id: stockLocationId,
         stocked_quantity: DEMO_STOCKED_QUANTITY,
