@@ -1,0 +1,19 @@
+{
+  "name": "@qticaret/types",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Shared types and Store API contracts (docs/02)",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@qticaret/config": "workspace:*",
+    "eslint": "10.12.0",
+    "typescript": "5.9.3"
+  }
+}

@@ -1,0 +1,94 @@
+# Lint, typecheck, unit tests, build and HTTP integration tests (F0.5).
+# Third-party actions and images are pinned by commit SHA / digest
+# (docs/04, after the 2026 tag-hijack of trivy-action); Renovate bumps them.
+name: CI
+
+on:
+  push:
+    paths-ignore: ["**/*.md", "docs/**", "adr/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  HUSKY: "0"
+  MEDUSA_DISABLE_TELEMETRY: "true"
+  TURBO_TELEMETRY_DISABLED: "1"
+  # Syntactically valid config so medusa-config's env schema passes; the
+  # integration job overrides what it needs. Secrets are generated per run.
+  DATABASE_URL: postgres://postgres@localhost:5432/qticaret
+  STORE_CORS: http://localhost:8000
+  ADMIN_CORS: http://localhost:9000
+  AUTH_CORS: http://localhost:9000,http://localhost:8000
+
+jobs:
+  quality:
+    name: Lint, typecheck, test, build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      # Random per run and useless outside this job, so they are never
+      # printed and need no masking
+      - name: Generate throwaway secrets
+        run: |
+          for name in JWT_SECRET COOKIE_SECRET; do
+            echo "$name=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
+          done
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm format:check
+      - run: pnpm turbo run lint typecheck test build
+
+  integration:
+    name: HTTP integration tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16.15-alpine@sha256:f4610795587492cd4fb887c2dc3de301b813278bb6f616992061141b5f15ac36
+        env:
+          # Ephemeral, job-scoped container: no password to manage or leak
+          POSTGRES_HOST_AUTH_METHOD: trust
+          POSTGRES_DB: qticaret
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DB_HOST: localhost
+      DB_PORT: "5432"
+      DB_USERNAME: postgres
+      DB_PASSWORD: ""
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      # Random per run and useless outside this job, so they are never
+      # printed and need no masking
+      - name: Generate throwaway secrets
+        run: |
+          for name in JWT_SECRET COOKIE_SECRET; do
+            echo "$name=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
+          done
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @qticaret/backend test:integration:http

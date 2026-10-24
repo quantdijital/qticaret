@@ -1,0 +1,42 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "ui": "stream",
+  "globalPassThroughEnv": [
+    "NODE_ENV",
+    "DATABASE_URL",
+    "REDIS_URL",
+    "*_CORS",
+    "JWT_SECRET",
+    "COOKIE_SECRET",
+    "DB_*",
+    "MEDUSA_*",
+    "S3_*",
+    "SMTP_*"
+  ],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["dist/**", ".medusa/**", "*.tsbuildinfo"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
+    "lint": {
+      "dependsOn": ["^lint"]
+    },
+    "typecheck": {
+      "dependsOn": ["^typecheck"]
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"]
+    },
+    "test:integration:http": {
+      "cache": false
+    },
+    "test:integration:modules": {
+      "cache": false
+    }
+  }
+}

@@ -1,0 +1,9 @@
+# gitleaks config (docs/04): default rules plus narrowly scoped exceptions.
+# Used by the pre-commit hook and the CI security workflow.
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Turkish prose in Markdown trips the generic keyword rule (e.g. 'secret iptali, DNS/...'); provider-specific rules still apply to docs"
+targetRules = ["generic-api-key"]
+paths = ['''\.md$''']

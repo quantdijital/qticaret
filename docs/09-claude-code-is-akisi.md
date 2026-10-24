@@ -18,7 +18,7 @@
 | GitHub | PR/issue işlerinde | `claude mcp add --transport http github https://api.githubcopilot.com/mcp/` |
 | Playwright | Admin UI test/gezinti | `.mcp.json` içinde |
 | PostgreSQL (dev, salt-okunur) | Şema/veri inceleme | Salt-okunur kullanıcıyla, **sadece local DB** |
-| Sentry | F10 sonrası hata analizi | Gerektiğinde ekle |
+| Sentry | F15 sonrası hata analizi | Gerektiğinde ekle |
 
 > MCP paket adları ve kurulum komutları değişebilir; kurmadan önce resmi kaynaktan doğrula.
 > Kural: aynı anda en fazla 3-4 MCP aktif. Her MCP araç tanımlarıyla bağlam tüketir.
@@ -42,6 +42,16 @@
 | `security-reviewer` | Salt-okunur. Güvenlik kontrol listesi, bulgu raporu |
 | `test-writer` | Test senaryosu çıkarır, test yazar, çalıştırır |
 | `code-reviewer` | Standartlara uyum, sadeleştirme önerileri |
+
+## Yerel SEO skill'leri (`claude-seo` eklentisi)
+Kullanıcının makinesinde `/seo-*` skill'leri kuruludur. Kod değil, referans ve denetim aracıdır:
+| Skill | Kullanım yeri |
+|---|---|
+| `seo-ecommerce`, `seo-schema` | F3.12–F3.13 kural ve şema tasarımında referans; F18'de ürün sayfası doğrulama |
+| `seo-technical`, `seo-sitemap` | F3.6/F3.15 kural tasarımı; F14 geçiş öncesi eski site envanteri; F18 teknik denetim |
+| `seo-programmatic`, `seo-geo`, `seo-content` | F3.16 içerik/landing kalite kapıları ve editör kuralları |
+| `seo-audit`, `seo-page` | F18 demo mağaza tam denetimi; canlı tenant'larda dönemsel kontrol |
+Kural: skill çıktısı dokümana "kaynak: claude-seo, <tarih>" notuyla girer; Google kuralı değiştiğinde doc 13/14 güncellenir.
 
 ## Hook'lar
 `.claude/settings.json` içinde: dosya düzenlemesinden sonra prettier (jq gerektirir).

@@ -8,7 +8,8 @@
 | HTTP entegrasyon | Medusa test-utils (`medusaIntegrationTestRunner`) | API route + workflow + mock sağlayıcı |
 | Contract | Ortak test paketi | Her payment/fulfillment provider aynı sözleşmeyi sağlar |
 | E2E (admin) | Playwright | Kritik admin akışları (smoke) |
-| Yük | k6 | F10 |
+| SEO denetimi | Yerel `/seo-*` skill'leri, Lighthouse | F18 demo mağaza; F14 geçiş öncesi/sonrası |
+| Yük | k6 | F15 |
 
 ## Kurallar
 - Dış servisler testte **asla** gerçek çağrılmaz. `packages/testing` altında mock sunucular (msw veya küçük HTTP sunucu):
@@ -25,7 +26,7 @@
 - Mükerrer callback / webhook
 - İstemci tutar manipülasyonu
 - Tam iade, kısmi iade, aynı gün iptal
-- Sağlayıcı 5xx → retry → yedek sağlayıcı (F4)
+- Sağlayıcı 5xx → retry → yedek sağlayıcı (F6)
 
 ## Zorunlu senaryolar (kargo)
 - Ölçü eksik ürün, adres hatası, sağlayıcı teklif vermiyor
@@ -36,3 +37,43 @@
 - Bireysel/kurumsal ayrımı, mükellef sorgusu hatası
 - Entegratör kapalı → retry → başarılı
 - Mükerrer fatura engeli
+
+## Zorunlu senaryolar (stok ve katalog)
+- Son ürün için eşzamanlı checkout → yalnızca biri tamamlanır
+- İptal/iade/süresi dolan havale → rezervasyon serbest kalır
+- İçe aktarmada hatalı satırlar diğerlerini bozmaz; yeniden çalıştırma mükerrer üretmez
+- Slug değişimi → otomatik 301
+
+## Zorunlu senaryolar (fiyat ve promosyon)
+- Kupon limiti eşzamanlı kullanımda aşılmaz; süresi geçmiş/kapsam dışı kupon reddedilir
+- Son 30 gün en düşük fiyat: fiyat artışı, indirim, zamanlı fiyat geçişlerinde doğru
+- İndirimli siparişte kısmi iade: kalem indirim payı düşülür, kuruş farkı oluşmaz
+- İstemciden gelen indirim/ek ücret tutarı etkisiz
+
+## Zorunlu senaryolar (SEO)
+- Slug: Türkçe karakter tablosu, uzunluk kesme, benzersizlik çakışması, değişimde otomatik 301, rezerve slug'ın yeniden kullanılamaması
+- Redirect motoru: zincir düzleştirme, döngü reddi, regex zaman aşımı, sorgu parametresi davranışı, 410
+- `seo` payload contract: her varlık türünde zorunlu alanlar, mutlak URL, canonical host, noindex kuralları (taslak, boş kategori, filtre parametresi)
+- JSON-LD: her blok JSON şemadan geçer; `StrikethroughPrice` 30 gün kuralıyla tutarlı; `aggregateRating` yorumsuz üründe yok
+- Sitemap: 50.000 bölme, `lastmod` yalnızca anlamlı değişimde, taslak/noindex dışarıda; robots facet parametresini engelliyor, landing yolunu engellemiyor
+- Advisor: her kural pozitif/negatif fixture; skor deterministik; p95 < 50 ms; 404 hedef önerisi doğruluğu; landing özgünlük kapısı
+- İçe aktarma: SEO sütunları, satır bazlı advisor özeti
+
+## Zorunlu senaryolar (güvenlik tabanı)
+- Upload: SVG, sahte MIME, boyut/piksel aşımı reddi; EXIF temizlendi
+- SSRF: iç IP, link-local, DNS rebinding, yönlendirmeyle iç IP'ye gitme reddi (webhook, geçiş görseli, feed)
+- Dışa aktarma: formül başlangıçlı hücre kaçışlanmış; XML'de DTD/entity reddi; zip bomb sınırı
+- Rate limit: login/kayıt/şifre sıfırlama/kupon/taksit/SMS uçlarında 429; header'lar her yanıtta; CORS allowlist dışı origin reddi
+- Open redirect: ödeme dönüş URL'si allowlist dışı reddi
+- Okuma denetimi: TCKN görüntüleme ve dışa aktarma audit log'da
+
+## Zorunlu senaryolar (sipariş operasyonu)
+- Değişim: fark tutarı tahsilat/iade, stok iki yönde, fatura akışı
+- Sipariş düzenleme: faturalandırılmış siparişte kısıt; ödeme farkı
+- Müşteri iptali: kargo öncesi/sonrası ayrımı
+- Ters ibraz: belge paketi içeriği
+
+## Zorunlu senaryolar (entegrasyon ve geçiş)
+- Muhasebe adaptörü kapalı → retry → mükerrer kayıt yok
+- Giden webhook: imza doğrulanabilir, 5xx → retry, iç IP hedefi reddedilir
+- Geçiş: dry-run sayımları = gerçek çalıştırma sayımları; yarıda kalan geçiş tekrar çalıştırılabilir

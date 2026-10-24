@@ -8,15 +8,17 @@
 | prod | Tenant'lar | Canlı (tenant'ın kendi hesapları) |
 
 ## Local (docker compose)
-Postgres, Redis, Mailpit, MinIO. `pnpm dev` backend'i host'ta çalıştırır (hızlı reload).
+Postgres, Redis, Mailpit (e-posta yakalama), SeaweedFS (S3; MinIO arşivlendi, adr/0006). `pnpm dev` backend'i host'ta çalıştırır (hızlı reload).
 
 ## Üretim imajı
 - Multi-stage Dockerfile, `node:<LTS>-alpine` veya distroless, non-root kullanıcı
 - Aynı imaj iki rolde: `MEDUSA_WORKER_MODE=server` ve `=worker`
 - Admin build imaja dahil (veya ayrı statik barındırma — ADR ile karar)
 - Health check endpoint'i; graceful shutdown (SIGTERM'de iş bitirme)
+- DB ve Redis bağlantıları TLS + auth; yalnızca iç ağdan erişim (docs/04)
+- Staging/önizleme: `X-Robots-Tag: noindex` + basic auth; F16.13 otomatik kontrol
 
-## Tenant provisioning (F11)
+## Tenant provisioning (F16)
 `infra/tenant/create-tenant <slug>`:
 1. DB + kullanıcı oluştur (en az yetki)
 2. Secret'ları secret store'a yaz (şablondan; sağlayıcı anahtarları boş/sandbox)
@@ -25,6 +27,16 @@ Postgres, Redis, Mailpit, MinIO. `pnpm dev` backend'i host'ta çalıştırır (h
 5. Server + worker servislerini başlat, domain/SSL bağla
 6. Health check → başarılıysa tenant kaydını "aktif" yap
 Script **idempotent** olmalı (yarıda kalırsa tekrar çalıştırılabilir).
+
+## Tenant işletimi (F16)
+- **Hosting ve bölge:** adr/0003 (KVKK veri yerleşimi dahil)
+- **Alan adı:** varsayılan `<slug>.<platform-domain>`; tenant domain'i DNS TXT sahiplik doğrulamasıyla bağlanır, otomatik SSL; bağlanınca platform alt alan adı 301 (SEO + güvenlik)
+- **Kapatma sonrası:** DNS/sertifika kayıtları temizlenir, alt alan adı devralma (subdomain takeover) kontrolü
+- **SEO dosyaları:** sitemap/robots worker'da üretilir, S3'ten storefront proxy'ler; CDN cache kısa TTL
+- **E-posta:** tenant alan adı için SPF/DKIM/DMARC doğrulaması (F9.6)
+- **Destek erişimi:** süreli, gerekçeli, audit log'lu; tenant'a bildirim
+- **Kapatma:** veri dışa aktarma paketi → saklama süresi → silme, secret iptali, DNS temizliği
+- **Maliyet:** tenant başına kaynak/maliyet raporu; boşta tenant optimizasyonu ayrı ADR
 
 ## Sürüm yayma
 - Migration'lar geri uyumlu (expand → migrate → contract).

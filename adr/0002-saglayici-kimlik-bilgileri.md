@@ -10,7 +10,7 @@ Ayrıca secret'ların uygulama DB'sinde tutulması saldırı yüzeyini büyütü
 
 ## Karar
 - Sağlayıcı kimlik bilgileri instance'a **ortam değişkeni / secret** olarak enjekte edilir; provider'lar options/env'den okur.
-- Doğruluk kaynağı: secret store (F12'de Control Plane arayüzüyle yönetilir; öncesinde provisioning script'i).
+- Doğruluk kaynağı: secret store (F17'de Control Plane arayüzüyle yönetilir; öncesinde provisioning script'i).
 - Anahtar değişikliği → secret güncelle → rolling restart.
 - Instance admin'indeki "Entegrasyonlar" sayfası secret göstermez/düzenlemez; durum, bağlantı testi ve son hata gösterir.
 
@@ -21,5 +21,5 @@ Ayrıca secret'ların uygulama DB'sinde tutulması saldırı yüzeyini büyütü
 | **Env/secret store + restart** | Basit, güvenli, Medusa ile uyumlu | Değişiklik restart gerektirir |
 
 ## Sonuçlar
-- F12 Control Plane'de tenant'ın anahtar girdiği güvenli bir form gerekir.
+- F17 Control Plane'de tenant'ın anahtar girdiği güvenli bir form gerekir.
 - Provider'lar açılışta anahtar formatını ve sandbox/prod tutarlılığını doğrular.

@@ -1,0 +1,82 @@
+# Local development services (docs/08).
+# Secrets come from infra/docker/.env (template: env.example, created by
+# scripts/init-dev-env.sh). Ports are off the defaults to avoid clashing with
+# locally installed services and bind to loopback only, so nothing is exposed
+# on the network. Images are pinned by digest (docs/04, adr/0006).
+name: qticaret-dev
+
+services:
+  postgres:
+    image: postgres:16.15-alpine@sha256:f4610795587492cd4fb887c2dc3de301b813278bb6f616992061141b5f15ac36
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in infra/docker/.env}
+      POSTGRES_DB: qticaret
+    ports:
+      - "127.0.0.1:55432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7.4.11-alpine@sha256:57e4255cc971b1c8d6f8a6ca283ac01bc3ecdd914273ef6bfaede87aaecd6541
+    ports:
+      - "127.0.0.1:56379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Catches outgoing e-mail; web UI on http://localhost:58025
+  mailpit:
+    image: axllent/mailpit:v1.31.4@sha256:b68349e3a014b90c5610bfb26b2ae36f3892d7b8cf25ee140c6c71c98d2fcf48
+    ports:
+      - "127.0.0.1:51025:1025"
+      - "127.0.0.1:58025:8025"
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # S3-compatible object storage (MinIO replacement, adr/0006).
+  # Anonymous identity may only read, so stored files get public URLs like a
+  # public-read bucket; writes need the generated key pair.
+  seaweedfs:
+    image: chrislusf/seaweedfs:4.48@sha256:4e61d15fd35994cb1e43e1e553dff106794841fd9a99ade2fc8c8bfce4d7872d
+    environment:
+      S3_ACCESS_KEY_ID: ${S3_ACCESS_KEY_ID:?set in infra/docker/.env}
+      S3_SECRET_ACCESS_KEY: ${S3_SECRET_ACCESS_KEY:?set in infra/docker/.env}
+    entrypoint: ["/bin/sh", "-c"]
+    command:
+      - |
+        cat > /etc/seaweedfs/s3.json <<EOF
+        {"identities": [
+          {"name": "anonymous", "actions": ["Read"]},
+          {"name": "qticaret",
+           "credentials": [{"accessKey": "$${S3_ACCESS_KEY_ID}", "secretKey": "$${S3_SECRET_ACCESS_KEY}"}],
+           "actions": ["Admin", "Read", "List", "Tagging", "Write"]}
+        ]}
+        EOF
+        exec /entrypoint.sh mini -dir=/data -s3.config=/etc/seaweedfs/s3.json -bucket=qticaret
+    ports:
+      - "127.0.0.1:58333:8333"
+    volumes:
+      - seaweedfs-data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:8333/healthz"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  postgres-data:
+  redis-data:
+  seaweedfs-data:

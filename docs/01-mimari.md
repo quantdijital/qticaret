@@ -2,7 +2,7 @@
 
 ## Genel görünüm
 ```
-                ┌──────────────── Control Plane (F12) ────────────────┐
+                ┌──────────────── Control Plane (F17) ────────────────┐
                 │  tenant kayıt, abonelik, secret yönetimi, provisioning │
                 └───────────────┬─────────────────────────────────────┘
                                 │ provision / deploy / secret inject
@@ -32,7 +32,7 @@ Medusa module provider'ları izoledir; özel bir "settings" modülünü çağır
   provisioning servisi secret'ı günceller ve instance'ı rolling restart eder.
 - Instance içindeki admin'de **"Entegrasyonlar" sayfası** anahtarları göstermez; sadece durum,
   "bağlantıyı test et" ve son hata bilgisini gösterir. (adr/0002)
-- F12 öncesinde (control plane yokken) secret'lar dağıtım aracı üzerinden manuel/script ile girilir.
+- F17 öncesinde (control plane yokken) secret'lar dağıtım aracı üzerinden manuel/script ile girilir.
 
 ## Backend katmanları
 | Katman | Sorumluluk | Kural |
@@ -50,15 +50,39 @@ Medusa module provider'ları izoledir; özel bir "settings" modülünü çağır
 |---|---|---|
 | `payment-iyzico` | Payment provider | iyzico Checkout Form, taksit, iade |
 | `payment-paytr` | Payment provider | PayTR iFrame, yedek sağlayıcı |
+| `payment-bank-transfer` | Payment provider | Havale/EFT, manuel onay, süre aşımı iptali (F6) |
+| `payment-cod` | Payment provider | Kapıda ödeme, ek ücret, tutar sınırı (F6) |
 | `fulfillment-geliver` | Fulfillment provider | Teklif, etiket, takip, iade gönderisi |
 | `notification-sms` | Notification provider | Netgsm vb. SMS |
 | `notification-email` | Notification provider | Resend/SES |
 | `einvoice` | Custom modül + provider deseni | e-Arşiv/e-Fatura, adaptör tabanlı |
-| `platform-settings` | Custom modül | Feature flag'ler, mağaza ayarları (secret İÇERMEZ) |
+| `platform-settings` | Custom modül | Feature flag'ler, mağaza ayarları, künye (secret İÇERMEZ) |
 | `product-attributes` | Custom modül | Sektörel attribute şablonları (ör. çelik tipi, beden) |
-| `legal-consent` | Custom modül | Sözleşme sürümleri, onay kayıtları, İYS izinleri |
+| `legal-consent` | Custom modül | Sözleşme sürümleri, onay kayıtları, çerez onayı, İYS izinleri |
 | `audit-log` | Custom modül | Admin işlemlerinin denetim kaydı |
 | `tr-address` | Custom modül | İl/ilçe/mahalle referans verisi |
+| `seo-redirects` | Custom modül | 301/302/410, regex kurallar, zincir düzleştirme, 404 günlüğü + hedef önerisi (F3) |
+| `seo-advisor` | Custom modül | Kural motoru: SEO/içerik skoru, bulgular, tek tık düzeltme, mağaza denetimi, paylaşım önizleme (F3, docs/14) |
+| `brands` | Custom modül | Marka sayfaları (slug, logo, açıklama, SEO alanları), ürün ↔ marka link'i (F3) |
+| `content` | Custom modül | İçerik sayfaları, blog, facet landing sayfaları; SEO alanlı (F3) |
+| `product-qa` | Custom modül | Ürün Soru-Cevap, moderasyon, `QAPage` şeması (F10) |
+| `seo-insights` | Custom modül | Search Console / CrUX / IndexNow entegrasyonları, SEO paneli verisi (F10) |
+| `price-history` | Custom modül | Fiyat değişim geçmişi, son 30 gün en düşük fiyat; JSON-LD üstü çizili fiyat kaynağı (F4) |
+| `wishlist` | Custom modül | Favori listesi (F10) |
+| `back-in-stock` | Custom modül | Stok gelince haber ver abonelikleri (F10) |
+| `product-reviews` | Custom modül | Satın alan müşteri yorumları + moderasyon (F10) |
+| `marketing-feeds` | Custom modül + formatter deseni | Google/Meta/Akakçe/Cimri feed'leri (F10) |
+| `accounting` | Custom modül + adaptör deseni | Paraşüt/Logo/Mikro aktarımı (F11) |
+| `tenant-webhooks` | Custom modül | Tenant sistemlerine imzalı giden olaylar (F11) |
+| `fraud-guard` | Custom modül | Captcha, velocity kuralları, şüpheli sipariş kuyruğu (F15) |
+| `data-migration` | Custom modül + kaynak adaptörleri | Shopify/Ticimax/ikas vb. geçiş (F14) |
+
+**Çekirdekte hazır gelenler (yeniden yazılmaz, yapılandırılır):** Product, Inventory, Stock Location,
+Pricing (fiyat listeleri), Promotion, Customer (gruplar), Auth, API Key, Tax, Region, Sales Channel, Order Edit, Return, Exchange.
+
+**Paylaşılan kütüphaneler (`lib/`):** `clients`, `errors`, `money`, `security` (safe-fetch, upload validator, CSV/XML güvenliği),
+`seo` (Türkçe slug, url-registry, şablon motoru, JSON-LD üretici). Bkz. docs/02.
+Hediye kartı, ürün çevirisi gibi yeteneklerin çekirdekte/resmi eklentide olup olmadığı Context7 ile doğrulanır.
 
 ## Sektörden bağımsızlık deseni
 - `platform-settings` içinde feature flag'ler: `age_verification`, `engraving_option`, `cash_on_delivery`, ...
@@ -67,17 +91,32 @@ Medusa module provider'ları izoledir; özel bir "settings" modülünü çağır
 
 ## Event akışı (ana senaryo)
 ```
-cart.complete → order.placed
+cart.complete → stok rezervasyonu → order.placed
   ├─ subscriber: sipariş bildirimi (e-posta/SMS)
   ├─ subscriber: yasal onay snapshot'ı siparişe bağlanır
+  ├─ subscriber: sunucu taraflı dönüşüm olayı (çerez onayı varsa)
+  └─ subscriber: tenant webhook'ları (abonelik varsa)
 order.fulfillment_created → kargo etiketi (Geliver)
 shipment tracking webhook → fulfillment güncellemesi → müşteri bildirimi
-order.shipped (veya placed; tenant ayarı) → e-arşiv fatura workflow'u
-refund → iyzico iade → kısmi ise kalem bazlı → e-arşiv iade/iptal süreci
+order.shipped (veya placed; tenant ayarı) → e-arşiv fatura workflow'u → muhasebe aktarımı
+iade talebi → onay → iade gönderisi → depoya varış → para iadesi + stok + iade faturası
+inventory güncellendi → stok bildirimi abonelerine haber, düşük stok uyarısı
+product fiyatı güncellendi → price-history kaydı (+ audit log)
+ürün/kategori/sayfa kaydedildi → seo-advisor değerlendirmesi (senkron) → url-registry + otomatik 301 → sitemap yeniden üretimi (debounce) → IndexNow
+storefront 404 bildirdi → seo-advisor 404 günlüğü → hedef önerisi → admin tek tıkla 301
 ```
+
+## SEO katmanı (özet; detay docs/13 ve docs/14)
+- Store API her varlık için hazır `seo` payload'ı döner (title, description, canonical, robots, OG, breadcrumbs, JSON-LD). Tema SEO mantığı yazmaz.
+- Sitemap ve robots backend'de üretilir (worker → S3), storefront proxy'ler.
+- Ürün URL'si kategori içermez; birincil kategori breadcrumb ve şema için; URL desenleri tenant ayarı, değişimde toplu 301.
+- `seo-advisor` kaydetme anında skor ve bulgu üretir; gece denetimi mağaza genelini tarar; LLM taslakları opsiyonel (adr/0005).
 
 ## Altyapı bileşenleri
 - PostgreSQL (tenant başına DB), Redis (event bus, workflow engine, cache, lock)
 - Medusa `workerMode`: `server` ve `worker` ayrı süreçler (prod). Geliştirmede `shared`.
-- Obje depolama: S3 uyumlu (ürün görselleri, etiket PDF'leri, fatura PDF'leri)
-- Arama (F13'e yakın): Meilisearch — backend'de indeksleme subscriber'ı hazırlanır.
+- Obje depolama: S3 uyumlu (ürün görselleri, etiket PDF'leri, fatura PDF'leri, içe aktarma/rapor/feed dosyaları)
+- CDN + WAF: görseller, DDoS ve bot koruması (sağlayıcı ve bölge: adr/0003)
+- Arama (F18): Meilisearch — backend'de indeksleme subscriber'ı hazırlanır.
+- Dış bağımlılık ilkesi: her dış servis adaptör arkasında ve mümkünse self-host alternatifi olan (captcha, hata izleme, obje depolama, arama, secret store);
+  kaçınılmaz olanlar (kart ödeme, e-fatura iletimi, SMS, kargo taşıma) en ince katmanda tutulur (UBL üretimi, mükellef listesi, PDF bizde).

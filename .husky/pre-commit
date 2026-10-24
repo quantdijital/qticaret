@@ -1,0 +1,9 @@
+# Secret scan of the staged changes (docs/04). There is no bypass on purpose:
+# CI scans the full history again, so --no-verify only delays the failure.
+if ! command -v gitleaks >/dev/null 2>&1; then
+  echo "pre-commit: gitleaks is required (macOS: brew install gitleaks). See README." >&2
+  exit 1
+fi
+gitleaks git --pre-commit --staged --redact --no-banner --verbose
+
+pnpm exec lint-staged

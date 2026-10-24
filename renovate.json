@@ -1,0 +1,46 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": "Weekly dependency updates; releases must be 14 days old (docs/04). Security fixes are raised immediately but still need pnpm's own 14-day gate or a reviewed minimumReleaseAgeExclude entry.",
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard",
+    "security:minimumReleaseAgeNpm",
+    "helpers:pinGitHubActionDigests",
+    "docker:pinDigests"
+  ],
+  "timezone": "Europe/Istanbul",
+  "schedule": ["before 9am on monday"],
+  "minimumReleaseAge": "14 days",
+  "internalChecksFilter": "strict",
+  "prCreation": "not-pending",
+  "rangeStrategy": "pin",
+  "osvVulnerabilityAlerts": true,
+  "vulnerabilityAlerts": {
+    "labels": ["security"]
+  },
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 9am on monday"]
+  },
+  "major": {
+    "dependencyDashboardApproval": true
+  },
+  "packageRules": [
+    {
+      "description": "Raise the npm preset's 3 days to our 14 days",
+      "matchDatasources": ["npm"],
+      "matchUpdateTypes": ["major", "minor", "patch", "digest"],
+      "minimumReleaseAge": "14 days"
+    },
+    {
+      "description": "Medusa packages are released together and must stay on one version (adr/0001)",
+      "matchPackageNames": ["@medusajs/**"],
+      "groupName": "medusa"
+    },
+    {
+      "description": "Node.js stays on the 24 LTS line (engines >=24.11 <25)",
+      "matchDepNames": ["node"],
+      "allowedVersions": "<25"
+    }
+  ]
+}

@@ -22,19 +22,30 @@ repo/
 │   │   │   │   │   ├── types.ts
 │   │   │   │   │   └── __tests__/
 │   │   │   │   ├── payment-paytr/
-│   │   │   │   ├── fulfillment-geliver/
+│   │   │   │   ├── payment-bank-transfer/
+│   │   │   │   ├── payment-cod/
+│   │   │   │   ├── fulfillment-geliver/  fulfillment-<tasiyici>/   # doğrudan taşıyıcı adaptörü (F7.14)
 │   │   │   │   ├── notification-sms/
 │   │   │   │   ├── notification-email/
 │   │   │   │   ├── einvoice/
 │   │   │   │   │   ├── models/ service.ts index.ts
-│   │   │   │   │   └── adapters/ (nilvera.ts, ...)   # InvoiceAdapter arayüzü
+│   │   │   │   │   ├── ubl/                          # UBL-TR üretimi (bizde)
+│   │   │   │   │   ├── taxpayers/                    # GİB mükellef listesi job'u
+│   │   │   │   │   └── adapters/ (nilvera.ts, ...)   # InvoiceAdapter: imza + iletim
 │   │   │   │   ├── platform-settings/
 │   │   │   │   ├── product-attributes/
 │   │   │   │   ├── legal-consent/
 │   │   │   │   ├── audit-log/
-│   │   │   │   └── tr-address/
+│   │   │   │   ├── tr-address/
+│   │   │   │   ├── seo-redirects/  seo-advisor/ (rules/<alan>/<id>.ts)  seo-insights/  brands/  content/
+│   │   │   │   ├── price-history/  product-qa/
+│   │   │   │   ├── wishlist/  back-in-stock/  product-reviews/  marketing-feeds/
+│   │   │   │   ├── accounting/                       # adapters/ (parasut.ts, ...)
+│   │   │   │   ├── tenant-webhooks/  fraud-guard/
+│   │   │   │   └── data-migration/                   # sources/ (shopify.ts, ticimax.ts, ...)
 │   │   │   ├── workflows/
 │   │   │   │   ├── payment/  fulfillment/  invoice/  notification/  legal/
+│   │   │   │   ├── catalog/  seo/  inventory/  promotion/  returns/  exchanges/  marketing/  reports/  accounting/
 │   │   │   │   └── <alan>/steps/
 │   │   │   ├── api/
 │   │   │   │   ├── middlewares.ts
@@ -53,12 +64,14 @@ repo/
 │   │   │   ├── lib/
 │   │   │   │   ├── clients/         # http istemci tabanı (timeout, retry, redaksiyon)
 │   │   │   │   ├── crypto/          # imza/HMAC yardımcıları
+│   │   │   │   ├── security/        # safe-fetch (SSRF), upload validator, csv-escape, safe-xml
+│   │   │   │   ├── seo/             # slug (TR), url-registry, title templates, jsonld builders
 │   │   │   │   ├── money/           # tutar dönüşümleri
 │   │   │   │   └── errors/          # ortak hata tipleri
 │   │   │   └── scripts/             # seed, tr-address import, tenant bootstrap
 │   │   └── integration-tests/
 │   │       ├── http/  modules/  fixtures/
-│   └── storefront/                  # F13 — ŞİMDİ BOŞ
+│   └── storefront/                  # F18 — ŞİMDİ BOŞ
 ├── packages/
 │   ├── types/                       # paylaşılan tipler (Store API sözleşmeleri)
 │   ├── config/                      # eslint, tsconfig, prettier
