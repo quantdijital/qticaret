@@ -1,4 +1,5 @@
 import { z } from "@medusajs/framework/zod"
+import { LOG_LEVELS } from "./logging/levels"
 
 /**
  * Environment schema validated once at startup (docs/04): a missing or
@@ -39,6 +40,8 @@ const envSchema = z.object({
   COOKIE_SECRET: secret,
   PII_ENCRYPTION_KEY: key256,
   PII_HASH_KEY: key256,
+  // Medusa's level names; unset means Medusa's default, `http`
+  LOG_LEVEL: z.enum(LOG_LEVELS).optional(),
 })
 
 const deployedEnvSchema = envSchema.superRefine((env, ctx) => {

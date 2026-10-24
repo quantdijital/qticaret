@@ -1,11 +1,15 @@
 import { defineConfig, loadEnv } from "@medusajs/framework/utils"
 import { isLocalEnv, parseEnv } from "./src/lib/env"
+import { DEFAULT_LOG_LEVEL, MedusaPinoLogger, baseLogger } from "./src/lib/logging"
 
 loadEnv(process.env["NODE_ENV"] ?? "development", process.cwd())
 
 const env = parseEnv()
 
 module.exports = defineConfig({
+  // Core, modules and scripts log through the platform logger: JSON,
+  // redacted, with the request ID (docs/10)
+  logger: new MedusaPinoLogger(baseLogger, env.LOG_LEVEL ?? DEFAULT_LOG_LEVEL),
   projectConfig: {
     databaseUrl: env.DATABASE_URL,
     // Session store for cookie auth (adr/0004); without it sessions live in
