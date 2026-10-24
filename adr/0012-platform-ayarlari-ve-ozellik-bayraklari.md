@@ -1,6 +1,6 @@
 # ADR-0012: Platform ayarları ve özellik bayrakları (`platform-settings`)
 
-- **Durum:** Önerildi (F2 S9'da karara bağlanacak)
+- **Durum:** Kabul edildi (2026-10-24, kullanıcı onayı; uygulama F2 S8–S13)
 - **Tarih:** 2026-10-24
 
 ## Bağlam

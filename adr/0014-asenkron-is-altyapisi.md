@@ -1,6 +1,6 @@
 # ADR-0014: Asenkron iş altyapısı (iş kaydı, ilerleme, sonuç dosyası)
 
-- **Durum:** Önerildi (F2 S13'te karara bağlanacak)
+- **Durum:** Kabul edildi (2026-10-24, kullanıcı onayı; uygulama F2 S8–S13)
 - **Tarih:** 2026-10-24
 
 ## Bağlam

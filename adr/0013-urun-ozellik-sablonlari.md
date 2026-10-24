@@ -1,6 +1,6 @@
 # ADR-0013: Ürün özellik şablonları (`product-attributes`) veri modeli
 
-- **Durum:** Önerildi (F2 S11'de karara bağlanacak)
+- **Durum:** Kabul edildi (2026-10-24, kullanıcı onayı; uygulama F2 S8–S13)
 - **Tarih:** 2026-10-24
 
 ## Bağlam

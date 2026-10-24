@@ -248,7 +248,7 @@ Paralel zincirler:
 Önerilen sıra, güvenlik tabanını (S1–S3) yeni route'lardan önce kurar (docs/04 "Route eklenmeden önce hazır").
 
 ## Açık sorular / bloklayıcılar
-- [ ] **Gözden geçir: otonom oturumda S4, S7 ve S6 için verilen muhafazakâr kararlar (kullanıcı onayı bekliyor):**
+- [x] **Gözden geçir: otonom oturumda S4, S7 ve S6 için verilen muhafazakâr kararlar:** Kullanıcı 2026-10-24 akşamı olduğu gibi kabul etti.
   - **S4:**
     - `safeFetch` varsayılan yönlendirme modu `same-origin`. Başka origin'e gitmek için `follow` açıkça istenmeli; webhook'larda `error`.
     - DNS c-ares ile yapılıyor; /etc/hosts okunmuyor.
@@ -269,7 +269,7 @@ Paralel zincirler:
   - **S6, HTTPS testi:** `openssl` gerektiriyor; CI imajında var.
   - **S7 migration:** `url-registry` migration'ı `db:generate` ile üretildi. `/yeni-modul` komutu "üretmeden önce sor" diyor; kullanıcının "izin isteme" talimatıyla soruldu sayıldı. DB'ye dokunan `db:migrate` çalıştırılmadı.
   - **Yeni i18n anahtarları:** `seo.template_invalid`, `seo.path_taken`, `seo.path_not_owned`, `seo.path_invalid`, `seo.locale_invalid`, `seo.entity_type_invalid`, `seo.entity_id_invalid`.
-- [ ] **Gözden geçir: F2 S2 muhafazakâr kararları (kullanıcı onayı bekliyor):**
+- [x] **Gözden geçir: F2 S2 muhafazakâr kararları:** Kullanıcı 2026-10-24 akşamı olduğu gibi kabul etti.
   - Loglarda ad, soyad, unvan ve posta kodu anahtarları da maskeleniyor; docs/04 yalnızca TCKN, telefon ve adresi sayıyor.
   - `body` anahtarı tamamen redakte ediliyor. Sağlayıcı yanıt gövdeleri loga girmiyor; S6 istemcisi hata ayıklama için `providerCode` gibi alanları ayrıca yazmalı.
   - Kodun fırlattığı ham ZodError 400 ve genel `errors.invalid_data` dönüyor. Medusa'nın davranışı issue metinlerini göndermekti.

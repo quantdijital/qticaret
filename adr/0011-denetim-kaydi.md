@@ -1,6 +1,6 @@
 # ADR-0011: Denetim kaydı (audit log) modeli
 
-- **Durum:** Önerildi (F2 S8'de karara bağlanacak)
+- **Durum:** Kabul edildi (2026-10-24, kullanıcı onayı; uygulama F2 S8–S13)
 - **Tarih:** 2026-10-24
 
 ## Bağlam
