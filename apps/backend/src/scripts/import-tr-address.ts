@@ -24,7 +24,7 @@ export default async function run({ container, args }: ExecArgs): Promise<void> 
   const service = container.resolve<TrAddressModuleService>(TR_ADDRESS_MODULE)
   const startedAt = Date.now()
   const report = await service.importReferenceData(rows, {
-    deactivateMissing: args.includes("--deactivate-missing"),
+    shouldDeactivateMissing: args.includes("--deactivate-missing"),
   })
 
   logger.info(

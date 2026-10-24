@@ -1,7 +1,8 @@
 import { z } from "@medusajs/framework/zod"
 import { normalizePlateCode } from "../../../lib/tr/postal-code"
 
-export const TR_ADDRESS_MAX_LIMIT = 1000
+// docs/04: list endpoints page at most 100 records; clients page through larger districts
+export const TR_ADDRESS_MAX_LIMIT = 100
 
 const pagination = {
   limit: z.coerce.number().int().min(1).max(TR_ADDRESS_MAX_LIMIT).default(100),
@@ -17,7 +18,7 @@ export const StoreGetTrDistricts = z.object({
   province: z.string().transform((value, ctx) => {
     const code = normalizePlateCode(value)
     if (!code) {
-      ctx.addIssue({ code: "custom", message: "must be a plate code between 1 and 81" })
+      ctx.addIssue({ code: "custom", message: "tr_address.province_code_invalid" })
       return z.NEVER
     }
     return code
@@ -27,6 +28,6 @@ export type StoreGetTrDistrictsType = z.infer<typeof StoreGetTrDistricts>
 
 export const StoreGetTrNeighborhoods = z.object({
   ...pagination,
-  district: z.string().regex(/^trdst_[0-9A-Z]{26}$/, "must be a district id"),
+  district: z.string().regex(/^trdst_[0-9A-Z]{26}$/, "tr_address.district_id_invalid"),
 })
 export type StoreGetTrNeighborhoodsType = z.infer<typeof StoreGetTrNeighborhoods>

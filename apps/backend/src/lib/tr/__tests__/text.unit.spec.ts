@@ -1,4 +1,4 @@
-import { trMatchKey, trNeighborhoodMatchKey, trSortKey } from "../text"
+import { trAsciiFold, trMatchKey, trNeighborhoodMatchKey, trSortKey } from "../text"
 
 describe("trMatchKey", () => {
   it.each([
@@ -47,5 +47,17 @@ describe("trSortKey", () => {
   it("is case-insensitive and made of digits only", () => {
     expect(trSortKey("İZMİR")).toBe(trSortKey("izmir"))
     expect(trSortKey("Çağlayan 2. Sokak")).toMatch(/^\d+$/)
+  })
+})
+
+describe("trAsciiFold", () => {
+  it.each([
+    ["İstanbul", "Istanbul"],
+    ["Kadıköy", "Kadikoy"],
+    ["Çankaya", "Cankaya"],
+    ["Şanlıurfa", "Sanliurfa"],
+    ["Iğdır", "Igdir"],
+  ])("maps %p and %p to the same key", (turkish, ascii) => {
+    expect(trAsciiFold(trMatchKey(ascii))).toBe(trAsciiFold(trMatchKey(turkish)))
   })
 })

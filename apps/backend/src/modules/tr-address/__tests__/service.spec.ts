@@ -86,7 +86,7 @@ moduleIntegrationTestRunner<TrAddressModuleService>({
               postal_code: "34711",
             },
           ],
-          { deactivateMissing: true }
+          { shouldDeactivateMissing: true }
         )
 
         expect(report.neighborhoods).toMatchObject({ updated: 1, deactivated: 10 })

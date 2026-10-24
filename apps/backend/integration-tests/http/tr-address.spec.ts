@@ -48,6 +48,7 @@ medusaIntegrationTestRunner({
         expect(response.data).toMatchObject({ count: 6, offset: 0, limit: 100 })
         expect(Object.keys(response.data.provinces[0] ?? {}).sort()).toEqual(["code", "id", "name"])
         expect(response.headers["cache-control"]).toContain("public")
+        expect(response.headers["vary"]).toContain("x-publishable-api-key")
       })
 
       it("paginates with limit and offset", async () => {
@@ -57,14 +58,14 @@ medusaIntegrationTestRunner({
         expect(response.data).toMatchObject({ count: 6, offset: 2, limit: 2 })
       })
 
-      it("rejects a limit above the maximum", async () => {
-        expect((await get("/store/tr-address/provinces?limit=1001")).status).toBe(400)
+      it("rejects a limit above the maximum of 100", async () => {
+        expect((await get("/store/tr-address/provinces?limit=101")).status).toBe(400)
       })
 
       it("hides deactivated provinces", async () => {
         await trAddressService(getContainer()).importReferenceData(
           [{ province_code: "6", province_name: "Ankara", district_name: "Çankaya" }],
-          { deactivateMissing: true }
+          { shouldDeactivateMissing: true }
         )
 
         const response = await get<Provinces>("/store/tr-address/provinces")

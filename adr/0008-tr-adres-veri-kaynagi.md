@@ -64,4 +64,10 @@ Araştırma (2026-10-24) sonucu:
 - **Middleware:** `src/api/validation/tr-address.ts`, şu route'larda: `POST /store/customers/me/addresses[/:address_id]`, `POST /store/carts`, `POST /store/carts/:id`. Core'un gövde doğrulamasından sonra çalışır (`req.validatedBody`). Kısmi güncellemeyi kayıtlı adresle birleştirerek denetler.
 - **Hata yanıtı:** 400 `{ type: "invalid_data", issues: [{ field, code }] }`. `code` storefront için i18n anahtarıdır (`tr_address.district_not_in_province` vb.).
 - **İkinci savunma hattı:** `createCartWorkflow` / `updateCartWorkflow` `validate` hook'ları (`src/workflows/hooks/validate-cart-tr-address.ts`). Store API dışından gelen sepet işlemlerini de kapsar.
-- **Bilinen sınır:** Müşteri adresleri için core'da `validate` hook'u yok. Bu yüzden müşteri adresleri yalnızca middleware ile korunur.
+- **Müşteri adresleri:** Core'da `validate` hook'u yok. `createCustomerAddressesWorkflow.hooks.addressesCreated` ve `updateCustomerAddressesWorkflow.hooks.addressesUpdated` kaydı denetler; hata workflow'u düşürür ve compensation yazımı geri alır. Admin düzenlemeleri de kapsanır (`src/workflows/hooks/validate-customer-address-tr-address.ts`).
+
+## İnceleme sonrası düzeltmeler (2026-10-24)
+- **Türkçe karakter kullanılmadan yazılan adlar:** "Istanbul", "Kadikoy", "Caferaga Mah." gibi girdiler ASCII'ye katlanmış anahtarla eşleşir. Önce tam eşleşme aranır. Katlanmış eşleşme yalnızca tek bir yere çıkıyorsa kabul edilir; belirsizse adres reddedilir.
+- **Sayfalama:** Store route'larında `limit` en fazla 100 (docs/04). Mahallesi 100'den çok olan ilçeler için istemci sayfalar.
+- **Cache:** Yanıta `Vary: x-publishable-api-key` eklendi; paylaşılan bir cache anahtarsız isteğe cevap vermez.
+- **Sorgu hata mesajları:** i18n anahtarıdır (`tr_address.province_code_invalid`, `tr_address.district_id_invalid`).

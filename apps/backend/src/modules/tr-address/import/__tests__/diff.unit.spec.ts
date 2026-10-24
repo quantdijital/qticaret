@@ -16,7 +16,7 @@ describe("planLevel", () => {
         { key: "c", values: { name: "C2" } },
         { key: "d", values: { name: "D" } },
       ],
-      { deactivateMissing: false }
+      { shouldDeactivateMissing: false }
     )
 
     expect(plan).toEqual({
@@ -33,7 +33,9 @@ describe("planLevel", () => {
   it("deactivates active records missing from the input only when asked", () => {
     const desired = [{ key: "a", values: { name: "A" } }]
 
-    expect(planLevel(existing, desired, { deactivateMissing: false }).deactivate).toEqual([])
-    expect(planLevel(existing, desired, { deactivateMissing: true }).deactivate).toEqual(["3"])
+    expect(planLevel(existing, desired, { shouldDeactivateMissing: false }).deactivate).toEqual([])
+    expect(planLevel(existing, desired, { shouldDeactivateMissing: true }).deactivate).toEqual([
+      "3",
+    ])
   })
 })

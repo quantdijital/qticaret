@@ -45,6 +45,11 @@ export function validateTrAddresses(
         next()
         return
       }
+      // Most cart updates carry no address; skip the lookups for them
+      if (!keys.some((key) => isRecord(key === ROOT ? body : body[key]))) {
+        next()
+        return
+      }
       const service = req.scope.resolve<TrAddressModuleService>(TR_ADDRESS_MODULE)
       const existing = loadExisting ? await loadExisting(req) : {}
 

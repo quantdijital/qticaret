@@ -47,3 +47,24 @@ export function trSortKey(value: string): string {
     })
     .join("")
 }
+
+const ASCII_FOLD: Record<string, string> = {
+  Ç: "C",
+  Ğ: "G",
+  İ: "I",
+  Ö: "O",
+  Ş: "S",
+  Ü: "U",
+  Â: "A",
+  Î: "I",
+  Û: "U",
+}
+
+/**
+ * Match key with Turkish letters replaced by ASCII ones, for input typed
+ * without Turkish characters ("Kadikoy" for "Kadıköy"). Lossy: use it only
+ * as a fallback that must resolve to a single place.
+ */
+export function trAsciiFold(matchKey: string): string {
+  return matchKey.replace(/[ÇĞİÖŞÜÂÎÛ]/gu, (char) => ASCII_FOLD[char] ?? char)
+}

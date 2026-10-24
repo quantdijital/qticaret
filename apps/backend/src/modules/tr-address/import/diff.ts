@@ -26,7 +26,7 @@ export interface LevelPlan<T> {
 export function planLevel<T extends Record<string, string>>(
   existing: ExistingRecord<T>[],
   desired: DesiredRecord<T>[],
-  options: { deactivateMissing: boolean }
+  options: { shouldDeactivateMissing: boolean }
 ): LevelPlan<T> {
   const byKey = new Map(existing.map((record) => [record.key, record]))
   const plan: LevelPlan<T> = { create: [], update: [], deactivate: [], unchanged: 0 }
@@ -44,7 +44,7 @@ export function planLevel<T extends Record<string, string>>(
     }
   }
 
-  if (options.deactivateMissing) {
+  if (options.shouldDeactivateMissing) {
     plan.deactivate = existing
       .filter((record) => record.is_active && !seen.has(record.key))
       .map((record) => record.id)

@@ -1,4 +1,8 @@
-import { createCartWorkflow, updateCartWorkflow } from "@medusajs/medusa/core-flows"
+import {
+  createCartWorkflow,
+  createCustomerAddressesWorkflow,
+  updateCartWorkflow,
+} from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { bootstrapTenant } from "../../src/scripts/bootstrap"
 import type { TestCustomer } from "../helpers/customer"
@@ -112,6 +116,17 @@ medusaIntegrationTestRunner({
         })
       })
 
+      it("accepts names typed without Turkish letters", async () => {
+        const response = await post<CustomerResponse>("/store/customers/me/addresses", {
+          ...VALID_ADDRESS,
+          province: "Istanbul",
+          city: "KADIKOY",
+          address_2: "Caferaga Mah.",
+        })
+
+        expect(response.status).toBe(200)
+      })
+
       it("leaves non-Turkish addresses alone", async () => {
         const response = await post("/store/customers/me/addresses", {
           ...VALID_ADDRESS,
@@ -164,6 +179,25 @@ medusaIntegrationTestRunner({
       })
     })
 
+    describe("cart address updates", () => {
+      it("accepts a valid update and stores the phone in E.164", async () => {
+        const created = await post<{ cart: { id: string } }>(
+          "/store/carts",
+          { region_id: regionId },
+          storefront.headers
+        )
+
+        const response = await post<{ cart: { shipping_address: { phone: string } } }>(
+          `/store/carts/${created.data.cart.id}`,
+          { shipping_address: VALID_ADDRESS },
+          storefront.headers
+        )
+
+        expect(response.status).toBe(200)
+        expect(response.data.cart.shipping_address.phone).toBe("+905321234567")
+      })
+    })
+
     describe("cart workflow hooks", () => {
       // Workflow errors reach the caller serialized, not as Error instances
       it("reject an invalid address even when the Store API is bypassed", async () => {
@@ -183,6 +217,23 @@ medusaIntegrationTestRunner({
             input: { id: cart.id, shipping_address: { postal_code: "99999" } },
           })
         ).rejects.toMatchObject({ message: containing("tr_address.postal_code_invalid") })
+      })
+
+      it("reject an invalid customer address saved outside the Store API, e.g. by an admin", async () => {
+        const container = getContainer()
+
+        await expect(
+          createCustomerAddressesWorkflow(container).run({
+            input: {
+              addresses: [{ ...VALID_ADDRESS, customer_id: customer.id, province: "Ankara" }],
+            },
+          })
+        ).rejects.toMatchObject({ message: containing("tr_address.district_not_in_province") })
+
+        const { data } = await http.get<CustomerResponse>("/store/customers/me", {
+          headers: customer.headers,
+        })
+        expect(data.customer.addresses).toHaveLength(0)
       })
     })
   },
