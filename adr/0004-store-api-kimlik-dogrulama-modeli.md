@@ -1,6 +1,6 @@
 # ADR-0004: Store API kimlik doğrulama modeli
 
-- **Durum:** Önerildi (F1.8'de Context7 ile Medusa'nın güncel davranışı doğrulanıp kabul edilecek)
+- **Durum:** Kabul edildi (2026-10-24, F1 S8)
 - **Tarih:** 2026-10-22
 
 ## Bağlam
@@ -11,7 +11,7 @@ varsayılan olarak bearer JWT döndürür; cookie/session desteği de vardır (d
 - Çoklu tema ve headless istemcilerin tek sözleşmeye bağlanması (`packages/types`)
 - SSR'de (Next.js) sunucu tarafı istek yaparken kimliğin taşınması
 
-## Karar (öneri)
+## Karar
 - **Web storefront:** httpOnly + Secure + SameSite=Lax cookie oturumu. Storefront sunucusu (SSR) cookie'yi Medusa'ya iletir.
   Cookie kullanılan tüm mutasyonlarda CSRF token (double-submit veya Origin kontrolü + custom header).
 - **Mobil/üçüncü taraf istemciler:** Bearer JWT, kısa ömürlü access + refresh (Medusa'nın yerleşik desteği doğrulanır);
@@ -45,3 +45,16 @@ varsayılan olarak bearer JWT döndürür; cookie/session desteği de vardır (d
 - F1.8: Medusa'nın auth modülü ve session/JWT seçenekleri doğrulanır; karar buraya işlenir.
 - F2.10 CSRF middleware'i bu karara göre yazılır. F10.1 müşteri hesabı bu modeli uygular.
 - `packages/types` istemci sözleşmesinde kimlik taşıma biçimi belgelenir.
+
+## Uygulama ve kanıt (F1 S8)
+- **`medusa-config.ts`:**
+  - `cookieOptions: { httpOnly: true, sameSite: "lax", secure: staging/production }`.
+  - `redisUrl` verildiğinde session store Redis'tir. Env şeması staging/production'da `REDIS_URL`'i zorunlu tutar (bellek içi session store çok instance'ta ve yeniden başlatmada kaybolur).
+- **`integration-tests/http/auth.spec.ts`:**
+  - Bearer ile `/store/customers/me` 200 döner.
+  - `POST /auth/session` `connect.sid` cookie'sini `HttpOnly` ve `SameSite=Lax` olarak verir. Cookie tek başına kimlik doğrular.
+  - `DELETE /auth/session` sonrası cookie 401 alır.
+  - Sahte bearer ve sahte cookie 401 alır.
+  - `/auth/token/refresh` aynı müşteri için yeni token üretir.
+- **Yerel doğrulama:** `.env.test`'te `REDIS_URL` olduğundan session'lar Redis'e yazılır (`sess:*`). CI'da Redis yok, bellek içi store kullanılır.
+- **Açık kalanlar (karar değişmedi):** CSRF (Origin kontrolü ve custom header) F2.10'da. Kısa ömürlü access ile dönen refresh token ve iptal mekanizması F19 mobil işinde. `jwtExpiresIn` varsayılanı (`1d`) korunuyor.

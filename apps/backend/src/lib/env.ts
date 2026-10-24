@@ -39,6 +39,17 @@ const envSchema = z.object({
   PII_HASH_KEY: key256,
 })
 
+const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
+  // Sessions must survive restarts and be shared across instances (adr/0004)
+  if ((env.NODE_ENV === "production" || env.NODE_ENV === "staging") && !env.REDIS_URL) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["REDIS_URL"],
+      message: "is required in production and staging",
+    })
+  }
+})
+
 export type Env = z.infer<typeof envSchema>
 
 export class EnvValidationError extends Error {
@@ -53,14 +64,15 @@ export function parseEnv(source: Record<string, string | undefined> = process.en
     input[key] = value === "" ? undefined : value
   }
 
-  const result = envSchema.safeParse(input)
+  const result = deployedEnvSchema.safeParse(input)
   if (result.success) {
     return result.data
   }
 
   const problems = result.error.issues.map((issue) => {
     const key = issue.path.join(".")
-    return `  - ${key}: ${input[key] === undefined ? "is missing" : issue.message}`
+    const missing = input[key] === undefined && issue.code !== "custom"
+    return `  - ${key}: ${missing ? "is missing" : issue.message}`
   })
   throw new EnvValidationError(`Invalid environment configuration:\n${problems.join("\n")}`)
 }

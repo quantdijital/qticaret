@@ -65,6 +65,13 @@ describe("parseEnv", () => {
     ).toContain("STORE_CORS: must be a comma-separated list of http(s) origins")
   })
 
+  it.each(["production", "staging"])("requires REDIS_URL in %s for the session store", (env) => {
+    expect(errorOf({ ...validEnv, NODE_ENV: env, REDIS_URL: undefined })).toContain(
+      "REDIS_URL: is required in production and staging"
+    )
+    expect(parseEnv({ ...validEnv, NODE_ENV: env }).REDIS_URL).toBe(validEnv.REDIS_URL)
+  })
+
   it("requires 32-byte hex PII keys", () => {
     expect(errorOf({ ...validEnv, PII_ENCRYPTION_KEY: undefined })).toContain(
       "PII_ENCRYPTION_KEY: is missing"
