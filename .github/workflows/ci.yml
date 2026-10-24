@@ -40,12 +40,12 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
+      # Random per run and useless outside this job, so they are never
+      # printed and need no masking
       - name: Generate throwaway secrets
         run: |
           for name in JWT_SECRET COOKIE_SECRET; do
-            value="$(openssl rand -hex 32)"
-            echo "::add-mask::$value"
-            echo "$name=$value" >> "$GITHUB_ENV"
+            echo "$name=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
           done
       - run: pnpm install --frozen-lockfile
       - run: pnpm format:check
@@ -83,12 +83,12 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
+      # Random per run and useless outside this job, so they are never
+      # printed and need no masking
       - name: Generate throwaway secrets
         run: |
           for name in JWT_SECRET COOKIE_SECRET; do
-            value="$(openssl rand -hex 32)"
-            echo "::add-mask::$value"
-            echo "$name=$value" >> "$GITHUB_ENV"
+            echo "$name=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
           done
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @qticaret/backend test:integration:http
