@@ -17,5 +17,6 @@ export type {
   RetryableErrorShape,
   ValidationErrorShape,
 } from "./errors"
+export { uniqueViolationKeys } from "./db"
 export { toHttpError } from "./http"
 export type { HttpErrorResponse } from "./http"
