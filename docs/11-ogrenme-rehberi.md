@@ -341,6 +341,7 @@ Yukarıdan aşağı çağrılır; aşağıdakiler yukarıyı bilmez.
 | Durum | İlk bak | Sonra |
 |---|---|---|
 | "Şu an ne yapıyorduk?" | `PROGRESS.md` | `/oturum-baslat` |
+| "Şu iş kodda nerede?" | `docs/16-proje-haritasi.md` → "X nerede?" tablosu | `apps/backend/src/api/middlewares.ts` |
 | "Bu fazın bitme şartı ne?" | `docs/03-yol-haritasi.md` → **KK** listesi | `/faz-baslat F#` |
 | "Bunu neden böyle yaptık?" | `adr/` | Yoksa yeni ADR yaz (`adr/0000-sablon.md`) |
 | Medusa API'si nasıl kullanılır? | Claude → Context7 / `medusa-researcher` ajanı | docs.medusajs.com, Medusa GitHub/Discord |
