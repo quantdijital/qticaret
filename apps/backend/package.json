@@ -11,6 +11,7 @@
     "build": "medusa build",
     "start": "medusa start",
     "medusa": "medusa",
+    "tenant:bootstrap": "medusa exec ./src/scripts/bootstrap-tenant.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "pnpm test:unit",

@@ -1,6 +1,6 @@
 # ADR-0007: KDV modeli (ürün tipi = KDV grubu)
 
-- **Durum:** Önerildi (F1.2 oturumunda kabul edilecek)
+- **Durum:** Kabul edildi (2026-10-24, F1 S1)
 - **Tarih:** 2026-10-24
 
 ## Bağlam
@@ -13,7 +13,7 @@ Medusa 2.21.2'de doğrulananlar (core-flows, tax-module-service @v2.21.2):
 - **KDV dahil fiyat:** price preference ile yapılır (`is_tax_inclusive`, region veya currency bazında); region tercihi önceliklidir.
 - **Provider izolasyonu (adr/0002):** Özel bir tax provider kategori veya attribute okumak için başka modülleri sorgulayamaz.
 
-## Karar (öneri)
+## Karar
 - **Varsayılan oran:** Vergi bölgesi `tr`, varsayılan oran %20 (`KDV20`).
 - **İndirimli oranlar:** Her biri için bir **ürün tipi** tanımlanır (`KDV %10`, `KDV %1`). Oranın kuralı `reference: product_type` ile o tipe bağlanır.
   - Tipsiz ürünler ve varsayılan oranda olanlar %20 alır.
@@ -34,3 +34,8 @@ Medusa 2.21.2'de doğrulananlar (core-flows, tax-module-service @v2.21.2):
 - **Admin UX:** Ürün formunda "KDV grubu" olarak ürün tipi alanı açıklanır (F12 i18n metni).
 - **Raporlama:** KDV raporu (F11) oran koduna (`KDV20`/`KDV10`/`KDV1`) göre gruplar. E-fatura (F8) satır KDV'sini tax line'dan alır.
 - **İleride:** Oranların mevzuatla değişmesi tek bir yerden (bootstrap + admin) güncellenir. Geçmiş siparişler kendi tax line'larını korur.
+
+## Uygulama (F1 S1)
+- `src/scripts/bootstrap-tenant.ts` → `src/scripts/bootstrap/` (region, store, tax). Yalnızca eksik kayıtları oluşturur; tenant'ın admin'de düzenlediği oranlara dokunmaz.
+- Kargo KDV'si için `shipping_option` kuralı henüz yok; kargo varsayılan %20'yi alır. Oran mali müşavirle doğrulanınca eklenecek (docs/12).
+- Kanıt: `integration-tests/http/bootstrap-tenant.spec.ts` (iki çalıştırma, KDV dahil tax line).
