@@ -29,7 +29,8 @@ const createShipmentStep = createStep(
 
 ## Hata yönetimi
 
-- Sağlayıcı hataları `ProviderError` ile sarılır: `{ provider, code, retryable, safeMessage }`.
+- Sağlayıcı hataları `ProviderError` ile sarılır: `{ provider, providerCode, retryable, safeMessage }`. Alanın adı `code` değildir, çünkü Medusa'nın error handler'ı `error.code`'u yanıt gövdesine kopyalar.
+- `safeMessage` her zaman bir i18n anahtarıdır (`billing_profile.tax_id_invalid`). Anahtar biçiminde olmayan bir değer istemciye gitmez, yerine varsayılan anahtar kullanılır.
 - Kullanıcıya `safeMessage` (Türkçe, i18n), loga tam bağlam (redakte).
 - `catch` edip yutmak yasak; ya ele al ya yeniden fırlat.
 - Hata türü `instanceof` ile değil, `lib/errors` guard'larıyla (`isProviderError` vb.) kontrol edilir. Workflow'dan geçen hata düz nesneye dönüşür ve sınıf kimliği kaybolur; Medusa da kendi hatasını `MedusaError.isMedusaError` ile böyle tanır.

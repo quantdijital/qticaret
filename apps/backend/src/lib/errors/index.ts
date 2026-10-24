@@ -1,6 +1,7 @@
 export {
   DEFAULT_PROVIDER_MESSAGE,
   DEFAULT_RETRYABLE_MESSAGE,
+  DEFAULT_VALIDATION_MESSAGE,
   ProviderError,
   RetryableError,
   ValidationError,
