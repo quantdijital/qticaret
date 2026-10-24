@@ -47,7 +47,7 @@ F17 öncesinde tenant'lar F16 script'leriyle elle açılır.
 - F0.3 `infra/docker/compose.dev.yml`: Postgres, Redis, Mailpit (e-posta yakalama), MinIO (S3)
 - F0.4 Git hooks (lint-staged), conventional commits, commitlint, gitleaks pre-commit
 - F0.5 CI iskeleti: lint, typecheck, unit test, build (GitHub Actions); `--frozen-lockfile`
-- F0.6 `.env.example` + ortam değişkeni şeması (Zod ile açılışta doğrulama; eksikse süreç başlamaz)
+- F0.6 `env.example` + ortam değişkeni şeması (Zod ile açılışta doğrulama; eksikse süreç başlamaz)
 - F0.7 Güvenlik taraması CI'da: gitleaks, `pnpm audit` (kritik → build kırılır), SAST (Semgrep veya CodeQL), Trivy imaj taraması, SBOM (CycloneDX); pnpm postinstall script'leri kapalı
 - F0.8 Renovate: haftalık, güvenlik yamaları anında, `minimumReleaseAge` 14 gün
 

@@ -4,18 +4,29 @@ Quant Dijital'in Türkiye odaklı, çok müşterili (instance-per-tenant) e-tica
 Medusa.js v2 tabanlı backend + admin. Mimari ve yol haritası: `docs/`, güncel durum: `PROGRESS.md`.
 
 ## Gereksinimler
-- Node.js 22 (`.nvmrc`; `nvm use` veya `fnm use`)
+- Node.js 24 LTS (`.nvmrc`; `nvm use` veya `fnm use`)
 - pnpm 11 (`corepack enable` veya `npm i -g pnpm@11`) — sürüm `package.json` → `packageManager` ile sabit
-- Docker (F0.3'ten itibaren: Postgres, Redis, Mailpit, MinIO)
-- `jq` (Claude Code prettier hook'u için)
+- Docker (Docker Desktop veya OrbStack): Postgres 16, Redis 7 (F0.3'te Mailpit, MinIO)
+- `openssl` (yerel secret üretimi), `jq` (Claude Code prettier hook'u için)
 
 ## Kurulum
 ```sh
+pnpm env:init          # infra/docker/.env, apps/backend/.env(.test) — secret'lar rastgele üretilir
+pnpm db:up             # Postgres :55432, Redis :56379 (yalnızca 127.0.0.1)
 pnpm install
-pnpm lint
-pnpm typecheck
-pnpm format:check
+pnpm --filter @qticaret/backend medusa db:migrate
+pnpm --filter @qticaret/backend dev     # http://localhost:9000/app
 ```
+Admin kullanıcısı. `EPOSTA` yerine kendi adresini yaz. Şifre ekrana yazılmadan sorulur ve shell
+geçmişine düşmez. Komut çalışırken şifre `ps` çıktısında görünebilir, bu yüzden bunu yalnızca yerel makinede yap:
+```sh
+read -rs "PW?Şifre: " && echo && pnpm --filter @qticaret/backend medusa user -e EPOSTA -p "$PW"; unset PW
+```
+(bash'te `read -rsp "Şifre: " PW` kullan.)
+Env şablonları `env.example` adındadır (gerçek `.env*` dosyaları git'e ve Claude Code'a kapalı).
+Portlar, makinedeki yerel Postgres/Redis ile çakışmasın diye varsayılanın dışındadır.
+Yerel veritabanını sıfırlamak için `pnpm db:down -v` kullan. Bu komut volume'ları siler; Postgres şifresi
+yalnızca boş volume'da uygulandığı için env dosyalarını yeniden üretirken de bu gerekir.
 
 ## Komutlar
 | Komut | Ne yapar |
@@ -24,15 +35,21 @@ pnpm format:check
 | `pnpm build` | Tüm paketleri derler |
 | `pnpm lint` | ESLint (strict, type-checked) |
 | `pnpm typecheck` | `tsc --noEmit` |
-| `pnpm test` | Testler |
+| `pnpm test` | Unit testler |
+| `pnpm --filter @qticaret/backend test:integration:http` | HTTP entegrasyon testleri (Postgres gerekir) |
+| `pnpm db:up` / `pnpm db:down` | Geliştirme servislerini başlat / durdur |
+| `pnpm env:init` | Eksik yerel env dosyalarını şablondan üret (var olanı ezmez) |
 | `pnpm format` / `pnpm format:check` | Prettier yaz / kontrol et (Markdown hariç) |
 
 ## Yapı
 ```
-apps/        uygulamalar (backend F0.2'de gelir; storefront F18)
+apps/
+  backend/   Medusa v2.21.2 — API, worker, admin (adr/0001); storefront F18'de gelir
 packages/
   config/    paylaşılan tsconfig (strict), ESLint flat config, Prettier
   types/     paylaşılan tipler ve Store API sözleşmeleri
+infra/docker/ geliştirme compose dosyası
+scripts/     yerel ortam yardımcıları
 docs/        mimari, yol haritası, güvenlik, SEO
 adr/         mimari karar kayıtları
 ```

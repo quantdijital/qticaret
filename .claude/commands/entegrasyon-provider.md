@@ -11,6 +11,6 @@ Argümanlar: $ARGUMENTS
    `webhook.ts` (gerekirse), `types.ts` (Zod şemaları), `__tests__/`.
 4. `packages/testing/mocks/<ad>` altında mock sunucu iskeleti.
 5. Provider ortak contract test paketine bağla.
-6. Env değişkenlerini env şemasına ve `.env.example`'a ekle (değer yazmadan).
+6. Env değişkenlerini env şemasına ve `apps/backend/env.example`'a ekle (değer yazmadan).
 7. `healthCheck()` metodu ekle (entegrasyonlar sayfası için).
 8. İlk aşamada metotları TODO ile bırakma; en az initiate/create yolunu testle birlikte bitir.

@@ -259,7 +259,7 @@ Yukarıdan aşağı çağrılır; aşağıdakiler yukarıyı bilmez.
 |---|---|
 | **Secret** | API anahtarı, şifre gibi gizli değerler. Koda, loga, repoya asla girmez |
 | **Env (ortam değişkeni)** | Uygulamaya dışarıdan verilen ayar (`IYZICO_API_KEY`). Geliştirmede `.env` dosyası (git'e girmez) |
-| **`.env.example`** | Hangi değişkenlerin gerektiğini gösteren, değerleri boş şablon (git'e girer) |
+| **`env.example`** | Hangi değişkenlerin gerektiğini gösteren, değerleri boş şablon (git'e girer). Yaygın adı `.env.example`; bu repoda başında nokta yok çünkü `.env*` Claude Code'a kapalı |
 | **Secret manager** | Prod'da secret'ların şifreli tutulduğu kasa |
 | **Redaksiyon** | Logda gizli alanları `[REDACTED]` yapmak |
 | **HMAC / imza** | Gelen isteğin gerçekten iyzico/PayTR'den geldiğini kanıtlayan şifreli damga |

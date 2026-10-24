@@ -1,6 +1,8 @@
 packages:
   - "apps/*"
   - "packages/*"
+  # Medusa build output contains its own package.json
+  - "!apps/backend/.medusa/**"
 
 # Supply chain (docs/04): exact versions, strict engines,
 # no install for releases younger than 14 days (in minutes).
@@ -10,4 +12,14 @@ minimumReleaseAge: 20160
 
 # Dependency build/postinstall scripts are blocked unless listed here.
 # Add an entry only after reviewing the package's install script.
-allowBuilds: {}
+allowBuilds:
+  # Telemetry opt-in hook; telemetry is disabled (MEDUSA_DISABLE_TELEMETRY).
+  "@medusajs/telemetry": false
+  # Binding check / wasm fallback download; native binding is an optional dep.
+  "@swc/core": false
+  # Binary verification only; platform binaries come from @esbuild/* optional deps.
+  esbuild: false
+  # Native addon; prebuilt binaries are optional deps, msgpackr falls back to JS.
+  msgpackr-extract: false
+  # Prints a protobufjs-cli version warning only.
+  protobufjs: false

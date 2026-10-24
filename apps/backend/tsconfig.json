@@ -1,0 +1,24 @@
+{
+  "extends": "@qticaret/config/tsconfig/base.json",
+  "compilerOptions": {
+    // Medusa compiles to CommonJS with decorators (dtc-starter@2.21.2, adr/0001)
+    "target": "ES2021",
+    "lib": ["ES2023", "DOM"],
+    "module": "Node16",
+    "moduleResolution": "Node16",
+    "verbatimModuleSyntax": false,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "jsx": "react-jsx",
+    "declaration": false,
+    "sourceMap": false,
+    "inlineSourceMap": true,
+    "outDir": "./.medusa/server",
+    "rootDir": "./"
+  },
+  "ts-node": {
+    "swc": true
+  },
+  "include": ["**/*", ".medusa/types/*"],
+  "exclude": ["node_modules", ".medusa/server", ".medusa/admin", ".cache", "eslint.config.*"]
+}

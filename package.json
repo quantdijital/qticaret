@@ -4,7 +4,7 @@
   "description": "Quant Ticaret — multi-tenant e-commerce infrastructure by Quant Dijital",
   "packageManager": "pnpm@11.17.0",
   "engines": {
-    "node": ">=22.12.0 <23"
+    "node": ">=24.11.0 <25"
   },
   "scripts": {
     "dev": "turbo run dev",
@@ -13,7 +13,10 @@
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "env:init": "bash scripts/init-dev-env.sh",
+    "db:up": "docker compose --env-file infra/docker/.env -f infra/docker/compose.dev.yml up -d --wait",
+    "db:down": "docker compose --env-file infra/docker/.env -f infra/docker/compose.dev.yml down"
   },
   "prettier": "@qticaret/config/prettier",
   "devDependencies": {
