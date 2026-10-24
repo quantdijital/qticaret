@@ -10,13 +10,13 @@ dist/
 # Env (never commit)
 .env
 .env.*
-!.env.example
 
 # Logs
 *.log
 
-# Claude Code local settings
+# Claude Code local settings and browser tool artifacts
 .claude/settings.local.json
+.playwright-mcp/
 
 # Test & build artifacts
 coverage/
