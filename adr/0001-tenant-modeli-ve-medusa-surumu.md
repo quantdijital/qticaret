@@ -31,6 +31,17 @@ Platform birden çok bağımsız mağazaya hizmet verecek. Medusa v2 tek mağaza
 - **Telemetri:** `MEDUSA_DISABLE_TELEMETRY=true`.
 - **Redis:** Dev ortamında zorunlu değil (in-memory modüller). Prod için caching, event-bus, workflow-engine ve locking Redis modülleri ilgili fazda eklenecek.
 
+## Bilinen açıklar (2026-10-24, F0.7)
+CI kritik açıkta kırılır. Yüksek seviyedekiler aşağıda takip edilir; hiçbir tenant henüz canlıda değil.
+
+| Paket | Kaynak | Durum |
+|---|---|---|
+| lodash <4.18.1 (CVE-2026-4800) | @graphql-codegen, build sırasında | `pnpm-workspace.yaml` override ile 4.18.1'e çekildi |
+| zod 4.2.0 (CVE-2023-54404, DoS) | doğrudan bağımlılık + admin-sdk (exact) | 4.6.6, 14 gün kuralı 2026-10-25'te doluyor → bump + override |
+| body-parser 1.20.8 (DoS) | express ~1.20.3 | 1.20.9, 2026-11-05'te uygun → override |
+| multer 2.4.0 (DoS) | @medusajs/medusa ^2.3.0 | 2.5.0, 2026-11-05'te uygun → override |
+| @graphql-tools/utils 10.11.0 (prototype pollution DoS) | @graphql-codegen ^10, build sırasında | v10 için yama yok, düzeltme 12.x (major). İstek yolunda değil, girdisi güvenilir şema; **kabul edilmiş risk**, Medusa yükseltmesinde tekrar bakılacak |
+
 ## Alternatifler
 | Seçenek | Artı | Eksi |
 |---|---|---|

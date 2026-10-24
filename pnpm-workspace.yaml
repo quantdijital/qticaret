@@ -10,6 +10,13 @@ saveExact: true
 engineStrict: true
 minimumReleaseAge: 20160
 
+# Security overrides for transitive dependencies (F0.7). Each entry names the
+# advisory; remove it once the dependent package ships the fix itself.
+overrides:
+  # CVE-2026-4800 (code execution via template imports), pulled in by
+  # @graphql-codegen/plugin-helpers (~4.17.0) at build time; 4.18 is semver-compatible
+  "lodash@<4.18.1": 4.18.1
+
 # Dependency build/postinstall scripts are blocked unless listed here.
 # Add an entry only after reviewing the package's install script.
 allowBuilds:
