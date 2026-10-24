@@ -79,6 +79,10 @@ adr/         mimari karar kayıtları
 - 14 günden genç paket sürümleri kurulmaz (`minimumReleaseAge`).
 - Bağımlılıkların install/postinstall script'leri kapalıdır; açmak için paketin script'ini inceleyip
   `pnpm-workspace.yaml` → `allowBuilds` altına eklemek gerekir.
+- Renovate (`renovate.json`, Mend Renovate GitHub App) her pazartesi 14 günden eski güncellemeleri PR olarak açar.
+  Major güncellemeler Dependency Dashboard'dan onay bekler. Güvenlik yaması prosedürü: docs/04.
+- CI: `.github/workflows/ci.yml` (lint, typecheck, test, build, entegrasyon) ve `security.yml` (gitleaks,
+  pnpm audit, Semgrep, Trivy, SBOM). Kritik bulgu build'i kırar.
 
 ## Claude Code
 İlk komut: `/oturum-baslat`. Çalışma düzeni: `docs/09-claude-code-is-akisi.md`.

@@ -116,6 +116,15 @@
 - Yeni yayımlanmış paket sürümlerini (son 14 gün) otomatik alma; Renovate `minimumReleaseAge`.
 - `pnpm audit` CI'da; kritik bulgu build'i kırar. SAST (Semgrep/CodeQL) ve Trivy imaj taraması CI'da; SBOM (CycloneDX) her sürümde üretilir.
 - Postinstall script'leri kapalı (`pnpm` ayarı); istisna açıkça listelenir.
+- **14 günden yeni güvenlik yaması:** Renovate güvenlik PR'ını hemen açar, ama pnpm'in `minimumReleaseAge` kuralı
+  kurulumu reddeder. Karar etkiye göre verilir:
+  - Canlıda etkilenen bir yol varsa: `pnpm-workspace.yaml` → `minimumReleaseAgeExclude`'a o paket ve sürüm için
+    gerekçe ve bitiş tarihiyle bir istisna eklenir.
+  - Yoksa yama 14 gün dolana kadar beklenir ve takip ADR'de tutulur (örnek: adr/0001 "Bilinen açıklar").
+- Geçişli bağımlılık açıkları `pnpm-workspace.yaml` → `overrides` ile yamalanır. Her kayıt advisory'yi ve
+  kaldırılma koşulunu yazar.
+- CI tarayıcıları ve imajları commit SHA / digest / checksum ile sabitlenir; tag'e güvenilmez
+  (Mart 2026 trivy-action tag ele geçirme olayı, CVE-2026-33634).
 
 ## Review süreci
 - Her faz sonunda `/guvenlik-review` çalıştırılır. Ödeme/kargo/fatura/auth/webhook/upload PR'larında `security-reviewer` ajanı zorunlu.
