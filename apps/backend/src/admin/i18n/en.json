@@ -1,0 +1,21 @@
+{
+  "qticaret": {
+    "billingProfile": {
+      "title": "Billing details",
+      "empty": "The customer has not entered billing details yet.",
+      "error": "Billing details could not be loaded.",
+      "type": "Billing type",
+      "types": {
+        "individual": "Individual",
+        "corporate": "Corporate"
+      },
+      "legalName": "Full name / company name",
+      "taxOffice": "Tax office",
+      "taxId": {
+        "individual": "Turkish ID number",
+        "corporate": "Tax ID number"
+      },
+      "maskedHint": "The ID number is masked for security."
+    }
+  }
+}

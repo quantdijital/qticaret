@@ -1,0 +1,21 @@
+{
+  "qticaret": {
+    "billingProfile": {
+      "title": "Fatura bilgileri",
+      "empty": "Müşteri henüz fatura bilgisi girmedi.",
+      "error": "Fatura bilgileri yüklenemedi.",
+      "type": "Fatura tipi",
+      "types": {
+        "individual": "Bireysel",
+        "corporate": "Kurumsal"
+      },
+      "legalName": "Ad soyad / unvan",
+      "taxOffice": "Vergi dairesi",
+      "taxId": {
+        "individual": "TC kimlik no",
+        "corporate": "Vergi kimlik no"
+      },
+      "maskedHint": "Kimlik numarası güvenlik nedeniyle maskeli gösterilir."
+    }
+  }
+}

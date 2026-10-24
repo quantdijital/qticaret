@@ -1,0 +1,16 @@
+{
+  // Admin extensions are bundled by Medusa's Vite build as ESM, unlike the
+  // CommonJS server code, so they type-check with bundler settings.
+  "extends": "@qticaret/config/tsconfig/base.json",
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "declaration": false,
+    "sourceMap": false
+  },
+  "include": ["./**/*"]
+}
