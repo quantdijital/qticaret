@@ -3,30 +3,46 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**F2 — Platform çekirdek modülleri + güvenlik tabanı** (devam; S1/13 bitti). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
+**F2 — Platform çekirdek modülleri + güvenlik tabanı** (devam; S1, S2 /13 bitti). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
 
 ## Son oturum özeti
-2026-10-24 (gece, F2 S1): `lib/errors` + `lib/money` (F2.2 + F2.7). ADR-0010 kabul edildi.
-- **`lib/errors`:**
-  - `ValidationError`, `ProviderError { provider, providerCode, retryable, safeMessage }`, `RetryableError`.
-  - `toHttpError` 400/502/503 döner ve S2'deki errorHandler'ın eşleme noktasıdır. İstemciye yalnızca i18n anahtarı biçimindeki `safeMessage` gider; değilse varsayılan anahtar kullanılır.
+2026-10-24 (akşam, F2 S2): F2.10a. Pino logger, redaksiyon, istek ID'si, hata yanıtı sanitizasyonu. Kullanıcı dışarıdayken, açık yetkiyle plan onayı beklemeden yürütüldü (kapsam S2 → S4 → S7 → S6; belirsizlikte muhafazakâr seçenek + not).
+- **`lib/logging`:**
+  - Tek logger: pino 10.4.0, stdout'a JSON. `request_id` AsyncLocalStorage'dan geliyor.
+  - `MedusaPinoLogger`, `defineConfig({ logger })` ile bağlandı; çekirdek, modüller ve script'ler aynı logger'ı kullanıyor (kök container testi var).
+  - Redaksiyon serileştirmeden önce uygulanıyor, satır her zaman geçerli JSON:
+    - anahtar kuralları her derinlikte, `cause` dahil
+    - metin desenleri her string değerde ve mesajda
+    - SQL öneki düz nesne hatalarda ve stack'te de siliniyor
+  - Desenler doğrusal; 8 KB üstü metin kesiliyor. Ölçüm: eski regex 64 KB'ta 2,3 sn sürüyordu.
+- **`api/http`:**
+  - İstek ID'si doğrulanıyor, `X-Request-Id` yazılıyor.
+  - `platformErrorHandler` bağlandı:
+    - 5xx genel gövde
+    - DB 4xx mesajları `/admin` dışında i18n anahtarı
+    - body-parser hataları sabit gövde; gövde loga girmiyor
+    - handler'ın kendi hatası genel 500 döner
+  - `rejectRequest`: tr-address ve sensitive-fields doğrulamaları da `request_id` döndürüyor.
 - **Doğrulanan (2.21.2):**
-  - Workflow'dan geçen hata düz nesneye dönüşüyor ve `instanceof` tutmuyor. Türler yapısal işaretle (`qtErrorKind`) tanınıyor; kural docs/10'da.
-  - JSON gidiş-dönüşü `message`'ı düşürüyor; guard'lar ona dayanmıyor.
-  - Medusa'nın error handler'ı `error.code`'u yanıta kopyalıyor; bu yüzden alanın adı `providerCode`.
-- **`lib/money`:**
-  - Kuruş tam sayı. Oran (bps) hesabı BigInt'le yapılıyor; yarım yukarı ve sıfırdan uzağa yuvarlanıyor.
-  - En büyük kalan dağıtımı: toplam korunuyor, eşitlik kuralları deterministik.
-  - `fromMedusaAmount`, MathBN'in sessizce yanlış okuduğu girdileri reddediyor: `null`/`undefined` → 0, `"0x10"` → 16, `"1e2"` → 100.
-- **İnceleme:** Bağımsız kod incelemesi yapıldı.
+  - Logger modül container'larına paylaşılan container'dan geçiyor.
+  - Medusa'nın ilk middleware'i `x-request-id`'yi doğrulamadan kopyalıyor.
+  - `authenticate` 401'i doğrudan yazıyor; bu yanıt bizim middleware'imizden ve handler'dan geçmiyor.
+  - Dev dışında morgan erişim logu logger'ı atlıyor.
+  - `dbErrorMapper` export edilmiyor; gerçek metinleri entegrasyon testi modül servisi üzerinden üretiyor.
+  - Store'da e-posta çakışmasını çekirdek önceden yakalıyor ("already has an account").
+  - Mevcut log kanıtı testleri pino'nun fd yazıcısıyla boşa geçerdi. Logger hedefi `process.stdout`; `captureOutput` yoklama satırı görmezse hata veriyor.
+- **İnceleme:** Kod ve güvenlik incelemeleri yapıldı.
   - Düzeltilen bulgular:
-    - eksik tutarın 0 okunması
-    - `code` alanından sızıntı
-    - doğrulanmayan `safeMessage`
-    - iddiasını kanıtlamayan iki test
-    - geçersiz `retryAfterMs`
-  - Ardışık kısmi iadelerde satır payının aşılabilmesi tasarım notu olarak ADR-0010'a yazıldı (F4.7/F6).
-- **Testler:** 186 birim (+78). Lint ve typecheck temiz. Commit'ler: `c665bcb`, `4faf669`, `449ead7` (+ plan `2bf7605`).
+    - karesel regex'ler (ReDoS)
+    - satır seviyesindeki maskelemenin JSON'u bozması ve kaçış dizisinden sonra değer kaçırması
+    - SQL temizliğinin düz nesne hatalarda ve mesajda atlanması
+    - body-parser hatasının ham gövdesi
+    - anahtar listesindeki boşluklar (`address_1`, `gsmNumber`, `hashKey`, isimler)
+    - Express'in ham stack basan fallback'i
+    - `$&` replacement
+    - ZodError dalının geniş olması
+  - "Body-parser hatası 500'e düşer" iddiası kaynakla çelişiyordu; 400 döndüğü entegrasyon testiyle doğrulandı.
+- **Testler:** 373 birim (+187), 72 HTTP (+10), 24 modül. Lint ve typecheck temiz. Commit'ler: `9e235db`, `a9354e5`, `1fb52dc`, `fa7c1e1`, `48d5180`.
 
 2026-10-24 (gece): F2 planlandı (`/faz-baslat F2`).
 - Medusa 2.21.2 API'leri üç araştırma ajanıyla doğrulandı (Context7 + v2.21.2 kaynağı): HTTP katmanı, modül/link/admin, asenkron iş/dosya/para. Planı değiştiren bulgular:
@@ -40,6 +56,7 @@
 - docs/12'ye iki kalem eklendi: denetim kaydı saklama süresi ve kuruş yuvarlama kuralı. docs/03'te F2.11 `url-registry` modül olarak netleştirildi.
 
 Önceki oturumlar:
+- **F2 S1 (2026-10-24 gece):** `lib/errors` + `lib/money` (F2.2 + F2.7), ADR-0010 kabul. 186 birim test. Commit'ler `c665bcb`, `4faf669`, `449ead7`.
 - **F1 S1–S8 (2026-10-24 gece):** tenant bootstrap, demo seed, `tr-address`, admin i18n, `billing-profile`, auth cookie/session. ADR 0004, 0007, 0008, 0009 kabul edildi. Testler: 108 birim, 24 modül, 62 HTTP.
 - **Daha önce:** F1 planlaması ve F0.2–F0.8 (2026-10-24), F0.1 monorepo (2026-10-24 sabahı), SEO ve güvenlik dokümanları (2026-10-22).
 
@@ -47,13 +64,13 @@
 1. **Kullanıcı:**
    - `f1-tr-localization` için PR açmak (dal push edildi; CI'da modül testleri ilk kez çalışacak). F1 merge edilince `f2-platform-core` `main`'e rebase edilir.
    - Yerel dev DB'deki doğrulama verisini isterse silmek: "Deneme Müşteri" ve demo seed. Ortam `pnpm db:down -v` ile sıfırlanabilir.
-2. **S2: F2.10a** (pino logger, redaksiyon, istek ID'si, hata yanıtı sanitizasyonu). Oturum başında `pino` bağımlılığı onaya sunulur.
+2. **S4: F2.9a** (`safe-fetch` + timing-safe), ardından S7 ve S6. Kullanıcı dönüşünde bu oturumun "Gözden geçir" notlarına bakar (Açık sorular).
 
 ### F2 görev planı (oturum büyüklüğünde, önerilen sıra)
 | # | Görev | Kapsam | Bağımlılık | ADR |
 |---|---|---|---|---|
 | S1 ✅ | F2.2 + F2.7 | `lib/errors` ve `lib/money`. Birim testleri | — | 0010 ✅ |
-| S2 | F2.10a | Pino logger, redaksiyon, istek ID'si, hata yanıtı sanitizasyonu | S1 | — |
+| S2 ✅ | F2.10a | Pino logger, redaksiyon, istek ID'si, hata yanıtı sanitizasyonu | S1 | — |
 | S3 | F2.10b | Güvenlik header'ları, Redis rate limit, CSRF, sayfalama sınırı, upload boyut kapısı. KK: login 429, header'lar | S2 | 0004 eki |
 | S4 | F2.9a | `safe-fetch` (SSRF) + timing-safe yardımcıları. KK: iç IP / rebinding reddi | S1 | — |
 | S5 | F2.9b | Upload validator + `/admin/uploads` kapısı, CSV kaçışlama, güvenli XML, zip sınırları. KK: SVG / sahte MIME reddi | S3, S4 | — |
@@ -68,7 +85,7 @@
 
 Görev ayrıntıları:
 - **S1:** Tamamlandı (bkz. "Son oturum özeti" ve ADR-0010 "Uygulama").
-- **S2:**
+- **S2:** Tamamlandı (bkz. "Son oturum özeti"). İlk plan:
   - errorHandler önce `lib/errors` `toHttpError`'ı uygular. Bizim tipimiz değilse sanitize edilmiş Medusa varsayılanına düşer; varsa `Retry-After` header'ını yazar.
   - Medusa logger'ı `defineConfig({ logger })` ile pino adaptörüne geçer. Modül container'larına da geçtiği doğrulanır.
   - `lib/logging`: `{ event, ... }` alanlı yapılandırılmış logger, docs/10 ve adr/0009 redaksiyon listesi (+ `cookie`, `set-cookie`), AsyncLocalStorage istek bağlamı.
@@ -163,6 +180,11 @@ Paralel zincirler:
 Önerilen sıra, güvenlik tabanını (S1–S3) yeni route'lardan önce kurar (docs/04 "Route eklenmeden önce hazır").
 
 ## Açık sorular / bloklayıcılar
+- [ ] **Gözden geçir: F2 S2 muhafazakâr kararları (kullanıcı onayı bekliyor):**
+  - Loglarda ad, soyad, unvan ve posta kodu anahtarları da maskeleniyor; docs/04 yalnızca TCKN, telefon ve adresi sayıyor.
+  - `body` anahtarı tamamen redakte ediliyor. Sağlayıcı yanıt gövdeleri loga girmiyor; S6 istemcisi hata ayıklama için `providerCode` gibi alanları ayrıca yazmalı.
+  - Kodun fırlattığı ham ZodError 400 ve genel `errors.invalid_data` dönüyor. Medusa'nın davranışı issue metinlerini göndermekti.
+  - Yeni i18n anahtarları: `errors.duplicate`, `errors.invalid_reference`, `errors.request_too_large`, `errors.invalid_request`. F18'de kataloğa girecek.
 - [ ] **Renovate GitHub App kurulumu (kullanıcı):** github.com/apps/renovate → `denizcanmaya/eticaret-platform`. Kurulunca onboarding PR'ı kontrol edilecek.
 - [ ] **Takip edilen açıklar** (adr/0001 "Bilinen açıklar"):
   - zod → 4.6.6: 2026-10-25'ten itibaren uygun; doğrudan bağımlılık + admin-sdk override.
@@ -175,11 +197,17 @@ Paralel zincirler:
   - ADR-0013 (S11): tipli EAV satırları ve ürün ↔ şablon/değer link'leri.
   - ADR-0014 (S13): iş kaydı modülü, event → subscriber → workflow; file-s3 F3.3'ten öne çekilir.
 - [ ] **F2 yeni bağımlılıkları** (her biri kendi oturumunda `pnpm add` onayıyla; exact sürüm, ≥14 gün):
-  - `pino` (S2)
+  - `pino` (S2) ✅ 10.4.0
   - `ioredis` (S3; framework'ün opsiyonel peer aralığı ^5.4.1)
   - `fast-xml-parser` ve `yauzl` (S5)
   - Görsel boyutu için kendi başlık okuyucumuz ya da `image-size` (S5'te karar)
   - S4, S6 ve S7 yeni bağımlılık getirmez.
+- [ ] **F2 S2'den devreden işler:**
+  - **Erişim logu (F16, OAuth fazı):** Dev dışında Medusa'nın morgan logu logger'ı atlayıp stdout'a JSON yazıyor. Satırda tam URL (sorgu dizesi dahil), `client_ip`, user agent ve referrer var. Riskli içerik: admin aramalarındaki `?q=` (telefon, e-posta) ve ileride OAuth `code`/`state`. Reverse proxy log politikasıyla ya da Medusa'nın logunu kapatıp kendi erişim logumuzla çözülecek.
+  - **Bizim katmanımızdan önce biten yanıtlar:** `authenticate`'in 401'i ve CORS reddi `X-Request-Id` taşımıyor; morgan satırında ham `x-request-id` kalıyor (JSON escape'li). Body parser ve auth aşamasında yazılan loglarda request context yok.
+  - **İstek ID'sine güven (F16):** İnternetten gelen geçerli biçimli ID'ler kabul ediliyor, bu da korelasyonun taklit edilebilmesi demek. Edge proxy geldiğinde yalnızca proxy'den gelen ID'ye güvenilmeli.
+  - **NODE_ENV (F16):** Express, tanımsız NODE_ENV'i development sayıyor; bizim handler'ımız dışına düşen hatalarda stack HTML'de görünebilir. Üretim imajında NODE_ENV zorunlu olmalı (F1'den devreden maddeyle birlikte).
+  - **test-utils logları:** DB kurulumu Medusa'nın varsayılan winston reporter'ıyla yazıyor; yalnızca testte.
 - [ ] **F2 planlamasında çıkan, sonraki fazlara devreden işler:**
   - **Redis modülleri (F16):** Prod için Redis event bus, workflow engine, locking ve caching modülleri gerekli. Bunlar olmadan server/worker ayrımı, restart sonrası iş devamı ve tek instance'ta zamanlanmış iş garantisi yok (ADR-0014).
   - **trust proxy (F16):** Medusa `trust proxy = 1` ayarlıyor. Rate limit IP'si doğru olsun diye prod'da tam bir reverse proxy katmanı olmalı.
@@ -191,7 +219,6 @@ Paralel zincirler:
   - Kargo KDV oranı için `shipping_option` vergi kuralı, mali müşavir onayından sonra (docs/12).
   - Soft-delete edilmiş fatura profillerini kalıcı silme / KVKK imha işi (F13).
   - Locking modülünün Redis sağlayıcısına geçmesi ve üretim imajında `NODE_ENV=production` (F16).
-  - Yapılandırılmış log sarmalayıcısı (`{ event, ... }`) ve pino redaksiyonu (F2.10). Script logları şimdilik düz metin.
   - Telefon E.164 normalizasyonu yalnızca Store API yolunda yapılıyor; workflow ile yazılan sepet adresi ham telefonu saklar (doğrulama iki yolda da var).
   - `tr-address` ve fatura profili Store API sözleşme tipleri `packages/types`'a (F18).
   - Tam vergi kimliğini gösterme: yetki (F12) ve okuma audit log'u (F2.5).
