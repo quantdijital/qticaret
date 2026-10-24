@@ -8,6 +8,7 @@ jest.setTimeout(60 * 1000)
 // Algorithmically valid test numbers, not real people or companies
 const TCKN = "10000000146"
 const VKN = "1234567890"
+const CUSTOMER = "cus_test_a"
 
 moduleIntegrationTestRunner<BillingProfileModuleService>({
   moduleName: BILLING_PROFILE_MODULE,
@@ -19,11 +20,14 @@ moduleIntegrationTestRunner<BillingProfileModuleService>({
   testSuite: ({ service }) => {
     describe("prepareProfileData", () => {
       it("stores only ciphertext, keyed hash and last four digits", () => {
-        const data = service.prepareProfileData({
-          type: "individual",
-          legal_name: "  Ayşe Yılmaz ",
-          tax_id: "100 000 001 46",
-        })
+        const data = service.prepareProfileData(
+          {
+            type: "individual",
+            legal_name: "  Ayşe Yılmaz ",
+            tax_id: "100 000 001 46",
+          },
+          CUSTOMER
+        )
 
         expect(data).toMatchObject({
           legal_name: "Ayşe Yılmaz",
@@ -39,8 +43,12 @@ moduleIntegrationTestRunner<BillingProfileModuleService>({
       it("accepts a VKN or a sole proprietor's TCKN for corporates", () => {
         const base = { type: "corporate" as const, legal_name: "Örnek", tax_office: "Kadıköy" }
 
-        expect(service.prepareProfileData({ ...base, tax_id: VKN }).tax_id_kind).toBe("vkn")
-        expect(service.prepareProfileData({ ...base, tax_id: TCKN }).tax_id_kind).toBe("tckn")
+        expect(service.prepareProfileData({ ...base, tax_id: VKN }, CUSTOMER).tax_id_kind).toBe(
+          "vkn"
+        )
+        expect(service.prepareProfileData({ ...base, tax_id: TCKN }, CUSTOMER).tax_id_kind).toBe(
+          "tckn"
+        )
       })
 
       it.each([
@@ -48,21 +56,37 @@ moduleIntegrationTestRunner<BillingProfileModuleService>({
         ["billing_profile.tax_id_invalid", { type: "individual" as const, tax_id: "10000000147" }],
         ["billing_profile.tax_office_required", { type: "corporate" as const, tax_id: VKN }],
       ])("throws %s", (message, input) => {
-        expect(() => service.prepareProfileData({ legal_name: "Örnek", ...input })).toThrow(message)
+        expect(() =>
+          service.prepareProfileData({ legal_name: "Örnek", ...input }, CUSTOMER)
+        ).toThrow(message)
       })
     })
 
     describe("revealTaxId", () => {
       it("decrypts a stored profile", async () => {
         const profile = await service.createBillingProfiles(
-          service.prepareProfileData({
-            type: "individual",
-            legal_name: "Ayşe Yılmaz",
-            tax_id: TCKN,
-          })
+          service.prepareProfileData(
+            {
+              type: "individual",
+              legal_name: "Ayşe Yılmaz",
+              tax_id: TCKN,
+            },
+            CUSTOMER
+          )
         )
 
-        expect(await service.revealTaxId(profile.id)).toBe(TCKN)
+        expect(await service.revealTaxId(profile.id, CUSTOMER)).toBe(TCKN)
+      })
+
+      it("refuses a ciphertext moved to another customer's profile", async () => {
+        const profile = await service.createBillingProfiles(
+          service.prepareProfileData(
+            { type: "individual", legal_name: "Ayşe Yılmaz", tax_id: TCKN },
+            CUSTOMER
+          )
+        )
+
+        await expect(service.revealTaxId(profile.id, "cus_test_b")).rejects.toThrow()
       })
     })
   },

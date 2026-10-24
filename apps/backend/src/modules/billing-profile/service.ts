@@ -5,8 +5,14 @@ import { detectTaxIdKind } from "../../lib/tr/tax-id"
 import { BillingProfile } from "./models/billing-profile"
 import type { BillingProfileInput, BillingProfileModuleOptions } from "./types"
 
-/** Associated data binding ciphertexts and hashes to this field (adr/0009). */
+/** Domain separation for the tax id's ciphertext and hash (adr/0009). */
 const TAX_ID_CONTEXT = "billing_profile.tax_id"
+/**
+ * Ciphertexts are bound to their customer as associated data, so one copied
+ * onto another customer's profile fails to decrypt instead of putting the
+ * wrong number on an invoice.
+ */
+const encryptionContext = (customerId: string) => `${TAX_ID_CONTEXT}:${customerId}`
 const CURRENT_KEY_VERSION = 1
 
 export interface ProtectedProfileData {
@@ -36,8 +42,11 @@ class BillingProfileModuleService extends MedusaService({ BillingProfile }) {
    * encrypted, hashed and reduced to its last four digits. Individuals need a
    * TCKN; corporates a VKN, or a TCKN for sole proprietorships, plus a tax
    * office. Error messages never contain the tax id.
+   *
+   * Call it where the plaintext enters (the API route), so workflows only
+   * ever carry the protected form.
    */
-  prepareProfileData(input: BillingProfileInput): ProtectedProfileData {
+  prepareProfileData(input: BillingProfileInput, customerId: string): ProtectedProfileData {
     const taxId = input.tax_id.replace(/\s+/g, "")
     const kind = detectTaxIdKind(taxId)
     const taxOffice = input.tax_office?.trim() ?? ""
@@ -52,7 +61,7 @@ class BillingProfileModuleService extends MedusaService({ BillingProfile }) {
       legal_name: input.legal_name.trim(),
       tax_office: taxOffice || null,
       tax_id_kind: kind,
-      tax_id_encrypted: encryptPii(taxId, this.encryptionKey, TAX_ID_CONTEXT),
+      tax_id_encrypted: encryptPii(taxId, this.encryptionKey, encryptionContext(customerId)),
       tax_id_hash: this.hashTaxId(taxId),
       tax_id_last4: taxId.slice(-4),
       key_version: CURRENT_KEY_VERSION,
@@ -68,7 +77,11 @@ class BillingProfileModuleService extends MedusaService({ BillingProfile }) {
    * be written to the audit log once F2.5 exists; never return it from an API.
    */
   @InjectManager()
-  async revealTaxId(id: string, @MedusaContext() sharedContext: Context = {}): Promise<string> {
+  async revealTaxId(
+    id: string,
+    customerId: string,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<string> {
     const profile = await this.retrieveBillingProfile(
       id,
       { select: ["tax_id_encrypted", "key_version"] },
@@ -80,7 +93,7 @@ class BillingProfileModuleService extends MedusaService({ BillingProfile }) {
         "unknown billing profile key version"
       )
     }
-    return decryptPii(profile.tax_id_encrypted, this.encryptionKey, TAX_ID_CONTEXT)
+    return decryptPii(profile.tax_id_encrypted, this.encryptionKey, encryptionContext(customerId))
   }
 }
 

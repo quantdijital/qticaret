@@ -15,8 +15,8 @@
       "legalName": "Ad soyad / unvan",
       "taxOffice": "Vergi dairesi",
       "taxId": {
-        "individual": "TC kimlik no",
-        "corporate": "Vergi kimlik no"
+        "tckn": "TC kimlik no",
+        "vkn": "Vergi kimlik no"
       },
       "maskedHint": "Kimlik numarası güvenlik nedeniyle maskeli gösterilir."
     }

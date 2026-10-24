@@ -15,8 +15,8 @@
       "legalName": "Full name / company name",
       "taxOffice": "Tax office",
       "taxId": {
-        "individual": "Turkish ID number",
-        "corporate": "Tax ID number"
+        "tckn": "Turkish ID number",
+        "vkn": "Tax ID number"
       },
       "maskedHint": "The ID number is masked for security."
     }

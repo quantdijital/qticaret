@@ -1,5 +1,7 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { BILLING_PROFILE_MODULE } from "../../../../../modules/billing-profile"
+import type BillingProfileModuleService from "../../../../../modules/billing-profile/service"
 import type { StoredBillingProfile } from "../../../../../modules/billing-profile/types"
 import {
   MASKED_PROFILE_FIELDS,
@@ -25,8 +27,13 @@ export async function POST(
   req: AuthenticatedMedusaRequest<StorePostBillingProfileType>,
   res: MedusaResponse
 ): Promise<void> {
+  const customerId = req.auth_context.actor_id
+  // Encrypt where the plaintext enters, so it never reaches workflow storage
+  const service = req.scope.resolve<BillingProfileModuleService>(BILLING_PROFILE_MODULE)
+  const data = service.prepareProfileData(req.validatedBody, customerId)
+
   const { result } = await upsertCustomerBillingProfileWorkflow(req.scope).run({
-    input: { ...req.validatedBody, customer_id: req.auth_context.actor_id },
+    input: { customer_id: customerId, data },
   })
   res.json({ billing_profile: result })
 }

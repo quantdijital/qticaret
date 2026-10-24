@@ -74,7 +74,8 @@ function ProfileDetails({ profile }: { profile: MaskedBillingProfile }) {
     ...(profile.tax_office
       ? [[t("qticaret.billingProfile.taxOffice"), profile.tax_office] as [string, string]]
       : []),
-    [t(`qticaret.billingProfile.taxId.${profile.type}`), profile.tax_id_masked],
+    // By kind, not type: a sole proprietor's corporate profile carries a TCKN
+    [t(`qticaret.billingProfile.taxId.${profile.tax_id_kind}`), profile.tax_id_masked],
   ]
 
   return (

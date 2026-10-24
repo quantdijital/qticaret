@@ -10,6 +10,7 @@ import {
   StoreGetTrNeighborhoods,
   StoreGetTrProvinces,
 } from "./store/tr-address/validators"
+import { rejectSensitiveStoreFields } from "./validation/sensitive-fields"
 import {
   ROOT,
   existingCartAddresses,
@@ -21,6 +22,10 @@ const CART_ADDRESSES = ["shipping_address", "billing_address"] as const
 
 export default defineMiddlewares({
   routes: [
+    {
+      matcher: "/store/*",
+      middlewares: [rejectSensitiveStoreFields],
+    },
     {
       matcher: "/store/tr-address/provinces",
       methods: ["GET"],

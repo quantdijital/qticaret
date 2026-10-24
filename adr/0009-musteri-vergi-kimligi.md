@@ -51,9 +51,18 @@ Medusa 2.21.2'de doğrulananlar:
   - Anahtarlar modül seçeneği olarak verilir (`PII_ENCRYPTION_KEY`, `PII_HASH_KEY`; env şemasında 64 hex karakter zorunlu). Anahtara yalnızca modül erişir.
   - `prepareProfileData` doğrular, şifreler (AES-256-GCM, alana bağlı AAD) ve HMAC'ler. `revealTaxId` yalnızca F8 içindir.
 - **Kurumsal profil:** VKN veya TCKN kabul eder (şahıs şirketi). Bireysel profil yalnızca TCKN kabul eder.
-- **Workflow:** `billing-profile-upsert-for-customer`. Oluşturma veya güncelleme ve link adımlarının hepsinde compensation var. Girdide düz TCKN taşındığı için workflow `store` ile çalıştırılmamalı.
+- **Workflow:** `billing-profile-upsert-for-customer`. Oluşturma veya güncelleme ve link adımlarının hepsinde compensation var. Girdi yalnızca şifreli veridir (aşağıya bakın).
 - **Store API:** `GET/POST /store/customers/me/billing-profile` (session veya bearer). Hata mesajları i18n anahtarıdır (`billing_profile.tax_id_invalid`, `billing_profile.tax_office_required`) ve numarayı tekrar etmez.
 - **Admin:** `GET /admin/customers/:id/billing-profile` (maskeli) ve `customer.details.after` widget'ı.
 - **Silme:** Medusa'nın müşteri silme workflow'u link'leri kaldırmadığı için link'in `deleteCascade`'i tetiklenmiyor. `deleteCustomersWorkflow.hooks.customersDeleted` profili soft-delete eder (compensation ile).
 - **Kabul edilen risk:** Admin, `GET /admin/customers?fields=*billing_profile` ile şifreli değeri ve HMAC'i görebilir; açık değeri göremez. HMAC anahtarsız kaba kuvvete dayanıklıdır. Alan bazlı admin yetkisi F12'de ele alınır.
 - **Kanıt:** `integration-tests/http/billing-profile.spec.ts`. TCKN yanıtlarda, `billing_profile` ve `workflow_execution` tablolarında ve stdout/stderr loglarında açık metin olarak yok.
+
+## İnceleme sonrası düzeltmeler (2026-10-24)
+- **Şifreleme sınırda:** Route, `prepareProfileData` ile numarayı doğrular ve şifreler. Workflow'a yalnızca şifreli metin, HMAC ve son 4 hane girer. Düz değer workflow motoruna, checkpoint'lere, WAL'a veya yedeklere hiç ulaşmaz; workflow `store` ya da `retentionTime` ile çalıştırılsa bile bu değişmez.
+- **Kayda bağlı şifreleme:** AAD `billing_profile.tax_id:<customer_id>`. Başka müşterinin profiline kopyalanan bir şifreli metin çözülmez. `revealTaxId(id, customerId)` müşteri kimliğini ister. HMAC bağlamı alan düzeyinde kalır, çünkü müşteriler arasında eşitlik araması yapılabilmeli.
+- **Eşzamanlılık:** `acquireLockStep` / `releaseLockStep`, `billing-profile:<customer_id>` anahtarıyla çalışır. Eşzamanlı iki ilk kayıt tek profil üretir; testi var. Locking modülü şu an bellek içi, çok instance'ta Redis sağlayıcısına geçilir (F16).
+- **Anahtarlar:** `PII_ENCRYPTION_KEY` ile `PII_HASH_KEY`'in aynı olması env şemasında reddedilir.
+- **Store `fields`:** Medusa'nın store route'ları izin listesi dışındaki alanları zaten düşürüyor; testlerle doğrulandı. Ek savunma olarak `/store/*` middleware'i `billing_profile` veya `tax_id` içeren `fields` isteğini 400 ile reddeder (`src/api/validation/sensitive-fields.ts`). `/store/customers/me` ve `/store/carts/:id` için test var.
+- **Testler:** Compensation (oluşturma sonrası ve güncelleme sonrası zorlanmış hata), workflow hatasında log ve depolama kontrolü, müşteri bağlama.
+- **Açık kalan:** Soft-delete edilmiş profilleri kalıcı silme (KVKK) F13'te.

@@ -1,16 +1,16 @@
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { BILLING_PROFILE_MODULE } from "../../../modules/billing-profile"
-import type BillingProfileModuleService from "../../../modules/billing-profile/service"
 import type {
-  BillingProfileInput,
-  StoredBillingProfile,
-} from "../../../modules/billing-profile/types"
+  ProtectedProfileData,
+  default as BillingProfileModuleService,
+} from "../../../modules/billing-profile/service"
+import type { StoredBillingProfile } from "../../../modules/billing-profile/types"
 
 export const createBillingProfileStep = createStep(
   "billing-profile-create",
-  async (input: BillingProfileInput, { container }) => {
+  async (data: ProtectedProfileData, { container }) => {
     const service = container.resolve<BillingProfileModuleService>(BILLING_PROFILE_MODULE)
-    const created = await service.createBillingProfiles(service.prepareProfileData(input))
+    const created = await service.createBillingProfiles(data)
     const profile: StoredBillingProfile = {
       id: created.id,
       type: created.type,
