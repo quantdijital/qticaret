@@ -16,4 +16,5 @@ module.exports = defineConfig({
       cookieSecret: env.COOKIE_SECRET,
     },
   },
+  modules: [{ resolve: "./src/modules/tr-address" }],
 })

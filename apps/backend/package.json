@@ -13,6 +13,7 @@
     "medusa": "medusa",
     "tenant:bootstrap": "medusa exec ./src/scripts/bootstrap-tenant.ts",
     "seed:demo": "medusa exec ./src/scripts/seed-demo.ts",
+    "tr-address:import": "medusa exec ./src/scripts/import-tr-address.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "pnpm test:unit",

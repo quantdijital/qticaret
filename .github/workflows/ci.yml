@@ -52,7 +52,7 @@ jobs:
       - run: pnpm turbo run lint typecheck test build
 
   integration:
-    name: HTTP integration tests
+    name: Integration tests (HTTP and modules)
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     services:
@@ -92,3 +92,4 @@ jobs:
           done
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @qticaret/backend test:integration:http
+      - run: pnpm --filter @qticaret/backend test:integration:modules
