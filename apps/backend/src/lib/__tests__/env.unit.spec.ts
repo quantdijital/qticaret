@@ -1,23 +1,85 @@
-import { requireEnv } from "../env"
+import { EnvValidationError, parseEnv } from "../env"
 
-describe("requireEnv", () => {
-  const name = "QT_TEST_REQUIRED_VAR"
+// Test-only values, generated per run so no fixed secret lives in the repo (docs/04)
+const jwtSecret = "j".repeat(16) + Math.random().toString(36).padEnd(16, "x")
+const cookieSecret = "c".repeat(16) + Math.random().toString(36).padEnd(16, "x")
 
-  afterEach(() => {
-    Reflect.deleteProperty(process.env, name)
-  })
+const validEnv = {
+  DATABASE_URL: "postgres://postgres:pw@localhost:55432/qticaret",
+  REDIS_URL: "redis://localhost:56379",
+  STORE_CORS: "http://localhost:8000",
+  ADMIN_CORS: "http://localhost:9000",
+  AUTH_CORS: "http://localhost:9000,http://localhost:8000",
+  JWT_SECRET: jwtSecret,
+  COOKIE_SECRET: cookieSecret,
+}
 
-  it("returns the value when set", () => {
-    process.env[name] = "value"
-    expect(requireEnv(name)).toBe("value")
-  })
-
-  it.each([undefined, "", "   "])("throws when the value is %p", (value) => {
-    if (value === undefined) {
-      Reflect.deleteProperty(process.env, name)
-    } else {
-      process.env[name] = value
+function errorOf(source: Record<string, string | undefined>): string {
+  try {
+    parseEnv(source)
+  } catch (error) {
+    if (error instanceof EnvValidationError) {
+      return error.message
     }
-    expect(() => requireEnv(name)).toThrow(`Missing required environment variable: ${name}`)
+    throw error
+  }
+  throw new Error("expected parseEnv to throw")
+}
+
+describe("parseEnv", () => {
+  it("returns typed config for a valid environment", () => {
+    const env = parseEnv(validEnv)
+
+    expect(env.DATABASE_URL).toBe(validEnv.DATABASE_URL)
+    expect(env.NODE_ENV).toBe("development")
+  })
+
+  it("treats REDIS_URL as optional", () => {
+    expect(parseEnv({ ...validEnv, REDIS_URL: undefined }).REDIS_URL).toBeUndefined()
+  })
+
+  it.each([undefined, "", "   "])("reports a variable as missing when it is %p", (value) => {
+    expect(errorOf({ ...validEnv, JWT_SECRET: value })).toContain("JWT_SECRET: is missing")
+  })
+
+  it("rejects a short secret without echoing its value", () => {
+    const message = errorOf({ ...validEnv, COOKIE_SECRET: "supersecret" })
+
+    expect(message).toContain("COOKIE_SECRET: must be at least 32 characters")
+    expect(message).not.toContain("supersecret")
+  })
+
+  it("rejects a non-postgres database URL", () => {
+    expect(errorOf({ ...validEnv, DATABASE_URL: "mysql://localhost/db" })).toContain(
+      "DATABASE_URL: must be a postgres:// URL"
+    )
+  })
+
+  it("rejects a CORS list containing a non-http origin", () => {
+    expect(
+      errorOf({ ...validEnv, STORE_CORS: "http://localhost:8000,javascript:alert(1)" })
+    ).toContain("STORE_CORS: must be a comma-separated list of http(s) origins")
+  })
+
+  it("lists every problem in a single error", () => {
+    const message = errorOf({
+      ...validEnv,
+      DATABASE_URL: undefined,
+      JWT_SECRET: "short",
+      NODE_ENV: "prod",
+    })
+
+    expect(message).toContain("DATABASE_URL: is missing")
+    expect(message).toContain("JWT_SECRET:")
+    expect(message).toContain("NODE_ENV:")
+  })
+
+  it("never includes any provided value in the error message", () => {
+    const source = { ...validEnv, ADMIN_CORS: "not-a-url" }
+    const message = errorOf(source)
+
+    for (const value of Object.values(source)) {
+      expect(message).not.toContain(value)
+    }
   })
 })
