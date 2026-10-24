@@ -35,7 +35,7 @@ ama faturayı kiracı kendi adına ödüyor.
           │  server süreci (istek karşılar) + worker (ağır iş)  │
           └───┬───────────┬──────────────┬──────────────────────┘
               ▼           ▼              ▼
-         PostgreSQL     Redis        S3 (MinIO)          Dış servisler:
+         PostgreSQL     Redis        S3 (SeaweedFS)      Dış servisler:
          (kalıcı veri)  (kuyruk,     (görsel, PDF)       iyzico, PayTR, Geliver,
                         cache, kilit)                    e-fatura, SMS, e-posta
 ```
@@ -84,7 +84,7 @@ yapı ileride **Control Plane** (F17) olacak.
 | **PostgreSQL** | İlişkisel veritabanı | Ürün, sipariş, müşteri — kalıcı her şey | Arşiv dolabı |
 | **Redis** | Bellek içi hızlı veri deposu | Event bus (olay kuyruğu), workflow motoru, cache, kilit (lock), rate limit sayacı | Masadaki not kâğıtları + sıra numaratörü |
 | **S3 / obje depolama** | Dosya deposu | Ürün görselleri, kargo etiketi PDF, fatura PDF | Depo |
-| **MinIO** | S3'ün yerel (bilgisayarında çalışan) taklidi | Geliştirmede S3 yerine | Depo maketi |
+| **SeaweedFS** | S3'ün yerel (bilgisayarında çalışan) taklidi | Geliştirmede S3 yerine | Depo maketi |
 | **Mailpit** | Sahte e-posta sunucusu | Geliştirmede giden e-postaları yakalar, tarayıcıda gösterir; gerçek kimseye gitmez | Postacının çantasına bakmak |
 | **Meilisearch** | Arama motoru | İleride ürün araması (F18) | Kütüphane kataloğu |
 | **CDN** | İçerik dağıtım ağı | Görselleri müşteriye yakın sunucudan hızlı verir | Şubeler |
@@ -95,7 +95,7 @@ yapı ileride **Control Plane** (F17) olacak.
 | **Docker** | Uygulamayı ve bağımlılıklarını "konteyner" denen paketlere koyar; her makinede aynı çalışır |
 | **Image (imaj)** | Konteynerin kalıbı. Bir kere build edilir, her yerde aynı çalışır |
 | **Container** | İmajın çalışan hali |
-| **docker compose** | Birden çok konteyneri tek dosyayla ayağa kaldırır (`compose.dev.yml`: Postgres + Redis + Mailpit + MinIO) |
+| **docker compose** | Birden çok konteyneri tek dosyayla ayağa kaldırır (`compose.dev.yml`: Postgres + Redis + Mailpit + SeaweedFS) |
 | **Multi-stage Dockerfile** | Build araçlarını son imaja koymadan küçük, güvenli imaj üretme |
 | **non-root** | Konteyner içinde yönetici olmayan kullanıcıyla çalışmak (saldırı olursa hasar sınırlı) |
 | **local / staging / prod** | Senin makinen / test sunucusu (sandbox hesaplarla) / gerçek müşteriler |

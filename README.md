@@ -6,13 +6,13 @@ Medusa.js v2 tabanlı backend + admin. Mimari ve yol haritası: `docs/`, güncel
 ## Gereksinimler
 - Node.js 24 LTS (`.nvmrc`; `nvm use` veya `fnm use`)
 - pnpm 11 (`corepack enable` veya `npm i -g pnpm@11`) — sürüm `package.json` → `packageManager` ile sabit
-- Docker (Docker Desktop veya OrbStack): Postgres 16, Redis 7 (F0.3'te Mailpit, MinIO)
+- Docker (Docker Desktop veya OrbStack): Postgres 16, Redis 7, Mailpit, SeaweedFS (S3)
 - `openssl` (yerel secret üretimi), `jq` (Claude Code prettier hook'u için)
 
 ## Kurulum
 ```sh
 pnpm env:init          # infra/docker/.env, apps/backend/.env(.test) — secret'lar rastgele üretilir
-pnpm db:up             # Postgres :55432, Redis :56379 (yalnızca 127.0.0.1)
+pnpm db:up             # geliştirme servisleri (aşağıdaki tablo)
 pnpm install
 pnpm --filter @qticaret/backend medusa db:migrate
 pnpm --filter @qticaret/backend dev     # http://localhost:9000/app
@@ -24,7 +24,18 @@ read -rs "PW?Şifre: " && echo && pnpm --filter @qticaret/backend medusa user -e
 ```
 (bash'te `read -rsp "Şifre: " PW` kullan.)
 Env şablonları `env.example` adındadır (gerçek `.env*` dosyaları git'e ve Claude Code'a kapalı).
-Portlar, makinedeki yerel Postgres/Redis ile çakışmasın diye varsayılanın dışındadır.
+Şablona yeni değişken eklendiğinde `pnpm env:init` tekrar çalıştırılır; mevcut değerlere dokunmadan eksikleri ekler.
+
+### Geliştirme servisleri
+Hepsi yalnızca `127.0.0.1`'e bağlıdır. Portlar, makinedeki yerel kurulumlarla çakışmasın diye varsayılanın dışındadır.
+
+| Servis | Adres | Not |
+|---|---|---|
+| Postgres 16 | `localhost:55432` | DB `qticaret`, kullanıcı `postgres` |
+| Redis 7 | `localhost:56379` | Dev'de opsiyonel |
+| Mailpit | SMTP `localhost:51025`, arayüz http://localhost:58025 | Giden e-postaları yakalar |
+| SeaweedFS (S3) | http://localhost:58333 | Bucket `qticaret`; anonim yalnızca okuma (adr/0006) |
+
 Yerel veritabanını sıfırlamak için `pnpm db:down -v` kullan. Bu komut volume'ları siler; Postgres şifresi
 yalnızca boş volume'da uygulandığı için env dosyalarını yeniden üretirken de bu gerekir.
 
@@ -38,7 +49,7 @@ yalnızca boş volume'da uygulandığı için env dosyalarını yeniden üretirk
 | `pnpm test` | Unit testler |
 | `pnpm --filter @qticaret/backend test:integration:http` | HTTP entegrasyon testleri (Postgres gerekir) |
 | `pnpm db:up` / `pnpm db:down` | Geliştirme servislerini başlat / durdur |
-| `pnpm env:init` | Eksik yerel env dosyalarını şablondan üret (var olanı ezmez) |
+| `pnpm env:init` | Eksik env dosyalarını ve değişkenlerini şablondan tamamla (mevcut değeri değiştirmez) |
 | `pnpm format` / `pnpm format:check` | Prettier yaz / kontrol et (Markdown hariç) |
 
 ## Yapı

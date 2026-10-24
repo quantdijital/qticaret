@@ -44,7 +44,7 @@ F17 öncesinde tenant'lar F16 script'leriyle elle açılır.
 
 - F0.1 Monorepo iskeleti: pnpm workspaces, Turborepo, `packages/config` (tsconfig strict, eslint, prettier)
 - F0.2 Medusa v2 kurulumu `apps/backend` (güncel sürüm Context7 ile doğrulanır → adr/0001)
-- F0.3 `infra/docker/compose.dev.yml`: Postgres, Redis, Mailpit (e-posta yakalama), MinIO (S3)
+- F0.3 `infra/docker/compose.dev.yml`: Postgres, Redis, Mailpit (e-posta yakalama), SeaweedFS (S3; MinIO arşivlendi → adr/0006)
 - F0.4 Git hooks (lint-staged), conventional commits, commitlint, gitleaks pre-commit
 - F0.5 CI iskeleti: lint, typecheck, unit test, build (GitHub Actions); `--frozen-lockfile`
 - F0.6 `env.example` + ortam değişkeni şeması (Zod ile açılışta doğrulama; eksikse süreç başlamaz)
@@ -118,7 +118,7 @@ F17 öncesinde tenant'lar F16 script'leriyle elle açılır.
 - F3.1 Ürün yapısı: varyant/seçenek, kategori ağacı, koleksiyon, etiket (Medusa çekirdeği) + fiziksel ürünlerde ölçü/ağırlık zorunluluğu
   + GTIN/MPN/durum alanları + **birincil kategori** (`primary_category_id`) + **halef ürün** alanı (satıştan kalkınca 301 hedefi)
 - F3.2 Fiziksel olmayan ürün tipi (dijital/hizmet; kargo gerektirmez) — flag ile
-- F3.3 Görseller: S3 file provider (dev'de MinIO), tür/boyut sınırı (`lib/security` upload validator; SVG kapalı; EXIF temizleme; yeniden kodlama),
+- F3.3 Görseller: S3 file provider (dev'de SeaweedFS, adr/0006), tür/boyut sınırı (`lib/security` upload validator; SVG kapalı; EXIF temizleme; yeniden kodlama),
   varyant görselleri, worker'da yeniden boyutlandırma + WebP/AVIF türevleri, slug'dan dosya adı, zorunlu alt alanı, OG 1200×630 kırpma
 - F3.11 `brands` modülü: marka (slug, açıklama, logo, SEO alanları), ürün ↔ marka link'i, admin ekranı, Store API marka sayfası
 

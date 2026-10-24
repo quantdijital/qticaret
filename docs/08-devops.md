@@ -8,7 +8,7 @@
 | prod | Tenant'lar | Canlı (tenant'ın kendi hesapları) |
 
 ## Local (docker compose)
-Postgres, Redis, Mailpit, MinIO. `pnpm dev` backend'i host'ta çalıştırır (hızlı reload).
+Postgres, Redis, Mailpit (e-posta yakalama), SeaweedFS (S3; MinIO arşivlendi, adr/0006). `pnpm dev` backend'i host'ta çalıştırır (hızlı reload).
 
 ## Üretim imajı
 - Multi-stage Dockerfile, `node:<LTS>-alpine` veya distroless, non-root kullanıcı
