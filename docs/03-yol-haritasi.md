@@ -52,10 +52,13 @@ F17 öncesinde tenant'lar F16 script'leriyle elle açılır.
 - F0.8 Renovate: haftalık, güvenlik yamaları anında, `minimumReleaseAge` 14 gün
 
 **KK:**
-- [ ] `pnpm i && pnpm dev` temiz makinede çalışıyor (README adımlarıyla)
-- [ ] CI yeşil; kasıtlı eklenen sahte secret ve bilinen zafiyetli paket CI'ı kırıyor (testli)
-- [ ] Eksik env değişkeniyle backend açıklayıcı hatayla durur
-- [ ] adr/0001 (Medusa sürümü + tenant modeli) yazıldı
+- [x] `pnpm i && pnpm dev` temiz makinede çalışıyor (README adımlarıyla). README akışı sıfır volume ile doğrulandı;
+  CI her push'ta temiz runner'da install, build ve test yapıyor.
+- [x] CI yeşil; kasıtlı eklenen sahte secret ve bilinen zafiyetli paket CI'ı kırıyor (testli). Kanıt:
+  [run 40090293700](https://github.com/denizcanmaya/eticaret-platform/actions/runs/40090293700): gitleaks, pnpm audit
+  ve Trivy kırmızı.
+- [x] Eksik env değişkeniyle backend açıklayıcı hatayla durur (F0.6, `EnvValidationError`)
+- [x] adr/0001 (Medusa sürümü + tenant modeli) yazıldı
 
 ---
 
