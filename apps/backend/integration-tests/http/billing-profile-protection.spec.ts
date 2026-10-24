@@ -10,12 +10,12 @@ import {
   INDIVIDUAL,
   TCKN,
   billingProfileService,
-  captureOutput,
   saveProfile,
   storedText,
 } from "../helpers/billing-profile"
 import type { TestCustomer } from "../helpers/customer"
 import { registerCustomer } from "../helpers/customer"
+import { captureOutput } from "../helpers/logs"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { createStorefront } from "../helpers/storefront"

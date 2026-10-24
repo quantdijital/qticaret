@@ -72,6 +72,8 @@ medusaIntegrationTestRunner({
           type: "invalid_data",
           message: anyString,
           issues: [{ field: "city", code: "tr_address.district_not_in_province" }],
+          // F2.10: direct rejections carry the request ID like error responses
+          request_id: response.headers["x-request-id"],
         })
       })
 

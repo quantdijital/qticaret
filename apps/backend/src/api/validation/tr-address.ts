@@ -6,6 +6,7 @@ import type {
 } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { normalizeTrPhone } from "../../lib/tr/phone"
+import { rejectRequest } from "../http/reject"
 import { TR_ADDRESS_MODULE } from "../../modules/tr-address"
 import type TrAddressModuleService from "../../modules/tr-address/service"
 import type { AddressFields } from "../../modules/tr-address/validation"
@@ -75,11 +76,13 @@ export function validateTrAddresses(
       }
 
       if (issues.length > 0) {
-        res.status(400).json({
-          type: "invalid_data",
-          message: "The address is not a valid Turkish address",
-          issues,
-        })
+        rejectRequest(
+          req,
+          res,
+          400,
+          { type: "invalid_data", message: "The address is not a valid Turkish address", issues },
+          "tr_address_invalid"
+        )
         return
       }
       normalize.forEach((apply) => {

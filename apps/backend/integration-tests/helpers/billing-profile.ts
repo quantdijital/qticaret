@@ -38,25 +38,6 @@ export function saveProfile(
   )
 }
 
-/** Collects everything written to stdout/stderr while `run` executes. */
-export async function captureOutput(run: () => Promise<void>): Promise<string> {
-  const chunks: string[] = []
-  const spies = [process.stdout, process.stderr].map((stream) =>
-    jest.spyOn(stream, "write").mockImplementation((chunk: string | Uint8Array) => {
-      chunks.push(typeof chunk === "string" ? chunk : Buffer.from(chunk).toString("utf8"))
-      return true
-    })
-  )
-  try {
-    await run()
-  } finally {
-    spies.forEach((spy) => {
-      spy.mockRestore()
-    })
-  }
-  return chunks.join("")
-}
-
 /** Text of every row in tables that could hold the tax id. */
 export async function storedText(container: MedusaContainer): Promise<string> {
   const db = container.resolve(ContainerRegistrationKeys.PG_CONNECTION)

@@ -4,6 +4,8 @@ import {
   validateAndTransformBody,
   validateAndTransformQuery,
 } from "@medusajs/framework/http"
+import { platformErrorHandler } from "./http/error-handler"
+import { requestContext } from "./http/request-id"
 import { StorePostBillingProfile } from "./store/customers/me/billing-profile/validators"
 import {
   StoreGetTrDistricts,
@@ -21,7 +23,15 @@ import {
 const CART_ADDRESSES = ["shipping_address", "billing_address"] as const
 
 export default defineMiddlewares({
+  // F2.10: sanitized error bodies with request_id, logged with redaction
+  errorHandler: platformErrorHandler,
   routes: [
+    // F2.10: validated request ID and the log context for the request;
+    // runs after Medusa's body parser, CORS and authentication
+    {
+      matcher: "/*",
+      middlewares: [requestContext],
+    },
     {
       matcher: "/store/*",
       middlewares: [rejectSensitiveStoreFields],
