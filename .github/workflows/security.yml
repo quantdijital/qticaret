@@ -92,8 +92,8 @@ jobs:
       - name: Report HIGH and CRITICAL
         run: >-
           docker run --rm -v "$PWD:/src:ro" -v trivy-cache:/root/.cache "$TRIVY_IMAGE"
-          fs --scanners vuln,misconfig --skip-dirs "**/node_modules" --severity HIGH,CRITICAL /src
+          fs --scanners vuln,misconfig --include-dev-deps --skip-dirs "**/node_modules" --severity HIGH,CRITICAL /src
       - name: Fail on CRITICAL
         run: >-
           docker run --rm -v "$PWD:/src:ro" -v trivy-cache:/root/.cache "$TRIVY_IMAGE"
-          fs --scanners vuln,misconfig --skip-dirs "**/node_modules" --severity CRITICAL --exit-code 1 --quiet /src
+          fs --scanners vuln,misconfig --include-dev-deps --skip-dirs "**/node_modules" --severity CRITICAL --exit-code 1 --quiet /src
