@@ -3,9 +3,24 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**F2 — Platform çekirdek modülleri + güvenlik tabanı** (devam; S1, S2, S4, S6, S7 /13 bitti). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
+**F2 — Platform çekirdek modülleri + güvenlik tabanı** (devam; S1–S7 /13 bitti). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
 
 ## Son oturum özeti
+**2026-10-24 gece oturumu (S3, S5; S8 başladı).** Kullanıcı döndü; dört karar verdi: bağımlılıklar onaylandı (ioredis 5.11.1, fast-xml-parser 5.11.2, yauzl 3.4.0, kendi görsel başlık okuyucumuz), ADR-0011..0014 kabul edildi, otonom devam, eski "Gözden geçir" maddeleri olduğu gibi kabul. Commit `54abc2a`.
+
+2026-10-24 (gece, F2 S5): F2.9b. Upload validator, CSV kaçışlama, güvenli XML, zip sınırları.
+- **Upload:** Tür baytlardan okunuyor (PNG IHDR, JPEG SOF, WebP VP8/VP8L/VP8X, AVIF ispe); başlık baytlarının ve boyut alanlarının tutarlı olması şart. Kabul edilen dosya `<slug>.<gerçek uzantı>` adıyla ve gerçek MIME ile saklanıyor; istek başına en fazla 20 dosya; multer'ın latin1 okuduğu UTF-8 dosya adı onarılıyor.
+- **CSV / XML / zip:** Türkçe Excel `;` ile böldüğü için hücre içi formül başlangıçları da kaçışlanıyor. XML'de derinlik sınırı 64 ve değerler metin; `__proto__`/`constructor` etiketleri reddediliyor. Zip'te aynı ad (büyük/küçük harf, Unicode biçimi dahil) ve kontrol karakteri reddediliyor.
+- **İnceleme:** Güvenlik incelemesi yapıldı. Yüksek bulgu: PNG başlıklı ama `.html` adlı dosya `/static`'ten HTML olarak servis edilirdi (stored XSS; dev sunucuda `/static`'in bizim header'larımızı almadığı doğrulandı). Bu, 1 orta ve 11 düşük bulgu düzeltildi.
+- **KK:** "SVG ve sahte MIME yükleme reddediliyor" karşılandı (S4 kısmıyla birlikte satır kapandı).
+
+2026-10-24 (gece, F2 S3): F2.10b. Rate limit, güvenlik header'ları, CSRF, istek sınırları.
+- **Rate limit:** Redis'te atomik sabit pencere (EVALSHA); Redis düşerse 30 sn bellek store'u. Kimlik `PII_HASH_KEY` HMAC'i, IPv6 /64 kovası, anahtarlar DB sunucusu + adıyla ad alanında.
+- **Yol eşleme:** Kurallar Express'in rotaladığı yola göre seçiliyor (`routePath`). İnceleme `/auth/customer/emailpass/` ile login limitinin, `/ADMIN/...` ile admin CSRF'nin atlandığını buldu; ikisi de testle kapatıldı.
+- **CSRF:** `Origin: null` reddediliyor; alan dışı cookie'li mutasyon üç CORS listesinden birini istiyor. Upload boyut kapısı içerik türüne bağlı.
+- **İnceleme:** Güvenlik incelemesi yapıldı; 2 yüksek, 4 orta ve 7 düşük bulgu düzeltildi ya da docs/04'e (güven modeli, F16/F18 notları) yazıldı.
+- **KK:** "Login ucunda limit aşımı 429; header'lar tüm yanıtlarda" karşılandı. Medusa'nın önce yazdığı yanıtlar F16'da proxy'de.
+
 **2026-10-24 akşamı otonom oturum (S2, S4, S7, S6).** Kullanıcı dışarıdayken açık yetkiyle yürütüldü: plan onayı beklenmedi, belirsizlikte muhafazakâr seçenek uygulanıp aşağıdaki "Gözden geçir" maddesine yazıldı. Planlar `/Users/deniz/.claude/plans/` altında (`f2-s4-safe-fetch.md`, `f2-s6-http-client-health.md`; S2 ve S7 bu dosyanın görev ayrıntılarında). Her görev bağımsız kod ve/veya güvenlik incelemesinden geçti; bulgular düzeltildi. Son durum: 647 birim, 74 HTTP, 47 modül testi; lint ve typecheck temiz. Push yapılmadı.
 
 2026-10-24 (akşam, F2 S6): F2.1 + F2.6. Sağlayıcı HTTP istemcisi ve `/admin/integrations/health`. Plan `/Users/deniz/.claude/plans/f2-s6-http-client-health.md`.
@@ -123,25 +138,18 @@
 1. **Kullanıcı:**
    - `f1-tr-localization` için PR açmak (dal push edildi; CI'da modül testleri ilk kez çalışacak). F1 merge edilince `f2-platform-core` `main`'e rebase edilir.
    - Yerel dev DB'deki doğrulama verisini isterse silmek: "Deneme Müşteri" ve demo seed. Ortam `pnpm db:down -v` ile sıfırlanabilir.
-2. **Kalan F2 görevlerinin hepsi senin kararını bekliyor:**
-   - **S3 (F2.10b: rate limit, header'lar, CSRF):** `ioredis` bağımlılığı gerekiyor; `pnpm add` onayı lazım.
-   - **S5 (F2.9b: upload, CSV, XML, zip):**
-     - `fast-xml-parser` ve `yauzl` bağımlılıkları gerekiyor.
-     - Görsel boyutu için kendi başlık okuyucumuz mu, `image-size` mı, karar verilecek.
-   - **S8 → S9–S12:** Önce ADR-0011, 0012 ve 0013 kabul edilmeli.
-   - **S13:** Önce ADR-0014 kabul edilmeli; S5 ve S8'e de bağlı.
-   - Önerilen sıra: S3 (güvenlik tabanı) → S5 → S8.
+2. **Kalan F2 görevleri (kararlar verildi, otonom devam):** S8 (audit-log) başladı: modül, model ve migration hazır, HTTP katmanı yazılıyor. Sonra S9 → S10 → S11 → S12 → S13. Araya proje haritası dokümanı ve kullanıcıyla canlı turlar girecek.
 3. Otonom oturumun "Gözden geçir" maddesine bak (Açık sorular).
-4. **Yerel dev DB:** `url_entry` tablosu henüz yok. Dev sunucusunu kullanmadan önce `pnpm --filter backend medusa db:migrate` çalıştırılmalı; testler kendi DB'lerinde migrate ediyor.
+4. **Yerel dev DB:** `url_entry` migrate edildi; `audit_entry` (S8) henüz edilmedi. Yeni modüllerden sonra `pnpm --filter backend medusa db:migrate` (onay ister); testler kendi DB'lerinde migrate ediyor.
 
 ### F2 görev planı (oturum büyüklüğünde, önerilen sıra)
 | # | Görev | Kapsam | Bağımlılık | ADR |
 |---|---|---|---|---|
 | S1 ✅ | F2.2 + F2.7 | `lib/errors` ve `lib/money`. Birim testleri | — | 0010 ✅ |
 | S2 ✅ | F2.10a | Pino logger, redaksiyon, istek ID'si, hata yanıtı sanitizasyonu | S1 | — |
-| S3 | F2.10b | Güvenlik header'ları, Redis rate limit, CSRF, sayfalama sınırı, upload boyut kapısı. KK: login 429, header'lar | S2 | 0004 eki |
+| S3 ✅ | F2.10b | Güvenlik header'ları, Redis rate limit, CSRF, sayfalama sınırı, upload boyut kapısı. KK: login 429, header'lar | S2 | 0004 eki |
 | S4 ✅ | F2.9a | `safe-fetch` (SSRF) + timing-safe yardımcıları. KK: iç IP / rebinding reddi | S1 | — |
-| S5 | F2.9b | Upload validator + `/admin/uploads` kapısı, CSV kaçışlama, güvenli XML, zip sınırları. KK: SVG / sahte MIME reddi | S3, S4 | — |
+| S5 ✅ | F2.9b | Upload validator + `/admin/uploads` kapısı, CSV kaçışlama, güvenli XML, zip sınırları. KK: SVG / sahte MIME reddi | S3, S4 | — |
 | S6 ✅ | F2.1 + F2.6 | HTTP istemcisi + `/admin/integrations/health` deseni. KK: logda Authorization yok | S2, S4 | — |
 | S7 ✅ | F2.11 | `lib/seo` + `url-registry` modülü. KK: slug tablosu, path tekilliği | S1 | — |
 | S8 | F2.5 | `audit-log` modülü, mutasyon ve okuma kaydı. KK: fiyat değişimi, TCKN okuma | S3 | 0011 |
@@ -308,6 +316,13 @@ Paralel zincirler:
   - **Handle (F3.1):** Ürün, kategori ve koleksiyon handle'ları `lib/seo` slug üreticisinden verilir; Medusa'nın `toHandle`'ı Türkçe karakterleri ASCII'ye çevirmiyor.
   - **İçe aktarma (F3.9):** Medusa'nın ürün içe aktarması dosyayı presigned URL ile doğrudan depoya yükleyebiliyor. Bu yol `/admin/uploads` doğrulamasından geçmez; F3.9'da ele alınacak.
   - **Kısmi iade dağıtımı (F4.7, F6):** `allocateKurus` her çağrıda bağımsız yuvarlar. Ardışık kısmi iadelerde bir satırın iadesi o satırın payını aşabilir. Satır başına kalan tutarı tavan alan bir dağıtım ve docs/07 testi gerekir (ADR-0010 "Sonuçlar").
+  - **S3/S5'ten devreden (F16, F18, S13):**
+    - CI'a Redis servisi: `TEST_REDIS_URL` testleri (Lua script) CI'da atlanıyor.
+    - F16 proxy: `/static`, `/app`, 401 ve preflight yanıtlarına güvenlik header'ları; `/static` için `sandbox` CSP; tek hop XFF şartı ya da `TRUSTED_PROXY_HOPS`.
+    - F18: Medusa store preflight'ında publishable key istiyor (izinli origin de 400 alıyor). Tarayıcıdan doğrudan store çağrısı için çözülmeli. Sunucudan login proxy'leyen storefront için imzalı istemci-IP ADR'si.
+    - S13: `presigned-urls` yolu için uzantı/MIME allowlist'i ve worker'da doğrulama; CSV dışa aktarımın ayırıcısı ve BOM'u.
+    - Hesap kilidi ve IP'den bağımsız kimlik sınırı (docs/04 "artan gecikme + kilit"); admin `limit` üst sınırı ölçülünce.
+    - Admin, çekirdek dashboard'un çevirmediği `errors.too_many_requests` gibi anahtarları ham gösteriyor.
   - **Storefront hata anahtarları (F18):** `errors.*`, `billing_profile.*`, `tr_address.*` gibi i18n anahtarları henüz bir çeviri kataloğunda değil. Storefront'la birlikte `packages/types`'a taşınır.
 - [ ] **F1'den devreden işler:**
   - Kargo KDV oranı için `shipping_option` vergi kuralı, mali müşavir onayından sonra (docs/12).
@@ -317,7 +332,7 @@ Paralel zincirler:
   - `tr-address` ve fatura profili Store API sözleşme tipleri `packages/types`'a (F18).
   - Tam vergi kimliğini gösterme: yetki (F12) ve okuma audit log'u (F2.5).
 - [ ] Çok dilli içerik: Medusa Translation modülü feature flag arkasında, şimdilik kapalı. Ana içerik Türkçe; çok dil F19.
-- [ ] Medusa'da CSRF koruması yok → F2 S3'te Origin kontrolü + custom header (ADR-0004 F2.10 eki).
+- [x] Medusa'da CSRF koruması yok → F2 S3'te Origin kontrolü + JSON gövde şartı (ADR-0004 F2.10 eki).
 - [ ] Trivy imaj taraması: üretim Dockerfile'ı ile birlikte F16'da.
 - [ ] GitHub Actions dakikaları: private repo, ücretsiz kota 2000 dk/ay; ilk ayda izlenecek.
 - [ ] `adr/0003` hosting ve veri yerleşimi kararı (en geç F15 öncesi; KVKK danışmanı görüşü gerekli)

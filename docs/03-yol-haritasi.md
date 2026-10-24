@@ -108,8 +108,8 @@ F17 öncesinde tenant'lar F16 script'leriyle elle açılır.
 - [ ] Ürün fiyatı değişikliği audit log'da görünüyor; müşteri TCKN görüntüleme okuma kaydı düşüyor
 - [x] HTTP istemci logunda Authorization/API key görünmüyor (testli) — F2 S6
 - [x] `lib/money` oransal dağıtımda kuruş kaybı/fazlası olmuyor (testli, uç durumlar dahil) — F2 S1
-- [ ] `safe-fetch` iç IP'ye ve DNS rebinding'e giden isteği reddediyor (testli); SVG ve sahte MIME yükleme reddediliyor
-- [ ] Login ucunda limit aşımı 429 dönüyor; güvenlik header'ları tüm yanıtlarda (testli)
+- [x] `safe-fetch` iç IP'ye ve DNS rebinding'e giden isteği reddediyor (testli); SVG ve sahte MIME yükleme reddediliyor — F2 S4 + S5 (sahte MIME'lı gerçek görsel, içeriğinin türüyle yeniden adlandırılıp saklanıyor)
+- [x] Login ucunda limit aşımı 429 dönüyor; güvenlik header'ları tüm yanıtlarda (testli) — F2 S3 (bizim middleware'lerimiz ve hata yanıtları; Medusa'nın önce yazdığı 401, CORS preflight, `/app` ve `/static` yanıtları F16'da proxy'de)
 - [x] Slug üretici transliterasyon tablosunu geçiyor; aynı path ikinci varlığa verilemiyor — F2 S7
 
 ---
