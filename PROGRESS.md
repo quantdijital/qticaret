@@ -3,9 +3,44 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**F2 — Platform çekirdek modülleri + güvenlik tabanı** (devam; S1, S2, S4 /13 bitti; S7 ve S6 commit bekliyor). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
+**F2 — Platform çekirdek modülleri + güvenlik tabanı** (devam; S1, S2, S4, S6, S7 /13 bitti). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
 
 ## Son oturum özeti
+**2026-10-24 akşamı otonom oturum (S2, S4, S7, S6).** Kullanıcı dışarıdayken açık yetkiyle yürütüldü: plan onayı beklenmedi, belirsizlikte muhafazakâr seçenek uygulanıp aşağıdaki "Gözden geçir" maddesine yazıldı. Planlar `/Users/deniz/.claude/plans/` altında (`f2-s4-safe-fetch.md`, `f2-s6-http-client-health.md`; S2 ve S7 bu dosyanın görev ayrıntılarında). Her görev bağımsız kod ve/veya güvenlik incelemesinden geçti; bulgular düzeltildi. Son durum: 647 birim, 74 HTTP, 47 modül testi; lint ve typecheck temiz. Push yapılmadı.
+
+2026-10-24 (akşam, F2 S6): F2.1 + F2.6. Sağlayıcı HTTP istemcisi ve `/admin/integrations/health`. Plan `/Users/deniz/.claude/plans/f2-s6-http-client-health.md`.
+- **`lib/clients`:**
+  - Timeout; yeni bağımlılık yok.
+  - Yeniden deneme: idempotent isteklerde tam jitter'lı geri çekilme.
+  - POST yalnızca gönderilmediği kesinse tekrarlanır (bağlantı reddi, DNS, TLS).
+  - Sonucu belirsiz hata (gönderildikten sonra timeout, 500/502/504) `outcome_unknown` döner ve denenmez; ödemede çift tahsilat olmaz.
+  - `Retry-After` jitter'la uygulanır; `ProviderError.retryAfterMs` üzerinden taşınır ve bizim yanıtımızda 300 sn ile sınırlanır.
+  - Devre kesici izin nesneleriyle çalışır; sağlayıcıya ulaşmayan deneme yarı açık durumu kilitlemez.
+  - Path segmentleri tek tek kodlanır, nokta segmenti ve sorgu reddedilir. Header değerleri alıntılanmadan doğrulanır.
+  - Log satırı sabit alanlıdır; `hidePaths` ve `logPath` desteklenir. Yanıt boyutu 5 MB ile sınırlı.
+- **Health:** Kontroller paralel çalışır, her biri 5 sn ile sınırlı; sonuç 30 sn cache'lenir ve yalnızca durum ile neden kodu döner. İlk kontrol RESP üzerinden Redis (AUTH, PING; kütüphanesiz).
+- **İnceleme:** Güvenlik incelemesi yapıldı. Yüksek bulgu, belirsiz sonuçların `retryable: true` işaretlenmesiydi (çift tahsilat riski). Bu ve 5 orta, 9 düşük bulgu düzeltildi.
+- **KK:** "HTTP istemci logunda Authorization/API key görünmüyor" karşılandı. Test redaksiyonsuz bir casus logger'la yalnızca izinli alanların yazıldığını doğruluyor. Commit: `7a57ed3`.
+
+2026-10-24 (akşam, F2 S7): F2.11. `lib/seo` ve `url-registry` modülü.
+- **`toSlug`:**
+  - Türkçe transliterasyon. NFKD ile ligatür ve üst simge ayrıştırılır.
+  - 80 karakter, kelime sınırında kesim.
+  - Harf kalmazsa `""` döner: sayısal slug olmaz.
+- **Şablon motoru:**
+  - Türkçe tokenlar; varlık türü başına token kataloğu (`SEO_TEMPLATE_TOKENS`).
+  - Bilinmeyen token kaydederken reddedilir.
+  - Boş token ayırıcısıyla birlikte düşer; güçlü ayırıcı kalır. Noktalama artıkları doğrusal sürede temizlenir.
+- **Piksel genişliği:** Helvetica AFM metrikleri (Arial ve Liberation Sans aynı ölçüde), macOS Arial.ttf ile çapraz kontrol edildi. docs/14 karakter hedefleri de eklendi.
+- **`url-registry`:**
+  - `(locale, path)` unique.
+  - `claimPath` path'i kaydın aktif path'i yapar ve eski aktif path'i rezerve eder. `unclaimPath` workflow compensation içindir. Ayrıca `releasePath`, `releasePathsOf` ve `freePath`.
+- **Doğrulanan (Medusa 2.21.2):**
+  - Servis içindeki `create` INSERT'i transaction commit edilirken flush ediliyor. Metot içindeki try/catch yarışı yakalamıyordu; 10 eşzamanlı claim testi bunu gösterdi.
+  - Düzeltme: transaction iç metotta kapanıyor, hata dış metotta `seo.path_taken`'a çevriliyor. Medusa'nın duplicate metni `lib/errors` `uniqueViolationKeys`'te tek yerde okunuyor.
+- **İnceleme:** Kod incelemesi yapıldı; 2 yüksek, 4 orta ve 12 düşük bulgu düzeltildi.
+- **KK:** "Slug üretici transliterasyon tablosunu geçiyor; aynı path ikinci varlığa verilemiyor" karşılandı. Commit: `c3d1c80`.
+
 2026-10-24 (akşam, F2 S4): F2.9a. `safe-fetch` (SSRF) ve timing-safe karşılaştırma. Aynı otonom oturum; plan `/Users/deniz/.claude/plans/f2-s4-safe-fetch.md`.
 - **`lib/security/safe-fetch`:**
   - Yalnızca http/https; URL'de kimlik bilgisi yok; port allowlist 80/443.
@@ -88,7 +123,16 @@
 1. **Kullanıcı:**
    - `f1-tr-localization` için PR açmak (dal push edildi; CI'da modül testleri ilk kez çalışacak). F1 merge edilince `f2-platform-core` `main`'e rebase edilir.
    - Yerel dev DB'deki doğrulama verisini isterse silmek: "Deneme Müşteri" ve demo seed. Ortam `pnpm db:down -v` ile sıfırlanabilir.
-2. **S4: F2.9a** (`safe-fetch` + timing-safe), ardından S7 ve S6. Kullanıcı dönüşünde bu oturumun "Gözden geçir" notlarına bakar (Açık sorular).
+2. **Kalan F2 görevlerinin hepsi senin kararını bekliyor:**
+   - **S3 (F2.10b: rate limit, header'lar, CSRF):** `ioredis` bağımlılığı gerekiyor; `pnpm add` onayı lazım.
+   - **S5 (F2.9b: upload, CSV, XML, zip):**
+     - `fast-xml-parser` ve `yauzl` bağımlılıkları gerekiyor.
+     - Görsel boyutu için kendi başlık okuyucumuz mu, `image-size` mı, karar verilecek.
+   - **S8 → S9–S12:** Önce ADR-0011, 0012 ve 0013 kabul edilmeli.
+   - **S13:** Önce ADR-0014 kabul edilmeli; S5 ve S8'e de bağlı.
+   - Önerilen sıra: S3 (güvenlik tabanı) → S5 → S8.
+3. Otonom oturumun "Gözden geçir" maddesine bak (Açık sorular).
+4. **Yerel dev DB:** `url_entry` tablosu henüz yok. Dev sunucusunu kullanmadan önce `pnpm --filter backend medusa db:migrate` çalıştırılmalı; testler kendi DB'lerinde migrate ediyor.
 
 ### F2 görev planı (oturum büyüklüğünde, önerilen sıra)
 | # | Görev | Kapsam | Bağımlılık | ADR |
@@ -98,8 +142,8 @@
 | S3 | F2.10b | Güvenlik header'ları, Redis rate limit, CSRF, sayfalama sınırı, upload boyut kapısı. KK: login 429, header'lar | S2 | 0004 eki |
 | S4 ✅ | F2.9a | `safe-fetch` (SSRF) + timing-safe yardımcıları. KK: iç IP / rebinding reddi | S1 | — |
 | S5 | F2.9b | Upload validator + `/admin/uploads` kapısı, CSV kaçışlama, güvenli XML, zip sınırları. KK: SVG / sahte MIME reddi | S3, S4 | — |
-| S6 | F2.1 + F2.6 | HTTP istemcisi + `/admin/integrations/health` deseni. KK: logda Authorization yok | S2, S4 | — |
-| S7 | F2.11 | `lib/seo` + `url-registry` modülü. KK: slug tablosu, path tekilliği | S1 | — |
+| S6 ✅ | F2.1 + F2.6 | HTTP istemcisi + `/admin/integrations/health` deseni. KK: logda Authorization yok | S2, S4 | — |
+| S7 ✅ | F2.11 | `lib/seo` + `url-registry` modülü. KK: slug tablosu, path tekilliği | S1 | — |
 | S8 | F2.5 | `audit-log` modülü, mutasyon ve okuma kaydı. KK: fiyat değişimi, TCKN okuma | S3 | 0011 |
 | S9 | F2.3a | `platform-settings` backend: bölümler, bayraklar, cache, uygulama noktaları. KK: kapalı bayrak | S7, S8 | 0012 |
 | S10 | F2.3b | Admin: Ayarlar > Özellikler ve Ayarlar > SEO sayfaları | S9 | — |
@@ -148,7 +192,7 @@ Görev ayrıntıları:
   - **CSV:** `= + - @ \t \r` ile başlayan hücreler kaçışlanır; RFC 4180 tırnaklama.
   - **XML:** DOCTYPE içeren girdi reddedilir, entity işleme kapalı, boyut sınırı var.
   - **Zip:** Giriş sayısı, gerçek açılmış toplam boyut ve sıkıştırma oranı sınırlanır; path traversal ve symlink reddedilir. xlsx de zip olduğundan F3.9'da önce bu kontrolden geçer.
-- **S6:**
+- **S6:** Tamamlandı (bkz. "Son oturum özeti"). İlk plan:
   - **İstemci:** Node `fetch`. Özellikleri:
     - istek başına timeout
     - üstel geri çekilme + jitter (yalnız idempotent ya da açıkça işaretli isteklerde; 429'da `Retry-After`'a uyulur)
@@ -164,7 +208,7 @@ Görev ayrıntıları:
     - `GET /admin/integrations/health`: kontroller paralel ve zaman sınırlı çalışır, sonuç 30 sn cache'lenir. Yanıtta secret veya ham hata olmaz.
     - İlk kontrol Redis'tir; dosya deposu S13'te eklenir.
     - Core `/health` her zaman 200 döner; readiness ucu F16'da.
-- **S7:**
+- **S7:** Tamamlandı (bkz. "Son oturum özeti"). İlk plan:
   - **Slug:** docs/13 §2.1 kuralları. F3.1'de ürün handle'ı bu üreticiden verilir.
   - **Şablon motoru:** Tokenlar desteklenir. Bilinmeyen token kaydetme anında hata verir; boş token kalan ayırıcıları temizler.
   - **Piksel genişliği:** Tablo, Arial ile aynı metriklere sahip Liberation Sans'tan (OFL) üretilir. Sınırlar doc 14 ve `/seo-*` skill'leriyle doğrulanır.
@@ -204,6 +248,27 @@ Paralel zincirler:
 Önerilen sıra, güvenlik tabanını (S1–S3) yeni route'lardan önce kurar (docs/04 "Route eklenmeden önce hazır").
 
 ## Açık sorular / bloklayıcılar
+- [ ] **Gözden geçir: otonom oturumda S4, S7 ve S6 için verilen muhafazakâr kararlar (kullanıcı onayı bekliyor):**
+  - **S4:**
+    - `safeFetch` varsayılan yönlendirme modu `same-origin`. Başka origin'e gitmek için `follow` açıkça istenmeli; webhook'larda `error`.
+    - DNS c-ares ile yapılıyor; /etc/hosts okunmuyor.
+  - **S7 piksel tablosu ve SERP sınırları:**
+    - Tablo, Liberation Sans dosyası yerine Helvetica AFM değerlerinden kuruldu: Liberation yerelde yoktu, ağdan font indirilmedi. Değerler aynı.
+    - SERP sınırları (başlık 600 px / 20 px, açıklama 920 px / 14 px) tahmindir; yalnızca uyarı üretmeli.
+  - **S7 slug ve `url-registry`:**
+    - `toSlug` sayısal sonuçta `""` dönüyor; F3.1 başka bir kaynak metin seçmeli.
+    - Registry yalnızca iki harfli locale kabul ediyor (F19'a kadar). Path'in her segmenti geçerli slug olmalı.
+    - `seo.path_taken` 400 dönüyor; 409 da düşünülebilir.
+  - **S7, düz URL deseni:** Düz desen (`/{slug}`) için sistem yolları (`/arama`, `/sepet`, `/blog`) henüz rezerve değil; F3'te ele alınmalı.
+  - **S6 istemci kapsamı:**
+    - PUT ve DELETE varsayılan olarak yeniden deneniyor (REST semantiğine güven).
+    - İstemci yalnızca JSON konuşuyor. PayTR form-encoded, e-fatura entegratörleri SOAP/XML olabilir; ilgili fazda genişletilir.
+  - **S6 health:**
+    - Kontroller provider'ın kendi `healthCheck()`'i yerine ayrı bir kayıt defterinde tutuluyor (modül izolasyonu; docs/03 F2.6 metninden sapma).
+    - Redis kontrolü elle yazılmış bir RESP istemcisiyle yapılıyor; ioredis gelince değiştirilebilir.
+  - **S6, HTTPS testi:** `openssl` gerektiriyor; CI imajında var.
+  - **S7 migration:** `url-registry` migration'ı `db:generate` ile üretildi. `/yeni-modul` komutu "üretmeden önce sor" diyor; kullanıcının "izin isteme" talimatıyla soruldu sayıldı. DB'ye dokunan `db:migrate` çalıştırılmadı.
+  - **Yeni i18n anahtarları:** `seo.template_invalid`, `seo.path_taken`, `seo.path_not_owned`, `seo.path_invalid`, `seo.locale_invalid`, `seo.entity_type_invalid`, `seo.entity_id_invalid`.
 - [ ] **Gözden geçir: F2 S2 muhafazakâr kararları (kullanıcı onayı bekliyor):**
   - Loglarda ad, soyad, unvan ve posta kodu anahtarları da maskeleniyor; docs/04 yalnızca TCKN, telefon ve adresi sayıyor.
   - `body` anahtarı tamamen redakte ediliyor. Sağlayıcı yanıt gövdeleri loga girmiyor; S6 istemcisi hata ayıklama için `providerCode` gibi alanları ayrıca yazmalı.
@@ -226,6 +291,11 @@ Paralel zincirler:
   - `fast-xml-parser` ve `yauzl` (S5)
   - Görsel boyutu için kendi başlık okuyucumuz ya da `image-size` (S5'te karar)
   - S4, S6 ve S7 yeni bağımlılık getirmez.
+- [ ] **F2 S4/S6/S7'den devreden işler:**
+  - **F3.1:** Ürün, kategori ve koleksiyon workflow'ları `claimPath` çağırmalı ve compensation'da `unclaimPath` kullanmalı. Silmede `releasePathsOf`, redirect kalkınca `freePath`. Slug `""` gelirse başka bir kaynak metin seçilmeli.
+  - **Ödeme fazları (F5, F6):** `outcome_unknown` gelirse yeniden denemeden önce sağlayıcıda durum sorgusu (conversationId) zorunlu.
+  - **F11.7 tenant webhook'ları:** `safeTransport` + `hidePaths` + `redirect: "error"`.
+  - **F16:** NAT64 kendi önekiyle kullanılıyorsa önek `address-policy`'ye eklenmeli. Egress proxy gelirse `safe-fetch`'in adres sabitlemesi yeniden düşünülmeli (proxy kendi DNS'ini yapar).
 - [ ] **F2 S2'den devreden işler:**
   - **Erişim logu (F16, OAuth fazı):** Dev dışında Medusa'nın morgan logu logger'ı atlayıp stdout'a JSON yazıyor. Satırda tam URL (sorgu dizesi dahil), `client_ip`, user agent ve referrer var. Riskli içerik: admin aramalarındaki `?q=` (telefon, e-posta) ve ileride OAuth `code`/`state`. Reverse proxy log politikasıyla ya da Medusa'nın logunu kapatıp kendi erişim logumuzla çözülecek.
   - **Bizim katmanımızdan önce biten yanıtlar:** `authenticate`'in 401'i ve CORS reddi `X-Request-Id` taşımıyor; morgan satırında ham `x-request-id` kalıyor (JSON escape'li). Body parser ve auth aşamasında yazılan loglarda request context yok.
