@@ -60,7 +60,16 @@
 ### Sunucu taraflı istekler (SSRF)
 - Kullanıcı/tenant kontrollü her URL (`tenant-webhooks`, geçişte görsel indirme, feed kaynakları, muhasebe/LLM uç noktaları)
   `lib/security/safe-fetch` üzerinden gider: DNS çözümü sonrası özel/iç/link-local aralıklar reddedilir, yönlendirmeler yeniden doğrulanır,
-  yalnızca http/https, zaman aşımı ve yanıt boyutu sınırı.
+  yalnızca http/https, zaman aşımı ve yanıt boyutu sınırı. Uygulama (F2 S4):
+  - **Adres:** IPv4'te IANA özel aralıkları reddedilir. IPv6'da yalnızca `2000::/3` kabul edilir ve onun içindeki özel aralıklar (Teredo, 6to4, dokümantasyon) da reddedilir. IPv4-mapped adresler her zaman reddedilir.
+  - **Rebinding:** Host bir kez çözülür; tek bir yasaklı yanıt bile isteği reddettirir. Bağlantı doğrulanan IP'ye sabitlenir (`lookup`, `agent: false`), TLS doğrulaması ve SNI hostname'le yapılır.
+  - **DNS:** `dns.lookup` değil c-ares kullanılır. getaddrinfo libuv thread havuzunu bloke ederdi; c-ares sorgusu zaman aşımında iptal edilir.
+  - **Yönlendirme:**
+    - Varsayılan mod `same-origin`. `follow` modunda başka origin'e yalnızca `accept`, `accept-language` ve `user-agent` taşınır. Webhook teslimi `error` modunu kullanır.
+    - https→http inişi ve başka origin'e giden 307/308 gövdesi reddedilir.
+  - **Hata nedenleri:** `dns_failed` ile `address_not_allowed` farkı iç DNS'i sızdırır. Kullanıcıya gösterirken tek bir i18n anahtarına indirgenir.
+  - **Test kancası:** `createSafeFetch` (DNS ve adres kuralı enjekte edilir) kütüphaneden export edilmez; yalnızca testler kullanır.
+  - **Karşılaştırma:** Secret karşılaştırması `lib/security` `safeEqual` ile yapılır. Boş beklenen değer hiçbir zaman eşleşmez.
 
 ### Giden entegrasyonlar
 - Tenant API anahtarları yalnızca oluşturulurken bir kez gösterilir, hash'li saklanır (çekirdek davranışı doğrulanır).
