@@ -14,6 +14,13 @@ export interface HttpErrorResponse {
   retryAfterSeconds?: number
 }
 
+// A provider's Retry-After passes through to our clients; it is capped so a
+// provider cannot set what we tell them
+const MAX_RETRY_AFTER_SECONDS = 300
+
+const retryAfterSecondsOf = (ms: number): number =>
+  Math.min(MAX_RETRY_AFTER_SECONDS, Math.max(1, Math.ceil(ms / 1000)))
+
 // `billing_profile.tax_id_invalid`: dotted snake_case, nothing else
 const I18N_KEY = /^[a-z][a-z0-9_]*(\.[a-z0-9_]+)+$/
 
@@ -33,9 +40,17 @@ export function toHttpError(value: unknown): HttpErrorResponse | null {
   }
   if (isProviderError(value)) {
     const message = clientMessage(value.safeMessage, DEFAULT_PROVIDER_MESSAGE)
-    return value.retryable
-      ? { status: 503, body: { type: "provider_unavailable", message } }
-      : { status: 502, body: { type: "provider_error", message } }
+    if (!value.retryable) {
+      return { status: 502, body: { type: "provider_error", message } }
+    }
+    const response: HttpErrorResponse = {
+      status: 503,
+      body: { type: "provider_unavailable", message },
+    }
+    if (value.retryAfterMs !== undefined) {
+      response.retryAfterSeconds = retryAfterSecondsOf(value.retryAfterMs)
+    }
+    return response
   }
   if (isRetryableError(value)) {
     const message = clientMessage(value.safeMessage, DEFAULT_RETRYABLE_MESSAGE)
@@ -44,7 +59,7 @@ export function toHttpError(value: unknown): HttpErrorResponse | null {
       body: { type: "temporarily_unavailable", message },
     }
     if (value.retryAfterMs !== undefined) {
-      response.retryAfterSeconds = Math.max(1, Math.ceil(value.retryAfterMs / 1000))
+      response.retryAfterSeconds = retryAfterSecondsOf(value.retryAfterMs)
     }
     return response
   }

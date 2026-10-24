@@ -175,3 +175,35 @@ describe("errors thrown inside a workflow", () => {
     expect(toHttpError(caught)).toEqual(toHttpError(ERRORS[kind]()))
   })
 })
+
+describe("ProviderError with Retry-After", () => {
+  it("passes the provider's delay to the response, capped at five minutes", () => {
+    const soon = new ProviderError({
+      provider: "acme",
+      providerCode: "http_429",
+      retryable: true,
+      retryAfterMs: 2500,
+    })
+    const late = new ProviderError({
+      provider: "acme",
+      providerCode: "http_429",
+      retryable: true,
+      retryAfterMs: 3_600_000,
+    })
+
+    expect(toHttpError(soon)).toMatchObject({ status: 503, retryAfterSeconds: 3 })
+    expect(toHttpError(late)).toMatchObject({ retryAfterSeconds: 300 })
+  })
+
+  it("drops an invalid delay", () => {
+    const error = new ProviderError({
+      provider: "acme",
+      providerCode: "x",
+      retryable: true,
+      retryAfterMs: Number.NaN,
+    })
+
+    expect(error.retryAfterMs).toBeUndefined()
+    expect(toHttpError(error)).not.toHaveProperty("retryAfterSeconds")
+  })
+})

@@ -25,6 +25,8 @@ export interface ProviderErrorShape extends ErrorShape<"provider"> {
   readonly provider: string
   readonly providerCode: string
   readonly retryable: boolean
+  /** How long the provider asked us to wait (its Retry-After). */
+  readonly retryAfterMs?: number
 }
 
 export interface RetryableErrorShape extends ErrorShape<"retryable"> {
@@ -62,6 +64,8 @@ export interface ProviderErrorInit {
   providerCode: string
   retryable: boolean
   safeMessage?: string
+  /** Dropped unless a finite, non-negative number. */
+  retryAfterMs?: number
   cause?: unknown
 }
 
@@ -73,6 +77,7 @@ export class ProviderError extends Error implements ProviderErrorShape {
   readonly providerCode: string
   readonly retryable: boolean
   readonly safeMessage: string
+  readonly retryAfterMs?: number
 
   constructor(init: ProviderErrorInit) {
     super(`${init.provider} error ${init.providerCode}`, causeOf(init))
@@ -80,6 +85,9 @@ export class ProviderError extends Error implements ProviderErrorShape {
     this.providerCode = init.providerCode
     this.retryable = init.retryable
     this.safeMessage = init.safeMessage ?? DEFAULT_PROVIDER_MESSAGE
+    if (isDelay(init.retryAfterMs)) {
+      this.retryAfterMs = init.retryAfterMs
+    }
   }
 }
 
@@ -122,7 +130,8 @@ export function isProviderError(value: unknown): value is ProviderErrorShape {
     fields !== null &&
     typeof fields["provider"] === "string" &&
     typeof fields["providerCode"] === "string" &&
-    typeof fields["retryable"] === "boolean"
+    typeof fields["retryable"] === "boolean" &&
+    (fields["retryAfterMs"] === undefined || isDelay(fields["retryAfterMs"]))
   )
 }
 

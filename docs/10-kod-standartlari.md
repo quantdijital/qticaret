@@ -43,6 +43,18 @@ const createShipmentStep = createStep(
   - Her gövdede `request_id` bulunur ve `X-Request-Id` header'ıyla aynıdır. İsteği kendisi reddeden middleware'ler `src/api/http/reject.ts`'teki `rejectRequest`'i kullanır.
   - Handler'ın kendisi hata verirse genel 500 döner; yanıt akmaya başladıysa bağlantı kesilir. İki durumda da Express'in ham stack basan fallback'ine düşülmez.
 
+## Dış servis çağrıları
+
+- Sağlayıcılar `lib/clients` `createHttpClient`'ı kullanır. Sağlayıcı başına bir kez, modül seviyesinde oluşturulur; devre kesici bu yüzden süreç başınadır.
+- **Yeniden deneme:**
+  - GET, HEAD, PUT, DELETE ve OPTIONS yeniden denenir. POST ve PATCH yalnızca `idempotent: true` (idempotency key) ile denenir.
+  - Gönderilmediği kesin hatalar (bağlantı reddi, DNS, TLS) her metotta denenir.
+- **Sonucu belirsiz hata:** İdempotent olmayan bir istek zaman aşımı, bağlantı kopması ya da 500/502/504 alırsa `providerCode: "outcome_unknown"` ve `retryable: false` döner. Ödeme gibi akışlar bu durumda yeniden denemeden önce sağlayıcıda durum sorgular.
+- **Path:** Girdi içeren path'ler segment dizisi olarak verilir (`["shipments", trackingNo]`); her segment ayrı kodlanır. Ham path'te `?`, `#`, `\` ve nokta segmenti reddedilir.
+- **Log:** Her denemede sabit alanlı tek satır yazılır; header, sorgu, gövde ve hata metni yazılmaz. Secret'ı path'te taşıyan URL'ler (webhook) `hidePaths` ya da `logPath` kullanır.
+- **Kullanıcı URL'leri:** Kullanıcı ya da tenant kontrollü URL'ler `safeTransport` üzerinden gider (SSRF kuralları, yönlendirme yok).
+- **Sağlık kontrolü:** `/admin/integrations/health` kontrolleri `lib/integrations/health` `defaultHealthChecks()` listesine eklenir. Sonuç yalnızca durum ve neden kodu taşır.
+
 ## Loglama
 
 - Tek logger `src/lib/logging`: pino, her ortamda stdout'a JSON satırı. Medusa'nın logger'ı da (`defineConfig({ logger })`) buna bağlıdır; çekirdek, modüller ve `medusa exec` script'leri aynı biçimde ve aynı redaksiyonla yazar.

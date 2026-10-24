@@ -37,6 +37,7 @@ repo/
 │   │   │   │   ├── legal-consent/
 │   │   │   │   ├── audit-log/
 │   │   │   │   ├── tr-address/
+│   │   │   │   ├── url-registry/                     # (locale, path) unique; claim/release/resolve (F2.11)
 │   │   │   │   ├── seo-redirects/  seo-advisor/ (rules/<alan>/<id>.ts)  seo-insights/  brands/  content/
 │   │   │   │   ├── price-history/  product-qa/
 │   │   │   │   ├── wishlist/  back-in-stock/  product-reviews/  marketing-feeds/
@@ -64,10 +65,11 @@ repo/
 │   │   │   │   ├── hooks/           # react-query hook'ları
 │   │   │   │   └── i18n/            # tr.json, en.json
 │   │   │   ├── lib/
-│   │   │   │   ├── clients/         # http istemci tabanı (timeout, retry, redaksiyon)
+│   │   │   │   ├── clients/         # http istemci tabanı (timeout, retry, devre kesici, redaksiyon)
+│   │   │   │   ├── integrations/    # health/: /admin/integrations/health kontrolleri
 │   │   │   │   ├── crypto/          # imza/HMAC yardımcıları
 │   │   │   │   ├── security/        # safe-fetch (SSRF), upload validator, csv-escape, safe-xml
-│   │   │   │   ├── seo/             # slug (TR), url-registry, title templates, jsonld builders
+│   │   │   │   ├── seo/             # slug (TR), başlık şablonları, piksel genişliği, jsonld builders (F3.12)
 │   │   │   │   ├── money/           # tutar dönüşümleri
 │   │   │   │   ├── errors/          # ortak hata tipleri
 │   │   │   │   └── logging/         # pino logger, redaksiyon, istek bağlamı, Medusa logger adaptörü
