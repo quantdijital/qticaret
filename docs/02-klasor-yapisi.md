@@ -49,6 +49,8 @@ repo/
 │   │   │   │   └── <alan>/steps/
 │   │   │   ├── api/
 │   │   │   │   ├── middlewares.ts
+│   │   │   │   ├── http/                       # istek ID'si, error handler, hata yanıtı sanitizasyonu
+│   │   │   │   ├── validation/                 # core route'lara eklenen doğrulama middleware'leri
 │   │   │   │   ├── admin/<kaynak>/route.ts
 │   │   │   │   ├── store/<kaynak>/route.ts
 │   │   │   │   └── hooks/<saglayici>/route.ts     # webhook'lar
@@ -67,7 +69,8 @@ repo/
 │   │   │   │   ├── security/        # safe-fetch (SSRF), upload validator, csv-escape, safe-xml
 │   │   │   │   ├── seo/             # slug (TR), url-registry, title templates, jsonld builders
 │   │   │   │   ├── money/           # tutar dönüşümleri
-│   │   │   │   └── errors/          # ortak hata tipleri
+│   │   │   │   ├── errors/          # ortak hata tipleri
+│   │   │   │   └── logging/         # pino logger, redaksiyon, istek bağlamı, Medusa logger adaptörü
 │   │   │   └── scripts/             # seed, tr-address import, tenant bootstrap
 │   │   └── integration-tests/
 │   │       ├── http/  modules/  fixtures/

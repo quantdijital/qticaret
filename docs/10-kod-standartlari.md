@@ -34,12 +34,36 @@ const createShipmentStep = createStep(
 - Kullanıcıya `safeMessage` (Türkçe, i18n), loga tam bağlam (redakte).
 - `catch` edip yutmak yasak; ya ele al ya yeniden fırlat.
 - Hata türü `instanceof` ile değil, `lib/errors` guard'larıyla (`isProviderError` vb.) kontrol edilir. Workflow'dan geçen hata düz nesneye dönüşür ve sınıf kimliği kaybolur; Medusa da kendi hatasını `MedusaError.isMedusaError` ile böyle tanır.
+- HTTP hata yanıtları `src/api/http/error-handler.ts`'ten geçer (Medusa'nın handler'ının yerine):
+  - Bizim tiplerimiz `toHttpError` ile eşlenir; `ProviderError` 502/503 ve `RetryableError` 503 kendi i18n gövdeleriyle döner, `RetryableError`'da `Retry-After` yazılır.
+  - Medusa kaynaklı 5xx her yerde, admin dahil, genel gövde döner (`type: "unknown_error"`).
+  - DB kaynaklı 4xx mesajları (unique/FK/not-null/kolon; kolon adı ve satır değeri içerir) `/admin/*` dışında i18n anahtarıyla değişir: `errors.duplicate`, `errors.invalid_reference`, `errors.invalid_data`.
+  - Body-parser hataları (bozuk JSON, büyük gövde) sabit gövdeyle döner: 400 `errors.invalid_data`, 413 `errors.request_too_large`. V8'in JSON hata mesajı gövdeden alıntı yaptığı için mesaj ne gönderilir ne loglanır.
+  - Kod tarafından fırlatılan bir ZodError 400 ve `errors.invalid_data` döner; şema yolları gönderilmez. Medusa'nın istek doğrulaması MedusaError fırlatır, onun mesajı korunur.
+  - Her gövdede `request_id` bulunur ve `X-Request-Id` header'ıyla aynıdır. İsteği kendisi reddeden middleware'ler `src/api/http/reject.ts`'teki `rejectRequest`'i kullanır.
+  - Handler'ın kendisi hata verirse genel 500 döner; yanıt akmaya başladıysa bağlantı kesilir. İki durumda da Express'in ham stack basan fallback'ine düşülmez.
 
 ## Loglama
 
-- `logger.info({ event, orderId, provider }, "mesaj")` — yapılandırılmış alanlar.
-- Kişisel veri ve secret loglanmaz. Redaksiyon listesi: authorization, apiKey, secretKey, merchant_key,
-  merchant_salt, cardNumber, tckn, identityNumber, password, token.
+- Tek logger `src/lib/logging`: pino, her ortamda stdout'a JSON satırı. Medusa'nın logger'ı da (`defineConfig({ logger })`) buna bağlıdır; çekirdek, modüller ve `medusa exec` script'leri aynı biçimde ve aynı redaksiyonla yazar.
+- Platform kodu `logger.info({ event, orderId, provider }, "mesaj")` biçimini kullanır. `event` zorunludur ve olayı adlandırır (`bootstrap.region_created`). Mesaj verilmezse `event` mesaj olur; pino'nun mesajı `err.message`'tan türetmesi engellenir. Container'daki Medusa logger'ı yalnızca string kabul eder; yeni kodda kullanılmaz.
+- İstek içinde yazılan her satır `request_id` taşır (AsyncLocalStorage). Alan adı, Medusa'nın erişim loguyla aynı anahtar olsun diye `request_id`'dir. Gelen `x-request-id` biçim kontrolünden geçer (`src/api/http/request-id.ts`); geçmezse UUID üretilir.
+- Kişisel veri ve secret loglanmaz. Redaksiyon satır serileştirilmeden önce uygulanır; çıktı her zaman geçerli JSON kalır (`src/lib/logging/redact.ts`):
+  - **Anahtar adı:** Her derinlikte, `cause` zinciri dahil uygulanır. Anahtar küçük harfe çevrilir ve ayırıcılardan arındırılır.
+    - Secret, içeriyorsa: password, secret, token, apikey, authorization, cookie (`set-cookie` dahil), credential, signature, encryptionkey, hashkey, privatekey, tckn, taxid, identitynumber, cardnumber, cvv, cvc, merchantkey, merchantsalt, iban.
+    - Kişisel veri, içeriyorsa: phone, gsm, msisdn, email, address, postalcode, firstname, lastname, fullname, legalname, contactname. `id`/`ids` ile bitenler (`address_id`) ve `email_verified` okunur kalır.
+    - Tam olarak: body, rawbody, rawheaders, detail, query, sql, bindings, parameters (istek ve satır içeriği taşıyan alanlar), sessionid, sid, otp.
+  - **Metin deseni:** Tutulan her string değerde ve mesajda uygulanır.
+    - `Authorization:`/`Cookie:` başlık satırları (şema ne olursa olsun), `Bearer`/`Basic` kimlik bilgileri, JWT
+    - Metin içindeki `ad=değer` ve `"ad":"değer"` biçimindeki secret'lar (form gövdesi, sorgu dizesi, string olarak tutulan JSON)
+    - URL'deki `kullanıcı:şifre@` (kullanıcı boş da olabilir)
+    - E-posta yerel kısmı (`%40` dahil), TR cep ve önekli sabit telefon
+    - Checksum'ı geçen TCKN (sayı alanlarında da)
+    - MikroORM hata mesajının başındaki SQL ifadesi (düz nesne hatalarda ve stack'te de)
+  - Desenler doğrusal çalışır; her desen bir dizinin yalnızca başında denenir. 8 KB'tan uzun metin kesilir.
+- Hata nesnesi `err` alanında loglanır. Düz nesneye çevrilir (`name`, `message`, `stack`, kendi alanları); `cause` ve `AggregateError.errors` da redakte edilir. Okunamayan nesne (throw eden getter) `[Unreadable]` olur; loglama hiçbir zaman isteği düşürmez.
+- Çıktı pino'nun doğrudan fd yazıcısına değil `process.stdout`'a gider. Testler stdout'u yakalar (`integration-tests/helpers/logs.ts`); yakalayıcı logger'ın yoklama satırını görmezse hata verir, böylece "logda görünmüyor" testleri boşa geçemez.
+- Seviye `LOG_LEVEL` ile ayarlanır: Medusa seviye adları, varsayılan `http`.
 
 ## İsimlendirme
 

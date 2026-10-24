@@ -70,7 +70,7 @@
 ### Secret yönetimi
 - Secret'lar: geliştirmede `.env` (git'e girmez), prod'da secret manager / Docker secrets.
 - Control plane secret deposu: KMS destekli envelope encryption, anahtar döndürme planı (F17 ADR'ında ayrıntı).
-- Açılışta Zod ile env doğrulama; secret değerleri asla loglanmaz (pino `redact` yolları tanımlı).
+- Açılışta Zod ile env doğrulama; secret değerleri asla loglanmaz (`src/lib/logging` redaksiyonu, kurallar docs/10 "Loglama").
 - Repo'da gitleaks (pre-commit + CI). CI loglarında secret maskeleme.
 - Claude Code `.env*` dosyalarını okuyamaz (`.claude/settings.json` deny).
 
