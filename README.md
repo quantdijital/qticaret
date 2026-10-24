@@ -8,6 +8,7 @@ Medusa.js v2 tabanlı backend + admin. Mimari ve yol haritası: `docs/`, güncel
 - pnpm 11 (`corepack enable` veya `npm i -g pnpm@11`) — sürüm `package.json` → `packageManager` ile sabit
 - Docker (Docker Desktop veya OrbStack): Postgres 16, Redis 7, Mailpit, SeaweedFS (S3)
 - `openssl` (yerel secret üretimi), `jq` (Claude Code prettier hook'u için)
+- `gitleaks` (commit öncesi secret taraması; macOS: `brew install gitleaks`). Kurulu değilse commit reddedilir.
 
 ## Kurulum
 ```sh
@@ -64,6 +65,14 @@ scripts/     yerel ortam yardımcıları
 docs/        mimari, yol haritası, güvenlik, SEO
 adr/         mimari karar kayıtları
 ```
+
+## Git hook'ları
+`pnpm install` hook'ları kurar (husky).
+- **pre-commit:** gitleaks staged değişiklikleri secret için tarar (`.gitleaks.toml`). Ardından lint-staged
+  değişen dosyalarda prettier ve o paketin ESLint config'ini çalıştırır.
+- **commit-msg:** commitlint, conventional commits biçimini zorunlu kılar: `type(scope): subject`, İngilizce.
+
+`--no-verify` hook'ları atlar, ama CI tüm geçmişi yeniden taradığı için hata sadece ertelenmiş olur.
 
 ## Tedarik zinciri güvenliği
 - Sürümler tam sabit (`saveExact`), lockfile zorunlu.

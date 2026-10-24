@@ -16,11 +16,16 @@
     "format:check": "prettier --check .",
     "env:init": "bash scripts/init-dev-env.sh",
     "db:up": "docker compose --env-file infra/docker/.env -f infra/docker/compose.dev.yml up -d --wait",
-    "db:down": "docker compose --env-file infra/docker/.env -f infra/docker/compose.dev.yml down"
+    "db:down": "docker compose --env-file infra/docker/.env -f infra/docker/compose.dev.yml down",
+    "prepare": "husky"
   },
   "prettier": "@qticaret/config/prettier",
   "devDependencies": {
+    "@commitlint/cli": "21.2.3",
+    "@commitlint/config-conventional": "21.2.3",
     "@qticaret/config": "workspace:*",
+    "husky": "9.1.7",
+    "lint-staged": "17.6.0",
     "prettier": "3.9.9",
     "turbo": "2.11.7",
     "typescript": "5.9.3"
