@@ -1,0 +1,79 @@
+/**
+ * Sector-neutral demo catalog (F1.6). Handles follow docs/13 slug rules:
+ * transliterated Turkish, lowercase, [a-z0-9-], at most 80 characters.
+ * Prices are gross TRY amounts (KDV included, adr/0007).
+ */
+
+export const DEMO_PUBLISHABLE_KEY_TITLE = "Demo storefront"
+
+export const DEMO_STOCK_LOCATION = {
+  name: "Ana Depo",
+  address: { address_1: "Merkez Mahallesi", city: "İstanbul", country_code: "tr" },
+} as const
+
+export const DEMO_FULFILLMENT_SET_NAME = "Ana Depo gönderileri"
+export const DEMO_SERVICE_ZONE_NAME = "Türkiye"
+export const MANUAL_FULFILLMENT_PROVIDER_ID = "manual_manual"
+
+export const DEMO_SHIPPING_OPTIONS = [
+  { name: "Standart Kargo", code: "standart", description: "2-4 iş günü", price: 90 },
+  { name: "Hızlı Kargo", code: "hizli", description: "1 iş günü", price: 150 },
+] as const
+
+export const DEMO_CATEGORIES = [
+  { name: "Ev ve Yaşam", handle: "ev-ve-yasam" },
+  { name: "Giyim", handle: "giyim" },
+  { name: "Gıda", handle: "gida" },
+] as const
+
+export type DemoCategoryHandle = (typeof DEMO_CATEGORIES)[number]["handle"]
+
+export interface DemoProduct {
+  title: string
+  handle: string
+  description: string
+  category: DemoCategoryHandle
+  /** VAT product type (adr/0007); omitted means the default 20% rate. */
+  vatProductType?: string
+  option: { title: string; values: string[] }
+  price: number
+}
+
+export const DEMO_PRODUCTS: DemoProduct[] = [
+  {
+    title: "Seramik Kupa",
+    handle: "seramik-kupa",
+    description: "El yapımı, bulaşık makinesinde yıkanabilir 350 ml seramik kupa.",
+    category: "ev-ve-yasam",
+    option: { title: "Renk", values: ["Beyaz", "Lacivert"] },
+    price: 249,
+  },
+  {
+    title: "Keten Masa Örtüsü",
+    handle: "keten-masa-ortusu",
+    description: "Doğal keten, 140 x 180 cm masa örtüsü.",
+    category: "ev-ve-yasam",
+    option: { title: "Renk", values: ["Bej", "Gri"] },
+    price: 549,
+  },
+  {
+    title: "Pamuklu Tişört",
+    handle: "pamuklu-tisort",
+    description: "Yüzde yüz pamuk, bisiklet yaka tişört.",
+    category: "giyim",
+    vatProductType: "KDV %10",
+    option: { title: "Beden", values: ["S", "M", "L"] },
+    price: 399,
+  },
+  {
+    title: "Organik Tam Buğday Unu 1 kg",
+    handle: "organik-tam-bugday-unu-1-kg",
+    description: "Taş değirmende öğütülmüş organik tam buğday unu.",
+    category: "gida",
+    vatProductType: "KDV %1",
+    option: { title: "Ağırlık", values: ["1 kg"] },
+    price: 89,
+  },
+]
+
+export const DEMO_STOCKED_QUANTITY = 100
