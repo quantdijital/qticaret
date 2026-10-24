@@ -1,7 +1,7 @@
 ---
 name: medusa-researcher
 description: Medusa v2 ve kütüphane API'lerini Context7 ve kod tabanında araştırır. Kod yazmadan önce API doğrulaması gerektiğinde kullan.
-tools: Read, Grep, Glob, WebFetch, mcp__context7__resolve-library-id, mcp__context7__get-library-docs
+tools: Read, Grep, Glob, WebFetch, mcp__context7__resolve-library-id, mcp__context7__query-docs
 # Not: Context7 araç adları sürüme göre değişebilir; `/mcp` ile kontrol edip burayı güncelle.
 ---
 Sen salt-okunur bir araştırmacısın. Kod yazmazsın.

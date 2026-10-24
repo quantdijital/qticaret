@@ -19,5 +19,5 @@ Platform birden çok bağımsız mağazaya hizmet verecek. Medusa v2 tek mağaza
 | **Instance-per-tenant** | İzolasyon, basit yedek, Medusa ile uyum | Tenant başına kaynak maliyeti, sürüm yayma otomasyonu gerekir |
 
 ## Sonuçlar
-- F11'de provisioning otomasyonu zorunlu.
+- F16'da provisioning otomasyonu zorunlu.
 - Tenant sayısı arttığında kaynak optimizasyonu yeni ADR ile değerlendirilecek.

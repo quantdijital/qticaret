@@ -8,10 +8,13 @@
 | Admin liste sayfaları p95 | < 1 sn |
 | Webhook yanıtı | < 300 ms (işi kuyruğa bırak, hemen 200 dön) |
 | Worker kuyruk gecikmesi | < 5 sn |
+| SEO advisor tekil değerlendirme (kaydetme anında) | < 50 ms p95 |
+| Sitemap tam üretimi (10.000 ürün) | < 2 dk (worker) |
+| `GET /store/seo/resolve` (cache'li) | < 20 ms |
 
 ## İlkeler
 1. **Ölç, sonra optimize et.** OpenTelemetry trace + yavaş sorgu logu olmadan optimizasyon yapılmaz.
-2. **Server ve worker ayrı.** Prod'da `workerMode: "server"` ve `"worker"` ayrı süreçler; ağır işler (fatura, etiket, e-posta, indeksleme) worker'da.
+2. **Server ve worker ayrı.** Prod'da `workerMode: "server"` ve `"worker"` ayrı süreçler; ağır işler (fatura, etiket, e-posta, indeksleme, sitemap, SEO denetimi, görsel türevleri) worker'da.
 3. **Dış çağrılar request yolunda minimum.** Kargo teklifi ve taksit tablosu cache'lenir (Redis, kısa TTL).
 4. **Webhook'lar asenkron.** İmza doğrula → event/kuyruk → 200. İş worker'da.
 5. **N+1 yok.** `query.graph` ile ihtiyaç duyulan alanlar tek seferde; `fields` parametresi dar tutulur.
@@ -21,7 +24,7 @@
 9. **Redis modülleri.** Event bus, workflow engine, cache, locking için Redis modülleri (prod).
 10. **Bağlantı havuzu.** Postgres pool boyutu süreç sayısına göre ayarlı; tenant başına üst sınır.
 
-## Yük testi (F10)
+## Yük testi (F15)
 - Araç: k6. Senaryolar: ürün gezinme, sepete ekleme, checkout (mock sağlayıcı), webhook patlaması (1000 istek/dk).
 - Sonuçlar `docs/perf-raporlari/` altına tarihli kaydedilir.
 

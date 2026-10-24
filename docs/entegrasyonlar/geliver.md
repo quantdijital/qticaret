@@ -23,5 +23,11 @@ Sağlayıcı durumları → iç enum: `created`, `picked_up`, `in_transit`, `out
 ## Env
 `GELIVER_API_TOKEN`, `GELIVER_BASE_URL`, `GELIVER_WEBHOOK_SECRET` (varsa)
 
-## Gelecek
-Doğrudan kargo firması entegrasyonları (Yurtiçi, Aras, MNG) aynı provider arayüzüyle ayrı modüller olarak eklenir.
+## Doğrudan taşıyıcı adaptörleri (F7.14)
+Geliver bir aracıdır (komisyon + tek nokta bağımlılığı). Aynı `AbstractFulfillmentProviderService` arayüzüyle doğrudan kargo firması modülleri
+(`fulfillment-yurtici`, `fulfillment-aras`, `fulfillment-mng`, `fulfillment-ptt`, `fulfillment-surat`) eklenir; ilk müşterinin anlaşmalı firması F7.14'te yazılır.
+- Her taşıyıcı adaptörü ortak contract test paketini (F6.4 deseni) ve durum eşleme tablosunu kullanır.
+- Takip: taşıyıcı webhook'u varsa kullanılır, yoksa polling job'u (F7.6).
+- Etiket PDF/ZPL üretimi taşıyıcıdan gelir; yoksa biz üretiriz (şablon).
+- Tenant birden fazla taşıyıcıyı aynı anda kullanabilir; kargo kuralları (F7.8) seçimi yapar.
+- Tüm etiket/irsaliye dosyaları private depolamada, presigned erişimle (kişisel veri içerir).

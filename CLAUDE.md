@@ -37,6 +37,8 @@ Güncel faz ve görevler: `PROGRESS.md`
 8. Ödeme, kargo, fatura modüllerinde test olmadan PR yok.
 9. Türkçe UI metinleri i18n anahtarlarıyla; kod, değişken, commit İngilizce.
 10. Belirsizlikte varsayım yapma, sor. Mimari karar gerekiyorsa `adr/` altına ADR öner.
+11. SEO çekirdek özelliktir: katalog/içerik dokunan her görevde `seo` payload, slug/301 ve advisor etkisi düşünülür (docs/13, docs/14).
+12. Güvenlik tabanı (`lib/security`, rate limit, redaksiyon) F2'de hazırdır; sonraki fazlarda bunlar kullanılır, yeniden yazılmaz (docs/04).
 
 ## Doküman haritası
 | Konu | Dosya |
@@ -51,6 +53,10 @@ Güncel faz ve görevler: `PROGRESS.md`
 | DevOps | docs/08-devops.md |
 | Claude Code çalışma düzeni, MCP | docs/09-claude-code-is-akisi.md |
 | Kod standartları | docs/10-kod-standartlari.md |
+| Kod dışı gereksinimler (hukuk, mali, sağlayıcı) | docs/12-kod-disi-gereksinimler.md |
+| SEO mimarisi (URL, 301, JSON-LD, sitemap, GEO) | docs/13-seo-mimarisi.md |
+| SEO advisor kural seti ve öneri motoru | docs/14-seo-advisor-kural-seti.md |
+| Rakip analizi ve farklılaşma | docs/15-rakip-analizi-ve-farklilasma.md |
 | Entegrasyonlar | docs/entegrasyonlar/*.md |
 
 ## Oturum düzeni
