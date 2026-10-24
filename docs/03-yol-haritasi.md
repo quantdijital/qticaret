@@ -76,11 +76,11 @@ F17 öncesinde tenant'lar F16 script'leriyle elle açılır.
 - F1.8 Store API kimlik doğrulama modeli: Medusa auth modülünün session/JWT seçenekleri Context7 ile doğrulanır → adr/0004 kabul edilir
 
 **KK:**
-- [ ] Seed sonrası Store API'den TRY fiyatlı ürün listelenebiliyor
-- [ ] Geçersiz il/ilçe kombinasyonu 400 döner
-- [ ] TCKN loglarda ve admin listelerinde maskeli
-- [ ] tr-address entegrasyon testleri geçiyor
-- [ ] adr/0004 kabul edildi
+- [x] Seed sonrası Store API'den TRY fiyatlı ürün listelenebiliyor (`seed-demo.spec.ts`)
+- [x] Geçersiz il/ilçe kombinasyonu 400 döner (`tr-address-validation.spec.ts`)
+- [x] TCKN loglarda ve admin listelerinde maskeli (`billing-profile.spec.ts`)
+- [x] tr-address entegrasyon testleri geçiyor (`src/modules/tr-address/__tests__`, `tr-address.spec.ts`)
+- [x] adr/0004 kabul edildi
 
 ---
 
