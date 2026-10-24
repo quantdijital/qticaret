@@ -1,0 +1,10 @@
+# Generated / vendored
+node_modules
+dist
+coverage
+.turbo
+.medusa
+pnpm-lock.yaml
+
+# Documentation is hand-formatted (Turkish tables); prettier would reflow it
+*.md

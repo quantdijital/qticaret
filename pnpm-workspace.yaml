@@ -1,0 +1,13 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+# Supply chain (docs/04): exact versions, strict engines,
+# no install for releases younger than 14 days (in minutes).
+saveExact: true
+engineStrict: true
+minimumReleaseAge: 20160
+
+# Dependency build/postinstall scripts are blocked unless listed here.
+# Add an entry only after reviewing the package's install script.
+allowBuilds: {}

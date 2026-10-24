@@ -17,3 +17,7 @@ dist/
 
 # Claude Code local settings
 .claude/settings.local.json
+
+# Test & build artifacts
+coverage/
+*.tsbuildinfo
