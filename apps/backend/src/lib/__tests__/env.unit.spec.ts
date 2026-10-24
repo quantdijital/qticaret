@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto"
-import { EnvValidationError, parseEnv } from "../env"
+import { EnvValidationError, isLocalEnv, parseEnv } from "../env"
 
 // Test-only values, generated per run so no fixed secret lives in the repo (docs/04)
 const jwtSecret = "j".repeat(16) + Math.random().toString(36).padEnd(16, "x")
@@ -35,7 +35,7 @@ describe("parseEnv", () => {
     const env = parseEnv(validEnv)
 
     expect(env.DATABASE_URL).toBe(validEnv.DATABASE_URL)
-    expect(env.NODE_ENV).toBe("development")
+    expect(env.NODE_ENV).toBeUndefined()
   })
 
   it("treats REDIS_URL as optional", () => {
@@ -70,6 +70,23 @@ describe("parseEnv", () => {
       "REDIS_URL: is required in production and staging"
     )
     expect(parseEnv({ ...validEnv, NODE_ENV: env }).REDIS_URL).toBe(validEnv.REDIS_URL)
+  })
+
+  it("rejects identical PII encryption and hash keys", () => {
+    const key = hexKey()
+    expect(
+      errorOf({ ...validEnv, PII_ENCRYPTION_KEY: key, PII_HASH_KEY: key.toUpperCase() })
+    ).toContain("PII_HASH_KEY: must differ from PII_ENCRYPTION_KEY")
+  })
+
+  it.each([
+    [undefined, false],
+    ["development", true],
+    ["test", true],
+    ["staging", false],
+    ["production", false],
+  ] as const)("treats NODE_ENV %p as local: %p", (nodeEnv, isLocal) => {
+    expect(isLocalEnv({ NODE_ENV: nodeEnv })).toBe(isLocal)
   })
 
   it("requires 32-byte hex PII keys", () => {

@@ -1,10 +1,9 @@
 import { defineConfig, loadEnv } from "@medusajs/framework/utils"
-import { parseEnv } from "./src/lib/env"
+import { isLocalEnv, parseEnv } from "./src/lib/env"
 
 loadEnv(process.env["NODE_ENV"] ?? "development", process.cwd())
 
 const env = parseEnv()
-const isDeployed = env.NODE_ENV === "production" || env.NODE_ENV === "staging"
 
 module.exports = defineConfig({
   projectConfig: {
@@ -13,8 +12,11 @@ module.exports = defineConfig({
     // process memory, so the env schema requires it when deployed.
     ...(env.REDIS_URL ? { redisUrl: env.REDIS_URL } : {}),
     // Customer web sessions: never readable by scripts, sent on top-level
-    // navigation only, HTTPS-only when deployed (adr/0004; CSRF in F2.10).
-    cookieOptions: { httpOnly: true, sameSite: "lax", secure: isDeployed },
+    // navigation only, HTTPS-only unless explicitly local (adr/0004; CSRF in
+    // F2.10). Session lifetime is Medusa's default, stated explicitly: 10
+    // hours, shorter than the 1-day bearer token.
+    cookieOptions: { httpOnly: true, sameSite: "lax", secure: !isLocalEnv(env) },
+    sessionOptions: { ttl: 10 * 60 * 60 * 1000 },
     http: {
       storeCors: env.STORE_CORS,
       adminCors: env.ADMIN_CORS,

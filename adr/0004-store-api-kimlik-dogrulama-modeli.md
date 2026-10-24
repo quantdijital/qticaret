@@ -58,3 +58,8 @@ varsayılan olarak bearer JWT döndürür; cookie/session desteği de vardır (d
   - `/auth/token/refresh` aynı müşteri için yeni token üretir.
 - **Yerel doğrulama:** `.env.test`'te `REDIS_URL` olduğundan session'lar Redis'e yazılır (`sess:*`). CI'da Redis yok, bellek içi store kullanılır.
 - **Açık kalanlar (karar değişmedi):** CSRF (Origin kontrolü ve custom header) F2.10'da. Kısa ömürlü access ile dönen refresh token ve iptal mekanizması F19 mobil işinde. `jwtExpiresIn` varsayılanı (`1d`) korunuyor.
+
+## İnceleme sonrası düzeltmeler (2026-10-24)
+- **`Secure` cookie varsayılan olarak açık:** Yalnızca `NODE_ENV` açıkça `development` veya `test` ise kapanır. Env şemasında `NODE_ENV`'in varsayılanı yok; NODE_ENV'i ayarlanmamış bir dağıtım güvenli ayarlarla açılır. Yerelde `medusa develop` ve jest NODE_ENV'i kendisi ayarlar.
+- **Session ömrü açık yazıldı:** `sessionOptions.ttl` = 10 saat (Medusa varsayılanı), bearer token'ın 1 günlük ömründen kısa. Testte cookie'nin `Expires` değeri kontrol edilir.
+- **F16 için not:** Üretim imajı `NODE_ENV=production` ayarlamalıdır. `REDIS_URL` zorunluluğu NODE_ENV'e bağlıdır.

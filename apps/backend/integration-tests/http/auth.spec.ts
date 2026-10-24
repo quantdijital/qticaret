@@ -54,8 +54,11 @@ medusaIntegrationTestRunner({
 
       expect(cookie).toMatch(/;\s*HttpOnly/i)
       expect(cookie).toMatch(/;\s*SameSite=Lax/i)
-      // Secure is only set when deployed (staging/production)
+      // Secure is only left off in an explicitly local environment (test here)
       expect(cookie).not.toMatch(/;\s*Secure/i)
+      // Session lifetime: 10 hours (medusa-config sessionOptions.ttl)
+      const expires = Date.parse(/Expires=([^;]+)/i.exec(cookie)?.[1] ?? "")
+      expect((expires - Date.now()) / 3_600_000).toBeCloseTo(10, 0)
 
       const cookieHeader = cookie.split(";")[0] ?? ""
       const response = await me({ ...storefront.headers, cookie: cookieHeader })

@@ -27,7 +27,9 @@ const secret = z
 const key256 = z.string().regex(/^[0-9a-fA-F]{64}$/, "must be 64 hex characters (32 bytes)")
 
 const envSchema = z.object({
-  NODE_ENV: z.enum(["development", "test", "staging", "production"]).default("development"),
+  // No default: an unset NODE_ENV must not quietly mean "development" and
+  // relax security settings (see isLocalEnv)
+  NODE_ENV: z.enum(["development", "test", "staging", "production"]).optional(),
   DATABASE_URL: z.url({ protocol: /^postgres(ql)?$/, error: "must be a postgres:// URL" }),
   REDIS_URL: z.url({ protocol: /^rediss?$/, error: "must be a redis:// URL" }).optional(),
   STORE_CORS: originList,
@@ -48,7 +50,23 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
       message: "is required in production and staging",
     })
   }
+  // Separate keys keep the lookup hash from weakening the encryption (adr/0009)
+  if (env.PII_ENCRYPTION_KEY.toLowerCase() === env.PII_HASH_KEY.toLowerCase()) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["PII_HASH_KEY"],
+      message: "must differ from PII_ENCRYPTION_KEY",
+    })
+  }
 })
+
+/**
+ * Only an explicit development or test environment counts as local; an unset
+ * NODE_ENV gets production-grade settings such as Secure cookies.
+ */
+export function isLocalEnv(env: Pick<Env, "NODE_ENV">): boolean {
+  return env.NODE_ENV === "development" || env.NODE_ENV === "test"
+}
 
 export type Env = z.infer<typeof envSchema>
 
