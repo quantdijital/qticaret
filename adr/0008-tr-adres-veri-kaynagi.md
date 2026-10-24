@@ -42,3 +42,26 @@ Araştırma (2026-10-24) sonucu:
   - Pasifleştirme yalnızca `--deactivate-missing` ile yapılır: kısmi bir dosya ülkenin geri kalanını pasifleştirmesin.
 - **Ölçüm (2026-10-24, yerel Postgres 16):** 32.076 mahalle (81 il × 12 ilçe × 33 mahalle, sentetik), ilk yükleme ~4,3 sn, değişmeyen veriyle yeniden yükleme ~1,6 sn. Servisin toplu `create/update` metotları yeterli, ham SQL gerekmedi.
 - **Satır kaynak kimliği:** Satıra yazılmıyor. Kaynak adı import komutunun loguna düşer; gerekirse F16'da eklenir.
+
+## Ek: Medusa adres alanlarına eşleme ve doğrulama (F1 S5, 2026-10-24)
+**Eşleme** (yalnızca `country_code = tr` adreslerde):
+| TR kavramı | Medusa alanı | Not |
+|---|---|---|
+| İl | `province` | Ad ile yazılır (ör. "İstanbul"); kargo etiketi ve faturada okunur kalır |
+| İlçe | `city` | |
+| Mahalle | `address_2` | Storefront mahalleyi listeden seçer; daire/kat bilgisi `address_1`'e yazılır |
+| Cadde/sokak, bina ve daire no | `address_1` | Serbest metin |
+| Telefon | `phone` | E.164'e normalleştirilir (`+905321234567`) |
+
+**Kurallar:**
+- Doğrulama, adreste yazılanın tutarlılığını denetler; eksik alan istemez. Sepet, alıcı yazarken yalnızca ülke taşıyabilir. Zorunlu alanlar checkout'ta (F7) denetlenir.
+- İl referans veride olmalı. İlçe ilin altında olmalı. İl verilmeden ilçe, ilçe verilmeden mahalle kabul edilmez.
+- Mahalle denetimi yalnızca ilçenin mahalle verisi yüklüyse yapılır.
+- Posta kodu: 5 hane, ilk iki hane ilin plaka kodu. Mahalle eşleşmişse posta kodu mahalleninkiyle aynı olmalı.
+- Telefon TR formatında olmalı.
+
+**Uygulandığı yer:**
+- **Middleware:** `src/api/validation/tr-address.ts`, şu route'larda: `POST /store/customers/me/addresses[/:address_id]`, `POST /store/carts`, `POST /store/carts/:id`. Core'un gövde doğrulamasından sonra çalışır (`req.validatedBody`). Kısmi güncellemeyi kayıtlı adresle birleştirerek denetler.
+- **Hata yanıtı:** 400 `{ type: "invalid_data", issues: [{ field, code }] }`. `code` storefront için i18n anahtarıdır (`tr_address.district_not_in_province` vb.).
+- **İkinci savunma hattı:** `createCartWorkflow` / `updateCartWorkflow` `validate` hook'ları (`src/workflows/hooks/validate-cart-tr-address.ts`). Store API dışından gelen sepet işlemlerini de kapsar.
+- **Bilinen sınır:** Müşteri adresleri için core'da `validate` hook'u yok. Bu yüzden müşteri adresleri yalnızca middleware ile korunur.
