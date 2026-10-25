@@ -1,4 +1,5 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
+import { MedusaError } from "@medusajs/framework/utils"
 import { PRODUCT_ATTRIBUTES_MODULE } from "../../../../modules/product-attributes"
 import type ProductAttributesModuleService from "../../../../modules/product-attributes/service"
 import { readProductAttributes } from "../../../admin/products/[id]/attributes/read"
@@ -21,9 +22,13 @@ async function productSnapshot(scope: Resolver, productId: string): Promise<Snap
       template: template?.id ?? null,
       ...Object.fromEntries(Object.entries(values).map(([key, value]) => [`value.${key}`, value])),
     }
-  } catch {
-    // An unknown product: the route answers 404, nothing changed
-    return {}
+  } catch (error) {
+    // An unknown product: the route answers 404, nothing changed. Anything
+    // else (the database) is not hidden as an empty snapshot
+    if (MedusaError.isMedusaError(error) && error.type === MedusaError.Types.NOT_FOUND) {
+      return {}
+    }
+    throw error
   }
 }
 
