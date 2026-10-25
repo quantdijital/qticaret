@@ -1,3 +1,5 @@
+export { BOARD_STAGES, boardSlice } from "./board"
+export type { BoardSlice, BoardStage } from "./board"
 export {
   LIFECYCLES,
   LIFECYCLE_FIELDS,

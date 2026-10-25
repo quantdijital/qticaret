@@ -15,6 +15,7 @@ import { AdminGetAsyncJobs, AdminPostAsyncJob } from "./admin/async-jobs/validat
 import { AdminGetAuditLog } from "./admin/audit-log/validators"
 import { AdminGetDashboardNoQuery, AdminGetDashboardOverview } from "./admin/dashboard/validators"
 import { AdminGetHomeSummary } from "./admin/home/summary/validators"
+import { AdminGetOrderBoard } from "./admin/order-board/validators"
 import { AdminPostProductAttributes } from "./admin/products/[id]/attributes/validators"
 import { AdminPostProductCatalog } from "./admin/products/[id]/catalog/validators"
 import { AdminPostFeature, validateSectionBody } from "./admin/platform-settings/validators"
@@ -59,6 +60,7 @@ const SENSITIVE_READS: readonly [string, string, boolean, (readonly string[])?][
   ["/admin/customer-groups/:id", "customer_group", false],
   ["/admin/orders", "order", true],
   ["/admin/dashboard/recent-orders", "order", true],
+  ["/admin/order-board", "order", true],
   ["/admin/orders/:id", "order", false],
   ["/admin/orders/:id/preview", "order", false],
   ["/admin/orders/:id/changes", "order", false],
@@ -203,6 +205,12 @@ export default defineMiddlewares({
       methods: ["GET" as const],
       middlewares: [requireUserActor, validateAndTransformQuery(AdminGetDashboardNoQuery, {})],
     })),
+    // The panel's order list by stage (adr/0022): customers' names, for people
+    {
+      matcher: "/admin/order-board",
+      methods: ["GET"],
+      middlewares: [requireUserActor, validateAndTransformQuery(AdminGetOrderBoard, {})],
+    },
     // F2.8: long tasks (adr/0014); starting one and fetching its result are
     // for people: results can hold personal data (the audit log export)
     {
