@@ -3,7 +3,7 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a, T1b, T2, T3, T4, T5, T9 ve T10a bitti; sırada T10b önizleme + IndexNow, T7 stok, T6 görsel). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı; push edilmedi. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
+**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a, T1b, T2, T3, T4, T5, T9, T10 bitti; sırada T7 stok, T6 görsel, T11 danışman). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı; push edilmedi. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
 
 ## Son oturum özeti
 **2026-10-25/26 gece (kullanıcı yatarken, "panel işlerini tamamla" talimatıyla).** Panelin ekranları yazıldı; her biri gerçek veriyle tarayıcıda denendi (CDP ekran görüntüsü, test kayıtları sonra silindi). Commit'ler `e11a201`…`6d63df7`, push yok.
@@ -129,6 +129,11 @@
     - `/store/seo/site` storefront kenarına canonical host'u (301 için) ve indeksleme durumunu söylüyor.
   - `SEO_INDEXING` (staging'de varsayılan kapalı): robots her şeyi engelliyor, her sayfa `noindex,nofollow`.
   - Panel: SEO özetinde site haritası kartı (sayfa sayısı, dosyalar, bekleyen değişiklik, şimdi yenile).
+- **F3 T10b bitti:** IndexNow. Commit `b12cf27`.
+  - `seo.indexnow` bayrağının arkasında, varsayılan kapalı.
+  - On dakikada bir, son bildirimden bu yana değişen yayındaki sayfaları ve bırakılan yolları api.indexnow.org'a bildiriyor; çağrı başına 10.000 URL.
+  - Anahtar ilk kullanımda üretiliyor; storefront `/store/seo/site`'tan alıp `/{key}.txt`'de sunar.
+  - Host yoksa ya da indeksleme kapalıysa hiçbir şey gitmiyor. Başarısız çağrı bir sonrakinde aynı değişikliklerle tekrarlanıyor.
 - **Gözden geçir (kullanıcı yokken önerilen seçenekle verilen kararlar):**
   1. Bayrak adı `catalog.non_physical`, mağaza tarafından açılır, varsayılan kapalı. Etiketleri Medusa Admin'de ve panelde var.
   2. Kargo gerekmeyen kalemler sipariş ödenince "teslim edildi" sayılıyor. Dijital teslimat (indirme bağlantısı, kod gönderimi) F9 bildirimleriyle gelecek.
@@ -162,6 +167,11 @@
   28. "Yapay zekâ aramalarında görün" ön ayarı robots'a satır eklemiyor (arama tarayıcıları `*` grubunu izler).
      - "Model eğitimini engelle" şunları engelliyor: GPTBot, ClaudeBot, CCBot, Google-Extended, Applebot-Extended, Bytespider, Meta-ExternalAgent.
   29. Staging'de indeksleme kapalı; başka bir ortam `SEO_INDEXING=off` ile kapatılabilir.
+  30. IndexNow dışarıya çağrı yaptığı için bayrakla açılıyor (varsayılan kapalı).
+     - İlk çalıştırma son bir günü bildiriyor, uzun bir kesinti en fazla bir haftayı.
+     - Google katılmıyor; onun için site haritası + Search Console (F10.11).
+  31. **İmzalı önizleme bağlantıları F18'e kaydırıldı.** Taslak sayfayı göstermek, storefront'un taslak ürün verisini alabilmesini gerektiriyor; bu da önizleme akışıyla birlikte tasarlanmalı.
+  32. Canonical host 301'ini storefront kenarı yapıyor: `/store/seo/site`'taki host'tan farklı bir host'a gelen istek 301 alır (F18).
 - **Bilinen sınırlar (devreden):**
   - Sipariş ve stok panosu bellek içi sıralıyor (5000/2000 kayıt). Büyük mağazada kayıtlı aşama sütunu ya da Index modülü gerekir.
   - Kargo etiketi ve takip F7'de. Kampanyada minimum sepet ve kategori kuralları F4'te.
@@ -469,7 +479,7 @@
 | T7 | F3.7 | Stok: depo/seviye kurulumu, Redis kilit sağlayıcısı, iptal/iade geri dönüş testleri. KK: eşzamanlı checkout | — | 0020 |
 | T8 | F3.8 | `stock-ledger`, düşük stok eşiği + `feed` uyarısı, ön sipariş bayrağı, uzlaştırma işi. KK: düşük stok uyarısı | T7 | 0020 |
 | T9 ✅ | F3.12 | `lib/seo/jsonld`: ProductGroup/Product/Offer, BreadcrumbList, CollectionPage/ItemList, OnlineStore, Article; şema testleri. KK: payload + JSON-LD sözleşme testi | T1, T4 | — |
-| T10 (a ✅) | F3.6 + F3.15 | Sitemap işi (debounce + günlük, 50.000'de bölme, görsel sitemap, S3), robots.txt üretimi ve AI ön ayarları, canonical host 301, staging `noindex`, imzalı önizleme, IndexNow. KK: sitemap/robots | T4, T5 | — |
+| T10 ✅ | F3.6 + F3.15 | Sitemap işi (debounce + günlük, 50.000'de bölme, görsel sitemap, S3), robots.txt üretimi ve AI ön ayarları, canonical host 301, staging `noindex`, imzalı önizleme, IndexNow. KK: sitemap/robots | T4, T5 | — |
 | T11 | F3.13 | `seo-advisor`: kural motoru, skor, bulgular, tek tık düzeltme, widget + SERP önizleme, liste sütunu, yayın kapısı. KK: deterministik, p95 < 50 ms | T2, T9 | — |
 | T12 | F3.14 | Mağaza geneli SEO denetim işi, 404 isabet listesi + "301 oluştur", mükerrer/öksüz/zincir listeleri. KK: 404 önerisi | T3, T11 | — |
 | T13 | F3.16a | `content` modülü: sayfa ve blog, zengin metin (belge JSON + sunucu oluşturucu, Tiptap), kısa kodlar, Store API | T2, Tiptap onayı | 0019 |
@@ -555,6 +565,9 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
     - Büyük harf ve sondaki `/` gibi normalizasyon 301'leri edge'de yapılır; resolve normalize edilmiş yolu `path` alanında döndürüyor.
   - **F14 geçiş:** Sorgu dizeli eski adresler (`?id=`) ve regex kuralları desen diline çevrilir; çevrilemeyenler rapora düşer.
   - **T12:** 12 ay isabet almayan kurallar için "temizle" önerisi; 404 isabet listesi.
+  - **F18 (T10'dan):**
+    - İmzalı önizleme bağlantıları (taslak sayfa, `noindex`).
+    - Kenarda: canonical host 301'i; `indexing: false` iken `X-Robots-Tag: noindex`; `/robots.txt`, `/sitemap*.xml` ve `/{indexnow_key}.txt` vekilliği.
   - ✅ **T4:** URL stili değişiminde tüm yolları taşıyan iş; önce çakışma raporu, çakışma varsa iş başlamıyor.
   - **F3.17:** Facet landing ad alanı alt kategori yollarıyla aynı biçimde (docs/13 notu).
   - ~~Admin hata metinleri~~: çözüldü (adr/0021, dashboard'a Türkçe cümle).
