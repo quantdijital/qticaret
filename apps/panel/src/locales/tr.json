@@ -820,5 +820,46 @@
       "billingHint": "Vergi numarası gizlenerek gösterilir.",
       "noBilling": "Fatura bilgisi girilmemiş."
     }
+  },
+  "categories": {
+    "description": "Ürünlerinizin mağazada nasıl gruplanacağı",
+    "add": "Kategori ekle",
+    "tree": "Kategori ağacı",
+    "treeHint": "Bir kategoriyi düzenlemek için seçin; oklarla aynı seviyede sıralayın.",
+    "empty": "Henüz kategori yok. İlk kategorinizi ekleyin.",
+    "pick": "Düzenlemek için soldan bir kategori seçin ya da yeni bir kategori ekleyin.",
+    "expand": "{{name}} alt kategorilerini göster",
+    "collapse": "{{name}} alt kategorilerini gizle",
+    "moveUp": "{{name}} yukarı taşı",
+    "moveDown": "{{name}} aşağı taşı",
+    "hidden": "Mağazada gizli",
+    "internal": "İç kategori",
+    "new": "Yeni kategori",
+    "newHint": "Ad yeterli; adres addan oluşur.",
+    "editHint": "Değişiklikler kaydedince mağazaya yansır.",
+    "name": "Kategori adı",
+    "nameRequired": "Kategori adı en az 2 karakter olmalı.",
+    "url": "Kategori adresi",
+    "urlHint": "Boş bırakırsanız addan oluşur.",
+    "parent": "Üst kategori",
+    "root": "Yok (ana kategori)",
+    "descriptionHint": "Kategori sayfasında ürünlerin üstünde görünür; arama motorları için de yararlıdır.",
+    "flags": {
+      "is_active": {
+        "title": "Mağazada görünsün",
+        "description": "Kapalıysa kategori sayfası ve menüsü gösterilmez."
+      },
+      "is_internal": {
+        "title": "İç kategori",
+        "description": "Yalnızca panelde düzen için kullanılır; müşteriler görmez."
+      }
+    },
+    "created": "Kategori eklendi.",
+    "saved": "Kategori kaydedildi.",
+    "delete": "Kategoriyi sil",
+    "deleteTitle": "{{name}} silinsin mi?",
+    "deleteDescription": "Kategori silinir; ürünler silinmez, yalnızca bu kategoriden çıkar. Alt kategorisi olan bir kategori silinemez.",
+    "deleted": "Kategori silindi.",
+    "descriptionLabel": "Açıklama"
   }
 }

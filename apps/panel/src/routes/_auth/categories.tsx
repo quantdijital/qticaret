@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { navItem } from "@/components/layout/navigation"
-import { UpcomingPage } from "@/components/patterns/upcoming-page"
+import { z } from "zod"
+import { CategoriesPage } from "@/features/categories/pages/categories-page"
 
-// Replaced by its panel screen (docs/03 panel hattı)
 export const Route = createFileRoute("/_auth/categories")({
-  component: () => <UpcomingPage item={navItem("categories")} />,
+  validateSearch: z.object({ selected: z.string().max(64).optional().catch(undefined) }),
+  component: CategoriesPage,
 })
