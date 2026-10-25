@@ -15,7 +15,8 @@
     "done": "Done",
     "open": "Open",
     "menu": "Menu",
-    "close": "Close"
+    "close": "Close",
+    "edit": "Edit"
   },
   "errors": {
     "generic": "The action could not be completed. Try again in a moment.",
@@ -336,6 +337,352 @@
         "Sitemap and robots.txt"
       ],
       "reports": ["Sales, VAT and stock reports", "Period comparisons", "Excel and CSV export"]
+    }
+  },
+  "leave": {
+    "title": "You have unsaved changes",
+    "description": "If you leave this page, your changes will be lost.",
+    "confirm": "Leave without saving"
+  },
+  "wizard": {
+    "stepOf": "Step {{step}} of {{total}}"
+  },
+  "list": {
+    "range": "{{from}}–{{to}} of {{total}}",
+    "page": "Page {{page}} of {{pages}}",
+    "previous": "Previous page",
+    "next": "Next page",
+    "clearSearch": "Clear search"
+  },
+  "products": {
+    "description": "Your shop's products, prices and stock",
+    "add": "Add product",
+    "views": "Product views",
+    "search": "Search by name or SKU",
+    "empty": "No products yet. Your first one is ready in a few steps.",
+    "noMatch": "No products match your search.",
+    "inStock_one": "{{formatted}} unit",
+    "inStock_other": "{{formatted}} units",
+    "untracked": "Not tracked",
+    "tabs": {
+      "all": "All",
+      "published": "Published",
+      "draft": "Draft"
+    },
+    "status": {
+      "published": "Published",
+      "draft": "Draft"
+    },
+    "columns": {
+      "product": "Product",
+      "status": "Status",
+      "stock": "Stock",
+      "variants": "Variants",
+      "category": "Category",
+      "updated": "Last change",
+      "price": "Price"
+    },
+    "errors": {
+      "title": "The product name needs at least 2 characters.",
+      "handle": "The address can only hold lowercase letters, digits and hyphens.",
+      "price": "Enter a price above zero.",
+      "stock": "Stock must be a whole number, 0 or more.",
+      "measure": "Enter a number above zero, or leave it empty.",
+      "sku": "The SKU can be at most 64 characters.",
+      "ean": "The barcode must be 8 to 14 digits.",
+      "optionTitle": "Give the option a name.",
+      "optionValues": "Add at least one value to each option.",
+      "tooManyVariants": "A product can have at most 100 variants."
+    },
+    "media": {
+      "card": "Images",
+      "hint": "The first image is the main one; up to {{max}} images.",
+      "drop": "Drag images here, or click to choose",
+      "types": "JPG, PNG, WebP or AVIF",
+      "main": "Main image",
+      "makeMain": "Make main image",
+      "remove": "Remove image",
+      "optional": "You can add images later, but products with images sell better."
+    },
+    "wizard": {
+      "pageTitle": "New product",
+      "steps": {
+        "basics": {
+          "title": "Basics",
+          "description": "The product's name, address, description and category."
+        },
+        "media": {
+          "title": "Images",
+          "description": "The photos shoppers will see."
+        },
+        "pricing": {
+          "title": "Price and stock",
+          "description": "Selling price, stock and options such as size or colour."
+        },
+        "shipping": {
+          "title": "Shipping",
+          "description": "Packed weight and size, so shipping can be priced."
+        },
+        "review": {
+          "title": "Review and publish",
+          "description": "Look it over once more; save as a draft or publish."
+        }
+      },
+      "basics": {
+        "card": "Product details"
+      },
+      "title": "Product name",
+      "titlePlaceholder": "e.g. Linen shirt",
+      "url": "Product address",
+      "urlHint": "Made from the name. No need to change it.",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Who uses it, and for what? Material, size, care…",
+      "words_one": "{{count}} word. Search engines favour at least {{suggested}}.",
+      "words_other": "{{count}} words. Search engines favour at least {{suggested}}.",
+      "organize": "Organisation",
+      "categories": "Categories",
+      "categoriesHint": "A product can appear in several categories.",
+      "noCategories": "No categories yet. You can add them later.",
+      "vat": "VAT rate",
+      "vatHint": "Without a choice, the shop's default rate applies.",
+      "vatDefault": "Default rate",
+      "optionsCard": "Options",
+      "optionsHint": "Turn on if the product comes in sizes, colours and the like.",
+      "hasOptions": "This product has options",
+      "noOptions": "This product comes in one kind. If it has sizes or colours, turn options on at the top right.",
+      "options": {
+        "add": "Add option",
+        "name": "Option name",
+        "namePlaceholder": "e.g. Size",
+        "values": "{{option}} values",
+        "valuesPlaceholder": "Type a value and press Enter: S, M, L",
+        "removeValue": "Remove {{value}}",
+        "remove": "Remove option"
+      },
+      "pricingCard": "Price and stock",
+      "pricingHint": "Prices include VAT.",
+      "price": "Price",
+      "stock": "Stock",
+      "stockUntracked": "Stock tracking is off.",
+      "sku": "SKU",
+      "ean": "Barcode (EAN)",
+      "variant": "Variant",
+      "variantCount_one": "{{count}} variant",
+      "variantCount_other": "{{count}} variants",
+      "bulkPrice": "Price for all:",
+      "applyAll": "Apply",
+      "inventoryCard": "Stock settings",
+      "manageInventory": "Track stock",
+      "manageInventoryHint": "Stock goes down with each sale; at zero the product cannot be bought.",
+      "allowBackorder": "Keep selling when out of stock",
+      "allowBackorderHint": "For pre-orders or ship-from-supplier.",
+      "shippingCard": "Package size",
+      "shippingHint": "Weight and size of the product as packed.",
+      "measures": {
+        "weight": "Weight",
+        "length": "Length",
+        "width": "Width",
+        "height": "Height"
+      },
+      "measuresPackaged": "Carriers price shipping by these. A draft can leave them empty.",
+      "shippingSummary": "Shipping summary",
+      "desi": "Desi",
+      "measuresReady": "Measurements complete. The product can be published.",
+      "measuresMissing": "Publishing needs the weight and all three dimensions.",
+      "summary": "Summary",
+      "imageCount_one": "{{count}} image",
+      "imageCount_other": "{{count}} images",
+      "wordTotal_one": "{{count}} word",
+      "wordTotal_other": "{{count}} words",
+      "checklist": "Ready to publish",
+      "checklistHint": "The product cannot be published until the required items are done.",
+      "check": {
+        "title": "Product name",
+        "price": "A price for every variant",
+        "measures": "Weight and dimensions",
+        "images": "At least one image",
+        "description": "A 150-word description",
+        "category": "A category",
+        "required": "Required to publish",
+        "suggested": "Suggested; helps the product get found"
+      },
+      "saveDraft": "Save as draft",
+      "publish": "Publish",
+      "publishBlocked": "Complete the missing items to publish",
+      "published": "Product published.",
+      "drafted": "Product saved as a draft.",
+      "stockFailed": "The product was saved but its stock was not. Enter the stock on the product page.",
+      "defaultOption": "Option",
+      "defaultValue": "Standard"
+    },
+    "detail": {
+      "title": "Product",
+      "general": "General",
+      "handleHint": "If you change a published product's address, the old one is kept and not given to another product.",
+      "saved": "Changes saved.",
+      "mediaSaved": "Images updated.",
+      "variants": "Variants, price and stock",
+      "variantsHint": "Stock is the quantity at the shop's default location.",
+      "variantsSaved": "Prices and stock saved.",
+      "reserved": "Reserved",
+      "summary": "Summary",
+      "available": "Sellable stock",
+      "created": "Added",
+      "shippingHint": "These apply to variants without their own values.",
+      "publish": "Publish",
+      "unpublish": "Unpublish",
+      "published": "Product published.",
+      "unpublished": "Product unpublished and moved to drafts.",
+      "more": "More actions",
+      "delete": "Delete product",
+      "deleteTitle": "Delete {{title}}?",
+      "deleteDescription": "The product, its variants and stock records are deleted. This cannot be undone.",
+      "deleted": "Product deleted."
+    },
+    "catalog": {
+      "card": "Catalog details",
+      "hint": "Used in search results and product feeds.",
+      "condition": "Condition",
+      "conditions": {
+        "new": "New",
+        "refurbished": "Refurbished",
+        "used": "Used",
+        "damaged": "Damaged"
+      },
+      "primaryCategory": "Primary category",
+      "primaryCategoryHint": "One of the product's categories; the page's breadcrumb follows it.",
+      "noPrimary": "Not chosen"
+    }
+  },
+  "orders": {
+    "description": "Incoming orders; the ones to pack first",
+    "views": "Order views",
+    "search": "Order number, name or e-mail",
+    "tabs": {
+      "all": "All"
+    },
+    "columns": {
+      "order": "Order",
+      "date": "Date",
+      "customer": "Customer",
+      "stage": "Status",
+      "items": "Items",
+      "total": "Total"
+    },
+    "itemsCount_one": "{{count}} item",
+    "itemsCount_other": "{{count}} items",
+    "noName": "Unnamed customer",
+    "empty": "No orders yet. The first one will show up here.",
+    "emptyStage": "No orders in this status.",
+    "noMatch": "No orders match your search.",
+    "limited": "Counts cover the newest 5,000 orders.",
+    "progress": {
+      "placed": "Order placed",
+      "paid": "Payment received",
+      "shipped": "Shipped",
+      "delivered": "Delivered",
+      "next": "Next step"
+    },
+    "payment": {
+      "notPaid": "Not paid",
+      "authorized": "Authorized, not captured",
+      "captured": "Paid",
+      "partiallyCaptured": "Partially paid",
+      "refunded": "Refunded",
+      "partiallyRefunded": "Partially refunded"
+    },
+    "actions": {
+      "ship": "Ship",
+      "deliver": "Mark as delivered",
+      "capture": "Capture payment",
+      "cancel": "Cancel order",
+      "more": "More actions"
+    },
+    "ship": {
+      "title": "Ship #{{number}}?",
+      "description": "These items go into the parcel and the order becomes \"Shipped\".",
+      "notify": "Send the customer a shipping notice",
+      "done": "Order shipped."
+    },
+    "deliver": {
+      "title": "Was the order delivered?",
+      "description": "Parcels in transit are marked as delivered.",
+      "done": "Order marked as delivered."
+    },
+    "capture": {
+      "title": "Capture the payment?",
+      "description": "The amount authorized on the customer's card is transferred to your account.",
+      "done": "Payment captured."
+    },
+    "cancel": {
+      "title": "Cancel #{{number}}?",
+      "description": "The order is canceled and its reserved stock returns. This cannot be undone.",
+      "done": "Order canceled."
+    },
+    "detail": {
+      "title": "Order",
+      "number": "Order #{{number}}",
+      "placed": "Placed on {{date}}",
+      "canceledNote": "This order was canceled.",
+      "items_one": "Items ({{count}})",
+      "items_other": "Items ({{count}})",
+      "subtotal": "Subtotal",
+      "shipping": "Shipping",
+      "shippingNamed": "Shipping ({{name}})",
+      "discount": "Discount",
+      "tax": "VAT (included)",
+      "total": "Total",
+      "customer": "Customer",
+      "delivery": "Delivery address",
+      "billing": "Billing address",
+      "noAddress": "No address.",
+      "payment": "Payment",
+      "amount": "Order amount",
+      "captured": "Captured",
+      "refunded": "Refunded",
+      "provider": "Payment method"
+    },
+    "providers": {
+      "pp_system_default": "Manual payment"
+    }
+  },
+  "customers": {
+    "description": "Everyone who ordered or signed up",
+    "views": "Customer views",
+    "search": "Search by name, e-mail or phone",
+    "tabs": {
+      "all": "All",
+      "registered": "Members",
+      "guest": "Guests"
+    },
+    "kind": {
+      "registered": "Member",
+      "guest": "Guest"
+    },
+    "columns": {
+      "customer": "Customer",
+      "phone": "Phone",
+      "kind": "Type",
+      "joined": "First seen"
+    },
+    "empty": "No customers yet. They show up with the first order or sign-up.",
+    "noMatch": "No customers match your search.",
+    "billing": {
+      "individual": "Individual",
+      "corporate": "Company",
+      "taxOffice": "{{office}} tax office"
+    },
+    "detail": {
+      "title": "Customer",
+      "since": "Customer since {{date}}",
+      "orders": "Recent orders",
+      "noOrders": "This customer has no orders yet.",
+      "contact": "Contact",
+      "addresses": "Saved addresses",
+      "noAddresses": "No saved addresses.",
+      "billing": "Billing details",
+      "billingHint": "The tax number is shown masked.",
+      "noBilling": "No billing details."
     }
   }
 }

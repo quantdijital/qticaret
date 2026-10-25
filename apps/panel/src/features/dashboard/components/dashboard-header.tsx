@@ -1,3 +1,4 @@
+import { Link } from "@tanstack/react-router"
 import { Plus } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { PeriodPicker } from "@/components/patterns/period-picker"
@@ -5,7 +6,6 @@ import { Button } from "@/components/ui/button"
 import { useCurrentUser } from "@/features/auth/api/me"
 import { PERIODS } from "@/features/dashboard/period"
 import type { PeriodKey } from "@/features/dashboard/period"
-import { advancedPanelUrl } from "@/lib/advanced-panel"
 import { formatLongDate } from "@/lib/format"
 
 interface DashboardHeaderProps {
@@ -30,10 +30,10 @@ export function DashboardHeader({ period, onPeriodChange }: DashboardHeaderProps
       <div className="flex flex-wrap items-center gap-2">
         <PeriodPicker periods={PERIODS} value={period} onChange={onPeriodChange} />
         <Button asChild>
-          <a href={advancedPanelUrl("/products/create")} target="_blank" rel="noreferrer">
+          <Link to="/products/new">
             <Plus />
             {t("dashboard.addProduct")}
-          </a>
+          </Link>
         </Button>
       </div>
     </header>

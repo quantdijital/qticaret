@@ -15,7 +15,8 @@
     "done": "Tamamlandı",
     "open": "Aç",
     "menu": "Menü",
-    "close": "Kapat"
+    "close": "Kapat",
+    "edit": "Düzenle"
   },
   "errors": {
     "generic": "İşlem tamamlanamadı. Biraz sonra tekrar deneyin.",
@@ -344,6 +345,352 @@
         "Dönem karşılaştırmaları",
         "Excel ve CSV dışa aktarma"
       ]
+    }
+  },
+  "leave": {
+    "title": "Kaydedilmemiş değişiklikler var",
+    "description": "Bu sayfadan çıkarsanız yaptığınız değişiklikler kaybolur.",
+    "confirm": "Kaydetmeden çık"
+  },
+  "wizard": {
+    "stepOf": "Adım {{step}} / {{total}}"
+  },
+  "list": {
+    "range": "{{total}} kayıttan {{from}}–{{to}} arası",
+    "page": "Sayfa {{page}} / {{pages}}",
+    "previous": "Önceki sayfa",
+    "next": "Sonraki sayfa",
+    "clearSearch": "Aramayı temizle"
+  },
+  "products": {
+    "description": "Mağazanızdaki ürünler, fiyatları ve stokları",
+    "add": "Ürün ekle",
+    "views": "Ürün görünümleri",
+    "search": "Ürün adı ya da stok kodu ile ara",
+    "empty": "Henüz ürün eklemediniz. İlk ürününüz birkaç adımda hazır.",
+    "noMatch": "Aramanızla eşleşen ürün yok.",
+    "inStock_one": "{{formatted}} adet",
+    "inStock_other": "{{formatted}} adet",
+    "untracked": "Takip edilmiyor",
+    "tabs": {
+      "all": "Tümü",
+      "published": "Yayında",
+      "draft": "Taslak"
+    },
+    "status": {
+      "published": "Yayında",
+      "draft": "Taslak"
+    },
+    "columns": {
+      "product": "Ürün",
+      "status": "Durum",
+      "stock": "Stok",
+      "variants": "Varyant",
+      "category": "Kategori",
+      "updated": "Son değişiklik",
+      "price": "Fiyat"
+    },
+    "errors": {
+      "title": "Ürün adı en az 2 karakter olmalı.",
+      "handle": "Adres yalnızca küçük harf, rakam ve tire içerebilir.",
+      "price": "Sıfırdan büyük bir fiyat girin.",
+      "stock": "Stok 0 ya da daha büyük bir tam sayı olmalı.",
+      "measure": "Sıfırdan büyük bir sayı girin ya da boş bırakın.",
+      "sku": "Stok kodu en çok 64 karakter olabilir.",
+      "ean": "Barkod 8 ile 14 rakam arasında olmalı.",
+      "optionTitle": "Seçeneğe bir ad verin.",
+      "optionValues": "Her seçeneğe en az bir değer ekleyin.",
+      "tooManyVariants": "Bir üründe en çok 100 varyant olabilir."
+    },
+    "media": {
+      "card": "Görseller",
+      "hint": "İlk görsel ana görseldir; en çok {{max}} görsel ekleyebilirsiniz.",
+      "drop": "Görselleri buraya sürükleyin ya da seçmek için tıklayın",
+      "types": "JPG, PNG, WebP ya da AVIF",
+      "main": "Ana görsel",
+      "makeMain": "Ana görsel yap",
+      "remove": "Görseli kaldır",
+      "optional": "Görseli şimdi eklemeyebilirsiniz, ama görselli ürünler daha çok satar."
+    },
+    "wizard": {
+      "pageTitle": "Yeni ürün",
+      "steps": {
+        "basics": {
+          "title": "Temel bilgiler",
+          "description": "Ürünün adı, adresi, açıklaması ve kategorisi."
+        },
+        "media": {
+          "title": "Görseller",
+          "description": "Müşterinin ürünü göreceği fotoğraflar."
+        },
+        "pricing": {
+          "title": "Fiyat ve stok",
+          "description": "Satış fiyatı, stok adedi ve varsa beden, renk gibi seçenekler."
+        },
+        "shipping": {
+          "title": "Kargo",
+          "description": "Kargo ücretinin hesaplanması için paketli ağırlık ve ölçüler."
+        },
+        "review": {
+          "title": "Kontrol ve yayın",
+          "description": "Son bir kez gözden geçirin; taslak olarak saklayın ya da yayınlayın."
+        }
+      },
+      "basics": {
+        "card": "Ürün bilgileri"
+      },
+      "title": "Ürün adı",
+      "titlePlaceholder": "Örn. Keten gömlek",
+      "url": "Ürün adresi",
+      "urlHint": "Addan otomatik oluşur. Değiştirmeniz gerekmez.",
+      "descriptionLabel": "Açıklama",
+      "descriptionPlaceholder": "Ürünü kim, ne için kullanır? Malzemesi, ölçüleri, bakımı…",
+      "words_one": "{{count}} kelime. Arama motorları için en az {{suggested}} kelime önerilir.",
+      "words_other": "{{count}} kelime. Arama motorları için en az {{suggested}} kelime önerilir.",
+      "organize": "Düzen",
+      "categories": "Kategoriler",
+      "categoriesHint": "Ürün birden çok kategoride görünebilir.",
+      "noCategories": "Henüz kategori yok. Kategorileri sonra da ekleyebilirsiniz.",
+      "vat": "KDV oranı",
+      "vatHint": "Seçmezseniz mağazanın varsayılan oranı uygulanır.",
+      "vatDefault": "Varsayılan oran",
+      "optionsCard": "Seçenekler",
+      "optionsHint": "Ürün beden, renk gibi seçeneklerle satılıyorsa açın.",
+      "hasOptions": "Bu ürünün seçenekleri var",
+      "noOptions": "Bu ürün tek tip satılıyor. Beden ya da renk seçeneği varsa sağ üstten açın.",
+      "options": {
+        "add": "Seçenek ekle",
+        "name": "Seçenek adı",
+        "namePlaceholder": "Örn. Beden",
+        "values": "{{option}} değerleri",
+        "valuesPlaceholder": "Değer yazıp Enter'a basın: S, M, L",
+        "removeValue": "{{value}} değerini kaldır",
+        "remove": "Seçeneği kaldır"
+      },
+      "pricingCard": "Fiyat ve stok",
+      "pricingHint": "Fiyatlar KDV dahil girilir.",
+      "price": "Fiyat",
+      "stock": "Stok",
+      "stockUntracked": "Stok takibi kapalı.",
+      "sku": "Stok kodu (SKU)",
+      "ean": "Barkod (EAN)",
+      "variant": "Varyant",
+      "variantCount_one": "{{count}} varyant",
+      "variantCount_other": "{{count}} varyant",
+      "bulkPrice": "Tümüne fiyat:",
+      "applyAll": "Uygula",
+      "inventoryCard": "Stok ayarları",
+      "manageInventory": "Stoku takip et",
+      "manageInventoryHint": "Satıldıkça stok düşer; stok bitince ürün satılamaz.",
+      "allowBackorder": "Stok bitince de satışa izin ver",
+      "allowBackorderHint": "Ön sipariş ya da tedarikten gönderim için.",
+      "shippingCard": "Paket ölçüleri",
+      "shippingHint": "Ürünün paketlenmiş hâlinin ağırlığı ve ölçüleri.",
+      "measures": {
+        "weight": "Ağırlık",
+        "length": "Uzunluk",
+        "width": "Genişlik",
+        "height": "Yükseklik"
+      },
+      "measuresPackaged": "Kargo firmaları ücreti bu bilgilerle hesaplar. Taslak için boş bırakabilirsiniz.",
+      "shippingSummary": "Kargo özeti",
+      "desi": "Desi",
+      "measuresReady": "Ölçüler tamam. Ürün yayınlanabilir.",
+      "measuresMissing": "Yayınlamak için ağırlık ve üç ölçünün hepsi gerekir.",
+      "summary": "Özet",
+      "imageCount_one": "{{count}} görsel",
+      "imageCount_other": "{{count}} görsel",
+      "wordTotal_one": "{{count}} kelime",
+      "wordTotal_other": "{{count}} kelime",
+      "checklist": "Yayına hazırlık",
+      "checklistHint": "Zorunlu olanlar tamamlanmadan ürün yayınlanamaz.",
+      "check": {
+        "title": "Ürün adı",
+        "price": "Her varyantın fiyatı",
+        "measures": "Ağırlık ve ölçüler",
+        "images": "En az bir görsel",
+        "description": "150 kelimelik açıklama",
+        "category": "Kategori",
+        "required": "Yayınlamak için gerekli",
+        "suggested": "Önerilir; daha çok görünürlük sağlar"
+      },
+      "saveDraft": "Taslak olarak kaydet",
+      "publish": "Yayınla",
+      "publishBlocked": "Yayınlamak için eksikleri tamamlayın",
+      "published": "Ürün yayınlandı.",
+      "drafted": "Ürün taslak olarak kaydedildi.",
+      "stockFailed": "Ürün kaydedildi ama stok kaydedilemedi. Stoku ürün sayfasından girin.",
+      "defaultOption": "Seçenek",
+      "defaultValue": "Standart"
+    },
+    "detail": {
+      "title": "Ürün",
+      "general": "Genel bilgiler",
+      "handleHint": "Yayındaki ürünün adresini değiştirirseniz eski adres saklanır, başka bir ürüne verilmez.",
+      "saved": "Değişiklikler kaydedildi.",
+      "mediaSaved": "Görseller güncellendi.",
+      "variants": "Varyantlar, fiyat ve stok",
+      "variantsHint": "Stok, mağazanın varsayılan depo adresindeki adettir.",
+      "variantsSaved": "Fiyat ve stoklar kaydedildi.",
+      "reserved": "Siparişe ayrılan",
+      "summary": "Özet",
+      "available": "Satılabilir stok",
+      "created": "Eklenme",
+      "shippingHint": "Varyantında ayrıca girilmemişse bu değerler geçerlidir.",
+      "publish": "Yayınla",
+      "unpublish": "Yayından kaldır",
+      "published": "Ürün yayınlandı.",
+      "unpublished": "Ürün yayından kaldırıldı, taslağa alındı.",
+      "more": "Diğer işlemler",
+      "delete": "Ürünü sil",
+      "deleteTitle": "{{title}} silinsin mi?",
+      "deleteDescription": "Ürün, varyantları ve stok kayıtları silinir. Bu işlem geri alınamaz.",
+      "deleted": "Ürün silindi."
+    },
+    "catalog": {
+      "card": "Katalog bilgileri",
+      "hint": "Arama sonuçları ve ürün listelerinde kullanılır.",
+      "condition": "Ürünün durumu",
+      "conditions": {
+        "new": "Yeni",
+        "refurbished": "Yenilenmiş",
+        "used": "İkinci el",
+        "damaged": "Kusurlu"
+      },
+      "primaryCategory": "Ana kategori",
+      "primaryCategoryHint": "Ürünün kategorilerinden biri; sayfadaki yol bu kategoriyle gösterilir.",
+      "noPrimary": "Seçilmedi"
+    }
+  },
+  "orders": {
+    "description": "Gelen siparişler; önce hazırlanacak olanlar",
+    "views": "Sipariş görünümleri",
+    "search": "Sipariş no, ad ya da e-posta ile ara",
+    "tabs": {
+      "all": "Tümü"
+    },
+    "columns": {
+      "order": "Sipariş",
+      "date": "Tarih",
+      "customer": "Müşteri",
+      "stage": "Durum",
+      "items": "Ürün",
+      "total": "Tutar"
+    },
+    "itemsCount_one": "{{count}} ürün",
+    "itemsCount_other": "{{count}} ürün",
+    "noName": "İsimsiz müşteri",
+    "empty": "Henüz sipariş yok. İlk sipariş geldiğinde burada görünür.",
+    "emptyStage": "Bu durumda sipariş yok.",
+    "noMatch": "Aramanızla eşleşen sipariş yok.",
+    "limited": "Sayılar en yeni 5.000 siparişe göre.",
+    "progress": {
+      "placed": "Sipariş alındı",
+      "paid": "Ödeme alındı",
+      "shipped": "Kargoya verildi",
+      "delivered": "Teslim edildi",
+      "next": "Sıradaki adım"
+    },
+    "payment": {
+      "notPaid": "Ödenmedi",
+      "authorized": "Onaylandı, tahsil edilmedi",
+      "captured": "Ödendi",
+      "partiallyCaptured": "Kısmen ödendi",
+      "refunded": "İade edildi",
+      "partiallyRefunded": "Kısmen iade edildi"
+    },
+    "actions": {
+      "ship": "Kargoya ver",
+      "deliver": "Teslim edildi olarak işaretle",
+      "capture": "Ödemeyi tahsil et",
+      "cancel": "Siparişi iptal et",
+      "more": "Diğer işlemler"
+    },
+    "ship": {
+      "title": "#{{number}} kargoya verilsin mi?",
+      "description": "Aşağıdaki ürünler pakete girer ve sipariş \"Kargoda\" olur.",
+      "notify": "Müşteriye kargo bildirimi gönder",
+      "done": "Sipariş kargoya verildi."
+    },
+    "deliver": {
+      "title": "Sipariş teslim edildi mi?",
+      "description": "Kargodaki paketler teslim edildi olarak işaretlenir.",
+      "done": "Sipariş teslim edildi olarak işaretlendi."
+    },
+    "capture": {
+      "title": "Ödeme tahsil edilsin mi?",
+      "description": "Müşterinin kartında onaylanan tutar hesabınıza aktarılır.",
+      "done": "Ödeme tahsil edildi."
+    },
+    "cancel": {
+      "title": "#{{number}} iptal edilsin mi?",
+      "description": "Sipariş iptal edilir ve ayrılan stok geri döner. Bu işlem geri alınamaz.",
+      "done": "Sipariş iptal edildi."
+    },
+    "detail": {
+      "title": "Sipariş",
+      "number": "Sipariş #{{number}}",
+      "placed": "{{date}} tarihinde verildi",
+      "canceledNote": "Bu sipariş iptal edildi.",
+      "items_one": "Ürünler ({{count}})",
+      "items_other": "Ürünler ({{count}})",
+      "subtotal": "Ara toplam",
+      "shipping": "Kargo",
+      "shippingNamed": "Kargo ({{name}})",
+      "discount": "İndirim",
+      "tax": "KDV (fiyatlara dahil)",
+      "total": "Toplam",
+      "customer": "Müşteri",
+      "delivery": "Teslimat adresi",
+      "billing": "Fatura adresi",
+      "noAddress": "Adres yok.",
+      "payment": "Ödeme",
+      "amount": "Sipariş tutarı",
+      "captured": "Tahsil edilen",
+      "refunded": "İade edilen",
+      "provider": "Ödeme yöntemi"
+    },
+    "providers": {
+      "pp_system_default": "Manuel ödeme"
+    }
+  },
+  "customers": {
+    "description": "Sipariş veren ya da üye olan herkes",
+    "views": "Müşteri görünümleri",
+    "search": "Ad, e-posta ya da telefon ile ara",
+    "tabs": {
+      "all": "Tümü",
+      "registered": "Üyeler",
+      "guest": "Misafirler"
+    },
+    "kind": {
+      "registered": "Üye",
+      "guest": "Misafir"
+    },
+    "columns": {
+      "customer": "Müşteri",
+      "phone": "Telefon",
+      "kind": "Tür",
+      "joined": "İlk kayıt"
+    },
+    "empty": "Henüz müşteri yok. İlk sipariş ya da üyelikle burada görünür.",
+    "noMatch": "Aramanızla eşleşen müşteri yok.",
+    "billing": {
+      "individual": "Bireysel",
+      "corporate": "Kurumsal",
+      "taxOffice": "{{office}} Vergi Dairesi"
+    },
+    "detail": {
+      "title": "Müşteri",
+      "since": "{{date}} tarihinden beri müşteri",
+      "orders": "Son siparişler",
+      "noOrders": "Bu müşterinin henüz siparişi yok.",
+      "contact": "İletişim",
+      "addresses": "Kayıtlı adresler",
+      "noAddresses": "Kayıtlı adres yok.",
+      "billing": "Fatura bilgisi",
+      "billingHint": "Vergi numarası gizlenerek gösterilir.",
+      "noBilling": "Fatura bilgisi girilmemiş."
     }
   }
 }

@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
-import { ArrowUpRight, X } from "lucide-react"
+import { Link } from "@tanstack/react-router"
+import { ArrowRight, ArrowUpRight, X } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Stepper } from "@/components/patterns/stepper"
@@ -35,14 +36,21 @@ function NextStep({ status, selected }: { status: SetupStatus; selected: SetupSt
           {t(`dashboard.setup.steps.${selected}.description`)}
         </span>
       </div>
-      {!entry.isDone ? (
+      {entry.isDone ? null : entry.step.panelPath ? (
+        <Button asChild size="sm" className="shrink-0">
+          <Link to={entry.step.panelPath}>
+            {t("dashboard.setup.continue")}
+            <ArrowRight />
+          </Link>
+        </Button>
+      ) : (
         <Button asChild size="sm" className="shrink-0">
           <a href={advancedPanelUrl(entry.step.advancedPath)} target="_blank" rel="noreferrer">
             {t("dashboard.setup.continue")}
             <ArrowUpRight />
           </a>
         </Button>
-      ) : null}
+      )}
     </div>
   )
 }

@@ -22,6 +22,8 @@ export interface SetupStep {
   key: SetupStepKey
   /** The Medusa Admin screen that completes it, until the panel has its own (docs/03 P2). */
   advancedPath: string
+  /** The panel's own screen for it, once there is one; preferred over the advanced one. */
+  panelPath?: string
   isDone: (facts: SetupFacts) => boolean
 }
 
@@ -47,6 +49,7 @@ export const SETUP_STEPS: readonly SetupStep[] = [
   {
     key: "product",
     advancedPath: "/products/create",
+    panelPath: "/products/new",
     isDone: (facts) => facts.publishedProductCount > 0,
   },
 ]

@@ -4,7 +4,6 @@ import { ArrowRight, Inbox } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { AsyncBody } from "@/components/patterns/async-body"
 import { SectionCard } from "@/components/patterns/section-card"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
@@ -18,15 +17,8 @@ import {
 import { recentOrdersQuery } from "@/features/dashboard/api/recent-orders"
 import type { RecentOrder } from "@/features/dashboard/api/recent-orders"
 import { formatDateTime, formatMoney, formatRelative } from "@/lib/format"
-import { StageBadge } from "./stage-badge"
-
-const initials = (name: string | null) =>
-  (name ?? "?")
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part.slice(0, 1).toLocaleUpperCase("tr"))
-    .join("")
+import { CustomerCell } from "@/features/orders/components/customer-cell"
+import { StageBadge } from "@/features/orders/components/stage-badge"
 
 function OrdersTable({ orders }: { orders: RecentOrder[] }) {
   const { t } = useTranslation()
@@ -53,25 +45,13 @@ function OrdersTable({ orders }: { orders: RecentOrder[] }) {
       <TableBody>
         {orders.map((order) => (
           <TableRow key={order.id} className="h-[var(--row-height)]">
-            <TableCell className="tabular pl-5 font-medium">#{order.display_id}</TableCell>
+            <TableCell className="tabular pl-5 font-medium">
+              <Link to="/orders/$id" params={{ id: order.id }} className="hover:underline">
+                #{order.display_id}
+              </Link>
+            </TableCell>
             <TableCell>
-              <div className="flex items-center gap-2.5">
-                <Avatar className="size-7">
-                  <AvatarFallback className="bg-muted text-[11px] font-medium">
-                    {initials(order.customer.name)}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="flex min-w-0 flex-col">
-                  <span className="truncate text-sm">
-                    {order.customer.name ?? t("dashboard.recent.noName")}
-                  </span>
-                  {order.customer.place ? (
-                    <span className="truncate text-xs text-muted-foreground">
-                      {order.customer.place}
-                    </span>
-                  ) : null}
-                </div>
-              </div>
+              <CustomerCell customer={order.customer} />
             </TableCell>
             <TableCell className="hidden text-muted-foreground md:table-cell">
               <time dateTime={order.created_at} title={formatDateTime(order.created_at)}>

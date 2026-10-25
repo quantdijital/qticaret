@@ -3,7 +3,14 @@ import { sdk } from "@/lib/sdk"
 
 /** The SEO settings the panel reads outside the SEO screens (the storefront's host). */
 export interface SeoSettingsResponse {
-  values: { canonical_host: string | null }
+  values: {
+    canonical_host: string | null
+    url_style: {
+      product: "prefixed" | "flat"
+      category: "prefixed" | "flat"
+      brand: "prefixed" | "flat"
+    }
+  }
   version: number
 }
 

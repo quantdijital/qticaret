@@ -15,6 +15,8 @@ export default [
       ...reactHooks.configs.flat.recommended.rules,
       // Route files export their `Route` constant next to the component
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
+      // React Hook Form names array fields by index (`variants.${index}.price`)
+      "@typescript-eslint/restrict-template-expressions": ["error", { allowNumber: true }],
     },
   },
   {

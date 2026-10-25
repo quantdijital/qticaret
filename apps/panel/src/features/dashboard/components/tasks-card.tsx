@@ -16,6 +16,7 @@ interface TaskRow {
   icon: LucideIcon
   count: number
   to: string
+  search?: { status: "draft" }
   /** A count here needs the shop's attention (amber) rather than routine work. */
   urgent: boolean
 }
@@ -31,7 +32,14 @@ function rows(tasks: DashboardTasks): TaskRow[] {
       urgent: false,
     },
     { key: "lowStock", icon: PackageMinus, count: tasks.low_stock, to: "/inventory", urgent: true },
-    { key: "drafts", icon: FilePen, count: tasks.draft_products, to: "/products", urgent: false },
+    {
+      key: "drafts",
+      icon: FilePen,
+      count: tasks.draft_products,
+      to: "/products",
+      search: { status: "draft" },
+      urgent: false,
+    },
   ]
 }
 
@@ -52,6 +60,7 @@ function TaskList({ tasks }: { tasks: DashboardTasks }) {
         <li key={row.key} className="border-t first:border-t-0">
           <Link
             to={row.to}
+            {...(row.search ? { search: row.search } : {})}
             className="group flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-muted/60 focus-visible:bg-muted/60 focus-visible:outline-none"
           >
             <span

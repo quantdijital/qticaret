@@ -13,14 +13,18 @@ import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthIndexRouteImport } from './routes/_auth/index'
 import { Route as AuthCategoriesRouteImport } from './routes/_auth/categories'
-import { Route as AuthCustomersRouteImport } from './routes/_auth/customers'
 import { Route as AuthInventoryRouteImport } from './routes/_auth/inventory'
-import { Route as AuthOrdersRouteImport } from './routes/_auth/orders'
-import { Route as AuthProductsRouteImport } from './routes/_auth/products'
 import { Route as AuthPromotionsRouteImport } from './routes/_auth/promotions'
 import { Route as AuthReportsRouteImport } from './routes/_auth/reports'
 import { Route as AuthSeoRouteImport } from './routes/_auth/seo'
 import { Route as AuthSettingsRouteImport } from './routes/_auth/settings'
+import { Route as AuthCustomersIndexRouteImport } from './routes/_auth/customers/index'
+import { Route as AuthCustomersIdRouteImport } from './routes/_auth/customers/$id'
+import { Route as AuthOrdersIndexRouteImport } from './routes/_auth/orders/index'
+import { Route as AuthOrdersIdRouteImport } from './routes/_auth/orders/$id'
+import { Route as AuthProductsIndexRouteImport } from './routes/_auth/products/index'
+import { Route as AuthProductsIdRouteImport } from './routes/_auth/products/$id'
+import { Route as AuthProductsNewRouteImport } from './routes/_auth/products/new'
 import { Route as AuthSettingsIndexRouteImport } from './routes/_auth/settings/index'
 import { Route as AuthSettingsAppearanceRouteImport } from './routes/_auth/settings/appearance'
 
@@ -43,24 +47,9 @@ const AuthCategoriesRoute = AuthCategoriesRouteImport.update({
   path: '/categories',
   getParentRoute: () => AuthRoute,
 } as any)
-const AuthCustomersRoute = AuthCustomersRouteImport.update({
-  id: '/customers',
-  path: '/customers',
-  getParentRoute: () => AuthRoute,
-} as any)
 const AuthInventoryRoute = AuthInventoryRouteImport.update({
   id: '/inventory',
   path: '/inventory',
-  getParentRoute: () => AuthRoute,
-} as any)
-const AuthOrdersRoute = AuthOrdersRouteImport.update({
-  id: '/orders',
-  path: '/orders',
-  getParentRoute: () => AuthRoute,
-} as any)
-const AuthProductsRoute = AuthProductsRouteImport.update({
-  id: '/products',
-  path: '/products',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthPromotionsRoute = AuthPromotionsRouteImport.update({
@@ -83,6 +72,41 @@ const AuthSettingsRoute = AuthSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AuthRoute,
 } as any)
+const AuthCustomersIndexRoute = AuthCustomersIndexRouteImport.update({
+  id: '/customers/',
+  path: '/customers/',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthCustomersIdRoute = AuthCustomersIdRouteImport.update({
+  id: '/customers/$id',
+  path: '/customers/$id',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthOrdersIndexRoute = AuthOrdersIndexRouteImport.update({
+  id: '/orders/',
+  path: '/orders/',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthOrdersIdRoute = AuthOrdersIdRouteImport.update({
+  id: '/orders/$id',
+  path: '/orders/$id',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthProductsIndexRoute = AuthProductsIndexRouteImport.update({
+  id: '/products/',
+  path: '/products/',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthProductsIdRoute = AuthProductsIdRouteImport.update({
+  id: '/products/$id',
+  path: '/products/$id',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthProductsNewRoute = AuthProductsNewRouteImport.update({
+  id: '/products/new',
+  path: '/products/new',
+  getParentRoute: () => AuthRoute,
+} as any)
 const AuthSettingsIndexRoute = AuthSettingsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -98,29 +122,37 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthIndexRoute
   '/login': typeof LoginRoute
   '/categories': typeof AuthCategoriesRoute
-  '/customers': typeof AuthCustomersRoute
   '/inventory': typeof AuthInventoryRoute
-  '/orders': typeof AuthOrdersRoute
-  '/products': typeof AuthProductsRoute
   '/promotions': typeof AuthPromotionsRoute
   '/reports': typeof AuthReportsRoute
   '/seo': typeof AuthSeoRoute
   '/settings': typeof AuthSettingsRouteWithChildren
+  '/customers/$id': typeof AuthCustomersIdRoute
+  '/orders/$id': typeof AuthOrdersIdRoute
+  '/products/$id': typeof AuthProductsIdRoute
+  '/products/new': typeof AuthProductsNewRoute
   '/settings/appearance': typeof AuthSettingsAppearanceRoute
+  '/customers/': typeof AuthCustomersIndexRoute
+  '/orders/': typeof AuthOrdersIndexRoute
+  '/products/': typeof AuthProductsIndexRoute
   '/settings/': typeof AuthSettingsIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/categories': typeof AuthCategoriesRoute
-  '/customers': typeof AuthCustomersRoute
   '/inventory': typeof AuthInventoryRoute
-  '/orders': typeof AuthOrdersRoute
-  '/products': typeof AuthProductsRoute
   '/promotions': typeof AuthPromotionsRoute
   '/reports': typeof AuthReportsRoute
   '/seo': typeof AuthSeoRoute
   '/': typeof AuthIndexRoute
+  '/customers/$id': typeof AuthCustomersIdRoute
+  '/orders/$id': typeof AuthOrdersIdRoute
+  '/products/$id': typeof AuthProductsIdRoute
+  '/products/new': typeof AuthProductsNewRoute
   '/settings/appearance': typeof AuthSettingsAppearanceRoute
+  '/customers': typeof AuthCustomersIndexRoute
+  '/orders': typeof AuthOrdersIndexRoute
+  '/products': typeof AuthProductsIndexRoute
   '/settings': typeof AuthSettingsIndexRoute
 }
 export interface FileRoutesById {
@@ -128,16 +160,20 @@ export interface FileRoutesById {
   '/_auth': typeof AuthRouteWithChildren
   '/login': typeof LoginRoute
   '/_auth/categories': typeof AuthCategoriesRoute
-  '/_auth/customers': typeof AuthCustomersRoute
   '/_auth/inventory': typeof AuthInventoryRoute
-  '/_auth/orders': typeof AuthOrdersRoute
-  '/_auth/products': typeof AuthProductsRoute
   '/_auth/promotions': typeof AuthPromotionsRoute
   '/_auth/reports': typeof AuthReportsRoute
   '/_auth/seo': typeof AuthSeoRoute
   '/_auth/settings': typeof AuthSettingsRouteWithChildren
   '/_auth/': typeof AuthIndexRoute
+  '/_auth/customers/$id': typeof AuthCustomersIdRoute
+  '/_auth/orders/$id': typeof AuthOrdersIdRoute
+  '/_auth/products/$id': typeof AuthProductsIdRoute
+  '/_auth/products/new': typeof AuthProductsNewRoute
   '/_auth/settings/appearance': typeof AuthSettingsAppearanceRoute
+  '/_auth/customers/': typeof AuthCustomersIndexRoute
+  '/_auth/orders/': typeof AuthOrdersIndexRoute
+  '/_auth/products/': typeof AuthProductsIndexRoute
   '/_auth/settings/': typeof AuthSettingsIndexRoute
 }
 export interface FileRouteTypes {
@@ -146,45 +182,57 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/categories'
-    | '/customers'
     | '/inventory'
-    | '/orders'
-    | '/products'
     | '/promotions'
     | '/reports'
     | '/seo'
     | '/settings'
+    | '/customers/$id'
+    | '/orders/$id'
+    | '/products/$id'
+    | '/products/new'
     | '/settings/appearance'
+    | '/customers/'
+    | '/orders/'
+    | '/products/'
     | '/settings/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
     | '/categories'
-    | '/customers'
     | '/inventory'
-    | '/orders'
-    | '/products'
     | '/promotions'
     | '/reports'
     | '/seo'
     | '/'
+    | '/customers/$id'
+    | '/orders/$id'
+    | '/products/$id'
+    | '/products/new'
     | '/settings/appearance'
+    | '/customers'
+    | '/orders'
+    | '/products'
     | '/settings'
   id:
     | '__root__'
     | '/_auth'
     | '/login'
     | '/_auth/categories'
-    | '/_auth/customers'
     | '/_auth/inventory'
-    | '/_auth/orders'
-    | '/_auth/products'
     | '/_auth/promotions'
     | '/_auth/reports'
     | '/_auth/seo'
     | '/_auth/settings'
     | '/_auth/'
+    | '/_auth/customers/$id'
+    | '/_auth/orders/$id'
+    | '/_auth/products/$id'
+    | '/_auth/products/new'
     | '/_auth/settings/appearance'
+    | '/_auth/customers/'
+    | '/_auth/orders/'
+    | '/_auth/products/'
     | '/_auth/settings/'
   fileRoutesById: FileRoutesById
 }
@@ -223,32 +271,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthCategoriesRouteImport
       parentRoute: typeof AuthRoute
     }
-    '/_auth/customers': {
-      id: '/_auth/customers'
-      path: '/customers'
-      fullPath: '/customers'
-      preLoaderRoute: typeof AuthCustomersRouteImport
-      parentRoute: typeof AuthRoute
-    }
     '/_auth/inventory': {
       id: '/_auth/inventory'
       path: '/inventory'
       fullPath: '/inventory'
       preLoaderRoute: typeof AuthInventoryRouteImport
-      parentRoute: typeof AuthRoute
-    }
-    '/_auth/orders': {
-      id: '/_auth/orders'
-      path: '/orders'
-      fullPath: '/orders'
-      preLoaderRoute: typeof AuthOrdersRouteImport
-      parentRoute: typeof AuthRoute
-    }
-    '/_auth/products': {
-      id: '/_auth/products'
-      path: '/products'
-      fullPath: '/products'
-      preLoaderRoute: typeof AuthProductsRouteImport
       parentRoute: typeof AuthRoute
     }
     '/_auth/promotions': {
@@ -277,6 +304,55 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof AuthSettingsRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/customers/': {
+      id: '/_auth/customers/'
+      path: '/customers'
+      fullPath: '/customers/'
+      preLoaderRoute: typeof AuthCustomersIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/customers/$id': {
+      id: '/_auth/customers/$id'
+      path: '/customers/$id'
+      fullPath: '/customers/$id'
+      preLoaderRoute: typeof AuthCustomersIdRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/orders/': {
+      id: '/_auth/orders/'
+      path: '/orders'
+      fullPath: '/orders/'
+      preLoaderRoute: typeof AuthOrdersIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/orders/$id': {
+      id: '/_auth/orders/$id'
+      path: '/orders/$id'
+      fullPath: '/orders/$id'
+      preLoaderRoute: typeof AuthOrdersIdRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/products/': {
+      id: '/_auth/products/'
+      path: '/products'
+      fullPath: '/products/'
+      preLoaderRoute: typeof AuthProductsIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/products/$id': {
+      id: '/_auth/products/$id'
+      path: '/products/$id'
+      fullPath: '/products/$id'
+      preLoaderRoute: typeof AuthProductsIdRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/products/new': {
+      id: '/_auth/products/new'
+      path: '/products/new'
+      fullPath: '/products/new'
+      preLoaderRoute: typeof AuthProductsNewRouteImport
       parentRoute: typeof AuthRoute
     }
     '/_auth/settings/': {
@@ -312,28 +388,36 @@ const AuthSettingsRouteWithChildren = AuthSettingsRoute._addFileChildren(
 
 interface AuthRouteChildren {
   AuthCategoriesRoute: typeof AuthCategoriesRoute
-  AuthCustomersRoute: typeof AuthCustomersRoute
   AuthInventoryRoute: typeof AuthInventoryRoute
-  AuthOrdersRoute: typeof AuthOrdersRoute
-  AuthProductsRoute: typeof AuthProductsRoute
   AuthPromotionsRoute: typeof AuthPromotionsRoute
   AuthReportsRoute: typeof AuthReportsRoute
   AuthSeoRoute: typeof AuthSeoRoute
   AuthSettingsRoute: typeof AuthSettingsRouteWithChildren
   AuthIndexRoute: typeof AuthIndexRoute
+  AuthCustomersIdRoute: typeof AuthCustomersIdRoute
+  AuthOrdersIdRoute: typeof AuthOrdersIdRoute
+  AuthProductsIdRoute: typeof AuthProductsIdRoute
+  AuthProductsNewRoute: typeof AuthProductsNewRoute
+  AuthCustomersIndexRoute: typeof AuthCustomersIndexRoute
+  AuthOrdersIndexRoute: typeof AuthOrdersIndexRoute
+  AuthProductsIndexRoute: typeof AuthProductsIndexRoute
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
   AuthCategoriesRoute: AuthCategoriesRoute,
-  AuthCustomersRoute: AuthCustomersRoute,
   AuthInventoryRoute: AuthInventoryRoute,
-  AuthOrdersRoute: AuthOrdersRoute,
-  AuthProductsRoute: AuthProductsRoute,
   AuthPromotionsRoute: AuthPromotionsRoute,
   AuthReportsRoute: AuthReportsRoute,
   AuthSeoRoute: AuthSeoRoute,
   AuthSettingsRoute: AuthSettingsRouteWithChildren,
   AuthIndexRoute: AuthIndexRoute,
+  AuthCustomersIdRoute: AuthCustomersIdRoute,
+  AuthOrdersIdRoute: AuthOrdersIdRoute,
+  AuthProductsIdRoute: AuthProductsIdRoute,
+  AuthProductsNewRoute: AuthProductsNewRoute,
+  AuthCustomersIndexRoute: AuthCustomersIndexRoute,
+  AuthOrdersIndexRoute: AuthOrdersIndexRoute,
+  AuthProductsIndexRoute: AuthProductsIndexRoute,
 }
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
