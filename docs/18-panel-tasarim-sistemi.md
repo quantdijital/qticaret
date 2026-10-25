@@ -81,8 +81,8 @@ Tek kaynak: `apps/panel/src/theme/tokens.css`. Üç katman; bileşenler yalnızc
 | `--radius` (sm/md/lg türetilir) | 8 px | Görünüm ayarı: köşe |
 | `--control-height`, `--row-height` | 36 / 40 px | Görünüm ayarı: yoğunluk |
 | `--border-width`, `--border` | 1 px, nötr-200 | sabit |
-| `--sidebar-width`, `--sidebar-width-icon` | 264 / 56 px | sabit |
-| `--topbar-height` | 56 px | sabit |
+| `--layout-sidebar-width`, `--layout-sidebar-width-icon` | 264 / 56 px | sabit (shadcn'in kenar çubuğu bunları okur) |
+| `--layout-topbar-height` | 56 px | sabit |
 | `--content-max-width`, `--page-padding` | 1280 / 24 px | sabit |
 | `--dialog-width-sm/md/lg` | 420 / 560 / 760 px | sabit |
 | `--overlay` | nötr-900 %40 | sabit |

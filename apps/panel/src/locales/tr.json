@@ -1,0 +1,152 @@
+{
+  "app": {
+    "name": "Panel",
+    "skipToContent": "İçeriğe geç"
+  },
+  "common": {
+    "save": "Kaydet",
+    "cancel": "Vazgeç",
+    "reset": "Geri al",
+    "retry": "Tekrar dene",
+    "loading": "Yükleniyor",
+    "back": "Geri",
+    "next": "İleri",
+    "done": "Tamamlandı",
+    "open": "Aç",
+    "menu": "Menü",
+    "close": "Kapat"
+  },
+  "errors": {
+    "generic": "İşlem tamamlanamadı. Biraz sonra tekrar deneyin.",
+    "loadFailed": "Bilgiler yüklenemedi."
+  },
+  "nav": {
+    "dashboard": "Genel bakış",
+    "products": "Ürünler",
+    "orders": "Siparişler",
+    "customers": "Müşteriler",
+    "settings": "Ayarlar",
+    "advanced": "Gelişmiş panel",
+    "advancedHint": "Henüz bu panele taşınmamış işler için",
+    "account": "Hesap",
+    "logout": "Çıkış yap",
+    "collapse": "Menüyü daralt"
+  },
+  "login": {
+    "title": "Giriş yap",
+    "subtitle": "Mağaza panelinize giriş yapın.",
+    "email": "E-posta",
+    "password": "Şifre",
+    "submit": "Giriş yap",
+    "failed": "E-posta ya da şifre hatalı.",
+    "required": "Bu alan gerekli."
+  },
+  "dashboard": {
+    "title": "Genel bakış",
+    "greeting": "Merhaba {{name}}",
+    "greetingNoName": "Merhaba",
+    "today": {
+      "title": "Bugün",
+      "awaiting": "Kargoya hazırlanmayı bekleyen",
+      "awaitingHint": "Ödemesi alınmış, henüz gönderisi oluşturulmamış",
+      "orders": "Bugünkü siparişler",
+      "ordersHint": "Gece yarısından beri",
+      "sales": "Bugünkü satış",
+      "salesHint": "İptaller hariç, KDV dahil",
+      "open": "Açık siparişler",
+      "openHint": "Henüz tamamlanmamış ya da iptal edilmemiş"
+    },
+    "products": {
+      "title": "Ürünler",
+      "published": "Yayında",
+      "draft": "Taslak",
+      "viewAll": "Tüm ürünler",
+      "empty": "Henüz ürün yok. İlk ürününüzü ekleyin."
+    },
+    "setup": {
+      "title": "Mağazanızı satışa hazırlayın",
+      "progress": "{{total}} adımdan {{done}} tanesi tamamlandı",
+      "next": "Sıradaki adım",
+      "allDone": "Kurulum tamamlandı. Mağazanız satışa hazır.",
+      "steps": {
+        "storeName": {
+          "title": "Mağazanıza bir ad verin",
+          "description": "Panelde ve müşterilere gösterilen yerlerde kullanılır."
+        },
+        "currency": {
+          "title": "Para birimini belirleyin",
+          "description": "Fiyatlar bu para biriminde girilir ve gösterilir."
+        },
+        "region": {
+          "title": "Satış yapacağınız ülkeyi ekleyin",
+          "description": "Vergilerin nasıl hesaplanacağını belirler."
+        },
+        "location": {
+          "title": "Gönderim adresinizi ekleyin",
+          "description": "Kargoların çıkacağı depo ya da dükkân adresi."
+        },
+        "shipping": {
+          "title": "Bir kargo seçeneği tanımlayın",
+          "description": "Müşteri sipariş verirken bunlardan birini seçer."
+        },
+        "product": {
+          "title": "İlk ürününüzü yayınlayın",
+          "description": "Yalnızca yayındaki ürünler mağazada görünür."
+        }
+      },
+      "openInAdvanced": "Gelişmiş panelde aç"
+    }
+  },
+  "settings": {
+    "title": "Ayarlar",
+    "sections": {
+      "appearance": "Görünüm"
+    },
+    "appearance": {
+      "title": "Görünüm",
+      "subtitle": "Panelin rengi, köşeleri ve yoğunluğu. Değişiklikler kaydedene kadar yalnızca sizin ekranınızda görünür.",
+      "brandColor": "Marka rengi",
+      "brandColorHint": "Birincil düğmeler, seçili durumlar ve grafikler bu renkten türetilir.",
+      "presets": "Hazır renkler",
+      "preset": {
+        "ink": "Mürekkep",
+        "sea": "Deniz",
+        "olive": "Zeytin",
+        "brick": "Kiremit",
+        "saffron": "Safran",
+        "plum": "Mürdüm"
+      },
+      "adjusted": "Bu renk düğme yazısı için fazla açık ya da koyu; düğmelerde okunur bir tonu kullanılacak.",
+      "radius": "Köşeler",
+      "radiusOptions": {
+        "sharp": "Keskin",
+        "soft": "Yumuşak",
+        "round": "Yuvarlak"
+      },
+      "density": "Yoğunluk",
+      "densityOptions": {
+        "comfortable": "Ferah",
+        "compact": "Kompakt"
+      },
+      "mode": "Mod",
+      "modeOptions": {
+        "light": "Açık",
+        "dark": "Koyu",
+        "system": "Sisteme göre"
+      },
+      "preview": "Önizleme",
+      "previewHint": "Örnek bir sipariş satırı ve düğmeler.",
+      "saved": "Görünüm kaydedildi.",
+      "errors": {
+        "color": "Renk #rrggbb biçiminde olmalı, ör. #2f6feb."
+      }
+    }
+  },
+  "status": {
+    "paid": "Ödendi",
+    "awaitingPayment": "Ödeme bekliyor",
+    "shipped": "Kargoda",
+    "delivered": "Teslim edildi",
+    "canceled": "İptal"
+  }
+}

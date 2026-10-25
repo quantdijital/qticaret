@@ -1,0 +1,152 @@
+{
+  "app": {
+    "name": "Panel",
+    "skipToContent": "Skip to content"
+  },
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "reset": "Reset",
+    "retry": "Try again",
+    "loading": "Loading",
+    "back": "Back",
+    "next": "Next",
+    "done": "Done",
+    "open": "Open",
+    "menu": "Menu",
+    "close": "Close"
+  },
+  "errors": {
+    "generic": "The action could not be completed. Try again in a moment.",
+    "loadFailed": "The information could not be loaded."
+  },
+  "nav": {
+    "dashboard": "Overview",
+    "products": "Products",
+    "orders": "Orders",
+    "customers": "Customers",
+    "settings": "Settings",
+    "advanced": "Advanced panel",
+    "advancedHint": "For what this panel does not cover yet",
+    "account": "Account",
+    "logout": "Sign out",
+    "collapse": "Collapse menu"
+  },
+  "login": {
+    "title": "Sign in",
+    "subtitle": "Sign in to your shop's panel.",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Sign in",
+    "failed": "Wrong email or password.",
+    "required": "This field is required."
+  },
+  "dashboard": {
+    "title": "Overview",
+    "greeting": "Hello {{name}}",
+    "greetingNoName": "Hello",
+    "today": {
+      "title": "Today",
+      "awaiting": "Waiting to be shipped",
+      "awaitingHint": "Paid, no shipment created yet",
+      "orders": "Today's orders",
+      "ordersHint": "Since midnight",
+      "sales": "Today's sales",
+      "salesHint": "Cancellations left out, tax included",
+      "open": "Open orders",
+      "openHint": "Not completed or canceled yet"
+    },
+    "products": {
+      "title": "Products",
+      "published": "Published",
+      "draft": "Draft",
+      "viewAll": "All products",
+      "empty": "No products yet. Add your first one."
+    },
+    "setup": {
+      "title": "Get your shop ready to sell",
+      "progress": "{{done}} of {{total}} steps done",
+      "next": "Next step",
+      "allDone": "Setup is complete. Your shop is ready to sell.",
+      "steps": {
+        "storeName": {
+          "title": "Name your shop",
+          "description": "Shown in the panel and to customers."
+        },
+        "currency": {
+          "title": "Set the currency",
+          "description": "Prices are entered and shown in it."
+        },
+        "region": {
+          "title": "Add the country you sell to",
+          "description": "Decides how taxes are worked out."
+        },
+        "location": {
+          "title": "Add your shipping address",
+          "description": "The warehouse or shop parcels leave from."
+        },
+        "shipping": {
+          "title": "Define a shipping option",
+          "description": "Customers pick one of these at checkout."
+        },
+        "product": {
+          "title": "Publish your first product",
+          "description": "Only published products show in the shop."
+        }
+      },
+      "openInAdvanced": "Open in the advanced panel"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "sections": {
+      "appearance": "Appearance"
+    },
+    "appearance": {
+      "title": "Appearance",
+      "subtitle": "The panel's colour, corners and density. Changes show only on your screen until you save.",
+      "brandColor": "Brand colour",
+      "brandColorHint": "Primary buttons, selected states and charts derive from it.",
+      "presets": "Presets",
+      "preset": {
+        "ink": "Ink",
+        "sea": "Sea",
+        "olive": "Olive",
+        "brick": "Brick",
+        "saffron": "Saffron",
+        "plum": "Plum"
+      },
+      "adjusted": "This colour is too light or dark for button text; a readable shade of it is used on buttons.",
+      "radius": "Corners",
+      "radiusOptions": {
+        "sharp": "Sharp",
+        "soft": "Soft",
+        "round": "Round"
+      },
+      "density": "Density",
+      "densityOptions": {
+        "comfortable": "Comfortable",
+        "compact": "Compact"
+      },
+      "mode": "Mode",
+      "modeOptions": {
+        "light": "Light",
+        "dark": "Dark",
+        "system": "Follow the system"
+      },
+      "preview": "Preview",
+      "previewHint": "A sample order row and buttons.",
+      "saved": "Appearance saved.",
+      "errors": {
+        "color": "The colour must be in #rrggbb form, e.g. #2f6feb."
+      }
+    }
+  },
+  "status": {
+    "paid": "Paid",
+    "awaitingPayment": "Awaiting payment",
+    "shipped": "Shipped",
+    "delivered": "Delivered",
+    "canceled": "Canceled"
+  }
+}

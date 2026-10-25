@@ -1,0 +1,99 @@
+/*
+ * Design tokens (docs/18 §4). Three layers: primitives (fixed), semantic
+ * (the theme engine rewrites these on the root element from the shop's
+ * settings; the values here are the defaults for the first paint) and
+ * component/layout (a few come from settings, the rest are fixed).
+ * Components read tokens only; no colour, radius or shadow is hard-coded.
+ */
+
+:root {
+  /* Primitives */
+  --font-sans:
+    "Inter Variable", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --duration-fast: 120ms;
+  --duration-base: 180ms;
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+
+  /* Semantic: light defaults for brand #2f6feb (engine output) */
+  --background: oklch(0.985 0.006 262);
+  --foreground: oklch(0.145 0.006 262);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0.006 262);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0.006 262);
+  --primary: oklch(0.58 0.2 262);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.965 0.006 262);
+  --secondary-foreground: oklch(0.22 0.006 262);
+  --muted: oklch(0.965 0.006 262);
+  --muted-foreground: oklch(0.48 0.006 262);
+  --accent: oklch(0.95 0.04 262);
+  --accent-foreground: oklch(0.35 0.12 262);
+  --destructive: oklch(0.55 0.2 25);
+  --destructive-foreground: oklch(1 0 0);
+  --success: oklch(0.55 0.15 150);
+  --success-foreground: oklch(1 0 0);
+  --warning: oklch(0.55 0.14 60);
+  --warning-foreground: oklch(1 0 0);
+  --info: oklch(0.55 0.17 255);
+  --info-foreground: oklch(1 0 0);
+  --border: oklch(0.925 0.006 262);
+  --input: oklch(0.87 0.006 262);
+  --ring: oklch(0.58 0.2 262);
+  --chart-1: oklch(0.6 0.13 262);
+  --chart-2: oklch(0.6 0.13 307);
+  --chart-3: oklch(0.6 0.13 2);
+  --chart-4: oklch(0.6 0.13 82);
+  --chart-5: oklch(0.6 0.13 132);
+  --sidebar: oklch(1 0 0);
+  --sidebar-foreground: oklch(0.22 0.006 262);
+  --sidebar-primary: oklch(0.58 0.2 262);
+  --sidebar-primary-foreground: oklch(1 0 0);
+  --sidebar-accent: oklch(0.965 0.006 262);
+  --sidebar-accent-foreground: oklch(0.22 0.006 262);
+  --sidebar-border: oklch(0.925 0.006 262);
+  --sidebar-ring: oklch(0.58 0.2 262);
+
+  /* Component and layout: from settings */
+  --radius: 8px;
+  --control-height: 36px;
+  --row-height: 40px;
+
+  /* Component and layout: fixed */
+  --border-width: 1px;
+  --layout-sidebar-width: 16.5rem;
+  --layout-sidebar-width-icon: 3.5rem;
+  --layout-topbar-height: 3.5rem;
+  --content-max-width: 80rem;
+  --page-padding: 1.5rem;
+  --dialog-width-sm: 26.25rem;
+  --dialog-width-md: 35rem;
+  --dialog-width-lg: 47.5rem;
+  --overlay: oklch(0.145 0.006 262 / 40%);
+  --shadow-overlay: 0 8px 24px -8px oklch(0.145 0.006 262 / 24%);
+}
+
+.dark {
+  --background: oklch(0.145 0.006 262);
+  --foreground: oklch(0.985 0.006 262);
+  --card: oklch(0.19 0.006 262);
+  --card-foreground: oklch(0.985 0.006 262);
+  --popover: oklch(0.19 0.006 262);
+  --popover-foreground: oklch(0.985 0.006 262);
+  --primary: oklch(0.68 0.18 262);
+  --primary-foreground: oklch(0.145 0.006 262);
+  --secondary: oklch(0.24 0.006 262);
+  --secondary-foreground: oklch(0.965 0.006 262);
+  --muted: oklch(0.24 0.006 262);
+  --muted-foreground: oklch(0.72 0.006 262);
+  --accent: oklch(0.3 0.06 262);
+  --accent-foreground: oklch(0.85 0.1 262);
+  --border: oklch(0.27 0.006 262);
+  --input: oklch(0.3 0.006 262);
+  --sidebar: oklch(0.17 0.006 262);
+  --sidebar-foreground: oklch(0.965 0.006 262);
+  --sidebar-accent: oklch(0.24 0.006 262);
+  --sidebar-accent-foreground: oklch(0.965 0.006 262);
+  --sidebar-border: oklch(0.27 0.006 262);
+  --overlay: oklch(0 0 0 / 60%);
+}
