@@ -16,7 +16,9 @@
     "open": "Aç",
     "menu": "Menü",
     "close": "Kapat",
-    "edit": "Düzenle"
+    "edit": "Düzenle",
+    "actions": "İşlemler",
+    "delete": "Sil"
   },
   "errors": {
     "generic": "İşlem tamamlanamadı. Biraz sonra tekrar deneyin.",
@@ -492,7 +494,6 @@
       "seo": [
         "Mağaza SEO puanı",
         "En çok iyileştirme bekleyen sayfalar",
-        "Yönlendirmeler ve 404 günlüğü",
         "Site haritası ve robots.txt"
       ],
       "reports": [
@@ -1097,6 +1098,159 @@
       "canonicalHint": "Yalnızca bu sitede bir yol. Boşsa sayfanın kendi adresi kullanılır.",
       "saved": "SEO alanları kaydedildi.",
       "duplicates": "Başka sayfalarla aynı: başlık {{title}}, açıklama {{description}} sayfada. Kayıt yapıldı, ama benzersiz metinler arama sonuçlarında daha iyi görünür."
+    },
+    "redirectsCard": {
+      "title": "Yönlendirmeler ve 404",
+      "hint": "Eski adreslerin ziyaretçileri doğru sayfaya ulaşsın.",
+      "rules": "Kural",
+      "old": "Eski adres",
+      "missing": "Bulunamayan adres",
+      "open": "Yönlendirmeleri yönet"
+    },
+    "redirects": {
+      "title": "Yönlendirmeler",
+      "description": "Eski adresleri yeni sayfalara gönderin, kırık bağlantıları onarın.",
+      "add": "Yönlendirme ekle",
+      "export": "Dışa aktar (CSV)",
+      "fileMenu": "Dosya işlemleri",
+      "search": "Adreste ara…",
+      "matchFilter": "Eşleşme türü",
+      "allRules": "Tüm kurallar",
+      "tabs": {
+        "rules": "Kurallar",
+        "old": "Eski adresler",
+        "missing": "404 günlüğü"
+      },
+      "matches": {
+        "exact": "Tam adres",
+        "prefix": "Önek",
+        "pattern": "Desen"
+      },
+      "matchHints": {
+        "exact": "Yalnızca bu adres yönlendirilir.",
+        "prefix": "Bu adres ve altındaki her şey; kalan kısım hedefe eklenir (/eski/a → /yeni/a).",
+        "pattern": ":ad bir bölümü, sondaki * kalan kısmı yakalar; hedefte aynı adlarla kullanılır."
+      },
+      "placeholders": {
+        "exact": "/eski-urun-adresi",
+        "prefix": "/eski-kategori/*",
+        "pattern": "/eski/urunler/:slug"
+      },
+      "targetPlaceholders": {
+        "exact": "/urun/yeni-urun",
+        "prefix": "/kategori/yeni",
+        "pattern": "/urun/:slug"
+      },
+      "statuses": {
+        "301": "301 · Kalıcı (önerilen)",
+        "302": "302 · Geçici",
+        "307": "307 · Geçici, yöntemi korur",
+        "410": "410 · Kalıcı olarak kaldırıldı"
+      },
+      "statusShort": {
+        "301": "301 Kalıcı",
+        "302": "302 Geçici",
+        "307": "307 Geçici",
+        "410": "410 Kaldırıldı"
+      },
+      "queryPolicies": {
+        "keep": "Parametreleri koru (önerilen)",
+        "drop": "Parametreleri at",
+        "keep_list": "Yalnızca şunları koru"
+      },
+      "columns": {
+        "source": "Eski adres",
+        "target": "Gittiği yer",
+        "status": "Yanıt",
+        "hits": "İsabet",
+        "oldPath": "Eski adres",
+        "owner": "Sahibi",
+        "now": "Şu an",
+        "since": "Bırakıldığı tarih",
+        "missingPath": "Bulunamayan adres",
+        "asked": "İstek",
+        "fix": "Önerilen çözüm"
+      },
+      "gone": "Sayfa kaldırıldı",
+      "shadowed": "Bu adres artık bir sayfaya ait",
+      "empty": "Henüz kural yok. Ürün ve kategori adresleri değişince eski adresler kendiliğinden yönlendirilir; kural yalnızca başka adresler için gerekir.",
+      "noMatch": "Aramanızla eşleşen kayıt yok.",
+      "deleteTitle": "Yönlendirme silinsin mi?",
+      "deleteText": "{{source}} adresine gelen ziyaretçiler artık yönlendirilmez.",
+      "deleteConfirm": "Yönlendirmeyi sil",
+      "deleted": "Yönlendirme silindi.",
+      "answers": {
+        "entity": "Sayfa açılıyor",
+        "redirect": "Yönlendiriliyor",
+        "gone": "410 · Kaldırıldı",
+        "not_found": "404 · Bulunamadı"
+      },
+      "owners": {
+        "product": "Ürün",
+        "product_category": "Kategori",
+        "product_collection": "Koleksiyon"
+      },
+      "ownerDeleted": "silindi",
+      "oldHint": "Ürün, kategori ve koleksiyonların önceden kullandığı adresler. Ziyaretçiler kaydın bugünkü adresine, silinmişse yerine geçen ürüne gider; yoksa 410 alır.",
+      "oldEmpty": "Henüz eski adres yok. Bir ürünün adresi değişince eski adresi burada görünür.",
+      "release": "Serbest bırak",
+      "releaseTitle": "Adres serbest bırakılsın mı?",
+      "releaseText": "{{path}} artık yönlendirilmez ve 404 verir; başka bir ürün ya da kategori bu adresi alabilir.",
+      "releaseConfirm": "Adresi serbest bırak",
+      "released": "Adres serbest bırakıldı.",
+      "missingHint": "Ziyaretçilerin istediği ama bulamadığı adresler, en çok istenen önce. Önerilen sayfaya tek tıkla 301 verin.",
+      "missingEmpty": "Kayıtlı 404 yok. Mağaza bulunamayan adresleri bildirdikçe burada listelenir.",
+      "from": "Geldiği site: {{host}}",
+      "oneClick": "{{target}} adresine 301 ile yönlendir",
+      "otherTarget": "Başka hedef",
+      "addFor": "Yönlendirme ekle",
+      "dismiss": "Listeden kaldır",
+      "form": {
+        "title": "Yönlendirme ekle",
+        "editTitle": "Yönlendirmeyi düzenle",
+        "description": "Zincir ve döngü oluşmaz: hedef başka bir yönlendirmeyse kural doğrudan son adrese kaydedilir.",
+        "match": "Eşleşme",
+        "source": "Eski adres",
+        "sourceHint": "Yol ya da eski sitenin tam adresi; büyük-küçük harf ve sondaki / fark etmez.",
+        "status": "Yanıt",
+        "target": "Yeni adres",
+        "targetPatternHint": "Bu sitede bir yol; kaynaktaki :ad ve * burada kullanılabilir.",
+        "goneHint": "Ziyaretçi \"sayfa kalıcı olarak kaldırıldı\" yanıtı alır; arama motorları adresi dizinden çıkarır.",
+        "query": "Sorgu parametreleri",
+        "keepList": "Korunacak parametreler",
+        "sourceRequired": "Eski adresi girin.",
+        "sourceSlash": "Adres / ile ya da http ile başlamalı.",
+        "targetRequired": "Yeni adresi girin.",
+        "targetSlash": "Yeni adres bu sitede / ile başlayan bir yol olmalı.",
+        "keepRequired": "En az bir parametre adı girin.",
+        "created": "Yönlendirme eklendi.",
+        "updated": "Yönlendirme kaydedildi."
+      },
+      "import": {
+        "title": "Dosyadan içe aktar",
+        "description": "Önce dosyanın tamamı denetlenir; hata yoksa tek seferde uygulanır, varsa hiçbir satır yazılmaz.",
+        "choose": "CSV dosyası seçin",
+        "columns": "Sütunlar: source, target; isteğe bağlı status, match, query_policy, query_keep. En fazla 1000 satır.",
+        "template": "Örnek dosyayı indir",
+        "checking": "Dosya denetleniyor…",
+        "ready": "{{created}} yeni kural eklenecek, {{updated}} kural güncellenecek.",
+        "problems_one": "{{count}} satırda sorun var; düzeltip yeniden yükleyin.",
+        "problems_other": "{{count}} satırda sorun var; düzeltip yeniden yükleyin.",
+        "line": "Satır {{line}}",
+        "apply_one": "{{count}} kuralı uygula",
+        "apply_other": "{{count}} kuralı uygula",
+        "done_one": "{{count}} kural içe aktarıldı.",
+        "done_other": "{{count}} kural içe aktarıldı.",
+        "tooLarge": "Dosya çok büyük; en fazla 1 MB."
+      },
+      "tester": {
+        "title": "Adres testi",
+        "hint": "Bir adresin mağazada bugün ne yanıt verdiğini görün; test isabet sayılmaz.",
+        "label": "Test edilecek adres",
+        "placeholder": "/eski-urun-adresi",
+        "try": "Test et",
+        "entity": "Sayfa açılıyor ({{kind}})."
+      }
     }
   },
   "attributes": {

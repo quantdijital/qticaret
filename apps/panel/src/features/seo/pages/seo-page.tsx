@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
-import { CircleCheck, Globe, Sparkles, TriangleAlert } from "lucide-react"
+import { ArrowRight, CircleCheck, Globe, Sparkles, TriangleAlert } from "lucide-react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { PageHeader } from "@/components/patterns/page-header"
@@ -9,10 +9,12 @@ import { StatusBadge } from "@/components/patterns/status-badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { CatalogHealthCard } from "@/features/dashboard/components/catalog-health-card"
+import { redirectCountsQuery } from "@/features/seo/api/redirects"
 import { sectionQuery } from "@/features/settings/api/sections"
 import type { SeoSettings } from "@/features/settings/api/sections"
 import { useStoreName } from "@/features/settings/api/store"
 import { renderSample } from "@/features/settings/seo-sample"
+import { formatCount } from "@/lib/format"
 
 function Check({ ok, children }: { ok: boolean; children: ReactNode }) {
   const Icon = ok ? CircleCheck : TriangleAlert
@@ -59,10 +61,59 @@ function SearchPreview({ seo, storeName }: { seo: SeoSettings; storeName: string
   )
 }
 
+/** Rules, old addresses and open 404s, with the way to the redirects screen. */
+function RedirectsCard({ className }: { className?: string }) {
+  const { t } = useTranslation()
+  const counts = useQuery(redirectCountsQuery())
+  const items = [
+    { key: "rules", tab: undefined },
+    { key: "old", tab: "old" },
+    { key: "missing", tab: "missing" },
+  ] as const
+  return (
+    <SectionCard
+      title={t("seo.redirectsCard.title")}
+      description={t("seo.redirectsCard.hint")}
+      className={className}
+      action={
+        <Button asChild variant="outline" size="sm">
+          <Link to="/seo/redirects">
+            {t("seo.redirectsCard.open")}
+            <ArrowRight />
+          </Link>
+        </Button>
+      }
+    >
+      <ul className="grid grid-cols-3 divide-x rounded-md border">
+        {items.map(({ key, tab }) => (
+          <li key={key}>
+            <Link
+              to="/seo/redirects"
+              search={tab ? { tab } : {}}
+              className="flex flex-col gap-1 px-4 py-3 transition-colors hover:bg-muted/50"
+            >
+              <span
+                className={
+                  key === "missing" && (counts.data?.missing ?? 0) > 0
+                    ? "text-2xl font-semibold text-warning-text tabular-nums"
+                    : "text-2xl font-semibold tabular-nums"
+                }
+              >
+                {counts.data ? formatCount(counts.data[key]) : "–"}
+              </span>
+              <span className="text-xs text-muted-foreground">{t(`seo.redirectsCard.${key}`)}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    </SectionCard>
+  )
+}
+
 /**
- * SEO (docs/13, docs/14): how the shop looks in search today and what its
- * catalog still lacks. The score, suggestions and redirects come with the
- * advisor (F3).
+ * SEO (docs/13, docs/14): how the shop looks in search today, what its
+ * catalog still lacks, and its redirects. The score and suggestions come
+ * with the advisor (F3).
  */
 export function SeoOverviewPage() {
   const { t } = useTranslation()
@@ -107,23 +158,27 @@ export function SeoOverviewPage() {
         </SectionCard>
         <CatalogHealthCard className="xl:col-span-5" />
       </div>
-      <SectionCard
-        title={t("seo.advisor")}
-        description={t("seo.advisorHint")}
-        action={<StatusBadge tone="info">{t("upcoming.badge")}</StatusBadge>}
-      >
-        <ul className="grid gap-3 sm:grid-cols-2">
-          {planned.map((item) => (
-            <li
-              key={item}
-              className="flex items-center gap-2.5 rounded-md border bg-muted/30 px-3 py-2.5 text-sm"
-            >
-              <Sparkles className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-              {item}
-            </li>
-          ))}
-        </ul>
-      </SectionCard>
+      <div className="grid grid-cols-1 items-start gap-[var(--grid-gap)] xl:grid-cols-12">
+        <RedirectsCard className="xl:col-span-5" />
+        <SectionCard
+          title={t("seo.advisor")}
+          description={t("seo.advisorHint")}
+          action={<StatusBadge tone="info">{t("upcoming.badge")}</StatusBadge>}
+          className="xl:col-span-7"
+        >
+          <ul className="grid gap-3 sm:grid-cols-2">
+            {planned.map((item) => (
+              <li
+                key={item}
+                className="flex items-center gap-2.5 rounded-md border bg-muted/30 px-3 py-2.5 text-sm"
+              >
+                <Sparkles className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
+                {item}
+              </li>
+            ))}
+          </ul>
+        </SectionCard>
+      </div>
     </div>
   )
 }

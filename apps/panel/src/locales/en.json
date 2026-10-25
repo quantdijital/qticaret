@@ -16,7 +16,9 @@
     "open": "Open",
     "menu": "Menu",
     "close": "Close",
-    "edit": "Edit"
+    "edit": "Edit",
+    "actions": "Actions",
+    "delete": "Delete"
   },
   "errors": {
     "generic": "The action could not be completed. Try again in a moment.",
@@ -485,12 +487,7 @@
         "Bulk stock updates"
       ],
       "promotions": ["Coupons and campaigns", "Usage statistics", "Bulk coupon codes"],
-      "seo": [
-        "Shop SEO score",
-        "Pages that need the most work",
-        "Redirects and the 404 log",
-        "Sitemap and robots.txt"
-      ],
+      "seo": ["Shop SEO score", "Pages that need the most work", "Sitemap and robots.txt"],
       "reports": ["Sales, VAT and stock reports", "Period comparisons", "Excel and CSV export"]
     }
   },
@@ -1089,6 +1086,159 @@
       "canonicalHint": "A path on this site only. Empty uses the page's own address.",
       "saved": "SEO fields saved.",
       "duplicates": "Same as other pages: the title on {{title}}, the description on {{description}}. Saved, but unique texts do better in search results."
+    },
+    "redirectsCard": {
+      "title": "Redirects and 404s",
+      "hint": "Visitors of old addresses reach the right page.",
+      "rules": "Rules",
+      "old": "Old addresses",
+      "missing": "Missing addresses",
+      "open": "Manage redirects"
+    },
+    "redirects": {
+      "title": "Redirects",
+      "description": "Send old addresses to new pages and repair broken links.",
+      "add": "Add redirect",
+      "export": "Export (CSV)",
+      "fileMenu": "File actions",
+      "search": "Search addresses…",
+      "matchFilter": "Match type",
+      "allRules": "All rules",
+      "tabs": {
+        "rules": "Rules",
+        "old": "Old addresses",
+        "missing": "404 log"
+      },
+      "matches": {
+        "exact": "Exact address",
+        "prefix": "Prefix",
+        "pattern": "Pattern"
+      },
+      "matchHints": {
+        "exact": "Only this address is redirected.",
+        "prefix": "This address and everything under it; the rest is added to the target (/old/a → /new/a).",
+        "pattern": ":name takes a segment, a final * the rest; use the same names in the target."
+      },
+      "placeholders": {
+        "exact": "/old-product-address",
+        "prefix": "/old-category/*",
+        "pattern": "/old/products/:slug"
+      },
+      "targetPlaceholders": {
+        "exact": "/urun/new-product",
+        "prefix": "/kategori/new",
+        "pattern": "/urun/:slug"
+      },
+      "statuses": {
+        "301": "301 · Permanent (recommended)",
+        "302": "302 · Temporary",
+        "307": "307 · Temporary, keeps the method",
+        "410": "410 · Gone for good"
+      },
+      "statusShort": {
+        "301": "301 Permanent",
+        "302": "302 Temporary",
+        "307": "307 Temporary",
+        "410": "410 Gone"
+      },
+      "queryPolicies": {
+        "keep": "Keep parameters (recommended)",
+        "drop": "Drop parameters",
+        "keep_list": "Keep only these"
+      },
+      "columns": {
+        "source": "Old address",
+        "target": "Goes to",
+        "status": "Answer",
+        "hits": "Hits",
+        "oldPath": "Old address",
+        "owner": "Owner",
+        "now": "Now",
+        "since": "Left on",
+        "missingPath": "Missing address",
+        "asked": "Requests",
+        "fix": "Suggested fix"
+      },
+      "gone": "Page removed",
+      "shadowed": "A page uses this address now",
+      "empty": "No rules yet. When a product's or category's address changes, the old one is redirected on its own; rules are only needed for other addresses.",
+      "noMatch": "Nothing matches your search.",
+      "deleteTitle": "Delete the redirect?",
+      "deleteText": "Visitors of {{source}} will no longer be redirected.",
+      "deleteConfirm": "Delete redirect",
+      "deleted": "Redirect deleted.",
+      "answers": {
+        "entity": "Page opens",
+        "redirect": "Redirects",
+        "gone": "410 · Gone",
+        "not_found": "404 · Not found"
+      },
+      "owners": {
+        "product": "Product",
+        "product_category": "Category",
+        "product_collection": "Collection"
+      },
+      "ownerDeleted": "deleted",
+      "oldHint": "Addresses products, categories and collections used before. Visitors go to the record's address today, to its successor if it was deleted, or get a 410.",
+      "oldEmpty": "No old addresses yet. When a product's address changes, the old one shows here.",
+      "release": "Release",
+      "releaseTitle": "Release the address?",
+      "releaseText": "{{path}} will no longer redirect and will answer 404; another product or category may take it.",
+      "releaseConfirm": "Release address",
+      "released": "Address released.",
+      "missingHint": "Addresses visitors asked for and did not find, most asked first. Give the suggested page a 301 in one click.",
+      "missingEmpty": "No 404s recorded. They show here as the storefront reports them.",
+      "from": "Came from: {{host}}",
+      "oneClick": "Redirect to {{target}} with a 301",
+      "otherTarget": "Other target",
+      "addFor": "Add redirect",
+      "dismiss": "Remove from list",
+      "form": {
+        "title": "Add redirect",
+        "editTitle": "Edit redirect",
+        "description": "No chains or loops: if the target is itself redirected, the rule is saved straight to the final address.",
+        "match": "Match",
+        "source": "Old address",
+        "sourceHint": "A path or the old site's full address; case and a trailing / do not matter.",
+        "status": "Answer",
+        "target": "New address",
+        "targetPatternHint": "A path on this site; the source's :name and * can be used here.",
+        "goneHint": "Visitors get \"page gone for good\"; search engines drop the address.",
+        "query": "Query parameters",
+        "keepList": "Parameters to keep",
+        "sourceRequired": "Enter the old address.",
+        "sourceSlash": "The address must start with / or http.",
+        "targetRequired": "Enter the new address.",
+        "targetSlash": "The new address must be a path on this site starting with /.",
+        "keepRequired": "Enter one parameter name at least.",
+        "created": "Redirect added.",
+        "updated": "Redirect saved."
+      },
+      "import": {
+        "title": "Import from file",
+        "description": "The whole file is checked first; with no errors it is applied at once, otherwise no row is written.",
+        "choose": "Choose a CSV file",
+        "columns": "Columns: source, target; optional status, match, query_policy, query_keep. 1000 rows at most.",
+        "template": "Download a sample file",
+        "checking": "Checking the file…",
+        "ready": "{{created}} new rules will be added, {{updated}} rules updated.",
+        "problems_one": "{{count}} row has a problem; fix it and upload again.",
+        "problems_other": "{{count}} rows have problems; fix them and upload again.",
+        "line": "Line {{line}}",
+        "apply_one": "Apply {{count}} rule",
+        "apply_other": "Apply {{count}} rules",
+        "done_one": "{{count}} rule imported.",
+        "done_other": "{{count}} rules imported.",
+        "tooLarge": "The file is too large; 1 MB at most."
+      },
+      "tester": {
+        "title": "Address test",
+        "hint": "See what an address answers in the shop today; a test is not counted as a hit.",
+        "label": "Address to test",
+        "placeholder": "/old-product-address",
+        "try": "Test",
+        "entity": "The page opens ({{kind}})."
+      }
     }
   },
   "attributes": {

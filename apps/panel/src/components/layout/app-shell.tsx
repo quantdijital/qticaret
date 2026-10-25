@@ -24,12 +24,14 @@ export function AppShell({ children }: { children: ReactNode }) {
       <AppSidebar />
       <SidebarInset className="min-w-0 bg-background">
         <Topbar />
-        <main
+        {/* SidebarInset is the page's one <main>; this is the skip link's target */}
+        <div
           id="content"
-          className="w-full flex-1 px-[var(--page-padding)] py-6 lg:px-[var(--page-padding-wide)] lg:py-8"
+          tabIndex={-1}
+          className="w-full flex-1 px-[var(--page-padding)] py-6 outline-none lg:px-[var(--page-padding-wide)] lg:py-8"
         >
           {children}
-        </main>
+        </div>
       </SidebarInset>
     </SidebarProvider>
   )
