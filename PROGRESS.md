@@ -3,7 +3,7 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a, T1b, T2, T3, T4 bitti; sırada T5). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı; push edilmedi. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
+**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a, T1b, T2, T3, T4, T5 bitti; sırada T7, T6 `sharp` onaylı). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı; push edilmedi. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
 
 ## Son oturum özeti
 **2026-10-25/26 gece (kullanıcı yatarken, "panel işlerini tamamla" talimatıyla).** Panelin ekranları yazıldı; her biri gerçek veriyle tarayıcıda denendi (CDP ekran görüntüsü, test kayıtları sonra silindi). Commit'ler `e11a201`…`6d63df7`, push yok.
@@ -91,6 +91,24 @@
     - Ayarlar ucu biçimi doğrudan değiştirmeyi reddediyor.
     - Panelde SEO ayarlarında kontrol, onay ve ilerleme akışı var.
   - Panel SEO önizlemesi sunucunun metin kurallarını kullanıyor (port + test).
+- **F3 T5 (F3.11) bitti:** marka modülü. Commit'ler `eff702d` ve panel.
+  - Marka: ad (büyük-küçük harf fark etmeden tekil), Türkçe harfleri katlanmış slug, açıklama, mağazanın kendi yüklediği logo, yayında anahtarı.
+  - Ürün ↔ marka link'i; marka SEO alanları kategori gibi link'li.
+  - Marka sayfa yolu `url-registry`'de (`/marka/{slug}` ya da düz):
+    - adres değişince eski yol 301 verir;
+    - gizli marka 404, silinen marka 410 verir;
+    - URL biçimi taşıma işi markaları da kapsıyor.
+  - Uçlar:
+    - Yönetici: `/admin/brands` CRUD (ürün sayısıyla) ve `POST /admin/products/:id/brand`; denetim kayıtlı.
+    - Store: `/store/brands`, `/store/brands/:id`, `/store/brands/:id/products` (yayındaki ürün id'leri) ve ürünlerde `fields=+brand.name`.
+  - SEO: marka sayfası payload'u marka şablonundan; ürün başlığı `{marka}`'yı dolduruyor.
+  - Panel:
+    - Katalog > Markalar: liste, yeni marka diyaloğu, detay (genel, logo, arama görünümü, silme).
+    - Ürün sayfasında aranabilir marka seçici (yeni `SearchPicker` deseni).
+  - **Güvenlik düzeltmesi (T2'den):** bir işin sonuç dosyası (ör. denetim kaydı dışa aktarımı) artık paylaşım görseli ya da logo olarak verilemiyor.
+    - Açık şuydu: API anahtarı dosya id'sini OG görseline yazıp URL'yi Store resolve yanıtından okuyabiliyordu. Bu, sonuç ucundaki kişi kontrolünü atlatıyordu.
+    - Ortak kontrol: `workflows/files/public-upload.ts`.
+  - Dev DB: "Örnek Seramik Atölyesi" markası oluşturuldu ve Seramik Kupa'ya atandı (deneme verisi).
 - **Gözden geçir (kullanıcı yokken önerilen seçenekle verilen kararlar):**
   1. Bayrak adı `catalog.non_physical`, mağaza tarafından açılır, varsayılan kapalı. Etiketleri Medusa Admin'de ve panelde var.
   2. Kargo gerekmeyen kalemler sipariş ödenince "teslim edildi" sayılıyor. Dijital teslimat (indirme bağlantısı, kod gönderimi) F9 bildirimleriyle gelecek.
@@ -109,6 +127,10 @@
   13. Fiyat cümlesi, fiyat listesi dışındaki TRY fiyatlarından geliyor. İndirim ve üstü çizili fiyat F4.3'te; kargo cümlesi F7'de.
   14. Medusa'da mağaza olayı yok: mağaza adı değişikliği başlıklara en geç 30 sn'de yansıyor.
   15. Ürün ve kategori adresleri yalnızca kontrol + iş akışıyla taşınıyor. Taslak ürünün eski adresi rezerve edilmiyor (yayında olmamış URL).
+  16. Marka adı mağazada tekil (büyük-küçük harf fark etmez). Ad değişince slug kendiliğinden değişmiyor; adres ancak elle değiştirilirse taşınıyor.
+  17. Gizli markanın ürünlerinde marka adı görünmeye devam ediyor; yalnızca marka sayfası ve mağaza listesi kapanıyor.
+  18. Markanın ürün listesi Store'da id olarak dönüyor; fiyat ve satış kanalı için storefront `/store/products?id[]=` çağırıyor. Satış kanalı filtresi o çağrıda.
+  19. Markaları API anahtarlı entegrasyonlar da yazabiliyor (içe aktarma, F3.9).
 - **Bilinen sınırlar (devreden):**
   - Sipariş ve stok panosu bellek içi sıralıyor (5000/2000 kayıt). Büyük mağazada kayıtlı aşama sütunu ya da Index modülü gerekir.
   - Kargo etiketi ve takip F7'de. Kampanyada minimum sepet ve kategori kuralları F4'te.
@@ -411,7 +433,7 @@
 | T2 ✅ | F3.4a | `seo-meta` modülü ve link'ler, `PUT /admin/seo/:type/:id`, ürün/kategori widget'ı, denetim kaydı | — | 0015 |
 | T3 ✅ | F3.5 | `seo-redirects`: kurallar, güvenli desen, zincir/döngü, slug ve halef değişiminde otomatik 301, `GET /store/seo/resolve`, 404 günlüğü + hedef önerisi, CSV içe/dışa. KK: 301 zinciri | T1 | 0017 |
 | T4 ✅ | F3.4b | `lib/seo/resolve`, resolve yanıtında `seo` payload, versioned cache, URL deseni değişiminde toplu 301 (iş) | T2, T3 | 0015 |
-| T5 | F3.11 | `brands` modülü, ürün ↔ marka, admin sayfası, Store marka ucu, SEO link'i | T2 | — |
+| T5 ✅ | F3.11 | `brands` modülü, ürün ↔ marka, admin sayfası, Store marka ucu, SEO link'i | T2 | — |
 | T6 | F3.3 | Görsel hattı: `image.process` işi, türevler, OG kırpma, alt metin, varyant görselleri. KK: EXIF temizleme | `sharp` onayı | 0016 |
 | T7 | F3.7 | Stok: depo/seviye kurulumu, Redis kilit sağlayıcısı, iptal/iade geri dönüş testleri. KK: eşzamanlı checkout | — | 0020 |
 | T8 | F3.8 | `stock-ledger`, düşük stok eşiği + `feed` uyarısı, ön sipariş bayrağı, uzlaştırma işi. KK: düşük stok uyarısı | T7 | 0020 |
