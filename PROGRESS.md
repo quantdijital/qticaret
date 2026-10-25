@@ -3,7 +3,7 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a, T1b, T2, T3 bitti; sırada T4). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı; push edilmedi. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
+**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a, T1b, T2, T3, T4 bitti; sırada T5). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı; push edilmedi. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
 
 ## Son oturum özeti
 **2026-10-25/26 gece (kullanıcı yatarken, "panel işlerini tamamla" talimatıyla).** Panelin ekranları yazıldı; her biri gerçek veriyle tarayıcıda denendi (CDP ekran görüntüsü, test kayıtları sonra silindi). Commit'ler `e11a201`…`6d63df7`, push yok.
@@ -71,6 +71,26 @@
     - Backend yoluna yönlendirme.
   - Testler: birim (yol, desen, kaynak/hedef, konum, CSV, sayaç, dosya içi döngü); HTTP 12 test (iki yeni dosya).
   - Dev DB'de örnek veri var (4 kural, 4 404 kaydı); panelden silinebilir.
+- **F3 T4 (F3.4b) bitti:** Commit'ler `de2b799`, `0a46f01`, `d400f47`, `c30756c`.
+  - Store resolve yanıtında yayındaki sayfanın `seo` nesnesi var (adr/0015, docs/13 §1). `lib/seo/resolve` saf.
+    - Başlık ve açıklama: sayfanın kendi alanı ya da şablon.
+    - Canonical host'ta mutlak URL; host yoksa `null`.
+    - Ayrıca robots, OG, Twitter ve birincil (yoksa en derin) kategoriden breadcrumb.
+  - Şablon değerleri:
+    - kategori;
+    - kısa metin (alt başlık, yoksa açıklama kelime sınırında kesilir);
+    - TRY fiyatlarından fiyat cümlesi ("899,00 TL'den başlayan fiyatlarla.");
+    - SEO'da öne çıkan ilk özellik.
+    - Marka T5'te, kargo cümlesi F7'de, JSON-LD T9'da, hreflang F19'da gelecek.
+  - Yanıtlar süreç içinde önbellekte. Sayfa, SEO alanı, kural, yol ya da ayar değişince ve katalog olaylarında tüm süreçlerde siliniyor (sürümlü işaret); en geç 30 sn.
+    - Önbellekten dönen yönlendirme de isabet sayıyor.
+    - Değişiklik sırasında hesaplanan yanıt yeni önbelleğe girmiyor.
+  - URL biçimi değişimi:
+    - Önce `GET /admin/seo/url-style` kontrolü: taşınacak sayfa sayısı ve çakışmalar (aynı yol, mağazanın kendi sayfası, başka kaydın yolu).
+    - Sonra `seo.url_style` işi yolları 100'lük partilerle taşıyor ve biçimi en sonda kaydediyor. Eski yollar 301 veriyor. Yarıda kalan iş yeniden çalıştırılınca kaldığı yerden devam ediyor.
+    - Ayarlar ucu biçimi doğrudan değiştirmeyi reddediyor.
+    - Panelde SEO ayarlarında kontrol, onay ve ilerleme akışı var.
+  - Panel SEO önizlemesi sunucunun metin kurallarını kullanıyor (port + test).
 - **Gözden geçir (kullanıcı yokken önerilen seçenekle verilen kararlar):**
   1. Bayrak adı `catalog.non_physical`, mağaza tarafından açılır, varsayılan kapalı. Etiketleri Medusa Admin'de ve panelde var.
   2. Kargo gerekmeyen kalemler sipariş ödenince "teslim edildi" sayılıyor. Dijital teslimat (indirme bağlantısı, kod gönderimi) F9 bildirimleriyle gelecek.
@@ -85,6 +105,10 @@
   9. Kurallar ve CSV içe aktarma API anahtarıyla da yazılabiliyor (F14 geçiş aracı için). Eski yolu serbest bırakmak yalnızca kişiye açık, çünkü geri alınamıyor.
   10. Yönlendirme yanıtı: tüm atlamalar 301 ise 301, değilse ilk geçici kod. Önbellek 60 sn, `stale-while-revalidate` 300 sn.
   11. 404 günlüğü 90 gün ve 10.000 kayıtla sınırlı. Kişisel veri içeren yol (e-posta, telefon, token) hiç kaydedilmiyor.
+  12. Canonical host boşken `seo.canonical` `null` dönüyor; storefront kendi host'unu kullanır (adr/0015'teki kullanıcı kararıyla uyumlu).
+  13. Fiyat cümlesi, fiyat listesi dışındaki TRY fiyatlarından geliyor. İndirim ve üstü çizili fiyat F4.3'te; kargo cümlesi F7'de.
+  14. Medusa'da mağaza olayı yok: mağaza adı değişikliği başlıklara en geç 30 sn'de yansıyor.
+  15. Ürün ve kategori adresleri yalnızca kontrol + iş akışıyla taşınıyor. Taslak ürünün eski adresi rezerve edilmiyor (yayında olmamış URL).
 - **Bilinen sınırlar (devreden):**
   - Sipariş ve stok panosu bellek içi sıralıyor (5000/2000 kayıt). Büyük mağazada kayıtlı aşama sütunu ya da Index modülü gerekir.
   - Kargo etiketi ve takip F7'de. Kampanyada minimum sepet ve kategori kuralları F4'te.
@@ -386,7 +410,7 @@
 | T1b ✅ | F3.2 | Fiziksel olmayan ürün (`kind`: dijital/hizmet; bayrak): kargo profili bağı kalkar, envanter kalemi "kargo gerekir" kapanır, yeni varyantlarda da. Ölçü kuralından muaf. Kargosuz checkout testi | T1a | — |
 | T2 ✅ | F3.4a | `seo-meta` modülü ve link'ler, `PUT /admin/seo/:type/:id`, ürün/kategori widget'ı, denetim kaydı | — | 0015 |
 | T3 ✅ | F3.5 | `seo-redirects`: kurallar, güvenli desen, zincir/döngü, slug ve halef değişiminde otomatik 301, `GET /store/seo/resolve`, 404 günlüğü + hedef önerisi, CSV içe/dışa. KK: 301 zinciri | T1 | 0017 |
-| T4 | F3.4b | `lib/seo/resolve`, resolve yanıtında `seo` payload, versioned cache, URL deseni değişiminde toplu 301 (iş) | T2, T3 | 0015 |
+| T4 ✅ | F3.4b | `lib/seo/resolve`, resolve yanıtında `seo` payload, versioned cache, URL deseni değişiminde toplu 301 (iş) | T2, T3 | 0015 |
 | T5 | F3.11 | `brands` modülü, ürün ↔ marka, admin sayfası, Store marka ucu, SEO link'i | T2 | — |
 | T6 | F3.3 | Görsel hattı: `image.process` işi, türevler, OG kırpma, alt metin, varyant görselleri. KK: EXIF temizleme | `sharp` onayı | 0016 |
 | T7 | F3.7 | Stok: depo/seviye kurulumu, Redis kilit sağlayıcısı, iptal/iade geri dönüş testleri. KK: eşzamanlı checkout | — | 0020 |
@@ -477,9 +501,8 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
     - Resolve satış kanalına bakmıyor: başka kanaldaki yayındaki ürün de `entity` döner.
     - Büyük harf ve sondaki `/` gibi normalizasyon 301'leri edge'de yapılır; resolve normalize edilmiş yolu `path` alanında döndürüyor.
   - **F14 geçiş:** Sorgu dizeli eski adresler (`?id=`) ve regex kuralları desen diline çevrilir; çevrilemeyenler rapora düşer.
-  - **T4:** Resolve yanıtına `seo` payload'ı ve sürümlü önbellek eklenecek. Desen değişimi işi eski yolları rezerve bırakır; yönlendirmeyi çözümleme kendisi yapar.
   - **T12:** 12 ay isabet almayan kurallar için "temizle" önerisi; 404 isabet listesi.
-  - **T4:** URL stili değişiminde tüm yolları taşıyan iş; önce çakışma raporu, çakışma varsa değişiklik reddedilir.
+  - ✅ **T4:** URL stili değişiminde tüm yolları taşıyan iş; önce çakışma raporu, çakışma varsa iş başlamıyor.
   - **F3.17:** Facet landing ad alanı alt kategori yollarıyla aynı biçimde (docs/13 notu).
   - ~~Admin hata metinleri~~: çözüldü (adr/0021, dashboard'a Türkçe cümle).
   - **İçe aktarma (T15'e kadar):** Medusa'nın CSV'sinde handle'ı olmayan Türkçe başlıklı satır tüm chunk'ı `catalog.handle_invalid` ile reddettiriyor; hangi satır olduğu söylenmiyor.
