@@ -105,7 +105,7 @@ F17 öncesinde tenant'lar F16 script'leriyle elle açılır.
 **KK:**
 - [ ] Feature flag kapalıyken ilgili endpoint/akış devreye girmiyor (testli)
 - [ ] Attribute şablonu tanımlayıp ürüne değer atanabiliyor, Store API'de görünüyor
-- [ ] Ürün fiyatı değişikliği audit log'da görünüyor; müşteri TCKN görüntüleme okuma kaydı düşüyor
+- [x] Ürün fiyatı değişikliği audit log'da görünüyor; müşteri TCKN görüntüleme okuma kaydı düşüyor — F2 S8 (fatura profili görüntüleme; tam TCKN gösteren uç F12'de aynı yardımcıyla)
 - [x] HTTP istemci logunda Authorization/API key görünmüyor (testli) — F2 S6
 - [x] `lib/money` oransal dağıtımda kuruş kaybı/fazlası olmuyor (testli, uç durumlar dahil) — F2 S1
 - [x] `safe-fetch` iç IP'ye ve DNS rebinding'e giden isteği reddediyor (testli); SVG ve sahte MIME yükleme reddediliyor — F2 S4 + S5 (sahte MIME'lı gerçek görsel, içeriğinin türüyle yeniden adlandırılıp saklanıyor)

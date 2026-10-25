@@ -1,12 +1,11 @@
 import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { hashPii, parseKey } from "../../lib/crypto/pii"
 import { isLocalEnv, parseEnv } from "../../lib/env"
-import { logger } from "../../lib/logging"
+import { errorSummary, logger } from "../../lib/logging"
 import {
   RATE_LIMIT_PROFILES,
   createMemoryStore,
   createRedisStore,
-  errorSummary,
   ipBucket,
   perIpScale,
   withFallback,

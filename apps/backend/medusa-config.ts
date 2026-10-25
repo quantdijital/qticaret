@@ -32,6 +32,7 @@ module.exports = defineConfig({
   modules: [
     { resolve: "./src/modules/tr-address" },
     { resolve: "./src/modules/url-registry" },
+    { resolve: "./src/modules/audit-log" },
     {
       resolve: "./src/modules/billing-profile",
       options: { encryptionKey: env.PII_ENCRYPTION_KEY, hashKey: env.PII_HASH_KEY },

@@ -5,6 +5,8 @@ import {
   validateAndTransformQuery,
 } from "@medusajs/framework/http"
 import { RATE_LIMIT_PROFILES } from "../lib/security/rate-limit"
+import { AdminGetAuditLog } from "./admin/audit-log/validators"
+import { auditMutations, auditSensitiveRead } from "./http/audit"
 import { csrfProtection } from "./http/csrf"
 import { platformErrorHandler } from "./http/error-handler"
 import { authIdentity, authProfile, rateLimit } from "./http/rate-limit"
@@ -52,9 +54,34 @@ export default defineMiddlewares({
         rejectSensitiveStoreFields,
       ],
     },
+    // F2.5: admin mutations are recorded once answered (adr/0011)
     {
       matcher: "/admin/*",
-      middlewares: [rateLimit(() => RATE_LIMIT_PROFILES.admin_default)],
+      middlewares: [rateLimit(() => RATE_LIMIT_PROFILES.admin_default), auditMutations],
+    },
+    // F2.5: reads of personal data are recorded before the answer, or refused
+    ...[
+      "/admin/customers/:id",
+      "/admin/customers/:id/addresses",
+      "/admin/customers/:id/addresses/:address_id",
+      "/admin/customers/:id/billing-profile",
+    ].map((matcher) => ({
+      matcher,
+      methods: ["GET" as const],
+      middlewares: [auditSensitiveRead("customer")],
+    })),
+    {
+      matcher: "/admin/orders/:id",
+      methods: ["GET"],
+      middlewares: [auditSensitiveRead("order")],
+    },
+    {
+      matcher: "/admin/audit-log",
+      methods: ["GET"],
+      middlewares: [
+        validateAndTransformQuery(AdminGetAuditLog, {}),
+        auditSensitiveRead("audit_log"),
+      ],
     },
     // F2.9b: uploaded files checked by their bytes, after Medusa's multer
     {

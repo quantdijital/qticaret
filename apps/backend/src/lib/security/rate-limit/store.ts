@@ -1,5 +1,5 @@
 import Redis from "ioredis"
-import { logger } from "../../logging"
+import { errorSummary, logger } from "../../logging"
 
 /**
  * Fixed-window counters for rate limiting (docs/04). Redis when REDIS_URL
@@ -98,10 +98,6 @@ export function withFallback(
     ...(primary.close ? { close: primary.close } : {}),
   }
 }
-
-/** Name and message only: ioredis errors carry the command, whose key holds a client IP. */
-export const errorSummary = (error: unknown) =>
-  error instanceof Error ? { name: error.name, message: error.message } : { message: String(error) }
 
 // INCR and the expiry in one step: a crash between them would leave a key
 // that never expires and blocks its owner for good

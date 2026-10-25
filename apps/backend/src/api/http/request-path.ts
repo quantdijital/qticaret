@@ -24,8 +24,13 @@ const ABSOLUTE_FORM = /^[a-z][a-z0-9+.-]*:\/\/[^/]*/i
  * stay as they are: Express does not decode fixed segments either.
  */
 export function routePath(req: MedusaRequest): string {
+  return routePathKeepingCase(req).toLowerCase()
+}
+
+/** `routePath` with the case kept, for reading IDs: `prod_01JABC` is not `prod_01jabc`. */
+export function routePathKeepingCase(req: MedusaRequest): string {
   const raw = requestPath(req)
   const end = raw.indexOf("#")
   const path = (end === -1 ? raw : raw.slice(0, end)).replace(ABSOLUTE_FORM, "")
-  return path.toLowerCase().replace(/\/+$/, "") || "/"
+  return path.replace(/\/+$/, "") || "/"
 }

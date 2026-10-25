@@ -3,10 +3,17 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**F2 — Platform çekirdek modülleri + güvenlik tabanı** (devam; S1–S7 /13 bitti). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
+**F2 — Platform çekirdek modülleri + güvenlik tabanı** (devam; S1–S8 /13 bitti). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
 
 ## Son oturum özeti
 **2026-10-24 gece oturumu (S3, S5; S8 başladı).** Kullanıcı döndü; dört karar verdi: bağımlılıklar onaylandı (ioredis 5.11.1, fast-xml-parser 5.11.2, yauzl 3.4.0, kendi görsel başlık okuyucumuz), ADR-0011..0014 kabul edildi, otonom devam, eski "Gözden geçir" maddeleri olduğu gibi kabul. Commit `54abc2a`.
+
+2026-10-25 (F2 S8): F2.5. `audit-log` modülü, mutasyon ve hassas okuma kaydı (adr/0011).
+- **Modül:** `audit_entry`, yalnızca ekleme. Güncelleme/silme metotları parametresiz override ile kapalı; çağrı derlenmez, tiple aşılırsa hata fırlatır. Satır boyutu sınırlı (metin 256, UA 512, `changes` 16 KB üstü alan adlarına iner).
+- **Mutasyon:** `/admin/*` POST/PUT/PATCH/DELETE yanıt bittikten sonra yazılır. Kayıt defteri (varyant fiyatı, ürün üzerinden fiyat, varyant batch, price list fiyat batch) önce/sonra fiyatlarını `variants.prices` ile okur. Diğer route'larda yalnızca alan adları yazılır.
+- **Okuma:** Müşteri detayı/adresleri/fatura profili, sipariş detayı ve `GET /admin/audit-log` yanıttan önce kaydedilir; yazılamazsa 503.
+- **Bulunan hata:** `routePath` küçük harfe çevirdiği için ID'ler (`prod_01JABC`) bozuluyordu. Birim testi yakaladı; denetim katmanı `routePathKeepingCase` kullanıyor.
+- **KK:** "Ürün fiyatı değişikliği audit log'da görünüyor; müşteri TCKN görüntüleme okuma kaydı düşüyor" karşılandı (HTTP testi: fiyat 1000 → 1250 önce/sonra; fatura profili görüntüleme `sensitive_read`; secret API key actor'ı `api-key`).
 
 2026-10-24 (gece, F2 S5): F2.9b. Upload validator, CSV kaçışlama, güvenli XML, zip sınırları.
 - **Upload:** Tür baytlardan okunuyor (PNG IHDR, JPEG SOF, WebP VP8/VP8L/VP8X, AVIF ispe); başlık baytlarının ve boyut alanlarının tutarlı olması şart. Kabul edilen dosya `<slug>.<gerçek uzantı>` adıyla ve gerçek MIME ile saklanıyor; istek başına en fazla 20 dosya; multer'ın latin1 okuduğu UTF-8 dosya adı onarılıyor.
@@ -138,7 +145,7 @@
 1. **Kullanıcı:**
    - `f1-tr-localization` için PR açmak (dal push edildi; CI'da modül testleri ilk kez çalışacak). F1 merge edilince `f2-platform-core` `main`'e rebase edilir.
    - Yerel dev DB'deki doğrulama verisini isterse silmek: "Deneme Müşteri" ve demo seed. Ortam `pnpm db:down -v` ile sıfırlanabilir.
-2. **Kalan F2 görevleri (kararlar verildi, otonom devam):** S8 (audit-log) başladı: modül, model ve migration hazır, HTTP katmanı yazılıyor. Sonra S9 → S10 → S11 → S12 → S13. Araya proje haritası dokümanı ve kullanıcıyla canlı turlar girecek.
+2. **Kalan F2 görevleri (kullanıcı: "F2'yi tamamlayalım"):** S9 → S10 → S11 → S12 → S13. Canlı turlar F2 bitince (proje haritası `docs/16` hazır).
 3. Otonom oturumun "Gözden geçir" maddesine bak (Açık sorular).
 4. **Yerel dev DB:** `url_entry` migrate edildi; `audit_entry` (S8) henüz edilmedi. Yeni modüllerden sonra `pnpm --filter backend medusa db:migrate` (onay ister); testler kendi DB'lerinde migrate ediyor.
 
@@ -152,7 +159,7 @@
 | S5 ✅ | F2.9b | Upload validator + `/admin/uploads` kapısı, CSV kaçışlama, güvenli XML, zip sınırları. KK: SVG / sahte MIME reddi | S3, S4 | — |
 | S6 ✅ | F2.1 + F2.6 | HTTP istemcisi + `/admin/integrations/health` deseni. KK: logda Authorization yok | S2, S4 | — |
 | S7 ✅ | F2.11 | `lib/seo` + `url-registry` modülü. KK: slug tablosu, path tekilliği | S1 | — |
-| S8 | F2.5 | `audit-log` modülü, mutasyon ve okuma kaydı. KK: fiyat değişimi, TCKN okuma | S3 | 0011 |
+| S8 ✅ | F2.5 | `audit-log` modülü, mutasyon ve okuma kaydı. KK: fiyat değişimi, TCKN okuma | S3 | 0011 |
 | S9 | F2.3a | `platform-settings` backend: bölümler, bayraklar, cache, uygulama noktaları. KK: kapalı bayrak | S7, S8 | 0012 |
 | S10 | F2.3b | Admin: Ayarlar > Özellikler ve Ayarlar > SEO sayfaları | S9 | — |
 | S11 | F2.4a | `product-attributes` backend: modül, link'ler, workflow'lar, admin/store API. KK: Store API'de değer | S8 | 0013 |

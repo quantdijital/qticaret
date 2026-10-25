@@ -6,3 +6,4 @@ export { baseLogger, createPinoLogger, createStructuredLogger, logger } from "./
 export type { BaseLogger, LogFields, LoggerOptions, StructuredLogger } from "./logger"
 export { MedusaPinoLogger } from "./medusa-logger"
 export { REDACTED, isSensitiveKey, redactDeep, redactText } from "./redact"
+export { errorSummary } from "./error-summary"

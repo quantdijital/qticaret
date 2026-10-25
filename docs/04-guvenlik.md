@@ -129,6 +129,11 @@
 ### Veri ve KVKK
 - TCKN, telefon, adres: loglarda maskeli; admin listelerinde maskeli, detayda yetkiye bağlı açık.
 - Hassas veri **okuma** da audit log'a düşer: kim, hangi müşteri kaydı, ne zaman (TCKN/adres görüntüleme, dışa aktarma).
+  - Uygulama (F2 S8, adr/0011, `modules/audit-log`, `src/api/http/audit/`):
+    - `/admin/*` mutasyonları yanıt bittikten sonra yazılır: actor (`user` ya da `api-key`), route deseni, kaynak kimliği, durum kodu. Kayıt defterindeki kaynaklarda (varyant ve price list fiyatları) alan bazında önce/sonra yazılır. Diğer route'larda yalnızca gövdedeki alan adları yazılır, değerler yazılmaz.
+    - Müşteri detayı, adresleri, fatura profili, sipariş detayı ve denetim kaydının kendisi okunurken kayıt yanıttan önce yazılır. Yazılamazsa 503 döner (fail closed).
+    - Tablo yalnızca ekleme kabul eder: servis güncelleme/silme metotlarını kapatır. DB seviyesinde UPDATE/DELETE yetkisinin kaldırılması F16'da.
+    - IP ve user agent kişisel veridir; saklama süresi docs/12, silme işi F13.
 - Hassas alanlar için DB seviyesinde şifreleme gerekirse (TCKN) uygulama katmanında AES-256-GCM.
 - Saklama süreleri job'u: süresi dolan kişisel veriler anonimleştirilir (muhasebe kayıtları korunur).
 - Veri işleme envanteri `docs/kvkk-envanter.md` (F13'te oluşturulur).

@@ -4,7 +4,7 @@
 > Yalnızca **bugün var olanı** anlatır. Terimler için [docs/11](11-ogrenme-rehberi.md); ileride gelecek
 > klasörler dahil hedef yapı için [docs/02](02-klasor-yapisi.md). Yeni klasör veya önemli dosya eklendiğinde güncellenir.
 >
-> Son güncelleme: 2026-10-24, F2 S1–S7 bitti, S8 (audit log) yarıda.
+> Son güncelleme: 2026-10-25, F2 S1–S8 bitti.
 
 ---
 
@@ -58,7 +58,7 @@ Medusa'nın ürün, sipariş ve müşteri gibi hazır modülleri `node_modules` 
 | [tr-address](../apps/backend/src/modules/tr-address) | İl / ilçe / mahalle verisi, adres doğrulama | F1 |
 | [billing-profile](../apps/backend/src/modules/billing-profile) | Müşterinin fatura bilgisi; TCKN/VKN şifreli | F1 |
 | [url-registry](../apps/backend/src/modules/url-registry) | Hangi URL hangi ürüne/sayfaya ait; aynı URL iki kez verilemez | F2 S7 |
-| [audit-log](../apps/backend/src/modules/audit-log) | Kim neyi ne zaman değiştirdi/gördü (yarıda) | F2 S8 |
+| [audit-log](../apps/backend/src/modules/audit-log) | Kim neyi ne zaman değiştirdi/gördü; yalnızca ekleme | F2 S8 |
 
 Her modülün iç yapısı aynıdır (örnek: billing-profile):
 - `models/billing-profile.ts`: tablonun tanımı (kolonlar).
@@ -71,6 +71,7 @@ Her modülün iç yapısı aynıdır (örnek: billing-profile):
 İş mantığı burada yaşar (altın kural 3). Her workflow adımlardan (`steps/`) oluşur; bir adım hata verirse önceki adımlar geri alınır (compensation).
 - [billing-profile/](../apps/backend/src/workflows/billing-profile): fatura profilini oluştur/güncelle (kilit al → var mı bak → güncelle ya da oluştur → müşteriye bağla).
 - [tr-address/](../apps/backend/src/workflows/tr-address): adreslerin TR verisine uyduğunu doğrula.
+- [audit-log/](../apps/backend/src/workflows/audit-log): `recordAuditEntryStep`, otomatik işleri (`system`) denetim kaydına yazan adım.
 - [hooks/](../apps/backend/src/workflows/hooks): Medusa'nın **kendi** workflow'larına takılan kancalar. Örnek: sepete adres yazılırken TR doğrulaması, müşteri silinince fatura profilinin silinmesi.
 
 ### 2.3 `src/api/`: dışarıya açılan kapılar
@@ -87,7 +88,7 @@ Her modülün iç yapısı aynıdır (örnek: billing-profile):
   | `request-path.ts` | Yolu Express'in gördüğü biçime çevirir (`/ADMIN/` = `/admin`) |
   | `upload-validator.ts` | Yüklenen dosyayı baytlarından kontrol eder |
   | `error-handler.ts`, `error-response.ts`, `reject.ts` | Hata yanıtları: iç detay sızdırmadan, `request_id` ile |
-  | `audit/` | Denetim kaydı katmanı (S8, yarıda) |
+  | `audit/` | Denetim kaydı: admin değişikliklerini ve kişisel veri okumalarını yazar; `registry.ts` önce/sonra özeti çıkarılan kaynaklar |
 - [validation/](../apps/backend/src/api/validation): Medusa'nın hazır route'larına eklediğimiz kontroller (TR adres, store'da hassas alan isteme yasağı).
 - `store/...` ve `admin/...`: kendi route'larımız. **Klasör yolu = URL**. Örnek: `api/store/tr-address/provinces/route.ts` → `GET /store/tr-address/provinces`. Köşeli parantez parametredir: `admin/customers/[id]/billing-profile` → `/admin/customers/:id/billing-profile`.
 
@@ -131,6 +132,7 @@ Her modülün iç yapısı aynıdır (örnek: billing-profile):
 | Logda ne maskeleniyor? | [lib/logging/redact.ts](../apps/backend/src/lib/logging/redact.ts) |
 | Hangi ortam değişkeni zorunlu? | [lib/env.ts](../apps/backend/src/lib/env.ts) |
 | Hangi dosya türleri yüklenebiliyor? | [lib/security/upload/](../apps/backend/src/lib/security/upload), [api/http/upload-validator.ts](../apps/backend/src/api/http/upload-validator.ts) |
+| Kim neyi değiştirdi / kim müşteri verisine baktı? | `GET /admin/audit-log` ([route](../apps/backend/src/api/admin/audit-log/route.ts)); kayıt mantığı [api/http/audit/](../apps/backend/src/api/http/audit) |
 | Hangi modüller açık? | [medusa-config.ts](../apps/backend/medusa-config.ts) |
 | Bir tablo nasıl oluştu? | `src/modules/<ad>/migrations/` |
 | TCKN nasıl saklanıyor? | [lib/crypto/pii.ts](../apps/backend/src/lib/crypto/pii.ts), [modules/billing-profile/service.ts](../apps/backend/src/modules/billing-profile/service.ts) |

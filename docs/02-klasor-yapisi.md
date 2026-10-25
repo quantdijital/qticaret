@@ -50,7 +50,8 @@ repo/
 │   │   │   │   └── <alan>/steps/
 │   │   │   ├── api/
 │   │   │   │   ├── middlewares.ts
-│   │   │   │   ├── http/                       # istek ID'si, error handler, hata yanıtı sanitizasyonu
+│   │   │   │   ├── http/                       # istek ID'si, error handler, rate limit, CSRF, header'lar, upload kontrolü
+│   │   │   │   │   └── audit/                  # denetim kaydı: mutasyon/okuma middleware'leri, kaynak kayıt defteri (adr/0011)
 │   │   │   │   ├── validation/                 # core route'lara eklenen doğrulama middleware'leri
 │   │   │   │   ├── admin/<kaynak>/route.ts
 │   │   │   │   ├── store/<kaynak>/route.ts
