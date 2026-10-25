@@ -2,7 +2,7 @@ import { JOB_TYPE_KEYS, jobType } from "../types"
 
 describe("job types", () => {
   it("knows its types by own key only", () => {
-    expect(JOB_TYPE_KEYS).toEqual(["audit_log.export", "seo.url_style"])
+    expect(JOB_TYPE_KEYS).toEqual(["audit_log.export", "seo.sitemap", "seo.url_style"])
     expect(jobType("__proto__")).toBeUndefined()
     expect(jobType("constructor")).toBeUndefined()
   })

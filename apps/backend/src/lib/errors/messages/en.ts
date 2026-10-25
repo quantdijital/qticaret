@@ -130,6 +130,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "seo.redirect_target_placeholder": "The target's placeholders must be in the source too.",
   "seo.redirect_target_required": "Enter the target path.",
   "seo.redirect_unknown": "Redirect not found.",
+  "seo.sitemap_unknown": "Sitemap file not found.",
   "seo.template_invalid": "The template has a tag this field does not support, or broken braces.",
   "seo.text_invalid": "The text holds characters that cannot be used.",
   "seo.text_too_long": "The text is too long.",

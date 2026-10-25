@@ -4,6 +4,7 @@ import type { SeoShop, SeoSubject } from "../resolve"
 const shop: SeoShop = {
   name: "Demo Mağaza",
   canonicalHost: "magaza.example.com",
+  indexing: true,
   titleTemplates: {
     product: "{ürün_adı} | {marka} | {mağaza}",
     category: "{kategori} Modelleri ve Fiyatları | {mağaza}",
@@ -85,6 +86,12 @@ describe("resolveSeoPayload", () => {
       robots: "noindex,follow",
       openGraph: { imageAlt: "Beyaz keten gömlek" },
     })
+  })
+
+  it("says noindex on every page of an instance that must stay out of search", () => {
+    expect(resolveSeoPayload(product(), { ...shop, indexing: false }).robots).toBe(
+      "noindex,nofollow"
+    )
   })
 
   it("has no canonical without a host, and paths for breadcrumbs", () => {

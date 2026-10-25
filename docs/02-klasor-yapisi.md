@@ -41,6 +41,7 @@ repo/
 │   │   │   │   ├── url-registry/                     # (locale, path) unique; claim/release/resolve (F2.11)
 │   │   │   │   ├── seo-meta/                         # sayfanın kendi SEO alanları (F3.4, adr/0015)
 │   │   │   │   ├── seo-redirects/                    # kurallar + 404 günlüğü, tamponlu sayaçlar (F3.5, adr/0017)
+│   │   │   │   ├── seo-sitemaps/                     # üretilen site haritası dosyaları + yenileme durumu (F3.6)
 │   │   │   │   ├── brands/                           # marka sayfası, logo, ürün ↔ marka link'i (F3.11)
 │   │   │   │   ├── seo-advisor/ (rules/<alan>/<id>.ts)  seo-insights/  content/
 │   │   │   │   ├── price-history/  product-qa/

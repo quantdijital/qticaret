@@ -71,6 +71,8 @@ export interface SeoSubject {
 export interface SeoShop {
   name: string
   canonicalHost: string | null
+  /** False on an instance search engines must not index (staging): every page says noindex. */
+  indexing: boolean
   titleTemplates: { product: string; category: string; brand: string }
   descriptionTemplates: { product: string }
 }
@@ -185,7 +187,11 @@ export function resolveSeoPayload(subject: SeoSubject, shop: SeoShop): SeoPayloa
     title,
     description,
     canonical,
-    robots: robotsOverride ? ROBOTS[robotsOverride] : "index,follow",
+    robots: !shop.indexing
+      ? "noindex,nofollow"
+      : robotsOverride
+        ? ROBOTS[robotsOverride]
+        : "index,follow",
     openGraph: {
       title,
       description,

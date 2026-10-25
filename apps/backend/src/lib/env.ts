@@ -42,6 +42,9 @@ const envSchema = z.object({
   PII_HASH_KEY: key256,
   // Medusa's level names; unset means Medusa's default, `http`
   LOG_LEVEL: z.enum(LOG_LEVELS).optional(),
+  // docs/13 §6: "off" keeps search engines out (robots.txt, noindex) on an
+  // instance that is not the live shop; unset means off on staging only
+  SEO_INDEXING: z.enum(["on", "off"]).optional(),
   // S3-compatible file storage (adr/0006, adr/0014): SeaweedFS in dev, a
   // cloud bucket when deployed; unset in test, where files stay local
   S3_ENDPOINT: z.url({ protocol: /^https?$/ }).optional(),
@@ -113,6 +116,11 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
  * Only an explicit development or test environment counts as local; an unset
  * NODE_ENV gets production-grade settings such as Secure cookies.
  */
+/** Whether search engines may index this instance (docs/13 §6: staging and previews stay out). */
+export function isSearchIndexingOn(env: Pick<Env, "NODE_ENV" | "SEO_INDEXING">): boolean {
+  return env.SEO_INDEXING ? env.SEO_INDEXING === "on" : env.NODE_ENV !== "staging"
+}
+
 export function isLocalEnv(env: Pick<Env, "NODE_ENV">): boolean {
   return env.NODE_ENV === "development" || env.NODE_ENV === "test"
 }

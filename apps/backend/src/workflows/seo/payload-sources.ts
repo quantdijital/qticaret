@@ -1,6 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import ProductBrandLink from "../../links/product-brand"
+import { isSearchIndexingOn, parseEnv } from "../../lib/env"
 import type { SeoOverrides, SeoShop, SeoSubject } from "../../lib/seo/resolve"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import type { SeoSettings } from "../../modules/platform-settings/sections"
@@ -45,6 +46,9 @@ export async function rowOf<T>(
   return (data[0] as T | undefined) ?? null
 }
 
+// Read once: the environment does not change while the process runs
+let indexing: boolean | undefined
+
 export async function shopOf(container: MedusaContainer): Promise<SeoShop> {
   const settings = container.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
   const seo = (await settings.getSection("seo")) as unknown as SeoSettings
@@ -53,6 +57,7 @@ export async function shopOf(container: MedusaContainer): Promise<SeoShop> {
   return {
     name: (data[0] as { name?: string | null } | undefined)?.name ?? "",
     canonicalHost: seo.canonical_host,
+    indexing: (indexing ??= isSearchIndexingOn(parseEnv())),
     titleTemplates: seo.title_templates,
     descriptionTemplates: seo.description_templates,
   }

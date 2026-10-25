@@ -138,6 +138,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "seo.redirect_target_placeholder": "Hedefteki yer tutucular kaynakta da olmalı.",
   "seo.redirect_target_required": "Hedef adresi girin.",
   "seo.redirect_unknown": "Yönlendirme bulunamadı.",
+  "seo.sitemap_unknown": "Site haritası dosyası bulunamadı.",
   "seo.template_invalid":
     "Şablonda bu alan için tanımlı olmayan bir etiket ya da hatalı süslü parantez var.",
   "seo.text_invalid": "Metinde kullanılamayan karakterler var.",

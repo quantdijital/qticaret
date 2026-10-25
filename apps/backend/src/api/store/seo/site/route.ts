@@ -6,9 +6,12 @@ import type PlatformSettingsModuleService from "../../../../modules/platform-set
 import { shopOf } from "../../../../workflows/seo/payload-sources"
 
 /**
- * `GET /store/seo/site` (docs/13 §5): the home page's structured data, the
- * shop as an `OnlineStore` and its `WebSite`. Empty until the canonical
- * host is set: the blocks need absolute URLs.
+ * `GET /store/seo/site` (docs/13 §2.2, §5, §6): what the storefront's edge
+ * needs for every request: the canonical host (another host gets a 301
+ * there), whether this instance may be indexed (if not, `X-Robots-Tag:
+ * noindex` on every page), and the home page's structured data, the shop
+ * as an `OnlineStore` and its `WebSite`. No blocks until the canonical
+ * host is set: they need absolute URLs.
  */
 export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {
   const shop = await shopOf(req.scope)
@@ -19,6 +22,8 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
   res.setHeader("Cache-Control", "public, max-age=300, stale-while-revalidate=3600")
   res.vary("x-publishable-api-key")
   res.json({
+    canonical_host: shop.canonicalHost,
+    indexing: shop.indexing,
     jsonLd: url ? siteJsonLd({ name: shop.name, url, logo: appearance.logo_light_url }) : [],
   })
 }
