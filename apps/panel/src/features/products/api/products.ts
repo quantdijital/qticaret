@@ -70,6 +70,7 @@ export const productCountsQuery = () =>
 const DETAIL_FIELDS = [
   "id",
   "title",
+  "subtitle",
   "handle",
   "status",
   "description",

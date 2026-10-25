@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import type { Category } from "@/features/categories/api/categories"
 import { ancestorHandles } from "@/features/categories/tree"
 import { SeoCard } from "@/features/seo/components/seo-card"
+import { DESCRIPTION_EXCERPT, excerpt } from "@/features/seo/seo-text"
 import { seoSettingsQuery } from "@/features/settings/api/seo"
 
 /** The category's SEO fields, previewed with its path (ancestors' handles, docs/13 §2) and text. */
@@ -25,7 +26,7 @@ export function CategorySeoCard({
       context={{
         path: `${prefix}${path}`,
         tokens: { kategori: category.name },
-        fallbackDescription: category.description.replace(/\s+/g, " ").trim().slice(0, 155),
+        fallbackDescription: excerpt(category.description, DESCRIPTION_EXCERPT),
       }}
     />
   )
