@@ -7,6 +7,7 @@ import { SECTIONS, isSectionName } from "../../../modules/platform-settings/sect
 const SECTION_VALIDATORS = {
   store: validateAndTransformBody(SECTIONS.store.patch),
   seo: validateAndTransformBody(SECTIONS.seo.patch),
+  appearance: validateAndTransformBody(SECTIONS.appearance.patch),
 } as const
 
 /**

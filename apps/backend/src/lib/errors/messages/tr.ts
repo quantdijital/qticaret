@@ -45,6 +45,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "features.disabled": "Bu özellik kapalı.",
   "features.platform_owned": "Bu özellik platform tarafından yönetilir.",
   "features.unknown": "Böyle bir özellik yok.",
+  "platform_settings.color_invalid": "Renk #rrggbb biçiminde olmalı, ör. #2f6feb.",
   "platform_settings.email_invalid": "Geçerli bir e-posta adresi girin.",
   "platform_settings.feature_unknown": "Böyle bir özellik yok.",
   "platform_settings.host_invalid": "Alan adını https:// ve yol olmadan yazın, ör. magaza.com.tr.",
@@ -56,6 +57,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "platform_settings.text_invalid": "Metin, görünmeyen kontrol karakterleri içeremez.",
   "platform_settings.timezone_invalid": "Geçerli bir saat dilimi seçin.",
   "platform_settings.unknown_section": "Böyle bir ayar bölümü yok.",
+  "platform_settings.url_invalid": "Adres https:// ile ya da / ile başlamalı.",
   "product_attributes.definition_locked":
     "Ürünlerde değeri olan bir özelliğin anahtarı ve birimi değiştirilemez.",
   "product_attributes.definition_unknown": "Özellik bu şablona ait değil.",

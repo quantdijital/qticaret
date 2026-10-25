@@ -39,6 +39,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "features.disabled": "This feature is turned off.",
   "features.platform_owned": "This feature is managed by the platform.",
   "features.unknown": "There is no such feature.",
+  "platform_settings.color_invalid": "The colour must be in #rrggbb form, e.g. #2f6feb.",
   "platform_settings.email_invalid": "Enter a valid email address.",
   "platform_settings.feature_unknown": "There is no such feature.",
   "platform_settings.host_invalid": "Enter the domain without https:// or a path, e.g. shop.com.",
@@ -50,6 +51,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "platform_settings.text_invalid": "The text cannot contain invisible control characters.",
   "platform_settings.timezone_invalid": "Choose a valid time zone.",
   "platform_settings.unknown_section": "There is no such settings section.",
+  "platform_settings.url_invalid": "The address must start with https:// or /.",
   "product_attributes.definition_locked":
     "An attribute products have values for cannot change its key or unit.",
   "product_attributes.definition_unknown": "The attribute does not belong to this template.",
