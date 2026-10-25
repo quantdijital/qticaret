@@ -3,7 +3,7 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a, T1b, T2, T3, T4, T5 bitti; sırada T7, T6 `sharp` onaylı). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı; push edilmedi. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
+**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a, T1b, T2, T3, T4, T5, T9 bitti; sırada T10 sitemap/robots, T7 stok, T6 görsel). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı; push edilmedi. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
 
 ## Son oturum özeti
 **2026-10-25/26 gece (kullanıcı yatarken, "panel işlerini tamamla" talimatıyla).** Panelin ekranları yazıldı; her biri gerçek veriyle tarayıcıda denendi (CDP ekran görüntüsü, test kayıtları sonra silindi). Commit'ler `e11a201`…`6d63df7`, push yok.
@@ -109,6 +109,15 @@
     - Açık şuydu: API anahtarı dosya id'sini OG görseline yazıp URL'yi Store resolve yanıtından okuyabiliyordu. Bu, sonuç ucundaki kişi kontrolünü atlatıyordu.
     - Ortak kontrol: `workflows/files/public-upload.ts`.
   - Dev DB: "Örnek Seramik Atölyesi" markası oluşturuldu ve Seramik Kupa'ya atandı (deneme verisi).
+- **F3 T9 (F3.12) bitti:** yapılandırılmış veri. Commit'ler `4a03882`, `f668f88`.
+  - `lib/seo/jsonld` saf; bloklar sayfanın ve feed'in kullandığı kaynaklardan.
+  - Ürün:
+    - Tek varyant `Product` + `Offer`; çok varyant `ProductGroup` + varyant başına `Product`. Her teklifin URL'si `?variant=` ile varyantı seçili açar.
+    - Alanlar: SKU, yalnızca geçerli GTIN, MPN, TRY fiyat (sayısal metin), stoktan `availability`, ürün durumu, marka, görseller.
+    - `variesBy` özellik şablonunun Google özelliklerinden.
+  - Kategori, marka, koleksiyon: `CollectionPage` + ilk 24 yayındaki ürünün `ItemList`'i.
+  - Ayrıca `BreadcrumbList`; ana sayfa için `GET /store/seo/site` (`OnlineStore` + `WebSite`).
+  - Sözleşme testleri: bloklar Google'ın zorunlu alanlarını taşıyan zod şemalarıyla doğrulanıyor.
 - **Gözden geçir (kullanıcı yokken önerilen seçenekle verilen kararlar):**
   1. Bayrak adı `catalog.non_physical`, mağaza tarafından açılır, varsayılan kapalı. Etiketleri Medusa Admin'de ve panelde var.
   2. Kargo gerekmeyen kalemler sipariş ödenince "teslim edildi" sayılıyor. Dijital teslimat (indirme bağlantısı, kod gönderimi) F9 bildirimleriyle gelecek.
@@ -131,6 +140,12 @@
   17. Gizli markanın ürünlerinde marka adı görünmeye devam ediyor; yalnızca marka sayfası ve mağaza listesi kapanıyor.
   18. Markanın ürün listesi Store'da id olarak dönüyor; fiyat ve satış kanalı için storefront `/store/products?id[]=` çağırıyor. Satış kanalı filtresi o çağrıda.
   19. Markaları API anahtarlı entegrasyonlar da yazabiliyor (içe aktarma, F3.9).
+  20. JSON-LD yalnızca canonical host girilince üretiliyor (mutlak URL ister); host yokken `jsonLd: []`.
+  21. `productGroupID` ürünün handle'ı; Medusa'da ürün seviyesinde SKU yok.
+  22. Seçenekler özellik şablonunda Google özelliğine (renk, beden…) eşlenmemişse `ProductGroup` `variesBy`'sız çıkıyor. Danışman (T11) bunu uyaracak.
+  23. Listeleme `ItemList`'i yayındaki ilk 24 ürün, yeniden eskiye. Storefront'un varsayılan sıralaması buna uymalı (F18).
+  24. Stok takibi kapalı varyant "stokta"; stoksuz ama ön sipariş/backorder açık varyant `BackOrder`. Ön sipariş bayrağı T8'de.
+  25. Kargo detayı ve iade politikası (F7, F13), üstü çizili fiyat (F4.3) ve `Article` (T13) ilgili fazlarında JSON-LD'ye eklenecek.
 - **Bilinen sınırlar (devreden):**
   - Sipariş ve stok panosu bellek içi sıralıyor (5000/2000 kayıt). Büyük mağazada kayıtlı aşama sütunu ya da Index modülü gerekir.
   - Kargo etiketi ve takip F7'de. Kampanyada minimum sepet ve kategori kuralları F4'te.
@@ -437,7 +452,7 @@
 | T6 | F3.3 | Görsel hattı: `image.process` işi, türevler, OG kırpma, alt metin, varyant görselleri. KK: EXIF temizleme | `sharp` onayı | 0016 |
 | T7 | F3.7 | Stok: depo/seviye kurulumu, Redis kilit sağlayıcısı, iptal/iade geri dönüş testleri. KK: eşzamanlı checkout | — | 0020 |
 | T8 | F3.8 | `stock-ledger`, düşük stok eşiği + `feed` uyarısı, ön sipariş bayrağı, uzlaştırma işi. KK: düşük stok uyarısı | T7 | 0020 |
-| T9 | F3.12 | `lib/seo/jsonld`: ProductGroup/Product/Offer, BreadcrumbList, CollectionPage/ItemList, OnlineStore, Article; şema testleri. KK: payload + JSON-LD sözleşme testi | T1, T4 | — |
+| T9 ✅ | F3.12 | `lib/seo/jsonld`: ProductGroup/Product/Offer, BreadcrumbList, CollectionPage/ItemList, OnlineStore, Article; şema testleri. KK: payload + JSON-LD sözleşme testi | T1, T4 | — |
 | T10 | F3.6 + F3.15 | Sitemap işi (debounce + günlük, 50.000'de bölme, görsel sitemap, S3), robots.txt üretimi ve AI ön ayarları, canonical host 301, staging `noindex`, imzalı önizleme, IndexNow. KK: sitemap/robots | T4, T5 | — |
 | T11 | F3.13 | `seo-advisor`: kural motoru, skor, bulgular, tek tık düzeltme, widget + SERP önizleme, liste sütunu, yayın kapısı. KK: deterministik, p95 < 50 ms | T2, T9 | — |
 | T12 | F3.14 | Mağaza geneli SEO denetim işi, 404 isabet listesi + "301 oluştur", mükerrer/öksüz/zincir listeleri. KK: 404 önerisi | T3, T11 | — |
