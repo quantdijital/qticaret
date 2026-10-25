@@ -86,6 +86,8 @@ const DETAIL_FIELDS = [
   "images.rank",
   "categories.id",
   "categories.name",
+  "brand.id",
+  "brand.name",
   "type.id",
   "type.value",
   "options.id",

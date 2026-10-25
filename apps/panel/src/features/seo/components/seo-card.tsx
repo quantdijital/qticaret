@@ -91,8 +91,7 @@ function SeoForm({
   })
 
   // The template fills what is left empty, as the storefront will (F3.4b)
-  const templateKey =
-    type === "category" ? "category" : type === "collection" ? "category" : "product"
+  const templateKey = type === "collection" ? "category" : type
   const titleTemplate = settings?.values.title_templates[templateKey] ?? ""
   const shownTitle = title.trim() || renderSample(titleTemplate, storeName, context.tokens)
   const shownDescription =

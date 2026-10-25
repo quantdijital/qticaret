@@ -18,7 +18,8 @@
     "close": "Close",
     "edit": "Edit",
     "actions": "Actions",
-    "delete": "Delete"
+    "delete": "Delete",
+    "clear": "Clear"
   },
   "errors": {
     "generic": "The action could not be completed. Try again in a moment.",
@@ -44,7 +45,8 @@
     "inventory": "Inventory",
     "promotions": "Promotions",
     "seo": "SEO",
-    "reports": "Reports"
+    "reports": "Reports",
+    "brands": "Brands"
   },
   "login": {
     "title": "Sign in",
@@ -1198,7 +1200,8 @@
       "owners": {
         "product": "Product",
         "product_category": "Category",
-        "product_collection": "Collection"
+        "product_collection": "Collection",
+        "brand": "Brand"
       },
       "ownerDeleted": "deleted",
       "oldHint": "Addresses products, categories and collections used before. Visitors go to the record's address today, to its successor if it was deleted, or get a 410.",
@@ -1344,5 +1347,48 @@
     "changeTemplateTitle": "Change the template?",
     "changeTemplateDescription": "The product's current attribute values are deleted when you save.",
     "changeTemplateConfirm": "Change"
+  },
+  "brands": {
+    "description": "Each brand has its own page, logo and products.",
+    "add": "Add brand",
+    "addHint": "Enter its name first; the page address comes from it. Add the logo and text on the next page.",
+    "create": "Create brand",
+    "created": "Brand created.",
+    "search": "Search brands…",
+    "empty": "No brands yet. Once you add one, you can give it to your products and its own page.",
+    "noMatch": "No brand matches your search.",
+    "columns": {
+      "brand": "Brand",
+      "products": "Products",
+      "status": "Status"
+    },
+    "active": "Live",
+    "inactive": "Hidden",
+    "general": "General",
+    "name": "Brand name",
+    "handle": "Page address",
+    "handleHint": "If you change it, the old address redirects permanently to the new one.",
+    "descriptionLabel": "Description",
+    "descriptionHint": "Shown on the brand page; also in search results when the SEO description is empty.",
+    "activeLabel": "Brand page is live",
+    "activeHint": "When off, the page answers 404 and the brand leaves store lists; products keep the brand name.",
+    "saved": "Brand saved.",
+    "logo": "Logo",
+    "logoHint": "A square or wide PNG, WebP or AVIF with a transparent background works best.",
+    "logoUpload": "Upload logo",
+    "logoChange": "Change logo",
+    "logoRemove": "Remove logo",
+    "logoSaved": "Logo saved.",
+    "logoRemoved": "Logo removed.",
+    "productCount_one": "{{products}} product",
+    "productCount_other": "{{products}} products",
+    "delete": "Delete brand",
+    "deleteTitle": "Delete {{name}}?",
+    "deleteText": "Products stay but lose the brand. The brand page answers gone for good (410).",
+    "deleted": "Brand deleted.",
+    "field": "Brand",
+    "fieldHint": "Shown on the product page and in the search result title.",
+    "pick": "Choose a brand",
+    "noneFound": "No brand found."
   }
 }

@@ -18,7 +18,8 @@
     "close": "Kapat",
     "edit": "Düzenle",
     "actions": "İşlemler",
-    "delete": "Sil"
+    "delete": "Sil",
+    "clear": "Temizle"
   },
   "errors": {
     "generic": "İşlem tamamlanamadı. Biraz sonra tekrar deneyin.",
@@ -44,7 +45,8 @@
     "inventory": "Stok",
     "promotions": "Kampanyalar",
     "seo": "SEO",
-    "reports": "Raporlar"
+    "reports": "Raporlar",
+    "brands": "Markalar"
   },
   "login": {
     "title": "Giriş yap",
@@ -1210,7 +1212,8 @@
       "owners": {
         "product": "Ürün",
         "product_category": "Kategori",
-        "product_collection": "Koleksiyon"
+        "product_collection": "Koleksiyon",
+        "brand": "Marka"
       },
       "ownerDeleted": "silindi",
       "oldHint": "Ürün, kategori ve koleksiyonların önceden kullandığı adresler. Ziyaretçiler kaydın bugünkü adresine, silinmişse yerine geçen ürüne gider; yoksa 410 alır.",
@@ -1356,5 +1359,48 @@
     "changeTemplateTitle": "Şablon değiştirilsin mi?",
     "changeTemplateDescription": "Ürünün mevcut özellik değerleri kaydettiğinizde silinecek.",
     "changeTemplateConfirm": "Değiştir"
+  },
+  "brands": {
+    "description": "Markaların kendi sayfası, logosu ve ürünleri olur.",
+    "add": "Marka ekle",
+    "addHint": "Önce adını girin; sayfa adresi addan oluşur. Logo ve açıklamayı sonraki sayfada ekleyin.",
+    "create": "Markayı oluştur",
+    "created": "Marka oluşturuldu.",
+    "search": "Marka ara…",
+    "empty": "Henüz marka yok. Marka ekleyince ürünlerinize atayabilir, her markaya kendi sayfasını verebilirsiniz.",
+    "noMatch": "Aramanızla eşleşen marka yok.",
+    "columns": {
+      "brand": "Marka",
+      "products": "Ürün",
+      "status": "Durum"
+    },
+    "active": "Yayında",
+    "inactive": "Gizli",
+    "general": "Genel",
+    "name": "Marka adı",
+    "handle": "Sayfa adresi",
+    "handleHint": "Değiştirirseniz eski adres kalıcı yönlendirmeyle yenisine gider.",
+    "descriptionLabel": "Açıklama",
+    "descriptionHint": "Marka sayfasında görünür; SEO açıklaması boşsa arama sonucunda da kullanılır.",
+    "activeLabel": "Marka sayfası yayında",
+    "activeHint": "Kapalıyken sayfa 404 verir ve marka mağaza listelerinde görünmez; ürünlerdeki marka adı kalır.",
+    "saved": "Marka kaydedildi.",
+    "logo": "Logo",
+    "logoHint": "Kare ya da yatay, şeffaf arka planlı PNG, WebP ya da AVIF önerilir.",
+    "logoUpload": "Logo yükle",
+    "logoChange": "Logoyu değiştir",
+    "logoRemove": "Logoyu kaldır",
+    "logoSaved": "Logo kaydedildi.",
+    "logoRemoved": "Logo kaldırıldı.",
+    "productCount_one": "{{products}} ürün",
+    "productCount_other": "{{products}} ürün",
+    "delete": "Markayı sil",
+    "deleteTitle": "{{name}} silinsin mi?",
+    "deleteText": "Ürünler kalır ama markasız olur. Marka sayfası kalıcı olarak kaldırıldı (410) yanıtı verir.",
+    "deleted": "Marka silindi.",
+    "field": "Marka",
+    "fieldHint": "Ürün sayfasında ve arama sonucu başlığında görünür.",
+    "pick": "Marka seçin",
+    "noneFound": "Marka bulunamadı."
   }
 }

@@ -7,6 +7,7 @@ import {
   Search,
   Settings,
   ShoppingBag,
+  Tag,
   Users,
   Warehouse,
 } from "lucide-react"
@@ -50,6 +51,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { key: "products", to: "/products", icon: Package, advanced: "/products" },
       { key: "categories", to: "/categories", icon: FolderTree, advanced: "/categories" },
+      { key: "brands", to: "/brands", icon: Tag, advanced: "/products" },
       { key: "inventory", to: "/inventory", icon: Warehouse, advanced: "/inventory" },
     ],
   },
