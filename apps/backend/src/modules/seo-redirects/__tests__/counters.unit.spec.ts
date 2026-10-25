@@ -80,6 +80,20 @@ describe("createCounterBuffer", () => {
     ])
   })
 
+  it("writes what it holds after everyMs even when no request comes", async () => {
+    jest.useFakeTimers()
+    try {
+      const counts = buffer()
+      counts.add("/a")
+      await jest.advanceTimersByTimeAsync(999)
+      expect(written).toHaveLength(0)
+      await jest.advanceTimersByTimeAsync(1)
+      expect(written.map((rows) => rows.map(({ key }) => key))).toEqual([["/a"]])
+    } finally {
+      jest.useRealTimers()
+    }
+  })
+
   it("survives a failed write", async () => {
     const counts = createCounterBuffer({
       name: "test",

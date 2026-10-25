@@ -21,6 +21,7 @@ export interface CounterBufferOptions {
 /**
  * Counts held in memory and written in one statement (adr/0017): a hit
  * counter or a 404 log must not turn every public request into a write.
+ * Counts wait at most `everyMs`, written by a timer when no request comes.
  * Counts are approximate by design: a process that stops loses what it
  * held, a failed write is logged and dropped, and while a write is in
  * flight new keys beyond `maxKeys` are dropped. Writes run one after
@@ -40,8 +41,14 @@ export function createCounterBuffer({
   // another, so a stalled database cannot pile batches up in memory
   let writing = false
   let tail: Promise<void> = Promise.resolve()
+  // A quiet shop sends no next request to write the counts it holds
+  let timer: ReturnType<typeof setTimeout> | null = null
 
   function flush(): Promise<void> {
+    if (timer) {
+      clearTimeout(timer)
+      timer = null
+    }
     const batch = [...rows.values()]
     rows = new Map()
     startedAt = null
@@ -79,7 +86,12 @@ export function createCounterBuffer({
     } else {
       dropped += 1
     }
-    startedAt ??= now()
+    if (startedAt === null) {
+      startedAt = now()
+      // unref: a pending write never keeps a process from exiting
+      timer = setTimeout(() => void flush(), everyMs)
+      timer.unref()
+    }
     if (!writing && (rows.size >= maxKeys || now() - startedAt >= everyMs)) {
       void flush()
     }
