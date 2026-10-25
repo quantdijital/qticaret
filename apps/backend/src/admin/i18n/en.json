@@ -75,6 +75,13 @@
         "option_value_invalid": "An option value holds only lowercase letters, digits, hyphens and underscores (e.g. stainless_steel).",
         "definition_locked": "An attribute products have values for cannot change its key or unit.",
         "template_change_unconfirmed": "Changing the template deletes the product's current values; confirm and try again."
+      },
+      "async_job": {
+        "type_unknown": "There is no such job type.",
+        "input_invalid": "The job's options are not valid.",
+        "already_running": "One of these jobs is already queued or running.",
+        "result_unavailable": "This job has no result to download, or it expired.",
+        "not_queued": "The job has already started."
       }
     },
     "settings": {
@@ -235,6 +242,34 @@
         "pattern": "Pattern"
       },
       "publicWarning": "Attribute values are public on product pages and in the Store API. Do not keep internal data such as costs or supplier codes here."
+    },
+    "asyncJobs": {
+      "title": "Jobs",
+      "subtitle": "Long tasks such as exports run in the background; follow their progress and results here. Result files are kept for 7 days.",
+      "exportAuditLog": "Export the audit log",
+      "queued": "Job queued.",
+      "empty": "No jobs have run yet.",
+      "type": "Job",
+      "status": "Status",
+      "requested": "Requested",
+      "finished": "Finished",
+      "download": "Download",
+      "truncated": "Only the first {{rows}} rows were taken.",
+      "types": {
+        "audit_log_export": "Audit log export"
+      },
+      "statuses": {
+        "queued": "Queued",
+        "running": "Running",
+        "succeeded": "Done",
+        "failed": "Failed",
+        "cancelled": "Cancelled"
+      },
+      "errors": {
+        "failed": "The job did not finish.",
+        "interrupted": "The job stopped midway (the server may have restarted); run it again.",
+        "not_started": "The job never started; run it again."
+      }
     }
   }
 }

@@ -63,17 +63,18 @@ export function requireFeature(key: string) {
       next()
       return
     }
-    logRejection(req, ensureRequestId(req, res), {
-      status: 404,
-      type: undefined,
-      reason: "feature_disabled",
-    })
-    const page = notFoundPage(req)
-    res.status(404)
-    res.setHeader("Content-Security-Policy", "default-src 'none'")
-    res.setHeader("X-Content-Type-Options", "nosniff")
-    res.setHeader("Content-Type", "text/html; charset=utf-8")
-    res.setHeader("Content-Length", String(Buffer.byteLength(page)))
-    res.end(page)
+    answerAsMissing(req, res, "feature_disabled")
   }
+}
+
+/** Answers as Express does for a route that does not exist, and logs why. */
+export function answerAsMissing(req: MedusaRequest, res: MedusaResponse, reason: string): void {
+  logRejection(req, ensureRequestId(req, res), { status: 404, type: undefined, reason })
+  const page = notFoundPage(req)
+  res.status(404)
+  res.setHeader("Content-Security-Policy", "default-src 'none'")
+  res.setHeader("X-Content-Type-Options", "nosniff")
+  res.setHeader("Content-Type", "text/html; charset=utf-8")
+  res.setHeader("Content-Length", String(Buffer.byteLength(page)))
+  res.end(page)
 }

@@ -11,6 +11,7 @@ import {
   AdminPostAttributeTemplate,
   AdminUpdateAttributeTemplate,
 } from "./admin/attribute-templates/validators"
+import { AdminGetAsyncJobs, AdminPostAsyncJob } from "./admin/async-jobs/validators"
 import { AdminGetAuditLog } from "./admin/audit-log/validators"
 import { AdminPostProductAttributes } from "./admin/products/[id]/attributes/validators"
 import { AdminPostFeature, validateSectionBody } from "./admin/platform-settings/validators"
@@ -32,6 +33,7 @@ import {
 } from "./store/tr-address/validators"
 import { STORE_ATTRIBUTE_FIELDS, restrictStoreAttributeFields } from "./validation/attribute-fields"
 import { rejectSensitiveFields } from "./validation/sensitive-fields"
+import { closePresignedUploads, hideJobResultFiles } from "./validation/upload-routes"
 import {
   ROOT,
   existingCartAddresses,
@@ -162,6 +164,33 @@ export default defineMiddlewares({
       matcher: "/admin/products/:id/attributes",
       methods: ["POST"],
       middlewares: [validateAndTransformBody(AdminPostProductAttributes)],
+    },
+    // F2.8: long tasks (adr/0014); starting one and fetching its result are
+    // for people: results can hold personal data (the audit log export)
+    {
+      matcher: "/admin/async-jobs",
+      methods: ["GET"],
+      middlewares: [validateAndTransformQuery(AdminGetAsyncJobs, {})],
+    },
+    {
+      matcher: "/admin/async-jobs",
+      methods: ["POST"],
+      middlewares: [requireUserActor, validateAndTransformBody(AdminPostAsyncJob)],
+    },
+    {
+      matcher: "/admin/async-jobs/:id/result",
+      methods: ["GET"],
+      middlewares: [requireUserActor],
+    },
+    {
+      matcher: "/admin/uploads/:id",
+      methods: ["GET", "DELETE"],
+      middlewares: [hideJobResultFiles],
+    },
+    {
+      matcher: "/admin/uploads/presigned-urls",
+      methods: ["POST"],
+      middlewares: [closePresignedUploads],
     },
     // F2.9b: uploaded files checked by their bytes, after Medusa's multer
     {

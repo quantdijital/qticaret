@@ -56,11 +56,12 @@
   - `POST /admin/uploads`'ta her dosya baytlarından okunur. Kabul edilen dosya, içeriğinin türüne göre yeniden adlandırılır (`<slug>.<png|jpg|webp|avif|csv>`) ve MIME türü yeniden yazılır. Gerekçe: depolama dosyayı uzantısına göre servis eder; PNG başlıklı ama `.html` adlı bir dosya backend origin'inde stored XSS olurdu.
   - İstek başına en fazla 20 dosya. Bir dosya reddedilirse hiçbir dosya saklanmaz.
   - Medusa'nın `/static` dosyaları bizim header'larımızı almaz. F16'da proxy `/static` için nosniff ve `Content-Security-Policy: default-src 'none'; sandbox` ekler; uzun vadede yüklemeler cookie'siz ayrı bir origin'den servis edilir.
-  - S13'te file-s3 ile gelecek `POST /admin/uploads/presigned-urls` bu doğrulamadan geçmez; S13 uzantı/MIME allowlist'i, private erişim ve worker'da doğrulama ekler.
+  - `POST /admin/uploads/presigned-urls` (file-s3 ile çalışır hâle gelir) bu doğrulamadan geçmediği için F3.9'un kontrollü içe aktarma yolu gelene kadar kapalıdır (F2 S13). Medusa'nın `GET/DELETE /admin/uploads/:id` uçları iş sonucu dosyalarını göstermez.
 - CSV/Excel dışa aktarımda `=`, `+`, `-`, `@`, tab, CR (ve tam genişlik biçimleri) ile başlayan metinler kaçışlanır (formül enjeksiyonu). Türkçe Excel satırı `;` ile böldüğü için hücre içinde `,`, `;` ya da tab'dan sonra başlayan formüller de kaçışlanır. Dışa aktarımın ayırıcısı ve BOM'u ilk dışa aktarım işiyle (S13) kararlaştırılır.
 - XML okuma (geçiş, feed, UBL): DTD ve external entity kapalı, boyut sınırı (5 MB), iç içe derinlik sınırı (64), değerler metin olarak kalır (`06100` posta kodudur). Zip çıkarmada toplam boyut, dosya sayısı ve sıkıştırma oranı sınırı; yol aşımı, symlink, kontrol karakteri ve aynı ada (büyük/küçük harf ve Unicode biçimi dahil) sahip girdiler reddedilir.
 - İçe aktarma dosyaları işlenmeden önce virüs taraması (ClamAV, worker'da) — hosting kararıyla birlikte (ADR-0003).
 - Fatura, etiket ve rapor PDF'leri kişisel veri içerir: obje depolamada private; erişim kısa süreli presigned URL + rol kontrolüyle; URL'ler loglanmaz.
+- Uygulama (F2 S13, adr/0014): iş sonuçları `access: private` ve tahmin edilemez adla saklanır; indirme 5 dakikalık imzalı bağlantıdır, kişisel veri içeren sonuçta okuma kaydı yazılır (yazılamazsa 503). Dev SeaweedFS bucket'ı anonim okumaya açıktır (adr/0006): private dosyalar orada yalnızca adlarıyla korunur. Prod'da private bucket ya da anonim okumasız politika F16 şartıdır.
 
 ### Sunucu taraflı istekler (SSRF)
 - Kullanıcı/tenant kontrollü her URL (`tenant-webhooks`, geçişte görsel indirme, feed kaynakları, muhasebe/LLM uç noktaları)

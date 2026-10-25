@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto"
-import { EnvValidationError, isLocalEnv, parseEnv } from "../env"
+import { EnvValidationError, isLocalEnv, parseEnv, s3Settings } from "../env"
 
 // Test-only values, generated per run so no fixed secret lives in the repo (docs/04)
 const jwtSecret = "j".repeat(16) + Math.random().toString(36).padEnd(16, "x")
@@ -16,6 +16,15 @@ const validEnv = {
   COOKIE_SECRET: cookieSecret,
   PII_ENCRYPTION_KEY: hexKey(),
   PII_HASH_KEY: hexKey(),
+}
+
+// Generated per run like the secrets above
+const s3Env = {
+  S3_REGION: "us-east-1",
+  S3_BUCKET: "qticaret",
+  S3_FILE_URL: "https://files.example.com/qticaret",
+  S3_ACCESS_KEY_ID: randomBytes(8).toString("hex"),
+  S3_SECRET_ACCESS_KEY: randomBytes(20).toString("hex"),
 }
 
 function errorOf(source: Record<string, string | undefined>): string {
@@ -69,7 +78,27 @@ describe("parseEnv", () => {
     expect(errorOf({ ...validEnv, NODE_ENV: env, REDIS_URL: undefined })).toContain(
       "REDIS_URL: is required in production and staging"
     )
-    expect(parseEnv({ ...validEnv, NODE_ENV: env }).REDIS_URL).toBe(validEnv.REDIS_URL)
+    expect(parseEnv({ ...validEnv, ...s3Env, NODE_ENV: env }).REDIS_URL).toBe(validEnv.REDIS_URL)
+  })
+
+  it.each(["production", "staging"])("requires the S3 variables in %s", (env) => {
+    expect(errorOf({ ...validEnv, NODE_ENV: env })).toContain(
+      "S3_BUCKET: is required in production and staging"
+    )
+  })
+
+  it("refuses a half-configured S3 store and reads a complete one", () => {
+    expect(errorOf({ ...validEnv, S3_BUCKET: "qticaret" })).toContain(
+      "S3_REGION: is required with the other S3 variables"
+    )
+    expect(errorOf({ ...validEnv, ...s3Env, S3_FILE_URL: "https://files.example.com/" })).toContain(
+      "S3_FILE_URL: must not end with a slash"
+    )
+    expect(s3Settings(parseEnv(validEnv))).toBeNull()
+    expect(s3Settings(parseEnv({ ...validEnv, ...s3Env }))).toMatchObject({
+      bucket: "qticaret",
+      fileUrl: s3Env.S3_FILE_URL,
+    })
   })
 
   it("rejects identical PII encryption and hash keys", () => {

@@ -4,7 +4,7 @@
 > Yalnızca **bugün var olanı** anlatır. Terimler için [docs/11](11-ogrenme-rehberi.md); ileride gelecek
 > klasörler dahil hedef yapı için [docs/02](02-klasor-yapisi.md). Yeni klasör veya önemli dosya eklendiğinde güncellenir.
 >
-> Son güncelleme: 2026-10-25, F2 S1–S12 bitti.
+> Son güncelleme: 2026-10-25, F2 bitti (S1–S13).
 
 ---
 
@@ -45,6 +45,8 @@ apps/backend/
     ├── workflows/          ← iş akışları (çok adımlı işler, geri alınabilir)
     ├── modules/            ← kendi veri modüllerimiz (tablolar + servisleri)
     ├── links/              ← bizim modüllerle Medusa'nın modülleri arasındaki bağlar
+    ├── subscribers/        ← olay dinleyicileri (ör. sıraya alınan işi başlatan)
+    ├── jobs/               ← zamanlanmış işler (yarıda kalan işleri kapatma, eski sonuçları silme)
     ├── admin/              ← admin paneline eklediğimiz parçalar (widget, çeviri)
     ├── lib/                ← her yerden kullanılan yardımcı kütüphaneler
     └── scripts/            ← elle çalıştırılan işler (kurulum, demo veri, adres içe aktarma)
@@ -61,6 +63,7 @@ Medusa'nın ürün, sipariş ve müşteri gibi hazır modülleri `node_modules` 
 | [audit-log](../apps/backend/src/modules/audit-log) | Kim neyi ne zaman değiştirdi/gördü; yalnızca ekleme | F2 S8 |
 | [platform-settings](../apps/backend/src/modules/platform-settings) | Mağaza ve SEO ayarları, özellik bayrakları (`features.ts`) | F2 S9 |
 | [product-attributes](../apps/backend/src/modules/product-attributes) | Ürün özellik şablonları (malzeme, ölçü, beden gibi), tanımlar ve ürün değerleri | F2 S11 |
+| [async-job](../apps/backend/src/modules/async-job) | Uzun işlerin kaydı: durum, ilerleme, sonuç dosyası (dışa aktarma, ileride içe aktarma) | F2 S13 |
 
 Her modülün iç yapısı aynıdır (örnek: billing-profile):
 - `models/billing-profile.ts`: tablonun tanımı (kolonlar).
@@ -76,6 +79,7 @@ Her modülün iç yapısı aynıdır (örnek: billing-profile):
 - [audit-log/](../apps/backend/src/workflows/audit-log): `recordAuditEntryStep`, otomatik işleri (`system`) denetim kaydına yazan adım.
 - [platform-settings/](../apps/backend/src/workflows/platform-settings): ayar bölümü kaydetme ve bayrak açıp kapama (geri alınabilir); `assertFeatureEnabledStep`.
 - [product-attributes/](../apps/backend/src/workflows/product-attributes): şablon oluştur/güncelle/sil ve ürün değerlerini ürün başına kilitle kaydetme.
+- [async-job/](../apps/backend/src/workflows/async-job): iş kuyruğa alma ve çalıştırma; `types/` iş tipleri (ilk tip: denetim kaydı CSV dışa aktarma).
 - [hooks/](../apps/backend/src/workflows/hooks): Medusa'nın **kendi** workflow'larına takılan kancalar. Örnek: sepete adres yazılırken TR doğrulaması, müşteri silinince fatura profilinin silinmesi.
 
 ### 2.3 `src/api/`: dışarıya açılan kapılar
@@ -115,7 +119,7 @@ Her modülün iç yapısı aynıdır (örnek: billing-profile):
 ### 2.5 `src/admin/`: admin paneline eklenenler
 - `widgets/customer-billing-profile.tsx`: müşteri detay sayfasındaki fatura bilgisi kutusu.
 - `widgets/default-language.tsx`: admin'i ilk açılışta Türkçe yapar.
-- `routes/settings/features`, `routes/settings/seo`, `routes/settings/attribute-templates`: Ayarlar > Özellikler, SEO ve Ürün özellikleri sayfaları.
+- `routes/settings/features`, `routes/settings/seo`, `routes/settings/attribute-templates`, `routes/settings/async-jobs`: Ayarlar > Özellikler, SEO, Ürün özellikleri ve İşler sayfaları.
 - `widgets/product-attributes.tsx`: ürün sayfasındaki özellik formu (`components/product-attributes/`).
 - `lib/sdk.ts` (Medusa JS SDK, oturum çerezi), `lib/errors.ts` (API hata anahtarını Türkçe metne çevirir), `components/page-states.tsx` (yükleniyor ve hata durumları).
 - `i18n/tr.json`, `en.json`: bizim eklediğimiz parçaların metinleri.
@@ -142,6 +146,8 @@ Her modülün iç yapısı aynıdır (örnek: billing-profile):
 | Hangi dosya türleri yüklenebiliyor? | [lib/security/upload/](../apps/backend/src/lib/security/upload), [api/http/upload-validator.ts](../apps/backend/src/api/http/upload-validator.ts) |
 | Kim neyi değiştirdi / kim müşteri verisine baktı? | `GET /admin/audit-log` ([route](../apps/backend/src/api/admin/audit-log/route.ts)); kayıt mantığı [api/http/audit/](../apps/backend/src/api/http/audit) |
 | Ürün özellikleri (şablon, değer) nerede tanımlı? | [modules/product-attributes](../apps/backend/src/modules/product-attributes); API `/admin/attribute-templates`, `/admin/products/:id/attributes`; ürünle bağı [links/](../apps/backend/src/links) |
+| Arka plan işleri (dışa aktarma) nerede? | Ayarlar > İşler; API `/admin/async-jobs`; iş tipleri [workflows/async-job/types](../apps/backend/src/workflows/async-job/types) |
+| Dosyalar nereye kaydediliyor? | Dev'de SeaweedFS (`localhost:58333`), testte yerel `static/`; ayar [medusa-config.ts](../apps/backend/medusa-config.ts) ve `S3_*` env |
 | Bir özellik açık mı, nasıl açılır? | `GET /admin/features`; bayrak tanımları [features.ts](../apps/backend/src/modules/platform-settings/features.ts) |
 | Mağaza / SEO ayarları nerede? | `GET /admin/platform-settings/store` ve `/seo`; alanlar [sections/](../apps/backend/src/modules/platform-settings/sections) |
 | Hangi modüller açık? | [medusa-config.ts](../apps/backend/medusa-config.ts) |

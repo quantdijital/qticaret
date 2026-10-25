@@ -3,10 +3,24 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**F2 — Platform çekirdek modülleri + güvenlik tabanı** (devam; S1–S12 /13 bitti). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
+**F2 — Platform çekirdek modülleri + güvenlik tabanı: BİTTİ** (S1–S13; KK'ların hepsi işaretli). Sıradaki faz F3 (katalog, SEO motoru, stok). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
 
 ## Son oturum özeti
 **2026-10-24 gece oturumu (S3, S5; S8 başladı).** Kullanıcı döndü; dört karar verdi: bağımlılıklar onaylandı (ioredis 5.11.1, fast-xml-parser 5.11.2, yauzl 3.4.0, kendi görsel başlık okuyucumuz), ADR-0011..0014 kabul edildi, otonom devam, eski "Gözden geçir" maddeleri olduğu gibi kabul. Commit `54abc2a`.
+
+2026-10-25 (F2 S13): F2.8. `async-job` modülü, iş tipleri, "İşler" sayfası (adr/0014). Plan `/Users/deniz/.claude/plans/f2-s13-async-jobs.md`.
+- **Akış:** `POST /admin/async-jobs` → enqueue workflow'u (tip/girdi/bayrak, tip başına kilit, tekillik) → `async-job.queued` → subscriber → run workflow'u. Run workflow'unda iş başlar, sonuç akış hâlinde private dosyaya yazılır ve iş biter.
+- **İlk tip:** denetim kaydı CSV (`;` + BOM, formül kaçışı). İndirme 5 dk imzalı bağlantı; okuma kaydı filtrelerle yazılıyor.
+- **Zamanlanmış işler:** süpürücü (5 dk: `interrupted`/`not_started`) ve saklama (günlük: sonuç 7 gün, kayıt 90 gün).
+- **Dosya deposu:**
+  - Env'de `S3_*` ya hepsi ya hiçbiri; staging/production'da zorunlu ve https.
+  - Testte file-local, dev'de file-s3. SeaweedFS ile imzalı bağlantı doğrulandı.
+  - Dev bucket'ı anonim okunabilir; F16 şartı olarak adr/0014 ekinde.
+- **İnceleme:** Güvenlik incelemesi yapıldı.
+  - Yüksek 1: API dosya anahtarını veriyordu; Medusa'nın `/admin/uploads/:id` ucuyla kayıtsız indirme mümkündü. Anahtar gizlendi, uç kapatıldı.
+  - Yüksek 2: `presigned-urls` S5 kontrollerini atlıyordu; F3.9'a kadar kapatıldı.
+  - 3 orta bulgu düzeltildi: bellekte dışa aktarma, takılı `queued`, `NODE_ENV` tanımsızken yerel disk (uyarı). Düşüklerin çoğu düzeltildi (atomik geçişler, subscriber, saklama döngüsü, https).
+- F2 bu görevle bitti.
 
 2026-10-25 (F2 S12): F2.4b. Admin: ürün özellikleri widget'ı ve Ayarlar > Ürün özellikleri. Plan `/Users/deniz/.claude/plans/f2-s12-attribute-admin.md`.
 - **Widget (`product.details.after`):** Şablon seçimi ve tipine göre alanlar (metin, sayı+birim, evet/hayır, tek ve çoklu seçim). Varyant özellikleri bilgi satırı olarak görünür. Değeri olan üründe şablon değişimi onay ister.
@@ -200,11 +214,12 @@
 
 ## Sıradaki görev
 1. **Kullanıcı:**
-   - `f1-tr-localization` için PR açmak (dal push edildi; CI'da modül testleri ilk kez çalışacak). F1 merge edilince `f2-platform-core` `main`'e rebase edilir.
-   - Yerel dev DB'deki doğrulama verisini isterse silmek: "Deneme Müşteri" ve demo seed. Ortam `pnpm db:down -v` ile sıfırlanabilir.
-2. **Kalan F2 görevleri (kullanıcı: "F2'yi tamamlayalım"):** S9 → S10 → S11 → S12 → S13. Canlı turlar F2 bitince (proje haritası `docs/16` hazır).
-3. Otonom oturumun "Gözden geçir" maddesine bak (Açık sorular).
-4. **Yerel dev DB:** `url_entry` migrate edildi; `audit_entry` (S8) henüz edilmedi. Yeni modüllerden sonra `pnpm --filter backend medusa db:migrate` (onay ister); testler kendi DB'lerinde migrate ediyor.
+   - **Push ve PR kararı:** F1 dalı push edildi, PR yok. F2 dalı (`f2-platform-core`) yerelde ve push edilmedi. F1 merge edilince F2 `main` üzerine rebase edilir.
+   - **Admin'de gözle kontrol:** Ayarlar > Özellikler, SEO, Ürün özellikleri, İşler; ürün sayfasındaki özellik kutusu. Rota etiketleri Türkçe mi, ham anahtar mı?
+   - **Canlı turlar:** `docs/16-proje-haritasi.md` sırasıyla (bölüm 9).
+   - **Dev'deki geçici admin kullanıcısı:** `playwright-admin@example.com` silinsin mi?
+2. **F3'e geçmeden önce kararlar:** F3 kapsamı (docs/03); F2'den devreden maddeler aşağıda. Playwright e2e altyapısı (ayrı profil + `@playwright/test`) onay ister.
+3. **Yerel dev DB:** F2'nin tüm migration'ları uygulandı. Dev dosyaları artık SeaweedFS'e yazılıyor.
 
 ### F2 görev planı (oturum büyüklüğünde, önerilen sıra)
 | # | Görev | Kapsam | Bağımlılık | ADR |
@@ -221,7 +236,7 @@
 | S10 ✅ | F2.3b | Admin: Ayarlar > Özellikler ve Ayarlar > SEO sayfaları | S9 | — |
 | S11 ✅ | F2.4a | `product-attributes` backend: modül, link'ler, workflow'lar, admin/store API. KK: Store API'de değer | S8 | 0013 |
 | S12 ✅ | F2.4b | Admin: ürün widget'ı + şablon yönetim sayfası | S11 | — |
-| S13 | F2.8 | `async-job` modülü, file-s3, "İşler" sayfası; ilk tip denetim kaydı CSV dışa aktarma | S5, S8 | 0014 |
+| S13 ✅ | F2.8 | `async-job` modülü, file-s3, "İşler" sayfası; ilk tip denetim kaydı CSV dışa aktarma | S5, S8 | 0014 |
 
 Görev ayrıntıları:
 - **S1:** Tamamlandı (bkz. "Son oturum özeti" ve ADR-0010 "Uygulama").
@@ -387,6 +402,12 @@ Paralel zincirler:
     - S13: `presigned-urls` yolu için uzantı/MIME allowlist'i ve worker'da doğrulama; CSV dışa aktarımın ayırıcısı ve BOM'u.
     - Hesap kilidi ve IP'den bağımsız kimlik sınırı (docs/04 "artan gecikme + kilit"); admin `limit` üst sınırı ölçülünce.
     - Admin, çekirdek dashboard'un çevirmediği `errors.too_many_requests` gibi anahtarları ham gösteriyor.
+  - **S13'ten devreden:**
+    - F16: private bucket/politika ve kanarya testi, `NODE_ENV=production`, Redis event bus + workflow engine + locking (worker ayrımı, restart sonrası devam).
+    - file-s3 `cache_control` varsayılanının private sonuçlara etkisi.
+    - Yetim dosyalar için bucket lifecycle kuralı.
+    - İptal ucu (F3.9).
+    - İsteğe bağlı `TEST_S3_*` testi (private nesnenin imzasız 403'ü).
   - **S11'den devreden:**
     - Özellik görünürlüğü (`is_public`) ve Store yanıt filtresi.
     - (ürün, tanım) için DB tekillik indeksi.
@@ -423,7 +444,7 @@ Paralel zincirler:
 |---|---|
 | F0 Repo & araçlar | ✅ |
 | F1 Medusa çekirdek + TR lokalizasyon | ✅ |
-| F2 Platform çekirdek modülleri | ⏳ |
+| F2 Platform çekirdek modülleri | ✅ |
 | F3 Katalog, SEO motoru ve stok | ⬜ |
 | F4 Fiyatlandırma ve promosyon | ⬜ |
 | F5 Ödeme: iyzico | ⬜ |

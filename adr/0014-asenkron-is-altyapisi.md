@@ -63,3 +63,33 @@ Medusa 2.21.2'de doğrulananlar (F2 planlaması):
 - **Prod gereksinimi:** Gerçek server/worker ayrımı, restart sonrası devam ve tek instance'ta çalışan zamanlanmış işler için Redis event bus, Redis workflow engine ve Redis locking modülleri gerekir. Bunlar F16'da bağlanır; F2'de dev/test in-memory çalışır. PROGRESS'te takip edilir.
 - **Yeniden kullanım:** F3.9 içe aktarma, F3.14 SEO denetimi, F3.6 sitemap ve F11.1 raporlar bu deseni kullanır. Satır bazlı hatalar ikinci bir CSV dosyası olarak sonuçta yer alır.
 - **Medusa'nın yerleşik ürün içe/dışa aktarması:** Ayrı kalır. F3.9'da bu desene sarılıp sarılmayacağı değerlendirilir.
+
+## Ek: F2 S13 uygulaması ve güvenlik incelemesi (2026-10-25)
+- **İş tipleri:** `src/workflows/async-job/types/`. `execute` sonucu `resultFile` ile akış hâlinde private dosyaya yazar (`getUploadStream`); dışa aktarma bellekte birikmez.
+- **İlk tip `audit_log.export`:**
+  - `;` + BOM; 50 bin satır.
+  - `changes` hücresi 8 KB'ta kırpılır, sayısı özette yazılır.
+  - Satırlar işin başlangıç anına kadar okunur, sayfalar kaymaz.
+- **Durum geçişleri karşılaştır-ve-yaz:**
+  - İş bir kez başlar; aynı olay için workflow `transactionId: async-job-run:<id>` kullanır.
+  - Süpürülmüş iş geç bitse de `succeeded`'a dönmez; dosyası compensation ile silinir.
+- **Süpürücü:**
+  - 10 dk kalp atışı vermeyen `running` işler `interrupted` olur.
+  - 30 dk'dan eski `queued` işler `not_started` olur (olayı kaybolmuş iş). Eski `queued` iş tekilliği kilitlemez.
+- **Sonuç dosyası erişimi:**
+  - API yanıtında dosya anahtarı yoktur (`has_result`).
+  - Medusa'nın `GET/DELETE /admin/uploads/:id` uçları iş sonucu dosyası için bilinmeyen route gibi yanıt verir.
+  - İndirme yalnızca `/admin/async-jobs/:id/result` üzerinden olur: kullanıcı aktörü, okuma kaydı (filtrelerle), 5 dk imzalı bağlantı.
+- **Doğrudan yükleme:** `POST /admin/uploads/presigned-urls` F3.9'a kadar kapalıdır (S5 kontrollerini atlıyordu).
+- **Dosya deposu:**
+  - Dev'de file-s3 + SeaweedFS çalıştı (imzalı bağlantı 200).
+  - Dev bucket'ı anonim okunabilir (adr/0006). İmzasız URL de açılır; private dosyalar dev'de yalnızca tahmin edilemez adla korunur.
+  - **F16 şartları:**
+    - private bucket ya da anonim okumasız politika; staging'de private kanarya nesnenin imzasız GET'i 403 olmalı,
+    - S3 adresleri https,
+    - `NODE_ENV=production`; tanımsızken dosyalar yerel diske düşer ve açılışta uyarı loglanır.
+- **Açık kalanlar:**
+  - Tek provider olduğu için file-s3 `cache_control` varsayılanı private sonuçlara da uygulanır (doğrulanmalı; F3.3/F16).
+  - Çökme anında yetim kalan sonuç dosyası için bucket lifecycle kuralı (F16).
+  - İptal ucu (F3.9).
+

@@ -75,6 +75,13 @@
         "option_value_invalid": "Seçenek değeri yalnızca küçük harf, rakam, tire ve alt çizgi içerebilir (ör. paslanmaz_celik).",
         "definition_locked": "Ürünlerde değeri olan bir özelliğin anahtarı ve birimi değiştirilemez.",
         "template_change_unconfirmed": "Şablon değişikliği ürünün mevcut değerlerini siler; onaylayarak tekrar deneyin."
+      },
+      "async_job": {
+        "type_unknown": "Böyle bir iş tipi yok.",
+        "input_invalid": "İş için verilen seçenekler geçerli değil.",
+        "already_running": "Bu işten biri zaten sırada ya da çalışıyor.",
+        "result_unavailable": "Bu işin indirilebilir bir sonucu yok ya da süresi doldu.",
+        "not_queued": "İş zaten başlamış."
       }
     },
     "settings": {
@@ -235,6 +242,34 @@
         "pattern": "Desen (pattern)"
       },
       "publicWarning": "Özellik değerleri ürün sayfasında ve Store API'de herkese görünür. Maliyet, tedarikçi kodu gibi iç bilgileri burada tutmayın."
+    },
+    "asyncJobs": {
+      "title": "İşler",
+      "subtitle": "Dışa aktarma gibi uzun işler arka planda çalışır; ilerlemesini ve sonucunu buradan izleyin. Sonuç dosyaları 7 gün saklanır.",
+      "exportAuditLog": "Denetim kaydını dışa aktar",
+      "queued": "İş sıraya alındı.",
+      "empty": "Henüz bir iş çalıştırılmadı.",
+      "type": "İş",
+      "status": "Durum",
+      "requested": "İstenme",
+      "finished": "Bitiş",
+      "download": "İndir",
+      "truncated": "Yalnızca ilk {{rows}} satır alındı.",
+      "types": {
+        "audit_log_export": "Denetim kaydı dışa aktarma"
+      },
+      "statuses": {
+        "queued": "Sırada",
+        "running": "Çalışıyor",
+        "succeeded": "Tamamlandı",
+        "failed": "Başarısız",
+        "cancelled": "İptal edildi"
+      },
+      "errors": {
+        "failed": "İş tamamlanamadı.",
+        "interrupted": "İş yarıda kaldı (sunucu yeniden başlamış olabilir); tekrar çalıştırın.",
+        "not_started": "İş başlatılamadı; tekrar çalıştırın."
+      }
     }
   }
 }

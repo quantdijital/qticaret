@@ -42,7 +42,28 @@ const envSchema = z.object({
   PII_HASH_KEY: key256,
   // Medusa's level names; unset means Medusa's default, `http`
   LOG_LEVEL: z.enum(LOG_LEVELS).optional(),
+  // S3-compatible file storage (adr/0006, adr/0014): SeaweedFS in dev, a
+  // cloud bucket when deployed; unset in test, where files stay local
+  S3_ENDPOINT: z.url({ protocol: /^https?$/ }).optional(),
+  S3_REGION: z.string().min(1).optional(),
+  S3_BUCKET: z.string().min(1).optional(),
+  S3_FILE_URL: z
+    .url({ protocol: /^https?$/ })
+    .refine((value) => !value.endsWith("/"), "must not end with a slash")
+    .optional(),
+  S3_ACCESS_KEY_ID: z.string().min(1).optional(),
+  S3_SECRET_ACCESS_KEY: z.string().min(1).optional(),
 })
+
+// Without these the file provider cannot work; the endpoint is only for
+// non-AWS stores
+const S3_REQUIRED = [
+  "S3_REGION",
+  "S3_BUCKET",
+  "S3_FILE_URL",
+  "S3_ACCESS_KEY_ID",
+  "S3_SECRET_ACCESS_KEY",
+] as const
 
 const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
   // Sessions must survive restarts and be shared across instances (adr/0004)
@@ -52,6 +73,31 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
       path: ["REDIS_URL"],
       message: "is required in production and staging",
     })
+  }
+  // Uploads and job results must outlive the instance (adr/0014); a half
+  // configured store would fail at the first upload
+  const s3Set = S3_REQUIRED.filter((name) => env[name] !== undefined)
+  const deployed = env.NODE_ENV === "production" || env.NODE_ENV === "staging"
+  if (deployed || s3Set.length > 0) {
+    for (const name of S3_REQUIRED.filter((item) => env[item] === undefined)) {
+      ctx.addIssue({
+        code: "custom",
+        path: [name],
+        message: deployed
+          ? "is required in production and staging"
+          : "is required with the other S3 variables",
+      })
+    }
+  }
+  // Results hold personal data: they travel over TLS once deployed
+  for (const name of ["S3_ENDPOINT", "S3_FILE_URL"] as const) {
+    if (deployed && env[name]?.startsWith("http:")) {
+      ctx.addIssue({
+        code: "custom",
+        path: [name],
+        message: "must be https in production and staging",
+      })
+    }
   }
   // Separate keys keep the lookup hash from weakening the encryption (adr/0009)
   if (env.PII_ENCRYPTION_KEY.toLowerCase() === env.PII_HASH_KEY.toLowerCase()) {
@@ -96,4 +142,29 @@ export function parseEnv(source: Record<string, string | undefined> = process.en
     return `  - ${key}: ${missing ? "is missing" : issue.message}`
   })
   throw new EnvValidationError(`Invalid environment configuration:\n${problems.join("\n")}`)
+}
+
+export interface S3Settings {
+  endpoint?: string
+  region: string
+  bucket: string
+  fileUrl: string
+  accessKeyId: string
+  secretAccessKey: string
+}
+
+/** The S3 settings when configured (the schema makes them all or none), else null. */
+export function s3Settings(env: Env): S3Settings | null {
+  const { S3_REGION, S3_BUCKET, S3_FILE_URL, S3_ACCESS_KEY_ID, S3_SECRET_ACCESS_KEY } = env
+  if (!S3_REGION || !S3_BUCKET || !S3_FILE_URL || !S3_ACCESS_KEY_ID || !S3_SECRET_ACCESS_KEY) {
+    return null
+  }
+  return {
+    ...(env.S3_ENDPOINT ? { endpoint: env.S3_ENDPOINT } : {}),
+    region: S3_REGION,
+    bucket: S3_BUCKET,
+    fileUrl: S3_FILE_URL,
+    accessKeyId: S3_ACCESS_KEY_ID,
+    secretAccessKey: S3_SECRET_ACCESS_KEY,
+  }
 }
