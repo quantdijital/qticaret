@@ -64,13 +64,15 @@ export function PathTester() {
           {t("seo.redirects.tester.try")}
         </Button>
       </div>
-      <div className="min-h-6 min-w-0 sm:w-80">
-        {answer.isError ? (
-          <span className="text-[13px] text-destructive-text">{errorText(t, answer.error)}</span>
-        ) : answer.data ? (
-          <Outcome resolution={answer.data.resolution} />
-        ) : null}
-      </div>
+      {answer.isError || answer.data ? (
+        <div className="min-w-0 sm:w-80">
+          {answer.isError ? (
+            <span className="text-[13px] text-destructive-text">{errorText(t, answer.error)}</span>
+          ) : (
+            <Outcome resolution={answer.data.resolution} />
+          )}
+        </div>
+      ) : null}
     </form>
   )
 }

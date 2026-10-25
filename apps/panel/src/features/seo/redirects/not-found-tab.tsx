@@ -78,6 +78,10 @@ function useColumns(actions: Actions): Column<NotFoundEntry>[] {
               {t("seo.redirects.from", { host: entry.last_referer_host })}
             </span>
           ) : null}
+          {/* Phones have no room for the fix column: it comes under the path */}
+          <span className="mt-2 md:hidden">
+            <Fix entry={entry} {...actions} />
+          </span>
         </span>
       ),
     },
@@ -97,7 +101,7 @@ function useColumns(actions: Actions): Column<NotFoundEntry>[] {
     {
       key: "fix",
       header: t("seo.redirects.columns.fix"),
-      className: "min-w-[14rem]",
+      className: "hidden min-w-[14rem] md:table-cell",
       cell: (entry) => <Fix entry={entry} {...actions} />,
     },
     {
