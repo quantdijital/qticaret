@@ -51,7 +51,8 @@
       },
       "errors": {
         "users_only": "Bu işlemi yalnızca oturum açmış yöneticiler yapabilir.",
-        "too_many_requests": "Çok fazla deneme yapıldı. Biraz bekleyip tekrar deneyin."
+        "too_many_requests": "Çok fazla deneme yapıldı. Biraz bekleyip tekrar deneyin.",
+        "busy": "Kayıt şu an başka bir işlemle güncelleniyor; birkaç saniye sonra tekrar deneyin."
       },
       "product_attributes": {
         "key_invalid": "Anahtar küçük harfle başlamalı; yalnızca küçük harf, rakam ve alt çizgi içerebilir.",

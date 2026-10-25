@@ -22,7 +22,7 @@ import { authIdentity, authProfile, rateLimit } from "./http/rate-limit"
 import { requireUserActor } from "./http/actor"
 import { requestContext } from "./http/request-id"
 import { rejectAmbiguousPath } from "./http/request-path"
-import { storeLimitGuard, uploadSizeGate } from "./http/request-limits"
+import { adminLimitGuard, storeLimitGuard, uploadSizeGate } from "./http/request-limits"
 import { securityHeaders } from "./http/security-headers"
 import { uploadValidator } from "./http/upload-validator"
 import { StorePostBillingProfile } from "./store/customers/me/billing-profile/validators"
@@ -106,6 +106,7 @@ export default defineMiddlewares({
       matcher: "/admin/*",
       middlewares: [
         rateLimit(() => RATE_LIMIT_PROFILES.admin_default),
+        adminLimitGuard,
         rejectSensitiveFields,
         auditMutations,
       ],

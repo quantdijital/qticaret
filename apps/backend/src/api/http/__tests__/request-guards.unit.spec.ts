@@ -1,7 +1,7 @@
 import type { MedusaRequest } from "@medusajs/framework/http"
 import { logger } from "../../../lib/logging"
 import { csrfProtection } from "../csrf"
-import { storeLimitGuard, uploadSizeGate } from "../request-limits"
+import { adminLimitGuard, storeLimitGuard, uploadSizeGate } from "../request-limits"
 import { rejectAmbiguousPath } from "../request-path"
 import { applySecurityHeaders } from "../security-headers"
 import { fakeResponse } from "./fakes"
@@ -190,6 +190,25 @@ describe("storeLimitGuard", () => {
       expect(result.next).toHaveBeenCalled()
     } else {
       expect(result.next).not.toHaveBeenCalled()
+      expect(result.status()).toBe(400)
+      expect(result.body()).toMatchObject({ message: refusal })
+    }
+  })
+})
+
+describe("adminLimitGuard", () => {
+  it.each([
+    [{ limit: "1000" }, null],
+    [{ limit: "20" }, null],
+    [{ limit: "1001" }, "errors.limit_too_large"],
+    [{ limit: "99999" }, "errors.invalid_limit"],
+    [{ limit: "1000x" }, "errors.invalid_limit"],
+  ])("handles %p", (query, refusal) => {
+    const result = run(adminLimitGuard, request({ method: "GET", path: "/admin/products", query }))
+
+    if (refusal === null) {
+      expect(result.next).toHaveBeenCalled()
+    } else {
       expect(result.status()).toBe(400)
       expect(result.body()).toMatchObject({ message: refusal })
     }

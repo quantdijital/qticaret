@@ -118,7 +118,7 @@
   - `/store`, `/auth`, `/admin` dışındaki bir yolda cookie'li mutasyon, üç CORS listesinden birindeki origin'den gelmelidir.
   - Admin'de gövde JSON olmalıdır. Multipart yalnızca upload ve ürün içe aktarma yollarında kabul edilir.
   - Store'da Medusa `x-publishable-api-key` header'ını zaten zorunlu tuttuğu için ayrıca header şartı yoktur.
-- İstek sınırları: `/store/*`'da `limit` yalnızca rakam ve en fazla 100 (`1000abc` ya da `-1` 400 döner; Medusa `parseInt` ile okur). Multipart her istekte multer öncesi bildirilen boyut en fazla 25 MB; uzunluk yoksa 411. Bu kontrol yola değil içerik türüne bağlıdır. Admin `limit` üst sınırı, dashboard'un kullandığı değerler ölçülünce eklenecek.
+- İstek sınırları: `/store/*`'da `limit` yalnızca rakam ve en fazla 100 (`1000abc` ya da `-1` 400 döner; Medusa `parseInt` ile okur). Multipart her istekte multer öncesi bildirilen boyut en fazla 25 MB; uzunluk yoksa 411. Bu kontrol yola değil içerik türüne bağlıdır. `/admin/*`'da `limit` en fazla 1000 (dashboard'un seçim listelerinin kullandığı değer; dev'de ölçüldü). Kilit alınamayan kayıt 503 + `Retry-After` alır, kilit anahtarı yanıta ve loga girmez.
 - Özellik bayrağı kapalıyken uç (`requireFeature`), Express'in bilinmeyen route sayfasının aynısını döner; kapalı bir özelliğin varlığı sızmaz (adr/0012). Ayar bölümleri strict şemalıdır, serbest alan ve secret tutulmaz. robots.txt yalnızca bilinen direktifleri kabul eder.
 - Store API'de ürün özellik değerleri `allowFields` ile açılır: değer kolonları ve tanımın `key`, `label`, `type`, `unit`, `rank`, `is_seo_highlight` alanları; tanımın geri kalanı yalnızca admin'dedir (adr/0013).
 - CORS: sadece tenant'ın storefront ve admin origin'leri.

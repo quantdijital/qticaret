@@ -1,6 +1,6 @@
 import { getHttpResponseFromError } from "@medusajs/framework/http"
 import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { DEFAULT_VALIDATION_MESSAGE, toHttpError } from "../../lib/errors"
+import { DEFAULT_VALIDATION_MESSAGE, lockTimeoutError, toHttpError } from "../../lib/errors"
 import { currentRequestId, logger } from "../../lib/logging"
 import { INTERNAL_ERROR_BODY, sanitizeErrorResponse } from "./error-response"
 import type { ErrorBody } from "./error-response"
@@ -59,7 +59,7 @@ const isZodError = (error: unknown): boolean => {
 }
 
 function resolveError(error: unknown, path: string): ResolvedError {
-  const own = toHttpError(error)
+  const own = toHttpError(lockTimeoutError(error) ?? error)
   if (own) {
     return {
       status: own.status,
@@ -95,11 +95,13 @@ function logError(
   req: MedusaRequest,
   requestId: string
 ): void {
-  if (resolved.status < 500) {
+  // A busy lock is an expected answer, not a failure: one line, no stack
+  // and no lock key (it names a record)
+  if (resolved.status < 500 || lockTimeoutError(error)) {
     logRejection(req, requestId, {
       status: resolved.status,
       type: resolved.body.type,
-      reason: resolved.reason,
+      reason: resolved.status < 500 ? resolved.reason : "lock_busy",
     })
     return
   }

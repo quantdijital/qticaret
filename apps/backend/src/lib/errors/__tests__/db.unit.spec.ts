@@ -1,5 +1,5 @@
 import { MedusaError } from "@medusajs/framework/utils"
-import { uniqueViolationKeys } from "../db"
+import { lockTimeoutError, uniqueViolationKeys } from "../db"
 
 describe("uniqueViolationKeys", () => {
   it("reads the columns from Medusa's duplicate text", () => {
@@ -24,5 +24,21 @@ describe("uniqueViolationKeys", () => {
     null,
   ])("returns null for %p", (error) => {
     expect(uniqueViolationKeys(error)).toBeNull()
+  })
+})
+
+describe("lockTimeoutError", () => {
+  it("turns Medusa's lock timeout into a 503 without the key", () => {
+    const error = lockTimeoutError(
+      new Error('Failed to acquire lock for key "product-attributes:prod_1"')
+    )
+
+    expect(error).toMatchObject({ safeMessage: "errors.busy", retryAfterMs: 2000 })
+    expect(JSON.stringify(error)).not.toContain("prod_1")
+  })
+
+  it("leaves other errors alone", () => {
+    expect(lockTimeoutError(new Error("boom"))).toBeNull()
+    expect(lockTimeoutError(null)).toBeNull()
   })
 })

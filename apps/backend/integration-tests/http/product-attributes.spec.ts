@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { PRODUCT_ATTRIBUTES_MODULE } from "../../src/modules/product-attributes"
 import type ProductAttributesModuleService from "../../src/modules/product-attributes/service"
 import { createAdminUser } from "../helpers/admin"
@@ -323,6 +323,24 @@ medusaIntegrationTestRunner({
       expect(renamed.status).toBe(409)
       expect(renamed.data.message).toBe("product_attributes.definition_locked")
       expect(readded.status).toBe(200)
+    })
+
+    it("answers 503 with Retry-After while another save holds the product", async () => {
+      const template = await createTemplate()
+      const productId = await newProduct()
+      const locking = getContainer().resolve(Modules.LOCKING)
+      await locking.acquire(`product-attributes:${productId}`, { expire: 60 })
+
+      const busy = await setAttributes(productId, {
+        template_id: template.id,
+        values: { material: "steel" },
+      })
+      await locking.release(`product-attributes:${productId}`)
+
+      expect(busy.status).toBe(503)
+      expect(busy.headers["retry-after"]).toBe("2")
+      expect(busy.data.message).toBe("errors.busy")
+      expect(JSON.stringify(busy.data)).not.toContain(productId)
     })
   },
 })

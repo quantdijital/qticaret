@@ -51,7 +51,8 @@
       },
       "errors": {
         "users_only": "Only signed-in admin users can do this.",
-        "too_many_requests": "Too many attempts. Wait a moment and try again."
+        "too_many_requests": "Too many attempts. Wait a moment and try again.",
+        "busy": "The record is being updated by another action; try again in a few seconds."
       },
       "product_attributes": {
         "key_invalid": "The key starts with a lowercase letter and holds only lowercase letters, digits and underscores.",

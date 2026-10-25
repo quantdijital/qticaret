@@ -7,30 +7,40 @@ import { rejectRequest } from "./reject"
  */
 
 export const STORE_MAX_LIMIT = 100
+// The dashboard's own pickers ask for 1000 (regions, sales channels, tags,
+// customers: measured in dev, 2026-10-25); more is a bulk read
+export const ADMIN_MAX_LIMIT = 1000
 // Above the per-file image limit (S5) times the files an admin sends at once
 export const MAX_UPLOAD_REQUEST_BYTES = 25 * 1024 * 1024
 // Digits only: Medusa reads `limit` with parseInt, so "1000abc" would be 1000
-const LIMIT_VALUE = /^\d{1,3}$/
+const LIMIT_VALUE = /^\d{1,4}$/
+
+function limitGuard(max: number) {
+  return (req: MedusaRequest, res: MedusaResponse, next: MedusaNextFunction) => {
+    const value: unknown = req.query["limit"]
+    if (value === undefined) {
+      next()
+      return
+    }
+    const problem =
+      typeof value !== "string" || !LIMIT_VALUE.test(value)
+        ? "invalid_limit"
+        : Number(value) > max
+          ? "limit_too_large"
+          : null
+    if (problem !== null) {
+      rejectRequest(req, res, 400, { type: "invalid_data", message: `errors.${problem}` }, problem)
+      return
+    }
+    next()
+  }
+}
 
 /** `/store/*`: a `limit` above 100, or one that is not a plain number, is refused. */
-export function storeLimitGuard(req: MedusaRequest, res: MedusaResponse, next: MedusaNextFunction) {
-  const value: unknown = req.query["limit"]
-  if (value === undefined) {
-    next()
-    return
-  }
-  const problem =
-    typeof value !== "string" || !LIMIT_VALUE.test(value)
-      ? "invalid_limit"
-      : Number(value) > STORE_MAX_LIMIT
-        ? "limit_too_large"
-        : null
-  if (problem !== null) {
-    rejectRequest(req, res, 400, { type: "invalid_data", message: `errors.${problem}` }, problem)
-    return
-  }
-  next()
-}
+export const storeLimitGuard = limitGuard(STORE_MAX_LIMIT)
+
+/** `/admin/*`: a `limit` above what the dashboard asks for is refused (bulk reads, adr/0011). */
+export const adminLimitGuard = limitGuard(ADMIN_MAX_LIMIT)
 
 /**
  * Multipart requests (`/admin/uploads`, product imports): the declared size
