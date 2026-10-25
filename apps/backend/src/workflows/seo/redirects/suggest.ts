@@ -25,6 +25,7 @@ export interface Suggestion {
 const MIN_SCORE = 0.4
 const MAX_CANDIDATES = 60
 const MIN_WORD = 3
+const STEM = 4
 
 const lastSegment = (path: string): string => path.slice(path.lastIndexOf("/") + 1)
 
@@ -97,12 +98,18 @@ export async function suggestTargets(
   if (words.length === 0) {
     return []
   }
+  // A word's first letters too, so a typo at its end (`giyimm`) still finds `giyim`
+  const fragments = [
+    ...new Set(
+      words.flatMap((word) => (word.length > STEM ? [word, word.slice(0, STEM)] : [word]))
+    ),
+  ]
   const registry = container.resolve<UrlRegistryModuleService>(URL_REGISTRY_MODULE)
   const entries = await registry.listUrlEntries(
     {
       locale: CATALOG_LOCALE,
       status: "active",
-      $or: words.map((word) => ({ path: { $ilike: containsPattern(word) } })),
+      $or: fragments.map((fragment) => ({ path: { $ilike: containsPattern(fragment) } })),
     },
     { take: MAX_CANDIDATES, select: ["path", "entity_type", "entity_id"] }
   )
