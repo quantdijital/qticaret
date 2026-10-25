@@ -8,6 +8,21 @@
 ## Son oturum özeti
 **2026-10-24 gece oturumu (S3, S5; S8 başladı).** Kullanıcı döndü; dört karar verdi: bağımlılıklar onaylandı (ioredis 5.11.1, fast-xml-parser 5.11.2, yauzl 3.4.0, kendi görsel başlık okuyucumuz), ADR-0011..0014 kabul edildi, otonom devam, eski "Gözden geçir" maddeleri olduğu gibi kabul. Commit `54abc2a`.
 
+2026-10-25 (admin kullanılabilirliği, dilim 1 ve 2): Kullanıcı "panel çok zor, dashboard bile yok" dedi. docs/17 ve ADR-0021 (kabul).
+- **Dilim 1 (ayrı ajan, worktree):** Başlangıç sayfası (`/app/home`).
+  - Mağaza kurulum kontrol listesi: 6 adım, ilerleme çubuğu, "Sıradaki adım".
+  - Hızlı işlemler ve ürün sayıları.
+  - Kullanılabilirlik denetimi ve doğrulanmış Medusa sınırları (açılış sayfası sabit; menü sırası ve gizleme yalnızca düzen tercihiyle).
+- **Dilim 2 (kullanıcı kararları 1–5):**
+  - `tenant:bootstrap` mağaza adını ister (`--store-name`) ve admin menü varsayılanını yazar: Başlangıç en üstte, geliştirici ayarları gizli, bizim ayar sayfalarımız "Genel"de. Mevcut bir varsayılana dokunmaz.
+  - Çekirdek Türkçe terimler sözlüğe göre ezildi (119 metin): Gönderi, Stok, stoktan ayır, mağazadan teslim, URL adresi. Yükseltme kontrolü `scripts/check-core-overrides.mjs`.
+  - Dashboard'a hata mesajı Türkçe cümle olarak dönüyor, anahtar `code`'da. API istemcileri ve testler anahtarı almaya devam ediyor. Metinlerin tek kaynağı `src/lib/errors/messages`; eksik 29 anahtar eklendi.
+  - `GET /admin/home/summary`: kargoya hazırlanmayı bekleyen, bugünkü sipariş ve satış. Kişisel veri yok. Başlangıç'ta "Bugün" bölümü.
+- **Ara düzeltmeler (kullanıcının bulduğu hatalar):**
+  - Ayar menü etiketleri ham anahtardı (`translationNs` eksikti).
+  - SEO sayfası açılışta çöküyordu.
+  - Ürün oluşturma ekranı `limit=9999` istiyordu; admin sınırı 1000'den 9999'a çıkarıldı (dashboard en az on ekranda 9999 kullanıyor).
+
 2026-10-25 (F3 T1a): F3.1 katalog uzantısı. Plan `/Users/deniz/.claude/plans/f3-t1-catalog-extension.md`.
 - **Modül `catalog-extension`:** Ürün ve varyanta link'li ek alanlar: durum (yeni/yenilenmiş/ikinci el/kusurlu), tür (fiziksel; dijital/hizmet davranışı T1b), birincil kategori, halef ürün, varyant MPN'i.
   - GTIN, Medusa'nın varyant `ean`/`upc`/`barcode` alanlarından okunur; `lib/catalog/gtin` kontrol basamağına bakar. Geçersiz kod reddedilmez.
@@ -46,7 +61,7 @@
 
 2026-10-25 (F2 sonrası, kullanıcı dışarıdayken): devreden işlerden onay gerektirmeyenler.
 - Kilit alınamayan kayıt (aynı ürüne iki eşzamanlı kayıt, aynı iş tipine iki istek) artık 500 değil 503 + `Retry-After: 2` alıyor; tek satırlık bilgi logu yazılıyor, yığın izi ve kilit anahtarı yok. HTTP testli.
-- `/admin/*` `limit` üst sınırı 1000. Dashboard'un dev'deki 593 isteğinde görülen en yüksek değer (seçim listeleri) bu.
+- `/admin/*` `limit` üst sınırı 1000 (sonradan 9999'a çıkarıldı: ürün oluşturma ve fiyat ekranları 9999 istiyor).
 - CI kalite işine Redis servisi eklendi (dev ile aynı sabit imaj); Lua sayaç testleri CI'da da çalışacak. Turbo `TEST_*` değişkenlerini geçiriyor.
 
 2026-10-25 (F2 S13): F2.8. `async-job` modülü, iş tipleri, "İşler" sayfası (adr/0014). Plan `/Users/deniz/.claude/plans/f2-s13-async-jobs.md`.
@@ -353,6 +368,13 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
   - `fast-xml-parser` ve `yauzl` (S5)
   - Görsel boyutu için kendi başlık okuyucumuz ya da `image-size` (S5'te karar)
   - S4, S6 ve S7 yeni bağımlılık getirmez.
+- [ ] **Admin kullanılabilirliğinden devreden işler (docs/17):**
+  - **F12.6:** Geliştirici ayarları yalnızca menüden gizli; adresle açılıyor. Gerçek kısıtlama rol modeliyle (Medusa RBAC, `MEDUSA_FF_RBAC`). `is_default` düzeni de her admin değiştirebiliyor.
+  - **Dil:** İngilizce kullanan admin, dashboard'dan gelen hata cümlesini Türkçe görür; kullanıcı dili F19.
+  - **Başlangıç:** Düşük stok kartı F3 T8'de. Kart bölgesi (`LayoutComposer`) F12.1'de. Yardım şeritleri ve KDV ipucu P2.
+  - **Özet ucu testi:** Yalnızca siparişsiz durum HTTP testli; siparişli senaryo, sepet tamamlama yardımcısı gelince (F5) eklenir. Hesap kuralları birim testli.
+  - **Dev DB:** Bootstrap yeniden çalıştırılırsa menü varsayılanı yazılır; mağaza adı `--store-name` ile verilmeli.
+  - **F16 proxy:** `/admin` ve `/auth` hata gövdesi `Authorization`, çerez ve `Origin`'e göre değişiyor (dashboard cümlesi). Bu yanıtlar önbelleğe alınmamalı (`Cache-Control: no-store` ya da `Vary`).
 - [ ] **F3 T1a'dan devreden işler:**
   - **T1b:** `kind` yazılabilir olunca `setProductCatalogWorkflow` yayın kuralını da çağırmalı; aksi halde "dijital olarak yayınla, sonra fiziksele çevir" kuralı aşar. Denetim anlık görüntüsüne `kind` eklenir.
   - **T3:**
@@ -361,7 +383,7 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
     - Kayıt başına rezerve yol üst sınırı düşünülür.
   - **T4:** URL stili değişiminde tüm yolları taşıyan iş; önce çakışma raporu, çakışma varsa değişiklik reddedilir.
   - **F3.17:** Facet landing ad alanı alt kategori yollarıyla aynı biçimde (docs/13 notu).
-  - **Admin hata metinleri (kullanılabilirlik):** Core dashboard bizim hata anahtarlarımızı ham gösteriyor (`catalog.dimensions_required` toast'ı). Çözüm önerisi: admin isteklerinde mesajı sunucuda çevirip anahtarı `code` alanında tutmak.
+  - ~~Admin hata metinleri~~: çözüldü (adr/0021, dashboard'a Türkçe cümle).
   - **İçe aktarma (T15'e kadar):** Medusa'nın CSV'sinde handle'ı olmayan Türkçe başlıklı satır tüm chunk'ı `catalog.handle_invalid` ile reddettiriyor; hangi satır olduğu söylenmiyor.
   - **Yayın kuralı yarışı:** Aynı anda yayınlama ve varyant ölçüsünü silme ölçüsüz bir yayın bırakabilir; F7 kargo hesabı savunmacı kontrol yapar.
   - **Deploy adımı:** `claim-catalog-paths` her veritabanında bir kez çalıştırılır (F16 runbook).
@@ -394,7 +416,7 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
     - F18: Medusa store preflight'ında publishable key istiyor (izinli origin de 400 alıyor). Tarayıcıdan doğrudan store çağrısı için çözülmeli. Sunucudan login proxy'leyen storefront için imzalı istemci-IP ADR'si.
     - S13: `presigned-urls` yolu için uzantı/MIME allowlist'i ve worker'da doğrulama; CSV dışa aktarımın ayırıcısı ve BOM'u.
     - Hesap kilidi ve IP'den bağımsız kimlik sınırı (docs/04 "artan gecikme + kilit").
-    - Admin, çekirdek dashboard'un çevirmediği `errors.too_many_requests` gibi anahtarları ham gösteriyor.
+    - ~~Admin, çekirdek dashboard'un çevirmediği anahtarları ham gösteriyor~~: çözüldü (adr/0021).
   - **S13'ten devreden:**
     - F16: private bucket/politika ve kanarya testi, `NODE_ENV=production`, Redis event bus + workflow engine + locking (worker ayrımı, restart sonrası devam).
     - file-s3 `cache_control` varsayılanının private sonuçlara etkisi.

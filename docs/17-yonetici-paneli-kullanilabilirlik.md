@@ -3,7 +3,7 @@
 > Amaç: Paneli hiç admin paneli kullanmamış bir mağaza sahibinin de anlayacağı hâle getirmek.
 > Açık bir başlangıç sayfası, sade Türkçe ve her ekranda "sıradaki adım".
 > İlkeler [docs/06](06-admin-ux.md)'dadır; bu doküman 2026-10-25 denetimini, doğrulanan Medusa sınırlarını ve öncelikli işleri içerir.
-> İlgili karar taslağı: [adr/0021](../adr/0021-yonetici-paneli-varsayilan-duzen-ve-cekirdek-metinler.md).
+> İlgili karar: [adr/0021](../adr/0021-yonetici-paneli-varsayilan-duzen-ve-cekirdek-metinler.md) (kabul edildi, 2026-10-25).
 
 ---
 
@@ -27,7 +27,7 @@ Kısaltma: `D/` = `packages/admin/dashboard/src/`.
 | Menüde özel öğe, `rank`, `nested` | `defineRouteConfig({ label, icon, nested, rank, translationNs })`. `rank` 2.11.4'ten beri var; yalnızca uzantı öğelerini kendi aralarında sıralar. `nested` yalnızca `/orders`, `/products`, `/inventory`, `/customers`, `/promotions`, `/price-lists` altına alt öğe ekler. | `admin-sdk/src/config/types.ts`, `admin-shared/src/extensions/routes/constants.ts`, Context7 ui-routes |
 | Uzantı öğesi menüde nerede? | Çekirdek öğelerden (Siparişler … Fiyat Listeleri) **sonra**. `rank: 0` bile çekirdek öğelerin önüne geçmez. İkon verilmezse genel "eklenti" ikonu çıkar. | `D/components/layout/main-layout/main-layout.tsx` (`SidebarRoutes`), `D/dashboard-app/dashboard-app.tsx` (`populateMenus`) |
 | Çekirdek menü öğeleri gizlenir/sıralanır mı? | **Kodla (SDK ile) hayır; düzen tercihiyle evet.** Menü bir `LayoutComposer`'dır. Kullanıcı "Kenar çubuğunu özelleştir" ile sürükleyip sıralar, gizler; "Herkes için kaydet" sistem varsayılanı yazar. | `main-layout.tsx`, `D/components/layout-composer/*`, `D/hooks/use-layout-preference.ts` |
-| Düzen tercihi nerede saklanır? | `GET/POST/DELETE /admin/layouts/:zone/configuration` (2.17.2+), çekirdek settings modülü. Gövde: `{ is_default, configuration: { widgets: { [id]: { order?, hidden?, section? } } } }`. Ana menü bölgesi `sidebar` (kimlikler `core:Searchbar`, `core:nav:/orders`, `core:nav:/home` …). Ayarlar menüsü `settings.sidebar` (bölümler `general`, `developer`, `account`, `extensions`). Sırası verilmeyen öğe `order: 0` alır. | `packages/medusa/src/api/admin/layouts/[zone]/configuration/{route,validators,middlewares}.ts`, `D/components/layout-composer/entries.ts` |
+| Düzen tercihi nerede saklanır? | `GET/POST/DELETE /admin/layouts/:zone/configuration` (2.17.2+), çekirdek settings modülü. Gövde: `{ is_default, configuration: { widgets: { [id]: { order?, hidden?, section? } } } }`. Ana menü bölgesi `sidebar` (kimlikler `core:Searchbar`, `core:nav:/orders`, `core:nav:/home` …). Ayarlar menüsü `settings.sidebar` (bölümler `general`, `developer`, `myAccount`, `extensions`). Sırası verilmeyen öğe `order: 0` alır. | `packages/medusa/src/api/admin/layouts/[zone]/configuration/{route,validators,middlewares}.ts`, `D/components/layout-composer/entries.ts` |
 | `is_default` için yetki | Ayrı yetki kontrolü yok: oturum açmış her admin herkesin varsayılan menüsünü değiştirebilir. Yalnızca arayüz etkisi var; rol modeli gelince (F12.6) ele alınmalı. | aynı route ve middleware |
 | `defineLayoutConfig` ne yapar? | `src/admin/layouts/` altında `LayoutComposer` için **sayfa düzeni** (bölümler) kaydeder. Menüyü ya da açılış sayfasını değiştirmez. `LayoutComposer` (2.16.0+) `@medusajs/dashboard/components`'tan gelir; özel bir sayfaya widget bölgesi ve kullanıcı sıralaması kazandırır. | Context7 admin-sdk AGENTS.md, `www/apps/resources/app/admin-components/layouts/layout-composer/page.mdx` |
 | Liste sayfası widget bölgeleri | Yeni adlar: `order.list`, `product.list`, `customer.list`, `customer_group.list`, `inventory_item.list`, `price_list.list`, `promotion.list`, `campaign.list`, `region.list`, `location.list` (+ `location.list.side`), `product_category.list`, `product_collection.list`, `user.list`. Eski `.before`/`.after` adları hâlâ geçerli; düzende son ek yok sayılır. Diğer: `login.before/after`, `topbar`, `search.list`. **`home`/`dashboard` bölgesi yok.** | `admin-shared/src/extensions/widgets/constants.ts`, `dashboard-app.tsx` (`getWidgetsForSections`) |
@@ -89,18 +89,18 @@ Not: Tarayıcı kullanılmadı. Denetim çekirdek kaynak, Türkçe çeviri dosya
 
 ### P1 — hemen
 - [x] **Başlangıç sayfası** (bu dilim, bölüm 6).
-- **P1-a Menüde en üste alma.** Kod ile yapılamıyor; iki yol var:
+- [x] **P1-a Menüde en üste alma** (dilim 2: bootstrap varsayılan düzeni yazar). Kod ile yapılamıyordu; iki yol vardı:
   - Bugün, elle: Başlangıç'ı "Kenar çubuğunu özelleştir" ile sürükleyip en üste alın, "Herkes için kaydet" deyin.
   - Kalıcı: `tenant:bootstrap` `sidebar` bölgesine sistem varsayılanı yazar (`core:Searchbar` → `core:nav:/home` → çekirdek öğeler). Yalnızca varsayılan yoksa yazar, mağazanın seçimini ezmez. Backend işi; ADR-0021.
-- **P1-b Sipariş sayıları için özet ucu.** `GET /admin/home/summary` (ad önerisi): bekleyen sipariş, kargoya hazır, bugünkü satış tutarı.
+- [x] **P1-b Sipariş sayıları için özet ucu** (dilim 2): `GET /admin/home/summary`. Kargoya hazırlanmayı bekleyen, bugünkü sipariş sayısı, bugünkü satış. Düşük stok F3 T8'de eklenir.
   - Sunucuda hesaplanır (altın kural 5); kişisel veri döndürmez, bu yüzden okuma kaydı gerekmez.
   - Bir istekte gelir; F12.1 widget'ları da aynı ucu kullanır.
   - Alternatif: `/admin/orders`'a `["id"]` güvenli alan eklemek. Ama durum bazında birkaç istek ister ve ciroyu çözmez.
-- **P1-c Mağaza adı kurulumda.** Provizyon (F17) mağaza adını sorar ve yazar. O zamana kadar kontrol listesi uyarır.
+- [x] **P1-c Mağaza adı kurulumda** (dilim 2): `tenant:bootstrap --store-name="..."`; varsayılan adla kurulum yapılmaz. Provizyon (F17) adı sorup geçirir.
 
 ### P2 — sonraki dilimler
-- **Çekirdek metin düzeltmeleri** (ADR-0021): Bölüm 3.6'daki kısa liste ve bizim hata anahtarlarımız Türkçede ezilir. Liste testle sınırlanır.
-- **Ayarlar menüsünü sadeleştirme:** `settings.sidebar` varsayılanında bizim sayfalarımız "Genel"e taşınır. Geliştirici bölümü mağaza sahibi için gizlenir; platform ekibi gösterebilir.
+- [x] **Çekirdek metin düzeltmeleri** (dilim 2, ADR-0021): 119 metin sözlüğe göre ezildi. Bizim hata anahtarlarımız ise sunucuda cümleye çevrilir; çekirdek `error.message`'ı çevirmeden bastığı için metin ezme yetmez.
+- [x] **Ayarlar menüsünü sadeleştirme** (dilim 2): bizim sayfalarımız "Genel"de. Geliştirici öğeleri mağaza sahibinden gizli; platform ekibi adresle erişir, gerçek yetki F12.6'da.
 - **Ekran başı yardım şeritleri:** `product.list`, `order.list`, `location.list` bölgelerinde tek cümlelik "bu ekran ne işe yarar" ve Başlangıç'a dönüş bağlantısı. Kapatılabilir; tercih tarayıcıda tutulur.
 - **KDV ipucu:** Ürün detayında, KDV oranının ürün tipinden geldiğini söyleyen widget. Ayrı bir KDV alanı ileride ayrıca kararlaştırılır.
 - **Başlangıç'ta widget bölgesi:** `LayoutComposer` (`@medusajs/dashboard/components`) ile `qticaret.home` bölgesi. F12.1 kartları buraya eklenir, mağaza sahibi sıralayabilir. docs/06'daki "yalnızca @medusajs/ui" kuralına istisna olduğu için ADR'de anılır.
@@ -155,10 +155,10 @@ Not: Tarayıcı kullanılmadı. Denetim çekirdek kaynak, Türkçe çeviri dosya
 
 ---
 
-## 7. Açık sorular (proje sahibi)
+## 7. Kararlar (proje sahibi, 2026-10-25)
 
-1. Başlangıç her yeni mağazada menünün en üstünde mi olsun? Evet ise bootstrap düzeni yazar (P1-a, ADR-0021).
-2. Çekirdek Türkçe terimler bizim sözlüğe göre ezilsin mi? Bölüm 3.6'daki liste uygun mu?
-3. Geliştirici ayarları (API anahtarları, iş akışları) mağaza sahibinden gizlensin mi? Platform ekibi adresle erişmeye devam eder.
-4. Başlangıç'ta hangi sayılar en önemli: bekleyen sipariş, kargoya hazır, bugünkü satış, düşük stok? P1-b ucunun kapsamı buna göre belirlenir.
-5. Mağaza adı provizyonda mı sorulsun, yoksa kontrol listesi yeterli mi?
+1. Başlangıç her yeni mağazada menünün en üstünde: **evet** (bootstrap yazar).
+2. Çekirdek Türkçe terimler sözlüğe göre: **değiştirilsin** (bölüm 3.6 ve `core-overrides/tr.json`).
+3. Geliştirici ayarları: **mağaza sahibi görmesin** (menüde gizli).
+4. Başlangıç sayıları: **önerilen**: kargoya hazırlanmayı bekleyen, bugünkü sipariş, bugünkü satış; düşük stok F3 T8 ile.
+5. Mağaza adı: **kurulumda sorulsun**.

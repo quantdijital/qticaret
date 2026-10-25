@@ -57,6 +57,8 @@ const createShipmentStep = createStep(
   - Kod tarafından fırlatılan bir ZodError 400 ve `errors.invalid_data` döner; şema yolları gönderilmez. Medusa'nın istek doğrulaması MedusaError fırlatır, onun mesajı korunur.
   - Her gövdede `request_id` bulunur ve `X-Request-Id` header'ıyla aynıdır. İsteği kendisi reddeden middleware'ler `src/api/http/reject.ts`'teki `rejectRequest`'i kullanır.
   - Handler'ın kendisi hata verirse genel 500 döner; yanıt akmaya başladıysa bağlantı kesilir. İki durumda da Express'in ham stack basan fallback'ine düşülmez.
+  - Dashboard'a (session çereziyle, `Authorization` başlığı olmadan gelen admin isteği ya da `Origin`'li giriş isteği) i18n anahtarı Türkçe cümle olarak döner; anahtar `code`'da kalır (adr/0021). Çekirdek ekranlar mesajı çevirmeden basar. API istemcileri anahtarı `message`'da alır.
+- **Yeni bir hata anahtarı** `src/lib/errors/messages/tr.ts` ve `en.ts`'e cümlesiyle eklenir. Admin çevirisi ve dashboard yanıtı bu tek kaynaktan gelir; cümlesi olmayan anahtar, kodu anan genel bir cümleye düşer.
 
 ## Dış servis çağrıları
 
