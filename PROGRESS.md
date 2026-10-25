@@ -3,10 +3,22 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**F2 — Platform çekirdek modülleri + güvenlik tabanı: BİTTİ** (S1–S13; KK'ların hepsi işaretli). Sıradaki faz F3 (katalog, SEO motoru, stok). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
+**F3 — Katalog, SEO motoru ve stok: PLANLAMA** (kullanıcı kararı bekliyor; uygulama kodu yazılmadı). F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
 
 ## Son oturum özeti
 **2026-10-24 gece oturumu (S3, S5; S8 başladı).** Kullanıcı döndü; dört karar verdi: bağımlılıklar onaylandı (ioredis 5.11.1, fast-xml-parser 5.11.2, yauzl 3.4.0, kendi görsel başlık okuyucumuz), ADR-0011..0014 kabul edildi, otonom devam, eski "Gözden geçir" maddeleri olduğu gibi kabul. Commit `54abc2a`.
+
+2026-10-25 (F3 planlaması, kullanıcı dışarıdayken; `/faz-baslat`). Uygulama kodu yazılmadı.
+- **Medusa 2.21.2 doğrulaması** (Context7 + v2.21.2 kaynağı, medusa-researcher ajanı): katalog alanları ve genişletme yolu, görseller, rezervasyon ve kilit, içe/dışa aktarma, olaylar, Store `seo` payload seçenekleri, admin bildirimleri. Bulgular ADR'lerin "Bağlam" bölümlerinde.
+- **Kritik bulgu:** Locking modülü tanımlı değil; Medusa bellek içi sağlayıcıyla çalışıyor ve çok süreçte stok kilidi süreçler arası geçerli değil. Bu biliniyordu (F16'ya bırakılmıştı). F3'ün eşzamanlı checkout KK'sı buna bağlı olduğu için ADR-0020 öne çekmeyi öneriyor. Sağlayıcı `@medusajs/medusa` ile geliyor; yeni bağımlılık yok.
+- **Önerilen ADR'ler, hepsi "Önerildi":**
+  - 0015: SEO alanları ve Store `seo` payload
+  - 0016: görsel işleme
+  - 0017: yönlendirme motoru
+  - 0018: xlsx
+  - 0019: zengin metin
+  - 0020: stok defteri, düşük stok, ön sipariş, kilit
+- **F3 görev planı** aşağıda (T1–T16).
 
 2026-10-25 (F2 sonrası, kullanıcı dışarıdayken): devreden işlerden onay gerektirmeyenler.
 - Kilit alınamayan kayıt (aynı ürüne iki eşzamanlı kayıt, aynı iş tipine iki istek) artık 500 değil 503 + `Retry-After: 2` alıyor; tek satırlık bilgi logu yazılıyor, yığın izi ve kilit anahtarı yok. HTTP testli.
@@ -223,123 +235,52 @@
    - **Admin'de gözle kontrol:** Ayarlar > Özellikler, SEO, Ürün özellikleri, İşler; ürün sayfasındaki özellik kutusu. Rota etiketleri Türkçe mi, ham anahtar mı?
    - **Canlı turlar:** `docs/16-proje-haritasi.md` sırasıyla (bölüm 9).
    - **Dev'deki geçici admin kullanıcısı:** `playwright-admin@example.com` silinsin mi?
-2. **F3'e geçmeden önce kararlar:** F3 kapsamı (docs/03); F2'den devreden maddeler aşağıda. Playwright e2e altyapısı (ayrı profil + `@playwright/test`) onay ister.
+2. **F3 kararları (kullanıcı):**
+   - ADR-0015..0020: her biri ayrı ayrı kabul ya da ret.
+   - Yeni bağımlılıklar: `sharp` (T6), `yazl` (T15), Tiptap paketleri (T13, yalnızca admin). Sürümler kendi oturumunda ≥14 gün kuralıyla seçilir.
+   - Redis kilit sağlayıcısının F16'dan F3'e (T7) çekilmesi (ADR-0020).
+   - Canonical host boşken mutlak URL'nin kaynağı (ADR-0015 açık sorusu).
+   - Görev sırası ve kapsam (aşağıdaki tablo). Playwright e2e altyapısı (ayrı profil + `@playwright/test`) onay ister.
+   - İlk uygulama oturumunda F3 dalı açılır (öneri: `f3-catalog-seo-stock`, `f2-platform-core` üzerinden).
 3. **Yerel dev DB:** F2'nin tüm migration'ları uygulandı. Dev dosyaları artık SeaweedFS'e yazılıyor.
 
-### F2 görev planı (oturum büyüklüğünde, önerilen sıra)
+### F3 görev planı (oturum büyüklüğünde, önerilen sıra; kullanıcı onayı bekliyor)
 | # | Görev | Kapsam | Bağımlılık | ADR |
 |---|---|---|---|---|
-| S1 ✅ | F2.2 + F2.7 | `lib/errors` ve `lib/money`. Birim testleri | — | 0010 ✅ |
-| S2 ✅ | F2.10a | Pino logger, redaksiyon, istek ID'si, hata yanıtı sanitizasyonu | S1 | — |
-| S3 ✅ | F2.10b | Güvenlik header'ları, Redis rate limit, CSRF, sayfalama sınırı, upload boyut kapısı. KK: login 429, header'lar | S2 | 0004 eki |
-| S4 ✅ | F2.9a | `safe-fetch` (SSRF) + timing-safe yardımcıları. KK: iç IP / rebinding reddi | S1 | — |
-| S5 ✅ | F2.9b | Upload validator + `/admin/uploads` kapısı, CSV kaçışlama, güvenli XML, zip sınırları. KK: SVG / sahte MIME reddi | S3, S4 | — |
-| S6 ✅ | F2.1 + F2.6 | HTTP istemcisi + `/admin/integrations/health` deseni. KK: logda Authorization yok | S2, S4 | — |
-| S7 ✅ | F2.11 | `lib/seo` + `url-registry` modülü. KK: slug tablosu, path tekilliği | S1 | — |
-| S8 ✅ | F2.5 | `audit-log` modülü, mutasyon ve okuma kaydı. KK: fiyat değişimi, TCKN okuma | S3 | 0011 |
-| S9 ✅ | F2.3a | `platform-settings` backend: bölümler, bayraklar, cache, uygulama noktaları. KK: kapalı bayrak | S7, S8 | 0012 |
-| S10 ✅ | F2.3b | Admin: Ayarlar > Özellikler ve Ayarlar > SEO sayfaları | S9 | — |
-| S11 ✅ | F2.4a | `product-attributes` backend: modül, link'ler, workflow'lar, admin/store API. KK: Store API'de değer | S8 | 0013 |
-| S12 ✅ | F2.4b | Admin: ürün widget'ı + şablon yönetim sayfası | S11 | — |
-| S13 ✅ | F2.8 | `async-job` modülü, file-s3, "İşler" sayfası; ilk tip denetim kaydı CSV dışa aktarma | S5, S8 | 0014 |
-
-Görev ayrıntıları:
-- **S1:** Tamamlandı (bkz. "Son oturum özeti" ve ADR-0010 "Uygulama").
-- **S2:** Tamamlandı (bkz. "Son oturum özeti"). İlk plan:
-  - errorHandler önce `lib/errors` `toHttpError`'ı uygular. Bizim tipimiz değilse sanitize edilmiş Medusa varsayılanına düşer; varsa `Retry-After` header'ını yazar.
-  - Medusa logger'ı `defineConfig({ logger })` ile pino adaptörüne geçer. Modül container'larına da geçtiği doğrulanır.
-  - `lib/logging`: `{ event, ... }` alanlı yapılandırılmış logger, docs/10 ve adr/0009 redaksiyon listesi (+ `cookie`, `set-cookie`), AsyncLocalStorage istek bağlamı.
-  - İstek ID'si: gelen `x-request-id` biçim kontrolünden geçer; yoksa veya geçersizse UUID üretilir. Yanıta `X-Request-Id` yazılır.
-  - errorHandler varsayılanı sarar:
-    - DB kaynaklı mesajlar (unique/FK/not-null) genel mesajla değiştirilir.
-    - 5xx yanıtı genel mesaj döner.
-    - Yanıtta `request_id` bulunur.
-    - Test: unique ihlali yanıtında değer görünmez.
-  - Script logları (seed, bootstrap, import) yapılandırılmış loga geçer (F1'den devreden).
-- **S3:**
-  - **Header'lar:** Global `"/*"` middleware'i şunları ekler: HSTS (yerel değilse), `nosniff`, `X-Frame-Options: DENY` + `frame-ancestors 'none'`, Referrer-Policy, Permissions-Policy. `X-Powered-By` kaldırılır. Admin `/app` statiklerinin bu middleware'den geçip geçmediği doğrulanır; geçmiyorsa admin CSP F16'da reverse proxy'de uygulanır.
-  - **Rate limit:**
-    - Medusa Redis istemcisini dışarı açmadığı için kendi ioredis bağlantımız kullanılır. `REDIS_URL` yoksa (dev/test) bellek içi store.
-    - Profiller: login (`/auth/{customer,user}/emailpass`), kayıt, şifre sıfırlama, token yenileme, varsayılan store/admin.
-    - Checkout, kupon, taksit, SMS ve webhook profilleri tanımlanır; uçları ilgili fazda bağlanır.
-    - Anahtar: IP + hash'lenmiş kimlik. Yanıt: 429 + `Retry-After`.
-    - Limit, admin auth ve publishable key kontrolünden sonra çalışır.
-  - **CSRF:** ADR-0004 F2.10 ekindeki kurallar.
-  - **Sayfalama:** `/store/*`'da `limit > 100` 400 döner. Admin dashboard'un kullandığı limitler Playwright ile ölçülür, ardından admin'e de uygulanır.
-  - **Upload:** `/admin/uploads` için multer öncesi Content-Length üst sınırı.
-  - **CORS:** Allowlist dışı origin için regresyon testi.
-- **S4:** Tamamlandı (bkz. "Son oturum özeti"). İlk plan:
-  - `node:http(s)` istekleri özel bir `lookup` ile yapılır. DNS çözümünden sonra adres `net.BlockList` ile kontrol edilir:
-    - özel, loopback, link-local/metadata, CGNAT, multicast, ayrılmış aralıklar
-    - IPv6 ULA, IPv4-mapped, NAT64
-  - Bağlantı doğrulanan IP'ye gider, bu yüzden DNS rebinding işe yaramaz.
-  - Yalnızca http/https ve port allowlist. Yönlendirmeler elle izlenir ve her adımda yeniden doğrulanır (en çok 5). Toplam süre ve yanıt boyutu sınırlıdır.
-  - Yeni bağımlılık yok.
-- **S5:**
-  - **Upload validator:**
-    - Tür magic bytes ile belirlenir (jpeg/png/webp/avif). SVG ve tanınmayan türler reddedilir.
-    - Boyut ve piksel sınırı uygulanır.
-    - Validator `/admin/uploads` POST'unda multer'dan sonra çalışır (aynı matcher + `methods`).
-    - Yeniden kodlama ve EXIF temizleme F3.3'te.
-  - **CSV:** `= + - @ \t \r` ile başlayan hücreler kaçışlanır; RFC 4180 tırnaklama.
-  - **XML:** DOCTYPE içeren girdi reddedilir, entity işleme kapalı, boyut sınırı var.
-  - **Zip:** Giriş sayısı, gerçek açılmış toplam boyut ve sıkıştırma oranı sınırlanır; path traversal ve symlink reddedilir. xlsx de zip olduğundan F3.9'da önce bu kontrolden geçer.
-- **S6:** Tamamlandı (bkz. "Son oturum özeti"). İlk plan:
-  - **İstemci:** Node `fetch`. Özellikleri:
-    - istek başına timeout
-    - üstel geri çekilme + jitter (yalnız idempotent ya da açıkça işaretli isteklerde; 429'da `Retry-After`'a uyulur)
-    - süreç başına devre kesici
-    - `x-request-id` korelasyonu, header/gövde redaksiyonu
-    - Zod ile yanıt parse etme, `ProviderError` / `RetryableError`
-    - Medusa'nın `retryExecution`'ında üstel geri çekilme yok, kullanılmaz.
-    - Kullanıcı kontrollü URL'lerde transport olarak `safe-fetch` kullanılır.
-    - Testler `node:http` sahte sunucusuyla yazılır.
-  - **Sağlık:**
-    - Arayüz: `IntegrationHealthCheck { id, kind, check(signal) }`.
-    - Provider'lar izole olduğundan kontroller provider sınıfından ayrı bir kayıt defterinde tutulur; aynı istemci ve env yapılandırmasını kullanır.
-    - `GET /admin/integrations/health`: kontroller paralel ve zaman sınırlı çalışır, sonuç 30 sn cache'lenir. Yanıtta secret veya ham hata olmaz.
-    - İlk kontrol Redis'tir; dosya deposu S13'te eklenir.
-    - Core `/health` her zaman 200 döner; readiness ucu F16'da.
-- **S7:** Tamamlandı (bkz. "Son oturum özeti"). İlk plan:
-  - **Slug:** docs/13 §2.1 kuralları. F3.1'de ürün handle'ı bu üreticiden verilir.
-  - **Şablon motoru:** Tokenlar desteklenir. Bilinmeyen token kaydetme anında hata verir; boş token kalan ayırıcıları temizler.
-  - **Piksel genişliği:** Tablo, Arial ile aynı metriklere sahip Liberation Sans'tan (OFL) üretilir. Sınırlar doc 14 ve `/seo-*` skill'leriyle doğrulanır.
-  - **`url-registry` modülü:** `(locale, path)` unique; durum `active` | `reserved`; `claim` / `release` / `resolve`.
-- **S8:** ADR-0011'e göre:
-  - mutasyon middleware'i ve kaynak kayıt defteri (ilk giriş: varyant fiyatları)
-  - okuma middleware'i: fatura profili, müşteri detayı ve adresleri, sipariş detayı
-  - `GET /admin/audit-log`, `recordAuditEntryStep`
-  - secret API key actor'ı testi
-- **S9:** ADR-0012'ye göre:
-  - `store` ve `seo` bölümleri. SEO bölümü canonical host, URL deseni, başlık şablonları (S7 motoruyla doğrulanır) ve robots şablonunu içerir.
-  - Bayrak kayıt defteri, Redis sürüm sayaçlı cache, `requireFeature`, `assertFeatureEnabledStep`.
-  - Admin API ve denetim kaydı girişleri.
-  - KK testi bir test bayrağıyla yapılır.
-- **S10:**
-  - Sayfalar: `src/admin/routes/settings/features` ve `settings/seo`; SEO sayfasında şablon önizlemesi var.
-  - Admin'e JS SDK (`sdk.client.fetch`) eklenir.
-  - Kurallar: `@medusajs/ui`, i18n, yükleniyor/boş/hata durumları, Playwright smoke.
-- **S11:** ADR-0013'e göre:
-  - modül ve link'ler
-  - şablon ve değer workflow'ları (ürün başına kilitli upsert)
-  - Store'da `allowFields`; matcher hem `/store/products` hem `/store/products/:id`
-  - facet indeksleri, denetim kaydı girişi
-- **S12:** `product.details` widget'ı (şablon seçimi + dinamik form) ve `settings/attribute-templates` sayfası.
-- **S13:** ADR-0014'e göre:
-  - modül, iş tipi kayıt defteri, enqueue workflow'u ve subscriber
-  - heartbeat, süpürücü ve saklama job'ları
-  - file-s3 (SeaweedFS) bağlantısı ve env şeması, sonuç indirme ucu, "İşler" sayfası
+| T1 | F3.1 + F3.2 | Katalog uzantısı: MPN, durum, birincil kategori, halef ürün (link'li modül + widget). Fiziksel üründe ölçü/ağırlık kuralı, fiziksel olmayan ürün bayrağı. Handle `lib/seo` slug'ından; ürün/kategori/koleksiyon hook'larında `claimPath`/`unclaimPath`. Düz desen için sistem yolları rezervi | — | 0013 deseni |
+| T2 | F3.4a | `seo-meta` modülü ve link'ler, `PUT /admin/seo/:type/:id`, ürün/kategori widget'ı, denetim kaydı | — | 0015 |
+| T3 | F3.5 | `seo-redirects`: kurallar, güvenli desen, zincir/döngü, slug ve halef değişiminde otomatik 301, `GET /store/seo/resolve`, 404 günlüğü + hedef önerisi, CSV içe/dışa. KK: 301 zinciri | T1 | 0017 |
+| T4 | F3.4b | `lib/seo/resolve`, resolve yanıtında `seo` payload, versioned cache, URL deseni değişiminde toplu 301 (iş) | T2, T3 | 0015 |
+| T5 | F3.11 | `brands` modülü, ürün ↔ marka, admin sayfası, Store marka ucu, SEO link'i | T2 | — |
+| T6 | F3.3 | Görsel hattı: `image.process` işi, türevler, OG kırpma, alt metin, varyant görselleri. KK: EXIF temizleme | `sharp` onayı | 0016 |
+| T7 | F3.7 | Stok: depo/seviye kurulumu, Redis kilit sağlayıcısı, iptal/iade geri dönüş testleri. KK: eşzamanlı checkout | — | 0020 |
+| T8 | F3.8 | `stock-ledger`, düşük stok eşiği + `feed` uyarısı, ön sipariş bayrağı, uzlaştırma işi. KK: düşük stok uyarısı | T7 | 0020 |
+| T9 | F3.12 | `lib/seo/jsonld`: ProductGroup/Product/Offer, BreadcrumbList, CollectionPage/ItemList, OnlineStore, Article; şema testleri. KK: payload + JSON-LD sözleşme testi | T1, T4 | — |
+| T10 | F3.6 + F3.15 | Sitemap işi (debounce + günlük, 50.000'de bölme, görsel sitemap, S3), robots.txt üretimi ve AI ön ayarları, canonical host 301, staging `noindex`, imzalı önizleme, IndexNow. KK: sitemap/robots | T4, T5 | — |
+| T11 | F3.13 | `seo-advisor`: kural motoru, skor, bulgular, tek tık düzeltme, widget + SERP önizleme, liste sütunu, yayın kapısı. KK: deterministik, p95 < 50 ms | T2, T9 | — |
+| T12 | F3.14 | Mağaza geneli SEO denetim işi, 404 isabet listesi + "301 oluştur", mükerrer/öksüz/zincir listeleri. KK: 404 önerisi | T3, T11 | — |
+| T13 | F3.16a | `content` modülü: sayfa ve blog, zengin metin (belge JSON + sunucu oluşturucu, Tiptap), kısa kodlar, Store API | T2, Tiptap onayı | 0019 |
+| T14 | F3.16b + F3.17 | Facet landing sayfaları, özgünlük kapısı, facet parametre kuralları ve robots engelleri. KK: özgünlük < %30 | T10, T13 | — |
+| T15 | F3.9 | xlsx okuyucu + `yazl` yazıcı, TR şablonu, `catalog.import`/`catalog.export` işleri, kontrollü yükleme yolu, satır hata raporu, advisor ön özeti. KK: 1000 satır, formül kaçışı | T1, T2, T5, T8, `yazl` onayı | 0018 |
+| T16 | F3.10 | Toplu düzenleme: fiyat, stok, yayın durumu, kategori, SEO şablonu, alt metin | T8, T15 | — |
 
 Paralel zincirler:
-- S1 → S2 → S3 → S8 → S9 → S10
-- S8 → S11 → S12
-- S1 → S4 → S5 ve S6
-- S1 → S7 → S9
-- S13 en son (S5 ve S8'den sonra)
+- T1 → T3 → T4 → T9 → T11 → T12
+- T2 → T4; T2 → T5; T2 → T13 → T14
+- T7 → T8 → T15 → T16
+- T6 bağımsız (`sharp` onayından sonra).
+- T10, T4 ve T5'ten sonra gelir; sayfa ve landing bölümleri T13 ve T14'te eklenir.
 
-Önerilen sıra, güvenlik tabanını (S1–S3) yeni route'lardan önce kurar (docs/04 "Route eklenmeden önce hazır").
+Devreden işlerin F3 görevlerine dağılımı:
+- **T1:** `claimPath`/`unclaimPath` ve slug `""` durumu (S7), Türkçe handle (F2 planlaması), düz desen sistem yolları (S7). `additional_data`: admin ürün formu göndermiyor (2.21.2 doğrulandı), alanlar widget + kendi route'umuzla yazılır.
+- **T5 ve T14:** özellik görünürlüğü (`is_public`) ve Store yanıt filtresi (S11).
+- **T7:** Redis kilit sağlayıcısı (F1, F2'den F16'ya bırakılmıştı; ADR-0020 öneriyor).
+- **T15:** `presigned-urls` yerine kontrollü yükleme yolu, iş iptal ucu (S13).
+
+F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde: `git show 118e835:PROGRESS.md`.
 
 ## Açık sorular / bloklayıcılar
+- [ ] **F3 kararları** (2026-10-25 planlaması; ayrıntı "Sıradaki görev" ve "F3 görev planı"): ADR-0015..0020, yeni bağımlılıklar (`sharp`, `yazl`, Tiptap), kilit sağlayıcısının öne çekilmesi, canonical host kaynağı.
 - [x] **Gözden geçir: otonom oturumda S4, S7 ve S6 için verilen muhafazakâr kararlar:** Kullanıcı 2026-10-24 akşamı olduğu gibi kabul etti.
   - **S4:**
     - `safeFetch` varsayılan yönlendirme modu `same-origin`. Başka origin'e gitmek için `follow` açıkça istenmeli; webhook'larda `error`.
@@ -395,7 +336,7 @@ Paralel zincirler:
   - **NODE_ENV (F16):** Express, tanımsız NODE_ENV'i development sayıyor; bizim handler'ımız dışına düşen hatalarda stack HTML'de görünebilir. Üretim imajında NODE_ENV zorunlu olmalı (F1'den devreden maddeyle birlikte).
   - **test-utils logları:** DB kurulumu Medusa'nın varsayılan winston reporter'ıyla yazıyor; yalnızca testte.
 - [ ] **F2 planlamasında çıkan, sonraki fazlara devreden işler:**
-  - **Redis modülleri (F16):** Prod için Redis event bus, workflow engine, locking ve caching modülleri gerekli. Bunlar olmadan server/worker ayrımı, restart sonrası iş devamı ve tek instance'ta zamanlanmış iş garantisi yok (ADR-0014).
+  - **Redis modülleri (F16):** Prod için Redis event bus, workflow engine, locking ve caching modülleri gerekli. Bunlar olmadan server/worker ayrımı, restart sonrası iş devamı ve tek instance'ta zamanlanmış iş garantisi yok (ADR-0014). ADR-0020 locking'i F3 T7'ye çekmeyi öneriyor.
   - **trust proxy (F16):** Medusa `trust proxy = 1` ayarlıyor. Rate limit IP'si doğru olsun diye prod'da tam bir reverse proxy katmanı olmalı.
   - **Handle (F3.1):** Ürün, kategori ve koleksiyon handle'ları `lib/seo` slug üreticisinden verilir; Medusa'nın `toHandle`'ı Türkçe karakterleri ASCII'ye çevirmiyor.
   - **İçe aktarma (F3.9):** Medusa'nın ürün içe aktarması dosyayı presigned URL ile doğrudan depoya yükleyebiliyor. Bu yol `/admin/uploads` doğrulamasından geçmez; F3.9'da ele alınacak.
@@ -448,7 +389,7 @@ Paralel zincirler:
 | F0 Repo & araçlar | ✅ |
 | F1 Medusa çekirdek + TR lokalizasyon | ✅ |
 | F2 Platform çekirdek modülleri | ✅ |
-| F3 Katalog, SEO motoru ve stok | ⬜ |
+| F3 Katalog, SEO motoru ve stok | ⏳ (planlama, karar bekliyor) |
 | F4 Fiyatlandırma ve promosyon | ⬜ |
 | F5 Ödeme: iyzico | ⬜ |
 | F6 Ödeme: PayTR + havale/EFT + kapıda ödeme + yönlendirici + ters ibraz | ⬜ |
