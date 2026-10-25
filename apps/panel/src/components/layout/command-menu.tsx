@@ -1,5 +1,15 @@
 import { useNavigate } from "@tanstack/react-router"
-import { ArrowUpRight, LogOut, Palette } from "lucide-react"
+import {
+  ArrowUpRight,
+  BadgePercent,
+  FolderPlus,
+  LogOut,
+  PackageMinus,
+  PackagePlus,
+  Palette,
+  Truck,
+} from "lucide-react"
+import type { LucideIcon } from "lucide-react"
 import { useEffect } from "react"
 import { useTranslation } from "react-i18next"
 import {
@@ -15,6 +25,16 @@ import {
 import { useLogout } from "@/features/auth/api/me"
 import { advancedPanelUrl } from "@/lib/advanced-panel"
 import { ALL_NAV_ITEMS } from "./navigation"
+
+// The jobs people start most, a keystroke away (docs/06 §5)
+const SHORTCUTS: { key: string; icon: LucideIcon; to: string; search?: Record<string, string> }[] =
+  [
+    { key: "addProduct", icon: PackagePlus, to: "/products/new" },
+    { key: "toShip", icon: Truck, to: "/orders", search: { stage: "to_ship" } },
+    { key: "lowStock", icon: PackageMinus, to: "/inventory", search: { view: "low" } },
+    { key: "addPromotion", icon: BadgePercent, to: "/promotions/new" },
+    { key: "addCategory", icon: FolderPlus, to: "/categories", search: { selected: "new" } },
+  ]
 
 interface CommandMenuProps {
   open: boolean
@@ -71,6 +91,24 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
         </CommandGroup>
         <CommandSeparator />
         <CommandGroup heading={t("command.actions")}>
+          {SHORTCUTS.map((shortcut) => (
+            <CommandItem
+              key={shortcut.key}
+              value={t(`command.shortcuts.${shortcut.key}`)}
+              onSelect={() => {
+                run(
+                  () =>
+                    void navigate({
+                      to: shortcut.to,
+                      ...(shortcut.search ? { search: shortcut.search } : {}),
+                    })
+                )
+              }}
+            >
+              <shortcut.icon />
+              {t(`command.shortcuts.${shortcut.key}`)}
+            </CommandItem>
+          ))}
           <CommandItem
             value={t("command.appearance")}
             onSelect={() => {

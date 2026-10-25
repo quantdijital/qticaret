@@ -59,7 +59,15 @@ function useColumns(): Column<BoardOrder>[] {
     {
       key: "stage",
       header: t("orders.columns.stage"),
-      cell: (order) => <StageBadge stage={order.stage} />,
+      // On phones the total sits under the stage; its own column comes back from sm up
+      cell: (order) => (
+        <div className="flex flex-col items-start gap-1">
+          <StageBadge stage={order.stage} />
+          <span className="tabular text-xs font-medium sm:hidden">
+            {formatMoney(order.total, order.currency_code)}
+          </span>
+        </div>
+      ),
     },
     {
       key: "items",
@@ -75,6 +83,7 @@ function useColumns(): Column<BoardOrder>[] {
       key: "total",
       header: t("orders.columns.total"),
       align: "right",
+      className: "hidden sm:table-cell",
       cell: (order) => (
         <span className="tabular font-medium">{formatMoney(order.total, order.currency_code)}</span>
       ),

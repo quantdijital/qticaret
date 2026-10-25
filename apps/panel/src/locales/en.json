@@ -392,7 +392,14 @@
     "pages": "Pages",
     "actions": "Actions",
     "appearance": "Appearance settings",
-    "trigger": "Search or jump to…"
+    "trigger": "Search or jump to…",
+    "shortcuts": {
+      "addProduct": "Add product",
+      "toShip": "Orders to ship",
+      "lowStock": "Low stock",
+      "addPromotion": "Create promotion",
+      "addCategory": "Add category"
+    }
   },
   "topbar": {
     "viewStore": "View store"

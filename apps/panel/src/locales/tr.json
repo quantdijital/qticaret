@@ -392,7 +392,14 @@
     "pages": "Sayfalar",
     "actions": "İşlemler",
     "appearance": "Görünüm ayarları",
-    "trigger": "Ara ya da bir sayfaya git…"
+    "trigger": "Ara ya da bir sayfaya git…",
+    "shortcuts": {
+      "addProduct": "Ürün ekle",
+      "toShip": "Hazırlanacak siparişler",
+      "lowStock": "Azalan stok",
+      "addPromotion": "Kampanya oluştur",
+      "addCategory": "Kategori ekle"
+    }
   },
   "topbar": {
     "viewStore": "Mağazayı görüntüle"

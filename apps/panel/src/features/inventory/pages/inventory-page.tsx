@@ -32,6 +32,17 @@ const DIGITS = /^\d{1,7}$/
 
 type Drafts = Record<string, string>
 
+function AvailableBadge({ available, threshold }: { available: number; threshold: number }) {
+  const { t } = useTranslation()
+  return available <= 0 ? (
+    <StatusBadge tone="danger">{t("inventory.out")}</StatusBadge>
+  ) : available <= threshold ? (
+    <StatusBadge tone="warning">{t("inventory.lowCount", { count: available })}</StatusBadge>
+  ) : (
+    <span className="tabular-nums">{formatCount(available)}</span>
+  )
+}
+
 function useColumns(
   locationId: string | null,
   threshold: number,
@@ -49,7 +60,8 @@ function useColumns(
         return (
           <div className="flex min-w-0 items-center gap-3">
             <ProductThumb src={product?.thumbnail} />
-            <div className="flex min-w-0 flex-col">
+            {/* Capped on phones so long codes truncate instead of pushing the shelf field off screen */}
+            <div className="flex max-w-[8.5rem] min-w-0 flex-col sm:max-w-xs">
               {product ? (
                 <Link
                   to="/products/$id"
@@ -64,6 +76,11 @@ function useColumns(
               <span className="truncate text-xs text-muted-foreground">
                 {[item.variant?.title, item.sku].filter(Boolean).join(" · ")}
               </span>
+              {/* On phones sellable stock sits here; its own column comes back from sm up */}
+              <span className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground sm:hidden">
+                {t("inventory.columns.available")}
+                <AvailableBadge available={item.available} threshold={threshold} />
+              </span>
             </div>
           </div>
         )
@@ -72,16 +89,8 @@ function useColumns(
     {
       key: "available",
       header: t("inventory.columns.available"),
-      cell: (item) =>
-        item.available <= 0 ? (
-          <StatusBadge tone="danger">{t("inventory.out")}</StatusBadge>
-        ) : item.available <= threshold ? (
-          <StatusBadge tone="warning">
-            {t("inventory.lowCount", { count: item.available })}
-          </StatusBadge>
-        ) : (
-          <span className="tabular-nums">{formatCount(item.available)}</span>
-        ),
+      className: "hidden sm:table-cell",
+      cell: (item) => <AvailableBadge available={item.available} threshold={threshold} />,
     },
     {
       key: "reserved",
@@ -111,7 +120,7 @@ function useColumns(
             })}
             aria-invalid={invalid || undefined}
             className={cn(
-              "ml-auto h-8 w-24 text-right tabular-nums",
+              "ml-auto h-8 w-20 text-right tabular-nums sm:w-24",
               drafts[item.id] !== undefined && drafts[item.id] !== current && "border-primary"
             )}
             onClick={(event) => {
