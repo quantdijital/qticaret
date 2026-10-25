@@ -367,6 +367,12 @@
             "label": "Dijital ve hizmet ürünleri",
             "description": "Kargo gerektirmeyen ürünler (e-kitap, hediye kodu, kurs, hizmet) satılabilir; bu ürünlerde kargo ve ölçü istenmez."
           }
+        },
+        "seo": {
+          "indexnow": {
+            "label": "Değişen sayfaları IndexNow ile bildir",
+            "description": "Ürün, kategori ve marka sayfası eklenince, değişince ya da kalkınca Bing, Yandex ve diğer IndexNow arama motorlarına haber verilir. Mağazanın ana alan adı gerekir; Google bu protokole katılmıyor."
+          }
         }
       }
     },

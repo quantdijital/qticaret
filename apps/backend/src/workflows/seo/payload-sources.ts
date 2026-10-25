@@ -1,6 +1,5 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
-import ProductBrandLink from "../../links/product-brand"
 import { isSearchIndexingOn, parseEnv } from "../../lib/env"
 import type { SeoOverrides, SeoShop, SeoSubject } from "../../lib/seo/resolve"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
@@ -123,12 +122,14 @@ export async function listingItems(
   } else if (owner.entity_type === CATALOG_ENTITY_TYPES.collection) {
     filters = { collection_id: owner.entity_id }
   } else if (owner.entity_type === CATALOG_ENTITY_TYPES.brand) {
+    // Through the brand's side of the link: no link definition is loaded here
     const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
-      entity: ProductBrandLink.entryPoint,
-      fields: ["product_id"],
-      filters: { brand_id: owner.entity_id },
+      entity: "brand",
+      fields: ["products.id"],
+      filters: { id: owner.entity_id },
     })
-    filters = { id: (data as { product_id: string }[]).map((row) => row.product_id) }
+    const brand = data[0] as { products?: ({ id: string } | null)[] | null } | undefined
+    filters = { id: (brand?.products ?? []).flatMap((row) => (row ? [row.id] : [])) }
   }
   if (!filters) {
     return []

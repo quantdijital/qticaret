@@ -367,6 +367,12 @@
             "label": "Digital and service products",
             "description": "Sell products that need no shipping (e-books, gift codes, courses, services); they ask for no shipping or measurements."
           }
+        },
+        "seo": {
+          "indexnow": {
+            "label": "Announce changed pages with IndexNow",
+            "description": "When a product, category or brand page is added, changed or removed, Bing, Yandex and other IndexNow search engines are told. Needs the shop's main domain; Google does not take part."
+          }
         }
       }
     },

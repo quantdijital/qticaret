@@ -18,6 +18,9 @@ export interface FeatureDefinition {
 /** The flag key the code reads for digital and service products (F3.2). */
 export const NON_PHYSICAL_PRODUCTS = "catalog.non_physical"
 
+/** Announcing changed pages to IndexNow search engines (F3.15); calls go out of the shop. */
+export const SEO_INDEXNOW = "seo.indexnow"
+
 export const FEATURES: Readonly<Record<string, FeatureDefinition>> = Object.freeze({
   // F3.2: products that need no shipping (e-books, gift codes, courses, services)
   [NON_PHYSICAL_PRODUCTS]: {
@@ -25,6 +28,13 @@ export const FEATURES: Readonly<Record<string, FeatureDefinition>> = Object.free
     owner: "tenant",
     labelKey: "qticaret.features.catalog_non_physical.label",
     descriptionKey: "qticaret.features.catalog_non_physical.description",
+  },
+  // F3.15: off until the shop turns it on, since it calls a service outside
+  [SEO_INDEXNOW]: {
+    default: false,
+    owner: "tenant",
+    labelKey: "qticaret.features.seo_indexnow.label",
+    descriptionKey: "qticaret.features.seo_indexnow.description",
   },
 })
 
