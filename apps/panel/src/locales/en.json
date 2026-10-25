@@ -285,8 +285,8 @@
     "seo": {
       "title": "SEO",
       "subtitle": "General settings for how your shop shows up in search engines.",
-      "addresses": "Domain and address shape",
-      "addressesHint": "Permanent page addresses are built from these.",
+      "addresses": "Domain",
+      "addressesHint": "Permanent addresses and share links use this domain.",
       "host": "Main domain",
       "hostHint": "e.g. www.yourshop.com. Empty means the platform subdomain.",
       "urlStyle": {
@@ -294,7 +294,6 @@
         "category": "Category addresses",
         "brand": "Brand addresses"
       },
-      "urlStyleNote": "Changes apply to pages saved from now on; moving existing addresses is a separate step.",
       "templates": "Title and description templates",
       "templatesHint": "Used when a page has no title of its own. Click a tag to add it at the cursor.",
       "titleTemplate": {
@@ -330,6 +329,28 @@
         "kısa_açıklama": "A relaxed shirt in washed linen",
         "fiyat_cümlesi": "TRY 899.00.",
         "kargo_cümlesi": "Ships the same day."
+      },
+      "style": {
+        "title": "URL style",
+        "hint": "Changing it moves every product and category address; old addresses redirect permanently (301) to the new ones.",
+        "check": "Check the change",
+        "move": "Move addresses",
+        "ready_one": "{{pages}} page will get a new address. The old one redirects permanently; search engines carry its ranking over.",
+        "ready_other": "{{pages}} pages will get new addresses. The old ones redirect permanently; search engines carry their ranking over.",
+        "conflicts_one": "{{count}} address conflicts; resolve it first.",
+        "conflicts_other": "{{count}} addresses conflict; resolve them first.",
+        "reasons": {
+          "shared": "{{names}} fall on the same address; change one of them.",
+          "reserved_root": "{{names}}: this address is kept for the shop's own pages.",
+          "taken": "{{names}}: another record holds this address."
+        },
+        "releasable": "An old address; it can be released in SEO > Redirects > Old addresses.",
+        "confirmTitle": "Move the addresses?",
+        "confirmText": "{{pages}} pages will move to their new addresses. The job runs in the background; the new style is saved when it ends.",
+        "moving": "Moving addresses… {{percent}}%",
+        "moved_one": "{{count}} page moved to its new address.",
+        "moved_other": "{{count}} pages moved to their new addresses.",
+        "failed": "The addresses could not be moved; run the check again. Details in Settings > Jobs."
       }
     },
     "features": {
@@ -366,7 +387,8 @@
         "cancelled": "Cancelled"
       },
       "types": {
-        "audit_log.export": "Audit log export"
+        "audit_log.export": "Audit log export",
+        "seo.url_style": "URL style change"
       }
     },
     "audit": {

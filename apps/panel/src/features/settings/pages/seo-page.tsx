@@ -13,6 +13,7 @@ import { sectionQuery, useSaveSection } from "@/features/settings/api/sections"
 import type { SeoSettings } from "@/features/settings/api/sections"
 import { useStoreName } from "@/features/settings/api/store"
 import { TemplateField } from "@/features/settings/components/template-field"
+import { UrlStyleCard } from "@/features/settings/components/url-style-card"
 import { TEMPLATE_TOKENS } from "@/features/settings/seo-sample"
 import { errorText } from "@/lib/errors"
 
@@ -21,8 +22,6 @@ const TITLE_LIMIT = 60
 const DESCRIPTION_LIMIT = 155
 const ENTITIES = ["product", "category", "brand"] as const
 const PRESETS = ["ai_search_visible", "block_training", "none"] as const
-const EXAMPLE_SLUG = { product: "keten-gomlek", category: "giyim", brand: "ornek-marka" } as const
-const PREFIX = { product: "/urun/", category: "/kategori/", brand: "/marka/" } as const
 
 function useSave(form: { reset: (values: SeoSettings) => void }) {
   const { t } = useTranslation()
@@ -45,7 +44,7 @@ function AddressCard({ saved }: { saved: SeoSettings }) {
   const { run, saving } = useSave(form)
   const submit = form.handleSubmit((values) => {
     const host = values.canonical_host?.trim()
-    run({ canonical_host: host?.length ? host : null, url_style: values.url_style })
+    run({ canonical_host: host?.length ? host : null })
   })
   return (
     <CardForm
@@ -66,35 +65,6 @@ function AddressCard({ saved }: { saved: SeoSettings }) {
           {...form.register("canonical_host")}
         />
       </Field>
-      {ENTITIES.map((entity) => (
-        <Field key={entity} label={t(`settings.seo.urlStyle.${entity}`)}>
-          <Controller
-            control={form.control}
-            name={`url_style.${entity}`}
-            render={({ field }) => (
-              <RadioGroup
-                value={field.value}
-                onValueChange={field.onChange}
-                className="grid gap-2 sm:grid-cols-2"
-              >
-                {(["prefixed", "flat"] as const).map((style) => (
-                  <label
-                    key={style}
-                    className="flex cursor-pointer items-center gap-2.5 rounded-md border px-3 py-2.5 has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-accent"
-                  >
-                    <RadioGroupItem value={style} />
-                    <span className="font-mono text-[13px]">
-                      {style === "prefixed" ? PREFIX[entity] : "/"}
-                      {EXAMPLE_SLUG[entity]}
-                    </span>
-                  </label>
-                ))}
-              </RadioGroup>
-            )}
-          />
-        </Field>
-      ))}
-      <p className="text-xs text-muted-foreground">{t("settings.seo.urlStyleNote")}</p>
     </CardForm>
   )
 }
@@ -232,6 +202,7 @@ export function SeoPage() {
       ) : (
         <>
           <AddressCard saved={query.data.values} />
+          <UrlStyleCard saved={query.data.values.url_style} />
           <TemplatesCard saved={query.data.values} storeName={storeName} />
           <CrawlersCard saved={query.data.values} />
         </>

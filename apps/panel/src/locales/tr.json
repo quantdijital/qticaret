@@ -285,8 +285,8 @@
     "seo": {
       "title": "SEO",
       "subtitle": "Arama motorlarında mağazanızın nasıl görüneceğini belirleyen genel ayarlar.",
-      "addresses": "Alan adı ve adres yapısı",
-      "addressesHint": "Kalıcı sayfa adresleri bu ayarlarla oluşur.",
+      "addresses": "Alan adı",
+      "addressesHint": "Kalıcı adresler ve paylaşım bağlantıları bu alan adıyla oluşur.",
       "host": "Ana alan adı",
       "hostHint": "Örn. www.magazaniz.com. Boş bırakılırsa platform alt alan adı kullanılır.",
       "urlStyle": {
@@ -294,7 +294,6 @@
         "category": "Kategori adresleri",
         "brand": "Marka adresleri"
       },
-      "urlStyleNote": "Değişiklik yeni kaydedilen sayfalara uygulanır; mevcut adreslerin taşınması ayrı bir işlemle yapılır.",
       "templates": "Başlık ve açıklama şablonları",
       "templatesHint": "Sayfaya özel başlık girilmediğinde bu şablonlar kullanılır. Etikete tıklayıp imlecin olduğu yere ekleyin.",
       "titleTemplate": {
@@ -330,6 +329,28 @@
         "kısa_açıklama": "Yıkanmış ketenden rahat kesim gömlek",
         "fiyat_cümlesi": "899,00 TL.",
         "kargo_cümlesi": "Aynı gün kargoda."
+      },
+      "style": {
+        "title": "Adres biçimi",
+        "hint": "Değiştirmek tüm ürün ve kategori adreslerini taşır; eski adresler kalıcı (301) yönlendirmeyle yenilerine gider.",
+        "check": "Değişikliği kontrol et",
+        "move": "Adresleri taşı",
+        "ready_one": "{{pages}} sayfanın adresi değişecek. Eski adres kalıcı yönlendirmeyle yenisine gider; arama motorları sıralamayı yeni adrese taşır.",
+        "ready_other": "{{pages}} sayfanın adresi değişecek. Eski adresler kalıcı yönlendirmeyle yenilerine gider; arama motorları sıralamayı yeni adreslere taşır.",
+        "conflicts_one": "{{count}} adres çakışıyor; önce bunu çözün.",
+        "conflicts_other": "{{count}} adres çakışıyor; önce bunları çözün.",
+        "reasons": {
+          "shared": "{{names}} aynı adrese düşüyor; birinin adresini değiştirin.",
+          "reserved_root": "{{names}}: bu adres mağazanın kendi sayfasına ayrılmış.",
+          "taken": "{{names}}: bu adres başka bir kayda ait."
+        },
+        "releasable": "Eski bir adres; SEO > Yönlendirmeler > Eski adresler'den serbest bırakılabilir.",
+        "confirmTitle": "Adresler taşınsın mı?",
+        "confirmText": "{{pages}} sayfa yeni adresine taşınacak. İş arka planda çalışır; bitince yeni biçim kaydedilir.",
+        "moving": "Adresler taşınıyor… %{{percent}}",
+        "moved_one": "{{count}} sayfa yeni adresine taşındı.",
+        "moved_other": "{{count}} sayfa yeni adresine taşındı.",
+        "failed": "Adresler taşınamadı; kontrolü yeniden çalıştırın. Ayrıntı Ayarlar > İşler'de."
       }
     },
     "features": {
@@ -366,7 +387,8 @@
         "cancelled": "İptal edildi"
       },
       "types": {
-        "audit_log.export": "Denetim kaydı dışa aktarımı"
+        "audit_log.export": "Denetim kaydı dışa aktarımı",
+        "seo.url_style": "Adres biçimi değişikliği"
       }
     },
     "audit": {
