@@ -12,7 +12,8 @@
     "DB_*",
     "MEDUSA_*",
     "S3_*",
-    "SMTP_*"
+    "SMTP_*",
+    "TEST_*"
   ],
   "tasks": {
     "build": {

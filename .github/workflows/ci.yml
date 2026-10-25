@@ -31,6 +31,20 @@ jobs:
     name: Lint, typecheck, test, build
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    # The rate limiter's Redis counters (an atomic Lua script) are tested
+    # against a real Redis; the same pinned image as local dev
+    services:
+      redis:
+        image: redis:7.4.11-alpine@sha256:57e4255cc971b1c8d6f8a6ca283ac01bc3ecdd914273ef6bfaede87aaecd6541
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      TEST_REDIS_URL: redis://localhost:6379/15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

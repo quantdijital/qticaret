@@ -8,6 +8,11 @@
 ## Son oturum özeti
 **2026-10-24 gece oturumu (S3, S5; S8 başladı).** Kullanıcı döndü; dört karar verdi: bağımlılıklar onaylandı (ioredis 5.11.1, fast-xml-parser 5.11.2, yauzl 3.4.0, kendi görsel başlık okuyucumuz), ADR-0011..0014 kabul edildi, otonom devam, eski "Gözden geçir" maddeleri olduğu gibi kabul. Commit `54abc2a`.
 
+2026-10-25 (F2 sonrası, kullanıcı dışarıdayken): devreden işlerden onay gerektirmeyenler.
+- Kilit alınamayan kayıt (aynı ürüne iki eşzamanlı kayıt, aynı iş tipine iki istek) artık 500 değil 503 + `Retry-After: 2` alıyor; tek satırlık bilgi logu yazılıyor, yığın izi ve kilit anahtarı yok. HTTP testli.
+- `/admin/*` `limit` üst sınırı 1000. Dashboard'un dev'deki 593 isteğinde görülen en yüksek değer (seçim listeleri) bu.
+- CI kalite işine Redis servisi eklendi (dev ile aynı sabit imaj); Lua sayaç testleri CI'da da çalışacak. Turbo `TEST_*` değişkenlerini geçiriyor.
+
 2026-10-25 (F2 S13): F2.8. `async-job` modülü, iş tipleri, "İşler" sayfası (adr/0014). Plan `/Users/deniz/.claude/plans/f2-s13-async-jobs.md`.
 - **Akış:** `POST /admin/async-jobs` → enqueue workflow'u (tip/girdi/bayrak, tip başına kilit, tekillik) → `async-job.queued` → subscriber → run workflow'u. Run workflow'unda iş başlar, sonuç akış hâlinde private dosyaya yazılır ve iş biter.
 - **İlk tip:** denetim kaydı CSV (`;` + BOM, formül kaçışı). İndirme 5 dk imzalı bağlantı; okuma kaydı filtrelerle yazılıyor.
@@ -396,11 +401,10 @@ Paralel zincirler:
   - **İçe aktarma (F3.9):** Medusa'nın ürün içe aktarması dosyayı presigned URL ile doğrudan depoya yükleyebiliyor. Bu yol `/admin/uploads` doğrulamasından geçmez; F3.9'da ele alınacak.
   - **Kısmi iade dağıtımı (F4.7, F6):** `allocateKurus` her çağrıda bağımsız yuvarlar. Ardışık kısmi iadelerde bir satırın iadesi o satırın payını aşabilir. Satır başına kalan tutarı tavan alan bir dağıtım ve docs/07 testi gerekir (ADR-0010 "Sonuçlar").
   - **S3/S5'ten devreden (F16, F18, S13):**
-    - CI'a Redis servisi: `TEST_REDIS_URL` testleri (Lua script) CI'da atlanıyor.
     - F16 proxy: `/static`, `/app`, 401 ve preflight yanıtlarına güvenlik header'ları; `/static` için `sandbox` CSP; tek hop XFF şartı ya da `TRUSTED_PROXY_HOPS`.
     - F18: Medusa store preflight'ında publishable key istiyor (izinli origin de 400 alıyor). Tarayıcıdan doğrudan store çağrısı için çözülmeli. Sunucudan login proxy'leyen storefront için imzalı istemci-IP ADR'si.
     - S13: `presigned-urls` yolu için uzantı/MIME allowlist'i ve worker'da doğrulama; CSV dışa aktarımın ayırıcısı ve BOM'u.
-    - Hesap kilidi ve IP'den bağımsız kimlik sınırı (docs/04 "artan gecikme + kilit"); admin `limit` üst sınırı ölçülünce.
+    - Hesap kilidi ve IP'den bağımsız kimlik sınırı (docs/04 "artan gecikme + kilit").
     - Admin, çekirdek dashboard'un çevirmediği `errors.too_many_requests` gibi anahtarları ham gösteriyor.
   - **S13'ten devreden:**
     - F16: private bucket/politika ve kanarya testi, `NODE_ENV=production`, Redis event bus + workflow engine + locking (worker ayrımı, restart sonrası devam).
@@ -412,7 +416,6 @@ Paralel zincirler:
     - Özellik görünürlüğü (`is_public`) ve Store yanıt filtresi.
     - (ürün, tanım) için DB tekillik indeksi.
     - `additional_data` ile ürün formundan kayıt (F3.9).
-    - Kilit alınamayınca 500 yerine 503 (billing-profile'da da aynı).
     - Şablon güncellemesinde soft-delete edilen değerlerin link satırları kalıyor (zararsız; temizlik işi F13).
   - **S10'dan devreden:** Playwright e2e altyapısı: ayrı bir tarayıcı profili ve `@playwright/test` (onay gerekir). docs/06 kontrol listesindeki duman testleri bununla eklenecek.
   - **S9'dan devreden:**

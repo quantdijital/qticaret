@@ -73,8 +73,8 @@ describe("withFallback", () => {
   })
 })
 
-// Runs against a real Redis when TEST_REDIS_URL is set (locally:
-// TEST_REDIS_URL=redis://localhost:6379/15); CI has no Redis service yet
+// Runs against a real Redis when TEST_REDIS_URL is set: CI's quality job
+// has a Redis service; locally TEST_REDIS_URL=redis://localhost:56379/15
 const redisUrl = process.env["TEST_REDIS_URL"]
 const withRedis = redisUrl === undefined ? describe.skip : describe
 
