@@ -6,8 +6,8 @@ import type { ProductCounts } from "./use-home-data"
 import { useProductCounts } from "./use-home-data"
 
 /**
- * Product numbers: cheap counts with no personal data. Order and revenue
- * numbers need a backend summary endpoint first (docs/17).
+ * Product numbers: cheap counts with no personal data. Order numbers come
+ * from the server's summary (`order-numbers.tsx`).
  */
 export function ProductNumbers() {
   const { t } = useTranslation()

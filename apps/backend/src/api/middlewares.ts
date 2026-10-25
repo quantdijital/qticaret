@@ -13,6 +13,7 @@ import {
 } from "./admin/attribute-templates/validators"
 import { AdminGetAsyncJobs, AdminPostAsyncJob } from "./admin/async-jobs/validators"
 import { AdminGetAuditLog } from "./admin/audit-log/validators"
+import { AdminGetHomeSummary } from "./admin/home/summary/validators"
 import { AdminPostProductAttributes } from "./admin/products/[id]/attributes/validators"
 import { AdminPostProductCatalog } from "./admin/products/[id]/catalog/validators"
 import { AdminPostFeature, validateSectionBody } from "./admin/platform-settings/validators"
@@ -178,6 +179,12 @@ export default defineMiddlewares({
       matcher: "/admin/products/:id/catalog",
       methods: ["POST"],
       middlewares: [validateAndTransformBody(AdminPostProductCatalog)],
+    },
+    // docs/17: the home page's order numbers are for people (shop revenue)
+    {
+      matcher: "/admin/home/summary",
+      methods: ["GET"],
+      middlewares: [requireUserActor, validateAndTransformQuery(AdminGetHomeSummary, {})],
     },
     // F2.8: long tasks (adr/0014); starting one and fetching its result are
     // for people: results can hold personal data (the audit log export)

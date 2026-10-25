@@ -64,3 +64,26 @@ export function useFirstName(): string | null {
   const name = data?.user.first_name?.trim()
   return name === undefined || name === "" ? null : name
 }
+
+/** `GET /admin/home/summary` (docs/17): order numbers worked out on the server. */
+export interface HomeSummary {
+  open_orders: number
+  awaiting_shipment: number
+  /** More open orders than the server reads: the waiting count is a floor. */
+  capped: boolean
+  today: {
+    orders: number
+    sales: { currency_code: string; amount: string }[]
+    /** More of today's orders than the server sums: the total is a floor. */
+    capped: boolean
+  }
+}
+
+export function useHomeSummary() {
+  return useQuery({
+    queryKey: [...KEY, "summary"],
+    queryFn: () => sdk.client.fetch<HomeSummary>("/admin/home/summary"),
+    // Worked out on the server from up to 1000 orders: not on every visit
+    staleTime: 30_000,
+  })
+}

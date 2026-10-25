@@ -2,6 +2,7 @@ import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { Container, Heading, Text } from "@medusajs/ui"
 import { useTranslation } from "react-i18next"
 import { HomeIcon } from "./home-icon"
+import { OrderNumbers } from "./order-numbers"
 import { ProductNumbers } from "./product-numbers"
 import { QuickActions } from "./quick-actions"
 import { SetupChecklist } from "./setup-checklist"
@@ -31,6 +32,7 @@ function HomePage() {
         </Text>
       </Container>
       <SetupChecklist />
+      <OrderNumbers />
       <QuickActions />
       <ProductNumbers />
     </div>
