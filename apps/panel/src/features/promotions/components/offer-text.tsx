@@ -1,0 +1,46 @@
+import { useTranslation } from "react-i18next"
+import { StatusBadge } from "@/components/patterns/status-badge"
+import type { StatusTone } from "@/components/patterns/status-badge"
+import type { Promotion } from "@/features/promotions/api/promotions"
+import { offerKind, scheduleOf } from "@/features/promotions/offer"
+import { formatMoney } from "@/lib/format"
+
+interface Method {
+  type?: string | null
+  target_type?: string | null
+  value?: number | null
+  currency_code?: string | null
+}
+
+/** "%10 sepette", "₺50 sepette" or "Ücretsiz kargo". */
+export function OfferText({ method }: { method: Method | null | undefined }) {
+  const { t } = useTranslation()
+  const kind = offerKind(method)
+  const value = method?.value ?? 0
+  if (kind === "free_shipping") {
+    return <span>{t("promotions.offer.free_shipping")}</span>
+  }
+  return (
+    <span className="tabular-nums">
+      {kind === "fixed"
+        ? t("promotions.offer.fixed", {
+            amount: formatMoney(value, method?.currency_code ?? "try"),
+          })
+        : t("promotions.offer.percentage", { value })}
+    </span>
+  )
+}
+
+const TONE: Record<ReturnType<typeof scheduleOf>, StatusTone> = {
+  active: "success",
+  scheduled: "info",
+  draft: "neutral",
+  ended: "neutral",
+  inactive: "warning",
+}
+
+export function ScheduleBadge({ promotion }: { promotion: Promotion }) {
+  const { t } = useTranslation()
+  const schedule = scheduleOf(promotion.status ?? "draft", promotion.campaign)
+  return <StatusBadge tone={TONE[schedule]}>{t(`promotions.schedule.${schedule}`)}</StatusBadge>
+}

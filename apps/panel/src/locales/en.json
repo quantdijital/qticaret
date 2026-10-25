@@ -884,5 +884,101 @@
       "out": "Nothing is sold out."
     },
     "note": "\"On shelf\" is the quantity at the shop's default location; sellable stock spans all locations, less what is reserved for orders."
+  },
+  "promotions": {
+    "title": "Promotion",
+    "description": "Discount codes and automatic promotions",
+    "add": "Create promotion",
+    "new": "New promotion",
+    "create": "Create promotion",
+    "views": "Promotion views",
+    "tabs": {
+      "all": "All",
+      "active": "Live",
+      "scheduled": "Scheduled",
+      "draft": "Draft",
+      "ended": "Ended / paused"
+    },
+    "schedule": {
+      "active": "Live",
+      "scheduled": "Scheduled",
+      "draft": "Draft",
+      "ended": "Ended",
+      "inactive": "Paused"
+    },
+    "columns": {
+      "code": "Code",
+      "offer": "Discount",
+      "mode": "Applied",
+      "dates": "Dates",
+      "used": "Uses",
+      "status": "Status"
+    },
+    "automatic": "Automatically",
+    "withCode": "With a code",
+    "noDates": "No end",
+    "empty": "No promotions yet. Create your first discount code in a few steps.",
+    "offer": {
+      "percentage": "{{value}}% off the basket",
+      "fixed": "{{amount}} off the basket",
+      "free_shipping": "Free shipping"
+    },
+    "kinds": {
+      "percentage": {
+        "title": "Percentage off",
+        "description": "A percentage off the basket total."
+      },
+      "fixed": {
+        "title": "Amount off",
+        "description": "A fixed amount off the basket total."
+      },
+      "free_shipping": {
+        "title": "Free shipping",
+        "description": "No shipping charge."
+      }
+    },
+    "form": {
+      "offer": "Discount",
+      "offerHint": "What the customer gets. Your prices include VAT, so an amount does too.",
+      "percentage": "Discount rate",
+      "amount": "Discount amount",
+      "usage": "Usage",
+      "usageHint": "How customers get it, and when.",
+      "code": "Promotion code",
+      "codeHint": "Customers enter it in the basket. Letters, digits, hyphen and underscore.",
+      "codeAutomaticHint": "Applied automatically, the code is not shown to customers; it names the promotion for you.",
+      "automatic": "Apply automatically",
+      "automaticHint": "Applies to every basket without a code.",
+      "limit": "Total uses",
+      "limitHint": "Empty means unlimited.",
+      "limitAutomatic": "Automatic promotions have no limit.",
+      "unlimited": "Unlimited",
+      "starts": "Starts",
+      "startsHint": "Empty starts it now.",
+      "ends": "Ends",
+      "endsHint": "Empty means no end; valid until the end of that day.",
+      "preview": "Preview",
+      "previewCode": "Applies when the customer enters this code in the basket.",
+      "previewAutomatic": "No code needed; applies to eligible baskets on its own.",
+      "activate": "Go live now",
+      "activateHint": "When off, it is saved as a draft."
+    },
+    "errors": {
+      "code": "The code needs 3–40 letters, digits, hyphens or underscores.",
+      "percentage": "The rate must be above 0 and at most 100.",
+      "amount": "Enter an amount above zero.",
+      "limit": "The limit must be a whole number.",
+      "dates": "The end cannot be before the start."
+    },
+    "created": "Promotion created.",
+    "saved": "Promotion saved.",
+    "start": "Go live",
+    "pause": "Pause",
+    "started": "Promotion is live.",
+    "paused": "Promotion paused.",
+    "delete": "Delete promotion",
+    "deleteTitle": "Delete {{code}}?",
+    "deleteDescription": "The code stops working. Discounts on past orders stay as they are.",
+    "deleted": "Promotion deleted."
   }
 }

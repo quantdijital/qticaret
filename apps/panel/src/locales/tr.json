@@ -892,5 +892,101 @@
       "out": "Tükenen ürün yok."
     },
     "note": "\"Rafta\" mağazanın varsayılan depo adresindeki adettir; satılabilir stok tüm depolardan siparişe ayrılanlar düşülerek hesaplanır."
+  },
+  "promotions": {
+    "title": "Kampanya",
+    "description": "İndirim kodları ve kendiliğinden uygulanan kampanyalar",
+    "add": "Kampanya oluştur",
+    "new": "Yeni kampanya",
+    "create": "Kampanyayı oluştur",
+    "views": "Kampanya görünümleri",
+    "tabs": {
+      "all": "Tümü",
+      "active": "Yayında",
+      "scheduled": "Planlanan",
+      "draft": "Taslak",
+      "ended": "Biten / durdurulan"
+    },
+    "schedule": {
+      "active": "Yayında",
+      "scheduled": "Planlandı",
+      "draft": "Taslak",
+      "ended": "Bitti",
+      "inactive": "Durduruldu"
+    },
+    "columns": {
+      "code": "Kod",
+      "offer": "İndirim",
+      "mode": "Uygulama",
+      "dates": "Tarihler",
+      "used": "Kullanım",
+      "status": "Durum"
+    },
+    "automatic": "Kendiliğinden",
+    "withCode": "Kodla",
+    "noDates": "Süresiz",
+    "empty": "Henüz kampanya yok. İlk indirim kodunuzu birkaç adımda oluşturun.",
+    "offer": {
+      "percentage": "%{{value}} sepette",
+      "fixed": "{{amount}} sepette",
+      "free_shipping": "Ücretsiz kargo"
+    },
+    "kinds": {
+      "percentage": {
+        "title": "Yüzde indirim",
+        "description": "Sepet toplamından yüzde indirim."
+      },
+      "fixed": {
+        "title": "Tutar indirimi",
+        "description": "Sepet toplamından sabit tutar düşer."
+      },
+      "free_shipping": {
+        "title": "Ücretsiz kargo",
+        "description": "Kargo ücreti alınmaz."
+      }
+    },
+    "form": {
+      "offer": "İndirim",
+      "offerHint": "Müşterinin kazanacağı. Fiyatlarınız KDV dahil olduğundan tutar da KDV dahildir.",
+      "percentage": "İndirim oranı",
+      "amount": "İndirim tutarı",
+      "usage": "Kullanım",
+      "usageHint": "Müşterinin kampanyadan nasıl yararlanacağı ve ne zaman.",
+      "code": "Kampanya kodu",
+      "codeHint": "Müşteri sepette bu kodu girer. Harf, rakam, tire ve alt çizgi.",
+      "codeAutomaticHint": "Kendiliğinden uygulandığında kod müşteriye gösterilmez; kampanyayı tanımanız için kullanılır.",
+      "automatic": "Kendiliğinden uygula",
+      "automaticHint": "Kod girmeden tüm sepetlere uygulanır.",
+      "limit": "Toplam kullanım sınırı",
+      "limitHint": "Boş bırakırsanız sınırsız.",
+      "limitAutomatic": "Kendiliğinden uygulanan kampanyalarda sınır olmaz.",
+      "unlimited": "Sınırsız",
+      "starts": "Başlangıç",
+      "startsHint": "Boşsa hemen başlar.",
+      "ends": "Bitiş",
+      "endsHint": "Boşsa süresiz; o günün sonuna kadar geçerli.",
+      "preview": "Önizleme",
+      "previewCode": "Müşteri bu kodu sepette girdiğinde uygulanır.",
+      "previewAutomatic": "Kod gerekmez; uygun sepetlere kendiliğinden uygulanır.",
+      "activate": "Hemen yayına al",
+      "activateHint": "Kapalıysa taslak olarak kaydedilir."
+    },
+    "errors": {
+      "code": "Kod 3–40 karakter olmalı; harf, rakam, tire ve alt çizgi kullanılabilir.",
+      "percentage": "Oran 0'dan büyük, en çok 100 olmalı.",
+      "amount": "Sıfırdan büyük bir tutar girin.",
+      "limit": "Sınır bir tam sayı olmalı.",
+      "dates": "Bitiş, başlangıçtan önce olamaz."
+    },
+    "created": "Kampanya oluşturuldu.",
+    "saved": "Kampanya kaydedildi.",
+    "start": "Yayına al",
+    "pause": "Durdur",
+    "started": "Kampanya yayına alındı.",
+    "paused": "Kampanya durduruldu.",
+    "delete": "Kampanyayı sil",
+    "deleteTitle": "{{code}} silinsin mi?",
+    "deleteDescription": "Kod artık çalışmaz. Geçmiş siparişlerdeki indirimler değişmez.",
+    "deleted": "Kampanya silindi."
   }
 }
