@@ -12,7 +12,6 @@ const order = (at: string, total: number, extra: Partial<OverviewOrder> = {}): O
   currency_code: "try",
   total,
   payment_collections: paid,
-  fulfillments: [],
   items: [
     {
       product_id: "prod_knife",
@@ -73,12 +72,12 @@ describe("buildOverview", () => {
   })
 
   it("tells delivered and in-transit orders from those still to ship", () => {
-    const shipped = order("2026-10-26T08:00:00Z", 10, {
-      fulfillments: [{ shipped_at: "2026-10-26T09:00:00Z" }],
+    const sent = (delivered: number) => ({
+      quantity: 2,
+      detail: { fulfilled_quantity: 2, shipped_quantity: 2, delivered_quantity: delivered },
     })
-    const delivered = order("2026-10-26T08:00:00Z", 10, {
-      fulfillments: [{ shipped_at: "2026-10-26T09:00:00Z", delivered_at: "2026-10-26T10:00:00Z" }],
-    })
+    const shipped = order("2026-10-26T08:00:00Z", 10, { items: [sent(0)] })
+    const delivered = order("2026-10-26T08:00:00Z", 10, { items: [sent(2)] })
     const unpaid = order("2026-10-26T08:00:00Z", 10, {
       payment_collections: [{ status: "not_paid", amount: 10 }],
     })

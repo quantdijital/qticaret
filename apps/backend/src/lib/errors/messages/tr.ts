@@ -45,6 +45,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "features.disabled": "Bu özellik kapalı.",
   "features.platform_owned": "Bu özellik platform tarafından yönetilir.",
   "features.unknown": "Böyle bir özellik yok.",
+  "orders.nothing_to_ship": "Bu siparişte kargoya verilecek ürün kalmadı.",
+  "orders.unknown": "Sipariş bulunamadı.",
   "platform_settings.color_invalid": "Renk #rrggbb biçiminde olmalı, ör. #2f6feb.",
   "platform_settings.email_invalid": "Geçerli bir e-posta adresi girin.",
   "platform_settings.feature_unknown": "Böyle bir özellik yok.",

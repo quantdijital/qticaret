@@ -13,14 +13,13 @@ import {
 } from "./admin/attribute-templates/validators"
 import { AdminGetAsyncJobs, AdminPostAsyncJob } from "./admin/async-jobs/validators"
 import { AdminGetAuditLog } from "./admin/audit-log/validators"
-import { AdminGetDashboardNoQuery, AdminGetDashboardOverview } from "./admin/dashboard/validators"
 import { AdminGetHomeSummary } from "./admin/home/summary/validators"
-import { AdminGetOrderBoard } from "./admin/order-board/validators"
-import { AdminGetStockBoard } from "./admin/stock-board/validators"
+import { PANEL_ROUTES } from "./admin/panel-routes"
 import { AdminPostProductAttributes } from "./admin/products/[id]/attributes/validators"
 import { AdminPostProductCatalog } from "./admin/products/[id]/catalog/validators"
 import { AdminPostFeature, validateSectionBody } from "./admin/platform-settings/validators"
 import { auditMutations, auditSensitiveRead } from "./http/audit"
+import { SENSITIVE_READS } from "./http/audit/sensitive-routes"
 import { csrfProtection } from "./http/csrf"
 import { platformErrorHandler } from "./http/error-handler"
 import { authIdentity, authProfile, rateLimit } from "./http/rate-limit"
@@ -48,34 +47,6 @@ import {
 } from "./validation/tr-address"
 
 const CART_ADDRESSES = ["shipping_address", "billing_address"] as const
-
-// Admin GET routes that return personal data: [matcher, resource type, list,
-// fields that show none] (adr/0011). A phase adding such a route adds it here
-// (code-reviewer checklist).
-const SENSITIVE_READS: readonly [string, string, boolean, (readonly string[])?][] = [
-  ["/admin/customers", "customer", true],
-  ["/admin/customers/:id", "customer", false],
-  ["/admin/customers/:id/addresses", "customer", false],
-  ["/admin/customers/:id/addresses/:address_id", "customer", false],
-  ["/admin/customers/:id/billing-profile", "customer", false],
-  ["/admin/customer-groups/:id", "customer_group", false],
-  ["/admin/orders", "order", true],
-  ["/admin/dashboard/recent-orders", "order", true],
-  ["/admin/order-board", "order", true],
-  ["/admin/orders/:id", "order", false],
-  ["/admin/orders/:id/preview", "order", false],
-  ["/admin/orders/:id/changes", "order", false],
-  ["/admin/draft-orders", "draft_order", true],
-  ["/admin/draft-orders/:id", "draft_order", false],
-  ["/admin/returns", "return", true],
-  ["/admin/returns/:id", "return", false],
-  ["/admin/claims", "claim", true],
-  ["/admin/claims/:id", "claim", false],
-  ["/admin/exchanges", "exchange", true],
-  ["/admin/exchanges/:id", "exchange", false],
-  ["/admin/notifications", "notification", true, ["id", "created_at"]],
-  ["/admin/notifications/:id", "notification", false],
-]
 
 export default defineMiddlewares({
   // F2.10: sanitized error bodies with request_id, logged with redaction
@@ -191,33 +162,8 @@ export default defineMiddlewares({
       methods: ["GET"],
       middlewares: [requireUserActor, validateAndTransformQuery(AdminGetHomeSummary, {})],
     },
-    // The panel's dashboard (adr/0022): shop revenue and orders, for people
-    ...["/admin/dashboard/overview", "/admin/reports/sales"].map((matcher) => ({
-      matcher,
-      methods: ["GET" as const],
-      middlewares: [requireUserActor, validateAndTransformQuery(AdminGetDashboardOverview, {})],
-    })),
-    ...[
-      "/admin/dashboard/tasks",
-      "/admin/dashboard/recent-orders",
-      "/admin/dashboard/catalog-health",
-    ].map((matcher) => ({
-      matcher,
-      methods: ["GET" as const],
-      middlewares: [requireUserActor, validateAndTransformQuery(AdminGetDashboardNoQuery, {})],
-    })),
-    // The panel's order list by stage (adr/0022): customers' names, for people
-    {
-      matcher: "/admin/order-board",
-      methods: ["GET"],
-      middlewares: [requireUserActor, validateAndTransformQuery(AdminGetOrderBoard, {})],
-    },
-    // The panel's stock list (adr/0022): low and sold-out items first
-    {
-      matcher: "/admin/stock-board",
-      methods: ["GET"],
-      middlewares: [requireUserActor, validateAndTransformQuery(AdminGetStockBoard, {})],
-    },
+    // The panel's read models and actions (adr/0022)
+    ...PANEL_ROUTES,
     // F2.8: long tasks (adr/0014); starting one and fetching its result are
     // for people: results can hold personal data (the audit log export)
     {

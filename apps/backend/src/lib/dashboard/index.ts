@@ -5,11 +5,14 @@ export type { BoardSlice, BoardStage } from "./board"
 export {
   LIFECYCLES,
   LIFECYCLE_FIELDS,
-  fulfillmentStatusOf,
+  hasSomethingToShip,
+  isPaid,
   lifecycleOf,
   paymentStatusOf,
 } from "./lifecycle"
-export type { Lifecycle, LifecycleOrder } from "./lifecycle"
+export type { Lifecycle, LifecycleItem, LifecycleOrder } from "./lifecycle"
+export { ORDER_STATE_FIELDS, orderState } from "./order-state"
+export type { OrderState, ShipmentPlan, StateOrder } from "./order-state"
 export { buildOverview } from "./overview"
 export type { Overview, OverviewItem, OverviewLimits, OverviewOrder } from "./overview"
 export { PERIODS, bucketIndex, periodWindow, startOfTurkishDay } from "./period"

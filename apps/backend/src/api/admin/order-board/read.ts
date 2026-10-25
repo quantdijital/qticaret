@@ -1,11 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
-import {
-  LIFECYCLE_FIELDS,
-  boardSlice,
-  fulfillmentStatusOf,
-  paymentStatusOf,
-} from "../../../lib/dashboard"
+import { LIFECYCLE_FIELDS, boardSlice } from "../../../lib/dashboard"
 import type { LifecycleOrder } from "../../../lib/dashboard"
 import { createSingleFlight } from "../../../lib/cache"
 import { fromMedusaAmount, toMedusaAmount } from "../../../lib/money"
@@ -51,7 +46,7 @@ const customerOf = (address: DisplayRow["shipping_address"]) => ({
  */
 export async function readOrderBoard(scope: MedusaContainer, params: AdminGetOrderBoardType) {
   const query = scope.resolve(ContainerRegistrationKeys.QUERY)
-  const { data, metadata } = await stageRead(params.q ?? "", () =>
+  const { data, metadata } = await stageRead(`${params.customer_id ?? ""}|${params.q ?? ""}`, () =>
     query.graph({
       entity: "order",
       fields: ["id", ...LIFECYCLE_FIELDS],
@@ -59,6 +54,7 @@ export async function readOrderBoard(scope: MedusaContainer, params: AdminGetOrd
         status: { $nin: NOT_ORDERS },
         is_draft_order: false,
         ...(params.q ? { q: params.q } : {}),
+        ...(params.customer_id ? { customer_id: params.customer_id } : {}),
       },
       pagination: { skip: 0, take: MAX_ORDERS_READ, order: { created_at: "DESC" } },
     })
@@ -98,8 +94,6 @@ export async function readOrderBoard(scope: MedusaContainer, params: AdminGetOrd
               total: toMedusaAmount(fromMedusaAmount(order.total, { allowRounding: true })),
               items: (order.items ?? []).reduce((sum, item) => sum + (item?.quantity ?? 0), 0),
               stage,
-              payment_status: paymentStatusOf(order),
-              fulfillment_status: fulfillmentStatusOf(order),
               customer: customerOf(order.shipping_address),
             },
           ]

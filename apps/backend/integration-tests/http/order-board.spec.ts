@@ -19,6 +19,13 @@ interface Board {
   limited: boolean
 }
 
+interface State {
+  stage: string
+  ship: { fulfillment_id: string | null; items: { id: string; quantity: number }[] } | null
+  deliver: string[]
+  cancelable: boolean
+}
+
 async function firstId(container: MedusaContainer, entity: string, filters = {}) {
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
   const { data } = await query.graph({ entity, fields: ["id"], filters })
@@ -31,7 +38,7 @@ medusaIntegrationTestRunner({
     const http = api as HttpClient
     let admin: { headers: Record<string, string> }
 
-    const get = (url: string) => settle(http.get<Board>(url, { headers: admin.headers }))
+    const get = <T = Board>(url: string) => settle(http.get<T>(url, { headers: admin.headers }))
 
     beforeEach(async () => {
       admin = await createAdminUser(http, getContainer())
@@ -45,6 +52,69 @@ medusaIntegrationTestRunner({
       expect(bad.status).toBe(400)
       expect(extra.status).toBe(400)
       expect(anonymous.status).toBe(401)
+    })
+
+    it("ships an order in one step, a packed parcel first, and says what is next", async () => {
+      const container = getContainer()
+      const { regionId, salesChannelId } = await seedDemo(container)
+      const option = await firstId(container, "shipping_option", {
+        name: DEMO_SHIPPING_OPTIONS[0].name,
+      })
+      const variants = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+        entity: "product_variant",
+        fields: ["id"],
+      })
+      const [first, second] = variants.data as { id: string }[]
+      const orderId = await placeOrder(container, {
+        regionId,
+        salesChannelId,
+        shippingOptionId: option,
+        items: [
+          { variant_id: first?.id ?? "", quantity: 1 },
+          { variant_id: second?.id ?? "", quantity: 2 },
+        ],
+        address: { first_name: "Ayşe", last_name: "Yılmaz", address_1: "Demo Sokak 1" },
+      })
+      await advanceOrder(container, orderId, "to_ship")
+      const state = () => get<State>(`/admin/order-board/${orderId}`)
+      const ship = () =>
+        settle(
+          http.post(`/admin/orders/${orderId}/ship`, { notify: false }, { headers: admin.headers })
+        )
+
+      const before = await state()
+      expect(before.data).toMatchObject({ stage: "to_ship", cancelable: true })
+      expect(before.data.ship?.items).toHaveLength(2)
+
+      // A parcel packed elsewhere (or a half-done shipment) is handed over first
+      const [line] = before.data.ship?.items ?? []
+      await http.post(
+        `/admin/orders/${orderId}/fulfillments`,
+        { items: [line], no_notification: true },
+        { headers: admin.headers }
+      )
+      const packed = await state()
+      expect(packed.data.ship?.fulfillment_id).toBeTruthy()
+      expect(packed.data.cancelable).toBe(false)
+
+      expect((await ship()).status).toBe(200)
+      const half = await state()
+      expect(half.data.stage).toBe("to_ship")
+      expect(half.data.ship).toMatchObject({ fulfillment_id: null, items: [{ quantity: 2 }] })
+
+      expect((await ship()).status).toBe(200)
+      const after = await state()
+      expect(after.data).toMatchObject({ stage: "shipped", ship: null })
+      expect(after.data.deliver).toHaveLength(2)
+
+      const again = await ship()
+      const anonymous = await settle(http.post(`/admin/orders/${orderId}/ship`, {}))
+      const extra = await settle(
+        http.post(`/admin/orders/${orderId}/ship`, { items: [] }, { headers: admin.headers })
+      )
+      expect(again.status).toBe(400)
+      expect(anonymous.status).toBe(401)
+      expect(extra.status).toBe(400)
     })
 
     it("sorts orders into stages, searches them and records the read", async () => {

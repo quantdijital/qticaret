@@ -1,7 +1,7 @@
 import { ZERO_KURUS, addKurus, fromMedusaAmount, kurus, toMedusaAmount } from "../money"
 import type { Kurus, MedusaAmount } from "../money"
 import { LIFECYCLES, lifecycleOf } from "./lifecycle"
-import type { Lifecycle, LifecycleOrder } from "./lifecycle"
+import type { Lifecycle, LifecycleItem, LifecycleOrder } from "./lifecycle"
 import { bucketIndex } from "./period"
 import type { PeriodWindow } from "./period"
 
@@ -12,7 +12,7 @@ import type { PeriodWindow } from "./period"
  * answered as Medusa amount strings; canceled orders are no sales.
  */
 
-export interface OverviewItem {
+export interface OverviewItem extends LifecycleItem {
   product_id?: string | null
   product_title?: string | null
   thumbnail?: string | null

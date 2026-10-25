@@ -3,14 +3,16 @@ import type { LifecycleOrder } from "../lifecycle"
 
 const paid = [{ status: "authorized", amount: 100, captured_amount: 0, refunded_amount: 0 }]
 const unpaid = [{ status: "not_paid", amount: 100, captured_amount: 0, refunded_amount: 0 }]
-const shipped = [{ packed_at: "2026-10-20", shipped_at: "2026-10-21" }]
+const item = (fulfilled: number, shipped = fulfilled) => [
+  { quantity: 1, detail: { fulfilled_quantity: fulfilled, shipped_quantity: shipped } },
+]
 
 const order = (id: string, extra: Partial<LifecycleOrder> = {}) => ({
   id,
   status: "pending",
   currency_code: "try",
   payment_collections: paid,
-  fulfillments: [],
+  items: item(0),
   ...extra,
 })
 
@@ -18,7 +20,7 @@ const order = (id: string, extra: Partial<LifecycleOrder> = {}) => ({
 const orders = [
   order("o5"),
   order("o4", { payment_collections: unpaid }),
-  order("o3", { fulfillments: shipped }),
+  order("o3", { items: item(1) }),
   order("o2"),
   order("o1", { status: "canceled" }),
 ]

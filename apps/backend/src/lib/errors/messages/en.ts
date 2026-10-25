@@ -39,6 +39,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "features.disabled": "This feature is turned off.",
   "features.platform_owned": "This feature is managed by the platform.",
   "features.unknown": "There is no such feature.",
+  "orders.nothing_to_ship": "Nothing is left to ship in this order.",
+  "orders.unknown": "Order not found.",
   "platform_settings.color_invalid": "The colour must be in #rrggbb form, e.g. #2f6feb.",
   "platform_settings.email_invalid": "Enter a valid email address.",
   "platform_settings.feature_unknown": "There is no such feature.",
