@@ -7,13 +7,15 @@ import { rejectRequest } from "./reject"
  */
 
 export const STORE_MAX_LIMIT = 100
-// The dashboard's own pickers ask for 1000 (regions, sales channels, tags,
-// customers: measured in dev, 2026-10-25); more is a bulk read
-export const ADMIN_MAX_LIMIT = 1000
+// The dashboard loads whole lookup lists with 9999: regions and price
+// preferences on product create and price editing, stock locations,
+// categories, price lists (v2.21.2 source). 1000 broke product create;
+// the bound stays against unpaged reads of millions
+export const ADMIN_MAX_LIMIT = 9999
 // Above the per-file image limit (S5) times the files an admin sends at once
 export const MAX_UPLOAD_REQUEST_BYTES = 25 * 1024 * 1024
 // Digits only: Medusa reads `limit` with parseInt, so "1000abc" would be 1000
-const LIMIT_VALUE = /^\d{1,4}$/
+const LIMIT_VALUE = /^\d{1,5}$/
 
 function limitGuard(max: number) {
   return (req: MedusaRequest, res: MedusaResponse, next: MedusaNextFunction) => {

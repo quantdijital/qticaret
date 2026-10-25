@@ -198,10 +198,11 @@ describe("storeLimitGuard", () => {
 
 describe("adminLimitGuard", () => {
   it.each([
-    [{ limit: "1000" }, null],
+    // Product create asks for 9999 regions and price preferences
+    [{ limit: "9999" }, null],
     [{ limit: "20" }, null],
-    [{ limit: "1001" }, "errors.limit_too_large"],
-    [{ limit: "99999" }, "errors.invalid_limit"],
+    [{ limit: "10000" }, "errors.limit_too_large"],
+    [{ limit: "100000" }, "errors.invalid_limit"],
     [{ limit: "1000x" }, "errors.invalid_limit"],
   ])("handles %p", (query, refusal) => {
     const result = run(adminLimitGuard, request({ method: "GET", path: "/admin/products", query }))
