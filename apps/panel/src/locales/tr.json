@@ -1009,5 +1009,22 @@
       "share": "Satıştaki payı",
       "sales": "Satış"
     }
+  },
+  "seo": {
+    "description": "Mağazanızın arama motorlarında ve yapay zekâ aramalarında nasıl göründüğü",
+    "editSettings": "SEO ayarları",
+    "search": "Arama sonuçlarında",
+    "searchHint": "Şablonlarınızla bir ürün sayfası böyle görünür.",
+    "previewNote": "Örnek ürünle oluşturuldu; gerçek görünüm arama motoruna göre değişebilir.",
+    "checks": {
+      "host": "Kalıcı adresler {{host}} alan adını kullanıyor.",
+      "noHost": "Ana alan adı girilmedi; platform alt alan adı kullanılıyor.",
+      "urls": {
+        "prefixed": "Ürün adresleri /urun/ önekiyle oluşuyor.",
+        "flat": "Ürün adresleri kökte, öneksiz oluşuyor."
+      }
+    },
+    "advisor": "SEO danışmanı",
+    "advisorHint": "Her ürün ve kategori için puan, öneri ve tek tıkla düzeltmeler."
   }
 }

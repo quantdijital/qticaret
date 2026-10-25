@@ -1,8 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { navItem } from "@/components/layout/navigation"
-import { UpcomingPage } from "@/components/patterns/upcoming-page"
+import { SeoOverviewPage } from "@/features/seo/pages/seo-page"
 
-// Replaced by its panel screen (docs/03 panel hattı)
 export const Route = createFileRoute("/_auth/seo")({
-  component: () => <UpcomingPage item={navItem("seo")} />,
+  component: SeoOverviewPage,
 })

@@ -1001,5 +1001,22 @@
       "share": "Share of sales",
       "sales": "Sales"
     }
+  },
+  "seo": {
+    "description": "How your shop shows up in search engines and AI search",
+    "editSettings": "SEO settings",
+    "search": "In search results",
+    "searchHint": "With your templates, a product page looks like this.",
+    "previewNote": "Built from a sample product; the real look depends on the search engine.",
+    "checks": {
+      "host": "Permanent addresses use {{host}}.",
+      "noHost": "No main domain yet; the platform subdomain is used.",
+      "urls": {
+        "prefixed": "Product addresses carry the /urun/ prefix.",
+        "flat": "Product addresses sit at the root, no prefix."
+      }
+    },
+    "advisor": "SEO advisor",
+    "advisorHint": "A score, suggestions and one-click fixes for every product and category."
   }
 }
