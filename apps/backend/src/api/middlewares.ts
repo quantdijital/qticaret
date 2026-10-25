@@ -192,11 +192,11 @@ export default defineMiddlewares({
       middlewares: [requireUserActor, validateAndTransformQuery(AdminGetHomeSummary, {})],
     },
     // The panel's dashboard (adr/0022): shop revenue and orders, for people
-    {
-      matcher: "/admin/dashboard/overview",
-      methods: ["GET"],
+    ...["/admin/dashboard/overview", "/admin/reports/sales"].map((matcher) => ({
+      matcher,
+      methods: ["GET" as const],
       middlewares: [requireUserActor, validateAndTransformQuery(AdminGetDashboardOverview, {})],
-    },
+    })),
     ...[
       "/admin/dashboard/tasks",
       "/admin/dashboard/recent-orders",

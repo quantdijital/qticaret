@@ -107,6 +107,18 @@ medusaIntegrationTestRunner({
       expect(recorded).toBeGreaterThan(0)
     })
 
+    it("answers the sales report with the overview's totals, for people only", async () => {
+      const report = await get<Overview>("/admin/reports/sales?period=30d")
+      const overview = await get<Overview>("/admin/dashboard/overview?period=30d")
+      const anonymous = await settle(http.get("/admin/reports/sales"))
+      const bad = await get("/admin/reports/sales?period=1y")
+
+      expect(report.status).toBe(200)
+      expect(report.data.totals).toEqual(overview.data.totals)
+      expect(anonymous.status).toBe(401)
+      expect(bad.status).toBe(400)
+    })
+
     it("reports how complete the catalog is", async () => {
       await seedDemo(getContainer())
 

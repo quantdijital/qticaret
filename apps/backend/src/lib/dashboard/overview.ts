@@ -27,8 +27,13 @@ export interface OverviewOrder extends LifecycleOrder {
   items?: (OverviewItem | null)[] | null
 }
 
-const TOP_PRODUCTS = 5
-const TOP_CATEGORIES = 5
+/** How many products and categories the answer lists: five for the dashboard, more for reports. */
+export interface OverviewLimits {
+  products: number
+  categories: number
+}
+
+const DASHBOARD_LIMITS: OverviewLimits = { products: 5, categories: 5 }
 
 const kurusOf = (value: MedusaAmount | null | undefined): Kurus =>
   value === null || value === undefined
@@ -90,7 +95,7 @@ function series(window: PeriodWindow, current: OverviewOrder[], previous: Overvi
   }))
 }
 
-function topProducts(orders: OverviewOrder[]) {
+function topProducts(orders: OverviewOrder[], limit: number) {
   const byProduct = new Map<
     string,
     { title: string; thumbnail: string | null; units: number; sales: Kurus }
@@ -111,7 +116,7 @@ function topProducts(orders: OverviewOrder[]) {
   }
   return [...byProduct.entries()]
     .sort(([, a], [, b]) => b.sales - a.sales || b.units - a.units)
-    .slice(0, TOP_PRODUCTS)
+    .slice(0, limit)
     .map(([product_id, entry]) => ({ product_id, ...entry, sales: toMedusaAmount(entry.sales) }))
 }
 
@@ -123,7 +128,7 @@ function categoryOf(item: OverviewItem): { id: string; name: string } | null {
   return categories.sort((a, b) => a.name.localeCompare(b.name, "tr"))[0] ?? null
 }
 
-function categorySales(orders: OverviewOrder[]) {
+function categorySales(orders: OverviewOrder[], limit: number) {
   const byCategory = new Map<string, { name: string | null; sales: Kurus }>()
   for (const item of orders.flatMap(presentItems)) {
     const category = categoryOf(item)
@@ -133,9 +138,9 @@ function categorySales(orders: OverviewOrder[]) {
     byCategory.set(key, entry)
   }
   const ranked = [...byCategory.entries()].sort(([, a], [, b]) => b.sales - a.sales)
-  const shown = ranked.slice(0, TOP_CATEGORIES)
+  const shown = ranked.slice(0, limit)
   const rest = ranked
-    .slice(TOP_CATEGORIES)
+    .slice(limit)
     .reduce((sum, [, entry]) => addKurus(sum, entry.sales), ZERO_KURUS)
   return [
     ...shown.map(([key, entry]) => ({
@@ -153,7 +158,8 @@ function categorySales(orders: OverviewOrder[]) {
 export function buildOverview(
   window: PeriodWindow,
   current: OverviewOrder[],
-  previous: OverviewOrder[]
+  previous: OverviewOrder[],
+  limits: OverviewLimits = DASHBOARD_LIMITS
 ) {
   const sold = (orders: OverviewOrder[]) => orders.filter((order) => order.status !== "canceled")
   const now = tally(sold(current))
@@ -174,8 +180,8 @@ export function buildOverview(
     },
     series: series(window, sold(current), sold(previous)),
     statuses,
-    top_products: topProducts(sold(current)),
-    categories: categorySales(sold(current)),
+    top_products: topProducts(sold(current), limits.products),
+    categories: categorySales(sold(current), limits.categories),
   }
 }
 

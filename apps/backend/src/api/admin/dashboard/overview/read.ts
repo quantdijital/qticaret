@@ -1,6 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { LIFECYCLE_FIELDS, buildOverview, periodWindow } from "../../../../lib/dashboard"
-import type { Overview, OverviewOrder, PeriodKey } from "../../../../lib/dashboard"
+import type { Overview, OverviewLimits, OverviewOrder, PeriodKey } from "../../../../lib/dashboard"
 import { ordersBetween } from "../orders"
 
 // Statuses and amounts only: no customer, address or email (adr/0011)
@@ -32,7 +32,12 @@ export type DashboardOverview = Overview & {
 // The shop sells in lira (adr/0007); orders in other currencies wait for F19
 const CURRENCY = "try"
 
-async function compute(scope: MedusaContainer, key: PeriodKey): Promise<DashboardOverview> {
+/** The period's numbers, uncached; reports ask for longer lists than the dashboard. */
+export async function computeOverview(
+  scope: MedusaContainer,
+  key: PeriodKey,
+  limits?: OverviewLimits
+): Promise<DashboardOverview> {
   const window = periodWindow(key)
   const [current, previous] = await Promise.all([
     ordersBetween<OverviewOrder>(scope, FIELDS, window.from, window.to),
@@ -48,7 +53,7 @@ async function compute(scope: MedusaContainer, key: PeriodKey): Promise<Dashboar
     },
     currency_code: CURRENCY,
     capped: current.count > current.rows.length || previous.count > previous.rows.length,
-    ...buildOverview(window, inLira(current.rows), inLira(previous.rows)),
+    ...buildOverview(window, inLira(current.rows), inLira(previous.rows), limits),
   }
 }
 
@@ -60,7 +65,7 @@ export async function readDashboardOverview(
   if (hit && Date.now() - hit.at < TTL_MS) {
     return hit.value
   }
-  const value = await compute(scope, key)
+  const value = await computeOverview(scope, key)
   cache.set(key, { at: Date.now(), value })
   return value
 }
