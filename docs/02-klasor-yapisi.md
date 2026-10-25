@@ -78,6 +78,7 @@ repo/
 │   │   │   │   ├── catalog/         # GTIN doğrulama, ölçü/ağırlık kuralı (F3.1)
 │   │   │   │   ├── money/           # tutar dönüşümleri
 │   │   │   │   ├── dashboard/       # panel okuma modelleri: dönem, sipariş aşaması, özet/rapor, sipariş ve stok panosu (adr/0022)
+│   │   │   │   ├── checkout/        # checkout kuralları: KDV için ülke, kargo gerekmeyen sepette kargo yöntemi yok (F3.2)
 │   │   │   │   ├── errors/          # ortak hata tipleri
 │   │   │   │   └── logging/         # pino logger, redaksiyon, istek bağlamı, Medusa logger adaptörü
 │   │   │   └── scripts/             # seed, tr-address import, tenant bootstrap, katalog yollarını claim etme (F3.1)

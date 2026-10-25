@@ -17,6 +17,7 @@ import { AdminGetHomeSummary } from "./admin/home/summary/validators"
 import { PANEL_ROUTES } from "./admin/panel-routes"
 import { AdminPostProductAttributes } from "./admin/products/[id]/attributes/validators"
 import { AdminPostProductCatalog } from "./admin/products/[id]/catalog/validators"
+import { AdminPutSeoMeta } from "./admin/seo/[entity_type]/[entity_id]/validators"
 import { AdminPostFeature, validateSectionBody } from "./admin/platform-settings/validators"
 import { auditMutations, auditSensitiveRead } from "./http/audit"
 import { SENSITIVE_READS } from "./http/audit/sensitive-routes"
@@ -37,6 +38,7 @@ import {
 } from "./store/tr-address/validators"
 import { STORE_ATTRIBUTE_FIELDS, restrictStoreAttributeFields } from "./validation/attribute-fields"
 import { slugHandles } from "./validation/catalog-handles"
+import { rejectStoreSeoFields } from "./validation/seo-fields"
 import { rejectSensitiveFields } from "./validation/sensitive-fields"
 import { closePresignedUploads, hideJobResultFiles } from "./validation/upload-routes"
 import {
@@ -77,6 +79,7 @@ export default defineMiddlewares({
         storeLimitGuard,
         rejectSensitiveFields,
         restrictStoreAttributeFields,
+        rejectStoreSeoFields,
       ],
     },
     // F2.5: admin mutations are recorded once answered (adr/0011); tax ids
@@ -155,6 +158,12 @@ export default defineMiddlewares({
       matcher: "/admin/products/:id/catalog",
       methods: ["POST"],
       middlewares: [validateAndTransformBody(AdminPostProductCatalog)],
+    },
+    // F3.4 (adr/0015): a page's own SEO fields
+    {
+      matcher: "/admin/seo/:entity_type/:entity_id",
+      methods: ["PUT"],
+      middlewares: [validateAndTransformBody(AdminPutSeoMeta)],
     },
     // docs/17: the home page's order numbers are for people (shop revenue)
     {

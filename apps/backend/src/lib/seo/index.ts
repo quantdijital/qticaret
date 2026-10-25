@@ -1,3 +1,4 @@
+export { SEO_META_LIMITS, isSitePath, seoTextHash } from "./meta"
 export { RESERVED_ROOT_SEGMENTS, isReservedPath } from "./paths"
 export { SERP_LIMITS, SERP_TEXT_LENGTH, estimatePixelWidth, fitsSerp } from "./pixel-width"
 export type { SerpField } from "./pixel-width"

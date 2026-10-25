@@ -4,6 +4,7 @@ import { ATTRIBUTE_RESOURCES } from "./resources/attributes"
 import { CATALOG_RESOURCES } from "./resources/catalog"
 import { PRICE_RESOURCES } from "./resources/prices"
 import { PROMOTION_RESOURCES } from "./resources/promotions"
+import { SEO_RESOURCES } from "./resources/seo"
 import { SETTINGS_RESOURCES } from "./resources/settings"
 import type { AuditedResource } from "./types"
 import { ID } from "./types"
@@ -20,6 +21,7 @@ export const AUDITED_RESOURCES: readonly AuditedResource[] = [
   ...ATTRIBUTE_RESOURCES,
   ...CATALOG_RESOURCES,
   ...PROMOTION_RESOURCES,
+  ...SEO_RESOURCES,
 ]
 
 export interface ResourceMatch {
