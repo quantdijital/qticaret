@@ -4,14 +4,13 @@ import { useTranslation } from "react-i18next"
 import { PageHeader } from "@/components/patterns/page-header"
 import { ErrorState } from "@/components/patterns/states"
 import { Skeleton } from "@/components/ui/skeleton"
-import { orderQuery } from "@/features/orders/api/orders"
+import { orderQuery, orderStateQuery } from "@/features/orders/api/orders"
 import { StageBadge } from "@/features/orders/components/stage-badge"
 import { ItemsCard } from "@/features/orders/detail/items-card"
 import { OrderActions } from "@/features/orders/detail/order-actions"
 import { PaymentCard } from "@/features/orders/detail/payment-card"
 import { AddressCard, CustomerCard } from "@/features/orders/detail/people-cards"
 import { ProgressCard } from "@/features/orders/detail/progress-card"
-import { lifecycleOf } from "@/features/orders/order-math"
 import { errorText } from "@/lib/errors"
 import { formatLongDate } from "@/lib/format"
 
@@ -25,18 +24,26 @@ export function OrderDetailPage() {
   const { t } = useTranslation()
   const { id } = route.useParams()
   const query = useQuery(orderQuery(id))
+  const state = useQuery(orderStateQuery(id))
   const order = query.data
   const back = { to: "/orders", label: t("nav.orders") }
 
-  if (query.isError) {
+  const failed = query.error ?? state.error
+  if (failed) {
     return (
       <div className="flex flex-col gap-6">
         <PageHeader title={t("orders.detail.title")} back={back} />
-        <ErrorState text={errorText(t, query.error)} onRetry={() => void query.refetch()} />
+        <ErrorState
+          text={errorText(t, failed)}
+          onRetry={() => {
+            void query.refetch()
+            void state.refetch()
+          }}
+        />
       </div>
     )
   }
-  if (!order) {
+  if (!order || !state.data) {
     return (
       <div className="flex flex-col gap-6">
         <PageHeader title={t("common.loading")} back={back} />
@@ -53,11 +60,11 @@ export function OrderDetailPage() {
       <PageHeader
         title={t("orders.detail.number", { number: order.display_id })}
         description={t("orders.detail.placed", { date: formatLongDate(order.created_at) })}
-        badge={<StageBadge stage={lifecycleOf(order)} />}
+        badge={<StageBadge stage={state.data.stage} />}
         back={back}
-        action={<OrderActions order={order} />}
+        action={<OrderActions order={order} state={state.data} />}
       />
-      <ProgressCard order={order} />
+      <ProgressCard order={order} stage={state.data.stage} />
       <div className="grid items-start gap-[var(--grid-gap)] xl:grid-cols-12">
         <div className="flex min-w-0 flex-col gap-[var(--grid-gap)] xl:col-span-8">
           <ItemsCard order={order} />

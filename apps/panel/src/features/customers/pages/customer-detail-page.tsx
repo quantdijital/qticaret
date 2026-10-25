@@ -9,15 +9,11 @@ import { SectionCard } from "@/components/patterns/section-card"
 import { ErrorState } from "@/components/patterns/states"
 import { StatusBadge } from "@/components/patterns/status-badge"
 import { Skeleton } from "@/components/ui/skeleton"
-import {
-  billingProfileQuery,
-  customerOrdersQuery,
-  customerQuery,
-} from "@/features/customers/api/customers"
+import { billingProfileQuery, customerQuery } from "@/features/customers/api/customers"
 import type { CustomerDetail } from "@/features/customers/api/customers"
 import { customerName } from "@/features/customers/names"
 import { StageBadge } from "@/features/orders/components/stage-badge"
-import { lifecycleOf } from "@/features/orders/order-math"
+import { orderBoardQuery } from "@/features/orders/api/orders"
 import { errorText } from "@/lib/errors"
 import { formatDate, formatMoney } from "@/lib/format"
 
@@ -34,7 +30,8 @@ function Line({ icon: Icon, children }: { icon: typeof Mail; children: ReactNode
 
 function OrdersCard({ customerId }: { customerId: string }) {
   const { t } = useTranslation()
-  const query = useQuery(customerOrdersQuery(customerId))
+  // The order board's own stage rule, so the stages here match the order list
+  const query = useQuery(orderBoardQuery({ stage: "all", q: "", page: 0, customerId }))
   return (
     <SectionCard title={t("customers.detail.orders")} flush>
       <AsyncBody query={query} skeleton={<Skeleton className="mx-5 mb-5 h-40" />}>
@@ -56,7 +53,7 @@ function OrdersCard({ customerId }: { customerId: string }) {
                     <span className="flex-1 text-sm text-muted-foreground">
                       {formatDate(order.created_at)}
                     </span>
-                    <StageBadge stage={lifecycleOf(order)} />
+                    <StageBadge stage={order.stage} />
                     <span className="w-28 text-right text-sm font-medium tabular-nums">
                       {formatMoney(order.total, order.currency_code)}
                     </span>

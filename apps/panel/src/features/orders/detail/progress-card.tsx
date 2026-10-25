@@ -2,8 +2,8 @@ import { Ban, CreditCard, PackageCheck, ShoppingBag, Truck } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import type { OrderDetail } from "@/features/orders/api/orders"
-import { lifecycleOf, milestones } from "@/features/orders/order-math"
-import type { OrderFacts } from "@/features/orders/order-math"
+import type { Lifecycle } from "@/features/dashboard/api/overview"
+import { milestones } from "@/features/orders/order-math"
 import { formatDateTime } from "@/lib/format"
 import { cn } from "@/lib/utils"
 
@@ -15,11 +15,10 @@ const STEPS: { key: "placed" | "paid" | "shipped" | "delivered"; icon: LucideIco
 ]
 
 /** The order's way from checkout to the door, each step with when it happened. */
-export function ProgressCard({ order }: { order: OrderDetail }) {
+export function ProgressCard({ order, stage }: { order: OrderDetail; stage: Lifecycle }) {
   const { t } = useTranslation()
-  const facts = order as unknown as OrderFacts & { created_at: string }
-  const when = milestones(facts)
-  const canceled = lifecycleOf(facts) === "canceled"
+  const when = milestones(order, stage)
+  const canceled = stage === "canceled"
   const reached = STEPS.filter((step) => when[step.key]).length
 
   return (

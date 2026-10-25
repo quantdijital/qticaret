@@ -16,15 +16,7 @@ import {
   useMarkDelivered,
   useShipOrder,
 } from "@/features/orders/api/orders"
-import type { OrderDetail } from "@/features/orders/api/orders"
-import {
-  inTransit,
-  isPaid,
-  lifecycleOf,
-  uncaptured,
-  unshippedItems,
-} from "@/features/orders/order-math"
-import type { OrderFacts } from "@/features/orders/order-math"
+import type { OrderDetail, OrderState } from "@/features/orders/api/orders"
 import { errorText } from "@/lib/errors"
 import { ShipDialog } from "./ship-dialog"
 
@@ -35,22 +27,20 @@ type Dialog = "ship" | "deliver" | "cancel" | "capture" | null
  * delivered); taking the payment and canceling sit in the menu, each
  * behind a question (docs/06 §6).
  */
-export function OrderActions({ order }: { order: OrderDetail }) {
+export function OrderActions({ order, state }: { order: OrderDetail; state: OrderState }) {
   const { t } = useTranslation()
   const [dialog, setDialog] = useState<Dialog>(null)
   const ship = useShipOrder(order.id)
   const deliver = useMarkDelivered(order.id)
   const cancel = useCancelOrder(order.id)
-  const capture = useCapturePayment(order.id)
+  const capture = useCapturePayment()
 
-  const facts = order as unknown as OrderFacts
-  const stage = lifecycleOf(facts)
-  const toShip = stage === "canceled" ? [] : unshippedItems(facts)
-  const parcels = inTransit(facts)
-  const held = stage === "canceled" ? [] : uncaptured(facts)
-  const cancelable =
-    stage === "awaiting_payment" ||
-    (stage === "to_ship" && toShip.length > 0 && parcels.length === 0)
+  // What the server says can be done now (`/admin/order-board/:id`)
+  const toShip = state.ship?.items ?? []
+  const parcels = state.deliver
+  const held = state.capture
+  const cancelable = state.cancelable
+  const canShip = state.ship !== null && state.stage !== "awaiting_payment"
 
   const done = (message: string) => () => {
     setDialog(null)
@@ -67,7 +57,7 @@ export function OrderActions({ order }: { order: OrderDetail }) {
 
   return (
     <>
-      {toShip.length > 0 && isPaid(facts) ? (
+      {canShip ? (
         <Button
           onClick={() => {
             setDialog("ship")
@@ -127,10 +117,7 @@ export function OrderActions({ order }: { order: OrderDetail }) {
         busy={ship.isPending}
         onOpenChange={close}
         onConfirm={(notify) => {
-          ship.mutate(
-            { items: toShip, notify },
-            { onSuccess: done("orders.ship.done"), onError: failed }
-          )
+          ship.mutate({ notify }, { onSuccess: done("orders.ship.done"), onError: failed })
         }}
       />
       <ConfirmDialog

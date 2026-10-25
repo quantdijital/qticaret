@@ -21,8 +21,6 @@ export interface BoardOrder {
   total: string
   items: number
   stage: Lifecycle
-  payment_status: string
-  fulfillment_status: string
   customer: { name: string | null; place: string | null }
 }
 
@@ -40,16 +38,23 @@ export interface OrderBoardParams {
   stage: OrderStage
   q: string
   page: number
+  /** One customer's orders, for their page. */
+  customerId?: string | undefined
 }
 
 export const ORDER_PAGE_SIZE = 20
 
-export const orderBoardQuery = ({ stage, q, page }: OrderBoardParams) =>
+export const orderBoardQuery = ({ stage, q, page, customerId }: OrderBoardParams) =>
   queryOptions({
-    queryKey: ["orders", "board", { stage, q, page }],
+    queryKey: ["orders", "board", { stage, q, page, customerId }],
     queryFn: () =>
       sdk.client.fetch<OrderBoard>("/admin/order-board", {
-        query: { stage, offset: page * ORDER_PAGE_SIZE, ...(q ? { q } : {}) },
+        query: {
+          stage,
+          offset: page * ORDER_PAGE_SIZE,
+          ...(q ? { q } : {}),
+          ...(customerId ? { customer_id: customerId } : {}),
+        },
       }),
     placeholderData: keepPreviousData,
   })
@@ -116,55 +121,54 @@ export const orderQuery = (id: string) =>
 
 export type OrderDetail = Awaited<ReturnType<typeof sdk.admin.order.retrieve>>["order"]
 
-function useOrderMutation<T>(id: string, run: (input: T) => Promise<unknown>) {
+/** `GET /admin/order-board/:id`: the stage and what can be done next, worked out by the server. */
+export interface OrderState {
+  stage: Lifecycle
+  /** A packed parcel to hand over (fulfillment_id), or what is left to pack; null: nothing. */
+  ship: { fulfillment_id: string | null; items: { id: string; quantity: number }[] } | null
+  deliver: string[]
+  capture: string[]
+  cancelable: boolean
+}
+
+export const orderStateQuery = (id: string) =>
+  queryOptions({
+    queryKey: ["orders", "state", id],
+    queryFn: () => sdk.client.fetch<OrderState>(`/admin/order-board/${encodeURIComponent(id)}`),
+  })
+
+function useOrderMutation<T>(run: (input: T) => Promise<unknown>) {
   const client = useQueryClient()
   return useMutation({
     mutationFn: run,
-    onSuccess: async () => {
+    // Settled, not only succeeded: a step that half-failed must not leave the page stale
+    onSettled: async () => {
       await client.invalidateQueries({ queryKey: ["orders"] })
-      await client.invalidateQueries({ queryKey: ["orders", "detail", id] })
       await client.invalidateQueries({ queryKey: ["dashboard"] })
     },
   })
 }
 
-type Items = { id: string; quantity: number }[]
-
-/** Packs and hands the parcel to the carrier in one go: a fulfillment, then its shipment. */
+/** Packs what is left (or a packed parcel) and hands it over, as one step on the server. */
 export const useShipOrder = (id: string) =>
-  useOrderMutation(id, async ({ items, notify }: { items: Items; notify: boolean }) => {
-    const { order } = await sdk.admin.order.createFulfillment(
-      id,
-      {
-        items,
-        no_notification: !notify,
-      },
-      {
-        fields:
-          "fulfillments.id,fulfillments.created_at,fulfillments.shipped_at,fulfillments.canceled_at",
-      }
-    )
-    // The newest fulfillment not yet shipped is the one just made
-    const fulfillment = [...(order.fulfillments ?? [])]
-      .filter((row) => !row.shipped_at && !row.canceled_at)
-      .sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)))[0]
-    if (!fulfillment) {
-      throw new Error("fulfillment missing")
-    }
-    await sdk.admin.order.createShipment(id, fulfillment.id, { items, no_notification: !notify })
-  })
+  useOrderMutation(({ notify }: { notify: boolean }) =>
+    sdk.client.fetch(`/admin/orders/${encodeURIComponent(id)}/ship`, {
+      method: "POST",
+      body: { notify },
+    })
+  )
 
 export const useMarkDelivered = (id: string) =>
-  useOrderMutation(id, async (fulfillmentIds: string[]) => {
+  useOrderMutation(async (fulfillmentIds: string[]) => {
     for (const fulfillmentId of fulfillmentIds) {
       await sdk.admin.order.markAsDelivered(id, fulfillmentId)
     }
   })
 
-export const useCancelOrder = (id: string) => useOrderMutation(id, () => sdk.admin.order.cancel(id))
+export const useCancelOrder = (id: string) => useOrderMutation(() => sdk.admin.order.cancel(id))
 
-export const useCapturePayment = (id: string) =>
-  useOrderMutation(id, async (paymentIds: string[]) => {
+export const useCapturePayment = () =>
+  useOrderMutation(async (paymentIds: string[]) => {
     for (const paymentId of paymentIds) {
       await sdk.admin.payment.capture(paymentId, {})
     }

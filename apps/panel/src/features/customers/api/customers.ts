@@ -65,41 +65,6 @@ export const customerQuery = (id: string) =>
 
 export type CustomerDetail = Awaited<ReturnType<typeof sdk.admin.customer.retrieve>>["customer"]
 
-// What the order page's stage rule needs, and what a row shows
-const ORDER_FIELDS = [
-  "id",
-  "display_id",
-  "status",
-  "created_at",
-  "currency_code",
-  "total",
-  "items.id",
-  "items.quantity",
-  "items.detail.fulfilled_quantity",
-  "fulfillments.id",
-  "fulfillments.shipped_at",
-  "fulfillments.delivered_at",
-  "fulfillments.canceled_at",
-  "payment_collections.status",
-  "payment_collections.payments.id",
-  "payment_collections.payments.captured_at",
-  "payment_collections.payments.canceled_at",
-].join(",")
-
-export const CUSTOMER_ORDERS_SHOWN = 10
-
-export const customerOrdersQuery = (customerId: string) =>
-  queryOptions({
-    queryKey: ["customers", "orders", customerId],
-    queryFn: () =>
-      sdk.admin.order.list({
-        customer_id: customerId,
-        fields: ORDER_FIELDS,
-        limit: CUSTOMER_ORDERS_SHOWN,
-        order: "-created_at",
-      }),
-  })
-
 /** The customer's invoice details, masked (adr/0009): the full tax id is never shown here. */
 export interface MaskedBillingProfile {
   id: string
