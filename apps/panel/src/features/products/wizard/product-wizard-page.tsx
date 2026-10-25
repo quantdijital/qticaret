@@ -16,7 +16,7 @@ import { shopDefaultsQuery } from "@/features/products/api/lookups"
 import { errorText } from "@/lib/errors"
 import { useCreateProduct } from "./create-product"
 import { canPublish, readiness } from "./readiness"
-import { STEP_FIELDS, WIZARD_STEPS, defaultWizardValues, wizardSchema } from "./schema"
+import { STEP_FIELDS, defaultWizardValues, stepsFor, wizardSchema } from "./schema"
 import type { WizardStepKey, WizardValues } from "./schema"
 import { BasicsStep } from "./steps/basics-step"
 import { MediaStep } from "./steps/media-step"
@@ -33,8 +33,8 @@ const STEP_VIEWS: Record<WizardStepKey, ComponentType> = {
 }
 
 /** The first step holding an error, so a failed save shows where to look. */
-const firstStepWithError = (errors: FieldErrors<WizardValues>): number =>
-  WIZARD_STEPS.findIndex((key) =>
+const firstStepWithError = (keys: WizardStepKey[], errors: FieldErrors<WizardValues>): number =>
+  keys.findIndex((key) =>
     (STEP_FIELDS[key] as readonly (keyof WizardValues)[]).some((field) => errors[field])
   )
 
@@ -52,8 +52,9 @@ export function ProductWizardPage() {
   const defaults = useQuery(shopDefaultsQuery())
   const create = useCreateProduct()
   const values = useWatch({ control: form.control }) as WizardValues
-  const stepKey = WIZARD_STEPS[current] ?? "basics"
-  const last = current === WIZARD_STEPS.length - 1
+  const stepKeys = stepsFor(values.kind)
+  const stepKey = stepKeys[current] ?? "basics"
+  const last = current === stepKeys.length - 1
   const publishable = canPublish(readiness(values))
   const StepView = STEP_VIEWS[stepKey]
 
@@ -106,14 +107,14 @@ export function ProductWizardPage() {
         )
       },
       (errors) => {
-        const index = firstStepWithError(errors)
+        const index = firstStepWithError(stepKeys, errors)
         if (index >= 0) {
           goTo(index)
         }
       }
     )()
 
-  const steps = WIZARD_STEPS.map((key) => ({
+  const steps = stepKeys.map((key) => ({
     key,
     title: t(`products.wizard.steps.${key}.title`),
     description: t(`products.wizard.steps.${key}.description`),

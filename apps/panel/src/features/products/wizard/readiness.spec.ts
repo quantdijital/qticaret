@@ -51,4 +51,18 @@ describe("readiness", () => {
 
     expect(state({ ...values, variants: [...values.variants, second] })["price"]).toBe(false)
   })
+
+  it("asks no measurements of a digital or service product (F3.2)", () => {
+    const digital = {
+      ...complete(),
+      kind: "digital" as const,
+      weight: "",
+      length: "",
+      width: "",
+      height: "",
+    }
+
+    expect(state(digital)).not.toHaveProperty("measures")
+    expect(canPublish(readiness(digital))).toBe(true)
+  })
 })

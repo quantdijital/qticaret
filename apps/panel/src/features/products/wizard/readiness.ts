@@ -26,7 +26,10 @@ export function readiness(values: WizardValues): ReadinessItem[] {
   return [
     { key: "title", done: values.title.trim().length >= 2, required: true },
     { key: "price", done: priced, required: true },
-    { key: "measures", done: hasMeasures(values), required: true },
+    // F3.2: only a physical product has a parcel to measure
+    ...(values.kind === "physical"
+      ? [{ key: "measures" as const, done: hasMeasures(values), required: true }]
+      : []),
     { key: "images", done: values.images.length > 0, required: false },
     { key: "description", done: wordCount(values.description) >= SUGGESTED_WORDS, required: false },
     { key: "category", done: values.category_ids.length > 0, required: false },

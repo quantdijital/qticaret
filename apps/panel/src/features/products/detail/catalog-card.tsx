@@ -13,10 +13,16 @@ import {
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   PRODUCT_CONDITIONS,
+  PRODUCT_KINDS,
   productCatalogQuery,
   useSaveCatalog,
 } from "@/features/products/api/product-edit"
-import type { ProductCatalog, ProductCondition } from "@/features/products/api/product-edit"
+import type {
+  ProductCatalog,
+  ProductCondition,
+  ProductKind,
+} from "@/features/products/api/product-edit"
+import { useFeature } from "@/features/settings/api/features"
 import { errorText } from "@/lib/errors"
 import { CardForm } from "@/components/patterns/card-form"
 
@@ -25,14 +31,18 @@ const NONE = "__none__"
 
 interface Values {
   condition: ProductCondition
+  kind: ProductKind
   primary_category_id: string
 }
 
 function CatalogForm({ productId, catalog }: { productId: string; catalog: ProductCatalog }) {
   const { t } = useTranslation()
   const save = useSaveCatalog(productId)
+  // The kind shows once the shop sells digital or service products, or this one is one
+  const kinds = useFeature("catalog.non_physical") || catalog.kind !== "physical"
   const saved: Values = {
     condition: catalog.condition,
+    kind: catalog.kind,
     primary_category_id: catalog.primary_category_id ?? "",
   }
   const form = useForm<Values>({ values: saved, resetOptions: { keepDirtyValues: true } })
@@ -43,6 +53,7 @@ function CatalogForm({ productId, catalog }: { productId: string; catalog: Produ
     save.mutate(
       {
         ...(dirtyFields.condition ? { condition: values.condition } : {}),
+        ...(dirtyFields.kind ? { kind: values.kind } : {}),
         ...(dirtyFields.primary_category_id
           ? { primary_category_id: values.primary_category_id || null }
           : {}),
@@ -68,6 +79,32 @@ function CatalogForm({ productId, catalog }: { productId: string; catalog: Produ
         form.reset(saved)
       }}
     >
+      {kinds ? (
+        <Field
+          label={t("products.catalog.kind")}
+          htmlFor="catalog-kind"
+          hint={t("products.catalog.kindHint")}
+        >
+          <Controller
+            control={form.control}
+            name="kind"
+            render={({ field }) => (
+              <Select value={field.value} onValueChange={field.onChange}>
+                <SelectTrigger id="catalog-kind" className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PRODUCT_KINDS.map((kind) => (
+                    <SelectItem key={kind} value={kind}>
+                      {t(`products.catalog.kinds.${kind}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          />
+        </Field>
+      ) : null}
       <Field label={t("products.catalog.condition")} htmlFor="catalog-condition">
         <Controller
           control={form.control}

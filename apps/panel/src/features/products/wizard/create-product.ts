@@ -35,12 +35,16 @@ function productBody({ values, publish, defaults, defaultOption }: CreateInput) 
     title: values.title.trim(),
     ...(values.handle.trim() ? { handle: values.handle.trim() } : {}),
     description: values.description.trim(),
-    status: publish ? ("published" as const) : ("draft" as const),
+    // A digital or service product is published after its kind is set (F3.2): as a
+    // physical one it would need measurements first
+    status: publish && values.kind === "physical" ? ("published" as const) : ("draft" as const),
     images: values.images.map((image) => ({ url: image.url })),
     ...(values.images[0] ? { thumbnail: values.images[0].url } : {}),
     categories: values.category_ids.map((id) => ({ id })),
     ...(values.type_id ? { type_id: values.type_id } : {}),
-    ...(defaults.shippingProfileId ? { shipping_profile_id: defaults.shippingProfileId } : {}),
+    ...(defaults.shippingProfileId && values.kind === "physical"
+      ? { shipping_profile_id: defaults.shippingProfileId }
+      : {}),
     ...(defaults.salesChannelId ? { sales_channels: [{ id: defaults.salesChannelId }] } : {}),
     ...dimensions,
     options,
@@ -99,6 +103,15 @@ export function useCreateProduct() {
   return useMutation({
     mutationFn: async (input: CreateInput): Promise<CreateResult> => {
       const { product } = await sdk.admin.product.create(productBody(input))
+      if (input.values.kind !== "physical") {
+        await sdk.client.fetch(`/admin/products/${encodeURIComponent(product.id)}/catalog`, {
+          method: "POST",
+          body: { kind: input.values.kind },
+        })
+        if (input.publish) {
+          await sdk.admin.product.update(product.id, { status: "published" })
+        }
+      }
       if (!input.values.manage_inventory) {
         return { productId: product.id, stockProblem: null }
       }

@@ -54,6 +54,8 @@ export const optionSchema = z.object({
 
 export const wizardSchema = z
   .object({
+    // F3.2: digital and service products skip shipping (flag catalog.non_physical)
+    kind: z.enum(["physical", "digital", "service"]),
     title: z.string().trim().min(2, { message: "products.errors.title" }).max(MAX_TEXT),
     handle: z
       .string()
@@ -102,6 +104,7 @@ export type VariantValues = z.infer<typeof variantSchema>
 export const DEFAULT_VARIANT_KEY = "default"
 
 export const defaultWizardValues = (): WizardValues => ({
+  kind: "physical",
   title: "",
   handle: "",
   description: "",
@@ -132,6 +135,10 @@ export const STEP_FIELDS = {
 
 export type WizardStepKey = keyof typeof STEP_FIELDS
 export const WIZARD_STEPS = Object.keys(STEP_FIELDS) as WizardStepKey[]
+
+/** The steps for a kind: a digital or service product has no parcel, so no shipping step. */
+export const stepsFor = (kind: WizardValues["kind"]): WizardStepKey[] =>
+  kind === "physical" ? WIZARD_STEPS : WIZARD_STEPS.filter((key) => key !== "shipping")
 
 /** Publishing needs weight and all three dimensions (the F3.1 rule the server applies). */
 export const hasMeasures = (values: WizardValues): boolean =>

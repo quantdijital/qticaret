@@ -1,4 +1,4 @@
-import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
+import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { sdk } from "@/lib/sdk"
 
 /** A feature flag (adr/0012): tenant flags the shop turns on and off, platform flags come with the plan. */
@@ -30,4 +30,10 @@ export function useSetFeature() {
       await client.invalidateQueries({ queryKey: FEATURES_KEY })
     },
   })
+}
+
+/** Whether a tenant flag is on; false while loading or unknown. */
+export function useFeature(key: string): boolean {
+  const { data } = useQuery(featuresQuery())
+  return data?.find((feature) => feature.key === key)?.enabled ?? false
 }

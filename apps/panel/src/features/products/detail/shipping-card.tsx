@@ -1,10 +1,14 @@
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useQuery } from "@tanstack/react-query"
+import { PackageX } from "lucide-react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { z } from "zod"
 import { Field } from "@/components/patterns/form-section"
+import { SectionCard } from "@/components/patterns/section-card"
 import { Input } from "@/components/ui/input"
+import { productCatalogQuery } from "@/features/products/api/product-edit"
 import { useUpdateProduct } from "@/features/products/api/products"
 import type { ProductDetail } from "@/features/products/api/products"
 import { useStoreUnits } from "@/features/products/use-units"
@@ -42,6 +46,7 @@ export function ShippingCard({ product }: { product: ProductDetail }) {
   const { t } = useTranslation()
   const update = useUpdateProduct(product.id)
   const units = useStoreUnits()
+  const catalog = useQuery(productCatalogQuery(product.id))
   const saved: Values = {
     weight: asText(product.weight),
     length: asText(product.length),
@@ -64,6 +69,18 @@ export function ShippingCard({ product }: { product: ProductDetail }) {
       onError: (failure) => toast.error(errorText(t, failure)),
     })
   })
+
+  // F3.2: a digital or service product has no parcel to measure
+  if (catalog.data && catalog.data.kind !== "physical") {
+    return (
+      <SectionCard title={t("products.wizard.shippingCard")}>
+        <p className="flex items-start gap-2.5 text-sm text-muted-foreground">
+          <PackageX className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+          {t(`products.detail.noShipping.${catalog.data.kind}`)}
+        </p>
+      </SectionCard>
+    )
+  }
 
   return (
     <CardForm

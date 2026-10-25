@@ -335,7 +335,15 @@
       "subtitle": "Mağazanıza göre açıp kapatabileceğiniz özellikler.",
       "list": "Özellikler",
       "empty": "Şu an açıp kapatılabilecek bir özellik yok. Kapıda ödeme gibi özellikler eklendikçe burada görünecek.",
-      "locked": "Paketinizle birlikte gelir; buradan değiştirilemez."
+      "locked": "Paketinizle birlikte gelir; buradan değiştirilemez.",
+      "flags": {
+        "catalog": {
+          "non_physical": {
+            "label": "Dijital ve hizmet ürünleri",
+            "description": "Kargo gerektirmeyen ürünler (e-kitap, hediye kodu, kurs, hizmet) satılabilir; bu ürünlerde kargo ve ölçü istenmez."
+          }
+        }
+      }
     },
     "jobs": {
       "title": "İşler",
@@ -673,7 +681,8 @@
       "defaultOption": "Seçenek",
       "defaultValue": "Standart",
       "stockNoLocation": "Ürün kaydedildi ama mağazanın varsayılan depo adresi olmadığı için stok girilemedi. Ayarlardan bir depo adresi ekleyin.",
-      "defaultsFailed": "Mağaza ayarları okunamadı. Biraz sonra tekrar deneyin."
+      "defaultsFailed": "Mağaza ayarları okunamadı. Biraz sonra tekrar deneyin.",
+      "kindHint": "Dijital ürün ve hizmette kargo adımı atlanır."
     },
     "detail": {
       "title": "Ürün",
@@ -698,7 +707,11 @@
       "deleteTitle": "{{title}} silinsin mi?",
       "deleteDescription": "Ürün, varyantları ve stok kayıtları silinir. Bu işlem geri alınamaz.",
       "deleted": "Ürün silindi.",
-      "variantsNoLocation": "Mağazanın varsayılan depo adresi yok; stok girmek için önce bir depo adresi ekleyin."
+      "variantsNoLocation": "Mağazanın varsayılan depo adresi yok; stok girmek için önce bir depo adresi ekleyin.",
+      "noShipping": {
+        "digital": "Dijital ürün: kargo ve paket ölçüsü gerekmez.",
+        "service": "Hizmet: kargo ve paket ölçüsü gerekmez."
+      }
     },
     "catalog": {
       "card": "Katalog bilgileri",
@@ -712,7 +725,14 @@
       },
       "primaryCategory": "Ana kategori",
       "primaryCategoryHint": "Ürünün kategorilerinden biri; sayfadaki yol bu kategoriyle gösterilir.",
-      "noPrimary": "Seçilmedi"
+      "noPrimary": "Seçilmedi",
+      "kind": "Ürün türü",
+      "kindHint": "Dijital ve hizmet ürünleri kargo ve ölçü gerektirmez.",
+      "kinds": {
+        "physical": "Fiziksel ürün",
+        "digital": "Dijital ürün",
+        "service": "Hizmet"
+      }
     }
   },
   "orders": {

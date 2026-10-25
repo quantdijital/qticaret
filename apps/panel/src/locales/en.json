@@ -335,7 +335,15 @@
       "subtitle": "Features you can turn on or off for your shop.",
       "list": "Features",
       "empty": "No features to switch yet. Features such as cash on delivery will show up here as they arrive.",
-      "locked": "Comes with your plan; cannot be changed here."
+      "locked": "Comes with your plan; cannot be changed here.",
+      "flags": {
+        "catalog": {
+          "non_physical": {
+            "label": "Digital and service products",
+            "description": "Sell products that need no shipping (e-books, gift codes, courses, services); they ask for no shipping or measurements."
+          }
+        }
+      }
     },
     "jobs": {
       "title": "Jobs",
@@ -665,7 +673,8 @@
       "defaultOption": "Option",
       "defaultValue": "Standard",
       "stockNoLocation": "The product was saved, but the shop has no default location, so its stock was not. Add a location in settings.",
-      "defaultsFailed": "The shop's settings could not be read. Try again shortly."
+      "defaultsFailed": "The shop's settings could not be read. Try again shortly.",
+      "kindHint": "Digital products and services skip the shipping step."
     },
     "detail": {
       "title": "Product",
@@ -690,7 +699,11 @@
       "deleteTitle": "Delete {{title}}?",
       "deleteDescription": "The product, its variants and stock records are deleted. This cannot be undone.",
       "deleted": "Product deleted.",
-      "variantsNoLocation": "The shop has no default location; add one before entering stock."
+      "variantsNoLocation": "The shop has no default location; add one before entering stock.",
+      "noShipping": {
+        "digital": "Digital product: no shipping or package size needed.",
+        "service": "Service: no shipping or package size needed."
+      }
     },
     "catalog": {
       "card": "Catalog details",
@@ -704,7 +717,14 @@
       },
       "primaryCategory": "Primary category",
       "primaryCategoryHint": "One of the product's categories; the page's breadcrumb follows it.",
-      "noPrimary": "Not chosen"
+      "noPrimary": "Not chosen",
+      "kind": "Product type",
+      "kindHint": "Digital and service products need no shipping or measurements.",
+      "kinds": {
+        "physical": "Physical product",
+        "digital": "Digital product",
+        "service": "Service"
+      }
     }
   },
   "orders": {

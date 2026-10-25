@@ -6,10 +6,12 @@ import { Field } from "@/components/patterns/form-section"
 import { SectionCard } from "@/components/patterns/section-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Textarea } from "@/components/ui/textarea"
 import { CategoryTree } from "@/features/products/components/category-tree"
 import { VatSelect } from "@/features/products/components/vat-select"
 import { useProductPathPrefix } from "@/features/products/use-product-path"
+import { useFeature } from "@/features/settings/api/features"
 import { toSlug } from "@/lib/slug"
 import { SUGGESTED_WORDS, wordCount } from "../readiness"
 import type { WizardValues } from "../schema"
@@ -90,6 +92,43 @@ function VatPicker() {
   )
 }
 
+const KINDS = ["physical", "digital", "service"] as const
+
+/** F3.2: what kind of product it is, once the shop sells digital or service products. */
+function KindPicker() {
+  const { t } = useTranslation()
+  const { control } = useFormContext<WizardValues>()
+  const enabled = useFeature("catalog.non_physical")
+  if (!enabled) {
+    return null
+  }
+  return (
+    <Field label={t("products.catalog.kind")} hint={t("products.wizard.kindHint")}>
+      <Controller
+        control={control}
+        name="kind"
+        render={({ field }) => (
+          <RadioGroup
+            value={field.value}
+            onValueChange={field.onChange}
+            className="flex flex-col gap-2"
+          >
+            {KINDS.map((kind) => (
+              <label
+                key={kind}
+                className="flex cursor-pointer items-center gap-2.5 rounded-md border px-3 py-2 text-sm has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-accent"
+              >
+                <RadioGroupItem value={kind} />
+                {t(`products.catalog.kinds.${kind}`)}
+              </label>
+            ))}
+          </RadioGroup>
+        )}
+      />
+    </Field>
+  )
+}
+
 /** Step 1: what the product is called, its URL, its story and where it belongs. */
 export function BasicsStep() {
   const { t } = useTranslation()
@@ -131,6 +170,7 @@ export function BasicsStep() {
       </SectionCard>
       <SectionCard title={t("products.wizard.organize")} className="xl:col-span-4">
         <div className="flex flex-col gap-5">
+          <KindPicker />
           <Field label={t("products.wizard.categories")} hint={t("products.wizard.categoriesHint")}>
             <CategoryPicker />
           </Field>

@@ -6,10 +6,14 @@ import { sdk } from "@/lib/sdk"
 export const PRODUCT_CONDITIONS = ["new", "refurbished", "used", "damaged"] as const
 export type ProductCondition = (typeof PRODUCT_CONDITIONS)[number]
 
+/** F3.2: digital and service products need no shipping (flag `catalog.non_physical`). */
+export const PRODUCT_KINDS = ["physical", "digital", "service"] as const
+export type ProductKind = (typeof PRODUCT_KINDS)[number]
+
 /** `GET /admin/products/:id/catalog` (F3.1). */
 export interface ProductCatalog {
   condition: ProductCondition
-  kind: "physical" | "digital" | "service"
+  kind: ProductKind
   primary_category_id: string | null
   successor: { id: string; title: string; handle: string } | null
   categories: { id: string; name: string }[]
@@ -33,10 +37,15 @@ export const productCatalogQuery = (id: string) =>
 export function useSaveCatalog(id: string) {
   const client = useQueryClient()
   return useMutation({
-    mutationFn: (body: { condition?: ProductCondition; primary_category_id?: string | null }) =>
-      sdk.client.fetch<ProductCatalog>(catalogUrl(id), { method: "POST", body }),
-    onSuccess: (catalog) => {
+    mutationFn: (body: {
+      condition?: ProductCondition
+      kind?: ProductKind
+      primary_category_id?: string | null
+    }) => sdk.client.fetch<ProductCatalog>(catalogUrl(id), { method: "POST", body }),
+    onSuccess: async (catalog) => {
       client.setQueryData(["products", "catalog", id], catalog)
+      // A kind change moves the product's shipping set-up and what its page asks for
+      await client.invalidateQueries({ queryKey: ["products", "detail", id] })
     },
   })
 }
