@@ -51,3 +51,21 @@ Medusa 2.21.2'de doğrulananlar (F2 planlaması):
 - IP ve user agent kişisel veridir. Saklama süresi (öneri: 2 yıl) KVKK danışmanıyla belirlenir (docs/12). Silme/anonimleştirme job'u F13'te yazılır.
 - Görüntüleyici ekran F12.5'te. F2'de yalnızca admin list API'si (`GET /admin/audit-log`, filtreli, sayfalı) var.
 - Yeni bir hassas route ekleyen her faz, kaynağını kayıt defterine ekler. code-reviewer kontrol listesine eklenir.
+
+## Ek: F2 S8 güvenlik incelemesi (2026-10-25)
+- **Kapsam:** Hassas okuma kapsamı detay route'larıyla sınırlı kalmadı. Kişisel veri dönen admin GET route'ları `middlewares.ts` içindeki `SENSITIVE_READS` listesinde tutulur.
+  - Kapsananlar: müşteri ve sipariş listeleri, sipariş preview/changes, draft order, iade, claim, exchange, bildirim ve müşteri grubu detayı.
+  - Liste okumasında `fields`, `limit`, `offset` ve filtrelerin yalnızca **adları** yazılır.
+  - Admin'de `fields` ile `billing_profile`/`tax_id` genişletmesi 400 döner. Maskeli profil kendi route'undan okunur.
+- **Yazım zamanı:** Mutasyon kaydı handler'ın `res.end` çağrısına bağlıdır. İstemci bağlantıyı kopardığında `finish` gelmez ama değişiklik yapılmıştır.
+- **Kırpma:** Bütçe 64 KB'tır. Aşılırsa `diff` bölümü kırpılır (`diff_truncated`, `diff_total`); alan adları korunur.
+- **Okuma yetkisi:** Denetim kaydını yalnızca admin kullanıcıları okur; secret API key 403 alır (RBAC F12'de).
+- **İstek hedefi:** `\` ya da `#` içeren istek hedefleri 400 ile reddedilir. Express'in seçtiği route ile kontrollerin okuduğu yol ayrışmasın diye.
+- **Açık kalanlar:**
+  - İki aşamalı yazım: süreç çökse de "başladı" izi kalsın diye.
+  - Ürün içe aktarma workflow'una `system` kaydı (F3.9).
+  - Price list fiyatının hangi varyanta ait olduğu.
+  - Admin `limit` üst sınırı.
+  - Admin route envanter testi.
+  - `request_id`'nin istemci seçimi olabilmesi.
+

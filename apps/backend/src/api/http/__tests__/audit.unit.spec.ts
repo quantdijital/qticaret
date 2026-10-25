@@ -3,8 +3,15 @@ import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { logger } from "../../../lib/logging"
 import { AUDIT_LOG_MODULE } from "../../../modules/audit-log"
-import { auditMutations, auditSensitiveRead, describeRoute, diffSnapshots } from "../audit"
-import { matchAuditedResource } from "../audit/registry"
+import {
+  auditMutations,
+  auditPath,
+  auditSensitiveRead,
+  describeRoute,
+  diffSnapshots,
+  matchAuditedResource,
+} from "../audit"
+import { requireUserActor } from "../actor"
 import { fakeResponse } from "./fakes"
 
 const flush = () => new Promise((resolve) => setImmediate(resolve))
@@ -13,6 +20,8 @@ function fakes(fields: {
   path: string
   method?: string
   body?: unknown
+  query?: Record<string, unknown>
+  params?: Record<string, string>
   record?: jest.Mock
   graph?: jest.Mock
 }) {
@@ -22,6 +31,8 @@ function fakes(fields: {
     originalUrl: fields.path,
     method: fields.method ?? "POST",
     body: fields.body ?? {},
+    query: fields.query ?? {},
+    params: fields.params ?? {},
     headers: { "user-agent": "jest" },
     ip: "203.0.113.7",
     requestId: "req-12345678",
@@ -38,9 +49,10 @@ function fakes(fields: {
   return { req, record, graph }
 }
 
+// `end` is what the handler calls; "finish" follows only while the client is connected
 function finishingResponse(statusCode: number) {
-  const res = Object.assign(new EventEmitter(), { statusCode })
-  return res as unknown as MedusaResponse & EventEmitter
+  const res = Object.assign(new EventEmitter(), { statusCode, end: jest.fn() })
+  return res as unknown as MedusaResponse & EventEmitter & { end: jest.Mock }
 }
 
 beforeEach(() => {
@@ -88,21 +100,60 @@ describe("audit registry", () => {
     })
   })
 
-  it("leaves other routes and methods to the generic entry", () => {
-    expect(matchAuditedResource("DELETE", "/admin/products/prod_01ABC")).toBeNull()
+  it.each([
+    ["POST", "/admin/products/batch", "POST /admin/products/batch"],
+    ["POST", "/admin/products/prod_01A/variants", "POST /admin/products/:id/variants"],
+    ["DELETE", "/admin/products/prod_01A", "DELETE /admin/products/:id"],
+    ["POST", "/admin/price-lists/plist_01A", "POST /admin/price-lists/:id"],
+    ["DELETE", "/admin/price-lists/plist_01A", "DELETE /admin/price-lists/:id"],
+    ["POST", "/admin/price-lists/plist_01A/products", "POST /admin/price-lists/:id/products"],
+  ])("covers every price-bearing route: %s %s", (method, path, route) => {
+    expect(matchAuditedResource(method, path)?.resource.route).toBe(route)
+  })
+
+  it("leaves other routes to the generic entry", () => {
     expect(matchAuditedResource("POST", "/admin/regions/reg_01ABC")).toBeNull()
+  })
+
+  it("reads encoded IDs as Express decodes them", () => {
+    const req = { originalUrl: "/admin/products/prod%5F01ABC/variants/variant%5F01X" }
+
+    expect(auditPath(req as unknown as MedusaRequest)).toBe(
+      "/admin/products/prod_01ABC/variants/variant_01X"
+    )
+  })
+
+  it("snapshots the products a batch names in its body", async () => {
+    const graph = jest.fn(() => Promise.resolve({ data: [] }))
+    const match = matchAuditedResource("POST", "/admin/products/batch")
+
+    await match?.resource.snapshot({
+      scope: { resolve: () => ({ graph }) },
+      params: match.params,
+      body: { update: [{ id: "prod_1" }, { id: "prod_2" }], delete: ["prod_3"], create: [{}] },
+    })
+
+    expect(graph).toHaveBeenCalledWith(
+      expect.objectContaining({
+        entity: "product",
+        filters: { id: ["prod_1", "prod_2", "prod_3"] },
+      })
+    )
   })
 
   it("describes a route by its pattern, area and first ID", () => {
     expect(describeRoute("POST", "/admin/customers/cus_01ABC/addresses/cuaddr_01X")).toEqual({
       action: "POST /admin/customers/:id/addresses/:id",
-      resourceType: "customers",
+      resourceType: "customer",
       resourceId: "cus_01ABC",
     })
     expect(describeRoute("POST", "/admin/products/batch")).toEqual({
       action: "POST /admin/products/batch",
-      resourceType: "products",
+      resourceType: "product",
       resourceId: null,
+    })
+    expect(describeRoute("POST", "/admin/product-categories")).toMatchObject({
+      resourceType: "product_category",
     })
   })
 })
@@ -189,18 +240,49 @@ describe("auditMutations", () => {
     expect(JSON.stringify(entry)).not.toContain("Gizli")
   })
 
-  it("does not read again after a refused request", async () => {
+  it("reads again after a failed request, which may have changed something", async () => {
     const graph = jest.fn(() => Promise.resolve({ data: [{ prices: [] }] }))
     const { req, record } = fakes({ path: "/admin/products/prod_1A/variants/variant_1B", graph })
-    const res = finishingResponse(400)
+    const res = finishingResponse(500)
 
     await auditMutations(req, res, jest.fn())
     res.emit("finish")
     await flush()
 
-    expect(graph).toHaveBeenCalledTimes(1)
+    expect(graph).toHaveBeenCalledTimes(2)
     expect(record).toHaveBeenCalledWith(
-      expect.objectContaining({ outcome: 400, changes: { fields: [] } })
+      expect.objectContaining({ outcome: 500, changes: { fields: [], diff: {} } })
+    )
+  })
+
+  it("records a mutation whose client hung up before the answer", async () => {
+    const { req, record } = fakes({ path: "/admin/regions", body: { name: "x" } })
+    const res = finishingResponse(200)
+
+    await auditMutations(req, res, jest.fn())
+    // The handler ends the response; no "finish" comes on a closed socket
+    res.end()
+    await flush()
+
+    expect(record).toHaveBeenCalledTimes(1)
+    res.emit("finish")
+    await flush()
+    expect(record).toHaveBeenCalledTimes(1)
+  })
+
+  it("writes field names Postgres can store", async () => {
+    const { req, record } = fakes({
+      path: "/admin/regions",
+      body: { name: "x", "\u0000": 1, ["a".repeat(65)]: 2 },
+    })
+    const res = finishingResponse(200)
+
+    await auditMutations(req, res, jest.fn())
+    res.end()
+    await flush()
+
+    expect(record).toHaveBeenCalledWith(
+      expect.objectContaining({ changes: { fields: ["name", "<invalid>", "<invalid>"] } })
     )
   })
 
@@ -214,19 +296,24 @@ describe("auditMutations", () => {
     expect(record).not.toHaveBeenCalled()
   })
 
-  it("logs a failed write instead of throwing", async () => {
-    const { req } = fakes({
-      path: "/admin/regions",
-      record: jest.fn(() => Promise.reject(new Error("db down"))),
-    })
+  it("logs a failed write and retries it without the change summary", async () => {
+    const record = jest
+      .fn()
+      .mockRejectedValueOnce(new Error("db refused"))
+      .mockResolvedValueOnce({ id: "aud_1" })
+    const { req } = fakes({ path: "/admin/regions", record })
     const res = finishingResponse(200)
 
     await auditMutations(req, res, jest.fn())
     res.emit("finish")
     await flush()
+    await flush()
 
     expect(logger.error).toHaveBeenCalledWith(
       expect.objectContaining({ event: "audit.write_failed", action: "POST /admin/regions" })
+    )
+    expect(record).toHaveBeenLastCalledWith(
+      expect.objectContaining({ action: "POST /admin/regions", changes: { write_failed: true } })
     )
   })
 })
@@ -253,6 +340,41 @@ describe("auditSensitiveRead", () => {
     expect(next).toHaveBeenCalled()
   })
 
+  it("records what a list read asked for, never filter values", async () => {
+    const { req, record } = fakes({
+      path: "/admin/customers",
+      method: "GET",
+      query: { fields: "*addresses", limit: "50", offset: "0", q: "Ayşe Yılmaz" },
+    })
+
+    await auditSensitiveRead("customer", { list: true })(req, fakeResponse().res, jest.fn())
+
+    const entry = (record.mock.calls[0] as [Record<string, unknown>])[0]
+    expect(entry).toMatchObject({
+      action: "GET /admin/customers",
+      resource_id: null,
+      changes: {
+        fields: "*addresses",
+        limit: "50",
+        offset: "0",
+        params: ["fields", "limit", "offset", "q"],
+      },
+    })
+    expect(JSON.stringify(entry)).not.toContain("Ayşe")
+  })
+
+  it("takes the resource ID from the decoded route parameter", async () => {
+    const { req, record } = fakes({
+      path: "/admin/customers/cus%5F01A",
+      method: "GET",
+      params: { id: "cus_01A" },
+    })
+
+    await auditSensitiveRead("customer")(req, fakeResponse().res, jest.fn())
+
+    expect(record).toHaveBeenCalledWith(expect.objectContaining({ resource_id: "cus_01A" }))
+  })
+
   it("refuses the read with 503 when the record cannot be written", async () => {
     const { req } = fakes({
       path: "/admin/customers/cus_01A",
@@ -267,5 +389,30 @@ describe("auditSensitiveRead", () => {
     expect(next).not.toHaveBeenCalled()
     expect(response.status()).toBe(503)
     expect(response.body()).toMatchObject({ message: "errors.temporarily_unavailable" })
+  })
+})
+
+describe("requireUserActor", () => {
+  it.each([
+    ["a secret API key", { actor_type: "api-key", actor_id: "apk_1" }],
+    ["no actor", undefined],
+  ])("refuses %s", (_label, auth) => {
+    const req = { auth_context: auth, method: "GET", originalUrl: "/admin/audit-log" }
+    const response = fakeResponse()
+    const next = jest.fn()
+
+    requireUserActor(req as unknown as MedusaRequest, response.res, next)
+
+    expect(next).not.toHaveBeenCalled()
+    expect(response.status()).toBe(403)
+  })
+
+  it("lets a signed-in user through", () => {
+    const next = jest.fn()
+    const req = { auth_context: { actor_type: "user", actor_id: "user_1" } }
+
+    requireUserActor(req as unknown as MedusaRequest, fakeResponse().res, next)
+
+    expect(next).toHaveBeenCalled()
   })
 })

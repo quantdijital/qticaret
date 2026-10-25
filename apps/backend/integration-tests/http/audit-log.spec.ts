@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto"
+import { connect } from "node:net"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { createApiKeysWorkflow } from "@medusajs/medusa/core-flows"
@@ -56,6 +57,35 @@ medusaIntegrationTestRunner({
         filters: { id: variantId },
       })
       return (data[0] as { product_id: string }).product_id
+    }
+
+    // A raw HTTP/1.1 request: clients normalise paths and wait for answers;
+    // these tests need neither. `hangUp` closes as soon as the request is out.
+    function rawRequest(lines: string[], body: string, hangUp: boolean): Promise<string> {
+      const base = new URL((api as { defaults: { baseURL: string } }).defaults.baseURL)
+      return new Promise((resolve, reject) => {
+        const socket = connect(Number(base.port), base.hostname)
+        let answer = ""
+        socket.on("data", (chunk: Buffer) => {
+          answer += chunk.toString()
+        })
+        socket.on("close", () => {
+          resolve(answer)
+        })
+        socket.on("error", reject)
+        const head = [
+          ...lines,
+          `Host: ${base.host}`,
+          `Content-Length: ${String(Buffer.byteLength(body))}`,
+        ]
+        socket.write(`${head.join("\r\n")}\r\n\r\n${body}`, () => {
+          if (hangUp) {
+            socket.destroy()
+          } else {
+            socket.end()
+          }
+        })
+      })
     }
 
     beforeEach(async () => {
@@ -162,6 +192,75 @@ medusaIntegrationTestRunner({
 
       expect(entry).toMatchObject({ kind: "sensitive_read", action: "GET /admin/audit-log" })
       expect(tooMany.status).toBe(400)
+    })
+
+    it("records a list read with what it asked for, and refuses tax id expansions", async () => {
+      await http.get("/admin/customers?fields=email,*addresses&limit=20", {
+        headers: admin.headers,
+      })
+      const expansion = await settle(
+        http.get("/admin/customers/cus_01ABC?fields=*billing_profile", { headers: admin.headers })
+      )
+      const [entry] = await entries({ resource_type: "customer", kind: "sensitive_read" })
+
+      expect(entry).toMatchObject({
+        action: "GET /admin/customers",
+        resource_id: null,
+        changes: { fields: "email,*addresses", limit: "20" },
+      })
+      expect(expansion.status).toBe(400)
+    })
+
+    it("keeps the audit log from secret API keys", async () => {
+      const { result } = await createApiKeysWorkflow(getContainer()).run({
+        input: { api_keys: [{ title: "integration", type: "secret", created_by: "user_test" }] },
+      })
+      const basic = Buffer.from(`${result[0]?.token ?? ""}:`).toString("base64")
+
+      const read = await settle(
+        http.get("/admin/audit-log", { headers: { authorization: `Basic ${basic}` } })
+      )
+
+      expect(read.status).toBe(403)
+    })
+
+    it("records a mutation whose client hangs up before the answer", async () => {
+      const name = `Kopan Bağlantı ${randomUUID()}`
+      const body = JSON.stringify({ name, currency_code: "try" })
+
+      await rawRequest(
+        [
+          "POST /admin/regions HTTP/1.1",
+          `Authorization: ${admin.headers["authorization"] ?? ""}`,
+          "Content-Type: application/json",
+        ],
+        body,
+        true
+      )
+      const query = getContainer().resolve(ContainerRegistrationKeys.QUERY)
+      let regionId: string | undefined
+      for (let attempt = 0; attempt < 30 && !regionId; attempt++) {
+        const { data } = await query.graph({ entity: "region", fields: ["id"], filters: { name } })
+        regionId = (data[0] as { id: string } | undefined)?.id
+        await new Promise((resolve) => setTimeout(resolve, 100))
+      }
+      const recorded = await entries({ resource_type: "region", kind: "mutation" })
+
+      expect(regionId).toBeDefined()
+      expect(recorded.some((entry) => entry.action === "POST /admin/regions")).toBe(true)
+    })
+
+    it("refuses a request target with a backslash or a fragment", async () => {
+      const answer = await rawRequest(
+        [
+          "POST /auth\\customer\\emailpass\\reset-password# HTTP/1.1",
+          "Content-Type: application/json",
+        ],
+        JSON.stringify({ identifier: "kurban@example.com" }),
+        false
+      )
+
+      expect(answer.split("\r\n")[0]).toContain(" 400 ")
     })
   },
 })

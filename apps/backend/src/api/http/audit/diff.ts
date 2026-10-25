@@ -1,4 +1,4 @@
-import type { Snapshot } from "./registry"
+import type { Snapshot } from "./types"
 
 export interface FieldChange {
   before?: unknown

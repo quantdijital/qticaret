@@ -2,6 +2,7 @@ import type { MedusaRequest } from "@medusajs/framework/http"
 import { logger } from "../../../lib/logging"
 import { csrfProtection } from "../csrf"
 import { storeLimitGuard, uploadSizeGate } from "../request-limits"
+import { rejectAmbiguousPath } from "../request-path"
 import { applySecurityHeaders } from "../security-headers"
 import { fakeResponse } from "./fakes"
 
@@ -225,5 +226,23 @@ describe("uploadSizeGate", () => {
     })
 
     expect(run(uploadSizeGate, json).next).toHaveBeenCalled()
+  })
+})
+
+describe("rejectAmbiguousPath", () => {
+  it.each(["/auth\\customer\\emailpass\\reset-password#", "/admin/products#x", "/admin\\products"])(
+    "refuses %s",
+    (path) => {
+      const result = run(rejectAmbiguousPath, request({ path }))
+
+      expect(result.status()).toBe(400)
+      expect(result.body()).toMatchObject({ message: "errors.invalid_request" })
+    }
+  )
+
+  it("lets an ordinary path through, encoded characters included", () => {
+    const req = request({ path: "/admin/products/prod%5F01?q=%23" })
+
+    expect(run(rejectAmbiguousPath, req).next).toHaveBeenCalled()
   })
 })

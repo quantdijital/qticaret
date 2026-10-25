@@ -1,15 +1,17 @@
 import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { rejectRequest } from "../http/reject"
 
-// Linked data that must never be selectable through store `fields` (adr/0009)
+// Linked data that must never be selectable through `fields` (adr/0009)
 const SENSITIVE_FIELD = /billing_profile|tax_id/i
 
 /**
- * Defence in depth for docs/04: Medusa's store routes already drop fields
- * outside their allow lists (tested), but a route that forgets one must not
- * expose tax identities through `?fields=`.
+ * Defence in depth for docs/04 on /store and /admin: Medusa's store routes
+ * drop fields outside their allow lists (tested), but admin routes expand
+ * links freely: `/admin/customers?fields=*billing_profile` would return the
+ * encrypted tax id and its hash for every customer, unrecorded. The masked
+ * profile has its own audited route (`/admin/customers/:id/billing-profile`).
  */
-export function rejectSensitiveStoreFields(
+export function rejectSensitiveFields(
   req: MedusaRequest,
   res: MedusaResponse,
   next: MedusaNextFunction

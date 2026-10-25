@@ -21,7 +21,9 @@ export async function GET(
   }
   const [entries, count] = await service.listAndCountAuditEntries(
     { ...fields, ...(Object.keys(createdAt).length > 0 ? { created_at: createdAt } : {}) },
-    { order: { created_at: "DESC" }, skip: offset, take: limit }
+    // id breaks ties between entries of the same millisecond, so pages do
+    // not overlap; soft-deleted rows (only raw SQL could make one) still show
+    { order: { created_at: "DESC", id: "DESC" }, skip: offset, take: limit, withDeleted: true }
   )
 
   res.json({ audit_entries: entries, count, offset, limit })

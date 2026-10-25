@@ -12,6 +12,7 @@
 - **Modül:** `audit_entry`, yalnızca ekleme. Güncelleme/silme metotları parametresiz override ile kapalı; çağrı derlenmez, tiple aşılırsa hata fırlatır. Satır boyutu sınırlı (metin 256, UA 512, `changes` 16 KB üstü alan adlarına iner).
 - **Mutasyon:** `/admin/*` POST/PUT/PATCH/DELETE yanıt bittikten sonra yazılır. Kayıt defteri (varyant fiyatı, ürün üzerinden fiyat, varyant batch, price list fiyat batch) önce/sonra fiyatlarını `variants.prices` ile okur. Diğer route'larda yalnızca alan adları yazılır.
 - **Okuma:** Müşteri detayı/adresleri/fatura profili, sipariş detayı ve `GET /admin/audit-log` yanıttan önce kaydedilir; yazılamazsa 503.
+- **İnceleme:** Güvenlik incelemesi yapıldı; 2 yüksek, 5 orta bulgu düzeltildi (ayrı commit; ayrıntı adr/0011 eki). Yüksekler: bağlantıyı koparan istemcinin mutasyonu kaydedilmiyordu (yazım `res.end`'e bağlandı); liste ve alt route'lardan kişisel veri ve `fields=*billing_profile` ile şifreli vergi kimliği kayıtsız çekilebiliyordu. Açık kalanlar adr/0011 ekinde.
 - **Bulunan hata:** `routePath` küçük harfe çevirdiği için ID'ler (`prod_01JABC`) bozuluyordu. Birim testi yakaladı; denetim katmanı `routePathKeepingCase` kullanıyor.
 - **KK:** "Ürün fiyatı değişikliği audit log'da görünüyor; müşteri TCKN görüntüleme okuma kaydı düşüyor" karşılandı (HTTP testi: fiyat 1000 → 1250 önce/sonra; fatura profili görüntüleme `sensitive_read`; secret API key actor'ı `api-key`).
 

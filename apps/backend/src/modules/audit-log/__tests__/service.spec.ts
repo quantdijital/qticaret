@@ -46,12 +46,32 @@ moduleIntegrationTestRunner<AuditLogModuleService>({
         kind: "mutation",
         action: "x".repeat(1000),
         user_agent: "u".repeat(2000),
-        changes: { big: "y".repeat(20_000) },
+        changes: { big: "y".repeat(70_000) },
       })
 
       expect(entry.action).toHaveLength(256)
       expect(entry.user_agent).toHaveLength(512)
       expect(entry.changes).toEqual({ truncated: true, fields: ["big"] })
+    })
+
+    it("cuts a large diff at the budget and keeps the field names and the count", async () => {
+      const diff = Object.fromEntries(
+        Array.from({ length: 2000 }, (_, i) => [
+          `variant:variant_${String(i)}:price:price_${String(i)}`,
+          { before: "1000 try", after: "1250 try" },
+        ])
+      )
+
+      const entry = await service.record({
+        kind: "mutation",
+        action: "POST /admin/price-lists/:id/prices/batch",
+        changes: { fields: ["update"], diff },
+      })
+
+      const changes = entry.changes as { fields: string[]; diff: object; diff_total: number }
+      expect(changes).toMatchObject({ fields: ["update"], diff_truncated: true, diff_total: 2000 })
+      expect(Object.keys(changes.diff).length).toBeGreaterThan(500)
+      expect(Object.keys(changes.diff).length).toBeLessThan(2000)
     })
 
     it("refuses an unknown kind", async () => {
@@ -66,6 +86,7 @@ moduleIntegrationTestRunner<AuditLogModuleService>({
       // Called past the types on purpose: in code these calls do not compile
       const writers = service as unknown as Record<string, (...args: unknown[]) => unknown>
       for (const write of [
+        () => writers["createAuditEntries"]?.({ kind: "system", action: "backdated" }),
         () => writers["updateAuditEntries"]?.({ id: entry.id, action: "changed" }),
         () => writers["deleteAuditEntries"]?.(entry.id),
         () => writers["softDeleteAuditEntries"]?.(entry.id),

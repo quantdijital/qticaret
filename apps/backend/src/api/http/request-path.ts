@@ -1,4 +1,5 @@
-import type { MedusaRequest } from "@medusajs/framework/http"
+import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { rejectRequest } from "./reject"
 
 /**
  * The full request path without the query. Medusa mounts a middleware that
@@ -33,4 +34,29 @@ export function routePathKeepingCase(req: MedusaRequest): string {
   const end = raw.indexOf("#")
   const path = (end === -1 ? raw : raw.slice(0, end)).replace(ABSOLUTE_FORM, "")
   return path.replace(/\/+$/, "") || "/"
+}
+
+// A backslash or a fragment in the request line: no client sends one, and
+// when `#` is present Express's URL parser turns `\` into `/`, so the route
+// Express picks and the path our checks read would differ
+const AMBIGUOUS_TARGET = /[\\#]/
+
+/** Refuses request targets Express and our path checks could read differently. */
+export function rejectAmbiguousPath(
+  req: MedusaRequest,
+  res: MedusaResponse,
+  next: MedusaNextFunction
+) {
+  const fields = req as { originalUrl?: string; url?: string }
+  if (AMBIGUOUS_TARGET.test(fields.originalUrl ?? fields.url ?? "")) {
+    rejectRequest(
+      req,
+      res,
+      400,
+      { type: "invalid_data", message: "errors.invalid_request" },
+      "ambiguous_path"
+    )
+    return
+  }
+  next()
 }

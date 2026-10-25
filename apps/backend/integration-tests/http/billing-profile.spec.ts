@@ -102,9 +102,11 @@ medusaIntegrationTestRunner({
           `/admin/customers/${customer.id}/billing-profile`,
           admin
         )
-        const list = await http.get("/admin/customers?fields=*billing_profile", admin)
+        // The link would return the encrypted tax id and its hash for every customer
+        const list = await settle(http.get("/admin/customers?fields=*billing_profile", admin))
 
         expect(detail.data.billing_profile?.tax_id_masked).toBe("*******0146")
+        expect(list.status).toBe(400)
         expect(JSON.stringify([detail.data, list.data])).not.toContain(TCKN)
       })
     })

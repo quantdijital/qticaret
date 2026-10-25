@@ -131,7 +131,9 @@
 - Hassas veri **okuma** da audit log'a düşer: kim, hangi müşteri kaydı, ne zaman (TCKN/adres görüntüleme, dışa aktarma).
   - Uygulama (F2 S8, adr/0011, `modules/audit-log`, `src/api/http/audit/`):
     - `/admin/*` mutasyonları yanıt bittikten sonra yazılır: actor (`user` ya da `api-key`), route deseni, kaynak kimliği, durum kodu. Kayıt defterindeki kaynaklarda (varyant ve price list fiyatları) alan bazında önce/sonra yazılır. Diğer route'larda yalnızca gövdedeki alan adları yazılır, değerler yazılmaz.
-    - Müşteri detayı, adresleri, fatura profili, sipariş detayı ve denetim kaydının kendisi okunurken kayıt yanıttan önce yazılır. Yazılamazsa 503 döner (fail closed).
+    - Kişisel veri dönen admin GET route'larında (`SENSITIVE_READS`: müşteri ve sipariş listeleri/detayları, adresler, fatura profili, draft order, iade, claim, exchange, bildirim, müşteri grubu, denetim kaydı) kayıt yanıttan önce yazılır. Yazılamazsa 503 döner (fail closed). Liste okumasında istenen `fields` ve sayfalama yazılır; filtre değerleri yazılmaz.
+    - Admin'de `fields` ile fatura profili/vergi kimliği genişletilemez (400). Denetim kaydını yalnızca admin kullanıcıları okur.
+    - Mutasyon kaydı handler yanıtı bitirdiğinde yazılır; istemcinin bağlantıyı koparması kaydı engellemez. `\\` ya da `#` içeren istek hedefleri 400 alır.
     - Tablo yalnızca ekleme kabul eder: servis güncelleme/silme metotlarını kapatır. DB seviyesinde UPDATE/DELETE yetkisinin kaldırılması F16'da.
     - IP ve user agent kişisel veridir; saklama süresi docs/12, silme işi F13.
 - Hassas alanlar için DB seviyesinde şifreleme gerekirse (TCKN) uygulama katmanında AES-256-GCM.

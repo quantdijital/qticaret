@@ -23,19 +23,47 @@ const KINDS = new Set<AuditKind>(["mutation", "sensitive_read", "system"])
 // Bounds so one request cannot write an unbounded row
 const MAX_TEXT = 256
 const MAX_USER_AGENT = 512
-const MAX_CHANGES_BYTES = 16 * 1024
+const MAX_CHANGES_BYTES = 64 * 1024
 
 const bounded = (value: string | null | undefined, max: number): string | null =>
   value === undefined || value === null ? null : value.slice(0, max)
 
+function bytes(value: unknown): number {
+  // undefined for undefined, despite the type
+  const json: unknown = JSON.stringify(value)
+  return typeof json === "string" ? Buffer.byteLength(json) : 0
+}
+
+/**
+ * A change set over the budget keeps everything but the per-field `diff`,
+ * which is cut at the budget with its full count; a hundred harmless price
+ * changes must not hide the one that matters by wiping them all.
+ */
 function boundedChanges(changes: Record<string, unknown> | null | undefined) {
   if (changes === undefined || changes === null) {
     return null
   }
-  // A change set that big is summarised by its field names
-  return Buffer.byteLength(JSON.stringify(changes)) > MAX_CHANGES_BYTES
-    ? { truncated: true, fields: Object.keys(changes).slice(0, 200) }
-    : changes
+  if (bytes(changes) <= MAX_CHANGES_BYTES) {
+    return changes
+  }
+  const { diff, ...rest } = changes
+  if (diff !== null && typeof diff === "object") {
+    const entries = Object.entries(diff)
+    const kept: Record<string, unknown> = {}
+    let size = bytes(rest) + 100
+    for (const [key, value] of entries) {
+      size += bytes(key) + bytes(value) + 2
+      if (size > MAX_CHANGES_BYTES) {
+        break
+      }
+      kept[key] = value
+    }
+    const cut = { ...rest, diff: kept, diff_truncated: true, diff_total: entries.length }
+    if (bytes(cut) <= MAX_CHANGES_BYTES) {
+      return cut
+    }
+  }
+  return { truncated: true, fields: Object.keys(changes).slice(0, 200) }
 }
 
 // No parameters: a call with the generated writer's arguments does not
@@ -54,7 +82,8 @@ class AuditLogModuleService extends MedusaService({ AuditEntry }) {
     if (!KINDS.has(input.kind)) {
       throw new MedusaError(MedusaError.Types.INVALID_DATA, "audit_log.kind_invalid")
     }
-    return await this.createAuditEntries(
+    // The generated writer itself is closed below: entries go through here
+    return await super.createAuditEntries(
       {
         kind: input.kind,
         action: input.action.slice(0, MAX_TEXT),
@@ -73,8 +102,9 @@ class AuditLogModuleService extends MedusaService({ AuditEntry }) {
   }
 
   // The generated writers stay unreachable: an audit entry is never changed
-  // or removed. Field initialisers run after the base constructor, so these
+  // or removed, and is created only through record() with its bounds. Field initialisers run after the base constructor, so these
   // replace the generated methods on every instance.
+  override createAuditEntries = refuseWrite
   override updateAuditEntries = refuseWrite
   override deleteAuditEntries = refuseWrite
   override softDeleteAuditEntries = refuseWrite

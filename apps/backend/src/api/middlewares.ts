@@ -10,7 +10,9 @@ import { auditMutations, auditSensitiveRead } from "./http/audit"
 import { csrfProtection } from "./http/csrf"
 import { platformErrorHandler } from "./http/error-handler"
 import { authIdentity, authProfile, rateLimit } from "./http/rate-limit"
+import { requireUserActor } from "./http/actor"
 import { requestContext } from "./http/request-id"
+import { rejectAmbiguousPath } from "./http/request-path"
 import { storeLimitGuard, uploadSizeGate } from "./http/request-limits"
 import { securityHeaders } from "./http/security-headers"
 import { uploadValidator } from "./http/upload-validator"
@@ -20,7 +22,7 @@ import {
   StoreGetTrNeighborhoods,
   StoreGetTrProvinces,
 } from "./store/tr-address/validators"
-import { rejectSensitiveStoreFields } from "./validation/sensitive-fields"
+import { rejectSensitiveFields } from "./validation/sensitive-fields"
 import {
   ROOT,
   existingCartAddresses,
@@ -30,6 +32,31 @@ import {
 
 const CART_ADDRESSES = ["shipping_address", "billing_address"] as const
 
+// Admin GET routes that return personal data: [matcher, resource type, list]
+// (adr/0011). A phase adding such a route adds it here (code-reviewer checklist).
+const SENSITIVE_READS: readonly [string, string, boolean][] = [
+  ["/admin/customers", "customer", true],
+  ["/admin/customers/:id", "customer", false],
+  ["/admin/customers/:id/addresses", "customer", false],
+  ["/admin/customers/:id/addresses/:address_id", "customer", false],
+  ["/admin/customers/:id/billing-profile", "customer", false],
+  ["/admin/customer-groups/:id", "customer_group", false],
+  ["/admin/orders", "order", true],
+  ["/admin/orders/:id", "order", false],
+  ["/admin/orders/:id/preview", "order", false],
+  ["/admin/orders/:id/changes", "order", false],
+  ["/admin/draft-orders", "draft_order", true],
+  ["/admin/draft-orders/:id", "draft_order", false],
+  ["/admin/returns", "return", true],
+  ["/admin/returns/:id", "return", false],
+  ["/admin/claims", "claim", true],
+  ["/admin/claims/:id", "claim", false],
+  ["/admin/exchanges", "exchange", true],
+  ["/admin/exchanges/:id", "exchange", false],
+  ["/admin/notifications", "notification", true],
+  ["/admin/notifications/:id", "notification", false],
+]
+
 export default defineMiddlewares({
   // F2.10: sanitized error bodies with request_id, logged with redaction
   errorHandler: platformErrorHandler,
@@ -38,7 +65,13 @@ export default defineMiddlewares({
     // these run after Medusa's body parser, CORS and authentication
     {
       matcher: "/*",
-      middlewares: [requestContext, securityHeaders, csrfProtection, uploadSizeGate],
+      middlewares: [
+        requestContext,
+        rejectAmbiguousPath,
+        securityHeaders,
+        csrfProtection,
+        uploadSizeGate,
+      ],
     },
     // F2.10: rate limits per area; login, registration and reset per identity too
     {
@@ -51,36 +84,33 @@ export default defineMiddlewares({
       middlewares: [
         rateLimit(() => RATE_LIMIT_PROFILES.store_default),
         storeLimitGuard,
-        rejectSensitiveStoreFields,
+        rejectSensitiveFields,
       ],
     },
-    // F2.5: admin mutations are recorded once answered (adr/0011)
+    // F2.5: admin mutations are recorded once answered (adr/0011); tax ids
+    // are never expanded through `fields`
     {
       matcher: "/admin/*",
-      middlewares: [rateLimit(() => RATE_LIMIT_PROFILES.admin_default), auditMutations],
+      middlewares: [
+        rateLimit(() => RATE_LIMIT_PROFILES.admin_default),
+        rejectSensitiveFields,
+        auditMutations,
+      ],
     },
-    // F2.5: reads of personal data are recorded before the answer, or refused
-    ...[
-      "/admin/customers/:id",
-      "/admin/customers/:id/addresses",
-      "/admin/customers/:id/addresses/:address_id",
-      "/admin/customers/:id/billing-profile",
-    ].map((matcher) => ({
+    // F2.5: reads that return personal data (names, contact details,
+    // addresses) are recorded before the answer, or refused
+    ...SENSITIVE_READS.map(([matcher, resourceType, list]) => ({
       matcher,
       methods: ["GET" as const],
-      middlewares: [auditSensitiveRead("customer")],
+      middlewares: [auditSensitiveRead(resourceType, { list })],
     })),
-    {
-      matcher: "/admin/orders/:id",
-      methods: ["GET"],
-      middlewares: [auditSensitiveRead("order")],
-    },
     {
       matcher: "/admin/audit-log",
       methods: ["GET"],
       middlewares: [
+        requireUserActor,
         validateAndTransformQuery(AdminGetAuditLog, {}),
-        auditSensitiveRead("audit_log"),
+        auditSensitiveRead("audit_log", { list: true }),
       ],
     },
     // F2.9b: uploaded files checked by their bytes, after Medusa's multer

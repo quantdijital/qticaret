@@ -1,25 +1,29 @@
 import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { errorSummary, logger } from "../../../lib/logging"
 import type { AuditEntryInput } from "../../../modules/audit-log/service"
-import { routePathKeepingCase } from "../request-path"
-import { auditContext, auditService, graphQuery } from "./context"
+import { auditContext, auditService } from "./context"
 import { diffSnapshots } from "./diff"
-import { describeRoute, matchAuditedResource } from "./registry"
-import type { ResourceMatch, Snapshot } from "./registry"
+import { auditPath, describeRoute, matchAuditedResource } from "./registry"
+import type { ResourceMatch } from "./registry"
+import type { Snapshot } from "./types"
 
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"])
 const MAX_FIELDS = 100
+// Postgres jsonb refuses NUL and lone surrogates; a key like that would fail the write
+const FIELD_NAME = /^[A-Za-z0-9_.-]{1,64}$/
 
 // Names only: a body's values can be anything, personal data included
 function bodyFields(body: unknown): string[] {
   return body !== null && typeof body === "object" && !Array.isArray(body)
-    ? Object.keys(body).slice(0, MAX_FIELDS)
+    ? Object.keys(body)
+        .slice(0, MAX_FIELDS)
+        .map((key) => (FIELD_NAME.test(key) ? key : "<invalid>"))
     : []
 }
 
 async function snapshotOf(req: MedusaRequest, match: ResourceMatch): Promise<Snapshot | null> {
   try {
-    return await match.resource.snapshot(graphQuery(req), match.params)
+    return await match.resource.snapshot({ scope: req.scope, params: match.params, body: req.body })
   } catch (error) {
     logger.warn({
       event: "audit.snapshot_failed",
@@ -41,26 +45,54 @@ interface PendingEntry {
 
 async function writeEntry({ req, res, match, before, entry, fields }: PendingEntry) {
   let changes: Record<string, unknown> = { fields }
-  // A refused request changed nothing; only a done one is read again
-  if (match && before && res.statusCode < 400) {
+  // Read again whatever the status: a failed request may still have changed something
+  if (match && before) {
     const after = await snapshotOf(req, match)
     if (after) {
       changes = { fields, diff: diffSnapshots(before, after, match.resource.sensitive) }
     }
   }
+  const service = auditService(req)
   try {
-    await auditService(req).record({ ...entry, outcome: res.statusCode, changes })
+    await service.record({ ...entry, outcome: res.statusCode, changes })
   } catch (error) {
     logger.error({ event: "audit.write_failed", action: entry.action, err: errorSummary(error) })
+    // Once more without the change summary, so the mutation leaves a trace
+    try {
+      await service.record({ ...entry, outcome: res.statusCode, changes: { write_failed: true } })
+    } catch {
+      // Logged above; the answer has already gone
+    }
   }
 }
 
 /**
- * `/admin/*` mutations (F2.5, adr/0011), recorded once the response has
- * finished: who, which route, which resource, the status. Registered
+ * Calls `write` once, when the handler ends the response. Tied to `end`
+ * rather than "finish": a client that hangs up after sending its request
+ * gets no "finish", but the change is made and must be recorded.
+ */
+function onResponseEnd(res: MedusaResponse, write: () => void) {
+  let done = false
+  const once = () => {
+    if (!done) {
+      done = true
+      setImmediate(write)
+    }
+  }
+  const end = res.end.bind(res) as (...args: unknown[]) => MedusaResponse
+  res.end = ((...args: unknown[]) => {
+    once()
+    return end(...args)
+  }) as MedusaResponse["end"]
+  res.on("finish", once)
+}
+
+/**
+ * `/admin/*` mutations (F2.5, adr/0011), recorded once the handler has
+ * answered: who, which route, which resource, the status. Registered
  * resources (prices) also get a field-by-field summary of what changed,
  * read before and after; any other route gets its body's field names. A
- * failed write is logged: the answer has already gone.
+ * failed write is logged and retried without the summary.
  */
 export async function auditMutations(
   req: MedusaRequest,
@@ -71,7 +103,7 @@ export async function auditMutations(
     next()
     return
   }
-  const path = routePathKeepingCase(req)
+  const path = auditPath(req)
   const match = matchAuditedResource(req.method, path)
   const route = match
     ? {
@@ -94,7 +126,7 @@ export async function auditMutations(
     },
     fields: bodyFields(req.body),
   }
-  res.on("finish", () => {
+  onResponseEnd(res, () => {
     void writeEntry(pending)
   })
   next()
