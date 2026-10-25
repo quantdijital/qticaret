@@ -33,12 +33,20 @@
   - Checkout'ta kargo gerekmeyen sepet kargo yöntemiyle tamamlanamıyor; ülkesiz sepet KDV'siz kalmasın diye reddediliyor.
   - Panelde sihirbazda tür seçimi var (kargo adımı atlanıyor); ürün sayfasında tür değiştirilebiliyor.
   - HTTP: tam takım 26 dosya / 172 test geçti.
+- **F3 T2 (F3.4a) bitti:** `seo-meta` modülü (adr/0015). Ürün, kategori ve koleksiyona link'li.
+  - `GET/PUT /admin/seo/:entity_type/:entity_id`; `upsertSeoMetaWorkflow` kilitli çalışıyor, her adım geri alınabilir.
+  - Alanlar temiz metin ve tavan uzunlukla doğrulanıyor. Canonical yalnızca site içi yol olabiliyor; OG görseli mağazanın kendi dosyası olmalı.
+  - Aynı türde aynı başlık ya da açıklama uyarı olarak dönüyor, kayıt reddedilmiyor (normalize hash, indeksli).
+  - Denetim kaydında alan bazında önce/sonra var. Store API'de `seo_meta` alanları istenemiyor (`rejectStoreSeoFields`).
+  - Panelde ürün ve kategori sayfasında "Arama motoru görünümü" kartı: sunucuyla aynı şablon kuralıyla Google önizlemesi, sayaçlar, odak kelime, robots, gelişmiş canonical, tekrar uyarısı.
+  - OG görseli seçimi T6'daki görsel hattıyla gelecek.
 - **Gözden geçir (kullanıcı yokken önerilen seçenekle verilen kararlar):**
   1. Bayrak adı `catalog.non_physical`, mağaza tarafından açılır, varsayılan kapalı. Etiketleri Medusa Admin'de ve panelde var.
   2. Kargo gerekmeyen kalemler sipariş ödenince "teslim edildi" sayılıyor. Dijital teslimat (indirme bağlantısı, kod gönderimi) F9 bildirimleriyle gelecek.
   3. Her checkout'ta teslimat ülkesi zorunlu. Medusa tek ülkeli bölgede ülkeyi kendisi dolduruyor, kural çok ülkeli bölgeler için koruma.
   4. Promosyon kodu 6 karakterden kısaysa uyarı veriliyor, kod yine kaydediliyor. Kupon deneme sınırı F4'te.
   5. Paylaşılan Medusa kampanyalarının tarihleri panelde salt okunur.
+  6. SEO alanlarını API anahtarlı entegrasyonlar da yazabiliyor (`requireUserActor` yok); içe aktarma (T15) bunu kullanacak. Robots seçenekleri üç değerli (index/follow, noindex/follow, noindex/nofollow); boş değer sayfa durumuna göre davranış demek.
 - **Bilinen sınırlar (devreden):**
   - Sipariş ve stok panosu bellek içi sıralıyor (5000/2000 kayıt). Büyük mağazada kayıtlı aşama sütunu ya da Index modülü gerekir.
   - Kargo etiketi ve takip F7'de. Kampanyada minimum sepet ve kategori kuralları F4'te.
@@ -338,7 +346,7 @@
 |---|---|---|---|---|
 | T1a ✅ | F3.1 | Katalog uzantısı: MPN, durum, birincil kategori, halef ürün (link'li modül + widget). Fiziksel üründe ölçü/ağırlık kuralı. Türkçe handle, hook'larda yol sahipliği, sistem yolları rezervi | — | 0013 deseni |
 | T1b ✅ | F3.2 | Fiziksel olmayan ürün (`kind`: dijital/hizmet; bayrak): kargo profili bağı kalkar, envanter kalemi "kargo gerekir" kapanır, yeni varyantlarda da. Ölçü kuralından muaf. Kargosuz checkout testi | T1a | — |
-| T2 | F3.4a | `seo-meta` modülü ve link'ler, `PUT /admin/seo/:type/:id`, ürün/kategori widget'ı, denetim kaydı | — | 0015 |
+| T2 ✅ | F3.4a | `seo-meta` modülü ve link'ler, `PUT /admin/seo/:type/:id`, ürün/kategori widget'ı, denetim kaydı | — | 0015 |
 | T3 | F3.5 | `seo-redirects`: kurallar, güvenli desen, zincir/döngü, slug ve halef değişiminde otomatik 301, `GET /store/seo/resolve`, 404 günlüğü + hedef önerisi, CSV içe/dışa. KK: 301 zinciri | T1 | 0017 |
 | T4 | F3.4b | `lib/seo/resolve`, resolve yanıtında `seo` payload, versioned cache, URL deseni değişiminde toplu 301 (iş) | T2, T3 | 0015 |
 | T5 | F3.11 | `brands` modülü, ürün ↔ marka, admin sayfası, Store marka ucu, SEO link'i | T2 | — |

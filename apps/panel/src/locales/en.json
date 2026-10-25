@@ -1066,7 +1066,30 @@
     },
     "advisor": "SEO advisor",
     "advisorHint": "A score, suggestions and one-click fixes for every product and category.",
-    "sampleHost": "yourdomain.com"
+    "sampleHost": "yourdomain.com",
+    "card": {
+      "title": "Search appearance",
+      "hint": "Fields left empty come from the shop's SEO templates.",
+      "noDescription": "No description; the search engine picks a snippet from the page.",
+      "seoTitle": "SEO title",
+      "seoTitleHint": "Made from the template when empty. Search results show about 60 characters.",
+      "seoDescription": "Meta description",
+      "seoDescriptionHint": "The short text under the result; about 155 characters show.",
+      "focusKeyword": "Focus keyword",
+      "focusKeywordHint": "Used in the panel and its suggestions only; never shown in the shop.",
+      "robots": "Search engine indexing",
+      "robotsDefault": "Follow the page's state (recommended)",
+      "robotsOptions": {
+        "index_follow": "Index, follow links",
+        "noindex_follow": "Don't index, follow links",
+        "noindex_nofollow": "Don't index, don't follow links"
+      },
+      "advanced": "Advanced",
+      "canonical": "Canonical address",
+      "canonicalHint": "A path on this site only. Empty uses the page's own address.",
+      "saved": "SEO fields saved.",
+      "duplicates": "Same as other pages: the title on {{title}}, the description on {{description}}. Saved, but unique texts do better in search results."
+    }
   },
   "attributes": {
     "title": "Product attributes",

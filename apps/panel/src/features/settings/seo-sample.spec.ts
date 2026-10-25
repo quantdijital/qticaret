@@ -15,4 +15,15 @@ describe("renderSample", () => {
       "Giyim Modelleri"
     )
   })
+
+  it("drops an empty token with its joiner and folds a doubled stop, as the server does", () => {
+    expect(renderSample("{ürün_adı} | {marka} | {mağaza}", "Demo", { ürün_adı: "Kupa" })).toBe(
+      "Kupa | Demo"
+    )
+    expect(
+      renderSample("{kısa_açıklama}. {fiyat_cümlesi}", "Demo", { kısa_açıklama: "Seramik kupa." })
+    ).toBe("Seramik kupa.")
+    expect(renderSample("{ürün_adı}...", "Demo", { ürün_adı: "Kupa" })).toBe("Kupa...")
+    expect(renderSample("{constructor} | {ürün_adı}", "Demo", { ürün_adı: "Kupa" })).toBe("Kupa")
+  })
 })

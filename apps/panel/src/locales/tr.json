@@ -1074,7 +1074,30 @@
     },
     "advisor": "SEO danışmanı",
     "advisorHint": "Her ürün ve kategori için puan, öneri ve tek tıkla düzeltmeler.",
-    "sampleHost": "alanadiniz.com"
+    "sampleHost": "alanadiniz.com",
+    "card": {
+      "title": "Arama motoru görünümü",
+      "hint": "Boş bıraktığınız alanlar mağazanın SEO şablonlarından oluşur.",
+      "noDescription": "Açıklama yok; arama motoru sayfadan bir parça seçer.",
+      "seoTitle": "SEO başlığı",
+      "seoTitleHint": "Boşsa şablondan oluşur. Arama sonucunda yaklaşık 60 karakter görünür.",
+      "seoDescription": "Meta açıklama",
+      "seoDescriptionHint": "Arama sonucundaki kısa açıklama; yaklaşık 155 karakter görünür.",
+      "focusKeyword": "Odak anahtar kelime",
+      "focusKeywordHint": "Yalnızca panelde ve önerilerde kullanılır; mağazada görünmez.",
+      "robots": "Arama motoru dizini",
+      "robotsDefault": "Sayfanın durumuna göre (önerilen)",
+      "robotsOptions": {
+        "index_follow": "Dizine ekle, bağlantıları izle",
+        "noindex_follow": "Dizine ekleme, bağlantıları izle",
+        "noindex_nofollow": "Dizine ekleme, bağlantıları izleme"
+      },
+      "advanced": "Gelişmiş",
+      "canonical": "Canonical adres",
+      "canonicalHint": "Yalnızca bu sitede bir yol. Boşsa sayfanın kendi adresi kullanılır.",
+      "saved": "SEO alanları kaydedildi.",
+      "duplicates": "Başka sayfalarla aynı: başlık {{title}}, açıklama {{description}} sayfada. Kayıt yapıldı, ama benzersiz metinler arama sonuçlarında daha iyi görünür."
+    }
   },
   "attributes": {
     "title": "Ürün özellikleri",

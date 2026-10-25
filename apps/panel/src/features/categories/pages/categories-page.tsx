@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { categoryTreeQuery } from "@/features/categories/api/categories"
 import { CategoryEditor } from "@/features/categories/components/category-editor"
+import { CategorySeoCard } from "@/features/categories/components/category-seo-card"
 import { CategoryTreeCard } from "@/features/categories/components/category-tree-card"
 import { errorText } from "@/lib/errors"
 
@@ -60,17 +61,26 @@ export function CategoriesPage() {
               onSelect={select}
             />
           </div>
-          <div className="xl:sticky xl:top-20 xl:col-span-7">
+          <div className="flex flex-col gap-[var(--grid-gap)] xl:col-span-7">
             {selected === "new" || current ? (
-              <CategoryEditor
-                key={current?.id ?? "new"}
-                categories={categories}
-                category={current}
-                onSaved={select}
-                onDeleted={() => {
-                  select(undefined)
-                }}
-              />
+              <>
+                <CategoryEditor
+                  key={current?.id ?? "new"}
+                  categories={categories}
+                  category={current}
+                  onSaved={select}
+                  onDeleted={() => {
+                    select(undefined)
+                  }}
+                />
+                {current ? (
+                  <CategorySeoCard
+                    key={`seo-${current.id}`}
+                    category={current}
+                    categories={categories}
+                  />
+                ) : null}
+              </>
             ) : (
               <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed px-6 py-16 text-center">
                 <MousePointerClick className="size-8 text-muted-foreground" aria-hidden="true" />
