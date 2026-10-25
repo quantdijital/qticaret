@@ -25,6 +25,12 @@ const createShipmentStep = createStep(
 
 - Workflow ve step adları kebab-case, benzersiz, alan önekli: `invoice-create-for-order`.
 - Subscriber'lar sadece workflow tetikler; iş mantığı içermez.
+- **Çekirdek workflow hook'ları** (`src/workflows/hooks/`):
+  - Medusa hook başına **tek handler** kabul eder; ikinci tanım hata verir. Yeni bir kural, o hook'un mevcut handler'ına eklenir. Dosya adı amacı ya da hook'u söyler.
+  - `validate` hook'ları ana adımlardan önce çalışır.
+  - `productsCreated`/`productsUpdated` gibi sonuç hook'ları ana adımlardan sonra çalışır: girdiyi değiştiremez, hata fırlatmak işlemi geri alır.
+  - Handler'ın kendi yan etkileri (ör. `url-registry` claim'leri) compensation ile geri alınır.
+- **Core route gövdesini doğrulamadan önce değiştiren middleware** `methods` belirtmez. Medusa onu `app.use` ile, core validator'dan önce bağlar. Path'i `routePath(req)` ile okur, çünkü `req.path` mount yolu kadar kısalır (ör. `api/validation/catalog-handles.ts`).
 - Scheduled job'lar idempotent ve kilitli.
 
 ### Özellik bayrakları (adr/0012)

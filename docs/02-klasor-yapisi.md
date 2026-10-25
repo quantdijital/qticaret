@@ -34,6 +34,7 @@ repo/
 │   │   │   │   │   └── adapters/ (nilvera.ts, ...)   # InvoiceAdapter: imza + iletim
 │   │   │   │   ├── platform-settings/
 │   │   │   │   ├── product-attributes/
+│   │   │   │   ├── catalog-extension/                # ürün/varyant ek alanları: durum, tür, birincil kategori, halef, MPN (F3.1)
 │   │   │   │   ├── legal-consent/
 │   │   │   │   ├── audit-log/
 │   │   │   │   ├── tr-address/
@@ -47,6 +48,7 @@ repo/
 │   │   │   ├── workflows/
 │   │   │   │   ├── payment/  fulfillment/  invoice/  notification/  legal/
 │   │   │   │   ├── catalog/  seo/  inventory/  promotion/  returns/  exchanges/  marketing/  reports/  accounting/
+│   │   │   │   ├── hooks/                            # çekirdek workflow hook'ları; hook başına tek dosya, tek handler
 │   │   │   │   └── <alan>/steps/
 │   │   │   ├── api/
 │   │   │   │   ├── middlewares.ts
@@ -72,11 +74,12 @@ repo/
 │   │   │   │   ├── security/        # safe-fetch (SSRF), rate-limit, upload validator, csv-escape, safe-xml, zip
 │   │   │   │   ├── redis/           # kendi Redis istemcimiz (hızlı vazgeçen), tenant ad alanı
 │   │   │   │   ├── cache/           # süreç içi değer + Redis sürüm sayacı (ayarlar, adr/0012)
-│   │   │   │   ├── seo/             # slug (TR), başlık şablonları, piksel genişliği, jsonld builders (F3.12)
+│   │   │   │   ├── seo/             # slug (TR), başlık şablonları, piksel genişliği, URL desenleri, rezerv yollar, jsonld builders (F3.12)
+│   │   │   │   ├── catalog/         # GTIN doğrulama, ölçü/ağırlık kuralı (F3.1)
 │   │   │   │   ├── money/           # tutar dönüşümleri
 │   │   │   │   ├── errors/          # ortak hata tipleri
 │   │   │   │   └── logging/         # pino logger, redaksiyon, istek bağlamı, Medusa logger adaptörü
-│   │   │   └── scripts/             # seed, tr-address import, tenant bootstrap
+│   │   │   └── scripts/             # seed, tr-address import, tenant bootstrap, katalog yollarını claim etme (F3.1)
 │   │   └── integration-tests/
 │   │       ├── http/  modules/  fixtures/
 │   └── storefront/                  # F18 — ŞİMDİ BOŞ

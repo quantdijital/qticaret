@@ -3,10 +3,34 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**F3 — Katalog, SEO motoru ve stok: DEVAM** (T1'den başlandı; kararlar 2026-10-25'te verildi). Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı; push edilmedi. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
+**F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a bitti; sıradaki T1b ya da T2; kararlar 2026-10-25'te verildi). Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı; push edilmedi. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
 
 ## Son oturum özeti
 **2026-10-24 gece oturumu (S3, S5; S8 başladı).** Kullanıcı döndü; dört karar verdi: bağımlılıklar onaylandı (ioredis 5.11.1, fast-xml-parser 5.11.2, yauzl 3.4.0, kendi görsel başlık okuyucumuz), ADR-0011..0014 kabul edildi, otonom devam, eski "Gözden geçir" maddeleri olduğu gibi kabul. Commit `54abc2a`.
+
+2026-10-25 (F3 T1a): F3.1 katalog uzantısı. Plan `/Users/deniz/.claude/plans/f3-t1-catalog-extension.md`.
+- **Modül `catalog-extension`:** Ürün ve varyanta link'li ek alanlar: durum (yeni/yenilenmiş/ikinci el/kusurlu), tür (fiziksel; dijital/hizmet davranışı T1b), birincil kategori, halef ürün, varyant MPN'i.
+  - GTIN, Medusa'nın varyant `ean`/`upc`/`barcode` alanlarından okunur; `lib/catalog/gtin` kontrol basamağına bakar. Geçersiz kod reddedilmez.
+- **Admin:** `GET/POST /admin/products/:id/catalog` ve ürün sayfasında "Katalog bilgileri" kutusu.
+  - Birincil kategori yalnızca ürünün kendi kategorilerinden seçilir.
+  - Halef: kendisi olamaz, var olmalı, döngü kurmamalı (ortak kilit).
+  - Form yalnızca değişen alanları gönderir. Denetim kaydında ham alanlar önce/sonra olarak görünür.
+- **Handle:** Ürün/kategori/koleksiyon oluştururken handle başlıktan Türkçe-ASCII slug olarak üretilir; verilen handle slug değilse 400.
+  - Middleware `methods` belirtilmeden, core doğrulamasından önce çalışır. Hook'lar ikinci kez kontrol eder (içe aktarma middleware'den geçmez).
+- **URL sahipliği:** Hook'lar her kayıttan sonra yolu `url-registry`'de tek transaction'da claim eder.
+  - Ürün `/urun/{h}`, kategori `/kategori/{atalar}/{h}`, koleksiyon `/koleksiyon/{h}`; düz stil seçiliyse kökte.
+  - Yolunu zaten tutan kayıt (iki stilden birinde) yeniden claim edilmez; stil değişimi ilgisiz düzenlemeleri kilitlemez (toplu taşıma T4).
+  - Kategori yeniden adlandırılınca ya da taşınınca alt ağacın yolları da güncellenir; eski handle'lı bir alt kategori atlanıp loglanır.
+  - Yayındaki ürünün eski yolu 301 için rezerve kalır. Taslağın eski yolu ve silinen taslağın yolları serbest kalır.
+  - Sistem kök yolları (`/arama`, `/sepet`, `/urun`, `/admin`...) alınamaz.
+- **Yayın kuralı:** Yayındaki fiziksel ürünün her varyantının ağırlığı ve üç ölçüsü (varyantın ya da ürünün) dolu olmalı. Ürün, varyant, toplu ve dashboard varyant batch yollarında geçerli; ihlalde işlem geri alınır.
+- **Diğer:**
+  - `routePath`'teki `/\/+$/` karesel çalışıyordu (16 KB'lık yolda istek başına ~90 ms); döngüyle değiştirildi, testli.
+  - `src/scripts/claim-catalog-paths.ts`: eski kayıtların yollarını claim eder, ölçüsü eksik yayındaki ürünleri raporlar. Veritabanı başına bir kez çalıştırılır (deploy adımı).
+  - Seed: demo ürünlere ölçü eklendi; tekrar çalışınca mevcut demo ürünlerin eksik ölçülerini doldurur.
+  - docs/02, docs/10 (hook ve middleware kuralları), docs/13 (kategori yolu, facet notu).
+- **İncelemeler:** Güvenlik incelemesinde kritik ya da yüksek bulgu yok. Orta ve düşük bulguların ve kod incelemesi bulgularının çoğu düzeltildi; kalanlar aşağıda "F3 T1a'dan devreden".
+- **Testler:** birim + 6 yeni HTTP spec dosyası (29 katalog testi) + `url-registry` modül testleri.
 
 2026-10-25 (F3 planlaması, kullanıcı dışarıdayken; `/faz-baslat`). Uygulama kodu yazılmadı.
 - **Medusa 2.21.2 doğrulaması** (Context7 + v2.21.2 kaynağı, medusa-researcher ajanı): katalog alanları ve genişletme yolu, görseller, rezervasyon ve kilit, içe/dışa aktarma, olaylar, Store `seo` payload seçenekleri, admin bildirimleri. Bulgular ADR'lerin "Bağlam" bölümlerinde.
@@ -251,7 +275,8 @@
 ### F3 görev planı (oturum büyüklüğünde; kullanıcı 2026-10-25 onayladı)
 | # | Görev | Kapsam | Bağımlılık | ADR |
 |---|---|---|---|---|
-| T1 | F3.1 + F3.2 | Katalog uzantısı: MPN, durum, birincil kategori, halef ürün (link'li modül + widget). Fiziksel üründe ölçü/ağırlık kuralı, fiziksel olmayan ürün bayrağı. Handle `lib/seo` slug'ından; ürün/kategori/koleksiyon hook'larında `claimPath`/`unclaimPath`. Düz desen için sistem yolları rezervi | — | 0013 deseni |
+| T1a ✅ | F3.1 | Katalog uzantısı: MPN, durum, birincil kategori, halef ürün (link'li modül + widget). Fiziksel üründe ölçü/ağırlık kuralı. Türkçe handle, hook'larda yol sahipliği, sistem yolları rezervi | — | 0013 deseni |
+| T1b | F3.2 | Fiziksel olmayan ürün (`kind`: dijital/hizmet; bayrak): kargo profili bağı kalkar, envanter kalemi "kargo gerekir" kapanır, yeni varyantlarda da. Ölçü kuralından muaf. Kargosuz checkout testi | T1a | — |
 | T2 | F3.4a | `seo-meta` modülü ve link'ler, `PUT /admin/seo/:type/:id`, ürün/kategori widget'ı, denetim kaydı | — | 0015 |
 | T3 | F3.5 | `seo-redirects`: kurallar, güvenli desen, zincir/döngü, slug ve halef değişiminde otomatik 301, `GET /store/seo/resolve`, 404 günlüğü + hedef önerisi, CSV içe/dışa. KK: 301 zinciri | T1 | 0017 |
 | T4 | F3.4b | `lib/seo/resolve`, resolve yanıtında `seo` payload, versioned cache, URL deseni değişiminde toplu 301 (iş) | T2, T3 | 0015 |
@@ -328,6 +353,25 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
   - `fast-xml-parser` ve `yauzl` (S5)
   - Görsel boyutu için kendi başlık okuyucumuz ya da `image-size` (S5'te karar)
   - S4, S6 ve S7 yeni bağımlılık getirmez.
+- [ ] **F3 T1a'dan devreden işler:**
+  - **T1b:** `kind` yazılabilir olunca `setProductCatalogWorkflow` yayın kuralını da çağırmalı; aksi halde "dijital olarak yayınla, sonra fiziksele çevir" kuralı aşar. Denetim anlık görüntüsüne `kind` eklenir.
+  - **T3:**
+    - Ürün hook'unun `replacedPaths` çıktısından otomatik 301; kategori alt ağacı için de.
+    - Denetim kayıtlı, kişiye özel "yolu serbest bırak" eylemi. Yayındaki ürün silinip aynı adla yeniden açılınca yol rezerve olduğu için 400 dönüyor.
+    - Kayıt başına rezerve yol üst sınırı düşünülür.
+  - **T4:** URL stili değişiminde tüm yolları taşıyan iş; önce çakışma raporu, çakışma varsa değişiklik reddedilir.
+  - **F3.17:** Facet landing ad alanı alt kategori yollarıyla aynı biçimde (docs/13 notu).
+  - **Admin hata metinleri (kullanılabilirlik):** Core dashboard bizim hata anahtarlarımızı ham gösteriyor (`catalog.dimensions_required` toast'ı). Çözüm önerisi: admin isteklerinde mesajı sunucuda çevirip anahtarı `code` alanında tutmak.
+  - **İçe aktarma (T15'e kadar):** Medusa'nın CSV'sinde handle'ı olmayan Türkçe başlıklı satır tüm chunk'ı `catalog.handle_invalid` ile reddettiriyor; hangi satır olduğu söylenmiyor.
+  - **Yayın kuralı yarışı:** Aynı anda yayınlama ve varyant ölçüsünü silme ölçüsüz bir yayın bırakabilir; F7 kargo hesabı savunmacı kontrol yapar.
+  - **Deploy adımı:** `claim-catalog-paths` her veritabanında bir kez çalıştırılır (F16 runbook).
+- [ ] **Gözden geçir: F3 T1a muhafazakâr kararları:**
+  - Ağırlık ve ölçü mağaza ayarındaki birimlerde (varsayılan g ve cm); seed ve testler bu birimlerle yazıldı. F7.2 dönüştürür.
+  - Geçersiz GTIN kaydı reddedilmiyor (iç barkod olabilir); yapılandırılmış veriye ve feed'e girmiyor, danışman uyarır.
+  - MPN varyant başına; durum ürün başına, varsayılan "yeni".
+  - Taslak ürünün yeniden adlandırmada bıraktığı yol ve silinen taslağın yolları serbest bırakılıyor (URL hiç herkese açık olmadı); yayındaki ürününkiler rezerve kalıyor.
+  - Silinen ürünün yolu yayındaysa rezerve kalıyor; aynı adla yeni ürün açılamıyor (T3'te serbest bırakma eylemi).
+  - Kategori hook'u, alt ağaçta handle'ı F3.1 öncesinden kalma (geçersiz) bir kategoriyi atlayıp logluyor; doğrudan düzenlenen kategoride ise kaydı reddediyor.
 - [ ] **F2 S4/S6/S7'den devreden işler:**
   - **F3.1:** Ürün, kategori ve koleksiyon workflow'ları `claimPath` çağırmalı ve compensation'da `unclaimPath` kullanmalı. Silmede `releasePathsOf`, redirect kalkınca `freePath`. Slug `""` gelirse başka bir kaynak metin seçilmeli.
   - **Ödeme fazları (F5, F6):** `outcome_unknown` gelirse yeniden denemeden önce sağlayıcıda durum sorgusu (conversationId) zorunlu.

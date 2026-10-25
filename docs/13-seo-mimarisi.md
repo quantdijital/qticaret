@@ -40,7 +40,7 @@ Tenant kurulumda bir desen seti seçer; desen tokenlarla tanımlıdır ve sonrad
 | Varlık | Varsayılan | Alternatif (düz) |
 |---|---|---|
 | Ürün | `/urun/{slug}` | `/{slug}` |
-| Kategori | `/kategori/{parent-slug}/{slug}` | `/{slug}` |
+| Kategori | `/kategori/{ata-slug'ları}/{slug}` (kökten bu kategoriye tüm zincir) | `/{slug}` |
 | Marka | `/marka/{slug}` | `/{slug}` |
 | Koleksiyon / kampanya | `/koleksiyon/{slug}` | |
 | Facet landing | `/kategori/{slug}/{facet-slug}` (ör. `/kategori/bicak/paslanmaz-celik`) | |
@@ -51,6 +51,7 @@ Tenant kurulumda bir desen seti seçer; desen tokenlarla tanımlıdır ve sonrad
 - **Ürün URL'si kategori içermez.** Bir ürün birden çok kategoride olabilir; URL tek, canonical tek. (Shopify'daki `/collections/x/products/y` çoğaltması bilinçli olarak yok.)
 - Her ürünün bir **birincil kategorisi** vardır (`primary_category_id`); breadcrumb, JSON-LD ve "kategoriye dön" bağlantısı bundan üretilir. Birincil kategori yoksa en derin kategori seçilir ve advisor uyarır.
 - Kategori URL'si hiyerarşiyi taşır; kategori taşınırsa alt ağaç için 301 üretilir.
+- Facet landing yolu (`/kategori/{slug}/{facet-slug}`) alt kategori yollarıyla aynı biçimdedir. İkisi de `url-registry`'ye yazıldığı için çakışma kayıtta reddedilir; F3.17 bu ad alanını kesinleştirir.
 - Trailing slash yok; büyük harf, çift slash, `index.html` gibi varyantlar 301 ile normalize edilir (edge/storefront katmanı, F18).
 - Canonical host tenant ayarıdır (`www` tercihli/tercihsiz). Varsayılan `<slug>.<platform-domain>`, özel domain bağlanınca ona **301** olur (hem güvenlik hem çift indeks önleme).
 
