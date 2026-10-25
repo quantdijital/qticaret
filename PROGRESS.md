@@ -14,7 +14,7 @@
   - Hızlı işlemler ve ürün sayıları.
   - Kullanılabilirlik denetimi ve doğrulanmış Medusa sınırları (açılış sayfası sabit; menü sırası ve gizleme yalnızca düzen tercihiyle).
 - **Dilim 2 (kullanıcı kararları 1–5):**
-  - `tenant:bootstrap` mağaza adını ister (`--store-name`) ve admin menü varsayılanını yazar: Başlangıç en üstte, geliştirici ayarları gizli, bizim ayar sayfalarımız "Genel"de. Mevcut bir varsayılana dokunmaz.
+  - `tenant:bootstrap` mağaza adını ister (`store-name="..."`) ve admin menü varsayılanını yazar: Başlangıç en üstte, geliştirici ayarları gizli, bizim ayar sayfalarımız "Genel"de. Mevcut bir varsayılana dokunmaz.
   - Çekirdek Türkçe terimler sözlüğe göre ezildi (119 metin): Gönderi, Stok, stoktan ayır, mağazadan teslim, URL adresi. Yükseltme kontrolü `scripts/check-core-overrides.mjs`.
   - Dashboard'a hata mesajı Türkçe cümle olarak dönüyor, anahtar `code`'da. API istemcileri ve testler anahtarı almaya devam ediyor. Metinlerin tek kaynağı `src/lib/errors/messages`; eksik 29 anahtar eklendi.
   - `GET /admin/home/summary`: kargoya hazırlanmayı bekleyen, bugünkü sipariş ve satış. Kişisel veri yok. Başlangıç'ta "Bugün" bölümü.
@@ -373,7 +373,7 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
   - **Dil:** İngilizce kullanan admin, dashboard'dan gelen hata cümlesini Türkçe görür; kullanıcı dili F19.
   - **Başlangıç:** Düşük stok kartı F3 T8'de. Kart bölgesi (`LayoutComposer`) F12.1'de. Yardım şeritleri ve KDV ipucu P2.
   - **Özet ucu testi:** Yalnızca siparişsiz durum HTTP testli; siparişli senaryo, sepet tamamlama yardımcısı gelince (F5) eklenir. Hesap kuralları birim testli.
-  - **Dev DB:** Bootstrap yeniden çalıştırılırsa menü varsayılanı yazılır; mağaza adı `--store-name` ile verilmeli.
+  - **Dev DB:** Bootstrap yeniden çalıştırılırsa menü varsayılanı yazılır; mağaza adı `store-name="..."` ile verilmeli.
   - **F16 proxy:** `/admin` ve `/auth` hata gövdesi `Authorization`, çerez ve `Origin`'e göre değişiyor (dashboard cümlesi). Bu yanıtlar önbelleğe alınmamalı (`Cache-Control: no-store` ya da `Vary`).
 - [ ] **F3 T1a'dan devreden işler:**
   - **T1b:** `kind` yazılabilir olunca `setProductCatalogWorkflow` yayın kuralını da çağırmalı; aksi halde "dijital olarak yayınla, sonra fiziksele çevir" kuralı aşar. Denetim anlık görüntüsüne `kind` eklenir.

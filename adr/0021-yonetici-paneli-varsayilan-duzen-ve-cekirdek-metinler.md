@@ -27,7 +27,7 @@
      - Geliştirici öğeleri `hidden: true`: yayınlanabilir ve gizli API anahtarları, iş akışları, arama. Kullanıcı kararı: mağaza sahibi geliştirici alanlarını görmez.
    - Bir bölgede sistem varsayılanı varsa dokunulmaz (idempotent; mağazanın ya da platform ekibinin seçimi korunur).
    - Gizlemek yalnızca menüden kaldırır. Adresle erişim ve yetki değişmez; gerçek kısıtlama rol modeliyle gelir (F12.6, Medusa RBAC).
-2. **Mağaza adı kurulumda sorulur.** `tenant:bootstrap --store-name="..."`. Mağaza hâlâ Medusa'nın varsayılan adını ("Medusa Store") taşıyorsa ad verilmeden kurulum yapılmaz; sonraki çalıştırmalarda bayrak verilmezse ad korunur. Provizyon (F17) adı sorup geçirir.
+2. **Mağaza adı kurulumda sorulur.** `tenant:bootstrap store-name="..."`. Mağaza hâlâ Medusa'nın varsayılan adını ("Medusa Store") taşıyorsa ad verilmeden kurulum yapılmaz; sonraki çalıştırmalarda verilmezse ad korunur (`medusa exec` tanımadığı `--seçenek`leri reddettiği için düz argüman). Provizyon (F17) adı sorup geçirir.
 3. **Çekirdek Türkçe metinler sözlüğe göre ezilir** (`src/admin/i18n/core-overrides/tr.json`).
    - Terimler: Fulfillment → Gönderi ("Hazırlandı", "Kargoya hazırla"); Inventory → Stok (stok kalemi, stok seti); Allocate → stoktan ayır; Backorder → "Stok bitince de satışa izin ver"; Pickup → Mağazadan teslim; Handle → URL adresi.
    - Yalnızca `tr`; İngilizce çekirdek metinlere dokunulmaz.

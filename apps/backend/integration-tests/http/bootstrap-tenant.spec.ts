@@ -227,8 +227,8 @@ medusaIntegrationTestRunner({
           ((await query.graph({ entity: "store", fields: ["name"] })).data[0] as { name: string })
             .name
 
-        await expect(run([])).rejects.toThrow("--store-name")
-        await run(["--store-name=Bıçak Dünyası"])
+        await expect(run([])).rejects.toThrow("store-name")
+        await run(["store-name=Bıçak Dünyası"])
         expect(await name()).toBe("Bıçak Dünyası")
         await run([])
         expect(await name()).toBe("Bıçak Dünyası")

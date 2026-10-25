@@ -2,10 +2,11 @@ import type { ExecArgs } from "@medusajs/framework/types"
 import { isLocalEnv, parseEnv } from "../lib/env"
 import { seedDemo } from "./seed"
 
-const ALLOW_FLAG = "--allow-non-local"
+// `medusa exec` refuses `--options` it does not know; plain arguments pass
+const ALLOW_FLAG = "allow-non-local"
 
 /**
- * Usage: pnpm --filter @qticaret/backend seed:demo [--allow-non-local]
+ * Usage: pnpm --filter @qticaret/backend seed:demo [allow-non-local]
  *
  * The demo products are published, priced and in stock, so customers could
  * buy them. Outside development/test the seed runs only with the explicit

@@ -96,7 +96,7 @@ Not: Tarayıcı kullanılmadı. Denetim çekirdek kaynak, Türkçe çeviri dosya
   - Sunucuda hesaplanır (altın kural 5); kişisel veri döndürmez, bu yüzden okuma kaydı gerekmez.
   - Bir istekte gelir; F12.1 widget'ları da aynı ucu kullanır.
   - Alternatif: `/admin/orders`'a `["id"]` güvenli alan eklemek. Ama durum bazında birkaç istek ister ve ciroyu çözmez.
-- [x] **P1-c Mağaza adı kurulumda** (dilim 2): `tenant:bootstrap --store-name="..."`; varsayılan adla kurulum yapılmaz. Provizyon (F17) adı sorup geçirir.
+- [x] **P1-c Mağaza adı kurulumda** (dilim 2): `tenant:bootstrap store-name="..."`; varsayılan adla kurulum yapılmaz. Provizyon (F17) adı sorup geçirir.
 
 ### P2 — sonraki dilimler
 - [x] **Çekirdek metin düzeltmeleri** (dilim 2, ADR-0021): 119 metin sözlüğe göre ezildi. Bizim hata anahtarlarımız ise sunucuda cümleye çevrilir; çekirdek `error.message`'ı çevirmeden bastığı için metin ezme yetmez.
