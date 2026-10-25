@@ -12,7 +12,9 @@ export type {
   SafeFetchResponse,
 } from "./safe-fetch"
 export { safeEqual } from "./timing-safe"
-export { escapeCsvCell, toCsv, toCsvRow } from "./csv"
+export { CSV_BOM, escapeCsvCell, toCsv, toCsvRow } from "./csv"
+export { isCleanText } from "./text"
+export type { CsvDelimiter } from "./csv"
 export { MAX_XML_BYTES, MAX_XML_DEPTH, parseXmlSafely } from "./xml"
 export type { SafeXmlOptions } from "./xml"
 export { DEFAULT_ZIP_LIMITS, readZipSafely } from "./zip"

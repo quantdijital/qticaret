@@ -162,6 +162,10 @@ describe("escapeCsvCell", () => {
     expect(escapeCsvCell(cycle)).toBe("")
   })
 
+  it("joins cells with semicolons for Turkish Excel", () => {
+    expect(toCsv([["a;b", "c"]], ";")).toBe('"a;b";c\r\n')
+  })
+
   it("joins rows with CRLF and ends with one", () => {
     expect(
       toCsv([

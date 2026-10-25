@@ -7,7 +7,7 @@
  * Excel in a Turkish locale splits rows on `;`, where quotes from a comma
  * file mean nothing, so a formula can start mid-cell: after a `,`, `;` or
  * tab, spaces allowed. Those starts are escaped too, whatever the delimiter.
- * The delimiter and BOM of an export are the export's choice (F2 S13).
+ * Exports for Turkish users write `;` and a BOM (`CSV_BOM`).
  */
 
 const FORMULA_CHARS = "=+\\-@\\t\\r\\uFF1D\\uFF0B\\uFF0D\\uFF20"
@@ -43,11 +43,23 @@ export function escapeCsvCell(value: unknown): string {
   return NEEDS_QUOTES.test(text) ? `"${text.replace(/"/g, '""')}"` : text
 }
 
-export function toCsvRow(values: readonly unknown[]): string {
-  return values.map(escapeCsvCell).join(",")
+export type CsvDelimiter = "," | ";"
+
+/**
+ * Cells joined by `delimiter`. Turkish Excel opens `;` files as columns and
+ * `,` files as one column; exports for Turkish users use `;` and a BOM.
+ */
+export function toCsvRow(values: readonly unknown[], delimiter: CsvDelimiter = ","): string {
+  return values.map(escapeCsvCell).join(delimiter)
 }
 
 /** Rows joined with CRLF, ending with one (RFC 4180). */
-export function toCsv(rows: readonly (readonly unknown[])[]): string {
-  return rows.map((row) => `${toCsvRow(row)}\r\n`).join("")
+export function toCsv(
+  rows: readonly (readonly unknown[])[],
+  delimiter: CsvDelimiter = ","
+): string {
+  return rows.map((row) => `${toCsvRow(row, delimiter)}\r\n`).join("")
 }
+
+/** A UTF-8 byte order mark: Excel reads Turkish letters right only with it. */
+export const CSV_BOM = "\uFEFF"
