@@ -2,8 +2,15 @@ import { Link, Outlet, useRouterState } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
 import { cn } from "@/lib/utils"
 
-// Sections grow with the slices (docs/03 P2+: store, shipping, payments...)
-const SECTIONS = [{ key: "appearance", to: "/settings/appearance" }] as const
+// Sections grow with the slices (docs/03 P2+: shipping, payments, users...)
+const SECTIONS = [
+  { key: "store", to: "/settings/store" },
+  { key: "appearance", to: "/settings/appearance" },
+  { key: "seo", to: "/settings/seo" },
+  { key: "features", to: "/settings/features" },
+  { key: "jobs", to: "/settings/jobs" },
+  { key: "audit", to: "/settings/audit" },
+] as const
 
 /** Settings: a section list on the left, the section on the right. */
 export function SettingsLayout() {

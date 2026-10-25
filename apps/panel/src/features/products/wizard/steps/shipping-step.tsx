@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next"
 import { Field } from "@/components/patterns/form-section"
 import { SectionCard } from "@/components/patterns/section-card"
 import { Input } from "@/components/ui/input"
+import { useStoreUnits } from "@/features/products/use-units"
 import { parseMoneyInput } from "@/lib/money-input"
 import { hasMeasures } from "../schema"
 import type { WizardValues } from "../schema"
@@ -42,10 +43,13 @@ function MeasureInput({ name, unit }: { name: Measure; unit: string }) {
 export function ShippingStep() {
   const { t } = useTranslation()
   const { control, getValues } = useFormContext<WizardValues>()
+  const units = useStoreUnits()
   const [length, width, height] = useWatch({ control, name: ["length", "width", "height"] })
   useWatch({ control, name: "weight" })
   const ready = hasMeasures(getValues())
-  const sides = [length, width, height].map((text) => parseMoneyInput(text) ?? 0)
+  // Desi is reckoned in centimetres
+  const toCm = units.dimension === "mm" ? 0.1 : 1
+  const sides = [length, width, height].map((text) => (parseMoneyInput(text) ?? 0) * toCm)
   const desi = sides.every((side) => side > 0)
     ? sides.reduce((product, side) => product * side, 1) / DESI_DIVISOR
     : null
@@ -59,10 +63,10 @@ export function ShippingStep() {
       >
         <div className="flex flex-col gap-5">
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-            <MeasureInput name="weight" unit="g" />
-            <MeasureInput name="length" unit="cm" />
-            <MeasureInput name="width" unit="cm" />
-            <MeasureInput name="height" unit="cm" />
+            <MeasureInput name="weight" unit={units.weight} />
+            <MeasureInput name="length" unit={units.dimension} />
+            <MeasureInput name="width" unit={units.dimension} />
+            <MeasureInput name="height" unit={units.dimension} />
           </div>
           <p className="text-xs text-muted-foreground">{t("products.wizard.measuresPackaged")}</p>
         </div>

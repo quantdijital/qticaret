@@ -12,7 +12,7 @@ import { useProductPathPrefix } from "@/features/products/use-product-path"
 import { SUGGESTED_WORDS, wordCount } from "@/features/products/wizard/readiness"
 import { errorText } from "@/lib/errors"
 import { isValidSlug } from "@/lib/slug"
-import { CardForm } from "./card-form"
+import { CardForm } from "@/components/patterns/card-form"
 
 const schema = z.object({
   title: z.string().trim().min(2, { message: "products.errors.title" }).max(200),

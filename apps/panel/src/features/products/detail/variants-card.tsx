@@ -13,7 +13,7 @@ import { errorText } from "@/lib/errors"
 import { formatCount } from "@/lib/format"
 import { formatMoneyInput, parseMoneyInput } from "@/lib/money-input"
 import { cn } from "@/lib/utils"
-import { CardForm } from "./card-form"
+import { CardForm } from "@/components/patterns/card-form"
 
 const CURRENCY = "try"
 

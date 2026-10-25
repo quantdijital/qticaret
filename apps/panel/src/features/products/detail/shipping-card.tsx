@@ -7,15 +7,16 @@ import { Field } from "@/components/patterns/form-section"
 import { Input } from "@/components/ui/input"
 import { useUpdateProduct } from "@/features/products/api/products"
 import type { ProductDetail } from "@/features/products/api/products"
+import { useStoreUnits } from "@/features/products/use-units"
 import { errorText } from "@/lib/errors"
 import { formatMoneyInput, parseMoneyInput } from "@/lib/money-input"
-import { CardForm } from "./card-form"
+import { CardForm } from "@/components/patterns/card-form"
 
 const FIELDS = [
-  { name: "weight", unit: "g" },
-  { name: "length", unit: "cm" },
-  { name: "width", unit: "cm" },
-  { name: "height", unit: "cm" },
+  { name: "weight", unit: "weight" },
+  { name: "length", unit: "dimension" },
+  { name: "width", unit: "dimension" },
+  { name: "height", unit: "dimension" },
 ] as const
 
 type Name = (typeof FIELDS)[number]["name"]
@@ -40,6 +41,7 @@ const asText = (value: number | null | undefined) =>
 export function ShippingCard({ product }: { product: ProductDetail }) {
   const { t } = useTranslation()
   const update = useUpdateProduct(product.id)
+  const units = useStoreUnits()
   const saved: Values = {
     weight: asText(product.weight),
     length: asText(product.length),
@@ -92,7 +94,7 @@ export function ShippingCard({ product }: { product: ProductDetail }) {
                   {...form.register(name)}
                 />
                 <span className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-xs text-muted-foreground">
-                  {unit}
+                  {units[unit]}
                 </span>
               </div>
             </Field>

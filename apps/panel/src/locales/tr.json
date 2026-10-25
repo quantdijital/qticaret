@@ -199,7 +199,12 @@
   "settings": {
     "title": "Ayarlar",
     "sections": {
-      "appearance": "Görünüm"
+      "appearance": "Görünüm",
+      "store": "Mağaza",
+      "seo": "SEO",
+      "features": "Özellikler",
+      "jobs": "İşler",
+      "audit": "Denetim kaydı"
     },
     "appearance": {
       "title": "Görünüm",
@@ -246,6 +251,129 @@
         "light": "Açık",
         "brand": "Marka rengi"
       }
+    },
+    "saved": "Ayarlar kaydedildi.",
+    "store": {
+      "title": "Mağaza",
+      "subtitle": "Mağazanızın adı, iletişim bilgileri, saat dilimi ve ölçü birimleri.",
+      "identity": "Mağaza bilgileri",
+      "identityHint": "Panelde, e-postalarda ve faturalarda görünür.",
+      "name": "Mağaza adı",
+      "nameRequired": "Mağazanıza bir ad verin.",
+      "email": "İletişim e-postası",
+      "emailHint": "Müşterilerin size yazacağı adres.",
+      "phone": "İletişim telefonu",
+      "phoneHint": "Türkiye numarası; +90 eklemeniz gerekmez.",
+      "region": "Bölge ve birimler",
+      "regionHint": "Tarihlerin ve ürün ölçülerinin nasıl tutulacağı.",
+      "timezone": "Saat dilimi",
+      "weightUnit": "Ağırlık birimi",
+      "dimensionUnit": "Ölçü birimi",
+      "unitsHint": "Ürün formları bu birimlerle açılır. Kayıtlı ürünlerin değerleri çevrilmez.",
+      "units": {
+        "g": "Gram (g)",
+        "kg": "Kilogram (kg)",
+        "cm": "Santimetre (cm)",
+        "mm": "Milimetre (mm)"
+      }
+    },
+    "seo": {
+      "title": "SEO",
+      "subtitle": "Arama motorlarında mağazanızın nasıl görüneceğini belirleyen genel ayarlar.",
+      "addresses": "Alan adı ve adres yapısı",
+      "addressesHint": "Kalıcı sayfa adresleri bu ayarlarla oluşur.",
+      "host": "Ana alan adı",
+      "hostHint": "Örn. www.magazaniz.com. Boş bırakılırsa platform alt alan adı kullanılır.",
+      "urlStyle": {
+        "product": "Ürün adresleri",
+        "category": "Kategori adresleri",
+        "brand": "Marka adresleri"
+      },
+      "urlStyleNote": "Değişiklik yeni kaydedilen sayfalara uygulanır; mevcut adreslerin taşınması ayrı bir işlemle yapılır.",
+      "templates": "Başlık ve açıklama şablonları",
+      "templatesHint": "Sayfaya özel başlık girilmediğinde bu şablonlar kullanılır. Etikete tıklayıp imlecin olduğu yere ekleyin.",
+      "titleTemplate": {
+        "product": "Ürün sayfası başlığı",
+        "category": "Kategori sayfası başlığı",
+        "brand": "Marka sayfası başlığı"
+      },
+      "descriptionTemplate": "Ürün sayfası açıklaması",
+      "preview": "Önizleme:",
+      "crawlers": "Tarayıcılar",
+      "crawlersHint": "Arama motorlarının ve yapay zekâ tarayıcılarının mağazanızı nasıl gezeceği.",
+      "ai": "Yapay zekâ tarayıcıları",
+      "presets": {
+        "ai_search_visible": {
+          "title": "Yapay zekâ aramalarında görün (önerilen)",
+          "description": "ChatGPT, Perplexity gibi yapay zekâ aramaları ürünlerinizi bulup önerebilir."
+        },
+        "block_training": {
+          "title": "Model eğitimini engelle",
+          "description": "Yapay zekâ modellerini eğitmek için içerik toplayan tarayıcılar engellenir."
+        },
+        "none": {
+          "title": "Ek kural ekleme",
+          "description": "Yalnızca aşağıdaki robots.txt kuralları geçerli olur."
+        }
+      },
+      "robotsHint": "{sitemap_url} etiketi yayında site haritası adresiyle değiştirilir."
+    },
+    "features": {
+      "title": "Özellikler",
+      "subtitle": "Mağazanıza göre açıp kapatabileceğiniz özellikler.",
+      "list": "Özellikler",
+      "empty": "Şu an açıp kapatılabilecek bir özellik yok. Kapıda ödeme gibi özellikler eklendikçe burada görünecek.",
+      "locked": "Paketinizle birlikte gelir; buradan değiştirilemez."
+    },
+    "jobs": {
+      "title": "İşler",
+      "subtitle": "Dışa aktarma gibi uzun süren işler. Dosyalar bir hafta saklanır.",
+      "empty": "Henüz iş yok. Bir dışa aktarma başlattığınızda burada görünür.",
+      "download": "İndir",
+      "columns": {
+        "type": "İş",
+        "status": "Durum",
+        "created": "Başlangıç",
+        "expires": "Dosya saklanır"
+      },
+      "status": {
+        "queued": "Sırada",
+        "running": "Çalışıyor",
+        "succeeded": "Tamamlandı",
+        "failed": "Başarısız",
+        "cancelled": "İptal edildi"
+      },
+      "types": {
+        "audit_log.export": "Denetim kaydı dışa aktarımı"
+      }
+    },
+    "audit": {
+      "title": "Denetim kaydı",
+      "subtitle": "Kim neyi değiştirdi, kim kişisel verilere baktı. Bu sayfayı açmak da kaydedilir.",
+      "views": "Kayıt türleri",
+      "all": "Tümü",
+      "kinds": {
+        "mutation": "Değişiklik",
+        "sensitive_read": "Kişisel veri okuma",
+        "system": "Sistem"
+      },
+      "actors": {
+        "system": "Sistem",
+        "user": "Kullanıcı",
+        "api_key": "API anahtarı"
+      },
+      "columns": {
+        "when": "Zaman",
+        "kind": "Tür",
+        "action": "İşlem",
+        "actor": "Yapan",
+        "ip": "IP"
+      },
+      "empty": "Bu türde kayıt yok.",
+      "export": "CSV olarak dışa aktar",
+      "exportStarted": "Dışa aktarma başladı. Dosya hazır olunca İşler sayfasından indirebilirsiniz.",
+      "openJobs": "İşler sayfasına git",
+      "retention": "Dışa aktarılan dosyalar İşler sayfasında bir hafta saklanır."
     }
   },
   "status": {

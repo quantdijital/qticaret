@@ -7,7 +7,7 @@ import type { ProductDetail } from "@/features/products/api/products"
 import { CategoryTree } from "@/features/products/components/category-tree"
 import { VatSelect } from "@/features/products/components/vat-select"
 import { errorText } from "@/lib/errors"
-import { CardForm } from "./card-form"
+import { CardForm } from "@/components/patterns/card-form"
 
 interface Values {
   category_ids: string[]

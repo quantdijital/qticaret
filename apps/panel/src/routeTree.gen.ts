@@ -27,6 +27,11 @@ import { Route as AuthProductsIdRouteImport } from './routes/_auth/products/$id'
 import { Route as AuthProductsNewRouteImport } from './routes/_auth/products/new'
 import { Route as AuthSettingsIndexRouteImport } from './routes/_auth/settings/index'
 import { Route as AuthSettingsAppearanceRouteImport } from './routes/_auth/settings/appearance'
+import { Route as AuthSettingsAuditRouteImport } from './routes/_auth/settings/audit'
+import { Route as AuthSettingsFeaturesRouteImport } from './routes/_auth/settings/features'
+import { Route as AuthSettingsJobsRouteImport } from './routes/_auth/settings/jobs'
+import { Route as AuthSettingsSeoRouteImport } from './routes/_auth/settings/seo'
+import { Route as AuthSettingsStoreRouteImport } from './routes/_auth/settings/store'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/_auth',
@@ -117,6 +122,31 @@ const AuthSettingsAppearanceRoute = AuthSettingsAppearanceRouteImport.update({
   path: '/appearance',
   getParentRoute: () => AuthSettingsRoute,
 } as any)
+const AuthSettingsAuditRoute = AuthSettingsAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => AuthSettingsRoute,
+} as any)
+const AuthSettingsFeaturesRoute = AuthSettingsFeaturesRouteImport.update({
+  id: '/features',
+  path: '/features',
+  getParentRoute: () => AuthSettingsRoute,
+} as any)
+const AuthSettingsJobsRoute = AuthSettingsJobsRouteImport.update({
+  id: '/jobs',
+  path: '/jobs',
+  getParentRoute: () => AuthSettingsRoute,
+} as any)
+const AuthSettingsSeoRoute = AuthSettingsSeoRouteImport.update({
+  id: '/seo',
+  path: '/seo',
+  getParentRoute: () => AuthSettingsRoute,
+} as any)
+const AuthSettingsStoreRoute = AuthSettingsStoreRouteImport.update({
+  id: '/store',
+  path: '/store',
+  getParentRoute: () => AuthSettingsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthIndexRoute
@@ -132,6 +162,11 @@ export interface FileRoutesByFullPath {
   '/products/$id': typeof AuthProductsIdRoute
   '/products/new': typeof AuthProductsNewRoute
   '/settings/appearance': typeof AuthSettingsAppearanceRoute
+  '/settings/audit': typeof AuthSettingsAuditRoute
+  '/settings/features': typeof AuthSettingsFeaturesRoute
+  '/settings/jobs': typeof AuthSettingsJobsRoute
+  '/settings/seo': typeof AuthSettingsSeoRoute
+  '/settings/store': typeof AuthSettingsStoreRoute
   '/customers/': typeof AuthCustomersIndexRoute
   '/orders/': typeof AuthOrdersIndexRoute
   '/products/': typeof AuthProductsIndexRoute
@@ -150,6 +185,11 @@ export interface FileRoutesByTo {
   '/products/$id': typeof AuthProductsIdRoute
   '/products/new': typeof AuthProductsNewRoute
   '/settings/appearance': typeof AuthSettingsAppearanceRoute
+  '/settings/audit': typeof AuthSettingsAuditRoute
+  '/settings/features': typeof AuthSettingsFeaturesRoute
+  '/settings/jobs': typeof AuthSettingsJobsRoute
+  '/settings/seo': typeof AuthSettingsSeoRoute
+  '/settings/store': typeof AuthSettingsStoreRoute
   '/customers': typeof AuthCustomersIndexRoute
   '/orders': typeof AuthOrdersIndexRoute
   '/products': typeof AuthProductsIndexRoute
@@ -171,6 +211,11 @@ export interface FileRoutesById {
   '/_auth/products/$id': typeof AuthProductsIdRoute
   '/_auth/products/new': typeof AuthProductsNewRoute
   '/_auth/settings/appearance': typeof AuthSettingsAppearanceRoute
+  '/_auth/settings/audit': typeof AuthSettingsAuditRoute
+  '/_auth/settings/features': typeof AuthSettingsFeaturesRoute
+  '/_auth/settings/jobs': typeof AuthSettingsJobsRoute
+  '/_auth/settings/seo': typeof AuthSettingsSeoRoute
+  '/_auth/settings/store': typeof AuthSettingsStoreRoute
   '/_auth/customers/': typeof AuthCustomersIndexRoute
   '/_auth/orders/': typeof AuthOrdersIndexRoute
   '/_auth/products/': typeof AuthProductsIndexRoute
@@ -192,6 +237,11 @@ export interface FileRouteTypes {
     | '/products/$id'
     | '/products/new'
     | '/settings/appearance'
+    | '/settings/audit'
+    | '/settings/features'
+    | '/settings/jobs'
+    | '/settings/seo'
+    | '/settings/store'
     | '/customers/'
     | '/orders/'
     | '/products/'
@@ -210,6 +260,11 @@ export interface FileRouteTypes {
     | '/products/$id'
     | '/products/new'
     | '/settings/appearance'
+    | '/settings/audit'
+    | '/settings/features'
+    | '/settings/jobs'
+    | '/settings/seo'
+    | '/settings/store'
     | '/customers'
     | '/orders'
     | '/products'
@@ -230,6 +285,11 @@ export interface FileRouteTypes {
     | '/_auth/products/$id'
     | '/_auth/products/new'
     | '/_auth/settings/appearance'
+    | '/_auth/settings/audit'
+    | '/_auth/settings/features'
+    | '/_auth/settings/jobs'
+    | '/_auth/settings/seo'
+    | '/_auth/settings/store'
     | '/_auth/customers/'
     | '/_auth/orders/'
     | '/_auth/products/'
@@ -369,16 +429,61 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSettingsAppearanceRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
+    '/_auth/settings/audit': {
+      id: '/_auth/settings/audit'
+      path: '/audit'
+      fullPath: '/settings/audit'
+      preLoaderRoute: typeof AuthSettingsAuditRouteImport
+      parentRoute: typeof AuthSettingsRoute
+    }
+    '/_auth/settings/features': {
+      id: '/_auth/settings/features'
+      path: '/features'
+      fullPath: '/settings/features'
+      preLoaderRoute: typeof AuthSettingsFeaturesRouteImport
+      parentRoute: typeof AuthSettingsRoute
+    }
+    '/_auth/settings/jobs': {
+      id: '/_auth/settings/jobs'
+      path: '/jobs'
+      fullPath: '/settings/jobs'
+      preLoaderRoute: typeof AuthSettingsJobsRouteImport
+      parentRoute: typeof AuthSettingsRoute
+    }
+    '/_auth/settings/seo': {
+      id: '/_auth/settings/seo'
+      path: '/seo'
+      fullPath: '/settings/seo'
+      preLoaderRoute: typeof AuthSettingsSeoRouteImport
+      parentRoute: typeof AuthSettingsRoute
+    }
+    '/_auth/settings/store': {
+      id: '/_auth/settings/store'
+      path: '/store'
+      fullPath: '/settings/store'
+      preLoaderRoute: typeof AuthSettingsStoreRouteImport
+      parentRoute: typeof AuthSettingsRoute
+    }
   }
 }
 
 interface AuthSettingsRouteChildren {
   AuthSettingsAppearanceRoute: typeof AuthSettingsAppearanceRoute
+  AuthSettingsAuditRoute: typeof AuthSettingsAuditRoute
+  AuthSettingsFeaturesRoute: typeof AuthSettingsFeaturesRoute
+  AuthSettingsJobsRoute: typeof AuthSettingsJobsRoute
+  AuthSettingsSeoRoute: typeof AuthSettingsSeoRoute
+  AuthSettingsStoreRoute: typeof AuthSettingsStoreRoute
   AuthSettingsIndexRoute: typeof AuthSettingsIndexRoute
 }
 
 const AuthSettingsRouteChildren: AuthSettingsRouteChildren = {
   AuthSettingsAppearanceRoute: AuthSettingsAppearanceRoute,
+  AuthSettingsAuditRoute: AuthSettingsAuditRoute,
+  AuthSettingsFeaturesRoute: AuthSettingsFeaturesRoute,
+  AuthSettingsJobsRoute: AuthSettingsJobsRoute,
+  AuthSettingsSeoRoute: AuthSettingsSeoRoute,
+  AuthSettingsStoreRoute: AuthSettingsStoreRoute,
   AuthSettingsIndexRoute: AuthSettingsIndexRoute,
 }
 

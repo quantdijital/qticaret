@@ -199,7 +199,12 @@
   "settings": {
     "title": "Settings",
     "sections": {
-      "appearance": "Appearance"
+      "appearance": "Appearance",
+      "store": "Store",
+      "seo": "SEO",
+      "features": "Features",
+      "jobs": "Jobs",
+      "audit": "Audit log"
     },
     "appearance": {
       "title": "Appearance",
@@ -246,6 +251,129 @@
         "light": "Light",
         "brand": "Brand colour"
       }
+    },
+    "saved": "Settings saved.",
+    "store": {
+      "title": "Store",
+      "subtitle": "Your shop's name, contact details, time zone and units.",
+      "identity": "Store details",
+      "identityHint": "Shown in the panel, e-mails and invoices.",
+      "name": "Store name",
+      "nameRequired": "Give your store a name.",
+      "email": "Contact e-mail",
+      "emailHint": "Where customers write to you.",
+      "phone": "Contact phone",
+      "phoneHint": "A Turkish number; no need to add +90.",
+      "region": "Region and units",
+      "regionHint": "How dates and product measurements are kept.",
+      "timezone": "Time zone",
+      "weightUnit": "Weight unit",
+      "dimensionUnit": "Dimension unit",
+      "unitsHint": "Product forms open in these units. Saved products are not converted.",
+      "units": {
+        "g": "Gram (g)",
+        "kg": "Kilogram (kg)",
+        "cm": "Centimetre (cm)",
+        "mm": "Millimetre (mm)"
+      }
+    },
+    "seo": {
+      "title": "SEO",
+      "subtitle": "General settings for how your shop shows up in search engines.",
+      "addresses": "Domain and address shape",
+      "addressesHint": "Permanent page addresses are built from these.",
+      "host": "Main domain",
+      "hostHint": "e.g. www.yourshop.com. Empty means the platform subdomain.",
+      "urlStyle": {
+        "product": "Product addresses",
+        "category": "Category addresses",
+        "brand": "Brand addresses"
+      },
+      "urlStyleNote": "Changes apply to pages saved from now on; moving existing addresses is a separate step.",
+      "templates": "Title and description templates",
+      "templatesHint": "Used when a page has no title of its own. Click a tag to add it at the cursor.",
+      "titleTemplate": {
+        "product": "Product page title",
+        "category": "Category page title",
+        "brand": "Brand page title"
+      },
+      "descriptionTemplate": "Product page description",
+      "preview": "Preview:",
+      "crawlers": "Crawlers",
+      "crawlersHint": "How search engines and AI crawlers may go through your shop.",
+      "ai": "AI crawlers",
+      "presets": {
+        "ai_search_visible": {
+          "title": "Show up in AI search (recommended)",
+          "description": "AI search such as ChatGPT or Perplexity can find and suggest your products."
+        },
+        "block_training": {
+          "title": "Block model training",
+          "description": "Crawlers that collect content to train AI models are blocked."
+        },
+        "none": {
+          "title": "No extra rules",
+          "description": "Only the robots.txt rules below apply."
+        }
+      },
+      "robotsHint": "The {sitemap_url} tag becomes the sitemap address when published."
+    },
+    "features": {
+      "title": "Features",
+      "subtitle": "Features you can turn on or off for your shop.",
+      "list": "Features",
+      "empty": "No features to switch yet. Features such as cash on delivery will show up here as they arrive.",
+      "locked": "Comes with your plan; cannot be changed here."
+    },
+    "jobs": {
+      "title": "Jobs",
+      "subtitle": "Long tasks such as exports. Files are kept for a week.",
+      "empty": "No jobs yet. They show up here when you start an export.",
+      "download": "Download",
+      "columns": {
+        "type": "Job",
+        "status": "Status",
+        "created": "Started",
+        "expires": "File kept until"
+      },
+      "status": {
+        "queued": "Queued",
+        "running": "Running",
+        "succeeded": "Done",
+        "failed": "Failed",
+        "cancelled": "Cancelled"
+      },
+      "types": {
+        "audit_log.export": "Audit log export"
+      }
+    },
+    "audit": {
+      "title": "Audit log",
+      "subtitle": "Who changed what, and who looked at personal data. Opening this page is recorded too.",
+      "views": "Record types",
+      "all": "All",
+      "kinds": {
+        "mutation": "Change",
+        "sensitive_read": "Personal data read",
+        "system": "System"
+      },
+      "actors": {
+        "system": "System",
+        "user": "User",
+        "api_key": "API key"
+      },
+      "columns": {
+        "when": "When",
+        "kind": "Type",
+        "action": "Action",
+        "actor": "By",
+        "ip": "IP"
+      },
+      "empty": "No records of this type.",
+      "export": "Export as CSV",
+      "exportStarted": "Export started. Download the file from Jobs when it is ready.",
+      "openJobs": "Go to Jobs",
+      "retention": "Exported files are kept on the Jobs page for a week."
     }
   },
   "status": {

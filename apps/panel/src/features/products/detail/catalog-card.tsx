@@ -18,7 +18,7 @@ import {
 } from "@/features/products/api/product-edit"
 import type { ProductCatalog, ProductCondition } from "@/features/products/api/product-edit"
 import { errorText } from "@/lib/errors"
-import { CardForm } from "./card-form"
+import { CardForm } from "@/components/patterns/card-form"
 
 // Radix Select has no empty value; this one stands for "none chosen"
 const NONE = "__none__"
