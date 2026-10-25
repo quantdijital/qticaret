@@ -30,6 +30,9 @@
 | Payment provider | Ödeme sağlayıcı | POS firması |
 | Invoice | Fatura | e-belge |
 
+## Yapılan ekranlar (2026-10-25)
+Dashboard, Siparişler (aşama sekmeleri + detay: kargoya ver, teslim edildi, tahsil et, iptal), Müşteriler (liste + detay, maskeli fatura bilgisi), Ürünler (liste, 5 adımlı sihirbaz, kart kart kaydeden detay, özellikler), Kategoriler (ağaç + düzenleyici), Stok (azalan/tükenen, satır içi raf adedi), Kampanyalar (yüzde/tutar/ücretsiz kargo, kod/otomatik, tarih, sınır), Raporlar (KPI, ürün performansı, gün gün satış, CSV), SEO (arama önizlemesi, katalog sağlığı), Ayarlar (Mağaza, Görünüm, SEO, Ürün özellikleri, Özellikler, İşler, Denetim kaydı). Komut menüsünde sık işler. Telefonda listeler sütun katlayarak sığar.
+
 ## Planlanan ekranlar (panel hattı P1–P6 ve ilgili fazlar)
 | Ekran | Desen (docs/18 §7) | İçerik |
 |---|---|---|

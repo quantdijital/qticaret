@@ -77,6 +77,7 @@ repo/
 │   │   │   │   ├── seo/             # slug (TR), başlık şablonları, piksel genişliği, URL desenleri, rezerv yollar, jsonld builders (F3.12)
 │   │   │   │   ├── catalog/         # GTIN doğrulama, ölçü/ağırlık kuralı (F3.1)
 │   │   │   │   ├── money/           # tutar dönüşümleri
+│   │   │   │   ├── dashboard/       # panel okuma modelleri: dönem, sipariş aşaması, özet/rapor, sipariş ve stok panosu (adr/0022)
 │   │   │   │   ├── errors/          # ortak hata tipleri
 │   │   │   │   └── logging/         # pino logger, redaksiyon, istek bağlamı, Medusa logger adaptörü
 │   │   │   └── scripts/             # seed, tr-address import, tenant bootstrap, katalog yollarını claim etme (F3.1)

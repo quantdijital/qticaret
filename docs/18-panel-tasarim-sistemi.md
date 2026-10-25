@@ -83,7 +83,8 @@ Tek kaynak: `apps/panel/src/theme/tokens.css`. Üç katman; bileşenler yalnızc
 | `--border-width`, `--border` | 1 px, nötr-200 | sabit |
 | `--layout-sidebar-width`, `--layout-sidebar-width-icon` | 264 / 56 px | sabit (shadcn'in kenar çubuğu bunları okur) |
 | `--layout-topbar-height` | 56 px | sabit |
-| `--content-max-width`, `--page-padding` | 1280 / 24 px | sabit |
+| `--page-padding`, `--page-padding-wide`, `--grid-gap` | 24 / 32 / 16 px | sabit. İçerik tam genişlik kullanır (üst sınır yok, kullanıcı kararı 2026-10-25); okunabilirlik 12 kolonlu ızgara ve kart genişlikleriyle sağlanır |
+| `--chart-muted`, `--chart-grid`, `--chart-canceled`, `--chart-ramp-1..4` | motor türetir | grafik: karşılaştırma serisi, ızgara, iptal, sıralı aşama rampası (akromatik markada gri rampa) |
 | `--dialog-width-sm/md/lg` | 420 / 560 / 760 px | sabit |
 | `--overlay` | nötr-900 %40 | sabit |
 | `--shadow-overlay` | tek gölge | sabit |
@@ -135,11 +136,13 @@ apps/panel/
 │   │   ├── products/
 │   │   ├── orders/
 │   │   ├── customers/
-│   │   ├── settings/
-│   │   └── <alan>/{api,components,pages,schemas}/
+│   │   ├── categories/ inventory/ promotions/ reports/ seo/
+│   │   ├── attributes/       # özellik şablonları ve ürün özellikleri (adr/0013)
+│   │   ├── settings/         # mağaza, görünüm, SEO, özellikler, işler, denetim kaydı
+│   │   └── <alan>/{api,components,pages,detail,wizard}/
 │   ├── components/
 │   │   ├── ui/               # shadcn üretimi, bizim sahipliğimizde
-│   │   ├── patterns/         # PageHeader, DataTable, Wizard, StatCard, EmptyState, StatusBadge, ConfirmDialog, FormSection
+│   │   ├── patterns/         # PageHeader, DataTable, FilterTabs, SearchInput, Pagination, Wizard, CardForm, LeaveGuard, SectionCard, KpiTile, StatusBadge, ConfirmDialog, FormSection
 │   │   └── layout/           # AppShell, Sidebar, Topbar, PageContainer
 │   ├── theme/                # tokens.css, engine.ts, presets.ts, schema.ts
 │   ├── lib/                  # sdk, auth, i18n, format (para, tarih, tr), errors
@@ -152,7 +155,7 @@ apps/panel/
 
 Kurallar:
 - `routes/` içinde iş mantığı yok; sayfa `features/<alan>/pages` içindedir.
-- `components/ui` yalnızca shadcn CLI ile değişir; özelleştirme token'la yapılır, bileşen kodunu elle boyamak yok.
+- `components/ui` yalnızca shadcn CLI ile değişir; özelleştirme token'la yapılır, bileşen kodunu elle boyamak yok. CLI `cn` paketini bağımlılık olarak ekleyip `import { cn } from "cn"` yazıyor: her eklemeden sonra import `@/lib/utils`'e çevrilir, `cn` paketi ve CLI'nin indirdiği sürüm değişiklikleri (ör. recharts) geri alınır.
 - Bir desen (`patterns/`) iki yerde kullanılmadan önce yazılmaz; üç yerde kopyalanmadan önce desen olur.
 - Dosya ~300 satır, fonksiyon ~50 satır (docs/10).
 
@@ -171,6 +174,10 @@ Kurallar:
 | ConfirmDialog | Geri alınamaz işlem | Özet + açık eylem adı ("Siparişi iptal et"), "Tamam" değil |
 | FormSection | Formlar | Başlık + açıklama solda, alanlar sağda (geniş ekranda); doğrulama satır altında |
 | Toast | Sonuç bildirimi | Kısa, eylem bağlantılı; hata toast'ı kalıcı, başarı 4 sn |
+| FilterTabs + SearchInput + Pagination | Liste üstü ve altı | Hızlı görünümler sayılarıyla; arama 300 ms sonra; durum URL'de (`?status=&q=&page=`, sayfa 1 tabanlı) |
+| CardForm | Detay sayfasının bölümleri | Her kart kendi kaydeder; Kaydet/Geri al yalnızca değişiklik varken görünür; RHF `values` + `keepDirtyValues` ile başka kartın kaydı bu karttaki düzenlemeyi silmez |
+| LeaveGuard | Uzun formlar (sihirbaz, kampanya) | Kaydedilmemiş değişiklikle sayfadan çıkarken onay; kayıttan sonraki yönlendirme `ignoreBlocker` ile |
+| Sunucu panosu (board) | Sunucunun filtreleyemediği hesaplanan durumlar | Sipariş aşaması ve satılabilir stok gibi: en yeni N kayıt sunucuda sıralanır, sekme sayıları ve `limited` bayrağıyla döner (`/admin/order-board`, `/admin/stock-board`) |
 
 ---
 

@@ -3,9 +3,24 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**Panel P1 (kendi yönetici panelimiz, adr/0022): BAŞLADI** ve **F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a bitti). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı; push edilmedi. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
+**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a bitti). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı; push edilmedi. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
 
 ## Son oturum özeti
+**2026-10-25/26 gece (kullanıcı yatarken, "panel işlerini tamamla" talimatıyla).** Panelin ekranları yazıldı; her biri gerçek veriyle tarayıcıda denendi (CDP ekran görüntüsü, test kayıtları sonra silindi). Commit'ler `e11a201`…`6d63df7`, push yok.
+- **Backend (yeni okuma uçları, testli):**
+  - `GET /admin/order-board`: siparişler aşamaya göre (ödeme bekliyor / hazırlanacak / kargoda / teslim / iptal), sekme sayıları, Medusa `q` araması, 20'lik sayfa. Aşama ödeme ve gönderi kayıtlarından hesaplandığı için en yeni 5000 sipariş bellekte sıralanır, `limited` bayrağı. Kişisel veri: okuma kaydı (SENSITIVE_READS).
+  - `GET /admin/stock-board`: satılabilir stok (raf − ayrılan, tüm depolar) ile tümü / azalan (≤5, tükenenler dahil) / tükenen; en boş önce; en yeni 2000 kalem.
+  - `GET /admin/reports/sales`: dashboard özeti, tüm satılan ürünler (100'e kadar) ve 20 kategoriyle; `buildOverview` limit alıyor.
+  - Birim: `lib/dashboard/{board,stock}`; HTTP: order-board, stock-board, dashboard (rapor).
+- **Panel ekranları:**
+  - Ürünler: liste; 5 adımlı sihirbaz (temel, görsel, fiyat/stok + seçenek/varyant, paket ölçüsü + desi, kontrol listesiyle yayın); kart kart kaydeden detay (genel, görsel, varyant fiyat/stok, düzen, ölçü, katalog, özellikler), yayınla/kaldır, sil.
+  - Siparişler: aşama sekmeleri; detay (ilerleme çizgisi, kalemler + tutarlar, müşteri, adres, ödeme), kargoya ver (fulfillment + shipment), teslim edildi, tahsil et, iptal.
+  - Müşteriler (üye/misafir, detayda son siparişler ve maskeli fatura bilgisi), Kategoriler (ağaç + düzenleyici, sıra), Stok (satır içi raf adedi, toplu kaydet), Kampanyalar (yüzde/tutar/ücretsiz kargo, kod/otomatik, sınır, tarihler kendi kampanyasında), Raporlar (KPI, ürün performansı, gün gün, CSV), SEO özeti (arama önizlemesi, katalog sağlığı).
+  - Ayarlar: Mağaza (ad, iletişim, saat dilimi, birimler; ürün formları birimi izler), SEO, Ürün özellikleri (şablon düzenleyici, adr/0013), Özellikler (bayraklar), İşler (indir), Denetim kaydı (personel adıyla, CSV dışa aktarma işi).
+  - Desenler: DataTable, FilterTabs, SearchInput, Pagination, Wizard, CardForm, LeaveGuard, ConfirmDialog; komut menüsünde sık işler; telefonda listeler sütun katlıyor.
+  - Panel oturumunda hata `code`'u SDK'dan gelmediği için "değerler silinecek" ve "şablon değişimi" onayları hata beklenmeden önceden soruluyor.
+- **Bilinen sınırlar (devreden):** sipariş/stok panosu bellek içi sıralama (büyük mağazada index/kayıtlı aşama gerekir); sipariş detayındaki aşama istemcide `lib/dashboard/lifecycle` kuralıyla hesaplanıyor (kısmi gönderimde sunucudan farklı olabilir); kargo etiketi/takip F7'de; kampanyada minimum sepet ve kategori kuralları F4'te.
+
 **2026-10-24 gece oturumu (S3, S5; S8 başladı).** Kullanıcı döndü; dört karar verdi: bağımlılıklar onaylandı (ioredis 5.11.1, fast-xml-parser 5.11.2, yauzl 3.4.0, kendi görsel başlık okuyucumuz), ADR-0011..0014 kabul edildi, otonom devam, eski "Gözden geçir" maddeleri olduğu gibi kabul. Commit `54abc2a`.
 
 2026-10-25 (karar, adr/0022): Kullanıcı Medusa Admin'i yetersiz buldu ("tek renk, dashboard yok, düz kartlar, adım adım olmalı") ve kendi panelimizi yazmaya karar verdi.
@@ -467,7 +482,7 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
 | F0 Repo & araçlar | ✅ |
 | F1 Medusa çekirdek + TR lokalizasyon | ✅ |
 | F2 Platform çekirdek modülleri | ✅ |
-| Panel P1–P6 (adr/0022) | ⏳ P1 |
+| Panel P1–P6 (adr/0022) | ⏳ P1–P4 ekranları yazıldı (kullanıcı kontrolü bekliyor) |
 | F3 Katalog, SEO motoru ve stok | ⏳ |
 | F4 Fiyatlandırma ve promosyon | ⬜ |
 | F5 Ödeme: iyzico | ⬜ |
