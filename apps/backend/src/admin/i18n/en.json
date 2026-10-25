@@ -10,6 +10,85 @@
       "delete": "Delete",
       "remove": "Remove"
     },
+    "home": {
+      "title": "Home",
+      "greeting": "Hello {{name}}",
+      "greetingNoName": "Hello",
+      "subtitle": "Start running your shop from here: finish what is left to set up and reach the screens you use most in one click.",
+      "setup": {
+        "title": "Get your shop ready to sell",
+        "subtitle": "Complete the steps in order. Each button takes you to the screen where the step is done; come back here when you finish.",
+        "progress": "{{done}} of {{total}} steps done",
+        "done": "Done",
+        "next": "Next step",
+        "allDone": "All steps are done. Your shop looks ready to sell.",
+        "error": "The setup steps could not be loaded right now. Please try again shortly.",
+        "steps": {
+          "storeName": {
+            "title": "Give your shop a name",
+            "description": "The shop name is used in the admin and wherever your customers see your shop.",
+            "action": "Open store settings"
+          },
+          "currency": {
+            "title": "Choose your currency",
+            "description": "Product prices are entered and shown in this currency; Turkish lira (TRY) for Turkey.",
+            "action": "Open store settings"
+          },
+          "region": {
+            "title": "Add the country you sell to",
+            "description": "Sets which country you sell to and how taxes are calculated; the admin calls this screen \"Regions\".",
+            "action": "Open regions"
+          },
+          "location": {
+            "title": "Add your shipping address",
+            "description": "The warehouse or shop your parcels leave from; stock is kept per address.",
+            "action": "Open locations"
+          },
+          "shipping": {
+            "title": "Set up a shipping option",
+            "description": "Customers pick one of these when they order (e.g. \"Standard shipping\"); you add them on your shipping address's page.",
+            "action": "Add a shipping option"
+          },
+          "product": {
+            "title": "Publish your first product",
+            "description": "Only products marked \"Published\" appear in your shop; drafts are not shown to customers.",
+            "action": "Add product"
+          }
+        }
+      },
+      "actions": {
+        "title": "Quick actions",
+        "addProduct": {
+          "title": "Add product",
+          "description": "Create a new product with its name, photos, price and stock.",
+          "button": "Add product"
+        },
+        "orders": {
+          "title": "Orders",
+          "description": "See incoming orders and follow their payment and shipping.",
+          "button": "View orders"
+        },
+        "settings": {
+          "title": "Settings",
+          "description": "Store details, shipping, SEO and other settings.",
+          "button": "Open settings"
+        }
+      },
+      "numbers": {
+        "title": "Your products",
+        "viewAll": "All products",
+        "published": {
+          "label": "Published",
+          "hint": "Products your customers see in your shop"
+        },
+        "draft": {
+          "label": "Draft",
+          "hint": "Not published yet, visible in the admin only"
+        },
+        "empty": "You have not added any products yet. Start by adding your first one.",
+        "error": "Product numbers could not be loaded right now. Please try again shortly."
+      }
+    },
     "billingProfile": {
       "title": "Billing details",
       "empty": "The customer has not entered billing details yet.",

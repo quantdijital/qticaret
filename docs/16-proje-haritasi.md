@@ -117,6 +117,7 @@ Her modülün iç yapısı aynıdır (örnek: billing-profile):
 | [redis/](../apps/backend/src/lib/redis), [cache/](../apps/backend/src/lib/cache) | Kendi Redis istemcimiz, tenant ad alanı; ayarların süreç içi cache'i |
 
 ### 2.5 `src/admin/`: admin paneline eklenenler
+- `routes/home/`: "Başlangıç" sayfası (`/app/home`): kurulum kontrol listesi, hızlı işlemler, ürün sayıları. Kontrol listesi kuralları `setup-steps.ts`'te ([docs/17](17-yonetici-paneli-kullanilabilirlik.md)).
 - `widgets/customer-billing-profile.tsx`: müşteri detay sayfasındaki fatura bilgisi kutusu.
 - `widgets/default-language.tsx`: admin'i ilk açılışta Türkçe yapar.
 - `routes/settings/features`, `routes/settings/seo`, `routes/settings/attribute-templates`, `routes/settings/async-jobs`: Ayarlar > Özellikler, SEO, Ürün özellikleri ve İşler sayfaları.
