@@ -29,6 +29,7 @@ import { Route as AuthPromotionsIdRouteImport } from './routes/_auth/promotions/
 import { Route as AuthPromotionsNewRouteImport } from './routes/_auth/promotions/new'
 import { Route as AuthSettingsIndexRouteImport } from './routes/_auth/settings/index'
 import { Route as AuthSettingsAppearanceRouteImport } from './routes/_auth/settings/appearance'
+import { Route as AuthSettingsAttributesRouteImport } from './routes/_auth/settings/attributes'
 import { Route as AuthSettingsAuditRouteImport } from './routes/_auth/settings/audit'
 import { Route as AuthSettingsFeaturesRouteImport } from './routes/_auth/settings/features'
 import { Route as AuthSettingsJobsRouteImport } from './routes/_auth/settings/jobs'
@@ -134,6 +135,11 @@ const AuthSettingsAppearanceRoute = AuthSettingsAppearanceRouteImport.update({
   path: '/appearance',
   getParentRoute: () => AuthSettingsRoute,
 } as any)
+const AuthSettingsAttributesRoute = AuthSettingsAttributesRouteImport.update({
+  id: '/attributes',
+  path: '/attributes',
+  getParentRoute: () => AuthSettingsRoute,
+} as any)
 const AuthSettingsAuditRoute = AuthSettingsAuditRouteImport.update({
   id: '/audit',
   path: '/audit',
@@ -175,6 +181,7 @@ export interface FileRoutesByFullPath {
   '/promotions/$id': typeof AuthPromotionsIdRoute
   '/promotions/new': typeof AuthPromotionsNewRoute
   '/settings/appearance': typeof AuthSettingsAppearanceRoute
+  '/settings/attributes': typeof AuthSettingsAttributesRoute
   '/settings/audit': typeof AuthSettingsAuditRoute
   '/settings/features': typeof AuthSettingsFeaturesRoute
   '/settings/jobs': typeof AuthSettingsJobsRoute
@@ -200,6 +207,7 @@ export interface FileRoutesByTo {
   '/promotions/$id': typeof AuthPromotionsIdRoute
   '/promotions/new': typeof AuthPromotionsNewRoute
   '/settings/appearance': typeof AuthSettingsAppearanceRoute
+  '/settings/attributes': typeof AuthSettingsAttributesRoute
   '/settings/audit': typeof AuthSettingsAuditRoute
   '/settings/features': typeof AuthSettingsFeaturesRoute
   '/settings/jobs': typeof AuthSettingsJobsRoute
@@ -228,6 +236,7 @@ export interface FileRoutesById {
   '/_auth/promotions/$id': typeof AuthPromotionsIdRoute
   '/_auth/promotions/new': typeof AuthPromotionsNewRoute
   '/_auth/settings/appearance': typeof AuthSettingsAppearanceRoute
+  '/_auth/settings/attributes': typeof AuthSettingsAttributesRoute
   '/_auth/settings/audit': typeof AuthSettingsAuditRoute
   '/_auth/settings/features': typeof AuthSettingsFeaturesRoute
   '/_auth/settings/jobs': typeof AuthSettingsJobsRoute
@@ -256,6 +265,7 @@ export interface FileRouteTypes {
     | '/promotions/$id'
     | '/promotions/new'
     | '/settings/appearance'
+    | '/settings/attributes'
     | '/settings/audit'
     | '/settings/features'
     | '/settings/jobs'
@@ -281,6 +291,7 @@ export interface FileRouteTypes {
     | '/promotions/$id'
     | '/promotions/new'
     | '/settings/appearance'
+    | '/settings/attributes'
     | '/settings/audit'
     | '/settings/features'
     | '/settings/jobs'
@@ -308,6 +319,7 @@ export interface FileRouteTypes {
     | '/_auth/promotions/$id'
     | '/_auth/promotions/new'
     | '/_auth/settings/appearance'
+    | '/_auth/settings/attributes'
     | '/_auth/settings/audit'
     | '/_auth/settings/features'
     | '/_auth/settings/jobs'
@@ -467,6 +479,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSettingsAppearanceRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
+    '/_auth/settings/attributes': {
+      id: '/_auth/settings/attributes'
+      path: '/attributes'
+      fullPath: '/settings/attributes'
+      preLoaderRoute: typeof AuthSettingsAttributesRouteImport
+      parentRoute: typeof AuthSettingsRoute
+    }
     '/_auth/settings/audit': {
       id: '/_auth/settings/audit'
       path: '/audit'
@@ -507,6 +526,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthSettingsRouteChildren {
   AuthSettingsAppearanceRoute: typeof AuthSettingsAppearanceRoute
+  AuthSettingsAttributesRoute: typeof AuthSettingsAttributesRoute
   AuthSettingsAuditRoute: typeof AuthSettingsAuditRoute
   AuthSettingsFeaturesRoute: typeof AuthSettingsFeaturesRoute
   AuthSettingsJobsRoute: typeof AuthSettingsJobsRoute
@@ -517,6 +537,7 @@ interface AuthSettingsRouteChildren {
 
 const AuthSettingsRouteChildren: AuthSettingsRouteChildren = {
   AuthSettingsAppearanceRoute: AuthSettingsAppearanceRoute,
+  AuthSettingsAttributesRoute: AuthSettingsAttributesRoute,
   AuthSettingsAuditRoute: AuthSettingsAuditRoute,
   AuthSettingsFeaturesRoute: AuthSettingsFeaturesRoute,
   AuthSettingsJobsRoute: AuthSettingsJobsRoute,

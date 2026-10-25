@@ -7,6 +7,7 @@ const SECTIONS = [
   { key: "store", to: "/settings/store" },
   { key: "appearance", to: "/settings/appearance" },
   { key: "seo", to: "/settings/seo" },
+  { key: "attributes", to: "/settings/attributes" },
   { key: "features", to: "/settings/features" },
   { key: "jobs", to: "/settings/jobs" },
   { key: "audit", to: "/settings/audit" },

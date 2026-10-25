@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/patterns/page-header"
 import { ErrorState } from "@/components/patterns/states"
 import { Skeleton } from "@/components/ui/skeleton"
 import { productQuery } from "@/features/products/api/products"
+import { AttributesCard } from "@/features/attributes/components/attributes-card"
 import { ProductStatusBadge } from "@/features/products/components/product-status-badge"
 import { CatalogCard } from "@/features/products/detail/catalog-card"
 import { GeneralCard } from "@/features/products/detail/general-card"
@@ -72,6 +73,7 @@ export function ProductDetailPage() {
           <GeneralCard product={product} />
           <MediaCard product={product} />
           <VariantsCard product={product} />
+          <AttributesCard productId={product.id} />
         </div>
         <div className="flex min-w-0 flex-col gap-[var(--grid-gap)] xl:col-span-4">
           <SummaryCard product={product} />
