@@ -48,7 +48,10 @@ function CatalogForm({ productId, catalog }: { productId: string; catalog: Produ
           : {}),
       },
       {
-        onSuccess: () => toast.success(t("products.detail.saved")),
+        onSuccess: () => {
+          form.reset(values)
+          toast.success(t("products.detail.saved"))
+        },
         onError: (failure) => toast.error(errorText(t, failure)),
       }
     )

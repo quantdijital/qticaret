@@ -34,7 +34,8 @@ function Check({ ok, children }: { ok: boolean; children: ReactNode }) {
 /** How a product page shows in search results, from the shop's own templates. */
 function SearchPreview({ seo, storeName }: { seo: SeoSettings; storeName: string }) {
   const { t } = useTranslation()
-  const host = seo.canonical_host ?? "alanadiniz.com"
+  const host = seo.canonical_host ?? t("seo.sampleHost")
+  const samples = t("settings.seo.samples", { returnObjects: true }) as Record<string, string>
   const path = seo.url_style.product === "flat" ? "/keten-gomlek" : "/urun/keten-gomlek"
   return (
     <div className="flex flex-col gap-1 rounded-lg border bg-background p-4">
@@ -48,10 +49,10 @@ function SearchPreview({ seo, storeName }: { seo: SeoSettings; storeName: string
         </span>
       </span>
       <span className="truncate text-lg text-info-text">
-        {renderSample(seo.title_templates.product, storeName)}
+        {renderSample(seo.title_templates.product, storeName, samples)}
       </span>
       <span className="line-clamp-2 text-sm text-muted-foreground">
-        {renderSample(seo.description_templates.product, storeName)}
+        {renderSample(seo.description_templates.product, storeName, samples)}
       </span>
       <span className="mt-2 text-[11px] text-muted-foreground">{t("seo.previewNote")}</span>
     </div>

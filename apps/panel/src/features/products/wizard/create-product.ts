@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { sdk } from "@/lib/sdk"
-import { parseMoneyInput } from "@/lib/money-input"
+import { parseMeasureInput, parseMoneyInput } from "@/lib/money-input"
 import type { ShopDefaults } from "@/features/products/api/lookups"
 import { DEFAULT_VARIANT_KEY } from "./schema"
 import type { WizardValues } from "./schema"
@@ -16,14 +16,15 @@ interface CreateInput {
 }
 
 const measure = (text: string) => {
-  const value = parseMoneyInput(text)
+  const value = parseMeasureInput(text)
   return value && value > 0 ? value : undefined
 }
 
 function productBody({ values, publish, defaults, defaultOption }: CreateInput) {
-  const options = values.has_options
-    ? values.options.map((option) => ({ title: option.title, values: option.values }))
-    : [{ title: defaultOption.title, values: [defaultOption.value] }]
+  const options =
+    values.has_options && values.options.length > 0
+      ? values.options.map((option) => ({ title: option.title, values: option.values }))
+      : [{ title: defaultOption.title, values: [defaultOption.value] }]
   const dimensions = Object.fromEntries(
     (["weight", "length", "width", "height"] as const).flatMap((field) => {
       const value = measure(values[field])
@@ -85,8 +86,11 @@ async function stockLevels(productId: string, values: WizardValues, locationId: 
 
 export interface CreateResult {
   productId: string
-  /** The product was saved but its stock could not be; the page says so. */
-  stockFailed: boolean
+  /**
+   * The product was saved but its stock was not: the shop has no default
+   * location, or writing the levels failed (with why). The page says so.
+   */
+  stockProblem: { kind: "no_location" } | { kind: "failed"; reason: unknown } | null
 }
 
 /** Creates the product, then its stock at the default location. */
@@ -95,16 +99,19 @@ export function useCreateProduct() {
   return useMutation({
     mutationFn: async (input: CreateInput): Promise<CreateResult> => {
       const { product } = await sdk.admin.product.create(productBody(input))
-      let stockFailed = false
-      if (input.values.manage_inventory && input.defaults.locationId) {
-        try {
-          await stockLevels(product.id, input.values, input.defaults.locationId)
-        } catch {
-          // The product stands; its stock is set on its page
-          stockFailed = true
-        }
+      if (!input.values.manage_inventory) {
+        return { productId: product.id, stockProblem: null }
       }
-      return { productId: product.id, stockFailed }
+      if (!input.defaults.locationId) {
+        return { productId: product.id, stockProblem: { kind: "no_location" } }
+      }
+      try {
+        await stockLevels(product.id, input.values, input.defaults.locationId)
+        return { productId: product.id, stockProblem: null }
+      } catch (reason) {
+        // The product stands; its stock is set on its page
+        return { productId: product.id, stockProblem: { kind: "failed", reason } }
+      }
     },
     onSuccess: async () => {
       await client.invalidateQueries({ queryKey: ["products"] })

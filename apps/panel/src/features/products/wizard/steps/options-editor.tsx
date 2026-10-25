@@ -9,8 +9,6 @@ import type { WizardValues } from "../schema"
 type Option = WizardValues["options"][number]
 
 const MAX_OPTIONS = 3
-// Sector-neutral starting points (docs/06 ilke 9)
-const SUGGESTIONS = ["Beden", "Renk", "Boyut", "Malzeme"]
 
 function ValueChips({
   option,
@@ -83,6 +81,8 @@ interface OptionsEditorProps {
 export function OptionsEditor({ options, onChange }: OptionsEditorProps) {
   const { t } = useTranslation()
   const used = new Set(options.map((option) => option.title))
+  // Sector-neutral starting points (docs/06 ilke 9)
+  const suggestions = t("products.wizard.options.suggestions", { returnObjects: true }) as string[]
   const update = (index: number, next: Option) => {
     onChange(options.map((option, at) => (at === index ? next : option)))
   }
@@ -133,18 +133,20 @@ export function OptionsEditor({ options, onChange }: OptionsEditorProps) {
             <Plus />
             {t("products.wizard.options.add")}
           </Button>
-          {SUGGESTIONS.filter((title) => !used.has(title)).map((title) => (
-            <button
-              key={title}
-              type="button"
-              onClick={() => {
-                onChange([...options, { title, values: [] }])
-              }}
-              className="rounded-full border px-2.5 py-1 text-xs text-muted-foreground hover:border-input hover:text-foreground"
-            >
-              + {title}
-            </button>
-          ))}
+          {suggestions
+            .filter((title) => !used.has(title))
+            .map((title) => (
+              <button
+                key={title}
+                type="button"
+                onClick={() => {
+                  onChange([...options, { title, values: [] }])
+                }}
+                className="rounded-full border px-2.5 py-1 text-xs text-muted-foreground hover:border-input hover:text-foreground"
+              >
+                + {title}
+              </button>
+            ))}
         </div>
       ) : null}
     </div>

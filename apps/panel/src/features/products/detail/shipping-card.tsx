@@ -9,7 +9,7 @@ import { useUpdateProduct } from "@/features/products/api/products"
 import type { ProductDetail } from "@/features/products/api/products"
 import { useStoreUnits } from "@/features/products/use-units"
 import { errorText } from "@/lib/errors"
-import { formatMoneyInput, parseMoneyInput } from "@/lib/money-input"
+import { formatMeasureInput, parseMeasureInput } from "@/lib/money-input"
 import { CardForm } from "@/components/patterns/card-form"
 
 const FIELDS = [
@@ -24,14 +24,14 @@ type Name = (typeof FIELDS)[number]["name"]
 const measure = z
   .string()
   .trim()
-  .refine((text) => text === "" || (parseMoneyInput(text) ?? 0) > 0, {
+  .refine((text) => text === "" || (parseMeasureInput(text) ?? 0) > 0, {
     message: "products.errors.measure",
   })
 const schema = z.object({ weight: measure, length: measure, width: measure, height: measure })
 type Values = z.infer<typeof schema>
 
 const asText = (value: number | null | undefined) =>
-  typeof value === "number" && value > 0 ? formatMoneyInput(value).replace(/,00$/, "") : ""
+  typeof value === "number" && value > 0 ? formatMeasureInput(value) : ""
 
 /**
  * The parcel's weight and size at product level; variants without their
@@ -57,7 +57,7 @@ export function ShippingCard({ product }: { product: ProductDetail }) {
 
   const submit = form.handleSubmit((values) => {
     const body = Object.fromEntries(
-      FIELDS.map(({ name }) => [name, parseMoneyInput(values[name]) ?? null])
+      FIELDS.map(({ name }) => [name, parseMeasureInput(values[name]) ?? null])
     ) as Record<Name, number | null>
     update.mutate(body, {
       onSuccess: () => toast.success(t("products.detail.saved")),

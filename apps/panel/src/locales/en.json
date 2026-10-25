@@ -251,7 +251,9 @@
         "dark": "Dark",
         "light": "Light",
         "brand": "Brand colour"
-      }
+      },
+      "previewValue": "Sample product name",
+      "previewField": "Sample field"
     },
     "saved": "Settings saved.",
     "store": {
@@ -317,7 +319,16 @@
           "description": "Only the robots.txt rules below apply."
         }
       },
-      "robotsHint": "The {sitemap_url} tag becomes the sitemap address when published."
+      "robotsHint": "The {sitemap_url} tag becomes the sitemap address when published.",
+      "samples": {
+        "ürün_adı": "Linen Shirt",
+        "marka": "Sample Brand",
+        "kategori": "Clothing",
+        "öne_çıkan_attribute": "100% linen",
+        "kısa_açıklama": "A relaxed shirt in washed linen",
+        "fiyat_cümlesi": "TRY 899.00.",
+        "kargo_cümlesi": "Ships the same day."
+      }
     },
     "features": {
       "title": "Features",
@@ -528,7 +539,9 @@
       "ean": "The barcode must be 8 to 14 digits.",
       "optionTitle": "Give the option a name.",
       "optionValues": "Add at least one value to each option.",
-      "tooManyVariants": "A product can have at most 100 variants."
+      "tooManyVariants": "A product can have at most 100 variants.",
+      "optionRequired": "Add at least one option, or turn options off.",
+      "optionDuplicate": "An option with this name already exists."
     },
     "media": {
       "card": "Images",
@@ -593,7 +606,8 @@
         "values": "{{option}} values",
         "valuesPlaceholder": "Type a value and press Enter: S, M, L",
         "removeValue": "Remove {{value}}",
-        "remove": "Remove option"
+        "remove": "Remove option",
+        "suggestions": ["Size", "Colour", "Dimensions", "Material"]
       },
       "pricingCard": "Price and stock",
       "pricingHint": "Prices include VAT.",
@@ -649,7 +663,9 @@
       "drafted": "Product saved as a draft.",
       "stockFailed": "The product was saved but its stock was not. Enter the stock on the product page.",
       "defaultOption": "Option",
-      "defaultValue": "Standard"
+      "defaultValue": "Standard",
+      "stockNoLocation": "The product was saved, but the shop has no default location, so its stock was not. Add a location in settings.",
+      "defaultsFailed": "The shop's settings could not be read. Try again shortly."
     },
     "detail": {
       "title": "Product",
@@ -673,7 +689,8 @@
       "delete": "Delete product",
       "deleteTitle": "Delete {{title}}?",
       "deleteDescription": "The product, its variants and stock records are deleted. This cannot be undone.",
-      "deleted": "Product deleted."
+      "deleted": "Product deleted.",
+      "variantsNoLocation": "The shop has no default location; add one before entering stock."
     },
     "catalog": {
       "card": "Catalog details",
@@ -971,7 +988,8 @@
       "activate": "Go live now",
       "activateHint": "When off, it is saved as a draft.",
       "codeShort": "Codes shorter than 6 characters are easy to guess; a longer one is better.",
-      "datesShared": "The dates live on a campaign shared with other promotions; change them in the advanced panel."
+      "datesShared": "The dates live on a campaign shared with other promotions; change them in the advanced panel.",
+      "codePlaceholder": "CODE"
     },
     "errors": {
       "code": "The code needs 3–40 letters, digits, hyphens or underscores.",
@@ -1027,7 +1045,8 @@
       }
     },
     "advisor": "SEO advisor",
-    "advisorHint": "A score, suggestions and one-click fixes for every product and category."
+    "advisorHint": "A score, suggestions and one-click fixes for every product and category.",
+    "sampleHost": "yourdomain.com"
   },
   "attributes": {
     "title": "Product attributes",

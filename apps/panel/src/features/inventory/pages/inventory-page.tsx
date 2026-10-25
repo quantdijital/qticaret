@@ -7,6 +7,7 @@ import { toast } from "sonner"
 import { DataTable } from "@/components/patterns/data-table"
 import type { Column } from "@/components/patterns/data-table"
 import { FilterTabs } from "@/components/patterns/filter-tabs"
+import { LeaveGuard } from "@/components/patterns/leave-guard"
 import { PageHeader } from "@/components/patterns/page-header"
 import { Pagination } from "@/components/patterns/pagination"
 import { SearchInput } from "@/components/patterns/search-input"
@@ -147,7 +148,20 @@ export function InventoryPage() {
   const board = useQuery(stockBoardQuery({ view, q, page }))
   const defaults = useQuery(shopDefaultsQuery())
   const save = useSetStock()
-  const [drafts, setDrafts] = useState<Drafts>({})
+  // Drafts belong to the list on screen: another view, search or page starts clean,
+  // and leaving with unsaved counts asks first
+  const listKey = `${view}|${q}|${String(page)}`
+  const [draftState, setDraftState] = useState<{ key: string; values: Drafts }>({
+    key: listKey,
+    values: {},
+  })
+  const drafts = draftState.key === listKey ? draftState.values : {}
+  const setDrafts = (next: Drafts | ((was: Drafts) => Drafts)) => {
+    setDraftState((was) => {
+      const current = was.key === listKey ? was.values : {}
+      return { key: listKey, values: typeof next === "function" ? next(current) : next }
+    })
+  }
   const locationId = defaults.data?.locationId ?? null
   const items = board.data?.items ?? []
   const shelf = (item: StockItem) => item.levels.find((level) => level.location_id === locationId)
@@ -161,7 +175,6 @@ export function InventoryPage() {
   })
   const setSearch = (next: { q?: string; view?: StockView; page?: number }) => {
     const nextView = next.view ?? view
-    setDrafts({})
     void navigate({
       to: "/inventory",
       search: {
@@ -197,6 +210,7 @@ export function InventoryPage() {
 
   return (
     <div className="flex flex-col gap-6">
+      <LeaveGuard when={changed.length > 0 && !save.isPending} />
       <PageHeader title={t("nav.inventory")} description={t("inventory.description")} />
       <section className="overflow-hidden rounded-lg border bg-card shadow-card">
         <FilterTabs

@@ -1,20 +1,14 @@
 /** A template filled with sample values, for previews (no SDK, tested on its own). */
 
-// What a template's preview fills each token with (docs/13 §3)
-const SAMPLE: Record<string, string> = {
-  ürün_adı: "Keten Gömlek",
-  marka: "Örnek Marka",
-  kategori: "Giyim",
-  öne_çıkan_attribute: "%100 keten",
-  kısa_açıklama: "Yıkanmış ketenden rahat kesim gömlek",
-  fiyat_cümlesi: "899,00 TL.",
-  kargo_cümlesi: "Aynı gün kargoda.",
-}
-
-export function renderSample(template: string, storeName: string): string {
+/** Fills tokens with `samples` (i18n `settings.seo.samples`), the shop's name for {mağaza}. */
+export function renderSample(
+  template: string,
+  storeName: string,
+  samples: Readonly<Record<string, string>>
+): string {
   return template
     .replace(/\{([^{}]*)\}/gu, (_, token: string) =>
-      token === "mağaza" ? storeName : (SAMPLE[token] ?? "")
+      token === "mağaza" ? storeName : (samples[token] ?? "")
     )
     .replace(/\s+/g, " ")
     .trim()

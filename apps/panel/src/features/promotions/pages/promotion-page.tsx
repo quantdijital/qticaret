@@ -51,7 +51,7 @@ function Preview({ existing }: { existing: Promotion | null }) {
             <OfferText method={method} />
           </span>
           <span className="rounded-md border bg-background px-2.5 py-1 font-mono text-sm tracking-wider uppercase">
-            {code.trim() || "KOD"}
+            {code.trim() || t("promotions.form.codePlaceholder")}
           </span>
           <span className="text-[13px] text-muted-foreground">
             {t(automatic ? "promotions.form.previewAutomatic" : "promotions.form.previewCode")}
@@ -90,14 +90,19 @@ function PromotionForm({ existing }: { existing: Promotion | null }) {
   // Dates on a campaign shared with other promotions are not this form's to change
   const datesLocked =
     Boolean(existing?.campaign?.id) && !ownsCampaign(existing?.id ?? "", members.data)
+  const initial = valuesOf(existing)
   const form = useForm<PromotionValues>({
     resolver: zodResolver(promotionSchema),
-    defaultValues: valuesOf(existing),
+    defaultValues: initial,
   })
 
   const submit = form.handleSubmit((values) => {
     save.mutate(
-      { existing, body: createBody(values, CURRENCY) },
+      {
+        existing,
+        body: createBody(values, CURRENCY),
+        datesChanged: values.starts !== initial.starts || values.ends !== initial.ends,
+      },
       {
         onSuccess: (id) => {
           form.reset(values)

@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { parseMoneyInput } from "@/lib/money-input"
+import { parseMeasureInput, parseMoneyInput } from "@/lib/money-input"
 import { isValidSlug } from "@/lib/slug"
 
 /**
@@ -27,7 +27,7 @@ const stock = z
 const measure = z
   .string()
   .trim()
-  .refine((text) => text === "" || (parseMoneyInput(text) ?? 0) > 0, {
+  .refine((text) => text === "" || (parseMeasureInput(text) ?? 0) > 0, {
     message: "products.errors.measure",
   })
 
@@ -52,26 +52,49 @@ export const optionSchema = z.object({
     .max(30),
 })
 
-export const wizardSchema = z.object({
-  title: z.string().trim().min(2, { message: "products.errors.title" }).max(MAX_TEXT),
-  handle: z
-    .string()
-    .trim()
-    .refine((text) => text === "" || isValidSlug(text), { message: "products.errors.handle" }),
-  description: z.string().max(20_000),
-  category_ids: z.array(z.string()),
-  type_id: z.string(),
-  images: z.array(z.object({ id: z.string(), url: z.string() })).max(20),
-  has_options: z.boolean(),
-  options: z.array(optionSchema).max(3),
-  variants: z.array(variantSchema).min(1).max(100, { message: "products.errors.tooManyVariants" }),
-  manage_inventory: z.boolean(),
-  allow_backorder: z.boolean(),
-  weight: measure,
-  length: measure,
-  width: measure,
-  height: measure,
-})
+export const wizardSchema = z
+  .object({
+    title: z.string().trim().min(2, { message: "products.errors.title" }).max(MAX_TEXT),
+    handle: z
+      .string()
+      .trim()
+      .refine((text) => text === "" || isValidSlug(text), { message: "products.errors.handle" }),
+    description: z.string().max(20_000),
+    category_ids: z.array(z.string()),
+    type_id: z.string(),
+    images: z.array(z.object({ id: z.string(), url: z.string() })).max(20),
+    has_options: z.boolean(),
+    options: z.array(optionSchema).max(3),
+    variants: z
+      .array(variantSchema)
+      .min(1)
+      .max(100, { message: "products.errors.tooManyVariants" }),
+    manage_inventory: z.boolean(),
+    allow_backorder: z.boolean(),
+    weight: measure,
+    length: measure,
+    width: measure,
+    height: measure,
+  })
+  .superRefine((values, ctx) => {
+    if (!values.has_options) {
+      return
+    }
+    if (values.options.length === 0) {
+      ctx.addIssue({ code: "custom", path: ["options"], message: "products.errors.optionRequired" })
+    }
+    // Two options with one name would overwrite each other in every variant
+    const titles = values.options.map((option) => option.title.trim().toLocaleLowerCase("tr"))
+    titles.forEach((title, index) => {
+      if (title && titles.indexOf(title) !== index) {
+        ctx.addIssue({
+          code: "custom",
+          path: ["options", index, "title"],
+          message: "products.errors.optionDuplicate",
+        })
+      }
+    })
+  })
 
 export type WizardValues = z.infer<typeof wizardSchema>
 export type VariantValues = z.infer<typeof variantSchema>
@@ -113,5 +136,5 @@ export const WIZARD_STEPS = Object.keys(STEP_FIELDS) as WizardStepKey[]
 /** Publishing needs weight and all three dimensions (the F3.1 rule the server applies). */
 export const hasMeasures = (values: WizardValues): boolean =>
   [values.weight, values.length, values.width, values.height].every(
-    (text) => (parseMoneyInput(text) ?? 0) > 0
+    (text) => (parseMeasureInput(text) ?? 0) > 0
   )

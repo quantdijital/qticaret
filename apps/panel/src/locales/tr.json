@@ -251,7 +251,9 @@
         "dark": "Koyu",
         "light": "Açık",
         "brand": "Marka rengi"
-      }
+      },
+      "previewValue": "Örnek ürün adı",
+      "previewField": "Örnek alan"
     },
     "saved": "Ayarlar kaydedildi.",
     "store": {
@@ -317,7 +319,16 @@
           "description": "Yalnızca aşağıdaki robots.txt kuralları geçerli olur."
         }
       },
-      "robotsHint": "{sitemap_url} etiketi yayında site haritası adresiyle değiştirilir."
+      "robotsHint": "{sitemap_url} etiketi yayında site haritası adresiyle değiştirilir.",
+      "samples": {
+        "ürün_adı": "Keten Gömlek",
+        "marka": "Örnek Marka",
+        "kategori": "Giyim",
+        "öne_çıkan_attribute": "%100 keten",
+        "kısa_açıklama": "Yıkanmış ketenden rahat kesim gömlek",
+        "fiyat_cümlesi": "899,00 TL.",
+        "kargo_cümlesi": "Aynı gün kargoda."
+      }
     },
     "features": {
       "title": "Özellikler",
@@ -536,7 +547,9 @@
       "ean": "Barkod 8 ile 14 rakam arasında olmalı.",
       "optionTitle": "Seçeneğe bir ad verin.",
       "optionValues": "Her seçeneğe en az bir değer ekleyin.",
-      "tooManyVariants": "Bir üründe en çok 100 varyant olabilir."
+      "tooManyVariants": "Bir üründe en çok 100 varyant olabilir.",
+      "optionRequired": "En az bir seçenek ekleyin ya da seçenekleri kapatın.",
+      "optionDuplicate": "Bu adla bir seçenek zaten var."
     },
     "media": {
       "card": "Görseller",
@@ -601,7 +614,8 @@
         "values": "{{option}} değerleri",
         "valuesPlaceholder": "Değer yazıp Enter'a basın: S, M, L",
         "removeValue": "{{value}} değerini kaldır",
-        "remove": "Seçeneği kaldır"
+        "remove": "Seçeneği kaldır",
+        "suggestions": ["Beden", "Renk", "Boyut", "Malzeme"]
       },
       "pricingCard": "Fiyat ve stok",
       "pricingHint": "Fiyatlar KDV dahil girilir.",
@@ -657,7 +671,9 @@
       "drafted": "Ürün taslak olarak kaydedildi.",
       "stockFailed": "Ürün kaydedildi ama stok kaydedilemedi. Stoku ürün sayfasından girin.",
       "defaultOption": "Seçenek",
-      "defaultValue": "Standart"
+      "defaultValue": "Standart",
+      "stockNoLocation": "Ürün kaydedildi ama mağazanın varsayılan depo adresi olmadığı için stok girilemedi. Ayarlardan bir depo adresi ekleyin.",
+      "defaultsFailed": "Mağaza ayarları okunamadı. Biraz sonra tekrar deneyin."
     },
     "detail": {
       "title": "Ürün",
@@ -681,7 +697,8 @@
       "delete": "Ürünü sil",
       "deleteTitle": "{{title}} silinsin mi?",
       "deleteDescription": "Ürün, varyantları ve stok kayıtları silinir. Bu işlem geri alınamaz.",
-      "deleted": "Ürün silindi."
+      "deleted": "Ürün silindi.",
+      "variantsNoLocation": "Mağazanın varsayılan depo adresi yok; stok girmek için önce bir depo adresi ekleyin."
     },
     "catalog": {
       "card": "Katalog bilgileri",
@@ -979,7 +996,8 @@
       "activate": "Hemen yayına al",
       "activateHint": "Kapalıysa taslak olarak kaydedilir.",
       "codeShort": "6 karakterden kısa kodlar tahmin edilebilir; daha uzun bir kod önerilir.",
-      "datesShared": "Tarihler başka promosyonlarla ortak bir kampanyada; gelişmiş panelden değiştirin."
+      "datesShared": "Tarihler başka promosyonlarla ortak bir kampanyada; gelişmiş panelden değiştirin.",
+      "codePlaceholder": "KOD"
     },
     "errors": {
       "code": "Kod 3–40 karakter olmalı; harf, rakam, tire ve alt çizgi kullanılabilir.",
@@ -1035,7 +1053,8 @@
       }
     },
     "advisor": "SEO danışmanı",
-    "advisorHint": "Her ürün ve kategori için puan, öneri ve tek tıkla düzeltmeler."
+    "advisorHint": "Her ürün ve kategori için puan, öneri ve tek tıkla düzeltmeler.",
+    "sampleHost": "alanadiniz.com"
   },
   "attributes": {
     "title": "Ürün özellikleri",

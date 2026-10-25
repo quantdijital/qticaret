@@ -36,10 +36,14 @@ export function PricingStep() {
     name: ["has_options", "options", "variants", "manage_inventory", "allow_backorder"],
   })
   const multi = hasOptions && variants.length > 1
-  const optionMessage = options
-    .map((_, index) => formState.errors.options?.[index])
-    .flatMap((error) => [error?.title?.message, error?.values?.message])
-    .find(Boolean)
+  // The list's own error (none, or a missing option) first, then the first option's
+  const optionMessage =
+    formState.errors.options?.message ??
+    formState.errors.options?.root?.message ??
+    options
+      .map((_, index) => formState.errors.options?.[index])
+      .flatMap((error) => [error?.title?.message, error?.values?.message])
+      .find(Boolean)
 
   const updateOptions = (next: WizardValues["options"], nextHasOptions = hasOptions) => {
     setValue("options", next, { shouldDirty: true })
@@ -60,8 +64,9 @@ export function PricingStep() {
               checked={hasOptions}
               onCheckedChange={(checked) => {
                 setValue("has_options", checked, { shouldDirty: true })
+                // Off clears the options: hidden ones must not hold the step back
                 updateOptions(
-                  checked && options.length === 0 ? [{ title: "", values: [] }] : options,
+                  checked ? (options.length ? options : [{ title: "", values: [] }]) : [],
                   checked
                 )
               }}

@@ -45,7 +45,8 @@ export interface VariantEdit {
   variantId: string
   /** The variant's prices as stored; the TRY one is replaced, the rest kept. */
   prices: { id: string; currency_code: string; amount: number }[]
-  amount: number
+  /** The new TRY price; null leaves the prices alone. */
+  amount: number | null
   /** Null for a variant whose stock is not tracked. */
   stock: { inventoryItemId: string; quantity: number; hasLevel: boolean } | null
 }
@@ -57,7 +58,7 @@ function nextPrices(edit: VariantEdit) {
   const current = edit.prices.find((price) => price.currency_code === CURRENCY)
   return [
     ...others.map(({ id, currency_code, amount }) => ({ id, currency_code, amount })),
-    { ...(current ? { id: current.id } : {}), currency_code: CURRENCY, amount: edit.amount },
+    { ...(current ? { id: current.id } : {}), currency_code: CURRENCY, amount: edit.amount ?? 0 },
   ]
 }
 
@@ -78,9 +79,12 @@ export function useSaveVariants(productId: string) {
       if (edits.length === 0) {
         return
       }
-      await sdk.admin.product.batchVariants(productId, {
-        update: edits.map((edit) => ({ id: edit.variantId, prices: nextPrices(edit) })),
-      })
+      const priced = edits.filter((edit) => edit.amount !== null)
+      if (priced.length > 0) {
+        await sdk.admin.product.batchVariants(productId, {
+          update: priced.map((edit) => ({ id: edit.variantId, prices: nextPrices(edit) })),
+        })
+      }
       const stocked = edits.flatMap((edit) => (edit.stock ? [edit.stock] : []))
       if (locationId && stocked.length > 0) {
         const row = (stock: (typeof stocked)[number]) => ({

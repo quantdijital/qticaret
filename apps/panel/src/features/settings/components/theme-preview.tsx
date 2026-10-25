@@ -38,7 +38,11 @@ export function ThemePreview({ mode }: { mode: ResolvedMode }) {
             {t("status.canceled")}
           </Button>
         </div>
-        <Input readOnly value="Şef bıçağı 20 cm" aria-label="Örnek alan" />
+        <Input
+          readOnly
+          value={t("settings.appearance.previewValue")}
+          aria-label={t("settings.appearance.previewField")}
+        />
         <table className="w-full text-sm">
           <tbody>
             {ROWS.map((row) => (

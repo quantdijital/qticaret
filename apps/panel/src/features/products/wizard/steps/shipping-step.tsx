@@ -5,7 +5,7 @@ import { Field } from "@/components/patterns/form-section"
 import { SectionCard } from "@/components/patterns/section-card"
 import { Input } from "@/components/ui/input"
 import { useStoreUnits } from "@/features/products/use-units"
-import { parseMoneyInput } from "@/lib/money-input"
+import { parseMeasureInput } from "@/lib/money-input"
 import { hasMeasures } from "../schema"
 import type { WizardValues } from "../schema"
 
@@ -49,7 +49,7 @@ export function ShippingStep() {
   const ready = hasMeasures(getValues())
   // Desi is reckoned in centimetres
   const toCm = units.dimension === "mm" ? 0.1 : 1
-  const sides = [length, width, height].map((text) => (parseMoneyInput(text) ?? 0) * toCm)
+  const sides = [length, width, height].map((text) => (parseMeasureInput(text) ?? 0) * toCm)
   const desi = sides.every((side) => side > 0)
     ? sides.reduce((product, side) => product * side, 1) / DESI_DIVISOR
     : null

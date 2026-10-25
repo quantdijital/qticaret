@@ -83,6 +83,8 @@ export const useDeletePromotion = () =>
 interface SaveInput {
   existing: Promotion | null
   body: ReturnType<typeof createBody>
+  /** The start or end day was changed in the form; otherwise the campaign's times stay as set. */
+  datesChanged: boolean
 }
 
 /**
@@ -92,7 +94,7 @@ interface SaveInput {
 export function useSavePromotion() {
   const client = useQueryClient()
   return useMutation({
-    mutationFn: async ({ existing, body }: SaveInput): Promise<string> => {
+    mutationFn: async ({ existing, body, datesChanged }: SaveInput): Promise<string> => {
       if (!existing) {
         return (await sdk.admin.promotion.create(body)).promotion.id
       }
@@ -109,7 +111,11 @@ export function useSavePromotion() {
         starts_at: body.campaign?.starts_at ?? null,
         ends_at: body.campaign?.ends_at ?? null,
       }
-      // A campaign other promotions share keeps its dates (and budget) as they are
+      // A campaign other promotions share keeps its dates (and budget) as they are;
+      // untouched days are not rewritten (a time set elsewhere would move to midnight)
+      if (!datesChanged) {
+        return existing.id
+      }
       if (existing.campaign?.id) {
         if (ownsCampaign(existing.id, await campaignMembers(existing.campaign.id))) {
           await sdk.admin.campaign.update(existing.campaign.id, dates)

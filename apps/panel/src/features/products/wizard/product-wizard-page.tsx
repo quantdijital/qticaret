@@ -71,6 +71,9 @@ export function ProductWizardPage() {
     form.handleSubmit(
       (submitted) => {
         if (!defaults.data) {
+          // The shop's defaults could not be read: say so instead of doing nothing
+          toast.error(t("products.wizard.defaultsFailed"))
+          void defaults.refetch()
           return
         }
         create.mutate(
@@ -84,10 +87,14 @@ export function ProductWizardPage() {
             },
           },
           {
-            onSuccess: ({ productId, stockFailed }) => {
+            onSuccess: ({ productId, stockProblem }) => {
               toast.success(t(publish ? "products.wizard.published" : "products.wizard.drafted"))
-              if (stockFailed) {
-                toast.warning(t("products.wizard.stockFailed"))
+              if (stockProblem?.kind === "no_location") {
+                toast.warning(t("products.wizard.stockNoLocation"))
+              } else if (stockProblem) {
+                toast.warning(
+                  `${t("products.wizard.stockFailed")} ${errorText(t, stockProblem.reason)}`
+                )
               }
               // Saved: leaving is no longer a loss, so the guard stands aside
               void navigate({ to: "/products/$id", params: { id: productId }, ignoreBlocker: true })

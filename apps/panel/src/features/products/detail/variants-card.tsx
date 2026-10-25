@@ -79,7 +79,11 @@ export function VariantsCard({
   const submit = form.handleSubmit((values) => {
     const edits: VariantEdit[] = variants.flatMap((variant, index) => {
       const row = values.rows[index]
-      if (!row || !dirtyFields.rows?.[index]) {
+      // Only what was changed is sent: an untouched stock is never written back over a newer one
+      const changed = dirtyFields.rows?.[index]
+      const priceChanged = Boolean(changed?.price)
+      const stockChanged = Boolean(changed?.stock) && locationId !== null
+      if (!row || (!priceChanged && !stockChanged)) {
         return []
       }
       const level = levelAt(variant, locationId)
@@ -91,9 +95,9 @@ export function VariantsCard({
             currency_code,
             amount,
           })),
-          amount: parseMoneyInput(row.price) ?? 0,
+          amount: priceChanged ? (parseMoneyInput(row.price) ?? 0) : null,
           stock:
-            variant.manage_inventory && level.inventoryItemId
+            stockChanged && variant.manage_inventory && level.inventoryItemId
               ? {
                   inventoryItemId: level.inventoryItemId,
                   quantity: Number(row.stock),
@@ -106,7 +110,10 @@ export function VariantsCard({
     save.mutate(
       { edits, locationId },
       {
-        onSuccess: () => toast.success(t("products.detail.variantsSaved")),
+        onSuccess: () => {
+          form.reset(values)
+          toast.success(t("products.detail.variantsSaved"))
+        },
         onError: (failure) => toast.error(errorText(t, failure)),
       }
     )
@@ -116,7 +123,9 @@ export function VariantsCard({
   return (
     <CardForm
       title={t("products.detail.variants")}
-      description={t("products.detail.variantsHint")}
+      description={t(
+        locationId ? "products.detail.variantsHint" : "products.detail.variantsNoLocation"
+      )}
       {...(className ? { className } : {})}
       dirty={isDirty}
       saving={save.isPending}
@@ -173,6 +182,7 @@ export function VariantsCard({
                       <Input
                         inputMode="numeric"
                         aria-label={`${variant.title ?? ""} ${t("products.wizard.stock")}`}
+                        disabled={!locationId}
                         className="tabular-nums"
                         {...form.register(`rows.${index}.stock`)}
                       />

@@ -33,7 +33,8 @@ export function TemplateField({
 }: TemplateFieldProps) {
   const { t } = useTranslation()
   const input = useRef<HTMLInputElement>(null)
-  const preview = renderSample(value, storeName)
+  const samples = t("settings.seo.samples", { returnObjects: true }) as Record<string, string>
+  const preview = renderSample(value, storeName, samples)
   const insert = (token: string) => {
     const element = input.current
     const at = element?.selectionStart ?? value.length
