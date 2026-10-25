@@ -19,7 +19,30 @@
   - Ayarlar: Mağaza (ad, iletişim, saat dilimi, birimler; ürün formları birimi izler), SEO, Ürün özellikleri (şablon düzenleyici, adr/0013), Özellikler (bayraklar), İşler (indir), Denetim kaydı (personel adıyla, CSV dışa aktarma işi).
   - Desenler: DataTable, FilterTabs, SearchInput, Pagination, Wizard, CardForm, LeaveGuard, ConfirmDialog; komut menüsünde sık işler; telefonda listeler sütun katlıyor.
   - Panel oturumunda hata `code`'u SDK'dan gelmediği için "değerler silinecek" ve "şablon değişimi" onayları hata beklenmeden önceden soruluyor.
-- **Bilinen sınırlar (devreden):** sipariş/stok panosu bellek içi sıralama (büyük mağazada index/kayıtlı aşama gerekir); sipariş detayındaki aşama istemcide `lib/dashboard/lifecycle` kuralıyla hesaplanıyor (kısmi gönderimde sunucudan farklı olabilir); kargo etiketi/takip F7'de; kampanyada minimum sepet ve kategori kuralları F4'te.
+- **Bağımsız incelemeler (kod + güvenlik ajanları) ve düzeltmeler:**
+  - Kargoya verme artık tek backend workflow'u (`POST /admin/orders/:id/ship`). Medusa'nın fulfillment ve shipment workflow'ları adım olarak, sipariş başına kilitle çalışıyor; kalemleri sunucu seçiyor. Paketlenip gönderilmemiş bir koli önce teslim ediliyor.
+  - Sipariş aşaması tek kaynakta, kalem adetlerinden hesaplanıyor (`lib/dashboard/lifecycle`). Gönderilecek kalemi kalan sipariş "hazırlanacak"ta kalıyor; kısmi iadeli sipariş ödenmiş sayılıyor.
+  - Panel aşamayı ve yapılabilecek işlemleri `/admin/order-board/:id`'den alıyor. Müşteri sayfasındaki siparişler de aynı panodan geliyor.
+  - Liste telefonları kaldırıldı (docs/04). Panel CSV'si sunucunun kaçış kuralıyla aynı.
+  - Paylaşılan kampanyanın tarihleri kilitli. Promosyon ve kampanya değişiklikleri önce/sonra özetiyle denetim kaydında.
+  - Pano ve rapor okumalarında eşzamanlı istekler tek hesaplamayı paylaşıyor (`createSingleFlight`).
+  - Sihirbaz seçenek hatası, 3 ondalıklı ölçü, eski stok değerinin geri yazılması, depo yokken stok, kaydedilmemiş stok taslakları düzeltildi.
+  - i18n dışı metinler taşındı; görünüm önizlemesindeki sektöre özel örnek kaldırıldı. `middlewares.ts` 300 satırın altına indi.
+- **F3 T1b (F3.2) bitti:** dijital ve hizmet ürünleri, `catalog.non_physical` bayrağıyla.
+  - Tür değişince kargo profili ve envanter kalemlerinin `requires_shipping` değeri geri alınabilir adımlarla ayarlanıyor. Yeni varyant ve yeniden bağlanan profil hook'larla düzeltiliyor.
+  - Checkout'ta kargo gerekmeyen sepet kargo yöntemiyle tamamlanamıyor; ülkesiz sepet KDV'siz kalmasın diye reddediliyor.
+  - Panelde sihirbazda tür seçimi var (kargo adımı atlanıyor); ürün sayfasında tür değiştirilebiliyor.
+  - HTTP: tam takım 26 dosya / 172 test geçti.
+- **Gözden geçir (kullanıcı yokken önerilen seçenekle verilen kararlar):**
+  1. Bayrak adı `catalog.non_physical`, mağaza tarafından açılır, varsayılan kapalı. Etiketleri Medusa Admin'de ve panelde var.
+  2. Kargo gerekmeyen kalemler sipariş ödenince "teslim edildi" sayılıyor. Dijital teslimat (indirme bağlantısı, kod gönderimi) F9 bildirimleriyle gelecek.
+  3. Her checkout'ta teslimat ülkesi zorunlu. Medusa tek ülkeli bölgede ülkeyi kendisi dolduruyor, kural çok ülkeli bölgeler için koruma.
+  4. Promosyon kodu 6 karakterden kısaysa uyarı veriliyor, kod yine kaydediliyor. Kupon deneme sınırı F4'te.
+  5. Paylaşılan Medusa kampanyalarının tarihleri panelde salt okunur.
+- **Bilinen sınırlar (devreden):**
+  - Sipariş ve stok panosu bellek içi sıralıyor (5000/2000 kayıt). Büyük mağazada kayıtlı aşama sütunu ya da Index modülü gerekir.
+  - Kargo etiketi ve takip F7'de. Kampanyada minimum sepet ve kategori kuralları F4'te.
+  - Panelde bazı bileşen fonksiyonları 50 satırı aşıyor (sihirbaz sayfası, kategori düzenleyici, şablon paneli); docs/10'a göre bölünmeli.
 
 **2026-10-24 gece oturumu (S3, S5; S8 başladı).** Kullanıcı döndü; dört karar verdi: bağımlılıklar onaylandı (ioredis 5.11.1, fast-xml-parser 5.11.2, yauzl 3.4.0, kendi görsel başlık okuyucumuz), ADR-0011..0014 kabul edildi, otonom devam, eski "Gözden geçir" maddeleri olduğu gibi kabul. Commit `54abc2a`.
 
@@ -314,7 +337,7 @@
 | # | Görev | Kapsam | Bağımlılık | ADR |
 |---|---|---|---|---|
 | T1a ✅ | F3.1 | Katalog uzantısı: MPN, durum, birincil kategori, halef ürün (link'li modül + widget). Fiziksel üründe ölçü/ağırlık kuralı. Türkçe handle, hook'larda yol sahipliği, sistem yolları rezervi | — | 0013 deseni |
-| T1b | F3.2 | Fiziksel olmayan ürün (`kind`: dijital/hizmet; bayrak): kargo profili bağı kalkar, envanter kalemi "kargo gerekir" kapanır, yeni varyantlarda da. Ölçü kuralından muaf. Kargosuz checkout testi | T1a | — |
+| T1b ✅ | F3.2 | Fiziksel olmayan ürün (`kind`: dijital/hizmet; bayrak): kargo profili bağı kalkar, envanter kalemi "kargo gerekir" kapanır, yeni varyantlarda da. Ölçü kuralından muaf. Kargosuz checkout testi | T1a | — |
 | T2 | F3.4a | `seo-meta` modülü ve link'ler, `PUT /admin/seo/:type/:id`, ürün/kategori widget'ı, denetim kaydı | — | 0015 |
 | T3 | F3.5 | `seo-redirects`: kurallar, güvenli desen, zincir/döngü, slug ve halef değişiminde otomatik 301, `GET /store/seo/resolve`, 404 günlüğü + hedef önerisi, CSV içe/dışa. KK: 301 zinciri | T1 | 0017 |
 | T4 | F3.4b | `lib/seo/resolve`, resolve yanıtında `seo` payload, versioned cache, URL deseni değişiminde toplu 301 (iş) | T2, T3 | 0015 |
