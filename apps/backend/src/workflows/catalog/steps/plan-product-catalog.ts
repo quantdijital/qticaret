@@ -3,6 +3,11 @@ import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/util
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { ValidationError } from "../../../lib/errors"
 import type { PRODUCT_CONDITIONS } from "../../../modules/catalog-extension/models/product-extension"
+import { PLATFORM_SETTINGS_MODULE } from "../../../modules/platform-settings"
+import { NON_PHYSICAL_PRODUCTS } from "../../../modules/platform-settings/features"
+import type PlatformSettingsModuleService from "../../../modules/platform-settings/service"
+import { NO_SHIPPING_CHANGES, SHIPPING_FIELDS, shippingChanges } from "../shipping-kind"
+import type { ProductKind, ShippingChanges, ShippingRow } from "../shipping-kind"
 
 type Condition = (typeof PRODUCT_CONDITIONS)[number]
 
@@ -10,6 +15,7 @@ export interface SetProductCatalogInput {
   product_id: string
   // Optional as the request body has them: absent or undefined both mean "keep"
   condition?: Condition | undefined
+  kind?: ProductKind | undefined
   primary_category_id?: string | null | undefined
   successor_product_id?: string | null | undefined
   variants?: Record<string, { mpn: string | null }> | undefined
@@ -17,6 +23,7 @@ export interface SetProductCatalogInput {
 
 export interface ExtensionFields {
   condition: Condition
+  kind: ProductKind
   primary_category_id: string | null
   successor_product_id: string | null
 }
@@ -26,15 +33,22 @@ export interface ProductCatalogPlan {
   /** The product's extension: its row (null: none yet), what changes, what it was. */
   product: { id: string | null; set: Partial<ExtensionFields>; previous: Partial<ExtensionFields> }
   variants: { variant_id: string; id: string | null; mpn: string | null; previous: string | null }[]
+  /** Profile links and inventory items the kind asks to change (F3.2). */
+  shipping: ShippingChanges
 }
 
-interface ProductRow {
+type ShippingVariant = NonNullable<NonNullable<ShippingRow["variants"]>[number]>
+
+interface ProductRow extends ShippingRow {
   id: string
   categories?: ({ id: string } | null)[] | null
-  variants?: ({
-    id: string
-    variant_extension?: { id: string; mpn: string | null } | null
-  } | null)[]
+  variants?: (
+    | (ShippingVariant & {
+        id: string
+        variant_extension?: { id: string; mpn: string | null } | null
+      })
+    | null
+  )[]
   product_extension?: (ExtensionFields & { id: string }) | null
 }
 
@@ -81,7 +95,7 @@ async function checkSuccessor(container: MedusaContainer, productId: string, suc
   throw new ValidationError("catalog.successor_loop", { field: "successor_product_id" })
 }
 
-const EXTENSION_KEYS = ["condition", "primary_category_id", "successor_product_id"] as const
+const EXTENSION_KEYS = ["condition", "kind", "primary_category_id", "successor_product_id"] as const
 
 /** The fields the save sends (absent ones keep their values) and what they hold now. */
 function changesOf(input: SetProductCatalogInput, current: ExtensionFields | null) {
@@ -98,6 +112,38 @@ function changesOf(input: SetProductCatalogInput, current: ExtensionFields | nul
   return { set, previous }
 }
 
+/**
+ * A kind change (F3.2): digital and service need the flag (a product that
+ * already is one may stay so), and shipping follows the kind. Saving the
+ * same kind again re-aligns profile and items too.
+ */
+async function kindShipping(
+  container: MedusaContainer,
+  product: ProductRow,
+  kind: ProductKind,
+  current: ProductKind
+): Promise<ShippingChanges> {
+  if (kind !== "physical" && kind !== current) {
+    const settings = container.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
+    if (!(await settings.isFeatureEnabled(NON_PHYSICAL_PRODUCTS))) {
+      throw new ValidationError("catalog.kind_disabled", { field: "kind" })
+    }
+  }
+  let defaultProfile: string | null = null
+  if (kind === "physical" && !product.shipping_profile?.id) {
+    const query = container.resolve(ContainerRegistrationKeys.QUERY)
+    const { data } = await query.graph({
+      entity: "shipping_profile",
+      fields: ["id", "type"],
+      filters: {},
+    })
+    const profiles = data as { id: string; type: string }[]
+    defaultProfile =
+      (profiles.find((profile) => profile.type === "default") ?? profiles[0])?.id ?? null
+  }
+  return shippingChanges(product, kind, defaultProfile)
+}
+
 /** Checks a catalog save against the product and works out the rows to write; writes nothing. */
 export const planProductCatalogStep = createStep(
   "catalog-plan-product-catalog",
@@ -108,6 +154,7 @@ export const planProductCatalogStep = createStep(
       "variants.id",
       "variants.variant_extension.*",
       "product_extension.*",
+      ...SHIPPING_FIELDS,
     ])
     if (!product) {
       throw new MedusaError(MedusaError.Types.NOT_FOUND, "catalog.product_unknown")
@@ -144,6 +191,9 @@ export const planProductCatalogStep = createStep(
       product_id: product.id,
       product: { id: extension?.id ?? null, set, previous },
       variants: variantChanges,
+      shipping: input.kind
+        ? await kindShipping(container, product, input.kind, extension?.kind ?? "physical")
+        : NO_SHIPPING_CHANGES,
     }
     return new StepResponse(plan)
   }

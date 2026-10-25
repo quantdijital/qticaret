@@ -12,11 +12,15 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "audit_log.kind_invalid": "Kayıt türü geçerli değil.",
   "billing_profile.tax_id_invalid": "Vergi ya da TC kimlik numarası geçerli değil.",
   "billing_profile.tax_office_required": "Vergi dairesini girin.",
+  "cart.address_required": "Siparişi tamamlamak için teslimat adresi gerekir.",
+  "cart.shipping_not_needed": "Sepette kargo gerektiren ürün yok; kargo seçimini kaldırın.",
   "catalog.dimensions_required":
     "Fiziksel bir ürünü yayınlamak için her varyantın ağırlığı ve ölçüleri girilmeli.",
   "catalog.handle_invalid":
     "Adres (handle) yalnızca küçük harf, rakam ve tire içerebilir; Türkçe karakter kullanmayın.",
   "catalog.handle_required": "Başlıktan bir adres üretilemedi; adresi (handle) kendiniz girin.",
+  "catalog.kind_disabled":
+    "Dijital ve hizmet ürünleri için önce Ayarlar > Özellikler'den bu özelliği açın.",
   "catalog.mpn_invalid": "MPN geçersiz karakter içeriyor.",
   "catalog.primary_category_not_assigned":
     "Birincil kategori, ürünün eklendiği kategorilerden biri olmalı.",

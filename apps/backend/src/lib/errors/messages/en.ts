@@ -8,10 +8,13 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "audit_log.kind_invalid": "The entry kind is not valid.",
   "billing_profile.tax_id_invalid": "The tax or national ID number is not valid.",
   "billing_profile.tax_office_required": "Enter the tax office.",
+  "cart.address_required": "An address is needed to complete the order.",
+  "cart.shipping_not_needed": "Nothing in the cart needs shipping; remove the shipping method.",
   "catalog.dimensions_required":
     "A physical product needs weight and dimensions for every variant before it is published.",
   "catalog.handle_invalid": "The handle may contain only lowercase letters, digits and hyphens.",
   "catalog.handle_required": "No handle could be made from the title; enter one yourself.",
+  "catalog.kind_disabled": "Turn on digital and service products in Settings > Features first.",
   "catalog.mpn_invalid": "The MPN contains invalid characters.",
   "catalog.primary_category_not_assigned":
     "The primary category must be one of the product's categories.",

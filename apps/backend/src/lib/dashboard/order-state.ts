@@ -1,4 +1,4 @@
-import { lifecycleOf } from "./lifecycle"
+import { lifecycleOf, shippableItems } from "./lifecycle"
 import type { Lifecycle, LifecycleItem, LifecycleOrder } from "./lifecycle"
 
 /**
@@ -76,7 +76,8 @@ function shipmentPlan(order: StateOrder): ShipmentPlan | null {
     )
     return { fulfillment_id: packed.id, items }
   }
-  const left = present(order.items).flatMap((item) => {
+  // Only lines that travel in a parcel: Medusa refuses a fulfillment mixing both kinds
+  const left = shippableItems(order.items).flatMap((item) => {
     const quantity = (item.quantity ?? 0) - (item.detail?.fulfilled_quantity ?? 0)
     return quantity > 0 ? [{ id: item.id, quantity }] : []
   })

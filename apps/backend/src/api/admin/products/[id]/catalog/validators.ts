@@ -1,6 +1,9 @@
 import { z } from "@medusajs/framework/zod"
 import { isCleanText } from "../../../../../lib/security"
-import { PRODUCT_CONDITIONS } from "../../../../../modules/catalog-extension/models/product-extension"
+import {
+  PRODUCT_CONDITIONS,
+  PRODUCT_KINDS,
+} from "../../../../../modules/catalog-extension/models/product-extension"
 
 // Medusa IDs are short; a variant list is bounded by what a product carries
 const id = z.string().min(1).max(64)
@@ -27,6 +30,8 @@ const mpn = z
 export const AdminPostProductCatalog = z
   .object({
     condition: z.enum(PRODUCT_CONDITIONS).optional(),
+    // F3.2: digital and service need the catalog.non_physical flag (checked in the workflow)
+    kind: z.enum(PRODUCT_KINDS).optional(),
     primary_category_id: id.nullable().optional(),
     successor_product_id: id.nullable().optional(),
     variants: z

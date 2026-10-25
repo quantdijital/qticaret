@@ -204,6 +204,10 @@
       "test_platform_sample": {
         "label": "Platform deneme özelliği",
         "description": "Yalnızca testlerde görünen, platformun yönettiği örnek özellik."
+      },
+      "catalog_non_physical": {
+        "label": "Dijital ve hizmet ürünleri",
+        "description": "Kargo gerektirmeyen ürünler (e-kitap, hediye kodu, kurs, hizmet) satılabilir; bu ürünlerde kargo ve ölçü istenmez."
       }
     },
     "attributes": {

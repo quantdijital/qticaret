@@ -15,7 +15,18 @@ export interface FeatureDefinition {
   descriptionKey: string
 }
 
-export const FEATURES: Readonly<Record<string, FeatureDefinition>> = Object.freeze({})
+/** The flag key the code reads for digital and service products (F3.2). */
+export const NON_PHYSICAL_PRODUCTS = "catalog.non_physical"
+
+export const FEATURES: Readonly<Record<string, FeatureDefinition>> = Object.freeze({
+  // F3.2: products that need no shipping (e-books, gift codes, courses, services)
+  [NON_PHYSICAL_PRODUCTS]: {
+    default: false,
+    owner: "tenant",
+    labelKey: "qticaret.features.catalog_non_physical.label",
+    descriptionKey: "qticaret.features.catalog_non_physical.description",
+  },
+})
 
 /**
  * Flags for tests only, present under NODE_ENV=test (like RATE_LIMIT_RELAXED):

@@ -6,6 +6,7 @@ interface ProductRow {
   variants?: ({ id: string; variant_extension?: { mpn: string | null } | null } | null)[] | null
   product_extension?: {
     condition: string
+    kind?: string | null
     primary_category_id: string | null
     successor_product_id: string | null
   } | null
@@ -30,6 +31,7 @@ async function catalogSnapshot(scope: Resolver, productId: string): Promise<Snap
   const extension = product.product_extension ?? null
   return {
     condition: extension?.condition ?? "new",
+    kind: extension?.kind ?? "physical",
     primary_category_id: extension?.primary_category_id ?? null,
     successor_product_id: extension?.successor_product_id ?? null,
     ...Object.fromEntries(

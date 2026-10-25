@@ -11,7 +11,8 @@ import { SYSTEM_PAYMENT_PROVIDER_ID } from "../../bootstrap/constants"
 export interface PlaceOrderInput {
   regionId: string
   salesChannelId: string
-  shippingOptionId: string
+  /** None for a cart with nothing to ship (digital or service lines, F3.2). */
+  shippingOptionId?: string | undefined
   items: { variant_id: string; quantity: number }[]
   /** Turkish address fields as F1.4 stores them: il in province, ilçe in city. */
   address: {
@@ -42,9 +43,11 @@ export async function placeOrder(
       billing_address: { ...input.address, country_code: "tr" },
     },
   })
-  await addShippingMethodToCartWorkflow(container).run({
-    input: { cart_id: cart.id, options: [{ id: input.shippingOptionId }] },
-  })
+  if (input.shippingOptionId) {
+    await addShippingMethodToCartWorkflow(container).run({
+      input: { cart_id: cart.id, options: [{ id: input.shippingOptionId }] },
+    })
+  }
   const { result: collection } = await createPaymentCollectionForCartWorkflow(container).run({
     input: { cart_id: cart.id },
   })

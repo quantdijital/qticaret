@@ -1,6 +1,12 @@
 import { Modules } from "@medusajs/framework/utils"
 import { WorkflowResponse, createWorkflow, transform } from "@medusajs/framework/workflows-sdk"
-import { acquireLockStep, createRemoteLinkStep, releaseLockStep } from "@medusajs/medusa/core-flows"
+import {
+  acquireLockStep,
+  createRemoteLinkStep,
+  dismissRemoteLinkStep,
+  releaseLockStep,
+  updateInventoryItemsStep,
+} from "@medusajs/medusa/core-flows"
 import { CATALOG_EXTENSION_MODULE } from "../../modules/catalog-extension"
 import { planProductCatalogStep } from "./steps/plan-product-catalog"
 import type { SetProductCatalogInput } from "./steps/plan-product-catalog"
@@ -9,7 +15,8 @@ import { writeProductCatalogStep } from "./steps/write-product-catalog"
 const SUCCESSOR_LOCK = "catalog:successors"
 
 /**
- * Saves a product's catalog fields and its variants' MPNs (F3.1). A lock
+ * Saves a product's catalog fields and its variants' MPNs (F3.1), and with
+ * the kind its shipping set-up (F3.2). A lock
  * per product keeps two first saves from making two extension rows; every
  * step undoes itself if a later one fails.
  */
@@ -40,8 +47,17 @@ export const setProductCatalogWorkflow = createWorkflow(
         [Modules.PRODUCT]: { product_variant_id: variant_id },
         [CATALOG_EXTENSION_MODULE]: { variant_extension_id: id },
       })),
+      // F3.2: a physical product back on the shop's default shipping profile
+      ...plan.shipping.link,
     ])
     createRemoteLinkStep(links)
+
+    // F3.2: a digital or service product leaves its shipping profile and its
+    // items stop requiring shipping (or the reverse); both steps undo themselves
+    const dismiss = transform({ plan }, ({ plan }) => plan.shipping.dismiss)
+    dismissRemoteLinkStep(dismiss)
+    const inventory = transform({ plan }, ({ plan }) => plan.shipping.inventory)
+    updateInventoryItemsStep(inventory)
 
     releaseLockStep({ key: lockKey })
     return new WorkflowResponse({ product_id: input.product_id })

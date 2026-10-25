@@ -204,6 +204,10 @@
       "test_platform_sample": {
         "label": "Platform sample feature",
         "description": "A platform-managed sample feature that appears in tests only."
+      },
+      "catalog_non_physical": {
+        "label": "Digital and service products",
+        "description": "Sell products that need no shipping (e-books, gift codes, courses, services); they ask for no shipping or measurements."
       }
     },
     "attributes": {

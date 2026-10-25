@@ -46,4 +46,16 @@ describe("lifecycleOf", () => {
   it("puts a canceled order first", () => {
     expect(lifecycleOf(order({ status: "canceled", items: [line(1, 1, 1, 1)] }))).toBe("canceled")
   })
+
+  it("counts lines that need no shipping as done once paid (F3.2)", () => {
+    const digital = { ...line(1), requires_shipping: false }
+    const unpaid = [{ status: "not_paid", amount: 10, captured_amount: 0 }]
+
+    expect(lifecycleOf(order({ items: [digital] }))).toBe("delivered")
+    expect(lifecycleOf(order({ items: [digital], payment_collections: unpaid }))).toBe(
+      "awaiting_payment"
+    )
+    expect(lifecycleOf(order({ items: [digital, line(1)] }))).toBe("to_ship")
+    expect(lifecycleOf(order({ items: [digital, line(1, 1, 1, 1)] }))).toBe("delivered")
+  })
 })

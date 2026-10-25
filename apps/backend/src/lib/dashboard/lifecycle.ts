@@ -7,7 +7,8 @@ import { getLastPaymentStatus } from "@medusajs/medusa/core-flows"
  * delivered, canceled. Payment follows Medusa's own order list; the parcel
  * side is read from each item's fulfilled, shipped and delivered counts, so
  * an order with something left to send stays "to ship" after its first
- * parcel leaves. The list, the dashboard and the order page all use this.
+ * parcel leaves. Lines that need no shipping (digital, service; F3.2) are
+ * done once paid. The list, the dashboard and the order page all use this.
  */
 
 export const LIFECYCLES = [
@@ -28,6 +29,7 @@ export const LIFECYCLE_FIELDS = [
   "payment_collections.refunded_amount",
   // Medusa fills an item's quantity only with its detail (or the totals) requested
   "items.quantity",
+  "items.requires_shipping",
   "items.detail.quantity",
   "items.detail.fulfilled_quantity",
   "items.detail.shipped_quantity",
@@ -36,6 +38,8 @@ export const LIFECYCLE_FIELDS = [
 
 export interface LifecycleItem {
   quantity?: number | null
+  /** False for a digital or service line (F3.2); missing reads as true. */
+  requires_shipping?: boolean | null
   detail?: {
     fulfilled_quantity?: number | null
     shipped_quantity?: number | null
@@ -79,6 +83,12 @@ export const isPaid = (order: LifecycleOrder): boolean => PAID.has(paymentStatus
 const presentItems = (order: LifecycleOrder): LifecycleItem[] =>
   (order.items ?? []).filter((item): item is LifecycleItem => item !== null)
 
+// The lines that travel in a parcel; the others are done once paid
+export const shippableItems = <T extends LifecycleItem>(
+  items: (T | null)[] | null | undefined
+): T[] =>
+  (items ?? []).filter((item): item is T => item !== null && item.requires_shipping !== false)
+
 const counts = (item: LifecycleItem) => ({
   quantity: item.quantity ?? 0,
   fulfilled: item.detail?.fulfilled_quantity ?? 0,
@@ -88,7 +98,7 @@ const counts = (item: LifecycleItem) => ({
 
 /** Something not yet in a parcel, or packed and not yet handed over. */
 export function hasSomethingToShip(order: LifecycleOrder): boolean {
-  return presentItems(order).some((item) => {
+  return shippableItems(order.items).some((item) => {
     const { quantity, fulfilled, shipped } = counts(item)
     return fulfilled < quantity || shipped < fulfilled
   })
@@ -98,7 +108,10 @@ export function lifecycleOf(order: LifecycleOrder): Lifecycle {
   if (order.status === "canceled") {
     return "canceled"
   }
-  const items = presentItems(order).map(counts)
+  if (presentItems(order).length > 0 && shippableItems(order.items).length === 0) {
+    return isPaid(order) ? "delivered" : "awaiting_payment"
+  }
+  const items = shippableItems(order.items).map(counts)
   if (
     items.length > 0 &&
     items.every((item) => item.quantity > 0 && item.delivered >= item.quantity)

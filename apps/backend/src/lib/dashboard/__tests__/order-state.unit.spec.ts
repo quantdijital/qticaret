@@ -81,4 +81,22 @@ describe("orderState", () => {
       cancelable: false,
     })
   })
+
+  it("leaves lines that need no shipping out of the parcel", () => {
+    const state = orderState(
+      order({
+        items: [
+          { id: "item_a", quantity: 1, detail: { fulfilled_quantity: 0 } },
+          {
+            id: "item_code",
+            quantity: 1,
+            requires_shipping: false,
+            detail: { fulfilled_quantity: 0 },
+          },
+        ],
+      })
+    )
+
+    expect(state.ship?.items).toEqual([{ id: "item_a", quantity: 1 }])
+  })
 })

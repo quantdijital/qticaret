@@ -9,6 +9,7 @@ export {
   isPaid,
   lifecycleOf,
   paymentStatusOf,
+  shippableItems,
 } from "./lifecycle"
 export type { Lifecycle, LifecycleItem, LifecycleOrder } from "./lifecycle"
 export { ORDER_STATE_FIELDS, orderState } from "./order-state"
