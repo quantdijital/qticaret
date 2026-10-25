@@ -1,8 +1,10 @@
 import { WorkflowResponse, createStep, createWorkflow } from "@medusajs/framework/workflows-sdk"
 import {
+  ConflictError,
   ProviderError,
   RetryableError,
   ValidationError,
+  isConflictError,
   isProviderError,
   isRetryable,
   isRetryableError,
@@ -22,12 +24,14 @@ const ERRORS = {
   validation: () => new ValidationError("cart.invalid_quantity", { field: "quantity" }),
   provider: () => providerError(true),
   retryable: () => new RetryableError("lock.busy", { retryAfterMs: 1200 }),
+  conflict: () => new ConflictError("product_attributes.type_locked"),
 }
 type Kind = keyof typeof ERRORS
 const GUARDS = {
   validation: isValidationError,
   provider: isProviderError,
   retryable: isRetryableError,
+  conflict: isConflictError,
 }
 const KINDS = Object.keys(ERRORS) as Kind[]
 
@@ -205,5 +209,18 @@ describe("ProviderError with Retry-After", () => {
 
     expect(error.retryAfterMs).toBeUndefined()
     expect(toHttpError(error)).not.toHaveProperty("retryAfterSeconds")
+  })
+})
+
+describe("ConflictError", () => {
+  it("answers 409 with its own key, which Medusa's CONFLICT would replace", () => {
+    expect(toHttpError(new ConflictError("product_attributes.type_locked"))).toEqual({
+      status: 409,
+      body: { type: "conflict", message: "product_attributes.type_locked" },
+    })
+    expect(toHttpError(new ConflictError("not a key"))).toEqual({
+      status: 409,
+      body: { type: "conflict", message: "errors.conflict" },
+    })
   })
 })

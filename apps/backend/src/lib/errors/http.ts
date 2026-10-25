@@ -1,7 +1,9 @@
 import {
+  DEFAULT_CONFLICT_MESSAGE,
   DEFAULT_PROVIDER_MESSAGE,
   DEFAULT_RETRYABLE_MESSAGE,
   DEFAULT_VALIDATION_MESSAGE,
+  isConflictError,
   isProviderError,
   isRetryableError,
   isValidationError,
@@ -37,6 +39,10 @@ export function toHttpError(value: unknown): HttpErrorResponse | null {
   if (isValidationError(value)) {
     const message = clientMessage(value.safeMessage, DEFAULT_VALIDATION_MESSAGE)
     return { status: 400, body: { type: "invalid_data", message } }
+  }
+  if (isConflictError(value)) {
+    const message = clientMessage(value.safeMessage, DEFAULT_CONFLICT_MESSAGE)
+    return { status: 409, body: { type: "conflict", message } }
   }
   if (isProviderError(value)) {
     const message = clientMessage(value.safeMessage, DEFAULT_PROVIDER_MESSAGE)

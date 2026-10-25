@@ -104,7 +104,7 @@ F17 öncesinde tenant'lar F16 script'leriyle elle açılır.
 
 **KK:**
 - [x] Feature flag kapalıyken ilgili endpoint/akış devreye girmiyor (testli) — F2 S9 (test bayrağıyla: middleware gerçek container'la 404, workflow ilk adımda duruyor; 404 bilinmeyen route sayfasıyla bayt bayt aynı)
-- [ ] Attribute şablonu tanımlayıp ürüne değer atanabiliyor, Store API'de görünüyor
+- [x] Attribute şablonu tanımlayıp ürüne değer atanabiliyor, Store API'de görünüyor — F2 S11 (API; admin ekranları S12)
 - [x] Ürün fiyatı değişikliği audit log'da görünüyor; müşteri TCKN görüntüleme okuma kaydı düşüyor — F2 S8 (fatura profili görüntüleme; tam TCKN gösteren uç F12'de aynı yardımcıyla)
 - [x] HTTP istemci logunda Authorization/API key görünmüyor (testli) — F2 S6
 - [x] `lib/money` oransal dağıtımda kuruş kaybı/fazlası olmuyor (testli, uç durumlar dahil) — F2 S1

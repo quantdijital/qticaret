@@ -1,5 +1,6 @@
 import type { MedusaRequest } from "@medusajs/framework/http"
 import { routePathKeepingCase } from "../request-path"
+import { ATTRIBUTE_RESOURCES } from "./resources/attributes"
 import { PRICE_RESOURCES } from "./resources/prices"
 import { SETTINGS_RESOURCES } from "./resources/settings"
 import type { AuditedResource } from "./types"
@@ -14,6 +15,7 @@ import { ID } from "./types"
 export const AUDITED_RESOURCES: readonly AuditedResource[] = [
   ...PRICE_RESOURCES,
   ...SETTINGS_RESOURCES,
+  ...ATTRIBUTE_RESOURCES,
 ]
 
 export interface ResourceMatch {

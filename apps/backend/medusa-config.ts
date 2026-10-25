@@ -34,6 +34,7 @@ module.exports = defineConfig({
     { resolve: "./src/modules/tr-address" },
     { resolve: "./src/modules/url-registry" },
     { resolve: "./src/modules/audit-log" },
+    { resolve: "./src/modules/product-attributes" },
     {
       resolve: "./src/modules/platform-settings",
       options: {

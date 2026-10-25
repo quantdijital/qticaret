@@ -61,3 +61,23 @@ Medusa 2.21.2'de doğrulananlar (F2 planlaması):
 - Şablon yönetim ekranının ilk sürümü F2'de gelir. F12.4 bunu ayar ekranları arasında düzenler.
 - Facet sorguları (F3.17) için gereken indeksler: `(definition_id, value_number)`, `(definition_id, value_text)` ve `value_options` üzerinde GIN. Bunlar S11 migration'ında oluşturulur.
 - Store API sözleşmesi F18 öncesi `packages/types`'a taşınır.
+
+## Ek: F2 S11 uygulaması ve güvenlik incelemesi (2026-10-25)
+- **Değer kolonları:**
+  - Tek seçim ve metin `value_text`'te (btree facet).
+  - Çoklu seçim `value_options`'ta (GIN; migration'a elle eklendi).
+  - Sayı `value_number`'da (numeric), evet/hayır `value_boolean`'da.
+- **Store:**
+  - `allowFields` yaprak alanları açar; seçenekler dahil, çünkü vitrin seçimin etiketini gösterir.
+  - Kendi guard'ımız `fields` içinde özelliklere değen her parçanın izinli bir yaprak olmasını ister. `*attribute_values`, `attribute_values.*` ve `.definition.template` gibi geçişler 400 alır.
+- **Görünürlük:** Tüm ürün kapsamlı değerler herkese açıktır. `is_public` bayrağı ertelendi; admin şablon ekranı bunu açıkça uyarır.
+- **Kilitler:** Değeri olan tanımda tip, kapsam, anahtar ve birim değişimi ile kullanılan seçeneğin kaldırılması 409 alır.
+- **Onaylar:** Değeri olan üründe şablon değişimi `confirm_template_change` ister.
+- **Eşzamanlılık:**
+  - Şablon değişiklikleri şablon başına kilit alır; ürün kaydı ürün ve hedef şablon kilidini alır.
+  - (ürün, tanım) tekilliği için link tablosunda DB indeksi ertelendi (F16'da Redis locking ile birlikte değerlendirilir).
+- **Sınırlar:**
+  - Anahtar `Object.prototype` adlarını alamaz.
+  - Seçenek değeri slug biçimindedir; metinler kontrol karakteri içeremez.
+  - Değer metni 500 karakterdir (btree satır sınırının altında).
+

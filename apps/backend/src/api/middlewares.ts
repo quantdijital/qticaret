@@ -1,11 +1,18 @@
 import {
+  allowFields,
   authenticate,
   defineMiddlewares,
   validateAndTransformBody,
   validateAndTransformQuery,
 } from "@medusajs/framework/http"
 import { RATE_LIMIT_PROFILES } from "../lib/security/rate-limit"
+import {
+  AdminGetAttributeTemplates,
+  AdminPostAttributeTemplate,
+  AdminUpdateAttributeTemplate,
+} from "./admin/attribute-templates/validators"
 import { AdminGetAuditLog } from "./admin/audit-log/validators"
+import { AdminPostProductAttributes } from "./admin/products/[id]/attributes/validators"
 import { AdminPostFeature, validateSectionBody } from "./admin/platform-settings/validators"
 import { auditMutations, auditSensitiveRead } from "./http/audit"
 import { csrfProtection } from "./http/csrf"
@@ -23,6 +30,7 @@ import {
   StoreGetTrNeighborhoods,
   StoreGetTrProvinces,
 } from "./store/tr-address/validators"
+import { STORE_ATTRIBUTE_FIELDS, restrictStoreAttributeFields } from "./validation/attribute-fields"
 import { rejectSensitiveFields } from "./validation/sensitive-fields"
 import {
   ROOT,
@@ -87,6 +95,7 @@ export default defineMiddlewares({
         rateLimit(() => RATE_LIMIT_PROFILES.store_default),
         storeLimitGuard,
         rejectSensitiveFields,
+        restrictStoreAttributeFields,
       ],
     },
     // F2.5: admin mutations are recorded once answered (adr/0011); tax ids
@@ -127,6 +136,32 @@ export default defineMiddlewares({
       matcher: "/admin/features/:key",
       methods: ["POST"],
       middlewares: [requireUserActor, validateAndTransformBody(AdminPostFeature)],
+    },
+    // F2.4: attribute templates and product values (adr/0013); global so
+    // allowFields runs before the core route checks `fields`
+    {
+      matcher: "/store/products",
+      middlewares: [allowFields(...STORE_ATTRIBUTE_FIELDS)],
+    },
+    {
+      matcher: "/admin/attribute-templates",
+      methods: ["GET"],
+      middlewares: [validateAndTransformQuery(AdminGetAttributeTemplates, {})],
+    },
+    {
+      matcher: "/admin/attribute-templates",
+      methods: ["POST"],
+      middlewares: [validateAndTransformBody(AdminPostAttributeTemplate)],
+    },
+    {
+      matcher: "/admin/attribute-templates/:id",
+      methods: ["POST"],
+      middlewares: [validateAndTransformBody(AdminUpdateAttributeTemplate)],
+    },
+    {
+      matcher: "/admin/products/:id/attributes",
+      methods: ["POST"],
+      middlewares: [validateAndTransformBody(AdminPostProductAttributes)],
     },
     // F2.9b: uploaded files checked by their bytes, after Medusa's multer
     {

@@ -6,11 +6,12 @@
  * and the guards check shape, never `instanceof`.
  */
 
-export type ErrorKind = "validation" | "provider" | "retryable"
+export type ErrorKind = "validation" | "provider" | "retryable" | "conflict"
 
 export const DEFAULT_VALIDATION_MESSAGE = "errors.invalid_data"
 export const DEFAULT_PROVIDER_MESSAGE = "errors.provider_unavailable"
 export const DEFAULT_RETRYABLE_MESSAGE = "errors.temporarily_unavailable"
+export const DEFAULT_CONFLICT_MESSAGE = "errors.conflict"
 
 interface ErrorShape<K extends ErrorKind> {
   readonly qtErrorKind: K
@@ -28,6 +29,8 @@ export interface ProviderErrorShape extends ErrorShape<"provider"> {
   /** How long the provider asked us to wait (its Retry-After). */
   readonly retryAfterMs?: number
 }
+
+export type ConflictErrorShape = ErrorShape<"conflict">
 
 export interface RetryableErrorShape extends ErrorShape<"retryable"> {
   readonly retryAfterMs?: number
@@ -52,6 +55,22 @@ export class ValidationError extends Error implements ValidationErrorShape {
     if (options.field !== undefined) {
       this.field = options.field
     }
+  }
+}
+
+/**
+ * A request that clashes with the current state (a type change on an
+ * attribute products use). Medusa's own CONFLICT answer replaces the message
+ * with a generic retry hint; this keeps the rule's i18n key.
+ */
+export class ConflictError extends Error implements ConflictErrorShape {
+  override readonly name = "ConflictError"
+  readonly qtErrorKind = "conflict"
+  readonly safeMessage: string
+
+  constructor(safeMessage: string, options: { cause?: unknown } = {}) {
+    super(`conflict: ${safeMessage}`, causeOf(options))
+    this.safeMessage = safeMessage
   }
 }
 
@@ -133,6 +152,10 @@ export function isProviderError(value: unknown): value is ProviderErrorShape {
     typeof fields["retryable"] === "boolean" &&
     (fields["retryAfterMs"] === undefined || isDelay(fields["retryAfterMs"]))
   )
+}
+
+export function isConflictError(value: unknown): value is ConflictErrorShape {
+  return fieldsOf(value, "conflict") !== null
 }
 
 export function isRetryableError(value: unknown): value is RetryableErrorShape {
