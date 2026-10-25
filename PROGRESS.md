@@ -422,7 +422,7 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
   - **Dev DB:** Bootstrap yeniden çalıştırılırsa menü varsayılanı yazılır; mağaza adı `store-name="..."` ile verilmeli.
   - **F16 proxy:** `/admin` ve `/auth` hata gövdesi `Authorization`, çerez ve `Origin`'e göre değişiyor (dashboard cümlesi). Bu yanıtlar önbelleğe alınmamalı (`Cache-Control: no-store` ya da `Vary`).
 - [ ] **F3 T1a'dan devreden işler:**
-  - **T1b:** `kind` yazılabilir olunca `setProductCatalogWorkflow` yayın kuralını da çağırmalı; aksi halde "dijital olarak yayınla, sonra fiziksele çevir" kuralı aşar. Denetim anlık görüntüsüne `kind` eklenir.
+  - ✅ **T1b:** `setProductCatalogWorkflow` yazımlardan sonra yayın kuralını çalıştırıyor (yayındaki ürün fiziksele dönerken ölçü yoksa red, hepsi geri alınır; HTTP testli). Denetim anlık görüntüsünde `kind` var.
   - **T3:**
     - Ürün hook'unun `replacedPaths` çıktısından otomatik 301; kategori alt ağacı için de.
     - Denetim kayıtlı, kişiye özel "yolu serbest bırak" eylemi. Yayındaki ürün silinip aynı adla yeniden açılınca yol rezerve olduğu için 400 dönüyor.

@@ -111,6 +111,15 @@ medusaIntegrationTestRunner({
       expect((await setKind("digital", id)).status).toBe(200)
       expect((await publish()).status).toBe(200)
 
+      // Turned physical while published, it needs its measurements: refused, still digital
+      const back = await setKind("physical", id)
+      expect(back.status).toBe(400)
+      expect(back.data).toMatchObject({ message: "catalog.dimensions_required" })
+      const { data: catalog } = await http.get<{ kind: string }>(`/admin/products/${id}/catalog`, {
+        headers: admin.headers,
+      })
+      expect(catalog.kind).toBe("digital")
+
       // A variant added later gets an item that needs no shipping either
       await http.post(
         `/admin/products/${id}/variants`,
