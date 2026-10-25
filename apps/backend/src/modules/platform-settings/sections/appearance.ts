@@ -11,6 +11,8 @@ export interface AppearanceSettings {
   radius: "sharp" | "soft" | "round"
   density: "comfortable" | "compact"
   mode: "light" | "dark" | "system"
+  /** The navigation's surface: ink, page-light, or the brand colour. */
+  sidebar: "dark" | "light" | "brand"
   logo_light_url: string | null
   logo_dark_url: string | null
 }
@@ -40,6 +42,7 @@ export const appearanceSection = defineSection<AppearanceSettings>(
     radius: z.enum(["sharp", "soft", "round"]),
     density: z.enum(["comfortable", "compact"]),
     mode: z.enum(["light", "dark", "system"]),
+    sidebar: z.enum(["dark", "light", "brand"]),
     logo_light_url: logoUrl,
     logo_dark_url: logoUrl,
   },
@@ -48,6 +51,7 @@ export const appearanceSection = defineSection<AppearanceSettings>(
     radius: "soft",
     density: "comfortable",
     mode: "system",
+    sidebar: "dark",
     logo_light_url: null,
     logo_dark_url: null,
   }

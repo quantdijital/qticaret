@@ -13,12 +13,17 @@ export type ThemeDensity = (typeof THEME_DENSITIES)[number]
 export const THEME_MODES = ["light", "dark", "system"] as const
 export type ThemeMode = (typeof THEME_MODES)[number]
 
+export const THEME_SIDEBARS = ["dark", "light", "brand"] as const
+export type ThemeSidebar = (typeof THEME_SIDEBARS)[number]
+
 export interface AppearanceSettings {
   /** `#rrggbb`, lower case. */
   brand_color: string
   radius: ThemeRadius
   density: ThemeDensity
   mode: ThemeMode
+  /** The navigation's surface: ink, page-light, or the brand colour. */
+  sidebar: ThemeSidebar
   logo_light_url: string | null
   logo_dark_url: string | null
 }
@@ -30,6 +35,7 @@ export const DEFAULT_APPEARANCE: AppearanceSettings = {
   radius: "soft",
   density: "comfortable",
   mode: "system",
+  sidebar: "dark",
   logo_light_url: null,
   logo_dark_url: null,
 }

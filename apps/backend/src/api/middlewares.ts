@@ -13,6 +13,7 @@ import {
 } from "./admin/attribute-templates/validators"
 import { AdminGetAsyncJobs, AdminPostAsyncJob } from "./admin/async-jobs/validators"
 import { AdminGetAuditLog } from "./admin/audit-log/validators"
+import { AdminGetDashboardNoQuery, AdminGetDashboardOverview } from "./admin/dashboard/validators"
 import { AdminGetHomeSummary } from "./admin/home/summary/validators"
 import { AdminPostProductAttributes } from "./admin/products/[id]/attributes/validators"
 import { AdminPostProductCatalog } from "./admin/products/[id]/catalog/validators"
@@ -57,6 +58,7 @@ const SENSITIVE_READS: readonly [string, string, boolean, (readonly string[])?][
   ["/admin/customers/:id/billing-profile", "customer", false],
   ["/admin/customer-groups/:id", "customer_group", false],
   ["/admin/orders", "order", true],
+  ["/admin/dashboard/recent-orders", "order", true],
   ["/admin/orders/:id", "order", false],
   ["/admin/orders/:id/preview", "order", false],
   ["/admin/orders/:id/changes", "order", false],
@@ -186,6 +188,21 @@ export default defineMiddlewares({
       methods: ["GET"],
       middlewares: [requireUserActor, validateAndTransformQuery(AdminGetHomeSummary, {})],
     },
+    // The panel's dashboard (adr/0022): shop revenue and orders, for people
+    {
+      matcher: "/admin/dashboard/overview",
+      methods: ["GET"],
+      middlewares: [requireUserActor, validateAndTransformQuery(AdminGetDashboardOverview, {})],
+    },
+    ...[
+      "/admin/dashboard/tasks",
+      "/admin/dashboard/recent-orders",
+      "/admin/dashboard/catalog-health",
+    ].map((matcher) => ({
+      matcher,
+      methods: ["GET" as const],
+      middlewares: [requireUserActor, validateAndTransformQuery(AdminGetDashboardNoQuery, {})],
+    })),
     // F2.8: long tasks (adr/0014); starting one and fetching its result are
     // for people: results can hold personal data (the audit log export)
     {
