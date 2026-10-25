@@ -87,6 +87,9 @@ medusaIntegrationTestRunner({
       expect(outView.data.items[0]?.available).toBe(0)
       expect(outView.data.items[0]?.variant?.product?.title).toBeTruthy()
       expect(search.data.items.map((item) => item.sku)).toContain(sku)
+      // The search narrows: an item with another SKU stays out
+      expect(search.data.count).toBeLessThan(all.data.count)
+      expect(search.data.items.every((item) => item.sku?.includes(sku))).toBe(true)
     })
   },
 })

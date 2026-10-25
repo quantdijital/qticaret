@@ -1,4 +1,5 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
+import { createSingleFlight } from "../../../../lib/cache"
 import { LIFECYCLE_FIELDS, buildOverview, periodWindow } from "../../../../lib/dashboard"
 import type { Overview, OverviewLimits, OverviewOrder, PeriodKey } from "../../../../lib/dashboard"
 import { ordersBetween } from "../orders"
@@ -22,6 +23,8 @@ const FIELDS = [
 // totals on every visit; one entry per period
 const TTL_MS = 60_000
 const cache = new Map<PeriodKey, { at: number; value: DashboardOverview }>()
+// Requests missing the cache together wait for one computation
+const computing = createSingleFlight<DashboardOverview>()
 
 export type DashboardOverview = Overview & {
   period: { key: PeriodKey; granularity: "hour" | "day"; from: string; to: string }
@@ -65,7 +68,7 @@ export async function readDashboardOverview(
   if (hit && Date.now() - hit.at < TTL_MS) {
     return hit.value
   }
-  const value = await computeOverview(scope, key)
+  const value = await computing(key, () => computeOverview(scope, key))
   cache.set(key, { at: Date.now(), value })
   return value
 }

@@ -1,5 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { createSingleFlight } from "../../../lib/cache"
 import { stockSlice } from "../../../lib/dashboard"
 import type { StockRow } from "../../../lib/dashboard"
 import { LOW_STOCK_THRESHOLD } from "../dashboard/tasks/read"
@@ -8,6 +9,12 @@ import type { AdminGetStockBoardType } from "./validators"
 
 // Stock records read at most (docs/04), as the dashboard's count; past this `limited`
 const MAX_ITEMS_READ = 2000
+
+// Views and pages asked at once share one read of the levels (docs/04)
+const levelRead = createSingleFlight<{
+  data: unknown[]
+  metadata?: { count?: number } | undefined
+}>()
 
 interface Level {
   location_id: string
@@ -36,13 +43,15 @@ interface ItemRow {
  */
 export async function readStockBoard(scope: MedusaContainer, params: AdminGetStockBoardType) {
   const query = scope.resolve(ContainerRegistrationKeys.QUERY)
-  const { data, metadata } = await query.graph({
-    entity: "inventory_item",
-    fields: ["id", "location_levels.stocked_quantity", "location_levels.reserved_quantity"],
-    // Medusa's search over the item's searchable fields (SKU, title); its filter type leaves `q` out
-    filters: (params.q ? { q: params.q } : {}) as Record<string, never>,
-    pagination: { skip: 0, take: MAX_ITEMS_READ, order: { created_at: "DESC" } },
-  })
+  const { data, metadata } = await levelRead(params.q ?? "", () =>
+    query.graph({
+      entity: "inventory_item",
+      fields: ["id", "location_levels.stocked_quantity", "location_levels.reserved_quantity"],
+      // Medusa's search over the item's searchable fields (SKU, title); its filter type leaves `q` out
+      filters: (params.q ? { q: params.q } : {}) as Record<string, never>,
+      pagination: { skip: 0, take: MAX_ITEMS_READ, order: { created_at: "DESC" } },
+    })
+  )
   const rows = data as unknown as StockRow[]
   const slice = stockSlice(rows, params.view, params.offset, STOCK_BOARD_PAGE, LOW_STOCK_THRESHOLD)
   const ids = slice.page.map((row) => row.id)

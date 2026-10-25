@@ -7,11 +7,18 @@ import {
   paymentStatusOf,
 } from "../../../lib/dashboard"
 import type { LifecycleOrder } from "../../../lib/dashboard"
+import { createSingleFlight } from "../../../lib/cache"
 import { fromMedusaAmount, toMedusaAmount } from "../../../lib/money"
 import type { MedusaAmount } from "../../../lib/money"
 import { MAX_ORDERS_READ, NOT_ORDERS } from "../dashboard/orders"
 import { ORDER_BOARD_PAGE } from "./validators"
 import type { AdminGetOrderBoardType } from "./validators"
+
+// Tabs and pages asked at once share one read of the stages (docs/04)
+const stageRead = createSingleFlight<{
+  data: unknown[]
+  metadata?: { count?: number } | undefined
+}>()
 
 interface StageRow extends LifecycleOrder {
   id: string
@@ -44,17 +51,18 @@ const customerOf = (address: DisplayRow["shipping_address"]) => ({
  */
 export async function readOrderBoard(scope: MedusaContainer, params: AdminGetOrderBoardType) {
   const query = scope.resolve(ContainerRegistrationKeys.QUERY)
-  const filters = {
-    status: { $nin: NOT_ORDERS },
-    is_draft_order: false,
-    ...(params.q ? { q: params.q } : {}),
-  }
-  const { data, metadata } = await query.graph({
-    entity: "order",
-    fields: ["id", ...LIFECYCLE_FIELDS],
-    filters,
-    pagination: { skip: 0, take: MAX_ORDERS_READ, order: { created_at: "DESC" } },
-  })
+  const { data, metadata } = await stageRead(params.q ?? "", () =>
+    query.graph({
+      entity: "order",
+      fields: ["id", ...LIFECYCLE_FIELDS],
+      filters: {
+        status: { $nin: NOT_ORDERS },
+        is_draft_order: false,
+        ...(params.q ? { q: params.q } : {}),
+      },
+      pagination: { skip: 0, take: MAX_ORDERS_READ, order: { created_at: "DESC" } },
+    })
+  )
   const rows = data as unknown as StageRow[]
   const slice = boardSlice(rows, params.stage, params.offset, ORDER_BOARD_PAGE)
   const ids = slice.page.map((row) => row.id)
