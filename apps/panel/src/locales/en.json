@@ -980,5 +980,26 @@
     "deleteTitle": "Delete {{code}}?",
     "deleteDescription": "The code stops working. Discounts on past orders stay as they are.",
     "deleted": "Promotion deleted."
+  },
+  "reports": {
+    "description": "The chosen period's sales, day by day and product by product",
+    "csv": "Download CSV",
+    "daily": {
+      "title": "Sales by day",
+      "titleHourly": "Sales by hour",
+      "date": "Date",
+      "orders": "Orders",
+      "units": "Units",
+      "average": "Average basket",
+      "sales": "Sales"
+    },
+    "products": {
+      "title": "Product performance",
+      "hint": "Products sold in the period, by sales; cancellations left out.",
+      "product": "Product",
+      "units": "Units",
+      "share": "Share of sales",
+      "sales": "Sales"
+    }
   }
 }

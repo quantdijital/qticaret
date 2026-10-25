@@ -988,5 +988,26 @@
     "deleteTitle": "{{code}} silinsin mi?",
     "deleteDescription": "Kod artık çalışmaz. Geçmiş siparişlerdeki indirimler değişmez.",
     "deleted": "Kampanya silindi."
+  },
+  "reports": {
+    "description": "Seçtiğiniz dönemin satışları; gün gün ve ürün ürün",
+    "csv": "CSV indir",
+    "daily": {
+      "title": "Gün gün satış",
+      "titleHourly": "Saat saat satış",
+      "date": "Tarih",
+      "orders": "Sipariş",
+      "units": "Adet",
+      "average": "Ortalama sepet",
+      "sales": "Satış"
+    },
+    "products": {
+      "title": "Ürün performansı",
+      "hint": "Dönemde satılan ürünler, satışa göre; iptaller hariç.",
+      "product": "Ürün",
+      "units": "Adet",
+      "share": "Satıştaki payı",
+      "sales": "Satış"
+    }
   }
 }

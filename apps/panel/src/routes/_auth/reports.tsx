@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { navItem } from "@/components/layout/navigation"
-import { UpcomingPage } from "@/components/patterns/upcoming-page"
+import { dashboardSearchSchema } from "@/features/dashboard/period"
+import { ReportsPage } from "@/features/reports/pages/reports-page"
 
-// Replaced by its panel screen (docs/03 panel hattı)
 export const Route = createFileRoute("/_auth/reports")({
-  component: () => <UpcomingPage item={navItem("reports")} />,
+  validateSearch: dashboardSearchSchema,
+  component: ReportsPage,
 })
