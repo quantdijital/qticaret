@@ -10,6 +10,24 @@ const MAX_PARAMS = 50
 export interface SensitiveReadOptions {
   /** A list route: no single resource; the paging asked for is recorded. */
   list?: boolean
+  /**
+   * Fields that show no personal data: a read asking for these alone is
+   * not recorded (the dashboard's notification badge polls
+   * `fields=created_at` every minute).
+   */
+  safeFields?: readonly string[]
+}
+
+// The fields a `fields` parameter names, without +/- prefixes; null when it names none
+function requestedFields(fields: unknown): string[] | null {
+  if (typeof fields !== "string") {
+    return null
+  }
+  const names = fields
+    .split(",")
+    .map((field) => field.trim().replace(/^[+-]/, ""))
+    .filter(Boolean)
+  return names.length > 0 ? names : null
 }
 
 // What was asked for: `fields` (which relations were expanded) and, for
@@ -37,7 +55,13 @@ function readDetails(req: MedusaRequest, list: boolean): Record<string, unknown>
  */
 export function auditSensitiveRead(resourceType: string, options: SensitiveReadOptions = {}) {
   const list = options.list ?? false
+  const safe = options.safeFields ?? []
   return async (req: MedusaRequest, res: MedusaResponse, next: MedusaNextFunction) => {
+    const asked = requestedFields((req.query as Record<string, unknown>)["fields"])
+    if (asked && safe.length > 0 && asked.every((field) => safe.includes(field))) {
+      next()
+      return
+    }
     const { action, resourceId } = describeRoute(req.method, auditPath(req))
     // Bound with `methods`, so Express has matched and decoded the parameters
     const params = req.params as Record<string, string | undefined> | undefined

@@ -33,9 +33,10 @@ import {
 
 const CART_ADDRESSES = ["shipping_address", "billing_address"] as const
 
-// Admin GET routes that return personal data: [matcher, resource type, list]
-// (adr/0011). A phase adding such a route adds it here (code-reviewer checklist).
-const SENSITIVE_READS: readonly [string, string, boolean][] = [
+// Admin GET routes that return personal data: [matcher, resource type, list,
+// fields that show none] (adr/0011). A phase adding such a route adds it here
+// (code-reviewer checklist).
+const SENSITIVE_READS: readonly [string, string, boolean, (readonly string[])?][] = [
   ["/admin/customers", "customer", true],
   ["/admin/customers/:id", "customer", false],
   ["/admin/customers/:id/addresses", "customer", false],
@@ -54,7 +55,7 @@ const SENSITIVE_READS: readonly [string, string, boolean][] = [
   ["/admin/claims/:id", "claim", false],
   ["/admin/exchanges", "exchange", true],
   ["/admin/exchanges/:id", "exchange", false],
-  ["/admin/notifications", "notification", true],
+  ["/admin/notifications", "notification", true, ["id", "created_at"]],
   ["/admin/notifications/:id", "notification", false],
 ]
 
@@ -100,10 +101,10 @@ export default defineMiddlewares({
     },
     // F2.5: reads that return personal data (names, contact details,
     // addresses) are recorded before the answer, or refused
-    ...SENSITIVE_READS.map(([matcher, resourceType, list]) => ({
+    ...SENSITIVE_READS.map(([matcher, resourceType, list, safeFields]) => ({
       matcher,
       methods: ["GET" as const],
-      middlewares: [auditSensitiveRead(resourceType, { list })],
+      middlewares: [auditSensitiveRead(resourceType, { list, safeFields: safeFields ?? [] })],
     })),
     {
       matcher: "/admin/audit-log",

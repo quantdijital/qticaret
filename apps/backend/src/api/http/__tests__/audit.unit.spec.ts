@@ -363,6 +363,31 @@ describe("auditSensitiveRead", () => {
     expect(JSON.stringify(entry)).not.toContain("Ayşe")
   })
 
+  it("does not record a read asking only for fields without personal data", async () => {
+    const read = auditSensitiveRead("notification", {
+      list: true,
+      safeFields: ["id", "created_at"],
+    })
+    const badge = fakes({
+      path: "/admin/notifications",
+      method: "GET",
+      query: { fields: "created_at" },
+    })
+    const full = fakes({
+      path: "/admin/notifications",
+      method: "GET",
+      query: { fields: "created_at,to" },
+    })
+    const next = jest.fn()
+
+    await read(badge.req, fakeResponse().res, next)
+    await read(full.req, fakeResponse().res, next)
+
+    expect(next).toHaveBeenCalledTimes(2)
+    expect(badge.record).not.toHaveBeenCalled()
+    expect(full.record).toHaveBeenCalledTimes(1)
+  })
+
   it("takes the resource ID from the decoded route parameter", async () => {
     const { req, record } = fakes({
       path: "/admin/customers/cus%5F01A",
