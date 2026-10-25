@@ -1,30 +1,23 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { defineRouteConfig } from "@medusajs/admin-sdk"
 import { Button, Container, Heading, Input, Label, Select, Text, Textarea } from "@medusajs/ui"
-import { useEffect } from "react"
 import { Controller, useForm } from "react-hook-form"
 import type { Control } from "react-hook-form"
 import { useTranslation } from "react-i18next"
+import type { SeoSettings } from "../../../../modules/platform-settings/sections"
 import { ErrorState, LoadingRows } from "../../../components/page-states"
 import { errorText } from "../../../lib/errors"
 import { seoFormSchema, toForm } from "./form-schema"
 import type { SeoForm } from "./form-schema"
 import { TemplateField } from "./template-field"
 import { useSeoSettings } from "./use-seo-settings"
+import type { SeoSave } from "./use-seo-settings"
 
 /** Settings > SEO (F2.3, docs/13): canonical host, URL style, templates, robots.txt. */
 function SeoSettingsPage() {
   const { t } = useTranslation()
-  const form = useForm<SeoForm>({ resolver: zodResolver(seoFormSchema) })
-  const { query, save } = useSeoSettings((saved) => {
-    form.reset(toForm(saved.values))
-  })
+  const { query, save } = useSeoSettings()
   const { data, isPending, isError, error, refetch } = query
-  useEffect(() => {
-    if (data) {
-      form.reset(toForm(data.values))
-    }
-  }, [data, form])
 
   return (
     <Container className="divide-y p-0">
@@ -43,35 +36,49 @@ function SeoSettingsPage() {
           )}
         </div>
       ) : (
-        <form
-          className="divide-y"
-          onSubmit={(event) => {
-            void form.handleSubmit((values) => {
-              save.mutate(values)
-            })(event)
-          }}
-        >
-          <HostAndUrls control={form.control} />
-          <Templates control={form.control} />
-          <Robots control={form.control} />
-          <div className="flex justify-end gap-2 px-6 py-4">
-            <Button
-              type="button"
-              variant="secondary"
-              disabled={!form.formState.isDirty || save.isPending}
-              onClick={() => {
-                form.reset(toForm(data.values))
-              }}
-            >
-              {t("qticaret.common.reset")}
-            </Button>
-            <Button type="submit" disabled={!form.formState.isDirty} isLoading={save.isPending}>
-              {t("qticaret.common.save")}
-            </Button>
-          </div>
-        </form>
+        // Mounted once the values are here, so no field starts out empty; a
+        // new version (this save or another admin's) starts a fresh form
+        <SeoSettingsForm key={data.version} values={data.values} save={save} />
       )}
     </Container>
+  )
+}
+
+function SeoSettingsForm({ values, save }: { values: SeoSettings; save: SeoSave }) {
+  const { t } = useTranslation()
+  const form = useForm<SeoForm>({
+    resolver: zodResolver(seoFormSchema),
+    defaultValues: toForm(values),
+  })
+
+  return (
+    <form
+      className="divide-y"
+      onSubmit={(event) => {
+        void form.handleSubmit((submitted) => {
+          save.mutate(submitted)
+        })(event)
+      }}
+    >
+      <HostAndUrls control={form.control} />
+      <Templates control={form.control} />
+      <Robots control={form.control} />
+      <div className="flex justify-end gap-2 px-6 py-4">
+        <Button
+          type="button"
+          variant="secondary"
+          disabled={!form.formState.isDirty || save.isPending}
+          onClick={() => {
+            form.reset()
+          }}
+        >
+          {t("qticaret.common.reset")}
+        </Button>
+        <Button type="submit" disabled={!form.formState.isDirty} isLoading={save.isPending}>
+          {t("qticaret.common.save")}
+        </Button>
+      </div>
+    </form>
   )
 }
 
@@ -227,8 +234,10 @@ function Robots({ control }: { control: Control<SeoForm> }) {
   )
 }
 
+// The label is a key in the namespace our strings merge into (src/admin/i18n)
 export const config = defineRouteConfig({
   label: "qticaret.settings.seo.title",
+  translationNs: "translation",
 })
 
 export default SeoSettingsPage

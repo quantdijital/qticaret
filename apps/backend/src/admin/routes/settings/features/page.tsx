@@ -86,8 +86,10 @@ function FeaturesPage() {
   )
 }
 
+// The label is a key in the namespace our strings merge into (src/admin/i18n)
 export const config = defineRouteConfig({
   label: "qticaret.settings.features.title",
+  translationNs: "translation",
 })
 
 export default FeaturesPage

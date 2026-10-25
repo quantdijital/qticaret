@@ -164,8 +164,10 @@ function AsyncJobsPage() {
   )
 }
 
+// The label is a key in the namespace our strings merge into (src/admin/i18n)
 export const config = defineRouteConfig({
   label: "qticaret.asyncJobs.title",
+  translationNs: "translation",
 })
 
 export default AsyncJobsPage

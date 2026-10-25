@@ -14,8 +14,12 @@ export interface SectionResponse {
   version: number
 }
 
-/** The SEO section from the API, and its save (toasts on both outcomes). */
-export function useSeoSettings(onSaved: (saved: SectionResponse) => void) {
+/**
+ * The SEO section from the API, and its save (toasts on both outcomes). A
+ * save puts the stored values in the cache at once, so the page shows the
+ * new version without waiting for the refetch.
+ */
+export function useSeoSettings() {
   const { t } = useTranslation()
   const client = useQueryClient()
   const query = useQuery({
@@ -30,7 +34,7 @@ export function useSeoSettings(onSaved: (saved: SectionResponse) => void) {
       }),
     onSuccess: async (saved) => {
       toast.success(t("qticaret.settings.seo.saved"))
-      onSaved(saved)
+      client.setQueryData(QUERY_KEY, saved)
       await client.invalidateQueries({ queryKey: QUERY_KEY })
     },
     onError: (failure) => {
@@ -39,3 +43,5 @@ export function useSeoSettings(onSaved: (saved: SectionResponse) => void) {
   })
   return { query, save }
 }
+
+export type SeoSave = ReturnType<typeof useSeoSettings>["save"]

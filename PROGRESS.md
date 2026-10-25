@@ -232,7 +232,11 @@
 ## Sıradaki görev
 1. **Kullanıcı:**
    - **Push ve PR kararı:** F1 dalı push edildi, PR yok. F2 dalı (`f2-platform-core`) yerelde ve push edilmedi. F1 merge edilince F2 `main` üzerine rebase edilir.
-   - **Admin'de gözle kontrol:** Ayarlar > Özellikler, SEO, Ürün özellikleri, İşler; ürün sayfasındaki özellik kutusu. Rota etiketleri Türkçe mi, ham anahtar mı?
+   - **Admin'de gözle kontrol:** Ayarlar > Özellikler, SEO, Ürün özellikleri, İşler; ürün sayfasındaki özellik kutusu.
+     - Kullanıcı 2026-10-25'te iki hata buldu, ikisi düzeltildi.
+     - Menü etiketleri ham anahtar görünüyordu: `translationNs` eksikti. Test artık bunu yakalıyor.
+     - SEO sayfası açılışta çöküyordu: form, değerler gelmeden çiziliyordu.
+     - Kalan kontrol: sayfa başlığı ve breadcrumb'da ham anahtar kalıyor mu?
    - **Canlı turlar:** `docs/16-proje-haritasi.md` sırasıyla (bölüm 9).
    - **Dev'deki geçici admin kullanıcısı:** `playwright-admin@example.com` silinsin mi?
 2. **F3 kararları (kullanıcı):**
