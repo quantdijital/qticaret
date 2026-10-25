@@ -1,5 +1,6 @@
 import { WorkflowResponse, createWorkflow } from "@medusajs/framework/workflows-sdk"
 import { acquireLockStep, releaseLockStep } from "@medusajs/medusa/core-flows"
+import { forgetResolutionsStep } from "../steps/forget-resolutions"
 import { deleteRedirectsStep } from "./steps/delete-redirects"
 import { importRedirectsStep } from "./steps/import-redirects"
 import type { ImportRedirectsInput } from "./steps/import-redirects"
@@ -48,7 +49,8 @@ export const importRedirectsWorkflow = createWorkflow(
   }
 )
 
-export const releasePathWorkflow = createWorkflow(
-  "seo-release-path",
-  (input: { path: string }) => new WorkflowResponse(releasePathStep(input))
-)
+export const releasePathWorkflow = createWorkflow("seo-release-path", (input: { path: string }) => {
+  const released = releasePathStep(input)
+  forgetResolutionsStep()
+  return new WorkflowResponse(released)
+})

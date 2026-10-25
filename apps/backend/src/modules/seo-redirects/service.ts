@@ -21,9 +21,10 @@ export type SeoRedirectRecord = InferTypeOf<typeof SeoRedirect>
 export type SeoNotFoundRecord = InferTypeOf<typeof SeoNotFound>
 
 export interface SeoRedirectsModuleOptions {
-  /** Shared marker for the pattern rules' cache across processes. */
+  /** Shared markers for the pattern rules' and the answers' caches across processes. */
   redisUrl?: string
   versionKey?: string
+  resolutionsVersionKey?: string
   /** How long hit and 404 counts wait in memory before they are written. */
   flushEveryMs?: number
 }
@@ -32,6 +33,9 @@ export interface SeoRedirectsModuleOptions {
 // more has rules a file import should turn into exact ones
 export const MAX_PATTERN_RULES = 200
 const MAX_BUFFERED_KEYS = 5_000
+// Answers kept per process; the oldest goes first. A storefront asks for
+// the same few thousand pages most of the time
+const MAX_CACHED_RESOLUTIONS = 5_000
 
 interface SqlExecutor {
   execute: (sql: string, params?: unknown[]) => Promise<unknown>
@@ -56,6 +60,9 @@ export const toRedirectRule = (record: SeoRedirectRecord): RedirectRule => ({
  */
 class SeoRedirectsModuleService extends MedusaService({ SeoRedirect, SeoNotFound }) {
   private readonly patterns: VersionedCache<CompiledPatternRule[]>
+  // Answers to resolve calls by request; a new marker (any page, rule or
+  // setting saved) or 30 seconds start an empty map
+  private readonly resolutions: VersionedCache<Map<string, unknown>>
   private readonly hits: CounterBuffer
   private readonly notFound: CounterBuffer
 
@@ -64,12 +71,14 @@ class SeoRedirectsModuleService extends MedusaService({ SeoRedirect, SeoNotFound
     super(...arguments)
     const { redisUrl } = options
     let client: Redis | undefined
-    const source = redisUrl
-      ? createRedisVersionSource(
-          () => (client ??= createRedisClient(redisUrl, "seo_redirects")),
-          options.versionKey ?? "qt:redirects:version"
-        )
-      : null
+    const marker = (key: string) =>
+      redisUrl
+        ? createRedisVersionSource(
+            () => (client ??= createRedisClient(redisUrl, "seo_redirects")),
+            key
+          )
+        : null
+    const source = marker(options.versionKey ?? "qt:redirects:version")
     const env = process.env["NODE_ENV"]
     if (!source && env !== "development" && env !== "test") {
       logger.warn({ event: "seo_redirects.no_shared_version", nodeEnv: env ?? null })
@@ -78,6 +87,11 @@ class SeoRedirectsModuleService extends MedusaService({ SeoRedirect, SeoNotFound
       name: "seo_redirects",
       source,
       load: () => this.loadPatterns_(),
+    })
+    this.resolutions = createVersionedCache({
+      name: "seo_resolutions",
+      source: marker(options.resolutionsVersionKey ?? "qt:seo:resolutions:version"),
+      load: () => Promise.resolve(new Map<string, unknown>()),
     })
     const everyMs = options.flushEveryMs ?? 30_000
     this.hits = createCounterBuffer({
@@ -132,9 +146,35 @@ class SeoRedirectsModuleService extends MedusaService({ SeoRedirect, SeoNotFound
     return this.patterns.get()
   }
 
-  /** After a rule write: every process reloads the patterns. */
-  invalidatePatterns(): Promise<void> {
-    return this.patterns.invalidate()
+  /** After a rule write: every process reloads the patterns and forgets its answers. */
+  async invalidatePatterns(): Promise<void> {
+    await Promise.all([this.patterns.invalidate(), this.resolutions.invalidate()])
+  }
+
+  /**
+   * The cached resolve answer for `key`, and where to keep a new one: the
+   * map current when the lookup began, so an answer computed across a
+   * change lands in a map already dropped, never in the fresh one.
+   */
+  async resolutionSlot(key: string): Promise<{ value: unknown; keep: (value: unknown) => void }> {
+    const answers = await this.resolutions.get()
+    return {
+      value: answers.get(key),
+      keep: (value) => {
+        if (answers.size >= MAX_CACHED_RESOLUTIONS && !answers.has(key)) {
+          const oldest = answers.keys().next()
+          if (!oldest.done) {
+            answers.delete(oldest.value)
+          }
+        }
+        answers.set(key, value)
+      },
+    }
+  }
+
+  /** After a page, its SEO fields, a path or a setting changed: every process forgets its answers. */
+  invalidateResolutions(): Promise<void> {
+    return this.resolutions.invalidate()
   }
 
   recordHit(ruleId: string): void {

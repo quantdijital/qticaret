@@ -7,3 +7,12 @@ export { SEO_TEMPLATE_TOKENS, assertValidTemplate, checkTemplate, renderTemplate
 export type { TemplateCheck } from "./template"
 export { categoryPath, collectionPath, productPath } from "./url-patterns"
 export type { UrlStyle } from "./url-patterns"
+export {
+  DESCRIPTION_EXCERPT,
+  SHORT_EXCERPT,
+  excerpt,
+  plainText,
+  priceSentence,
+  resolveSeoPayload,
+} from "./resolve"
+export type { RobotsValue, SeoOverrides, SeoPayload, SeoShop, SeoSubject } from "./resolve"

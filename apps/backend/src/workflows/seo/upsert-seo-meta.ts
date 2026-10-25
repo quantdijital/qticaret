@@ -2,6 +2,7 @@ import { WorkflowResponse, createWorkflow, transform } from "@medusajs/framework
 import { acquireLockStep, createRemoteLinkStep, releaseLockStep } from "@medusajs/medusa/core-flows"
 import { SEO_META_MODULE } from "../../modules/seo-meta"
 import { LINK_MODULE, SEO_ENTITIES } from "./entities"
+import { forgetResolutionsStep } from "./steps/forget-resolutions"
 import { planSeoMetaStep } from "./steps/plan-seo-meta"
 import type { UpsertSeoMetaInput } from "./steps/plan-seo-meta"
 import { writeSeoMetaStep } from "./steps/write-seo-meta"
@@ -35,6 +36,7 @@ export const upsertSeoMetaWorkflow = createWorkflow(
         : []
     )
     createRemoteLinkStep(links)
+    forgetResolutionsStep()
 
     releaseLockStep({ key: lockKey })
     const result = transform({ plan }, ({ plan }) => ({ duplicates: plan.duplicates }))

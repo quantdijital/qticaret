@@ -13,7 +13,7 @@ export async function GET(
   res: MedusaResponse
 ): Promise<void> {
   const { path } = req.validatedQuery as StoreGetSeoResolveType
-  const resolution = await resolveStorefrontPath(req.scope, path)
+  const resolution = await resolveStorefrontPath(req.scope, path, { cache: true })
   res.setHeader("Cache-Control", "public, max-age=60, stale-while-revalidate=300")
   // Added to CORS's `Vary: Origin`, not in its place
   res.vary("x-publishable-api-key")

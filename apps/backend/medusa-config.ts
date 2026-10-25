@@ -50,6 +50,7 @@ module.exports = defineConfig({
       options: {
         redisUrl: env.REDIS_URL,
         versionKey: `qt:redirects:${tenantNamespace(env.DATABASE_URL)}:version`,
+        resolutionsVersionKey: `qt:seo:${tenantNamespace(env.DATABASE_URL)}:resolutions`,
       },
     },
     { resolve: "./src/modules/async-job" },
