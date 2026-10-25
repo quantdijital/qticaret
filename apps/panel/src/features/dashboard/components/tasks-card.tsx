@@ -16,7 +16,7 @@ interface TaskRow {
   icon: LucideIcon
   count: number
   to: string
-  search?: { status: "draft" }
+  search?: { status: "draft" } | { view: "low" }
   /** A count here needs the shop's attention (amber) rather than routine work. */
   urgent: boolean
 }
@@ -31,7 +31,14 @@ function rows(tasks: DashboardTasks): TaskRow[] {
       to: "/orders",
       urgent: false,
     },
-    { key: "lowStock", icon: PackageMinus, count: tasks.low_stock, to: "/inventory", urgent: true },
+    {
+      key: "lowStock",
+      icon: PackageMinus,
+      count: tasks.low_stock,
+      to: "/inventory",
+      search: { view: "low" },
+      urgent: true,
+    },
     {
       key: "drafts",
       icon: FilePen,

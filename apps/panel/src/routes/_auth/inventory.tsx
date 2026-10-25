@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { navItem } from "@/components/layout/navigation"
-import { UpcomingPage } from "@/components/patterns/upcoming-page"
+import { InventoryPage } from "@/features/inventory/pages/inventory-page"
+import { stockSearchSchema } from "@/features/inventory/search"
 
-// Replaced by its panel screen (docs/03 panel hattı)
 export const Route = createFileRoute("/_auth/inventory")({
-  component: () => <UpcomingPage item={navItem("inventory")} />,
+  validateSearch: stockSearchSchema,
+  component: InventoryPage,
 })

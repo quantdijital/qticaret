@@ -853,5 +853,36 @@
     "deleteDescription": "The category is deleted; products stay and only leave this category. A category with subcategories cannot be deleted.",
     "deleted": "Category deleted.",
     "descriptionLabel": "Description"
+  },
+  "inventory": {
+    "description": "Sellable stock; low and sold-out items first",
+    "views": "Stock views",
+    "tabs": {
+      "all": "All",
+      "low": "Low (≤{{threshold}})",
+      "out": "Sold out"
+    },
+    "search": "Search by product name or SKU",
+    "columns": {
+      "item": "Product",
+      "available": "Sellable",
+      "reserved": "Reserved",
+      "shelf": "On shelf"
+    },
+    "out": "Sold out",
+    "lowCount_one": "{{count}} left",
+    "lowCount_other": "{{count}} left",
+    "shelfOf": "{{name}} on shelf",
+    "save_one": "Save {{count}} change",
+    "save_other": "Save {{count}} changes",
+    "saved_one": "Stock updated for {{count}} item.",
+    "saved_other": "Stock updated for {{count}} items.",
+    "noMatch": "No products match your search.",
+    "empty": {
+      "all": "No products with tracked stock.",
+      "low": "No low stock. All good.",
+      "out": "Nothing is sold out."
+    },
+    "note": "\"On shelf\" is the quantity at the shop's default location; sellable stock spans all locations, less what is reserved for orders."
   }
 }

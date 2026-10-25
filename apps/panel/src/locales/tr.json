@@ -861,5 +861,36 @@
     "deleteDescription": "Kategori silinir; ürünler silinmez, yalnızca bu kategoriden çıkar. Alt kategorisi olan bir kategori silinemez.",
     "deleted": "Kategori silindi.",
     "descriptionLabel": "Açıklama"
+  },
+  "inventory": {
+    "description": "Satılabilir stok; önce azalan ve tükenen ürünler",
+    "views": "Stok görünümleri",
+    "tabs": {
+      "all": "Tümü",
+      "low": "Azalan (≤{{threshold}})",
+      "out": "Tükenen"
+    },
+    "search": "Ürün adı ya da stok kodu ile ara",
+    "columns": {
+      "item": "Ürün",
+      "available": "Satılabilir",
+      "reserved": "Siparişe ayrılan",
+      "shelf": "Rafta"
+    },
+    "out": "Tükendi",
+    "lowCount_one": "{{count}} kaldı",
+    "lowCount_other": "{{count}} kaldı",
+    "shelfOf": "{{name}} raftaki adet",
+    "save_one": "{{count}} değişikliği kaydet",
+    "save_other": "{{count}} değişikliği kaydet",
+    "saved_one": "{{count}} ürünün stoku güncellendi.",
+    "saved_other": "{{count}} ürünün stoku güncellendi.",
+    "noMatch": "Aramanızla eşleşen ürün yok.",
+    "empty": {
+      "all": "Stok takibi yapılan ürün yok.",
+      "low": "Azalan stok yok. Her şey yolunda.",
+      "out": "Tükenen ürün yok."
+    },
+    "note": "\"Rafta\" mağazanın varsayılan depo adresindeki adettir; satılabilir stok tüm depolardan siparişe ayrılanlar düşülerek hesaplanır."
   }
 }
