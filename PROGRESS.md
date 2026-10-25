@@ -3,7 +3,7 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a bitti). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı; push edilmedi. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
+**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a, T1b, T2, T3 bitti; sırada T4). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı; push edilmedi. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
 
 ## Son oturum özeti
 **2026-10-25/26 gece (kullanıcı yatarken, "panel işlerini tamamla" talimatıyla).** Panelin ekranları yazıldı; her biri gerçek veriyle tarayıcıda denendi (CDP ekran görüntüsü, test kayıtları sonra silindi). Commit'ler `e11a201`…`6d63df7`, push yok.
@@ -40,6 +40,37 @@
   - Denetim kaydında alan bazında önce/sonra var. Store API'de `seo_meta` alanları istenemiyor (`rejectStoreSeoFields`).
   - Panelde ürün ve kategori sayfasında "Arama motoru görünümü" kartı: sunucuyla aynı şablon kuralıyla Google önizlemesi, sayaçlar, odak kelime, robots, gelişmiş canonical, tekrar uyarısı.
   - OG görseli seçimi T6'daki görsel hattıyla gelecek.
+- **F3 T3 (F3.5) bitti:** yönlendirme motoru (adr/0017, uygulama notu eklendi). Commit'ler `0720c43`, `2de61a5`, `87cedcb`, `6f586a4`, `8e5c9c9`.
+  - `seo-redirects` modülü. Tam, önek ve desen kuralları; desen dili güvenli (`:ad` bir bölüm, sondaki `*` kalanı), regex yok. Yanıtlar 301/302/307/410; sorgu dizesi korunur, atılır ya da yalnız listelenenler kalır.
+  - `GET /store/seo/resolve` şu sırayla bakar: yayındaki kaydın kendi yolu (hiçbir kural canlı sayfayı gizleyemez) → kurallar → `url-registry`'deki eski yollar. Zincirin sonu tek atlamada dönüyor; 60 sn paylaşılan önbellek.
+  - Eski yolların davranışı:
+    - Adı değişen ürünün eski yolu bugünkü yoluna gider.
+    - Satıştan kalkan ya da silinen ürün yayındaki halefine gider.
+    - Halefi olmayan silinmiş kayıt 410, taslak 404 verir.
+  - Kaydetme anında:
+    - Zincirler düz saklanıyor (A→B, B→C ⇒ A→C).
+    - Döngü, 410'a giden hedef ve canlı sayfanın yolunu alan tam kural reddediliyor.
+    - Kural yazımları tek kilit altında.
+    - Hedef yalnızca site içi yol; backend yolları ne kaynak ne sonuç olabiliyor.
+  - CSV içe/dışa aktarma: dosya tümüyle uygulanır ya da hiç uygulanmaz. Kuru çalıştırma hiçbir şey yazmıyor; hatalar satır numarasıyla dönüyor.
+  - Eski adresler listesi ve kişiye özel "serbest bırak" eylemi. T1a'dan devreden işi kapatıyor: silinen ürünün adı yeniden kullanılabiliyor.
+  - 404 günlüğü:
+    - Storefront bildiriyor (dakikada 30 istek sınırı). Yalnızca gerçekten çözülemeyen yollar sayılıyor; referer'dan yalnızca host tutuluyor; kişisel veri içeren yollar hiç tutulmuyor.
+    - Benzer slug'a göre hedef önerisi var.
+    - Sayaçlar bellekte toplanıp 30 sn'de bir tek SQL ifadesiyle yazılıyor. Günlük iş 90 günden eskiyi siliyor, en çok 10.000 kayıt tutuyor.
+  - Denetim kaydı: kural değişiklikleri ve serbest bırakmalar önce/sonra ile.
+  - Panel: SEO > Yönlendirmeler ekranı.
+    - Sekmeler: kurallar (ekle/düzenle/sil, eşleşme filtresi), eski adresler, 404 günlüğü (önerilen sayfaya tek tıkla 301).
+    - Dosyadan içe aktarma (önce kontrol), dışa aktarma, adres testi.
+    - SEO özetinde sayılı kart. Telefonda da denendi.
+  - Bağımsız güvenlik incelemesi: açık yönlendirme, header enjeksiyonu ve SQL enjeksiyonu yok. Bulunan bir orta ve dört düşük bulgu düzeltildi:
+    - Bozuk Unicode ile 404 toplu yazımını düşürme.
+    - `Vary: Origin`'in ezilmesi. Aynı hata `tr-address` önbelleğinde de vardı.
+    - Kuru çalıştırmanın kural yazması.
+    - Sayaç tamponunun sınırsız büyümesi.
+    - Backend yoluna yönlendirme.
+  - Testler: birim (yol, desen, kaynak/hedef, konum, CSV, sayaç, dosya içi döngü); HTTP 12 test (iki yeni dosya).
+  - Dev DB'de örnek veri var (4 kural, 4 404 kaydı); panelden silinebilir.
 - **Gözden geçir (kullanıcı yokken önerilen seçenekle verilen kararlar):**
   1. Bayrak adı `catalog.non_physical`, mağaza tarafından açılır, varsayılan kapalı. Etiketleri Medusa Admin'de ve panelde var.
   2. Kargo gerekmeyen kalemler sipariş ödenince "teslim edildi" sayılıyor. Dijital teslimat (indirme bağlantısı, kod gönderimi) F9 bildirimleriyle gelecek.
@@ -47,6 +78,13 @@
   4. Promosyon kodu 6 karakterden kısaysa uyarı veriliyor, kod yine kaydediliyor. Kupon deneme sınırı F4'te.
   5. Paylaşılan Medusa kampanyalarının tarihleri panelde salt okunur.
   6. SEO alanlarını API anahtarlı entegrasyonlar da yazabiliyor (`requireUserActor` yok); içe aktarma (T15) bunu kullanacak. Robots seçenekleri üç değerli (index/follow, noindex/follow, noindex/nofollow); boş değer sayfa durumuna göre davranış demek.
+  7. **Kayıtların eski yolları kural olarak yazılmıyor** (ADR-0017'den sapma, adr'de uygulama notu var). Eski yollar `url-registry`'de rezerve kalıyor ve çözümleme onları sahibinin bugünkü yoluna gönderiyor.
+     - Gerekçe: kural tablosuyla registry arasında senkron sorunu olmuyor; ürün eski adına dönünce döngü oluşmuyor; desen değişimi (T4) tek toplu işlem kalıyor.
+     - Karşılığı: bu yolların isabet sayacı yok. Panelde ayrı bir "Eski adresler" sekmesi var.
+  8. Kural kaynağında sorgu dizesi kabul edilmiyor (`/urun.php?id=12`); F14 geçişi bunları eşleme raporuna düşürür. Hedef yalnızca site içi göreli yol olabiliyor; canonical host doğrulanana kadar mutlak URL yok.
+  9. Kurallar ve CSV içe aktarma API anahtarıyla da yazılabiliyor (F14 geçiş aracı için). Eski yolu serbest bırakmak yalnızca kişiye açık, çünkü geri alınamıyor.
+  10. Yönlendirme yanıtı: tüm atlamalar 301 ise 301, değilse ilk geçici kod. Önbellek 60 sn, `stale-while-revalidate` 300 sn.
+  11. 404 günlüğü 90 gün ve 10.000 kayıtla sınırlı. Kişisel veri içeren yol (e-posta, telefon, token) hiç kaydedilmiyor.
 - **Bilinen sınırlar (devreden):**
   - Sipariş ve stok panosu bellek içi sıralıyor (5000/2000 kayıt). Büyük mağazada kayıtlı aşama sütunu ya da Index modülü gerekir.
   - Kargo etiketi ve takip F7'de. Kampanyada minimum sepet ve kategori kuralları F4'te.
@@ -347,7 +385,7 @@
 | T1a ✅ | F3.1 | Katalog uzantısı: MPN, durum, birincil kategori, halef ürün (link'li modül + widget). Fiziksel üründe ölçü/ağırlık kuralı. Türkçe handle, hook'larda yol sahipliği, sistem yolları rezervi | — | 0013 deseni |
 | T1b ✅ | F3.2 | Fiziksel olmayan ürün (`kind`: dijital/hizmet; bayrak): kargo profili bağı kalkar, envanter kalemi "kargo gerekir" kapanır, yeni varyantlarda da. Ölçü kuralından muaf. Kargosuz checkout testi | T1a | — |
 | T2 ✅ | F3.4a | `seo-meta` modülü ve link'ler, `PUT /admin/seo/:type/:id`, ürün/kategori widget'ı, denetim kaydı | — | 0015 |
-| T3 | F3.5 | `seo-redirects`: kurallar, güvenli desen, zincir/döngü, slug ve halef değişiminde otomatik 301, `GET /store/seo/resolve`, 404 günlüğü + hedef önerisi, CSV içe/dışa. KK: 301 zinciri | T1 | 0017 |
+| T3 ✅ | F3.5 | `seo-redirects`: kurallar, güvenli desen, zincir/döngü, slug ve halef değişiminde otomatik 301, `GET /store/seo/resolve`, 404 günlüğü + hedef önerisi, CSV içe/dışa. KK: 301 zinciri | T1 | 0017 |
 | T4 | F3.4b | `lib/seo/resolve`, resolve yanıtında `seo` payload, versioned cache, URL deseni değişiminde toplu 301 (iş) | T2, T3 | 0015 |
 | T5 | F3.11 | `brands` modülü, ürün ↔ marka, admin sayfası, Store marka ucu, SEO link'i | T2 | — |
 | T6 | F3.3 | Görsel hattı: `image.process` işi, türevler, OG kırpma, alt metin, varyant görselleri. KK: EXIF temizleme | `sharp` onayı | 0016 |
@@ -431,10 +469,16 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
   - **F16 proxy:** `/admin` ve `/auth` hata gövdesi `Authorization`, çerez ve `Origin`'e göre değişiyor (dashboard cümlesi). Bu yanıtlar önbelleğe alınmamalı (`Cache-Control: no-store` ya da `Vary`).
 - [ ] **F3 T1a'dan devreden işler:**
   - ✅ **T1b:** `setProductCatalogWorkflow` yazımlardan sonra yayın kuralını çalıştırıyor (yayındaki ürün fiziksele dönerken ölçü yoksa red, hepsi geri alınır; HTTP testli). Denetim anlık görüntüsünde `kind` var.
-  - **T3:**
-    - Ürün hook'unun `replacedPaths` çıktısından otomatik 301; kategori alt ağacı için de.
-    - Denetim kayıtlı, kişiye özel "yolu serbest bırak" eylemi. Yayındaki ürün silinip aynı adla yeniden açılınca yol rezerve olduğu için 400 dönüyor.
-    - Kayıt başına rezerve yol üst sınırı düşünülür.
+  - ✅ **T3:** Eski yollar çözümlemede sahibinin bugünkü yoluna gidiyor (kategori alt ağacı dahil). Kişiye özel ve denetim kayıtlı "serbest bırak" eylemi var.
+    - Açık kalan: kayıt başına rezerve yol üst sınırı. Şimdilik yok; T12 SEO denetiminde çok yol biriken kayıtlar listelenir.
+- [ ] **F3 T3'ten devreden işler:**
+  - **F18 storefront:**
+    - Resolve ve 404 bildirimi sunucudan çağrılırsa IP sınırları mağaza geneline iner; imzalı istemci IP'si ADR'siyle çözülmeli.
+    - Resolve satış kanalına bakmıyor: başka kanaldaki yayındaki ürün de `entity` döner.
+    - Büyük harf ve sondaki `/` gibi normalizasyon 301'leri edge'de yapılır; resolve normalize edilmiş yolu `path` alanında döndürüyor.
+  - **F14 geçiş:** Sorgu dizeli eski adresler (`?id=`) ve regex kuralları desen diline çevrilir; çevrilemeyenler rapora düşer.
+  - **T4:** Resolve yanıtına `seo` payload'ı ve sürümlü önbellek eklenecek. Desen değişimi işi eski yolları rezerve bırakır; yönlendirmeyi çözümleme kendisi yapar.
+  - **T12:** 12 ay isabet almayan kurallar için "temizle" önerisi; 404 isabet listesi.
   - **T4:** URL stili değişiminde tüm yolları taşıyan iş; önce çakışma raporu, çakışma varsa değişiklik reddedilir.
   - **F3.17:** Facet landing ad alanı alt kategori yollarıyla aynı biçimde (docs/13 notu).
   - ~~Admin hata metinleri~~: çözüldü (adr/0021, dashboard'a Türkçe cümle).
