@@ -33,7 +33,7 @@
 ## Planlanan ekranlar (F12 ve ilgili fazlar)
 | Ekran | Tür | İçerik |
 |---|---|---|
-| Dashboard özet | Widget (home) | Ciro, bekleyen, kargoya hazır, hatalı ödeme/fatura sayıları |
+| Dashboard özet (Başlangıç) | Route `/home` (Medusa'da `home` widget bölgesi yok; docs/17) | Kurulum kontrol listesi ve hızlı işlemler (var); ciro, bekleyen, kargoya hazır, hatalı ödeme/fatura sayıları (özet ucu ile) |
 | Sipariş detay ek bilgi | Widget (order.details) | Ödeme sağlayıcı detayı, kargo takip zaman çizelgesi, fatura durumu, yasal onay kaydı |
 | Ürün attribute'ları | Widget (product.details) | Şablona göre dinamik form |
 | Entegrasyonlar | Route | Sağlayıcı kartları: durum, bağlantı testi, son hata |

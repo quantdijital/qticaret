@@ -10,6 +10,85 @@
       "delete": "Sil",
       "remove": "Kaldır"
     },
+    "home": {
+      "title": "Başlangıç",
+      "greeting": "Merhaba {{name}}",
+      "greetingNoName": "Merhaba",
+      "subtitle": "Mağazanızı buradan yönetmeye başlayın: eksik ayarları tamamlayın, sık kullandığınız ekranlara tek tıkla gidin.",
+      "setup": {
+        "title": "Mağazanızı satışa hazırlayın",
+        "subtitle": "Adımları sırayla tamamlayın. Her düğme sizi işin yapıldığı ekrana götürür; bitirince bu sayfaya dönün.",
+        "progress": "{{total}} adımdan {{done}} tanesi tamamlandı",
+        "done": "Tamamlandı",
+        "next": "Sıradaki adım",
+        "allDone": "Bütün adımlar tamamlandı. Mağazanız satışa hazır görünüyor.",
+        "error": "Kurulum adımları şu an yüklenemedi. Biraz sonra tekrar deneyin.",
+        "steps": {
+          "storeName": {
+            "title": "Mağazanıza bir ad verin",
+            "description": "Mağaza adı panelde ve müşterilerinize gösterilen yerlerde kullanılır.",
+            "action": "Mağaza ayarlarını aç"
+          },
+          "currency": {
+            "title": "Para birimini belirleyin",
+            "description": "Ürün fiyatları bu para biriminde girilir ve gösterilir; Türkiye için Türk lirası (TRY).",
+            "action": "Mağaza ayarlarını aç"
+          },
+          "region": {
+            "title": "Satış yapacağınız ülkeyi ekleyin",
+            "description": "Hangi ülkeye satış yaptığınızı ve vergilerin nasıl hesaplanacağını belirler; panelde bu ekranın adı \"Bölgeler\".",
+            "action": "Bölgeleri aç"
+          },
+          "location": {
+            "title": "Gönderim adresinizi ekleyin",
+            "description": "Kargoların çıkacağı depo ya da dükkân adresidir; stok bu adrese göre tutulur.",
+            "action": "Konumları aç"
+          },
+          "shipping": {
+            "title": "Bir kargo seçeneği tanımlayın",
+            "description": "Müşteriler sipariş verirken bu seçeneklerden birini seçer (ör. \"Standart kargo\"); gönderim adresinizin sayfasından eklenir.",
+            "action": "Kargo seçeneği ekle"
+          },
+          "product": {
+            "title": "İlk ürününüzü yayınlayın",
+            "description": "Yalnızca \"Yayınlandı\" durumundaki ürünler mağazanızda görünür; taslaklar müşterilere gösterilmez.",
+            "action": "Ürün ekle"
+          }
+        }
+      },
+      "actions": {
+        "title": "Hızlı işlemler",
+        "addProduct": {
+          "title": "Ürün ekle",
+          "description": "Ad, fotoğraf, fiyat ve stok bilgisini girerek yeni bir ürün oluşturun.",
+          "button": "Ürün ekle"
+        },
+        "orders": {
+          "title": "Siparişler",
+          "description": "Gelen siparişleri görün; ödemesini ve kargosunu takip edin.",
+          "button": "Siparişleri gör"
+        },
+        "settings": {
+          "title": "Ayarlar",
+          "description": "Mağaza bilgileri, kargo, SEO ve diğer ayarlar.",
+          "button": "Ayarları aç"
+        }
+      },
+      "numbers": {
+        "title": "Ürünleriniz",
+        "viewAll": "Tüm ürünler",
+        "published": {
+          "label": "Yayınlandı",
+          "hint": "Mağazanızda müşterilerin gördüğü ürünler"
+        },
+        "draft": {
+          "label": "Taslak",
+          "hint": "Henüz yayınlanmamış, yalnızca panelde görünen ürünler"
+        },
+        "empty": "Henüz ürün eklemediniz. İlk ürününüzü ekleyerek başlayın.",
+        "error": "Ürün sayıları şu an yüklenemedi. Biraz sonra tekrar deneyin."
+      }
+    },
     "billingProfile": {
       "title": "Fatura bilgileri",
       "empty": "Müşteri henüz fatura bilgisi girmedi.",
