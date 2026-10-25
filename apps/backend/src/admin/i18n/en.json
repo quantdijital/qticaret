@@ -87,6 +87,23 @@
         },
         "empty": "You have not added any products yet. Start by adding your first one.",
         "error": "Product numbers could not be loaded right now. Please try again shortly."
+      },
+      "orders": {
+        "title": "Today",
+        "viewAll": "All orders",
+        "error": "Order numbers could not be loaded right now. Try again in a moment.",
+        "awaiting": {
+          "label": "Waiting to be shipped",
+          "hint": "Paid orders with no shipment created yet"
+        },
+        "todayOrders": {
+          "label": "Today's orders",
+          "hint": "Orders placed since midnight"
+        },
+        "todaySales": {
+          "label": "Today's sales",
+          "hint": "Total of today's orders, canceled ones left out, tax included"
+        }
       }
     },
     "billingProfile": {
@@ -108,76 +125,6 @@
     },
     "errors": {
       "generic": "That did not work. Please try again."
-    },
-    "serverErrors": {
-      "seo": {
-        "template_invalid": "The template has a tag this field does not support, or broken braces.",
-        "path_taken": "Another record already uses this URL.",
-        "path_reserved": "This URL is reserved for the store's own pages."
-      },
-      "features": {
-        "platform_owned": "This feature is managed by the platform.",
-        "unknown": "There is no such feature.",
-        "disabled": "This feature is turned off."
-      },
-      "platform_settings": {
-        "invalid": "The value is not valid.",
-        "host_invalid": "Enter the domain without https:// or a path, e.g. shop.com.",
-        "robots_invalid": "robots.txt may only hold User-agent, Allow, Disallow, Sitemap, Crawl-delay lines and comments.",
-        "text_invalid": "The text cannot contain invisible control characters.",
-        "email_invalid": "Enter a valid email address.",
-        "phone_invalid": "Enter a valid Turkish phone number.",
-        "timezone_invalid": "Choose a valid time zone.",
-        "unknown_section": "There is no such settings section."
-      },
-      "errors": {
-        "users_only": "Only signed-in admin users can do this.",
-        "too_many_requests": "Too many attempts. Wait a moment and try again.",
-        "busy": "The record is being updated by another action; try again in a few seconds."
-      },
-      "product_attributes": {
-        "key_invalid": "The key starts with a lowercase letter and holds only lowercase letters, digits and underscores.",
-        "key_taken": "A key can be used once per template.",
-        "handle_invalid": "The handle holds only lowercase letters, digits and hyphens.",
-        "handle_taken": "Another template uses this handle.",
-        "options_required": "Add at least one option for a choice attribute.",
-        "options_not_allowed": "This attribute type takes no options.",
-        "options_duplicate": "Option values cannot repeat.",
-        "option_title_required": "Enter the product option's name for a variant attribute.",
-        "variant_only": "variesBy and the option name apply to variant attributes only.",
-        "option_unknown": "The value is not one of this attribute's options.",
-        "value_invalid": "The value is not valid for this attribute.",
-        "type_locked": "An attribute products have values for cannot change type or scope.",
-        "option_in_use": "An option products use cannot be removed.",
-        "values_exist": "Products have values for the attributes being removed.",
-        "template_in_use": "Products use this template; remove it from them first.",
-        "definition_unknown": "The attribute does not belong to this template.",
-        "product_unknown": "Product not found.",
-        "text_invalid": "The text cannot contain invisible control characters.",
-        "option_value_invalid": "An option value holds only lowercase letters, digits, hyphens and underscores (e.g. stainless_steel).",
-        "definition_locked": "An attribute products have values for cannot change its key or unit.",
-        "template_change_unconfirmed": "Changing the template deletes the product's current values; confirm and try again."
-      },
-      "async_job": {
-        "type_unknown": "There is no such job type.",
-        "input_invalid": "The job's options are not valid.",
-        "already_running": "One of these jobs is already queued or running.",
-        "result_unavailable": "This job has no result to download, or it expired.",
-        "not_queued": "The job has already started."
-      },
-      "catalog": {
-        "handle_invalid": "The handle may contain only lowercase letters, digits and hyphens.",
-        "handle_required": "No handle could be made from the title; enter one yourself.",
-        "dimensions_required": "A physical product needs weight and dimensions for every variant before it is published.",
-        "primary_category_not_assigned": "The primary category must be one of the product's categories.",
-        "successor_self": "A product cannot succeed itself.",
-        "successor_unknown": "The selected product was not found.",
-        "successor_loop": "This choice would create a redirect loop.",
-        "variant_unknown": "The variant does not belong to this product.",
-        "mpn_invalid": "The MPN contains invalid characters.",
-        "product_unknown": "Product not found.",
-        "variants_too_many": "At most 500 variants can be saved at once."
-      }
     },
     "settings": {
       "features": {

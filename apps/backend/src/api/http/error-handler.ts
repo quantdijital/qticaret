@@ -2,6 +2,7 @@ import { getHttpResponseFromError } from "@medusajs/framework/http"
 import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { DEFAULT_VALIDATION_MESSAGE, lockTimeoutError, toHttpError } from "../../lib/errors"
 import { currentRequestId, logger } from "../../lib/logging"
+import { forDashboard } from "./dashboard-messages"
 import { INTERNAL_ERROR_BODY, sanitizeErrorResponse } from "./error-response"
 import type { ErrorBody } from "./error-response"
 import { logRejection } from "./reject"
@@ -119,11 +120,16 @@ function logError(
   )
 }
 
-function send(res: MedusaResponse, resolved: ResolvedError, requestId: string): void {
+function send(
+  req: MedusaRequest,
+  res: MedusaResponse,
+  resolved: ResolvedError,
+  requestId: string
+): void {
   if (resolved.retryAfterSeconds !== undefined) {
     res.setHeader("Retry-After", String(resolved.retryAfterSeconds))
   }
-  res.status(resolved.status).json({ ...resolved.body, request_id: requestId })
+  res.status(resolved.status).json({ ...forDashboard(req, resolved.body), request_id: requestId })
 }
 
 export function platformErrorHandler(
@@ -150,7 +156,7 @@ export function platformErrorHandler(
   try {
     const resolved = resolveError(error, req.path)
     logError(error, resolved, req, requestId)
-    send(res, resolved, requestId)
+    send(req, res, resolved, requestId)
   } catch (handlerError) {
     // Mapping or logging failed (Medusa's formatter throws on malformed
     // database errors): answer with the generic 500 and record both

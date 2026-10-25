@@ -22,5 +22,5 @@ export type {
   ValidationErrorShape,
 } from "./errors"
 export { lockTimeoutError, uniqueViolationKeys } from "./db"
-export { toHttpError } from "./http"
+export { I18N_KEY, toHttpError } from "./http"
 export type { HttpErrorResponse } from "./http"

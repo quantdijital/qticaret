@@ -24,7 +24,8 @@ const retryAfterSecondsOf = (ms: number): number =>
   Math.min(MAX_RETRY_AFTER_SECONDS, Math.max(1, Math.ceil(ms / 1000)))
 
 // `billing_profile.tax_id_invalid`: dotted snake_case, nothing else
-const I18N_KEY = /^[a-z][a-z0-9_]*(\.[a-z0-9_]+)+$/
+/** What an i18n key looks like (`catalog.handle_invalid`), the only message clients get. */
+export const I18N_KEY = /^[a-z][a-z0-9_]*(\.[a-z0-9_]+)+$/
 
 /** A `safeMessage` that is not an i18n key (say, provider text) never reaches the client. */
 const clientMessage = (safeMessage: string, fallback: string): string =>

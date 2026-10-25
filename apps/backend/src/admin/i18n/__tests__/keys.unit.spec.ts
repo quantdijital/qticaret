@@ -1,5 +1,6 @@
 import { readFileSync, readdirSync } from "node:fs"
 import { join } from "node:path"
+import coreTr from "../core-overrides/tr.json"
 import en from "../en.json"
 import tr from "../tr.json"
 
@@ -57,6 +58,18 @@ describe("admin translations", () => {
       })
       expect({ page, tr: typeof lookup(tr, label) }).toEqual({ page, tr: "string" })
       expect({ page, en: typeof lookup(en, label) }).toEqual({ page, en: "string" })
+    }
+  })
+
+  // adr/0021: core screens' Turkish rewritten in our glossary, nothing of ours
+  it("override only core keys, with real Turkish texts", () => {
+    expect(Object.keys(coreTr)).not.toContain("qticaret")
+    for (const key of leafKeys(coreTr)) {
+      const text = lookup(coreTr, key)
+      expect({ key, ok: typeof text === "string" && text.trim().length > 0 }).toEqual({
+        key,
+        ok: true,
+      })
     }
   })
 

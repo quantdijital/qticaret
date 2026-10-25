@@ -1,5 +1,6 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { currentRequestId, logger } from "../../lib/logging"
+import { forDashboard } from "./dashboard-messages"
 import type { ErrorBody } from "./error-response"
 import { ensureRequestId } from "./request-id"
 import { requestPath } from "./request-path"
@@ -43,5 +44,5 @@ export function rejectRequest(
   const requestId = ensureRequestId(req, res)
   applySecurityHeaders(res)
   logRejection(req, requestId, { status, type: body.type, reason })
-  res.status(status).json({ ...body, request_id: requestId })
+  res.status(status).json({ ...body, ...forDashboard(req, body), request_id: requestId })
 }

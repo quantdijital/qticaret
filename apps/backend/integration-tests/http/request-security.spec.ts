@@ -150,7 +150,8 @@ medusaIntegrationTestRunner({
       expect(json.status).toBe(200)
       for (const refused of [form, elsewhere, upperCase]) {
         expect(refused.status).toBe(403)
-        expect(refused.data).toMatchObject({ message: "errors.csrf_rejected" })
+        // A session request is the dashboard's: the key comes in `code` (adr/0021)
+        expect(refused.data).toMatchObject({ code: "errors.csrf_rejected" })
       }
     })
 

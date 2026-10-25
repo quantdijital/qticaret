@@ -87,6 +87,23 @@
         },
         "empty": "Henüz ürün eklemediniz. İlk ürününüzü ekleyerek başlayın.",
         "error": "Ürün sayıları şu an yüklenemedi. Biraz sonra tekrar deneyin."
+      },
+      "orders": {
+        "title": "Bugün",
+        "viewAll": "Tüm siparişler",
+        "error": "Sipariş sayıları şu an yüklenemedi. Biraz sonra tekrar deneyin.",
+        "awaiting": {
+          "label": "Kargoya hazırlanmayı bekleyen",
+          "hint": "Ödemesi alınmış, henüz gönderisi oluşturulmamış siparişler"
+        },
+        "todayOrders": {
+          "label": "Bugünkü siparişler",
+          "hint": "Bugün gece yarısından beri gelen siparişler"
+        },
+        "todaySales": {
+          "label": "Bugünkü satış",
+          "hint": "Bugünkü siparişlerin toplamı; iptal edilenler hariç, KDV dahil"
+        }
       }
     },
     "billingProfile": {
@@ -108,76 +125,6 @@
     },
     "errors": {
       "generic": "İşlem tamamlanamadı. Lütfen tekrar deneyin."
-    },
-    "serverErrors": {
-      "seo": {
-        "template_invalid": "Şablonda bu alan için tanımlı olmayan bir etiket ya da hatalı süslü parantez var.",
-        "path_taken": "Bu adres başka bir kayıt tarafından kullanılıyor.",
-        "path_reserved": "Bu adres mağazanın kendi sayfalarına ayrılmış."
-      },
-      "features": {
-        "platform_owned": "Bu özellik platform tarafından yönetilir.",
-        "unknown": "Böyle bir özellik yok.",
-        "disabled": "Bu özellik kapalı."
-      },
-      "platform_settings": {
-        "invalid": "Girilen değer geçerli değil.",
-        "host_invalid": "Alan adını https:// ve yol olmadan yazın, ör. magaza.com.tr.",
-        "robots_invalid": "robots.txt yalnızca User-agent, Allow, Disallow, Sitemap, Crawl-delay satırları ve yorum içerebilir.",
-        "text_invalid": "Metin, görünmeyen kontrol karakterleri içeremez.",
-        "email_invalid": "Geçerli bir e-posta adresi girin.",
-        "phone_invalid": "Geçerli bir Türkiye telefon numarası girin.",
-        "timezone_invalid": "Geçerli bir saat dilimi seçin.",
-        "unknown_section": "Böyle bir ayar bölümü yok."
-      },
-      "errors": {
-        "users_only": "Bu işlemi yalnızca oturum açmış yöneticiler yapabilir.",
-        "too_many_requests": "Çok fazla deneme yapıldı. Biraz bekleyip tekrar deneyin.",
-        "busy": "Kayıt şu an başka bir işlemle güncelleniyor; birkaç saniye sonra tekrar deneyin."
-      },
-      "product_attributes": {
-        "key_invalid": "Anahtar küçük harfle başlamalı; yalnızca küçük harf, rakam ve alt çizgi içerebilir.",
-        "key_taken": "Bu şablonda aynı anahtar iki kez kullanılamaz.",
-        "handle_invalid": "Tanıtıcı yalnızca küçük harf, rakam ve tire içerebilir.",
-        "handle_taken": "Bu tanıtıcı başka bir şablonda kullanılıyor.",
-        "options_required": "Seçimli özellik için en az bir seçenek ekleyin.",
-        "options_not_allowed": "Bu özellik tipi seçenek almaz.",
-        "options_duplicate": "Seçenek değerleri tekrarlanamaz.",
-        "option_title_required": "Varyant özelliği için ürün seçeneğinin adını girin.",
-        "variant_only": "variesBy ve seçenek adı yalnızca varyant özelliklerinde kullanılır.",
-        "option_unknown": "Seçilen değer bu özelliğin seçenekleri arasında yok.",
-        "value_invalid": "Girilen değer bu özellik için geçerli değil.",
-        "type_locked": "Ürünlerde değeri olan bir özelliğin tipi ya da kapsamı değiştirilemez.",
-        "option_in_use": "Ürünlerde kullanılan bir seçenek kaldırılamaz.",
-        "values_exist": "Kaldırılan özelliklerin ürünlerde değerleri var.",
-        "template_in_use": "Bu şablonu kullanan ürünler var; önce ürünlerden kaldırın.",
-        "definition_unknown": "Özellik bu şablona ait değil.",
-        "product_unknown": "Ürün bulunamadı.",
-        "text_invalid": "Metin, görünmeyen kontrol karakterleri içeremez.",
-        "option_value_invalid": "Seçenek değeri yalnızca küçük harf, rakam, tire ve alt çizgi içerebilir (ör. paslanmaz_celik).",
-        "definition_locked": "Ürünlerde değeri olan bir özelliğin anahtarı ve birimi değiştirilemez.",
-        "template_change_unconfirmed": "Şablon değişikliği ürünün mevcut değerlerini siler; onaylayarak tekrar deneyin."
-      },
-      "async_job": {
-        "type_unknown": "Böyle bir iş tipi yok.",
-        "input_invalid": "İş için verilen seçenekler geçerli değil.",
-        "already_running": "Bu işten biri zaten sırada ya da çalışıyor.",
-        "result_unavailable": "Bu işin indirilebilir bir sonucu yok ya da süresi doldu.",
-        "not_queued": "İş zaten başlamış."
-      },
-      "catalog": {
-        "handle_invalid": "Adres (handle) yalnızca küçük harf, rakam ve tire içerebilir; Türkçe karakter kullanmayın.",
-        "handle_required": "Başlıktan bir adres üretilemedi; adresi (handle) kendiniz girin.",
-        "dimensions_required": "Fiziksel bir ürünü yayınlamak için her varyantın ağırlığı ve ölçüleri girilmeli.",
-        "primary_category_not_assigned": "Birincil kategori, ürünün eklendiği kategorilerden biri olmalı.",
-        "successor_self": "Ürün kendi yerine geçemez.",
-        "successor_unknown": "Seçilen ürün bulunamadı.",
-        "successor_loop": "Bu seçim bir yönlendirme döngüsü oluşturur.",
-        "variant_unknown": "Varyant bu ürüne ait değil.",
-        "mpn_invalid": "MPN geçersiz karakter içeriyor.",
-        "product_unknown": "Ürün bulunamadı.",
-        "variants_too_many": "Tek seferde en çok 500 varyant kaydedilebilir."
-      }
     },
     "settings": {
       "features": {
