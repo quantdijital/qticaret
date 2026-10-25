@@ -4,7 +4,7 @@
 > Yalnızca **bugün var olanı** anlatır. Terimler için [docs/11](11-ogrenme-rehberi.md); ileride gelecek
 > klasörler dahil hedef yapı için [docs/02](02-klasor-yapisi.md). Yeni klasör veya önemli dosya eklendiğinde güncellenir.
 >
-> Son güncelleme: 2026-10-25, F2 S1–S10 bitti.
+> Son güncelleme: 2026-10-25, F2 S1–S12 bitti.
 
 ---
 
@@ -60,13 +60,14 @@ Medusa'nın ürün, sipariş ve müşteri gibi hazır modülleri `node_modules` 
 | [url-registry](../apps/backend/src/modules/url-registry) | Hangi URL hangi ürüne/sayfaya ait; aynı URL iki kez verilemez | F2 S7 |
 | [audit-log](../apps/backend/src/modules/audit-log) | Kim neyi ne zaman değiştirdi/gördü; yalnızca ekleme | F2 S8 |
 | [platform-settings](../apps/backend/src/modules/platform-settings) | Mağaza ve SEO ayarları, özellik bayrakları (`features.ts`) | F2 S9 |
+| [product-attributes](../apps/backend/src/modules/product-attributes) | Ürün özellik şablonları (malzeme, ölçü, beden gibi), tanımlar ve ürün değerleri | F2 S11 |
 
 Her modülün iç yapısı aynıdır (örnek: billing-profile):
 - `models/billing-profile.ts`: tablonun tanımı (kolonlar).
 - `service.ts`: o tabloyla çalışan metotlar. Medusa `MedusaService` ile listeleme/oluşturma metotlarını kendisi üretir; biz şifreleme gibi kendi metotlarımızı ekleriz.
 - `index.ts`: modülün kayıt adı (`billingProfile`).
 - `migrations/`: tabloyu veritabanında oluşturan SQL (`db:generate` ile üretilir, elle yazılmaz).
-- Ayrıca [medusa-config.ts](../apps/backend/medusa-config.ts) içinde kaydı ve [links/customer-billing-profile.ts](../apps/backend/src/links/customer-billing-profile.ts) ile müşteriye bağı vardır.
+- Ayrıca [medusa-config.ts](../apps/backend/medusa-config.ts) içinde kaydı ve [links/customer-billing-profile.ts](../apps/backend/src/links/customer-billing-profile.ts) ile müşteriye bağı vardır (ürün özellikleri de `links/product-attribute-*.ts` ile ürüne bağlıdır).
 
 ### 2.2 `src/workflows/`: iş akışları
 İş mantığı burada yaşar (altın kural 3). Her workflow adımlardan (`steps/`) oluşur; bir adım hata verirse önceki adımlar geri alınır (compensation).
@@ -74,6 +75,7 @@ Her modülün iç yapısı aynıdır (örnek: billing-profile):
 - [tr-address/](../apps/backend/src/workflows/tr-address): adreslerin TR verisine uyduğunu doğrula.
 - [audit-log/](../apps/backend/src/workflows/audit-log): `recordAuditEntryStep`, otomatik işleri (`system`) denetim kaydına yazan adım.
 - [platform-settings/](../apps/backend/src/workflows/platform-settings): ayar bölümü kaydetme ve bayrak açıp kapama (geri alınabilir); `assertFeatureEnabledStep`.
+- [product-attributes/](../apps/backend/src/workflows/product-attributes): şablon oluştur/güncelle/sil ve ürün değerlerini ürün başına kilitle kaydetme.
 - [hooks/](../apps/backend/src/workflows/hooks): Medusa'nın **kendi** workflow'larına takılan kancalar. Örnek: sepete adres yazılırken TR doğrulaması, müşteri silinince fatura profilinin silinmesi.
 
 ### 2.3 `src/api/`: dışarıya açılan kapılar
@@ -113,7 +115,8 @@ Her modülün iç yapısı aynıdır (örnek: billing-profile):
 ### 2.5 `src/admin/`: admin paneline eklenenler
 - `widgets/customer-billing-profile.tsx`: müşteri detay sayfasındaki fatura bilgisi kutusu.
 - `widgets/default-language.tsx`: admin'i ilk açılışta Türkçe yapar.
-- `routes/settings/features`, `routes/settings/seo`: Ayarlar > Özellikler ve Ayarlar > SEO sayfaları.
+- `routes/settings/features`, `routes/settings/seo`, `routes/settings/attribute-templates`: Ayarlar > Özellikler, SEO ve Ürün özellikleri sayfaları.
+- `widgets/product-attributes.tsx`: ürün sayfasındaki özellik formu (`components/product-attributes/`).
 - `lib/sdk.ts` (Medusa JS SDK, oturum çerezi), `lib/errors.ts` (API hata anahtarını Türkçe metne çevirir), `components/page-states.tsx` (yükleniyor ve hata durumları).
 - `i18n/tr.json`, `en.json`: bizim eklediğimiz parçaların metinleri.
 
@@ -138,6 +141,7 @@ Her modülün iç yapısı aynıdır (örnek: billing-profile):
 | Hangi ortam değişkeni zorunlu? | [lib/env.ts](../apps/backend/src/lib/env.ts) |
 | Hangi dosya türleri yüklenebiliyor? | [lib/security/upload/](../apps/backend/src/lib/security/upload), [api/http/upload-validator.ts](../apps/backend/src/api/http/upload-validator.ts) |
 | Kim neyi değiştirdi / kim müşteri verisine baktı? | `GET /admin/audit-log` ([route](../apps/backend/src/api/admin/audit-log/route.ts)); kayıt mantığı [api/http/audit/](../apps/backend/src/api/http/audit) |
+| Ürün özellikleri (şablon, değer) nerede tanımlı? | [modules/product-attributes](../apps/backend/src/modules/product-attributes); API `/admin/attribute-templates`, `/admin/products/:id/attributes`; ürünle bağı [links/](../apps/backend/src/links) |
 | Bir özellik açık mı, nasıl açılır? | `GET /admin/features`; bayrak tanımları [features.ts](../apps/backend/src/modules/platform-settings/features.ts) |
 | Mağaza / SEO ayarları nerede? | `GET /admin/platform-settings/store` ve `/seo`; alanlar [sections/](../apps/backend/src/modules/platform-settings/sections) |
 | Hangi modüller açık? | [medusa-config.ts](../apps/backend/medusa-config.ts) |

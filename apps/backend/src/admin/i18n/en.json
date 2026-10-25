@@ -4,7 +4,11 @@
       "loading": "Loading",
       "retry": "Try again",
       "save": "Save",
-      "reset": "Discard changes"
+      "reset": "Discard changes",
+      "cancel": "Cancel",
+      "edit": "Edit",
+      "delete": "Delete",
+      "remove": "Remove"
     },
     "billingProfile": {
       "title": "Billing details",
@@ -48,6 +52,29 @@
       "errors": {
         "users_only": "Only signed-in admin users can do this.",
         "too_many_requests": "Too many attempts. Wait a moment and try again."
+      },
+      "product_attributes": {
+        "key_invalid": "The key starts with a lowercase letter and holds only lowercase letters, digits and underscores.",
+        "key_taken": "A key can be used once per template.",
+        "handle_invalid": "The handle holds only lowercase letters, digits and hyphens.",
+        "handle_taken": "Another template uses this handle.",
+        "options_required": "Add at least one option for a choice attribute.",
+        "options_not_allowed": "This attribute type takes no options.",
+        "options_duplicate": "Option values cannot repeat.",
+        "option_title_required": "Enter the product option's name for a variant attribute.",
+        "variant_only": "variesBy and the option name apply to variant attributes only.",
+        "option_unknown": "The value is not one of this attribute's options.",
+        "value_invalid": "The value is not valid for this attribute.",
+        "type_locked": "An attribute products have values for cannot change type or scope.",
+        "option_in_use": "An option products use cannot be removed.",
+        "values_exist": "Products have values for the attributes being removed.",
+        "template_in_use": "Products use this template; remove it from them first.",
+        "definition_unknown": "The attribute does not belong to this template.",
+        "product_unknown": "Product not found.",
+        "text_invalid": "The text cannot contain invisible control characters.",
+        "option_value_invalid": "An option value holds only lowercase letters, digits, hyphens and underscores (e.g. stainless_steel).",
+        "definition_locked": "An attribute products have values for cannot change its key or unit.",
+        "template_change_unconfirmed": "Changing the template deletes the product's current values; confirm and try again."
       }
     },
     "settings": {
@@ -129,6 +156,85 @@
         "label": "Platform sample feature",
         "description": "A platform-managed sample feature that appears in tests only."
       }
+    },
+    "attributes": {
+      "title": "Product attributes",
+      "template": "Attribute template",
+      "noTemplate": "No template",
+      "noTemplates": "No attribute templates yet. Create one under Settings > Product attributes.",
+      "noValue": "Not set",
+      "required": "This field is required.",
+      "saved": "Product attributes saved.",
+      "variantAttribute": "{{label}}: set by the variant option \"{{option}}\".",
+      "changeTemplate": {
+        "title": "Change the template?",
+        "description": "The product's current attribute values will be removed when you save.",
+        "confirm": "Change",
+        "cancel": "Cancel"
+      }
+    },
+    "attributeTemplates": {
+      "title": "Product attributes",
+      "subtitle": "Define the attributes products take with templates; each product picks one template.",
+      "create": "Create template",
+      "createTitle": "New attribute template",
+      "editTitle": "Edit template",
+      "empty": "No templates yet. Create the first one for your products.",
+      "name": "Name",
+      "handle": "Handle",
+      "handleHint": "Lowercase letters, digits and hyphens; cannot be changed later.",
+      "description": "Description",
+      "attributes": "Attributes",
+      "noAttributes": "This template has no attributes yet.",
+      "addAttribute": "Add attribute",
+      "saved": "Template saved.",
+      "deleted": "Template deleted.",
+      "deleteTitle": "Delete the template?",
+      "deleteDescription": "The \"{{name}}\" template will be deleted.",
+      "removeValues": {
+        "title": "Remove attribute values?",
+        "description": "Products' values for the attributes you removed will be deleted too.",
+        "confirm": "Delete and save"
+      },
+      "definition": {
+        "label": "Label",
+        "key": "Key",
+        "keyHint": "E.g. material, length_cm",
+        "type": "Type",
+        "unit": "Unit",
+        "options": "Options",
+        "optionLabel": "Label",
+        "optionValue": "Value",
+        "addOption": "Add option",
+        "required": "Required",
+        "filterable": "Filterable",
+        "seoHighlight": "Highlight in SEO",
+        "scope": "Scope",
+        "optionTitle": "Product option name",
+        "variesBy": "Google variesBy",
+        "remove": "Remove attribute"
+      },
+      "types": {
+        "text": "Text",
+        "number": "Number",
+        "boolean": "Yes / No",
+        "select": "Single choice",
+        "multi_select": "Multiple choice"
+      },
+      "scopes": {
+        "product": "Product",
+        "variant": "Variant"
+      },
+      "variesBy": {
+        "none": "None",
+        "color": "Color",
+        "size": "Size",
+        "suggestedAge": "Suggested age",
+        "suggestedGender": "Suggested gender",
+        "material": "Material",
+        "pattern": "Pattern"
+      },
+      "publicWarning": "Attribute values are public on product pages and in the Store API. Do not keep internal data such as costs or supplier codes here."
     }
   }
 }

@@ -3,10 +3,35 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**F2 — Platform çekirdek modülleri + güvenlik tabanı** (devam; S1–S10 /13 bitti). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
+**F2 — Platform çekirdek modülleri + güvenlik tabanı** (devam; S1–S12 /13 bitti). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
 
 ## Son oturum özeti
 **2026-10-24 gece oturumu (S3, S5; S8 başladı).** Kullanıcı döndü; dört karar verdi: bağımlılıklar onaylandı (ioredis 5.11.1, fast-xml-parser 5.11.2, yauzl 3.4.0, kendi görsel başlık okuyucumuz), ADR-0011..0014 kabul edildi, otonom devam, eski "Gözden geçir" maddeleri olduğu gibi kabul. Commit `54abc2a`.
+
+2026-10-25 (F2 S12): F2.4b. Admin: ürün özellikleri widget'ı ve Ayarlar > Ürün özellikleri. Plan `/Users/deniz/.claude/plans/f2-s12-attribute-admin.md`.
+- **Widget (`product.details.after`):** Şablon seçimi ve tipine göre alanlar (metin, sayı+birim, evet/hayır, tek ve çoklu seçim). Varyant özellikleri bilgi satırı olarak görünür. Değeri olan üründe şablon değişimi onay ister.
+- **Şablon sayfası:**
+  - Liste; oluştur/düzenle çekmecesi.
+  - Tanım düzenleyici: seçenekler, bayraklar, kapsam, variesBy. Seçenek değeri etiketten üretilir.
+  - Silinen özelliğin değerleri varsa onay istenip yeniden gönderilir. Kullanılan şablon silinemez.
+  - "Değerler herkese görünür" uyarısı var.
+- **Doğrulama:** Admin tip denetimi, lint, `medusa build` temiz. Playwright duman testi S10'daki devreden işe bağlı; kullanıcı gözle kontrol eder.
+
+2026-10-25 (F2 S11): F2.4a. `product-attributes` backend (adr/0013). Plan `/Users/deniz/.claude/plans/f2-s11-product-attributes.md`.
+- **Modül:** şablon, tanım ve değer (tipli kolonlar, facet indeksleri, GIN). Link'ler: ürün ↔ şablon (tek) ve ürün ↔ değerler (`deleteCascade`; ürün silinince değerler gidiyor, testli).
+- **Workflow'lar:**
+  - Şablon oluştur/güncelle/sil compensation'lı ve şablon kilitli.
+  - Ürün değerleri ürün + şablon kilidiyle; plan → yaz → link adımları; yetim değerler temizleniyor.
+  - Değer şeması tanımlardan üretiliyor.
+- **API:** `/admin/attribute-templates` CRUD, `GET/POST /admin/products/:id/attributes`; Store'da değerler ve seçenek etiketleri.
+- **`lib/errors`:** `ConflictError` (409, i18n anahtarı korunur). Medusa'nın CONFLICT yanıtı mesajı genel bir cümleyle değiştiriyordu.
+- **İnceleme:** Güvenlik incelemesi yapıldı, yüksek bulgu yok. 5 orta bulgunun 4'ü düzeltildi:
+  - Store `*`/ilişki geçişi guard'ı.
+  - `constructor` anahtarı prototipten okunuyordu.
+  - Şablon güncellemesi tüm değerleri belleğe yüklüyordu.
+  - Seçenek etiketleri vitrine kapalıydı.
+  - Görünürlük bayrağı ertelendi, admin'de uyarı var. Düşüklerin çoğu düzeltildi; kalanlar adr/0013 ekinde.
+- **KK:** "Attribute şablonu tanımlayıp ürüne değer atanabiliyor, Store API'de görünüyor" karşılandı.
 
 2026-10-25 (F2 S10): F2.3b. Admin: Ayarlar > Özellikler ve Ayarlar > SEO.
 - **Bağımlılıklar** (kullanıcı onayı, exact, ≥14 gün): `@medusajs/js-sdk` 2.21.2, `react-hook-form` 7.89.0, `@hookform/resolvers` 5.9.1.
@@ -194,8 +219,8 @@
 | S8 ✅ | F2.5 | `audit-log` modülü, mutasyon ve okuma kaydı. KK: fiyat değişimi, TCKN okuma | S3 | 0011 |
 | S9 ✅ | F2.3a | `platform-settings` backend: bölümler, bayraklar, cache, uygulama noktaları. KK: kapalı bayrak | S7, S8 | 0012 |
 | S10 ✅ | F2.3b | Admin: Ayarlar > Özellikler ve Ayarlar > SEO sayfaları | S9 | — |
-| S11 | F2.4a | `product-attributes` backend: modül, link'ler, workflow'lar, admin/store API. KK: Store API'de değer | S8 | 0013 |
-| S12 | F2.4b | Admin: ürün widget'ı + şablon yönetim sayfası | S11 | — |
+| S11 ✅ | F2.4a | `product-attributes` backend: modül, link'ler, workflow'lar, admin/store API. KK: Store API'de değer | S8 | 0013 |
+| S12 ✅ | F2.4b | Admin: ürün widget'ı + şablon yönetim sayfası | S11 | — |
 | S13 | F2.8 | `async-job` modülü, file-s3, "İşler" sayfası; ilk tip denetim kaydı CSV dışa aktarma | S5, S8 | 0014 |
 
 Görev ayrıntıları:
@@ -362,6 +387,12 @@ Paralel zincirler:
     - S13: `presigned-urls` yolu için uzantı/MIME allowlist'i ve worker'da doğrulama; CSV dışa aktarımın ayırıcısı ve BOM'u.
     - Hesap kilidi ve IP'den bağımsız kimlik sınırı (docs/04 "artan gecikme + kilit"); admin `limit` üst sınırı ölçülünce.
     - Admin, çekirdek dashboard'un çevirmediği `errors.too_many_requests` gibi anahtarları ham gösteriyor.
+  - **S11'den devreden:**
+    - Özellik görünürlüğü (`is_public`) ve Store yanıt filtresi.
+    - (ürün, tanım) için DB tekillik indeksi.
+    - `additional_data` ile ürün formundan kayıt (F3.9).
+    - Kilit alınamayınca 500 yerine 503 (billing-profile'da da aynı).
+    - Şablon güncellemesinde soft-delete edilen değerlerin link satırları kalıyor (zararsız; temizlik işi F13).
   - **S10'dan devreden:** Playwright e2e altyapısı: ayrı bir tarayıcı profili ve `@playwright/test` (onay gerekir). docs/06 kontrol listesindeki duman testleri bununla eklenecek.
   - **S9'dan devreden:**
     - `canonical_host` alan adı sahiplik doğrulaması (F16/F18).

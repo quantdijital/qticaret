@@ -4,7 +4,11 @@
       "loading": "Yükleniyor",
       "retry": "Tekrar dene",
       "save": "Kaydet",
-      "reset": "Değişiklikleri geri al"
+      "reset": "Değişiklikleri geri al",
+      "cancel": "Vazgeç",
+      "edit": "Düzenle",
+      "delete": "Sil",
+      "remove": "Kaldır"
     },
     "billingProfile": {
       "title": "Fatura bilgileri",
@@ -48,6 +52,29 @@
       "errors": {
         "users_only": "Bu işlemi yalnızca oturum açmış yöneticiler yapabilir.",
         "too_many_requests": "Çok fazla deneme yapıldı. Biraz bekleyip tekrar deneyin."
+      },
+      "product_attributes": {
+        "key_invalid": "Anahtar küçük harfle başlamalı; yalnızca küçük harf, rakam ve alt çizgi içerebilir.",
+        "key_taken": "Bu şablonda aynı anahtar iki kez kullanılamaz.",
+        "handle_invalid": "Tanıtıcı yalnızca küçük harf, rakam ve tire içerebilir.",
+        "handle_taken": "Bu tanıtıcı başka bir şablonda kullanılıyor.",
+        "options_required": "Seçimli özellik için en az bir seçenek ekleyin.",
+        "options_not_allowed": "Bu özellik tipi seçenek almaz.",
+        "options_duplicate": "Seçenek değerleri tekrarlanamaz.",
+        "option_title_required": "Varyant özelliği için ürün seçeneğinin adını girin.",
+        "variant_only": "variesBy ve seçenek adı yalnızca varyant özelliklerinde kullanılır.",
+        "option_unknown": "Seçilen değer bu özelliğin seçenekleri arasında yok.",
+        "value_invalid": "Girilen değer bu özellik için geçerli değil.",
+        "type_locked": "Ürünlerde değeri olan bir özelliğin tipi ya da kapsamı değiştirilemez.",
+        "option_in_use": "Ürünlerde kullanılan bir seçenek kaldırılamaz.",
+        "values_exist": "Kaldırılan özelliklerin ürünlerde değerleri var.",
+        "template_in_use": "Bu şablonu kullanan ürünler var; önce ürünlerden kaldırın.",
+        "definition_unknown": "Özellik bu şablona ait değil.",
+        "product_unknown": "Ürün bulunamadı.",
+        "text_invalid": "Metin, görünmeyen kontrol karakterleri içeremez.",
+        "option_value_invalid": "Seçenek değeri yalnızca küçük harf, rakam, tire ve alt çizgi içerebilir (ör. paslanmaz_celik).",
+        "definition_locked": "Ürünlerde değeri olan bir özelliğin anahtarı ve birimi değiştirilemez.",
+        "template_change_unconfirmed": "Şablon değişikliği ürünün mevcut değerlerini siler; onaylayarak tekrar deneyin."
       }
     },
     "settings": {
@@ -129,6 +156,85 @@
         "label": "Platform deneme özelliği",
         "description": "Yalnızca testlerde görünen, platformun yönettiği örnek özellik."
       }
+    },
+    "attributes": {
+      "title": "Ürün özellikleri",
+      "template": "Özellik şablonu",
+      "noTemplate": "Şablon yok",
+      "noTemplates": "Henüz özellik şablonu yok. Ayarlar > Ürün özellikleri'nden bir şablon oluşturun.",
+      "noValue": "Seçilmedi",
+      "required": "Bu alan zorunlu.",
+      "saved": "Ürün özellikleri kaydedildi.",
+      "variantAttribute": "{{label}}: varyant seçeneği \"{{option}}\" üzerinden belirlenir.",
+      "changeTemplate": {
+        "title": "Şablon değiştirilsin mi?",
+        "description": "Ürünün mevcut özellik değerleri kaydettiğinizde silinecek.",
+        "confirm": "Değiştir",
+        "cancel": "Vazgeç"
+      }
+    },
+    "attributeTemplates": {
+      "title": "Ürün özellikleri",
+      "subtitle": "Ürünlerin alacağı özellikleri şablonlarla tanımlayın; her ürün bir şablon seçer.",
+      "create": "Şablon oluştur",
+      "createTitle": "Yeni özellik şablonu",
+      "editTitle": "Şablonu düzenle",
+      "empty": "Henüz şablon yok. Ürünleriniz için ilk şablonu oluşturun.",
+      "name": "Ad",
+      "handle": "Tanıtıcı",
+      "handleHint": "Küçük harf, rakam ve tire; sonradan değiştirilemez.",
+      "description": "Açıklama",
+      "attributes": "Özellikler",
+      "noAttributes": "Bu şablonda henüz özellik yok.",
+      "addAttribute": "Özellik ekle",
+      "saved": "Şablon kaydedildi.",
+      "deleted": "Şablon silindi.",
+      "deleteTitle": "Şablon silinsin mi?",
+      "deleteDescription": "\"{{name}}\" şablonu silinecek.",
+      "removeValues": {
+        "title": "Özellik değerleri silinsin mi?",
+        "description": "Kaldırdığınız özelliklerin ürünlerdeki değerleri de silinecek.",
+        "confirm": "Sil ve kaydet"
+      },
+      "definition": {
+        "label": "Etiket",
+        "key": "Anahtar",
+        "keyHint": "Örn. malzeme, uzunluk_cm",
+        "type": "Tip",
+        "unit": "Birim",
+        "options": "Seçenekler",
+        "optionLabel": "Görünen ad",
+        "optionValue": "Değer",
+        "addOption": "Seçenek ekle",
+        "required": "Zorunlu",
+        "filterable": "Filtrelenebilir",
+        "seoHighlight": "SEO'da öne çıkar",
+        "scope": "Kapsam",
+        "optionTitle": "Ürün seçeneğinin adı",
+        "variesBy": "Google variesBy",
+        "remove": "Özelliği kaldır"
+      },
+      "types": {
+        "text": "Metin",
+        "number": "Sayı",
+        "boolean": "Evet / Hayır",
+        "select": "Tek seçim",
+        "multi_select": "Çoklu seçim"
+      },
+      "scopes": {
+        "product": "Ürün",
+        "variant": "Varyant"
+      },
+      "variesBy": {
+        "none": "Yok",
+        "color": "Renk (color)",
+        "size": "Beden / boyut (size)",
+        "suggestedAge": "Önerilen yaş (suggestedAge)",
+        "suggestedGender": "Önerilen cinsiyet (suggestedGender)",
+        "material": "Malzeme (material)",
+        "pattern": "Desen (pattern)"
+      },
+      "publicWarning": "Özellik değerleri ürün sayfasında ve Store API'de herkese görünür. Maliyet, tedarikçi kodu gibi iç bilgileri burada tutmayın."
     }
   }
 }
