@@ -390,7 +390,8 @@
       },
       "types": {
         "audit_log.export": "Denetim kaydı dışa aktarımı",
-        "seo.url_style": "Adres biçimi değişikliği"
+        "seo.url_style": "Adres biçimi değişikliği",
+        "seo.sitemap": "Site haritası"
       }
     },
     "audit": {
@@ -515,11 +516,7 @@
         "Kullanım istatistikleri",
         "Toplu kupon kodu üretimi"
       ],
-      "seo": [
-        "Mağaza SEO puanı",
-        "En çok iyileştirme bekleyen sayfalar",
-        "Site haritası ve robots.txt"
-      ],
+      "seo": ["Mağaza SEO puanı", "En çok iyileştirme bekleyen sayfalar"],
       "reports": [
         "Satış, KDV ve stok raporları",
         "Dönem karşılaştırmaları",
@@ -1276,6 +1273,20 @@
         "try": "Test et",
         "entity": "Sayfa açılıyor ({{kind}})."
       }
+    },
+    "sitemap": {
+      "title": "Site haritası",
+      "hint": "Arama motorları sayfalarınızı bu dosyalardan bulur; değişikliklerden birkaç dakika sonra kendiliğinden yenilenir.",
+      "refresh": "Şimdi yenile",
+      "queued": "Site haritası yenileniyor; Ayarlar > İşler'den izleyebilirsiniz.",
+      "hostMissing": "Ana alan adı girilmeden site haritası oluşmaz; adresler tam olmalı.",
+      "noIndexing": "Bu ortam arama motorlarına kapalı: robots.txt tüm tarayıcıları engelliyor, sayfalar noindex.",
+      "generated": "{{when}} oluşturuldu",
+      "index": "dizin",
+      "urls_one": "{{urls}} sayfa",
+      "urls_other": "{{urls}} sayfa",
+      "none": "Henüz site haritası yok; ilk yenilemede oluşur.",
+      "pending": "Son değişiklikler bir sonraki yenilemede eklenecek."
     }
   },
   "attributes": {

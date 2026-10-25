@@ -390,7 +390,8 @@
       },
       "types": {
         "audit_log.export": "Audit log export",
-        "seo.url_style": "URL style change"
+        "seo.url_style": "URL style change",
+        "seo.sitemap": "Sitemap"
       }
     },
     "audit": {
@@ -511,7 +512,7 @@
         "Bulk stock updates"
       ],
       "promotions": ["Coupons and campaigns", "Usage statistics", "Bulk coupon codes"],
-      "seo": ["Shop SEO score", "Pages that need the most work", "Sitemap and robots.txt"],
+      "seo": ["Shop SEO score", "Pages that need the most work"],
       "reports": ["Sales, VAT and stock reports", "Period comparisons", "Excel and CSV export"]
     }
   },
@@ -1264,6 +1265,20 @@
         "try": "Test",
         "entity": "The page opens ({{kind}})."
       }
+    },
+    "sitemap": {
+      "title": "Sitemap",
+      "hint": "Search engines find your pages in these files; they refresh a few minutes after changes.",
+      "refresh": "Refresh now",
+      "queued": "The sitemap is being refreshed; follow it in Settings > Jobs.",
+      "hostMissing": "No sitemap without the main domain: addresses must be complete.",
+      "noIndexing": "This instance is closed to search engines: robots.txt blocks all crawlers, pages say noindex.",
+      "generated": "made {{when}}",
+      "index": "index",
+      "urls_one": "{{urls}} page",
+      "urls_other": "{{urls}} pages",
+      "none": "No sitemap yet; the first refresh makes it.",
+      "pending": "The latest changes go in at the next refresh."
     }
   },
   "attributes": {

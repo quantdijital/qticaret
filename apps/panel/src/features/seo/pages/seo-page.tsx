@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { CatalogHealthCard } from "@/features/dashboard/components/catalog-health-card"
 import { redirectCountsQuery } from "@/features/seo/api/redirects"
+import { SitemapCard } from "@/features/seo/components/sitemap-card"
 import { sectionQuery } from "@/features/settings/api/sections"
 import type { SeoSettings } from "@/features/settings/api/sections"
 import { useStoreName } from "@/features/settings/api/store"
@@ -159,12 +160,13 @@ export function SeoOverviewPage() {
         <CatalogHealthCard className="xl:col-span-5" />
       </div>
       <div className="grid grid-cols-1 items-start gap-[var(--grid-gap)] xl:grid-cols-12">
-        <RedirectsCard className="xl:col-span-5" />
+        <RedirectsCard className="xl:col-span-6" />
+        <SitemapCard className="xl:col-span-6" />
         <SectionCard
           title={t("seo.advisor")}
           description={t("seo.advisorHint")}
           action={<StatusBadge tone="info">{t("upcoming.badge")}</StatusBadge>}
-          className="xl:col-span-7"
+          className="xl:col-span-12"
         >
           <ul className="grid gap-3 sm:grid-cols-2">
             {planned.map((item) => (
