@@ -1,5 +1,5 @@
 import { ValidationError } from "../../lib/errors"
-import { SLUG_SEGMENT, isValidSlug } from "../../lib/seo"
+import { SLUG_SEGMENT, isReservedPath, isValidSlug } from "../../lib/seo"
 
 export interface UrlKey {
   locale: string
@@ -39,6 +39,13 @@ export function assertUrlKey({ locale, path }: UrlKey): void {
   }
   if (!isPath(path)) {
     throw new ValidationError("seo.path_invalid", { field: "path" })
+  }
+}
+
+/** A record may not take a root path the storefront keeps (`/arama`, docs/13 §2.2). */
+export function assertClaimable({ path }: UrlKey): void {
+  if (isReservedPath(path)) {
+    throw new ValidationError("seo.path_reserved", { field: "path" })
   }
 }
 

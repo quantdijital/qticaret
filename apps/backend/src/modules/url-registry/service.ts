@@ -7,7 +7,7 @@ import {
 } from "@medusajs/framework/utils"
 import { ValidationError, uniqueViolationKeys } from "../../lib/errors"
 import { UrlEntry } from "./models/url-entry"
-import { assertUrlKey, assertUrlOwner, isUrlKey } from "./validation"
+import { assertClaimable, assertUrlKey, assertUrlOwner, isUrlKey } from "./validation"
 import type { UrlKey, UrlOwner } from "./validation"
 
 export type UrlEntryRecord = InferTypeOf<typeof UrlEntry>
@@ -23,7 +23,18 @@ export interface PathClaim {
   previousStatus: PathStatus | "none"
   /** The owner's earlier active paths in the locale, now reserved: the sources of their 301s. */
   replacedPaths: string[]
+  /** Entries of earlier active paths given up instead of reserved (`replaced: "free"`). */
+  freedIds: string[]
 }
+
+/**
+ * What happens to the owner's earlier active path: kept reserved for its
+ * redirect, or given up when the URL was never public (an unpublished
+ * product's renamed handle), so the slug stays free for another record.
+ */
+export type ReplacedPaths = "reserve" | "free"
+
+export type ClaimInput = UrlKey & UrlOwner & { replaced?: ReplacedPaths }
 
 const isSameOwner = (entry: UrlOwner, owner: UrlOwner): boolean =>
   entry.entity_type === owner.entity_type && entry.entity_id === owner.entity_id
@@ -43,11 +54,27 @@ class UrlRegistryModuleService extends MedusaService({ UrlEntry }) {
    * path becomes active again, and a path another record holds throws
    * `seo.path_taken`.
    */
-  async claimPath(input: UrlKey & UrlOwner, sharedContext: Context = {}): Promise<PathClaim> {
-    assertUrlKey(input)
-    assertUrlOwner(input)
+  async claimPath(input: ClaimInput, sharedContext: Context = {}): Promise<PathClaim> {
+    const [claim] = await this.claimPaths([input], sharedContext)
+    if (!claim) {
+      throw new Error("claimPaths returned no claim")
+    }
+    return claim
+  }
+
+  /**
+   * `claimPath` for several paths in one transaction: every claim or none,
+   * so a refused batch leaves no half of it behind (a workflow hook claims
+   * all the products it saved).
+   */
+  async claimPaths(inputs: ClaimInput[], sharedContext: Context = {}): Promise<PathClaim[]> {
+    for (const input of inputs) {
+      assertUrlKey(input)
+      assertClaimable(input)
+      assertUrlOwner(input)
+    }
     try {
-      return await this.claimPathInTransaction_(input, sharedContext)
+      return await this.claimPathsInTransaction_(inputs, sharedContext)
     } catch (error) {
       // The insert runs when the transaction commits, so a concurrent claim
       // that took the path first surfaces here, outside the transaction
@@ -59,28 +86,45 @@ class UrlRegistryModuleService extends MedusaService({ UrlEntry }) {
   }
 
   @InjectTransactionManager()
-  protected async claimPathInTransaction_(
-    input: UrlKey & UrlOwner,
+  protected async claimPathsInTransaction_(
+    inputs: ClaimInput[],
     @MedusaContext() sharedContext: Context = {}
-  ): Promise<PathClaim> {
+  ): Promise<PathClaim[]> {
+    const claims: PathClaim[] = []
+    for (const input of inputs) {
+      claims.push(await this.claimOne_(input, sharedContext))
+    }
+    return claims
+  }
+
+  protected async claimOne_(input: ClaimInput, sharedContext: Context): Promise<PathClaim> {
     const { locale, path, entity_type, entity_id } = input
     const [existing] = await this.listUrlEntries({ locale, path }, { take: 1 }, sharedContext)
     if (existing && !isSameOwner(existing, input)) {
       throw pathTakenError()
     }
     if (existing?.status === "active") {
-      return { entry: existing, previousStatus: "active", replacedPaths: [] }
+      return { entry: existing, previousStatus: "active", replacedPaths: [], freedIds: [] }
     }
     const active = await this.listUrlEntries(
       { locale, entity_type, entity_id, status: "active" },
       {},
       sharedContext
     )
+    const free = input.replaced === "free"
     if (active.length > 0) {
-      await this.updateUrlEntries(
-        active.map(({ id }) => ({ id, status: "reserved" as const })),
-        sharedContext
-      )
+      if (free) {
+        await this.softDeleteUrlEntries(
+          active.map(({ id }) => id),
+          {},
+          sharedContext
+        )
+      } else {
+        await this.updateUrlEntries(
+          active.map(({ id }) => ({ id, status: "reserved" as const })),
+          sharedContext
+        )
+      }
     }
     const entry = existing
       ? await this.updateUrlEntries({ id: existing.id, status: "active" }, sharedContext)
@@ -91,7 +135,8 @@ class UrlRegistryModuleService extends MedusaService({ UrlEntry }) {
     return {
       entry,
       previousStatus: existing ? "reserved" : "none",
-      replacedPaths: active.map((replaced) => replaced.path),
+      replacedPaths: free ? [] : active.map((replaced) => replaced.path),
+      freedIds: free ? active.map((replaced) => replaced.id) : [],
     }
   }
 
@@ -101,7 +146,7 @@ class UrlRegistryModuleService extends MedusaService({ UrlEntry }) {
    */
   @InjectTransactionManager()
   async unclaimPath(claim: PathClaim, @MedusaContext() sharedContext: Context = {}): Promise<void> {
-    const { entry, previousStatus, replacedPaths } = claim
+    const { entry, previousStatus, replacedPaths, freedIds } = claim
     const [current] = await this.listUrlEntries({ id: entry.id }, { take: 1 }, sharedContext)
     if (current && isSameOwner(current, entry)) {
       if (previousStatus === "none") {
@@ -109,6 +154,9 @@ class UrlRegistryModuleService extends MedusaService({ UrlEntry }) {
       } else if (previousStatus === "reserved") {
         await this.updateUrlEntries({ id: current.id, status: "reserved" }, sharedContext)
       }
+    }
+    if (freedIds.length > 0) {
+      await this.restoreFreed_(freedIds)
     }
     if (replacedPaths.length === 0) {
       return
@@ -154,6 +202,48 @@ class UrlRegistryModuleService extends MedusaService({ UrlEntry }) {
       await this.updateUrlEntries({ id: existing.id, status: "reserved" }, sharedContext)
     }
     return existing.status
+  }
+
+  // Each in a transaction of its own: a freed path another record took
+  // meanwhile fails alone, when it commits, and stays with that record
+  protected async restoreFreed_(ids: string[]): Promise<void> {
+    for (const id of ids) {
+      try {
+        await this.restoreUrlEntries([id])
+      } catch (error) {
+        if (!uniqueViolationKeys(error)?.includes("path")) {
+          throw error
+        }
+      }
+    }
+  }
+
+  /**
+   * Gives up every path of a record whose URL was never public (an
+   * unpublished product that is deleted); returns the entries, so a
+   * compensation can bring them back with `restorePaths`.
+   */
+  @InjectTransactionManager()
+  async freePathsOf(
+    owner: UrlOwner,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<string[]> {
+    assertUrlOwner(owner)
+    const entries = await this.listUrlEntries(
+      { entity_type: owner.entity_type, entity_id: owner.entity_id },
+      {},
+      sharedContext
+    )
+    const ids = entries.map(({ id }) => id)
+    if (ids.length > 0) {
+      await this.softDeleteUrlEntries(ids, {}, sharedContext)
+    }
+    return ids
+  }
+
+  /** Undoes `freePathsOf` (a compensation); paths taken meanwhile stay taken. */
+  async restorePaths(ids: string[]): Promise<void> {
+    await this.restoreFreed_(ids)
   }
 
   /** Reserves every active path of a record that is deleted or unpublished; returns them. */

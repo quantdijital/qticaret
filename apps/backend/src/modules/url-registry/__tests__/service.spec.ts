@@ -101,6 +101,7 @@ moduleIntegrationTestRunner<UrlRegistryModuleService>({
         ["no leading slash", { ...OLD, path: "urun/x" }, "seo.path_invalid"],
         ["a trailing slash", { ...OLD, path: "/urun/x/" }, "seo.path_invalid"],
         ["a digits-only segment", { ...OLD, path: "/marka/4711" }, "seo.path_invalid"],
+        ["a root path the storefront keeps", { ...OLD, path: "/arama" }, "seo.path_reserved"],
         [
           "a segment over 80 characters",
           { ...OLD, path: `/urun/${"a".repeat(81)}` },
@@ -202,6 +203,59 @@ moduleIntegrationTestRunner<UrlRegistryModuleService>({
 
         expect(await reasonOf(service.freePath({ ...OLD, ...OTHER }))).toBe("seo.path_not_owned")
         expect(await service.freePath({ ...NEW, ...PRODUCT })).toBe(false)
+      })
+    })
+
+    describe("claimPaths", () => {
+      it("claims every path or none: a taken one leaves the batch unwritten", async () => {
+        await service.claimPath({ ...OLD, ...OTHER })
+        const first = { locale: "tr", path: "/urun/ekmek-bicagi", ...PRODUCT }
+
+        const refused = await reasonOf(service.claimPaths([first, { ...OLD, ...PRODUCT }]))
+
+        expect(refused).toBe("seo.path_taken")
+        expect(await service.resolvePath(first)).toBeNull()
+      })
+
+      it("gives the earlier path up instead of reserving it when asked", async () => {
+        await service.claimPath({ ...OLD, ...PRODUCT })
+
+        const [claim] = await service.claimPaths([{ ...NEW, ...PRODUCT, replaced: "free" }])
+
+        expect(claim).toMatchObject({ replacedPaths: [] })
+        expect(claim?.freedIds).toHaveLength(1)
+        expect(await service.resolvePath(OLD)).toBeNull()
+        // Another record may take the slug the unpublished product left
+        await service.claimPath({ ...OLD, ...OTHER })
+        expect(await service.resolvePath(OLD)).toMatchObject({ entity_id: OTHER.entity_id })
+      })
+
+      it("brings a freed path back on unclaim, unless another record took it", async () => {
+        await service.claimPath({ ...OLD, ...PRODUCT })
+        const kept = await service.claimPath({ ...NEW, ...PRODUCT, replaced: "free" })
+        await service.unclaimPath(kept)
+        expect(await service.resolvePath(OLD)).toEqual({ ...PRODUCT, status: "active" })
+
+        const lost = await service.claimPath({ ...NEW, ...PRODUCT, replaced: "free" })
+        await service.claimPath({ ...OLD, ...OTHER })
+        await service.unclaimPath(lost)
+        expect(await service.resolvePath(OLD)).toMatchObject({ entity_id: OTHER.entity_id })
+      })
+    })
+
+    describe("freePathsOf", () => {
+      it("gives up every path of a record, and restorePaths brings them back", async () => {
+        await service.claimPath({ ...OLD, ...PRODUCT })
+        await service.claimPath({ ...NEW, ...PRODUCT })
+
+        const ids = await service.freePathsOf(PRODUCT)
+
+        expect(ids).toHaveLength(2)
+        expect(await service.resolvePath(OLD)).toBeNull()
+        expect(await service.resolvePath(NEW)).toBeNull()
+        await service.restorePaths(ids)
+        expect(await service.resolvePath(NEW)).toEqual({ ...PRODUCT, status: "active" })
+        expect(await service.resolvePath(OLD)).toEqual({ ...PRODUCT, status: "reserved" })
       })
     })
 
