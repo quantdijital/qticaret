@@ -1,5 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { THEME_DENSITIES, THEME_MODES, THEME_PRESETS, THEME_RADII } from "@qticaret/types"
+import {
+  THEME_DENSITIES,
+  THEME_MODES,
+  THEME_PRESETS,
+  THEME_RADII,
+  THEME_SIDEBARS,
+} from "@qticaret/types"
 import type { AppearanceSettings } from "@qticaret/types"
 import { useEffect, useMemo } from "react"
 import { Controller, useForm, useWatch } from "react-hook-form"
@@ -24,7 +30,7 @@ import type { AppearanceForm as FormValues } from "@/theme"
 const HEX = /^#[0-9a-f]{6}$/
 
 /**
- * The shop's five choices (docs/18 §5). Every change repaints this screen
+ * The shop's choices (docs/18 §5): brand colour, menu, corners, density, mode. Every change repaints this screen
  * at once; leaving without saving paints the stored values back.
  */
 export function AppearanceForm({ saved }: { saved: AppearanceSettings }) {
@@ -37,6 +43,7 @@ export function AppearanceForm({ saved }: { saved: AppearanceSettings }) {
       radius: saved.radius,
       density: saved.density,
       mode: saved.mode,
+      sidebar: saved.sidebar,
     },
   })
   // `useWatch`, not `form.watch()`: the React Compiler can follow it. It
@@ -48,8 +55,9 @@ export function AppearanceForm({ saved }: { saved: AppearanceSettings }) {
       radius: watched.radius ?? saved.radius,
       density: watched.density ?? saved.density,
       mode: watched.mode ?? saved.mode,
+      sidebar: watched.sidebar ?? saved.sidebar,
     }),
-    [watched.brand_color, watched.radius, watched.density, watched.mode, saved]
+    [watched.brand_color, watched.radius, watched.density, watched.mode, watched.sidebar, saved]
   )
   const { isDirty } = form.formState
   const colorValid = HEX.test(values.brand_color)
@@ -157,6 +165,13 @@ export function AppearanceForm({ saved }: { saved: AppearanceSettings }) {
         </section>
 
         <Choice
+          name="sidebar"
+          label={t("settings.appearance.sidebar")}
+          options={THEME_SIDEBARS}
+          optionLabel={(option) => t(`settings.appearance.sidebarOptions.${option}`)}
+          form={form}
+        />
+        <Choice
           name="radius"
           label={t("settings.appearance.radius")}
           options={THEME_RADII}
@@ -200,7 +215,9 @@ export function AppearanceForm({ saved }: { saved: AppearanceSettings }) {
   )
 }
 
-interface ChoiceProps<K extends "radius" | "density" | "mode"> {
+type ChoiceName = "radius" | "density" | "mode" | "sidebar"
+
+interface ChoiceProps<K extends ChoiceName> {
   name: K
   label: string
   options: readonly FormValues[K][]
@@ -208,13 +225,7 @@ interface ChoiceProps<K extends "radius" | "density" | "mode"> {
   form: ReturnType<typeof useForm<FormValues>>
 }
 
-function Choice<K extends "radius" | "density" | "mode">({
-  name,
-  label,
-  options,
-  optionLabel,
-  form,
-}: ChoiceProps<K>) {
+function Choice<K extends ChoiceName>({ name, label, options, optionLabel, form }: ChoiceProps<K>) {
   return (
     <section className="flex flex-col gap-3">
       <Label id={`${name}-label`}>{label}</Label>

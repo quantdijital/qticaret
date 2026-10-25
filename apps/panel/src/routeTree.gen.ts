@@ -12,6 +12,14 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/_auth'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthIndexRouteImport } from './routes/_auth/index'
+import { Route as AuthCategoriesRouteImport } from './routes/_auth/categories'
+import { Route as AuthCustomersRouteImport } from './routes/_auth/customers'
+import { Route as AuthInventoryRouteImport } from './routes/_auth/inventory'
+import { Route as AuthOrdersRouteImport } from './routes/_auth/orders'
+import { Route as AuthProductsRouteImport } from './routes/_auth/products'
+import { Route as AuthPromotionsRouteImport } from './routes/_auth/promotions'
+import { Route as AuthReportsRouteImport } from './routes/_auth/reports'
+import { Route as AuthSeoRouteImport } from './routes/_auth/seo'
 import { Route as AuthSettingsRouteImport } from './routes/_auth/settings'
 import { Route as AuthSettingsIndexRouteImport } from './routes/_auth/settings/index'
 import { Route as AuthSettingsAppearanceRouteImport } from './routes/_auth/settings/appearance'
@@ -28,6 +36,46 @@ const LoginRoute = LoginRouteImport.update({
 const AuthIndexRoute = AuthIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthCategoriesRoute = AuthCategoriesRouteImport.update({
+  id: '/categories',
+  path: '/categories',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthCustomersRoute = AuthCustomersRouteImport.update({
+  id: '/customers',
+  path: '/customers',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthInventoryRoute = AuthInventoryRouteImport.update({
+  id: '/inventory',
+  path: '/inventory',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthOrdersRoute = AuthOrdersRouteImport.update({
+  id: '/orders',
+  path: '/orders',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthProductsRoute = AuthProductsRouteImport.update({
+  id: '/products',
+  path: '/products',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthPromotionsRoute = AuthPromotionsRouteImport.update({
+  id: '/promotions',
+  path: '/promotions',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthReportsRoute = AuthReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthSeoRoute = AuthSeoRouteImport.update({
+  id: '/seo',
+  path: '/seo',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthSettingsRoute = AuthSettingsRouteImport.update({
@@ -49,12 +97,28 @@ const AuthSettingsAppearanceRoute = AuthSettingsAppearanceRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof AuthIndexRoute
   '/login': typeof LoginRoute
+  '/categories': typeof AuthCategoriesRoute
+  '/customers': typeof AuthCustomersRoute
+  '/inventory': typeof AuthInventoryRoute
+  '/orders': typeof AuthOrdersRoute
+  '/products': typeof AuthProductsRoute
+  '/promotions': typeof AuthPromotionsRoute
+  '/reports': typeof AuthReportsRoute
+  '/seo': typeof AuthSeoRoute
   '/settings': typeof AuthSettingsRouteWithChildren
   '/settings/appearance': typeof AuthSettingsAppearanceRoute
   '/settings/': typeof AuthSettingsIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
+  '/categories': typeof AuthCategoriesRoute
+  '/customers': typeof AuthCustomersRoute
+  '/inventory': typeof AuthInventoryRoute
+  '/orders': typeof AuthOrdersRoute
+  '/products': typeof AuthProductsRoute
+  '/promotions': typeof AuthPromotionsRoute
+  '/reports': typeof AuthReportsRoute
+  '/seo': typeof AuthSeoRoute
   '/': typeof AuthIndexRoute
   '/settings/appearance': typeof AuthSettingsAppearanceRoute
   '/settings': typeof AuthSettingsIndexRoute
@@ -63,6 +127,14 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_auth': typeof AuthRouteWithChildren
   '/login': typeof LoginRoute
+  '/_auth/categories': typeof AuthCategoriesRoute
+  '/_auth/customers': typeof AuthCustomersRoute
+  '/_auth/inventory': typeof AuthInventoryRoute
+  '/_auth/orders': typeof AuthOrdersRoute
+  '/_auth/products': typeof AuthProductsRoute
+  '/_auth/promotions': typeof AuthPromotionsRoute
+  '/_auth/reports': typeof AuthReportsRoute
+  '/_auth/seo': typeof AuthSeoRoute
   '/_auth/settings': typeof AuthSettingsRouteWithChildren
   '/_auth/': typeof AuthIndexRoute
   '/_auth/settings/appearance': typeof AuthSettingsAppearanceRoute
@@ -71,13 +143,45 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/login' | '/settings' | '/settings/appearance' | '/settings/'
+    | '/'
+    | '/login'
+    | '/categories'
+    | '/customers'
+    | '/inventory'
+    | '/orders'
+    | '/products'
+    | '/promotions'
+    | '/reports'
+    | '/seo'
+    | '/settings'
+    | '/settings/appearance'
+    | '/settings/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/' | '/settings/appearance' | '/settings'
+  to:
+    | '/login'
+    | '/categories'
+    | '/customers'
+    | '/inventory'
+    | '/orders'
+    | '/products'
+    | '/promotions'
+    | '/reports'
+    | '/seo'
+    | '/'
+    | '/settings/appearance'
+    | '/settings'
   id:
     | '__root__'
     | '/_auth'
     | '/login'
+    | '/_auth/categories'
+    | '/_auth/customers'
+    | '/_auth/inventory'
+    | '/_auth/orders'
+    | '/_auth/products'
+    | '/_auth/promotions'
+    | '/_auth/reports'
+    | '/_auth/seo'
     | '/_auth/settings'
     | '/_auth/'
     | '/_auth/settings/appearance'
@@ -110,6 +214,62 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof AuthIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/categories': {
+      id: '/_auth/categories'
+      path: '/categories'
+      fullPath: '/categories'
+      preLoaderRoute: typeof AuthCategoriesRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/customers': {
+      id: '/_auth/customers'
+      path: '/customers'
+      fullPath: '/customers'
+      preLoaderRoute: typeof AuthCustomersRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/inventory': {
+      id: '/_auth/inventory'
+      path: '/inventory'
+      fullPath: '/inventory'
+      preLoaderRoute: typeof AuthInventoryRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/orders': {
+      id: '/_auth/orders'
+      path: '/orders'
+      fullPath: '/orders'
+      preLoaderRoute: typeof AuthOrdersRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/products': {
+      id: '/_auth/products'
+      path: '/products'
+      fullPath: '/products'
+      preLoaderRoute: typeof AuthProductsRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/promotions': {
+      id: '/_auth/promotions'
+      path: '/promotions'
+      fullPath: '/promotions'
+      preLoaderRoute: typeof AuthPromotionsRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/reports': {
+      id: '/_auth/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof AuthReportsRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/seo': {
+      id: '/_auth/seo'
+      path: '/seo'
+      fullPath: '/seo'
+      preLoaderRoute: typeof AuthSeoRouteImport
       parentRoute: typeof AuthRoute
     }
     '/_auth/settings': {
@@ -151,11 +311,27 @@ const AuthSettingsRouteWithChildren = AuthSettingsRoute._addFileChildren(
 )
 
 interface AuthRouteChildren {
+  AuthCategoriesRoute: typeof AuthCategoriesRoute
+  AuthCustomersRoute: typeof AuthCustomersRoute
+  AuthInventoryRoute: typeof AuthInventoryRoute
+  AuthOrdersRoute: typeof AuthOrdersRoute
+  AuthProductsRoute: typeof AuthProductsRoute
+  AuthPromotionsRoute: typeof AuthPromotionsRoute
+  AuthReportsRoute: typeof AuthReportsRoute
+  AuthSeoRoute: typeof AuthSeoRoute
   AuthSettingsRoute: typeof AuthSettingsRouteWithChildren
   AuthIndexRoute: typeof AuthIndexRoute
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
+  AuthCategoriesRoute: AuthCategoriesRoute,
+  AuthCustomersRoute: AuthCustomersRoute,
+  AuthInventoryRoute: AuthInventoryRoute,
+  AuthOrdersRoute: AuthOrdersRoute,
+  AuthProductsRoute: AuthProductsRoute,
+  AuthPromotionsRoute: AuthPromotionsRoute,
+  AuthReportsRoute: AuthReportsRoute,
+  AuthSeoRoute: AuthSeoRoute,
   AuthSettingsRoute: AuthSettingsRouteWithChildren,
   AuthIndexRoute: AuthIndexRoute,
 }

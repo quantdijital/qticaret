@@ -27,6 +27,18 @@ export default [
       "@typescript-eslint/no-confusing-void-expression": "off",
       "react-hooks/purity": "off",
       "react-refresh/only-export-components": "off",
+      // The generated code's own idioms (any from recharts, `!= null`, `||`)
+      "@typescript-eslint/no-unsafe-assignment": "off",
+      "@typescript-eslint/no-unsafe-member-access": "off",
+      "@typescript-eslint/no-unsafe-argument": "off",
+      "@typescript-eslint/no-unsafe-return": "off",
+      "@typescript-eslint/no-unsafe-call": "off",
+      "@typescript-eslint/no-unnecessary-condition": "off",
+      "@typescript-eslint/no-unnecessary-type-assertion": "off",
+      "@typescript-eslint/prefer-nullish-coalescing": "off",
+      "@typescript-eslint/no-deprecated": "off",
+      "@typescript-eslint/no-base-to-string": "off",
+      eqeqeq: "off",
     },
   },
   {

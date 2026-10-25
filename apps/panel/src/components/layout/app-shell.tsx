@@ -10,7 +10,7 @@ const SIDEBAR_STYLE = {
   "--sidebar-width-icon": "var(--layout-sidebar-width-icon)",
 } as CSSProperties
 
-/** Sidebar, top bar and the page area (docs/18 §2 "Yerleşim"). */
+/** Menu, top bar and the page, which uses the whole width (docs/18 §2 "Yerleşim"). */
 export function AppShell({ children }: { children: ReactNode }) {
   const { t } = useTranslation()
   return (
@@ -22,11 +22,11 @@ export function AppShell({ children }: { children: ReactNode }) {
         {t("app.skipToContent")}
       </a>
       <AppSidebar />
-      <SidebarInset className="min-w-0">
+      <SidebarInset className="min-w-0 bg-background">
         <Topbar />
         <main
           id="content"
-          className="mx-auto w-full max-w-[var(--content-max-width)] flex-1 px-[var(--page-padding)] py-6"
+          className="w-full flex-1 px-[var(--page-padding)] py-6 lg:px-[var(--page-padding-wide)] lg:py-8"
         >
           {children}
         </main>

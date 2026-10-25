@@ -1,0 +1,63 @@
+import type { UseQueryResult } from "@tanstack/react-query"
+import { useTranslation } from "react-i18next"
+import { BarList } from "@/components/charts/bar-list"
+import { AsyncBody } from "@/components/patterns/async-body"
+import { SectionCard } from "@/components/patterns/section-card"
+import { Skeleton } from "@/components/ui/skeleton"
+import type { DashboardOverview } from "@/features/dashboard/api/overview"
+import { formatMoney, formatPercent } from "@/lib/format"
+
+function Categories({ overview }: { overview: DashboardOverview }) {
+  const { t } = useTranslation()
+  const rows = overview.categories
+  if (rows.length === 0) {
+    return <p className="py-6 text-sm text-muted-foreground">{t("dashboard.categories.empty")}</p>
+  }
+  const total = rows.reduce((sum, row) => sum + Number(row.sales), 0)
+  return (
+    <BarList
+      items={rows.map((row) => ({
+        key: row.key,
+        label:
+          row.kind === "category"
+            ? (row.name ?? "")
+            : t(`dashboard.categories.${row.kind === "other" ? "other" : "uncategorized"}`),
+        value: Number(row.sales),
+        display: formatMoney(row.sales, overview.currency_code),
+        sub: total > 0 ? formatPercent(Number(row.sales) / total) : "",
+        muted: row.kind !== "category",
+      }))}
+    />
+  )
+}
+
+/** How the period's sales split across categories. */
+export function CategorySalesCard({
+  query,
+  className,
+}: {
+  query: UseQueryResult<DashboardOverview>
+  className?: string
+}) {
+  const { t } = useTranslation()
+  return (
+    <SectionCard
+      title={t("dashboard.categories.title")}
+      description={t("dashboard.categories.description")}
+      className={className}
+    >
+      <AsyncBody
+        query={query}
+        skeleton={
+          <div className="flex flex-col gap-4">
+            {[0, 1, 2, 3].map((index) => (
+              <Skeleton key={index} className="h-9 w-full" />
+            ))}
+          </div>
+        }
+      >
+        {(overview) => <Categories overview={overview} />}
+      </AsyncBody>
+    </SectionCard>
+  )
+}

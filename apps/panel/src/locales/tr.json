@@ -1,7 +1,8 @@
 {
   "app": {
     "name": "Panel",
-    "skipToContent": "İçeriğe geç"
+    "skipToContent": "İçeriğe geç",
+    "subtitle": "Yönetim paneli"
   },
   "common": {
     "save": "Kaydet",
@@ -30,7 +31,17 @@
     "advancedHint": "Henüz bu panele taşınmamış işler için",
     "account": "Hesap",
     "logout": "Çıkış yap",
-    "collapse": "Menüyü daralt"
+    "collapse": "Menüyü daralt",
+    "groups": {
+      "sales": "Satış",
+      "catalog": "Katalog",
+      "growth": "Büyüme"
+    },
+    "categories": "Kategoriler",
+    "inventory": "Stok",
+    "promotions": "Kampanyalar",
+    "seo": "SEO",
+    "reports": "Raporlar"
   },
   "login": {
     "title": "Giriş yap",
@@ -94,7 +105,94 @@
           "description": "Yalnızca yayındaki ürünler mağazada görünür."
         }
       },
-      "openInAdvanced": "Gelişmiş panelde aç"
+      "openInAdvanced": "Gelişmiş panelde aç",
+      "subtitle": "Satışa başlamadan önce tamamlanacak adımlar",
+      "hide": "Gizle",
+      "continue": "Devam et"
+    },
+    "subtitle": "{{date}} · Mağazanızın özeti",
+    "addProduct": "Ürün ekle",
+    "capped": "Sayılar ilk {{count}} siparişi kapsıyor.",
+    "kpi": {
+      "sales": "Satış",
+      "orders": "Sipariş",
+      "average": "Ortalama sepet",
+      "units": "Satılan ürün",
+      "salesHint": "KDV dahil, iptaller hariç",
+      "label": "Özet sayılar"
+    },
+    "sales": {
+      "title": "Satışlar",
+      "amount": "Tutar",
+      "count": "Sipariş",
+      "current": "Bu dönem",
+      "previous": "Önceki dönem",
+      "empty": "Bu dönemde satış yok. Siparişler geldikçe grafik burada oluşur.",
+      "table": "Grafiğin verisi"
+    },
+    "tasks": {
+      "title": "Bekleyen işler",
+      "description": "Sırada sizi bekleyenler",
+      "toShip": {
+        "label": "Kargoya hazırlanacak",
+        "hint": "Ödemesi alındı, gönderi bekliyor"
+      },
+      "awaitingPayment": {
+        "label": "Ödeme bekleyen",
+        "hint": "Onay ya da havale bekleyen siparişler"
+      },
+      "lowStock": {
+        "label": "Stoku azalan",
+        "hint": "{{threshold}} adet ve altı kalan ürünler"
+      },
+      "drafts": {
+        "label": "Taslak ürün",
+        "hint": "Henüz yayınlanmamış ürünler"
+      },
+      "allClear": "Bekleyen iş yok, her şey yolunda."
+    },
+    "recent": {
+      "title": "Son siparişler",
+      "viewAll": "Tüm siparişler",
+      "order": "Sipariş",
+      "customer": "Müşteri",
+      "date": "Tarih",
+      "items": "Ürün",
+      "total": "Tutar",
+      "status": "Durum",
+      "itemsCount": "{{count}} ürün",
+      "noName": "İsimsiz",
+      "empty": "Henüz sipariş yok. İlk sipariş geldiğinde burada görünecek."
+    },
+    "top": {
+      "title": "Çok satanlar",
+      "description": "Bu dönemde en çok satan ürünler",
+      "units": "{{count}} adet",
+      "empty": "Bu dönemde satış yok."
+    },
+    "statuses": {
+      "title": "Sipariş durumları",
+      "description": "Bu dönemdeki siparişler nerede",
+      "total": "{{count}} sipariş",
+      "empty": "Bu dönemde sipariş yok."
+    },
+    "categories": {
+      "title": "Kategorilere göre satış",
+      "description": "Satışın kategorilere dağılımı",
+      "uncategorized": "Kategorisiz",
+      "other": "Diğer",
+      "empty": "Bu dönemde satış yok."
+    },
+    "health": {
+      "title": "Katalog sağlığı",
+      "description": "Ürünleriniz ne kadar eksiksiz",
+      "score": "{{total}} üründen {{complete}} tanesi eksiksiz",
+      "withoutImage": "Görseli olmayan",
+      "withoutCategory": "Kategorisi olmayan",
+      "shortDescription": "Açıklaması {{words}} kelimeden kısa",
+      "missingDimensions": "Ağırlığı ya da ölçüsü eksik",
+      "allGood": "Bütün ürünler eksiksiz.",
+      "empty": "Henüz ürün yok."
     }
   },
   "settings": {
@@ -139,6 +237,13 @@
       "saved": "Görünüm kaydedildi.",
       "errors": {
         "color": "Renk #rrggbb biçiminde olmalı, ör. #2f6feb."
+      },
+      "sidebar": "Menü",
+      "sidebarHint": "Sol menünün zemini.",
+      "sidebarOptions": {
+        "dark": "Koyu",
+        "light": "Açık",
+        "brand": "Marka rengi"
       }
     }
   },
@@ -148,5 +253,97 @@
     "shipped": "Kargoda",
     "delivered": "Teslim edildi",
     "canceled": "İptal"
+  },
+  "command": {
+    "title": "Komut menüsü",
+    "description": "Bir sayfaya gidin ya da bir işlem çalıştırın.",
+    "placeholder": "Sayfa ya da işlem arayın…",
+    "empty": "Sonuç bulunamadı.",
+    "pages": "Sayfalar",
+    "actions": "İşlemler",
+    "appearance": "Görünüm ayarları",
+    "trigger": "Ara ya da bir sayfaya git…"
+  },
+  "topbar": {
+    "viewStore": "Mağazayı görüntüle"
+  },
+  "delta": {
+    "none": "Önceki dönemde yok",
+    "new": "Yeni",
+    "up": "Artış",
+    "down": "Azalış"
+  },
+  "period": {
+    "label": "Dönem",
+    "today": "Bugün",
+    "7d": "7 gün",
+    "30d": "30 gün",
+    "90d": "90 gün",
+    "compare": {
+      "today": "dünün aynı saatlerine göre",
+      "7d": "önceki 7 güne göre",
+      "30d": "önceki 30 güne göre",
+      "90d": "önceki 90 güne göre"
+    }
+  },
+  "stage": {
+    "awaiting_payment": "Ödeme bekliyor",
+    "to_ship": "Hazırlanacak",
+    "shipped": "Kargoda",
+    "delivered": "Teslim edildi",
+    "canceled": "İptal edildi"
+  },
+  "upcoming": {
+    "badge": "Hazırlanıyor",
+    "description": "Bu ekran yeni panelde hazırlanıyor. O zamana kadar aynı işi gelişmiş panelde yapabilirsiniz.",
+    "open": "Gelişmiş panelde aç",
+    "planned": "Bu ekranda olacaklar",
+    "features": {
+      "orders": [
+        "Durum, ödeme ve kargoya göre filtreler",
+        "Toplu kargo etiketi ve durum güncelleme",
+        "Sipariş detayı: ödeme, gönderi ve fatura tek bakışta",
+        "İade ve değişim talepleri"
+      ],
+      "customers": [
+        "Müşteri listesi ve arama",
+        "Sipariş geçmişi ve toplam harcama",
+        "Müşteri grupları",
+        "Adres ve fatura bilgileri"
+      ],
+      "products": [
+        "Görselli ürün listesi ve hızlı filtreler",
+        "Adım adım ürün ekleme sihirbazı",
+        "Varyant, fiyat ve stok düzenleme",
+        "SEO önerileri yan panelde"
+      ],
+      "categories": [
+        "Sürükle bırak kategori ağacı",
+        "Kategori sayfası ve SEO alanları",
+        "Ürünleri kategoriye toplu ekleme"
+      ],
+      "inventory": [
+        "Depo bazlı stok",
+        "Düşük stok listesi ve eşikler",
+        "Stok hareket geçmişi",
+        "Toplu stok güncelleme"
+      ],
+      "promotions": [
+        "Kupon ve kampanya oluşturma",
+        "Kullanım istatistikleri",
+        "Toplu kupon kodu üretimi"
+      ],
+      "seo": [
+        "Mağaza SEO puanı",
+        "En çok iyileştirme bekleyen sayfalar",
+        "Yönlendirmeler ve 404 günlüğü",
+        "Site haritası ve robots.txt"
+      ],
+      "reports": [
+        "Satış, KDV ve stok raporları",
+        "Dönem karşılaştırmaları",
+        "Excel ve CSV dışa aktarma"
+      ]
+    }
   }
 }

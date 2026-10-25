@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router"
-import { DashboardPage } from "@/features/dashboard/pages/dashboard-page"
+import { DashboardRoute } from "@/features/dashboard/pages/dashboard-page"
+import { dashboardSearchSchema } from "@/features/dashboard/period"
 
 export const Route = createFileRoute("/_auth/")({
-  component: DashboardPage,
+  validateSearch: dashboardSearchSchema,
+  component: DashboardRoute,
 })

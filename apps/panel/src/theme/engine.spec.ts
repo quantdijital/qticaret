@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs"
 import { resolve } from "node:path"
 import { converter } from "culori"
-import { DEFAULT_APPEARANCE, THEME_PRESETS } from "@qticaret/types"
+import { DEFAULT_APPEARANCE, THEME_PRESETS, THEME_SIDEBARS } from "@qticaret/types"
 import type { AppearanceSettings } from "@qticaret/types"
 import { describe, expect, it } from "vitest"
 import { AA_LARGE, AA_TEXT, contrast, parseBrandColor, resolveTheme } from "./engine"
@@ -24,20 +24,73 @@ const settings = (brand: string): AppearanceSettings => ({
 const MODES: ResolvedMode[] = ["light", "dark"]
 
 // Text pairs every screen relies on (docs/18 §8: AA, by the engine)
-const TEXT_PAIRS: [Var, Var][] = [
+const BASE_TEXT_PAIRS: [Var, Var][] = [
   ["--foreground", "--background"],
   ["--muted-foreground", "--background"],
   ["--card-foreground", "--card"],
   ["--primary-foreground", "--primary"],
   ["--accent-foreground", "--accent"],
-  ["--sidebar-foreground", "--sidebar"],
   ["--destructive-foreground", "--destructive"],
   ["--success-foreground", "--success"],
   ["--warning-foreground", "--warning"],
   ["--info-foreground", "--info"],
 ]
 
+// Status labels on their tint and on cards
+const STATUS_TEXT_PAIRS: [Var, Var][] = ["success", "warning", "destructive", "info"].flatMap(
+  (name): [Var, Var][] => [
+    [`--${name}-text`, `--${name}-soft`],
+    [`--${name}-text`, "--card"],
+  ]
+)
+
+// The navigation's text, for every sidebar style
+const SIDEBAR_TEXT_PAIRS: [Var, Var][] = [
+  ["--sidebar-foreground", "--sidebar"],
+  ["--sidebar-muted-foreground", "--sidebar"],
+  ["--sidebar-accent-foreground", "--sidebar-accent"],
+  ["--sidebar-primary-foreground", "--sidebar-primary"],
+]
+
+const TEXT_PAIRS: [Var, Var][] = [...BASE_TEXT_PAIRS, ...STATUS_TEXT_PAIRS]
+
 describe("resolveTheme", () => {
+  it.each(MODES)("keeps the navigation readable in every sidebar style in %s mode", (mode) => {
+    for (const preset of THEME_PRESETS) {
+      for (const sidebar of THEME_SIDEBARS) {
+        const { vars } = resolveTheme({ ...settings(preset.brand_color), sidebar }, mode)
+        for (const [fg, bg] of SIDEBAR_TEXT_PAIRS) {
+          const ratio = contrast(color(vars, fg), color(vars, bg))
+          expect({ preset: preset.key, sidebar, fg, ok: ratio >= AA_TEXT }).toEqual({
+            preset: preset.key,
+            sidebar,
+            fg,
+            ok: true,
+          })
+        }
+        // The active item's marker stands out from the navigation
+        expect(
+          contrast(color(vars, "--sidebar-primary"), color(vars, "--sidebar"))
+        ).toBeGreaterThanOrEqual(AA_LARGE)
+      }
+    }
+  })
+
+  it.each(MODES)("keeps the brand series and ordered ramp visible on cards in %s mode", (mode) => {
+    for (const preset of THEME_PRESETS) {
+      const { vars } = resolveTheme(settings(preset.brand_color), mode)
+      expect(contrast(color(vars, "--chart-1"), color(vars, "--card"))).toBeGreaterThanOrEqual(
+        AA_LARGE
+      )
+      // dataviz: the ordinal step nearest the surface clears 2:1
+      for (const step of [1, 2, 3, 4]) {
+        expect(
+          contrast(color(vars, `--chart-ramp-${String(step)}`), color(vars, "--card"))
+        ).toBeGreaterThanOrEqual(2)
+      }
+    }
+  })
+
   it.each(MODES)("keeps every text pair at AA in %s mode for every preset", (mode) => {
     for (const preset of THEME_PRESETS) {
       const { vars } = resolveTheme(settings(preset.brand_color), mode)
@@ -93,7 +146,7 @@ describe("resolveTheme", () => {
 
     expect(vars["--radius"]).toBe("12px")
     expect(vars["--control-height"]).toBe("32px")
-    expect(vars["--row-height"]).toBe("36px")
+    expect(vars["--row-height"]).toBe("38px")
   })
 
   it("gives five distinct chart colours", () => {

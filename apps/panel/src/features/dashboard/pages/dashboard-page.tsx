@@ -1,114 +1,72 @@
 import { useQuery } from "@tanstack/react-query"
+import { getRouteApi } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
-import { PageHeader } from "@/components/patterns/page-header"
-import { StatCard } from "@/components/patterns/stat-card"
-import { EmptyState, ErrorState, LoadingRows } from "@/components/patterns/states"
-import { Button } from "@/components/ui/button"
-import { useCurrentUser } from "@/features/auth/api/me"
-import { productCountsQuery, summaryQuery } from "@/features/dashboard/api/summary"
-import type { HomeSummary } from "@/features/dashboard/api/summary"
-import { SetupProgress } from "@/features/dashboard/components/setup-progress"
-import { advancedPanelUrl } from "@/lib/advanced-panel"
-import { errorText } from "@/lib/errors"
-import { formatCount, formatMoney } from "@/lib/format"
+import { overviewQuery } from "@/features/dashboard/api/overview"
+import { CatalogHealthCard } from "@/features/dashboard/components/catalog-health-card"
+import { CategorySalesCard } from "@/features/dashboard/components/category-sales-card"
+import { DashboardHeader } from "@/features/dashboard/components/dashboard-header"
+import { KpiRow } from "@/features/dashboard/components/kpi-row"
+import { OrderStatusCard } from "@/features/dashboard/components/order-status-card"
+import { RecentOrdersCard } from "@/features/dashboard/components/recent-orders-card"
+import { SalesChartCard } from "@/features/dashboard/components/sales-chart-card"
+import { SetupBanner } from "@/features/dashboard/components/setup-banner"
+import { TasksCard } from "@/features/dashboard/components/tasks-card"
+import { TopProductsCard } from "@/features/dashboard/components/top-products-card"
+import { DEFAULT_PERIOD } from "@/features/dashboard/period"
+import type { PeriodKey } from "@/features/dashboard/period"
+import { formatCount } from "@/lib/format"
 
-export function DashboardPage() {
+interface DashboardPageProps {
+  period: PeriodKey
+  onPeriodChange: (period: PeriodKey) => void
+}
+
+/**
+ * The shop at a glance (docs/06 Dashboard): the period's numbers, the
+ * sales curve, what waits, recent orders and what sells; full width, a
+ * 12-column grid from wide screens down to one column on phones.
+ */
+export function DashboardPage({ period, onPeriodChange }: DashboardPageProps) {
   const { t } = useTranslation()
-  const user = useCurrentUser()
-  const name = user?.first_name?.trim()
+  const overview = useQuery(overviewQuery(period))
   return (
-    <div className="flex flex-col gap-8">
-      <PageHeader
-        title={name ? t("dashboard.greeting", { name }) : t("dashboard.greetingNoName")}
-      />
-      <SetupProgress />
-      <TodaySection />
-      <ProductsSection />
+    <div className="flex flex-col gap-[var(--grid-gap)]">
+      <DashboardHeader period={period} onPeriodChange={onPeriodChange} />
+      <SetupBanner />
+      <KpiRow query={overview} />
+      <div className="grid grid-cols-1 gap-[var(--grid-gap)] xl:grid-cols-12">
+        <SalesChartCard query={overview} className="xl:col-span-8" />
+        <TasksCard className="xl:col-span-4" />
+        <RecentOrdersCard className="xl:col-span-8" />
+        <TopProductsCard query={overview} className="xl:col-span-4" />
+        <OrderStatusCard query={overview} className="lg:col-span-1 xl:col-span-4" />
+        <CategorySalesCard query={overview} className="xl:col-span-4" />
+        <CatalogHealthCard className="xl:col-span-4" />
+      </div>
+      {overview.data?.capped ? (
+        <p className="text-xs text-muted-foreground">
+          {t("dashboard.capped", { count: formatCount(5000) })}
+        </p>
+      ) : null}
     </div>
   )
 }
 
-function TodaySection() {
-  const { t } = useTranslation()
-  const { data, isPending, isError, error, refetch } = useQuery(summaryQuery())
-  return (
-    <section className="flex flex-col gap-3">
-      <h2 className="text-base font-semibold">{t("dashboard.today.title")}</h2>
-      {isPending ? (
-        <LoadingRows rows={2} />
-      ) : isError ? (
-        <ErrorState text={errorText(t, error)} onRetry={() => void refetch()} />
-      ) : (
-        <TodayCards summary={data} />
-      )}
-    </section>
-  )
-}
+const route = getRouteApi("/_auth/")
 
-function TodayCards({ summary }: { summary: HomeSummary }) {
-  const { t } = useTranslation()
-  const sales = summary.today.sales.length
-    ? summary.today.sales.map((sale) => formatMoney(sale.amount, sale.currency_code)).join(" · ")
-    : formatMoney("0", "try")
-  const more = (capped: boolean) => (capped ? "+" : "")
+/** The route's page: the period lives in the URL (`/?period=7d`), so a link keeps it. */
+export function DashboardRoute() {
+  const { period } = route.useSearch()
+  const navigate = route.useNavigate()
   return (
-    <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-      <StatCard
-        label={t("dashboard.today.awaiting")}
-        value={`${formatCount(summary.awaiting_shipment)}${more(summary.capped)}`}
-        hint={t("dashboard.today.awaitingHint")}
-      />
-      <StatCard
-        label={t("dashboard.today.orders")}
-        value={`${formatCount(summary.today.orders)}${more(summary.today.capped)}`}
-        hint={t("dashboard.today.ordersHint")}
-      />
-      <StatCard
-        label={t("dashboard.today.sales")}
-        value={`${sales}${more(summary.today.capped)}`}
-        hint={t("dashboard.today.salesHint")}
-      />
-      <StatCard
-        label={t("dashboard.today.open")}
-        value={formatCount(summary.open_orders)}
-        hint={t("dashboard.today.openHint")}
-      />
-    </dl>
-  )
-}
-
-function ProductsSection() {
-  const { t } = useTranslation()
-  const { data, isPending, isError, error, refetch } = useQuery(productCountsQuery())
-  const addProduct = (
-    <Button asChild size="sm" variant="outline">
-      <a href={advancedPanelUrl("/products/create")} target="_blank" rel="noreferrer">
-        {t("dashboard.setup.openInAdvanced")}
-      </a>
-    </Button>
-  )
-  return (
-    <section className="flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold">{t("dashboard.products.title")}</h2>
-        <Button asChild size="sm" variant="ghost">
-          <a href={advancedPanelUrl("/products")} target="_blank" rel="noreferrer">
-            {t("dashboard.products.viewAll")}
-          </a>
-        </Button>
-      </div>
-      {isPending ? (
-        <LoadingRows rows={1} />
-      ) : isError ? (
-        <ErrorState text={errorText(t, error)} onRetry={() => void refetch()} />
-      ) : data.published + data.draft === 0 ? (
-        <EmptyState text={t("dashboard.products.empty")} action={addProduct} />
-      ) : (
-        <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <StatCard label={t("dashboard.products.published")} value={formatCount(data.published)} />
-          <StatCard label={t("dashboard.products.draft")} value={formatCount(data.draft)} />
-        </dl>
-      )}
-    </section>
+    <DashboardPage
+      period={period ?? DEFAULT_PERIOD}
+      onPeriodChange={(next) => {
+        void navigate({
+          search: { period: next === DEFAULT_PERIOD ? undefined : next },
+          replace: true,
+        })
+      }}
+    />
   )
 }

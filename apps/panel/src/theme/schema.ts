@@ -1,4 +1,10 @@
-import { BRAND_COLOR_PATTERN, THEME_DENSITIES, THEME_MODES, THEME_RADII } from "@qticaret/types"
+import {
+  BRAND_COLOR_PATTERN,
+  THEME_DENSITIES,
+  THEME_MODES,
+  THEME_RADII,
+  THEME_SIDEBARS,
+} from "@qticaret/types"
 import { z } from "zod"
 
 /** The appearance form's own checks, mirroring the server's; messages are i18n keys. */
@@ -11,6 +17,7 @@ export const appearanceSchema = z.object({
   radius: z.enum(THEME_RADII),
   density: z.enum(THEME_DENSITIES),
   mode: z.enum(THEME_MODES),
+  sidebar: z.enum(THEME_SIDEBARS),
 })
 
 export type AppearanceForm = z.infer<typeof appearanceSchema>

@@ -1,7 +1,8 @@
 {
   "app": {
     "name": "Panel",
-    "skipToContent": "Skip to content"
+    "skipToContent": "Skip to content",
+    "subtitle": "Admin panel"
   },
   "common": {
     "save": "Save",
@@ -30,7 +31,17 @@
     "advancedHint": "For what this panel does not cover yet",
     "account": "Account",
     "logout": "Sign out",
-    "collapse": "Collapse menu"
+    "collapse": "Collapse menu",
+    "groups": {
+      "sales": "Sales",
+      "catalog": "Catalog",
+      "growth": "Growth"
+    },
+    "categories": "Categories",
+    "inventory": "Inventory",
+    "promotions": "Promotions",
+    "seo": "SEO",
+    "reports": "Reports"
   },
   "login": {
     "title": "Sign in",
@@ -94,7 +105,94 @@
           "description": "Only published products show in the shop."
         }
       },
-      "openInAdvanced": "Open in the advanced panel"
+      "openInAdvanced": "Open in the advanced panel",
+      "subtitle": "Steps to complete before you start selling",
+      "hide": "Hide",
+      "continue": "Continue"
+    },
+    "subtitle": "{{date}} · Your shop at a glance",
+    "addProduct": "Add product",
+    "capped": "The numbers cover the first {{count}} orders.",
+    "kpi": {
+      "sales": "Sales",
+      "orders": "Orders",
+      "average": "Average order",
+      "units": "Units sold",
+      "salesHint": "Tax included, cancellations left out",
+      "label": "Headline numbers"
+    },
+    "sales": {
+      "title": "Sales",
+      "amount": "Amount",
+      "count": "Orders",
+      "current": "This period",
+      "previous": "Previous period",
+      "empty": "No sales in this period yet. The chart builds up as orders come in.",
+      "table": "Chart data"
+    },
+    "tasks": {
+      "title": "Waiting for you",
+      "description": "What is next in line",
+      "toShip": {
+        "label": "To ship",
+        "hint": "Paid, waiting for a shipment"
+      },
+      "awaitingPayment": {
+        "label": "Awaiting payment",
+        "hint": "Orders waiting for approval or a transfer"
+      },
+      "lowStock": {
+        "label": "Low stock",
+        "hint": "{{threshold}} or fewer left"
+      },
+      "drafts": {
+        "label": "Draft products",
+        "hint": "Not published yet"
+      },
+      "allClear": "Nothing is waiting. All good."
+    },
+    "recent": {
+      "title": "Recent orders",
+      "viewAll": "All orders",
+      "order": "Order",
+      "customer": "Customer",
+      "date": "Date",
+      "items": "Items",
+      "total": "Total",
+      "status": "Status",
+      "itemsCount": "{{count}} items",
+      "noName": "No name",
+      "empty": "No orders yet. The first one will show up here."
+    },
+    "top": {
+      "title": "Best sellers",
+      "description": "Top products in this period",
+      "units": "{{count}} sold",
+      "empty": "No sales in this period."
+    },
+    "statuses": {
+      "title": "Order status",
+      "description": "Where this period's orders are",
+      "total": "{{count}} orders",
+      "empty": "No orders in this period."
+    },
+    "categories": {
+      "title": "Sales by category",
+      "description": "How sales split across categories",
+      "uncategorized": "Uncategorized",
+      "other": "Other",
+      "empty": "No sales in this period."
+    },
+    "health": {
+      "title": "Catalog health",
+      "description": "How complete your products are",
+      "score": "{{complete}} of {{total}} products complete",
+      "withoutImage": "Without an image",
+      "withoutCategory": "Without a category",
+      "shortDescription": "Description under {{words}} words",
+      "missingDimensions": "Missing weight or dimensions",
+      "allGood": "Every product is complete.",
+      "empty": "No products yet."
     }
   },
   "settings": {
@@ -139,6 +237,13 @@
       "saved": "Appearance saved.",
       "errors": {
         "color": "The colour must be in #rrggbb form, e.g. #2f6feb."
+      },
+      "sidebar": "Menu",
+      "sidebarHint": "The left menu's surface.",
+      "sidebarOptions": {
+        "dark": "Dark",
+        "light": "Light",
+        "brand": "Brand colour"
       }
     }
   },
@@ -148,5 +253,89 @@
     "shipped": "Shipped",
     "delivered": "Delivered",
     "canceled": "Canceled"
+  },
+  "command": {
+    "title": "Command menu",
+    "description": "Go to a page or run an action.",
+    "placeholder": "Search pages or actions…",
+    "empty": "No results.",
+    "pages": "Pages",
+    "actions": "Actions",
+    "appearance": "Appearance settings",
+    "trigger": "Search or jump to…"
+  },
+  "topbar": {
+    "viewStore": "View store"
+  },
+  "delta": {
+    "none": "None before",
+    "new": "New",
+    "up": "Up",
+    "down": "Down"
+  },
+  "period": {
+    "label": "Period",
+    "today": "Today",
+    "7d": "7 days",
+    "30d": "30 days",
+    "90d": "90 days",
+    "compare": {
+      "today": "vs the same hours yesterday",
+      "7d": "vs the previous 7 days",
+      "30d": "vs the previous 30 days",
+      "90d": "vs the previous 90 days"
+    }
+  },
+  "stage": {
+    "awaiting_payment": "Awaiting payment",
+    "to_ship": "To ship",
+    "shipped": "In transit",
+    "delivered": "Delivered",
+    "canceled": "Canceled"
+  },
+  "upcoming": {
+    "badge": "In progress",
+    "description": "This screen is being built in the new panel. Until then, do the same job in the advanced panel.",
+    "open": "Open in the advanced panel",
+    "planned": "What this screen will have",
+    "features": {
+      "orders": [
+        "Filters by status, payment and shipping",
+        "Bulk labels and status updates",
+        "Order detail: payment, shipment and invoice at a glance",
+        "Returns and exchanges"
+      ],
+      "customers": [
+        "Customer list and search",
+        "Order history and total spend",
+        "Customer groups",
+        "Addresses and billing details"
+      ],
+      "products": [
+        "Product list with images and quick filters",
+        "Step-by-step product wizard",
+        "Variants, prices and stock",
+        "SEO suggestions in a side panel"
+      ],
+      "categories": [
+        "Drag and drop category tree",
+        "Category page and SEO fields",
+        "Add products to a category in bulk"
+      ],
+      "inventory": [
+        "Stock per location",
+        "Low stock list and thresholds",
+        "Stock movement history",
+        "Bulk stock updates"
+      ],
+      "promotions": ["Coupons and campaigns", "Usage statistics", "Bulk coupon codes"],
+      "seo": [
+        "Shop SEO score",
+        "Pages that need the most work",
+        "Redirects and the 404 log",
+        "Sitemap and robots.txt"
+      ],
+      "reports": ["Sales, VAT and stock reports", "Period comparisons", "Excel and CSV export"]
+    }
   }
 }
