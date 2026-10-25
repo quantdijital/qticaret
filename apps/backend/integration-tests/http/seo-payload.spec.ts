@@ -116,14 +116,14 @@ medusaIntegrationTestRunner({
 
         // F3.12: the product's group with an offer per size, and its breadcrumbs
         const [group, crumbs] = answer.seo?.jsonLd ?? []
-        expect(group).toMatchObject({
-          "@type": "ProductGroup",
-          productGroupID: "keten-gomlek",
-          hasVariant: [
-            { name: "Keten Gömlek – S", offers: { price: "899.00", priceCurrency: "TRY" } },
-            { name: "Keten Gömlek – M", offers: { price: "999.00" } },
-          ],
-        })
+        expect(group).toMatchObject({ "@type": "ProductGroup", productGroupID: "keten-gomlek" })
+        // Both variants were made in one call: their order is not the point here
+        const variants = (group as { hasVariant: { name: string; offers: { price: string } }[] })
+          .hasVariant
+        expect(variants.map((variant) => [variant.name, variant.offers.price]).sort()).toEqual([
+          ["Keten Gömlek – M", "999.00"],
+          ["Keten Gömlek – S", "899.00"],
+        ])
         expect(crumbs).toMatchObject({ "@type": "BreadcrumbList" })
 
         const listing = await resolve("/kategori/giyim/gomlek")

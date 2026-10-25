@@ -20,6 +20,7 @@ export const PRODUCT_FACT_FIELDS = [
   "variants.id",
   "variants.title",
   "variants.variant_rank",
+  "variants.created_at",
   "variants.sku",
   "variants.ean",
   "variants.upc",
@@ -58,6 +59,7 @@ export interface FactRow {
         id: string
         title?: string | null
         variant_rank?: number | null
+        created_at?: string | Date | null
         sku?: string | null
         ean?: string | null
         upc?: string | null
@@ -80,6 +82,9 @@ export interface FactRow {
 }
 
 type Variant = NonNullable<NonNullable<FactRow["variants"]>[number]>
+
+const timeOf = (value: string | Date | null | undefined): number =>
+  value ? new Date(value).getTime() : 0
 
 const isVariesBy = (value: unknown): value is VariesBy =>
   (VARIES_BY_PROPERTIES as readonly unknown[]).includes(value)
@@ -137,7 +142,12 @@ export function productFacts(
   // In the order the shop shows them (Medusa's variant rank)
   const variants = (row.variants ?? [])
     .filter((variant): variant is Variant => variant !== null)
-    .sort((a, b) => (a.variant_rank ?? 0) - (b.variant_rank ?? 0) || a.id.localeCompare(b.id))
+    .sort(
+      (a, b) =>
+        (a.variant_rank ?? 0) - (b.variant_rank ?? 0) ||
+        timeOf(a.created_at) - timeOf(b.created_at) ||
+        a.id.localeCompare(b.id)
+    )
     .map((variant) => {
       const properties: Partial<Record<VariesBy, string>> = {}
       for (const option of variant.options ?? []) {
