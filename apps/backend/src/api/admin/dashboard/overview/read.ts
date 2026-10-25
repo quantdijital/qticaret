@@ -22,9 +22,6 @@ const FIELDS = [
 // A minute is fresh enough for a dashboard and spares the order module's
 // totals on every visit; one entry per period
 const TTL_MS = 60_000
-const cache = new Map<PeriodKey, { at: number; value: DashboardOverview }>()
-// Requests missing the cache together wait for one computation
-const computing = createSingleFlight<DashboardOverview>()
 
 export type DashboardOverview = Overview & {
   period: { key: PeriodKey; granularity: "hour" | "day"; from: string; to: string }
@@ -60,20 +57,37 @@ export async function computeOverview(
   }
 }
 
-export async function readDashboardOverview(
-  scope: MedusaContainer,
-  key: PeriodKey
-): Promise<DashboardOverview> {
-  const hit = cache.get(key)
-  if (hit && Date.now() - hit.at < TTL_MS) {
-    return hit.value
+/**
+ * A period's overview, cached a minute per period; requests missing the
+ * cache together wait for one computation. One reader per list length.
+ */
+function cachedOverview(limits?: OverviewLimits) {
+  const cache = new Map<PeriodKey, { at: number; value: DashboardOverview }>()
+  const computing = createSingleFlight<DashboardOverview>()
+  const read = async (scope: MedusaContainer, key: PeriodKey): Promise<DashboardOverview> => {
+    const hit = cache.get(key)
+    if (hit && Date.now() - hit.at < TTL_MS) {
+      return hit.value
+    }
+    const value = await computing(key, () => computeOverview(scope, key, limits))
+    cache.set(key, { at: Date.now(), value })
+    return value
   }
-  const value = await computing(key, () => computeOverview(scope, key))
-  cache.set(key, { at: Date.now(), value })
-  return value
+  const clear = () => {
+    cache.clear()
+  }
+  return { read, clear }
 }
 
-/** Tests start from an empty cache. */
+const dashboard = cachedOverview()
+// Reports list every product sold (up to a page a person reads) and every category
+const report = cachedOverview({ products: 100, categories: 20 })
+
+export const readDashboardOverview = dashboard.read
+export const readSalesReport = report.read
+
+/** Tests start from empty caches. */
 export function clearDashboardCache(): void {
-  cache.clear()
+  dashboard.clear()
+  report.clear()
 }

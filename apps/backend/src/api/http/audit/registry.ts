@@ -3,6 +3,7 @@ import { routePathKeepingCase } from "../request-path"
 import { ATTRIBUTE_RESOURCES } from "./resources/attributes"
 import { CATALOG_RESOURCES } from "./resources/catalog"
 import { PRICE_RESOURCES } from "./resources/prices"
+import { PROMOTION_RESOURCES } from "./resources/promotions"
 import { SETTINGS_RESOURCES } from "./resources/settings"
 import type { AuditedResource } from "./types"
 import { ID } from "./types"
@@ -18,6 +19,7 @@ export const AUDITED_RESOURCES: readonly AuditedResource[] = [
   ...SETTINGS_RESOURCES,
   ...ATTRIBUTE_RESOURCES,
   ...CATALOG_RESOURCES,
+  ...PROMOTION_RESOURCES,
 ]
 
 export interface ResourceMatch {

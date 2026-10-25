@@ -107,6 +107,10 @@ describe("audit registry", () => {
     ["POST", "/admin/price-lists/plist_01A", "POST /admin/price-lists/:id"],
     ["DELETE", "/admin/price-lists/plist_01A", "DELETE /admin/price-lists/:id"],
     ["POST", "/admin/price-lists/plist_01A/products", "POST /admin/price-lists/:id/products"],
+    ["POST", "/admin/promotions/promo_01A", "POST /admin/promotions/:id"],
+    ["DELETE", "/admin/promotions/promo_01A", "DELETE /admin/promotions/:id"],
+    ["POST", "/admin/campaigns/procamp_01A", "POST /admin/campaigns/:id"],
+    ["DELETE", "/admin/campaigns/procamp_01A", "DELETE /admin/campaigns/:id"],
   ])("covers every price-bearing route: %s %s", (method, path, route) => {
     expect(matchAuditedResource(method, path)?.resource.route).toBe(route)
   })
