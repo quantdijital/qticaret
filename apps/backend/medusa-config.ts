@@ -1,6 +1,7 @@
 import { defineConfig, loadEnv } from "@medusajs/framework/utils"
 import { isLocalEnv, parseEnv } from "./src/lib/env"
 import { DEFAULT_LOG_LEVEL, MedusaPinoLogger, baseLogger } from "./src/lib/logging"
+import { tenantNamespace } from "./src/lib/redis"
 
 loadEnv(process.env["NODE_ENV"] ?? "development", process.cwd())
 
@@ -33,6 +34,13 @@ module.exports = defineConfig({
     { resolve: "./src/modules/tr-address" },
     { resolve: "./src/modules/url-registry" },
     { resolve: "./src/modules/audit-log" },
+    {
+      resolve: "./src/modules/platform-settings",
+      options: {
+        redisUrl: env.REDIS_URL,
+        versionKey: `qt:settings:${tenantNamespace(env.DATABASE_URL)}:version`,
+      },
+    },
     {
       resolve: "./src/modules/billing-profile",
       options: { encryptionKey: env.PII_ENCRYPTION_KEY, hashKey: env.PII_HASH_KEY },

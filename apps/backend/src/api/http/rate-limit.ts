@@ -2,6 +2,7 @@ import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusaj
 import { hashPii, parseKey } from "../../lib/crypto/pii"
 import { isLocalEnv, parseEnv } from "../../lib/env"
 import { errorSummary, logger } from "../../lib/logging"
+import { tenantNamespace } from "../../lib/redis"
 import {
   RATE_LIMIT_PROFILES,
   createMemoryStore,
@@ -23,21 +24,9 @@ import { routePath } from "./request-path"
 
 let sharedStore: RateLimitStore | undefined
 
-/**
- * Counters are namespaced by database server and name: tenants that share a
- * Redis (instance-per-tenant, one database each), and local dev and test
- * runs on one Redis, must not count each other's requests.
- */
+/** Counters live under the tenant's namespace (see `tenantNamespace`). */
 export function rateLimitPrefix(databaseUrl: string): string {
-  const url = new URL(databaseUrl)
-  const raw = url.pathname.slice(1)
-  let name = raw
-  try {
-    name = decodeURIComponent(raw)
-  } catch {
-    // A malformed escape is kept as written rather than disabling the limiter
-  }
-  return `qt:rl:${url.hostname}:${url.port || "5432"}/${name || "default"}:`
+  return `qt:rl:${tenantNamespace(databaseUrl)}:`
 }
 
 function defaultStore(): RateLimitStore {

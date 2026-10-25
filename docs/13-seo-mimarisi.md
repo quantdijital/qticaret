@@ -75,6 +75,7 @@ Tenant kurulumda bir desen seti seçer; desen tokenlarla tanımlıdır ve sonrad
   - Kategori: `{kategori} Modelleri ve Fiyatları | {mağaza}`
   - Marka: `{marka} Ürünleri | {mağaza}`
   - Meta description ürün: `{kısa_açıklama}. {fiyat_cümlesi} {kargo_cümlesi}` (ör. "1.250 TL'den başlayan fiyatlarla, ücretsiz kargo")
+- Şablonlar ve tenant metinleri sayfaya basılırken kaçışlanır (F18): HTML'de entity, JSON-LD içinde `<` → `\u003c` (`</script>` kapanışı olmasın). robots.txt `text/plain` + nosniff ile servis edilir. `canonical_host` alan adı doğrulaması gelene kadar yalnızca bağlantı üretiminde kullanılır; sunucu tarafı istek ve yönlendirme hedefi olmadan önce doğrulanmış alan adlarıyla sınırlanır (F16/F18).
 - Uzunluk hedefleri (lint): başlık 30–60 karakter (piksel genişliği tahmini ile), açıklama 70–155. Türkçe karakterler geniş; piksel tahmini font metrik tablosundan.
 - Mağaza genelinde başlık/açıklama **benzersizliği** denetlenir (hash + normalize karşılaştırma).
 - Sayfalama: `?page=2` sayfaları kendi canonical'ına sahiptir (`rel=prev/next` Google tarafından kullanılmıyor); başlığa " - Sayfa 2" eklenir; 1. sayfa parametresiz canonical.

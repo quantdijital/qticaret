@@ -1,5 +1,5 @@
-import Redis from "ioredis"
-import { errorSummary, logger } from "../../logging"
+import type Redis from "ioredis"
+import { createRedisClient } from "../../redis"
 
 /**
  * Fixed-window counters for rate limiting (docs/04). Redis when REDIS_URL
@@ -17,7 +17,7 @@ export interface WindowCount {
 
 export interface RateLimitStore {
   hit: (key: string, windowMs: number) => Promise<WindowCount>
-  /** Resolves once the store can count; until then hits fail and the limiter steps aside. */
+  /** Resolves once the store can count; until then hits wait for the connection, up to the command timeout. */
   ready?: () => Promise<void>
   close?: () => Promise<void>
 }
@@ -118,31 +118,11 @@ type CountingRedis = Redis & {
   rateLimitHit: (key: string, windowMs: string) => Promise<[number, number]>
 }
 
-const ERROR_LOG_EVERY_MS = 60_000
-
-/** A Redis client of our own: Medusa does not expose its connection. */
+/** Counters in Redis, shared by every instance; fails fast so the fallback takes over. */
 export function createRedisStore(redisUrl: string, prefix = "qt:rl:"): RateLimitStore {
-  const client = new Redis(redisUrl, {
-    // A limiter must answer fast or step aside: commands wait for the
-    // connection (so the first requests after start are counted) but give up
-    // within a retry and the command timeout when Redis is down
-    maxRetriesPerRequest: 1,
-    enableOfflineQueue: true,
-    connectTimeout: 2_000,
-    commandTimeout: 500,
-    lazyConnect: false,
-  }) as CountingRedis
+  const client = createRedisClient(redisUrl, "rate_limit") as CountingRedis
   // Sent by SHA after the first call (EVALSHA), not as a whole script each time
   client.defineCommand("rateLimitHit", { numberOfKeys: 1, lua: HIT_SCRIPT })
-  // Without a listener ioredis prints unhandled errors to the console. It
-  // reconnects every few seconds during an outage, so this logs once a minute
-  let lastErrorLog = Number.NEGATIVE_INFINITY
-  client.on("error", (error: unknown) => {
-    if (Date.now() - lastErrorLog >= ERROR_LOG_EVERY_MS) {
-      lastErrorLog = Date.now()
-      logger.warn({ event: "rate_limit.redis_error", err: errorSummary(error) })
-    }
-  })
   return {
     hit: async (key, windowMs) => {
       const [count, ttl] = await client.rateLimitHit(`${prefix}${key}`, String(windowMs))

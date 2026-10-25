@@ -40,6 +40,10 @@ export function fakeResponse(headersSent = false): FakeResponse {
       sent = body
       return res
     },
+    end(body?: unknown) {
+      sent = body
+      return res
+    },
     destroy() {
       destroyed = true
       return res

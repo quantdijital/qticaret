@@ -4,7 +4,7 @@
 > Yalnızca **bugün var olanı** anlatır. Terimler için [docs/11](11-ogrenme-rehberi.md); ileride gelecek
 > klasörler dahil hedef yapı için [docs/02](02-klasor-yapisi.md). Yeni klasör veya önemli dosya eklendiğinde güncellenir.
 >
-> Son güncelleme: 2026-10-25, F2 S1–S8 bitti.
+> Son güncelleme: 2026-10-25, F2 S1–S9 bitti.
 
 ---
 
@@ -59,6 +59,7 @@ Medusa'nın ürün, sipariş ve müşteri gibi hazır modülleri `node_modules` 
 | [billing-profile](../apps/backend/src/modules/billing-profile) | Müşterinin fatura bilgisi; TCKN/VKN şifreli | F1 |
 | [url-registry](../apps/backend/src/modules/url-registry) | Hangi URL hangi ürüne/sayfaya ait; aynı URL iki kez verilemez | F2 S7 |
 | [audit-log](../apps/backend/src/modules/audit-log) | Kim neyi ne zaman değiştirdi/gördü; yalnızca ekleme | F2 S8 |
+| [platform-settings](../apps/backend/src/modules/platform-settings) | Mağaza ve SEO ayarları, özellik bayrakları (`features.ts`) | F2 S9 |
 
 Her modülün iç yapısı aynıdır (örnek: billing-profile):
 - `models/billing-profile.ts`: tablonun tanımı (kolonlar).
@@ -72,6 +73,7 @@ Her modülün iç yapısı aynıdır (örnek: billing-profile):
 - [billing-profile/](../apps/backend/src/workflows/billing-profile): fatura profilini oluştur/güncelle (kilit al → var mı bak → güncelle ya da oluştur → müşteriye bağla).
 - [tr-address/](../apps/backend/src/workflows/tr-address): adreslerin TR verisine uyduğunu doğrula.
 - [audit-log/](../apps/backend/src/workflows/audit-log): `recordAuditEntryStep`, otomatik işleri (`system`) denetim kaydına yazan adım.
+- [platform-settings/](../apps/backend/src/workflows/platform-settings): ayar bölümü kaydetme ve bayrak açıp kapama (geri alınabilir); `assertFeatureEnabledStep`.
 - [hooks/](../apps/backend/src/workflows/hooks): Medusa'nın **kendi** workflow'larına takılan kancalar. Örnek: sepete adres yazılırken TR doğrulaması, müşteri silinince fatura profilinin silinmesi.
 
 ### 2.3 `src/api/`: dışarıya açılan kapılar
@@ -106,6 +108,7 @@ Her modülün iç yapısı aynıdır (örnek: billing-profile):
 | [clients/](../apps/backend/src/lib/clients) | Ödeme/kargo gibi sağlayıcılara HTTP istemcisi: zaman aşımı, yeniden deneme, devre kesici |
 | [integrations/health/](../apps/backend/src/lib/integrations/health) | `/admin/integrations/health`: dış servisler ayakta mı |
 | [seo/](../apps/backend/src/lib/seo) | Türkçe slug, SEO başlık şablonları, Google'da başlık genişliği |
+| [redis/](../apps/backend/src/lib/redis), [cache/](../apps/backend/src/lib/cache) | Kendi Redis istemcimiz, tenant ad alanı; ayarların süreç içi cache'i |
 
 ### 2.5 `src/admin/`: admin paneline eklenenler
 - `widgets/customer-billing-profile.tsx`: müşteri detay sayfasındaki fatura bilgisi kutusu.
@@ -133,6 +136,8 @@ Her modülün iç yapısı aynıdır (örnek: billing-profile):
 | Hangi ortam değişkeni zorunlu? | [lib/env.ts](../apps/backend/src/lib/env.ts) |
 | Hangi dosya türleri yüklenebiliyor? | [lib/security/upload/](../apps/backend/src/lib/security/upload), [api/http/upload-validator.ts](../apps/backend/src/api/http/upload-validator.ts) |
 | Kim neyi değiştirdi / kim müşteri verisine baktı? | `GET /admin/audit-log` ([route](../apps/backend/src/api/admin/audit-log/route.ts)); kayıt mantığı [api/http/audit/](../apps/backend/src/api/http/audit) |
+| Bir özellik açık mı, nasıl açılır? | `GET /admin/features`; bayrak tanımları [features.ts](../apps/backend/src/modules/platform-settings/features.ts) |
+| Mağaza / SEO ayarları nerede? | `GET /admin/platform-settings/store` ve `/seo`; alanlar [sections/](../apps/backend/src/modules/platform-settings/sections) |
 | Hangi modüller açık? | [medusa-config.ts](../apps/backend/medusa-config.ts) |
 | Bir tablo nasıl oluştu? | `src/modules/<ad>/migrations/` |
 | TCKN nasıl saklanıyor? | [lib/crypto/pii.ts](../apps/backend/src/lib/crypto/pii.ts), [modules/billing-profile/service.ts](../apps/backend/src/modules/billing-profile/service.ts) |

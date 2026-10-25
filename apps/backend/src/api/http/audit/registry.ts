@@ -1,6 +1,7 @@
 import type { MedusaRequest } from "@medusajs/framework/http"
 import { routePathKeepingCase } from "../request-path"
 import { PRICE_RESOURCES } from "./resources/prices"
+import { SETTINGS_RESOURCES } from "./resources/settings"
 import type { AuditedResource } from "./types"
 import { ID } from "./types"
 
@@ -10,7 +11,10 @@ import { ID } from "./types"
  * its resource under `resources/` (code-reviewer checklist). Other admin
  * mutations get the names of the body fields only.
  */
-export const AUDITED_RESOURCES: readonly AuditedResource[] = [...PRICE_RESOURCES]
+export const AUDITED_RESOURCES: readonly AuditedResource[] = [
+  ...PRICE_RESOURCES,
+  ...SETTINGS_RESOURCES,
+]
 
 export interface ResourceMatch {
   resource: AuditedResource

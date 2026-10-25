@@ -6,6 +6,7 @@ import {
 } from "@medusajs/framework/http"
 import { RATE_LIMIT_PROFILES } from "../lib/security/rate-limit"
 import { AdminGetAuditLog } from "./admin/audit-log/validators"
+import { AdminPostFeature, validateSectionBody } from "./admin/platform-settings/validators"
 import { auditMutations, auditSensitiveRead } from "./http/audit"
 import { csrfProtection } from "./http/csrf"
 import { platformErrorHandler } from "./http/error-handler"
@@ -112,6 +113,19 @@ export default defineMiddlewares({
         validateAndTransformQuery(AdminGetAuditLog, {}),
         auditSensitiveRead("audit_log", { list: true }),
       ],
+    },
+    // F2.3: settings sections and flags, each body checked by its own schema
+    // (adr/0012); people only until roles arrive (F12): robots.txt or a flag
+    // is not a change for an integration key
+    {
+      matcher: "/admin/platform-settings/:section",
+      methods: ["POST"],
+      middlewares: [requireUserActor, validateSectionBody],
+    },
+    {
+      matcher: "/admin/features/:key",
+      methods: ["POST"],
+      middlewares: [requireUserActor, validateAndTransformBody(AdminPostFeature)],
     },
     // F2.9b: uploaded files checked by their bytes, after Medusa's multer
     {

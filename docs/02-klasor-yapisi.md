@@ -69,7 +69,9 @@ repo/
 │   │   │   │   ├── clients/         # http istemci tabanı (timeout, retry, devre kesici, redaksiyon)
 │   │   │   │   ├── integrations/    # health/: /admin/integrations/health kontrolleri
 │   │   │   │   ├── crypto/          # imza/HMAC yardımcıları
-│   │   │   │   ├── security/        # safe-fetch (SSRF), upload validator, csv-escape, safe-xml
+│   │   │   │   ├── security/        # safe-fetch (SSRF), rate-limit, upload validator, csv-escape, safe-xml, zip
+│   │   │   │   ├── redis/           # kendi Redis istemcimiz (hızlı vazgeçen), tenant ad alanı
+│   │   │   │   ├── cache/           # süreç içi değer + Redis sürüm sayacı (ayarlar, adr/0012)
 │   │   │   │   ├── seo/             # slug (TR), başlık şablonları, piksel genişliği, jsonld builders (F3.12)
 │   │   │   │   ├── money/           # tutar dönüşümleri
 │   │   │   │   ├── errors/          # ortak hata tipleri

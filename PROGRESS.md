@@ -3,10 +3,27 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**F2 — Platform çekirdek modülleri + güvenlik tabanı** (devam; S1–S8 /13 bitti). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
+**F2 — Platform çekirdek modülleri + güvenlik tabanı** (devam; S1–S9 /13 bitti). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
 
 ## Son oturum özeti
 **2026-10-24 gece oturumu (S3, S5; S8 başladı).** Kullanıcı döndü; dört karar verdi: bağımlılıklar onaylandı (ioredis 5.11.1, fast-xml-parser 5.11.2, yauzl 3.4.0, kendi görsel başlık okuyucumuz), ADR-0011..0014 kabul edildi, otonom devam, eski "Gözden geçir" maddeleri olduğu gibi kabul. Commit `54abc2a`.
+
+2026-10-25 (F2 S9): F2.3a. `platform-settings` modülü, özellik bayrakları (adr/0012). Plan `/Users/deniz/.claude/plans/f2-s9-platform-settings.md`.
+- **Bölümler:**
+  - `store`: iletişim e-postası ve TR telefonu (E.164), saat dilimi, birimler.
+  - `seo`: canonical host, URL stili (prefixed/flat), başlık ve açıklama şablonları (`lib/seo` token kontrolü), robots.txt (direktif allowlist'i), AI tarayıcı ön ayarı.
+  - Şemalar strict; patch kısmi gelir, mevcut değerin üzerine bir seviye derin birleştirilir. Okumada bilinmeyen alan düşürülür, geçmeyen alan tek başına varsayılana döner.
+- **Bayraklar:**
+  - Kayıt defteri kodda. İş bayrağı yok; test bayrakları yalnızca `NODE_ENV=test`'te var.
+  - Platform bayrağı admin'den değişmez (403) ve tenant override'ını okumaz.
+  - `requireFeature` kapalıyken Express'in bilinmeyen route sayfasını bayt bayt üretir (testle karşılaştırılıyor). `assertFeatureEnabledStep` workflow'u ilk adımda durdurur.
+- **Cache:** Süreç içi değer + Redis'te her yazımda yeni rastgele işaret. Kontrol en çok saniyede bir; 30 sn üst yaş; eşzamanlı yükleme tek uçuş; invalidate öncesi başlayan yükleme atılır; başarısız işaret yazımı yeniden denenir. Redis istemcisi tembel açılır. Ortak parçalar `lib/redis` ve `lib/cache`'e taşındı; rate limit de kullanıyor.
+- **API:**
+  - `GET/POST /admin/platform-settings/:section`, `GET /admin/features`, `POST /admin/features/:key`; workflow ve compensation'lı.
+  - Mutasyonlar yalnızca admin kullanıcıları içindir (API key 403, F12'ye kadar).
+  - Denetim kaydı alan bazında önce/sonra yazar; iletişim alanları maskeli.
+- **İnceleme:** Güvenlik incelemesi yapıldı, yüksek bulgu yok. 3 orta bulgu düzeltildi: cache'in sınırsız eskimesi, yeniden yükleme fırtınası, platform bayrağında override'ın okunması. Düşüklerin çoğu da düzeltildi (`%73tore` doğrulama atlatması, gate hata yolu, 404 sayfa farkları, kontrol karakterleri).
+- **KK:** "Feature flag kapalıyken ilgili endpoint/akış devreye girmiyor (testli)" karşılandı.
 
 2026-10-25 (F2 S8): F2.5. `audit-log` modülü, mutasyon ve hassas okuma kaydı (adr/0011).
 - **Modül:** `audit_entry`, yalnızca ekleme. Güncelleme/silme metotları parametresiz override ile kapalı; çağrı derlenmez, tiple aşılırsa hata fırlatır. Satır boyutu sınırlı (metin 256, UA 512, `changes` 16 KB üstü alan adlarına iner).
@@ -161,7 +178,7 @@
 | S6 ✅ | F2.1 + F2.6 | HTTP istemcisi + `/admin/integrations/health` deseni. KK: logda Authorization yok | S2, S4 | — |
 | S7 ✅ | F2.11 | `lib/seo` + `url-registry` modülü. KK: slug tablosu, path tekilliği | S1 | — |
 | S8 ✅ | F2.5 | `audit-log` modülü, mutasyon ve okuma kaydı. KK: fiyat değişimi, TCKN okuma | S3 | 0011 |
-| S9 | F2.3a | `platform-settings` backend: bölümler, bayraklar, cache, uygulama noktaları. KK: kapalı bayrak | S7, S8 | 0012 |
+| S9 ✅ | F2.3a | `platform-settings` backend: bölümler, bayraklar, cache, uygulama noktaları. KK: kapalı bayrak | S7, S8 | 0012 |
 | S10 | F2.3b | Admin: Ayarlar > Özellikler ve Ayarlar > SEO sayfaları | S9 | — |
 | S11 | F2.4a | `product-attributes` backend: modül, link'ler, workflow'lar, admin/store API. KK: Store API'de değer | S8 | 0013 |
 | S12 | F2.4b | Admin: ürün widget'ı + şablon yönetim sayfası | S11 | — |
@@ -331,6 +348,12 @@ Paralel zincirler:
     - S13: `presigned-urls` yolu için uzantı/MIME allowlist'i ve worker'da doğrulama; CSV dışa aktarımın ayırıcısı ve BOM'u.
     - Hesap kilidi ve IP'den bağımsız kimlik sınırı (docs/04 "artan gecikme + kilit"); admin `limit` üst sınırı ölçülünce.
     - Admin, çekirdek dashboard'un çevirmediği `errors.too_many_requests` gibi anahtarları ham gösteriyor.
+  - **S9'dan devreden:**
+    - `canonical_host` alan adı sahiplik doğrulaması (F16/F18).
+    - JSON-LD ve meta çıktısında kaçışlama (docs/13, F18).
+    - İyimser kilit (eşzamanlı iki admin kaydı; F12.4).
+    - Store bölümü için admin sayfası (S10 kapsamı features + SEO).
+    - Medusa modül kapanış kancası belgelenmediği için Redis istemcisi tembel açılıyor ama kapatılmıyor; bayrak okuyan bir `medusa exec` script'inin çıkışı izlenmeli.
   - **Storefront hata anahtarları (F18):** `errors.*`, `billing_profile.*`, `tr_address.*` gibi i18n anahtarları henüz bir çeviri kataloğunda değil. Storefront'la birlikte `packages/types`'a taşınır.
 - [ ] **F1'den devreden işler:**
   - Kargo KDV oranı için `shipping_option` vergi kuralı, mali müşavir onayından sonra (docs/12).

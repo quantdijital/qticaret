@@ -118,6 +118,7 @@
   - Admin'de gövde JSON olmalıdır. Multipart yalnızca upload ve ürün içe aktarma yollarında kabul edilir.
   - Store'da Medusa `x-publishable-api-key` header'ını zaten zorunlu tuttuğu için ayrıca header şartı yoktur.
 - İstek sınırları: `/store/*`'da `limit` yalnızca rakam ve en fazla 100 (`1000abc` ya da `-1` 400 döner; Medusa `parseInt` ile okur). Multipart her istekte multer öncesi bildirilen boyut en fazla 25 MB; uzunluk yoksa 411. Bu kontrol yola değil içerik türüne bağlıdır. Admin `limit` üst sınırı, dashboard'un kullandığı değerler ölçülünce eklenecek.
+- Özellik bayrağı kapalıyken uç (`requireFeature`), Express'in bilinmeyen route sayfasının aynısını döner; kapalı bir özelliğin varlığı sızmaz (adr/0012). Ayar bölümleri strict şemalıdır, serbest alan ve secret tutulmaz. robots.txt yalnızca bilinen direktifleri kabul eder.
 - CORS: sadece tenant'ın storefront ve admin origin'leri.
 - Güvenlik header'ları: HSTS, X-Content-Type-Options, X-Frame-Options/frame-ancestors, Referrer-Policy, CSP (admin), Permissions-Policy.
   - API yanıtlarında `src/api/http/security-headers.ts` uygulanır: `default-src 'none'; frame-ancestors 'none'`, nosniff, DENY, `no-referrer`, Permissions-Policy, yerel ortam dışında HSTS. `X-Powered-By` kaldırılır.
