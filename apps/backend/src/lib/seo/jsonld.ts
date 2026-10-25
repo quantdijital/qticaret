@@ -1,0 +1,201 @@
+/**
+ * Structured data blocks (docs/13 §5, F3.12): what search engines read of
+ * a page, built from the same facts the page and the feeds use. Pure: the
+ * caller gathers the facts. URLs are absolute (the caller has the host);
+ * prices are numeric strings without a symbol; availability and condition
+ * are full schema.org URLs. The storefront escapes `<` when it prints
+ * them (F18).
+ */
+
+export type JsonLd = Record<string, unknown>
+
+const SCHEMA = "https://schema.org"
+
+export const AVAILABILITIES = ["InStock", "OutOfStock", "BackOrder", "PreOrder"] as const
+export type Availability = (typeof AVAILABILITIES)[number]
+
+// Catalog conditions (F3.1) as schema.org's item conditions
+const CONDITIONS = {
+  new: "NewCondition",
+  refurbished: "RefurbishedCondition",
+  used: "UsedCondition",
+  damaged: "DamagedCondition",
+} as const
+export type Condition = keyof typeof CONDITIONS
+
+/** Google reads only these in `variesBy` (docs/13 §2.3). */
+export const VARIES_BY_PROPERTIES = [
+  "color",
+  "size",
+  "suggestedAge",
+  "suggestedGender",
+  "material",
+  "pattern",
+] as const
+export type VariesBy = (typeof VARIES_BY_PROPERTIES)[number]
+
+export interface VariantFacts {
+  id: string
+  /** The variant's own name ("Keten Gömlek – M"). */
+  name: string
+  sku: string | null
+  gtin: string | null
+  mpn: string | null
+  image: string | null
+  /** Gross TRY price; null when the variant has none (no offer then). */
+  price: number | null
+  availability: Availability
+  /** The values of the properties the group varies by ({ size: "M" }). */
+  properties: Partial<Record<VariesBy, string>>
+}
+
+export interface ProductFacts {
+  name: string
+  description: string
+  /** Absolute URLs, the main one first. */
+  images: string[]
+  brand: string | null
+  condition: Condition
+  /** A stable id for the group (the product's handle). */
+  groupId: string
+  variesBy: VariesBy[]
+  variants: VariantFacts[]
+}
+
+export interface ListingFacts {
+  name: string
+  description: string
+  /** The first page of products, as the storefront lists them. */
+  items: { name: string; url: string }[]
+}
+
+const price = (amount: number): string => amount.toFixed(2)
+
+function offerOf(variant: VariantFacts, url: string, condition: Condition): JsonLd | null {
+  if (variant.price === null || !(variant.price > 0)) {
+    return null
+  }
+  return {
+    "@type": "Offer",
+    url,
+    price: price(variant.price),
+    priceCurrency: "TRY",
+    availability: `${SCHEMA}/${variant.availability}`,
+    itemCondition: `${SCHEMA}/${CONDITIONS[condition]}`,
+  }
+}
+
+const compact = (block: JsonLd): JsonLd =>
+  Object.fromEntries(
+    Object.entries(block).filter(
+      ([, value]) =>
+        value !== null &&
+        value !== undefined &&
+        value !== "" &&
+        !(Array.isArray(value) && value.length === 0)
+    )
+  )
+
+function variantProduct(
+  facts: ProductFacts,
+  variant: VariantFacts,
+  url: string,
+  single: boolean
+): JsonLd {
+  const offer = offerOf(variant, url, facts.condition)
+  return compact({
+    "@type": "Product",
+    ...(single ? { "@context": SCHEMA } : {}),
+    name: single ? facts.name : variant.name,
+    description: single ? facts.description : undefined,
+    sku: variant.sku,
+    gtin: variant.gtin,
+    mpn: variant.mpn,
+    image: single ? facts.images : variant.image ? [variant.image] : facts.images.slice(0, 1),
+    brand: single && facts.brand ? { "@type": "Brand", name: facts.brand } : undefined,
+    ...variant.properties,
+    offers: offer,
+  })
+}
+
+/**
+ * A product page's block: `Product` for one variant, `ProductGroup` with
+ * a `Product` per variant otherwise, each with its own `Offer`. A variant
+ * is preselected by `?variant=` (docs/13 §2.3), so its offer URL says so.
+ */
+export function productJsonLd(facts: ProductFacts, url: string): JsonLd {
+  const [only] = facts.variants
+  if (facts.variants.length === 1 && only) {
+    return variantProduct(facts, only, url, true)
+  }
+  return compact({
+    "@context": SCHEMA,
+    "@type": "ProductGroup",
+    name: facts.name,
+    description: facts.description,
+    image: facts.images,
+    brand: facts.brand ? { "@type": "Brand", name: facts.brand } : undefined,
+    productGroupID: facts.groupId,
+    variesBy: facts.variesBy.map((property) => `${SCHEMA}/${property}`),
+    hasVariant: facts.variants.map((variant) =>
+      variantProduct(facts, variant, `${url}?variant=${encodeURIComponent(variant.id)}`, false)
+    ),
+  })
+}
+
+/** A category, brand or collection page: what it is and the products it lists first. */
+export function listingJsonLd(facts: ListingFacts, url: string): JsonLd {
+  return compact({
+    "@context": SCHEMA,
+    "@type": "CollectionPage",
+    name: facts.name,
+    description: facts.description,
+    url,
+    mainEntity:
+      facts.items.length > 0
+        ? {
+            "@type": "ItemList",
+            itemListElement: facts.items.map((item, index) => ({
+              "@type": "ListItem",
+              position: index + 1,
+              url: item.url,
+              name: item.name,
+            })),
+          }
+        : undefined,
+  })
+}
+
+export function breadcrumbJsonLd(crumbs: readonly { name: string; url: string }[]): JsonLd | null {
+  if (crumbs.length < 2) {
+    return null
+  }
+  return {
+    "@context": SCHEMA,
+    "@type": "BreadcrumbList",
+    itemListElement: crumbs.map((crumb, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: crumb.name,
+      item: crumb.url,
+    })),
+  }
+}
+
+/**
+ * The home page's blocks (docs/13 §5): the shop as an `OnlineStore` (the
+ * most specific organisation type for a web shop) and the `WebSite`
+ * without a search action (Google dropped the sitelinks search box).
+ */
+export function siteJsonLd(shop: { name: string; url: string; logo: string | null }): JsonLd[] {
+  return [
+    compact({
+      "@context": SCHEMA,
+      "@type": "OnlineStore",
+      name: shop.name,
+      url: shop.url,
+      logo: shop.logo,
+    }),
+    { "@context": SCHEMA, "@type": "WebSite", name: shop.name, url: shop.url },
+  ]
+}

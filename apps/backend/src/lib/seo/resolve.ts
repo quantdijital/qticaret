@@ -1,3 +1,5 @@
+import { breadcrumbJsonLd, listingJsonLd, productJsonLd } from "./jsonld"
+import type { JsonLd, ProductFacts } from "./jsonld"
 import { renderTemplate } from "./template"
 
 /**
@@ -32,8 +34,8 @@ export interface SeoPayload {
   }
   /** From the root down to the page itself; URLs absolute when the host is set. */
   breadcrumbs: { name: string; url: string }[]
-  /** Structured data blocks (F3.12). */
-  jsonLd: Record<string, unknown>[]
+  /** Structured data blocks (F3.12); none until the canonical host is set (they need absolute URLs). */
+  jsonLd: JsonLd[]
   /** Other languages' URLs (F19). */
   hreflang: { locale: string; url: string }[]
 }
@@ -60,6 +62,10 @@ export interface SeoSubject {
   image: { url: string; alt: string | null } | null
   /** Ancestors, root first (a product's primary category chain); the page is added last. */
   trail: { name: string; path: string }[]
+  /** A product page's facts for its structured data (F3.12). */
+  product?: ProductFacts | undefined
+  /** A listing page's first products, for its `ItemList`. */
+  listing?: { name: string; path: string }[] | undefined
 }
 
 export interface SeoShop {
@@ -172,6 +178,9 @@ export function resolveSeoPayload(subject: SeoSubject, shop: SeoShop): SeoPayloa
   const robotsOverride = subject.overrides?.robots_override
   const image = subject.image
   const url = (path: string) => absolute(shop.canonicalHost, path) ?? path
+  const breadcrumbs = [...subject.trail, { name: subject.name, path: subject.path }].map(
+    (crumb) => ({ name: crumb.name, url: url(crumb.path) })
+  )
   return {
     title,
     description,
@@ -192,11 +201,30 @@ export function resolveSeoPayload(subject: SeoSubject, shop: SeoShop): SeoPayloa
       description,
       image: image?.url ?? null,
     },
-    breadcrumbs: [...subject.trail, { name: subject.name, path: subject.path }].map((crumb) => ({
-      name: crumb.name,
-      url: url(crumb.path),
-    })),
-    jsonLd: [],
+    breadcrumbs,
+    jsonLd: canonical ? structuredData(subject, description, canonical, breadcrumbs, url) : [],
     hreflang: [],
   }
+}
+
+function structuredData(
+  subject: SeoSubject,
+  description: string,
+  canonical: string,
+  breadcrumbs: SeoPayload["breadcrumbs"],
+  url: (path: string) => string
+): JsonLd[] {
+  const page = subject.product
+    ? productJsonLd(subject.product, canonical)
+    : subject.listing
+      ? listingJsonLd(
+          {
+            name: subject.name,
+            description,
+            items: subject.listing.map((item) => ({ name: item.name, url: url(item.path) })),
+          },
+          canonical
+        )
+      : null
+  return [page, breadcrumbJsonLd(breadcrumbs)].filter((block): block is JsonLd => block !== null)
 }

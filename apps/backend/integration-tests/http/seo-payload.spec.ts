@@ -8,6 +8,7 @@ import type { Storefront } from "../helpers/storefront"
 jest.setTimeout(120 * 1000)
 
 interface Seo {
+  jsonLd: Record<string, unknown>[]
   title: string
   description: string
   canonical: string | null
@@ -112,12 +113,40 @@ medusaIntegrationTestRunner({
           ],
         })
         expect(answer.seo?.title.startsWith("Keten Gömlek |")).toBe(true)
+
+        // F3.12: the product's group with an offer per size, and its breadcrumbs
+        const [group, crumbs] = answer.seo?.jsonLd ?? []
+        expect(group).toMatchObject({
+          "@type": "ProductGroup",
+          productGroupID: "keten-gomlek",
+          hasVariant: [
+            { name: "Keten Gömlek – S", offers: { price: "899.00", priceCurrency: "TRY" } },
+            { name: "Keten Gömlek – M", offers: { price: "999.00" } },
+          ],
+        })
+        expect(crumbs).toMatchObject({ "@type": "BreadcrumbList" })
+
+        const listing = await resolve("/kategori/giyim/gomlek")
+        expect(listing.seo?.jsonLd[0]).toMatchObject({
+          "@type": "CollectionPage",
+          mainEntity: {
+            itemListElement: [{ position: 1, url: "https://magaza.example.com/urun/keten-gomlek" }],
+          },
+        })
+        const site = await http.get<{ jsonLd: { "@type": string }[] }>("/store/seo/site", {
+          headers: store.headers,
+        })
+        expect(site.data.jsonLd.map((block) => block["@type"])).toEqual(["OnlineStore", "WebSite"])
       })
     })
 
     it("answers at once after the page's own fields, its handle or a rule change", async () => {
       const { productId } = await catalog()
-      expect((await resolve("/urun/keten-gomlek")).seo?.canonical).toBeNull()
+      // No host: no canonical, and no structured data (it needs absolute URLs)
+      expect((await resolve("/urun/keten-gomlek")).seo).toMatchObject({
+        canonical: null,
+        jsonLd: [],
+      })
 
       await http.put(
         `/admin/seo/product/${productId}`,

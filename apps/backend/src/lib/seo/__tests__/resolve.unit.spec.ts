@@ -59,7 +59,8 @@ describe("resolveSeoPayload", () => {
         { name: "Gömlek", url: "https://magaza.example.com/kategori/giyim/gomlek" },
         { name: "Keten Gömlek", url: "https://magaza.example.com/urun/keten-gomlek" },
       ],
-      jsonLd: [],
+      // The subject has no product facts here: only its breadcrumbs (F3.12)
+      jsonLd: [expect.objectContaining({ "@type": "BreadcrumbList" })],
       hreflang: [],
     })
   })
