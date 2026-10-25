@@ -95,10 +95,16 @@ export function OfferCard({ kindLocked }: { kindLocked: boolean }) {
 }
 
 /** How it is used: a code the customer types, or applied on its own; how many times; when. */
-export function UsageCard() {
+// Shorter codes are easy to guess until coupon attempts are rate limited (F4)
+const SAFE_CODE_LENGTH = 6
+
+export function UsageCard({ datesLocked = false }: { datesLocked?: boolean }) {
   const { t } = useTranslation()
   const { control, register } = useFormContext<PromotionValues>()
-  const automatic = useWatch<PromotionValues, "automatic">({ name: "automatic" })
+  const [automatic, code] = useWatch<PromotionValues, ["automatic", "code"]>({
+    name: ["automatic", "code"],
+  })
+  const shortCode = !automatic && code.trim().length > 0 && code.trim().length < SAFE_CODE_LENGTH
   const error = useError()
   return (
     <SectionCard title={t("promotions.form.usage")} description={t("promotions.form.usageHint")}>
@@ -107,7 +113,13 @@ export function UsageCard() {
           label={t("promotions.form.code")}
           htmlFor="promotion-code"
           required
-          hint={t(automatic ? "promotions.form.codeAutomaticHint" : "promotions.form.codeHint")}
+          hint={t(
+            automatic
+              ? "promotions.form.codeAutomaticHint"
+              : shortCode
+                ? "promotions.form.codeShort"
+                : "promotions.form.codeHint"
+          )}
           error={error("code")}
         >
           <Input
@@ -159,9 +171,14 @@ export function UsageCard() {
           <Field
             label={t("promotions.form.starts")}
             htmlFor="promotion-starts"
-            hint={t("promotions.form.startsHint")}
+            hint={t(datesLocked ? "promotions.form.datesShared" : "promotions.form.startsHint")}
           >
-            <Input id="promotion-starts" type="date" {...register("starts")} />
+            <Input
+              id="promotion-starts"
+              type="date"
+              disabled={datesLocked}
+              {...register("starts")}
+            />
           </Field>
           <Field
             label={t("promotions.form.ends")}
@@ -169,7 +186,7 @@ export function UsageCard() {
             hint={t("promotions.form.endsHint")}
             error={error("ends")}
           >
-            <Input id="promotion-ends" type="date" {...register("ends")} />
+            <Input id="promotion-ends" type="date" disabled={datesLocked} {...register("ends")} />
           </Field>
         </div>
       </div>

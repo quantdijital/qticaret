@@ -977,7 +977,9 @@
       "previewCode": "Müşteri bu kodu sepette girdiğinde uygulanır.",
       "previewAutomatic": "Kod gerekmez; uygun sepetlere kendiliğinden uygulanır.",
       "activate": "Hemen yayına al",
-      "activateHint": "Kapalıysa taslak olarak kaydedilir."
+      "activateHint": "Kapalıysa taslak olarak kaydedilir.",
+      "codeShort": "6 karakterden kısa kodlar tahmin edilebilir; daha uzun bir kod önerilir.",
+      "datesShared": "Tarihler başka promosyonlarla ortak bir kampanyada; gelişmiş panelden değiştirin."
     },
     "errors": {
       "code": "Kod 3–40 karakter olmalı; harf, rakam, tire ve alt çizgi kullanılabilir.",

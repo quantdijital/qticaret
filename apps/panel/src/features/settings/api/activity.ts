@@ -36,7 +36,8 @@ export const jobsQuery = (page: number) =>
 
 /** A short-lived link to a finished job's file; fetching it is a recorded read. */
 export const jobResultUrl = async (id: string) =>
-  (await sdk.client.fetch<{ url: string }>(`/admin/async-jobs/${id}/result`)).url
+  (await sdk.client.fetch<{ url: string }>(`/admin/async-jobs/${encodeURIComponent(id)}/result`))
+    .url
 
 export function useStartJob() {
   const client = useQueryClient()

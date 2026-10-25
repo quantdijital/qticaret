@@ -61,3 +61,15 @@ export function scheduleOf(
   }
   return "active"
 }
+
+/**
+ * The promotion is its campaign's only member: the campaign holds just its
+ * dates, so the panel may change or delete it. A campaign made elsewhere for
+ * several promotions (with a budget, say) is left alone; unknown counts as shared.
+ */
+export function ownsCampaign(
+  promotionId: string,
+  members: ({ id: string } | null)[] | null | undefined
+): boolean {
+  return Array.isArray(members) && members.every((member) => member?.id === promotionId)
+}

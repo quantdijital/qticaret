@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { applicationMethod, offerKind, scheduleOf } from "./offer"
+import { applicationMethod, offerKind, ownsCampaign, scheduleOf } from "./offer"
 
 describe("offers", () => {
   it("reads free shipping, amounts and percentages back from the method", () => {
@@ -25,5 +25,11 @@ describe("offers", () => {
     expect(scheduleOf("active", { starts_at: "2026-11-01T00:00:00Z" }, now)).toBe("scheduled")
     expect(scheduleOf("active", { ends_at: "2026-10-01T00:00:00Z" }, now)).toBe("ended")
     expect(scheduleOf("draft", null, now)).toBe("draft")
+  })
+
+  it("owns a campaign only as its sole member; unknown members count as shared", () => {
+    expect(ownsCampaign("p1", [{ id: "p1" }])).toBe(true)
+    expect(ownsCampaign("p1", [{ id: "p1" }, { id: "p2" }])).toBe(false)
+    expect(ownsCampaign("p1", undefined)).toBe(false)
   })
 })

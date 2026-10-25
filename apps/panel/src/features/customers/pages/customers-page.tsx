@@ -53,14 +53,6 @@ function useColumns(): Column<CustomerListItem>[] {
       ),
     },
     {
-      key: "phone",
-      header: t("customers.columns.phone"),
-      className: "hidden md:table-cell",
-      cell: (customer) => (
-        <span className="text-muted-foreground tabular-nums">{customer.phone ?? "—"}</span>
-      ),
-    },
-    {
       key: "kind",
       header: t("customers.columns.kind"),
       cell: (customer) => (

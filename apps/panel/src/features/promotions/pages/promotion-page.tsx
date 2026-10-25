@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Switch } from "@/components/ui/switch"
 import {
+  campaignMembersQuery,
   promotionQuery,
   useDeletePromotion,
   useSavePromotion,
@@ -25,7 +26,7 @@ import { OfferText, ScheduleBadge } from "@/features/promotions/components/offer
 import { OfferCard, UsageCard } from "@/features/promotions/components/promotion-fields"
 import { createBody, promotionSchema, valuesOf } from "@/features/promotions/form"
 import type { PromotionValues } from "@/features/promotions/form"
-import { applicationMethod } from "@/features/promotions/offer"
+import { applicationMethod, ownsCampaign } from "@/features/promotions/offer"
 import { errorText } from "@/lib/errors"
 import { formatCount } from "@/lib/format"
 import { parseMoneyInput } from "@/lib/money-input"
@@ -82,6 +83,13 @@ function PromotionForm({ existing }: { existing: Promotion | null }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const save = useSavePromotion()
+  const members = useQuery({
+    ...campaignMembersQuery(existing?.campaign?.id ?? ""),
+    enabled: Boolean(existing?.campaign?.id),
+  })
+  // Dates on a campaign shared with other promotions are not this form's to change
+  const datesLocked =
+    Boolean(existing?.campaign?.id) && !ownsCampaign(existing?.id ?? "", members.data)
   const form = useForm<PromotionValues>({
     resolver: zodResolver(promotionSchema),
     defaultValues: valuesOf(existing),
@@ -115,7 +123,7 @@ function PromotionForm({ existing }: { existing: Promotion | null }) {
       >
         <div className="flex min-w-0 flex-col gap-[var(--grid-gap)] xl:col-span-8">
           <OfferCard kindLocked={existing !== null} />
-          <UsageCard />
+          <UsageCard datesLocked={datesLocked} />
         </div>
         <div className="flex min-w-0 flex-col gap-[var(--grid-gap)] xl:sticky xl:top-20 xl:col-span-4">
           <Preview existing={existing} />

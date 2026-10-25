@@ -22,7 +22,7 @@ export interface ProductCatalog {
   }[]
 }
 
-const catalogUrl = (id: string) => `/admin/products/${id}/catalog`
+const catalogUrl = (id: string) => `/admin/products/${encodeURIComponent(id)}/catalog`
 
 export const productCatalogQuery = (id: string) =>
   queryOptions({

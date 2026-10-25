@@ -1,6 +1,7 @@
 import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
 import { sdk } from "@/lib/sdk"
 import type { createBody } from "../form"
+import { ownsCampaign } from "../offer"
 
 // A shop runs a handful at a time: one read holds them, tabs filter here
 export const PROMOTIONS_READ = 200
@@ -39,6 +40,19 @@ export const promotionQuery = (id: string) =>
 
 export type Promotion = Awaited<ReturnType<typeof sdk.admin.promotion.retrieve>>["promotion"]
 
+// A campaign's promotions are read from the campaign: the promotion's own query leaves them out
+async function campaignMembers(campaignId: string) {
+  const { campaign } = await sdk.admin.campaign.retrieve(campaignId, { fields: "id,promotions.id" })
+  return (campaign as { promotions?: ({ id: string } | null)[] | null }).promotions
+}
+
+/** Who else is in the promotion's campaign, to tell whether its dates are the promotion's own. */
+export const campaignMembersQuery = (campaignId: string) =>
+  queryOptions({
+    queryKey: ["promotions", "campaign-members", campaignId],
+    queryFn: () => campaignMembers(campaignId),
+  })
+
 function usePromotionMutation<T, R>(run: (input: T) => Promise<R>) {
   const client = useQueryClient()
   return useMutation({
@@ -54,12 +68,15 @@ export const useUpdatePromotion = (id: string) =>
     sdk.admin.promotion.update(id, body)
   )
 
-/** Deletes the promotion and the campaign that only held its dates. */
+/** Deletes the promotion, and its campaign when that held only this promotion's dates. */
 export const useDeletePromotion = () =>
   usePromotionMutation(async (promotion: Promotion) => {
+    const campaignId = promotion.campaign?.id
+    // Read before the promotion goes, while it still counts as a member
+    const members = campaignId ? await campaignMembers(campaignId) : null
     await sdk.admin.promotion.delete(promotion.id)
-    if (promotion.campaign?.id) {
-      await sdk.admin.campaign.delete(promotion.campaign.id)
+    if (campaignId && ownsCampaign(promotion.id, members)) {
+      await sdk.admin.campaign.delete(campaignId)
     }
   })
 
@@ -92,8 +109,11 @@ export function useSavePromotion() {
         starts_at: body.campaign?.starts_at ?? null,
         ends_at: body.campaign?.ends_at ?? null,
       }
+      // A campaign other promotions share keeps its dates (and budget) as they are
       if (existing.campaign?.id) {
-        await sdk.admin.campaign.update(existing.campaign.id, dates)
+        if (ownsCampaign(existing.id, await campaignMembers(existing.campaign.id))) {
+          await sdk.admin.campaign.update(existing.campaign.id, dates)
+        }
       } else if (body.campaign) {
         const { campaign } = await sdk.admin.campaign.create(body.campaign)
         await sdk.admin.promotion.update(existing.id, { campaign_id: campaign.id })

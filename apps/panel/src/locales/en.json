@@ -969,7 +969,9 @@
       "previewCode": "Applies when the customer enters this code in the basket.",
       "previewAutomatic": "No code needed; applies to eligible baskets on its own.",
       "activate": "Go live now",
-      "activateHint": "When off, it is saved as a draft."
+      "activateHint": "When off, it is saved as a draft.",
+      "codeShort": "Codes shorter than 6 characters are easy to guess; a longer one is better.",
+      "datesShared": "The dates live on a campaign shared with other promotions; change them in the advanced panel."
     },
     "errors": {
       "code": "The code needs 3–40 letters, digits, hyphens or underscores.",
