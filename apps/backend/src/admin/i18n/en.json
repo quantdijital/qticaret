@@ -32,7 +32,9 @@
     },
     "serverErrors": {
       "seo": {
-        "template_invalid": "The template has a tag this field does not support, or broken braces."
+        "template_invalid": "The template has a tag this field does not support, or broken braces.",
+        "path_taken": "Another record already uses this URL.",
+        "path_reserved": "This URL is reserved for the store's own pages."
       },
       "features": {
         "platform_owned": "This feature is managed by the platform.",
@@ -83,6 +85,19 @@
         "already_running": "One of these jobs is already queued or running.",
         "result_unavailable": "This job has no result to download, or it expired.",
         "not_queued": "The job has already started."
+      },
+      "catalog": {
+        "handle_invalid": "The handle may contain only lowercase letters, digits and hyphens.",
+        "handle_required": "No handle could be made from the title; enter one yourself.",
+        "dimensions_required": "A physical product needs weight and dimensions for every variant before it is published.",
+        "primary_category_not_assigned": "The primary category must be one of the product's categories.",
+        "successor_self": "A product cannot succeed itself.",
+        "successor_unknown": "The selected product was not found.",
+        "successor_loop": "This choice would create a redirect loop.",
+        "variant_unknown": "The variant does not belong to this product.",
+        "mpn_invalid": "The MPN contains invalid characters.",
+        "product_unknown": "Product not found.",
+        "variants_too_many": "At most 500 variants can be saved at once."
       }
     },
     "settings": {
@@ -270,6 +285,41 @@
         "failed": "The job did not finish.",
         "interrupted": "The job stopped midway (the server may have restarted); run it again.",
         "not_started": "The job never started; run it again."
+      }
+    },
+    "catalog": {
+      "title": "Catalog details",
+      "subtitle": "The product's identity for search engines, Google Shopping and product feeds.",
+      "saved": "Catalog details saved.",
+      "condition": {
+        "label": "Condition",
+        "options": {
+          "new": "New",
+          "refurbished": "Refurbished",
+          "used": "Used",
+          "damaged": "Damaged"
+        }
+      },
+      "primaryCategory": {
+        "label": "Primary category",
+        "none": "Not set",
+        "hint": "Breadcrumbs, structured data and the \"back to category\" link come from this category.",
+        "noCategories": "Add a category to the product first."
+      },
+      "successor": {
+        "label": "Successor product",
+        "search": "Search by product name",
+        "clear": "Remove",
+        "noResults": "No matching product.",
+        "hint": "Once the product is no longer sold, its URL points to this product. Pick a true equivalent only."
+      },
+      "variants": {
+        "title": "Variant codes",
+        "variant": "Variant",
+        "gtin": "GTIN",
+        "mpn": "MPN",
+        "noGtin": "No valid GTIN",
+        "hint": "The GTIN is read from the variant's EAN, UPC or barcode field. The MPN is the manufacturer part number; with the brand it identifies a product that has no GTIN."
       }
     }
   }

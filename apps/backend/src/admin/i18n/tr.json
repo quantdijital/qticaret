@@ -32,7 +32,9 @@
     },
     "serverErrors": {
       "seo": {
-        "template_invalid": "Şablonda bu alan için tanımlı olmayan bir etiket ya da hatalı süslü parantez var."
+        "template_invalid": "Şablonda bu alan için tanımlı olmayan bir etiket ya da hatalı süslü parantez var.",
+        "path_taken": "Bu adres başka bir kayıt tarafından kullanılıyor.",
+        "path_reserved": "Bu adres mağazanın kendi sayfalarına ayrılmış."
       },
       "features": {
         "platform_owned": "Bu özellik platform tarafından yönetilir.",
@@ -83,6 +85,19 @@
         "already_running": "Bu işten biri zaten sırada ya da çalışıyor.",
         "result_unavailable": "Bu işin indirilebilir bir sonucu yok ya da süresi doldu.",
         "not_queued": "İş zaten başlamış."
+      },
+      "catalog": {
+        "handle_invalid": "Adres (handle) yalnızca küçük harf, rakam ve tire içerebilir; Türkçe karakter kullanmayın.",
+        "handle_required": "Başlıktan bir adres üretilemedi; adresi (handle) kendiniz girin.",
+        "dimensions_required": "Fiziksel bir ürünü yayınlamak için her varyantın ağırlığı ve ölçüleri girilmeli.",
+        "primary_category_not_assigned": "Birincil kategori, ürünün eklendiği kategorilerden biri olmalı.",
+        "successor_self": "Ürün kendi yerine geçemez.",
+        "successor_unknown": "Seçilen ürün bulunamadı.",
+        "successor_loop": "Bu seçim bir yönlendirme döngüsü oluşturur.",
+        "variant_unknown": "Varyant bu ürüne ait değil.",
+        "mpn_invalid": "MPN geçersiz karakter içeriyor.",
+        "product_unknown": "Ürün bulunamadı.",
+        "variants_too_many": "Tek seferde en çok 500 varyant kaydedilebilir."
       }
     },
     "settings": {
@@ -270,6 +285,41 @@
         "failed": "İş tamamlanamadı.",
         "interrupted": "İş yarıda kaldı (sunucu yeniden başlamış olabilir); tekrar çalıştırın.",
         "not_started": "İş başlatılamadı; tekrar çalıştırın."
+      }
+    },
+    "catalog": {
+      "title": "Katalog bilgileri",
+      "subtitle": "Arama motorları, Google Alışveriş ve ürün listeleri için ürünün kimliği.",
+      "saved": "Katalog bilgileri kaydedildi.",
+      "condition": {
+        "label": "Ürün durumu",
+        "options": {
+          "new": "Yeni",
+          "refurbished": "Yenilenmiş",
+          "used": "İkinci el",
+          "damaged": "Kusurlu"
+        }
+      },
+      "primaryCategory": {
+        "label": "Birincil kategori",
+        "none": "Seçilmedi",
+        "hint": "Breadcrumb, yapılandırılmış veri ve \"kategoriye dön\" bağlantısı bu kategoriden üretilir.",
+        "noCategories": "Önce ürüne kategori ekleyin."
+      },
+      "successor": {
+        "label": "Yerine geçen ürün",
+        "search": "Ürün adıyla arayın",
+        "clear": "Kaldır",
+        "noResults": "Eşleşen ürün yok.",
+        "hint": "Ürün satıştan kalkınca adresi bu ürüne yönlenir. Yalnızca gerçek bir eşdeğer seçin."
+      },
+      "variants": {
+        "title": "Varyant kodları",
+        "variant": "Varyant",
+        "gtin": "GTIN",
+        "mpn": "MPN",
+        "noGtin": "Geçerli GTIN yok",
+        "hint": "GTIN, varyantın EAN, UPC ya da barkod alanından okunur. MPN üretici parça numarasıdır; GTIN'i olmayan üründe marka ile birlikte kimlik sağlar."
       }
     }
   }
