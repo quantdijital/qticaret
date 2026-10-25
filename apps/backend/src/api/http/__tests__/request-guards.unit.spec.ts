@@ -2,7 +2,7 @@ import type { MedusaRequest } from "@medusajs/framework/http"
 import { logger } from "../../../lib/logging"
 import { csrfProtection } from "../csrf"
 import { adminLimitGuard, storeLimitGuard, uploadSizeGate } from "../request-limits"
-import { rejectAmbiguousPath } from "../request-path"
+import { rejectAmbiguousPath, routePath } from "../request-path"
 import { applySecurityHeaders } from "../security-headers"
 import { fakeResponse } from "./fakes"
 
@@ -263,5 +263,22 @@ describe("rejectAmbiguousPath", () => {
     const req = request({ path: "/admin/products/prod%5F01?q=%23" })
 
     expect(run(rejectAmbiguousPath, req).next).toHaveBeenCalled()
+  })
+})
+
+describe("routePath", () => {
+  const request = (url: string) => ({ originalUrl: url }) as unknown as MedusaRequest
+
+  it("reads the path as Express routes it", () => {
+    expect(routePath(request("/ADMIN/Products//?q=1"))).toBe("/admin/products")
+    expect(routePath(request("///"))).toBe("/")
+  })
+
+  it("trims a long run of slashes in linear time", () => {
+    const start = performance.now()
+    routePath(request(`/auth/${"/".repeat(16_000)}x`))
+    routePath(request(`/auth${"/".repeat(16_000)}`))
+    // The regex it replaces took ~90 ms for one of these
+    expect(performance.now() - start).toBeLessThan(50)
   })
 })

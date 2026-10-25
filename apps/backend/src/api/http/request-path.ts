@@ -33,7 +33,17 @@ export function routePathKeepingCase(req: MedusaRequest): string {
   const raw = requestPath(req)
   const end = raw.indexOf("#")
   const path = (end === -1 ? raw : raw.slice(0, end)).replace(ABSOLUTE_FORM, "")
-  return path.replace(/\/+$/, "") || "/"
+  return trimTrailingSlashes(path) || "/"
+}
+
+// A loop, not `/\/+$/`: that pattern rescans a long run of slashes from every
+// start, and a request line of 16 KB of them held the event loop for ~90 ms
+function trimTrailingSlashes(path: string): string {
+  let end = path.length
+  while (end > 0 && path.charCodeAt(end - 1) === 0x2f) {
+    end -= 1
+  }
+  return path.slice(0, end)
 }
 
 // A backslash or a fragment in the request line: no client sends one, and
