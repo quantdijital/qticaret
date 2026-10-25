@@ -1,13 +1,24 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { updateStoresWorkflow } from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { bootstrapTenant } from "../../src/scripts/bootstrap"
 import { REDUCED_VAT_RATES } from "../../src/scripts/bootstrap/constants"
+import runBootstrapScript from "../../src/scripts/bootstrap-tenant"
 import type { HttpClient } from "../helpers/http"
 import { createStorefront, createTestProduct } from "../helpers/storefront"
 
 jest.setTimeout(120 * 1000)
+
+interface LayoutStore {
+  getSystemDefaultLayoutConfiguration(
+    zone: string
+  ): Promise<{ configuration: { widgets: Record<string, unknown> } } | null>
+  setSystemDefaultLayoutConfiguration(
+    zone: string,
+    data: { widgets: Record<string, unknown> }
+  ): Promise<unknown>
+}
 
 interface TaxLine {
   code: string
@@ -175,6 +186,52 @@ medusaIntegrationTestRunner({
           tax_total: 1,
           tax_lines: [expect.objectContaining({ code: "KDV1", rate: 1 })],
         })
+      })
+
+      it("puts Home first and hides developer settings in the admin menus (adr/0021)", async () => {
+        const layouts = getContainer().resolve<LayoutStore>(Modules.SETTINGS)
+
+        await bootstrapTenant(getContainer())
+        const main = await layouts.getSystemDefaultLayoutConfiguration("sidebar")
+        const settings = await layouts.getSystemDefaultLayoutConfiguration("settings.sidebar")
+
+        expect(main?.configuration.widgets).toMatchObject({
+          "core:Searchbar": { order: -2 },
+          "core:nav:/home": { order: -1 },
+        })
+        expect(settings?.configuration.widgets).toMatchObject({
+          "core:settings-nav:/settings/secret-api-keys": { hidden: true },
+          "core:settings-nav:/settings/publishable-api-keys": { hidden: true },
+          "core:settings-nav:/settings/workflows": { hidden: true },
+          "core:settings-nav:/settings/seo": { section: "general" },
+        })
+      })
+
+      it("keeps an admin menu the shop saved since", async () => {
+        const layouts = getContainer().resolve<LayoutStore>(Modules.SETTINGS)
+        await layouts.setSystemDefaultLayoutConfiguration("sidebar", {
+          widgets: { "core:nav:/orders": { order: -5 } },
+        })
+
+        await bootstrapTenant(getContainer())
+        const main = await layouts.getSystemDefaultLayoutConfiguration("sidebar")
+
+        expect(main?.configuration.widgets).toEqual({ "core:nav:/orders": { order: -5 } })
+      })
+
+      it("asks for the store's name at setup, and keeps it on a rerun (docs/17)", async () => {
+        const container = getContainer()
+        const query = container.resolve(ContainerRegistrationKeys.QUERY)
+        const run = (args: string[]) => runBootstrapScript({ container, args })
+        const name = async () =>
+          ((await query.graph({ entity: "store", fields: ["name"] })).data[0] as { name: string })
+            .name
+
+        await expect(run([])).rejects.toThrow("--store-name")
+        await run(["--store-name=Bıçak Dünyası"])
+        expect(await name()).toBe("Bıçak Dünyası")
+        await run([])
+        expect(await name()).toBe("Bıçak Dünyası")
       })
 
       it("keeps the tenant's currency choices and default region on a rerun", async () => {
