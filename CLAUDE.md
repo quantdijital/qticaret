@@ -9,18 +9,19 @@ sektörel ihtiyaçlar feature flag ve attribute şablonlarıyla çözülür.
 Model: **instance-per-tenant** (her müşteriye ayrı Medusa instance + ayrı DB).
 
 ## Şu anki odak
-Backend + Admin. Storefront/temalar SONRAKİ aşama — şimdi storefront kodu yazma.
+Backend + kendi yönetici panelimiz (`apps/panel`, adr/0022). Medusa Admin'e yeni ekran yazılmaz. Storefront/temalar SONRAKİ aşama — şimdi storefront kodu yazma.
 Güncel faz ve görevler: `PROGRESS.md`
 
 ## Stack
 - Medusa.js v2 (Node.js, TypeScript strict), PostgreSQL, Redis
 - pnpm workspaces + Turborepo monorepo
-- Admin genişletmeleri: Medusa Admin SDK + `@medusajs/ui`
+- Panel: React 19 + Vite, Tailwind v4 + shadcn/ui, TanStack Router/Query/Table, RHF + Zod (docs/18)
 - Test: Vitest/Jest (Medusa test-utils), entegrasyon testleri zorunlu
 
 ## Komutlar
 - `pnpm dev` — tüm uygulamalar
 - `pnpm --filter backend dev` — sadece backend
+- `pnpm --filter panel dev` — panel (backend'e proxy)
 - `pnpm --filter backend test:unit` / `test:integration:http` / `test:integration:modules`
 - `pnpm lint` / `pnpm typecheck` / `pnpm format`
 - `pnpm --filter backend medusa db:migrate` — migration
@@ -28,7 +29,7 @@ Güncel faz ve görevler: `PROGRESS.md`
 
 ## Altın kurallar
 1. **Kod yazmadan önce** Medusa API'sini Context7 MCP ile doğrula. Hafızandan Medusa v1 API'si yazma.
-2. Medusa çekirdeğini değiştirme. Her şey modül, module provider, workflow, subscriber, API route, admin extension.
+2. Medusa çekirdeğini değiştirme. Her şey modül, module provider, workflow, subscriber, API route; arayüz panel ekranı.
 3. İş mantığı **workflow**'larda; API route'lar ince kalır (doğrula → workflow çağır → dön).
 4. Dış servis çağıran her adımın **compensation**'ı olur.
 5. Fiyat/tutar istemciden asla kabul edilmez; sunucuda hesaplanır.
@@ -48,7 +49,9 @@ Güncel faz ve görevler: `PROGRESS.md`
 | Yol haritası + kabul kriterleri | docs/03-yol-haritasi.md |
 | Güvenlik | docs/04-guvenlik.md |
 | Performans | docs/05-performans.md |
-| Admin UX | docs/06-admin-ux.md |
+| Panel UX ve ekran planı | docs/06-admin-ux.md |
+| Panel tasarım sistemi (token, tema, klasör) | docs/18-panel-tasarim-sistemi.md |
+| Panel kullanılabilirlik denetimi | docs/17-yonetici-paneli-kullanilabilirlik.md |
 | Test | docs/07-test-stratejisi.md |
 | DevOps | docs/08-devops.md |
 | Claude Code çalışma düzeni, MCP | docs/09-claude-code-is-akisi.md |

@@ -1,4 +1,4 @@
-# 03 — Yol Haritası (Backend + Admin)
+# 03 — Yol Haritası (Backend + Panel)
 
 > Her görev tek bir Claude Code oturumuna sığacak büyüklüktedir.
 > Görev bitince kabul kriterleri işaretlenir ve `PROGRESS.md` güncellenir.
@@ -34,7 +34,19 @@
 | F18 | Storefront ve çoklu tema | Sonraki aşama |
 | F19 | Genişleme: pazaryeri, B2B, yurt dışı, sadakat, ajan ticareti | Sonraki aşama |
 
-**İlk müşteri canlıya çıkış eşiği:** F0–F16 tamamlanmış ve F18'den en az bir tema hazır.
+## Panel hattı (P): kendi yönetici panelimiz
+adr/0022: panel `apps/panel`'dir; F3'ten itibaren fazların "admin" maddeleri panel ekranı olarak teslim edilir. Tasarım: docs/18. Dilimler backend fazlarıyla paralel yürür.
+
+| Dilim | Konu | KK |
+|---|---|---|
+| P1 | Temel: tasarım sistemi ve token'lar, tema motoru, kabuk (menü, üst çubuk), giriş, dashboard, Ayarlar > Görünüm, `appearance` ayar bölümü | Marka rengi değişince panel anında yeniden boyanıyor; AA kontrast testli; açık/koyu ve üç köşe seçeneği; Playwright duman testi |
+| P2 | Kurulum sihirbazı ve mağaza ayarları (bilgiler, bölge, kargo adımı, ödeme adımı) | Yeni mağaza sihirbazı bitmeden ürün ekleyebiliyor ama "yayına al" adımı eksikleri sayıyor |
+| P3 | Ürünler: liste, adım adım ürün sihirbazı, düzenleme (görsel, varyant, özellik şablonu, katalog, SEO yan paneli), kategoriler, stok | Ürün sihirbazı 6 adımda yayına kadar; F3 ekranları Medusa Admin'e değil panele |
+| P4 | Siparişler: liste, detay, kargoya hazırla, iade/değişim giriş noktaları (F7 ile) | Operasyon rolü günlük işini yalnızca panelde yapıyor |
+| P5 | Müşteriler, kampanyalar (F4), raporlar (F11), entegrasyonlar, denetim kaydı | F12 ekranları panelde |
+| P6 | Medusa Admin'in tenant'larda kapatılması | Hiçbir günlük iş `/app` gerektirmiyor |
+
+**İlk müşteri canlıya çıkış eşiği:** F0–F16 tamamlanmış, panel P1–P4 bitmiş ve F18'den en az bir tema hazır.
 F17 öncesinde tenant'lar F16 script'leriyle elle açılır.
 
 ---
@@ -361,7 +373,7 @@ Detay: `docs/entegrasyonlar/muhasebe.md`
 ---
 
 ## F12 — Admin Genişletmeleri
-Detay: `docs/06-admin-ux.md`
+Detay: `docs/06-admin-ux.md`. adr/0022'den sonra bu fazın ekranları panel hattında (P5) teslim edilir; burada iş kuralları kalır.
 
 - F12.1 Dashboard widget'ları: günlük ciro, bekleyen siparişler, kargoya hazır, başarısız ödeme/fatura, düşük stok, SEO skoru özeti
 - F12.2 "Entegrasyonlar" sayfası: provider durumu, bağlantı testi, son hatalar (secret göstermez)

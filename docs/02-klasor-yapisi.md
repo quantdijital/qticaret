@@ -8,7 +8,7 @@ repo/
 ├── docs/
 ├── .claude/ (commands, agents, settings.json)
 ├── apps/
-│   ├── backend/                    # Medusa v2 (API + worker + admin)
+│   ├── backend/                    # Medusa v2 (API + worker; Medusa Admin yalnızca platform ekibi için)
 │   │   ├── CLAUDE.md
 │   │   ├── medusa-config.ts
 │   │   ├── src/
@@ -82,6 +82,7 @@ repo/
 │   │   │   └── scripts/             # seed, tr-address import, tenant bootstrap, katalog yollarını claim etme (F3.1)
 │   │   └── integration-tests/
 │   │       ├── http/  modules/  fixtures/
+│   ├── panel/                       # yönetici paneli, bizim SPA'mız (adr/0022; yapı docs/18 §6)
 │   └── storefront/                  # F18 — ŞİMDİ BOŞ
 ├── packages/
 │   ├── types/                       # paylaşılan tipler (Store API sözleşmeleri)

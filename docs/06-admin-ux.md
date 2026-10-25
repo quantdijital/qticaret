@@ -1,13 +1,13 @@
-# 06 — Admin UX
+# 06 — Panel UX
 
-> Bu aşamada UX odağı **admin paneli**. Storefront UX'i F18'de ayrı dokümanla ele alınır.
+> Yönetici paneli bizim uygulamamızdır: `apps/panel` (adr/0022). Görsel dil, token'lar ve klasör yapısı [docs/18](18-panel-tasarim-sistemi.md)'de; bu belge ilkeleri, sözlüğü ve ekran planını tutar.
+> Medusa Admin saklanır, mağaza sahibine gösterilmez; yeni hiçbir ekran oraya yazılmaz. Storefront UX'i F18'de ayrı dokümanla ele alınır.
 
 ## Araçlar
-- Medusa Admin SDK: widget'lar (`defineWidgetConfig`) ve özel sayfalar (`defineRouteConfig`)
-- `@medusajs/ui` bileşenleri — admin'in görsel dilini bozmamak için **sadece** bu kütüphane (+ ikonlar)
-- Veri: TanStack Query (Medusa JS SDK ile), formlar: React Hook Form + Zod
-- i18n: `src/admin/i18n/tr.json` (varsayılan), `en.json`
-- Test: Playwright (Playwright MCP ile Claude da gezer), axe ile erişilebilirlik
+- Yığın ve sürümler: docs/18 §1 (React, Tailwind v4, shadcn/ui, TanStack Router/Query/Table, RHF + Zod, Recharts, i18next)
+- Veri: `@medusajs/js-sdk` (session) ile Medusa Admin API ve bizim `/admin/*` uçlarımız; aynı origin (Vite proxy / F16 reverse proxy)
+- i18n: `apps/panel/src/locales/tr.json` (varsayılan), `en.json`; API hata metinleri backend'in `lib/errors/messages` kaynağından gelir (adr/0021)
+- Test: Vitest + Testing Library, Playwright (e2e), axe
 
 ## İlkeler
 1. **Operasyon önce.** Admin'i en çok kullanan kişi sipariş hazırlayan çalışan. En sık iş (kargoya hazırla, etiket bas) en az tıkla.
@@ -30,39 +30,41 @@
 | Payment provider | Ödeme sağlayıcı | POS firması |
 | Invoice | Fatura | e-belge |
 
-## Planlanan ekranlar (F12 ve ilgili fazlar)
-| Ekran | Tür | İçerik |
+## Planlanan ekranlar (panel hattı P1–P6 ve ilgili fazlar)
+| Ekran | Desen (docs/18 §7) | İçerik |
 |---|---|---|
-| Dashboard özet (Başlangıç) | Route `/home` (Medusa'da `home` widget bölgesi yok; docs/17) | Kurulum kontrol listesi ve hızlı işlemler (var); ciro, bekleyen, kargoya hazır, hatalı ödeme/fatura sayıları (özet ucu ile) |
-| Sipariş detay ek bilgi | Widget (order.details) | Ödeme sağlayıcı detayı, kargo takip zaman çizelgesi, fatura durumu, yasal onay kaydı |
-| Ürün attribute'ları | Widget (product.details) | Şablona göre dinamik form |
-| Entegrasyonlar | Route | Sağlayıcı kartları: durum, bağlantı testi, son hata |
-| Operasyon | Route | Kargoya hazır listesi, toplu etiket, filtreler |
-| Ayarlar > Özellikler | Route | Feature flag'ler |
-| Ayarlar > Yasal metinler | Route | Sürümlü sözleşme editörü |
-| Ayarlar > Mağaza künyesi | Route | Unvan, MERSİS, VKN, KEP, ETBİS; eksik alan uyarısı (F13) |
-| Denetim kaydı | Route | Filtrelenebilir audit log |
-| İçe/dışa aktarma | Route | Şablon indir, dosya yükle, ilerleme, satır bazlı hata raporu (F3) |
-| Toplu düzenleme | Route | Fiyat/stok/durum toplu güncelleme (F3) |
-| Yönlendirmeler | Route | 301/302 listesi, toplu yükleme (F3) |
-| Stok | Widget + Route | Depo bazlı stok, düşük stok listesi, hareket geçmişi (F3) |
-| Fiyat geçmişi | Widget (product.details) | Varyant fiyat grafiği, son 30 gün en düşük (F4) |
-| SEO ve paylaşım | Widget (product/category/brand.details) | Skor halkası, bulgular + "neden önemli", tek tık düzeltmeler, SERP/WhatsApp/Instagram önizleme, UTM'li paylaşım bağlantısı (F3) |
-| SEO paneli | Route | Mağaza skoru, en düşük varlıklar, 404 + 301 oluştur, zincir/mükerrer/öksüz, GSC/CWV kartları, denetim raporu, kurulum kontrol listesi (F3, F10, F12) |
-| Markalar | Route | Marka listesi/detay, SEO alanları (F3) |
-| İçerik | Route | Sayfalar, blog, facet landing (özgünlük göstergesi, parti yayını) (F3) |
-| Soru-Cevap moderasyonu | Route | Bekleyen sorular/cevaplar, toplu onay (F10) |
-| Değişim ve sipariş düzenleme | Widget + Route | Değişim talepleri, fark tutarı, sipariş düzenleme geçmişi (F7) |
-| Ters ibraz | Route | Açık ibrazlar, belge paketi indir, durum (F6) |
-| Promosyonlar | Route | Kupon/kampanya oluşturma, kullanım istatistiği, toplu kod üretimi (F4) |
-| Havale onayları | Route | Ödeme bekleyen siparişler, onay/iptal, kalan süre (F6) |
-| İade talepleri | Route | Talep listesi, onay/ret, depoya varış kontrolü (F7) |
-| Yorum moderasyonu | Route | Onay bekleyen yorumlar, toplu onay/ret (F10) |
-| Raporlar | Route | Satış, finans/KDV, stok raporları, dışa aktarma (F11) |
-| Muhasebe aktarımı | Route | Aktarım durumu, hatalılar, yeniden dene (F11) |
-| API ve webhook'lar | Route | API anahtarları, webhook abonelikleri, teslim logu (F11) |
-| Şüpheli siparişler | Route | Dolandırıcılık inceleme kuyruğu (F15) |
-| Geçiş | Route | Kaynak seçimi, dry-run raporu, çalıştırma durumu (F14) |
+| Dashboard | StatCard + grafik + kurulum ilerlemesi (P1) | Bugünkü satış, bekleyen ve kargoya hazır sipariş, düşük stok, haftalık grafik, sıradaki kurulum adımı; hatalı ödeme/fatura sayıları ilgili fazda |
+| Sipariş detay | Sayfa (P4, F7) | Kalemler, ödeme/kargo/fatura durumu tek bakışta, kargo takip zaman çizelgesi, yasal onay kaydı, iç notlar |
+| Ürün sihirbazı ve düzenleme | Wizard + FormSection (P3, F3) | Temel bilgi → görseller → fiyat ve stok → özellikler (şablon) → katalog ve SEO → yayınla; düzenlemede aynı bölümler |
+| Entegrasyonlar | Sayfa | Sağlayıcı kartları: durum, bağlantı testi, son hata |
+| Operasyon | Sayfa | Kargoya hazır listesi, toplu etiket, filtreler |
+| Ayarlar > Görünüm | Sayfa (P1) | Marka rengi, logo, köşe, yoğunluk, mod; canlı önizleme (docs/18 §5) |
+| Kurulum sihirbazı | Wizard (P2) | Mağaza bilgileri → ilk ürün → kargo → ödeme → yayına al; atlanabilir, ilerleme kalıcı |
+| Ayarlar > Özellikler | Sayfa | Feature flag'ler |
+| Ayarlar > Yasal metinler | Sayfa | Sürümlü sözleşme editörü |
+| Ayarlar > Mağaza künyesi | Sayfa | Unvan, MERSİS, VKN, KEP, ETBİS; eksik alan uyarısı (F13) |
+| Denetim kaydı | Sayfa | Filtrelenebilir audit log |
+| İçe/dışa aktarma | Sayfa | Şablon indir, dosya yükle, ilerleme, satır bazlı hata raporu (F3) |
+| Toplu düzenleme | Sayfa | Fiyat/stok/durum toplu güncelleme (F3) |
+| Yönlendirmeler | Sayfa | 301/302 listesi, toplu yükleme (F3) |
+| Stok | DataTable (P3, F3) | Depo bazlı stok, düşük stok listesi, hareket geçmişi |
+| Fiyat geçmişi | Ürün sayfası bölümü (F4) | Varyant fiyat grafiği, son 30 gün en düşük |
+| SEO ve paylaşım | Ürün/kategori/marka sayfasında yan panel (F3) | Skor, bulgular + "neden önemli", tek tık düzeltmeler, SERP/WhatsApp/Instagram önizleme, UTM'li paylaşım bağlantısı |
+| SEO paneli | Sayfa | Mağaza skoru, en düşük varlıklar, 404 + 301 oluştur, zincir/mükerrer/öksüz, GSC/CWV kartları, denetim raporu, kurulum kontrol listesi (F3, F10, F12) |
+| Markalar | Sayfa | Marka listesi/detay, SEO alanları (F3) |
+| İçerik | Sayfa | Sayfalar, blog, facet landing (özgünlük göstergesi, parti yayını) (F3) |
+| Soru-Cevap moderasyonu | Sayfa | Bekleyen sorular/cevaplar, toplu onay (F10) |
+| Değişim ve sipariş düzenleme | Sayfa (F7) | Değişim talepleri, fark tutarı, sipariş düzenleme geçmişi |
+| Ters ibraz | Sayfa | Açık ibrazlar, belge paketi indir, durum (F6) |
+| Promosyonlar | Sayfa | Kupon/kampanya oluşturma, kullanım istatistiği, toplu kod üretimi (F4) |
+| Havale onayları | Sayfa | Ödeme bekleyen siparişler, onay/iptal, kalan süre (F6) |
+| İade talepleri | Sayfa | Talep listesi, onay/ret, depoya varış kontrolü (F7) |
+| Yorum moderasyonu | Sayfa | Onay bekleyen yorumlar, toplu onay/ret (F10) |
+| Raporlar | Sayfa | Satış, finans/KDV, stok raporları, dışa aktarma (F11) |
+| Muhasebe aktarımı | Sayfa | Aktarım durumu, hatalılar, yeniden dene (F11) |
+| API ve webhook'lar | Sayfa | API anahtarları, webhook abonelikleri, teslim logu (F11) |
+| Şüpheli siparişler | Sayfa | Dolandırıcılık inceleme kuyruğu (F15) |
+| Geçiş | Sayfa | Kaynak seçimi, dry-run raporu, çalıştırma durumu (F14) |
 
 ## SEO ve içerik girişi deneyimi (ilke)
 - Ürün formunda SEO sekmesi değil, **yan panel**: kullanıcı yazarken skor ve bulgular canlı güncellenir; "düzelt" tek tık.
@@ -71,9 +73,7 @@
 - Toplu içe aktarmada dosya seçilir seçilmez ön değerlendirme özeti ("%40 üründe görsel yok").
 - Her bulguda "neden önemli" kısa, Türkçe, sektör nötr; terim sözlüğüne uyar.
 
-## Kontrol listesi (her admin PR'ı)
-- [ ] Yükleniyor/boş/hata durumları var
-- [ ] Tüm metinler i18n anahtarı
-- [ ] Rol kontrolü hem UI'da hem API'de
-- [ ] Mobil genişlikte bozulmuyor (tablet kullanan depo çalışanı)
-- [ ] Playwright smoke testi eklendi
+## Kontrol listesi (her panel PR'ı)
+- [ ] docs/18 §9 listesi: yalnızca token, kara liste yok, tek birincil eylem, üç durum, sözlük, klavye/axe, mobil, açık/koyu
+- [ ] Rol kontrolü hem UI'da hem API'de (F12.6'ya kadar: yalnızca giriş)
+- [ ] Playwright duman testi eklendi

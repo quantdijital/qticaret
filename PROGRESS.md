@@ -3,10 +3,17 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a bitti; sıradaki T1b ya da T2; kararlar 2026-10-25'te verildi). Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı; push edilmedi. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
+**Panel P1 (kendi yönetici panelimiz, adr/0022): BAŞLADI** ve **F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a bitti). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı; push edilmedi. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
 
 ## Son oturum özeti
 **2026-10-24 gece oturumu (S3, S5; S8 başladı).** Kullanıcı döndü; dört karar verdi: bağımlılıklar onaylandı (ioredis 5.11.1, fast-xml-parser 5.11.2, yauzl 3.4.0, kendi görsel başlık okuyucumuz), ADR-0011..0014 kabul edildi, otonom devam, eski "Gözden geçir" maddeleri olduğu gibi kabul. Commit `54abc2a`.
+
+2026-10-25 (karar, adr/0022): Kullanıcı Medusa Admin'i yetersiz buldu ("tek renk, dashboard yok, düz kartlar, adım adım olmalı") ve kendi panelimizi yazmaya karar verdi.
+- Panel `apps/panel`: React 19 + Vite, Tailwind v4 + shadcn/ui, TanStack Router/Query/Table, RHF + Zod, Recharts, i18next. Backend'le aynı origin (proxy), oturum çerezi.
+- Tema mağaza sahibi tarafından yönetilir: marka rengi, logo, köşe, yoğunluk, mod; motor OKLCH ölçeği türetir, AA kontrastı garanti eder (docs/18 §5).
+- Kurallar: "AI slop" kara listesi (docs/18 §3), token dışı değer yok, klasör yapısı docs/18 §6.
+- Medusa Admin saklanır, mağaza sahibine gösterilmez; yeni ekran oraya yazılmaz; P6'da kapatılır.
+- docs/06 baştan yazıldı; docs/18 yeni; docs/02, docs/03 (P hattı), CLAUDE.md güncellendi.
 
 2026-10-25 (admin kullanılabilirliği, dilim 1 ve 2): Kullanıcı "panel çok zor, dashboard bile yok" dedi. docs/17 ve ADR-0021 (kabul).
 - **Dilim 1 (ayrı ajan, worktree):** Başlangıç sayfası (`/app/home`).
@@ -277,7 +284,8 @@
      - SEO sayfası açılışta çöküyordu: form, değerler gelmeden çiziliyordu.
      - Kalan kontrol: sayfa başlığı ve breadcrumb'da ham anahtar kalıyor mu?
    - **Canlı turlar:** `docs/16-proje-haritasi.md` sırasıyla (bölüm 9).
-2. **F3 kararları: verildi (2026-10-25).**
+2. **Panel P1 (adr/0022):** tasarım sistemi ve token'lar, tema motoru (+ kontrast birim testleri), kabuk, giriş, dashboard, Ayarlar > Görünüm, backend `appearance` ayar bölümü, Playwright duman testi. Yeni bağımlılıklar docs/18 §1 (hepsi ≥14 gün; `pnpm add` onayı).
+3. **F3 kararları: verildi (2026-10-25).**
    - ADR-0015..0020 kabul edildi.
    - Yeni bağımlılıklar onaylandı: `sharp` (T6), `yazl` (T15), Tiptap (T13). Her biri kendi oturumunda, exact sürüm ve ≥14 gün kuralıyla eklenir.
    - Redis kilit sağlayıcısı F3 T7'de bağlanır.
@@ -285,7 +293,7 @@
    - Görev sırası tablodaki gibi.
    - Açık kalanlar: Playwright e2e altyapısı (ayrı profil + `@playwright/test`; son karar listesinde yoktu) ve push/PR.
    - Dev'deki `playwright-admin@example.com` kalıyor (kullanıcı kararı).
-3. **Yerel dev DB:** F2'nin tüm migration'ları uygulandı. Dev dosyaları artık SeaweedFS'e yazılıyor.
+4. **Yerel dev DB:** F2'nin tüm migration'ları uygulandı. Dev dosyaları artık SeaweedFS'e yazılıyor.
 
 ### F3 görev planı (oturum büyüklüğünde; kullanıcı 2026-10-25 onayladı)
 | # | Görev | Kapsam | Bağımlılık | ADR |
@@ -459,6 +467,7 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
 | F0 Repo & araçlar | ✅ |
 | F1 Medusa çekirdek + TR lokalizasyon | ✅ |
 | F2 Platform çekirdek modülleri | ✅ |
+| Panel P1–P6 (adr/0022) | ⏳ P1 |
 | F3 Katalog, SEO motoru ve stok | ⏳ |
 | F4 Fiyatlandırma ve promosyon | ⬜ |
 | F5 Ödeme: iyzico | ⬜ |
@@ -468,7 +477,7 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
 | F9 Bildirimler (e-posta/SMS) | ⬜ |
 | F10 Müşteri hesabı, etkileşim, pazarlama ve SEO ölçümü | ⬜ |
 | F11 Raporlama, muhasebe ve dış API | ⬜ |
-| F12 Admin genişletmeleri | ⬜ |
+| F12 Admin genişletmeleri (ekranlar panel hattı P5'te) | ⬜ |
 | F13 Uyum & yasal özellikler | ⬜ |
 | F14 Veri taşıma ve geçiş araçları | ⬜ |
 | F15 Sertleştirme (güvenlik/dolandırıcılık/yük) | ⬜ |
