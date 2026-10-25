@@ -48,7 +48,8 @@ yalnızca boş volume'da uygulandığı için env dosyalarını yeniden üretirk
 | `pnpm lint` | ESLint (strict, type-checked) |
 | `pnpm typecheck` | `tsc --noEmit` |
 | `pnpm test` | Unit testler |
-| `pnpm --filter @qticaret/backend test:integration:http` | HTTP entegrasyon testleri (Postgres gerekir) |
+| `pnpm --filter @qticaret/backend test:integration:http` | HTTP entegrasyon testleri (Postgres gerekir); bir dosya için sonuna adını ekleyin |
+| `pnpm --filter @qticaret/backend test:integration:http:all` | Tüm HTTP testleri üç süreçte (CI bunu kullanır; tek süreçte bellek yetmiyor) |
 | `pnpm db:up` / `pnpm db:down` | Geliştirme servislerini başlat / durdur |
 | `pnpm env:init` | Eksik env dosyalarını ve değişkenlerini şablondan tamamla (mevcut değeri değiştirmez) |
 | `pnpm format` / `pnpm format:check` | Prettier yaz / kontrol et (Markdown hariç) |

@@ -105,5 +105,7 @@ jobs:
             echo "$name=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
           done
       - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @qticaret/backend test:integration:http
+      # Three processes: each spec file boots Medusa and one process runs out
+      # of heap after about twenty files
+      - run: pnpm --filter @qticaret/backend test:integration:http:all
       - run: pnpm --filter @qticaret/backend test:integration:modules
