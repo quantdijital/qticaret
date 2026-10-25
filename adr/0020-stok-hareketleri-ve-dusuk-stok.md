@@ -1,6 +1,6 @@
 # ADR-0020: Stok hareket defteri, düşük stok uyarısı, ön sipariş ve kilit sağlayıcısı
 
-- **Durum:** Önerildi (F3.7, F3.8; kullanıcı kararı bekliyor)
+- **Durum:** Kabul edildi (2026-10-25, kullanıcı onayı; uygulama F3.7, F3.8)
 - **Tarih:** 2026-10-25
 
 ## Bağlam

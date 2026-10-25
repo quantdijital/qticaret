@@ -1,6 +1,6 @@
 # ADR-0016: Görsel işleme hattı (EXIF temizleme, yeniden kodlama, türevler)
 
-- **Durum:** Önerildi (F3.3; kullanıcı kararı bekliyor)
+- **Durum:** Kabul edildi (2026-10-25, kullanıcı onayı; uygulama F3.3)
 - **Tarih:** 2026-10-25
 
 ## Bağlam

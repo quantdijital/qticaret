@@ -1,6 +1,6 @@
 # ADR-0019: Zengin metin içeriği (içerik sayfaları, blog, açıklamalar)
 
-- **Durum:** Önerildi (F3.16; kullanıcı kararı bekliyor)
+- **Durum:** Kabul edildi (2026-10-25, kullanıcı onayı; uygulama F3.16)
 - **Tarih:** 2026-10-25
 
 ## Bağlam

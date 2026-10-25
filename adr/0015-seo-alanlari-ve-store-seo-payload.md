@@ -1,6 +1,6 @@
 # ADR-0015: SEO alanlarının saklanması ve Store API `seo` payload'u
 
-- **Durum:** Önerildi (F3.4; kullanıcı kararı bekliyor)
+- **Durum:** Kabul edildi (2026-10-25, kullanıcı onayı; uygulama F3.4)
 - **Tarih:** 2026-10-25
 
 ## Bağlam
@@ -74,6 +74,6 @@ Elimizde olanlar (F2):
 
 - **İlk HTML garantisi:** Storefront (F18) sayfa başına bir `resolve` ve bir içerik çağrısı yapar.
 - **Fiyat cümlesi ve `Offer` bölge/para birimine bağlıdır:** Cache anahtarı bölgeyi içerir; TR tek bölgeyle başlar.
-- **Açık soru, canonical host boşken mutlak URL:** `canonical_host` null olabilir. Platform alt alan adı (`<slug>.<platform-domain>`) instance yapılandırmasından gelmeli (F16/F17). O zamana kadar resolve `canonical_host` ister; boşsa SEO ayarlarında uyarı gösterilir.
+- **Canonical host boşken mutlak URL (kullanıcı kararı 2026-10-25):** `canonical_host` null olabilir. Platform alt alan adı (`<slug>.<platform-domain>`) instance yapılandırmasından gelmeli (F16/F17). O zamana kadar resolve `canonical_host` ister; boşsa SEO ayarlarında uyarı gösterilir.
 - **Varyantı ayrı sayfa yap (docs/13 §2.3):** Bu bayrak gelirse `entity_type: variant_group` eklenir.
 - **Doğrulanacak, T2 planında:** link'li bir tabloya `deleteCascade` ile kategori ve koleksiyon silmede kayıt temizliği ve `entity_type` kolonunun link'le tutarlılığı (Zod + workflow).

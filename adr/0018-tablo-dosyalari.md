@@ -1,6 +1,6 @@
 # ADR-0018: Tablo dosyaları (xlsx) içe ve dışa aktarma
 
-- **Durum:** Önerildi (F3.9; kullanıcı kararı bekliyor)
+- **Durum:** Kabul edildi (2026-10-25, kullanıcı onayı; uygulama F3.9)
 - **Tarih:** 2026-10-25
 
 ## Bağlam

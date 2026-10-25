@@ -3,7 +3,7 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**F3 — Katalog, SEO motoru ve stok: PLANLAMA** (kullanıcı kararı bekliyor; uygulama kodu yazılmadı). F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
+**F3 — Katalog, SEO motoru ve stok: DEVAM** (T1'den başlandı; kararlar 2026-10-25'te verildi). Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı; push edilmedi. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
 
 ## Son oturum özeti
 **2026-10-24 gece oturumu (S3, S5; S8 başladı).** Kullanıcı döndü; dört karar verdi: bağımlılıklar onaylandı (ioredis 5.11.1, fast-xml-parser 5.11.2, yauzl 3.4.0, kendi görsel başlık okuyucumuz), ADR-0011..0014 kabul edildi, otonom devam, eski "Gözden geçir" maddeleri olduğu gibi kabul. Commit `54abc2a`.
@@ -238,17 +238,17 @@
      - SEO sayfası açılışta çöküyordu: form, değerler gelmeden çiziliyordu.
      - Kalan kontrol: sayfa başlığı ve breadcrumb'da ham anahtar kalıyor mu?
    - **Canlı turlar:** `docs/16-proje-haritasi.md` sırasıyla (bölüm 9).
-   - **Dev'deki geçici admin kullanıcısı:** `playwright-admin@example.com` silinsin mi?
-2. **F3 kararları (kullanıcı):**
-   - ADR-0015..0020: her biri ayrı ayrı kabul ya da ret.
-   - Yeni bağımlılıklar: `sharp` (T6), `yazl` (T15), Tiptap paketleri (T13, yalnızca admin). Sürümler kendi oturumunda ≥14 gün kuralıyla seçilir.
-   - Redis kilit sağlayıcısının F16'dan F3'e (T7) çekilmesi (ADR-0020).
-   - Canonical host boşken mutlak URL'nin kaynağı (ADR-0015 açık sorusu).
-   - Görev sırası ve kapsam (aşağıdaki tablo). Playwright e2e altyapısı (ayrı profil + `@playwright/test`) onay ister.
-   - İlk uygulama oturumunda F3 dalı açılır (öneri: `f3-catalog-seo-stock`, `f2-platform-core` üzerinden).
+2. **F3 kararları: verildi (2026-10-25).**
+   - ADR-0015..0020 kabul edildi.
+   - Yeni bağımlılıklar onaylandı: `sharp` (T6), `yazl` (T15), Tiptap (T13). Her biri kendi oturumunda, exact sürüm ve ≥14 gün kuralıyla eklenir.
+   - Redis kilit sağlayıcısı F3 T7'de bağlanır.
+   - Canonical host boşken: resolve `canonical_host` ister, SEO ayarlarında uyarı gösterilir. Platform alt alan adı F16/F17'de gelir.
+   - Görev sırası tablodaki gibi.
+   - Açık kalanlar: Playwright e2e altyapısı (ayrı profil + `@playwright/test`; son karar listesinde yoktu) ve push/PR.
+   - Dev'deki `playwright-admin@example.com` kalıyor (kullanıcı kararı).
 3. **Yerel dev DB:** F2'nin tüm migration'ları uygulandı. Dev dosyaları artık SeaweedFS'e yazılıyor.
 
-### F3 görev planı (oturum büyüklüğünde, önerilen sıra; kullanıcı onayı bekliyor)
+### F3 görev planı (oturum büyüklüğünde; kullanıcı 2026-10-25 onayladı)
 | # | Görev | Kapsam | Bağımlılık | ADR |
 |---|---|---|---|---|
 | T1 | F3.1 + F3.2 | Katalog uzantısı: MPN, durum, birincil kategori, halef ürün (link'li modül + widget). Fiziksel üründe ölçü/ağırlık kuralı, fiziksel olmayan ürün bayrağı. Handle `lib/seo` slug'ından; ürün/kategori/koleksiyon hook'larında `claimPath`/`unclaimPath`. Düz desen için sistem yolları rezervi | — | 0013 deseni |
@@ -284,7 +284,7 @@ Devreden işlerin F3 görevlerine dağılımı:
 F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde: `git show 118e835:PROGRESS.md`.
 
 ## Açık sorular / bloklayıcılar
-- [ ] **F3 kararları** (2026-10-25 planlaması; ayrıntı "Sıradaki görev" ve "F3 görev planı"): ADR-0015..0020, yeni bağımlılıklar (`sharp`, `yazl`, Tiptap), kilit sağlayıcısının öne çekilmesi, canonical host kaynağı.
+- [x] **F3 kararları:** Kullanıcı 2026-10-25'te önerilerin hepsini onayladı (ayrıntı "Sıradaki görev" madde 2).
 - [x] **Gözden geçir: otonom oturumda S4, S7 ve S6 için verilen muhafazakâr kararlar:** Kullanıcı 2026-10-24 akşamı olduğu gibi kabul etti.
   - **S4:**
     - `safeFetch` varsayılan yönlendirme modu `same-origin`. Başka origin'e gitmek için `follow` açıkça istenmeli; webhook'larda `error`.
@@ -393,7 +393,7 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
 | F0 Repo & araçlar | ✅ |
 | F1 Medusa çekirdek + TR lokalizasyon | ✅ |
 | F2 Platform çekirdek modülleri | ✅ |
-| F3 Katalog, SEO motoru ve stok | ⏳ (planlama, karar bekliyor) |
+| F3 Katalog, SEO motoru ve stok | ⏳ |
 | F4 Fiyatlandırma ve promosyon | ⬜ |
 | F5 Ödeme: iyzico | ⬜ |
 | F6 Ödeme: PayTR + havale/EFT + kapıda ödeme + yönlendirici + ters ibraz | ⬜ |
