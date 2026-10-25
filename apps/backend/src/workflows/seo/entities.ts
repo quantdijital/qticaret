@@ -1,15 +1,21 @@
 import { Modules } from "@medusajs/framework/utils"
+import { BRANDS_MODULE } from "../../modules/brands"
 import type { ROBOTS_OVERRIDES } from "../../modules/seo-meta/models/seo-meta"
 
 /**
  * The page types that carry SEO fields today (adr/0015) and how each is
- * read and linked: the query entity and the link's key on Medusa's side.
- * Brand and content pages join with their modules (F3.11, F3.16).
+ * read and linked: the query entity, the module that owns it and the
+ * link's key on its side. Content pages join with their module (F3.16).
  */
 export const SEO_ENTITIES = {
-  product: { entity: "product", linkKey: "product_id" },
-  category: { entity: "product_category", linkKey: "product_category_id" },
-  collection: { entity: "product_collection", linkKey: "product_collection_id" },
+  product: { entity: "product", module: Modules.PRODUCT, linkKey: "product_id" },
+  category: { entity: "product_category", module: Modules.PRODUCT, linkKey: "product_category_id" },
+  collection: {
+    entity: "product_collection",
+    module: Modules.PRODUCT,
+    linkKey: "product_collection_id",
+  },
+  brand: { entity: "brand", module: BRANDS_MODULE, linkKey: "brand_id" },
 } as const
 
 export type SeoEntityType = keyof typeof SEO_ENTITIES
@@ -40,5 +46,3 @@ export interface SeoValues {
   og_image_override: string | null
   og_image_alt: string | null
 }
-
-export const LINK_MODULE = Modules.PRODUCT

@@ -1,5 +1,5 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { SHORT_EXCERPT, excerpt, priceSentence, resolveSeoPayload } from "../../lib/seo/resolve"
 import type { SeoOverrides, SeoPayload, SeoShop, SeoSubject } from "../../lib/seo/resolve"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
@@ -9,6 +9,7 @@ import { URL_REGISTRY_MODULE } from "../../modules/url-registry"
 import type UrlRegistryModuleService from "../../modules/url-registry/service"
 import type { UrlOwner } from "../../modules/url-registry/validation"
 import { CATALOG_ENTITY_TYPES, CATALOG_LOCALE } from "../catalog/entity-paths"
+import { publicUploadUrl } from "../files/public-upload"
 import { highlightText } from "./highlight"
 import type { HighlightValue } from "./highlight"
 
@@ -50,6 +51,7 @@ interface ProductRow {
   product_extension?: { primary_category_id?: string | null } | null
   variants?: ({ prices?: PriceRow[] | null } | null)[] | null
   attribute_values?: (HighlightValue | null)[] | null
+  brand?: { name: string } | null
   seo_meta?: SeoMetaRow | null
 }
 
@@ -113,19 +115,17 @@ async function trailOf(container: MedusaContainer, last: CategoryRow, withLast: 
   })
 }
 
-/** The share image: the page's own file (its id is checked when saved), else the main image. */
+/** The share image: the page's own upload, else the main image (a file gone since stands aside). */
 async function imageOf(
   container: MedusaContainer,
   meta: SeoMetaRow | null | undefined,
   fallback: string | null | undefined
 ): Promise<SeoSubject["image"]> {
-  if (meta?.og_image_override) {
-    try {
-      const file = await container.resolve(Modules.FILE).retrieveFile(meta.og_image_override)
-      return { url: file.url, alt: meta.og_image_alt }
-    } catch {
-      // A file deleted since: the main image stands in
-    }
+  const own = meta?.og_image_override
+    ? await publicUploadUrl(container, meta.og_image_override)
+    : null
+  if (own) {
+    return { url: own, alt: meta?.og_image_alt ?? null }
   }
   return fallback ? { url: fallback, alt: null } : null
 }
@@ -171,6 +171,7 @@ async function productSubject(container: MedusaContainer, id: string, path: stri
       "variants.prices.price_list_id",
       "attribute_values.*",
       "attribute_values.definition.*",
+      "brand.name",
       ...SEO_FIELDS,
     ],
     id
@@ -191,8 +192,8 @@ async function productSubject(container: MedusaContainer, id: string, path: stri
       kısa_açıklama: subtitle !== "" ? subtitle : excerpt(description, SHORT_EXCERPT),
       fiyat_cümlesi: priceSentence(lirasOf(product)),
       öne_çıkan_attribute: highlightText(product.attribute_values ?? []),
-      // Brands (F3.11) and shipping offers (F7) fill these
-      marka: null,
+      marka: product.brand?.name ?? null,
+      // Shipping offers (F7) fill this
       kargo_cümlesi: null,
     },
     overrides: product.seo_meta ?? null,
@@ -248,6 +249,30 @@ async function collectionSubject(container: MedusaContainer, id: string, path: s
   return subject
 }
 
+async function brandSubject(container: MedusaContainer, id: string, path: string) {
+  const brand = await rowOf<{
+    id: string
+    name: string
+    description?: string | null
+    logo_url?: string | null
+    seo_meta?: SeoMetaRow | null
+  }>(container, "brand", ["id", "name", "description", "logo_url", ...SEO_FIELDS], id)
+  if (!brand) {
+    return null
+  }
+  const subject: SeoSubject = {
+    kind: "brand",
+    path,
+    name: brand.name,
+    description: brand.description ?? "",
+    tokens: {},
+    overrides: brand.seo_meta ?? null,
+    image: await imageOf(container, brand.seo_meta, brand.logo_url),
+    trail: [],
+  }
+  return subject
+}
+
 const SUBJECTS: Readonly<
   Record<
     string,
@@ -257,6 +282,7 @@ const SUBJECTS: Readonly<
   [CATALOG_ENTITY_TYPES.product]: productSubject,
   [CATALOG_ENTITY_TYPES.category]: categorySubject,
   [CATALOG_ENTITY_TYPES.collection]: collectionSubject,
+  [CATALOG_ENTITY_TYPES.brand]: brandSubject,
 }
 
 /** The `seo` object of a live page at `path`, or null for a kind without one. */

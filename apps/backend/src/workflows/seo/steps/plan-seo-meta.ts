@@ -1,6 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys, MedusaError, Modules } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
+import { publicUploadUrl } from "../../files/public-upload"
 import { ValidationError } from "../../../lib/errors"
 import { seoTextHash } from "../../../lib/seo"
 import { SEO_ENTITIES } from "../entities"
@@ -73,11 +74,9 @@ async function countSame(
   return (data as { id: string }[]).filter((row) => row.id !== ownId).length
 }
 
-/** The OG image must be one of the shop's own uploads (adr/0015). */
+/** The OG image must be one of the shop's own uploads, never a job's private result (adr/0015). */
 async function assertOwnFile(container: MedusaContainer, fileId: string): Promise<void> {
-  try {
-    await container.resolve(Modules.FILE).retrieveFile(fileId)
-  } catch {
+  if ((await publicUploadUrl(container, fileId)) === null) {
     throw new ValidationError("seo.og_image_unknown", { field: "og_image_override" })
   }
 }

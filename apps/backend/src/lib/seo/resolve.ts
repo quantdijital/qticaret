@@ -7,7 +7,7 @@ import { renderTemplate } from "./template"
  */
 
 export type RobotsValue = "index,follow" | "noindex,follow" | "noindex,nofollow"
-export type SeoPageKind = "product" | "category" | "collection"
+export type SeoPageKind = "product" | "category" | "collection" | "brand"
 
 export interface SeoPayload {
   title: string
@@ -65,7 +65,7 @@ export interface SeoSubject {
 export interface SeoShop {
   name: string
   canonicalHost: string | null
-  titleTemplates: { product: string; category: string }
+  titleTemplates: { product: string; category: string; brand: string }
   descriptionTemplates: { product: string }
 }
 
@@ -122,17 +122,24 @@ function absolute(host: string | null, path: string): string | null {
   return host ? new URL(path, `https://${host}`).href : null
 }
 
+// A page's own name fills its kind's token; a collection uses the category template
+const NAME_TOKEN: Record<SeoPageKind, string> = {
+  product: "ürün_adı",
+  category: "kategori",
+  collection: "kategori",
+  brand: "marka",
+}
+
 function titleOf(subject: SeoSubject, shop: SeoShop): string {
   const own = subject.overrides?.seo_title
   if (own) {
     return own
   }
-  const values =
-    subject.kind === "product"
-      ? { ...subject.tokens, ürün_adı: subject.name, mağaza: shop.name }
-      : { ...subject.tokens, kategori: subject.name, mağaza: shop.name }
+  const values = { ...subject.tokens, [NAME_TOKEN[subject.kind]]: subject.name, mağaza: shop.name }
   const template =
-    subject.kind === "product" ? shop.titleTemplates.product : shop.titleTemplates.category
+    subject.kind === "product" || subject.kind === "brand"
+      ? shop.titleTemplates[subject.kind]
+      : shop.titleTemplates.category
   return renderTemplate(template, values) || subject.name
 }
 

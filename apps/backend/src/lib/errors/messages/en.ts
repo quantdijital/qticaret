@@ -8,6 +8,12 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "audit_log.kind_invalid": "The entry kind is not valid.",
   "billing_profile.tax_id_invalid": "The tax or national ID number is not valid.",
   "billing_profile.tax_office_required": "Enter the tax office.",
+  "brands.description_invalid":
+    "The description is too long or holds characters that cannot be used.",
+  "brands.logo_unknown": "The logo must be one of the shop's uploaded images.",
+  "brands.name_invalid": "Enter the brand's name (120 characters at most).",
+  "brands.name_taken": "A brand with this name already exists.",
+  "brands.unknown": "Brand not found.",
   "cart.address_required": "An address is needed to complete the order.",
   "cart.shipping_not_needed": "Nothing in the cart needs shipping; remove the shipping method.",
   "catalog.dimensions_required":

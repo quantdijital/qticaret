@@ -7,6 +7,7 @@ const shop: SeoShop = {
   titleTemplates: {
     product: "{ürün_adı} | {marka} | {mağaza}",
     category: "{kategori} Modelleri ve Fiyatları | {mağaza}",
+    brand: "{marka} Ürünleri | {mağaza}",
   },
   descriptionTemplates: { product: "{kısa_açıklama}. {fiyat_cümlesi} {kargo_cümlesi}" },
 }
@@ -111,6 +112,15 @@ describe("resolveSeoPayload", () => {
       openGraph: { type: "website", image: null, imageAlt: null },
       twitter: { card: "summary" },
     })
+  })
+
+  it("titles a brand from its own template", () => {
+    const payload = resolveSeoPayload(
+      { ...product(), kind: "brand", path: "/marka/ornek", name: "Örnek", tokens: {}, trail: [] },
+      shop
+    )
+    expect(payload.title).toBe("Örnek Ürünleri | Demo Mağaza")
+    expect(payload.openGraph.type).toBe("website")
   })
 
   it("falls back to the description when the template renders nothing", () => {

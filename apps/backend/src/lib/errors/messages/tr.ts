@@ -12,6 +12,11 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "audit_log.kind_invalid": "Kayıt türü geçerli değil.",
   "billing_profile.tax_id_invalid": "Vergi ya da TC kimlik numarası geçerli değil.",
   "billing_profile.tax_office_required": "Vergi dairesini girin.",
+  "brands.description_invalid": "Açıklama çok uzun ya da kullanılamayan karakterler içeriyor.",
+  "brands.logo_unknown": "Logo mağazanın yüklenen görsellerinden biri olmalı.",
+  "brands.name_invalid": "Marka adını girin (en fazla 120 karakter).",
+  "brands.name_taken": "Bu adla bir marka zaten var.",
+  "brands.unknown": "Marka bulunamadı.",
   "cart.address_required": "Siparişi tamamlamak için teslimat adresi gerekir.",
   "cart.shipping_not_needed": "Sepette kargo gerektiren ürün yok; kargo seçimini kaldırın.",
   "catalog.dimensions_required":

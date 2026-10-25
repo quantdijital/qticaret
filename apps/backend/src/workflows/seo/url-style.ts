@@ -1,6 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
-import { categoryPath, isReservedPath, isValidSlug, productPath } from "../../lib/seo"
+import { brandPath, categoryPath, isReservedPath, isValidSlug, productPath } from "../../lib/seo"
 import type { UrlStyle } from "../../lib/seo"
 import { URL_REGISTRY_MODULE } from "../../modules/url-registry"
 import type UrlRegistryModuleService from "../../modules/url-registry/service"
@@ -8,7 +8,7 @@ import type { ClaimInput } from "../../modules/url-registry/service"
 import { CATALOG_ENTITY_TYPES, CATALOG_LOCALE } from "../catalog/entity-paths"
 
 /**
- * Moving every product and category to another URL style (docs/13 §2.2):
+ * Moving every product, category and brand to another URL style (docs/13 §2.2):
  * the new paths are claimed record by record, the old ones stay reserved
  * and resolution sends them on with a 301 (adr/0017). A plan comes first:
  * a path two records would share, a page the storefront keeps, or another
@@ -75,7 +75,7 @@ interface Wanted extends StyleMove {
 }
 
 async function wantedPaths(container: MedusaContainer, styles: UrlStyles): Promise<Wanted[]> {
-  const [products, categories] = await Promise.all([
+  const [products, categories, brands] = await Promise.all([
     allRows<{ id: string; title: string; handle: string; status: string }>(container, "product", [
       "id",
       "title",
@@ -87,6 +87,12 @@ async function wantedPaths(container: MedusaContainer, styles: UrlStyles): Promi
       "product_category",
       ["id", "name", "handle", "mpath"]
     ),
+    allRows<{ id: string; name: string; handle: string; is_active: boolean }>(container, "brand", [
+      "id",
+      "name",
+      "handle",
+      "is_active",
+    ]),
   ])
   const byId = new Map(categories.map((category) => [category.id, category]))
   const wanted: Wanted[] = products.map((product) => ({
@@ -110,6 +116,17 @@ async function wantedPaths(container: MedusaContainer, styles: UrlStyles): Promi
       path: valid ? categoryPath(handles, styles.category) : "",
       invalid: !valid,
       replaced: "reserve",
+    })
+  }
+  for (const brand of brands) {
+    wanted.push({
+      entity_type: CATALOG_ENTITY_TYPES.brand,
+      entity_id: brand.id,
+      name: brand.name,
+      path: isValidSlug(brand.handle) ? brandPath(brand.handle, styles.brand) : "",
+      invalid: !isValidSlug(brand.handle),
+      // An inactive brand's page was not public: its slug goes back to the pool
+      replaced: brand.is_active ? "reserve" : "free",
     })
   }
   return wanted

@@ -1,7 +1,7 @@
 import { WorkflowResponse, createWorkflow, transform } from "@medusajs/framework/workflows-sdk"
 import { acquireLockStep, createRemoteLinkStep, releaseLockStep } from "@medusajs/medusa/core-flows"
 import { SEO_META_MODULE } from "../../modules/seo-meta"
-import { LINK_MODULE, SEO_ENTITIES } from "./entities"
+import { SEO_ENTITIES } from "./entities"
 import { forgetResolutionsStep } from "./steps/forget-resolutions"
 import { planSeoMetaStep } from "./steps/plan-seo-meta"
 import type { UpsertSeoMetaInput } from "./steps/plan-seo-meta"
@@ -29,7 +29,9 @@ export const upsertSeoMetaWorkflow = createWorkflow(
       written.created
         ? [
             {
-              [LINK_MODULE]: { [SEO_ENTITIES[input.entity_type].linkKey]: input.entity_id },
+              [SEO_ENTITIES[input.entity_type].module]: {
+                [SEO_ENTITIES[input.entity_type].linkKey]: input.entity_id,
+              },
               [SEO_META_MODULE]: { seo_meta_id: written.id },
             },
           ]

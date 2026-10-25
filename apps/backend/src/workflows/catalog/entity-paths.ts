@@ -2,7 +2,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { ValidationError, isValidationError } from "../../lib/errors"
 import { logger } from "../../lib/logging"
-import { categoryPath, collectionPath, isValidSlug, productPath } from "../../lib/seo"
+import { brandPath, categoryPath, collectionPath, isValidSlug, productPath } from "../../lib/seo"
 import type { UrlStyle } from "../../lib/seo"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import type { SeoSettings } from "../../modules/platform-settings/sections"
@@ -33,6 +33,7 @@ export const CATALOG_ENTITY_TYPES = {
   product: "product",
   category: "product_category",
   collection: "product_collection",
+  brand: "brand",
 } as const
 
 interface Handled {
@@ -229,6 +230,34 @@ export async function claimCollectionPaths(
         entity_id: collection.id,
         path,
         accepted: [path],
+      }
+    })
+  )
+}
+
+/**
+ * Claims the brands' paths (F3.11) in the shop's brand URL style. An
+ * inactive brand's page was not public: a renamed handle frees its old
+ * slug instead of reserving it.
+ */
+export async function claimBrandPaths(
+  container: MedusaContainer,
+  brands: { id: string; handle: string; is_active: boolean }[]
+): Promise<PathClaim[]> {
+  if (brands.length === 0) {
+    return []
+  }
+  const style = await urlStyle(container)
+  return claimMissing(
+    container,
+    brands.map((brand) => {
+      const handle = handleOf(brand)
+      return {
+        entity_type: CATALOG_ENTITY_TYPES.brand,
+        entity_id: brand.id,
+        path: brandPath(handle, style.brand),
+        accepted: STYLES.map((each) => brandPath(handle, each)),
+        replaced: brand.is_active ? "reserve" : "free",
       }
     })
   )

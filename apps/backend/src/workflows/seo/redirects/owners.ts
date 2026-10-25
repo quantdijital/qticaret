@@ -42,6 +42,7 @@ const OWNER_QUERIES: Readonly<Record<string, { entity: string; fields: string[] 
     fields: ["id", "deleted_at", "is_active", "is_internal"],
   },
   [CATALOG_ENTITY_TYPES.collection]: { entity: "product_collection", fields: ["id", "deleted_at"] },
+  [CATALOG_ENTITY_TYPES.brand]: { entity: "brand", fields: ["id", "deleted_at", "is_active"] },
 }
 
 function isLive(type: string, row: OwnerRow): boolean {
@@ -50,6 +51,9 @@ function isLive(type: string, row: OwnerRow): boolean {
   }
   if (type === CATALOG_ENTITY_TYPES.category) {
     return row.is_active === true && row.is_internal !== true
+  }
+  if (type === CATALOG_ENTITY_TYPES.brand) {
+    return row.is_active === true
   }
   return true
 }

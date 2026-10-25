@@ -20,3 +20,6 @@ export function categoryPath(handles: readonly string[], style: UrlStyle): strin
 }
 
 export const collectionPath = (handle: string): string => `/koleksiyon/${handle}`
+
+export const brandPath = (handle: string, style: UrlStyle): string =>
+  style === "flat" ? `/${handle}` : `/marka/${handle}`

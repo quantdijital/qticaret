@@ -1,6 +1,7 @@
 import type { MedusaRequest } from "@medusajs/framework/http"
 import { routePathKeepingCase } from "../request-path"
 import { ATTRIBUTE_RESOURCES } from "./resources/attributes"
+import { BRAND_RESOURCES } from "./resources/brands"
 import { CATALOG_RESOURCES } from "./resources/catalog"
 import { PRICE_RESOURCES } from "./resources/prices"
 import { PROMOTION_RESOURCES } from "./resources/promotions"
@@ -24,6 +25,7 @@ export const AUDITED_RESOURCES: readonly AuditedResource[] = [
   ...PROMOTION_RESOURCES,
   ...SEO_RESOURCES,
   ...REDIRECT_RESOURCES,
+  ...BRAND_RESOURCES,
 ]
 
 export interface ResourceMatch {

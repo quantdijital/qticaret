@@ -5,7 +5,7 @@ export type { SerpField } from "./pixel-width"
 export { SLUG_MAX_LENGTH, SLUG_SEGMENT, isValidSlug, toSlug } from "./slug"
 export { SEO_TEMPLATE_TOKENS, assertValidTemplate, checkTemplate, renderTemplate } from "./template"
 export type { TemplateCheck } from "./template"
-export { categoryPath, collectionPath, productPath } from "./url-patterns"
+export { brandPath, categoryPath, collectionPath, productPath } from "./url-patterns"
 export type { UrlStyle } from "./url-patterns"
 export {
   DESCRIPTION_EXCERPT,

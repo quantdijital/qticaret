@@ -19,6 +19,7 @@ import { AdminPostProductAttributes } from "./admin/products/[id]/attributes/val
 import { AdminPostProductCatalog } from "./admin/products/[id]/catalog/validators"
 import { AdminPostFeature, validateSectionBody } from "./admin/platform-settings/validators"
 import { auditMutations, auditSensitiveRead } from "./http/audit"
+import { BRAND_ROUTES, STORE_BRAND_FIELDS } from "./http/brand-routes"
 import { SENSITIVE_READS } from "./http/audit/sensitive-routes"
 import { csrfProtection } from "./http/csrf"
 import { platformErrorHandler } from "./http/error-handler"
@@ -132,7 +133,7 @@ export default defineMiddlewares({
     // allowFields runs before the core route checks `fields`
     {
       matcher: "/store/products",
-      middlewares: [allowFields(...STORE_ATTRIBUTE_FIELDS)],
+      middlewares: [allowFields(...STORE_ATTRIBUTE_FIELDS, ...STORE_BRAND_FIELDS)],
     },
     {
       matcher: "/admin/attribute-templates",
@@ -161,6 +162,8 @@ export default defineMiddlewares({
     },
     // F3.4, F3.5: a page's own SEO fields, redirects, the 404 log
     ...SEO_ROUTES,
+    // F3.11: brands
+    ...BRAND_ROUTES,
     // docs/17: the home page's order numbers are for people (shop revenue)
     {
       matcher: "/admin/home/summary",
