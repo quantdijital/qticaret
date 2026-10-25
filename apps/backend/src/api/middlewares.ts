@@ -16,6 +16,7 @@ import { AdminGetAuditLog } from "./admin/audit-log/validators"
 import { AdminGetDashboardNoQuery, AdminGetDashboardOverview } from "./admin/dashboard/validators"
 import { AdminGetHomeSummary } from "./admin/home/summary/validators"
 import { AdminGetOrderBoard } from "./admin/order-board/validators"
+import { AdminGetStockBoard } from "./admin/stock-board/validators"
 import { AdminPostProductAttributes } from "./admin/products/[id]/attributes/validators"
 import { AdminPostProductCatalog } from "./admin/products/[id]/catalog/validators"
 import { AdminPostFeature, validateSectionBody } from "./admin/platform-settings/validators"
@@ -210,6 +211,12 @@ export default defineMiddlewares({
       matcher: "/admin/order-board",
       methods: ["GET"],
       middlewares: [requireUserActor, validateAndTransformQuery(AdminGetOrderBoard, {})],
+    },
+    // The panel's stock list (adr/0022): low and sold-out items first
+    {
+      matcher: "/admin/stock-board",
+      methods: ["GET"],
+      middlewares: [requireUserActor, validateAndTransformQuery(AdminGetStockBoard, {})],
     },
     // F2.8: long tasks (adr/0014); starting one and fetching its result are
     // for people: results can hold personal data (the audit log export)

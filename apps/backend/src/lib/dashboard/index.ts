@@ -1,3 +1,5 @@
+export { STOCK_VIEWS, sellable, stockSlice } from "./stock"
+export type { StockRow, StockSlice, StockView } from "./stock"
 export { BOARD_STAGES, boardSlice } from "./board"
 export type { BoardSlice, BoardStage } from "./board"
 export {
