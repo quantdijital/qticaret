@@ -8,5 +8,6 @@ import type { MedusaResponse } from "@medusajs/framework/http"
  */
 export function setReferenceDataCache(res: MedusaResponse): void {
   res.setHeader("Cache-Control", "public, max-age=3600, stale-while-revalidate=86400")
-  res.setHeader("Vary", "x-publishable-api-key")
+  // Added to CORS's `Vary: Origin`, not in its place
+  res.vary("x-publishable-api-key")
 }

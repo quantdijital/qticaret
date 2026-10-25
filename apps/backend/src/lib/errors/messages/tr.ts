@@ -98,11 +98,41 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "seo.entity_type_unknown": "Bu sayfa türü için SEO alanları yok.",
   "seo.entity_unknown": "Sayfa bulunamadı.",
   "seo.locale_invalid": "Dil kodu geçerli değil.",
+  "seo.not_found_unknown": "Bu kayıt 404 günlüğünde yok.",
   "seo.og_image_unknown": "Paylaşım görseli mağazanın yüklenen dosyalarından biri olmalı.",
+  "seo.path_active":
+    "Bu adres bir kayıt tarafından kullanılıyor; yalnızca eski adresler serbest bırakılabilir.",
   "seo.path_invalid": "Adres yalnızca küçük harf, rakam ve tireden oluşan bölümler içerebilir.",
   "seo.path_not_owned": "Bu adres başka bir kayda ait.",
   "seo.path_reserved": "Bu adres mağazanın kendi sayfalarına ayrılmış.",
   "seo.path_taken": "Bu adres başka bir kayıt tarafından kullanılıyor.",
+  "seo.path_unknown": "Bu adres kayıtlı değil.",
+  "seo.redirect_csv_header": 'Dosyanın ilk satırında en az "source" sütunu olmalı.',
+  "seo.redirect_duplicate_row": "Aynı kaynak dosyada birden fazla kez geçiyor.",
+  "seo.redirect_exists": "Bu kaynak için zaten bir yönlendirme var; onu düzenleyin.",
+  "seo.redirect_loop": "Bu yönlendirme bir döngü oluşturur: hedef sonunda yine bu adrese döner.",
+  "seo.redirect_match_invalid": "Eşleşme türü exact, prefix ya da pattern olmalı.",
+  "seo.redirect_pattern_invalid":
+    "Desen geçersiz: :ad yer tutucuları ve sonda * kullanın, en az bir sabit bölüm olsun.",
+  "seo.redirect_pattern_limit":
+    "Desen kuralı sınırına ulaşıldı; bazılarını tam eşleşen kurallara çevirin.",
+  "seo.redirect_query_invalid": "Korunacak parametre adları geçerli değil.",
+  "seo.redirect_self": "Hedef, kuralın kendi kaynağına düşüyor.",
+  "seo.redirect_source_invalid": "Kaynak adres geçerli değil.",
+  "seo.redirect_source_live":
+    "Bu adres yayındaki bir sayfaya ait; önce o sayfanın adresini değiştirin.",
+  "seo.redirect_source_query":
+    "Kaynak adres soru işaretli parametre içeremez; yalnızca yolu girin.",
+  "seo.redirect_source_reserved": "Bu adres mağazanın kendi sayfalarına ya da sisteme ayrılmış.",
+  "seo.redirect_source_root": "Ana sayfa yönlendirilemez.",
+  "seo.redirect_source_wildcard":
+    'Kaynakta * ya da :ad var; desen kuralı için eşleşme türünü "desen" seçin.',
+  "seo.redirect_status_invalid": "Durum kodu 301, 302, 307 ya da 410 olmalı.",
+  "seo.redirect_target_gone": "Hedef sayfa kaldırılmış (410); başka bir hedef seçin.",
+  "seo.redirect_target_invalid": "Hedef bu sitede bir yol olmalı, örn. /urun/keten-gomlek.",
+  "seo.redirect_target_placeholder": "Hedefteki yer tutucular kaynakta da olmalı.",
+  "seo.redirect_target_required": "Hedef adresi girin.",
+  "seo.redirect_unknown": "Yönlendirme bulunamadı.",
   "seo.template_invalid":
     "Şablonda bu alan için tanımlı olmayan bir etiket ya da hatalı süslü parantez var.",
   "seo.text_invalid": "Metinde kullanılamayan karakterler var.",
@@ -110,6 +140,10 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "tr_address.district_id_invalid": "İlçe seçimi geçerli değil.",
   "tr_address.district_not_in_province": "Seçilen ilçe bu ile ait değil.",
   "tr_address.province_code_invalid": "İl seçimi geçerli değil.",
+  "upload.csv_empty": "Dosya boş.",
+  "upload.csv_invalid": "Dosya okunamadı: kapanmamış bir tırnak var.",
+  "upload.csv_too_many_rows": "Dosyada çok fazla satır var; en fazla 1000 satır yükleyin.",
+  "upload.csv_too_wide": "Dosyada çok fazla sütun var.",
   "upload.dimensions_too_large":
     "Görselin piksel boyutu çok büyük; daha küçük bir görsel yükleyin.",
   "upload.too_large": "Dosya çok büyük.",

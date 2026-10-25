@@ -17,7 +17,6 @@ import { AdminGetHomeSummary } from "./admin/home/summary/validators"
 import { PANEL_ROUTES } from "./admin/panel-routes"
 import { AdminPostProductAttributes } from "./admin/products/[id]/attributes/validators"
 import { AdminPostProductCatalog } from "./admin/products/[id]/catalog/validators"
-import { AdminPutSeoMeta } from "./admin/seo/[entity_type]/[entity_id]/validators"
 import { AdminPostFeature, validateSectionBody } from "./admin/platform-settings/validators"
 import { auditMutations, auditSensitiveRead } from "./http/audit"
 import { SENSITIVE_READS } from "./http/audit/sensitive-routes"
@@ -29,6 +28,7 @@ import { requestContext } from "./http/request-id"
 import { rejectAmbiguousPath } from "./http/request-path"
 import { adminLimitGuard, storeLimitGuard, uploadSizeGate } from "./http/request-limits"
 import { securityHeaders } from "./http/security-headers"
+import { SEO_ROUTES } from "./http/seo-routes"
 import { uploadValidator } from "./http/upload-validator"
 import { StorePostBillingProfile } from "./store/customers/me/billing-profile/validators"
 import {
@@ -159,12 +159,8 @@ export default defineMiddlewares({
       methods: ["POST"],
       middlewares: [validateAndTransformBody(AdminPostProductCatalog)],
     },
-    // F3.4 (adr/0015): a page's own SEO fields
-    {
-      matcher: "/admin/seo/:entity_type/:entity_id",
-      methods: ["PUT"],
-      middlewares: [validateAndTransformBody(AdminPutSeoMeta)],
-    },
+    // F3.4, F3.5: a page's own SEO fields, redirects, the 404 log
+    ...SEO_ROUTES,
     // docs/17: the home page's order numbers are for people (shop revenue)
     {
       matcher: "/admin/home/summary",

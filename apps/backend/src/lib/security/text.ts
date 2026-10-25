@@ -15,3 +15,10 @@ export function isCleanText(text: string, allowTab = false): boolean {
   }
   return true
 }
+
+/**
+ * A `LIKE`/`ILIKE` pattern for "contains `text`": the wildcards `%` and `_`
+ * and the escape `\` in a search match themselves, so a search cannot turn
+ * into a pattern that matches everything.
+ */
+export const containsPattern = (text: string): string => `%${text.replace(/[\\%_]/g, "\\$&")}%`

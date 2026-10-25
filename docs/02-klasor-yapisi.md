@@ -39,7 +39,9 @@ repo/
 │   │   │   │   ├── audit-log/
 │   │   │   │   ├── tr-address/
 │   │   │   │   ├── url-registry/                     # (locale, path) unique; claim/release/resolve (F2.11)
-│   │   │   │   ├── seo-redirects/  seo-advisor/ (rules/<alan>/<id>.ts)  seo-insights/  brands/  content/
+│   │   │   │   ├── seo-meta/                         # sayfanın kendi SEO alanları (F3.4, adr/0015)
+│   │   │   │   ├── seo-redirects/                    # kurallar + 404 günlüğü, tamponlu sayaçlar (F3.5, adr/0017)
+│   │   │   │   ├── seo-advisor/ (rules/<alan>/<id>.ts)  seo-insights/  brands/  content/
 │   │   │   │   ├── price-history/  product-qa/
 │   │   │   │   ├── wishlist/  back-in-stock/  product-reviews/  marketing-feeds/
 │   │   │   │   ├── accounting/                       # adapters/ (parasut.ts, ...)
@@ -74,7 +76,7 @@ repo/
 │   │   │   │   ├── security/        # safe-fetch (SSRF), rate-limit, upload validator, csv-escape, safe-xml, zip
 │   │   │   │   ├── redis/           # kendi Redis istemcimiz (hızlı vazgeçen), tenant ad alanı
 │   │   │   │   ├── cache/           # süreç içi değer + Redis sürüm sayacı (ayarlar, adr/0012)
-│   │   │   │   ├── seo/             # slug (TR), başlık şablonları, piksel genişliği, URL desenleri, rezerv yollar, jsonld builders (F3.12)
+│   │   │   │   ├── seo/             # slug (TR), başlık şablonları, piksel genişliği, URL desenleri, rezerv yollar, redirects/ (güvenli desen, normalize yol), jsonld builders (F3.12)
 │   │   │   │   ├── catalog/         # GTIN doğrulama, ölçü/ağırlık kuralı (F3.1)
 │   │   │   │   ├── money/           # tutar dönüşümleri
 │   │   │   │   ├── dashboard/       # panel okuma modelleri: dönem, sipariş aşaması, özet/rapor, sipariş ve stok panosu (adr/0022)

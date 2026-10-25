@@ -10,6 +10,7 @@ export interface HttpResponse<T> {
 
 export interface RequestConfig {
   headers?: Record<string, string>
+  responseType?: "json" | "text"
 }
 
 export interface HttpClient {

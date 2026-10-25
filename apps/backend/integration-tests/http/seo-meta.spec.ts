@@ -131,13 +131,17 @@ medusaIntegrationTestRunner({
       await put(`product/${kupa}`, { seo_title: "Önce" })
       await put(`product/${kupa}`, { seo_title: "Sonra" })
 
-      let entry: { changes?: { diff?: Record<string, unknown> } } | undefined
-      for (let attempt = 0; attempt < 30 && !entry?.changes?.diff; attempt++) {
-        const { data } = await http.get<{ audit_entries: (typeof entry)[] }>(
-          "/admin/audit-log?resource_type=seo_meta&limit=1",
+      // Entries are written after the answer: wait for the second save's
+      interface Entry {
+        changes?: { diff?: { seo_title?: { after?: unknown } } }
+      }
+      let entry: Entry | undefined
+      for (let attempt = 0; attempt < 30 && !entry; attempt++) {
+        const { data } = await http.get<{ audit_entries: Entry[] }>(
+          "/admin/audit-log?resource_type=seo_meta&limit=5",
           { headers: admin.headers }
         )
-        entry = data.audit_entries[0]
+        entry = data.audit_entries.find((each) => each.changes?.diff?.seo_title?.after === "Sonra")
         await new Promise((resolve) => setTimeout(resolve, 100))
       }
       expect(entry?.changes?.diff).toMatchObject({ seo_title: { before: "Önce", after: "Sonra" } })

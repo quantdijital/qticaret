@@ -25,7 +25,8 @@ import type { ClaimInput, PathClaim } from "../../modules/url-registry/service"
  */
 
 // One language until F19 (DEFAULT_LOCALE in packages/types)
-const LOCALE = "tr"
+export const CATALOG_LOCALE = "tr"
+const LOCALE = CATALOG_LOCALE
 const STYLES: readonly UrlStyle[] = ["prefixed", "flat"]
 
 export const CATALOG_ENTITY_TYPES = {

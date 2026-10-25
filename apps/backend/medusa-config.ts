@@ -45,6 +45,13 @@ module.exports = defineConfig({
     { resolve: "./src/modules/product-attributes" },
     { resolve: "./src/modules/catalog-extension" },
     { resolve: "./src/modules/seo-meta" },
+    {
+      resolve: "./src/modules/seo-redirects",
+      options: {
+        redisUrl: env.REDIS_URL,
+        versionKey: `qt:redirects:${tenantNamespace(env.DATABASE_URL)}:version`,
+      },
+    },
     { resolve: "./src/modules/async-job" },
     {
       resolve: "./src/modules/platform-settings",

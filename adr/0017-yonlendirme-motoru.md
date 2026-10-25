@@ -52,3 +52,31 @@ Bugünkü durum:
 
 - F14 geçiş araçları (Shopify, Ticimax) regex kurallarını desen diline çevirir; çevrilemeyenler rapora düşer.
 - Storefront (F18) çözümleme yanıtını CDN'de kısa süre önbelleğe alır.
+
+## Uygulama notu (F3.5, 2026-10-26)
+
+Uygulamada kararın iki noktası değişti. Kullanıcı yokken önerilen seçenekle verildiler; PROGRESS "Gözden geçir" listesinde.
+
+- **Kayıtların eski yolları kural olarak yazılmıyor.** Slug değişimi, kategori taşıma, URL deseni değişimi, silme ve halef için `seo_redirect` satırı (`origin: auto`) üretilmiyor. Eski yol `url-registry`'de rezerve kalıyor ve çözümleme onu sahibinin bugünkü yoluna gönderiyor:
+  - kayıt yayında → bugünkü yolu (301);
+  - yayında değil ya da silinmiş, halefi var → yayındaki ilk halefin yolu (301);
+  - silinmiş, halefi yok → `gone` (410);
+  - taslak, halefi yok → `not_found`.
+  - Gerekçe: kural tablosuyla registry arasında senkron sorunu olmuyor. Ürün eski adına dönünce zincir ya da döngü oluşmuyor. Desen değişimi (F3 T4) tek bir toplu `claimPaths` olarak kalıyor. Eski yol her zaman tek atlamada bugünkü sayfaya gidiyor.
+  - Bunun karşılığında panelde "Eski adresler" listesi ve "serbest bırak" eylemi var (denetim kayıtlı). Serbest bırakılan yol 404 olur ve başka kayıt alabilir.
+  - Bu yolların isabet sayacı yok; kural sayaçları var.
+  - `origin` alanı: `manual` | `import`.
+- **Çözümleme sırası:** önce yayındaki bir kaydın kendi yolu (canlı sayfa her zaman kazanır, hiçbir kural onu gizleyemez), sonra tam eşleşme → en uzun önek → desen (daha çok sabit bölümü olan önce) → registry'deki eski yol → `not_found`.
+  - Zincirin sonu tek yanıtta döner. Tüm atlamalar 301 ise sonuç 301 olur, değilse ilk geçici kod (302/307) kullanılır. Zincirin sonu 410 ise `gone` döner.
+  - Çözümleme sırasında döngüye rastlanırsa yanıt `not_found` olur ve loglanır.
+- **Kaydetme anında:**
+  - Tam eşleşme kuralı yayındaki bir sayfanın yolunu kaynak alamaz.
+  - Hedef bir tam eşleşme kuralının kaynağıysa kural düz saklanır (A→B, B→C varken A→C).
+  - Bu kuralın kaynağına giden tam hedefli kurallar yeni hedefe çevrilir. Geçici bir atlama kalıcıya dönüştürülmez.
+  - Hedef izlenir: kurala geri dönen bir zincir (döngü) ya da 410 ile biten bir hedef reddedilir.
+  - Kural yazımları tek bir kilit altında; aynı anda iki kayıt birlikte döngü kuramaz.
+- **Sayaçlar:** isabet ve 404 sayıları süreç içinde toplanıp tek SQL ifadesiyle yazılıyor (30 sn ya da 5000 anahtar). Yaklaşık değerler; sürecin kapanırken bellekte tuttuğu kaybolur.
+  - 404 günlüğü yalnızca gerçekten çözülemeyen yolları sayar. Referer'dan yalnızca host saklanır.
+  - Günlük iş 90 günden eski kayıtları siler ve en çok istenen 10.000 kaydı tutar.
+- **Kaynakta sorgu dizesi kabul edilmiyor** (`/urun.php?id=12`). F14 geçiş aracı bu tür adresleri eşleme raporuna düşürür.
+- **Hedef yalnızca site içi göreli yol** (sorgu dizesi olabilir). Canonical host doğrulaması gelene kadar mutlak URL kabul edilmiyor (docs/13 §3).

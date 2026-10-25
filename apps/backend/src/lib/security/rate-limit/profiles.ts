@@ -57,6 +57,8 @@ export const RATE_LIMIT_PROFILES = {
     perIdentity: { max: 3, windowMs: 10 * MINUTE },
   },
   webhook: { name: "webhook", perIp: { max: 600, windowMs: MINUTE } },
+  // F3.5: the storefront's 404 reports; beyond this a flood is not worth counting
+  seo_report: { name: "seo_report", perIp: { max: 30, windowMs: MINUTE } },
 } as const satisfies Record<string, RateLimitProfile>
 
 export type RateLimitProfileName = keyof typeof RATE_LIMIT_PROFILES
