@@ -9,6 +9,7 @@ import {
   AdminGetOldPaths,
   AdminGetRedirects,
   AdminGetSeoResolve,
+  AdminGetUrlStyle,
   AdminPostRedirect,
   AdminPostRedirectImport,
   AdminPostReleasePath,
@@ -54,6 +55,7 @@ export const SEO_ROUTES = [
     middlewares: [requireUserActor, validateAndTransformBody(AdminPostReleasePath)],
   },
   get("/admin/seo/not-found", AdminGetNotFound),
+  get("/admin/seo/url-style", AdminGetUrlStyle),
   get("/store/seo/resolve", StoreGetSeoResolve),
   {
     matcher: "/store/seo/not-found",

@@ -2,7 +2,7 @@ import { JOB_TYPE_KEYS, jobType } from "../types"
 
 describe("job types", () => {
   it("knows its types by own key only", () => {
-    expect(JOB_TYPE_KEYS).toEqual(["audit_log.export"])
+    expect(JOB_TYPE_KEYS).toEqual(["audit_log.export", "seo.url_style"])
     expect(jobType("__proto__")).toBeUndefined()
     expect(jobType("constructor")).toBeUndefined()
   })
@@ -13,6 +13,15 @@ describe("job types", () => {
       containsPersonalData: true,
       resultTtlDays: 7,
     })
+  })
+
+  it("moves URL styles one run at a time, with nothing personal", () => {
+    const type = jobType("seo.url_style")
+    expect(type).toMatchObject({ singleton: true, containsPersonalData: false })
+    expect(
+      type?.input.safeParse({ product: "flat", category: "prefixed", brand: "prefixed" }).success
+    ).toBe(true)
+    expect(type?.input.safeParse({ product: "short" }).success).toBe(false)
   })
 
   it.each([

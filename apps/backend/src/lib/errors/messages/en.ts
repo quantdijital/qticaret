@@ -127,6 +127,10 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "seo.template_invalid": "The template has a tag this field does not support, or broken braces.",
   "seo.text_invalid": "The text holds characters that cannot be used.",
   "seo.text_too_long": "The text is too long.",
+  "seo.url_style_conflicts":
+    "The URL style could not be changed: some pages fall on the same address or another record holds it. Run the check again.",
+  "seo.url_style_job_required":
+    'The URL style changes every page\'s address; use "Change URL style" in the SEO settings.',
   "tr_address.district_id_invalid": "The district is not valid.",
   "tr_address.district_not_in_province": "The selected district is not in this province.",
   "tr_address.province_code_invalid": "The province is not valid.",

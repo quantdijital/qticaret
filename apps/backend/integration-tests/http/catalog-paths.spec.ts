@@ -1,4 +1,6 @@
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
+import { PLATFORM_SETTINGS_MODULE } from "../../src/modules/platform-settings"
+import type PlatformSettingsModuleService from "../../src/modules/platform-settings/service"
 import { URL_REGISTRY_MODULE } from "../../src/modules/url-registry"
 import type UrlRegistryModuleService from "../../src/modules/url-registry/service"
 import { createAdminUser } from "../helpers/admin"
@@ -44,12 +46,13 @@ medusaIntegrationTestRunner({
     const createProduct = async (body: unknown) =>
       (await post<{ product: Record_ }>("/admin/products", body)).data.product
 
-    // The settings cache outlives the database reset between tests: always set back
+    // The settings cache outlives the database reset between tests: always set back.
+    // Saved on the module: over HTTP a style change goes through the move job (F3 T4)
     async function withStyle(product: string, category: string, run: () => Promise<void>) {
       const style = (p: string, c: string) =>
-        post("/admin/platform-settings/seo", {
-          url_style: { product: p, category: c, brand: "prefixed" },
-        })
+        getContainer()
+          .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
+          .saveSection("seo", { url_style: { product: p, category: c, brand: "prefixed" } }, null)
       await style(product, category)
       try {
         await run()

@@ -71,3 +71,11 @@ export const AdminGetNotFound = z
   .object({ ...page, order: z.enum(NOT_FOUND_ORDERS).default("hits") })
   .strict()
 export type AdminGetNotFoundType = z.infer<typeof AdminGetNotFound>
+
+const urlStyle = z.enum(["prefixed", "flat"])
+
+/** `?product=flat&category=prefixed&brand=prefixed`: the URL style to check a move to. */
+export const AdminGetUrlStyle = z
+  .object({ product: urlStyle, category: urlStyle, brand: urlStyle })
+  .strict()
+export type AdminGetUrlStyleType = z.infer<typeof AdminGetUrlStyle>

@@ -1,0 +1,35 @@
+import { z } from "@medusajs/framework/zod"
+import { ValidationError } from "../../../lib/errors"
+import { updatePlatformSettingsWorkflow } from "../../platform-settings/update-platform-settings"
+import { movePaths, planUrlStyle } from "../../seo/url-style"
+import type { JobType } from "./types"
+
+const style = z.enum(["prefixed", "flat"])
+const input = z.object({ product: style, category: style, brand: style }).strict()
+
+/**
+ * Moves the shop to another URL style (docs/13 §2.2): plans again (the
+ * catalog may have changed since the panel's check), claims every new
+ * path, then saves the style, so the storefront links the new paths only
+ * once they all answer. Old paths answer with a 301 throughout.
+ */
+export const seoUrlStyle: JobType<z.infer<typeof input>> = {
+  input,
+  singleton: true,
+  resultTtlDays: 7,
+  containsPersonalData: false,
+  execute: async ({ container, job, progress }, styles) => {
+    const plan = await planUrlStyle(container, styles)
+    if (plan.conflicts.length > 0) {
+      throw new ValidationError("seo.url_style_conflicts")
+    }
+    await progress(0)
+    await movePaths(container, plan.moves, async (done) => {
+      await progress(Math.floor((done / Math.max(plan.moves.length, 1)) * 95))
+    })
+    await updatePlatformSettingsWorkflow(container).run({
+      input: { section: "seo", values: { url_style: styles }, actor_id: job.requested_by ?? null },
+    })
+    return { summary: { moved: plan.moves.length, skipped: plan.skipped.length } }
+  },
+}

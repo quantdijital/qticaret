@@ -137,6 +137,10 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Şablonda bu alan için tanımlı olmayan bir etiket ya da hatalı süslü parantez var.",
   "seo.text_invalid": "Metinde kullanılamayan karakterler var.",
   "seo.text_too_long": "Metin çok uzun.",
+  "seo.url_style_conflicts":
+    "Adres biçimi değiştirilemedi: bazı sayfalar aynı adrese düşüyor ya da adres başka bir kayda ait. Kontrolü yeniden çalıştırın.",
+  "seo.url_style_job_required":
+    'Adres biçimi tüm sayfaların adresini değiştirir; SEO ayarlarındaki "Adres biçimini değiştir" adımıyla yapın.',
   "tr_address.district_id_invalid": "İlçe seçimi geçerli değil.",
   "tr_address.district_not_in_province": "Seçilen ilçe bu ile ait değil.",
   "tr_address.province_code_invalid": "İl seçimi geçerli değil.",
