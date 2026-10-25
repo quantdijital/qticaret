@@ -1,7 +1,10 @@
 {
   "qticaret": {
     "common": {
-      "loading": "Yükleniyor"
+      "loading": "Yükleniyor",
+      "retry": "Tekrar dene",
+      "save": "Kaydet",
+      "reset": "Değişiklikleri geri al"
     },
     "billingProfile": {
       "title": "Fatura bilgileri",
@@ -19,6 +22,113 @@
         "vkn": "Vergi kimlik no"
       },
       "maskedHint": "Kimlik numarası güvenlik nedeniyle maskeli gösterilir."
+    },
+    "errors": {
+      "generic": "İşlem tamamlanamadı. Lütfen tekrar deneyin."
+    },
+    "serverErrors": {
+      "seo": {
+        "template_invalid": "Şablonda bu alan için tanımlı olmayan bir etiket ya da hatalı süslü parantez var."
+      },
+      "features": {
+        "platform_owned": "Bu özellik platform tarafından yönetilir.",
+        "unknown": "Böyle bir özellik yok.",
+        "disabled": "Bu özellik kapalı."
+      },
+      "platform_settings": {
+        "invalid": "Girilen değer geçerli değil.",
+        "host_invalid": "Alan adını https:// ve yol olmadan yazın, ör. magaza.com.tr.",
+        "robots_invalid": "robots.txt yalnızca User-agent, Allow, Disallow, Sitemap, Crawl-delay satırları ve yorum içerebilir.",
+        "text_invalid": "Metin, görünmeyen kontrol karakterleri içeremez.",
+        "email_invalid": "Geçerli bir e-posta adresi girin.",
+        "phone_invalid": "Geçerli bir Türkiye telefon numarası girin.",
+        "timezone_invalid": "Geçerli bir saat dilimi seçin.",
+        "unknown_section": "Böyle bir ayar bölümü yok."
+      },
+      "errors": {
+        "users_only": "Bu işlemi yalnızca oturum açmış yöneticiler yapabilir.",
+        "too_many_requests": "Çok fazla deneme yapıldı. Biraz bekleyip tekrar deneyin."
+      }
+    },
+    "settings": {
+      "features": {
+        "title": "Özellikler",
+        "subtitle": "Mağazanızda açılıp kapatılabilen özellikler. Bir özelliği kapattığınızda ilgili ekran ve işlemler devre dışı kalır.",
+        "empty": "Şu an açılıp kapatılabilen bir özellik yok. Yeni özellikler eklendikçe burada görünecek.",
+        "platformManaged": "Platform tarafından yönetilir",
+        "saved": "Özellik güncellendi."
+      },
+      "seo": {
+        "title": "SEO",
+        "subtitle": "Arama motorlarında mağazanızın nasıl görüneceğini belirleyen genel ayarlar.",
+        "saved": "SEO ayarları kaydedildi.",
+        "host": {
+          "label": "Ana alan adı",
+          "hint": "Ürün ve kategori sayfalarının kalıcı adreslerinde kullanılır. Boş bırakılırsa platform alt alan adı kullanılır."
+        },
+        "urls": {
+          "title": "Alan adı ve URL yapısı",
+          "product": "Ürün adresleri",
+          "category": "Kategori adresleri",
+          "brand": "Marka adresleri",
+          "styles": {
+            "product": {
+              "prefixed": "Önekli: /urun/ornek-urun",
+              "flat": "Düz: /ornek-urun"
+            },
+            "category": {
+              "prefixed": "Önekli: /kategori/ornek-kategori",
+              "flat": "Düz: /ornek-kategori"
+            },
+            "brand": {
+              "prefixed": "Önekli: /marka/ornek-marka",
+              "flat": "Düz: /ornek-marka"
+            }
+          }
+        },
+        "templates": {
+          "title": "Başlık ve açıklama şablonları",
+          "product": "Ürün sayfası başlığı",
+          "category": "Kategori sayfası başlığı",
+          "brand": "Marka sayfası başlığı",
+          "descriptionProduct": "Ürün sayfası açıklaması",
+          "tokens": "Kullanılabilir etiketler:",
+          "preview": "Önizleme:",
+          "fits": "Google sonucuna sığar",
+          "tooLong": "Google sonucunda kısaltılabilir"
+        },
+        "robots": {
+          "title": "Tarayıcılar",
+          "label": "robots.txt",
+          "hint": "{sitemap_url} etiketi yayında site haritası adresiyle değiştirilir.",
+          "aiPreset": "Yapay zekâ tarayıcıları",
+          "presets": {
+            "ai_search_visible": "Yapay zekâ aramalarında görün (önerilen)",
+            "block_training": "Model eğitimi yapan tarayıcıları engelle",
+            "none": "Ek kural ekleme"
+          }
+        },
+        "samples": {
+          "ürün_adı": "Örnek Ürün",
+          "marka": "Örnek Marka",
+          "mağaza": "Mağazanız",
+          "kategori": "Örnek Kategori",
+          "öne_çıkan_attribute": "Paslanmaz Çelik",
+          "kısa_açıklama": "Günlük kullanıma uygun dayanıklı ürün",
+          "fiyat_cümlesi": "1.250 TL'den başlayan fiyatlarla",
+          "kargo_cümlesi": "ücretsiz kargo"
+        }
+      }
+    },
+    "features": {
+      "test_sample": {
+        "label": "Deneme özelliği",
+        "description": "Yalnızca testlerde görünen örnek özellik."
+      },
+      "test_platform_sample": {
+        "label": "Platform deneme özelliği",
+        "description": "Yalnızca testlerde görünen, platformun yönettiği örnek özellik."
+      }
     }
   }
 }

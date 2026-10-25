@@ -4,7 +4,7 @@
 > Yalnızca **bugün var olanı** anlatır. Terimler için [docs/11](11-ogrenme-rehberi.md); ileride gelecek
 > klasörler dahil hedef yapı için [docs/02](02-klasor-yapisi.md). Yeni klasör veya önemli dosya eklendiğinde güncellenir.
 >
-> Son güncelleme: 2026-10-25, F2 S1–S9 bitti.
+> Son güncelleme: 2026-10-25, F2 S1–S10 bitti.
 
 ---
 
@@ -113,6 +113,8 @@ Her modülün iç yapısı aynıdır (örnek: billing-profile):
 ### 2.5 `src/admin/`: admin paneline eklenenler
 - `widgets/customer-billing-profile.tsx`: müşteri detay sayfasındaki fatura bilgisi kutusu.
 - `widgets/default-language.tsx`: admin'i ilk açılışta Türkçe yapar.
+- `routes/settings/features`, `routes/settings/seo`: Ayarlar > Özellikler ve Ayarlar > SEO sayfaları.
+- `lib/sdk.ts` (Medusa JS SDK, oturum çerezi), `lib/errors.ts` (API hata anahtarını Türkçe metne çevirir), `components/page-states.tsx` (yükleniyor ve hata durumları).
 - `i18n/tr.json`, `en.json`: bizim eklediğimiz parçaların metinleri.
 
 ### 2.6 `src/scripts/`: elle çalıştırılan işler

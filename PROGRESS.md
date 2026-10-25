@@ -3,10 +3,24 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**F2 — Platform çekirdek modülleri + güvenlik tabanı** (devam; S1–S9 /13 bitti). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
+**F2 — Platform çekirdek modülleri + güvenlik tabanı** (devam; S1–S10 /13 bitti). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
 
 ## Son oturum özeti
 **2026-10-24 gece oturumu (S3, S5; S8 başladı).** Kullanıcı döndü; dört karar verdi: bağımlılıklar onaylandı (ioredis 5.11.1, fast-xml-parser 5.11.2, yauzl 3.4.0, kendi görsel başlık okuyucumuz), ADR-0011..0014 kabul edildi, otonom devam, eski "Gözden geçir" maddeleri olduğu gibi kabul. Commit `54abc2a`.
+
+2026-10-25 (F2 S10): F2.3b. Admin: Ayarlar > Özellikler ve Ayarlar > SEO.
+- **Bağımlılıklar** (kullanıcı onayı, exact, ≥14 gün): `@medusajs/js-sdk` 2.21.2, `react-hook-form` 7.89.0, `@hookform/resolvers` 5.9.1.
+- **Özellikler:** Bayrak listesi; tenant bayrağı anahtarla açılıp kapanır. Platform bayrağı "Platform tarafından yönetilir" rozetiyle salt okunur. Kayıt defteri boşken yönlendirici boş durum gösterilir.
+- **SEO:**
+  - Alan adı ve URL stili.
+  - Başlık/açıklama şablonları: kullanılabilir etiketler, örnek değerlerle önizleme ve "Google sonucuna sığar" rozeti (`lib/seo` tarayıcıda çalışıyor).
+  - robots.txt ve yapay zekâ tarayıcı ön ayarı.
+  - İstemci tarafı Zod doğrulaması sunucuyla aynı token kuralını uygular.
+- **Genel:** Yükleniyor, boş ve hata durumları her ekranda var. Tüm metinler i18n anahtarı (tr/en). Sunucu hata anahtarı (`seo.template_invalid`) Türkçe metne çevrilir.
+- **Doğrulama:** Admin tip denetimi, lint ve `medusa build` (frontend) temiz. Dev logunda dashboard POST'ları CSRF'ten geçiyor.
+  - **Playwright duman testi yapılmadı:** MCP tarayıcısı kullanıcının profilini kullanıyor ve repoda `@playwright/test` yok. Sayfalar kullanıcının gözle kontrolüne bırakıldı.
+  - Rota etiketi (`defineRouteConfig.label`) i18n anahtarı olarak verildi. Dashboard'un çevirip çevirmediği bu kontrolde görülecek; çevirmiyorsa sabit metne dönülür.
+- **Bulunan sorun (S8 düzeltmesi):** Dashboard'un bildirim rozeti dakikada bir `fields=created_at` ile okuma yapıyor ve her biri denetim kaydı yazıyordu. Kişisel veri içermeyen alanlarla sınırlı okumalar artık kaydedilmiyor (`18a6390`).
 
 2026-10-25 (F2 S9): F2.3a. `platform-settings` modülü, özellik bayrakları (adr/0012). Plan `/Users/deniz/.claude/plans/f2-s9-platform-settings.md`.
 - **Bölümler:**
@@ -179,7 +193,7 @@
 | S7 ✅ | F2.11 | `lib/seo` + `url-registry` modülü. KK: slug tablosu, path tekilliği | S1 | — |
 | S8 ✅ | F2.5 | `audit-log` modülü, mutasyon ve okuma kaydı. KK: fiyat değişimi, TCKN okuma | S3 | 0011 |
 | S9 ✅ | F2.3a | `platform-settings` backend: bölümler, bayraklar, cache, uygulama noktaları. KK: kapalı bayrak | S7, S8 | 0012 |
-| S10 | F2.3b | Admin: Ayarlar > Özellikler ve Ayarlar > SEO sayfaları | S9 | — |
+| S10 ✅ | F2.3b | Admin: Ayarlar > Özellikler ve Ayarlar > SEO sayfaları | S9 | — |
 | S11 | F2.4a | `product-attributes` backend: modül, link'ler, workflow'lar, admin/store API. KK: Store API'de değer | S8 | 0013 |
 | S12 | F2.4b | Admin: ürün widget'ı + şablon yönetim sayfası | S11 | — |
 | S13 | F2.8 | `async-job` modülü, file-s3, "İşler" sayfası; ilk tip denetim kaydı CSV dışa aktarma | S5, S8 | 0014 |
@@ -348,6 +362,7 @@ Paralel zincirler:
     - S13: `presigned-urls` yolu için uzantı/MIME allowlist'i ve worker'da doğrulama; CSV dışa aktarımın ayırıcısı ve BOM'u.
     - Hesap kilidi ve IP'den bağımsız kimlik sınırı (docs/04 "artan gecikme + kilit"); admin `limit` üst sınırı ölçülünce.
     - Admin, çekirdek dashboard'un çevirmediği `errors.too_many_requests` gibi anahtarları ham gösteriyor.
+  - **S10'dan devreden:** Playwright e2e altyapısı: ayrı bir tarayıcı profili ve `@playwright/test` (onay gerekir). docs/06 kontrol listesindeki duman testleri bununla eklenecek.
   - **S9'dan devreden:**
     - `canonical_host` alan adı sahiplik doğrulaması (F16/F18).
     - JSON-LD ve meta çıktısında kaçışlama (docs/13, F18).

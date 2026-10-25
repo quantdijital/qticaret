@@ -1,7 +1,10 @@
 {
   "qticaret": {
     "common": {
-      "loading": "Loading"
+      "loading": "Loading",
+      "retry": "Try again",
+      "save": "Save",
+      "reset": "Discard changes"
     },
     "billingProfile": {
       "title": "Billing details",
@@ -19,6 +22,113 @@
         "vkn": "Tax ID number"
       },
       "maskedHint": "The ID number is masked for security."
+    },
+    "errors": {
+      "generic": "That did not work. Please try again."
+    },
+    "serverErrors": {
+      "seo": {
+        "template_invalid": "The template has a tag this field does not support, or broken braces."
+      },
+      "features": {
+        "platform_owned": "This feature is managed by the platform.",
+        "unknown": "There is no such feature.",
+        "disabled": "This feature is turned off."
+      },
+      "platform_settings": {
+        "invalid": "The value is not valid.",
+        "host_invalid": "Enter the domain without https:// or a path, e.g. shop.com.",
+        "robots_invalid": "robots.txt may only hold User-agent, Allow, Disallow, Sitemap, Crawl-delay lines and comments.",
+        "text_invalid": "The text cannot contain invisible control characters.",
+        "email_invalid": "Enter a valid email address.",
+        "phone_invalid": "Enter a valid Turkish phone number.",
+        "timezone_invalid": "Choose a valid time zone.",
+        "unknown_section": "There is no such settings section."
+      },
+      "errors": {
+        "users_only": "Only signed-in admin users can do this.",
+        "too_many_requests": "Too many attempts. Wait a moment and try again."
+      }
+    },
+    "settings": {
+      "features": {
+        "title": "Features",
+        "subtitle": "Features you can turn on or off for your store. Turning one off disables its screens and actions.",
+        "empty": "There are no features to turn on or off yet. New features will show up here.",
+        "platformManaged": "Managed by the platform",
+        "saved": "Feature updated."
+      },
+      "seo": {
+        "title": "SEO",
+        "subtitle": "General settings that shape how your store appears in search engines.",
+        "saved": "SEO settings saved.",
+        "host": {
+          "label": "Primary domain",
+          "hint": "Used in the permanent addresses of product and category pages. Left empty, the platform subdomain is used."
+        },
+        "urls": {
+          "title": "Domain and URL structure",
+          "product": "Product addresses",
+          "category": "Category addresses",
+          "brand": "Brand addresses",
+          "styles": {
+            "product": {
+              "prefixed": "Prefixed: /urun/sample-product",
+              "flat": "Flat: /sample-product"
+            },
+            "category": {
+              "prefixed": "Prefixed: /kategori/sample-category",
+              "flat": "Flat: /sample-category"
+            },
+            "brand": {
+              "prefixed": "Prefixed: /marka/sample-brand",
+              "flat": "Flat: /sample-brand"
+            }
+          }
+        },
+        "templates": {
+          "title": "Title and description templates",
+          "product": "Product page title",
+          "category": "Category page title",
+          "brand": "Brand page title",
+          "descriptionProduct": "Product page description",
+          "tokens": "Available tags:",
+          "preview": "Preview:",
+          "fits": "Fits a Google result",
+          "tooLong": "May be cut in a Google result"
+        },
+        "robots": {
+          "title": "Crawlers",
+          "label": "robots.txt",
+          "hint": "The {sitemap_url} tag is replaced with the sitemap address when published.",
+          "aiPreset": "AI crawlers",
+          "presets": {
+            "ai_search_visible": "Appear in AI search (recommended)",
+            "block_training": "Block crawlers that train models",
+            "none": "Add no extra rules"
+          }
+        },
+        "samples": {
+          "ürün_adı": "Sample Product",
+          "marka": "Sample Brand",
+          "mağaza": "Your Store",
+          "kategori": "Sample Category",
+          "öne_çıkan_attribute": "Stainless Steel",
+          "kısa_açıklama": "A durable product for everyday use",
+          "fiyat_cümlesi": "from 1,250 TL",
+          "kargo_cümlesi": "free shipping"
+        }
+      }
+    },
+    "features": {
+      "test_sample": {
+        "label": "Sample feature",
+        "description": "A sample feature that appears in tests only."
+      },
+      "test_platform_sample": {
+        "label": "Platform sample feature",
+        "description": "A platform-managed sample feature that appears in tests only."
+      }
     }
   }
 }
