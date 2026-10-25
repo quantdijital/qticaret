@@ -47,6 +47,7 @@ module.exports = defineConfig({
     { resolve: "./src/modules/seo-meta" },
     { resolve: "./src/modules/brands" },
     { resolve: "./src/modules/seo-sitemaps" },
+    { resolve: "./src/modules/seo-advisor" },
     {
       resolve: "./src/modules/seo-redirects",
       options: {
