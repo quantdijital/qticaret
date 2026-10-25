@@ -14,6 +14,7 @@ import {
 import { AdminGetAsyncJobs, AdminPostAsyncJob } from "./admin/async-jobs/validators"
 import { AdminGetAuditLog } from "./admin/audit-log/validators"
 import { AdminPostProductAttributes } from "./admin/products/[id]/attributes/validators"
+import { AdminPostProductCatalog } from "./admin/products/[id]/catalog/validators"
 import { AdminPostFeature, validateSectionBody } from "./admin/platform-settings/validators"
 import { auditMutations, auditSensitiveRead } from "./http/audit"
 import { csrfProtection } from "./http/csrf"
@@ -32,6 +33,7 @@ import {
   StoreGetTrProvinces,
 } from "./store/tr-address/validators"
 import { STORE_ATTRIBUTE_FIELDS, restrictStoreAttributeFields } from "./validation/attribute-fields"
+import { slugHandles } from "./validation/catalog-handles"
 import { rejectSensitiveFields } from "./validation/sensitive-fields"
 import { closePresignedUploads, hideJobResultFiles } from "./validation/upload-routes"
 import {
@@ -111,6 +113,12 @@ export default defineMiddlewares({
         auditMutations,
       ],
     },
+    // F3.1: handles are storefront slugs. Without `methods` this runs before
+    // the core routes validate the body, so the handle it fills reaches them
+    ...["/admin/products", "/admin/product-categories", "/admin/collections"].map((matcher) => ({
+      matcher,
+      middlewares: [slugHandles],
+    })),
     // F2.5: reads that return personal data (names, contact details,
     // addresses) are recorded before the answer, or refused
     ...SENSITIVE_READS.map(([matcher, resourceType, list, safeFields]) => ({
@@ -165,6 +173,11 @@ export default defineMiddlewares({
       matcher: "/admin/products/:id/attributes",
       methods: ["POST"],
       middlewares: [validateAndTransformBody(AdminPostProductAttributes)],
+    },
+    {
+      matcher: "/admin/products/:id/catalog",
+      methods: ["POST"],
+      middlewares: [validateAndTransformBody(AdminPostProductCatalog)],
     },
     // F2.8: long tasks (adr/0014); starting one and fetching its result are
     // for people: results can hold personal data (the audit log export)

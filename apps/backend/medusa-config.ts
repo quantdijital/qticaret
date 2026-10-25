@@ -43,6 +43,7 @@ module.exports = defineConfig({
     { resolve: "./src/modules/url-registry" },
     { resolve: "./src/modules/audit-log" },
     { resolve: "./src/modules/product-attributes" },
+    { resolve: "./src/modules/catalog-extension" },
     { resolve: "./src/modules/async-job" },
     {
       resolve: "./src/modules/platform-settings",

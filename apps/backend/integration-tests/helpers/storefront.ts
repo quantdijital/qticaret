@@ -58,6 +58,11 @@ export async function createTestProduct(
           title: input.handle,
           handle: input.handle,
           status: "published",
+          // A published physical product needs them (F3.1); the store's default units, g and cm
+          weight: 500,
+          length: 20,
+          width: 10,
+          height: 5,
           ...(input.typeId ? { type_id: input.typeId } : {}),
           options: [{ title: "Seçenek", values: ["Standart"] }],
           variants: [

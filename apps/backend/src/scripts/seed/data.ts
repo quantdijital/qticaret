@@ -37,6 +37,8 @@ export interface DemoProduct {
   vatProductType?: string
   option: { title: string; values: string[] }
   price: number
+  /** Published physical products need them (F3.1); in the store's default units, g and cm. */
+  dimensions: { weight: number; length: number; width: number; height: number }
 }
 
 export const DEMO_PRODUCTS: DemoProduct[] = [
@@ -47,6 +49,7 @@ export const DEMO_PRODUCTS: DemoProduct[] = [
     category: "ev-ve-yasam",
     option: { title: "Renk", values: ["Beyaz", "Lacivert"] },
     price: 249,
+    dimensions: { weight: 350, length: 12, width: 9, height: 10 },
   },
   {
     title: "Keten Masa Örtüsü",
@@ -55,6 +58,7 @@ export const DEMO_PRODUCTS: DemoProduct[] = [
     category: "ev-ve-yasam",
     option: { title: "Renk", values: ["Bej", "Gri"] },
     price: 549,
+    dimensions: { weight: 600, length: 30, width: 25, height: 3 },
   },
   {
     title: "Pamuklu Tişört",
@@ -64,6 +68,7 @@ export const DEMO_PRODUCTS: DemoProduct[] = [
     vatProductType: "KDV %10",
     option: { title: "Beden", values: ["S", "M", "L"] },
     price: 399,
+    dimensions: { weight: 200, length: 30, width: 25, height: 2 },
   },
   {
     title: "Organik Tam Buğday Unu 1 kg",
@@ -73,6 +78,7 @@ export const DEMO_PRODUCTS: DemoProduct[] = [
     vatProductType: "KDV %1",
     option: { title: "Ağırlık", values: ["1 kg"] },
     price: 89,
+    dimensions: { weight: 1000, length: 20, width: 12, height: 6 },
   },
 ]
 

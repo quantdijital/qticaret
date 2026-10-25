@@ -1,0 +1,150 @@
+import type { MedusaContainer } from "@medusajs/framework/types"
+import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
+import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
+import { ValidationError } from "../../../lib/errors"
+import type { PRODUCT_CONDITIONS } from "../../../modules/catalog-extension/models/product-extension"
+
+type Condition = (typeof PRODUCT_CONDITIONS)[number]
+
+export interface SetProductCatalogInput {
+  product_id: string
+  // Optional as the request body has them: absent or undefined both mean "keep"
+  condition?: Condition | undefined
+  primary_category_id?: string | null | undefined
+  successor_product_id?: string | null | undefined
+  variants?: Record<string, { mpn: string | null }> | undefined
+}
+
+export interface ExtensionFields {
+  condition: Condition
+  primary_category_id: string | null
+  successor_product_id: string | null
+}
+
+export interface ProductCatalogPlan {
+  product_id: string
+  /** The product's extension: its row (null: none yet), what changes, what it was. */
+  product: { id: string | null; set: Partial<ExtensionFields>; previous: Partial<ExtensionFields> }
+  variants: { variant_id: string; id: string | null; mpn: string | null; previous: string | null }[]
+}
+
+interface ProductRow {
+  id: string
+  categories?: ({ id: string } | null)[] | null
+  variants?: ({
+    id: string
+    variant_extension?: { id: string; mpn: string | null } | null
+  } | null)[]
+  product_extension?: (ExtensionFields & { id: string }) | null
+}
+
+// A successor chain longer than this is refused as if it looped
+const MAX_SUCCESSOR_CHAIN = 20
+
+async function productRow(container: MedusaContainer, id: string, fields: string[]) {
+  const query = container.resolve(ContainerRegistrationKeys.QUERY)
+  const { data } = await query.graph({ entity: "product", fields, filters: { id } })
+  return data[0] as ProductRow | undefined
+}
+
+/**
+ * The successor is where the product's URL points once it is no longer sold
+ * (docs/13 §2.4): another existing product, and following successors from
+ * it never comes back to this one (a redirect loop).
+ */
+async function checkSuccessor(container: MedusaContainer, productId: string, successorId: string) {
+  if (successorId === productId) {
+    throw new ValidationError("catalog.successor_self", { field: "successor_product_id" })
+  }
+  let current = successorId
+  for (let step = 0; step < MAX_SUCCESSOR_CHAIN; step += 1) {
+    const row = await productRow(container, current, [
+      "id",
+      "product_extension.successor_product_id",
+    ])
+    if (!row) {
+      if (step === 0) {
+        throw new ValidationError("catalog.successor_unknown", { field: "successor_product_id" })
+      }
+      // A deleted product further down ends the chain
+      return
+    }
+    const next = row.product_extension?.successor_product_id
+    if (!next) {
+      return
+    }
+    if (next === productId) {
+      break
+    }
+    current = next
+  }
+  throw new ValidationError("catalog.successor_loop", { field: "successor_product_id" })
+}
+
+const EXTENSION_KEYS = ["condition", "primary_category_id", "successor_product_id"] as const
+
+/** The fields the save sends (absent ones keep their values) and what they hold now. */
+function changesOf(input: SetProductCatalogInput, current: ExtensionFields | null) {
+  const set: Partial<ExtensionFields> = {}
+  const previous: Partial<ExtensionFields> = {}
+  for (const key of EXTENSION_KEYS) {
+    if (input[key] !== undefined) {
+      Object.assign(set, { [key]: input[key] })
+      if (current) {
+        Object.assign(previous, { [key]: current[key] })
+      }
+    }
+  }
+  return { set, previous }
+}
+
+/** Checks a catalog save against the product and works out the rows to write; writes nothing. */
+export const planProductCatalogStep = createStep(
+  "catalog-plan-product-catalog",
+  async (input: SetProductCatalogInput, { container }) => {
+    const product = await productRow(container, input.product_id, [
+      "id",
+      "categories.id",
+      "variants.id",
+      "variants.variant_extension.*",
+      "product_extension.*",
+    ])
+    if (!product) {
+      throw new MedusaError(MedusaError.Types.NOT_FOUND, "catalog.product_unknown")
+    }
+    const primary = input.primary_category_id
+    if (primary && !product.categories?.some((category) => category?.id === primary)) {
+      throw new ValidationError("catalog.primary_category_not_assigned", {
+        field: "primary_category_id",
+      })
+    }
+    const successor = input.successor_product_id
+    // An unchanged successor was checked when it was set
+    if (successor && successor !== product.product_extension?.successor_product_id) {
+      await checkSuccessor(container, product.id, successor)
+    }
+    const variants = new Map(
+      (product.variants ?? []).flatMap((variant) => (variant ? [[variant.id, variant]] : []))
+    )
+    const variantChanges = Object.entries(input.variants ?? {}).flatMap(([variantId, { mpn }]) => {
+      const variant = variants.get(variantId)
+      if (!variant) {
+        throw new ValidationError("catalog.variant_unknown", { field: "variants" })
+      }
+      const extension = variant.variant_extension ?? null
+      const previous = extension?.mpn ?? null
+      // Nothing to write: the same MPN, or clearing one that was never set
+      return mpn === previous
+        ? []
+        : [{ variant_id: variantId, id: extension?.id ?? null, mpn, previous }]
+    })
+    const extension = product.product_extension ?? null
+    const { set, previous } = changesOf(input, extension)
+    const plan: ProductCatalogPlan = {
+      product_id: product.id,
+      product: { id: extension?.id ?? null, set, previous },
+      variants: variantChanges,
+    }
+    return new StepResponse(plan)
+  }
+)

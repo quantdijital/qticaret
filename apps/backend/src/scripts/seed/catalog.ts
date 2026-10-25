@@ -4,6 +4,7 @@ import {
   createInventoryLevelsWorkflow,
   createProductCategoriesWorkflow,
   createProductsWorkflow,
+  updateProductsWorkflow,
 } from "@medusajs/medusa/core-flows"
 import { logger } from "../../lib/logging"
 import { TRY_CURRENCY_CODE } from "../bootstrap/constants"
@@ -27,9 +28,10 @@ export async function ensureDemoCatalog(
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
   const { data: existing } = await query.graph({
     entity: "product",
-    fields: ["handle"],
+    fields: ["id", "handle", "weight"],
     filters: { handle: DEMO_PRODUCTS.map((product) => product.handle) },
   })
+  await fillDemoDimensions(container, existing)
   const existingHandles = new Set(existing.map((product) => product.handle))
   const missing = DEMO_PRODUCTS.filter((product) => !existingHandles.has(product.handle))
   if (missing.length > 0) {
@@ -46,6 +48,36 @@ export async function ensureDemoCatalog(
   }
   // Also on reruns: a run that failed after creating products left them unstocked
   await stockDemoVariants(container, context.stockLocationId)
+}
+
+interface ExistingProduct {
+  id: string
+  handle: string
+  weight: number | null
+}
+
+// Demo products made before F3.1 lack weight and dimensions, so the publish
+// rule would refuse every edit of them: they get the demo values once
+async function fillDemoDimensions(
+  container: MedusaContainer,
+  existing: ExistingProduct[]
+): Promise<void> {
+  const demos = new Map(DEMO_PRODUCTS.map((product) => [product.handle, product]))
+  const lacking = existing.filter((product) => product.weight === null)
+  for (const product of lacking) {
+    const demo = demos.get(product.handle)
+    if (demo) {
+      await updateProductsWorkflow(container).run({
+        input: { selector: { id: product.id }, update: demo.dimensions },
+      })
+    }
+  }
+  if (lacking.length > 0) {
+    logger.info(
+      { event: "seed.dimensions_filled", count: lacking.length },
+      "filled demo dimensions"
+    )
+  }
 }
 
 function toProductInput(
@@ -67,6 +99,7 @@ function toProductInput(
     handle: product.handle,
     description: product.description,
     status: ProductStatus.PUBLISHED,
+    ...product.dimensions,
     shipping_profile_id: context.shippingProfileId,
     category_ids: [categoryId],
     ...(typeId ? { type_id: typeId } : {}),

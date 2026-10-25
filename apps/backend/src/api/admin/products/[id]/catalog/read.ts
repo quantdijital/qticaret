@@ -1,0 +1,91 @@
+import type { MedusaContainer } from "@medusajs/framework/types"
+import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
+import { variantGtin } from "../../../../../lib/catalog"
+
+interface ProductRow {
+  id: string
+  categories?: ({ id: string; name: string } | null)[] | null
+  variants?:
+    | ({
+        id: string
+        title: string | null
+        sku: string | null
+        ean: string | null
+        upc: string | null
+        barcode: string | null
+        variant_extension?: { mpn: string | null } | null
+      } | null)[]
+    | null
+  product_extension?: {
+    condition: string
+    kind: string
+    primary_category_id: string | null
+    successor_product_id: string | null
+  } | null
+}
+
+const present = <T>(items: (T | null)[] | null | undefined): T[] =>
+  (items ?? []).filter((item): item is T => item !== null)
+
+async function productTitle(scope: MedusaContainer, id: string | null) {
+  if (!id) {
+    return null
+  }
+  const query = scope.resolve(ContainerRegistrationKeys.QUERY)
+  const { data } = await query.graph({
+    entity: "product",
+    fields: ["id", "title", "handle"],
+    filters: { id },
+  })
+  return (data[0] as { id: string; title: string; handle: string } | undefined) ?? null
+}
+
+/**
+ * A product's catalog fields (F3.1) with what the admin shows beside them:
+ * its categories to pick the primary one from, the successor's title, and
+ * each variant's MPN and the GTIN structured data would use. A primary
+ * category the product no longer has reads as unset.
+ */
+export async function readProductCatalog(scope: MedusaContainer, productId: string) {
+  const query = scope.resolve(ContainerRegistrationKeys.QUERY)
+  const { data } = await query.graph({
+    entity: "product",
+    fields: [
+      "id",
+      "categories.id",
+      "categories.name",
+      "variants.id",
+      "variants.title",
+      "variants.sku",
+      "variants.ean",
+      "variants.upc",
+      "variants.barcode",
+      "variants.variant_extension.mpn",
+      "product_extension.*",
+    ],
+    filters: { id: productId },
+  })
+  const product = data[0] as ProductRow | undefined
+  if (!product) {
+    throw new MedusaError(MedusaError.Types.NOT_FOUND, "catalog.product_unknown")
+  }
+  const extension = product.product_extension ?? null
+  const categories = present(product.categories).map(({ id, name }) => ({ id, name }))
+  const primary = extension?.primary_category_id ?? null
+  return {
+    condition: extension?.condition ?? "new",
+    kind: extension?.kind ?? "physical",
+    primary_category_id: categories.some((category) => category.id === primary) ? primary : null,
+    successor: await productTitle(scope, extension?.successor_product_id ?? null),
+    categories,
+    variants: present(product.variants).map((variant) => ({
+      id: variant.id,
+      title: variant.title,
+      sku: variant.sku,
+      mpn: variant.variant_extension?.mpn ?? null,
+      gtin: variantGtin(variant),
+    })),
+  }
+}
+
+export type ProductCatalog = Awaited<ReturnType<typeof readProductCatalog>>
