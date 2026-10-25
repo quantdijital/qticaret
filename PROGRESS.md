@@ -3,7 +3,7 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a, T1b, T2, T3, T4, T5, T9 bitti; sırada T10 sitemap/robots, T7 stok, T6 görsel). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı; push edilmedi. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
+**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a, T1b, T2, T3, T4, T5, T9 ve T10a bitti; sırada T10b önizleme + IndexNow, T7 stok, T6 görsel). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı; push edilmedi. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
 
 ## Son oturum özeti
 **2026-10-25/26 gece (kullanıcı yatarken, "panel işlerini tamamla" talimatıyla).** Panelin ekranları yazıldı; her biri gerçek veriyle tarayıcıda denendi (CDP ekran görüntüsü, test kayıtları sonra silindi). Commit'ler `e11a201`…`6d63df7`, push yok.
@@ -118,6 +118,17 @@
   - Kategori, marka, koleksiyon: `CollectionPage` + ilk 24 yayındaki ürünün `ItemList`'i.
   - Ayrıca `BreadcrumbList`; ana sayfa için `GET /store/seo/site` (`OnlineStore` + `WebSite`).
   - Sözleşme testleri: bloklar Google'ın zorunlu alanlarını taşıyan zod şemalarıyla doğrulanıyor.
+- **F3 T10a bitti:** site haritası ve robots.txt. Commit `9dac9d8` ve panel.
+  - `seo.sitemap` işi yayındaki, indekslenebilir sayfaları bugünkü yollarıyla topluyor: ürün (görselleriyle), kategori, marka, koleksiyon.
+    - Taslak, noindex ve canonical'ı başka yeri gösteren sayfalar dışarıda.
+    - Tür başına dosya; 50.000 URL ya da 45 MB'ta bölünüyor; dizin dosyası var; dosyalar tek seferde değişiyor.
+  - Değişiklikler işaret bırakıyor. Beş dakikalık zamanlayıcı, değişiklikler iki dakika durulunca ve günde bir yenilemeyi kuyruğa alıyor.
+  - Store uçları:
+    - `GET /store/seo/sitemaps/:name` (yalnızca site haritası adları).
+    - `GET /store/seo/robots`: şablon + site haritası adresi + AI ön ayarı (eğitim tarayıcıları tek grupta engelleniyor; arama tarayıcıları serbest).
+    - `/store/seo/site` storefront kenarına canonical host'u (301 için) ve indeksleme durumunu söylüyor.
+  - `SEO_INDEXING` (staging'de varsayılan kapalı): robots her şeyi engelliyor, her sayfa `noindex,nofollow`.
+  - Panel: SEO özetinde site haritası kartı (sayfa sayısı, dosyalar, bekleyen değişiklik, şimdi yenile).
 - **Gözden geçir (kullanıcı yokken önerilen seçenekle verilen kararlar):**
   1. Bayrak adı `catalog.non_physical`, mağaza tarafından açılır, varsayılan kapalı. Etiketleri Medusa Admin'de ve panelde var.
   2. Kargo gerekmeyen kalemler sipariş ödenince "teslim edildi" sayılıyor. Dijital teslimat (indirme bağlantısı, kod gönderimi) F9 bildirimleriyle gelecek.
@@ -146,6 +157,11 @@
   23. Listeleme `ItemList`'i yayındaki ilk 24 ürün, yeniden eskiye. Storefront'un varsayılan sıralaması buna uymalı (F18).
   24. Stok takibi kapalı varyant "stokta"; stoksuz ama ön sipariş/backorder açık varyant `BackOrder`. Ön sipariş bayrağı T8'de.
   25. Kargo detayı ve iade politikası (F7, F13), üstü çizili fiyat (F4.3) ve `Article` (T13) ilgili fazlarında JSON-LD'ye eklenecek.
+  26. Site haritası dosyaları S3 yerine veritabanında tutuluyor. Medusa'nın S3 sağlayıcısı her dosyaya rastgele ad veriyor; sabit adlı birkaç dosya için tablo daha basit. docs/13 §6'dan sapma; ileride aynı uçların arkasında S3'e taşınabilir.
+  27. Site haritası gzip'siz XML; sıkıştırmayı HTTP katmanı (F16/F18) yapar. Sınır 50 MB yerine 45 MB (pay).
+  28. "Yapay zekâ aramalarında görün" ön ayarı robots'a satır eklemiyor (arama tarayıcıları `*` grubunu izler).
+     - "Model eğitimini engelle" şunları engelliyor: GPTBot, ClaudeBot, CCBot, Google-Extended, Applebot-Extended, Bytespider, Meta-ExternalAgent.
+  29. Staging'de indeksleme kapalı; başka bir ortam `SEO_INDEXING=off` ile kapatılabilir.
 - **Bilinen sınırlar (devreden):**
   - Sipariş ve stok panosu bellek içi sıralıyor (5000/2000 kayıt). Büyük mağazada kayıtlı aşama sütunu ya da Index modülü gerekir.
   - Kargo etiketi ve takip F7'de. Kampanyada minimum sepet ve kategori kuralları F4'te.
@@ -453,7 +469,7 @@
 | T7 | F3.7 | Stok: depo/seviye kurulumu, Redis kilit sağlayıcısı, iptal/iade geri dönüş testleri. KK: eşzamanlı checkout | — | 0020 |
 | T8 | F3.8 | `stock-ledger`, düşük stok eşiği + `feed` uyarısı, ön sipariş bayrağı, uzlaştırma işi. KK: düşük stok uyarısı | T7 | 0020 |
 | T9 ✅ | F3.12 | `lib/seo/jsonld`: ProductGroup/Product/Offer, BreadcrumbList, CollectionPage/ItemList, OnlineStore, Article; şema testleri. KK: payload + JSON-LD sözleşme testi | T1, T4 | — |
-| T10 | F3.6 + F3.15 | Sitemap işi (debounce + günlük, 50.000'de bölme, görsel sitemap, S3), robots.txt üretimi ve AI ön ayarları, canonical host 301, staging `noindex`, imzalı önizleme, IndexNow. KK: sitemap/robots | T4, T5 | — |
+| T10 (a ✅) | F3.6 + F3.15 | Sitemap işi (debounce + günlük, 50.000'de bölme, görsel sitemap, S3), robots.txt üretimi ve AI ön ayarları, canonical host 301, staging `noindex`, imzalı önizleme, IndexNow. KK: sitemap/robots | T4, T5 | — |
 | T11 | F3.13 | `seo-advisor`: kural motoru, skor, bulgular, tek tık düzeltme, widget + SERP önizleme, liste sütunu, yayın kapısı. KK: deterministik, p95 < 50 ms | T2, T9 | — |
 | T12 | F3.14 | Mağaza geneli SEO denetim işi, 404 isabet listesi + "301 oluştur", mükerrer/öksüz/zincir listeleri. KK: 404 önerisi | T3, T11 | — |
 | T13 | F3.16a | `content` modülü: sayfa ve blog, zengin metin (belge JSON + sunucu oluşturucu, Tiptap), kısa kodlar, Store API | T2, Tiptap onayı | 0019 |
