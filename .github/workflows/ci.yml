@@ -63,7 +63,11 @@ jobs:
           done
       - run: pnpm install --frozen-lockfile
       - run: pnpm format:check
-      - run: pnpm turbo run lint typecheck test build
+      # The backend's tsconfig includes the query and container types Medusa
+      # writes when it builds (.medusa/types; `medusa develop` writes them
+      # locally): typecheck and lint run after them, not beside them
+      - run: pnpm turbo run build
+      - run: pnpm turbo run lint typecheck test
 
   integration:
     name: Integration tests (HTTP and modules)
@@ -105,9 +109,8 @@ jobs:
             echo "$name=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
           done
       - run: pnpm install --frozen-lockfile
-      # Three processes: each spec file boots Medusa and one process runs out
-      # of heap after about twenty files
-      - run: pnpm --filter @qticaret/backend test:integration:http:all
+      # One jest worker, replaced when its heap grows (jest.config.js)
+      - run: pnpm --filter @qticaret/backend test:integration:http
       - run: pnpm --filter @qticaret/backend test:integration:modules
 
   e2e:

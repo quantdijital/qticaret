@@ -227,7 +227,7 @@ Tarayıcıda bir isteğin yanıtındaki `X-Request-Id` değerini loglarda aratı
 | Modül entegrasyon | `src/modules/*/__tests__/` | `pnpm --filter backend test:integration:modules` | Tek modülü gerçek veritabanıyla dener |
 | Kalite | — | `pnpm lint`, `pnpm typecheck` | Kod biçimi ve tip hataları |
 
-Tek bir dosyayı çalıştırmak için sonuna adını ekle: `pnpm --filter backend test:integration:http -- uploads`. Hepsini çalıştırmak için `test:integration:http:all` kullan: testleri üç ayrı süreçte koşar, çünkü tek süreçte yirmi kadar dosyadan sonra bellek yetmiyor.
+Tek bir dosyayı çalıştırmak için sonuna adını ekle: `pnpm --filter backend test:integration:http -- uploads`. Adsız çalıştırınca hepsi koşar. Her dosya Medusa'yı yeniden açtığı için bellek birikir; jest bu yüzden testleri tek bir alt süreçte koşar ve bu süreç 1 GB'ı geçince dosya arasında yenisiyle değiştirir (`jest.config.js`).
 
 **Çıktıyı okumak:** `PASS` / `FAIL` dosya başına; `✓` geçen, `✕` kalan test; en altta `Tests: 87 passed, 87 total`.
 Kalan testte `Expected` (beklenen) ve `Received` (gelen) satırlarına bak.

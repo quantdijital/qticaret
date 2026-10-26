@@ -52,10 +52,9 @@ yalnızca boş volume'da uygulandığı için env dosyalarını yeniden üretirk
 | `pnpm dev` | Tüm uygulamaları geliştirme modunda çalıştırır (Turborepo) |
 | `pnpm build` | Tüm paketleri derler |
 | `pnpm lint` | ESLint (strict, type-checked) |
-| `pnpm typecheck` | `tsc --noEmit` |
+| `pnpm typecheck` | `tsc --noEmit`; backend, Medusa'nın ürettiği tipleri (`.medusa/types`) okur: önce bir kez `pnpm dev` ya da `pnpm build` |
 | `pnpm test` | Unit testler |
-| `pnpm --filter @qticaret/backend test:integration:http` | HTTP entegrasyon testleri (Postgres gerekir); bir dosya için sonuna adını ekleyin |
-| `pnpm --filter @qticaret/backend test:integration:http:all` | Tüm HTTP testleri üç süreçte (CI bunu kullanır; tek süreçte bellek yetmiyor) |
+| `pnpm --filter @qticaret/backend test:integration:http` | HTTP entegrasyon testleri (Postgres gerekir); bir dosya için sonuna adını ekleyin. Hepsi tek komutta: jest, belleği büyüyen süreci dosya arasında yeniler |
 | `pnpm db:up` / `pnpm db:down` | Geliştirme servislerini başlat / durdur |
 | `pnpm env:init` | Eksik env dosyalarını ve değişkenlerini şablondan tamamla (mevcut değeri değiştirmez) |
 | `pnpm format` / `pnpm format:check` | Prettier yaz / kontrol et (Markdown hariç) |
