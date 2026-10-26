@@ -3,7 +3,7 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a, T1b, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12 bitti; sırada T13 içerik). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı; push edilmedi. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
+**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a, T1b, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13 bitti; sırada T14 facet landing). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı; push edilmedi. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
 
 ## Son oturum özeti
 **2026-10-25/26 gece (kullanıcı yatarken, "panel işlerini tamamla" talimatıyla).** Panelin ekranları yazıldı; her biri gerçek veriyle tarayıcıda denendi (CDP ekran görüntüsü, test kayıtları sonra silindi). Commit'ler `e11a201`…`6d63df7`, push yok.
@@ -212,6 +212,22 @@
     - Ürün sayfasında marka seçicinin temizle düğmesi kartın dışına taşıyordu.
     - Varyant kartı satır bileşeni ve saf yardımcılar olarak bölündü (birim testli).
   - Bağımsız kod incelemesinin bulguları düzeltildi.
+- **F3 T13 (F3.16a) bitti:** içerik sayfaları ve blog (adr/0019, uygulama notu eklendi). Tiptap 3.31.4 eklendi (3.32.0, 14 gün kuralını sağlamadığı için alınmadı).
+  - **`content` modülü:** sayfa (`/{slug}`) ve blog yazısı (`/blog/{slug}`) tek kayıtta, `kind` ile.
+    - Gövde ProseMirror belge JSON'u olarak saklanıyor, HTML olarak değil. Zod izin listesi: h2–h4, kalın, italik, bağlantı, liste, alıntı, tablo, görsel, ürün ve kategori kartı.
+    - Belge önce boyut ve derinlik sınırından, sonra şemadan geçiyor. Her düğüm tek kez denetleniyor (iç içe listeler üstel süre almıyor; testli).
+    - HTML'i kendi oluşturucumuz üretiyor: izin listesi dışında etiket yok, her metin ve adres kaçışlı.
+    - Görseller yalnızca medya kütüphanesine yüklenmiş dosyalar. Kartlar yalnızca id taşıyor; Store API'de canlı ürünün ya da kategorinin güncel adı ve yoluyla çiziliyor.
+  - **Yol ve SEO:**
+    - Yol url-registry'de. Yayında olmuş girişin eski yolu 301 veriyor, silinince 410; hiç yayına çıkmamışsa yol boşalıyor.
+    - Resolve `seo` payload'ı: sayfa `WebPage`, yazı `BlogPosting` (yazar, tarihler, yayıncı), blog yazısında "Blog" breadcrumb'ı.
+    - Başlık şablonları `{başlık} | {mağaza}` (Ayarlar > SEO). Sitemap'te `pages`/`posts` dosyaları (`lastmod` metnin değiştiği tarih). IndexNow ve yönlendirme önerileri içeriği tanıyor.
+    - SEO danışmanında içerik kuralları (docs/14 §3.8): A-LEN, A-STRUCT, A-ANSWER, A-INLINK, A-BYLINE, A-COVER, A-STALE.
+  - **Uçlar:** `/admin/content` (liste, oluştur, güncelle, sil; denetim kaydında önce/sonra) ve `/store/content` (yayındaki liste; tek giriş HTML, başlık listesi, okuma süresi).
+  - **Panel:** İçerik menüsü (Sayfalar / Blog yazıları).
+    - Giriş sayfasında genel bilgiler, editör, kapak, arama görünümü ve danışman.
+    - Editör sunucunun izin listesine göre daraltıldı. Görseller yükleniyor ve alt metin soruluyor; ürün ya da kategori kartı aranarak ekleniyor; yapıştırılan görsel ve izinsiz bağlantı atılıyor.
+  - **İncelemeler:** bağımsız kod ve güvenlik incelemelerinin bulguları düzeltildi. Güvenlik incelemesi XSS bulmadı; iki DoS bulgusu (üstel doğrulama, karesel regex) düzeltildi ve süre testleriyle kilitlendi.
 - **Gözden geçir (kullanıcı yokken önerilen seçenekle verilen kararlar):**
   1. Bayrak adı `catalog.non_physical`, mağaza tarafından açılır, varsayılan kapalı. Etiketleri Medusa Admin'de ve panelde var.
   2. Kargo gerekmeyen kalemler sipariş ödenince "teslim edildi" sayılıyor. Dijital teslimat (indirme bağlantısı, kod gönderimi) F9 bildirimleriyle gelecek.
@@ -328,7 +344,20 @@
   69. "Azalan" sekmesi ve pano görevi artık eşik sayısını göstermiyor (kalemlerin eşikleri farklı olabilir).
   70. Ürün sayfasında "Stoksuz satış" sütunu bayrak açıkken ya da açık bir varyant varken görünüyor. Bayrak kapalıyken yalnızca kapatılabiliyor.
   71. Varyantın stok takibi ve stoksuz satış ayarı, fiyatlarla birlikte denetim kaydının önce/sonra özetinde.
+  72. **İçerik sayfası ve blog yazısı tek kayıt** (`content_entry`, `kind`). SEO ve url-registry tarafında `page` ve `post`; seo-meta zaten bu türleri tanıyordu.
+  73. Ürünün zengin açıklaması (ADR-0019'daki "ürün açıklaması content'e bağlanır") bu göreve alınmadı; Medusa'nın düz metin alanı sürüyor. İçe aktarma (T15) ya da sonrası için.
+  74. **Danışman kural adları docs/14'ten farklı:** META-01, LINK-01, IMG-01 başka kuralların adı ve panel kuralı adından tanıyor. A-META-01 → A-BYLINE-01, A-LINK-01 → A-INLINK-01, A-IMG-01 → A-COVER-01. docs/14 güncellendi.
+  75. Az kelimeli metinde yapı ve iç bağlantı kuralları susuyor (önce uzunluk). Yazar ve giriş bloğu yalnızca blog yazısında isteniyor.
+  76. Kartların hedefi kayıtta yalnızca gönderilen gövde için denetleniyor. Sonradan silinen ürün sayfayı kilitlemiyor; kartı sayfada görünmüyor.
+  77. `revised_at` yalnızca başlık ya da gövde gerçekten değişince güncelleniyor (iki taraf aynı şemadan geçirilip karşılaştırılıyor); aynı gövdeyi yeniden göndermek tarih değiştirmiyor.
+  78. Gövdenin özeti (300 karakter) ve kelime sayısı kayıtta yazılıyor. Herkese açık liste ve resolve belgeyi okumuyor.
+  79. İçerik kayıtlarında gövde sınırı 1 MB (Express'in 100 kB varsayılanı uzun yazıya yetmiyordu). Belgenin kendi sınırı 200.000 karakter, 12 düğüm derinliği, 20.000 düğüm.
+  80. İçerik görselleri ürün görselleri gibi WebP/AVIF türevi almıyor; storefront ana dosyayı gösteriyor.
+  81. İçerik uçları entegrasyon anahtarlarına açık (silme dahil), marka ile aynı. Roller F12'de.
 - **Bilinen sınırlar (devreden):**
+  - JSON-LD'yi storefront basarken `<`, `>` ve `&` kaçışlanmalı (`</script>` içeren başlık ya da metin). Kural docs/13'te var; F18 kabulüne sözleşme testi olarak eklenecek.
+  - Editöre yüklenip bir günden uzun süre kaydedilmeyen görseli gece süpürmesi siler; kayıt `content.image_unknown` verir.
+  - Blog breadcrumb adı "Blog" sabit; F19'da mağaza diline göre.
   - Defter satırları için saklama süresi ve arşiv F13'te. Mağaza eşiği değişince kalemler toplu olarak yeniden kontrol edilmiyor (bir sonraki harekette).
   - Sipariş ve stok panosu bellek içi sıralıyor (5000/2000 kayıt). Büyük mağazada kayıtlı aşama sütunu ya da Index modülü gerekir.
   - Kargo etiketi ve takip F7'de. Kampanyada minimum sepet ve kategori kuralları F4'te.
@@ -639,7 +668,7 @@
 | T10 ✅ | F3.6 + F3.15 | Sitemap işi (debounce + günlük, 50.000'de bölme, görsel sitemap, S3), robots.txt üretimi ve AI ön ayarları, canonical host 301, staging `noindex`, imzalı önizleme, IndexNow. KK: sitemap/robots | T4, T5 | — |
 | T11 ✅ | F3.13 | `seo-advisor`: kural motoru, skor, bulgular, tek tık düzeltme, widget + SERP önizleme, liste sütunu, yayın kapısı. KK: deterministik, p95 < 50 ms | T2, T9 | — |
 | T12 ✅ | F3.14 | Mağaza geneli SEO denetim işi, 404 isabet listesi + "301 oluştur", mükerrer/öksüz/zincir listeleri. KK: 404 önerisi | T3, T11 | — |
-| T13 | F3.16a | `content` modülü: sayfa ve blog, zengin metin (belge JSON + sunucu oluşturucu, Tiptap), kısa kodlar, Store API | T2, Tiptap onayı | 0019 |
+| T13 ✅ | F3.16a | `content` modülü: sayfa ve blog, zengin metin (belge JSON + sunucu oluşturucu, Tiptap), kısa kodlar, Store API | T2, Tiptap onayı | 0019 |
 | T14 | F3.16b + F3.17 | Facet landing sayfaları, özgünlük kapısı, facet parametre kuralları ve robots engelleri. KK: özgünlük < %30 | T10, T13 | — |
 | T15 | F3.9 | xlsx okuyucu + `yazl` yazıcı, TR şablonu, `catalog.import`/`catalog.export` işleri, kontrollü yükleme yolu, satır hata raporu, advisor ön özeti. KK: 1000 satır, formül kaçışı | T1, T2, T5, T8, `yazl` onayı | 0018 |
 | T16 | F3.10 | Toplu düzenleme: fiyat, stok, yayın durumu, kategori, SEO şablonu, alt metin | T8, T15 | — |

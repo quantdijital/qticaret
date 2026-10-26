@@ -35,3 +35,17 @@
 
 - Tiptap paketleri yeni bağımlılıktır (yalnızca admin paketi; exact sürüm, ≥14 gün).
 - Geçiş araçları (F14) HTML'i belge JSON'una çeviren bir dönüştürücü ister; çevrilemeyen öğeler rapora düşer.
+
+## Uygulama notu (F3 T13, 2026-10-26)
+
+- **Kod:**
+  - Belge, oluşturucu ve okuyucu `src/lib/content` altında (`doc.ts`, `render.ts`, `stats.ts`). Modül `src/modules/content` (`content_entry`, `kind`: page/post).
+  - Editör yönetici panelinde (`apps/panel/src/features/content/editor`), Medusa Admin'de değil (adr/0022). Tiptap 3.31.4.
+- **İzin listesi:**
+  - Kararla aynı: paragraf, h2–h4, liste, alıntı, tablo, görsel, bağlantı, ürün ve kategori kartı. İşaretler yalnızca kalın, italik ve bağlantı.
+  - Alıntı ve liste maddesi yalnızca paragraf ve liste; tablo hücresi yalnızca paragraf taşıyor. Editör de aynı şemaya daraltıldı.
+- **Sınırlar:** belge şemadan önce yığınla ölçülüyor (20.000 düğüm, 12 derinlik, 200.000 karakter). Birleşimler `type` ayrımlı, böylece doğrulama düğüm sayısıyla doğrusal.
+- **Bağlantı:** http(s) ya da site içi yol. `javascript:`, `data:`, `//`, ters eğik çizgi, kontrol ve görünmez biçim karakterleri, `kullanıcı@` içeren adresler reddediliyor.
+- **Görsel:** yalnızca medya kütüphanesine yüklenmiş (dosyası olan) kayıtlar. Kayıt görseli "bağlı" işaretliyor, gece süpürmesi silmiyor.
+- **Kartlar:** belgede yalnızca id. HTML'e çevrilirken canlı kaydın güncel adı ve url-registry'deki yolu basılıyor; yayında olmayan kart çıkmıyor.
+- **Ürün açıklaması:** Kararın "ürün açıklaması content'e bağlanır" kısmı uygulanmadı (PROGRESS karar 73).

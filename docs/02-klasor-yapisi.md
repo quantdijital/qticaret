@@ -46,7 +46,8 @@ repo/
 │   │   │   │   ├── seo-advisor/                      # sayfa değerlendirmeleri; kurallar lib/seo/advisor'da (F3.13)
 │   │   │   │   ├── media/                            # görsel kayıtları: alt metin, türevler (F3.3, adr/0016)
 │   │   │   │   ├── stock-ledger/                     # stok hareket defteri (yalnız ekleme) + kalem eşiği/uyarı durumu (F3.8, adr/0020)
-│   │   │   │   ├── seo-insights/  content/
+│   │   │   │   ├── content/                          # içerik sayfası ve blog yazısı; gövde belge JSON'u (F3.16, adr/0019)
+│   │   │   │   ├── seo-insights/
 │   │   │   │   ├── price-history/  product-qa/
 │   │   │   │   ├── wishlist/  back-in-stock/  product-reviews/  marketing-feeds/
 │   │   │   │   ├── accounting/                       # adapters/ (parasut.ts, ...)
@@ -88,6 +89,7 @@ repo/
 │   │   │   │   ├── dashboard/       # panel okuma modelleri: dönem, sipariş aşaması, özet/rapor, sipariş ve stok panosu (adr/0022)
 │   │   │   │   ├── checkout/        # checkout kuralları: KDV için ülke, kargo gerekmeyen sepette kargo yöntemi yok (F3.2)
 │   │   │   │   ├── stock/           # hareket nedeni, düşük stok eşikleri (F3.8)
+│   │   │   │   ├── content/         # zengin metin: izin listesi şeması, HTML oluşturucu, metin/yapı okuyucu (adr/0019)
 │   │   │   │   ├── notifications/   # yönetici bildirimlerinin sunucu metin kataloğu (feed kanalı)
 │   │   │   │   ├── errors/          # ortak hata tipleri
 │   │   │   │   └── logging/         # pino logger, redaksiyon, istek bağlamı, Medusa logger adaptörü

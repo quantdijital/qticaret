@@ -124,14 +124,16 @@ Kategori ağırlıkları (claude-seo e-ticaret puanlamasıyla hizalı):
 | L-EMPTY-01 | Landing'in ürün sayısı < 3 ise noindex önerisi | Y |
 
 ### 3.8 İçerik sayfaları ve blog
+Kural adları ortak ve ürün kurallarıyla çakışmasın diye farklıdır (META-01, LINK-01, IMG-01 başka kuralların adı; panel kuralı adından tanır). F3.16'da uygulandı (`lib/seo/advisor/rules-content.ts`).
+
 | ID | Kural | Önem |
 |---|---|---|
-| A-META-01 | Yayın ve güncelleme tarihi, yazar (`Person`) | O |
-| A-STRUCT-01 | Soru biçimli H2/H3, 2–4 cümlelik paragraflar, liste/tablo kullanımı | O |
-| A-ANSWER-01 | Giriş bölümünde 130–170 kelimelik kendi kendine yeten cevap bloğu | B |
-| A-LINK-01 | Her 1.000 kelimede 3–5 iç bağlantı (ürün/kategori) | O |
-| A-STALE-01 | 6 aydır güncellenmemiş içerik için "gözden geçir" hatırlatması | D |
-| A-IMG-01 | En az bir görsel + alt | D |
+| A-BYLINE-01 | Blog yazısında yazar (`Person`); yayın ve güncelleme tarihi kendiliğinden tutulur | O |
+| A-STRUCT-01 | ≥ 300 kelimelik metinde H2 ara başlık; paragrafların en fazla üçte biri 4 cümleden uzun | O |
+| A-ANSWER-01 | Blog yazısında ilk başlıktan önce 130–170 kelimelik kendi kendine yeten cevap bloğu | B |
+| A-INLINK-01 | ≥ 300 kelimelik metinde her 1.000 kelimede en az 3 iç bağlantı (ürün/kategori bağlantısı ya da kartı) | O |
+| A-STALE-01 | Yayındaki metin 180 günden uzun süredir güncellenmemişse "gözden geçir" hatırlatması | D |
+| A-COVER-01 | En az bir görsel (kapak ya da metinde); her görselin alt metni | D |
 | A-LEN-01 | ≥ 300 kelime | O |
 
 ### 3.9 Mağaza geneli (gece denetimi)
