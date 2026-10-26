@@ -3,7 +3,7 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: BİTTİ** (T1a–T16; kabul kriterlerinin hepsi testlerle işaretli, docs/03; son eksik iki kanıt, danışmanın p95 ölçümü ve yedi sayfa türünün SEO sözleşme testi, kapanışta eklendi). Playwright e2e altyapısı kuruldu; CI düzeltildi. Sırada F4 (fiyatlandırma ve promosyon) planı. Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı. F1, F2 ve F3 dalları push edildi (kullanıcı 2026-10-26: "pushları sen önerdiğinde yapabilirsin"); PR açılmadı.
+**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: BİTTİ** (T1a–T16; kabul kriterlerinin hepsi testlerle işaretli, docs/03; son eksik iki kanıt, danışmanın p95 ölçümü ve yedi sayfa türünün SEO sözleşme testi, kapanışta eklendi). Playwright e2e altyapısı kuruldu; CI düzeltildi. **F4 — Fiyatlandırma ve promosyon: BAŞLADI** (plan ve ADR-0023/0024/0025 taslakları hazır; sırada U1 `price-history`). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı. F1, F2 ve F3 dalları push edildi (kullanıcı 2026-10-26: "pushları sen önerdiğinde yapabilirsin"); PR açılmadı.
 
 ## Son oturum özeti
 **2026-10-25/26 gece (kullanıcı yatarken, "panel işlerini tamamla" talimatıyla).** Panelin ekranları yazıldı; her biri gerçek veriyle tarayıcıda denendi (CDP ekran görüntüsü, test kayıtları sonra silindi). Commit'ler `e11a201`…`6d63df7`, push yok.
@@ -799,7 +799,10 @@
 - **Daha önce:** F1 planlaması ve F0.2–F0.8 (2026-10-24), F0.1 monorepo (2026-10-24 sabahı), SEO ve güvenlik dokümanları (2026-10-22).
 
 ## Sıradaki görev
+**Claude'un sıradaki işi:** F4 U1 `price-history` (plan aşağıda, "F4 görev planı"). F4 kodu yeni dalda: `f4-pricing-promotions`, F1–F3 birleştirilmediği için `f3-catalog-seo-stock` üzerinden.
+
 1. **Kullanıcı:**
+   - **F4 kararları (ADR-0023, 0024, 0025, "Önerildi"):** 30 gün kuralının tanımı (hukukçu teyidi docs/12'de), sepette tek kod kuralı, kodların büyük harfe çevrilmesi, hediye kartı için resmi Medusa eklentisi. Kullanıcı yokken önerilen seçenekle ilerleniyor.
    - **Push ve PR kararı:** Kullanıcı 2026-10-26'da push'u Claude'un önerisine bıraktı; F1, F2 ve F3 dalları push edildi. PR açılması ve birleştirme sırası (F1 → F2 → F3) kullanıcının kararı.
    - **Admin'de gözle kontrol:** Ayarlar > Özellikler, SEO, Ürün özellikleri, İşler; ürün sayfasındaki özellik kutusu.
      - Kullanıcı 2026-10-25'te iki hata buldu, ikisi düzeltildi.
@@ -817,6 +820,29 @@
    - Playwright e2e altyapısı: kullanıcı 2026-10-26'da onayladı ve kuruldu (yukarıda).
    - Dev'deki `playwright-admin@example.com` kalıyor (kullanıcı kararı).
 4. **Yerel dev DB:** F2'nin tüm migration'ları uygulandı. Dev dosyaları artık SeaweedFS'e yazılıyor.
+
+### F4 görev planı (2026-10-26, Medusa 2.21.2 kaynak kodundan doğrulandı)
+Kararlar: ADR-0023 (fiyat geçmişi, 30 gün kuralı), ADR-0024 (kupon ve kampanya kuralları), ADR-0025 (hediye kartı: resmi `@medusajs/loyalty-plugin`). Üçü "Önerildi"; kullanıcı yokken önerilen seçenekle ilerlenir, kullanıcı gözden geçirir.
+
+| # | F4 | Görev | Bağımlılık | KK |
+|---|---|---|---|---|
+| U1 | F4.2 | `price-history` modülü (append-only): satıştaki fiyatın (calculated/original, herkese açık bağlam) varyant ve para birimi başına geçmişi. Yakalama: `pricing.price.*` ve `pricing.price_list.*` subscriber'ı (olayların çalıştığı testle kanıtlanır), saatlik zamanlama işi (liste başlangıç/bitişi olaysız), açılış bakiyesi migration script'i. `lib/pricing` 30 gün hesabı (saf, fixture'lı) | — | KK2 (yarısı) |
+| U2 | F4.1 | Fiyat listeleri: panel ekranları (indirimli/geçersiz kılan liste, tarih aralığı, müşteri grubu, ürün fiyatları), denetim kaydı kapsamı, panel `nextPrices`'ın liste fiyatlarını korumasının doğrulanması (devreden iş) | — | — |
+| U3 | F4.3 | İndirim gösterimi: Store API `price_display` (güncel, liste fiyatı, indirimden önceki fiyat, kural sürümü), JSON-LD `StrikethroughPrice` aynı kaynaktan, panelde ürün fiyat geçmişi ve indirim uyarısı | U1, U2 | KK2 |
+| U4 | F4.4 + F4.6 | Kuponlar: kod normalleştirme (büyük harf, ASCII) + mevcut kodlar için migration, sepette tek kod kuralı (ayarla açılır), `coupon` hız profilinin üç Store ucuna bağlanması, kapsam (ürün/kategori/koleksiyon), minimum sepet (`item_total gte`, testle doğrulanır), kişi başı limit (`use_by_attribute`). Eşzamanlı limit KK testi | — | KK1 |
+| U5 | F4.6 | Tek kullanımlık kodlar: `promotion.codes` işi (şablondan N promosyon, `limit: 1`, okunur kodlar, CSV sonuç, en çok 10.000), panelde üret ve indir | U4 | — |
+| U6 | F4.5 | Otomatik kampanyalar: X al Y öde (`buyget`), sepette indirim (sipariş hedefli, minimumlu), kargo bedava eşiği (mağaza ayarı → düz fiyatlı kargo seçeneklerine `item_total gte` kurallı 0 TL fiyat) | U4 | KK3 |
+| U7 | F4.7 | İndirim dağılımı ve iade tutarı: kalem başına indirim payı (Medusa ayarlamalarından, `lib/money`), ardışık kısmi iadelerde satırın kalanını tavan alan dağıtım (ADR-0010 "Sonuçlar"), `refundableAmount` (F6/F7/F8 kullanır) | — | KK4 |
+| U8 | F4.8 | Hediye kartı ve mağaza kredisi: eklenti kurulumu (exact 2.21.2), `promotions.gift_cards` bayrağı, panelden kart oluşturma ve bakiye, checkout'ta kullanım, iadede mağaza kredisi. Satış ve e-posta F9'da | ADR-0025 | — |
+
+Sıra: U1 → U3; U2 → U3; U4 → U5, U6; U7 ve U8 bağımsız. Önerilen başlangıç: U1, U4, U7 (KK taşıyanlar), sonra U2–U3, U5–U6, U8.
+
+Medusa 2.21.2 bulguları (planı etkileyenler):
+- Fiyat olayları yalnızca `{ id }` taşıyor; fiyat listesi workflow olayları 2.22.1'de geliyor; liste başlangıç/bitişi olay üretmiyor.
+- `sale` listesinde `calculated` düşük olan, `original` varsayılan fiyat; birden çok `override` çakışırsa ilk eşleşen kazanıyor (çakışan liste uyarısı panelde).
+- Kupon limiti: `registerUsage` transaction içinde promosyon ve bütçe satırlarını `FOR UPDATE` ile kilitliyor; aşımda `NOT_ALLOWED`. Kodlar harfe duyarlı; birleştirme alanı yok; toplu kod API'si yok.
+- Kargo bedava eşiği: düz fiyatlı seçenekte `item_total gte` kurallı fiyat (KDV dahil, indirim sonrası).
+- İade: Medusa birim başına `refundable_total` hesaplıyor; para iadesi `refundPaymentWorkflow` ile, tutarı çağıran veriyor.
 
 ### F3 görev planı (oturum büyüklüğünde; kullanıcı 2026-10-25 onayladı)
 | # | Görev | Kapsam | Bağımlılık | ADR |
@@ -1005,7 +1031,7 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
 | F2 Platform çekirdek modülleri | ✅ |
 | Panel P1–P6 (adr/0022) | ⏳ P1–P4 ekranları yazıldı (kullanıcı kontrolü bekliyor) |
 | F3 Katalog, SEO motoru ve stok | ✅ (KK'lar işaretli; PR ve birleştirme kullanıcının kararı) |
-| F4 Fiyatlandırma ve promosyon | ⬜ |
+| F4 Fiyatlandırma ve promosyon | ⏳ (plan: U1–U8) |
 | F5 Ödeme: iyzico | ⬜ |
 | F6 Ödeme: PayTR + havale/EFT + kapıda ödeme + yönlendirici + ters ibraz | ⬜ |
 | F7 Kargo, sipariş operasyonu, iade ve değişim | ⬜ |

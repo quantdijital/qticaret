@@ -29,6 +29,7 @@
 | KDV oran grupları (%20/%10/%1) ve kargo bedelinin KDV oranı; tenant ürün gruplarının hangi orana düştüğü | Mali müşavir | F1.2 (ADR-0007) |
 | Kuruş yuvarlama kuralı (yarım yukarı) ve sepet indiriminin kalemlere dağıtımının faturadaki karşılığı | Mali müşavir | F2.7, F4.7, F8 (ADR-0010) |
 | İndirim ve kargo bedelinin faturada gösterimi | Mali müşavir | F4.7, F8 |
+| Hediye kartı ve mağaza kredisinin vergisi: satışta mı kullanımda mı KDV, e-fatura/e-arşiv karşılığı, kullanılmayan bakiyenin muhasebesi | Mali müşavir | F4.8, F8 (ADR-0025) |
 | Kapıda ödeme tahsilat mutabakatı ve muhasebeleştirme | Mali müşavir | F6.6, F11.3 |
 | Platformun kendi abonelik faturası ve e-fatura mükellefiyeti | Mali müşavir | F17.3 |
 | Muhasebe programı aktarım formatları (Paraşüt/Logo/Mikro) | Mali müşavir + tenant | F11.5 |
