@@ -114,7 +114,7 @@ Kurallar:
 
 ## 6. Sitemap ve robots
 - **Backend üretir** (worker, değişiklik sonrası debounce'lu + günlük tam üretim) → S3; storefront `/sitemap.xml` ve `/robots.txt`'yi proxy'ler. Tema bağımsız, tek kaynak.
-- Sitemap index: `sitemap-products-N.xml`, `-categories`, `-brands`, `-pages`, `-posts`, `-landing`; dosya başına 50.000 URL / 50 MB sınırı; gzip.
+- Sitemap index: `sitemap-products-N.xml`, `-categories`, `-brands`, `-collections`, `-pages`, `-posts`, `-landings`; dosya başına 50.000 URL / 50 MB sınırı; gzip.
 - `lastmod` yalnızca içerik/fiyat/stok gibi anlamlı değişimde güncellenir (üretim zamanı değil).
 - Görsel sitemap uzantısı (`image:image` + `image:loc`, URL başına en çok 1.000 görsel; `caption/title/license` alanları 2022'de kaldırıldı) ürün görselleri için; video varsa video sitemap (`thumbnail_loc`, `title`, `description`, `content_loc`/`player_loc` zorunlu). `priority` ve `changefreq` yazılmaz (Google yok sayar).
 - Dışarıda: `noindex` varlıklar, taslaklar, kısıtlı kategori (ayara göre), arama ve filtre URL'leri, hesap/sepet/checkout.
@@ -126,6 +126,12 @@ Kurallar:
 - Filtre URL'leri parametreyle (`?marka=x&renk=y&fiyat=100-500&sirala=...`; ayırıcı yalnızca `&`, sabit parametre sırası). Google'ın güncel önerisi (Aralık 2025 facet rehberi): indekslenmeyecek filtre URL'leri **robots.txt ile taranmaz** (`Disallow: /*?*renk=` gibi desenler; canonical/nofollow/noindex uzun vadede daha zayıf ve tarama bütçesini korumaz). robots.txt şablonu facet parametrelerini otomatik üretir; canonical yine temiz kategori URL'sine işaret eder.
 - Boş sonuç veren filtre kombinasyonu o URL'de **404** döner (genel 404 sayfasına yönlendirme yok); boş kategori sayfası `noindex` veya 404 (tenant ayarı) ve advisor uyarısı.
 - **Facet landing sayfaları** (allowlist): tenant bir kategori + attribute/marka kombinasyonunu "landing" olarak işaretler → **path tabanlı** kendi slug'ı (`/kategori/bicak/paslanmaz-celik`; parametre değil, bu yüzden robots engeline takılmaz), başlığı, açıklaması, en az N kelime **özgün** metni, kendi canonical'ı, sitemap'e girer. Programatik sayfa güvenlik kapıları: sayfalar arası benzersiz içerik ≥ %40 (altında uyarı, %30 altında yayın engeli), 50–100'lük partiler halinde yayın, en az %5 insan incelemesi, "tek başına değerli mi" testi (Google ölçekli içerik kötüye kullanımı politikası).
+  - **Uygulama notu (F3 T14a, 2026-10-26):**
+    - Landing kaydı `content` modülünde (`landing_page`): kategori + tek facet (marka ya da filtrelenebilir seçim özelliğinin bir değeri). Kategori ve facet sonradan değişmez; kategori + facet ve kategori + adres benzersizdir.
+    - Yol kategorinin bugünkü yolu + adres (`/kategori/ev-ve-yasam/seramik`). Kategori taşınınca landing'ler de taşınır (eski yol 301); kategori gizlenince sayfa 404, silinince 410.
+    - Özgünlük: metnin 5 kelimelik dizilerinin MinHash imzası (`lib/content/originality`); facet ve kategori adları ölçümden önce yer tutucuya çevrilir. Bir sayfa, metni kendisinden önce yayına girmiş canlı sayfalarla ölçülür (metnin sahibi onu ilk yayına alan). Kapı yayına alırken ve canlı metin değişirken çalışır; gece işi hepsini yeniden ölçer.
+    - Sitemap (`landings`), IndexNow ve 404 önerileri yalnızca kategorisi görünen landing'leri alır. Ürün listesi kategorinin görünen alt kategorilerini kapsar.
+    - Parametreli facet URL'leri, canonical ve robots desenleri F3.17'de (T14b).
 - Sıralama ve fiyat aralığı parametreleri asla indekslenmez. Sayfalama §3.
 - Dahili arama sayfası `noindex`; arama terimleri raporu (F11) içerik fırsatı önerir (çok aranan ama ürünü/sayfası olmayan terimler).
 

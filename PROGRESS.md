@@ -3,7 +3,7 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a, T1b, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13 bitti; sırada T14 facet landing). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı; push edilmedi. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
+**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a, T1b, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14a bitti; sırada T14b facet parametreleri ve robots). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı; push edilmedi. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
 
 ## Son oturum özeti
 **2026-10-25/26 gece (kullanıcı yatarken, "panel işlerini tamamla" talimatıyla).** Panelin ekranları yazıldı; her biri gerçek veriyle tarayıcıda denendi (CDP ekran görüntüsü, test kayıtları sonra silindi). Commit'ler `e11a201`…`6d63df7`, push yok.
@@ -228,6 +228,38 @@
     - Giriş sayfasında genel bilgiler, editör, kapak, arama görünümü ve danışman.
     - Editör sunucunun izin listesine göre daraltıldı. Görseller yükleniyor ve alt metin soruluyor; ürün ya da kategori kartı aranarak ekleniyor; yapıştırılan görsel ve izinsiz bağlantı atılıyor.
   - **İncelemeler:** bağımsız kod ve güvenlik incelemelerinin bulguları düzeltildi. Güvenlik incelemesi XSS bulmadı; iki DoS bulgusu (üstel doğrulama, karesel regex) düzeltildi ve süre testleriyle kilitlendi.
+- **F3 T14a (F3.16b) bitti:** facet landing sayfaları (docs/13 §7 ve docs/14 §3.7 uygulama notları).
+  - **Kayıt:** `landing_page` (`content` modülünde). Bir kategori ve tek facet: marka ya da filtrelenebilir seçim özelliğinin bir değeri. Başlık, adres, durum, belge gövdesi (ADR-0019 denetimi), özgünlük.
+    - Kategori ve facet sonradan değişmiyor. Kategori + facet ve kategori + adres benzersiz.
+    - Varsayılan adres değerin slug'ı. Slug çıkmayan değerde (`42`) değerin adı, o da olmazsa başlık.
+  - **Adres:** kategorinin yolu + adres (`/kategori/ev-ve-yasam/seramik`).
+    - Kategori adı ya da yeri değişince landing'ler de taşınıyor; eski yol 301.
+    - Kategori gizlenince sayfa 404, silinince 410.
+  - **Özgünlük kapısı (KK: < %30):**
+    - Metnin parmak izi kayıtta tutuluyor: 5 kelimelik dizilerin MinHash imzası (128 tohum). Karşılaştırma imzayla ve sabit sürede; tam metin karşılaştırılmıyor.
+    - Facet ve kategori adları ölçümden önce yer tutucuya çevriliyor; yalnızca adı değiştirilmiş şablon aynı metin sayılıyor.
+    - Metnin sahibi onu ilk yayına alan sayfa: bir sayfa, metni kendisinden önce yayına girmiş canlı sayfalarla ölçülüyor. Sonradan kopyalayan taslak orijinali düşürmüyor.
+    - Yayına alırken ya da canlı metin değişirken %30'un altı reddediliyor (`content.landing_not_original`). Danışmanda %40'ın altı kritik.
+    - Gece işi hepsini aynı kuralla yeniden ölçüyor; `updated_at` değişmiyor.
+  - **Ürünler:** kategoride ve görünen alt kategorilerinde, facet'e sahip, yayındaki ürünler; en yeni önce.
+    - Facet sorgusu tek seçimli (`value_text`) ve çok seçimli (`value_options`) değerleri indeksli SQL'le okuyor.
+    - Büyük facet'te kimlikler 5000'lik parçalarla sorgulanıyor.
+  - **SEO:**
+    - Resolve `seo` payload'ı: CollectionPage + ItemList; breadcrumb kategori zinciri ve sayfa.
+    - Başlık şablonu `{başlık} | {mağaza}`; `{kategori}` da kullanılabiliyor.
+    - Sitemap'te `landings` dosyası. Sitemap, IndexNow ve 404 önerileri yalnızca kategorisi görünen sayfaları alıyor (`workflows/seo/live-records`).
+    - IndexNow artık kaydı değişmeden yolu değişen sayfaları da duyuruyor: kategori taşınınca alt kategoriler ve landing'ler.
+  - **Danışman:** L-UNIQ-01, L-TEXT-01, L-PRODUCTS-01, L-BATCH-01, L-REVIEW-01; `RULES_VERSION` 4.
+  - **Uçlar:**
+    - `/admin/landings`: liste, oluştur, güncelle, sil, `facets` kataloğu. Denetim kaydında oluşturma dahil önce/sonra.
+    - `/store/landings/:id`: HTML, facet, ürün sayısı. `/store/landings/:id/products`: Store ürün API'si için kimlikler.
+  - **Panel:** İçerik > Filtre sayfaları sekmesi; yeni sayfa diyaloğu (kategori + facet).
+    - Sayfa ekranında genel bilgiler, editör, arama görünümü, danışman ve "Sayfanın durumu" kartı (özgünlük çubuğu, ürün sayısı, "İnsan inceledi").
+    - Kategori ya da facet silinmişse uyarı var.
+  - **İnceleme:** bağımsız kod incelemesinin 4 yüksek ve 9 orta bulgusu ile düşük bulguların çoğu düzeltildi.
+    - Yüksekler: gizli kategorinin landing'i sitemap'e giriyordu. `paslanmaz_celik` gibi değerler geçersiz adres üretiyordu. Kopya taslak orijinali düşürüyordu. Kategori hook'u yarıda kalınca yolları geri almıyordu.
+    - Ortalar ve düşükler aşağıdaki kararlarda.
+  - **Testler:** birim (özgünlük, ad yer tutucusu, sıra kuralı, alt ağaç, kurallar) ve HTTP 10 test (`landings`, `landings-standing`).
 - **Gözden geçir (kullanıcı yokken önerilen seçenekle verilen kararlar):**
   1. Bayrak adı `catalog.non_physical`, mağaza tarafından açılır, varsayılan kapalı. Etiketleri Medusa Admin'de ve panelde var.
   2. Kargo gerekmeyen kalemler sipariş ödenince "teslim edildi" sayılıyor. Dijital teslimat (indirme bağlantısı, kod gönderimi) F9 bildirimleriyle gelecek.
@@ -354,6 +386,28 @@
   79. İçerik kayıtlarında gövde sınırı 1 MB (Express'in 100 kB varsayılanı uzun yazıya yetmiyordu). Belgenin kendi sınırı 200.000 karakter, 12 düğüm derinliği, 20.000 düğüm.
   80. İçerik görselleri ürün görselleri gibi WebP/AVIF türevi almıyor; storefront ana dosyayı gösteriyor.
   81. İçerik uçları entegrasyon anahtarlarına açık (silme dahil), marka ile aynı. Roller F12'de.
+  82. **Landing sayfaları `content` modülünde ayrı model** (`landing_page`). `content_entry`'ye yeni bir `kind` eklenmedi, çünkü alanları farklı (kategori, facet, parmak izi).
+  83. **Özgünlük MinHash ile ölçülüyor:** 5 kelimelik diziler, FNV-1a + murmur3 karışımı, 128 tohum. Payda sayfanın kendi dizileri, yani "bu metnin ne kadarı başka sayfada".
+     - Gerekçe: sonuç her seferinde aynı, maliyet sabit, tam metinler karşılaştırılmıyor.
+     - İmza boyutu değişirse eski imzalar karşılaştırılamaz; kodda uyarı var.
+  84. **Metnin sahibi ilk yayına alan sayfa** (`text_live_at`).
+     - Taslaklar başkası için referans değil. Yayından kalkan sayfa kimseye karşı sayılmıyor.
+     - Canlı sayfanın metni değişince sırası "şimdi"ye geliyor.
+     - Kapı yalnızca yayına alırken ve canlı metin değişirken çalışıyor; başlık değişikliğini engellemiyor.
+  85. Facet etiketi ve kategori adı ölçümden önce yer tutucuya çevriliyor. Yalnızca kelime başında eşleşiyor (Türkçe ekler kalıyor); 3 harften kısa adlar çevrilmiyor.
+  86. Panelde "Yayına al" düğmesi düşük özgünlükte kilitlenmiyor, uyarı veriyor. Sayfadaki değer son kayıttan; sunucu yeniden ölçüyor.
+  87. **Landing yolu kategorinin yolunun altında,** kategorinin URL stilini izliyor.
+     - URL stili değişim planı landing çakışmalarını önceden göstermiyor. Taşımada yeni yolu alınmış landing eski yolunda kalıyor ve loglanıyor.
+     - Landing'lerin yeniden yol alması kayıtlarla aynı kilit altında.
+  88. **Kategori silinince landing kaydı silinmiyor,** metin kaybolmasın diye.
+     - Yolu bırakılıyor (410). Panelde uyarı çıkıyor; sayfa kaydedilemiyor (kategorinin yolu yok) ama silinebiliyor.
+  89. Facet (marka ya da seçenek) sonradan silinirse sayfa kaydedilebiliyor; ürün sayısı 0'a iniyor, L-PRODUCTS-01 ve panel uyarısı haber veriyor. Yeni sayfa yalnızca panelin sunduğu facet'lerle açılıyor; pasif marka bunlara dahil değil.
+  90. Ürün listesi kategorinin görünen alt kategorilerini kapsıyor: aktif, iç olmayan, aradaki zincir de görünür. Yol taşıma tüm alt ağaca uygulanıyor.
+  91. Marka facet'inin anahtarı `marka` veride saklanıyor (F3.17'nin parametre adı). Bu ad değişirse veri taşıması gerekir.
+  92. **L-CONT-01 → L-TEXT-01**, çünkü CONT-01 metni ürün açıklaması için yazılmış. L-EMPTY-01 → L-PRODUCTS-01. docs/14 güncellendi.
+  93. **Bulgu:** tek seçimli özellik değeri `value_text`'te, çok seçimli değer `value_options`'ta saklanıyor. Facet sorgusu ikisini de okuyor.
+  94. **Bulgu:** link tanımı import eden dosya, yüklendiği her yerde `defineLink` çalıştırıyor ve birim testlerini düşürüyor. Landing ve listeleme kodu link'leri öbür taraftan okuyor (`brand.products`, `attribute_value.product`).
+  95. İçerik workflow'larının adım kimlikleri workflow kimlikleriyle aynıydı (`content-save-entry` vb.). Adımlar `content-write-*` / `content-remove-*` oldu.
 - **Bilinen sınırlar (devreden):**
   - JSON-LD'yi storefront basarken `<`, `>` ve `&` kaçışlanmalı (`</script>` içeren başlık ya da metin). Kural docs/13'te var; F18 kabulüne sözleşme testi olarak eklenecek.
   - Editöre yüklenip bir günden uzun süre kaydedilmeyen görseli gece süpürmesi siler; kayıt `content.image_unknown` verir.
@@ -361,7 +415,10 @@
   - Defter satırları için saklama süresi ve arşiv F13'te. Mağaza eşiği değişince kalemler toplu olarak yeniden kontrol edilmiyor (bir sonraki harekette).
   - Sipariş ve stok panosu bellek içi sıralıyor (5000/2000 kayıt). Büyük mağazada kayıtlı aşama sütunu ya da Index modülü gerekir.
   - Kargo etiketi ve takip F7'de. Kampanyada minimum sepet ve kategori kuralları F4'te.
-  - Panelde bazı bileşen fonksiyonları 50 satırı aşıyor (sihirbaz sayfası, kategori düzenleyici, şablon paneli); docs/10'a göre bölünmeli.
+  - Panelde bazı bileşen fonksiyonları 50 satırı aşıyor (sihirbaz sayfası, kategori düzenleyici, şablon paneli, yeni landing diyaloğu); docs/10'a göre bölünmeli.
+  - Landing ürün sayısı her okumada hesaplanıyor; liste ekranında gösterilmiyor. Büyük mağazada önbellek ya da Index modülü gerekir.
+  - Facet kataloğu en çok 500 aktif marka listeliyor; daha büyük mağazada aramalı seçici (F3.17 ile).
+  - HTTP takımında `request-security` rate-limit testi T13'te bir kez dalgalandı; nedeni bulunamadı, tekrarlarda geçti.
 
 **2026-10-24 gece oturumu (S3, S5; S8 başladı).** Kullanıcı döndü; dört karar verdi: bağımlılıklar onaylandı (ioredis 5.11.1, fast-xml-parser 5.11.2, yauzl 3.4.0, kendi görsel başlık okuyucumuz), ADR-0011..0014 kabul edildi, otonom devam, eski "Gözden geçir" maddeleri olduğu gibi kabul. Commit `54abc2a`.
 
@@ -669,7 +726,8 @@
 | T11 ✅ | F3.13 | `seo-advisor`: kural motoru, skor, bulgular, tek tık düzeltme, widget + SERP önizleme, liste sütunu, yayın kapısı. KK: deterministik, p95 < 50 ms | T2, T9 | — |
 | T12 ✅ | F3.14 | Mağaza geneli SEO denetim işi, 404 isabet listesi + "301 oluştur", mükerrer/öksüz/zincir listeleri. KK: 404 önerisi | T3, T11 | — |
 | T13 ✅ | F3.16a | `content` modülü: sayfa ve blog, zengin metin (belge JSON + sunucu oluşturucu, Tiptap), kısa kodlar, Store API | T2, Tiptap onayı | 0019 |
-| T14 | F3.16b + F3.17 | Facet landing sayfaları, özgünlük kapısı, facet parametre kuralları ve robots engelleri. KK: özgünlük < %30 | T10, T13 | — |
+| T14a ✅ | F3.16b | Facet landing sayfaları, özgünlük kapısı. KK: özgünlük < %30 | T10, T13 | — |
+| T14b | F3.17 | Facet parametre kuralları (canonical, 301, noindex), robots engelleri. KK: robots facet parametrelerini engelliyor, landing yolunu engellemiyor | T14a | — |
 | T15 | F3.9 | xlsx okuyucu + `yazl` yazıcı, TR şablonu, `catalog.import`/`catalog.export` işleri, kontrollü yükleme yolu, satır hata raporu, advisor ön özeti. KK: 1000 satır, formül kaçışı | T1, T2, T5, T8, `yazl` onayı | 0018 |
 | T16 | F3.10 | Toplu düzenleme: fiyat, stok, yayın durumu, kategori, SEO şablonu, alt metin | T8, T15 | — |
 

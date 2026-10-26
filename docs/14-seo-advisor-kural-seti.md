@@ -115,13 +115,17 @@ Kategori ağırlıkları (claude-seo e-ticaret puanlamasıyla hizalı):
 | B-* | Marka: açıklama, logo, başlık (aynı kurallar) | O |
 
 ### 3.7 Facet landing ve programatik sayfalar
+F3.16'da uygulandı (`lib/seo/advisor/rules-landing.ts`). Özgünlük her metnin 5 kelimelik dizilerinin MinHash imzasıyla ölçülür (`lib/content/originality.ts`); facet ve kategori adları önce yer tutucuya çevrilir. Sayfanın, metni kendisinden önce yayına girmiş canlı landing'lerden en çok benzediğiyle ortak payı düşülür: metnin sahibi onu ilk yayına alandır, sonradan kopyalayan sayfa orijinali düşürmez. Kayıtta ve her gece yeniden hesaplanır.
+
+Ad değişiklikleri (panel kuralı adının son kısmından tanır): L-EMPTY-01 → L-PRODUCTS-01 (EMPTY-01 liste sayfalarında "ürün yok" demek), L-CONT-01 → L-TEXT-01 (CONT-01 metni ürün açıklaması için yazılmış).
+
 | ID | Kural | Önem |
 |---|---|---|
-| L-UNIQ-01 | Diğer landing sayfalarıyla özgün içerik ≥ %40 (< %30 yayın engeli) | K |
-| L-CONT-01 | ≥ 300 kelime özgün metin | Y |
-| L-BATCH-01 | Aynı anda ≤ 100 yeni landing yayını; sonraki parti için 2 hafta bekleme önerisi | Y |
-| L-REVIEW-01 | Partinin ≥ %5'i "insan inceledi" işaretli | O |
-| L-EMPTY-01 | Landing'in ürün sayısı < 3 ise noindex önerisi | Y |
+| L-UNIQ-01 | Diğer landing sayfalarıyla özgün içerik ≥ %40 (< %30 yayın engeli, kayıtta reddedilir) | K |
+| L-TEXT-01 | ≥ 300 kelime özgün metin | Y |
+| L-BATCH-01 | Son 14 günde ≤ 100 yeni landing yayını; sonraki parti için 2 hafta bekleme önerisi | Y |
+| L-REVIEW-01 | Son 14 günün partisinin ≥ %5'i "insan inceledi" işaretli (incelenmemiş sayfada uyarır) | O |
+| L-PRODUCTS-01 | Landing'in ürün sayısı < 3 ise noindex önerisi (sayfa zaten noindex ise susar) | Y |
 
 ### 3.8 İçerik sayfaları ve blog
 Kural adları ortak ve ürün kurallarıyla çakışmasın diye farklıdır (META-01, LINK-01, IMG-01 başka kuralların adı; panel kuralı adından tanır). F3.16'da uygulandı (`lib/seo/advisor/rules-content.ts`).
