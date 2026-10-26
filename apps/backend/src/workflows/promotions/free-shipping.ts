@@ -1,6 +1,13 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
-import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
+import {
+  StepResponse,
+  WorkflowResponse,
+  createStep,
+  createWorkflow,
+  transform,
+  when,
+} from "@medusajs/framework/workflows-sdk"
 import { updateShippingOptionsWorkflow } from "@medusajs/medusa/core-flows"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
@@ -128,41 +135,45 @@ export async function freeShippingThreshold(container: MedusaContainer): Promise
   return typeof value === "number" && value > 0 ? value : null
 }
 
-/** Brings the options (all, or those named) in line with `threshold`; how many it changed. */
-export async function syncFreeShipping(
-  container: MedusaContainer,
-  threshold: number | null,
-  optionIds?: string[]
-): Promise<number> {
-  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
-    entity: "shipping_option",
-    fields: OPTION_FIELDS,
-    ...(optionIds ? { filters: { id: optionIds } } : {}),
-  })
-  const updates = (data as ShippingOptionRow[]).flatMap((option) => {
-    const prices = planFreeShipping(option, threshold)
-    return prices ? [{ id: option.id, prices }] : []
-  })
-  if (updates.length > 0) {
-    await updateShippingOptionsWorkflow(container).run({ input: updates })
-  }
-  return updates.length
+export interface SyncFreeShippingInput {
+  /** The threshold to follow; the shop's stored one when left out. */
+  threshold?: number | null | undefined
+  /** The options to bring in line; all when left out. */
+  option_ids?: string[] | undefined
 }
 
+/** Reads the options and works out their new prices; read only. */
+const planFreeShippingStep = createStep(
+  "promotions-free-shipping-plan",
+  async (input: SyncFreeShippingInput, { container }) => {
+    const threshold =
+      input.threshold === undefined ? await freeShippingThreshold(container) : input.threshold
+    const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+      entity: "shipping_option",
+      fields: OPTION_FIELDS,
+      ...(input.option_ids ? { filters: { id: input.option_ids } } : {}),
+    })
+    const updates = (data as ShippingOptionRow[]).flatMap((option) => {
+      const prices = planFreeShipping(option, threshold)
+      return prices ? [{ id: option.id, prices }] : []
+    })
+    return new StepResponse(updates)
+  }
+)
+
 /**
- * After the promotions settings are saved: the options follow the new
- * threshold. Undone by following the one before, so a later failure leaves
- * the options as the restored settings say.
+ * Brings the shipping options (all, or those named) in line with the free
+ * shipping threshold: after the promotions settings are saved, and when an
+ * option is made or changed. Medusa's own update writes the prices and
+ * puts them back if a later step fails. Returns how many changed.
  */
-export const syncFreeShippingStep = createStep(
+export const syncFreeShippingWorkflow = createWorkflow(
   "promotions-free-shipping-sync",
-  async (input: { threshold: number | null; previous: number | null }, { container }) => {
-    const changed = await syncFreeShipping(container, input.threshold)
-    return new StepResponse(changed, { previous: input.previous })
-  },
-  async (undo, { container }) => {
-    if (undo) {
-      await syncFreeShipping(container, undo.previous)
-    }
+  (input: SyncFreeShippingInput) => {
+    const updates = planFreeShippingStep(input)
+    when({ updates }, ({ updates }) => updates.length > 0).then(() => {
+      updateShippingOptionsWorkflow.runAsStep({ input: updates })
+    })
+    return new WorkflowResponse(transform({ updates }, ({ updates }) => updates.length))
   }
 )

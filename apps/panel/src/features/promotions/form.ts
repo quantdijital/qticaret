@@ -25,7 +25,8 @@ export const promotionSchema = z
     limit: z
       .string()
       .trim()
-      .regex(/^\d{0,7}$/, { message: "promotions.errors.limit" }),
+      // Empty for no limit; 0 would be a promotion no one can use
+      .regex(/^(?:[1-9]\d{0,6})?$/, { message: "promotions.errors.limit" }),
     starts: z.string(),
     ends: z.string(),
     activate: z.boolean(),
@@ -35,7 +36,7 @@ export const promotionSchema = z
     perCustomer: z
       .string()
       .trim()
-      .regex(/^\d{0,5}$/, { message: "promotions.errors.perCustomer" }),
+      .regex(/^(?:[1-9]\d{0,4})?$/, { message: "promotions.errors.perCustomer" }),
   })
   .superRefine((values, ctx) => {
     const amount = parseMoneyInput(values.value) ?? 0

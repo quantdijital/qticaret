@@ -147,6 +147,46 @@ medusaIntegrationTestRunner({
       expect(wrong.status).toBe(404)
     })
 
+    it("stops a batch's codes, used or not, and only through its own template", async () => {
+      const id = await template()
+      const job = await codes(id, 2)
+      const batchId = job.result_summary?.["campaign_id"]
+      if (typeof batchId !== "string") {
+        throw new Error("the job names no batch campaign")
+      }
+      const [code] = (await sheets.fileBytes(job)).toString("utf8").trim().split(/\r\n/u).slice(1)
+      const other = await template({ code: "KIS" })
+      const wrong = await settle(
+        http.post(
+          `/admin/promotions/${other}/code-batches/${batchId}/revoke`,
+          {},
+          { headers: admin.headers }
+        )
+      )
+      expect(wrong.status).toBe(404)
+
+      const stopped = await settle(
+        http.post(
+          `/admin/promotions/${id}/code-batches/${batchId}/revoke`,
+          {},
+          { headers: admin.headers }
+        )
+      )
+      expect(stopped.status).toBe(200)
+      const batches = await get<{ batches: { ends_at: string | null }[] }>(
+        `/admin/promotions/${id}/code-batches`
+      )
+      expect(new Date(batches.data.batches[0]?.ends_at ?? 0).getTime()).toBeLessThanOrEqual(
+        Date.now()
+      )
+      // The batch's campaign has ended: its codes take nothing off
+      const ordered = await order(code ?? "")
+      const { data } = await getContainer()
+        .resolve(ContainerRegistrationKeys.QUERY)
+        .graph({ entity: "order", fields: ["discount_total"], filters: { id: ordered } })
+      expect(Number((data[0] as { discount_total: unknown }).discount_total)).toBe(0)
+    })
+
     it("gives a batch its template's budget, and takes a batch back whole", async () => {
       const campaign = await http.post<{ campaign: { id: string } }>(
         "/admin/campaigns",

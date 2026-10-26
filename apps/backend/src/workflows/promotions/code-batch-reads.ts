@@ -6,7 +6,11 @@ interface CampaignRow {
   id: string
   campaign_identifier: string
   created_at: Date | string
+  starts_at?: Date | string | null
+  ends_at?: Date | string | null
 }
+
+const iso = (when: Date | string | null | undefined) => (when ? new Date(when).toISOString() : null)
 
 // Medusa's filters take MikroORM operators; its types name only plain values
 type Filters = Record<string, unknown>
@@ -20,7 +24,7 @@ async function batchCampaigns(container: MedusaContainer, templateId?: string) {
   return (await container
     .resolve(Modules.PROMOTION)
     .listCampaigns({ campaign_identifier: { $like: like } } as Filters, {
-      select: ["id", "campaign_identifier", "created_at"],
+      select: ["id", "campaign_identifier", "created_at", "ends_at"],
       take: null,
     })) as unknown as CampaignRow[]
 }
@@ -54,6 +58,8 @@ export async function promotionBoard(container: MedusaContainer, fields: string[
 
 export interface CodeBatchSummary {
   campaign_id: string
+  /** When its codes stop working; past once the batch was stopped. */
+  ends_at: string | null
   created_at: Date | string
   count: number
   used: number
@@ -74,6 +80,7 @@ export async function codeBatchesOf(
       )
       return {
         campaign_id: campaign.id,
+        ends_at: iso(campaign.ends_at),
         created_at: campaign.created_at,
         count: rows.length,
         used: rows.filter((row) => (row.used ?? 0) > 0).length,
@@ -85,6 +92,24 @@ export async function codeBatchesOf(
   )
 }
 
+/** A template's batch campaign; not found when the batch is another's (or no batch). */
+export async function batchOf(
+  container: MedusaContainer,
+  templateId: string,
+  campaignId: string
+): Promise<{ id: string; starts_at: string | null; ends_at: string | null }> {
+  const [campaign] = (await container
+    .resolve(Modules.PROMOTION)
+    .listCampaigns(
+      { id: [campaignId] },
+      { select: ["id", "campaign_identifier", "starts_at", "ends_at"], take: 1 }
+    )) as unknown as CampaignRow[]
+  if (!campaign || templateOfBatch(campaign.campaign_identifier) !== templateId) {
+    throw new MedusaError(MedusaError.Types.NOT_FOUND, "promotions.unknown")
+  }
+  return { id: campaign.id, starts_at: iso(campaign.starts_at), ends_at: iso(campaign.ends_at) }
+}
+
 /** A batch's codes and whether each was used, for its CSV; the batch must be the template's. */
 export async function batchCodes(
   container: MedusaContainer,
@@ -92,13 +117,7 @@ export async function batchCodes(
   campaignId: string
 ) {
   const promotions = container.resolve(Modules.PROMOTION)
-  const [campaign] = (await promotions.listCampaigns(
-    { id: [campaignId] },
-    { select: ["id", "campaign_identifier"], take: 1 }
-  )) as unknown as CampaignRow[]
-  if (!campaign || templateOfBatch(campaign.campaign_identifier) !== templateId) {
-    throw new MedusaError(MedusaError.Types.NOT_FOUND, "promotions.unknown")
-  }
+  await batchOf(container, templateId, campaignId)
   const rows = await promotions.listPromotions(
     { campaign: { id: [campaignId] } },
     { select: ["code", "used"], take: null, order: { code: "ASC" } }

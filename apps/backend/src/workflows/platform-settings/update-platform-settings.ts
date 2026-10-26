@@ -4,7 +4,7 @@ import {
   transform,
   when,
 } from "@medusajs/framework/workflows-sdk"
-import { syncFreeShippingStep } from "../promotions/free-shipping"
+import { syncFreeShippingWorkflow } from "../promotions/free-shipping"
 import { forgetResolutionsStep } from "../seo/steps/forget-resolutions"
 import { saveSettingsSectionStep } from "./steps/save-settings-section"
 import type { SaveSettingsSectionInput } from "./steps/save-settings-section"
@@ -26,11 +26,11 @@ export const updatePlatformSettingsWorkflow = createWorkflow(
     const saved = saveSettingsSectionStep(input)
     forgetResolutionsStep()
     when({ input }, ({ input }) => input.section === "promotions").then(() => {
-      const thresholds = transform({ saved }, ({ saved }) => ({
+      // The options follow the new threshold; a later failure puts their prices back
+      const threshold = transform({ saved }, ({ saved }) => ({
         threshold: thresholdOf(saved.after as Record<string, unknown>),
-        previous: thresholdOf(saved.before as Record<string, unknown> | null),
       }))
-      syncFreeShippingStep(thresholds)
+      syncFreeShippingWorkflow.runAsStep({ input: threshold })
     })
     return new WorkflowResponse(saved)
   }

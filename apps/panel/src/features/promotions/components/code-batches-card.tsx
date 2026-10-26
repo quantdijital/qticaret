@@ -1,11 +1,13 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { Download, Loader2, Plus } from "lucide-react"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { Ban, Download, Loader2, Plus } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
+import { ConfirmDialog } from "@/components/patterns/confirm-dialog"
 import { Field } from "@/components/patterns/form-section"
 import { SectionCard } from "@/components/patterns/section-card"
 import { EmptyState, ErrorState, LoadingRows } from "@/components/patterns/states"
+import { StatusBadge } from "@/components/patterns/status-badge"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -22,8 +24,10 @@ import {
   batchCodesUrl,
   codeBatchesQuery,
   codeCountOf,
+  revokeCodeBatch,
   startCodeBatch,
 } from "@/features/promotions/api/code-batches"
+import type { CodeBatch } from "@/features/promotions/api/code-batches"
 import { errorText } from "@/lib/errors"
 import { formatCount, formatDateTime } from "@/lib/format"
 
@@ -142,6 +146,74 @@ function MakeCodesDialog({
   )
 }
 
+// Ended on its campaign's day, or stopped
+const hasEnded = (batch: CodeBatch) =>
+  batch.ends_at !== null && new Date(batch.ends_at).getTime() <= Date.now()
+
+/** One batch: its size and use, its codes to download, and a way to stop them. */
+function BatchRow({ promotionId, batch }: { promotionId: string; batch: CodeBatch }) {
+  const { t } = useTranslation()
+  const client = useQueryClient()
+  const [asking, setAsking] = useState(false)
+  const closed = hasEnded(batch)
+  const stop = useMutation({
+    mutationFn: () => revokeCodeBatch(promotionId, batch.campaign_id),
+    onSuccess: async () => {
+      toast.success(t("promotions.codes.stopped"))
+      await client.invalidateQueries({ queryKey: ["promotions", "code-batches", promotionId] })
+    },
+    onError: (failure) => toast.error(errorText(t, failure)),
+  })
+  return (
+    <li className="flex items-center gap-3 py-2.5">
+      <div className="flex min-w-0 flex-1 flex-col">
+        <span className="text-sm font-medium tabular-nums">
+          {t("promotions.codes.batch", { count: batch.count, formatted: formatCount(batch.count) })}
+        </span>
+        <span className="text-xs text-muted-foreground tabular-nums">
+          {t("promotions.codes.batchMeta", {
+            date: formatDateTime(batch.created_at),
+            used: formatCount(batch.used),
+          })}
+        </span>
+      </div>
+      {closed ? <StatusBadge tone="neutral">{t("promotions.codes.closed")}</StatusBadge> : null}
+      <Button asChild size="sm" variant="ghost">
+        <a href={batchCodesUrl(promotionId, batch.campaign_id)} download>
+          <Download />
+          {t("promotions.codes.download")}
+        </a>
+      </Button>
+      {closed ? null : (
+        <Button
+          size="sm"
+          variant="ghost"
+          className="text-destructive-text"
+          disabled={stop.isPending}
+          onClick={() => {
+            setAsking(true)
+          }}
+        >
+          <Ban />
+          {t("promotions.codes.stop")}
+        </Button>
+      )}
+      <ConfirmDialog
+        open={asking}
+        onOpenChange={setAsking}
+        title={t("promotions.codes.stopTitle")}
+        description={t("promotions.codes.stopHint", { formatted: formatCount(batch.count) })}
+        confirmLabel={t("promotions.codes.stopConfirm")}
+        destructive
+        onConfirm={() => {
+          setAsking(false)
+          stop.mutate()
+        }}
+      />
+    </li>
+  )
+}
+
 /**
  * Single-use codes from this promotion (F4.6, ADR-0024): its batches, how
  * many of each were used, their codes to download, and a way to make more.
@@ -177,28 +249,7 @@ export function CodeBatchesCard({ promotionId, code }: { promotionId: string; co
       ) : (
         <ul className="flex flex-col divide-y">
           {batches.data.map((batch) => (
-            <li key={batch.campaign_id} className="flex items-center gap-4 py-2.5">
-              <div className="flex min-w-0 flex-1 flex-col">
-                <span className="text-sm font-medium tabular-nums">
-                  {t("promotions.codes.batch", {
-                    count: batch.count,
-                    formatted: formatCount(batch.count),
-                  })}
-                </span>
-                <span className="text-xs text-muted-foreground tabular-nums">
-                  {t("promotions.codes.batchMeta", {
-                    date: formatDateTime(batch.created_at),
-                    used: formatCount(batch.used),
-                  })}
-                </span>
-              </div>
-              <Button asChild size="sm" variant="ghost">
-                <a href={batchCodesUrl(promotionId, batch.campaign_id)} download>
-                  <Download />
-                  {t("promotions.codes.download")}
-                </a>
-              </Button>
-            </li>
+            <BatchRow key={batch.campaign_id} promotionId={promotionId} batch={batch} />
           ))}
         </ul>
       )}

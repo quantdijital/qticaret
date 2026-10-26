@@ -1,7 +1,7 @@
 import type { SubscriberArgs, SubscriberConfig } from "@medusajs/framework"
 import { FulfillmentEvents } from "@medusajs/framework/utils"
 import { errorSummary, logger } from "../lib/logging"
-import { freeShippingThreshold, syncFreeShipping } from "../workflows/promotions/free-shipping"
+import { syncFreeShippingWorkflow } from "../workflows/promotions/free-shipping"
 
 /**
  * A shipping option made or changed (in Medusa Admin, say) gets the shop's
@@ -10,7 +10,7 @@ import { freeShippingThreshold, syncFreeShipping } from "../workflows/promotions
  */
 export default async function freeShipping({ event, container }: SubscriberArgs<{ id: string }>) {
   try {
-    await syncFreeShipping(container, await freeShippingThreshold(container), [event.data.id])
+    await syncFreeShippingWorkflow(container).run({ input: { option_ids: [event.data.id] } })
   } catch (error) {
     // The settings save syncs every option; one missed here is caught at the next save
     logger.warn({

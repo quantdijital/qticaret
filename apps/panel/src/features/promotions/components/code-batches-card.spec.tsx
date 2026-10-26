@@ -12,6 +12,7 @@ vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 
 const BATCH = {
   campaign_id: "procamp_1",
+  ends_at: null,
   created_at: "2026-10-26T10:00:00.000Z",
   count: 250,
   used: 12,
@@ -74,5 +75,31 @@ describe("CodeBatchesCard", () => {
       })
     })
     expect(await screen.findByText("Kodlar üretiliyor… %40")).toBeInTheDocument()
+  })
+
+  it("stops a batch after asking, and shows a closed one as closed", async () => {
+    fetchMock.mockImplementation((url: string) =>
+      Promise.resolve(
+        url.endsWith("/revoke")
+          ? { batch: { campaign_id: "procamp_1" } }
+          : {
+              batches: [
+                BATCH,
+                { ...BATCH, campaign_id: "procamp_2", ends_at: "2026-01-01T00:00:00.000Z" },
+              ],
+            }
+      )
+    )
+    renderCard()
+    expect(await screen.findByText("Kapalı")).toBeInTheDocument()
+    // Only the open batch can be stopped
+    await userEvent.click(screen.getByRole("button", { name: "Durdur" }))
+    await userEvent.click(await screen.findByRole("button", { name: "Partiyi durdur" }))
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(
+        "/admin/promotions/promo_1/code-batches/procamp_1/revoke",
+        { method: "POST", body: {} }
+      )
+    })
   })
 })

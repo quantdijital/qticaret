@@ -177,4 +177,13 @@ export const PROMOTION_RESOURCES: readonly AuditedResource[] = [
   nested("promotions/(?<id>ID)/buy-rules/batch", "promotion", promotionSnapshot),
   nested("campaigns/(?<id>ID)/promotions", "campaign", campaignSnapshot),
   nested("promotions/(?<id>ID)/offer", "promotion", promotionSnapshot),
+  // A batch stopped: its campaign's end before and after
+  {
+    method: "POST",
+    route: "POST /admin/promotions/:id/code-batches/:campaign_id/revoke",
+    pattern: new RegExp(`^/admin/promotions/${ID}/code-batches/(?<id>${ID})/revoke$`, "i"),
+    resourceType: "campaign",
+    resourceId: (params) => params["id"] ?? null,
+    snapshot: ({ scope, params }) => campaignSnapshot(scope, params["id"] ?? ""),
+  },
 ]

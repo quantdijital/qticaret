@@ -1,6 +1,7 @@
 import type { MedusaRequest } from "@medusajs/framework/http"
-import { validateAndTransformQuery } from "@medusajs/framework/http"
+import { validateAndTransformBody, validateAndTransformQuery } from "@medusajs/framework/http"
 import { AdminGetDashboardNoQuery } from "../admin/dashboard/validators"
+import { AdminPostCodeBatchRevoke } from "../admin/promotions/[id]/code-batches/[campaign_id]/revoke/validators"
 import { requireUserActor } from "./actor"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import {
@@ -44,4 +45,10 @@ export const PROMOTION_ROUTES = [
     methods: ["GET" as const],
     middlewares: [requireUserActor, validateAndTransformQuery(AdminGetDashboardNoQuery, {})],
   })),
+  // F4.6: a batch's codes stopped
+  {
+    matcher: "/admin/promotions/:id/code-batches/:campaign_id/revoke",
+    methods: ["POST" as const],
+    middlewares: [requireUserActor, validateAndTransformBody(AdminPostCodeBatchRevoke)],
+  },
 ]

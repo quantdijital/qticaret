@@ -8,6 +8,8 @@ export const MAX_CODES = 10_000
 
 export interface CodeBatch {
   campaign_id: string
+  /** When its codes stop working; past once it ended or was stopped. */
+  ends_at: string | null
   created_at: string
   count: number
   used: number
@@ -27,6 +29,13 @@ export const codeBatchesQuery = (promotionId: string) =>
 /** A batch's codes as a CSV, each with whether it was used; the session cookie signs the link. */
 export const batchCodesUrl = (promotionId: string, campaignId: string) =>
   `/admin/promotions/${encodeURIComponent(promotionId)}/code-batches/${encodeURIComponent(campaignId)}/codes`
+
+/** A batch's codes stopped: its campaign ends now (a leaked batch, a campaign called off). */
+export const revokeCodeBatch = (promotionId: string, campaignId: string) =>
+  sdk.client.fetch(
+    `/admin/promotions/${encodeURIComponent(promotionId)}/code-batches/${encodeURIComponent(campaignId)}/revoke`,
+    { method: "POST", body: {} }
+  )
 
 /** Starts a batch: a job the panel follows (`sheetJobQuery`) until its codes are written. */
 export const startCodeBatch = async (promotionId: string, count: number): Promise<SheetJob> =>

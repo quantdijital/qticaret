@@ -1381,7 +1381,7 @@
       "empty": "No codes made yet.",
       "make": "Make codes",
       "makeTitle": "Make single-use codes",
-      "makeHint": "Codes look like {{code}}-XXXXXXXX, without characters that mix up (0/O, 1/I). Dates and the offer come from this promotion.",
+      "makeHint": "Codes look like {{code}}-XXXXXXXXXXXX, without characters easily mixed up (0/O, 1/I). Dates, budget and discount come from this promotion.",
       "count": "How many codes?",
       "countHint": "Up to {{max}} codes.",
       "countError": "Enter a number from 1 to {{max}}.",
@@ -1394,7 +1394,13 @@
       "batchCount_one": "{{count}} code batch",
       "batchCount_other": "{{count}} code batches",
       "done_one": "{{formatted}} code made.",
-      "done_other": "{{formatted}} codes made."
+      "done_other": "{{formatted}} codes made.",
+      "closed": "Closed",
+      "stop": "Stop",
+      "stopTitle": "Stop the code batch",
+      "stopHint": "None of the batch's {{formatted}} codes gives a discount from now on. Orders that used one are not affected.",
+      "stopConfirm": "Stop the batch",
+      "stopped": "The code batch was stopped."
     },
     "settings": {
       "title": "Promotion settings",

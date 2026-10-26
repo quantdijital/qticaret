@@ -1389,7 +1389,7 @@
       "empty": "Henüz kod üretilmedi.",
       "make": "Kod üret",
       "makeTitle": "Tek kullanımlık kod üret",
-      "makeHint": "Kodlar {{code}}-XXXXXXXX biçiminde olur; karışan harf ve rakamlar (0/O, 1/I) kullanılmaz. Tarihler ve indirim bu kampanyadan alınır.",
+      "makeHint": "Kodlar {{code}}-XXXXXXXXXXXX biçiminde olur; karışan harf ve rakamlar (0/O, 1/I) kullanılmaz. Tarihler, bütçe ve indirim bu kampanyadan alınır.",
       "count": "Kaç kod?",
       "countHint": "En çok {{max}} kod.",
       "countError": "1 ile {{max}} arasında bir sayı girin.",
@@ -1402,7 +1402,13 @@
       "batchCount_one": "{{count}} kod partisi",
       "batchCount_other": "{{count}} kod partisi",
       "done_one": "{{formatted}} kod üretildi.",
-      "done_other": "{{formatted}} kod üretildi."
+      "done_other": "{{formatted}} kod üretildi.",
+      "closed": "Kapalı",
+      "stop": "Durdur",
+      "stopTitle": "Kod partisini durdur",
+      "stopHint": "Bu partideki {{formatted}} kodun hiçbiri bundan sonra indirim vermez. Kullanılmış siparişler etkilenmez.",
+      "stopConfirm": "Partiyi durdur",
+      "stopped": "Kod partisi durduruldu."
     },
     "settings": {
       "title": "Kampanya ayarları",

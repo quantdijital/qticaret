@@ -15,6 +15,20 @@ describe("promotion form", () => {
     ).toBe(false)
   })
 
+  it("takes no limit, or one above zero", () => {
+    for (const [field, value, ok] of [
+      ["limit", "", true],
+      ["limit", "25", true],
+      ["limit", "0", false],
+      ["limit", "007", false],
+      ["perCustomer", "", true],
+      ["perCustomer", "2", true],
+      ["perCustomer", "0", false],
+    ] as const) {
+      expect(promotionSchema.safeParse({ ...base, [field]: value }).success).toBe(ok)
+    }
+  })
+
   it("upper-cases the code, drops the limit of an automatic one, dates a campaign", () => {
     const body = createBody(
       { ...base, automatic: true, limit: "50", starts: "2026-11-01", ends: "" },
