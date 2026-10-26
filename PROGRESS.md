@@ -3,7 +3,7 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a, T1b, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14a bitti; sırada T14b facet parametreleri ve robots). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı; push edilmedi. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
+**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a, T1b, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14a, T14b bitti; sırada T15 Excel içe/dışa aktarma). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı; push edilmedi. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
 
 ## Son oturum özeti
 **2026-10-25/26 gece (kullanıcı yatarken, "panel işlerini tamamla" talimatıyla).** Panelin ekranları yazıldı; her biri gerçek veriyle tarayıcıda denendi (CDP ekran görüntüsü, test kayıtları sonra silindi). Commit'ler `e11a201`…`6d63df7`, push yok.
@@ -260,6 +260,21 @@
     - Yüksekler: gizli kategorinin landing'i sitemap'e giriyordu. `paslanmaz_celik` gibi değerler geçersiz adres üretiyordu. Kopya taslak orijinali düşürüyordu. Kategori hook'u yarıda kalınca yolları geri almıyordu.
     - Ortalar ve düşükler aşağıdaki kararlarda.
   - **Testler:** birim (özgünlük, ad yer tutucusu, sıra kuralı, alt ağaç, kurallar) ve HTTP 10 test (`landings`, `landings-standing`).
+- **F3 T14b (F3.17) bitti:** liste sayfalarının filtre parametreleri (docs/13 §3 ve §7 uygulama notu).
+  - **Parametreler:** `marka` (handle), filtrelenebilir seçim özelliklerinin anahtarları, `fiyat` (`100-500`), `sirala`, `sayfa`. Bir anahtarın değerleri virgülle (`renk=kirmizi,mavi`).
+  - **Kanonik biçim:** sabit sıra, sıralı değerler. Başka sıra ya da biçim tek 301 ile düzeltiliyor. `utm_source` gibi diğer parametreler korunuyor ve yönlendirme yaptırmıyor.
+  - **Landing'e yönlendirme:** kategoride tek facet'in yayında landing'i varsa 301 ile oraya gidiliyor. Bu, sırası yanlış sorguda ve sorguyla biten yönlendirme kuralında da tek atlamada oluyor.
+  - **404:** ürünü olmayan kombinasyon, son sayfadan sonrası ve tuzak sorgular (6'dan fazla anahtar, toplam 12'den fazla değer, 10.000'den büyük sayfa).
+  - **İndeks:** filtreli, fiyatlı ya da sıralı liste `noindex,follow`, canonical temiz sayfa. Numaralı sayfa kendi canonical'ında; başlıkta ve JSON-LD'de "Sayfa N".
+  - **Resolve yanıtında `listing` alanı** var (filtreler, fiyat, sıralama, sayfa, `page_size` 24); storefront ürünleri buna göre isteyecek.
+  - **Önbellek:** veritabanı işi (anahtarlar, landing, ürün sayısı) kanonik liste sorgusuna göre resolve önbelleğinde tutuluyor; rastgele izleme parametresi işi tekrarlatmıyor. Filtre başına tek indeksli SQL, anahtarlar sırayla, boş kesişimde duruyor.
+  - **robots.txt:** şablondaki `{facet_disallow}` satırı her filtre, `fiyat` ve `sirala` için iki `Disallow` satırına açılıyor; `sayfa` ve landing yolları açık (KK testli).
+    - Eski varsayılanı kayıtlı mağazalarda `db:migrate` bir kez yeni varsayılana geçiriyor (denetim kaydında `system`).
+    - Mağaza denetimi (S-ROBOTS-01) açık kalan filtre adresini Googlebot/Bingbot'un kendi grubu dahil buluyor.
+  - **Ayrılmış adlar:** `marka`, `fiyat`, `sirala`, `sayfa`, `variant`, `q`, `utm_*`, `gclid` vb. filtrelenebilir seçim özelliğinin anahtarı olamıyor (`product_attributes.key_reserved`).
+  - **Storefront'un kendi sayfaları:** `/store/seo/site` robots değerlerini veriyor: arama `noindex,follow`, sepet/ödeme/hesap `noindex,nofollow`.
+  - **İnceleme:** bağımsız kod incelemesinin bulguları düzeltildi. En önemlisi, rastgele parametreli sorguların önbelleği atlayıp istek başına onlarca sorgu çalıştırabilmesiydi.
+  - **Testler:** birim (sorgu okuma, kanonik biçim, robots satırları, sayfa SEO'su, denetim, ayar doğrulama, migration betiği) ve HTTP 12 test (`seo-facets`, `seo-facets-listings`).
 - **Gözden geçir (kullanıcı yokken önerilen seçenekle verilen kararlar):**
   1. Bayrak adı `catalog.non_physical`, mağaza tarafından açılır, varsayılan kapalı. Etiketleri Medusa Admin'de ve panelde var.
   2. Kargo gerekmeyen kalemler sipariş ödenince "teslim edildi" sayılıyor. Dijital teslimat (indirme bağlantısı, kod gönderimi) F9 bildirimleriyle gelecek.
@@ -408,6 +423,16 @@
   93. **Bulgu:** tek seçimli özellik değeri `value_text`'te, çok seçimli değer `value_options`'ta saklanıyor. Facet sorgusu ikisini de okuyor.
   94. **Bulgu:** link tanımı import eden dosya, yüklendiği her yerde `defineLink` çalıştırıyor ve birim testlerini düşürüyor. Landing ve listeleme kodu link'leri öbür taraftan okuyor (`brand.products`, `attribute_value.product`).
   95. İçerik workflow'larının adım kimlikleri workflow kimlikleriyle aynıydı (`content-save-entry` vb.). Adımlar `content-write-*` / `content-remove-*` oldu.
+  96. **Parametre adları Türkçe:** `marka`, `fiyat`, `sirala`, `sayfa` (docs/13 §7). §3'teki `?page=2` örneği `?sayfa=2` oldu.
+     - Sıralama seçenekleri: `onerilen` (varsayılan, yazılmaz), `yeni`, `fiyat-artan`, `fiyat-azalan`. Storefront (F18) bunları kullanacak.
+  97. Bir anahtarın değerleri tek parametrede virgülle. Tekrarlanan anahtar birleştirilip 301 veriyor.
+  98. Fiyat, "ürünü olmayan kombinasyon" sayımına girmiyor: fiyat bölge ve para birimine bağlı. Fiyatlı sayfa hep `noindex`. Fiyatla boş kalan sayfada 404'ü storefront veriyor (F18).
+  99. Sayfa boyutu 24 (`LISTING_PAGE_SIZE`; JSON-LD listesiyle aynı sayı ama ayrı sabit) ve resolve yanıtında `page_size` olarak dönüyor. Storefront başka sayı kullanmamalı.
+  100. Tek facet → landing yönlendirmesi yalnızca kategoride (landing'ler kategoriye bağlı). Marka sayfasındaki `?malzeme=` filtresinin landing'i yok.
+  101. **robots.txt satırları** parametre başına iki tane (`/*?{ad}=` ve `/*&{ad}=`). `/*?*{ad}=` biçimi, sonu aynı olan başka bir parametreyi de yakalardı.
+     - Mağazanın kendi yazdığı şablona dokunulmuyor; denetim uyarıyor.
+  102. Yönlendirme kuralı kaydı ve yönlendirme denetimi, hedefin filtre sorgusunun 404 ya da 301 olacağını önceden görmüyor. Resolve bunu çalışma anında tek atlamaya katlıyor.
+  103. Numaralı sayfanın JSON-LD'sinde `CollectionPage` kendi adresi ve "Sayfa N" adıyla; ilk sayfanın ürün listesi (`ItemList`) çıkarılıyor. Sayfanın elle verilmiş canonical'ı varsa ona sayfa eklenmiyor.
 - **Bilinen sınırlar (devreden):**
   - JSON-LD'yi storefront basarken `<`, `>` ve `&` kaçışlanmalı (`</script>` içeren başlık ya da metin). Kural docs/13'te var; F18 kabulüne sözleşme testi olarak eklenecek.
   - Editöre yüklenip bir günden uzun süre kaydedilmeyen görseli gece süpürmesi siler; kayıt `content.image_unknown` verir.
@@ -417,7 +442,8 @@
   - Kargo etiketi ve takip F7'de. Kampanyada minimum sepet ve kategori kuralları F4'te.
   - Panelde bazı bileşen fonksiyonları 50 satırı aşıyor (sihirbaz sayfası, kategori düzenleyici, şablon paneli, yeni landing diyaloğu); docs/10'a göre bölünmeli.
   - Landing ürün sayısı her okumada hesaplanıyor; liste ekranında gösterilmiyor. Büyük mağazada önbellek ya da Index modülü gerekir.
-  - Facet kataloğu en çok 500 aktif marka listeliyor; daha büyük mağazada aramalı seçici (F3.17 ile).
+  - Facet kataloğu en çok 500 aktif marka listeliyor; daha büyük mağazada aramalı seçici gerekir.
+  - Liste sorgusunun ürün sayısı büyük facet'lerde ürün kimliklerini bellekte kesiştiriyor (önbellekli). Büyük katalogda SQL'de `EXISTS` ile sayım ya da Index modülü düşünülmeli.
   - HTTP takımında `request-security` rate-limit testi T13'te bir kez dalgalandı; nedeni bulunamadı, tekrarlarda geçti.
 
 **2026-10-24 gece oturumu (S3, S5; S8 başladı).** Kullanıcı döndü; dört karar verdi: bağımlılıklar onaylandı (ioredis 5.11.1, fast-xml-parser 5.11.2, yauzl 3.4.0, kendi görsel başlık okuyucumuz), ADR-0011..0014 kabul edildi, otonom devam, eski "Gözden geçir" maddeleri olduğu gibi kabul. Commit `54abc2a`.
@@ -727,7 +753,7 @@
 | T12 ✅ | F3.14 | Mağaza geneli SEO denetim işi, 404 isabet listesi + "301 oluştur", mükerrer/öksüz/zincir listeleri. KK: 404 önerisi | T3, T11 | — |
 | T13 ✅ | F3.16a | `content` modülü: sayfa ve blog, zengin metin (belge JSON + sunucu oluşturucu, Tiptap), kısa kodlar, Store API | T2, Tiptap onayı | 0019 |
 | T14a ✅ | F3.16b | Facet landing sayfaları, özgünlük kapısı. KK: özgünlük < %30 | T10, T13 | — |
-| T14b | F3.17 | Facet parametre kuralları (canonical, 301, noindex), robots engelleri. KK: robots facet parametrelerini engelliyor, landing yolunu engellemiyor | T14a | — |
+| T14b ✅ | F3.17 | Facet parametre kuralları (canonical, 301, noindex), robots engelleri. KK: robots facet parametrelerini engelliyor, landing yolunu engellemiyor | T14a | — |
 | T15 | F3.9 | xlsx okuyucu + `yazl` yazıcı, TR şablonu, `catalog.import`/`catalog.export` işleri, kontrollü yükleme yolu, satır hata raporu, advisor ön özeti. KK: 1000 satır, formül kaçışı | T1, T2, T5, T8, `yazl` onayı | 0018 |
 | T16 | F3.10 | Toplu düzenleme: fiyat, stok, yayın durumu, kategori, SEO şablonu, alt metin | T8, T15 | — |
 

@@ -79,7 +79,7 @@ Tenant kurulumda bir desen seti seçer; desen tokenlarla tanımlıdır ve sonrad
 - Şablonlar ve tenant metinleri sayfaya basılırken kaçışlanır (F18): HTML'de entity, JSON-LD içinde `<` → `\u003c` (`</script>` kapanışı olmasın). robots.txt `text/plain` + nosniff ile servis edilir. `canonical_host` alan adı doğrulaması gelene kadar yalnızca bağlantı üretiminde kullanılır; sunucu tarafı istek ve yönlendirme hedefi olmadan önce doğrulanmış alan adlarıyla sınırlanır (F16/F18).
 - Uzunluk hedefleri (lint): başlık 30–60 karakter (piksel genişliği tahmini ile), açıklama 70–155. Türkçe karakterler geniş; piksel tahmini font metrik tablosundan.
 - Mağaza genelinde başlık/açıklama **benzersizliği** denetlenir (hash + normalize karşılaştırma).
-- Sayfalama: `?page=2` sayfaları kendi canonical'ına sahiptir (`rel=prev/next` Google tarafından kullanılmıyor); başlığa " - Sayfa 2" eklenir; 1. sayfa parametresiz canonical.
+- Sayfalama: `?sayfa=2` sayfaları kendi canonical'ına sahiptir (`rel=prev/next` Google tarafından kullanılmıyor); başlığa " - Sayfa 2" eklenir; 1. sayfa parametresiz canonical (`?sayfa=1` 301 ile temiz adrese gider). Son sayfadan sonrası 404.
 - OG görseli: elle seçilmemişse ana ürün görseli 1200×630'a kırpılır (worker, F3.3); kategori/marka için şablonlu görsel üretimi (logo + ad) opsiyonel.
 - Paylaşım önizlemesi admin'de gösterilir (Google sonuç kartı, WhatsApp/Instagram/X kart önizlemesi) — bkz. doc 14 §6.
 
@@ -118,7 +118,7 @@ Kurallar:
 - `lastmod` yalnızca içerik/fiyat/stok gibi anlamlı değişimde güncellenir (üretim zamanı değil).
 - Görsel sitemap uzantısı (`image:image` + `image:loc`, URL başına en çok 1.000 görsel; `caption/title/license` alanları 2022'de kaldırıldı) ürün görselleri için; video varsa video sitemap (`thumbnail_loc`, `title`, `description`, `content_loc`/`player_loc` zorunlu). `priority` ve `changefreq` yazılmaz (Google yok sayar).
 - Dışarıda: `noindex` varlıklar, taslaklar, kısıtlı kategori (ayara göre), arama ve filtre URL'leri, hesap/sepet/checkout.
-- robots.txt admin'den düzenlenebilir; güvenli varsayılan şablon: `Disallow: /sepet, /odeme, /hesap, /arama, /*?sort=, /*?page=0`; `Sitemap:` satırı; AI tarayıcı ön ayarları (§9).
+- robots.txt admin'den düzenlenebilir; güvenli varsayılan şablon: `Disallow: /sepet, /odeme, /hesap, /arama`, filtre engelleri için `{facet_disallow}` satırı (§7); `Sitemap:` satırı; AI tarayıcı ön ayarları (§9).
 - Staging ve önizleme ortamları: `X-Robots-Tag: noindex` + basic auth; yanlışlıkla indekslenme testi (F16).
 - IndexNow: yayın/güncelleme/silme olaylarında tek uç (`api.indexnow.org`) üzerinden Bing, Yandex, Naver, Seznam, Amazon'a anahtarlı toplu bildirim (job). Google katılımcı değil; Google Indexing API yalnızca `JobPosting`/`BroadcastEvent` için çalışır, ürün sayfalarında kullanılamaz. Google için yol: sitemap + GSC sitemap gönderimi + URL Inspection (kota 2.000/gün/site).
 
@@ -131,7 +131,15 @@ Kurallar:
     - Yol kategorinin bugünkü yolu + adres (`/kategori/ev-ve-yasam/seramik`). Kategori taşınınca landing'ler de taşınır (eski yol 301); kategori gizlenince sayfa 404, silinince 410.
     - Özgünlük: metnin 5 kelimelik dizilerinin MinHash imzası (`lib/content/originality`); facet ve kategori adları ölçümden önce yer tutucuya çevrilir. Bir sayfa, metni kendisinden önce yayına girmiş canlı sayfalarla ölçülür (metnin sahibi onu ilk yayına alan). Kapı yayına alırken ve canlı metin değişirken çalışır; gece işi hepsini yeniden ölçer.
     - Sitemap (`landings`), IndexNow ve 404 önerileri yalnızca kategorisi görünen landing'leri alır. Ürün listesi kategorinin görünen alt kategorilerini kapsar.
-    - Parametreli facet URL'leri, canonical ve robots desenleri F3.17'de (T14b).
+- **Uygulama notu (F3 T14b, 2026-10-26):**
+  - Parametreler: `marka` (marka handle'ları), filtrelenebilir seçim özelliklerinin anahtarları (seçenek değerleri), `fiyat` (`100-500`, uçlardan biri açık olabilir), `sirala` (`yeni`, `fiyat-artan`, `fiyat-azalan`; varsayılan `onerilen` yazılmaz), `sayfa`. Bir anahtarın birden çok değeri virgülle (`renk=kirmizi,mavi`). Bu adlar ve başka adreslerin parametreleri (`variant`, `q`, `utm_*`, `gclid` vb.) filtrelenebilir özelliğin anahtarı olamaz.
+  - Kanonik biçim: `marka`, sonra özellik anahtarları alfabetik, her birinin değerleri sıralı ve tekil; sonra `fiyat`, `sirala`, `sayfa`. Diğer parametreler (`utm_source`) geldikleri sırayla sona eklenir ve yönlendirme yaptırmaz. Başka sıra ya da biçim (tekrarlanan anahtar, boş ya da geçersiz değer, `sayfa=1`, varsayılan sıralama) tek 301 ile kanonik biçime gider.
+  - Kategoride tek facet (tek anahtar, tek değer, fiyat ve sıralama yok) yayındaki bir landing'e karşılık geliyorsa 301 ile landing'e gider; `sayfa` ve diğer parametreler korunur.
+  - Ürünü olmayan filtre kombinasyonu, son sayfadan sonrası (sayfa başına 24 ürün) ve tuzak sorgular (6'dan fazla anahtar, anahtar başına 10'dan, toplam 12'den fazla değer, 10.000'den büyük sayfa) 404. Fiyat bu sayıma girmez (bölgeye bağlı); fiyatla boş kalan sayfada 404'ü storefront verir.
+  - Sorguyla biten yönlendirme (eski yol, kural) hedefin liste yanıtıyla birleşir: tek atlama.
+  - Filtreli, fiyatlı ya da sıralı liste `noindex,follow`, canonical temiz sayfa. Numaralı sayfanın JSON-LD'si kendi adresini ve "Sayfa N" adını taşır, ilk sayfanın ürün listesini taşımaz. Resolve yanıtında okunan sorgu `listing` alanında (`page_size` dahil; storefront ürünleri buna göre ister).
+  - robots.txt şablonundaki `{facet_disallow}` satırı her filtre, `fiyat` ve `sirala` için `Disallow: /*?{ad}=` ve `Disallow: /*&{ad}=` satırlarına açılır; `sayfa` ve landing yolları açık kalır. Mağaza denetimi (S-ROBOTS-01) açık kalan filtre adresini bulur.
+  - `/store/seo/site` storefront'un kendi sayfalarının robots değerini verir: arama `noindex,follow`; sepet, ödeme, hesap, giriş `noindex,nofollow`.
 - Sıralama ve fiyat aralığı parametreleri asla indekslenmez. Sayfalama §3.
 - Dahili arama sayfası `noindex`; arama terimleri raporu (F11) içerik fırsatı önerir (çok aranan ama ürünü/sayfası olmayan terimler).
 
