@@ -41,3 +41,11 @@ Medusa 2.21.2'de doğrulananlar (F4 planlaması, kaynak kodu):
 - `spend_by_attribute` (kişi başı harcama sınırı) Medusa işleyene kadar sunulmaz.
 - Kodların normalleştirilmesi var olan küçük harfli kodları etkiler: migration script'i mevcut kodları büyük harfe çevirir, çakışmayı raporlar.
 - Kampanya ekranı (panel) kapsam, minimum sepet, kişi başı limit ve "X al Y öde" ile genişler.
+
+## Uygulama notu (F4 U4a, 2026-10-26)
+
+- **Kod biçimi:** `src/lib/promotions/code.ts` (`normalizeCode`). Admin'de `POST /admin/promotions(/:id)`, Store'da sepet uçları yazmadan önce kodu çeviriyor. Mevcut kodlar `src/migration-scripts/promotion-codes-normalized.ts` ile bir kez çevriliyor; yeni biçimi başka bir promosyonda olan kod olduğu gibi kalıyor ve logda adıyla yazılıyor.
+- **Ara katmanlar `methods` olmadan:** Medusa gövdeyi route'un kendi ara katmanında doğrulayıp `validatedBody`'den okuyor; `methods` verilen ara katmanlar ondan sonra çalıştığı için yeniden yazdıkları kod route'a ulaşmıyordu. `app.use` ile çalıştıkları için route parametreleri dolu değil; sepet kimliği ve işlem yoldan okunuyor (`cartRoute`). Kayıt: `src/api/http/promotion-routes.ts`.
+- **Tek kod:** mağaza ayarı `promotions.combine_codes` (varsayılan kapalı). `POST /store/carts` ve `POST /store/carts/:id` kodları gönderilenlerle değiştiriyor (Medusa `REPLACE`), `POST /store/carts/:id/promotions` ekliyor (`ADD`): ikincisinde sepetteki elle girilmiş kodlar da sayılıyor. Hata `promotions.one_code`.
+- **Deneme sınırı:** `coupon` profili (IP başına 10 dk'da 30, sepet başına 10) yalnızca kod gönderen sepet isteklerini sayıyor.
+- **Doğrulananlar (HTTP testleri):** `item_total gte` kuralı Medusa'da çalışıyor (belgelenmemişti); kullanım limiti 1 olan kodla yarışan üç ödemeden yalnızca biri tamamlanıyor ve `used` 1 kalıyor (KK).

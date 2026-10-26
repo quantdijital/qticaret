@@ -181,6 +181,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "product_attributes.values_exist": "Kaldırılan özelliklerin ürünlerde değerleri var.",
   "product_attributes.variant_only":
     "variesBy ve seçenek adı yalnızca varyant özelliklerinde kullanılır.",
+  "promotions.one_code":
+    "Sepette tek bir indirim kodu kullanılabilir; önce eklediğiniz kodu çıkarın.",
   "seo.canonical_invalid": "Canonical adres bu sitede bir yol olmalı, örn. /urun/keten-gomlek.",
   "seo.entity_id_invalid": "Kayıt kimliği geçerli değil.",
   "seo.entity_type_invalid": "Kayıt türü geçerli değil.",

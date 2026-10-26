@@ -1,12 +1,14 @@
 import { appearanceSection } from "./appearance"
 import type { SectionDefinition } from "./define"
 import { inventorySection } from "./inventory"
+import { promotionsSection } from "./promotions"
 import { seoSection } from "./seo"
 import { storeSection } from "./store"
 
 export { DEFAULT_ROBOTS_TXT } from "./seo"
 export type { AppearanceSettings } from "./appearance"
 export type { InventorySettings } from "./inventory"
+export type { PromotionSettings } from "./promotions"
 export type { SeoSettings } from "./seo"
 export type { StoreSettings } from "./store"
 export { mergePatch } from "./define"
@@ -17,6 +19,7 @@ export const SECTIONS = {
   seo: seoSection,
   appearance: appearanceSection,
   inventory: inventorySection,
+  promotions: promotionsSection,
 } as const
 
 export type SectionName = keyof typeof SECTIONS

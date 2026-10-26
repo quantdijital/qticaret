@@ -178,6 +178,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "product_attributes.values_exist": "Products have values for the attributes being removed.",
   "product_attributes.variant_only":
     "variesBy and the option name apply to variant attributes only.",
+  "promotions.one_code": "A cart takes one discount code; remove the one you added first.",
   "seo.canonical_invalid":
     "The canonical address must be a path on this site, e.g. /urun/keten-gomlek.",
   "seo.entity_id_invalid": "The record ID is not valid.",
