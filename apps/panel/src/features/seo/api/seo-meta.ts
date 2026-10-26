@@ -35,8 +35,10 @@ export function useSaveSeoMeta(type: SeoEntityType, id: string) {
   return useMutation({
     mutationFn: (body: Partial<SeoMeta>) =>
       sdk.client.fetch<SeoSaveResult>(url(type, id), { method: "PUT", body }),
-    onSuccess: (result) => {
+    onSuccess: async (result) => {
       client.setQueryData(["seo-meta", type, id], result.seo)
+      // The page's assessment reads these fields
+      await client.invalidateQueries({ queryKey: ["seo", "assessment", type, id] })
     },
   })
 }

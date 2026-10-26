@@ -19,6 +19,7 @@ import { brandQuery, useDeleteBrand } from "@/features/brands/api/brands"
 import { BrandGeneralCard } from "@/features/brands/components/brand-general-card"
 import { BrandLogoCard } from "@/features/brands/components/brand-logo-card"
 import { useBrandPathPrefix } from "@/features/brands/use-brand-path"
+import { AdvisorCard } from "@/features/seo/advisor/advisor-card"
 import { SeoCard } from "@/features/seo/components/seo-card"
 import { DESCRIPTION_EXCERPT, excerpt } from "@/features/seo/seo-text"
 import { errorText } from "@/lib/errors"
@@ -80,19 +81,38 @@ export function BrandPage() {
       />
       <div className="grid grid-cols-1 items-start gap-[var(--grid-gap)] xl:grid-cols-12">
         <div className="flex flex-col gap-[var(--grid-gap)] xl:col-span-8">
-          <BrandGeneralCard brand={data} />
-          <SeoCard
-            type="brand"
-            id={data.id}
-            context={{
-              path: `${prefix}${data.handle}`,
-              tokens: { marka: data.name },
-              fallbackDescription: excerpt(data.description, DESCRIPTION_EXCERPT),
-            }}
-          />
+          <div id="brand-general" className="scroll-mt-20">
+            <BrandGeneralCard brand={data} />
+          </div>
+          <div id="brand-seo" className="scroll-mt-20">
+            <SeoCard
+              type="brand"
+              id={data.id}
+              context={{
+                path: `${prefix}${data.handle}`,
+                tokens: { marka: data.name },
+                fallbackDescription: excerpt(data.description, DESCRIPTION_EXCERPT),
+              }}
+            />
+          </div>
         </div>
         <div className="flex flex-col gap-[var(--grid-gap)] xl:col-span-4">
-          <BrandLogoCard brand={data} />
+          <AdvisorCard
+            kind="brand"
+            id={data.id}
+            version={data.updated_at}
+            targets={{
+              edit_title: "brand-seo",
+              edit_description: "brand-seo",
+              edit_robots: "brand-seo",
+              edit_body: "brand-general",
+              edit_handle: "brand-general",
+              add_logo: "brand-logo",
+            }}
+          />
+          <div id="brand-logo" className="scroll-mt-20">
+            <BrandLogoCard brand={data} />
+          </div>
         </div>
       </div>
       <ConfirmDialog

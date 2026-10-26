@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { categoryTreeQuery } from "@/features/categories/api/categories"
 import { CategoryEditor } from "@/features/categories/components/category-editor"
 import { CategorySeoCard } from "@/features/categories/components/category-seo-card"
+import { AdvisorCard } from "@/features/seo/advisor/advisor-card"
 import { CategoryTreeCard } from "@/features/categories/components/category-tree-card"
 import { errorText } from "@/lib/errors"
 
@@ -74,11 +75,26 @@ export function CategoriesPage() {
                   }}
                 />
                 {current ? (
-                  <CategorySeoCard
-                    key={`seo-${current.id}`}
-                    category={current}
-                    categories={categories}
-                  />
+                  <>
+                    <AdvisorCard
+                      key={`advisor-${current.id}`}
+                      kind="category"
+                      id={current.id}
+                      version={current.updated_at}
+                      targets={{
+                        edit_title: "category-seo",
+                        edit_description: "category-seo",
+                        edit_robots: "category-seo",
+                      }}
+                    />
+                    <div id="category-seo" className="scroll-mt-20">
+                      <CategorySeoCard
+                        key={`seo-${current.id}`}
+                        category={current}
+                        categories={categories}
+                      />
+                    </div>
+                  </>
                 ) : null}
               </>
             ) : (

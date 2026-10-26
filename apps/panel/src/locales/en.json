@@ -518,7 +518,6 @@
         "Bulk stock updates"
       ],
       "promotions": ["Coupons and campaigns", "Usage statistics", "Bulk coupon codes"],
-      "seo": ["Shop SEO score", "Pages that need the most work"],
       "reports": ["Sales, VAT and stock reports", "Period comparisons", "Excel and CSV export"]
     }
   },
@@ -1092,8 +1091,6 @@
         "flat": "Product addresses sit at the root, no prefix."
       }
     },
-    "advisor": "SEO advisor",
-    "advisorHint": "A score, suggestions and one-click fixes for every product and category.",
     "sampleHost": "yourdomain.com",
     "card": {
       "title": "Search appearance",
@@ -1285,6 +1282,176 @@
       "urls_other": "{{urls}} pages",
       "none": "No sitemap yet; the first refresh makes it.",
       "pending": "The latest changes go in at the next refresh."
+    },
+    "advisor": {
+      "title": "SEO advisor",
+      "cardHint": "How ready the page is for search engines; assessed again after every save.",
+      "scoreLabel": "SEO score {{score}}/100",
+      "issueCount_one": "{{count}} suggestion",
+      "issueCount_other": "{{count}} suggestions",
+      "noIssues": "Nothing missing.",
+      "why": "Why it matters, how to fix it",
+      "goToField": "Go to the field",
+      "fixed": "Fix applied.",
+      "grades": {
+        "excellent": "Excellent",
+        "good": "Good",
+        "needs_work": "Needs work",
+        "poor": "Poor"
+      },
+      "severities": {
+        "critical": "Critical",
+        "high": "High",
+        "medium": "Medium",
+        "low": "Low",
+        "info": "Info"
+      },
+      "fixes": {
+        "use_template_title": "Use the template title",
+        "use_template_description": "Use the template description",
+        "set_primary_category": "Make the deepest category primary"
+      },
+      "places": {
+        "title": "title",
+        "description": "description",
+        "body": "start of the text"
+      },
+      "problems": {
+        "shouting": "all capitals",
+        "repeated": "a word repeats",
+        "symbols": "runs of symbols"
+      },
+      "rules": {
+        "TITLE-01": {
+          "title": "The search result title is {{length}} characters; {{min}}–{{max}} is advised.",
+          "why": "A short title says little about the page; a long one is cut in search results. Turkish letters are wide, so the pixel width counts too.",
+          "how": "Edit the SEO title, or remove your own title to use the shop's title template."
+        },
+        "TITLE-02": {
+          "title": "{{count}} more pages share this title.",
+          "why": "Pages with the same title compete in search; which one shows becomes unclear.",
+          "how": "Add a property that sets the page apart (colour, size, material)."
+        },
+        "TITLE-03": {
+          "title": "The title has {{problem}}.",
+          "why": "Shouting, repeated or symbol-heavy titles look untrustworthy and search engines may rewrite them.",
+          "how": "Write the title plainly, in normal case."
+        },
+        "TITLE-04": {
+          "title": "The brand ({{brand}}) is not in the title.",
+          "why": "Shoppers searching for a brand click more on results that show it.",
+          "how": "Add the {marka} token to the title template or the brand to the SEO title."
+        },
+        "META-01": {
+          "title": "The meta description is {{length}} characters; {{min}}–{{max}} is advised.",
+          "why": "The description shows under the title in results; when short the search engine picks any text from the page, when long it is cut.",
+          "how": "Write a description with the benefit and a price or shipping hint, or use the template."
+        },
+        "META-02": {
+          "title": "{{count}} more pages share this description.",
+          "why": "The same description makes pages hard to tell apart in results.",
+          "how": "Make the description this page's own."
+        },
+        "SLUG-01": {
+          "title": "The page address ({{slug}}) breaks the rules.",
+          "why": "Addresses use lower-case letters, digits and hyphens, up to 80 characters; otherwise they look broken when shared and searched.",
+          "how": "Make the address again from the name."
+        },
+        "SLUG-02": {
+          "title": "The page address ({{slug}}) has none of the name's words.",
+          "why": "Meaningful words in the address tell shoppers and search engines what the page is.",
+          "how": "Make the address from the product's or page's name; the old one redirects on its own."
+        },
+        "KW-01": {
+          "title": "The focus keyword \"{{keyword}}\" is missing from: {{missing}}.",
+          "why": "When the chosen word is in the title, the description and the start of the text, the page matches that search better.",
+          "how": "Add the word where it is missing, in a natural sentence."
+        },
+        "ROBOTS-01": {
+          "title": "The page is closed to search engines (noindex).",
+          "why": "This page does not show in search; the other suggestions still help sharing and quality.",
+          "how": "If that is not intended, set the index choice in the SEO card to \"by the page's state\"."
+        },
+        "CONT-01": {
+          "title": "The text has {{words}} words; at least {{min}} is advised.",
+          "why": "A short text does not answer shoppers' questions nor tell search engines enough about the page.",
+          "how": "Add sections such as features, use, care and specifications."
+        },
+        "CONT-03": {
+          "title": "Required attributes are empty: {{fields}}.",
+          "why": "The attribute table informs comparing shoppers and filters; empty fields drop the product from lists.",
+          "how": "Fill the missing fields in the attributes card."
+        },
+        "CONT-04": {
+          "title": "The description has a main heading (H1).",
+          "why": "The page's H1 is the product's name; a second one in the text blurs the page's subject.",
+          "how": "Make the text's headings subheadings (H2, H3)."
+        },
+        "CONT-07": {
+          "title": "The description has an insecure (http) link or image.",
+          "why": "http content on a secure page triggers browser warnings or does not load at all.",
+          "how": "Change the links to start with https."
+        },
+        "IMG-01": {
+          "title": "{{count}} images; at least {{target}} are advised.",
+          "why": "Products without images do not show in Google Shopping nor in rich results; several angles build trust.",
+          "how": "Add images showing the product from different angles."
+        },
+        "DATA-01": {
+          "title": "{{count}} variants have no price.",
+          "why": "A product without a price cannot be sold nor offered to search engines.",
+          "how": "Enter each variant's price in the variants card."
+        },
+        "DATA-02": {
+          "title": "{{count}} variants have no barcode (GTIN) nor brand + manufacturer code (MPN).",
+          "why": "Google Shopping recognises products by these codes; without them the product matches less and shows less.",
+          "how": "Enter a valid barcode for the variants; without one, add the brand and the manufacturer code."
+        },
+        "DATA-03": {
+          "title": "The product has no brand.",
+          "why": "The brand is what shoppers look for in structured data and results.",
+          "how": "Pick a brand in the organise card."
+        },
+        "DATA-04": {
+          "title": "No primary category is chosen.",
+          "why": "The primary category sets the product's breadcrumb and its \"back to category\" link.",
+          "how": "Make the deepest category primary in one click, or pick one in the catalog card."
+        },
+        "DATA-05": {
+          "title": "Weight or dimensions are missing.",
+          "why": "Shipping costs and delivery details are worked out from them.",
+          "how": "Enter the weight and dimensions in the package card."
+        },
+        "LINK-01": {
+          "title": "The product is in no category.",
+          "why": "No link inside the shop leads to it; shoppers and search engines find it hard.",
+          "how": "Pick at least one category in the organise card."
+        },
+        "EMPTY-01": {
+          "title": "The page lists no live products.",
+          "why": "An empty list disappoints visitors and search engines count it as thin content.",
+          "how": "Add products, or close the page to search engines."
+        },
+        "DEPTH-01": {
+          "title": "The category is at level {{depth}}; {{max}} at most is advised.",
+          "why": "Deep structures sit far from the home page and are crawled less.",
+          "how": "Flatten the category tree."
+        },
+        "LOGO-01": {
+          "title": "The brand has no logo.",
+          "why": "A logo makes the brand recognisable on its page and when shared.",
+          "how": "Upload an image in the logo card."
+        }
+      },
+      "summaryHint": "How ready your products are for search engines; refreshed nightly and after every save.",
+      "noAssessments": "No products assessed yet; they show here as they are saved.",
+      "shopScore": "Shop SEO score",
+      "assessed_one": "{{products}} product assessed",
+      "assessed_other": "{{products}} products assessed",
+      "criticalCount_one": "{{products}} product misses something critical (price or images).",
+      "criticalCount_other": "{{products}} products miss something critical (price or images).",
+      "lowest": "Products that need the most work",
+      "column": "SEO"
     }
   },
   "attributes": {

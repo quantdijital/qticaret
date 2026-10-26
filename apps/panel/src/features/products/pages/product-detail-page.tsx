@@ -16,7 +16,24 @@ import { ProductActions } from "@/features/products/detail/product-actions"
 import { ShippingCard } from "@/features/products/detail/shipping-card"
 import { SummaryCard } from "@/features/products/detail/summary-card"
 import { VariantsCard } from "@/features/products/detail/variants-card"
+import { AdvisorCard } from "@/features/seo/advisor/advisor-card"
 import { errorText } from "@/lib/errors"
+
+// Where each of the advisor's manual fixes takes the person on this page
+const ADVISOR_TARGETS = {
+  edit_title: "product-seo",
+  edit_description: "product-seo",
+  edit_robots: "product-seo",
+  edit_body: "product-general",
+  edit_handle: "product-general",
+  add_images: "product-media",
+  edit_prices: "product-variants",
+  edit_codes: "product-variants",
+  edit_attributes: "product-attributes",
+  edit_brand: "product-organize",
+  edit_categories: "product-organize",
+  edit_dimensions: "product-shipping",
+}
 
 const route = getRouteApi("/_auth/products/$id")
 
@@ -71,16 +88,36 @@ export function ProductDetailPage() {
       />
       <div className="grid items-start gap-[var(--grid-gap)] xl:grid-cols-12">
         <div className="flex min-w-0 flex-col gap-[var(--grid-gap)] xl:col-span-8">
-          <GeneralCard product={product} />
-          <MediaCard product={product} />
-          <VariantsCard product={product} />
-          <AttributesCard productId={product.id} />
-          <ProductSeoCard product={product} />
+          <div id="product-general" className="scroll-mt-20">
+            <GeneralCard product={product} />
+          </div>
+          <div id="product-media" className="scroll-mt-20">
+            <MediaCard product={product} />
+          </div>
+          <div id="product-variants" className="scroll-mt-20">
+            <VariantsCard product={product} />
+          </div>
+          <div id="product-attributes" className="scroll-mt-20">
+            <AttributesCard productId={product.id} />
+          </div>
+          <div id="product-seo" className="scroll-mt-20">
+            <ProductSeoCard product={product} />
+          </div>
         </div>
         <div className="flex min-w-0 flex-col gap-[var(--grid-gap)] xl:col-span-4">
           <SummaryCard product={product} />
-          <OrganizeCard product={product} />
-          <ShippingCard product={product} />
+          <AdvisorCard
+            kind="product"
+            id={product.id}
+            version={product.updated_at}
+            targets={ADVISOR_TARGETS}
+          />
+          <div id="product-organize" className="scroll-mt-20">
+            <OrganizeCard product={product} />
+          </div>
+          <div id="product-shipping" className="scroll-mt-20">
+            <ShippingCard product={product} />
+          </div>
           <CatalogCard productId={product.id} />
         </div>
       </div>

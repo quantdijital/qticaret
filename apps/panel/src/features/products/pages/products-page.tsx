@@ -3,6 +3,9 @@ import { Link, getRouteApi, useNavigate } from "@tanstack/react-router"
 import { PackageOpen, Plus } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { DataTable } from "@/components/patterns/data-table"
+import { productScoresQuery } from "@/features/seo/api/advisor"
+import type { StoredAssessment } from "@/features/seo/api/advisor"
+import { GRADE_TEXT } from "@/features/seo/advisor/grades"
 import type { Column } from "@/components/patterns/data-table"
 import { FilterTabs } from "@/components/patterns/filter-tabs"
 import { PageHeader } from "@/components/patterns/page-header"
@@ -25,7 +28,7 @@ const CURRENCY = "try"
 // docs/18: low stock reads amber from here down (adr/0020 brings per-item thresholds)
 const LOW_STOCK = 5
 
-function useColumns(): Column<ProductListItem>[] {
+function useColumns(scores: ReadonlyMap<string, StoredAssessment>): Column<ProductListItem>[] {
   const { t } = useTranslation()
   const prefix = useProductPathPrefix()
   return [
@@ -109,6 +112,25 @@ function useColumns(): Column<ProductListItem>[] {
       ),
     },
     {
+      key: "seo",
+      header: t("seo.advisor.column"),
+      align: "right",
+      className: "hidden lg:table-cell",
+      cell: (product) => {
+        const score = scores.get(product.id)
+        return score ? (
+          <span
+            className={cn("font-semibold tabular-nums", GRADE_TEXT[score.grade])}
+            title={t(`seo.advisor.grades.${score.grade}`)}
+          >
+            {score.score}
+          </span>
+        ) : (
+          <span className="text-muted-foreground">—</span>
+        )
+      },
+    },
+    {
       key: "price",
       header: t("products.columns.price"),
       align: "right",
@@ -138,7 +160,10 @@ export function ProductsPage() {
   const q = search.q ?? ""
   const list = useQuery(productsQuery({ q, status, page }))
   const counts = useQuery(productCountsQuery())
-  const columns = useColumns()
+  const scores = useQuery(
+    productScoresQuery((list.data?.products ?? []).map((product) => product.id))
+  )
+  const columns = useColumns(new Map((scores.data ?? []).map((score) => [score.entity_id, score])))
   const setSearch = (next: { q?: string; status?: typeof status; page?: number }) => {
     void navigate({
       to: "/products",

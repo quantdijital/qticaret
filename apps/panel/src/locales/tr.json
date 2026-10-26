@@ -522,7 +522,6 @@
         "Kullanım istatistikleri",
         "Toplu kupon kodu üretimi"
       ],
-      "seo": ["Mağaza SEO puanı", "En çok iyileştirme bekleyen sayfalar"],
       "reports": [
         "Satış, KDV ve stok raporları",
         "Dönem karşılaştırmaları",
@@ -1100,8 +1099,6 @@
         "flat": "Ürün adresleri kökte, öneksiz oluşuyor."
       }
     },
-    "advisor": "SEO danışmanı",
-    "advisorHint": "Her ürün ve kategori için puan, öneri ve tek tıkla düzeltmeler.",
     "sampleHost": "alanadiniz.com",
     "card": {
       "title": "Arama motoru görünümü",
@@ -1293,6 +1290,176 @@
       "urls_other": "{{urls}} sayfa",
       "none": "Henüz site haritası yok; ilk yenilemede oluşur.",
       "pending": "Son değişiklikler bir sonraki yenilemede eklenecek."
+    },
+    "advisor": {
+      "title": "SEO danışmanı",
+      "cardHint": "Sayfanın arama motorlarına hazırlığı; her kayıttan sonra yeniden değerlendirilir.",
+      "scoreLabel": "SEO puanı {{score}}/100",
+      "issueCount_one": "{{count}} öneri",
+      "issueCount_other": "{{count}} öneri",
+      "noIssues": "Eksik bulunmadı.",
+      "why": "Neden önemli, nasıl düzeltilir",
+      "goToField": "Alana git",
+      "fixed": "Düzeltme uygulandı.",
+      "grades": {
+        "excellent": "Mükemmel",
+        "good": "İyi",
+        "needs_work": "Geliştirilmeli",
+        "poor": "Zayıf"
+      },
+      "severities": {
+        "critical": "Kritik",
+        "high": "Yüksek",
+        "medium": "Orta",
+        "low": "Düşük",
+        "info": "Bilgi"
+      },
+      "fixes": {
+        "use_template_title": "Şablon başlığını kullan",
+        "use_template_description": "Şablon açıklamasını kullan",
+        "set_primary_category": "En derin kategoriyi birincil yap"
+      },
+      "places": {
+        "title": "başlık",
+        "description": "açıklama",
+        "body": "metnin başı"
+      },
+      "problems": {
+        "shouting": "tamamı büyük harf",
+        "repeated": "aynı kelime tekrarlanıyor",
+        "symbols": "art arda işaretler var"
+      },
+      "rules": {
+        "TITLE-01": {
+          "title": "Arama sonucu başlığı {{length}} karakter; {{min}}–{{max}} arası önerilir.",
+          "why": "Kısa başlık sayfayı anlatmaz, uzun başlık arama sonucunda kesilir. Türkçe harfler geniş olduğundan piksel genişliği de hesaba katılır.",
+          "how": "SEO başlığını düzenleyin ya da kendi başlığınızı silip mağazanın başlık şablonunu kullanın."
+        },
+        "TITLE-02": {
+          "title": "Başlık {{count}} sayfada daha aynı.",
+          "why": "Aynı başlıklı sayfalar arama motorunda birbiriyle yarışır; hangisinin gösterileceği belirsizleşir.",
+          "how": "Başlığa sayfayı ayıran bir özellik (renk, ölçü, malzeme) ekleyin."
+        },
+        "TITLE-03": {
+          "title": "Başlıkta {{problem}}.",
+          "why": "Bağıran, tekrarlı ya da işaret yığınlı başlıklar güven vermez ve arama motorlarınca düzeltilebilir.",
+          "how": "Başlığı sade, normal yazımla düzenleyin."
+        },
+        "TITLE-04": {
+          "title": "Marka ({{brand}}) başlıkta geçmiyor.",
+          "why": "Marka adını arayan alıcı, başlıkta markayı gördüğünde sonuca daha çok tıklar.",
+          "how": "Başlık şablonuna {marka} etiketini ekleyin ya da SEO başlığına markayı yazın."
+        },
+        "META-01": {
+          "title": "Meta açıklama {{length}} karakter; {{min}}–{{max}} arası önerilir.",
+          "why": "Açıklama arama sonucunda başlığın altında görünür; kısa olursa arama motoru sayfadan rastgele bir parça seçer, uzunsa kesilir.",
+          "how": "Faydayı, fiyat ya da kargo ipucunu içeren bir açıklama yazın ya da şablonu kullanın."
+        },
+        "META-02": {
+          "title": "Meta açıklama {{count}} sayfada daha aynı.",
+          "why": "Aynı açıklama, sayfaların arama sonucunda birbirinden ayırt edilmesini zorlaştırır.",
+          "how": "Açıklamayı bu sayfaya özgü hâle getirin."
+        },
+        "SLUG-01": {
+          "title": "Sayfa adresi ({{slug}}) kurala uymuyor.",
+          "why": "Adres küçük harf, rakam ve tireden oluşmalı, 80 karakteri geçmemeli; aksi hâlde paylaşımda ve aramada bozuk görünür.",
+          "how": "Sayfa adresini addan yeniden oluşturun."
+        },
+        "SLUG-02": {
+          "title": "Sayfa adresi ({{slug}}) adın kelimelerini içermiyor.",
+          "why": "Adresteki anlamlı kelimeler hem alıcıya hem arama motoruna sayfanın ne olduğunu söyler.",
+          "how": "Adresi ürünün ya da sayfanın adından oluşturun; eski adres kendiliğinden yönlendirilir."
+        },
+        "KW-01": {
+          "title": "Odak kelime \"{{keyword}}\" şurada yok: {{missing}}.",
+          "why": "Seçtiğiniz kelime başlıkta, açıklamada ve metnin başında geçtiğinde sayfa o aramayla daha iyi eşleşir.",
+          "how": "Kelimeyi doğal bir cümleyle eksik yerlere ekleyin."
+        },
+        "ROBOTS-01": {
+          "title": "Sayfa arama motorlarına kapalı (noindex).",
+          "why": "Bu sayfa arama sonuçlarında görünmez; diğer öneriler yine de paylaşım ve kalite için geçerlidir.",
+          "how": "İstemiyorsanız SEO kartındaki dizin seçimini \"Sayfanın durumuna göre\" yapın."
+        },
+        "CONT-01": {
+          "title": "Metin {{words}} kelime; en az {{min}} önerilir.",
+          "why": "Kısa metin, alıcının sorularını cevaplamaz ve arama motoruna sayfayı anlatacak kadar bilgi vermez.",
+          "how": "Özellikler, kullanım, bakım ve teknik bilgiler gibi bölümlerle metni zenginleştirin."
+        },
+        "CONT-03": {
+          "title": "Zorunlu özellikler boş: {{fields}}.",
+          "why": "Özellik tablosu karşılaştırma yapan alıcıya ve filtrelere bilgi verir; boş alanlar ürünü listelerden düşürür.",
+          "how": "Ürün özellikleri kartında eksik alanları doldurun."
+        },
+        "CONT-04": {
+          "title": "Açıklamada ana başlık (H1) var.",
+          "why": "Sayfanın H1'i ürünün adıdır; metindeki ikinci bir H1 sayfanın konusunu bulanıklaştırır.",
+          "how": "Metindeki başlıkları alt başlık (H2, H3) olarak düzenleyin."
+        },
+        "CONT-07": {
+          "title": "Açıklamada güvensiz (http) bağlantı ya da görsel var.",
+          "why": "Güvenli sayfada http içerik tarayıcı uyarısına ya da görselin hiç yüklenmemesine yol açar.",
+          "how": "Bağlantıları https ile başlayacak şekilde değiştirin."
+        },
+        "IMG-01": {
+          "title": "{{count}} görsel var; en az {{target}} önerilir.",
+          "why": "Görselsiz ürün Google Alışveriş'te ve arama sonuçlarında gösterilmez; birden çok açı alıcının güvenini artırır.",
+          "how": "Ürünü farklı açılardan gösteren görseller ekleyin."
+        },
+        "DATA-01": {
+          "title": "{{count}} varyantın fiyatı yok.",
+          "why": "Fiyatsız ürün satılamaz ve ürün bilgisi (teklif) arama motorlarına gönderilemez.",
+          "how": "Varyantlar kartında her varyantın fiyatını girin."
+        },
+        "DATA-02": {
+          "title": "{{count}} varyantta barkod (GTIN) ya da marka + üretici kodu (MPN) yok.",
+          "why": "Google Alışveriş ürünü bu kodlarla tanır; kodsuz ürün eşleşmez ve daha az gösterilir.",
+          "how": "Varyantlara geçerli barkod girin; barkod yoksa marka ve üretici kodunu ekleyin."
+        },
+        "DATA-03": {
+          "title": "Ürüne marka atanmamış.",
+          "why": "Marka, yapılandırılmış veride ve arama sonucunda alıcının aradığı bilgidir.",
+          "how": "Düzen kartında bir marka seçin."
+        },
+        "DATA-04": {
+          "title": "Birincil kategori seçilmemiş.",
+          "why": "Birincil kategori ürünün yol izini (breadcrumb) ve \"kategoriye dön\" bağlantısını belirler.",
+          "how": "Tek tıkla en derin kategoriyi birincil yapın ya da katalog bilgilerinden seçin."
+        },
+        "DATA-05": {
+          "title": "Ağırlık ya da ölçüler eksik.",
+          "why": "Kargo ücreti ve teslimat bilgisi bu değerlerle hesaplanır.",
+          "how": "Paket ölçüleri kartında ağırlık ve ölçüleri girin."
+        },
+        "LINK-01": {
+          "title": "Ürün hiçbir kategoride değil.",
+          "why": "Kategorisiz ürüne mağaza içinden bağlantı gelmez; alıcı ve arama motoru onu zor bulur.",
+          "how": "Düzen kartında en az bir kategori seçin."
+        },
+        "EMPTY-01": {
+          "title": "Sayfada yayındaki ürün yok.",
+          "why": "Boş liste sayfası ziyaretçiyi hayal kırıklığına uğratır ve arama motorunca zayıf içerik sayılır.",
+          "how": "Ürün ekleyin ya da sayfayı arama motorlarına kapatın."
+        },
+        "DEPTH-01": {
+          "title": "Kategori {{depth}}. seviyede; en fazla {{max}} önerilir.",
+          "why": "Çok derin yapılar ana sayfadan uzak kalır ve daha az taranır.",
+          "how": "Kategori ağacını sadeleştirin."
+        },
+        "LOGO-01": {
+          "title": "Markanın logosu yok.",
+          "why": "Logo marka sayfasında ve paylaşımlarda markayı tanınır kılar.",
+          "how": "Logo kartından bir görsel yükleyin."
+        }
+      },
+      "summaryHint": "Ürünlerinizin arama motorlarına hazırlığı; her gece ve her kayıttan sonra yenilenir.",
+      "noAssessments": "Henüz değerlendirilen ürün yok; ürün kaydedildikçe burada görünür.",
+      "shopScore": "Mağaza SEO puanı",
+      "assessed_one": "{{products}} ürün değerlendirildi",
+      "assessed_other": "{{products}} ürün değerlendirildi",
+      "criticalCount_one": "{{products}} üründe kritik eksik var (fiyat ya da görsel).",
+      "criticalCount_other": "{{products}} üründe kritik eksik var (fiyat ya da görsel).",
+      "lowest": "En çok iyileştirme bekleyen ürünler",
+      "column": "SEO"
     }
   },
   "attributes": {

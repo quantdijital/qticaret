@@ -15,6 +15,7 @@ export interface Brand {
   is_active: boolean
   product_count: number
   created_at: string
+  updated_at: string
 }
 
 export interface BrandInput {

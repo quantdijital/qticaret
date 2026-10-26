@@ -1,15 +1,15 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
-import { ArrowRight, CircleCheck, Globe, Sparkles, TriangleAlert } from "lucide-react"
+import { ArrowRight, CircleCheck, Globe, TriangleAlert } from "lucide-react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { PageHeader } from "@/components/patterns/page-header"
 import { SectionCard } from "@/components/patterns/section-card"
-import { StatusBadge } from "@/components/patterns/status-badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { CatalogHealthCard } from "@/features/dashboard/components/catalog-health-card"
 import { redirectCountsQuery } from "@/features/seo/api/redirects"
+import { AdvisorSummaryCard } from "@/features/seo/advisor/summary-card"
 import { SitemapCard } from "@/features/seo/components/sitemap-card"
 import { sectionQuery } from "@/features/settings/api/sections"
 import type { SeoSettings } from "@/features/settings/api/sections"
@@ -120,7 +120,6 @@ export function SeoOverviewPage() {
   const { t } = useTranslation()
   const seo = useQuery(sectionQuery<SeoSettings>("seo"))
   const storeName = useStoreName() ?? t("app.name")
-  const planned = t("upcoming.features.seo", { returnObjects: true }) as string[]
   return (
     <div className="flex flex-col gap-[var(--grid-gap)]">
       <PageHeader
@@ -162,24 +161,7 @@ export function SeoOverviewPage() {
       <div className="grid grid-cols-1 items-start gap-[var(--grid-gap)] xl:grid-cols-12">
         <RedirectsCard className="xl:col-span-6" />
         <SitemapCard className="xl:col-span-6" />
-        <SectionCard
-          title={t("seo.advisor")}
-          description={t("seo.advisorHint")}
-          action={<StatusBadge tone="info">{t("upcoming.badge")}</StatusBadge>}
-          className="xl:col-span-12"
-        >
-          <ul className="grid gap-3 sm:grid-cols-2">
-            {planned.map((item) => (
-              <li
-                key={item}
-                className="flex items-center gap-2.5 rounded-md border bg-muted/30 px-3 py-2.5 text-sm"
-              >
-                <Sparkles className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
-                {item}
-              </li>
-            ))}
-          </ul>
-        </SectionCard>
+        <AdvisorSummaryCard className="xl:col-span-12" />
       </div>
     </div>
   )

@@ -1,7 +1,7 @@
 import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
 import { sdk } from "@/lib/sdk"
 
-const FIELDS = "id,name,handle,description,parent_category_id,rank,is_active,is_internal"
+const FIELDS = "id,name,handle,description,parent_category_id,rank,is_active,is_internal,updated_at"
 
 /** Every category, for the tree; a shop has hundreds at most. */
 export const categoryTreeQuery = () =>
