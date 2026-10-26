@@ -3,7 +3,7 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a, T1b, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14a, T14b bitti; sırada T15 Excel içe/dışa aktarma). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı; push edilmedi. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
+**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a, T1b, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14a, T14b, T15 bitti; sırada Playwright e2e altyapısı (kullanıcı 2026-10-26 onayladı), sonra T16 toplu düzenleme). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı. F1, F2 ve F3 dalları push edildi (kullanıcı 2026-10-26: "pushları sen önerdiğinde yapabilirsin"); PR açılmadı.
 
 ## Son oturum özeti
 **2026-10-25/26 gece (kullanıcı yatarken, "panel işlerini tamamla" talimatıyla).** Panelin ekranları yazıldı; her biri gerçek veriyle tarayıcıda denendi (CDP ekran görüntüsü, test kayıtları sonra silindi). Commit'ler `e11a201`…`6d63df7`, push yok.
@@ -275,6 +275,40 @@
   - **Storefront'un kendi sayfaları:** `/store/seo/site` robots değerlerini veriyor: arama `noindex,follow`, sepet/ödeme/hesap `noindex,nofollow`.
   - **İnceleme:** bağımsız kod incelemesinin bulguları düzeltildi. En önemlisi, rastgele parametreli sorguların önbelleği atlayıp istek başına onlarca sorgu çalıştırabilmesiydi.
   - **Testler:** birim (sorgu okuma, kanonik biçim, robots satırları, sayfa SEO'su, denetim, ayar doğrulama, migration betiği) ve HTTP 12 test (`seo-facets`, `seo-facets-listings`).
+- **F3 T15 (F3.9) bitti:** Excel (xlsx) ve CSV ile ürün içe/dışa aktarma (adr/0018 uygulama notu). `yazl` 3.3.1 eklendi.
+  - **Tablo katmanı (`lib/sheets`):**
+    - Kendi xlsx okuyucumuz: güvenli zip ve XML, ayrıştırmadan önce satır, hücre ve metin sayımıyla bellek koruması.
+    - `yazl` ile akan xlsx yazıcı: kalın ve dondurulmuş başlık, ikinci sayfada açıklamalar.
+    - Windows-1254 CSV okunuyor.
+    - Formül kaçışı: xlsx'te hücre başında, CSV'de tam kural; okuyucu biçime göre geri alıyor.
+  - **Ürün tablosu (`lib/catalog-sheet`):** Türkçe sütunlar (birimler başlıkta), `Özellik: anahtar` sütunları, Türkçe sayı biçimi.
+    - Aynı `Tanıtıcı`'lı satırlar bir ürünün varyantları.
+    - Satır satır sorun listesi; sorunlu satırı olan ürün bütünüyle atlanıyor.
+  - **İçe aktarma:** `POST /admin/catalog/imports?mode=check|apply`, gövde dosyanın kendisi (10 MB).
+    - Dosya özel saklanıyor; kuyruğa alma reddedilirse geri alma adımı dosyayı siliyor. İş, dosyayı her sonuçta siliyor; yarıda kalanları gece temizliği topluyor.
+    - "Kontrol et" hiçbir şey yazmıyor: eklenecek, güncellenecek ve değişmeyen ürün sayıları, sorunlar ve yeni ürünlerin SEO ön değerlendirmesi.
+    - "Uygula" her ürünü tek bir birleşik workflow'la yazıyor (ürün, varyant, fiyat, marka, birincil kategori, SEO, özellik, stok); bir adım düşerse ürünün önceki adımları geri alınıyor (testli).
+    - Var olan ürünlerde yalnızca değişen alanlar yazılıyor; dışa aktarılan dosya olduğu gibi geri yüklenince hiçbir şey değişmiyor (testli).
+    - Rapor xlsx: satır, tanıtıcı, sonuç, sütun, açıklama, SEO puanı ve önerileri.
+    - Denetim kaydında başlangıç ve bitiş (`catalog.import_started` / `_finished`): kim, dosyanın özeti, yazılan ürünler.
+  - **Dışa aktarma:** `catalog.export` işi (xlsx ya da `;`+BOM CSV, ondalık virgülle), içe aktarmayla aynı sütunlar. Şablon: `GET /admin/catalog/import-template`.
+  - **Panel:** Ürünler sayfasında "Dışa aktar" (Excel/CSV, hazır olunca indir) ve "İçe aktar" diyaloğu: şablon, dosya, kontrol özeti, SEO ön değerlendirmesi, rapor, uygula.
+  - **Güvenlik:**
+    - `catalog.import` iç iş tipi; genel `POST /admin/async-jobs` kuyruğa alamıyor.
+    - Yüklenen dosya `/admin/uploads/:id`'den verilmiyor. CSRF istisnası yalnızca bu yolda ve xlsx/CSV gövde türlerinde.
+    - Medusa'nın kendi ürün içe aktarma uçları ve workflow çalıştırma uçları kapatıldı (404).
+  - **KK:**
+    - 1000 satırlık Excel worker'da tamamlanıyor ve hatalı satırlar raporda (HTTP testi, yaklaşık 42 sn).
+    - Dışa aktarılan Excel'de formülle başlayan hücre kaçışlı (HTTP testi).
+  - **İnceleme:** bağımsız kod incelemesinin bulguları düzeltildi.
+    - Temel TRY fiyatı ayrımı: fiyat listesi, kural ve kademe fiyatları korunuyor.
+    - Çok satırlı açıklama kabul ediliyor.
+    - Değişmeyen alanlar yazılmıyor.
+    - XML boyut sınırı, ayrıştırmadan önce sayım.
+    - Dışa aktarma hatasının zip akışına iletilmesi.
+    - Geri alınabilir yükleme, denetim kaydı, aynı varyanta iki satırın sorun sayılması, Medusa'nın içe aktarmasının kapatılması.
+    - "Listeler 15 kayıtla sınırlı" bulgusu dev'de ölçülerek yanlış çıktı.
+  - **Testler:** birim (tablo okuma/yazma, tablo modeli, planlayıcı, CSRF, ayar doğrulama) ve HTTP 6 test (`catalog-sheets`, `catalog-sheets-roundtrip`).
 - **Gözden geçir (kullanıcı yokken önerilen seçenekle verilen kararlar):**
   1. Bayrak adı `catalog.non_physical`, mağaza tarafından açılır, varsayılan kapalı. Etiketleri Medusa Admin'de ve panelde var.
   2. Kargo gerekmeyen kalemler sipariş ödenince "teslim edildi" sayılıyor. Dijital teslimat (indirme bağlantısı, kod gönderimi) F9 bildirimleriyle gelecek.
@@ -433,6 +467,19 @@
      - Mağazanın kendi yazdığı şablona dokunulmuyor; denetim uyarıyor.
   102. Yönlendirme kuralı kaydı ve yönlendirme denetimi, hedefin filtre sorgusunun 404 ya da 301 olacağını önceden görmüyor. Resolve bunu çalışma anında tek atlamaya katlıyor.
   103. Numaralı sayfanın JSON-LD'sinde `CollectionPage` kendi adresi ve "Sayfa N" adıyla; ilk sayfanın ürün listesi (`ItemList`) çıkarılıyor. Sayfanın elle verilmiş canonical'ı varsa ona sayfa eklenmiyor.
+  104. **İçe aktarma iki adımlı ve iki ayrı iş:** "kontrol" ve "uygula". Uygulamada dosya yeniden gönderiliyor; işler birbirinin dosyasına başvurmuyor. Her iş kendi dosyasını siliyor.
+  105. **Yükleme multipart değil, dosyanın kendisi:** yeni bağımlılık (multer) yok, tür baytlardan anlaşılıyor. CSRF istisnası yalnızca `/admin/catalog/imports` ve xlsx/CSV/octet-stream türlerinde; bu türler CORS-basit değil.
+  106. **Satır = varyant**, aynı `Tanıtıcı` bir ürün. Boş hücre alanı değiştirmiyor (alan temizlemek için panel). Sorunlu satırı olan ürün bütünüyle atlanıyor.
+  107. Var olan üründe yeni seçenek değeri (ör. yeni beden) eklenmiyor; satır sorun olarak raporlanıyor ve değer panelden ekleniyor. Medusa 2.21'in seçenek modeli (paylaşılan seçenekler) nedeniyle muhafazakâr seçim.
+  108. **Fiyat sütunu varyantın temel TRY fiyatı:** fiyat listesiz, kuralsız, kademesiz. Diğer fiyatlar kuralları ve kimlikleriyle korunuyor; fiyat listesi fiyatlarına dokunulmuyor.
+  109. **Birincil kategori** yalnızca yeni üründe ya da satır kategorileri değiştirdiğinde ilk yazılan kategori oluyor. Kategorisi değişmeyen ürünün birincil kategorisine (ya da eksikliğine) dokunulmuyor.
+  110. Barkod sütunu varyantın EAN'ı; UPC ve `barcode` alanları tabloda yok.
+  111. Sayı biçimi: virgül varsa Türkçe (`1.250,50`), yoksa nokta ondalık (`1.250` = 1,25). Fiyat en çok 2, ölçü 3 ondalık; özellik sayıları negatif olabilir.
+  112. Tablo başlıkları, rapor ve açıklama sayfası sunucuda Türkçe (dosya biçimi, bildirim metinleri gibi); başka diller F19.
+  113. **Medusa'nın ürün içe aktarma uçları** (`/admin/products/import(s)` ve onay uçları) ile **workflow çalıştırma uçları** (`/admin/workflows-executions/:id/run` ve adım cevapları) kapatıldı (404). Açık sorudaki öneri uygulandı: iç iş tiplerinin ve tüm route kontrollerinin atlanmasını engelliyor.
+  114. Denetim kaydı: uygulama başlarken ve biterken `system` kaydı (kim, dosyanın sha256'sı, sayılar, en çok 500 tanıtıcı). Alan bazında önce/sonra yok (64 kB sınırı).
+  115. SEO ön değerlendirmesi yalnızca yeni ürünler için. Görseller tabloda yok (panelden); olmayan görsel danışman bulgusu olarak görünüyor.
+  116. Tek seferde en çok 5000 satır, 10 MB. Bir içe aktarma çalışırken ikincisi kuyruğa alınamıyor (singleton).
 - **Bilinen sınırlar (devreden):**
   - JSON-LD'yi storefront basarken `<`, `>` ve `&` kaçışlanmalı (`</script>` içeren başlık ya da metin). Kural docs/13'te var; F18 kabulüne sözleşme testi olarak eklenecek.
   - Editöre yüklenip bir günden uzun süre kaydedilmeyen görseli gece süpürmesi siler; kayıt `content.image_unknown` verir.
@@ -443,6 +490,8 @@
   - Panelde bazı bileşen fonksiyonları 50 satırı aşıyor (sihirbaz sayfası, kategori düzenleyici, şablon paneli, yeni landing diyaloğu); docs/10'a göre bölünmeli.
   - Landing ürün sayısı her okumada hesaplanıyor; liste ekranında gösterilmiyor. Büyük mağazada önbellek ya da Index modülü gerekir.
   - Facet kataloğu en çok 500 aktif marka listeliyor; daha büyük mağazada aramalı seçici gerekir.
+  - İçe aktarma: iş iptal ucu (S13'ten devreden) hâlâ yok. Gerçek Excel, LibreOffice ve Google Sheets dosyalarıyla örnek testleri eklenmedi (fixture'lar openpyxl ile üretildi: Excel uyumlu, paylaşılan metinli sürümü de var).
+  - Panelin varyant fiyat kaydı (`nextPrices`) fiyat listesi fiyatlarını ayırt etmiyor; Admin API'nin döndürdüğü fiyatlara göre F4'te (fiyat listeleri) doğrulanmalı.
   - Liste sorgusunun ürün sayısı büyük facet'lerde ürün kimliklerini bellekte kesiştiriyor (önbellekli). Büyük katalogda SQL'de `EXISTS` ile sayım ya da Index modülü düşünülmeli.
   - HTTP takımında `request-security` rate-limit testi T13'te bir kez dalgalandı; nedeni bulunamadı, tekrarlarda geçti.
 
@@ -717,7 +766,7 @@
 
 ## Sıradaki görev
 1. **Kullanıcı:**
-   - **Push ve PR kararı:** F1 dalı push edildi, PR yok. F2 dalı (`f2-platform-core`) yerelde ve push edilmedi. F1 merge edilince F2 `main` üzerine rebase edilir.
+   - **Push ve PR kararı:** Kullanıcı 2026-10-26'da push'u Claude'un önerisine bıraktı; F1, F2 ve F3 dalları push edildi. PR açılması ve birleştirme sırası (F1 → F2 → F3) kullanıcının kararı.
    - **Admin'de gözle kontrol:** Ayarlar > Özellikler, SEO, Ürün özellikleri, İşler; ürün sayfasındaki özellik kutusu.
      - Kullanıcı 2026-10-25'te iki hata buldu, ikisi düzeltildi.
      - Menü etiketleri ham anahtar görünüyordu: `translationNs` eksikti. Test artık bunu yakalıyor.
@@ -731,7 +780,7 @@
    - Redis kilit sağlayıcısı F3 T7'de bağlanır.
    - Canonical host boşken: resolve `canonical_host` ister, SEO ayarlarında uyarı gösterilir. Platform alt alan adı F16/F17'de gelir.
    - Görev sırası tablodaki gibi.
-   - Açık kalanlar: Playwright e2e altyapısı (ayrı profil + `@playwright/test`; son karar listesinde yoktu) ve push/PR.
+   - Playwright e2e altyapısı: kullanıcı 2026-10-26'da onayladı ("altyapıyı kur"); sıradaki iş.
    - Dev'deki `playwright-admin@example.com` kalıyor (kullanıcı kararı).
 4. **Yerel dev DB:** F2'nin tüm migration'ları uygulandı. Dev dosyaları artık SeaweedFS'e yazılıyor.
 
@@ -754,7 +803,7 @@
 | T13 ✅ | F3.16a | `content` modülü: sayfa ve blog, zengin metin (belge JSON + sunucu oluşturucu, Tiptap), kısa kodlar, Store API | T2, Tiptap onayı | 0019 |
 | T14a ✅ | F3.16b | Facet landing sayfaları, özgünlük kapısı. KK: özgünlük < %30 | T10, T13 | — |
 | T14b ✅ | F3.17 | Facet parametre kuralları (canonical, 301, noindex), robots engelleri. KK: robots facet parametrelerini engelliyor, landing yolunu engellemiyor | T14a | — |
-| T15 | F3.9 | xlsx okuyucu + `yazl` yazıcı, TR şablonu, `catalog.import`/`catalog.export` işleri, kontrollü yükleme yolu, satır hata raporu, advisor ön özeti. KK: 1000 satır, formül kaçışı | T1, T2, T5, T8, `yazl` onayı | 0018 |
+| T15 ✅ | F3.9 | xlsx okuyucu + `yazl` yazıcı, TR şablonu, `catalog.import`/`catalog.export` işleri, kontrollü yükleme yolu, satır hata raporu, advisor ön özeti. KK: 1000 satır, formül kaçışı | T1, T2, T5, T8, `yazl` onayı | 0018 |
 | T16 | F3.10 | Toplu düzenleme: fiyat, stok, yayın durumu, kategori, SEO şablonu, alt metin | T8, T15 | — |
 
 Paralel zincirler:
@@ -800,7 +849,7 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
   - `body` anahtarı tamamen redakte ediliyor. Sağlayıcı yanıt gövdeleri loga girmiyor; S6 istemcisi hata ayıklama için `providerCode` gibi alanları ayrıca yazmalı.
   - Kodun fırlattığı ham ZodError 400 ve genel `errors.invalid_data` dönüyor. Medusa'nın davranışı issue metinlerini göndermekti.
   - Yeni i18n anahtarları: `errors.duplicate`, `errors.invalid_reference`, `errors.request_too_large`, `errors.invalid_request`. F18'de kataloğa girecek.
-- [ ] **Medusa'nın workflow çalıştırma ucu (öneri, F4 güvenlik geçişi):**
+- [x] **Medusa'nın workflow çalıştırma ucu:** T15'te önerilen seçenek uygulandı, uçlar kapatıldı (karar 113). Medusa Admin'in bu uca ihtiyacı varsa kullanıcı söyler.
   - `POST /admin/workflows-executions/:workflow_id/run` admin kullanıcısına herhangi bir workflow'u doğrudan çalıştırtıyor.
   - Bu yol, route katmanındaki kontrollerin hepsini atlıyor: Türkçe adres, handle, yayın kapısı, ön sipariş koruması.
   - Öneri: panel bu ucu kullanmıyor; `requireFeature` deseniyle 404 dönecek şekilde kapatılsın. Medusa Admin'in bu ucu kullanıp kullanmadığı o geçişte doğrulanır.

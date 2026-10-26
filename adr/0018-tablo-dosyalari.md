@@ -59,3 +59,14 @@ Medusa 2.21.2'nin yerleşik ürün içe aktarması (F3 araştırması):
 
 - Şablon dosyası (TR sütun adları) admin'den indirilir; sütun eşleme Medusa'nın ürün CSV'sinden bağımsızdır.
 - Okuyucu için gerçek Excel, LibreOffice ve Google Sheets çıktılarıyla örnek dosya testleri eklenir.
+
+## Uygulama notu (F3 T15, 2026-10-26)
+
+- **Okuyucu (`lib/sheets/xlsx-read.ts`):** zip `readZipSafely`, XML `parseXmlSafely` ile (DTD yok; varlıklar elle çözülüyor: beş önceden tanımlı ve karakter referansları). İlk sayfa `workbook.xml` + ilişkiler üzerinden bulunuyor. Paylaşılan ve satır içi metin, sayı (Excel'in kayan nokta artığı 15 basamakla temizleniyor), boolean, formülün önbellek değeri okunuyor; formül çalışmıyor. Bozuk ya da düşmanca dosya kullanıcıya `upload.sheet_invalid` / `upload.sheet_too_large` olarak dönüyor.
+- **Yazıcı (`lib/sheets/xlsx-write.ts`):** `yazl` 3.3.1 ile en küçük SpreadsheetML; satırlar akarak zip'e giriyor (50.000 satır bellekte tutulmuyor). Kalın ve dondurulmuş başlık, sütun genişlikleri, ikinci sayfa ("Nasıl doldurulur"). Her metin hücresi CSV ile aynı kuralla formül kaçışından geçiyor; içe aktarma kaçış kesmesini geri alıyor.
+- **CSV:** UTF-8 değilse Windows-1254 olarak okunuyor (Türkçe Excel'in "CSV"si).
+- **Yükleme yolu:** `POST /admin/catalog/imports?mode=check|apply`, gövde dosyanın kendisi (en çok 10 MB, gövde ayrıştırıcı kapalı). Tür baytlardan anlaşılıyor; dosya özel erişimle `catalog-import-*` adıyla saklanıyor ve `/admin/uploads/:id`'den verilmiyor. CSRF: bu yolda yalnızca xlsx/CSV gövde türleri (CORS-basit değiller) kabul ediliyor, köken kontrolü sürüyor. `catalog.import` işi iç tür: genel `POST /admin/async-jobs` kuyruğa alamıyor. İş kaynağı her sonuçta siliyor.
+- **İçe aktarma:** her ürün tek bir birleşik workflow (`catalog-import-product`): Medusa'nın ürün/varyant/stok workflow'ları ve bizim marka, birincil kategori, SEO, özellik workflow'ları `runAsStep` ile iç içe; biri düşerse ürünün önceki adımları geri alınıyor. Önce "kontrol" (hiçbir şey yazmaz; yeni ürünlerin SEO ön değerlendirmesi dahil), sonra "uygula". Sonuç raporu xlsx (satır, tanıtıcı, sonuç, sütun, açıklama, SEO).
+- **Dışa aktarma:** `catalog.export` işi (xlsx ya da `;`+BOM CSV), içe aktarmayla aynı sütunlar; dışa aktarılan dosya olduğu gibi geri yüklenebiliyor (testli).
+- KK: 1000 satırlık Excel worker'da tamamlanıyor, hatalı satırlar raporda (HTTP testi); dışa aktarılan Excel'de formülle başlayan hücre kaçışlı (HTTP testi).
+
