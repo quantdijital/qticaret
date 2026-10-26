@@ -3,6 +3,7 @@ import { requireUserActor } from "../http/actor"
 import { AdminGetDashboardNoQuery, AdminGetDashboardOverview } from "./dashboard/validators"
 import { AdminGetOrderBoard } from "./order-board/validators"
 import { AdminPostShipOrder } from "./orders/[id]/ship/validators"
+import { AdminPostPriceListDiscount } from "./price-lists/[id]/discount/validators"
 import { AdminGetStockBoard } from "./stock-board/validators"
 
 const NO_QUERY_READS = [
@@ -11,6 +12,7 @@ const NO_QUERY_READS = [
   "/admin/dashboard/catalog-health",
   "/admin/order-board/:id",
   "/admin/orders/:id/money",
+  "/admin/price-lists/:id/lines",
 ]
 
 /**
@@ -44,5 +46,10 @@ export const PANEL_ROUTES = [
     matcher: "/admin/orders/:id/ship",
     methods: ["POST" as const],
     middlewares: [requireUserActor, validateAndTransformBody(AdminPostShipOrder)],
+  },
+  {
+    matcher: "/admin/price-lists/:id/discount",
+    methods: ["POST" as const],
+    middlewares: [requireUserActor, validateAndTransformBody(AdminPostPriceListDiscount)],
   },
 ]

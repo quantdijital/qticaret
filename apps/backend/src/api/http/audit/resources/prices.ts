@@ -6,8 +6,9 @@ import { ID } from "../types"
  * Price-bearing routes (adr/0011, F2 KK): every price a request could add,
  * change or remove, before and after. One key per price, its value the
  * amount, currency and quantity bounds: `variant:<id>:price:<id>` →
- * "1250 try". Price lists also show status, dates and type, which decide
- * the price a customer pays. A variant also shows whether it tracks stock
+ * "1250 try". Price lists also show title, status, dates, type and who
+ * they are for (`rule:customer.groups.id`), which decide the price a
+ * customer pays. A variant also shows whether it tracks stock
  * and sells past it (F3.8): `variant:<id>:allow_backorder` → true.
  */
 
@@ -101,15 +102,35 @@ async function variantPrices(scope: Resolver, id: string | undefined): Promise<S
 async function priceList(scope: Resolver, id: string | undefined): Promise<Snapshot> {
   const { data } = await graph(scope).graph({
     entity: "price_list",
-    fields: ["status", "starts_at", "ends_at", "type", ...PRICE_FIELDS.map((f) => `prices.${f}`)],
+    fields: [
+      "title",
+      "status",
+      "starts_at",
+      "ends_at",
+      "type",
+      "price_list_rules.attribute",
+      "price_list_rules.value",
+      ...PRICE_FIELDS.map((f) => `prices.${f}`),
+    ],
     filters: { id },
   })
-  const list = data[0] as (Record<string, unknown> & { prices?: PriceRow[] }) | undefined
+  const list = data[0] as
+    | (Record<string, unknown> & {
+        prices?: PriceRow[]
+        price_list_rules?: ({ attribute?: string | null; value?: unknown } | null)[]
+      })
+    | undefined
   if (!list) {
     return {}
   }
-  const { prices: rows, ...meta } = list
-  return { ...meta, ...prices("", rows) }
+  // Who the list is for (customer groups): one key per rule
+  const { prices: rows, price_list_rules: rules, ...meta } = list
+  const ruleKeys = Object.fromEntries(
+    (rules ?? []).flatMap((rule) =>
+      rule?.attribute ? [[`rule:${rule.attribute}`, JSON.stringify(rule.value ?? null)]] : []
+    )
+  )
+  return { ...meta, ...ruleKeys, ...prices("", rows) }
 }
 
 // Products a batch updates or deletes, from its body
@@ -174,6 +195,7 @@ export const PRICE_RESOURCES: readonly AuditedResource[] = [
       `/admin/price-lists/(?<id>${ID})/prices/batch`
     ),
     route("POST", "/admin/price-lists/:id/products", `/admin/price-lists/(?<id>${ID})/products`),
+    route("POST", "/admin/price-lists/:id/discount", `/admin/price-lists/(?<id>${ID})/discount`),
   ].map((entry) => ({
     ...entry,
     resourceType: "price_list",

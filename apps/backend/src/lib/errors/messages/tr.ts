@@ -138,6 +138,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "media.unknown": "Görsel bulunamadı.",
   "orders.nothing_to_ship": "Bu siparişte kargoya verilecek ürün kalmadı.",
   "orders.unknown": "Sipariş bulunamadı.",
+  "price_lists.unknown": "Fiyat listesi bulunamadı.",
+  "price_lists.no_currency": "Mağazanın para birimi tanımlı değil.",
   "platform_settings.color_invalid": "Renk #rrggbb biçiminde olmalı, ör. #2f6feb.",
   "platform_settings.email_invalid": "Geçerli bir e-posta adresi girin.",
   "platform_settings.feature_unknown": "Böyle bir özellik yok.",

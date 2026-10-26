@@ -134,6 +134,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "media.unknown": "Image not found.",
   "orders.nothing_to_ship": "Nothing is left to ship in this order.",
   "orders.unknown": "Order not found.",
+  "price_lists.unknown": "Price list not found.",
+  "price_lists.no_currency": "The shop has no currency set.",
   "platform_settings.color_invalid": "The colour must be in #rrggbb form, e.g. #2f6feb.",
   "platform_settings.email_invalid": "Enter a valid email address.",
   "platform_settings.feature_unknown": "There is no such feature.",
