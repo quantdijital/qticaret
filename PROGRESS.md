@@ -6,6 +6,13 @@
 **Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: BİTTİ** (T1a–T16; kabul kriterlerinin hepsi testlerle işaretli, docs/03; son eksik iki kanıt, danışmanın p95 ölçümü ve yedi sayfa türünün SEO sözleşme testi, kapanışta eklendi). Playwright e2e altyapısı kuruldu; CI düzeltildi. **F4 — Fiyatlandırma ve promosyon: BİTTİ** (plan ve ADR-0023/0024/0025 kabul edildi; U1 `price-history`, U4 kuponlar, U7 indirim dağılımı ve iade tutarı, U2 fiyat listeleri, U3 indirim gösterimi, U5 tek kullanımlık kodlar, U6 otomatik kampanyalar ve kargo bedava eşiği, U8 hediye kartı ve mağaza kredisi bitti (KK1–KK4 işaretli); F4 kapanış incelemesi yapıldı, bulgular düzeltildi: F4 BİTTİ). Dal `f4-pricing-promotions`. Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı. F1, F2 ve F3 dalları push edildi (kullanıcı 2026-10-26: "pushları sen önerdiğinde yapabilirsin"); PR açılmadı.
 
 ## Son oturum özeti
+**2026-10-26/27 (U8, panel dengesi, F4 kapanışı; kullanıcı yatarken "sabaha kadar çalış, izin isteme").** F4 BİTTİ; dal `f4-pricing-promotions`, son commit `87636da`, CI yeşil.
+- **U8 hediye kartı ve mağaza kredisi** (`@medusajs/loyalty-plugin` 2.21.2, `promotions.gift_cards` bayrağı): panelde Kampanyalar > Hediye kartları, müşteri sayfasında mağaza kredisi, sipariş ödemesinde kredi satırı. Bağımsız kod ve güvenlik incelemesinin bulguları düzeltildi: kendi kod üreticimiz (80 bit), kod denemesi sınırı (HEAD dahil), alışverişçiye kartın yalnızca kendi alanları, kredi yalnızca sepetin sahibine, misafire hesap yok, `claim` kapalı, denetim kaydı ve loglarda kod maskesi.
+- **Panel dengesi (kullanıcı kuralı):** `PageGrid`/`PageColumn` ile yan yana kartlar eşit, satırdaki kontroller tek boy; `e2e/layout.e2e.ts` her sayfayı ölçüyor; docs/18 §2 "Denge". Raporlar dört sekme (Özet, Ürünler, Kategoriler, Gün gün), Görünüm ayarları kartlara bölündü.
+- **F4 kapanış incelemesi (kod + güvenlik) ve düzeltmeler:** 30 gün kuralında yükselen indirimli fiyat (yasal risk), ödeme anında tek kod ve güncel kargo fiyatı denetimi, `price-display` yalnızca yayındaki ürünler, kod biçimi/sayısı/uzunluğu, fiyat listesi sınırlarının dakikalık kaydı, kod partisi ve kampanya kaydı telafili workflow'larda, parti durdurma, denetim kaydında bütün kurallar (madde 169, ADR notları).
+- **Test altyapısı:** test çalıştırmalarının Redis anahtarları dev'den ayrı (dev girişini kilitliyordu); erişilebilirlik testi her ekranı açık ve koyu modda denetliyor; geçici e2e admin şifresi `-` ile başlayınca kırılmıyor.
+- **Sayılar:** backend 1484 birim, 64 dosyada 342 HTTP testi; panel 176+ birim, 22 e2e (denge ve iki modlu axe dahil).
+
 **2026-10-25/26 gece (kullanıcı yatarken, "panel işlerini tamamla" talimatıyla).** Panelin ekranları yazıldı; her biri gerçek veriyle tarayıcıda denendi (CDP ekran görüntüsü, test kayıtları sonra silindi). Commit'ler `e11a201`…`6d63df7`, push yok.
 - **Backend (yeni okuma uçları, testli):**
   - `GET /admin/order-board`: siparişler aşamaya göre (ödeme bekliyor / hazırlanacak / kargoda / teslim / iptal), sekme sayıları, Medusa `q` araması, 20'lik sayfa. Aşama ödeme ve gönderi kayıtlarından hesaplandığı için en yeni 5000 sipariş bellekte sıralanır, `limited` bayrağı. Kişisel veri: okuma kaydı (SENSITIVE_READS).
@@ -973,6 +980,9 @@ Devreden işlerin F3 görevlerine dağılımı:
 F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde: `git show 118e835:PROGRESS.md`.
 
 ## Açık sorular / bloklayıcılar
+- [ ] **F5 için iyzico sandbox anahtarları** (API key + secret key; `.env`'e kullanıcı yazar, koda/loga girmez). Gelmeden F5'in sağlayıcı iskeleti ve sahte sunucuyla testleri yazılabilir; gerçek sandbox doğrulaması anahtar ister.
+- [ ] **Kullanıcı kontrolü (panel):** Raporlar'ın dört sekmesi, Görünüm ayarlarının yeni düzeni, Kampanyalar > Hediye kartları (bayrak Ayarlar > Özellikler'den açılır), kod partisi "Durdur", müşteri sayfasında mağaza kredisi.
+- [ ] **PR ve birleştirme:** F1 → F2 → F3 → F4 dalları push edildi; PR açılması ve birleştirme sırası kullanıcının kararı.
 - [x] **F3 kararları:** Kullanıcı 2026-10-25'te önerilerin hepsini onayladı (ayrıntı "Sıradaki görev" madde 2).
 - [x] **Gözden geçir: otonom oturumda S4, S7 ve S6 için verilen muhafazakâr kararlar:** Kullanıcı 2026-10-24 akşamı olduğu gibi kabul etti.
   - **S4:**
