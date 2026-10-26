@@ -78,27 +78,30 @@ export function AppSidebar() {
         <StoreMark />
       </SidebarHeader>
       <SidebarContent className="gap-0 px-1 pt-2">
-        {NAV_GROUPS.map((group) => (
-          <SidebarGroup key={group.key ?? "main"} className="py-1.5">
-            {group.key ? (
-              <SidebarGroupLabel className="h-7 text-[11px] font-medium tracking-wide text-sidebar-muted-foreground">
-                {t(`nav.groups.${group.key}`)}
-              </SidebarGroupLabel>
-            ) : null}
-            <SidebarGroupContent>
-              <SidebarMenu className="gap-0.5">
-                {group.items.map((item) => (
-                  <NavLink
-                    key={item.key}
-                    item={item}
-                    pathname={pathname}
-                    badge={badges[item.key]}
-                  />
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        ))}
+        {/* A landmark screen readers list as the menu; `contents` keeps the sidebar's layout */}
+        <nav aria-label={t("nav.label")} className="contents">
+          {NAV_GROUPS.map((group) => (
+            <SidebarGroup key={group.key ?? "main"} className="py-1.5">
+              {group.key ? (
+                <SidebarGroupLabel className="h-7 text-[11px] font-medium tracking-wide text-sidebar-muted-foreground">
+                  {t(`nav.groups.${group.key}`)}
+                </SidebarGroupLabel>
+              ) : null}
+              <SidebarGroupContent>
+                <SidebarMenu className="gap-0.5">
+                  {group.items.map((item) => (
+                    <NavLink
+                      key={item.key}
+                      item={item}
+                      pathname={pathname}
+                      badge={badges[item.key]}
+                    />
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          ))}
+        </nav>
       </SidebarContent>
       <SidebarFooter className="gap-0.5 border-t border-sidebar-border px-3 py-3">
         <SidebarMenu className="gap-0.5">

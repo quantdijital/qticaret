@@ -23,7 +23,9 @@ export function StackedBar({ segments }: { segments: Segment[] }) {
         {shown.map((segment) => (
           <Tooltip key={segment.key}>
             <TooltipTrigger asChild>
+              {/* A labelled part a keyboard can reach for its tooltip: an image, to assistive tech */}
               <div
+                role="img"
                 tabIndex={0}
                 aria-label={`${segment.label}: ${formatCount(segment.value)}`}
                 className="h-full outline-none transition-opacity first:rounded-l-full last:rounded-r-full hover:opacity-85 focus-visible:opacity-85"

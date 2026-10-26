@@ -27,6 +27,7 @@
     "loadFailed": "The information could not be loaded."
   },
   "nav": {
+    "label": "Main menu",
     "dashboard": "Overview",
     "products": "Products",
     "orders": "Orders",

@@ -27,6 +27,7 @@
     "loadFailed": "Bilgiler yüklenemedi."
   },
   "nav": {
+    "label": "Ana menü",
     "dashboard": "Genel bakış",
     "products": "Ürünler",
     "orders": "Siparişler",

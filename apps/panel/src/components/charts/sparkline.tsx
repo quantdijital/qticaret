@@ -18,7 +18,12 @@ export function Sparkline({ values, className }: { values: number[]; className?:
       aria-hidden="true"
       className={cn("aspect-auto h-10 w-full", className)}
     >
-      <AreaChart data={data} margin={{ top: 2, right: 0, bottom: 2, left: 0 }}>
+      {/* Decorative and hidden from assistive tech: no keyboard stop inside it either */}
+      <AreaChart
+        data={data}
+        margin={{ top: 2, right: 0, bottom: 2, left: 0 }}
+        accessibilityLayer={false}
+      >
         <defs>
           <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="var(--color-value)" stopOpacity={0.18} />
