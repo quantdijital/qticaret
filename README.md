@@ -24,6 +24,12 @@ geçmişine düşmez. Komut çalışırken şifre `ps` çıktısında görünebi
 read -rs "PW?Şifre: " && echo && pnpm --filter @qticaret/backend medusa user -e EPOSTA -p "$PW"; unset PW
 ```
 (bash'te `read -rsp "Şifre: " PW` kullan.)
+
+Panelin uçtan uca testleri (backend açıkken; kendi geçici yöneticisini açıp siler):
+```sh
+pnpm --filter @qticaret/panel exec playwright install chromium   # bir kez
+pnpm --filter @qticaret/panel test:e2e
+```
 Env şablonları `env.example` adındadır (gerçek `.env*` dosyaları git'e ve Claude Code'a kapalı).
 Şablona yeni değişken eklendiğinde `pnpm env:init` tekrar çalıştırılır; mevcut değerlere dokunmadan eksikleri ekler.
 

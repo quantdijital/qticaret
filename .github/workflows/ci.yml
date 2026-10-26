@@ -109,3 +109,75 @@ jobs:
       # of heap after about twenty files
       - run: pnpm --filter @qticaret/backend test:integration:http:all
       - run: pnpm --filter @qticaret/backend test:integration:modules
+
+  e2e:
+    name: Panel e2e (smoke, accessibility)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    # A real backend on a fresh database with the demo shop; the panel's dev
+    # server proxies to it, as on a developer's machine (apps/panel/e2e)
+    services:
+      postgres:
+        image: postgres:16.15-alpine@sha256:f4610795587492cd4fb887c2dc3de301b813278bb6f616992061141b5f15ac36
+        env:
+          POSTGRES_HOST_AUTH_METHOD: trust
+          POSTGRES_DB: qticaret
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+      redis:
+        image: redis:7.4.11-alpine@sha256:57e4255cc971b1c8d6f8a6ca283ac01bc3ecdd914273ef6bfaede87aaecd6541
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      REDIS_URL: redis://localhost:6379
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@ea17c68df8912ef543352723c149a84f56e3d413 # v6.1.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: Generate throwaway secrets
+        run: |
+          for name in JWT_SECRET COOKIE_SECRET PII_ENCRYPTION_KEY PII_HASH_KEY; do
+            echo "$name=$(openssl rand -hex 32)" >> "$GITHUB_ENV"
+          done
+      - run: pnpm install --frozen-lockfile
+      - name: Install Chromium for Playwright
+        run: pnpm --filter @qticaret/panel exec playwright install --with-deps chromium
+      - name: Database and demo shop
+        run: |
+          pnpm --filter @qticaret/backend medusa db:migrate
+          pnpm --filter @qticaret/backend seed:demo
+      - name: Start the backend
+        run: |
+          pnpm --filter @qticaret/backend dev > backend.log 2>&1 &
+          for attempt in $(seq 1 90); do
+            if curl -fsS http://localhost:9000/health > /dev/null; then exit 0; fi
+            sleep 2
+          done
+          cat backend.log
+          exit 1
+      - run: pnpm --filter @qticaret/panel test:e2e
+      - name: Keep the report of a failed run
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: e2e-report
+          path: |
+            apps/panel/e2e/.report
+            apps/panel/e2e/.results
+            backend.log
+          retention-days: 7

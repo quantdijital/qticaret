@@ -1,0 +1,13 @@
+{
+  // Playwright's tests run in Node: Node types here, never in the app's own tsconfig
+  "extends": "@qticaret/config/tsconfig/base.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "noEmit": true,
+    "declaration": false,
+    "sourceMap": false,
+    "types": ["node"]
+  },
+  "include": ["./**/*.ts"]
+}

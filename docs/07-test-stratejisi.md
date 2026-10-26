@@ -11,6 +11,14 @@
 | SEO denetimi | Yerel `/seo-*` skill'leri, Lighthouse | F18 demo mağaza; F14 geçiş öncesi/sonrası |
 | Yük | k6 | F15 |
 
+## E2E (panel)
+- Yer: `apps/panel/e2e/` (Playwright 1.64, `@axe-core/playwright`). Çalıştırma: backend açıkken `pnpm --filter @qticaret/panel test:e2e`. Panelin dev sunucusu kapalıysa test onu kendisi başlatır.
+- Her çalıştırma kendi geçici yöneticisini açar: Medusa CLI ile rastgele parolalı `e2e-…@example.com`. Giriş sayfasından girer; sonunda `src/scripts/remove-e2e-admin.ts` ile silinir. Kimsenin hesabı ya da tarayıcı profili kullanılmaz; oturum dosyası git dışında (`e2e/.auth`).
+- Duman testleri veri değiştirmez: ana bölümler ve ayar sayfaları hatasız açılır (yakalanmamış betik hatası, 5xx yanıt ve panelin hata satırları aranır), ürün arama ve detay çalışır, içe aktarma "Kontrol et" adımı çalışır.
+- Erişilebilirlik: axe, WCAG 2.1 A/AA kurallarıyla çok kullanılan ekranlarda "ciddi" ve "kritik" bulgu bulmamalı.
+- CI: `e2e` işi boş veritabanına migration ve demo mağazayı kurar, backend'i başlatır, testleri koşar. Başarısız çalıştırmanın raporu 7 gün saklanır.
+- Yeni ekran ya da akış eklendiğinde duman listesine eklenir (docs/06 kontrol listesi).
+
 ## Kurallar
 - Dış servisler testte **asla** gerçek çağrılmaz. `packages/testing` altında mock sunucular (msw veya küçük HTTP sunucu):
   iyzico, PayTR, Geliver, e-fatura, SMS.

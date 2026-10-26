@@ -79,4 +79,4 @@ Dashboard, Siparişler (aşama sekmeleri + detay: kargoya ver, teslim edildi, ta
 ## Kontrol listesi (her panel PR'ı)
 - [ ] docs/18 §9 listesi: yalnızca token, kara liste yok, tek birincil eylem, üç durum, sözlük, klavye/axe, mobil, açık/koyu
 - [ ] Rol kontrolü hem UI'da hem API'de (F12.6'ya kadar: yalnızca giriş)
-- [ ] Playwright duman testi eklendi
+- [ ] Playwright duman testi eklendi: yeni ekran `apps/panel/e2e/smoke.e2e.ts` listesinde; çok kullanılan ekransa axe listesinde (docs/07 E2E)

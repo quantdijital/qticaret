@@ -3,7 +3,7 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a, T1b, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14a, T14b, T15 bitti; sırada Playwright e2e altyapısı (kullanıcı 2026-10-26 onayladı), sonra T16 toplu düzenleme). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı. F1, F2 ve F3 dalları push edildi (kullanıcı 2026-10-26: "pushları sen önerdiğinde yapabilirsin"); PR açılmadı.
+**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a, T1b, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14a, T14b, T15 bitti; Playwright e2e altyapısı kuruldu; sırada T16 toplu düzenleme). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı. F1, F2 ve F3 dalları push edildi (kullanıcı 2026-10-26: "pushları sen önerdiğinde yapabilirsin"); PR açılmadı.
 
 ## Son oturum özeti
 **2026-10-25/26 gece (kullanıcı yatarken, "panel işlerini tamamla" talimatıyla).** Panelin ekranları yazıldı; her biri gerçek veriyle tarayıcıda denendi (CDP ekran görüntüsü, test kayıtları sonra silindi). Commit'ler `e11a201`…`6d63df7`, push yok.
@@ -309,6 +309,12 @@
     - Geri alınabilir yükleme, denetim kaydı, aynı varyanta iki satırın sorun sayılması, Medusa'nın içe aktarmasının kapatılması.
     - "Listeler 15 kayıtla sınırlı" bulgusu dev'de ölçülerek yanlış çıktı.
   - **Testler:** birim (tablo okuma/yazma, tablo modeli, planlayıcı, CSRF, ayar doğrulama) ve HTTP 6 test (`catalog-sheets`, `catalog-sheets-roundtrip`).
+- **Playwright e2e altyapısı kuruldu** (kullanıcı 2026-10-26 onayladı; docs/07 "E2E (panel)"). `@playwright/test` 1.64.0, `@axe-core/playwright` 4.13.0, panelde `@types/node` 24.19.2. 1.64.1 henüz 14 günlük değildi.
+  - `apps/panel/e2e/`: her çalıştırma Medusa CLI ile rastgele parolalı geçici bir yönetici açıyor, giriş sayfasından giriyor, sonunda backend betiğiyle (`remove-e2e-admin.ts`) siliyor. Medusa kullanıcının kendini silmesine izin vermiyor; betik yalnızca e2e adreslerini siliyor.
+  - Duman testleri (veri yazmaz): ana bölümler ve ayar sayfaları, ürün arama ve detay, içe aktarma kontrolü. Erişilebilirlik: dört ekranda axe (WCAG 2.1 A/AA), ciddi ve kritik bulgu yok.
+  - axe'ın bulduğu iki sorun düzeltildi: süs grafiklerinde gizli alanda klavye durağı, sipariş durumu çubuğunda rolsüz `aria-label`. Kenar çubuğu artık adlandırılmış bir `<nav>` alanı ("Ana menü").
+  - CI'da yeni `e2e` işi: Postgres ve Redis, migration ve demo mağaza, backend, Chromium. Başarısız çalıştırmanın raporu 7 gün saklanıyor (`actions/upload-artifact` v7.0.2, SHA'yla sabit).
+  - Komut: `pnpm --filter @qticaret/panel test:e2e`. Yerelde 10 test yaklaşık 36 saniyede geçiyor.
 - **Gözden geçir (kullanıcı yokken önerilen seçenekle verilen kararlar):**
   1. Bayrak adı `catalog.non_physical`, mağaza tarafından açılır, varsayılan kapalı. Etiketleri Medusa Admin'de ve panelde var.
   2. Kargo gerekmeyen kalemler sipariş ödenince "teslim edildi" sayılıyor. Dijital teslimat (indirme bağlantısı, kod gönderimi) F9 bildirimleriyle gelecek.
@@ -780,7 +786,7 @@
    - Redis kilit sağlayıcısı F3 T7'de bağlanır.
    - Canonical host boşken: resolve `canonical_host` ister, SEO ayarlarında uyarı gösterilir. Platform alt alan adı F16/F17'de gelir.
    - Görev sırası tablodaki gibi.
-   - Playwright e2e altyapısı: kullanıcı 2026-10-26'da onayladı ("altyapıyı kur"); sıradaki iş.
+   - Playwright e2e altyapısı: kullanıcı 2026-10-26'da onayladı ve kuruldu (yukarıda).
    - Dev'deki `playwright-admin@example.com` kalıyor (kullanıcı kararı).
 4. **Yerel dev DB:** F2'nin tüm migration'ları uygulandı. Dev dosyaları artık SeaweedFS'e yazılıyor.
 
@@ -938,7 +944,7 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
     - (ürün, tanım) için DB tekillik indeksi.
     - `additional_data` ile ürün formundan kayıt (F3.9).
     - Şablon güncellemesinde soft-delete edilen değerlerin link satırları kalıyor (zararsız; temizlik işi F13).
-  - **S10'dan devreden:** Playwright e2e altyapısı: ayrı bir tarayıcı profili ve `@playwright/test` (onay gerekir). docs/06 kontrol listesindeki duman testleri bununla eklenecek.
+  - **S10'dan devreden:** Playwright e2e altyapısı 2026-10-26'da kuruldu (docs/07 "E2E (panel)"); yeni ekranlar duman listesine eklenir.
   - **S9'dan devreden:**
     - `canonical_host` alan adı sahiplik doğrulaması (F16/F18).
     - JSON-LD ve meta çıktısında kaçışlama (docs/13, F18).

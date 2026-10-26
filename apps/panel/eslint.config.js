@@ -7,6 +7,8 @@ export default [
   ...baseConfig(import.meta.dirname),
   // Written by the TanStack Router plugin on every dev/build run
   { ignores: ["src/routeTree.gen.ts"] },
+  // Playwright's own output: the run's session, results and HTML report
+  { ignores: ["e2e/.auth/**", "e2e/.results/**", "e2e/.report/**"] },
   {
     files: ["**/*.{ts,tsx}"],
     languageOptions: { globals: globals.browser },
@@ -18,6 +20,12 @@ export default [
       // React Hook Form names array fields by index (`variants.${index}.price`)
       "@typescript-eslint/restrict-template-expressions": ["error", { allowNumber: true }],
     },
+  },
+  {
+    // Playwright's tests run in Node, and its fixtures' `use` is no React hook
+    files: ["e2e/**/*.ts"],
+    languageOptions: { globals: globals.node },
+    rules: { "react-hooks/rules-of-hooks": "off" },
   },
   {
     // shadcn's generated components (docs/18 §6): changed only through its

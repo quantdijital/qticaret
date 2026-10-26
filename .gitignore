@@ -24,3 +24,8 @@ coverage/
 
 # Local file provider uploads (dev and test)
 apps/backend/static/
+
+# Playwright e2e runs: the temporary admin's session, results and reports
+apps/panel/e2e/.auth/
+apps/panel/e2e/.results/
+apps/panel/e2e/.report/
