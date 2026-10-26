@@ -8,6 +8,7 @@ const SECTION_VALIDATORS = {
   store: validateAndTransformBody(SECTIONS.store.patch),
   seo: validateAndTransformBody(SECTIONS.seo.patch),
   appearance: validateAndTransformBody(SECTIONS.appearance.patch),
+  inventory: validateAndTransformBody(SECTIONS.inventory.patch),
 } as const
 
 /**

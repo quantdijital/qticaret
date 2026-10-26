@@ -7,7 +7,8 @@ import { ID } from "../types"
  * change or remove, before and after. One key per price, its value the
  * amount, currency and quantity bounds: `variant:<id>:price:<id>` →
  * "1250 try". Price lists also show status, dates and type, which decide
- * the price a customer pays.
+ * the price a customer pays. A variant also shows whether it tracks stock
+ * and sells past it (F3.8): `variant:<id>:allow_backorder` → true.
  */
 
 interface PriceRow {
@@ -42,10 +43,24 @@ function prices(prefix: string, rows: readonly (PriceRow | null)[] | null | unde
   return snapshot
 }
 
+interface VariantRow {
+  id: string
+  manage_inventory?: boolean | null
+  allow_backorder?: boolean | null
+  prices?: PriceRow[]
+}
+
 interface ProductRow {
   id: string
-  variants?: ({ id: string; prices?: PriceRow[] } | null)[]
+  variants?: (VariantRow | null)[]
 }
+
+const STOCK_FIELDS = ["manage_inventory", "allow_backorder"] as const
+
+const variantSnapshot = (prefix: string, variant: Omit<VariantRow, "id">): Snapshot => ({
+  ...prices(prefix, variant.prices),
+  ...Object.fromEntries(STOCK_FIELDS.map((field) => [`${prefix}${field}`, variant[field] ?? null])),
+})
 
 async function productPrices(scope: Resolver, ids: string[], keyByProduct: boolean) {
   if (ids.length === 0) {
@@ -53,7 +68,12 @@ async function productPrices(scope: Resolver, ids: string[], keyByProduct: boole
   }
   const { data } = await graph(scope).graph({
     entity: "product",
-    fields: ["id", "variants.id", ...PRICE_FIELDS.map((field) => `variants.prices.${field}`)],
+    fields: [
+      "id",
+      "variants.id",
+      ...STOCK_FIELDS.map((field) => `variants.${field}`),
+      ...PRICE_FIELDS.map((field) => `variants.prices.${field}`),
+    ],
     filters: { id: ids },
   })
   const snapshot: Snapshot = {}
@@ -61,7 +81,7 @@ async function productPrices(scope: Resolver, ids: string[], keyByProduct: boole
     for (const variant of product.variants ?? []) {
       if (variant) {
         const prefix = `${keyByProduct ? `product:${product.id}:` : ""}variant:${variant.id}:`
-        Object.assign(snapshot, prices(prefix, variant.prices))
+        Object.assign(snapshot, variantSnapshot(prefix, variant))
       }
     }
   }
@@ -71,10 +91,11 @@ async function productPrices(scope: Resolver, ids: string[], keyByProduct: boole
 async function variantPrices(scope: Resolver, id: string | undefined): Promise<Snapshot> {
   const { data } = await graph(scope).graph({
     entity: "product_variant",
-    fields: PRICE_FIELDS.map((field) => `prices.${field}`),
+    fields: [...STOCK_FIELDS, ...PRICE_FIELDS.map((field) => `prices.${field}`)],
     filters: { id },
   })
-  return prices("", (data[0] as { prices?: PriceRow[] } | undefined)?.prices)
+  const variant = data[0] as Omit<VariantRow, "id"> | undefined
+  return variant ? variantSnapshot("", variant) : {}
 }
 
 async function priceList(scope: Resolver, id: string | undefined): Promise<Snapshot> {

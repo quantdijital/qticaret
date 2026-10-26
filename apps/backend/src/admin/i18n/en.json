@@ -216,6 +216,10 @@
       "seo_publish_gate": {
         "label": "SEO publish gate",
         "description": "A product with a critical gap (no price or image) or an SEO score under 50 cannot go live. When off, the advisor only suggests."
+      },
+      "stock_preorder": {
+        "label": "Selling past stock (preorder)",
+        "description": "A variant whose stock runs out can still be sold, as a preorder or shipped from a supplier. Turned on per variant on the product page; search engines are told it is on backorder."
       }
     },
     "attributes": {

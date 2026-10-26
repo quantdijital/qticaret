@@ -1,8 +1,8 @@
 /**
  * The stock list's views (adr/0022): every item, the ones running low and
  * the sold-out ones. Sellable stock is what is on the shelves less what is
- * held for orders, across locations; low means at or under the threshold
- * (one for all items until F3 T8 gives each its own, adr/0020).
+ * held for orders, across locations; low means at or under the item's
+ * threshold (its own, else the shop's; adr/0020).
  */
 
 export const STOCK_VIEWS = ["all", "low", "out"] as const
@@ -40,12 +40,13 @@ export function stockSlice(
   view: StockView,
   offset: number,
   limit: number,
-  threshold: number
+  thresholdOf: (id: string) => number
 ): StockSlice {
   const counts: Record<StockView, number> = { all: 0, low: 0, out: 0 }
   const matching: StockSlice["page"] = []
   for (const row of rows) {
     const available = sellable(row)
+    const threshold = thresholdOf(row.id)
     for (const key of STOCK_VIEWS) {
       counts[key] += inView(key, available, threshold) ? 1 : 0
     }

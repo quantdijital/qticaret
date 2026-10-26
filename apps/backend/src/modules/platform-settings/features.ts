@@ -24,6 +24,9 @@ export const SEO_INDEXNOW = "seo.indexnow"
 /** Refusing to publish a product the SEO advisor finds unready (F3.13, docs/14 §2). */
 export const SEO_PUBLISH_GATE = "seo.publish_gate"
 
+/** Selling a variant past its stock, as a preorder or from a supplier (F3.8, adr/0020). */
+export const STOCK_PREORDER = "stock.preorder"
+
 export const FEATURES: Readonly<Record<string, FeatureDefinition>> = Object.freeze({
   // F3.2: products that need no shipping (e-books, gift codes, courses, services)
   [NON_PHYSICAL_PRODUCTS]: {
@@ -45,6 +48,13 @@ export const FEATURES: Readonly<Record<string, FeatureDefinition>> = Object.free
     owner: "tenant",
     labelKey: "qticaret.features.seo_publish_gate.label",
     descriptionKey: "qticaret.features.seo_publish_gate.description",
+  },
+  // F3.8: off by default; a variant already selling past its stock may stay so
+  [STOCK_PREORDER]: {
+    default: false,
+    owner: "tenant",
+    labelKey: "qticaret.features.stock_preorder.label",
+    descriptionKey: "qticaret.features.stock_preorder.description",
   },
 })
 

@@ -17,14 +17,19 @@ describe("stockSlice", () => {
   })
 
   it("counts every view; low holds the sold-out ones too", () => {
-    expect(stockSlice(rows, "all", 0, 20, 5).counts).toEqual({ all: 5, low: 4, out: 2 })
+    expect(stockSlice(rows, "all", 0, 20, () => 5).counts).toEqual({ all: 5, low: 4, out: 2 })
+  })
+
+  it("judges each item by its own threshold when it has one", () => {
+    // "a" holds 50: low under its own threshold of 50
+    expect(stockSlice(rows, "low", 0, 20, (id) => (id === "a" ? 50 : 5)).counts.low).toBe(5)
   })
 
   it("puts the emptiest first in low, and pages", () => {
-    const low = stockSlice(rows, "low", 0, 20, 5)
+    const low = stockSlice(rows, "low", 0, 20, () => 5)
 
     expect(low.page.map((row) => row.id)).toEqual(["c", "e", "d", "b"])
     expect(low.page[0]).toEqual({ id: "c", available: 0 })
-    expect(stockSlice(rows, "all", 1, 2, 5).page.map((row) => row.id)).toEqual(["b", "c"])
+    expect(stockSlice(rows, "all", 1, 2, () => 5).page.map((row) => row.id)).toEqual(["b", "c"])
   })
 })

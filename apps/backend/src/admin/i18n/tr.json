@@ -216,6 +216,10 @@
       "seo_publish_gate": {
         "label": "SEO yayın kapısı",
         "description": "Kritik eksiği olan (fiyat ya da görsel yok) ya da SEO puanı 50'nin altındaki ürün yayına alınamaz. Kapalıyken danışman yalnızca öneri verir."
+      },
+      "stock_preorder": {
+        "label": "Stoksuz satış (ön sipariş)",
+        "description": "Stoku biten varyant satılmaya devam edebilir: ön sipariş ya da tedarikçiden gönderim için. Ürün sayfasında varyant bazında açılır; arama motorlarına \"ön sipariş\" olarak bildirilir."
       }
     },
     "attributes": {

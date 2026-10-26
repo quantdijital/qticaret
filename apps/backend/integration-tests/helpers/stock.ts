@@ -1,6 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
-import { createProductsWorkflow } from "@medusajs/medusa/core-flows"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { createInventoryLevelsWorkflow, createProductsWorkflow } from "@medusajs/medusa/core-flows"
 import { seedDemo } from "../../src/scripts/seed"
 import { placeOrder } from "../../src/scripts/seed/orders/place"
 
@@ -30,13 +30,17 @@ export async function stockShop(container: MedusaContainer): Promise<StockShop> 
   }
 }
 
-/** A product tracking its stock, with `quantity` on the shelf at the shop's warehouse. */
+/**
+ * A product tracking its stock, with `quantity` on the shelf at the shop's
+ * warehouse; null leaves it with no stock level at all, as Medusa's own
+ * admin does.
+ */
 export async function stockedProduct(
   container: MedusaContainer,
   shop: StockShop,
   handle: string,
-  quantity: number
-): Promise<{ variantId: string; itemId: string }> {
+  quantity: number | null
+): Promise<{ productId: string; variantId: string; itemId: string }> {
   const { result } = await createProductsWorkflow(container).run({
     input: {
       products: [
@@ -63,6 +67,7 @@ export async function stockedProduct(
       ],
     },
   })
+  const productId = result[0]?.id ?? ""
   const variantId = result[0]?.variants[0]?.id ?? ""
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "product_variant",
@@ -74,12 +79,18 @@ export async function stockedProduct(
   if (!itemId) {
     throw new Error("variant has no inventory item")
   }
-  await container
-    .resolve(Modules.INVENTORY)
-    .createInventoryLevels([
-      { inventory_item_id: itemId, location_id: shop.locationId, stocked_quantity: quantity },
-    ])
-  return { variantId, itemId }
+  if (quantity === null) {
+    return { productId, variantId, itemId }
+  }
+  // As the stock page does: through Medusa's workflow, which tells the stock ledger
+  await createInventoryLevelsWorkflow(container).run({
+    input: {
+      inventory_levels: [
+        { inventory_item_id: itemId, location_id: shop.locationId, stocked_quantity: quantity },
+      ],
+    },
+  })
+  return { productId, variantId, itemId }
 }
 
 /** One unit of the variant, ordered as a shopper does. */

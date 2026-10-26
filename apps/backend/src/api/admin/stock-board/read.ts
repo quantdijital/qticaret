@@ -3,7 +3,7 @@ import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { createSingleFlight } from "../../../lib/cache"
 import { stockSlice } from "../../../lib/dashboard"
 import type { StockRow } from "../../../lib/dashboard"
-import { LOW_STOCK_THRESHOLD } from "../dashboard/tasks/read"
+import { lowStockThresholds } from "../../../lib/stock"
 import { STOCK_BOARD_PAGE } from "./validators"
 import type { AdminGetStockBoardType } from "./validators"
 
@@ -53,7 +53,11 @@ export async function readStockBoard(scope: MedusaContainer, params: AdminGetSto
     })
   )
   const rows = data as unknown as StockRow[]
-  const slice = stockSlice(rows, params.view, params.offset, STOCK_BOARD_PAGE, LOW_STOCK_THRESHOLD)
+  const thresholds = await lowStockThresholds(
+    scope,
+    rows.map((row) => row.id)
+  )
+  const slice = stockSlice(rows, params.view, params.offset, STOCK_BOARD_PAGE, thresholds.of)
   const ids = slice.page.map((row) => row.id)
   const { data: full } = ids.length
     ? await query.graph({
@@ -88,6 +92,7 @@ export async function readStockBoard(scope: MedusaContainer, params: AdminGetSto
           sku: item.sku,
           title: item.title,
           available,
+          threshold: thresholds.of(id),
           levels: (item.location_levels ?? []).flatMap((level) =>
             level
               ? [
@@ -107,7 +112,7 @@ export async function readStockBoard(scope: MedusaContainer, params: AdminGetSto
     }),
     count: slice.count,
     counts: slice.counts,
-    threshold: LOW_STOCK_THRESHOLD,
+    threshold: thresholds.fallback,
     offset: params.offset,
     limit: STOCK_BOARD_PAGE,
     limited: (metadata?.count ?? rows.length) > rows.length,

@@ -155,12 +155,14 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Adres biçimi değiştirilemedi: bazı sayfalar aynı adrese düşüyor ya da adres başka bir kayda ait. Kontrolü yeniden çalıştırın.",
   "seo.url_style_job_required":
     'Adres biçimi tüm sayfaların adresini değiştirir; SEO ayarlarındaki "Adres biçimini değiştir" adımıyla yapın.',
+  "stock.item_unknown": "Stok kalemi bulunamadı.",
   "stock.location_has_returns":
     "Bu depoya gelmesi beklenen iadeler var; önce iadeleri teslim alın ya da iptal edin.",
   "stock.location_has_stock":
     "Bu depoda stok, rezervasyon ya da gelecek stok var; önce stoğu başka bir depoya taşıyın ya da sıfırlayın.",
   "stock.location_is_default": "Varsayılan depo silinemez; önce başka bir depoyu varsayılan yapın.",
   "stock.location_unknown": "Depo bulunamadı.",
+  "stock.preorder_disabled": "Stoksuz satış için önce Ayarlar > Özellikler'den bu özelliği açın.",
   "stock.text_invalid": "Metinde kullanılamayan karakterler var.",
   "tr_address.district_id_invalid": "İlçe seçimi geçerli değil.",
   "tr_address.district_not_in_province": "Seçilen ilçe bu ile ait değil.",

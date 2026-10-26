@@ -63,6 +63,15 @@ async function storeDefault(scope: Resolver): Promise<Snapshot> {
   }
 }
 
+async function watchOf(scope: Resolver, id: string): Promise<Snapshot> {
+  const { data } = await query(scope).graph({
+    entity: "stock_watch",
+    fields: ["threshold"],
+    filters: { inventory_item_id: id },
+  })
+  return { threshold: (data[0] as { threshold?: number | null } | undefined)?.threshold ?? null }
+}
+
 const SENSITIVE = ["phone"] as const
 
 const byId = (method: "POST" | "DELETE", path: string): AuditedResource => ({
@@ -88,6 +97,15 @@ export const STOCK_RESOURCES: readonly AuditedResource[] = [
   byId("POST", `/admin/warehouses/(?<id>${ID})`),
   byId("POST", `/admin/stock-locations/(?<id>${ID})`),
   byId("DELETE", `/admin/stock-locations/(?<id>${ID})`),
+  // An item's own low-stock threshold decides when the shop is alerted
+  {
+    method: "POST",
+    route: "POST /admin/stock-items/:id/watch",
+    pattern: new RegExp(`^/admin/stock-items/(?<id>${ID})/watch$`, "i"),
+    resourceType: "inventory_item",
+    resourceId: (params) => params["id"] ?? null,
+    snapshot: ({ scope, params }) => watchOf(scope, params["id"] ?? ""),
+  },
   ...[`/admin/warehouses/(?<id>${ID})/default`, `/admin/stores/(?<id>${ID})`].map(
     (path): AuditedResource => ({
       method: "POST",

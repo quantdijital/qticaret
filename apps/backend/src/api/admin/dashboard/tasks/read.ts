@@ -2,15 +2,14 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { LIFECYCLE_FIELDS, lifecycleOf } from "../../../../lib/dashboard"
 import type { LifecycleOrder } from "../../../../lib/dashboard"
+import { lowStockThresholds } from "../../../../lib/stock"
 
 // Open orders and stock records read at most (docs/04); past this the
 // counts are floors and the answer says so
 const MAX_READ = 2000
 
-// A placeholder until F3 T8 gives each item its own threshold (adr/0020)
-export const LOW_STOCK_THRESHOLD = 5
-
 interface StockRow {
+  id: string
   location_levels?:
     ({ stocked_quantity?: number | null; reserved_quantity?: number | null } | null)[] | null
 }
@@ -49,11 +48,15 @@ export async function readDashboardTasks(scope: MedusaContainer) {
   const orders = open.data as LifecycleOrder[]
   const stages = orders.map(lifecycleOf)
   const items = stock.data as StockRow[]
+  const thresholds = await lowStockThresholds(
+    scope,
+    items.map((row) => row.id)
+  )
   return {
     to_ship: stages.filter((stage) => stage === "to_ship").length,
     awaiting_payment: stages.filter((stage) => stage === "awaiting_payment").length,
-    low_stock: items.filter((row) => available(row) <= LOW_STOCK_THRESHOLD).length,
-    low_stock_threshold: LOW_STOCK_THRESHOLD,
+    low_stock: items.filter((row) => available(row) <= thresholds.of(row.id)).length,
+    low_stock_threshold: thresholds.fallback,
     draft_products: drafts.metadata?.count ?? drafts.data.length,
     capped:
       (open.metadata?.count ?? 0) > orders.length || (stock.metadata?.count ?? 0) > items.length,
