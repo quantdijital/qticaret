@@ -10,8 +10,8 @@ interface PageHeaderProps {
   action?: ReactNode
   /** Next to the title: a status badge. */
   badge?: ReactNode
-  /** The list this page belongs to. */
-  back?: { to: string; label: string } | undefined
+  /** The list this page belongs to, in the view it came from (`search`). */
+  back?: { to: string; search?: Record<string, string>; label: string } | undefined
 }
 
 /** Every page starts with it (docs/18 §7). */
@@ -21,6 +21,7 @@ export function PageHeader({ title, description, action, badge, back }: PageHead
       {back ? (
         <Link
           to={back.to}
+          search={back.search ?? {}}
           className="inline-flex w-fit items-center gap-1.5 text-[13px] text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="size-3.5" aria-hidden="true" />

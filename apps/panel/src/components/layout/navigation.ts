@@ -1,6 +1,7 @@
 import {
   BadgePercent,
   ChartColumnBig,
+  FileText,
   FolderTree,
   LayoutDashboard,
   Package,
@@ -60,6 +61,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { key: "promotions", to: "/promotions", icon: BadgePercent, advanced: "/promotions" },
       { key: "seo", to: "/seo", icon: Search, advanced: "/settings/seo" },
+      { key: "content", to: "/content", icon: FileText, advanced: "/" },
       { key: "reports", to: "/reports", icon: ChartColumnBig, advanced: "/" },
     ],
   },

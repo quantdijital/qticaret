@@ -47,7 +47,8 @@
     "promotions": "Promotions",
     "seo": "SEO",
     "reports": "Reports",
-    "brands": "Brands"
+    "brands": "Brands",
+    "content": "Content"
   },
   "login": {
     "title": "Sign in",
@@ -303,7 +304,9 @@
       "titleTemplate": {
         "product": "Product page title",
         "category": "Category page title",
-        "brand": "Brand page title"
+        "brand": "Brand page title",
+        "page": "Content page title",
+        "post": "Blog post title"
       },
       "descriptionTemplate": "Product page description",
       "preview": "Preview:",
@@ -332,7 +335,8 @@
         "öne_çıkan_attribute": "100% linen",
         "kısa_açıklama": "A relaxed shirt in washed linen",
         "fiyat_cümlesi": "TRY 899.00.",
-        "kargo_cümlesi": "Ships the same day."
+        "kargo_cümlesi": "Ships the same day.",
+        "başlık": "How to choose a mug?"
       },
       "style": {
         "title": "URL style",
@@ -1290,7 +1294,9 @@
         "product": "Product",
         "product_category": "Category",
         "product_collection": "Collection",
-        "brand": "Brand"
+        "brand": "Brand",
+        "page": "Content page",
+        "post": "Blog post"
       },
       "ownerDeleted": "deleted",
       "oldHint": "Addresses products, categories and collections used before. Visitors go to the record's address today, to its successor if it was deleted, or get a 410.",
@@ -1404,7 +1410,11 @@
       "problems": {
         "shouting": "all capitals",
         "repeated": "a word repeats",
-        "symbols": "runs of symbols"
+        "symbols": "runs of symbols",
+        "no_headings": "no subheadings (H2)",
+        "long_paragraphs": "paragraphs are long",
+        "no_image": "no image on the page",
+        "missing_alt": "an image lacks alt text"
       },
       "rules": {
         "TITLE-01": {
@@ -1532,6 +1542,41 @@
           "title_other": "{{count}} images have no alt text.",
           "why": "Alt text tells people who cannot see an image, and image search, what it shows; without it the image does not appear in image search.",
           "how": "In the Images section, write a short description for each image: the product, its colour, the angle."
+        },
+        "LEN-01": {
+          "title": "The text has {{words}} words; at least {{min}} is recommended.",
+          "why": "Short pages do not answer the question fully; search engines and AI answers favour thorough content.",
+          "how": "Expand the topic with examples, steps or frequently asked questions."
+        },
+        "STRUCT-01": {
+          "title": "Weak structure: {{problem}}.",
+          "why": "Question-style subheadings and paragraphs of 2–4 sentences read easily; search engines and AI answers quote sections one by one.",
+          "how": "Split the text with question-style H2/H3 headings, break long paragraphs; use a list or table where it fits."
+        },
+        "ANSWER-01": {
+          "title": "The opening has {{words}} words; a {{min}}–{{max}} word answer block is recommended.",
+          "why": "A short section that answers the question on its own before the first heading is more likely to be quoted in AI answers and featured results.",
+          "how": "Start the post with a {{min}}–{{max}} word introduction that sums up the topic."
+        },
+        "INLINK-01": {
+          "title": "{{links}} internal links; at least {{min}} is recommended at this length.",
+          "why": "Links to products and categories take the reader to shopping and help search engines discover your pages.",
+          "how": "Link the products and categories the text mentions, or add their cards."
+        },
+        "BYLINE-01": {
+          "title": "The post's author is not named.",
+          "why": "An author name builds trust; search engines want to see who wrote the post.",
+          "how": "Enter the author in the General card."
+        },
+        "COVER-01": {
+          "title": "Images: {{problem}}.",
+          "why": "Images support the text and are found in image search; alt text describes them to screen readers and search engines.",
+          "how": "Add a cover image and write what each image shows in its alt text."
+        },
+        "STALE-01": {
+          "title": "The text has not been updated for {{days}} days.",
+          "why": "Content kept up to date looks more trustworthy to readers and search engines.",
+          "how": "Review the facts; update products, prices and dates."
         }
       },
       "summaryHint": "How ready your products are for search engines; refreshed nightly and after every save.",
@@ -1812,6 +1857,135 @@
       "title": "Running low: {{name}}",
       "description_one": "{{count}} unit left (threshold {{threshold}}).",
       "description_other": "{{count}} units left (threshold {{threshold}})."
+    }
+  },
+  "content": {
+    "description": "The shop's own pages (about us, shipping and returns) and blog posts.",
+    "kinds": "Content kinds",
+    "tabs": {
+      "page": "Pages",
+      "post": "Blog posts"
+    },
+    "search": "Search by title",
+    "noMatch": "No content matches your search.",
+    "empty": {
+      "page": "No pages yet. Write pages such as about us or shipping and returns here.",
+      "post": "No blog posts yet. Add a first post about your products."
+    },
+    "add": {
+      "page": "Add page",
+      "post": "Add post"
+    },
+    "addHint": "Enter the title; you edit the text, cover and search appearance on its page next. It stays a draft until you publish it.",
+    "create": "Create",
+    "created": {
+      "page": "Page created.",
+      "post": "Post created."
+    },
+    "columns": {
+      "title": "Title",
+      "status": "Status",
+      "updated": "Last change"
+    },
+    "status": {
+      "published": "Live",
+      "draft": "Draft"
+    },
+    "general": "General",
+    "fields": {
+      "title": "Title",
+      "handle": "Page address",
+      "excerpt": "Summary",
+      "author": "Author",
+      "coverAlt": "Cover image's alt text"
+    },
+    "handleHint": "Changing a live page's address redirects the old one to the new one.",
+    "excerptHint": "Shown in lists and search results; the start of the text is used when empty.",
+    "authorHint": "Who wrote the post: it builds trust with readers and search engines.",
+    "body": "Text",
+    "bodyHint": "Write with headings, lists, tables, images and product or category cards.",
+    "cover": "Cover image",
+    "coverHint": "Shown in lists and when shared on social media.",
+    "noCover": "No cover image",
+    "addCover": "Upload image",
+    "replaceCover": "Replace image",
+    "removeCover": "Remove",
+    "coverAltHint": "Briefly describe what the image shows.",
+    "saved": "Saved.",
+    "publish": "Publish",
+    "unpublish": "Unpublish",
+    "published": "Published.",
+    "unpublished": "Unpublished.",
+    "delete": "Delete",
+    "deleteTitle": "Delete \"{{title}}\"?",
+    "deleteLive": "The page is deleted for good; its address answers \"gone\" (410).",
+    "deleteDraft": "The draft is deleted for good; another page may use its address.",
+    "deleted": "Deleted.",
+    "dates": {
+      "published": "Published",
+      "revised": "Updated"
+    },
+    "editor": {
+      "placeholder": "Start writing…",
+      "words_one": "{{words}} word",
+      "words_other": "{{words}} words",
+      "blocks": {
+        "paragraph": "Paragraph",
+        "h2": "Heading 2",
+        "h3": "Heading 3",
+        "h4": "Heading 4"
+      },
+      "tools": {
+        "block": "Text style",
+        "bold": "Bold",
+        "italic": "Italic",
+        "link": "Link",
+        "bulletList": "Bulleted list",
+        "orderedList": "Numbered list",
+        "quote": "Quote",
+        "table": "Insert table",
+        "image": "Insert image",
+        "imageAlt": "Image's alt text",
+        "productCard": "Insert product card",
+        "categoryCard": "Insert category card",
+        "addRow": "Add row",
+        "addColumn": "Add column",
+        "deleteTable": "Delete table",
+        "undo": "Undo",
+        "redo": "Redo"
+      },
+      "link": {
+        "title": "Link",
+        "hint": "Enter the path of a page on the shop (/kategori/kupa) or an address starting with http(s).",
+        "address": "Address",
+        "invalid": "Enter a valid path or http(s) address.",
+        "apply": "Apply",
+        "remove": "Remove link"
+      },
+      "image": {
+        "title": "Insert image",
+        "editTitle": "Image's alt text",
+        "hint": "The image is uploaded to the shop's media library, its metadata removed.",
+        "file": "Image",
+        "alt": "Alt text",
+        "altHint": "Briefly describe what the image shows; screen readers and search engines read it.",
+        "insert": "Insert"
+      },
+      "card": {
+        "product": "Product",
+        "category": "Category",
+        "missing": "Not found",
+        "remove": "Remove card",
+        "hint": "The card shows the product's or category's current name and link on the shop.",
+        "pick": "Search and pick",
+        "none": "No results",
+        "draft": "not live",
+        "insert": "Insert",
+        "add": {
+          "product": "Insert product card",
+          "category": "Insert category card"
+        }
+      }
     }
   }
 }

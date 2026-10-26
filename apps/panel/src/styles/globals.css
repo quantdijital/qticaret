@@ -103,3 +103,58 @@
     }
   }
 }
+
+/* The content editor's text (F3.16): readable defaults, the theme's colours */
+@layer components {
+  .qt-prose {
+    @apply text-[15px] leading-7;
+
+    & > * + * {
+      @apply mt-3;
+    }
+    & h2 {
+      @apply mt-6 text-xl font-semibold tracking-tight;
+    }
+    & h3 {
+      @apply mt-5 text-lg font-semibold;
+    }
+    & h4 {
+      @apply mt-4 text-base font-semibold;
+    }
+    & ul {
+      @apply list-disc pl-6;
+    }
+    & ol {
+      @apply list-decimal pl-6;
+    }
+    & li > p {
+      @apply my-0.5;
+    }
+    & blockquote {
+      @apply border-l-2 pl-4 text-muted-foreground italic;
+    }
+    & a {
+      @apply text-primary underline underline-offset-2;
+    }
+    & table {
+      @apply w-full border-collapse text-sm;
+    }
+    & th,
+    & td {
+      @apply border px-2 py-1.5 align-top;
+    }
+    & th {
+      @apply bg-muted/60 text-left font-medium;
+    }
+    & img {
+      @apply max-h-96 max-w-full rounded-md;
+    }
+    & img.ProseMirror-selectednode {
+      @apply ring-2 ring-ring;
+    }
+    & p.is-editor-empty:first-child::before {
+      @apply pointer-events-none float-left h-0 text-muted-foreground;
+      content: attr(data-placeholder);
+    }
+  }
+}

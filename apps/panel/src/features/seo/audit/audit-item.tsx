@@ -110,6 +110,15 @@ function EntityLink({ entity }: { entity: NonNullable<AuditItem["entity"]> }) {
           </Link>
         </GoTo>
       )
+    case "page":
+    case "post":
+      return (
+        <GoTo>
+          <Link to="/content/$id" params={{ id: entity.id }}>
+            <ActionLabel action="openPage" />
+          </Link>
+        </GoTo>
+      )
     case "collection":
       return null
   }

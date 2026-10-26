@@ -47,7 +47,8 @@
     "promotions": "Kampanyalar",
     "seo": "SEO",
     "reports": "Raporlar",
-    "brands": "Markalar"
+    "brands": "Markalar",
+    "content": "İçerik"
   },
   "login": {
     "title": "Giriş yap",
@@ -303,7 +304,9 @@
       "titleTemplate": {
         "product": "Ürün sayfası başlığı",
         "category": "Kategori sayfası başlığı",
-        "brand": "Marka sayfası başlığı"
+        "brand": "Marka sayfası başlığı",
+        "page": "İçerik sayfası başlığı",
+        "post": "Blog yazısı başlığı"
       },
       "descriptionTemplate": "Ürün sayfası açıklaması",
       "preview": "Önizleme:",
@@ -332,7 +335,8 @@
         "öne_çıkan_attribute": "%100 keten",
         "kısa_açıklama": "Yıkanmış ketenden rahat kesim gömlek",
         "fiyat_cümlesi": "899,00 TL.",
-        "kargo_cümlesi": "Aynı gün kargoda."
+        "kargo_cümlesi": "Aynı gün kargoda.",
+        "başlık": "Kupa nasıl seçilir?"
       },
       "style": {
         "title": "Adres biçimi",
@@ -1298,7 +1302,9 @@
         "product": "Ürün",
         "product_category": "Kategori",
         "product_collection": "Koleksiyon",
-        "brand": "Marka"
+        "brand": "Marka",
+        "page": "İçerik sayfası",
+        "post": "Blog yazısı"
       },
       "ownerDeleted": "silindi",
       "oldHint": "Ürün, kategori ve koleksiyonların önceden kullandığı adresler. Ziyaretçiler kaydın bugünkü adresine, silinmişse yerine geçen ürüne gider; yoksa 410 alır.",
@@ -1412,7 +1418,11 @@
       "problems": {
         "shouting": "tamamı büyük harf",
         "repeated": "aynı kelime tekrarlanıyor",
-        "symbols": "art arda işaretler var"
+        "symbols": "art arda işaretler var",
+        "no_headings": "ara başlık (H2) yok",
+        "long_paragraphs": "paragraflar uzun",
+        "no_image": "sayfada görsel yok",
+        "missing_alt": "alt metni eksik görsel var"
       },
       "rules": {
         "TITLE-01": {
@@ -1540,6 +1550,41 @@
           "title_other": "{{count}} görselin alt metni yok.",
           "why": "Alt metin, görseli göremeyenlere ve görsel aramasına görselde ne olduğunu anlatır; eksikse görsel aramada görünmez.",
           "how": "Görseller bölümünde her görsel için kısa bir açıklama yazın: ürün, rengi, açısı."
+        },
+        "LEN-01": {
+          "title": "Metin {{words}} kelime; en az {{min}} önerilir.",
+          "why": "Kısa sayfalar soruyu tam yanıtlamaz; arama motorları ve yapay zekâ yanıtları kapsamlı içeriği öne çıkarır.",
+          "how": "Konuyu örnekler, adımlar ya da sık sorulan sorularla genişletin."
+        },
+        "STRUCT-01": {
+          "title": "Metnin yapısı zayıf: {{problem}}.",
+          "why": "Soru biçimli ara başlıklar ve 2–4 cümlelik paragraflar okumayı kolaylaştırır; arama motorları ve yapay zekâ yanıtları bölümleri tek tek alıntılar.",
+          "how": "Metni soru biçimli H2/H3 başlıklarla bölün, uzun paragrafları ayırın; uygun yerde liste ya da tablo kullanın."
+        },
+        "ANSWER-01": {
+          "title": "Giriş bölümü {{words}} kelime; {{min}}–{{max}} kelimelik bir cevap bloğu önerilir.",
+          "why": "İlk başlıktan önce soruyu kendi başına yanıtlayan kısa bir bölüm, yapay zekâ yanıtlarında ve öne çıkan sonuçlarda alıntılanma şansını artırır.",
+          "how": "Yazının başına konuyu özetleyen, {{min}}–{{max}} kelimelik bir giriş yazın."
+        },
+        "INLINK-01": {
+          "title": "{{links}} iç bağlantı var; bu uzunlukta en az {{min}} önerilir.",
+          "why": "Ürün ve kategori bağlantıları okuru alışverişe taşır ve arama motorlarının sayfalarınızı keşfetmesine yardım eder.",
+          "how": "Metinde geçen ürün ve kategorilere bağlantı ya da kart ekleyin."
+        },
+        "BYLINE-01": {
+          "title": "Yazının yazarı belirtilmemiş.",
+          "why": "Yazar adı güven verir; arama motorları yazıyı kimin yazdığını görmek ister.",
+          "how": "Genel bilgiler kartında yazar adını girin."
+        },
+        "COVER-01": {
+          "title": "Görsel: {{problem}}.",
+          "why": "Görseller metni destekler ve görsel aramada bulunur; alt metin görmeyenlere ve arama motorlarına görseli anlatır.",
+          "how": "Kapak görseli ekleyin ve her görselin ne gösterdiğini alt metinde yazın."
+        },
+        "STALE-01": {
+          "title": "Metin {{days}} gündür güncellenmedi.",
+          "why": "Güncel tutulan içerik okurun ve arama motorlarının gözünde daha güvenilirdir.",
+          "how": "Bilgileri gözden geçirin; ürünleri, fiyatları ve tarihleri güncelleyin."
         }
       },
       "summaryHint": "Ürünlerinizin arama motorlarına hazırlığı; her gece ve her kayıttan sonra yenilenir.",
@@ -1820,6 +1865,135 @@
       "title": "Stok azalıyor: {{name}}",
       "description_one": "{{count}} adet kaldı (eşik {{threshold}}).",
       "description_other": "{{count}} adet kaldı (eşik {{threshold}})."
+    }
+  },
+  "content": {
+    "description": "Mağazanın kendi sayfaları (hakkımızda, kargo ve iade) ve blog yazıları.",
+    "kinds": "İçerik türleri",
+    "tabs": {
+      "page": "Sayfalar",
+      "post": "Blog yazıları"
+    },
+    "search": "Başlığa göre ara",
+    "noMatch": "Aramanızla eşleşen içerik yok.",
+    "empty": {
+      "page": "Henüz sayfa yok. Hakkımızda, kargo ve iade gibi sayfaları buradan yazın.",
+      "post": "Henüz blog yazısı yok. Ürünlerinizi anlatan ilk yazıyı ekleyin."
+    },
+    "add": {
+      "page": "Sayfa ekle",
+      "post": "Yazı ekle"
+    },
+    "addHint": "Başlığı yazın; metni, kapağı ve arama görünümünü açılan sayfada düzenlersiniz. Yayınlayana kadar taslak kalır.",
+    "create": "Oluştur",
+    "created": {
+      "page": "Sayfa oluşturuldu.",
+      "post": "Yazı oluşturuldu."
+    },
+    "columns": {
+      "title": "Başlık",
+      "status": "Durum",
+      "updated": "Son değişiklik"
+    },
+    "status": {
+      "published": "Yayında",
+      "draft": "Taslak"
+    },
+    "general": "Genel bilgiler",
+    "fields": {
+      "title": "Başlık",
+      "handle": "Sayfa adresi",
+      "excerpt": "Özet",
+      "author": "Yazar",
+      "coverAlt": "Kapak görselinin alt metni"
+    },
+    "handleHint": "Yayındaki sayfanın adresini değiştirirseniz eski adres yeni adrese yönlendirilir.",
+    "excerptHint": "Listelerde ve arama sonucunda görünür; boşsa metnin başı kullanılır.",
+    "authorHint": "Yazıyı kimin yazdığı: okura ve arama motorlarına güven verir.",
+    "body": "Metin",
+    "bodyHint": "Başlıklar, listeler, tablolar, görseller ve ürün ya da kategori kartlarıyla yazın.",
+    "cover": "Kapak görseli",
+    "coverHint": "Listelerde ve sosyal medyada paylaşılınca görünür.",
+    "noCover": "Kapak görseli yok",
+    "addCover": "Görsel yükle",
+    "replaceCover": "Görseli değiştir",
+    "removeCover": "Kaldır",
+    "coverAltHint": "Görselde ne olduğunu kısaca yazın.",
+    "saved": "Kaydedildi.",
+    "publish": "Yayınla",
+    "unpublish": "Yayından kaldır",
+    "published": "Yayına alındı.",
+    "unpublished": "Yayından kaldırıldı.",
+    "delete": "Sil",
+    "deleteTitle": "\"{{title}}\" silinsin mi?",
+    "deleteLive": "Sayfa kalıcı olarak silinir; adresi ziyaret edenlere \"kaldırıldı\" (410) yanıtı verilir.",
+    "deleteDraft": "Taslak kalıcı olarak silinir; adresi başka bir sayfa kullanabilir.",
+    "deleted": "Silindi.",
+    "dates": {
+      "published": "Yayın tarihi",
+      "revised": "Güncelleme tarihi"
+    },
+    "editor": {
+      "placeholder": "Yazmaya başlayın…",
+      "words_one": "{{words}} kelime",
+      "words_other": "{{words}} kelime",
+      "blocks": {
+        "paragraph": "Paragraf",
+        "h2": "Başlık 2",
+        "h3": "Başlık 3",
+        "h4": "Başlık 4"
+      },
+      "tools": {
+        "block": "Metin biçimi",
+        "bold": "Kalın",
+        "italic": "İtalik",
+        "link": "Bağlantı",
+        "bulletList": "Madde listesi",
+        "orderedList": "Numaralı liste",
+        "quote": "Alıntı",
+        "table": "Tablo ekle",
+        "image": "Görsel ekle",
+        "imageAlt": "Görselin alt metni",
+        "productCard": "Ürün kartı ekle",
+        "categoryCard": "Kategori kartı ekle",
+        "addRow": "Satır ekle",
+        "addColumn": "Sütun ekle",
+        "deleteTable": "Tabloyu sil",
+        "undo": "Geri al",
+        "redo": "Yinele"
+      },
+      "link": {
+        "title": "Bağlantı",
+        "hint": "Mağazadaki bir sayfanın yolunu (/kategori/kupa) ya da http(s) ile başlayan bir adres yazın.",
+        "address": "Adres",
+        "invalid": "Geçerli bir yol ya da http(s) adresi yazın.",
+        "apply": "Uygula",
+        "remove": "Bağlantıyı kaldır"
+      },
+      "image": {
+        "title": "Görsel ekle",
+        "editTitle": "Görselin alt metni",
+        "hint": "Görsel mağazanın medya kütüphanesine yüklenir; meta verisi temizlenir.",
+        "file": "Görsel",
+        "alt": "Alt metin",
+        "altHint": "Görselde ne olduğunu kısaca yazın; görmeyenler ve arama motorları bunu okur.",
+        "insert": "Ekle"
+      },
+      "card": {
+        "product": "Ürün",
+        "category": "Kategori",
+        "missing": "Bulunamadı",
+        "remove": "Kartı kaldır",
+        "hint": "Kart, ürünün ya da kategorinin mağazadaki güncel adı ve bağlantısıyla gösterilir.",
+        "pick": "Ara ve seç",
+        "none": "Sonuç yok",
+        "draft": "yayında değil",
+        "insert": "Ekle",
+        "add": {
+          "product": "Ürün kartı ekle",
+          "category": "Kategori kartı ekle"
+        }
+      }
     }
   }
 }
