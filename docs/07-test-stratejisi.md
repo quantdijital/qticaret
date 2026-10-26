@@ -11,11 +11,17 @@
 | SEO denetimi | Yerel `/seo-*` skill'leri, Lighthouse | F18 demo mağaza; F14 geçiş öncesi/sonrası |
 | Yük | k6 | F15 |
 
+## Entegrasyon testlerinin koşusu
+- Her test dosyası Medusa'yı yeniden açar; bellek birikir. Testler tek bir jest alt sürecinde koşar ve bu süreç bir dosyadan sonra 1 GB'ı geçince yenisiyle değiştirilir (`apps/backend/jest.config.js`, `workerIdleMemoryLimit`). `--runInBand` bu sınırı yok saydığı için kullanılmaz.
+- Yerelde hepsi tek komut: `pnpm --filter backend test:integration:http` (49 dosya yaklaşık 8 dakika).
+- CI'da HTTP testleri üç parçaya bölünür (`--shard=N/3`) ve modül testleriyle yan yana dört işte koşar; her işin kendi Postgres'i var.
+- CI'da typecheck ve lint, `medusa build`'in ürettiği `.medusa/types`'tan sonra koşar; yerelde bu tipleri `medusa develop` üretir.
+
 ## E2E (panel)
 - Yer: `apps/panel/e2e/` (Playwright 1.64, `@axe-core/playwright`). Çalıştırma: backend açıkken `pnpm --filter @qticaret/panel test:e2e`. Panelin dev sunucusu kapalıysa test onu kendisi başlatır.
 - Her çalıştırma kendi geçici yöneticisini açar: Medusa CLI ile rastgele parolalı `e2e-…@example.com`. Giriş sayfasından girer; sonunda `src/scripts/remove-e2e-admin.ts` ile silinir. Kimsenin hesabı ya da tarayıcı profili kullanılmaz; oturum dosyası git dışında (`e2e/.auth`).
-- Duman testleri veri değiştirmez: ana bölümler ve ayar sayfaları hatasız açılır (yakalanmamış betik hatası, 5xx yanıt ve panelin hata satırları aranır), ürün arama ve detay çalışır, içe aktarma "Kontrol et" adımı çalışır.
-- Erişilebilirlik: axe, WCAG 2.1 A/AA kurallarıyla çok kullanılan ekranlarda "ciddi" ve "kritik" bulgu bulmamalı.
+- Duman testleri veri değiştirmez: ana bölümler ve ayar sayfaları hatasız açılır (yakalanmamış betik hatası, 5xx yanıt ve panelin hata satırları aranır), ürün arama ve detay çalışır, içe aktarma "Kontrol et" adımı çalışır, toplu düzenleme seçim ve alan kontrolüne kadar çalışır (uygulanmaz).
+- Erişilebilirlik: axe, WCAG 2.1 A/AA kurallarıyla çok kullanılan ekranlarda (ürün sihirbazı ve toplu düzenleme penceresi dahil) "ciddi" ve "kritik" bulgu bulmamalı. Kurulmamış mağazanın gördüğü öğeler (kurulum kartı) yalnızca CI'ın boş mağazasında görünür; yerelde görünmeyen bir bulgu CI'da çıkabilir.
 - CI: `e2e` işi boş veritabanına migration ve demo mağazayı kurar, backend'i başlatır, testleri koşar. Başarısız çalıştırmanın raporu 7 gün saklanır.
 - Yeni ekran ya da akış eklendiğinde duman listesine eklenir (docs/06 kontrol listesi).
 

@@ -48,7 +48,7 @@ Dashboard, Siparişler (aşama sekmeleri + detay: kargoya ver, teslim edildi, ta
 | Ayarlar > Mağaza künyesi | Sayfa | Unvan, MERSİS, VKN, KEP, ETBİS; eksik alan uyarısı (F13) |
 | Denetim kaydı | Sayfa | Filtrelenebilir audit log |
 | İçe/dışa aktarma | Sayfa | Şablon indir, dosya yükle, ilerleme, satır bazlı hata raporu (F3) |
-| Toplu düzenleme | Sayfa | Fiyat/stok/durum toplu güncelleme (F3) |
+| Toplu düzenleme | Ürün listesi (seçim çubuğu + pencere) | Fiyat, stok, yayın durumu, kategori, SEO şablonu, eksik alt metin; iş olarak koşar, rapor indirilir (F3.10) |
 | Yönlendirmeler | Sayfa | 301/302 listesi, toplu yükleme (F3) |
 | Stok | DataTable (P3, F3) | Depo bazlı stok, düşük stok listesi, hareket geçmişi |
 | Fiyat geçmişi | Ürün sayfası bölümü (F4) | Varyant fiyat grafiği, son 30 gün en düşük |

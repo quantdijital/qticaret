@@ -112,3 +112,10 @@ Medusa 2.21.2'de doğrulananlar (Context7 + v2.21.2 kaynağı):
   - Bayrak adı `stock.preorder`. Koruma `src/api/validation/backorder-gate.ts`'de ve Medusa'nın altı ürün/varyant yolunu kapsıyor; toplu yollar ayrı kayıtlı, çünkü Medusa onları `:id` middleware'inden önce yanıtlıyor.
   - Boş seviye abonelikle değil, ürün/varyant hook'larında istek içinde açılıyor. Panelin aynı anda yazdığı seviyeyle çakışma olmuyor.
   - JSON-LD `BackOrder` T9'dan beri vardı.
+
+## Uygulama notu (F3 T15–T16, 2026-10-26)
+
+- **Kendi yazma yollarımız:** `src/workflows/stock/write-levels.ts` seviyeleri Medusa'nın seviye workflow'larıyla yazıyor, aynı workflow'da defter satırını yazanın nedeniyle (`import` ya da `bulk_edit`), işin kimliği (`reference`) ve isteyen kişiyle (`actor_id`) kaydediyor. Satır, seviyelerin olayları yayılmadan önce yazıldığı için subscriber fark bulmuyor (HTTP testleri).
+  - T15'teki içe aktarma bu yolu kullanmıyordu; hareketleri `manual` olarak kaydediliyordu. T16'da düzeltildi.
+- **Toplu düzenleme (F3.10):** varsayılan depoda miktarı ayarla ya da ekle/çıkar. "Ekle/çıkar" Medusa'nın `adjustInventoryLevelsStep`'iyle, kalem kilidi altında fark olarak yazılıyor (sipariş akışlarının kullandığı kilit); okuma ile yazma arasında satılan stok geri gelmiyor. Stoğu takip edilmeyen ve kit varyantlar atlanıyor; sıfırın altına inecek ürün bütünüyle atlanıyor.
+- **Kararın değiştiği yer:** Yazılan seviyelerden sonra defter satırı ya da düşük stok kontrolü düşerse seviyeler geri alınmıyor (`continueOnPermanentFailure`). Aksi halde geri alınan seviyenin defterde satırı kalıyordu. Eksik satırı seviyelerin olayı ya da gece eşitlemesi yazıyor.

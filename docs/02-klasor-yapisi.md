@@ -87,6 +87,7 @@ repo/
 │   │   │   │   ├── catalog/         # GTIN doğrulama, ölçü/ağırlık kuralı (F3.1), id parçalama (IN listeleri)
 │   │   │   │   ├── sheets/          # xlsx okuyucu (güvenli zip/XML) + yazl ile akan xlsx yazıcı, CSV/xlsx tanıma (F3.9, adr/0018)
 │   │   │   │   ├── catalog-sheet/   # ürün tablosunun sütunları, hücre okuma (TR sayı), satırları ürüne toplama (F3.9)
+│   │   │   │   ├── media/           # görsel temizleme ve türevler (sharp, F3.3), ürün adından alt metin önerisi (F3.10)
 │   │   │   │   ├── money/           # tutar dönüşümleri
 │   │   │   │   ├── dashboard/       # panel okuma modelleri: dönem, sipariş aşaması, özet/rapor, sipariş ve stok panosu (adr/0022)
 │   │   │   │   ├── checkout/        # checkout kuralları: KDV için ülke, kargo gerekmeyen sepette kargo yöntemi yok (F3.2)

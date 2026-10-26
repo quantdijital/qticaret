@@ -3,7 +3,7 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a, T1b, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14a, T14b, T15 bitti; Playwright e2e altyapısı kuruldu; sırada T16 toplu düzenleme). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı. F1, F2 ve F3 dalları push edildi (kullanıcı 2026-10-26: "pushları sen önerdiğinde yapabilirsin"); PR açılmadı.
+**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a–T16 bitti, T16 toplu düzenleme dahil; Playwright e2e altyapısı kuruldu; CI düzeltmeleri push edildi; sırada F3 kabul kriterlerinin gözden geçirilip fazın kapatılması). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı. F1, F2 ve F3 dalları push edildi (kullanıcı 2026-10-26: "pushları sen önerdiğinde yapabilirsin"); PR açılmadı.
 
 ## Son oturum özeti
 **2026-10-25/26 gece (kullanıcı yatarken, "panel işlerini tamamla" talimatıyla).** Panelin ekranları yazıldı; her biri gerçek veriyle tarayıcıda denendi (CDP ekran görüntüsü, test kayıtları sonra silindi). Commit'ler `e11a201`…`6d63df7`, push yok.
@@ -315,6 +315,21 @@
   - axe'ın bulduğu iki sorun düzeltildi: süs grafiklerinde gizli alanda klavye durağı, sipariş durumu çubuğunda rolsüz `aria-label`. Kenar çubuğu artık adlandırılmış bir `<nav>` alanı ("Ana menü").
   - CI'da yeni `e2e` işi: Postgres ve Redis, migration ve demo mağaza, backend, Chromium. Başarısız çalıştırmanın raporu 7 gün saklanıyor (`actions/upload-artifact` v7.0.2, SHA'yla sabit).
   - Komut: `pnpm --filter @qticaret/panel test:e2e`. Yerelde 10 test yaklaşık 36 saniyede geçiyor.
+- **CI düzeltildi (GitHub'da F2'den beri kırmızıydı):**
+  - Typecheck, Medusa'nın `medusa build` ile ürettiği `.medusa/types` oluşmadan koşuyordu (turbo görevleri yan yana); `query.graph` sonuçları tipsiz kalıp 19 "implicit any" hatası veriyordu. CI artık önce build'i koşuyor.
+  - Build de aslında kırıktı: Medusa Admin uzantılarından dördü `lib/seo` barrel'ını içe aktarıyordu, o da `node:crypto`'yu tarayıcı paketine taşıyordu. Dosyaların kendisi içe aktarılıyor; lint kuralı tekrarını önlüyor.
+  - Entegrasyon testleri tek süreçte belleği dolduruyordu (`--runInBand`). Artık tek jest alt süreci, 1 GB'ı geçince dosya arasında yenileniyor; yerelde 49 dosya tek komutta yaklaşık 8 dakika. CI'da HTTP üç parça + modüller dört paralel işte (tek işte 25 dakikayı aşıyordu).
+  - CI'ın boş mağazasında ilk e2e koşusu iki sorun buldu: kurulum kartının adsız ilerleme çubuğu ve yalnızca tik içeren adım düğmeleri (axe), arama kutusunun 300 ms bekleyen aramasının ürüne tıklamadan sonra sayfayı listeye geri götürmesi. İkisi de düzeltildi; arama kutusundan çıkınca arama hemen yapılıyor.
+  - `sitemap_state` "duplicate key" satırları Postgres'in kendi logu; `markDirty` bu yarışı zaten yakalıyor, hata değil.
+- **F3 T16 (F3.10) bitti: toplu düzenleme.**
+  - **İş:** `catalog.bulk_edit`, genel `POST /admin/async-jobs` ile; girdi en çok 1000 ürün kimliği ve tek bir değişiklik. Her ürün önce mevcut durumundan planlanıyor (saf fonksiyonlar, birim testli), sonra panelin kendi kaydının kullandığı workflow'la tek tek yazılıyor; bir ürünün reddi yalnızca o ürünü etkiliyor.
+  - **Değişiklikler:** fiyat (yeni fiyat, yüzde ya da tutar artır/azalt; temel TRY fiyatı, diğer para birimleri ve fiyat listeleri korunuyor), stok (varsayılan depoda ayarla/ekle/çıkar; defterde `bulk_edit`, iş ve kişi), yayın durumu (SEO yayın kapısı ve ölçü kuralı ürün route'undaki gibi), kategori (ekle/çıkar/birincil yap), SEO şablonu (ürünün kendi başlık/açıklaması şablona bırakılıyor), eksik alt metinleri doldurma (ürün adı + tek varyanta ait görselde varyant değerleri).
+  - **Kayıt:** denetim kaydında başlangıç (değişiklik, ürün sayısı), her yazılan ürün için ayrı kayıt (kaynak `product`, her alanın önce/sonra değeri; fiyat route'larıyla aynı biçim) ve bitiş (sayılar, değişen ürünlerin hepsi); rapor xlsx, ürün başına satır ve neden.
+  - **Bağımsız inceleme (kod + güvenlik) ve düzeltmeler:** ürünler baştan değil 20'şerlik parçalarla yazılmadan hemen önce okunuyor; stok ekle/çıkar Medusa'nın kalem kilidiyle fark olarak yazılıyor; içe aktarma ve toplu düzenleme aynı anda çalışamıyor (iş grubu `catalog.write`); fiyat kuruş ve baz puanla (201 TL +%0,5 = 202,01); kategori adımı düşerse kategoriler geri geliyor (testli); birincil kategori çıkarılınca en derin kalan kategori birincil oluyor; kit varyantları atlanıyor; stok yazıldıktan sonra defter ya da uyarı adımı düşerse stok geri alınmıyor; uzun adda alt metin numarası korunuyor.
+  - **Panel:** ürün listesinde satır seçimi (sayfalar ve aramalar arasında kalıyor), seçim çubuğu (seçili sayı, eşleşenlerin hepsini seç, seçimi kaldır, "Toplu düzenle" menüsü), değişiklik penceresi (Türkçe sayı biçimi, sunucunun sınırlarıyla alan hatası, fiyatta örnek), ardından ilerleme, sonuç ve rapor. Pencere iş sürerken kapatılabiliyor; iş Ayarlar › İşler'de.
+  - **İçe aktarmadaki iki açık kapandı:** içe aktarma taslağı yayına alırken SEO yayın kapısını atlıyordu ve stok hareketlerini defterde `manual` yazıyordu. Kapı kararı `publishGate()` olarak paylaşıldı; stok `writeStockLevelsWorkflow` ile `import` nedeniyle yazılıyor (ADR-0020 uygulama notu).
+  - **Ek düzeltmeler:** panelin diyalog ve yan panel kapat düğmeleri ekran okuyucuya İngilizce "Close" diyordu; `Checkbox` kısmi seçimde tik gösteriyordu (artık çizgi); `Progress` değeri ekran okuyucuya iletmiyordu.
+  - **Testler:** birim (planlayıcılar, girdi şeması, alt metin önerisi; panelde form ve sayı okuma), HTTP 6 test (`catalog-bulk-edit`: fiyat + fiyat listesi + rapor + denetim, stok defteri, yayın kapısı ve ölçü kuralı, kategori, SEO şablonu ve alt metin, geçersiz girdi), içe aktarma testine defter nedeni; e2e 13 test (toplu düzenleme seçimi ve pencere erişilebilirliği dahil).
 - **Gözden geçir (kullanıcı yokken önerilen seçenekle verilen kararlar):**
   1. Bayrak adı `catalog.non_physical`, mağaza tarafından açılır, varsayılan kapalı. Etiketleri Medusa Admin'de ve panelde var.
   2. Kargo gerekmeyen kalemler sipariş ödenince "teslim edildi" sayılıyor. Dijital teslimat (indirme bağlantısı, kod gönderimi) F9 bildirimleriyle gelecek.
@@ -486,6 +501,19 @@
   114. Denetim kaydı: uygulama başlarken ve biterken `system` kaydı (kim, dosyanın sha256'sı, sayılar, en çok 500 tanıtıcı). Alan bazında önce/sonra yok (64 kB sınırı).
   115. SEO ön değerlendirmesi yalnızca yeni ürünler için. Görseller tabloda yok (panelden); olmayan görsel danışman bulgusu olarak görünüyor.
   116. Tek seferde en çok 5000 satır, 10 MB. Bir içe aktarma çalışırken ikincisi kuyruğa alınamıyor (singleton).
+  117. **Toplu düzenleme genel iş kuyruğundan** (`catalog.bulk_edit`, iç tip değil): girdi yalnızca kimlikler ve değişiklik, dosya yok; şeması iş tipinde. Tek seferde en çok 1000 ürün, aynı anda tek toplu düzenleme.
+  118. **Seçim panelde kimlik listesi.** "Eşleşenlerin hepsini seç" listenin arama ve görünümüyle en çok 1000 kimliği okuyor; daha fazlasında aramayı daraltmayı söylüyor. Sunucuda filtreyle seçim yok. Seçim sayfalar ve aramalar arasında kalıyor; iş başlatılınca bırakılıyor.
+  119. **Fiyat:** yalnızca temel TRY fiyatı (içe aktarmayla aynı tanım). Yüzde ve tutar kuruşa yuvarlanıyor (yarım yukarı); yüzde −99 ile +1000 arası. Bir varyantın yeni fiyatı sıfır ya da altına düşerse ürün bütünüyle atlanıyor. TRY fiyatı olmayan varyant yalnızca "Yeni fiyat" ile fiyat alıyor.
+  120. **Stok:** yalnızca varsayılan depo. "Ayarla" miktarı yazıyor; "ekle/çıkar" seviyeyi Medusa'nın kalem kilidi altında fark olarak değiştiriyor (arada satılan stok geri gelmiyor). Sıfırın altına inecek ürün bütünüyle atlanıyor. Seviyesi olmayan varyanta seviye açılıyor (0'a ayarlamak hariç). Birden çok envanter kalemli ya da kalemden birden fazla adet düşen varyantlar (kitler) atlanıyor; içe aktarma da aynı.
+  121. **Yayın:** SEO yayın kapısının tuttuğu ürün "Atlandı", ölçü kuralının reddettiği "Hata" olarak raporlanıyor. Kapı, ürünü değişiklikten önceki haliyle değerlendiriyor (route'taki gibi).
+  122. **Kategori:** çıkarılan kategori birincil ise kalanların en derini (eşitlikte en küçük kimlik) birincil oluyor; kalan yoksa boşalıyor. Aynı seçim kuralı SEO payload'ında ve danışmanın tek tık düzeltmesinde de (`lib/catalog` `deepestCategory`). "Birincil yap" ürün kategoride değilse önce ekliyor. Medusa'nın `batchLinkProductsToCategoryWorkflow`'u kullanılmadı: ürün hook'larımızı atlıyor ve ürün zaten kategorideyse geri alması kategoriyi siliyor.
+  123. **SEO şablonu:** ürünün kendi başlık ve/veya açıklaması siliniyor (danışmanın tek tık düzeltmesinin toplu hali). Odak kelime kapsamda değil.
+  124. **Alt metin:** yalnızca boş olanlar dolduruluyor; üzerine yazma seçeneği yok. Aynı metni alacak görseller ", görsel N" ile ayrılıyor (sunucu metni, F19'a kadar TR). Medya kaydı olmayan görsel atlanıyor, raporda yazılıyor.
+  125. **Geri alma yok:** toplu değişikliğin "geri al" düğmesi yok. Her ürünün denetim kaydında alan alan önce/sonra değerleri var; geri almak gerekirse oradan okunur.
+  126. İş listesinde (`GET /admin/async-jobs`) `*_ids` girdileri sayı olarak gösteriliyor (`product_count`); kimlik listesi API'den dönmüyor.
+  127. **İçe aktarma ve toplu düzenleme aynı anda çalışmıyor:** iş tiplerine grup eklendi (`catalog.write`); gruptaki tipler kuyruğa alınırken birlikte kilitleniyor ve birbirini bekletiyor (409).
+  128. **Yayın kapısı yalnızca var olan taslağı yayına alırken:** ürün route'unda olduğu gibi. Yeni ürünü doğrudan yayında açmak (panelden, Admin API'den ya da tablodan) kapıya takılmıyor; kayıtlı bir ürün olmadan değerlendirme yapılamıyor. Kapıyı oluşturmaya da uygulamak ayrı bir karar (taslak oluştur → değerlendir → yayınla).
+  129. **Yetki:** toplu düzenleme her yöneticiye açık (bugün rol ayrımı yok). F12 rol matrisine "toplu fiyat/stok değişikliği" ayrı izin olarak eklenmeli.
 - **Bilinen sınırlar (devreden):**
   - JSON-LD'yi storefront basarken `<`, `>` ve `&` kaçışlanmalı (`</script>` içeren başlık ya da metin). Kural docs/13'te var; F18 kabulüne sözleşme testi olarak eklenecek.
   - Editöre yüklenip bir günden uzun süre kaydedilmeyen görseli gece süpürmesi siler; kayıt `content.image_unknown` verir.
@@ -810,7 +838,7 @@
 | T14a ✅ | F3.16b | Facet landing sayfaları, özgünlük kapısı. KK: özgünlük < %30 | T10, T13 | — |
 | T14b ✅ | F3.17 | Facet parametre kuralları (canonical, 301, noindex), robots engelleri. KK: robots facet parametrelerini engelliyor, landing yolunu engellemiyor | T14a | — |
 | T15 ✅ | F3.9 | xlsx okuyucu + `yazl` yazıcı, TR şablonu, `catalog.import`/`catalog.export` işleri, kontrollü yükleme yolu, satır hata raporu, advisor ön özeti. KK: 1000 satır, formül kaçışı | T1, T2, T5, T8, `yazl` onayı | 0018 |
-| T16 | F3.10 | Toplu düzenleme: fiyat, stok, yayın durumu, kategori, SEO şablonu, alt metin | T8, T15 | — |
+| T16 ✅ | F3.10 | Toplu düzenleme: fiyat, stok, yayın durumu, kategori, SEO şablonu, alt metin | T8, T15 | — |
 
 Paralel zincirler:
 - T1 → T3 → T4 → T9 → T11 → T12
