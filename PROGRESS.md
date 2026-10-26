@@ -3,7 +3,7 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: BİTTİ** (T1a–T16; kabul kriterlerinin hepsi testlerle işaretli, docs/03; son eksik iki kanıt, danışmanın p95 ölçümü ve yedi sayfa türünün SEO sözleşme testi, kapanışta eklendi). Playwright e2e altyapısı kuruldu; CI düzeltildi. **F4 — Fiyatlandırma ve promosyon: DEVAM** (plan ve ADR-0023/0024/0025 kabul edildi; U1 `price-history`, U4 kuponlar, U7 indirim dağılımı ve iade tutarı, U2 fiyat listeleri, U3 indirim gösterimi, U5 tek kullanımlık kodlar, U6 otomatik kampanyalar ve kargo bedava eşiği, U8 hediye kartı ve mağaza kredisi bitti (KK1–KK4 işaretli); sırada F4 kapanışı). Dal `f4-pricing-promotions`. Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı. F1, F2 ve F3 dalları push edildi (kullanıcı 2026-10-26: "pushları sen önerdiğinde yapabilirsin"); PR açılmadı.
+**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: BİTTİ** (T1a–T16; kabul kriterlerinin hepsi testlerle işaretli, docs/03; son eksik iki kanıt, danışmanın p95 ölçümü ve yedi sayfa türünün SEO sözleşme testi, kapanışta eklendi). Playwright e2e altyapısı kuruldu; CI düzeltildi. **F4 — Fiyatlandırma ve promosyon: BİTTİ** (plan ve ADR-0023/0024/0025 kabul edildi; U1 `price-history`, U4 kuponlar, U7 indirim dağılımı ve iade tutarı, U2 fiyat listeleri, U3 indirim gösterimi, U5 tek kullanımlık kodlar, U6 otomatik kampanyalar ve kargo bedava eşiği, U8 hediye kartı ve mağaza kredisi bitti (KK1–KK4 işaretli); F4 kapanış incelemesi yapıldı, bulgular düzeltildi: F4 BİTTİ). Dal `f4-pricing-promotions`. Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı. F1, F2 ve F3 dalları push edildi (kullanıcı 2026-10-26: "pushları sen önerdiğinde yapabilirsin"); PR açılmadı.
 
 ## Son oturum özeti
 **2026-10-25/26 gece (kullanıcı yatarken, "panel işlerini tamamla" talimatıyla).** Panelin ekranları yazıldı; her biri gerçek veriyle tarayıcıda denendi (CDP ekran görüntüsü, test kayıtları sonra silindi). Commit'ler `e11a201`…`6d63df7`, push yok.
@@ -578,6 +578,16 @@
   166. **Raporlar dört sekme:** Özet (göstergeler, grafik, sipariş durumları, ilk 5 ürün ve kategori), Ürünler (100 ürüne kadar; arama, satış/adet sıralaması, ortalama fiyat, pay, CSV), Kategoriler (pay ve tutar, CSV), Gün gün (grafik ve tam tablo). Dönem adreste, sekmeler arasında korunuyor; her sekmenin üstünde dört gösterge.
   167. **Görünüm ayarları yeniden düzenlendi:** "Renkler" (marka rengi, hazır renkler, mod) ve "Düzen" (menü, köşeler, yoğunluk; eşit boy segment kontroller) yan yana, altında panelin minyatürü (menü zemini dahil). Kaydet/Geri al sayfa başlığında.
   168. **Detay sayfalarında uzayan kartın içi:** sipariş toplamları kartın dibinde (fatura gibi); siparişi olmayan müşterinin boş durumu kartın ortasında. SEO danışmanındaki ürün listesi iki sütun (puan özetiyle aynı boyda).
+  169. **F4 kapanış incelemesi (kod + güvenlik, 2026-10-27 gecesi) ve düzeltmeler.** Ayrıntı ADR-0023/0024/0010 notlarında:
+     - 30 gün kuralı: yükselen indirimli fiyat yeni indirim sayılıyor, önceki fiyatı 30 günün en düşüğü (yasal risk, testli).
+     - Ödeme anında yeniden denetim: tek kod kuralı ve kargo fiyatının sepete göre güncel olması (kupon eşiğin altına indirince 0 TL kargo kalıyordu; artık `cart.shipping_changed`).
+     - `/store/price-display` yalnızca yayındaki ve satış kanalındaki ürünler.
+     - Kodlar: sunucuda biçim denetimi, istek başına en çok 5 kod, tek kullanımlık kod 12 karakter, sepet başına deneme IP'den bağımsız da sayılıyor.
+     - Fiyat listesi başlangıç/bitişi dakikalık işle sınır anında kaydediliyor.
+     - Kod partisi tek telafili workflow; bütçe kopyalanıyor; panelden durdurulabiliyor.
+     - Kampanya kaydı tek istek, tek workflow (`POST /admin/promotions/:id/offer`): yarım kaydedilmiş kampanya kalmıyor.
+     - Denetim kaydı kampanyanın bütün kurallarını içeriyor; kod dökümü hassas okuma.
+     - Doğrulanıp değişmeyenler: Store alanları kampanya içine ulaşamıyor; misafir kişi başı sınırı çalışıyor; çifte harcama yok.
 - **Bilinen sınırlar (devreden):**
   - JSON-LD'yi storefront basarken `<`, `>` ve `&` kaçışlanmalı (`</script>` içeren başlık ya da metin). Kural docs/13'te var; F18 kabulüne sözleşme testi olarak eklenecek.
   - Editöre yüklenip bir günden uzun süre kaydedilmeyen görseli gece süpürmesi siler; kayıt `content.image_unknown` verir.
@@ -601,6 +611,11 @@
   - Hediye kartı ve mağaza kredisi (Medusa credit line'ları) sipariş parasında toplam olarak var (`credit`), satır paylarına dağıtılmıyor. İadede kredi payının krediye dönmesi F7 iade akışıyla (ADR-0025 notu).
   - Hediye kartı listesi en yeni 200 kartı okuyor (sayfalama ve kodla arama yok). Kart düzenleme/iptal ve krediden düşme panelde yok (Medusa Admin'de).
   - Kodla kart sorgusu (`GET /store/gift-cards/:code`) kodu büyük harfe çevirmiyor (yol parametresi); storefront kodu büyük harfle göndermeli (F18).
+  - Kod eklenince Medusa kargoyu yeniden fiyatlamıyor; ödeme `cart.shipping_changed` ile duruyor. Storefront (F18) kod ekleyip çıkarınca kargoyu yeniden seçtirmeli.
+  - Ücretsiz kargo fiyatı yalnızca kuralsız (para birimi) fiyatı olan sabit seçeneklere yazılıyor; yalnızca bölgeye göre fiyatlanan seçenek almıyor. Eşik her para biriminde aynı sayı (platform TRY).
+  - Promosyon panosu en yeni 200 kampanyayı gösteriyor (`limited` notuyla); parti kampanyalarını dışlayan `$nin` listesi parti sayısıyla büyüyor.
+  - Fiyat listesi bir dakikadan kısa sürerse (iki iş çalışması arasında başlayıp biterse) geçmişe girmeyebilir.
+  - Kod partisi sürecin ortasında çökerse yarım parti kalabilir (workflow motoru bellek içi); bir süpürücü F16'da düşünülmeli.
   - Hediye kartı hesaplarının sahiplenme kodları (`SC-…`) eklentinin zayıf üreticisinden (~50 bit); `claim` açılırsa (F18) kendi kodumuzla değiştirilmeli.
   - `lib/money` iki haneli kuruş varsayıyor; ondalıksız para birimleri (JPY gibi) için genelleştirme gerekir (platform TRY).
   - Medusa'nın Query'si sipariş ayarlamalarını bütün sürümlerden döndürüyor; ayarlama okuyan yeni kod güncel sürüme göre süzmeli (`workflows/orders/order-money.ts` `currentAdjustments`).
@@ -875,7 +890,7 @@
 - **Daha önce:** F1 planlaması ve F0.2–F0.8 (2026-10-24), F0.1 monorepo (2026-10-24 sabahı), SEO ve güvenlik dokümanları (2026-10-22).
 
 ## Sıradaki görev
-**Claude'un sıradaki işi:** F4 kapanışı: bağımsız inceleme (kod + güvenlik), CI yeşil, docs/03 F4 durumu, /oturum-kapat. U1–U8 bitti; plan aşağıda, "F4 görev planı". F4 kodu `f4-pricing-promotions` dalında (F1–F3 birleştirilmediği için `f3-catalog-seo-stock` üzerinden).
+**Claude'un sıradaki işi:** F4 bitti (U1–U8, KK1–KK4 işaretli, kapanış incelemesi bulguları düzeltildi, madde 169). Sıradaki faz F5 (iyzico ödeme): `/faz-baslat F5`. iyzico sandbox anahtarları kullanıcıdan gelecek (secret; koda girmez). Plan aşağıda, "F4 görev planı". F4 kodu `f4-pricing-promotions` dalında (F1–F3 birleştirilmediği için `f3-catalog-seo-stock` üzerinden).
 
 1. **Kullanıcı:**
    - **F4 kararları:** ADR-0023/0024/0025 kabul edildi (2026-10-26). Dışarıda bekleyen: 30 gün kuralının hukukçu teyidi, hediye kartı vergisinin mali müşavir teyidi (docs/12).
@@ -1110,7 +1125,7 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
 | F2 Platform çekirdek modülleri | ✅ |
 | Panel P1–P6 (adr/0022) | ⏳ P1–P4 ekranları yazıldı (kullanıcı kontrolü bekliyor) |
 | F3 Katalog, SEO motoru ve stok | ✅ (KK'lar işaretli; PR ve birleştirme kullanıcının kararı) |
-| F4 Fiyatlandırma ve promosyon | ⏳ (plan: U1–U8) |
+| F4 Fiyatlandırma ve promosyon | ✅ (U1–U8; KK1–KK4; kapanış incelemesi 2026-10-27) |
 | F5 Ödeme: iyzico | ⬜ |
 | F6 Ödeme: PayTR + havale/EFT + kapıda ödeme + yönlendirici + ters ibraz | ⬜ |
 | F7 Kargo, sipariş operasyonu, iade ve değişim | ⬜ |

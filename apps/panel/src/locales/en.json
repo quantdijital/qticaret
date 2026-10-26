@@ -1411,7 +1411,8 @@
       "combineCodes": "More than one code in a cart",
       "combineCodesHint": "Off, a customer may use one code. Automatic promotions apply either way.",
       "saved": "Promotion settings saved."
-    }
+    },
+    "limited": "The newest {{total}} promotions are shown."
   },
   "reports": {
     "description": "The chosen period's sales: summary, products, categories and day by day",

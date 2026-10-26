@@ -53,9 +53,12 @@ export const promotionsQuery = () =>
   queryOptions({
     queryKey: ["promotions", "list"],
     queryFn: () =>
-      sdk.client.fetch<{ promotions: Promotion[]; batch_counts: Record<string, number> }>(
-        "/admin/promotion-board"
-      ),
+      sdk.client.fetch<{
+        promotions: Promotion[]
+        batch_counts: Record<string, number>
+        /** Only the newest ones fit the list. */
+        limited?: boolean
+      }>("/admin/promotion-board"),
   })
 
 export const promotionQuery = (id: string) =>

@@ -92,9 +92,11 @@ medusaIntegrationTestRunner({
       const board = await get<{
         promotions: { id: string }[]
         batch_counts: Record<string, number>
+        limited: boolean
       }>("/admin/promotion-board")
       expect(board.data.promotions.map((promotion) => promotion.id)).toEqual([id])
       expect(board.data.batch_counts).toEqual({ [id]: 1 })
+      expect(board.data).toMatchObject({ limited: false })
 
       const first = list[0] ?? ""
       await order(first)

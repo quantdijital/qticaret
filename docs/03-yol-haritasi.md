@@ -205,6 +205,7 @@ F17 öncesinde tenant'lar F16 script'leriyle elle açılır.
   ekranlarıyla tek tek geri alınıp para iadesi yapılıyor: 30,00 + 29,99 + 30,00 = satıra ödenen 89,99 ₺, kuruş farkı yok.
   Toplamı yarım kuruşla biten sipariş, kargosu ve iade kargosu dahil, Medusa'nın kabul ettiği tutarlarla tamamen iade ediliyor.
   Birim ve özellik testleri: `src/lib/orders/__tests__/`, `src/lib/money/__tests__/capped.unit.spec.ts`
+  Hesap testli ve Medusa'nın gerçek iadesiyle doğrulandı; panelde ve Store'da iade akışına bağlanması F7'de (ADR-0010 notu).
 
 ---
 

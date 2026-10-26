@@ -79,3 +79,5 @@ Medusa 2.21.2'de doğrulananlar (F2 planlaması):
 - **İade edilebilir tutar:** Ödemelerin tahsil edilen − iade edilen toplamıdır. Medusa'nın `refundPaymentWorkflow` sınırıyla aynıdır.
 - **Uç:** `GET /admin/orders/:id/money`. Panelin sipariş sayfası satır ödemelerini, indirim paylarını, toplamları ve iade edilebilir tutarı buradan gösterir.
 - **Kanıt:** `lib/orders/__tests__/` (tohumlu 500 rastgele sipariş: toplam korunur, indirim fiyatı aşmaz, satır Medusa'dan 2 kuruştan az sapar), `lib/money/__tests__/capped.unit.spec.ts` (1000 rastgele vaka: tavan aşılmaz, toplam korunur), `integration-tests/http/order-money.spec.ts` (KK).
+- **Bağlantı (F4 kapanış incelemesi):** `returnRefundOf` / `unitsRefund` / `spreadRefund` şu an yalnızca testlerden çağrılıyor. KK testi hesaplanan tutarı Medusa'nın gerçek iadesine (`refundPaymentWorkflow`) verip satırın kuruşu kuruşuna kapandığını gösteriyor; ama panelde ve Store'da iade akışı yok. İade/değişim akışı F7'de bu hesaba bağlanacak (iadenin önizlemesi ve tutarı buradan); o zamana kadar panel yalnızca okur (`paid`, `refundable`, `credit`). Hediye kartı ve kredi payının satırlara dağıtılıp krediye dönmesi de F7'de (ADR-0025).
+

@@ -1419,7 +1419,8 @@
       "combineCodes": "Bir sepette birden fazla kod",
       "combineCodesHint": "Kapalıyken müşteri tek kod kullanabilir. Otomatik kampanyalar her durumda uygulanır.",
       "saved": "Kampanya ayarları kaydedildi."
-    }
+    },
+    "limited": "En yeni {{total}} kampanya gösteriliyor."
   },
   "reports": {
     "description": "Seçtiğiniz dönemin satışları: özet, ürünler, kategoriler ve gün gün",

@@ -168,6 +168,11 @@ export function PromotionsPage() {
             }
           />
         )}
+        {list.data?.limited ? (
+          <p className="border-t px-5 py-3 text-xs text-muted-foreground">
+            {t("promotions.limited", { total: formatCount(list.data.promotions.length) })}
+          </p>
+        ) : null}
       </section>
       <PromotionSettingsCard />
     </div>

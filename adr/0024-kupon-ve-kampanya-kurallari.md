@@ -76,3 +76,29 @@ Medusa 2.21.2'de doğrulananlar (F4 planlaması, kaynak kodu):
   - Ölçüldü: 2 adette indirim yok; 3, 6 ve 9 adette 1, 2 ve 3 birim bedava; karışık sepette en ucuz ürün bedava. `max_quantity: 1` teklifi tek seferle sınırlıyor.
 - **Sepette indirim:** otomatik + tüm sepet + en az tutar. Var olan formla kuruluyor, "X al Y öde" ile birlikte uygulanabiliyor (testli).
 - **Kanıt:** `integration-tests/http/free-shipping.spec.ts` (KK), `integration-tests/http/promotion-offers.spec.ts` (panelin gövdesiyle), `workflows/promotions/__tests__/free-shipping.unit.spec.ts`; panelde `offer.spec.ts`, `form.spec.ts`.
+
+## Uygulama notu (F4 kapanış incelemesi, 2026-10-27)
+
+- **Ödeme anında yeniden denetim** (`workflows/hooks/complete-cart-validate.ts`):
+  - Birleştirme kapalıyken sepette birden çok elle girilmiş kod varsa ödeme reddedilir (`promotions.one_code`). Kod eklerken yapılan denetimi yarışan istekler aşabiliyordu.
+  - Sabit fiyatlı kargo yönteminin tutarı seçeneğin sepete göre güncel fiyatıyla karşılaştırılır; tutmazsa `cart.shipping_changed`. Medusa ürün değişince kargoyu yeniden fiyatlıyor, kod eklenince fiyatlamıyor: eşiğin altına inen sepette 0 TL kargo kalıyordu. Storefront (F18) kod ekleyince kargoyu yeniden seçtirmeli.
+  - HTTP tamamlama yolunda testli. Aynı workflow doğrudan `.run()` ile çağrılınca kanca hatası tamamlamayı durdurmadı; alışverişçinin yolu HTTP olduğu için kayda geçirildi.
+- **Kodlar:**
+  - Admin'den kaydedilen kod sunucuda da `^[A-Z0-9_-]{3,40}$` (CSV'ye formül sızmasını da önler).
+  - Bir Store isteğinde en çok 5 kod.
+  - Tek kullanımlık kodun rastgele kısmı 12 karakter (yaklaşık 2^60).
+  - Sepet başına deneme bütçesi IP'den bağımsız da sayılır (`perIdentityAnyIp`).
+- **Doğrulanan, değişiklik gerekmeyen:**
+  - Store `fields` bir promosyonun kampanyasına, diğer kodlarına, bütçesine ve kurallarına ulaşamıyor; Medusa izinsiz alanları düşürüyor (testli).
+  - Bilinmeyen kodu silmek kod varlığını sızdırmıyor (200).
+  - Kişi başı sınır misafiri de sayıyor: Medusa aynı e-postaya (büyük/küçük harf farkıyla da) aynı misafir müşteriyi bağlıyor. Karardaki `customer_email` yedeğine gerek kalmadı (testli).
+- **Kayıt:** `POST /admin/promotions/:id/offer`. Panelin formu değişen parçaları tek istekle gönderir; tek bir workflow promosyon alanlarını, kapsamı ve "al" kurallarını, en az sepeti, kampanyanın günlerini ve kişi başı sınırını Medusa'nın kendi telafili workflow'larıyla uygular. Sonraki bir parça başarısız olursa öncekiler geri alınır (testli). Kampanyanın promosyona ait olup olmadığına sunucu karar verir.
+- **Kod partileri:**
+  - Tek workflow: şablon, kampanya, kodlar. Kampanya ve kodlar telafili.
+  - CSV ya da denetim kaydı yazılamazsa parti silinir.
+  - Parti, şablon kampanyanın bütçesinin kopyasını alır: kişi başı sınır geçer, toplam bütçe parti başına ayrı sayılır.
+  - Parti panelden durdurulabilir: kampanyası şimdi biter, durdurma denetim kaydına girer.
+  - Kod dökümü hassas okuma kaydına girer; CSV'ler `lib/security/csv` ile yazılır.
+- **Denetim kaydı:** promosyon özeti kuralları, hedef ve "al" kurallarını, dağıtımı ve adetleri, bütçenin niteliğini içerir; kural toplu uçları ve kampanyaya üye ekleme de kayda girer.
+- **Ücretsiz kargo:** tek workflow (`promotions-free-shipping-sync`); ayarlar workflow'u adım olarak çalıştırır, Medusa'nın güncellemesi sonraki hata durumunda fiyatları geri koyar.
+

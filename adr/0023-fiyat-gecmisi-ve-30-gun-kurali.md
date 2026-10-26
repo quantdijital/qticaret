@@ -68,3 +68,11 @@ Medusa 2.21.2'de doğrulananlar (F4 planlaması, kaynak kodu):
   - indirim üstü çizili gösteriliyor;
   - 30 gün içinde görülmüş fiyata dönüş indirim sayılmıyor;
   - JSON-LD'nin fiyatı ve üstü çizili fiyatı Store ucuyla aynı (KK2).
+
+## Uygulama notu (F4 kapanış incelemesi, 2026-10-27)
+
+- **Yükselen indirimli fiyat:** Kesintisiz indirim serisi yalnızca fiyat indikçe tek indirim sayılır. 70'lik bir listeden 90'lık bir listeye geçiş yeni bir indirim başlatır ve önceki fiyatı son 30 günün en düşüğü (70) olur. Bu yüzden 90 TL, 120'nin üstü çizilerek gösterilmez (`lib/pricing/discount.ts`, testli).
+- **Liste sınırları:** Dakikalık iş (`jobs/price-list-boundaries.ts`) son beş dakikada başlayan ya da biten fiyat listelerinin varyantlarını, kayıt zamanı sınır anı olacak şekilde yazar. Saatlik tam tarama kaçanlar için kalır. İki çalışma arasında (bir dakikadan kısa) başlayıp biten bir liste kaçabilir.
+- **Okuma sırası:** Son fiyat, geçmişin her okuması gibi önce kayıt zamanına, sonra yazılış sırasına göre bulunur (geriye tarihli içe aktarım satırları için).
+- **Store ucu:** `/store/price-display` yalnızca yayındaki ve publishable key'in satış kanalındaki ürünlerin varyantlarına cevap verir.
+

@@ -53,7 +53,8 @@ export async function promotionBoard(container: MedusaContainer, fields: string[
       counts[template] = (counts[template] ?? 0) + 1
     }
   }
-  return { promotions: data, batch_counts: counts }
+  // `limited`: the list is the newest `take`; older ones are not in it
+  return { promotions: data, batch_counts: counts, limited: data.length >= take }
 }
 
 export interface CodeBatchSummary {
