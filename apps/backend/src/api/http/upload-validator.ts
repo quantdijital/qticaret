@@ -1,5 +1,6 @@
 import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { isValidationError } from "../../lib/errors"
+import { sanitizeImage } from "../../lib/media"
 import { UPLOAD_MEDIA_TYPES, storedName, validateUpload } from "../../lib/security/upload"
 import type { UploadFile } from "../../lib/security/upload"
 import { rejectRequest } from "./reject"
@@ -9,13 +10,13 @@ import { rejectRequest } from "./reject"
  * Medusa's multer has read it (route middlewares of ours run after the
  * core's); one refused file refuses the request, before anything is stored.
  * Accepted files get the name and MIME type of what their bytes are, which
- * is what storage serves them with.
+ * is what storage serves them with, and images are stored cleaned (F3.3).
  */
 
 // One admin action uploads a few product images; each file is stored apart
 export const MAX_FILES_PER_UPLOAD = 20
 
-type MulterFile = UploadFile & { mimetype?: string }
+type MulterFile = UploadFile & { mimetype?: string; size?: number }
 
 // Medusa uses multer's `.array()`; `.single()`, `.fields()` and `.any()`
 // shapes are read too, so a change upstream cannot slip files past the check
@@ -41,7 +42,11 @@ function refuse(req: MedusaRequest, res: MedusaResponse, reason: string) {
   rejectRequest(req, res, 400, { type: "invalid_data", message: reason }, reason)
 }
 
-export function uploadValidator(req: MedusaRequest, res: MedusaResponse, next: MedusaNextFunction) {
+export async function uploadValidator(
+  req: MedusaRequest,
+  res: MedusaResponse,
+  next: MedusaNextFunction
+) {
   const files = uploadedFiles(req)
   if (files.length > MAX_FILES_PER_UPLOAD) {
     refuse(req, res, "upload.too_many_files")
@@ -56,6 +61,21 @@ export function uploadValidator(req: MedusaRequest, res: MedusaResponse, next: M
         throw error
       }
       refuse(req, res, error.safeMessage)
+      return
+    }
+  }
+  // Images are stored cleaned: upright, without EXIF/GPS and other metadata (F3.3)
+  for (const { file, type } of accepted) {
+    if (type.type === "csv") {
+      continue
+    }
+    try {
+      const clean = await sanitizeImage(file.buffer, type.type)
+      file.buffer = clean.buffer
+      file.size = clean.buffer.length
+    } catch {
+      // A header that passed the check over pixels the decoder cannot read
+      refuse(req, res, "upload.unreadable_image")
       return
     }
   }

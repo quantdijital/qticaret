@@ -169,6 +169,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "upload.dimensions_too_large": "The image has too many pixels; upload a smaller one.",
   "upload.too_large": "The file is too large.",
   "upload.too_many_files": "Too many files were uploaded at once.",
+  "upload.unreadable_image": "The image could not be read; the file may be damaged.",
   "upload.unsupported_type":
     "This file type is not supported; upload a JPEG, PNG, WebP or AVIF image.",
 }

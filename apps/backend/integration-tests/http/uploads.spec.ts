@@ -1,6 +1,7 @@
-import { readdirSync, rmSync } from "node:fs"
+import { readFileSync, readdirSync, rmSync } from "node:fs"
 import { basename, join } from "node:path"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
+import sharp from "sharp"
 import { PNG_1X1 } from "../../src/lib/security/__tests__/fixtures"
 import { createAdminUser } from "../helpers/admin"
 import type { HttpClient } from "../helpers/http"
@@ -55,6 +56,34 @@ medusaIntegrationTestRunner({
       for (const name of created) {
         rmSync(join(STATIC_DIR, name), { force: true })
       }
+    })
+
+    it("stores a phone photo upright and without EXIF or GPS (F3.3 KK)", async () => {
+      const photo = await sharp({
+        create: { width: 60, height: 40, channels: 3, background: { r: 0, g: 90, b: 160 } },
+      })
+        .jpeg()
+        .withExif({
+          IFD0: { Make: "Phone", Copyright: "Ayşe" },
+          IFD3: { GPSLatitudeRef: "N", GPSLatitude: "41/1 0/1 0/1" },
+        })
+        .withMetadata({ orientation: 6 })
+        .toBuffer()
+      const stored = await upload(form([photo, "IMG_0042.JPG", "image/jpeg"]))
+      expect(stored.status).toBe(200)
+      const name = basename(stored.data.files?.[0]?.url ?? "")
+      const saved = await sharp(readFileSync(join(STATIC_DIR, name))).metadata()
+      expect(saved.exif).toBeUndefined()
+      expect(saved.orientation).toBeUndefined()
+      expect([saved.width, saved.height]).toEqual([40, 60])
+      expect(name).toMatch(/img-0042.*\.jpg$/)
+    })
+
+    it("refuses an image its header passes but whose pixels cannot be read", async () => {
+      const truncated = PNG_1X1.subarray(0, PNG_1X1.length - 20)
+      const broken = await upload(form([truncated, "broken.png", "image/png"]))
+      expect(broken.status).toBe(400)
+      expect(broken.data.message).toBe("upload.unreadable_image")
     })
 
     it("refuses an SVG and a fake image, and accepts a real PNG", async () => {

@@ -178,6 +178,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Görselin piksel boyutu çok büyük; daha küçük bir görsel yükleyin.",
   "upload.too_large": "Dosya çok büyük.",
   "upload.too_many_files": "Tek seferde çok fazla dosya yüklendi.",
+  "upload.unreadable_image": "Görsel okunamadı; dosya bozuk olabilir.",
   "upload.unsupported_type":
     "Bu dosya türü desteklenmiyor; JPEG, PNG, WebP ya da AVIF görsel yükleyin.",
 }
