@@ -85,3 +85,11 @@ Medusa 2.21.2'de doğrulananlar (Context7 + v2.21.2 kaynağı):
   - Kilit anahtar öneki.
 - **Bilinen sınır:** Medusa yalnızca ilk depodan rezerve eder; çok depolu dağıtım (F7) bunu genişletir.
 - **Saklama:** Defter satırları için saklama süresi ve arşiv F13'te (KVKK değil, ticari kayıt).
+
+## Uygulama notu (F3 T7, 2026-10-26)
+
+- **Kilit:** `src/lib/redis/locking.ts`. `REDIS_URL` varsa `@medusajs/medusa/locking-redis` tek ve varsayılan sağlayıcı. Anahtar öneki sağlayıcının `namespace` seçeneğiyle `qt:lock:<tenant>:` (2.21.2 kaynağında doğrulandı). Testler de Redis kilidiyle çalışıyor; eşzamanlı checkout KK testi bunu kullanıyor.
+- **Depo:** Bootstrap varsayılan depoyu kuruyor ve varsayılan satış kanalına bağlıyor. Panel depoları `/admin/warehouses` uçlarından yönetiyor.
+  - Medusa 2.21.2'nin `updateStockLocationsWorkflow`'u adresi olmayan depoya adres bağlayamıyor (adres satırı oluşuyor, bağ kurulmuyor). Kendi adımımız (`workflows/stock/steps/set-location-address.ts`) adresi modüle bütün halinde veriyor.
+- **Silme:** Medusa depo silerken envanter seviyelerini bırakıyor. Varsayılan depo, stoklu/rezerveli/gelecek stoklu depo ve iade beklenen depo silinmiyor (409).
+- **Olay zamanlaması** (rezervasyon değişimi `inventory-level.updated` yayıyor mu) defterle birlikte T8'de doğrulanacak.

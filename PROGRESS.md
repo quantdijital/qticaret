@@ -3,7 +3,7 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a, T1b, T2, T3, T4, T5, T9, T10, T11, T12 bitti; sırada T7 stok, T6 görsel). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı; push edilmedi. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
+**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a, T1b, T2, T3, T4, T5, T7, T9, T10, T11, T12 bitti; sırada T6 görsel, T8 stok kuralları). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı; push edilmedi. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
 
 ## Son oturum özeti
 **2026-10-25/26 gece (kullanıcı yatarken, "panel işlerini tamamla" talimatıyla).** Panelin ekranları yazıldı; her biri gerçek veriyle tarayıcıda denendi (CDP ekran görüntüsü, test kayıtları sonra silindi). Commit'ler `e11a201`…`6d63df7`, push yok.
@@ -161,6 +161,19 @@
     - İş indirme düğmesi ortak bileşen oldu.
   - Hata düzeltmesi: yeni sayfa aynı anda iki kez değerlendirilince (kayıt aboneliği + sayfanın açılması) ikinci kayıt 400 dönüyordu. Artık güncellemeye düşüyor; birim testli.
   - Bağımsız kod incelemesinin bulguları düzeltildi.
+- **F3 T7 (F3.7) bitti:** stok ve depolar.
+  - Kilit modülü bağlandı (adr/0020): `REDIS_URL` varsa `locking-redis`, anahtarlar `qt:lock:<tenant>:` altında; yoksa Medusa'nın bellek içi sağlayıcısı. Dev ve testler Redis kilidiyle çalışıyor.
+  - KK testli: aynı son ürüne eşzamanlı iki checkout'tan biri sipariş oluyor, diğeri stok hatası alıyor; rezervasyon rafı aşmıyor.
+  - İptal rezervasyonu geri veriyor; gönderim raftan düşüyor; teslim alınan iade rafa dönüyor (HTTP testli, admin iade akışıyla).
+  - Bootstrap her mağazaya varsayılan depo kuruyor ("Ana Depo"), varsayılan satış kanalına bağlıyor; seed demo adresini ekliyor.
+  - Panel, Ayarlar > Depolar:
+    - Depo ekle/düzenle (il/ilçe seçimli Türkçe adres formu, mahalle, posta kodu-il uyumu, telefon kontrolü), varsayılan yap, sil.
+    - Stok sayfası varsayılan depo yoksa uyarıyor.
+  - Kendi uçlarımız `/admin/warehouses` (oluştur + kanala bağla, güncelle + adres ekle, varsayılan yap); her biri tek workflow.
+  - Depo silme koruması: varsayılan depo, stok/rezervasyon/gelecek stok olan depo ve iade beklenen depo silinmiyor (409).
+  - Depo adresleri F1.4 Türkçe adres kontrolünden geçiyor (hem bizim uçlar hem Medusa'nınkiler). Adres reddi artık i18n anahtarıyla dönüyor; tüm sorun kodlarının Türkçe/İngilizce cümlesi var.
+  - Depo ve varsayılan depo değişiklikleri denetim kaydında (önce/sonra; telefon yalnızca "değişti").
+  - Bağımsız kod incelemesinin bulguları düzeltildi.
 - **Gözden geçir (kullanıcı yokken önerilen seçenekle verilen kararlar):**
   1. Bayrak adı `catalog.non_physical`, mağaza tarafından açılır, varsayılan kapalı. Etiketleri Medusa Admin'de ve panelde var.
   2. Kargo gerekmeyen kalemler sipariş ödenince "teslim edildi" sayılıyor. Dijital teslimat (indirme bağlantısı, kod gönderimi) F9 bildirimleriyle gelecek.
@@ -230,6 +243,17 @@
      - S-POLICY-01 (F13), S-GSC-01 ve S-CWV-01 (F10.11), S-SOCIAL-01, S-SEARCH-01.
      - Puan dağılımı denetim raporunda tekrarlanmıyor; danışman özet kartında.
   44. 404 için "301 oluştur" doğrudan kural yazıyor. 404 kaydı silinmiyor; çözümleme artık yönlendirme döndüğü için sonraki denetimde düşüyor.
+  45. **Kilit F3'te bağlandı** (adr/0020 önerisi): Redis varsa her ortamda Redis kilidi, testler dahil. Event bus, workflow engine ve cache Redis modülleri F16'da kalıyor.
+  46. Bootstrap'ın depo adımı: mağazanın varsayılanı yoksa en eski depo varsayılan oluyor, hiç depo yoksa adressiz "Ana Depo" açılıyor. Adresi mağaza panelden giriyor.
+  47. **Depo işlemleri panelde kendi uçlarımızdan:**
+     - Gerekçe: Medusa 2.21.2'nin `updateStockLocationsWorkflow`'u adresi olmayan depoya adres ekleyemiyor; adres satırını oluşturup bağlamıyor, yanıt 200. Kendi adımımız adresi modüle bütün halinde vererek bağlıyor.
+     - Medusa'nın kendi uçları açık kalıyor; Medusa Admin'den adressiz depoya adres eklemek hâlâ sessizce başarısız (çekirdek hatası).
+     - Yeni depo oluşturulduğu anda mağaza kanalına bağlanıyor; varsayılan yapılan depo da bağlanıyor (checkout yalnızca kanala bağlı depodan ayırıyor).
+  48. Depo silme kontrolü silmeden önce yapılıyor; arada gelen stok girişi tek açık nokta. İzin verilen silmede sıfır miktarlı seviyeler kalıyor (stok toplamını etkilemiyor).
+  49. Adres reddi mesajı: tek sorun varsa o sorunun anahtarı (`tr_address.district_not_in_province`), birden çoksa `tr_address.invalid`; `issues` listesi aynı. Storefront (F18) da bu anahtarları kullanacak.
+  50. Depo telefonu iş hattı sayılıyor: depo listesi kişisel veri okuması değil. Denetim kaydında yine yalnızca "değişti" yazılıyor.
+  51. Paneldeki adres formu Türkçe: yurt dışı adresli bir depoda yalnızca ad değiştirilebiliyor. Mahalle serbest metin; sunucu, referans verisi olan ilçelerde doğruluyor.
+  52. T8'e kalanlar: stok hareket defteri ve olay doğrulaması (rezervasyon değişimi `inventory-level.updated` yayıyor mu), düşük stok eşiği/uyarısı, ön sipariş, uzlaştırma işi.
 - **Bilinen sınırlar (devreden):**
   - Sipariş ve stok panosu bellek içi sıralıyor (5000/2000 kayıt). Büyük mağazada kayıtlı aşama sütunu ya da Index modülü gerekir.
   - Kargo etiketi ve takip F7'de. Kampanyada minimum sepet ve kategori kuralları F4'te.
@@ -534,7 +558,7 @@
 | T4 ✅ | F3.4b | `lib/seo/resolve`, resolve yanıtında `seo` payload, versioned cache, URL deseni değişiminde toplu 301 (iş) | T2, T3 | 0015 |
 | T5 ✅ | F3.11 | `brands` modülü, ürün ↔ marka, admin sayfası, Store marka ucu, SEO link'i | T2 | — |
 | T6 | F3.3 | Görsel hattı: `image.process` işi, türevler, OG kırpma, alt metin, varyant görselleri. KK: EXIF temizleme | `sharp` onayı | 0016 |
-| T7 | F3.7 | Stok: depo/seviye kurulumu, Redis kilit sağlayıcısı, iptal/iade geri dönüş testleri. KK: eşzamanlı checkout | — | 0020 |
+| T7 ✅ | F3.7 | Stok: depo/seviye kurulumu, Redis kilit sağlayıcısı, iptal/iade geri dönüş testleri. KK: eşzamanlı checkout | — | 0020 |
 | T8 | F3.8 | `stock-ledger`, düşük stok eşiği + `feed` uyarısı, ön sipariş bayrağı, uzlaştırma işi. KK: düşük stok uyarısı | T7 | 0020 |
 | T9 ✅ | F3.12 | `lib/seo/jsonld`: ProductGroup/Product/Offer, BreadcrumbList, CollectionPage/ItemList, OnlineStore, Article; şema testleri. KK: payload + JSON-LD sözleşme testi | T1, T4 | — |
 | T10 ✅ | F3.6 + F3.15 | Sitemap işi (debounce + günlük, 50.000'de bölme, görsel sitemap, S3), robots.txt üretimi ve AI ön ayarları, canonical host 301, staging `noindex`, imzalı önizleme, IndexNow. KK: sitemap/robots | T4, T5 | — |
