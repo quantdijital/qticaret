@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link, getRouteApi, useNavigate } from "@tanstack/react-router"
-import { PackageOpen, Plus } from "lucide-react"
+import { PackageOpen, Plus, Upload } from "lucide-react"
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { DataTable } from "@/components/patterns/data-table"
 import { productScoresQuery } from "@/features/seo/api/advisor"
@@ -16,6 +17,8 @@ import { Button } from "@/components/ui/button"
 import { PAGE_SIZE, productCountsQuery, productsQuery } from "@/features/products/api/products"
 import type { ProductListItem } from "@/features/products/api/products"
 import { ProductStatusBadge } from "@/features/products/components/product-status-badge"
+import { SheetExportMenu } from "@/features/products/components/sheet-export-menu"
+import { SheetImportDialog } from "@/features/products/components/sheet-import-dialog"
 import { ProductThumb } from "@/features/products/components/product-thumb"
 import { availableStock, priceRange } from "@/features/products/product-math"
 import { useProductPathPrefix } from "@/features/products/use-product-path"
@@ -164,6 +167,7 @@ export function ProductsPage() {
     productScoresQuery((list.data?.products ?? []).map((product) => product.id))
   )
   const columns = useColumns(new Map((scores.data ?? []).map((score) => [score.entity_id, score])))
+  const [importing, setImporting] = useState(false)
   const setSearch = (next: { q?: string; status?: typeof status; page?: number }) => {
     void navigate({
       to: "/products",
@@ -182,14 +186,27 @@ export function ProductsPage() {
         title={t("nav.products")}
         description={t("products.description")}
         action={
-          <Button asChild>
-            <Link to="/products/new">
-              <Plus />
-              {t("products.add")}
-            </Link>
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <SheetExportMenu />
+            <Button
+              variant="outline"
+              onClick={() => {
+                setImporting(true)
+              }}
+            >
+              <Upload />
+              {t("products.sheets.import")}
+            </Button>
+            <Button asChild>
+              <Link to="/products/new">
+                <Plus />
+                {t("products.add")}
+              </Link>
+            </Button>
+          </div>
         }
       />
+      <SheetImportDialog open={importing} onOpenChange={setImporting} />
       <section className="overflow-hidden rounded-lg border bg-card shadow-card">
         <FilterTabs
           label={t("products.views")}

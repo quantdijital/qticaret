@@ -415,7 +415,9 @@
         "audit_log.export": "Audit log export",
         "seo.url_style": "URL style change",
         "seo.sitemap": "Sitemap",
-        "seo.audit": "SEO audit"
+        "seo.audit": "SEO audit",
+        "catalog.import": "Product import",
+        "catalog.export": "Product export"
       }
     },
     "audit": {
@@ -819,6 +821,42 @@
       "hint": "Choose which variants each picture shows. A picture tied to no variant shows with all of them; the storefront brings a variant's pictures forward when it is chosen.",
       "toggle": "Image {{position}} for {{variant}}",
       "all": "All variants"
+    },
+    "sheets": {
+      "import": "Import",
+      "export": "Export",
+      "exportExcel": "Excel (xlsx)",
+      "exportCsv": "CSV",
+      "exportStarted": "The product list is being prepared; download it when it is ready.",
+      "exportReady": "The product list is ready.",
+      "exportFailed": "The product list could not be prepared.",
+      "download": "Download",
+      "importTitle": "Import products",
+      "importHint": "Excel (xlsx) or CSV, 5,000 rows at most. The file is checked first; you see what it would do, then confirm.",
+      "template": "Download the template",
+      "templateHint": "An empty sheet with your shop's columns; its second sheet explains each. An exported list can be edited and uploaded too.",
+      "chooseFile": "Choose a file",
+      "noFile": "No file chosen",
+      "check": "Check",
+      "apply": "Apply",
+      "working": "Processing the file…",
+      "done": "Done",
+      "planned": "{{create}} products will be added, {{update}} updated.",
+      "applied": "{{create}} products added, {{update}} updated.",
+      "rows_one": "{{formatted}} row read.",
+      "rows_other": "{{formatted}} rows read.",
+      "problems_one": "{{count}} row has a problem; its product is skipped.",
+      "problems_other": "{{count}} rows have problems; their products are skipped.",
+      "failedCount_one": "{{count}} product could not be saved.",
+      "failedCount_other": "{{count}} products could not be saved.",
+      "unknownColumns": "Columns not read: {{columns}}",
+      "report": "Download the report",
+      "seoTitle": "SEO preview of the new products",
+      "seoIssue": "{{text}} ({{count}} products)",
+      "nothing": "No product to apply; the report shows the rows with problems.",
+      "jobFailed": "The file could not be processed.",
+      "unchanged_one": "{{formatted}} product stays as it is.",
+      "unchanged_other": "{{formatted}} products stay as they are."
     }
   },
   "orders": {

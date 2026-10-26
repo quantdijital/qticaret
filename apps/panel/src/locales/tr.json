@@ -415,7 +415,9 @@
         "audit_log.export": "Denetim kaydı dışa aktarımı",
         "seo.url_style": "Adres biçimi değişikliği",
         "seo.sitemap": "Site haritası",
-        "seo.audit": "SEO denetimi"
+        "seo.audit": "SEO denetimi",
+        "catalog.import": "Ürün içe aktarma",
+        "catalog.export": "Ürün dışa aktarma"
       }
     },
     "audit": {
@@ -827,6 +829,42 @@
       "hint": "Her görselin hangi varyantları gösterdiğini seçin. Hiçbir varyanta bağlı olmayan görsel tüm varyantlarda görünür; mağazada varyant seçilince kendi görselleri öne çıkar.",
       "toggle": "{{variant}} için {{position}}. görsel",
       "all": "Tüm varyantlar"
+    },
+    "sheets": {
+      "import": "İçe aktar",
+      "export": "Dışa aktar",
+      "exportExcel": "Excel (xlsx)",
+      "exportCsv": "CSV",
+      "exportStarted": "Ürün listesi hazırlanıyor; hazır olunca indirebilirsiniz.",
+      "exportReady": "Ürün listesi hazır.",
+      "exportFailed": "Ürün listesi hazırlanamadı.",
+      "download": "İndir",
+      "importTitle": "Ürünleri içe aktar",
+      "importHint": "Excel (xlsx) ya da CSV, en fazla 5000 satır. Dosya önce kontrol edilir; ne yapacağını görüp onaylarsınız.",
+      "template": "Şablonu indir",
+      "templateHint": "Mağazanızın sütunlarıyla boş şablon; ikinci sayfada her sütunun açıklaması var. Dışa aktarılan liste de düzenlenip yüklenebilir.",
+      "chooseFile": "Dosya seç",
+      "noFile": "Dosya seçilmedi",
+      "check": "Kontrol et",
+      "apply": "Uygula",
+      "working": "Dosya işleniyor…",
+      "done": "Tamam",
+      "planned": "{{create}} ürün eklenecek, {{update}} ürün güncellenecek.",
+      "applied": "{{create}} ürün eklendi, {{update}} ürün güncellendi.",
+      "rows_one": "{{formatted}} satır okundu.",
+      "rows_other": "{{formatted}} satır okundu.",
+      "problems_one": "{{count}} satırda sorun var; bu satırların ürünleri atlanır.",
+      "problems_other": "{{count}} satırda sorun var; bu satırların ürünleri atlanır.",
+      "failedCount_one": "{{count}} ürün kaydedilemedi.",
+      "failedCount_other": "{{count}} ürün kaydedilemedi.",
+      "unknownColumns": "Okunmayan sütunlar: {{columns}}",
+      "report": "Raporu indir",
+      "seoTitle": "Yeni ürünlerin SEO ön değerlendirmesi",
+      "seoIssue": "{{text}} ({{count}} ürün)",
+      "nothing": "Uygulanacak ürün yok; raporda sorunlu satırları görebilirsiniz.",
+      "jobFailed": "Dosya işlenemedi.",
+      "unchanged_one": "{{formatted}} ürün değişmeden kaldı.",
+      "unchanged_other": "{{formatted}} ürün değişmeden kaldı."
     }
   },
   "orders": {
