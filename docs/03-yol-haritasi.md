@@ -164,17 +164,17 @@ F17 öncesinde tenant'lar F16 script'leriyle elle açılır.
 - F3.10 Toplu düzenleme: fiyat, stok, yayın durumu, kategori, SEO şablonu uygula, alt metin doldur (admin)
 
 **KK:**
-- [ ] 1000 satırlık Excel içe aktarma worker'da tamamlanıyor, hatalı satırlar raporlanıyor
-- [ ] Aynı son ürün için eşzamanlı iki checkout'tan yalnızca biri tamamlanıyor (testli)
-- [ ] Slug değişince eski URL 301 ile yeni URL'e çözülüyor; A→B→C zinciri A→C'ye düzleşiyor; döngü reddediliyor
-- [ ] Sınırı aşan görsel, SVG ve sahte MIME yüklemesi açıklayıcı hatayla reddediliyor; EXIF temizleniyor
-- [ ] Düşük stok eşiğine inince admin uyarısı oluşuyor
-- [ ] Her varlık türü için `seo` payload tam ve mutlak URL'li (contract test); JSON-LD şema doğrulamasından geçiyor
-- [ ] Advisor skoru deterministik, p95 < 50 ms; eksik alt metin/GTIN/birincil kategori bulguları doğru (fixture'lı)
-- [ ] 404 günlüğündeki yol için doğru 301 hedefi öneriliyor; tek tıkla kural oluşuyor
-- [ ] Sitemap 50.000'de bölünüyor, taslak/noindex dışarıda; robots facet parametrelerini engelliyor, landing yolunu engellemiyor
-- [ ] Özgünlük < %30 olan landing sayfası yayımlanamıyor (testli)
-- [ ] Dışa aktarılan Excel'de formül başlangıçlı hücre kaçışlanmış
+- [x] 1000 satırlık Excel içe aktarma worker'da tamamlanıyor, hatalı satırlar raporlanıyor — F3 T15 (`catalog-sheets.spec`)
+- [x] Aynı son ürün için eşzamanlı iki checkout'tan yalnızca biri tamamlanıyor (testli) — F3 T7 (`stock.spec`)
+- [x] Slug değişince eski URL 301 ile yeni URL'e çözülüyor; A→B→C zinciri A→C'ye düzleşiyor; döngü reddediliyor — F3 T3/T4 (`seo-redirects.spec`, `seo-resolve.spec`)
+- [x] Sınırı aşan görsel, SVG ve sahte MIME yüklemesi açıklayıcı hatayla reddediliyor; EXIF temizleniyor — F2 S5 + F3 T6 (`uploads.spec`, `files.unit.spec`)
+- [x] Düşük stok eşiğine inince admin uyarısı oluşuyor — F3 T8 (`stock-ledger.spec`)
+- [x] Her varlık türü için `seo` payload tam ve mutlak URL'li (contract test); JSON-LD şema doğrulamasından geçiyor — F3 T4/T9/T16 (`seo-contract.spec` yedi sayfa türü; `jsonld.unit.spec` Google'ın zorunlu alanlarıyla zod şemaları)
+- [x] Advisor skoru deterministik, p95 < 50 ms; eksik alt metin/GTIN/birincil kategori bulguları doğru (fixture'lı) — F3 T11 (`engine.unit.spec`; p95 ölçümü T16'da eklendi, yerelde ~4 ms)
+- [x] 404 günlüğündeki yol için doğru 301 hedefi öneriliyor; tek tıkla kural oluşuyor — F3 T3/T12 (`seo-resolve.spec`, `seo-audit.spec`)
+- [x] Sitemap 50.000'de bölünüyor, taslak/noindex dışarıda; robots facet parametrelerini engelliyor, landing yolunu engellemiyor — F3 T10/T14b (`robots-sitemap.unit.spec`, `seo-sitemap.spec`, `seo-facets.spec`)
+- [x] Özgünlük < %30 olan landing sayfası yayımlanamıyor (testli) — F3 T14a (`landings.spec`)
+- [x] Dışa aktarılan Excel'de formül başlangıçlı hücre kaçışlanmış — F3 T15 (`catalog-sheets-roundtrip.spec`)
 
 ---
 
