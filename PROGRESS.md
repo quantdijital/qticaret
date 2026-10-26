@@ -3,7 +3,7 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a, T1b, T2, T3, T4, T5, T9, T10 bitti; sırada T7 stok, T6 görsel, T11 danışman). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı; push edilmedi. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
+**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a, T1b, T2, T3, T4, T5, T9, T10, T11 bitti; sırada T12 mağaza denetimi, T7 stok, T6 görsel). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı; push edilmedi. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
 
 ## Son oturum özeti
 **2026-10-25/26 gece (kullanıcı yatarken, "panel işlerini tamamla" talimatıyla).** Panelin ekranları yazıldı; her biri gerçek veriyle tarayıcıda denendi (CDP ekran görüntüsü, test kayıtları sonra silindi). Commit'ler `e11a201`…`6d63df7`, push yok.
@@ -134,6 +134,19 @@
   - On dakikada bir, son bildirimden bu yana değişen yayındaki sayfaları ve bırakılan yolları api.indexnow.org'a bildiriyor; çağrı başına 10.000 URL.
   - Anahtar ilk kullanımda üretiliyor; storefront `/store/seo/site`'tan alıp `/{key}.txt`'de sunar.
   - Host yoksa ya da indeksleme kapalıysa hiçbir şey gitmiyor. Başarısız çağrı bir sonrakinde aynı değişikliklerle tekrarlanıyor.
+- **F3 T11 (F3.13) bitti:** SEO danışmanı. Commit'ler `2a55c50`, `729ac87`, `812d045`, `4cf7f32`.
+  - `lib/seo/advisor` saf ve deterministik. Bugünkü veriyle cevaplanabilen kurallar:
+    - Ortak: başlık/açıklama uzunluğu (piksel tahminiyle), tekrar, bağırma, marka, slug, odak kelime.
+    - Ürün: metin uzunluğu, zorunlu özellikler, H1, http, görsel sayısı, fiyat, GTIN/MPN, marka, kategori/birincil kategori, ölçü.
+    - Kategori/marka/koleksiyon: metin, boş sayfa, derinlik, logo.
+  - Puan: bulgu, önemine göre kategorisinin ağırlığından pay alır; kritik bulgu kategoriyi sıfırlar. Sayfa türüne uyan ağırlıklar üzerinden 0–100. Notlar 90/70/50.
+  - `seo-advisor` modülü değerlendirmeleri tutuyor. Değerlendirme şu durumlarda yenileniyor: kayıt olaylarında (ürün, varyant, SEO alanı, marka), sayfa açılınca, gece 04:15'te.
+  - Tek tık düzeltmeler sunucuda, aynı workflow'larla: şablon başlık/açıklamaya dön, en derin kategoriyi birincil yap.
+  - Panel:
+    - Ürün, kategori ve marka sayfasında danışman kartı (puan halkası, not, "neden önemli/nasıl düzeltilir", düzelt ya da alana git).
+    - Ürün listesinde SEO sütunu.
+    - SEO özetinde mağaza puanı, not dağılımı, kritik sayısı, en düşük 10 ürün.
+  - `seo.publish_gate` bayrağı (varsayılan kapalı): taslaktan yayına geçişte kritik bulgu ya da 50 altı puan reddediliyor.
 - **Gözden geçir (kullanıcı yokken önerilen seçenekle verilen kararlar):**
   1. Bayrak adı `catalog.non_physical`, mağaza tarafından açılır, varsayılan kapalı. Etiketleri Medusa Admin'de ve panelde var.
   2. Kargo gerekmeyen kalemler sipariş ödenince "teslim edildi" sayılıyor. Dijital teslimat (indirme bağlantısı, kod gönderimi) F9 bildirimleriyle gelecek.
@@ -172,6 +185,17 @@
      - Google katılmıyor; onun için site haritası + Search Console (F10.11).
   31. **İmzalı önizleme bağlantıları F18'e kaydırıldı.** Taslak sayfayı göstermek, storefront'un taslak ürün verisini alabilmesini gerektiriyor; bu da önizleme akışıyla birlikte tasarlanmalı.
   32. Canonical host 301'ini storefront kenarı yapıyor: `/store/seo/site`'taki host'tan farklı bir host'a gelen istek 301 alır (F18).
+  33. Danışman puan formülü: önem payları kritik 1, yüksek 0,5, orta 0,25, düşük 0,1, bilgi 0 (kategori ağırlığının payı, kategori başına en fazla 1).
+     - Ürün altı kategoriyle, kategori/koleksiyon başlık + içerik + teknik ile, marka bunlara görsel (logo) eklenerek değerlendiriliyor.
+  34. Şimdilik olmayan kurallar:
+     - Görsel alt metni, boyut, dosya adı (T6).
+     - Benzer içerik shingle'ı ve şablondan üretilen başlıkların mağaza geneli tekrarı (T12 denetimi).
+     - JSON-LD doğrulaması, puan/yorum (F10), kargo/iade politikası (F13), ilgili ürün bağlantıları.
+     - Tekrar kontrolü şimdilik yalnızca sayfaların kendi başlık/açıklamalarını karşılaştırıyor.
+  35. Yayın kapısı yalnızca taslaktan yayına geçişi kontrol ediyor. Yayında ürün düzenlenebiliyor.
+     - Doğrudan yayında oluşturulan ürün (sihirbaz) kapıdan geçmiyor; sihirbazın kendi hazırlık kontrolü var.
+     - Eşik 50, artı kritik bulgu yok.
+  36. Değerlendirme kaydı engellemiyor: abonelik kayıt yanıtlandıktan sonra çalışıyor, hata loglanıyor, gece işi açığı kapatıyor.
 - **Bilinen sınırlar (devreden):**
   - Sipariş ve stok panosu bellek içi sıralıyor (5000/2000 kayıt). Büyük mağazada kayıtlı aşama sütunu ya da Index modülü gerekir.
   - Kargo etiketi ve takip F7'de. Kampanyada minimum sepet ve kategori kuralları F4'te.
@@ -480,7 +504,7 @@
 | T8 | F3.8 | `stock-ledger`, düşük stok eşiği + `feed` uyarısı, ön sipariş bayrağı, uzlaştırma işi. KK: düşük stok uyarısı | T7 | 0020 |
 | T9 ✅ | F3.12 | `lib/seo/jsonld`: ProductGroup/Product/Offer, BreadcrumbList, CollectionPage/ItemList, OnlineStore, Article; şema testleri. KK: payload + JSON-LD sözleşme testi | T1, T4 | — |
 | T10 ✅ | F3.6 + F3.15 | Sitemap işi (debounce + günlük, 50.000'de bölme, görsel sitemap, S3), robots.txt üretimi ve AI ön ayarları, canonical host 301, staging `noindex`, imzalı önizleme, IndexNow. KK: sitemap/robots | T4, T5 | — |
-| T11 | F3.13 | `seo-advisor`: kural motoru, skor, bulgular, tek tık düzeltme, widget + SERP önizleme, liste sütunu, yayın kapısı. KK: deterministik, p95 < 50 ms | T2, T9 | — |
+| T11 ✅ | F3.13 | `seo-advisor`: kural motoru, skor, bulgular, tek tık düzeltme, widget + SERP önizleme, liste sütunu, yayın kapısı. KK: deterministik, p95 < 50 ms | T2, T9 | — |
 | T12 | F3.14 | Mağaza geneli SEO denetim işi, 404 isabet listesi + "301 oluştur", mükerrer/öksüz/zincir listeleri. KK: 404 önerisi | T3, T11 | — |
 | T13 | F3.16a | `content` modülü: sayfa ve blog, zengin metin (belge JSON + sunucu oluşturucu, Tiptap), kısa kodlar, Store API | T2, Tiptap onayı | 0019 |
 | T14 | F3.16b + F3.17 | Facet landing sayfaları, özgünlük kapısı, facet parametre kuralları ve robots engelleri. KK: özgünlük < %30 | T10, T13 | — |
