@@ -47,6 +47,16 @@ test("an order's page has no serious accessibility issue", async ({ page }) => {
   expect(await seriousIssues(page)).toEqual([])
 })
 
+test("a product's page has no serious accessibility issue", async ({ page }) => {
+  await page.goto("/products")
+  await page.getByRole("table").getByRole("link").first().click()
+  await expect(pageHeading(page)).toBeVisible()
+  // Its price history (F4.3) is read beside the product
+  await page.locator("#product-price-history").scrollIntoViewIfNeeded()
+  await page.waitForLoadState("networkidle")
+  expect(await seriousIssues(page)).toEqual([])
+})
+
 test("bulk edit's bar and dialog have no serious accessibility issue", async ({ page }) => {
   await page.goto("/products")
   await page.getByRole("table").getByRole("checkbox").nth(1).check()

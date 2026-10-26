@@ -3,7 +3,7 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: BİTTİ** (T1a–T16; kabul kriterlerinin hepsi testlerle işaretli, docs/03; son eksik iki kanıt, danışmanın p95 ölçümü ve yedi sayfa türünün SEO sözleşme testi, kapanışta eklendi). Playwright e2e altyapısı kuruldu; CI düzeltildi. **F4 — Fiyatlandırma ve promosyon: DEVAM** (plan ve ADR-0023/0024/0025 kabul edildi; U1 `price-history`, U4 kuponlar, U7 indirim dağılımı ve iade tutarı, U2 fiyat listeleri bitti; sırada U3 indirim gösterimi). Dal `f4-pricing-promotions`. Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı. F1, F2 ve F3 dalları push edildi (kullanıcı 2026-10-26: "pushları sen önerdiğinde yapabilirsin"); PR açılmadı.
+**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: BİTTİ** (T1a–T16; kabul kriterlerinin hepsi testlerle işaretli, docs/03; son eksik iki kanıt, danışmanın p95 ölçümü ve yedi sayfa türünün SEO sözleşme testi, kapanışta eklendi). Playwright e2e altyapısı kuruldu; CI düzeltildi. **F4 — Fiyatlandırma ve promosyon: DEVAM** (plan ve ADR-0023/0024/0025 kabul edildi; U1 `price-history`, U4 kuponlar, U7 indirim dağılımı ve iade tutarı, U2 fiyat listeleri, U3 indirim gösterimi bitti (KK1, KK2, KK4 işaretli); sırada U5 tek kullanımlık kodlar). Dal `f4-pricing-promotions`. Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı. F1, F2 ve F3 dalları push edildi (kullanıcı 2026-10-26: "pushları sen önerdiğinde yapabilirsin"); PR açılmadı.
 
 ## Son oturum özeti
 **2026-10-25/26 gece (kullanıcı yatarken, "panel işlerini tamamla" talimatıyla).** Panelin ekranları yazıldı; her biri gerçek veriyle tarayıcıda denendi (CDP ekran görüntüsü, test kayıtları sonra silindi). Commit'ler `e11a201`…`6d63df7`, push yok.
@@ -549,6 +549,14 @@
   144. **Kayıtlı listede durum yalnızca başlıktaki "Durdur / Yayına al" düğmesiyle değişiyor**; form durumu göndermiyor. Yeni listede "Kaydedince yayına al" anahtarı var. "Tüm müşteriler" kural nesnesini boşaltıyor; Medusa'nın grup kuralını kaldırdığı testli.
   145. **Devreden doğrulandı: panelin varyant fiyat kaydı liste fiyatlarını koruyor** (testli). Admin API'nin `variants.prices` alanı yalnızca taban fiyatı döndürüyor. Medusa'nın fiyat seti güncellemesi de yalnızca listesiz fiyatlara dokunuyor.
   146. **Ürün-fiyat satırları e2e'de değil, bileşen testinde sınanıyor.** E2E geliştirme veritabanına yazar, fiyat geçmişi de ekleme-yalnız bir defter; bu yüzden e2e'de liste fiyatı yazılmıyor. Satır kartı Testing Library ile panelin ilk bileşen testi oldu; kurulum dosyasına ortak temizlik eklendi.
+  147. **Fiyat gösterimi ayrı Store ucunda:** `GET /store/price-display?variant_id=…&currency_code=try`. Medusa'nın ürün yanıtı değiştirilmedi (Altın kural 2). Storefront ürün ve liste sayfasında bu ucu çağırır; JSON-LD aynı okumadan kurulur (ADR-0023 uygulama notu).
+  148. **İndirim yalnızca gösterilebilecekse gösteriliyor:** üstü çizili fiyat, indirimden önceki fiyat güncel fiyattan yüksekse veriliyor. Önce artırılıp 30 gün içinde eski fiyatına "indirilen" ürün indirim olarak gösterilmiyor. Panel bunu ürün sayfasında nedeniyle söylüyor.
+  149. **JSON-LD teklif fiyatı artık satıştaki fiyat:** önceden indirim sırasında da taban fiyat yazılıyordu. Google işaretlemedeki fiyatın sayfadakiyle aynı olmasını istiyor. Satıştaki fiyatı olmayan çeşidin teklifi çıkmıyor.
+  150. **Panelde fiyat geçmişi ürün sayfasında** (varyantlar kartının altında):
+     - Son 90 gün basamaklı çizgi olarak gösteriliyor: satış fiyatı marka renginde, indirimsiz fiyat gri. Lejant, tooltip ve ekran okuyucu tablosu var.
+     - 90 günde fiyat değişmediyse grafik yerine tek cümle çıkıyor.
+     - Grafik bileşeni `components/charts/step-chart.tsx`, yeniden kullanılabilir.
+     - Palet doğrulayıcıyla sınandı: vurgu rengi iki temada da geçiyor. Gri, rehberin vurgu deseninin bağlam grisi; 3:1 kontrast uyarısı lejant ve tabloyla karşılanıyor.
 - **Bilinen sınırlar (devreden):**
   - JSON-LD'yi storefront basarken `<`, `>` ve `&` kaçışlanmalı (`</script>` içeren başlık ya da metin). Kural docs/13'te var; F18 kabulüne sözleşme testi olarak eklenecek.
   - Editöre yüklenip bir günden uzun süre kaydedilmeyen görseli gece süpürmesi siler; kayıt `content.image_unknown` verir.
@@ -842,7 +850,7 @@
 - **Daha önce:** F1 planlaması ve F0.2–F0.8 (2026-10-24), F0.1 monorepo (2026-10-24 sabahı), SEO ve güvenlik dokümanları (2026-10-22).
 
 ## Sıradaki görev
-**Claude'un sıradaki işi:** F4 U3 indirim gösterimi (Store API `price_display`, JSON-LD `StrikethroughPrice`, panelde fiyat geçmişi; plan aşağıda, "F4 görev planı"), ardından U5–U6. F4 kodu `f4-pricing-promotions` dalında (F1–F3 birleştirilmediği için `f3-catalog-seo-stock` üzerinden).
+**Claude'un sıradaki işi:** F4 U5 tek kullanımlık kodlar (plan aşağıda, "F4 görev planı"), ardından U6 otomatik kampanyalar ve kargo bedava eşiği (KK3), U8 hediye kartı. F4 kodu `f4-pricing-promotions` dalında (F1–F3 birleştirilmediği için `f3-catalog-seo-stock` üzerinden).
 
 1. **Kullanıcı:**
    - **F4 kararları:** ADR-0023/0024/0025 kabul edildi (2026-10-26). Dışarıda bekleyen: 30 gün kuralının hukukçu teyidi, hediye kartı vergisinin mali müşavir teyidi (docs/12).
@@ -871,7 +879,7 @@ Kararlar: ADR-0023 (fiyat geçmişi, 30 gün kuralı), ADR-0024 (kupon ve kampan
 |---|---|---|---|---|
 | U1 ✅ | F4.2 | `price-history` modülü (append-only): satıştaki fiyatın (calculated/original, herkese açık bağlam) varyant ve para birimi başına geçmişi. Yakalama: `pricing.price.*` ve `pricing.price_list.*` subscriber'ı (olayların çalıştığı testle kanıtlanır), saatlik zamanlama işi (liste başlangıç/bitişi olaysız), açılış bakiyesi migration script'i. `lib/pricing` 30 gün hesabı (saf, fixture'lı) | — | KK2 (yarısı) |
 | U2 ✅ | F4.1 | Fiyat listeleri: panel ekranları (indirimli/geçersiz kılan liste, tarih aralığı, müşteri grubu, ürün fiyatları), denetim kaydı kapsamı, panel `nextPrices`'ın liste fiyatlarını korumasının doğrulanması (devreden iş) | — | — |
-| U3 | F4.3 | İndirim gösterimi: Store API `price_display` (güncel, liste fiyatı, indirimden önceki fiyat, kural sürümü), JSON-LD `StrikethroughPrice` aynı kaynaktan, panelde ürün fiyat geçmişi ve indirim uyarısı | U1, U2 | KK2 |
+| U3 ✅ | F4.3 | İndirim gösterimi: Store API `price_display` (güncel, liste fiyatı, indirimden önceki fiyat, kural sürümü), JSON-LD `StrikethroughPrice` aynı kaynaktan, panelde ürün fiyat geçmişi ve indirim uyarısı | U1, U2 | KK2 |
 | U4 ✅ | F4.4 + F4.6 | Kuponlar: kod normalleştirme (büyük harf, ASCII) + mevcut kodlar için migration, sepette tek kod kuralı (ayarla açılır), `coupon` hız profilinin üç Store ucuna bağlanması, kapsam (ürün/kategori/koleksiyon), minimum sepet (`item_total gte`, testle doğrulanır), kişi başı limit (`use_by_attribute`). Eşzamanlı limit KK testi | — | KK1 |
 | U5 | F4.6 | Tek kullanımlık kodlar: `promotion.codes` işi (şablondan N promosyon, `limit: 1`, okunur kodlar, CSV sonuç, en çok 10.000), panelde üret ve indir | U4 | — |
 | U6 | F4.5 | Otomatik kampanyalar: X al Y öde (`buyget`), sepette indirim (sipariş hedefli, minimumlu), kargo bedava eşiği (mağaza ayarı → düz fiyatlı kargo seçeneklerine `item_total gte` kurallı 0 TL fiyat) | U4 | KK3 |

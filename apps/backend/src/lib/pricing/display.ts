@@ -13,6 +13,11 @@ export interface PriceDisplay {
   regular: Kurus
   /** Shown struck through; null when the price is not shown as a discount. */
   before: Kurus | null
+  /**
+   * The rule's price before the discount, shown or not: for the shop, to
+   * see why a discount is not struck through. Null without a discount.
+   */
+  lowest_before: Kurus | null
   on_sale: boolean
   /** When the discount began; null when there is none. */
   since: Date | null
@@ -47,6 +52,7 @@ export function priceDisplay(
     current: live.amount,
     regular: live.original,
     before: onSale ? before : null,
+    lowest_before: view?.discounted ? before : null,
     on_sale: onSale,
     since: onSale ? (view?.since ?? null) : null,
     basis: onSale ? (view?.basis ?? null) : null,

@@ -7,6 +7,7 @@ import { PLATFORM_SETTINGS_MODULE } from "../../src/modules/platform-settings"
 import type PlatformSettingsModuleService from "../../src/modules/platform-settings/service"
 import { PRICE_HISTORY_MODULE } from "../../src/modules/price-history"
 import type PriceHistoryModuleService from "../../src/modules/price-history/service"
+import { createAdminUser } from "../helpers/admin"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { stockShop, stockedProduct } from "../helpers/stock"
@@ -150,6 +151,50 @@ medusaIntegrationTestRunner({
         // The settings cache outlives the database reset between tests
         await settings.saveSection("seo", { canonical_host: null }, null)
       }
+    })
+
+    it("shows the shop a variant's 90 days and why a discount is not struck through", async () => {
+      const admin = await createAdminUser(http, getContainer())
+      const { productId, variantId } = await stockedProduct(getContainer(), shop, "gecmis", 5, 80)
+      await recorded(variantId, 1)
+      await setPrice(variantId, 100)
+      await recorded(variantId, 2)
+      await saleList(variantId, 80)
+      await recorded(variantId, 3)
+
+      const read = await settle(
+        http.get<{
+          rule_version: string
+          variants: {
+            id: string
+            display: Record<string, unknown> | null
+            points: { amount: string; original: string }[]
+          }[]
+        }>(`/admin/products/${productId}/price-history?currency_code=try`, {
+          headers: admin.headers,
+        })
+      )
+      expect(read.status).toBe(200)
+      const [variant] = read.data.variants
+      expect(variant?.points.map((point) => [point.amount, point.original])).toEqual([
+        ["80.00", "80.00"],
+        ["100.00", "100.00"],
+        ["80.00", "100.00"],
+      ])
+      // Discounted, but 80 sold days ago: the rule's price is shown to the shop, not struck through
+      expect(variant?.display).toMatchObject({
+        current: "80.00",
+        regular: "100.00",
+        before: null,
+        lowest_before: "80.00",
+        on_sale: false,
+      })
+      const missing = await settle(
+        http.get("/admin/products/prod_unknown/price-history?currency_code=try", {
+          headers: admin.headers,
+        })
+      )
+      expect(missing.status).toBe(404)
     })
 
     it("shows a plain price, leaves out an unknown variant and refuses a bad query", async () => {

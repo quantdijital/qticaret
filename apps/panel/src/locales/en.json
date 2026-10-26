@@ -964,6 +964,23 @@
         "category": "Choose a category.",
         "seoFields": "Choose at least one field."
       }
+    },
+    "priceHistory": {
+      "title": "Price history",
+      "hint": "The selling price and the price without a sale over the last 90 days. The price struck through in the shop is the lowest of the 30 days before a discount.",
+      "variant": "Variant",
+      "paid": "Selling price",
+      "regular": "Price without a sale",
+      "empty": "No prices recorded yet.",
+      "unpriced": "This variant has no Turkish lira price.",
+      "none": "No discount. Selling price {{price}}.",
+      "struck": "The discount is shown struck through",
+      "struckDetail": "The shop shows {{before}} struck through, with {{price}} beside it.",
+      "blocked": "This discount is not shown struck through",
+      "blockedDetail": "The lowest price in the 30 days before the discount was {{lowest}}. Today's {{price}} is not below it, so the shop does not show it as a discount.",
+      "regularBasis": "The price history begins after the discount did, so the price without a sale is used.",
+      "table": "Prices from {{from}} to today",
+      "unchanged": "The price has not changed in the last 90 days."
     }
   },
   "orders": {

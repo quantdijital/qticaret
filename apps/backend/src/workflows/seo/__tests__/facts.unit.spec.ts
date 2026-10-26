@@ -105,6 +105,7 @@ describe("productFacts", () => {
       current: kurus(current),
       regular: kurus(89_900),
       before: before === null ? null : kurus(before),
+      lowest_before: before === null ? null : kurus(before),
       on_sale: before !== null,
       since: null,
       basis: before === null ? null : "history",

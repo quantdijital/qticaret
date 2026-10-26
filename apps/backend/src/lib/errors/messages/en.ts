@@ -134,6 +134,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "media.unknown": "Image not found.",
   "orders.nothing_to_ship": "Nothing is left to ship in this order.",
   "orders.unknown": "Order not found.",
+  "products.unknown": "Product not found.",
   "price_lists.unknown": "Price list not found.",
   "price_lists.no_currency": "The shop has no currency set.",
   "price_lists.rate": "The rate must be between 0 and 100 percent.",

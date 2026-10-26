@@ -26,6 +26,7 @@ describe("how a price is shown (F4.3, ADR-0023)", () => {
       current: 8000,
       regular: 10000,
       before: 9500,
+      lowest_before: 9500,
       on_sale: true,
       since: at(5),
       basis: "history",
@@ -40,7 +41,13 @@ describe("how a price is shown (F4.3, ADR-0023)", () => {
       live(8000, 10000),
       NOW
     )
-    expect(shown).toMatchObject({ current: 8000, regular: 10000, before: null, on_sale: false })
+    expect(shown).toMatchObject({
+      current: 8000,
+      regular: 10000,
+      before: null,
+      lowest_before: 8000,
+      on_sale: false,
+    })
   })
 
   it("shows the regular price alone when there is no discount", () => {

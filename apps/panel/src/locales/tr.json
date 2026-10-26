@@ -972,6 +972,23 @@
         "category": "Bir kategori seçin.",
         "seoFields": "En az bir alan seçin."
       }
+    },
+    "priceHistory": {
+      "title": "Fiyat geçmişi",
+      "hint": "Son 90 günde satış fiyatı ve indirimsiz fiyat. Mağazada üstü çizili fiyat, indirimden önceki 30 günün en düşük fiyatıdır.",
+      "variant": "Ürün çeşidi",
+      "paid": "Satış fiyatı",
+      "regular": "İndirimsiz fiyat",
+      "empty": "Henüz kaydedilmiş fiyat yok.",
+      "unpriced": "Bu çeşidin Türk lirası fiyatı yok.",
+      "none": "İndirim yok. Satış fiyatı {{price}}.",
+      "struck": "İndirim üstü çizili gösteriliyor",
+      "struckDetail": "Mağazada {{before}} üstü çizili, yanında {{price}} görünür.",
+      "blocked": "Bu indirim üstü çizili gösterilmiyor",
+      "blockedDetail": "İndirimden önceki 30 günde en düşük fiyat {{lowest}}. Bugünkü {{price}} bundan düşük olmadığı için mağazada indirim olarak gösterilmez.",
+      "regularBasis": "Fiyat geçmişi indirim başladıktan sonra tutulmaya başladığı için indirimsiz fiyat kullanılıyor.",
+      "table": "{{from}} tarihinden bugüne fiyatlar",
+      "unchanged": "Son 90 günde fiyat değişmedi."
     }
   },
   "orders": {

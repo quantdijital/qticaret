@@ -138,6 +138,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "media.unknown": "Görsel bulunamadı.",
   "orders.nothing_to_ship": "Bu siparişte kargoya verilecek ürün kalmadı.",
   "orders.unknown": "Sipariş bulunamadı.",
+  "products.unknown": "Ürün bulunamadı.",
   "price_lists.unknown": "Fiyat listesi bulunamadı.",
   "price_lists.no_currency": "Mağazanın para birimi tanımlı değil.",
   "price_lists.rate": "Oran yüzde 0 ile 100 arasında olmalı.",

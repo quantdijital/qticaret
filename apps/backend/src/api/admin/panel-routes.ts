@@ -4,6 +4,7 @@ import { AdminGetDashboardNoQuery, AdminGetDashboardOverview } from "./dashboard
 import { AdminGetOrderBoard } from "./order-board/validators"
 import { AdminPostShipOrder } from "./orders/[id]/ship/validators"
 import { AdminPostPriceListDiscount } from "./price-lists/[id]/discount/validators"
+import { AdminGetPriceHistory } from "./products/[id]/price-history/validators"
 import { AdminGetStockBoard } from "./stock-board/validators"
 
 const NO_QUERY_READS = [
@@ -46,6 +47,11 @@ export const PANEL_ROUTES = [
     matcher: "/admin/orders/:id/ship",
     methods: ["POST" as const],
     middlewares: [requireUserActor, validateAndTransformBody(AdminPostShipOrder)],
+  },
+  {
+    matcher: "/admin/products/:id/price-history",
+    methods: ["GET" as const],
+    middlewares: [requireUserActor, validateAndTransformQuery(AdminGetPriceHistory, {})],
   },
   {
     matcher: "/admin/price-lists/:id/discount",

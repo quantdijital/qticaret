@@ -12,6 +12,7 @@ import { CatalogCard } from "@/features/products/detail/catalog-card"
 import { GeneralCard } from "@/features/products/detail/general-card"
 import { MediaCard } from "@/features/products/detail/media-card"
 import { OrganizeCard } from "@/features/products/detail/organize-card"
+import { PriceHistoryCard } from "@/features/products/detail/price-history-card"
 import { ProductActions } from "@/features/products/detail/product-actions"
 import { ShippingCard } from "@/features/products/detail/shipping-card"
 import { SummaryCard } from "@/features/products/detail/summary-card"
@@ -98,6 +99,9 @@ export function ProductDetailPage() {
           </div>
           <div id="product-variants" className="scroll-mt-20">
             <VariantsCard product={product} />
+          </div>
+          <div id="product-price-history" className="scroll-mt-20">
+            <PriceHistoryCard productId={product.id} />
           </div>
           {(product.variants?.length ?? 0) > 1 && (product.images?.length ?? 0) > 0 ? (
             <div id="product-variant-images" className="scroll-mt-20">
