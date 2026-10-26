@@ -159,6 +159,15 @@ describe("rateLimitPrefix", () => {
     expect(rateLimitPrefix("postgres://localhost")).toBe("qt:rl:localhost:5432/default:")
   })
 
+  it("names a test run apart from dev on the same database", () => {
+    expect(rateLimitPrefix("postgres://localhost/qticaret", "test")).toBe(
+      "qt:rl:localhost:5432/qticaret/test:"
+    )
+    expect(rateLimitPrefix("postgres://localhost/qticaret", "development")).toBe(
+      "qt:rl:localhost:5432/qticaret:"
+    )
+  })
+
   it("keeps a malformed escape as written instead of throwing", () => {
     expect(rateLimitPrefix("postgres://localhost/shop%zz")).toBe("qt:rl:localhost:5432/shop%zz:")
   })

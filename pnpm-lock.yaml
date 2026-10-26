@@ -65,6 +65,9 @@ importers:
       '@medusajs/js-sdk':
         specifier: 2.21.2
         version: 2.21.2
+      '@medusajs/loyalty-plugin':
+        specifier: 2.21.2
+        version: 2.21.2(4231a86d84342e53a89b39d414326595)
       '@medusajs/medusa':
         specifier: 2.21.2
         version: 2.21.2(16ab2dc07a9a38659d6bcf7bae8b1292)
@@ -2024,6 +2027,41 @@ packages:
     resolution: {integrity: sha512-u9Wuy7X5l0mXs9x0y4dWeS7TAEZWHdPtQVPG6CMPTN4Ene2E9PAfGHfXxlifQG3OXVvyFeDLNw2Lzxt71F7FFA==}
     peerDependencies:
       '@medusajs/framework': 2.21.2
+
+  '@medusajs/loyalty-plugin@2.21.2':
+    resolution: {integrity: sha512-hp2VzucNaJ0WRLDp/OAwvTKtXJ7pd3rB/hBHVu28kXRAh3XNGsy1HyBxEXJVwoR6vW4f8Z7vpOJHHg3XwykeXQ==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      '@medusajs/admin-sdk': 2.21.2
+      '@medusajs/cli': 2.21.2
+      '@medusajs/dashboard': 2.21.2
+      '@medusajs/framework': 2.21.2
+      '@medusajs/icons': 2.21.2
+      '@medusajs/medusa': 2.21.2
+      '@medusajs/test-utils': 2.21.2
+      '@medusajs/ui': 4.2.6
+      react: ^18.3.1
+      react-dom: ^18.3.1
+      react-router-dom: ^6.30.4 || ^7.0.0
+    peerDependenciesMeta:
+      '@medusajs/admin-sdk':
+        optional: true
+      '@medusajs/cli':
+        optional: true
+      '@medusajs/dashboard':
+        optional: true
+      '@medusajs/icons':
+        optional: true
+      '@medusajs/test-utils':
+        optional: true
+      '@medusajs/ui':
+        optional: true
+      react:
+        optional: true
+      react-dom:
+        optional: true
+      react-router-dom:
+        optional: true
 
   '@medusajs/medusa@2.21.2':
     resolution: {integrity: sha512-kzotmmmdv8hou319iRiYuDDqqNzxPWf9d7HHidRhagmHDGU+b863ecLaeLyfAvyc2UniFxb/UpnwjvKDvZ0cuA==}
@@ -11870,6 +11908,21 @@ snapshots:
   '@medusajs/locking@2.21.2(@medusajs/framework@2.21.2(@medusajs/cli@2.21.2(@types/node@24.19.2)(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(@types/node@24.19.2)(debug@4.4.3(supports-color@8.1.1))(ioredis@5.11.1(supports-color@8.1.1))(supports-color@8.1.1)(vite@7.3.7(@types/node@24.19.2)(jiti@1.21.7)(lightningcss@1.33.0)(yaml@2.9.1))(zod@4.2.0))':
     dependencies:
       '@medusajs/framework': 2.21.2(@medusajs/cli@2.21.2(@types/node@24.19.2)(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(@types/node@24.19.2)(debug@4.4.3(supports-color@8.1.1))(ioredis@5.11.1(supports-color@8.1.1))(supports-color@8.1.1)(vite@7.3.7(@types/node@24.19.2)(jiti@1.21.7)(lightningcss@1.33.0)(yaml@2.9.1))(zod@4.2.0)
+
+  '@medusajs/loyalty-plugin@2.21.2(4231a86d84342e53a89b39d414326595)':
+    dependencies:
+      '@medusajs/framework': 2.21.2(@medusajs/cli@2.21.2(@types/node@24.19.2)(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(@types/node@24.19.2)(debug@4.4.3(supports-color@8.1.1))(ioredis@5.11.1(supports-color@8.1.1))(supports-color@8.1.1)(vite@7.3.7(@types/node@24.19.2)(jiti@1.21.7)(lightningcss@1.33.0)(yaml@2.9.1))(zod@4.2.0)
+      '@medusajs/medusa': 2.21.2(16ab2dc07a9a38659d6bcf7bae8b1292)
+    optionalDependencies:
+      '@medusajs/admin-sdk': 2.21.2
+      '@medusajs/cli': 2.21.2(@types/node@24.19.2)(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1)
+      '@medusajs/dashboard': 2.21.2(@sinclair/typebox@0.34.52)(@standard-schema/spec@1.1.0)(@types/react-dom@18.3.7(@types/react@18.3.31))(@types/react@18.3.31)(ajv-formats@2.1.1(ajv@8.13.0))(ajv@8.13.0)(typescript@5.9.3)
+      '@medusajs/icons': 2.21.2(react@18.3.1)
+      '@medusajs/test-utils': 2.21.2(@medusajs/core-flows@2.21.2(@medusajs/framework@2.21.2(@medusajs/cli@2.21.2(@types/node@24.19.2)(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(@types/node@24.19.2)(debug@4.4.3(supports-color@8.1.1))(ioredis@5.11.1(supports-color@8.1.1))(supports-color@8.1.1)(vite@7.3.7(@types/node@24.19.2)(jiti@1.21.7)(lightningcss@1.33.0)(yaml@2.9.1))(zod@4.2.0)))(@medusajs/framework@2.21.2(@medusajs/cli@2.21.2(@types/node@24.19.2)(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1))(@types/node@24.19.2)(debug@4.4.3(supports-color@8.1.1))(ioredis@5.11.1(supports-color@8.1.1))(supports-color@8.1.1)(vite@7.3.7(@types/node@24.19.2)(jiti@1.21.7)(lightningcss@1.33.0)(yaml@2.9.1))(zod@4.2.0))(@medusajs/medusa@2.21.2)(debug@4.4.3(supports-color@8.1.1))(supports-color@8.1.1)
+      '@medusajs/ui': 4.2.6(@types/react-dom@18.3.7(@types/react@18.3.31))(@types/react@18.3.31)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(typescript@5.9.3)
+      react: 18.3.1
+      react-dom: 18.3.1(react@18.3.1)
+      react-router-dom: 7.18.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
 
   '@medusajs/medusa@2.21.2(16ab2dc07a9a38659d6bcf7bae8b1292)':
     dependencies:

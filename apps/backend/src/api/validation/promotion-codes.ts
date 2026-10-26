@@ -5,7 +5,7 @@ import { normalizeCode } from "../../lib/promotions"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import type { PromotionSettings } from "../../modules/platform-settings/sections"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
-import { routePath, routePathKeepingCase } from "../http/request-path"
+import { decodedSegment, routePath, routePathKeepingCase } from "../http/request-path"
 
 type Body = Record<string, unknown> | undefined
 
@@ -26,7 +26,8 @@ export function cartRoute(req: MedusaRequest): CartRoute | null {
   if (parts[0]?.toLowerCase() !== "store" || parts[1]?.toLowerCase() !== "carts") {
     return null
   }
-  const cartId = parts[2] ?? null
+  // As the route reads it: `cart%5F01` is the same cart, counted as one
+  const cartId = parts[2] === undefined ? null : decodedSegment(parts[2])
   if (parts.length <= 3) {
     return req.method === "POST" ? { mode: "replace", cartId } : null
   }

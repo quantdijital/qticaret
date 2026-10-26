@@ -32,6 +32,8 @@ export interface OrderMoney extends MoneyTotals {
   /** The items' and the shipping's own totals: price, discount and payment add up in each. */
   items: MoneyTotals
   shipping: MoneyTotals
+  /** Paid with gift cards and store credit (F4.8): the net less this is what payments take. */
+  credit: Kurus
   /** Taken from the customer, less what was given back: what a refund can still return. */
   paid: Kurus
   refunded: Kurus
@@ -85,6 +87,7 @@ export async function readOrderMoney(
     ...totalsOf(lines),
     items: totalsOf(lines.filter((line) => line.kind === "item")),
     shipping: totalsOf(lines.filter((line) => line.kind === "shipping")),
+    credit: sumKurus(facts.credits.map(kurusOf)),
     paid,
     refunded,
     refundable: kurus(Math.max(subtractKurus(paid, refunded), 0)),

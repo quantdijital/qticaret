@@ -11,6 +11,8 @@ export interface HttpResponse<T> {
 export interface RequestConfig {
   headers?: Record<string, string>
   responseType?: "json" | "text"
+  /** A body for DELETE, which axios takes here. */
+  data?: unknown
 }
 
 export interface HttpClient {
@@ -18,6 +20,7 @@ export interface HttpClient {
   post<T = unknown>(url: string, body?: unknown, config?: RequestConfig): Promise<HttpResponse<T>>
   put<T = unknown>(url: string, body?: unknown, config?: RequestConfig): Promise<HttpResponse<T>>
   delete<T = unknown>(url: string, config?: RequestConfig): Promise<HttpResponse<T>>
+  head<T = unknown>(url: string, config?: RequestConfig): Promise<HttpResponse<T>>
   options<T = unknown>(url: string, config?: RequestConfig): Promise<HttpResponse<T>>
 }
 

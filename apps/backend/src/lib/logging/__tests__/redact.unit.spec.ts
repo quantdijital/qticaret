@@ -253,6 +253,11 @@ describe("redactText", () => {
       `connect postgres://${REDACTED}@db:5432/medusa failed`,
     ],
     [
+      "gift card code in a lookup path",
+      "GET /store/gift-cards/GIFT-ABCD-EFGH-JKLM-NPQR?fields=id 429",
+      `GET /store/gift-cards/${REDACTED}NPQR?fields=id 429`,
+    ],
+    [
       "e-mail",
       "Customer with email: ayse@example.com",
       `Customer with email: ${REDACTED}@example.com`,

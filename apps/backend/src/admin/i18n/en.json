@@ -223,6 +223,10 @@
       "stock_preorder": {
         "label": "Selling past stock (preorder)",
         "description": "A variant whose stock runs out can still be sold, as a preorder or shipped from a supplier. Turned on per variant on the product page; search engines are told it is on backorder."
+      },
+      "promotions_gift_cards": {
+        "label": "Gift cards and store credit",
+        "description": "Gift cards can be made and given to customers, who use the code in their basket and keep what is left for later. Store credit takes refunds or goodwill amounts onto an account."
       }
     },
     "attributes": {

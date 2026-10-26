@@ -2,8 +2,12 @@
  * A tenant's name for keys in a shared Redis: its database server and name.
  * Tenants that share a Redis (instance-per-tenant, one database each), and
  * local dev and test runs on one Redis, must not see each other's keys.
+ * Medusa's test runner works in databases of its own but leaves
+ * DATABASE_URL as the env file has it, often dev's: a test run
+ * (`NODE_ENV=test`) is named apart, or its sign-ups would use up dev's
+ * login limit.
  */
-export function tenantNamespace(databaseUrl: string): string {
+export function tenantNamespace(databaseUrl: string, nodeEnv?: string): string {
   const url = new URL(databaseUrl)
   const raw = url.pathname.slice(1)
   let name = raw
@@ -12,5 +16,6 @@ export function tenantNamespace(databaseUrl: string): string {
   } catch {
     // A malformed escape is kept as written rather than failing
   }
-  return `${url.hostname}:${url.port || "5432"}/${name || "default"}`
+  const namespace = `${url.hostname}:${url.port || "5432"}/${name || "default"}`
+  return nodeEnv === "test" ? `${namespace}/test` : namespace
 }

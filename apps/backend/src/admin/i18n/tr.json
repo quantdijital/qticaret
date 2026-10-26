@@ -223,6 +223,10 @@
       "stock_preorder": {
         "label": "Stoksuz satış (ön sipariş)",
         "description": "Stoku biten varyant satılmaya devam edebilir: ön sipariş ya da tedarikçiden gönderim için. Ürün sayfasında varyant bazında açılır; arama motorlarına \"ön sipariş\" olarak bildirilir."
+      },
+      "promotions_gift_cards": {
+        "label": "Hediye kartı ve mağaza kredisi",
+        "description": "Hediye kartı oluşturulup müşteriye verilebilir; müşteri kodu sepette kullanır, kalan bakiyesi sonraki alışverişte geçer. Mağaza kredisiyle iade ya da iyi niyet tutarı hesaba yazılabilir."
       }
     },
     "attributes": {

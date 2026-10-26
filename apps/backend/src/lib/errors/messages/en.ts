@@ -127,6 +127,10 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "features.disabled": "This feature is turned off.",
   "features.platform_owned": "This feature is managed by the platform.",
   "features.unknown": "There is no such feature.",
+  "gift_cards.code_prefix":
+    "A card code's prefix is up to 20 letters, digits or dashes; the rest of the code is drawn at random.",
+  "gift_cards.guest_account":
+    "Store credit is for customers with an account; a guest could not spend it.",
   "media.alt_invalid": "The alt text has characters that cannot be used.",
   "media.file_id_invalid": "The file id is not valid.",
   "media.file_unknown": "File not found.",

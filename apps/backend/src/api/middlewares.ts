@@ -32,6 +32,8 @@ import { rejectAmbiguousPath } from "./http/request-path"
 import { adminLimitGuard, storeLimitGuard, uploadSizeGate } from "./http/request-limits"
 import { securityHeaders } from "./http/security-headers"
 import { MEDIA_ROUTES, STORE_MEDIA_FIELDS, restrictStoreMediaFields } from "./http/media-routes"
+import { GIFT_CARD_ROUTES } from "./http/gift-card-routes"
+import { restrictStoreGiftCardFields } from "./http/shopper-gift-cards"
 import { PRICING_ROUTES } from "./http/pricing-routes"
 import { PROMOTION_ROUTES } from "./http/promotion-routes"
 import { SEO_ROUTES } from "./http/seo-routes"
@@ -84,6 +86,7 @@ export default defineMiddlewares({
         restrictStoreAttributeFields,
         restrictStoreMediaFields,
         rejectStoreSeoFields,
+        restrictStoreGiftCardFields,
       ],
     },
     // F2.5: admin mutations are recorded once answered (adr/0011); tax ids
@@ -180,6 +183,8 @@ export default defineMiddlewares({
     ...PROMOTION_ROUTES,
     // F4.3: price display
     ...PRICING_ROUTES,
+    // F4.8: gift cards and store credit, behind their flag
+    ...GIFT_CARD_ROUTES,
     // docs/17: the home page's order numbers are for people (shop revenue)
     {
       matcher: "/admin/home/summary",

@@ -27,6 +27,9 @@ export const SEO_PUBLISH_GATE = "seo.publish_gate"
 /** Selling a variant past its stock, as a preorder or from a supplier (F3.8, adr/0020). */
 export const STOCK_PREORDER = "stock.preorder"
 
+// F4.8 (ADR-0025): gift cards and store credit, off until the shop takes them on
+export const GIFT_CARDS = "promotions.gift_cards"
+
 export const FEATURES: Readonly<Record<string, FeatureDefinition>> = Object.freeze({
   // F3.2: products that need no shipping (e-books, gift codes, courses, services)
   [NON_PHYSICAL_PRODUCTS]: {
@@ -55,6 +58,13 @@ export const FEATURES: Readonly<Record<string, FeatureDefinition>> = Object.free
     owner: "tenant",
     labelKey: "qticaret.features.stock_preorder.label",
     descriptionKey: "qticaret.features.stock_preorder.description",
+  },
+  // F4.8: off by default; selling cards and their e-mails come with F9
+  [GIFT_CARDS]: {
+    default: false,
+    owner: "tenant",
+    labelKey: "qticaret.features.promotions_gift_cards.label",
+    descriptionKey: "qticaret.features.promotions_gift_cards.description",
   },
 })
 

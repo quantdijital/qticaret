@@ -33,6 +33,9 @@ export const ORDER_MONEY_FIELDS = [
   "returns.shipping_methods.shipping_method_id",
   "exchanges.shipping_methods.shipping_method_id",
   "claims.shipping_methods.shipping_method_id",
+  // Gift cards and store credit (F4.8): Medusa takes them off the total the customer pays
+  "credit_lines.raw_amount",
+  "credit_lines.version",
   "payment_collections.raw_captured_amount",
   "payment_collections.raw_refunded_amount",
 ]
@@ -76,6 +79,7 @@ export interface OrderRow {
   returns?: Rows<Changes>
   exchanges?: Rows<Changes>
   claims?: Rows<Changes>
+  credit_lines?: Rows<{ raw_amount?: Amount; version?: number | null }>
   payment_collections?: Rows<{ raw_captured_amount?: Amount; raw_refunded_amount?: Amount }>
 }
 
@@ -84,6 +88,8 @@ export interface OrderFacts {
   /** With the units that came back on returns (received or dismissed). */
   items: (ItemFacts & { returned: number })[]
   shipping: ShippingFacts[]
+  /** Paid with gift cards and store credit, outside the payments. */
+  credits: MedusaAmount[]
   payments: { captured: MedusaAmount; refunded: MedusaAmount }[]
 }
 
@@ -97,9 +103,10 @@ function required(amount: Amount, what: string): MedusaAmount {
 }
 
 /**
- * Medusa copies a line's adjustments into each new version of the order
- * (a fulfillment, a return), and Query returns every copy; Medusa's own
- * order reads keep the current version's. So does this.
+ * Medusa copies a line's adjustments, and the order's credit lines, into
+ * each new version of the order (a fulfillment, a return), and Query
+ * returns every copy; Medusa's own order reads keep the current version's.
+ * So does this.
  */
 const currentAdjustments = (rows: Rows<AdjustmentRow>, version: number) =>
   present(rows)
@@ -147,6 +154,9 @@ export function orderFacts(order: OrderRow): OrderFacts {
         tax_lines: method.tax_lines ?? null,
         adjustments: currentAdjustments(method.adjustments, order.version),
       })),
+    credits: present(order.credit_lines)
+      .filter((row) => row.version === order.version)
+      .map((row) => required(row.raw_amount, "a credit line")),
     payments: present(order.payment_collections).map((row) => ({
       captured: row.raw_captured_amount ?? 0,
       refunded: row.raw_refunded_amount ?? 0,

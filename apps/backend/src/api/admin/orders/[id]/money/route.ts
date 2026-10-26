@@ -12,8 +12,8 @@ const amounts = (totals: MoneyTotals) => ({
 /**
  * `GET /admin/orders/:id/money` (F4.7): each line's price, discount share
  * and payment as exact lira ("20.50"), the items' and shipping's totals,
- * the units given back, and what a refund can still return. No personal
- * data.
+ * the units given back, what gift cards and store credit paid, and what
+ * a refund can still return. No personal data.
  */
 export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse): Promise<void> {
   const money = await readOrderMoney(req.scope, req.params["id"] ?? "")
@@ -31,6 +31,7 @@ export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse):
       ...amounts(money),
       items: amounts(money.items),
       shipping: amounts(money.shipping),
+      credit: toMedusaAmount(money.credit),
       paid: toMedusaAmount(money.paid),
       refunded: toMedusaAmount(money.refunded),
       refundable: toMedusaAmount(money.refundable),

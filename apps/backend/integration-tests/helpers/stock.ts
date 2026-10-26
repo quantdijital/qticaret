@@ -18,7 +18,8 @@ export async function stockShop(container: MedusaContainer): Promise<StockShop> 
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
   const [{ data: stores }, { data: options }, { data: profiles }] = await Promise.all([
     query.graph({ entity: "store", fields: ["default_location_id"] }),
-    query.graph({ entity: "shipping_option", fields: ["id"] }),
+    // The seed's standard option, whatever order the database returns them in
+    query.graph({ entity: "shipping_option", fields: ["id"], filters: { name: "Standart Kargo" } }),
     query.graph({ entity: "shipping_profile", fields: ["id"], filters: { type: "default" } }),
   ])
   return {

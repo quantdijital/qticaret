@@ -24,4 +24,17 @@ export const SENSITIVE_READS: readonly [string, string, boolean, (readonly strin
   ["/admin/exchanges/:id", "exchange", false],
   ["/admin/notifications", "notification", true, ["id", "created_at"]],
   ["/admin/notifications/:id", "notification", false],
+  // F4.8: a card's code spends it and its note names whom it was for; a
+  // customer's store credit and its movements
+  ["/admin/gift-cards", "gift_card", true],
+  ["/admin/gift-cards/:id", "gift_card", false],
+  ["/admin/gift-cards/:id/orders", "gift_card", false],
+  [
+    "/admin/store-credit-accounts",
+    "store_credit_account",
+    true,
+    ["id", "currency_code", "balance", "credits", "debits"],
+  ],
+  ["/admin/store-credit-accounts/:id", "store_credit_account", false],
+  ["/admin/store-credit-accounts/:id/transactions", "store_credit_account", false],
 ]

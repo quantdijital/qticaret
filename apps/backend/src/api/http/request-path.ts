@@ -70,3 +70,12 @@ export function rejectAmbiguousPath(
   }
   next()
 }
+
+/** A path segment as Express hands it to a route parameter: decoded, or as written when malformed. */
+export function decodedSegment(segment: string): string {
+  try {
+    return decodeURIComponent(segment)
+  } catch {
+    return segment
+  }
+}

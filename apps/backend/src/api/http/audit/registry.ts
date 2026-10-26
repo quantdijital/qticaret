@@ -4,6 +4,7 @@ import { ATTRIBUTE_RESOURCES } from "./resources/attributes"
 import { BRAND_RESOURCES } from "./resources/brands"
 import { CATALOG_RESOURCES } from "./resources/catalog"
 import { CONTENT_RESOURCES } from "./resources/content"
+import { GIFT_CARD_RESOURCES } from "./resources/gift-cards"
 import { MEDIA_RESOURCES } from "./resources/media"
 import { PRICE_RESOURCES } from "./resources/prices"
 import { PROMOTION_RESOURCES } from "./resources/promotions"
@@ -32,6 +33,7 @@ export const AUDITED_RESOURCES: readonly AuditedResource[] = [
   ...STOCK_RESOURCES,
   ...MEDIA_RESOURCES,
   ...CONTENT_RESOURCES,
+  ...GIFT_CARD_RESOURCES,
 ]
 
 export interface ResourceMatch {

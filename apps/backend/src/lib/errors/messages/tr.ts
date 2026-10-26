@@ -131,6 +131,10 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "features.disabled": "Bu özellik kapalı.",
   "features.platform_owned": "Bu özellik platform tarafından yönetilir.",
   "features.unknown": "Böyle bir özellik yok.",
+  "gift_cards.code_prefix":
+    "Kart kodunun öneki en çok 20 harf, rakam ya da tire olabilir; kodun geri kalanı rastgele üretilir.",
+  "gift_cards.guest_account":
+    "Mağaza kredisi yalnızca üye müşterilere verilebilir; misafir müşteri krediyi kullanamaz.",
   "media.alt_invalid": "Alt metinde kullanılamayan karakterler var.",
   "media.file_id_invalid": "Dosya adı geçerli değil.",
   "media.file_unknown": "Dosya bulunamadı.",

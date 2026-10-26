@@ -32,5 +32,6 @@ export interface AuditedResource {
   sensitive?: readonly string[]
 }
 
-// Medusa IDs: a prefix and a ULID (`prod_01J...`); "batch" and other words are not IDs
-export const ID = "[a-z]+_[0-9A-Za-z]+"
+// Medusa IDs: a prefix, sometimes in parts, and a ULID (`prod_01J...`, `sc_acc_01...`);
+// "batch" and other words are not IDs
+export const ID = "[a-z]+(?:_[a-z]+)*_[0-9A-Za-z]+"

@@ -131,6 +131,12 @@ const TEXT_PATTERNS: readonly (readonly [
     /(?<![A-Za-z0-9._%+-])[A-Za-z0-9._%+-]+(@|%40)([A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,})/g,
     (_match, at = "@", domain = "") => `${REDACTED}${at}${domain}`,
   ],
+  // A gift card's code in the path of its lookup (ADR-0025): whoever holds
+  // it spends the card, so only its last four characters are kept
+  [
+    /(\/store\/gift-cards\/)([^/?#\s"]+)/gi,
+    (_match, path = "", code = "") => `${path}${REDACTED}${code.slice(-4)}`,
+  ],
   // Turkish mobiles with or without +90/0; landlines only with a prefix
   [new RegExp(String.raw`(?<![A-Za-z0-9])${PHONE_PREFIX}?5${PHONE_REST}`, "g"), () => REDACTED],
   [new RegExp(String.raw`(?<![A-Za-z0-9])${PHONE_PREFIX}[2-4]${PHONE_REST}`, "g"), () => REDACTED],

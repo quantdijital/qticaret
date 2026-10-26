@@ -25,8 +25,8 @@ import { routePath } from "./request-path"
 let sharedStore: RateLimitStore | undefined
 
 /** Counters live under the tenant's namespace (see `tenantNamespace`). */
-export function rateLimitPrefix(databaseUrl: string): string {
-  return `qt:rl:${tenantNamespace(databaseUrl)}:`
+export function rateLimitPrefix(databaseUrl: string, nodeEnv?: string): string {
+  return `qt:rl:${tenantNamespace(databaseUrl, nodeEnv)}:`
 }
 
 function defaultStore(): RateLimitStore {
@@ -46,7 +46,7 @@ function defaultStore(): RateLimitStore {
     sharedStore = memory
   } else {
     sharedStore = withFallback(
-      createRedisStore(env.REDIS_URL, rateLimitPrefix(env.DATABASE_URL)),
+      createRedisStore(env.REDIS_URL, rateLimitPrefix(env.DATABASE_URL, env.NODE_ENV)),
       memory,
       {
         onError: (error) => {

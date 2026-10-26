@@ -6,6 +6,8 @@ import { lockingModules, tenantNamespace } from "./src/lib/redis"
 loadEnv(process.env["NODE_ENV"] ?? "development", process.cwd())
 
 const env = parseEnv()
+// Redis keys of this tenant, a test run apart from dev (lib/redis/namespace.ts)
+const namespace = tenantNamespace(env.DATABASE_URL, env.NODE_ENV)
 // Tests keep files local (CI has no object store); elsewhere S3 when set,
 // which the env schema requires once deployed (adr/0014)
 const s3 = env.NODE_ENV === "test" ? null : s3Settings(env)
@@ -38,6 +40,9 @@ module.exports = defineConfig({
       cookieSecret: env.COOKIE_SECRET,
     },
   },
+  // F4.8 (ADR-0025): gift cards and store credit; its routes answer only with
+  // the shop's `promotions.gift_cards` flag on (src/api/http/gift-card-routes.ts)
+  plugins: [{ resolve: "@medusajs/loyalty-plugin", options: {} }],
   modules: [
     { resolve: "./src/modules/tr-address" },
     { resolve: "./src/modules/url-registry" },
@@ -56,8 +61,8 @@ module.exports = defineConfig({
       resolve: "./src/modules/seo-redirects",
       options: {
         redisUrl: env.REDIS_URL,
-        versionKey: `qt:redirects:${tenantNamespace(env.DATABASE_URL)}:version`,
-        resolutionsVersionKey: `qt:seo:${tenantNamespace(env.DATABASE_URL)}:resolutions`,
+        versionKey: `qt:redirects:${namespace}:version`,
+        resolutionsVersionKey: `qt:seo:${namespace}:resolutions`,
       },
     },
     { resolve: "./src/modules/async-job" },
@@ -65,7 +70,7 @@ module.exports = defineConfig({
       resolve: "./src/modules/platform-settings",
       options: {
         redisUrl: env.REDIS_URL,
-        versionKey: `qt:settings:${tenantNamespace(env.DATABASE_URL)}:version`,
+        versionKey: `qt:settings:${namespace}:version`,
       },
     },
     {
@@ -73,7 +78,7 @@ module.exports = defineConfig({
       options: { encryptionKey: env.PII_ENCRYPTION_KEY, hashKey: env.PII_HASH_KEY },
     },
     // Locks shared by every process of the tenant (adr/0020)
-    ...lockingModules(env.REDIS_URL, tenantNamespace(env.DATABASE_URL)),
+    ...lockingModules(env.REDIS_URL, namespace),
     // Without it Medusa keeps files on local disk (dev and test only)
     ...(s3
       ? [

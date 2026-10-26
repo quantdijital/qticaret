@@ -111,6 +111,18 @@ describe("audit registry", () => {
     ["DELETE", "/admin/promotions/promo_01A", "DELETE /admin/promotions/:id"],
     ["POST", "/admin/campaigns/procamp_01A", "POST /admin/campaigns/:id"],
     ["DELETE", "/admin/campaigns/procamp_01A", "DELETE /admin/campaigns/:id"],
+    [
+      "POST",
+      "/admin/store-credit-accounts/sc_acc_01A/credit",
+      "POST /admin/store-credit-accounts/:id/credit",
+    ],
+    [
+      "POST",
+      "/admin/store-credit-accounts/sc_acc_01A/debit",
+      "POST /admin/store-credit-accounts/:id/debit",
+    ],
+    ["POST", "/admin/gift-cards", "POST /admin/gift-cards"],
+    ["POST", "/admin/gift-cards/gcard_01A", "POST /admin/gift-cards/:id"],
   ])("covers every price-bearing route: %s %s", (method, path, route) => {
     expect(matchAuditedResource(method, path)?.resource.route).toBe(route)
   })
@@ -150,6 +162,10 @@ describe("audit registry", () => {
       action: "POST /admin/customers/:id/addresses/:id",
       resourceType: "customer",
       resourceId: "cus_01ABC",
+    })
+    expect(describeRoute("POST", "/admin/store-credit-accounts/sc_acc_01X/debit")).toMatchObject({
+      action: "POST /admin/store-credit-accounts/:id/debit",
+      resourceId: "sc_acc_01X",
     })
     expect(describeRoute("POST", "/admin/products/batch")).toEqual({
       action: "POST /admin/products/batch",
