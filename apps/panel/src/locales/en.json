@@ -418,7 +418,8 @@
         "seo.sitemap": "Sitemap",
         "seo.audit": "SEO audit",
         "catalog.import": "Product import",
-        "catalog.export": "Product export"
+        "catalog.export": "Product export",
+        "catalog.bulk_edit": "Bulk edit"
       }
     },
     "audit": {
@@ -585,7 +586,9 @@
     "page": "Page {{page}} of {{pages}}",
     "previous": "Previous page",
     "next": "Next page",
-    "clearSearch": "Clear search"
+    "clearSearch": "Clear search",
+    "selectPage": "Select every row on this page",
+    "selectRow": "Select {{name}}"
   },
   "products": {
     "description": "Your shop's products, prices and stock",
@@ -858,6 +861,108 @@
       "jobFailed": "The file could not be processed.",
       "unchanged_one": "{{formatted}} product stays as it is.",
       "unchanged_other": "{{formatted}} products stay as they are."
+    },
+    "bulk": {
+      "region": "Selected products",
+      "selected_one": "{{formatted}} product selected",
+      "selected_other": "{{formatted}} products selected",
+      "selectAll_one": "Select the {{formatted}} matching product",
+      "selectAll_other": "Select all {{formatted}} matching products",
+      "clear": "Clear selection",
+      "edit": "Bulk edit",
+      "tooMany": "At most {{max}} products can be edited at once; narrow the search or view.",
+      "scope_one": "Applies to the {{formatted}} selected product. Each product is checked as if saved on its own; those that do not fit are listed in the report.",
+      "scope_other": "Applies to the {{formatted}} selected products. Each product is checked as if saved on its own; those that do not fit are listed in the report.",
+      "apply_one": "Apply to {{formatted}} product",
+      "apply_other": "Apply to {{formatted}} products",
+      "working": "Updating products…",
+      "background": "The bulk edit goes on in the background; follow it under Settings › Jobs.",
+      "jobFailed": "The bulk edit could not finish.",
+      "changed_one": "{{formatted}} product updated.",
+      "changed_other": "{{formatted}} products updated.",
+      "unchanged_one": "{{formatted}} product was already so.",
+      "unchanged_other": "{{formatted}} products were already so.",
+      "left_one": "{{formatted}} product was skipped or could not be saved; see the report for why.",
+      "left_other": "{{formatted}} products were skipped or could not be saved; see the report for why.",
+      "report": "Download report",
+      "direction": "Direction",
+      "actions": {
+        "price": "Change price",
+        "stock": "Change stock",
+        "status": "Change status",
+        "category": "Edit category",
+        "seo_template": "Apply SEO template",
+        "alt_text": "Fill missing alt texts"
+      },
+      "price": {
+        "mode": "Price change",
+        "modes": {
+          "set": "New price",
+          "percent": "Percent",
+          "amount": "Amount"
+        },
+        "directions": {
+          "up": "Raise",
+          "down": "Lower"
+        },
+        "amount": "Amount (₺)",
+        "percent": "Rate (%)",
+        "hint": "The variants' TRY price changes; other currencies and price lists stay as they are.",
+        "example": "Example: {{from}} → {{to}}"
+      },
+      "stock": {
+        "mode": "Stock change",
+        "modes": {
+          "set": "Set quantity",
+          "add": "Add",
+          "remove": "Remove"
+        },
+        "quantity": "Quantity",
+        "hint": "The quantity at the default warehouse changes; products whose stock is not tracked are skipped. Recorded in the stock history as a bulk edit."
+      },
+      "status": {
+        "label": "New status",
+        "options": {
+          "published": "Publish",
+          "draft": "Move to draft"
+        },
+        "hints": {
+          "published": "Physical products missing measurements, and those the SEO publish gate holds back when it is on, are not published; the report lists them.",
+          "draft": "The products leave the shop; their pages do not open until they are published again."
+        }
+      },
+      "category": {
+        "mode": "Category action",
+        "modes": {
+          "add": "Add",
+          "remove": "Remove",
+          "primary": "Make primary"
+        },
+        "label": "Category",
+        "hints": {
+          "add": "The products are added to this category too; their other categories stay.",
+          "remove": "The products leave this category; if it was their primary one, the primary category is cleared.",
+          "primary": "The category becomes the products' primary one (added first if needed); the category path search engines see comes from it."
+        }
+      },
+      "seo": {
+        "label": "Fields to give back to the template",
+        "title": "SEO title",
+        "description": "Meta description",
+        "hint": "Text written for each product is removed; the shop's SEO template is used (Settings › SEO)."
+      },
+      "alt": {
+        "hint": "Images without alt text get one from the product's name; an image of one variant gets that variant's values too (e.g. “Linen Shirt – White”). Alt texts already written are left alone."
+      },
+      "errors": {
+        "price": "Enter an amount above zero.",
+        "rise": "Enter a rate above zero, 1000 at most.",
+        "fall": "Enter a rate above zero, 99 at most.",
+        "quantity": "Enter zero or a positive whole number.",
+        "adjust": "Enter a whole number above zero.",
+        "category": "Choose a category.",
+        "seoFields": "Choose at least one field."
+      }
     }
   },
   "orders": {

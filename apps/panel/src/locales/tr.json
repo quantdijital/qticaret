@@ -418,7 +418,8 @@
         "seo.sitemap": "Site haritası",
         "seo.audit": "SEO denetimi",
         "catalog.import": "Ürün içe aktarma",
-        "catalog.export": "Ürün dışa aktarma"
+        "catalog.export": "Ürün dışa aktarma",
+        "catalog.bulk_edit": "Toplu düzenleme"
       }
     },
     "audit": {
@@ -593,7 +594,9 @@
     "page": "Sayfa {{page}} / {{pages}}",
     "previous": "Önceki sayfa",
     "next": "Sonraki sayfa",
-    "clearSearch": "Aramayı temizle"
+    "clearSearch": "Aramayı temizle",
+    "selectPage": "Bu sayfadaki tüm satırları seç",
+    "selectRow": "{{name}} seç"
   },
   "products": {
     "description": "Mağazanızdaki ürünler, fiyatları ve stokları",
@@ -866,6 +869,108 @@
       "jobFailed": "Dosya işlenemedi.",
       "unchanged_one": "{{formatted}} ürün değişmeden kaldı.",
       "unchanged_other": "{{formatted}} ürün değişmeden kaldı."
+    },
+    "bulk": {
+      "region": "Seçili ürünler",
+      "selected_one": "{{formatted}} ürün seçildi",
+      "selected_other": "{{formatted}} ürün seçildi",
+      "selectAll_one": "Eşleşen {{formatted}} ürünün hepsini seç",
+      "selectAll_other": "Eşleşen {{formatted}} ürünün hepsini seç",
+      "clear": "Seçimi kaldır",
+      "edit": "Toplu düzenle",
+      "tooMany": "Bir seferde en fazla {{max}} ürün düzenlenebilir; aramayı ya da görünümü daraltın.",
+      "scope_one": "Seçili {{formatted}} ürüne uygulanır. Her ürün tek tek kaydedilir gibi kontrol edilir; uymayanlar raporda yazılır.",
+      "scope_other": "Seçili {{formatted}} ürüne uygulanır. Her ürün tek tek kaydedilir gibi kontrol edilir; uymayanlar raporda yazılır.",
+      "apply_one": "{{formatted}} ürüne uygula",
+      "apply_other": "{{formatted}} ürüne uygula",
+      "working": "Ürünler güncelleniyor…",
+      "background": "Toplu düzenleme arka planda sürüyor; Ayarlar › İşler'den izleyebilirsiniz.",
+      "jobFailed": "Toplu düzenleme tamamlanamadı.",
+      "changed_one": "{{formatted}} ürün güncellendi.",
+      "changed_other": "{{formatted}} ürün güncellendi.",
+      "unchanged_one": "{{formatted}} ürün zaten böyleydi.",
+      "unchanged_other": "{{formatted}} ürün zaten böyleydi.",
+      "left_one": "{{formatted}} ürün atlandı ya da kaydedilemedi; nedenleri raporda.",
+      "left_other": "{{formatted}} ürün atlandı ya da kaydedilemedi; nedenleri raporda.",
+      "report": "Raporu indir",
+      "direction": "Yön",
+      "actions": {
+        "price": "Fiyatı değiştir",
+        "stock": "Stoğu değiştir",
+        "status": "Yayın durumunu değiştir",
+        "category": "Kategoriyi düzenle",
+        "seo_template": "SEO şablonunu uygula",
+        "alt_text": "Eksik alt metinleri doldur"
+      },
+      "price": {
+        "mode": "Fiyat değişikliği",
+        "modes": {
+          "set": "Yeni fiyat",
+          "percent": "Yüzde",
+          "amount": "Tutar"
+        },
+        "directions": {
+          "up": "Artır",
+          "down": "Azalt"
+        },
+        "amount": "Tutar (₺)",
+        "percent": "Oran (%)",
+        "hint": "Varyantların TL fiyatı değişir; diğer para birimleri ve fiyat listeleri olduğu gibi kalır.",
+        "example": "Örnek: {{from}} → {{to}}"
+      },
+      "stock": {
+        "mode": "Stok değişikliği",
+        "modes": {
+          "set": "Miktarı ayarla",
+          "add": "Ekle",
+          "remove": "Çıkar"
+        },
+        "quantity": "Adet",
+        "hint": "Varsayılan depodaki miktar değişir; stoğu takip edilmeyen ürünler atlanır. Stok geçmişine toplu düzenleme olarak yazılır."
+      },
+      "status": {
+        "label": "Yeni durum",
+        "options": {
+          "published": "Yayına al",
+          "draft": "Taslağa al"
+        },
+        "hints": {
+          "published": "Ölçüleri eksik fiziksel ürünler ve SEO yayın kapısı açıksa ona takılanlar yayına alınmaz; raporda yazılır.",
+          "draft": "Ürünler mağazadan kalkar; yeniden yayına alınana kadar sayfaları açılmaz."
+        }
+      },
+      "category": {
+        "mode": "Kategori işlemi",
+        "modes": {
+          "add": "Ekle",
+          "remove": "Çıkar",
+          "primary": "Birincil yap"
+        },
+        "label": "Kategori",
+        "hints": {
+          "add": "Ürünler bu kategoriye de eklenir; diğer kategorileri kalır.",
+          "remove": "Ürünler bu kategoriden çıkar; birincil kategorileri buysa birincil kategori boşalır.",
+          "primary": "Kategori, ürünlerin birincil kategorisi olur (gerekirse önce eklenir); arama motorlarına gösterilen kategori yolu bundan gelir."
+        }
+      },
+      "seo": {
+        "label": "Şablona dönecek alanlar",
+        "title": "SEO başlığı",
+        "description": "Meta açıklama",
+        "hint": "Ürünlere özel yazılmış metin silinir; mağazanın SEO şablonu kullanılır (Ayarlar › SEO)."
+      },
+      "alt": {
+        "hint": "Alt metni boş görsellere ürün adından metin yazılır; bir varyanta ait görsele o varyantın değerleri eklenir (ör. “Keten Gömlek – Beyaz”). Yazılmış alt metinlere dokunulmaz."
+      },
+      "errors": {
+        "price": "Sıfırdan büyük bir tutar girin.",
+        "rise": "Sıfırdan büyük, en fazla 1000 olan bir oran girin.",
+        "fall": "Sıfırdan büyük, en fazla 99 olan bir oran girin.",
+        "quantity": "Sıfır ya da pozitif bir tam sayı girin.",
+        "adjust": "Sıfırdan büyük bir tam sayı girin.",
+        "category": "Bir kategori seçin.",
+        "seoFields": "En az bir alan seçin."
+      }
     }
   },
   "orders": {

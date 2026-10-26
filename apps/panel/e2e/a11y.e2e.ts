@@ -1,4 +1,5 @@
 import AxeBuilder from "@axe-core/playwright"
+import type { Page } from "@playwright/test"
 import { expect, pageHeading, test } from "./support/guard"
 
 /**
@@ -8,22 +9,32 @@ import { expect, pageHeading, test } from "./support/guard"
  */
 const SCREENS = ["/", "/products", "/products/new", "/orders", "/settings/store"]
 
+async function seriousIssues(page: Page): Promise<string[]> {
+  const results = await new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+    .analyze()
+  return results.violations
+    .filter((violation) => violation.impact === "serious" || violation.impact === "critical")
+    .map(
+      (violation) =>
+        `${violation.id}: ${violation.nodes.map((node) => node.target.join(" ")).join(" | ")}`
+    )
+}
+
 for (const path of SCREENS) {
   test(`${path} has no serious accessibility issue`, async ({ page }) => {
     await page.goto(path)
     await expect(pageHeading(page)).toBeVisible()
     await page.waitForLoadState("networkidle")
-    const results = await new AxeBuilder({ page })
-      .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
-      .analyze()
-    const serious = results.violations.filter(
-      (violation) => violation.impact === "serious" || violation.impact === "critical"
-    )
-    expect(
-      serious.map(
-        (violation) =>
-          `${violation.id}: ${violation.nodes.map((node) => node.target.join(" ")).join(" | ")}`
-      )
-    ).toEqual([])
+    expect(await seriousIssues(page)).toEqual([])
   })
 }
+
+test("bulk edit's bar and dialog have no serious accessibility issue", async ({ page }) => {
+  await page.goto("/products")
+  await page.getByRole("table").getByRole("checkbox").nth(1).check()
+  await page.getByRole("button", { name: "Toplu düzenle" }).click()
+  await page.getByRole("menuitem", { name: "Stoğu değiştir" }).click()
+  await expect(page.getByRole("dialog", { name: "Stoğu değiştir" })).toBeVisible()
+  expect(await seriousIssues(page)).toEqual([])
+})

@@ -38,6 +38,12 @@ export const parseMoneyInput = (text: string): number | null => parseDecimalInpu
 /** Weight and size: up to three decimals (0,125 kg). */
 export const parseMeasureInput = (text: string): number | null => parseDecimalInput(text, 3)
 
+/** A whole count (stock): "1.000" or "1000"; null for a fraction or anything else. */
+export function parseCountInput(text: string): number | null {
+  const value = text.trim().replace(/\s/g, "")
+  return /^\d{1,3}(\.\d{3})+$|^\d+$/.test(value) ? Number(value.replace(/\./g, "")) : null
+}
+
 /** An amount back into the field's form: 1250.5 → "1.250,50". */
 export function formatMoneyInput(amount: number): string {
   return new Intl.NumberFormat("tr-TR", {

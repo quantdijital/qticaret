@@ -1,4 +1,6 @@
 import type { ReactNode } from "react"
+import { useTranslation } from "react-i18next"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
   Table,
@@ -20,6 +22,14 @@ export interface Column<T> {
   className?: string
 }
 
+/** Rows picked for a bulk action; they stay picked across pages. */
+export interface RowSelection<T> {
+  selected: ReadonlySet<string>
+  onChange: (next: Set<string>) => void
+  /** What a row's checkbox is called for screen readers (its record's name). */
+  rowLabel: (row: T) => string
+}
+
 interface DataTableProps<T> {
   columns: Column<T>[]
   rows: T[] | undefined
@@ -30,6 +40,72 @@ interface DataTableProps<T> {
   empty: ReactNode
   /** Dimmed while the next page loads (the frame stays). */
   stale?: boolean
+  /** A checkbox per row, and one for the page, in a first column. */
+  selection?: RowSelection<T>
+}
+
+function PageCheckbox<T>({
+  rows,
+  rowKey,
+  selection,
+}: {
+  rows: T[]
+  rowKey: (row: T) => string
+  selection: RowSelection<T>
+}) {
+  const { t } = useTranslation()
+  const keys = rows.map(rowKey)
+  const picked = keys.filter((key) => selection.selected.has(key)).length
+  return (
+    <Checkbox
+      aria-label={t("list.selectPage")}
+      disabled={keys.length === 0}
+      checked={picked === 0 ? false : picked === keys.length ? true : "indeterminate"}
+      onCheckedChange={(checked) => {
+        const next = new Set(selection.selected)
+        for (const key of keys) {
+          if (checked === true) {
+            next.add(key)
+          } else {
+            next.delete(key)
+          }
+        }
+        selection.onChange(next)
+      }}
+    />
+  )
+}
+
+function RowCheckbox<T>({
+  row,
+  rowKey,
+  selection,
+}: {
+  row: T
+  rowKey: (row: T) => string
+  selection: RowSelection<T>
+}) {
+  const { t } = useTranslation()
+  const key = rowKey(row)
+  return (
+    <Checkbox
+      aria-label={t("list.selectRow", { name: selection.rowLabel(row) })}
+      checked={selection.selected.has(key)}
+      // The row opens its record; the box only picks it
+      onClick={(event) => {
+        event.stopPropagation()
+      }}
+      onCheckedChange={(checked) => {
+        const next = new Set(selection.selected)
+        if (checked === true) {
+          next.add(key)
+        } else {
+          next.delete(key)
+        }
+        selection.onChange(next)
+      }}
+    />
+  )
 }
 
 /**
@@ -45,14 +121,23 @@ export function DataTable<T>({
   loading,
   empty,
   stale,
+  selection,
 }: DataTableProps<T>) {
   const align = (column: Column<T>) => (column.align === "right" ? "text-right" : "")
-  const pad = (index: number) => (index === 0 ? "pl-5" : index === columns.length - 1 ? "pr-5" : "")
+  // With checkboxes, they take the first column's inset
+  const pad = (index: number) =>
+    index === 0 && !selection ? "pl-5" : index === columns.length - 1 ? "pr-5" : ""
+  const boxCell = "w-10 pr-0 pl-5"
   return (
     <div className={cn("transition-opacity", stale && "opacity-60")}>
       <Table>
         <TableHeader className="sticky top-0 z-10 bg-card">
           <TableRow className="hover:bg-transparent">
+            {selection ? (
+              <TableHead className={boxCell}>
+                <PageCheckbox rows={rows ?? []} rowKey={rowKey} selection={selection} />
+              </TableHead>
+            ) : null}
             {columns.map((column, index) => (
               <TableHead
                 key={column.key}
@@ -72,6 +157,7 @@ export function DataTable<T>({
           {loading
             ? Array.from({ length: 8 }, (_, row) => (
                 <TableRow key={row}>
+                  {selection ? <TableCell className={boxCell} /> : null}
                   {columns.map((column, index) => (
                     <TableCell key={column.key} className={cn(pad(index), column.className)}>
                       <Skeleton className="h-5 w-full max-w-40" />
@@ -89,8 +175,14 @@ export function DataTable<T>({
                         }
                       : undefined
                   }
+                  data-state={selection?.selected.has(rowKey(row)) ? "selected" : undefined}
                   className={cn("h-[var(--row-height)]", onRowClick && "cursor-pointer")}
                 >
+                  {selection ? (
+                    <TableCell className={boxCell}>
+                      <RowCheckbox row={row} rowKey={rowKey} selection={selection} />
+                    </TableCell>
+                  ) : null}
                   {columns.map((column, index) => (
                     <TableCell
                       key={column.key}

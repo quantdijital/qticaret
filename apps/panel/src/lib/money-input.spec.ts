@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import {
   formatMeasureInput,
   formatMoneyInput,
+  parseCountInput,
   parseMeasureInput,
   parseMoneyInput,
 } from "./money-input"
@@ -44,5 +45,14 @@ describe("measurements", () => {
     expect(parseMoneyInput("0,125")).toBeNull()
     expect(formatMeasureInput(0.125)).toBe("0,125")
     expect(formatMeasureInput(1250)).toBe("1250")
+  })
+
+  it("reads whole counts, grouped or not, and nothing else", () => {
+    expect(parseCountInput("1.000")).toBe(1000)
+    expect(parseCountInput(" 250 ")).toBe(250)
+    expect(parseCountInput("0")).toBe(0)
+    expect(parseCountInput("2,5")).toBeNull()
+    expect(parseCountInput("1.00")).toBeNull()
+    expect(parseCountInput("-3")).toBeNull()
   })
 })

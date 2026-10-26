@@ -83,3 +83,30 @@ test("checks a product sheet without writing it", async ({ page, guard }) => {
   await expect(dialog).toBeHidden()
   await guard.assertHealthy()
 })
+
+test("picks products and checks a bulk change without applying it", async ({ page, guard }) => {
+  await page.goto("/products")
+  const rows = page.getByRole("table").getByRole("checkbox")
+  await expect(rows.nth(2)).toBeVisible()
+  await rows.nth(1).check()
+  await rows.nth(2).check()
+  const bar = page.getByRole("region", { name: "Seçili ürünler" })
+  await expect(bar.getByText("2 ürün seçildi")).toBeVisible()
+  await bar.getByRole("button", { name: "Toplu düzenle" }).click()
+  await page.getByRole("menuitem", { name: "Fiyatı değiştir" }).click()
+  const dialog = page.getByRole("dialog", { name: "Fiyatı değiştir" })
+  await dialog.getByRole("radio", { name: "Yüzde" }).check()
+  await dialog.getByLabel("Oran (%)").fill("0")
+  await dialog.getByRole("button", { name: "2 ürüne uygula" }).click()
+  // Named on the field; nothing is sent
+  await expect(dialog.getByRole("alert")).toHaveText(
+    "Sıfırdan büyük, en fazla 1000 olan bir oran girin."
+  )
+  await dialog.getByLabel("Oran (%)").fill("10")
+  await expect(dialog.getByText("Örnek: ₺100,00 → ₺110,00")).toBeVisible()
+  await dialog.getByRole("button", { name: "Vazgeç" }).click()
+  await expect(dialog).toBeHidden()
+  await bar.getByRole("button", { name: "Seçimi kaldır" }).click()
+  await expect(bar).toBeHidden()
+  await guard.assertHealthy()
+})
