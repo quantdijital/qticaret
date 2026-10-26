@@ -1,60 +1,49 @@
-import type { LevelQuantity } from "../../stock/write-levels"
+import { deepestCategory } from "../../../lib/catalog"
+import {
+  BPS_PER_WHOLE,
+  addKurus,
+  fromMedusaAmount,
+  multiplyByRateBps,
+  toMedusaAmount,
+} from "../../../lib/money"
+import type { Kurus } from "../../../lib/money"
 import { baseTryOf, nextPrices, pricesOf } from "../prices"
-import { MAX_AMOUNT, MAX_QUANTITY } from "./change"
+import { MAX_AMOUNT } from "./change"
 import type { BulkChange } from "./change"
 import { altWrites } from "./plan-alt"
+import { UNCHANGED, skipped, writing } from "./plan-result"
+import type { BulkDiff, BulkPlan, PlanContext } from "./plan-result"
+import { planStock } from "./plan-stock"
 import type { BulkProduct } from "./products"
 
 /**
- * What one change does to one product (F3.10), read from what it has: the
- * writes, nothing (it is so already), or why it is left out. Pure; the
- * run writes the plans, one product at a time.
+ * What one change does to one product (F3.10), read from what it has just
+ * before it is written (plan-result.ts). Pure.
  */
 
-export type BulkWrite =
-  | { action: "price"; variants: { id: string; prices: ReturnType<typeof nextPrices> }[] }
-  | { action: "stock"; create: LevelQuantity[]; update: LevelQuantity[] }
-  | { action: "status"; status: "published" | "draft" }
-  | {
-      action: "category"
-      /** The product's categories after the change; undefined when they stay. */
-      category_ids?: string[]
-      /** The primary category after the change; undefined when it stays. */
-      primary_category_id?: string | null
-    }
-  | { action: "seo_template"; values: { seo_title?: null; seo_description?: null } }
-  | { action: "alt_text"; alts: { id: string; alt: string }[] }
+export type { BulkDiff, BulkPlan, BulkWrite, PlanContext } from "./plan-result"
 
-export type BulkPlan =
-  | { kind: "write"; write: BulkWrite }
-  | { kind: "unchanged" }
-  /** Left out, with the server message key that says why. */
-  | { kind: "skipped"; key: string }
+// Kuruş, never floats (adr/0010): a percent is basis points, rounded half up
+const PERCENT_BPS = 100
 
-export interface PlanContext {
-  /** The shop's default warehouse, where stock changes. */
-  locationId: string | null
-}
-
-const UNCHANGED: BulkPlan = { kind: "unchanged" }
-const skipped = (key: string): BulkPlan => ({ kind: "skipped", key })
-const writing = (write: BulkWrite): BulkPlan => ({ kind: "write", write })
-
-/** To the kuruş, half away from zero, as a person would round a price. */
-export const roundAmount = (value: number): number =>
-  Math.sign(value) * (Math.round((Math.abs(value) + Number.EPSILON) * 100) / 100)
-
-function nextAmount(current: number | undefined, change: Extract<BulkChange, { action: "price" }>) {
+/** The base TRY price after the change, in kuruş; none when there is nothing to change by. */
+export function nextKurus(
+  current: number | undefined,
+  change: Extract<BulkChange, { action: "price" }>
+): Kurus | undefined {
   if (change.mode === "set") {
-    return roundAmount(change.value)
+    return fromMedusaAmount(change.value, { allowRounding: true })
   }
   if (current === undefined) {
     return undefined
   }
-  return roundAmount(
-    change.mode === "percent" ? current * (1 + change.value / 100) : current + change.value
-  )
+  const now = fromMedusaAmount(current, { allowRounding: true })
+  return change.mode === "percent"
+    ? multiplyByRateBps(now, BPS_PER_WHOLE + Math.round(change.value * PERCENT_BPS))
+    : addKurus(now, fromMedusaAmount(change.value, { allowRounding: true }))
 }
+
+const lira = (amount: Kurus): number => Number(toMedusaAmount(amount))
 
 // The base TRY price of every variant; one with none takes a price only when set
 function planPrice(
@@ -63,67 +52,31 @@ function planPrice(
 ): BulkPlan {
   const variants = product.variants ?? []
   const writes: { id: string; prices: ReturnType<typeof nextPrices> }[] = []
+  const diff: BulkDiff = {}
   let unpriced = 0
   for (const variant of variants) {
     const prices = pricesOf(variant.prices)
     const base = baseTryOf(prices)
-    const amount = nextAmount(base?.amount, change)
-    if (amount === undefined) {
+    const next = nextKurus(base?.amount, change)
+    if (next === undefined) {
       unpriced += 1
       continue
     }
     // A product is changed whole or not at all: one price out of range leaves it as it is
-    if (amount <= 0 || amount > MAX_AMOUNT) {
+    if (next <= 0 || next > MAX_AMOUNT * 100) {
       return skipped("bulk_edit.price_out_of_range")
     }
-    if (base?.amount !== amount) {
+    const amount = lira(next)
+    if (base === undefined || fromMedusaAmount(base.amount, { allowRounding: true }) !== next) {
       writes.push({ id: variant.id, prices: nextPrices(prices, amount) })
+      diff[`variant:${variant.id}:price:try`] = { before: base?.amount ?? null, after: amount }
     }
   }
   if (writes.length > 0) {
-    return writing({ action: "price", variants: writes })
+    return writing({ action: "price", variants: writes }, diff)
   }
   return variants.length > 0 && unpriced === variants.length
     ? skipped("bulk_edit.no_price")
-    : UNCHANGED
-}
-
-// Quantities at the default warehouse, for variants whose stock is kept
-function planStock(
-  product: BulkProduct,
-  change: Extract<BulkChange, { action: "stock" }>,
-  locationId: string
-): BulkPlan {
-  const variants = product.variants ?? []
-  const create: LevelQuantity[] = []
-  const update: LevelQuantity[] = []
-  let untracked = 0
-  for (const variant of variants) {
-    const item = variant.inventory_items?.[0]
-    if (!variant.manage_inventory || !item) {
-      untracked += 1
-      continue
-    }
-    const level = item.inventory?.location_levels?.find((each) => each.location_id === locationId)
-    const current = level ? Number(level.stocked_quantity) : 0
-    const next = change.mode === "set" ? change.value : current + change.value
-    if (next < 0) {
-      return skipped("bulk_edit.stock_negative")
-    }
-    if (next > MAX_QUANTITY) {
-      return skipped("bulk_edit.stock_out_of_range")
-    }
-    if (next === current) {
-      continue
-    }
-    const quantity = { inventory_item_id: item.inventory_item_id, location_id: locationId }
-    ;(level ? update : create).push({ ...quantity, stocked_quantity: next })
-  }
-  if (create.length + update.length > 0) {
-    return writing({ action: "stock", create, update })
-  }
-  return variants.length > 0 && untracked === variants.length
-    ? skipped("bulk_edit.stock_untracked")
     : UNCHANGED
 }
 
@@ -135,24 +88,38 @@ function planCategory(
   const primary = product.product_extension?.primary_category_id ?? null
   const target = change.category_id
   const has = ids.includes(target)
+  const categories = (after: string[]) => ({ category_ids: { before: ids, after } })
+  const primaryTo = (after: string | null) => ({ primary_category_id: { before: primary, after } })
   if (change.mode === "add") {
-    return has ? UNCHANGED : writing({ action: "category", category_ids: [...ids, target] })
+    const after = [...ids, target]
+    return has ? UNCHANGED : writing({ action: "category", category_ids: after }, categories(after))
   }
   if (change.mode === "remove") {
     if (!has) {
       return UNCHANGED
     }
-    const category_ids = ids.filter((id) => id !== target)
-    // The primary category goes with it (readers fall back to the deepest one left)
-    const write =
-      primary === target ? { category_ids, primary_category_id: null } : { category_ids }
-    return writing({ action: "category", ...write })
+    const after = ids.filter((id) => id !== target)
+    if (primary !== target) {
+      return writing({ action: "category", category_ids: after }, categories(after))
+    }
+    // The primary category goes with it: the deepest one left takes its place
+    const next =
+      deepestCategory((product.categories ?? []).filter((row) => row?.id !== target))?.id ?? null
+    return writing(
+      { action: "category", category_ids: after, primary_category_id: next },
+      { ...categories(after), ...primaryTo(next) }
+    )
   }
   if (has && primary === target) {
     return UNCHANGED
   }
-  const added = has ? {} : { category_ids: [...ids, target] }
-  return writing({ action: "category", ...added, primary_category_id: target })
+  const after = [...ids, target]
+  return has
+    ? writing({ action: "category", primary_category_id: target }, primaryTo(target))
+    : writing(
+        { action: "category", category_ids: after, primary_category_id: target },
+        { ...categories(after), ...primaryTo(target) }
+      )
 }
 
 // The page's own SEO text given up for the shop's template (as the advisor's one-click fix)
@@ -160,10 +127,16 @@ function planSeoTemplate(
   product: BulkProduct,
   change: Extract<BulkChange, { action: "seo_template" }>
 ): BulkPlan {
-  const values = Object.fromEntries(
-    change.fields.filter((field) => product.seo_meta?.[field]?.trim()).map((field) => [field, null])
+  const fields = change.fields.filter((field) => product.seo_meta?.[field]?.trim())
+  if (fields.length === 0) {
+    return UNCHANGED
+  }
+  return writing(
+    { action: "seo_template", values: Object.fromEntries(fields.map((field) => [field, null])) },
+    Object.fromEntries(
+      fields.map((field) => [field, { before: product.seo_meta?.[field] ?? null, after: null }])
+    )
   )
-  return Object.keys(values).length > 0 ? writing({ action: "seo_template", values }) : UNCHANGED
 }
 
 export function planBulkChange(
@@ -181,7 +154,10 @@ export function planBulkChange(
     case "status":
       return product.status === change.status
         ? UNCHANGED
-        : writing({ action: "status", status: change.status })
+        : writing(
+            { action: "status", status: change.status },
+            { status: { before: product.status, after: change.status } }
+          )
     case "category":
       return planCategory(product, change)
     case "seo_template":

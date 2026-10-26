@@ -1,5 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { chunksOf } from "../../../lib/catalog"
 import { ValidationError } from "../../../lib/errors"
 import { serverErrorMessage } from "../../../lib/errors/messages"
 import { errorSummary, logger } from "../../../lib/logging"
@@ -8,7 +9,7 @@ import { publishGate } from "../../seo/advisor/publish-gate"
 import { writeErrorText } from "../write-error"
 import type { BulkAction, BulkChange, BulkEditInput } from "./change"
 import { planBulkChange } from "./plan"
-import type { BulkPlan, PlanContext } from "./plan"
+import type { BulkDiff, BulkPlan, PlanContext } from "./plan"
 import { bulkProducts } from "./products"
 import type { BulkProduct } from "./products"
 import { bulkRow } from "./report"
@@ -27,13 +28,19 @@ export interface BulkEditSummary {
 
 export interface BulkEditHooks {
   progress: (percent: number) => Promise<void>
-  /** What the run writes to the audit log, as it starts and as it ends (adr/0011). */
+  /** The run in the audit log as it starts and as it ends (adr/0011). */
   audit: (action: "started" | "finished", changes: Record<string, unknown>) => Promise<void>
+  /** A product it changed, with each field before and after, once it is written. */
+  auditProduct: (productId: string, diff: BulkDiff) => Promise<void>
   origin: WriteOrigin
 }
 
-// The products an audit entry names, within its size budget
-const MAX_AUDITED_PRODUCTS = 500
+// Products are read this many at a time, each just before it is written: a
+// sale or an edit made while the run goes on is what its plan starts from
+const PRODUCT_CHUNK = 20
+
+type Counts = Omit<BulkEditSummary, "action" | "products">
+type IsBlocked = ((id: string) => Promise<boolean>) | null
 
 // What the run needs of the shop: the change's category, the default warehouse
 async function planContext(container: MedusaContainer, change: BulkChange): Promise<PlanContext> {
@@ -60,14 +67,12 @@ async function planContext(container: MedusaContainer, change: BulkChange): Prom
   return { locationId }
 }
 
-type Counts = Omit<BulkEditSummary, "action" | "products">
-
 // One product: planned, held by the publish gate, or written
 async function applyOne(
   container: MedusaContainer,
   product: BulkProduct,
   plan: BulkPlan,
-  context: { origin: WriteOrigin; isBlocked: ((id: string) => Promise<boolean>) | null }
+  context: { origin: WriteOrigin; isBlocked: IsBlocked }
 ): Promise<{ outcome: keyof Counts; message: string | null }> {
   if (plan.kind === "unchanged") {
     return { outcome: "unchanged", message: null }
@@ -94,10 +99,63 @@ async function applyOne(
   }
 }
 
+// A change written stays written: its audit entry failing is logged, not undone
+async function auditWritten(hooks: BulkEditHooks, productId: string, diff: BulkDiff) {
+  try {
+    await hooks.auditProduct(productId, diff)
+  } catch (error) {
+    logger.error({ event: "audit.write_failed", productId, err: errorSummary(error) })
+  }
+}
+
+/** Every product named, a chunk at a time; a row each, in the order named. */
+async function applyAll(
+  container: MedusaContainer,
+  input: BulkEditInput,
+  hooks: BulkEditHooks,
+  context: PlanContext & { isBlocked: IsBlocked }
+) {
+  const { change } = input
+  const counts: Counts = { changed: 0, unchanged: 0, skipped: 0, failed: 0 }
+  const rows: SheetCell[][] = []
+  const changed: string[] = []
+  let done = 0
+  for (const chunk of chunksOf(input.product_ids, PRODUCT_CHUNK)) {
+    const found = new Map(
+      (await bulkProducts(container, chunk, change.action)).map((product) => [product.id, product])
+    )
+    for (const id of chunk) {
+      const product = found.get(id)
+      if (!product) {
+        // Deleted since the panel listed it
+        counts.skipped += 1
+        const missing = serverErrorMessage("bulk_edit.product_missing", "tr")
+        rows.push(bulkRow({ handle: id, title: null }, "skipped", missing))
+        continue
+      }
+      const plan = planBulkChange(product, change, context)
+      const { outcome, message } = await applyOne(container, product, plan, {
+        origin: hooks.origin,
+        isBlocked: context.isBlocked,
+      })
+      counts[outcome] += 1
+      rows.push(bulkRow(product, outcome, message))
+      if (outcome === "changed" && plan.kind === "write") {
+        changed.push(product.id)
+        await auditWritten(hooks, product.id, plan.diff)
+      }
+    }
+    done += chunk.length
+    await hooks.progress(5 + Math.floor((done / input.product_ids.length) * 95))
+  }
+  return { counts, rows, changed }
+}
+
 /**
  * Applies one change to the products named (F3.10), one product at a time,
  * each in its own run: a product the change cannot take costs that product,
- * not the rest. Returns the summary and the report's rows, in the order named.
+ * not the rest. Each product written has its own audit entry; the run's
+ * entry as it ends names them all (a run takes at most 1,000).
  */
 export async function runBulkEdit(
   container: MedusaContainer,
@@ -106,50 +164,25 @@ export async function runBulkEdit(
 ): Promise<{ summary: BulkEditSummary; rows: SheetCell[][] }> {
   const { change } = input
   const context = await planContext(container, change)
-  const products = await bulkProducts(container, input.product_ids, change.action)
   const isBlocked =
     change.action === "status" && change.status === "published"
       ? await publishGate(container)
       : null
   await hooks.progress(5)
   await hooks.audit("started", { change, products: input.product_ids.length })
-  const counts: Counts = { changed: 0, unchanged: 0, skipped: 0, failed: 0 }
-  const rows: SheetCell[][] = []
-  const changed: string[] = []
+  let finished: Record<string, unknown> = { interrupted: true }
   try {
-    for (const [index, product] of products.entries()) {
-      const plan = planBulkChange(product, change, context)
-      const { outcome, message } = await applyOne(container, product, plan, {
-        origin: hooks.origin,
-        isBlocked,
-      })
-      counts[outcome] += 1
-      if (outcome === "changed") {
-        changed.push(product.id)
-      }
-      rows.push(bulkRow(product, outcome, message))
-      await hooks.progress(5 + Math.floor(((index + 1) / products.length) * 95))
+    const { counts, rows, changed } = await applyAll(container, input, hooks, {
+      ...context,
+      isBlocked,
+    })
+    finished = { ...counts, product_ids: changed }
+    return {
+      summary: { action: change.action, products: input.product_ids.length, ...counts },
+      rows,
     }
   } finally {
-    await hooks.audit("finished", {
-      ...counts,
-      product_ids: changed.slice(0, MAX_AUDITED_PRODUCTS),
-    })
-  }
-  // Named but gone (deleted since the panel listed them)
-  const found = new Set(products.map((product) => product.id))
-  for (const id of input.product_ids.filter((each) => !found.has(each))) {
-    counts.skipped += 1
-    rows.push(
-      bulkRow(
-        { handle: id, title: null },
-        "skipped",
-        serverErrorMessage("bulk_edit.product_missing", "tr")
-      )
-    )
-  }
-  return {
-    summary: { action: change.action, products: input.product_ids.length, ...counts },
-    rows,
+    // However the run ended; the products' own entries say what was written before a crash
+    await hooks.audit("finished", finished)
   }
 }

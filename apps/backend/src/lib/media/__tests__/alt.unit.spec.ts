@@ -33,4 +33,17 @@ describe("suggested alt texts", () => {
       null,
     ])
   })
+
+  it("keeps the place on a long name, and a name's own symbols as they are", () => {
+    const [, second] = suggestedAlts({
+      title: "a".repeat(400),
+      images: [plain, plain],
+      variantValues: new Map(),
+    })
+    expect(second).toHaveLength(ALT_MAX)
+    expect(second?.endsWith(", görsel 2")).toBe(true)
+    expect(
+      suggestedAlts({ title: "Kupa $& $' 2$", images: [plain, plain], variantValues: new Map() })
+    ).toEqual(["Kupa $& $' 2$", "Kupa $& $' 2$, görsel 2"])
+  })
 })

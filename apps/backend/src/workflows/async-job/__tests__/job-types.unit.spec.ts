@@ -1,4 +1,4 @@
-import { JOB_TYPE_KEYS, jobType } from "../types"
+import { JOB_TYPE_KEYS, exclusiveTypes, jobType, queueLockKey } from "../types"
 
 // The audit reads redirects, and the publish gate (an import's, a bulk
 // edit's) assesses products, through module links, which need a running
@@ -48,6 +48,10 @@ describe("job types", () => {
     const type = jobType("catalog.bulk_edit")
     expect(type).toMatchObject({ singleton: true, containsPersonalData: false, resultTtlDays: 7 })
     expect(type?.internal).toBeUndefined()
+    // Never beside an import: both write products
+    expect(exclusiveTypes("catalog.bulk_edit")).toEqual(["catalog.bulk_edit", "catalog.import"])
+    expect(queueLockKey("catalog.import")).toBe(queueLockKey("catalog.bulk_edit"))
+    expect(exclusiveTypes("seo.audit")).toEqual(["seo.audit"])
     expect(
       type?.input.safeParse({
         product_ids: ["prod_1"],

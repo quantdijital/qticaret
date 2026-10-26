@@ -17,7 +17,8 @@ const MIN_PERCENT = -99
 const MAX_PERCENT = 1000
 
 const id = z.string().min(1).max(64)
-const amount = z.number()
+// To the kuruş: a percent of 12.25 or an amount of 9.99, nothing finer
+const amount = z.number().multipleOf(0.01)
 
 const price = z
   .object({

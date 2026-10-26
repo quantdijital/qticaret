@@ -32,6 +32,11 @@ export interface JobType<Input = unknown> {
   feature?: string
   /** One at a time: a second request while one is queued or running is refused. */
   singleton: boolean
+  /**
+   * Singleton kinds that write the same records share a group and run one
+   * at a time between them (an import and a bulk edit both write products).
+   */
+  group?: string
   resultTtlDays: number
   /** Downloading the result is a personal data read (adr/0011). */
   containsPersonalData: boolean

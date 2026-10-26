@@ -31,7 +31,11 @@ export const bulkCategoryWorkflow = createWorkflow(
       updateProductsWorkflow.runAsStep({
         input: transform({ input }, ({ input }) => ({
           selector: { id: input.product_id },
-          update: { category_ids: input.category_ids ?? [] },
+          // As relations, not `category_ids`: Medusa's step then reads the old
+          // categories first, and puts them back if a later step fails
+          update: {
+            categories: (input.category_ids ?? []).map((id) => ({ id })),
+          } as never,
         })),
       })
     })
@@ -78,6 +82,7 @@ export async function writeBulkChange(
         input: {
           create: write.create,
           update: write.update,
+          adjust: write.adjust,
           reason: "bulk_edit",
           reference: origin.job_id,
           actor_id: origin.actor_id,

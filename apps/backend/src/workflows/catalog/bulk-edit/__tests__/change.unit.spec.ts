@@ -19,6 +19,9 @@ describe("bulk edit input", () => {
 
   it("refuses changes that would do nothing or harm", () => {
     expect(accepts({ action: "price", mode: "set", value: 0 })).toBe(false)
+    expect(accepts({ action: "price", mode: "set", value: 10.005 })).toBe(false)
+    expect(accepts({ action: "price", mode: "set", value: 0.07 })).toBe(true)
+    expect(accepts({ action: "price", mode: "percent", value: 12.25 })).toBe(true)
     expect(accepts({ action: "price", mode: "percent", value: 0 })).toBe(false)
     expect(accepts({ action: "price", mode: "percent", value: -100 })).toBe(false)
     expect(accepts({ action: "price", mode: "amount", value: Number.POSITIVE_INFINITY })).toBe(

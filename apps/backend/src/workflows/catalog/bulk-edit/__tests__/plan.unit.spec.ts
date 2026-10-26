@@ -1,5 +1,5 @@
 import type { BulkChange } from "../change"
-import { planBulkChange, roundAmount } from "../plan"
+import { nextKurus, planBulkChange } from "../plan"
 import type { BulkPlan } from "../plan"
 import type { BulkProduct, BulkVariant } from "../products"
 
@@ -74,8 +74,11 @@ describe("bulk edit: price", () => {
       )
     )
     expect(down).toMatchObject({ variants: [{ prices: [{ amount: 19.49 }] }] })
-    expect(roundAmount(1.005)).toBe(1.01)
-    expect(roundAmount(21.989)).toBe(21.99)
+    // In kuruş with half-up rounding: floats would give 202.00 here
+    expect(nextKurus(201, { action: "price", mode: "percent", value: 0.5 })).toBe(20201)
+    expect(nextKurus(19.99, { action: "price", mode: "percent", value: 10 })).toBe(2199)
+    expect(nextKurus(100, { action: "price", mode: "percent", value: -12.5 })).toBe(8750)
+    expect(nextKurus(undefined, { action: "price", mode: "amount", value: 5 })).toBeUndefined()
   })
 
   it("leaves the whole product when one variant's price would leave the range", () => {
@@ -157,7 +160,54 @@ describe("bulk edit: stock", () => {
       action: "stock",
       update: [{ inventory_item_id: "iitem_a", location_id: LOCATION, stocked_quantity: 7 }],
       create: [{ inventory_item_id: "iitem_b", location_id: LOCATION, stocked_quantity: 7 }],
+      adjust: [],
     })
+    // Each level before and after, for the product's audit entry
+    expect(plan.kind === "write" ? plan.diff : null).toEqual({
+      "level:iitem_a:stocked_quantity": { before: 2, after: 7 },
+      "level:iitem_b:stocked_quantity": { before: null, after: 7 },
+    })
+  })
+
+  it("adds and removes by a number, so a sale meanwhile is not undone", () => {
+    const plan = planBulkChange(
+      product({ variants: [tracked("a", 2), tracked("b", null)] }),
+      { action: "stock", mode: "adjust", value: 5 },
+      context
+    )
+    expect(writeOf(plan)).toEqual({
+      action: "stock",
+      update: [],
+      adjust: [{ inventory_item_id: "iitem_a", location_id: LOCATION, adjustment: 5 }],
+      create: [{ inventory_item_id: "iitem_b", location_id: LOCATION, stocked_quantity: 5 }],
+    })
+  })
+
+  it("leaves a kit's items alone, and moves an item two variants share once", () => {
+    const kit: BulkVariant = {
+      ...tracked("kit", 4),
+      inventory_items: [
+        { inventory_item_id: "iitem_x", required_quantity: 1 },
+        { inventory_item_id: "iitem_y", required_quantity: 1 },
+      ],
+    }
+    const pair: BulkVariant = {
+      ...tracked("pair", 4),
+      inventory_items: [{ inventory_item_id: "iitem_p", required_quantity: 2 }],
+    }
+    expect(
+      planBulkChange(
+        product({ variants: [kit, pair] }),
+        { action: "stock", mode: "set", value: 1 },
+        context
+      )
+    ).toEqual({ kind: "skipped", key: "bulk_edit.stock_untracked" })
+    const shared = planBulkChange(
+      product({ variants: [tracked("a", 2), { ...tracked("a", 2), id: "a2" }] }),
+      { action: "stock", mode: "set", value: 9 },
+      context
+    )
+    expect(writeOf(shared)).toMatchObject({ update: [{ inventory_item_id: "iitem_a" }] })
   })
 
   it("refuses to take stock below zero, and leaves untracked products out", () => {
@@ -225,7 +275,24 @@ describe("bulk edit: status, categories, SEO", () => {
     const remove = { action: "category", mode: "remove", category_id: "pcat_a" } as const
     expect(
       writeOf(planBulkChange(inCategories(["pcat_a", "pcat_b"], "pcat_a"), remove, context))
-    ).toEqual({ action: "category", category_ids: ["pcat_b"], primary_category_id: null })
+    ).toEqual({ action: "category", category_ids: ["pcat_b"], primary_category_id: "pcat_b" })
+    // The deepest category left takes the primary one's place; none left, none
+    const deep = product({
+      categories: [
+        { id: "pcat_a", mpath: "pcat_a" },
+        { id: "pcat_top", mpath: "pcat_top" },
+        { id: "pcat_leaf", mpath: "pcat_top.pcat_leaf" },
+      ],
+      product_extension: { primary_category_id: "pcat_a" },
+    })
+    expect(writeOf(planBulkChange(deep, remove, context))).toMatchObject({
+      primary_category_id: "pcat_leaf",
+    })
+    expect(writeOf(planBulkChange(inCategories(["pcat_a"], "pcat_a"), remove, context))).toEqual({
+      action: "category",
+      category_ids: [],
+      primary_category_id: null,
+    })
     expect(writeOf(planBulkChange(inCategories(["pcat_a"], "pcat_z"), remove, context))).toEqual({
       action: "category",
       category_ids: [],
@@ -330,7 +397,7 @@ describe("bulk edit: alt texts", () => {
         { action: "alt_text" },
         context
       )
-    ).toEqual({ kind: "skipped", key: "bulk_edit.alt_no_record" })
+    ).toEqual({ kind: "skipped", key: "bulk_edit.alt_not_filled" })
     expect(
       planBulkChange(product({ images: [], media_assets: [] }), { action: "alt_text" }, context)
     ).toEqual({ kind: "unchanged" })

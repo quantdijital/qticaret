@@ -1,5 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { deepestCategory } from "../../../lib/catalog"
 import { ValidationError } from "../../../lib/errors"
 import type { PageKind } from "../../../lib/seo/advisor"
 import { setProductCatalogWorkflow } from "../../catalog/set-product-catalog"
@@ -21,7 +22,7 @@ export const AUTO_FIXES = [
 ] as const
 export type AutoFix = (typeof AUTO_FIXES)[number]
 
-async function deepestCategory(container: MedusaContainer, productId: string): Promise<string> {
+async function deepestCategoryOf(container: MedusaContainer, productId: string): Promise<string> {
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "product",
     fields: ["categories.id", "categories.mpath"],
@@ -31,11 +32,7 @@ async function deepestCategory(container: MedusaContainer, productId: string): P
     categories?: ({ id: string; mpath?: string | null } | null)[] | null
   }
   const product = data[0] as Row | undefined
-  const categories = (product?.categories ?? []).filter(
-    (row): row is { id: string; mpath?: string | null } => row !== null
-  )
-  const depth = (row: { mpath?: string | null }) => (row.mpath ?? "").split(".").length
-  const deepest = [...categories].sort((a, b) => depth(b) - depth(a) || a.id.localeCompare(b.id))[0]
+  const deepest = deepestCategory(product?.categories ?? [])
   if (!deepest) {
     throw new ValidationError("seo.fix_not_applicable", { field: "action" })
   }
@@ -53,7 +50,7 @@ export async function applyFix(
       throw new ValidationError("seo.fix_not_applicable", { field: "action" })
     }
     await setProductCatalogWorkflow(container).run({
-      input: { product_id: id, primary_category_id: await deepestCategory(container, id) },
+      input: { product_id: id, primary_category_id: await deepestCategoryOf(container, id) },
     })
     return
   }

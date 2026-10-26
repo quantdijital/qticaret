@@ -17,8 +17,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "brands.name_invalid": "Marka adını girin (en fazla 120 karakter).",
   "brands.name_taken": "Bu adla bir marka zaten var.",
   "brands.unknown": "Marka bulunamadı.",
-  "bulk_edit.alt_no_record":
-    "Bazı görsellerin alt metni buradan yazılamıyor; ürün sayfasından ekleyin.",
+  "bulk_edit.alt_not_filled": "Bazı görsellerin alt metni yazılamadı; ürün sayfasından ekleyin.",
   "bulk_edit.category_unknown": "Seçilen kategori bulunamadı.",
   "bulk_edit.no_location": "Stok için varsayılan bir depo seçilmemiş.",
   "bulk_edit.no_price": "Varyantlarının TL fiyatı yok; önce fiyat girin.",

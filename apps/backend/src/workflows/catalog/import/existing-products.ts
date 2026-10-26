@@ -198,7 +198,11 @@ function existingOf(row: ProductRow): ExistingProduct {
         (variant.options ?? []).map((value) => [titleOf.get(value.option_id) ?? "", value.value])
       ),
       prices: pricesOf(variant.prices),
-      inventoryItemId: variant.inventory_items?.[0]?.inventory_item_id ?? null,
+      // A kit's several items are not one stock a sheet can set
+      inventoryItemId:
+        variant.inventory_items?.length === 1
+          ? (variant.inventory_items[0]?.inventory_item_id ?? null)
+          : null,
       levels: Object.fromEntries(
         (variant.inventory_items?.[0]?.inventory?.location_levels ?? []).map((level) => [
           level.location_id,

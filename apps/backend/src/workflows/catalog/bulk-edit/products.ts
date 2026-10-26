@@ -11,7 +11,7 @@ export interface BulkProduct {
   handle: string
   title: string
   status: string
-  categories?: ({ id: string } | null)[] | null
+  categories?: ({ id: string; mpath?: string | null } | null)[] | null
   product_extension?: { primary_category_id?: string | null } | null
   seo_meta?: { seo_title?: string | null; seo_description?: string | null } | null
   options?: { id: string; title: string }[] | null
@@ -28,6 +28,7 @@ export interface BulkVariant {
   inventory_items?:
     | {
         inventory_item_id: string
+        required_quantity?: number | null
         inventory?: {
           location_levels?: { location_id: string; stocked_quantity: number | string }[] | null
         } | null
@@ -44,11 +45,12 @@ const FIELDS: Readonly<Record<BulkAction, readonly string[]>> = {
     "variants.id",
     "variants.manage_inventory",
     "variants.inventory_items.inventory_item_id",
+    "variants.inventory_items.required_quantity",
     "variants.inventory_items.inventory.location_levels.location_id",
     "variants.inventory_items.inventory.location_levels.stocked_quantity",
   ],
   status: BASE,
-  category: [...BASE, "categories.id", "product_extension.primary_category_id"],
+  category: [...BASE, "categories.id", "categories.mpath", "product_extension.primary_category_id"],
   seo_template: [...BASE, "seo_meta.seo_title", "seo_meta.seo_description"],
   alt_text: [
     ...BASE,

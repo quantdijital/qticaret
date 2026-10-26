@@ -6,6 +6,7 @@ import {
   priceSentence,
   resolveSeoPayload,
 } from "../../lib/seo/resolve"
+import { deepestCategory } from "../../lib/catalog"
 import type { SeoPayload, SeoSubject } from "../../lib/seo/resolve"
 import type { UrlOwner } from "../../modules/url-registry/validation"
 import { CATALOG_ENTITY_TYPES } from "../catalog/entity-paths"
@@ -50,12 +51,7 @@ interface ProductRow extends Omit<FactRow, "product_extension"> {
 function primaryCategory(product: ProductRow): CategoryRow | null {
   const categories = (product.categories ?? []).filter((row): row is CategoryRow => row !== null)
   const chosen = product.product_extension?.primary_category_id
-  const depth = (row: CategoryRow) => (row.mpath ?? "").split(".").length
-  return (
-    categories.find((row) => row.id === chosen) ??
-    [...categories].sort((a, b) => depth(b) - depth(a))[0] ??
-    null
-  )
+  return categories.find((row) => row.id === chosen) ?? deepestCategory(categories) ?? null
 }
 
 async function productSubject(container: MedusaContainer, id: string, path: string) {

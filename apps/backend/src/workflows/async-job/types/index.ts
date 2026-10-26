@@ -29,3 +29,12 @@ export const jobType = (key: string): JobType | undefined =>
   Object.hasOwn(JOB_TYPES, key) ? JOB_TYPES[key] : undefined
 
 export const JOB_TYPE_KEYS = Object.keys(JOB_TYPES)
+
+/** The kinds one of this kind cannot run beside (itself, and its group's). */
+export function exclusiveTypes(key: string): string[] {
+  const group = jobType(key)?.group
+  return group ? JOB_TYPE_KEYS.filter((other) => jobType(other)?.group === group) : [key]
+}
+
+/** What a request for this kind locks while it is checked and queued. */
+export const queueLockKey = (key: string): string => `async-job:${jobType(key)?.group ?? key}`

@@ -14,8 +14,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "brands.name_invalid": "Enter the brand's name (120 characters at most).",
   "brands.name_taken": "A brand with this name already exists.",
   "brands.unknown": "Brand not found.",
-  "bulk_edit.alt_no_record":
-    "Some images' alt text cannot be written here; add it on the product page.",
+  "bulk_edit.alt_not_filled":
+    "Some images' alt text could not be written; add it on the product page.",
   "bulk_edit.category_unknown": "The chosen category was not found.",
   "bulk_edit.no_location": "No default warehouse is set for stock.",
   "bulk_edit.no_price": "Its variants have no TRY price; enter a price first.",

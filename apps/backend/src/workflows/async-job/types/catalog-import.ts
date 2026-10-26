@@ -34,6 +34,8 @@ const input = z
 export const catalogImport: JobType<z.infer<typeof input>> = {
   input,
   singleton: true,
+  // Both write products: an import and a bulk edit never run side by side
+  group: "catalog.write",
   resultTtlDays: 7,
   containsPersonalData: false,
   internal: true,

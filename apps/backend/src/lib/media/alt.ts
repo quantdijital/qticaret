@@ -42,11 +42,17 @@ export function suggestedAlts(source: AltSource, locale: MessageLocale = "tr"): 
   return bases.map((base) => {
     const place = (seen.get(base) ?? 0) + 1
     seen.set(base, place)
-    const text =
+    if (!base) {
+      return null
+    }
+    // The place survives a long name: the name is cut, not the number. The
+    // name goes in by concatenation, so a "$&" in it is text, not a pattern
+    const [before = "", after = ""] =
       place > 1 && (totals.get(base) ?? 0) > 1
-        ? NUMBERED[locale].replace("{{text}}", base).replace("{{n}}", String(place))
-        : base
-    const fitted = text.length > ALT_MAX ? text.slice(0, ALT_MAX).trimEnd() : text
-    return fitted && isCleanText(fitted) ? fitted : null
+        ? NUMBERED[locale].replace("{{n}}", String(place)).split("{{text}}")
+        : []
+    const room = ALT_MAX - before.length - after.length
+    const text = `${before}${base.length > room ? base.slice(0, room).trimEnd() : base}${after}`
+    return isCleanText(text) ? text : null
   })
 }

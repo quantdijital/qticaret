@@ -1,5 +1,6 @@
 import { suggestedAlts } from "../../../lib/media/alt"
-import type { BulkPlan } from "./plan"
+import { UNCHANGED, skipped, writing } from "./plan-result"
+import type { BulkPlan } from "./plan-result"
 import type { BulkProduct } from "./products"
 
 /**
@@ -30,15 +31,23 @@ export function altWrites(product: BulkProduct): BulkPlan {
     })),
     variantValues,
   })
-  const alts = images.flatMap((image, index) => {
+  const filled = images.flatMap((image, index) => {
     const asset = assets.get(image.url)
     const text = texts[index]
-    return asset && !asset.alt?.trim() && text ? [{ id: asset.id, alt: text }] : []
+    return asset && !asset.alt?.trim() && text ? [{ asset, alt: text }] : []
   })
-  if (alts.length > 0) {
-    return { kind: "write", write: { action: "alt_text", alts } }
+  if (filled.length > 0) {
+    return writing(
+      { action: "alt_text", alts: filled.map(({ asset, alt }) => ({ id: asset.id, alt })) },
+      Object.fromEntries(
+        filled.map(({ asset, alt }) => [
+          `media:${asset.id}:alt`,
+          { before: asset.alt ?? null, after: alt },
+        ])
+      )
+    )
   }
   // Images still without a text that no record can hold
   const unlabelled = images.some((image) => !assets.get(image.url)?.alt?.trim())
-  return unlabelled ? { kind: "skipped", key: "bulk_edit.alt_no_record" } : { kind: "unchanged" }
+  return unlabelled ? skipped("bulk_edit.alt_not_filled") : UNCHANGED
 }

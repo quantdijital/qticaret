@@ -5,7 +5,7 @@ import { QUEUED_STALE_MS } from "../../../modules/async-job/service"
 import type AsyncJobModuleService from "../../../modules/async-job/service"
 import { PLATFORM_SETTINGS_MODULE } from "../../../modules/platform-settings"
 import type PlatformSettingsModuleService from "../../../modules/platform-settings/service"
-import { jobType } from "../types"
+import { exclusiveTypes, jobType } from "../types"
 
 export interface EnqueueAsyncJobInput {
   type: string
@@ -15,8 +15,9 @@ export interface EnqueueAsyncJobInput {
 
 /**
  * Checks a job request against its type (input schema, feature flag, one at
- * a time) and opens its `queued` record. The workflow holds a lock per type
- * around this step, so two requests cannot both pass the one-at-a-time check.
+ * a time, with its group's kinds too) and opens its `queued` record. The
+ * workflow holds a lock per type, or per group, around this step, so two
+ * requests cannot both pass the one-at-a-time check.
  */
 export const createAsyncJobStep = createStep(
   "async-job-create",
@@ -40,7 +41,7 @@ export const createAsyncJobStep = createStep(
       // A queued job past QUEUED_STALE_MS lost its event; it does not block
       const active = await service.listAsyncJobs(
         {
-          type: request.type,
+          type: exclusiveTypes(request.type),
           $or: [
             { status: "running" },
             { status: "queued", created_at: { $gte: new Date(Date.now() - QUEUED_STALE_MS) } },

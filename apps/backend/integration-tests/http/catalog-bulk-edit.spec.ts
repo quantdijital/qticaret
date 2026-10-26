@@ -19,6 +19,7 @@ import { PLATFORM_SETTINGS_MODULE } from "../../src/modules/platform-settings"
 import type PlatformSettingsModuleService from "../../src/modules/platform-settings/service"
 import { STOCK_LEDGER_MODULE } from "../../src/modules/stock-ledger"
 import type StockLedgerModuleService from "../../src/modules/stock-ledger/service"
+import { bulkCategoryWorkflow } from "../../src/workflows/catalog/bulk-edit/write"
 import { setProductCatalogWorkflow } from "../../src/workflows/catalog/set-product-catalog"
 import { upsertSeoMetaWorkflow } from "../../src/workflows/seo/upsert-seo-meta"
 import { createAdminUser } from "../helpers/admin"
@@ -138,6 +139,23 @@ medusaIntegrationTestRunner({
       ])
       const finished = entries.find((entry) => entry.action === "catalog.bulk_edit_finished")
       expect(finished?.changes).toMatchObject({ product_ids: [a.productId, b.productId] })
+      // And each product's own entry, its price before and after (as the price routes record)
+      const [own] = await getContainer()
+        .resolve<AuditLogModuleService>(AUDIT_LOG_MODULE)
+        .listAuditEntries(
+          {
+            resource_type: "product",
+            resource_id: a.productId,
+            action: "catalog.bulk_edit_product",
+          },
+          { select: ["changes", "actor_id"] }
+        )
+      expect(own?.changes).toMatchObject({
+        job_id: job.id,
+        action: "price",
+        diff: { [`variant:${a.variantId}:price:try`]: { before: 100, after: 112.5 } },
+      })
+      expect(own?.actor_id).toBeTruthy()
       // The jobs list shows how many products, not the thousand ids
       const { data } = await http.get<{ async_job: { input: Record<string, unknown> } }>(
         `/admin/async-jobs/${job.id}`,
@@ -170,6 +188,15 @@ medusaIntegrationTestRunner({
       }
       const taken = await bulk([shelved.productId], { action: "stock", mode: "adjust", value: -20 })
       expect(taken.result_summary).toMatchObject({ changed: 0, skipped: 1 })
+      // Added by a number under the item's lock, recorded as the bulk edit's
+      const added = await bulk([shelved.productId], { action: "stock", mode: "adjust", value: 3 })
+      expect(added.result_summary).toMatchObject({ changed: 1 })
+      expect(await ledger.lastMovement(shelved.itemId, shop.locationId)).toMatchObject({
+        delta_stocked: 3,
+        stocked_after: 12,
+        reason: "bulk_edit",
+        reference: added.id,
+      })
     })
 
     it("takes drafts live through the SEO gate and the measurement rule", async () => {
@@ -221,10 +248,11 @@ medusaIntegrationTestRunner({
           product_categories: [
             { name: "Mutfak", handle: "toplu-mutfak", is_active: true },
             { name: "Kupalar", handle: "toplu-kupalar", is_active: true },
+            { name: "Diğer", handle: "toplu-diger", is_active: true },
           ],
         },
       })
-      const [kitchen, mugs] = categories.map((category) => category.id)
+      const [kitchen, mugs, other] = categories.map((category) => category.id)
       const filed = await stockedProduct(getContainer(), shop, "toplu-kategorili", 1)
       const loose = await stockedProduct(getContainer(), shop, "toplu-kategorisiz", 1)
       await updateProductsWorkflow(getContainer()).run({
@@ -262,8 +290,21 @@ medusaIntegrationTestRunner({
         mode: "remove",
         category_id: mugs,
       })
-      expect(await placed(filed.productId)).toEqual({ categories: [kitchen], primary: null })
+      // The primary category gone, the one left takes its place
+      expect(await placed(filed.productId)).toEqual({ categories: [kitchen], primary: kitchen })
       expect(await placed(loose.productId)).toEqual({ categories: [], primary: null })
+
+      // A failing later step puts the categories back (Medusa's step, by relation)
+      await expect(
+        bulkCategoryWorkflow(getContainer()).run({
+          input: {
+            product_id: filed.productId,
+            category_ids: [kitchen ?? "", mugs ?? ""],
+            primary_category_id: other ?? "",
+          },
+        })
+      ).rejects.toBeTruthy()
+      expect(await placed(filed.productId)).toEqual({ categories: [kitchen], primary: kitchen })
 
       const unknown = await bulk([filed.productId], {
         action: "category",
