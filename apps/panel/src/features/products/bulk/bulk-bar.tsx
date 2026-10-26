@@ -37,6 +37,8 @@ interface BulkBarProps {
 export function BulkBar({ selected, onSelect, filters, total, onAction }: BulkBarProps) {
   const { t } = useTranslation()
   const [loading, setLoading] = useState(false)
+  // Picked one by one across pages, past what a run takes
+  const tooMany = selected.size > MAX_BULK_PRODUCTS
   const selectAll = async () => {
     setLoading(true)
     try {
@@ -66,7 +68,7 @@ export function BulkBar({ selected, onSelect, filters, total, onAction }: BulkBa
     <div
       role="region"
       aria-label={t("products.bulk.region")}
-      className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t bg-accent/60 px-5 py-2.5 text-sm"
+      className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t bg-muted/60 px-5 py-2.5 text-sm"
     >
       <span className="font-medium" aria-live="polite">
         {t("products.bulk.selected", {
@@ -77,7 +79,8 @@ export function BulkBar({ selected, onSelect, filters, total, onAction }: BulkBa
       {total > selected.size ? (
         <Button
           variant="link"
-          className="h-auto p-0"
+          // The shop's own brand colour may be too light on the bar: links read in text colour
+          className="h-auto p-0 text-foreground underline"
           disabled={loading}
           onClick={() => void selectAll()}
         >
@@ -87,16 +90,21 @@ export function BulkBar({ selected, onSelect, filters, total, onAction }: BulkBa
       ) : null}
       <Button
         variant="link"
-        className="h-auto p-0 text-muted-foreground"
+        className="h-auto p-0 text-foreground underline"
         onClick={() => {
           onSelect(new Set())
         }}
       >
         {t("products.bulk.clear")}
       </Button>
+      {tooMany ? (
+        <span className="text-warning-text">
+          {t("products.bulk.tooMany", { max: formatCount(MAX_BULK_PRODUCTS) })}
+        </span>
+      ) : null}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button size="sm" className="ml-auto">
+          <Button size="sm" className="ml-auto" disabled={tooMany}>
             <Pencil />
             {t("products.bulk.edit")}
             <ChevronDown />

@@ -25,8 +25,12 @@ const SETTINGS = [
   "/settings/audit",
 ]
 
+// A page takes a few seconds on a CI runner: a test that walks many gets that much per page
+const PER_PAGE_MS = 10_000
+
 /** Docs/06's smoke test: every screen a shop uses opens, with no error, script or server. */
 test("opens every main section without an error", async ({ page, guard }) => {
+  test.setTimeout(SECTIONS.length * PER_PAGE_MS)
   for (const path of SECTIONS) {
     await test.step(path, async () => {
       await page.goto(path)
@@ -38,6 +42,7 @@ test("opens every main section without an error", async ({ page, guard }) => {
 })
 
 test("opens every settings page without an error", async ({ page, guard }) => {
+  test.setTimeout(SETTINGS.length * PER_PAGE_MS)
   for (const path of SETTINGS) {
     await test.step(path, async () => {
       await page.goto(path)

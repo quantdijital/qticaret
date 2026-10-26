@@ -59,6 +59,8 @@ describe("bulk edit form", () => {
 
   it("shows a price change on an example as the server rounds it", () => {
     expect(examplePrice({ action: "price", mode: "percent", value: 10 }, 19.99)).toBe(21.99)
+    // Floats would give 202.00
+    expect(examplePrice({ action: "price", mode: "percent", value: 0.5 }, 201)).toBe(202.01)
     expect(examplePrice({ action: "price", mode: "amount", value: -0.5 }, 100)).toBe(99.5)
     expect(examplePrice({ action: "alt_text" }, 100)).toBeNull()
   })

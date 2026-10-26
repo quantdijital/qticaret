@@ -106,16 +106,25 @@ export function bulkChangeOf(action: BulkAction, form: BulkForm): BulkFormResult
   }
 }
 
-/** What a price change does to an example price, as the server rounds it (to the kuruş). */
+// Kuruş and basis points, rounded half up away from zero: the server's own rule (lib/money)
+const BPS_PER_WHOLE = 10_000
+
+function divideHalfUp(numerator: number, denominator: number): number {
+  const rounded = Math.floor((Math.abs(numerator) * 2 + denominator) / (denominator * 2))
+  return numerator < 0 ? -rounded : rounded
+}
+
+/** What a price change does to an example price, as the server computes it (to the kuruş). */
 export function examplePrice(change: BulkChange, example: number): number | null {
   if (change.action !== "price") {
     return null
   }
+  const kurus = Math.round(example * 100)
   const next =
     change.mode === "set"
-      ? change.value
+      ? Math.round(change.value * 100)
       : change.mode === "percent"
-        ? example * (1 + change.value / 100)
-        : example + change.value
-  return Math.sign(next) * (Math.round((Math.abs(next) + Number.EPSILON) * 100) / 100)
+        ? divideHalfUp(kurus * (BPS_PER_WHOLE + Math.round(change.value * 100)), BPS_PER_WHOLE)
+        : kurus + Math.round(change.value * 100)
+  return next / 100
 }
