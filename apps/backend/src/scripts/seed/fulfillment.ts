@@ -6,15 +6,15 @@ import {
   createShippingOptionsWorkflow,
   createShippingProfilesWorkflow,
   createLocationFulfillmentSetWorkflow,
-  createStockLocationsWorkflow,
   linkSalesChannelsToStockLocationWorkflow,
 } from "@medusajs/medusa/core-flows"
+import { updateWarehouseWorkflow } from "../../workflows/stock/warehouses"
 import { TRY_CURRENCY_CODE, TR_COUNTRY_CODE } from "../bootstrap/constants"
 import {
   DEMO_FULFILLMENT_SET_NAME,
   DEMO_SERVICE_ZONE_NAME,
   DEMO_SHIPPING_OPTIONS,
-  DEMO_STOCK_LOCATION,
+  DEMO_LOCATION_ADDRESS,
   MANUAL_FULFILLMENT_PROVIDER_ID,
 } from "./data"
 
@@ -24,14 +24,18 @@ export interface DemoFulfillment {
 }
 
 /**
- * Warehouse that ships to Turkey with the manual provider and flat TRY
- * shipping options. Each piece is created only when missing.
+ * The tenant's warehouse shipping to Turkey with the manual provider and
+ * flat TRY shipping options. Each piece is created only when missing.
  */
 export async function ensureDemoFulfillment(
   container: MedusaContainer,
-  input: { regionId: string; salesChannelId: string }
+  input: { regionId: string; salesChannelId: string; locationId: string }
 ): Promise<DemoFulfillment> {
-  const stockLocationId = await ensureStockLocation(container, input.salesChannelId)
+  const stockLocationId = await ensureStockLocation(
+    container,
+    input.locationId,
+    input.salesChannelId
+  )
   const shippingProfileId = await ensureDefaultShippingProfile(container)
   const serviceZoneId = await ensureServiceZone(container, stockLocationId)
   await ensureShippingOptions(container, {
@@ -42,22 +46,31 @@ export async function ensureDemoFulfillment(
   return { stockLocationId, shippingProfileId }
 }
 
+/**
+ * The bootstrap's warehouse, with the demo address when it has none yet,
+ * selling to the channel and shipping with the manual provider.
+ */
 async function ensureStockLocation(
   container: MedusaContainer,
+  locationId: string,
   salesChannelId: string
 ): Promise<string> {
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
   const { data } = await query.graph({
     entity: "stock_location",
-    fields: ["id", "sales_channels.id", "fulfillment_providers.id"],
-    filters: { name: DEMO_STOCK_LOCATION.name },
+    fields: ["id", "name", "address.id", "sales_channels.id", "fulfillment_providers.id"],
+    filters: { id: locationId },
   })
-
   const existing = data[0]
-  const locationId = existing?.id ?? (await createStockLocation(container))
   const channelIds = (existing?.sales_channels ?? []).map((channel) => channel?.id)
   const providerIds = (existing?.fulfillment_providers ?? []).map((provider) => provider?.id)
 
+  // Medusa's own update cannot give an address to a location without one
+  if (existing && !existing.address) {
+    await updateWarehouseWorkflow(container).run({
+      input: { id: locationId, name: existing.name, address: DEMO_LOCATION_ADDRESS },
+    })
+  }
   if (!channelIds.includes(salesChannelId)) {
     await linkSalesChannelsToStockLocationWorkflow(container).run({
       input: { id: locationId, add: [salesChannelId] },
@@ -74,19 +87,6 @@ async function ensureStockLocation(
     })
   }
   return locationId
-}
-
-async function createStockLocation(container: MedusaContainer): Promise<string> {
-  const { result } = await createStockLocationsWorkflow(container).run({
-    input: {
-      locations: [{ name: DEMO_STOCK_LOCATION.name, address: DEMO_STOCK_LOCATION.address }],
-    },
-  })
-  const created = result[0]
-  if (!created) {
-    throw new Error("seed: createStockLocationsWorkflow returned no location")
-  }
-  return created.id
 }
 
 async function ensureDefaultShippingProfile(container: MedusaContainer): Promise<string> {

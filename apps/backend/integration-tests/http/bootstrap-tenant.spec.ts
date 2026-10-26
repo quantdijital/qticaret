@@ -97,6 +97,41 @@ medusaIntegrationTestRunner({
         )
       })
 
+      it("gives the store one default warehouse selling to its channel, and keeps the shop's choice", async () => {
+        const container = getContainer()
+        const query = container.resolve(ContainerRegistrationKeys.QUERY)
+        const store = async () =>
+          (
+            await query.graph({
+              entity: "store",
+              fields: ["id", "default_location_id", "default_sales_channel_id"],
+            })
+          ).data[0]
+
+        const first = await bootstrapTenant(container)
+        const second = await bootstrapTenant(container)
+        expect(second.locationId).toBe(first.locationId)
+        expect((await store())?.default_location_id).toBe(first.locationId)
+        const { data: locations } = await query.graph({
+          entity: "stock_location",
+          fields: ["id", "name", "sales_channels.id"],
+        })
+        expect(locations).toHaveLength(1)
+        expect(locations[0]).toMatchObject({
+          name: "Ana Depo",
+          sales_channels: [{ id: (await store())?.default_sales_channel_id }],
+        })
+
+        // Another warehouse the shop made the default stays the default
+        const locationModule = container.resolve(Modules.STOCK_LOCATION)
+        const other = await locationModule.createStockLocations({ name: "İzmir Depo" })
+        const storeId = (await store())?.id ?? ""
+        await updateStoresWorkflow(container).run({
+          input: { selector: { id: storeId }, update: { default_location_id: other.id } },
+        })
+        expect((await bootstrapTenant(container)).locationId).toBe(other.id)
+      })
+
       it("makes TRY the default currency and marks TRY and the region tax inclusive", async () => {
         const container = getContainer()
         const query = container.resolve(ContainerRegistrationKeys.QUERY)

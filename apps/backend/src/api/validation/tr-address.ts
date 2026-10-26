@@ -14,7 +14,7 @@ import { isTrAddress, validateTrAddress } from "../../modules/tr-address/validat
 
 /** Where an address sits in the validated body; ROOT means the body is the address. */
 export const ROOT = "$root"
-type AddressKey = typeof ROOT | "shipping_address" | "billing_address"
+type AddressKey = typeof ROOT | "shipping_address" | "billing_address" | "address"
 type ExistingAddresses = Partial<Record<AddressKey, AddressFields | null>>
 
 export const ADDRESS_FIELDS = [
@@ -80,7 +80,12 @@ export function validateTrAddresses(
           req,
           res,
           400,
-          { type: "invalid_data", message: "The address is not a valid Turkish address", issues },
+          {
+            type: "invalid_data",
+            // One issue names itself; several get the general sentence (keys, adr/0021)
+            message: issues.length === 1 && issues[0] ? issues[0].code : "tr_address.invalid",
+            issues,
+          },
           "tr_address_invalid"
         )
         return
@@ -141,4 +146,19 @@ export async function existingCartAddresses(req: MedusaRequest): Promise<Existin
     shipping_address: data[0]?.shipping_address ?? null,
     billing_address: data[0]?.billing_address ?? null,
   }
+}
+
+/** A warehouse's stored address (F3.7), for partial updates. */
+export async function existingLocationAddress(req: MedusaRequest): Promise<ExistingAddresses> {
+  const locationId = req.params["id"]
+  if (!locationId) {
+    return {}
+  }
+  const query = req.scope.resolve(ContainerRegistrationKeys.QUERY)
+  const { data } = await query.graph({
+    entity: "stock_location",
+    fields: ADDRESS_FIELDS.map((field) => `address.${field}`),
+    filters: { id: locationId },
+  })
+  return { address: (data[0] as { address?: AddressFields | null } | undefined)?.address ?? null }
 }

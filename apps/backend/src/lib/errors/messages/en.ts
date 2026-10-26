@@ -141,9 +141,27 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The URL style could not be changed: some pages fall on the same address or another record holds it. Run the check again.",
   "seo.url_style_job_required":
     'The URL style changes every page\'s address; use "Change URL style" in the SEO settings.',
+  "stock.location_has_returns":
+    "Returns are on their way to this location; receive or cancel them first.",
+  "stock.location_has_stock":
+    "This location holds, reserves or awaits stock; move or clear it first.",
+  "stock.location_is_default":
+    "The default location cannot be deleted; make another one the default first.",
+  "stock.location_unknown": "Location not found.",
+  "stock.text_invalid": "The text has characters that cannot be used.",
   "tr_address.district_id_invalid": "The district is not valid.",
   "tr_address.district_not_in_province": "The selected district is not in this province.",
+  "tr_address.district_requires_province": "Choose a province before the district.",
+  "tr_address.invalid":
+    "The address does not match Turkish address records; check the province, district, neighbourhood and postal code.",
+  "tr_address.neighborhood_not_in_district": "The neighbourhood is not in this district.",
+  "tr_address.neighborhood_requires_district": "Choose a district before the neighbourhood.",
+  "tr_address.phone_invalid": "The phone number is not valid.",
+  "tr_address.postal_code_invalid": "The postal code is not valid.",
+  "tr_address.postal_code_neighborhood_mismatch": "The postal code is not the neighbourhood's.",
+  "tr_address.postal_code_province_mismatch": "The postal code is not in the chosen province.",
   "tr_address.province_code_invalid": "The province is not valid.",
+  "tr_address.province_not_found": "Province not found.",
   "upload.csv_empty": "The file is empty.",
   "upload.csv_invalid": "The file could not be read: a quote is not closed.",
   "upload.csv_too_many_rows": "The file has too many rows; upload 1000 at most.",

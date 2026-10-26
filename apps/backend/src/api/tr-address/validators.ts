@@ -1,5 +1,5 @@
 import { z } from "@medusajs/framework/zod"
-import { normalizePlateCode } from "../../../lib/tr/postal-code"
+import { normalizePlateCode } from "../../lib/tr/postal-code"
 
 // docs/04: list endpoints page at most 100 records; clients page through larger districts
 export const TR_ADDRESS_MAX_LIMIT = 100
@@ -9,10 +9,10 @@ const pagination = {
   offset: z.coerce.number().int().min(0).default(0),
 }
 
-export const StoreGetTrProvinces = z.object(pagination)
-export type StoreGetTrProvincesType = z.infer<typeof StoreGetTrProvinces>
+export const GetTrProvinces = z.object(pagination)
+export type GetTrProvincesType = z.infer<typeof GetTrProvinces>
 
-export const StoreGetTrDistricts = z.object({
+export const GetTrDistricts = z.object({
   ...pagination,
   /** Plate code, "6" or "06". */
   province: z.string().transform((value, ctx) => {
@@ -24,10 +24,10 @@ export const StoreGetTrDistricts = z.object({
     return code
   }),
 })
-export type StoreGetTrDistrictsType = z.infer<typeof StoreGetTrDistricts>
+export type GetTrDistrictsType = z.infer<typeof GetTrDistricts>
 
-export const StoreGetTrNeighborhoods = z.object({
+export const GetTrNeighborhoods = z.object({
   ...pagination,
   district: z.string().regex(/^trdst_[0-9A-Z]{26}$/, "tr_address.district_id_invalid"),
 })
-export type StoreGetTrNeighborhoodsType = z.infer<typeof StoreGetTrNeighborhoods>
+export type GetTrNeighborhoodsType = z.infer<typeof GetTrNeighborhoods>

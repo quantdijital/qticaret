@@ -150,9 +150,26 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Adres biçimi değiştirilemedi: bazı sayfalar aynı adrese düşüyor ya da adres başka bir kayda ait. Kontrolü yeniden çalıştırın.",
   "seo.url_style_job_required":
     'Adres biçimi tüm sayfaların adresini değiştirir; SEO ayarlarındaki "Adres biçimini değiştir" adımıyla yapın.',
+  "stock.location_has_returns":
+    "Bu depoya gelmesi beklenen iadeler var; önce iadeleri teslim alın ya da iptal edin.",
+  "stock.location_has_stock":
+    "Bu depoda stok, rezervasyon ya da gelecek stok var; önce stoğu başka bir depoya taşıyın ya da sıfırlayın.",
+  "stock.location_is_default": "Varsayılan depo silinemez; önce başka bir depoyu varsayılan yapın.",
+  "stock.location_unknown": "Depo bulunamadı.",
+  "stock.text_invalid": "Metinde kullanılamayan karakterler var.",
   "tr_address.district_id_invalid": "İlçe seçimi geçerli değil.",
   "tr_address.district_not_in_province": "Seçilen ilçe bu ile ait değil.",
+  "tr_address.district_requires_province": "İlçe için önce il seçin.",
+  "tr_address.invalid":
+    "Adres Türkiye adres kayıtlarıyla uyuşmuyor; il, ilçe, mahalle ve posta kodunu kontrol edin.",
+  "tr_address.neighborhood_not_in_district": "Mahalle bu ilçede bulunamadı.",
+  "tr_address.neighborhood_requires_district": "Mahalle için önce ilçe seçin.",
+  "tr_address.phone_invalid": "Telefon numarası geçerli değil.",
+  "tr_address.postal_code_invalid": "Posta kodu geçerli değil.",
+  "tr_address.postal_code_neighborhood_mismatch": "Posta kodu seçilen mahalleye ait değil.",
+  "tr_address.postal_code_province_mismatch": "Posta kodu seçilen ile ait değil.",
   "tr_address.province_code_invalid": "İl seçimi geçerli değil.",
+  "tr_address.province_not_found": "İl bulunamadı.",
   "upload.csv_empty": "Dosya boş.",
   "upload.csv_invalid": "Dosya okunamadı: kapanmamış bir tırnak var.",
   "upload.csv_too_many_rows": "Dosyada çok fazla satır var; en fazla 1000 satır yükleyin.",

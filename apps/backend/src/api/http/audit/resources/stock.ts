@@ -1,0 +1,101 @@
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import type { AuditedResource, GraphQuery, Resolver, Snapshot } from "../types"
+import { ID } from "../types"
+
+/**
+ * Warehouses and the store's default one (F3.7, adr/0011): name and
+ * address before and after, through the panel's routes or Medusa's own.
+ * The default warehouse decides where every stock entry goes, so its
+ * change is a setting. The warehouse phone is a business line, but it is
+ * written as changed only, like other phone numbers.
+ */
+
+const query = (scope: Resolver) => scope.resolve(ContainerRegistrationKeys.QUERY) as GraphQuery
+
+const ADDRESS_FIELDS = [
+  "address_1",
+  "address_2",
+  "city",
+  "province",
+  "postal_code",
+  "country_code",
+  "phone",
+] as const
+
+interface LocationRow {
+  name?: string
+  address?: Record<string, unknown> | null
+}
+
+async function locationSnapshot(scope: Resolver, filters: Record<string, unknown>) {
+  const { data } = await query(scope).graph({
+    entity: "stock_location",
+    fields: ["name", ...ADDRESS_FIELDS.map((field) => `address.${field}`)],
+    filters,
+  })
+  const row = data[0] as LocationRow | undefined
+  if (!row) {
+    return {}
+  }
+  return {
+    name: row.name ?? null,
+    ...Object.fromEntries(ADDRESS_FIELDS.map((field) => [field, row.address?.[field] ?? null])),
+  } satisfies Snapshot
+}
+
+// A new warehouse is found by the name in its body
+async function byName(scope: Resolver, body: unknown): Promise<Snapshot> {
+  const { name } = (body ?? {}) as { name?: unknown }
+  return typeof name === "string" && name.trim() !== ""
+    ? locationSnapshot(scope, { name: name.trim() })
+    : {}
+}
+
+async function storeDefault(scope: Resolver): Promise<Snapshot> {
+  const { data } = await query(scope).graph({
+    entity: "store",
+    fields: ["default_location_id"],
+    filters: {},
+  })
+  return {
+    default_location_id:
+      (data[0] as { default_location_id?: string | null } | undefined)?.default_location_id ?? null,
+  }
+}
+
+const SENSITIVE = ["phone"] as const
+
+const byId = (method: "POST" | "DELETE", path: string): AuditedResource => ({
+  method,
+  route: `${method} ${path.replace(`(?<id>${ID})`, ":id")}`,
+  pattern: new RegExp(`^${path}$`, "i"),
+  resourceType: "stock_location",
+  resourceId: (params) => params["id"] ?? null,
+  snapshot: ({ scope, params }) => locationSnapshot(scope, { id: params["id"] ?? "" }),
+  sensitive: SENSITIVE,
+})
+
+export const STOCK_RESOURCES: readonly AuditedResource[] = [
+  ...["/admin/warehouses", "/admin/stock-locations"].map((path): AuditedResource => ({
+    method: "POST",
+    route: `POST ${path}`,
+    pattern: new RegExp(`^${path}$`, "i"),
+    resourceType: "stock_location",
+    resourceId: () => null,
+    snapshot: ({ scope, body }) => byName(scope, body),
+    sensitive: SENSITIVE,
+  })),
+  byId("POST", `/admin/warehouses/(?<id>${ID})`),
+  byId("POST", `/admin/stock-locations/(?<id>${ID})`),
+  byId("DELETE", `/admin/stock-locations/(?<id>${ID})`),
+  ...[`/admin/warehouses/(?<id>${ID})/default`, `/admin/stores/(?<id>${ID})`].map(
+    (path): AuditedResource => ({
+      method: "POST",
+      route: `POST ${path.replace(`(?<id>${ID})`, ":id")}`,
+      pattern: new RegExp(`^${path}$`, "i"),
+      resourceType: "store",
+      resourceId: (params) => params["id"] ?? null,
+      snapshot: ({ scope }) => storeDefault(scope),
+    })
+  ),
+]

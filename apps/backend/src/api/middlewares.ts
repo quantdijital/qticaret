@@ -30,13 +30,10 @@ import { rejectAmbiguousPath } from "./http/request-path"
 import { adminLimitGuard, storeLimitGuard, uploadSizeGate } from "./http/request-limits"
 import { securityHeaders } from "./http/security-headers"
 import { SEO_ROUTES } from "./http/seo-routes"
+import { STOCK_ROUTES } from "./http/stock-routes"
 import { uploadValidator } from "./http/upload-validator"
 import { StorePostBillingProfile } from "./store/customers/me/billing-profile/validators"
-import {
-  StoreGetTrDistricts,
-  StoreGetTrNeighborhoods,
-  StoreGetTrProvinces,
-} from "./store/tr-address/validators"
+import { GetTrDistricts, GetTrNeighborhoods, GetTrProvinces } from "./tr-address/validators"
 import { STORE_ATTRIBUTE_FIELDS, restrictStoreAttributeFields } from "./validation/attribute-fields"
 import { slugHandles } from "./validation/catalog-handles"
 import { rejectStoreSeoFields } from "./validation/seo-fields"
@@ -164,6 +161,8 @@ export default defineMiddlewares({
     ...SEO_ROUTES,
     // F3.11: brands
     ...BRAND_ROUTES,
+    // F3.7: warehouses
+    ...STOCK_ROUTES,
     // docs/17: the home page's order numbers are for people (shop revenue)
     {
       matcher: "/admin/home/summary",
@@ -208,17 +207,17 @@ export default defineMiddlewares({
     {
       matcher: "/store/tr-address/provinces",
       methods: ["GET"],
-      middlewares: [validateAndTransformQuery(StoreGetTrProvinces, {})],
+      middlewares: [validateAndTransformQuery(GetTrProvinces, {})],
     },
     {
       matcher: "/store/tr-address/districts",
       methods: ["GET"],
-      middlewares: [validateAndTransformQuery(StoreGetTrDistricts, {})],
+      middlewares: [validateAndTransformQuery(GetTrDistricts, {})],
     },
     {
       matcher: "/store/tr-address/neighborhoods",
       methods: ["GET"],
-      middlewares: [validateAndTransformQuery(StoreGetTrNeighborhoods, {})],
+      middlewares: [validateAndTransformQuery(GetTrNeighborhoods, {})],
     },
     // F1.4: Turkish address checks on core routes; they run after Medusa's
     // own authentication and body validation for these routes.

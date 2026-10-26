@@ -5,6 +5,8 @@
 export const TR_COUNTRY_CODE = "tr"
 export const TRY_CURRENCY_CODE = "try"
 export const TR_REGION_NAME = "Türkiye"
+/** The warehouse every tenant starts with (F3.7); renamed and addressed in the panel. */
+export const DEFAULT_STOCK_LOCATION_NAME = "Ana Depo"
 
 /** Providers registered by Medusa's default config. */
 export const SYSTEM_PAYMENT_PROVIDER_ID = "pp_system_default"

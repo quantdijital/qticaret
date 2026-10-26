@@ -20,11 +20,15 @@ export interface DemoSeedResult {
  * bootstrap first, then adds only what is missing, so it can be rerun.
  */
 export async function seedDemo(container: MedusaContainer): Promise<DemoSeedResult> {
-  const { regionId } = await bootstrapTenant(container)
+  const { regionId, locationId } = await bootstrapTenant(container)
   const salesChannelId = await defaultSalesChannelId(container)
   const publishableKeyId = await ensurePublishableKey(container, salesChannelId)
 
-  const fulfillment = await ensureDemoFulfillment(container, { regionId, salesChannelId })
+  const fulfillment = await ensureDemoFulfillment(container, {
+    regionId,
+    salesChannelId,
+    locationId,
+  })
   await ensureDemoCatalog(container, { salesChannelId, ...fulfillment })
 
   return { regionId, salesChannelId, publishableKeyId }

@@ -1,7 +1,7 @@
 import { defineConfig, loadEnv } from "@medusajs/framework/utils"
 import { isLocalEnv, parseEnv, s3Settings } from "./src/lib/env"
 import { DEFAULT_LOG_LEVEL, MedusaPinoLogger, baseLogger, logger } from "./src/lib/logging"
-import { tenantNamespace } from "./src/lib/redis"
+import { lockingModules, tenantNamespace } from "./src/lib/redis"
 
 loadEnv(process.env["NODE_ENV"] ?? "development", process.cwd())
 
@@ -68,6 +68,8 @@ module.exports = defineConfig({
       resolve: "./src/modules/billing-profile",
       options: { encryptionKey: env.PII_ENCRYPTION_KEY, hashKey: env.PII_HASH_KEY },
     },
+    // Locks shared by every process of the tenant (adr/0020)
+    ...lockingModules(env.REDIS_URL, tenantNamespace(env.DATABASE_URL)),
     // Without it Medusa keeps files on local disk (dev and test only)
     ...(s3
       ? [

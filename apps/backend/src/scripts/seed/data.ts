@@ -6,9 +6,14 @@
 
 export const DEMO_PUBLISHABLE_KEY_TITLE = "Demo storefront"
 
-export const DEMO_STOCK_LOCATION = {
-  name: "Ana Depo",
-  address: { address_1: "Merkez Mahallesi", city: "İstanbul", country_code: "tr" },
+/** Given to the bootstrap's warehouse when it has no address yet. */
+export const DEMO_LOCATION_ADDRESS = {
+  address_1: "Caferağa Mahallesi, Moda Caddesi No: 1",
+  // F1.4: il in province, ilçe in city
+  province: "İstanbul",
+  city: "Kadıköy",
+  postal_code: "34710",
+  country_code: "tr",
 } as const
 
 export const DEMO_FULFILLMENT_SET_NAME = "Ana Depo gönderileri"
