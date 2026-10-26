@@ -1,6 +1,6 @@
 # ADR-0025: Hediye kartı ve mağaza kredisi
 
-- **Durum:** Önerildi (F4 planlaması; vergi yönü mali müşavir teyidine bağlı, docs/12)
+- **Durum:** Kabul edildi (2026-10-26, kullanıcı önerilen seçenekle onayladı; vergi yönü mali müşavir teyidine bağlı, docs/12)
 - **Tarih:** 2026-10-26
 
 ## Bağlam

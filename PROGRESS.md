@@ -802,7 +802,7 @@
 **Claude'un sıradaki işi:** F4 U1 `price-history` (plan aşağıda, "F4 görev planı"). F4 kodu yeni dalda: `f4-pricing-promotions`, F1–F3 birleştirilmediği için `f3-catalog-seo-stock` üzerinden.
 
 1. **Kullanıcı:**
-   - **F4 kararları (ADR-0023, 0024, 0025, "Önerildi"):** 30 gün kuralının tanımı (hukukçu teyidi docs/12'de), sepette tek kod kuralı, kodların büyük harfe çevrilmesi, hediye kartı için resmi Medusa eklentisi. Kullanıcı yokken önerilen seçenekle ilerleniyor.
+   - **F4 kararları:** ADR-0023/0024/0025 kabul edildi (2026-10-26). Dışarıda bekleyen: 30 gün kuralının hukukçu teyidi, hediye kartı vergisinin mali müşavir teyidi (docs/12).
    - **Push ve PR kararı:** Kullanıcı 2026-10-26'da push'u Claude'un önerisine bıraktı; F1, F2 ve F3 dalları push edildi. PR açılması ve birleştirme sırası (F1 → F2 → F3) kullanıcının kararı.
    - **Admin'de gözle kontrol:** Ayarlar > Özellikler, SEO, Ürün özellikleri, İşler; ürün sayfasındaki özellik kutusu.
      - Kullanıcı 2026-10-25'te iki hata buldu, ikisi düzeltildi.
@@ -822,7 +822,7 @@
 4. **Yerel dev DB:** F2'nin tüm migration'ları uygulandı. Dev dosyaları artık SeaweedFS'e yazılıyor.
 
 ### F4 görev planı (2026-10-26, Medusa 2.21.2 kaynak kodundan doğrulandı)
-Kararlar: ADR-0023 (fiyat geçmişi, 30 gün kuralı), ADR-0024 (kupon ve kampanya kuralları), ADR-0025 (hediye kartı: resmi `@medusajs/loyalty-plugin`). Üçü "Önerildi"; kullanıcı yokken önerilen seçenekle ilerlenir, kullanıcı gözden geçirir.
+Kararlar: ADR-0023 (fiyat geçmişi, 30 gün kuralı), ADR-0024 (kupon ve kampanya kuralları), ADR-0025 (hediye kartı: resmi `@medusajs/loyalty-plugin`). Kullanıcı 2026-10-26'da önerilen seçeneklerle kabul etti ("önerinle devam et, sormana gerek yok").
 
 | # | F4 | Görev | Bağımlılık | KK |
 |---|---|---|---|---|

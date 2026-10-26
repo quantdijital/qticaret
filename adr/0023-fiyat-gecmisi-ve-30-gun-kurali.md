@@ -1,6 +1,6 @@
 # ADR-0023: Fiyat geçmişi ve indirimli fiyat gösterimi (son 30 gün kuralı)
 
-- **Durum:** Önerildi (F4 planlaması; kural hukukçu teyidine bağlı, docs/12)
+- **Durum:** Kabul edildi (2026-10-26, kullanıcı önerilen seçenekle onayladı; kural hukukçu teyidine bağlı, docs/12)
 - **Tarih:** 2026-10-26
 
 ## Bağlam

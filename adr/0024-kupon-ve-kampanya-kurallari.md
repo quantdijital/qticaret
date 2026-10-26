@@ -1,6 +1,6 @@
 # ADR-0024: Kupon ve kampanya kuralları
 
-- **Durum:** Önerildi (F4 planlaması)
+- **Durum:** Kabul edildi (2026-10-26, kullanıcı önerilen seçenekle onayladı)
 - **Tarih:** 2026-10-26
 
 ## Bağlam
