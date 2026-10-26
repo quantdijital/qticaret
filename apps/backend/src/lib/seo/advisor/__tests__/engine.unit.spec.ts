@@ -169,4 +169,25 @@ describe("advisor text checks", () => {
     })
     expect(findIssues(good()).some(({ ruleId }) => ruleId === "P-IMG-02")).toBe(false)
   })
+
+  it("assesses a long page in well under 50 ms at the 95th percentile (F3 KK)", () => {
+    // A 5,000-word description with headings, images and a focus keyword
+    const words = Array.from({ length: 5000 }, (_, index) =>
+      index % 25 === 0 ? "keten" : `kelime${String(index % 300)}`
+    )
+    const html = Array.from(
+      { length: 50 },
+      (_, part) =>
+        `<h2>Bölüm ${String(part)}</h2><p>${words.slice(part * 100, part * 100 + 100).join(" ")}</p><img src="https://cdn.example.com/${String(part)}.jpg" alt="">`
+    ).join("")
+    const facts = good({ body: words.join(" "), bodyHtml: html, focusKeyword: "keten gömlek" })
+    const times: number[] = []
+    for (let run = 0; run < 200; run++) {
+      const started = performance.now()
+      assess(facts)
+      times.push(performance.now() - started)
+    }
+    const p95 = [...times].sort((a, b) => a - b)[Math.floor(times.length * 0.95)] ?? Infinity
+    expect(p95).toBeLessThan(50)
+  })
 })
