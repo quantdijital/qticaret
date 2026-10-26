@@ -22,6 +22,13 @@ export interface InventorySettings {
   low_stock_threshold: number
 }
 
+/** Promotion rules (F4.4, F4.5): codes per cart, free shipping from a basket total. */
+export interface PromotionSettings {
+  combine_codes: boolean
+  /** Lira, KDV in, after discounts; null: no free shipping by basket total. */
+  free_shipping_threshold: number | null
+}
+
 type UrlStyle = "prefixed" | "flat"
 
 export interface SeoSettings {

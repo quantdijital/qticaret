@@ -16,6 +16,8 @@ const FIELDS = [
   "application_method.target_type",
   "application_method.value",
   "application_method.currency_code",
+  "application_method.apply_to_quantity",
+  "application_method.buy_rules_min_quantity",
   "campaign.id",
   "campaign.starts_at",
   "campaign.ends_at",

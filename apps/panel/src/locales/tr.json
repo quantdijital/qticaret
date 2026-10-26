@@ -1260,7 +1260,8 @@
       "fixed": "{{amount}} sepette",
       "free_shipping": "Ücretsiz kargo",
       "percentageItems": "%{{value}} indirim",
-      "fixedItems": "{{amount}} indirim"
+      "fixedItems": "{{amount}} indirim",
+      "buyget": "{{buy}} al {{pay}} öde"
     },
     "kinds": {
       "percentage": {
@@ -1274,6 +1275,10 @@
       "free_shipping": {
         "title": "Ücretsiz kargo",
         "description": "Kargo ücreti alınmaz."
+      },
+      "buyget": {
+        "title": "X al Y öde",
+        "description": "Seçtiğiniz ürünlerden belli sayıda alana en ucuzları bedava."
       }
     },
     "form": {
@@ -1333,7 +1338,13 @@
       },
       "previewMinimum": "En az {{amount}} tutarındaki sepetlerde",
       "previewPerCustomer_one": "Her müşteri {{count}} kez kullanabilir",
-      "previewPerCustomer_other": "Her müşteri {{count}} kez kullanabilir"
+      "previewPerCustomer_other": "Her müşteri {{count}} kez kullanabilir",
+      "buyget": "Kampanya",
+      "buygetHint": "Örnek: 3 al 2 öde. Sepetteki her 3 üründe en ucuz 1 tanesi bedava olur; kampanya sepet büyüdükçe tekrarlanır.",
+      "buyCount": "Alınan adet",
+      "payCount": "Ödenen adet",
+      "buyWord": "al",
+      "payWord": "öde"
     },
     "errors": {
       "code": "Kod 3–40 karakter olmalı; harf, rakam, tire ve alt çizgi kullanılabilir.",
@@ -1343,7 +1354,9 @@
       "dates": "Bitiş, başlangıçtan önce olamaz.",
       "scope": "En az bir seçim yapın ya da tüm sepeti seçin.",
       "minimum": "Sıfırdan büyük bir tutar girin ya da boş bırakın.",
-      "perCustomer": "Müşteri başına kullanım bir tam sayı olmalı."
+      "perCustomer": "Müşteri başına kullanım bir tam sayı olmalı.",
+      "buyget": "Ödenen adet alınandan az olmalı; ikisi de 1 ile 99 arasında tam sayı (ör. 3 al 2 öde).",
+      "buygetScope": "X al Y öde için ürün, kategori ya da koleksiyon seçin."
     },
     "created": "Kampanya oluşturuldu.",
     "saved": "Kampanya kaydedildi.",
@@ -1375,6 +1388,16 @@
       "batchCount_other": "{{count}} kod partisi",
       "done_one": "{{formatted}} kod üretildi.",
       "done_other": "{{formatted}} kod üretildi."
+    },
+    "settings": {
+      "title": "Kampanya ayarları",
+      "hint": "Bütün kampanyalar için geçerli kurallar.",
+      "freeShipping": "Belli bir tutardan sonra kargo bedava",
+      "freeShippingHint": "Sepetteki ürünlerin toplamı (KDV dahil, indirimler düşüldükten sonra) bu tutara ulaşınca sabit fiyatlı kargo seçenekleri ücretsiz olur.",
+      "threshold": "En az sepet tutarı",
+      "combineCodes": "Bir sepette birden fazla kod",
+      "combineCodesHint": "Kapalıyken müşteri tek kod kullanabilir. Otomatik kampanyalar her durumda uygulanır.",
+      "saved": "Kampanya ayarları kaydedildi."
     }
   },
   "reports": {

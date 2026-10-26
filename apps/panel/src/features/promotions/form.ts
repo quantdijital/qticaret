@@ -1,7 +1,7 @@
 import { z } from "zod"
 import { dayEnd, dayOf, dayStart } from "@/lib/days"
 import { parseMoneyInput } from "@/lib/money-input"
-import { applicationMethod, offerKind } from "./offer"
+import { applicationMethod, buyGetMethod, buyGetOf, offerKind } from "./offer"
 import type { OfferKind } from "./offer"
 import { minimumOf, minimumRulesFor, perCustomerBudget, perCustomerOf, scopeOf } from "./scope"
 import type { BudgetLike, RuleLike } from "./scope"
@@ -10,8 +10,11 @@ import type { Promotion } from "./api/promotions"
 /** The promotion form; messages are i18n keys. Dates are whole Istanbul days. */
 export const promotionSchema = z
   .object({
-    kind: z.enum(["percentage", "fixed", "free_shipping"]),
+    kind: z.enum(["percentage", "fixed", "free_shipping", "buyget"]),
     value: z.string().trim(),
+    // "X al Y öde": units taken, units paid for
+    buyCount: z.string().trim(),
+    payCount: z.string().trim(),
     code: z
       .string()
       .trim()
@@ -42,6 +45,20 @@ export const promotionSchema = z
     if (values.kind === "fixed" && !(amount > 0)) {
       ctx.addIssue({ code: "custom", path: ["value"], message: "promotions.errors.amount" })
     }
+    if (values.kind === "buyget") {
+      const counts = buyGetCounts(values)
+      if (!counts) {
+        ctx.addIssue({ code: "custom", path: ["buyCount"], message: "promotions.errors.buyget" })
+      }
+      if (values.scope === "all") {
+        // Shown where the scope is chosen
+        ctx.addIssue({
+          code: "custom",
+          path: ["scopeIds"],
+          message: "promotions.errors.buygetScope",
+        })
+      }
+    }
     if (values.starts && values.ends && values.ends < values.starts) {
       ctx.addIssue({ code: "custom", path: ["ends"], message: "promotions.errors.dates" })
     }
@@ -55,6 +72,18 @@ export const promotionSchema = z
 
 export type PromotionValues = z.infer<typeof promotionSchema>
 
+// The most units "X al Y öde" may name: a shop's offer, not a wholesale tier
+const MAX_BUY = 99
+
+/** "3" and "2" → { buy: 3, pay: 2 }; null unless 1 ≤ pay < buy ≤ 99, whole numbers. */
+export function buyGetCounts(values: Pick<PromotionValues, "buyCount" | "payCount">) {
+  const whole = (text: string) =>
+    /^\d{1,2}$/u.test(text.trim()) ? Number(text.trim()) : Number.NaN
+  const buy = whole(values.buyCount)
+  const pay = whole(values.payCount)
+  return buy <= MAX_BUY && pay >= 1 && pay < buy ? { buy, pay } : null
+}
+
 export function valuesOf(promotion: Promotion | null): PromotionValues {
   const method = promotion?.application_method
   const kind: OfferKind = promotion ? offerKind(method) : "percentage"
@@ -62,13 +91,19 @@ export function valuesOf(promotion: Promotion | null): PromotionValues {
     (method as { target_rules?: RuleLike[] | null } | undefined)?.target_rules
   )
   const campaign = promotion?.campaign as { budget?: BudgetLike | null } | null | undefined
+  const counts = buyGetOf(method)
   return {
     scope,
     scopeIds: ids,
     minimum: minimumOf((promotion as { rules?: RuleLike[] | null } | null)?.rules),
     perCustomer: perCustomerOf(campaign?.budget),
     kind,
-    value: kind === "free_shipping" || !method?.value ? "" : String(method.value).replace(".", ","),
+    value:
+      kind === "free_shipping" || kind === "buyget" || !method?.value
+        ? ""
+        : String(method.value).replace(".", ","),
+    buyCount: counts ? String(counts.buy) : "3",
+    payCount: counts ? String(counts.pay) : "2",
     code: promotion?.code ?? "",
     automatic: promotion?.is_automatic ?? false,
     limit: promotion?.limit ? String(promotion.limit) : "",
@@ -91,20 +126,24 @@ export function createBody(values: PromotionValues, currency: string, suffix?: s
   const code = values.code.trim().toUpperCase()
   const dated = Boolean(values.starts || values.ends)
   const perCustomer = perCustomerLimit(values)
+  const scope = { scope: values.scope, ids: values.scopeIds }
+  const counts = values.kind === "buyget" ? buyGetCounts(values) : null
   return {
     code,
-    type: "standard" as const,
+    type: counts ? ("buyget" as const) : ("standard" as const),
     is_automatic: values.automatic,
     // Shop prices include KDV, so an amount off does too
     is_tax_inclusive: true,
     status: values.activate ? ("active" as const) : ("draft" as const),
     limit: values.automatic || !values.limit ? null : Number(values.limit),
-    application_method: applicationMethod(
-      values.kind,
-      parseMoneyInput(values.value) ?? 0,
-      currency,
-      { scope: values.scope, ids: values.scopeIds }
-    ),
+    application_method: counts
+      ? buyGetMethod(counts.buy, counts.pay, scope)
+      : applicationMethod(
+          values.kind === "buyget" ? "percentage" : values.kind,
+          parseMoneyInput(values.value) ?? 0,
+          currency,
+          scope
+        ),
     rules: minimumRulesFor(parseMoneyInput(values.minimum)),
     ...(dated || perCustomer
       ? {

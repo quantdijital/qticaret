@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { createBody, promotionSchema, valuesOf } from "./form"
+import { buyGetCounts, createBody, promotionSchema, valuesOf } from "./form"
 
 const base = { ...valuesOf(null), code: "yaz10", value: "10" }
 
@@ -92,5 +92,38 @@ describe("promotion form", () => {
       minimum: "200,00",
       perCustomer: "3",
     })
+  })
+
+  it("takes buy X, pay Y with fewer paid than taken, on chosen products", () => {
+    const buyget = {
+      ...base,
+      kind: "buyget" as const,
+      value: "",
+      scope: "products" as const,
+      scopeIds: ["prod_1"],
+    }
+    const errors = (values: typeof buyget) => {
+      const parsed = promotionSchema.safeParse(values)
+      return parsed.success ? [] : parsed.error.issues.map((issue) => issue.message)
+    }
+    expect(errors(buyget)).toEqual([])
+    expect(errors({ ...buyget, buyCount: "2", payCount: "2" })).toEqual([
+      "promotions.errors.buyget",
+    ])
+    expect(errors({ ...buyget, buyCount: "100", payCount: "2" })).toEqual([
+      "promotions.errors.buyget",
+    ])
+    expect(errors({ ...buyget, scope: "all" as never, scopeIds: [] })).toEqual([
+      "promotions.errors.buygetScope",
+    ])
+
+    const body = createBody(buyget, "try")
+    expect(body.type).toBe("buyget")
+    expect(body.application_method).toMatchObject({
+      apply_to_quantity: 1,
+      buy_rules_min_quantity: 2,
+      target_type: "items",
+    })
+    expect(buyGetCounts({ buyCount: "3", payCount: "2" })).toEqual({ buy: 3, pay: 2 })
   })
 })

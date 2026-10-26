@@ -1252,7 +1252,8 @@
       "fixed": "{{amount}} off the basket",
       "free_shipping": "Free shipping",
       "percentageItems": "{{value}}% off",
-      "fixedItems": "{{amount}} off"
+      "fixedItems": "{{amount}} off",
+      "buyget": "Buy {{buy}}, pay {{pay}}"
     },
     "kinds": {
       "percentage": {
@@ -1266,6 +1267,10 @@
       "free_shipping": {
         "title": "Free shipping",
         "description": "No shipping charge."
+      },
+      "buyget": {
+        "title": "Buy X, pay Y",
+        "description": "Customers taking a number of the chosen products get the cheapest free."
       }
     },
     "form": {
@@ -1325,7 +1330,13 @@
       },
       "previewMinimum": "On baskets of {{amount}} or more",
       "previewPerCustomer_one": "Each customer may use it {{count}} time",
-      "previewPerCustomer_other": "Each customer may use it {{count}} times"
+      "previewPerCustomer_other": "Each customer may use it {{count}} times",
+      "buyget": "Offer",
+      "buygetHint": "For example buy 3, pay 2: of every 3 products in the basket the cheapest is free; it repeats as the basket grows.",
+      "buyCount": "Units taken",
+      "payCount": "Units paid",
+      "buyWord": "buy",
+      "payWord": "pay"
     },
     "errors": {
       "code": "The code needs 3–40 letters, digits, hyphens or underscores.",
@@ -1335,7 +1346,9 @@
       "dates": "The end cannot be before the start.",
       "scope": "Choose at least one, or the whole basket.",
       "minimum": "Enter an amount above zero, or leave it empty.",
-      "perCustomer": "Uses per customer must be a whole number."
+      "perCustomer": "Uses per customer must be a whole number.",
+      "buyget": "Units paid must be fewer than units taken, both whole numbers from 1 to 99 (for example buy 3, pay 2).",
+      "buygetScope": "For buy X, pay Y choose products, categories or collections."
     },
     "created": "Promotion created.",
     "saved": "Promotion saved.",
@@ -1367,6 +1380,16 @@
       "batchCount_other": "{{count}} code batches",
       "done_one": "{{formatted}} code made.",
       "done_other": "{{formatted}} codes made."
+    },
+    "settings": {
+      "title": "Promotion settings",
+      "hint": "Rules for every promotion.",
+      "freeShipping": "Free shipping from a basket total",
+      "freeShippingHint": "Once the basket's products (VAT in, after discounts) reach this total, flat-rate shipping options cost nothing.",
+      "threshold": "Basket total",
+      "combineCodes": "More than one code in a cart",
+      "combineCodesHint": "Off, a customer may use one code. Automatic promotions apply either way.",
+      "saved": "Promotion settings saved."
     }
   },
   "reports": {

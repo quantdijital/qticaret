@@ -1,18 +1,37 @@
-import { WorkflowResponse, createWorkflow } from "@medusajs/framework/workflows-sdk"
+import {
+  WorkflowResponse,
+  createWorkflow,
+  transform,
+  when,
+} from "@medusajs/framework/workflows-sdk"
+import { syncFreeShippingStep } from "../promotions/free-shipping"
 import { forgetResolutionsStep } from "../seo/steps/forget-resolutions"
 import { saveSettingsSectionStep } from "./steps/save-settings-section"
 import type { SaveSettingsSectionInput } from "./steps/save-settings-section"
 
+const thresholdOf = (values: Record<string, unknown> | null | undefined): number | null => {
+  const value = values?.["free_shipping_threshold"]
+  return typeof value === "number" && value > 0 ? value : null
+}
+
 /**
  * Saves a settings section (F2.3, adr/0012); a later failing step puts the
  * old values back. Pages' SEO answers use the shop's name, templates and
- * host, so cached ones are forgotten.
+ * host, so cached ones are forgotten. The promotions section's free
+ * shipping threshold reaches the shipping options' prices (F4.5).
  */
 export const updatePlatformSettingsWorkflow = createWorkflow(
   "platform-settings-update-section",
   (input: SaveSettingsSectionInput) => {
     const saved = saveSettingsSectionStep(input)
     forgetResolutionsStep()
+    when({ input }, ({ input }) => input.section === "promotions").then(() => {
+      const thresholds = transform({ saved }, ({ saved }) => ({
+        threshold: thresholdOf(saved.after as Record<string, unknown>),
+        previous: thresholdOf(saved.before as Record<string, unknown> | null),
+      }))
+      syncFreeShippingStep(thresholds)
+    })
     return new WorkflowResponse(saved)
   }
 )

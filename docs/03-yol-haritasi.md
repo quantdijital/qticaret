@@ -197,7 +197,9 @@ F17 öncesinde tenant'lar F16 script'leriyle elle açılır.
 - [x] Son 30 gün en düşük fiyat, fiyat geçmişinden doğru hesaplanıyor (testli); JSON-LD'deki üstü çizili fiyat bununla tutarlı. Kanıt:
   `src/lib/pricing/__tests__/` (30 gün hesabı ve gösterim), `integration-tests/http/price-history.spec.ts` (geçmişin yakalanması),
   `integration-tests/http/price-display.spec.ts` (Store ucu, 30 günde görülmüş fiyata dönüşün indirim sayılmaması, JSON-LD'nin aynı fiyat ve üstü çizili fiyatı)
-- [ ] Kargo bedava eşiği sepet tutarına göre doğru uygulanıyor
+- [x] Kargo bedava eşiği sepet tutarına göre doğru uygulanıyor. Kanıt: `integration-tests/http/free-shipping.spec.ts`.
+  Eşiğin altı ücretli, tam eşik ve üstü ücretsiz. Kupon sepeti eşiğin altına indirirse kargo ücretli (`item_total` indirim sonrası).
+  Eşik kaldırılınca fiyat geri geliyor; sonradan açılan kargo seçeneği eşiği alıyor.
 - [x] İndirimli siparişte kısmi iade tutarı, kalemin indirim payı düşülerek hesaplanıyor (testli). Kanıt:
   `integration-tests/http/order-money.spec.ts`. Gerçek checkout, %10 kupon, 3 × 33,33 ₺. Birimler Medusa'nın iade
   ekranlarıyla tek tek geri alınıp para iadesi yapılıyor: 30,00 + 29,99 + 30,00 = satıra ödenen 89,99 ₺, kuruş farkı yok.

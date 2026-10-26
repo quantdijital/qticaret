@@ -1,4 +1,4 @@
-import { Percent, Tag, Truck } from "lucide-react"
+import { Gift, Percent, Tag, Truck } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { Controller, useFormContext, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -13,6 +13,7 @@ const KINDS: { key: PromotionValues["kind"]; icon: LucideIcon }[] = [
   { key: "percentage", icon: Percent },
   { key: "fixed", icon: Tag },
   { key: "free_shipping", icon: Truck },
+  { key: "buyget", icon: Gift },
 ]
 
 const useError = () => {
@@ -24,7 +25,38 @@ const useError = () => {
   }
 }
 
-/** What the customer gets: a percentage, an amount off the basket, or free shipping. */
+/** "X al Y öde": how many are taken and how many paid for, as the shop says it. */
+function BuyGetFields() {
+  const { t } = useTranslation()
+  const { register } = useFormContext<PromotionValues>()
+  const error = useError()
+  return (
+    <Field
+      label={t("promotions.form.buyget")}
+      hint={t("promotions.form.buygetHint")}
+      error={error("buyCount")}
+    >
+      <div className="flex flex-wrap items-center gap-2 text-sm">
+        <Input
+          aria-label={t("promotions.form.buyCount")}
+          inputMode="numeric"
+          className="w-16 text-right tabular-nums"
+          {...register("buyCount")}
+        />
+        <span>{t("promotions.form.buyWord")}</span>
+        <Input
+          aria-label={t("promotions.form.payCount")}
+          inputMode="numeric"
+          className="w-16 text-right tabular-nums"
+          {...register("payCount")}
+        />
+        <span>{t("promotions.form.payWord")}</span>
+      </div>
+    </Field>
+  )
+}
+
+/** What the customer gets: a percentage or an amount off, free shipping, or "X al Y öde". */
 export function OfferCard({ kindLocked }: { kindLocked: boolean }) {
   const { t } = useTranslation()
   const { control, register } = useFormContext<PromotionValues>()
@@ -41,7 +73,7 @@ export function OfferCard({ kindLocked }: { kindLocked: boolean }) {
               value={field.value}
               onValueChange={field.onChange}
               disabled={kindLocked}
-              className="grid gap-3 sm:grid-cols-3"
+              className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4"
             >
               {KINDS.map(({ key, icon: Icon }) => (
                 <label
@@ -67,7 +99,8 @@ export function OfferCard({ kindLocked }: { kindLocked: boolean }) {
             </RadioGroup>
           )}
         />
-        {kind === "free_shipping" ? null : (
+        {kind === "buyget" ? <BuyGetFields /> : null}
+        {kind === "free_shipping" || kind === "buyget" ? null : (
           <Field
             label={t(
               kind === "percentage" ? "promotions.form.percentage" : "promotions.form.amount"

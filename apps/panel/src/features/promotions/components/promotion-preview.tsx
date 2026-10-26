@@ -7,8 +7,9 @@ import {
   OfferText,
   ScheduleBadge,
 } from "@/features/promotions/components/offer-text"
+import { buyGetCounts } from "@/features/promotions/form"
 import type { PromotionValues } from "@/features/promotions/form"
-import { applicationMethod } from "@/features/promotions/offer"
+import { applicationMethod, buyGetMethod } from "@/features/promotions/offer"
 import { formatCount } from "@/lib/format"
 import { parseMoneyInput } from "@/lib/money-input"
 
@@ -23,16 +24,21 @@ export function PromotionPreview({ existing }: { existing: Promotion | null }) {
   >({
     name: ["kind", "value", "code", "automatic", "scope", "scopeIds", "minimum", "perCustomer"],
   })
-  const method = applicationMethod(kind, parseMoneyInput(value) ?? 0, CURRENCY, {
-    scope,
-    ids: scopeIds,
+  const [buyCount, payCount] = useWatch<PromotionValues, ["buyCount", "payCount"]>({
+    name: ["buyCount", "payCount"],
   })
+  const counts = buyGetCounts({ buyCount, payCount })
+  const target = { scope, ids: scopeIds }
+  const method =
+    kind === "buyget"
+      ? counts && buyGetMethod(counts.buy, counts.pay, target)
+      : applicationMethod(kind, parseMoneyInput(value) ?? 0, CURRENCY, target)
   return (
     <SectionCard title={t("promotions.form.preview")}>
       <div className="flex flex-col gap-4">
         <div className="flex flex-col items-start gap-3 rounded-lg border border-dashed bg-muted/40 p-5">
           <span className="text-2xl font-semibold tracking-tight">
-            <OfferText method={method} />
+            {method ? <OfferText method={method} /> : t("promotions.kinds.buyget.title")}
           </span>
           <span className="rounded-md border bg-background px-2.5 py-1 font-mono text-sm tracking-wider uppercase">
             {code.trim() || t("promotions.form.codePlaceholder")}

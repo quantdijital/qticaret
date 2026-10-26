@@ -63,3 +63,16 @@ Medusa 2.21.2'de doğrulananlar (F4 planlaması, kaynak kodu):
 - **Partiler:** `GET /admin/promotions/:id/code-batches` kod ve kullanım sayılarını verir. `GET …/code-batches/:campaign_id/codes`, kodları "kullanıldı" bilgisiyle CSV olarak her zaman veritabanından verir; iş dosyasının süresi dolsa da indirilebilir.
 - **Kullanım:** Kullanılmış kodu Medusa sepete uygulamaz, hata da vermez; ikinci sipariş indirimsiz tamamlanır (testli). Eşzamanlı kullanım sınırı U4'teki gibi `registerUsage` kilidiyle korunur.
 - **Kanıt:** `lib/promotions/__tests__/single-use.unit.spec.ts`, `integration-tests/http/promotion-code-batches.spec.ts`.
+
+## Uygulama notu (F4 U6, 2026-10-26)
+
+- **Kargo bedava eşiği:** `promotions.free_shipping_threshold` (lira, KDV dahil, indirim sonrası; null kapalı).
+  - Ayar kaydedilince `syncFreeShippingStep` düz fiyatlı kargo seçeneklerine, düz fiyatlarının olduğu her para biriminde, `item_total gte eşik` kurallı 0 TL fiyat yazar. Eşik değişince bu fiyatı taşır, eşik kalkınca siler (`src/workflows/promotions/free-shipping.ts`). Adımın geri alması önceki eşiğe döner.
+  - Platformun fiyatı şöyle tanınır: tutarı 0 ve tek kuralı `item_total gte`. Mağazanın Medusa Admin'den girdiği başka kurallı fiyatlara dokunulmaz. Medusa, kimliğiyle verilen fiyatın yalnızca verilen alanlarını değiştirdiği için korunan fiyatlar kimlikleriyle geri gönderilir.
+  - Yeni ya da değişen kargo seçeneği `shipping_option.created/updated` olaylarıyla aynı eşiği alır. İkinci geçiş değişiklik bulmadığı için döngü olmaz.
+  - Taşıyıcının hesapladığı (`calculated`) seçenekler sağlayıcıya kalır (F7).
+- **"X al Y öde":** Medusa'nın `buyget` türü.
+  - Eşleme: `buy_rules_min_quantity: Y`, `apply_to_quantity: X − Y`, `%100`, `allocation: each`. Alım ve hedef kuralları aynı kapsamdır, kapsam zorunludur. `max_quantity: 1000` toplam bedava birim sınırıdır ve teklifin sepet büyüdükçe tekrarlanmasını sağlar.
+  - Ölçüldü: 2 adette indirim yok; 3, 6 ve 9 adette 1, 2 ve 3 birim bedava; karışık sepette en ucuz ürün bedava. `max_quantity: 1` teklifi tek seferle sınırlıyor.
+- **Sepette indirim:** otomatik + tüm sepet + en az tutar. Var olan formla kuruluyor, "X al Y öde" ile birlikte uygulanabiliyor (testli).
+- **Kanıt:** `integration-tests/http/free-shipping.spec.ts` (KK), `integration-tests/http/promotion-offers.spec.ts` (panelin gövdesiyle), `workflows/promotions/__tests__/free-shipping.unit.spec.ts`; panelde `offer.spec.ts`, `form.spec.ts`.

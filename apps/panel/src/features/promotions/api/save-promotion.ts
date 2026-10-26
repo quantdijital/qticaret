@@ -27,7 +27,10 @@ interface SaveInput {
 
 interface Detail {
   rules?: RuleLike[] | null
-  application_method?: { target_rules?: RuleLike[] | null } | null
+  application_method?: {
+    target_rules?: RuleLike[] | null
+    buy_rules?: RuleLike[] | null
+  } | null
   campaign?: { id?: string | null; budget?: BudgetLike | null } | null
 }
 
@@ -36,7 +39,7 @@ const ids = (rules: readonly (RuleLike | null)[] | null | undefined) =>
 
 const batch = (
   id: string,
-  kind: "rules" | "target-rules",
+  kind: "rules" | "target-rules" | "buy-rules",
   create: RuleInput[],
   remove: string[]
 ) =>
@@ -72,6 +75,15 @@ async function syncRules(existing: Promotion & Detail, body: Body) {
     })
     if (wanted.scope === "all") {
       await batch(existing.id, "target-rules", [], old)
+    }
+    // "X al Y öde" counts what is bought from the same products it gives
+    if ("buy_rules" in method) {
+      await batch(
+        existing.id,
+        "buy-rules",
+        method.buy_rules,
+        ids(existing.application_method?.buy_rules)
+      )
     }
   }
   // Compared as the form shows them: "150" and "150.00" are one minimum
@@ -123,13 +135,24 @@ export function useSavePromotion() {
         return (await sdk.admin.promotion.create(body)).promotion.id
       }
       const detail = existing as Promotion & Detail
+      const method = body.application_method
       await sdk.admin.promotion.update(existing.id, {
         code: body.code,
         is_automatic: body.is_automatic,
         limit: body.limit,
-        ...(body.application_method.target_type === "shipping_methods"
+        ...(method.target_type === "shipping_methods"
           ? {}
-          : { application_method: { value: body.application_method.value } }),
+          : {
+              application_method: {
+                value: method.value,
+                ...("apply_to_quantity" in method
+                  ? {
+                      apply_to_quantity: method.apply_to_quantity,
+                      buy_rules_min_quantity: method.buy_rules_min_quantity,
+                    }
+                  : {}),
+              },
+            }),
       })
       if (body.application_method.target_type !== "shipping_methods") {
         await syncRules(detail, body)

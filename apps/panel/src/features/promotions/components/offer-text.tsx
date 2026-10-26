@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next"
 import { StatusBadge } from "@/components/patterns/status-badge"
 import type { Promotion } from "@/features/promotions/api/promotions"
-import { SCHEDULE_TONE, offerKind, scheduleOf } from "@/features/promotions/offer"
+import { SCHEDULE_TONE, buyGetOf, offerKind, scheduleOf } from "@/features/promotions/offer"
 import type { Scope } from "@/features/promotions/scope"
 import { formatMoney } from "@/lib/format"
 
@@ -10,15 +10,21 @@ interface Method {
   target_type?: string | null
   value?: number | null
   currency_code?: string | null
+  apply_to_quantity?: number | null
+  buy_rules_min_quantity?: number | null
 }
 
-/** "%10 sepette", "₺50 sepette" or "Ücretsiz kargo". */
+/** "%10 sepette", "₺50 sepette", "Ücretsiz kargo" or "3 al 2 öde". */
 export function OfferText({ method }: { method: Method | null | undefined }) {
   const { t } = useTranslation()
   const kind = offerKind(method)
   const value = method?.value ?? 0
   if (kind === "free_shipping") {
     return <span>{t("promotions.offer.free_shipping")}</span>
+  }
+  const counts = buyGetOf(method)
+  if (counts) {
+    return <span className="tabular-nums">{t("promotions.offer.buyget", counts)}</span>
   }
   // Off some items, not the basket: the lines below say which
   const items = method?.target_type === "items"
