@@ -10,4 +10,22 @@ export default [
     languageOptions: { sourceType: "commonjs" },
     rules: { "@typescript-eslint/no-require-imports": "off" },
   },
+  {
+    // Medusa Admin extensions are bundled for the browser by `medusa build`:
+    // the server's lib/seo barrel brings node:crypto with it
+    files: ["src/admin/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              regex: "/lib/seo$",
+              message: "Import the lib/seo module itself (slug, template, pixel-width).",
+            },
+          ],
+        },
+      ],
+    },
+  },
 ]

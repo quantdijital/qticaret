@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { SEO_TEMPLATE_TOKENS, checkTemplate } from "../../../../lib/seo"
+import { SEO_TEMPLATE_TOKENS, checkTemplate } from "../../../../lib/seo/template"
 import type { SeoSettings } from "../../../../modules/platform-settings/sections"
 
 /**

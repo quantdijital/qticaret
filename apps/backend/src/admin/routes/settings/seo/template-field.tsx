@@ -1,7 +1,8 @@
 import { Badge, Input, Label, Text, Textarea } from "@medusajs/ui"
 import { useTranslation } from "react-i18next"
-import { SEO_TEMPLATE_TOKENS, fitsSerp, renderTemplate } from "../../../../lib/seo"
-import type { SerpField } from "../../../../lib/seo"
+import { fitsSerp } from "../../../../lib/seo/pixel-width"
+import type { SerpField } from "../../../../lib/seo/pixel-width"
+import { SEO_TEMPLATE_TOKENS, renderTemplate } from "../../../../lib/seo/template"
 
 type Entity = keyof typeof SEO_TEMPLATE_TOKENS
 

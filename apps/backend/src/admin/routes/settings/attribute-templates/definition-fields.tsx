@@ -5,7 +5,7 @@ import { Button, Checkbox, Input, Label, Select, Text } from "@medusajs/ui"
 import { Controller, useFieldArray, useWatch } from "react-hook-form"
 import type { Control, UseFormGetValues, UseFormSetValue } from "react-hook-form"
 import { useTranslation } from "react-i18next"
-import { toSlug } from "../../../../lib/seo"
+import { toSlug } from "../../../../lib/seo/slug"
 import { ATTRIBUTE_TYPES, VARIES_BY, isSelectType } from "../../../lib/attributes"
 import type { TemplateForm } from "./form"
 
