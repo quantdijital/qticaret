@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { errorText } from "@/lib/errors"
+import { registerMedia } from "@/features/products/api/media"
 import { sdk } from "@/lib/sdk"
 import { cn } from "@/lib/utils"
 
@@ -88,7 +89,16 @@ export function ImageUploader({
     setBusy(true)
     try {
       const { files: stored } = await sdk.admin.upload.create({ files: files.slice(0, room) })
-      onAdd(stored.map((file) => ({ id: file.id, url: file.url })))
+      let urls = stored.map((file) => file.url)
+      try {
+        // Product images get an alt text and versions (F3.3), under the address the
+        // server keeps for them; the upload stands without them
+        const { media } = await registerMedia(stored.map((file) => file.id))
+        urls = media.map((each) => each.url)
+      } catch (failure) {
+        toast.warning(`${t("products.media.registerFailed")} ${errorText(t, failure)}`)
+      }
+      onAdd(stored.map((file, index) => ({ id: file.id, url: urls[index] ?? file.url })))
     } catch (failure) {
       toast.error(errorText(t, failure))
     } finally {

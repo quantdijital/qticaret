@@ -15,6 +15,7 @@ import { OrganizeCard } from "@/features/products/detail/organize-card"
 import { ProductActions } from "@/features/products/detail/product-actions"
 import { ShippingCard } from "@/features/products/detail/shipping-card"
 import { SummaryCard } from "@/features/products/detail/summary-card"
+import { VariantImagesCard } from "@/features/products/detail/variant-images-card"
 import { VariantsCard } from "@/features/products/detail/variants-card"
 import { AdvisorCard } from "@/features/seo/advisor/advisor-card"
 import { errorText } from "@/lib/errors"
@@ -27,6 +28,7 @@ const ADVISOR_TARGETS = {
   edit_body: "product-general",
   edit_handle: "product-general",
   add_images: "product-media",
+  add_alt_text: "product-media",
   edit_prices: "product-variants",
   edit_codes: "product-variants",
   edit_attributes: "product-attributes",
@@ -97,6 +99,11 @@ export function ProductDetailPage() {
           <div id="product-variants" className="scroll-mt-20">
             <VariantsCard product={product} />
           </div>
+          {(product.variants?.length ?? 0) > 1 && (product.images?.length ?? 0) > 0 ? (
+            <div id="product-variant-images" className="scroll-mt-20">
+              <VariantImagesCard product={product} />
+            </div>
+          ) : null}
           <div id="product-attributes" className="scroll-mt-20">
             <AttributesCard productId={product.id} />
           </div>

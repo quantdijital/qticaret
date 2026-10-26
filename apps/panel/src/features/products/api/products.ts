@@ -1,5 +1,7 @@
 import { keepPreviousData, queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
 import { sdk } from "@/lib/sdk"
+import { MEDIA_FIELDS, isMediaSettling } from "@/features/products/api/media"
+import type { ProductMedia } from "@/features/products/api/media"
 
 export type ProductStatus = "draft" | "proposed" | "published" | "rejected"
 export const PAGE_SIZE = 20
@@ -118,15 +120,28 @@ const DETAIL_FIELDS = [
   "variants.inventory_items.inventory.location_levels.stocked_quantity",
   "variants.inventory_items.inventory.location_levels.reserved_quantity",
   "variants.inventory_items.inventory.location_levels.available_quantity",
+  "images.variants.id",
+  ...MEDIA_FIELDS,
 ].join(",")
 
 export const productQuery = (id: string) =>
   queryOptions({
     queryKey: ["products", "detail", id],
-    queryFn: async () => (await sdk.admin.product.retrieve(id, { fields: DETAIL_FIELDS })).product,
+    queryFn: async () => {
+      const product = (await sdk.admin.product.retrieve(id, { fields: DETAIL_FIELDS }))
+        .product as ProductDetail
+      // A link whose record is gone reads as null
+      return { ...product, media_assets: (product.media_assets ?? []).filter(Boolean) }
+    },
+    // New images get their record and versions on the server shortly after a save
+    refetchInterval: (query) =>
+      query.state.data && isMediaSettling(query.state.data) ? 2000 : false,
   })
 
-export type ProductDetail = Awaited<ReturnType<typeof sdk.admin.product.retrieve>>["product"]
+export type ProductDetail = Awaited<ReturnType<typeof sdk.admin.product.retrieve>>["product"] & {
+  /** The media module's records of its images (F3.3). */
+  media_assets?: ProductMedia[]
+}
 
 /** Saves product fields; the page reloads what changed. */
 export function useUpdateProduct(id: string) {

@@ -5,13 +5,17 @@ import { useUpdateProduct } from "@/features/products/api/products"
 import type { ProductDetail } from "@/features/products/api/products"
 import { ImageUploader, MAX_IMAGES } from "@/features/products/components/image-uploader"
 import { errorText } from "@/lib/errors"
+import { AltTexts } from "./alt-texts"
 
 interface Image {
   id?: string
   url: string
 }
 
-/** The pictures, saved as they change; the first is the product's thumbnail. */
+/**
+ * The pictures, saved as they change; the first is the product's thumbnail.
+ * Each gets its alt text below, and its versions are made on the server.
+ */
 export function MediaCard({ product, className }: { product: ProductDetail; className?: string }) {
   const { t } = useTranslation()
   const update = useUpdateProduct(product.id)
@@ -35,25 +39,34 @@ export function MediaCard({ product, className }: { product: ProductDetail; clas
       description={t("products.media.hint", { max: MAX_IMAGES })}
       {...(className ? { className } : {})}
     >
-      <ImageUploader
-        images={images.map((image) => ({
-          key: image.id ?? image.url,
-          url: image.url,
-        }))}
-        disabled={update.isPending}
-        onAdd={(stored) => {
-          save([...images, ...stored.map(({ url }) => ({ url }))])
-        }}
-        onRemove={(index) => {
-          save(images.filter((_, at) => at !== index))
-        }}
-        onMakeMain={(index) => {
-          const chosen = images[index]
-          if (chosen) {
-            save([chosen, ...images.filter((_, at) => at !== index)])
-          }
-        }}
-      />
+      <div className="flex flex-col gap-5">
+        <ImageUploader
+          images={images.map((image) => ({
+            key: image.id ?? image.url,
+            url: image.url,
+          }))}
+          disabled={update.isPending}
+          onAdd={(stored) => {
+            save([...images, ...stored.map(({ url }) => ({ url }))])
+          }}
+          onRemove={(index) => {
+            save(images.filter((_, at) => at !== index))
+          }}
+          onMakeMain={(index) => {
+            const chosen = images[index]
+            if (chosen) {
+              save([chosen, ...images.filter((_, at) => at !== index)])
+            }
+          }}
+        />
+        {images.length > 0 ? (
+          <AltTexts
+            productId={product.id}
+            images={images.map((image) => ({ key: image.id ?? image.url, url: image.url }))}
+            media={product.media_assets ?? []}
+          />
+        ) : null}
+      </div>
     </SectionCard>
   )
 }

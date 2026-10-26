@@ -617,7 +617,19 @@
       "main": "Main image",
       "makeMain": "Make main image",
       "remove": "Remove image",
-      "optional": "You can add images later, but products with images sell better."
+      "optional": "You can add images later, but products with images sell better.",
+      "registerFailed": "The image was uploaded, but it could not be registered for alt text and versions.",
+      "altTitle": "Alt texts",
+      "altHint": "Tells people who cannot see the image, and image search, what it shows; for example “White linen shirt, front”. Saved when you leave the field.",
+      "altLabel": "Image {{position}}",
+      "altPlaceholder": "What is in the picture?",
+      "altLegacy": "Upload this image again to give it an alt text",
+      "altSaved": "Alt text saved.",
+      "altMissing_one": "{{count}} image has no alt text",
+      "altMissing_other": "{{count}} images have no alt text",
+      "altComplete": "Every image has an alt text",
+      "versionsReady": "Versions ready",
+      "versionsPending": "Preparing"
     },
     "wizard": {
       "pageTitle": "New product",
@@ -783,6 +795,12 @@
         "digital": "Digital product",
         "service": "Service"
       }
+    },
+    "variantImages": {
+      "title": "Variant images",
+      "hint": "Choose which variants each picture shows. A picture tied to no variant shows with all of them; the storefront brings a variant's pictures forward when it is chosen.",
+      "toggle": "Image {{position}} for {{variant}}",
+      "all": "All variants"
     }
   },
   "orders": {
@@ -1474,6 +1492,12 @@
           "title": "The brand has no logo.",
           "why": "A logo makes the brand recognisable on its page and when shared.",
           "how": "Upload an image in the logo card."
+        },
+        "IMG-02": {
+          "title_one": "{{count}} image has no alt text.",
+          "title_other": "{{count}} images have no alt text.",
+          "why": "Alt text tells people who cannot see an image, and image search, what it shows; without it the image does not appear in image search.",
+          "how": "In the Images section, write a short description for each image: the product, its colour, the angle."
         }
       },
       "summaryHint": "How ready your products are for search engines; refreshed nightly and after every save.",
@@ -1542,6 +1566,11 @@
           "title_one": "{{amount}} thing to fix in redirects",
           "title_other": "{{amount}} things to fix in redirects",
           "why": "A rule whose target is missing or removed sends visitors to an empty page; a rule under a live page never runs; a rule whose target redirects again is out of date. Rules unused for a year can go; records with many old addresses carry a redirect for each."
+        },
+        "S-IMG-01": {
+          "title_one": "{{amount}} product image has no alt text",
+          "title_other": "{{amount}} product images have no alt text",
+          "why": "An image without alt text is blank to image search and screen readers. Add it in the product page's Images section."
         }
       },
       "reasons": {
@@ -1586,6 +1615,10 @@
           "shadowed": "A live page has this address; the rule never runs.",
           "dead_target": "Target not found: {{target}}",
           "gone_target": "Target removed: {{target}}"
+        },
+        "S-IMG-01": {
+          "no_alt_one": "{{amount}} image without alt text",
+          "no_alt_other": "{{amount}} images without alt text"
         }
       }
     }

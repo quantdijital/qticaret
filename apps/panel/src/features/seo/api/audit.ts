@@ -15,6 +15,7 @@ export type AuditRuleId =
   | "S-DUP-01"
   | "S-ORPHAN-01"
   | "S-REDIR-01"
+  | "S-IMG-01"
 
 export interface AuditItem {
   reason: string

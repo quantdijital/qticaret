@@ -19,6 +19,7 @@ const NAMED: ReadonlySet<AuditRuleId> = new Set([
   "S-ORPHAN-01",
   "S-REDIR-01",
   "S-ROBOTS-01",
+  "S-IMG-01",
 ])
 
 /** A way to the place the item is fixed; the link inside keeps its route's types. */

@@ -625,7 +625,19 @@
       "main": "Ana görsel",
       "makeMain": "Ana görsel yap",
       "remove": "Görseli kaldır",
-      "optional": "Görseli şimdi eklemeyebilirsiniz, ama görselli ürünler daha çok satar."
+      "optional": "Görseli şimdi eklemeyebilirsiniz, ama görselli ürünler daha çok satar.",
+      "registerFailed": "Görsel yüklendi ama alt metin ve sürümler için kaydedilemedi.",
+      "altTitle": "Alt metinler",
+      "altHint": "Görseli göremeyenlere ve görsel aramasına ne gösterdiğini anlatır; örneğin “Beyaz keten gömlek, önden”. Alandan çıkınca kaydedilir.",
+      "altLabel": "{{position}}. görsel",
+      "altPlaceholder": "Görselde ne var?",
+      "altLegacy": "Bu görsel yeniden yüklenirse alt metin eklenebilir",
+      "altSaved": "Alt metin kaydedildi.",
+      "altMissing_one": "{{count}} görselin alt metni eksik",
+      "altMissing_other": "{{count}} görselin alt metni eksik",
+      "altComplete": "Tüm görsellerin alt metni var",
+      "versionsReady": "Sürümler hazır",
+      "versionsPending": "Hazırlanıyor"
     },
     "wizard": {
       "pageTitle": "Yeni ürün",
@@ -791,6 +803,12 @@
         "digital": "Dijital ürün",
         "service": "Hizmet"
       }
+    },
+    "variantImages": {
+      "title": "Varyant görselleri",
+      "hint": "Her görselin hangi varyantları gösterdiğini seçin. Hiçbir varyanta bağlı olmayan görsel tüm varyantlarda görünür; mağazada varyant seçilince kendi görselleri öne çıkar.",
+      "toggle": "{{variant}} için {{position}}. görsel",
+      "all": "Tüm varyantlar"
     }
   },
   "orders": {
@@ -1482,6 +1500,12 @@
           "title": "Markanın logosu yok.",
           "why": "Logo marka sayfasında ve paylaşımlarda markayı tanınır kılar.",
           "how": "Logo kartından bir görsel yükleyin."
+        },
+        "IMG-02": {
+          "title_one": "{{count}} görselin alt metni yok.",
+          "title_other": "{{count}} görselin alt metni yok.",
+          "why": "Alt metin, görseli göremeyenlere ve görsel aramasına görselde ne olduğunu anlatır; eksikse görsel aramada görünmez.",
+          "how": "Görseller bölümünde her görsel için kısa bir açıklama yazın: ürün, rengi, açısı."
         }
       },
       "summaryHint": "Ürünlerinizin arama motorlarına hazırlığı; her gece ve her kayıttan sonra yenilenir.",
@@ -1550,6 +1574,11 @@
           "title_one": "Yönlendirmelerde {{amount}} düzeltilecek nokta var",
           "title_other": "Yönlendirmelerde {{amount}} düzeltilecek nokta var",
           "why": "Hedefi bulunamayan ya da kaldırılmış kural ziyaretçiyi boş sayfaya gönderir; canlı bir sayfanın altında kalan kural hiç çalışmaz; hedefi yeniden yönlenen kuralın hedefi eskimiştir. Bir yıldır kullanılmayan kurallar silinebilir; çok sayıda eski adresi olan kayıtlar her adres için bir yönlendirme taşır."
+        },
+        "S-IMG-01": {
+          "title_one": "{{amount}} ürün görselinin alt metni yok",
+          "title_other": "{{amount}} ürün görselinin alt metni yok",
+          "why": "Alt metinsiz görsel, görsel aramasında ve ekran okuyucularda boş kalır. Ürün sayfasının Görseller bölümünden eklenir."
         }
       },
       "reasons": {
@@ -1594,6 +1623,10 @@
           "shadowed": "Bu adreste canlı bir sayfa var; kural hiç çalışmıyor.",
           "dead_target": "Hedef bulunamıyor: {{target}}",
           "gone_target": "Hedef kaldırılmış: {{target}}"
+        },
+        "S-IMG-01": {
+          "no_alt_one": "{{amount}} görselin alt metni yok",
+          "no_alt_other": "{{amount}} görselin alt metni yok"
         }
       }
     }
