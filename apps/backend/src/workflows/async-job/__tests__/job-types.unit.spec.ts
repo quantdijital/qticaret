@@ -1,8 +1,10 @@
 import { JOB_TYPE_KEYS, jobType } from "../types"
 
-// The audit reads redirects through a module link, which needs a running
+// The audit reads redirects, and the publish gate (an import's, a bulk
+// edit's) assesses products, through module links, which need a running
 // app to define; the registry's own facts do not
 jest.mock("../../seo/audit", () => ({ runSeoAudit: jest.fn() }))
+jest.mock("../../seo/advisor/publish-gate", () => ({ publishGate: jest.fn() }))
 
 describe("job types", () => {
   it("knows its types by own key only", () => {

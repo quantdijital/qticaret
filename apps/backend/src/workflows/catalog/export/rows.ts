@@ -1,7 +1,8 @@
 import { OPTION_KEYS, SHEET_COLUMNS, attributeHeader, headerOf } from "../../../lib/catalog-sheet"
 import type { ColumnKey, SheetUnits } from "../../../lib/catalog-sheet"
 import type { SheetCell } from "../../../lib/sheets"
-import { CURRENCY, DEFAULT_OPTION } from "../import/plan-variants"
+import { DEFAULT_OPTION } from "../import/plan-variants"
+import { CURRENCY } from "../prices"
 
 /**
  * A product as the sheet's rows (F3.9): one per variant, the product's

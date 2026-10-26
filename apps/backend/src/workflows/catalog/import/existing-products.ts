@@ -1,6 +1,10 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { chunksOf } from "../../../lib/catalog"
+import { PRICE_FIELDS, pricesOf } from "../prices"
+import type { ExistingPrice, PriceRow } from "../prices"
+
+export type { ExistingPrice } from "../prices"
 
 /**
  * The products a sheet names that exist, as the import needs them (F3.9):
@@ -13,14 +17,6 @@ import { chunksOf } from "../../../lib/catalog"
 
 // Products read with their variants per query
 const PRODUCT_CHUNK = 200
-
-export interface ExistingPrice {
-  id: string
-  currency_code: string
-  amount: number
-  /** No rules and no quantity bounds: the plain price in its currency. */
-  isBase: boolean
-}
 
 export interface ExistingVariant {
   id: string
@@ -58,16 +54,6 @@ export interface ExistingProduct {
   current: CurrentFields
   /** Attribute key → its value as the template takes it. */
   attributes: Record<string, unknown>
-}
-
-interface PriceRow {
-  id: string
-  currency_code: string
-  amount: number | string
-  price_list_id?: string | null
-  min_quantity?: number | string | null
-  max_quantity?: number | string | null
-  rules_count?: number | null
 }
 
 interface ProductRow extends Omit<
@@ -136,13 +122,7 @@ const FIELDS = [
   "variants.ean",
   "variants.options.value",
   "variants.options.option_id",
-  "variants.prices.id",
-  "variants.prices.currency_code",
-  "variants.prices.amount",
-  "variants.prices.price_list_id",
-  "variants.prices.min_quantity",
-  "variants.prices.max_quantity",
-  "variants.prices.rules_count",
+  ...PRICE_FIELDS,
   "variants.inventory_items.inventory_item_id",
   "variants.inventory_items.inventory.location_levels.location_id",
   "variants.inventory_items.inventory.location_levels.stocked_quantity",
@@ -168,20 +148,6 @@ function attributeValue(value: AttributeValueRow): unknown {
   }
   return type === "multi_select" ? (value.value_options ?? null) : (value.value_text ?? null)
 }
-
-// The price set's own prices; a price list's are kept by the pricing module itself
-const pricesOf = (prices: readonly PriceRow[] | null | undefined): ExistingPrice[] =>
-  (prices ?? [])
-    .filter((price) => !price.price_list_id)
-    .map((price) => ({
-      id: price.id,
-      currency_code: price.currency_code,
-      amount: Number(price.amount),
-      isBase:
-        !price.rules_count &&
-        (price.min_quantity ?? null) === null &&
-        (price.max_quantity ?? null) === null,
-    }))
 
 function currentOf(row: ProductRow): CurrentFields {
   return {

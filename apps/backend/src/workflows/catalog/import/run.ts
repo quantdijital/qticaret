@@ -1,14 +1,14 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { MedusaError } from "@medusajs/framework/utils"
 import { productsOf } from "../../../lib/catalog-sheet"
 import type { SheetProduct } from "../../../lib/catalog-sheet"
-import { ValidationError, isConflictError, isValidationError } from "../../../lib/errors"
-import { serverErrorMessage } from "../../../lib/errors/messages"
+import { ValidationError } from "../../../lib/errors"
 import { errorSummary, logger } from "../../../lib/logging"
 import type { Assessment } from "../../../lib/seo/advisor"
 import { readSheet } from "../../../lib/sheets"
 import type { SheetCell } from "../../../lib/sheets"
+import { publishGate } from "../../seo/advisor/publish-gate"
 import { shopOf } from "../../seo/payload-sources"
+import { writeErrorText } from "../write-error"
 import { sheetAssessment } from "./advisor"
 import { importProductWorkflow } from "./import-product"
 import { planImport } from "./plan"
@@ -53,6 +53,13 @@ export type ImportAudit = (
 // The handles an audit entry names, within its size budget
 const MAX_AUDITED_HANDLES = 500
 
+/** What a run reports to, and where its writes come from (the job, its requester). */
+export interface ImportHooks {
+  progress: (percent: number) => Promise<void>
+  audit: ImportAudit
+  origin: { job_id: string | null; actor_id: string | null }
+}
+
 /** A product that exists and that nothing in its rows changes. */
 const isUnchanged = (plan: ImportPlan): boolean =>
   plan.productId !== null &&
@@ -65,34 +72,28 @@ const isUnchanged = (plan: ImportPlan): boolean =>
   plan.attributes === null &&
   plan.stock.length === 0
 
-// Our checks' sentences, Medusa's refusals as they are; anything else the generic one
-function writeError(error: unknown): string {
-  if (isValidationError(error) || isConflictError(error)) {
-    return serverErrorMessage(error.safeMessage, "tr")
-  }
-  if (MedusaError.isMedusaError(error) && error.type !== MedusaError.Types.UNEXPECTED_STATE) {
-    return `${serverErrorMessage("catalog_import.write_failed", "tr")} ${error.message}`
-  }
-  return serverErrorMessage("catalog_import.write_failed", "tr")
-}
+// A product that exists going live (the plan holds the status only when it changes)
+const goesLive = (plan: ImportPlan): boolean =>
+  plan.productId !== null && plan.product["status"] === "published"
 
 async function applyPlans(
   container: MedusaContainer,
   planned: readonly Planned[],
-  context: {
-    locationId: string | null
-    audit: ImportAudit
-    progress: (percent: number) => Promise<void>
-  }
+  context: ImportHooks & { locationId: string | null }
 ) {
   const rows: SheetCell[][] = []
   const counts = { create: 0, update: 0, failed: 0 }
   const written: string[] = []
+  const isBlocked = await publishGate(container)
   try {
     for (const [index, { plan }] of planned.entries()) {
       try {
+        // A draft taken live passes the SEO gate as the product route's would
+        if (isBlocked && goesLive(plan) && (await isBlocked(plan.productId ?? ""))) {
+          throw new ValidationError("seo.publish_gate_blocked", { field: "status" })
+        }
         await importProductWorkflow(container).run({
-          input: { plan, location_id: context.locationId },
+          input: { plan, location_id: context.locationId, ...context.origin },
         })
         counts[plan.productId ? "update" : "create"] += 1
         written.push(plan.handle)
@@ -104,7 +105,7 @@ async function applyPlans(
           handle: plan.handle,
           err: errorSummary(error),
         })
-        rows.push(productRow(plan.line, plan.handle, "failed", { message: writeError(error) }))
+        rows.push(productRow(plan.line, plan.handle, "failed", { message: writeErrorText(error) }))
       }
       await context.progress(10 + Math.floor(((index + 1) / planned.length) * 90))
     }
@@ -165,7 +166,7 @@ export async function runImport(
   container: MedusaContainer,
   buffer: Buffer,
   mode: ImportMode,
-  hooks: { progress: (percent: number) => Promise<void>; audit: ImportAudit }
+  hooks: ImportHooks
 ): Promise<{ summary: ImportSummary; rows: SheetCell[][] }> {
   const { rows, sheet, refs, planned: all, problemRows } = await planSheet(container, buffer)
   await hooks.progress(10)

@@ -5,6 +5,8 @@ import {
 } from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { readXlsx } from "../../src/lib/sheets"
+import { STOCK_LEDGER_MODULE } from "../../src/modules/stock-ledger"
+import type StockLedgerModuleService from "../../src/modules/stock-ledger/service"
 import { importProductWorkflow } from "../../src/workflows/catalog/import/import-product"
 import type { ImportPlan } from "../../src/workflows/catalog/import/plan"
 import { createAdminUser } from "../helpers/admin"
@@ -130,6 +132,22 @@ medusaIntegrationTestRunner({
       expect(
         product.variants[0]?.inventory_items[0]?.inventory.location_levels[0]?.stocked_quantity
       ).toBe(7)
+      // In the stock ledger as the import's, by its job (adr/0020)
+      const { data: items } = await getContainer()
+        .resolve(ContainerRegistrationKeys.QUERY)
+        .graph({
+          entity: "product_variant",
+          fields: ["inventory_items.inventory_item_id"],
+          filters: { id: variantId },
+        })
+      const itemId =
+        (items[0] as { inventory_items: { inventory_item_id: string }[] } | undefined)
+          ?.inventory_items[0]?.inventory_item_id ?? ""
+      expect(
+        await getContainer()
+          .resolve<StockLedgerModuleService>(STOCK_LEDGER_MODULE)
+          .lastMovement(itemId, shop.locationId)
+      ).toMatchObject({ stocked_after: 7, reason: "import", reference: applied.id })
     })
 
     it("exports cells escaped against formulas (KK); its file applied as it is changes nothing", async () => {

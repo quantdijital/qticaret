@@ -1,4 +1,5 @@
 import type { SheetProblem, SheetProduct, SheetVariant } from "../../../lib/catalog-sheet"
+import { CURRENCY, baseTryOf, nextPrices } from "../prices"
 import type { ExistingProduct, ExistingVariant, ImportReferences } from "./references"
 
 /**
@@ -11,7 +12,6 @@ import type { ExistingProduct, ExistingVariant, ImportReferences } from "./refer
  * Prices: the TRY price is replaced, the others kept, as the panel does.
  */
 
-export const CURRENCY = "try"
 // What the panel's wizard gives a product without options (Medusa needs one)
 export const DEFAULT_OPTION = { title: "Seçenek", value: "Standart" } as const
 
@@ -31,10 +31,6 @@ export interface VariantsPlan {
   stock: StockLine[]
 }
 
-type Price = ExistingVariant["prices"][number]
-
-const isBaseTry = (price: Price) => price.currency_code === CURRENCY && price.isBase
-
 /** The variant's option values as one key, whatever their order or case. */
 export const optionKey = (options: Record<string, string>): string =>
   JSON.stringify(
@@ -43,20 +39,9 @@ export const optionKey = (options: Record<string, string>): string =>
       .sort(([a = ""], [b = ""]) => a.localeCompare(b))
   )
 
-// The base TRY price replaced, every other price of the set kept as it is (its rules too)
-function nextPrices(prices: readonly Price[], amount: number) {
-  const base = prices.find(isBaseTry)
-  return [
-    ...prices
-      .filter((price) => price !== base)
-      .map(({ id, currency_code, amount: kept }) => ({ id, currency_code, amount: kept })),
-    { ...(base ? { id: base.id } : {}), currency_code: CURRENCY, amount },
-  ]
-}
-
 // What a row changes of a variant: only what differs from what it has
 function variantChanges(variant: SheetVariant, match: ExistingVariant) {
-  const base = match.prices.find(isBaseTry)
+  const base = baseTryOf(match.prices)
   return {
     ...(variant.sku && variant.sku !== match.sku ? { sku: variant.sku } : {}),
     ...(variant.barcode && variant.barcode !== match.ean ? { ean: variant.barcode } : {}),

@@ -6,16 +6,15 @@ import {
   when,
 } from "@medusajs/framework/workflows-sdk"
 import {
-  createInventoryLevelsWorkflow,
   createProductVariantsWorkflow,
   createProductsWorkflow,
-  updateInventoryLevelsWorkflow,
   updateProductVariantsWorkflow,
   updateProductsWorkflow,
 } from "@medusajs/medusa/core-flows"
 import { setProductBrandWorkflow } from "../../brands/workflows"
 import { upsertProductAttributesWorkflow } from "../../product-attributes/upsert-product-attributes"
 import { upsertSeoMetaWorkflow } from "../../seo/upsert-seo-meta"
+import { writeStockLevelsWorkflow } from "../../stock/write-levels"
 import { setProductCatalogWorkflow } from "../set-product-catalog"
 import type { ImportPlan } from "./plan"
 import { resolveImportStockStep } from "./steps/resolve-import-stock"
@@ -23,6 +22,9 @@ import { resolveImportStockStep } from "./steps/resolve-import-stock"
 export interface ImportProductInput {
   plan: ImportPlan
   location_id: string | null
+  /** The import's job and who started it, for the stock ledger (adr/0020). */
+  job_id?: string | null
+  actor_id?: string | null
 }
 
 type Input = WorkflowData<ImportProductInput>
@@ -128,7 +130,7 @@ function writeExtras(input: Input, productId: WorkflowData<string>) {
   })
 }
 
-// The quantities at the default warehouse, through the level workflows (the stock ledger hears them)
+// The quantities at the default warehouse, recorded in the stock ledger as the import's
 function writeStock(input: Input, productId: WorkflowData<string>) {
   const levels = resolveImportStockStep(
     transform({ input, productId }, ({ input, productId }) => ({
@@ -137,14 +139,18 @@ function writeStock(input: Input, productId: WorkflowData<string>) {
       stock: input.plan.stock,
     }))
   )
-  when("import-stock-create", { levels }, ({ levels }) => levels.create.length > 0).then(() => {
-    createInventoryLevelsWorkflow.runAsStep({
-      input: transform({ levels }, ({ levels }) => ({ inventory_levels: levels.create })),
-    })
-  })
-  when("import-stock-update", { levels }, ({ levels }) => levels.update.length > 0).then(() => {
-    updateInventoryLevelsWorkflow.runAsStep({
-      input: transform({ levels }, ({ levels }) => ({ updates: levels.update })),
+  when(
+    "import-stock",
+    { levels },
+    ({ levels }) => levels.create.length + levels.update.length > 0
+  ).then(() => {
+    writeStockLevelsWorkflow.runAsStep({
+      input: transform({ levels, input }, ({ levels, input }) => ({
+        ...levels,
+        reason: "import" as const,
+        reference: input.job_id ?? null,
+        actor_id: input.actor_id ?? null,
+      })),
     })
   })
 }

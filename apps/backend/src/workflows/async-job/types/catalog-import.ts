@@ -45,6 +45,7 @@ export const catalogImport: JobType<z.infer<typeof input>> = {
       const audit = container.resolve<AuditLogModuleService>(AUDIT_LOG_MODULE)
       const { summary, rows } = await runImport(container, buffer, mode, {
         progress: (percent) => progress(percent),
+        origin: { job_id: job.id, actor_id: job.requested_by },
         audit: async (action, changes) => {
           await audit.record({
             kind: "system",
