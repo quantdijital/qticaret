@@ -92,6 +92,32 @@ class PriceHistoryModuleService extends MedusaService({ PriceRecord }) {
     return inForce ? [inForce, ...later] : later
   }
 
+  /**
+   * Every recorded price of the variants in one currency, oldest first, by
+   * variant. A price changes a few times a month, so a variant's whole
+   * history is a few dozen rows even after years.
+   */
+  @InjectManager()
+  async historyOf(
+    variantIds: readonly string[],
+    currencyCode: string,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<Map<string, PriceRecordRow[]>> {
+    const byVariant = new Map<string, PriceRecordRow[]>()
+    if (variantIds.length === 0) {
+      return byVariant
+    }
+    const rows = await this.listPriceRecords(
+      { variant_id: [...variantIds], currency_code: currencyCode },
+      { order: { recorded_at: "ASC", seq: "ASC" }, take: null },
+      sharedContext
+    )
+    for (const row of rows) {
+      byVariant.set(row.variant_id, [...(byVariant.get(row.variant_id) ?? []), row])
+    }
+    return byVariant
+  }
+
   async recordPrices(input: PriceRecordInput[]): Promise<PriceRecordRow[]> {
     if (input.length === 0) {
       return []

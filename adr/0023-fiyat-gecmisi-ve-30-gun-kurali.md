@@ -50,3 +50,21 @@ Medusa 2.21.2'de doğrulananlar (F4 planlaması, kaynak kodu):
 - **Yakalama:** `src/subscribers/price-history.ts` (`PricingEvents` fiyat, liste ve liste kuralı olayları; silinen satır da okunur), `src/jobs/price-history-reconcile.ts` (saat başı 7. dakika, süreçler arası tek), `src/migration-scripts/price-history-opening.ts`. Hepsi `recordSellingPricesWorkflow`'a gider: satıştaki fiyat `QueryContext({ currency_code })` ile mağazanın her para biriminde okunur, son kayıttan farklıysa yazılır. İki çalışma aynı değişikliği iki kez yazabilir; eşit satırlar hesabı değiştirmez.
 - **Kanıt:** HTTP testleri olayların çalıştığını (fiyat, değişiklik, indirimli liste), müşteri grubu fiyatının girmediğini, olaysız başlayan listenin saatlik kontrolde yakalandığını ve ikinci kontrolün hiçbir şey yazmadığını gösteriyor.
 - **30 gün hesabı:** `src/lib/pricing/discount.ts` (`discountView`, kural sürümü `tr-30d-1`). Kademeli derinleşen indirim tek indirim sayılıyor; "indirimden önceki fiyat" ilk adımdan önceki 30 güne bakıyor (AB Omnibus yorumu). Bu yorum hukukçu teyidinde ayrıca sorulmalı (docs/12). Geçmişi indirimin içinde başlayan mağazada liste fiyatı kullanılıyor (`basis: "regular"`).
+
+## Uygulama notu (F4 U3, 2026-10-26)
+
+- **Tek kaynak:** `src/lib/pricing/display.ts` (`priceDisplay`). Kaydedilmiş geçmiş ve satıştaki canlı fiyattan varyantın gösterimini çıkarır: güncel fiyat, liste fiyatı (`regular`), üstü çizili fiyat (`before`), `on_sale`, indirimin başlangıcı, `basis`, kural sürümü. Okuyan: `src/workflows/pricing/price-display.ts` (`priceDisplays`).
+- **İndirim yalnızca gösterilebilecekse gösterilir:** `on_sale`, indirimden önceki fiyat güncel fiyattan yüksekse doğrudur. Fiyat 30 gün içinde zaten o kadar düştüyse (önce artırılıp sonra "indirilen" fiyat), Medusa'nın liste fiyatı ne derse desin üstü çizili fiyat çıkmaz.
+- **Geçmişin gecikmesi:** Geçmiş olaylarla ve saatlik kontrolle yazılır. Yeni başlamış bir liste henüz yazılmamışsa canlı fiyat "şimdi" noktası olarak hesaba katılır.
+- **Store API:** Karar "ürün yanıtına `price_display`" diyordu. Medusa'nın çekirdek ürün yanıtı değiştirilmediği için (Altın kural 2) ayrı uç açıldı: `GET /store/price-display?variant_id=…&currency_code=try`.
+  - En çok 100 varyant alır; bilinmeyen ya da o para biriminde fiyatı olmayan varyant yanıtta yer almaz.
+  - Paylaşılan önbellek 60 saniye tutar.
+  - Tutarlar "80.00" biçimindedir; `rule_version` ve `basis` döner.
+- **JSON-LD aynı kaynaktan:** Ürün sayfasının `seo.jsonLd` alanı aynı `priceDisplays` ile kurulur.
+  - Teklifin `price` alanı satıştaki fiyattır; Google işaretlemedeki fiyatın sayfadakiyle aynı olmasını ister (docs/13). Önceden indirim sırasında bile taban fiyat yazılıyordu.
+  - Üstü çizili fiyat `priceSpecification` içinde `UnitPriceSpecification` ve `priceType: StrikethroughPrice` olarak yazılır.
+  - Satıştaki fiyatı olmayan varyantın teklifi çıkmaz. Çözümleme önbelleği en çok 30 saniye tutar.
+- **Kanıt:** `lib/pricing/__tests__/display.unit.spec.ts`, `integration-tests/http/price-display.spec.ts`. Entegrasyon testi şunları gösteriyor:
+  - indirim üstü çizili gösteriliyor;
+  - 30 gün içinde görülmüş fiyata dönüş indirim sayılmıyor;
+  - JSON-LD'nin fiyatı ve üstü çizili fiyatı Store ucuyla aynı (KK2).

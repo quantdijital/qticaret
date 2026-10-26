@@ -1,4 +1,7 @@
 import { variantGtin } from "../../lib/catalog"
+import { toMedusaAmount } from "../../lib/money"
+import type { Kurus } from "../../lib/money"
+import type { PriceDisplay } from "../../lib/pricing"
 import { VARIES_BY_PROPERTIES } from "../../lib/seo/jsonld"
 import type { Availability, Condition, ProductFacts, VariesBy } from "../../lib/seo/jsonld"
 
@@ -98,6 +101,19 @@ export function liraOf(variant: Variant): number | null {
   return Number.isFinite(amount) && amount > 0 ? amount : null
 }
 
+// Without displays the variant's own price; with them, a variant missing from them
+// has no price a shopper can pay, so no offer
+function priceOf(variant: Variant, displays: ReadonlyMap<string, PriceDisplay> | undefined) {
+  if (!displays) {
+    return { price: liraOf(variant), strikethrough: null }
+  }
+  const display = displays.get(variant.id)
+  return {
+    price: display ? lira(display.current) : null,
+    strikethrough: display?.before ? lira(display.before) : null,
+  }
+}
+
 function availabilityOf(variant: Variant): Availability {
   if (variant.manage_inventory === false) {
     return "InStock"
@@ -129,10 +145,18 @@ function propertiesByOption(row: FactRow): Map<string, VariesBy> {
   return map
 }
 
+const lira = (amount: Kurus): number => Number(toMedusaAmount(amount))
+
+/**
+ * A product's facts for its structured data. With `displays` (F4.3) an
+ * offer carries the price the shopper pays now and, where the 30-day rule
+ * allows, the price struck through; without, the variant's own price.
+ */
 export function productFacts(
   row: FactRow,
   brand: string | null,
-  description: string
+  description: string,
+  displays?: ReadonlyMap<string, PriceDisplay>
 ): ProductFacts {
   const byOption = propertiesByOption(row)
   const images = [...(row.images ?? [])]
@@ -163,7 +187,7 @@ export function productFacts(
         gtin: variantGtin(variant),
         mpn: variant.variant_extension?.mpn ?? null,
         image: null,
-        price: liraOf(variant),
+        ...priceOf(variant, displays),
         availability: availabilityOf(variant),
         properties,
       }

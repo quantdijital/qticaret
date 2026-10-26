@@ -1,24 +1,16 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys, QueryContext } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { chunksOf } from "../../../lib/catalog"
 import { fromMedusaAmount } from "../../../lib/money"
 import { PRICE_HISTORY_MODULE } from "../../../modules/price-history"
 import type PriceHistoryModuleService from "../../../modules/price-history/service"
 import type { PriceRecordInput, PriceRecordReason } from "../../../modules/price-history/service"
+import { sellingPrices } from "../selling-prices"
 
 export interface RecordSellingPricesInput {
   variant_ids: string[]
   reason: PriceRecordReason
-}
-
-interface VariantPrice {
-  id: string
-  calculated_price?: {
-    calculated_amount?: number | null
-    original_amount?: number | null
-    calculated_price?: { price_list_id?: string | null } | null
-  } | null
 }
 
 // Variants priced per query
@@ -33,22 +25,6 @@ async function currencies(container: MedusaContainer): Promise<string[]> {
   })
   const store = data[0] as { supported_currencies?: { currency_code: string }[] } | undefined
   return [...new Set((store?.supported_currencies ?? []).map((each) => each.currency_code))]
-}
-
-// What a shopper with no customer group pays now, per variant, in one currency
-async function sellingPrices(container: MedusaContainer, ids: string[], currency: string) {
-  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
-    entity: "product_variant",
-    fields: [
-      "id",
-      "calculated_price.calculated_amount",
-      "calculated_price.original_amount",
-      "calculated_price.calculated_price.price_list_id",
-    ],
-    filters: { id: ids },
-    context: { calculated_price: QueryContext({ currency_code: currency }) },
-  })
-  return data as unknown as VariantPrice[]
 }
 
 async function changedPrices(

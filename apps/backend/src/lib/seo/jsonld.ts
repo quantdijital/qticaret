@@ -42,8 +42,13 @@ export interface VariantFacts {
   gtin: string | null
   mpn: string | null
   image: string | null
-  /** Gross TRY price; null when the variant has none (no offer then). */
+  /** Gross TRY price the shopper pays now; null when the variant has none (no offer then). */
   price: number | null
+  /**
+   * The price shown struck through beside it (F4.3): set only when the
+   * 30-day rule lets the price be shown as a discount (ADR-0023).
+   */
+  strikethrough?: number | null
   availability: Availability
   /** The values of the properties the group varies by ({ size: "M" }). */
   properties: Partial<Record<VariesBy, string>>
@@ -75,11 +80,24 @@ function offerOf(variant: VariantFacts, url: string, condition: Condition): Json
   if (variant.price === null || !(variant.price > 0)) {
     return null
   }
+  const struck =
+    variant.strikethrough && variant.strikethrough > variant.price ? variant.strikethrough : null
   return {
     "@type": "Offer",
     url,
     price: price(variant.price),
     priceCurrency: "TRY",
+    // The price before the discount, as the storefront shows it struck through (docs/13)
+    ...(struck === null
+      ? {}
+      : {
+          priceSpecification: {
+            "@type": "UnitPriceSpecification",
+            priceType: `${SCHEMA}/StrikethroughPrice`,
+            price: price(struck),
+            priceCurrency: "TRY",
+          },
+        }),
     availability: `${SCHEMA}/${variant.availability}`,
     itemCondition: `${SCHEMA}/${CONDITIONS[condition]}`,
   }

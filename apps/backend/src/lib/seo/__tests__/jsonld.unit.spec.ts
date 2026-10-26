@@ -10,6 +10,16 @@ const offer = z
     url: absoluteUrl,
     price: z.string().regex(/^\d+\.\d{2}$/),
     priceCurrency: z.literal("TRY"),
+    // A discount's price before it (F4.3): Google's strikethrough price
+    priceSpecification: z
+      .object({
+        "@type": z.literal("UnitPriceSpecification"),
+        priceType: z.literal("https://schema.org/StrikethroughPrice"),
+        price: z.string().regex(/^\d+\.\d{2}$/),
+        priceCurrency: z.literal("TRY"),
+      })
+      .strict()
+      .optional(),
     availability: z
       .string()
       .regex(/^https:\/\/schema\.org\/(InStock|OutOfStock|BackOrder|PreOrder)$/),
@@ -88,6 +98,32 @@ describe("productJsonLd", () => {
       brand: { "@type": "Brand", name: "Örnek Marka" },
       offers: { price: "899.00", url: URL, itemCondition: "https://schema.org/NewCondition" },
     })
+  })
+
+  it("adds a discount's price before it as a strikethrough price, never one not above it", () => {
+    const sale = productJsonLd(
+      facts({ variants: [variant({ price: 799, strikethrough: 899 })] }),
+      URL
+    )
+    expect(product.parse(sale)).toBeTruthy()
+    expect(sale).toMatchObject({
+      offers: {
+        price: "799.00",
+        priceSpecification: {
+          "@type": "UnitPriceSpecification",
+          priceType: "https://schema.org/StrikethroughPrice",
+          price: "899.00",
+          priceCurrency: "TRY",
+        },
+      },
+    })
+    for (const strikethrough of [799, 700, null]) {
+      const plain = productJsonLd(
+        facts({ variants: [variant({ price: 799, strikethrough })] }),
+        URL
+      )
+      expect(JSON.stringify(plain)).not.toContain("priceSpecification")
+    }
   })
 
   it("writes several as a ProductGroup, each variant preselected by its URL", () => {

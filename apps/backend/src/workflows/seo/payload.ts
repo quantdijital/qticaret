@@ -10,6 +10,7 @@ import { deepestCategory } from "../../lib/catalog"
 import type { SeoPayload, SeoSubject } from "../../lib/seo/resolve"
 import type { UrlOwner } from "../../modules/url-registry/validation"
 import { CATALOG_ENTITY_TYPES } from "../catalog/entity-paths"
+import { priceDisplays } from "../pricing/price-display"
 import { PRODUCT_FACT_FIELDS, productFacts } from "./facts"
 import type { FactRow } from "./facts"
 import type { Condition } from "../../lib/seo/jsonld"
@@ -86,7 +87,13 @@ async function productSubject(container: MedusaContainer, id: string, path: stri
   const category = primaryCategory(product)
   const description = product.description ?? ""
   const subtitle = product.subtitle?.trim() ?? ""
-  const facts = productFacts(product, product.brand?.name ?? null, plainText(description))
+  // The price the shopper pays now and, where the 30-day rule allows, the one struck through
+  const displays = await priceDisplays(
+    container,
+    (product.variants ?? []).flatMap((variant) => (variant ? [variant.id] : [])),
+    "try"
+  )
+  const facts = productFacts(product, product.brand?.name ?? null, plainText(description), displays)
   const subject: SeoSubject = {
     kind: "product",
     path,

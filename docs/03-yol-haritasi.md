@@ -194,7 +194,9 @@ F17 öncesinde tenant'lar F16 script'leriyle elle açılır.
 
 **KK:**
 - [ ] Kullanım limiti dolan kupon eşzamanlı isteklerde bile limit aşmıyor (testli)
-- [ ] Son 30 gün en düşük fiyat, fiyat geçmişinden doğru hesaplanıyor (testli); JSON-LD'deki üstü çizili fiyat bununla tutarlı
+- [x] Son 30 gün en düşük fiyat, fiyat geçmişinden doğru hesaplanıyor (testli); JSON-LD'deki üstü çizili fiyat bununla tutarlı. Kanıt:
+  `src/lib/pricing/__tests__/` (30 gün hesabı ve gösterim), `integration-tests/http/price-history.spec.ts` (geçmişin yakalanması),
+  `integration-tests/http/price-display.spec.ts` (Store ucu, 30 günde görülmüş fiyata dönüşün indirim sayılmaması, JSON-LD'nin aynı fiyat ve üstü çizili fiyatı)
 - [ ] Kargo bedava eşiği sepet tutarına göre doğru uygulanıyor
 - [x] İndirimli siparişte kısmi iade tutarı, kalemin indirim payı düşülerek hesaplanıyor (testli). Kanıt:
   `integration-tests/http/order-money.spec.ts`. Gerçek checkout, %10 kupon, 3 × 33,33 ₺. Birimler Medusa'nın iade

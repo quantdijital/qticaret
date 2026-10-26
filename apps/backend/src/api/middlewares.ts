@@ -32,6 +32,7 @@ import { rejectAmbiguousPath } from "./http/request-path"
 import { adminLimitGuard, storeLimitGuard, uploadSizeGate } from "./http/request-limits"
 import { securityHeaders } from "./http/security-headers"
 import { MEDIA_ROUTES, STORE_MEDIA_FIELDS, restrictStoreMediaFields } from "./http/media-routes"
+import { PRICING_ROUTES } from "./http/pricing-routes"
 import { PROMOTION_ROUTES } from "./http/promotion-routes"
 import { SEO_ROUTES } from "./http/seo-routes"
 import { STOCK_ROUTES } from "./http/stock-routes"
@@ -177,6 +178,8 @@ export default defineMiddlewares({
     ...MEDIA_ROUTES,
     // F4.4/F4.6: promotion codes
     ...PROMOTION_ROUTES,
+    // F4.3: price display
+    ...PRICING_ROUTES,
     // docs/17: the home page's order numbers are for people (shop revenue)
     {
       matcher: "/admin/home/summary",

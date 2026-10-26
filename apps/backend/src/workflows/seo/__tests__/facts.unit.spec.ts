@@ -1,3 +1,6 @@
+import { kurus } from "../../../lib/money"
+import { DISCOUNT_RULE } from "../../../lib/pricing"
+import type { PriceDisplay } from "../../../lib/pricing"
 import { productFacts } from "../facts"
 import type { FactRow } from "../facts"
 
@@ -95,5 +98,28 @@ describe("productFacts", () => {
     expect(facts.images).toEqual(["https://cdn.example.com/kapak.webp"])
     expect(facts.variants[0]).toMatchObject({ availability: "InStock", price: null })
     expect(facts.variesBy).toEqual([])
+  })
+
+  it("prices offers as the shopper pays now, struck through only as the 30-day rule allows", () => {
+    const display = (current: number, before: number | null): PriceDisplay => ({
+      current: kurus(current),
+      regular: kurus(89_900),
+      before: before === null ? null : kurus(before),
+      on_sale: before !== null,
+      since: null,
+      basis: before === null ? null : "history",
+      rule_version: DISCOUNT_RULE.version,
+    })
+    const facts = productFacts(
+      row(),
+      null,
+      "",
+      // variant_b has no price a shopper can pay: no offer, not its own price
+      new Map([["variant_a", display(79_990, 89_900)]])
+    )
+    expect(facts.variants.map((variant) => [variant.price, variant.strikethrough])).toEqual([
+      [799.9, 899],
+      [null, null],
+    ])
   })
 })
