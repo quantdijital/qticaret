@@ -52,9 +52,14 @@ export function discountView(points: readonly PricePoint[]): DiscountView | null
   if (!isDiscounted(last)) {
     return { ...base, discounted: false, since: null, before: null, basis: null }
   }
-  // The discount's first point: the run of discounted prices up to now
+  // The discount's first point: the run of discounted prices up to now in
+  // which the price only came down. A rise (a list at 70 followed by one at
+  // 90) begins a new discount, measured against the 70 before it
   let start = points.length - 1
-  for (let previous = points[start - 1]; previous && isDiscounted(previous);) {
+  for (
+    let previous = points[start - 1];
+    previous && isDiscounted(previous) && previous.amount >= (points[start]?.amount ?? 0);
+  ) {
     start -= 1
     previous = points[start - 1]
   }

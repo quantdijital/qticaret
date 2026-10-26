@@ -193,7 +193,7 @@ F17 öncesinde tenant'lar F16 script'leriyle elle açılır.
 - F4.8 Hediye kartı / mağaza kredisi: çekirdekte veya resmi eklentide varsa kullanılır, yoksa özel modül (ADR)
 
 **KK:**
-- [ ] Kullanım limiti dolan kupon eşzamanlı isteklerde bile limit aşmıyor (testli)
+- [x] Kullanım limiti dolan kupon eşzamanlı isteklerde bile limit aşmıyor (testli). Kanıt: `integration-tests/http/promotion-codes.spec.ts` ("…however many checkouts race (KK)": aynı kodla yarışan üç ödemeden biri indirimli tamamlanıyor, `used` 1 kalıyor). Hediye kartı bakiyesi için aynısı: `integration-tests/http/store-credit.spec.ts`.
 - [x] Son 30 gün en düşük fiyat, fiyat geçmişinden doğru hesaplanıyor (testli); JSON-LD'deki üstü çizili fiyat bununla tutarlı. Kanıt:
   `src/lib/pricing/__tests__/` (30 gün hesabı ve gösterim), `integration-tests/http/price-history.spec.ts` (geçmişin yakalanması),
   `integration-tests/http/price-display.spec.ts` (Store ucu, 30 günde görülmüş fiyata dönüşün indirim sayılmaması, JSON-LD'nin aynı fiyat ve üstü çizili fiyatı)

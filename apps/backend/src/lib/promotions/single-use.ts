@@ -3,12 +3,13 @@ import { normalizeCode } from "./code"
 
 /**
  * Single-use codes (F4.6, ADR-0024): a batch's codes start with its
- * template's code, then eight characters a shopper reads off a card or a
- * receipt without mixing them up (no 0/O, no 1/I). 32 characters, eight of
- * them: about a trillion codes, so a guess is hopeless and a clash rare.
+ * template's code, then twelve characters a shopper reads off a card or a
+ * receipt without mixing them up (no 0/O, no 1/I). 32 characters, twelve
+ * of them: about 2^60 codes. Eight (2^40) fell to guessing from many
+ * addresses at once against a 10,000-code batch (security review, F4).
  */
 export const CODE_ALPHABET = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ"
-export const CODE_RANDOM_LENGTH = 8
+export const CODE_RANDOM_LENGTH = 12
 export const MAX_CODES_PER_BATCH = 10_000
 // Codes are at most 40 characters (ADR-0024): the prefix, a dash, the random part
 const PREFIX_MAX = 40 - 1 - CODE_RANDOM_LENGTH

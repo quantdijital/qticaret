@@ -1,4 +1,4 @@
-export { normalizeCode } from "./code"
+export { CODE_PATTERN, MAX_CODES_PER_REQUEST, enteredCodes, normalizeCode } from "./code"
 export {
   GIFT_CARD_CODE_LENGTH,
   GIFT_CARD_PREFIX_MAX,

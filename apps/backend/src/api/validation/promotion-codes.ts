@@ -1,7 +1,12 @@
 import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { ValidationError } from "../../lib/errors"
-import { normalizeCode } from "../../lib/promotions"
+import {
+  CODE_PATTERN,
+  enteredCodes,
+  MAX_CODES_PER_REQUEST,
+  normalizeCode,
+} from "../../lib/promotions"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import type { PromotionSettings } from "../../modules/platform-settings/sections"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
@@ -65,7 +70,13 @@ export function normalizePromotionCode(
     body &&
     typeof body["code"] === "string"
   ) {
-    body["code"] = normalizeCode(body["code"])
+    const code = normalizeCode(body["code"])
+    // Also what keeps a code harmless in the batch CSVs it may prefix
+    if (!CODE_PATTERN.test(code)) {
+      next(new ValidationError("promotions.code_invalid", { field: "code" }))
+      return
+    }
+    body["code"] = code
   }
   next()
 }
@@ -78,6 +89,10 @@ export function normalizePromoCodes(
 ) {
   const body = req.body as Body
   const codes = cartRoute(req) ? sentCodes(req) : null
+  if (codes && codes.length > MAX_CODES_PER_REQUEST) {
+    next(new ValidationError("promotions.too_many_codes", { field: "promo_codes" }))
+    return
+  }
   if (body && codes) {
     body["promo_codes"] = codes
   }
@@ -93,9 +108,7 @@ async function codesOnCart(req: MedusaRequest, cartId: string): Promise<string[]
   const cart = data[0] as
     | { promotions?: ({ code?: string | null; is_automatic?: boolean | null } | null)[] | null }
     | undefined
-  return (cart?.promotions ?? []).flatMap((promotion) =>
-    promotion?.code && !promotion.is_automatic ? [promotion.code] : []
-  )
+  return enteredCodes(cart?.promotions)
 }
 
 /**

@@ -11,7 +11,7 @@ import type { StockShop } from "../helpers/stock"
 
 jest.setTimeout(300 * 1000)
 
-const CODE = /^YAZ-[23456789ABCDEFGHJKLMNPQRSTUVWXYZ]{8}$/
+const CODE = /^YAZ-[23456789ABCDEFGHJKLMNPQRSTUVWXYZ]{12}$/
 
 /** F4.6 (ADR-0024): batches of single-use codes, kept out of the list, each code used once. */
 medusaIntegrationTestRunner({

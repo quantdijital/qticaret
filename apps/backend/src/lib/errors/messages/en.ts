@@ -25,6 +25,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "bulk_edit.stock_out_of_range": "The new stock would pass the limit.",
   "bulk_edit.stock_untracked": "This product's stock is not tracked.",
   "cart.address_required": "An address is needed to complete the order.",
+  "cart.shipping_changed":
+    "The shipping price changed with your basket; choose shipping again and retry.",
   "cart.shipping_not_needed": "Nothing in the cart needs shipping; remove the shipping method.",
   "catalog_import.attribute_invalid":
     "The value does not fit this attribute (one of its options, a number or Yes/No).",
@@ -186,6 +188,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "product_attributes.values_exist": "Products have values for the attributes being removed.",
   "product_attributes.variant_only":
     "variesBy and the option name apply to variant attributes only.",
+  "promotions.code_invalid": "A code is 3 to 40 letters, digits, dashes or underscores.",
+  "promotions.too_many_codes": "A request may send at most 5 codes.",
   "promotions.unknown": "Promotion not found.",
   "promotions.codes_template":
     "Single-use codes can only be made from a standard promotion with a code.",

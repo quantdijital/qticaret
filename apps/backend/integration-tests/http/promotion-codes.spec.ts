@@ -1,9 +1,16 @@
-import { Modules } from "@medusajs/framework/utils"
+import { Modules, PromotionActions } from "@medusajs/framework/utils"
+import {
+  createPaymentCollectionForCartWorkflow,
+  createPaymentSessionsWorkflow,
+  updateCartPromotionsWorkflow,
+} from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { PLATFORM_SETTINGS_MODULE } from "../../src/modules/platform-settings"
+import { SYSTEM_PAYMENT_PROVIDER_ID } from "../../src/scripts/bootstrap/constants"
 import type PlatformSettingsModuleService from "../../src/modules/platform-settings/service"
 import { placeOrder } from "../../src/scripts/seed/orders/place"
 import { createAdminUser } from "../helpers/admin"
+import { shippedCart } from "../helpers/gift-cards"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { stockShop, stockedProduct } from "../helpers/stock"
@@ -140,6 +147,81 @@ medusaIntegrationTestRunner({
       const applied = await addCodes(big.id, ["asgari"])
       expect(applied.status).toBe(200)
       expect(applied.data.cart.discount_total).toBe(20)
+    })
+
+    // A cart holding `codes`, made by the workflow straight (as requests racing
+    // each other could leave it), then completed as a shopper does
+    async function completeWith(codes: string[]) {
+      const id = await shippedCart(getContainer(), shop, variantId)
+      await updateCartPromotionsWorkflow(getContainer()).run({
+        input: { cart_id: id, promo_codes: codes, action: PromotionActions.ADD },
+      })
+      const { result: collection } = await createPaymentCollectionForCartWorkflow(
+        getContainer()
+      ).run({ input: { cart_id: id } })
+      await createPaymentSessionsWorkflow(getContainer()).run({
+        input: { payment_collection_id: collection.id, provider_id: SYSTEM_PAYMENT_PROVIDER_ID },
+      })
+      return storePost<{ type?: string }>(`/store/carts/${id}/complete`, {})
+    }
+
+    it("refuses a checkout whose cart took two codes past the one-code check", async () => {
+      await promotion("BIR")
+      await promotion("IKI")
+      const refused = await completeWith(["BIR", "IKI"])
+      expect({ status: refused.status, message: refused.data.message }).toEqual({
+        status: 400,
+        message: "promotions.one_code",
+      })
+      await settings().saveSection("promotions", { combine_codes: true }, null)
+      try {
+        expect((await completeWith(["BIR", "IKI"])).data).toMatchObject({ type: "order" })
+      } finally {
+        await settings().saveSection("promotions", { combine_codes: false }, null)
+      }
+    })
+
+    it("takes at most five codes a request, and plain codes from the admin", async () => {
+      const six = ["K1X", "K2X", "K3X", "K4X", "K5X", "K6X"]
+      const sent = await storePost("/store/carts", {
+        region_id: shop.regionId,
+        promo_codes: six,
+      })
+      expect(sent.status).toBe(400)
+      const formula = await settle(
+        http.post(
+          "/admin/promotions",
+          {
+            code: "=1+1",
+            type: "standard",
+            status: "active",
+            application_method: { type: "percentage", target_type: "order", value: 10 },
+          },
+          { headers: admin.headers }
+        )
+      )
+      expect(formula.status).toBe(400)
+    })
+
+    it("shows a shopper their own promotion only, never the rest of its campaign", async () => {
+      const campaign = await http.post<{ campaign: { id: string } }>(
+        "/admin/campaigns",
+        { name: "Parti", campaign_identifier: "parti-gizli" },
+        { headers: admin.headers }
+      )
+      await promotion("GIZLI-AAAA", { campaign_id: campaign.data.campaign.id })
+      await promotion("GIZLI-BBBB", { campaign_id: campaign.data.campaign.id })
+      const { id } = await cart(1, ["GIZLI-AAAA"])
+      for (const fields of [
+        "promotions.campaign.promotions.code",
+        "*promotions",
+        "items.adjustments.promotion.campaign.promotions.code",
+      ]) {
+        const read = await settle(
+          http.get(`/store/carts/${id}?fields=${fields}`, { headers: store.headers })
+        )
+        expect(JSON.stringify(read.data)).not.toContain("GIZLI-BBBB")
+      }
     })
 
     it("lets a code limited to one use be used once, however many checkouts race (KK)", async () => {

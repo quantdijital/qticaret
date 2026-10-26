@@ -17,6 +17,12 @@ export interface RateLimitProfile {
   name: string
   perIp?: Limit
   perIdentity?: Limit
+  /**
+   * Per identity from every address together. Only for identities a client
+   * holds rather than names (a cart's id): counted so, an e-mail would let
+   * anyone lock its owner out; a cart's tries are not spread over addresses.
+   */
+  perIdentityAnyIp?: Limit
 }
 
 const MINUTE = 60_000
@@ -49,6 +55,8 @@ export const RATE_LIMIT_PROFILES = {
     name: "coupon",
     perIp: { max: 30, windowMs: 10 * MINUTE },
     perIdentity: { max: 10, windowMs: 10 * MINUTE },
+    // The cart's own budget, however many addresses try codes on it
+    perIdentityAnyIp: { max: 10, windowMs: 10 * MINUTE },
   },
   installment: { name: "installment", perIp: { max: 30, windowMs: MINUTE } },
   sms: {

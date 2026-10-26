@@ -1,7 +1,7 @@
 import type { MedusaRequest } from "@medusajs/framework/http"
 import { logger } from "../../../lib/logging"
 import { RATE_LIMIT_PROFILES, createMemoryStore } from "../../../lib/security/rate-limit"
-import type { RateLimitStore } from "../../../lib/security/rate-limit"
+import type { RateLimitProfile, RateLimitStore } from "../../../lib/security/rate-limit"
 import { authIdentity, authProfile, rateLimit, rateLimitPrefix } from "../rate-limit"
 import { fakeResponse } from "./fakes"
 
@@ -93,6 +93,24 @@ describe("rateLimit", () => {
       request({ ip: "198.51.100.9", body: { email: "a@example.com" } })
     )
     expect(other.next).toHaveBeenCalled()
+  })
+
+  it("counts an identity a client holds from every address together, when the profile says so", async () => {
+    const store = createMemoryStore()
+    const cartProfile: RateLimitProfile = {
+      name: "cart",
+      perIdentity: { max: 5, windowMs: 60_000 },
+      perIdentityAnyIp: { max: 2, windowMs: 60_000 },
+    }
+    const limiter = rateLimit(() => cartProfile, {
+      store: () => store,
+      identity: () => "cart_01ABC",
+      scale: 1,
+    })
+    await run(limiter, request({ ip: "203.0.113.7" }))
+    await run(limiter, request({ ip: "198.51.100.9" }))
+    const third = await run(limiter, request({ ip: "192.0.2.44" }))
+    expect(third.status()).toBe(429)
   })
 
   it("never stores the identity as it is", async () => {

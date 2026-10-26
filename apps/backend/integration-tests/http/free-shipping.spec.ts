@@ -7,11 +7,13 @@ import {
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { PLATFORM_SETTINGS_MODULE } from "../../src/modules/platform-settings"
 import type PlatformSettingsModuleService from "../../src/modules/platform-settings/service"
+import { SYSTEM_PAYMENT_PROVIDER_ID } from "../../src/scripts/bootstrap/constants"
 import { createAdminUser } from "../helpers/admin"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { stockShop, stockedProduct } from "../helpers/stock"
 import type { StockShop } from "../helpers/stock"
+import { createStorefront } from "../helpers/storefront"
 
 jest.setTimeout(240 * 1000)
 
@@ -118,6 +120,64 @@ medusaIntegrationTestRunner({
       // 300 less 20% is 240: under the threshold
       expect(await shipping(3, ["YIRMI"])).toBeGreaterThan(0)
       expect(await shipping(3)).toBe(0)
+    })
+
+    it("stops a checkout whose code took the basket under the threshold after shipping was chosen", async () => {
+      await http.post(
+        "/admin/promotions",
+        {
+          code: "YIRMI",
+          type: "standard",
+          is_automatic: false,
+          is_tax_inclusive: true,
+          status: "active",
+          application_method: {
+            type: "percentage",
+            target_type: "order",
+            allocation: "across",
+            value: 20,
+          },
+        },
+        { headers: admin.headers }
+      )
+      await threshold(250)
+      const store = await createStorefront(getContainer())
+      const send = <T>(path: string, body: object) =>
+        settle(http.post<T & { message?: string }>(path, body, { headers: store.headers }))
+      const address = {
+        first_name: "Ayşe",
+        last_name: "Yılmaz",
+        address_1: "Demo",
+        country_code: "tr",
+      }
+      const made = await send<{ cart: { id: string } }>("/store/carts", {
+        region_id: shop.regionId,
+        items: [{ variant_id: variantId, quantity: 3 }],
+        shipping_address: address,
+      })
+      const id = made.data.cart.id
+      const chooseShipping = () =>
+        send<{ cart: { shipping_total: number } }>(`/store/carts/${id}/shipping-methods`, {
+          option_id: shop.shippingOptionId,
+        })
+      expect((await chooseShipping()).data.cart.shipping_total).toBe(0)
+      // 300 less 20% is 240: under the threshold, but the method chosen at 300 stays 0 TL
+      await send(`/store/carts/${id}/promotions`, { promo_codes: ["YIRMI"] })
+      const collection = await send<{ payment_collection: { id: string } }>(
+        "/store/payment-collections",
+        { cart_id: id }
+      )
+      await send(
+        `/store/payment-collections/${collection.data.payment_collection.id}/payment-sessions`,
+        { provider_id: SYSTEM_PAYMENT_PROVIDER_ID }
+      )
+      const refused = await send(`/store/carts/${id}/complete`, {})
+      expect({ status: refused.status, message: refused.data.message }).toEqual({
+        status: 400,
+        message: "cart.shipping_changed",
+      })
+      // Chosen again, it costs what the basket now pays
+      expect((await chooseShipping()).data.cart.shipping_total).toBeGreaterThan(0)
     })
 
     it("takes free shipping away with the threshold, and gives it to a new option", async () => {

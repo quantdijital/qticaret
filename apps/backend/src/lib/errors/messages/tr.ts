@@ -27,6 +27,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "bulk_edit.stock_out_of_range": "Yeni stok üst sınırı aşar.",
   "bulk_edit.stock_untracked": "Bu ürünün stoğu takip edilmiyor.",
   "cart.address_required": "Siparişi tamamlamak için teslimat adresi gerekir.",
+  "cart.shipping_changed":
+    "Kargo ücreti sepetinize göre değişti; kargo seçiminizi yenileyip tekrar deneyin.",
   "cart.shipping_not_needed": "Sepette kargo gerektiren ürün yok; kargo seçimini kaldırın.",
   "catalog_import.attribute_invalid":
     "Özellik değeri bu özellik için geçerli değil (seçeneklerden biri, sayı ya da Evet/Hayır olmalı).",
@@ -189,6 +191,9 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "product_attributes.values_exist": "Kaldırılan özelliklerin ürünlerde değerleri var.",
   "product_attributes.variant_only":
     "variesBy ve seçenek adı yalnızca varyant özelliklerinde kullanılır.",
+  "promotions.code_invalid":
+    "Kod 3 ile 40 karakter arasında olmalı; harf, rakam, tire ve alt çizgi kullanılabilir.",
+  "promotions.too_many_codes": "Bir istekte en çok 5 kod gönderilebilir.",
   "promotions.unknown": "Kampanya bulunamadı.",
   "promotions.codes_template":
     "Tek kullanımlık kodlar yalnızca kodlu, standart bir kampanyadan üretilebilir.",

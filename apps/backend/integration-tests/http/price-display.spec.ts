@@ -1,6 +1,7 @@
 import {
   createPriceListsWorkflow,
   updateProductVariantsWorkflow,
+  updateProductsWorkflow,
 } from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { PLATFORM_SETTINGS_MODULE } from "../../src/modules/platform-settings"
@@ -209,6 +210,14 @@ medusaIntegrationTestRunner({
         on_sale: false,
       })
       expect(read.headers["cache-control"]).toContain("max-age=60")
+
+      // A draft's price stays inside, as an unknown variant's does
+      const draft = await stockedProduct(getContainer(), shop, "gosterim-taslak", 5, 100)
+      await updateProductsWorkflow(getContainer()).run({
+        input: { selector: { id: draft.productId }, update: { status: "draft" } },
+      })
+      const hidden = await display(`variant_id=${draft.variantId}&currency_code=try`)
+      expect(hidden.data.price_display).toEqual({})
 
       const many = Array.from({ length: 101 }, (_, index) => `variant_id=v${String(index)}`)
       for (const query of [`variant_id=${variantId}`, `${many.join("&")}&currency_code=try`]) {

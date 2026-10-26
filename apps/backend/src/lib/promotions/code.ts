@@ -28,3 +28,20 @@ export function normalizeCode(code: string): string {
     .replace(/[ıiİşŞğĞüÜöÖçÇ]/gu, (letter) => ASCII[letter] ?? letter)
     .toUpperCase()
 }
+
+/** A code in the stored form: letters, digits, dashes and underscores, 3 to 40 of them. */
+export const CODE_PATTERN = /^[A-Z0-9_-]{3,40}$/u
+
+/**
+ * Codes one Store request may send. Each request counts as one code try
+ * (the coupon limit); more codes in it would be more guesses for one try.
+ */
+export const MAX_CODES_PER_REQUEST = 5
+
+type Promoted = { code?: string | null; is_automatic?: boolean | null } | null
+
+/** The codes a shopper entered on a cart: its promotions, automatic ones aside. */
+export const enteredCodes = (promotions: readonly Promoted[] | null | undefined): string[] =>
+  (promotions ?? []).flatMap((promotion) =>
+    promotion?.code && !promotion.is_automatic ? [promotion.code] : []
+  )

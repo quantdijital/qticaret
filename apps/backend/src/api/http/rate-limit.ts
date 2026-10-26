@@ -82,8 +82,13 @@ async function retryAfterSeconds(
   if (profile.perIp) {
     checks.push([`${profile.name}:ip:${ip}`, { ...profile.perIp, max: profile.perIp.max * scale }])
   }
-  if (profile.perIdentity && identity !== undefined && identity.trim() !== "") {
-    checks.push([`${profile.name}:id:${ip}:${identityKey(identity)}`, profile.perIdentity])
+  if (identity !== undefined && identity.trim() !== "") {
+    if (profile.perIdentity) {
+      checks.push([`${profile.name}:id:${ip}:${identityKey(identity)}`, profile.perIdentity])
+    }
+    if (profile.perIdentityAnyIp) {
+      checks.push([`${profile.name}:any:${identityKey(identity)}`, profile.perIdentityAnyIp])
+    }
   }
   const counts = await Promise.all(
     checks.map(async ([key, limit]) => ({ limit, window: await store.hit(key, limit.windowMs) }))

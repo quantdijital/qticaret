@@ -59,6 +59,20 @@ describe("the price before a discount (ADR-0023)", () => {
     expect(view).toMatchObject({ current: 8000, since: at(10), before: 12000 })
   })
 
+  it("begins a new discount where a sale price went up, measured against the lower one", () => {
+    // 120 regular, a list at 70, then a list at 90 with no regular price between
+    const risen = discountView([point(70, 12000), point(20, 7000, 12000), point(5, 9000, 12000)])
+    expect(risen).toMatchObject({ current: 9000, since: at(5), before: 7000, basis: "history" })
+    // A deepening after the rise is measured from the rise's start
+    const deepened = discountView([
+      point(70, 12000),
+      point(20, 8000, 12000),
+      point(10, 8500, 12000),
+      point(2, 7000, 12000),
+    ])
+    expect(deepened).toMatchObject({ current: 7000, since: at(10), before: 8000 })
+  })
+
   it("falls back to the regular price when history starts inside the discount", () => {
     expect(discountView([point(3, 8000, 12000)])).toMatchObject({
       discounted: true,
