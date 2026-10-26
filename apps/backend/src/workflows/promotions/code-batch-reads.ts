@@ -13,7 +13,10 @@ type Filters = Record<string, unknown>
 
 /** Every batch campaign, or a template's (identifiers start with its id). */
 async function batchCampaigns(container: MedusaContainer, templateId?: string) {
-  const like = templateId ? `${BATCH_PREFIX}${templateId}-%` : `${BATCH_PREFIX}%`
+  // An id is taken as written: LIKE's own wildcards in it are escaped
+  const like = templateId
+    ? `${BATCH_PREFIX}${templateId.replace(/[\\%_]/gu, (char) => `\\${char}`)}-%`
+    : `${BATCH_PREFIX}%`
   return (await container
     .resolve(Modules.PROMOTION)
     .listCampaigns({ campaign_identifier: { $like: like } } as Filters, {

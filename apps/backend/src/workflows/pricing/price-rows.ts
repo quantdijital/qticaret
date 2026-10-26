@@ -35,5 +35,11 @@ export const isPlainPrice = (row: PriceRow): boolean =>
   (row.min_quantity === null || row.min_quantity === undefined) &&
   (row.max_quantity === null || row.max_quantity === undefined)
 
-export const kurusOfRow = (row: PriceRow): Kurus =>
-  fromMedusaAmount(row.raw_amount ?? row.amount ?? 0, { allowRounding: true })
+/** A price's amount in kuruş; a row read without its amount is a mistake, not a free price (adr/0010). */
+export function kurusOfRow(row: PriceRow): Kurus {
+  const amount = row.raw_amount ?? row.amount
+  if (amount === null || amount === undefined) {
+    throw new RangeError(`price ${row.id} has no amount`)
+  }
+  return fromMedusaAmount(amount, { allowRounding: true })
+}

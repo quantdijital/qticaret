@@ -1,20 +1,14 @@
 import type { MedusaContainer, PromotionDTO } from "@medusajs/framework/types"
 import { MedusaError, Modules } from "@medusajs/framework/utils"
-import {
-  createCampaignsWorkflow,
-  createPromotionsWorkflow,
-  deleteCampaignsWorkflow,
-  deletePromotionsWorkflow,
-} from "@medusajs/medusa/core-flows"
 import { chunksOf } from "../../lib/catalog"
 import { ValidationError } from "../../lib/errors"
-import { batchPrefix, freshCodes } from "../../lib/promotions"
 
 /**
  * Batches of single-use codes (F4.6, ADR-0024). Each batch is a campaign
  * of its own whose identifier names its template (`codes-<template id>-…`),
  * holding a copy of the template per code, each usable once. The batch
- * campaign carries the template's days; the copies its offer and rules.
+ * campaign carries the template's days and budget; the copies its offer
+ * and rules. Made by `createCodeBatchWorkflow` (code-batch-workflow.ts).
  */
 export const BATCH_PREFIX = "codes-"
 // Promotions written per call, and codes checked against the shop's per query
@@ -35,6 +29,7 @@ const TEMPLATE_RELATIONS = [
   "rules",
   "rules.values",
   "campaign",
+  "campaign.budget",
 ]
 
 type Template = PromotionDTO
@@ -98,57 +93,56 @@ export interface CodeBatch {
 }
 
 /**
- * `count` codes copied from the template into a batch campaign of their
- * own. Codes are checked against the shop's before they are written; if
- * writing fails part way, what was written is taken back.
+ * The batch's campaign: the template's days, and a copy of its budget. A
+ * per-customer limit goes on holding across the batch's codes; a total
+ * (spend or uses) is counted for the batch on its own (ADR-0024 note).
  */
-export async function createCodeBatch(
-  container: MedusaContainer,
-  input: { promotion_id: string; count: number },
-  progress: (percent: number) => Promise<void>
-): Promise<CodeBatch> {
-  const template = await codeTemplate(container, input.promotion_id)
-  const prefix = batchPrefix(template.code ?? "")
-  const { result: campaigns } = await createCampaignsWorkflow(container).run({
-    input: {
-      campaignsData: [
-        {
-          name: `${template.code ?? ""} · ${String(input.count)}`,
-          campaign_identifier: batchIdentifier(template.id),
-          starts_at: template.campaign?.starts_at ?? null,
-          ends_at: template.campaign?.ends_at ?? null,
-        },
-      ],
-    },
-  })
-  const campaignId = campaigns[0]?.id ?? ""
-  const written: string[] = []
-  const codes: string[] = []
-  try {
-    const promotions = container.resolve(Modules.PROMOTION)
-    const batches = Math.ceil(input.count / CHUNK)
-    for (let batch = 0; batch < batches; batch++) {
-      const size = Math.min(CHUNK, input.count - batch * CHUNK)
-      const drawn = freshCodes(prefix, size, new Set(codes))
-      const taken = await promotions.listPromotions({ code: drawn }, { select: ["code"] })
-      // A clash with a code the shop has: draw those again, against both
-      const clashes = new Set(taken.flatMap((row) => (row.code ? [row.code] : [])))
-      const fresh = drawn.filter((code) => !clashes.has(code))
-      fresh.push(...freshCodes(prefix, size - fresh.length, new Set([...codes, ...drawn])))
-      const { result } = await createPromotionsWorkflow(container).run({
-        input: { promotionsData: fresh.map((code) => copyOf(template, code, campaignId)) },
-      })
-      written.push(...result.map((row) => row.id))
-      codes.push(...fresh)
-      await progress(Math.round(((batch + 1) / batches) * 100))
-    }
-  } catch (error) {
-    // Best effort: a batch is whole or gone
-    for (const ids of chunksOf(written, CHUNK)) {
-      await deletePromotionsWorkflow(container).run({ input: { ids } })
-    }
-    await deleteCampaignsWorkflow(container).run({ input: { ids: [campaignId] } })
-    throw error
+export function batchCampaignData(template: Template, count: number) {
+  const budget = template.campaign?.budget
+  return {
+    name: `${template.code ?? ""} · ${String(count)}`,
+    campaign_identifier: batchIdentifier(template.id),
+    starts_at: template.campaign?.starts_at ?? null,
+    ends_at: template.campaign?.ends_at ?? null,
+    ...(budget?.type
+      ? {
+          budget: {
+            type: budget.type,
+            limit: budget.limit ?? null,
+            ...(budget.currency_code ? { currency_code: budget.currency_code } : {}),
+            ...(budget.attribute ? { attribute: budget.attribute } : {}),
+          },
+        }
+      : {}),
   }
-  return { campaign_id: campaignId, codes }
 }
+
+/** A batch taken back whole: its codes, then its campaign. */
+export async function removeCodeBatch(
+  container: MedusaContainer,
+  batch: { campaign_id: string; promotion_ids: string[] }
+): Promise<void> {
+  const promotions = container.resolve(Modules.PROMOTION)
+  for (const ids of chunksOf(batch.promotion_ids, CHUNK)) {
+    await promotions.deletePromotions(ids)
+  }
+  if (batch.campaign_id) {
+    await promotions.deleteCampaigns([batch.campaign_id])
+  }
+}
+
+/** A batch taken back by its campaign: every code in it, then the campaign. */
+export async function removeCodeBatchOf(
+  container: MedusaContainer,
+  campaignId: string
+): Promise<void> {
+  const rows = await container
+    .resolve(Modules.PROMOTION)
+    .listPromotions({ campaign: { id: [campaignId] } }, { select: ["id"], take: null })
+  await removeCodeBatch(container, {
+    campaign_id: campaignId,
+    promotion_ids: rows.map((row) => row.id),
+  })
+}
+
+export { CHUNK as BATCH_CHUNK, copyOf as batchCopyOf }

@@ -7,7 +7,10 @@ import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { PRICE_HISTORY_MODULE } from "../../src/modules/price-history"
 import type PriceHistoryModuleService from "../../src/modules/price-history/service"
 import { discountViewOf } from "../../src/workflows/pricing/discount-view"
-import { recordAllSellingPrices } from "../../src/workflows/pricing/price-history"
+import {
+  recordAllSellingPrices,
+  recordListBoundaries,
+} from "../../src/workflows/pricing/price-history"
 import { stockShop, stockedProduct } from "../helpers/stock"
 import type { StockShop } from "../helpers/stock"
 
@@ -111,6 +114,22 @@ medusaIntegrationTestRunner({
       const before = (await recordsOf(variantId, 2)).length
       await recordAllSellingPrices(getContainer(), "reconcile")
       expect((await recordsOf(variantId, before)).length).toBe(before)
+    })
+
+    it("records a list's start at the time it began, not at the next hourly check", async () => {
+      const { variantId } = await stockedProduct(getContainer(), shop, "sinir-kupa", 1)
+      await recordsOf(variantId, 1)
+      const startsAt = new Date(Date.now() + 2000)
+      await saleList(variantId, 60, { starts_at: startsAt })
+      await pause(3000)
+
+      expect(await recordListBoundaries(getContainer())).toBeGreaterThan(0)
+      const rows = await recordsOf(variantId, 2)
+      expect(rows.at(-1)).toMatchObject({ amount: 60, reason: "price_change" })
+      expect(new Date(rows.at(-1)?.recorded_at ?? 0).getTime()).toBe(startsAt.getTime())
+      // The hourly check finds it already recorded
+      await recordAllSellingPrices(getContainer(), "reconcile")
+      expect((await recordsOf(variantId, 2)).length).toBe(2)
     })
   },
 })

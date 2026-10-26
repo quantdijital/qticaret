@@ -7,7 +7,11 @@ import {
   transform,
   when,
 } from "@medusajs/framework/workflows-sdk"
-import { batchPriceListPricesWorkflow } from "@medusajs/medusa/core-flows"
+import {
+  acquireLockStep,
+  batchPriceListPricesWorkflow,
+  releaseLockStep,
+} from "@medusajs/medusa/core-flows"
 import { BPS_PER_WHOLE, multiplyByRateBps, toMedusaAmount } from "../../lib/money"
 import { PRICE_ROW_FIELDS, isPlainPrice, kurusOfRow } from "./price-rows"
 import type { PriceRow } from "./price-rows"
@@ -148,6 +152,9 @@ const planDiscountStep = createStep(
 export const discountPriceListWorkflow = createWorkflow(
   "price-list-discount",
   (input: DiscountPriceListInput) => {
+    // One at a time per list: two (a double click) would read the same prices and both add one
+    const lock = transform({ input }, ({ input }) => `price-list-discount:${input.price_list_id}`)
+    acquireLockStep({ key: lock, timeout: 5, ttl: 60 })
     const plan = planDiscountStep(input)
     const data = transform({ plan }, ({ plan }) => plan.batch)
     // Nothing to write (unknown products, or none with a price of their own): no batch
@@ -156,6 +163,7 @@ export const discountPriceListWorkflow = createWorkflow(
         batchPriceListPricesWorkflow.runAsStep({ input: { data } })
       }
     )
+    releaseLockStep({ key: lock })
     return new WorkflowResponse(
       transform({ plan }, ({ plan }) => ({
         priced: plan.batch.create.length + plan.batch.update.length,

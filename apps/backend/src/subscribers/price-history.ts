@@ -1,7 +1,12 @@
 import type { SubscriberArgs, SubscriberConfig } from "@medusajs/framework"
-import { ContainerRegistrationKeys, Modules, PricingEvents } from "@medusajs/framework/utils"
+import { Modules, PricingEvents } from "@medusajs/framework/utils"
 import { errorSummary, logger } from "../lib/logging"
 import { recordSellingPricesWorkflow } from "../workflows/pricing/price-history"
+import {
+  priceSetsOfLists,
+  priceSetsOfPrices,
+  variantsOfPriceSets,
+} from "../workflows/pricing/priced-variants"
 
 type Container = SubscriberArgs["container"]
 
@@ -21,49 +26,19 @@ const LIST_RULE_EVENTS: readonly string[] = [
   PricingEvents.PRICE_LIST_RULE_DELETED,
 ]
 
-// A deleted row too: its price set still says whose price it was
-const READ = { withDeleted: true } as const
-
-const setsOf = (prices: { price_set_id?: string | null }[]): string[] =>
-  prices.flatMap((price) => (price.price_set_id ? [price.price_set_id] : []))
-
 async function priceSetsOf(container: Container, eventName: string, id: string) {
-  const pricing = container.resolve(Modules.PRICING)
-  let listId: string | null
   if (PRICE_EVENTS.includes(eventName)) {
-    const prices = await pricing.listPrices({ id: [id] }, { select: ["price_set_id"], ...READ })
-    return setsOf(prices)
+    return priceSetsOfPrices(container, [id])
   }
+  let listId: string | null = id
   if (LIST_RULE_EVENTS.includes(eventName)) {
-    const [rule] = await pricing.listPriceListRules(
-      { id: [id] },
-      { select: ["price_list_id"], take: 1, ...READ }
-    )
+    const [rule] = await container
+      .resolve(Modules.PRICING)
+      .listPriceListRules({ id: [id] }, { select: ["price_list_id"], take: 1, withDeleted: true })
     // Selected as the column; the DTO names only the relation
     listId = (rule as { price_list_id?: string | null } | undefined)?.price_list_id ?? null
-  } else {
-    listId = id
   }
-  if (!listId) {
-    return []
-  }
-  const prices = await pricing.listPrices(
-    { price_list_id: [listId] },
-    { select: ["price_set_id"], ...READ }
-  )
-  return setsOf(prices)
-}
-
-async function variantsOf(container: Container, priceSetIds: string[]): Promise<string[]> {
-  if (priceSetIds.length === 0) {
-    return []
-  }
-  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
-    entity: "product_variant_price_set",
-    fields: ["variant_id"],
-    filters: { price_set_id: [...new Set(priceSetIds)] },
-  })
-  return (data as { variant_id: string }[]).map((link) => link.variant_id)
+  return listId ? priceSetsOfLists(container, [listId]) : []
 }
 
 /**
@@ -75,7 +50,7 @@ async function variantsOf(container: Container, priceSetIds: string[]): Promise<
 export default async function priceHistory({ event, container }: SubscriberArgs<{ id: string }>) {
   try {
     const priceSetIds = await priceSetsOf(container, event.name, event.data.id)
-    const variantIds = await variantsOf(container, priceSetIds)
+    const variantIds = await variantsOfPriceSets(container, priceSetIds)
     if (variantIds.length > 0) {
       await recordSellingPricesWorkflow(container).run({
         input: { variant_ids: variantIds, reason: "price_change" },

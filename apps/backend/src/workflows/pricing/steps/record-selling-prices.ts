@@ -11,6 +11,8 @@ import { sellingPrices } from "../selling-prices"
 export interface RecordSellingPricesInput {
   variant_ids: string[]
   reason: PriceRecordReason
+  /** When the prices began, if not now (a price list's start or end, ISO). */
+  recorded_at?: string
 }
 
 // Variants priced per query
@@ -31,7 +33,8 @@ async function changedPrices(
   container: MedusaContainer,
   ids: string[],
   currency: string,
-  reason: PriceRecordReason
+  reason: PriceRecordReason,
+  recordedAt: Date | undefined
 ): Promise<PriceRecordInput[]> {
   const history = container.resolve<PriceHistoryModuleService>(PRICE_HISTORY_MODULE)
   const last = new Map(
@@ -62,6 +65,7 @@ async function changedPrices(
             original_amount: original,
             price_list_id: listId,
             reason,
+            ...(recordedAt ? { recorded_at: recordedAt } : {}),
           },
         ]
   })
@@ -77,13 +81,14 @@ async function changedPrices(
  * No compensation: a row records a price that already applied.
  */
 export const recordSellingPricesStep = createStep(
-  "price-history-record",
+  "price-history-record-step",
   async (input: RecordSellingPricesInput, { container }) => {
     const ids = [...new Set(input.variant_ids)]
+    const recordedAt = input.recorded_at ? new Date(input.recorded_at) : undefined
     let recorded = 0
     for (const currency of await currencies(container)) {
       for (const chunk of chunksOf(ids, VARIANT_CHUNK)) {
-        const rows = await changedPrices(container, chunk, currency, input.reason)
+        const rows = await changedPrices(container, chunk, currency, input.reason, recordedAt)
         await container.resolve<PriceHistoryModuleService>(PRICE_HISTORY_MODULE).recordPrices(rows)
         recorded += rows.length
       }

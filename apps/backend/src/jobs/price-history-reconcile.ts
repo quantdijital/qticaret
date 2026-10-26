@@ -1,6 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { errorSummary, logger } from "../lib/logging"
-import { recordAllSellingPrices } from "../workflows/pricing/price-history"
+import { isLockBusy, recordAllSellingPrices } from "../workflows/pricing/price-history"
 
 /**
  * The price history's hourly check (F4.2, ADR-0023): a price list that
@@ -12,8 +12,12 @@ export default async function priceHistoryReconcile(container: MedusaContainer) 
     const recorded = await recordAllSellingPrices(container, "reconcile")
     logger.info({ event: "price_history.reconciled", recorded })
   } catch (error) {
-    // Another process is running it
-    logger.warn({ event: "price_history.reconcile_skipped", err: errorSummary(error) })
+    if (isLockBusy(error)) {
+      // Another process is running it
+      logger.info({ event: "price_history.reconcile_skipped" })
+      return
+    }
+    logger.error({ event: "price_history.reconcile_failed", err: errorSummary(error) })
   }
 }
 

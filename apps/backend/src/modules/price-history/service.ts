@@ -42,7 +42,10 @@ function refuseWrite(): never {
  * moment on.
  */
 class PriceHistoryModuleService extends MedusaService({ PriceRecord }) {
-  /** Each variant's last recorded price in each of these currencies; none before its first. */
+  /**
+   * Each variant's price in force last in each of these currencies: by when
+   * it began, then by write order (as the history reads); none before its first.
+   */
   @InjectManager()
   async lastPrices(
     variantIds: string[],
@@ -61,7 +64,7 @@ class PriceHistoryModuleService extends MedusaService({ PriceRecord }) {
         WHERE deleted_at IS NULL
           AND variant_id IN (${placeholders(variantIds)})
           AND currency_code IN (${placeholders(currencyCodes)})
-        ORDER BY variant_id, currency_code, seq DESC`,
+        ORDER BY variant_id, currency_code, recorded_at DESC, seq DESC`,
       [...variantIds, ...currencyCodes]
     )) as LastPrice[]
   }
@@ -86,7 +89,7 @@ class PriceHistoryModuleService extends MedusaService({ PriceRecord }) {
     )
     const later = await this.listPriceRecords(
       { ...key, recorded_at: { $gte: since } },
-      { order: { recorded_at: "ASC", seq: "ASC" } },
+      { order: { recorded_at: "ASC", seq: "ASC" }, take: null },
       sharedContext
     )
     return inForce ? [inForce, ...later] : later

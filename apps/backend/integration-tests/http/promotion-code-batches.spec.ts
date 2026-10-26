@@ -1,6 +1,7 @@
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { placeOrder } from "../../src/scripts/seed/orders/place"
+import { removeCodeBatchOf } from "../../src/workflows/promotions/code-batches"
 import { createAdminUser } from "../helpers/admin"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
@@ -144,6 +145,48 @@ medusaIntegrationTestRunner({
         `/admin/promotions/${other}/code-batches/${batch?.campaign_id ?? ""}/codes`
       )
       expect(wrong.status).toBe(404)
+    })
+
+    it("gives a batch its template's budget, and takes a batch back whole", async () => {
+      const campaign = await http.post<{ campaign: { id: string } }>(
+        "/admin/campaigns",
+        {
+          name: "Kişi başı bir",
+          campaign_identifier: "kisi-basi",
+          budget: { type: "use_by_attribute", attribute: "customer_id", limit: 1 },
+        },
+        { headers: admin.headers }
+      )
+      const id = await template({ campaign_id: campaign.data.campaign.id })
+      const job = await codes(id, 3)
+      expect(job.status).toBe("succeeded")
+      const batchId = job.result_summary?.["campaign_id"]
+      if (typeof batchId !== "string") {
+        throw new Error("the job names no batch campaign")
+      }
+      const query = getContainer().resolve(ContainerRegistrationKeys.QUERY)
+      const { data } = await query.graph({
+        entity: "campaign",
+        fields: ["budget.type", "budget.limit", "budget.attribute"],
+        filters: { id: batchId },
+      })
+      expect(data[0]).toMatchObject({
+        budget: { type: "use_by_attribute", limit: 1, attribute: "customer_id" },
+      })
+
+      await removeCodeBatchOf(getContainer(), batchId)
+      const left = await query.graph({
+        entity: "promotion",
+        fields: ["id"],
+        filters: { campaign_id: batchId },
+      })
+      expect(left.data).toEqual([])
+      const gone = await query.graph({
+        entity: "campaign",
+        fields: ["id"],
+        filters: { id: batchId },
+      })
+      expect(gone.data).toEqual([])
     })
   },
 })
