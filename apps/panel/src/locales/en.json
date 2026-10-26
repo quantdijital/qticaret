@@ -401,7 +401,8 @@
       "types": {
         "audit_log.export": "Audit log export",
         "seo.url_style": "URL style change",
-        "seo.sitemap": "Sitemap"
+        "seo.sitemap": "Sitemap",
+        "seo.audit": "SEO audit"
       }
     },
     "audit": {
@@ -1456,6 +1457,109 @@
       "criticalCount_other": "{{products}} products miss something critical (price or images).",
       "lowest": "Products that need the most work",
       "column": "SEO"
+    },
+    "audit": {
+      "title": "Store audit",
+      "hint": "Runs on its own every night: whether search engines can get in, the sitemap, 404s, shared titles and products in no category, in one report.",
+      "run": "Audit now",
+      "running": "Auditing…",
+      "queued": "The audit has started; results show here in a few minutes.",
+      "download": "Download report",
+      "last": "Last audit {{when}}",
+      "never": "No audit yet. The first one runs on its own tonight; start one now if you would rather not wait.",
+      "failed": "The last audit did not finish. Start it again; if it keeps failing, Settings > Jobs has the details.",
+      "clean": "No store-wide issues found.",
+      "more_one": "{{amount}} more; the report has them all.",
+      "more_other": "{{amount}} more; the report has them all.",
+      "findingCount_one": "{{count}} {{severity}}",
+      "findingCount_other": "{{count}} {{severity}}",
+      "suggested": "Suggested:",
+      "actions": {
+        "redirect": "Create 301",
+        "redirected": "Redirected",
+        "chooseTarget": "Choose target",
+        "openRule": "Open rule",
+        "openPage": "Open page",
+        "openSettings": "Open settings"
+      },
+      "rules": {
+        "S-HOST-01": {
+          "title": "The store is not ready for search engines",
+          "why": "Without a primary domain, pages have no canonical address and there is no sitemap; an environment closed to search engines is never indexed."
+        },
+        "S-ROBOTS-01": {
+          "title": "robots.txt blocks search engines",
+          "why": "One rule in robots.txt can drop every product or category page from search results. The Sitemap line shows crawlers where the list of pages is."
+        },
+        "S-SITEMAP-01": {
+          "title": "The sitemap is out of date",
+          "why": "Search engines learn about new and changed pages from the sitemap first; an old or partial one means new products show up late."
+        },
+        "S-404-01": {
+          "title_one": "{{amount}} address often returns 404",
+          "title_other": "{{amount}} addresses often return 404",
+          "why": "Addresses visitors and search engines asked for many times, this week too, but cannot find cost sales and rankings. A 301 to the suggested page carries the address's value over."
+        },
+        "S-DUP-01": {
+          "title_one": "{{amount}} title or description is the same on several pages",
+          "title_other": "{{amount}} titles or descriptions are the same on several pages",
+          "why": "Pages showing the same title compete with each other in search results and tell searchers nothing apart. Titles from the template count too: give pages a distinct name or their own title."
+        },
+        "S-ORPHAN-01": {
+          "title_one": "{{amount}} live product is in no category",
+          "title_other": "{{amount}} live products are in no category",
+          "why": "Nothing in the store links to a product without a category; search engines find it late and rate it low. Add it to at least one category."
+        },
+        "S-REDIR-01": {
+          "title_one": "{{amount}} thing to fix in redirects",
+          "title_other": "{{amount}} things to fix in redirects",
+          "why": "A rule whose target is missing or removed sends visitors to an empty page; a rule under a live page never runs; a rule whose target redirects again is out of date. Rules unused for a year can go; records with many old addresses carry a redirect for each."
+        }
+      },
+      "reasons": {
+        "S-HOST-01": {
+          "no_host": "No primary domain: no canonical addresses and no sitemap.",
+          "indexing_off": "This environment is closed to search engines (SEO_INDEXING); robots.txt blocks every crawler.",
+          "staging_indexed": "This is a staging environment but it is open to search engines (SEO_INDEXING); its copy competes with the live store."
+        },
+        "S-ROBOTS-01": {
+          "blocked": "{{target}} cannot crawl this page.",
+          "no_sitemap": "robots.txt does not give the sitemap's address.",
+          "blocked_all": "Closed to every crawler."
+        },
+        "S-SITEMAP-01": {
+          "failed": "The last sitemap build failed.",
+          "stale": "The sitemap has not been refreshed in over two days.",
+          "never": "The sitemap has never been built.",
+          "missing_one": "{{amount}} page is missing from the sitemap.",
+          "missing_other": "{{amount}} pages are missing from the sitemap.",
+          "no_path_one": "{{amount}} live page has no address; it cannot appear in the sitemap or the store.",
+          "no_path_other": "{{amount}} live pages have no address; they cannot appear in the sitemap or the store."
+        },
+        "S-404-01": {
+          "missing_one": "{{amount}} request in all; asked for this week too",
+          "missing_other": "{{amount}} requests in all; asked for this week too"
+        },
+        "S-DUP-01": {
+          "title_one": "Same title on {{amount}} page",
+          "title_other": "Same title on {{amount}} pages",
+          "description_one": "Same description on {{amount}} page",
+          "description_other": "Same description on {{amount}} pages"
+        },
+        "S-ORPHAN-01": {
+          "no_category": "In no category"
+        },
+        "S-REDIR-01": {
+          "chain": "Target redirects again: {{target}}",
+          "idle_one": "Unused for a year; {{amount}} hit in all",
+          "idle_other": "Unused for a year; {{amount}} hits in all",
+          "crowded_one": "Has {{amount}} old address",
+          "crowded_other": "Has {{amount}} old addresses",
+          "shadowed": "A live page has this address; the rule never runs.",
+          "dead_target": "Target not found: {{target}}",
+          "gone_target": "Target removed: {{target}}"
+        }
+      }
     }
   },
   "attributes": {

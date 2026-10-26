@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { CatalogHealthCard } from "@/features/dashboard/components/catalog-health-card"
 import { redirectCountsQuery } from "@/features/seo/api/redirects"
 import { AdvisorSummaryCard } from "@/features/seo/advisor/summary-card"
+import { AuditCard } from "@/features/seo/audit/audit-card"
 import { SitemapCard } from "@/features/seo/components/sitemap-card"
 import { sectionQuery } from "@/features/settings/api/sections"
 import type { SeoSettings } from "@/features/settings/api/sections"
@@ -113,8 +114,8 @@ function RedirectsCard({ className }: { className?: string }) {
 
 /**
  * SEO (docs/13, docs/14): how the shop looks in search today, what its
- * catalog still lacks, and its redirects. The score and suggestions come
- * with the advisor (F3).
+ * catalog still lacks, its redirects and sitemap, the advisor's score and
+ * the store-wide audit.
  */
 export function SeoOverviewPage() {
   const { t } = useTranslation()
@@ -162,6 +163,7 @@ export function SeoOverviewPage() {
         <RedirectsCard className="xl:col-span-6" />
         <SitemapCard className="xl:col-span-6" />
         <AdvisorSummaryCard className="xl:col-span-12" />
+        <AuditCard className="xl:col-span-12" />
       </div>
     </div>
   )

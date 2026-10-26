@@ -4,23 +4,14 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { SectionCard } from "@/components/patterns/section-card"
 import { StatusBadge } from "@/components/patterns/status-badge"
-import type { StatusTone } from "@/components/patterns/status-badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { assessmentQuery, useApplyFix } from "@/features/seo/api/advisor"
-import type { AdvisorKind, SeoIssue, Severity } from "@/features/seo/api/advisor"
+import type { AdvisorKind, SeoIssue } from "@/features/seo/api/advisor"
 import { errorText } from "@/lib/errors"
 import { cn } from "@/lib/utils"
-import { GRADE_TEXT } from "./grades"
+import { GRADE_TEXT, SEVERITY_TONES } from "./grades"
 import { ScoreRing } from "./score-ring"
-
-const TONES: Record<Severity, StatusTone> = {
-  critical: "danger",
-  high: "warning",
-  medium: "info",
-  low: "neutral",
-  info: "neutral",
-}
 
 // Rule texts are shared by kind: "P-TITLE-01" and "C-TITLE-01" read the same
 const textKey = (ruleId: string) => ruleId.slice(ruleId.indexOf("-") + 1)
@@ -54,7 +45,7 @@ function Issue({ issue, kind, id, targets }: IssueProps) {
   return (
     <li className="flex flex-col gap-2 py-3">
       <div className="flex items-start gap-2.5">
-        <StatusBadge tone={TONES[issue.severity]}>
+        <StatusBadge tone={SEVERITY_TONES[issue.severity]}>
           {t(`seo.advisor.severities.${issue.severity}`)}
         </StatusBadge>
         <span className="min-w-0 flex-1 text-[13px] leading-5">{t(`${key}.title`, params)}</span>

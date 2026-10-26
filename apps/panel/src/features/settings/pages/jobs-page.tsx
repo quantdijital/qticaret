@@ -1,8 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
-import { Download, FileClock, Loader2 } from "lucide-react"
+import { FileClock } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { toast } from "sonner"
 import { DataTable } from "@/components/patterns/data-table"
 import type { Column } from "@/components/patterns/data-table"
 import { PageHeader } from "@/components/patterns/page-header"
@@ -10,9 +9,9 @@ import { Pagination } from "@/components/patterns/pagination"
 import { ErrorState } from "@/components/patterns/states"
 import { StatusBadge } from "@/components/patterns/status-badge"
 import type { StatusTone } from "@/components/patterns/status-badge"
-import { Button } from "@/components/ui/button"
-import { JOB_PAGE_SIZE, jobResultUrl, jobsQuery } from "@/features/settings/api/activity"
+import { JOB_PAGE_SIZE, jobsQuery } from "@/features/settings/api/activity"
 import type { AsyncJob } from "@/features/settings/api/activity"
+import { JobDownloadButton } from "@/features/settings/components/job-download-button"
 import { errorText } from "@/lib/errors"
 import { formatDateTime, formatPercent, formatRelative } from "@/lib/format"
 
@@ -22,35 +21,6 @@ const TONE: Record<AsyncJob["status"], StatusTone> = {
   succeeded: "success",
   failed: "danger",
   cancelled: "neutral",
-}
-
-function DownloadButton({ job }: { job: AsyncJob }) {
-  const { t } = useTranslation()
-  const [busy, setBusy] = useState(false)
-  if (!job.has_result) {
-    return null
-  }
-  const open = async () => {
-    setBusy(true)
-    try {
-      // The link lives a few minutes: fetched on demand, never kept; only web links are followed
-      const url = new URL(await jobResultUrl(job.id), window.location.origin)
-      if (url.protocol !== "https:" && url.protocol !== "http:") {
-        throw new Error("unexpected link")
-      }
-      window.location.assign(url.href)
-    } catch (failure) {
-      toast.error(errorText(t, failure))
-    } finally {
-      setBusy(false)
-    }
-  }
-  return (
-    <Button variant="outline" size="sm" disabled={busy} onClick={() => void open()}>
-      {busy ? <Loader2 className="animate-spin" /> : <Download />}
-      {t("settings.jobs.download")}
-    </Button>
-  )
 }
 
 function useColumns(): Column<AsyncJob>[] {
@@ -101,7 +71,7 @@ function useColumns(): Column<AsyncJob>[] {
         </span>
       ),
     },
-    { key: "result", header: "", align: "right", cell: (job) => <DownloadButton job={job} /> },
+    { key: "result", header: "", align: "right", cell: (job) => <JobDownloadButton job={job} /> },
   ]
 }
 

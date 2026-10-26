@@ -401,7 +401,8 @@
       "types": {
         "audit_log.export": "Denetim kaydı dışa aktarımı",
         "seo.url_style": "Adres biçimi değişikliği",
-        "seo.sitemap": "Site haritası"
+        "seo.sitemap": "Site haritası",
+        "seo.audit": "SEO denetimi"
       }
     },
     "audit": {
@@ -1464,6 +1465,109 @@
       "criticalCount_other": "{{products}} üründe kritik eksik var (fiyat ya da görsel).",
       "lowest": "En çok iyileştirme bekleyen ürünler",
       "column": "SEO"
+    },
+    "audit": {
+      "title": "Mağaza denetimi",
+      "hint": "Her gece kendiliğinden çalışır: arama motorlarının mağazaya girebildiğini, site haritasını, 404'leri, aynı başlıkları ve kategorisiz ürünleri tek raporda toplar.",
+      "run": "Şimdi denetle",
+      "running": "Denetleniyor…",
+      "queued": "Denetim başladı; sonuç birkaç dakika içinde burada.",
+      "download": "Raporu indir",
+      "last": "Son denetim {{when}}",
+      "never": "Henüz denetim yok. İlk denetim bu gece kendiliğinden çalışır; beklemek istemezseniz şimdi başlatın.",
+      "failed": "Son denetim tamamlanamadı. Yeniden başlatın; sorun sürerse Ayarlar > İşler'de ayrıntısı var.",
+      "clean": "Mağaza genelinde sorun bulunmadı.",
+      "more_one": "{{amount}} kayıt daha var; tamamı raporda.",
+      "more_other": "{{amount}} kayıt daha var; tamamı raporda.",
+      "findingCount_one": "{{count}} {{severity}}",
+      "findingCount_other": "{{count}} {{severity}}",
+      "suggested": "Önerilen:",
+      "actions": {
+        "redirect": "301 oluştur",
+        "redirected": "Yönlendirildi",
+        "chooseTarget": "Hedef seç",
+        "openRule": "Kurala git",
+        "openPage": "Sayfaya git",
+        "openSettings": "Ayarlara git"
+      },
+      "rules": {
+        "S-HOST-01": {
+          "title": "Mağaza arama motorlarına hazır değil",
+          "why": "Ana alan adı olmadan sayfaların kanonik adresi ve site haritası oluşmaz; arama motorlarına kapalı bir ortam hiç dizine eklenmez."
+        },
+        "S-ROBOTS-01": {
+          "title": "robots.txt arama motorlarının yolunu kesiyor",
+          "why": "robots.txt'deki bir engel ürün ya da kategori sayfalarının tamamını arama sonuçlarından düşürebilir. Site haritası satırı da tarayıcılara sayfaların listesini gösterir."
+        },
+        "S-SITEMAP-01": {
+          "title": "Site haritası güncel değil",
+          "why": "Arama motorları yeni ve değişen sayfaları önce site haritasından öğrenir; eski ya da eksik bir harita yeni ürünlerin geç görünmesine yol açar."
+        },
+        "S-404-01": {
+          "title_one": "{{amount}} adres sık sık 404 veriyor",
+          "title_other": "{{amount}} adres sık sık 404 veriyor",
+          "why": "Ziyaretçilerin ve arama motorlarının defalarca istediği, bu hafta da istenen ama bulunamayan adresler satış ve sıralama kaybettirir. Önerilen sayfaya 301 yönlendirmesi, adresin değerini yeni sayfaya taşır."
+        },
+        "S-DUP-01": {
+          "title_one": "{{amount}} başlık ya da açıklama birden çok sayfada aynı",
+          "title_other": "{{amount}} başlık ya da açıklama birden çok sayfada aynı",
+          "why": "Aynı başlığı gösteren sayfalar arama sonuçlarında birbiriyle yarışır ve tıklayana fark anlatmaz. Şablondan gelen başlıklar da sayılır: sayfalara ayırt edici bir ad ya da kendi başlığını verin."
+        },
+        "S-ORPHAN-01": {
+          "title_one": "{{amount}} yayındaki ürün hiçbir kategoride değil",
+          "title_other": "{{amount}} yayındaki ürün hiçbir kategoride değil",
+          "why": "Kategorisiz ürüne mağaza içinden bağlantı gitmez; arama motorları onu geç bulur ve önemsiz sayar. Ürünü en az bir kategoriye ekleyin."
+        },
+        "S-REDIR-01": {
+          "title_one": "Yönlendirmelerde {{amount}} düzeltilecek nokta var",
+          "title_other": "Yönlendirmelerde {{amount}} düzeltilecek nokta var",
+          "why": "Hedefi bulunamayan ya da kaldırılmış kural ziyaretçiyi boş sayfaya gönderir; canlı bir sayfanın altında kalan kural hiç çalışmaz; hedefi yeniden yönlenen kuralın hedefi eskimiştir. Bir yıldır kullanılmayan kurallar silinebilir; çok sayıda eski adresi olan kayıtlar her adres için bir yönlendirme taşır."
+        }
+      },
+      "reasons": {
+        "S-HOST-01": {
+          "no_host": "Ana alan adı girilmemiş: kanonik adresler ve site haritası oluşmuyor.",
+          "indexing_off": "Bu ortam arama motorlarına kapalı (SEO_INDEXING); robots.txt tüm tarayıcıları engelliyor.",
+          "staging_indexed": "Bu bir test ortamı ama arama motorlarına açık (SEO_INDEXING); kopya içerik asıl mağazayla yarışır."
+        },
+        "S-ROBOTS-01": {
+          "blocked": "{{target}} bu sayfaya giremiyor.",
+          "no_sitemap": "robots.txt site haritasının adresini vermiyor.",
+          "blocked_all": "Tüm tarayıcılara kapalı."
+        },
+        "S-SITEMAP-01": {
+          "failed": "Son site haritası üretimi başarısız oldu.",
+          "stale": "Site haritası iki günden uzun süredir yenilenmedi.",
+          "never": "Site haritası henüz hiç oluşturulmadı.",
+          "missing_one": "Site haritasında {{amount}} sayfa eksik.",
+          "missing_other": "Site haritasında {{amount}} sayfa eksik.",
+          "no_path_one": "{{amount}} yayındaki sayfanın adresi yok; site haritasına ve mağazaya çıkamıyor.",
+          "no_path_other": "{{amount}} yayındaki sayfanın adresi yok; site haritasına ve mağazaya çıkamıyor."
+        },
+        "S-404-01": {
+          "missing_one": "Toplam {{amount}} istek; bu hafta da istendi",
+          "missing_other": "Toplam {{amount}} istek; bu hafta da istendi"
+        },
+        "S-DUP-01": {
+          "title_one": "{{amount}} sayfada aynı başlık",
+          "title_other": "{{amount}} sayfada aynı başlık",
+          "description_one": "{{amount}} sayfada aynı açıklama",
+          "description_other": "{{amount}} sayfada aynı açıklama"
+        },
+        "S-ORPHAN-01": {
+          "no_category": "Hiçbir kategoride değil"
+        },
+        "S-REDIR-01": {
+          "chain": "Hedef başka bir adrese yönleniyor: {{target}}",
+          "idle_one": "Bir yıldır kullanılmadı; toplam {{amount}} isabet",
+          "idle_other": "Bir yıldır kullanılmadı; toplam {{amount}} isabet",
+          "crowded_one": "{{amount}} eski adresi var",
+          "crowded_other": "{{amount}} eski adresi var",
+          "shadowed": "Bu adreste canlı bir sayfa var; kural hiç çalışmıyor.",
+          "dead_target": "Hedef bulunamıyor: {{target}}",
+          "gone_target": "Hedef kaldırılmış: {{target}}"
+        }
+      }
     }
   },
   "attributes": {
