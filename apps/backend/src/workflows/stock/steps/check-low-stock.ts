@@ -37,6 +37,9 @@ async function sellableOf(container: MedusaContainer, id: string): Promise<numbe
   return levels.reduce((sum, level) => sum + level.stocked_quantity - level.reserved_quantity, 0)
 }
 
+/** The lock an item's watch is read and written under: one writer at a time makes it. */
+export const watchLock = (inventoryItemId: string) => `stock-low:${inventoryItemId}`
+
 /**
  * One item, under its own lock, so two changes at once see each other's
  * result. Above the line it is armed; low and armed, it alerts and is
@@ -46,7 +49,7 @@ async function sellableOf(container: MedusaContainer, id: string): Promise<numbe
 async function checkItem(container: MedusaContainer, id: string, threshold: number) {
   const ledger = container.resolve<StockLedgerModuleService>(STOCK_LEDGER_MODULE)
   return container.resolve(Modules.LOCKING).execute(
-    `stock-low:${id}`,
+    watchLock(id),
     async () => {
       const available = await sellableOf(container, id)
       const [watch] = await ledger.listStockWatches({ inventory_item_id: id }, { take: 1 })
