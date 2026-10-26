@@ -328,7 +328,7 @@
           "description": "Yalnızca aşağıdaki robots.txt kuralları geçerli olur."
         }
       },
-      "robotsHint": "{sitemap_url} etiketi yayında site haritası adresiyle değiştirilir.",
+      "robotsHint": "{sitemap_url} yayında site haritası adresiyle, {facet_disallow} satırı filtre, sıralama ve fiyat parametrelerinin engelleriyle değiştirilir; landing sayfalarının adresleri açık kalır.",
       "samples": {
         "ürün_adı": "Keten Gömlek",
         "marka": "Örnek Marka",
@@ -1696,7 +1696,8 @@
         "S-ROBOTS-01": {
           "blocked": "{{target}} bu sayfaya giremiyor.",
           "no_sitemap": "robots.txt site haritasının adresini vermiyor.",
-          "blocked_all": "Tüm tarayıcılara kapalı."
+          "blocked_all": "Tüm tarayıcılara kapalı.",
+          "facets_open": "Filtreli ya da sıralı liste tarayıcılara açık; tarama bütçesi binlerce kombinasyona harcanır. robots.txt şablonuna {facet_disallow} satırını ekleyin."
         },
         "S-SITEMAP-01": {
           "failed": "Son site haritası üretimi başarısız oldu.",

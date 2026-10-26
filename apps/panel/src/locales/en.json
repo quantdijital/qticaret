@@ -328,7 +328,7 @@
           "description": "Only the robots.txt rules below apply."
         }
       },
-      "robotsHint": "The {sitemap_url} tag becomes the sitemap address when published.",
+      "robotsHint": "{sitemap_url} becomes the sitemap's address and the {facet_disallow} line the blocks for filter, sort and price parameters when published; landing page addresses stay open.",
       "samples": {
         "ürün_adı": "Linen Shirt",
         "marka": "Sample Brand",
@@ -1688,7 +1688,8 @@
         "S-ROBOTS-01": {
           "blocked": "{{target}} cannot crawl this page.",
           "no_sitemap": "robots.txt does not give the sitemap's address.",
-          "blocked_all": "Closed to every crawler."
+          "blocked_all": "Closed to every crawler.",
+          "facets_open": "A filtered or sorted listing is open to crawlers; their budget goes on thousands of combinations. Add the {facet_disallow} line to the robots.txt template."
         },
         "S-SITEMAP-01": {
           "failed": "The last sitemap build failed.",
