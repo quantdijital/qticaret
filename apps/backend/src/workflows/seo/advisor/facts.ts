@@ -1,15 +1,16 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
+import { Modules } from "@medusajs/framework/utils"
 import { missingDimensions, variantGtin } from "../../../lib/catalog"
 import type { AdvisorFacts, PageKind } from "../../../lib/seo/advisor"
-import { plainText, seoTextHash } from "../../../lib/seo"
-import { SEO_ADVISOR_MODULE } from "../../../modules/seo-advisor"
-import type SeoAdvisorModuleService from "../../../modules/seo-advisor/service"
+import { plainText } from "../../../lib/seo"
 import { CATALOG_ENTITY_TYPES } from "../../catalog/entity-paths"
 import { liraOf } from "../facts"
 import type { FactRow } from "../facts"
 import { seoPayloadFor } from "../payload"
 import { activePathOf } from "../redirects/owners"
+import { contentFacts } from "./facts-content"
+import { OWN_FIELDS, duplicates, rowOf } from "./facts-common"
+import type { Own } from "./facts-common"
 
 /**
  * What the advisor reads of a page (docs/14): the search result text the
@@ -17,63 +18,12 @@ import { activePathOf } from "../redirects/owners"
  * catalog facts behind the rules.
  */
 
-const OWN_FIELDS = [
-  "seo_meta.seo_title",
-  "seo_meta.seo_description",
-  "seo_meta.focus_keyword",
-  "seo_meta.robots_override",
-  "seo_meta.canonical_override",
-]
-
-interface Own {
-  seo_title?: string | null
-  seo_description?: string | null
-  focus_keyword?: string | null
-  robots_override?: string | null
-  canonical_override?: string | null
-}
-
-const ENTITIES: Record<PageKind, { entity: string; owner: string }> = {
+// Content pages and blog posts have their own facts (`facts-content.ts`)
+const ENTITIES: Record<Exclude<PageKind, "page" | "post">, { entity: string; owner: string }> = {
   product: { entity: "product", owner: CATALOG_ENTITY_TYPES.product },
   category: { entity: "product_category", owner: CATALOG_ENTITY_TYPES.category },
   brand: { entity: "brand", owner: CATALOG_ENTITY_TYPES.brand },
   collection: { entity: "product_collection", owner: CATALOG_ENTITY_TYPES.collection },
-}
-
-async function rowOf<T>(container: MedusaContainer, entity: string, fields: string[], id: string) {
-  const { data } = await container
-    .resolve(ContainerRegistrationKeys.QUERY)
-    .graph({ entity, fields, filters: { id } })
-  return (data[0] as T | undefined) ?? null
-}
-
-/**
- * Other live, indexable pages of the kind showing the same title or
- * description, own or from the template (their assessments keep the
- * hashes; docs/14 S-DUP-01). A draft copy competes with nothing.
- */
-async function duplicates(
-  container: MedusaContainer,
-  kind: PageKind,
-  id: string,
-  texts: { title: string; description: string }
-) {
-  const service = container.resolve<SeoAdvisorModuleService>(SEO_ADVISOR_MODULE)
-  const count = async (field: "title_hash" | "description_hash", text: string) => {
-    const hash = seoTextHash(text)
-    if (!hash) {
-      return 0
-    }
-    const rows = await service.listSeoAssessments(
-      { entity_type: kind, [field]: hash, is_listed: true, entity_id: { $ne: id } },
-      { select: ["id"], take: 100 }
-    )
-    return rows.length
-  }
-  return {
-    title: await count("title_hash", texts.title),
-    description: await count("description_hash", texts.description),
-  }
 }
 
 type ProductRow = Omit<FactRow, "attribute_template" | "product_extension" | "images"> & {
@@ -224,7 +174,7 @@ interface ListingRow {
   seo_meta?: Own | null
 }
 
-const LISTING_FIELDS: Record<Exclude<PageKind, "product">, string[]> = {
+const LISTING_FIELDS: Record<Exclude<PageKind, "product" | "page" | "post">, string[]> = {
   category: ["id", "name", "handle", "description", "mpath", "is_active", "is_internal"],
   brand: ["id", "name", "handle", "description", "logo_url", "is_active"],
   collection: ["id", "title", "handle"],
@@ -248,6 +198,9 @@ export async function advisorFacts(
   kind: PageKind,
   id: string
 ): Promise<(AdvisorFacts & { isListed: boolean }) | null> {
+  if (kind === "page" || kind === "post") {
+    return contentFacts(container, kind, id)
+  }
   const spec = ENTITIES[kind]
   const row =
     kind === "product"

@@ -4,7 +4,7 @@ import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { publicUploadUrl } from "../../files/public-upload"
 import { ValidationError } from "../../../lib/errors"
 import { seoTextHash } from "../../../lib/seo"
-import { SEO_ENTITIES } from "../entities"
+import { SEO_ENTITIES, seoEntityFilter } from "../entities"
 import type { SeoEntityType, SeoValues } from "../entities"
 
 export interface UpsertSeoMetaInput {
@@ -46,7 +46,7 @@ async function current(
   const { data } = await query.graph({
     entity: SEO_ENTITIES[type].entity,
     fields: ["id", "seo_meta.*"],
-    filters: { id },
+    filters: seoEntityFilter(type, id),
   })
   const row = data[0] as { id: string; seo_meta?: Stored | null } | undefined
   if (!row) {

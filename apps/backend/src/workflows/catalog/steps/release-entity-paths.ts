@@ -1,6 +1,8 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
+import { CONTENT_MODULE } from "../../../modules/content"
+import type ContentModuleService from "../../../modules/content/service"
 import { URL_REGISTRY_MODULE } from "../../../modules/url-registry"
 import type UrlRegistryModuleService from "../../../modules/url-registry/service"
 import type { UrlKey, UrlOwner } from "../../../modules/url-registry/validation"
@@ -9,8 +11,21 @@ import { CATALOG_ENTITY_TYPES } from "../entity-paths"
 type Undo = { owner: UrlOwner } & ({ reserved: UrlKey[] } | { freed: string[] })
 
 // A deleted product that was not published had no public URL: no redirect
-// or 410 will answer for it, so its slugs go back to the pool
+// or 410 will answer for it, so its slugs go back to the pool. Nor had a
+// content page that never went live (F3.16).
 async function wasPublic(container: MedusaContainer, owner: UrlOwner): Promise<boolean> {
+  if (
+    owner.entity_type === CATALOG_ENTITY_TYPES.page ||
+    owner.entity_type === CATALOG_ENTITY_TYPES.post
+  ) {
+    const [entry] = await container
+      .resolve<ContentModuleService>(CONTENT_MODULE)
+      .listContentEntries(
+        { id: owner.entity_id },
+        { withDeleted: true, select: ["id", "published_at"], take: 1 }
+      )
+    return Boolean(entry?.published_at)
+  }
   if (owner.entity_type !== CATALOG_ENTITY_TYPES.product) {
     return true
   }

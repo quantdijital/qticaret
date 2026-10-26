@@ -43,10 +43,16 @@ const OWNER_QUERIES: Readonly<Record<string, { entity: string; fields: string[] 
   },
   [CATALOG_ENTITY_TYPES.collection]: { entity: "product_collection", fields: ["id", "deleted_at"] },
   [CATALOG_ENTITY_TYPES.brand]: { entity: "brand", fields: ["id", "deleted_at", "is_active"] },
+  [CATALOG_ENTITY_TYPES.page]: { entity: "content_entry", fields: ["id", "deleted_at", "status"] },
+  [CATALOG_ENTITY_TYPES.post]: { entity: "content_entry", fields: ["id", "deleted_at", "status"] },
 }
 
 function isLive(type: string, row: OwnerRow): boolean {
-  if (type === CATALOG_ENTITY_TYPES.product) {
+  if (
+    type === CATALOG_ENTITY_TYPES.product ||
+    type === CATALOG_ENTITY_TYPES.page ||
+    type === CATALOG_ENTITY_TYPES.post
+  ) {
     return row.status === "published"
   }
   if (type === CATALOG_ENTITY_TYPES.category) {

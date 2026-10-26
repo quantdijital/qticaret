@@ -18,6 +18,8 @@ const PAGE = 1_000
 interface Row {
   id: string
   updated_at?: string | Date | null
+  revised_at?: string | Date | null
+  published_at?: string | Date | null
   images?: ({ url: string } | null)[] | null
   seo_meta?: { robots_override?: string | null; canonical_override?: string | null } | null
 }
@@ -28,6 +30,8 @@ interface KindSpec {
   type: string
   filters: Record<string, unknown>
   images: boolean
+  /** The fields whose date is the page's last meaningful change, first set first; else `updated_at`. */
+  changed?: readonly ("revised_at" | "published_at")[]
 }
 
 const KINDS: readonly KindSpec[] = [
@@ -59,6 +63,24 @@ const KINDS: readonly KindSpec[] = [
     filters: {},
     images: false,
   },
+  // F3.16
+  {
+    kind: "pages",
+    entity: "content_entry",
+    type: CATALOG_ENTITY_TYPES.page,
+    filters: { kind: "page", status: "published" },
+    images: false,
+    // A cover or status change is no change of the text (docs/13 §6)
+    changed: ["revised_at", "published_at"],
+  },
+  {
+    kind: "posts",
+    entity: "content_entry",
+    type: CATALOG_ENTITY_TYPES.post,
+    filters: { kind: "post", status: "published" },
+    images: false,
+    changed: ["revised_at", "published_at"],
+  },
 ]
 
 // A page that asks not to be indexed, or names another page as canonical, stays out
@@ -74,11 +96,17 @@ async function entriesOf(
   const registry = container.resolve<UrlRegistryModuleService>(URL_REGISTRY_MODULE)
   const fields = [
     "id",
-    "updated_at",
+    ...(spec.changed ?? ["updated_at"]),
     "seo_meta.robots_override",
     "seo_meta.canonical_override",
     ...(spec.images ? ["images.url"] : []),
   ]
+  const lastmod = (row: Row): Date | null => {
+    const value = spec.changed
+      ? spec.changed.map((field) => row[field]).find(Boolean)
+      : row.updated_at
+    return value ? new Date(value) : null
+  }
   const entries: SitemapEntry[] = []
   for (let skip = 0; ; skip += PAGE) {
     const { data } = await query.graph({
@@ -107,7 +135,7 @@ async function entriesOf(
       if (path) {
         entries.push({
           loc: new URL(path, origin).href,
-          lastmod: row.updated_at ? new Date(row.updated_at) : null,
+          lastmod: lastmod(row),
           images: (row.images ?? []).flatMap((image) => (image ? [image.url] : [])),
         })
       }

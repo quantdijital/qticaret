@@ -13,6 +13,7 @@ import { PRODUCT_FACT_FIELDS, productFacts } from "./facts"
 import type { FactRow } from "./facts"
 import type { Condition } from "../../lib/seo/jsonld"
 import { highlightText } from "./highlight"
+import { contentSubject } from "./payload-content"
 import type { HighlightValue } from "./highlight"
 import {
   MEDIA_FIELDS,
@@ -208,6 +209,8 @@ const SUBJECTS: Readonly<
   [CATALOG_ENTITY_TYPES.category]: categorySubject,
   [CATALOG_ENTITY_TYPES.collection]: collectionSubject,
   [CATALOG_ENTITY_TYPES.brand]: brandSubject,
+  [CATALOG_ENTITY_TYPES.page]: contentSubject,
+  [CATALOG_ENTITY_TYPES.post]: contentSubject,
 }
 
 /** The `seo` object of a live page at `path`, or null for a kind without one. */

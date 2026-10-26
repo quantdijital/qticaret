@@ -182,6 +182,46 @@ export function breadcrumbJsonLd(crumbs: readonly { name: string; url: string }[
   }
 }
 
+/** A content page's or blog post's facts (F3.16, docs/13 §5). */
+export interface ArticleFacts {
+  /** A blog post is a `BlogPosting`; a content page (about, delivery terms) a `WebPage`. */
+  type: "BlogPosting" | "WebPage"
+  headline: string
+  description: string
+  /** ISO dates: first published, last changed in its text. */
+  datePublished: string | null
+  dateModified: string | null
+  author: string | null
+  image: string | null
+  publisher: string
+}
+
+export function articleJsonLd(facts: ArticleFacts, url: string): JsonLd {
+  if (facts.type === "WebPage") {
+    return compact({
+      "@context": SCHEMA,
+      "@type": "WebPage",
+      name: facts.headline,
+      description: facts.description,
+      url,
+      dateModified: facts.dateModified ?? facts.datePublished,
+    })
+  }
+  return compact({
+    "@context": SCHEMA,
+    "@type": "BlogPosting",
+    headline: facts.headline,
+    description: facts.description,
+    url,
+    mainEntityOfPage: url,
+    image: facts.image ? [facts.image] : undefined,
+    datePublished: facts.datePublished,
+    dateModified: facts.dateModified ?? facts.datePublished,
+    author: facts.author ? { "@type": "Person", name: facts.author } : undefined,
+    publisher: { "@type": "Organization", name: facts.publisher },
+  })
+}
+
 /**
  * The home page's blocks (docs/13 §5): the shop as an `OnlineStore` (the
  * most specific organisation type for a web shop) and the `WebSite`

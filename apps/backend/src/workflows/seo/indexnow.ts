@@ -37,6 +37,16 @@ const LIVE = [
   },
   { entity: "brand", type: CATALOG_ENTITY_TYPES.brand, filters: { is_active: true } },
   { entity: "product_collection", type: CATALOG_ENTITY_TYPES.collection, filters: {} },
+  {
+    entity: "content_entry",
+    type: CATALOG_ENTITY_TYPES.page,
+    filters: { kind: "page", status: "published" },
+  },
+  {
+    entity: "content_entry",
+    type: CATALOG_ENTITY_TYPES.post,
+    filters: { kind: "post", status: "published" },
+  },
 ] as { entity: string; type: string; filters: Record<string, unknown> }[]
 
 /** Active paths of live records changed since `since`, and paths reserved since then. */

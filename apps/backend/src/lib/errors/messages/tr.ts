@@ -35,6 +35,22 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "catalog.successor_unknown": "Seçilen ürün bulunamadı.",
   "catalog.variant_unknown": "Varyant bu ürüne ait değil.",
   "catalog.variants_too_many": "Tek seferde en çok 500 varyant kaydedilebilir.",
+  "content.author_invalid":
+    "Yazar adı en fazla 120 karakter olmalı ve kullanılamayan karakter içermemeli.",
+  "content.body_invalid":
+    "İçerikte izin verilmeyen bir öğe ya da biçim var; sayfayı yenileyip yeniden deneyin.",
+  "content.card_unknown":
+    "İçerikteki ürün ya da kategori kartlarından biri artık yok; kartı kaldırın.",
+  "content.excerpt_invalid":
+    "Özet en fazla 500 karakter olmalı ve kullanılamayan karakter içermemeli.",
+  "content.image_alt_invalid": "Kapak görselinin alt metni en fazla 300 karakter olmalı.",
+  "content.image_unknown":
+    "Görseller mağazanın medya kütüphanesinden olmalı; görseli yükleyerek ekleyin.",
+  "content.title_invalid":
+    "Başlık gerekli; en fazla 200 karakter olmalı ve kullanılamayan karakter içermemeli.",
+  "content.too_large":
+    "İçerik çok uzun ya da iç içe; bir sayfa en fazla 200.000 karakter ve birkaç seviye iç içe liste olabilir.",
+  "content.unknown": "İçerik bulunamadı.",
   "errors.busy": "Kayıt şu an başka bir işlemle güncelleniyor; birkaç saniye sonra tekrar deneyin.",
   "errors.conflict": "Kayıt bu arada değişti; sayfayı yenileyip tekrar deneyin.",
   "errors.csrf_rejected": "İstek güvenlik kontrolünden geçemedi; sayfayı yenileyip tekrar deneyin.",

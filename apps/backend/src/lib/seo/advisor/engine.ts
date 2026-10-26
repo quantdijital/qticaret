@@ -1,3 +1,4 @@
+import { CONTENT_RULES } from "./rules-content"
 import { LISTING_RULES } from "./rules-listing"
 import { PRODUCT_RULES } from "./rules-product"
 import { SHARED_RULES } from "./rules-shared"
@@ -27,6 +28,9 @@ const APPLICABLE: Record<PageKind, readonly Category[]> = {
   category: ["meta", "content", "technical"],
   collection: ["meta", "content", "technical"],
   brand: ["meta", "images", "content", "technical"],
+  // F3.16: their structured data is built for them, so it is not judged
+  page: ["meta", "images", "content", "links", "technical"],
+  post: ["meta", "images", "content", "links", "technical"],
 }
 
 export const GRADES = ["excellent", "good", "needs_work", "poor"] as const
@@ -46,7 +50,13 @@ export interface Assessment {
 }
 
 export function findIssues(facts: AdvisorFacts): SeoIssue[] {
-  const rules = [...SHARED_RULES, ...(facts.kind === "product" ? PRODUCT_RULES : LISTING_RULES)]
+  const own =
+    facts.kind === "product"
+      ? PRODUCT_RULES
+      : facts.kind === "page" || facts.kind === "post"
+        ? CONTENT_RULES
+        : LISTING_RULES
+  const rules = [...SHARED_RULES, ...own]
   return rules
     .map((rule) => rule(facts))
     .filter((issue): issue is SeoIssue => issue !== null)

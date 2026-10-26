@@ -23,3 +23,8 @@ export const collectionPath = (handle: string): string => `/koleksiyon/${handle}
 
 export const brandPath = (handle: string, style: UrlStyle): string =>
   style === "flat" ? `/${handle}` : `/marka/${handle}`
+
+/** A content page sits at the root in either style; a reserved word (`/blog`, `/urun`) cannot be one. */
+export const pagePath = (handle: string): string => `/${handle}`
+
+export const postPath = (handle: string): string => `/blog/${handle}`

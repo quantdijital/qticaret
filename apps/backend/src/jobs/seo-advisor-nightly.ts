@@ -7,11 +7,13 @@ import { enqueueAsyncJobWorkflow } from "../workflows/async-job/enqueue-async-jo
 import { assessPage } from "../workflows/seo/advisor/assess"
 
 const PAGE = 500
-const KINDS: { kind: PageKind; entity: string }[] = [
+const KINDS: { kind: PageKind; entity: string; filters?: Record<string, unknown> }[] = [
   { kind: "product", entity: "product" },
   { kind: "category", entity: "product_category" },
   { kind: "brand", entity: "brand" },
   { kind: "collection", entity: "product_collection" },
+  { kind: "page", entity: "content_entry", filters: { kind: "page" } },
+  { kind: "post", entity: "content_entry", filters: { kind: "post" } },
 ]
 
 /**
@@ -22,12 +24,13 @@ const KINDS: { kind: PageKind; entity: string }[] = [
 export default async function seoAdvisorNightly(container: MedusaContainer) {
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
   const counts: Record<string, number> = {}
-  for (const { kind, entity } of KINDS) {
+  for (const { kind, entity, filters } of KINDS) {
     counts[kind] = 0
     for (let skip = 0; ; skip += PAGE) {
       const { data } = await query.graph({
         entity,
         fields: ["id"],
+        filters: filters ?? {},
         pagination: { skip, take: PAGE, order: { id: "ASC" } },
       })
       for (const { id } of data as { id: string }[]) {

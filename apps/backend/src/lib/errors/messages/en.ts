@@ -30,6 +30,22 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "catalog.successor_unknown": "The selected product was not found.",
   "catalog.variant_unknown": "The variant does not belong to this product.",
   "catalog.variants_too_many": "At most 500 variants can be saved at once.",
+  "content.author_invalid":
+    "The author name must be at most 120 characters, without disallowed characters.",
+  "content.body_invalid":
+    "The content holds an element or format that is not allowed; reload the page and try again.",
+  "content.card_unknown":
+    "One of the product or category cards in the content no longer exists; remove it.",
+  "content.excerpt_invalid":
+    "The summary must be at most 500 characters, without disallowed characters.",
+  "content.image_alt_invalid": "The cover image's alt text must be at most 300 characters.",
+  "content.image_unknown":
+    "Images must come from the shop's media library; upload the image to add it.",
+  "content.title_invalid":
+    "A title is required, at most 200 characters, without disallowed characters.",
+  "content.too_large":
+    "The content is too long or too deeply nested; a page can hold at most 200,000 characters and a few levels of nested lists.",
+  "content.unknown": "Content not found.",
   "errors.busy": "The record is being updated by another action; try again in a few seconds.",
   "errors.conflict": "The record changed meanwhile; reload and try again.",
   "errors.csrf_rejected": "The request failed a security check; reload the page and try again.",

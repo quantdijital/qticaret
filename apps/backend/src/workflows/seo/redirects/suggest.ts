@@ -62,6 +62,14 @@ const LIVE_QUERIES: Readonly<Record<string, { entity: string; filters: Record<st
     },
     [CATALOG_ENTITY_TYPES.collection]: { entity: "product_collection", filters: {} },
     [CATALOG_ENTITY_TYPES.brand]: { entity: "brand", filters: { is_active: true } },
+    [CATALOG_ENTITY_TYPES.page]: {
+      entity: "content_entry",
+      filters: { kind: "page", status: "published" },
+    },
+    [CATALOG_ENTITY_TYPES.post]: {
+      entity: "content_entry",
+      filters: { kind: "post", status: "published" },
+    },
   }
 
 /** Which of the owners are live, one query per kind of record. */

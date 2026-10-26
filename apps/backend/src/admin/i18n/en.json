@@ -171,7 +171,9 @@
           "tokens": "Available tags:",
           "preview": "Preview:",
           "fits": "Fits a Google result",
-          "tooLong": "May be cut in a Google result"
+          "tooLong": "May be cut in a Google result",
+          "page": "Content page title",
+          "post": "Blog post title"
         },
         "robots": {
           "title": "Crawlers",

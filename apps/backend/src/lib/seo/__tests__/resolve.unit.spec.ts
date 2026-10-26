@@ -9,6 +9,8 @@ const shop: SeoShop = {
     product: "{ürün_adı} | {marka} | {mağaza}",
     category: "{kategori} Modelleri ve Fiyatları | {mağaza}",
     brand: "{marka} Ürünleri | {mağaza}",
+    page: "{başlık} | {mağaza}",
+    post: "{başlık} | {mağaza}",
   },
   descriptionTemplates: { product: "{kısa_açıklama}. {fiyat_cümlesi} {kargo_cümlesi}" },
 }
@@ -137,6 +139,56 @@ describe("resolveSeoPayload", () => {
       descriptionTemplates: { product: "{fiyat_cümlesi}" },
     })
     expect(payload.description).toBe("Yıkanmış ketenden rahat kesim gömlek.")
+  })
+})
+
+describe("content pages (F3.16)", () => {
+  const post = (kind: "page" | "post"): SeoSubject => ({
+    kind,
+    path: kind === "post" ? "/blog/kupa-secimi" : "/hakkimizda",
+    name: "Kupa nasıl seçilir?",
+    description: "Seramik mi porselen mi? Kullanım ve bakıma göre seçim.",
+    tokens: {},
+    overrides: null,
+    image: { url: "https://cdn.example.com/kapak.webp", alt: null },
+    trail: kind === "post" ? [{ name: "Blog", path: "/blog" }] : [],
+    article: {
+      type: kind === "post" ? "BlogPosting" : "WebPage",
+      headline: "Kupa nasıl seçilir?",
+      datePublished: "2026-10-20T09:00:00.000Z",
+      dateModified: "2026-10-25T09:00:00.000Z",
+      author: "Ayşe Yılmaz",
+      image: "https://cdn.example.com/kapak.webp",
+    },
+  })
+
+  it("makes a blog post an article with its author and dates", () => {
+    const seo = resolveSeoPayload(post("post"), shop)
+    expect(seo.title).toBe("Kupa nasıl seçilir? | Demo Mağaza")
+    expect(seo.openGraph.type).toBe("article")
+    expect(seo.breadcrumbs.map((crumb) => crumb.url)).toEqual([
+      "https://magaza.example.com/blog",
+      "https://magaza.example.com/blog/kupa-secimi",
+    ])
+    expect(seo.jsonLd[0]).toEqual({
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      headline: "Kupa nasıl seçilir?",
+      description: "Seramik mi porselen mi? Kullanım ve bakıma göre seçim.",
+      url: "https://magaza.example.com/blog/kupa-secimi",
+      mainEntityOfPage: "https://magaza.example.com/blog/kupa-secimi",
+      image: ["https://cdn.example.com/kapak.webp"],
+      datePublished: "2026-10-20T09:00:00.000Z",
+      dateModified: "2026-10-25T09:00:00.000Z",
+      author: { "@type": "Person", name: "Ayşe Yılmaz" },
+      publisher: { "@type": "Organization", name: "Demo Mağaza" },
+    })
+  })
+
+  it("makes a content page a web page", () => {
+    const seo = resolveSeoPayload(post("page"), shop)
+    expect(seo.openGraph.type).toBe("website")
+    expect(seo.jsonLd[0]).toMatchObject({ "@type": "WebPage", name: "Kupa nasıl seçilir?" })
   })
 })
 

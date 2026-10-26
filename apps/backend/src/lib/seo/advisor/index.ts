@@ -1,5 +1,6 @@
 export { GRADES, assess, findIssues, gradeOf, scoreIssues } from "./engine"
 export type { Assessment, Grade } from "./engine"
+export { MIN_ARTICLE_WORDS, OPENING_WORDS, STALE_DAYS } from "./rules-content"
 export { MIN_LISTING_WORDS } from "./rules-listing"
 export { MIN_PRODUCT_WORDS } from "./rules-product"
 export { CATEGORY_WEIGHTS, RULES_VERSION, SEVERITIES } from "./types"

@@ -1,6 +1,13 @@
 import { model } from "@medusajs/framework/utils"
 
-export const ASSESSED_KINDS = ["product", "category", "brand", "collection"] as const
+export const ASSESSED_KINDS = [
+  "product",
+  "category",
+  "brand",
+  "collection",
+  "page",
+  "post",
+] as const
 
 /**
  * A page's latest SEO assessment (docs/14 §1): its score, grade and

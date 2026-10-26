@@ -1,5 +1,10 @@
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
-import { SEO_ENTITIES, SEO_FIELDS, isSeoEntityType } from "../../../../workflows/seo/entities"
+import {
+  SEO_ENTITIES,
+  SEO_FIELDS,
+  isSeoEntityType,
+  seoEntityFilter,
+} from "../../../../workflows/seo/entities"
 import type { AuditedResource, GraphQuery, Resolver, Snapshot } from "../types"
 import { ID } from "../types"
 
@@ -16,7 +21,7 @@ async function seoSnapshot(scope: Resolver, type: string, id: string): Promise<S
   const { data } = await query.graph({
     entity: SEO_ENTITIES[type].entity,
     fields: SEO_FIELDS.map((field) => `seo_meta.${field}`),
-    filters: { id },
+    filters: seoEntityFilter(type, id),
   })
   const row = data[0] as { seo_meta?: Record<string, unknown> | null } | undefined
   return row

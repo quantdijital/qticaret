@@ -15,6 +15,8 @@ const ENTITIES: Record<AuditEntityKind, { entity: string; name: string; type: st
     name: "title",
     type: CATALOG_ENTITY_TYPES.collection,
   },
+  page: { entity: "content_entry", name: "title", type: CATALOG_ENTITY_TYPES.page },
+  post: { entity: "content_entry", name: "title", type: CATALOG_ENTITY_TYPES.post },
 }
 
 export const AUDIT_KINDS = Object.keys(ENTITIES) as AuditEntityKind[]

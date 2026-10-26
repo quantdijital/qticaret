@@ -171,7 +171,9 @@
           "tokens": "Kullanılabilir etiketler:",
           "preview": "Önizleme:",
           "fits": "Google sonucuna sığar",
-          "tooLong": "Google sonucunda kısaltılabilir"
+          "tooLong": "Google sonucunda kısaltılabilir",
+          "page": "İçerik sayfası başlığı",
+          "post": "Blog yazısı başlığı"
         },
         "robots": {
           "title": "Tarayıcılar",

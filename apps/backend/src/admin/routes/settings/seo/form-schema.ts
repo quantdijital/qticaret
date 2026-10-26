@@ -30,6 +30,8 @@ export const seoFormSchema = z.object({
     product: template("product", 200),
     category: template("category", 200),
     brand: template("brand", 200),
+    page: template("page", 200),
+    post: template("post", 200),
   }),
   description_templates: z.object({ product: template("product", 300) }),
   robots_txt: z.string().max(8 * 1024, "qticaret.serverErrors.platform_settings.robots_invalid"),

@@ -6,7 +6,8 @@ import type { AdvisorFacts, IssueFix, PageKind, Rule } from "./types"
 /**
  * Rules every page kind shares (docs/14 §3.1, §3.6): search result title
  * and description, slug, focus keyword. Their ids carry the kind's letter
- * (P product, C category, B brand, K collection), as the catalog lists them.
+ * (P product, C category, B brand, K collection, A content page and blog
+ * post), as the catalog lists them.
  */
 
 export const PREFIX: Record<PageKind, string> = {
@@ -14,6 +15,8 @@ export const PREFIX: Record<PageKind, string> = {
   category: "C",
   brand: "B",
   collection: "K",
+  page: "A",
+  post: "A",
 }
 
 const id = (facts: AdvisorFacts, rule: string) => `${PREFIX[facts.kind]}-${rule}`

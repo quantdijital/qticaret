@@ -1,6 +1,11 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
-import { SEO_ENTITIES, SEO_FIELDS, isSeoEntityType } from "../../../../../workflows/seo/entities"
+import {
+  SEO_ENTITIES,
+  SEO_FIELDS,
+  isSeoEntityType,
+  seoEntityFilter,
+} from "../../../../../workflows/seo/entities"
 import type { SeoEntityType } from "../../../../../workflows/seo/entities"
 import { upsertSeoMetaWorkflow } from "../../../../../workflows/seo/upsert-seo-meta"
 import type { AdminPutSeoMetaType } from "./validators"
@@ -19,7 +24,7 @@ async function readSeo(req: AuthenticatedMedusaRequest, type: SeoEntityType, id:
   const { data } = await query.graph({
     entity: SEO_ENTITIES[type].entity,
     fields: ["id", ...SEO_FIELDS.map((field) => `seo_meta.${field}`)],
-    filters: { id },
+    filters: seoEntityFilter(type, id),
   })
   const row = data[0] as { seo_meta?: Record<string, string | null> | null } | undefined
   if (!row) {

@@ -6,9 +6,13 @@ import type MediaModuleService from "../../../modules/media/service"
 import type { MediaAssetRecord } from "../../../modules/media/service"
 import { removeFiles } from "../files"
 
-// Still unused: never attached, linked to nothing, and no product image has the URL
+// Still unused: never attached, linked to nothing, and no product image has the URL.
+// Read again here: a content page (F3.16) may have taken it since the sweep's list
 async function isAbandoned(container: MedusaContainer, asset: MediaAssetRecord): Promise<boolean> {
-  if (asset.attached_at) {
+  const [fresh] = await container
+    .resolve<MediaModuleService>(MEDIA_MODULE)
+    .listMediaAssets({ id: asset.id }, { select: ["id", "attached_at"], take: 1 })
+  if (!fresh || fresh.attached_at) {
     return false
   }
   const query = container.resolve(ContainerRegistrationKeys.QUERY)

@@ -4,7 +4,7 @@
  * of the facts, so the same page always gets the same score.
  */
 
-export const RULES_VERSION = 2
+export const RULES_VERSION = 3
 
 export const SEVERITIES = ["critical", "high", "medium", "low", "info"] as const
 export type Severity = (typeof SEVERITIES)[number]
@@ -20,7 +20,7 @@ export const CATEGORY_WEIGHTS = {
 } as const
 export type Category = keyof typeof CATEGORY_WEIGHTS
 
-export type PageKind = "product" | "category" | "brand" | "collection"
+export type PageKind = "product" | "category" | "brand" | "collection" | "page" | "post"
 
 /**
  * How the panel helps: `auto` applies a known change in one click,
@@ -84,6 +84,26 @@ export interface AdvisorFacts {
         /** A category's level, the root being 1. */
         depth: number
         hasLogo: boolean
+      }
+    | undefined
+  /** A content page's or blog post's document, as `lib/content` reads it (F3.16). */
+  article?:
+    | {
+        words: number
+        /** Words before the first heading: the opening answer (docs/14 A-ANSWER-01). */
+        openingWords: number
+        headings: { level: 2 | 3 | 4; text: string }[]
+        paragraphs: { sentences: number; words: number }[]
+        internalLinks: number
+        lists: number
+        tables: number
+        /** Images in the body and the cover; the ones with no alt text. */
+        images: number
+        imagesWithoutAlt: number
+        author: string | null
+        published: boolean
+        /** Days since it last changed in text (or went live); null while a draft. */
+        ageDays: number | null
       }
     | undefined
 }

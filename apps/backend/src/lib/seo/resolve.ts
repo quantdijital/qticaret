@@ -1,5 +1,5 @@
-import { breadcrumbJsonLd, listingJsonLd, productJsonLd } from "./jsonld"
-import type { JsonLd, ProductFacts } from "./jsonld"
+import { articleJsonLd, breadcrumbJsonLd, listingJsonLd, productJsonLd } from "./jsonld"
+import type { ArticleFacts, JsonLd, ProductFacts } from "./jsonld"
 import { renderTemplate } from "./template"
 
 /**
@@ -9,7 +9,7 @@ import { renderTemplate } from "./template"
  */
 
 export type RobotsValue = "index,follow" | "noindex,follow" | "noindex,nofollow"
-export type SeoPageKind = "product" | "category" | "collection" | "brand"
+export type SeoPageKind = "product" | "category" | "collection" | "brand" | "page" | "post"
 
 export interface SeoPayload {
   title: string
@@ -22,7 +22,7 @@ export interface SeoPayload {
     description: string
     image: string | null
     imageAlt: string | null
-    type: "product" | "website"
+    type: "product" | "article" | "website"
     url: string | null
     siteName: string
   }
@@ -66,6 +66,8 @@ export interface SeoSubject {
   product?: ProductFacts | undefined
   /** A listing page's first products, for its `ItemList`. */
   listing?: { name: string; path: string }[] | undefined
+  /** A content page's or blog post's facts (F3.16); the description and publisher are filled in. */
+  article?: Omit<ArticleFacts, "description" | "publisher"> | undefined
 }
 
 export interface SeoShop {
@@ -73,7 +75,7 @@ export interface SeoShop {
   canonicalHost: string | null
   /** False on an instance search engines must not index (staging): every page says noindex. */
   indexing: boolean
-  titleTemplates: { product: string; category: string; brand: string }
+  titleTemplates: { product: string; category: string; brand: string; page: string; post: string }
   descriptionTemplates: { product: string }
 }
 
@@ -88,10 +90,14 @@ const ROBOTS: Record<NonNullable<SeoOverrides["robots_override"]>, RobotsValue> 
   noindex_nofollow: "noindex,nofollow",
 }
 
+// A tag: `<` then a letter (or `/` and a letter), up to its `>`. "3 < 5" is text; no
+// `<` inside, so many `<` without a `>` cost one pass, not one pass each
+const TAG = /<\/?[a-z][^<>]*>/gi
+
 /** Text as one line: tags dropped, spaces collapsed. Descriptions may hold simple HTML. */
 export function plainText(text: string | null | undefined): string {
   return (text ?? "")
-    .replace(/<[^>]*>/g, " ")
+    .replace(TAG, " ")
     .replace(/&nbsp;/gi, " ")
     .replace(/\s+/g, " ")
     .trim()
@@ -136,6 +142,8 @@ const NAME_TOKEN: Record<SeoPageKind, string> = {
   category: "kategori",
   collection: "kategori",
   brand: "marka",
+  page: "başlık",
+  post: "başlık",
 }
 
 function titleOf(subject: SeoSubject, shop: SeoShop): string {
@@ -145,9 +153,9 @@ function titleOf(subject: SeoSubject, shop: SeoShop): string {
   }
   const values = { ...subject.tokens, [NAME_TOKEN[subject.kind]]: subject.name, mağaza: shop.name }
   const template =
-    subject.kind === "product" || subject.kind === "brand"
-      ? shop.titleTemplates[subject.kind]
-      : shop.titleTemplates.category
+    subject.kind === "category" || subject.kind === "collection"
+      ? shop.titleTemplates.category
+      : shop.titleTemplates[subject.kind]
   return renderTemplate(template, values) || subject.name
 }
 
@@ -197,7 +205,8 @@ export function resolveSeoPayload(subject: SeoSubject, shop: SeoShop): SeoPayloa
       description,
       image: image?.url ?? null,
       imageAlt: image ? (subject.overrides?.og_image_alt ?? image.alt ?? subject.name) : null,
-      type: subject.kind === "product" ? "product" : "website",
+      type:
+        subject.kind === "product" ? "product" : subject.kind === "post" ? "article" : "website",
       url: canonical,
       siteName: shop.name,
     },
@@ -208,29 +217,38 @@ export function resolveSeoPayload(subject: SeoSubject, shop: SeoShop): SeoPayloa
       image: image?.url ?? null,
     },
     breadcrumbs,
-    jsonLd: canonical ? structuredData(subject, description, canonical, breadcrumbs, url) : [],
+    jsonLd: canonical
+      ? structuredData(subject, { description, canonical, breadcrumbs, url, shop: shop.name })
+      : [],
     hreflang: [],
   }
 }
 
+interface PageFacts {
+  description: string
+  canonical: string
+  breadcrumbs: SeoPayload["breadcrumbs"]
+  url: (path: string) => string
+  shop: string
+}
+
 function structuredData(
   subject: SeoSubject,
-  description: string,
-  canonical: string,
-  breadcrumbs: SeoPayload["breadcrumbs"],
-  url: (path: string) => string
+  { description, canonical, breadcrumbs, url, shop }: PageFacts
 ): JsonLd[] {
   const page = subject.product
     ? productJsonLd(subject.product, canonical)
-    : subject.listing
-      ? listingJsonLd(
-          {
-            name: subject.name,
-            description,
-            items: subject.listing.map((item) => ({ name: item.name, url: url(item.path) })),
-          },
-          canonical
-        )
-      : null
+    : subject.article
+      ? articleJsonLd({ ...subject.article, description, publisher: shop }, canonical)
+      : subject.listing
+        ? listingJsonLd(
+            {
+              name: subject.name,
+              description,
+              items: subject.listing.map((item) => ({ name: item.name, url: url(item.path) })),
+            },
+            canonical
+          )
+        : null
   return [page, breadcrumbJsonLd(breadcrumbs)].filter((block): block is JsonLd => block !== null)
 }

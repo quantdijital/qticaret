@@ -49,7 +49,7 @@ export interface SeoSettings {
   canonical_host: string | null
   /** docs/13 §2: `/urun/{slug}` (prefixed) or `/{slug}` (flat). */
   url_style: { product: UrlStyle; category: UrlStyle; brand: UrlStyle }
-  title_templates: { product: string; category: string; brand: string }
+  title_templates: { product: string; category: string; brand: string; page: string; post: string }
   description_templates: { product: string }
   robots_txt: string
   ai_crawler_preset: "ai_search_visible" | "block_training" | "none"
@@ -66,7 +66,15 @@ export const seoSection = defineSection<SeoSettings>(
       .regex(HOSTNAME, { message: "platform_settings.host_invalid" })
       .nullable(),
     url_style: z.object({ product: urlStyle, category: urlStyle, brand: urlStyle }).strict(),
-    title_templates: z.object({ product: template, category: template, brand: template }).strict(),
+    title_templates: z
+      .object({
+        product: template,
+        category: template,
+        brand: template,
+        page: template,
+        post: template,
+      })
+      .strict(),
     description_templates: z
       .object({
         product: z
@@ -88,6 +96,8 @@ export const seoSection = defineSection<SeoSettings>(
       product: "{ürün_adı} | {marka} | {mağaza}",
       category: "{kategori} Modelleri ve Fiyatları | {mağaza}",
       brand: "{marka} Ürünleri | {mağaza}",
+      page: "{başlık} | {mağaza}",
+      post: "{başlık} | {mağaza}",
     },
     description_templates: { product: "{kısa_açıklama}. {fiyat_cümlesi} {kargo_cümlesi}" },
     robots_txt: DEFAULT_ROBOTS_TXT,

@@ -25,6 +25,8 @@ const SEO_KINDS: Readonly<Record<string, PageKind>> = {
   category: "category",
   collection: "collection",
   brand: "brand",
+  page: "page",
+  post: "post",
 }
 
 async function productOfVariant(
@@ -48,7 +50,7 @@ async function productOfVariant(
 export default async function seoAdvisorAssess({
   event,
   container,
-}: SubscriberArgs<{ id?: string; entity_type?: string; entity_id?: string }>) {
+}: SubscriberArgs<{ id?: string; kind?: string; entity_type?: string; entity_id?: string }>) {
   let kind: PageKind | undefined
   let id: string | null | undefined
   if (event.name === "seo-meta.saved") {
@@ -56,6 +58,10 @@ export default async function seoAdvisorAssess({
       ? SEO_KINDS[event.data.entity_type ?? ""]
       : undefined
     id = event.data.entity_id
+  } else if (event.name.startsWith("content.")) {
+    // F3.16: a content entry's event names its kind
+    kind = event.data.kind === "page" || event.data.kind === "post" ? event.data.kind : undefined
+    id = event.data.id
   } else if (event.name.startsWith("product-variant.")) {
     kind = "product"
     id = event.data.id ? await productOfVariant(container, event.data.id) : null
@@ -78,6 +84,8 @@ export const config: SubscriberConfig = {
   event: [
     ...Object.keys(KINDS),
     "seo-meta.saved",
+    "content.saved",
+    "content.deleted",
     "product-variant.created",
     "product-variant.updated",
   ],

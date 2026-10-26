@@ -34,6 +34,9 @@ export const CATALOG_ENTITY_TYPES = {
   category: "product_category",
   collection: "product_collection",
   brand: "brand",
+  // F3.16: content pages and blog posts
+  page: "page",
+  post: "post",
 } as const
 
 interface Handled {
@@ -41,7 +44,7 @@ interface Handled {
   handle?: string | null
 }
 
-interface Wanted {
+export interface Wanted {
   entity_type: string
   entity_id: string
   /** The path in the shop's current style, and every form that already counts. */
@@ -76,7 +79,10 @@ async function rows<T>(
 }
 
 /** Claims the paths records do not hold yet, all in one transaction. */
-async function claimMissing(container: MedusaContainer, wanted: Wanted[]): Promise<PathClaim[]> {
+export async function claimMissing(
+  container: MedusaContainer,
+  wanted: Wanted[]
+): Promise<PathClaim[]> {
   if (wanted.length === 0) {
     return []
   }
