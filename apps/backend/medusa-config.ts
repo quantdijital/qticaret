@@ -51,6 +51,7 @@ module.exports = defineConfig({
     { resolve: "./src/modules/seo-advisor" },
     { resolve: "./src/modules/media" },
     { resolve: "./src/modules/stock-ledger" },
+    { resolve: "./src/modules/price-history" },
     {
       resolve: "./src/modules/seo-redirects",
       options: {

@@ -3,7 +3,7 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: BİTTİ** (T1a–T16; kabul kriterlerinin hepsi testlerle işaretli, docs/03; son eksik iki kanıt, danışmanın p95 ölçümü ve yedi sayfa türünün SEO sözleşme testi, kapanışta eklendi). Playwright e2e altyapısı kuruldu; CI düzeltildi. **F4 — Fiyatlandırma ve promosyon: BAŞLADI** (plan ve ADR-0023/0024/0025 taslakları hazır; sırada U1 `price-history`). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı. F1, F2 ve F3 dalları push edildi (kullanıcı 2026-10-26: "pushları sen önerdiğinde yapabilirsin"); PR açılmadı.
+**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: BİTTİ** (T1a–T16; kabul kriterlerinin hepsi testlerle işaretli, docs/03; son eksik iki kanıt, danışmanın p95 ölçümü ve yedi sayfa türünün SEO sözleşme testi, kapanışta eklendi). Playwright e2e altyapısı kuruldu; CI düzeltildi. **F4 — Fiyatlandırma ve promosyon: DEVAM** (plan ve ADR-0023/0024/0025 kabul edildi; U1 `price-history` bitti; sırada U4 kuponlar). Dal `f4-pricing-promotions`. Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı. F1, F2 ve F3 dalları push edildi (kullanıcı 2026-10-26: "pushları sen önerdiğinde yapabilirsin"); PR açılmadı.
 
 ## Son oturum özeti
 **2026-10-25/26 gece (kullanıcı yatarken, "panel işlerini tamamla" talimatıyla).** Panelin ekranları yazıldı; her biri gerçek veriyle tarayıcıda denendi (CDP ekran görüntüsü, test kayıtları sonra silindi). Commit'ler `e11a201`…`6d63df7`, push yok.
@@ -330,6 +330,12 @@
   - **İçe aktarmadaki iki açık kapandı:** içe aktarma taslağı yayına alırken SEO yayın kapısını atlıyordu ve stok hareketlerini defterde `manual` yazıyordu. Kapı kararı `publishGate()` olarak paylaşıldı; stok `writeStockLevelsWorkflow` ile `import` nedeniyle yazılıyor (ADR-0020 uygulama notu).
   - **Ek düzeltmeler:** panelin diyalog ve yan panel kapat düğmeleri ekran okuyucuya İngilizce "Close" diyordu; `Checkbox` kısmi seçimde tik gösteriyordu (artık çizgi); `Progress` değeri ekran okuyucuya iletmiyordu.
   - **Testler:** birim (planlayıcılar, girdi şeması, alt metin önerisi; panelde form ve sayı okuma), HTTP 6 test (`catalog-bulk-edit`: fiyat + fiyat listesi + rapor + denetim, stok defteri, yayın kapısı ve ölçü kuralı, kategori, SEO şablonu ve alt metin, geçersiz girdi), içe aktarma testine defter nedeni; e2e 13 test (toplu düzenleme seçimi ve pencere erişilebilirliği dahil).
+- **F4 planlandı (2026-10-26):** Medusa 2.21.2 kaynak kodundan doğrulanan bulgularla 8 görev; ADR-0023 (fiyat geçmişi, 30 gün kuralı), ADR-0024 (kupon/kampanya kuralları), ADR-0025 (hediye kartı için resmi eklenti). Kullanıcı önerilen seçeneklerle kabul etti.
+- **F4 U1 (F4.2) bitti: fiyat geçmişi.**
+  - `price-history` modülü (append-only): varyant ve para birimi başına, müşteri grubu olmayan alışverişçinin ödediği fiyat (`calculated`) ve yanındaki liste fiyatı (`original`), fiyatı veren liste, neden, zaman. Satır yalnızca değişince yazılıyor.
+  - Yakalama: fiyat, fiyat listesi ve liste kuralı olaylarına subscriber; saat başı kontrol (başlangıç/bitiş tarihi gelen liste olay üretmiyor); `db:migrate`'te açılış kaydı (yerelde 20 varyant).
+  - 30 gün hesabı `lib/pricing` (`discountView`): indirimin başladığı andan önceki 30 günde geçerli en düşük fiyat; kademeli derinleşen indirim tek indirim (hukukçuya sorulacak, docs/12). Store API'de gösterim U3'te.
+  - Testler: modül (3), birim (6), HTTP 2 (olaylar çalışıyor, indirimli liste, müşteri grubu fiyatı dışarıda, olaysız başlayan liste saatlik kontrolde, tekrar kontrol boş).
 - **Gözden geçir (kullanıcı yokken önerilen seçenekle verilen kararlar):**
   1. Bayrak adı `catalog.non_physical`, mağaza tarafından açılır, varsayılan kapalı. Etiketleri Medusa Admin'de ve panelde var.
   2. Kargo gerekmeyen kalemler sipariş ödenince "teslim edildi" sayılıyor. Dijital teslimat (indirme bağlantısı, kod gönderimi) F9 bildirimleriyle gelecek.
@@ -799,7 +805,7 @@
 - **Daha önce:** F1 planlaması ve F0.2–F0.8 (2026-10-24), F0.1 monorepo (2026-10-24 sabahı), SEO ve güvenlik dokümanları (2026-10-22).
 
 ## Sıradaki görev
-**Claude'un sıradaki işi:** F4 U1 `price-history` (plan aşağıda, "F4 görev planı"). F4 kodu yeni dalda: `f4-pricing-promotions`, F1–F3 birleştirilmediği için `f3-catalog-seo-stock` üzerinden.
+**Claude'un sıradaki işi:** F4 U4 kuponlar (plan aşağıda, "F4 görev planı"), ardından U7. F4 kodu `f4-pricing-promotions` dalında (F1–F3 birleştirilmediği için `f3-catalog-seo-stock` üzerinden).
 
 1. **Kullanıcı:**
    - **F4 kararları:** ADR-0023/0024/0025 kabul edildi (2026-10-26). Dışarıda bekleyen: 30 gün kuralının hukukçu teyidi, hediye kartı vergisinin mali müşavir teyidi (docs/12).
@@ -826,7 +832,7 @@ Kararlar: ADR-0023 (fiyat geçmişi, 30 gün kuralı), ADR-0024 (kupon ve kampan
 
 | # | F4 | Görev | Bağımlılık | KK |
 |---|---|---|---|---|
-| U1 | F4.2 | `price-history` modülü (append-only): satıştaki fiyatın (calculated/original, herkese açık bağlam) varyant ve para birimi başına geçmişi. Yakalama: `pricing.price.*` ve `pricing.price_list.*` subscriber'ı (olayların çalıştığı testle kanıtlanır), saatlik zamanlama işi (liste başlangıç/bitişi olaysız), açılış bakiyesi migration script'i. `lib/pricing` 30 gün hesabı (saf, fixture'lı) | — | KK2 (yarısı) |
+| U1 ✅ | F4.2 | `price-history` modülü (append-only): satıştaki fiyatın (calculated/original, herkese açık bağlam) varyant ve para birimi başına geçmişi. Yakalama: `pricing.price.*` ve `pricing.price_list.*` subscriber'ı (olayların çalıştığı testle kanıtlanır), saatlik zamanlama işi (liste başlangıç/bitişi olaysız), açılış bakiyesi migration script'i. `lib/pricing` 30 gün hesabı (saf, fixture'lı) | — | KK2 (yarısı) |
 | U2 | F4.1 | Fiyat listeleri: panel ekranları (indirimli/geçersiz kılan liste, tarih aralığı, müşteri grubu, ürün fiyatları), denetim kaydı kapsamı, panel `nextPrices`'ın liste fiyatlarını korumasının doğrulanması (devreden iş) | — | — |
 | U3 | F4.3 | İndirim gösterimi: Store API `price_display` (güncel, liste fiyatı, indirimden önceki fiyat, kural sürümü), JSON-LD `StrikethroughPrice` aynı kaynaktan, panelde ürün fiyat geçmişi ve indirim uyarısı | U1, U2 | KK2 |
 | U4 | F4.4 + F4.6 | Kuponlar: kod normalleştirme (büyük harf, ASCII) + mevcut kodlar için migration, sepette tek kod kuralı (ayarla açılır), `coupon` hız profilinin üç Store ucuna bağlanması, kapsam (ürün/kategori/koleksiyon), minimum sepet (`item_total gte`, testle doğrulanır), kişi başı limit (`use_by_attribute`). Eşzamanlı limit KK testi | — | KK1 |

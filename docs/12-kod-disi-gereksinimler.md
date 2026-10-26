@@ -12,7 +12,7 @@
 | Platformun kendi KVKK aydınlatma metni, VERBİS değerlendirmesi | KVKK danışmanı | F17 |
 | Yurt dışı veri aktarımı değerlendirmesi (hosting, e-posta, Sentry, CDN) | KVKK danışmanı | ADR-0003 |
 | Tenant'lar için yasal metin şablonları (mesafeli satış, ön bilgilendirme, KVKK, çerez, iade) | Avukat | F13.7 |
-| İndirimli fiyat gösterimi kuralı (son 30 gün en düşük fiyat) teyidi | Avukat | F4.3 |
+| İndirimli fiyat gösterimi kuralı (son 30 gün en düşük fiyat) teyidi; kademeli derinleşen indirimde "indirimden önceki fiyat"ın ilk adımdan önceye mi son adımdan önceye mi bakacağı (ADR-0023) | Avukat | F4.3 |
 | Sektöre özel satış kısıtları (ilk müşteri: bıçak — 6136 sayılı kanun kapsamı, yaş sınırı) | Avukat | F13.3, F13.4 |
 | Ticari ileti / İYS süreçleri | Avukat | F9.5, F10.7 |
 | Ödeme modeli teyidi: platform tenant adına para toplamaz (lisans gerektirmez) | Avukat | F5, F6, F17.3 |

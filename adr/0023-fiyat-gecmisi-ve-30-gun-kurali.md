@@ -42,3 +42,11 @@ Medusa 2.21.2'de doğrulananlar (F4 planlaması, kaynak kodu):
 - Müşteri grubu fiyatları geçmişe girmez (herkese açık değil); B2B (F19) gerekirse ayrı karar.
 - Medusa 2.22 yükseltmesinde (en erken 2026-11-06) liste olayları subscriber'a eklenir; zamanlama işi kalır.
 - Panel ürün sayfasında "fiyat geçmişi" grafiği ve indirim uyarısı ("bu indirim, 30 günün en düşük fiyatına göre gösterilecek") F4 panel işinde.
+
+## Uygulama notu (F4 U1, 2026-10-26)
+
+- **Modül:** `src/modules/price-history` (`price_record`: `seq`, varyant, para birimi, `amount`, `original_amount`, `price_list_id`, neden, `recorded_at`). Append-only; servis "her varyantın son fiyatı" (`DISTINCT ON`) ve "bir andan beri geçerli olanlar" (o an yürürlükteki dahil) okur.
+- **Nedenler sadeleşti:** `price_change` (fiyat, liste ya da liste kuralı olayı), `reconcile` (saatlik kontrol: başlayan/biten liste, kaçan olay), `opening` (ilk kurulum), `import` (F14'te eski platformun geçmişi). Kararın `price_list`/`schedule` ayrımı satırdaki `price_list_id`'den okunur.
+- **Yakalama:** `src/subscribers/price-history.ts` (`PricingEvents` fiyat, liste ve liste kuralı olayları; silinen satır da okunur), `src/jobs/price-history-reconcile.ts` (saat başı 7. dakika, süreçler arası tek), `src/migration-scripts/price-history-opening.ts`. Hepsi `recordSellingPricesWorkflow`'a gider: satıştaki fiyat `QueryContext({ currency_code })` ile mağazanın her para biriminde okunur, son kayıttan farklıysa yazılır. İki çalışma aynı değişikliği iki kez yazabilir; eşit satırlar hesabı değiştirmez.
+- **Kanıt:** HTTP testleri olayların çalıştığını (fiyat, değişiklik, indirimli liste), müşteri grubu fiyatının girmediğini, olaysız başlayan listenin saatlik kontrolde yakalandığını ve ikinci kontrolün hiçbir şey yazmadığını gösteriyor.
+- **30 gün hesabı:** `src/lib/pricing/discount.ts` (`discountView`, kural sürümü `tr-30d-1`). Kademeli derinleşen indirim tek indirim sayılıyor; "indirimden önceki fiyat" ilk adımdan önceki 30 güne bakıyor (AB Omnibus yorumu). Bu yorum hukukçu teyidinde ayrıca sorulmalı (docs/12). Geçmişi indirimin içinde başlayan mağazada liste fiyatı kullanılıyor (`basis: "regular"`).

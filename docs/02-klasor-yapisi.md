@@ -46,6 +46,7 @@ repo/
 │   │   │   │   ├── seo-advisor/                      # sayfa değerlendirmeleri; kurallar lib/seo/advisor'da (F3.13)
 │   │   │   │   ├── media/                            # görsel kayıtları: alt metin, türevler (F3.3, adr/0016)
 │   │   │   │   ├── stock-ledger/                     # stok hareket defteri (yalnız ekleme) + kalem eşiği/uyarı durumu (F3.8, adr/0020)
+│   │   │   │   ├── price-history/                    # satıştaki fiyatın geçmişi (yalnız ekleme), 30 gün kuralının kaynağı (F4.2, adr/0023)
 │   │   │   │   ├── content/                          # içerik sayfası, blog yazısı ve facet landing sayfası (parmak izi, özgünlük); gövde belge JSON'u (F3.16, adr/0019)
 │   │   │   │   ├── seo-insights/
 │   │   │   │   ├── price-history/  product-qa/
@@ -89,6 +90,7 @@ repo/
 │   │   │   │   ├── catalog-sheet/   # ürün tablosunun sütunları, hücre okuma (TR sayı), satırları ürüne toplama (F3.9)
 │   │   │   │   ├── media/           # görsel temizleme ve türevler (sharp, F3.3), ürün adından alt metin önerisi (F3.10)
 │   │   │   │   ├── money/           # tutar dönüşümleri
+│   │   │   │   ├── pricing/         # indirim gösterimi: son 30 gün kuralı (F4.3, ADR-0023)
 │   │   │   │   ├── dashboard/       # panel okuma modelleri: dönem, sipariş aşaması, özet/rapor, sipariş ve stok panosu (adr/0022)
 │   │   │   │   ├── checkout/        # checkout kuralları: KDV için ülke, kargo gerekmeyen sepette kargo yöntemi yok (F3.2)
 │   │   │   │   ├── stock/           # hareket nedeni, düşük stok eşikleri (F3.8)
