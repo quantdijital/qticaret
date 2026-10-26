@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button"
 import { promotionsQuery } from "@/features/promotions/api/promotions"
 import type { Promotion } from "@/features/promotions/api/promotions"
 import { OfferText, ScheduleBadge } from "@/features/promotions/components/offer-text"
+import { PromotionsNav } from "@/features/promotions/components/promotions-nav"
 import { scheduleOf } from "@/features/promotions/offer"
 import { errorText } from "@/lib/errors"
 import { formatCount, formatDate } from "@/lib/format"
@@ -121,6 +122,7 @@ export function PromotionsPage() {
         description={t("promotions.description")}
         action={add}
       />
+      <PromotionsNav />
       <section className="overflow-hidden rounded-lg border bg-card shadow-card">
         <FilterTabs
           label={t("promotions.views")}

@@ -1,7 +1,8 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, MedusaError, Modules } from "@medusajs/framework/utils"
-import { fromMedusaAmount } from "../../lib/money"
-import type { Kurus, MedusaAmount } from "../../lib/money"
+import type { Kurus } from "../../lib/money"
+import { PRICE_ROW_FIELDS, isPlainPrice, kurusOfRow } from "./price-rows"
+import type { PriceRow } from "./price-rows"
 
 /**
  * A price list's prices as the panel shows them (F4.1): which product and
@@ -43,16 +44,6 @@ interface ListRow {
   ends_at: Date | string | null
 }
 
-interface PriceRow {
-  id: string
-  raw_amount?: MedusaAmount | null
-  amount?: MedusaAmount | null
-  currency_code: string
-  price_set_id: string
-  price_list_id?: string | null
-  rules_count?: number | null
-}
-
 interface VariantRow {
   id: string
   title?: string | null
@@ -61,25 +52,13 @@ interface VariantRow {
 }
 
 const LIST_FIELDS = ["id", "title", "type", "status", "starts_at", "ends_at"]
-const PRICE_FIELDS = [
-  "id",
-  "amount",
-  "raw_amount",
-  "currency_code",
-  "price_set_id",
-  "price_list_id",
-  "rules_count",
-]
 const EVERY = { take: null } as const
-
-const kurusOf = (row: PriceRow): Kurus =>
-  fromMedusaAmount(row.raw_amount ?? row.amount ?? 0, { allowRounding: true })
 
 const time = (when: Date | string | null, open: number) =>
   when === null ? open : new Date(when).getTime()
 
 /** Two lists' days meet; an open end runs forever. */
-function overlaps(a: ListRow, b: ListRow): boolean {
+export function overlaps(a: ListRow, b: ListRow): boolean {
   return (
     time(a.starts_at, -Infinity) <= time(b.ends_at, Infinity) &&
     time(b.starts_at, -Infinity) <= time(a.ends_at, Infinity)
@@ -138,8 +117,10 @@ async function overlapsOf(
       { id: [...byList.keys()], status: ["active"] },
       { select: LIST_FIELDS, ...EVERY }
     )) as unknown as ListRow[]
+  const now = Date.now()
+  // A list already over can no longer clash with anything
   return lists
-    .filter((other) => overlaps(list, other))
+    .filter((other) => time(other.ends_at, Infinity) >= now && overlaps(list, other))
     .map((other) => ({
       id: other.id,
       title: other.title,
@@ -150,45 +131,22 @@ async function overlapsOf(
     }))
 }
 
-export async function priceListLines(
-  container: MedusaContainer,
-  listId: string
-): Promise<{ lines: PriceListLine[]; overlaps: PriceListOverlap[] }> {
-  const pricing = container.resolve(Modules.PRICING)
-  const [list] = (await pricing.listPriceLists(
-    { id: [listId] },
-    { select: LIST_FIELDS, take: 1 }
-  )) as unknown as ListRow[]
-  if (!list) {
-    throw new MedusaError(MedusaError.Types.NOT_FOUND, "price_lists.unknown")
-  }
-  const own = (await pricing.listPrices(
-    { price_list_id: [listId] },
-    { select: PRICE_FIELDS, ...EVERY }
-  )) as unknown as PriceRow[]
-  const setIds = [...new Set(own.map((price) => price.price_set_id))]
-  // Every price of those variants: their own (base) prices and other lists'
-  const [variantOf, related] = await Promise.all([
-    variantsBySet(container, setIds),
-    setIds.length === 0
-      ? Promise.resolve([] as PriceRow[])
-      : (pricing.listPrices(
-          { price_set_id: setIds },
-          { select: PRICE_FIELDS, ...EVERY }
-        ) as unknown as Promise<PriceRow[]>),
-  ])
-  const variants = new Map(
-    (await variantRows(container, [...new Set(variantOf.values())])).map((row) => [row.id, row])
-  )
+/** The list's own prices as lines, by product and variant name; prices of unknown variants left out. */
+function linesOf(
+  own: readonly PriceRow[],
+  related: readonly PriceRow[],
+  variantOf: ReadonlyMap<string, string>,
+  variants: ReadonlyMap<string, VariantRow>
+): PriceListLine[] {
   const baseOf = (setId: string, currency: string) => {
     const base = related.find(
       (price) =>
         price.price_set_id === setId &&
         !price.price_list_id &&
         price.currency_code === currency &&
-        !price.rules_count
+        isPlainPrice(price)
     )
-    return base ? kurusOf(base) : null
+    return base ? kurusOfRow(base) : null
   }
   const lines = own.flatMap((price): PriceListLine[] => {
     const variant = variants.get(variantOf.get(price.price_set_id) ?? "")
@@ -206,14 +164,47 @@ export async function priceListLines(
         thumbnail: variant.product.thumbnail ?? null,
         currency_code: price.currency_code,
         base: baseOf(price.price_set_id, price.currency_code),
-        price: kurusOf(price),
+        price: kurusOfRow(price),
       },
     ]
   })
-  lines.sort(
+  return lines.sort(
     (a, b) =>
       a.product_title.localeCompare(b.product_title, "tr") ||
       (a.variant_title ?? "").localeCompare(b.variant_title ?? "", "tr")
   )
+}
+
+export async function priceListLines(
+  container: MedusaContainer,
+  listId: string
+): Promise<{ lines: PriceListLine[]; overlaps: PriceListOverlap[] }> {
+  const pricing = container.resolve(Modules.PRICING)
+  const [list] = (await pricing.listPriceLists(
+    { id: [listId] },
+    { select: LIST_FIELDS, take: 1 }
+  )) as unknown as ListRow[]
+  if (!list) {
+    throw new MedusaError(MedusaError.Types.NOT_FOUND, "price_lists.unknown")
+  }
+  const own = (await pricing.listPrices(
+    { price_list_id: [listId] },
+    { select: PRICE_ROW_FIELDS, ...EVERY }
+  )) as unknown as PriceRow[]
+  const setIds = [...new Set(own.map((price) => price.price_set_id))]
+  // Every price of those variants: their own (base) prices and other lists'
+  const [variantOf, related] = await Promise.all([
+    variantsBySet(container, setIds),
+    setIds.length === 0
+      ? Promise.resolve([] as PriceRow[])
+      : (pricing.listPrices(
+          { price_set_id: setIds },
+          { select: PRICE_ROW_FIELDS, ...EVERY }
+        ) as unknown as Promise<PriceRow[]>),
+  ])
+  const variants = new Map(
+    (await variantRows(container, [...new Set(variantOf.values())])).map((row) => [row.id, row])
+  )
+  const lines = linesOf(own, related, variantOf, variants)
   return { lines, overlaps: await overlapsOf(container, list, related, variantOf) }
 }

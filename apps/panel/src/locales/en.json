@@ -2227,5 +2227,119 @@
       "reviewedHint": "A person read the page through and approved it. At least 5% of newly published pages should be reviewed.",
       "blocked": "At the last save less than 30% of the text was original; publishing may be refused. Make it specific to this page."
     }
+  },
+  "priceLists": {
+    "sections": "Kinds of offer",
+    "sectionPromotions": "Codes and offers",
+    "sectionPriceLists": "Price lists",
+    "description": "Sale prices show the product's own price struck through; special prices go to the customer groups you choose.",
+    "add": "New price list",
+    "views": "Price list views",
+    "empty": "No price lists yet.",
+    "noDates": "No end date",
+    "groupCount_one": "{{count}} customer group",
+    "groupCount_other": "{{count}} customer groups",
+    "title": "Price list",
+    "new": "New price list",
+    "create": "Create price list",
+    "created": "Price list created. You can add products now.",
+    "saved": "Changes saved.",
+    "paused": "Price list paused.",
+    "started": "Price list is live.",
+    "pause": "Pause",
+    "start": "Make live",
+    "delete": "Delete price list",
+    "deleteTitle": "Delete “{{title}}”?",
+    "deleteDescription": "Its prices are deleted too; products sell at their own prices. This cannot be undone.",
+    "deleted": "Price list deleted.",
+    "tabs": {
+      "all": "All",
+      "active": "Live",
+      "scheduled": "Scheduled",
+      "draft": "Draft",
+      "ended": "Ended"
+    },
+    "columns": {
+      "title": "Name",
+      "type": "Kind",
+      "audience": "For",
+      "prices": "Prices",
+      "dates": "Dates",
+      "status": "Status"
+    },
+    "types": {
+      "sale": "Sale",
+      "saleHint": "Customers see the product's own price struck through and this one as the sale price.",
+      "override": "Special price",
+      "overrideHint": "Replaces the product's own price, not shown as a sale. For trade or wholesale prices."
+    },
+    "audiences": {
+      "everyone": "All customers",
+      "groups": "Customer groups I choose"
+    },
+    "schedule": {
+      "active": "Live",
+      "scheduled": "Scheduled",
+      "draft": "Draft",
+      "ended": "Ended",
+      "inactive": "Paused"
+    },
+    "form": {
+      "details": "Price list",
+      "title": "Name",
+      "titleHint": "Only you see it: Summer sale, Trade prices.",
+      "description": "Description",
+      "type": "Kind",
+      "when": "When and for whom",
+      "whenHint": "Without dates the list runs until you pause it.",
+      "active": "Make live when saved",
+      "activeHint": "Off saves it as a draft.",
+      "starts": "Starts",
+      "startsHint": "From the start of the day (Turkey time).",
+      "ends": "Ends",
+      "endsHint": "Until the end of the day.",
+      "audience": "For",
+      "noGroups": "No customer groups yet.",
+      "productsAfter": "You add products and prices once the list is saved.",
+      "groups": "Customer groups"
+    },
+    "errors": {
+      "title": "Enter a name of 1 to 100 characters.",
+      "description": "The description can be at most 500 characters.",
+      "dates": "The end day cannot be before the start.",
+      "groups": "Choose at least one customer group.",
+      "percent": "Enter a rate above zero and at most 99.",
+      "price": "Enter a price above zero."
+    },
+    "lines": {
+      "title": "Products and prices",
+      "hint": "Type a price on its row, or take a percentage off the products' own prices.",
+      "add": "Add products",
+      "discountAll": "Percentage for all",
+      "empty": "No products in the list yet.",
+      "overlapTitle": "Some products are in another price list too",
+      "overlapHint": "Where lists' dates meet, a sale gives the lowest price and a special price the first list found.",
+      "overlapItem_one": "{{title}}: {{count}} variant",
+      "overlapItem_other": "{{title}}: {{count}} variants",
+      "own": "Own price {{amount}}",
+      "priceOf": "List price of {{name}} ({{currency}})",
+      "saved": "Price of {{name}} saved.",
+      "remove": "Take {{name}} out of the list"
+    },
+    "discount": {
+      "addProduct": "Search and add products",
+      "noProducts": "No products found.",
+      "removeProduct": "Remove {{name}}",
+      "allTitle": "Percentage for all",
+      "addTitle": "Add products",
+      "hint": "Each variant is written into the list at its own price less this rate. A variant the list already prices gets the new price.",
+      "percent": "Rate off",
+      "apply_one": "Apply to {{formatted}} product",
+      "apply_other": "Apply to {{formatted}} products",
+      "done_one": "{{count}} price written.",
+      "done_other": "{{count}} prices written.",
+      "skipped_one": "{{count}} variant has no price of its own and was left out.",
+      "skipped_other": "{{count}} variants have no price of their own and were left out."
+    }
   }
 }

@@ -2235,5 +2235,119 @@
       "reviewedHint": "Sayfa bir kişi tarafından okunup onaylandı. Yeni yayınlanan sayfaların en az %5'i incelenmeli.",
       "blocked": "Son kayıtta metnin %30'dan azı özgündü; yayına alma reddedilebilir. Metni bu sayfaya özgü hâle getirin."
     }
+  },
+  "priceLists": {
+    "sections": "Kampanya türleri",
+    "sectionPromotions": "Kuponlar ve kampanyalar",
+    "sectionPriceLists": "Fiyat listeleri",
+    "description": "İndirimli fiyatlar ürünün kendi fiyatı üstü çizili gösterilerek uygulanır; özel fiyatlar seçtiğiniz müşteri gruplarına verilir.",
+    "add": "Yeni fiyat listesi",
+    "views": "Fiyat listesi görünümleri",
+    "empty": "Henüz fiyat listesi yok.",
+    "noDates": "Süresiz",
+    "groupCount_one": "{{count}} müşteri grubu",
+    "groupCount_other": "{{count}} müşteri grubu",
+    "title": "Fiyat listesi",
+    "new": "Yeni fiyat listesi",
+    "create": "Fiyat listesini oluştur",
+    "created": "Fiyat listesi oluşturuldu. Şimdi ürün ekleyebilirsiniz.",
+    "saved": "Değişiklikler kaydedildi.",
+    "paused": "Fiyat listesi durduruldu.",
+    "started": "Fiyat listesi yayında.",
+    "pause": "Durdur",
+    "start": "Yayına al",
+    "delete": "Fiyat listesini sil",
+    "deleteTitle": "“{{title}}” silinsin mi?",
+    "deleteDescription": "Listedeki fiyatlar da silinir; ürünler kendi fiyatlarıyla satılır. Bu işlem geri alınamaz.",
+    "deleted": "Fiyat listesi silindi.",
+    "tabs": {
+      "all": "Tümü",
+      "active": "Yayında",
+      "scheduled": "Planlandı",
+      "draft": "Taslak",
+      "ended": "Bitti"
+    },
+    "columns": {
+      "title": "Ad",
+      "type": "Tür",
+      "audience": "Kimler için",
+      "prices": "Fiyat",
+      "dates": "Tarihler",
+      "status": "Durum"
+    },
+    "types": {
+      "sale": "İndirim",
+      "saleHint": "Müşteri ürünün kendi fiyatını üstü çizili, bu fiyatı indirimli görür.",
+      "override": "Özel fiyat",
+      "overrideHint": "Ürünün kendi fiyatının yerine geçer, indirim olarak gösterilmez. Bayi ya da toptan fiyatı için."
+    },
+    "audiences": {
+      "everyone": "Tüm müşteriler",
+      "groups": "Seçtiğim müşteri grupları"
+    },
+    "schedule": {
+      "active": "Yayında",
+      "scheduled": "Planlandı",
+      "draft": "Taslak",
+      "ended": "Bitti",
+      "inactive": "Durduruldu"
+    },
+    "form": {
+      "details": "Fiyat listesi",
+      "title": "Ad",
+      "titleHint": "Yalnızca sizin göreceğiniz ad: Yaz indirimi, Bayi fiyatları.",
+      "description": "Açıklama",
+      "type": "Tür",
+      "when": "Ne zaman ve kimler için",
+      "whenHint": "Tarih vermezseniz liste siz durdurana kadar geçerli olur.",
+      "active": "Kaydedince yayına al",
+      "activeHint": "Kapalıysa taslak olarak kaydedilir.",
+      "starts": "Başlangıç",
+      "startsHint": "Günün başından itibaren (Türkiye saati).",
+      "ends": "Bitiş",
+      "endsHint": "Günün sonuna kadar.",
+      "audience": "Kimler için",
+      "noGroups": "Henüz müşteri grubu yok.",
+      "productsAfter": "Ürünleri ve fiyatları liste kaydedildikten sonra eklersiniz.",
+      "groups": "Müşteri grupları"
+    },
+    "errors": {
+      "title": "1 ile 100 karakter arasında bir ad girin.",
+      "description": "Açıklama en fazla 500 karakter olabilir.",
+      "dates": "Bitiş günü başlangıçtan önce olamaz.",
+      "groups": "En az bir müşteri grubu seçin.",
+      "percent": "Sıfırdan büyük, en fazla 99 olan bir oran girin.",
+      "price": "Sıfırdan büyük bir fiyat girin."
+    },
+    "lines": {
+      "title": "Ürünler ve fiyatlar",
+      "hint": "Fiyatı satırda yazın ya da ürünlere kendi fiyatlarından yüzde indirim uygulayın.",
+      "add": "Ürün ekle",
+      "discountAll": "Tümüne yüzde uygula",
+      "empty": "Listede henüz ürün yok.",
+      "overlapTitle": "Aynı ürünler başka bir fiyat listesinde de var",
+      "overlapHint": "Tarihleri çakışan listelerde indirimde en düşük fiyat, özel fiyatta ilk bulunan liste uygulanır.",
+      "overlapItem_one": "{{title}}: {{count}} ürün çeşidi",
+      "overlapItem_other": "{{title}}: {{count}} ürün çeşidi",
+      "own": "Kendi fiyatı {{amount}}",
+      "priceOf": "{{name}} liste fiyatı ({{currency}})",
+      "saved": "{{name}} fiyatı kaydedildi.",
+      "remove": "{{name}} listeden çıkar"
+    },
+    "discount": {
+      "addProduct": "Ürün arayın ve ekleyin",
+      "noProducts": "Ürün bulunamadı.",
+      "removeProduct": "{{name}} çıkar",
+      "allTitle": "Tümüne yüzde indirim",
+      "addTitle": "Ürün ekle",
+      "hint": "Her ürün çeşidi, kendi fiyatından bu oran düşülerek listeye yazılır. Listede fiyatı olan çeşidin fiyatı yenisiyle değişir.",
+      "percent": "İndirim oranı",
+      "apply_one": "{{formatted}} ürüne uygula",
+      "apply_other": "{{formatted}} ürüne uygula",
+      "done_one": "{{count}} fiyat yazıldı.",
+      "done_other": "{{count}} fiyat yazıldı.",
+      "skipped_one": "{{count}} çeşidin kendi fiyatı olmadığı için atlandı.",
+      "skipped_other": "{{count}} çeşidin kendi fiyatı olmadığı için atlandı."
+    }
   }
 }

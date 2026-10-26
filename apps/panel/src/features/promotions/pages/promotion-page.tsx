@@ -208,7 +208,8 @@ export function PromotionPage() {
   const { id } = detailRoute.useParams()
   const query = useQuery(promotionQuery(id))
   const back = { to: "/promotions", label: t("nav.promotions") }
-  if (query.isError) {
+  // A failed read again (after a save, say) keeps the page and its form
+  if (query.isError && !query.data) {
     return (
       <div className="flex flex-col gap-6">
         <PageHeader title={t("promotions.title")} back={back} />

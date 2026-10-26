@@ -7,7 +7,15 @@ import { expect, pageHeading, test } from "./support/guard"
  * docs/18). The product wizard carries the stepper the dashboard's setup
  * card shows only to a shop not yet set up.
  */
-const SCREENS = ["/", "/products", "/products/new", "/orders", "/settings/store"]
+const SCREENS = [
+  "/",
+  "/products",
+  "/products/new",
+  "/orders",
+  "/promotions/price-lists",
+  "/promotions/price-lists/new",
+  "/settings/store",
+]
 
 async function seriousIssues(page: Page): Promise<string[]> {
   const results = await new AxeBuilder({ page })

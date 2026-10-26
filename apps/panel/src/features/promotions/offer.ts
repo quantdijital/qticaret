@@ -1,3 +1,4 @@
+import type { StatusTone } from "@/components/patterns/status-badge"
 import { targetRulesFor } from "./scope"
 import type { Scope } from "./scope"
 
@@ -83,4 +84,13 @@ export function ownsCampaign(
   members: ({ id: string } | null)[] | null | undefined
 ): boolean {
   return Array.isArray(members) && members.every((member) => member?.id === promotionId)
+}
+
+/** How each schedule state looks; price lists share them (F4.1). */
+export const SCHEDULE_TONE: Record<ReturnType<typeof scheduleOf>, StatusTone> = {
+  active: "success",
+  scheduled: "info",
+  draft: "neutral",
+  ended: "neutral",
+  inactive: "warning",
 }

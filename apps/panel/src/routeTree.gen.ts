@@ -42,6 +42,9 @@ import { Route as AuthSettingsLocationsRouteImport } from './routes/_auth/settin
 import { Route as AuthSettingsSeoRouteImport } from './routes/_auth/settings/seo'
 import { Route as AuthSettingsStoreRouteImport } from './routes/_auth/settings/store'
 import { Route as AuthContentLandingsIdRouteImport } from './routes/_auth/content/landings/$id'
+import { Route as AuthPromotionsPriceListsIndexRouteImport } from './routes/_auth/promotions/price-lists/index'
+import { Route as AuthPromotionsPriceListsIdRouteImport } from './routes/_auth/promotions/price-lists/$id'
+import { Route as AuthPromotionsPriceListsNewRouteImport } from './routes/_auth/promotions/price-lists/new'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/_auth',
@@ -207,6 +210,24 @@ const AuthContentLandingsIdRoute = AuthContentLandingsIdRouteImport.update({
   path: '/content/landings/$id',
   getParentRoute: () => AuthRoute,
 } as any)
+const AuthPromotionsPriceListsIndexRoute =
+  AuthPromotionsPriceListsIndexRouteImport.update({
+    id: '/promotions/price-lists/',
+    path: '/promotions/price-lists/',
+    getParentRoute: () => AuthRoute,
+  } as any)
+const AuthPromotionsPriceListsIdRoute =
+  AuthPromotionsPriceListsIdRouteImport.update({
+    id: '/promotions/price-lists/$id',
+    path: '/promotions/price-lists/$id',
+    getParentRoute: () => AuthRoute,
+  } as any)
+const AuthPromotionsPriceListsNewRoute =
+  AuthPromotionsPriceListsNewRouteImport.update({
+    id: '/promotions/price-lists/new',
+    path: '/promotions/price-lists/new',
+    getParentRoute: () => AuthRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthIndexRoute
@@ -241,6 +262,9 @@ export interface FileRoutesByFullPath {
   '/seo/': typeof AuthSeoIndexRoute
   '/settings/': typeof AuthSettingsIndexRoute
   '/content/landings/$id': typeof AuthContentLandingsIdRoute
+  '/promotions/price-lists/$id': typeof AuthPromotionsPriceListsIdRoute
+  '/promotions/price-lists/new': typeof AuthPromotionsPriceListsNewRoute
+  '/promotions/price-lists/': typeof AuthPromotionsPriceListsIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
@@ -274,6 +298,9 @@ export interface FileRoutesByTo {
   '/seo': typeof AuthSeoIndexRoute
   '/settings': typeof AuthSettingsIndexRoute
   '/content/landings/$id': typeof AuthContentLandingsIdRoute
+  '/promotions/price-lists/$id': typeof AuthPromotionsPriceListsIdRoute
+  '/promotions/price-lists/new': typeof AuthPromotionsPriceListsNewRoute
+  '/promotions/price-lists': typeof AuthPromotionsPriceListsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -310,6 +337,9 @@ export interface FileRoutesById {
   '/_auth/seo/': typeof AuthSeoIndexRoute
   '/_auth/settings/': typeof AuthSettingsIndexRoute
   '/_auth/content/landings/$id': typeof AuthContentLandingsIdRoute
+  '/_auth/promotions/price-lists/$id': typeof AuthPromotionsPriceListsIdRoute
+  '/_auth/promotions/price-lists/new': typeof AuthPromotionsPriceListsNewRoute
+  '/_auth/promotions/price-lists/': typeof AuthPromotionsPriceListsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -346,6 +376,9 @@ export interface FileRouteTypes {
     | '/seo/'
     | '/settings/'
     | '/content/landings/$id'
+    | '/promotions/price-lists/$id'
+    | '/promotions/price-lists/new'
+    | '/promotions/price-lists/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -379,6 +412,9 @@ export interface FileRouteTypes {
     | '/seo'
     | '/settings'
     | '/content/landings/$id'
+    | '/promotions/price-lists/$id'
+    | '/promotions/price-lists/new'
+    | '/promotions/price-lists'
   id:
     | '__root__'
     | '/_auth'
@@ -414,6 +450,9 @@ export interface FileRouteTypes {
     | '/_auth/seo/'
     | '/_auth/settings/'
     | '/_auth/content/landings/$id'
+    | '/_auth/promotions/price-lists/$id'
+    | '/_auth/promotions/price-lists/new'
+    | '/_auth/promotions/price-lists/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -654,6 +693,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthContentLandingsIdRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_auth/promotions/price-lists/': {
+      id: '/_auth/promotions/price-lists/'
+      path: '/promotions/price-lists'
+      fullPath: '/promotions/price-lists/'
+      preLoaderRoute: typeof AuthPromotionsPriceListsIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/promotions/price-lists/$id': {
+      id: '/_auth/promotions/price-lists/$id'
+      path: '/promotions/price-lists/$id'
+      fullPath: '/promotions/price-lists/$id'
+      preLoaderRoute: typeof AuthPromotionsPriceListsIdRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/promotions/price-lists/new': {
+      id: '/_auth/promotions/price-lists/new'
+      path: '/promotions/price-lists/new'
+      fullPath: '/promotions/price-lists/new'
+      preLoaderRoute: typeof AuthPromotionsPriceListsNewRouteImport
+      parentRoute: typeof AuthRoute
+    }
   }
 }
 
@@ -708,6 +768,9 @@ interface AuthRouteChildren {
   AuthPromotionsIndexRoute: typeof AuthPromotionsIndexRoute
   AuthSeoIndexRoute: typeof AuthSeoIndexRoute
   AuthContentLandingsIdRoute: typeof AuthContentLandingsIdRoute
+  AuthPromotionsPriceListsIdRoute: typeof AuthPromotionsPriceListsIdRoute
+  AuthPromotionsPriceListsNewRoute: typeof AuthPromotionsPriceListsNewRoute
+  AuthPromotionsPriceListsIndexRoute: typeof AuthPromotionsPriceListsIndexRoute
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
@@ -733,6 +796,9 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthPromotionsIndexRoute: AuthPromotionsIndexRoute,
   AuthSeoIndexRoute: AuthSeoIndexRoute,
   AuthContentLandingsIdRoute: AuthContentLandingsIdRoute,
+  AuthPromotionsPriceListsIdRoute: AuthPromotionsPriceListsIdRoute,
+  AuthPromotionsPriceListsNewRoute: AuthPromotionsPriceListsNewRoute,
+  AuthPromotionsPriceListsIndexRoute: AuthPromotionsPriceListsIndexRoute,
 }
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)

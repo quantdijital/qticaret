@@ -12,6 +12,7 @@ export async function POST(
       price_list_id: req.params["id"] ?? "",
       product_ids: req.validatedBody.product_ids,
       rate_bps: Math.round(req.validatedBody.percent * 100),
+      only_listed: req.validatedBody.only_listed,
     },
   })
   res.json(result)

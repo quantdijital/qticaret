@@ -127,7 +127,7 @@ async function priceList(scope: Resolver, id: string | undefined): Promise<Snaps
   const { prices: rows, price_list_rules: rules, ...meta } = list
   const ruleKeys = Object.fromEntries(
     (rules ?? []).flatMap((rule) =>
-      rule?.attribute ? [[`rule:${rule.attribute}`, JSON.stringify(rule.value ?? null)]] : []
+      rule?.attribute ? [[`rule:${rule.attribute}`, ruleText(rule.value)]] : []
     )
   )
   return { ...meta, ...ruleKeys, ...prices("", rows) }
@@ -153,6 +153,13 @@ const route = (method: string, path: string, pattern: string) => ({
 })
 
 const productId = (params: Record<string, string>) => params["id"] ?? null
+const priceListId = productId
+
+// A rule's values in a stable order: the same groups in another order are no change
+const ruleText = (value: unknown): string =>
+  JSON.stringify(
+    Array.isArray(value) ? [...(value as unknown[])].map(String).sort() : (value ?? null)
+  )
 
 export const PRICE_RESOURCES: readonly AuditedResource[] = [
   {
@@ -199,7 +206,7 @@ export const PRICE_RESOURCES: readonly AuditedResource[] = [
   ].map((entry) => ({
     ...entry,
     resourceType: "price_list",
-    resourceId: productId,
+    resourceId: priceListId,
     snapshot: ({ scope, params }: { scope: Resolver; params: Record<string, string> }) =>
       priceList(scope, params["id"]),
   })),

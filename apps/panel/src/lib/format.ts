@@ -10,6 +10,15 @@ export function formatMoney(amount: string | number, currencyCode: string): stri
   }).format(Number(amount))
 }
 
+/** A currency's sign beside a money field: ₺ for TRY, € for EUR. */
+export function currencySymbol(currencyCode: string): string {
+  return (
+    new Intl.NumberFormat(LOCALE, { style: "currency", currency: currencyCode.toUpperCase() })
+      .formatToParts(0)
+      .find((part) => part.type === "currency")?.value ?? currencyCode.toUpperCase()
+  )
+}
+
 /** Money for axes and tight spots: ₺12,5 B. */
 export function formatCompactMoney(amount: string | number, currencyCode: string): string {
   return new Intl.NumberFormat(LOCALE, {

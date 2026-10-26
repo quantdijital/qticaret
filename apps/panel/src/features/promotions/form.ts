@@ -1,4 +1,5 @@
 import { z } from "zod"
+import { dayEnd, dayOf, dayStart } from "@/lib/days"
 import { parseMoneyInput } from "@/lib/money-input"
 import { applicationMethod, offerKind } from "./offer"
 import type { OfferKind } from "./offer"
@@ -53,12 +54,6 @@ export const promotionSchema = z
   })
 
 export type PromotionValues = z.infer<typeof promotionSchema>
-
-// The day's first and last second in Turkey (UTC+3, no summer time)
-export const dayStart = (day: string) => (day ? new Date(`${day}T00:00:00+03:00`) : null)
-export const dayEnd = (day: string) => (day ? new Date(`${day}T23:59:59+03:00`) : null)
-const dayOf = (when: string | Date | null | undefined) =>
-  when ? new Date(new Date(when).getTime() + 3 * 3_600_000).toISOString().slice(0, 10) : ""
 
 export function valuesOf(promotion: Promotion | null): PromotionValues {
   const method = promotion?.application_method

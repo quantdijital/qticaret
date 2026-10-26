@@ -3,7 +3,7 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: BİTTİ** (T1a–T16; kabul kriterlerinin hepsi testlerle işaretli, docs/03; son eksik iki kanıt, danışmanın p95 ölçümü ve yedi sayfa türünün SEO sözleşme testi, kapanışta eklendi). Playwright e2e altyapısı kuruldu; CI düzeltildi. **F4 — Fiyatlandırma ve promosyon: DEVAM** (plan ve ADR-0023/0024/0025 kabul edildi; U1 `price-history`, U4 kuponlar ve U7 indirim dağılımı ve iade tutarı bitti; sırada U2 fiyat listeleri). Dal `f4-pricing-promotions`. Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı. F1, F2 ve F3 dalları push edildi (kullanıcı 2026-10-26: "pushları sen önerdiğinde yapabilirsin"); PR açılmadı.
+**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: BİTTİ** (T1a–T16; kabul kriterlerinin hepsi testlerle işaretli, docs/03; son eksik iki kanıt, danışmanın p95 ölçümü ve yedi sayfa türünün SEO sözleşme testi, kapanışta eklendi). Playwright e2e altyapısı kuruldu; CI düzeltildi. **F4 — Fiyatlandırma ve promosyon: DEVAM** (plan ve ADR-0023/0024/0025 kabul edildi; U1 `price-history`, U4 kuponlar, U7 indirim dağılımı ve iade tutarı, U2 fiyat listeleri bitti; sırada U3 indirim gösterimi). Dal `f4-pricing-promotions`. Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı. F1, F2 ve F3 dalları push edildi (kullanıcı 2026-10-26: "pushları sen önerdiğinde yapabilirsin"); PR açılmadı.
 
 ## Son oturum özeti
 **2026-10-25/26 gece (kullanıcı yatarken, "panel işlerini tamamla" talimatıyla).** Panelin ekranları yazıldı; her biri gerçek veriyle tarayıcıda denendi (CDP ekran görüntüsü, test kayıtları sonra silindi). Commit'ler `e11a201`…`6d63df7`, push yok.
@@ -539,6 +539,16 @@
      - F5 iyzico sepeti aynı payları (`lineShares`) kullanmalı ki tahsil edilen tutar ve satırlar kuruşla eşleşsin.
   139. **Tutarlar Medusa'nın sakladığı hâliyle okunuyor:** `raw_*` alanları ve hesaplanan toplamlarda `.raw` (20 hane). Medusa'nın iç değerinde bölme artığı var (90,045 içeride 90,04499…988); bununla yarım kuruş ters yöne yuvarlanıyordu. Entegrasyon testi yakaladı.
   140. **İade, değişim ve talep kargoları satır paylarına girmiyor:** müşterinin ödediği değil, mağazanın sonraki gideri. Medusa bunları siparişin `shipping_methods`'unda ve kargo toplamında sayıyor. Query bu kargoların `detail`'ini döndürmediği için iade, değişim ve taleplerin kendi kargo kimliklerinden ayıklanıyor.
+  141. **Fiyat listeleri Kampanyalar altında** (`/promotions/price-lists`); iki ekran arasında sekme bağlantısı var, kenar çubuğuna yeni öğe eklenmedi. Türler panelde "İndirim" (`sale`, üstü çizili gösterilir) ve "Özel fiyat" (`override`, bayi/toptan).
+  142. **Yüzde indirim sunucuda hesaplanıyor** (`POST /admin/price-lists/:id/discount`).
+     - Hesap: çeşidin kendi fiyatı × (1 − oran), kuruşa yarım yukarı. Para birimi mağazanın varsayılanı.
+     - Listede fiyatı olan çeşit güncelleniyor. Kendi fiyatı olmayan çeşit atlanıyor ve sayısı söyleniyor.
+     - Sınırlar: en çok 500 ürün, %0,01–%99.
+     - Tek tek fiyat girişi Medusa'nın toplu fiyat ucundan gidiyor (yöneticinin yazdığı tutar).
+  143. **Çakışma bir uyarı, engel değil:** aynı çeşitleri fiyatlayan, yayında ve tarihleri kesişen başka listeler adıyla gösteriliyor. Taslak ve tarihi kesişmeyen listeler sayılmıyor.
+  144. **Kayıtlı listede durum yalnızca başlıktaki "Durdur / Yayına al" düğmesiyle değişiyor**; form durumu göndermiyor. Yeni listede "Kaydedince yayına al" anahtarı var. "Tüm müşteriler" kural nesnesini boşaltıyor; Medusa'nın grup kuralını kaldırdığı testli.
+  145. **Devreden doğrulandı: panelin varyant fiyat kaydı liste fiyatlarını koruyor** (testli). Admin API'nin `variants.prices` alanı yalnızca taban fiyatı döndürüyor. Medusa'nın fiyat seti güncellemesi de yalnızca listesiz fiyatlara dokunuyor.
+  146. **Ürün-fiyat satırları e2e'de değil, bileşen testinde sınanıyor.** E2E geliştirme veritabanına yazar, fiyat geçmişi de ekleme-yalnız bir defter; bu yüzden e2e'de liste fiyatı yazılmıyor. Satır kartı Testing Library ile panelin ilk bileşen testi oldu; kurulum dosyasına ortak temizlik eklendi.
 - **Bilinen sınırlar (devreden):**
   - JSON-LD'yi storefront basarken `<`, `>` ve `&` kaçışlanmalı (`</script>` içeren başlık ya da metin). Kural docs/13'te var; F18 kabulüne sözleşme testi olarak eklenecek.
   - Editöre yüklenip bir günden uzun süre kaydedilmeyen görseli gece süpürmesi siler; kayıt `content.image_unknown` verir.
@@ -550,7 +560,12 @@
   - Landing ürün sayısı her okumada hesaplanıyor; liste ekranında gösterilmiyor. Büyük mağazada önbellek ya da Index modülü gerekir.
   - Facet kataloğu en çok 500 aktif marka listeliyor; daha büyük mağazada aramalı seçici gerekir.
   - İçe aktarma: iş iptal ucu (S13'ten devreden) hâlâ yok. Gerçek Excel, LibreOffice ve Google Sheets dosyalarıyla örnek testleri eklenmedi (fixture'lar openpyxl ile üretildi: Excel uyumlu, paylaşılan metinli sürümü de var).
-  - Panelin varyant fiyat kaydı (`nextPrices`) fiyat listesi fiyatlarını ayırt etmiyor; Admin API'nin döndürdüğü fiyatlara göre F4'te (fiyat listeleri) doğrulanmalı.
+  - Fiyat listesi satırları (`GET /admin/price-lists/:id/lines`) sayfalanmadan okunuyor; binlerce çeşitli listede sayfalama gerekir.
+  - Müşteri grubu yönetimi panelde yok (Medusa Admin'de); fiyat listesi formu var olan grupları seçiyor.
+  - Fiyat listesi ekranı en çok 200 liste ve 200 müşteri grubu okuyor; daha fazlası için sayfalama ve aramalı seçici gerekir.
+  - Çakışma uyarısı para birimine ve müşteri grubuna bakmıyor; farklı gruplara fiyat veren listeleri de çakışma sayabiliyor (yanlış uyarı verebilir, çakışmayı kaçırmaz).
+  - Fiyat listesi denetim kaydında liste fiyatının anahtarı `price:<id>`; hangi çeşide ait olduğu yazmıyor.
+  - Fiyat listesi bileşenlerinden birkaçı (`DiscountDialog`, `AudienceCard`, `PriceLinesCard`) 50 satırı aşıyor; diğer panel bileşenleriyle birlikte bölünmeli.
   - Liste sorgusunun ürün sayısı büyük facet'lerde ürün kimliklerini bellekte kesiştiriyor (önbellekli). Büyük katalogda SQL'de `EXISTS` ile sayım ya da Index modülü düşünülmeli.
   - HTTP takımında `request-security` rate-limit testi T13'te bir kez dalgalandı; nedeni bulunamadı, tekrarlarda geçti.
   - Hediye kartı ve mağaza kredisi (Medusa credit line'ları) satır paylarına ve iade edilebilir tutara girmiyor; U8'de eklenecek.
@@ -827,7 +842,7 @@
 - **Daha önce:** F1 planlaması ve F0.2–F0.8 (2026-10-24), F0.1 monorepo (2026-10-24 sabahı), SEO ve güvenlik dokümanları (2026-10-22).
 
 ## Sıradaki görev
-**Claude'un sıradaki işi:** F4 U2 fiyat listeleri (plan aşağıda, "F4 görev planı"), ardından U3 indirim gösterimi. F4 kodu `f4-pricing-promotions` dalında (F1–F3 birleştirilmediği için `f3-catalog-seo-stock` üzerinden).
+**Claude'un sıradaki işi:** F4 U3 indirim gösterimi (Store API `price_display`, JSON-LD `StrikethroughPrice`, panelde fiyat geçmişi; plan aşağıda, "F4 görev planı"), ardından U5–U6. F4 kodu `f4-pricing-promotions` dalında (F1–F3 birleştirilmediği için `f3-catalog-seo-stock` üzerinden).
 
 1. **Kullanıcı:**
    - **F4 kararları:** ADR-0023/0024/0025 kabul edildi (2026-10-26). Dışarıda bekleyen: 30 gün kuralının hukukçu teyidi, hediye kartı vergisinin mali müşavir teyidi (docs/12).
@@ -855,7 +870,7 @@ Kararlar: ADR-0023 (fiyat geçmişi, 30 gün kuralı), ADR-0024 (kupon ve kampan
 | # | F4 | Görev | Bağımlılık | KK |
 |---|---|---|---|---|
 | U1 ✅ | F4.2 | `price-history` modülü (append-only): satıştaki fiyatın (calculated/original, herkese açık bağlam) varyant ve para birimi başına geçmişi. Yakalama: `pricing.price.*` ve `pricing.price_list.*` subscriber'ı (olayların çalıştığı testle kanıtlanır), saatlik zamanlama işi (liste başlangıç/bitişi olaysız), açılış bakiyesi migration script'i. `lib/pricing` 30 gün hesabı (saf, fixture'lı) | — | KK2 (yarısı) |
-| U2 | F4.1 | Fiyat listeleri: panel ekranları (indirimli/geçersiz kılan liste, tarih aralığı, müşteri grubu, ürün fiyatları), denetim kaydı kapsamı, panel `nextPrices`'ın liste fiyatlarını korumasının doğrulanması (devreden iş) | — | — |
+| U2 ✅ | F4.1 | Fiyat listeleri: panel ekranları (indirimli/geçersiz kılan liste, tarih aralığı, müşteri grubu, ürün fiyatları), denetim kaydı kapsamı, panel `nextPrices`'ın liste fiyatlarını korumasının doğrulanması (devreden iş) | — | — |
 | U3 | F4.3 | İndirim gösterimi: Store API `price_display` (güncel, liste fiyatı, indirimden önceki fiyat, kural sürümü), JSON-LD `StrikethroughPrice` aynı kaynaktan, panelde ürün fiyat geçmişi ve indirim uyarısı | U1, U2 | KK2 |
 | U4 ✅ | F4.4 + F4.6 | Kuponlar: kod normalleştirme (büyük harf, ASCII) + mevcut kodlar için migration, sepette tek kod kuralı (ayarla açılır), `coupon` hız profilinin üç Store ucuna bağlanması, kapsam (ürün/kategori/koleksiyon), minimum sepet (`item_total gte`, testle doğrulanır), kişi başı limit (`use_by_attribute`). Eşzamanlı limit KK testi | — | KK1 |
 | U5 | F4.6 | Tek kullanımlık kodlar: `promotion.codes` işi (şablondan N promosyon, `limit: 1`, okunur kodlar, CSV sonuç, en çok 10.000), panelde üret ve indir | U4 | — |

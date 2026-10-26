@@ -10,6 +10,7 @@ const SECTIONS = [
   "/brands",
   "/inventory",
   "/promotions",
+  "/promotions/price-lists",
   "/content",
   "/seo",
   "/reports",
