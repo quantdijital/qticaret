@@ -88,3 +88,9 @@ export function formatRelative(value: string | Date, now: Date = new Date()): st
   }
   return format.format(0, "minute")
 }
+
+/** A Turkish number as people write it (+90 216 555 12 34); any other stays as stored. */
+export function formatPhone(value: string): string {
+  const match = /^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/.exec(value)
+  return match ? `+90 ${match.slice(1).join(" ")}` : value
+}

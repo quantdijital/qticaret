@@ -22,6 +22,7 @@ import {
   useSetStock,
 } from "@/features/inventory/api/stock"
 import type { StockItem, StockView } from "@/features/inventory/api/stock"
+import { NoLocationNotice } from "@/features/inventory/components/no-location-notice"
 import { shopDefaultsQuery } from "@/features/products/api/lookups"
 import { ProductThumb } from "@/features/products/components/product-thumb"
 import { errorText } from "@/lib/errors"
@@ -212,6 +213,7 @@ export function InventoryPage() {
     <div className="flex flex-col gap-6">
       <LeaveGuard when={changed.length > 0 && !save.isPending} />
       <PageHeader title={t("nav.inventory")} description={t("inventory.description")} />
+      {defaults.isSuccess && !locationId ? <NoLocationNotice /> : null}
       <section className="overflow-hidden rounded-lg border bg-card shadow-card">
         <FilterTabs
           label={t("inventory.views")}

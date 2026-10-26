@@ -36,6 +36,7 @@ import { Route as AuthSettingsAttributesRouteImport } from './routes/_auth/setti
 import { Route as AuthSettingsAuditRouteImport } from './routes/_auth/settings/audit'
 import { Route as AuthSettingsFeaturesRouteImport } from './routes/_auth/settings/features'
 import { Route as AuthSettingsJobsRouteImport } from './routes/_auth/settings/jobs'
+import { Route as AuthSettingsLocationsRouteImport } from './routes/_auth/settings/locations'
 import { Route as AuthSettingsSeoRouteImport } from './routes/_auth/settings/seo'
 import { Route as AuthSettingsStoreRouteImport } from './routes/_auth/settings/store'
 
@@ -173,6 +174,11 @@ const AuthSettingsJobsRoute = AuthSettingsJobsRouteImport.update({
   path: '/jobs',
   getParentRoute: () => AuthSettingsRoute,
 } as any)
+const AuthSettingsLocationsRoute = AuthSettingsLocationsRouteImport.update({
+  id: '/locations',
+  path: '/locations',
+  getParentRoute: () => AuthSettingsRoute,
+} as any)
 const AuthSettingsSeoRoute = AuthSettingsSeoRouteImport.update({
   id: '/seo',
   path: '/seo',
@@ -204,6 +210,7 @@ export interface FileRoutesByFullPath {
   '/settings/audit': typeof AuthSettingsAuditRoute
   '/settings/features': typeof AuthSettingsFeaturesRoute
   '/settings/jobs': typeof AuthSettingsJobsRoute
+  '/settings/locations': typeof AuthSettingsLocationsRoute
   '/settings/seo': typeof AuthSettingsSeoRoute
   '/settings/store': typeof AuthSettingsStoreRoute
   '/brands/': typeof AuthBrandsIndexRoute
@@ -233,6 +240,7 @@ export interface FileRoutesByTo {
   '/settings/audit': typeof AuthSettingsAuditRoute
   '/settings/features': typeof AuthSettingsFeaturesRoute
   '/settings/jobs': typeof AuthSettingsJobsRoute
+  '/settings/locations': typeof AuthSettingsLocationsRoute
   '/settings/seo': typeof AuthSettingsSeoRoute
   '/settings/store': typeof AuthSettingsStoreRoute
   '/brands': typeof AuthBrandsIndexRoute
@@ -265,6 +273,7 @@ export interface FileRoutesById {
   '/_auth/settings/audit': typeof AuthSettingsAuditRoute
   '/_auth/settings/features': typeof AuthSettingsFeaturesRoute
   '/_auth/settings/jobs': typeof AuthSettingsJobsRoute
+  '/_auth/settings/locations': typeof AuthSettingsLocationsRoute
   '/_auth/settings/seo': typeof AuthSettingsSeoRoute
   '/_auth/settings/store': typeof AuthSettingsStoreRoute
   '/_auth/brands/': typeof AuthBrandsIndexRoute
@@ -297,6 +306,7 @@ export interface FileRouteTypes {
     | '/settings/audit'
     | '/settings/features'
     | '/settings/jobs'
+    | '/settings/locations'
     | '/settings/seo'
     | '/settings/store'
     | '/brands/'
@@ -326,6 +336,7 @@ export interface FileRouteTypes {
     | '/settings/audit'
     | '/settings/features'
     | '/settings/jobs'
+    | '/settings/locations'
     | '/settings/seo'
     | '/settings/store'
     | '/brands'
@@ -357,6 +368,7 @@ export interface FileRouteTypes {
     | '/_auth/settings/audit'
     | '/_auth/settings/features'
     | '/_auth/settings/jobs'
+    | '/_auth/settings/locations'
     | '/_auth/settings/seo'
     | '/_auth/settings/store'
     | '/_auth/brands/'
@@ -564,6 +576,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSettingsJobsRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
+    '/_auth/settings/locations': {
+      id: '/_auth/settings/locations'
+      path: '/locations'
+      fullPath: '/settings/locations'
+      preLoaderRoute: typeof AuthSettingsLocationsRouteImport
+      parentRoute: typeof AuthSettingsRoute
+    }
     '/_auth/settings/seo': {
       id: '/_auth/settings/seo'
       path: '/seo'
@@ -587,6 +606,7 @@ interface AuthSettingsRouteChildren {
   AuthSettingsAuditRoute: typeof AuthSettingsAuditRoute
   AuthSettingsFeaturesRoute: typeof AuthSettingsFeaturesRoute
   AuthSettingsJobsRoute: typeof AuthSettingsJobsRoute
+  AuthSettingsLocationsRoute: typeof AuthSettingsLocationsRoute
   AuthSettingsSeoRoute: typeof AuthSettingsSeoRoute
   AuthSettingsStoreRoute: typeof AuthSettingsStoreRoute
   AuthSettingsIndexRoute: typeof AuthSettingsIndexRoute
@@ -598,6 +618,7 @@ const AuthSettingsRouteChildren: AuthSettingsRouteChildren = {
   AuthSettingsAuditRoute: AuthSettingsAuditRoute,
   AuthSettingsFeaturesRoute: AuthSettingsFeaturesRoute,
   AuthSettingsJobsRoute: AuthSettingsJobsRoute,
+  AuthSettingsLocationsRoute: AuthSettingsLocationsRoute,
   AuthSettingsSeoRoute: AuthSettingsSeoRoute,
   AuthSettingsStoreRoute: AuthSettingsStoreRoute,
   AuthSettingsIndexRoute: AuthSettingsIndexRoute,

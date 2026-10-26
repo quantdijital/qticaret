@@ -19,7 +19,8 @@
     "edit": "Düzenle",
     "actions": "İşlemler",
     "delete": "Sil",
-    "clear": "Temizle"
+    "clear": "Temizle",
+    "more": "Diğer işlemler"
   },
   "errors": {
     "generic": "İşlem tamamlanamadı. Biraz sonra tekrar deneyin.",
@@ -209,7 +210,8 @@
       "features": "Özellikler",
       "jobs": "İşler",
       "audit": "Denetim kaydı",
-      "attributes": "Ürün özellikleri"
+      "attributes": "Ürün özellikleri",
+      "locations": "Depolar"
     },
     "appearance": {
       "title": "Görünüm",
@@ -432,6 +434,30 @@
       "exportStarted": "Dışa aktarma başladı. Dosya hazır olunca İşler sayfasından indirebilirsiniz.",
       "openJobs": "İşler sayfasına git",
       "retention": "Dışa aktarılan dosyalar İşler sayfasında bir hafta saklanır."
+    },
+    "locations": {
+      "title": "Depolar",
+      "description": "Stoğunuzu tuttuğunuz yerler. Yeni ürünlerin stoğu ve Stok sayfası varsayılan depoyu kullanır; siparişlerde stok satış kanalınıza bağlı depodan ayrılır.",
+      "add": "Depo ekle",
+      "default": "Varsayılan",
+      "noAddress": "Adres girilmemiş; kargo ve iade için gerekecek.",
+      "makeDefault": "Varsayılan yap",
+      "defaultSet": "Varsayılan depo değişti.",
+      "deleteTitle": "{{name}} silinsin mi?",
+      "deleteDescription": "Depo listeden kalkar. İçinde stok, rezervasyon ya da gelecek stok varsa silinmez.",
+      "deleted": "Depo silindi.",
+      "form": {
+        "title": "Depo ekle",
+        "editTitle": "Depoyu düzenle",
+        "description": "Depo adı ve açık adresi. Kargo ve iade işlemleri bu adresi kullanacak.",
+        "name": "Depo adı",
+        "nameHint": "Örneğin Ana Depo, Kadıköy Mağaza.",
+        "nameRequired": "Depo adını girin.",
+        "created": "Depo eklendi.",
+        "updated": "Depo kaydedildi.",
+        "nameTooLong": "Depo adı en fazla 100 karakter olabilir.",
+        "foreign": "Bu deponun adresi yurt dışında; panelden yalnızca adı değiştirilebilir."
+      }
     }
   },
   "status": {
@@ -712,7 +738,7 @@
       "stockFailed": "Ürün kaydedildi ama stok kaydedilemedi. Stoku ürün sayfasından girin.",
       "defaultOption": "Seçenek",
       "defaultValue": "Standart",
-      "stockNoLocation": "Ürün kaydedildi ama mağazanın varsayılan depo adresi olmadığı için stok girilemedi. Ayarlardan bir depo adresi ekleyin.",
+      "stockNoLocation": "Ürün kaydedildi ama mağazanın varsayılan deposu olmadığı için stok girilemedi. Ayarlar > Depolar'dan bir depo ekleyin.",
       "defaultsFailed": "Mağaza ayarları okunamadı. Biraz sonra tekrar deneyin.",
       "kindHint": "Dijital ürün ve hizmette kargo adımı atlanır."
     },
@@ -968,7 +994,9 @@
       "low": "Azalan stok yok. Her şey yolunda.",
       "out": "Tükenen ürün yok."
     },
-    "note": "\"Rafta\" mağazanın varsayılan depo adresindeki adettir; satılabilir stok tüm depolardan siparişe ayrılanlar düşülerek hesaplanır."
+    "note": "\"Rafta\" mağazanın varsayılan depo adresindeki adettir; satılabilir stok tüm depolardan siparişe ayrılanlar düşülerek hesaplanır.",
+    "noLocation": "Mağazanın varsayılan deposu yok; stok girmek için bir depo gerekli.",
+    "addLocation": "Depo ekle"
   },
   "promotions": {
     "title": "Kampanya",
@@ -1694,5 +1722,25 @@
     "fieldHint": "Ürün sayfasında ve arama sonucu başlığında görünür.",
     "pick": "Marka seçin",
     "noneFound": "Marka bulunamadı."
+  },
+  "address": {
+    "province": "İl",
+    "district": "İlçe",
+    "choose": "Seçin",
+    "provinceFirst": "Önce il seçin",
+    "line": "Adres",
+    "lineHint": "Cadde/sokak, bina ve kapı numarası.",
+    "postalCode": "Posta kodu",
+    "phone": "Telefon",
+    "neighborhood": "Mahalle",
+    "errors": {
+      "lineRequired": "Açık adresi girin.",
+      "provinceRequired": "İl seçin.",
+      "districtRequired": "İlçe seçin.",
+      "postalCodeInvalid": "Posta kodu 5 rakam olmalı.",
+      "postalCodeProvince": "Posta kodu seçilen ile ait değil.",
+      "phoneInvalid": "Telefon numarası geçerli değil; örneğin 0216 555 12 34.",
+      "tooLong": "Bu alan çok uzun."
+    }
   }
 }
