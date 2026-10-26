@@ -211,6 +211,8 @@ medusaIntegrationTestRunner({
         `/admin/stock-items/${itemId}/watch`,
         { threshold: 8 }
       )
+      // The status first: a refusal then says what it was
+      expect({ status: saved.status, body: saved.data }).toMatchObject({ status: 200 })
       expect(saved.data.watch).toMatchObject({ threshold: 8, fallback: 5 })
       // Raised over what is left: checked at once
       await armed(itemId)

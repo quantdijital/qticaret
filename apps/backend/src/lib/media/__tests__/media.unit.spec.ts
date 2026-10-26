@@ -20,6 +20,10 @@ async function phonePhoto(width: number, height: number): Promise<Buffer> {
     .toBuffer()
 }
 
+// Encoding AVIF and WebP is CPU work: a CI runner sharing its cores with lint
+// and typecheck took longer than jest's 5 seconds
+jest.setTimeout(30_000)
+
 describe("uploaded images (adr/0016)", () => {
   it("drops EXIF and GPS, and turns the photo upright by its orientation (KK)", async () => {
     const original = await phonePhoto(60, 40)
