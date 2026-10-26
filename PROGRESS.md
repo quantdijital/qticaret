@@ -3,7 +3,7 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a, T1b, T2, T3, T4, T5, T9, T10, T11 bitti; sırada T12 mağaza denetimi, T7 stok, T6 görsel). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı; push edilmedi. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
+**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a, T1b, T2, T3, T4, T5, T9, T10, T11, T12 bitti; sırada T7 stok, T6 görsel). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı; push edilmedi. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
 
 ## Son oturum özeti
 **2026-10-25/26 gece (kullanıcı yatarken, "panel işlerini tamamla" talimatıyla).** Panelin ekranları yazıldı; her biri gerçek veriyle tarayıcıda denendi (CDP ekran görüntüsü, test kayıtları sonra silindi). Commit'ler `e11a201`…`6d63df7`, push yok.
@@ -147,6 +147,20 @@
     - Ürün listesinde SEO sütunu.
     - SEO özetinde mağaza puanı, not dağılımı, kritik sayısı, en düşük 10 ürün.
   - `seo.publish_gate` bayrağı (varsayılan kapalı): taslaktan yayına geçişte kritik bulgu ya da 50 altı puan reddediliyor.
+- **F3 T12 (F3.14) bitti:** mağaza geneli SEO denetimi.
+  - `seo.audit` işi (tekil, rapor 30 gün): gece değerlendirmelerinin ardından kendiliğinden, panelden de istenince çalışıyor. Her kontrolden sonra ilerleme bildiriyor.
+  - Kurallar (docs/14 §3.9): S-HOST-01, S-ROBOTS-01, S-SITEMAP-01, S-404-01, S-DUP-01, S-ORPHAN-01, S-REDIR-01. Kurallar `lib/seo/audit` içinde saf; robots.txt RFC 9309'a göre okunuyor (`lib/seo/robots-match`).
+  - Bulgular iş özetinde (her birinin ilk 10 kaydı), tamamı `;` ayraçlı, formül kaçışlı CSV raporda.
+  - Değerlendirmeler artık gösterilen başlık/açıklamanın hash'ini ve sayfanın yayında + indekslenebilir olduğunu (`is_listed`) tutuyor. Şablondan gelen tekrarlar da yakalanıyor.
+  - Panel, SEO sayfasındaki "Mağaza denetimi" kartı:
+    - Şimdi denetle, raporu indir.
+    - Bulgular önem sırasıyla, açılınca "neden önemli" ve kayıtlar.
+    - 404 için önerilen sayfaya tek tık 301; diğer kayıtlarda sayfaya, kurala ya da ayarlara git.
+  - Yan iyileştirmeler:
+    - Kart başlığı dar ekranda eylemi alt satıra alıyor (tüm `SectionCard`'lar).
+    - İş indirme düğmesi ortak bileşen oldu.
+  - Hata düzeltmesi: yeni sayfa aynı anda iki kez değerlendirilince (kayıt aboneliği + sayfanın açılması) ikinci kayıt 400 dönüyordu. Artık güncellemeye düşüyor; birim testli.
+  - Bağımsız kod incelemesinin bulguları düzeltildi.
 - **Gözden geçir (kullanıcı yokken önerilen seçenekle verilen kararlar):**
   1. Bayrak adı `catalog.non_physical`, mağaza tarafından açılır, varsayılan kapalı. Etiketleri Medusa Admin'de ve panelde var.
   2. Kargo gerekmeyen kalemler sipariş ödenince "teslim edildi" sayılıyor. Dijital teslimat (indirme bağlantısı, kod gönderimi) F9 bildirimleriyle gelecek.
@@ -189,13 +203,33 @@
      - Ürün altı kategoriyle, kategori/koleksiyon başlık + içerik + teknik ile, marka bunlara görsel (logo) eklenerek değerlendiriliyor.
   34. Şimdilik olmayan kurallar:
      - Görsel alt metni, boyut, dosya adı (T6).
-     - Benzer içerik shingle'ı ve şablondan üretilen başlıkların mağaza geneli tekrarı (T12 denetimi).
+     - Benzer içerik shingle'ı (şablondan gelen başlık tekrarı T12'de geldi).
      - JSON-LD doğrulaması, puan/yorum (F10), kargo/iade politikası (F13), ilgili ürün bağlantıları.
-     - Tekrar kontrolü şimdilik yalnızca sayfaların kendi başlık/açıklamalarını karşılaştırıyor.
+     - ~~Tekrar kontrolü yalnızca sayfaların kendi metnini karşılaştırıyor~~: T12'den beri gösterilen metin (kendi ya da şablon) ve yalnızca yayındaki, indekslenebilir sayfalar karşılaştırılıyor.
   35. Yayın kapısı yalnızca taslaktan yayına geçişi kontrol ediyor. Yayında ürün düzenlenebiliyor.
      - Doğrudan yayında oluşturulan ürün (sihirbaz) kapıdan geçmiyor; sihirbazın kendi hazırlık kontrolü var.
      - Eşik 50, artı kritik bulgu yok.
   36. Değerlendirme kaydı engellemiyor: abonelik kayıt yanıtlandıktan sonra çalışıyor, hata loglanıyor, gece işi açığı kapatıyor.
+  37. **S-404-01 haftalık sayaç tutmuyor.** 404 günlüğü toplam isabet sayıyor. Kural: toplamda ≥ 10 istek ve son 7 günde de istenmiş; panel metni bunu söylüyor. docs/14'teki "son 7 günde ≥ 10" ancak haftalık sayaçla birebir olur; gerekirse günlüğe pencere sayacı eklenir.
+  38. Tekrar sayımı (S-DUP-01, P-TITLE-02, P-META-02) yalnızca yayındaki ve indekslenebilir sayfaları sayıyor:
+     - Dışarıda kalanlar: taslak ürün, pasif ya da dahili kategori, pasif marka, noindex ya da başka canonical gösteren sayfa.
+     - Gerekçe: taslakta tutulan kopya, yayındaki asıl ürünün puanını düşürmemeli.
+  39. S-HOST-01 ortamı biliyor:
+     - Staging kapalı olmalı; açıksa kritik bulgu var. Staging'de ana alan adı aranmıyor.
+     - Platform alt alan adının 301'i kenar işi (F18); denetimde yok.
+  40. S-ROBOTS-01 şu sayfaları deniyor: ana sayfa ve her türden bir örnek sayfa (mağazanın adres biçimiyle).
+     - Önce `*` için bakıyor; Googlebot ya da Bingbot'un kendi grubu varsa onlar için de.
+     - İndekslemesi kapalı ortamda robots kontrolü atlanıyor (bulgu S-HOST-01'de).
+  41. S-REDIR-01: her tam eşleşen kuralın kaynağı ve hedefi ziyaretçi gibi çözümleniyor.
+     - En çok kullanılan 2000 kural deneniyor.
+     - Kural başına tek kayıt, en acil sebep: canlı sayfanın altında kalmış, hedefi yok ya da kaldırılmış, hedefi yine yönleniyor (ziyaretçi tek adımda gidiyor ama hedef eskimiş), 12 aydır kullanılmamış.
+     - Ek olarak 10 ve daha çok eski yolu olan kayıtlar listeleniyor; silinmiş kayıtlar dahil değil. T1a'daki "kayıt başına rezerve yol üst sınırı" açığına şimdilik bu liste cevap veriyor; sınır konmadı.
+  42. S-SITEMAP-01 adresi olmayan canlı sayfaları da sayıyor (`no_path`). Bunlar ne site haritasına ne mağazaya çıkabiliyor.
+  43. Şimdilik olmayan mağaza kuralları:
+     - S-IMG-01 (alt metin): T6'da, görsellerde alt metin alanı gelince.
+     - S-POLICY-01 (F13), S-GSC-01 ve S-CWV-01 (F10.11), S-SOCIAL-01, S-SEARCH-01.
+     - Puan dağılımı denetim raporunda tekrarlanmıyor; danışman özet kartında.
+  44. 404 için "301 oluştur" doğrudan kural yazıyor. 404 kaydı silinmiyor; çözümleme artık yönlendirme döndüğü için sonraki denetimde düşüyor.
 - **Bilinen sınırlar (devreden):**
   - Sipariş ve stok panosu bellek içi sıralıyor (5000/2000 kayıt). Büyük mağazada kayıtlı aşama sütunu ya da Index modülü gerekir.
   - Kargo etiketi ve takip F7'de. Kampanyada minimum sepet ve kategori kuralları F4'te.
@@ -505,7 +539,7 @@
 | T9 ✅ | F3.12 | `lib/seo/jsonld`: ProductGroup/Product/Offer, BreadcrumbList, CollectionPage/ItemList, OnlineStore, Article; şema testleri. KK: payload + JSON-LD sözleşme testi | T1, T4 | — |
 | T10 ✅ | F3.6 + F3.15 | Sitemap işi (debounce + günlük, 50.000'de bölme, görsel sitemap, S3), robots.txt üretimi ve AI ön ayarları, canonical host 301, staging `noindex`, imzalı önizleme, IndexNow. KK: sitemap/robots | T4, T5 | — |
 | T11 ✅ | F3.13 | `seo-advisor`: kural motoru, skor, bulgular, tek tık düzeltme, widget + SERP önizleme, liste sütunu, yayın kapısı. KK: deterministik, p95 < 50 ms | T2, T9 | — |
-| T12 | F3.14 | Mağaza geneli SEO denetim işi, 404 isabet listesi + "301 oluştur", mükerrer/öksüz/zincir listeleri. KK: 404 önerisi | T3, T11 | — |
+| T12 ✅ | F3.14 | Mağaza geneli SEO denetim işi, 404 isabet listesi + "301 oluştur", mükerrer/öksüz/zincir listeleri. KK: 404 önerisi | T3, T11 | — |
 | T13 | F3.16a | `content` modülü: sayfa ve blog, zengin metin (belge JSON + sunucu oluşturucu, Tiptap), kısa kodlar, Store API | T2, Tiptap onayı | 0019 |
 | T14 | F3.16b + F3.17 | Facet landing sayfaları, özgünlük kapısı, facet parametre kuralları ve robots engelleri. KK: özgünlük < %30 | T10, T13 | — |
 | T15 | F3.9 | xlsx okuyucu + `yazl` yazıcı, TR şablonu, `catalog.import`/`catalog.export` işleri, kontrollü yükleme yolu, satır hata raporu, advisor ön özeti. KK: 1000 satır, formül kaçışı | T1, T2, T5, T8, `yazl` onayı | 0018 |
@@ -581,14 +615,14 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
 - [ ] **F3 T1a'dan devreden işler:**
   - ✅ **T1b:** `setProductCatalogWorkflow` yazımlardan sonra yayın kuralını çalıştırıyor (yayındaki ürün fiziksele dönerken ölçü yoksa red, hepsi geri alınır; HTTP testli). Denetim anlık görüntüsünde `kind` var.
   - ✅ **T3:** Eski yollar çözümlemede sahibinin bugünkü yoluna gidiyor (kategori alt ağacı dahil). Kişiye özel ve denetim kayıtlı "serbest bırak" eylemi var.
-    - Açık kalan: kayıt başına rezerve yol üst sınırı. Şimdilik yok; T12 SEO denetiminde çok yol biriken kayıtlar listelenir.
+    - Açık kalan: kayıt başına rezerve yol üst sınırı. Şimdilik yok; ✅ T12 denetimi 10 ve üstü eski yolu olan kayıtları listeliyor.
 - [ ] **F3 T3'ten devreden işler:**
   - **F18 storefront:**
     - Resolve ve 404 bildirimi sunucudan çağrılırsa IP sınırları mağaza geneline iner; imzalı istemci IP'si ADR'siyle çözülmeli.
     - Resolve satış kanalına bakmıyor: başka kanaldaki yayındaki ürün de `entity` döner.
     - Büyük harf ve sondaki `/` gibi normalizasyon 301'leri edge'de yapılır; resolve normalize edilmiş yolu `path` alanında döndürüyor.
   - **F14 geçiş:** Sorgu dizeli eski adresler (`?id=`) ve regex kuralları desen diline çevrilir; çevrilemeyenler rapora düşer.
-  - **T12:** 12 ay isabet almayan kurallar için "temizle" önerisi; 404 isabet listesi.
+  - ✅ **T12:** 12 ay isabet almayan kurallar için "temizle" önerisi; 404 isabet listesi (önerili, tek tık 301).
   - **F18 (T10'dan):**
     - İmzalı önizleme bağlantıları (taslak sayfa, `noindex`).
     - Kenarda: canonical host 301'i; `indexing: false` iken `X-Robots-Tag: noindex`; `/robots.txt`, `/sitemap*.xml` ve `/{indexnow_key}.txt` vekilliği.
