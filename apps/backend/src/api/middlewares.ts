@@ -29,6 +29,7 @@ import { requestContext } from "./http/request-id"
 import { rejectAmbiguousPath } from "./http/request-path"
 import { adminLimitGuard, storeLimitGuard, uploadSizeGate } from "./http/request-limits"
 import { securityHeaders } from "./http/security-headers"
+import { MEDIA_ROUTES, STORE_MEDIA_FIELDS, restrictStoreMediaFields } from "./http/media-routes"
 import { SEO_ROUTES } from "./http/seo-routes"
 import { STOCK_ROUTES } from "./http/stock-routes"
 import { uploadValidator } from "./http/upload-validator"
@@ -77,6 +78,7 @@ export default defineMiddlewares({
         storeLimitGuard,
         rejectSensitiveFields,
         restrictStoreAttributeFields,
+        restrictStoreMediaFields,
         rejectStoreSeoFields,
       ],
     },
@@ -130,7 +132,9 @@ export default defineMiddlewares({
     // allowFields runs before the core route checks `fields`
     {
       matcher: "/store/products",
-      middlewares: [allowFields(...STORE_ATTRIBUTE_FIELDS, ...STORE_BRAND_FIELDS)],
+      middlewares: [
+        allowFields(...STORE_ATTRIBUTE_FIELDS, ...STORE_BRAND_FIELDS, ...STORE_MEDIA_FIELDS),
+      ],
     },
     {
       matcher: "/admin/attribute-templates",
@@ -163,6 +167,8 @@ export default defineMiddlewares({
     ...BRAND_ROUTES,
     // F3.7: warehouses
     ...STOCK_ROUTES,
+    // F3.3: product images
+    ...MEDIA_ROUTES,
     // docs/17: the home page's order numbers are for people (shop revenue)
     {
       matcher: "/admin/home/summary",

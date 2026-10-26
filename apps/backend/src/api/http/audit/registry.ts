@@ -3,6 +3,7 @@ import { routePathKeepingCase } from "../request-path"
 import { ATTRIBUTE_RESOURCES } from "./resources/attributes"
 import { BRAND_RESOURCES } from "./resources/brands"
 import { CATALOG_RESOURCES } from "./resources/catalog"
+import { MEDIA_RESOURCES } from "./resources/media"
 import { PRICE_RESOURCES } from "./resources/prices"
 import { PROMOTION_RESOURCES } from "./resources/promotions"
 import { REDIRECT_RESOURCES } from "./resources/redirects"
@@ -28,6 +29,7 @@ export const AUDITED_RESOURCES: readonly AuditedResource[] = [
   ...REDIRECT_RESOURCES,
   ...BRAND_RESOURCES,
   ...STOCK_RESOURCES,
+  ...MEDIA_RESOURCES,
 ]
 
 export interface ResourceMatch {

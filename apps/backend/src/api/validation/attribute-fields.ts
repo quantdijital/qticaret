@@ -31,37 +31,44 @@ export const STORE_ATTRIBUTE_FIELDS = [
 // Anywhere in a path: `items.product.attribute_values` reaches them too
 const ATTRIBUTE_RELATION = /(^|\.)\*?attribute_(values|template)\b/
 
+/** The store `fields` tokens, without their `+`/`-` prefix. */
+function fieldTokens(req: MedusaRequest): string[] {
+  const fields: unknown = req.query["fields"]
+  return (Array.isArray(fields) ? fields : [fields])
+    .filter((value): value is string => typeof value === "string")
+    .flatMap((value) => value.split(","))
+    .map((token) => token.trim().replace(/^[+-]/, ""))
+}
+
 /**
- * Store `fields` that touch product attributes must name allowed leaves one
- * by one: a relation name, `*attribute_values` or `attribute_values.*`
- * would select every column, and a deeper path (`.definition.template`,
- * `.definition.values`) would walk to other products' data. Defence in
+ * Store `fields` that touch a relation must name its allowed leaves one by
+ * one: the relation's name, `*relation` or `relation.*` would select every
+ * column, and a deeper path would walk to other records' data. Defence in
  * depth over Medusa's allowed list, whose handling of these forms is
  * internal.
  */
-export function restrictStoreAttributeFields(
-  req: MedusaRequest,
-  res: MedusaResponse,
-  next: MedusaNextFunction
-): void {
-  const fields: unknown = req.query["fields"]
-  const values = (Array.isArray(fields) ? fields : [fields]).filter(
-    (value): value is string => typeof value === "string"
-  )
-  const tokens = values
-    .flatMap((value) => value.split(","))
-    .map((token) => token.trim().replace(/^[+-]/, ""))
-  const leaves: readonly string[] = STORE_ATTRIBUTE_LEAVES
-  const refused = tokens.some((token) => ATTRIBUTE_RELATION.test(token) && !leaves.includes(token))
-  if (refused) {
-    rejectRequest(
-      req,
-      res,
-      400,
-      { type: "invalid_data", message: "The requested fields are not available" },
-      "attribute_fields"
+export function restrictStoreRelation(relation: RegExp, leaves: readonly string[], reason: string) {
+  return (req: MedusaRequest, res: MedusaResponse, next: MedusaNextFunction): void => {
+    const refused = fieldTokens(req).some(
+      (token) => relation.test(token) && !leaves.includes(token)
     )
-    return
+    if (refused) {
+      rejectRequest(
+        req,
+        res,
+        400,
+        { type: "invalid_data", message: "The requested fields are not available" },
+        reason
+      )
+      return
+    }
+    next()
   }
-  next()
 }
+
+/** Product attributes: `.definition.template` or `.definition.values` would reach other products. */
+export const restrictStoreAttributeFields = restrictStoreRelation(
+  ATTRIBUTE_RELATION,
+  STORE_ATTRIBUTE_LEAVES,
+  "attribute_fields"
+)

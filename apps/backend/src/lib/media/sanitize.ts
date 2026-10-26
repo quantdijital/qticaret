@@ -18,7 +18,8 @@ const ENCODERS: Record<ImageType, (image: Sharp) => Sharp> = {
   jpeg: (image) => image.jpeg({ quality: 86, mozjpeg: true }),
   png: (image) => image.png({ compressionLevel: 9 }),
   webp: (image) => image.webp({ quality: 86 }),
-  avif: (image) => image.avif({ quality: 60 }),
+  // Upload answers wait for this; a low effort keeps an AVIF to well under a second
+  avif: (image) => image.avif({ quality: 60, effort: 2 }),
 }
 
 export interface CleanImage {

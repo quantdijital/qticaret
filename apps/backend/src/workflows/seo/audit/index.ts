@@ -1,6 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import type { AuditFinding } from "../../../lib/seo/audit"
-import { duplicateFinding, notFoundFinding, orphanFinding } from "./catalog"
+import { duplicateFinding, notFoundFinding, productFindings } from "./catalog"
 import { redirectFinding } from "./redirects"
 import { siteFindings } from "./site"
 
@@ -15,7 +15,7 @@ const CHECKS: readonly Check[] = [
   siteFindings,
   notFoundFinding,
   duplicateFinding,
-  orphanFinding,
+  productFindings,
   redirectFinding,
 ]
 
@@ -23,7 +23,7 @@ const CHECKS: readonly Check[] = [
  * The store-wide SEO audit (docs/14 §3.9, F3.14): whether search engines
  * can get in and find their way (host, robots.txt, sitemap), and what the
  * pages add up to (404s worth a redirect, shared titles, products in no
- * category, redirects to tidy). Findings most severe first, the biggest
+ * category, images without alt text, redirects to tidy). Findings most severe first, the biggest
  * first within a severity. `progress` hears of each check done (the job's
  * heartbeat).
  */

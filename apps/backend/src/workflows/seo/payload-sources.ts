@@ -96,7 +96,7 @@ export async function trailOf(container: MedusaContainer, last: CategoryRow, wit
 export async function imageOf(
   container: MedusaContainer,
   meta: SeoMetaRow | null | undefined,
-  fallback: string | null | undefined
+  fallback: string | { url: string; alt: string | null } | null | undefined
 ): Promise<SeoSubject["image"]> {
   const own = meta?.og_image_override
     ? await publicUploadUrl(container, meta.og_image_override)
@@ -104,7 +104,33 @@ export async function imageOf(
   if (own) {
     return { url: own, alt: meta?.og_image_alt ?? null }
   }
-  return fallback ? { url: fallback, alt: null } : null
+  if (!fallback) {
+    return null
+  }
+  return typeof fallback === "string" ? { url: fallback, alt: null } : fallback
+}
+
+export interface MediaRow {
+  url: string
+  alt?: string | null
+  derivatives?: { og?: { url: string } | null } | null
+}
+
+export const MEDIA_FIELDS = ["media_assets.url", "media_assets.alt", "media_assets.derivatives"]
+
+/**
+ * A product's main image as it is shared (F3.3): its 1200×630 crop when the
+ * pipeline has made one, else the image itself, with its alt text.
+ */
+export function mainImageOf(
+  thumbnail: string | null | undefined,
+  media: (MediaRow | null)[] | null | undefined
+): { url: string; alt: string | null } | null {
+  if (!thumbnail) {
+    return null
+  }
+  const asset = (media ?? []).find((row) => row?.url === thumbnail)
+  return { url: asset?.derivatives?.og?.url ?? thumbnail, alt: asset?.alt ?? null }
 }
 
 // What a listing page shows first; its JSON-LD lists the same (F18 sorts alike)

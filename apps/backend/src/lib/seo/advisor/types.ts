@@ -4,7 +4,7 @@
  * of the facts, so the same page always gets the same score.
  */
 
-export const RULES_VERSION = 1
+export const RULES_VERSION = 2
 
 export const SEVERITIES = ["critical", "high", "medium", "low", "info"] as const
 export type Severity = (typeof SEVERITIES)[number]
@@ -61,6 +61,8 @@ export interface AdvisorFacts {
   product?:
     | {
         images: number
+        /** Images with no alt text (docs/13 §8). */
+        imagesWithoutAlt: number
         variants: number
         /** Variants without a TRY price above zero. */
         unpriced: number

@@ -32,12 +32,16 @@ const EXTENSIONS = { webp: "webp", avif: "avif", jpeg: "jpg" } as const
 export const derivativeName = (slug: string, position: number, derivative: Derivative): string =>
   `${slug}-${String(position)}-${derivative.kind === "og" ? "og" : String(derivative.width)}.${EXTENSIONS[derivative.format]}`
 
+// Upright first: a master stored before the cleaning (an import) may carry an orientation
+const upright = (master: Buffer) => readImage(master).rotate()
+
 export async function deriveImages(master: Buffer): Promise<Derivative[]> {
-  const { width } = await readImage(master).metadata()
+  const { info } = await upright(master).toBuffer({ resolveWithObject: true })
+  const width = info.width
   const derivatives: Derivative[] = []
   for (const target of srcsetWidths(width)) {
     for (const format of SRCSET_FORMATS) {
-      const resized = readImage(master).resize({ width: target, withoutEnlargement: true })
+      const resized = upright(master).resize({ width: target, withoutEnlargement: true })
       const encoded =
         format === "webp" ? resized.webp({ quality: 80 }) : resized.avif({ quality: 50 })
       const { data, info } = await encoded.toBuffer({ resolveWithObject: true })
@@ -50,8 +54,10 @@ export async function deriveImages(master: Buffer): Promise<Derivative[]> {
       })
     }
   }
-  const og = await readImage(master)
+  // JPEG has no transparency: a cut-out product sits on white, not black
+  const og = await upright(master)
     .resize({ ...OG_SIZE, fit: "cover", position: "attention" })
+    .flatten({ background: "#ffffff" })
     .jpeg({ quality: 85, mozjpeg: true })
     .toBuffer({ resolveWithObject: true })
   derivatives.push({

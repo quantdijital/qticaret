@@ -14,7 +14,17 @@ import type { FactRow } from "./facts"
 import type { Condition } from "../../lib/seo/jsonld"
 import { highlightText } from "./highlight"
 import type { HighlightValue } from "./highlight"
-import { SEO_FIELDS, imageOf, listingItems, rowOf, shopOf, trailOf } from "./payload-sources"
+import {
+  MEDIA_FIELDS,
+  SEO_FIELDS,
+  imageOf,
+  listingItems,
+  mainImageOf,
+  rowOf,
+  shopOf,
+  trailOf,
+} from "./payload-sources"
+import type { MediaRow } from "./payload-sources"
 import type { CategoryRow, SeoMetaRow } from "./payload-sources"
 
 /**
@@ -31,6 +41,7 @@ interface ProductRow extends Omit<FactRow, "product_extension"> {
   product_extension?: { primary_category_id?: string | null; condition?: Condition | null } | null
   attribute_values?: (HighlightValue | null)[] | null
   brand?: { name: string } | null
+  media_assets?: (MediaRow | null)[] | null
   seo_meta?: SeoMetaRow | null
 }
 
@@ -67,6 +78,7 @@ async function productSubject(container: MedusaContainer, id: string, path: stri
       "attribute_values.*",
       "attribute_values.definition.*",
       "brand.name",
+      ...MEDIA_FIELDS,
       ...SEO_FIELDS,
     ],
     id
@@ -93,7 +105,11 @@ async function productSubject(container: MedusaContainer, id: string, path: stri
       kargo_cümlesi: null,
     },
     overrides: product.seo_meta ?? null,
-    image: await imageOf(container, product.seo_meta, product.thumbnail),
+    image: await imageOf(
+      container,
+      product.seo_meta,
+      mainImageOf(product.thumbnail, product.media_assets)
+    ),
     trail: category ? await trailOf(container, category, true) : [],
     product: facts,
   }

@@ -16,6 +16,7 @@ export const AUDIT_RULES = {
   "S-DUP-01": "high",
   "S-ORPHAN-01": "high",
   "S-REDIR-01": "medium",
+  "S-IMG-01": "medium",
 } as const satisfies Record<string, Severity>
 export type AuditRuleId = keyof typeof AUDIT_RULES
 

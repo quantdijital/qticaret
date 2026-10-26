@@ -100,6 +100,19 @@ const imageCount = forProduct((_facts, product) => {
     : null
 })
 
+// Screen readers and image search read the alt text; a missing one says nothing
+const imageAlt = forProduct((_facts, product) =>
+  product.images > 0 && product.imagesWithoutAlt > 0
+    ? {
+        ruleId: "P-IMG-02",
+        severity: "medium",
+        category: "images",
+        params: { count: product.imagesWithoutAlt, total: product.images },
+        fix: { kind: "manual", action: "add_alt_text" },
+      }
+    : null
+)
+
 const prices = forProduct((_facts, product) =>
   product.unpriced > 0
     ? {
@@ -177,6 +190,7 @@ export const PRODUCT_RULES: readonly Rule[] = [
   headingOrder,
   insecureLinks,
   imageCount,
+  imageAlt,
   prices,
   identifiers,
   brand,

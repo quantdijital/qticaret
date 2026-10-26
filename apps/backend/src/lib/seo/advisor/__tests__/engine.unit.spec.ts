@@ -10,6 +10,7 @@ type ProductFacts = NonNullable<AdvisorFacts["product"]>
 
 const PRODUCT: ProductFacts = {
   images: 4,
+  imagesWithoutAlt: 0,
   variants: 2,
   unpriced: 0,
   unidentified: 0,
@@ -155,5 +156,17 @@ describe("advisor text checks", () => {
       "needs_work",
       "poor",
     ])
+  })
+
+  it("asks for alt text on images that have none (P-IMG-02)", () => {
+    const issues = findIssues(good({ product: { ...PRODUCT, images: 3, imagesWithoutAlt: 2 } }))
+    expect(issues.find(({ ruleId }) => ruleId === "P-IMG-02")).toEqual({
+      ruleId: "P-IMG-02",
+      severity: "medium",
+      category: "images",
+      params: { count: 2, total: 3 },
+      fix: { kind: "manual", action: "add_alt_text" },
+    })
+    expect(findIssues(good()).some(({ ruleId }) => ruleId === "P-IMG-02")).toBe(false)
   })
 })

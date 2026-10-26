@@ -78,40 +78,65 @@ export async function duplicateFinding(container: MedusaContainer): Promise<Audi
   return finding("S-DUP-01", items, total)
 }
 
-interface OrphanRow {
+interface ProductRow {
   id: string
   title: string
   categories?: unknown[] | null
+  images?: ({ url: string } | null)[] | null
+  media_assets?: ({ url: string; alt?: string | null } | null)[] | null
 }
 
-/** S-ORPHAN-01: live products in no category (no way to them but search and links). */
-export async function orphanFinding(container: MedusaContainer): Promise<AuditFinding | null> {
+/**
+ * One pass over the live products:
+ * - S-ORPHAN-01: products in no category (no way to them but search and links);
+ * - S-IMG-01: products whose images lack alt text (docs/13 §8).
+ */
+export async function productFindings(
+  container: MedusaContainer
+): Promise<(AuditFinding | null)[]> {
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
-  const items: AuditItem[] = []
-  let count = 0
+  const orphans: AuditItem[] = []
+  const unlabelled: AuditItem[] = []
+  let orphanCount = 0
+  let imageCount = 0
   for (let skip = 0; ; skip += PAGE) {
     const { data } = await query.graph({
       entity: "product",
-      fields: ["id", "title", "categories.id"],
+      fields: [
+        "id",
+        "title",
+        "categories.id",
+        "images.url",
+        "media_assets.url",
+        "media_assets.alt",
+      ],
       filters: { status: "published" },
       pagination: { skip, take: PAGE, order: { id: "ASC" } },
     })
-    for (const row of data as OrphanRow[]) {
-      if ((row.categories ?? []).filter(Boolean).length > 0) {
-        continue
+    for (const row of data as ProductRow[]) {
+      const entity = { kind: "product" as const, id: row.id }
+      if ((row.categories ?? []).filter(Boolean).length === 0) {
+        orphanCount += 1
+        if (orphans.length < MAX_LISTED) {
+          orphans.push({ reason: "no_category", subject: row.title, entity })
+        }
       }
-      count += 1
-      if (items.length < MAX_LISTED) {
-        items.push({
-          reason: "no_category",
-          subject: row.title,
-          entity: { kind: "product", id: row.id },
-        })
+      const alts = new Map(
+        (row.media_assets ?? []).flatMap((asset) => (asset ? [[asset.url, asset.alt ?? ""]] : []))
+      )
+      const missing = (row.images ?? []).filter(
+        (image) => image && !alts.get(image.url)?.trim()
+      ).length
+      if (missing > 0) {
+        imageCount += missing
+        if (unlabelled.length < MAX_LISTED) {
+          unlabelled.push({ reason: "no_alt", subject: row.title, count: missing, entity })
+        }
       }
     }
     if (data.length < PAGE) {
       break
     }
   }
-  return finding("S-ORPHAN-01", items, count)
+  return [finding("S-ORPHAN-01", orphans, orphanCount), finding("S-IMG-01", unlabelled, imageCount)]
 }

@@ -16,6 +16,8 @@ const KINDS: Readonly<Record<string, PageKind>> = {
   "product-collection.deleted": "collection",
   "brand.saved": "brand",
   "brand.deleted": "brand",
+  // An image's alt text: its product's (`id` is the product's)
+  "media.saved": "product",
 }
 
 const SEO_KINDS: Readonly<Record<string, PageKind>> = {

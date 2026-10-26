@@ -53,12 +53,24 @@ describe("uploaded images (adr/0016)", () => {
     await expect(sanitizeImage(Buffer.from("not an image"), "jpeg")).rejects.toThrow()
   })
 
+  it("puts a transparent cut-out on white in the share crop", async () => {
+    const cutOut = await sharp({
+      create: { width: 600, height: 600, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } },
+    })
+      .png()
+      .toBuffer()
+    const og = (await deriveImages(cutOut)).at(-1)
+    const { data } = await sharp(og?.buffer).raw().toBuffer({ resolveWithObject: true })
+    expect([data[0], data[1], data[2]]).toEqual([255, 255, 255])
+  })
+
   it("serves a srcset no wider than the image, and a share crop", async () => {
     expect(srcsetWidths(3000)).toEqual([400, 800, 1600])
     expect(srcsetWidths(1000)).toEqual([400, 800, 1000])
     expect(srcsetWidths(800)).toEqual([400, 800])
     expect(srcsetWidths(300)).toEqual([300])
 
+    // A master with an orientation (an import) is turned upright: 1200×900 seen as 900×1200
     const derivatives = await deriveImages(await phonePhoto(1200, 900))
     expect(
       derivatives.map(({ kind, format, width }) => `${kind}:${format}:${String(width)}`)
@@ -67,10 +79,11 @@ describe("uploaded images (adr/0016)", () => {
       "srcset:avif:400",
       "srcset:webp:800",
       "srcset:avif:800",
-      "srcset:webp:1200",
-      "srcset:avif:1200",
+      "srcset:webp:900",
+      "srcset:avif:900",
       "og:jpeg:1200",
     ])
+    expect(derivatives[4]?.height).toBe(1200)
     const og = derivatives.at(-1)
     expect(og && [og.width, og.height]).toEqual([OG_SIZE.width, OG_SIZE.height])
     expect((await sharp(og?.buffer).metadata()).format).toBe("jpeg")

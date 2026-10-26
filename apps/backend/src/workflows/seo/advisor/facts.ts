@@ -84,7 +84,8 @@ type ProductRow = Omit<FactRow, "attribute_template" | "product_extension" | "im
   length?: number | null
   width?: number | null
   height?: number | null
-  images?: ({ id: string } | null)[] | null
+  images?: ({ id: string; url?: string | null } | null)[] | null
+  media_assets?: ({ url: string; alt?: string | null } | null)[] | null
   categories?: ({ id: string } | null)[] | null
   brand?: { name: string } | null
   product_extension?: { primary_category_id?: string | null; kind?: string | null } | null
@@ -113,6 +114,9 @@ const PRODUCT_FIELDS = [
   "width",
   "height",
   "images.id",
+  "images.url",
+  "media_assets.url",
+  "media_assets.alt",
   "categories.id",
   "brand.name",
   "product_extension.primary_category_id",
@@ -144,8 +148,14 @@ function productFacts(row: ProductRow): NonNullable<AdvisorFacts["product"]> {
     (row.attribute_values ?? []).flatMap((value) => value?.definition?.id ?? [])
   )
   const physical = (row.product_extension?.kind ?? "physical") === "physical"
+  const images = (row.images ?? []).flatMap((image) => (image ? [image] : []))
+  const alts = new Map(
+    (row.media_assets ?? []).flatMap((asset) => (asset ? [[asset.url, asset.alt ?? ""]] : []))
+  )
   return {
-    images: (row.images ?? []).filter(Boolean).length,
+    images: images.length,
+    // An image without a media asset (added by URL) has no alt text either
+    imagesWithoutAlt: images.filter((image) => !alts.get(image.url ?? "")?.trim()).length,
     variants: variants.length,
     unpriced: variants.filter((variant) => liraOf(variant) === null).length,
     unidentified: variants.filter(

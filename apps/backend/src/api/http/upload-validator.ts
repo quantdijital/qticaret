@@ -1,5 +1,6 @@
 import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { isValidationError } from "../../lib/errors"
+import { errorSummary, logger } from "../../lib/logging"
 import { sanitizeImage } from "../../lib/media"
 import { UPLOAD_MEDIA_TYPES, storedName, validateUpload } from "../../lib/security/upload"
 import type { UploadFile } from "../../lib/security/upload"
@@ -73,8 +74,9 @@ export async function uploadValidator(
       const clean = await sanitizeImage(file.buffer, type.type)
       file.buffer = clean.buffer
       file.size = clean.buffer.length
-    } catch {
+    } catch (error) {
       // A header that passed the check over pixels the decoder cannot read
+      logger.info({ event: "upload.image_unreadable", err: errorSummary(error) })
       refuse(req, res, "upload.unreadable_image")
       return
     }
