@@ -249,7 +249,7 @@
         "system": "Sisteme göre"
       },
       "preview": "Önizleme",
-      "previewHint": "Örnek bir sipariş satırı ve düğmeler.",
+      "previewHint": "Paneliniz seçimlerinizle böyle görünür; kaydedene kadar yalnızca sizin ekranınızda.",
       "saved": "Görünüm kaydedildi.",
       "errors": {
         "color": "Renk #rrggbb biçiminde olmalı, ör. #2f6feb."
@@ -262,7 +262,14 @@
         "brand": "Marka rengi"
       },
       "previewValue": "Örnek ürün adı",
-      "previewField": "Örnek alan"
+      "previewField": "Örnek alan",
+      "colors": "Renkler",
+      "colorsHint": "Marka rengi düğmeleri, seçili durumları ve grafikleri boyar; mod zemini belirler.",
+      "layout": "Düzen",
+      "layoutHint": "Menünün zemini, köşeler ve satır yüksekliği.",
+      "radiusHint": "Kartların, düğmelerin ve alanların köşeleri.",
+      "densityHint": "Tablo satırlarının ve alanların yüksekliği.",
+      "modeHint": "Açık ya da koyu zemin; sisteme göre seçilirse cihazınızı izler."
     },
     "saved": "Ayarlar kaydedildi.",
     "store": {
@@ -1409,7 +1416,7 @@
     }
   },
   "reports": {
-    "description": "Seçtiğiniz dönemin satışları; gün gün ve ürün ürün",
+    "description": "Seçtiğiniz dönemin satışları: özet, ürünler, kategoriler ve gün gün",
     "csv": "CSV indir",
     "daily": {
       "title": "Gün gün satış",
@@ -1418,7 +1425,34 @@
       "orders": "Sipariş",
       "units": "Adet",
       "average": "Ortalama sepet",
-      "sales": "Satış"
+      "sales": "Satış",
+      "tiles": {
+        "label": "Gün gün raporun özeti",
+        "best": {
+          "day": "En iyi gün",
+          "hour": "En iyi saat"
+        },
+        "average": {
+          "day": "Günlük ortalama satış",
+          "hour": "Saatlik ortalama satış"
+        },
+        "orders": {
+          "day": "Günlük ortalama sipariş",
+          "hour": "Saatlik ortalama sipariş"
+        },
+        "averageHint": {
+          "day": "{{total}} günün ortalaması",
+          "hour": "{{total}} saatin ortalaması"
+        },
+        "active": {
+          "day": "Satış olan gün",
+          "hour": "Satış olan saat"
+        },
+        "activeHint": {
+          "day": "{{total}} günden",
+          "hour": "{{total}} saatten"
+        }
+      }
     },
     "products": {
       "title": "Ürün performansı",
@@ -1426,7 +1460,52 @@
       "product": "Ürün",
       "units": "Adet",
       "share": "Satıştaki payı",
-      "sales": "Satış"
+      "sales": "Satış",
+      "search": "Ürün ara",
+      "sortBy": "Sıralama",
+      "by": {
+        "sales": "Satışa göre",
+        "units": "Adede göre"
+      },
+      "average": "Ortalama fiyat",
+      "noMatch": "Aramanızla eşleşen ürün yok.",
+      "capped": "Dönemin en çok satan {{total}} ürünü gösteriliyor.",
+      "tiles": {
+        "label": "Ürün raporunun özeti",
+        "kinds": "Satılan ürün",
+        "kindsHint": "Dönemde en az bir kez satılan",
+        "units": "Satılan adet",
+        "unitsHint": "İptal edilen siparişler hariç",
+        "unitPrice": "Ortalama birim fiyat",
+        "unitPriceHint": "Adet başına, indirimler düşülmüş",
+        "best": "En çok satan"
+      }
+    },
+    "sections": "Rapor türleri",
+    "tabs": {
+      "summary": "Özet",
+      "products": "Ürünler",
+      "categories": "Kategoriler",
+      "daily": "Gün gün"
+    },
+    "viewProducts": "Tüm ürünler",
+    "viewCategories": "Tüm kategoriler",
+    "categories": {
+      "title": "Kategori performansı",
+      "hint": "Dönemin satışı kategori kategori; birden çok kategorideki ürün, adı alfabede önce gelen kategoride sayılır.",
+      "category": "Kategori",
+      "share": "Satıştaki payı",
+      "sales": "Satış",
+      "tiles": {
+        "label": "Kategori raporunun özeti",
+        "count": "Satış yapan kategori",
+        "countHint": "Kategorisiz satış hariç",
+        "best": "En çok satan kategori",
+        "uncategorized": "Kategorisiz satış",
+        "uncategorizedHint": "Satışın {{share}} kadarı",
+        "total": "Dönemin satışı",
+        "totalHint": "Kategorilere dağılan toplam"
+      }
     }
   },
   "seo": {
@@ -2434,7 +2513,7 @@
     "copy": "Kodu kopyala",
     "copyFailed": "Kod kopyalanamadı; seçip elle kopyalayın.",
     "empty": "Henüz hediye kartı yok.",
-    "truncated": "En yeni {{shown}} kart gösteriliyor; mağazada toplam {{count}} kart var.",
+    "truncated": "En yeni {{shown}} kart gösteriliyor; mağazada toplam {{total}} kart var.",
     "off": "Hediye kartları kapalı. Açtığınızda müşterilere hediye kartı ve mağaza kredisi verebilirsiniz.",
     "turnOn": "Özelliklere git",
     "noEnd": "Süresiz",

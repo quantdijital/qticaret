@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { ConfirmDialog } from "@/components/patterns/confirm-dialog"
 import { LeaveGuard } from "@/components/patterns/leave-guard"
+import { PageColumn, PageGrid } from "@/components/patterns/page-grid"
 import { PageHeader } from "@/components/patterns/page-header"
 import { ErrorState } from "@/components/patterns/states"
 import { Button } from "@/components/ui/button"
@@ -86,47 +87,48 @@ function PromotionForm({ existing }: { existing: Promotion | null }) {
         onSubmit={(event) => {
           void submit(event)
         }}
-        className="grid items-start gap-[var(--grid-gap)] xl:grid-cols-12"
       >
-        <div className="flex min-w-0 flex-col gap-[var(--grid-gap)] xl:col-span-8">
-          <OfferCard kindLocked={existing !== null} />
-          <ConditionsCard perCustomerLocked={perCustomerLocked} />
-          <UsageCard datesLocked={datesLocked} />
-        </div>
-        <div className="flex min-w-0 flex-col gap-[var(--grid-gap)] xl:sticky xl:top-20 xl:col-span-4">
-          <PromotionPreview existing={existing} />
-          {existing ? null : (
-            <label
-              htmlFor="promotion-activate"
-              className="flex cursor-pointer items-start justify-between gap-4 rounded-lg border bg-card px-4 py-3 shadow-card"
-            >
-              <span className="flex flex-col gap-0.5">
-                <span className="text-sm font-medium">{t("promotions.form.activate")}</span>
-                <span className="text-[13px] text-muted-foreground">
-                  {t("promotions.form.activateHint")}
+        <PageGrid>
+          <PageColumn span={8}>
+            <OfferCard kindLocked={existing !== null} />
+            <ConditionsCard perCustomerLocked={perCustomerLocked} />
+            <UsageCard datesLocked={datesLocked} />
+          </PageColumn>
+          <PageColumn span={4} sticky>
+            <PromotionPreview existing={existing} />
+            {existing ? null : (
+              <label
+                htmlFor="promotion-activate"
+                className="flex cursor-pointer items-start justify-between gap-4 rounded-lg border bg-card px-4 py-3 shadow-card"
+              >
+                <span className="flex flex-col gap-0.5">
+                  <span className="text-sm font-medium">{t("promotions.form.activate")}</span>
+                  <span className="text-[13px] text-muted-foreground">
+                    {t("promotions.form.activateHint")}
+                  </span>
                 </span>
-              </span>
-              <Controller
-                control={form.control}
-                name="activate"
-                render={({ field }) => (
-                  <Switch
-                    id="promotion-activate"
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                )}
-              />
-            </label>
-          )}
-          <Button
-            type="submit"
-            disabled={save.isPending || (existing !== null && !form.formState.isDirty)}
-          >
-            {save.isPending ? <Loader2 className="animate-spin" /> : null}
-            {t(existing ? "common.save" : "promotions.create")}
-          </Button>
-        </div>
+                <Controller
+                  control={form.control}
+                  name="activate"
+                  render={({ field }) => (
+                    <Switch
+                      id="promotion-activate"
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  )}
+                />
+              </label>
+            )}
+            <Button
+              type="submit"
+              disabled={save.isPending || (existing !== null && !form.formState.isDirty)}
+            >
+              {save.isPending ? <Loader2 className="animate-spin" /> : null}
+              {t(existing ? "common.save" : "promotions.create")}
+            </Button>
+          </PageColumn>
+        </PageGrid>
       </form>
     </FormProvider>
   )

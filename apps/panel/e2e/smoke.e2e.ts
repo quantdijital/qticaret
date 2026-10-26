@@ -1,31 +1,5 @@
 import { expect, pageHeading, test } from "./support/guard"
-
-/** The sidebar's sections (src/components/layout/navigation.ts) and the settings pages. */
-const SECTIONS = [
-  "/",
-  "/orders",
-  "/customers",
-  "/products",
-  "/categories",
-  "/brands",
-  "/inventory",
-  "/promotions",
-  "/promotions/price-lists",
-  "/promotions/gift-cards",
-  "/content",
-  "/seo",
-  "/reports",
-]
-const SETTINGS = [
-  "/settings/store",
-  "/settings/appearance",
-  "/settings/locations",
-  "/settings/seo",
-  "/settings/attributes",
-  "/settings/features",
-  "/settings/jobs",
-  "/settings/audit",
-]
+import { SECTIONS, SETTINGS } from "./support/screens"
 
 // A page takes a few seconds on a CI runner: a test that walks many gets that much per page
 const PER_PAGE_MS = 10_000

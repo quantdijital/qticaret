@@ -5,6 +5,7 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { ConfirmDialog } from "@/components/patterns/confirm-dialog"
+import { PageColumn, PageGrid } from "@/components/patterns/page-grid"
 import { PageHeader } from "@/components/patterns/page-header"
 import { ErrorState, LoadingRows } from "@/components/patterns/states"
 import { StatusBadge } from "@/components/patterns/status-badge"
@@ -79,8 +80,8 @@ export function BrandPage() {
           </DropdownMenu>
         }
       />
-      <div className="grid grid-cols-1 items-start gap-[var(--grid-gap)] xl:grid-cols-12">
-        <div className="flex flex-col gap-[var(--grid-gap)] xl:col-span-8">
+      <PageGrid>
+        <PageColumn span={8}>
           <div id="brand-general" className="scroll-mt-20">
             <BrandGeneralCard brand={data} />
           </div>
@@ -95,8 +96,8 @@ export function BrandPage() {
               }}
             />
           </div>
-        </div>
-        <div className="flex flex-col gap-[var(--grid-gap)] xl:col-span-4">
+        </PageColumn>
+        <PageColumn span={4}>
           <AdvisorCard
             kind="brand"
             id={data.id}
@@ -113,8 +114,8 @@ export function BrandPage() {
           <div id="brand-logo" className="scroll-mt-20">
             <BrandLogoCard brand={data} />
           </div>
-        </div>
-      </div>
+        </PageColumn>
+      </PageGrid>
       <ConfirmDialog
         open={deleting}
         onOpenChange={setDeleting}

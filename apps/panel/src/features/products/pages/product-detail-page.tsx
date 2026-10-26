@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { getRouteApi } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
+import { PageColumn, PageGrid } from "@/components/patterns/page-grid"
 import { PageHeader } from "@/components/patterns/page-header"
 import { ErrorState } from "@/components/patterns/states"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -89,8 +90,8 @@ export function ProductDetailPage() {
         back={back}
         action={<ProductActions product={product} />}
       />
-      <div className="grid items-start gap-[var(--grid-gap)] xl:grid-cols-12">
-        <div className="flex min-w-0 flex-col gap-[var(--grid-gap)] xl:col-span-8">
+      <PageGrid>
+        <PageColumn span={8}>
           <div id="product-general" className="scroll-mt-20">
             <GeneralCard product={product} />
           </div>
@@ -114,8 +115,8 @@ export function ProductDetailPage() {
           <div id="product-seo" className="scroll-mt-20">
             <ProductSeoCard product={product} />
           </div>
-        </div>
-        <div className="flex min-w-0 flex-col gap-[var(--grid-gap)] xl:col-span-4">
+        </PageColumn>
+        <PageColumn span={4}>
           <SummaryCard product={product} />
           <AdvisorCard
             kind="product"
@@ -130,8 +131,8 @@ export function ProductDetailPage() {
             <ShippingCard product={product} />
           </div>
           <CatalogCard productId={product.id} />
-        </div>
-      </div>
+        </PageColumn>
+      </PageGrid>
     </div>
   )
 }

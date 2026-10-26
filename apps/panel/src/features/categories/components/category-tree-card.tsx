@@ -79,7 +79,7 @@ export function CategoryTreeCard({ categories, selectedId, onSelect }: CategoryT
                   onClick={() => {
                     toggle(category.id)
                   }}
-                  className="flex size-6 items-center justify-center rounded text-muted-foreground hover:text-foreground disabled:invisible"
+                  className="flex w-6 items-center justify-center self-stretch rounded text-muted-foreground hover:text-foreground disabled:invisible"
                 >
                   {open ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
                 </button>

@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { getRouteApi } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
+import { PageColumn, PageGrid } from "@/components/patterns/page-grid"
 import { PageHeader } from "@/components/patterns/page-header"
 import { ErrorState, LoadingRows } from "@/components/patterns/states"
 import { landingQuery, useUpdateLanding } from "@/features/content/api/landings"
@@ -33,7 +34,7 @@ function LandingMain({ data }: { data: LandingDetail }) {
   const client = useQueryClient()
   const update = useUpdateLanding(data.id)
   return (
-    <div className="flex flex-col gap-[var(--grid-gap)] xl:col-span-8">
+    <PageColumn span={8}>
       <div id="landing-general" className="scroll-mt-20">
         <LandingGeneralCard landing={data} />
       </div>
@@ -60,7 +61,7 @@ function LandingMain({ data }: { data: LandingDetail }) {
           }}
         />
       </div>
-    </div>
+    </PageColumn>
   )
 }
 
@@ -85,15 +86,15 @@ export function LandingEntryPage() {
         badge={<ContentStatusBadge status={data.status} />}
         action={<LandingActions landing={data} />}
       />
-      <div className="grid grid-cols-1 items-start gap-[var(--grid-gap)] xl:grid-cols-12">
+      <PageGrid>
         <LandingMain data={data} />
-        <div className="flex flex-col gap-[var(--grid-gap)] xl:col-span-4">
+        <PageColumn span={4}>
           <AdvisorCard kind="landing" id={data.id} version={data.updated_at} targets={TARGETS} />
           <div id="landing-standing" className="scroll-mt-20">
             <LandingStandingCard landing={data} />
           </div>
-        </div>
-      </div>
+        </PageColumn>
+      </PageGrid>
     </div>
   )
 }

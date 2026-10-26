@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { getRouteApi } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
+import { PageColumn, PageGrid } from "@/components/patterns/page-grid"
 import { PageHeader } from "@/components/patterns/page-header"
 import { ErrorState, LoadingRows } from "@/components/patterns/states"
 import { contentQuery } from "@/features/content/api/content"
@@ -73,8 +74,8 @@ export function ContentEntryPage() {
         badge={<ContentStatusBadge status={data.status} />}
         action={<ContentActions entry={data} />}
       />
-      <div className="grid grid-cols-1 items-start gap-[var(--grid-gap)] xl:grid-cols-12">
-        <div className="flex flex-col gap-[var(--grid-gap)] xl:col-span-8">
+      <PageGrid>
+        <PageColumn span={8}>
           <div id="content-general" className="scroll-mt-20">
             <ContentGeneralCard entry={data} />
           </div>
@@ -95,15 +96,15 @@ export function ContentEntryPage() {
               }}
             />
           </div>
-        </div>
-        <div className="flex flex-col gap-[var(--grid-gap)] xl:col-span-4">
+        </PageColumn>
+        <PageColumn span={4}>
           <AdvisorCard kind={data.kind} id={data.id} version={data.updated_at} targets={TARGETS} />
+          <Dates entry={data} />
           <div id="content-cover" className="scroll-mt-20">
             <ContentCoverCard entry={data} />
           </div>
-          <Dates entry={data} />
-        </div>
-      </div>
+        </PageColumn>
+      </PageGrid>
     </div>
   )
 }

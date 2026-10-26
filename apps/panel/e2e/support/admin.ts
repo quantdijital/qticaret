@@ -22,7 +22,8 @@ const backend = (args: string[]) =>
 export function createTemporaryAdmin(): TemporaryAdmin {
   const email = `e2e-${String(Date.now())}-${randomBytes(3).toString("hex")}@example.com`
   const password = randomBytes(18).toString("base64url")
-  backend(["user", "-e", email, "-p", password])
+  // `--password=`, joined: a password starting with "-" would read as an option
+  backend(["user", `--email=${email}`, `--password=${password}`])
   return { email, password }
 }
 

@@ -3,7 +3,9 @@ import { Link } from "@tanstack/react-router"
 import { ArrowRight, CircleCheck, Globe, TriangleAlert } from "lucide-react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
+import { PageGrid } from "@/components/patterns/page-grid"
 import { PageHeader } from "@/components/patterns/page-header"
+import { spanOf } from "@/components/patterns/page-spans"
 import { SectionCard } from "@/components/patterns/section-card"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -132,11 +134,11 @@ export function SeoOverviewPage() {
           </Button>
         }
       />
-      <div className="grid grid-cols-1 items-start gap-[var(--grid-gap)] xl:grid-cols-12">
+      <PageGrid>
         <SectionCard
           title={t("seo.search")}
           description={t("seo.searchHint")}
-          className="xl:col-span-7"
+          className={spanOf(7)}
         >
           {seo.data ? (
             <div className="flex flex-col gap-4">
@@ -157,14 +159,12 @@ export function SeoOverviewPage() {
             <Skeleton className="h-56" />
           )}
         </SectionCard>
-        <CatalogHealthCard className="xl:col-span-5" />
-      </div>
-      <div className="grid grid-cols-1 items-start gap-[var(--grid-gap)] xl:grid-cols-12">
-        <RedirectsCard className="xl:col-span-6" />
-        <SitemapCard className="xl:col-span-6" />
-        <AdvisorSummaryCard className="xl:col-span-12" />
-        <AuditCard className="xl:col-span-12" />
-      </div>
+        <CatalogHealthCard className={spanOf(5)} />
+        <RedirectsCard className={spanOf(6)} />
+        <SitemapCard className={spanOf(6)} />
+        <AdvisorSummaryCard className={spanOf(12)} />
+        <AuditCard className={spanOf(12)} />
+      </PageGrid>
     </div>
   )
 }

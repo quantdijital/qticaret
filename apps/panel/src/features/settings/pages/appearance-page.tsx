@@ -10,20 +10,21 @@ import { errorText } from "@/lib/errors"
 export function AppearancePage() {
   const { t } = useTranslation()
   const { data, isPending, isError, error, refetch } = useQuery(appearanceQuery())
-  return (
-    <div className="flex flex-col gap-6">
-      <PageHeader
-        title={t("settings.appearance.title")}
-        description={t("settings.appearance.subtitle")}
-      />
-      {isPending ? (
-        <LoadingRows rows={5} />
-      ) : isError ? (
-        <ErrorState text={errorText(t, error)} onRetry={() => void refetch()} />
-      ) : (
-        // A save brings a new version: the form starts again from it
-        <AppearanceForm key={data.version} saved={data.values} />
-      )}
-    </div>
-  )
+  if (isPending || isError) {
+    return (
+      <div className="flex flex-col gap-6">
+        <PageHeader
+          title={t("settings.appearance.title")}
+          description={t("settings.appearance.subtitle")}
+        />
+        {isPending ? (
+          <LoadingRows rows={5} />
+        ) : (
+          <ErrorState text={errorText(t, error)} onRetry={() => void refetch()} />
+        )}
+      </div>
+    )
+  }
+  // A save brings a new version: the form starts again from it; it has the page's header
+  return <AppearanceForm key={data.version} saved={data.values} />
 }

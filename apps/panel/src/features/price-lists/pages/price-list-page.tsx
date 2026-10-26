@@ -8,6 +8,7 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { ConfirmDialog } from "@/components/patterns/confirm-dialog"
 import { LeaveGuard } from "@/components/patterns/leave-guard"
+import { PageColumn, PageGrid } from "@/components/patterns/page-grid"
 import { PageHeader } from "@/components/patterns/page-header"
 import { ErrorState } from "@/components/patterns/states"
 import { Button } from "@/components/ui/button"
@@ -59,26 +60,27 @@ function PriceListForm({ existing }: { existing: PriceList | null }) {
         onSubmit={(event) => {
           void submit(event)
         }}
-        className="grid items-start gap-[var(--grid-gap)] xl:grid-cols-12"
       >
-        <div className="flex min-w-0 flex-col gap-[var(--grid-gap)] xl:col-span-8">
-          <DetailsCard />
-          <AudienceCard isNew={existing === null} />
-        </div>
-        <div className="flex min-w-0 flex-col gap-[var(--grid-gap)] xl:sticky xl:top-20 xl:col-span-4">
-          {existing ? null : (
-            <p className="rounded-lg border bg-card px-4 py-3 text-[13px] text-muted-foreground shadow-card">
-              {t("priceLists.form.productsAfter")}
-            </p>
-          )}
-          <Button
-            type="submit"
-            disabled={save.isPending || (existing !== null && !form.formState.isDirty)}
-          >
-            {save.isPending ? <Loader2 className="animate-spin" /> : null}
-            {t(existing ? "common.save" : "priceLists.create")}
-          </Button>
-        </div>
+        <PageGrid>
+          <PageColumn span={8}>
+            <DetailsCard />
+            <AudienceCard isNew={existing === null} />
+          </PageColumn>
+          <PageColumn span={4} sticky>
+            {existing ? null : (
+              <p className="rounded-lg border bg-card px-4 py-3 text-[13px] text-muted-foreground shadow-card">
+                {t("priceLists.form.productsAfter")}
+              </p>
+            )}
+            <Button
+              type="submit"
+              disabled={save.isPending || (existing !== null && !form.formState.isDirty)}
+            >
+              {save.isPending ? <Loader2 className="animate-spin" /> : null}
+              {t(existing ? "common.save" : "priceLists.create")}
+            </Button>
+          </PageColumn>
+        </PageGrid>
       </form>
     </FormProvider>
   )

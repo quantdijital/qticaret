@@ -117,7 +117,7 @@ function GiftCardsList({
       />
       {count > shown ? (
         <p className="border-t px-5 py-3 text-xs text-muted-foreground">
-          {t("giftCards.truncated", { shown: formatCount(shown), count: formatCount(count) })}
+          {t("giftCards.truncated", { shown: formatCount(shown), total: formatCount(count) })}
         </p>
       ) : null}
     </>

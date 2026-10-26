@@ -106,7 +106,8 @@ export function ItemsCard({ order, money: shares }: { order: OrderDetail; money?
           />
         ))}
       </ul>
-      <dl className="flex flex-col gap-2 border-t bg-muted/30 px-5 py-4">
+      {/* At the foot of the card when it stretches beside a taller column */}
+      <dl className="mt-auto flex flex-col gap-2 border-t bg-muted/30 px-5 py-4">
         <TotalRow
           label={t("orders.detail.subtotal")}
           value={money(shares?.items.gross ?? order.original_item_total)}

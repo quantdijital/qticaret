@@ -114,7 +114,8 @@ export function AdvisorSummaryCard({ className }: { className?: string }) {
             <span className="text-xs font-medium text-muted-foreground">
               {t("seo.advisor.lowest")}
             </span>
-            <ul className="flex flex-col divide-y rounded-md border">
+            {/* Two columns on a wide card, so the list is about as tall as the score beside it */}
+            <ul className="grid overflow-hidden rounded-md border sm:grid-cols-2 [&>li]:-mb-px [&>li]:border-b sm:[&>li:nth-child(odd)]:border-r">
               {data.lowest.map((product) => (
                 <li key={product.id}>
                   <Link

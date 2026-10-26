@@ -1,5 +1,6 @@
 import type { UseQueryResult } from "@tanstack/react-query"
 import { ImageOff } from "lucide-react"
+import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { AsyncBody } from "@/components/patterns/async-body"
 import { SectionCard } from "@/components/patterns/section-card"
@@ -61,9 +62,15 @@ function ProductList({ overview }: { overview: DashboardOverview }) {
 /** The period's best sellers by sales, with units sold. */
 export function TopProductsCard({
   query,
+  limit,
+  action,
   className,
 }: {
   query: UseQueryResult<DashboardOverview>
+  /** The first rows only (a summary pointing to the full report). */
+  limit?: number
+  /** Right of the title: a link to the full list. */
+  action?: ReactNode
   className?: string
 }) {
   const { t } = useTranslation()
@@ -71,6 +78,7 @@ export function TopProductsCard({
     <SectionCard
       title={t("dashboard.top.title")}
       description={t("dashboard.top.description")}
+      action={action}
       className={className}
     >
       <AsyncBody
@@ -83,7 +91,15 @@ export function TopProductsCard({
           </div>
         }
       >
-        {(overview) => <ProductList overview={overview} />}
+        {(overview) => (
+          <ProductList
+            overview={
+              limit === undefined
+                ? overview
+                : { ...overview, top_products: overview.top_products.slice(0, limit) }
+            }
+          />
+        )}
       </AsyncBody>
     </SectionCard>
   )

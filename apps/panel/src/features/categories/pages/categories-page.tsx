@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query"
 import { getRouteApi, useNavigate } from "@tanstack/react-router"
 import { FolderPlus, MousePointerClick } from "lucide-react"
 import { useTranslation } from "react-i18next"
+import { PageColumn, PageGrid } from "@/components/patterns/page-grid"
 import { PageHeader } from "@/components/patterns/page-header"
 import { ErrorState } from "@/components/patterns/states"
 import { Button } from "@/components/ui/button"
@@ -54,15 +55,15 @@ export function CategoriesPage() {
           <Skeleton className="h-96 rounded-lg xl:col-span-7" />
         </div>
       ) : (
-        <div className="grid items-start gap-[var(--grid-gap)] xl:grid-cols-12">
-          <div className="xl:col-span-5">
+        <PageGrid>
+          <PageColumn span={5}>
             <CategoryTreeCard
               categories={categories}
               selectedId={current?.id ?? null}
               onSelect={select}
             />
-          </div>
-          <div className="flex flex-col gap-[var(--grid-gap)] xl:col-span-7">
+          </PageColumn>
+          <PageColumn span={7}>
             {selected === "new" || current ? (
               <>
                 <CategoryEditor
@@ -103,8 +104,8 @@ export function CategoriesPage() {
                 <p className="max-w-sm text-sm text-muted-foreground">{t("categories.pick")}</p>
               </div>
             )}
-          </div>
-        </div>
+          </PageColumn>
+        </PageGrid>
       )}
     </div>
   )

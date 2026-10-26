@@ -132,8 +132,9 @@ export function SearchPicker({
         <Button
           type="button"
           variant="ghost"
+          // The field's height beside it (docs/18 §2, "Denge")
           size="icon"
-          className="size-8"
+          className="shrink-0"
           aria-label={t("common.clear")}
           onClick={() => {
             onChange(null)

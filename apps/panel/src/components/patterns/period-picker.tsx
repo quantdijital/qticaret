@@ -7,14 +7,16 @@ interface PeriodPickerProps<T extends string> {
   onChange: (value: T) => void
 }
 
-/** The date range every number below follows (dataviz: one filter row, presets first). */
+/**
+ * The date range every number below follows (dataviz: one filter row, presets
+ * first). Control height as every page header control (docs/18 §2).
+ */
 export function PeriodPicker<T extends string>({ periods, value, onChange }: PeriodPickerProps<T>) {
   const { t } = useTranslation()
   return (
     <ToggleGroup
       type="single"
       variant="outline"
-      size="sm"
       value={value}
       aria-label={t("period.label")}
       onValueChange={(next) => {

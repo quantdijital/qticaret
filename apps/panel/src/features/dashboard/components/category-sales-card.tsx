@@ -1,4 +1,5 @@
 import type { UseQueryResult } from "@tanstack/react-query"
+import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { BarList } from "@/components/charts/bar-list"
 import { AsyncBody } from "@/components/patterns/async-body"
@@ -34,9 +35,15 @@ function Categories({ overview }: { overview: DashboardOverview }) {
 /** How the period's sales split across categories. */
 export function CategorySalesCard({
   query,
+  limit,
+  action,
   className,
 }: {
   query: UseQueryResult<DashboardOverview>
+  /** The first rows only (a summary pointing to the full report). */
+  limit?: number
+  /** Right of the title: a link to the full list. */
+  action?: ReactNode
   className?: string
 }) {
   const { t } = useTranslation()
@@ -44,6 +51,7 @@ export function CategorySalesCard({
     <SectionCard
       title={t("dashboard.categories.title")}
       description={t("dashboard.categories.description")}
+      action={action}
       className={className}
     >
       <AsyncBody
@@ -56,7 +64,15 @@ export function CategorySalesCard({
           </div>
         }
       >
-        {(overview) => <Categories overview={overview} />}
+        {(overview) => (
+          <Categories
+            overview={
+              limit === undefined
+                ? overview
+                : { ...overview, categories: overview.categories.slice(0, limit) }
+            }
+          />
+        )}
       </AsyncBody>
     </SectionCard>
   )

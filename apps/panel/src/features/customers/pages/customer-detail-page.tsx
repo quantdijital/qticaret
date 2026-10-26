@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link, getRouteApi } from "@tanstack/react-router"
-import { Building2, Mail, MapPin, Phone, ReceiptText } from "lucide-react"
+import { Building2, Mail, MapPin, Phone, ReceiptText, ShoppingBag } from "lucide-react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { AsyncBody } from "@/components/patterns/async-body"
+import { PageColumn, PageGrid } from "@/components/patterns/page-grid"
 import { PageHeader } from "@/components/patterns/page-header"
 import { SectionCard } from "@/components/patterns/section-card"
 import { ErrorState } from "@/components/patterns/states"
@@ -40,9 +41,11 @@ function OrdersCard({ customerId }: { customerId: string }) {
       <AsyncBody query={query} skeleton={<Skeleton className="mx-5 mb-5 h-40" />}>
         {(data) =>
           data.orders.length === 0 ? (
-            <p className="px-5 pb-5 text-sm text-muted-foreground">
-              {t("customers.detail.noOrders")}
-            </p>
+            // Centred in the card, which stretches beside the column of contact cards
+            <div className="flex flex-1 flex-col items-center justify-center gap-2 px-5 py-8 text-center">
+              <ShoppingBag className="size-8 text-muted-foreground" aria-hidden="true" />
+              <p className="text-sm text-muted-foreground">{t("customers.detail.noOrders")}</p>
+            </div>
           ) : (
             <ul className="flex flex-col">
               {data.orders.map((order) => (
@@ -203,11 +206,11 @@ export function CustomerDetailPage() {
         }
         back={back}
       />
-      <div className="grid items-start gap-[var(--grid-gap)] xl:grid-cols-12">
-        <div className="flex min-w-0 flex-col gap-[var(--grid-gap)] xl:col-span-8">
+      <PageGrid>
+        <PageColumn span={8}>
           <OrdersCard customerId={customer.id} />
-        </div>
-        <div className="flex min-w-0 flex-col gap-[var(--grid-gap)] xl:col-span-4">
+        </PageColumn>
+        <PageColumn span={4}>
           <ContactCard customer={customer} />
           <AddressesCard customer={customer} />
           <BillingCard customerId={customer.id} />
@@ -215,8 +218,8 @@ export function CustomerDetailPage() {
           {storeCredit && customer.has_account ? (
             <StoreCreditCard customerId={customer.id} />
           ) : null}
-        </div>
-      </div>
+        </PageColumn>
+      </PageGrid>
     </div>
   )
 }

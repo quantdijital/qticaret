@@ -571,6 +571,13 @@
   162. **Test çalıştırmaları Redis anahtarlarında dev'den ayrı** (`…/test` eki). Önce entegrasyon testleri dev sunucusunun giriş sınırını dolduruyordu (Medusa'nın test çalıştırıcısı DATABASE_URL'i değiştirmiyor); panel 15 dakika giriş yapamıyordu.
   163. **Sepette mağaza kredisini yalnızca sepetin kendi müşterisi kullanabiliyor;** eklenti kimin oturum açtığına bakmıyordu (güvenlik incelemesi). Hesabı koduyla sahiplenme (`claim`) F18'e kadar kapalı.
   164. **Tamamı hediye kartıyla ödenen sipariş "Kredi ile ödendi"** ve doğrudan "gönderilecek" aşamasında. Ödeme kartındaki satırın adı "Kredi ve hediye kartıyla ödenen" (Medusa'nın bütün kredi satırlarını sayıyor).
+  165. **Panelde denge kuralı (kullanıcı, 2026-10-26: "bu tarz ui kötü görüntüleri istemiyorum … tekrarlama").** docs/18 §2 "Denge":
+     - Yan yana kartlar `PageGrid` + `PageColumn` ile; aynı satırdaki kartlar eşit, sütunlar aynı çizgide biter (kısa sütunun son kartı uzar). Yapışkan özet sütunu (kampanya ve fiyat listesi formu) muaf.
+     - Bir satırdaki kontroller tek boy: sayfa başlığında 36 px (dönem seçici artık "Ürün ekle" ile eşit), alanın yanındaki temizle düğmesi ve ağaçtaki açma oku satır boyunda, üst çubuktaki menü düğmesi aramayla eşit.
+     - `e2e/layout.e2e.ts` her sayfayı (detaylar dahil) 1440 px'te ölçer; bilerek bozulunca 6 sayfada kırıldığı görüldü.
+  166. **Raporlar dört sekme:** Özet (göstergeler, grafik, sipariş durumları, ilk 5 ürün ve kategori), Ürünler (100 ürüne kadar; arama, satış/adet sıralaması, ortalama fiyat, pay, CSV), Kategoriler (pay ve tutar, CSV), Gün gün (grafik ve tam tablo). Dönem adreste, sekmeler arasında korunuyor; her sekmenin üstünde dört gösterge.
+  167. **Görünüm ayarları yeniden düzenlendi:** "Renkler" (marka rengi, hazır renkler, mod) ve "Düzen" (menü, köşeler, yoğunluk; eşit boy segment kontroller) yan yana, altında panelin minyatürü (menü zemini dahil). Kaydet/Geri al sayfa başlığında.
+  168. **Detay sayfalarında uzayan kartın içi:** sipariş toplamları kartın dibinde (fatura gibi); siparişi olmayan müşterinin boş durumu kartın ortasında. SEO danışmanındaki ürün listesi iki sütun (puan özetiyle aynı boyda).
 - **Bilinen sınırlar (devreden):**
   - JSON-LD'yi storefront basarken `<`, `>` ve `&` kaçışlanmalı (`</script>` içeren başlık ya da metin). Kural docs/13'te var; F18 kabulüne sözleşme testi olarak eklenecek.
   - Editöre yüklenip bir günden uzun süre kaydedilmeyen görseli gece süpürmesi siler; kayıt `content.image_unknown` verir.

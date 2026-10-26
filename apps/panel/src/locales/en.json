@@ -249,7 +249,7 @@
         "system": "Follow the system"
       },
       "preview": "Preview",
-      "previewHint": "A sample order row and buttons.",
+      "previewHint": "Your panel with your choices; only on your screen until you save.",
       "saved": "Appearance saved.",
       "errors": {
         "color": "The colour must be in #rrggbb form, e.g. #2f6feb."
@@ -262,7 +262,14 @@
         "brand": "Brand colour"
       },
       "previewValue": "Sample product name",
-      "previewField": "Sample field"
+      "previewField": "Sample field",
+      "colors": "Colours",
+      "colorsHint": "The brand colour paints buttons, selections and charts; the mode sets the ground.",
+      "layout": "Layout",
+      "layoutHint": "The menu's ground, the corners and the row height.",
+      "radiusHint": "The corners of cards, buttons and fields.",
+      "densityHint": "The height of table rows and fields.",
+      "modeHint": "A light or dark ground; by system follows your device."
     },
     "saved": "Settings saved.",
     "store": {
@@ -1401,7 +1408,7 @@
     }
   },
   "reports": {
-    "description": "The chosen period's sales, day by day and product by product",
+    "description": "The chosen period's sales: summary, products, categories and day by day",
     "csv": "Download CSV",
     "daily": {
       "title": "Sales by day",
@@ -1410,7 +1417,34 @@
       "orders": "Orders",
       "units": "Units",
       "average": "Average basket",
-      "sales": "Sales"
+      "sales": "Sales",
+      "tiles": {
+        "label": "Day by day summary",
+        "best": {
+          "day": "Best day",
+          "hour": "Best hour"
+        },
+        "average": {
+          "day": "Average sales a day",
+          "hour": "Average sales an hour"
+        },
+        "orders": {
+          "day": "Average orders a day",
+          "hour": "Average orders an hour"
+        },
+        "averageHint": {
+          "day": "Over {{total}} days",
+          "hour": "Over {{total}} hours"
+        },
+        "active": {
+          "day": "Days with sales",
+          "hour": "Hours with sales"
+        },
+        "activeHint": {
+          "day": "Out of {{total}} days",
+          "hour": "Out of {{total}} hours"
+        }
+      }
     },
     "products": {
       "title": "Product performance",
@@ -1418,7 +1452,52 @@
       "product": "Product",
       "units": "Units",
       "share": "Share of sales",
-      "sales": "Sales"
+      "sales": "Sales",
+      "search": "Search products",
+      "sortBy": "Order",
+      "by": {
+        "sales": "By sales",
+        "units": "By units"
+      },
+      "average": "Average price",
+      "noMatch": "No product matches your search.",
+      "capped": "The period's {{total}} best sellers are shown.",
+      "tiles": {
+        "label": "Product report summary",
+        "kinds": "Products sold",
+        "kindsHint": "Sold at least once in the period",
+        "units": "Units sold",
+        "unitsHint": "Canceled orders left out",
+        "unitPrice": "Average unit price",
+        "unitPriceHint": "Per unit, after discounts",
+        "best": "Best seller"
+      }
+    },
+    "sections": "Reports",
+    "tabs": {
+      "summary": "Summary",
+      "products": "Products",
+      "categories": "Categories",
+      "daily": "Day by day"
+    },
+    "viewProducts": "All products",
+    "viewCategories": "All categories",
+    "categories": {
+      "title": "Category performance",
+      "hint": "The period's sales category by category; a product in several categories counts in the one first by name.",
+      "category": "Category",
+      "share": "Share of sales",
+      "sales": "Sales",
+      "tiles": {
+        "label": "Category report summary",
+        "count": "Categories with sales",
+        "countHint": "Sales without a category left out",
+        "best": "Best-selling category",
+        "uncategorized": "Sales without a category",
+        "uncategorizedHint": "{{share}} of sales",
+        "total": "The period's sales",
+        "totalHint": "The total spread over categories"
+      }
     }
   },
   "seo": {
@@ -2426,7 +2505,7 @@
     "copy": "Copy the code",
     "copyFailed": "The code could not be copied; select it and copy it by hand.",
     "empty": "No gift cards yet.",
-    "truncated": "Showing the newest {{shown}} of the shop's {{count}} cards.",
+    "truncated": "Showing the newest {{shown}} of the shop's {{total}} cards.",
     "off": "Gift cards are off. Turn them on to give customers gift cards and store credit.",
     "turnOn": "Go to features",
     "noEnd": "No end",

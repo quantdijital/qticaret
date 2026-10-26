@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { getRouteApi } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
+import { PageColumn, PageGrid } from "@/components/patterns/page-grid"
 import { PageHeader } from "@/components/patterns/page-header"
 import { ErrorState } from "@/components/patterns/states"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -67,11 +68,11 @@ export function OrderDetailPage() {
         action={<OrderActions order={order} state={state.data} />}
       />
       <ProgressCard order={order} stage={state.data.stage} />
-      <div className="grid items-start gap-[var(--grid-gap)] xl:grid-cols-12">
-        <div className="flex min-w-0 flex-col gap-[var(--grid-gap)] xl:col-span-8">
+      <PageGrid>
+        <PageColumn span={8}>
           <ItemsCard order={order} {...(money.data ? { money: money.data } : {})} />
-        </div>
-        <div className="flex min-w-0 flex-col gap-[var(--grid-gap)] xl:col-span-4">
+        </PageColumn>
+        <PageColumn span={4}>
           <CustomerCard order={order} />
           <AddressCard order={order} />
           <PaymentCard
@@ -79,8 +80,8 @@ export function OrderDetailPage() {
             {...(money.data ? { money: money.data } : {})}
             {...(money.error ? { moneyError: { onRetry: () => void money.refetch() } } : {})}
           />
-        </div>
-      </div>
+        </PageColumn>
+      </PageGrid>
     </div>
   )
 }

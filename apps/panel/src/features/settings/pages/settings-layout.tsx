@@ -23,11 +23,11 @@ export function SettingsLayout() {
       <nav aria-label={t("settings.title")} className="lg:w-56 lg:shrink-0">
         <ul className="flex gap-1 overflow-x-auto lg:flex-col">
           {SECTIONS.map((section) => (
-            <li key={section.key}>
+            <li key={section.key} className="shrink-0">
               <Link
                 to={section.to}
                 className={cn(
-                  "block rounded-md px-3 py-2 text-sm hover:bg-muted",
+                  "block rounded-md px-3 py-2 text-sm whitespace-nowrap hover:bg-muted",
                   pathname.startsWith(section.to) && "bg-muted font-medium"
                 )}
               >

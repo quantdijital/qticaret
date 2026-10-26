@@ -1,0 +1,29 @@
+/** The sidebar's sections (src/components/layout/navigation.ts) and the settings pages. */
+export const SECTIONS = [
+  "/",
+  "/orders",
+  "/customers",
+  "/products",
+  "/categories",
+  "/brands",
+  "/inventory",
+  "/promotions",
+  "/promotions/price-lists",
+  "/promotions/gift-cards",
+  "/content",
+  "/seo",
+  "/reports",
+  "/reports/products",
+  "/reports/categories",
+  "/reports/daily",
+]
+export const SETTINGS = [
+  "/settings/store",
+  "/settings/appearance",
+  "/settings/locations",
+  "/settings/seo",
+  "/settings/attributes",
+  "/settings/features",
+  "/settings/jobs",
+  "/settings/audit",
+]

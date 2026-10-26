@@ -36,7 +36,10 @@ export function Topbar() {
 
   return (
     <header className="sticky top-0 z-20 flex h-[var(--layout-topbar-height)] shrink-0 items-center gap-3 border-b bg-card px-4 lg:px-[var(--page-padding-wide)]">
-      <SidebarTrigger aria-label={t("common.menu")} className="-ml-1 text-muted-foreground" />
+      <SidebarTrigger
+        aria-label={t("common.menu")}
+        className="-ml-1 size-9 text-muted-foreground"
+      />
       <Separator orientation="vertical" className="h-5" />
       <button
         type="button"

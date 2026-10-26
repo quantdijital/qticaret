@@ -5,6 +5,8 @@ interface SectionNavProps {
   /** What the links are, for screen readers ("Kampanya türleri"). */
   label: string
   items: { to: string; label: string }[]
+  /** The tabs share the page's search (a report's period), so moving between them keeps it. */
+  keepSearch?: boolean
 }
 
 /**
@@ -12,14 +14,15 @@ interface SectionNavProps {
  * (Kampanyalar: codes, price lists). Each is a link; the page it names is
  * marked current, so the address is the state.
  */
-export function SectionNav({ label, items }: SectionNavProps) {
+export function SectionNav({ label, items, keepSearch = false }: SectionNavProps) {
   return (
     <nav aria-label={label} className="-mt-2 flex gap-1 overflow-x-auto border-b">
       {items.map((item) => (
         <Link
           key={item.to}
           to={item.to}
-          activeOptions={{ exact: true }}
+          {...(keepSearch ? { search: true } : {})}
+          activeOptions={{ exact: true, includeSearch: false }}
           className={cn(
             "relative flex h-10 shrink-0 items-center px-3 text-sm text-muted-foreground transition-colors hover:text-foreground",
             "after:absolute after:inset-x-3 after:-bottom-px after:h-0.5 after:rounded-full",

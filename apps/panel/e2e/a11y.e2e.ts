@@ -16,6 +16,8 @@ const SCREENS = [
   "/promotions/gift-cards",
   "/promotions/price-lists/new",
   "/settings/store",
+  "/settings/appearance",
+  "/reports/products",
 ]
 
 async function seriousIssues(page: Page): Promise<string[]> {
