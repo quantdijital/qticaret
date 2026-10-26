@@ -92,6 +92,7 @@ repo/
 │   │   │   │   ├── money/           # tutar dönüşümleri
 │   │   │   │   ├── orders/          # sipariş satırlarının kuruş payları, kısmi iade tutarı (F4.7, ADR-0010)
 │   │   │   │   ├── pricing/         # indirim gösterimi: son 30 gün kuralı (F4.3, ADR-0023)
+│   │   │   │   ├── promotions/      # kod biçimi (büyük harf, ASCII), tek kullanımlık ve hediye kartı kodları (F4.4–F4.8, ADR-0024/0025)
 │   │   │   │   ├── dashboard/       # panel okuma modelleri: dönem, sipariş aşaması, özet/rapor, sipariş ve stok panosu (adr/0022)
 │   │   │   │   ├── checkout/        # checkout kuralları: KDV için ülke, kargo gerekmeyen sepette kargo yöntemi yok (F3.2)
 │   │   │   │   ├── stock/           # hareket nedeni, düşük stok eşikleri (F3.8)

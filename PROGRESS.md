@@ -3,7 +3,7 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: BİTTİ** (T1a–T16; kabul kriterlerinin hepsi testlerle işaretli, docs/03; son eksik iki kanıt, danışmanın p95 ölçümü ve yedi sayfa türünün SEO sözleşme testi, kapanışta eklendi). Playwright e2e altyapısı kuruldu; CI düzeltildi. **F4 — Fiyatlandırma ve promosyon: DEVAM** (plan ve ADR-0023/0024/0025 kabul edildi; U1 `price-history`, U4 kuponlar, U7 indirim dağılımı ve iade tutarı, U2 fiyat listeleri, U3 indirim gösterimi, U5 tek kullanımlık kodlar, U6 otomatik kampanyalar ve kargo bedava eşiği bitti (KK1–KK4 işaretli); sırada U8 hediye kartı). Dal `f4-pricing-promotions`. Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı. F1, F2 ve F3 dalları push edildi (kullanıcı 2026-10-26: "pushları sen önerdiğinde yapabilirsin"); PR açılmadı.
+**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: BİTTİ** (T1a–T16; kabul kriterlerinin hepsi testlerle işaretli, docs/03; son eksik iki kanıt, danışmanın p95 ölçümü ve yedi sayfa türünün SEO sözleşme testi, kapanışta eklendi). Playwright e2e altyapısı kuruldu; CI düzeltildi. **F4 — Fiyatlandırma ve promosyon: DEVAM** (plan ve ADR-0023/0024/0025 kabul edildi; U1 `price-history`, U4 kuponlar, U7 indirim dağılımı ve iade tutarı, U2 fiyat listeleri, U3 indirim gösterimi, U5 tek kullanımlık kodlar, U6 otomatik kampanyalar ve kargo bedava eşiği, U8 hediye kartı ve mağaza kredisi bitti (KK1–KK4 işaretli); sırada F4 kapanışı). Dal `f4-pricing-promotions`. Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı. F1, F2 ve F3 dalları push edildi (kullanıcı 2026-10-26: "pushları sen önerdiğinde yapabilirsin"); PR açılmadı.
 
 ## Son oturum özeti
 **2026-10-25/26 gece (kullanıcı yatarken, "panel işlerini tamamla" talimatıyla).** Panelin ekranları yazıldı; her biri gerçek veriyle tarayıcıda denendi (CDP ekran görüntüsü, test kayıtları sonra silindi). Commit'ler `e11a201`…`6d63df7`, push yok.
@@ -562,6 +562,15 @@
   153. **Kod partisi CSV'si `kod;kullanıldı` sütunlu**, Excel için UTF-8 BOM'lu. İşin kendi CSV'si yalnızca kodları taşıyor.
   154. **Kargo bedava eşiği ve "bir sepette birden çok kod" ayarı Kampanyalar sayfasında**, listenin altında "Kampanya ayarları" kartında. Eşik KDV dahil, indirim sonrası ürün toplamı; yalnızca sabit fiyatlı kargo seçeneklerine uygulanıyor.
   155. **"X al Y öde" kampanya formunda dördüncü tür.** Ürün, kategori ya da koleksiyon seçmek zorunlu. Teklif sepet büyüdükçe tekrarlanıyor (her X üründe X − Y bedava) ve en ucuz ürünler bedava oluyor. "Yalnızca bir kez" seçeneği yok; gerekirse sonra eklenir.
+  156. **Hediye kartları Kampanyalar altında bir sekme** (`/promotions/gift-cards`); sekme ve ekran yalnızca "Hediye kartı" özelliği açıkken görünüyor. Kart tutar, isteğe bağlı son gün (o günün sonu, Türkiye saati) ve mağazanın notuyla açılıyor; kod oluşturulunca kopyalanmak üzere gösteriliyor. Kart düzenleme ve iptal şimdilik Medusa Admin'de.
+  157. **Hediye kartı kodu bizim üreticimizden** (`GIFT-` + 16 rastgele karakter). Eklentinin üreticisi 16 karakterin yalnızca 10'unu rastgele çekiyor (ADR-0025 notu). Mağazanın yazdığı kelime yalnızca önek olur (`YILBASI-XXXX-…`); tamamen mağazanın seçtiği kod yok, çünkü tahmin edilen kod kartı harcatır (güvenlik incelemesi).
+  158. **Mağaza kredisi müşteri sayfasında, yalnızca üye müşteride** (bayrak açıkken): bakiye ve "Kredi ekle" (tutar + not). Hesap ilk eklemede açılıyor; misafire hesap açılmıyor (oturum açamaz, e-postasını bilen başkası harcayabilirdi). Kredi düşme (borç) panelde yok.
+  159. **Kart kodu denemesi promosyon kodlarıyla aynı bütçeden sayılıyor** (`coupon`: IP başına 10 dakikada 30, sepet başına 10); sepete ekleme ve çıkarma, kodla sorgu (HEAD dahil) sayılıyor.
+  160. **Alışverişçi kartın notunu, referansını ve sahibini görmüyor:** Store yanıtlarında kart yalnızca kod, tutar, durum, bitiş ve bakiyeyle var; başka alan isteyen `fields` 400 alıyor.
+  161. **Kartla ve krediyle ödenen tutar sipariş sayfasının ödeme kartında ayrı satır** ("Kredi ve hediye kartıyla ödenen"). İadede bu payın krediye dönmesi F7'de; o zamana kadar elle "Kredi ekle".
+  162. **Test çalıştırmaları Redis anahtarlarında dev'den ayrı** (`…/test` eki). Önce entegrasyon testleri dev sunucusunun giriş sınırını dolduruyordu (Medusa'nın test çalıştırıcısı DATABASE_URL'i değiştirmiyor); panel 15 dakika giriş yapamıyordu.
+  163. **Sepette mağaza kredisini yalnızca sepetin kendi müşterisi kullanabiliyor;** eklenti kimin oturum açtığına bakmıyordu (güvenlik incelemesi). Hesabı koduyla sahiplenme (`claim`) F18'e kadar kapalı.
+  164. **Tamamı hediye kartıyla ödenen sipariş "Kredi ile ödendi"** ve doğrudan "gönderilecek" aşamasında. Ödeme kartındaki satırın adı "Kredi ve hediye kartıyla ödenen" (Medusa'nın bütün kredi satırlarını sayıyor).
 - **Bilinen sınırlar (devreden):**
   - JSON-LD'yi storefront basarken `<`, `>` ve `&` kaçışlanmalı (`</script>` içeren başlık ya da metin). Kural docs/13'te var; F18 kabulüne sözleşme testi olarak eklenecek.
   - Editöre yüklenip bir günden uzun süre kaydedilmeyen görseli gece süpürmesi siler; kayıt `content.image_unknown` verir.
@@ -582,7 +591,10 @@
   - Fiyat listesi bileşenlerinden birkaçı (`DiscountDialog`, `AudienceCard`, `PriceLinesCard`) 50 satırı aşıyor; diğer panel bileşenleriyle birlikte bölünmeli.
   - Liste sorgusunun ürün sayısı büyük facet'lerde ürün kimliklerini bellekte kesiştiriyor (önbellekli). Büyük katalogda SQL'de `EXISTS` ile sayım ya da Index modülü düşünülmeli.
   - HTTP takımında `request-security` rate-limit testi T13'te bir kez dalgalandı; nedeni bulunamadı, tekrarlarda geçti.
-  - Hediye kartı ve mağaza kredisi (Medusa credit line'ları) satır paylarına ve iade edilebilir tutara girmiyor; U8'de eklenecek.
+  - Hediye kartı ve mağaza kredisi (Medusa credit line'ları) sipariş parasında toplam olarak var (`credit`), satır paylarına dağıtılmıyor. İadede kredi payının krediye dönmesi F7 iade akışıyla (ADR-0025 notu).
+  - Hediye kartı listesi en yeni 200 kartı okuyor (sayfalama ve kodla arama yok). Kart düzenleme/iptal ve krediden düşme panelde yok (Medusa Admin'de).
+  - Kodla kart sorgusu (`GET /store/gift-cards/:code`) kodu büyük harfe çevirmiyor (yol parametresi); storefront kodu büyük harfle göndermeli (F18).
+  - Hediye kartı hesaplarının sahiplenme kodları (`SC-…`) eklentinin zayıf üreticisinden (~50 bit); `claim` açılırsa (F18) kendi kodumuzla değiştirilmeli.
   - `lib/money` iki haneli kuruş varsayıyor; ondalıksız para birimleri (JPY gibi) için genelleştirme gerekir (platform TRY).
   - Medusa'nın Query'si sipariş ayarlamalarını bütün sürümlerden döndürüyor; ayarlama okuyan yeni kod güncel sürüme göre süzmeli (`workflows/orders/order-money.ts` `currentAdjustments`).
 
@@ -856,7 +868,7 @@
 - **Daha önce:** F1 planlaması ve F0.2–F0.8 (2026-10-24), F0.1 monorepo (2026-10-24 sabahı), SEO ve güvenlik dokümanları (2026-10-22).
 
 ## Sıradaki görev
-**Claude'un sıradaki işi:** F4 U8 hediye kartı ve mağaza kredisi (`@medusajs/loyalty-plugin` exact 2.21.2, `promotions.gift_cards` bayrağı; plan aşağıda, "F4 görev planı"). Yeni bağımlılık: ≥14 gün kuralı ve sürüm uyumu kontrol edilip eklenecek. Ardından F4 kapanışı (bağımsız inceleme, CI, /oturum-kapat). F4 kodu `f4-pricing-promotions` dalında (F1–F3 birleştirilmediği için `f3-catalog-seo-stock` üzerinden).
+**Claude'un sıradaki işi:** F4 kapanışı: bağımsız inceleme (kod + güvenlik), CI yeşil, docs/03 F4 durumu, /oturum-kapat. U1–U8 bitti; plan aşağıda, "F4 görev planı". F4 kodu `f4-pricing-promotions` dalında (F1–F3 birleştirilmediği için `f3-catalog-seo-stock` üzerinden).
 
 1. **Kullanıcı:**
    - **F4 kararları:** ADR-0023/0024/0025 kabul edildi (2026-10-26). Dışarıda bekleyen: 30 gün kuralının hukukçu teyidi, hediye kartı vergisinin mali müşavir teyidi (docs/12).
@@ -890,7 +902,7 @@ Kararlar: ADR-0023 (fiyat geçmişi, 30 gün kuralı), ADR-0024 (kupon ve kampan
 | U5 ✅ | F4.6 | Tek kullanımlık kodlar: `promotion.codes` işi (şablondan N promosyon, `limit: 1`, okunur kodlar, CSV sonuç, en çok 10.000), panelde üret ve indir | U4 | — |
 | U6 ✅ | F4.5 | Otomatik kampanyalar: X al Y öde (`buyget`), sepette indirim (sipariş hedefli, minimumlu), kargo bedava eşiği (mağaza ayarı → düz fiyatlı kargo seçeneklerine `item_total gte` kurallı 0 TL fiyat) | U4 | KK3 |
 | U7 ✅ | F4.7 | İndirim dağılımı ve iade tutarı: kalem başına indirim payı (Medusa ayarlamalarından, `lib/money`), ardışık kısmi iadelerde satırın kalanını tavan alan dağıtım (ADR-0010 "Sonuçlar"), `refundableAmount` (F6/F7/F8 kullanır) | — | KK4 |
-| U8 | F4.8 | Hediye kartı ve mağaza kredisi: eklenti kurulumu (exact 2.21.2), `promotions.gift_cards` bayrağı, panelden kart oluşturma ve bakiye, checkout'ta kullanım, iadede mağaza kredisi. Satış ve e-posta F9'da | ADR-0025 | — |
+| U8 ✅ | F4.8 | Hediye kartı ve mağaza kredisi: eklenti kurulumu (exact 2.21.2), `promotions.gift_cards` bayrağı, panelden kart oluşturma ve bakiye, checkout'ta kullanım, iadede mağaza kredisi. Satış ve e-posta F9'da | ADR-0025 | — |
 
 Sıra: U1 → U3; U2 → U3; U4 → U5, U6; U7 ve U8 bağımsız. Önerilen başlangıç: U1, U4, U7 (KK taşıyanlar), sonra U2–U3, U5–U6, U8.
 
