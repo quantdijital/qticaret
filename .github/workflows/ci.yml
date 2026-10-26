@@ -176,6 +176,8 @@ jobs:
         run: |
           pnpm --filter @qticaret/backend medusa db:migrate
           pnpm --filter @qticaret/backend seed:demo
+          # A few days of orders: the order page's tests open one
+          pnpm --filter @qticaret/backend seed:demo-orders days=3
       - name: Start the backend
         run: |
           pnpm --filter @qticaret/backend dev > backend.log 2>&1 &

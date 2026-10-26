@@ -59,13 +59,17 @@ medusaIntegrationTestRunner({
       }
     }
 
-    async function auditEntries(resourceId: string): Promise<AuditEntry[]> {
+    // Entries land once the response has finished; `until` says which one is awaited
+    async function auditEntries(
+      resourceId: string,
+      until: (entries: AuditEntry[]) => boolean = (entries) => entries.length > 0
+    ): Promise<AuditEntry[]> {
       for (let attempt = 0; attempt < 30; attempt++) {
         const { data } = await http.get<{ audit_entries: AuditEntry[] }>(
           `/admin/audit-log?resource_id=${resourceId}&kind=mutation`,
           { headers: admin.headers }
         )
-        if (data.audit_entries.length > 0) {
+        if (until(data.audit_entries)) {
           return data.audit_entries
         }
         await new Promise((resolve) => setTimeout(resolve, 100))
@@ -118,7 +122,12 @@ medusaIntegrationTestRunner({
         { headers: admin.headers }
       )
       await setFlag("test.sample", true)
-      const [entry] = await auditEntries("test.sample")
+      // The reset before each test is recorded too: wait for this change's own entry
+      const turnedOn = (each: AuditEntry) =>
+        JSON.stringify(each.changes?.diff ?? {}).includes('"after":true')
+      const entry = (await auditEntries("test.sample", (entries) => entries.some(turnedOn))).find(
+        turnedOn
+      )
 
       expect(data.features).toEqual(
         expect.arrayContaining([

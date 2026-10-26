@@ -92,7 +92,7 @@ async function context(container: MedusaContainer) {
  */
 export async function seedDemoOrders(
   container: MedusaContainer,
-  { append = false }: { append?: boolean } = {}
+  { append = false, days = DAYS }: { append?: boolean; days?: number } = {}
 ): Promise<number> {
   if (!append && (await first(container, "order", ["id"])).length > 0) {
     logger.info({ event: "seed.orders_kept" }, "orders exist, keeping them")
@@ -105,7 +105,7 @@ export async function seedDemoOrders(
   ])
   const plan = planDemoOrders({
     now: new Date(),
-    days: DAYS,
+    days,
     weights: variants.map((variant) => variant.weight),
     places: destinations.length,
   })
