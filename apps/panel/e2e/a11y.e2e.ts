@@ -1,6 +1,7 @@
 import AxeBuilder from "@axe-core/playwright"
 import type { Page } from "@playwright/test"
 import { expect, pageHeading, test } from "./support/guard"
+import { MODES, inMode } from "./support/theme"
 
 /**
  * Screens a person spends the most time on; WCAG 2.1 A and AA rules (docs/06,
@@ -33,11 +34,17 @@ async function seriousIssues(page: Page): Promise<string[]> {
 }
 
 for (const path of SCREENS) {
-  test(`${path} has no serious accessibility issue`, async ({ page }) => {
-    await page.goto(path)
-    await expect(pageHeading(page)).toBeVisible()
-    await page.waitForLoadState("networkidle")
-    expect(await seriousIssues(page)).toEqual([])
+  test(`${path} has no serious accessibility issue, light or dark`, async ({ page }) => {
+    for (const mode of MODES) {
+      await test.step(mode, async () => {
+        await inMode(page, mode)
+        await page.goto(path)
+        await expect(pageHeading(page)).toBeVisible()
+        await page.waitForLoadState("networkidle")
+        expect(await seriousIssues(page)).toEqual([])
+        await page.unrouteAll({ behavior: "ignoreErrors" })
+      })
+    }
   })
 }
 

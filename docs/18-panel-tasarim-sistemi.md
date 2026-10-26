@@ -192,7 +192,7 @@ Kurallar:
 
 ## 8. Erişilebilirlik ve performans
 
-- Kontrast AA; tema motoru garanti eder, axe testi doğrular.
+- Kontrast AA; tema motoru garanti eder, axe testi doğrular: `e2e/a11y.e2e.ts` her ekranı açık ve koyu modda denetler (kayıtlı mod ne olursa olsun; CI'ın yeni mağazası açık, geliştiricininki koyu olabilir).
 - Her etkileşimli öğe klavyeyle; odak halkası token'dan; diyaloglar ESC ile kapanır, odak tuzağı.
 - `aria-live` ile sonuç bildirimi; tablo başlıkları `scope`.
 - İlk yükleme: kod bölme route başına; grafik kütüphanesi yalnızca dashboard'da yüklenir.
