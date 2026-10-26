@@ -4,7 +4,8 @@ import type { AsyncJobRecord } from "../../../modules/async-job/service"
 
 /** A result file written as it is produced, so no export sits whole in memory. */
 export interface ResultWriter {
-  write: (text: string) => Promise<void>
+  /** Text is written as UTF-8; bytes (a zip, an xlsx) as they are. */
+  write: (chunk: string | Buffer) => Promise<void>
 }
 
 export interface JobContext {
@@ -34,5 +35,10 @@ export interface JobType<Input = unknown> {
   resultTtlDays: number
   /** Downloading the result is a personal data read (adr/0011). */
   containsPersonalData: boolean
+  /**
+   * Queued only by its own route (an import queued with the file it was
+   * sent), never through `POST /admin/async-jobs`, whose input it would trust.
+   */
+  internal?: boolean
   execute: (context: JobContext, input: Input) => Promise<JobResult>
 }

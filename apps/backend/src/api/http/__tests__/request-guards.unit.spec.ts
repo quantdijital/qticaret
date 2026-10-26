@@ -158,6 +158,19 @@ describe("csrfProtection", () => {
     expect(
       run(csrfProtection, admin("/admin/invites", "multipart/form-data; boundary=x")).status()
     ).toBe(403)
+    // Medusa's own product import is closed: no multipart there any more (F3.9)
+    expect(
+      run(
+        csrfProtection,
+        admin("/admin/products/imports", "multipart/form-data; boundary=x")
+      ).status()
+    ).toBe(403)
+    // The product sheet: its own bytes, typed as no form can send them, on its own path only
+    const xlsx = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    expect(run(csrfProtection, admin("/admin/catalog/imports", xlsx)).next).toHaveBeenCalled()
+    expect(run(csrfProtection, admin("/admin/catalog/imports", "text/csv")).next).toHaveBeenCalled()
+    expect(run(csrfProtection, admin("/admin/catalog/imports", "text/plain")).status()).toBe(403)
+    expect(run(csrfProtection, admin("/admin/products", xlsx)).status()).toBe(403)
   })
 
   it("lets an admin DELETE without a body through", () => {

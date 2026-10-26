@@ -13,8 +13,9 @@ import { routePath } from "./request-path"
  * - `/store/*` needs no extra header: Medusa already requires
  *   `x-publishable-api-key`, which a cross-site form cannot send.
  * - `/admin/*` bodies must be JSON (a form cannot send that cross-site),
- *   except multipart file routes (uploads, product imports), which rely on
- *   the origin check alone.
+ *   except multipart file uploads, which rely on
+ *   the origin check alone, and the product sheet upload, whose xlsx or
+ *   CSV body types no form can send either (they are not CORS-simple).
  * - Any other path (none sets the cookie today) needs an origin from any of
  *   the three lists: a path the areas miss must not miss the check.
  *
@@ -25,8 +26,15 @@ import { routePath } from "./request-path"
 const SAFE_METHODS = new Set(["GET", "HEAD", "OPTIONS"])
 // Medusa's default session cookie name (sessionOptions.name is not set)
 const SESSION_COOKIE = "connect.sid"
-// Admin routes that take files as multipart: uploads and product imports
-const MULTIPART_PATH = /^\/admin\/(uploads|products\/imports?)(\/|$)/
+// Admin routes that take files as multipart: uploads (Medusa's product import is closed, F3.9)
+const MULTIPART_PATH = /^\/admin\/uploads(\/|$)/
+// The product sheet upload (F3.9): its bytes as the body, typed as what they are
+const SHEET_PATH = /^\/admin\/catalog\/imports$/
+const SHEET_TYPES = [
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "text/csv",
+  "application/octet-stream",
+]
 
 type Area = "store" | "admin" | "auth"
 
@@ -77,7 +85,8 @@ function isAllowedAdminBody(req: MedusaRequest): boolean {
   return (
     !hasBody(req) ||
     type.startsWith("application/json") ||
-    (type.startsWith("multipart/form-data") && MULTIPART_PATH.test(routePath(req)))
+    (type.startsWith("multipart/form-data") && MULTIPART_PATH.test(routePath(req))) ||
+    (SHEET_TYPES.some((sheet) => type.startsWith(sheet)) && SHEET_PATH.test(routePath(req)))
   )
 }
 

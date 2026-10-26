@@ -19,6 +19,49 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "brands.unknown": "Marka bulunamadı.",
   "cart.address_required": "Siparişi tamamlamak için teslimat adresi gerekir.",
   "cart.shipping_not_needed": "Sepette kargo gerektiren ürün yok; kargo seçimini kaldırın.",
+  "catalog_import.attribute_invalid":
+    "Özellik değeri bu özellik için geçerli değil (seçeneklerden biri, sayı ya da Evet/Hayır olmalı).",
+  "catalog_import.attribute_required": "Şablonun zorunlu özelliklerinden biri boş.",
+  "catalog_import.attribute_unknown": "Bu özellik ürünün şablonunda yok.",
+  "catalog_import.brand_unknown": "Bu tanıtıcıyla bir marka yok.",
+  "catalog_import.category_unknown": "Kategorilerden biri bu tanıtıcıyla yok.",
+  "catalog_import.collection_unknown": "Bu tanıtıcıyla bir koleksiyon yok.",
+  "catalog_import.column_repeated": "Bu sütun dosyada iki kez var; ikincisi okunmadı.",
+  "catalog_import.columns_missing":
+    'Dosyada "Tanıtıcı" ya da "Ürün adı" sütunu yok; şablonu kullanın.',
+  "catalog_import.dimension_invalid":
+    "Ölçü sıfır ya da pozitif bir sayı olmalı (en fazla 3 ondalık).",
+  "catalog_import.handle_exists":
+    'Başlıktan üretilen tanıtıcıyla bir ürün zaten var; o ürünü güncellemek için "Tanıtıcı" sütununu doldurun.',
+  "catalog_import.handle_invalid":
+    "Tanıtıcı yalnızca küçük harf, rakam ve tire içerebilir (ör. seramik-kupa).",
+  "catalog_import.handle_or_title_required": "Satırda tanıtıcı da ürün adı da yok.",
+  "catalog_import.handle_repeated":
+    "Tanıtıcısız iki satır aynı ürün adını taşıyor; ayırmak için tanıtıcı girin.",
+  "catalog_import.no_location":
+    "Mağazanın varsayılan deposu yok; stok yazılamaz. Ayarlar > Depolar'dan bir depo ekleyin.",
+  "catalog_import.option_incomplete": "Seçeneğin adı ve değeri birlikte girilmeli.",
+  "catalog_import.option_unknown": "Ürünün bu adla bir seçeneği yok.",
+  "catalog_import.option_value_unknown": "Yeni seçenek değeri; önce panelden ürüne ekleyin.",
+  "catalog_import.options_differ": "Bir ürünün satırları aynı seçenek adlarını taşımalı.",
+  "catalog_import.price_invalid":
+    "Fiyat sıfır ya da pozitif bir tutar olmalı (en fazla 2 ondalık, ör. 1.250,50).",
+  "catalog_import.product_field_conflict":
+    "Aynı ürünün başka bir satırı bu alana farklı bir değer veriyor.",
+  "catalog_import.sku_repeated": "Bu SKU dosyada daha önce kullanıldı.",
+  "catalog_import.sku_taken": "Bu SKU başka bir ürünün varyantında kullanılıyor.",
+  "catalog_import.status_invalid": 'Durum "Taslak" ya da "Yayında" olmalı.',
+  "catalog_import.stock_invalid": "Stok sıfır ya da pozitif bir tam sayı olmalı.",
+  "catalog_import.template_change": "Ürünün özellik şablonu farklı; şablonu panelden değiştirin.",
+  "catalog_import.template_required": "Özellik girmek için bir özellik şablonu seçin.",
+  "catalog_import.template_unknown": "Bu tanıtıcıyla bir özellik şablonu yok.",
+  "catalog_import.text_invalid": "Metin görünmeyen kontrol karakterleri içeremez.",
+  "catalog_import.text_too_long": "Metin bu alan için çok uzun.",
+  "catalog_import.title_required": "Yeni ürün için ürün adı gerekli.",
+  "catalog_import.variant_repeated": "Aynı seçenek değerleriyle iki satır var.",
+  "catalog_import.variant_unmatched":
+    "Satır ürünün bir varyantıyla eşleşmedi; SKU ya da ürünün tüm seçeneklerini girin.",
+  "catalog_import.write_failed": "Ürün kaydedilemedi.",
   "catalog.dimensions_required":
     "Fiziksel bir ürünü yayınlamak için her varyantın ağırlığı ve ölçüleri girilmeli.",
   "catalog.handle_invalid":
@@ -204,6 +247,12 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "tr_address.postal_code_province_mismatch": "Posta kodu seçilen ile ait değil.",
   "tr_address.province_code_invalid": "İl seçimi geçerli değil.",
   "tr_address.province_not_found": "İl bulunamadı.",
+  "upload.file_too_large": "Dosya çok büyük; en fazla 10 MB yükleyin.",
+  "upload.sheet_empty": "Dosyada başlık satırı yok.",
+  "upload.sheet_invalid": "Dosya okunamadı; Excel (xlsx) ya da CSV olarak kaydedin.",
+  "upload.sheet_too_large": "Dosyanın içeriği çok büyük ya da bozuk.",
+  "upload.sheet_too_many_rows": "Dosyada çok fazla satır var; en fazla 5000 satır yükleyin.",
+  "upload.sheet_too_wide": "Dosyada çok fazla sütun var.",
   "upload.csv_empty": "Dosya boş.",
   "upload.csv_invalid": "Dosya okunamadı: kapanmamış bir tırnak var.",
   "upload.csv_too_many_rows": "Dosyada çok fazla satır var; en fazla 1000 satır yükleyin.",

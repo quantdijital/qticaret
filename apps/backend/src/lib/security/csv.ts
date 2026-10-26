@@ -32,6 +32,24 @@ function cellText(value: unknown): string {
   }
 }
 
+/** Text a spreadsheet would read as a formula, made plain text with an apostrophe. */
+export const escapeFormulas = (text: string): string => text.replace(FORMULA_START, "$1$2'")
+
+const ESCAPED_FORMULA = new RegExp(`(^|[,;\\t])([ \\u00a0]*)'(?=[${FORMULA_CHARS}])`, "g")
+
+/** An exported cell read back: the apostrophes `escapeFormulas` added come off. */
+export const unescapeFormulas = (text: string): string => text.replace(ESCAPED_FORMULA, "$1$2")
+
+// A spreadsheet cell has no delimiters inside: only its start can read as a formula
+const LEADING_FORMULA = new RegExp(`^([ \\u00a0]*)(?=[${FORMULA_CHARS}])`)
+const LEADING_ESCAPED = new RegExp(`^([ \\u00a0]*)'(?=[${FORMULA_CHARS}])`)
+
+/** A spreadsheet cell's escape: an apostrophe before a formula-like start only. */
+export const escapeFormulaStart = (text: string): string => text.replace(LEADING_FORMULA, "$1'")
+
+/** `escapeFormulaStart` undone, exactly. */
+export const unescapeFormulaStart = (text: string): string => text.replace(LEADING_ESCAPED, "$1")
+
 export function escapeCsvCell(value: unknown): string {
   if (value === null || value === undefined) {
     return ""
@@ -39,7 +57,7 @@ export function escapeCsvCell(value: unknown): string {
   if (typeof value === "number" || typeof value === "bigint" || typeof value === "boolean") {
     return String(value)
   }
-  const text = cellText(value).replace(FORMULA_START, "$1$2'")
+  const text = escapeFormulas(cellText(value))
   return NEEDS_QUOTES.test(text) ? `"${text.replace(/"/g, '""')}"` : text
 }
 

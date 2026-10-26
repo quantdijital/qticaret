@@ -112,7 +112,8 @@ medusaIntegrationTestRunner({
       expect(response.data.files?.[0]?.url).toMatch(/-logo\.png$/)
     })
 
-    it("accepts a plain CSV for Medusa's product import", async () => {
+    // Medusa's own product import is closed (F3.9); a CSV is still a file the shop may keep
+    it("accepts a plain CSV", async () => {
       const response = await upload(
         form(["Product Handle,Title\nsef-bicagi,Şef Bıçağı\n", "Ürünler.csv", "text/csv"])
       )

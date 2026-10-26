@@ -1,7 +1,9 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ASYNC_JOB_MODULE } from "../../../modules/async-job"
 import type AsyncJobModuleService from "../../../modules/async-job/service"
+import { ValidationError } from "../../../lib/errors"
 import { enqueueAsyncJobWorkflow } from "../../../workflows/async-job/enqueue-async-job"
+import { jobType } from "../../../workflows/async-job/types"
 import { serializeJob } from "./serialize"
 import type { AdminGetAsyncJobsType, AdminPostAsyncJobType } from "./validators"
 
@@ -17,11 +19,14 @@ export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse):
   res.json({ async_jobs: jobs.map(serializeJob), count, offset, limit })
 }
 
-/** Queues a job; the worker runs it and the list shows its progress. */
+/** Queues a job; the worker runs it and the list shows its progress. Internal types have their own routes. */
 export async function POST(
   req: AuthenticatedMedusaRequest<AdminPostAsyncJobType>,
   res: MedusaResponse
 ): Promise<void> {
+  if (jobType(req.validatedBody.type)?.internal) {
+    throw new ValidationError("async_job.type_unknown", { field: "type" })
+  }
   const { result } = await enqueueAsyncJobWorkflow(req.scope).run({
     input: {
       type: req.validatedBody.type,

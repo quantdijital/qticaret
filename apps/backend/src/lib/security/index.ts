@@ -12,7 +12,16 @@ export type {
   SafeFetchResponse,
 } from "./safe-fetch"
 export { safeEqual } from "./timing-safe"
-export { CSV_BOM, escapeCsvCell, toCsv, toCsvRow } from "./csv"
+export {
+  CSV_BOM,
+  escapeCsvCell,
+  escapeFormulaStart,
+  escapeFormulas,
+  toCsv,
+  toCsvRow,
+  unescapeFormulaStart,
+  unescapeFormulas,
+} from "./csv"
 export { readCsv } from "./csv-read"
 export type { CsvRead, CsvReadLimits, CsvRow } from "./csv-read"
 export { containsPattern, isCleanText } from "./text"

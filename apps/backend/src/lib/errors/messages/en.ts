@@ -16,6 +16,51 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "brands.unknown": "Brand not found.",
   "cart.address_required": "An address is needed to complete the order.",
   "cart.shipping_not_needed": "Nothing in the cart needs shipping; remove the shipping method.",
+  "catalog_import.attribute_invalid":
+    "The value does not fit this attribute (one of its options, a number or Yes/No).",
+  "catalog_import.attribute_required": "A required attribute of the template is empty.",
+  "catalog_import.attribute_unknown": "The product's template has no such attribute.",
+  "catalog_import.brand_unknown": "No brand has this handle.",
+  "catalog_import.category_unknown": "One of the categories has no such handle.",
+  "catalog_import.collection_unknown": "No collection has this handle.",
+  "catalog_import.column_repeated": "This column is in the file twice; the second was not read.",
+  "catalog_import.columns_missing":
+    'The file has no "Tanıtıcı" or "Ürün adı" column; use the template.',
+  "catalog_import.dimension_invalid":
+    "A measurement is zero or a positive number (3 decimals at most).",
+  "catalog_import.handle_exists":
+    'A product already has the handle made from this title; fill in "Tanıtıcı" to update it.',
+  "catalog_import.handle_invalid":
+    "A handle holds only lowercase letters, digits and hyphens (e.g. ceramic-mug).",
+  "catalog_import.handle_or_title_required": "The row has neither a handle nor a product name.",
+  "catalog_import.handle_repeated":
+    "Two rows without a handle have the same product name; give them handles.",
+  "catalog_import.no_location":
+    "The shop has no default warehouse, so stock cannot be written. Add one under Settings > Warehouses.",
+  "catalog_import.option_incomplete": "An option's name and value go together.",
+  "catalog_import.option_unknown": "The product has no option of this name.",
+  "catalog_import.option_value_unknown":
+    "A new option value; add it to the product in the panel first.",
+  "catalog_import.options_differ": "A product's rows carry the same option names.",
+  "catalog_import.price_invalid":
+    "A price is zero or a positive amount (2 decimals at most, e.g. 1.250,50).",
+  "catalog_import.product_field_conflict":
+    "Another row of the same product gives this field another value.",
+  "catalog_import.sku_repeated": "This SKU was used earlier in the file.",
+  "catalog_import.sku_taken": "Another product's variant uses this SKU.",
+  "catalog_import.status_invalid": 'The status is "Taslak" or "Yayında".',
+  "catalog_import.stock_invalid": "Stock is zero or a positive whole number.",
+  "catalog_import.template_change":
+    "The product has another attribute template; change it in the panel.",
+  "catalog_import.template_required": "Choose an attribute template to fill attributes.",
+  "catalog_import.template_unknown": "No attribute template has this handle.",
+  "catalog_import.text_invalid": "Text cannot hold invisible control characters.",
+  "catalog_import.text_too_long": "The text is too long for this field.",
+  "catalog_import.title_required": "A new product needs a product name.",
+  "catalog_import.variant_repeated": "Two rows have the same option values.",
+  "catalog_import.variant_unmatched":
+    "The row matches none of the product's variants; give its SKU or all of the product's options.",
+  "catalog_import.write_failed": "The product could not be saved.",
   "catalog.dimensions_required":
     "A physical product needs weight and dimensions for every variant before it is published.",
   "catalog.handle_invalid": "The handle may contain only lowercase letters, digits and hyphens.",
@@ -195,6 +240,12 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "tr_address.postal_code_province_mismatch": "The postal code is not in the chosen province.",
   "tr_address.province_code_invalid": "The province is not valid.",
   "tr_address.province_not_found": "Province not found.",
+  "upload.file_too_large": "The file is too big; upload 10 MB at most.",
+  "upload.sheet_empty": "The file has no header row.",
+  "upload.sheet_invalid": "The file could not be read; save it as Excel (xlsx) or CSV.",
+  "upload.sheet_too_large": "The file's content is too big or broken.",
+  "upload.sheet_too_many_rows": "The file has too many rows; upload 5,000 at most.",
+  "upload.sheet_too_wide": "The file has too many columns.",
   "upload.csv_empty": "The file is empty.",
   "upload.csv_invalid": "The file could not be read: a quote is not closed.",
   "upload.csv_too_many_rows": "The file has too many rows; upload 1000 at most.",

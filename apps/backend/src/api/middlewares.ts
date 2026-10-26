@@ -20,6 +20,7 @@ import { AdminPostProductCatalog } from "./admin/products/[id]/catalog/validator
 import { AdminPostFeature, validateSectionBody } from "./admin/platform-settings/validators"
 import { auditMutations, auditSensitiveRead } from "./http/audit"
 import { BRAND_ROUTES, STORE_BRAND_FIELDS } from "./http/brand-routes"
+import { CATALOG_SHEET_ROUTES } from "./http/catalog-sheet-routes"
 import { CONTENT_ROUTES } from "./http/content-routes"
 import { SENSITIVE_READS } from "./http/audit/sensitive-routes"
 import { csrfProtection } from "./http/csrf"
@@ -167,6 +168,8 @@ export default defineMiddlewares({
     // F3.11: brands
     ...BRAND_ROUTES,
     ...CONTENT_ROUTES,
+    // F3.9: product sheets
+    ...CATALOG_SHEET_ROUTES,
     // F3.7: warehouses
     ...STOCK_ROUTES,
     // F3.3: product images

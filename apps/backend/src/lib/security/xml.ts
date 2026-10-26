@@ -19,6 +19,8 @@ export interface SafeXmlOptions {
   keepAttributes?: boolean
   /** Elements that always parse as arrays, for repeated items. */
   isArray?: (tagName: string) => boolean
+  /** Off keeps the spaces around text, where they are content (spreadsheet cells). */
+  trimValues?: boolean
 }
 
 // A document type declaration is where entities are defined: refused outright
@@ -60,8 +62,13 @@ export function parseXmlSafely(text: string, options: SafeXmlOptions = {}): unkn
       processEntities: false,
       parseTagValue: false,
       ignoreAttributes: !(options.keepAttributes ?? false),
+      trimValues: options.trimValues ?? true,
+      // Elements only: an attribute of the same name (a cell's `r`) stays a value
       ...(options.isArray
-        ? { isArray: (tagName: string) => options.isArray?.(tagName) ?? false }
+        ? {
+            isArray: (tagName: string, _path: unknown, _leaf: boolean, isAttribute: boolean) =>
+              !isAttribute && (options.isArray?.(tagName) ?? false),
+          }
         : {}),
     })
     return parser.parse(text) as unknown

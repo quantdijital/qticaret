@@ -1,0 +1,6 @@
+export { readSheet, sheetFormatOf } from "./read"
+export type { SheetFormat } from "./read"
+export type { SheetLimits, SheetRead, SheetRow } from "./types"
+export { readXlsx } from "./xlsx-read"
+export { XLSX_MIME, writeXlsx } from "./xlsx-write"
+export type { SheetCell, SheetSpec } from "./xlsx-write"

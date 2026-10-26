@@ -1,6 +1,7 @@
 import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ASYNC_JOB_MODULE } from "../../modules/async-job"
 import type AsyncJobModuleService from "../../modules/async-job/service"
+import { IMPORT_FILE_PREFIX } from "../../workflows/async-job/types/catalog-import"
 import { answerAsMissing } from "../http/require-feature"
 
 /**
@@ -15,6 +16,11 @@ export async function hideJobResultFiles(
   next: MedusaNextFunction
 ) {
   const id = (req.params as Record<string, string | undefined>)["id"] ?? ""
+  // An uploaded product sheet is its import job's to read (F3.9)
+  if (id.includes(IMPORT_FILE_PREFIX)) {
+    answerAsMissing(req, res, "job_result_file")
+    return
+  }
   try {
     const jobs = await req.scope
       .resolve<AsyncJobModuleService>(ASYNC_JOB_MODULE)

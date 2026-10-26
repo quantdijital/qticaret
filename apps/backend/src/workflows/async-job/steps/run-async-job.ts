@@ -43,8 +43,8 @@ async function openResultFile(
   return {
     key: upload.fileKey,
     writer: {
-      write: async (text) => {
-        if (!stream.write(text)) {
+      write: async (chunk) => {
+        if (!stream.write(chunk)) {
           await once(stream, "drain")
         }
       },
