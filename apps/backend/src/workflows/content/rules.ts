@@ -59,7 +59,7 @@ export interface ContentPlan {
   wasLive: boolean
 }
 
-function lineOf(raw: string, max: number, key: string): string {
+export function lineOf(raw: string, max: number, key: string): string {
   const text = raw.trim().replace(/\s+/g, " ")
   if (text.length > max || !isCleanText(text)) {
     throw new ValidationError(key, { field: key.split(".")[1] ?? key })
@@ -70,7 +70,7 @@ function lineOf(raw: string, max: number, key: string): string {
 const optional = (raw: string | null, max: number, key: string): string | null =>
   raw === null || raw.trim() === "" ? null : lineOf(raw, max, key)
 
-function handleOf(raw: string | undefined, title: string): string {
+export function handleOf(raw: string | undefined, title: string): string {
   const handle = raw === undefined || raw.trim() === "" ? toSlug(title) : raw.trim()
   if (handle === "") {
     throw new ValidationError("catalog.handle_required", { field: "handle" })
@@ -82,7 +82,7 @@ function handleOf(raw: string | undefined, title: string): string {
 }
 
 /** The document checked again (an import or job may skip the route), as the schema shapes it. */
-function bodyOf(raw: unknown): ContentDoc {
+export function bodyOf(raw: unknown): ContentDoc {
   const parsed = contentDoc.safeParse(raw)
   if (!parsed.success) {
     const message = parsed.error.issues[0]?.message
@@ -95,13 +95,13 @@ function bodyOf(raw: unknown): ContentDoc {
 }
 
 // Both sides through one schema, so key order (jsonb keeps its own) does not count as a change
-const canonical = (body: unknown): string | null => {
+export const canonical = (body: unknown): string | null => {
   const parsed = contentDoc.safeParse(body)
   return parsed.success ? JSON.stringify(parsed.data) : null
 }
 
 /** The uploaded media records behind these addresses; one that is not the shop's upload refuses the save. */
-async function mediaOf(container: MedusaContainer, urls: string[], field: string) {
+export async function mediaOf(container: MedusaContainer, urls: string[], field: string) {
   const unique = [...new Set(urls)]
   if (unique.length === 0) {
     return []
@@ -115,7 +115,7 @@ async function mediaOf(container: MedusaContainer, urls: string[], field: string
   return assets.map((asset) => asset.id)
 }
 
-async function assertCards(container: MedusaContainer, doc: ContentDoc): Promise<void> {
+export async function assertCards(container: MedusaContainer, doc: ContentDoc): Promise<void> {
   const { product, category } = docStats(doc).cards
   const products = [...new Set(product)]
   const categories = [...new Set(category)]

@@ -34,9 +34,10 @@ export const CATALOG_ENTITY_TYPES = {
   category: "product_category",
   collection: "product_collection",
   brand: "brand",
-  // F3.16: content pages and blog posts
+  // F3.16: content pages, blog posts and facet landing pages
   page: "page",
   post: "post",
+  landing: "landing",
 } as const
 
 interface Handled {

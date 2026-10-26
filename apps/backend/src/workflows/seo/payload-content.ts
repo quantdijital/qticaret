@@ -1,7 +1,8 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import type { SeoSubject } from "../../lib/seo/resolve"
-import { SEO_FIELDS, imageOf, rowOf } from "./payload-sources"
-import type { SeoMetaRow } from "./payload-sources"
+import { CATALOG_ENTITY_TYPES } from "../catalog/entity-paths"
+import { SEO_FIELDS, imageOf, listingItems, rowOf, trailOf } from "./payload-sources"
+import type { CategoryRow, SeoMetaRow } from "./payload-sources"
 
 interface ContentRow {
   id: string
@@ -77,5 +78,54 @@ export async function contentSubject(
       author: entry.author_name ?? null,
       image: image?.url ?? null,
     },
+  }
+}
+
+interface LandingRow {
+  id: string
+  title: string
+  category_id: string
+  body_summary: string
+  seo_meta?: SeoMetaRow | null
+}
+
+/**
+ * A facet landing page's subject (F3.16, docs/13 §7): a listing of its
+ * products under its category's trail, described by its own text, its
+ * category name at hand for the title template.
+ */
+export async function landingSubject(
+  container: MedusaContainer,
+  id: string,
+  path: string
+): Promise<SeoSubject | null> {
+  const landing = await rowOf<LandingRow>(
+    container,
+    "landing_page",
+    ["id", "title", "category_id", "body_summary", ...SEO_FIELDS],
+    id
+  )
+  if (!landing) {
+    return null
+  }
+  const category = await rowOf<CategoryRow>(
+    container,
+    "product_category",
+    ["id", "name", "mpath"],
+    landing.category_id
+  )
+  return {
+    kind: "landing",
+    path,
+    name: landing.title,
+    description: landing.body_summary,
+    tokens: { kategori: category?.name ?? null },
+    overrides: landing.seo_meta ?? null,
+    image: await imageOf(container, landing.seo_meta, null),
+    trail: category ? await trailOf(container, category, true) : [],
+    listing: await listingItems(container, {
+      entity_type: CATALOG_ENTITY_TYPES.landing,
+      entity_id: id,
+    }),
   }
 }

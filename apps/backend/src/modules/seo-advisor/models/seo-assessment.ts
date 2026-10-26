@@ -7,6 +7,7 @@ export const ASSESSED_KINDS = [
   "collection",
   "page",
   "post",
+  "landing",
 ] as const
 
 /**

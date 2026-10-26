@@ -11,6 +11,7 @@ const shop: SeoShop = {
     brand: "{marka} Ürünleri | {mağaza}",
     page: "{başlık} | {mağaza}",
     post: "{başlık} | {mağaza}",
+    landing: "{başlık} | {mağaza}",
   },
   descriptionTemplates: { product: "{kısa_açıklama}. {fiyat_cümlesi} {kargo_cümlesi}" },
 }

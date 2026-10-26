@@ -49,7 +49,14 @@ export interface SeoSettings {
   canonical_host: string | null
   /** docs/13 §2: `/urun/{slug}` (prefixed) or `/{slug}` (flat). */
   url_style: { product: UrlStyle; category: UrlStyle; brand: UrlStyle }
-  title_templates: { product: string; category: string; brand: string; page: string; post: string }
+  title_templates: {
+    product: string
+    category: string
+    brand: string
+    page: string
+    post: string
+    landing: string
+  }
   description_templates: { product: string }
   robots_txt: string
   ai_crawler_preset: "ai_search_visible" | "block_training" | "none"
@@ -73,6 +80,7 @@ export const seoSection = defineSection<SeoSettings>(
         brand: template,
         page: template,
         post: template,
+        landing: template,
       })
       .strict(),
     description_templates: z
@@ -98,6 +106,7 @@ export const seoSection = defineSection<SeoSettings>(
       brand: "{marka} Ürünleri | {mağaza}",
       page: "{başlık} | {mağaza}",
       post: "{başlık} | {mağaza}",
+      landing: "{başlık} | {mağaza}",
     },
     description_templates: { product: "{kısa_açıklama}. {fiyat_cümlesi} {kargo_cümlesi}" },
     robots_txt: DEFAULT_ROBOTS_TXT,

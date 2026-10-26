@@ -9,7 +9,8 @@ import { renderTemplate } from "./template"
  */
 
 export type RobotsValue = "index,follow" | "noindex,follow" | "noindex,nofollow"
-export type SeoPageKind = "product" | "category" | "collection" | "brand" | "page" | "post"
+export type SeoPageKind =
+  "product" | "category" | "collection" | "brand" | "page" | "post" | "landing"
 
 export interface SeoPayload {
   title: string
@@ -75,7 +76,14 @@ export interface SeoShop {
   canonicalHost: string | null
   /** False on an instance search engines must not index (staging): every page says noindex. */
   indexing: boolean
-  titleTemplates: { product: string; category: string; brand: string; page: string; post: string }
+  titleTemplates: {
+    product: string
+    category: string
+    brand: string
+    page: string
+    post: string
+    landing: string
+  }
   descriptionTemplates: { product: string }
 }
 
@@ -144,6 +152,7 @@ const NAME_TOKEN: Record<SeoPageKind, string> = {
   brand: "marka",
   page: "başlık",
   post: "başlık",
+  landing: "başlık",
 }
 
 function titleOf(subject: SeoSubject, shop: SeoShop): string {

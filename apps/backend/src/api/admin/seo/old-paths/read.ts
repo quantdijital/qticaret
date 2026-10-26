@@ -15,6 +15,7 @@ const NAMES: Readonly<Record<string, { entity: string; field: string }>> = {
   [CATALOG_ENTITY_TYPES.brand]: { entity: "brand", field: "name" },
   [CATALOG_ENTITY_TYPES.page]: { entity: "content_entry", field: "title" },
   [CATALOG_ENTITY_TYPES.post]: { entity: "content_entry", field: "title" },
+  [CATALOG_ENTITY_TYPES.landing]: { entity: "landing_page", field: "title" },
 }
 
 interface Owner {

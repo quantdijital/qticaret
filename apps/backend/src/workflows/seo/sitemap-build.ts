@@ -5,6 +5,7 @@ import type { SitemapEntry, SitemapFile } from "../../lib/seo/sitemap"
 import { URL_REGISTRY_MODULE } from "../../modules/url-registry"
 import type UrlRegistryModuleService from "../../modules/url-registry/service"
 import { CATALOG_ENTITY_TYPES, CATALOG_LOCALE } from "../catalog/entity-paths"
+import { liveLandingFilters } from "../content/landing-facet"
 import { shopOf } from "./payload-sources"
 
 /**
@@ -29,6 +30,8 @@ interface KindSpec {
   entity: string
   type: string
   filters: Record<string, unknown>
+  /** Filters read at build time, in place of `filters` (a landing page's category must show). */
+  filtersOf?: (container: MedusaContainer) => Promise<Record<string, unknown>>
   images: boolean
   /** The fields whose date is the page's last meaningful change, first set first; else `updated_at`. */
   changed?: readonly ("revised_at" | "published_at")[]
@@ -81,7 +84,19 @@ const KINDS: readonly KindSpec[] = [
     images: false,
     changed: ["revised_at", "published_at"],
   },
+  {
+    kind: "landings",
+    entity: "landing_page",
+    type: CATALOG_ENTITY_TYPES.landing,
+    filters: { status: "published" },
+    filtersOf: liveLandingFilters,
+    images: false,
+    changed: ["revised_at", "published_at"],
+  },
 ]
+
+const filtersOf = async (container: MedusaContainer, spec: KindSpec) =>
+  spec.filtersOf ? spec.filtersOf(container) : spec.filters
 
 // A page that asks not to be indexed, or names another page as canonical, stays out
 const listed = (row: Row): boolean =>
@@ -108,11 +123,12 @@ async function entriesOf(
     return value ? new Date(value) : null
   }
   const entries: SitemapEntry[] = []
+  const filters = await filtersOf(container, spec)
   for (let skip = 0; ; skip += PAGE) {
     const { data } = await query.graph({
       entity: spec.entity,
       fields,
-      filters: spec.filters,
+      filters,
       pagination: { skip, take: PAGE, order: { id: "ASC" } },
     })
     const rows = (data as Row[]).filter(listed)
@@ -158,11 +174,12 @@ export async function sitemapCounts(
   const registry = container.resolve<UrlRegistryModuleService>(URL_REGISTRY_MODULE)
   const counts = { expected: 0, pathless: 0 }
   for (const spec of KINDS) {
+    const filters = await filtersOf(container, spec)
     for (let skip = 0; ; skip += PAGE) {
       const { data } = await query.graph({
         entity: spec.entity,
         fields: ["id", "seo_meta.robots_override", "seo_meta.canonical_override"],
-        filters: spec.filters,
+        filters,
         pagination: { skip, take: PAGE, order: { id: "ASC" } },
       })
       const ids = (data as Row[]).filter(listed).map((row) => row.id)

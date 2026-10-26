@@ -20,7 +20,8 @@ export const AUDIT_RULES = {
 } as const satisfies Record<string, Severity>
 export type AuditRuleId = keyof typeof AUDIT_RULES
 
-export type AuditEntityKind = "product" | "category" | "brand" | "collection" | "page" | "post"
+export type AuditEntityKind =
+  "product" | "category" | "brand" | "collection" | "page" | "post" | "landing"
 
 export interface AuditItem {
   reason: string

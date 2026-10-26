@@ -24,6 +24,7 @@ export const SEO_TEMPLATE_TOKENS = {
   // F3.16: content pages and blog posts
   page: ["başlık", "mağaza"],
   post: ["başlık", "mağaza"],
+  landing: ["başlık", "kategori", "mağaza"],
 } as const
 
 const TOKEN = /\{([^{}]*)\}/gu

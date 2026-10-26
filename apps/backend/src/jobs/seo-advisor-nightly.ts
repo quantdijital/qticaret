@@ -4,6 +4,7 @@ import { isConflictError } from "../lib/errors"
 import { errorSummary, logger } from "../lib/logging"
 import type { PageKind } from "../lib/seo/advisor"
 import { enqueueAsyncJobWorkflow } from "../workflows/async-job/enqueue-async-job"
+import { refreshLandingOriginality } from "../workflows/content/landing-originality"
 import { assessPage } from "../workflows/seo/advisor/assess"
 
 const PAGE = 500
@@ -14,6 +15,7 @@ const KINDS: { kind: PageKind; entity: string; filters?: Record<string, unknown>
   { kind: "collection", entity: "product_collection" },
   { kind: "page", entity: "content_entry", filters: { kind: "page" } },
   { kind: "post", entity: "content_entry", filters: { kind: "post" } },
+  { kind: "landing", entity: "landing_page" },
 ]
 
 /**
@@ -23,6 +25,13 @@ const KINDS: { kind: PageKind; entity: string; filters?: Record<string, unknown>
  */
 export default async function seoAdvisorNightly(container: MedusaContainer) {
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
+  // Landing pages are measured again first: a page gone off the shop counts against no other
+  let remeasured: number | null = null
+  try {
+    remeasured = await refreshLandingOriginality(container)
+  } catch (error) {
+    logger.warn({ event: "content.landing_remeasure_failed", err: errorSummary(error) })
+  }
   const counts: Record<string, number> = {}
   for (const { kind, entity, filters } of KINDS) {
     counts[kind] = 0
@@ -46,7 +55,7 @@ export default async function seoAdvisorNightly(container: MedusaContainer) {
       }
     }
   }
-  logger.info({ event: "seo.advisor_nightly", ...counts })
+  logger.info({ event: "seo.advisor_nightly", ...counts, landingsRemeasured: remeasured })
   try {
     await enqueueAsyncJobWorkflow(container).run({
       input: { type: "seo.audit", input: {}, requested_by: null },

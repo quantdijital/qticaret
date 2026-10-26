@@ -29,6 +29,8 @@ interface OwnerRow {
   status?: string | null
   is_active?: boolean | null
   is_internal?: boolean | null
+  // A landing page's category (F3.16)
+  category_id?: string | null
   product_extension?: { successor_product_id?: string | null } | null
 }
 
@@ -45,13 +47,18 @@ const OWNER_QUERIES: Readonly<Record<string, { entity: string; fields: string[] 
   [CATALOG_ENTITY_TYPES.brand]: { entity: "brand", fields: ["id", "deleted_at", "is_active"] },
   [CATALOG_ENTITY_TYPES.page]: { entity: "content_entry", fields: ["id", "deleted_at", "status"] },
   [CATALOG_ENTITY_TYPES.post]: { entity: "content_entry", fields: ["id", "deleted_at", "status"] },
+  [CATALOG_ENTITY_TYPES.landing]: {
+    entity: "landing_page",
+    fields: ["id", "deleted_at", "status", "category_id"],
+  },
 }
 
 function isLive(type: string, row: OwnerRow): boolean {
   if (
     type === CATALOG_ENTITY_TYPES.product ||
     type === CATALOG_ENTITY_TYPES.page ||
-    type === CATALOG_ENTITY_TYPES.post
+    type === CATALOG_ENTITY_TYPES.post ||
+    type === CATALOG_ENTITY_TYPES.landing
   ) {
     return row.status === "published"
   }
@@ -91,6 +98,21 @@ async function deletedSuccessor(
   return extensions.find((row) => row.successor_product_id)?.successor_product_id ?? null
 }
 
+// A landing page's category: its page shows while the category does, and goes with it
+async function categoryState(container: MedusaContainer, id: string): Promise<OwnerState["kind"]> {
+  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+    entity: "product_category",
+    fields: ["deleted_at", "is_active", "is_internal"],
+    filters: { id },
+    withDeleted: true,
+  })
+  const row = data[0] as OwnerRow | undefined
+  if (!row || row.deleted_at) {
+    return "deleted"
+  }
+  return isLive(CATALOG_ENTITY_TYPES.category, row) ? "live" : "hidden"
+}
+
 /** Live, hidden (a draft, an inactive category) or deleted; an unknown type counts as deleted. */
 export async function ownerState(container: MedusaContainer, owner: UrlOwner): Promise<OwnerState> {
   const spec = Object.hasOwn(OWNER_QUERIES, owner.entity_type)
@@ -115,7 +137,15 @@ export async function ownerState(container: MedusaContainer, owner: UrlOwner): P
     }
   }
   const successorId = row.product_extension?.successor_product_id ?? null
-  return isLive(owner.entity_type, row) ? { kind: "live" } : { kind: "hidden", successorId }
+  if (!isLive(owner.entity_type, row)) {
+    return { kind: "hidden", successorId }
+  }
+  // A landing page shows while its category does, and goes with it (F3.16)
+  const category = row.category_id ? await categoryState(container, row.category_id) : "live"
+  if (category !== "live") {
+    return { kind: category, successorId: null }
+  }
+  return { kind: "live" }
 }
 
 /** The record's active path, or null when it has none. */

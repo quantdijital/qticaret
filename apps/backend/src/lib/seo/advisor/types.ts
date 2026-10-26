@@ -4,7 +4,7 @@
  * of the facts, so the same page always gets the same score.
  */
 
-export const RULES_VERSION = 3
+export const RULES_VERSION = 4
 
 export const SEVERITIES = ["critical", "high", "medium", "low", "info"] as const
 export type Severity = (typeof SEVERITIES)[number]
@@ -20,7 +20,7 @@ export const CATEGORY_WEIGHTS = {
 } as const
 export type Category = keyof typeof CATEGORY_WEIGHTS
 
-export type PageKind = "product" | "category" | "brand" | "collection" | "page" | "post"
+export type PageKind = "product" | "category" | "brand" | "collection" | "page" | "post" | "landing"
 
 /**
  * How the panel helps: `auto` applies a known change in one click,
@@ -104,6 +104,21 @@ export interface AdvisorFacts {
         published: boolean
         /** Days since it last changed in text (or went live); null while a draft. */
         ageDays: number | null
+      }
+    | undefined
+  /** A facet landing page's standing among the others (docs/14 §3.7, F3.16). */
+  landing?:
+    | {
+        words: number
+        /** Its own share of text against the other landing pages, 0–100. */
+        originality: number
+        /** Published products it lists. */
+        products: number
+        /** Whether it went live in the batch window, and that batch: its size and read share. */
+        recent: boolean
+        batchSize: number
+        batchReviewedShare: number
+        reviewed: boolean
       }
     | undefined
 }

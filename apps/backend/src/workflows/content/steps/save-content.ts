@@ -36,7 +36,7 @@ const fieldsOf = (entry: ContentEntryRecord): ContentFields => ({
 
 /** Checks and writes a content entry; undone if a later step fails (its path, its media). */
 export const saveContentStep = createStep(
-  "content-save-entry",
+  "content-write-entry",
   async (input: SaveContentInput, { container }) => {
     const service = container.resolve<ContentModuleService>(CONTENT_MODULE)
     const current = input.id

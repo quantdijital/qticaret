@@ -173,7 +173,8 @@
           "fits": "Fits a Google result",
           "tooLong": "May be cut in a Google result",
           "page": "Content page title",
-          "post": "Blog post title"
+          "post": "Blog post title",
+          "landing": "Filter page title"
         },
         "robots": {
           "title": "Crawlers",

@@ -1,11 +1,10 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { containsPattern } from "../../../lib/security"
 import { toSlug } from "../../../lib/seo"
 import { URL_REGISTRY_MODULE } from "../../../modules/url-registry"
 import type UrlRegistryModuleService from "../../../modules/url-registry/service"
-import type { UrlOwner } from "../../../modules/url-registry/validation"
-import { CATALOG_ENTITY_TYPES, CATALOG_LOCALE } from "../../catalog/entity-paths"
+import { CATALOG_LOCALE } from "../../catalog/entity-paths"
+import { liveOwnerKeys } from "../live-records"
 
 /**
  * Where a 404 probably meant to go (docs/13 §4, docs/14 §3.9): live pages
@@ -53,46 +52,6 @@ export function slugSimilarity(a: string, b: string): number {
   return total > 0 ? (2 * shared) / total : 0
 }
 
-const LIVE_QUERIES: Readonly<Record<string, { entity: string; filters: Record<string, unknown> }>> =
-  {
-    [CATALOG_ENTITY_TYPES.product]: { entity: "product", filters: { status: "published" } },
-    [CATALOG_ENTITY_TYPES.category]: {
-      entity: "product_category",
-      filters: { is_active: true, is_internal: false },
-    },
-    [CATALOG_ENTITY_TYPES.collection]: { entity: "product_collection", filters: {} },
-    [CATALOG_ENTITY_TYPES.brand]: { entity: "brand", filters: { is_active: true } },
-    [CATALOG_ENTITY_TYPES.page]: {
-      entity: "content_entry",
-      filters: { kind: "page", status: "published" },
-    },
-    [CATALOG_ENTITY_TYPES.post]: {
-      entity: "content_entry",
-      filters: { kind: "post", status: "published" },
-    },
-  }
-
-/** Which of the owners are live, one query per kind of record. */
-async function liveOwners(container: MedusaContainer, owners: UrlOwner[]): Promise<Set<string>> {
-  const query = container.resolve(ContainerRegistrationKeys.QUERY)
-  const live = new Set<string>()
-  for (const [type, spec] of Object.entries(LIVE_QUERIES)) {
-    const ids = owners.filter((owner) => owner.entity_type === type).map((owner) => owner.entity_id)
-    if (ids.length === 0) {
-      continue
-    }
-    const { data } = await query.graph({
-      entity: spec.entity,
-      fields: ["id"],
-      filters: { ...spec.filters, id: ids },
-    })
-    for (const row of data as { id: string }[]) {
-      live.add(`${type}:${row.id}`)
-    }
-  }
-  return live
-}
-
 export async function suggestTargets(
   container: MedusaContainer,
   path: string,
@@ -131,6 +90,6 @@ export async function suggestTargets(
     }))
     .filter((each) => each.score >= MIN_SCORE)
     .sort((a, b) => b.score - a.score || a.path.length - b.path.length)
-  const live = await liveOwners(container, scored)
+  const live = await liveOwnerKeys(container, scored)
   return scored.filter((each) => live.has(`${each.entity_type}:${each.entity_id}`)).slice(0, limit)
 }

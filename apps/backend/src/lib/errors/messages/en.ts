@@ -41,6 +41,14 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "content.image_alt_invalid": "The cover image's alt text must be at most 300 characters.",
   "content.image_unknown":
     "Images must come from the shop's media library; upload the image to add it.",
+  "content.landing_category_unknown": "Category not found.",
+  "content.landing_category_unlisted": "The category has no address yet; save the category first.",
+  "content.landing_exists": "A page for this category and filter already exists.",
+  "content.landing_facet_unknown":
+    "Filter not found: choose a brand or a filterable choice attribute.",
+  "content.landing_not_original":
+    "The text is not original enough (under 30%); it is too close to other filter pages. Make it specific to this page before publishing.",
+  "content.landing_unknown": "Filter page not found.",
   "content.title_invalid":
     "A title is required, at most 200 characters, without disallowed characters.",
   "content.too_large":

@@ -30,6 +30,7 @@ export const SEO_ENTITIES = {
     linkKey: "content_entry_id",
     kind: "post",
   },
+  landing: { entity: "landing_page", module: CONTENT_MODULE, linkKey: "landing_page_id" },
 } as const
 
 export type SeoEntityType = keyof typeof SEO_ENTITIES

@@ -173,7 +173,8 @@
           "fits": "Google sonucuna sığar",
           "tooLong": "Google sonucunda kısaltılabilir",
           "page": "İçerik sayfası başlığı",
-          "post": "Blog yazısı başlığı"
+          "post": "Blog yazısı başlığı",
+          "landing": "Filtre sayfası başlığı"
         },
         "robots": {
           "title": "Tarayıcılar",

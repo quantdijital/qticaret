@@ -5,7 +5,7 @@ import type ContentModuleService from "../../../modules/content/service"
 
 /** Soft-deletes a content entry, so the compensation can bring it back. */
 export const deleteContentStep = createStep(
-  "content-delete-entry",
+  "content-remove-entry",
   async (id: string, { container }) => {
     const service = container.resolve<ContentModuleService>(CONTENT_MODULE)
     const [entry] = await service.listContentEntries({ id }, { take: 1, select: ["id", "kind"] })

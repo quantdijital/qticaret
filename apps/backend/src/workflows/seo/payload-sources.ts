@@ -1,3 +1,6 @@
+import { CONTENT_MODULE } from "../../modules/content"
+import type ContentModuleService from "../../modules/content/service"
+import { landingProducts } from "../content/landing-facet"
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { isSearchIndexingOn, parseEnv } from "../../lib/env"
@@ -136,18 +139,38 @@ export function mainImageOf(
 // What a listing page shows first; its JSON-LD lists the same (F18 sorts alike)
 export const LISTING_SIZE = 24
 
-/** The first published products of a category, brand or collection, newest first, with their paths. */
-export async function listingItems(
+// The listed products of a landing page: its category and facet's, the newest first
+async function landingListing(container: MedusaContainer, id: string): Promise<string[] | null> {
+  const [landing] = await container
+    .resolve<ContentModuleService>(CONTENT_MODULE)
+    .listLandingPages(
+      { id },
+      { select: ["category_id", "facet_kind", "facet_key", "facet_value"], take: 1 }
+    )
+  if (!landing) {
+    return null
+  }
+  const facet = { kind: landing.facet_kind, key: landing.facet_key, value: landing.facet_value }
+  const listed = await landingProducts(
+    container,
+    { category_id: landing.category_id, facet },
+    { skip: 0, take: LISTING_SIZE }
+  )
+  return listed.ids
+}
+
+// Which products a listing page shows, as product filters; null for no listing
+async function listingFilters(
   container: MedusaContainer,
   owner: { entity_type: string; entity_id: string }
-): Promise<{ name: string; path: string }[]> {
-  const products = container.resolve(Modules.PRODUCT)
-  let filters: Record<string, unknown> | null = null
+): Promise<Record<string, unknown> | null> {
   if (owner.entity_type === CATALOG_ENTITY_TYPES.category) {
-    filters = { categories: { id: [owner.entity_id] } }
-  } else if (owner.entity_type === CATALOG_ENTITY_TYPES.collection) {
-    filters = { collection_id: owner.entity_id }
-  } else if (owner.entity_type === CATALOG_ENTITY_TYPES.brand) {
+    return { categories: { id: [owner.entity_id] } }
+  }
+  if (owner.entity_type === CATALOG_ENTITY_TYPES.collection) {
+    return { collection_id: owner.entity_id }
+  }
+  if (owner.entity_type === CATALOG_ENTITY_TYPES.brand) {
     // Through the brand's side of the link: no link definition is loaded here
     const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
       entity: "brand",
@@ -155,8 +178,25 @@ export async function listingItems(
       filters: { id: owner.entity_id },
     })
     const brand = data[0] as { products?: ({ id: string } | null)[] | null } | undefined
-    filters = { id: (brand?.products ?? []).flatMap((row) => (row ? [row.id] : [])) }
+    return { id: (brand?.products ?? []).flatMap((row) => (row ? [row.id] : [])) }
   }
+  if (owner.entity_type === CATALOG_ENTITY_TYPES.landing) {
+    const ids = await landingListing(container, owner.entity_id)
+    return ids ? { id: ids } : null
+  }
+  return null
+}
+
+/**
+ * The first published products of a category, brand, collection or
+ * landing page, newest first, with their paths.
+ */
+export async function listingItems(
+  container: MedusaContainer,
+  owner: { entity_type: string; entity_id: string }
+): Promise<{ name: string; path: string }[]> {
+  const products = container.resolve(Modules.PRODUCT)
+  const filters = await listingFilters(container, owner)
   if (!filters) {
     return []
   }

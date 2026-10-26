@@ -46,6 +46,15 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "content.image_alt_invalid": "Kapak görselinin alt metni en fazla 300 karakter olmalı.",
   "content.image_unknown":
     "Görseller mağazanın medya kütüphanesinden olmalı; görseli yükleyerek ekleyin.",
+  "content.landing_category_unknown": "Kategori bulunamadı.",
+  "content.landing_category_unlisted":
+    "Kategorinin henüz bir adresi yok; önce kategoriyi kaydedin.",
+  "content.landing_exists": "Bu kategori ve filtre için zaten bir sayfa var.",
+  "content.landing_facet_unknown":
+    "Filtre bulunamadı: marka ya da filtrelenebilir bir seçenekli özellik seçin.",
+  "content.landing_not_original":
+    "Metin yeterince özgün değil (%30'un altında); başka filtre sayfalarına çok benziyor. Yayına almadan önce metni bu sayfaya özgü hâle getirin.",
+  "content.landing_unknown": "Filtre sayfası bulunamadı.",
   "content.title_invalid":
     "Başlık gerekli; en fazla 200 karakter olmalı ve kullanılamayan karakter içermemeli.",
   "content.too_large":

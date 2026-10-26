@@ -11,7 +11,9 @@ import { SEO_SITEMAPS_MODULE } from "../../modules/seo-sitemaps"
 import type SeoSitemapsModuleService from "../../modules/seo-sitemaps/service"
 import { URL_REGISTRY_MODULE } from "../../modules/url-registry"
 import type UrlRegistryModuleService from "../../modules/url-registry/service"
-import { CATALOG_ENTITY_TYPES, CATALOG_LOCALE } from "../catalog/entity-paths"
+import { CATALOG_LOCALE } from "../catalog/entity-paths"
+import { LIVE_RECORDS, liveOwnerKeys } from "./live-records"
+import type { LiveSpec } from "./live-records"
 import { shopOf } from "./payload-sources"
 
 /**
@@ -28,59 +30,70 @@ const MAX_LOOKBACK_MS = 7 * 24 * 60 * 60 * 1000
 const FIRST_LOOKBACK_MS = 24 * 60 * 60 * 1000
 const MAX_PATHS = 50_000
 
-const LIVE = [
-  { entity: "product", type: CATALOG_ENTITY_TYPES.product, filters: { status: "published" } },
-  {
-    entity: "product_category",
-    type: CATALOG_ENTITY_TYPES.category,
-    filters: { is_active: true, is_internal: false },
-  },
-  { entity: "brand", type: CATALOG_ENTITY_TYPES.brand, filters: { is_active: true } },
-  { entity: "product_collection", type: CATALOG_ENTITY_TYPES.collection, filters: {} },
-  {
-    entity: "content_entry",
-    type: CATALOG_ENTITY_TYPES.page,
-    filters: { kind: "page", status: "published" },
-  },
-  {
-    entity: "content_entry",
-    type: CATALOG_ENTITY_TYPES.post,
-    filters: { kind: "post", status: "published" },
-  },
-] as { entity: string; type: string; filters: Record<string, unknown> }[]
-
-/** Active paths of live records changed since `since`, and paths reserved since then. */
-export async function changedPaths(container: MedusaContainer, since: Date): Promise<string[]> {
+/** The active paths of the live records of one kind changed since `since`. */
+async function changedOf(
+  container: MedusaContainer,
+  spec: LiveSpec,
+  since: Date,
+  room: number
+): Promise<string[]> {
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
   const registry = container.resolve<UrlRegistryModuleService>(URL_REGISTRY_MODULE)
+  const filters = { ...(await spec.filters(container)), updated_at: { $gt: since } }
   const paths: string[] = []
-  for (const spec of LIVE) {
-    for (let skip = 0; paths.length < MAX_PATHS; skip += PAGE) {
-      const { data } = await query.graph({
-        entity: spec.entity,
-        fields: ["id"],
-        filters: { ...spec.filters, updated_at: { $gt: since } },
-        pagination: { skip, take: PAGE, order: { id: "ASC" } },
-      })
-      const ids = (data as { id: string }[]).map((row) => row.id)
-      if (ids.length > 0) {
-        const entries = await registry.listUrlEntries(
-          { locale: CATALOG_LOCALE, entity_type: spec.type, entity_id: ids, status: "active" },
-          { select: ["path"] }
-        )
-        paths.push(...entries.map((entry) => entry.path))
-      }
-      if (ids.length < PAGE) {
-        break
-      }
+  for (let skip = 0; paths.length < room; skip += PAGE) {
+    const { data } = await query.graph({
+      entity: spec.entity,
+      fields: ["id"],
+      filters,
+      pagination: { skip, take: PAGE, order: { id: "ASC" } },
+    })
+    const ids = (data as { id: string }[]).map((row) => row.id)
+    if (ids.length > 0) {
+      const entries = await registry.listUrlEntries(
+        { locale: CATALOG_LOCALE, entity_type: spec.type, entity_id: ids, status: "active" },
+        { select: ["path"] }
+      )
+      paths.push(...entries.map((entry) => entry.path))
+    }
+    if (ids.length < PAGE) {
+      break
     }
   }
-  const given = await registry.listUrlEntries(
-    { locale: CATALOG_LOCALE, status: "reserved", updated_at: { $gt: since } },
-    { select: ["path"], take: MAX_PATHS }
+  return paths
+}
+
+/**
+ * Active paths of live records changed since `since`; paths claimed since
+ * whose record did not change (a category moved: the categories and the
+ * landing pages below it); and paths reserved since then.
+ */
+export async function changedPaths(container: MedusaContainer, since: Date): Promise<string[]> {
+  const registry = container.resolve<UrlRegistryModuleService>(URL_REGISTRY_MODULE)
+  const paths = new Set<string>()
+  for (const spec of LIVE_RECORDS) {
+    for (const path of await changedOf(container, spec, since, MAX_PATHS - paths.size)) {
+      paths.add(path)
+    }
+  }
+  const [claimed, given] = await Promise.all(
+    (["active", "reserved"] as const).map((status) =>
+      registry.listUrlEntries(
+        { locale: CATALOG_LOCALE, status, updated_at: { $gt: since } },
+        { select: ["path", "entity_type", "entity_id"], take: MAX_PATHS }
+      )
+    )
   )
-  paths.push(...given.map((entry) => entry.path))
-  return paths.slice(0, MAX_PATHS)
+  const live = await liveOwnerKeys(container, claimed ?? [])
+  for (const entry of claimed ?? []) {
+    if (live.has(`${entry.entity_type}:${entry.entity_id}`)) {
+      paths.add(entry.path)
+    }
+  }
+  for (const entry of given ?? []) {
+    paths.add(entry.path)
+  }
+  return [...paths].slice(0, MAX_PATHS)
 }
 
 export type AnnounceOutcome =

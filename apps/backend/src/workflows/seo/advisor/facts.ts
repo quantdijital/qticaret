@@ -9,6 +9,7 @@ import type { FactRow } from "../facts"
 import { seoPayloadFor } from "../payload"
 import { activePathOf } from "../redirects/owners"
 import { contentFacts } from "./facts-content"
+import { landingFacts } from "./facts-landing"
 import { OWN_FIELDS, duplicates, rowOf } from "./facts-common"
 import type { Own } from "./facts-common"
 
@@ -18,8 +19,11 @@ import type { Own } from "./facts-common"
  * catalog facts behind the rules.
  */
 
-// Content pages and blog posts have their own facts (`facts-content.ts`)
-const ENTITIES: Record<Exclude<PageKind, "page" | "post">, { entity: string; owner: string }> = {
+// Content, blog and landing pages have their own facts (`facts-content.ts`, `facts-landing.ts`)
+const ENTITIES: Record<
+  Exclude<PageKind, "page" | "post" | "landing">,
+  { entity: string; owner: string }
+> = {
   product: { entity: "product", owner: CATALOG_ENTITY_TYPES.product },
   category: { entity: "product_category", owner: CATALOG_ENTITY_TYPES.category },
   brand: { entity: "brand", owner: CATALOG_ENTITY_TYPES.brand },
@@ -174,7 +178,10 @@ interface ListingRow {
   seo_meta?: Own | null
 }
 
-const LISTING_FIELDS: Record<Exclude<PageKind, "product" | "page" | "post">, string[]> = {
+const LISTING_FIELDS: Record<
+  Exclude<PageKind, "product" | "page" | "post" | "landing">,
+  string[]
+> = {
   category: ["id", "name", "handle", "description", "mpath", "is_active", "is_internal"],
   brand: ["id", "name", "handle", "description", "logo_url", "is_active"],
   collection: ["id", "title", "handle"],
@@ -200,6 +207,9 @@ export async function advisorFacts(
 ): Promise<(AdvisorFacts & { isListed: boolean }) | null> {
   if (kind === "page" || kind === "post") {
     return contentFacts(container, kind, id)
+  }
+  if (kind === "landing") {
+    return landingFacts(container, id)
   }
   const spec = ENTITIES[kind]
   const row =

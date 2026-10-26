@@ -33,7 +33,7 @@
           "scale": null,
           "default": null,
           "comment": null,
-          "enumItems": ["product", "category", "brand", "collection", "page", "post"],
+          "enumItems": ["product", "category", "brand", "collection", "page", "post", "landing"],
           "mappedType": "enum"
         },
         "entity_id": {

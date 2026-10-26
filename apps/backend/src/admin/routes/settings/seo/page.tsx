@@ -137,7 +137,7 @@ function HostAndUrls({ control }: { control: Control<SeoForm> }) {
 
 function Templates({ control }: { control: Control<SeoForm> }) {
   const { t } = useTranslation()
-  const titles = ["product", "category", "brand", "page", "post"] as const
+  const titles = ["product", "category", "brand", "page", "post", "landing"] as const
   return (
     <section className="flex flex-col gap-4 px-6 py-4">
       <Heading level="h2">{t("qticaret.settings.seo.templates.title")}</Heading>
