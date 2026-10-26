@@ -12,8 +12,11 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { billingProfileQuery, customerQuery } from "@/features/customers/api/customers"
 import type { CustomerDetail } from "@/features/customers/api/customers"
 import { customerName } from "@/features/customers/names"
+import { GIFT_CARDS_FLAG } from "@/features/gift-cards/api/gift-cards"
+import { StoreCreditCard } from "@/features/gift-cards/components/store-credit-card"
 import { StageBadge } from "@/features/orders/components/stage-badge"
 import { orderBoardQuery } from "@/features/orders/api/orders"
+import { useFeature } from "@/features/settings/api/features"
 import { errorText } from "@/lib/errors"
 import { formatDate, formatMoney } from "@/lib/format"
 
@@ -162,6 +165,7 @@ function BillingCard({ customerId }: { customerId: string }) {
 /** One customer (docs/06 §4): their orders on the left, how to reach and bill them on the right. */
 export function CustomerDetailPage() {
   const { t } = useTranslation()
+  const storeCredit = useFeature(GIFT_CARDS_FLAG)
   const { id } = route.useParams()
   const query = useQuery(customerQuery(id))
   const customer = query.data
@@ -207,6 +211,10 @@ export function CustomerDetailPage() {
           <ContactCard customer={customer} />
           <AddressesCard customer={customer} />
           <BillingCard customerId={customer.id} />
+          {/* Store credit is for members: a guest cannot sign in to spend it */}
+          {storeCredit && customer.has_account ? (
+            <StoreCreditCard customerId={customer.id} />
+          ) : null}
         </div>
       </div>
     </div>

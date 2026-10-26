@@ -11,6 +11,7 @@ const SECTIONS = [
   "/inventory",
   "/promotions",
   "/promotions/price-lists",
+  "/promotions/gift-cards",
   "/content",
   "/seo",
   "/reports",

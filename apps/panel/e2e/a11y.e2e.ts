@@ -13,6 +13,7 @@ const SCREENS = [
   "/products/new",
   "/orders",
   "/promotions/price-lists",
+  "/promotions/gift-cards",
   "/promotions/price-lists/new",
   "/settings/store",
 ]

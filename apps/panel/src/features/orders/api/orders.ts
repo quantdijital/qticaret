@@ -164,6 +164,8 @@ export interface OrderMoney extends MoneyTotals {
   lines: OrderMoneyLine[]
   items: MoneyTotals
   shipping: MoneyTotals
+  /** Paid with gift cards and store credit (F4.8), outside the payment. */
+  credit: string
   paid: string
   refunded: string
   /** What a refund can still give back: taken less refunded. */

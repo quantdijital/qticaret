@@ -392,6 +392,12 @@
             "label": "Stoksuz satış (ön sipariş)",
             "description": "Stoku biten varyant satılmaya devam edebilir: ön sipariş ya da tedarikçiden gönderim için. Ürün sayfasında varyant bazında açılır; arama motorlarına \"ön sipariş\" olarak bildirilir."
           }
+        },
+        "promotions": {
+          "gift_cards": {
+            "label": "Hediye kartı ve mağaza kredisi",
+            "description": "Hediye kartı oluşturulup müşteriye verilebilir; müşteri kodu sepette kullanır, kalan bakiyesi sonraki alışverişte geçer. Mağaza kredisiyle iade ya da iyi niyet tutarı hesaba yazılabilir."
+          }
         }
       }
     },
@@ -1026,7 +1032,8 @@
       "captured": "Ödendi",
       "partiallyCaptured": "Kısmen ödendi",
       "refunded": "İade edildi",
-      "partiallyRefunded": "Kısmen iade edildi"
+      "partiallyRefunded": "Kısmen iade edildi",
+      "credit": "Kredi ile ödendi"
     },
     "actions": {
       "ship": "Kargoya ver",
@@ -1075,6 +1082,7 @@
       "noAddress": "Adres yok.",
       "payment": "Ödeme",
       "amount": "Sipariş tutarı",
+      "credit": "Kredi ve hediye kartıyla ödenen",
       "captured": "Tahsil edilen",
       "refunded": "İade edilen",
       "provider": "Ödeme yöntemi",
@@ -2410,5 +2418,49 @@
       "skipped_one": "{{count}} çeşidin kendi fiyatı olmadığı için atlandı.",
       "skipped_other": "{{count}} çeşidin kendi fiyatı olmadığı için atlandı."
     }
+  },
+  "giftCards": {
+    "section": "Hediye kartları",
+    "description": "Müşterilere verdiğiniz hediye kartları ve kalan bakiyeleri. Müşteri kodu sepette kullanır; kalan bakiye sonraki alışverişe geçer.",
+    "new": "Hediye kartı oluştur",
+    "newHint": "Kod otomatik üretilir; kartı müşteriye verin ya da gönderin.",
+    "create": "Kartı oluştur",
+    "value": "Tutar",
+    "expires": "Son kullanma günü",
+    "expiresHint": "Boşsa süresiz geçerli.",
+    "note": "Not",
+    "noteHint": "Yalnızca sizin göreceğiniz not: kime, neden verildiği.",
+    "made": "{{amount}} değerinde kart oluşturuldu. Kodu kopyalayıp müşteriye verin.",
+    "copy": "Kodu kopyala",
+    "copyFailed": "Kod kopyalanamadı; seçip elle kopyalayın.",
+    "empty": "Henüz hediye kartı yok.",
+    "truncated": "En yeni {{shown}} kart gösteriliyor; mağazada toplam {{count}} kart var.",
+    "off": "Hediye kartları kapalı. Açtığınızda müşterilere hediye kartı ve mağaza kredisi verebilirsiniz.",
+    "turnOn": "Özelliklere git",
+    "noEnd": "Süresiz",
+    "columns": {
+      "code": "Kod",
+      "value": "Tutar",
+      "balance": "Kalan",
+      "expires": "Son kullanma",
+      "note": "Not",
+      "status": "Durum"
+    },
+    "states": {
+      "usable": "Kullanılabilir",
+      "used": "Kullanıldı",
+      "expired": "Süresi doldu"
+    },
+    "errors": {
+      "value": "En az 1 ₺ olan bir tutar girin."
+    }
+  },
+  "storeCredit": {
+    "title": "Mağaza kredisi",
+    "hint": "Müşterinin ödemede kullanabileceği bakiye. İade karşılığı ya da jest olarak eklenir; her ekleme kayıt altına alınır.",
+    "add": "Kredi ekle",
+    "note": "Not (isteğe bağlı)",
+    "submit": "Ekle",
+    "added": "{{amount}} kredi eklendi."
   }
 }

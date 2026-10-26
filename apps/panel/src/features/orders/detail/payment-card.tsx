@@ -40,6 +40,10 @@ function paymentState(order: OrderDetail, totals: OrderMoney | undefined) {
       refunded,
     } as const
   }
+  // A gift card or store credit covered the whole order: nothing was left to pay (F4.8)
+  if (amount === 0 && totals && Number(totals.credit) > 0) {
+    return { key: "credit", tone: "success", amount, captured, refunded } as const
+  }
   if (authorized) {
     return { key: "authorized", tone: "info", amount, captured, refunded } as const
   }
@@ -56,8 +60,9 @@ function Row({ label, value }: { label: string; value: string }) {
 }
 
 /**
- * What the customer paid, what the shop has taken and given back, and
- * what a refund can still return (from the server, F4.7).
+ * What the customer paid, by card and by gift card or store credit, what
+ * the shop has taken and given back, and what a refund can still return
+ * (from the server, F4.7).
  */
 export function PaymentCard({
   order,
@@ -80,6 +85,9 @@ export function PaymentCard({
     >
       <dl className="flex flex-col divide-y">
         <Row label={t("orders.detail.amount")} value={money(state.amount)} />
+        {totals && Number(totals.credit) > 0 ? (
+          <Row label={t("orders.detail.credit")} value={money(totals.credit)} />
+        ) : null}
         <Row label={t("orders.detail.captured")} value={money(state.captured)} />
         {state.refunded > 0 ? (
           <Row label={t("orders.detail.refunded")} value={money(state.refunded)} />

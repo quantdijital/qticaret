@@ -29,6 +29,7 @@ import { Route as AuthProductsIdRouteImport } from './routes/_auth/products/$id'
 import { Route as AuthProductsNewRouteImport } from './routes/_auth/products/new'
 import { Route as AuthPromotionsIndexRouteImport } from './routes/_auth/promotions/index'
 import { Route as AuthPromotionsIdRouteImport } from './routes/_auth/promotions/$id'
+import { Route as AuthPromotionsGiftCardsRouteImport } from './routes/_auth/promotions/gift-cards'
 import { Route as AuthPromotionsNewRouteImport } from './routes/_auth/promotions/new'
 import { Route as AuthSeoIndexRouteImport } from './routes/_auth/seo/index'
 import { Route as AuthSeoRedirectsRouteImport } from './routes/_auth/seo/redirects'
@@ -145,6 +146,11 @@ const AuthPromotionsIdRoute = AuthPromotionsIdRouteImport.update({
   path: '/promotions/$id',
   getParentRoute: () => AuthRoute,
 } as any)
+const AuthPromotionsGiftCardsRoute = AuthPromotionsGiftCardsRouteImport.update({
+  id: '/promotions/gift-cards',
+  path: '/promotions/gift-cards',
+  getParentRoute: () => AuthRoute,
+} as any)
 const AuthPromotionsNewRoute = AuthPromotionsNewRouteImport.update({
   id: '/promotions/new',
   path: '/promotions/new',
@@ -243,6 +249,7 @@ export interface FileRoutesByFullPath {
   '/products/$id': typeof AuthProductsIdRoute
   '/products/new': typeof AuthProductsNewRoute
   '/promotions/$id': typeof AuthPromotionsIdRoute
+  '/promotions/gift-cards': typeof AuthPromotionsGiftCardsRoute
   '/promotions/new': typeof AuthPromotionsNewRoute
   '/seo/redirects': typeof AuthSeoRedirectsRoute
   '/settings/appearance': typeof AuthSettingsAppearanceRoute
@@ -279,6 +286,7 @@ export interface FileRoutesByTo {
   '/products/$id': typeof AuthProductsIdRoute
   '/products/new': typeof AuthProductsNewRoute
   '/promotions/$id': typeof AuthPromotionsIdRoute
+  '/promotions/gift-cards': typeof AuthPromotionsGiftCardsRoute
   '/promotions/new': typeof AuthPromotionsNewRoute
   '/seo/redirects': typeof AuthSeoRedirectsRoute
   '/settings/appearance': typeof AuthSettingsAppearanceRoute
@@ -318,6 +326,7 @@ export interface FileRoutesById {
   '/_auth/products/$id': typeof AuthProductsIdRoute
   '/_auth/products/new': typeof AuthProductsNewRoute
   '/_auth/promotions/$id': typeof AuthPromotionsIdRoute
+  '/_auth/promotions/gift-cards': typeof AuthPromotionsGiftCardsRoute
   '/_auth/promotions/new': typeof AuthPromotionsNewRoute
   '/_auth/seo/redirects': typeof AuthSeoRedirectsRoute
   '/_auth/settings/appearance': typeof AuthSettingsAppearanceRoute
@@ -357,6 +366,7 @@ export interface FileRouteTypes {
     | '/products/$id'
     | '/products/new'
     | '/promotions/$id'
+    | '/promotions/gift-cards'
     | '/promotions/new'
     | '/seo/redirects'
     | '/settings/appearance'
@@ -393,6 +403,7 @@ export interface FileRouteTypes {
     | '/products/$id'
     | '/products/new'
     | '/promotions/$id'
+    | '/promotions/gift-cards'
     | '/promotions/new'
     | '/seo/redirects'
     | '/settings/appearance'
@@ -431,6 +442,7 @@ export interface FileRouteTypes {
     | '/_auth/products/$id'
     | '/_auth/products/new'
     | '/_auth/promotions/$id'
+    | '/_auth/promotions/gift-cards'
     | '/_auth/promotions/new'
     | '/_auth/seo/redirects'
     | '/_auth/settings/appearance'
@@ -602,6 +614,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthPromotionsIdRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_auth/promotions/gift-cards': {
+      id: '/_auth/promotions/gift-cards'
+      path: '/promotions/gift-cards'
+      fullPath: '/promotions/gift-cards'
+      preLoaderRoute: typeof AuthPromotionsGiftCardsRouteImport
+      parentRoute: typeof AuthRoute
+    }
     '/_auth/promotions/new': {
       id: '/_auth/promotions/new'
       path: '/promotions/new'
@@ -758,6 +777,7 @@ interface AuthRouteChildren {
   AuthProductsIdRoute: typeof AuthProductsIdRoute
   AuthProductsNewRoute: typeof AuthProductsNewRoute
   AuthPromotionsIdRoute: typeof AuthPromotionsIdRoute
+  AuthPromotionsGiftCardsRoute: typeof AuthPromotionsGiftCardsRoute
   AuthPromotionsNewRoute: typeof AuthPromotionsNewRoute
   AuthSeoRedirectsRoute: typeof AuthSeoRedirectsRoute
   AuthBrandsIndexRoute: typeof AuthBrandsIndexRoute
@@ -786,6 +806,7 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthProductsIdRoute: AuthProductsIdRoute,
   AuthProductsNewRoute: AuthProductsNewRoute,
   AuthPromotionsIdRoute: AuthPromotionsIdRoute,
+  AuthPromotionsGiftCardsRoute: AuthPromotionsGiftCardsRoute,
   AuthPromotionsNewRoute: AuthPromotionsNewRoute,
   AuthSeoRedirectsRoute: AuthSeoRedirectsRoute,
   AuthBrandsIndexRoute: AuthBrandsIndexRoute,
