@@ -21,6 +21,7 @@ import {
 } from "@/features/promotions/api/promotions"
 import { useSavePromotion } from "@/features/promotions/api/save-promotion"
 import type { Promotion } from "@/features/promotions/api/promotions"
+import { CodeBatchesCard } from "@/features/promotions/components/code-batches-card"
 import { ConditionsCard } from "@/features/promotions/components/conditions-card"
 import { ScheduleBadge } from "@/features/promotions/components/offer-text"
 import { PromotionPreview } from "@/features/promotions/components/promotion-preview"
@@ -235,6 +236,9 @@ export function PromotionPage() {
         action={<Actions promotion={promotion} />}
       />
       <PromotionForm key={promotion.id} existing={promotion} />
+      {promotion.is_automatic || promotion.type !== "standard" ? null : (
+        <CodeBatchesCard promotionId={promotion.id} code={promotion.code ?? ""} />
+      )}
     </div>
   )
 }

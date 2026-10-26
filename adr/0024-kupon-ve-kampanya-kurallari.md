@@ -49,3 +49,17 @@ Medusa 2.21.2'de doğrulananlar (F4 planlaması, kaynak kodu):
 - **Tek kod:** mağaza ayarı `promotions.combine_codes` (varsayılan kapalı). `POST /store/carts` ve `POST /store/carts/:id` kodları gönderilenlerle değiştiriyor (Medusa `REPLACE`), `POST /store/carts/:id/promotions` ekliyor (`ADD`): ikincisinde sepetteki elle girilmiş kodlar da sayılıyor. Hata `promotions.one_code`.
 - **Deneme sınırı:** `coupon` profili (IP başına 10 dk'da 30, sepet başına 10) yalnızca kod gönderen sepet isteklerini sayıyor.
 - **Doğrulananlar (HTTP testleri):** `item_total gte` kuralı Medusa'da çalışıyor (belgelenmemişti); kullanım limiti 1 olan kodla yarışan üç ödemeden yalnızca biri tamamlanıyor ve `used` 1 kalıyor (KK).
+
+## Uygulama notu (F4 U5, 2026-10-26)
+
+- **Kod üretimi:** `src/lib/promotions/single-use.ts`. Kod, şablonun kodu + `-` + 8 karakter. Alfabe 32 karakter, 0/O ve 1/I yok; `crypto.randomInt` kullanılır, toplam yaklaşık 10¹² olasılık. Kodlar saklanan biçimde üretilir (büyük harf, ASCII).
+- **İş:** `promotion.codes` (`src/workflows/async-job/types/promotion-codes.ts`, `src/workflows/promotions/code-batches.ts`).
+  - Şablon: kodlu, standart, otomatik olmayan ve kendisi bir partinin kopyası olmayan promosyon.
+  - Her parti kendi kampanyasında. Tanımlayıcı `codes-<şablon kimliği>-<zaman>`, tarihler şablonun kampanyasından.
+  - Kopyalar şablonun indirimini, hedef kurallarını ve en az sepet kuralını taşır; `limit: 1`.
+  - Kodlar 500'lük parçalarla mağazadakilere karşı denetlenip yazılır. Yarıda kalan parti geri alınır.
+  - Sonuç CSV'si 30 gün saklanır. Parti denetim kaydına `promotions.codes_created` olarak yazılır. Yerelde 10.000 kod 3,8 saniye sürdü.
+- **Liste:** Medusa'nın promosyon listesi kampanyaya göre dışlamayı desteklemiyor. Panelin listesi bu yüzden `GET /admin/promotion-board`'dan okunur: parti kampanyaları dışarıda kalır, şablon başına parti sayısı verilir.
+- **Partiler:** `GET /admin/promotions/:id/code-batches` kod ve kullanım sayılarını verir. `GET …/code-batches/:campaign_id/codes`, kodları "kullanıldı" bilgisiyle CSV olarak her zaman veritabanından verir; iş dosyasının süresi dolsa da indirilebilir.
+- **Kullanım:** Kullanılmış kodu Medusa sepete uygulamaz, hata da vermez; ikinci sipariş indirimsiz tamamlanır (testli). Eşzamanlı kullanım sınırı U4'teki gibi `registerUsage` kilidiyle korunur.
+- **Kanıt:** `lib/promotions/__tests__/single-use.unit.spec.ts`, `integration-tests/http/promotion-code-batches.spec.ts`.

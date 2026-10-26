@@ -1,4 +1,7 @@
 import type { MedusaRequest } from "@medusajs/framework/http"
+import { validateAndTransformQuery } from "@medusajs/framework/http"
+import { AdminGetDashboardNoQuery } from "../admin/dashboard/validators"
+import { requireUserActor } from "./actor"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import {
   cartRoute,
@@ -31,4 +34,14 @@ const couponTries = rateLimit(couponProfile, {
 export const PROMOTION_ROUTES = [
   { matcher: "/admin/promotions", middlewares: [normalizePromotionCode] },
   { matcher: "/store/carts", middlewares: [couponTries, normalizePromoCodes, oneCodePerCart] },
+  // F4.6: the list without single-use code batches, a promotion's batches and their codes
+  ...[
+    "/admin/promotion-board",
+    "/admin/promotions/:id/code-batches",
+    "/admin/promotions/:id/code-batches/:campaign_id/codes",
+  ].map((matcher) => ({
+    matcher,
+    methods: ["GET" as const],
+    middlewares: [requireUserActor, validateAndTransformQuery(AdminGetDashboardNoQuery, {})],
+  })),
 ]

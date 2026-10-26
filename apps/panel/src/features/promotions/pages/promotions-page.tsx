@@ -25,23 +25,30 @@ const tabOf = (promotion: Promotion): Exclude<Tab, "all"> => {
   return schedule === "inactive" ? "ended" : schedule
 }
 
-function useColumns(): Column<Promotion>[] {
+function useColumns(batches: Readonly<Record<string, number>>): Column<Promotion>[] {
   const { t } = useTranslation()
   return [
     {
       key: "code",
       header: t("promotions.columns.code"),
       cell: (promotion) => (
-        <Link
-          to="/promotions/$id"
-          params={{ id: promotion.id }}
-          className="font-mono text-[13px] font-medium hover:underline"
-          onClick={(event) => {
-            event.stopPropagation()
-          }}
-        >
-          {promotion.code}
-        </Link>
+        <div className="flex flex-col">
+          <Link
+            to="/promotions/$id"
+            params={{ id: promotion.id }}
+            className="font-mono text-[13px] font-medium hover:underline"
+            onClick={(event) => {
+              event.stopPropagation()
+            }}
+          >
+            {promotion.code}
+          </Link>
+          {batches[promotion.id] ? (
+            <span className="text-xs text-muted-foreground">
+              {t("promotions.codes.batchCount", { count: batches[promotion.id] })}
+            </span>
+          ) : null}
+        </div>
       ),
     },
     {
@@ -103,7 +110,7 @@ export function PromotionsPage() {
   const navigate = useNavigate()
   const [tab, setTab] = useState<Tab>("all")
   const list = useQuery(promotionsQuery())
-  const columns = useColumns()
+  const columns = useColumns(list.data?.batch_counts ?? {})
   const all = list.data?.promotions ?? []
   const rows = tab === "all" ? all : all.filter((promotion) => tabOf(promotion) === tab)
   const add = (

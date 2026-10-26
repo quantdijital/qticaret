@@ -13,6 +13,7 @@ describe("job types", () => {
       "catalog.bulk_edit",
       "catalog.export",
       "catalog.import",
+      "promotion.codes",
       "seo.audit",
       "seo.sitemap",
       "seo.url_style",

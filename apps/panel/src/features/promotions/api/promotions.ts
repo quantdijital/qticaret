@@ -2,9 +2,6 @@ import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query
 import { sdk } from "@/lib/sdk"
 import { ownsCampaign } from "../offer"
 
-// A shop runs a handful at a time: one read holds them, tabs filter here
-export const PROMOTIONS_READ = 200
-
 const FIELDS = [
   "id",
   "code",
@@ -41,11 +38,18 @@ const DETAIL_FIELDS = [
   "campaign.budget.limit",
 ].join(",")
 
+/**
+ * `GET /admin/promotion-board` (F4.6): the shop's promotions, newest first,
+ * without the copies single-use code batches hold, and each one's batches.
+ * The same fields as Medusa's list.
+ */
 export const promotionsQuery = () =>
   queryOptions({
     queryKey: ["promotions", "list"],
     queryFn: () =>
-      sdk.admin.promotion.list({ fields: FIELDS, limit: PROMOTIONS_READ, order: "-created_at" }),
+      sdk.client.fetch<{ promotions: Promotion[]; batch_counts: Record<string, number> }>(
+        "/admin/promotion-board"
+      ),
   })
 
 export const promotionQuery = (id: string) =>

@@ -1354,7 +1354,28 @@
     "delete": "Kampanyayı sil",
     "deleteTitle": "{{code}} silinsin mi?",
     "deleteDescription": "Kod artık çalışmaz. Geçmiş siparişlerdeki indirimler değişmez.",
-    "deleted": "Kampanya silindi."
+    "deleted": "Kampanya silindi.",
+    "codes": {
+      "title": "Tek kullanımlık kodlar",
+      "hint": "Bu kampanyanın her biri bir kez kullanılabilen kopyaları. Kodları müşterilere tek tek dağıtın; kullanılan kod başka siparişte geçmez.",
+      "empty": "Henüz kod üretilmedi.",
+      "make": "Kod üret",
+      "makeTitle": "Tek kullanımlık kod üret",
+      "makeHint": "Kodlar {{code}}-XXXXXXXX biçiminde olur; karışan harf ve rakamlar (0/O, 1/I) kullanılmaz. Tarihler ve indirim bu kampanyadan alınır.",
+      "count": "Kaç kod?",
+      "countHint": "En çok {{max}} kod.",
+      "countError": "1 ile {{max}} arasında bir sayı girin.",
+      "running": "Kodlar üretiliyor… %{{percent}}",
+      "failed": "Kodlar üretilemedi.",
+      "batch_one": "{{formatted}} kod",
+      "batch_other": "{{formatted}} kod",
+      "batchMeta": "{{date}} · {{used}} kullanıldı",
+      "download": "CSV indir",
+      "batchCount_one": "{{count}} kod partisi",
+      "batchCount_other": "{{count}} kod partisi",
+      "done_one": "{{formatted}} kod üretildi.",
+      "done_other": "{{formatted}} kod üretildi."
+    }
   },
   "reports": {
     "description": "Seçtiğiniz dönemin satışları; gün gün ve ürün ürün",

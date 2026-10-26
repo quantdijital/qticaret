@@ -185,6 +185,9 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "product_attributes.values_exist": "Kaldırılan özelliklerin ürünlerde değerleri var.",
   "product_attributes.variant_only":
     "variesBy ve seçenek adı yalnızca varyant özelliklerinde kullanılır.",
+  "promotions.unknown": "Kampanya bulunamadı.",
+  "promotions.codes_template":
+    "Tek kullanımlık kodlar yalnızca kodlu, standart bir kampanyadan üretilebilir.",
   "promotions.one_code":
     "Sepette tek bir indirim kodu kullanılabilir; önce eklediğiniz kodu çıkarın.",
   "seo.canonical_invalid": "Canonical adres bu sitede bir yol olmalı, örn. /urun/keten-gomlek.",

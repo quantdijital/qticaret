@@ -1346,7 +1346,28 @@
     "delete": "Delete promotion",
     "deleteTitle": "Delete {{code}}?",
     "deleteDescription": "The code stops working. Discounts on past orders stay as they are.",
-    "deleted": "Promotion deleted."
+    "deleted": "Promotion deleted.",
+    "codes": {
+      "title": "Single-use codes",
+      "hint": "Copies of this promotion, each usable once. Hand the codes out one by one; a used code does not work on another order.",
+      "empty": "No codes made yet.",
+      "make": "Make codes",
+      "makeTitle": "Make single-use codes",
+      "makeHint": "Codes look like {{code}}-XXXXXXXX, without characters that mix up (0/O, 1/I). Dates and the offer come from this promotion.",
+      "count": "How many codes?",
+      "countHint": "Up to {{max}} codes.",
+      "countError": "Enter a number from 1 to {{max}}.",
+      "running": "Making codes… {{percent}}%",
+      "failed": "The codes could not be made.",
+      "batch_one": "{{formatted}} code",
+      "batch_other": "{{formatted}} codes",
+      "batchMeta": "{{date}} · {{used}} used",
+      "download": "Download CSV",
+      "batchCount_one": "{{count}} code batch",
+      "batchCount_other": "{{count}} code batches",
+      "done_one": "{{formatted}} code made.",
+      "done_other": "{{formatted}} codes made."
+    }
   },
   "reports": {
     "description": "The chosen period's sales, day by day and product by product",

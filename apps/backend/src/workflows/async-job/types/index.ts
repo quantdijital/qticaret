@@ -2,6 +2,7 @@ import { auditLogExport } from "./audit-log-export"
 import { catalogBulkEdit } from "./catalog-bulk-edit"
 import { catalogExport } from "./catalog-export"
 import { catalogImport } from "./catalog-import"
+import { promotionCodes } from "./promotion-codes"
 import { seoAudit } from "./seo-audit"
 import { seoSitemap } from "./seo-sitemap"
 import { seoUrlStyle } from "./seo-url-style"
@@ -19,6 +20,7 @@ const JOB_TYPES: Readonly<Record<string, JobType>> = Object.freeze({
   "catalog.bulk_edit": erase(catalogBulkEdit),
   "catalog.export": erase(catalogExport),
   "catalog.import": erase(catalogImport),
+  "promotion.codes": erase(promotionCodes),
   "seo.audit": erase(seoAudit),
   "seo.sitemap": erase(seoSitemap),
   "seo.url_style": erase(seoUrlStyle),
