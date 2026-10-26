@@ -60,3 +60,21 @@ Kısıtlar:
 - T6 planında karar verilecekler:
   - Alt metin `ProductImage.metadata`'da mı, yoksa kendi tablomuzda mı tutulacak (adr/0015 gerekçesi: core route `metadata`'yı doğrulamadan yazar).
   - Türev URL'leri `metadata`'ya mı, ayrı bir tabloya mı yazılacak (ürün `images` alanı tek URL taşır).
+
+## Uygulama notu (F3 T6, 2026-10-26)
+
+- **Kütüphane:** `sharp` 0.35.5 (exact; 2026-09-27'de yayımlandı, ≥14 gün kuralına uyuyor).
+- **Temizleme yüklemede, eşzamanlı (ADR'den sapma):** `POST /admin/uploads`'tan geçen her görsel saklanmadan önce işleniyor:
+  - EXIF yönüne göre döndürülüyor, tüm metadata atılıyor (EXIF/GPS, XMP, IPTC), uzun kenarı en fazla 2560 px'e indiriliyor, kendi biçiminde yeniden kodlanıyor.
+  - Gerekçe: Metadata'lı bir kopya hiçbir yerde tutulmuyor (private "işlenmemiş" orijinal de yok). Sihirbaz görseli ürün oluşmadan hemen kullanabiliyor.
+  - Bedeli: yükleme isteğinde görsel başına birkaç yüz ms. Yalnızca admin yolu; vitrin etkilenmiyor.
+- **Türevler asenkron:** Ayrı bir iş tipi değil, ürün kaydı aboneliği. Ürün başına kilitli `deriveProductMediaWorkflow`:
+  - 400/800/1600 px WebP + AVIF (görselden geniş olanı yok) ve 1200×630 OG kırpması (`attention`).
+  - Ad: `{slug}-{sıra}-{genişlik}`. S3 sağlayıcısı sonuna benzersiz ek koyuyor.
+  - Slug ya da sıra değişince yeniden üretiliyor, eskileri siliniyor.
+  - Gece süpürmesi kaçanları üretiyor; bir gündür hiçbir üründe kullanılmayan yüklemeleri siliyor.
+- **Alt metin ve türevler kendi tablomuzda** (`media` modülü, `MediaAsset`, ürüne link). `ProductImage.metadata` kullanılmadı; çekirdek route metadata'yı doğrulamadan yazıyor (adr/0015 gerekçesi).
+- **Store API:** `/store/products?fields=+media_assets.url,+media_assets.alt,+media_assets.derivatives,...`. Toplu `*media_assets` reddediliyor; depolama anahtarları dışarı çıkmıyor.
+- **S3 adresi düzeltmesi:** Medusa'nın `retrieveFile` URL'si S3'te imzalı ve süreli. Logo, paylaşım görseli ve ürün görseli için kalıcı public adres `S3_FILE_URL` + anahtar olarak kuruluyor.
+- **Mevcut görseller:** Canlıda mağaza olmadığından taşıma işi yazılmadı. Hattan önce eklenmiş görselin türevi ve alt metin kaydı yok; yeniden yüklenince hatta giriyor. Eski platformdan geçişte (F14) taşıma aracı bunu yapacak.
+- **Kalite ayarları** (`media` ayar bölümü) şimdilik sabit: master JPEG 86, WebP 80, AVIF 50, OG JPEG 85. Mağaza bazlı ayar ihtiyacı doğarsa eklenecek.

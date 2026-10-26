@@ -3,7 +3,7 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a, T1b, T2, T3, T4, T5, T7, T9, T10, T11, T12 bitti; sırada T6 görsel, T8 stok kuralları). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı; push edilmedi. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
+**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a, T1b, T2, T3, T4, T5, T6, T7, T9, T10, T11, T12 bitti; sırada T8 stok kuralları, T13 içerik). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı; push edilmedi. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
 
 ## Son oturum özeti
 **2026-10-25/26 gece (kullanıcı yatarken, "panel işlerini tamamla" talimatıyla).** Panelin ekranları yazıldı; her biri gerçek veriyle tarayıcıda denendi (CDP ekran görüntüsü, test kayıtları sonra silindi). Commit'ler `e11a201`…`6d63df7`, push yok.
@@ -174,6 +174,20 @@
   - Depo adresleri F1.4 Türkçe adres kontrolünden geçiyor (hem bizim uçlar hem Medusa'nınkiler). Adres reddi artık i18n anahtarıyla dönüyor; tüm sorun kodlarının Türkçe/İngilizce cümlesi var.
   - Depo ve varsayılan depo değişiklikleri denetim kaydında (önce/sonra; telefon yalnızca "değişti").
   - Bağımsız kod incelemesinin bulguları düzeltildi.
+- **F3 T6 (F3.3) bitti:** görsel hattı (adr/0016, uygulama notu eklendi). `sharp` 0.35.5 eklendi.
+  - **KK, EXIF temizleme:** `/admin/uploads`'tan geçen her görsel saklanmadan önce işleniyor: EXIF yönüne göre döndürülüyor, metadata (EXIF/GPS/XMP/IPTC) atılıyor, en fazla 2560 px. Çözülemeyen görsel reddediliyor. HTTP testli.
+  - **`media` modülü:** görsel kaydı (alt metin, türevler), ürüne link. Panel yüklemeden sonra görseli kaydediyor. URL ile eklenmiş görsele de alt metin için kayıt açılıyor.
+  - **Türevler:** ürün kaydından sonra ürün başına kilitli workflow üretiyor:
+    - 400/800/1600 WebP + AVIF ve 1200×630 OG; şeffaf görsel beyaz zeminde.
+    - Ad ürün slug'ından: `{slug}-{sıra}-…`. Slug ya da sıra değişince yeniden üretiliyor.
+    - Gece süpürmesi kaçanları üretiyor; hiçbir ürüne girmemiş, bir günlük yüklemeleri siliyor.
+  - **Store API:** `fields=+media_assets.url,+media_assets.alt,+media_assets.derivatives`. Toplu ya da iç içe yollar reddediliyor.
+  - **SEO:** Paylaşım görseli ana görselin OG kırpması ve alt metni. Danışmanda P-IMG-02 (alt metin), mağaza denetiminde S-IMG-01.
+  - **Panel:**
+    - Ürün sayfasında alt metinler (alandan çıkınca kaydedilir) ve sürüm durumu; sunucu işlerken sayfa kısa süre kendini yeniliyor.
+    - Varyant görselleri kartı.
+  - **Düzeltme:** S3'te logo, paylaşım ve ürün görseli adresleri Medusa'nın süreli imzalı bağlantısı yerine kalıcı public adres oluyor.
+  - Bağımsız kod incelemesinin bulguları düzeltildi.
 - **Gözden geçir (kullanıcı yokken önerilen seçenekle verilen kararlar):**
   1. Bayrak adı `catalog.non_physical`, mağaza tarafından açılır, varsayılan kapalı. Etiketleri Medusa Admin'de ve panelde var.
   2. Kargo gerekmeyen kalemler sipariş ödenince "teslim edildi" sayılıyor. Dijital teslimat (indirme bağlantısı, kod gönderimi) F9 bildirimleriyle gelecek.
@@ -254,6 +268,16 @@
   50. Depo telefonu iş hattı sayılıyor: depo listesi kişisel veri okuması değil. Denetim kaydında yine yalnızca "değişti" yazılıyor.
   51. Paneldeki adres formu Türkçe: yurt dışı adresli bir depoda yalnızca ad değiştirilebiliyor. Mahalle serbest metin; sunucu, referans verisi olan ilçelerde doğruluyor.
   52. T8'e kalanlar: stok hareket defteri ve olay doğrulaması (rezervasyon değişimi `inventory-level.updated` yayıyor mu), düşük stok eşiği/uyarısı, ön sipariş, uzlaştırma işi.
+  53. **Görsel temizliği yüklemede, eşzamanlı** (ADR-0016'dan sapma; ADR'de uygulama notu var). Metadata'lı kopya hiç tutulmuyor ve sihirbaz görseli hemen kullanabiliyor. Bedeli yükleme isteğinde görsel başına birkaç yüz ms; vitrin yolu etkilenmiyor.
+  54. Türevler ayrı bir iş tipi değil, ürün kaydı aboneliği. Her ürün kaydı bir iş kaydı açsaydı Ayarlar > İşler listesi dolardı. Hata kaydı yanıtlamayı etkilemiyor, gece süpürmesi tamamlıyor.
+  55. Bir kez ürüne girmiş görselin dosyaları, ürün onu bıraksa da tutuluyor (siparişler ve e-postalar gösterebilir). Yalnızca hiç ürüne girmemiş, bir günlük yüklemeler siliniyor. Slug ya da sıra değişince eski türevler siliniyor.
+  56. Alt metin ve türevler `ProductImage.metadata`'da değil kendi tablomuzda (adr/0015 gerekçesi). Alt metin değişikliği denetim kaydında; görsel kaydetme işlemi değil.
+  57. Alt metin yayın için zorunlu değil. Danışman (P-IMG-02, orta) ve mağaza denetimi (S-IMG-01) uyarıyor. Kurallar sürümü 2 oldu; gece değerlendirmesi tüm sayfaları yeniden puanlıyor.
+  58. Varyant görselleri Medusa'nın anlamıyla: hiçbir varyanta bağlanmamış görsel tüm varyantlarda görünür.
+  59. Kalite değerleri sabit: master JPEG 86, WebP 80, AVIF 50, OG JPEG 85. Ayar bölümü ihtiyaç doğunca eklenecek.
+     - Hattan önceki görseller için taşıma işi yazılmadı (canlı mağaza yok); F14 geçiş aracı yapacak.
+  60. S3'te daha önce kaydedilmiş logo ya da paylaşım görseli adresleri süreli imzalı bağlantı olarak kalmış olabilir; kayıt yeniden kaydedilince düzelir. Canlı veri yok.
+  61. Tek yüklemede en fazla 20 görsel sırayla işleniyor (AVIF hızlı ayarda). Vekil zaman aşımı F16'da ayarlanacak.
 - **Bilinen sınırlar (devreden):**
   - Sipariş ve stok panosu bellek içi sıralıyor (5000/2000 kayıt). Büyük mağazada kayıtlı aşama sütunu ya da Index modülü gerekir.
   - Kargo etiketi ve takip F7'de. Kampanyada minimum sepet ve kategori kuralları F4'te.
@@ -557,7 +581,7 @@
 | T3 ✅ | F3.5 | `seo-redirects`: kurallar, güvenli desen, zincir/döngü, slug ve halef değişiminde otomatik 301, `GET /store/seo/resolve`, 404 günlüğü + hedef önerisi, CSV içe/dışa. KK: 301 zinciri | T1 | 0017 |
 | T4 ✅ | F3.4b | `lib/seo/resolve`, resolve yanıtında `seo` payload, versioned cache, URL deseni değişiminde toplu 301 (iş) | T2, T3 | 0015 |
 | T5 ✅ | F3.11 | `brands` modülü, ürün ↔ marka, admin sayfası, Store marka ucu, SEO link'i | T2 | — |
-| T6 | F3.3 | Görsel hattı: `image.process` işi, türevler, OG kırpma, alt metin, varyant görselleri. KK: EXIF temizleme | `sharp` onayı | 0016 |
+| T6 ✅ | F3.3 | Görsel hattı: `image.process` işi, türevler, OG kırpma, alt metin, varyant görselleri. KK: EXIF temizleme | `sharp` onayı | 0016 |
 | T7 ✅ | F3.7 | Stok: depo/seviye kurulumu, Redis kilit sağlayıcısı, iptal/iade geri dönüş testleri. KK: eşzamanlı checkout | — | 0020 |
 | T8 | F3.8 | `stock-ledger`, düşük stok eşiği + `feed` uyarısı, ön sipariş bayrağı, uzlaştırma işi. KK: düşük stok uyarısı | T7 | 0020 |
 | T9 ✅ | F3.12 | `lib/seo/jsonld`: ProductGroup/Product/Offer, BreadcrumbList, CollectionPage/ItemList, OnlineStore, Article; şema testleri. KK: payload + JSON-LD sözleşme testi | T1, T4 | — |
