@@ -36,14 +36,19 @@ medusaIntegrationTestRunner({
         })
       ).data.product_category.id
     // Category deletions reach the paths through an event
-    async function settled(path: string, type: string): Promise<Answer> {
-      let answer = await kit.resolve(path)
-      for (let attempt = 0; attempt < 30 && answer.type !== type; attempt++) {
+    async function eventually<T>(look: () => Promise<T>, done: (value: T) => boolean): Promise<T> {
+      let value = await look()
+      for (let attempt = 0; attempt < 30 && !done(value); attempt++) {
         await new Promise((resolve) => setTimeout(resolve, 100))
-        answer = await kit.resolve(path)
+        value = await look()
       }
-      return answer
+      return value
     }
+    const settled = (path: string, type: string): Promise<Answer> =>
+      eventually(
+        () => kit.resolve(path),
+        (answer) => answer.type === type
+      )
 
     beforeEach(async () => {
       kit = await landingKit(http, getContainer())
@@ -109,7 +114,12 @@ medusaIntegrationTestRunner({
       expect(await settled("/kategori/mutfak-gerecleri/porselen", "gone")).toMatchObject({
         type: "gone",
       })
-      expect((await read(made.data.landing.id)).path).toBeNull()
+      // The page's own path is released after its category's, by the same event
+      const page = await eventually(
+        () => read(made.data.landing.id),
+        (landing) => landing.path === null
+      )
+      expect(page.path).toBeNull()
     })
 
     it("is in the sitemap and IndexNow while its category shows, at its new path after a move", async () => {
