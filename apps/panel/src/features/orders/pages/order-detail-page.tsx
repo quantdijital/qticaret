@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next"
 import { PageHeader } from "@/components/patterns/page-header"
 import { ErrorState } from "@/components/patterns/states"
 import { Skeleton } from "@/components/ui/skeleton"
-import { orderQuery, orderStateQuery } from "@/features/orders/api/orders"
+import { orderMoneyQuery, orderQuery, orderStateQuery } from "@/features/orders/api/orders"
 import { StageBadge } from "@/features/orders/components/stage-badge"
 import { ItemsCard } from "@/features/orders/detail/items-card"
 import { OrderActions } from "@/features/orders/detail/order-actions"
@@ -25,6 +25,8 @@ export function OrderDetailPage() {
   const { id } = route.useParams()
   const query = useQuery(orderQuery(id))
   const state = useQuery(orderStateQuery(id))
+  // The page does not wait for it: lines show Medusa's totals until it comes
+  const money = useQuery(orderMoneyQuery(id))
   const order = query.data
   const back = { to: "/orders", label: t("nav.orders") }
 
@@ -67,12 +69,16 @@ export function OrderDetailPage() {
       <ProgressCard order={order} stage={state.data.stage} />
       <div className="grid items-start gap-[var(--grid-gap)] xl:grid-cols-12">
         <div className="flex min-w-0 flex-col gap-[var(--grid-gap)] xl:col-span-8">
-          <ItemsCard order={order} />
+          <ItemsCard order={order} {...(money.data ? { money: money.data } : {})} />
         </div>
         <div className="flex min-w-0 flex-col gap-[var(--grid-gap)] xl:col-span-4">
           <CustomerCard order={order} />
           <AddressCard order={order} />
-          <PaymentCard order={order} />
+          <PaymentCard
+            order={order}
+            {...(money.data ? { money: money.data } : {})}
+            {...(money.error ? { moneyError: { onRetry: () => void money.refetch() } } : {})}
+          />
         </div>
       </div>
     </div>

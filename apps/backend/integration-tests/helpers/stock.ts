@@ -33,13 +33,14 @@ export async function stockShop(container: MedusaContainer): Promise<StockShop> 
 /**
  * A product tracking its stock, with `quantity` on the shelf at the shop's
  * warehouse; null leaves it with no stock level at all, as Medusa's own
- * admin does.
+ * admin does. Its price is `price` lira, tax included.
  */
 export async function stockedProduct(
   container: MedusaContainer,
   shop: StockShop,
   handle: string,
-  quantity: number | null
+  quantity: number | null,
+  price = 100
 ): Promise<{ productId: string; variantId: string; itemId: string }> {
   const { result } = await createProductsWorkflow(container).run({
     input: {
@@ -59,7 +60,7 @@ export async function stockedProduct(
               title: "Standart",
               options: { Seçenek: "Standart" },
               manage_inventory: true,
-              prices: [{ currency_code: "try", amount: 100 }],
+              prices: [{ currency_code: "try", amount: price }],
             },
           ],
           sales_channels: [{ id: shop.salesChannelId }],

@@ -1060,7 +1060,12 @@
       "amount": "Sipariş tutarı",
       "captured": "Tahsil edilen",
       "refunded": "İade edilen",
-      "provider": "Ödeme yöntemi"
+      "provider": "Ödeme yöntemi",
+      "lineDiscount": "{{amount}} indirim",
+      "refundable": "İade edilebilir",
+      "moneyFailed": "İade edilebilir tutar okunamadı.",
+      "returnedUnits_one": "{{count}} adet iade edildi",
+      "returnedUnits_other": "{{count}} adet iade edildi"
     },
     "providers": {
       "pp_system_default": "Manuel ödeme"

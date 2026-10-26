@@ -115,3 +115,19 @@ test("picks products and checks a bulk change without applying it", async ({ pag
   await expect(bar).toBeHidden()
   await guard.assertHealthy()
 })
+
+test("opens an order with what each line was paid", async ({ page, guard }) => {
+  await page.goto("/orders")
+  const first = page.getByRole("table").getByRole("link").first()
+  await expect(first).toBeVisible()
+  // The lines' money (F4.7) is read beside the order
+  const money = page.waitForResponse((response) =>
+    /\/admin\/orders\/[^/]+\/money/.test(response.url())
+  )
+  await first.click()
+  await expect(page).toHaveURL(/\/orders\/order_/)
+  expect((await money).status()).toBe(200)
+  await expect(pageHeading(page)).toBeVisible()
+  await page.waitForLoadState("networkidle")
+  await guard.assertHealthy()
+})

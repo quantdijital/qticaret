@@ -59,3 +59,23 @@ Medusa 2.21.2'de doğrulananlar (F2 planlaması):
   - MathBN `null`/`undefined`'ı 0, `"0x10"`'u 16, `"1e2"`'yi 100 olarak okur. `fromMedusaAmount` bunları reddeder: eksik tutar (ör. sorguda seçilmemiş alan) 0 kuruş olarak işlenmez. String girdi yalnızca düz ondalık olabilir.
   - `toMedusaAmount` `"20.50"` biçiminde string döner.
 - **Kanıt:** `src/lib/money/__tests__/` (55 test). Dağıtımda tohumlu 1000 rastgele vaka çalıştırılır: toplam korunur ve her parça tam paydan 1 kuruştan az sapar. Diğer testler: yarım kuruşta sıfırdan uzağa yuvarlama, eşitlik kuralları, negatif tutar, gidiş-dönüş.
+
+## Uygulama (F4.7)
+
+- **Satır payları (`lib/orders/shares.ts`):** Medusa indirimi kalemlere kuruş altı haneyle dağıtır (%10 × 33,33 = 3,333). `lineShares` bunları kuruşa çevirir:
+  - Fiyatlar Medusa'nın tam tutarlarına göre bölünür; kuruşlu fiyat olduğu gibi kalır.
+  - İndirim tam paylarına göre dağıtılır, her satırda satır fiyatı tavandır.
+  - Ödeme, fiyattan indirim düşülerek bulunur. Ödemelerin toplamı, siparişin yarım yukarı yuvarlanmış toplamına eşittir.
+- **`lib/money` ekleri:**
+  - `allocateCappedKurus`: tavanlı dağıtım. Tavanını aşan parça tavanda sabitlenir; kalan, diğerlerine ağırlıklarıyla dağıtılır.
+  - `prorateKurus`: oransal pay, yarım yukarı.
+  - `weightOfMedusaAmount`: Medusa tutarını milyonda bir lira cinsinden ağırlığa çevirir, kuruş altı haneleri korur.
+- **Saklanan değer:** Hesaplanan toplamlar Medusa'nın sakladığı ham değerle (20 hane) alınır, iç değeriyle alınmaz. İç değerde bölme artığı kalır (90,045 → 90,04499…988), bu da yarım kuruşu Medusa'nın tahsil ettiğinin tersine yuvarlar. Sorgu tutarları da `raw_*` alanlarından okunur.
+- **Sonraki kargolar:** İade, değişim ve talep kargoları paylara girmez. Bunlar müşterinin ödediği tutar değil, mağazanın sonraki gideridir.
+- **Tam adet:** Satır tutarları Medusa'nın kendi formülüyle (`getLineItemTotals`, `getShippingMethodTotals`) `detail` verilmeden hesaplanır. Medusa'nın siparişteki `total`'ı iade edilen adetleri düşer; paylar düşmez, yoksa her iade bir sonrakini kaydırırdı.
+- **Sürüm tuzağı:** Medusa her sipariş değişikliğinde (karşılama, gönderi, iade) ayarlamaları yeni sürüme kopyalar. Query bütün kopyaları döner; okuyucu güncel sürümünkileri alır. Medusa'nın kendi sipariş okumaları da böyle yapar. Entegrasyon testinde teslim edilmiş sipariş dört kopya taşıyordu.
+- **Birim iadesi (`lib/orders/refunds.ts`):** İade kümülatif hesaplanır: n birimin ödediğinden n − 1 birimin ödediği düşülür (`prorateKurus`). Böylece birimler nasıl gruplanırsa gruplansın satırın iadeleri satırın ödemesine eşit olur. Satır başına ayrı defter gerekmez: Medusa siparişin değişikliklerini sırayla yürütür, iade de teslim alınmadan önce hesaplanır.
+- **Serbest tutar:** İyi niyet iadesi ya da sonradan düzeltilen fiyat gibi tutarlar `spreadRefund` ile satırların kalanına göre dağıtılır. `allocateCappedKurus` hiçbir satırı kalanının üstüne çıkarmaz, böylece satır satır iade yapan sağlayıcı (iyzico) reddetmez. Satır başına kalanın kaydı F5'te ödeme sağlayıcısının işlem eşlemesiyle tutulur.
+- **İade edilebilir tutar:** Ödemelerin tahsil edilen − iade edilen toplamıdır. Medusa'nın `refundPaymentWorkflow` sınırıyla aynıdır.
+- **Uç:** `GET /admin/orders/:id/money`. Panelin sipariş sayfası satır ödemelerini, indirim paylarını, toplamları ve iade edilebilir tutarı buradan gösterir.
+- **Kanıt:** `lib/orders/__tests__/` (tohumlu 500 rastgele sipariş: toplam korunur, indirim fiyatı aşmaz, satır Medusa'dan 2 kuruştan az sapar), `lib/money/__tests__/capped.unit.spec.ts` (1000 rastgele vaka: tavan aşılmaz, toplam korunur), `integration-tests/http/order-money.spec.ts` (KK).

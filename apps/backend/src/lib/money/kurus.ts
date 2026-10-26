@@ -47,3 +47,15 @@ export function multiplyByRateBps(amount: Kurus, rateBps: number): Kurus {
   const product = BigInt(amount) * BigInt(rateBps)
   return kurus(Number(divideRoundHalfUp(product, BigInt(BPS_PER_WHOLE))))
 }
+
+/**
+ * `amount × part / whole` rounded half-up: what `part` of `whole` units
+ * paid, say. Taken cumulatively (what n units paid, less what n − 1 did),
+ * the steps always add up to `amount`.
+ */
+export function prorateKurus(amount: Kurus, part: number, whole: number): Kurus {
+  if (!Number.isSafeInteger(part) || !Number.isSafeInteger(whole) || whole <= 0) {
+    throw new RangeError("proration needs whole numbers and a positive whole")
+  }
+  return kurus(Number(divideRoundHalfUp(BigInt(amount) * BigInt(part), BigInt(whole))))
+}

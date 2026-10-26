@@ -10,6 +10,7 @@ const NO_QUERY_READS = [
   "/admin/dashboard/recent-orders",
   "/admin/dashboard/catalog-health",
   "/admin/order-board/:id",
+  "/admin/orders/:id/money",
 ]
 
 /**

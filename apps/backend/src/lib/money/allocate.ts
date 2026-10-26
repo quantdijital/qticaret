@@ -51,3 +51,49 @@ function allocateMagnitude(total: bigint, weights: readonly number[]): bigint[] 
   }
   return shares.map((share) => share.amount)
 }
+
+/**
+ * Splits `total` like `allocateKurus`, but no part exceeds its cap: a part
+ * whose share would pass its cap gets the cap, and what it could not take
+ * goes to the others in proportion to their weights (adr/0010). A refund
+ * spread over lines uses each line's refundable remainder as its cap, so
+ * successive refunds never give back more on a line than it was paid.
+ */
+export function allocateCappedKurus(
+  total: Kurus,
+  weights: readonly number[],
+  caps: readonly Kurus[]
+): Kurus[] {
+  if (weights.length !== caps.length) {
+    throw new RangeError("allocation needs one cap per weight")
+  }
+  if (total < 0 || caps.some((cap) => cap < 0)) {
+    throw new RangeError("capped allocation takes a non-negative total and caps")
+  }
+  if (total > caps.reduce((sum, cap) => sum + cap, 0)) {
+    throw new RangeError("total exceeds what the caps allow")
+  }
+  const parts = caps.map(() => 0)
+  let open = caps.flatMap((cap, index) => (cap > 0 ? [index] : []))
+  let left: number = total
+  // Each round fixes at least one part at its cap, so it ends within one round per part
+  while (left > 0) {
+    const shares = allocateKurus(
+      kurus(left),
+      open.map((index) => weights[index] ?? 0)
+    )
+    const over = open.filter((index, at) => (shares[at] ?? 0) > (caps[index] ?? 0))
+    if (over.length === 0) {
+      open.forEach((index, at) => {
+        parts[index] = shares[at] ?? 0
+      })
+      break
+    }
+    for (const index of over) {
+      parts[index] = caps[index] ?? 0
+      left -= caps[index] ?? 0
+    }
+    open = open.filter((index) => !over.includes(index))
+  }
+  return parts.map((part) => kurus(part))
+}

@@ -196,7 +196,11 @@ F17 öncesinde tenant'lar F16 script'leriyle elle açılır.
 - [ ] Kullanım limiti dolan kupon eşzamanlı isteklerde bile limit aşmıyor (testli)
 - [ ] Son 30 gün en düşük fiyat, fiyat geçmişinden doğru hesaplanıyor (testli); JSON-LD'deki üstü çizili fiyat bununla tutarlı
 - [ ] Kargo bedava eşiği sepet tutarına göre doğru uygulanıyor
-- [ ] İndirimli siparişte kısmi iade tutarı, kalemin indirim payı düşülerek hesaplanıyor (testli)
+- [x] İndirimli siparişte kısmi iade tutarı, kalemin indirim payı düşülerek hesaplanıyor (testli). Kanıt:
+  `integration-tests/http/order-money.spec.ts`. Gerçek checkout, %10 kupon, 3 × 33,33 ₺. Birimler Medusa'nın iade
+  ekranlarıyla tek tek geri alınıp para iadesi yapılıyor: 30,00 + 29,99 + 30,00 = satıra ödenen 89,99 ₺, kuruş farkı yok.
+  Toplamı yarım kuruşla biten sipariş, kargosu ve iade kargosu dahil, Medusa'nın kabul ettiği tutarlarla tamamen iade ediliyor.
+  Birim ve özellik testleri: `src/lib/orders/__tests__/`, `src/lib/money/__tests__/capped.unit.spec.ts`
 
 ---
 

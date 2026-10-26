@@ -1052,7 +1052,12 @@
       "amount": "Order amount",
       "captured": "Captured",
       "refunded": "Refunded",
-      "provider": "Payment method"
+      "provider": "Payment method",
+      "lineDiscount": "{{amount}} off",
+      "returnedUnits_one": "{{count}} returned",
+      "returnedUnits_other": "{{count}} returned",
+      "refundable": "Refundable",
+      "moneyFailed": "The refundable amount could not be read."
     },
     "providers": {
       "pp_system_default": "Manual payment"

@@ -67,8 +67,9 @@ const DETAIL_FIELDS = [
   "created_at",
   "email",
   "currency_code",
-  "subtotal",
-  "shipping_total",
+  // Tax included and before discounts, as the shop priced them; the discount is its own row
+  "original_item_total",
+  "original_shipping_total",
   "discount_total",
   "tax_total",
   "total",
@@ -135,6 +136,53 @@ export const orderStateQuery = (id: string) =>
   queryOptions({
     queryKey: ["orders", "state", id],
     queryFn: () => sdk.client.fetch<OrderState>(`/admin/order-board/${encodeURIComponent(id)}`),
+  })
+
+/** One line of `GET /admin/orders/:id/money`: amounts as exact lira ("89.99"). */
+export interface OrderMoneyLine {
+  id: string
+  kind: "item" | "shipping"
+  quantity: number
+  /** Units that came back on returns. */
+  returned: number
+  gross: string
+  /** The line's share of the order's discounts. */
+  discount: string
+  /** What the line was paid. */
+  net: string
+  returned_net: string
+}
+
+export interface MoneyTotals {
+  gross: string
+  discount: string
+  net: string
+}
+
+export interface OrderMoney extends MoneyTotals {
+  currency_code: string
+  lines: OrderMoneyLine[]
+  items: MoneyTotals
+  shipping: MoneyTotals
+  paid: string
+  refunded: string
+  /** What a refund can still give back: taken less refunded. */
+  refundable: string
+}
+
+/**
+ * `GET /admin/orders/:id/money` (F4.7): each line's discount share and
+ * payment to the kuruş, worked out by the server, and what is refundable.
+ */
+export const orderMoneyQuery = (id: string) =>
+  queryOptions({
+    queryKey: ["orders", "money", id],
+    queryFn: async () =>
+      (
+        await sdk.client.fetch<{ money: OrderMoney }>(
+          `/admin/orders/${encodeURIComponent(id)}/money`
+        )
+      ).money,
   })
 
 function useOrderMutation<T>(run: (input: T) => Promise<unknown>) {

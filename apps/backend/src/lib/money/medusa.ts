@@ -46,3 +46,21 @@ export function toMedusaAmount(amount: Kurus): string {
   const fraction = (magnitude % 100n).toString().padStart(KURUS_DIGITS, "0")
   return `${amount < 0 ? "-" : ""}${String(magnitude / 100n)}.${fraction}`
 }
+
+const WEIGHT_DIGITS = 6
+
+/**
+ * A Medusa amount in millionths of a lira, as a weight for `allocateKurus`:
+ * shares follow Medusa's exact amounts, digits below a kuruş included
+ * (a 10% discount on 33.33 is 3.333). Negative amounts weigh nothing.
+ */
+export function weightOfMedusaAmount(value: MedusaAmount): number {
+  if ((value as unknown) === null || (value as unknown) === undefined) {
+    throw new RangeError("amount is missing")
+  }
+  const weight = MathBN.convert(value, WEIGHT_DIGITS).shiftedBy(WEIGHT_DIGITS).toNumber()
+  if (!Number.isSafeInteger(weight)) {
+    throw new RangeError("amount is too large to weigh")
+  }
+  return Math.max(weight, 0)
+}

@@ -3,7 +3,7 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: BİTTİ** (T1a–T16; kabul kriterlerinin hepsi testlerle işaretli, docs/03; son eksik iki kanıt, danışmanın p95 ölçümü ve yedi sayfa türünün SEO sözleşme testi, kapanışta eklendi). Playwright e2e altyapısı kuruldu; CI düzeltildi. **F4 — Fiyatlandırma ve promosyon: DEVAM** (plan ve ADR-0023/0024/0025 kabul edildi; U1 `price-history` ve U4 kuponlar bitti; sırada U7 indirim dağılımı ve iade tutarı). Dal `f4-pricing-promotions`. Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı. F1, F2 ve F3 dalları push edildi (kullanıcı 2026-10-26: "pushları sen önerdiğinde yapabilirsin"); PR açılmadı.
+**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: BİTTİ** (T1a–T16; kabul kriterlerinin hepsi testlerle işaretli, docs/03; son eksik iki kanıt, danışmanın p95 ölçümü ve yedi sayfa türünün SEO sözleşme testi, kapanışta eklendi). Playwright e2e altyapısı kuruldu; CI düzeltildi. **F4 — Fiyatlandırma ve promosyon: DEVAM** (plan ve ADR-0023/0024/0025 kabul edildi; U1 `price-history`, U4 kuponlar ve U7 indirim dağılımı ve iade tutarı bitti; sırada U2 fiyat listeleri). Dal `f4-pricing-promotions`. Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı. F1, F2 ve F3 dalları push edildi (kullanıcı 2026-10-26: "pushları sen önerdiğinde yapabilirsin"); PR açılmadı.
 
 ## Son oturum özeti
 **2026-10-25/26 gece (kullanıcı yatarken, "panel işlerini tamamla" talimatıyla).** Panelin ekranları yazıldı; her biri gerçek veriyle tarayıcıda denendi (CDP ekran görüntüsü, test kayıtları sonra silindi). Commit'ler `e11a201`…`6d63df7`, push yok.
@@ -529,6 +529,16 @@
   131. **Kalem hedefli indirim sepete yayılıyor** (`allocation: across`): tutar indiriminde tutar eşleşen kalemlerin toplamından düşüyor, kalem başına değil.
   132. **En az sepet tutarı** `item_total` kuralı: KDV dahil, indirimler düşüldükten sonraki kalem toplamı (kargo hariç). Ücretsiz kargo kampanyasında da kullanılabiliyor.
   133. **Müşteri başına kullanım** kampanyanın bütçesi (`use_by_attribute`, `customer_id`). Medusa misafir alışverişte de e-postaya bağlı müşteri kaydı açtığı için misafiri de sayıyor; farklı e-postayla yeniden kullanım engellenemiyor (kimlik doğrulama F10). Başka promosyonlarla paylaşılan ya da başka türde bütçesi olan kampanyada alan kilitli.
+  134. **İndirim payı siparişin verildiği hâliyle (U7, ADR-0010):** satır payları tam adet üzerinden hesaplanıyor, iade edilen adetler payları değiştirmiyor. Sipariş sayfası satırları ve toplamları verildiği hâliyle gösteriyor; iadeler ödeme kartında (iade edilen, iade edilebilir). İade almış siparişin ayrıntılı görünümü F7'de.
+  135. **Birim iadesi kümülatif** (n birimin ödediği − n − 1 birimin ödediği); satır başına iade defteri tutulmuyor. Koşul: iade, teslim alınmadan önce, teslim alan akışın içinde hesaplanmalı (F7). Aynı satır iki kez verilirse adetleri birleştiriliyor. `returnRefundOf` tavan uygulamıyor, yanında `refundable` döndürüyor; iade daha fazlasını isterse ne yapılacağı F7'nin kararı.
+  136. **Kargo bedeli iade tutarına girmiyor**; kargonun iadesi mağaza politikası, F7'de.
+  137. **Sipariş sayfasının toplamları düzeltildi:** "Ara toplam" KDV hariç kalem ve kargo toplamını gösteriyordu, satırlar toplamı tutmuyordu (540 + 90 ≠ 648). Artık KDV dahil kalemler + kargo − indirim = toplam; KDV satırı bilgi için.
+  138. **Medusa ödemeyi kuruş altı haneyle tutabiliyor.** İndirimi yuvarlamıyor; sistem sağlayıcısı 157,891 tahsil ediyor.
+     - Kuruş gerçeği, toplamın yarım yukarı yuvarlanmış hali. Payların ve `refundable`'ın Medusa'nın kesin tutarını en çok yarım kuruş aşabilmesi bu yüzden.
+     - Medusa iadeyi para biriminin hassasiyeti kadar toleransla (TRY'de 0,01) kabul ediyor. Testli: yarım kuruşla biten sipariş kargosuyla birlikte tamamen iade edildi.
+     - F5 iyzico sepeti aynı payları (`lineShares`) kullanmalı ki tahsil edilen tutar ve satırlar kuruşla eşleşsin.
+  139. **Tutarlar Medusa'nın sakladığı hâliyle okunuyor:** `raw_*` alanları ve hesaplanan toplamlarda `.raw` (20 hane). Medusa'nın iç değerinde bölme artığı var (90,045 içeride 90,04499…988); bununla yarım kuruş ters yöne yuvarlanıyordu. Entegrasyon testi yakaladı.
+  140. **İade, değişim ve talep kargoları satır paylarına girmiyor:** müşterinin ödediği değil, mağazanın sonraki gideri. Medusa bunları siparişin `shipping_methods`'unda ve kargo toplamında sayıyor. Query bu kargoların `detail`'ini döndürmediği için iade, değişim ve taleplerin kendi kargo kimliklerinden ayıklanıyor.
 - **Bilinen sınırlar (devreden):**
   - JSON-LD'yi storefront basarken `<`, `>` ve `&` kaçışlanmalı (`</script>` içeren başlık ya da metin). Kural docs/13'te var; F18 kabulüne sözleşme testi olarak eklenecek.
   - Editöre yüklenip bir günden uzun süre kaydedilmeyen görseli gece süpürmesi siler; kayıt `content.image_unknown` verir.
@@ -543,6 +553,9 @@
   - Panelin varyant fiyat kaydı (`nextPrices`) fiyat listesi fiyatlarını ayırt etmiyor; Admin API'nin döndürdüğü fiyatlara göre F4'te (fiyat listeleri) doğrulanmalı.
   - Liste sorgusunun ürün sayısı büyük facet'lerde ürün kimliklerini bellekte kesiştiriyor (önbellekli). Büyük katalogda SQL'de `EXISTS` ile sayım ya da Index modülü düşünülmeli.
   - HTTP takımında `request-security` rate-limit testi T13'te bir kez dalgalandı; nedeni bulunamadı, tekrarlarda geçti.
+  - Hediye kartı ve mağaza kredisi (Medusa credit line'ları) satır paylarına ve iade edilebilir tutara girmiyor; U8'de eklenecek.
+  - `lib/money` iki haneli kuruş varsayıyor; ondalıksız para birimleri (JPY gibi) için genelleştirme gerekir (platform TRY).
+  - Medusa'nın Query'si sipariş ayarlamalarını bütün sürümlerden döndürüyor; ayarlama okuyan yeni kod güncel sürüme göre süzmeli (`workflows/orders/order-money.ts` `currentAdjustments`).
 
 **2026-10-24 gece oturumu (S3, S5; S8 başladı).** Kullanıcı döndü; dört karar verdi: bağımlılıklar onaylandı (ioredis 5.11.1, fast-xml-parser 5.11.2, yauzl 3.4.0, kendi görsel başlık okuyucumuz), ADR-0011..0014 kabul edildi, otonom devam, eski "Gözden geçir" maddeleri olduğu gibi kabul. Commit `54abc2a`.
 
@@ -814,7 +827,7 @@
 - **Daha önce:** F1 planlaması ve F0.2–F0.8 (2026-10-24), F0.1 monorepo (2026-10-24 sabahı), SEO ve güvenlik dokümanları (2026-10-22).
 
 ## Sıradaki görev
-**Claude'un sıradaki işi:** F4 U7 indirim dağılımı ve iade tutarı (plan aşağıda, "F4 görev planı"), ardından U2–U3. F4 kodu `f4-pricing-promotions` dalında (F1–F3 birleştirilmediği için `f3-catalog-seo-stock` üzerinden).
+**Claude'un sıradaki işi:** F4 U2 fiyat listeleri (plan aşağıda, "F4 görev planı"), ardından U3 indirim gösterimi. F4 kodu `f4-pricing-promotions` dalında (F1–F3 birleştirilmediği için `f3-catalog-seo-stock` üzerinden).
 
 1. **Kullanıcı:**
    - **F4 kararları:** ADR-0023/0024/0025 kabul edildi (2026-10-26). Dışarıda bekleyen: 30 gün kuralının hukukçu teyidi, hediye kartı vergisinin mali müşavir teyidi (docs/12).
@@ -847,7 +860,7 @@ Kararlar: ADR-0023 (fiyat geçmişi, 30 gün kuralı), ADR-0024 (kupon ve kampan
 | U4 ✅ | F4.4 + F4.6 | Kuponlar: kod normalleştirme (büyük harf, ASCII) + mevcut kodlar için migration, sepette tek kod kuralı (ayarla açılır), `coupon` hız profilinin üç Store ucuna bağlanması, kapsam (ürün/kategori/koleksiyon), minimum sepet (`item_total gte`, testle doğrulanır), kişi başı limit (`use_by_attribute`). Eşzamanlı limit KK testi | — | KK1 |
 | U5 | F4.6 | Tek kullanımlık kodlar: `promotion.codes` işi (şablondan N promosyon, `limit: 1`, okunur kodlar, CSV sonuç, en çok 10.000), panelde üret ve indir | U4 | — |
 | U6 | F4.5 | Otomatik kampanyalar: X al Y öde (`buyget`), sepette indirim (sipariş hedefli, minimumlu), kargo bedava eşiği (mağaza ayarı → düz fiyatlı kargo seçeneklerine `item_total gte` kurallı 0 TL fiyat) | U4 | KK3 |
-| U7 | F4.7 | İndirim dağılımı ve iade tutarı: kalem başına indirim payı (Medusa ayarlamalarından, `lib/money`), ardışık kısmi iadelerde satırın kalanını tavan alan dağıtım (ADR-0010 "Sonuçlar"), `refundableAmount` (F6/F7/F8 kullanır) | — | KK4 |
+| U7 ✅ | F4.7 | İndirim dağılımı ve iade tutarı: kalem başına indirim payı (Medusa ayarlamalarından, `lib/money`), ardışık kısmi iadelerde satırın kalanını tavan alan dağıtım (ADR-0010 "Sonuçlar"), `refundableAmount` (F6/F7/F8 kullanır) | — | KK4 |
 | U8 | F4.8 | Hediye kartı ve mağaza kredisi: eklenti kurulumu (exact 2.21.2), `promotions.gift_cards` bayrağı, panelden kart oluşturma ve bakiye, checkout'ta kullanım, iadede mağaza kredisi. Satış ve e-posta F9'da | ADR-0025 | — |
 
 Sıra: U1 → U3; U2 → U3; U4 → U5, U6; U7 ve U8 bağımsız. Önerilen başlangıç: U1, U4, U7 (KK taşıyanlar), sonra U2–U3, U5–U6, U8.
@@ -995,7 +1008,10 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
   - **trust proxy (F16):** Medusa `trust proxy = 1` ayarlıyor. Rate limit IP'si doğru olsun diye prod'da tam bir reverse proxy katmanı olmalı.
   - **Handle (F3.1):** Ürün, kategori ve koleksiyon handle'ları `lib/seo` slug üreticisinden verilir; Medusa'nın `toHandle`'ı Türkçe karakterleri ASCII'ye çevirmiyor.
   - **İçe aktarma (F3.9):** Medusa'nın ürün içe aktarması dosyayı presigned URL ile doğrudan depoya yükleyebiliyor. Bu yol `/admin/uploads` doğrulamasından geçmez; F3.9'da ele alınacak.
-  - **Kısmi iade dağıtımı (F4.7, F6):** `allocateKurus` her çağrıda bağımsız yuvarlar. Ardışık kısmi iadelerde bir satırın iadesi o satırın payını aşabilir. Satır başına kalan tutarı tavan alan bir dağıtım ve docs/07 testi gerekir (ADR-0010 "Sonuçlar").
+  - **Kısmi iade dağıtımı (F4.7 ✅, F6):** F4.7'de çözüldü. Birim iadesi kümülatif (`unitsRefund`), serbest tutar için `allocateCappedKurus`/`spreadRefund` var; kanıt `integration-tests/http/order-money.spec.ts`. F5/F6'ya devredenler:
+    - Satır başına serbest iade defteri tutulmalı. İyi niyet iadesi gibi tutarlar bir satıra yazıldıktan sonra o satırın birim iadesi, satırın kalanıyla sınırlanmalı.
+    - İade tutarı, iadeyi teslim alan iş akışının içinde, o iadenin kendi kalemlerinden hesaplanmalı. Böylece iki yönetici aynı anda hesaplayamaz.
+    - iyzico 0 TL'lik sepet kalemini kabul etmiyor. Tam indirimli ya da "X al Y öde"deki bedava satırın `net`'i 0 olabilir; sepet kurulurken bu satırlar ayrılmalı.
   - **S3/S5'ten devreden (F16, F18, S13):**
     - F16 proxy: `/static`, `/app`, 401 ve preflight yanıtlarına güvenlik header'ları; `/static` için `sandbox` CSP; tek hop XFF şartı ya da `TRUSTED_PROXY_HOPS`.
     - F18: Medusa store preflight'ında publishable key istiyor (izinli origin de 400 alıyor). Tarayıcıdan doğrudan store çağrısı için çözülmeli. Sunucudan login proxy'leyen storefront için imzalı istemci-IP ADR'si.

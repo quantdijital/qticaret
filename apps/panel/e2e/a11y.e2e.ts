@@ -30,6 +30,15 @@ for (const path of SCREENS) {
   })
 }
 
+test("an order's page has no serious accessibility issue", async ({ page }) => {
+  await page.goto("/orders")
+  await page.getByRole("table").getByRole("link").first().click()
+  await expect(page).toHaveURL(/\/orders\/order_/)
+  await expect(pageHeading(page)).toBeVisible()
+  await page.waitForLoadState("networkidle")
+  expect(await seriousIssues(page)).toEqual([])
+})
+
 test("bulk edit's bar and dialog have no serious accessibility issue", async ({ page }) => {
   await page.goto("/products")
   await page.getByRole("table").getByRole("checkbox").nth(1).check()
