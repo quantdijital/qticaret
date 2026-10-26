@@ -1,8 +1,12 @@
 import { JOB_TYPE_KEYS, jobType } from "../types"
 
+// The audit reads redirects through a module link, which needs a running
+// app to define; the registry's own facts do not
+jest.mock("../../seo/audit", () => ({ runSeoAudit: jest.fn() }))
+
 describe("job types", () => {
   it("knows its types by own key only", () => {
-    expect(JOB_TYPE_KEYS).toEqual(["audit_log.export", "seo.sitemap", "seo.url_style"])
+    expect(JOB_TYPE_KEYS).toEqual(["audit_log.export", "seo.audit", "seo.sitemap", "seo.url_style"])
     expect(jobType("__proto__")).toBeUndefined()
     expect(jobType("constructor")).toBeUndefined()
   })
@@ -22,6 +26,12 @@ describe("job types", () => {
       type?.input.safeParse({ product: "flat", category: "prefixed", brand: "prefixed" }).success
     ).toBe(true)
     expect(type?.input.safeParse({ product: "short" }).success).toBe(false)
+  })
+
+  it("audits the store one run at a time, keeping its report a month", () => {
+    const type = jobType("seo.audit")
+    expect(type).toMatchObject({ singleton: true, containsPersonalData: false, resultTtlDays: 30 })
+    expect(type?.input.safeParse({ deep: true }).success).toBe(false)
   })
 
   it.each([

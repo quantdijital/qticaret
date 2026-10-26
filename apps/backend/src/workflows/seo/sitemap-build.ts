@@ -118,6 +118,51 @@ async function entriesOf(
   }
 }
 
+/**
+ * What a build now would list, counted (the SEO audit): live, listed
+ * pages with an address, and the live, listed pages a build skips for
+ * having none.
+ */
+export async function sitemapCounts(
+  container: MedusaContainer
+): Promise<{ expected: number; pathless: number }> {
+  const query = container.resolve(ContainerRegistrationKeys.QUERY)
+  const registry = container.resolve<UrlRegistryModuleService>(URL_REGISTRY_MODULE)
+  const counts = { expected: 0, pathless: 0 }
+  for (const spec of KINDS) {
+    for (let skip = 0; ; skip += PAGE) {
+      const { data } = await query.graph({
+        entity: spec.entity,
+        fields: ["id", "seo_meta.robots_override", "seo_meta.canonical_override"],
+        filters: spec.filters,
+        pagination: { skip, take: PAGE, order: { id: "ASC" } },
+      })
+      const ids = (data as Row[]).filter(listed).map((row) => row.id)
+      const withPath = ids.length
+        ? new Set(
+            (
+              await registry.listUrlEntries(
+                {
+                  locale: CATALOG_LOCALE,
+                  entity_type: spec.type,
+                  entity_id: ids,
+                  status: "active",
+                },
+                { select: ["entity_id"] }
+              )
+            ).map((entry) => entry.entity_id)
+          ).size
+        : 0
+      counts.expected += withPath
+      counts.pathless += ids.length - withPath
+      if (data.length < PAGE) {
+        break
+      }
+    }
+  }
+  return counts
+}
+
 export interface BuiltSitemap {
   /** The index first (`sitemap.xml`), then a file per kind and page of URLs. */
   files: SitemapFile[]

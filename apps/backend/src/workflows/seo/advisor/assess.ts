@@ -1,4 +1,5 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
+import { seoTextHash } from "../../../lib/seo"
 import { RULES_VERSION, assess } from "../../../lib/seo/advisor"
 import type { Assessment, PageKind } from "../../../lib/seo/advisor"
 import { SEO_ADVISOR_MODULE } from "../../../modules/seo-advisor"
@@ -29,6 +30,9 @@ export async function assessPage(
     issues: result.issues as unknown as Record<string, unknown>[],
     critical: result.issues.filter((issue) => issue.severity === "critical").length,
     rules_version: RULES_VERSION,
+    title_hash: seoTextHash(facts.title),
+    description_hash: seoTextHash(facts.description),
+    is_listed: facts.isListed,
   })
   return result
 }

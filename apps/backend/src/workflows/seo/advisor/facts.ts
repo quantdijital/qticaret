@@ -2,7 +2,9 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { missingDimensions, variantGtin } from "../../../lib/catalog"
 import type { AdvisorFacts, PageKind } from "../../../lib/seo/advisor"
-import { plainText } from "../../../lib/seo"
+import { plainText, seoTextHash } from "../../../lib/seo"
+import { SEO_ADVISOR_MODULE } from "../../../modules/seo-advisor"
+import type SeoAdvisorModuleService from "../../../modules/seo-advisor/service"
 import { CATALOG_ENTITY_TYPES } from "../../catalog/entity-paths"
 import { liraOf } from "../facts"
 import type { FactRow } from "../facts"
@@ -20,8 +22,7 @@ const OWN_FIELDS = [
   "seo_meta.seo_description",
   "seo_meta.focus_keyword",
   "seo_meta.robots_override",
-  "seo_meta.title_hash",
-  "seo_meta.description_hash",
+  "seo_meta.canonical_override",
 ]
 
 interface Own {
@@ -29,8 +30,7 @@ interface Own {
   seo_description?: string | null
   focus_keyword?: string | null
   robots_override?: string | null
-  title_hash?: string | null
-  description_hash?: string | null
+  canonical_override?: string | null
 }
 
 const ENTITIES: Record<PageKind, { entity: string; owner: string }> = {
@@ -47,30 +47,38 @@ async function rowOf<T>(container: MedusaContainer, entity: string, fields: stri
   return (data[0] as T | undefined) ?? null
 }
 
-/** Other pages of the kind whose own title or description hashes to the same text. */
-async function duplicates(container: MedusaContainer, kind: PageKind, own: Own | null | undefined) {
-  const count = async (
-    field: "title_hash" | "description_hash",
-    hash: string | null | undefined
-  ) => {
+/**
+ * Other live, indexable pages of the kind showing the same title or
+ * description, own or from the template (their assessments keep the
+ * hashes; docs/14 S-DUP-01). A draft copy competes with nothing.
+ */
+async function duplicates(
+  container: MedusaContainer,
+  kind: PageKind,
+  id: string,
+  texts: { title: string; description: string }
+) {
+  const service = container.resolve<SeoAdvisorModuleService>(SEO_ADVISOR_MODULE)
+  const count = async (field: "title_hash" | "description_hash", text: string) => {
+    const hash = seoTextHash(text)
     if (!hash) {
       return 0
     }
-    const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
-      entity: "seo_meta",
-      fields: ["id"],
-      filters: { entity_type: kind, [field]: hash },
-    })
-    return Math.max(0, data.length - 1)
+    const rows = await service.listSeoAssessments(
+      { entity_type: kind, [field]: hash, is_listed: true, entity_id: { $ne: id } },
+      { select: ["id"], take: 100 }
+    )
+    return rows.length
   }
   return {
-    title: await count("title_hash", own?.title_hash),
-    description: await count("description_hash", own?.description_hash),
+    title: await count("title_hash", texts.title),
+    description: await count("description_hash", texts.description),
   }
 }
 
 type ProductRow = Omit<FactRow, "attribute_template" | "product_extension" | "images"> & {
   id: string
+  status: string
   description?: string | null
   weight?: number | null
   length?: number | null
@@ -96,6 +104,7 @@ type ProductRow = Omit<FactRow, "attribute_template" | "product_extension" | "im
 
 const PRODUCT_FIELDS = [
   "id",
+  "status",
   "title",
   "handle",
   "description",
@@ -200,21 +209,35 @@ interface ListingRow {
   description?: string | null
   mpath?: string | null
   logo_url?: string | null
+  is_active?: boolean
+  is_internal?: boolean
   seo_meta?: Own | null
 }
 
 const LISTING_FIELDS: Record<Exclude<PageKind, "product">, string[]> = {
-  category: ["id", "name", "handle", "description", "mpath"],
-  brand: ["id", "name", "handle", "description", "logo_url"],
+  category: ["id", "name", "handle", "description", "mpath", "is_active", "is_internal"],
+  brand: ["id", "name", "handle", "description", "logo_url", "is_active"],
   collection: ["id", "title", "handle"],
 }
 
-/** The advisor's facts for a page, or null when it is gone. */
+/** Whether the storefront shows the page: published, or an active (public) listing. */
+function isLive(kind: PageKind, row: ProductRow | ListingRow): boolean {
+  if (kind === "product") {
+    return (row as ProductRow).status === "published"
+  }
+  const listing = row as ListingRow
+  return kind === "collection" || (listing.is_active === true && listing.is_internal !== true)
+}
+
+/**
+ * The advisor's facts for a page, or null when it is gone; `isListed`
+ * says whether it is live and indexable (what search engines compare).
+ */
 export async function advisorFacts(
   container: MedusaContainer,
   kind: PageKind,
   id: string
-): Promise<AdvisorFacts | null> {
+): Promise<(AdvisorFacts & { isListed: boolean }) | null> {
   const spec = ENTITIES[kind]
   const row =
     kind === "product"
@@ -235,7 +258,9 @@ export async function advisorFacts(
   const html = row.description ?? ""
   const named = row as { title?: string | null; name?: string | null }
   const name = named.title ?? named.name ?? row.handle
+  const noindex = own?.robots_override?.startsWith("noindex") ?? false
   return {
+    isListed: isLive(kind, row) && !noindex && !own?.canonical_override,
     kind,
     name,
     handle: row.handle,
@@ -246,8 +271,11 @@ export async function advisorFacts(
     body: plainText(html),
     bodyHtml: html,
     focusKeyword: own?.focus_keyword ?? null,
-    duplicates: await duplicates(container, kind, own),
-    noindex: own?.robots_override?.startsWith("noindex") ?? false,
+    duplicates: await duplicates(container, kind, id, {
+      title: seo?.title ?? name,
+      description: seo?.description ?? "",
+    }),
+    noindex,
     product: kind === "product" ? productFacts(row as ProductRow) : undefined,
     listing:
       kind === "product"

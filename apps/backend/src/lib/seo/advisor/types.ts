@@ -55,7 +55,7 @@ export interface AdvisorFacts {
   body: string
   bodyHtml: string
   focusKeyword: string | null
-  /** Other pages of the kind with the same own title or description (adr/0015 hashes). */
+  /** Other live, indexable pages of the kind showing the same title or description. */
   duplicates: { title: number; description: number }
   noindex: boolean
   product?:

@@ -1,5 +1,4 @@
-import { readFileSync, readdirSync, rmSync, statSync } from "node:fs"
-import { join } from "node:path"
+import { readFileSync, rmSync } from "node:fs"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { Modules } from "@medusajs/framework/utils"
 import { createApiKeysWorkflow } from "@medusajs/medusa/core-flows"
@@ -8,6 +7,7 @@ import asyncJobSweeper from "../../src/jobs/async-job-sweeper"
 import { ASYNC_JOB_MODULE } from "../../src/modules/async-job"
 import type AsyncJobModuleService from "../../src/modules/async-job/service"
 import { createAdminUser } from "../helpers/admin"
+import { filesNamed } from "../helpers/files"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 
@@ -19,26 +19,6 @@ interface Job {
   progress: number
   has_result: boolean
   result_summary: { rows?: number } | null
-}
-
-// The local file provider's folder in tests (no object store in CI)
-const STATIC_DIR = join(process.cwd(), "static")
-
-function filesNamed(pattern: RegExp, dir = STATIC_DIR): string[] {
-  let names: string[]
-  try {
-    names = readdirSync(dir)
-  } catch {
-    return []
-  }
-  return names.flatMap((name) => {
-    const path = join(dir, name)
-    return statSync(path).isDirectory()
-      ? filesNamed(pattern, path)
-      : pattern.test(name)
-        ? [path]
-        : []
-  })
 }
 
 /** F2.8 (adr/0014): queued jobs, their run in the subscriber, results, recovery and retention. */

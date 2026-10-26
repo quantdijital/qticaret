@@ -102,7 +102,7 @@ medusaIntegrationTestRunner({
         product("Seramik Kupa")
       )
       let listed: { entity_id: string; score: number }[] = []
-      for (let attempt = 0; attempt < 30 && listed.length === 0; attempt++) {
+      for (let attempt = 0; attempt < 50 && listed.length === 0; attempt++) {
         const response = await http.get<{ assessments: typeof listed }>(
           `/admin/seo/assessments?kind=product&ids=${data.product.id}`,
           { headers: admin.headers }

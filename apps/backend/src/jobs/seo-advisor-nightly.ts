@@ -1,7 +1,9 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
-import type { PageKind } from "../lib/seo/advisor"
+import { isConflictError } from "../lib/errors"
 import { errorSummary, logger } from "../lib/logging"
+import type { PageKind } from "../lib/seo/advisor"
+import { enqueueAsyncJobWorkflow } from "../workflows/async-job/enqueue-async-job"
 import { assessPage } from "../workflows/seo/advisor/assess"
 
 const PAGE = 500
@@ -14,7 +16,8 @@ const KINDS: { kind: PageKind; entity: string }[] = [
 
 /**
  * Assesses every page again each night (docs/14 §1): a new rules version,
- * a template or a price changed elsewhere all show up by morning.
+ * a template or a price changed elsewhere all show up by morning. The
+ * store-wide audit (§3.9) runs after, on the fresh assessments.
  */
 export default async function seoAdvisorNightly(container: MedusaContainer) {
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
@@ -41,6 +44,16 @@ export default async function seoAdvisorNightly(container: MedusaContainer) {
     }
   }
   logger.info({ event: "seo.advisor_nightly", ...counts })
+  try {
+    await enqueueAsyncJobWorkflow(container).run({
+      input: { type: "seo.audit", input: {}, requested_by: null },
+    })
+  } catch (error) {
+    // One asked for in the panel is already on its way
+    if (!isConflictError(error)) {
+      throw error
+    }
+  }
 }
 
 export const config = {
