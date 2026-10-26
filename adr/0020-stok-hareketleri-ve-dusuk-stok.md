@@ -93,3 +93,22 @@ Medusa 2.21.2'de doğrulananlar (Context7 + v2.21.2 kaynağı):
   - Medusa 2.21.2'nin `updateStockLocationsWorkflow`'u adresi olmayan depoya adres bağlayamıyor (adres satırı oluşuyor, bağ kurulmuyor). Kendi adımımız (`workflows/stock/steps/set-location-address.ts`) adresi modüle bütün halinde veriyor.
 - **Silme:** Medusa depo silerken envanter seviyelerini bırakıyor. Varsayılan depo, stoklu/rezerveli/gelecek stoklu depo ve iade beklenen depo silinmiyor (409).
 - **Olay zamanlaması** (rezervasyon değişimi `inventory-level.updated` yayıyor mu) defterle birlikte T8'de doğrulanacak.
+
+## Uygulama notu (F3 T8, 2026-10-26)
+
+- **Defter:** `src/modules/stock-ledger`, subscriber `src/subscribers/stock-ledger.ts`, workflow `src/workflows/stock/ledger.ts`.
+  - **Olay zamanlaması (T7'den):** Bir rezervasyon hem `reservation-item.*` hem seviye değişikliği olarak gelebilir. Defter olayın sayısına değil seviyenin kendisine baktığı ve seviye başına kilit tuttuğu için hangisi önce gelirse tek satır yazılıyor; diğeri fark bulmuyor (HTTP testi).
+  - Medusa'nın rezervasyon olayları yalnızca rezervasyon kimliğini taşıyor. Sipariş, rezervasyonun `line_item_id`'sinden `order_item` üzerinden bulunuyor; checkout, iptal ve gönderim satırlarında sipariş referansı var.
+  - **Kararın değiştiği yer:** Kararda "workflow yarıda düşerse kendi satırlarını geri alır" deniyordu. Satırlar geri alınmıyor, çünkü her satır olmuş bir değişikliği kaydediyor. Sıra saatle değil `seq` (autoincrement) sütunuyla.
+  - Modül servisine doğrudan çağrı olay yaymıyor (2.21.2). Bu değişiklikleri gece eşitlemesi yakalıyor; eşitleme silinmiş seviyeleri de dolaşıyor ve süreçler arası tek çalışıyor.
+  - Açılış bakiyeleri `src/migration-scripts/stock-ledger-opening-balances.ts` ile, `db:migrate`'te bir kez yazılıyor.
+- **Düşük stok:**
+  - **Kararın değiştiği yer:** Kararın "uyarıldı" durumu "kuruldu" durumuna çevrildi (`stock_watch.armed_at`).
+    - Eşiğin üstünde görülen kalem kuruluyor. Kurulu kalem eşiğe inince bildirim gidiyor ve kurulum düşüyor.
+    - Kalem başına kilit ve kurulma zamanından türeyen `idempotency_key`, eşzamanlı iki değişikliğin uyarıyı kaçırmasını da çift bildirimi de önlüyor.
+    - Az stokla açılan kalem uyarmıyor; kurulumda toplu bildirim yağmıyor.
+  - Bildirim metni `src/lib/notifications/messages.ts` kataloğundan geliyor (F19'a kadar TR). Panel metni bildirimin `data` alanından kendi dilinde kuruyor.
+- **Ön sipariş:**
+  - Bayrak adı `stock.preorder`. Koruma `src/api/validation/backorder-gate.ts`'de ve Medusa'nın altı ürün/varyant yolunu kapsıyor; toplu yollar ayrı kayıtlı, çünkü Medusa onları `:id` middleware'inden önce yanıtlıyor.
+  - Boş seviye abonelikle değil, ürün/varyant hook'larında istek içinde açılıyor. Panelin aynı anda yazdığı seviyeyle çakışma olmuyor.
+  - JSON-LD `BackOrder` T9'dan beri vardı.

@@ -3,7 +3,7 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a, T1b, T2, T3, T4, T5, T6, T7, T9, T10, T11, T12 bitti; sırada T8 stok kuralları, T13 içerik). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı; push edilmedi. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
+**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: DEVAM** (T1a, T1b, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12 bitti; sırada T13 içerik). Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı; push edilmedi. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı; henüz push edilmedi. F1 dalı push edildi; PR açılmadı.
 
 ## Son oturum özeti
 **2026-10-25/26 gece (kullanıcı yatarken, "panel işlerini tamamla" talimatıyla).** Panelin ekranları yazıldı; her biri gerçek veriyle tarayıcıda denendi (CDP ekran görüntüsü, test kayıtları sonra silindi). Commit'ler `e11a201`…`6d63df7`, push yok.
@@ -188,6 +188,30 @@
     - Varyant görselleri kartı.
   - **Düzeltme:** S3'te logo, paylaşım ve ürün görseli adresleri Medusa'nın süreli imzalı bağlantısı yerine kalıcı public adres oluyor.
   - Bağımsız kod incelemesinin bulguları düzeltildi.
+- **F3 T8 (F3.8) bitti:** stok kuralları (adr/0020, uygulama notu eklendi).
+  - **`stock-ledger` modülü:** stok hareket defteri, yalnızca ekleniyor.
+    - Her satırda raf ve ayrılan adet için önce/sonra, neden (elle, sipariş, iptal, iade, eşitleme…) ve sipariş referansı var.
+    - Satırları Medusa'nın seviye ve rezervasyon olaylarına abone olan workflow yazıyor. Seviye okunup defterin son satırıyla farkı yazılıyor, seviye başına kilit altında; tekrar gelen olay hiçbir şey yazmıyor.
+    - Rezervasyon olayları sipariş taşımıyor; sipariş, rezervasyonun sipariş satırından bulunuyor.
+  - **Eşitleme:**
+    - Gece işi (03:15) olayların kaçırdığı farkları yazıyor.
+    - `db:migrate` bir kez açılış bakiyelerini yazıyor (`src/migration-scripts`). Böylece mevcut mağazada ilk değişiklik "+3" değil "97 → 3" olarak görünüyor.
+  - **KK, düşük stok uyarısı:**
+    - Mağaza eşiği Ayarlar > Depolar'da (varsayılan 5); kaleme kendi eşiği verilebiliyor.
+    - Satılabilir stok (tüm depolar, ayrılan düşülmüş) eşiğin üstünden eşiğe ya da altına inince bir `feed` bildirimi yazılıyor. Eşiğin üstüne çıkınca yeniden kuruluyor.
+    - Eşzamanlı iki siparişte tek bildirim (testli).
+  - **Ön sipariş:** `stock.preorder` bayrağı; ürün sayfasında varyant başına "Stoksuz satış".
+    - Bayrak kapalıyken Medusa'nın altı ürün/varyant yolunda yeni stoksuz satış reddediliyor.
+    - Stoksuz satan varyantın stok seviyesi yoksa kayıt sırasında varsayılan depoda boş seviye açılıyor; checkout "bulunamadı" demiyor. Stoksuz sipariş testli.
+  - **Panel:**
+    - Üst çubukta bildirim zili.
+    - Stok sayfasında satır başına "stok geçmişi" paneli: hareketler, nedenler, sipariş bağlantısı, kalemin kendi eşiği.
+    - Ayarlar > Depolar'da düşük stok eşiği kartı.
+    - Sihirbazdaki "stok bitince de sat" anahtarı bayrağa bağlandı.
+  - **Yan düzeltmeler:**
+    - Ürün sayfasında marka seçicinin temizle düğmesi kartın dışına taşıyordu.
+    - Varyant kartı satır bileşeni ve saf yardımcılar olarak bölündü (birim testli).
+  - Bağımsız kod incelemesinin bulguları düzeltildi.
 - **Gözden geçir (kullanıcı yokken önerilen seçenekle verilen kararlar):**
   1. Bayrak adı `catalog.non_physical`, mağaza tarafından açılır, varsayılan kapalı. Etiketleri Medusa Admin'de ve panelde var.
   2. Kargo gerekmeyen kalemler sipariş ödenince "teslim edildi" sayılıyor. Dijital teslimat (indirme bağlantısı, kod gönderimi) F9 bildirimleriyle gelecek.
@@ -278,7 +302,34 @@
      - Hattan önceki görseller için taşıma işi yazılmadı (canlı mağaza yok); F14 geçiş aracı yapacak.
   60. S3'te daha önce kaydedilmiş logo ya da paylaşım görseli adresleri süreli imzalı bağlantı olarak kalmış olabilir; kayıt yeniden kaydedilince düzelir. Canlı veri yok.
   61. Tek yüklemede en fazla 20 görsel sırayla işleniyor (AVIF hızlı ayarda). Vekil zaman aşımı F16'da ayarlanacak.
+  62. **Defter satırları geri alınmıyor:** workflow'da compensation yok, çünkü satır olmuş bir değişikliği kaydediyor.
+     - Satır sırası saatle değil `seq` (autoincrement) sütunuyla; süreçlerin saatleri farklı olabilir.
+     - Çekirdek yollarda `actor_id` boş. Kimin değiştirdiği denetim kaydında (Medusa'nın stok uçları kayıtlı).
+  63. Medusa 2.21.2'de modül servisine doğrudan yapılan çağrı olay yaymıyor; bu değişiklikleri gece eşitlemesi yakalıyor.
+     - Eşitleme silinmiş seviyeleri de dolaşıyor.
+     - Süreçler arası tek çalışma kilidi var; ikinci süreç bir saniye bekleyip vazgeçiyor.
+     - Açılış ve gece satırlarının nedeni "Eşitleme".
+  64. **Düşük stok "kurma" mantığıyla:**
+     - Eşiğin üstünde görülen kalem kuruluyor; eşiğe inince bir bildirim gidiyor ve kurulum düşüyor.
+     - Az stokla açılan kalem, bir kez eşiğin üstüne çıkana kadar uyarmıyor. Böylece kurulumda toplu bildirim yağmıyor.
+     - Kalem başına kilit var. Bildirimin `idempotency_key`'i kurulma zamanı; yarıda kalan deneme tekrar bildirim yazmıyor.
+     - Kalemin kendi eşiği değişince kalem hemen kontrol ediliyor. Mağaza eşiği değişince kontrol bir sonraki harekette.
+  65. Bildirim `title`/`description` metni sunucudaki katalogdan geliyor (`lib/notifications/messages`, F19'a kadar TR); bunu Medusa Admin gösteriyor. Panel zili metni `data` alanından kendi dilinde kuruyor.
+  66. **Zil:**
+     - Okunmamış sayısı bu tarayıcıda zilin en son açıldığı ana göre (localStorage); sunucuda "okundu" bilgisi yok.
+     - Liste son 20 bildirim, dakikada bir yenileniyor.
+     - Rozet liste kapanınca sıfırlanıyor.
+  67. **Ön sipariş bayrağı `stock.preorder`:** mağaza açıyor, varsayılan kapalı.
+     - Kapalıyken yeni stoksuz satış reddediliyor; var olmayan bir varyant kimliği de "yeni" sayılıyor. Zaten açık olan varyant öyle kalabiliyor (T1b emsali).
+     - CSV içe aktarma F3.9'a kadar korumanın dışında. Medusa'nın workflow çalıştırma ucu için aşağıdaki açık soruya bakın.
+  68. **Stoksuz satan varyantın boş seviyesi ürün/varyant hook'larında, istek içinde açılıyor;** abonelik değil, çünkü panelin aynı anda yazdığı seviyeyle çakışırdı.
+     - Bayrak kapalıyken de açılıyor, ki eskiden açık kalmış varyantlar satılabilsin.
+     - Sihirbaz ve ürün sayfası var olan seviyeyi güncelliyor. Ürün sayfası önce stoğu, sonra varyantı yazıyor.
+  69. "Azalan" sekmesi ve pano görevi artık eşik sayısını göstermiyor (kalemlerin eşikleri farklı olabilir).
+  70. Ürün sayfasında "Stoksuz satış" sütunu bayrak açıkken ya da açık bir varyant varken görünüyor. Bayrak kapalıyken yalnızca kapatılabiliyor.
+  71. Varyantın stok takibi ve stoksuz satış ayarı, fiyatlarla birlikte denetim kaydının önce/sonra özetinde.
 - **Bilinen sınırlar (devreden):**
+  - Defter satırları için saklama süresi ve arşiv F13'te. Mağaza eşiği değişince kalemler toplu olarak yeniden kontrol edilmiyor (bir sonraki harekette).
   - Sipariş ve stok panosu bellek içi sıralıyor (5000/2000 kayıt). Büyük mağazada kayıtlı aşama sütunu ya da Index modülü gerekir.
   - Kargo etiketi ve takip F7'de. Kampanyada minimum sepet ve kategori kuralları F4'te.
   - Panelde bazı bileşen fonksiyonları 50 satırı aşıyor (sihirbaz sayfası, kategori düzenleyici, şablon paneli); docs/10'a göre bölünmeli.
@@ -583,7 +634,7 @@
 | T5 ✅ | F3.11 | `brands` modülü, ürün ↔ marka, admin sayfası, Store marka ucu, SEO link'i | T2 | — |
 | T6 ✅ | F3.3 | Görsel hattı: `image.process` işi, türevler, OG kırpma, alt metin, varyant görselleri. KK: EXIF temizleme | `sharp` onayı | 0016 |
 | T7 ✅ | F3.7 | Stok: depo/seviye kurulumu, Redis kilit sağlayıcısı, iptal/iade geri dönüş testleri. KK: eşzamanlı checkout | — | 0020 |
-| T8 | F3.8 | `stock-ledger`, düşük stok eşiği + `feed` uyarısı, ön sipariş bayrağı, uzlaştırma işi. KK: düşük stok uyarısı | T7 | 0020 |
+| T8 ✅ | F3.8 | `stock-ledger`, düşük stok eşiği + `feed` uyarısı, ön sipariş bayrağı, uzlaştırma işi. KK: düşük stok uyarısı | T7 | 0020 |
 | T9 ✅ | F3.12 | `lib/seo/jsonld`: ProductGroup/Product/Offer, BreadcrumbList, CollectionPage/ItemList, OnlineStore, Article; şema testleri. KK: payload + JSON-LD sözleşme testi | T1, T4 | — |
 | T10 ✅ | F3.6 + F3.15 | Sitemap işi (debounce + günlük, 50.000'de bölme, görsel sitemap, S3), robots.txt üretimi ve AI ön ayarları, canonical host 301, staging `noindex`, imzalı önizleme, IndexNow. KK: sitemap/robots | T4, T5 | — |
 | T11 ✅ | F3.13 | `seo-advisor`: kural motoru, skor, bulgular, tek tık düzeltme, widget + SERP önizleme, liste sütunu, yayın kapısı. KK: deterministik, p95 < 50 ms | T2, T9 | — |
@@ -636,6 +687,10 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
   - `body` anahtarı tamamen redakte ediliyor. Sağlayıcı yanıt gövdeleri loga girmiyor; S6 istemcisi hata ayıklama için `providerCode` gibi alanları ayrıca yazmalı.
   - Kodun fırlattığı ham ZodError 400 ve genel `errors.invalid_data` dönüyor. Medusa'nın davranışı issue metinlerini göndermekti.
   - Yeni i18n anahtarları: `errors.duplicate`, `errors.invalid_reference`, `errors.request_too_large`, `errors.invalid_request`. F18'de kataloğa girecek.
+- [ ] **Medusa'nın workflow çalıştırma ucu (öneri, F4 güvenlik geçişi):**
+  - `POST /admin/workflows-executions/:workflow_id/run` admin kullanıcısına herhangi bir workflow'u doğrudan çalıştırtıyor.
+  - Bu yol, route katmanındaki kontrollerin hepsini atlıyor: Türkçe adres, handle, yayın kapısı, ön sipariş koruması.
+  - Öneri: panel bu ucu kullanmıyor; `requireFeature` deseniyle 404 dönecek şekilde kapatılsın. Medusa Admin'in bu ucu kullanıp kullanmadığı o geçişte doğrulanır.
 - [ ] **Renovate GitHub App kurulumu (kullanıcı):** github.com/apps/renovate → `denizcanmaya/eticaret-platform`. Kurulunca onboarding PR'ı kontrol edilecek.
 - [ ] **Takip edilen açıklar** (adr/0001 "Bilinen açıklar"):
   - zod → 4.6.6: 2026-10-25'ten itibaren uygun; doğrudan bağımlılık + admin-sdk override.
