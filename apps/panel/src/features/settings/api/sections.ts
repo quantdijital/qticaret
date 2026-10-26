@@ -27,7 +27,14 @@ type UrlStyle = "prefixed" | "flat"
 export interface SeoSettings {
   canonical_host: string | null
   url_style: { product: UrlStyle; category: UrlStyle; brand: UrlStyle }
-  title_templates: { product: string; category: string; brand: string; page: string; post: string }
+  title_templates: {
+    product: string
+    category: string
+    brand: string
+    page: string
+    post: string
+    landing: string
+  }
   description_templates: { product: string }
   robots_txt: string
   ai_crawler_preset: "ai_search_visible" | "block_training" | "none"

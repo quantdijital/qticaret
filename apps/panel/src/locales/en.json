@@ -306,7 +306,8 @@
         "category": "Category page title",
         "brand": "Brand page title",
         "page": "Content page title",
-        "post": "Blog post title"
+        "post": "Blog post title",
+        "landing": "Filter page title"
       },
       "descriptionTemplate": "Product page description",
       "preview": "Preview:",
@@ -1296,7 +1297,8 @@
         "product_collection": "Collection",
         "brand": "Brand",
         "page": "Content page",
-        "post": "Blog post"
+        "post": "Blog post",
+        "landing": "Filter page"
       },
       "ownerDeleted": "deleted",
       "oldHint": "Addresses products, categories and collections used before. Visitors go to the record's address today, to its successor if it was deleted, or get a 410.",
@@ -1577,6 +1579,31 @@
           "title": "The text has not been updated for {{days}} days.",
           "why": "Content kept up to date looks more trustworthy to readers and search engines.",
           "how": "Review the facts; update products, prices and dates."
+        },
+        "TEXT-01": {
+          "title": "The page's text is {{words}} words; at least {{min}} is suggested.",
+          "why": "A filter page earns its place by what it adds to the product list; a short text makes it a copy of the list.",
+          "how": "Add buying advice, comparisons and common questions specific to this category and filter."
+        },
+        "UNIQ-01": {
+          "title": "Only {{originality}}% of the text is this page's own; at least {{min}}% is recommended.",
+          "why": "Programmatic pages that resemble each other fall under Google's scaled content policy; a page must be valuable on its own.",
+          "how": "Write facts, comparisons and advice specific to this category and filter; do not repeat other pages' text."
+        },
+        "PRODUCTS-01": {
+          "title": "The page lists {{products}} products; at least {{min}} is recommended.",
+          "why": "A filter page with very few products offers little choice and counts as thin content.",
+          "how": "Add products that match this filter, or keep the page out of search."
+        },
+        "BATCH-01": {
+          "title": "{{count}} filter pages went live in the last {{days}} days; at most {{max}} is recommended.",
+          "why": "Publishing many programmatic pages at once looks like spam to search engines.",
+          "how": "Publish pages in batches of 50–100, two weeks apart."
+        },
+        "REVIEW-01": {
+          "title": "Only {{share}}% of the latest batch was reviewed by a person; at least {{min}}% is recommended.",
+          "why": "Human review catches mistakes and repetition in programmatic pages.",
+          "how": "Read the page and mark it \"Reviewed by a person\"."
         }
       },
       "summaryHint": "How ready your products are for search engines; refreshed nightly and after every save.",
@@ -1860,27 +1887,31 @@
     }
   },
   "content": {
-    "description": "The shop's own pages (about us, shipping and returns) and blog posts.",
+    "description": "The shop's own pages (about us, shipping and returns), blog posts and filter pages.",
     "kinds": "Content kinds",
     "tabs": {
       "page": "Pages",
-      "post": "Blog posts"
+      "post": "Blog posts",
+      "landing": "Filter pages"
     },
     "search": "Search by title",
     "noMatch": "No content matches your search.",
     "empty": {
       "page": "No pages yet. Write pages such as about us or shipping and returns here.",
-      "post": "No blog posts yet. Add a first post about your products."
+      "post": "No blog posts yet. Add a first post about your products.",
+      "landing": "No filter pages yet. Give a category with a brand or attribute option a page of its own, with its own address and text."
     },
     "add": {
       "page": "Add page",
-      "post": "Add post"
+      "post": "Add post",
+      "landing": "Add filter page"
     },
     "addHint": "Enter the title; you edit the text, cover and search appearance on its page next. It stays a draft until you publish it.",
     "create": "Create",
     "created": {
       "page": "Page created.",
-      "post": "Post created."
+      "post": "Post created.",
+      "landing": "Filter page created."
     },
     "columns": {
       "title": "Title",
@@ -1986,6 +2017,29 @@
           "category": "Insert category card"
         }
       }
+    },
+    "landing": {
+      "addHint": "The category and filter are fixed once the page is made. You write its text and search appearance on its page next; to publish it, at least 30% of the text must be its own.",
+      "category": "Category",
+      "pickCategory": "Choose a category",
+      "facet": "Filter",
+      "pickFacet": "A brand or attribute option",
+      "brand": "Brand",
+      "facetIs": "Filter: {{facet}}",
+      "gone": {
+        "category": "The page's category was deleted; the page has no address and its old one answers 410. Move the text to a new page and delete this one.",
+        "facet": "The page's filter value no longer exists; the page cannot list products. Consider taking it down or deleting it."
+      },
+      "bodyHint": "Write a text specific to this category and filter; do not repeat other filter pages' text.",
+      "standing": "Page standing",
+      "standingHint": "Programmatic pages must be worth reading on their own.",
+      "originality": "Originality",
+      "percent": "{{value}}%",
+      "originalityHint": "The share of the text not found on other filter pages. Under {{warn}}% it warns, under {{block}}% it cannot be published.",
+      "products": "Products listed",
+      "reviewed": "Reviewed by a person",
+      "reviewedHint": "A person read the page through and approved it. At least 5% of newly published pages should be reviewed.",
+      "blocked": "At the last save less than 30% of the text was original; publishing may be refused. Make it specific to this page."
     }
   }
 }

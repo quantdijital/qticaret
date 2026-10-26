@@ -3,7 +3,8 @@ import { sdk } from "@/lib/sdk"
 
 /** The SEO advisor's assessments (docs/14, `/admin/seo/assessments`). */
 
-export type AdvisorKind = "product" | "category" | "brand" | "collection" | "page" | "post"
+export type AdvisorKind =
+  "product" | "category" | "brand" | "collection" | "page" | "post" | "landing"
 export type Grade = "excellent" | "good" | "needs_work" | "poor"
 export type Severity = "critical" | "high" | "medium" | "low" | "info"
 export type AdvisorCategory = "structured" | "meta" | "images" | "content" | "links" | "technical"

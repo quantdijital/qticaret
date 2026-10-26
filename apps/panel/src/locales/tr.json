@@ -306,7 +306,8 @@
         "category": "Kategori sayfası başlığı",
         "brand": "Marka sayfası başlığı",
         "page": "İçerik sayfası başlığı",
-        "post": "Blog yazısı başlığı"
+        "post": "Blog yazısı başlığı",
+        "landing": "Filtre sayfası başlığı"
       },
       "descriptionTemplate": "Ürün sayfası açıklaması",
       "preview": "Önizleme:",
@@ -1304,7 +1305,8 @@
         "product_collection": "Koleksiyon",
         "brand": "Marka",
         "page": "İçerik sayfası",
-        "post": "Blog yazısı"
+        "post": "Blog yazısı",
+        "landing": "Filtre sayfası"
       },
       "ownerDeleted": "silindi",
       "oldHint": "Ürün, kategori ve koleksiyonların önceden kullandığı adresler. Ziyaretçiler kaydın bugünkü adresine, silinmişse yerine geçen ürüne gider; yoksa 410 alır.",
@@ -1585,6 +1587,31 @@
           "title": "Metin {{days}} gündür güncellenmedi.",
           "why": "Güncel tutulan içerik okurun ve arama motorlarının gözünde daha güvenilirdir.",
           "how": "Bilgileri gözden geçirin; ürünleri, fiyatları ve tarihleri güncelleyin."
+        },
+        "TEXT-01": {
+          "title": "Sayfanın metni {{words}} kelime; en az {{min}} önerilir.",
+          "why": "Filtre sayfası, ürün listesine ekledikleriyle değer kazanır; kısa metin onu listenin bir kopyası yapar.",
+          "how": "Bu kategori ve filtreye özgü seçim önerileri, karşılaştırmalar ve sık sorulan sorular ekleyin."
+        },
+        "UNIQ-01": {
+          "title": "Metnin yalnızca %{{originality}}'i bu sayfaya özgü; en az %{{min}} önerilir.",
+          "why": "Birbirinin benzeri programatik sayfalar Google'ın ölçekli içerik politikasına takılır; sayfa tek başına değerli olmalı.",
+          "how": "Bu kategori ve filtreye özgü bilgiler, karşılaştırmalar ve öneriler yazın; diğer sayfalardaki metni tekrar etmeyin."
+        },
+        "PRODUCTS-01": {
+          "title": "Sayfada {{products}} ürün var; en az {{min}} önerilir.",
+          "why": "Çok az ürünlü filtre sayfası ziyaretçiye seçenek sunmaz ve zayıf içerik sayılır.",
+          "how": "Bu filtreye uyan ürünler ekleyin ya da sayfayı arama motorlarına kapatın."
+        },
+        "BATCH-01": {
+          "title": "Son {{days}} günde {{count}} filtre sayfası yayına alındı; en fazla {{max}} önerilir.",
+          "why": "Bir anda çok sayıda programatik sayfa yayına almak arama motorlarında spam izlenimi bırakır.",
+          "how": "Sayfaları 50–100'lük partiler hâlinde, aralarında iki hafta bırakarak yayına alın."
+        },
+        "REVIEW-01": {
+          "title": "Son partinin yalnızca %{{share}}'i insan tarafından incelendi; en az %{{min}} önerilir.",
+          "why": "İnsan incelemesi programatik sayfalardaki hataları ve tekrarları yakalar.",
+          "how": "Sayfayı okuyun ve \"İnsan inceledi\" olarak işaretleyin."
         }
       },
       "summaryHint": "Ürünlerinizin arama motorlarına hazırlığı; her gece ve her kayıttan sonra yenilenir.",
@@ -1868,27 +1895,31 @@
     }
   },
   "content": {
-    "description": "Mağazanın kendi sayfaları (hakkımızda, kargo ve iade) ve blog yazıları.",
+    "description": "Mağazanın kendi sayfaları (hakkımızda, kargo ve iade), blog yazıları ve filtre sayfaları.",
     "kinds": "İçerik türleri",
     "tabs": {
       "page": "Sayfalar",
-      "post": "Blog yazıları"
+      "post": "Blog yazıları",
+      "landing": "Filtre sayfaları"
     },
     "search": "Başlığa göre ara",
     "noMatch": "Aramanızla eşleşen içerik yok.",
     "empty": {
       "page": "Henüz sayfa yok. Hakkımızda, kargo ve iade gibi sayfaları buradan yazın.",
-      "post": "Henüz blog yazısı yok. Ürünlerinizi anlatan ilk yazıyı ekleyin."
+      "post": "Henüz blog yazısı yok. Ürünlerinizi anlatan ilk yazıyı ekleyin.",
+      "landing": "Henüz filtre sayfası yok. Bir kategori ile marka ya da özellik seçeneğine kendi adresi ve metni olan bir sayfa verin."
     },
     "add": {
       "page": "Sayfa ekle",
-      "post": "Yazı ekle"
+      "post": "Yazı ekle",
+      "landing": "Filtre sayfası ekle"
     },
     "addHint": "Başlığı yazın; metni, kapağı ve arama görünümünü açılan sayfada düzenlersiniz. Yayınlayana kadar taslak kalır.",
     "create": "Oluştur",
     "created": {
       "page": "Sayfa oluşturuldu.",
-      "post": "Yazı oluşturuldu."
+      "post": "Yazı oluşturuldu.",
+      "landing": "Filtre sayfası oluşturuldu."
     },
     "columns": {
       "title": "Başlık",
@@ -1994,6 +2025,29 @@
           "category": "Kategori kartı ekle"
         }
       }
+    },
+    "landing": {
+      "addHint": "Kategori ve filtre sayfa oluşunca değişmez. Metni ve arama görünümünü açılan sayfada yazarsınız; yayına almak için metnin en az %30'u bu sayfaya özgü olmalı.",
+      "category": "Kategori",
+      "pickCategory": "Kategori seçin",
+      "facet": "Filtre",
+      "pickFacet": "Marka ya da özellik seçeneği",
+      "brand": "Marka",
+      "facetIs": "Filtre: {{facet}}",
+      "gone": {
+        "category": "Sayfanın kategorisi silindi; sayfanın adresi yok ve eski adresi 410 döner. Metni yeni bir sayfaya taşıyıp bu sayfayı silebilirsiniz.",
+        "facet": "Sayfanın filtre değeri artık yok; sayfa ürün listeleyemez. Sayfayı yayından kaldırmayı ya da silmeyi düşünün."
+      },
+      "bodyHint": "Bu kategori ve filtreye özgü bir metin yazın; başka filtre sayfalarındaki metni tekrar etmeyin.",
+      "standing": "Sayfanın durumu",
+      "standingHint": "Programatik sayfaların kendi başına değerli olması gerekir.",
+      "originality": "Özgünlük",
+      "percent": "%{{value}}",
+      "originalityHint": "Metnin diğer filtre sayfalarında geçmeyen kısmı. %{{warn}} altında uyarı verilir, %{{block}} altında yayına alınamaz.",
+      "products": "Listelenen ürün",
+      "reviewed": "İnsan inceledi",
+      "reviewedHint": "Sayfa bir kişi tarafından okunup onaylandı. Yeni yayınlanan sayfaların en az %5'i incelenmeli.",
+      "blocked": "Son kayıtta metnin %30'dan azı özgündü; yayına alma reddedilebilir. Metni bu sayfaya özgü hâle getirin."
     }
   }
 }

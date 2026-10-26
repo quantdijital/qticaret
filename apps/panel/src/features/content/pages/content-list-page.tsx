@@ -11,9 +11,11 @@ import { Pagination } from "@/components/patterns/pagination"
 import { SearchInput } from "@/components/patterns/search-input"
 import { ErrorState } from "@/components/patterns/states"
 import { Button } from "@/components/ui/button"
-import { CONTENT_KINDS, CONTENT_PAGE_SIZE, contentListQuery } from "@/features/content/api/content"
-import type { ContentEntry, ContentKind } from "@/features/content/api/content"
+import { CONTENT_PAGE_SIZE, CONTENT_TABS, contentListQuery } from "@/features/content/api/content"
+import type { ContentEntry, ContentKind, ContentTab } from "@/features/content/api/content"
 import { ContentStatusBadge } from "@/features/content/components/content-status"
+import { LandingList } from "@/features/content/components/landing-list"
+import { NewLandingDialog } from "@/features/content/components/new-landing-dialog"
 import { NewContentDialog } from "@/features/content/components/new-content-dialog"
 import { errorText } from "@/lib/errors"
 import { formatDate } from "@/lib/format"
@@ -64,14 +66,16 @@ export function ContentListPage() {
   const { t } = useTranslation()
   const search = route.useSearch()
   const navigate = useNavigate()
-  const kind: ContentKind = search.kind ?? "page"
+  const tab: ContentTab = search.kind ?? "page"
+  // The list of pages or posts; landing pages have their own
+  const kind: ContentKind = tab === "landing" ? "page" : tab
   const q = search.q ?? ""
   const page = (search.page ?? 1) - 1
-  const list = useQuery(contentListQuery({ kind, q, page }))
+  const list = useQuery({ ...contentListQuery({ kind, q, page }), enabled: tab !== "landing" })
   const columns = useColumns()
   const [adding, setAdding] = useState(false)
-  const setSearch = (next: { kind?: ContentKind; q?: string; page?: number }) => {
-    const merged = { kind, q, page: page + 1, ...next }
+  const setSearch = (next: { kind?: ContentTab; q?: string; page?: number }) => {
+    const merged = { kind: tab, q, page: page + 1, ...next }
     void navigate({
       to: "/content",
       search: {
@@ -89,7 +93,7 @@ export function ContentListPage() {
       }}
     >
       <Plus />
-      {t(`content.add.${kind}`)}
+      {t(`content.add.${tab}`)}
     </Button>
   )
 
@@ -99,11 +103,11 @@ export function ContentListPage() {
       <section className="overflow-hidden rounded-lg border bg-card shadow-card">
         <FilterTabs
           label={t("content.kinds")}
-          value={kind}
+          value={tab}
           onChange={(next) => {
             setSearch({ kind: next, q: "", page: 1 })
           }}
-          tabs={CONTENT_KINDS.map((key) => ({ key, label: t(`content.tabs.${key}`) }))}
+          tabs={CONTENT_TABS.map((key) => ({ key, label: t(`content.tabs.${key}`) }))}
         />
         <div className="flex flex-wrap items-center gap-3 px-5 py-3">
           <SearchInput
@@ -114,7 +118,16 @@ export function ContentListPage() {
             }}
           />
         </div>
-        {list.isError ? (
+        {tab === "landing" ? (
+          <LandingList
+            q={q}
+            page={page}
+            onPage={(next) => {
+              setSearch({ page: next + 1 })
+            }}
+            add={add}
+          />
+        ) : list.isError ? (
           <div className="p-5">
             <ErrorState text={errorText(t, list.error)} onRetry={() => void list.refetch()} />
           </div>
@@ -139,7 +152,7 @@ export function ContentListPage() {
             }
           />
         )}
-        {list.data && list.data.count > CONTENT_PAGE_SIZE ? (
+        {tab !== "landing" && list.data && list.data.count > CONTENT_PAGE_SIZE ? (
           <Pagination
             page={page}
             pageSize={CONTENT_PAGE_SIZE}
@@ -150,7 +163,11 @@ export function ContentListPage() {
           />
         ) : null}
       </section>
-      <NewContentDialog kind={kind} open={adding} onOpenChange={setAdding} />
+      {tab === "landing" ? (
+        <NewLandingDialog open={adding} onOpenChange={setAdding} />
+      ) : (
+        <NewContentDialog kind={kind} open={adding} onOpenChange={setAdding} />
+      )}
     </div>
   )
 }

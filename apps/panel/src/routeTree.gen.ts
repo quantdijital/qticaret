@@ -41,6 +41,7 @@ import { Route as AuthSettingsJobsRouteImport } from './routes/_auth/settings/jo
 import { Route as AuthSettingsLocationsRouteImport } from './routes/_auth/settings/locations'
 import { Route as AuthSettingsSeoRouteImport } from './routes/_auth/settings/seo'
 import { Route as AuthSettingsStoreRouteImport } from './routes/_auth/settings/store'
+import { Route as AuthContentLandingsIdRouteImport } from './routes/_auth/content/landings/$id'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/_auth',
@@ -201,6 +202,11 @@ const AuthSettingsStoreRoute = AuthSettingsStoreRouteImport.update({
   path: '/store',
   getParentRoute: () => AuthSettingsRoute,
 } as any)
+const AuthContentLandingsIdRoute = AuthContentLandingsIdRouteImport.update({
+  id: '/content/landings/$id',
+  path: '/content/landings/$id',
+  getParentRoute: () => AuthRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthIndexRoute
@@ -234,6 +240,7 @@ export interface FileRoutesByFullPath {
   '/promotions/': typeof AuthPromotionsIndexRoute
   '/seo/': typeof AuthSeoIndexRoute
   '/settings/': typeof AuthSettingsIndexRoute
+  '/content/landings/$id': typeof AuthContentLandingsIdRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
@@ -266,6 +273,7 @@ export interface FileRoutesByTo {
   '/promotions': typeof AuthPromotionsIndexRoute
   '/seo': typeof AuthSeoIndexRoute
   '/settings': typeof AuthSettingsIndexRoute
+  '/content/landings/$id': typeof AuthContentLandingsIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -301,6 +309,7 @@ export interface FileRoutesById {
   '/_auth/promotions/': typeof AuthPromotionsIndexRoute
   '/_auth/seo/': typeof AuthSeoIndexRoute
   '/_auth/settings/': typeof AuthSettingsIndexRoute
+  '/_auth/content/landings/$id': typeof AuthContentLandingsIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -336,6 +345,7 @@ export interface FileRouteTypes {
     | '/promotions/'
     | '/seo/'
     | '/settings/'
+    | '/content/landings/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -368,6 +378,7 @@ export interface FileRouteTypes {
     | '/promotions'
     | '/seo'
     | '/settings'
+    | '/content/landings/$id'
   id:
     | '__root__'
     | '/_auth'
@@ -402,6 +413,7 @@ export interface FileRouteTypes {
     | '/_auth/promotions/'
     | '/_auth/seo/'
     | '/_auth/settings/'
+    | '/_auth/content/landings/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -635,6 +647,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSettingsStoreRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
+    '/_auth/content/landings/$id': {
+      id: '/_auth/content/landings/$id'
+      path: '/content/landings/$id'
+      fullPath: '/content/landings/$id'
+      preLoaderRoute: typeof AuthContentLandingsIdRouteImport
+      parentRoute: typeof AuthRoute
+    }
   }
 }
 
@@ -688,6 +707,7 @@ interface AuthRouteChildren {
   AuthProductsIndexRoute: typeof AuthProductsIndexRoute
   AuthPromotionsIndexRoute: typeof AuthPromotionsIndexRoute
   AuthSeoIndexRoute: typeof AuthSeoIndexRoute
+  AuthContentLandingsIdRoute: typeof AuthContentLandingsIdRoute
 }
 
 const AuthRouteChildren: AuthRouteChildren = {
@@ -712,6 +732,7 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthProductsIndexRoute: AuthProductsIndexRoute,
   AuthPromotionsIndexRoute: AuthPromotionsIndexRoute,
   AuthSeoIndexRoute: AuthSeoIndexRoute,
+  AuthContentLandingsIdRoute: AuthContentLandingsIdRoute,
 }
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)

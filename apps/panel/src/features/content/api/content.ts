@@ -6,6 +6,10 @@ import { sdk } from "@/lib/sdk"
 
 export const CONTENT_KINDS = ["page", "post"] as const
 export type ContentKind = (typeof CONTENT_KINDS)[number]
+
+/** The Content screen's tabs: pages, posts and the facet landing pages (F3.16). */
+export const CONTENT_TABS = [...CONTENT_KINDS, "landing"] as const
+export type ContentTab = (typeof CONTENT_TABS)[number]
 export type ContentStatus = "draft" | "published"
 
 export const CONTENT_PAGE_SIZE = 25

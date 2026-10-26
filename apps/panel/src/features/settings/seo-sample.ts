@@ -77,4 +77,5 @@ export const TEMPLATE_TOKENS = {
   brand: ["marka", "mağaza"],
   page: ["başlık", "mağaza"],
   post: ["başlık", "mağaza"],
+  landing: ["başlık", "kategori", "mağaza"],
 } as const

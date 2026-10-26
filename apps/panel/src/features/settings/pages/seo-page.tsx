@@ -20,7 +20,7 @@ import { errorText } from "@/lib/errors"
 // What search results show before cutting (docs/13 §3)
 const TITLE_LIMIT = 60
 const DESCRIPTION_LIMIT = 155
-const ENTITIES = ["product", "category", "brand", "page", "post"] as const
+const ENTITIES = ["product", "category", "brand", "page", "post", "landing"] as const
 const PRESETS = ["ai_search_visible", "block_training", "none"] as const
 
 function useSave(form: { reset: (values: SeoSettings) => void }) {
