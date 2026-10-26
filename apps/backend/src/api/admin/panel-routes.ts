@@ -4,6 +4,7 @@ import { AdminGetDashboardNoQuery, AdminGetDashboardOverview } from "./dashboard
 import { AdminGetOrderBoard } from "./order-board/validators"
 import { AdminPostShipOrder } from "./orders/[id]/ship/validators"
 import { AdminPostPriceListDiscount } from "./price-lists/[id]/discount/validators"
+import { AdminPostPromotionOffer } from "./promotions/[id]/offer/validators"
 import { AdminGetPriceHistory } from "./products/[id]/price-history/validators"
 import { AdminGetStockBoard } from "./stock-board/validators"
 
@@ -57,5 +58,10 @@ export const PANEL_ROUTES = [
     matcher: "/admin/price-lists/:id/discount",
     methods: ["POST" as const],
     middlewares: [requireUserActor, validateAndTransformBody(AdminPostPriceListDiscount)],
+  },
+  {
+    matcher: "/admin/promotions/:id/offer",
+    methods: ["POST" as const],
+    middlewares: [requireUserActor, validateAndTransformBody(AdminPostPromotionOffer)],
   },
 ]

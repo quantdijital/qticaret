@@ -26,13 +26,14 @@ medusaIntegrationTestRunner({
 
     const promotion = async (body: Record<string, unknown>) => {
       const made = await settle(
-        http.post(
+        http.post<{ promotion: { id: string } }>(
           "/admin/promotions",
           { type: "standard", is_tax_inclusive: true, status: "active", ...body },
           { headers: admin.headers }
         )
       )
       expect({ status: made.status, body: made.data }).toMatchObject({ status: 200 })
+      return made.data.promotion.id
     }
 
     // The discount a basket of `items` gets, with `codes`
@@ -111,6 +112,44 @@ medusaIntegrationTestRunner({
       })
       expect(await discount([{ variant_id: cup.variantId, quantity: 2 }])).toBe(0)
       expect(await discount([{ variant_id: cup.variantId, quantity: 3 }])).toBe(30)
+    })
+
+    it("records a rule added later with what the promotion's rules were before and after", async () => {
+      const id = await promotion({
+        code: "KURAL",
+        is_automatic: false,
+        application_method: {
+          type: "percentage",
+          target_type: "order",
+          allocation: "across",
+          value: 10,
+        },
+      })
+      const batch = await settle(
+        http.post(
+          `/admin/promotions/${id}/rules/batch`,
+          { create: [{ attribute: "item_total", operator: "gte", values: ["300"] }] },
+          { headers: admin.headers }
+        )
+      )
+      expect(batch.status).toBe(200)
+      interface Entry {
+        action?: string
+        changes?: { diff?: Record<string, unknown> }
+      }
+      let entry: Entry | undefined
+      for (let attempt = 0; attempt < 30 && !entry; attempt++) {
+        const { data } = await http.get<{ audit_entries: Entry[] }>(
+          `/admin/audit-log?resource_id=${id}&kind=mutation`,
+          { headers: admin.headers }
+        )
+        entry = data.audit_entries.find((row) => row.action?.endsWith("/rules/batch"))
+        await new Promise((resolve) => setTimeout(resolve, 100))
+      }
+      expect(entry).toMatchObject({
+        action: "POST /admin/promotions/:id/rules/batch",
+        changes: { diff: { rules: { after: "item_total gte 300" } } },
+      })
     })
   },
 })

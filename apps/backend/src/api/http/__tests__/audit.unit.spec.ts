@@ -111,6 +111,13 @@ describe("audit registry", () => {
     ["DELETE", "/admin/promotions/promo_01A", "DELETE /admin/promotions/:id"],
     ["POST", "/admin/campaigns/procamp_01A", "POST /admin/campaigns/:id"],
     ["DELETE", "/admin/campaigns/procamp_01A", "DELETE /admin/campaigns/:id"],
+    ["POST", "/admin/promotions/promo_01A/rules/batch", "POST /admin/promotions/:id/rules/batch"],
+    [
+      "POST",
+      "/admin/promotions/promo_01A/buy-rules/batch",
+      "POST /admin/promotions/:id/buy-rules/batch",
+    ],
+    ["POST", "/admin/campaigns/procamp_01A/promotions", "POST /admin/campaigns/:id/promotions"],
     [
       "POST",
       "/admin/store-credit-accounts/sc_acc_01A/credit",
