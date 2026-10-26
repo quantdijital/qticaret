@@ -2,6 +2,7 @@ import { useFormContext, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { SectionCard } from "@/components/patterns/section-card"
 import { Switch } from "@/components/ui/switch"
+import { useFeature } from "@/features/settings/api/features"
 import type { WizardValues } from "../schema"
 import { syncVariants } from "../variants"
 import { OptionsEditor } from "./options-editor"
@@ -36,6 +37,8 @@ export function PricingStep() {
     name: ["has_options", "options", "variants", "manage_inventory", "allow_backorder"],
   })
   const multi = hasOptions && variants.length > 1
+  // Selling past stock needs the preorder flag; one already on can still be turned off
+  const preorder = useFeature("stock.preorder") || backorder
   // The list's own error (none, or a missing option) first, then the first option's
   const optionMessage =
     formState.errors.options?.message ??
@@ -104,15 +107,17 @@ export function PricingStep() {
               setValue("manage_inventory", checked, { shouldDirty: true })
             }}
           />
-          <ToggleRow
-            id="allow-backorder"
-            title={t("products.wizard.allowBackorder")}
-            description={t("products.wizard.allowBackorderHint")}
-            checked={backorder}
-            onChange={(checked) => {
-              setValue("allow_backorder", checked, { shouldDirty: true })
-            }}
-          />
+          {preorder ? (
+            <ToggleRow
+              id="allow-backorder"
+              title={t("products.wizard.allowBackorder")}
+              description={t("products.wizard.allowBackorderHint")}
+              checked={backorder}
+              onChange={(checked) => {
+                setValue("allow_backorder", checked, { shouldDirty: true })
+              }}
+            />
+          ) : null}
         </div>
       </SectionCard>
     </div>

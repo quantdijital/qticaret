@@ -65,10 +65,13 @@ function productBody({ values, publish, defaults, defaultOption }: CreateInput) 
   }
 }
 
-// The stock typed per variant, at the shop's default location
+// The stock typed per variant, at the shop's default location. A variant made to sell
+// past stock already has its (empty) level there from the server: that one is updated.
 async function stockLevels(productId: string, values: WizardValues, locationId: string) {
   const { product } = await sdk.admin.product.retrieve(productId, {
-    fields: "variants.id,variants.title,variants.inventory_items.inventory_item_id",
+    fields:
+      "variants.id,variants.title,variants.inventory_items.inventory_item_id," +
+      "variants.inventory_items.inventory.location_levels.location_id",
   })
   const stockByTitle = new Map(
     values.variants.map((variant) => [
@@ -76,15 +79,23 @@ async function stockLevels(productId: string, values: WizardValues, locationId: 
       Number(variant.stock),
     ])
   )
-  const create = (product.variants ?? []).flatMap((variant) =>
+  const rows = (product.variants ?? []).flatMap((variant) =>
     (variant.inventory_items ?? []).map((item) => ({
-      inventory_item_id: item.inventory_item_id,
-      location_id: locationId,
-      stocked_quantity: stockByTitle.get(variant.title ?? "") ?? 0,
+      level: {
+        inventory_item_id: item.inventory_item_id,
+        location_id: locationId,
+        stocked_quantity: stockByTitle.get(variant.title ?? "") ?? 0,
+      },
+      exists: (item.inventory?.location_levels ?? []).some(
+        (level) => level.location_id === locationId
+      ),
     }))
   )
-  if (create.length > 0) {
-    await sdk.admin.inventoryItem.batchInventoryItemsLocationLevels({ create })
+  if (rows.length > 0) {
+    await sdk.admin.inventoryItem.batchInventoryItemsLocationLevels({
+      create: rows.filter((row) => !row.exists).map((row) => row.level),
+      update: rows.filter((row) => row.exists).map((row) => row.level),
+    })
   }
 }
 

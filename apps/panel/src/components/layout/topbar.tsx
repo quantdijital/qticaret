@@ -17,6 +17,7 @@ import { Kbd, KbdGroup } from "@/components/ui/kbd"
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { useCurrentUser, useLogout } from "@/features/auth/api/me"
+import { NotificationBell } from "@/features/notifications/notification-bell"
 import { seoSettingsQuery } from "@/features/settings/api/seo"
 import { CommandMenu } from "./command-menu"
 
@@ -60,6 +61,7 @@ export function Topbar() {
             </a>
           </Button>
         ) : null}
+        <NotificationBell />
         <AccountMenu />
       </div>
       <CommandMenu open={commandOpen} onOpenChange={setCommandOpen} />

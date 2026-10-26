@@ -80,7 +80,7 @@ export function SearchPicker({
             role="combobox"
             aria-expanded={open}
             disabled={disabled}
-            className="w-full justify-between font-normal sm:w-80"
+            className="min-w-0 flex-1 justify-between font-normal sm:max-w-80"
           >
             <span className={cn("truncate", !value && "text-muted-foreground")}>
               {value?.label ?? placeholder}

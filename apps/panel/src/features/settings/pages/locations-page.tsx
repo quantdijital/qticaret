@@ -22,6 +22,7 @@ import {
 } from "@/features/settings/api/locations"
 import type { Location } from "@/features/settings/api/locations"
 import { LocationDialog } from "@/features/settings/components/location-dialog"
+import { LowStockCard } from "@/features/settings/components/low-stock-card"
 import { errorText } from "@/lib/errors"
 import { formatPhone } from "@/lib/format"
 
@@ -162,6 +163,7 @@ export function LocationsPage() {
           ))}
         </ul>
       )}
+      <LowStockCard />
       <LocationDialog
         open={editing !== null}
         onOpenChange={(open) => {

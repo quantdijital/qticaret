@@ -17,6 +17,11 @@ export interface StoreSettings {
   dimension_unit: "cm" | "mm"
 }
 
+/** Stock rules (F3.8): the shop's default low-stock threshold. */
+export interface InventorySettings {
+  low_stock_threshold: number
+}
+
 type UrlStyle = "prefixed" | "flat"
 
 export interface SeoSettings {

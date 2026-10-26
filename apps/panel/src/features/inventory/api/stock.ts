@@ -11,6 +11,8 @@ export interface StockItem {
   sku: string | null
   title: string | null
   available: number
+  /** Its own low-stock threshold, else the shop's. */
+  threshold: number
   levels: { location_id: string; stocked_quantity: number; reserved_quantity: number }[]
   variant: {
     id: string

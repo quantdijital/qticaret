@@ -149,7 +149,7 @@
       },
       "lowStock": {
         "label": "Low stock",
-        "hint": "{{threshold}} or fewer left"
+        "hint": "At or under their low-stock threshold"
       },
       "drafts": {
         "label": "Draft products",
@@ -379,6 +379,12 @@
             "label": "SEO publish gate",
             "description": "A product with a critical gap (no price or image) or an SEO score under 50 cannot go live. When off, the advisor only suggests."
           }
+        },
+        "stock": {
+          "preorder": {
+            "label": "Selling past stock (preorder)",
+            "description": "A variant whose stock runs out can still be sold, as a preorder or shipped from a supplier. Turned on per variant on the product page; search engines are told it is on backorder."
+          }
         }
       }
     },
@@ -457,6 +463,12 @@
         "updated": "Location saved.",
         "nameTooLong": "The location's name can be at most 100 characters.",
         "foreign": "This location's address is abroad; only its name can be changed here."
+      },
+      "lowStock": {
+        "title": "Low stock alert",
+        "hint": "You are notified when a product's sellable quantity falls to this number. A product can have its own threshold from its stock history.",
+        "label": "Shop threshold (units)",
+        "saved": "Low stock threshold saved."
       }
     }
   },
@@ -754,7 +766,7 @@
       "mediaSaved": "Images updated.",
       "variants": "Variants, price and stock",
       "variantsHint": "Stock is the quantity at the shop's default location.",
-      "variantsSaved": "Prices and stock saved.",
+      "variantsSaved": "Variants saved.",
       "reserved": "Reserved",
       "summary": "Summary",
       "available": "Sellable stock",
@@ -773,7 +785,8 @@
       "noShipping": {
         "digital": "Digital product: no shipping or package size needed.",
         "service": "Service: no shipping or package size needed."
-      }
+      },
+      "backorder": "Sell past stock"
     },
     "catalog": {
       "card": "Catalog details",
@@ -980,7 +993,7 @@
     "views": "Stock views",
     "tabs": {
       "all": "All",
-      "low": "Low (≤{{threshold}})",
+      "low": "Low",
       "out": "Sold out"
     },
     "search": "Search by product name or SKU",
@@ -1006,7 +1019,28 @@
     },
     "note": "\"On shelf\" is the quantity at the shop's default location; sellable stock spans all locations, less what is reserved for orders.",
     "noLocation": "The shop has no default location; stock needs one.",
-    "addLocation": "Add a location"
+    "addLocation": "Add a location",
+    "history": {
+      "open": "Stock history of {{name}}",
+      "title": "Stock history",
+      "shelf": "Shelf",
+      "held": "Reserved",
+      "order": "Open order",
+      "threshold": "Low stock threshold",
+      "thresholdHint": "Leave empty to use the shop threshold ({{fallback}}). You are notified when the sellable quantity falls to it.",
+      "thresholdSaved": "Threshold saved.",
+      "empty": "No stock movements for this product yet.",
+      "reasons": {
+        "manual": "Manual edit",
+        "import": "Import",
+        "bulk_edit": "Bulk edit",
+        "order": "Order",
+        "return": "Return",
+        "cancel": "Cancellation",
+        "reconcile": "Reconciled",
+        "unknown": "Other"
+      }
+    }
   },
   "promotions": {
     "title": "Promotion",
@@ -1766,6 +1800,18 @@
       "postalCodeProvince": "The postal code is not in the chosen province.",
       "phoneInvalid": "The phone number is not valid; for example 0216 555 12 34.",
       "tooLong": "This field is too long."
+    }
+  },
+  "notifications": {
+    "title": "Notifications",
+    "open": "Notifications",
+    "openUnread_one": "Notifications, {{count}} new",
+    "openUnread_other": "Notifications, {{count}} new",
+    "empty": "No notifications yet.",
+    "lowStock": {
+      "title": "Running low: {{name}}",
+      "description_one": "{{count}} unit left (threshold {{threshold}}).",
+      "description_other": "{{count}} units left (threshold {{threshold}})."
     }
   }
 }

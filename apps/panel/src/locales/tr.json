@@ -149,7 +149,7 @@
       },
       "lowStock": {
         "label": "Stoku azalan",
-        "hint": "{{threshold}} adet ve altı kalan ürünler"
+        "hint": "Düşük stok eşiğine inen ürünler"
       },
       "drafts": {
         "label": "Taslak ürün",
@@ -379,6 +379,12 @@
             "label": "SEO yayın kapısı",
             "description": "Kritik eksiği olan (fiyat ya da görsel yok) ya da SEO puanı 50'nin altındaki ürün yayına alınamaz. Kapalıyken danışman yalnızca öneri verir."
           }
+        },
+        "stock": {
+          "preorder": {
+            "label": "Stoksuz satış (ön sipariş)",
+            "description": "Stoku biten varyant satılmaya devam edebilir: ön sipariş ya da tedarikçiden gönderim için. Ürün sayfasında varyant bazında açılır; arama motorlarına \"ön sipariş\" olarak bildirilir."
+          }
         }
       }
     },
@@ -457,6 +463,12 @@
         "updated": "Depo kaydedildi.",
         "nameTooLong": "Depo adı en fazla 100 karakter olabilir.",
         "foreign": "Bu deponun adresi yurt dışında; panelden yalnızca adı değiştirilebilir."
+      },
+      "lowStock": {
+        "title": "Düşük stok uyarısı",
+        "hint": "Bir ürünün satılabilir adedi bu sayıya inince bildirim gelir. Ürünlere stok geçmişinden kendi eşiği verilebilir.",
+        "label": "Mağaza eşiği (adet)",
+        "saved": "Düşük stok eşiği kaydedildi."
       }
     }
   },
@@ -762,7 +774,7 @@
       "mediaSaved": "Görseller güncellendi.",
       "variants": "Varyantlar, fiyat ve stok",
       "variantsHint": "Stok, mağazanın varsayılan depo adresindeki adettir.",
-      "variantsSaved": "Fiyat ve stoklar kaydedildi.",
+      "variantsSaved": "Varyantlar kaydedildi.",
       "reserved": "Siparişe ayrılan",
       "summary": "Özet",
       "available": "Satılabilir stok",
@@ -781,7 +793,8 @@
       "noShipping": {
         "digital": "Dijital ürün: kargo ve paket ölçüsü gerekmez.",
         "service": "Hizmet: kargo ve paket ölçüsü gerekmez."
-      }
+      },
+      "backorder": "Stoksuz satış"
     },
     "catalog": {
       "card": "Katalog bilgileri",
@@ -988,7 +1001,7 @@
     "views": "Stok görünümleri",
     "tabs": {
       "all": "Tümü",
-      "low": "Azalan (≤{{threshold}})",
+      "low": "Azalan",
       "out": "Tükenen"
     },
     "search": "Ürün adı ya da stok kodu ile ara",
@@ -1014,7 +1027,28 @@
     },
     "note": "\"Rafta\" mağazanın varsayılan depo adresindeki adettir; satılabilir stok tüm depolardan siparişe ayrılanlar düşülerek hesaplanır.",
     "noLocation": "Mağazanın varsayılan deposu yok; stok girmek için bir depo gerekli.",
-    "addLocation": "Depo ekle"
+    "addLocation": "Depo ekle",
+    "history": {
+      "open": "{{name}} stok geçmişi",
+      "title": "Stok geçmişi",
+      "shelf": "Raf",
+      "held": "Ayrılan",
+      "order": "Siparişi aç",
+      "threshold": "Düşük stok eşiği",
+      "thresholdHint": "Boş bırakırsanız mağaza eşiği ({{fallback}}) geçerli olur. Satılabilir adet bu eşiğe inince bildirim gelir.",
+      "thresholdSaved": "Eşik kaydedildi.",
+      "empty": "Bu ürün için henüz stok hareketi yok.",
+      "reasons": {
+        "manual": "Elle düzeltme",
+        "import": "İçe aktarma",
+        "bulk_edit": "Toplu düzenleme",
+        "order": "Sipariş",
+        "return": "İade",
+        "cancel": "İptal",
+        "reconcile": "Eşitleme",
+        "unknown": "Diğer"
+      }
+    }
   },
   "promotions": {
     "title": "Kampanya",
@@ -1774,6 +1808,18 @@
       "postalCodeProvince": "Posta kodu seçilen ile ait değil.",
       "phoneInvalid": "Telefon numarası geçerli değil; örneğin 0216 555 12 34.",
       "tooLong": "Bu alan çok uzun."
+    }
+  },
+  "notifications": {
+    "title": "Bildirimler",
+    "open": "Bildirimler",
+    "openUnread_one": "Bildirimler, {{count}} yeni",
+    "openUnread_other": "Bildirimler, {{count}} yeni",
+    "empty": "Henüz bildirim yok.",
+    "lowStock": {
+      "title": "Stok azalıyor: {{name}}",
+      "description_one": "{{count}} adet kaldı (eşik {{threshold}}).",
+      "description_other": "{{count}} adet kaldı (eşik {{threshold}})."
     }
   }
 }

@@ -58,6 +58,8 @@ export interface VariantEdit {
   amount: number | null
   /** Null for a variant whose stock is not tracked. */
   stock: { inventoryItemId: string; quantity: number; hasLevel: boolean } | null
+  /** Whether it sells past its stock (preorder); null leaves it alone. */
+  backorder: boolean | null
 }
 
 const CURRENCY = "try"
@@ -72,8 +74,10 @@ function nextPrices(edit: VariantEdit) {
 }
 
 /**
- * Prices in one variant batch, then stock at the shop's default location
- * in one level batch: a level that is there is updated, a missing one made.
+ * Stock at the shop's default location in one level batch (a level that is
+ * there is updated, a missing one made), then prices and preorder in one
+ * variant batch. Stock goes first: a variant turned to preorder gets an
+ * empty level from the server, which would collide with a level made here.
  */
 export function useSaveVariants(productId: string) {
   const client = useQueryClient()
@@ -85,15 +89,6 @@ export function useSaveVariants(productId: string) {
       edits: VariantEdit[]
       locationId: string | null
     }) => {
-      if (edits.length === 0) {
-        return
-      }
-      const priced = edits.filter((edit) => edit.amount !== null)
-      if (priced.length > 0) {
-        await sdk.admin.product.batchVariants(productId, {
-          update: priced.map((edit) => ({ id: edit.variantId, prices: nextPrices(edit) })),
-        })
-      }
       const stocked = edits.flatMap((edit) => (edit.stock ? [edit.stock] : []))
       if (locationId && stocked.length > 0) {
         const row = (stock: (typeof stocked)[number]) => ({
@@ -106,8 +101,23 @@ export function useSaveVariants(productId: string) {
           update: stocked.filter((stock) => stock.hasLevel).map(row),
         })
       }
+      const update = edits.flatMap((edit) =>
+        edit.amount === null && edit.backorder === null
+          ? []
+          : [
+              {
+                id: edit.variantId,
+                ...(edit.amount === null ? {} : { prices: nextPrices(edit) }),
+                ...(edit.backorder === null ? {} : { allow_backorder: edit.backorder }),
+              },
+            ]
+      )
+      if (update.length > 0) {
+        await sdk.admin.product.batchVariants(productId, { update })
+      }
     },
-    onSuccess: async () => {
+    // A save that failed half-way (stock written, prices refused) still changed the product
+    onSettled: async () => {
       await client.invalidateQueries({ queryKey: ["products"] })
       await client.invalidateQueries({ queryKey: ["dashboard"] })
     },

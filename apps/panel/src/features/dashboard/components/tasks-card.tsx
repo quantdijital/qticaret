@@ -84,7 +84,7 @@ function TaskList({ tasks }: { tasks: DashboardTasks }) {
             <span className="flex min-w-0 flex-1 flex-col">
               <span className="text-sm font-medium">{t(`dashboard.tasks.${row.key}.label`)}</span>
               <span className="truncate text-xs text-muted-foreground">
-                {t(`dashboard.tasks.${row.key}.hint`, { threshold: tasks.low_stock_threshold })}
+                {t(`dashboard.tasks.${row.key}.hint`)}
               </span>
             </span>
             <span
