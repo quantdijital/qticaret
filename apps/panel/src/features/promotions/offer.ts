@@ -1,3 +1,6 @@
+import { targetRulesFor } from "./scope"
+import type { Scope } from "./scope"
+
 /**
  * What a promotion gives, in the shop's terms, from Medusa's application
  * method: a percentage or an amount off the basket, or free shipping
@@ -24,7 +27,12 @@ export function offerKind(method: Method | null | undefined): OfferKind {
 }
 
 /** The application method a kind and value become; amounts are gross (KDV included). */
-export function applicationMethod(kind: OfferKind, value: number, currency: string) {
+export function applicationMethod(
+  kind: OfferKind,
+  value: number,
+  currency: string,
+  scope: { scope: Scope; ids: readonly string[] } = { scope: "all", ids: [] }
+) {
   if (kind === "free_shipping") {
     return {
       type: "percentage" as const,
@@ -33,12 +41,15 @@ export function applicationMethod(kind: OfferKind, value: number, currency: stri
       value: 100,
     }
   }
+  // Some items only: the discount spreads over the matching lines (F4.4)
+  const items = scope.scope !== "all"
   return {
     type: kind,
-    target_type: "order" as const,
+    target_type: items ? ("items" as const) : ("order" as const),
     allocation: "across" as const,
     value,
     ...(kind === "fixed" ? { currency_code: currency } : {}),
+    ...(items ? { target_rules: targetRulesFor(scope.scope, scope.ids) } : {}),
   }
 }
 

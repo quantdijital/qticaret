@@ -3,13 +3,12 @@ import { useQuery } from "@tanstack/react-query"
 import { getRouteApi, useNavigate } from "@tanstack/react-router"
 import { Loader2, Pause, Play, Trash2 } from "lucide-react"
 import { useState } from "react"
-import { Controller, FormProvider, useForm, useWatch } from "react-hook-form"
+import { Controller, FormProvider, useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { ConfirmDialog } from "@/components/patterns/confirm-dialog"
 import { LeaveGuard } from "@/components/patterns/leave-guard"
 import { PageHeader } from "@/components/patterns/page-header"
-import { SectionCard } from "@/components/patterns/section-card"
 import { ErrorState } from "@/components/patterns/states"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -18,66 +17,23 @@ import {
   campaignMembersQuery,
   promotionQuery,
   useDeletePromotion,
-  useSavePromotion,
   useUpdatePromotion,
 } from "@/features/promotions/api/promotions"
+import { useSavePromotion } from "@/features/promotions/api/save-promotion"
 import type { Promotion } from "@/features/promotions/api/promotions"
-import { OfferText, ScheduleBadge } from "@/features/promotions/components/offer-text"
+import { ConditionsCard } from "@/features/promotions/components/conditions-card"
+import { ScheduleBadge } from "@/features/promotions/components/offer-text"
+import { PromotionPreview } from "@/features/promotions/components/promotion-preview"
 import { OfferCard, UsageCard } from "@/features/promotions/components/promotion-fields"
-import { createBody, promotionSchema, valuesOf } from "@/features/promotions/form"
+import { createBody, perCustomerLimit, promotionSchema, valuesOf } from "@/features/promotions/form"
 import type { PromotionValues } from "@/features/promotions/form"
-import { applicationMethod, ownsCampaign } from "@/features/promotions/offer"
+import { ownsCampaign } from "@/features/promotions/offer"
+import { isPerCustomerBudget } from "@/features/promotions/scope"
+import type { BudgetLike } from "@/features/promotions/scope"
 import { errorText } from "@/lib/errors"
-import { formatCount } from "@/lib/format"
-import { parseMoneyInput } from "@/lib/money-input"
 
 const CURRENCY = "try"
 const detailRoute = getRouteApi("/_auth/promotions/$id")
-
-function Preview({ existing }: { existing: Promotion | null }) {
-  const { t } = useTranslation()
-  const [kind, value, code, automatic] = useWatch<
-    PromotionValues,
-    ["kind", "value", "code", "automatic"]
-  >({
-    name: ["kind", "value", "code", "automatic"],
-  })
-  const method = applicationMethod(kind, parseMoneyInput(value) ?? 0, CURRENCY)
-  return (
-    <SectionCard title={t("promotions.form.preview")}>
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col items-start gap-3 rounded-lg border border-dashed bg-muted/40 p-5">
-          <span className="text-2xl font-semibold tracking-tight">
-            <OfferText method={method} />
-          </span>
-          <span className="rounded-md border bg-background px-2.5 py-1 font-mono text-sm tracking-wider uppercase">
-            {code.trim() || t("promotions.form.codePlaceholder")}
-          </span>
-          <span className="text-[13px] text-muted-foreground">
-            {t(automatic ? "promotions.form.previewAutomatic" : "promotions.form.previewCode")}
-          </span>
-        </div>
-        {existing ? (
-          <dl className="flex flex-col divide-y text-sm">
-            <div className="flex justify-between py-2">
-              <dt className="text-muted-foreground">{t("promotions.columns.status")}</dt>
-              <dd>
-                <ScheduleBadge promotion={existing} />
-              </dd>
-            </div>
-            <div className="flex justify-between py-2">
-              <dt className="text-muted-foreground">{t("promotions.columns.used")}</dt>
-              <dd className="tabular-nums">
-                {formatCount(existing.used ?? 0)}
-                {existing.limit ? ` / ${formatCount(existing.limit)}` : ""}
-              </dd>
-            </div>
-          </dl>
-        ) : null}
-      </div>
-    </SectionCard>
-  )
-}
 
 function PromotionForm({ existing }: { existing: Promotion | null }) {
   const { t } = useTranslation()
@@ -90,6 +46,9 @@ function PromotionForm({ existing }: { existing: Promotion | null }) {
   // Dates on a campaign shared with other promotions are not this form's to change
   const datesLocked =
     Boolean(existing?.campaign?.id) && !ownsCampaign(existing?.id ?? "", members.data)
+  // Nor a budget of another kind (a total spend set elsewhere)
+  const budget = (existing?.campaign as { budget?: BudgetLike | null } | null | undefined)?.budget
+  const perCustomerLocked = datesLocked || Boolean(budget && !isPerCustomerBudget(budget))
   const initial = valuesOf(existing)
   const form = useForm<PromotionValues>({
     resolver: zodResolver(promotionSchema),
@@ -102,6 +61,8 @@ function PromotionForm({ existing }: { existing: Promotion | null }) {
         existing,
         body: createBody(values, CURRENCY),
         datesChanged: values.starts !== initial.starts || values.ends !== initial.ends,
+        perCustomer: perCustomerLimit(values),
+        perCustomerChanged: values.perCustomer !== initial.perCustomer,
       },
       {
         onSuccess: (id) => {
@@ -128,10 +89,11 @@ function PromotionForm({ existing }: { existing: Promotion | null }) {
       >
         <div className="flex min-w-0 flex-col gap-[var(--grid-gap)] xl:col-span-8">
           <OfferCard kindLocked={existing !== null} />
+          <ConditionsCard perCustomerLocked={perCustomerLocked} />
           <UsageCard datesLocked={datesLocked} />
         </div>
         <div className="flex min-w-0 flex-col gap-[var(--grid-gap)] xl:sticky xl:top-20 xl:col-span-4">
-          <Preview existing={existing} />
+          <PromotionPreview existing={existing} />
           {existing ? null : (
             <label
               htmlFor="promotion-activate"

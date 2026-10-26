@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next"
 import { Toaster as Sonner } from "sonner"
 
 /**
@@ -5,8 +6,11 @@ import { Toaster as Sonner } from "sonner"
  * tokens. An error stays until closed; success leaves after four seconds.
  */
 export function Toaster() {
+  const { t } = useTranslation()
   return (
     <Sonner
+      // The region's name for screen readers; Sonner's own is English
+      containerAriaLabel={t("common.notifications")}
       position="bottom-right"
       duration={4000}
       closeButton

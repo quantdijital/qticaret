@@ -20,7 +20,8 @@
     "actions": "Actions",
     "delete": "Delete",
     "clear": "Clear",
-    "more": "More actions"
+    "more": "More actions",
+    "notifications": "Notifications"
   },
   "errors": {
     "generic": "The action could not be completed. Try again in a moment.",
@@ -1227,7 +1228,9 @@
     "offer": {
       "percentage": "{{value}}% off the basket",
       "fixed": "{{amount}} off the basket",
-      "free_shipping": "Free shipping"
+      "free_shipping": "Free shipping",
+      "percentageItems": "{{value}}% off",
+      "fixedItems": "{{amount}} off"
     },
     "kinds": {
       "percentage": {
@@ -1270,14 +1273,47 @@
       "activateHint": "When off, it is saved as a draft.",
       "codeShort": "Codes shorter than 6 characters are easy to guess; a longer one is better.",
       "datesShared": "The dates live on a campaign shared with other promotions; change them in the advanced panel.",
-      "codePlaceholder": "CODE"
+      "codePlaceholder": "CODE",
+      "conditions": "Scope and conditions",
+      "conditionsHint": "Which products and which baskets the discount applies to.",
+      "scope": "On which products",
+      "scopes": {
+        "all": "Whole basket",
+        "categories": "Categories",
+        "collections": "Collections",
+        "products": "Products"
+      },
+      "noCollections": "No collections yet.",
+      "addProduct": "Add a product",
+      "noProducts": "No products found.",
+      "removeItem": "Remove {{name}}",
+      "minimum": "Minimum basket",
+      "minimumHint": "Applies once the basket's products reach this total, tax included.",
+      "none": "None",
+      "perCustomer": "Uses per customer",
+      "perCustomerHint": "How many times one customer may use it. Empty means no limit.",
+      "perCustomerLocked": "This campaign's budget is set elsewhere; change it in the advanced dashboard.",
+      "previewScope": {
+        "categories_one": "In {{count}} selected category",
+        "categories_other": "In {{count}} selected categories",
+        "collections_one": "In {{count}} selected collection",
+        "collections_other": "In {{count}} selected collections",
+        "products_one": "On {{count}} selected product",
+        "products_other": "On {{count}} selected products"
+      },
+      "previewMinimum": "On baskets of {{amount}} or more",
+      "previewPerCustomer_one": "Each customer may use it {{count}} time",
+      "previewPerCustomer_other": "Each customer may use it {{count}} times"
     },
     "errors": {
       "code": "The code needs 3–40 letters, digits, hyphens or underscores.",
       "percentage": "The rate must be above 0 and at most 100.",
       "amount": "Enter an amount above zero.",
       "limit": "The limit must be a whole number.",
-      "dates": "The end cannot be before the start."
+      "dates": "The end cannot be before the start.",
+      "scope": "Choose at least one, or the whole basket.",
+      "minimum": "Enter an amount above zero, or leave it empty.",
+      "perCustomer": "Uses per customer must be a whole number."
     },
     "created": "Promotion created.",
     "saved": "Promotion saved.",

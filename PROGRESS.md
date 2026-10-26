@@ -3,7 +3,7 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: BİTTİ** (T1a–T16; kabul kriterlerinin hepsi testlerle işaretli, docs/03; son eksik iki kanıt, danışmanın p95 ölçümü ve yedi sayfa türünün SEO sözleşme testi, kapanışta eklendi). Playwright e2e altyapısı kuruldu; CI düzeltildi. **F4 — Fiyatlandırma ve promosyon: DEVAM** (plan ve ADR-0023/0024/0025 kabul edildi; U1 `price-history` bitti; sırada U4 kuponlar). Dal `f4-pricing-promotions`. Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı. F1, F2 ve F3 dalları push edildi (kullanıcı 2026-10-26: "pushları sen önerdiğinde yapabilirsin"); PR açılmadı.
+**Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: BİTTİ** (T1a–T16; kabul kriterlerinin hepsi testlerle işaretli, docs/03; son eksik iki kanıt, danışmanın p95 ölçümü ve yedi sayfa türünün SEO sözleşme testi, kapanışta eklendi). Playwright e2e altyapısı kuruldu; CI düzeltildi. **F4 — Fiyatlandırma ve promosyon: DEVAM** (plan ve ADR-0023/0024/0025 kabul edildi; U1 `price-history` ve U4 kuponlar bitti; sırada U7 indirim dağılımı ve iade tutarı). Dal `f4-pricing-promotions`. Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı. F1, F2 ve F3 dalları push edildi (kullanıcı 2026-10-26: "pushları sen önerdiğinde yapabilirsin"); PR açılmadı.
 
 ## Son oturum özeti
 **2026-10-25/26 gece (kullanıcı yatarken, "panel işlerini tamamla" talimatıyla).** Panelin ekranları yazıldı; her biri gerçek veriyle tarayıcıda denendi (CDP ekran görüntüsü, test kayıtları sonra silindi). Commit'ler `e11a201`…`6d63df7`, push yok.
@@ -336,6 +336,11 @@
   - Yakalama: fiyat, fiyat listesi ve liste kuralı olaylarına subscriber; saat başı kontrol (başlangıç/bitiş tarihi gelen liste olay üretmiyor); `db:migrate`'te açılış kaydı (yerelde 20 varyant).
   - 30 gün hesabı `lib/pricing` (`discountView`): indirimin başladığı andan önceki 30 günde geçerli en düşük fiyat; kademeli derinleşen indirim tek indirim (hukukçuya sorulacak, docs/12). Store API'de gösterim U3'te.
   - Testler: modül (3), birim (6), HTTP 2 (olaylar çalışıyor, indirimli liste, müşteri grubu fiyatı dışarıda, olaysız başlayan liste saatlik kontrolde, tekrar kontrol boş).
+- **F4 U4 (F4.4 + F4.6) bitti: kuponlar.**
+  - Kodlar büyük harf ve Türkçe harfsiz saklanıyor; müşteri nasıl yazarsa yazsın bulunuyor (`İndirim` = `INDIRIM`). Mevcut kodlar `db:migrate`'te bir kez çevriliyor (yerelde değişen olmadı).
+  - Sepette tek kod (ayar `promotions.combine_codes`, varsayılan kapalı); otomatik kampanyalar kodla birlikte. Kod denemesi IP başına 10 dk'da 30, sepet başına 10.
+  - Panel kampanya formuna "Kapsam ve koşullar" eklendi: tüm sepet ya da seçili kategoriler / koleksiyonlar / ürünler, en az sepet tutarı (KDV dahil), müşteri başına kullanım. Var olan kampanyada da değişiyor (Medusa'nın kural batch uçları ve kampanya bütçesi); önizleme koşulları yazıyor.
+  - Testler: HTTP 5 (kod biçimi, tek kod ve birleştirme ayarı, deneme sınırı, `item_total` en az sepet kuralının çalıştığı, KK: limiti 1 olan koda yarışan üç ödemeden biri tamamlanıyor), panel birim (kural eşlemeleri, form), tarayıcıda oluştur/düzenle/sil denendi.
 - **Gözden geçir (kullanıcı yokken önerilen seçenekle verilen kararlar):**
   1. Bayrak adı `catalog.non_physical`, mağaza tarafından açılır, varsayılan kapalı. Etiketleri Medusa Admin'de ve panelde var.
   2. Kargo gerekmeyen kalemler sipariş ödenince "teslim edildi" sayılıyor. Dijital teslimat (indirme bağlantısı, kod gönderimi) F9 bildirimleriyle gelecek.
@@ -520,6 +525,10 @@
   127. **İçe aktarma ve toplu düzenleme aynı anda çalışmıyor:** iş tiplerine grup eklendi (`catalog.write`); gruptaki tipler kuyruğa alınırken birlikte kilitleniyor ve birbirini bekletiyor (409).
   128. **Yayın kapısı yalnızca var olan taslağı yayına alırken:** ürün route'unda olduğu gibi. Yeni ürünü doğrudan yayında açmak (panelden, Admin API'den ya da tablodan) kapıya takılmıyor; kayıtlı bir ürün olmadan değerlendirme yapılamıyor. Kapıyı oluşturmaya da uygulamak ayrı bir karar (taslak oluştur → değerlendir → yayınla).
   129. **Yetki:** toplu düzenleme her yöneticiye açık (bugün rol ayrımı yok). F12 rol matrisine "toplu fiyat/stok değişikliği" ayrı izin olarak eklenmeli.
+  130. **Kampanya kapsamı panelde dört seçenek:** tüm sepet, kategoriler, koleksiyonlar, ürünler. Medusa'nın diğer hedefleri (ürün türü, etiket) ve kuralları (müşteri grubu, bölge) panelde gösterilmiyor; başka yerde eklenmişse kapsam değiştirilmedikçe korunuyor, kapsam değişince yerine seçilen yazılıyor.
+  131. **Kalem hedefli indirim sepete yayılıyor** (`allocation: across`): tutar indiriminde tutar eşleşen kalemlerin toplamından düşüyor, kalem başına değil.
+  132. **En az sepet tutarı** `item_total` kuralı: KDV dahil, indirimler düşüldükten sonraki kalem toplamı (kargo hariç). Ücretsiz kargo kampanyasında da kullanılabiliyor.
+  133. **Müşteri başına kullanım** kampanyanın bütçesi (`use_by_attribute`, `customer_id`). Medusa misafir alışverişte de e-postaya bağlı müşteri kaydı açtığı için misafiri de sayıyor; farklı e-postayla yeniden kullanım engellenemiyor (kimlik doğrulama F10). Başka promosyonlarla paylaşılan ya da başka türde bütçesi olan kampanyada alan kilitli.
 - **Bilinen sınırlar (devreden):**
   - JSON-LD'yi storefront basarken `<`, `>` ve `&` kaçışlanmalı (`</script>` içeren başlık ya da metin). Kural docs/13'te var; F18 kabulüne sözleşme testi olarak eklenecek.
   - Editöre yüklenip bir günden uzun süre kaydedilmeyen görseli gece süpürmesi siler; kayıt `content.image_unknown` verir.
@@ -805,7 +814,7 @@
 - **Daha önce:** F1 planlaması ve F0.2–F0.8 (2026-10-24), F0.1 monorepo (2026-10-24 sabahı), SEO ve güvenlik dokümanları (2026-10-22).
 
 ## Sıradaki görev
-**Claude'un sıradaki işi:** F4 U4 kuponlar (plan aşağıda, "F4 görev planı"), ardından U7. F4 kodu `f4-pricing-promotions` dalında (F1–F3 birleştirilmediği için `f3-catalog-seo-stock` üzerinden).
+**Claude'un sıradaki işi:** F4 U7 indirim dağılımı ve iade tutarı (plan aşağıda, "F4 görev planı"), ardından U2–U3. F4 kodu `f4-pricing-promotions` dalında (F1–F3 birleştirilmediği için `f3-catalog-seo-stock` üzerinden).
 
 1. **Kullanıcı:**
    - **F4 kararları:** ADR-0023/0024/0025 kabul edildi (2026-10-26). Dışarıda bekleyen: 30 gün kuralının hukukçu teyidi, hediye kartı vergisinin mali müşavir teyidi (docs/12).
@@ -835,7 +844,7 @@ Kararlar: ADR-0023 (fiyat geçmişi, 30 gün kuralı), ADR-0024 (kupon ve kampan
 | U1 ✅ | F4.2 | `price-history` modülü (append-only): satıştaki fiyatın (calculated/original, herkese açık bağlam) varyant ve para birimi başına geçmişi. Yakalama: `pricing.price.*` ve `pricing.price_list.*` subscriber'ı (olayların çalıştığı testle kanıtlanır), saatlik zamanlama işi (liste başlangıç/bitişi olaysız), açılış bakiyesi migration script'i. `lib/pricing` 30 gün hesabı (saf, fixture'lı) | — | KK2 (yarısı) |
 | U2 | F4.1 | Fiyat listeleri: panel ekranları (indirimli/geçersiz kılan liste, tarih aralığı, müşteri grubu, ürün fiyatları), denetim kaydı kapsamı, panel `nextPrices`'ın liste fiyatlarını korumasının doğrulanması (devreden iş) | — | — |
 | U3 | F4.3 | İndirim gösterimi: Store API `price_display` (güncel, liste fiyatı, indirimden önceki fiyat, kural sürümü), JSON-LD `StrikethroughPrice` aynı kaynaktan, panelde ürün fiyat geçmişi ve indirim uyarısı | U1, U2 | KK2 |
-| U4 | F4.4 + F4.6 | Kuponlar: kod normalleştirme (büyük harf, ASCII) + mevcut kodlar için migration, sepette tek kod kuralı (ayarla açılır), `coupon` hız profilinin üç Store ucuna bağlanması, kapsam (ürün/kategori/koleksiyon), minimum sepet (`item_total gte`, testle doğrulanır), kişi başı limit (`use_by_attribute`). Eşzamanlı limit KK testi | — | KK1 |
+| U4 ✅ | F4.4 + F4.6 | Kuponlar: kod normalleştirme (büyük harf, ASCII) + mevcut kodlar için migration, sepette tek kod kuralı (ayarla açılır), `coupon` hız profilinin üç Store ucuna bağlanması, kapsam (ürün/kategori/koleksiyon), minimum sepet (`item_total gte`, testle doğrulanır), kişi başı limit (`use_by_attribute`). Eşzamanlı limit KK testi | — | KK1 |
 | U5 | F4.6 | Tek kullanımlık kodlar: `promotion.codes` işi (şablondan N promosyon, `limit: 1`, okunur kodlar, CSV sonuç, en çok 10.000), panelde üret ve indir | U4 | — |
 | U6 | F4.5 | Otomatik kampanyalar: X al Y öde (`buyget`), sepette indirim (sipariş hedefli, minimumlu), kargo bedava eşiği (mağaza ayarı → düz fiyatlı kargo seçeneklerine `item_total gte` kurallı 0 TL fiyat) | U4 | KK3 |
 | U7 | F4.7 | İndirim dağılımı ve iade tutarı: kalem başına indirim payı (Medusa ayarlamalarından, `lib/money`), ardışık kısmi iadelerde satırın kalanını tavan alan dağıtım (ADR-0010 "Sonuçlar"), `refundableAmount` (F6/F7/F8 kullanır) | — | KK4 |

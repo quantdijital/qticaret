@@ -42,4 +42,55 @@ describe("promotion form", () => {
     expect(values.starts).toBe("2026-11-01")
     expect(values.value).toBe("49,9")
   })
+
+  it("aims at the chosen items, a basket minimum and a per-customer budget", () => {
+    const body = createBody(
+      {
+        ...base,
+        scope: "categories",
+        scopeIds: ["pcat_1"],
+        minimum: "150",
+        perCustomer: "1",
+      },
+      "try",
+      "t2"
+    )
+    expect(body.application_method).toMatchObject({
+      target_type: "items",
+      allocation: "across",
+      target_rules: [
+        { attribute: "items.product.categories.id", operator: "in", values: ["pcat_1"] },
+      ],
+    })
+    expect(body.rules).toEqual([{ attribute: "item_total", operator: "gte", values: ["150"] }])
+    expect(body.campaign?.budget).toEqual({
+      type: "use_by_attribute",
+      attribute: "customer_id",
+      limit: 1,
+    })
+    expect(promotionSchema.safeParse({ ...base, scope: "products", scopeIds: [] }).success).toBe(
+      false
+    )
+    expect(promotionSchema.safeParse({ ...base, minimum: "0" }).success).toBe(false)
+  })
+
+  it("reads a stored promotion's scope, minimum and per-customer limit back", () => {
+    const values = valuesOf({
+      code: "X",
+      rules: [{ id: "r1", attribute: "item_total", values: [{ value: "200" }] }],
+      application_method: {
+        type: "percentage",
+        target_type: "items",
+        value: 10,
+        target_rules: [{ id: "t1", attribute: "items.product.id", values: [{ value: "prod_1" }] }],
+      },
+      campaign: { budget: { type: "use_by_attribute", attribute: "customer_id", limit: 3 } },
+    } as never)
+    expect(values).toMatchObject({
+      scope: "products",
+      scopeIds: ["prod_1"],
+      minimum: "200,00",
+      perCustomer: "3",
+    })
+  })
 })

@@ -2,6 +2,8 @@ import { z } from "zod"
 import { parseMoneyInput } from "@/lib/money-input"
 import { applicationMethod, offerKind } from "./offer"
 import type { OfferKind } from "./offer"
+import { minimumOf, minimumRulesFor, perCustomerBudget, perCustomerOf, scopeOf } from "./scope"
+import type { BudgetLike, RuleLike } from "./scope"
 import type { Promotion } from "./api/promotions"
 
 /** The promotion form; messages are i18n keys. Dates are whole Istanbul days. */
@@ -23,6 +25,13 @@ export const promotionSchema = z
     starts: z.string(),
     ends: z.string(),
     activate: z.boolean(),
+    scope: z.enum(["all", "categories", "collections", "products"]),
+    scopeIds: z.array(z.string()),
+    minimum: z.string().trim(),
+    perCustomer: z
+      .string()
+      .trim()
+      .regex(/^\d{0,5}$/, { message: "promotions.errors.perCustomer" }),
   })
   .superRefine((values, ctx) => {
     const amount = parseMoneyInput(values.value) ?? 0
@@ -34,6 +43,12 @@ export const promotionSchema = z
     }
     if (values.starts && values.ends && values.ends < values.starts) {
       ctx.addIssue({ code: "custom", path: ["ends"], message: "promotions.errors.dates" })
+    }
+    if (values.kind !== "free_shipping" && values.scope !== "all" && values.scopeIds.length === 0) {
+      ctx.addIssue({ code: "custom", path: ["scopeIds"], message: "promotions.errors.scope" })
+    }
+    if (values.minimum && !((parseMoneyInput(values.minimum) ?? 0) > 0)) {
+      ctx.addIssue({ code: "custom", path: ["minimum"], message: "promotions.errors.minimum" })
     }
   })
 
@@ -48,7 +63,15 @@ const dayOf = (when: string | Date | null | undefined) =>
 export function valuesOf(promotion: Promotion | null): PromotionValues {
   const method = promotion?.application_method
   const kind: OfferKind = promotion ? offerKind(method) : "percentage"
+  const { scope, ids } = scopeOf(
+    (method as { target_rules?: RuleLike[] | null } | undefined)?.target_rules
+  )
+  const campaign = promotion?.campaign as { budget?: BudgetLike | null } | null | undefined
   return {
+    scope,
+    scopeIds: ids,
+    minimum: minimumOf((promotion as { rules?: RuleLike[] | null } | null)?.rules),
+    perCustomer: perCustomerOf(campaign?.budget),
     kind,
     value: kind === "free_shipping" || !method?.value ? "" : String(method.value).replace(".", ","),
     code: promotion?.code ?? "",
@@ -64,10 +87,15 @@ export function valuesOf(promotion: Promotion | null): PromotionValues {
 export const campaignIdentifier = (code: string, suffix: string = Date.now().toString(36)) =>
   `${code}-${suffix}`.toUpperCase()
 
-/** The body for a new promotion; dates come on a campaign of its own. */
+/** How often one customer may use it; none for no such limit. */
+export const perCustomerLimit = (values: PromotionValues): number | null =>
+  values.perCustomer ? Number(values.perCustomer) || null : null
+
+/** The body for a new promotion; dates and a per-customer limit come on a campaign of its own. */
 export function createBody(values: PromotionValues, currency: string, suffix?: string) {
   const code = values.code.trim().toUpperCase()
   const dated = Boolean(values.starts || values.ends)
+  const perCustomer = perCustomerLimit(values)
   return {
     code,
     type: "standard" as const,
@@ -79,15 +107,18 @@ export function createBody(values: PromotionValues, currency: string, suffix?: s
     application_method: applicationMethod(
       values.kind,
       parseMoneyInput(values.value) ?? 0,
-      currency
+      currency,
+      { scope: values.scope, ids: values.scopeIds }
     ),
-    ...(dated
+    rules: minimumRulesFor(parseMoneyInput(values.minimum)),
+    ...(dated || perCustomer
       ? {
           campaign: {
             name: code,
             campaign_identifier: campaignIdentifier(code, suffix),
             starts_at: dayStart(values.starts),
             ends_at: dayEnd(values.ends),
+            ...(perCustomer ? { budget: perCustomerBudget(perCustomer) } : {}),
           },
         }
       : {}),

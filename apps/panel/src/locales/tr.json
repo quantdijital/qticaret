@@ -20,7 +20,8 @@
     "actions": "İşlemler",
     "delete": "Sil",
     "clear": "Temizle",
-    "more": "Diğer işlemler"
+    "more": "Diğer işlemler",
+    "notifications": "Bildirimler"
   },
   "errors": {
     "generic": "İşlem tamamlanamadı. Biraz sonra tekrar deneyin.",
@@ -1235,7 +1236,9 @@
     "offer": {
       "percentage": "%{{value}} sepette",
       "fixed": "{{amount}} sepette",
-      "free_shipping": "Ücretsiz kargo"
+      "free_shipping": "Ücretsiz kargo",
+      "percentageItems": "%{{value}} indirim",
+      "fixedItems": "{{amount}} indirim"
     },
     "kinds": {
       "percentage": {
@@ -1278,14 +1281,47 @@
       "activateHint": "Kapalıysa taslak olarak kaydedilir.",
       "codeShort": "6 karakterden kısa kodlar tahmin edilebilir; daha uzun bir kod önerilir.",
       "datesShared": "Tarihler başka promosyonlarla ortak bir kampanyada; gelişmiş panelden değiştirin.",
-      "codePlaceholder": "KOD"
+      "codePlaceholder": "KOD",
+      "conditions": "Kapsam ve koşullar",
+      "conditionsHint": "İndirimin hangi ürünlere ve hangi sepetlere uygulanacağı.",
+      "scope": "Hangi ürünlerde",
+      "scopes": {
+        "all": "Tüm sepet",
+        "categories": "Kategoriler",
+        "collections": "Koleksiyonlar",
+        "products": "Ürünler"
+      },
+      "noCollections": "Henüz koleksiyon yok.",
+      "addProduct": "Ürün ekle",
+      "noProducts": "Ürün bulunamadı.",
+      "removeItem": "{{name}} kaldır",
+      "minimum": "En az sepet tutarı",
+      "minimumHint": "Sepetteki ürünlerin KDV dahil toplamı bu tutara ulaşınca uygulanır.",
+      "none": "Yok",
+      "perCustomer": "Müşteri başına kullanım",
+      "perCustomerHint": "Bir müşterinin bu kampanyayı kaç kez kullanabileceği. Boşsa sınırsız.",
+      "perCustomerLocked": "Bu kampanyanın bütçesi başka bir yerde tanımlı; gelişmiş panelden değiştirin.",
+      "previewScope": {
+        "categories_one": "Seçili {{count}} kategoride",
+        "categories_other": "Seçili {{count}} kategoride",
+        "collections_one": "Seçili {{count}} koleksiyonda",
+        "collections_other": "Seçili {{count}} koleksiyonda",
+        "products_one": "Seçili {{count}} üründe",
+        "products_other": "Seçili {{count}} üründe"
+      },
+      "previewMinimum": "En az {{amount}} tutarındaki sepetlerde",
+      "previewPerCustomer_one": "Her müşteri {{count}} kez kullanabilir",
+      "previewPerCustomer_other": "Her müşteri {{count}} kez kullanabilir"
     },
     "errors": {
       "code": "Kod 3–40 karakter olmalı; harf, rakam, tire ve alt çizgi kullanılabilir.",
       "percentage": "Oran 0'dan büyük, en çok 100 olmalı.",
       "amount": "Sıfırdan büyük bir tutar girin.",
       "limit": "Sınır bir tam sayı olmalı.",
-      "dates": "Bitiş, başlangıçtan önce olamaz."
+      "dates": "Bitiş, başlangıçtan önce olamaz.",
+      "scope": "En az bir seçim yapın ya da tüm sepeti seçin.",
+      "minimum": "Sıfırdan büyük bir tutar girin ya da boş bırakın.",
+      "perCustomer": "Müşteri başına kullanım bir tam sayı olmalı."
     },
     "created": "Kampanya oluşturuldu.",
     "saved": "Kampanya kaydedildi.",
