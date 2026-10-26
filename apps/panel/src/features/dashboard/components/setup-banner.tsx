@@ -79,7 +79,11 @@ export function SetupBanner() {
             <p className="text-[13px] text-muted-foreground">{t("dashboard.setup.subtitle")}</p>
           </div>
           <div className="flex max-w-md items-center gap-3">
-            <Progress value={(status.doneCount / total) * 100} className="h-1.5" />
+            <Progress
+              value={(status.doneCount / total) * 100}
+              aria-label={t("dashboard.setup.title")}
+              className="h-1.5"
+            />
             <span className="tabular shrink-0 text-xs text-muted-foreground">
               {t("dashboard.setup.progress", { done: status.doneCount, total })}
             </span>

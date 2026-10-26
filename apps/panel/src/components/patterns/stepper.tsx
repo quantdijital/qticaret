@@ -1,4 +1,5 @@
 import { Check } from "lucide-react"
+import { useTranslation } from "react-i18next"
 import { cn } from "@/lib/utils"
 
 export interface Step {
@@ -21,6 +22,7 @@ interface StepperProps {
  * brand colour. Horizontal from tablet width, a list on phones.
  */
 export function Stepper({ steps, currentKey, onSelect, className }: StepperProps) {
+  const { t } = useTranslation()
   return (
     <ol className={cn("flex flex-col gap-3 md:flex-row md:gap-0", className)}>
       {steps.map((step, index) => {
@@ -44,6 +46,8 @@ export function Stepper({ steps, currentKey, onSelect, className }: StepperProps
               type="button"
               disabled={!onSelect}
               aria-current={current ? "step" : undefined}
+              // A done step shows a tick, not its number: its name says both
+              aria-label={step.done ? `${step.title} (${t("common.done")})` : step.title}
               onClick={() => onSelect?.(step.key)}
               className={cn(
                 "relative z-10 flex size-8 shrink-0 items-center justify-center rounded-full border-2 text-xs font-semibold transition-colors",

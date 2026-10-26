@@ -143,7 +143,10 @@ export function UrlStyleCard({ saved }: { saved: UrlStyles }) {
               <Loader2 className="size-4 animate-spin" aria-hidden="true" />
               {t("settings.seo.style.moving", { percent: job?.progress ?? 0 })}
             </p>
-            <Progress value={job?.progress ?? 0} />
+            <Progress
+              value={job?.progress ?? 0}
+              aria-label={t("settings.seo.style.moving", { percent: job?.progress ?? 0 })}
+            />
           </div>
         ) : check ? (
           check.conflicts.length > 0 ? (

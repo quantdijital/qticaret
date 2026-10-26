@@ -11,6 +11,8 @@ function Progress({
     <ProgressPrimitive.Root
       data-slot="progress"
       className={cn("relative h-2 w-full overflow-hidden rounded-full bg-primary/20", className)}
+      // The value reaches screen readers (aria-valuenow), not only the bar's width
+      value={value}
       {...props}
     >
       <ProgressPrimitive.Indicator

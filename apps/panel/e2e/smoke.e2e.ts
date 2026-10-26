@@ -54,6 +54,8 @@ test("finds a product by its name and opens it", async ({ page, guard }) => {
   await expect(first).toBeVisible()
   const title = (await first.textContent()) ?? ""
   await page.getByRole("searchbox", { name: "Ürün adı ya da stok kodu ile ara" }).fill(title)
+  // The search is in the address once it ran; the list then holds what it found
+  await expect(page).toHaveURL(/[?&]q=/)
   await expect(page.getByRole("table").getByRole("link", { name: title }).first()).toBeVisible()
   await page.getByRole("table").getByRole("link", { name: title }).first().click()
   await expect(pageHeading(page)).toHaveText(title)

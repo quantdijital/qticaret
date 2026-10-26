@@ -83,7 +83,7 @@ export function SheetJobResult({ job }: { job: SheetJob }) {
           <Loader2 className="size-4 animate-spin" aria-hidden="true" />
           {t("products.sheets.working")}
         </p>
-        <Progress value={job.progress ?? 0} />
+        <Progress value={job.progress ?? 0} aria-label={t("products.sheets.working")} />
       </div>
     )
   }

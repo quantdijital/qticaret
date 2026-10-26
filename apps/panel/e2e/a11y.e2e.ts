@@ -1,8 +1,12 @@
 import AxeBuilder from "@axe-core/playwright"
 import { expect, pageHeading, test } from "./support/guard"
 
-/** Screens a person spends the most time on; WCAG 2.1 A and AA rules (docs/06, docs/18). */
-const SCREENS = ["/", "/products", "/orders", "/settings/store"]
+/**
+ * Screens a person spends the most time on; WCAG 2.1 A and AA rules (docs/06,
+ * docs/18). The product wizard carries the stepper the dashboard's setup
+ * card shows only to a shop not yet set up.
+ */
+const SCREENS = ["/", "/products", "/products/new", "/orders", "/settings/store"]
 
 for (const path of SCREENS) {
   test(`${path} has no serious accessibility issue`, async ({ page }) => {
