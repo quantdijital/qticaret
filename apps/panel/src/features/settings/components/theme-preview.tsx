@@ -1,6 +1,6 @@
 import { ChartColumn, LayoutGrid, Package, ShoppingBag, Users } from "lucide-react"
 import { useTranslation } from "react-i18next"
-import { Badge } from "@/components/ui/badge"
+import { StatusBadge } from "@/components/patterns/status-badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { formatMoney } from "@/lib/format"
@@ -13,11 +13,12 @@ const ROWS = [
   { id: "1040", total: "2180.00", status: "awaitingPayment" },
 ] as const
 
-const STATUS_CLASS: Record<(typeof ROWS)[number]["status"], string> = {
-  paid: "bg-success/15 text-success",
-  shipped: "bg-info/15 text-info",
-  awaitingPayment: "bg-warning/15 text-warning",
-}
+// The panel's own badges, as an order list shows them
+const STATUS_TONE = {
+  paid: "success",
+  shipped: "info",
+  awaitingPayment: "warning",
+} as const satisfies Record<(typeof ROWS)[number]["status"], string>
 
 const MENU = [
   { key: "dashboard", icon: LayoutGrid },
@@ -91,9 +92,9 @@ export function ThemePreview({ mode }: { mode: ResolvedMode }) {
                 <tr key={row.id} className="h-[var(--row-height)] border-t first:border-t-0">
                   <td className="px-4 font-medium tabular-nums">#{row.id}</td>
                   <td className="hidden sm:table-cell">
-                    <Badge variant="secondary" className={STATUS_CLASS[row.status]}>
+                    <StatusBadge tone={STATUS_TONE[row.status]}>
                       {t(`status.${row.status}`)}
-                    </Badge>
+                    </StatusBadge>
                   </td>
                   <td className="px-4 text-right whitespace-nowrap tabular-nums">
                     {formatMoney(row.total, "try")}
