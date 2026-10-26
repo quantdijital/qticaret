@@ -4,7 +4,7 @@ import { requireUserActor } from "./actor"
 import { rateLimit } from "./rate-limit"
 import { StoreGetSeoResolve, StorePostNotFound } from "../store/seo/validators"
 import { AdminPutSeoMeta } from "../admin/seo/[entity_type]/[entity_id]/validators"
-import { AdminGetAssessments } from "../admin/seo/assessments/validators"
+import { AdminGetAssessments, AdminPostAssessmentFix } from "../admin/seo/assessments/validators"
 import {
   AdminGetNotFound,
   AdminGetOldPaths,
@@ -58,6 +58,11 @@ export const SEO_ROUTES = [
   get("/admin/seo/not-found", AdminGetNotFound),
   get("/admin/seo/url-style", AdminGetUrlStyle),
   get("/admin/seo/assessments", AdminGetAssessments),
+  {
+    matcher: "/admin/seo/assessments/:kind/:id/fix",
+    methods: ["POST" as const],
+    middlewares: [validateAndTransformBody(AdminPostAssessmentFix)],
+  },
   get("/store/seo/resolve", StoreGetSeoResolve),
   {
     matcher: "/store/seo/not-found",

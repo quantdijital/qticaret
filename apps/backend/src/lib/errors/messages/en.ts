@@ -98,6 +98,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "seo.entity_type_invalid": "The record type is not valid.",
   "seo.entity_type_unknown": "This page type has no SEO fields.",
   "seo.entity_unknown": "Page not found.",
+  "seo.fix_not_applicable": "This fix cannot be applied to this page.",
   "seo.locale_invalid": "The language code is not valid.",
   "seo.not_found_unknown": "This entry is not in the 404 log.",
   "seo.og_image_unknown": "The share image must be one of the shop's uploaded files.",

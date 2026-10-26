@@ -102,6 +102,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "seo.entity_type_invalid": "Kayıt türü geçerli değil.",
   "seo.entity_type_unknown": "Bu sayfa türü için SEO alanları yok.",
   "seo.entity_unknown": "Sayfa bulunamadı.",
+  "seo.fix_not_applicable": "Bu düzeltme bu sayfaya uygulanamıyor.",
   "seo.locale_invalid": "Dil kodu geçerli değil.",
   "seo.not_found_unknown": "Bu kayıt 404 günlüğünde yok.",
   "seo.og_image_unknown": "Paylaşım görseli mağazanın yüklenen dosyalarından biri olmalı.",

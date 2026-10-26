@@ -1,5 +1,6 @@
 import { z } from "@medusajs/framework/zod"
 import { ASSESSED_KINDS } from "../../../../modules/seo-advisor/models/seo-assessment"
+import { AUTO_FIXES } from "../../../../workflows/seo/advisor/fixes"
 
 /**
  * `?kind=product&max_score=69&ids=a,b`: stored assessments, lowest score
@@ -20,3 +21,7 @@ export const AdminGetAssessments = z
   })
   .strict()
 export type AdminGetAssessmentsType = z.infer<typeof AdminGetAssessments>
+
+/** One of the advisor's one-click fixes. */
+export const AdminPostAssessmentFix = z.object({ action: z.enum(AUTO_FIXES) }).strict()
+export type AdminPostAssessmentFixType = z.infer<typeof AdminPostAssessmentFix>

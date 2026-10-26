@@ -84,6 +84,14 @@ medusaIntegrationTestRunner({
         action: "set_primary_category",
       })
       expect(after.score).toBeGreaterThan(before.score)
+
+      // The one-click fix sets the deepest category as the primary one
+      const fixed = await post<{ assessment: Assessment }>(
+        `/admin/seo/assessments/product/${id}/fix`,
+        { action: "set_primary_category" }
+      )
+      expect(rules(fixed.data.assessment)).not.toContain("P-DATA-04")
+      expect(fixed.data.assessment.score).toBeGreaterThan(after.score)
     })
 
     it("assesses a saved page on its own and sums the shop up", async () => {
