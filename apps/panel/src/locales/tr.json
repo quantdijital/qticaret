@@ -372,6 +372,10 @@
           "indexnow": {
             "label": "Değişen sayfaları IndexNow ile bildir",
             "description": "Ürün, kategori ve marka sayfası eklenince, değişince ya da kalkınca Bing, Yandex ve diğer IndexNow arama motorlarına haber verilir. Mağazanın ana alan adı gerekir; Google bu protokole katılmıyor."
+          },
+          "publish_gate": {
+            "label": "SEO yayın kapısı",
+            "description": "Kritik eksiği olan (fiyat ya da görsel yok) ya da SEO puanı 50'nin altındaki ürün yayına alınamaz. Kapalıyken danışman yalnızca öneri verir."
           }
         }
       }

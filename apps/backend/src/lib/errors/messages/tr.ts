@@ -113,6 +113,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "seo.path_reserved": "Bu adres mağazanın kendi sayfalarına ayrılmış.",
   "seo.path_taken": "Bu adres başka bir kayıt tarafından kullanılıyor.",
   "seo.path_unknown": "Bu adres kayıtlı değil.",
+  "seo.publish_gate_blocked":
+    "Ürün SEO açısından yayına hazır değil: kritik bir eksik var ya da puanı 50'nin altında. SEO danışmanındaki önerileri tamamlayın.",
   "seo.redirect_csv_header": 'Dosyanın ilk satırında en az "source" sütunu olmalı.',
   "seo.redirect_duplicate_row": "Aynı kaynak dosyada birden fazla kez geçiyor.",
   "seo.redirect_exists": "Bu kaynak için zaten bir yönlendirme var; onu düzenleyin.",

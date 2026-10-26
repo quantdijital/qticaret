@@ -1,6 +1,7 @@
 import { validateAndTransformBody, validateAndTransformQuery } from "@medusajs/framework/http"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import { requireUserActor } from "./actor"
+import { seoPublishGate } from "../validation/seo-publish-gate"
 import { rateLimit } from "./rate-limit"
 import { StoreGetSeoResolve, StorePostNotFound } from "../store/seo/validators"
 import { AdminPutSeoMeta } from "../admin/seo/[entity_type]/[entity_id]/validators"
@@ -58,6 +59,12 @@ export const SEO_ROUTES = [
   get("/admin/seo/not-found", AdminGetNotFound),
   get("/admin/seo/url-style", AdminGetUrlStyle),
   get("/admin/seo/assessments", AdminGetAssessments),
+  // F3.13: taking a product live passes the advisor when the shop asks so
+  {
+    matcher: "/admin/products/:id",
+    methods: ["POST" as const],
+    middlewares: [seoPublishGate],
+  },
   {
     matcher: "/admin/seo/assessments/:kind/:id/fix",
     methods: ["POST" as const],

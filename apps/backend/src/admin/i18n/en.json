@@ -212,6 +212,10 @@
       "seo_indexnow": {
         "label": "Announce changed pages with IndexNow",
         "description": "When a product, category or brand page is added, changed or removed, Bing, Yandex and other IndexNow search engines are told. Needs the shop's main domain; Google does not take part."
+      },
+      "seo_publish_gate": {
+        "label": "SEO publish gate",
+        "description": "A product with a critical gap (no price or image) or an SEO score under 50 cannot go live. When off, the advisor only suggests."
       }
     },
     "attributes": {

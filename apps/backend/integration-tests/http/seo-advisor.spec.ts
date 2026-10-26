@@ -1,4 +1,6 @@
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
+import { PLATFORM_SETTINGS_MODULE } from "../../src/modules/platform-settings"
+import type PlatformSettingsModuleService from "../../src/modules/platform-settings/service"
 import { createAdminUser } from "../helpers/admin"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
@@ -118,6 +120,32 @@ medusaIntegrationTestRunner({
       }>("/admin/seo/assessments/summary", { headers: admin.headers })
       expect(summary).toMatchObject({ products: 1, critical: 1, average: listed[0]?.score })
       expect(summary.lowest[0]?.title).toBe("Seramik Kupa")
+    })
+
+    it("keeps an unready product from going live while the publish gate is on", async () => {
+      const settings =
+        getContainer().resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
+      const { data } = await post<{ product: { id: string } }>(
+        "/admin/products",
+        product("Taslak Ürün", { status: "draft" })
+      )
+      await settings.setFeature("seo.publish_gate", true, null)
+      try {
+        const refused = await post<{ message: string }>(`/admin/products/${data.product.id}`, {
+          status: "published",
+        })
+        expect(refused.status).toBe(400)
+        expect(refused.data.message).toBe("seo.publish_gate_blocked")
+        // A draft is still saved, and the gate off lets it go live
+        expect(
+          (await post(`/admin/products/${data.product.id}`, { title: "Taslak Ürün 2" })).status
+        ).toBe(200)
+      } finally {
+        await settings.setFeature("seo.publish_gate", false, null)
+      }
+      expect(
+        (await post(`/admin/products/${data.product.id}`, { status: "published" })).status
+      ).toBe(200)
     })
 
     it("judges a category on its own text and products", async () => {

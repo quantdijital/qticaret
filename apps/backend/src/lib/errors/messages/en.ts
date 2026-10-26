@@ -108,6 +108,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "seo.path_reserved": "This URL is reserved for the store's own pages.",
   "seo.path_taken": "Another record already uses this URL.",
   "seo.path_unknown": "This path is not registered.",
+  "seo.publish_gate_blocked":
+    "The product is not ready for search yet: it misses something critical or scores under 50. Complete the SEO advisor's suggestions.",
   "seo.redirect_csv_header": 'The file\'s first row needs a "source" column at least.',
   "seo.redirect_duplicate_row": "The same source appears more than once in the file.",
   "seo.redirect_exists": "This source already has a redirect; edit that one.",
