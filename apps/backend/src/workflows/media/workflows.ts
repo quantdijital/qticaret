@@ -19,6 +19,8 @@ import { planProductMediaStep } from "./steps/plan-product-media"
 import { registerMediaStep } from "./steps/register-media"
 import { removeAbandonedMediaStep } from "./steps/remove-abandoned-media"
 import { setMediaAltStep } from "./steps/set-media-alt"
+import { setMediaAltsStep } from "./steps/set-media-alts"
+import type { MediaAlt } from "./steps/set-media-alts"
 
 /** Emitted after an image's alt text is saved: `{ id }` of its product, for its assessment. */
 export const MEDIA_SAVED = "media.saved"
@@ -80,6 +82,19 @@ export const setMediaAltWorkflow = createWorkflow(
         eventName: MEDIA_SAVED,
         data: transform({ saved }, ({ saved }) => ({ id: saved.product_id })),
       })
+    })
+    return new WorkflowResponse(saved)
+  }
+)
+
+/** A product's images' alt texts at once (bulk edit, F3.10); its assessment once. */
+export const setProductAltsWorkflow = createWorkflow(
+  "media-set-product-alts",
+  (input: { product_id: string; alts: MediaAlt[] }) => {
+    const saved = setMediaAltsStep(transform({ input }, ({ input }) => ({ alts: input.alts })))
+    emitEventStep({
+      eventName: MEDIA_SAVED,
+      data: transform({ input }, ({ input }) => ({ id: input.product_id })),
     })
     return new WorkflowResponse(saved)
   }

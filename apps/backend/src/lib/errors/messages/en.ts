@@ -14,6 +14,16 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "brands.name_invalid": "Enter the brand's name (120 characters at most).",
   "brands.name_taken": "A brand with this name already exists.",
   "brands.unknown": "Brand not found.",
+  "bulk_edit.alt_no_record":
+    "Some images' alt text cannot be written here; add it on the product page.",
+  "bulk_edit.category_unknown": "The chosen category was not found.",
+  "bulk_edit.no_location": "No default warehouse is set for stock.",
+  "bulk_edit.no_price": "Its variants have no TRY price; enter a price first.",
+  "bulk_edit.price_out_of_range": "The new price would fall below zero or pass the limit.",
+  "bulk_edit.product_missing": "Product not found; it may have been deleted.",
+  "bulk_edit.stock_negative": "The new stock would fall below zero.",
+  "bulk_edit.stock_out_of_range": "The new stock would pass the limit.",
+  "bulk_edit.stock_untracked": "This product's stock is not tracked.",
   "cart.address_required": "An address is needed to complete the order.",
   "cart.shipping_not_needed": "Nothing in the cart needs shipping; remove the shipping method.",
   "catalog_import.attribute_invalid":

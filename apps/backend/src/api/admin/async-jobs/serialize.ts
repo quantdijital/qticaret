@@ -1,12 +1,22 @@
 import { serverErrorMessage } from "../../../lib/errors/messages"
 import type { AsyncJobRecord } from "../../../modules/async-job/service"
 
-// A file the job reads (an import's sheet) stays out like its result's key
+// A file the job reads (an import's sheet) stays out like its result's key; a
+// list of records (a bulk edit's thousand products) is shown by its length
 function publicInput(input: unknown): unknown {
   if (input === null || typeof input !== "object" || Array.isArray(input)) {
     return input
   }
-  return Object.fromEntries(Object.entries(input).filter(([key]) => !key.endsWith("_file_id")))
+  return Object.fromEntries(
+    Object.entries(input).flatMap(([key, value]): [string, unknown][] => {
+      if (key.endsWith("_file_id")) {
+        return []
+      }
+      return key.endsWith("_ids") && Array.isArray(value)
+        ? [[`${key.slice(0, -"_ids".length)}_count`, value.length]]
+        : [[key, value]]
+    })
+  )
 }
 
 /**

@@ -1,4 +1,5 @@
 import { z } from "@medusajs/framework/zod"
+import { ALT_MAX } from "../../../lib/media/alt"
 import { isCleanText } from "../../../lib/security"
 
 // A storage key as uploads make them (`kupa-on-01J….jpg`, `1792…-kupa.jpg`): one
@@ -10,9 +11,6 @@ export const AdminPostMedia = z
   .object({ file_ids: z.array(z.string().regex(FILE_KEY, "media.file_id_invalid")).min(1).max(20) })
   .strict()
 export type AdminPostMediaType = z.infer<typeof AdminPostMedia>
-
-// Screen readers read about this much; a longer text belongs in the description
-const ALT_MAX = 250
 
 /** An image's alt text; empty or null clears it. */
 export const AdminPostMediaAlt = z

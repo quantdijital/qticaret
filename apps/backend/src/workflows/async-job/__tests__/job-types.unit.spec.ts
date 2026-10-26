@@ -10,6 +10,7 @@ describe("job types", () => {
   it("knows its types by own key only", () => {
     expect(JOB_TYPE_KEYS).toEqual([
       "audit_log.export",
+      "catalog.bulk_edit",
       "catalog.export",
       "catalog.import",
       "seo.audit",
@@ -41,6 +42,18 @@ describe("job types", () => {
     const type = jobType("seo.audit")
     expect(type).toMatchObject({ singleton: true, containsPersonalData: false, resultTtlDays: 30 })
     expect(type?.input.safeParse({ deep: true }).success).toBe(false)
+  })
+
+  it("edits products in bulk one run at a time, through the generic jobs route", () => {
+    const type = jobType("catalog.bulk_edit")
+    expect(type).toMatchObject({ singleton: true, containsPersonalData: false, resultTtlDays: 7 })
+    expect(type?.internal).toBeUndefined()
+    expect(
+      type?.input.safeParse({
+        product_ids: ["prod_1"],
+        change: { action: "price", mode: "percent", value: 10 },
+      }).success
+    ).toBe(true)
   })
 
   it.each([

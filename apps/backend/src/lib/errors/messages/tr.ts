@@ -17,6 +17,16 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "brands.name_invalid": "Marka adını girin (en fazla 120 karakter).",
   "brands.name_taken": "Bu adla bir marka zaten var.",
   "brands.unknown": "Marka bulunamadı.",
+  "bulk_edit.alt_no_record":
+    "Bazı görsellerin alt metni buradan yazılamıyor; ürün sayfasından ekleyin.",
+  "bulk_edit.category_unknown": "Seçilen kategori bulunamadı.",
+  "bulk_edit.no_location": "Stok için varsayılan bir depo seçilmemiş.",
+  "bulk_edit.no_price": "Varyantlarının TL fiyatı yok; önce fiyat girin.",
+  "bulk_edit.price_out_of_range": "Yeni fiyat sıfırın altına iner ya da üst sınırı aşar.",
+  "bulk_edit.product_missing": "Ürün bulunamadı; silinmiş olabilir.",
+  "bulk_edit.stock_negative": "Yeni stok sıfırın altına iner.",
+  "bulk_edit.stock_out_of_range": "Yeni stok üst sınırı aşar.",
+  "bulk_edit.stock_untracked": "Bu ürünün stoğu takip edilmiyor.",
   "cart.address_required": "Siparişi tamamlamak için teslimat adresi gerekir.",
   "cart.shipping_not_needed": "Sepette kargo gerektiren ürün yok; kargo seçimini kaldırın.",
   "catalog_import.attribute_invalid":

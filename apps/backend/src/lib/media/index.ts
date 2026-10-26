@@ -9,3 +9,5 @@ export {
 export type { Derivative, SrcsetFormat } from "./derive"
 export { MASTER_MAX_SIDE, MAX_INPUT_PIXELS, readImage, sanitizeImage } from "./sanitize"
 export type { CleanImage } from "./sanitize"
+export { ALT_MAX, suggestedAlts } from "./alt"
+export type { AltSource } from "./alt"
