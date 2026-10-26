@@ -1,5 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { chunksOf } from "../../lib/catalog"
 import type { UrlOwner } from "../../modules/url-registry/validation"
 import { CATALOG_ENTITY_TYPES } from "../catalog/entity-paths"
 import { liveLandingFilters } from "../content/landing-facet"
@@ -41,9 +42,6 @@ export const LIVE_RECORDS: readonly LiveSpec[] = [
   { entity: "landing_page", type: CATALOG_ENTITY_TYPES.landing, filters: liveLandingFilters },
 ]
 
-// Ids per query: an IN list well below Postgres' bind limit
-const ID_CHUNK = 5000
-
 /** Which of the owners are live, as `type:id`; one query per kind of record. */
 export async function liveOwnerKeys(
   container: MedusaContainer,
@@ -56,11 +54,11 @@ export async function liveOwnerKeys(
       .filter((owner) => owner.entity_type === spec.type)
       .map((owner) => owner.entity_id)
     const filters = ids.length > 0 ? await spec.filters(container) : {}
-    for (let start = 0; start < ids.length; start += ID_CHUNK) {
+    for (const chunk of chunksOf(ids)) {
       const { data } = await query.graph({
         entity: spec.entity,
         fields: ["id"],
-        filters: { ...filters, id: ids.slice(start, start + ID_CHUNK) },
+        filters: { ...filters, id: chunk },
       })
       for (const row of data as { id: string }[]) {
         live.add(`${spec.type}:${row.id}`)

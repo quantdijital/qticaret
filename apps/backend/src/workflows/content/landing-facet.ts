@@ -1,6 +1,8 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
+import { ID_CHUNK, chunksOf } from "../../lib/catalog"
 import { ValidationError } from "../../lib/errors"
+import { LISTING_PARAMS } from "../../lib/seo/facets"
 import { BRANDS_MODULE } from "../../modules/brands"
 import type BrandsModuleService from "../../modules/brands/service"
 import { PRODUCT_ATTRIBUTES_MODULE } from "../../modules/product-attributes"
@@ -15,7 +17,8 @@ export interface LandingFacet {
   value: string
 }
 
-export const BRAND_FACET_KEY = "marka"
+// Stored with each brand landing page: the listing's brand parameter (F3.17)
+export const BRAND_FACET_KEY = LISTING_PARAMS.brand
 
 interface FacetOption {
   value: string
@@ -77,41 +80,59 @@ export async function describeFacet(
   return found
 }
 
+/** The brands' products, from the brand's side of the link. */
+export async function brandProductIds(
+  container: MedusaContainer,
+  brandIds: string[]
+): Promise<string[]> {
+  if (brandIds.length === 0) {
+    return []
+  }
+  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+    entity: "brand",
+    fields: ["products.id"],
+    filters: { id: brandIds },
+  })
+  const brands = data as { products?: ({ id: string } | null)[] | null }[]
+  return [
+    ...new Set(brands.flatMap((brand) => (brand.products ?? []).flatMap((row) => row?.id ?? []))),
+  ]
+}
+
+/** The products holding any of these options of the attribute, in two queries. */
+export async function optionProductIds(
+  container: MedusaContainer,
+  key: string,
+  options: string[]
+): Promise<string[]> {
+  const values = await container
+    .resolve<ProductAttributesModuleService>(PRODUCT_ATTRIBUTES_MODULE)
+    .valuesWithOptions(key, options)
+  const products = new Set<string>()
+  for (const ids of chunksOf(values)) {
+    const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+      entity: "attribute_value",
+      fields: ["product.id"],
+      filters: { id: ids },
+    })
+    for (const row of data as { product?: { id: string } | null }[]) {
+      if (row.product) {
+        products.add(row.product.id)
+      }
+    }
+  }
+  return [...products]
+}
+
 /**
  * Products that have the facet, in any category. Read from the brand's and
  * the value's side of their links: importing a link definition here would
  * define it wherever this file is loaded (tests too).
  */
-async function facetProductIds(container: MedusaContainer, facet: LandingFacet): Promise<string[]> {
-  const query = container.resolve(ContainerRegistrationKeys.QUERY)
-  if (facet.kind === "brand") {
-    const { data } = await query.graph({
-      entity: "brand",
-      fields: ["products.id"],
-      filters: { id: facet.value },
-    })
-    const brand = data[0] as { products?: ({ id: string } | null)[] | null } | undefined
-    return (brand?.products ?? []).flatMap((row) => (row ? [row.id] : []))
-  }
-  const values = await container
-    .resolve<ProductAttributesModuleService>(PRODUCT_ATTRIBUTES_MODULE)
-    .valuesWithOption(facet.key, facet.value)
-  if (values.length === 0) {
-    return []
-  }
-  const { data } = await query.graph({
-    entity: "attribute_value",
-    fields: ["product.id"],
-    filters: { id: values },
-  })
-  return [
-    ...new Set(
-      (data as { product?: { id: string } | null }[]).flatMap((row) =>
-        row.product ? [row.product.id] : []
-      )
-    ),
-  ]
-}
+export const facetProductIds = (container: MedusaContainer, facet: LandingFacet) =>
+  facet.kind === "brand"
+    ? brandProductIds(container, [facet.value])
+    : optionProductIds(container, facet.key, [facet.value])
 
 export interface CategoryRow {
   id: string
@@ -159,9 +180,6 @@ export async function liveLandingFilters(
   return { status: "published", category_id: await liveCategoryIds(container) }
 }
 
-// Product ids per query: an IN list well below Postgres' bind limit
-const ID_CHUNK = 5000
-
 /**
  * A landing page's products: published, in its category or a shown one
  * below, with its facet; the newest first. What its listing and its count
@@ -191,12 +209,9 @@ export async function landingProducts(
     return { ids: found.map((product) => product.id), count }
   }
   const found: { id: string; created_at: Date | string }[] = []
-  for (let start = 0; start < ids.length; start += ID_CHUNK) {
+  for (const chunk of chunksOf(ids)) {
     found.push(
-      ...(await products.listProducts(
-        { ...filters, id: ids.slice(start, start + ID_CHUNK) },
-        { select: ["id", "created_at"] }
-      ))
+      ...(await products.listProducts({ ...filters, id: chunk }, { select: ["id", "created_at"] }))
     )
   }
   found.sort(

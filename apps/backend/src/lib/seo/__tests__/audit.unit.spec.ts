@@ -50,6 +50,7 @@ describe("store-wide SEO audit rules (docs/14 §3.9)", () => {
         sitemapUrl: "https://ornek.com/sitemap.xml",
         preset: "block_training",
         indexing: true,
+        filterKeys: [],
       })
       expect(robotsFinding(robots, true, PAGES)).toBeNull()
     })
@@ -74,6 +75,26 @@ describe("store-wide SEO audit rules (docs/14 §3.9)", () => {
         { reason: "blocked", subject: "/", target: "Googlebot" },
         { reason: "blocked", subject: "/urun/ornek-urun", target: "Googlebot" },
       ])
+    })
+
+    it("finds a filtered listing open to crawlers (docs/13 §7)", () => {
+      const facets = ["/kategori/ornek?marka=ornek", "/kategori/ornek?sayfa=2&sirala=yeni"]
+      expect(
+        robotsFinding("User-agent: *\nDisallow: /sepet\n", false, PAGES, facets)?.items
+      ).toEqual(facets.map((subject) => ({ reason: "facets_open", subject })))
+      const closed = robotsTxt({
+        template: "User-agent: *\n{facet_disallow}\n",
+        sitemapUrl: null,
+        preset: "none",
+        indexing: true,
+        filterKeys: [],
+      })
+      expect(robotsFinding(closed, false, PAGES, facets)).toBeNull()
+      // Googlebot reads only its own group: the lines under `*` do not keep it off
+      const ownGroup = `${closed}\nUser-agent: Googlebot\nDisallow: /sepet\n`
+      expect(robotsFinding(ownGroup, false, PAGES, facets)?.items).toEqual(
+        facets.map((subject) => ({ reason: "facets_open", subject, target: "Googlebot" }))
+      )
     })
 
     it("wants the sitemap named once there is a host", () => {

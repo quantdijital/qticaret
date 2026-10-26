@@ -36,3 +36,19 @@ export function isReservedPath(path: string): boolean {
   const segments = path.split("/").slice(1)
   return segments.length === 1 && RESERVED_ROOT_SEGMENTS.has(segments[0] ?? "")
 }
+
+/**
+ * How the storefront's own pages are indexed (docs/13 §6, §7): search
+ * results stay out of the index but their links are followed; the rest
+ * are nobody's search result. robots.txt keeps several of them out too.
+ */
+export const SYSTEM_PAGES: readonly {
+  path: string
+  robots: "noindex,follow" | "noindex,nofollow"
+}[] = [
+  { path: "/arama", robots: "noindex,follow" },
+  ...["sepet", "odeme", "hesap", "giris", "kayit", "cikis"].map((segment) => ({
+    path: `/${segment}`,
+    robots: "noindex,nofollow" as const,
+  })),
+]

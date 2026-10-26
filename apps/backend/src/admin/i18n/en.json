@@ -179,7 +179,7 @@
         "robots": {
           "title": "Crawlers",
           "label": "robots.txt",
-          "hint": "The {sitemap_url} tag is replaced with the sitemap address when published.",
+          "hint": "{sitemap_url} becomes the sitemap's address and the {facet_disallow} line the blocks for filter, sort and price parameters when published.",
           "aiPreset": "AI crawlers",
           "presets": {
             "ai_search_visible": "Appear in AI search (recommended)",

@@ -3,6 +3,7 @@ import { parseEnv } from "../../../lib/env"
 import { brandPath, categoryPath, collectionPath, productPath } from "../../../lib/seo"
 import { hostFinding, robotsFinding, sitemapFinding } from "../../../lib/seo/audit"
 import type { AuditFinding } from "../../../lib/seo/audit"
+import { LISTING_PARAMS } from "../../../lib/seo/facets"
 import { robotsTxt } from "../../../lib/seo/robots"
 import { ASYNC_JOB_MODULE } from "../../../modules/async-job"
 import type AsyncJobModuleService from "../../../modules/async-job/service"
@@ -11,6 +12,7 @@ import type { SeoSettings } from "../../../modules/platform-settings/sections"
 import type PlatformSettingsModuleService from "../../../modules/platform-settings/service"
 import { SEO_SITEMAPS_MODULE } from "../../../modules/seo-sitemaps"
 import type SeoSitemapsModuleService from "../../../modules/seo-sitemaps/service"
+import { listingFilterKeys } from "../listing"
 import { shopOf } from "../payload-sources"
 import { sitemapCounts } from "../sitemap-build"
 
@@ -19,9 +21,24 @@ const samplePages = (style: SeoSettings["url_style"]): string[] => [
   "/",
   productPath("ornek-urun", style.product),
   categoryPath(["ornek-kategori"], style.category),
+  // A facet landing page sits under its category (F3.16)
+  `${categoryPath(["ornek-kategori"], style.category)}/ornek-filtre`,
   brandPath("ornek-marka", style.brand),
   collectionPath("ornek-koleksiyon"),
 ]
+
+// Filtered, priced and sorted listings the file should keep crawlers off (docs/13 §7):
+// each kind of parameter, and one of the shop's own filters
+const sampleFacets = (style: SeoSettings["url_style"], filterKeys: Set<string>): string[] => {
+  const category = categoryPath(["ornek-kategori"], style.category)
+  const [filter] = [...filterKeys].sort()
+  return [
+    `${category}?${LISTING_PARAMS.brand}=ornek-marka`,
+    ...(filter ? [`${category}?${filter}=ornek-deger`] : []),
+    `${category}?${LISTING_PARAMS.price}=100-500`,
+    `${category}?${LISTING_PARAMS.page}=2&${LISTING_PARAMS.sort}=yeni`,
+  ]
+}
 
 /** S-HOST-01, S-ROBOTS-01 and S-SITEMAP-01: what lets search engines in and shows them around. */
 export async function siteFindings(
@@ -33,12 +50,14 @@ export async function siteFindings(
     .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
     .getSection("seo")) as unknown as SeoSettings
   const hasHost = Boolean(shop.canonicalHost)
+  const filterKeys = await listingFilterKeys(container)
   // What `/robots.txt` serves now, built as its route builds it
   const robots = robotsTxt({
     template: seo.robots_txt,
     sitemapUrl: hasHost ? `https://${String(shop.canonicalHost)}/sitemap.xml` : null,
     preset: seo.ai_crawler_preset,
     indexing: shop.indexing,
+    filterKeys,
   })
 
   const sitemaps = container.resolve<SeoSitemapsModuleService>(SEO_SITEMAPS_MODULE)
@@ -59,7 +78,14 @@ export async function siteFindings(
       isStaging: parseEnv().NODE_ENV === "staging",
     }),
     // A shop kept out of search on purpose is S-HOST-01's finding, not its robots file's
-    shop.indexing ? robotsFinding(robots, hasHost, samplePages(seo.url_style)) : null,
+    shop.indexing
+      ? robotsFinding(
+          robots,
+          hasHost,
+          samplePages(seo.url_style),
+          sampleFacets(seo.url_style, filterKeys)
+        )
+      : null,
     sitemapFinding(
       {
         hasHost,

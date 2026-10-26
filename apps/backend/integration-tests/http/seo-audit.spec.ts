@@ -186,8 +186,12 @@ medusaIntegrationTestRunner({
       // Most severe first
       expect(findings[0]?.severity).toBe("critical")
 
+      // A file of the shop's own without `{facet_disallow}` leaves filtered listings open
       expect(byRule.get("S-ROBOTS-01")?.items).toEqual([
         { reason: "blocked_all", subject: "/urun/ornek-urun" },
+        { reason: "facets_open", subject: "/kategori/ornek-kategori?marka=ornek-marka" },
+        { reason: "facets_open", subject: "/kategori/ornek-kategori?fiyat=100-500" },
+        { reason: "facets_open", subject: "/kategori/ornek-kategori?sayfa=2&sirala=yeni" },
         { reason: "no_sitemap", subject: "Sitemap:" },
       ])
       // The five-minute refresh may build it meanwhile; never built otherwise

@@ -4,6 +4,7 @@ import { createAdminUser } from "./admin"
 import type { HttpClient, HttpResponse } from "./http"
 import { settle } from "./http"
 import { stockShop, stockedProduct } from "./stock"
+import type { StockShop } from "./stock"
 import { createStorefront } from "./storefront"
 import type { Storefront } from "./storefront"
 
@@ -38,6 +39,7 @@ export const doc = (text: string) => ({
 
 export interface LandingKit {
   admin: { headers: Record<string, string> }
+  shop: StockShop
   store: Storefront
   /** Ev ve Yaşam, from the demo seed. */
   categoryId: string
@@ -128,6 +130,7 @@ export async function landingKit(
   }
   return {
     admin,
+    shop,
     store,
     categoryId,
     templateId,

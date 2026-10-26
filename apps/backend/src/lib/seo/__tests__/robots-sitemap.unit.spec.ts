@@ -12,6 +12,7 @@ describe("robotsTxt", () => {
           sitemapUrl: "https://magaza.example.com/sitemap.xml",
           preset,
           indexing: true,
+          filterKeys: [],
         })
       ).toBe("User-agent: *\nDisallow: /sepet\n\nSitemap: https://magaza.example.com/sitemap.xml\n")
     }
@@ -23,6 +24,7 @@ describe("robotsTxt", () => {
       sitemapUrl: null,
       preset: "block_training",
       indexing: true,
+      filterKeys: [],
     })
     expect(text).not.toContain("Sitemap")
     expect(text).toContain("User-agent: GPTBot\nUser-agent: ClaudeBot\n")
@@ -30,9 +32,40 @@ describe("robotsTxt", () => {
     expect(text).not.toContain("OAI-SearchBot")
   })
 
+  it("writes the listing filters' lines where the template asks for them", () => {
+    const text = robotsTxt({
+      template: "User-agent: *\nDisallow: /sepet\n{facet_disallow}\n\nSitemap: {sitemap_url}",
+      sitemapUrl: null,
+      preset: "none",
+      indexing: true,
+      filterKeys: ["renk", "fiyat"],
+    })
+    expect(text).toBe(
+      [
+        "User-agent: *",
+        "Disallow: /sepet",
+        "Disallow: /*?marka=",
+        "Disallow: /*&marka=",
+        "Disallow: /*?renk=",
+        "Disallow: /*&renk=",
+        "Disallow: /*?fiyat=",
+        "Disallow: /*&fiyat=",
+        "Disallow: /*?sirala=",
+        "Disallow: /*&sirala=",
+        "",
+      ].join("\n")
+    )
+  })
+
   it("keeps every crawler out of a shop that must not be indexed", () => {
     expect(
-      robotsTxt({ template: TEMPLATE, sitemapUrl: null, preset: "none", indexing: false })
+      robotsTxt({
+        template: TEMPLATE,
+        sitemapUrl: null,
+        preset: "none",
+        indexing: false,
+        filterKeys: [],
+      })
     ).toBe("User-agent: *\nDisallow: /\n")
   })
 })

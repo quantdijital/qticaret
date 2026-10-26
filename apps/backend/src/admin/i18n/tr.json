@@ -179,7 +179,7 @@
         "robots": {
           "title": "Tarayıcılar",
           "label": "robots.txt",
-          "hint": "{sitemap_url} etiketi yayında site haritası adresiyle değiştirilir.",
+          "hint": "{sitemap_url} yayında site haritası adresiyle, {facet_disallow} satırı filtre, sıralama ve fiyat parametrelerinin engelleriyle değiştirilir.",
           "aiPreset": "Yapay zekâ tarayıcıları",
           "presets": {
             "ai_search_visible": "Yapay zekâ aramalarında görün (önerilen)",

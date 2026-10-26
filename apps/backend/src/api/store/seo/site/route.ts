@@ -1,5 +1,6 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { siteJsonLd } from "../../../../lib/seo/jsonld"
+import { SYSTEM_PAGES } from "../../../../lib/seo/paths"
 import { PLATFORM_SETTINGS_MODULE } from "../../../../modules/platform-settings"
 import { SEO_INDEXNOW } from "../../../../modules/platform-settings/features"
 import type { AppearanceSettings } from "../../../../modules/platform-settings/sections"
@@ -15,7 +16,8 @@ import { shopOf } from "../../../../workflows/seo/payload-sources"
  * noindex` on every page), the IndexNow key to serve when the shop
  * announces its changes, and the home page's structured data, the shop
  * as an `OnlineStore` and its `WebSite`. No blocks until the canonical
- * host is set: they need absolute URLs.
+ * host is set: they need absolute URLs. And the robots value of the
+ * storefront's own pages (search results, cart, account).
  */
 export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {
   const shop = await shopOf(req.scope)
@@ -36,5 +38,6 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
       ? await req.scope.resolve<SeoSitemapsModuleService>(SEO_SITEMAPS_MODULE).indexNowKey()
       : null,
     jsonLd: url ? siteJsonLd({ name: shop.name, url, logo: appearance.logo_light_url }) : [],
+    system_pages: SYSTEM_PAGES,
   })
 }

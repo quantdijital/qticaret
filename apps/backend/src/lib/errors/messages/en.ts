@@ -100,6 +100,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "product_attributes.handle_taken": "Another template uses this handle.",
   "product_attributes.key_invalid":
     "The key starts with a lowercase letter and holds only lowercase letters, digits and underscores.",
+  "product_attributes.key_reserved":
+    "A filterable attribute's key is another URL parameter's name (marka, fiyat, sirala, sayfa, variant, q, utm_…); choose another key.",
   "product_attributes.key_taken": "A key can be used once per template.",
   "product_attributes.option_in_use": "An option products use cannot be removed.",
   "product_attributes.option_title_required":

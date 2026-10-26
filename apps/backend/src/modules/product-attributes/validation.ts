@@ -1,5 +1,6 @@
 import { z } from "@medusajs/framework/zod"
 import { isCleanText } from "../../lib/security/text"
+import { isReservedParam } from "../../lib/seo/facets"
 import { ATTRIBUTE_TYPES, VARIES_BY } from "./models/attribute-definition"
 
 /**
@@ -79,6 +80,10 @@ export const definitionInput = z
     }
     if (new Set(values).size !== values.length) {
       issue("product_attributes.options_duplicate", "options")
+    }
+    // A filterable choice is a listing's URL parameter (F3.17): its name must be free there
+    if (isSelect && definition.is_filterable && isReservedParam(definition.key)) {
+      issue("product_attributes.key_reserved", "key")
     }
     const variant = definition.scope === "variant"
     if (variant && !definition.option_title) {

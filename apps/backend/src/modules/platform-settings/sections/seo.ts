@@ -1,12 +1,15 @@
 import { z } from "@medusajs/framework/zod"
 import { SEO_TEMPLATE_TOKENS, checkTemplate } from "../../../lib/seo"
+import { FACET_TOKEN } from "../../../lib/seo/robots"
 import { defineSection, isCleanText } from "./define"
 
 // Lower-case DNS name with at least one dot; internationalised names as punycode
 const HOSTNAME =
   /^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z](?:[a-z0-9-]{0,61}[a-z0-9])?$/
-// robots.txt lines: a known directive, a comment or nothing (docs/13 §6)
+// robots.txt lines: a known directive, a comment or nothing (docs/13 §6); or the
+// facet lines' place, written exactly as robots.txt generation looks for it
 const ROBOTS_LINE = /^(?:|#.*|(?:user-agent|allow|disallow|sitemap|crawl-delay)[ \t]*:.*)$/i
+const isRobotsLine = (line: string) => line.trim() === FACET_TOKEN || ROBOTS_LINE.test(line)
 const MAX_ROBOTS_BYTES = 8 * 1024
 const MAX_ROBOTS_LINES = 500
 
@@ -19,15 +22,15 @@ const template = z
   .max(200)
   .refine((text) => isCleanText(text), cleanText)
 
-// `{sitemap_url}` is filled in when robots.txt is generated (F3.6)
+// `{sitemap_url}` is filled in when robots.txt is generated (F3.6); `{facet_disallow}`
+// becomes a line per listing filter, sort and price parameter (F3.17)
 export const DEFAULT_ROBOTS_TXT = [
   "User-agent: *",
   "Disallow: /sepet",
   "Disallow: /odeme",
   "Disallow: /hesap",
   "Disallow: /arama",
-  "Disallow: /*?sort=",
-  "Disallow: /*?page=0",
+  "{facet_disallow}",
   "",
   "Sitemap: {sitemap_url}",
 ].join("\n")
@@ -37,7 +40,7 @@ function isRobotsTxt(text: string): boolean {
   return (
     Buffer.byteLength(text) <= MAX_ROBOTS_BYTES &&
     lines.length <= MAX_ROBOTS_LINES &&
-    lines.every((line) => ROBOTS_LINE.test(line) && isCleanText(line, true))
+    lines.every((line) => isRobotsLine(line) && isCleanText(line, true))
   )
 }
 

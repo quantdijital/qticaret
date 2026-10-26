@@ -61,6 +61,22 @@ describe("definitionInput", () => {
     expect(messages(definitionInput.safeParse(input))).toContain(message)
   })
 
+  it.each(["fiyat", "variant", "utm_kaynak"])(
+    "refuses a filterable choice keyed %s, another URL parameter's name",
+    (key) => {
+      const parsed = definitionInput.safeParse({
+        key,
+        label: "x",
+        type: "select",
+        is_filterable: true,
+        options: [{ value: "v", label: "V" }],
+      })
+      expect(parsed.error?.issues.map((issue) => issue.message)).toEqual([
+        "product_attributes.key_reserved",
+      ])
+    }
+  )
+
   it("finds repeated keys", () => {
     expect(duplicateKeys([{ key: "a" }, { key: "b" }, { key: "a" }])).toEqual(["a"])
   })

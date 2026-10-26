@@ -77,13 +77,15 @@ const SEARCH_CRAWLERS = { googlebot: "Googlebot", bingbot: "Bingbot" } as const
 /**
  * S-ROBOTS-01: every crawler, and Google's and Bing's own rules if the
  * file has any, may crawl the home page and a page of each kind
- * (`pages`, sample paths in the shop's URL style); the file names the
- * sitemap once there is a host to name it at.
+ * (`pages`, sample paths in the shop's URL style, a landing page's too);
+ * no crawler may crawl a filtered or sorted listing (`facets`, docs/13
+ * §7); the file names the sitemap once there is a host to name it at.
  */
 export function robotsFinding(
   robots: string,
   hasHost: boolean,
-  pages: readonly string[]
+  pages: readonly string[],
+  facets: readonly string[] = []
 ): AuditFinding | null {
   const groups = parseRobots(robots)
   const items: AuditItem[] = []
@@ -95,6 +97,20 @@ export function robotsFinding(
       if (hasOwnGroup(groups, agent) && !isCrawlable(groups, agent, path)) {
         items.push({ reason: "blocked", subject: path, target: name })
       }
+    }
+  }
+  for (const path of facets) {
+    // A crawler with a group of its own reads only that group
+    const open = [
+      "*",
+      ...Object.keys(SEARCH_CRAWLERS).filter((agent) => hasOwnGroup(groups, agent)),
+    ]
+      .filter((agent) => isCrawlable(groups, agent, path))
+      .map((agent) =>
+        agent === "*" ? null : SEARCH_CRAWLERS[agent as keyof typeof SEARCH_CRAWLERS]
+      )
+    for (const target of open) {
+      items.push({ reason: "facets_open", subject: path, ...(target ? { target } : {}) })
     }
   }
   if (hasHost && !/^\s*sitemap\s*:/im.test(robots)) {

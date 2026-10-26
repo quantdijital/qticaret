@@ -106,6 +106,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "product_attributes.handle_taken": "Bu tanıtıcı başka bir şablonda kullanılıyor.",
   "product_attributes.key_invalid":
     "Anahtar küçük harfle başlamalı; yalnızca küçük harf, rakam ve alt çizgi içerebilir.",
+  "product_attributes.key_reserved":
+    "Filtrelenebilir özelliğin anahtarı adreslerde başka bir parametrenin adı (marka, fiyat, sirala, sayfa, variant, q, utm_…); başka bir anahtar seçin.",
   "product_attributes.key_taken": "Bu şablonda aynı anahtar iki kez kullanılamaz.",
   "product_attributes.option_in_use": "Ürünlerde kullanılan bir seçenek kaldırılamaz.",
   "product_attributes.option_title_required": "Varyant özelliği için ürün seçeneğinin adını girin.",

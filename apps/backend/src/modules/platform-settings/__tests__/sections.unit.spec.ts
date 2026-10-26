@@ -88,8 +88,20 @@ describe("seo section", () => {
       { robots_txt: "Disallow: /a\u0007" },
       "platform_settings.robots_invalid",
     ],
+    [
+      "the facet lines' place in other letters (it would print as it is)",
+      { robots_txt: "User-agent: *\n{FACET_DISALLOW}" },
+      "platform_settings.robots_invalid",
+    ],
   ])("refuses %s", (_label, values, message) => {
     expect(messages(full.safeParse({ ...defaults, ...values }))).toContain(message)
+  })
+
+  it("takes the facet lines' place, as the default does", () => {
+    expect(
+      full.safeParse({ ...defaults, robots_txt: "User-agent: *\n{facet_disallow}" }).success
+    ).toBe(true)
+    expect(defaults.robots_txt).toContain("\n{facet_disallow}\n")
   })
 
   it("lower-cases the canonical host", () => {

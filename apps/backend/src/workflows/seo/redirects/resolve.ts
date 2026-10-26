@@ -15,7 +15,8 @@ import type UrlRegistryModuleService from "../../../modules/url-registry/service
 import type { ResolvedPath } from "../../../modules/url-registry/service"
 import type { SeoPayload } from "../../../lib/seo/resolve"
 import { CATALOG_LOCALE } from "../../catalog/entity-paths"
-import { seoPayloadFor } from "../payload"
+import { pageWithQuery, redirectThroughListing } from "../listing-resolution"
+import type { ListingView } from "../listing-resolution"
 import { activePathOf, ownerState, successorPath } from "./owners"
 import type { OwnerState } from "./owners"
 
@@ -32,6 +33,8 @@ export type Resolution =
       entity_type: string
       entity_id: string
       seo?: SeoPayload | null
+      /** A listing's filters, price range, sort and page as its query gave them (F3.17). */
+      listing?: ListingView
     }
   | { type: "redirect"; path: string; status: RedirectCode; location: string }
   | { type: "gone"; path: string }
@@ -205,10 +208,12 @@ export async function resolveStorefrontPath(
     return kept.resolution
   }
   const { resolution, ruleIds } = await followPath(container, request, { countHits })
-  const answered: Resolution =
+  const answered =
     resolution.type === "entity"
-      ? { ...resolution, seo: await seoPayloadFor(container, resolution, resolution.path) }
-      : resolution
+      ? await pageWithQuery(container, resolution, request)
+      : resolution.type === "redirect"
+        ? await redirectThroughListing(container, resolution)
+        : resolution
   slot?.keep({ resolution: answered, ruleIds } satisfies CachedAnswer)
   return answered
 }
