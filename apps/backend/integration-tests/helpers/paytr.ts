@@ -22,12 +22,13 @@ export const PAYTR_ADDRESS = {
   country_code: "tr",
 }
 
-/** One unit of `variantId` with the shop's shipping; needs the Turkish address list loaded. */
+/** `quantity` units of `variantId` with the shop's shipping; needs the Turkish address list loaded. */
 export async function readyCart(
   container: MedusaContainer,
   shop: StockShop,
   variantId: string,
-  address: Record<string, string> = PAYTR_ADDRESS
+  address: Record<string, string> = PAYTR_ADDRESS,
+  quantity = 1
 ): Promise<string> {
   const { result } = await createCartWorkflow(container).run({
     input: {
@@ -35,7 +36,7 @@ export async function readyCart(
       sales_channel_id: shop.salesChannelId,
       currency_code: "try",
       email: "ayse.yilmaz@example.com",
-      items: [{ variant_id: variantId, quantity: 1 }],
+      items: [{ variant_id: variantId, quantity }],
       shipping_address: address,
       billing_address: address,
     },

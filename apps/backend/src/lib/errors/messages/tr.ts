@@ -339,4 +339,14 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "paytr.test_mode_mismatch":
     "Ödemenin test modu hesabınızınkiyle uyuşmuyor; test anahtarıyla gerçek ödeme iade edilmez.",
   "payments.refund_reference_missing": "İade referansı eksik; iadeyi yeniden başlatın.",
+  "orders.refund_line_unknown": "Bu kalem siparişte yok.",
+  "orders.refund_units_exceeded": "Bu kalemden iade edilebilecek adetten fazlası seçildi.",
+  "orders.refund_exceeds_paid": "İade tutarı siparişten iade edilebilecek tutarı aşıyor.",
+  "orders.refund_empty": "İade edilecek bir tutar yok.",
+  "orders.refund_reference_taken":
+    "Bu iade anahtarı başka bir siparişte kullanılmış; iadeyi yeniden başlatın.",
+  "orders.refund_mode": "Ya kalem ve kargo seçin ya da bir tutar girin.",
+  "orders.refund_amount_kurus": "Tutar en çok iki ondalık basamak içerebilir.",
+  "orders.refund_reference_invalid": "İade anahtarı geçersiz; iadeyi yeniden başlatın.",
+  "payments.use_order_refund": "Bu ödemenin iadesi siparişin iade adımından yapılır.",
 }

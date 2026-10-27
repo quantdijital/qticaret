@@ -331,4 +331,14 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "paytr.test_mode_mismatch":
     "The payment's test mode does not match your account's; test keys never refund a real payment.",
   "payments.refund_reference_missing": "The refund reference is missing; start the refund again.",
+  "orders.refund_line_unknown": "This line is not on the order.",
+  "orders.refund_units_exceeded": "More units were chosen than this line can still give back.",
+  "orders.refund_exceeds_paid": "The refund is more than the order can still give back.",
+  "orders.refund_empty": "There is nothing to refund.",
+  "orders.refund_reference_taken":
+    "This refund key was used on another order; start the refund again.",
+  "orders.refund_mode": "Choose lines and shipping, or enter an amount.",
+  "orders.refund_amount_kurus": "The amount takes at most two decimals.",
+  "orders.refund_reference_invalid": "The refund key is not valid; start the refund again.",
+  "payments.use_order_refund": "This payment is refunded from the order's refund step.",
 }
