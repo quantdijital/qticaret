@@ -26,13 +26,12 @@ bir tenant'ın yükünün diğerini etkilememesi, Medusa'nın tek-mağaza varsay
 İleride tenant sayısı yüzleri bulursa paylaşımlı-kaynak optimizasyonu ayrı ADR ile değerlendirilir.
 
 ## Sağlayıcı kimlik bilgileri (önemli)
-Medusa module provider'ları izoledir; özel bir "settings" modülünü çağıramaz. Bu yüzden:
-- Tenant'ın iyzico/PayTR/Geliver/e-fatura anahtarları **instance ortam değişkenleri/secret** olarak enjekte edilir.
-- Kaynak doğruluk noktası: Control Plane'deki şifreli secret deposu. Tenant anahtarını oradan girer,
-  provisioning servisi secret'ı günceller ve instance'ı rolling restart eder.
-- Instance içindeki admin'de **"Entegrasyonlar" sayfası** anahtarları göstermez; sadece durum,
-  "bağlantıyı test et" ve son hata bilgisini gösterir. (adr/0002)
-- F17 öncesinde (control plane yokken) secret'lar dağıtım aracı üzerinden manuel/script ile girilir.
+Mağazanın kendi sağlayıcı hesapları (PayTR, iyzico, sonra Geliver, e-fatura, SMS) **panelden girilir** (adr/0027; adr/0002'nin yerini aldı, 2026-10-27):
+- Bilgiler `integration-credentials` modülünde durur. Gizli alanlar AES-256-GCM ile şifrelenir; anahtar env'deki `CREDENTIALS_ENCRYPTION_KEY`'dir.
+- Gizli alanlar yalnızca yazılır: hiçbir yanıtta, logda ya da denetim kaydında görünmez.
+- Kayıttan önce sağlayıcıya sorulur; değişiklik yeniden başlatma gerektirmez (sürümlü önbellek).
+- Medusa module provider'ları izoledir. Sağlayıcı, mağazanın hesabını `@medusajs/framework`'ün paylaşılan `container`'ı üzerinden, çağrı anında okur (V2'de testle doğrulanır).
+- Platformun kendi sırları (veritabanı, JWT, PII anahtarları, S3) env/secret store'da kalır. F17'de şifreleme anahtarı KMS'e taşınır.
 
 ## Backend katmanları
 | Katman | Sorumluluk | Kural |

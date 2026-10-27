@@ -214,7 +214,7 @@ F17 öncesinde tenant'lar F16 script'leriyle elle açılır.
 > Sıra değişikliği (2026-10-27, kullanıcı): ilk müşteri PayTR ile çalışıyor, test bilgisi buradan alınıyor; PayTR önce yazılır. iyzico'ya başvuru sürüyor; altyapısı da F5'te hazırlanır (F5.11), canlıya alınması sonra. Ortak parçalar (sunucuda sepet, bildirim kaydı, dönüş allowlist'i, sahte sunucular, sözleşme testleri) iki sağlayıcıya göre yazılır.
 
 - F5.1 Ortak altyapı: `packages/testing` (sahte sağlayıcı sunucusu, TR fixture fabrikaları), `lib/clients` form gövdesi, `webhook-events` modülü (sağlayıcı + olay anahtarı tekil; idempotency)
-- F5.2 `client.ts`: token ve hash hesapları, tutar biçimleri (kuruş tam sayı, TL ondalık), test modu (env), tip güvenli yanıtlar, hata kodu eşlemesi
+- F5.2 `client.ts`: token ve hash hesapları, tutar biçimleri (kuruş tam sayı, TL ondalık), test modu (panel), tip güvenli yanıtlar, hata kodu eşlemesi. Mağazanın PayTR hesabı Ayarlar > Ödeme'den girilir, kayıttan önce PayTR'ye sorulur (adr/0027)
 - F5.3 Ödeme başlatma: oturumu kendi Store ucumuz açar; sepet, alıcı, istemci IP'si ve dönüş adresleri sunucudaki sepetten; çekirdek `payment-sessions` ucu bu sağlayıcıya kapalı; ok/fail adresleri storefront origin allowlist'iyle sınırlı (open redirect yok)
 - F5.4 Bildirim akışı: `POST /hooks/paytr` → imza → idempotency kaydı → durum sorgusuyla yetkilendirme → cart complete → düz metin "OK"
 - F5.5 `authorizePayment` / `capturePayment` / `getPaymentStatus` / `retrievePayment` / `deletePayment`
@@ -394,7 +394,7 @@ Detay: `docs/06-admin-ux.md`. adr/0022'den sonra bu fazın ekranları panel hatt
 - F12.3 Sipariş operasyon ekranı: filtreler (ödeme/kargo/fatura durumu), toplu işlemler, sipariş düzenleme/iptal/değişim giriş noktaları
 - F12.4 Ayarlar: feature flag'ler, attribute şablonları, yasal metin sürümleri, mağaza künyesi, SEO ayarları (desenler, şablonlar, robots, canonical host)
 - F12.5 Audit log görüntüleyici (mutasyon + okuma kayıtları)
-- F12.6 Rol bazlı yetki: owner, admin, operasyon, salt-okunur; **admin 2FA (TOTP)** — Medusa'da yerleşik değilse ADR + uygulama
+- F12.6 Rol bazlı yetki: owner, admin, operasyon, salt-okunur; **admin 2FA (TOTP)** — Medusa'da yerleşik değilse ADR + uygulama. Ödeme ve entegrasyon hesapları (Ayarlar > Ödeme, adr/0027) yalnızca owner'a; gizli alan, mağaza no ve test modu değişikliğinde ikinci doğrulama. **Bu madde bitmeden personeli olan mağaza ödemeyle canlıya alınmaz.**
 - F12.7 Ekran bütünlüğü: önceki fazlarda eklenen ekranların menü yapısı, terim sözlüğü ve UX kontrol listesine uyumu
 - F12.8 Sipariş iç notları ve müşteri iletişim geçmişi
 - F12.9 Global arama: sipariş no, müşteri, ürün, takip no
@@ -504,7 +504,7 @@ Ayrı uygulama (`apps/control-plane`). Başlamadan önce ayrı ADR (teknoloji, v
 - F17.1 Tenant kaydı ve onboarding sihirbazı: firma bilgisi, paket seçimi, alt alan adı, kurulum tetikleme (F16.4)
 - F17.2 Paketler ve limitler: ürün/sipariş/personel/depolama/LLM kotası limitleri, kullanım ölçümü, limit uyarısı
 - F17.3 Abonelik faturalama: periyodik tahsilat, deneme süresi, gecikmede kısıtlama; kendi e-faturamız (F8 adaptörü)
-- F17.4 Secret girişi: tenant sağlayıcı anahtarlarını şifreli girer → secret store (KMS destekli envelope encryption, döndürme planı) → rolling restart (adr/0002)
+- F17.4 Secret anahtarları: mağaza sağlayıcı hesaplarını F5'ten beri kendi panelinden girer (adr/0027); F17 `CREDENTIALS_ENCRYPTION_KEY`'i KMS destekli envelope encryption'a ve döndürme planına taşır
 - F17.5 Sürüm yönetimi: tenant sürüm görünümü, dalga planı, canary
 - F17.6 Platform yönetici paneli: tenant listesi, durum, kullanım, destek erişimi başlatma (F16.10)
 - F17.7 Sektör paketi atama: tenant'a attribute şablonları + flag ön ayarı + SEO şablon seti yükleme

@@ -24,8 +24,8 @@ ADR-0002'nin itirazları ve bu karardaki cevapları:
 
 1. **`integration-credentials` modülü.** Sağlayıcı başına tek kayıt (`provider` tekil):
    - Gizli olmayan ayarlar `settings` JSON'unda; PayTR'de `merchant_id` ve `test_mode`.
-   - Gizli alanlar tek bir şifreli blokta (`secret_ciphertext`). Ek doğrulanmış veri (AAD) olarak `integration_credentials:<provider>` kullanılır; başka satıra kopyalanan blok çözülmez.
-   - Kayıtta şifreleme anahtarının parmak izi (`key_id`) ve sürüm (`version`) var; ayrıca son doğrulama sonucu ve zamanı, son değiştiren kişi.
+   - Gizli alanlar tek bir şifreli blokta (`secret_ciphertext`). Ek doğrulanmış veri (AAD) sağlayıcı ve ayarlardır (`integration_credentials:<provider>:<sıralı ayar JSON'u>`): başka satıra kopyalanan blok da, veritabanında arkadan değiştirilen test modu ya da mağaza no da kaydı "okunamaz" yapar.
+   - Kayıtta şifreleme anahtarının parmak izi (`key_id`, anahtarla HMAC) ve sürüm (`secrets_version`) var; ayrıca son doğrulama sonucu (`verified`, `unverified`, `rejected`) ve zamanı, son değiştiren kişi.
    - Sağlayıcıların alan şemaları kodda tanımlıdır. Serbest anahtar-değer yok.
 2. **Şifreleme anahtarı env'de:** `CREDENTIALS_ENCRYPTION_KEY` (32 bayt, 64 hex).
    - Canlıda ve staging'de zorunlu. PII anahtarlarından farklı olmalı.
@@ -33,6 +33,7 @@ ADR-0002'nin itirazları ve bu karardaki cevapları:
    - Anahtar değişirse eski kayıt çözülemez. Panel "bilgileri yeniden girin" der, sağlayıcı "yapılandırılmamış" gibi davranır. F17'de anahtar KMS'e taşınır (docs/04).
 3. **Gizli değerler yalnızca yazılır.**
    - Hiçbir yanıtta, logda ya da denetim kaydında gizli değer, son haneleri veya karması yer almaz.
+   - Gönderilen değer kayıtlıyla karşılaştırılmaz: gönderilen her gizli alan yeni sayılır, PayTR'ye sorulur ve sürümü artırır. Böylece yanıt bir tahminin doğru olup olmadığını söylemez.
    - Okuma ucu yalnızca şunları döner: gizli alanın kayıtlı olup olmadığı, ayarlar, durum ve son değişiklik.
    - Panelde gizli alanlar boş gelir. Boş bırakılan alan kayıtlı değeri korur.
 4. **Kaydetmeden önce doğrulanır.**
@@ -41,14 +42,19 @@ ADR-0002'nin itirazları ve bu karardaki cevapları:
      - `001`: mağaza no hatalı ya da mağaza pasif.
      - `003`: parola ya da gizli anahtar hatalı.
    - Bilgiler hatalıysa kayıt reddedilir; hata alan bazında döner.
-   - PayTR'ye ulaşılamazsa kayıt yapılır ve "doğrulanamadı" olarak işaretlenir. Panel uyarı gösterir, "Bağlantıyı test et" ile yeniden denenir.
+   - PayTR'ye ulaşılamazsa (ağ, zaman aşımı, 5xx, açık devre kesici) ilk bağlantı kaydedilir ve "doğrulanamadı" olarak işaretlenir. Çalışan, doğrulanmış bir hesabın yerine ise doğrulanmamış bilgi yazılmaz: kayıt reddedilir, eski hesap korunur.
+   - PayTR belgelenmemiş bir yanıt verirse kayıt yapılmaz.
+   - Panelden yapılan kontrol 8 saniyede kesilir.
    - Yalnızca test modu değiştiyse doğrulama yapılmaz.
+   - "Bağlantıyı test et" kayıtlı satırı veritabanından okur ve sonucu yalnızca satır o arada değişmediyse yazar. Ulaşılamazsa durum değişmez; PayTR reddederse durum "reddedildi" olur.
 5. **Mağaza no değişirse iki gizli alan da yeniden istenir.** Bir hesabın parolası başka hesabın numarasıyla eşleşmesin diye.
 6. **İş akışı ve denetim.**
    - Kayıt `saveIntegrationCredentialsWorkflow` ile yapılır: önce doğrulama adımı, sonra telafili kayıt adımı.
    - Denetim kaydında ayarlar önce/sonra görünür. Gizli alanlar için yalnızca sürüm numarası değişir.
    - Kayıt silinebilir. Silinen kayıtla sağlayıcı "yapılandırılmamış" gibi davranır.
-   - Uçlar personele açık (`requireUserActor`). Rol kısıtı (yalnızca mağaza sahibi) F12'de gelir.
+   - Uçlar personele açık (`requireUserActor`); secret API anahtarı ne kaydedebilir ne test ettirebilir (sağlık ucu dahil). Hız sınırı adres başına ve personel başına.
+   - Her bağlama, hesap/gizli bilgi değişikliği, test modu değişikliği ve kaldırma, bütün yöneticilere panelin zilinde bildirilir: kim, ne yaptı. Bildirim yazılamazsa değişiklik geri alınır.
+   - **Canlıya çıkış engeli:** Rol kısıtı (yalnızca mağaza sahibi) ve gizli alan değişikliğinde ikinci doğrulama F12.6'da gelir. O zamana kadar personeli olan bir mağaza ödeme alacak şekilde canlıya alınmaz (F16 kontrol listesi).
 7. **Önbellek.**
    - Çözülmüş bilgiler süreç belleğinde tutulur. Platform ayarlarındaki sürümlü önbellek kalıbı kullanılır: Redis'teki sürüm işareti diğer süreçlere değişikliği bildirir.
    - Değişiklik yeniden başlatma gerektirmez.
@@ -73,4 +79,6 @@ ADR-0002'nin itirazları ve bu karardaki cevapları:
 - **Panel:** Ayarlar > Ödeme ekranı V1'de gelir: PayTR bağlantısı, test modu, PayTR panelinde yapılacaklar (bildirim adresi, bilgilerin yeri). Taksit ayarları V6'da, işlem kartı V7'de.
 - **Sağlık kontrolü:** PayTR kontrolü kayıtlı bilgilerle durum sorgusu yapar (`004` = sağlıklı).
 - **Medusa yükseltmesinde:** paylaşılan `container`'ın sağlayıcı çağrısında modülü çözdüğü testle yeniden doğrulanır (V2 sözleşme testi).
-- **F12:** Bu uçlar rol modeliyle mağaza sahibine kısıtlanır. Gizli alan değişikliğine ikinci doğrulama (2FA) eklenmesi F12.6'da değerlendirilir.
+- **F12 (canlıya çıkış engeli):** Bu uçlar rol modeliyle mağaza sahibine kısıtlanır; gizli alan, mağaza no ve test modu değişikliğine ikinci doğrulama (yakın zamanda giriş ya da TOTP) gelir.
+- **Test modundaki ödemeler (V3, V7):** test modu canlı anahtarla çalıştığı için, test modunda ödenen sipariş kalıcı işaret taşır; panelde rozetle görünür ve kargoya verilmesi engellenir. Test modu değişikliği bildirimle izlenir.
+- **Workflow kalıcılığı:** Kaydetme ve kaldırma workflow'larında `store` ya da saklama süresi açılmaz; açılırsa şifreli blok `workflow_execution`'da kalır.

@@ -21,7 +21,8 @@ repo/
 │   │   │   │   │   ├── webhook.ts          # imza doğrulama + action eşleme
 │   │   │   │   │   ├── types.ts
 │   │   │   │   │   └── __tests__/
-│   │   │   │   ├── payment-paytr/
+│   │   │   │   ├── payment-paytr/                    # provider (V2); PayTR API'si lib/payments/paytr'de
+│   │   │   │   ├── integration-credentials/          # mağazanın sağlayıcı hesapları, şifreli, yalnız yazılır (F5, adr/0027)
 │   │   │   │   ├── payment-bank-transfer/
 │   │   │   │   ├── payment-cod/
 │   │   │   │   ├── fulfillment-geliver/  fulfillment-<tasiyici>/   # doğrudan taşıyıcı adaptörü (F7.14)
@@ -79,8 +80,9 @@ repo/
 │   │   │   │   └── i18n/            # tr.json, en.json
 │   │   │   ├── lib/
 │   │   │   │   ├── clients/         # http istemci tabanı (timeout, retry, devre kesici, redaksiyon)
-│   │   │   │   ├── integrations/    # health/: /admin/integrations/health kontrolleri
-│   │   │   │   ├── crypto/          # imza/HMAC yardımcıları
+│   │   │   │   ├── integrations/    # health/: /admin/integrations/health kontrolleri; account-check (sağlayıcı hesabı doğru mu)
+│   │   │   │   ├── payments/        # paytr/: imzalar, tutar biçimleri, err_no eşlemesi, istemci (F5, sağlayıcı ve uygulama birlikte kullanır)
+│   │   │   │   ├── crypto/          # PII şifreleme (adr/0009), sağlayıcı sırlarının mühürlenmesi (adr/0027)
 │   │   │   │   ├── security/        # safe-fetch (SSRF), rate-limit, upload validator, csv-escape, safe-xml, zip
 │   │   │   │   ├── redis/           # kendi Redis istemcimiz (hızlı vazgeçen), tenant ad alanı
 │   │   │   │   ├── cache/           # süreç içi değer + Redis sürüm sayacı (ayarlar, adr/0012)
@@ -108,7 +110,7 @@ repo/
 ├── packages/
 │   ├── types/                       # paylaşılan tipler (Store API sözleşmeleri)
 │   ├── config/                      # eslint, tsconfig, prettier
-│   └── testing/                     # mock sunucular (iyzico/geliver sahte API), fixture fabrikaları
+│   └── testing/                     # sahte sağlayıcı sunucuları (PayTR; iyzico V8, Geliver F7), TR fixture'ları (geçerli sahte TCKN/VKN), her çalıştırmada üretilen test sırları
 ├── infra/
 │   ├── docker/                      # Dockerfile'lar, compose (dev)
 │   ├── tenant/                      # tenant şablonu, provisioning scriptleri

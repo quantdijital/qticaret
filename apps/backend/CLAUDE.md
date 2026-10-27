@@ -1,6 +1,7 @@
 # apps/backend — Medusa v2
 
 ## Klasörler (Medusa konvansiyonu — dışına çıkma)
+
 - `src/modules/<ad>/` — özel modüller ve module provider'lar (models, service.ts, index.ts, migrations)
 - `src/workflows/<alan>/` — workflow'lar; `steps/` alt klasöründe adımlar
 - `src/api/admin/...`, `src/api/store/...`, `src/api/hooks/...` — route.ts dosyaları; `middlewares.ts`
@@ -11,9 +12,10 @@
 - `integration-tests/` — http ve modül testleri
 
 ## Kurallar
+
 - Provider'lar `AbstractPaymentProvider`, `AbstractFulfillmentProviderService`, `AbstractNotificationProviderService` üzerinden.
 - Modüller izoledir: bir modül başka modülün servisini doğrudan çağırmaz. Çapraz iş = workflow + link.
-- Module provider'lar da izoledir: sadece kendi modülünün container'ına erişir (bkz. adr/0002).
+- Module provider'lar da izoledir: sadece kendi modülünün container'ına erişir. Mağazanın sağlayıcı hesabını (`integration-credentials`) çağrı anında `@medusajs/framework`'ün paylaşılan `container`'ından okur (adr/0027); hesap bilgisi `data`'ya ya da `context`'e konmaz.
 - Route'larda `validateAndTransformBody` + Zod şeması zorunlu.
 - Dış API istemcileri `src/lib/clients/` altında, timeout + retry + log redaksiyonu ile.
 - Tutar dönüşümleri (ör. iyzico'nun string tutarı) sadece provider sınırında yapılır.

@@ -84,8 +84,8 @@ iyzico → callbackUrl (POST /hooks/iyzico/callback, gövde: token)
 - itemTransactions (kalem ↔ paymentTransactionId) ödeme verisinde saklanır; kısmi iadenin temeli. Her sağlayıcı çıktısı verinin tamamıdır.
 - Sandbox/canlı base URL env ile. Canlı anahtar sandbox URL'si ile asla eşleşmemeli (açılış kontrolü).
 
-## Env
-`IYZICO_API_KEY`, `IYZICO_SECRET_KEY`, `IYZICO_BASE_URL`
+## Hesap bilgileri
+API anahtarı ve gizli anahtar panelden girilir (Ayarlar > Ödeme, adr/0027; V8). Sandbox ya da canlı mod paneldeki seçimle belirlenir; adresler kodda sabittir, serbest URL yok. Yerel `.env`'deki sandbox anahtarları (2026-10-27) V8'de panele taşınır.
 
 ## Testler
 Sahte sunucu senaryoları: başarı, 3DS başarısız, kullanıcı iptali, fraudStatus 0 → 1 ve 0 → -1, mükerrer callback, imzası bozuk yanıt, kısmi iade (satır kalanı), aynı gün iptal, 10223, 5xx/timeout.

@@ -85,6 +85,12 @@
 ### Secret yönetimi
 - Secret'lar: geliştirmede `.env` (git'e girmez), prod'da secret manager / Docker secrets.
 - Control plane secret deposu: KMS destekli envelope encryption, anahtar döndürme planı (F17 ADR'ında ayrıntı).
+- Mağazanın sağlayıcı hesapları (PayTR, iyzico, ...) panelden girilir ve `integration-credentials` modülünde AES-256-GCM ile şifreli durur (adr/0027):
+  - Anahtar `CREDENTIALS_ENCRYPTION_KEY`; PII anahtarlarından ayrıdır ve canlıda zorunludur.
+  - Blok sağlayıcıya bağlıdır (AAD). Anahtar değişirse kayıt "yeniden girilmeli" olur.
+  - Gizli alanlar yalnızca yazılır: yanıt, log ve denetim kaydında değer ya da parçası yer almaz; denetimde yalnızca sürüm numarası görünür.
+  - Workflow girdisi ve adımları yalnızca şifreli bloğu taşır.
+  - Uçlar personele açık (secret API anahtarı reddedilir) ve sağlayıcıyı çağıran kayıt ile test uçları `provider_check` hız profilinde. Rol kısıtı F12'de.
 - Açılışta Zod ile env doğrulama; secret değerleri asla loglanmaz (`src/lib/logging` redaksiyonu, kurallar docs/10 "Loglama").
 - Repo'da gitleaks (pre-commit + CI). CI loglarında secret maskeleme.
 - Claude Code `.env*` dosyalarını okuyamaz (`.claude/settings.json` deny).

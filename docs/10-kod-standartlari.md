@@ -39,7 +39,7 @@ const createShipmentStep = createStep(
 - Workflow: ilk adım `assertFeatureEnabledStep("anahtar")`. Bu workflow'u çağıran route da aynı bayrakla korunur; yoksa kapalı özellik 404 yerine 400 `features.disabled` ile kendini belli eder.
 - Subscriber/job: `container.resolve(PLATFORM_SETTINGS_MODULE).isFeatureEnabled("anahtar")` false ise hiçbir şey yapmadan döner.
 - Admin widget/sayfa bayrak kapalıyken gizlenir. Bu yalnızca kullanılabilirlik içindir; koruma API'dedir.
-- Ayar bölümüne alan eklemek: `sections/<bölüm>.ts`'te alan ve varsayılan. Strict şema serbest alanı reddeder; secret alanı tanımlanmaz (adr/0002). Metin alanları `isCleanText` ile kontrol karakteri ve yalnız surrogate reddeder. Bir alanı kaldırmak, saklanan değeri okumada düşürür; geçmeyen alan tek başına varsayılana döner.
+- Ayar bölümüne alan eklemek: `sections/<bölüm>.ts`'te alan ve varsayılan. Strict şema serbest alanı reddeder; secret alanı tanımlanmaz; sağlayıcı hesaplarının gizli alanları `integration-credentials/providers.ts`'e girer (adr/0027). Metin alanları `isCleanText` ile kontrol karakteri ve yalnız surrogate reddeder. Bir alanı kaldırmak, saklanan değeri okumada düşürür; geçmeyen alan tek başına varsayılana döner.
 - Platform bayraklarında tenant override'ı okunmaz; bayrak tenant'tan platforma geçerse eski seçim etkisizdir.
 
 ## Hata yönetimi

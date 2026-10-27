@@ -26,7 +26,7 @@
 - **Çerez onayı (F13.8) yoksa olay gönderilmez.**
 - E-posta/telefon gibi alanlar sağlayıcının istediği şekilde normalize edilip SHA-256 ile hash'lenir; ham hali loglanmaz.
 - Storefront'taki tarayıcı olaylarıyla mükerrer sayımı önlemek için ortak `event_id` kullanılır.
-- Tenant kimlik bilgileri (pixel ID, access token, measurement ID/secret) env/secret olarak gelir (adr/0002).
+- Tenant kimlik bilgileri (pixel ID, access token, measurement ID/secret) panelden girilir, gizli olanlar `integration-credentials`'ta şifreli durur (adr/0027).
 
 ## Env
 `META_PIXEL_ID`, `META_CAPI_TOKEN`, `GA4_MEASUREMENT_ID`, `GA4_API_SECRET`
