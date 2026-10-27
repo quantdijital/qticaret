@@ -3,6 +3,8 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
+**F6 — Ödeme: alternatif ödemeler + yönlendirici + ters ibraz: BAŞLADI (2026-10-27 gece, otonom).** Plan aşağıda "F6 görev planı"; ADR-0029 (çevrim dışı ödemeler) kabul edildi (otonom, gözden geçir). Sıradaki: W1 (havale/EFT sağlayıcısı).
+
 **F5 — Ödeme: PayTR + iyzico (+ ortak ödeme altyapısı): BİTTİ (V1–V11, 2026-10-27).** Ertelenenler: gerçek PayTR test penceresi ve iyzico taksitli sandbox ödemesi (sunucuya çıkışta), iyzico webhook'u (gerçek firmayla). Sıradaki faz F6.
 - V1: mağaza PayTR hesabını panelden bağlıyor (kullanıcı talebi, ADR-0027 ADR-0002'nin yerini aldı); PayTR istemcisi, sahte PayTR, `packages/testing`. Commit'ler `77c88f6`, `a00fa45` ve dokümanlar.
 - Kullanıcı 2026-10-27'de iki sağlayıcının altyapısının da hazırlanmasını istedi; canlıya alma sonra. docs/03 güncellendi.
@@ -472,6 +474,7 @@
   - Panel kampanya formuna "Kapsam ve koşullar" eklendi: tüm sepet ya da seçili kategoriler / koleksiyonlar / ürünler, en az sepet tutarı (KDV dahil), müşteri başına kullanım. Var olan kampanyada da değişiyor (Medusa'nın kural batch uçları ve kampanya bütçesi); önizleme koşulları yazıyor.
   - Testler: HTTP 5 (kod biçimi, tek kod ve birleştirme ayarı, deneme sınırı, `item_total` en az sepet kuralının çalıştığı, KK: limiti 1 olan koda yarışan üç ödemeden biri tamamlanıyor), panel birim (kural eşlemeleri, form), tarayıcıda oluştur/düzenle/sil denendi.
 - **Gözden geçir (kullanıcı yokken önerilen seçenekle verilen kararlar):**
+  - (2026-10-27 gece, F6) ADR-0029: havale `pending_authorization` (sipariş "ödeme bekleniyor"), kapıda ödeme `authorized`; kapıda ödeme ek ücreti sepette ayrı, korunan kalem; havale açıklaması sipariş numarası; kargo yalnızca parası alınmış ya da kapıda ödemeli siparişe.
   1. Bayrak adı `catalog.non_physical`, mağaza tarafından açılır, varsayılan kapalı. Etiketleri Medusa Admin'de ve panelde var.
   2. Kargo gerekmeyen kalemler sipariş ödenince "teslim edildi" sayılıyor. Dijital teslimat (indirme bağlantısı, kod gönderimi) F9 bildirimleriyle gelecek.
   3. Her checkout'ta teslimat ülkesi zorunlu. Medusa tek ülkeli bölgede ülkeyi kendisi dolduruyor, kural çok ülkeli bölgeler için koruma.
@@ -1020,9 +1023,25 @@
 - **Daha önce:** F1 planlaması ve F0.2–F0.8 (2026-10-24), F0.1 monorepo (2026-10-24 sabahı), SEO ve güvenlik dokümanları (2026-10-22).
 
 ## Sıradaki görev
-**Claude'un sıradaki işi:** F5 V2 (provider `payment-paytr` ve ödeme başlatma), plan aşağıda "F5 görev planı". V1 bitti (2026-10-27). V2–V10 sahte sunucularla yapılır. V2'de ilk iş: sağlayıcının mağaza hesabını `@medusajs/framework`'ün paylaşılan `container`'ından okuduğunu testle doğrulamak (ADR-0027). Gerçek testler (Açık sorular):
-- iyzico sandbox'ı: anahtarlar şimdilik `.env`'de ve çalışıyor (2026-10-27); V8'de panele taşınır, V9'dan itibaren kullanılır.
-- PayTR: firmanın canlı hesabıyla, V11'de kısa bir test penceresinde. F4 bitti (U1–U8, KK1–KK4, madde 169); F4 kodu `f4-pricing-promotions` dalında (F1–F3 birleştirilmediği için `f3-catalog-seo-stock` üzerinden).
+**Claude'un sıradaki işi:** F6 W1 (havale/EFT sağlayıcısı), plan aşağıda "F6 görev planı". Kullanıcı 2026-10-27 gece: "izin istemeden çalışmaya devam edersin, kritik bir şey olursa sabah sorarım."
+
+### F6 görev planı (2026-10-27; Medusa 2.21.2 kaynağından doğrulandı, Context7 kotası dolu)
+Doğrulananlar (medusa-researcher, GitHub v2.21.2):
+- `pending_authorization` havale gibi yöntemler için: sipariş `awaiting` oluşur, `Payment` yok; `processPaymentWorkflow` sipariş varken oturumu yeniden yetkilendirir.
+- `authorized` yakalanmamış `Payment` oluşturur (`capturePaymentWorkflow` sağlayıcının `capturePayment`'ini çağırır).
+- `cancelOrderWorkflow` gönderisi olmayan siparişi kullanıcısız iptal eder ve rezervasyonları bırakır.
+- `createOrderFulfillmentWorkflow` ödeme durumuna bakmaz.
+- `addToCartWorkflow` varyantsız, `is_custom_price` kalem ekler; Store ucu bu kalemi değiştirebilir ve silebilir (ara katman gerekir).
+- `GET /store/payment-providers` bölge bağından listeler; asıl zorlama bölge bağı.
+
+| # | F6 | Görev | Bağımlılık | KK |
+|---|---|---|---|---|
+| W1 | F6.5 | Havale/EFT sağlayıcısı (`pp_bank-transfer_bank-transfer`, `pending_authorization`), `bank_transfer` ayar bölümü (IBAN mod-97), Store başlatma ucunun çevrim dışı sağlayıcılara açılması, sepet tamamlama kuralının genişlemesi, `GET /store/payment/methods`'ta havale ve IBAN, panel Ayarlar > Ödeme > Havale/EFT sayfası, deneme sayfasında havale | ADR-0029 | — |
+| W2 | F6.5 | Havale onayı (panel sipariş sayfası "Havale geldi" → `processPaymentWorkflow`), süresi dolan havale siparişinin iptali ve stok iadesi (iş), kargo kuralı (yalnızca `captured` ya da kapıda ödeme `authorized`), dashboard ve sipariş listesinde "havale bekliyor" | W1 | Havale KK'sı |
+| W3 | F6.6 | Kapıda ödeme sağlayıcısı (`pp_cod_cod`, `authorized`), bayrak + şartlar (üst tutar, izinli kargo seçenekleri), ek ücret kalemi (sunucuda, korunan), tamamlamada ek ücret doğrulaması, panelde "tahsil edildi" (capture) ve mutabakat alanları, panel ayar sayfası | ADR-0029 | Kapıda ödeme KK'sı |
+| W4 | F6.2–F6.4 | Yönlendirici: birincil/yedek kart sağlayıcısı, sağlık durumu kötüyse yedek önde (`/store/payment/methods`), yedekle tamamlanan checkout testi; sözleşme paketinin çevrim dışı dalı (havale, kapıda ödeme) | W1, W3 | KK1, KK2 |
+| W5 | F6.7 | Ters ibraz: `chargebacks` modülü (sipariş, sağlayıcı, tutar, sebep, son tarih, durum açık/belge sunuldu/kazanıldı/kaybedildi), panelden elle kayıt, belge paketi (async iş, indirilebilir: sipariş özeti, ödeme kaydı, IP/zaman, sözleşme onayı ve kargo kanıtı oldukça), panel kuyruğu; kaybedilen ibrazda muhasebe kaydı F11'de | — | KK5 |
+| W6 | — | Kapanış: güvenlik incelemesi, KK işaretleri, kapsam | W1–W5 | — |
 
 ### F5 görev planı (2026-10-27; Medusa 2.21.2 kaynağı, dev.paytr.com ve docs.iyzico.com'dan doğrulandı)
 Kararlar: ADR-0026 (barındırılan ödeme formu akışı; V1 başında kabul edildi), ADR-0027 (mağazanın sağlayıcı hesapları panelden, şifreli; kabul edildi, ADR-0002'nin yerini aldı). PayTR ayrıntıları `docs/entegrasyonlar/paytr.md`, iyzico ayrıntıları `docs/entegrasyonlar/iyzico.md`.
