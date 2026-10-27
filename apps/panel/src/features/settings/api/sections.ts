@@ -39,6 +39,14 @@ export interface BankTransferSettings {
   deadline_hours: number
 }
 
+/** Cash on delivery (F6, adr/0029): the fee in kuruş or basis points, the limit in kuruş. */
+export interface CashOnDeliverySettings {
+  fee_type: "none" | "fixed" | "percent"
+  fee_value: number
+  max_amount: number
+  shipping_option_ids: string[]
+}
+
 /** Promotion rules (F4.4, F4.5): codes per cart, free shipping from a basket total. */
 export interface PromotionSettings {
   combine_codes: boolean

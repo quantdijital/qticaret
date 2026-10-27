@@ -28,6 +28,23 @@ süre dolarsa    → job: sipariş iptal, rezervasyon serbest, müşteriye bildi
 - Yalnızca kapıda ödemeyi destekleyen kargo seçenekleriyle birlikte sunulur (Geliver desteği doğrulanır).
 - Teslimde tahsilat → kargo firmasından mutabakat bilgisi → `captured`; iade/teslim edilemezse sipariş iptal akışı.
 
+- **Uygulama (F6 W3, ADR-0029):**
+  - Sağlayıcı `pp_cod_cod`; yetkilendirme `authorized`. Sipariş kargoya verilebilir; para gelince panelden "Tahsil et" (capture).
+  - Kargo firmasının tahsilat mutabakatı F7'de.
+  - Ayar bölümü `cash_on_delivery`:
+    - `fee_type` (none/fixed/percent);
+    - `fee_value` (sabitte kuruş, oranda baz puan);
+    - `max_amount` (kuruş, 0 sınırsız; ek ücret hariç sipariş tutarına göre);
+    - `shipping_option_ids` (kapıda tahsilat yapan kargo seçenekleri).
+  - Açıp kapamak `cash_on_delivery` özellik bayrağıyla.
+  - Ek ücret kalemi:
+    - Başlatmada eklenir. Varyantsız, `is_custom_price`, KDV dahil, kargo gerektirmez, `metadata.qt_fee = "cash_on_delivery"`.
+    - Başka yönteme geçilince silinir.
+    - Medusa'nın sepet kilidi yüzünden başlatma kilidimizden önce eklenir.
+    - Store ucundan değiştirilemez ve silinemez.
+    - Tamamlamada ücret ve uygunluk yeniden hesaplanır; tutmazsa `cash_on_delivery.fee_mismatch`.
+  - `GET /store/payment/methods?cart_id=` sepete göre uygunluğu ve ücreti verir.
+
 ## Testler
 - Contract test paketini geçer (F6.4).
 - Havale: süre dolumu job'u, mükerrer onay, onay sonrası iptal.

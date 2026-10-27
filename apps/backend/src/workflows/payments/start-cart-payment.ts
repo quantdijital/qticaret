@@ -15,6 +15,7 @@ import { paymentBasket } from "../../lib/payments/basket"
 import { HOSTED_CHECKOUT } from "../../lib/payments/checkout"
 import type { HostedCheckout } from "../../lib/payments/checkout"
 import { readCheckoutCartStep } from "./steps/read-checkout-cart"
+import { applyPaymentFeeStep } from "./steps/payment-fee"
 import { readPaymentCollectionStep } from "./steps/read-payment-collection"
 import { recordPaymentFormStep } from "./steps/record-payment-form"
 
@@ -38,6 +39,9 @@ export interface StartCartPaymentInput {
 export const startCartPaymentWorkflow = createWorkflow(
   "payments-start-cart-payment",
   (input: StartCartPaymentInput) => {
+    // Cash on delivery's fee line put right first: Medusa's cart workflows that
+    // change lines take the cart's lock themselves (adr/0029)
+    const fee = applyPaymentFeeStep({ cart_id: input.cart_id, provider_id: input.provider_id })
     // The cart's own lock, as Medusa's cart workflows take it: the cart cannot
     // change between reading its amount and starting the session for it
     acquireLockStep({ key: input.cart_id, timeout: 5, ttl: 30 })
@@ -57,7 +61,7 @@ export const startCartPaymentWorkflow = createWorkflow(
     })
     const collection = readPaymentCollectionStep(input.cart_id)
     const session = createPaymentSessionsWorkflow.runAsStep({
-      input: transform({ input, cart, collection }, ({ input, cart, collection }) => {
+      input: transform({ input, cart, collection, fee }, ({ input, cart, collection, fee }) => {
         // Only a hosted form is given the buyer and the basket (adr/0029: offline ways need none)
         const checkout: HostedCheckout | null = input.return_urls
           ? {
@@ -71,7 +75,8 @@ export const startCartPaymentWorkflow = createWorkflow(
         return {
           payment_collection_id: collection.id,
           provider_id: input.provider_id,
-          data: checkout ? { checkout } : {},
+          // A hosted form gets the buyer and the basket; cash on delivery its fee
+          data: checkout ? { checkout } : { fee: fee.fee },
           context: { [HOSTED_CHECKOUT]: true },
         }
       }),

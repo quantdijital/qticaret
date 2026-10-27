@@ -7,6 +7,7 @@ import { ErrorState, LoadingRows } from "@/components/patterns/states"
 import { StatusBadge } from "@/components/patterns/status-badge"
 import { Button } from "@/components/ui/button"
 import { providerAccountsQuery } from "@/features/settings/api/payments"
+import { useFeature } from "@/features/settings/api/features"
 import { sectionQuery } from "@/features/settings/api/sections"
 import type { BankTransferSettings } from "@/features/settings/api/sections"
 import type { ProviderAccount } from "@/features/settings/api/payments"
@@ -19,11 +20,18 @@ import { errorText } from "@/lib/errors"
 
 const P = "settings.payments"
 
-/** Bank transfer's state: on or off, from the shop's settings (adr/0029). */
-function SettingsBadge() {
+/**
+ * On or off, for a way to pay with no provider account (adr/0029): bank
+ * transfer by its settings, cash on delivery by its feature flag.
+ */
+function SettingsBadge({ id }: { id: PaymentMethod["id"] }) {
   const { t } = useTranslation()
-  const query = useQuery(sectionQuery<BankTransferSettings>("bank_transfer"))
-  const enabled = query.data?.values.enabled
+  const bank = useQuery({
+    ...sectionQuery<BankTransferSettings>("bank_transfer"),
+    enabled: id === "bank_transfer",
+  })
+  const flag = useFeature("payments.cash_on_delivery")
+  const enabled = id === "bank_transfer" ? bank.data?.values.enabled : flag
   if (enabled === undefined) {
     return null
   }
@@ -57,11 +65,9 @@ function MethodRow({
         </span>
       </div>
       <div className="flex shrink-0 flex-wrap items-center gap-2">
-        {method.upcoming ? (
-          <StatusBadge tone="neutral">{t(`${P}.upcoming`)}</StatusBadge>
-        ) : method.kind === "settings" ? (
+        {method.kind === "settings" ? (
           <>
-            <SettingsBadge />
+            <SettingsBadge id={method.id} />
             <Button asChild variant="outline" size="sm">
               <Link
                 to="/settings/payments/$provider"

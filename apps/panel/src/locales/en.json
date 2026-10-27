@@ -415,6 +415,12 @@
             "label": "Gift cards and store credit",
             "description": "Gift cards can be made and given to customers, who use the code in their basket and keep what is left for later. Store credit takes refunds or goodwill amounts onto an account."
           }
+        },
+        "payments": {
+          "cash_on_delivery": {
+            "label": "Cash on delivery",
+            "description": "Shoppers can pay the courier on delivery. The fee, the limit and the couriers that collect are under Settings > Payment > Cash on delivery."
+          }
         }
       }
     },
@@ -663,6 +669,35 @@
           "enabled": "Offer it to shoppers",
           "enabledHint": "When the money comes, you confirm it on the order's page.",
           "needsAccount": "Save the account first to turn it on."
+        }
+      },
+      "cashOnDelivery": {
+        "invalid": "Enter the fee and the limit as numbers; a share is at most 100%.",
+        "max": "Largest order (TL)",
+        "maxHint": "Shipping included; empty means no limit.",
+        "status": {
+          "title": "Cash on delivery",
+          "description": "When on, shoppers can pay the courier on delivery; offered only with the shipping options you pick.",
+          "enabled": "Offer it to shoppers",
+          "enabledHint": "Record the money collected on the order's page with “Capture”."
+        },
+        "fee": {
+          "title": "Cash on delivery fee",
+          "description": "Shown as its own cart line; worked out on the server.",
+          "type": "Fee",
+          "types": {
+            "none": "Free",
+            "fixed": "Fixed amount",
+            "percent": "Share of the order"
+          },
+          "amount": "Amount (TL, VAT included)",
+          "percent": "Rate (%)",
+          "hint": "Of the order, shipping included."
+        },
+        "shipping": {
+          "title": "Shipping options that collect at the door",
+          "description": "Cash on delivery is offered only for orders sent with one of these.",
+          "none": "No shipping options yet; add one first."
         }
       }
     },
@@ -1325,7 +1360,8 @@
       "pp_system_default": "Manual payment",
       "pp_iyzico_iyzico": "iyzico",
       "pp_paytr_paytr": "PayTR",
-      "pp_bank-transfer_bank-transfer": "Bank transfer"
+      "pp_bank-transfer_bank-transfer": "Bank transfer",
+      "pp_cod_cod": "Cash on delivery"
     },
     "refund": {
       "title": "Refund for #{{number}}",

@@ -11,8 +11,7 @@ export const PAYMENT_METHODS = [
   { id: "iyzico", group: "card", upcoming: false, kind: "account" },
   // The shop's own settings, no provider account (F6, adr/0029)
   { id: "bank_transfer", group: "other", upcoming: false, kind: "settings" },
-  // Listed so the shop knows it is coming (F6 W3)
-  { id: "cash_on_delivery", group: "other", upcoming: true, kind: "settings" },
+  { id: "cash_on_delivery", group: "other", upcoming: false, kind: "settings" },
 ] as const
 
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number]

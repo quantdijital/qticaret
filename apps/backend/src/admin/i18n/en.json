@@ -227,6 +227,10 @@
       "promotions_gift_cards": {
         "label": "Gift cards and store credit",
         "description": "Gift cards can be made and given to customers, who use the code in their basket and keep what is left for later. Store credit takes refunds or goodwill amounts onto an account."
+      },
+      "payments_cash_on_delivery": {
+        "label": "Cash on delivery",
+        "description": "Shoppers can pay the courier on delivery. The fee, the limit and the couriers that collect are under Settings > Payment > Cash on delivery."
       }
     },
     "attributes": {

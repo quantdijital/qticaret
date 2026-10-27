@@ -1,6 +1,6 @@
 // The payment test page's result step (adr/0028): with checkout.js, one script.
 /* global $, el, money, config, state, CART_KEY, renderCart */
-/* exported showBankTransfer, followReturn */
+/* exported showBankTransfer, showCashOnDelivery, followReturn */
 
 /** A bank transfer's order, placed awaiting the money, and where to send it. */
 function showBankTransfer(order, bank) {
@@ -9,6 +9,21 @@ function showBankTransfer(order, bank) {
     `Sipariş #${order.display_id} açıldı, ödeme bekleniyor. `,
     `${bank.bank_name} · ${bank.account_holder} · ${bank.iban} hesabına ${money(bank.amount / 100)} gönderin; `,
     `açıklamaya sipariş numarasını yazın (${bank.deadline_hours} saat içinde). `,
+    el("a", {
+      href: `${config.panelUrl}/orders/${order.id}`,
+      target: "_blank",
+      textContent: "Panelde aç",
+    })
+  )
+}
+
+/** An order to be paid at the door, its fee a line of its own. */
+function showCashOnDelivery(order, session) {
+  $("result").hidden = false
+  $("result").classList.add("ok")
+  $("result-body").replaceChildren(
+    `Sipariş #${order.display_id} açıldı; ${money(session.amount / 100)} kapıda ödenecek `,
+    `(ücret ${money(session.fee / 100)}). `,
     el("a", {
       href: `${config.panelUrl}/orders/${order.id}`,
       target: "_blank",

@@ -6,7 +6,7 @@ describe("payment methods", () => {
     expect(isConnectable("paytr")).toBe(true)
     expect(isConnectable("iyzico")).toBe(true)
     expect(isConnectable("bank_transfer")).toBe(true)
-    expect(isConnectable("cash_on_delivery")).toBe(false)
+    expect(isConnectable("cash_on_delivery")).toBe(true)
     expect(isConnectable("paytr2")).toBe(false)
   })
 

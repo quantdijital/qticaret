@@ -12,6 +12,7 @@ import { PaytrSettings } from "@/features/settings/components/paytr-settings"
 import { isAccountMethod } from "@/features/settings/payment-methods"
 import type { AccountMethod } from "@/features/settings/payment-methods"
 import { BankTransferPage } from "@/features/settings/pages/bank-transfer-page"
+import { CashOnDeliveryPage } from "@/features/settings/pages/cash-on-delivery-page"
 import { accountKey } from "@/features/settings/payments"
 import { errorText } from "@/lib/errors"
 
@@ -52,6 +53,9 @@ export function PaymentProviderPage() {
   // Bank transfer has no account: the shop's own settings (adr/0029)
   if (provider === "bank_transfer") {
     return <BankTransferPage />
+  }
+  if (provider === "cash_on_delivery") {
+    return <CashOnDeliveryPage />
   }
   // The route lets only these through; the check narrows the id
   if (!isAccountMethod(provider)) {

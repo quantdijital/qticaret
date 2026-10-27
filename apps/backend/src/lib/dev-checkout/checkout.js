@@ -1,5 +1,5 @@
 // The payment test page's script (adr/0028): plain browser JavaScript, no build.
-/* global showBankTransfer, followReturn */
+/* global showBankTransfer, showCashOnDelivery, followReturn */
 const config = JSON.parse(document.getElementById("config").textContent)
 const CART_KEY = "qt-dev-checkout-cart"
 const $ = (id) => document.getElementById(id)
@@ -220,7 +220,7 @@ async function pay() {
   if (!state.cart) throw new Error("Sepet boş.")
   const provider = document.querySelector("input[name=provider]:checked").value
   const back = (result) => `${location.origin}/dev/checkout?sonuc=${result}&sepet=${state.cart.id}`
-  const offline = provider === "pp_bank-transfer_bank-transfer"
+  const offline = provider === "pp_bank-transfer_bank-transfer" || provider === "pp_cod_cod"
   const { payment_session: session } = await api(`/store/carts/${state.cart.id}/payment-session`, {
     method: "POST",
     body: offline
@@ -235,7 +235,8 @@ async function pay() {
     localStorage.removeItem(CART_KEY)
     state.cart = null
     renderCart()
-    showBankTransfer(completed.order, session.data)
+    if (provider === "pp_cod_cod") showCashOnDelivery(completed.order, session.data)
+    else showBankTransfer(completed.order, session.data)
     $("result").scrollIntoView({ behavior: "smooth" })
     return
   }

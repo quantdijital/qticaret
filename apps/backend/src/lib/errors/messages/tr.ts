@@ -22,6 +22,14 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "bank_transfer.order_canceled": "İptal edilmiş siparişin havalesi onaylanamaz.",
   "orders.payment_awaited":
     "Siparişin ödemesi henüz gelmedi; havale onaylanınca kargoya verilebilir.",
+  "cash_on_delivery.disabled": "Mağaza kapıda ödemeyi sunmuyor.",
+  "cash_on_delivery.over_limit": "Bu tutardaki sipariş kapıda ödenemiyor.",
+  "cash_on_delivery.shipping_unsupported":
+    "Seçilen kargo kapıda tahsilat yapmıyor; kapıda ödeme için başka bir kargo seçin.",
+  "cash_on_delivery.fee_line_locked":
+    "Kapıda ödeme ücreti sepetten değiştirilemez; başka bir ödeme yöntemi seçin.",
+  "cash_on_delivery.fee_mismatch": "Kapıda ödeme ücreti değişti; ödemeyi yeniden başlatın.",
+  "cash_on_delivery.fee_invalid": "Oran en çok %100 olabilir.",
   "brands.description_invalid": "Açıklama çok uzun ya da kullanılamayan karakterler içeriyor.",
   "brands.logo_unknown": "Logo mağazanın yüklenen görsellerinden biri olmalı.",
   "brands.name_invalid": "Marka adını girin (en fazla 120 karakter).",

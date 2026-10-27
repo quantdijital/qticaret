@@ -227,6 +227,10 @@
       "promotions_gift_cards": {
         "label": "Hediye kartı ve mağaza kredisi",
         "description": "Hediye kartı oluşturulup müşteriye verilebilir; müşteri kodu sepette kullanır, kalan bakiyesi sonraki alışverişte geçer. Mağaza kredisiyle iade ya da iyi niyet tutarı hesaba yazılabilir."
+      },
+      "payments_cash_on_delivery": {
+        "label": "Kapıda ödeme",
+        "description": "Müşteri ödemeyi teslimatta kuryeye yapabilir. Ücret, üst tutar ve kapıda tahsilat yapan kargo seçenekleri Ayarlar > Ödeme > Kapıda ödeme'de."
       }
     },
     "attributes": {

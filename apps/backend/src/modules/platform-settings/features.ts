@@ -1,6 +1,6 @@
 /**
  * Feature flags (adr/0012). Code reads flags, never sector names; each phase
- * adds its own (`cash_on_delivery` F6, `seo_publish_gate` F3.13...). A flag
+ * adds its own (`payments.cash_on_delivery` F6, `seo.publish_gate` F3.13...). A flag
  * a tenant changes in the admin is `owner: "tenant"`; one that provisioning
  * sets (plans, F17) is `owner: "platform"` and read-only in the admin.
  */
@@ -29,6 +29,9 @@ export const STOCK_PREORDER = "stock.preorder"
 
 // F4.8 (ADR-0025): gift cards and store credit, off until the shop takes them on
 export const GIFT_CARDS = "promotions.gift_cards"
+
+/** Paying at the door (F6, adr/0029): off until the shop sets its fee and couriers. */
+export const CASH_ON_DELIVERY = "payments.cash_on_delivery"
 
 export const FEATURES: Readonly<Record<string, FeatureDefinition>> = Object.freeze({
   // F3.2: products that need no shipping (e-books, gift codes, courses, services)
@@ -65,6 +68,13 @@ export const FEATURES: Readonly<Record<string, FeatureDefinition>> = Object.free
     owner: "tenant",
     labelKey: "qticaret.features.promotions_gift_cards.label",
     descriptionKey: "qticaret.features.promotions_gift_cards.description",
+  },
+  // F6 (adr/0029): off by default; offered only within the limit, with couriers that collect
+  [CASH_ON_DELIVERY]: {
+    default: false,
+    owner: "tenant",
+    labelKey: "qticaret.features.payments_cash_on_delivery.label",
+    descriptionKey: "qticaret.features.payments_cash_on_delivery.description",
   },
 })
 

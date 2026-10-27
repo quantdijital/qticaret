@@ -130,17 +130,18 @@ describe("PaymentsPage", () => {
     expect(within(await row("PayTR")).getByText("PayTR reddetti")).toBeInTheDocument()
   })
 
-  it("lists a method still being built without a way in, and bank transfer with its page", async () => {
+  it("opens bank transfer and cash on delivery on pages of their own", async () => {
     renderPage(paytr({}))
 
-    const upcoming = await row("Kapıda ödeme")
-    const bank = await row("Havale / EFT")
-
-    expect(within(upcoming).getByText("Yakında")).toBeInTheDocument()
-    expect(within(upcoming).queryByRole("link")).toBeNull()
-    expect(within(bank).getByRole("link", { name: "Yönet" })).toHaveAttribute(
-      "href",
-      "/settings/payments/bank_transfer"
-    )
+    for (const [name, id] of [
+      ["Havale / EFT", "bank_transfer"],
+      ["Kapıda ödeme", "cash_on_delivery"],
+    ] as const) {
+      const method = await row(name)
+      expect(within(method).getByRole("link", { name: "Yönet" })).toHaveAttribute(
+        "href",
+        `/settings/payments/${id}`
+      )
+    }
   })
 })

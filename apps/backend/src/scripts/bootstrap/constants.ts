@@ -12,6 +12,7 @@ export const DEFAULT_STOCK_LOCATION_NAME = "Ana Depo"
 export const SYSTEM_PAYMENT_PROVIDER_ID = "pp_system_default"
 export {
   BANK_TRANSFER_PAYMENT_PROVIDER_ID,
+  COD_PAYMENT_PROVIDER_ID,
   IYZICO_PAYMENT_PROVIDER_ID,
   PAYTR_PAYMENT_PROVIDER_ID,
 } from "../../lib/payments/checkout"

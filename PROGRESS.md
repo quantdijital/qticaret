@@ -3,7 +3,7 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**F6 — Ödeme: alternatif ödemeler + yönlendirici + ters ibraz: BAŞLADI (2026-10-27 gece, otonom).** Dal `f6-alternative-payments` (`f5-payments` üzerinden; F6 planı ve W1 `f5-payments`'ta, 9f34fd1). Plan aşağıda "F6 görev planı"; ADR-0029 (çevrim dışı ödemeler) kabul edildi (otonom, gözden geçir). W1–W2 bitti; sıradaki W3 (kapıda ödeme).
+**F6 — Ödeme: alternatif ödemeler + yönlendirici + ters ibraz: BAŞLADI (2026-10-27 gece, otonom).** Dal `f6-alternative-payments` (`f5-payments` üzerinden; F6 planı ve W1 `f5-payments`'ta, 9f34fd1). Plan aşağıda "F6 görev planı"; ADR-0029 (çevrim dışı ödemeler) kabul edildi (otonom, gözden geçir). W1–W3 bitti; sıradaki W4 (yönlendirici, sözleşme paketi).
 
 **F5 — Ödeme: PayTR + iyzico (+ ortak ödeme altyapısı): BİTTİ (V1–V11, 2026-10-27).** Ertelenenler: gerçek PayTR test penceresi ve iyzico taksitli sandbox ödemesi (sunucuya çıkışta), iyzico webhook'u (gerçek firmayla). Sıradaki faz F6.
 - V1: mağaza PayTR hesabını panelden bağlıyor (kullanıcı talebi, ADR-0027 ADR-0002'nin yerini aldı); PayTR istemcisi, sahte PayTR, `packages/testing`. Commit'ler `77c88f6`, `a00fa45` ve dokümanlar.
@@ -20,8 +20,20 @@
 **Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: BİTTİ** (T1a–T16; kabul kriterlerinin hepsi testlerle işaretli, docs/03; son eksik iki kanıt, danışmanın p95 ölçümü ve yedi sayfa türünün SEO sözleşme testi, kapanışta eklendi). Playwright e2e altyapısı kuruldu; CI düzeltildi. **F4 — Fiyatlandırma ve promosyon: BİTTİ** (plan ve ADR-0023/0024/0025 kabul edildi; U1 `price-history`, U4 kuponlar, U7 indirim dağılımı ve iade tutarı, U2 fiyat listeleri, U3 indirim gösterimi, U5 tek kullanımlık kodlar, U6 otomatik kampanyalar ve kargo bedava eşiği, U8 hediye kartı ve mağaza kredisi bitti (KK1–KK4 işaretli); F4 kapanış incelemesi yapıldı, bulgular düzeltildi: F4 BİTTİ). Dal `f4-pricing-promotions`. Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı. F1, F2 ve F3 dalları push edildi (kullanıcı 2026-10-26: "pushları sen önerdiğinde yapabilirsin"); PR açılmadı.
 
 ## Son oturum özeti
+> **Sabah için (kullanıcıya):** GitHub Actions 2026-10-27 ~23:45'ten beri işleri başlatmıyor: "recent account payments have failed or your spending limit needs to be increased" (Billing & plans). CI'ı yalnızca hesap sahibi açabilir. O zamandan sonraki commit'ler yerelde doğrulandı (birim + HTTP + e2e); faturalama düzelince son commit'te CI yeniden çalıştırılmalı.
+
 **2026-10-27 gece (otonom; F5 kapanışı, F6 başlangıcı).** Kullanıcı yatarken: "izin istemeden çalışmaya devam edersin, kritik bir şey olursa sabah sorarım."
 - F5 kapandı (yukarıda V11; CI yeşil `fcd06e7`).
+- **F6 W3 (kapıda ödeme):**
+  - `pp_cod_cod` (yetkilendirme `authorized`: kargoya verilebilir, para gelince "Tahsil et").
+  - `payments.cash_on_delivery` bayrağı. Kayıtta yoktu; eklendi, yönetim paneli ve panel metinleriyle.
+  - `cash_on_delivery` ayar bölümü: ücret türü/değeri, üst tutar, kapıda tahsilat yapan kargo seçenekleri.
+  - Ek ücret kalemi sunucuda hesaplanıyor ve başlatma kilidinden önce ekleniyor. Store ucundan değiştirilemiyor ve silinemiyor; tamamlamada yeniden hesaplanıyor.
+  - `GET /store/payment/methods?cart_id=` sepete göre uygunluk ve ücret.
+  - Panelde Ayarlar > Ödeme > Kapıda ödeme sayfası (durum, ücret, kargo seçenekleri); deneme sayfasında kapıda ödeme.
+  - Testler: birim `cod` 2, HTTP `cash-on-delivery` 5; ödeme/sipariş/dashboard takımları 97/97; panel 219; e2e 28.
+  - **Tam HTTP takımı yerelde 79/79 takım, 426 test (W2 sonrası), CI faturalama yüzünden çalışmadığı için.**
+  - Not: ek ücret kaleminin başlığı Türkçe sabit ("Kapıda ödeme ücreti"); kiracı dili F19'da.
 - **F6 W2 (havale onayı, süre, kargo kuralı):**
   - `confirmBankTransferWorkflow`: sipariş kilidi altında, oturuma onay yazılır (sağlayıcının kabul ettiği tek güncelleme), oturum yeniden yetkilendirilir, yakalanır; sipariş `captured`. İkinci onay yalnızca bildirilir, iptal edilmiş sipariş reddedilir.
   - `POST /admin/orders/:id/bank-transfer/confirm`: yalnızca personel, denetim kaydıyla.
@@ -1041,7 +1053,7 @@
 - **Daha önce:** F1 planlaması ve F0.2–F0.8 (2026-10-24), F0.1 monorepo (2026-10-24 sabahı), SEO ve güvenlik dokümanları (2026-10-22).
 
 ## Sıradaki görev
-**Claude'un sıradaki işi:** F6 W3 (kapıda ödeme), plan aşağıda "F6 görev planı". Kullanıcı 2026-10-27 gece: "izin istemeden çalışmaya devam edersin, kritik bir şey olursa sabah sorarım."
+**Claude'un sıradaki işi:** F6 W4 (yönlendirici: birincil/yedek, sağlık; sözleşme paketinin çevrim dışı dalı), plan aşağıda "F6 görev planı". Kullanıcı 2026-10-27 gece: "izin istemeden çalışmaya devam edersin, kritik bir şey olursa sabah sorarım."
 
 ### F6 görev planı (2026-10-27; Medusa 2.21.2 kaynağından doğrulandı, Context7 kotası dolu)
 Doğrulananlar (medusa-researcher, GitHub v2.21.2):
@@ -1056,7 +1068,7 @@ Doğrulananlar (medusa-researcher, GitHub v2.21.2):
 |---|---|---|---|---|
 | W1 ✅ | F6.5 | **Bitti (2026-10-27 gece).** Havale/EFT sağlayıcısı (`pp_bank-transfer_bank-transfer`, `pending_authorization`), `bank_transfer` ayar bölümü (IBAN mod-97), Store başlatma ucunun çevrim dışı sağlayıcılara açılması, sepet tamamlama kuralının genişlemesi, `GET /store/payment/methods`'ta havale ve IBAN, panel Ayarlar > Ödeme > Havale/EFT sayfası, deneme sayfasında havale | ADR-0029 | — |
 | W2 ✅ | F6.5 | **Bitti (2026-10-27 gece).** Havale onayı (panel sipariş sayfası "Havale geldi" → `processPaymentWorkflow`), süresi dolan havale siparişinin iptali ve stok iadesi (iş), kargo kuralı (yalnızca `captured` ya da kapıda ödeme `authorized`), dashboard ve sipariş listesinde "havale bekliyor" | W1 | Havale KK'sı |
-| W3 | F6.6 | Kapıda ödeme sağlayıcısı (`pp_cod_cod`, `authorized`), bayrak + şartlar (üst tutar, izinli kargo seçenekleri), ek ücret kalemi (sunucuda, korunan), tamamlamada ek ücret doğrulaması, panelde "tahsil edildi" (capture) ve mutabakat alanları, panel ayar sayfası | ADR-0029 | Kapıda ödeme KK'sı |
+| W3 ✅ | F6.6 | **Bitti (2026-10-28 gece).** Kapıda ödeme sağlayıcısı (`pp_cod_cod`, `authorized`), bayrak + şartlar (üst tutar, izinli kargo seçenekleri), ek ücret kalemi (sunucuda, korunan), tamamlamada ek ücret doğrulaması, panelde "tahsil edildi" (capture) ve mutabakat alanları, panel ayar sayfası | ADR-0029 | Kapıda ödeme KK'sı |
 | W4 | F6.2–F6.4 | Yönlendirici: birincil/yedek kart sağlayıcısı, sağlık durumu kötüyse yedek önde (`/store/payment/methods`), yedekle tamamlanan checkout testi; sözleşme paketinin çevrim dışı dalı (havale, kapıda ödeme) | W1, W3 | KK1, KK2 |
 | W5 | F6.7 | Ters ibraz: `chargebacks` modülü (sipariş, sağlayıcı, tutar, sebep, son tarih, durum açık/belge sunuldu/kazanıldı/kaybedildi), panelden elle kayıt, belge paketi (async iş, indirilebilir: sipariş özeti, ödeme kaydı, IP/zaman, sözleşme onayı ve kargo kanıtı oldukça), panel kuyruğu; kaybedilen ibrazda muhasebe kaydı F11'de | — | KK5 |
 | W6 | — | Kapanış: güvenlik incelemesi, KK işaretleri, kapsam | W1–W5 | — |

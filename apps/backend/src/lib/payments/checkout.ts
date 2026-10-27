@@ -27,8 +27,14 @@ export const HOSTED_FORM_PROVIDERS = [
 /** Bank transfer (F6, adr/0029): the order waits for the money. */
 export const BANK_TRANSFER_PAYMENT_PROVIDER_ID = "pp_bank-transfer_bank-transfer"
 
+/** Cash on delivery (F6, adr/0029): the courier collects at the door. */
+export const COD_PAYMENT_PROVIDER_ID = "pp_cod_cod"
+
 /** Ways to pay with no outside service (adr/0029); they start from our route too. */
-export const OFFLINE_PROVIDERS = [BANK_TRANSFER_PAYMENT_PROVIDER_ID] as const
+export const OFFLINE_PROVIDERS = [
+  BANK_TRANSFER_PAYMENT_PROVIDER_ID,
+  COD_PAYMENT_PROVIDER_ID,
+] as const
 
 /** Every provider a storefront starts a payment with, through our route only. */
 export const CHECKOUT_PROVIDERS = [...HOSTED_FORM_PROVIDERS, ...OFFLINE_PROVIDERS] as const

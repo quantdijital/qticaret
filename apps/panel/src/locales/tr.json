@@ -415,6 +415,12 @@
             "label": "Hediye kartı ve mağaza kredisi",
             "description": "Hediye kartı oluşturulup müşteriye verilebilir; müşteri kodu sepette kullanır, kalan bakiyesi sonraki alışverişte geçer. Mağaza kredisiyle iade ya da iyi niyet tutarı hesaba yazılabilir."
           }
+        },
+        "payments": {
+          "cash_on_delivery": {
+            "label": "Kapıda ödeme",
+            "description": "Müşteri ödemeyi teslimatta kuryeye yapabilir. Ücret, üst tutar ve kapıda tahsilat yapan kargo seçenekleri Ayarlar > Ödeme > Kapıda ödeme'de."
+          }
         }
       }
     },
@@ -663,6 +669,35 @@
           "enabled": "Müşteriye sun",
           "enabledHint": "Ödeme geldiğinde siparişin sayfasından onaylarsınız.",
           "needsAccount": "Açmak için önce hesap bilgilerini kaydedin."
+        }
+      },
+      "cashOnDelivery": {
+        "invalid": "Ücreti ya da üst tutarı rakamla girin; oran en çok %100 olabilir.",
+        "max": "En yüksek sipariş tutarı (TL)",
+        "maxHint": "Kargo dahil; boş bırakırsanız sınır yok.",
+        "status": {
+          "title": "Kapıda ödeme",
+          "description": "Açıkken müşteri ödemeyi teslimatta kuryeye yapabilir; yalnızca seçtiğiniz kargo seçenekleriyle sunulur.",
+          "enabled": "Müşteriye sun",
+          "enabledHint": "Tahsil edilen tutarı siparişin sayfasından «Tahsil et» ile kaydedersiniz."
+        },
+        "fee": {
+          "title": "Kapıda ödeme ücreti",
+          "description": "Sepette ayrı satır olarak görünür; sunucuda hesaplanır.",
+          "type": "Ücret",
+          "types": {
+            "none": "Ücretsiz",
+            "fixed": "Sabit tutar",
+            "percent": "Sipariş tutarının yüzdesi"
+          },
+          "amount": "Tutar (TL, KDV dahil)",
+          "percent": "Oran (%)",
+          "hint": "Kargo dahil sipariş tutarına göre."
+        },
+        "shipping": {
+          "title": "Kapıda tahsilat yapan kargo seçenekleri",
+          "description": "Kapıda ödeme yalnızca bu seçeneklerden biriyle gönderilen siparişlere sunulur.",
+          "none": "Henüz kargo seçeneği yok; önce kargo seçeneği ekleyin."
         }
       }
     },
@@ -1333,7 +1368,8 @@
       "pp_system_default": "Manuel ödeme",
       "pp_iyzico_iyzico": "iyzico",
       "pp_paytr_paytr": "PayTR",
-      "pp_bank-transfer_bank-transfer": "Havale / EFT"
+      "pp_bank-transfer_bank-transfer": "Havale / EFT",
+      "pp_cod_cod": "Kapıda ödeme"
     },
     "refund": {
       "title": "#{{number}} için para iadesi",

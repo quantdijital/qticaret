@@ -23,6 +23,7 @@ export const SETTINGS = [
   "/settings/payments/paytr",
   "/settings/payments/iyzico",
   "/settings/payments/bank_transfer",
+  "/settings/payments/cash_on_delivery",
   "/settings/integrations",
   "/settings/appearance",
   "/settings/locations",

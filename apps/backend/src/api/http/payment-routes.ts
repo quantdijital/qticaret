@@ -8,6 +8,8 @@ import { SHIPPING_PAYMENT_FIELDS, shippingBlock } from "../../lib/payments/shipp
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import { StorePostCartPaymentSession } from "../store/carts/[id]/payment-session/validators"
 import { StoreGetInstallments } from "../store/payment/installments/validators"
+import { StoreGetPaymentMethods } from "../store/payment/methods/validators"
+import { COD_FEE } from "../../lib/payments/cod"
 import { rateLimit } from "./rate-limit"
 
 /**
@@ -81,6 +83,35 @@ async function refuseUnshippable(
   }
 }
 
+/** A storefront may not change or remove cash on delivery's fee line (adr/0029 §5). */
+async function protectFeeLine(req: MedusaRequest, _res: MedusaResponse, next: MedusaNextFunction) {
+  if (req.method !== "POST" && req.method !== "DELETE") {
+    next()
+    return
+  }
+  try {
+    const { data } = await req.scope.resolve(ContainerRegistrationKeys.QUERY).graph({
+      entity: "cart",
+      fields: ["items.id", "items.metadata"],
+      filters: { id: req.params["id"] ?? "" },
+    })
+    const items =
+      (
+        data[0] as
+          | { items?: ({ id: string; metadata?: Record<string, unknown> | null } | null)[] }
+          | undefined
+      )?.items ?? []
+    const line = items.find((item) => item?.id === req.params["line_id"])
+    next(
+      line?.metadata?.["qt_fee"] === COD_FEE
+        ? new ValidationError("cash_on_delivery.fee_line_locked")
+        : undefined
+    )
+  } catch (error) {
+    next(error)
+  }
+}
+
 // Starting and completing call the provider: a budget per address and per cart
 const checkoutLimit = rateLimit(() => RATE_LIMIT_PROFILES.checkout, {
   identity: (req) => req.params["id"],
@@ -100,6 +131,16 @@ export const PAYMENT_ROUTES = [
       rateLimit(() => RATE_LIMIT_PROFILES.installment),
       validateAndTransformQuery(StoreGetInstallments, {}),
     ],
+  },
+  {
+    matcher: "/store/carts/:id/line-items/:line_id",
+    middlewares: [protectFeeLine],
+  },
+  // F6 W3: which ways to pay a cart can take (cash on delivery by its cart)
+  {
+    matcher: "/store/payment/methods",
+    methods: ["GET" as const],
+    middlewares: [validateAndTransformQuery(StoreGetPaymentMethods, {})],
   },
   {
     matcher: "/store/payment-collections/:id/payment-sessions",

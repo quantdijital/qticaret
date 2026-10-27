@@ -19,6 +19,14 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "bank_transfer.order_canceled": "A cancelled order's transfer cannot be confirmed.",
   "orders.payment_awaited":
     "The order's payment has not come yet; it can be shipped once the transfer is confirmed.",
+  "cash_on_delivery.disabled": "The shop does not offer cash on delivery.",
+  "cash_on_delivery.over_limit": "An order of this amount cannot be paid on delivery.",
+  "cash_on_delivery.shipping_unsupported":
+    "The chosen courier does not collect on delivery; pick another to pay at the door.",
+  "cash_on_delivery.fee_line_locked":
+    "The cash on delivery fee cannot be changed in the cart; pick another way to pay.",
+  "cash_on_delivery.fee_mismatch": "The cash on delivery fee changed; start the payment again.",
+  "cash_on_delivery.fee_invalid": "A share is at most 100%.",
   "brands.description_invalid":
     "The description is too long or holds characters that cannot be used.",
   "brands.logo_unknown": "The logo must be one of the shop's uploaded images.",

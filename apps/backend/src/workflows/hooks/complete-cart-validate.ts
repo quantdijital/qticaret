@@ -2,10 +2,13 @@ import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { completeCartWorkflow } from "@medusajs/medusa/core-flows"
 import { checkoutProblem } from "../../lib/checkout"
 import { ValidationError } from "../../lib/errors"
+import type { MedusaContainer } from "@medusajs/framework/types"
+import { COD_PAYMENT_PROVIDER_ID } from "../../lib/payments/checkout"
 import { PAYMENT_FACT_FIELDS, paymentMismatch } from "../../lib/payments/consistency"
 import type { PaymentFacts } from "../../lib/payments/consistency"
 import { enteredCodes } from "../../lib/promotions"
 import { hasStaleShipping } from "../checkout/stale-shipping"
+import { FEE_CART_FIELDS, expectedCodFee, feeFacts } from "../payments/steps/payment-fee"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import type { PromotionSettings } from "../../modules/platform-settings/sections"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
@@ -43,6 +46,8 @@ completeCartWorkflow.hooks.validate(async ({ cart }: { cart: { id: string } }, {
   if (paymentMismatch(row)) {
     throw new ValidationError("payments.cart_changed")
   }
+  // Cash on delivery's fee as the shop's settings make it now, and only with it (adr/0029)
+  await checkPaymentFee(container, cart.id, row)
   // A code applied after shipping was chosen can leave it at its old price
   if (await hasStaleShipping(container, cart.id)) {
     throw new ValidationError("cart.shipping_changed", { field: "shipping_methods" })
@@ -58,3 +63,35 @@ completeCartWorkflow.hooks.validate(async ({ cart }: { cart: { id: string } }, {
     }
   }
 })
+
+/**
+ * The cart pays at the door with exactly the fee it should, and carries no
+ * fee otherwise: settings or the cart changed since the payment started,
+ * or a fee line was tampered with, and the checkout starts again.
+ */
+async function checkPaymentFee(
+  container: MedusaContainer,
+  cartId: string,
+  row: PaymentFacts
+): Promise<void> {
+  const live = (row.payment_collection?.payment_sessions ?? []).find(
+    (session) => session && session.status !== "canceled" && session.status !== "error"
+  )
+  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+    entity: "cart",
+    fields: FEE_CART_FIELDS,
+    filters: { id: cartId },
+  })
+  const cart = (data[0] ?? {}) as Parameters<typeof feeFacts>[0]
+  const facts = feeFacts(cart)
+  if (live?.provider_id !== COD_PAYMENT_PROVIDER_ID) {
+    if (facts.lines.length > 0) {
+      throw new ValidationError("cash_on_delivery.fee_mismatch")
+    }
+    return
+  }
+  const expected = await expectedCodFee(container, cart)
+  if (facts.fees !== expected || facts.lines.length !== (expected > 0 ? 1 : 0)) {
+    throw new ValidationError("cash_on_delivery.fee_mismatch")
+  }
+}
