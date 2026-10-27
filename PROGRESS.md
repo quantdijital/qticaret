@@ -10,6 +10,7 @@
 - iyzico başvurusu sürüyor; iyzico görevleri PayTR'den sonra geliyor (V8–V10). Havale, kapıda ödeme, yönlendirici ve ters ibraz F6'da kaldı.
 - Plan aşağıda "F5 görev planı". ADR-0026 kabul edildi (V1 başında); ADR-0027 kabul edildi, ADR-0002'nin yerini aldı.
 - Kullanıcı müşteri tarafını görmek istedi (2026-10-27): ADR-0028 kabul edildi, yalnızca geliştirmede açılan ödeme deneme sayfası V2 ile gelir. CLAUDE.md'ye istisna notu eklendi.
+- **Canlıya alma yok (kullanıcı, 2026-10-27):** "müşteriyi şuan canlıya almıcaz, tüm projeyi bitirene kadar devam." Fazlar sırayla (F5 → F19) ilerler; canlıya çıkış için kısa yol (F18'i öne çekme) gündemde değil.
 - **Gerçek sağlayıcı testleri ertelendi (kullanıcı, 2026-10-27):** "bildirimleri localhostta izin vermiyorlar, sonra sunucuda gerçek çalıştırır deneriz; gerçek testleri atlayabilirsin, sen altyapı entegrasyonlarını yap." V2–V10 yalnızca sahte sunucularla doğrulanır; V11'in `@sandbox` testleri ve PayTR test penceresi sunucuya çıkışa kaldı. Deneme sayfası (ADR-0028) sahte PayTR'yle çalışır.
 - Ayarlar > Ödeme birden çok yönteme göre yeniden kuruldu (kullanıcı talebi, 2026-10-27): yöntem listesi + sağlayıcı başına sayfa. Ardından kullanıcı iyzico bağlantısını istedi: V8 (iyzico istemcisi + hesabın panelden bağlanması) V2'den önce yapıldı; kullanıcının sandbox hesabı panelden bağlandı ve doğrulandı.
 - Dal `f5-payments`, `f4-pricing-promotions` üzerinden açıldı (2026-10-27).

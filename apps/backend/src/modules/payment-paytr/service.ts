@@ -1,6 +1,7 @@
 import type {
   AuthorizePaymentInput,
   AuthorizePaymentOutput,
+  CancelPaymentInput,
   CancelPaymentOutput,
   CapturePaymentInput,
   CapturePaymentOutput,
@@ -11,6 +12,7 @@ import type {
   InitiatePaymentInput,
   InitiatePaymentOutput,
   PaymentSessionStatus,
+  RefundPaymentInput,
   RefundPaymentOutput,
   RetrievePaymentInput,
   RetrievePaymentOutput,
@@ -24,6 +26,7 @@ import { HOSTED_CHECKOUT } from "../../lib/payments/checkout"
 import { paytrApi, paytrFormUrl } from "../../lib/payments/paytr"
 import type { PaytrCredentials } from "../../lib/payments/paytr"
 import { storedPaytrAccount } from "./account"
+import { pendingReferenceOf, refundPaytrPayment, refundReferenceOf } from "./refund"
 import { paytrSession, tokenRequestOf } from "./session"
 
 // PayTR keeps an iFrame token this long (`timeout_limit`, minutes)
@@ -36,7 +39,8 @@ const TOKEN_MINUTES = 30
  * order reference, the expected amount and currency, test mode and expiry,
  * nothing personal. Authorization asks PayTR again (the status query) and
  * compares what was paid with what was expected; PayTR charges at once,
- * so an accepted payment is `captured`. Refunds and cancels come in F5 V5.
+ * so an accepted payment is `captured`. A refund is made once per
+ * reference, however often it is tried (F5 V5).
  */
 class PaytrProviderService extends AbstractPaymentProvider {
   static override identifier = "paytr"
@@ -124,12 +128,35 @@ class PaytrProviderService extends AbstractPaymentProvider {
     return Promise.reject(new ValidationError("payments.restart_checkout"))
   }
 
-  refundPayment(): Promise<RefundPaymentOutput> {
-    return Promise.reject(new ValidationError("paytr.refund_unavailable"))
+  /**
+   * Gives back `amount` of the payment under a reference that stays the
+   * same when the refund is tried again: the one our refund workflow put in
+   * the payment's data (`pending_refund`), else Medusa's key for this try.
+   */
+  async refundPayment(input: RefundPaymentInput): Promise<RefundPaymentOutput> {
+    const amount = fromMedusaAmount(input.amount, { allowRounding: true })
+    const reference = pendingReferenceOf(input.data, amount) ?? input.context?.idempotency_key
+    if (!reference) {
+      throw new ValidationError("payments.refund_reference_missing")
+    }
+    return {
+      data: await refundPaytrPayment(
+        await this.account(),
+        input.data,
+        amount,
+        refundReferenceOf(reference)
+      ),
+    }
   }
 
-  cancelPayment(): Promise<CancelPaymentOutput> {
-    return Promise.reject(new ValidationError("paytr.refund_unavailable"))
+  /**
+   * Nothing to do: PayTR charges at once, so every payment is captured, and
+   * Medusa gives a captured payment back through `refundPayment` (an order
+   * cancelled, a cart that could not be completed). Medusa calls this only
+   * to undo an authorization; refunding here too would refund twice.
+   */
+  cancelPayment(input: CancelPaymentInput): Promise<CancelPaymentOutput> {
+    return Promise.resolve({ data: input.data ?? {} })
   }
 
   // Notifications come to our own route, /hooks/paytr (adr/0026 §5), not Medusa's

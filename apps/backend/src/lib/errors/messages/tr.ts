@@ -326,7 +326,17 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "payments.session_invalid": "Ödeme oturumu tanınmadı.",
   "payments.use_checkout_route": "Bu ödeme yöntemi mağazanın ödeme adımından başlatılır.",
   "paytr.not_configured": "Mağaza PayTR hesabını henüz bağlamadı.",
-  "paytr.refund_unavailable": "PayTR ödemelerinin iadesi henüz desteklenmiyor.",
   "orders.test_payment_not_shippable":
     "Bu sipariş test modunda ödendi; gerçek para alınmadığı için kargoya verilemez.",
+  "paytr.refund_locked":
+    "PayTR şu an bu ödemenin iadesini kabul etmiyor (hesap kesimi sürüyor); biraz sonra tekrar deneyin.",
+  "paytr.refund_exceeds_payment": "İade tutarı ödemeden kalanı aşıyor.",
+  "paytr.payment_not_notified": "PayTR bu ödemenin bildirimini onaylanmış görmüyor; iade edilemez.",
+  "paytr.refund_not_supported": "PayTR bu ödeme için iade kabul etmiyor.",
+  "paytr.balance_insufficient": "PayTR bakiyeniz bu iade için yetersiz.",
+  "paytr.payment_too_old": "Ödemenin iade süresi geçmiş.",
+  "paytr.payment_not_found": "PayTR bu ödemeyi bulamadı.",
+  "paytr.test_mode_mismatch":
+    "Ödemenin test modu hesabınızınkiyle uyuşmuyor; test anahtarıyla gerçek ödeme iade edilmez.",
+  "payments.refund_reference_missing": "İade referansı eksik; iadeyi yeniden başlatın.",
 }

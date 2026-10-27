@@ -317,7 +317,18 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "payments.session_invalid": "The payment session is not recognised.",
   "payments.use_checkout_route": "This payment method starts from the shop's checkout step.",
   "paytr.not_configured": "The shop has not connected its PayTR account yet.",
-  "paytr.refund_unavailable": "Refunds of PayTR payments are not supported yet.",
   "orders.test_payment_not_shippable":
     "This order was paid in test mode; no real money was taken, so it cannot be shipped.",
+  "paytr.refund_locked":
+    "PayTR is not taking a refund of this payment right now (a payout is running); try again later.",
+  "paytr.refund_exceeds_payment": "The refund is more than what is left of the payment.",
+  "paytr.payment_not_notified":
+    "PayTR does not see this payment's notification acknowledged; it cannot be refunded.",
+  "paytr.refund_not_supported": "PayTR does not take a refund for this payment.",
+  "paytr.balance_insufficient": "Your PayTR balance is not enough for this refund.",
+  "paytr.payment_too_old": "The payment is past its refund period.",
+  "paytr.payment_not_found": "PayTR could not find this payment.",
+  "paytr.test_mode_mismatch":
+    "The payment's test mode does not match your account's; test keys never refund a real payment.",
+  "payments.refund_reference_missing": "The refund reference is missing; start the refund again.",
 }

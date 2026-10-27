@@ -146,13 +146,83 @@ describe("PayTR payment provider (adr/0026)", () => {
     })
   })
 
-  it("lets a session go without asking PayTR, and refuses what comes in F5 V5", async () => {
+  it("lets a session go without asking PayTR, and wants a new start for a new amount", async () => {
     expect(await provider.deletePayment({ data: { merchant_oid: "x" } })).toEqual({
       data: { merchant_oid: "x" },
     })
-    expect(await reasonOf(provider.refundPayment())).toBe("paytr.refund_unavailable")
-    expect(await reasonOf(provider.cancelPayment())).toBe("paytr.refund_unavailable")
     expect(await reasonOf(provider.updatePayment())).toBe("payments.restart_checkout")
     expect(fake.requests).toHaveLength(0)
+  })
+
+  /** A paid session whose notification the shop acknowledged, as PayTR requires for refunds. */
+  const paidSession = async (sessionId: string) => {
+    const data = (await start({ session_id: sessionId, checkout })).data ?? {}
+    const oid = String(data["merchant_oid"])
+    fake.pay(oid)
+    const payment = fake.payments.get(oid)
+    if (payment) {
+      payment.notified = true
+    }
+    return { data, oid }
+  }
+
+  it("refunds once per Medusa refund, and records it in the payment's data", async () => {
+    const { data, oid } = await paidSession("payses_01REF")
+    const refund = () =>
+      provider.refundPayment({ amount: 10, data, context: { idempotency_key: "ref_01ABC" } })
+
+    const first = await refund()
+    const again = await refund()
+
+    expect(first.data?.["refunds"]).toEqual([{ reference_no: "ref01ABC", amount: 1000 }])
+    expect(again.data?.["refunds"]).toEqual([{ reference_no: "ref01ABC", amount: 1000 }])
+    expect(fake.payments.get(oid)?.refunds).toEqual([{ amount: 1000, referenceNo: "ref01ABC" }])
+  })
+
+  it("says why PayTR refused a refund, and never refunds across test and live", async () => {
+    const { data } = await paidSession("payses_01RFX")
+
+    expect(
+      await reasonOf(
+        provider.refundPayment({ amount: 99, data, context: { idempotency_key: "ref_01BIG" } })
+      )
+    ).toBe("paytr.refund_exceeds_payment")
+    expect(
+      await reasonOf(
+        provider.refundPayment({
+          amount: 10,
+          data: { ...data, test_mode: false },
+          context: { idempotency_key: "ref_01LIVE" },
+        })
+      )
+    ).toBe("paytr.test_mode_mismatch")
+    expect(await reasonOf(provider.refundPayment({ amount: 10, data }))).toBe(
+      "payments.refund_reference_missing"
+    )
+  })
+
+  it("keeps one reference across tries when the refund workflow named it", async () => {
+    const { data, oid } = await paidSession("payses_01PND")
+    const withPending = { ...data, pending_refund: { reference_no: "qtref01KEY", amount: 1000 } }
+
+    await provider.refundPayment({
+      amount: 10,
+      data: withPending,
+      context: { idempotency_key: "ref_01TRY1" },
+    })
+    await provider.refundPayment({
+      amount: 10,
+      data: withPending,
+      context: { idempotency_key: "ref_01TRY2" },
+    })
+
+    expect(fake.payments.get(oid)?.refunds).toEqual([{ amount: 1000, referenceNo: "qtref01KEY" }])
+  })
+
+  it("does nothing on a cancel: a captured payment goes back through a refund", async () => {
+    const { data, oid } = await paidSession("payses_01CNL")
+
+    expect(await provider.cancelPayment({ data })).toEqual({ data })
+    expect(fake.payments.get(oid)?.refunds).toEqual([])
   })
 })

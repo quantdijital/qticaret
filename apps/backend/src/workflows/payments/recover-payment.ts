@@ -105,7 +105,13 @@ export const refundRecoveryStep = createStep(
     if (paid.testMode !== recovery.test_mode) {
       return new StepResponse(await fail("test_mode_mismatch"))
     }
-    if (paid.refunds.some((refund) => refund.referenceNo === recovery.refund_reference)) {
+    // Ours made already (an answer lost), or the whole payment given back another
+    // way (Medusa refunds a cart's payment when completing it failed after the charge)
+    const refunded = paid.refunds.reduce((sum, refund) => sum + refund.amount, 0)
+    if (
+      paid.refunds.some((refund) => refund.referenceNo === recovery.refund_reference) ||
+      refunded >= recovery.amount
+    ) {
       return new StepResponse(await done())
     }
     try {
