@@ -3,6 +3,8 @@ import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { LIFECYCLE_FIELDS, lifecycleOf } from "../../../../lib/dashboard"
 import type { LifecycleOrder } from "../../../../lib/dashboard"
 import { lowStockThresholds } from "../../../../lib/stock"
+import { PAYMENT_RECOVERY_MODULE } from "../../../../modules/payment-recovery"
+import type PaymentRecoveryModuleService from "../../../../modules/payment-recovery/service"
 
 // Open orders and stock records read at most (docs/04); past this the
 // counts are floors and the answer says so
@@ -22,11 +24,13 @@ const available = (row: StockRow): number =>
 
 /**
  * What waits for the shop (docs/17): orders to ship or still unpaid, stock
- * running low, products left as drafts. Counts only; no personal data.
+ * running low, products left as drafts, payments that became no order
+ * (F5 V4). Counts only; no personal data.
  */
 export async function readDashboardTasks(scope: MedusaContainer) {
   const query = scope.resolve(ContainerRegistrationKeys.QUERY)
-  const [open, stock, drafts] = await Promise.all([
+  const recoveries = scope.resolve<PaymentRecoveryModuleService>(PAYMENT_RECOVERY_MODULE)
+  const [open, stock, drafts, [, refunding], [, byHand]] = await Promise.all([
     query.graph({
       entity: "order",
       fields: ["id", ...LIFECYCLE_FIELDS],
@@ -44,6 +48,9 @@ export async function readDashboardTasks(scope: MedusaContainer) {
       filters: { status: "draft" },
       pagination: { skip: 0, take: 1 },
     }),
+    // F5 V4: payments that became no order, being given back or left to the shop
+    recoveries.listAndCountPaymentRecoveries({ status: "pending" }, { select: ["id"], take: 1 }),
+    recoveries.listAndCountPaymentRecoveries({ status: "failed" }, { select: ["id"], take: 1 }),
   ])
   const orders = open.data as LifecycleOrder[]
   const stages = orders.map(lifecycleOf)
@@ -58,6 +65,7 @@ export async function readDashboardTasks(scope: MedusaContainer) {
     low_stock: items.filter((row) => available(row) <= thresholds.of(row.id)).length,
     low_stock_threshold: thresholds.fallback,
     draft_products: drafts.metadata?.count ?? drafts.data.length,
+    orphan_payments: { refunding, by_hand: byHand },
     capped:
       (open.metadata?.count ?? 0) > orders.length || (stock.metadata?.count ?? 0) > items.length,
   }

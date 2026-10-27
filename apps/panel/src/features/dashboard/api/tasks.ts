@@ -8,6 +8,8 @@ export interface DashboardTasks {
   low_stock: number
   low_stock_threshold: number
   draft_products: number
+  /** Payments that became no order (F5 V4): being given back, or left to the shop. */
+  orphan_payments: { refunding: number; by_hand: number }
   capped: boolean
 }
 

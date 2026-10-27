@@ -47,7 +47,11 @@ medusaIntegrationTestRunner({
       expect(overview.status).toBe(200)
       expect(overview.data.totals.orders.current).toBe(0)
       expect(overview.data.totals.sales.current).toBe("0.00")
-      expect(tasks.data).toMatchObject({ to_ship: 0, awaiting_payment: 0 })
+      expect(tasks.data).toMatchObject({
+        to_ship: 0,
+        awaiting_payment: 0,
+        orphan_payments: { refunding: 0, by_hand: 0 },
+      })
       expect(recent.data.orders).toEqual([])
     })
 

@@ -33,6 +33,7 @@ medusaIntegrationTestRunner({
     let shop: StockShop
     let storefront: Storefront
     let variantId: string
+    let admin: { headers: Record<string, string> }
 
     const success = (merchantOid: string) =>
       paytrNotification(account, {
@@ -79,7 +80,7 @@ medusaIntegrationTestRunner({
       storefront = await createStorefront(container)
       const cup = await stockedProduct(container, shop, `kupa-${String(Date.now())}`, 10, 120)
       variantId = cup.variantId
-      await connectPaytr(http, container, account)
+      admin = await connectPaytr(http, container, account)
     })
 
     it("gives back a payment made for a replaced session, once", async () => {
@@ -91,10 +92,17 @@ medusaIntegrationTestRunner({
 
       const answer = await notifyPaytr(http, success(first))
       acknowledged(first)
+      const tasks = () =>
+        http.get<{ orphan_payments: Record<string, number> }>("/admin/dashboard/tasks", {
+          headers: admin.headers,
+        })
+      const waiting = (await tasks()).data.orphan_payments
       await paymentRecovery(getContainer())
       await paymentRecovery(getContainer())
 
       expect(answer.data).toBe("OK")
+      expect(waiting).toEqual({ refunding: 1, by_hand: 0 })
+      expect((await tasks()).data.orphan_payments).toEqual({ refunding: 0, by_hand: 0 })
       expect(await orderOfCart(getContainer(), cartId)).toBeNull()
       expect(await recoveries()).toEqual([
         expect.objectContaining({ reason: "session_gone", status: "refunded", amount: 21000 }),

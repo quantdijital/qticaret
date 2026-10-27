@@ -158,7 +158,11 @@
         "label": "Draft products",
         "hint": "Not published yet"
       },
-      "allClear": "Nothing is waiting. All good."
+      "allClear": "Nothing is waiting. All good.",
+      "orphanPayments": {
+        "label": "Payments that became no order",
+        "hint": "Refunded on their own; those to refund by hand are in the bell."
+      }
     },
     "recent": {
       "title": "Recent orders",

@@ -158,7 +158,11 @@
         "label": "Taslak ürün",
         "hint": "Henüz yayınlanmamış ürünler"
       },
-      "allClear": "Bekleyen iş yok, her şey yolunda."
+      "allClear": "Bekleyen iş yok, her şey yolunda.",
+      "orphanPayments": {
+        "label": "Siparişe dönüşmeyen ödemeler",
+        "hint": "Kendiliğinden iade ediliyor; elle iade gerekenler zilde."
+      }
     },
     "recent": {
       "title": "Son siparişler",

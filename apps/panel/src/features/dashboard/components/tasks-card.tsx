@@ -1,6 +1,14 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
-import { ChevronRight, CircleCheck, Clock, FilePen, PackageMinus, Truck } from "lucide-react"
+import {
+  ChevronRight,
+  CircleCheck,
+  Clock,
+  FilePen,
+  PackageMinus,
+  RotateCcw,
+  Truck,
+} from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { AsyncBody } from "@/components/patterns/async-body"
@@ -12,7 +20,7 @@ import { formatCount } from "@/lib/format"
 import { cn } from "@/lib/utils"
 
 interface TaskRow {
-  key: "toShip" | "awaitingPayment" | "lowStock" | "drafts"
+  key: "toShip" | "awaitingPayment" | "lowStock" | "drafts" | "orphanPayments"
   icon: LucideIcon
   count: number
   to: string
@@ -47,6 +55,18 @@ function rows(tasks: DashboardTasks): TaskRow[] {
       search: { status: "draft" },
       urgent: false,
     },
+    // Only while there are any: money taken for no order, refunded on its own or by hand
+    ...(tasks.orphan_payments.refunding + tasks.orphan_payments.by_hand > 0
+      ? [
+          {
+            key: "orphanPayments" as const,
+            icon: RotateCcw,
+            count: tasks.orphan_payments.refunding + tasks.orphan_payments.by_hand,
+            to: "/settings/payments",
+            urgent: true,
+          },
+        ]
+      : []),
   ]
 }
 
