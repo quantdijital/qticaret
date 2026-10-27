@@ -1,12 +1,7 @@
 import { PaymentActions } from "@medusajs/framework/utils"
 import { HOSTED_CHECKOUT } from "../../lib/payments/checkout"
-import * as settings from "../../lib/payments/settings"
 import BankTransferProviderService from "../payment-bank-transfer/service"
 import CashOnDeliveryProviderService from "../payment-cod/service"
-
-jest.mock("../../lib/payments/settings", () => ({
-  bankTransferSettings: jest.fn(),
-}))
 
 /**
  * The contract the offline providers keep (adr/0029; F6.4, beside the
@@ -16,6 +11,14 @@ jest.mock("../../lib/payments/settings", () => ({
  */
 
 const SESSION = "payses_01K8ZB2X9Q6J4V7W3N5R0T1Y2Z"
+
+// The shop's account, as our start workflow reads it from the settings
+const ACCOUNT = {
+  account_holder: "Örnek Ticaret A.Ş.",
+  bank_name: "Örnek Bankası",
+  iban: "TR330006100519786457841326",
+  deadline_hours: 48,
+}
 
 interface Harness {
   name: string
@@ -29,7 +32,7 @@ const HARNESSES: Harness[] = [
   {
     name: "bank transfer",
     provider: new BankTransferProviderService({}),
-    data: { session_id: SESSION },
+    data: { session_id: SESSION, account: ACCOUNT },
     placed: "pending_authorization",
   },
   {
@@ -45,16 +48,6 @@ const reasonOf = (run: Promise<unknown>) =>
     () => "no error",
     (error: unknown) => (error as { safeMessage?: string }).safeMessage ?? String(error)
   )
-
-beforeEach(() => {
-  jest.mocked(settings.bankTransferSettings).mockResolvedValue({
-    enabled: true,
-    account_holder: "Örnek Ticaret A.Ş.",
-    bank_name: "Örnek Bankası",
-    iban: "TR330006100519786457841326",
-    deadline_hours: 48,
-  })
-})
 
 describe.each(HARNESSES)("offline provider contract: $name", ({ provider, data, placed }) => {
   const start = (context: Record<string, unknown> = { [HOSTED_CHECKOUT]: true }) =>
@@ -97,11 +90,7 @@ describe("bank transfer's one update: the shop's confirmation", () => {
   const provider = new BankTransferProviderService({})
 
   it("takes a confirmation for the same amount, then authorizes; anything else starts again", async () => {
-    const data = {
-      amount: 23_500,
-      confirmed_at: "2026-10-28T09:00:00.000Z",
-      confirmed_by: "user_1",
-    }
+    const data = { amount: 23_500, confirmed_at: "2026-10-28T09:00:00.000Z" }
 
     const confirmed = await provider.updatePayment({ amount: 235, currency_code: "try", data })
     const other = await reasonOf(
@@ -113,15 +102,15 @@ describe("bank transfer's one update: the shop's confirmation", () => {
     expect(other).toBe("payments.restart_checkout")
   })
 
-  it("starts no transfer before the shop turns it on with an account", async () => {
-    jest.mocked(settings.bankTransferSettings).mockResolvedValueOnce({
-      enabled: false,
-      account_holder: "",
-      bank_name: "",
-      iban: "",
-      deadline_hours: 48,
+  it("starts no transfer without the account our route gives it, and keeps the one given", async () => {
+    const kept = await provider.initiatePayment({
+      amount: 235,
+      currency_code: "try",
+      data: { session_id: SESSION, account: ACCOUNT },
+      context: { [HOSTED_CHECKOUT]: true } as never,
     })
 
+    expect(kept.data).toMatchObject(ACCOUNT)
     expect(
       await reasonOf(
         provider.initiatePayment({
@@ -132,7 +121,7 @@ describe("bank transfer's one update: the shop's confirmation", () => {
           context: { [HOSTED_CHECKOUT]: true } as never,
         })
       )
-    ).toBe("bank_transfer.not_configured")
+    ).toBe("payments.checkout_invalid")
   })
 })
 

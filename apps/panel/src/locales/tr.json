@@ -649,8 +649,6 @@
         "hint": "Vitrin kartla ödemede önce bunu sunar; taksit tablosu da bu sağlayıcının fiyatlarıyla gösterilir."
       },
       "bankTransfer": {
-        "on": "Açık",
-        "off": "Kapalı",
         "required": "Bu alanı doldurun.",
         "ibanInvalid": "IBAN geçerli değil; TR ile başlayan 26 karakteri kontrol edin.",
         "ibanHint": "Müşteriler bu hesaba ödeme yapar; açıklamaya sipariş numarasını yazarlar.",
@@ -672,7 +670,6 @@
         }
       },
       "cashOnDelivery": {
-        "invalid": "Ücreti ya da üst tutarı rakamla girin; oran en çok %100 olabilir.",
         "max": "En yüksek sipariş tutarı (TL)",
         "maxHint": "Kargo dahil; boş bırakırsanız sınır yok.",
         "status": {
@@ -698,7 +695,13 @@
           "title": "Kapıda tahsilat yapan kargo seçenekleri",
           "description": "Kapıda ödeme yalnızca bu seçeneklerden biriyle gönderilen siparişlere sunulur.",
           "none": "Henüz kargo seçeneği yok; önce kargo seçeneği ekleyin."
-        }
+        },
+        "amountInvalid": "Tutarı rakamla girin.",
+        "percentInvalid": "Oran en çok %100 olabilir."
+      },
+      "offered": {
+        "on": "Açık",
+        "off": "Kapalı"
       }
     },
     "integrations": {

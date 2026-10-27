@@ -22,7 +22,7 @@ import type {
 import { AbstractPaymentProvider, PaymentActions } from "@medusajs/framework/utils"
 import { ValidationError } from "../../lib/errors"
 import { fromMedusaAmount, kurus } from "../../lib/money"
-import { HOSTED_CHECKOUT } from "../../lib/payments/checkout"
+import { startedByCheckout } from "../../lib/payments/checkout"
 import { paytrApi, paytrFormUrl } from "../../lib/payments/paytr"
 import type { PaytrCredentials } from "../../lib/payments/paytr"
 import { storedPaymentSettings, storedPaytrAccount } from "./account"
@@ -60,7 +60,7 @@ class PaytrProviderService extends AbstractPaymentProvider {
 
   async initiatePayment(input: InitiatePaymentInput): Promise<InitiatePaymentOutput> {
     // Medusa's own session route passes the shopper's `data` and no context: refused
-    if ((input.context as Record<string, unknown> | undefined)?.[HOSTED_CHECKOUT] !== true) {
+    if (!startedByCheckout(input.context)) {
       throw new ValidationError("payments.use_checkout_route")
     }
     const amount = fromMedusaAmount(input.amount, { allowRounding: true })

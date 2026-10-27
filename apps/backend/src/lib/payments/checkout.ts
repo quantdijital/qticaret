@@ -12,6 +12,10 @@ import type { Env } from "../env"
 /** Set in the session's `context` by our route only: Medusa's own session route never sets it. */
 export const HOSTED_CHECKOUT = "qt_hosted_checkout"
 
+/** Whether a provider's session was started by our route (every provider of ours refuses others). */
+export const startedByCheckout = (context: unknown): boolean =>
+  (context as Record<string, unknown> | undefined)?.[HOSTED_CHECKOUT] === true
+
 /** PayTR's hosted form: `pp_<identifier>_<id>` from medusa-config. */
 export const PAYTR_PAYMENT_PROVIDER_ID = "pp_paytr_paytr"
 
@@ -41,6 +45,17 @@ export const CHECKOUT_PROVIDERS = [...HOSTED_FORM_PROVIDERS, ...OFFLINE_PROVIDER
 
 export const isHostedFormProvider = (providerId: string): boolean =>
   (HOSTED_FORM_PROVIDERS as readonly string[]).includes(providerId)
+
+export const isOfflineProvider = (providerId: string): boolean =>
+  (OFFLINE_PROVIDERS as readonly string[]).includes(providerId)
+
+/** Every way to pay our route starts (hosted forms, bank transfer, cash on delivery). */
+export const isCheckoutProvider = (providerId: string | null | undefined): boolean =>
+  (CHECKOUT_PROVIDERS as readonly string[]).includes(providerId ?? "")
+
+/** `pp_paytr_paytr` → `paytr`: the provider as the shop names it. */
+export const providerName = (providerId: string): string =>
+  providerId.replace(/^pp_/, "").replace(/_[^_]+$/, "")
 
 /**
  * Where a hosted form may send the shopper back: an origin the storefront

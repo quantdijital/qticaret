@@ -1,8 +1,14 @@
-import type { BigNumberInput } from "@medusajs/framework/types"
+import type { BigNumberInput, MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, MedusaError, Modules } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { ValidationError } from "../../../lib/errors"
-import { BANK_TRANSFER_PAYMENT_PROVIDER_ID } from "../../../lib/payments/checkout"
+import {
+  BANK_TRANSFER_ORDER_FIELDS,
+  bankTransferOf,
+  confirmedAt,
+  transferDeadline,
+} from "../../../lib/payments/bank-transfer"
+import type { BankTransferOrderRow } from "../../../lib/payments/bank-transfer"
 
 /** An order's bank transfer, as the confirmation needs it; `done` when the money is already in. */
 export type BankTransferOrder =
@@ -15,61 +21,37 @@ export type BankTransferOrder =
       currency_code: string
     }
 
-interface OrderRow {
-  status: string
-  payment_collections?:
-    | ({
-        payment_sessions?:
-          | ({
-              id: string
-              provider_id: string
-              amount: BigNumberInput
-              currency_code: string
-              data?: Record<string, unknown> | null
-            } | null)[]
-          | null
-        payments?: ({ captured_at?: string | Date | null; canceled_at?: unknown } | null)[] | null
-      } | null)[]
-    | null
+const readOrder = async (
+  container: MedusaContainer,
+  orderId: string
+): Promise<BankTransferOrderRow> => {
+  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+    entity: "order",
+    fields: BANK_TRANSFER_ORDER_FIELDS,
+    filters: { id: orderId },
+  })
+  const order = data[0] as BankTransferOrderRow | undefined
+  if (!order) {
+    throw new MedusaError(MedusaError.Types.NOT_FOUND, "orders.unknown")
+  }
+  return order
 }
 
 /** The order's bank transfer session; a cancelled order, or one paid another way, is refused. */
 export const readBankTransferOrderStep = createStep(
   "payments-read-bank-transfer-order",
   async (orderId: string, { container }) => {
-    const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
-      entity: "order",
-      fields: [
-        "status",
-        "payment_collections.payment_sessions.id",
-        "payment_collections.payment_sessions.provider_id",
-        "payment_collections.payment_sessions.amount",
-        "payment_collections.payment_sessions.currency_code",
-        "payment_collections.payment_sessions.data",
-        "payment_collections.payments.captured_at",
-        "payment_collections.payments.canceled_at",
-      ],
-      filters: { id: orderId },
-    })
-    const order = data[0] as OrderRow | undefined
-    if (!order) {
-      throw new MedusaError(MedusaError.Types.NOT_FOUND, "orders.unknown")
-    }
+    const order = await readOrder(container, orderId)
     if (order.status === "canceled") {
       throw new ValidationError("bank_transfer.order_canceled")
     }
-    const collections = (order.payment_collections ?? []).filter((each) => each !== null)
-    const session = collections
-      .flatMap((collection) => collection.payment_sessions ?? [])
-      .find((each) => each?.provider_id === BANK_TRANSFER_PAYMENT_PROVIDER_ID)
-    if (!session) {
+    const transfer = bankTransferOf(order)
+    if (!transfer) {
       throw new ValidationError("bank_transfer.not_this_order")
     }
-    const captured = collections
-      .flatMap((collection) => collection.payments ?? [])
-      .some((payment) => payment?.captured_at && !payment.canceled_at)
+    const { session } = transfer
     return new StepResponse<BankTransferOrder>(
-      captured
+      transfer.captured
         ? { done: true }
         : {
             done: false,
@@ -83,14 +65,14 @@ export const readBankTransferOrderStep = createStep(
 )
 
 /**
- * Writes who confirmed the money, and when, into the session (the one
- * update the provider takes). A run that failed after it finds it there
- * and goes on: confirming again never needs undoing.
+ * Writes when the money was confirmed into the session (the one update
+ * the provider takes); who confirmed it the audit log keeps. A run that
+ * failed after it finds it there and goes on: confirming again never
+ * needs undoing.
  */
 export const markBankTransferConfirmedStep = createStep(
   "payments-mark-bank-transfer-confirmed",
-  async (input: { order: BankTransferOrder; confirmed_by: string }, { container }) => {
-    const { order } = input
+  async (order: BankTransferOrder, { container }) => {
     if (order.done || typeof order.data["confirmed_at"] === "string") {
       return new StepResponse(null)
     }
@@ -98,12 +80,31 @@ export const markBankTransferConfirmedStep = createStep(
       id: order.session_id,
       amount: order.amount,
       currency_code: order.currency_code,
-      data: {
-        ...order.data,
-        confirmed_at: new Date().toISOString(),
-        confirmed_by: input.confirmed_by,
-      },
+      data: { ...order.data, confirmed_at: new Date().toISOString() },
     })
     return new StepResponse(null)
+  }
+)
+
+/**
+ * Whether the order's time to pay ran out, read again under the order's
+ * lock (adr/0029): still pending and awaiting, never confirmed, nothing
+ * captured, past the deadline the shopper was told.
+ */
+export const readExpiredBankTransferStep = createStep(
+  "payments-read-expired-bank-transfer",
+  async (input: { order_id: string; now: string }, { container }) => {
+    const order = await readOrder(container, input.order_id)
+    const transfer = bankTransferOf(order)
+    const deadline = transfer ? transferDeadline(order.created_at, transfer.session) : null
+    const expired =
+      order.status === "pending" &&
+      transfer !== null &&
+      transfer.collection.status === "awaiting" &&
+      !transfer.captured &&
+      confirmedAt(transfer.session) === null &&
+      deadline !== null &&
+      deadline <= new Date(input.now)
+    return new StepResponse({ expired, deadline: deadline?.toISOString() ?? null })
   }
 )

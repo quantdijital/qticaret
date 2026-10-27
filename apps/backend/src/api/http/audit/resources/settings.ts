@@ -35,8 +35,8 @@ export const SETTINGS_RESOURCES: readonly AuditedResource[] = [
     pattern: /^\/admin\/platform-settings\/(?<section>[a-z_]+)$/i,
     resourceType: "platform_settings",
     resourceId: (params) => params["section"] ?? null,
-    // A sole trader's contact details are a person's
-    sensitive: ["contact_email", "contact_phone"],
+    // A sole trader's contact details and bank account are a person's
+    sensitive: ["contact_email", "contact_phone", "iban", "account_holder"],
     snapshot: async ({ scope, params }) => {
       const section = params["section"] ?? ""
       return isSectionName(section)

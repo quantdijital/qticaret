@@ -37,3 +37,9 @@ export function useFeature(key: string): boolean {
   const { data } = useQuery(featuresQuery())
   return data?.find((feature) => feature.key === key)?.enabled ?? false
 }
+
+/** A tenant flag's state; undefined while it loads (a badge waits rather than says "off"). */
+export function useFeatureState(key: string): boolean | undefined {
+  const { data } = useQuery(featuresQuery())
+  return data ? (data.find((feature) => feature.key === key)?.enabled ?? false) : undefined
+}

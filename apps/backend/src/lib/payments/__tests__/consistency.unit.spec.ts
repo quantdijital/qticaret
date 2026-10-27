@@ -1,4 +1,4 @@
-import { paidWithoutHostedForm, paymentMismatch } from "../consistency"
+import { paidOutsideCheckout, paymentMismatch } from "../consistency"
 
 const session = (overrides: Record<string, unknown> = {}) => ({
   provider_id: "pp_paytr_paytr",
@@ -29,15 +29,15 @@ describe("paymentMismatch (security review, 2026-10-27)", () => {
   })
 })
 
-describe("paidWithoutHostedForm", () => {
+describe("paidOutsideCheckout", () => {
   it("refuses a storefront completion paid with Medusa's system provider", () => {
-    expect(paidWithoutHostedForm(cart([session({ provider_id: "pp_system_default" })]))).toBe(true)
-    expect(paidWithoutHostedForm(cart([]))).toBe(true)
+    expect(paidOutsideCheckout(cart([session({ provider_id: "pp_system_default" })]))).toBe(true)
+    expect(paidOutsideCheckout(cart([]))).toBe(true)
   })
 
   it("lets a hosted form's session, and a cart credit pays in full, through", () => {
-    expect(paidWithoutHostedForm(cart([session()]))).toBe(false)
-    expect(paidWithoutHostedForm(cart([], "0", "0"))).toBe(false)
-    expect(paidWithoutHostedForm({ raw_total: "0" })).toBe(false)
+    expect(paidOutsideCheckout(cart([session()]))).toBe(false)
+    expect(paidOutsideCheckout(cart([], "0", "0"))).toBe(false)
+    expect(paidOutsideCheckout({ raw_total: "0" })).toBe(false)
   })
 })

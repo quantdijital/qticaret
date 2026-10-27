@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next"
 import { SectionCard } from "@/components/patterns/section-card"
 import { StatusBadge } from "@/components/patterns/status-badge"
 import type { StatusTone } from "@/components/patterns/status-badge"
-import type { ShopRefund } from "@/features/orders/api/orders"
+import type { ShopRefund } from "@/features/orders/api/payments"
 import { formatDateTime, formatMoney } from "@/lib/format"
 
 const TONES: Record<ShopRefund["status"], StatusTone> = {

@@ -21,7 +21,7 @@ import type {
 import { AbstractPaymentProvider, PaymentActions } from "@medusajs/framework/utils"
 import { ValidationError } from "../../lib/errors"
 import { fromMedusaAmount } from "../../lib/money"
-import { HOSTED_CHECKOUT } from "../../lib/payments/checkout"
+import { startedByCheckout } from "../../lib/payments/checkout"
 
 /**
  * Cash on delivery as a Medusa payment provider (`pp_cod_cod`, adr/0029).
@@ -40,7 +40,7 @@ class CashOnDeliveryProviderService extends AbstractPaymentProvider {
 
   initiatePayment(input: InitiatePaymentInput): Promise<InitiatePaymentOutput> {
     // Medusa's own session route passes no context of ours: refused
-    if ((input.context as Record<string, unknown> | undefined)?.[HOSTED_CHECKOUT] !== true) {
+    if (!startedByCheckout(input.context)) {
       return Promise.reject(new ValidationError("payments.use_checkout_route"))
     }
     const sessionId = input.data?.["session_id"]

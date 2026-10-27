@@ -1,5 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
+import type { UseFormReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { z } from "zod"
@@ -61,43 +62,13 @@ function StatusCard({ saved }: { saved: BankTransferSettings }) {
   )
 }
 
-/** The account shoppers send the money to, and how long they have. */
-function AccountCard({ saved }: { saved: BankTransferSettings }) {
+/** The account's fields; the IBAN is shown in fours once it checks out. */
+function AccountFields({ form }: { form: UseFormReturn<AccountInput, unknown, AccountValues> }) {
   const { t } = useTranslation()
-  const save = useSaveSection<BankTransferSettings>("bank_transfer")
-  const values: AccountInput = {
-    account_holder: saved.account_holder,
-    bank_name: saved.bank_name,
-    iban: formatIban(saved.iban),
-    deadline_hours: saved.deadline_hours,
-  }
-  const form = useForm<AccountInput, unknown, AccountValues>({
-    resolver: zodResolver(accountSchema),
-    values,
-    resetOptions: { keepDirtyValues: true },
-  })
   const { errors } = form.formState
   const message = (key: string | undefined) => (key ? t(key) : undefined)
-  const submit = form.handleSubmit((next) => {
-    save.mutate(
-      { ...next, iban: normalizeIban(next.iban) },
-      {
-        onSuccess: () => toast.success(t("settings.saved")),
-        onError: (failure) => toast.error(errorText(t, failure)),
-      }
-    )
-  })
   return (
-    <CardForm
-      title={t(`${B}.account.title`)}
-      description={t(`${B}.account.description`)}
-      dirty={form.formState.isDirty}
-      saving={save.isPending}
-      onSubmit={() => void submit()}
-      onReset={() => {
-        form.reset(values)
-      }}
-    >
+    <>
       <Field
         label={t(`${B}.holder`)}
         htmlFor="bank-holder"
@@ -151,6 +122,46 @@ function AccountCard({ saved }: { saved: BankTransferSettings }) {
           {...form.register("deadline_hours")}
         />
       </Field>
+    </>
+  )
+}
+
+/** The account shoppers send the money to, and how long they have. */
+function AccountCard({ saved }: { saved: BankTransferSettings }) {
+  const { t } = useTranslation()
+  const save = useSaveSection<BankTransferSettings>("bank_transfer")
+  const values: AccountInput = {
+    account_holder: saved.account_holder,
+    bank_name: saved.bank_name,
+    iban: formatIban(saved.iban),
+    deadline_hours: saved.deadline_hours,
+  }
+  const form = useForm<AccountInput, unknown, AccountValues>({
+    resolver: zodResolver(accountSchema),
+    values,
+    resetOptions: { keepDirtyValues: true },
+  })
+  const submit = form.handleSubmit((next) => {
+    save.mutate(
+      { ...next, iban: normalizeIban(next.iban) },
+      {
+        onSuccess: () => toast.success(t("settings.saved")),
+        onError: (failure) => toast.error(errorText(t, failure)),
+      }
+    )
+  })
+  return (
+    <CardForm
+      title={t(`${B}.account.title`)}
+      description={t(`${B}.account.description`)}
+      dirty={form.formState.isDirty}
+      saving={save.isPending}
+      onSubmit={() => void submit()}
+      onReset={() => {
+        form.reset(values)
+      }}
+    >
+      <AccountFields form={form} />
     </CardForm>
   )
 }

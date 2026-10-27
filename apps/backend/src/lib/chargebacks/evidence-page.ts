@@ -1,6 +1,54 @@
 import { fromMedusaAmount } from "../money"
-import type { orderPaymentDetails } from "../../workflows/payments/payment-details"
-import type { EvidenceChargeback, EvidenceOrder } from "./evidence"
+
+export interface EvidenceOrder {
+  display_id: number
+  created_at: string
+  email: string | null
+  currency_code: string
+  total: number
+  shipping_total: number
+  items: { title: string; quantity: number; total: number }[]
+  shipping_address: Record<string, string | null> | null
+  fulfillments: {
+    created_at: string
+    shipped_at: string | null
+    delivered_at: string | null
+    tracking: string[]
+  }[]
+}
+
+export interface EvidenceChargeback {
+  id: string
+  order_id: string
+  payment_id: string
+  provider: string
+  provider_reference: string | null
+  amount: number
+  currency_code: string
+  reason: string
+  status: string
+  due_at: Date | string | null
+  created_at: Date | string
+}
+
+/** The disputed payment as its provider holds it; kuruş. */
+export interface EvidencePayment {
+  available: boolean
+  reference: string | null
+  error_code: string | null
+  amount: number | null
+  card_brand: string | null
+  card_last4: string | null
+  installments: number | null
+  test_mode: boolean
+}
+
+export interface EvidenceRefund {
+  created_at: string
+  reference: string
+  amount: number
+  status: string
+}
 
 /**
  * The evidence document's markup: Turkish, for the provider and the bank
@@ -44,23 +92,28 @@ h1{font-size:22px;margin:0 0 4px}h2{font-size:16px;margin:28px 0 8px;border-bott
 p.lead{color:#555;margin:0 0 16px}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid #eee;vertical-align:top}
 th{width:38%;color:#444;font-weight:600}.note{color:#555;font-size:13px}@media print{body{margin:0}}`
 
-export function renderEvidence(input: {
-  chargeback: EvidenceChargeback
-  order: EvidenceOrder
-  payments: Awaited<ReturnType<typeof orderPaymentDetails>>
-  generatedAt: Date
-}): string {
-  const { chargeback, order, payments } = input
-  const currency = order.currency_code
-  const address = order.shipping_address ?? {}
-  const items = order.items
-    .map(
-      (item) =>
-        `<tr><td>${escape(item.title)}</td><td>${escape(item.quantity)}</td><td>${lira(item.total, currency)}</td></tr>`
-    )
-    .join("")
-  const payment = payments.payments[0]
-  const shipments = order.fulfillments.length
+function paymentSection(payment: EvidencePayment | null, currency: string): string {
+  if (!payment?.available) {
+    return `<p class="note">Sağlayıcının kaydı şu an okunamadı${payment?.error_code ? ` (${escape(payment.error_code)})` : ""}; işlem numarası: ${escape(payment?.reference ?? "—")}.</p>`
+  }
+  return rows([
+    ["İşlem numarası", escape(payment.reference ?? "—")],
+    ["Tutar", payment.amount === null ? "—" : kurusText(payment.amount, currency)],
+    ["Kart", escape(`${payment.card_brand ?? ""} •••• ${payment.card_last4 ?? ""}`.trim())],
+    [
+      "Taksit",
+      escape(
+        payment.installments && payment.installments > 1
+          ? `${String(payment.installments)} taksit`
+          : "Tek çekim"
+      ),
+    ],
+    ["Test modu", payment.test_mode ? "Evet" : "Hayır"],
+  ])
+}
+
+function shipmentsSection(order: EvidenceOrder): string {
+  return order.fulfillments.length
     ? order.fulfillments
         .map((each, index) =>
           rows([
@@ -72,14 +125,50 @@ export function renderEvidence(input: {
         )
         .join("")
     : `<p class="note">Bu sipariş için kargo kaydı yok.</p>`
-  const refunds = payments.refunds.length
+}
+
+function refundsSection(refunds: readonly EvidenceRefund[], currency: string): string {
+  return refunds.length
     ? rows(
-        payments.refunds.map((refund) => [
+        refunds.map((refund) => [
           `${date(refund.created_at)} (${refund.reference})`,
           `${kurusText(refund.amount, currency)} · ${escape(refund.status)}`,
         ])
       )
     : `<p class="note">Bu sipariş için iade yapılmadı.</p>`
+}
+
+function addressSection(address: Record<string, string | null>): string {
+  return rows([
+    ["Alıcı", escape(`${address["first_name"] ?? ""} ${address["last_name"] ?? ""}`.trim() || "—")],
+    [
+      "Adres",
+      escape([address["address_1"], address["address_2"]].filter(Boolean).join(", ") || "—"),
+    ],
+    [
+      "İlçe / İl",
+      escape([address["city"], address["province"]].filter(Boolean).join(" / ") || "—"),
+    ],
+    ["Posta kodu", escape(address["postal_code"] ?? "—")],
+    ["Telefon", escape(address["phone"] ?? "—")],
+  ])
+}
+
+export function renderEvidence(input: {
+  chargeback: EvidenceChargeback
+  order: EvidenceOrder
+  payment: EvidencePayment | null
+  refunds: readonly EvidenceRefund[]
+  generatedAt: Date
+}): string {
+  const { chargeback, order } = input
+  const currency = order.currency_code
+  const items = order.items
+    .map(
+      (item) =>
+        `<tr><td>${escape(item.title)}</td><td>${escape(item.quantity)}</td><td>${lira(item.total, currency)}</td></tr>`
+    )
+    .join("")
   return `<!doctype html><html lang="tr"><head><meta charset="utf-8"><title>Ters ibraz belgeleri: sipariş #${escape(order.display_id)}</title><style>${STYLE}</style></head><body>
 <h1>Ters ibraz belgeleri: sipariş #${escape(order.display_id)}</h1>
 <p class="lead">Hazırlanma: ${date(input.generatedAt)}</p>
@@ -99,39 +188,10 @@ export function renderEvidence(input: {
     ["Toplam (KDV dahil)", lira(order.total, currency)],
   ])}
 <table><tr><th>Ürün</th><th>Adet</th><th>Tutar</th></tr>${items}</table>
-<h2>Teslimat adresi</h2>${rows([
-    ["Alıcı", escape(`${address["first_name"] ?? ""} ${address["last_name"] ?? ""}`.trim() || "—")],
-    [
-      "Adres",
-      escape([address["address_1"], address["address_2"]].filter(Boolean).join(", ") || "—"),
-    ],
-    [
-      "İlçe / İl",
-      escape([address["city"], address["province"]].filter(Boolean).join(" / ") || "—"),
-    ],
-    ["Posta kodu", escape(address["postal_code"] ?? "—")],
-    ["Telefon", escape(address["phone"] ?? "—")],
-  ])}
-<h2>Ödeme (sağlayıcının kaydı)</h2>${
-    payment?.available
-      ? rows([
-          ["İşlem numarası", escape(payment.reference ?? "—")],
-          ["Tutar", payment.amount === null ? "—" : kurusText(payment.amount, currency)],
-          ["Kart", escape(`${payment.card_brand ?? ""} •••• ${payment.card_last4 ?? ""}`.trim())],
-          [
-            "Taksit",
-            escape(
-              payment.installments && payment.installments > 1
-                ? `${String(payment.installments)} taksit`
-                : "Tek çekim"
-            ),
-          ],
-          ["Test modu", payment.test_mode ? "Evet" : "Hayır"],
-        ])
-      : `<p class="note">Sağlayıcının kaydı şu an okunamadı${payment?.error_code ? ` (${escape(payment.error_code)})` : ""}; işlem numarası: ${escape(payment?.reference ?? "—")}.</p>`
-  }
-<h2>Kargo ve teslim</h2>${shipments}
-<h2>İadeler</h2>${refunds}
+<h2>Teslimat adresi</h2>${addressSection(order.shipping_address ?? {})}
+<h2>Ödeme (sağlayıcının kaydı)</h2>${paymentSection(input.payment, currency)}
+<h2>Kargo ve teslim</h2>${shipmentsSection(order)}
+<h2>İadeler</h2>${refundsSection(input.refunds, currency)}
 <h2>Sözleşme onayı ve erişim kaydı</h2>
 <p class="note">Mesafeli satış sözleşmesi ve ön bilgilendirme onaylarının kaydı ile alıcının IP adresi bu sürümde saklanmıyor; yasal metin onayları geldiğinde (F13) bu bölüm otomatik dolar.</p>
 </body></html>`

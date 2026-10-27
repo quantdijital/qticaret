@@ -12,7 +12,8 @@ export interface Chargeback {
   order_display_id: number | null
   provider: string
   provider_reference: string | null
-  amount: number
+  /** Exact lira, as the other admin money answers. */
+  amount: string
   currency_code: string
   reason: ChargebackReason
   status: ChargebackStatus
@@ -21,6 +22,13 @@ export interface Chargeback {
   created_at: string
   closed_at: string | null
 }
+
+export const CHARGEBACK_STATUSES: readonly ChargebackStatus[] = [
+  "open",
+  "evidence_submitted",
+  "won",
+  "lost",
+]
 
 export const CHARGEBACK_REASONS: readonly ChargebackReason[] = [
   "not_received",
@@ -40,12 +48,23 @@ export const NEXT_STATUS: Readonly<Record<ChargebackStatus, readonly ChargebackS
 
 const KEY = ["chargebacks"] as const
 
-export const chargebacksQuery = (filters: { status?: ChargebackStatus; order_id?: string }) =>
+export const CHARGEBACK_PAGE_SIZE = 50
+
+export const chargebacksQuery = (filters: {
+  status?: ChargebackStatus
+  order_id?: string
+  page?: number
+}) =>
   queryOptions({
     queryKey: [...KEY, filters],
     queryFn: () =>
       sdk.client.fetch<{ chargebacks: Chargeback[]; count: number }>("/admin/chargebacks", {
-        query: { ...filters, limit: 100 },
+        query: {
+          ...(filters.status ? { status: filters.status } : {}),
+          ...(filters.order_id ? { order_id: filters.order_id } : {}),
+          limit: CHARGEBACK_PAGE_SIZE,
+          offset: (filters.page ?? 0) * CHARGEBACK_PAGE_SIZE,
+        },
       }),
   })
 

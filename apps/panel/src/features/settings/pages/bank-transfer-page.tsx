@@ -24,7 +24,7 @@ export function BankTransferPage() {
         badge={
           saved ? (
             <StatusBadge tone={saved.enabled ? "success" : "neutral"}>
-              {t(saved.enabled ? `${P}.bankTransfer.on` : `${P}.bankTransfer.off`)}
+              {t(saved.enabled ? `${P}.offered.on` : `${P}.offered.off`)}
             </StatusBadge>
           ) : null
         }

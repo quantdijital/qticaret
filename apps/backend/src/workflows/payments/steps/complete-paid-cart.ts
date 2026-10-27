@@ -7,7 +7,8 @@ import type { PaymentVerdict } from "./payment-orphan"
 
 /**
  * Whether a failed completion will fail again: the cart's own rules
- * (it changed, an address, a code) or stock that ran out. Anything else
+ * (it changed, an address, a code, a payment fee or account no longer
+ * right) or stock that ran out. Anything else
  * (a lock, the provider unreachable) is tried again: money is given back
  * only when the order surely cannot be placed.
  */
@@ -20,7 +21,10 @@ function completionWillFailAgain(error: unknown): boolean {
     message?: unknown
     type?: unknown
   }
-  if (typeof safeMessage === "string" && /^(cart|payments|promotions)\./.test(safeMessage)) {
+  if (
+    typeof safeMessage === "string" &&
+    /^(cart|payments|promotions|cash_on_delivery|bank_transfer)\./.test(safeMessage)
+  ) {
     return true
   }
   return (

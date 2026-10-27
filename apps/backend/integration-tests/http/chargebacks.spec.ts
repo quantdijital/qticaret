@@ -48,7 +48,7 @@ medusaIntegrationTestRunner({
     }
     const open = (body: Record<string, unknown>) =>
       settle(
-        http.post<{ chargeback: { id: string; status: string; amount: number }; message?: string }>(
+        http.post<{ chargeback: { id: string; status: string; amount: string }; message?: string }>(
           "/admin/chargebacks",
           body,
           { headers: admin.headers }
@@ -99,13 +99,25 @@ medusaIntegrationTestRunner({
         { headers: admin.headers }
       )
 
-      expect(opened.data.chargeback).toMatchObject({ status: "open", amount: 21000 })
+      // Lira as exact text, like every order amount the panel reads
+      expect(opened.data.chargeback).toMatchObject({ status: "open", amount: "210.00" })
       expect(twice.data).toMatchObject({ message: "chargebacks.already_open" })
       expect(data.count).toBe(1)
       expect(data.chargebacks[0]).toMatchObject({
         provider: "paytr",
         order_display_id: expect.any(Number) as unknown,
       })
+    })
+
+    it("opens one dispute when the same notice is recorded twice at once", async () => {
+      const orderId = await paidOrder()
+
+      const both = await Promise.all([
+        open({ order_id: orderId, amount: 20, reason: "duplicate" }),
+        open({ order_id: orderId, amount: 20, reason: "duplicate" }),
+      ])
+
+      expect(both.map(({ status }) => status).sort()).toEqual([200, 400])
     })
 
     it("refuses more than was paid", async () => {

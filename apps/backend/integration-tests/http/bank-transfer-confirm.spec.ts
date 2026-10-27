@@ -141,5 +141,36 @@ medusaIntegrationTestRunner({
 
       expect(cancelled.data).toMatchObject({ message: "bank_transfer.order_canceled" })
     })
+
+    it("leaves a confirmed transfer to its time, and Medusa's cancel still cancels one awaited", async () => {
+      const confirmed = await awaitingOrder()
+      const awaited = await awaitingOrder()
+      await confirm(confirmed)
+
+      const cancel = await settle(
+        http.post(`/admin/orders/${awaited}/cancel`, {}, { headers: admin.headers })
+      )
+      const expired = await expireBankTransfers(getContainer(), new Date(Date.now() + 25 * HOUR))
+
+      expect(expired).toBe(0)
+      expect(await orderOf(confirmed)).toMatchObject({ payment_status: "captured" })
+      expect(cancel.status).toBe(200)
+      expect(await orderOf(awaited)).toMatchObject({ status: "canceled" })
+    })
+
+    it("takes no dispute against money the shop confirmed itself", async () => {
+      const orderId = await awaitingOrder()
+      await confirm(orderId)
+
+      const disputed = await settle(
+        http.post(
+          "/admin/chargebacks",
+          { order_id: orderId, amount: 10, reason: "other" },
+          { headers: admin.headers }
+        )
+      )
+
+      expect(disputed.data).toMatchObject({ message: "chargebacks.order_unpaid" })
+    })
   },
 })

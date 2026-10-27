@@ -1,13 +1,16 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { liraToKurus } from "../../validation/lira"
 import { CHARGEBACKS_MODULE } from "../../../modules/chargebacks"
 import type ChargebacksModuleService from "../../../modules/chargebacks/service"
 import { openChargebackWorkflow } from "../../../workflows/chargebacks/open-chargeback"
+import { chargebackView } from "./view"
 import type { AdminGetChargebacksType, AdminPostChargebackType } from "./validators"
 
 /**
  * GET /admin/chargebacks (F6.7, adr/0030): disputes, open ones with the
- * nearest deadline first, each with its order's number. Nothing personal.
+ * nearest deadline first, each with its order's number and its amount as
+ * exact lira. Nothing personal.
  */
 export async function GET(
   req: AuthenticatedMedusaRequest<unknown, AdminGetChargebacksType>,
@@ -33,7 +36,7 @@ export async function GET(
   )
   res.json({
     chargebacks: chargebacks.map((chargeback) => ({
-      ...chargeback,
+      ...chargebackView(chargeback),
       order_display_id: numbers.get(chargeback.order_id) ?? null,
     })),
     count,
@@ -51,7 +54,7 @@ export async function POST(
   const { result } = await openChargebackWorkflow(req.scope).run({
     input: {
       order_id: body.order_id,
-      amount: Math.round(body.amount * 100),
+      amount: liraToKurus(body.amount),
       reason: body.reason,
       provider_reference: body.provider_reference ?? null,
       due_at: body.due_at ?? null,
@@ -59,5 +62,5 @@ export async function POST(
       created_by: req.auth_context.actor_id,
     },
   })
-  res.json({ chargeback: result })
+  res.json({ chargeback: chargebackView(result) })
 }

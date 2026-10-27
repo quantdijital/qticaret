@@ -16,11 +16,13 @@ export const StorePostCartPaymentSession = z
   })
   .strict()
   .superRefine((body, ctx) => {
-    if (isHostedFormProvider(body.provider_id) && !body.return_urls) {
+    const hosted = isHostedFormProvider(body.provider_id)
+    // A hosted form needs somewhere to send the shopper back; an offline way never sends anyone
+    if (hosted !== Boolean(body.return_urls)) {
       ctx.addIssue({
         code: "custom",
         path: ["return_urls"],
-        message: "payments.return_urls_required",
+        message: hosted ? "payments.return_urls_required" : "payments.return_urls_unexpected",
       })
     }
   })

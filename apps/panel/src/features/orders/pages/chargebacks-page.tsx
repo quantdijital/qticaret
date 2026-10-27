@@ -1,13 +1,13 @@
 import { useQuery } from "@tanstack/react-query"
-import { Link } from "@tanstack/react-router"
+import { Link, getRouteApi, useNavigate } from "@tanstack/react-router"
 import { EllipsisVertical } from "lucide-react"
-import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { DataTable } from "@/components/patterns/data-table"
 import type { Column } from "@/components/patterns/data-table"
 import { FilterTabs } from "@/components/patterns/filter-tabs"
 import { PageHeader } from "@/components/patterns/page-header"
+import { Pagination } from "@/components/patterns/pagination"
 import { ErrorState } from "@/components/patterns/states"
 import { StatusBadge } from "@/components/patterns/status-badge"
 import type { StatusTone } from "@/components/patterns/status-badge"
@@ -19,6 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import {
+  CHARGEBACK_PAGE_SIZE,
   NEXT_STATUS,
   chargebacksQuery,
   evidenceUrl,
@@ -29,6 +30,7 @@ import { errorText } from "@/lib/errors"
 import { formatDateTime, formatMoney } from "@/lib/format"
 
 const C = "orders.chargeback"
+const route = getRouteApi("/_auth/orders/chargebacks")
 type View = ChargebackStatus | "all"
 const VIEWS: readonly View[] = ["open", "evidence_submitted", "won", "lost", "all"]
 
@@ -93,8 +95,22 @@ function Actions({ chargeback }: { chargeback: Chargeback }) {
  */
 export function ChargebacksPage() {
   const { t } = useTranslation()
-  const [view, setView] = useState<View>("open")
-  const query = useQuery(chargebacksQuery(view === "all" ? {} : { status: view }))
+  const search = route.useSearch()
+  const navigate = useNavigate()
+  const view: View = search.view ?? "open"
+  const page = (search.page ?? 1) - 1
+  const query = useQuery(chargebacksQuery(view === "all" ? { page } : { status: view, page }))
+  const setSearch = (next: { view?: View; page?: number }) => {
+    const nextView = next.view ?? view
+    void navigate({
+      to: "/orders/chargebacks",
+      search: {
+        view: nextView === "open" ? undefined : nextView,
+        page: next.page && next.page > 1 ? next.page : undefined,
+      },
+      replace: true,
+    })
+  }
   const columns: Column<Chargeback>[] = [
     {
       key: "order",
@@ -136,7 +152,7 @@ export function ChargebacksPage() {
       key: "amount",
       header: t(`${C}.columns.amount`),
       align: "right",
-      cell: (row) => formatMoney(row.amount / 100, row.currency_code),
+      cell: (row) => formatMoney(row.amount, row.currency_code),
     },
     { key: "actions", header: "", align: "right", cell: (row) => <Actions chargeback={row} /> },
   ]
@@ -151,7 +167,9 @@ export function ChargebacksPage() {
         <FilterTabs
           label={t(`${C}.queue`)}
           value={view}
-          onChange={setView}
+          onChange={(next) => {
+            setSearch({ view: next, page: 1 })
+          }}
           tabs={VIEWS.map((key) => ({
             key,
             label: key === "all" ? t("orders.tabs.all") : t(`${C}.status.${key}`),
@@ -162,13 +180,25 @@ export function ChargebacksPage() {
             <ErrorState text={errorText(t, query.error)} onRetry={() => void query.refetch()} />
           </div>
         ) : (
-          <DataTable
-            columns={columns}
-            rows={query.data?.chargebacks ?? []}
-            rowKey={(row) => row.id}
-            loading={!query.data}
-            empty={t(`${C}.empty`)}
-          />
+          <>
+            <DataTable
+              columns={columns}
+              rows={query.data?.chargebacks ?? []}
+              rowKey={(row) => row.id}
+              loading={!query.data}
+              empty={t(`${C}.empty`)}
+            />
+            {query.data && query.data.count > 0 ? (
+              <Pagination
+                page={page}
+                pageSize={CHARGEBACK_PAGE_SIZE}
+                count={query.data.count}
+                onPageChange={(next) => {
+                  setSearch({ page: next + 1 })
+                }}
+              />
+            ) : null}
+          </>
         )}
       </section>
     </div>

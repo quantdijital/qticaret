@@ -1,14 +1,7 @@
 import { z } from "@medusajs/framework/zod"
+import { liraAmount } from "../../../../validation/lira"
 
-// Lira with at most two decimals: kuruş are whole
-const lira = z
-  .number()
-  .positive()
-  .max(1_000_000_000)
-  .refine(
-    (value) => Math.abs(value * 100 - Math.round(value * 100)) < 1e-6,
-    "orders.refund_amount_kurus"
-  )
+const lira = liraAmount(1_000_000_000, "orders.refund_amount_kurus")
 
 const request = {
   items: z

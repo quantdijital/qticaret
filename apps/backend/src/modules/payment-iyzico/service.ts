@@ -23,7 +23,7 @@ import { AbstractPaymentProvider, PaymentActions } from "@medusajs/framework/uti
 import { backendUrl } from "../../lib/env"
 import { ValidationError } from "../../lib/errors"
 import { fromMedusaAmount, kurus, sumKurus } from "../../lib/money"
-import { HOSTED_CHECKOUT, hostedCheckout } from "../../lib/payments/checkout"
+import { hostedCheckout, startedByCheckout } from "../../lib/payments/checkout"
 import { callbackSignature, iyzicoApi } from "../../lib/payments/iyzico"
 import { pendingReferenceOf } from "../../lib/payments/pending-refund"
 import type { IyzicoCredentials } from "../../lib/payments/iyzico"
@@ -67,7 +67,7 @@ class IyzicoProviderService extends AbstractPaymentProvider {
 
   async initiatePayment(input: InitiatePaymentInput): Promise<InitiatePaymentOutput> {
     // Medusa's own session route passes the shopper's `data` and no context: refused
-    if ((input.context as Record<string, unknown> | undefined)?.[HOSTED_CHECKOUT] !== true) {
+    if (!startedByCheckout(input.context)) {
       throw new ValidationError("payments.use_checkout_route")
     }
     const sessionId = input.data?.["session_id"]

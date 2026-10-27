@@ -2,7 +2,8 @@ import { useTranslation } from "react-i18next"
 import { SectionCard } from "@/components/patterns/section-card"
 import { ErrorState } from "@/components/patterns/states"
 import { StatusBadge } from "@/components/patterns/status-badge"
-import type { HostedPayment, OrderDetail, OrderMoney } from "@/features/orders/api/orders"
+import type { OrderDetail, OrderMoney } from "@/features/orders/api/orders"
+import type { HostedPayment } from "@/features/orders/api/payments"
 import { formatMoney } from "@/lib/format"
 
 // The payment's state in the shop's words (docs/06 sözlük) and its tone. Taken

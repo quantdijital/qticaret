@@ -12,10 +12,11 @@ import {
   when,
 } from "@medusajs/framework/workflows-sdk"
 import { paymentBasket } from "../../lib/payments/basket"
-import { HOSTED_CHECKOUT } from "../../lib/payments/checkout"
+import { HOSTED_CHECKOUT, isHostedFormProvider } from "../../lib/payments/checkout"
 import type { HostedCheckout } from "../../lib/payments/checkout"
+import { offlineSessionDataStep } from "./steps/offline-session"
 import { readCheckoutCartStep } from "./steps/read-checkout-cart"
-import { applyPaymentFeeStep } from "./steps/payment-fee"
+import { applyPaymentFeeStep, checkPaymentFeeStep } from "./steps/payment-fee"
 import { readPaymentCollectionStep } from "./steps/read-payment-collection"
 import { recordPaymentFormStep } from "./steps/record-payment-form"
 
@@ -30,25 +31,33 @@ export interface StartCartPaymentInput {
 }
 
 /**
- * Starts a hosted-form payment for a cart (adr/0026 §1). Everything the
- * provider is given comes from the stored cart: the buyer, the basket
- * (F4.7 shares, credit spread over the lines) and the amount, which is the
- * payment collection's, brought up to the cart first. Medusa replaces the
- * collection's earlier sessions: each attempt is a new reference.
+ * Starts a payment for a cart (adr/0026 §1, adr/0029). Everything the
+ * provider is given comes from the server: for a hosted form the buyer
+ * and the basket (F4.7 shares, credit spread over the lines), for bank
+ * transfer the shop's account, for cash on delivery its fee; always the
+ * amount, which is the payment collection's, brought up to the cart
+ * first. Medusa replaces the collection's earlier sessions: each attempt
+ * is a new reference.
  */
 export const startCartPaymentWorkflow = createWorkflow(
   "payments-start-cart-payment",
   (input: StartCartPaymentInput) => {
     // Cash on delivery's fee line put right first: Medusa's cart workflows that
     // change lines take the cart's lock themselves (adr/0029)
-    const fee = applyPaymentFeeStep({ cart_id: input.cart_id, provider_id: input.provider_id })
+    const fee = applyPaymentFeeStep({
+      cart_id: input.cart_id,
+      provider_id: input.provider_id,
+      sales_channel_ids: input.sales_channel_ids,
+    })
     // The cart's own lock, as Medusa's cart workflows take it: the cart cannot
     // change between reading its amount and starting the session for it
     acquireLockStep({ key: input.cart_id, timeout: 5, ttl: 30 })
+    checkPaymentFeeStep({ cart_id: input.cart_id, fee: fee.fee })
     const cart = readCheckoutCartStep({
       cart_id: input.cart_id,
       sales_channel_ids: input.sales_channel_ids,
     })
+    const offline = offlineSessionDataStep({ provider_id: input.provider_id, fee: fee.fee })
     when("payments-create-collection", { cart }, ({ cart }) => !cart.payment_collection_id).then(
       () => {
         createPaymentCollectionForCartWorkflow.runAsStep({ input: { cart_id: input.cart_id } })
@@ -61,25 +70,28 @@ export const startCartPaymentWorkflow = createWorkflow(
     })
     const collection = readPaymentCollectionStep(input.cart_id)
     const session = createPaymentSessionsWorkflow.runAsStep({
-      input: transform({ input, cart, collection, fee }, ({ input, cart, collection, fee }) => {
-        // Only a hosted form is given the buyer and the basket (adr/0029: offline ways need none)
-        const checkout: HostedCheckout | null = input.return_urls
-          ? {
-              email: cart.email,
-              buyer: cart.buyer,
-              ip: input.ip,
-              return_urls: input.return_urls,
-              basket: paymentBasket(cart.lines, collection.amount),
-            }
-          : null
-        return {
-          payment_collection_id: collection.id,
-          provider_id: input.provider_id,
-          // A hosted form gets the buyer and the basket; cash on delivery its fee
-          data: checkout ? { checkout } : { fee: fee.fee },
-          context: { [HOSTED_CHECKOUT]: true },
+      input: transform(
+        { input, cart, collection, offline },
+        ({ input, cart, collection, offline }) => {
+          // Only a hosted form is given the buyer and the basket (adr/0029: offline ways need none)
+          const checkout: HostedCheckout | null =
+            isHostedFormProvider(input.provider_id) && input.return_urls
+              ? {
+                  email: cart.email,
+                  buyer: cart.buyer,
+                  ip: input.ip,
+                  return_urls: input.return_urls,
+                  basket: paymentBasket(cart.lines, collection.amount),
+                }
+              : null
+          return {
+            payment_collection_id: collection.id,
+            provider_id: input.provider_id,
+            data: checkout ? { checkout } : offline,
+            context: { [HOSTED_CHECKOUT]: true },
+          }
         }
-      }),
+      ),
     })
     recordPaymentFormStep(
       transform({ input, session }, ({ input, session }) => ({

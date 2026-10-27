@@ -1,7 +1,10 @@
+import { zodResolver } from "@hookform/resolvers/zod"
 import { useQuery } from "@tanstack/react-query"
 import { Controller, useForm, useWatch } from "react-hook-form"
+import type { Control, UseFormRegister } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
+import { z } from "zod"
 import { CardForm } from "@/components/patterns/card-form"
 import { Field } from "@/components/patterns/form-section"
 import { SectionCard } from "@/components/patterns/section-card"
@@ -12,20 +15,52 @@ import { Switch } from "@/components/ui/switch"
 import { featuresQuery, useSetFeature } from "@/features/settings/api/features"
 import { useSaveSection } from "@/features/settings/api/sections"
 import type { CashOnDeliverySettings } from "@/features/settings/api/sections"
+import { shippingOptionNamesQuery } from "@/features/settings/api/shipping-options"
 import { errorText } from "@/lib/errors"
 import { formatMoneyInput, parseDecimalInput, parseMoneyInput } from "@/lib/money-input"
-import { sdk } from "@/lib/sdk"
 
 const C = "settings.payments.cashOnDelivery"
+const FLAG = "payments.cash_on_delivery"
 const FEE_TYPES = ["none", "fixed", "percent"] as const
 
-/** Offered to shoppers or not: the `cash_on_delivery` flag (adr/0012). */
+/** Saved as kuruş (fixed) or basis points (percent): a hundredth of what is typed either way. */
+const feeSchema = z
+  .object({
+    fee_type: z.enum(FEE_TYPES),
+    fee: z.string(),
+    max: z
+      .string()
+      .refine((text) => text.trim() === "" || parseMoneyInput(text) !== null, `${C}.amountInvalid`),
+  })
+  .superRefine((values, ctx) => {
+    const fee = parseDecimalInput(values.fee, 2)
+    if (values.fee_type !== "none" && (fee === null || fee < 0)) {
+      ctx.addIssue({ code: "custom", path: ["fee"], message: `${C}.amountInvalid` })
+    } else if (values.fee_type === "percent" && fee !== null && fee > 100) {
+      ctx.addIssue({ code: "custom", path: ["fee"], message: `${C}.percentInvalid` })
+    }
+  })
+type FeeValues = z.infer<typeof feeSchema>
+
+const toValues = (saved: CashOnDeliverySettings): FeeValues => ({
+  fee_type: saved.fee_type,
+  fee: saved.fee_type === "none" ? "" : formatMoneyInput(saved.fee_value / 100),
+  max: saved.max_amount > 0 ? formatMoneyInput(saved.max_amount / 100) : "",
+})
+
+const toSettings = (values: FeeValues): Partial<CashOnDeliverySettings> => ({
+  fee_type: values.fee_type,
+  fee_value:
+    values.fee_type === "none" ? 0 : Math.round((parseDecimalInput(values.fee, 2) ?? 0) * 100),
+  max_amount: values.max.trim() === "" ? 0 : Math.round((parseMoneyInput(values.max) ?? 0) * 100),
+})
+
+/** Offered to shoppers or not: the `payments.cash_on_delivery` flag (adr/0012). */
 function StatusCard() {
   const { t } = useTranslation()
   const features = useQuery(featuresQuery())
   const set = useSetFeature()
-  const enabled =
-    features.data?.find(({ key }) => key === "payments.cash_on_delivery")?.enabled ?? false
+  const enabled = features.data?.find(({ key }) => key === FLAG)?.enabled ?? false
   return (
     <SectionCard title={t(`${C}.status.title`)} description={t(`${C}.status.description`)}>
       <div className="flex items-center justify-between gap-4">
@@ -39,7 +74,7 @@ function StatusCard() {
           disabled={!features.data || set.isPending}
           onCheckedChange={(next) => {
             set.mutate(
-              { key: "payments.cash_on_delivery", enabled: next },
+              { key: FLAG, enabled: next },
               {
                 onSuccess: () => toast.success(t("settings.saved")),
                 onError: (failure) => toast.error(errorText(t, failure)),
@@ -52,66 +87,23 @@ function StatusCard() {
   )
 }
 
-interface FeeValues {
-  fee_type: CashOnDeliverySettings["fee_type"]
-  /** Lira for a fixed fee, percent for a share, as typed. */
-  fee: string
-  /** Lira; empty: no limit. */
-  max: string
-}
-
-const feeText = (saved: CashOnDeliverySettings) =>
-  saved.fee_type === "fixed"
-    ? formatMoneyInput(saved.fee_value / 100)
-    : saved.fee_type === "percent"
-      ? formatMoneyInput(saved.fee_value / 100)
-      : ""
-
-/** The fee shoppers pay to pay at the door, and the largest order it takes. */
-function FeeCard({ saved }: { saved: CashOnDeliverySettings }) {
+function FeeFields({
+  control,
+  register,
+  errors,
+}: {
+  control: Control<FeeValues>
+  register: UseFormRegister<FeeValues>
+  errors: Partial<Record<keyof FeeValues, { message?: string }>>
+}) {
   const { t } = useTranslation()
-  const save = useSaveSection<CashOnDeliverySettings>("cash_on_delivery")
-  const values: FeeValues = {
-    fee_type: saved.fee_type,
-    fee: feeText(saved),
-    max: saved.max_amount > 0 ? formatMoneyInput(saved.max_amount / 100) : "",
-  }
-  const form = useForm<FeeValues>({ values, resetOptions: { keepDirtyValues: true } })
-  const submit = form.handleSubmit((next) => {
-    const fee = next.fee_type === "none" ? 0 : parseDecimalInput(next.fee, 2)
-    const max = next.max.trim() === "" ? 0 : parseMoneyInput(next.max)
-    if (fee === null || max === null || (next.fee_type === "percent" && fee > 100)) {
-      toast.error(t(`${C}.invalid`))
-      return
-    }
-    save.mutate(
-      {
-        fee_type: next.fee_type,
-        // Kuruş for a fixed fee, basis points for a share: both a hundredth of what was typed
-        fee_value: Math.round(fee * 100),
-        max_amount: Math.round(max * 100),
-      },
-      {
-        onSuccess: () => toast.success(t("settings.saved")),
-        onError: (failure) => toast.error(errorText(t, failure)),
-      }
-    )
-  })
-  const feeType = useWatch({ control: form.control, name: "fee_type" })
+  const feeType = useWatch({ control, name: "fee_type" })
+  const message = (key: string | undefined) => (key ? t(key) : undefined)
   return (
-    <CardForm
-      title={t(`${C}.fee.title`)}
-      description={t(`${C}.fee.description`)}
-      dirty={form.formState.isDirty}
-      saving={save.isPending}
-      onSubmit={() => void submit()}
-      onReset={() => {
-        form.reset(values)
-      }}
-    >
+    <>
       <Field label={t(`${C}.fee.type`)}>
         <Controller
-          control={form.control}
+          control={control}
           name="fee_type"
           render={({ field }) => (
             <RadioGroup
@@ -134,13 +126,51 @@ function FeeCard({ saved }: { saved: CashOnDeliverySettings }) {
           label={t(feeType === "fixed" ? `${C}.fee.amount` : `${C}.fee.percent`)}
           htmlFor="cod-fee"
           hint={t(`${C}.fee.hint`)}
+          error={message(errors.fee?.message)}
         >
-          <Input id="cod-fee" inputMode="decimal" className="w-40" {...form.register("fee")} />
+          <Input id="cod-fee" inputMode="decimal" className="w-40" {...register("fee")} />
         </Field>
       )}
-      <Field label={t(`${C}.max`)} htmlFor="cod-max" hint={t(`${C}.maxHint`)}>
-        <Input id="cod-max" inputMode="decimal" className="w-40" {...form.register("max")} />
+      <Field
+        label={t(`${C}.max`)}
+        htmlFor="cod-max"
+        hint={t(`${C}.maxHint`)}
+        error={message(errors.max?.message)}
+      >
+        <Input id="cod-max" inputMode="decimal" className="w-40" {...register("max")} />
       </Field>
+    </>
+  )
+}
+
+/** The fee shoppers pay to pay at the door, and the largest order it takes. */
+function FeeCard({ saved }: { saved: CashOnDeliverySettings }) {
+  const { t } = useTranslation()
+  const save = useSaveSection<CashOnDeliverySettings>("cash_on_delivery")
+  const values = toValues(saved)
+  const form = useForm<FeeValues>({
+    resolver: zodResolver(feeSchema),
+    values,
+    resetOptions: { keepDirtyValues: true },
+  })
+  const submit = form.handleSubmit((next) => {
+    save.mutate(toSettings(next), {
+      onSuccess: () => toast.success(t("settings.saved")),
+      onError: (failure) => toast.error(errorText(t, failure)),
+    })
+  })
+  return (
+    <CardForm
+      title={t(`${C}.fee.title`)}
+      description={t(`${C}.fee.description`)}
+      dirty={form.formState.isDirty}
+      saving={save.isPending}
+      onSubmit={() => void submit()}
+      onReset={() => {
+        form.reset(values)
+      }}
+    >
+      <FeeFields control={form.control} register={form.register} errors={form.formState.errors} />
     </CardForm>
   )
 }
@@ -149,11 +179,7 @@ function FeeCard({ saved }: { saved: CashOnDeliverySettings }) {
 function ShippingCard({ saved }: { saved: CashOnDeliverySettings }) {
   const { t } = useTranslation()
   const save = useSaveSection<CashOnDeliverySettings>("cash_on_delivery")
-  const options = useQuery({
-    queryKey: ["settings", "shipping-options", "names"],
-    queryFn: async () =>
-      (await sdk.admin.shippingOption.list({ fields: "id,name", limit: 100 })).shipping_options,
-  })
+  const options = useQuery(shippingOptionNamesQuery())
   const chosen = new Set(saved.shipping_option_ids)
   const toggle = (id: string, on: boolean) => {
     const next = on

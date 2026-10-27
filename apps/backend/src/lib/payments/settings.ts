@@ -7,26 +7,24 @@ import type {
 } from "../../modules/platform-settings/sections"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
 
+type Resolver = Pick<MedusaContainer, "resolve">
+
+const sectionOf = async <T>(
+  container: Resolver,
+  name: "payments" | "bank_transfer" | "cash_on_delivery"
+): Promise<T> =>
+  (await container
+    .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
+    .getSection(name)) as unknown as T
+
 /** The shop's payment choices (F5 V6, V10), for every card provider. */
-export async function paymentSettings(
-  container: Pick<MedusaContainer, "resolve">
-): Promise<PaymentSettings> {
-  const settings = container.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
-  return (await settings.getSection("payments")) as unknown as PaymentSettings
-}
+export const paymentSettings = (container: Resolver) =>
+  sectionOf<PaymentSettings>(container, "payments")
 
 /** The shop's bank account for transfers (F6, adr/0029). */
-export async function bankTransferSettings(
-  container: Pick<MedusaContainer, "resolve">
-): Promise<BankTransferSettings> {
-  const settings = container.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
-  return (await settings.getSection("bank_transfer")) as unknown as BankTransferSettings
-}
+export const bankTransferSettings = (container: Resolver) =>
+  sectionOf<BankTransferSettings>(container, "bank_transfer")
 
 /** Cash on delivery's fee, limit and couriers (F6, adr/0029). */
-export async function cashOnDeliverySettings(
-  container: Pick<MedusaContainer, "resolve">
-): Promise<CashOnDeliverySettings> {
-  const settings = container.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
-  return (await settings.getSection("cash_on_delivery")) as unknown as CashOnDeliverySettings
-}
+export const cashOnDeliverySettings = (container: Resolver) =>
+  sectionOf<CashOnDeliverySettings>(container, "cash_on_delivery")

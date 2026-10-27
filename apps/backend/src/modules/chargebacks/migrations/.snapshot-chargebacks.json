@@ -283,15 +283,6 @@
           "expression": "CREATE INDEX IF NOT EXISTS \"IDX_chargeback_order_id\" ON \"chargeback\" (\"order_id\") WHERE deleted_at IS NULL"
         },
         {
-          "keyName": "IDX_chargeback_payment_id_status",
-          "columnNames": [],
-          "composite": false,
-          "constraint": false,
-          "primary": false,
-          "unique": false,
-          "expression": "CREATE INDEX IF NOT EXISTS \"IDX_chargeback_payment_id_status\" ON \"chargeback\" (\"payment_id\", \"status\") WHERE deleted_at IS NULL"
-        },
-        {
           "keyName": "IDX_chargeback_status_due_at",
           "columnNames": [],
           "composite": false,
@@ -299,6 +290,15 @@
           "primary": false,
           "unique": false,
           "expression": "CREATE INDEX IF NOT EXISTS \"IDX_chargeback_status_due_at\" ON \"chargeback\" (\"status\", \"due_at\") WHERE deleted_at IS NULL"
+        },
+        {
+          "keyName": "IDX_chargeback_payment_id_unique",
+          "columnNames": [],
+          "composite": false,
+          "constraint": false,
+          "primary": false,
+          "unique": false,
+          "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_chargeback_payment_id_unique\" ON \"chargeback\" (\"payment_id\") WHERE status IN ('open', 'evidence_submitted') AND deleted_at IS NULL"
         },
         {
           "keyName": "chargeback_pkey",

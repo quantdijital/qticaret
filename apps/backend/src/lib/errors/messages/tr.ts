@@ -18,6 +18,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "IBAN geçerli değil. TR ile başlayan 26 karakterlik IBAN'ı kontrol edin.",
   "bank_transfer.incomplete": "Havale/EFT'yi açmak için hesap sahibi, banka adı ve IBAN gerekli.",
   "payments.return_urls_required": "Kartla ödeme için dönüş adresleri gerekli.",
+  "payments.return_urls_unexpected": "Bu ödeme yöntemi dönüş adresi almaz.",
+  "cart.metadata_reserved": "Bu satır bilgisi yalnızca mağaza tarafından yazılır.",
   "bank_transfer.not_this_order": "Bu siparişin ödemesi havale/EFT ile değil.",
   "bank_transfer.order_canceled": "İptal edilmiş siparişin havalesi onaylanamaz.",
   "orders.payment_awaited":
@@ -31,7 +33,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "cash_on_delivery.fee_mismatch": "Kapıda ödeme ücreti değişti; ödemeyi yeniden başlatın.",
   "cash_on_delivery.fee_invalid": "Oran en çok %100 olabilir.",
   "chargebacks.order_unpaid":
-    "Bu siparişin tahsil edilmiş bir ödemesi yok; ters ibraz kaydı açılamaz.",
+    "Bu siparişin kartla tahsil edilmiş bir ödemesi yok; ters ibraz kaydı açılamaz.",
+  "chargebacks.changed": "Kayıt bu sırada değişti; sayfayı yenileyip tekrar deneyin.",
   "chargebacks.amount_exceeds_paid": "İtiraz edilen tutar ödenen tutarı geçemez.",
   "chargebacks.amount_invalid": "Tutarı en çok iki ondalıkla girin.",
   "chargebacks.already_open": "Bu ödeme için açık bir ters ibraz kaydı zaten var.",

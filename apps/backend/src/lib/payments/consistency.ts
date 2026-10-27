@@ -1,6 +1,6 @@
 import { fromMedusaAmount } from "../money"
 import type { MedusaAmount } from "../money"
-import { CHECKOUT_PROVIDERS } from "./checkout"
+import { isCheckoutProvider } from "./checkout"
 
 /**
  * Whether a cart's payment still matches the cart (security review,
@@ -63,13 +63,12 @@ export function paymentMismatch(cart: PaymentFacts): boolean {
       return true
     }
     // Every session ours keeps the amount it was started for (adr/0026, adr/0029)
-    const ours = (CHECKOUT_PROVIDERS as readonly string[]).includes(session.provider_id ?? "")
-    return ours && session.data?.["amount"] !== amount
+    return isCheckoutProvider(session.provider_id) && session.data?.["amount"] !== amount
   })
 }
 
-/** A storefront completes a cart to be paid only through a session our route started (adr/0026, adr/0029). */
-export function paidWithoutHostedForm(cart: PaymentFacts): boolean {
+/** Whether a cart to be paid has no live session, or one our route did not start (adr/0026, adr/0029). */
+export function paidOutsideCheckout(cart: PaymentFacts): boolean {
   const collection = cart.payment_collection
   if (!collection || (kurusOf(collection.raw_amount, collection.amount) ?? 0) === 0) {
     return false
@@ -77,12 +76,7 @@ export function paidWithoutHostedForm(cart: PaymentFacts): boolean {
   const live = (collection.payment_sessions ?? []).filter(
     (session) => session && LIVE.has(session.status ?? "")
   )
-  return (
-    live.length === 0 ||
-    !live.every((session) =>
-      (CHECKOUT_PROVIDERS as readonly string[]).includes(session?.provider_id ?? "")
-    )
-  )
+  return live.length === 0 || !live.every((session) => isCheckoutProvider(session?.provider_id))
 }
 
 export const PAYMENT_FACT_FIELDS = [

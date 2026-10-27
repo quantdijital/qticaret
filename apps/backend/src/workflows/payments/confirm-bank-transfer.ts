@@ -10,6 +10,7 @@ import {
   capturePaymentWorkflow,
   releaseLockStep,
 } from "@medusajs/medusa/core-flows"
+import { bankTransferLockKey } from "../../lib/payments/bank-transfer"
 import { markBankTransferConfirmedStep, readBankTransferOrderStep } from "./steps/bank-transfer"
 
 export interface ConfirmBankTransferInput {
@@ -28,10 +29,10 @@ export interface ConfirmBankTransferInput {
 export const confirmBankTransferWorkflow = createWorkflow(
   "payments-confirm-bank-transfer",
   (input: ConfirmBankTransferInput) => {
-    const lockKey = transform({ input }, ({ input }) => `orders:bank-transfer:${input.order_id}`)
+    const lockKey = transform({ input }, ({ input }) => bankTransferLockKey(input.order_id))
     acquireLockStep({ key: lockKey, timeout: 10, ttl: 60 })
     const order = readBankTransferOrderStep(input.order_id)
-    markBankTransferConfirmedStep({ order, confirmed_by: input.confirmed_by })
+    markBankTransferConfirmedStep(order)
     when("payments-bank-transfer-capture", { order }, ({ order }) => !order.done).then(() => {
       const payment = authorizePaymentSessionStep(
         transform({ order }, ({ order }) => ({

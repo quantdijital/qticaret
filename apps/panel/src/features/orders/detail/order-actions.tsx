@@ -19,12 +19,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {
-  useCancelOrder,
-  useCapturePayment,
-  useMarkDelivered,
-  useShipOrder,
-} from "@/features/orders/api/orders"
+import { useCancelOrder, useMarkDelivered, useShipOrder } from "@/features/orders/api/orders"
+import { useCapturePayment } from "@/features/orders/api/payments"
 import type { OrderDetail, OrderMoney, OrderState } from "@/features/orders/api/orders"
 import { errorText } from "@/lib/errors"
 import { ChargebackDialog } from "./chargeback-dialog"

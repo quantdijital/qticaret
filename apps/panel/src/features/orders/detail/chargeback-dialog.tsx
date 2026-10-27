@@ -1,6 +1,9 @@
-import { useState } from "react"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { Controller, useForm } from "react-hook-form"
+import type { Control, FieldErrors, UseFormRegister } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
+import { z } from "zod"
 import { Field } from "@/components/patterns/form-section"
 import { Button } from "@/components/ui/button"
 import {
@@ -21,11 +24,91 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { CHARGEBACK_REASONS, useOpenChargeback } from "@/features/orders/api/chargebacks"
-import type { ChargebackReason } from "@/features/orders/api/chargebacks"
+import type { ChargebackReason, OpenChargebackBody } from "@/features/orders/api/chargebacks"
 import { errorText } from "@/lib/errors"
 import { formatMoneyInput, parseMoneyInput } from "@/lib/money-input"
 
 const C = "orders.chargeback"
+
+const schema = z.object({
+  amount: z.string().refine((text) => (parseMoneyInput(text) ?? 0) > 0, `${C}.amountInvalid`),
+  reason: z.enum(CHARGEBACK_REASONS as [ChargebackReason, ...ChargebackReason[]]),
+  reference: z.string().trim().max(100),
+  due: z.string(),
+  note: z.string().trim().max(1000),
+})
+type Values = z.infer<typeof schema>
+
+/** The body the server takes: lira as typed, the deadline at the day's end in Turkey. */
+const bodyOf = (orderId: string, values: Values): OpenChargebackBody => ({
+  order_id: orderId,
+  amount: parseMoneyInput(values.amount) ?? 0,
+  reason: values.reason,
+  ...(values.reference ? { provider_reference: values.reference } : {}),
+  ...(values.due ? { due_at: new Date(`${values.due}T23:59:00+03:00`).toISOString() } : {}),
+  ...(values.note ? { note: values.note } : {}),
+})
+
+function ChargebackFields({
+  control,
+  register,
+  errors,
+}: {
+  control: Control<Values>
+  register: UseFormRegister<Values>
+  errors: FieldErrors<Values>
+}) {
+  const { t } = useTranslation()
+  return (
+    <div className="flex flex-col gap-4">
+      <Field
+        label={t(`${C}.amount`)}
+        htmlFor="chargeback-amount"
+        error={errors.amount?.message ? t(errors.amount.message) : undefined}
+      >
+        <Input
+          id="chargeback-amount"
+          inputMode="decimal"
+          className="w-40"
+          {...register("amount")}
+        />
+      </Field>
+      <Field label={t(`${C}.reason`)} htmlFor="chargeback-reason">
+        <Controller
+          control={control}
+          name="reason"
+          render={({ field }) => (
+            <Select value={field.value} onValueChange={field.onChange}>
+              <SelectTrigger id="chargeback-reason" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {CHARGEBACK_REASONS.map((each) => (
+                  <SelectItem key={each} value={each}>
+                    {t(`${C}.reasons.${each}`)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        />
+      </Field>
+      <Field
+        label={t(`${C}.reference`)}
+        htmlFor="chargeback-reference"
+        hint={t(`${C}.referenceHint`)}
+      >
+        <Input id="chargeback-reference" maxLength={100} {...register("reference")} />
+      </Field>
+      <Field label={t(`${C}.due`)} htmlFor="chargeback-due">
+        <Input id="chargeback-due" type="date" className="w-48" {...register("due")} />
+      </Field>
+      <Field label={t(`${C}.note`)} htmlFor="chargeback-note">
+        <Textarea id="chargeback-note" rows={3} maxLength={1000} {...register("note")} />
+      </Field>
+    </div>
+  )
+}
 
 /**
  * Records a dispute from the provider's notice (F6.7, adr/0030): how much,
@@ -47,35 +130,25 @@ export function ChargebackDialog({
 }) {
   const { t } = useTranslation()
   const save = useOpenChargeback()
-  const [amount, setAmount] = useState(formatMoneyInput(Number(paid)))
-  const [reason, setReason] = useState<ChargebackReason>("not_received")
-  const [reference, setReference] = useState("")
-  const [dueDate, setDueDate] = useState("")
-  const [note, setNote] = useState("")
-  const parsed = parseMoneyInput(amount)
-  const submit = () => {
-    if (parsed === null || parsed <= 0) {
-      return
-    }
-    save.mutate(
-      {
-        order_id: orderId,
-        amount: parsed,
-        reason,
-        ...(reference.trim() ? { provider_reference: reference.trim() } : {}),
-        // The day's end in Turkey, as the provider's deadline is read
-        ...(dueDate ? { due_at: new Date(`${dueDate}T23:59:00+03:00`).toISOString() } : {}),
-        ...(note.trim() ? { note: note.trim() } : {}),
+  const form = useForm<Values>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      amount: formatMoneyInput(Number(paid)),
+      reason: "not_received",
+      reference: "",
+      due: "",
+      note: "",
+    },
+  })
+  const submit = form.handleSubmit((values) => {
+    save.mutate(bodyOf(orderId, values), {
+      onSuccess: () => {
+        toast.success(t(`${C}.opened`))
+        onOpenChange(false)
       },
-      {
-        onSuccess: () => {
-          toast.success(t(`${C}.opened`))
-          onOpenChange(false)
-        },
-        onError: (failure) => toast.error(errorText(t, failure)),
-      }
-    )
-  }
+      onError: (failure) => toast.error(errorText(t, failure)),
+    })
+  })
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -83,78 +156,11 @@ export function ChargebackDialog({
           <DialogTitle>{t(`${C}.title`, { number: displayId })}</DialogTitle>
           <DialogDescription>{t(`${C}.description`)}</DialogDescription>
         </DialogHeader>
-        <div className="flex flex-col gap-4">
-          <Field
-            label={t(`${C}.amount`)}
-            htmlFor="chargeback-amount"
-            error={parsed === null ? t(`${C}.amountInvalid`) : undefined}
-          >
-            <Input
-              id="chargeback-amount"
-              inputMode="decimal"
-              className="w-40"
-              value={amount}
-              onChange={(event) => {
-                setAmount(event.target.value)
-              }}
-            />
-          </Field>
-          <Field label={t(`${C}.reason`)} htmlFor="chargeback-reason">
-            <Select
-              value={reason}
-              onValueChange={(next) => {
-                setReason(next as ChargebackReason)
-              }}
-            >
-              <SelectTrigger id="chargeback-reason" className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {CHARGEBACK_REASONS.map((each) => (
-                  <SelectItem key={each} value={each}>
-                    {t(`${C}.reasons.${each}`)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field>
-          <Field
-            label={t(`${C}.reference`)}
-            htmlFor="chargeback-reference"
-            hint={t(`${C}.referenceHint`)}
-          >
-            <Input
-              id="chargeback-reference"
-              value={reference}
-              maxLength={100}
-              onChange={(event) => {
-                setReference(event.target.value)
-              }}
-            />
-          </Field>
-          <Field label={t(`${C}.due`)} htmlFor="chargeback-due">
-            <Input
-              id="chargeback-due"
-              type="date"
-              className="w-48"
-              value={dueDate}
-              onChange={(event) => {
-                setDueDate(event.target.value)
-              }}
-            />
-          </Field>
-          <Field label={t(`${C}.note`)} htmlFor="chargeback-note">
-            <Textarea
-              id="chargeback-note"
-              rows={3}
-              maxLength={1000}
-              value={note}
-              onChange={(event) => {
-                setNote(event.target.value)
-              }}
-            />
-          </Field>
-        </div>
+        <ChargebackFields
+          control={form.control}
+          register={form.register}
+          errors={form.formState.errors}
+        />
         <DialogFooter>
           <Button
             variant="outline"
@@ -164,7 +170,7 @@ export function ChargebackDialog({
           >
             {t("common.cancel")}
           </Button>
-          <Button disabled={parsed === null || parsed <= 0 || save.isPending} onClick={submit}>
+          <Button disabled={save.isPending} onClick={() => void submit()}>
             {t(`${C}.open`)}
           </Button>
         </DialogFooter>

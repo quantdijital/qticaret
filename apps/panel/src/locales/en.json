@@ -649,8 +649,6 @@
         "hint": "The storefront offers it first for card payments; the installment table shows its prices."
       },
       "bankTransfer": {
-        "on": "On",
-        "off": "Off",
         "required": "Fill in this field.",
         "ibanInvalid": "The IBAN is not valid; check the 26 characters starting with TR.",
         "ibanHint": "Shoppers pay into this account, writing the order number in the description.",
@@ -672,7 +670,6 @@
         }
       },
       "cashOnDelivery": {
-        "invalid": "Enter the fee and the limit as numbers; a share is at most 100%.",
         "max": "Largest order (TL)",
         "maxHint": "Shipping included; empty means no limit.",
         "status": {
@@ -698,7 +695,13 @@
           "title": "Shipping options that collect at the door",
           "description": "Cash on delivery is offered only for orders sent with one of these.",
           "none": "No shipping options yet; add one first."
-        }
+        },
+        "amountInvalid": "Enter the amount as a number.",
+        "percentInvalid": "A share is at most 100%."
+      },
+      "offered": {
+        "on": "On",
+        "off": "Off"
       }
     },
     "integrations": {

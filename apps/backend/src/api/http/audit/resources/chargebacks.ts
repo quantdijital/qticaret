@@ -11,8 +11,26 @@ export const CHARGEBACK_RESOURCES: readonly AuditedResource[] = [
     pattern: /^\/admin\/chargebacks$/i,
     resourceType: "chargeback",
     resourceId: () => null,
-    // A new record: nothing before it
-    snapshot: () => Promise.resolve({}),
+    // The order's disputes before and after: the new one shows as added
+    snapshot: async ({ scope, body }) => {
+      const orderId = (body as { order_id?: unknown } | null)?.order_id
+      if (typeof orderId !== "string") {
+        return {}
+      }
+      const chargebacks = await (scope as unknown as MedusaContainer)
+        .resolve<ChargebacksModuleService>(CHARGEBACKS_MODULE)
+        .listChargebacks(
+          { order_id: orderId },
+          { take: 20, select: ["id", "status", "amount", "reason"], order: { created_at: "DESC" } }
+        )
+      return Object.fromEntries(
+        chargebacks.flatMap((chargeback): [string, unknown][] => [
+          [`${chargeback.id}.status`, chargeback.status],
+          [`${chargeback.id}.amount`, chargeback.amount],
+          [`${chargeback.id}.reason`, chargeback.reason],
+        ])
+      )
+    },
   },
   {
     method: "POST",

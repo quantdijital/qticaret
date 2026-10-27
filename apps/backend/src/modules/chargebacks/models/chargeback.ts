@@ -1,4 +1,5 @@
 import { model } from "@medusajs/framework/utils"
+import { CHARGEBACK_REASONS, CHARGEBACK_STATUSES } from "../states"
 
 /**
  * A cardholder's dispute of an order's payment (F6.7, adr/0030), recorded
@@ -16,12 +17,21 @@ export const Chargeback = model
     provider_reference: model.text().nullable(),
     amount: model.number(),
     currency_code: model.text(),
-    reason: model.enum(["not_received", "unauthorized", "not_as_described", "duplicate", "other"]),
-    status: model.enum(["open", "evidence_submitted", "won", "lost"]).default("open"),
+    reason: model.enum([...CHARGEBACK_REASONS]),
+    status: model.enum([...CHARGEBACK_STATUSES]).default("open"),
     /** When the provider wants the evidence by. */
     due_at: model.dateTime().nullable(),
     note: model.text().nullable(),
     created_by: model.text().nullable(),
     closed_at: model.dateTime().nullable(),
   })
-  .indexes([{ on: ["order_id"] }, { on: ["payment_id", "status"] }, { on: ["status", "due_at"] }])
+  .indexes([
+    { on: ["order_id"] },
+    { on: ["status", "due_at"] },
+    // One dispute still argued per payment, whatever races to open a second
+    {
+      on: ["payment_id"],
+      unique: true,
+      where: "status IN ('open', 'evidence_submitted')",
+    },
+  ])

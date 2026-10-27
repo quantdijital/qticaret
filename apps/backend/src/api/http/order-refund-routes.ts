@@ -7,7 +7,7 @@ import type {
 } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { ValidationError } from "../../lib/errors"
-import { CHECKOUT_PROVIDERS } from "../../lib/payments/checkout"
+import { isCheckoutProvider } from "../../lib/payments/checkout"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import { readOrderMoney } from "../../workflows/orders/order-money"
 import { refundOrderWorkflow } from "../../workflows/orders/refund-order"
@@ -16,11 +16,8 @@ import {
   AdminPostOrderRefundPreview,
 } from "../admin/orders/[id]/refunds/validators"
 import { requireUserActor } from "./actor"
+import { holdBankTransferLock } from "./bank-transfer-routes"
 import { rateLimit } from "./rate-limit"
-
-// Every payment our route started (hosted forms, bank transfer, cash on delivery)
-const isOurs = (provider: string | null | undefined) =>
-  (CHECKOUT_PROVIDERS as readonly string[]).includes(provider ?? "")
 
 /** Medusa's own payment refund: a payment our route started is given back line by line, through ours. */
 async function refuseHostedPaymentRefund(
@@ -37,7 +34,9 @@ async function refuseHostedPaymentRefund(
       .resolve(Modules.PAYMENT)
       .listPayments({ id: req.params["id"] ?? "" }, { select: ["provider_id"] })
     next(
-      isOurs(payment?.provider_id) ? new ValidationError("payments.use_order_refund") : undefined
+      isCheckoutProvider(payment?.provider_id)
+        ? new ValidationError("payments.use_order_refund")
+        : undefined
     )
   } catch (error) {
     next(error)
@@ -122,5 +121,7 @@ export const ORDER_REFUND_ROUTES = [
   },
   // No `methods` on purpose: a method-scoped middleware may sort after the core route
   { matcher: "/admin/payments/:id/refund", middlewares: [refuseHostedPaymentRefund] },
-  { matcher: "/admin/orders/:id/cancel", middlewares: [refundBeforeCancel] },
+  // Cash on delivery's "collected" (adr/0029): Medusa's capture, by staff only
+  { matcher: "/admin/payments/:id/capture", middlewares: [requireUserActor] },
+  { matcher: "/admin/orders/:id/cancel", middlewares: [holdBankTransferLock, refundBeforeCancel] },
 ]

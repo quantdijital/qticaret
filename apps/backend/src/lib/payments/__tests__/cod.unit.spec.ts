@@ -1,5 +1,5 @@
 import { kurus } from "../../money"
-import { codFee, codRefusal } from "../cod"
+import { COD_FEE, codFee, codRefusal, feeFacts, feeLinesMatch, isFeeLine } from "../cod"
 
 const settings = {
   fee_type: "fixed" as const,
@@ -32,5 +32,33 @@ describe("cash on delivery (adr/0029)", () => {
     expect(codRefusal(settings, true, { ...cart, shipping_option_ids: [] })).toBe(
       "cash_on_delivery.shipping_unsupported"
     )
+  })
+
+  it("counts as the fee only the server's line: marked, without a product, priced by us", () => {
+    const fee = {
+      id: "ln_fee",
+      metadata: { qt_fee: COD_FEE },
+      variant_id: null,
+      is_custom_price: true,
+    }
+    const copied = { ...fee, id: "ln_goods", variant_id: "variant_1", is_custom_price: false }
+    const cart = {
+      raw_total: "235",
+      items: [
+        { ...fee, raw_total: "25" },
+        { ...copied, raw_total: "210" },
+      ],
+      shipping_methods: [{ shipping_option_id: "so_door" }],
+    }
+
+    expect(isFeeLine(fee)).toBe(true)
+    expect(isFeeLine(copied)).toBe(false)
+    expect(isFeeLine({ ...fee, is_custom_price: false })).toBe(false)
+    const facts = feeFacts(cart)
+    expect(facts.lines.map((line) => line.id)).toEqual(["ln_fee"])
+    expect(facts.base).toBe(21_000)
+    expect(feeLinesMatch(facts, kurus(2_500))).toBe(true)
+    expect(feeLinesMatch(facts, kurus(0))).toBe(false)
+    expect(feeLinesMatch(feeFacts({ items: [] }), kurus(0))).toBe(true)
   })
 })

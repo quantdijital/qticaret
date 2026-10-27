@@ -7,7 +7,7 @@ import { ErrorState, LoadingRows } from "@/components/patterns/states"
 import { StatusBadge } from "@/components/patterns/status-badge"
 import { Button } from "@/components/ui/button"
 import { providerAccountsQuery } from "@/features/settings/api/payments"
-import { useFeature } from "@/features/settings/api/features"
+import { useFeatureState } from "@/features/settings/api/features"
 import { sectionQuery } from "@/features/settings/api/sections"
 import type { BankTransferSettings } from "@/features/settings/api/sections"
 import type { ProviderAccount } from "@/features/settings/api/payments"
@@ -30,14 +30,14 @@ function SettingsBadge({ id }: { id: PaymentMethod["id"] }) {
     ...sectionQuery<BankTransferSettings>("bank_transfer"),
     enabled: id === "bank_transfer",
   })
-  const flag = useFeature("payments.cash_on_delivery")
+  const flag = useFeatureState("payments.cash_on_delivery")
   const enabled = id === "bank_transfer" ? bank.data?.values.enabled : flag
   if (enabled === undefined) {
     return null
   }
   return (
     <StatusBadge tone={enabled ? "success" : "neutral"}>
-      {t(enabled ? `${P}.bankTransfer.on` : `${P}.bankTransfer.off`)}
+      {t(enabled ? `${P}.offered.on` : `${P}.offered.off`)}
     </StatusBadge>
   )
 }

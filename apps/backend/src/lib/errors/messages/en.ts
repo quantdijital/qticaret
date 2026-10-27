@@ -15,6 +15,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "bank_transfer.incomplete":
     "Turning on bank transfer needs the account holder, the bank name and the IBAN.",
   "payments.return_urls_required": "Card payments need return addresses.",
+  "payments.return_urls_unexpected": "This way to pay takes no return addresses.",
+  "cart.metadata_reserved": "This line detail is set by the shop only.",
   "bank_transfer.not_this_order": "This order was not paid by bank transfer.",
   "bank_transfer.order_canceled": "A cancelled order's transfer cannot be confirmed.",
   "orders.payment_awaited":
@@ -27,7 +29,9 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The cash on delivery fee cannot be changed in the cart; pick another way to pay.",
   "cash_on_delivery.fee_mismatch": "The cash on delivery fee changed; start the payment again.",
   "cash_on_delivery.fee_invalid": "A share is at most 100%.",
-  "chargebacks.order_unpaid": "This order has no captured payment; no chargeback can be recorded.",
+  "chargebacks.order_unpaid":
+    "This order has no captured card payment; no chargeback can be recorded.",
+  "chargebacks.changed": "The record changed meanwhile; refresh and try again.",
   "chargebacks.amount_exceeds_paid": "The disputed amount cannot exceed what was paid.",
   "chargebacks.amount_invalid": "Enter the amount with at most two decimals.",
   "chargebacks.already_open": "This payment already has an open chargeback.",

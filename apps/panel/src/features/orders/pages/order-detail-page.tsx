@@ -8,12 +8,8 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { BankTransferAlert } from "@/features/orders/detail/bank-transfer-alert"
 import { ChargebackAlert } from "@/features/orders/detail/chargeback-alert"
-import {
-  orderMoneyQuery,
-  orderPaymentDetailsQuery,
-  orderQuery,
-  orderStateQuery,
-} from "@/features/orders/api/orders"
+import { orderMoneyQuery, orderQuery, orderStateQuery } from "@/features/orders/api/orders"
+import { orderPaymentDetailsQuery } from "@/features/orders/api/payments"
 import { StageBadge } from "@/features/orders/components/stage-badge"
 import { ItemsCard } from "@/features/orders/detail/items-card"
 import { OrderActions } from "@/features/orders/detail/order-actions"

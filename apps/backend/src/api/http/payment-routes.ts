@@ -2,30 +2,35 @@ import { validateAndTransformBody, validateAndTransformQuery } from "@medusajs/f
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ValidationError } from "../../lib/errors"
-import { PAYMENT_FACT_FIELDS, paidWithoutHostedForm } from "../../lib/payments/consistency"
+import { PAYMENT_FACT_FIELDS, paidOutsideCheckout } from "../../lib/payments/consistency"
 import type { PaymentFacts } from "../../lib/payments/consistency"
 import { SHIPPING_PAYMENT_FIELDS, shippingBlock } from "../../lib/payments/shippable"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import { StorePostCartPaymentSession } from "../store/carts/[id]/payment-session/validators"
 import { StoreGetInstallments } from "../store/payment/installments/validators"
 import { StoreGetPaymentMethods } from "../store/payment/methods/validators"
-import { COD_FEE } from "../../lib/payments/cod"
+import { isFeeLine } from "../../lib/payments/cod"
+import type { FeeCart } from "../../lib/payments/cod"
 import { rateLimit } from "./rate-limit"
+
+const FEE_LINE_FIELDS = ["items.id", "items.metadata", "items.variant_id", "items.is_custom_price"]
+// Line metadata keys the server alone writes (the fee line's `qt_fee`)
+const RESERVED_METADATA_PREFIX = "qt_"
 
 /**
  * Medusa's own session route is closed to shoppers (security review,
  * 2026-10-27): it would hand the shopper's `data` to a hosted form, and
  * with the system provider it opens an unpaid order the panel counts as
- * paid. Payments start from our route; bank transfer and cash on delivery
- * open their own way in F6. No `methods` on purpose: a method-scoped
- * middleware may sort after the core route.
+ * paid. Payments start from our route, every way to pay (adr/0029 too).
+ * No `methods` on purpose: a method-scoped middleware may sort after the
+ * core route.
  */
 function refuseCoreSessions(req: MedusaRequest, _res: MedusaResponse, next: MedusaNextFunction) {
   next(req.method === "POST" ? new ValidationError("payments.use_checkout_route") : undefined)
 }
 
-/** A storefront completes a cart to be paid only through a hosted form's session. */
-async function requireHostedPayment(
+/** A storefront completes a cart to be paid only through a session our route started. */
+async function requireCheckoutPayment(
   req: MedusaRequest,
   _res: MedusaResponse,
   next: MedusaNextFunction
@@ -41,7 +46,7 @@ async function requireHostedPayment(
       filters: { id: req.params["id"] ?? "" },
     })
     next(
-      paidWithoutHostedForm((data[0] ?? {}) as PaymentFacts)
+      paidOutsideCheckout((data[0] ?? {}) as PaymentFacts)
         ? new ValidationError("payments.use_checkout_route")
         : undefined
     )
@@ -92,24 +97,38 @@ async function protectFeeLine(req: MedusaRequest, _res: MedusaResponse, next: Me
   try {
     const { data } = await req.scope.resolve(ContainerRegistrationKeys.QUERY).graph({
       entity: "cart",
-      fields: ["items.id", "items.metadata"],
+      fields: FEE_LINE_FIELDS,
       filters: { id: req.params["id"] ?? "" },
     })
-    const items =
-      (
-        data[0] as
-          | { items?: ({ id: string; metadata?: Record<string, unknown> | null } | null)[] }
-          | undefined
-      )?.items ?? []
-    const line = items.find((item) => item?.id === req.params["line_id"])
-    next(
-      line?.metadata?.["qt_fee"] === COD_FEE
-        ? new ValidationError("cash_on_delivery.fee_line_locked")
-        : undefined
+    const line = ((data[0] as FeeCart | undefined)?.items ?? []).find(
+      (item) => item?.id === req.params["line_id"]
     )
+    next(isFeeLine(line) ? new ValidationError("cash_on_delivery.fee_line_locked") : undefined)
   } catch (error) {
     next(error)
   }
+}
+
+const reservedKeys = (metadata: unknown): boolean =>
+  metadata !== null &&
+  typeof metadata === "object" &&
+  Object.keys(metadata).some((key) => key.startsWith(RESERVED_METADATA_PREFIX))
+
+/**
+ * Line metadata under `qt_` is the server's (the fee line's marker): a
+ * storefront adding, changing or creating a cart with lines may not set it.
+ */
+function refuseReservedMetadata(
+  req: MedusaRequest,
+  _res: MedusaResponse,
+  next: MedusaNextFunction
+) {
+  const body = req.body as { metadata?: unknown; items?: unknown } | undefined
+  const items = Array.isArray(body?.items) ? (body.items as ({ metadata?: unknown } | null)[]) : []
+  const reserved =
+    req.method === "POST" &&
+    (reservedKeys(body?.metadata) || items.some((item) => reservedKeys(item?.metadata)))
+  next(reserved ? new ValidationError("cart.metadata_reserved", { field: "metadata" }) : undefined)
 }
 
 // Starting and completing call the provider: a budget per address and per cart
@@ -134,13 +153,24 @@ export const PAYMENT_ROUTES = [
   },
   {
     matcher: "/store/carts/:id/line-items/:line_id",
-    middlewares: [protectFeeLine],
+    middlewares: [refuseReservedMetadata, protectFeeLine],
+  },
+  {
+    matcher: "/store/carts/:id/line-items",
+    middlewares: [refuseReservedMetadata],
+  },
+  {
+    matcher: "/store/carts",
+    middlewares: [refuseReservedMetadata],
   },
   // F6 W3: which ways to pay a cart can take (cash on delivery by its cart)
   {
     matcher: "/store/payment/methods",
     methods: ["GET" as const],
-    middlewares: [validateAndTransformQuery(StoreGetPaymentMethods, {})],
+    middlewares: [
+      rateLimit(() => RATE_LIMIT_PROFILES.payment_methods),
+      validateAndTransformQuery(StoreGetPaymentMethods, {}),
+    ],
   },
   {
     matcher: "/store/payment-collections/:id/payment-sessions",
@@ -148,7 +178,7 @@ export const PAYMENT_ROUTES = [
   },
   {
     matcher: "/store/carts/:id/complete",
-    middlewares: [checkoutLimit, requireHostedPayment],
+    middlewares: [checkoutLimit, requireCheckoutPayment],
   },
   // PayTR's notifications (adr/0026 §5): its retries stay well inside the budget
   {

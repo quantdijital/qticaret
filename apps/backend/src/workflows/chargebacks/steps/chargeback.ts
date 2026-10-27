@@ -1,15 +1,13 @@
 import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
-import { ValidationError } from "../../../lib/errors"
+import { ConflictError, ValidationError } from "../../../lib/errors"
 import { fromMedusaAmount, kurus, sumKurus } from "../../../lib/money"
 import type { MedusaAmount } from "../../../lib/money"
+import { isHostedFormProvider, providerName } from "../../../lib/payments/checkout"
 import { CHARGEBACKS_MODULE } from "../../../modules/chargebacks"
 import type ChargebacksModuleService from "../../../modules/chargebacks/service"
-import { NEXT_STATUS, isClosed } from "../../../modules/chargebacks/service"
-import type { ChargebackStatus } from "../../../modules/chargebacks/service"
-
-export type ChargebackReason =
-  "not_received" | "unauthorized" | "not_as_described" | "duplicate" | "other"
+import { NEXT_STATUS, OPEN_STATUSES, isClosed } from "../../../modules/chargebacks/states"
+import type { ChargebackReason, ChargebackStatus } from "../../../modules/chargebacks/states"
 
 export interface OpenChargebackInput {
   order_id: string
@@ -37,13 +35,11 @@ const sumOf = (rows: PaymentRow["captures"]) =>
     )
   )
 
-/** `pp_paytr_paytr` → `paytr`: the provider as the shop names it. */
-const providerName = (providerId: string) => providerId.replace(/^pp_/, "").replace(/_[^_]+$/, "")
-
 /**
- * The order's captured payment the dispute is against (adr/0030): one the
- * money was taken for, not cancelled, with no dispute still open on it,
- * disputing no more than it took.
+ * The order's captured card payment the dispute is against (adr/0030): one
+ * a hosted form took (a bank transfer or cash is not disputed with a card
+ * issuer), not cancelled, with no dispute still open on it, disputing no
+ * more than it took.
  */
 export const readDisputedPaymentStep = createStep(
   "chargebacks-read-disputed-payment",
@@ -70,7 +66,12 @@ export const readDisputedPaymentStep = createStep(
     const payment = (order.payment_collections ?? [])
       .flatMap((collection) => collection?.payments ?? [])
       .find((each): each is PaymentRow =>
-        Boolean(each && !each.canceled_at && sumOf(each.captures) > 0)
+        Boolean(
+          each &&
+          isHostedFormProvider(each.provider_id) &&
+          !each.canceled_at &&
+          sumOf(each.captures) > 0
+        )
       )
     if (!payment) {
       throw new ValidationError("chargebacks.order_unpaid")
@@ -80,10 +81,7 @@ export const readDisputedPaymentStep = createStep(
     }
     const [open] = await container
       .resolve<ChargebacksModuleService>(CHARGEBACKS_MODULE)
-      .listChargebacks(
-        { payment_id: payment.id, status: ["open", "evidence_submitted"] },
-        { take: 1 }
-      )
+      .listChargebacks({ payment_id: payment.id, status: [...OPEN_STATUSES] }, { take: 1 })
     if (open) {
       throw new ValidationError("chargebacks.already_open")
     }
@@ -124,9 +122,12 @@ export const createChargebackStep = createStep(
   }
 )
 
-/** Moves a dispute on (adr/0030): only forward, and a closed one never again. */
+/**
+ * Moves a dispute on (adr/0030): only forward, and a closed one never
+ * again. The update holds only if the state is still the one read.
+ */
 export const moveChargebackStep = createStep(
-  "chargebacks-move",
+  "chargebacks-move-status",
   async (input: { id: string; status: ChargebackStatus; note?: string | null }, { container }) => {
     const service = container.resolve<ChargebacksModuleService>(CHARGEBACKS_MODULE)
     const [before] = await service.listChargebacks({ id: input.id }, { take: 1 })
@@ -136,12 +137,17 @@ export const moveChargebackStep = createStep(
     if (!NEXT_STATUS[before.status].includes(input.status)) {
       throw new ValidationError("chargebacks.transition_invalid", { field: "status" })
     }
-    const after = await service.updateChargebacks({
-      id: before.id,
-      status: input.status,
-      ...(input.note === undefined ? {} : { note: input.note }),
-      closed_at: isClosed(input.status) ? new Date() : null,
+    const [after] = await service.updateChargebacks({
+      selector: { id: before.id, status: before.status },
+      data: {
+        status: input.status,
+        ...(input.note === undefined ? {} : { note: input.note }),
+        closed_at: isClosed(input.status) ? new Date() : null,
+      },
     })
+    if (!after) {
+      throw new ConflictError("chargebacks.changed")
+    }
     return new StepResponse(after, {
       id: before.id,
       status: before.status,

@@ -182,6 +182,46 @@ medusaIntegrationTestRunner({
       expect(JSON.stringify(stale.data)).toMatch(/cash_on_delivery\.fee_mismatch/)
     })
 
+    it("takes no fee marker from a storefront, and no return address for paying at the door", async () => {
+      const cartId = await readyCart(getContainer(), shop, variantId)
+      const marker = { metadata: { qt_fee: "cash_on_delivery" } }
+
+      const added = await settle(
+        http.post(
+          `/store/carts/${cartId}/line-items`,
+          { variant_id: variantId, quantity: 1, ...marker },
+          { headers: storefront.headers }
+        )
+      )
+      const created = await settle(
+        http.post(
+          "/store/carts",
+          { items: [{ variant_id: variantId, quantity: 1, ...marker }] },
+          { headers: storefront.headers }
+        )
+      )
+      const returning = await settle(
+        http.post(
+          `/store/carts/${cartId}/payment-session`,
+          {
+            provider_id: COD,
+            return_urls: {
+              success: "http://localhost:8000/ok",
+              failure: "http://localhost:8000/no",
+            },
+          },
+          { headers: storefront.headers }
+        )
+      )
+
+      expect(added.data).toMatchObject({ message: "cart.metadata_reserved" })
+      expect(created.data).toMatchObject({ message: "cart.metadata_reserved" })
+      expect(returning.data).toMatchObject({
+        message: expect.stringContaining("payments.return_urls_unexpected") as unknown,
+      })
+      expect(await feeLine(cartId)).toBeUndefined()
+    })
+
     it("ships it unpaid, and the shop takes the money in once the courier reports it", async () => {
       const cartId = await readyCart(getContainer(), shop, variantId)
       await start(cartId)

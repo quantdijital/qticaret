@@ -1,4 +1,3 @@
-import { container } from "@medusajs/framework"
 import type {
   AuthorizePaymentInput,
   AuthorizePaymentOutput,
@@ -24,8 +23,21 @@ import type {
 import { AbstractPaymentProvider, PaymentActions } from "@medusajs/framework/utils"
 import { ValidationError } from "../../lib/errors"
 import { fromMedusaAmount } from "../../lib/money"
-import { HOSTED_CHECKOUT } from "../../lib/payments/checkout"
-import { bankTransferSettings } from "../../lib/payments/settings"
+import { startedByCheckout } from "../../lib/payments/checkout"
+
+const accountOf = (data: Record<string, unknown> | undefined) => {
+  const account = data?.["account"] as Record<string, unknown> | undefined
+  const text = (key: string) => (typeof account?.[key] === "string" ? account[key] : null)
+  const hours = account?.["deadline_hours"]
+  return text("iban") && text("account_holder") && typeof hours === "number"
+    ? {
+        account_holder: text("account_holder"),
+        bank_name: text("bank_name"),
+        iban: text("iban"),
+        deadline_hours: hours,
+      }
+    : null
+}
 
 /**
  * A session the shop confirmed (the money came) authorizes, and the
@@ -36,8 +48,9 @@ const statusOf = (data: Record<string, unknown> | undefined): PaymentSessionStat
 
 /**
  * Bank transfer as a Medusa payment provider (`pp_bank-transfer_bank-transfer`,
- * adr/0029). It calls no outside service. A session keeps the amount and
- * the shop's account, which the shopper sees (public by intent). At
+ * adr/0029). It calls no outside service and reads no other module: our
+ * start workflow gives it the shop's account. A session keeps the amount
+ * and the account, which the shopper sees (public by intent). At
  * completion it answers `pending_authorization`: Medusa places the order
  * "awaiting payment", with no payment yet. The shop's confirmation writes
  * itself into the session (the one update allowed), authorizes it again
@@ -51,32 +64,26 @@ class BankTransferProviderService extends AbstractPaymentProvider {
     super(cradle, options)
   }
 
-  async initiatePayment(input: InitiatePaymentInput): Promise<InitiatePaymentOutput> {
+  initiatePayment(input: InitiatePaymentInput): Promise<InitiatePaymentOutput> {
     // Medusa's own session route passes no context of ours: refused
-    if ((input.context as Record<string, unknown> | undefined)?.[HOSTED_CHECKOUT] !== true) {
-      throw new ValidationError("payments.use_checkout_route")
+    if (!startedByCheckout(input.context)) {
+      return Promise.reject(new ValidationError("payments.use_checkout_route"))
     }
     const sessionId = input.data?.["session_id"]
-    if (typeof sessionId !== "string") {
-      throw new ValidationError("payments.checkout_invalid")
+    const account = accountOf(input.data)
+    if (typeof sessionId !== "string" || !account) {
+      return Promise.reject(new ValidationError("payments.checkout_invalid"))
     }
-    const bank = await bankTransferSettings(container)
-    if (!bank.enabled || !bank.iban) {
-      throw new ValidationError("bank_transfer.not_configured")
-    }
-    return {
+    return Promise.resolve({
       id: sessionId,
       status: "pending",
       data: {
         method: "bank_transfer",
         amount: fromMedusaAmount(input.amount, { allowRounding: true }),
         currency_code: input.currency_code,
-        account_holder: bank.account_holder,
-        bank_name: bank.bank_name,
-        iban: bank.iban,
-        deadline_hours: bank.deadline_hours,
+        ...account,
       },
-    }
+    })
   }
 
   authorizePayment(input: AuthorizePaymentInput): Promise<AuthorizePaymentOutput> {
@@ -112,7 +119,6 @@ class BankTransferProviderService extends AbstractPaymentProvider {
     const data = input.data ?? {}
     const confirmed =
       typeof data["confirmed_at"] === "string" &&
-      typeof data["confirmed_by"] === "string" &&
       data["amount"] === fromMedusaAmount(input.amount, { allowRounding: true })
     return confirmed
       ? Promise.resolve({ data, status: "pending_authorization" })
