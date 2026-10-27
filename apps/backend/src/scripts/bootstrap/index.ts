@@ -1,6 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ensureAdminLayouts } from "./admin-layout"
 import { ensureDefaultLocation } from "./location"
+import { ensureLocationCarriers } from "./location-carriers"
 import { ensureTrRegion } from "./region"
 import { ensureStoreDefaults } from "./store"
 import { ensureVatRates } from "./tax"
@@ -17,6 +18,7 @@ export async function bootstrapTenant(
   const regionId = await ensureTrRegion(container)
   await ensureStoreDefaults(container, regionId)
   const locationId = await ensureDefaultLocation(container)
+  await ensureLocationCarriers(container)
   await ensureVatRates(container)
   await ensureAdminLayouts(container)
   return { regionId, locationId }

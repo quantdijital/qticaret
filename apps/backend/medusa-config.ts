@@ -104,6 +104,16 @@ module.exports = defineConfig({
         ],
       },
     },
+    // F7 (adr/0031): Geliver beside Medusa's manual provider, which the seed's options use
+    {
+      resolve: "@medusajs/medusa/fulfillment",
+      options: {
+        providers: [
+          { resolve: "@medusajs/medusa/fulfillment-manual", id: "manual" },
+          { resolve: "./src/modules/fulfillment-geliver", id: "geliver" },
+        ],
+      },
+    },
     {
       resolve: "./src/modules/billing-profile",
       options: { encryptionKey: env.PII_ENCRYPTION_KEY, hashKey: env.PII_HASH_KEY },

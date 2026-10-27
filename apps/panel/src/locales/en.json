@@ -1391,6 +1391,12 @@
         "confirmTitle": "Has order #{{number}}'s transfer come in?",
         "confirmDescription": "Check that the amount is in your bank account. Once confirmed, the order counts as paid and can be shipped.",
         "confirmed": "Transfer confirmed; the order can be shipped."
+      },
+      "pickup": {
+        "waiting_one": "The parcel's label is ready. Print it and stick it on the parcel; the order moves to shipped by itself when the carrier picks it up.",
+        "waiting_other": "Labels for {{count}} parcels are ready. Print them and stick them on the parcels; the order moves to shipped by itself when the carrier picks them up.",
+        "label": "Download label",
+        "labelOf": "Label {{number}}"
       }
     },
     "providers": {

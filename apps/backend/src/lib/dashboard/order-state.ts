@@ -1,3 +1,4 @@
+import { isCarrierProvider } from "../shipping/carriers"
 import { lifecycleOf, shippableItems } from "./lifecycle"
 import type { Lifecycle, LifecycleItem, LifecycleOrder } from "./lifecycle"
 
@@ -5,7 +6,9 @@ import type { Lifecycle, LifecycleItem, LifecycleOrder } from "./lifecycle"
  * What can be done with one order next, worked out on the server so the
  * panel and the actions agree (adr/0022): ship what is left (a packed
  * parcel first), mark parcels on their way delivered, take held payments,
- * cancel while nothing has left. Pure, so tested on its own.
+ * cancel while nothing has left. A parcel packed with a carrier's label
+ * (adr/0031) is not handed over here: it waits for the carrier's pickup.
+ * Pure, so tested on its own.
  */
 
 type When = string | Date | null | undefined
@@ -14,6 +17,7 @@ export const ORDER_STATE_FIELDS = [
   "id",
   "items.id",
   "fulfillments.id",
+  "fulfillments.provider_id",
   "fulfillments.shipped_at",
   "fulfillments.delivered_at",
   "fulfillments.canceled_at",
@@ -30,6 +34,7 @@ export interface StateOrder extends LifecycleOrder {
   fulfillments?:
     | ({
         id: string
+        provider_id?: string | null
         shipped_at?: When
         delivered_at?: When
         canceled_at?: When
@@ -55,6 +60,8 @@ export interface ShipmentPlan {
 export interface OrderState {
   stage: Lifecycle
   ship: ShipmentPlan | null
+  /** Parcels packed with a carrier's label, waiting for the carrier to pick them up. */
+  pickup: string[]
   /** Parcels handed over and not yet delivered. */
   deliver: string[]
   /** Payments held and not yet taken. */
@@ -67,7 +74,7 @@ const present = <T>(rows: (T | null)[] | null | undefined): T[] =>
 
 function shipmentPlan(order: StateOrder): ShipmentPlan | null {
   const active = present(order.fulfillments).filter((row) => !row.canceled_at)
-  const packed = active.find((row) => !row.shipped_at)
+  const packed = active.find((row) => !row.shipped_at && !isCarrierProvider(row.provider_id))
   if (packed) {
     const items = present(packed.items).flatMap((item) =>
       item.line_item_id && (item.quantity ?? 0) > 0
@@ -87,13 +94,16 @@ function shipmentPlan(order: StateOrder): ShipmentPlan | null {
 export function orderState(order: StateOrder): OrderState {
   const stage = lifecycleOf(order)
   if (stage === "canceled") {
-    return { stage, ship: null, deliver: [], capture: [], cancelable: false }
+    return { stage, ship: null, pickup: [], deliver: [], capture: [], cancelable: false }
   }
   const active = present(order.fulfillments).filter((row) => !row.canceled_at)
   const payments = present(order.payment_collections).flatMap((row) => present(row.payments))
   return {
     stage,
     ship: shipmentPlan(order),
+    pickup: active
+      .filter((row) => !row.shipped_at && isCarrierProvider(row.provider_id))
+      .map((row) => row.id),
     deliver: active.filter((row) => row.shipped_at && !row.delivered_at).map((row) => row.id),
     capture: payments.filter((row) => !row.captured_at && !row.canceled_at).map((row) => row.id),
     // Medusa cancels an order only with its parcels canceled first; the panel offers it before any

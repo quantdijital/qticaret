@@ -1,0 +1,92 @@
+import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
+import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
+import { fromMedusaAmount } from "../../../lib/money"
+import type { MedusaAmount } from "../../../lib/money"
+import { COD_PAYMENT_PROVIDER_ID } from "../../../lib/payments/checkout"
+import { GELIVER_FULFILLMENT_PROVIDER_ID } from "../../../lib/shipping/carriers"
+
+/** Who carries the order's parcel, from where, and what the courier collects. */
+export interface CarrierPlan {
+  /** A carrier we open shipments with; null for the manual provider (the shop ships itself). */
+  carrier: "geliver" | null
+  location_id: string | null
+  /** Kuruş collected at the door: the authorized, uncaptured cash-on-delivery payment. */
+  cash_on_delivery: number | null
+}
+
+interface OrderRow {
+  shipping_methods?: ({ shipping_option_id?: string | null } | null)[] | null
+  payment_collections?:
+    | ({
+        payments?:
+          | ({
+              provider_id: string
+              amount?: MedusaAmount
+              raw_amount?: MedusaAmount
+              captured_at?: unknown
+              canceled_at?: unknown
+            } | null)[]
+          | null
+      } | null)[]
+    | null
+}
+
+interface OptionRow {
+  provider_id?: string | null
+  service_zone?: { fulfillment_set?: { location?: { id: string } | null } | null } | null
+}
+
+/**
+ * Reads how the order ships (adr/0031): the provider of its shipping
+ * option and the warehouse behind it, and whether its courier collects a
+ * cash-on-delivery payment (adr/0029). Reads only.
+ */
+export const planCarrierStep = createStep(
+  "shipping-plan-carrier",
+  async (input: { order_id: string }, { container }) => {
+    const query = container.resolve(ContainerRegistrationKeys.QUERY)
+    const { data } = await query.graph({
+      entity: "order",
+      fields: [
+        "shipping_methods.shipping_option_id",
+        "payment_collections.payments.provider_id",
+        "payment_collections.payments.amount",
+        "payment_collections.payments.raw_amount",
+        "payment_collections.payments.captured_at",
+        "payment_collections.payments.canceled_at",
+      ],
+      filters: { id: input.order_id },
+    })
+    const order = data[0] as OrderRow | undefined
+    if (!order) {
+      throw new MedusaError(MedusaError.Types.NOT_FOUND, "orders.unknown")
+    }
+    const optionId = (order.shipping_methods ?? []).find(
+      (method) => method?.shipping_option_id
+    )?.shipping_option_id
+    let option: OptionRow | undefined
+    if (optionId) {
+      const { data: options } = await query.graph({
+        entity: "shipping_option",
+        fields: ["provider_id", "service_zone.fulfillment_set.location.id"],
+        filters: { id: optionId },
+      })
+      option = options[0]
+    }
+    const cod = (order.payment_collections ?? [])
+      .flatMap((collection) => collection?.payments ?? [])
+      .find(
+        (payment) =>
+          payment?.provider_id === COD_PAYMENT_PROVIDER_ID &&
+          !payment.captured_at &&
+          !payment.canceled_at
+      )
+    return new StepResponse<CarrierPlan>({
+      carrier: option?.provider_id === GELIVER_FULFILLMENT_PROVIDER_ID ? "geliver" : null,
+      location_id: option?.service_zone?.fulfillment_set?.location?.id ?? null,
+      cash_on_delivery: cod
+        ? fromMedusaAmount(cod.raw_amount ?? cod.amount ?? 0, { allowRounding: true })
+        : null,
+    })
+  }
+)

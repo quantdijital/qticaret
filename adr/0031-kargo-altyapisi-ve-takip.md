@@ -25,18 +25,22 @@ Geliver'in resmi SDK'sından okunanlar (`GeliverApp/geliver-js`):
 ## Karar
 
 1. **Sağlayıcı ve hesap:**
-   - `fulfillment-geliver` bir Medusa fulfillment module provider'ıdır (`fp_geliver_geliver`).
+   - `fulfillment-geliver` bir Medusa fulfillment module provider'ıdır (`geliver_geliver`; Medusa 2.21.2 fulfillment sağlayıcılarına `fp_` öneki koymuyor).
    - Mağaza Geliver hesabını panelden bağlar (ADR-0027 deseni, `integration-credentials`'a `geliver`): gizli API anahtarı ve test modu.
    - Gönderici adresi, mağazanın varsayılan deposunun adresinden Geliver'de bir kez oluşturulur; kimliği hesap ayarında tutulur.
    - Geliver istemcisi `lib/clients` tabanlıdır: zaman aşımı, yeniden deneme, devre kesici, log redaksiyonu.
    - Sahte Geliver `packages/testing`'de yazılır. Gerçek hesapla deneme sunucuya çıkışa kalır (ödemelerdeki gibi).
 2. **Fiyat (F7.2):**
-   - Desi = en × boy × yükseklik / 3000 ile ağırlığın büyüğü; ürün ölçüleri varyanttan okunur.
+   - Desi = en × boy × yükseklik / 3000 ile ağırlığın büyüğü; ürün ölçüleri varyanttan okunur (Medusa fiyat bağlamındaki ve siparişteki kalemlere varyantın ağırlık ve ölçülerini veriyor; testle doğrulandı).
+   - Ölçüler mağazanın biriminde saklanır (Ayarlar > Mağaza: g/kg, cm/mm). Sağlayıcı birimleri çağrı anında paylaşılan kapsayıcıdan okur (`platform-settings`'in `store` bölümü, salt okunur). Bu, PayTR sağlayıcısının taksit ayarını okuması gibi dar bir istisnadır: `calculatePrice`'a gelen `data` istemciden gelir, birimleri taşıyacak başka güvenli kanal yoktur.
    - Ölçüsü ya da ağırlığı eksik ürün açıklayıcı hatayla durur (`shipping.dimensions_missing`, ürün adlarıyla).
    - Hesaplanan seçenek Geliver'in fiyat listesinden seçilen servisin fiyatını kullanır. Desi ve servise göre önbelleğe alınır (10 dk).
    - Sabit ücretli seçenek de Geliver'le gönderilebilir: fiyat mağazanın, gönderi Geliver'in.
 3. **Gönderi ve etiket (F7.3):**
    - "Kargoya ver" gönderiyi oluşturur: teklif beklenir, seçenekteki servis (yoksa en ucuzu) kabul edilir, etiket satın alınır.
+   - Gönderici adresi ve kapıda ödeme tutarı sağlayıcıya iş akışımızdan Medusa'nın `additional_data`'sıyla gelir (`qt_ship`). Bu işaret olmadan (Medusa'nın kendi fulfillment ucundan) gönderi açılmaz. Böylece sağlayıcı depo ve ödeme modüllerine erişmez.
+   - Gönderici adresi saklanmaz: depo başına Geliver hesabında işaretle (`qt-<depo>`) aranır, adres değiştiyse ya da yoksa oluşturulur.
+   - Etiket satın alınamazsa Geliver'deki gönderi geri çekilir, sipariş paketlenmemiş kalır.
    - Etiket PDF'i indirilip **özel** dosya deposuna yazılır; herkese açık adresi yoktur.
    - Panel etiketi yalnızca personel ucundan alır (`requireUserActor`, hassas okuma olarak denetim kaydı). Etikette alıcının adı, adresi ve telefonu var.
    - Medusa'nın gönderi kaydı ("kargoya verildi") etiket basılınca değil, taşıyıcı paketi aldığında atılır.

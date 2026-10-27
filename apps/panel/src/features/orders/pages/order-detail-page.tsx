@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { BankTransferAlert } from "@/features/orders/detail/bank-transfer-alert"
 import { ChargebackAlert } from "@/features/orders/detail/chargeback-alert"
+import { PickupAlert } from "@/features/orders/detail/pickup-alert"
 import { orderMoneyQuery, orderQuery, orderStateQuery } from "@/features/orders/api/orders"
 import { orderPaymentDetailsQuery } from "@/features/orders/api/payments"
 import { StageBadge } from "@/features/orders/components/stage-badge"
@@ -90,6 +91,9 @@ export function OrderDetailPage() {
           displayId={order.display_id ?? 0}
           state={details.data.bank_transfer}
         />
+      ) : null}
+      {state.data.pickup.length > 0 ? (
+        <PickupAlert orderId={order.id} parcels={state.data.pickup} />
       ) : null}
       {hosted?.test_mode ? (
         <Alert>

@@ -4,6 +4,8 @@ import type { HttpClientOptions, HttpRequest } from "../../clients"
 import { parseEnv } from "../../env"
 import { ProviderError, isProviderError } from "../../errors"
 import { GELIVER_PROVIDER, geliverBodyCode, geliverError, isTokenRefused } from "./errors"
+import { quoteCalls } from "./quotes"
+import { shipmentCalls } from "./shipments"
 import { geliverAddress, geliverAddressList, geliverEnvelope } from "./schemas"
 import type { GeliverAddress } from "./schemas"
 import type { GeliverCredentialCheck, GeliverCredentials } from "./types"
@@ -124,7 +126,15 @@ export function createGeliverApi(
     await call(credentials, { method: "DELETE", path: ["addresses", id] }, z.unknown())
   }
 
-  return { call, checkCredentials, senderAddresses, createSenderAddress, deleteAddress }
+  return {
+    ...quoteCalls(call),
+    ...shipmentCalls(call),
+    call,
+    checkCredentials,
+    senderAddresses,
+    createSenderAddress,
+    deleteAddress,
+  }
 }
 
 let shared: GeliverApi | undefined

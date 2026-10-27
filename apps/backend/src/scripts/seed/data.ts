@@ -14,6 +14,8 @@ export const DEMO_LOCATION_ADDRESS = {
   city: "Kadıköy",
   postal_code: "34710",
   country_code: "tr",
+  // A carrier asks for the sender's phone (F7, adr/0031)
+  phone: "+902160000000",
 } as const
 
 export const DEMO_FULFILLMENT_SET_NAME = "Ana Depo gönderileri"

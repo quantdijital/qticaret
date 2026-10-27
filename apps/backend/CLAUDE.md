@@ -15,7 +15,7 @@
 
 - Provider'lar `AbstractPaymentProvider`, `AbstractFulfillmentProviderService`, `AbstractNotificationProviderService` üzerinden.
 - Modüller izoledir: bir modül başka modülün servisini doğrudan çağırmaz. Çapraz iş = workflow + link.
-- Module provider'lar da izoledir: sadece kendi modülünün container'ına erişir. Mağazanın sağlayıcı hesabını (`integration-credentials`) çağrı anında `@medusajs/framework`'ün paylaşılan `container`'ından okur (adr/0027); hesap bilgisi `data`'ya ya da `context`'e konmaz. Dar istisnalar (adr/0027 ek, 2026-10-27): iyzico sağlayıcısı iade defterine (`order-refunds`) iade parçalarını yazar ve `payment-recovery`'yi okur; başka modül erişimi yok.
+- Module provider'lar da izoledir: sadece kendi modülünün container'ına erişir. Mağazanın sağlayıcı hesabını (`integration-credentials`) çağrı anında `@medusajs/framework`'ün paylaşılan `container`'ından okur (adr/0027); hesap bilgisi `data`'ya ya da `context`'e konmaz. Dar istisnalar (adr/0027 ek, 2026-10-27): iyzico sağlayıcısı iade defterine (`order-refunds`) iade parçalarını yazar ve `payment-recovery`'yi okur; Geliver kargo sağlayıcısı mağazanın ağırlık/ölçü birimlerini (`platform-settings` `store`) okur (adr/0031); başka modül erişimi yok.
 - Route'larda `validateAndTransformBody` + Zod şeması zorunlu.
 - Dış API istemcileri `src/lib/clients/` altında, timeout + retry + log redaksiyonu ile.
 - Tutar dönüşümleri (ör. iyzico'nun string tutarı) sadece provider sınırında yapılır.

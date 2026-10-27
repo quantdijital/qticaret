@@ -190,6 +190,23 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "This card's bank takes no refunds; pay the customer back another way.",
   "iyzico.refund_same_day":
     "iyzico makes no partial refund on the day of the payment; try again tomorrow, or refund it whole.",
+  "shipping.carrier_not_connected":
+    "The shipping service is not connected. Connect the account under Settings > Shipping.",
+  "shipping.dimensions_missing":
+    "Some products in the cart have no weight or measures; shipping cannot be priced. Enter weight, length, width and height on their variants.",
+  "shipping.no_offer":
+    "No carrier offer came for this shipment. The chosen service may not carry this parcel.",
+  "shipping.option_invalid": "The shipping option does not belong to this service.",
+  "shipping.use_ship_route":
+    'Shipments with this service are opened with "Ship" on the order page.',
+  "shipping.address_incomplete":
+    "The delivery address is incomplete for shipping: province, district, postcode, address and phone are needed.",
+  "shipping.sender_address_incomplete":
+    "The warehouse's address is incomplete for shipping: province, district, postcode, address and phone are needed. Complete it under Settings > Locations.",
+  "shipping.sender_contact_missing":
+    "The shop has no contact email; the shipping service needs one for the sender. Add it under Settings > Store.",
+  "shipping.location_unknown": "The warehouse the shipment leaves from was not found.",
+  "shipping.label_unavailable": "This shipment has no label.",
   "geliver.merchant_invalid":
     "Geliver did not accept this API token. Copy it again from the API tokens page of the Geliver panel.",
   "geliver.secret_invalid":

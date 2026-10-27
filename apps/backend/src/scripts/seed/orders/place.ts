@@ -21,8 +21,11 @@ export interface PlaceOrderInput {
     first_name: string
     last_name: string
     address_1: string
+    address_2?: string
     province?: string
     city?: string
+    postal_code?: string
+    phone?: string
   }
 }
 

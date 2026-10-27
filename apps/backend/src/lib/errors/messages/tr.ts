@@ -190,6 +190,23 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Bu kartın bankası iade kabul etmiyor; müşteriye başka yolla ödeme yapın.",
   "iyzico.refund_same_day":
     "iyzico ödemenin alındığı gün kısmi iade yapmıyor; yarın tekrar deneyin ya da tamamını iade edin.",
+  "shipping.carrier_not_connected":
+    "Kargo hizmeti bağlı değil. Ayarlar > Kargo'dan hesabı bağlayın.",
+  "shipping.dimensions_missing":
+    "Sepetteki bazı ürünlerin ağırlığı ya da ölçüleri girilmemiş; kargo ücreti hesaplanamıyor. Ürünlerin varyantlarına ağırlık, en, boy ve yükseklik girin.",
+  "shipping.no_offer":
+    "Bu gönderi için kargo teklifi alınamadı. Seçilen kargo hizmeti bu koliyi taşımıyor olabilir.",
+  "shipping.option_invalid": "Kargo seçeneği bu hizmete ait değil.",
+  "shipping.use_ship_route":
+    'Bu kargo hizmetiyle gönderi, sipariş sayfasındaki "Kargoya ver" ile açılır.',
+  "shipping.address_incomplete":
+    "Teslimat adresi kargo için eksik: il, ilçe, posta kodu, adres ve telefon gerekli.",
+  "shipping.sender_address_incomplete":
+    "Deponun adresi kargo için eksik: il, ilçe, posta kodu, adres ve telefon gerekli. Ayarlar > Depolar'dan tamamlayın.",
+  "shipping.sender_contact_missing":
+    "Mağazanın iletişim e-postası girilmemiş; kargo hizmeti gönderici için istiyor. Ayarlar > Mağaza'dan ekleyin.",
+  "shipping.location_unknown": "Gönderinin çıkacağı depo bulunamadı.",
+  "shipping.label_unavailable": "Bu gönderinin etiketi yok.",
   "geliver.merchant_invalid":
     "Geliver bu API anahtarını kabul etmedi. Anahtarı Geliver panelindeki API anahtarları sayfasından yeniden kopyalayın.",
   "geliver.secret_invalid":

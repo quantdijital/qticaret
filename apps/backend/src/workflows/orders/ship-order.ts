@@ -10,6 +10,10 @@ import {
   createOrderShipmentWorkflow,
   releaseLockStep,
 } from "@medusajs/medusa/core-flows"
+import { SHIP_ROUTE_MARK } from "../../lib/shipping/carriers"
+import { ensureGeliverSenderStep } from "../shipping/steps/geliver-sender"
+import { planCarrierStep } from "../shipping/steps/plan-carrier"
+import { storeShipmentLabelStep } from "../shipping/steps/store-label"
 import { planShipmentStep } from "./steps/plan-shipment"
 
 export interface ShipOrderInput {
@@ -26,33 +30,77 @@ export interface ShipOrderInput {
  * shipment). Both are Medusa's workflows run as steps, so a failed
  * shipment undoes the packing and the order is never left half done. A
  * lock per order keeps two clicks from packing twice.
+ *
+ * With Geliver (adr/0031) packing opens the shipment at Geliver from the
+ * warehouse's sender address, buys its label and keeps the PDF privately;
+ * the order is handed over when the carrier picks the parcel up (its
+ * tracking), not here: such a parcel is not offered for shipping again
+ * (`orderState().pickup`).
  */
 export const shipOrderWorkflow = createWorkflow("orders-ship-order", (input: ShipOrderInput) => {
   const lockKey = transform({ input }, ({ input }) => `orders:ship:${input.order_id}`)
   acquireLockStep({ key: lockKey, timeout: 10, ttl: 60 })
 
   const plan = planShipmentStep({ order_id: input.order_id })
+  const carrier = planCarrierStep({ order_id: input.order_id })
+
+  const sender = when(
+    "shipping-geliver-sender",
+    { carrier, plan },
+    ({ carrier, plan }) => carrier.carrier === "geliver" && plan.fulfillment_id === null
+  ).then(() => ensureGeliverSenderStep({ location_id: carrier.location_id }))
 
   const packed = when({ plan }, ({ plan }) => plan.fulfillment_id === null).then(() =>
     createOrderFulfillmentWorkflow.runAsStep({
-      input: transform({ input, plan }, ({ input, plan }) => ({
+      input: transform({ input, plan, carrier, sender }, ({ input, plan, carrier, sender }) => ({
         order_id: input.order_id,
         items: plan.items,
         no_notification: !input.notify,
         ...(input.created_by ? { created_by: input.created_by } : {}),
+        ...(carrier.location_id ? { location_id: carrier.location_id } : {}),
+        // Our route's mark: the carrier provider opens no shipment without it
+        ...(sender
+          ? {
+              additional_data: {
+                [SHIP_ROUTE_MARK]: {
+                  sender_address_id: sender.sender_address_id,
+                  cash_on_delivery: carrier.cash_on_delivery,
+                },
+              },
+            }
+          : {}),
       })),
     })
   )
 
-  const shipment = transform({ input, plan, packed }, ({ input, plan, packed }) => ({
-    order_id: input.order_id,
-    fulfillment_id: plan.fulfillment_id ?? packed?.id ?? "",
-    items: plan.items,
-    no_notification: !input.notify,
-    ...(input.created_by ? { created_by: input.created_by } : {}),
-  }))
-  createOrderShipmentWorkflow.runAsStep({ input: shipment })
+  when(
+    "shipping-geliver-label",
+    { carrier, packed },
+    ({ carrier, packed }) => carrier.carrier === "geliver" && Boolean(packed?.id)
+  ).then(() => {
+    storeShipmentLabelStep(
+      transform({ packed }, ({ packed }) => ({ fulfillment_id: packed?.id ?? "" }))
+    )
+  })
+
+  when("orders-ship-hand-over", { carrier }, ({ carrier }) => carrier.carrier !== "geliver").then(
+    () => {
+      const shipment = transform({ input, plan, packed }, ({ input, plan, packed }) => ({
+        order_id: input.order_id,
+        fulfillment_id: plan.fulfillment_id ?? packed?.id ?? "",
+        items: plan.items,
+        no_notification: !input.notify,
+        ...(input.created_by ? { created_by: input.created_by } : {}),
+      }))
+      createOrderShipmentWorkflow.runAsStep({ input: shipment })
+    }
+  )
 
   releaseLockStep({ key: lockKey })
-  return new WorkflowResponse({ order_id: input.order_id })
+  return new WorkflowResponse(
+    transform({ input, carrier }, ({ input, carrier }) => ({
+      order_id: input.order_id,
+      carrier: carrier.carrier,
+    }))
+  )
 })

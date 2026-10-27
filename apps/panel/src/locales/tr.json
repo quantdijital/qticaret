@@ -1399,6 +1399,12 @@
         "confirmTitle": "#{{number}} siparişinin havalesi geldi mi?",
         "confirmDescription": "Tutarın banka hesabınıza geçtiğini kontrol edin. Onaylayınca sipariş ödenmiş sayılır ve kargoya verilebilir.",
         "confirmed": "Havale onaylandı; sipariş kargoya verilebilir."
+      },
+      "pickup": {
+        "waiting_one": "Kolinin etiketi hazır. Etiketi yazdırıp koliye yapıştırın; kargo firması teslim aldığında sipariş kendiliğinden \"kargoda\" olur.",
+        "waiting_other": "{{count}} kolinin etiketi hazır. Etiketleri yazdırıp kolilere yapıştırın; kargo firması teslim aldığında sipariş kendiliğinden \"kargoda\" olur.",
+        "label": "Etiketi indir",
+        "labelOf": "Etiket {{number}}"
       }
     },
     "providers": {

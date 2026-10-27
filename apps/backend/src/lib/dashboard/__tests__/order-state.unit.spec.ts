@@ -35,10 +35,32 @@ describe("orderState", () => {
           { id: "item_b", quantity: 1 },
         ],
       },
+      pickup: [],
       deliver: [],
       capture: ["pay_1"],
       cancelable: true,
     })
+  })
+
+  it("leaves a parcel with a carrier's label to its pickup, and packs what is left", () => {
+    const state = orderState(
+      order({
+        items: [
+          { id: "item_a", quantity: 2, detail: { fulfilled_quantity: 2 } },
+          { id: "item_b", quantity: 1, detail: { fulfilled_quantity: 0 } },
+        ],
+        fulfillments: [
+          {
+            id: "ful_1",
+            provider_id: "geliver_geliver",
+            items: [{ line_item_id: "item_a", quantity: 2 }],
+          },
+        ],
+      })
+    )
+
+    expect(state.pickup).toEqual(["ful_1"])
+    expect(state.ship).toEqual({ fulfillment_id: null, items: [{ id: "item_b", quantity: 1 }] })
   })
 
   it("hands over a packed parcel first, with its own items", () => {
@@ -76,6 +98,7 @@ describe("orderState", () => {
     expect(orderState(order({ status: "canceled" }))).toEqual({
       stage: "canceled",
       ship: null,
+      pickup: [],
       deliver: [],
       capture: [],
       cancelable: false,

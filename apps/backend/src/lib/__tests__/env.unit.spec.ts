@@ -163,6 +163,23 @@ describe("parseEnv", () => {
     ).toContain("IYZICO_BASE_URL: is not allowed on staging or production")
   })
 
+  it("lets a fake Geliver address on a developer's machine only", () => {
+    const fake = { GELIVER_BASE_URL: "http://127.0.0.1:9103/api/v1" }
+
+    expect(parseEnv({ ...validEnv, ...fake, NODE_ENV: "test" }).GELIVER_BASE_URL).toBe(
+      fake.GELIVER_BASE_URL
+    )
+    expect(
+      errorOf({
+        ...validEnv,
+        ...s3Env,
+        ...fake,
+        CREDENTIALS_ENCRYPTION_KEY: hexKey(),
+        NODE_ENV: "production",
+      })
+    ).toContain("GELIVER_BASE_URL: is not allowed on staging or production")
+  })
+
   it("lets a fake PayTR address on a developer's machine only", () => {
     const fake = { PAYTR_BASE_URL: "http://127.0.0.1:4010" }
 

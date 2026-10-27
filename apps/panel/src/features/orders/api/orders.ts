@@ -127,6 +127,8 @@ export interface OrderState {
   stage: Lifecycle
   /** A packed parcel to hand over (fulfillment_id), or what is left to pack; null: nothing. */
   ship: { fulfillment_id: string | null; items: { id: string; quantity: number }[] } | null
+  /** Parcels packed with a carrier's label, waiting for its pickup (adr/0031). */
+  pickup: string[]
   deliver: string[]
   capture: string[]
   cancelable: boolean
