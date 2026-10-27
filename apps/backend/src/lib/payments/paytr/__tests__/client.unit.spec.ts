@@ -3,7 +3,8 @@ import type { FakePaytr } from "@qticaret/testing"
 import { isProviderError } from "../../../errors"
 import { kurus } from "../../../money"
 import { createPaytrApi } from "../client"
-import type { PaytrApi, PaytrCredentials, PaytrTokenRequest } from "../client"
+import type { PaytrApi } from "../client"
+import type { PaytrCredentials, PaytrTokenRequest } from "../types"
 
 // A made-up account, fresh per run; the fake server checks every signature with it
 const account = fakePaytrAccount()
@@ -179,6 +180,29 @@ describe("PayTR client against the fake server", () => {
       expect(await refund("NOSUCH", 100)).toBe("payment_not_found")
     })
 
+    it("does not send a refund again after a gateway error: the outcome is unknown", async () => {
+      await paidOrder("SIP014")
+      fake.queue("/odeme/iade", { status: 502, body: "bad gateway" })
+
+      const code = await codeOf(
+        api.refund(credentials, { merchantOid: "SIP014", amount: kurus(100), referenceNo: "r3" })
+      )
+
+      expect(code).toBe("outcome_unknown")
+      expect(fake.requests.filter((request) => request.path === "/odeme/iade")).toHaveLength(1)
+    })
+
+    it("marks a refund refused while PayTR pays the shop out as worth trying later", async () => {
+      await paidOrder("SIP015")
+      fake.queue("/odeme/iade", { body: { status: "error", err_no: "000", err_msg: "kilitli" } })
+
+      const error = await api
+        .refund(credentials, { merchantOid: "SIP015", amount: kurus(100), referenceNo: "r4" })
+        .catch((failure: unknown) => failure)
+
+      expect(error).toMatchObject({ providerCode: "refund_locked", retryable: true })
+    })
+
     it("does not send a refund twice when the answer is lost", async () => {
       await paidOrder("SIP013")
       fake.queue("/odeme/iade", { hang: true })
@@ -198,6 +222,44 @@ describe("PayTR client against the fake server", () => {
     expect(rates.maxInstallment).toBe(12)
     expect(rates.rates["world"]).toEqual({ 2: 3.49, 3: 4.69, 6: 8.29, 12: 15.9 })
     expect(rates.rates["axess"]).toEqual({ 2: 3.59 })
+  })
+
+  it("reads a whole-lira amount written without decimals", async () => {
+    await api.requestToken(credentials, tokenRequest("SIP004"))
+    fake.pay("SIP004", { totalAmount: 3600 })
+
+    expect((await api.queryStatus(credentials, "SIP004"))?.totalAmount).toBe(3600)
+  })
+
+  it("turns an amount in an undocumented form into an invalid answer, not a crash", async () => {
+    fake.queue("/odeme/durum-sorgu", {
+      body: {
+        status: "success",
+        payment_amount: "1.234,56",
+        payment_total: "1.234,56",
+        currency: "TL",
+      },
+    })
+
+    expect(await codeOf(api.queryStatus(credentials, "SIP098"))).toBe("invalid_response")
+  })
+
+  it("does not resend a token request after a server error", async () => {
+    fake.queue("/odeme/api/get-token", { status: 500, body: "error" })
+
+    expect(await codeOf(api.requestToken(credentials, tokenRequest("SIP005")))).toBe(
+      "outcome_unknown"
+    )
+    expect(fake.requests).toHaveLength(1)
+  })
+
+  it("gives up a check when the caller stops waiting", async () => {
+    fake.queue("/odeme/durum-sorgu", { hang: true })
+    const waiting = new AbortController()
+    const check = api.checkCredentials(credentials, { signal: waiting.signal })
+    waiting.abort()
+
+    expect(await codeOf(check)).toBe("aborted")
   })
 
   it("treats an answer outside the documented shape as invalid", async () => {

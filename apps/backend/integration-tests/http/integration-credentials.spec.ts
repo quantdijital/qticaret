@@ -2,6 +2,8 @@ import { createApiKeysWorkflow } from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { anyOf, fakePaytrAccount, fakeSecret, startFakePaytr } from "@qticaret/testing"
 import type { FakePaytr } from "@qticaret/testing"
+import { INTEGRATION_CREDENTIALS_MODULE } from "../../src/modules/integration-credentials"
+import type IntegrationCredentialsModuleService from "../../src/modules/integration-credentials/service"
 import { createAdminUser } from "../helpers/admin"
 import { captureOutput } from "../helpers/logs"
 import type { HttpClient } from "../helpers/http"
@@ -192,6 +194,76 @@ medusaIntegrationTestRunner({
       expect(checked.data).toMatchObject({ check: "valid", account: { state: "connected" } })
     })
 
+    it("keeps a working account when PayTR cannot be reached to check new details", async () => {
+      await post(`${URL_PATH}/paytr`, connect)
+      for (let attempt = 0; attempt < 3; attempt++) {
+        fake.queue("/odeme/durum-sorgu", { drop: true })
+      }
+
+      const replaced = await post(`${URL_PATH}/paytr`, {
+        settings: connect.settings,
+        secrets: { merchant_salt: fakeSecret() },
+      })
+      const { data } = await http.get<{ accounts: Account[] }>(URL_PATH, { headers: admin.headers })
+
+      expect(replaced.status).toBe(400)
+      expect(replaced.data).toMatchObject({
+        message: "integration_credentials.provider_unreachable",
+      })
+      expect(data.accounts[0]).toMatchObject({ state: "connected", secrets_version: 1 })
+    })
+
+    it("tests the stored account: unreachable changes nothing, refused details show", async () => {
+      await post(`${URL_PATH}/paytr`, connect)
+      for (let attempt = 0; attempt < 3; attempt++) {
+        fake.queue("/odeme/durum-sorgu", { drop: true })
+      }
+      const unreachable = await post(`${URL_PATH}/paytr/check`, {})
+
+      expect(unreachable.data).toMatchObject({
+        check: "unreachable",
+        account: { state: "connected" },
+      })
+
+      // Details PayTR stopped accepting (a salt renewed in PayTR's panel, say)
+      const service = getContainer().resolve<IntegrationCredentialsModuleService>(
+        INTEGRATION_CREDENTIALS_MODULE
+      )
+      const stale = await service.draft("paytr", {
+        settings: connect.settings,
+        secrets: { merchant_salt: fakeSecret() },
+      })
+      await service.store(stale, "verified", null)
+      const refused = await post(`${URL_PATH}/paytr/check`, {})
+
+      expect(refused.data).toMatchObject({
+        check: "secret_invalid",
+        account: { state: "rejected" },
+      })
+    })
+
+    it("tells every admin in the bell who changed the payment account and how", async () => {
+      await post(`${URL_PATH}/paytr`, connect)
+      await post(`${URL_PATH}/paytr`, { settings: { ...connect.settings, test_mode: false } })
+      await settle(http.delete(`${URL_PATH}/paytr`, { headers: admin.headers }))
+
+      const { data } = await http.get<{
+        notifications: { data: Record<string, unknown> }[]
+      }>("/admin/notifications?fields=data,created_at&order=created_at", { headers: admin.headers })
+      const alerts = data.notifications
+        .map((notification) => notification.data)
+        .filter((alert) => alert["kind"] === "provider_account")
+
+      expect(alerts.map((alert) => alert["changes"])).toEqual(
+        expect.arrayContaining([["connected"], ["test_mode_off"], ["removed"]])
+      )
+      expect(alerts[0]).toMatchObject({
+        provider: "paytr",
+        actor: expect.stringMatching(/@example\.com$/) as string,
+      })
+      expect(JSON.stringify(alerts)).not.toMatch(SECRETS)
+    })
+
     it("reports PayTR in the integration health with the stored account", async () => {
       await post(`${URL_PATH}/paytr`, connect)
 
@@ -221,6 +293,10 @@ medusaIntegrationTestRunner({
       })
       const basic = Buffer.from(`${result[0]?.token ?? ""}:`).toString("base64")
 
+      const health = await settle(
+        http.get("/admin/integrations/health", { headers: { authorization: `Basic ${basic}` } })
+      )
+      const checkBody = await post(`${URL_PATH}/paytr/check`, { force: true })
       const unknown = await post(`${URL_PATH}/stripe`, connect)
       const extra = await post(`${URL_PATH}/paytr`, { ...connect, provider: "x" })
       const byKey = await settle(
@@ -230,6 +306,8 @@ medusaIntegrationTestRunner({
       expect(unknown.status).toBe(404)
       expect(extra.status).toBe(400)
       expect(byKey.status).toBe(403)
+      expect(health.status).toBe(403)
+      expect(checkBody.status).toBe(400)
     })
   },
 })

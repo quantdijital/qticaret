@@ -1,4 +1,5 @@
 import { z } from "@medusajs/framework/zod"
+import { parsePaytrLira } from "./amounts"
 
 /**
  * PayTR's answers (dev.paytr.com, 2026-10-27). Values arrive as strings or
@@ -8,6 +9,16 @@ import { z } from "@medusajs/framework/zod"
  */
 
 const text = z.union([z.string(), z.number()]).transform(String)
+
+/** Lira as PayTR writes it ("10,8", "9.76") read into kuruş; any other form fails the answer. */
+const lira = z.union([z.string(), z.number()]).transform((value, ctx) => {
+  try {
+    return parsePaytrLira(value)
+  } catch {
+    ctx.addIssue({ code: "custom", message: "not a PayTR lira amount" })
+    return z.NEVER
+  }
+})
 
 const failure = z.object({
   status: z.enum(["error", "failed"]),
@@ -20,7 +31,7 @@ export const tokenResponse = z.discriminatedUnion("status", [
 ])
 
 const refundEntry = z.object({
-  return_amount: text,
+  return_amount: lira,
   return_date: text.optional(),
   reference_no: text.optional(),
 })
@@ -28,8 +39,8 @@ const refundEntry = z.object({
 export const statusResponse = z.discriminatedUnion("status", [
   z.object({
     status: z.literal("success"),
-    payment_amount: text,
-    payment_total: text,
+    payment_amount: lira,
+    payment_total: lira,
     currency: z.string().max(8),
     taksit: text.optional(),
     kart_marka: z.string().max(64).optional(),
@@ -47,7 +58,7 @@ export const refundResponse = z.discriminatedUnion("status", [
     status: z.literal("success"),
     is_test: text.optional(),
     merchant_oid: z.string().max(64),
-    return_amount: text,
+    return_amount: lira,
     reference_no: text.optional(),
   }),
   failure.extend({ status: z.literal("error") }),

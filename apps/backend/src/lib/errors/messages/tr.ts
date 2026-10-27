@@ -137,9 +137,13 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Kart kodunun öneki en çok 20 harf, rakam ya da tire olabilir; kodun geri kalanı rastgele üretilir.",
   "gift_cards.guest_account":
     "Mağaza kredisi yalnızca üye müşterilere verilebilir; misafir müşteri krediyi kullanamaz.",
+  "integration_credentials.check_failed":
+    "Sağlayıcı beklenmedik bir yanıt verdi; bilgiler kaydedilmedi. Biraz sonra tekrar deneyin.",
   "integration_credentials.invalid": "Girilen değer geçerli değil.",
   "integration_credentials.key_missing":
     "Sunucuda ödeme bilgilerini saklamak için gereken şifreleme anahtarı tanımlı değil; platform ekibine bildirin.",
+  "integration_credentials.provider_unreachable":
+    "Sağlayıcıya şu an ulaşılamıyor. Çalışan bağlantınız korunuyor; yeni bilgileri biraz sonra kaydedin.",
   "integration_credentials.secret_invalid":
     "Değer 8–128 karakter olmalı ve boşluk içermemeli; sağlayıcının panelinden kopyalayıp yapıştırın.",
   "integration_credentials.secrets_required":

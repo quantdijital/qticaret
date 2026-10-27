@@ -10,5 +10,5 @@ export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse):
   const service = req.scope.resolve<IntegrationCredentialsModuleService>(
     INTEGRATION_CREDENTIALS_MODULE
   )
-  res.json({ key_configured: service.keyConfigured(), accounts: await service.describeAll() })
+  res.json({ key_configured: service.isKeyConfigured(), accounts: await service.describeAll() })
 }

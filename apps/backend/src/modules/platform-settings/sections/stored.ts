@@ -1,4 +1,4 @@
-import { ValidationError } from "../../../lib/errors"
+import { validationErrorFromZod } from "../../../lib/errors"
 import { logger } from "../../../lib/logging"
 import { mergePatch } from "./define"
 import { sectionOf } from "./index"
@@ -40,15 +40,5 @@ export function parseStored(name: SectionName, stored: unknown): SectionValues {
 }
 
 /** A ZodError from a section schema as a ValidationError carrying its first issue's key. */
-export function toValidationError(error: unknown): unknown {
-  const issues = (error as { issues?: { message?: string; path?: PropertyKey[] }[] }).issues
-  const issue = issues?.[0]
-  if (!issue) {
-    return error
-  }
-  const key =
-    issue.message && /^[a-z_]+\.[a-z_]+$/.test(issue.message)
-      ? issue.message
-      : "platform_settings.invalid"
-  return new ValidationError(key, { field: (issue.path ?? []).map(String).join(".") })
-}
+export const toValidationError = (error: unknown): unknown =>
+  validationErrorFromZod(error, "platform_settings.invalid")

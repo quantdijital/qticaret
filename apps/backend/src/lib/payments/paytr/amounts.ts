@@ -1,4 +1,4 @@
-import { kurus, toMedusaAmount } from "../../money"
+import { fromMedusaAmount, kurus, toMedusaAmount } from "../../money"
 import type { Kurus } from "../../money"
 
 /**
@@ -26,7 +26,7 @@ export function toPaytrLira(amount: Kurus): string {
 }
 
 const WHOLE_KURUS = /^\d{1,15}$/
-const LIRA = /^(\d{1,13})(?:[.,](\d{1,2}))?$/
+const LIRA = /^\d{1,13}(?:[.,]\d{1,2})?$/
 
 /** `total_amount` and `payment_amount` of a notification: whole kuruş. */
 export function parsePaytrKurus(value: string): Kurus {
@@ -43,10 +43,8 @@ export function parsePaytrKurus(value: string): Kurus {
  */
 export function parsePaytrLira(value: string | number): Kurus {
   const text = typeof value === "number" ? String(value) : value.trim()
-  const match = LIRA.exec(text)
-  if (!match) {
+  if (!LIRA.test(text)) {
     throw new RangeError("a PayTR lira amount must look like 10.80 or 10,8")
   }
-  const [, lira = "0", fraction = ""] = match
-  return kurus(Number(lira) * 100 + Number(fraction.padEnd(2, "0")))
+  return fromMedusaAmount(text.replace(",", "."))
 }

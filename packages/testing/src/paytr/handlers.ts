@@ -34,7 +34,7 @@ const LIRA = /^\d{1,13}(\.\d{1,2})?$/
 const commaLira = (kurus: number): string => {
   const fraction = String(kurus % 100)
     .padStart(2, "0")
-    .replace(/0$/, "")
+    .replace(/0+$/, "")
   return fraction === ""
     ? String(Math.floor(kurus / 100))
     : `${String(Math.floor(kurus / 100))},${fraction}`

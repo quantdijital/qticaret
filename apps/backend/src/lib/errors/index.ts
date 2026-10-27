@@ -23,4 +23,5 @@ export type {
 } from "./errors"
 export { lockTimeoutError, uniqueViolationKeys } from "./db"
 export { I18N_KEY, toHttpError } from "./http"
+export { validationErrorFromZod } from "./zod"
 export type { HttpErrorResponse } from "./http"

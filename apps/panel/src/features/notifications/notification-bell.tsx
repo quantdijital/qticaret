@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
-import { Bell, PackageMinus } from "lucide-react"
+import { Bell, PackageMinus, ShieldAlert } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
@@ -13,23 +13,58 @@ import { cn } from "@/lib/utils"
 const text = (value: unknown): string => (typeof value === "string" ? value : "")
 const amount = (value: unknown): number => (typeof value === "number" ? value : 0)
 
-function Entry({ notification, unread }: { notification: AdminNotification; unread: boolean }) {
+const PROVIDER_NAMES: Readonly<Record<string, string>> = { paytr: "PayTR" }
+
+/** What an alert says and where it leads, worded here from its data (adr/0020). */
+function useAlertText(data: Record<string, unknown>) {
   const { t } = useTranslation()
-  const data = notification.data ?? {}
-  const isLowStock = data["kind"] === "low_stock"
-  const title = isLowStock
-    ? t("notifications.lowStock.title", { name: text(data["name"]) })
-    : text(data["title"])
-  const description = isLowStock
-    ? t("notifications.lowStock.description", {
+  if (data["kind"] === "low_stock") {
+    return {
+      title: t("notifications.lowStock.title", { name: text(data["name"]) }),
+      description: t("notifications.lowStock.description", {
         count: amount(data["available"]),
         threshold: amount(data["threshold"]),
-      })
-    : text(data["description"])
+      }),
+      Icon: PackageMinus,
+      tone: "bg-warning-soft text-warning-text",
+      link: { to: "/inventory" as const, search: { view: "low" } },
+    }
+  }
+  if (data["kind"] === "provider_account") {
+    const changes = Array.isArray(data["changes"]) ? data["changes"].map(text) : []
+    const who = text(data["actor"])
+    return {
+      title: t("notifications.providerAccount.title", {
+        provider: PROVIDER_NAMES[text(data["provider"])] ?? text(data["provider"]),
+      }),
+      description: [
+        changes.map((change) => t(`notifications.providerAccount.changes.${change}`)).join(", "),
+        who ? t("notifications.providerAccount.by", { who }) : "",
+      ]
+        .filter(Boolean)
+        .join(" · "),
+      Icon: ShieldAlert,
+      tone: "bg-info-soft text-info-text",
+      link: { to: "/settings/payments" as const, search: {} },
+    }
+  }
+  return {
+    title: text(data["title"]),
+    description: text(data["description"]),
+    Icon: Bell,
+    tone: "bg-muted text-muted-foreground",
+    link: null,
+  }
+}
+
+function Entry({ notification, unread }: { notification: AdminNotification; unread: boolean }) {
+  const { title, description, Icon, tone, link } = useAlertText(notification.data ?? {})
   const body = (
     <div className="flex gap-3 px-3 py-2.5">
-      <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full bg-warning-soft text-warning-text">
-        <PackageMinus className="size-4" aria-hidden="true" />
+      <span
+        className={cn("mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-full", tone)}
+      >
+        <Icon className="size-4" aria-hidden="true" />
       </span>
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className={cn("truncate text-[13px]", unread && "font-semibold")}>{title}</span>
@@ -42,8 +77,8 @@ function Entry({ notification, unread }: { notification: AdminNotification; unre
   )
   return (
     <li>
-      {isLowStock ? (
-        <Link to="/inventory" search={{ view: "low" }} className="block hover:bg-muted/60">
+      {link ? (
+        <Link to={link.to} search={link.search} className="block hover:bg-muted/60">
           {body}
         </Link>
       ) : (

@@ -5,9 +5,9 @@ import { sdk } from "@/lib/sdk"
  * The shop's provider accounts (adr/0027). The server never sends a secret
  * back, nor any part of one: only whether each is stored.
  */
-export type AccountState = "not_configured" | "connected" | "unverified" | "unreadable"
+export type AccountState = "not_configured" | "connected" | "unverified" | "rejected" | "unreadable"
 export type AccountCheck =
-  "valid" | "merchant_invalid" | "secret_invalid" | "unreachable" | "not_configured"
+  "valid" | "merchant_invalid" | "secret_invalid" | "unreachable" | "failed" | "not_configured"
 
 export interface ProviderAccount {
   /** `paytr` today; iyzico joins in V8. */
@@ -50,6 +50,8 @@ function useAccountMutation<T>(call: (input: T) => Promise<AccountAnswer>) {
   const client = useQueryClient()
   return useMutation({
     mutationFn: call,
+    // The variables hold the secrets typed: dropped as soon as nothing watches them
+    gcTime: 0,
     onSettled: async () => {
       await client.invalidateQueries({ queryKey: ACCOUNTS_KEY })
     },

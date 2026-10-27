@@ -13,12 +13,12 @@ export function paytrHealthCheck(
   return {
     id: "paytr",
     kind: "payment",
-    check: async () => {
+    check: async (signal) => {
       const credentials = paytrCredentialsOf(await readAccount())
       if (!credentials) {
         return { status: "not_configured" }
       }
-      const result = await paytrApi().checkCredentials(credentials)
+      const result = await paytrApi().checkCredentials(credentials, { signal })
       return result === "valid" ? { status: "ok" } : { status: "down", reason: "auth_failed" }
     },
   }

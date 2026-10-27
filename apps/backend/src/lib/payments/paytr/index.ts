@@ -1,7 +1,8 @@
 export { parsePaytrKurus, parsePaytrLira, toPaytrKurus, toPaytrLira } from "./amounts"
-export { PAYTR_BASE_URL, createPaytrApi, encodeBasket, paytrApi, toPaytrCurrency } from "./client"
+export { PAYTR_BASE_URL, createPaytrApi, paytrApi } from "./client"
+export type { PaytrApi } from "./client"
+export { encodeBasket, toPaytrCurrency } from "./fields"
 export type {
-  PaytrApi,
   PaytrBasketLine,
   PaytrCredentialCheck,
   PaytrCredentials,
@@ -10,7 +11,7 @@ export type {
   PaytrRefund,
   PaytrRefundEntry,
   PaytrTokenRequest,
-} from "./client"
+} from "./types"
 export { PAYTR_PROVIDER, paytrError, paytrErrorCode, tokenFailureCode } from "./errors"
 export {
   installmentRatesHash,

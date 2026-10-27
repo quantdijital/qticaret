@@ -1,51 +1,60 @@
 import { isProviderError } from "../errors"
+import type { ProviderErrorShape } from "../errors"
 import { errorSummary, logger } from "../logging"
+import type { CredentialProviderName } from "../../modules/integration-credentials/providers"
 import { paytrApi, paytrCredentialsOf } from "../payments/paytr"
 
 /**
  * Asks a provider whether the shop's account details work (adr/0027 §4).
- * A provider that cannot be reached is `unreachable`, not a verdict on the
- * details: the panel saves them and says they are not checked yet.
+ * - `unreachable`: the network, a timeout, a 5xx or an open circuit; no
+ *   verdict on the details, which may be saved as not checked yet.
+ * - `failed`: the provider answered, but not as documented; nothing is saved.
  */
 
-export type AccountCheck = "valid" | "merchant_invalid" | "secret_invalid" | "unreachable"
+export type AccountCheck =
+  "valid" | "merchant_invalid" | "secret_invalid" | "unreachable" | "failed"
+
+/** Failures that say nothing about the details: the provider was not heard from. */
+const notReached = (error: ProviderErrorShape): boolean =>
+  error.retryable ||
+  ["outcome_unknown", "circuit_open", "network_error", "aborted"].includes(error.providerCode) ||
+  /^http_5\d\d$/.test(error.providerCode)
 
 export interface AccountDetails {
   settings: Record<string, unknown>
   secrets: Record<string, string>
 }
 
-type Checker = (account: AccountDetails) => Promise<AccountCheck>
+// A person waits at the panel: PayTR gets this long, not the client's three tries
+const CHECK_TIMEOUT_MS = 8_000
 
-const CHECKERS: Readonly<Record<string, Checker>> = {
-  paytr: async (account) => {
+type Checker = (account: AccountDetails, signal: AbortSignal) => Promise<AccountCheck>
+
+// One per connectable provider: a provider added without its check fails to compile
+const CHECKERS = {
+  paytr: async (account, signal) => {
     const credentials = paytrCredentialsOf(account)
-    return credentials ? paytrApi().checkCredentials(credentials) : "merchant_invalid"
+    return credentials ? paytrApi().checkCredentials(credentials, { signal }) : "merchant_invalid"
   },
-}
+} satisfies Record<CredentialProviderName, Checker>
 
 export async function checkAccount(
-  provider: string,
-  account: AccountDetails
+  provider: CredentialProviderName,
+  account: AccountDetails,
+  signal: AbortSignal = AbortSignal.timeout(CHECK_TIMEOUT_MS)
 ): Promise<AccountCheck> {
-  const checker = CHECKERS[provider]
-  if (!checker) {
-    return "unreachable"
-  }
   try {
-    return await checker(account)
+    return await CHECKERS[provider](account, signal)
   } catch (error) {
     if (!isProviderError(error)) {
       throw error
     }
     logger.warn({ event: "integrations.account_check_failed", provider, err: errorSummary(error) })
-    return "unreachable"
+    return notReached(error) ? "unreachable" : "failed"
   }
 }
 
 /** Which field the panel points at when a check refuses the details. */
-export const CHECK_FIELDS: Readonly<
-  Record<string, Record<"merchant_invalid" | "secret_invalid", string>>
-> = {
+export const CHECK_FIELDS = {
   paytr: { merchant_invalid: "settings.merchant_id", secret_invalid: "secrets.merchant_key" },
-}
+} satisfies Record<CredentialProviderName, Record<"merchant_invalid" | "secret_invalid", string>>

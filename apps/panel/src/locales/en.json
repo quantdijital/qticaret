@@ -505,7 +505,8 @@
           "connected": "Connected",
           "unverified": "Not verified",
           "unreadable": "Enter again",
-          "not_configured": "Not connected"
+          "not_configured": "Not connected",
+          "rejected": "Refused by PayTR"
         },
         "testModeBadge": "Test mode",
         "merchantId": "Merchant number",
@@ -531,8 +532,12 @@
           "unreachable": "Saved, but PayTR could not be reached just now. Try \"Test the connection\" again in a while.",
           "merchant_invalid": "PayTR does not know this merchant number, or the store is not active.",
           "secret_invalid": "PayTR did not accept the merchant key or salt.",
-          "not_configured": "No PayTR account is stored."
-        }
+          "not_configured": "No PayTR account is stored.",
+          "failed": "PayTR gave an unexpected answer; nothing changed. Try again in a while.",
+          "unreachableTest": "PayTR could not be reached just now; the connection's state did not change. Try again in a while."
+        },
+        "rejected": "PayTR no longer accepts the stored details; payments cannot be taken. Copy the merchant key and salt again from PayTR's Entegrasyon Bilgileri page.",
+        "secretFormat": "It must be 8–128 characters without spaces; copy it from the PayTR panel."
       },
       "setup": {
         "title": "What to do in the PayTR panel",
@@ -2280,6 +2285,18 @@
       "title": "Running low: {{name}}",
       "description_one": "{{count}} unit left (threshold {{threshold}}).",
       "description_other": "{{count}} units left (threshold {{threshold}})."
+    },
+    "providerAccount": {
+      "title": "{{provider}} account details changed",
+      "by": "Changed by {{who}}",
+      "changes": {
+        "connected": "account connected",
+        "account": "merchant number changed",
+        "secrets": "secrets changed",
+        "test_mode_on": "test mode turned on",
+        "test_mode_off": "test mode turned off",
+        "removed": "disconnected"
+      }
     }
   },
   "content": {

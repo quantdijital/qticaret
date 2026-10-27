@@ -505,7 +505,8 @@
           "connected": "Bağlı",
           "unverified": "Doğrulanmadı",
           "unreadable": "Yeniden girilmeli",
-          "not_configured": "Bağlı değil"
+          "not_configured": "Bağlı değil",
+          "rejected": "PayTR reddetti"
         },
         "testModeBadge": "Test modu",
         "merchantId": "Mağaza no",
@@ -531,8 +532,12 @@
           "unreachable": "Bilgiler kaydedildi ama PayTR'ye şu an ulaşılamadı. Biraz sonra \"Bağlantıyı test et\" ile tekrar deneyin.",
           "merchant_invalid": "PayTR bu mağaza numarasını tanımadı ya da mağaza aktif değil.",
           "secret_invalid": "PayTR mağaza parolasını ya da gizli anahtarı kabul etmedi.",
-          "not_configured": "Kayıtlı bir PayTR hesabı yok."
-        }
+          "not_configured": "Kayıtlı bir PayTR hesabı yok.",
+          "failed": "PayTR beklenmedik bir yanıt verdi; durum değişmedi. Biraz sonra tekrar deneyin.",
+          "unreachableTest": "PayTR'ye şu an ulaşılamadı; bağlantının durumu değişmedi. Biraz sonra tekrar deneyin."
+        },
+        "rejected": "PayTR kayıtlı bilgileri artık kabul etmiyor; ödeme alınamaz. Mağaza parolasını ve gizli anahtarı PayTR'nin Entegrasyon Bilgileri sayfasından yeniden kopyalayıp girin.",
+        "secretFormat": "8–128 karakter olmalı ve boşluk içermemeli; PayTR panelinden kopyalayıp yapıştırın."
       },
       "setup": {
         "title": "PayTR panelinde yapılacaklar",
@@ -2288,6 +2293,18 @@
       "title": "Stok azalıyor: {{name}}",
       "description_one": "{{count}} adet kaldı (eşik {{threshold}}).",
       "description_other": "{{count}} adet kaldı (eşik {{threshold}})."
+    },
+    "providerAccount": {
+      "title": "{{provider}} hesap bilgileri değişti",
+      "by": "{{who}} değiştirdi",
+      "changes": {
+        "connected": "hesap bağlandı",
+        "account": "mağaza numarası değişti",
+        "secrets": "gizli bilgiler değişti",
+        "test_mode_on": "test modu açıldı",
+        "test_mode_off": "test modu kapatıldı",
+        "removed": "bağlantı kaldırıldı"
+      }
     }
   },
   "content": {

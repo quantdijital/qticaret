@@ -1,3 +1,4 @@
+import { z } from "zod"
 import type { PaytrSave, ProviderAccount } from "@/features/settings/api/payments"
 
 /** What the PayTR form holds; secrets start empty, the server never sends them. */
@@ -31,6 +32,38 @@ export function secretsRequired(account: ProviderAccount | undefined, merchantId
     return true
   }
   return account.settings?.merchant_id !== merchantId.trim()
+}
+
+const P = "settings.payments.paytr"
+// What PayTR's console copies out: printable, no spaces (the server checks the same)
+const SECRET = /^[\x21-\x7E]{8,128}$/
+
+/**
+ * The form's rules, messages as i18n keys: a shop number in digits; the
+ * secrets in PayTR's form when typed, and required when none are stored,
+ * they cannot be read, or the shop number changed.
+ */
+export function paytrFormSchema(account: ProviderAccount | undefined) {
+  return z
+    .object({
+      merchant_id: z
+        .string()
+        .refine((value) => /^\d{1,20}$/.test(value.trim()), `${P}.merchantIdInvalid`),
+      merchant_key: z.string(),
+      merchant_salt: z.string(),
+      test_mode: z.boolean(),
+    })
+    .superRefine((values, ctx) => {
+      const required = secretsRequired(account, values.merchant_id)
+      for (const name of ["merchant_key", "merchant_salt"] as const) {
+        const value = values[name].trim()
+        if (value === "" && required) {
+          ctx.addIssue({ code: "custom", path: [name], message: `${P}.secretRequired` })
+        } else if (value !== "" && !SECRET.test(value)) {
+          ctx.addIssue({ code: "custom", path: [name], message: `${P}.secretFormat` })
+        }
+      }
+    })
 }
 
 /** The body for a save: blank secrets are left out, so the stored ones stay. */

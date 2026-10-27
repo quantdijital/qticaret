@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto"
+import { createHmac } from "node:crypto"
 import { decryptPii, encryptPii } from "./pii"
 
 /**
@@ -12,9 +12,16 @@ export const openSecret = decryptPii
 
 /**
  * Names the key a blob was sealed with, so a changed key is told apart
- * from a damaged blob. 64 bits of a hash of a random 256-bit key say
- * nothing usable about it.
+ * from a damaged blob. Keyed and domain-separated, so it says nothing
+ * about the key itself.
  */
 export function keyFingerprint(key: Buffer): string {
-  return createHash("sha256").update(key).digest("hex").slice(0, 16)
+  return createHmac("sha256", key).update("qt:credentials:key-id").digest("hex").slice(0, 16)
+}
+
+/** JSON with sorted keys: the same settings always give the same associated data. */
+export function canonicalJson(value: Record<string, unknown>): string {
+  return JSON.stringify(
+    Object.fromEntries(Object.entries(value).sort(([a], [b]) => a.localeCompare(b)))
+  )
 }

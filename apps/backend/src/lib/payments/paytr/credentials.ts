@@ -1,4 +1,4 @@
-import type { PaytrCredentials } from "./client"
+import type { PaytrCredentials } from "./types"
 
 /**
  * The shop's PayTR account as the client takes it, from what the panel

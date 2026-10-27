@@ -13,3 +13,6 @@ export const AdminPostCredentials = z
   .strict()
 
 export type AdminPostCredentialsType = z.infer<typeof AdminPostCredentials>
+
+/** "Test the connection" takes nothing: it checks what is stored. */
+export const AdminPostCredentialsCheck = z.object({}).strict()

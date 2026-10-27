@@ -30,6 +30,8 @@ export async function POST(
 /** DELETE /admin/integrations/credentials/:provider: disconnects; the stored account is deleted. */
 export async function DELETE(req: AuthenticatedMedusaRequest, res: MedusaResponse): Promise<void> {
   const provider = providerParam(req)
-  await removeIntegrationCredentialsWorkflow(req.scope).run({ input: provider })
+  await removeIntegrationCredentialsWorkflow(req.scope).run({
+    input: { provider, actor_id: req.auth_context.actor_id || null },
+  })
   res.json({ account: await serviceOf(req).describe(provider) })
 }

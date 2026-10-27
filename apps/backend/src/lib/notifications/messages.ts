@@ -23,11 +23,19 @@ export const NOTIFICATION_MESSAGES: Readonly<
       title: "Düşük stok: {{name}}",
       description: "{{available}} adet kaldı (eşik {{threshold}}).",
     },
+    "integrations.account_changed": {
+      title: "{{provider}} hesap bilgileri değişti",
+      description: "{{who}}: {{what}}",
+    },
   },
   en: {
     "stock.low_stock": {
       title: "Low stock: {{name}}",
       description: "{{available}} left (threshold {{threshold}}).",
+    },
+    "integrations.account_changed": {
+      title: "{{provider}} account details changed",
+      description: "{{who}}: {{what}}",
     },
   },
 }

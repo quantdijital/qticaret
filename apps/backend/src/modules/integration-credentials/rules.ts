@@ -1,21 +1,11 @@
-import type { z } from "@medusajs/framework/zod"
-import { ValidationError } from "../../lib/errors"
+import { ValidationError, validationErrorFromZod } from "../../lib/errors"
 import { CREDENTIAL_PROVIDERS } from "./providers"
 import type { CredentialProviderName } from "./providers"
 import type { CredentialStatus, IntegrationCredentialRecord } from "./types"
 
 /** The service's decisions as plain functions: what a save needs, what the panel is shown. */
 
-/** A Zod error as a ValidationError with its first issue's i18n key and field. */
-function toValidationError(error: z.ZodError, prefix: string): ValidationError {
-  const issue = error.issues[0]
-  const key =
-    issue?.message && /^[a-z_]+\.[a-z_]+$/.test(issue.message)
-      ? issue.message
-      : "integration_credentials.invalid"
-  const field = [prefix, ...(issue?.path ?? []).map(String)].filter(Boolean).join(".")
-  return new ValidationError(key, { field })
-}
+const INVALID = "integration_credentials.invalid"
 
 export interface SaveInput {
   settings: unknown
@@ -44,21 +34,21 @@ export function planSave(
   const definition = CREDENTIAL_PROVIDERS[provider]
   const parsed = definition.settings.safeParse(input.settings)
   if (!parsed.success) {
-    throw toValidationError(parsed.error, "settings")
+    throw validationErrorFromZod(parsed.error, INVALID, { prefix: "settings" })
   }
   const settings = parsed.data as Record<string, unknown>
   const names: readonly string[] = definition.secrets
   const given: Record<string, string> = {}
   for (const [name, value] of Object.entries(input.secrets ?? {})) {
     if (!names.includes(name)) {
-      throw new ValidationError("integration_credentials.invalid", { field: `secrets.${name}` })
+      throw new ValidationError(INVALID, { field: `secrets.${name}` })
     }
     if (value === null || value === undefined || value.trim() === "") {
       continue
     }
     const secret = definition.secret.safeParse(value)
     if (!secret.success) {
-      throw toValidationError(secret.error, `secrets.${name}`)
+      throw validationErrorFromZod(secret.error, INVALID, { prefix: `secrets.${name}` })
     }
     given[name] = secret.data
   }
@@ -73,11 +63,12 @@ export function planSave(
       field: `secrets.${missing}`,
     })
   }
-  const secrets = { ...kept, ...given }
-  const secretsChanged = names.some((name) => secrets[name] !== current?.[name])
+  // A secret sent counts as new even when it matches the stored one: no
+  // comparison, so the answer never tells a guess right from wrong
+  const secretsChanged = Object.keys(given).length > 0
   return {
     settings,
-    secrets,
+    secrets: { ...kept, ...given },
     needsCheck: !sameAccount || secretsChanged || row?.verification !== "verified",
     secretsChanged,
   }
@@ -104,7 +95,11 @@ export function statusOf(
   }
   return {
     provider,
-    state: !readable ? "unreadable" : row.verification === "verified" ? "connected" : "unverified",
+    state: !readable
+      ? "unreadable"
+      : row.verification === "verified"
+        ? "connected"
+        : row.verification,
     settings: row.settings,
     secrets: Object.fromEntries(names.map((name) => [name, readable])),
     secrets_version: row.secrets_version,
@@ -112,4 +107,33 @@ export function statusOf(
     updated_at: row.updated_at,
     updated_by: row.updated_by,
   }
+}
+
+/** What a save or a disconnect changed, for the shop's alert (adr/0027 §6). */
+export type AccountChange =
+  "connected" | "account" | "secrets" | "test_mode_on" | "test_mode_off" | "removed"
+
+export function accountChanges(
+  provider: CredentialProviderName,
+  before: { settings: Record<string, unknown> } | null,
+  after: { settings: Record<string, unknown>; secrets_changed: boolean } | null
+): AccountChange[] {
+  if (!after) {
+    return before ? ["removed"] : []
+  }
+  if (!before) {
+    return ["connected"]
+  }
+  const { identity } = CREDENTIAL_PROVIDERS[provider]
+  const changes: AccountChange[] = []
+  if (identity.some((name) => before.settings[name] !== after.settings[name])) {
+    changes.push("account")
+  } else if (after.secrets_changed) {
+    changes.push("secrets")
+  }
+  const testMode = after.settings["test_mode"]
+  if (typeof testMode === "boolean" && before.settings["test_mode"] !== testMode) {
+    changes.push(testMode ? "test_mode_on" : "test_mode_off")
+  }
+  return changes
 }

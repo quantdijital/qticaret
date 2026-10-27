@@ -1,6 +1,6 @@
 import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
-import { ConflictError, ValidationError } from "../../../lib/errors"
+import { ConflictError, validationErrorFromZod } from "../../../lib/errors"
 import { PRODUCT_ATTRIBUTES_MODULE } from "../../../modules/product-attributes"
 import type ProductAttributesModuleService from "../../../modules/product-attributes/service"
 import type {
@@ -42,16 +42,8 @@ const columnsOf = (row: StoredColumns): ValueColumns => ({
   value_options: Array.isArray(row.value_options) ? (row.value_options as string[]) : null,
 })
 
-function invalidValues(error: unknown): ValidationError {
-  const issue = (error as { issues?: { message?: string; path?: PropertyKey[] }[] }).issues?.[0]
-  const message =
-    issue?.message && /^[a-z_]+\.[a-z_]+$/.test(issue.message)
-      ? issue.message
-      : "product_attributes.value_invalid"
-  return new ValidationError(message, {
-    field: (issue?.path ?? []).map(String).join(".") || "values",
-  })
-}
+const invalidValues = (error: unknown): unknown =>
+  validationErrorFromZod(error, "product_attributes.value_invalid", { defaultField: "values" })
 
 /**
  * Reads the product's template and values, checks the new values against

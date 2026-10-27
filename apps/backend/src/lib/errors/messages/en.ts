@@ -133,9 +133,13 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "A card code's prefix is up to 20 letters, digits or dashes; the rest of the code is drawn at random.",
   "gift_cards.guest_account":
     "Store credit is for customers with an account; a guest could not spend it.",
+  "integration_credentials.check_failed":
+    "The provider gave an unexpected answer; nothing was saved. Try again in a while.",
   "integration_credentials.invalid": "The value is not valid.",
   "integration_credentials.key_missing":
     "The server has no encryption key for provider accounts; tell the platform team.",
+  "integration_credentials.provider_unreachable":
+    "The provider cannot be reached just now. Your working connection stays; save the new details in a while.",
   "integration_credentials.secret_invalid":
     "The value must be 8–128 characters without spaces; copy it from the provider's console.",
   "integration_credentials.secrets_required":

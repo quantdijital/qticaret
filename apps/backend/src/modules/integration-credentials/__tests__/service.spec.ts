@@ -33,7 +33,7 @@ moduleIntegrationTestRunner<IntegrationCredentialsModuleService>({
     }
 
     it("starts with every provider unconnected", async () => {
-      expect(service.keyConfigured()).toBe(true)
+      expect(service.isKeyConfigured()).toBe(true)
       expect(await service.describeAll()).toEqual([
         expect.objectContaining({ provider: "paytr", state: "not_configured", settings: null }),
       ])
@@ -100,13 +100,72 @@ moduleIntegrationTestRunner<IntegrationCredentialsModuleService>({
       await connect()
       const [row] = await service.listIntegrationCredentials({ provider: "paytr" })
       await service.updateIntegrationCredentials({ id: row?.id ?? "", key_id: "0000000000000000" })
-      await service.recordCheck("paytr", "verified")
 
       expect(await service.describe("paytr")).toMatchObject({ state: "unreadable" })
-      expect(await service.read("paytr")).toBeNull()
+      expect(await service.readForCheck("paytr")).toBeNull()
       expect(await reasonOf(service.draft("paytr", { settings }))).toBe(
         "integration_credentials.secrets_required"
       )
+    })
+
+    it("does not open an account whose settings were changed behind the panel's back", async () => {
+      await connect()
+      const [row] = await service.listIntegrationCredentials({ provider: "paytr" })
+      // Test mode turned on in the database: the blob is bound to the settings it was sealed with
+      await service.updateIntegrationCredentials({
+        id: row?.id ?? "",
+        settings: { ...settings, test_mode: false },
+      })
+
+      expect(await service.describe("paytr")).toMatchObject({ state: "unreadable" })
+      expect(await service.readForCheck("paytr")).toBeNull()
+    })
+
+    it("keeps a check's result only for the account it checked", async () => {
+      await connect()
+      const checked = await service.readForCheck("paytr")
+      const draft = await service.draft("paytr", { settings, secrets: { merchant_salt: newSalt } })
+      await service.store(draft, "unverified", "user_2")
+
+      expect(await service.recordCheck("paytr", "verified", checked?.stamp ?? "")).toBe(false)
+      expect(await service.describe("paytr")).toMatchObject({ state: "unverified" })
+
+      const current = await service.readForCheck("paytr")
+      expect(await service.recordCheck("paytr", "rejected", current?.stamp ?? "")).toBe(true)
+      expect(await service.describe("paytr")).toMatchObject({
+        state: "rejected",
+        verified_at: null,
+      })
+    })
+
+    it("puts an updated account back, dates as the workflow engine passes them", async () => {
+      await connect()
+      const draft = await service.draft("paytr", { settings, secrets: { merchant_salt: newSalt } })
+      const previous = await service.store(draft, "unverified", "user_2")
+      // Compensation data crosses the engine as JSON: dates arrive as strings
+      const passed = JSON.parse(JSON.stringify(previous)) as typeof previous
+      await service.restore("paytr", passed)
+
+      expect(await service.read("paytr")).toEqual({ settings, secrets })
+      expect(await service.describe("paytr")).toMatchObject({
+        state: "connected",
+        secrets_version: 1,
+        updated_by: "user_1",
+      })
+    })
+
+    it("lets two first saves race: one inserts, the other updates", async () => {
+      const [first, second] = await Promise.all([
+        service.draft("paytr", { settings, secrets }),
+        service.draft("paytr", { settings, secrets }),
+      ])
+      await Promise.all([
+        service.store(first, "verified", "user_1"),
+        service.store(second, "verified", "user_2"),
+      ])
+
+      expect(await service.listIntegrationCredentials({ provider: "paytr" })).toHaveLength(1)
+      expect(await service.read("paytr")).toEqual({ settings, secrets })
     })
 
     it("does not open a blob moved to another provider's row", async () => {
@@ -148,7 +207,7 @@ moduleIntegrationTestRunner<IntegrationCredentialsModuleService>({
   moduleOptions: {},
   testSuite: ({ service }) => {
     it("saves nothing without the server's key and says so", async () => {
-      expect(service.keyConfigured()).toBe(false)
+      expect(service.isKeyConfigured()).toBe(false)
       expect(await reasonOf(service.draft("paytr", { settings, secrets }))).toBe(
         "integration_credentials.key_missing"
       )

@@ -17,8 +17,11 @@ export interface CheckedDraft {
 
 /**
  * Asks the provider before a save (adr/0027 §4). Details it refuses stop
- * the workflow with the field to fix; an unreachable provider lets the
- * save go on as "not checked". The draft is opened here and nowhere kept.
+ * the workflow with the field to fix, and so does an answer the provider
+ * gives out of its documentation. An unreachable provider lets a first
+ * connection be saved as "not checked", but never replaces an account
+ * that works: payments would stop on details nobody checked. The draft is
+ * opened here and nowhere kept.
  */
 export const checkDraftStep = createStep(
   "integration-credentials-check-draft",
@@ -31,8 +34,15 @@ export const checkDraftStep = createStep(
     )
     const check = await checkAccount(draft.provider, service.openDraft(draft))
     if (check === "merchant_invalid" || check === "secret_invalid") {
-      const field = CHECK_FIELDS[draft.provider]?.[check]
-      throw new ValidationError(`${draft.provider}.${check}`, field ? { field } : {})
+      throw new ValidationError(`${draft.provider}.${check}`, {
+        field: CHECK_FIELDS[draft.provider][check],
+      })
+    }
+    if (check === "failed") {
+      throw new ValidationError("integration_credentials.check_failed")
+    }
+    if (check === "unreachable" && draft.connected) {
+      throw new ValidationError("integration_credentials.provider_unreachable")
     }
     return new StepResponse<CheckedDraft>({
       verification: check === "valid" ? "verified" : "unverified",

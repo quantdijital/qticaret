@@ -14,7 +14,8 @@ export const IntegrationCredential = model.define("integration_credential", {
   key_id: model.text(),
   /** Counts secret changes; the audit record shows this, never the secrets. */
   secrets_version: model.number().default(1),
-  verification: model.enum(["verified", "unverified"]),
+  /** `rejected`: the provider refused the stored details when they were tested again. */
+  verification: model.enum(["verified", "unverified", "rejected"]),
   verified_at: model.dateTime().nullable(),
   updated_by: model.text().nullable(),
 })

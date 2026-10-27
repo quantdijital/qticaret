@@ -12,15 +12,17 @@ export interface IntegrationCredentialsModuleOptions {
   versionKey?: string
 }
 
-export type Verification = "verified" | "unverified"
+export type Verification = "verified" | "unverified" | "rejected"
 
 /**
  * - `not_configured`: nothing saved
  * - `connected`: saved and accepted by the provider
  * - `unverified`: saved, the provider could not be asked
+ * - `rejected`: the provider refused the stored details when tested again
  * - `unreadable`: saved under another key; enter it again
  */
-export type CredentialState = "not_configured" | "connected" | "unverified" | "unreadable"
+export type CredentialState =
+  "not_configured" | "connected" | "unverified" | "rejected" | "unreadable"
 
 /** What the panel sees: never a secret, nor any part of one. */
 export interface CredentialStatus {
@@ -52,6 +54,8 @@ export interface CredentialDraft {
   /** The account or a secret changed: the provider is asked before it is saved. */
   needs_check: boolean
   secrets_changed: boolean
+  /** A checked account works now: an unreachable provider must not replace it unchecked. */
+  connected: boolean
 }
 
 /** The row before a change, for a compensation to put back; null when there was none. */

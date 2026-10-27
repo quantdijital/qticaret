@@ -1,5 +1,5 @@
 import { anyOf, fakeSecret } from "@qticaret/testing"
-import { planSave, statusOf } from "../rules"
+import { accountChanges, planSave, statusOf } from "../rules"
 import type { IntegrationCredentialRecord } from "../types"
 
 const reasonOf = (run: () => unknown): unknown => {
@@ -55,6 +55,18 @@ describe("planSave", () => {
 
     expect(plan.secrets).toEqual({ ...stored, merchant_salt: newSecret })
     expect(plan).toMatchObject({ needsCheck: true, secretsChanged: true })
+  })
+
+  it("asks again and counts a version for a secret sent, even one equal to the stored", () => {
+    // No comparison with the stored value: the answer must not tell a guess right from wrong
+    const plan = planSave(
+      "paytr",
+      { settings: row.settings, secrets: { merchant_key: stored.merchant_key } },
+      row,
+      stored
+    )
+
+    expect(plan).toMatchObject({ needsCheck: true, secretsChanged: true, secrets: stored })
   })
 
   it("asks for both secrets again when the shop number changes", () => {
@@ -142,5 +154,37 @@ describe("statusOf", () => {
       state: "unreadable",
       secrets: { merchant_key: false, merchant_salt: false },
     })
+  })
+})
+
+describe("accountChanges", () => {
+  const before = { settings: { merchant_id: "100001", test_mode: true } }
+
+  it("names a first connection and a disconnect", () => {
+    expect(accountChanges("paytr", null, { ...before, secrets_changed: true })).toEqual([
+      "connected",
+    ])
+    expect(accountChanges("paytr", before, null)).toEqual(["removed"])
+    expect(accountChanges("paytr", null, null)).toEqual([])
+  })
+
+  it("names a new shop number, new secrets and the test mode", () => {
+    expect(
+      accountChanges("paytr", before, {
+        settings: { merchant_id: "100002", test_mode: false },
+        secrets_changed: true,
+      })
+    ).toEqual(["account", "test_mode_off"])
+    expect(accountChanges("paytr", before, { ...before, secrets_changed: true })).toEqual([
+      "secrets",
+    ])
+    expect(
+      accountChanges(
+        "paytr",
+        { settings: { ...before.settings, test_mode: false } },
+        { ...before, secrets_changed: false }
+      )
+    ).toEqual(["test_mode_on"])
+    expect(accountChanges("paytr", before, { ...before, secrets_changed: false })).toEqual([])
   })
 })

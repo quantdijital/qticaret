@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest"
 import type { ProviderAccount } from "@/features/settings/api/payments"
 import {
   isPublicOrigin,
+  paytrFormSchema,
   paytrFormValues,
   paytrNotificationUrl,
   paytrSaveBody,
@@ -66,5 +67,34 @@ describe("PayTR settings form", () => {
     expect(isPublicOrigin("http://magaza.example.com")).toBe(false)
     expect(isPublicOrigin("https://localhost:9000")).toBe(false)
     expect(isPublicOrigin("https://192.168.1.10")).toBe(false)
+  })
+
+  it("checks the form as the server does: digits, secrets when needed, PayTR's secret form", () => {
+    const issues = (account: ProviderAccount | undefined, values: Record<string, unknown>) =>
+      (
+        paytrFormSchema(account).safeParse({
+          merchant_id: "100001",
+          merchant_key: "",
+          merchant_salt: "",
+          test_mode: true,
+          ...values,
+        }).error?.issues ?? []
+      ).map((issue) => `${issue.path.join(".")}:${issue.message}`)
+
+    expect(issues(connected, {})).toEqual([])
+    expect(
+      issues(undefined, {
+        merchant_id: "12AB",
+        merchant_key: "testkey-testkey",
+        merchant_salt: "testsalt-testsalt",
+      })
+    ).toEqual(["merchant_id:settings.payments.paytr.merchantIdInvalid"])
+    expect(issues(connected, { merchant_id: "100002" })).toEqual([
+      "merchant_key:settings.payments.paytr.secretRequired",
+      "merchant_salt:settings.payments.paytr.secretRequired",
+    ])
+    expect(issues(undefined, { merchant_key: "testkey-testkey", merchant_salt: "a b" })).toEqual([
+      "merchant_salt:settings.payments.paytr.secretFormat",
+    ])
   })
 })

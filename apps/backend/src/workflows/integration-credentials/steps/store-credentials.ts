@@ -1,6 +1,8 @@
+import type { MedusaContainer } from "@medusajs/framework/types"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../../modules/integration-credentials"
 import type { CredentialProviderName } from "../../../modules/integration-credentials/providers"
+import { accountChanges } from "../../../modules/integration-credentials/rules"
 import type {
   CredentialDraft,
   StoredCredential,
@@ -19,19 +21,22 @@ interface Undo {
   previous: StoredCredential | null
 }
 
-const serviceOf = (container: { resolve: (key: string) => unknown }) =>
-  container.resolve(INTEGRATION_CREDENTIALS_MODULE) as IntegrationCredentialsModuleService
+const serviceOf = (container: MedusaContainer) =>
+  container.resolve<IntegrationCredentialsModuleService>(INTEGRATION_CREDENTIALS_MODULE)
 
-/** Saves the sealed draft; a later failing step puts the account back as it was. */
+/**
+ * Saves the sealed draft and says what changed (for the shop's alert); a
+ * later failing step puts the account back as it was.
+ */
 export const storeCredentialsStep = createStep(
   "integration-credentials-store",
   async (input: StoreCredentialsInput, { container }) => {
-    const previous = await serviceOf(container).store(
-      input.draft,
-      input.verification,
-      input.actor_id
+    const { draft } = input
+    const previous = await serviceOf(container).store(draft, input.verification, input.actor_id)
+    return new StepResponse(
+      { changes: accountChanges(draft.provider, previous, draft) },
+      { provider: draft.provider, previous }
     )
-    return new StepResponse(undefined, { provider: input.draft.provider, previous })
   },
   async (undo: Undo | undefined, { container }) => {
     if (undo) {
@@ -42,10 +47,13 @@ export const storeCredentialsStep = createStep(
 
 /** Deletes the account; a later failing step puts it back. */
 export const removeCredentialsStep = createStep(
-  "integration-credentials-remove",
+  "integration-credentials-delete",
   async (provider: CredentialProviderName, { container }) => {
     const previous = await serviceOf(container).remove(provider)
-    return new StepResponse(previous !== null, { provider, previous })
+    return new StepResponse(
+      { changes: accountChanges(provider, previous, null) },
+      { provider, previous }
+    )
   },
   async (undo: Undo | undefined, { container }) => {
     if (undo?.previous) {

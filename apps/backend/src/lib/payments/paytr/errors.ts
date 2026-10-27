@@ -10,7 +10,7 @@ import { ProviderError } from "../../errors"
 
 export const PAYTR_PROVIDER = "paytr"
 
-export type PaytrApi = "status" | "refund" | "installments" | "token"
+export type PaytrEndpoint = "status" | "refund" | "installments" | "token"
 
 const STATUS_CODES: Readonly<Record<string, string>> = {
   "001": "merchant_invalid",
@@ -36,7 +36,7 @@ const REFUND_CODES: Readonly<Record<string, string>> = {
   "011": "payment_too_old",
 }
 
-const TABLES: Readonly<Record<PaytrApi, Readonly<Record<string, string>>>> = {
+const TABLES: Readonly<Record<PaytrEndpoint, Readonly<Record<string, string>>>> = {
   status: STATUS_CODES,
   refund: REFUND_CODES,
   installments: { "006": "field_invalid" },
@@ -47,7 +47,7 @@ const TABLES: Readonly<Record<PaytrApi, Readonly<Record<string, string>>>> = {
 const RETRYABLE = new Set(["refund_locked"])
 
 /** The platform's code for PayTR's `err_no`; an unknown number stays visible as `error_<no>`. */
-export function paytrErrorCode(api: PaytrApi, errNo: string | undefined): string {
+export function paytrErrorCode(api: PaytrEndpoint, errNo: string | undefined): string {
   const known = errNo === undefined ? undefined : TABLES[api][errNo]
   if (known) {
     return known
@@ -55,7 +55,7 @@ export function paytrErrorCode(api: PaytrApi, errNo: string | undefined): string
   return errNo !== undefined && /^[A-Za-z0-9]{1,8}$/.test(errNo) ? `error_${errNo}` : "error"
 }
 
-export function paytrError(api: PaytrApi, errNo: string | undefined): ProviderError {
+export function paytrError(api: PaytrEndpoint, errNo: string | undefined): ProviderError {
   const providerCode = paytrErrorCode(api, errNo)
   return new ProviderError({
     provider: PAYTR_PROVIDER,

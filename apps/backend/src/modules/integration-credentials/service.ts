@@ -8,7 +8,7 @@ import {
 import { createRedisVersionSource, createVersionedCache } from "../../lib/cache"
 import type { VersionedCache } from "../../lib/cache"
 import { parseKey } from "../../lib/crypto/pii"
-import { keyFingerprint, openSecret, sealSecret } from "../../lib/crypto/secrets"
+import { canonicalJson, keyFingerprint, openSecret, sealSecret } from "../../lib/crypto/secrets"
 import { ValidationError, uniqueViolationKeys } from "../../lib/errors"
 import { logger } from "../../lib/logging"
 import { createRedisClient } from "../../lib/redis"
@@ -30,8 +30,17 @@ import type {
 
 export type * from "./types"
 
-// Associated data: a blob copied onto another provider's row does not open
-const contextOf = (provider: string) => `integration_credentials:${provider}`
+/**
+ * Associated data: the provider and its settings. A blob copied onto
+ * another provider's row does not open, nor one whose settings (test mode,
+ * the shop number) were changed in the database behind the panel's back.
+ */
+const contextOf = (provider: string, settings: Record<string, unknown>) =>
+  `integration_credentials:${provider}:${canonicalJson(settings)}`
+
+/** Names one state of the row: a check answered for an older one is not recorded. */
+const stampOf = (row: IntegrationCredentialRecord): string =>
+  `${String(row.secrets_version)}:${String(new Date(row.updated_at).getTime())}`
 
 const storedOf = (row: IntegrationCredentialRecord): StoredCredential => ({
   settings: row.settings,
@@ -71,6 +80,11 @@ class IntegrationCredentialsModuleService extends MedusaService({ IntegrationCre
           options.versionKey ?? "qt:credentials:version"
         )
       : null
+    const env = process.env["NODE_ENV"]
+    if (!source && env !== "development" && env !== "test") {
+      // Each process sees its own writes at once and others' within maxAgeMs
+      logger.warn({ event: "integration_credentials.no_shared_version", nodeEnv: env ?? null })
+    }
     this.cache = createVersionedCache({
       name: "integration_credentials",
       source,
@@ -79,7 +93,7 @@ class IntegrationCredentialsModuleService extends MedusaService({ IntegrationCre
   }
 
   /** Whether the server has its key; without it the panel cannot save an account. */
-  keyConfigured(): boolean {
+  isKeyConfigured(): boolean {
     return this.key !== null
   }
 
@@ -92,14 +106,14 @@ class IntegrationCredentialsModuleService extends MedusaService({ IntegrationCre
 
   /** The row's secrets, or null when they were sealed under another key or are damaged. */
   private open(
-    row: Pick<IntegrationCredentialRecord, "provider" | "secret_ciphertext" | "key_id">
+    row: Pick<IntegrationCredentialRecord, "provider" | "settings" | "secret_ciphertext" | "key_id">
   ) {
     if (!this.key || row.key_id !== this.keyId) {
       return null
     }
     try {
       return JSON.parse(
-        openSecret(row.secret_ciphertext, this.key, contextOf(row.provider))
+        openSecret(row.secret_ciphertext, this.key, contextOf(row.provider, row.settings))
       ) as Record<string, string>
     } catch {
       logger.error({ event: "integration_credentials.unreadable", provider: row.provider })
@@ -158,13 +172,19 @@ class IntegrationCredentialsModuleService extends MedusaService({ IntegrationCre
   ): Promise<CredentialDraft> {
     const key = this.requireKey()
     const [row] = await this.listIntegrationCredentials({ provider }, { take: 1 }, sharedContext)
-    const plan = planSave(provider, input, row, row ? this.open(row) : null)
+    const current = row ? this.open(row) : null
+    const plan = planSave(provider, input, row, current)
     return {
       provider,
       settings: plan.settings,
-      secret_ciphertext: sealSecret(JSON.stringify(plan.secrets), key, contextOf(provider)),
+      secret_ciphertext: sealSecret(
+        JSON.stringify(plan.secrets),
+        key,
+        contextOf(provider, plan.settings)
+      ),
       needs_check: plan.needsCheck,
       secrets_changed: plan.secretsChanged,
+      connected: row?.verification === "verified" && current !== null,
     }
   }
 
@@ -242,11 +262,30 @@ class IntegrationCredentialsModuleService extends MedusaService({ IntegrationCre
     return null
   }
 
-  /** The result of "test the connection" on the stored account. */
-  async recordCheck(provider: CredentialProviderName, verification: Verification): Promise<void> {
+  /**
+   * The stored account as it is now (not the cache) for "test the
+   * connection", with a stamp of the row: `recordCheck` keeps the result
+   * only while the row is still the one checked.
+   */
+  async readForCheck(
+    provider: CredentialProviderName
+  ): Promise<{ account: ResolvedCredentials; stamp: string } | null> {
     const [row] = await this.listIntegrationCredentials({ provider }, { take: 1 })
-    if (!row) {
-      return
+    const secrets = row ? this.open(row) : null
+    return row && secrets
+      ? { account: { settings: row.settings, secrets }, stamp: stampOf(row) }
+      : null
+  }
+
+  /** Keeps a check's result; false when the account changed while it ran. */
+  async recordCheck(
+    provider: CredentialProviderName,
+    verification: Verification,
+    stamp: string
+  ): Promise<boolean> {
+    const [row] = await this.listIntegrationCredentials({ provider }, { take: 1 })
+    if (!row || stampOf(row) !== stamp) {
+      return false
     }
     await this.updateIntegrationCredentials({
       id: row.id,
@@ -254,6 +293,7 @@ class IntegrationCredentialsModuleService extends MedusaService({ IntegrationCre
       verified_at: verification === "verified" ? new Date() : null,
     })
     await this.cache.invalidate()
+    return true
   }
 
   /** Deletes the account outright; returns it for a compensation. */
