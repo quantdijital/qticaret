@@ -137,6 +137,14 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Kart kodunun öneki en çok 20 harf, rakam ya da tire olabilir; kodun geri kalanı rastgele üretilir.",
   "gift_cards.guest_account":
     "Mağaza kredisi yalnızca üye müşterilere verilebilir; misafir müşteri krediyi kullanamaz.",
+  "integration_credentials.invalid": "Girilen değer geçerli değil.",
+  "integration_credentials.key_missing":
+    "Sunucuda ödeme bilgilerini saklamak için gereken şifreleme anahtarı tanımlı değil; platform ekibine bildirin.",
+  "integration_credentials.secret_invalid":
+    "Değer 8–128 karakter olmalı ve boşluk içermemeli; sağlayıcının panelinden kopyalayıp yapıştırın.",
+  "integration_credentials.secrets_required":
+    "Gizli alanların hepsini girin; hesap numarası değişince ya da kayıtlı bilgiler okunamayınca hepsi yeniden istenir.",
+  "integration_credentials.unknown_provider": "Böyle bir ödeme ya da entegrasyon sağlayıcısı yok.",
   "media.alt_invalid": "Alt metinde kullanılamayan karakterler var.",
   "media.file_id_invalid": "Dosya adı geçerli değil.",
   "media.file_unknown": "Dosya bulunamadı.",
@@ -144,6 +152,12 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "media.unknown": "Görsel bulunamadı.",
   "orders.nothing_to_ship": "Bu siparişte kargoya verilecek ürün kalmadı.",
   "orders.unknown": "Sipariş bulunamadı.",
+  "paytr.merchant_id_invalid":
+    "Mağaza no yalnızca rakamlardan oluşur; PayTR panelinde Destek & Kurulum > Entegrasyon Bilgileri sayfasından kopyalayın.",
+  "paytr.merchant_invalid":
+    "PayTR bu mağaza numarasını tanımadı ya da mağaza aktif değil. Numarayı Entegrasyon Bilgileri sayfasından kontrol edin.",
+  "paytr.secret_invalid":
+    "PayTR mağaza parolasını ya da gizli anahtarı kabul etmedi. İkisini de Entegrasyon Bilgileri sayfasından yeniden kopyalayın.",
   "products.unknown": "Ürün bulunamadı.",
   "price_lists.unknown": "Fiyat listesi bulunamadı.",
   "price_lists.no_currency": "Mağazanın para birimi tanımlı değil.",

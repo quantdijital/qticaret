@@ -209,6 +209,7 @@
     "sections": {
       "appearance": "Görünüm",
       "store": "Mağaza",
+      "payments": "Ödeme",
       "seo": "SEO",
       "features": "Özellikler",
       "jobs": "İşler",
@@ -492,6 +493,60 @@
         "hint": "Bir ürünün satılabilir adedi bu sayıya inince bildirim gelir. Ürünlere stok geçmişinden kendi eşiği verilebilir.",
         "label": "Mağaza eşiği (adet)",
         "saved": "Düşük stok eşiği kaydedildi."
+      }
+    },
+    "payments": {
+      "title": "Ödeme",
+      "subtitle": "Kartla ödeme almak için PayTR mağaza hesabınızı bağlayın. Bilgiler şifreli saklanır, kaydedildikten sonra hiçbir yerde gösterilmez.",
+      "paytr": {
+        "title": "PayTR",
+        "description": "Kart ve taksitli ödemeler PayTR'nin güvenli ödeme sayfasında alınır; kart bilgisi mağazanıza hiç uğramaz.",
+        "states": {
+          "connected": "Bağlı",
+          "unverified": "Doğrulanmadı",
+          "unreadable": "Yeniden girilmeli",
+          "not_configured": "Bağlı değil"
+        },
+        "testModeBadge": "Test modu",
+        "merchantId": "Mağaza no",
+        "merchantIdHint": "PayTR'nin size verdiği mağaza numarası; yalnızca rakamlardan oluşur.",
+        "merchantIdInvalid": "Mağaza numarasını rakamlarla girin.",
+        "merchant_key": "Mağaza parola",
+        "merchant_salt": "Mağaza gizli anahtar",
+        "secretHint": "PayTR panelinden kopyalayıp yapıştırın.",
+        "secretStored": "Kayıtlı. Değiştirmek için yenisini girin; boş bırakırsanız kayıtlı değer korunur.",
+        "secretRequired": "Bu bilgiyi girin; mağaza numarası değişince ya da ilk bağlantıda gerekir.",
+        "testMode": "Test modu",
+        "testModeHint": "Gerçek para çekilmez; PayTR'nin test kartlarıyla denersiniz. Canlıya geçmeden kapatın.",
+        "keyMissing": "Sunucuda ödeme bilgilerini saklamak için gereken şifreleme anahtarı tanımlı değil. Bilgiler kaydedilemiyor; platform ekibine bildirin.",
+        "unreadable": "Kayıtlı bilgiler artık okunamıyor (sunucunun şifreleme anahtarı değişmiş olabilir). Mağaza parolasını ve gizli anahtarı yeniden girin.",
+        "save": "Kaydet ve doğrula",
+        "test": "Bağlantıyı test et",
+        "remove": "Bağlantıyı kaldır",
+        "removeTitle": "PayTR bağlantısı kaldırılsın mı?",
+        "removeDescription": "Kayıtlı mağaza bilgileri silinir ve mağazanız PayTR ile ödeme alamaz. Yeniden bağlamak için bilgileri tekrar girmeniz gerekir.",
+        "removed": "PayTR bağlantısı kaldırıldı.",
+        "checks": {
+          "valid": "PayTR bilgileri doğruladı, bağlantı hazır.",
+          "unreachable": "Bilgiler kaydedildi ama PayTR'ye şu an ulaşılamadı. Biraz sonra \"Bağlantıyı test et\" ile tekrar deneyin.",
+          "merchant_invalid": "PayTR bu mağaza numarasını tanımadı ya da mağaza aktif değil.",
+          "secret_invalid": "PayTR mağaza parolasını ya da gizli anahtarı kabul etmedi.",
+          "not_configured": "Kayıtlı bir PayTR hesabı yok."
+        }
+      },
+      "setup": {
+        "title": "PayTR panelinde yapılacaklar",
+        "description": "Bağlantıyı tamamlamak için PayTR Mağaza Paneli'nde üç adım.",
+        "findTitle": "1. Mağaza bilgilerini bulun",
+        "find": "Destek & Kurulum > Entegrasyon Bilgileri sayfasında, \"API Entegrasyon Bilgileri\" başlığı altında mağaza no, mağaza parola ve mağaza gizli anahtar yer alır.",
+        "notifyTitle": "2. Bildirim adresini girin",
+        "notify": "Destek & Kurulum > Ayarlar > Bildirim URL Ayarları'na aşağıdaki adresi yapıştırın. Ödeme sonuçları bu adrese gelir; siparişler ancak böyle onaylanır.",
+        "copy": "Bildirim adresini kopyala",
+        "copied": "Bildirim adresi kopyalandı.",
+        "copyFailed": "Kopyalanamadı; adresi seçip kendiniz kopyalayın.",
+        "notPublic": "Bu adres internetten erişilebilir değil. PayTR'ye mağazanızın https ile başlayan kendi adresini verin.",
+        "liveTitle": "3. Test edin, sonra canlıya geçin",
+        "live": "Test moduyla bir ödeme deneyin. Sorun yoksa Destek & Kurulum > Canlı Mod'dan canlıya geçiş talebi gönderin; onaydan sonra test modunu kapatın."
       }
     }
   },

@@ -133,6 +133,14 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "A card code's prefix is up to 20 letters, digits or dashes; the rest of the code is drawn at random.",
   "gift_cards.guest_account":
     "Store credit is for customers with an account; a guest could not spend it.",
+  "integration_credentials.invalid": "The value is not valid.",
+  "integration_credentials.key_missing":
+    "The server has no encryption key for provider accounts; tell the platform team.",
+  "integration_credentials.secret_invalid":
+    "The value must be 8–128 characters without spaces; copy it from the provider's console.",
+  "integration_credentials.secrets_required":
+    "Enter every secret field; all are asked again when the account number changes or the stored ones cannot be read.",
+  "integration_credentials.unknown_provider": "There is no such payment or integration provider.",
   "media.alt_invalid": "The alt text has characters that cannot be used.",
   "media.file_id_invalid": "The file id is not valid.",
   "media.file_unknown": "File not found.",
@@ -140,6 +148,12 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "media.unknown": "Image not found.",
   "orders.nothing_to_ship": "Nothing is left to ship in this order.",
   "orders.unknown": "Order not found.",
+  "paytr.merchant_id_invalid":
+    "The merchant number is digits only; copy it from Destek & Kurulum > Entegrasyon Bilgileri in the PayTR panel.",
+  "paytr.merchant_invalid":
+    "PayTR does not know this merchant number, or the store is not active. Check it on the Entegrasyon Bilgileri page.",
+  "paytr.secret_invalid":
+    "PayTR did not accept the merchant key or salt. Copy both again from the Entegrasyon Bilgileri page.",
   "products.unknown": "Product not found.",
   "price_lists.unknown": "Price list not found.",
   "price_lists.no_currency": "The shop has no currency set.",

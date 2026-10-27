@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils"
 // Sections grow with the slices (docs/03 P2+: shipping, payments, users...)
 const SECTIONS = [
   { key: "store", to: "/settings/store" },
+  { key: "payments", to: "/settings/payments" },
   { key: "locations", to: "/settings/locations" },
   { key: "appearance", to: "/settings/appearance" },
   { key: "seo", to: "/settings/seo" },

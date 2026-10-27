@@ -57,8 +57,8 @@ const send = (res: ServerResponse, reply: Reply) => {
   res.end(typeof reply.body === "string" ? reply.body : JSON.stringify(reply.body))
 }
 
-/** Starts the fake on a free local port. */
-export async function startFakePaytr(account: PaytrAccount): Promise<FakePaytr> {
+/** Starts the fake on a local port: a free one, or `port` for a dev backend's PAYTR_BASE_URL. */
+export async function startFakePaytr(account: PaytrAccount, port = 0): Promise<FakePaytr> {
   const payments = new Map<string, FakePayment>()
   const requests: FakePaytr["requests"] = []
   const queued = new Map<string, FakeAnswer[]>()
@@ -97,11 +97,11 @@ export async function startFakePaytr(account: PaytrAccount): Promise<FakePaytr> 
     sockets.add(socket)
     socket.on("close", () => sockets.delete(socket))
   })
-  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve))
-  const { port } = server.address() as AddressInfo
+  await new Promise<void>((resolve) => server.listen(port, "127.0.0.1", resolve))
+  const address = server.address() as AddressInfo
 
   const fake: FakePaytr = {
-    url: `http://127.0.0.1:${String(port)}`,
+    url: `http://127.0.0.1:${String(address.port)}`,
     account,
     payments,
     requests,
