@@ -617,6 +617,17 @@
           "secret_invalid": "iyzico gizli anahtarı kabul etmedi. API anahtarıyla aynı sayfadan yeniden kopyalayın."
         },
         "rejected": "iyzico kayıtlı anahtarları artık kabul etmiyor; ödeme alınamaz. İki anahtarı da iyzico panelinden yeniden kopyalayıp girin."
+      },
+      "installments": {
+        "title": "Taksit",
+        "description": "Kartla ödemede müşteriye taksit seçeneği sunulur. Vade farkını ödeme sağlayıcısının oranları belirler.",
+        "enabled": "Taksitli ödeme",
+        "enabledHint": "Kapalıyken kartla ödeme tek çekim olur.",
+        "max": "En çok taksit",
+        "maxHint": "Müşteriye sunulacak en çok taksit sayısı.",
+        "providerMax": "Hesabın izin verdiği en çok",
+        "count_one": "{{count}} taksit",
+        "count_other": "{{count}} taksit"
       }
     }
   },

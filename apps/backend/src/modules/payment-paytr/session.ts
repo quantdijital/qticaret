@@ -22,7 +22,8 @@ const join = (parts: (string | null | undefined)[]) =>
 export function tokenRequestOf(
   data: Record<string, unknown> | undefined,
   amount: Kurus,
-  currencyCode: string
+  currencyCode: string,
+  installments: { enabled: boolean; max: number } = { enabled: true, max: 0 }
 ): Omit<PaytrTokenRequest, "timeoutMinutes"> {
   const sessionId = data?.["session_id"]
   const checkout = hostedCheckout.safeParse(data?.["checkout"])
@@ -40,9 +41,9 @@ export function tokenRequestOf(
     amount,
     currencyCode,
     basket: paytrBasketOf(basket.map((line) => ({ ...line, amount: kurus(line.amount) }))),
-    // The shop's installment settings arrive in F5 V6: until then PayTR's own maximum
-    maxInstallment: 0,
-    noInstallment: false,
+    // The shop's choice (F5 V6): 0 lets PayTR offer what the account allows
+    maxInstallment: installments.enabled ? installments.max : 0,
+    noInstallment: !installments.enabled,
     userName: `${buyer.first_name} ${buyer.last_name}`.slice(0, 60),
     userAddress: join([
       buyer.address_1,

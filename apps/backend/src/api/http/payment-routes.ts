@@ -1,4 +1,4 @@
-import { validateAndTransformBody } from "@medusajs/framework/http"
+import { validateAndTransformBody, validateAndTransformQuery } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ValidationError } from "../../lib/errors"
@@ -7,6 +7,7 @@ import type { PaymentFacts } from "../../lib/payments/consistency"
 import { paidInTestMode } from "../../lib/payments/test-mode"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import { StorePostCartPaymentSession } from "../store/carts/[id]/payment-session/validators"
+import { StoreGetInstallments } from "../store/payment/installments/validators"
 import { rateLimit } from "./rate-limit"
 
 /**
@@ -91,6 +92,15 @@ export const PAYMENT_ROUTES = [
     matcher: "/store/carts/:id/payment-session",
     methods: ["POST" as const],
     middlewares: [checkoutLimit, validateAndTransformBody(StorePostCartPaymentSession)],
+  },
+  // F5 V6: a product page's or a cart's installment table
+  {
+    matcher: "/store/payment/installments",
+    methods: ["GET" as const],
+    middlewares: [
+      rateLimit(() => RATE_LIMIT_PROFILES.installment),
+      validateAndTransformQuery(StoreGetInstallments, {}),
+    ],
   },
   {
     matcher: "/store/payment-collections/:id/payment-sessions",

@@ -62,6 +62,12 @@ PayTR → tarayıcı: merchant_ok_url / merchant_fail_url (yalnızca bilgilendir
 - **İptal:** Medusa'nın iptali iade başarısız olsa da siparişi iptal ediyor (hata loglanıp yutuluyor). Çekirdek `POST /admin/orders/:id/cancel` önünde: Medusa'nın iptal edeceği ödemeli sipariş önce bizim akışımızla, siparişe özgü sabit referansla iade edilir; iade başarısızsa iptal yapılmaz. Medusa'nın `POST /admin/payments/:id/refund` ucu PayTR ödemelerine kapalı.
 - **Panel:** sipariş detayında "Para iadesi" (ürün seçerek ya da tutar girerek; tutar önizlemeden, her açılışta yeni anahtar).
 
+## Taksit (F5 V6, 2026-10-27)
+- **Mağaza ayarı:** `payments` ayar bölümü: `installments_enabled` (varsayılan açık), `max_installment` (0 = hesabın izin verdiği en çok, ya da 2–12). Panelde Ayarlar > Ödeme > Taksit. Sağlayıcı ödeme başlatırken okur: kapalıysa `no_installment=1`, açıksa `max_installment` bu sınır.
+- **Taksit tablosu:** `GET /store/payment/installments?variant_id=&region_id=` ya da `?cart_id=` (yayınlanmış ve vitrinin kanalındaki ürün/sepet; tutar sunucuda: varyantın bölgedeki hesaplanan fiyatı ya da sepet toplamı). Kart ailesi başına seçenekler: adet, oran, toplam, taksit tutarı (toplam = tutar × (100 + oran) / 100). Sınır: mağazanınki ve PayTR'nin `max_inst_non_bus`'ı. Hız profili `installment`.
+- **Oranlar:** `taksit-oranlari` her süreçte hesap başına günde bir kez sorulur (bellekte; plan Redis diyordu, amaç sayfa başına PayTR'ye gitmemek ve süreç başına günde bir çağrı bunu karşılıyor). Sorulamazsa dünkü oranlar kullanılır. Hesap (mağaza no, test modu) değişince yeniden sorulur.
+- Doğrulanmadı: yalnızca iFrame kullanan bir hesabın oran API'sine erişimi (gerçek testler sunucuya kaldı); erişim yoksa tablo kapalı döner, ödeme formu taksitleri kendisi gösterir.
+
 ## Uçlar ve imzalar
 Tüm imzalar `base64(HMAC-SHA256(key = merchant_key, mesaj))`.
 

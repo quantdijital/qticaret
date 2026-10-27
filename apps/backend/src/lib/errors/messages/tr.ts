@@ -349,4 +349,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "orders.refund_amount_kurus": "Tutar en çok iki ondalık basamak içerebilir.",
   "orders.refund_reference_invalid": "İade anahtarı geçersiz; iadeyi yeniden başlatın.",
   "payments.use_order_refund": "Bu ödemenin iadesi siparişin iade adımından yapılır.",
+  "payments.max_installment_invalid":
+    "En çok taksit 2 ile 12 arasında olmalı (0: PayTR'nin izin verdiği en çok).",
+  "payments.installments_unknown": "Taksit tablosu için ürün ya da sepet bulunamadı.",
+  "payments.installments_target": "Taksit için ya sepet ya da ürün ve bölge verin.",
 }

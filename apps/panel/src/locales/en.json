@@ -617,6 +617,17 @@
           "secret_invalid": "iyzico did not accept the secret key. Copy it again from the same page as the API key."
         },
         "rejected": "iyzico no longer accepts the stored keys; no payment can be taken. Copy both keys from the iyzico panel and enter them again."
+      },
+      "installments": {
+        "title": "Installments",
+        "description": "Card payments can be split into installments. The surcharge follows the payment provider's rates.",
+        "enabled": "Installments",
+        "enabledHint": "When off, card payments are taken in one go.",
+        "max": "Most installments",
+        "maxHint": "The most installments offered to customers.",
+        "providerMax": "What the account allows",
+        "count_one": "{{count}} installment",
+        "count_other": "{{count}} installments"
       }
     }
   },

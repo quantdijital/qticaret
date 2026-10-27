@@ -23,6 +23,12 @@ export interface InventorySettings {
 }
 
 /** Promotion rules (F4.4, F4.5): codes per cart, free shipping from a basket total. */
+/** Installments for every card provider (F5 V6); `max_installment` 0 is the provider's most. */
+export interface PaymentSettings {
+  installments_enabled: boolean
+  max_installment: number
+}
+
 export interface PromotionSettings {
   combine_codes: boolean
   /** Lira, KDV in, after discounts; null: no free shipping by basket total. */

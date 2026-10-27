@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button"
 import { providerAccountsQuery } from "@/features/settings/api/payments"
 import type { ProviderAccount } from "@/features/settings/api/payments"
 import { AccountBadges } from "@/features/settings/components/account-badges"
+import { InstallmentsCard } from "@/features/settings/components/installments-card"
 import { PAYMENT_GROUPS, PAYMENT_METHODS } from "@/features/settings/payment-methods"
 import type { PaymentMethod } from "@/features/settings/payment-methods"
 import { errorText } from "@/lib/errors"
@@ -76,7 +77,7 @@ export function PaymentsPage() {
       ) : !query.data ? (
         <LoadingRows rows={5} />
       ) : (
-        PAYMENT_GROUPS.map((group) => (
+        PAYMENT_GROUPS.map((group) => [
           <SectionCard
             key={group}
             title={t(`${P}.groups.${group}.title`)}
@@ -92,8 +93,10 @@ export function PaymentsPage() {
                 />
               ))}
             </ul>
-          </SectionCard>
-        ))
+          </SectionCard>,
+          // Installments follow the card providers they apply to
+          group === "card" ? <InstallmentsCard key="installments" /> : null,
+        ])
       )}
     </div>
   )

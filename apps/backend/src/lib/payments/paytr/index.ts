@@ -24,3 +24,4 @@ export {
 } from "./signatures"
 export type { NotificationHashFields, PaytrSecrets, TokenHashFields } from "./signatures"
 export { paytrCredentialsOf } from "./credentials"
+export { forgetPaytrInstallmentRates, paytrInstallmentRates } from "./rates-cache"

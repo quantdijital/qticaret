@@ -25,7 +25,7 @@ import { fromMedusaAmount, kurus } from "../../lib/money"
 import { HOSTED_CHECKOUT } from "../../lib/payments/checkout"
 import { paytrApi, paytrFormUrl } from "../../lib/payments/paytr"
 import type { PaytrCredentials } from "../../lib/payments/paytr"
-import { storedPaytrAccount } from "./account"
+import { storedPaymentSettings, storedPaytrAccount } from "./account"
 import { pendingReferenceOf, refundPaytrPayment, refundReferenceOf } from "./refund"
 import { paytrSession, tokenRequestOf } from "./session"
 
@@ -64,7 +64,11 @@ class PaytrProviderService extends AbstractPaymentProvider {
       throw new ValidationError("payments.use_checkout_route")
     }
     const amount = fromMedusaAmount(input.amount, { allowRounding: true })
-    const request = tokenRequestOf(input.data, amount, input.currency_code)
+    const settings = await storedPaymentSettings()
+    const request = tokenRequestOf(input.data, amount, input.currency_code, {
+      enabled: settings.installments_enabled,
+      max: settings.max_installment,
+    })
     const account = await this.account()
     const token = await paytrApi().requestToken(account, {
       ...request,

@@ -1,6 +1,7 @@
 import { appearanceSection } from "./appearance"
 import type { SectionDefinition } from "./define"
 import { inventorySection } from "./inventory"
+import { paymentsSection } from "./payments"
 import { promotionsSection } from "./promotions"
 import { seoSection } from "./seo"
 import { storeSection } from "./store"
@@ -8,6 +9,7 @@ import { storeSection } from "./store"
 export { DEFAULT_ROBOTS_TXT } from "./seo"
 export type { AppearanceSettings } from "./appearance"
 export type { InventorySettings } from "./inventory"
+export type { PaymentSettings } from "./payments"
 export type { PromotionSettings } from "./promotions"
 export type { SeoSettings } from "./seo"
 export type { StoreSettings } from "./store"
@@ -20,6 +22,7 @@ export const SECTIONS = {
   appearance: appearanceSection,
   inventory: inventorySection,
   promotions: promotionsSection,
+  payments: paymentsSection,
 } as const
 
 export type SectionName = keyof typeof SECTIONS

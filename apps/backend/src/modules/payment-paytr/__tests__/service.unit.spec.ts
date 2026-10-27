@@ -2,14 +2,18 @@ import { fakePaytrAccount, startFakePaytr } from "@qticaret/testing"
 import type { FakePaytr } from "@qticaret/testing"
 import { HOSTED_CHECKOUT } from "../../../lib/payments/checkout"
 import type { HostedCheckout } from "../../../lib/payments/checkout"
-import { storedPaytrAccount } from "../account"
+import { storedPaymentSettings, storedPaytrAccount } from "../account"
 import PaytrProviderService from "../service"
 
-jest.mock("../account", () => ({ storedPaytrAccount: jest.fn() }))
+jest.mock("../account", () => ({
+  storedPaytrAccount: jest.fn(),
+  storedPaymentSettings: jest.fn(),
+}))
 
 // A made-up account, fresh per run; the fake server checks every signature with it
 const account = fakePaytrAccount()
 const stored = jest.mocked(storedPaytrAccount)
+const settings = jest.mocked(storedPaymentSettings)
 
 const checkout: HostedCheckout = {
   email: "ayse.yilmaz@example.com",
@@ -71,6 +75,7 @@ describe("PayTR payment provider (adr/0026)", () => {
 
   beforeEach(() => {
     stored.mockResolvedValue({ ...account, testMode: true })
+    settings.mockResolvedValue({ installments_enabled: true, max_installment: 0 })
     fake.requests.length = 0
   })
 
@@ -109,6 +114,21 @@ describe("PayTR payment provider (adr/0026)", () => {
       [
         ["Seramik kupa", "12.00", 2],
         ["Standart Kargo", "10.56", 1],
+      ]
+    )
+  })
+
+  it("passes the shop's installment choice to PayTR", async () => {
+    settings.mockResolvedValue({ installments_enabled: true, max_installment: 6 })
+    await start({ session_id: "payses_01INS", checkout })
+    settings.mockResolvedValue({ installments_enabled: false, max_installment: 6 })
+    await start({ session_id: "payses_01ONE", checkout })
+
+    const sent = fake.requests.filter((request) => request.path === "/odeme/api/get-token")
+    expect(sent.map(({ fields }) => [fields["max_installment"], fields["no_installment"]])).toEqual(
+      [
+        ["6", "0"],
+        ["0", "1"],
       ]
     )
   })
