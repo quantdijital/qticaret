@@ -33,6 +33,7 @@ import { adminLimitGuard, storeLimitGuard, uploadSizeGate } from "./http/request
 import { securityHeaders } from "./http/security-headers"
 import { MEDIA_ROUTES, STORE_MEDIA_FIELDS, restrictStoreMediaFields } from "./http/media-routes"
 import { GIFT_CARD_ROUTES } from "./http/gift-card-routes"
+import { INTEGRATION_ROUTES } from "./http/integration-routes"
 import { restrictStoreGiftCardFields } from "./http/shopper-gift-cards"
 import { PRICING_ROUTES } from "./http/pricing-routes"
 import { PROMOTION_ROUTES } from "./http/promotion-routes"
@@ -170,6 +171,8 @@ export default defineMiddlewares({
     },
     // F3.4, F3.5: a page's own SEO fields, redirects, the 404 log
     ...SEO_ROUTES,
+    // F5: the shop's provider accounts (adr/0027)
+    ...INTEGRATION_ROUTES,
     // F3.11: brands
     ...BRAND_ROUTES,
     ...CONTENT_ROUTES,

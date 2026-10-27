@@ -1,6 +1,6 @@
 # ADR-0002: Sağlayıcı kimlik bilgilerinin yönetimi
 
-- **Durum:** Kabul edildi (2026-10-27, F5 planlaması; kullanıcının kalıcı "önerileni uygula" talimatıyla, PROGRESS "Gözden geçir" listesinde). F0–F4 bu kararla yazıldı; ilk sağlayıcı anahtarları F5'te (PayTR) bu yolla gelir.
+- **Durum:** Yerini aldı (ADR-0027, 2026-10-27). Kullanıcı aynı gün F5 V1'in başında sağlayıcı hesap bilgilerinin panelden girilmesini istedi; mağazanın sağlayıcı hesapları artık `integration-credentials` modülünde şifreli. Platformun kendi sırları env'de kalır.
 - **Tarih:** 2026-10-27
 
 ## Bağlam

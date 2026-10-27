@@ -1,0 +1,19 @@
+{
+  "name": "@qticaret/testing",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Fake provider servers and Turkish fixture factories for tests (docs/07)",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@qticaret/config": "workspace:*",
+    "@types/node": "24.19.2",
+    "eslint": "10.12.0",
+    "typescript": "5.9.3"
+  }
+}

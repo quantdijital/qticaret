@@ -7,6 +7,7 @@ import type { CircuitBreakerOptions } from "./circuit-breaker"
 import {
   HttpClientMisuse,
   buildUrl,
+  contentTypeHeader,
   describeNetworkError,
   integerOption,
   mergeHeaders,
@@ -14,7 +15,7 @@ import {
   serializeBody,
   wasNotSent,
 } from "./request"
-import type { QueryValues, RequestPath } from "./request"
+import type { FormValues, QueryValues, RequestPath } from "./request"
 import { IDEMPOTENT_METHODS, backoffDelay, parseRetryAfter, resolveRetryPolicy } from "./retry"
 import type { RetryPolicy } from "./retry"
 import { ResponseTooLarge, TransportRefusal, callTransport, fetchTransport } from "./transport"
@@ -60,6 +61,8 @@ export interface HttpRequest<T> {
   query?: QueryValues
   headers?: Readonly<Record<string, string>>
   json?: unknown
+  /** Form fields, sent URL-encoded; instead of `json`. */
+  form?: FormValues
   /** Marks a POST or PATCH as safe to repeat (it carries an idempotency key). */
   idempotent?: boolean
   /** Logged instead of the path when it holds secrets or identifiers (`/services/:token`). */
@@ -137,7 +140,7 @@ export function createHttpClient(options: HttpClientOptions): HttpClient {
       { accept: "application/json" },
       options.defaultHeaders,
       request.headers,
-      request.json === undefined ? undefined : { "content-type": "application/json" },
+      contentTypeHeader(request.json, request.form),
       requestId === undefined ? undefined : { "x-request-id": requestId }
     )
     const path = options.hidePaths ? "[hidden]" : (request.logPath ?? url.pathname)
@@ -145,7 +148,7 @@ export function createHttpClient(options: HttpClientOptions): HttpClient {
       url,
       method,
       headers,
-      body: serializeBody(method, request.json),
+      body: serializeBody(method, request.json, request.form),
       repeatable: request.idempotent ?? IDEMPOTENT_METHODS.has(method),
       fields: { event: "http_client.request", provider, method, path },
     }

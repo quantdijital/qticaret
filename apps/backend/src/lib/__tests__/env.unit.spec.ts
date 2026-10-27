@@ -78,7 +78,10 @@ describe("parseEnv", () => {
     expect(errorOf({ ...validEnv, NODE_ENV: env, REDIS_URL: undefined })).toContain(
       "REDIS_URL: is required in production and staging"
     )
-    expect(parseEnv({ ...validEnv, ...s3Env, NODE_ENV: env }).REDIS_URL).toBe(validEnv.REDIS_URL)
+    expect(
+      parseEnv({ ...validEnv, ...s3Env, CREDENTIALS_ENCRYPTION_KEY: hexKey(), NODE_ENV: env })
+        .REDIS_URL
+    ).toBe(validEnv.REDIS_URL)
   })
 
   it.each(["production", "staging"])("requires the S3 variables in %s", (env) => {
@@ -99,6 +102,45 @@ describe("parseEnv", () => {
       bucket: "qticaret",
       fileUrl: s3Env.S3_FILE_URL,
     })
+  })
+
+  it.each(["production", "staging"])(
+    "requires the provider account key in %s (adr/0027)",
+    (env) => {
+      expect(errorOf({ ...validEnv, ...s3Env, NODE_ENV: env })).toContain(
+        "CREDENTIALS_ENCRYPTION_KEY: is required in production and staging"
+      )
+      expect(parseEnv(validEnv).CREDENTIALS_ENCRYPTION_KEY).toBeUndefined()
+    }
+  )
+
+  it("keeps the provider account key apart from the PII keys", () => {
+    expect(
+      errorOf({ ...validEnv, CREDENTIALS_ENCRYPTION_KEY: validEnv.PII_HASH_KEY.toUpperCase() })
+    ).toContain("CREDENTIALS_ENCRYPTION_KEY: must differ from the PII keys")
+    expect(errorOf({ ...validEnv, CREDENTIALS_ENCRYPTION_KEY: "ab" })).toContain(
+      "CREDENTIALS_ENCRYPTION_KEY: must be 64 hex characters (32 bytes)"
+    )
+  })
+
+  it("lets a fake PayTR address in local runs only", () => {
+    const fake = { PAYTR_BASE_URL: "http://127.0.0.1:4010" }
+
+    expect(parseEnv({ ...validEnv, ...fake, NODE_ENV: "test" }).PAYTR_BASE_URL).toBe(
+      fake.PAYTR_BASE_URL
+    )
+    expect(errorOf({ ...validEnv, ...fake })).toContain(
+      "PAYTR_BASE_URL: is only allowed in development and test"
+    )
+    expect(
+      errorOf({
+        ...validEnv,
+        ...s3Env,
+        ...fake,
+        CREDENTIALS_ENCRYPTION_KEY: hexKey(),
+        NODE_ENV: "production",
+      })
+    ).toContain("PAYTR_BASE_URL: is only allowed in development and test")
   })
 
   it("rejects identical PII encryption and hash keys", () => {

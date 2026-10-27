@@ -69,12 +69,40 @@ export function mergeHeaders(
   return merged
 }
 
-export function serializeBody(method: string, json: unknown): string | undefined {
-  if (json === undefined) {
+export type FormValues = Readonly<Record<string, string>>
+
+/** The content type of the body `serializeBody` builds from the same arguments. */
+export function contentTypeHeader(
+  json: unknown,
+  form?: FormValues
+): Record<string, string> | undefined {
+  if (form !== undefined) {
+    return { "content-type": "application/x-www-form-urlencoded" }
+  }
+  return json === undefined ? undefined : { "content-type": "application/json" }
+}
+
+/**
+ * The request body: JSON, or form fields encoded as
+ * `application/x-www-form-urlencoded` (PayTR's APIs take forms). One or
+ * the other, never both.
+ */
+export function serializeBody(
+  method: string,
+  json: unknown,
+  form?: FormValues
+): string | undefined {
+  if (json === undefined && form === undefined) {
     return undefined
   }
   if (method === "GET" || method === "HEAD") {
     throw new HttpClientMisuse(`http client: ${method} cannot carry a body`)
+  }
+  if (form !== undefined) {
+    if (json !== undefined) {
+      throw new HttpClientMisuse("http client: a request has a JSON or a form body, not both")
+    }
+    return new URLSearchParams(Object.entries(form)).toString()
   }
   let body: unknown
   try {

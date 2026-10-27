@@ -1,0 +1,235 @@
+import { createApiKeysWorkflow } from "@medusajs/medusa/core-flows"
+import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
+import { anyOf, fakePaytrAccount, fakeSecret, startFakePaytr } from "@qticaret/testing"
+import type { FakePaytr } from "@qticaret/testing"
+import { createAdminUser } from "../helpers/admin"
+import { captureOutput } from "../helpers/logs"
+import type { HttpClient } from "../helpers/http"
+import { settle } from "../helpers/http"
+
+jest.setTimeout(120 * 1000)
+
+// A made-up PayTR account, fresh per run; the fake server checks every signature with it
+const account = fakePaytrAccount()
+const newSalt = fakeSecret()
+const SECRETS = anyOf(account.merchantKey, account.merchantSalt, newSalt)
+
+interface Account {
+  provider: string
+  state: string
+  settings: Record<string, unknown> | null
+  secrets: Record<string, boolean>
+  secrets_version: number
+}
+
+interface AuditEntry {
+  action: string
+  changes: { fields?: string[]; diff?: Record<string, unknown> } | null
+}
+
+const URL_PATH = "/admin/integrations/credentials"
+const connect = {
+  settings: { merchant_id: "100001", test_mode: true },
+  secrets: { merchant_key: account.merchantKey, merchant_salt: account.merchantSalt },
+}
+
+/** F5 V1 (adr/0027): the shop connects its PayTR account from the panel. */
+medusaIntegrationTestRunner({
+  testSuite: ({ api, getContainer }) => {
+    const http = api as HttpClient
+    let admin: { headers: Record<string, string> }
+    let fake: FakePaytr
+
+    const post = (path: string, body: unknown) =>
+      settle(
+        http.post<{ account: Account; check: string | null }>(path, body, {
+          headers: admin.headers,
+        })
+      )
+    const checks = () => fake.requests.filter((request) => request.path === "/odeme/durum-sorgu")
+
+    beforeAll(async () => {
+      fake = await startFakePaytr(account)
+      // Read on the first PayTR call (lib/payments/paytr/client.ts)
+      process.env["PAYTR_BASE_URL"] = fake.url
+    })
+
+    afterAll(async () => {
+      delete process.env["PAYTR_BASE_URL"]
+      await fake.close()
+    })
+
+    beforeEach(async () => {
+      admin = await createAdminUser(http, getContainer())
+      fake.requests.length = 0
+    })
+
+    it("lists PayTR as not connected, with the server's key in place", async () => {
+      const { data } = await http.get<{ key_configured: boolean; accounts: Account[] }>(URL_PATH, {
+        headers: admin.headers,
+      })
+
+      expect(data.key_configured).toBe(true)
+      expect(data.accounts).toEqual([
+        expect.objectContaining({
+          provider: "paytr",
+          state: "not_configured",
+          secrets: { merchant_key: false, merchant_salt: false },
+        }),
+      ])
+    })
+
+    it("refuses details PayTR turns down, naming the field, and stores nothing", async () => {
+      const wrongNumber = await post(`${URL_PATH}/paytr`, {
+        ...connect,
+        settings: { ...connect.settings, merchant_id: "999999" },
+      })
+      const wrongSalt = await post(`${URL_PATH}/paytr`, {
+        ...connect,
+        secrets: { ...connect.secrets, merchant_salt: fakeSecret() },
+      })
+      const { data } = await http.get<{ accounts: Account[] }>(URL_PATH, { headers: admin.headers })
+
+      expect(wrongNumber.status).toBe(400)
+      expect(wrongNumber.data).toMatchObject({ message: "paytr.merchant_invalid" })
+      expect(wrongSalt.status).toBe(400)
+      expect(wrongSalt.data).toMatchObject({ message: "paytr.secret_invalid" })
+      expect(data.accounts[0]?.state).toBe("not_configured")
+    })
+
+    it("connects after PayTR accepts; no answer, log or audit record holds a secret", async () => {
+      let saved!: Awaited<ReturnType<typeof post>>
+      let listed!: { data: unknown }
+      // A refused save logs the provider's answer too: none of it may quote a secret
+      const output = await captureOutput(async () => {
+        await post(`${URL_PATH}/paytr`, {
+          ...connect,
+          secrets: { ...connect.secrets, merchant_salt: newSalt },
+        })
+        saved = await post(`${URL_PATH}/paytr`, connect)
+        listed = await http.get<{ accounts: Account[] }>(URL_PATH, { headers: admin.headers })
+      })
+
+      expect(saved.status).toBe(200)
+      expect(saved.data).toMatchObject({
+        check: "valid",
+        account: {
+          state: "connected",
+          settings: connect.settings,
+          secrets: { merchant_key: true, merchant_salt: true },
+          secrets_version: 1,
+        },
+      })
+      expect(checks()).toHaveLength(2)
+      expect(JSON.stringify([saved.data, listed.data, fake.requests])).not.toMatch(SECRETS)
+      expect(output).toContain("http_client.request")
+      expect(output).not.toMatch(SECRETS)
+
+      let entries: AuditEntry[] = []
+      for (let attempt = 0; attempt < 30 && entries.length === 0; attempt++) {
+        entries = (
+          await http.get<{ audit_entries: AuditEntry[] }>(
+            "/admin/audit-log?resource_id=paytr&kind=mutation",
+            { headers: admin.headers }
+          )
+        ).data.audit_entries
+        await new Promise((resolve) => setTimeout(resolve, 100))
+      }
+      expect(entries[0]).toMatchObject({
+        action: "POST /admin/integrations/credentials/:provider",
+        changes: {
+          diff: expect.objectContaining({
+            state: { before: "not_configured", after: "connected" },
+            secrets_version: { before: 0, after: 1 },
+          }) as unknown,
+        },
+      })
+      expect(JSON.stringify(entries)).not.toMatch(SECRETS)
+    })
+
+    it("changes test mode without asking PayTR; a new secret is checked again", async () => {
+      await post(`${URL_PATH}/paytr`, connect)
+      fake.requests.length = 0
+
+      const testMode = await post(`${URL_PATH}/paytr`, {
+        settings: { ...connect.settings, test_mode: false },
+      })
+
+      expect(testMode.data).toMatchObject({ check: null, account: { state: "connected" } })
+      expect(checks()).toHaveLength(0)
+
+      const changed = await post(`${URL_PATH}/paytr`, {
+        settings: connect.settings,
+        secrets: { merchant_salt: newSalt },
+      })
+
+      // The fake knows the old salt only: PayTR would refuse the new one
+      expect(changed.status).toBe(400)
+      expect(changed.data).toMatchObject({ message: "paytr.secret_invalid" })
+    })
+
+    it("asks for both secrets when the shop number changes", async () => {
+      await post(`${URL_PATH}/paytr`, connect)
+
+      const moved = await post(`${URL_PATH}/paytr`, {
+        settings: { ...connect.settings, merchant_id: "100002" },
+        secrets: { merchant_key: account.merchantKey },
+      })
+
+      expect(moved.status).toBe(400)
+      expect(moved.data).toMatchObject({ message: "integration_credentials.secrets_required" })
+    })
+
+    it("saves as unchecked when PayTR cannot be reached, and checks again on request", async () => {
+      fake.queue("/odeme/durum-sorgu", { drop: true })
+      fake.queue("/odeme/durum-sorgu", { drop: true })
+      fake.queue("/odeme/durum-sorgu", { drop: true })
+
+      const saved = await post(`${URL_PATH}/paytr`, connect)
+      const checked = await post(`${URL_PATH}/paytr/check`, {})
+
+      expect(saved.data).toMatchObject({ check: "unreachable", account: { state: "unverified" } })
+      expect(checked.data).toMatchObject({ check: "valid", account: { state: "connected" } })
+    })
+
+    it("reports PayTR in the integration health with the stored account", async () => {
+      await post(`${URL_PATH}/paytr`, connect)
+
+      const { data } = await http.get<{ checks: { id: string; status: string }[] }>(
+        "/admin/integrations/health",
+        { headers: admin.headers }
+      )
+
+      expect(data.checks).toContainEqual(expect.objectContaining({ id: "paytr", status: "ok" }))
+    })
+
+    it("disconnects: the account is gone and a test says so", async () => {
+      await post(`${URL_PATH}/paytr`, connect)
+
+      const removed = await settle(
+        http.delete<{ account: Account }>(`${URL_PATH}/paytr`, { headers: admin.headers })
+      )
+      const checked = await post(`${URL_PATH}/paytr/check`, {})
+
+      expect(removed.data.account).toMatchObject({ state: "not_configured", settings: null })
+      expect(checked.data).toMatchObject({ check: "not_configured" })
+    })
+
+    it("refuses an unknown provider, a malformed body and an integration key", async () => {
+      const { result } = await createApiKeysWorkflow(getContainer()).run({
+        input: { api_keys: [{ title: "integration", type: "secret", created_by: "user_test" }] },
+      })
+      const basic = Buffer.from(`${result[0]?.token ?? ""}:`).toString("base64")
+
+      const unknown = await post(`${URL_PATH}/stripe`, connect)
+      const extra = await post(`${URL_PATH}/paytr`, { ...connect, provider: "x" })
+      const byKey = await settle(
+        http.post(`${URL_PATH}/paytr`, connect, { headers: { authorization: `Basic ${basic}` } })
+      )
+
+      expect(unknown.status).toBe(404)
+      expect(extra.status).toBe(400)
+      expect(byKey.status).toBe(403)
+    })
+  },
+})

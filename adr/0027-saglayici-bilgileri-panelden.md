@@ -1,0 +1,76 @@
+# ADR-0027: Sağlayıcı hesap bilgileri panelden girilir, veritabanında şifreli durur
+
+- **Durum:** Kabul edildi (2026-10-27, kullanıcı talebi: "mağaza bilgilerini panelden ayarlardan girilebilecek şekilde yapalım, müşteri odaklı çalışalım"). ADR-0002'nin yerini alır.
+- **Tarih:** 2026-10-27
+
+## Bağlam
+
+ADR-0002, sağlayıcı anahtarlarını ortam değişkeninde tutuyordu. Anahtar değişince secret güncellenip instance yeniden başlatılıyordu. Kullanıcı 2026-10-27'de F5 V1'in başında bunun yerine müşteri odaklı bir yol istedi: mağaza sahibi PayTR'nin mağaza bilgilerini kendi panelinden girer. Platform ekibine ve yeniden başlatmaya gerek kalmaz.
+
+PayTR'de üç bilgi var (dev.paytr.com, "iFrame API Entegrasyon Süreçleri"; PayTR Mağaza Paneli > Destek & Kurulum > Entegrasyon Bilgileri > API Entegrasyon Bilgileri):
+
+- Mağaza no (`merchant_id`): gizli değil.
+- Mağaza parola (`merchant_key`): gizli.
+- Mağaza gizli anahtar (`merchant_salt`): gizli.
+
+Test modu ayrı bir hesap değildir. Aynı bilgilerle istek başına `test_mode=1` gönderilir.
+
+ADR-0002'nin itirazları ve bu karardaki cevapları:
+
+- **Sağlayıcı izolasyonu:** Ödeme sağlayıcısı kendi modülünün container'ına kapalı. Medusa, uygulamanın paylaşılan container'ını `@medusajs/framework`'ten `container` olarak dışa açıyor (framework kaynağı, `container.ts`). Sağlayıcı bilgileri çağrı anında bu yoldan okur. Bilgiler sağlayıcının `data`'sına ya da `context`'ine girmez.
+- **Veritabanı sızıntısı:** Gizli değerler AES-256-GCM ile şifrelenir. Anahtar veritabanında değil, ortam değişkenindedir. Yalnızca veritabanını ele geçiren biri değerleri okuyamaz.
+
+## Karar
+
+1. **`integration-credentials` modülü.** Sağlayıcı başına tek kayıt (`provider` tekil):
+   - Gizli olmayan ayarlar `settings` JSON'unda; PayTR'de `merchant_id` ve `test_mode`.
+   - Gizli alanlar tek bir şifreli blokta (`secret_ciphertext`). Ek doğrulanmış veri (AAD) olarak `integration_credentials:<provider>` kullanılır; başka satıra kopyalanan blok çözülmez.
+   - Kayıtta şifreleme anahtarının parmak izi (`key_id`) ve sürüm (`version`) var; ayrıca son doğrulama sonucu ve zamanı, son değiştiren kişi.
+   - Sağlayıcıların alan şemaları kodda tanımlıdır. Serbest anahtar-değer yok.
+2. **Şifreleme anahtarı env'de:** `CREDENTIALS_ENCRYPTION_KEY` (32 bayt, 64 hex).
+   - Canlıda ve staging'de zorunlu. PII anahtarlarından farklı olmalı.
+   - Yerelde yoksa uygulama açılır, ama bilgiler kaydedilemez. Panel bunu söyler.
+   - Anahtar değişirse eski kayıt çözülemez. Panel "bilgileri yeniden girin" der, sağlayıcı "yapılandırılmamış" gibi davranır. F17'de anahtar KMS'e taşınır (docs/04).
+3. **Gizli değerler yalnızca yazılır.**
+   - Hiçbir yanıtta, logda ya da denetim kaydında gizli değer, son haneleri veya karması yer almaz.
+   - Okuma ucu yalnızca şunları döner: gizli alanın kayıtlı olup olmadığı, ayarlar, durum ve son değişiklik.
+   - Panelde gizli alanlar boş gelir. Boş bırakılan alan kayıtlı değeri korur.
+4. **Kaydetmeden önce doğrulanır.**
+   - PayTR'de, uydurma bir `merchant_oid` ile durum sorgusu yapılır:
+     - `004` (işlem bulunamadı): bilgiler doğru.
+     - `001`: mağaza no hatalı ya da mağaza pasif.
+     - `003`: parola ya da gizli anahtar hatalı.
+   - Bilgiler hatalıysa kayıt reddedilir; hata alan bazında döner.
+   - PayTR'ye ulaşılamazsa kayıt yapılır ve "doğrulanamadı" olarak işaretlenir. Panel uyarı gösterir, "Bağlantıyı test et" ile yeniden denenir.
+   - Yalnızca test modu değiştiyse doğrulama yapılmaz.
+5. **Mağaza no değişirse iki gizli alan da yeniden istenir.** Bir hesabın parolası başka hesabın numarasıyla eşleşmesin diye.
+6. **İş akışı ve denetim.**
+   - Kayıt `saveIntegrationCredentialsWorkflow` ile yapılır: önce doğrulama adımı, sonra telafili kayıt adımı.
+   - Denetim kaydında ayarlar önce/sonra görünür. Gizli alanlar için yalnızca sürüm numarası değişir.
+   - Kayıt silinebilir. Silinen kayıtla sağlayıcı "yapılandırılmamış" gibi davranır.
+   - Uçlar personele açık (`requireUserActor`). Rol kısıtı (yalnızca mağaza sahibi) F12'de gelir.
+7. **Önbellek.**
+   - Çözülmüş bilgiler süreç belleğinde tutulur. Platform ayarlarındaki sürümlü önbellek kalıbı kullanılır: Redis'teki sürüm işareti diğer süreçlere değişikliği bildirir.
+   - Değişiklik yeniden başlatma gerektirmez.
+8. **Sağlayıcı adresi kodda.**
+   - PayTR'nin adresi `https://www.paytr.com`. `PAYTR_BASE_URL` yalnızca yerelde ve testte sahte sunucu için kullanılır; canlıda ve staging'de tanımlıysa açılış reddedilir.
+   - iyzico'da sandbox ve canlı adresler sabit iki değerdir; hangisinin kullanılacağı paneldeki moda göre seçilir. Serbest URL yok.
+9. **Kapsam.** Kural, mağazanın kendi sağlayıcı hesaplarına uygulanır: PayTR, iyzico, sonra Geliver, e-fatura ve SMS. Platformun kendi sırları (veritabanı, JWT, PII anahtarları, S3) env'de kalır.
+
+## Alternatifler
+
+| Seçenek | Artı | Eksi |
+|---|---|---|
+| **Panelden, DB'de şifreli (seçilen)** | Mağaza sahibi bilgisini kendisi girer, doğrulanmış olarak; yeniden başlatma yok | Yeni modül; şifreleme anahtarının yönetimi; sağlayıcı paylaşılan container'dan okur |
+| Env + restart (ADR-0002) | Basit, saldırı yüzeyi küçük | Her değişiklik platform ekibine ve yeniden başlatmaya bağlı; müşteri kendi hesabını bağlayamaz |
+| Ayar bölümüne (`platform-settings`) gizli alan | Mevcut kalıp | Ayar okuma ucu her alanı döner; sırların ayrı bir modülde, yalnızca yazılır biçimde durması daha az hataya açık (docs/04: ayar bölümünde sır tutulmaz) |
+| Control plane'de (F17) secret store | En güçlü ayrım (KMS) | F17'ye kadar yok; bu karar F17'de anahtar saklama yerini değiştirir, arayüzü değiştirmez |
+
+## Sonuçlar
+
+- **Env değişiklikleri:** `PAYTR_MERCHANT_*` ve `PAYTR_TEST_MODE` env'e girmez. iyzico'nun yerel `.env`'deki sandbox anahtarları V8'de panele taşınır; iyzico istemcisi V8'de bu modülden okur.
+- **Kurulum:** Yerel `.env`'e `CREDENTIALS_ENCRYPTION_KEY` eklenir (`openssl rand -hex 32`). CI ve testler kendi anahtarlarını üretir.
+- **Panel:** Ayarlar > Ödeme ekranı V1'de gelir: PayTR bağlantısı, test modu, PayTR panelinde yapılacaklar (bildirim adresi, bilgilerin yeri). Taksit ayarları V6'da, işlem kartı V7'de.
+- **Sağlık kontrolü:** PayTR kontrolü kayıtlı bilgilerle durum sorgusu yapar (`004` = sağlıklı).
+- **Medusa yükseltmesinde:** paylaşılan `container`'ın sağlayıcı çağrısında modülü çözdüğü testle yeniden doğrulanır (V2 sözleşme testi).
+- **F12:** Bu uçlar rol modeliyle mağaza sahibine kısıtlanır. Gizli alan değişikliğine ikinci doğrulama (2FA) eklenmesi F12.6'da değerlendirilir.

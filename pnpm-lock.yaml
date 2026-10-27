@@ -114,6 +114,9 @@ importers:
       '@qticaret/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@qticaret/testing':
+        specifier: workspace:*
+        version: link:../../packages/testing
       '@swc/core':
         specifier: 1.16.13
         version: 1.16.13(@swc/helpers@0.5.23)
@@ -344,6 +347,21 @@ importers:
       prettier:
         specifier: 3.9.9
         version: 3.9.9
+      typescript:
+        specifier: 5.9.3
+        version: 5.9.3
+
+  packages/testing:
+    devDependencies:
+      '@qticaret/config':
+        specifier: workspace:*
+        version: link:../config
+      '@types/node':
+        specifier: 24.19.2
+        version: 24.19.2
+      eslint:
+        specifier: 10.12.0
+        version: 10.12.0(jiti@2.7.0)(supports-color@8.1.1)
       typescript:
         specifier: 5.9.3
         version: 5.9.3

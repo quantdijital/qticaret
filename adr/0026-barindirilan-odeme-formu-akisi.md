@@ -1,6 +1,6 @@
 # ADR-0026: Barındırılan ödeme formlarında ödeme akışı
 
-- **Durum:** Önerildi (F5 planlaması). Kullanıcının kalıcı "önerileni uygula" talimatıyla F5 V1 başında uygulanır; itiraz gelirse değiştirilir.
+- **Durum:** Kabul edildi (2026-10-27, F5 V1 başında; kullanıcı itiraz etmedi, kalıcı "önerileni uygula" talimatı). Sağlayıcı bilgileri ve test modu ADR-0027 ile panelden gelir.
 - **Tarih:** 2026-10-27
 
 ## Bağlam
@@ -79,7 +79,7 @@ F5'te iki sağlayıcı yazılır, önce PayTR. Kullanıcı 2026-10-27'de ilk mü
    - Sağlayıcı iptal ve iadeleri `payment.data`'da tutar; her çıktısı verinin tamamıdır.
    - Aynı `context.idempotency_key` ile sağlayıcıya ikinci kez gidilmez. PayTR'de sonuç belirsizse `reference_no` durum sorgusunda aranır.
    - PayTR'de iptal API'si yok; `cancelPayment` tam iade yapar.
-   - Test modunda (`PAYTR_TEST_MODE=on`) yalnızca durum sorgusunda `test_mode=1` görünen işlem iade edilebilir. Test modu canlı anahtarla çalıştığı için bu kural, bir hatanın ya da sızıntının hesabın gerçek ödemelerini iade etmesini engeller.
+   - Test modunda (paneldeki test modu, ADR-0027) yalnızca durum sorgusunda `test_mode=1` görünen işlem iade edilebilir. Test modu canlı anahtarla çalıştığı için bu kural, bir hatanın ya da sızıntının hesabın gerçek ödemelerini iade etmesini engeller.
    - `deletePayment` hiçbir durumda hata fırlatmaz.
 10. **Dönüş adresleri sınırlıdır.**
     - Storefront'un verdiği dönüş adresinin origin'i `STORE_CORS` listesinde olmalı; yol göreli ve güvenli olmalı. Aksi halde 400 döner.

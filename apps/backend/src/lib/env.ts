@@ -40,6 +40,11 @@ const envSchema = z.object({
   COOKIE_SECRET: secret,
   PII_ENCRYPTION_KEY: key256,
   PII_HASH_KEY: key256,
+  // The shop's provider accounts (PayTR, iyzico) are stored encrypted with
+  // it (adr/0027); required once deployed, locally the panel cannot save them
+  CREDENTIALS_ENCRYPTION_KEY: key256.optional(),
+  // A fake PayTR server in development and tests; the real address is fixed in code
+  PAYTR_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
   // Medusa's level names; unset means Medusa's default, `http`
   LOG_LEVEL: z.enum(LOG_LEVELS).optional(),
   // docs/13 §6: "off" keeps search engines out (robots.txt, noindex) on an
@@ -108,6 +113,34 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
       code: "custom",
       path: ["PII_HASH_KEY"],
       message: "must differ from PII_ENCRYPTION_KEY",
+    })
+  }
+  const credentialsKey = env.CREDENTIALS_ENCRYPTION_KEY?.toLowerCase()
+  if (deployed && credentialsKey === undefined) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["CREDENTIALS_ENCRYPTION_KEY"],
+      message: "is required in production and staging",
+    })
+  }
+  // Provider secrets and personal data are kept apart: one key's loss or
+  // rotation must not touch the other (adr/0027)
+  if (
+    credentialsKey !== undefined &&
+    [env.PII_ENCRYPTION_KEY, env.PII_HASH_KEY].some((key) => key.toLowerCase() === credentialsKey)
+  ) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["CREDENTIALS_ENCRYPTION_KEY"],
+      message: "must differ from the PII keys",
+    })
+  }
+  // Payments go to the provider's own address only; a fake server is for local runs
+  if (env.PAYTR_BASE_URL !== undefined && !isLocalEnv(env)) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["PAYTR_BASE_URL"],
+      message: "is only allowed in development and test",
     })
   }
 })

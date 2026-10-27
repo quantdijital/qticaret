@@ -73,6 +73,15 @@ module.exports = defineConfig({
         versionKey: `qt:settings:${namespace}:version`,
       },
     },
+    // adr/0027: the shop's provider accounts, sealed with their own key
+    {
+      resolve: "./src/modules/integration-credentials",
+      options: {
+        encryptionKey: env.CREDENTIALS_ENCRYPTION_KEY,
+        redisUrl: env.REDIS_URL,
+        versionKey: `qt:credentials:${namespace}:version`,
+      },
+    },
     {
       resolve: "./src/modules/billing-profile",
       options: { encryptionKey: env.PII_ENCRYPTION_KEY, hashKey: env.PII_HASH_KEY },

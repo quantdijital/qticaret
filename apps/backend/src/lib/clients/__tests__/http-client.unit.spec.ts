@@ -19,6 +19,31 @@ describe("createHttpClient", () => {
     expect(provider.requests[0]?.headers["content-type"]).toBe("application/json")
   })
 
+  it("sends form fields URL-encoded (PayTR's APIs)", async () => {
+    provider.setHandler(json(200, { id: "i_1" }))
+
+    await client().http.request({
+      method: "POST",
+      path: "/odeme/iade",
+      form: { merchant_oid: "SIP001", note: "a&b=ç" },
+      schema: Item,
+    })
+
+    expect(provider.requests[0]?.headers["content-type"]).toBe("application/x-www-form-urlencoded")
+    expect(new URLSearchParams(provider.requests[0]?.body)).toEqual(
+      new URLSearchParams({ merchant_oid: "SIP001", note: "a&b=ç" })
+    )
+  })
+
+  it("refuses a request with both a JSON and a form body before sending it", async () => {
+    const error = await errorOf(
+      client().http.request({ method: "POST", path: "/x", json: {}, form: {}, schema: Item })
+    )
+
+    expect(error).toMatchObject({ name: "HttpClientMisuse" })
+    expect(provider.requests).toHaveLength(0)
+  })
+
   it("keeps the base URL's path prefix and encodes segments", async () => {
     provider.setHandler(json(200, { id: "i_1" }))
     const { http } = client({ baseUrl: `${provider.baseUrl()}/api/v1` })

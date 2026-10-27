@@ -1,0 +1,10 @@
+{
+  "extends": "@qticaret/config/tsconfig/base.json",
+  "compilerOptions": {
+    // CommonJS like the backend that runs these in Jest (no "type": "module")
+    "verbatimModuleSyntax": false,
+    "types": ["node"],
+    "noEmit": true
+  },
+  "include": ["src"]
+}
