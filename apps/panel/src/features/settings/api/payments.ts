@@ -43,11 +43,11 @@ const ACCOUNTS_KEY = ["settings", "provider-accounts"] as const
 const accountUrl = (provider: string) =>
   `/admin/integrations/credentials/${encodeURIComponent(provider)}`
 
+export const fetchProviderAccounts = () =>
+  sdk.client.fetch<AccountsResponse>("/admin/integrations/credentials")
+
 export const providerAccountsQuery = () =>
-  queryOptions({
-    queryKey: ACCOUNTS_KEY,
-    queryFn: () => sdk.client.fetch<AccountsResponse>("/admin/integrations/credentials"),
-  })
+  queryOptions({ queryKey: ACCOUNTS_KEY, queryFn: fetchProviderAccounts })
 
 interface AccountAnswer {
   account: ProviderAccount
@@ -62,6 +62,8 @@ function useAccountMutation<T>(call: (input: T) => Promise<AccountAnswer>) {
     gcTime: 0,
     onSettled: async () => {
       await client.invalidateQueries({ queryKey: ACCOUNTS_KEY })
+      // The setup checklist's payment step
+      await client.invalidateQueries({ queryKey: ["dashboard", "setup"] })
     },
   })
 }

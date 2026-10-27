@@ -112,6 +112,10 @@
         "product": {
           "title": "İlk ürününüzü yayınlayın",
           "description": "Yalnızca yayındaki ürünler mağazada görünür."
+        },
+        "payment": {
+          "title": "Kartla ödeme alın",
+          "description": "PayTR ya da iyzico hesabınızı bağlayın; müşteri kartla ödeyebilsin."
         }
       },
       "openInAdvanced": "Gelişmiş panelde aç",
@@ -219,7 +223,8 @@
       "jobs": "İşler",
       "audit": "Denetim kaydı",
       "attributes": "Ürün özellikleri",
-      "locations": "Depolar"
+      "locations": "Depolar",
+      "integrations": "Entegrasyonlar"
     },
     "appearance": {
       "title": "Görünüm",
@@ -633,6 +638,41 @@
         "count_one": "{{count}} taksit",
         "count_other": "{{count}} taksit"
       }
+    },
+    "integrations": {
+      "title": "Entegrasyonlar",
+      "subtitle": "Mağazanın bağlı olduğu dış servislerin şu an çalışıp çalışmadığı.",
+      "health": {
+        "title": "Bağlantı durumu",
+        "all_ok": "Bağlı servislerin hepsi yanıt veriyor.",
+        "degraded": "Yanıt vermeyen servis var; ayrıntısı satırında.",
+        "checked": "Son kontrol: {{when}}",
+        "refresh": "Yeniden kontrol et"
+      },
+      "checks": {
+        "redis": "Önbellek (Redis)",
+        "paytr": "PayTR",
+        "iyzico": "iyzico"
+      },
+      "kinds": {
+        "cache": "Önbellek ve oturumlar",
+        "payment": "Kartla ödeme"
+      },
+      "status": {
+        "ok": "Çalışıyor",
+        "down": "Yanıt yok",
+        "not_configured": "Bağlı değil"
+      },
+      "reasons": {
+        "timeout": "Zamanında yanıt vermedi.",
+        "auth_failed": "Hesap bilgileri reddedildi; hesabı yeniden kaydedin.",
+        "connection_failed": "Bağlantı kurulamadı.",
+        "error_reply": "Hata ile yanıt verdi.",
+        "unexpected_reply": "Beklenmeyen bir yanıt verdi.",
+        "error": "Kontrol sırasında hata oluştu."
+      },
+      "latency": "{{ms}} ms",
+      "manage": "Hesabı yönet"
     }
   },
   "status": {

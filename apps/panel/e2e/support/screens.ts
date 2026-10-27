@@ -22,6 +22,7 @@ export const SETTINGS = [
   "/settings/payments",
   "/settings/payments/paytr",
   "/settings/payments/iyzico",
+  "/settings/integrations",
   "/settings/appearance",
   "/settings/locations",
   "/settings/seo",

@@ -13,10 +13,13 @@ export interface SetupFacts {
   regionCount: number
   locationCount: number
   shippingOptionCount: number
+  /** Card provider accounts connected in Settings > Payment (F5). */
+  paymentAccountCount: number
   publishedProductCount: number
 }
 
-export type SetupStepKey = "storeName" | "currency" | "region" | "location" | "shipping" | "product"
+export type SetupStepKey =
+  "storeName" | "currency" | "region" | "location" | "shipping" | "payment" | "product"
 
 export interface SetupStep {
   key: SetupStepKey
@@ -45,6 +48,13 @@ export const SETUP_STEPS: readonly SetupStep[] = [
     key: "shipping",
     advancedPath: "/settings/locations",
     isDone: (facts) => facts.shippingOptionCount > 0,
+  },
+  {
+    key: "payment",
+    // Medusa's admin has no screen for it: the panel's own is the only one
+    advancedPath: "/settings/regions",
+    panelPath: "/settings/payments",
+    isDone: (facts) => facts.paymentAccountCount > 0,
   },
   {
     key: "product",

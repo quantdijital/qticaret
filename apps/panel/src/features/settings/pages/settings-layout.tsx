@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils"
 const SECTIONS = [
   { key: "store", to: "/settings/store" },
   { key: "payments", to: "/settings/payments" },
+  { key: "integrations", to: "/settings/integrations" },
   { key: "locations", to: "/settings/locations" },
   { key: "appearance", to: "/settings/appearance" },
   { key: "seo", to: "/settings/seo" },

@@ -112,6 +112,10 @@
         "product": {
           "title": "Publish your first product",
           "description": "Only published products show in the shop."
+        },
+        "payment": {
+          "title": "Take card payments",
+          "description": "Connect your PayTR or iyzico account so customers can pay by card."
         }
       },
       "openInAdvanced": "Open in the advanced panel",
@@ -219,7 +223,8 @@
       "jobs": "Jobs",
       "audit": "Audit log",
       "attributes": "Product attributes",
-      "locations": "Locations"
+      "locations": "Locations",
+      "integrations": "Integrations"
     },
     "appearance": {
       "title": "Appearance",
@@ -633,6 +638,41 @@
         "count_one": "{{count}} installment",
         "count_other": "{{count}} installments"
       }
+    },
+    "integrations": {
+      "title": "Integrations",
+      "subtitle": "Whether the outside services the shop depends on are working right now.",
+      "health": {
+        "title": "Connection status",
+        "all_ok": "Every connected service answers.",
+        "degraded": "A service is not answering; its row says why.",
+        "checked": "Checked: {{when}}",
+        "refresh": "Check again"
+      },
+      "checks": {
+        "redis": "Cache (Redis)",
+        "paytr": "PayTR",
+        "iyzico": "iyzico"
+      },
+      "kinds": {
+        "cache": "Cache and sessions",
+        "payment": "Card payments"
+      },
+      "status": {
+        "ok": "Working",
+        "down": "Not answering",
+        "not_configured": "Not connected"
+      },
+      "reasons": {
+        "timeout": "Did not answer in time.",
+        "auth_failed": "The account details were refused; save the account again.",
+        "connection_failed": "Could not connect.",
+        "error_reply": "Answered with an error.",
+        "unexpected_reply": "Gave an unexpected answer.",
+        "error": "The check failed."
+      },
+      "latency": "{{ms}} ms",
+      "manage": "Manage account"
     }
   },
   "status": {

@@ -8,6 +8,7 @@ const READY: SetupFacts = {
   regionCount: 1,
   locationCount: 1,
   shippingOptionCount: 1,
+  paymentAccountCount: 1,
   publishedProductCount: 3,
 }
 
@@ -15,7 +16,7 @@ describe("setupStatus", () => {
   it("is done once every step is", () => {
     const status = setupStatus(READY)
 
-    expect(status.doneCount).toBe(6)
+    expect(status.doneCount).toBe(7)
     expect(status.nextKey).toBeNull()
   })
 
@@ -26,6 +27,12 @@ describe("setupStatus", () => {
     expect(setupStatus({ ...READY, regionCount: 0, publishedProductCount: 0 }).nextKey).toBe(
       "region"
     )
+  })
+
+  it("asks for a card provider after shipping, before the first product", () => {
+    expect(
+      setupStatus({ ...READY, paymentAccountCount: 0, publishedProductCount: 0 }).nextKey
+    ).toBe("payment")
   })
 
   it("does not count Medusa's default store name, or a blank one, as a name", () => {
