@@ -517,7 +517,7 @@ Ayrı uygulama (`apps/control-plane`). Başlamadan önce ayrı ADR (teknoloji, v
 ---
 
 ## F18 — Storefront ve Çoklu Tema (sonraki aşama)
-Şimdi kod yazılmaz, ama backend şu garantileri verir ve storefront şu kurallara uyar:
+Şimdi kod yazılmaz (tek istisna: geliştirmede açılan ödeme deneme sayfası, adr/0028; F18 başlayınca silinir), ama backend şu garantileri verir ve storefront şu kurallara uyar:
 - Store API tema bağımsızdır; tema'ya özel alan backend'e sızmaz. `seo` payload'ı (doc 13 §1) her temada olduğu gibi basılır; tema kendi SEO mantığı yazmaz.
 - **SSR zorunlu:** title, meta, canonical, robots, JSON-LD ilk HTML'de; JavaScript'le enjekte edilmez. Non-200 sayfalarda JS render'a güvenilmez.
 - **Core Web Vitals bütçeleri:** LCP ≤ 2,5 s, INP ≤ 200 ms, CLS ≤ 0,1 (p75, mobil). LCP görseli lazy değil; `srcset`/WebP/AVIF; HTML ilk 2 MB içinde kritik içerik.

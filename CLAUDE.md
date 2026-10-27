@@ -9,7 +9,7 @@ sektörel ihtiyaçlar feature flag ve attribute şablonlarıyla çözülür.
 Model: **instance-per-tenant** (her müşteriye ayrı Medusa instance + ayrı DB).
 
 ## Şu anki odak
-Backend + kendi yönetici panelimiz (`apps/panel`, adr/0022). Medusa Admin'e yeni ekran yazılmaz. Storefront/temalar SONRAKİ aşama — şimdi storefront kodu yazma.
+Backend + kendi yönetici panelimiz (`apps/panel`, adr/0022). Medusa Admin'e yeni ekran yazılmaz. Storefront/temalar SONRAKİ aşama — şimdi storefront kodu yazma (tek istisna: yalnızca geliştirmede açılan ödeme deneme sayfası, adr/0028).
 Güncel faz ve görevler: `PROGRESS.md`
 
 ## Stack
