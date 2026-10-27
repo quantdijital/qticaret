@@ -537,6 +537,27 @@
       "upcoming": "Coming soon",
       "connect": "Connect",
       "manage": "Manage",
+      "account": {
+        "keyMissing": "The server has no encryption key for payment details, so they cannot be saved. Tell the platform team.",
+        "unreadable": "The stored details can no longer be read (the server's encryption key may have changed). Enter the secrets again.",
+        "secretHint": "Copy it from the {{name}} panel and paste it here.",
+        "secretStored": "Stored. Enter a new one to change it; left blank, the stored value stays.",
+        "secretRequired": "Enter this; it is needed on the first connection and when the account changes.",
+        "secretFormat": "8–128 characters without spaces; copy it from the {{name}} panel and paste it here.",
+        "save": "Save and verify",
+        "test": "Test the connection",
+        "remove": "Disconnect",
+        "removeTitle": "Disconnect {{name}}?",
+        "removeDescription": "The stored details are deleted and your shop cannot take payments through {{name}}. To connect again you enter them anew.",
+        "removed": "{{name}} disconnected.",
+        "checks": {
+          "valid": "{{name}} accepted the details; the connection is ready.",
+          "unreachable": "Saved, but {{name}} did not answer just now. Try \"Test the connection\" again in a while.",
+          "unreachableTest": "{{name}} did not answer just now; the connection's state did not change. Try again in a while.",
+          "failed": "{{name}} gave an unexpected answer; nothing changed. Try again in a while.",
+          "not_configured": "No {{name}} account is stored."
+        }
+      },
       "paytr": {
         "account": {
           "title": "Store details",
@@ -557,36 +578,45 @@
         "merchantIdInvalid": "Enter the merchant number in digits.",
         "merchant_key": "Merchant key",
         "merchant_salt": "Merchant salt",
-        "secretHint": "Copy it from the PayTR panel and paste it here.",
-        "secretStored": "Stored. Enter a new one to change it; left blank, the stored value stays.",
-        "secretRequired": "Enter this; it is needed on the first connection and when the merchant number changes.",
         "testMode": "Test mode",
         "testModeHint": "While on, no real money is taken; you try payments with PayTR's test cards.",
-        "keyMissing": "The server has no encryption key for payment details, so they cannot be saved. Tell the platform team.",
-        "unreadable": "The stored details can no longer be read (the server's encryption key may have changed). Enter the merchant key and salt again.",
-        "save": "Save and verify",
-        "test": "Test the connection",
-        "remove": "Disconnect",
-        "removeTitle": "Disconnect PayTR?",
-        "removeDescription": "The stored details are deleted and your shop cannot take payments through PayTR. To connect again you enter them anew.",
-        "removed": "PayTR disconnected.",
         "checks": {
-          "valid": "PayTR accepted the details; the connection is ready.",
-          "unreachable": "Saved, but PayTR could not be reached just now. Try \"Test the connection\" again in a while.",
           "merchant_invalid": "PayTR does not know this merchant number, or the store is not active.",
-          "secret_invalid": "PayTR did not accept the merchant key or salt.",
-          "not_configured": "No PayTR account is stored.",
-          "failed": "PayTR gave an unexpected answer; nothing changed. Try again in a while.",
-          "unreachableTest": "PayTR could not be reached just now; the connection's state did not change. Try again in a while."
+          "secret_invalid": "PayTR did not accept the merchant key or salt."
         },
-        "rejected": "PayTR no longer accepts the stored details; payments cannot be taken. Copy the merchant key and salt again from PayTR's Entegrasyon Bilgileri page.",
-        "secretFormat": "It must be 8–128 characters without spaces; copy it from the PayTR panel."
+        "rejected": "PayTR no longer accepts the stored details; payments cannot be taken. Copy the merchant key and salt again from PayTR's Entegrasyon Bilgileri page."
       },
       "address": {
         "copy": "Copy the address",
         "copied": "Address copied.",
         "copyFailed": "Could not copy; select the address and copy it yourself.",
         "notPublic": "This address cannot be reached from the internet. Give the provider your shop's own address starting with https."
+      },
+      "iyzico": {
+        "keys": {
+          "title": "API keys",
+          "description": "Copy them from the API keys section of your iyzico panel (in the sandbox: Settings > Merchant Settings > API Keys). Both are stored encrypted and never shown again once saved."
+        },
+        "api_key": "API key",
+        "secret_key": "Secret key",
+        "notification": {
+          "title": "Notification address",
+          "description": "iyzico also reports payment results to this address; payments whose return was missed are caught this way.",
+          "where": "Paste it into the iyzico panel under Settings > Company Settings > Merchant Notifications. Email entegrasyon@iyzico.com to have the notifications signed (V3)."
+        },
+        "live": {
+          "title": "Sandbox and going live",
+          "description": "Try a payment in iyzico's test environment before you open your shop.",
+          "where": "Going live needs iyzico to approve your application. Then enter the keys from the live panel, turn the sandbox off and save."
+        },
+        "testMode": "Sandbox",
+        "testModeHint": "While on, no real money is taken. Sandbox and live keys differ; enter both again when you switch.",
+        "sandboxKeyLive": "This is a sandbox key. Enter the live key or keep the sandbox on.",
+        "checks": {
+          "merchant_invalid": "iyzico does not know this API key. Make sure it belongs to the chosen environment (sandbox or live).",
+          "secret_invalid": "iyzico did not accept the secret key. Copy it again from the same page as the API key."
+        },
+        "rejected": "iyzico no longer accepts the stored keys; no payment can be taken. Copy both keys from the iyzico panel and enter them again."
       }
     }
   },
@@ -2326,7 +2356,7 @@
       "by": "Changed by {{who}}",
       "changes": {
         "connected": "account connected",
-        "account": "merchant number changed",
+        "account": "another account was connected",
         "secrets": "secrets changed",
         "test_mode_on": "test mode turned on",
         "test_mode_off": "test mode turned off",

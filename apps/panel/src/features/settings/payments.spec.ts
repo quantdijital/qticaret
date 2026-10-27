@@ -90,11 +90,11 @@ describe("PayTR settings form", () => {
       })
     ).toEqual(["merchant_id:settings.payments.paytr.merchantIdInvalid"])
     expect(issues(connected, { merchant_id: "100002" })).toEqual([
-      "merchant_key:settings.payments.paytr.secretRequired",
-      "merchant_salt:settings.payments.paytr.secretRequired",
+      "merchant_key:settings.payments.account.secretRequired",
+      "merchant_salt:settings.payments.account.secretRequired",
     ])
     expect(issues(undefined, { merchant_key: "testkey-testkey", merchant_salt: "a b" })).toEqual([
-      "merchant_salt:settings.payments.paytr.secretFormat",
+      "merchant_salt:settings.payments.account.secretFormat",
     ])
   })
 })

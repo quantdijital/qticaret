@@ -26,16 +26,17 @@ export interface ProviderAccount<Settings = Record<string, unknown>> {
 }
 
 export type PaytrAccount = ProviderAccount<{ merchant_id: string; test_mode: boolean }>
+export type IyzicoAccount = ProviderAccount<{ test_mode: boolean }>
 
 interface AccountsResponse {
   key_configured: boolean
   accounts: ProviderAccount[]
 }
 
-export interface PaytrSave {
-  settings: { merchant_id: string; test_mode: boolean }
+export interface AccountSave {
+  settings: Record<string, unknown>
   /** Only the secrets typed in; one left out keeps the stored value. */
-  secrets?: { merchant_key?: string; merchant_salt?: string }
+  secrets?: Record<string, string>
 }
 
 const ACCOUNTS_KEY = ["settings", "provider-accounts"] as const
@@ -65,21 +66,21 @@ function useAccountMutation<T>(call: (input: T) => Promise<AccountAnswer>) {
   })
 }
 
-/** Saves after PayTR accepted the details; refused ones come back as a 400 with the reason. */
-export const useSavePaytr = () =>
-  useAccountMutation((body: PaytrSave) =>
-    sdk.client.fetch<AccountAnswer>(accountUrl("paytr"), { method: "POST", body })
+/** Saves after the provider accepted the details; refused ones come back as a 400 with the reason. */
+export const useSaveAccount = (provider: string) =>
+  useAccountMutation((body: AccountSave) =>
+    sdk.client.fetch<AccountAnswer>(accountUrl(provider), { method: "POST", body })
   )
 
 /** "Test the connection" with what is stored. */
-export const useCheckPaytr = () =>
+export const useCheckAccount = (provider: string) =>
   useAccountMutation(() =>
-    sdk.client.fetch<AccountAnswer>(`${accountUrl("paytr")}/check`, { method: "POST", body: {} })
+    sdk.client.fetch<AccountAnswer>(`${accountUrl(provider)}/check`, { method: "POST", body: {} })
   )
 
-export const useRemovePaytr = () =>
+export const useRemoveAccount = (provider: string) =>
   useAccountMutation(async () => ({
-    ...(await sdk.client.fetch<{ account: ProviderAccount }>(accountUrl("paytr"), {
+    ...(await sdk.client.fetch<{ account: ProviderAccount }>(accountUrl(provider), {
       method: "DELETE",
     })),
     check: null,

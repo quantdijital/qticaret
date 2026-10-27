@@ -5,12 +5,13 @@ import { useTranslation } from "react-i18next"
 import { PageHeader } from "@/components/patterns/page-header"
 import { ErrorState, LoadingRows } from "@/components/patterns/states"
 import { providerAccountsQuery } from "@/features/settings/api/payments"
-import type { PaytrAccount, ProviderAccount } from "@/features/settings/api/payments"
+import type { IyzicoAccount, PaytrAccount, ProviderAccount } from "@/features/settings/api/payments"
 import { AccountBadges } from "@/features/settings/components/account-badges"
+import { IyzicoSettings } from "@/features/settings/components/iyzico-settings"
 import { PaytrSettings } from "@/features/settings/components/paytr-settings"
 import { isConnectable } from "@/features/settings/payment-methods"
 import type { ConnectableMethod } from "@/features/settings/payment-methods"
-import { paytrCardKey } from "@/features/settings/payments"
+import { accountKey } from "@/features/settings/payments"
 import { errorText } from "@/lib/errors"
 
 const route = getRouteApi("/_auth/settings/payments/$provider")
@@ -20,13 +21,26 @@ interface ProviderSettingsProps {
   keyConfigured: boolean
 }
 
-/** Each provider's own settings; installments join PayTR's in V6, iyzico its own in V8. */
+/**
+ * Each provider's own settings, keyed by the stored account so a save
+ * starts the form afresh. The server describes each account with that
+ * provider's settings (adr/0027). Installments join in V6 and V10.
+ */
 const PROVIDER_SETTINGS: Record<ConnectableMethod, (props: ProviderSettingsProps) => ReactNode> = {
-  paytr: ({ account, keyConfigured }) => {
-    // The server describes PayTR's account with PayTR's settings (adr/0027)
-    const paytr = account as PaytrAccount | undefined
-    return <PaytrSettings key={paytrCardKey(paytr)} account={paytr} keyConfigured={keyConfigured} />
-  },
+  paytr: ({ account, keyConfigured }) => (
+    <PaytrSettings
+      key={accountKey(account)}
+      account={account as PaytrAccount | undefined}
+      keyConfigured={keyConfigured}
+    />
+  ),
+  iyzico: ({ account, keyConfigured }) => (
+    <IyzicoSettings
+      key={accountKey(account)}
+      account={account as IyzicoAccount | undefined}
+      keyConfigured={keyConfigured}
+    />
+  ),
 }
 
 /** Settings > Payment > one provider: its state by the title, its settings below. */

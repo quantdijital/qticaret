@@ -8,8 +8,8 @@ import type { ProviderAccount } from "@/features/settings/api/payments"
  */
 export const PAYMENT_METHODS = [
   { id: "paytr", group: "card", upcoming: false },
-  // Listed so the shop knows they are coming: iyzico in F5 V8, the others in F6
-  { id: "iyzico", group: "card", upcoming: true },
+  { id: "iyzico", group: "card", upcoming: false },
+  // Listed so the shop knows they are coming (F6)
   { id: "bank_transfer", group: "other", upcoming: true },
   { id: "cash_on_delivery", group: "other", upcoming: true },
 ] as const

@@ -537,6 +537,27 @@
       "upcoming": "Yakında",
       "connect": "Bağla",
       "manage": "Yönet",
+      "account": {
+        "keyMissing": "Sunucuda ödeme bilgilerini saklamak için gereken şifreleme anahtarı tanımlı değil. Bilgiler kaydedilemiyor; platform ekibine bildirin.",
+        "unreadable": "Kayıtlı bilgiler artık okunamıyor (sunucunun şifreleme anahtarı değişmiş olabilir). Gizli bilgileri yeniden girin.",
+        "secretHint": "{{name}} panelinden kopyalayıp yapıştırın.",
+        "secretStored": "Kayıtlı. Değiştirmek için yenisini girin; boş bırakırsanız kayıtlı değer korunur.",
+        "secretRequired": "Bu bilgiyi girin; ilk bağlantıda ve hesap değişince gerekir.",
+        "secretFormat": "8–128 karakter olmalı ve boşluk içermemeli; {{name}} panelinden kopyalayıp yapıştırın.",
+        "save": "Kaydet ve doğrula",
+        "test": "Bağlantıyı test et",
+        "remove": "Bağlantıyı kaldır",
+        "removeTitle": "{{name}} bağlantısı kaldırılsın mı?",
+        "removeDescription": "Kayıtlı bilgiler silinir ve mağazanız {{name}} ile ödeme alamaz. Yeniden bağlamak için bilgileri tekrar girmeniz gerekir.",
+        "removed": "{{name}} bağlantısı kaldırıldı.",
+        "checks": {
+          "valid": "{{name}} bilgileri doğruladı, bağlantı hazır.",
+          "unreachable": "Bilgiler kaydedildi ama {{name}} şu an yanıt vermedi. Biraz sonra \"Bağlantıyı test et\" ile tekrar deneyin.",
+          "unreachableTest": "{{name}} şu an yanıt vermedi; bağlantının durumu değişmedi. Biraz sonra tekrar deneyin.",
+          "failed": "{{name}} beklenmedik bir yanıt verdi; durum değişmedi. Biraz sonra tekrar deneyin.",
+          "not_configured": "Kayıtlı bir {{name}} hesabı yok."
+        }
+      },
       "paytr": {
         "account": {
           "title": "Mağaza bilgileri",
@@ -557,36 +578,45 @@
         "merchantIdInvalid": "Mağaza numarasını rakamlarla girin.",
         "merchant_key": "Mağaza parola",
         "merchant_salt": "Mağaza gizli anahtar",
-        "secretHint": "PayTR panelinden kopyalayıp yapıştırın.",
-        "secretStored": "Kayıtlı. Değiştirmek için yenisini girin; boş bırakırsanız kayıtlı değer korunur.",
-        "secretRequired": "Bu bilgiyi girin; mağaza numarası değişince ya da ilk bağlantıda gerekir.",
         "testMode": "Test modu",
         "testModeHint": "Açıkken gerçek para çekilmez; ödemeleri PayTR'nin test kartlarıyla denersiniz.",
-        "keyMissing": "Sunucuda ödeme bilgilerini saklamak için gereken şifreleme anahtarı tanımlı değil. Bilgiler kaydedilemiyor; platform ekibine bildirin.",
-        "unreadable": "Kayıtlı bilgiler artık okunamıyor (sunucunun şifreleme anahtarı değişmiş olabilir). Mağaza parolasını ve gizli anahtarı yeniden girin.",
-        "save": "Kaydet ve doğrula",
-        "test": "Bağlantıyı test et",
-        "remove": "Bağlantıyı kaldır",
-        "removeTitle": "PayTR bağlantısı kaldırılsın mı?",
-        "removeDescription": "Kayıtlı mağaza bilgileri silinir ve mağazanız PayTR ile ödeme alamaz. Yeniden bağlamak için bilgileri tekrar girmeniz gerekir.",
-        "removed": "PayTR bağlantısı kaldırıldı.",
         "checks": {
-          "valid": "PayTR bilgileri doğruladı, bağlantı hazır.",
-          "unreachable": "Bilgiler kaydedildi ama PayTR'ye şu an ulaşılamadı. Biraz sonra \"Bağlantıyı test et\" ile tekrar deneyin.",
           "merchant_invalid": "PayTR bu mağaza numarasını tanımadı ya da mağaza aktif değil.",
-          "secret_invalid": "PayTR mağaza parolasını ya da gizli anahtarı kabul etmedi.",
-          "not_configured": "Kayıtlı bir PayTR hesabı yok.",
-          "failed": "PayTR beklenmedik bir yanıt verdi; durum değişmedi. Biraz sonra tekrar deneyin.",
-          "unreachableTest": "PayTR'ye şu an ulaşılamadı; bağlantının durumu değişmedi. Biraz sonra tekrar deneyin."
+          "secret_invalid": "PayTR mağaza parolasını ya da gizli anahtarı kabul etmedi."
         },
-        "rejected": "PayTR kayıtlı bilgileri artık kabul etmiyor; ödeme alınamaz. Mağaza parolasını ve gizli anahtarı PayTR'nin Entegrasyon Bilgileri sayfasından yeniden kopyalayıp girin.",
-        "secretFormat": "8–128 karakter olmalı ve boşluk içermemeli; PayTR panelinden kopyalayıp yapıştırın."
+        "rejected": "PayTR kayıtlı bilgileri artık kabul etmiyor; ödeme alınamaz. Mağaza parolasını ve gizli anahtarı PayTR'nin Entegrasyon Bilgileri sayfasından yeniden kopyalayıp girin."
       },
       "address": {
         "copy": "Adresi kopyala",
         "copied": "Adres kopyalandı.",
         "copyFailed": "Kopyalanamadı; adresi seçip kendiniz kopyalayın.",
         "notPublic": "Bu adres internetten erişilebilir değil. Sağlayıcıya mağazanızın https ile başlayan kendi adresini verin."
+      },
+      "iyzico": {
+        "keys": {
+          "title": "API anahtarları",
+          "description": "iyzico panelinizin API anahtarları bölümünden kopyalayın (sandbox'ta Settings > Merchant Settings > API Keys). İkisi de şifreli saklanır; kaydedildikten sonra hiçbir yerde gösterilmez."
+        },
+        "api_key": "API anahtarı",
+        "secret_key": "Gizli anahtar",
+        "notification": {
+          "title": "Bildirim adresi",
+          "description": "iyzico ödeme sonuçlarını bu adrese de bildirir; dönüşü kaçan ödemeler böyle yakalanır.",
+          "where": "iyzico panelinde Ayarlar > Firma Ayarları > İşyeri Bildirimleri'ne yapıştırın. Bildirimlerin imzalı (V3) gelmesi için entegrasyon@iyzico.com adresine e-posta gönderin."
+        },
+        "live": {
+          "title": "Sandbox ve canlıya geçiş",
+          "description": "Mağazanızı açmadan önce ödemeyi iyzico'nun test ortamında deneyin.",
+          "where": "Canlıya geçmek için iyzico'nun başvurunuzu onaylaması gerekir. Onaydan sonra canlı paneldeki anahtarları girin, sandbox'ı kapatın ve kaydedin."
+        },
+        "testMode": "Sandbox",
+        "testModeHint": "Açıkken gerçek para çekilmez. Sandbox ve canlı anahtarlar farklıdır; modu değiştirince iki anahtarı da yeniden girin.",
+        "sandboxKeyLive": "Bu bir sandbox anahtarı. Canlı anahtarı girin ya da sandbox'ı açık bırakın.",
+        "checks": {
+          "merchant_invalid": "iyzico bu API anahtarını tanımadı. Anahtarın seçili ortama (sandbox ya da canlı) ait olduğundan emin olun.",
+          "secret_invalid": "iyzico gizli anahtarı kabul etmedi. API anahtarıyla aynı sayfadan yeniden kopyalayın."
+        },
+        "rejected": "iyzico kayıtlı anahtarları artık kabul etmiyor; ödeme alınamaz. İki anahtarı da iyzico panelinden yeniden kopyalayıp girin."
       }
     }
   },
@@ -2334,7 +2364,7 @@
       "by": "{{who}} değiştirdi",
       "changes": {
         "connected": "hesap bağlandı",
-        "account": "mağaza numarası değişti",
+        "account": "başka bir hesap bağlandı",
         "secrets": "gizli bilgiler değişti",
         "test_mode_on": "test modu açıldı",
         "test_mode_off": "test modu kapatıldı",

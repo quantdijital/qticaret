@@ -72,6 +72,15 @@ describe("PaymentsPage", () => {
     expect(within(other).getByText("Kapıda ödeme")).toBeInTheDocument()
   })
 
+  it("offers to connect iyzico on its own page", async () => {
+    renderPage(paytr({}))
+
+    expect(within(await row("iyzico")).getByRole("link", { name: "Bağla" })).toHaveAttribute(
+      "href",
+      "/settings/payments/iyzico"
+    )
+  })
+
   it("offers to connect PayTR while no account is stored", async () => {
     renderPage(paytr({}))
     const paytrRow = await row("PayTR")
@@ -109,7 +118,7 @@ describe("PaymentsPage", () => {
   it("lists the methods still being built without a way in", async () => {
     renderPage(paytr({}))
 
-    for (const name of ["iyzico", "Havale / EFT", "Kapıda ödeme"]) {
+    for (const name of ["Havale / EFT", "Kapıda ödeme"]) {
       const upcoming = await row(name)
       expect(within(upcoming).getByText("Yakında")).toBeInTheDocument()
       expect(within(upcoming).queryByRole("link")).toBeNull()

@@ -4,7 +4,8 @@ import { inTestMode, isConnectable } from "@/features/settings/payment-methods"
 describe("payment methods", () => {
   it("opens a page only for a method that is built", () => {
     expect(isConnectable("paytr")).toBe(true)
-    expect(isConnectable("iyzico")).toBe(false)
+    expect(isConnectable("iyzico")).toBe(true)
+    expect(isConnectable("bank_transfer")).toBe(false)
     expect(isConnectable("cash_on_delivery")).toBe(false)
     expect(isConnectable("paytr2")).toBe(false)
   })
