@@ -641,6 +641,29 @@
       "preferred": {
         "title": "Preferred provider",
         "hint": "The storefront offers it first for card payments; the installment table shows its prices."
+      },
+      "bankTransfer": {
+        "on": "On",
+        "off": "Off",
+        "required": "Fill in this field.",
+        "ibanInvalid": "The IBAN is not valid; check the 26 characters starting with TR.",
+        "ibanHint": "Shoppers pay into this account, writing the order number in the description.",
+        "deadlineInvalid": "It must be between 1 and 336 hours.",
+        "holder": "Account holder",
+        "bank": "Bank",
+        "deadline": "Time to pay (hours)",
+        "deadlineHint": "An order not paid within it is cancelled and its stock returned.",
+        "account": {
+          "title": "Account",
+          "description": "Shown to shoppers who pick bank transfer."
+        },
+        "status": {
+          "title": "Paying by bank transfer",
+          "description": "When on, shoppers can pay by transfer; the order waits for the money.",
+          "enabled": "Offer it to shoppers",
+          "enabledHint": "When the money comes, you confirm it on the order's page.",
+          "needsAccount": "Save the account first to turn it on."
+        }
       }
     },
     "integrations": {

@@ -12,7 +12,7 @@ export default [
   },
   {
     // The payment test page's script runs in the browser (adr/0028)
-    files: ["src/lib/dev-checkout/checkout.js"],
+    files: ["src/lib/dev-checkout/*.js"],
     languageOptions: {
       sourceType: "script",
       globals: { document: "readonly", location: "readonly", localStorage: "readonly" },

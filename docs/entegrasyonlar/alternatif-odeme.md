@@ -13,6 +13,13 @@ süre dolarsa    → job: sipariş iptal, rezervasyon serbest, müşteriye bildi
 - IBAN, banka adı, hesap sahibi, ödeme süresi (saat) `platform-settings`'te; secret değildir.
 - Açıklama kodu benzersiz ve kısa; admin listesinde ödeme eşleştirmesini kolaylaştırır.
 - Banka hesap hareketi otomatik eşleştirme (banka API'si) sonraki iyileştirme; ilk sürüm manuel onay.
+- **Uygulama (F6 W1, ADR-0029):**
+  - `pp_bank-transfer_bank-transfer`, Medusa'nın `pending_authorization` durumuyla. Sipariş `awaiting` oluşur, `Payment` yoktur.
+  - Onay W2'de: oturumun verisine `confirmed_at` yazılır, yeniden yetkilendirmede `captured` döner.
+  - Ayar bölümü `bank_transfer`: `enabled`, `account_holder`, `bank_name`, `iban` (boşluksuz, TR mod-97), `deadline_hours` (1–336, varsayılan 48).
+  - Açıklama kodu sipariş numarasıdır (`display_id`).
+  - Başlatma `POST /store/carts/:id/payment-session` `{ provider_id }` ile; dönüş adresi gerekmez.
+  - `GET /store/payment/methods` hesabı (IBAN dörtlü gruplarla) ve süreyi verir.
 
 ## Kapıda ödeme (`payment-cod`)
 - Feature flag: `cash_on_delivery`. Kapalıyken provider region'da listelenmez.

@@ -97,6 +97,7 @@ module.exports = defineConfig({
         providers: [
           { resolve: "./src/modules/payment-paytr", id: "paytr" },
           { resolve: "./src/modules/payment-iyzico", id: "iyzico" },
+          { resolve: "./src/modules/payment-bank-transfer", id: "bank-transfer" },
         ],
       },
     },

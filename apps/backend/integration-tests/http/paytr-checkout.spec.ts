@@ -225,8 +225,9 @@ medusaIntegrationTestRunner({
         "pp_paytr_paytr",
         "pp_system_default",
       ])
-      // Bootstrap gives a new shop's region every card provider (iyzico since F5 V9)
+      // Bootstrap gives a new shop's region every provider (iyzico since F5 V9, bank transfer F6)
       expect(await providersOf(shop.regionId)).toEqual([
+        "pp_bank-transfer_bank-transfer",
         "pp_iyzico_iyzico",
         "pp_paytr_paytr",
         "pp_system_default",

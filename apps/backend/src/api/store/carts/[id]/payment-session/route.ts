@@ -6,16 +6,16 @@ import { startCartPaymentWorkflow } from "../../../../../workflows/payments/star
 import type { StorePostCartPaymentSessionType } from "./validators"
 
 /**
- * Starts a hosted-form payment for the cart (adr/0026 §1): the provider's
- * form token comes back; the buyer, the basket and the amount come from the
- * stored cart, never from the request.
+ * Starts a payment for the cart (adr/0026 §1, adr/0029): a hosted form's
+ * token comes back, or a bank transfer's account; the buyer, the basket and
+ * the amount come from the stored cart, never from the request.
  */
 export const POST = async (
   req: MedusaStoreRequest<StorePostCartPaymentSessionType>,
   res: MedusaResponse
 ) => {
   const { provider_id, return_urls } = req.validatedBody
-  const refused = returnUrlProblem(return_urls, returnOrigins(parseEnv()))
+  const refused = return_urls ? returnUrlProblem(return_urls, returnOrigins(parseEnv())) : null
   if (refused) {
     throw new ValidationError("payments.return_url_invalid", { field: refused })
   }
@@ -26,10 +26,9 @@ export const POST = async (
       sales_channel_ids: req.publishable_key_context.sales_channel_ids,
       ip: req.ip ?? req.socket.remoteAddress ?? "",
       // The address as the URL parser reads it: what was checked is what is sent
-      return_urls: {
-        success: new URL(return_urls.success).href,
-        failure: new URL(return_urls.failure).href,
-      },
+      return_urls: return_urls
+        ? { success: new URL(return_urls.success).href, failure: new URL(return_urls.failure).href }
+        : null,
     },
   })
   res.json({

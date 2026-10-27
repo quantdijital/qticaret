@@ -1,6 +1,6 @@
 import { fromMedusaAmount } from "../money"
 import type { MedusaAmount } from "../money"
-import { HOSTED_FORM_PROVIDERS } from "./checkout"
+import { CHECKOUT_PROVIDERS } from "./checkout"
 
 /**
  * Whether a cart's payment still matches the cart (security review,
@@ -62,12 +62,13 @@ export function paymentMismatch(cart: PaymentFacts): boolean {
     if (kurusOf(session.raw_amount, session.amount) !== amount) {
       return true
     }
-    const hosted = (HOSTED_FORM_PROVIDERS as readonly string[]).includes(session.provider_id ?? "")
-    return hosted && session.data?.["amount"] !== amount
+    // Every session ours keeps the amount it was started for (adr/0026, adr/0029)
+    const ours = (CHECKOUT_PROVIDERS as readonly string[]).includes(session.provider_id ?? "")
+    return ours && session.data?.["amount"] !== amount
   })
 }
 
-/** A storefront completes a cart to be paid only through a hosted form's session (adr/0026). */
+/** A storefront completes a cart to be paid only through a session our route started (adr/0026, adr/0029). */
 export function paidWithoutHostedForm(cart: PaymentFacts): boolean {
   const collection = cart.payment_collection
   if (!collection || (kurusOf(collection.raw_amount, collection.amount) ?? 0) === 0) {
@@ -79,7 +80,7 @@ export function paidWithoutHostedForm(cart: PaymentFacts): boolean {
   return (
     live.length === 0 ||
     !live.every((session) =>
-      (HOSTED_FORM_PROVIDERS as readonly string[]).includes(session?.provider_id ?? "")
+      (CHECKOUT_PROVIDERS as readonly string[]).includes(session?.provider_id ?? "")
     )
   )
 }

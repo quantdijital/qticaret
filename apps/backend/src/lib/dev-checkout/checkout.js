@@ -1,4 +1,5 @@
 // The payment test page's script (adr/0028): plain browser JavaScript, no build.
+/* global showBankTransfer, followReturn */
 const config = JSON.parse(document.getElementById("config").textContent)
 const CART_KEY = "qt-dev-checkout-cart"
 const $ = (id) => document.getElementById(id)
@@ -219,13 +220,25 @@ async function pay() {
   if (!state.cart) throw new Error("Sepet boş.")
   const provider = document.querySelector("input[name=provider]:checked").value
   const back = (result) => `${location.origin}/dev/checkout?sonuc=${result}&sepet=${state.cart.id}`
+  const offline = provider === "pp_bank-transfer_bank-transfer"
   const { payment_session: session } = await api(`/store/carts/${state.cart.id}/payment-session`, {
     method: "POST",
-    body: {
-      provider_id: provider,
-      return_urls: { success: back("tamam"), failure: back("hata") },
-    },
+    body: offline
+      ? { provider_id: provider }
+      : { provider_id: provider, return_urls: { success: back("tamam"), failure: back("hata") } },
   })
+  // Bank transfer sends nobody anywhere: the order is placed now, awaiting the money (adr/0029)
+  if (offline) {
+    const completed = await api(`/store/carts/${state.cart.id}/complete`, { method: "POST" })
+    if (completed.type !== "order")
+      throw new Error(completed.error?.message ?? "Sipariş açılamadı.")
+    localStorage.removeItem(CART_KEY)
+    state.cart = null
+    renderCart()
+    showBankTransfer(completed.order, session.data)
+    $("result").scrollIntoView({ behavior: "smooth" })
+    return
+  }
   // iyzico's page is a whole page that sends the browser back; PayTR's form lives in an iFrame
   if (provider === "pp_iyzico_iyzico") {
     location.href = session.data.form_url
@@ -234,44 +247,6 @@ async function pay() {
   $("form").src = session.data.form_url
   $("form").hidden = false
   $("form").scrollIntoView({ behavior: "smooth" })
-}
-
-async function followReturn(params) {
-  const id = params.get("sepet")
-  const failed = params.get("sonuc") === "hata"
-  $("result").hidden = false
-  const say = (...nodes) => $("result-body").replaceChildren(...nodes)
-  if (failed) return say("Ödeme reddedildi. Sepet açık; yeniden ödeyebilirsiniz.")
-  // iyzico's callback says what became of a payment that is not an order yet
-  const status = params.get("payment_status")
-  if (status === "refund") return say("Ödeme alındı ama siparişe dönüşemedi; tutar iade edilecek.")
-  for (let attempt = 0; attempt < 120; attempt++) {
-    const { cart } = await fetch(`/dev/checkout/order?cart_id=${encodeURIComponent(id)}`, {
-      credentials: "omit",
-    }).then((r) => r.json())
-    if (cart?.order) {
-      localStorage.removeItem(CART_KEY)
-      state.cart = null
-      renderCart()
-      $("result").classList.add("ok")
-      return say(
-        `Sipariş #${cart.order.display_id} açıldı, ödeme alındı (${cart.payment_status}). `,
-        el("a", {
-          href: `${config.panelUrl}/orders/${cart.order.id}`,
-          target: "_blank",
-          textContent: "Panelde aç",
-        })
-      )
-    }
-    say(
-      status === "review"
-        ? "Ödeme iyzico'nun sahtekârlık incelemesinde; onaylanınca uzlaştırma işi (10 dakikada bir) siparişi açacak."
-        : attempt < 10
-          ? "Ödeme bildirimi bekleniyor…"
-          : "Bildirim gelmedi. Uzlaştırma işi (10 dakikada bir) sağlayıcıya sorup siparişi açacak; sayfa beklemeye devam ediyor."
-    )
-    await new Promise((resolve) => setTimeout(resolve, attempt < 10 ? 2000 : 10000))
-  }
 }
 
 $("address").addEventListener("submit", (event) => run(() => saveAddress(event)))

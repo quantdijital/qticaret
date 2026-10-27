@@ -24,7 +24,8 @@ export interface StartCartPaymentInput {
   sales_channel_ids: string[]
   /** The shopper's address, as the server saw the request. */
   ip: string
-  return_urls: HostedCheckout["return_urls"]
+  /** A hosted form's return addresses; null for a way to pay that sends nobody anywhere. */
+  return_urls: HostedCheckout["return_urls"] | null
 }
 
 /**
@@ -57,17 +58,20 @@ export const startCartPaymentWorkflow = createWorkflow(
     const collection = readPaymentCollectionStep(input.cart_id)
     const session = createPaymentSessionsWorkflow.runAsStep({
       input: transform({ input, cart, collection }, ({ input, cart, collection }) => {
-        const checkout: HostedCheckout = {
-          email: cart.email,
-          buyer: cart.buyer,
-          ip: input.ip,
-          return_urls: input.return_urls,
-          basket: paymentBasket(cart.lines, collection.amount),
-        }
+        // Only a hosted form is given the buyer and the basket (adr/0029: offline ways need none)
+        const checkout: HostedCheckout | null = input.return_urls
+          ? {
+              email: cart.email,
+              buyer: cart.buyer,
+              ip: input.ip,
+              return_urls: input.return_urls,
+              basket: paymentBasket(cart.lines, collection.amount),
+            }
+          : null
         return {
           payment_collection_id: collection.id,
           provider_id: input.provider_id,
-          data: { checkout },
+          data: checkout ? { checkout } : {},
           context: { [HOSTED_CHECKOUT]: true },
         }
       }),

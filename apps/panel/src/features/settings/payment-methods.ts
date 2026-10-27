@@ -7,22 +7,29 @@ import type { ProviderAccount } from "@/features/settings/api/payments"
  * `integration-credentials` and in the page's address.
  */
 export const PAYMENT_METHODS = [
-  { id: "paytr", group: "card", upcoming: false },
-  { id: "iyzico", group: "card", upcoming: false },
-  // Listed so the shop knows they are coming (F6)
-  { id: "bank_transfer", group: "other", upcoming: true },
-  { id: "cash_on_delivery", group: "other", upcoming: true },
+  { id: "paytr", group: "card", upcoming: false, kind: "account" },
+  { id: "iyzico", group: "card", upcoming: false, kind: "account" },
+  // The shop's own settings, no provider account (F6, adr/0029)
+  { id: "bank_transfer", group: "other", upcoming: false, kind: "settings" },
+  // Listed so the shop knows it is coming (F6 W3)
+  { id: "cash_on_delivery", group: "other", upcoming: true, kind: "settings" },
 ] as const
 
 export type PaymentMethod = (typeof PAYMENT_METHODS)[number]
 export type PaymentGroup = PaymentMethod["group"]
-/** A method with its own page; the page map is keyed by it, so one cannot be left out. */
+/** A method with its own page. */
 export type ConnectableMethod = Extract<PaymentMethod, { upcoming: false }>["id"]
+/** A provider whose account the shop connects; the page map is keyed by it. */
+export type AccountMethod = Extract<PaymentMethod, { upcoming: false; kind: "account" }>["id"]
 
 export const PAYMENT_GROUPS: readonly PaymentGroup[] = ["card", "other"]
 
 export function isConnectable(id: string): id is ConnectableMethod {
   return PAYMENT_METHODS.some((method) => method.id === id && !method.upcoming)
+}
+
+export function isAccountMethod(id: string): id is AccountMethod {
+  return PAYMENT_METHODS.some((method) => method.id === id && method.kind === "account")
 }
 
 /** Whether payments go through the provider's test (sandbox) mode: no real money moves. */

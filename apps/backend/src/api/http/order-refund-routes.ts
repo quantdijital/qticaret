@@ -7,7 +7,7 @@ import type {
 } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { ValidationError } from "../../lib/errors"
-import { HOSTED_FORM_PROVIDERS } from "../../lib/payments/checkout"
+import { CHECKOUT_PROVIDERS } from "../../lib/payments/checkout"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import { readOrderMoney } from "../../workflows/orders/order-money"
 import { refundOrderWorkflow } from "../../workflows/orders/refund-order"
@@ -18,10 +18,11 @@ import {
 import { requireUserActor } from "./actor"
 import { rateLimit } from "./rate-limit"
 
-const isHosted = (provider: string | null | undefined) =>
-  (HOSTED_FORM_PROVIDERS as readonly string[]).includes(provider ?? "")
+// Every payment our route started (hosted forms, bank transfer, cash on delivery)
+const isOurs = (provider: string | null | undefined) =>
+  (CHECKOUT_PROVIDERS as readonly string[]).includes(provider ?? "")
 
-/** Medusa's own payment refund: a hosted form's payment is given back line by line, through ours. */
+/** Medusa's own payment refund: a payment our route started is given back line by line, through ours. */
 async function refuseHostedPaymentRefund(
   req: MedusaRequest,
   _res: MedusaResponse,
@@ -36,7 +37,7 @@ async function refuseHostedPaymentRefund(
       .resolve(Modules.PAYMENT)
       .listPayments({ id: req.params["id"] ?? "" }, { select: ["provider_id"] })
     next(
-      isHosted(payment?.provider_id) ? new ValidationError("payments.use_order_refund") : undefined
+      isOurs(payment?.provider_id) ? new ValidationError("payments.use_order_refund") : undefined
     )
   } catch (error) {
     next(error)

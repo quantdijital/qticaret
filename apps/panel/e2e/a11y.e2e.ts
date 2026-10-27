@@ -20,6 +20,7 @@ const SCREENS = [
   "/settings/payments",
   "/settings/payments/paytr",
   "/settings/payments/iyzico",
+  "/settings/payments/bank_transfer",
   "/settings/integrations",
   "/settings/appearance",
   "/reports/products",

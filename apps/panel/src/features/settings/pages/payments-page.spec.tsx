@@ -39,7 +39,22 @@ const paytr = (account: Partial<PaytrAccount>): PaytrAccount => ({
 })
 
 function renderPage(account: PaytrAccount) {
-  fetchMock.mockResolvedValue({ key_configured: true, accounts: [account] })
+  // The accounts, and each settings section the page reads (bank transfer: off)
+  fetchMock.mockImplementation((url: string) =>
+    Promise.resolve(
+      url.startsWith("/admin/platform-settings/")
+        ? {
+            values: {
+              enabled: false,
+              installments_enabled: true,
+              max_installment: 0,
+              card_provider: null,
+            },
+            version: 1,
+          }
+        : { key_configured: true, accounts: [account] }
+    )
+  )
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
     <QueryClientProvider client={client}>
@@ -115,13 +130,17 @@ describe("PaymentsPage", () => {
     expect(within(await row("PayTR")).getByText("PayTR reddetti")).toBeInTheDocument()
   })
 
-  it("lists the methods still being built without a way in", async () => {
+  it("lists a method still being built without a way in, and bank transfer with its page", async () => {
     renderPage(paytr({}))
 
-    for (const name of ["Havale / EFT", "Kapıda ödeme"]) {
-      const upcoming = await row(name)
-      expect(within(upcoming).getByText("Yakında")).toBeInTheDocument()
-      expect(within(upcoming).queryByRole("link")).toBeNull()
-    }
+    const upcoming = await row("Kapıda ödeme")
+    const bank = await row("Havale / EFT")
+
+    expect(within(upcoming).getByText("Yakında")).toBeInTheDocument()
+    expect(within(upcoming).queryByRole("link")).toBeNull()
+    expect(within(bank).getByRole("link", { name: "Yönet" })).toHaveAttribute(
+      "href",
+      "/settings/payments/bank_transfer"
+    )
   })
 })

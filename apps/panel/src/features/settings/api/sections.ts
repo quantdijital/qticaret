@@ -30,6 +30,15 @@ export interface PaymentSettings {
   card_provider: "paytr" | "iyzico" | null
 }
 
+/** The shop's bank account for transfers (F6, adr/0029); the IBAN without spaces. */
+export interface BankTransferSettings {
+  enabled: boolean
+  account_holder: string
+  bank_name: string
+  iban: string
+  deadline_hours: number
+}
+
 /** Promotion rules (F4.4, F4.5): codes per cart, free shipping from a basket total. */
 export interface PromotionSettings {
   combine_codes: boolean

@@ -8,6 +8,13 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "audit_log.kind_invalid": "The entry kind is not valid.",
   "billing_profile.tax_id_invalid": "The tax or national ID number is not valid.",
   "billing_profile.tax_office_required": "Enter the tax office.",
+  "bank_transfer.not_configured":
+    "The shop has not turned on bank transfer or entered its account.",
+  "bank_transfer.iban_invalid":
+    "The IBAN is not valid. Check the 26-character IBAN starting with TR.",
+  "bank_transfer.incomplete":
+    "Turning on bank transfer needs the account holder, the bank name and the IBAN.",
+  "payments.return_urls_required": "Card payments need return addresses.",
   "brands.description_invalid":
     "The description is too long or holds characters that cannot be used.",
   "brands.logo_unknown": "The logo must be one of the shop's uploaded images.",

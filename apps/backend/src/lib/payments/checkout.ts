@@ -24,6 +24,18 @@ export const HOSTED_FORM_PROVIDERS = [
   IYZICO_PAYMENT_PROVIDER_ID,
 ] as const
 
+/** Bank transfer (F6, adr/0029): the order waits for the money. */
+export const BANK_TRANSFER_PAYMENT_PROVIDER_ID = "pp_bank-transfer_bank-transfer"
+
+/** Ways to pay with no outside service (adr/0029); they start from our route too. */
+export const OFFLINE_PROVIDERS = [BANK_TRANSFER_PAYMENT_PROVIDER_ID] as const
+
+/** Every provider a storefront starts a payment with, through our route only. */
+export const CHECKOUT_PROVIDERS = [...HOSTED_FORM_PROVIDERS, ...OFFLINE_PROVIDERS] as const
+
+export const isHostedFormProvider = (providerId: string): boolean =>
+  (HOSTED_FORM_PROVIDERS as readonly string[]).includes(providerId)
+
 /**
  * Where a hosted form may send the shopper back: an origin the storefront
  * is served from (`STORE_CORS`), never an address the request names

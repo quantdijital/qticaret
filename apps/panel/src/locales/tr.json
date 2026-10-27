@@ -641,6 +641,29 @@
       "preferred": {
         "title": "Öncelikli sağlayıcı",
         "hint": "Vitrin kartla ödemede önce bunu sunar; taksit tablosu da bu sağlayıcının fiyatlarıyla gösterilir."
+      },
+      "bankTransfer": {
+        "on": "Açık",
+        "off": "Kapalı",
+        "required": "Bu alanı doldurun.",
+        "ibanInvalid": "IBAN geçerli değil; TR ile başlayan 26 karakteri kontrol edin.",
+        "ibanHint": "Müşteriler bu hesaba ödeme yapar; açıklamaya sipariş numarasını yazarlar.",
+        "deadlineInvalid": "1 ile 336 saat arasında olmalı.",
+        "holder": "Hesap sahibi",
+        "bank": "Banka",
+        "deadline": "Ödeme süresi (saat)",
+        "deadlineHint": "Bu süre içinde ödenmeyen sipariş iptal edilir, stok geri döner.",
+        "account": {
+          "title": "Hesap bilgileri",
+          "description": "Havale/EFT seçen müşteriye gösterilir."
+        },
+        "status": {
+          "title": "Havale/EFT ile ödeme",
+          "description": "Açıkken müşteri ödemeyi havaleyle yapabilir; sipariş ödeme gelene kadar bekler.",
+          "enabled": "Müşteriye sun",
+          "enabledHint": "Ödeme geldiğinde siparişin sayfasından onaylarsınız.",
+          "needsAccount": "Açmak için önce hesap bilgilerini kaydedin."
+        }
       }
     },
     "integrations": {

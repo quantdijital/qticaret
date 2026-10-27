@@ -9,8 +9,9 @@ import type { IyzicoAccount, PaytrAccount, ProviderAccount } from "@/features/se
 import { AccountBadges } from "@/features/settings/components/account-badges"
 import { IyzicoSettings } from "@/features/settings/components/iyzico-settings"
 import { PaytrSettings } from "@/features/settings/components/paytr-settings"
-import { isConnectable } from "@/features/settings/payment-methods"
-import type { ConnectableMethod } from "@/features/settings/payment-methods"
+import { isAccountMethod } from "@/features/settings/payment-methods"
+import type { AccountMethod } from "@/features/settings/payment-methods"
+import { BankTransferPage } from "@/features/settings/pages/bank-transfer-page"
 import { accountKey } from "@/features/settings/payments"
 import { errorText } from "@/lib/errors"
 
@@ -26,7 +27,7 @@ interface ProviderSettingsProps {
  * starts the form afresh. The server describes each account with that
  * provider's settings (adr/0027). Installments join in V6 and V10.
  */
-const PROVIDER_SETTINGS: Record<ConnectableMethod, (props: ProviderSettingsProps) => ReactNode> = {
+const PROVIDER_SETTINGS: Record<AccountMethod, (props: ProviderSettingsProps) => ReactNode> = {
   paytr: ({ account, keyConfigured }) => (
     <PaytrSettings
       key={accountKey(account)}
@@ -48,8 +49,12 @@ export function PaymentProviderPage() {
   const { t } = useTranslation()
   const { provider } = route.useParams()
   const query = useQuery(providerAccountsQuery())
+  // Bank transfer has no account: the shop's own settings (adr/0029)
+  if (provider === "bank_transfer") {
+    return <BankTransferPage />
+  }
   // The route lets only these through; the check narrows the id
-  if (!isConnectable(provider)) {
+  if (!isAccountMethod(provider)) {
     return null
   }
   const Settings = PROVIDER_SETTINGS[provider]

@@ -3,6 +3,7 @@ import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { createRegionsWorkflow } from "@medusajs/medusa/core-flows"
 import { logger } from "../../lib/logging"
 import {
+  BANK_TRANSFER_PAYMENT_PROVIDER_ID,
   IYZICO_PAYMENT_PROVIDER_ID,
   PAYTR_PAYMENT_PROVIDER_ID,
   SYSTEM_PAYMENT_PROVIDER_ID,
@@ -46,6 +47,7 @@ export async function ensureTrRegion(container: MedusaContainer): Promise<string
             SYSTEM_PAYMENT_PROVIDER_ID,
             PAYTR_PAYMENT_PROVIDER_ID,
             IYZICO_PAYMENT_PROVIDER_ID,
+            BANK_TRANSFER_PAYMENT_PROVIDER_ID,
           ],
         },
       ],

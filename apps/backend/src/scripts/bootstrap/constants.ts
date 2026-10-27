@@ -10,7 +10,11 @@ export const DEFAULT_STOCK_LOCATION_NAME = "Ana Depo"
 
 /** Providers registered by Medusa's default config. */
 export const SYSTEM_PAYMENT_PROVIDER_ID = "pp_system_default"
-export { IYZICO_PAYMENT_PROVIDER_ID, PAYTR_PAYMENT_PROVIDER_ID } from "../../lib/payments/checkout"
+export {
+  BANK_TRANSFER_PAYMENT_PROVIDER_ID,
+  IYZICO_PAYMENT_PROVIDER_ID,
+  PAYTR_PAYMENT_PROVIDER_ID,
+} from "../../lib/payments/checkout"
 export const SYSTEM_TAX_PROVIDER_ID = "tp_system"
 
 /**

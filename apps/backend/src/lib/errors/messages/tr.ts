@@ -12,6 +12,12 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "audit_log.kind_invalid": "Kayıt türü geçerli değil.",
   "billing_profile.tax_id_invalid": "Vergi ya da TC kimlik numarası geçerli değil.",
   "billing_profile.tax_office_required": "Vergi dairesini girin.",
+  "bank_transfer.not_configured":
+    "Mağaza havale/EFT ile ödemeyi açmadı ya da hesap bilgilerini girmedi.",
+  "bank_transfer.iban_invalid":
+    "IBAN geçerli değil. TR ile başlayan 26 karakterlik IBAN'ı kontrol edin.",
+  "bank_transfer.incomplete": "Havale/EFT'yi açmak için hesap sahibi, banka adı ve IBAN gerekli.",
+  "payments.return_urls_required": "Kartla ödeme için dönüş adresleri gerekli.",
   "brands.description_invalid": "Açıklama çok uzun ya da kullanılamayan karakterler içeriyor.",
   "brands.logo_unknown": "Logo mağazanın yüklenen görsellerinden biri olmalı.",
   "brands.name_invalid": "Marka adını girin (en fazla 120 karakter).",

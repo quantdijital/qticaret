@@ -7,6 +7,8 @@ import { ErrorState, LoadingRows } from "@/components/patterns/states"
 import { StatusBadge } from "@/components/patterns/status-badge"
 import { Button } from "@/components/ui/button"
 import { providerAccountsQuery } from "@/features/settings/api/payments"
+import { sectionQuery } from "@/features/settings/api/sections"
+import type { BankTransferSettings } from "@/features/settings/api/sections"
 import type { ProviderAccount } from "@/features/settings/api/payments"
 import { AccountBadges } from "@/features/settings/components/account-badges"
 import { InstallmentsCard } from "@/features/settings/components/installments-card"
@@ -16,6 +18,21 @@ import type { PaymentMethod } from "@/features/settings/payment-methods"
 import { errorText } from "@/lib/errors"
 
 const P = "settings.payments"
+
+/** Bank transfer's state: on or off, from the shop's settings (adr/0029). */
+function SettingsBadge() {
+  const { t } = useTranslation()
+  const query = useQuery(sectionQuery<BankTransferSettings>("bank_transfer"))
+  const enabled = query.data?.values.enabled
+  if (enabled === undefined) {
+    return null
+  }
+  return (
+    <StatusBadge tone={enabled ? "success" : "neutral"}>
+      {t(enabled ? `${P}.bankTransfer.on` : `${P}.bankTransfer.off`)}
+    </StatusBadge>
+  )
+}
 
 /** One way to pay: what it is, where it stands, and the door to its page. */
 function MethodRow({
@@ -42,6 +59,19 @@ function MethodRow({
       <div className="flex shrink-0 flex-wrap items-center gap-2">
         {method.upcoming ? (
           <StatusBadge tone="neutral">{t(`${P}.upcoming`)}</StatusBadge>
+        ) : method.kind === "settings" ? (
+          <>
+            <SettingsBadge />
+            <Button asChild variant="outline" size="sm">
+              <Link
+                to="/settings/payments/$provider"
+                params={{ provider: method.id }}
+                aria-describedby={nameId}
+              >
+                {t(`${P}.manage`)}
+              </Link>
+            </Button>
+          </>
         ) : (
           <>
             <AccountBadges account={account} name={name} />
