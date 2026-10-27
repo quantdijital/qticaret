@@ -13,7 +13,7 @@ import {
 import type { PaytrNotification } from "./steps/paytr-notification"
 
 /** `ok`: answer "OK". Anything else gets no "OK", and PayTR sends the notification again. */
-export type PaytrNotificationAnswer = "ok" | "busy" | "not_ours"
+export type PaytrNotificationAnswer = "ok" | "busy" | "not_ours" | "orphan"
 
 /**
  * A genuine PayTR notification (the route checked its signature), handled
@@ -44,10 +44,10 @@ export const paytrNotificationWorkflow = createWorkflow(
     })
     return new WorkflowResponse(
       transform({ claim }, ({ claim }): PaytrNotificationAnswer => {
-        if (claim.state === "not_ours") {
-          return "not_ours"
+        if (claim.state === "not_ours" || claim.state === "orphan" || claim.state === "busy") {
+          return claim.state
         }
-        return claim.state === "busy" ? "busy" : "ok"
+        return "ok"
       })
     )
   }

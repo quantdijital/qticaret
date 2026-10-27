@@ -64,6 +64,10 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     answer(res, 200, "OK")
   } else if (result === "busy") {
     answer(res, 409, "in progress")
+  } else if (result === "orphan") {
+    // Money taken for a session that is gone: someone has to give it back (F5 V4)
+    logger.error({ event: "paytr.payment_orphan", merchantOid: signed.merchant_oid })
+    answer(res, 409, "orphan payment")
   } else {
     logger.warn({ event: "paytr.notification_not_ours", merchantOid: signed.merchant_oid })
     answer(res, 404, "unknown order")

@@ -265,7 +265,10 @@ class IntegrationCredentialsModuleService extends MedusaService({ IntegrationCre
     @MedusaContext() sharedContext: Context = {}
   ): Promise<boolean> {
     const manager = sharedContext.transactionManager as EntityManager | undefined
-    await manager?.execute(
+    if (!manager) {
+      throw new Error("integration_credentials: a check is recorded in a transaction")
+    }
+    await manager.execute(
       "SELECT id FROM integration_credential WHERE provider = ? AND deleted_at IS NULL FOR UPDATE",
       [provider]
     )

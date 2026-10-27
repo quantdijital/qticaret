@@ -2,18 +2,22 @@ import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { completeCartWorkflow } from "@medusajs/medusa/core-flows"
 import { checkoutProblem } from "../../lib/checkout"
 import { ValidationError } from "../../lib/errors"
+import { PAYMENT_FACT_FIELDS, paymentMismatch } from "../../lib/payments/consistency"
+import type { PaymentFacts } from "../../lib/payments/consistency"
 import { enteredCodes } from "../../lib/promotions"
 import { hasStaleShipping } from "../checkout/stale-shipping"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import type { PromotionSettings } from "../../modules/platform-settings/sections"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
 
-type CartRow = Parameters<typeof checkoutProblem>[0] & {
-  promotions?: ({ code?: string | null; is_automatic?: boolean | null } | null)[] | null
-}
+type CartRow = Parameters<typeof checkoutProblem>[0] &
+  PaymentFacts & {
+    promotions?: ({ code?: string | null; is_automatic?: boolean | null } | null)[] | null
+  }
 
-// One handler per hook: the checkout rules of lib/checkout (F3.2), shipping
-// at its current price (F4.5) and the one-code rule (F4.4), read fresh for
+// One handler per hook: the checkout rules of lib/checkout (F3.2), a payment
+// for the cart's current total (F5), shipping at its current price (F4.5)
+// and the one-code rule (F4.4), read fresh for
 // the cart being completed. Throwing
 // stops the checkout. The hook's cart is typed loosely: only its id is used
 completeCartWorkflow.hooks.validate(async ({ cart }: { cart: { id: string } }, { container }) => {
@@ -26,6 +30,7 @@ completeCartWorkflow.hooks.validate(async ({ cart }: { cart: { id: string } }, {
       "shipping_methods.id",
       "promotions.code",
       "promotions.is_automatic",
+      ...PAYMENT_FACT_FIELDS,
     ],
     filters: { id: cart.id },
   })
@@ -33,6 +38,10 @@ completeCartWorkflow.hooks.validate(async ({ cart }: { cart: { id: string } }, {
   const problem = checkoutProblem(row)
   if (problem) {
     throw new ValidationError(problem.key, { field: problem.field })
+  }
+  // A payment started while the cart changed can be for the old amount (adr/0026)
+  if (paymentMismatch(row)) {
+    throw new ValidationError("payments.cart_changed")
   }
   // A code applied after shipping was chosen can leave it at its old price
   if (await hasStaleShipping(container, cart.id)) {

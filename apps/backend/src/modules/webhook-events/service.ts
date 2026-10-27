@@ -1,4 +1,6 @@
-import { MedusaService } from "@medusajs/framework/utils"
+import type { EntityManager } from "@medusajs/framework/mikro-orm/knex"
+import type { Context } from "@medusajs/framework/types"
+import { InjectTransactionManager, MedusaContext, MedusaService } from "@medusajs/framework/utils"
 import { uniqueViolationKeys } from "../../lib/errors"
 import { WebhookEvent } from "./models/webhook-event"
 
@@ -36,17 +38,37 @@ class WebhookEventsModuleService extends MedusaService({ WebhookEvent }) {
     if (existing.status === "processed") {
       return { id: existing.id, state: "done" }
     }
-    const quiet = Date.now() - new Date(existing.updated_at).getTime()
-    if (existing.status === "processing" && quiet < PROCESSING_STALE_MS) {
-      return { id: existing.id, state: "busy" }
+    const taken = await this.reclaim_(existing.id, existing.attempts)
+    return { id: existing.id, state: taken ? "retry" : "busy" }
+  }
+
+  /**
+   * A failed event, or one stopped long enough, taken back for one more try,
+   * as a single `UPDATE … WHERE`: of two racing retries one gets it.
+   */
+  @InjectTransactionManager()
+  protected async reclaim_(
+    id: string,
+    attempts: number,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<boolean> {
+    const manager = sharedContext.transactionManager as EntityManager | undefined
+    if (!manager) {
+      throw new Error("webhook_event: a reclaim runs in a transaction")
     }
-    await this.updateWebhookEvents({
-      id: existing.id,
-      status: "processing",
-      attempts: existing.attempts + 1,
-      error_code: null,
-    })
-    return { id: existing.id, state: "retry" }
+    const changed = await manager.nativeUpdate(
+      "WebhookEvent",
+      {
+        id,
+        deleted_at: null,
+        $or: [
+          { status: "failed" },
+          { status: "processing", updated_at: { $lt: new Date(Date.now() - PROCESSING_STALE_MS) } },
+        ],
+      },
+      { status: "processing", attempts: attempts + 1, error_code: null, updated_at: new Date() }
+    )
+    return changed > 0
   }
 
   async markProcessed(id: string, summary?: Record<string, unknown>): Promise<void> {

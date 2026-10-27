@@ -43,5 +43,17 @@ moduleIntegrationTestRunner<WebhookEventsModuleService>({
 
       expect([paytr.state, iyzico.state]).toEqual(["new", "new"])
     })
+
+    it("gives a failed event to one of two racing retries", async () => {
+      const first = await service.claim("paytr", "payses01D:success", {})
+      await service.markFailed(first.id, "processing_failed")
+
+      const retries = await Promise.all([
+        service.claim("paytr", "payses01D:success", {}),
+        service.claim("paytr", "payses01D:success", {}),
+      ])
+
+      expect(retries.map(({ state }) => state).sort()).toEqual(["busy", "retry"])
+    })
   },
 })

@@ -7,13 +7,13 @@ import {
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { PLATFORM_SETTINGS_MODULE } from "../../src/modules/platform-settings"
 import type PlatformSettingsModuleService from "../../src/modules/platform-settings/service"
-import { SYSTEM_PAYMENT_PROVIDER_ID } from "../../src/scripts/bootstrap/constants"
 import { createAdminUser } from "../helpers/admin"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { stockShop, stockedProduct } from "../helpers/stock"
 import type { StockShop } from "../helpers/stock"
 import { createStorefront } from "../helpers/storefront"
+import { completeWithSystemPayment } from "../helpers/checkout"
 
 jest.setTimeout(240 * 1000)
 
@@ -167,15 +167,12 @@ medusaIntegrationTestRunner({
         "/store/payment-collections",
         { cart_id: id }
       )
-      await send(
-        `/store/payment-collections/${collection.data.payment_collection.id}/payment-sessions`,
-        { provider_id: SYSTEM_PAYMENT_PROVIDER_ID }
+      const refused = await completeWithSystemPayment(
+        getContainer(),
+        id,
+        collection.data.payment_collection.id
       )
-      const refused = await send(`/store/carts/${id}/complete`, {})
-      expect({ status: refused.status, message: refused.data.message }).toEqual({
-        status: 400,
-        message: "cart.shipping_changed",
-      })
+      expect(refused).toEqual({ order_id: null, message: "cart.shipping_changed" })
       // Chosen again, it costs what the basket now pays
       expect((await chooseShipping()).data.cart.shipping_total).toBeGreaterThan(0)
     })

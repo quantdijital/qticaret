@@ -1,7 +1,8 @@
 import { z } from "@medusajs/framework/zod"
 import { HOSTED_FORM_PROVIDERS } from "../../../../../lib/payments/checkout"
 
-const returnUrl = z.url({ protocol: /^https?$/ }).max(2000)
+// PayTR takes return addresses up to 400 characters
+const returnUrl = z.url({ protocol: /^https?$/ }).max(400)
 
 /** Which hosted form, and where it sends the shopper back; everything else comes from the cart. */
 export const StorePostCartPaymentSession = z

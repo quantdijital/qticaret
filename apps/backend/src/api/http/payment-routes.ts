@@ -2,25 +2,54 @@ import { validateAndTransformBody } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ValidationError } from "../../lib/errors"
-import { HOSTED_FORM_PROVIDERS } from "../../lib/payments/checkout"
+import { PAYMENT_FACT_FIELDS, paidWithoutHostedForm } from "../../lib/payments/consistency"
+import type { PaymentFacts } from "../../lib/payments/consistency"
 import { paidInTestMode } from "../../lib/payments/test-mode"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import { StorePostCartPaymentSession } from "../store/carts/[id]/payment-session/validators"
 import { rateLimit } from "./rate-limit"
 
 /**
- * Medusa's own session route hands the shopper's `data` to the provider:
- * a hosted form would take a basket and a buyer the shopper wrote. Ours
- * builds them from the cart (adr/0026 §1). No `methods` on purpose: a
- * method-scoped middleware may sort after the core route.
+ * Medusa's own session route is closed to shoppers (security review,
+ * 2026-10-27): it would hand the shopper's `data` to a hosted form, and
+ * with the system provider it opens an unpaid order the panel counts as
+ * paid. Payments start from our route; bank transfer and cash on delivery
+ * open their own way in F6. No `methods` on purpose: a method-scoped
+ * middleware may sort after the core route.
  */
-function refuseHostedProviders(req: MedusaRequest, _res: MedusaResponse, next: MedusaNextFunction) {
-  const provider = (req.body as { provider_id?: unknown } | undefined)?.provider_id
-  if (req.method === "POST" && (HOSTED_FORM_PROVIDERS as readonly unknown[]).includes(provider)) {
-    next(new ValidationError("payments.use_checkout_route", { field: "provider_id" }))
+function refuseCoreSessions(req: MedusaRequest, _res: MedusaResponse, next: MedusaNextFunction) {
+  next(req.method === "POST" ? new ValidationError("payments.use_checkout_route") : undefined)
+}
+
+/** A storefront completes a cart to be paid only through a hosted form's session. */
+async function requireHostedPayment(
+  req: MedusaRequest,
+  _res: MedusaResponse,
+  next: MedusaNextFunction
+) {
+  if (req.method !== "POST") {
+    next()
     return
   }
-  next()
+  try {
+    const { data } = await req.scope.resolve(ContainerRegistrationKeys.QUERY).graph({
+      entity: "cart",
+      fields: PAYMENT_FACT_FIELDS,
+      filters: { id: req.params["id"] ?? "" },
+    })
+    next(
+      paidWithoutHostedForm((data[0] ?? {}) as PaymentFacts)
+        ? new ValidationError("payments.use_checkout_route")
+        : undefined
+    )
+  } catch (error) {
+    next(error)
+  }
+}
+
+const orderIdOf = (body: unknown): string => {
+  const id = (body as { order_id?: unknown } | undefined)?.order_id
+  return typeof id === "string" ? id : ""
 }
 
 /**
@@ -41,7 +70,8 @@ async function refuseTestPaidFulfillment(
     const { data } = await req.scope.resolve(ContainerRegistrationKeys.QUERY).graph({
       entity: "order",
       fields: ["payment_collections.payments.data"],
-      filters: { id: req.params["id"] ?? "" },
+      // `/admin/orders/:id/fulfillments`, or the standalone route's `order_id`
+      filters: { id: req.params["id"] ?? orderIdOf(req.body) },
     })
     next(
       paidInTestMode(data[0]) ? new ValidationError("orders.test_payment_not_shippable") : undefined
@@ -51,19 +81,24 @@ async function refuseTestPaidFulfillment(
   }
 }
 
+// Starting and completing call the provider: a budget per address and per cart
+const checkoutLimit = rateLimit(() => RATE_LIMIT_PROFILES.checkout, {
+  identity: (req) => req.params["id"],
+})
+
 export const PAYMENT_ROUTES = [
   {
     matcher: "/store/carts/:id/payment-session",
     methods: ["POST" as const],
-    middlewares: [
-      // Each start calls the provider: a budget per address and per cart
-      rateLimit(() => RATE_LIMIT_PROFILES.checkout, { identity: (req) => req.params["id"] }),
-      validateAndTransformBody(StorePostCartPaymentSession),
-    ],
+    middlewares: [checkoutLimit, validateAndTransformBody(StorePostCartPaymentSession)],
   },
   {
     matcher: "/store/payment-collections/:id/payment-sessions",
-    middlewares: [refuseHostedProviders],
+    middlewares: [refuseCoreSessions],
+  },
+  {
+    matcher: "/store/carts/:id/complete",
+    middlewares: [checkoutLimit, requireHostedPayment],
   },
   // PayTR's notifications (adr/0026 §5): its retries stay well inside the budget
   {
@@ -73,6 +108,10 @@ export const PAYMENT_ROUTES = [
   },
   {
     matcher: "/admin/orders/:id/fulfillments",
+    middlewares: [refuseTestPaidFulfillment],
+  },
+  {
+    matcher: "/admin/fulfillments",
     middlewares: [refuseTestPaidFulfillment],
   },
 ]

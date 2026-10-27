@@ -50,6 +50,8 @@ export const RATE_LIMIT_PROFILES = {
     name: "checkout",
     perIp: { max: 60, windowMs: MINUTE },
     perIdentity: { max: 20, windowMs: MINUTE },
+    // The cart's own budget, however many addresses start or complete it
+    perIdentityAnyIp: { max: 30, windowMs: 10 * MINUTE },
   },
   coupon: {
     name: "coupon",

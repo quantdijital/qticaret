@@ -32,6 +32,11 @@ PayTR → tarayıcı: merchant_ok_url / merchant_fail_url (yalnızca bilgilendir
 - Medusa'nın `/store/payment-collections/:id/payment-sessions` ucu PayTR için 400 (`payments.use_checkout_route`); sağlayıcı da bizim ucumuzun `context` işareti olmayan başlatmayı reddeder.
 - `authorizePayment` durum sorgusudur: ödeme yoksa `pending`, tutar/para birimi/test modu oturumla eşleşirse `captured`, değilse `error`. Ödenen sepet `/store/carts/:id/complete` ile siparişe dönüşür (HTTP testi). İade ve iptal V5'e kadar `paytr.refund_unavailable`.
 - Taksit sınırı V6'ya kadar `max_installment: 0` (hesabın en çoğu).
+- **Güvenlik incelemesi sonrası (2026-10-27):**
+  - Medusa'nın çekirdek oturum ucu vitrine tamamen kapalı (sistem sağlayıcısıyla ödemesiz sipariş açılabiliyordu); havale ve kapıda ödeme F6'da kendi yolunu açar.
+  - `/store/carts/:id/complete`, tutarı olan sepeti yalnızca barındırılan form oturumuyla tamamlar; `checkout` hız profili (sepet başına, adresten bağımsız da) bu uca da uygulanır.
+  - Ödeme başlatma sepet kilidi altında (Medusa'nın sepet anahtarı). Sepet tamamlanırken sepet toplamı, ödeme koleksiyonu, canlı oturumlar ve formun kendi `amount` kaydı kuruşu kuruşuna eşit olmalı (`payments.cart_changed`; `lib/payments/consistency`).
+  - Dönüş adresinde kullanıcı bilgisi ve ters bölü reddedilir, en çok 400 karakter; PayTR'ye ayrıştırılmış adres (`URL.href`) gider.
 
 ## Bildirim ve sipariş (F5 V3, 2026-10-27)
 - Uç `POST /hooks/paytr` (form gövde, `webhook` hız profili). Sıra: alan doğrulama → kayıtlı hesap (yoksa 503) → imza sabit zamanlı (tutmazsa 400, "OK" yok) → `paytrNotificationWorkflow`.
@@ -40,6 +45,8 @@ PayTR → tarayıcı: merchant_ok_url / merchant_fail_url (yalnızca bilgilendir
 - Başarılı ödeme: `completeCartWorkflow` (Medusa'nın sepet kilidi) → `authorizePayment` durum sorgusuyla tutarı, para birimini ve test modunu oturumla karşılaştırır → sipariş. Tamamlanmış sepet aynı siparişi döner; iki eşzamanlı bildirim tek sipariş açar (HTTP testi).
 - Tamamlama başarısızsa (PayTR kaydı henüz tutmuyor, kilit) olay "başarısız" kaydedilir, "OK" dönülmez; PayTR'nin yeniden denemesi işler. Sahipsiz ödemenin iadesi V4'te.
 - Başarısız ödeme bildirimi: "OK", sepet değişmez, ödeme yeniden başlatılabilir.
+- **Sahipsiz ödeme:** imzası mağazanın hesabıyla tutan, `payses…` biçimindeki ama oturumu artık olmayan referans (müşteri ödemeyi yeniden başlattı, eski token ödendi; PayTR token'ı geri alınamaz) "başarısız / `orphan_payment`" kaydedilir, hata seviyesinde loglanır (`paytr.payment_orphan`), 409 döner; "OK" yok, iadesi V4'te.
+- Siparişten sonraki kayıt adımı hata verse de sipariş geri alınmaz (log). Başarısız olayın yeniden alınması koşullu güncellemeyle: iki eşzamanlı yeniden denemeden biri alır.
 - Test modunda ödenen sipariş (ödeme verisinde `test_mode: true`) kargoya verilemez: kendi kargolama akışımız (`planShipmentStep`) ve Medusa'nın `/admin/orders/:id/fulfillments` ucu `orders.test_payment_not_shippable` ile reddeder. Panel rozeti V7'de.
 
 ## Uçlar ve imzalar

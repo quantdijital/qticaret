@@ -20,14 +20,21 @@ export const HOSTED_FORM_PROVIDERS = [PAYTR_PAYMENT_PROVIDER_ID] as const
 /**
  * Where a hosted form may send the shopper back: an origin the storefront
  * is served from (`STORE_CORS`), never an address the request names
- * freely (an open redirect). The field of the first address refused.
+ * freely (an open redirect). No user info, no backslash (read differently
+ * by browsers). The field of the first address refused.
  */
 export function returnUrlProblem(
   urls: { success: string; failure: string },
   storeOrigins: readonly string[]
 ): "return_urls.success" | "return_urls.failure" | null {
   for (const name of ["success", "failure"] as const) {
-    if (!storeOrigins.includes(new URL(urls[name]).origin)) {
+    const url = new URL(urls[name])
+    if (
+      urls[name].includes("\\") ||
+      url.username !== "" ||
+      url.password !== "" ||
+      !storeOrigins.includes(url.origin)
+    ) {
       return `return_urls.${name}`
     }
   }

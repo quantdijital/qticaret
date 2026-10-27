@@ -1,7 +1,9 @@
 import {
+  acquireLockStep,
   createPaymentCollectionForCartWorkflow,
   createPaymentSessionsWorkflow,
   refreshPaymentCollectionForCartWorkflow,
+  releaseLockStep,
 } from "@medusajs/medusa/core-flows"
 import {
   WorkflowResponse,
@@ -34,6 +36,9 @@ export interface StartCartPaymentInput {
 export const startCartPaymentWorkflow = createWorkflow(
   "payments-start-cart-payment",
   (input: StartCartPaymentInput) => {
+    // The cart's own lock, as Medusa's cart workflows take it: the cart cannot
+    // change between reading its amount and starting the session for it
+    acquireLockStep({ key: input.cart_id, timeout: 5, ttl: 30 })
     const cart = readCheckoutCartStep({
       cart_id: input.cart_id,
       sales_channel_ids: input.sales_channel_ids,
@@ -66,6 +71,7 @@ export const startCartPaymentWorkflow = createWorkflow(
         }
       }),
     })
+    releaseLockStep({ key: input.cart_id })
     return new WorkflowResponse(session)
   }
 )

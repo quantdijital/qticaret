@@ -1,12 +1,10 @@
 import { Modules, PromotionActions } from "@medusajs/framework/utils"
 import {
   createPaymentCollectionForCartWorkflow,
-  createPaymentSessionsWorkflow,
   updateCartPromotionsWorkflow,
 } from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { PLATFORM_SETTINGS_MODULE } from "../../src/modules/platform-settings"
-import { SYSTEM_PAYMENT_PROVIDER_ID } from "../../src/scripts/bootstrap/constants"
 import type PlatformSettingsModuleService from "../../src/modules/platform-settings/service"
 import { placeOrder } from "../../src/scripts/seed/orders/place"
 import { createAdminUser } from "../helpers/admin"
@@ -17,6 +15,7 @@ import { stockShop, stockedProduct } from "../helpers/stock"
 import type { StockShop } from "../helpers/stock"
 import { createStorefront } from "../helpers/storefront"
 import type { Storefront } from "../helpers/storefront"
+import { completeWithSystemPayment } from "../helpers/checkout"
 
 jest.setTimeout(240 * 1000)
 
@@ -150,7 +149,7 @@ medusaIntegrationTestRunner({
     })
 
     // A cart holding `codes`, made by the workflow straight (as requests racing
-    // each other could leave it), then completed as a shopper does
+    // each other could leave it), then completed by the checkout workflow
     async function completeWith(codes: string[]) {
       const id = await shippedCart(getContainer(), shop, variantId)
       await updateCartPromotionsWorkflow(getContainer()).run({
@@ -159,23 +158,17 @@ medusaIntegrationTestRunner({
       const { result: collection } = await createPaymentCollectionForCartWorkflow(
         getContainer()
       ).run({ input: { cart_id: id } })
-      await createPaymentSessionsWorkflow(getContainer()).run({
-        input: { payment_collection_id: collection.id, provider_id: SYSTEM_PAYMENT_PROVIDER_ID },
-      })
-      return storePost<{ type?: string }>(`/store/carts/${id}/complete`, {})
+      return completeWithSystemPayment(getContainer(), id, collection.id)
     }
 
     it("refuses a checkout whose cart took two codes past the one-code check", async () => {
       await promotion("BIR")
       await promotion("IKI")
       const refused = await completeWith(["BIR", "IKI"])
-      expect({ status: refused.status, message: refused.data.message }).toEqual({
-        status: 400,
-        message: "promotions.one_code",
-      })
+      expect(refused).toEqual({ order_id: null, message: "promotions.one_code" })
       await settings().saveSection("promotions", { combine_codes: true }, null)
       try {
-        expect((await completeWith(["BIR", "IKI"])).data).toMatchObject({ type: "order" })
+        expect((await completeWith(["BIR", "IKI"])).order_id).toMatch(/^order_/)
       } finally {
         await settings().saveSection("promotions", { combine_codes: false }, null)
       }

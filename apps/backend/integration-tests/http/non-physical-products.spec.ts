@@ -1,13 +1,13 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
-import { SYSTEM_PAYMENT_PROVIDER_ID } from "../../src/scripts/bootstrap/constants"
 import { seedDemo } from "../../src/scripts/seed"
 import { placeOrder } from "../../src/scripts/seed/orders/place"
 import { createAdminUser } from "../helpers/admin"
 import { createStorefront } from "../helpers/storefront"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
+import { completeWithSystemPayment } from "../helpers/checkout"
 
 jest.setTimeout(180 * 1000)
 
@@ -178,16 +178,13 @@ medusaIntegrationTestRunner({
           cart_id: cartId,
         }
       )
-      await send(
-        `/store/payment-collections/${collection.data.payment_collection.id}/payment-sessions`,
-        {
-          provider_id: SYSTEM_PAYMENT_PROVIDER_ID,
-        }
+      const completed = await completeWithSystemPayment(
+        getContainer(),
+        cartId,
+        collection.data.payment_collection.id
       )
-      const completed = await send<{ message?: string }>(`/store/carts/${cartId}/complete`, {})
 
-      expect(completed.status).toBe(400)
-      expect(completed.data.message).toBe("cart.shipping_not_needed")
+      expect(completed).toEqual({ order_id: null, message: "cart.shipping_not_needed" })
     })
   },
 })

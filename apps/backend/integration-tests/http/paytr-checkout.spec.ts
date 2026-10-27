@@ -1,5 +1,9 @@
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
-import { createRegionsWorkflow } from "@medusajs/medusa/core-flows"
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
+import {
+  createPaymentCollectionForCartWorkflow,
+  createPaymentSessionsWorkflow,
+  createRegionsWorkflow,
+} from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { fakePaytrAccount, startFakePaytr } from "@qticaret/testing"
 import type { FakePaytr } from "@qticaret/testing"
@@ -222,6 +226,69 @@ medusaIntegrationTestRunner({
         "pp_system_default",
       ])
       expect(await providersOf(shop.regionId)).toEqual(["pp_paytr_paytr", "pp_system_default"])
+    })
+
+    it("refuses Medusa's session route for its system provider: no unpaid order", async () => {
+      const container = getContainer()
+      const cartId = await readyCart(container, shop, variantId)
+      const { result: collection } = await createPaymentCollectionForCartWorkflow(container).run({
+        input: { cart_id: cartId },
+      })
+
+      const viaRoute = await settle(
+        http.post(
+          `/store/payment-collections/${collection.id}/payment-sessions`,
+          { provider_id: "pp_system_default" },
+          { headers: storefront.headers }
+        )
+      )
+      // Even a session made without the route gets no order from the storefront
+      await createPaymentSessionsWorkflow(container).run({
+        input: { payment_collection_id: collection.id, provider_id: "pp_system_default" },
+      })
+      const completed = await settle(
+        http.post<{ type?: string }>(
+          `/store/carts/${cartId}/complete`,
+          {},
+          { headers: storefront.headers }
+        )
+      )
+
+      expect(viaRoute.status).toBe(400)
+      expect(viaRoute.data).toMatchObject({ message: "payments.use_checkout_route" })
+      expect(completed.status).toBe(400)
+      expect(completed.data).toMatchObject({ message: "payments.use_checkout_route" })
+    })
+
+    it("places no order for a payment of an amount the cart no longer has", async () => {
+      await connect()
+      const container = getContainer()
+      const cartId = await readyCart(container, shop, variantId)
+      const started = await start(cartId)
+      fake.pay(String(started.data.payment_session.data["merchant_oid"]))
+      const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+        entity: "cart",
+        fields: ["payment_collection.id"],
+        filters: { id: cartId },
+      })
+      // The cart's collection moves on; the session stays at what was paid
+      await container
+        .resolve(Modules.PAYMENT)
+        .updatePaymentCollections(
+          (data[0] as { payment_collection: { id: string } }).payment_collection.id,
+          { amount: 300 }
+        )
+
+      const completed = await settle(
+        http.post<{ type?: string }>(
+          `/store/carts/${cartId}/complete`,
+          {},
+          { headers: storefront.headers }
+        )
+      )
+
+      expect(completed.status).toBe(400)
+      expect(completed.data).toMatchObject({ message: "payments.cart_changed" })
     })
   },
 })

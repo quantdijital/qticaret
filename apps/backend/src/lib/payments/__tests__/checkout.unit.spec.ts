@@ -23,4 +23,15 @@ describe("returnUrlProblem (adr/0026: no open redirect)", () => {
       )
     ).toBe("return_urls.failure")
   })
+
+  it("refuses user info and backslashes, which browsers read their own way", () => {
+    for (const success of [
+      "https://user@magaza.example.com/odeme",
+      "https://magaza.example.com\\@evil.example.com/",
+    ]) {
+      expect(
+        returnUrlProblem({ success, failure: "https://magaza.example.com/hata" }, origins)
+      ).toBe("return_urls.success")
+    }
+  })
 })

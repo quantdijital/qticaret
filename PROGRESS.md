@@ -31,6 +31,13 @@
 - **F5 V3 (PayTR bildirimi ve sipariş):** `webhook-events` modülü (tekil kayıt, `claim`: new/retry/busy/done, 90 gün saklama işi), `POST /hooks/paytr` (imza sabit zamanlı, "OK" yalnızca işlenince), `paytrNotificationWorkflow` (oturumu bul → kaydı al, telafide "başarısız" → `completeCartWorkflow` → işlendi). Test modunda ödenen sipariş kargoya verilemiyor (kendi akışımız + çekirdek uç). Testler: modül 4, HTTP 7 (tek sipariş, eşzamanlı teslim, sahte imza, başka mağazanın siparişi, başarısız ödeme, kayıt tutmadan "OK" yok ve sonra başarı, kargo engeli, saklama).
   - Medusa 2.21.2'de `createOrderFulfillmentWorkflow`'da `validate` kancası yok (derlemeyle görüldü; yalnızca `fulfillmentCreated`); engel bu yüzden giriş noktalarında.
   - Context7'nin aylık kotası doldu (2026-10-27); V3'te yeni Medusa API'si yok, bu oturumda doğrulanmış kalıplar kullanıldı. Kota yenilenene kadar araştırma GitHub v2.21.2 kaynağından.
+- **Güvenlik incelemesi (V2+V3, bağımsız ajan) ve düzeltmeler:**
+  - Kritik (F2'den kalma, bu dalın çekirdek uç kapatması açık bırakıyordu): bölgede duran `pp_system_default` ile vitrinden ödemesiz, panelde "ödendi" görünen sipariş açılabiliyordu. Çekirdek oturum ucu vitrine tamamen kapandı; Store'dan sepet tamamlama tutarı varsa yalnızca barındırılan form oturumuyla (HTTP testleri). Sistem sağlayıcısı bölgede kalıyor (seed ve iç akışlar); vitrin için F6'da havale/kapıda ödeme kendi yolunu açar.
+  - Yüksek: ödeme başlarken sepet değişirse oturum eski tutarda kalabiliyordu. Başlatma sepet kilidi altında; tamamlamada sepet toplamı = koleksiyon = canlı oturumlar = formun `amount` kaydı (kanca + birim + HTTP testi).
+  - Orta: silinmiş oturumun ödemesi artık "sahipsiz" (kayıt + hata logu, "OK" yok; iade V4); kayıt adımının hatası siparişi geri almıyor.
+  - Düşük: yeniden deneme koşullu güncellemeyle; dönüş adresinde kullanıcı bilgisi/ters bölü yok, normalize adres, ≤400; `checkout` profiline sepet başına adresten bağımsız sınır ve tamamlama ucuna uygulama; bağımsız `/admin/fulfillments` ucu da test ödemesini reddediyor (gövdedeki `order_id`, şekli doğrulanmadı); kilit atlanırsa hata.
+  - Kanca kuralı testleri (kargo, tek kupon) artık sepeti Store ucundan değil tamamlama iş akışından tamamlıyor (`helpers/checkout.ts`).
+  - Not: Query iç içe `raw_` değerlerini yalnızca düz alan da istenince dolduruyor; ikisi birlikte isteniyor.
 - **V8'den V9/V10'a kayanlar:** CF initialize/retrieve, detail, refund, cancel istemci çağrıları ve sahte sunucu uçları kullanıldıkları görevle gelir (kullanılmayan kod yazılmadı). Webhook V3 imzası V9'da `/hooks/iyzico/webhook` ile.
 
 ### Önceki oturum
