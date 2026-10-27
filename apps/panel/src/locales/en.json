@@ -1283,10 +1283,17 @@
       "installmentCount_other": "{{count}} installments",
       "singlePayment": "One payment",
       "providerUnreachable": "The payment provider could not be reached; card and installments show later.",
-      "testPaid": "This order was paid in test mode: no real money was taken, so it cannot be shipped."
+      "testPaid": "This order was paid in test mode: no real money was taken, so it cannot be shipped.",
+      "fraud": "Fraud check",
+      "fraudStatus": {
+        "review": "iyzico is reviewing it; do not ship before approval",
+        "refused": "iyzico refused it; the amount is refunded"
+      }
     },
     "providers": {
-      "pp_system_default": "Manual payment"
+      "pp_system_default": "Manual payment",
+      "pp_iyzico_iyzico": "iyzico",
+      "pp_paytr_paytr": "PayTR"
     },
     "refund": {
       "title": "Refund for #{{number}}",

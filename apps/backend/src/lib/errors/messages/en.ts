@@ -146,12 +146,20 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "Enter every secret field; all are asked again when the account number changes or the stored ones cannot be read.",
   "integration_credentials.unknown_provider": "There is no such payment or integration provider.",
   "iyzico.not_configured": "The shop has not connected its iyzico account yet.",
-  "iyzico.refund_unavailable":
-    "iyzico payments cannot be refunded from the panel yet; use the iyzico panel.",
   "iyzico.basket_total_mismatch":
     "The basket could not be sent to iyzico consistently; start the payment again.",
   "iyzico.signature_mismatch":
     "iyzico's answer could not be verified; the payment was not accepted.",
+  "iyzico.test_mode_mismatch":
+    "This payment was taken in iyzico's other mode (sandbox/live); the connected account cannot refund it.",
+  "iyzico.refund_outcome_unknown":
+    "iyzico's answer to the refund was lost. Before sending it again, check this payment's refunds in iyzico's panel.",
+  "iyzico.refund_exceeds_line":
+    "iyzico refused the amount: it is more than what is left of the payment.",
+  "iyzico.refund_not_supported":
+    "This card's bank takes no refunds; pay the customer back another way.",
+  "iyzico.refund_same_day":
+    "iyzico makes no partial refund on the day of the payment; try again tomorrow, or refund it whole.",
   "iyzico.merchant_invalid":
     "iyzico does not know this API key. Make sure it belongs to the chosen environment: a sandbox key works only with the sandbox on, a live key only with it off.",
   "iyzico.secret_invalid":

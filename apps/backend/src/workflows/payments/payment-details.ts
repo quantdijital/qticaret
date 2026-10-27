@@ -2,18 +2,20 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
 import { isProviderError } from "../../lib/errors"
 import { errorSummary, logger } from "../../lib/logging"
-import { PAYTR_PAYMENT_PROVIDER_ID } from "../../lib/payments/checkout"
+import { IYZICO_PAYMENT_PROVIDER_ID, PAYTR_PAYMENT_PROVIDER_ID } from "../../lib/payments/checkout"
+import { iyzicoCredentialsOf } from "../../lib/payments/iyzico"
+import { iyzicoDetails } from "./iyzico-details"
 import { paytrApi, paytrCredentialsOf } from "../../lib/payments/paytr"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-credentials"
 import type IntegrationCredentialsModuleService from "../../modules/integration-credentials/service"
 import { ORDER_REFUNDS_MODULE } from "../../modules/order-refunds"
 import type OrderRefundsModuleService from "../../modules/order-refunds/service"
 
-/** What PayTR holds for one of the order's payments, read when the shop looks (F5 V7). */
+/** What the provider holds for one of the order's payments, read when the shop looks (F5 V7, V10). */
 export interface HostedPaymentDetails {
   payment_id: string
   provider_id: string
-  /** PayTR's `merchant_oid`. */
+  /** PayTR's `merchant_oid`, iyzico's `paymentId`. */
   reference: string | null
   test_mode: boolean
   /** False when PayTR could not be asked just now: the rest is empty. */
@@ -26,6 +28,8 @@ export interface HostedPaymentDetails {
   card_brand: string | null
   card_last4: string | null
   payment_type: string | null
+  /** iyzico's fraud check: 1 approved, 0 under review, -1 refused; null for PayTR. */
+  fraud_status: number | null
   refunds: { amount: number; date: string | null; reference: string | null }[]
 }
 
@@ -39,9 +43,10 @@ export interface OrderRefundEntry {
 }
 
 /**
- * The order's hosted-form payments as PayTR holds them, and the refunds the
- * shop made (F5 V7). Card details are asked of PayTR, never kept: a
- * session's data is public, an order's payment is read here only.
+ * The order's hosted-form payments as their provider holds them, and the
+ * refunds the shop made (F5 V7, V10). Card details are asked of the
+ * provider, never kept: a session's data is public, an order's payment is
+ * read here only.
  */
 export async function orderPaymentDetails(
   container: MedusaContainer,
@@ -78,14 +83,17 @@ export async function orderPaymentDetails(
     .flatMap((collection) => collection?.payments ?? [])
     .filter(
       (payment): payment is NonNullable<typeof payment> =>
-        payment?.provider_id === PAYTR_PAYMENT_PROVIDER_ID
+        payment?.provider_id === PAYTR_PAYMENT_PROVIDER_ID ||
+        payment?.provider_id === IYZICO_PAYMENT_PROVIDER_ID
     )
-  const account = hosted.length
-    ? paytrCredentialsOf(
-        await container
-          .resolve<IntegrationCredentialsModuleService>(INTEGRATION_CREDENTIALS_MODULE)
-          .read("paytr")
-      )
+  const accounts = container.resolve<IntegrationCredentialsModuleService>(
+    INTEGRATION_CREDENTIALS_MODULE
+  )
+  const account = hosted.some(({ provider_id }) => provider_id === PAYTR_PAYMENT_PROVIDER_ID)
+    ? paytrCredentialsOf(await accounts.read("paytr"))
+    : null
+  const iyzico = hosted.some(({ provider_id }) => provider_id === IYZICO_PAYMENT_PROVIDER_ID)
+    ? iyzicoCredentialsOf(await accounts.read("iyzico"))
     : null
   const payments = await Promise.all(
     hosted.map(async (payment): Promise<HostedPaymentDetails> => {
@@ -104,7 +112,11 @@ export async function orderPaymentDetails(
         card_brand: null,
         card_last4: null,
         payment_type: null,
+        fraud_status: null,
         refunds: [],
+      }
+      if (payment.provider_id === IYZICO_PAYMENT_PROVIDER_ID) {
+        return iyzicoDetails(iyzico, payment, base)
       }
       if (!account || !reference) {
         return { ...base, error_code: account ? "reference_missing" : "not_configured" }

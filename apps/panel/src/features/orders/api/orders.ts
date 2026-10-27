@@ -261,13 +261,13 @@ export const useCapturePayment = () =>
     }
   })
 
-/** One of the order's PayTR payments as PayTR holds it (F5 V7); amounts as exact lira. */
+/** One of the order's hosted-form payments as its provider holds it (F5 V7, V10); amounts as exact lira. */
 export interface HostedPayment {
   payment_id: string
   provider_id: string
   reference: string | null
   test_mode: boolean
-  /** False when PayTR could not be asked just now. */
+  /** False when the provider could not be asked just now. */
   available: boolean
   error_code: string | null
   amount: string | null
@@ -275,6 +275,8 @@ export interface HostedPayment {
   installments: number | null
   card_brand: string | null
   card_last4: string | null
+  /** iyzico's fraud check: 1 approved, 0 under review, -1 refused; null for PayTR. */
+  fraud_status: number | null
   refunds: { amount: string; date: string | null; reference: string | null }[]
 }
 
@@ -291,7 +293,7 @@ export interface PaymentDetails {
   refunds: ShopRefund[]
 }
 
-/** `GET /admin/orders/:id/payment-details`: asked of PayTR when the page opens. */
+/** `GET /admin/orders/:id/payment-details`: asked of the provider when the page opens. */
 export const orderPaymentDetailsQuery = (id: string) =>
   queryOptions({
     queryKey: ["orders", "payment-details", id],

@@ -58,6 +58,7 @@ describe("PaymentCard", () => {
           installments: 1,
           card_brand: "WORLD",
           card_last4: "6747",
+          fraud_status: null,
           refunds: [],
         }}
       />

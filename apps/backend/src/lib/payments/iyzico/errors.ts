@@ -20,6 +20,13 @@ const CODES: Readonly<Record<string, string>> = {
   // Nothing was paid with this checkout form's token (yet)
   "5122": "form_unpaid",
   "5124": "token_unknown",
+  // A refund past what is left of its line (with the refunds before it)
+  "5093": "refund_exceeds_line",
+  "10245": "refund_exceeds_line",
+  // The same day as the payment: a cancel takes it back instead
+  "10223": "refund_same_day",
+  // This card's bank takes no refunds
+  "10237": "refund_not_supported",
 }
 
 /** The platform's code for iyzico's `errorCode`; an unknown one stays visible as `error_<code>`. */

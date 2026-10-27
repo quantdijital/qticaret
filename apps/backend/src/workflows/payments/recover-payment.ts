@@ -17,8 +17,13 @@ import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-creden
 import type IntegrationCredentialsModuleService from "../../modules/integration-credentials/service"
 import { PAYMENT_RECOVERY_MODULE } from "../../modules/payment-recovery"
 import type PaymentRecoveryModuleService from "../../modules/payment-recovery/service"
+import { MAX_REFUND_ATTEMPTS } from "../../modules/payment-recovery/service"
+import { recoverIyzicoPayment } from "./recover-iyzico"
 
 type Recovery = Awaited<ReturnType<PaymentRecoveryModuleService["retrievePaymentRecovery"]>>
+
+/** Providers whose orphans this workflow gives back (the job picks only these). */
+export const REFUNDED_HERE: readonly string[] = ["paytr", "iyzico"]
 export type RecoveryOutcome = "refunded" | "pending" | "failed" | "skipped"
 
 /** The audit entry and the alert for a refund that went through or was given up. */
@@ -68,7 +73,7 @@ export const refundRecoveryStep = createStep(
   async (recoveryId: string, { container }) => {
     const service = container.resolve<PaymentRecoveryModuleService>(PAYMENT_RECOVERY_MODULE)
     const recovery = await service.retrievePaymentRecovery(recoveryId)
-    if (recovery.status !== "pending" || recovery.provider !== "paytr") {
+    if (recovery.status !== "pending" || !REFUNDED_HERE.includes(recovery.provider)) {
       return new StepResponse<RecoveryOutcome>("skipped")
     }
     const fail = async (code: string): Promise<RecoveryOutcome> => {
@@ -84,6 +89,16 @@ export const refundRecoveryStep = createStep(
       return "refunded"
     }
     const codeOf = (error: unknown) => (isProviderError(error) ? error.providerCode : "error")
+    if (recovery.provider === "iyzico") {
+      const giveUp = async (code: string): Promise<RecoveryOutcome> => {
+        await service.markAttempt(recovery.id, MAX_REFUND_ATTEMPTS, code)
+        await report(container, { ...recovery, error_code: code }, "failed")
+        return "failed"
+      }
+      return new StepResponse(
+        await recoverIyzicoPayment(container, recovery, { fail, giveUp, done })
+      )
+    }
 
     const account = paytrCredentialsOf(
       await container

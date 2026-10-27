@@ -107,8 +107,22 @@ iyzico → callbackUrl (POST /hooks/iyzico/callback, gövde: token)
 - Verilen her form `payment-forms` tablosuna yazılır (oturum, sepet, token, son geçerlilik): Medusa yeniden başlatılan ödemenin eski oturumunu siler ama form iyzico'da ödenebilir kalır. `iyzico-reconcile` işi (10 dakikada bir) 5 dakikadan eski açık formların hepsini sayfa sayfa callback'in akışıyla sorar (tarayıcısı dönmeyen alıcı, incelemedeki ödeme, silinmiş oturumun ödenmiş formu). Form ödenince, iade kaydına girince ya da ödenmeden süresi dolunca kapanır; bir günü geçen açık form uyarıyla kapanır.
 - Oturum verisi Store yanıtlarında görünür: Medusa'nın sakladığı ödeme verisinde kart bilgisi yok (yalnızca `payment_id`, taksit, fraud durumu ve satır işlemleri); panel kart bilgisini iyzico'ya sorarak gösterir (V10).
 - Webhook (V3 imzası) kullanıcının kararıyla gerçek firmaya kadar ertelendi (2026-10-27); akış callback + uzlaştırmayla eksiksiz.
-- Sağlayıcının `refundPayment`'i V10'a kadar `iyzico.refund_unavailable` döner.
 - Geliştirmede: deneme sayfası (`/dev/checkout`, ADR-0028) iyzico'yu paneldeki sandbox hesabıyla açar (tüm sayfa yönlendirmesi). Testler sahte iyzico'nun Checkout Form'unu ve tıklanabilir sayfasını (`/fake-cpp/<token>`: onayla, reddet, incelemede) kullanır.
+
+- **Sandbox'ta ölçüldü (2026-10-27, F5 V10, deneme siparişi #212'nin ödemesinde 1 TL iade):**
+  - Aynı gün iade sandbox'ta yapılabildi (`10223` görülmedi; canlıda görülürse tam tutar iptale düşülür).
+  - İade yanıtının imzası `paymentId:price:currency:conversationId` (doğrulandı).
+  - Satırın kalanını (önceki iadelerle) aşan iade `5093`.
+  - Ödeme detayı (`/payment/detail`) iadeleri göstermiyor (tutarlar ve `merchantPayoutAmount` iade sonrası aynı); imzasının alan sırası belgelenmemiş, denenen iki sıra tutmadı. Detay yalnızca kimlikler ve kart bilgisi için okunur.
+
+## İade, iptal, taksit ve panel (F5 V10)
+- **İade:** kendi sipariş iademizden (satır bazlı defter, `pending_refund` referansı). Tutar kalem işlemlerine (`itemTransactions`) bölünür: önce ürünler, kargo en son, en az parçayla; her işlem kendi kalanını aşmaz. Medusa'nın kendi iadeleri (referanssız) reddedilir: `payments.use_order_refund`.
+- **Kayıp yanıt:** iyzico iadeyi tekilleştirmiyor ve iade listesi vermiyor. Her parça gönderilmeden önce defter satırına `sending` yazılır, yanıt gelince `done`. `sending` kalan parça bir daha gönderilmez; mağazaya iyzico panelini kontrol etmesi söylenir (`iyzico.refund_outcome_unknown`).
+- **Aynı gün:** iyzico aynı gün iadeyi reddederse (`10223`) ve iade ödemenin tamamıysa ödeme iptal edilir; kısmi iade için "yarın tekrar deneyin".
+- **Sahipsiz ödemenin iadesi** (kurtarma işi): önce iptal (aynı gün, tamamı), olmazsa her kalem işleminin tamamı iade edilir. Bir parça gittikten sonra hata ya da kayıp yanıt olursa ödeme tekrar denenmez, mağazaya bırakılır (uyarı + denetim kaydı).
+- **Taksit:** vitrin tablosu öncelikli kart sağlayıcısından gelir. iyzico'da BIN'siz taksit sorgusu, aile başına iyzico'nun kendi toplamları; tutar başına 10 dakika süreç belleğinde saklanır.
+- **Öncelikli sağlayıcı:** Ayarlar > Ödeme'de iki kart sağlayıcısı bağlıyken seçilir (`payments.card_provider`). `GET /store/payment/methods` bağlı sağlayıcıları seçilen önde olacak şekilde listeler; Medusa'nın kendi listesi bağlı olmayanları da sayar.
+- **Panel:** sipariş sayfası iyzico ödemesini iyzico'ya sorarak gösterir (işlem no = `paymentId`, kart markası ve son 4 hane, taksit, sahtekârlık kontrolü 0/-1 ise uyarı); yapılan iadeler kendi kaydımızdan.
 
 ## Kritik noktalar
 - Sepet ve alıcı sunucuda kurulur. Oturum verisi herkese açık sayılır; kişisel veri bırakılmaz (adr/0026).

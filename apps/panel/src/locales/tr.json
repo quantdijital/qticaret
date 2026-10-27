@@ -1291,10 +1291,17 @@
       "installmentCount_other": "{{count}} taksit",
       "singlePayment": "Tek çekim",
       "providerUnreachable": "Ödeme sağlayıcısına şu an ulaşılamadı; kart ve taksit bilgisi sonra görünür.",
-      "testPaid": "Bu sipariş test modunda ödendi: gerçek para alınmadı, kargoya verilemez."
+      "testPaid": "Bu sipariş test modunda ödendi: gerçek para alınmadı, kargoya verilemez.",
+      "fraud": "Sahtekârlık kontrolü",
+      "fraudStatus": {
+        "review": "iyzico inceliyor; onaylanmadan kargoya vermeyin",
+        "refused": "iyzico reddetti; tutar iade edilir"
+      }
     },
     "providers": {
-      "pp_system_default": "Manuel ödeme"
+      "pp_system_default": "Manuel ödeme",
+      "pp_iyzico_iyzico": "iyzico",
+      "pp_paytr_paytr": "PayTR"
     },
     "refund": {
       "title": "#{{number}} için para iadesi",

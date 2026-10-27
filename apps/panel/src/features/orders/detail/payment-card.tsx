@@ -74,7 +74,7 @@ export function PaymentCard({
   money?: OrderMoney
   /** The server's money read failed: said so, with a way to try again. */
   moneyError?: { onRetry: () => void }
-  /** The order's PayTR payment as PayTR holds it (F5 V7). */
+  /** The order's hosted-form payment as its provider holds it (F5 V7, V10). */
   hosted?: HostedPayment | undefined
 }) {
   const { t } = useTranslation()
@@ -130,6 +130,14 @@ export function PaymentCard({
                 ? t("orders.detail.installmentCount", { count: hosted.installments })
                 : t("orders.detail.singlePayment")
             }
+          />
+        ) : null}
+        {hosted?.fraud_status === 0 || hosted?.fraud_status === -1 ? (
+          <Row
+            label={t("orders.detail.fraud")}
+            value={t(
+              `orders.detail.fraudStatus.${hosted.fraud_status === 0 ? "review" : "refused"}`
+            )}
           />
         ) : null}
       </dl>

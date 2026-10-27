@@ -21,5 +21,12 @@ export const OrderRefund = model
     note: model.text().nullable(),
     created_by: model.text().nullable(),
     error_code: model.text().nullable(),
+    /**
+     * A provider that refunds in parts and keeps no record we can read
+     * (iyzico, by item transaction): `[{ transaction_id, amount, state }]`,
+     * each written `sending` before it is sent and `done` after. One left
+     * `sending` lost its answer: it is never sent again (F5 V10).
+     */
+    provider_parts: model.json().nullable(),
   })
   .indexes([{ on: ["order_id", "status"] }])

@@ -15,8 +15,31 @@ export interface RefundedLines {
   net: Map<string, number>
 }
 
+/** One part of a refund a provider makes in parts (iyzico): kuruş, and whether its answer came. */
+export interface ProviderPart {
+  transaction_id: string
+  amount: number
+  state: "sending" | "done"
+}
+
 /** The order refund ledger (F5 V5): read and written inside the order's refund lock. */
 class OrderRefundsModuleService extends MedusaService({ OrderRefund }) {
+  /** The parts of the refund under `reference`; null when there is no such refund. */
+  async providerParts(reference: string): Promise<ProviderPart[] | null> {
+    const [entry] = await this.listOrderRefunds({ reference }, { take: 1 })
+    return entry ? ((entry.provider_parts as ProviderPart[] | null) ?? []) : null
+  }
+
+  async saveProviderParts(reference: string, parts: ProviderPart[]): Promise<void> {
+    const [entry] = await this.listOrderRefunds({ reference }, { take: 1 })
+    if (entry) {
+      await this.updateOrderRefunds({
+        id: entry.id,
+        provider_parts: parts as unknown as Record<string, unknown>,
+      })
+    }
+  }
+
   /** Lines given back by the refunds that went through, or are going through now. */
   async refundedLines(orderId: string): Promise<RefundedLines> {
     const refunds = await this.listOrderRefunds(

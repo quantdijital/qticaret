@@ -3,7 +3,8 @@ import type { FakeCheckoutForm } from "./checkout-form"
 import type { IyzicoAccount } from "./signing"
 
 /**
- * The fake iyzico's refund (v1, by item transaction) and cancel, as the
+ * The fake iyzico's refund (v1, by item transaction), cancel and payment
+ * detail, as the
  * sandbox answered on 2026-10-27: a refund past what is left of its line
  * is `5093`; a refund's answer is signed `paymentId:price:currency:conversationId`;
  * a cancel takes the whole payment back and carries no signature. Codes
@@ -112,11 +113,48 @@ export function createRefunds(account: IyzicoAccount, forms: Map<string, FakeChe
     }
   }
 
+  /** A paid payment as iyzico's detail shows it: no refunds in it (as measured). */
+  const detail = (body: Body) => {
+    const paymentId = typeof body["paymentId"] === "string" ? body["paymentId"] : ""
+    const form = paidForms().find((candidate) => candidate.result?.paymentId === paymentId)
+    if (!form?.result) {
+      return failure(body, "FAKE_UNKNOWN_PAYMENT", "Ödeme bulunamadı")
+    }
+    return {
+      body: {
+        status: "success",
+        locale: "tr",
+        systemTime: Date.now(),
+        paymentId,
+        paymentStatus: form.result.paymentStatus,
+        fraudStatus: form.result.fraudStatus,
+        price: Number(form.price),
+        paidPrice: Number(form.result.paidPrice),
+        currency: form.currency,
+        installment: form.result.installment,
+        basketId: form.basketId,
+        cardType: "CREDIT_CARD",
+        cardAssociation: "MASTER_CARD",
+        cardFamily: "Bonus",
+        lastFourDigits: "0008",
+        itemTransactions: form.items.map((item, index) => ({
+          itemId: item.id,
+          paymentTransactionId: `${paymentId}${String(index + 1).padStart(2, "0")}`,
+          price: Number(item.price),
+          paidPrice: Number(item.price),
+          transactionStatus: 2,
+        })),
+      },
+    }
+  }
+
   return {
     refunds,
     cancelled,
-    handlers: { "/payment/refund": refund, "/payment/cancel": cancel } as Readonly<
-      Record<string, (body: Body) => { status?: number; body: unknown }>
-    >,
+    handlers: {
+      "/payment/refund": refund,
+      "/payment/cancel": cancel,
+      "/payment/detail": detail,
+    } as Readonly<Record<string, (body: Body) => { status?: number; body: unknown }>>,
   }
 }

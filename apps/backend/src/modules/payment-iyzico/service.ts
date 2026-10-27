@@ -12,6 +12,7 @@ import type {
   InitiatePaymentInput,
   InitiatePaymentOutput,
   PaymentSessionStatus,
+  RefundPaymentInput,
   RefundPaymentOutput,
   RetrievePaymentInput,
   RetrievePaymentOutput,
@@ -26,6 +27,7 @@ import { HOSTED_CHECKOUT, hostedCheckout } from "../../lib/payments/checkout"
 import { callbackSignature, iyzicoApi } from "../../lib/payments/iyzico"
 import type { IyzicoCredentials } from "../../lib/payments/iyzico"
 import { storedIyzicoAccount, storedPaymentSettings } from "./account"
+import { refundIyzicoPayment } from "./refund"
 import { iyzicoSession, paymentFactsOf, resultMatches } from "./session"
 
 /**
@@ -43,7 +45,8 @@ export const iyzicoCallbackUrl = (sessionId: string, secretKey: string): string 
  * the expected amount, test mode and where the shopper returns, nothing
  * personal. Authorization asks iyzico for the form's result: a payment
  * that matches and passed the fraud check is `captured` (iyzico charges at
- * once); one under review stays `pending`. Refunds and cancels join in V10.
+ * once); one under review stays `pending`. Refunds go by item transaction,
+ * each part recorded before it is sent (`refund.ts`).
  */
 class IyzicoProviderService extends AbstractPaymentProvider {
   static override identifier = "iyzico"
@@ -152,9 +155,26 @@ class IyzicoProviderService extends AbstractPaymentProvider {
     return Promise.reject(new ValidationError("payments.restart_checkout"))
   }
 
-  // Refunds by line come in F5 V10; until then the order refund refuses them
-  refundPayment(): Promise<RefundPaymentOutput> {
-    return Promise.reject(new ValidationError("iyzico.refund_unavailable"))
+  /**
+   * Gives back `amount` by item transaction (F5 V10), under the reference
+   * our order refund named in the payment's data (`pending_refund`); a
+   * refund of Medusa's own (no such reference) is refused.
+   */
+  async refundPayment(input: RefundPaymentInput): Promise<RefundPaymentOutput> {
+    const amount = fromMedusaAmount(input.amount, { allowRounding: true })
+    const pending = input.data?.["pending_refund"] as
+      { reference_no?: unknown; amount?: unknown } | undefined
+    if (pending?.amount !== amount || typeof pending.reference_no !== "string") {
+      throw new ValidationError("payments.use_order_refund")
+    }
+    return {
+      data: await refundIyzicoPayment(
+        await this.account(),
+        input.data,
+        amount,
+        pending.reference_no
+      ),
+    }
   }
 
   /**

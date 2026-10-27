@@ -15,6 +15,7 @@ import {
 import type { CheckoutFormInput, CheckoutFormResult } from "./checkout-form"
 import { IYZICO_PROVIDER, iyzicoError } from "./errors"
 import { createInstallmentCache, installmentAnswer } from "./installments"
+import { refundCalls } from "./refund-calls"
 import { iyzicoAnswer } from "./schemas"
 import { isResponseGenuine, signaturePrice, signedHeaders } from "./signatures"
 import type { IyzicoCredentialCheck, IyzicoCredentials } from "./types"
@@ -229,6 +230,7 @@ export function createIyzicoApi(
   }
 
   return {
+    ...refundCalls(post, forged),
     checkCredentials,
     initializeCheckoutForm,
     retrieveCheckoutForm,

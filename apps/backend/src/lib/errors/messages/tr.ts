@@ -150,11 +150,18 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Gizli alanların hepsini girin; hesap numarası değişince ya da kayıtlı bilgiler okunamayınca hepsi yeniden istenir.",
   "integration_credentials.unknown_provider": "Böyle bir ödeme ya da entegrasyon sağlayıcısı yok.",
   "iyzico.not_configured": "Mağaza iyzico hesabını henüz bağlamadı.",
-  "iyzico.refund_unavailable":
-    "iyzico ödemelerinin iadesi henüz panelden yapılamıyor; iyzico panelinden yapın.",
   "iyzico.basket_total_mismatch":
     "Sepet tutarı iyzico'ya tutarlı gönderilemedi; ödemeyi yeniden başlatın.",
   "iyzico.signature_mismatch": "iyzico'nun yanıtı doğrulanamadı; ödeme kabul edilmedi.",
+  "iyzico.test_mode_mismatch":
+    "Bu ödeme iyzico'nun diğer ortamında (sandbox/canlı) alındı; bağlı hesapla iade edilemez.",
+  "iyzico.refund_outcome_unknown":
+    "iyzico'dan iadenin sonucu alınamadı. Tekrar göndermeden önce iyzico panelinde bu ödemenin iadelerini kontrol edin.",
+  "iyzico.refund_exceeds_line": "iyzico bu tutarı kabul etmedi: ödemenin kalan tutarını aşıyor.",
+  "iyzico.refund_not_supported":
+    "Bu kartın bankası iade kabul etmiyor; müşteriye başka yolla ödeme yapın.",
+  "iyzico.refund_same_day":
+    "iyzico ödemenin alındığı gün kısmi iade yapmıyor; yarın tekrar deneyin ya da tamamını iade edin.",
   "iyzico.merchant_invalid":
     "iyzico bu API anahtarını tanımadı. Anahtarın seçili ortama ait olduğundan emin olun: sandbox anahtarı yalnızca sandbox açıkken, canlı anahtar yalnızca kapalıyken çalışır.",
   "iyzico.secret_invalid":
