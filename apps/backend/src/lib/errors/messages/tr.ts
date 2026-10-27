@@ -313,4 +313,18 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "upload.unreadable_image": "Görsel okunamadı; dosya bozuk olabilir.",
   "upload.unsupported_type":
     "Bu dosya türü desteklenmiyor; JPEG, PNG, WebP ya da AVIF görsel yükleyin.",
+  "cart.completed": "Bu sepetle sipariş zaten verildi.",
+  "cart.email_required": "Siparişi tamamlamak için e-posta adresi gerekir.",
+  "cart.empty": "Sepet boş.",
+  "cart.phone_required": "Ödeme için teslimat adresinde telefon numarası gerekir.",
+  "cart.shipping_method_required": "Bir kargo seçeneği seçin.",
+  "cart.unknown": "Sepet bulunamadı.",
+  "payments.cart_changed": "Sepet değişti; ödemeyi yeniden başlatın.",
+  "payments.checkout_invalid": "Ödeme bilgileri eksik ya da geçersiz.",
+  "payments.restart_checkout": "Tutar değişti; ödemeyi yeniden başlatın.",
+  "payments.return_url_invalid": "Dönüş adresi bu mağazanın adreslerinden biri değil.",
+  "payments.session_invalid": "Ödeme oturumu tanınmadı.",
+  "payments.use_checkout_route": "Bu ödeme yöntemi mağazanın ödeme adımından başlatılır.",
+  "paytr.not_configured": "Mağaza PayTR hesabını henüz bağlamadı.",
+  "paytr.refund_unavailable": "PayTR ödemelerinin iadesi henüz desteklenmiyor.",
 }

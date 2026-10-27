@@ -22,6 +22,17 @@ PayTR → Bildirim URL (POST /hooks/paytr)
 PayTR → tarayıcı: merchant_ok_url / merchant_fail_url (yalnızca bilgilendirme; sipariş onaylamaz)
 ```
 
+## Ödeme başlatma (F5 V2, 2026-10-27)
+- Sağlayıcı `pp_paytr_paytr` (`src/modules/payment-paytr`, medusa-config'te `id: "paytr"`). Hesap çağrı anında `@medusajs/framework`'ün paylaşılan `container`'ından okunur (adr/0027); kurucuda okunmaz, modüller o sırada henüz kayıtlı değil.
+- Bölgeye bağlama: bootstrap yeni bölgeye `pp_system_default` ile birlikte ekler; `paytr-region-provider` migration betiği mevcut bölgelere, bölgenin kendi sağlayıcılarını koruyarak ekler (Medusa kümenin tamamını değiştirir). Hesap yoksa başlatma `paytr.not_configured` ile reddedilir.
+- Uç: `POST /store/carts/:id/payment-session` gövde `{ provider_id, return_urls: { success, failure } }`. Dönüş adresleri `STORE_CORS` origin'lerinden biri olmalı (`payments.return_url_invalid`). Hız profili `checkout` (adres ve sepet başına).
+- Sepet hazır mı: kalem, teslimat adresi, kargo yöntemi (gerekiyorsa), e-posta ve telefon; eksik olan alan adıyla döner.
+- Sepet (`lib/payments/basket`): F4.7 payları, kredi satırları (hediye kartı, mağaza kredisi) satırlara dağıtılır, 0 TL satır çıkar, toplam ödeme koleksiyonu tutarına kuruşu kuruşuna eşit. Adede bölünmeyen satır PayTR'ye tek satır olarak "(N adet)" adıyla gider.
+- Oturum verisi herkese açık: `checkout` (alıcı, sepet, IP) çıktıda boşaltılır; oturumda `token`, `form_url`, `merchant_oid`, `amount` (kuruş), `currency_code`, `test_mode`, `expires_at` kalır (HTTP testi).
+- Medusa'nın `/store/payment-collections/:id/payment-sessions` ucu PayTR için 400 (`payments.use_checkout_route`); sağlayıcı da bizim ucumuzun `context` işareti olmayan başlatmayı reddeder.
+- `authorizePayment` durum sorgusudur: ödeme yoksa `pending`, tutar/para birimi/test modu oturumla eşleşirse `captured`, değilse `error`. Ödenen sepet `/store/carts/:id/complete` ile siparişe dönüşür (HTTP testi). İade ve iptal V5'e kadar `paytr.refund_unavailable`.
+- Taksit sınırı V6'ya kadar `max_installment: 0` (hesabın en çoğu).
+
 ## Uçlar ve imzalar
 Tüm imzalar `base64(HMAC-SHA256(key = merchant_key, mesaj))`.
 

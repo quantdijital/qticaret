@@ -1,7 +1,7 @@
 export { parsePaytrKurus, parsePaytrLira, toPaytrKurus, toPaytrLira } from "./amounts"
-export { PAYTR_BASE_URL, createPaytrApi, paytrApi } from "./client"
+export { PAYTR_BASE_URL, createPaytrApi, paytrApi, paytrFormUrl } from "./client"
 export type { PaytrApi } from "./client"
-export { encodeBasket, toPaytrCurrency } from "./fields"
+export { encodeBasket, paytrBasketOf, toPaytrCurrency } from "./fields"
 export type {
   PaytrBasketLine,
   PaytrCredentialCheck,

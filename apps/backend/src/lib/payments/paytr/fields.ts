@@ -1,3 +1,5 @@
+import { kurus } from "../../money"
+import type { Kurus } from "../../money"
 import { toPaytrLira } from "./amounts"
 import type { PaytrBasketLine } from "./types"
 
@@ -65,4 +67,20 @@ export function parseRates(oranlar: Record<string, Record<string, string>>) {
     rates[family] = byCount
   }
   return rates
+}
+
+/**
+ * The shared payment basket (`lib/payments/basket`) as PayTR lists it: a
+ * unit price and a quantity. A line whose amount the quantity does not
+ * divide (a discount or credit share) goes as one line of its whole
+ * amount, the quantity in its name, so the lines still add up to the payment.
+ */
+export function paytrBasketOf(
+  lines: readonly { name: string; quantity: number; amount: Kurus }[]
+): PaytrBasketLine[] {
+  return lines.map((line) =>
+    line.amount % line.quantity === 0
+      ? { name: line.name, price: kurus(line.amount / line.quantity), quantity: line.quantity }
+      : { name: `${line.name} (${String(line.quantity)} adet)`, price: line.amount, quantity: 1 }
+  )
 }

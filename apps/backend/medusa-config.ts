@@ -82,6 +82,13 @@ module.exports = defineConfig({
         versionKey: `qt:credentials:${namespace}:version`,
       },
     },
+    // F5 (adr/0026): the hosted-form providers; the system provider stays registered
+    {
+      resolve: "@medusajs/medusa/payment",
+      options: {
+        providers: [{ resolve: "./src/modules/payment-paytr", id: "paytr" }],
+      },
+    },
     {
       resolve: "./src/modules/billing-profile",
       options: { encryptionKey: env.PII_ENCRYPTION_KEY, hashKey: env.PII_HASH_KEY },

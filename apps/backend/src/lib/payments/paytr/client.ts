@@ -230,3 +230,7 @@ export function paytrApi(): PaytrApi {
   shared ??= createPaytrApi({ baseUrl: parseEnv().PAYTR_BASE_URL ?? PAYTR_BASE_URL })
   return shared
 }
+
+/** The iFrame's address for a token, on PayTR or on the local fake server (`PAYTR_BASE_URL`). */
+export const paytrFormUrl = (token: string): string =>
+  `${parseEnv().PAYTR_BASE_URL ?? PAYTR_BASE_URL}/odeme/guvenli/${encodeURIComponent(token)}`

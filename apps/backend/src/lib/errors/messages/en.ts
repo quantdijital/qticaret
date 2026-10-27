@@ -304,4 +304,18 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "upload.unreadable_image": "The image could not be read; the file may be damaged.",
   "upload.unsupported_type":
     "This file type is not supported; upload a JPEG, PNG, WebP or AVIF image.",
+  "cart.completed": "An order was already placed with this cart.",
+  "cart.email_required": "An email address is needed to place the order.",
+  "cart.empty": "The cart is empty.",
+  "cart.phone_required": "The shipping address needs a phone number for the payment.",
+  "cart.shipping_method_required": "Choose a shipping option.",
+  "cart.unknown": "Cart not found.",
+  "payments.cart_changed": "The cart changed; start the payment again.",
+  "payments.checkout_invalid": "The payment details are missing or invalid.",
+  "payments.restart_checkout": "The amount changed; start the payment again.",
+  "payments.return_url_invalid": "The return address is not one of this shop's addresses.",
+  "payments.session_invalid": "The payment session is not recognised.",
+  "payments.use_checkout_route": "This payment method starts from the shop's checkout step.",
+  "paytr.not_configured": "The shop has not connected its PayTR account yet.",
+  "paytr.refund_unavailable": "Refunds of PayTR payments are not supported yet.",
 }
