@@ -7,6 +7,7 @@ import { ErrorState } from "@/components/patterns/states"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { BankTransferAlert } from "@/features/orders/detail/bank-transfer-alert"
+import { ChargebackAlert } from "@/features/orders/detail/chargeback-alert"
 import {
   orderMoneyQuery,
   orderPaymentDetailsQuery,
@@ -86,6 +87,7 @@ export function OrderDetailPage() {
           />
         }
       />
+      <ChargebackAlert orderId={order.id} />
       {details.data?.bank_transfer?.awaiting && order.status !== "canceled" ? (
         <BankTransferAlert
           orderId={order.id}

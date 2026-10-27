@@ -4,6 +4,7 @@ import {
   EllipsisVertical,
   Loader2,
   PackageCheck,
+  ShieldAlert,
   Truck,
   Undo2,
 } from "lucide-react"
@@ -26,10 +27,11 @@ import {
 } from "@/features/orders/api/orders"
 import type { OrderDetail, OrderMoney, OrderState } from "@/features/orders/api/orders"
 import { errorText } from "@/lib/errors"
+import { ChargebackDialog } from "./chargeback-dialog"
 import { RefundDialog } from "./refund-dialog"
 import { ShipDialog } from "./ship-dialog"
 
-type Dialog = "ship" | "deliver" | "cancel" | "capture" | "refund" | null
+type Dialog = "ship" | "deliver" | "cancel" | "capture" | "refund" | "chargeback" | null
 
 /**
  * The next step for the order as the page's main button (ship, then mark
@@ -62,6 +64,8 @@ export function OrderActions({
   const cancelable = state.cancelable
   const canShip = state.ship !== null && state.stage !== "awaiting_payment" && !testPaid
   const refundable = money !== undefined && Number(money.refundable) > 0
+  // A dispute is against money taken (F6.7)
+  const disputable = money !== undefined && Number(money.paid) > 0
 
   const done = (message: string) => () => {
     setDialog(null)
@@ -98,7 +102,7 @@ export function OrderActions({
           {t("orders.actions.deliver")}
         </Button>
       ) : null}
-      {held.length > 0 || refundable || cancelable ? (
+      {held.length > 0 || refundable || disputable || cancelable ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="icon" aria-label={t("orders.actions.more")}>
@@ -124,6 +128,16 @@ export function OrderActions({
               >
                 <Undo2 />
                 {t("orders.actions.refund")}
+              </DropdownMenuItem>
+            ) : null}
+            {disputable ? (
+              <DropdownMenuItem
+                onSelect={() => {
+                  setDialog("chargeback")
+                }}
+              >
+                <ShieldAlert />
+                {t("orders.actions.chargeback")}
               </DropdownMenuItem>
             ) : null}
             {cancelable ? (
@@ -171,6 +185,15 @@ export function OrderActions({
           capture.mutate(held, { onSuccess: done("orders.capture.done"), onError: failed })
         }}
       />
+      {dialog === "chargeback" && money ? (
+        <ChargebackDialog
+          orderId={order.id}
+          displayId={order.display_id ?? 0}
+          paid={money.paid}
+          open
+          onOpenChange={close}
+        />
+      ) : null}
       {/* Mounted while open: each opening is a new refund, with a key of its own */}
       {dialog === "refund" && money ? (
         <RefundDialog order={order} money={money} open onOpenChange={close} />

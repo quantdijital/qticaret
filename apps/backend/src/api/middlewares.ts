@@ -22,6 +22,7 @@ import { auditMutations, auditSensitiveRead } from "./http/audit"
 import { BANK_TRANSFER_ROUTES } from "./http/bank-transfer-routes"
 import { BRAND_ROUTES, STORE_BRAND_FIELDS } from "./http/brand-routes"
 import { CATALOG_SHEET_ROUTES } from "./http/catalog-sheet-routes"
+import { CHARGEBACK_ROUTES } from "./http/chargeback-routes"
 import { CONTENT_ROUTES } from "./http/content-routes"
 import { DEV_ROUTES } from "./http/dev-routes"
 import { SENSITIVE_READS } from "./http/audit/sensitive-routes"
@@ -182,6 +183,7 @@ export default defineMiddlewares({
     ...DEV_ROUTES,
     ...ORDER_REFUND_ROUTES,
     ...BANK_TRANSFER_ROUTES,
+    ...CHARGEBACK_ROUTES,
     // F3.11: brands
     ...BRAND_ROUTES,
     ...CONTENT_ROUTES,

@@ -88,6 +88,8 @@ module.exports = defineConfig({
     { resolve: "./src/modules/payment-recovery" },
     // F5 V9: hosted forms given out, for the iyzico reconcile job
     { resolve: "./src/modules/payment-forms" },
+    // F6.7 (adr/0030): cardholders' disputes of order payments
+    { resolve: "./src/modules/chargebacks" },
     // F5 V5: refunds line by line, each made once
     { resolve: "./src/modules/order-refunds" },
     // F5 (adr/0026): the hosted-form providers; the system provider stays registered

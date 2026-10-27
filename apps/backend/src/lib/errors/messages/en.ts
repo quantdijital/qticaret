@@ -27,6 +27,13 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The cash on delivery fee cannot be changed in the cart; pick another way to pay.",
   "cash_on_delivery.fee_mismatch": "The cash on delivery fee changed; start the payment again.",
   "cash_on_delivery.fee_invalid": "A share is at most 100%.",
+  "chargebacks.order_unpaid": "This order has no captured payment; no chargeback can be recorded.",
+  "chargebacks.amount_exceeds_paid": "The disputed amount cannot exceed what was paid.",
+  "chargebacks.amount_invalid": "Enter the amount with at most two decimals.",
+  "chargebacks.already_open": "This payment already has an open chargeback.",
+  "chargebacks.transition_invalid":
+    "The chargeback cannot move to this state; a closed one does not reopen.",
+  "chargebacks.unknown": "Chargeback not found.",
   "brands.description_invalid":
     "The description is too long or holds characters that cannot be used.",
   "brands.logo_unknown": "The logo must be one of the shop's uploaded images.",

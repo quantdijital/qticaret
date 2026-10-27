@@ -14,6 +14,8 @@ export const SENSITIVE_READS: readonly [string, string, boolean, (readonly strin
   ["/admin/orders/:id", "order", false],
   ["/admin/orders/:id/preview", "order", false],
   ["/admin/orders/:id/changes", "order", false],
+  // F6.7: a dispute's evidence holds the order's delivery address
+  ["/admin/chargebacks/:id/evidence", "chargeback", false],
   ["/admin/draft-orders", "draft_order", true],
   ["/admin/draft-orders/:id", "draft_order", false],
   ["/admin/returns", "return", true],

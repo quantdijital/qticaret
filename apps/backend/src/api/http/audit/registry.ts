@@ -3,6 +3,7 @@ import { routePathKeepingCase } from "../request-path"
 import { ATTRIBUTE_RESOURCES } from "./resources/attributes"
 import { BRAND_RESOURCES } from "./resources/brands"
 import { CATALOG_RESOURCES } from "./resources/catalog"
+import { CHARGEBACK_RESOURCES } from "./resources/chargebacks"
 import { CONTENT_RESOURCES } from "./resources/content"
 import { GIFT_CARD_RESOURCES } from "./resources/gift-cards"
 import { INTEGRATION_RESOURCES } from "./resources/integrations"
@@ -38,6 +39,7 @@ export const AUDITED_RESOURCES: readonly AuditedResource[] = [
   ...GIFT_CARD_RESOURCES,
   ...INTEGRATION_RESOURCES,
   ...ORDER_RESOURCES,
+  ...CHARGEBACK_RESOURCES,
 ]
 
 export interface ResourceMatch {

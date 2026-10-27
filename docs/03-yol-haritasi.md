@@ -258,7 +258,7 @@ Detay: `docs/entegrasyonlar/alternatif-odeme.md`
 - [x] Her provider (iyzico, PayTR, havale, kapıda ödeme) ortak contract test paketini geçiyor (`payment-providers.contract`, `offline-providers.contract`)
 - [x] Süresi dolan havale siparişi iptal ediliyor ve stok geri dönüyor (testli) (`bank-transfer-confirm`)
 - [x] Kapıda ödeme flag kapalıyken veya tutar sınırı aşıldığında seçenek sunulmuyor (testli) (`cash-on-delivery`)
-- [ ] Ters ibraz kaydı açılan siparişin belge paketi tek tıkla iniyor
+- [x] Ters ibraz kaydı açılan siparişin belge paketi tek tıkla iniyor (`chargebacks`: tek, kendi içinde tam HTML belge, ADR-0030; sözleşme onayı ve kargo kanıtı F13/F7 geldikçe dolar)
 
 ---
 

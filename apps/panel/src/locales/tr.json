@@ -1291,7 +1291,8 @@
       "capture": "Ödemeyi tahsil et",
       "cancel": "Siparişi iptal et",
       "more": "Diğer işlemler",
-      "refund": "Para iadesi"
+      "refund": "Para iadesi",
+      "chargeback": "Ters ibraz kaydı aç"
     },
     "ship": {
       "title": "#{{number}} kargoya verilsin mi?",
@@ -1397,6 +1398,46 @@
         "done": "İade edildi",
         "pending": "Sürüyor",
         "failed": "Yapılamadı"
+      }
+    },
+    "chargeback": {
+      "title": "#{{number}} siparişi için ters ibraz kaydı",
+      "description": "Sağlayıcının bildirimindeki bilgileri girin. Tutar ödenen tutarı geçemez.",
+      "amount": "İtiraz edilen tutar (TL)",
+      "amountInvalid": "Tutarı rakamla girin.",
+      "reason": "Sebep",
+      "reasons": {
+        "not_received": "Ürün ulaşmadı",
+        "unauthorized": "Yetkisiz işlem",
+        "not_as_described": "Ürün tarif edildiği gibi değil",
+        "duplicate": "Mükerrer tahsilat",
+        "other": "Diğer"
+      },
+      "reference": "Sağlayıcı referansı",
+      "referenceHint": "PayTR ya da iyzico'nun bildirimindeki itiraz numarası.",
+      "due": "Belge son tarihi",
+      "note": "Not",
+      "open": "Kaydı aç",
+      "opened": "Ters ibraz kaydı açıldı; belge paketini indirip sağlayıcıya gönderin.",
+      "alert": "Bu sipariş için ters ibraz kaydı var ({{status}}).",
+      "alertDue": "Bu sipariş için ters ibraz kaydı var ({{status}}); belge son tarihi {{date}}.",
+      "evidence": "Belge paketini indir",
+      "queue": "Ters ibrazlar",
+      "status": {
+        "open": "Açık",
+        "evidence_submitted": "Belge gönderildi",
+        "won": "Kazanıldı",
+        "lost": "Kaybedildi"
+      },
+      "queueDescription": "Kart sahiplerinin ödemelere itirazları; son tarihi yaklaşan önde.",
+      "move": "Durumu değiştir",
+      "markAs": "{{status}} olarak işaretle",
+      "moved": "Kayıt «{{status}}» oldu.",
+      "empty": "Bu görünümde ters ibraz kaydı yok.",
+      "columns": {
+        "order": "Sipariş",
+        "status": "Durum",
+        "amount": "Tutar"
       }
     }
   },

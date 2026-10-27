@@ -22,6 +22,7 @@ const SCREENS = [
   "/settings/payments/iyzico",
   "/settings/payments/bank_transfer",
   "/settings/payments/cash_on_delivery",
+  "/orders/chargebacks",
   "/settings/integrations",
   "/settings/appearance",
   "/reports/products",

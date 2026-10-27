@@ -6,6 +6,7 @@ import { DataTable } from "@/components/patterns/data-table"
 import type { Column } from "@/components/patterns/data-table"
 import { FilterTabs } from "@/components/patterns/filter-tabs"
 import { PageHeader } from "@/components/patterns/page-header"
+import { Button } from "@/components/ui/button"
 import { Pagination } from "@/components/patterns/pagination"
 import { SearchInput } from "@/components/patterns/search-input"
 import { ErrorState } from "@/components/patterns/states"
@@ -116,7 +117,15 @@ export function OrdersPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title={t("nav.orders")} description={t("orders.description")} />
+      <PageHeader
+        title={t("nav.orders")}
+        description={t("orders.description")}
+        action={
+          <Button asChild variant="outline" size="sm">
+            <Link to="/orders/chargebacks">{t("orders.chargeback.queue")}</Link>
+          </Button>
+        }
+      />
       <section className="overflow-hidden rounded-lg border bg-card shadow-card">
         <FilterTabs
           label={t("orders.views")}

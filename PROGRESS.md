@@ -3,7 +3,7 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**F6 — Ödeme: alternatif ödemeler + yönlendirici + ters ibraz: BAŞLADI (2026-10-27 gece, otonom).** Dal `f6-alternative-payments` (`f5-payments` üzerinden; F6 planı ve W1 `f5-payments`'ta, 9f34fd1). Plan aşağıda "F6 görev planı"; ADR-0029 (çevrim dışı ödemeler) kabul edildi (otonom, gözden geçir). W1–W4 bitti; sıradaki W5 (ters ibraz).
+**F6 — Ödeme: alternatif ödemeler + yönlendirici + ters ibraz: BAŞLADI (2026-10-27 gece, otonom).** Dal `f6-alternative-payments` (`f5-payments` üzerinden; F6 planı ve W1 `f5-payments`'ta, 9f34fd1). Plan aşağıda "F6 görev planı"; ADR-0029 (çevrim dışı ödemeler) kabul edildi (otonom, gözden geçir). W1–W5 bitti; sıradaki W6 (kapanış: güvenlik incelemesi, kapsam).
 
 **F5 — Ödeme: PayTR + iyzico (+ ortak ödeme altyapısı): BİTTİ (V1–V11, 2026-10-27).** Ertelenenler: gerçek PayTR test penceresi ve iyzico taksitli sandbox ödemesi (sunucuya çıkışta), iyzico webhook'u (gerçek firmayla). Sıradaki faz F6.
 - V1: mağaza PayTR hesabını panelden bağlıyor (kullanıcı talebi, ADR-0027 ADR-0002'nin yerini aldı); PayTR istemcisi, sahte PayTR, `packages/testing`. Commit'ler `77c88f6`, `a00fa45` ve dokümanlar.
@@ -24,6 +24,15 @@
 
 **2026-10-27 gece (otonom; F5 kapanışı, F6 başlangıcı).** Kullanıcı yatarken: "izin istemeden çalışmaya devam edersin, kritik bir şey olursa sabah sorarım."
 - F5 kapandı (yukarıda V11; CI yeşil `fcd06e7`).
+- **F6 W5 (ters ibraz, ADR-0030):**
+  - `chargebacks` modülü. Durumlar açık → belge gönderildi → kazanıldı/kaybedildi; kapanan yeniden açılmaz.
+  - Açma kuralları: yakalanmış ödeme, ödenenden fazla değil, ödeme başına tek açık kayıt.
+  - Kaybedilince `chargeback.lost` olayı (muhasebe F11).
+  - Belge paketi: tek, kendi içinde tam HTML (yazdırılabilir), `GET /admin/chargebacks/:id/evidence`, hassas okuma olarak denetim kaydına giriyor.
+  - Panel: Siparişler > Ters ibrazlar kuyruğu (durum sekmeleri, belge, durum değişikliği), sipariş sayfasında "Ters ibraz kaydı aç" ve açık kayıt uyarısı.
+  - F6 KK5 işaretlendi.
+  - Testler: modül 1, HTTP `chargebacks` 4, panel `chargeback-dialog` 1, e2e 29.
+  - Karar (gözden geçir): belge paketi zip/PDF değil HTML (yeni bağımlılık yok); sözleşme onayı ve IP bugün saklanmıyor, paket bunu açıkça yazıyor (F13); kaybedilen ibraz iade defterine yazılmıyor.
 - **F6 W4 (yönlendirici, sözleşme paketi):**
   - `routedCardProviders`: mağazanın seçtiği önde, ama entegrasyon sağlık kontrolünün düşük bulduğu sağlayıcı arkaya geçiyor. `GET /store/payment/methods` `card_providers_down` da veriyor. Taksit tablosu öndeki sağlıklı sağlayıcıdan.
   - Tek sağlayıcıda sağlık kontrolü çalıştırılmıyor.
@@ -1059,7 +1068,7 @@
 - **Daha önce:** F1 planlaması ve F0.2–F0.8 (2026-10-24), F0.1 monorepo (2026-10-24 sabahı), SEO ve güvenlik dokümanları (2026-10-22).
 
 ## Sıradaki görev
-**Claude'un sıradaki işi:** F6 W5 (ters ibraz: kayıt, durumlar, belge paketi, panel kuyruğu), plan aşağıda "F6 görev planı". Kullanıcı 2026-10-27 gece: "izin istemeden çalışmaya devam edersin, kritik bir şey olursa sabah sorarım."
+**Claude'un sıradaki işi:** F6 W6 (kapanış: bağımsız güvenlik ve kod incelemesi, kapsam, KK'lar), plan aşağıda "F6 görev planı". Kullanıcı 2026-10-27 gece: "izin istemeden çalışmaya devam edersin, kritik bir şey olursa sabah sorarım."
 
 ### F6 görev planı (2026-10-27; Medusa 2.21.2 kaynağından doğrulandı, Context7 kotası dolu)
 Doğrulananlar (medusa-researcher, GitHub v2.21.2):
@@ -1076,7 +1085,7 @@ Doğrulananlar (medusa-researcher, GitHub v2.21.2):
 | W2 ✅ | F6.5 | **Bitti (2026-10-27 gece).** Havale onayı (panel sipariş sayfası "Havale geldi" → `processPaymentWorkflow`), süresi dolan havale siparişinin iptali ve stok iadesi (iş), kargo kuralı (yalnızca `captured` ya da kapıda ödeme `authorized`), dashboard ve sipariş listesinde "havale bekliyor" | W1 | Havale KK'sı |
 | W3 ✅ | F6.6 | **Bitti (2026-10-28 gece).** Kapıda ödeme sağlayıcısı (`pp_cod_cod`, `authorized`), bayrak + şartlar (üst tutar, izinli kargo seçenekleri), ek ücret kalemi (sunucuda, korunan), tamamlamada ek ücret doğrulaması, panelde "tahsil edildi" (capture) ve mutabakat alanları, panel ayar sayfası | ADR-0029 | Kapıda ödeme KK'sı |
 | W4 ✅ | F6.2–F6.4 | **Bitti (2026-10-28 gece).** Yönlendirici: birincil/yedek kart sağlayıcısı, sağlık durumu kötüyse yedek önde (`/store/payment/methods`), yedekle tamamlanan checkout testi; sözleşme paketinin çevrim dışı dalı (havale, kapıda ödeme) | W1, W3 | KK1, KK2 |
-| W5 | F6.7 | Ters ibraz: `chargebacks` modülü (sipariş, sağlayıcı, tutar, sebep, son tarih, durum açık/belge sunuldu/kazanıldı/kaybedildi), panelden elle kayıt, belge paketi (async iş, indirilebilir: sipariş özeti, ödeme kaydı, IP/zaman, sözleşme onayı ve kargo kanıtı oldukça), panel kuyruğu; kaybedilen ibrazda muhasebe kaydı F11'de | — | KK5 |
+| W5 ✅ | F6.7 | **Bitti (2026-10-28 gece).** Ters ibraz: `chargebacks` modülü (sipariş, sağlayıcı, tutar, sebep, son tarih, durum açık/belge sunuldu/kazanıldı/kaybedildi), panelden elle kayıt, belge paketi (async iş, indirilebilir: sipariş özeti, ödeme kaydı, IP/zaman, sözleşme onayı ve kargo kanıtı oldukça), panel kuyruğu; kaybedilen ibrazda muhasebe kaydı F11'de | — | KK5 |
 | W6 | — | Kapanış: güvenlik incelemesi, KK işaretleri, kapsam | W1–W5 | — |
 
 ### F5 görev planı (2026-10-27; Medusa 2.21.2 kaynağı, dev.paytr.com ve docs.iyzico.com'dan doğrulandı)

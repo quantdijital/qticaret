@@ -30,6 +30,13 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Kapıda ödeme ücreti sepetten değiştirilemez; başka bir ödeme yöntemi seçin.",
   "cash_on_delivery.fee_mismatch": "Kapıda ödeme ücreti değişti; ödemeyi yeniden başlatın.",
   "cash_on_delivery.fee_invalid": "Oran en çok %100 olabilir.",
+  "chargebacks.order_unpaid":
+    "Bu siparişin tahsil edilmiş bir ödemesi yok; ters ibraz kaydı açılamaz.",
+  "chargebacks.amount_exceeds_paid": "İtiraz edilen tutar ödenen tutarı geçemez.",
+  "chargebacks.amount_invalid": "Tutarı en çok iki ondalıkla girin.",
+  "chargebacks.already_open": "Bu ödeme için açık bir ters ibraz kaydı zaten var.",
+  "chargebacks.transition_invalid": "Kayıt bu duruma geçemez; kapanmış kayıt yeniden açılmaz.",
+  "chargebacks.unknown": "Ters ibraz kaydı bulunamadı.",
   "brands.description_invalid": "Açıklama çok uzun ya da kullanılamayan karakterler içeriyor.",
   "brands.logo_unknown": "Logo mağazanın yüklenen görsellerinden biri olmalı.",
   "brands.name_invalid": "Marka adını girin (en fazla 120 karakter).",

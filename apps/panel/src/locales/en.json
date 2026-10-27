@@ -1283,7 +1283,8 @@
       "capture": "Capture payment",
       "cancel": "Cancel order",
       "more": "More actions",
-      "refund": "Refund money"
+      "refund": "Refund money",
+      "chargeback": "Record a chargeback"
     },
     "ship": {
       "title": "Ship #{{number}}?",
@@ -1389,6 +1390,46 @@
         "done": "Refunded",
         "pending": "In progress",
         "failed": "Failed"
+      }
+    },
+    "chargeback": {
+      "title": "Chargeback for order #{{number}}",
+      "description": "Enter what the provider's notice says. The amount cannot exceed what was paid.",
+      "amount": "Disputed amount (TL)",
+      "amountInvalid": "Enter the amount as a number.",
+      "reason": "Reason",
+      "reasons": {
+        "not_received": "Not received",
+        "unauthorized": "Unauthorized",
+        "not_as_described": "Not as described",
+        "duplicate": "Duplicate charge",
+        "other": "Other"
+      },
+      "reference": "Provider reference",
+      "referenceHint": "The dispute number in PayTR's or iyzico's notice.",
+      "due": "Evidence due",
+      "note": "Note",
+      "open": "Record it",
+      "opened": "Chargeback recorded; download the evidence and send it to the provider.",
+      "alert": "This order has a chargeback ({{status}}).",
+      "alertDue": "This order has a chargeback ({{status}}); evidence due {{date}}.",
+      "evidence": "Download evidence",
+      "queue": "Chargebacks",
+      "status": {
+        "open": "Open",
+        "evidence_submitted": "Evidence sent",
+        "won": "Won",
+        "lost": "Lost"
+      },
+      "queueDescription": "Cardholders' disputes of payments; the nearest deadline first.",
+      "move": "Change status",
+      "markAs": "Mark as {{status}}",
+      "moved": "The chargeback is now “{{status}}”.",
+      "empty": "No chargebacks in this view.",
+      "columns": {
+        "order": "Order",
+        "status": "Status",
+        "amount": "Amount"
       }
     }
   },
