@@ -6,7 +6,7 @@ import {
 } from "./steps/iyzico-callback"
 import type { IyzicoForm, IyzicoOutcome } from "./steps/iyzico-callback"
 import { recordPaymentOrphanStep } from "./steps/payment-orphan"
-import { completePaidCartStep } from "./steps/paytr-payment-check"
+import { completePaidCartStep } from "./steps/complete-paid-cart"
 
 export interface IyzicoCallbackResult {
   outcome: IyzicoOutcome

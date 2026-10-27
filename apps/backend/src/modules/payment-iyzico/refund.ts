@@ -2,19 +2,12 @@ import { container } from "@medusajs/framework"
 import { ValidationError, isProviderError } from "../../lib/errors"
 import { kurus } from "../../lib/money"
 import type { Kurus } from "../../lib/money"
-import { iyzicoApi } from "../../lib/payments/iyzico"
+import { iyzicoApi, nothingDone } from "../../lib/payments/iyzico"
 import type { IyzicoCredentials } from "../../lib/payments/iyzico"
 import { ORDER_REFUNDS_MODULE } from "../order-refunds"
 import type OrderRefundsModuleService from "../order-refunds/service"
 import type { ProviderPart } from "../order-refunds/service"
 import { iyzicoSession } from "./session"
-
-/** A refund kept in the payment's data: its reference, the kuruş and the parts by transaction. */
-interface RefundRecord {
-  reference_no: string
-  amount: number
-  parts: { transaction_id: string; amount: number }[]
-}
 
 interface ItemTransaction {
   item_id: string
@@ -22,17 +15,18 @@ interface ItemTransaction {
   paid: number
 }
 
+type Part = Pick<ProviderPart, "transaction_id" | "amount">
+
 // The whole payment taken back by a cancel, not by item transaction
 const CANCEL = "cancel"
 
-// iyzico's answers the shop can act on, as messages; the rest stay provider errors
+// iyzico's refusals the shop can act on, as messages; the rest stay provider errors
 const SHOP_ACTIONABLE = new Set(["refund_exceeds_line", "refund_not_supported", "refund_same_day"])
-
-const recordsOf = (data: Record<string, unknown> | undefined): RefundRecord[] =>
-  Array.isArray(data?.["refunds"]) ? (data["refunds"] as RefundRecord[]) : []
 
 const transactionsOf = (data: Record<string, unknown> | undefined): ItemTransaction[] =>
   Array.isArray(data?.["item_transactions"]) ? (data["item_transactions"] as ItemTransaction[]) : []
+
+const unknown = (cause?: unknown) => new ValidationError("iyzico.refund_outcome_unknown", { cause })
 
 /**
  * Splits `amount` over the item transactions by what each has left,
@@ -40,17 +34,20 @@ const transactionsOf = (data: Record<string, unknown> | undefined): ItemTransact
  */
 export function allocateRefund(
   transactions: readonly ItemTransaction[],
-  refunded: ReadonlyMap<string, number>,
+  sent: readonly Part[],
   amount: number
-): { transaction_id: string; amount: number }[] {
+): Part[] {
+  const refunded = new Map<string, number>()
+  for (const part of sent) {
+    refunded.set(part.transaction_id, (refunded.get(part.transaction_id) ?? 0) + part.amount)
+  }
   const ordered = [...transactions].sort(
     (a, b) => Number(!a.item_id.startsWith("cali_")) - Number(!b.item_id.startsWith("cali_"))
   )
-  const parts: { transaction_id: string; amount: number }[] = []
+  const parts: Part[] = []
   let left = amount
   for (const transaction of ordered) {
-    const room = transaction.paid - (refunded.get(transaction.transaction_id) ?? 0)
-    const part = Math.min(room, left)
+    const part = Math.min(transaction.paid - (refunded.get(transaction.transaction_id) ?? 0), left)
     if (part > 0) {
       parts.push({ transaction_id: transaction.transaction_id, amount: part })
       left -= part
@@ -62,27 +59,64 @@ export function allocateRefund(
   return parts
 }
 
-/** The ledger entry of the refund under way (`order-refunds`), as the provider keeps its parts. */
-async function ledgerParts(reference: string): Promise<{
-  parts: ProviderPart[]
-  save: (parts: ProviderPart[]) => Promise<void>
-}> {
+/**
+ * The refund's ledger entry (`order-refunds`, named by our order refund in
+ * `pending_refund`), and every part sent for the same payment under any
+ * reference: iyzico keeps no record we can read, this is the only one.
+ */
+async function ledgerOf(reference: string) {
   const ledger = container.resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE)
-  const parts = await ledger.providerParts(reference)
-  // Only our order refund names one: Medusa's own refunds of an iyzico payment are not made
-  if (!parts) {
+  const entry = await ledger.providerParts(reference)
+  if (!entry) {
     throw new ValidationError("payments.use_order_refund")
   }
-  return { parts, save: (next) => ledger.saveProviderParts(reference, next) }
+  const parts = [...entry.parts]
+  return {
+    parts,
+    sent: await ledger.paymentParts(entry.payment_id),
+    save: () => ledger.saveProviderParts(reference, parts),
+  }
 }
 
 /**
- * Gives back `amount` of an iyzico payment under `reference` (F5 V10).
- * iyzico refunds by item transaction and keeps no record we can read, so
- * each part is written to the refund's ledger entry before it is sent: a
- * part whose answer was lost is never sent again (the shop checks iyzico's
- * panel). A whole payment refused a refund the same day is cancelled
- * instead. Returns the payment's data with the refund recorded.
+ * Sends one part, written `sending` first and `done` once iyzico's signed
+ * answer is for exactly it. Only a part iyzico surely did not make is
+ * taken off again; any other failure leaves it `sending`: never sent again.
+ */
+async function sendPart(
+  ledger: Awaited<ReturnType<typeof ledgerOf>>,
+  part: Part,
+  call: () => Promise<boolean>
+): Promise<void> {
+  ledger.parts.push({ ...part, state: "sending" })
+  await ledger.save()
+  let matches: boolean
+  try {
+    matches = await call()
+  } catch (error) {
+    if (!nothingDone(error)) {
+      throw unknown(error)
+    }
+    ledger.parts.pop()
+    await ledger.save()
+    if (isProviderError(error) && SHOP_ACTIONABLE.has(error.providerCode)) {
+      throw new ValidationError(`iyzico.${error.providerCode}`, { cause: error })
+    }
+    throw error
+  }
+  if (!matches) {
+    throw unknown()
+  }
+  ledger.parts[ledger.parts.length - 1] = { ...part, state: "done" }
+  await ledger.save()
+}
+
+/**
+ * Gives back `amount` of an iyzico payment under `reference` (F5 V10,
+ * security review 2026-10-27). Each part is allocated against every part
+ * ever sent for the payment, and a part whose outcome is unknown stops all
+ * refunds of it until the shop checked iyzico's panel. A whole payment
+ * iyzico will not refund on its day is cancelled instead.
  */
 export async function refundIyzicoPayment(
   account: IyzicoCredentials,
@@ -91,78 +125,50 @@ export async function refundIyzicoPayment(
   reference: string
 ): Promise<Record<string, unknown>> {
   const session = iyzicoSession(data)
+  const paymentId = data?.["payment_id"]
   if (account.testMode !== session.test_mode) {
     throw new ValidationError("iyzico.test_mode_mismatch")
   }
-  const records = recordsOf(data)
-  if (records.some((record) => record.reference_no === reference)) {
-    return { ...data }
-  }
-  const paymentId = data?.["payment_id"]
   if (typeof paymentId !== "string") {
     throw new ValidationError("payments.session_invalid")
   }
-  const ledger = await ledgerParts(reference)
-  const parts = [...ledger.parts]
-  if (parts.some((part) => part.state === "sending")) {
-    throw new ValidationError("iyzico.refund_outcome_unknown")
+  const ledger = await ledgerOf(reference)
+  if (ledger.sent.some((part) => part.state === "sending")) {
+    throw unknown()
   }
-  const refunded = new Map<string, number>()
-  for (const part of [...records.flatMap((record) => record.parts), ...parts]) {
-    refunded.set(part.transaction_id, (refunded.get(part.transaction_id) ?? 0) + part.amount)
-  }
-  const done = parts.reduce((sum, part) => sum + part.amount, 0)
-  const send = async (
-    part: { transaction_id: string; amount: number },
-    call: () => Promise<unknown>
-  ) => {
-    parts.push({ ...part, state: "sending" })
-    await ledger.save(parts)
-    try {
-      await call()
-    } catch (error) {
-      if (isProviderError(error) && error.providerCode === "outcome_unknown") {
-        throw new ValidationError("iyzico.refund_outcome_unknown", { cause: error })
-      }
-      // Refused: nothing was given back, the part is not kept
-      parts.pop()
-      await ledger.save(parts)
-      throw error
-    }
-    parts[parts.length - 1] = { ...part, state: "done" }
-    await ledger.save(parts)
+  const currency = session.currency_code.toUpperCase()
+  const done = ledger.parts.reduce((sum, part) => sum + part.amount, 0)
+  const refund = (part: Part) => async () => {
+    const answer = await iyzicoApi().refundTransaction(account, {
+      transactionId: part.transaction_id,
+      amount: kurus(part.amount),
+      currency,
+      conversationId: reference,
+    })
+    return (
+      answer.paymentId === paymentId &&
+      answer.amount === part.amount &&
+      answer.currency.toUpperCase() === currency &&
+      answer.conversationId === reference
+    )
   }
   try {
-    for (const part of allocateRefund(transactionsOf(data), refunded, amount - done)) {
-      await send(part, () =>
-        iyzicoApi().refundTransaction(account, {
-          transactionId: part.transaction_id,
-          amount: kurus(part.amount),
-          conversationId: reference,
-        })
-      )
+    for (const part of allocateRefund(transactionsOf(data), ledger.sent, amount - done)) {
+      await sendPart(ledger, part, refund(part))
     }
   } catch (error) {
-    const whole = amount === session.amount && records.length === 0 && parts.length === 0
-    if (whole && isProviderError(error) && error.providerCode === "refund_same_day") {
-      await send({ transaction_id: CANCEL, amount }, () =>
-        iyzicoApi().cancelPayment(account, { paymentId, conversationId: reference })
-      )
-    } else if (isProviderError(error) && SHOP_ACTIONABLE.has(error.providerCode)) {
-      throw new ValidationError(`iyzico.${error.providerCode}`, { cause: error })
-    } else {
+    const whole = amount === session.amount && ledger.sent.length === 0 && ledger.parts.length === 0
+    const sameDay = (error as { safeMessage?: string }).safeMessage === "iyzico.refund_same_day"
+    if (!whole || !sameDay) {
       throw error
     }
+    await sendPart(ledger, { transaction_id: CANCEL, amount }, async () => {
+      const answer = await iyzicoApi().cancelPayment(account, {
+        paymentId,
+        conversationId: reference,
+      })
+      return answer.amount >= amount
+    })
   }
-  return {
-    ...data,
-    refunds: [
-      ...records,
-      {
-        reference_no: reference,
-        amount,
-        parts: parts.map(({ transaction_id, amount: part }) => ({ transaction_id, amount: part })),
-      },
-    ],
-  }
+  return { ...data }
 }

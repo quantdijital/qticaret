@@ -153,11 +153,20 @@ export const openRefundEntryStep = createStep(
     return new StepResponse(entry.id, entry.id)
   },
   async (entryId, { container }) => {
-    if (entryId) {
-      await container
-        .resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE)
-        .updateOrderRefunds({ id: entryId, status: "failed", error_code: "refund_failed" })
+    if (!entryId) {
+      return
     }
+    const ledger = container.resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE)
+    const [entry] = await ledger.listOrderRefunds({ id: entryId }, { select: ["provider_parts"] })
+    // A provider that refunds in parts sent some (or may have): the money is not
+    // all back, nor surely not. Kept pending, its lines stay counted; the same
+    // reference finishes it (security review 2026-10-27)
+    const sent = ((entry?.provider_parts as unknown[] | null) ?? []).length > 0
+    await ledger.updateOrderRefunds(
+      sent
+        ? { id: entryId, status: "pending", error_code: "refund_incomplete" }
+        : { id: entryId, status: "failed", error_code: "refund_failed" }
+    )
   }
 )
 
@@ -175,7 +184,7 @@ export const namePendingRefundStep = createStep(
     )
     const before = payment?.data ?? {}
     if (input.plan.done || !payment) {
-      return new StepResponse(null, null)
+      return new StepResponse<null, string | null>(null, null)
     }
     await payments.updatePayment(
       withData(payment.id, {
@@ -183,11 +192,20 @@ export const namePendingRefundStep = createStep(
         pending_refund: { reference_no: input.reference, amount: input.plan.amount },
       })
     )
-    return new StepResponse(null, { id: payment.id, data: before })
+    return new StepResponse(null, payment.id)
   },
-  async (previous, { container }) => {
-    if (previous) {
-      await container.resolve(Modules.PAYMENT).updatePayment(withData(previous.id, previous.data))
+  // Takes the name off again, nothing else: the provider may have written to the data since
+  async (paymentId, { container }) => {
+    if (!paymentId) {
+      return
+    }
+    const payments = container.resolve(Modules.PAYMENT)
+    const [payment] = await payments.listPayments({ id: paymentId }, { select: ["id", "data"] })
+    if (payment?.data && "pending_refund" in payment.data) {
+      const data = Object.fromEntries(
+        Object.entries(payment.data).filter(([key]) => key !== "pending_refund")
+      )
+      await payments.updatePayment(withData(payment.id, data))
     }
   }
 )

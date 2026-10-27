@@ -28,7 +28,8 @@ import type { Kurus } from "../../money"
  * and their own keys; the account's test mode picks one. Each has its own
  * client, so a sandbox outage never opens the live circuit breaker. The
  * shop's account comes with every call (adr/0027). Answers that move money
- * are checked against their signature. Refund and cancel join in F5 V10.
+ * are checked against their signature; refund, cancel and the payment
+ * detail are in `refund-calls.ts`.
  */
 
 export const IYZICO_SANDBOX_URL = "https://sandbox-api.iyzipay.com"
@@ -235,7 +236,6 @@ export function createIyzicoApi(
     initializeCheckoutForm,
     retrieveCheckoutForm,
     installmentTable,
-    forgetInstallments: installments.clear,
   }
 }
 

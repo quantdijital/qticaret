@@ -25,8 +25,9 @@ import { ValidationError } from "../../lib/errors"
 import { fromMedusaAmount, kurus, sumKurus } from "../../lib/money"
 import { HOSTED_CHECKOUT, hostedCheckout } from "../../lib/payments/checkout"
 import { callbackSignature, iyzicoApi } from "../../lib/payments/iyzico"
+import { pendingReferenceOf } from "../../lib/payments/pending-refund"
 import type { IyzicoCredentials } from "../../lib/payments/iyzico"
-import { storedIyzicoAccount, storedPaymentSettings } from "./account"
+import { isRecordedForRefund, storedIyzicoAccount, storedPaymentSettings } from "./account"
 import { refundIyzicoPayment } from "./refund"
 import { iyzicoSession, paymentFactsOf, resultMatches } from "./session"
 
@@ -121,7 +122,9 @@ class IyzicoProviderService extends AbstractPaymentProvider {
       return { status: "pending", data: data ?? {} }
     }
     const facts = { ...data, ...paymentFactsOf(result) }
-    if (!resultMatches(session, result) || result.fraudStatus === -1) {
+    // Recorded to be given back (security review): never an order, however the cart is completed
+    const recorded = result.paymentId !== null && (await isRecordedForRefund(result.paymentId))
+    if (recorded || !resultMatches(session, result) || result.fraudStatus === -1) {
       return { status: "error", data: facts }
     }
     // Under iyzico's fraud review (0): not an order to ship until approved
@@ -162,19 +165,11 @@ class IyzicoProviderService extends AbstractPaymentProvider {
    */
   async refundPayment(input: RefundPaymentInput): Promise<RefundPaymentOutput> {
     const amount = fromMedusaAmount(input.amount, { allowRounding: true })
-    const pending = input.data?.["pending_refund"] as
-      { reference_no?: unknown; amount?: unknown } | undefined
-    if (pending?.amount !== amount || typeof pending.reference_no !== "string") {
+    const reference = pendingReferenceOf(input.data, amount)
+    if (!reference) {
       throw new ValidationError("payments.use_order_refund")
     }
-    return {
-      data: await refundIyzicoPayment(
-        await this.account(),
-        input.data,
-        amount,
-        pending.reference_no
-      ),
-    }
+    return { data: await refundIyzicoPayment(await this.account(), input.data, amount, reference) }
   }
 
   /**

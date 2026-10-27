@@ -38,9 +38,34 @@ export function iyzicoErrorCode(code: string | undefined): string {
   return code !== undefined && /^[A-Za-z0-9]{1,8}$/.test(code) ? `error_${code}` : "error"
 }
 
-export const iyzicoError = (code: string | undefined): ProviderError =>
-  new ProviderError({
+// Errors made from iyzico's own `failure` answer: it refused, nothing was done
+const refusals = new WeakSet<ProviderError>()
+
+export function iyzicoError(code: string | undefined): ProviderError {
+  const error = new ProviderError({
     provider: IYZICO_PROVIDER,
     providerCode: iyzicoErrorCode(code),
     retryable: false,
   })
+  refusals.add(error)
+  return error
+}
+
+/**
+ * Whether iyzico itself answered `failure`: nothing was done. Any other
+ * error of a call that moves money (no answer, one that does not read or
+ * is not signed as expected) may hide a refund iyzico made.
+ */
+export const isIyzicoRefusal = (error: unknown): boolean =>
+  error instanceof ProviderError && refusals.has(error)
+
+// The platform client's codes for a call that never left (a non-repeatable request)
+const NEVER_SENT = new Set(["network_error", "circuit_open", "url_not_allowed"])
+
+/**
+ * Whether a call that moves money surely did nothing: iyzico refused it, or
+ * it was never sent. Anything else (no answer, one that does not read or is
+ * not signed as expected) may hide money iyzico moved: outcome unknown.
+ */
+export const nothingDone = (error: unknown): boolean =>
+  isIyzicoRefusal(error) || (error instanceof ProviderError && NEVER_SENT.has(error.providerCode))

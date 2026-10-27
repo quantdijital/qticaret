@@ -48,6 +48,9 @@ export function returnUrlProblem(
   return null
 }
 
+/** A Medusa payment session id, as our routes and providers take it. */
+export const PAYMENT_SESSION_ID = /^payses_[0-9A-Z]{20,40}$/
+
 const origins = (list: string) =>
   list
     .split(",")
@@ -96,3 +99,6 @@ export const hostedCheckout = z.object({
 })
 
 export type HostedCheckout = z.infer<typeof hostedCheckout>
+
+/** The storefront's origins (`STORE_CORS`); the first is where a shopper with nowhere else to go is sent. */
+export const storeOrigins = (env: Pick<Env, "STORE_CORS">): string[] => origins(env.STORE_CORS)

@@ -1,15 +1,14 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
-import { isProviderError } from "../../lib/errors"
-import { errorSummary, logger } from "../../lib/logging"
 import { IYZICO_PAYMENT_PROVIDER_ID, PAYTR_PAYMENT_PROVIDER_ID } from "../../lib/payments/checkout"
 import { iyzicoCredentialsOf } from "../../lib/payments/iyzico"
-import { iyzicoDetails } from "./iyzico-details"
-import { paytrApi, paytrCredentialsOf } from "../../lib/payments/paytr"
+import { paytrCredentialsOf } from "../../lib/payments/paytr"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-credentials"
 import type IntegrationCredentialsModuleService from "../../modules/integration-credentials/service"
 import { ORDER_REFUNDS_MODULE } from "../../modules/order-refunds"
 import type OrderRefundsModuleService from "../../modules/order-refunds/service"
+import { iyzicoDetails } from "./iyzico-details"
+import { paytrDetails } from "./paytr-details"
 
 /** What the provider holds for one of the order's payments, read when the shop looks (F5 V7, V10). */
 export interface HostedPaymentDetails {
@@ -18,10 +17,10 @@ export interface HostedPaymentDetails {
   /** PayTR's `merchant_oid`, iyzico's `paymentId`. */
   reference: string | null
   test_mode: boolean
-  /** False when PayTR could not be asked just now: the rest is empty. */
+  /** False when the provider could not be asked just now: the rest is empty. */
   available: boolean
   error_code: string | null
-  /** Kuruş the shop asked for, and what PayTR charged with the surcharge. */
+  /** Kuruş the shop asked for, and what the card paid with the surcharge. */
   amount: number | null
   total: number | null
   installments: number | null
@@ -95,6 +94,15 @@ export async function orderPaymentDetails(
   const iyzico = hosted.some(({ provider_id }) => provider_id === IYZICO_PAYMENT_PROVIDER_ID)
     ? iyzicoCredentialsOf(await accounts.read("iyzico"))
     : null
+  const refunds = await container
+    .resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE)
+    .listOrderRefunds(
+      { order_id: orderId },
+      {
+        select: ["reference", "payment_id", "amount", "status", "note", "created_by", "created_at"],
+        order: { created_at: "ASC" },
+      }
+    )
   const payments = await Promise.all(
     hosted.map(async (payment): Promise<HostedPaymentDetails> => {
       const reference =
@@ -116,51 +124,16 @@ export async function orderPaymentDetails(
         refunds: [],
       }
       if (payment.provider_id === IYZICO_PAYMENT_PROVIDER_ID) {
-        return iyzicoDetails(iyzico, payment, base)
+        return iyzicoDetails(
+          iyzico,
+          payment,
+          base,
+          refunds.filter((refund) => refund.payment_id === payment.id)
+        )
       }
-      if (!account || !reference) {
-        return { ...base, error_code: account ? "reference_missing" : "not_configured" }
-      }
-      try {
-        const paid = await paytrApi().queryStatus(account, reference)
-        if (!paid) {
-          return { ...base, error_code: "payment_not_found" }
-        }
-        return {
-          ...base,
-          available: true,
-          test_mode: paid.testMode,
-          amount: paid.paymentAmount,
-          total: paid.totalAmount,
-          installments: paid.installments,
-          card_brand: paid.cardBrand,
-          card_last4: paid.cardLast4,
-          payment_type: paid.paymentType,
-          refunds: paid.refunds.map((refund) => ({
-            amount: refund.amount,
-            date: refund.date,
-            reference: refund.referenceNo,
-          })),
-        }
-      } catch (error) {
-        logger.warn({
-          event: "paytr.payment_details_failed",
-          paymentId: payment.id,
-          err: errorSummary(error),
-        })
-        return { ...base, error_code: isProviderError(error) ? error.providerCode : "error" }
-      }
+      return paytrDetails(account, payment.id, base)
     })
   )
-  const refunds = await container
-    .resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE)
-    .listOrderRefunds(
-      { order_id: orderId },
-      {
-        select: ["reference", "amount", "status", "note", "created_by", "created_at"],
-        order: { created_at: "ASC" },
-      }
-    )
   return {
     payments,
     refunds: refunds.map((refund) => ({

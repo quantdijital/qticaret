@@ -1,4 +1,6 @@
-import { createHmac, randomUUID } from "node:crypto"
+import { randomUUID } from "node:crypto"
+import { failure, head, kurusOf, signAnswer, signedPrice } from "./answers"
+import type { Body } from "./answers"
 import type { IyzicoAccount } from "./signing"
 
 /**
@@ -37,30 +39,6 @@ export interface PayOutcome {
   /** Lira paid when it differs from the form's (an installment surcharge). */
   paidPrice?: string
 }
-
-type Body = Record<string, unknown>
-
-const kurusOf = (lira: string) => {
-  const [whole = "0", fraction = ""] = lira.split(".")
-  return Number(whole) * 100 + Number(fraction.padEnd(2, "0").slice(0, 2))
-}
-
-/** A price as signatures carry it: no trailing zeros ("10.50" → "10.5", "10.0" → "10"). */
-const signed = (lira: string) =>
-  lira.includes(".") ? lira.replace(/0+$/, "").replace(/\.$/, "") : lira
-
-const sign = (account: IyzicoAccount, values: readonly string[]) =>
-  createHmac("sha256", account.secretKey).update(values.join(":")).digest("hex")
-
-const head = (body: Body) => ({
-  locale: "tr",
-  systemTime: Date.now(),
-  conversationId: body["conversationId"],
-})
-
-const failure = (body: Body, errorCode: string, errorMessage: string) => ({
-  body: { status: "failure", errorCode, errorMessage, ...head(body) },
-})
 
 export function createCheckoutForms(account: IyzicoAccount, pageBase: () => string) {
   const forms = new Map<string, FakeCheckoutForm>()
@@ -107,7 +85,7 @@ export function createCheckoutForms(account: IyzicoAccount, pageBase: () => stri
         tokenExpireTime: 1800,
         paymentPageUrl: `${pageBase()}/fake-cpp/${token}`,
         checkoutFormContent: "<script>/* fake */</script>",
-        signature: sign(account, [conversationId, token]),
+        signature: signAnswer(account, [conversationId, token]),
       },
     }
   }
@@ -147,14 +125,14 @@ export function createCheckoutForms(account: IyzicoAccount, pageBase: () => stri
     return {
       body: {
         ...answer,
-        signature: sign(account, [
+        signature: signAnswer(account, [
           result.paymentStatus,
           result.paymentId,
           form.currency,
           form.basketId,
           form.conversationId,
-          signed(String(Number(paidPrice))),
-          signed(String(Number(form.price))),
+          signedPrice(String(Number(paidPrice))),
+          signedPrice(String(Number(form.price))),
           form.token,
         ]),
       },

@@ -6,10 +6,11 @@ import { orderPaymentDetails } from "../../../../../workflows/payments/payment-d
 const lira = (amount: number | null) => (amount === null ? null : toMedusaAmount(amount as Kurus))
 
 /**
- * `GET /admin/orders/:id/payment-details` (F5 V7): the order's PayTR
- * payments as PayTR holds them (reference, test mode, installments, card
- * brand and last four digits, PayTR's refunds) and the shop's refunds,
- * amounts as exact lira. Asked of PayTR when the shop looks.
+ * `GET /admin/orders/:id/payment-details` (F5 V7, V10): the order's
+ * hosted-form payments as their provider holds them (reference, test mode,
+ * installments, card brand and last four digits, refunds; iyzico's fraud
+ * check) and the shop's refunds, amounts as exact lira. Asked of the
+ * provider when the shop looks.
  */
 export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse): Promise<void> {
   const { payments, refunds } = await orderPaymentDetails(req.scope, req.params["id"] ?? "")

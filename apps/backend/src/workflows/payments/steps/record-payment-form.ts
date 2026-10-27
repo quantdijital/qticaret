@@ -3,8 +3,10 @@ import { IYZICO_PAYMENT_PROVIDER_ID } from "../../../lib/payments/checkout"
 import { PAYMENT_FORMS_MODULE } from "../../../modules/payment-forms"
 import type PaymentFormsModuleService from "../../../modules/payment-forms/service"
 
-// Providers whose result reaches us only through the shopper's browser (iyzico, no webhook)
-const RECONCILED_FROM_FORMS: readonly string[] = [IYZICO_PAYMENT_PROVIDER_ID]
+// Providers whose result reaches us only through the shopper's browser (iyzico, no webhook), by name
+const RECONCILED_FROM_FORMS: Readonly<Record<string, string>> = {
+  [IYZICO_PAYMENT_PROVIDER_ID]: "iyzico",
+}
 
 /**
  * Records the form just given out (`payment-forms`), so the reconcile job
@@ -23,15 +25,12 @@ export const recordPaymentFormStep = createStep(
     { container }
   ) => {
     const { token, expires_at: expiresAt } = input.data
-    if (
-      !RECONCILED_FROM_FORMS.includes(input.provider_id) ||
-      typeof token !== "string" ||
-      typeof expiresAt !== "string"
-    ) {
+    const provider = RECONCILED_FROM_FORMS[input.provider_id]
+    if (!provider || typeof token !== "string" || typeof expiresAt !== "string") {
       return new StepResponse(null)
     }
     await container.resolve<PaymentFormsModuleService>(PAYMENT_FORMS_MODULE).record({
-      provider: "iyzico",
+      provider,
       session_id: input.session_id,
       cart_id: input.cart_id,
       token,

@@ -62,9 +62,11 @@ medusaIntegrationTestRunner({
         )
       )
     const partsOf = async (reference: string) =>
-      getContainer()
-        .resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE)
-        .providerParts(reference)
+      (
+        await getContainer()
+          .resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE)
+          .providerParts(reference)
+      )?.parts
 
     beforeAll(async () => {
       fake = await startFakeIyzico(account)
@@ -166,6 +168,64 @@ medusaIntegrationTestRunner({
           refunds: [expect.objectContaining({ amount: "30.00", reference: "refund0000000006" })],
         }),
       ])
+    })
+
+    /** A replaced session's paid form, recorded to be given back; iyzico's payment id. */
+    const orphanPayment = async () => {
+      const cartId = await readyCart(getContainer(), shop, variantId)
+      const first = await startIyzicoPayment(http, storefront.headers, cartId)
+      await startIyzicoPayment(http, storefront.headers, cartId)
+      const form = fake.pay(first.token)
+      await postIyzicoCallback(base(), first.sessionId, first.token, account.secretKey)
+      return form.result?.paymentId ?? ""
+    }
+    const recoveryOf = async (paymentId: string) =>
+      (
+        await getContainer()
+          .resolve<PaymentRecoveryModuleService>(PAYMENT_RECOVERY_MODULE)
+          .listPaymentRecoveries({ provider: "iyzico", reference: paymentId })
+      )[0]
+
+    it("refunds every line of an orphan a cancel no longer takes back", async () => {
+      const paymentId = await orphanPayment()
+      fake.queue("/payment/cancel", failure("FAKE_NOT_CANCELLABLE"))
+
+      await paymentRecovery(getContainer())
+
+      expect(await recoveryOf(paymentId)).toMatchObject({ status: "refunded" })
+      expect(fake.refunds.get(`${paymentId}01`)).toEqual([12000])
+      expect(fake.refunds.get(`${paymentId}02`)).toEqual([9000])
+    })
+
+    it("leaves an orphan to the shop once a part went back and the next did not", async () => {
+      const paymentId = await orphanPayment()
+      fake.queue("/payment/cancel", failure("FAKE_NOT_CANCELLABLE"))
+      // The shipping line was given back some other way: refunding it again is refused (5093)
+      fake.refunds.set(`${paymentId}02`, [9000])
+
+      await paymentRecovery(getContainer())
+      await paymentRecovery(getContainer())
+
+      // Tried again, the first line would go back twice: the shop checks iyzico instead
+      expect(await recoveryOf(paymentId)).toMatchObject({
+        status: "failed",
+        error_code: "refund_exceeds_line",
+      })
+      expect(fake.refunds.get(`${paymentId}01`)).toEqual([12000])
+    })
+
+    it("tries an orphan again later when nothing went back", async () => {
+      const paymentId = await orphanPayment()
+      fake.queue("/payment/cancel", failure("FAKE_NOT_CANCELLABLE"))
+      fake.queue(REFUND, failure("10237"))
+
+      await paymentRecovery(getContainer())
+
+      expect(await recoveryOf(paymentId)).toMatchObject({
+        status: "pending",
+        attempts: 1,
+        error_code: "refund_not_supported",
+      })
     })
 
     it("gives back a paid form that became no order, by a cancel the same day", async () => {

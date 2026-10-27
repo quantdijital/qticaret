@@ -153,7 +153,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "iyzico.test_mode_mismatch":
     "This payment was taken in iyzico's other mode (sandbox/live); the connected account cannot refund it.",
   "iyzico.refund_outcome_unknown":
-    "iyzico's answer to the refund was lost. Before sending it again, check this payment's refunds in iyzico's panel.",
+    "iyzico's answer to a refund was lost; no further refund of this payment can be made. Check the payment's refunds in iyzico's panel and tell the platform team.",
   "iyzico.refund_exceeds_line":
     "iyzico refused the amount: it is more than what is left of the payment.",
   "iyzico.refund_not_supported":

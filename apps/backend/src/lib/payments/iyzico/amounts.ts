@@ -1,3 +1,4 @@
+import { z } from "@medusajs/framework/zod"
 import { kurus } from "../../money"
 import type { Kurus } from "../../money"
 
@@ -19,3 +20,6 @@ export function parseIyzicoPrice(value: string | number): Kurus {
   }
   return kurus(Number(match[1]) * 100 + Number((match[2] ?? "").padEnd(2, "0")))
 }
+
+/** A price in an answer: a JSON number, sometimes text. */
+export const iyzicoPrice = z.union([z.number(), z.string()])

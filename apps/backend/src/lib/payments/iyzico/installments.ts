@@ -2,7 +2,7 @@ import { z } from "@medusajs/framework/zod"
 import { kurus } from "../../money"
 import type { Kurus } from "../../money"
 import type { InstallmentFamily } from "../installments"
-import { parseIyzicoPrice } from "./amounts"
+import { iyzicoPrice, parseIyzicoPrice } from "./amounts"
 
 /**
  * iyzico's installment table without a card number (`/payment/iyzipos/installment`,
@@ -11,7 +11,7 @@ import { parseIyzicoPrice } from "./amounts"
  * count itself, so its totals are shown as they are.
  */
 
-const price = z.union([z.number(), z.string()])
+const price = iyzicoPrice
 
 export const installmentAnswer = z.object({
   installmentDetails: z
@@ -75,9 +75,6 @@ export function createInstallmentCache(now: () => number = Date.now) {
         entries.delete(entries.keys().next().value ?? "")
       }
       entries.set(key, { at: now(), answer })
-    },
-    clear: () => {
-      entries.clear()
     },
   }
 }

@@ -5,13 +5,11 @@ import type { Kurus, MedusaAmount } from "../../lib/money"
 import { installmentLimit, installmentTable } from "../../lib/payments/installments"
 import type { InstallmentFamily } from "../../lib/payments/installments"
 import { connectedCardProviders } from "../../lib/payments/card-providers"
+import { paymentSettings } from "../../lib/payments/settings"
 import { iyzicoApi, iyzicoCredentialsOf, iyzicoInstallmentTable } from "../../lib/payments/iyzico"
 import { paytrCredentialsOf, paytrInstallmentRates } from "../../lib/payments/paytr"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-credentials"
 import type IntegrationCredentialsModuleService from "../../modules/integration-credentials/service"
-import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
-import type { PaymentSettings } from "../../modules/platform-settings/sections"
-import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
 
 export type InstallmentsFor = { cart_id: string } | { variant_id: string; region_id: string }
 
@@ -104,9 +102,7 @@ export async function installmentsFor(
   salesChannelIds: readonly string[]
 ): Promise<Installments> {
   const { amount, currency_code } = await amountOf(container, target, salesChannelIds)
-  const settings = (await container
-    .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
-    .getSection("payments")) as unknown as PaymentSettings
+  const settings = await paymentSettings(container)
   const [provider] = await connectedCardProviders(container)
   const off = { enabled: false, amount, currency_code, max_count: 1, families: [] }
   if (!settings.installments_enabled || !provider || currency_code !== "try") {

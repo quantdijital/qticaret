@@ -1,5 +1,8 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { errorSummary, logger } from "../lib/logging"
+import { iyzicoCredentialsOf } from "../lib/payments/iyzico"
+import { INTEGRATION_CREDENTIALS_MODULE } from "../modules/integration-credentials"
+import type IntegrationCredentialsModuleService from "../modules/integration-credentials/service"
 import { PAYMENT_FORMS_MODULE } from "../modules/payment-forms"
 import type PaymentFormsModuleService from "../modules/payment-forms/service"
 import { iyzicoCallbackWorkflow } from "../workflows/payments/iyzico-callback"
@@ -20,6 +23,12 @@ export async function reconcileIyzicoSessions(
   container: MedusaContainer,
   options: { quietMs?: number } = {}
 ): Promise<number> {
+  const account = await container
+    .resolve<IntegrationCredentialsModuleService>(INTEGRATION_CREDENTIALS_MODULE)
+    .read("iyzico")
+  if (!iyzicoCredentialsOf(account)) {
+    return 0
+  }
   const forms = container.resolve<PaymentFormsModuleService>(PAYMENT_FORMS_MODULE)
   const now = Date.now()
   let placed = 0

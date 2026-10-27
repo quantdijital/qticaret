@@ -1,8 +1,9 @@
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { RetryableError } from "../../../lib/errors"
-import { IYZICO_PAYMENT_PROVIDER_ID } from "../../../lib/payments/checkout"
+import { IYZICO_PAYMENT_PROVIDER_ID, PAYMENT_SESSION_ID } from "../../../lib/payments/checkout"
 import { iyzicoApi, iyzicoCredentialsOf } from "../../../lib/payments/iyzico"
+import type { CheckoutFormResult } from "../../../lib/payments/iyzico"
 import { safeEqual } from "../../../lib/security"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../../modules/integration-credentials"
 import type IntegrationCredentialsModuleService from "../../../modules/integration-credentials/service"
@@ -11,6 +12,7 @@ import type PaymentFormsModuleService from "../../../modules/payment-forms/servi
 import { iyzicoSession } from "../../../modules/payment-iyzico/session"
 import { PAYMENT_RECOVERY_MODULE } from "../../../modules/payment-recovery"
 import type PaymentRecoveryModuleService from "../../../modules/payment-recovery/service"
+import type { RecoveryInput } from "../../../modules/payment-recovery/service"
 import type { PaymentVerdict } from "./payment-orphan"
 
 export interface IyzicoForm {
@@ -35,7 +37,7 @@ export type IyzicoTarget =
 export const findIyzicoSessionStep = createStep(
   "payments-find-iyzico-session",
   async (form: IyzicoForm, { container }) => {
-    if (!/^payses_[0-9A-Z]{20,40}$/.test(form.session_id)) {
+    if (!PAYMENT_SESSION_ID.test(form.session_id)) {
       return new StepResponse<IyzicoTarget | null>(null)
     }
     const [session] = await container
@@ -94,25 +96,79 @@ export interface IyzicoCheck {
   payment_id: string | null
 }
 
-/** The form's result from iyzico (signed), against what the session expected (adr/0026 §4). */
+/**
+ * What iyzico's signed result means for the session (adr/0026 §4): a
+ * payment recorded to be given back stays that way (a later callback or the
+ * job after the cart could complete again would make refund and goods).
+ */
+export function iyzicoVerdict(
+  target: IyzicoTarget,
+  result: CheckoutFormResult | null,
+  testMode: boolean,
+  recorded: { reason: RecoveryInput["reason"]; cart_id: string | null } | null
+): IyzicoCheck {
+  const skip = (outcome: IyzicoOutcome): IyzicoCheck => ({
+    outcome,
+    verdict: { kind: "skip" },
+    payment_id: result?.paymentId ?? null,
+  })
+  if (!result) {
+    return skip("unpaid")
+  }
+  // Signed by iyzico, yet for another basket: not this session's form
+  if (result.basketId !== target.session_id) {
+    return skip("not_ours")
+  }
+  if (!result.paid || result.fraudStatus === -1) {
+    return skip("failed")
+  }
+  const taken = {
+    amount: result.price ?? 0,
+    currency_code: (result.currency ?? "").toLowerCase(),
+    test_mode: testMode,
+  }
+  const orphan = (reason: RecoveryInput["reason"], cartId: string | null): IyzicoCheck => ({
+    outcome: "orphan",
+    verdict: { kind: "orphan", reason, ...taken, cart_id: cartId },
+    payment_id: result.paymentId,
+  })
+  if (recorded) {
+    return orphan(recorded.reason, recorded.cart_id)
+  }
+  if (target.orphan) {
+    return orphan("session_gone", null)
+  }
+  const { expected } = target
+  const matches =
+    taken.amount === expected.amount &&
+    taken.currency_code === expected.currency_code.toLowerCase() &&
+    taken.test_mode === expected.test_mode &&
+    result.paidPrice !== null &&
+    result.paidPrice >= taken.amount
+  if (!matches) {
+    return orphan("amount_mismatch", target.cart_id)
+  }
+  // Held by iyzico's fraud check: the order waits for its approval (the reconcile job asks)
+  if (result.fraudStatus !== 1) {
+    return skip("review")
+  }
+  return {
+    outcome: "paid",
+    verdict: { kind: "complete", cart_id: target.cart_id, ...taken },
+    payment_id: result.paymentId,
+  }
+}
+
+/** The form's result from iyzico (signed), against what the session expected. */
 export const checkIyzicoPaymentStep = createStep(
   "payments-check-iyzico-payment",
   async (target: IyzicoTarget | null, { container }) => {
-    const skip = (outcome: IyzicoOutcome, paymentId: string | null = null) =>
-      new StepResponse<IyzicoCheck>({ outcome, verdict: { kind: "skip" }, payment_id: paymentId })
-    const orphan = (
-      paymentId: string | null,
-      reason: "session_gone" | "amount_mismatch" | "completion_failed",
-      taken: { amount: number; currency_code: string; test_mode: boolean },
-      cartId: string | null
-    ) =>
-      new StepResponse<IyzicoCheck>({
-        outcome: "orphan",
-        verdict: { kind: "orphan", reason, ...taken, cart_id: cartId },
-        payment_id: paymentId,
-      })
     if (!target) {
-      return skip("not_ours")
+      return new StepResponse<IyzicoCheck>({
+        outcome: "not_ours",
+        verdict: { kind: "skip" },
+        payment_id: null,
+      })
     }
     const account = iyzicoCredentialsOf(
       await container
@@ -126,51 +182,12 @@ export const checkIyzicoPaymentStep = createStep(
       conversationId: target.session_id,
       token: target.token,
     })
-    if (!result) {
-      return skip("unpaid")
-    }
-    // Signed by iyzico, yet for another basket: not this session's form
-    if (result.basketId !== target.session_id) {
-      return skip("not_ours")
-    }
-    if (!result.paid || result.fraudStatus === -1) {
-      return skip("failed", result.paymentId)
-    }
-    const taken = {
-      amount: result.price ?? 0,
-      currency_code: (result.currency ?? "").toLowerCase(),
-      test_mode: account.testMode,
-    }
-    // Once recorded to be given back, a payment never becomes an order (a later
-    // callback or the job after the cart could complete again: refund and goods)
-    const [recorded] = await container
-      .resolve<PaymentRecoveryModuleService>(PAYMENT_RECOVERY_MODULE)
-      .listPaymentRecoveries({ provider: "iyzico", reference: result.paymentId ?? "" }, { take: 1 })
-    if (recorded) {
-      return orphan(result.paymentId, recorded.reason, taken, recorded.cart_id)
-    }
-    if (target.orphan) {
-      return orphan(result.paymentId, "session_gone", taken, null)
-    }
-    const { expected } = target
-    const matches =
-      taken.amount === expected.amount &&
-      taken.currency_code === expected.currency_code.toLowerCase() &&
-      taken.test_mode === expected.test_mode &&
-      result.paidPrice !== null &&
-      result.paidPrice >= taken.amount
-    if (!matches) {
-      return orphan(result.paymentId, "amount_mismatch", taken, target.cart_id)
-    }
-    // Held by iyzico's fraud check: the order waits for its approval (the reconcile job asks)
-    if (result.fraudStatus !== 1) {
-      return skip("review", result.paymentId)
-    }
-    return new StepResponse<IyzicoCheck>({
-      outcome: "paid",
-      verdict: { kind: "complete", cart_id: target.cart_id, ...taken },
-      payment_id: result.paymentId,
-    })
+    const [recorded] = result?.paymentId
+      ? await container
+          .resolve<PaymentRecoveryModuleService>(PAYMENT_RECOVERY_MODULE)
+          .listPaymentRecoveries({ provider: "iyzico", reference: result.paymentId }, { take: 1 })
+      : []
+    return new StepResponse(iyzicoVerdict(target, result, account.testMode, recorded ?? null))
   }
 )
 

@@ -1,11 +1,12 @@
 import { z } from "@medusajs/framework/zod"
 import { ValidationError } from "../../lib/errors"
+import { PAYMENT_SESSION_ID } from "../../lib/payments/checkout"
 import type { CheckoutFormResult } from "../../lib/payments/iyzico"
 
 /** What a started iyzico session keeps (public: nothing personal); anything else is not one of ours. */
 const sessionData = z.object({
   // Our session id: iyzico's conversation and basket
-  conversation_id: z.string().regex(/^payses_[0-9A-Z]{20,40}$/),
+  conversation_id: z.string().regex(PAYMENT_SESSION_ID),
   token: z.string().min(1).max(200),
   amount: z.number().int().positive(),
   currency_code: z.string().length(3),

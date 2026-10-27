@@ -22,8 +22,7 @@ export interface InventorySettings {
   low_stock_threshold: number
 }
 
-/** Promotion rules (F4.4, F4.5): codes per cart, free shipping from a basket total. */
-/** Installments for every card provider (F5 V6); `max_installment` 0 is the provider's most. */
+/** Card payments (F5 V6, V10); `max_installment` 0 is the provider's most. */
 export interface PaymentSettings {
   installments_enabled: boolean
   max_installment: number
@@ -31,6 +30,7 @@ export interface PaymentSettings {
   card_provider: "paytr" | "iyzico" | null
 }
 
+/** Promotion rules (F4.4, F4.5): codes per cart, free shipping from a basket total. */
 export interface PromotionSettings {
   combine_codes: boolean
   /** Lira, KDV in, after discounts; null: no free shipping by basket total. */

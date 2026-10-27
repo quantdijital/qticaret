@@ -30,8 +30,8 @@ export function refundCalls(post: IyzicoPost, forged: () => ProviderError) {
    */
   async function refundTransaction(
     credentials: IyzicoCredentials,
-    refund: { transactionId: string; amount: Kurus; conversationId: string }
-  ): Promise<{ paymentId: string; amount: Kurus }> {
+    refund: { transactionId: string; amount: Kurus; currency: string; conversationId: string }
+  ): Promise<{ paymentId: string; amount: Kurus; currency: string; conversationId: string }> {
     const answer = await post(
       credentials,
       REFUND_PATH,
@@ -40,7 +40,7 @@ export function refundCalls(post: IyzicoPost, forged: () => ProviderError) {
         conversationId: refund.conversationId,
         paymentTransactionId: refund.transactionId,
         price: toIyzicoPrice(refund.amount),
-        currency: "TRY",
+        currency: refund.currency.toUpperCase(),
       },
       refundAnswer
     )
@@ -53,7 +53,12 @@ export function refundCalls(post: IyzicoPost, forged: () => ProviderError) {
     if (!isResponseGenuine(credentials.secretKey, signed, answer.signature)) {
       throw forged()
     }
-    return { paymentId: answer.paymentId, amount: parseIyzicoPrice(answer.price) }
+    return {
+      paymentId: answer.paymentId,
+      amount: parseIyzicoPrice(answer.price),
+      currency: answer.currency,
+      conversationId: answer.conversationId ?? "",
+    }
   }
 
   /** Takes the whole payment back, the same day only; a later day needs refunds. */

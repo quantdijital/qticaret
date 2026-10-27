@@ -1,12 +1,10 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-credentials"
 import type IntegrationCredentialsModuleService from "../../modules/integration-credentials/service"
-import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
-import type { PaymentSettings } from "../../modules/platform-settings/sections"
-import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
 import { IYZICO_PAYMENT_PROVIDER_ID, PAYTR_PAYMENT_PROVIDER_ID } from "./checkout"
 import { iyzicoCredentialsOf } from "./iyzico"
 import { paytrCredentialsOf } from "./paytr"
+import { paymentSettings } from "./settings"
 
 export type CardProvider = "paytr" | "iyzico"
 
@@ -29,9 +27,7 @@ export async function connectedCardProviders(container: MedusaContainer): Promis
   const [paytr, iyzico, settings] = await Promise.all([
     accounts.read("paytr"),
     accounts.read("iyzico"),
-    container
-      .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
-      .getSection("payments") as Promise<unknown> as Promise<PaymentSettings>,
+    paymentSettings(container),
   ])
   const stored = new Set<CardProvider>([
     ...(paytrCredentialsOf(paytr) ? (["paytr"] as const) : []),

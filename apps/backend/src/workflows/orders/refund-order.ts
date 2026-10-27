@@ -31,7 +31,8 @@ export const refundOrderWorkflow = createWorkflow(
   "orders-refund-order",
   (input: RefundOrderInput) => {
     const lockKey = transform({ input }, ({ input }) => `orders:refund:${input.order_id}`)
-    acquireLockStep({ key: lockKey, timeout: 10, ttl: 120 })
+    // A provider refunding in parts makes several calls in a row: the lock outlasts them
+    acquireLockStep({ key: lockKey, timeout: 10, ttl: 600 })
     const plan = planOrderRefundStep(input)
     const entryId = openRefundEntryStep({ order: input, plan })
     namePendingRefundStep({ plan, reference: input.reference })

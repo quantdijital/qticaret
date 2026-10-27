@@ -1,4 +1,5 @@
 import { z } from "@medusajs/framework/zod"
+import { iyzicoPrice } from "./amounts"
 
 /**
  * iyzico's refund (v1, by item transaction), cancel and payment detail
@@ -10,14 +11,15 @@ import { z } from "@medusajs/framework/zod"
  *   is the only one, and a refund whose answer was lost is not sent again;
  * - a cancel takes the whole payment back, the same day only, unsigned;
  * - the detail lists the item transactions (unsigned by any field order we
- *   could match: it is read for ids, never for amounts to trust).
+ *   could match): its amounts are used only after they add up to what the
+ *   signed result said was paid, and iyzico caps each line itself.
  */
 
 export const REFUND_PATH = "/payment/refund"
 export const CANCEL_PATH = "/payment/cancel"
 export const DETAIL_PATH = "/payment/detail"
 
-const price = z.union([z.number(), z.string()])
+const price = iyzicoPrice
 
 export const refundAnswer = z.object({
   paymentId: z.string(),
@@ -51,5 +53,3 @@ export const detailAnswer = z.object({
     )
     .default([]),
 })
-
-export type IyzicoPaymentDetail = z.infer<typeof detailAnswer>

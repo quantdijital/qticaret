@@ -20,6 +20,7 @@ jest.mock("../payment-paytr/account", () => ({
 jest.mock("../payment-iyzico/account", () => ({
   storedIyzicoAccount: jest.fn(),
   storedPaymentSettings: jest.fn(),
+  isRecordedForRefund: jest.fn().mockResolvedValue(false),
 }))
 
 /**

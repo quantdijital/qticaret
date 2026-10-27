@@ -2,7 +2,7 @@ import { z } from "@medusajs/framework/zod"
 import { kurus } from "../../money"
 import type { Kurus } from "../../money"
 import type { HostedCheckout } from "../checkout"
-import { parseIyzicoPrice, toIyzicoPrice } from "./amounts"
+import { iyzicoPrice, parseIyzicoPrice, toIyzicoPrice } from "./amounts"
 
 /**
  * iyzico's Checkout Form (docs/entegrasyonlar/iyzico.md, measured in the
@@ -57,7 +57,7 @@ export function checkoutFormRequest(input: CheckoutFormInput): Record<string, un
     conversationId: input.sessionId,
     price,
     paidPrice: price,
-    currency: input.currencyCode.toUpperCase() === "TRY" ? "TRY" : input.currencyCode.toUpperCase(),
+    currency: input.currencyCode.toUpperCase(),
     basketId: input.sessionId,
     paymentGroup: "PRODUCT",
     callbackUrl: input.callbackUrl,
@@ -101,7 +101,7 @@ export const initializeAnswer = z.object({
   signature: z.string().optional(),
 })
 
-const price = z.union([z.number(), z.string()])
+const price = iyzicoPrice
 
 export const retrieveAnswer = z.object({
   status: z.literal("success"),

@@ -1,4 +1,5 @@
-import { createHmac } from "node:crypto"
+import { failure as failed, head, kurusOf, signAnswer } from "./answers"
+import type { Body } from "./answers"
 import type { FakeCheckoutForm } from "./checkout-form"
 import type { IyzicoAccount } from "./signing"
 
@@ -11,9 +12,6 @@ import type { IyzicoAccount } from "./signing"
  * the sandbox was not seen to give are the fake's own (`FAKE_*`).
  */
 
-type Body = Record<string, unknown>
-
-const kurusOf = (value: unknown) => Math.round(Number(value) * 100)
 const lira = (kurus: number) => String(kurus / 100)
 
 export function createRefunds(account: IyzicoAccount, forms: Map<string, FakeCheckoutForm>) {
@@ -21,14 +19,8 @@ export function createRefunds(account: IyzicoAccount, forms: Map<string, FakeChe
   const refunds = new Map<string, number[]>()
   const cancelled = new Set<string>()
 
-  const head = (body: Body) => ({
-    locale: "tr",
-    systemTime: Date.now(),
-    conversationId: body["conversationId"],
-  })
-  const failure = (body: Body, errorCode: string, errorMessage: string) => ({
-    body: { status: "failure", errorCode, errorMessage, retryable: false, ...head(body) },
-  })
+  const failure = (body: Body, errorCode: string, errorMessage: string) =>
+    failed(body, errorCode, errorMessage, { retryable: false })
   const paidForms = () =>
     [...forms.values()].filter((form) => form.result?.paymentStatus === "SUCCESS")
 
@@ -79,9 +71,7 @@ export function createRefunds(account: IyzicoAccount, forms: Map<string, FakeChe
         hostReference: "fake",
         refundHostReference: "fake",
         retryable: false,
-        signature: createHmac("sha256", account.secretKey)
-          .update([paymentId, lira(amount), currency, conversationId].join(":"))
-          .digest("hex"),
+        signature: signAnswer(account, [paymentId, lira(amount), currency, conversationId]),
       },
     }
   }

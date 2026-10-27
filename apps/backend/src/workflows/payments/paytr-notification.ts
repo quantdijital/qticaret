@@ -6,7 +6,8 @@ import {
 } from "./steps/paytr-notification"
 import type { PaytrNotification } from "./steps/paytr-notification"
 import { recordPaymentOrphanStep } from "./steps/payment-orphan"
-import { checkPaytrPaymentStep, completePaidCartStep } from "./steps/paytr-payment-check"
+import { completePaidCartStep } from "./steps/complete-paid-cart"
+import { checkPaytrPaymentStep } from "./steps/paytr-payment-check"
 
 /** `ok`: answer "OK". Anything else gets no "OK", and PayTR sends the notification again. */
 export type PaytrNotificationAnswer = "ok" | "busy" | "not_ours"

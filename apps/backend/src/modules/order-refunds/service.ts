@@ -24,10 +24,26 @@ export interface ProviderPart {
 
 /** The order refund ledger (F5 V5): read and written inside the order's refund lock. */
 class OrderRefundsModuleService extends MedusaService({ OrderRefund }) {
-  /** The parts of the refund under `reference`; null when there is no such refund. */
-  async providerParts(reference: string): Promise<ProviderPart[] | null> {
+  /** The refund under `reference`: its payment and its parts; null when there is no such refund. */
+  async providerParts(
+    reference: string
+  ): Promise<{ payment_id: string; parts: ProviderPart[] } | null> {
     const [entry] = await this.listOrderRefunds({ reference }, { take: 1 })
-    return entry ? ((entry.provider_parts as ProviderPart[] | null) ?? []) : null
+    return entry
+      ? {
+          payment_id: entry.payment_id,
+          parts: (entry.provider_parts as ProviderPart[] | null) ?? [],
+        }
+      : null
+  }
+
+  /** Every part sent for a payment, under any reference and whatever became of its refund. */
+  async paymentParts(paymentId: string): Promise<ProviderPart[]> {
+    const entries = await this.listOrderRefunds(
+      { payment_id: paymentId },
+      { select: ["provider_parts"] }
+    )
+    return entries.flatMap((entry) => (entry.provider_parts as ProviderPart[] | null) ?? [])
   }
 
   async saveProviderParts(reference: string, parts: ProviderPart[]): Promise<void> {

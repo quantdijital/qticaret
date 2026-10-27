@@ -1,6 +1,7 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { z } from "@medusajs/framework/zod"
 import { parseEnv } from "../../../../lib/env"
+import { PAYMENT_SESSION_ID, storeOrigins } from "../../../../lib/payments/checkout"
 import { errorSummary, logger } from "../../../../lib/logging"
 import { iyzicoCredentialsOf, isCallbackGenuine } from "../../../../lib/payments/iyzico"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../../../modules/integration-credentials"
@@ -10,10 +11,12 @@ import type { IyzicoCallbackResult } from "../../../../workflows/payments/iyzico
 
 // iyzico posts the form's token from the shopper's browser; our session is in the address
 const callback = z.object({
-  session: z.string().regex(/^payses_[0-9A-Z]{20,40}$/),
+  session: z.string().regex(PAYMENT_SESSION_ID),
   sig: z.string().regex(/^[0-9a-f]{32}$/),
   token: z.string().regex(/^[A-Za-z0-9-]{1,200}$/),
 })
+
+const storefront = () => storeOrigins(parseEnv())[0] ?? ""
 
 /** Where the shopper goes: the session's return address, with what the storefront should say. */
 function destination(result: IyzicoCallbackResult): string | null {
@@ -38,7 +41,8 @@ function destination(result: IyzicoCallbackResult): string | null {
  * checkout form with its token. The result comes from iyzico itself
  * (`iyzicoCallbackWorkflow`); the shopper goes on to the storefront's
  * return address the session stored (checked when the payment started).
- * Without one (the session is gone), to the storefront's first origin.
+ * Without one (the session is gone), or when the result cannot be read now
+ * (the reconcile job places it later), to the storefront's first origin.
  */
 export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const fields = callback.safeParse({
@@ -69,15 +73,14 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
       res.status(400).type("text/plain").send("unknown payment")
       return
     }
-    const storefront = parseEnv().STORE_CORS.split(",")[0]?.trim() ?? "/"
-    res.redirect(303, destination(result) ?? `${storefront}/`)
+    res.redirect(303, destination(result) ?? `${storefront()}/`)
   } catch (error) {
-    // The payment, if taken, is placed later by the reconcile job
+    // The payment, if taken, is placed later by the reconcile job: the storefront says so
     logger.error({
       event: "iyzico.callback_failed",
       sessionId: fields.data.session,
       err: errorSummary(error),
     })
-    res.status(502).type("text/plain").send("payment result not available yet")
+    res.redirect(303, `${storefront()}/?payment_status=pending`)
   }
 }

@@ -156,7 +156,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "iyzico.test_mode_mismatch":
     "Bu ödeme iyzico'nun diğer ortamında (sandbox/canlı) alındı; bağlı hesapla iade edilemez.",
   "iyzico.refund_outcome_unknown":
-    "iyzico'dan iadenin sonucu alınamadı. Tekrar göndermeden önce iyzico panelinde bu ödemenin iadelerini kontrol edin.",
+    "iyzico'dan bir iadenin sonucu alınamadı; bu ödemede yeni iade yapılamaz. iyzico panelinde ödemenin iadelerini kontrol edip platform ekibine bildirin.",
   "iyzico.refund_exceeds_line": "iyzico bu tutarı kabul etmedi: ödemenin kalan tutarını aşıyor.",
   "iyzico.refund_not_supported":
     "Bu kartın bankası iade kabul etmiyor; müşteriye başka yolla ödeme yapın.",

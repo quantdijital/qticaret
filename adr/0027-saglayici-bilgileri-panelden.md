@@ -82,3 +82,12 @@ ADR-0002'nin itirazları ve bu karardaki cevapları:
 - **F12 (canlıya çıkış engeli):** Bu uçlar rol modeliyle mağaza sahibine kısıtlanır; gizli alan, mağaza no ve test modu değişikliğine ikinci doğrulama (yakın zamanda giriş ya da TOTP) gelir.
 - **Test modundaki ödemeler (V3, V7):** test modu canlı anahtarla çalıştığı için, test modunda ödenen sipariş kalıcı işaret taşır; panelde rozetle görünür ve kargoya verilmesi engellenir. Test modu değişikliği bildirimle izlenir. (V3, 2026-10-27: işaret ayrı bir alan değil, ödemenin kendi verisindeki `test_mode`; sipariş hangi yoldan açılırsa açılsın aynı kaynak okunur. Kargolama bizim akışımızda ve Medusa'nın çekirdek ucunda reddediliyor.)
 - **Workflow kalıcılığı:** Kaydetme ve kaldırma workflow'larında `store` ya da saklama süresi açılmaz; açılırsa şifreli blok `workflow_execution`'da kalır.
+
+## Ek (2026-10-27, F5 V10 kod ve güvenlik incelemesi): sağlayıcının okuyup yazabildikleri
+
+Paylaşılan container'dan erişim ilk kararda yalnızca sağlayıcı hesabını (`integration-credentials`) okumak içindi. İki dar istisna eklendi:
+
+- **İade defteri (`order-refunds`), yalnızca iyzico:** iyzico iadeyi tekilleştirmiyor, yapılan iadeleri listeleyen bir uç da sunmuyor. Bu yüzden sağlayıcı, sipariş iademizin `pending_refund` ile adını verdiği defter satırına kalem işlemi parçalarını (`provider_parts`) yazar ve aynı ödemenin bütün parçalarını okur. Her parça gönderilmeden önce `sending`, iyzico'nun imzalı ve isteğe uyan yanıtından sonra `done` olur. Defter başka hiçbir şey için yazılmaz. Sağlayıcı ancak iademiz zaten açıkken (sipariş iadesinin kilidi altında) çağrılır.
+- **Kurtarma kaydı (`payment-recovery`), salt okunur:** iyzico sağlayıcısının yetkilendirmesi, iadeye yazılmış bir ödemeyi `error` sayar. Böylece bu ödeme sepet tamamlamayla siparişe dönüşmez.
+
+Bu iş parçaları bir workflow'a taşınamaz: parçalar, bir Medusa çağrısının (`refundPaymentWorkflow` → sağlayıcının `refundPayment`'i) içinde ve sırayla gönderiliyor. Her gönderimden önce kalıcı kayıt gerekiyor. PayTR iadeyi kendi referansıyla tekilleştirdiği için PayTR sağlayıcısı bu istisnaları kullanmaz.
