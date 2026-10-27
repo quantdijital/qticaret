@@ -213,25 +213,5 @@ medusaIntegrationTestRunner({
 
       expect((await events()).map(({ event_key }) => event_key)).toEqual(["new:success"])
     })
-
-    it("keeps a payment for a replaced session as an orphan, never answered OK", async () => {
-      const first = await startedPayment()
-      // The shopper starts again: the first session goes, its token stays payable
-      await http.post(
-        `/store/carts/${first.cartId}/payment-session`,
-        { provider_id: PAYTR_PAYMENT_PROVIDER_ID, return_urls: storeReturnUrls() },
-        { headers: storefront.headers }
-      )
-      fake.pay(first.merchantOid)
-
-      const answer = await notify(success(first.merchantOid))
-
-      expect(answer.status).toBe(409)
-      expect(answer.data).not.toBe("OK")
-      expect(await orderOf(first.cartId)).toBeNull()
-      expect(await events()).toEqual([
-        expect.objectContaining({ status: "failed", error_code: "orphan_payment" }),
-      ])
-    })
   },
 })

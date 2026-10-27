@@ -27,6 +27,18 @@ export const NOTIFICATION_MESSAGES: Readonly<
       title: "{{provider}} hesap bilgileri değişti",
       description: "{{who}}: {{what}}",
     },
+    "payments.orphan_recorded": {
+      title: "{{provider}} ödemesi siparişe dönüşmedi",
+      description: "{{amount}} ({{reference}}) otomatik olarak iade ediliyor.",
+    },
+    "payments.orphan_refunded": {
+      title: "{{provider}} ödemesi iade edildi",
+      description: "{{amount}} ({{reference}}) müşteriye geri verildi.",
+    },
+    "payments.orphan_refund_failed": {
+      title: "{{provider}} ödemesi iade edilemedi",
+      description: "{{amount}} ({{reference}}) {{provider}} panelinden elle iade edilmeli.",
+    },
   },
   en: {
     "stock.low_stock": {
@@ -36,6 +48,18 @@ export const NOTIFICATION_MESSAGES: Readonly<
     "integrations.account_changed": {
       title: "{{provider}} account details changed",
       description: "{{who}}: {{what}}",
+    },
+    "payments.orphan_recorded": {
+      title: "A {{provider}} payment became no order",
+      description: "{{amount}} ({{reference}}) is being refunded automatically.",
+    },
+    "payments.orphan_refunded": {
+      title: "{{provider}} payment refunded",
+      description: "{{amount}} ({{reference}}) was given back to the customer.",
+    },
+    "payments.orphan_refund_failed": {
+      title: "{{provider}} payment could not be refunded",
+      description: "{{amount}} ({{reference}}) must be refunded by hand in the {{provider}} panel.",
     },
   },
 }

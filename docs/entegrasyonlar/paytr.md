@@ -49,6 +49,12 @@ PayTR → tarayıcı: merchant_ok_url / merchant_fail_url (yalnızca bilgilendir
 - Siparişten sonraki kayıt adımı hata verse de sipariş geri alınmaz (log). Başarısız olayın yeniden alınması koşullu güncellemeyle: iki eşzamanlı yeniden denemeden biri alır.
 - Test modunda ödenen sipariş (ödeme verisinde `test_mode: true`) kargoya verilemez: kendi kargolama akışımız (`planShipmentStep`) ve Medusa'nın `/admin/orders/:id/fulfillments` ucu `orders.test_payment_not_shippable` ile reddeder. Panel rozeti V7'de.
 
+## Sahipsiz ödeme ve uzlaştırma (F5 V4, 2026-10-27)
+- Bildirim akışı siparişten önce PayTR'yi sorgular. Ödeme henüz görünmüyorsa "OK" yok (PayTR yeniden dener).
+- **Sahipsiz ödeme:** oturumu silinmiş (`session_gone`), tutarı/para birimi/test modu oturumla tutmayan (`amount_mismatch`) ya da sepeti artık tamamlanamayan (`completion_failed`: sepetin kendi kuralları, stok) ödeme `payment-recovery` modülüne bir kez kaydedilir, yöneticilere zilde uyarı gider ve bildirime **"OK" denir**: PayTR, "OK" almamış ödemeyi iade etmez (`007`). Kilit, ağ gibi geçici hatalar sahipsiz sayılmaz; "OK" verilmez.
+- **İade işi** (`payment-recovery`, 5 dakikada bir): önce durum sorgusu; iadelerde bizim referansımız (`R<merchant_oid>`) varsa iade yapılmış sayılır (cevabı kaybolmuş iade tekrarlanmaz). Yalnızca PayTR'nin gösterdiği, alındığı test moduyla aynı moddaki ödeme iade edilir (test anahtarıyla canlı ödeme iade edilmez). İade son adım; sonrasındaki kayıt hatası bir sonraki turda PayTR'nin kaydından bulunur. Her iade ve vazgeçiş denetim kaydına ve zile düşer; 10 denemede olmazsa "elle iade gerekli".
+- **Uzlaştırma işi** (`paytr-reconcile`, 10 dakikada bir): 10 dakika ile 24 saat arası açık PayTR oturumları sorgulanır; ödenmiş olan, bildirimiyle aynı akıştan (aynı olay anahtarı) geçer, sonradan gelen bildirim yalnızca "OK" alır.
+
 ## Uçlar ve imzalar
 Tüm imzalar `base64(HMAC-SHA256(key = merchant_key, mesaj))`.
 

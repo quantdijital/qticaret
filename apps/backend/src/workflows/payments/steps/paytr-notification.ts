@@ -5,6 +5,7 @@ import { PAYTR_PAYMENT_PROVIDER_ID } from "../../../lib/payments/checkout"
 import { WEBHOOK_EVENTS_MODULE } from "../../../modules/webhook-events"
 import type { ClaimState } from "../../../modules/webhook-events/service"
 import type WebhookEventsModuleService from "../../../modules/webhook-events/service"
+import { paytrSession } from "../../../modules/payment-paytr/session"
 
 export interface PaytrNotification {
   merchant_oid: string
@@ -15,8 +16,15 @@ export interface PaytrNotification {
   failed_reason_code: string | null
 }
 
+/** What the session expected to be paid (adr/0026 §4). */
+export interface PaytrExpected {
+  amount: number
+  currency_code: string
+  test_mode: boolean
+}
+
 export type PaytrTarget =
-  | { session_id: string; cart_id: string; orphan: false }
+  | { session_id: string; cart_id: string; orphan: false; expected: PaytrExpected }
   // A session replaced or dropped while its token stayed payable (PayTR cannot withdraw one)
   | { session_id: string; cart_id: null; orphan: true }
 
@@ -58,15 +66,23 @@ export const findPaytrSessionStep = createStep(
       filters: { id: session.payment_collection_id },
     })
     const cartId = (data[0] as { cart?: { id: string } | null } | undefined)?.cart?.id
+    const { amount, currency_code, test_mode } = paytrSession(session.data)
     return new StepResponse<PaytrTarget | null>(
-      cartId ? { session_id: session.id, cart_id: cartId, orphan: false } : null
+      cartId
+        ? {
+            session_id: session.id,
+            cart_id: cartId,
+            orphan: false,
+            expected: { amount, currency_code, test_mode },
+          }
+        : null
     )
   }
 )
 
 export interface PaytrClaim {
   id: string | null
-  state: ClaimState | "not_ours" | "orphan"
+  state: ClaimState | "not_ours"
   cart_id: string | null
 }
 
@@ -98,15 +114,6 @@ export const claimPaytrNotificationStep = createStep(
       }
     )
     const handling = claim.state === "new" || claim.state === "retry"
-    // Money taken for a session that is gone: kept as failed, never answered
-    // "OK", so PayTR keeps the payment until it is given back (F5 V4)
-    if (input.target.orphan && notification.status === "success" && handling) {
-      await events.markFailed(claim.id, "orphan_payment")
-      return new StepResponse<PaytrClaim, string | null>(
-        { id: claim.id, state: "orphan", cart_id: null },
-        null
-      )
-    }
     return new StepResponse<PaytrClaim, string | null>(
       { ...claim, cart_id: input.target.cart_id },
       handling ? claim.id : null
@@ -123,14 +130,20 @@ export const claimPaytrNotificationStep = createStep(
 
 export const markPaytrNotificationStep = createStep(
   "payments-mark-paytr-notification",
-  async (input: { claim: PaytrClaim; order_id: string | null }, { container }) => {
+  async (
+    input: { claim: PaytrClaim; order_id: string | null; recovery_id: string | null },
+    { container }
+  ) => {
     const { claim } = input
     if (claim.id && (claim.state === "new" || claim.state === "retry")) {
       // Bookkeeping only: a failure here must not undo the order just placed.
       // The record stays "processing"; a repeat finds the cart completed
       await container
         .resolve<WebhookEventsModuleService>(WEBHOOK_EVENTS_MODULE)
-        .markProcessed(claim.id, input.order_id ? { order_id: input.order_id } : undefined)
+        .markProcessed(claim.id, {
+          ...(input.order_id ? { order_id: input.order_id } : {}),
+          ...(input.recovery_id ? { recovery_id: input.recovery_id } : {}),
+        })
         .catch((error: unknown) => {
           logger.warn({
             event: "paytr.notification_mark_failed",
