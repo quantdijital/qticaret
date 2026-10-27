@@ -45,6 +45,16 @@ export const CREDENTIAL_PROVIDERS = {
     secret: secretField,
     identity: ["test_mode"],
   },
+  // Geliver panel > API tokens (adr/0031). Test shipments use the same token: a flag per shipment
+  geliver: {
+    settings: z.object({ test_mode: z.boolean() }).strict(),
+    secrets: ["api_token"],
+    secret: z
+      .string()
+      .trim()
+      .regex(/^[\x21-\x7E]{16,2048}$/, "integration_credentials.secret_invalid"),
+    identity: [],
+  },
 } as const satisfies Record<string, CredentialProvider>
 
 export type CredentialProviderName = keyof typeof CREDENTIAL_PROVIDERS

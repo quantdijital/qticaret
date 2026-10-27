@@ -24,10 +24,13 @@ export function AccountAlert({
   provider,
   state,
   keyConfigured,
+  ns = "settings.payments",
 }: {
   provider: string
   state: AccountState
   keyConfigured: boolean
+  /** Where the provider's own texts live (payment or shipping settings). */
+  ns?: string
 }) {
   const { t } = useTranslation()
   if (!keyConfigured) {
@@ -41,9 +44,7 @@ export function AccountAlert({
     return (
       <Alert>
         <AlertDescription>
-          {state === "unreadable"
-            ? t(`${A}.unreadable`)
-            : t(`settings.payments.${provider}.rejected`)}
+          {state === "unreadable" ? t(`${A}.unreadable`) : t(`${ns}.${provider}.rejected`)}
         </AlertDescription>
       </Alert>
     )

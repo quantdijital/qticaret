@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "medusa develop",
     "dev:paytr": "ts-node ../../packages/testing/src/dev/paytr.ts",
+    "dev:geliver": "ts-node ../../packages/testing/src/dev/geliver.ts",
     "build": "medusa build",
     "start": "medusa start",
     "medusa": "medusa",

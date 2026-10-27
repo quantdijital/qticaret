@@ -17,3 +17,5 @@ export type {
 } from "./iyzico/fake-server"
 export { fakeIyzicoAccount, iyzicoSign, readAuthorization } from "./iyzico/signing"
 export type { IyzicoAccount } from "./iyzico/signing"
+export { fakeGeliverToken, startFakeGeliver } from "./geliver/fake-server"
+export type { FakeAddress, FakeGeliver, FakeGeliverAnswer } from "./geliver/fake-server"

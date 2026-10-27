@@ -3,6 +3,7 @@ import type { AccountDetails } from "../account-check"
 import type { CredentialProviderName } from "../../../modules/integration-credentials/providers"
 import { createHealthMonitor } from "./health"
 import type { IntegrationHealthCheck } from "./health"
+import { geliverHealthCheck } from "./geliver-check"
 import { iyzicoHealthCheck } from "./iyzico-check"
 import { paytrHealthCheck } from "./paytr-check"
 import { redisHealthCheck } from "./redis-check"
@@ -16,6 +17,7 @@ export type {
   HealthStatus,
   IntegrationHealthCheck,
 } from "./health"
+export { geliverHealthCheck } from "./geliver-check"
 export { iyzicoHealthCheck } from "./iyzico-check"
 export { paytrHealthCheck } from "./paytr-check"
 export { redisHealthCheck } from "./redis-check"
@@ -35,6 +37,7 @@ export function defaultHealthChecks(accounts: AccountSource): IntegrationHealthC
     redisHealthCheck(env.REDIS_URL),
     paytrHealthCheck(() => accounts.read("paytr")),
     iyzicoHealthCheck(() => accounts.read("iyzico")),
+    geliverHealthCheck(() => accounts.read("geliver")),
   ]
 }
 

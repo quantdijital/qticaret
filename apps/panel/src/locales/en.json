@@ -218,6 +218,7 @@
       "appearance": "Appearance",
       "store": "Store",
       "payments": "Payment",
+      "shipping": "Shipping",
       "seo": "SEO",
       "features": "Features",
       "jobs": "Jobs",
@@ -702,6 +703,38 @@
       "offered": {
         "on": "On",
         "off": "Off"
+      }
+    },
+    "shipping": {
+      "title": "Shipping",
+      "subtitle": "How orders are shipped. Each shipping service is connected on its own page.",
+      "manage": "Manage",
+      "connect": "Connect",
+      "carriersTitle": "Shipping services",
+      "carriersDescription": "Shipments, labels and tracking go through these services.",
+      "carriers": {
+        "geliver": {
+          "name": "Geliver",
+          "description": "Offers from several carriers through one account; labels and tracking through Geliver."
+        }
+      },
+      "geliver": {
+        "keys": {
+          "title": "API token",
+          "description": "Create a token on the API tokens page of your Geliver panel (app.geliver.io/apitokens) and copy it. It is stored encrypted and never shown again once saved."
+        },
+        "apiToken": "API token",
+        "live": {
+          "title": "Test shipments and going live",
+          "description": "Try the shipping flow with Geliver's test shipments before you open your shop."
+        },
+        "testMode": "Test shipments",
+        "testModeHint": "While on, shipments are opened at Geliver as tests: no label is bought and nothing reaches the carrier. The same token works in both modes.",
+        "checks": {
+          "merchant_invalid": "Geliver did not accept this API token. Copy it again from the Geliver panel.",
+          "secret_invalid": "Geliver did not accept this API token. Copy it again from the Geliver panel."
+        },
+        "rejected": "Geliver no longer accepts the stored API token; no shipment can be created. Get a new token from the Geliver panel and enter it."
       }
     },
     "integrations": {

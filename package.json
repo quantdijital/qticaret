@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "turbo run dev",
     "dev:paytr": "pnpm --filter backend dev:paytr",
+    "dev:geliver": "pnpm --filter backend dev:geliver",
     "build": "turbo run build",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",

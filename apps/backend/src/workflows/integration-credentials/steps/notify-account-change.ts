@@ -13,11 +13,12 @@ export interface NotifyAccountChangeInput {
 const PROVIDER_NAMES: Readonly<Record<CredentialProviderName, string>> = {
   paytr: "PayTR",
   iyzico: "iyzico",
+  geliver: "Geliver",
 }
 
 /**
- * Tells every admin, in the panel's bell, that the payment account
- * changed, by whom (adr/0027 §6): until roles arrive (F12) any staff
+ * Tells every admin, in the panel's bell, that a provider account
+ * (payment, shipping) changed, by whom (adr/0027 §6): until roles arrive (F12) any staff
  * member can change it, so nobody should do it unseen. The last step of
  * its workflows; when the alert cannot be written, the change is undone.
  */

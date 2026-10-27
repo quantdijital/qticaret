@@ -218,6 +218,7 @@
       "appearance": "Görünüm",
       "store": "Mağaza",
       "payments": "Ödeme",
+      "shipping": "Kargo",
       "seo": "SEO",
       "features": "Özellikler",
       "jobs": "İşler",
@@ -702,6 +703,38 @@
       "offered": {
         "on": "Açık",
         "off": "Kapalı"
+      }
+    },
+    "shipping": {
+      "title": "Kargo",
+      "subtitle": "Siparişlerin nasıl gönderileceğini buradan yönetirsiniz. Her kargo hizmeti kendi sayfasında bağlanır.",
+      "manage": "Yönet",
+      "connect": "Bağla",
+      "carriersTitle": "Kargo hizmetleri",
+      "carriersDescription": "Gönderi oluşturma, etiket ve takip bu hizmetler üzerinden yapılır.",
+      "carriers": {
+        "geliver": {
+          "name": "Geliver",
+          "description": "Birden çok kargo firmasının teklifini tek hesaptan alır; etiket ve takip Geliver üzerinden."
+        }
+      },
+      "geliver": {
+        "keys": {
+          "title": "API anahtarı",
+          "description": "Geliver panelinizde API anahtarları sayfasından (app.geliver.io/apitokens) yeni bir anahtar oluşturup kopyalayın. Şifreli saklanır; kaydedildikten sonra hiçbir yerde gösterilmez."
+        },
+        "apiToken": "API anahtarı",
+        "live": {
+          "title": "Test gönderileri ve canlıya geçiş",
+          "description": "Mağazanızı açmadan önce gönderi akışını Geliver'in test gönderileriyle deneyin."
+        },
+        "testMode": "Test gönderileri",
+        "testModeHint": "Açıkken oluşturulan gönderiler Geliver'de test olarak açılır: etiket satın alınmaz, kargo firmasına iletilmez. Aynı anahtar iki modda da çalışır.",
+        "checks": {
+          "merchant_invalid": "Geliver bu API anahtarını kabul etmedi. Anahtarı Geliver panelinden yeniden kopyalayın.",
+          "secret_invalid": "Geliver bu API anahtarını kabul etmedi. Anahtarı Geliver panelinden yeniden kopyalayın."
+        },
+        "rejected": "Geliver kayıtlı API anahtarını artık kabul etmiyor; gönderi oluşturulamaz. Geliver panelinden yeni bir anahtar alıp girin."
       }
     },
     "integrations": {

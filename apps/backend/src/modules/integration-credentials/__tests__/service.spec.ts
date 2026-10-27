@@ -37,6 +37,7 @@ moduleIntegrationTestRunner<IntegrationCredentialsModuleService>({
       expect(await service.describeAll()).toEqual([
         expect.objectContaining({ provider: "paytr", state: "not_configured", settings: null }),
         expect.objectContaining({ provider: "iyzico", state: "not_configured", settings: null }),
+        expect.objectContaining({ provider: "geliver", state: "not_configured", settings: null }),
       ])
       expect(await service.read("paytr")).toBeNull()
       expect(await service.read("iyzico")).toBeNull()

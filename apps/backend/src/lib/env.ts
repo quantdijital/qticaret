@@ -46,9 +46,10 @@ const envSchema = z.object({
   // The backend's own public address: iyzico sends the shopper back to it
   // (`/hooks/iyzico/callback`). Required once deployed; locally localhost:9000
   BACKEND_URL: z.url({ protocol: /^https?$/ }).optional(),
-  // Fake PayTR and iyzico servers in development and tests; the real addresses are fixed in code
+  // Fake PayTR, iyzico and Geliver servers in development and tests; the real addresses are fixed in code
   PAYTR_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
   IYZICO_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
+  GELIVER_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
   // Medusa's level names; unset means Medusa's default, `http`
   LOG_LEVEL: z.enum(LOG_LEVELS).optional(),
   // docs/13 §6: "off" keeps search engines out (robots.txt, noindex) on an
@@ -146,9 +147,9 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
       message: "is required in production and staging, as an https:// address",
     })
   }
-  // A deployed shop pays at the provider's own address only. A fake server is for
-  // a developer's machine, where Medusa's CLI runs with NODE_ENV unset
-  for (const name of ["PAYTR_BASE_URL", "IYZICO_BASE_URL"] as const) {
+  // A deployed shop pays and ships at the provider's own address only. A fake server
+  // is for a developer's machine, where Medusa's CLI runs with NODE_ENV unset
+  for (const name of ["PAYTR_BASE_URL", "IYZICO_BASE_URL", "GELIVER_BASE_URL"] as const) {
     if (env[name] !== undefined && (env.NODE_ENV === "production" || env.NODE_ENV === "staging")) {
       ctx.addIssue({
         code: "custom",

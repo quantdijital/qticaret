@@ -24,28 +24,29 @@ export const accountKey = (account: ProviderAccount | undefined): string =>
 const textOf = (value: unknown): string => (typeof value === "string" ? value.trim() : "")
 
 /** Nothing usable stored: every secret is asked for. */
-const nothingStored = (account: ProviderAccount | undefined): boolean =>
+export const nothingStored = (account: ProviderAccount | undefined): boolean =>
   !account || account.state === "not_configured" || account.state === "unreadable"
 
 /** Each secret in the provider's form when typed, and required when `required`. */
-function checkSecrets(
+export function checkSecrets(
   values: Record<string, unknown>,
   names: readonly string[],
   required: boolean,
-  ctx: z.RefinementCtx
+  ctx: z.RefinementCtx,
+  pattern: RegExp = SECRET
 ) {
   for (const name of names) {
     const value = textOf(values[name])
     if (value === "" && required) {
       ctx.addIssue({ code: "custom", path: [name], message: `${A}.secretRequired` })
-    } else if (value !== "" && !SECRET.test(value)) {
+    } else if (value !== "" && !pattern.test(value)) {
       ctx.addIssue({ code: "custom", path: [name], message: `${A}.secretFormat` })
     }
   }
 }
 
 /** The secrets typed in; blank ones are left out, so the stored ones stay. */
-function typedSecrets(
+export function typedSecrets(
   values: Record<string, unknown>,
   names: readonly string[]
 ): Pick<AccountSave, "secrets"> {

@@ -3,7 +3,7 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**F7 — Kargo, sipariş operasyonu, iade ve değişim: BAŞLADI (2026-10-28 gece, otonom).** Plan aşağıda "F7 görev planı"; ADR-0031 (kargo altyapısı ve takip) kabul edildi (otonom, gözden geçir). Sıradaki K1 (Geliver istemcisi + hesap bağlantısı + sahte Geliver).
+**F7 — Kargo, sipariş operasyonu, iade ve değişim: BAŞLADI (2026-10-28 gece, otonom).** Plan aşağıda "F7 görev planı"; ADR-0031 (kargo altyapısı ve takip) kabul edildi (otonom, gözden geçir). K1 bitti; sıradaki K2 (`fulfillment-geliver` sağlayıcısı, desi, fiyat).
 
 **F6 — Ödeme: alternatif ödemeler + yönlendirici + ters ibraz: BİTTİ (2026-10-28 gece, otonom).** Dal `f6-alternative-payments`. W1–W6; KK1–KK5 işaretli. ADR-0029 ve ADR-0030 otonom kabul edildi (gözden geçir). Kapanışta yerelde: birim 1658, HTTP 81/81 takım (440 test), modül (ters ibraz) 1, panel 220, e2e 29.
 
@@ -1107,7 +1107,7 @@
 - **Daha önce:** F1 planlaması ve F0.2–F0.8 (2026-10-24), F0.1 monorepo (2026-10-24 sabahı), SEO ve güvenlik dokümanları (2026-10-22).
 
 ## Sıradaki görev
-**Claude'un sıradaki işi:** F7 K1 (Geliver istemcisi, `integration-credentials`'a `geliver`, bağlantı ve sağlık kontrolü, sahte Geliver, panelde Ayarlar > Kargo > Geliver), plan aşağıda "F7 görev planı". Dal `f7-shipping` (`f6-alternative-payments` üzerinden). Kullanıcı 2026-10-27 gece: "izin istemeden çalışmaya devam edersin, kritik bir şey olursa sabah sorarım."
+**Claude'un sıradaki işi:** F7 K2 (`fulfillment-geliver` sağlayıcısı: seçenekler, doğrulama, desi, `calculatePrice`, ölçüsü eksik ürün hatası), plan aşağıda "F7 görev planı". Dal `f7-shipping` (`f6-alternative-payments` üzerinden). Kullanıcı 2026-10-27 gece: "izin istemeden çalışmaya devam edersin, kritik bir şey olursa sabah sorarım."
 
 ### F7 görev planı (2026-10-28; Geliver uçları resmi JS SDK kaynağından, Medusa fulfillment sağlayıcı arayüzü docs.medusajs.com'dan doğrulandı; Context7 kotası dolu)
 Karar: ADR-0031 (kargo altyapısı, takip, etiketler; kabul edildi, otonom, gözden geçir). Geliver ayrıntıları `docs/entegrasyonlar/geliver.md`.
@@ -1122,7 +1122,7 @@ Doğrulananlar:
 
 | # | F7 | Görev | Bağımlılık | KK |
 |---|---|---|---|---|
-| K1 | F7.1 (temel) | Geliver istemcisi (`lib/shipping/geliver`: Bearer, zarf, hata anahtarları, Zod yanıtları, devre kesici, redaksiyon), `integration-credentials`'a `geliver` (gizli API anahtarı, test modu), bağlantı ve sağlık kontrolü, sahte Geliver (`packages/testing`), panel Ayarlar > Kargo > Geliver (hesap + gönderici adresi) | — | — |
+| K1 ✅ | F7.1 (temel) | **Bitti (2026-10-28 gece).** Geliver istemcisi (`lib/shipping/geliver`: Bearer, zarf, `result: false` reddi, 401/403 anahtar reddi, Zod yanıtları; okumalar tekrar denenir, sonucu bilinmeyen oluşturma denenmez), `integration-credentials`'a `geliver` (gizli `api_token`, `test_mode`; mod değişimi anahtar istemez), bağlantı ve sağlık kontrolü (`kind: shipping`), sahte Geliver (`packages/testing`, `pnpm dev:geliver`, `/api/v1` altında, adresler), `GELIVER_BASE_URL` (canlıda reddedilir; turbo geçiriyor), panelde Ayarlar > Kargo ve Kargo > Geliver (hesap çerçevesi `ns` ile ödeme dışına açıldı). Karar: gönderici adresi saklanmaz; depo başına Geliver'de bulunur, yoksa oluşturulur (K3). Testler: birim 6, HTTP 4 (+ sağlayıcı listesi testleri), panel 3, e2e listesine iki sayfa | — | — |
 | K2 | F7.1–F7.2 | `fulfillment-geliver` sağlayıcısı: seçenekler, doğrulama, desi (`lib/shipping/desi`), `canCalculate`/`calculatePrice` (fiyat listesi, önbellek), ölçüsü eksik ürün hatası, bootstrap'ta bağlama | K1 | KK2 |
 | K3 | F7.3–F7.4 | "Kargoya ver" Geliver'le: teklif bekleme, servis kabulü, etiket özel depoya, takip no; kapıda ödemeli gönderi; iptal; panelde etiket indirme (personel, denetim) | K2 | KK7 (etiket) |
 | K4 | F7.5–F7.6 | Takip: `shipment-tracking` modülü (iç durum, olay geçmişi, tekil geçiş), `/hooks/geliver/:token`, sorgu işi, Medusa gönderi/teslim kayıtları, `shipment.status_changed` | K3 | KK1, KK4 |
@@ -1507,7 +1507,7 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
 | F4 Fiyatlandırma ve promosyon | ✅ (U1–U8; KK1–KK4; kapanış incelemesi 2026-10-27) |
 | F5 Ödeme: PayTR + iyzico (+ ortak ödeme altyapısı) | ✅ (V1–V11; gerçek sağlayıcı testleri sunucuya çıkışta) |
 | F6 Ödeme: havale/EFT + kapıda ödeme + yönlendirici + ters ibraz | ✅ (W1–W6; KK1–KK5; 2026-10-28) |
-| F7 Kargo, sipariş operasyonu, iade ve değişim | ⏳ plan ve ADR-0031 (2026-10-28); sıradaki K1 |
+| F7 Kargo, sipariş operasyonu, iade ve değişim | ⏳ K1 bitti (2026-10-28); sıradaki K2 |
 | F8 E-fatura | ⬜ |
 | F9 Bildirimler (e-posta/SMS) | ⬜ |
 | F10 Müşteri hesabı, etkileşim, pazarlama ve SEO ölçümü | ⬜ |

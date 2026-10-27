@@ -67,7 +67,7 @@ medusaIntegrationTestRunner({
       fake.requests.length = 0
     })
 
-    it("lists PayTR as not connected, with the server's key in place", async () => {
+    it("lists every provider as not connected, with the server's key in place", async () => {
       const { data } = await http.get<{ key_configured: boolean; accounts: Account[] }>(URL_PATH, {
         headers: admin.headers,
       })
@@ -83,6 +83,11 @@ medusaIntegrationTestRunner({
           provider: "iyzico",
           state: "not_configured",
           secrets: { api_key: false, secret_key: false },
+        }),
+        expect.objectContaining({
+          provider: "geliver",
+          state: "not_configured",
+          secrets: { api_token: false },
         }),
       ])
     })

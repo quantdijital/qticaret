@@ -15,8 +15,11 @@ export const NOT_A_LOGIN = {
   "data-bwignore": "",
 } as const
 
-/** Save, test and disconnect for one provider, with their toasts. */
-export function useAccountActions(provider: string, name: string) {
+/**
+ * Save, test and disconnect for one provider, with their toasts. `ns` is
+ * where the provider's own texts live (payment or shipping settings).
+ */
+export function useAccountActions(provider: string, name: string, ns = "settings.payments") {
   const { t } = useTranslation()
   const save = useSaveAccount(provider)
   const check = useCheckAccount(provider)
@@ -28,7 +31,7 @@ export function useAccountActions(provider: string, name: string) {
     if (answer === null || answer === "valid") {
       toast.success(answer === "valid" ? t(`${A}.checks.valid`, { name }) : t("settings.saved"))
     } else if (answer === "merchant_invalid" || answer === "secret_invalid") {
-      toast.error(t(`settings.payments.${provider}.checks.${answer}`))
+      toast.error(t(`${ns}.${provider}.checks.${answer}`))
     } else if (answer === "unreachable") {
       toast.warning(
         t(source === "save" ? `${A}.checks.unreachable` : `${A}.checks.unreachableTest`, { name })

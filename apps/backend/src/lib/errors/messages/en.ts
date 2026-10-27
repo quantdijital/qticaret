@@ -190,6 +190,10 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "This card's bank takes no refunds; pay the customer back another way.",
   "iyzico.refund_same_day":
     "iyzico makes no partial refund on the day of the payment; try again tomorrow, or refund it whole.",
+  "geliver.merchant_invalid":
+    "Geliver did not accept this API token. Copy it again from the API tokens page of the Geliver panel.",
+  "geliver.secret_invalid":
+    "Geliver did not accept this API token. Copy it again from the API tokens page of the Geliver panel.",
   "iyzico.merchant_invalid":
     "iyzico does not know this API key. Make sure it belongs to the chosen environment: a sandbox key works only with the sandbox on, a live key only with it off.",
   "iyzico.secret_invalid":

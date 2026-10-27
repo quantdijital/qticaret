@@ -12,6 +12,7 @@
     "CREDENTIALS_*",
     "PAYTR_*",
     "IYZICO_*",
+    "GELIVER_*",
     "DB_*",
     "MEDUSA_*",
     "S3_*",

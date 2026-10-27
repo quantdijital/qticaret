@@ -54,6 +54,8 @@ import { Route as AuthPromotionsPriceListsIdRouteImport } from './routes/_auth/p
 import { Route as AuthPromotionsPriceListsNewRouteImport } from './routes/_auth/promotions/price-lists/new'
 import { Route as AuthSettingsPaymentsIndexRouteImport } from './routes/_auth/settings/payments/index'
 import { Route as AuthSettingsPaymentsProviderRouteImport } from './routes/_auth/settings/payments/$provider'
+import { Route as AuthSettingsShippingIndexRouteImport } from './routes/_auth/settings/shipping/index'
+import { Route as AuthSettingsShippingCarrierRouteImport } from './routes/_auth/settings/shipping/$carrier'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/_auth',
@@ -285,6 +287,18 @@ const AuthSettingsPaymentsProviderRoute =
     path: '/payments/$provider',
     getParentRoute: () => AuthSettingsRoute,
   } as any)
+const AuthSettingsShippingIndexRoute =
+  AuthSettingsShippingIndexRouteImport.update({
+    id: '/shipping/',
+    path: '/shipping/',
+    getParentRoute: () => AuthSettingsRoute,
+  } as any)
+const AuthSettingsShippingCarrierRoute =
+  AuthSettingsShippingCarrierRouteImport.update({
+    id: '/shipping/$carrier',
+    path: '/shipping/$carrier',
+    getParentRoute: () => AuthSettingsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthIndexRoute
@@ -329,8 +343,10 @@ export interface FileRoutesByFullPath {
   '/promotions/price-lists/$id': typeof AuthPromotionsPriceListsIdRoute
   '/promotions/price-lists/new': typeof AuthPromotionsPriceListsNewRoute
   '/settings/payments/$provider': typeof AuthSettingsPaymentsProviderRoute
+  '/settings/shipping/$carrier': typeof AuthSettingsShippingCarrierRoute
   '/promotions/price-lists/': typeof AuthPromotionsPriceListsIndexRoute
   '/settings/payments/': typeof AuthSettingsPaymentsIndexRoute
+  '/settings/shipping/': typeof AuthSettingsShippingIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
@@ -373,8 +389,10 @@ export interface FileRoutesByTo {
   '/promotions/price-lists/$id': typeof AuthPromotionsPriceListsIdRoute
   '/promotions/price-lists/new': typeof AuthPromotionsPriceListsNewRoute
   '/settings/payments/$provider': typeof AuthSettingsPaymentsProviderRoute
+  '/settings/shipping/$carrier': typeof AuthSettingsShippingCarrierRoute
   '/promotions/price-lists': typeof AuthPromotionsPriceListsIndexRoute
   '/settings/payments': typeof AuthSettingsPaymentsIndexRoute
+  '/settings/shipping': typeof AuthSettingsShippingIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -421,8 +439,10 @@ export interface FileRoutesById {
   '/_auth/promotions/price-lists/$id': typeof AuthPromotionsPriceListsIdRoute
   '/_auth/promotions/price-lists/new': typeof AuthPromotionsPriceListsNewRoute
   '/_auth/settings/payments/$provider': typeof AuthSettingsPaymentsProviderRoute
+  '/_auth/settings/shipping/$carrier': typeof AuthSettingsShippingCarrierRoute
   '/_auth/promotions/price-lists/': typeof AuthPromotionsPriceListsIndexRoute
   '/_auth/settings/payments/': typeof AuthSettingsPaymentsIndexRoute
+  '/_auth/settings/shipping/': typeof AuthSettingsShippingIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -469,8 +489,10 @@ export interface FileRouteTypes {
     | '/promotions/price-lists/$id'
     | '/promotions/price-lists/new'
     | '/settings/payments/$provider'
+    | '/settings/shipping/$carrier'
     | '/promotions/price-lists/'
     | '/settings/payments/'
+    | '/settings/shipping/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -513,8 +535,10 @@ export interface FileRouteTypes {
     | '/promotions/price-lists/$id'
     | '/promotions/price-lists/new'
     | '/settings/payments/$provider'
+    | '/settings/shipping/$carrier'
     | '/promotions/price-lists'
     | '/settings/payments'
+    | '/settings/shipping'
   id:
     | '__root__'
     | '/_auth'
@@ -560,8 +584,10 @@ export interface FileRouteTypes {
     | '/_auth/promotions/price-lists/$id'
     | '/_auth/promotions/price-lists/new'
     | '/_auth/settings/payments/$provider'
+    | '/_auth/settings/shipping/$carrier'
     | '/_auth/promotions/price-lists/'
     | '/_auth/settings/payments/'
+    | '/_auth/settings/shipping/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -886,6 +912,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSettingsPaymentsProviderRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
+    '/_auth/settings/shipping/': {
+      id: '/_auth/settings/shipping/'
+      path: '/shipping'
+      fullPath: '/settings/shipping/'
+      preLoaderRoute: typeof AuthSettingsShippingIndexRouteImport
+      parentRoute: typeof AuthSettingsRoute
+    }
+    '/_auth/settings/shipping/$carrier': {
+      id: '/_auth/settings/shipping/$carrier'
+      path: '/shipping/$carrier'
+      fullPath: '/settings/shipping/$carrier'
+      preLoaderRoute: typeof AuthSettingsShippingCarrierRouteImport
+      parentRoute: typeof AuthSettingsRoute
+    }
   }
 }
 
@@ -919,7 +959,9 @@ interface AuthSettingsRouteChildren {
   AuthSettingsStoreRoute: typeof AuthSettingsStoreRoute
   AuthSettingsIndexRoute: typeof AuthSettingsIndexRoute
   AuthSettingsPaymentsProviderRoute: typeof AuthSettingsPaymentsProviderRoute
+  AuthSettingsShippingCarrierRoute: typeof AuthSettingsShippingCarrierRoute
   AuthSettingsPaymentsIndexRoute: typeof AuthSettingsPaymentsIndexRoute
+  AuthSettingsShippingIndexRoute: typeof AuthSettingsShippingIndexRoute
 }
 
 const AuthSettingsRouteChildren: AuthSettingsRouteChildren = {
@@ -934,7 +976,9 @@ const AuthSettingsRouteChildren: AuthSettingsRouteChildren = {
   AuthSettingsStoreRoute: AuthSettingsStoreRoute,
   AuthSettingsIndexRoute: AuthSettingsIndexRoute,
   AuthSettingsPaymentsProviderRoute: AuthSettingsPaymentsProviderRoute,
+  AuthSettingsShippingCarrierRoute: AuthSettingsShippingCarrierRoute,
   AuthSettingsPaymentsIndexRoute: AuthSettingsPaymentsIndexRoute,
+  AuthSettingsShippingIndexRoute: AuthSettingsShippingIndexRoute,
 }
 
 const AuthSettingsRouteWithChildren = AuthSettingsRoute._addFileChildren(

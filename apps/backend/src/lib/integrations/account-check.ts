@@ -4,6 +4,7 @@ import { errorSummary, logger } from "../logging"
 import type { CredentialProviderName } from "../../modules/integration-credentials/providers"
 import { iyzicoApi, iyzicoCredentialsOf } from "../payments/iyzico"
 import { paytrApi, paytrCredentialsOf } from "../payments/paytr"
+import { geliverApi, geliverCredentialsOf } from "../shipping/geliver"
 
 /**
  * Asks a provider whether the shop's account details work (adr/0027 §4).
@@ -41,6 +42,10 @@ const CHECKERS = {
     const credentials = iyzicoCredentialsOf(account)
     return credentials ? iyzicoApi().checkCredentials(credentials, { signal }) : "merchant_invalid"
   },
+  geliver: async (account, signal) => {
+    const credentials = geliverCredentialsOf(account)
+    return credentials ? geliverApi().checkCredentials(credentials, { signal }) : "secret_invalid"
+  },
 } satisfies Record<CredentialProviderName, Checker>
 
 export async function checkAccount(
@@ -63,4 +68,6 @@ export async function checkAccount(
 export const CHECK_FIELDS = {
   paytr: { merchant_invalid: "settings.merchant_id", secret_invalid: "secrets.merchant_key" },
   iyzico: { merchant_invalid: "secrets.api_key", secret_invalid: "secrets.secret_key" },
+  // One token: whatever Geliver refuses is the token
+  geliver: { merchant_invalid: "secrets.api_token", secret_invalid: "secrets.api_token" },
 } satisfies Record<CredentialProviderName, Record<"merchant_invalid" | "secret_invalid", string>>

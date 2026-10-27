@@ -1,6 +1,18 @@
 # Geliver Fulfillment Provider
 
-> Doküman: docs.geliver.io. Resmi SDK'lar mevcut; Node/TS SDK yoksa REST + OpenAPI'den tip üret.
+> Doküman: docs.geliver.io (JS ile çiziliyor; uçlar resmi SDK'nın kaynağından okundu: `GeliverApp/geliver-js`, 2026-10-28). Karar: ADR-0031. SDK kullanılmıyor; kendi istemcimiz `apps/backend/src/lib/shipping/geliver`.
+
+## API (SDK kaynağından, 2026-10-28)
+- Adres `https://api.geliver.io/api/v1`, `Authorization: Bearer <token>`. Token Geliver panelinde: app.geliver.io/apitokens.
+- Yanıt zarfı `{ result, data, code, message }`; `result: false` ret. Liste yanıtında `limit`, `page`, `totalRows`, `totalPages` da var.
+- Adresler: `GET /addresses?isRecipientAddress=false&limit=` (hesap kontrolü bunu kullanır), `POST /addresses` (gönderici: `name`, `email`, `phone`, `address1`, `countryCode`, `cityName`, `cityCode`, `districtName`, `zip` zorunlu; `isRecipientAddress: false`), `DELETE /addresses/:id`.
+- Gönderi: `POST /shipments` (`senderAddressID`, `recipientAddress` ya da `recipientAddressID`, `length`/`width`/`height`/`distanceUnit`, `weight`/`massUnit` metin olarak, `order { orderNumber, totalAmount, totalAmountCurrency }`, `providerServiceCode`, `productPaymentOnDelivery`, test için `test: true`), `GET /shipments/:id`, `PATCH /shipments/:id` (koli ölçüsü), `DELETE /shipments/:id` (iptal), `POST /shipments/:id` gövdesiz (kopya) ya da `isReturn: true` ile (iade).
+- Teklifler zaman uyumsuz: `offers.percentageCompleted` 100 olana ya da `offers.cheapest` gelene kadar `GET /shipments/:id` (SDK 1 sn aralıkla, 60 sn).
+- Teklif kabulü `POST /transactions { offerID }` etiketi satın alır; yanıtta `shipment` (`barcode`, `trackingNumber`, `labelURL`, `responsiveLabelURL`, `trackingUrl`). Takip numarası sonra dolabilir (SDK 3 sn aralıkla, 180 sn).
+- Fiyat listesi `GET /priceList?paramType=parcel&length=&width=&height=&weight=`.
+- Bildirim: `POST /webhook { url, type }`; olay `TRACK_UPDATED`, gövde `{ event, data: <gönderi> }`. **İmza yok** (SDK'nın doğrulayıcısı yazılmamış): ADR-0031'e göre bildirim yalnızca yeniden okuma ipucu.
+- Gönderi durumu (`statusCode`, liste süzgecinden): `CREATED`, `GOT_OFFERS`, `OFFER_ACCEPTED`, `TRACKING_CODE_CREATED`, `LABEL_PRINTED`, `SHIPPED`, `DELIVERED`, `CANCELED`, `RETURNED`, `RETURN_SHIPPED`, `FAILED`. Takip kodları (`trackingStatus.trackingStatusCode`) SDK'da listelenmiyor; gerçek hesapla doğrulanacak.
+- Kapıda ödeme: `productPaymentOnDelivery: true` ve kapıda ödeme servis kodu (örnek: `PTT_KAPIDA_ODEME`).
 
 ## Medusa metot eşlemesi
 | Medusa | Geliver | Not |
@@ -20,8 +32,9 @@
 ## Durum eşlemesi
 Sağlayıcı durumları → iç enum: `created`, `picked_up`, `in_transit`, `out_for_delivery`, `delivered`, `returned`, `failed`.
 
-## Env
-`GELIVER_API_TOKEN`, `GELIVER_BASE_URL`, `GELIVER_WEBHOOK_SECRET` (varsa)
+## Hesap ve ortam
+- Mağazanın Geliver hesabı panelden bağlanır (ADR-0027): Ayarlar > Kargo > Geliver; API anahtarı şifreli, test gönderileri ayarı açık.
+- `GELIVER_BASE_URL` yalnızca geliştirme ve testte sahte Geliver için (`pnpm dev:geliver`); staging ve canlıda reddedilir.
 
 ## Doğrudan taşıyıcı adaptörleri (F7.14)
 Geliver bir aracıdır (komisyon + tek nokta bağımlılığı). Aynı `AbstractFulfillmentProviderService` arayüzüyle doğrudan kargo firması modülleri
