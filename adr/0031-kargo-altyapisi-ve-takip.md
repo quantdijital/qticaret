@@ -1,0 +1,74 @@
+# ADR-0031: Kargo altyapısı, gönderi takibi ve etiketler
+
+- **Durum:** Kabul edildi (2026-10-28 gece, otonom çalışma: önerilen seçenek uygulandı; kullanıcı sabah gözden geçirecek, PROGRESS "Gözden geçir").
+- **Tarih:** 2026-10-28
+- **İlgili:** F7.1–F7.8, F7.10, F7.14; ADR-0027 (sağlayıcı bilgileri panelden), ADR-0029 (kapıda ödeme), docs/entegrasyonlar/geliver.md
+
+## Bağlam
+
+F7 kargoyu üç parçada istiyor:
+- Sipariş hazırlanınca gönderi oluşturulsun, etiket basılsın.
+- Gönderi taşıyıcıda ilerledikçe sipariş kendiliğinden güncellensin.
+- Bir aracı (Geliver) ve sonra doğrudan taşıyıcılar aynı arayüzden bağlansın.
+
+Geliver'in resmi SDK'sından okunanlar (`GeliverApp/geliver-js`):
+- REST, `https://api.geliver.io/api/v1`, `Authorization: Bearer <token>`.
+- Yanıt zarfı `{ result, data, message, code }`; `result: false` hata.
+- Gönderi `POST /shipments`. Teklifler zaman uyumsuz dolar: yüzde 100'e ulaşana kadar `GET /shipments/:id` ile beklenir.
+- Teklif kabulü (`POST /transactions`) etiketi satın alır. Etiket PDF'i `labelURL`'de; takip numarası sonra dolabilir.
+- İptal `DELETE /shipments/:id`; iade `POST /shipments/:id` ile `isReturn`.
+- Test gönderisinde her `GET` durumu bir adım ilerletir.
+- Kapıda ödeme `productPaymentOnDelivery` ve siparişin tutarıyla.
+- Bildirim `TRACK_UPDATED` olayıdır, gövdesi gönderinin kendisidir.
+- **Bildirim imzası SDK'da da uygulanmamış:** doğrulama kapalı örnekleniyor, imza algoritması belgelenmemiş.
+
+## Karar
+
+1. **Sağlayıcı ve hesap:**
+   - `fulfillment-geliver` bir Medusa fulfillment module provider'ıdır (`fp_geliver_geliver`).
+   - Mağaza Geliver hesabını panelden bağlar (ADR-0027 deseni, `integration-credentials`'a `geliver`): gizli API anahtarı ve test modu.
+   - Gönderici adresi, mağazanın varsayılan deposunun adresinden Geliver'de bir kez oluşturulur; kimliği hesap ayarında tutulur.
+   - Geliver istemcisi `lib/clients` tabanlıdır: zaman aşımı, yeniden deneme, devre kesici, log redaksiyonu.
+   - Sahte Geliver `packages/testing`'de yazılır. Gerçek hesapla deneme sunucuya çıkışa kalır (ödemelerdeki gibi).
+2. **Fiyat (F7.2):**
+   - Desi = en × boy × yükseklik / 3000 ile ağırlığın büyüğü; ürün ölçüleri varyanttan okunur.
+   - Ölçüsü ya da ağırlığı eksik ürün açıklayıcı hatayla durur (`shipping.dimensions_missing`, ürün adlarıyla).
+   - Hesaplanan seçenek Geliver'in fiyat listesinden seçilen servisin fiyatını kullanır. Desi ve servise göre önbelleğe alınır (10 dk).
+   - Sabit ücretli seçenek de Geliver'le gönderilebilir: fiyat mağazanın, gönderi Geliver'in.
+3. **Gönderi ve etiket (F7.3):**
+   - "Kargoya ver" gönderiyi oluşturur: teklif beklenir, seçenekteki servis (yoksa en ucuzu) kabul edilir, etiket satın alınır.
+   - Etiket PDF'i indirilip **özel** dosya deposuna yazılır; herkese açık adresi yoktur.
+   - Panel etiketi yalnızca personel ucundan alır (`requireUserActor`, hassas okuma olarak denetim kaydı). Etikette alıcının adı, adresi ve telefonu var.
+   - Medusa'nın gönderi kaydı ("kargoya verildi") etiket basılınca değil, taşıyıcı paketi aldığında atılır.
+   - Kapıda ödemeli siparişin gönderisi `productPaymentOnDelivery` ve sipariş tutarıyla oluşturulur.
+4. **Takip (F7.5, F7.6):**
+   - `shipment-tracking` modülü gönderinin iç durumunu ve olay geçmişini tutar.
+   - İç durumlar: `created`, `picked_up`, `in_transit`, `out_for_delivery`, `delivered`, `returned`, `failed`, `canceled`.
+   - **Bildirime güvenilmez, ipucu sayılır:**
+     - Bildirim adresi mağazaya özel, tahmin edilemez bir anahtar taşır (`/hooks/geliver/:token`).
+     - Gövdedeki gönderi kimliği yalnızca o gönderiyi Geliver API'sinden yeniden okumak için kullanılır. Durum her zaman API'nin yanıtından yazılır.
+   - Bildirim gelmeyen açık gönderileri zamanlanmış iş aynı yoldan sorar.
+   - Bir durum geçişi gönderi başına tek kez uygulanır: tekil indeks ve kilit, ileri doğru geçiş. Bildirim ve sorgu aynı güncellemeyi iki kez uygulamaz (KK).
+   - `picked_up` Medusa'nın gönderi kaydını (`createOrderShipmentWorkflow`), `delivered` teslim kaydını (`markOrderFulfillmentAsDeliveredWorkflow`) tetikler.
+   - Her geçiş bir olay yayar (`shipment.status_changed`). Müşteri bildirimi F9'da bu olaya bağlanır.
+5. **Doğrudan taşıyıcılar (F7.14):**
+   - Aynı `AbstractFulfillmentProviderService` arayüzü, ortak sözleşme test paketi ve aynı iç durum tablosu kullanılır.
+   - Hangi taşıyıcının yazılacağı ilk müşterinin anlaşmalı firmasına bağlıdır: kullanıcıya sorulacak.
+6. **Yeni bağımlılık yok:** Geliver SDK'sı kullanılmaz. SDK küçük, yeniden deneme davranışı istemediğimiz şekilde (4xx'i de tekrar dener), ve kendi istemci tabanımız (redaksiyon, devre kesici) zaten var. Uçlar SDK'dan okunup kendi istemcimize yazılır.
+
+## Alternatifler
+
+| Seçenek | Artı | Eksi |
+|---|---|---|
+| **Bildirim ipucu + API'den yeniden okuma (seçilen)** | İmza olmadan da sahte durum yazılamaz | Her bildirim bir API çağrısı |
+| Bildirim gövdesini doğrudan yazmak | Hızlı | İmza yok: adresi bilen herkes "teslim edildi" yazar |
+| Yalnızca sorgu (bildirim yok) | En basit | Gecikme; çok gönderide gereksiz yük |
+| Geliver SDK'sı | Hazır tipler | 4xx'i de tekrar deniyor, redaksiyon yok, yeni bağımlılık |
+| Etiket için süreli imzalı adres | Panel dışında da açılır | Adres sızarsa süresi boyunca kişisel veri açık |
+
+## Sonuçlar
+
+- Geliver bildirim imzasını yayınlarsa imza kontrolü bildirime eklenir; yeniden okuma yine kalır.
+- Geliver'in takip durum kodları SDK'da listelenmiyor. Eşleme gönderi durumundan (`CREATED` … `DELIVERED`, `RETURNED`, `FAILED`) yapılır; gerçek hesapla doğrulanacak (sunucuya çıkışta).
+- Kapıda ödeme tahsilatının kargo mutabakatı (ADR-0029) Geliver'in raporladığı alana bağlanır; alan gerçek hesapla netleşene kadar "Tahsil et" elle kalır.
+- İade (RMA), değişim, sipariş düzenleme ve müşteri iptali ayrı bir ADR'de (F7.9, F7.11–F7.13).

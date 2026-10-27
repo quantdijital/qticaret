@@ -3,7 +3,9 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**F6 — Ödeme: alternatif ödemeler + yönlendirici + ters ibraz: BAŞLADI (2026-10-27 gece, otonom).** Dal `f6-alternative-payments` (`f5-payments` üzerinden; F6 planı ve W1 `f5-payments`'ta, 9f34fd1). Plan aşağıda "F6 görev planı"; ADR-0029 (çevrim dışı ödemeler) kabul edildi (otonom, gözden geçir). W1–W5 bitti; sıradaki W6 (kapanış: güvenlik incelemesi, kapsam).
+**F7 — Kargo, sipariş operasyonu, iade ve değişim: BAŞLADI (2026-10-28 gece, otonom).** Plan aşağıda "F7 görev planı"; ADR-0031 (kargo altyapısı ve takip) kabul edildi (otonom, gözden geçir). Sıradaki K1 (Geliver istemcisi + hesap bağlantısı + sahte Geliver).
+
+**F6 — Ödeme: alternatif ödemeler + yönlendirici + ters ibraz: BİTTİ (2026-10-28 gece, otonom).** Dal `f6-alternative-payments`. W1–W6; KK1–KK5 işaretli. ADR-0029 ve ADR-0030 otonom kabul edildi (gözden geçir). Kapanışta yerelde: birim 1658, HTTP 81/81 takım (440 test), modül (ters ibraz) 1, panel 220, e2e 29.
 
 **F5 — Ödeme: PayTR + iyzico (+ ortak ödeme altyapısı): BİTTİ (V1–V11, 2026-10-27).** Ertelenenler: gerçek PayTR test penceresi ve iyzico taksitli sandbox ödemesi (sunucuya çıkışta), iyzico webhook'u (gerçek firmayla). Sıradaki faz F6.
 - V1: mağaza PayTR hesabını panelden bağlıyor (kullanıcı talebi, ADR-0027 ADR-0002'nin yerini aldı); PayTR istemcisi, sahte PayTR, `packages/testing`. Commit'ler `77c88f6`, `a00fa45` ve dokümanlar.
@@ -24,6 +26,43 @@
 
 **2026-10-27 gece (otonom; F5 kapanışı, F6 başlangıcı).** Kullanıcı yatarken: "izin istemeden çalışmaya devam edersin, kritik bir şey olursa sabah sorarım."
 - F5 kapandı (yukarıda V11; CI yeşil `fcd06e7`).
+- **F6 W6 (kapanış): kod ve güvenlik incelemesi bulguları uygulandı (2026-10-28 gece).**
+  - Başlatma (Y1, G-L1, G-M3, O6):
+    - Barındırılan form mu kararı sağlayıcıdan veriliyor; çevrim dışı yöntem `return_urls` alırsa `payments.return_urls_unexpected` dönüyor.
+    - Ücret adımı önce kanal ve `completed_at` kontrolünü yapıyor. Başlatma sonra düşerse telafisi önceki ücreti geri koyuyor. Kilit alındıktan sonra ücret satırları yeniden kontrol ediliyor.
+    - Havale hesabı sağlayıcıya oturum verisiyle (`account`) geliyor; sağlayıcı başka modüle erişmiyor.
+  - Ücret satırı (Y2/G-M1, G-L3):
+    - `isFeeLine` yalnızca işaretli, varyantsız ve `is_custom_price` satırı ücret sayıyor; satır `is_discountable: false`.
+    - `qt_` metadata'sı üç Store ucunda reddediliyor: satır ekleme, satır güncelleme, sepet oluşturma (`cart.metadata_reserved`).
+    - Karar: satır kimliği oturum verisine konmadı. Gerekçe: varyantsız satırı vitrin üretemiyor, işaret de reddediliyor; kimlik eklemek yeni bir koruma getirmiyor.
+  - Havale yarışları (Y3/G-M2, G-L4):
+    - Süre dolumu `expireBankTransferWorkflow`'da: onay kilidi altında yeniden okuma; onaylı ya da yakalanmış ödeme atlanıyor.
+    - İş imleçli sayfalıyor, zaman penceresi en uzun süre artı 7 gün.
+    - Medusa'nın iptal ucu da aynı kilidi tutuyor (`holdBankTransferLock`).
+    - Oturuma yalnızca `confirmed_at` yazılıyor; kimin onayladığı denetim kaydında.
+  - Ters ibraz (Y4, Y5/G-L2, O9, O11):
+    - Yalnızca kartla (barındırılan form) alınmış ödemeye açılıyor. Belge itiraz edilen ödemenin kaydını gösteriyor.
+    - Açma ve durum değişikliği kilit altında. Kısmi tekil indeks: ödeme başına tek açık kayıt (migration `Migration20261027220843`). Durum değişikliği koşullu güncellemeyle (`chargebacks.changed`).
+    - Adım adı `chargebacks-move-status`. Açılış denetim kaydında siparişin itirazlarının öncesi ve sonrası tutuluyor.
+    - Uçlar tutarı lira metni olarak döndürüyor. Belge CSP'si `frame-ancestors 'none'` içeriyor.
+  - Denetim ve erişim (O9, G-L5):
+    - Çekirdek capture ucu (kapıda ödeme "Tahsil et") yalnızca personele açık ve denetimde.
+    - Ayar denetiminde `iban` ve `account_holder` hassas sayılıyor.
+  - `/store/payment/methods` (O7–O8): mantık `workflows/payments/payment-methods.ts`'te; yalnızca `cash_on_delivery.*` reddi "sunulmuyor" sayılıyor; hız sınırı `payment_methods` (60/dk/IP).
+  - Kopyalar, boyut ve adlar:
+    - Tek ayar okuyucu, `multiplyByRateBps`, `liraAmount`, `lib/payments/bank-transfer.ts`, `modules/chargebacks/states.ts`, `providerName`, `startedByCheckout`, `isCheckoutProvider`, tamamlama kancasında tek sorgu.
+    - `chargebackEvidence` `workflows/chargebacks/evidence.ts`'e taşındı; `renderEvidence` ve `orderPaymentDetails` bölündü.
+    - `paidOutsideCheckout` ve `requireCheckoutPayment` adlandırmaları.
+  - Panel:
+    - Ters ibraz sekmesi ve sayfa URL'de; sayfalama; tutar lira.
+    - Kapıda ödeme formu `zodResolver` ile.
+    - Ortak açık/kapalı anahtarı ve yüklenirken durumu (`useFeatureState`).
+    - `orders.ts` 256 satıra indi (`api/payments.ts` ayrıldı).
+  - Testler:
+    - Birim: `cod` +1, `bank-transfer` 2, sözleşme güncellendi.
+    - HTTP: kapıda ödeme +1 (işaret ve dönüş adresi reddi), havale +2 (onaylıya dokunulmaz, Medusa iptali kilitle çalışır, havaleye itiraz açılmaz), ters ibraz +1 (aynı anda iki açılıştan biri geçer).
+    - F6 takımları 23/23; PayTR, iyzico, iade ve deneme sayfası takımları 57/57.
+  - Ertelendi: ek ücret satırı başlığının i18n'i (F19), stok tutma suistimali (F15 sahtekârlık koruması).
 - **F6 W5 (ters ibraz, ADR-0030):**
   - `chargebacks` modülü. Durumlar açık → belge gönderildi → kazanıldı/kaybedildi; kapanan yeniden açılmaz.
   - Açma kuralları: yakalanmış ödeme, ödenenden fazla değil, ödeme başına tek açık kayıt.
@@ -1068,7 +1107,33 @@
 - **Daha önce:** F1 planlaması ve F0.2–F0.8 (2026-10-24), F0.1 monorepo (2026-10-24 sabahı), SEO ve güvenlik dokümanları (2026-10-22).
 
 ## Sıradaki görev
-**Claude'un sıradaki işi:** F6 W6 (kapanış: bağımsız güvenlik ve kod incelemesi, kapsam, KK'lar), plan aşağıda "F6 görev planı". Kullanıcı 2026-10-27 gece: "izin istemeden çalışmaya devam edersin, kritik bir şey olursa sabah sorarım."
+**Claude'un sıradaki işi:** F7 K1 (Geliver istemcisi, `integration-credentials`'a `geliver`, bağlantı ve sağlık kontrolü, sahte Geliver, panelde Ayarlar > Kargo > Geliver), plan aşağıda "F7 görev planı". Dal `f7-shipping` (`f6-alternative-payments` üzerinden). Kullanıcı 2026-10-27 gece: "izin istemeden çalışmaya devam edersin, kritik bir şey olursa sabah sorarım."
+
+### F7 görev planı (2026-10-28; Geliver uçları resmi JS SDK kaynağından, Medusa fulfillment sağlayıcı arayüzü docs.medusajs.com'dan doğrulandı; Context7 kotası dolu)
+Karar: ADR-0031 (kargo altyapısı, takip, etiketler; kabul edildi, otonom, gözden geçir). Geliver ayrıntıları `docs/entegrasyonlar/geliver.md`.
+
+Doğrulananlar:
+- Geliver: `https://api.geliver.io/api/v1`, `Authorization: Bearer`; zarf `{ result, data, message, code }`.
+  - Uçlar: `POST /shipments` (`test: true` test gönderisi), `GET/DELETE /shipments/:id`, `POST /transactions { offerID }` (etiketi satın alır), `POST /shipments/:id { isReturn }` (iade), `GET /priceList?paramType=parcel&…`, `POST /addresses` (gönderici).
+  - Teklifler zaman uyumsuz dolar (`offers.percentageCompleted`); takip numarası sonra dolabilir.
+  - Test gönderisinde her `GET` durumu bir adım ilerletir. Kapıda ödeme `productPaymentOnDelivery` + `order.totalAmount`.
+  - Bildirim `TRACK_UPDATED`, imza yok (ADR-0031: ipucu + yeniden okuma).
+- Medusa: `AbstractFulfillmentProviderService` (`getFulfillmentOptions`, `validateFulfillmentData`, `validateOption`, `canCalculate`, `calculatePrice` → `{ calculated_amount, is_calculated_price_tax_inclusive }`, `createFulfillment` → `{ data, labels }`, `cancelFulfillment`, `createReturnFulfillment`). Kimlik `fp_<identifier>_<id>`; fulfillment modülünün `providers` dizisine eklenir.
+
+| # | F7 | Görev | Bağımlılık | KK |
+|---|---|---|---|---|
+| K1 | F7.1 (temel) | Geliver istemcisi (`lib/shipping/geliver`: Bearer, zarf, hata anahtarları, Zod yanıtları, devre kesici, redaksiyon), `integration-credentials`'a `geliver` (gizli API anahtarı, test modu), bağlantı ve sağlık kontrolü, sahte Geliver (`packages/testing`), panel Ayarlar > Kargo > Geliver (hesap + gönderici adresi) | — | — |
+| K2 | F7.1–F7.2 | `fulfillment-geliver` sağlayıcısı: seçenekler, doğrulama, desi (`lib/shipping/desi`), `canCalculate`/`calculatePrice` (fiyat listesi, önbellek), ölçüsü eksik ürün hatası, bootstrap'ta bağlama | K1 | KK2 |
+| K3 | F7.3–F7.4 | "Kargoya ver" Geliver'le: teklif bekleme, servis kabulü, etiket özel depoya, takip no; kapıda ödemeli gönderi; iptal; panelde etiket indirme (personel, denetim) | K2 | KK7 (etiket) |
+| K4 | F7.5–F7.6 | Takip: `shipment-tracking` modülü (iç durum, olay geçmişi, tekil geçiş), `/hooks/geliver/:token`, sorgu işi, Medusa gönderi/teslim kayıtları, `shipment.status_changed` | K3 | KK1, KK4 |
+| K5 | F7.7, F7.10 | Panel: kargo durum sütunu, "kargoya hazır" listesi, toplu etiket (tek PDF), kısmi gönderim (bir siparişte birden çok koli) | K3, K4 | — |
+| K6 | F7.8 | Kargo kuralları: bölge/ağırlık bazlı ücret, koli birleştirme, teslim süresi tahmini (JSON-LD `shippingDetails` kaynağı), mağazadan teslim alma (bayrak) | K2 | — |
+| K7 | F7.13 | Müşteri tarafı iptal: kargoya verilmemiş sipariş Store ucundan iptal, otomatik para iadesi + stok; verilmişse iade talebine yönlendirme | — | KK6 |
+| K8 | F7.9 | İade talebi (RMA): müşteri talebi + neden kodu, panelde onay/ret, iade kodu (Geliver iade gönderisi), depoya varış kontrolü, iade workflow'u (para + stok + iade faturası olayı, F8) (+ ADR-0032) | K3, K4 | KK3 |
+| K9 | F7.11 | Değişim: Medusa exchange akışı, fark tutarı (tahsilat/iade), iade + yeni gönderi, stok iki yönde | K8 | KK5 |
+| K10 | F7.12 | Sipariş düzenleme: Medusa order edit (adres, kalem, miktar, fiyat düzeltme), ödeme farkı, faturalı siparişte kısıt, denetim | — | — |
+| K11 | F7.14 | Doğrudan taşıyıcı adaptörü: ilk müşterinin anlaşmalı firması (**kullanıcıya soruldu**), ortak sözleşme paketi | K2–K4 | KK7 |
+| K12 | — | Kapanış: güvenlik ve kod incelemesi, KK işaretleri | K1–K11 | — |
 
 ### F6 görev planı (2026-10-27; Medusa 2.21.2 kaynağından doğrulandı, Context7 kotası dolu)
 Doğrulananlar (medusa-researcher, GitHub v2.21.2):
@@ -1086,7 +1151,7 @@ Doğrulananlar (medusa-researcher, GitHub v2.21.2):
 | W3 ✅ | F6.6 | **Bitti (2026-10-28 gece).** Kapıda ödeme sağlayıcısı (`pp_cod_cod`, `authorized`), bayrak + şartlar (üst tutar, izinli kargo seçenekleri), ek ücret kalemi (sunucuda, korunan), tamamlamada ek ücret doğrulaması, panelde "tahsil edildi" (capture) ve mutabakat alanları, panel ayar sayfası | ADR-0029 | Kapıda ödeme KK'sı |
 | W4 ✅ | F6.2–F6.4 | **Bitti (2026-10-28 gece).** Yönlendirici: birincil/yedek kart sağlayıcısı, sağlık durumu kötüyse yedek önde (`/store/payment/methods`), yedekle tamamlanan checkout testi; sözleşme paketinin çevrim dışı dalı (havale, kapıda ödeme) | W1, W3 | KK1, KK2 |
 | W5 ✅ | F6.7 | **Bitti (2026-10-28 gece).** Ters ibraz: `chargebacks` modülü (sipariş, sağlayıcı, tutar, sebep, son tarih, durum açık/belge sunuldu/kazanıldı/kaybedildi), panelden elle kayıt, belge paketi (async iş, indirilebilir: sipariş özeti, ödeme kaydı, IP/zaman, sözleşme onayı ve kargo kanıtı oldukça), panel kuyruğu; kaybedilen ibrazda muhasebe kaydı F11'de | — | KK5 |
-| W6 | — | Kapanış: güvenlik incelemesi, KK işaretleri, kapsam | W1–W5 | — |
+| W6 ✅ | — | **Bitti (2026-10-28 gece).** Kapanış: bağımsız kod ve güvenlik incelemesi, bulguların hepsi uygulandı (yukarıda "F6 W6"), tam yerel koşu | W1–W5 | — |
 
 ### F5 görev planı (2026-10-27; Medusa 2.21.2 kaynağı, dev.paytr.com ve docs.iyzico.com'dan doğrulandı)
 Kararlar: ADR-0026 (barındırılan ödeme formu akışı; V1 başında kabul edildi), ADR-0027 (mağazanın sağlayıcı hesapları panelden, şifreli; kabul edildi, ADR-0002'nin yerini aldı). PayTR ayrıntıları `docs/entegrasyonlar/paytr.md`, iyzico ayrıntıları `docs/entegrasyonlar/iyzico.md`.
@@ -1219,6 +1284,15 @@ Devreden işlerin F3 görevlerine dağılımı:
 F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde: `git show 118e835:PROGRESS.md`.
 
 ## Açık sorular / bloklayıcılar
+- [ ] **Soru (F7.14): ilk müşterinin anlaşmalı kargo firması hangisi?** Yurtiçi, Aras, MNG, PTT ya da Sürat'ten biri. Doğrudan taşıyıcı adaptörü (K11) bu cevaba bağlı; K1–K10 beklemeden ilerler. Firmanın API erişimi (müşteri numarası, test ortamı) de gerekecek (docs/12).
+- [ ] **Geliver hesabı (F7; kullanıcı).** K1–K10 sahte Geliver'le yazılır (ödemelerdeki gibi). Gerçek hesapla deneme sunucuya çıkışta. Doğrulanacaklar: takip durum kodları (SDK listelemiyor), bildirim imzası (SDK'da uygulanmamış), kapıda ödeme tahsilatının raporlandığı alan.
+- [ ] **Gözden geçir: F6 kararları (2026-10-27/28 gece; kalıcı "önerileni uygula" talimatıyla):**
+  - ADR-0029 (çevrim dışı ödemeler) ve ADR-0030 (ters ibraz kaydı, HTML belge paketi) otonom kabul edildi.
+  - Kapıda ödeme ek ücret satırının başlığı Türkçe sabit ("Kapıda ödeme ücreti"); kiracı dili F19'da.
+  - Ücret satırının kimliği oturum verisine konmadı: varyantsız + sunucu fiyatlı satır kuralı ve `qt_` metadata reddi aynı korumayı veriyor.
+  - Havale süresi dolumu son 21 günün siparişlerine bakıyor (en uzun süre 14 gün + 7 gün iş kesintisi payı).
+  - Ters ibraz yalnızca kartla alınmış ödemeye açılıyor; havale ve kapıda ödemenin itirazı bankayla değil mağazayla.
+- [ ] **Gözden geçir: F7 planlama kararları (2026-10-28 gece):** ADR-0031 (Geliver sağlayıcısı, bildirim ipucu + API'den yeniden okuma, etiket özel depoda ve yalnızca personel ucundan, iç durum tablosu, Geliver SDK'sı yerine kendi istemcimiz).
 - [ ] **F5 PayTR gerçek testi (V11; kullanıcı + firma).** Firmanın hesabı canlıda kullanılıyor; firma test modunda bağlanmayı kabul etti (kullanıcı 2026-10-27).
   - Bildirim adresi hesap başına tek olduğu için test, kısa bir pencerede yapılır:
     1. Firma, satışın düşük olduğu bir saatte PayTR panelinden bildirim adresini bizim tünel adresimize çevirir.
@@ -1431,9 +1505,9 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
 | Panel P1–P6 (adr/0022) | ⏳ P1–P4 ekranları yazıldı (kullanıcı kontrolü bekliyor) |
 | F3 Katalog, SEO motoru ve stok | ✅ (KK'lar işaretli; PR ve birleştirme kullanıcının kararı) |
 | F4 Fiyatlandırma ve promosyon | ✅ (U1–U8; KK1–KK4; kapanış incelemesi 2026-10-27) |
-| F5 Ödeme: PayTR + iyzico (+ ortak ödeme altyapısı) | ⏳ V1 bitti (2026-10-27); sıradaki V2 |
-| F6 Ödeme: havale/EFT + kapıda ödeme + yönlendirici + ters ibraz | ⬜ |
-| F7 Kargo, sipariş operasyonu, iade ve değişim | ⬜ |
+| F5 Ödeme: PayTR + iyzico (+ ortak ödeme altyapısı) | ✅ (V1–V11; gerçek sağlayıcı testleri sunucuya çıkışta) |
+| F6 Ödeme: havale/EFT + kapıda ödeme + yönlendirici + ters ibraz | ✅ (W1–W6; KK1–KK5; 2026-10-28) |
+| F7 Kargo, sipariş operasyonu, iade ve değişim | ⏳ plan ve ADR-0031 (2026-10-28); sıradaki K1 |
 | F8 E-fatura | ⬜ |
 | F9 Bildirimler (e-posta/SMS) | ⬜ |
 | F10 Müşteri hesabı, etkileşim, pazarlama ve SEO ölçümü | ⬜ |
