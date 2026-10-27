@@ -260,3 +260,41 @@ export const useCapturePayment = () =>
       await sdk.admin.payment.capture(paymentId, {})
     }
   })
+
+/** One of the order's PayTR payments as PayTR holds it (F5 V7); amounts as exact lira. */
+export interface HostedPayment {
+  payment_id: string
+  provider_id: string
+  reference: string | null
+  test_mode: boolean
+  /** False when PayTR could not be asked just now. */
+  available: boolean
+  error_code: string | null
+  amount: string | null
+  total: string | null
+  installments: number | null
+  card_brand: string | null
+  card_last4: string | null
+  refunds: { amount: string; date: string | null; reference: string | null }[]
+}
+
+export interface ShopRefund {
+  reference: string
+  amount: string
+  status: "pending" | "done" | "failed"
+  note: string | null
+  created_at: string
+}
+
+export interface PaymentDetails {
+  payments: HostedPayment[]
+  refunds: ShopRefund[]
+}
+
+/** `GET /admin/orders/:id/payment-details`: asked of PayTR when the page opens. */
+export const orderPaymentDetailsQuery = (id: string) =>
+  queryOptions({
+    queryKey: ["orders", "payment-details", id],
+    queryFn: () =>
+      sdk.client.fetch<PaymentDetails>(`/admin/orders/${encodeURIComponent(id)}/payment-details`),
+  })

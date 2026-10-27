@@ -1176,7 +1176,8 @@
       "partiallyCaptured": "Kısmen ödendi",
       "refunded": "İade edildi",
       "partiallyRefunded": "Kısmen iade edildi",
-      "credit": "Kredi ile ödendi"
+      "credit": "Kredi ile ödendi",
+      "testMode": "Test modu"
     },
     "actions": {
       "ship": "Kargoya ver",
@@ -1234,7 +1235,15 @@
       "refundable": "İade edilebilir",
       "moneyFailed": "İade edilebilir tutar okunamadı.",
       "returnedUnits_one": "{{count}} adet iade edildi",
-      "returnedUnits_other": "{{count}} adet iade edildi"
+      "returnedUnits_other": "{{count}} adet iade edildi",
+      "transaction": "İşlem no",
+      "card": "Kart",
+      "installments": "Taksit",
+      "installmentCount_one": "{{count}} taksit",
+      "installmentCount_other": "{{count}} taksit",
+      "singlePayment": "Tek çekim",
+      "providerUnreachable": "Ödeme sağlayıcısına şu an ulaşılamadı; kart ve taksit bilgisi sonra görünür.",
+      "testPaid": "Bu sipariş test modunda ödendi: gerçek para alınmadı, kargoya verilemez."
     },
     "providers": {
       "pp_system_default": "Manuel ödeme"
@@ -1258,6 +1267,14 @@
       "choose": "İade edilecekleri seçin",
       "confirm": "{{amount}} iade et",
       "done": "Para iadesi yapıldı."
+    },
+    "refunds": {
+      "title": "İadeler",
+      "states": {
+        "done": "İade edildi",
+        "pending": "Sürüyor",
+        "failed": "Yapılamadı"
+      }
     }
   },
   "customers": {

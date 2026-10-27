@@ -40,4 +40,31 @@ describe("PaymentCard", () => {
     expect(screen.getByText("Ödenmedi")).toBeInTheDocument()
     expect(screen.queryByText("Kredi ve hediye kartıyla ödenen")).toBeNull()
   })
+
+  it("shows PayTR's record: the transaction, the card and test mode", () => {
+    render(
+      <PaymentCard
+        order={order(330, "completed")}
+        money={money("0.00", "330.00")}
+        hosted={{
+          payment_id: "pay_1",
+          provider_id: "pp_paytr_paytr",
+          reference: "payses01ABC",
+          test_mode: true,
+          available: true,
+          error_code: null,
+          amount: "330.00",
+          total: "330.00",
+          installments: 1,
+          card_brand: "WORLD",
+          card_last4: "6747",
+          refunds: [],
+        }}
+      />
+    )
+    expect(screen.getByText("payses01ABC")).toBeInTheDocument()
+    expect(screen.getByText("WORLD •••• 6747")).toBeInTheDocument()
+    expect(screen.getByText("Tek çekim")).toBeInTheDocument()
+    expect(screen.getByText("Test modu")).toBeInTheDocument()
+  })
 })

@@ -234,5 +234,32 @@ medusaIntegrationTestRunner({
       expect(refused.status).toBe(400)
       expect(refused.data).toMatchObject({ message: "payments.use_order_refund" })
     })
+
+    it("shows the shop PayTR's record of the payment, and the refunds made", async () => {
+      const { orderId, reference } = await paidOrder()
+      await refund(orderId, { amount: 30, reference: "refund0000000009" })
+
+      const { data } = await http.get<{
+        payments: Record<string, unknown>[]
+        refunds: Record<string, unknown>[]
+      }>(`/admin/orders/${orderId}/payment-details`, { headers: admin.headers })
+
+      expect(data.payments).toEqual([
+        expect.objectContaining({
+          reference,
+          available: true,
+          test_mode: true,
+          amount: "330.00",
+          installments: 1,
+          card_brand: "WORLD",
+          card_last4: "6747",
+          refunds: [expect.objectContaining({ amount: "30.00", reference: "refund0000000009" })],
+        }),
+      ])
+      expect(data.refunds).toEqual([
+        expect.objectContaining({ reference: "refund0000000009", amount: "30.00", status: "done" }),
+      ])
+      expect(JSON.stringify(data)).not.toMatch(/455359/)
+    })
   },
 })

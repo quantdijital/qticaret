@@ -40,10 +40,13 @@ export function OrderActions({
   order,
   state,
   money,
+  testPaid = false,
 }: {
   order: OrderDetail
   state: OrderState
   money?: OrderMoney | undefined
+  /** Paid in a provider's test mode: no real money, so it is not shipped (adr/0027). */
+  testPaid?: boolean
 }) {
   const { t } = useTranslation()
   const [dialog, setDialog] = useState<Dialog>(null)
@@ -57,7 +60,7 @@ export function OrderActions({
   const parcels = state.deliver
   const held = state.capture
   const cancelable = state.cancelable
-  const canShip = state.ship !== null && state.stage !== "awaiting_payment"
+  const canShip = state.ship !== null && state.stage !== "awaiting_payment" && !testPaid
   const refundable = money !== undefined && Number(money.refundable) > 0
 
   const done = (message: string) => () => {

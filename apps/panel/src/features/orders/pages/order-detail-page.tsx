@@ -5,13 +5,20 @@ import { PageColumn, PageGrid } from "@/components/patterns/page-grid"
 import { PageHeader } from "@/components/patterns/page-header"
 import { ErrorState } from "@/components/patterns/states"
 import { Skeleton } from "@/components/ui/skeleton"
-import { orderMoneyQuery, orderQuery, orderStateQuery } from "@/features/orders/api/orders"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import {
+  orderMoneyQuery,
+  orderPaymentDetailsQuery,
+  orderQuery,
+  orderStateQuery,
+} from "@/features/orders/api/orders"
 import { StageBadge } from "@/features/orders/components/stage-badge"
 import { ItemsCard } from "@/features/orders/detail/items-card"
 import { OrderActions } from "@/features/orders/detail/order-actions"
 import { PaymentCard } from "@/features/orders/detail/payment-card"
 import { AddressCard, CustomerCard } from "@/features/orders/detail/people-cards"
 import { ProgressCard } from "@/features/orders/detail/progress-card"
+import { RefundsCard } from "@/features/orders/detail/refunds-card"
 import { errorText } from "@/lib/errors"
 import { formatLongDate } from "@/lib/format"
 
@@ -28,6 +35,10 @@ export function OrderDetailPage() {
   const state = useQuery(orderStateQuery(id))
   // The page does not wait for it: lines show Medusa's totals until it comes
   const money = useQuery(orderMoneyQuery(id))
+  // PayTR is asked when the page opens (F5 V7); the page does not wait for it either
+  const details = useQuery(orderPaymentDetailsQuery(id))
+  const hosted = details.data?.payments[0]
+  const refunds = details.data?.refunds ?? []
   const order = query.data
   const back = { to: "/orders", label: t("nav.orders") }
 
@@ -65,12 +76,27 @@ export function OrderDetailPage() {
         description={t("orders.detail.placed", { date: formatLongDate(order.created_at) })}
         badge={<StageBadge stage={state.data.stage} />}
         back={back}
-        action={<OrderActions order={order} state={state.data} money={money.data} />}
+        action={
+          <OrderActions
+            order={order}
+            state={state.data}
+            money={money.data}
+            testPaid={hosted?.test_mode === true}
+          />
+        }
       />
+      {hosted?.test_mode ? (
+        <Alert>
+          <AlertDescription>{t("orders.detail.testPaid")}</AlertDescription>
+        </Alert>
+      ) : null}
       <ProgressCard order={order} stage={state.data.stage} />
       <PageGrid>
         <PageColumn span={8}>
           <ItemsCard order={order} {...(money.data ? { money: money.data } : {})} />
+          {refunds.length > 0 ? (
+            <RefundsCard refunds={refunds} currency={order.currency_code} />
+          ) : null}
         </PageColumn>
         <PageColumn span={4}>
           <CustomerCard order={order} />
@@ -79,6 +105,7 @@ export function OrderDetailPage() {
             order={order}
             {...(money.data ? { money: money.data } : {})}
             {...(money.error ? { moneyError: { onRetry: () => void money.refetch() } } : {})}
+            hosted={hosted}
           />
         </PageColumn>
       </PageGrid>

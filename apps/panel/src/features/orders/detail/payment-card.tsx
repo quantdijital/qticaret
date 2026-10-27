@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next"
 import { SectionCard } from "@/components/patterns/section-card"
 import { ErrorState } from "@/components/patterns/states"
 import { StatusBadge } from "@/components/patterns/status-badge"
-import type { OrderDetail, OrderMoney } from "@/features/orders/api/orders"
+import type { HostedPayment, OrderDetail, OrderMoney } from "@/features/orders/api/orders"
 import { formatMoney } from "@/lib/format"
 
 // The payment's state in the shop's words (docs/06 sözlük) and its tone. Taken
@@ -68,11 +68,14 @@ export function PaymentCard({
   order,
   money: totals,
   moneyError,
+  hosted,
 }: {
   order: OrderDetail
   money?: OrderMoney
   /** The server's money read failed: said so, with a way to try again. */
   moneyError?: { onRetry: () => void }
+  /** The order's PayTR payment as PayTR holds it (F5 V7). */
+  hosted?: HostedPayment | undefined
 }) {
   const { t } = useTranslation()
   const state = paymentState(order, totals)
@@ -81,7 +84,14 @@ export function PaymentCard({
   return (
     <SectionCard
       title={t("orders.detail.payment")}
-      action={<StatusBadge tone={state.tone}>{t(`orders.payment.${state.key}`)}</StatusBadge>}
+      action={
+        <>
+          {hosted?.test_mode ? (
+            <StatusBadge tone="warning">{t("orders.payment.testMode")}</StatusBadge>
+          ) : null}
+          <StatusBadge tone={state.tone}>{t(`orders.payment.${state.key}`)}</StatusBadge>
+        </>
+      }
     >
       <dl className="flex flex-col divide-y">
         <Row label={t("orders.detail.amount")} value={money(state.amount)} />
@@ -103,7 +113,31 @@ export function PaymentCard({
             })}
           />
         ) : null}
+        {hosted?.reference ? (
+          <Row label={t("orders.detail.transaction")} value={hosted.reference} />
+        ) : null}
+        {hosted?.card_last4 ? (
+          <Row
+            label={t("orders.detail.card")}
+            value={`${hosted.card_brand ?? ""} •••• ${hosted.card_last4}`.trim()}
+          />
+        ) : null}
+        {hosted?.installments ? (
+          <Row
+            label={t("orders.detail.installments")}
+            value={
+              hosted.installments > 1
+                ? t("orders.detail.installmentCount", { count: hosted.installments })
+                : t("orders.detail.singlePayment")
+            }
+          />
+        ) : null}
       </dl>
+      {hosted && !hosted.available ? (
+        <p className="mt-2 text-xs text-muted-foreground">
+          {t("orders.detail.providerUnreachable")}
+        </p>
+      ) : null}
       {moneyError ? (
         <div className="mt-3">
           <ErrorState text={t("orders.detail.moneyFailed")} onRetry={moneyError.onRetry} />

@@ -1,0 +1,41 @@
+import { useTranslation } from "react-i18next"
+import { SectionCard } from "@/components/patterns/section-card"
+import { StatusBadge } from "@/components/patterns/status-badge"
+import type { StatusTone } from "@/components/patterns/status-badge"
+import type { ShopRefund } from "@/features/orders/api/orders"
+import { formatDateTime, formatMoney } from "@/lib/format"
+
+const TONES: Record<ShopRefund["status"], StatusTone> = {
+  done: "success",
+  pending: "info",
+  failed: "danger",
+}
+
+/** The money given back on the order (F5 V5), newest last, with the shop's notes. */
+export function RefundsCard({ refunds, currency }: { refunds: ShopRefund[]; currency: string }) {
+  const { t } = useTranslation()
+  return (
+    <SectionCard title={t("orders.refunds.title")} flush>
+      <ul className="flex flex-col">
+        {refunds.map((refund) => (
+          <li
+            key={refund.reference}
+            className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-t px-5 py-3"
+          >
+            <span className="flex min-w-0 flex-col gap-0.5">
+              <span className="text-sm font-medium tabular-nums">
+                {formatMoney(refund.amount, currency)}
+              </span>
+              <span className="text-[13px] text-muted-foreground">
+                {[formatDateTime(refund.created_at), refund.note].filter(Boolean).join(" · ")}
+              </span>
+            </span>
+            <StatusBadge tone={TONES[refund.status]}>
+              {t(`orders.refunds.states.${refund.status}`)}
+            </StatusBadge>
+          </li>
+        ))}
+      </ul>
+    </SectionCard>
+  )
+}

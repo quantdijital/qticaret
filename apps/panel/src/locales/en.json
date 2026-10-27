@@ -1168,7 +1168,8 @@
       "partiallyCaptured": "Partially paid",
       "refunded": "Refunded",
       "partiallyRefunded": "Partially refunded",
-      "credit": "Paid with credit"
+      "credit": "Paid with credit",
+      "testMode": "Test mode"
     },
     "actions": {
       "ship": "Ship",
@@ -1226,7 +1227,15 @@
       "returnedUnits_one": "{{count}} returned",
       "returnedUnits_other": "{{count}} returned",
       "refundable": "Refundable",
-      "moneyFailed": "The refundable amount could not be read."
+      "moneyFailed": "The refundable amount could not be read.",
+      "transaction": "Transaction",
+      "card": "Card",
+      "installments": "Installments",
+      "installmentCount_one": "{{count}} installment",
+      "installmentCount_other": "{{count}} installments",
+      "singlePayment": "One payment",
+      "providerUnreachable": "The payment provider could not be reached; card and installments show later.",
+      "testPaid": "This order was paid in test mode: no real money was taken, so it cannot be shipped."
     },
     "providers": {
       "pp_system_default": "Manual payment"
@@ -1250,6 +1259,14 @@
       "choose": "Choose what to refund",
       "confirm": "Refund {{amount}}",
       "done": "Money refunded."
+    },
+    "refunds": {
+      "title": "Refunds",
+      "states": {
+        "done": "Refunded",
+        "pending": "In progress",
+        "failed": "Failed"
+      }
     }
   },
   "customers": {

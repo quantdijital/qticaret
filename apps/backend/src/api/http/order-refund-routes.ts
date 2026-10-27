@@ -113,6 +113,12 @@ export const ORDER_REFUND_ROUTES = [
     methods: ["POST" as const],
     middlewares: [requireUserActor, refundLimit, validateAndTransformBody(AdminPostOrderRefund)],
   },
+  // Card brand and last four digits, asked of PayTR: staff only
+  {
+    matcher: "/admin/orders/:id/payment-details",
+    methods: ["GET" as const],
+    middlewares: [requireUserActor],
+  },
   // No `methods` on purpose: a method-scoped middleware may sort after the core route
   { matcher: "/admin/payments/:id/refund", middlewares: [refuseHostedPaymentRefund] },
   { matcher: "/admin/orders/:id/cancel", middlewares: [refundBeforeCancel] },
