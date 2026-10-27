@@ -1311,12 +1311,21 @@
       "fraudStatus": {
         "review": "iyzico is reviewing it; do not ship before approval",
         "refused": "iyzico refused it; the amount is refunded"
+      },
+      "bankTransfer": {
+        "awaiting": "Order #{{number}} awaits its bank transfer.",
+        "awaitingUntil": "Order #{{number}} awaits its bank transfer until {{date}}; unpaid by then, it is cancelled.",
+        "confirm": "Transfer received",
+        "confirmTitle": "Has order #{{number}}'s transfer come in?",
+        "confirmDescription": "Check that the amount is in your bank account. Once confirmed, the order counts as paid and can be shipped.",
+        "confirmed": "Transfer confirmed; the order can be shipped."
       }
     },
     "providers": {
       "pp_system_default": "Manual payment",
       "pp_iyzico_iyzico": "iyzico",
-      "pp_paytr_paytr": "PayTR"
+      "pp_paytr_paytr": "PayTR",
+      "pp_bank-transfer_bank-transfer": "Bank transfer"
     },
     "refund": {
       "title": "Refund for #{{number}}",

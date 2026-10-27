@@ -13,8 +13,12 @@ const lira = (amount: number | null) => (amount === null ? null : toMedusaAmount
  * provider when the shop looks.
  */
 export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse): Promise<void> {
-  const { payments, refunds } = await orderPaymentDetails(req.scope, req.params["id"] ?? "")
+  const { payments, refunds, bank_transfer } = await orderPaymentDetails(
+    req.scope,
+    req.params["id"] ?? ""
+  )
   res.json({
+    bank_transfer,
     payments: payments.map((payment) => ({
       ...payment,
       amount: lira(payment.amount),

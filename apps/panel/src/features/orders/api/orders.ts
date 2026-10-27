@@ -254,6 +254,15 @@ export const useRefundOrder = (id: string) =>
     sdk.client.fetch(`/admin/orders/${encodeURIComponent(id)}/refunds`, { method: "POST", body })
   )
 
+/** The shop saw the bank transfer's money come in: the order's payment is taken (F6 W2). */
+export const useConfirmBankTransfer = (id: string) =>
+  useOrderMutation(() =>
+    sdk.client.fetch(`/admin/orders/${encodeURIComponent(id)}/bank-transfer/confirm`, {
+      method: "POST",
+      body: {},
+    })
+  )
+
 export const useCapturePayment = () =>
   useOrderMutation(async (paymentIds: string[]) => {
     for (const paymentId of paymentIds) {
@@ -288,9 +297,17 @@ export interface ShopRefund {
   created_at: string
 }
 
+/** A bank transfer order's state (F6, adr/0029). */
+export interface BankTransferState {
+  awaiting: boolean
+  deadline: string | null
+  confirmed_at: string | null
+}
+
 export interface PaymentDetails {
   payments: HostedPayment[]
   refunds: ShopRefund[]
+  bank_transfer: BankTransferState | null
 }
 
 /** `GET /admin/orders/:id/payment-details`: asked of the provider when the page opens. */

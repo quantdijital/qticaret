@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/patterns/page-header"
 import { ErrorState } from "@/components/patterns/states"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import { BankTransferAlert } from "@/features/orders/detail/bank-transfer-alert"
 import {
   orderMoneyQuery,
   orderPaymentDetailsQuery,
@@ -85,6 +86,13 @@ export function OrderDetailPage() {
           />
         }
       />
+      {details.data?.bank_transfer?.awaiting && order.status !== "canceled" ? (
+        <BankTransferAlert
+          orderId={order.id}
+          displayId={order.display_id ?? 0}
+          state={details.data.bank_transfer}
+        />
+      ) : null}
       {hosted?.test_mode ? (
         <Alert>
           <AlertDescription>{t("orders.detail.testPaid")}</AlertDescription>

@@ -1,6 +1,10 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
-import { IYZICO_PAYMENT_PROVIDER_ID, PAYTR_PAYMENT_PROVIDER_ID } from "../../lib/payments/checkout"
+import {
+  BANK_TRANSFER_PAYMENT_PROVIDER_ID,
+  IYZICO_PAYMENT_PROVIDER_ID,
+  PAYTR_PAYMENT_PROVIDER_ID,
+} from "../../lib/payments/checkout"
 import { iyzicoCredentialsOf } from "../../lib/payments/iyzico"
 import { paytrCredentialsOf } from "../../lib/payments/paytr"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-credentials"
@@ -32,6 +36,13 @@ export interface HostedPaymentDetails {
   refunds: { amount: number; date: string | null; reference: string | null }[]
 }
 
+/** A bank transfer order's state (adr/0029): awaiting the money until, or confirmed when. */
+export interface BankTransferState {
+  awaiting: boolean
+  deadline: string | null
+  confirmed_at: string | null
+}
+
 export interface OrderRefundEntry {
   reference: string
   amount: number
@@ -50,13 +61,21 @@ export interface OrderRefundEntry {
 export async function orderPaymentDetails(
   container: MedusaContainer,
   orderId: string
-): Promise<{ payments: HostedPaymentDetails[]; refunds: OrderRefundEntry[] }> {
+): Promise<{
+  payments: HostedPaymentDetails[]
+  refunds: OrderRefundEntry[]
+  bank_transfer: BankTransferState | null
+}> {
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "order",
     fields: [
+      "created_at",
+      "payment_collections.status",
       "payment_collections.payments.id",
       "payment_collections.payments.provider_id",
       "payment_collections.payments.data",
+      "payment_collections.payment_sessions.provider_id",
+      "payment_collections.payment_sessions.data",
     ],
     filters: { id: orderId },
   })
@@ -136,6 +155,7 @@ export async function orderPaymentDetails(
   )
   return {
     payments,
+    bank_transfer: bankTransferOf(order as Parameters<typeof bankTransferOf>[0]),
     refunds: refunds.map((refund) => ({
       reference: refund.reference,
       amount: refund.amount,
@@ -145,4 +165,34 @@ export async function orderPaymentDetails(
       created_at: new Date(refund.created_at).toISOString(),
     })),
   }
+}
+
+function bankTransferOf(order: {
+  created_at?: string | Date
+  payment_collections?:
+    | ({
+        status?: string | null
+        payment_sessions?:
+          ({ provider_id: string; data?: Record<string, unknown> | null } | null)[] | null
+      } | null)[]
+    | null
+}): BankTransferState | null {
+  for (const collection of order.payment_collections ?? []) {
+    const session = collection?.payment_sessions?.find(
+      (each) => each?.provider_id === BANK_TRANSFER_PAYMENT_PROVIDER_ID
+    )
+    if (session && collection) {
+      const hours = session.data?.["deadline_hours"]
+      const confirmed = session.data?.["confirmed_at"]
+      return {
+        awaiting: collection.status === "awaiting",
+        deadline:
+          typeof hours === "number" && order.created_at
+            ? new Date(new Date(order.created_at).getTime() + hours * 3_600_000).toISOString()
+            : null,
+        confirmed_at: typeof confirmed === "string" ? confirmed : null,
+      }
+    }
+  }
+  return null
 }

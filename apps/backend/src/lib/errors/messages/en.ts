@@ -15,6 +15,10 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "bank_transfer.incomplete":
     "Turning on bank transfer needs the account holder, the bank name and the IBAN.",
   "payments.return_urls_required": "Card payments need return addresses.",
+  "bank_transfer.not_this_order": "This order was not paid by bank transfer.",
+  "bank_transfer.order_canceled": "A cancelled order's transfer cannot be confirmed.",
+  "orders.payment_awaited":
+    "The order's payment has not come yet; it can be shipped once the transfer is confirmed.",
   "brands.description_invalid":
     "The description is too long or holds characters that cannot be used.",
   "brands.logo_unknown": "The logo must be one of the shop's uploaded images.",

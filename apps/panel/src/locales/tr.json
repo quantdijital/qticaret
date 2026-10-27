@@ -1319,12 +1319,21 @@
       "fraudStatus": {
         "review": "iyzico inceliyor; onaylanmadan kargoya vermeyin",
         "refused": "iyzico reddetti; tutar iade edilir"
+      },
+      "bankTransfer": {
+        "awaiting": "#{{number}} siparişinin havalesi bekleniyor.",
+        "awaitingUntil": "#{{number}} siparişinin havalesi bekleniyor; son gün {{date}}. Bu tarihe kadar gelmezse sipariş iptal edilir.",
+        "confirm": "Havale geldi",
+        "confirmTitle": "#{{number}} siparişinin havalesi geldi mi?",
+        "confirmDescription": "Tutarın banka hesabınıza geçtiğini kontrol edin. Onaylayınca sipariş ödenmiş sayılır ve kargoya verilebilir.",
+        "confirmed": "Havale onaylandı; sipariş kargoya verilebilir."
       }
     },
     "providers": {
       "pp_system_default": "Manuel ödeme",
       "pp_iyzico_iyzico": "iyzico",
-      "pp_paytr_paytr": "PayTR"
+      "pp_paytr_paytr": "PayTR",
+      "pp_bank-transfer_bank-transfer": "Havale / EFT"
     },
     "refund": {
       "title": "#{{number}} için para iadesi",

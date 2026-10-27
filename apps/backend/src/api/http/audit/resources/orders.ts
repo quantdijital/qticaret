@@ -18,4 +18,16 @@ export const ORDER_RESOURCES: readonly AuditedResource[] = [
       return { refunded: money.refunded, refundable: money.refundable }
     },
   },
+  // F6 W2: a bank transfer's money confirmed; the order's paid total before and after
+  {
+    method: "POST",
+    route: "POST /admin/orders/:id/bank-transfer/confirm",
+    pattern: /^\/admin\/orders\/(?<id>order_[A-Za-z0-9]+)\/bank-transfer\/confirm$/i,
+    resourceType: "order",
+    resourceId: (params) => params["id"] ?? null,
+    snapshot: async ({ scope, params }) => {
+      const money = await readOrderMoney(scope as unknown as MedusaContainer, params["id"] ?? "")
+      return { paid: money.paid }
+    },
+  },
 ]

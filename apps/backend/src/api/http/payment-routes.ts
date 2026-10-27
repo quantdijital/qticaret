@@ -4,7 +4,7 @@ import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusaj
 import { ValidationError } from "../../lib/errors"
 import { PAYMENT_FACT_FIELDS, paidWithoutHostedForm } from "../../lib/payments/consistency"
 import type { PaymentFacts } from "../../lib/payments/consistency"
-import { paidInTestMode } from "../../lib/payments/test-mode"
+import { SHIPPING_PAYMENT_FIELDS, shippingBlock } from "../../lib/payments/shippable"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import { StorePostCartPaymentSession } from "../store/carts/[id]/payment-session/validators"
 import { StoreGetInstallments } from "../store/payment/installments/validators"
@@ -55,10 +55,10 @@ const orderIdOf = (body: unknown): string => {
 
 /**
  * Medusa's own fulfillment route (the advanced panel) may not ship an order
- * paid in a provider's test mode either (adr/0027); ours refuses it in
- * `planShipmentStep`.
+ * paid in a provider's test mode, nor one whose payment is still awaited
+ * (adr/0027, adr/0029); ours refuses them in `planShipmentStep`.
  */
-async function refuseTestPaidFulfillment(
+async function refuseUnshippable(
   req: MedusaRequest,
   _res: MedusaResponse,
   next: MedusaNextFunction
@@ -70,13 +70,12 @@ async function refuseTestPaidFulfillment(
   try {
     const { data } = await req.scope.resolve(ContainerRegistrationKeys.QUERY).graph({
       entity: "order",
-      fields: ["payment_collections.payments.data"],
+      fields: SHIPPING_PAYMENT_FIELDS,
       // `/admin/orders/:id/fulfillments`, or the standalone route's `order_id`
       filters: { id: req.params["id"] ?? orderIdOf(req.body) },
     })
-    next(
-      paidInTestMode(data[0]) ? new ValidationError("orders.test_payment_not_shippable") : undefined
-    )
+    const blocked = shippingBlock(data[0])
+    next(blocked ? new ValidationError(blocked) : undefined)
   } catch (error) {
     next(error)
   }
@@ -129,10 +128,10 @@ export const PAYMENT_ROUTES = [
   },
   {
     matcher: "/admin/orders/:id/fulfillments",
-    middlewares: [refuseTestPaidFulfillment],
+    middlewares: [refuseUnshippable],
   },
   {
     matcher: "/admin/fulfillments",
-    middlewares: [refuseTestPaidFulfillment],
+    middlewares: [refuseUnshippable],
   },
 ]

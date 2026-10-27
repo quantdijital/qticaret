@@ -33,9 +33,11 @@ F6, dış servis çağırmayan iki ödeme yöntemi getiriyor:
    - Süresi dolan ve hâlâ `awaiting` olan sipariş bir işle `cancelOrderWorkflow` üzerinden iptal edilir; stok geri döner.
    - Müşteri bildirimi F9'da; o zamana kadar olay yayınlanır ve denetim kaydı düşer.
 4. **Kargo kuralı:**
-   - Kargoya yalnızca parası alınmış (`captured`) ya da kapıda ödemesi yetkilendirilmiş sipariş verilebilir.
-   - Kendi kargo akışımız (`planShipmentStep`) ve Medusa'nın kendi fulfillment uçları bu kuralı uygular, F5'teki test modu engeli gibi.
-   - Dashboard'un "Ödeme bekleyen" görevi `awaiting` siparişleri zaten sayar. "Kargoya hazır" `authorized` (kapıda ödeme) siparişleri de sayar.
+   - Ödemesi beklenen (`awaiting`, onaylanmamış havale) sipariş kargoya verilemez.
+   - Test modunda ödenmiş siparişin engeli de aynı kurala katıldı (`lib/payments/shippable.ts`).
+   - Kendi kargo akışımız (`planShipmentStep`) ve Medusa'nın kendi fulfillment uçları bu kuralı uygular.
+   - Kapıda ödeme (`authorized`) ve sistem sağlayıcısıyla elle alınmış siparişler engellenmez.
+   - Dashboard'un "Ödeme bekleyen" görevi `awaiting` siparişleri zaten sayar; panel bu aşamada "Kargoya ver"i göstermez.
 5. **Kapıda ödeme ek ücreti:**
    - Ek ücret sunucuda hesaplanır: sabit tutar ya da oran, KDV dahil.
    - Kapıda ödeme seçilince sepete varyantsız, `is_custom_price` bir kalem olarak eklenir. Kalemin metadata'sında `qt_fee: "cash_on_delivery"` bulunur.

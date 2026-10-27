@@ -17,6 +17,7 @@ import type {
   RefundPaymentOutput,
   RetrievePaymentInput,
   RetrievePaymentOutput,
+  UpdatePaymentInput,
   UpdatePaymentOutput,
   WebhookActionResult,
 } from "@medusajs/framework/types"
@@ -26,17 +27,21 @@ import { fromMedusaAmount } from "../../lib/money"
 import { HOSTED_CHECKOUT } from "../../lib/payments/checkout"
 import { bankTransferSettings } from "../../lib/payments/settings"
 
-/** A session the shop confirmed: the money came (W2's confirmation writes it). */
+/**
+ * A session the shop confirmed (the money came) authorizes, and the
+ * confirmation captures it; until then the order awaits the money.
+ */
 const statusOf = (data: Record<string, unknown> | undefined): PaymentSessionStatus =>
-  typeof data?.["confirmed_at"] === "string" ? "captured" : "pending_authorization"
+  typeof data?.["confirmed_at"] === "string" ? "authorized" : "pending_authorization"
 
 /**
  * Bank transfer as a Medusa payment provider (`pp_bank-transfer_bank-transfer`,
  * adr/0029). It calls no outside service. A session keeps the amount and
  * the shop's account, which the shopper sees (public by intent). At
  * completion it answers `pending_authorization`: Medusa places the order
- * "awaiting payment", with no payment yet. Once the shop confirms the
- * money, authorizing again answers `captured`.
+ * "awaiting payment", with no payment yet. The shop's confirmation writes
+ * itself into the session (the one update allowed), authorizes it again
+ * and captures it (`confirmBankTransferWorkflow`).
  */
 class BankTransferProviderService extends AbstractPaymentProvider {
   static override identifier = "bank-transfer"
@@ -99,9 +104,19 @@ class BankTransferProviderService extends AbstractPaymentProvider {
     return Promise.resolve({ data: input.data ?? {} })
   }
 
-  // A new amount is a new start: the shopper picks the method again
-  updatePayment(): Promise<UpdatePaymentOutput> {
-    return Promise.reject(new ValidationError("payments.restart_checkout"))
+  /**
+   * Only the shop's confirmation, for the same amount; anything else is a
+   * new start (the shopper picks the method again).
+   */
+  updatePayment(input: UpdatePaymentInput): Promise<UpdatePaymentOutput> {
+    const data = input.data ?? {}
+    const confirmed =
+      typeof data["confirmed_at"] === "string" &&
+      typeof data["confirmed_by"] === "string" &&
+      data["amount"] === fromMedusaAmount(input.amount, { allowRounding: true })
+    return confirmed
+      ? Promise.resolve({ data, status: "pending_authorization" })
+      : Promise.reject(new ValidationError("payments.restart_checkout"))
   }
 
   /**

@@ -19,6 +19,7 @@ import { AdminPostProductAttributes } from "./admin/products/[id]/attributes/val
 import { AdminPostProductCatalog } from "./admin/products/[id]/catalog/validators"
 import { AdminPostFeature, validateSectionBody } from "./admin/platform-settings/validators"
 import { auditMutations, auditSensitiveRead } from "./http/audit"
+import { BANK_TRANSFER_ROUTES } from "./http/bank-transfer-routes"
 import { BRAND_ROUTES, STORE_BRAND_FIELDS } from "./http/brand-routes"
 import { CATALOG_SHEET_ROUTES } from "./http/catalog-sheet-routes"
 import { CONTENT_ROUTES } from "./http/content-routes"
@@ -180,6 +181,7 @@ export default defineMiddlewares({
     // adr/0028: the payment test page, development only
     ...DEV_ROUTES,
     ...ORDER_REFUND_ROUTES,
+    ...BANK_TRANSFER_ROUTES,
     // F3.11: brands
     ...BRAND_ROUTES,
     ...CONTENT_ROUTES,

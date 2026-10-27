@@ -18,6 +18,10 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "IBAN geçerli değil. TR ile başlayan 26 karakterlik IBAN'ı kontrol edin.",
   "bank_transfer.incomplete": "Havale/EFT'yi açmak için hesap sahibi, banka adı ve IBAN gerekli.",
   "payments.return_urls_required": "Kartla ödeme için dönüş adresleri gerekli.",
+  "bank_transfer.not_this_order": "Bu siparişin ödemesi havale/EFT ile değil.",
+  "bank_transfer.order_canceled": "İptal edilmiş siparişin havalesi onaylanamaz.",
+  "orders.payment_awaited":
+    "Siparişin ödemesi henüz gelmedi; havale onaylanınca kargoya verilebilir.",
   "brands.description_invalid": "Açıklama çok uzun ya da kullanılamayan karakterler içeriyor.",
   "brands.logo_unknown": "Logo mağazanın yüklenen görsellerinden biri olmalı.",
   "brands.name_invalid": "Marka adını girin (en fazla 120 karakter).",
