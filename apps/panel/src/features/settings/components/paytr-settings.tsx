@@ -5,33 +5,24 @@ import { Controller, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { ConfirmDialog } from "@/components/patterns/confirm-dialog"
-import { Field } from "@/components/patterns/form-section"
+import { Field, FormSection } from "@/components/patterns/form-section"
 import { LeaveGuard } from "@/components/patterns/leave-guard"
-import { SectionCard } from "@/components/patterns/section-card"
-import { StatusBadge } from "@/components/patterns/status-badge"
-import type { StatusTone } from "@/components/patterns/status-badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import { useCheckPaytr, useRemovePaytr, useSavePaytr } from "@/features/settings/api/payments"
-import type { AccountCheck, AccountState, ProviderAccount } from "@/features/settings/api/payments"
+import type { AccountCheck, PaytrAccount } from "@/features/settings/api/payments"
+import { NotificationAddress } from "@/features/settings/components/notification-address"
 import {
   paytrFormSchema,
   paytrFormValues,
+  paytrNotificationUrl,
   paytrSaveBody,
   secretsRequired,
 } from "@/features/settings/payments"
 import type { PaytrFormValues } from "@/features/settings/payments"
 import { errorText } from "@/lib/errors"
-
-const STATE_TONES: Record<AccountState, StatusTone> = {
-  connected: "success",
-  unverified: "warning",
-  rejected: "danger",
-  unreadable: "danger",
-  not_configured: "neutral",
-}
 
 const P = "settings.payments.paytr"
 
@@ -55,17 +46,19 @@ const NOT_A_LOGIN = {
 } as const
 
 /**
- * Settings > Payment, PayTR (adr/0027): the shop's merchant number, key and
- * salt. The key and salt are written, never shown again; left blank they
- * stay as stored. PayTR is asked before anything is saved. The page
- * remounts the card when the stored account changes (`paytrCardKey`), so
- * the secrets typed for a save never linger after it.
+ * Settings > Payment > PayTR (adr/0027), in the order the shop sets it up:
+ * the account, the notification address to paste into PayTR, then test
+ * mode until going live. Each step says where in PayTR's own panel it is
+ * done (dev.paytr.com, 2026-10-27). The key and salt are written, never
+ * shown again; left blank they stay as stored. PayTR is asked before
+ * anything is saved. The page remounts this form when the stored account
+ * changes (`paytrCardKey`), so the secrets typed for a save never linger.
  */
-export function PaytrCard({
+export function PaytrSettings({
   account,
   keyConfigured,
 }: {
-  account: ProviderAccount | undefined
+  account: PaytrAccount | undefined
   keyConfigured: boolean
 }) {
   const { t } = useTranslation()
@@ -82,13 +75,14 @@ export function PaytrCard({
   const state = account?.state ?? "not_configured"
   const stored = state !== "not_configured"
   const busy = save.isPending || check.isPending || remove.isPending
+  const locked = !keyConfigured || busy
   // A new shop number asks for both secrets again, as the server does
   const merchantId = useWatch({ control: form.control, name: "merchant_id" })
   const required = secretsRequired(account, merchantId)
   const message = (key: string | undefined) => (key ? t(key) : undefined)
 
-  // Awaited, not `mutate` callbacks: the card remounts once the stored account
-  // changes, and a callback of the unmounted card would never run
+  // Awaited, not `mutate` callbacks: the form remounts once the stored account
+  // changes, and a callback of the unmounted form would never run
   async function settle<T>(run: Promise<T>, done: (answer: T) => void) {
     try {
       done(await run)
@@ -108,27 +102,16 @@ export function PaytrCard({
   })
 
   return (
-    <SectionCard
-      title={t(`${P}.title`)}
-      description={t(`${P}.description`)}
-      action={
-        <>
-          {account?.settings?.test_mode ? (
-            <StatusBadge tone="info">{t(`${P}.testModeBadge`)}</StatusBadge>
-          ) : null}
-          <StatusBadge tone={STATE_TONES[state]}>{t(`${P}.states.${state}`)}</StatusBadge>
-        </>
-      }
-    >
-      <LeaveGuard when={isDirty && !save.isPending} />
+    <>
       <form
         noValidate
-        className="flex flex-1 flex-col gap-5"
+        className="flex flex-col gap-8"
         onSubmit={(event) => {
           event.preventDefault()
           void submit()
         }}
       >
+        <LeaveGuard when={isDirty && !save.isPending} />
         {!keyConfigured ? (
           <Alert variant="destructive">
             <AlertDescription>{t(`${P}.keyMissing`)}</AlertDescription>
@@ -138,37 +121,65 @@ export function PaytrCard({
             <AlertDescription>{t(`${P}.${state}`)}</AlertDescription>
           </Alert>
         ) : null}
-        {failure ? (
-          <Alert variant="destructive">
-            <AlertDescription>{failure}</AlertDescription>
-          </Alert>
-        ) : null}
-        {/* Account and mode on the first row, the two secrets on the second */}
-        <fieldset
-          disabled={!keyConfigured || busy}
-          className="grid items-start gap-5 md:grid-cols-2"
+        <FormSection title={t(`${P}.account.title`)} description={t(`${P}.account.description`)}>
+          <fieldset disabled={locked} className="flex min-w-0 flex-col gap-5">
+            <Field
+              label={t(`${P}.merchantId`)}
+              htmlFor="paytr-merchant-id"
+              hint={t(`${P}.merchantIdHint`)}
+              required
+              error={message(errors.merchant_id?.message)}
+            >
+              <Input
+                id="paytr-merchant-id"
+                inputMode="numeric"
+                {...NOT_A_LOGIN}
+                {...form.register("merchant_id", {
+                  onChange: () => {
+                    if (form.formState.isSubmitted) {
+                      void form.trigger(["merchant_key", "merchant_salt"])
+                    }
+                  },
+                })}
+              />
+            </Field>
+            {(["merchant_key", "merchant_salt"] as const).map((name) => {
+              const kept = account?.secrets[name] === true && !required
+              return (
+                <Field
+                  key={name}
+                  label={t(`${P}.${name}`)}
+                  htmlFor={`paytr-${name}`}
+                  hint={kept ? t(`${P}.secretStored`) : t(`${P}.secretHint`)}
+                  required={!kept}
+                  error={message(errors[name]?.message)}
+                >
+                  <Input
+                    id={`paytr-${name}`}
+                    type="password"
+                    spellCheck={false}
+                    placeholder={kept ? "••••••••••••" : ""}
+                    {...NOT_A_LOGIN}
+                    {...form.register(name)}
+                  />
+                </Field>
+              )
+            })}
+          </fieldset>
+        </FormSection>
+        <FormSection
+          title={t(`${P}.notification.title`)}
+          description={t(`${P}.notification.description`)}
         >
-          <Field
-            label={t(`${P}.merchantId`)}
-            htmlFor="paytr-merchant-id"
-            hint={t(`${P}.merchantIdHint`)}
-            required
-            error={message(errors.merchant_id?.message)}
-          >
-            <Input
-              id="paytr-merchant-id"
-              inputMode="numeric"
-              {...NOT_A_LOGIN}
-              {...form.register("merchant_id", {
-                onChange: () => {
-                  if (form.formState.isSubmitted) {
-                    void form.trigger(["merchant_key", "merchant_salt"])
-                  }
-                },
-              })}
-            />
-          </Field>
-          <div className="flex items-start justify-between gap-4 rounded-md border px-4 py-3 md:mt-7">
+          <NotificationAddress
+            id="paytr-notification-url"
+            url={paytrNotificationUrl(window.location.origin)}
+            label={t(`${P}.notification.title`)}
+            hint={t(`${P}.notification.where`)}
+          />
+        </FormSection>
+        <FormSection title={t(`${P}.live.title`)} description={t(`${P}.live.description`)}>
+          <fieldset disabled={locked} className="flex min-w-0 items-start justify-between gap-4">
             <div className="flex min-w-0 flex-col gap-0.5">
               <label htmlFor="paytr-test-mode" className="text-sm font-medium">
                 {t(`${P}.testMode`)}
@@ -189,37 +200,21 @@ export function PaytrCard({
                 />
               )}
             />
-          </div>
-          {(["merchant_key", "merchant_salt"] as const).map((name) => {
-            const kept = account?.secrets[name] === true && !required
-            return (
-              <Field
-                key={name}
-                label={t(`${P}.${name}`)}
-                htmlFor={`paytr-${name}`}
-                hint={kept ? t(`${P}.secretStored`) : t(`${P}.secretHint`)}
-                required={!kept}
-                error={message(errors[name]?.message)}
-              >
-                <Input
-                  id={`paytr-${name}`}
-                  type="password"
-                  spellCheck={false}
-                  placeholder={kept ? "••••••••••••" : ""}
-                  {...NOT_A_LOGIN}
-                  {...form.register(name)}
-                />
-              </Field>
-            )
-          })}
-        </fieldset>
-        <div className="mt-auto flex flex-wrap items-center justify-end gap-2 border-t pt-4">
+          </fieldset>
+          <p className="border-t pt-4 text-xs text-muted-foreground">{t(`${P}.live.where`)}</p>
+        </FormSection>
+        {/* Next to the buttons: a refused save is read where it was asked for */}
+        {failure ? (
+          <Alert variant="destructive">
+            <AlertDescription>{failure}</AlertDescription>
+          </Alert>
+        ) : null}
+        <div className="flex flex-wrap items-center justify-end gap-2 border-t pt-5">
           {stored ? (
             <>
               <Button
                 type="button"
                 variant="ghost"
-                size="sm"
                 className="text-destructive-text sm:mr-auto"
                 disabled={busy}
                 onClick={() => {
@@ -231,7 +226,6 @@ export function PaytrCard({
               <Button
                 type="button"
                 variant="outline"
-                size="sm"
                 disabled={busy || isDirty || state === "unreadable"}
                 onClick={() => {
                   void settle(check.mutateAsync(), (answer) => {
@@ -244,7 +238,7 @@ export function PaytrCard({
               </Button>
             </>
           ) : null}
-          <Button type="submit" size="sm" disabled={!keyConfigured || busy || (stored && !isDirty)}>
+          <Button type="submit" disabled={locked || (stored && !isDirty)}>
             {save.isPending ? <Loader2 className="animate-spin" /> : null}
             {t(`${P}.save`)}
           </Button>
@@ -263,6 +257,6 @@ export function PaytrCard({
           })
         }}
       />
-    </SectionCard>
+    </>
   )
 }

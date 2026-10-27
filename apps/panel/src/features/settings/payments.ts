@@ -1,5 +1,5 @@
 import { z } from "zod"
-import type { PaytrSave, ProviderAccount } from "@/features/settings/api/payments"
+import type { PaytrAccount, PaytrSave, ProviderAccount } from "@/features/settings/api/payments"
 
 /** What the PayTR form holds; secrets start empty, the server never sends them. */
 export interface PaytrFormValues {
@@ -9,7 +9,7 @@ export interface PaytrFormValues {
   test_mode: boolean
 }
 
-export const paytrFormValues = (account: ProviderAccount | undefined): PaytrFormValues => ({
+export const paytrFormValues = (account: PaytrAccount | undefined): PaytrFormValues => ({
   merchant_id: account?.settings?.merchant_id ?? "",
   merchant_key: "",
   merchant_salt: "",
@@ -27,7 +27,7 @@ export const paytrCardKey = (account: ProviderAccount | undefined): string =>
     : "none"
 
 /** Whether the form must ask for both secrets: none stored, unreadable, or a new shop number. */
-export function secretsRequired(account: ProviderAccount | undefined, merchantId: string): boolean {
+export function secretsRequired(account: PaytrAccount | undefined, merchantId: string): boolean {
   if (!account || account.state === "not_configured" || account.state === "unreadable") {
     return true
   }
@@ -43,7 +43,7 @@ const SECRET = /^[\x21-\x7E]{8,128}$/
  * secrets in PayTR's form when typed, and required when none are stored,
  * they cannot be read, or the shop number changed.
  */
-export function paytrFormSchema(account: ProviderAccount | undefined) {
+export function paytrFormSchema(account: PaytrAccount | undefined) {
   return z
     .object({
       merchant_id: z

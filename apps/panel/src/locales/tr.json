@@ -497,18 +497,61 @@
     },
     "payments": {
       "title": "Ödeme",
-      "subtitle": "Kartla ödeme almak için PayTR mağaza hesabınızı bağlayın. Bilgiler şifreli saklanır, kaydedildikten sonra hiçbir yerde gösterilmez.",
-      "paytr": {
-        "title": "PayTR",
-        "description": "Kart ve taksitli ödemeler PayTR'nin güvenli ödeme sayfasında alınır; kart bilgisi mağazanıza hiç uğramaz.",
-        "states": {
-          "connected": "Bağlı",
-          "unverified": "Doğrulanmadı",
-          "unreadable": "Yeniden girilmeli",
-          "not_configured": "Bağlı değil",
-          "rejected": "PayTR reddetti"
+      "subtitle": "Müşterilerinizin nasıl ödeyeceğini buradan yönetirsiniz. Her yöntem kendi sayfasında bağlanır ve ayarlanır.",
+      "groups": {
+        "card": {
+          "title": "Kartla ödeme",
+          "description": "Kart ve taksitli ödemeler sağlayıcının güvenli ödeme sayfasında alınır; kart bilgisi mağazanıza hiç uğramaz."
         },
-        "testModeBadge": "Test modu",
+        "other": {
+          "title": "Diğer ödeme yöntemleri",
+          "description": "Kart dışında müşterilerinize sunabileceğiniz yöntemler."
+        }
+      },
+      "methods": {
+        "paytr": {
+          "name": "PayTR",
+          "description": "Kredi ve banka kartıyla tek çekim ya da taksitli ödeme."
+        },
+        "iyzico": {
+          "name": "iyzico",
+          "description": "Kredi ve banka kartıyla tek çekim ya da taksitli ödeme."
+        },
+        "bank_transfer": {
+          "name": "Havale / EFT",
+          "description": "Müşteri tutarı banka hesabınıza gönderir; ödeme gelince siparişi siz onaylarsınız."
+        },
+        "cash_on_delivery": {
+          "name": "Kapıda ödeme",
+          "description": "Müşteri teslimatta öder; ek ücret ve tutar sınırı koyabilirsiniz."
+        }
+      },
+      "states": {
+        "connected": "Bağlı",
+        "unverified": "Doğrulanmadı",
+        "unreadable": "Yeniden girilmeli",
+        "not_configured": "Bağlı değil",
+        "rejected": "{{name}} reddetti"
+      },
+      "testModeBadge": "Test modu",
+      "upcoming": "Yakında",
+      "connect": "Bağla",
+      "manage": "Yönet",
+      "paytr": {
+        "account": {
+          "title": "Mağaza bilgileri",
+          "description": "PayTR Mağaza Paneli'nde Destek & Kurulum > Entegrasyon Bilgileri sayfasında, \"API Entegrasyon Bilgileri\" başlığı altındadır. Mağaza parolası ve gizli anahtar şifreli saklanır; kaydedildikten sonra hiçbir yerde gösterilmez."
+        },
+        "notification": {
+          "title": "Bildirim adresi",
+          "description": "PayTR ödeme sonuçlarını bu adrese gönderir; siparişler ancak böyle onaylanır.",
+          "where": "PayTR Mağaza Paneli'nde Destek & Kurulum > Ayarlar > Bildirim URL Ayarları'na yapıştırın."
+        },
+        "live": {
+          "title": "Test modu ve canlıya geçiş",
+          "description": "Mağazanızı açmadan önce ödemeyi deneyin; canlıya geçişi PayTR onaylar.",
+          "where": "Canlıya geçmek için PayTR Mağaza Paneli'nde Destek & Kurulum > Canlı Mod'dan talep gönderin. PayTR onayladıktan sonra test modunu burada kapatıp kaydedin."
+        },
         "merchantId": "Mağaza no",
         "merchantIdHint": "PayTR'nin size verdiği mağaza numarası; yalnızca rakamlardan oluşur.",
         "merchantIdInvalid": "Mağaza numarasını rakamlarla girin.",
@@ -518,7 +561,7 @@
         "secretStored": "Kayıtlı. Değiştirmek için yenisini girin; boş bırakırsanız kayıtlı değer korunur.",
         "secretRequired": "Bu bilgiyi girin; mağaza numarası değişince ya da ilk bağlantıda gerekir.",
         "testMode": "Test modu",
-        "testModeHint": "Gerçek para çekilmez; PayTR'nin test kartlarıyla denersiniz. Canlıya geçmeden kapatın.",
+        "testModeHint": "Açıkken gerçek para çekilmez; ödemeleri PayTR'nin test kartlarıyla denersiniz.",
         "keyMissing": "Sunucuda ödeme bilgilerini saklamak için gereken şifreleme anahtarı tanımlı değil. Bilgiler kaydedilemiyor; platform ekibine bildirin.",
         "unreadable": "Kayıtlı bilgiler artık okunamıyor (sunucunun şifreleme anahtarı değişmiş olabilir). Mağaza parolasını ve gizli anahtarı yeniden girin.",
         "save": "Kaydet ve doğrula",
@@ -539,19 +582,11 @@
         "rejected": "PayTR kayıtlı bilgileri artık kabul etmiyor; ödeme alınamaz. Mağaza parolasını ve gizli anahtarı PayTR'nin Entegrasyon Bilgileri sayfasından yeniden kopyalayıp girin.",
         "secretFormat": "8–128 karakter olmalı ve boşluk içermemeli; PayTR panelinden kopyalayıp yapıştırın."
       },
-      "setup": {
-        "title": "PayTR panelinde yapılacaklar",
-        "description": "Bağlantıyı tamamlamak için PayTR Mağaza Paneli'nde üç adım.",
-        "findTitle": "1. Mağaza bilgilerini bulun",
-        "find": "Destek & Kurulum > Entegrasyon Bilgileri sayfasında, \"API Entegrasyon Bilgileri\" başlığı altında mağaza no, mağaza parola ve mağaza gizli anahtar yer alır.",
-        "notifyTitle": "2. Bildirim adresini girin",
-        "notify": "Destek & Kurulum > Ayarlar > Bildirim URL Ayarları'na aşağıdaki adresi yapıştırın. Ödeme sonuçları bu adrese gelir; siparişler ancak böyle onaylanır.",
-        "copy": "Bildirim adresini kopyala",
-        "copied": "Bildirim adresi kopyalandı.",
+      "address": {
+        "copy": "Adresi kopyala",
+        "copied": "Adres kopyalandı.",
         "copyFailed": "Kopyalanamadı; adresi seçip kendiniz kopyalayın.",
-        "notPublic": "Bu adres internetten erişilebilir değil. PayTR'ye mağazanızın https ile başlayan kendi adresini verin.",
-        "liveTitle": "3. Test edin, sonra canlıya geçin",
-        "live": "Test moduyla bir ödeme deneyin. Sorun yoksa Destek & Kurulum > Canlı Mod'dan canlıya geçiş talebi gönderin; onaydan sonra test modunu kapatın."
+        "notPublic": "Bu adres internetten erişilebilir değil. Sağlayıcıya mağazanızın https ile başlayan kendi adresini verin."
       }
     }
   },

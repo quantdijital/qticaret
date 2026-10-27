@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import type { ProviderAccount } from "@/features/settings/api/payments"
+import type { PaytrAccount } from "@/features/settings/api/payments"
 import {
   isPublicOrigin,
   paytrFormSchema,
@@ -9,7 +9,7 @@ import {
   secretsRequired,
 } from "@/features/settings/payments"
 
-const connected: ProviderAccount = {
+const connected: PaytrAccount = {
   provider: "paytr",
   state: "connected",
   settings: { merchant_id: "100001", test_mode: false },
@@ -70,7 +70,7 @@ describe("PayTR settings form", () => {
   })
 
   it("checks the form as the server does: digits, secrets when needed, PayTR's secret form", () => {
-    const issues = (account: ProviderAccount | undefined, values: Record<string, unknown>) =>
+    const issues = (account: PaytrAccount | undefined, values: Record<string, unknown>) =>
       (
         paytrFormSchema(account).safeParse({
           merchant_id: "100001",

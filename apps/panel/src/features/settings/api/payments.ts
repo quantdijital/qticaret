@@ -9,16 +9,23 @@ export type AccountState = "not_configured" | "connected" | "unverified" | "reje
 export type AccountCheck =
   "valid" | "merchant_invalid" | "secret_invalid" | "unreachable" | "failed" | "not_configured"
 
-export interface ProviderAccount {
+/**
+ * One provider's account; the settings are the provider's own. Every
+ * provider names its test or sandbox switch `test_mode`.
+ */
+export interface ProviderAccount<Settings = Record<string, unknown>> {
   /** `paytr` today; iyzico joins in V8. */
   provider: string
   state: AccountState
-  settings: { merchant_id: string; test_mode: boolean } | null
-  secrets: { merchant_key: boolean; merchant_salt: boolean }
+  settings: Settings | null
+  /** Whether each secret is stored, by field. */
+  secrets: Record<string, boolean>
   secrets_version: number
   verified_at: string | null
   updated_at: string | null
 }
+
+export type PaytrAccount = ProviderAccount<{ merchant_id: string; test_mode: boolean }>
 
 interface AccountsResponse {
   key_configured: boolean

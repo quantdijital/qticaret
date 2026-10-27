@@ -18,6 +18,7 @@ const SCREENS = [
   "/promotions/price-lists/new",
   "/settings/store",
   "/settings/payments",
+  "/settings/payments/paytr",
   "/settings/appearance",
   "/reports/products",
 ]

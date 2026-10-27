@@ -497,18 +497,61 @@
     },
     "payments": {
       "title": "Payment",
-      "subtitle": "Connect your PayTR store account to take card payments. The details are stored encrypted and never shown again once saved.",
-      "paytr": {
-        "title": "PayTR",
-        "description": "Card and installment payments are taken on PayTR's secure payment page; card details never reach your shop.",
-        "states": {
-          "connected": "Connected",
-          "unverified": "Not verified",
-          "unreadable": "Enter again",
-          "not_configured": "Not connected",
-          "rejected": "Refused by PayTR"
+      "subtitle": "How your customers pay. Each method is connected and set up on its own page.",
+      "groups": {
+        "card": {
+          "title": "Card payments",
+          "description": "Card and installment payments are taken on the provider's secure payment page; card details never reach your shop."
         },
-        "testModeBadge": "Test mode",
+        "other": {
+          "title": "Other payment methods",
+          "description": "Ways besides cards you can offer your customers."
+        }
+      },
+      "methods": {
+        "paytr": {
+          "name": "PayTR",
+          "description": "Credit and debit cards, in one payment or in installments."
+        },
+        "iyzico": {
+          "name": "iyzico",
+          "description": "Credit and debit cards, in one payment or in installments."
+        },
+        "bank_transfer": {
+          "name": "Bank transfer",
+          "description": "The customer sends the amount to your bank account; you confirm the order once it arrives."
+        },
+        "cash_on_delivery": {
+          "name": "Cash on delivery",
+          "description": "The customer pays on delivery; you can add a fee and an amount limit."
+        }
+      },
+      "states": {
+        "connected": "Connected",
+        "unverified": "Not verified",
+        "unreadable": "Enter again",
+        "not_configured": "Not connected",
+        "rejected": "Refused by {{name}}"
+      },
+      "testModeBadge": "Test mode",
+      "upcoming": "Coming soon",
+      "connect": "Connect",
+      "manage": "Manage",
+      "paytr": {
+        "account": {
+          "title": "Store details",
+          "description": "In the PayTR Merchant Panel under Support & Setup > Integration Details, below \"API Integration Details\". The merchant key and salt are stored encrypted and never shown again once saved."
+        },
+        "notification": {
+          "title": "Notification address",
+          "description": "PayTR sends payment results to this address; only then are orders confirmed.",
+          "where": "Paste it into the PayTR Merchant Panel under Support & Setup > Settings > Notification URL Settings."
+        },
+        "live": {
+          "title": "Test mode and going live",
+          "description": "Try a payment before you open your shop; PayTR approves going live.",
+          "where": "To go live, send a request in the PayTR Merchant Panel under Support & Setup > Live Mode. Once PayTR approves, turn test mode off here and save."
+        },
         "merchantId": "Merchant number",
         "merchantIdHint": "The store number PayTR gave you; digits only.",
         "merchantIdInvalid": "Enter the merchant number in digits.",
@@ -518,7 +561,7 @@
         "secretStored": "Stored. Enter a new one to change it; left blank, the stored value stays.",
         "secretRequired": "Enter this; it is needed on the first connection and when the merchant number changes.",
         "testMode": "Test mode",
-        "testModeHint": "No real money is taken; you try PayTR's test cards. Turn it off before going live.",
+        "testModeHint": "While on, no real money is taken; you try payments with PayTR's test cards.",
         "keyMissing": "The server has no encryption key for payment details, so they cannot be saved. Tell the platform team.",
         "unreadable": "The stored details can no longer be read (the server's encryption key may have changed). Enter the merchant key and salt again.",
         "save": "Save and verify",
@@ -539,19 +582,11 @@
         "rejected": "PayTR no longer accepts the stored details; payments cannot be taken. Copy the merchant key and salt again from PayTR's Entegrasyon Bilgileri page.",
         "secretFormat": "It must be 8–128 characters without spaces; copy it from the PayTR panel."
       },
-      "setup": {
-        "title": "What to do in the PayTR panel",
-        "description": "Three steps in the PayTR Mağaza Paneli complete the connection.",
-        "findTitle": "1. Find your store details",
-        "find": "Under Destek & Kurulum > Entegrasyon Bilgileri, the \"API Entegrasyon Bilgileri\" heading lists the merchant number, key and salt.",
-        "notifyTitle": "2. Enter the notification address",
-        "notify": "Paste the address below into Destek & Kurulum > Ayarlar > Bildirim URL Ayarları. Payment results arrive there; only then are orders confirmed.",
-        "copy": "Copy the notification address",
-        "copied": "Notification address copied.",
+      "address": {
+        "copy": "Copy the address",
+        "copied": "Address copied.",
         "copyFailed": "Could not copy; select the address and copy it yourself.",
-        "notPublic": "This address cannot be reached from the internet. Give PayTR your shop's own address starting with https.",
-        "liveTitle": "3. Test, then go live",
-        "live": "Try a payment in test mode. If all is well, request going live under Destek & Kurulum > Canlı Mod, then turn test mode off once approved."
+        "notPublic": "This address cannot be reached from the internet. Give the provider your shop's own address starting with https."
       }
     }
   },

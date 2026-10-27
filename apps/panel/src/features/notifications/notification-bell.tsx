@@ -7,13 +7,12 @@ import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { markSeen, notificationsQuery, seenAt } from "@/features/notifications/api"
 import type { AdminNotification } from "@/features/notifications/api"
+import { isConnectable } from "@/features/settings/payment-methods"
 import { formatRelative } from "@/lib/format"
 import { cn } from "@/lib/utils"
 
 const text = (value: unknown): string => (typeof value === "string" ? value : "")
 const amount = (value: unknown): number => (typeof value === "number" ? value : 0)
-
-const PROVIDER_NAMES: Readonly<Record<string, string>> = { paytr: "PayTR" }
 
 /** What an alert says and where it leads, worded here from its data (adr/0020). */
 function useAlertText(data: Record<string, unknown>) {
@@ -27,15 +26,16 @@ function useAlertText(data: Record<string, unknown>) {
       }),
       Icon: PackageMinus,
       tone: "bg-warning-soft text-warning-text",
-      link: { to: "/inventory" as const, search: { view: "low" } },
+      link: { to: "/inventory" as const, search: { view: "low" }, params: {} },
     }
   }
   if (data["kind"] === "provider_account") {
     const changes = Array.isArray(data["changes"]) ? data["changes"].map(text) : []
     const who = text(data["actor"])
+    const provider = text(data["provider"])
     return {
       title: t("notifications.providerAccount.title", {
-        provider: PROVIDER_NAMES[text(data["provider"])] ?? text(data["provider"]),
+        provider: t(`settings.payments.methods.${provider}.name`, { defaultValue: provider }),
       }),
       description: [
         changes.map((change) => t(`notifications.providerAccount.changes.${change}`)).join(", "),
@@ -45,7 +45,10 @@ function useAlertText(data: Record<string, unknown>) {
         .join(" · "),
       Icon: ShieldAlert,
       tone: "bg-info-soft text-info-text",
-      link: { to: "/settings/payments" as const, search: {} },
+      // Straight to the provider's page; one the panel does not know opens the list
+      link: isConnectable(provider)
+        ? { to: "/settings/payments/$provider" as const, search: {}, params: { provider } }
+        : { to: "/settings/payments" as const, search: {}, params: {} },
     }
   }
   return {
@@ -78,7 +81,12 @@ function Entry({ notification, unread }: { notification: AdminNotification; unre
   return (
     <li>
       {link ? (
-        <Link to={link.to} search={link.search} className="block hover:bg-muted/60">
+        <Link
+          to={link.to}
+          search={link.search}
+          params={link.params}
+          className="block hover:bg-muted/60"
+        >
           {body}
         </Link>
       ) : (
