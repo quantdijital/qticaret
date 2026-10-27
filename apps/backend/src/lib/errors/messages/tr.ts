@@ -149,6 +149,10 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "integration_credentials.secrets_required":
     "Gizli alanların hepsini girin; hesap numarası değişince ya da kayıtlı bilgiler okunamayınca hepsi yeniden istenir.",
   "integration_credentials.unknown_provider": "Böyle bir ödeme ya da entegrasyon sağlayıcısı yok.",
+  "iyzico.merchant_invalid":
+    "iyzico bu API anahtarını tanımadı. Anahtarın seçili ortama ait olduğundan emin olun: sandbox anahtarı yalnızca sandbox açıkken, canlı anahtar yalnızca kapalıyken çalışır.",
+  "iyzico.secret_invalid":
+    "iyzico gizli anahtarı kabul etmedi. Gizli anahtarı API anahtarıyla aynı sayfadan yeniden kopyalayın.",
   "media.alt_invalid": "Alt metinde kullanılamayan karakterler var.",
   "media.file_id_invalid": "Dosya adı geçerli değil.",
   "media.file_unknown": "Dosya bulunamadı.",

@@ -43,8 +43,9 @@ const envSchema = z.object({
   // The shop's provider accounts (PayTR, iyzico) are stored encrypted with
   // it (adr/0027); required once deployed, locally the panel cannot save them
   CREDENTIALS_ENCRYPTION_KEY: key256.optional(),
-  // A fake PayTR server in development and tests; the real address is fixed in code
+  // Fake PayTR and iyzico servers in development and tests; the real addresses are fixed in code
   PAYTR_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
+  IYZICO_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
   // Medusa's level names; unset means Medusa's default, `http`
   LOG_LEVEL: z.enum(LOG_LEVELS).optional(),
   // docs/13 §6: "off" keeps search engines out (robots.txt, noindex) on an
@@ -135,13 +136,16 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
       message: "must differ from the PII keys",
     })
   }
-  // Payments go to the provider's own address only; a fake server is for local runs
-  if (env.PAYTR_BASE_URL !== undefined && !isLocalEnv(env)) {
-    ctx.addIssue({
-      code: "custom",
-      path: ["PAYTR_BASE_URL"],
-      message: "is only allowed in development and test",
-    })
+  // A deployed shop pays at the provider's own address only. A fake server is for
+  // a developer's machine, where Medusa's CLI runs with NODE_ENV unset
+  for (const name of ["PAYTR_BASE_URL", "IYZICO_BASE_URL"] as const) {
+    if (env[name] !== undefined && (env.NODE_ENV === "production" || env.NODE_ENV === "staging")) {
+      ctx.addIssue({
+        code: "custom",
+        path: [name],
+        message: "is not allowed on staging or production",
+      })
+    }
   }
 })
 

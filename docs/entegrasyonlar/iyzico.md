@@ -64,6 +64,13 @@ iyzico → callbackUrl (POST /hooks/iyzico/callback, gövde: token)
   - Satıcı tarafı kart saklama (`/cardstorage/card`) kart numarasını bize getirir: kapsam dışı (adr/0026).
   - CF'de kaydedilen kart müşterinin kendi iyzico cüzdanına gider; satıcıya `cardUserKey` gelmez.
 - **Hata modeli:** `status: "failure"`, `errorCode`, `errorMessage`, `errorGroup`. Hata tablosunda kod başına "Retry" sütunu var.
+- **Sandbox'ta ölçüldü (2026-10-27, F5 V8):**
+  - Hatalar HTTP 200 ile döner; karar `status` alanından verilir.
+  - `1000` "Geçersiz imza": API anahtarı tanınıyor, gizli anahtar tutmuyor.
+  - `1001` "api bilgileri bulunamadı": API anahtarı bu adreste yok. Sandbox anahtarı canlı adrese gönderilince de `1001`.
+  - `5004`: zorunlu alan eksik (ör. `price`).
+  - Sandbox API ve gizli anahtarı `sandbox-` ile başlıyor (dokümanda yazmıyor; panel yalnızca "sandbox kapalıyken sandbox anahtarı" durumunu reddeder).
+  - Taksit sorgusunun yanıtında `signature` alanı yok.
 - **Sandbox:**
   - Kayıt sayfası https://sandbox-merchant.iyzipay.com/auth/register (firma ya da sözleşme şartı belgelenmemiş). Anahtarlar Settings > Merchant Settings > API Keys altında; OTP her zaman 123456.
   - Başarılı test kartları: 5528790000000008, 5890040000000016 (banka kartı).
@@ -82,10 +89,14 @@ iyzico → callbackUrl (POST /hooks/iyzico/callback, gövde: token)
 ## Kritik noktalar
 - Sepet ve alıcı sunucuda kurulur. Oturum verisi herkese açık sayılır; kişisel veri bırakılmaz (adr/0026).
 - itemTransactions (kalem ↔ paymentTransactionId) ödeme verisinde saklanır; kısmi iadenin temeli. Her sağlayıcı çıktısı verinin tamamıdır.
-- Sandbox/canlı base URL env ile. Canlı anahtar sandbox URL'si ile asla eşleşmemeli (açılış kontrolü).
+- Sandbox ve canlı adresler kodda sabit; hesabın `test_mode`'u seçer. Her adresin kendi HTTP istemcisi ve devre kesicisi var. `IYZICO_BASE_URL` yalnızca yerelde sahte sunucu içindir (canlı ve staging'de açılış reddedilir).
 
 ## Hesap bilgileri
-API anahtarı ve gizli anahtar panelden girilir (Ayarlar > Ödeme, adr/0027; V8). Sandbox ya da canlı mod paneldeki seçimle belirlenir; adresler kodda sabittir, serbest URL yok. Yerel `.env`'deki sandbox anahtarları (2026-10-27) V8'de panele taşınır.
+API anahtarı ve gizli anahtar panelden girilir (Ayarlar > Ödeme > iyzico, adr/0027; V8, 2026-10-27).
+- Ayar yalnızca `test_mode` (panelde "Sandbox"); iki anahtar da gizli ve yalnızca yazılır. `test_mode` kimlik alanıdır: sandbox ↔ canlı geçişinde iki anahtar yeniden istenir.
+- Kayıttan önce bağlantı kontrolü: 1 TL için BIN'siz taksit sorgusu (salt okunur), hesabın moduna ait adreste. `1001` → "API anahtarı tanınmadı", `1000` → "gizli anahtar kabul edilmedi"; ağ/5xx → ulaşılamadı (PayTR'deki kurallar).
+- Panel bildirim adresini (`/hooks/iyzico/webhook`) ve iyzico panelindeki yerini (Ayarlar > Firma Ayarları > İşyeri Bildirimleri) gösterir; uç V9'da yazılır.
+- Kullanıcının sandbox hesabı 2026-10-27'de panelden bağlandı ve doğrulandı; `.env`'deki `IYZICO_*` satırları artık kullanılmıyor.
 
 ## Testler
 Sahte sunucu senaryoları: başarı, 3DS başarısız, kullanıcı iptali, fraudStatus 0 → 1 ve 0 → -1, mükerrer callback, imzası bozuk yanıt, kısmi iade (satır kalanı), aynı gün iptal, 10223, 5xx/timeout.

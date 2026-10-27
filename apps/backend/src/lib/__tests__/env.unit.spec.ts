@@ -123,15 +123,32 @@ describe("parseEnv", () => {
     )
   })
 
-  it("lets a fake PayTR address in local runs only", () => {
+  it("lets a fake iyzico address on a developer's machine only", () => {
+    const fake = { IYZICO_BASE_URL: "http://127.0.0.1:4011" }
+
+    expect(parseEnv({ ...validEnv, ...fake, NODE_ENV: "test" }).IYZICO_BASE_URL).toBe(
+      fake.IYZICO_BASE_URL
+    )
+    // Medusa's CLI (`medusa user`, `db:migrate`) runs with NODE_ENV unset
+    expect(parseEnv({ ...validEnv, ...fake }).IYZICO_BASE_URL).toBe(fake.IYZICO_BASE_URL)
+    expect(
+      errorOf({
+        ...validEnv,
+        ...s3Env,
+        ...fake,
+        CREDENTIALS_ENCRYPTION_KEY: hexKey(),
+        NODE_ENV: "staging",
+      })
+    ).toContain("IYZICO_BASE_URL: is not allowed on staging or production")
+  })
+
+  it("lets a fake PayTR address on a developer's machine only", () => {
     const fake = { PAYTR_BASE_URL: "http://127.0.0.1:4010" }
 
     expect(parseEnv({ ...validEnv, ...fake, NODE_ENV: "test" }).PAYTR_BASE_URL).toBe(
       fake.PAYTR_BASE_URL
     )
-    expect(errorOf({ ...validEnv, ...fake })).toContain(
-      "PAYTR_BASE_URL: is only allowed in development and test"
-    )
+    expect(parseEnv({ ...validEnv, ...fake }).PAYTR_BASE_URL).toBe(fake.PAYTR_BASE_URL)
     expect(
       errorOf({
         ...validEnv,
@@ -140,7 +157,7 @@ describe("parseEnv", () => {
         CREDENTIALS_ENCRYPTION_KEY: hexKey(),
         NODE_ENV: "production",
       })
-    ).toContain("PAYTR_BASE_URL: is only allowed in development and test")
+    ).toContain("PAYTR_BASE_URL: is not allowed on staging or production")
   })
 
   it("rejects identical PII encryption and hash keys", () => {

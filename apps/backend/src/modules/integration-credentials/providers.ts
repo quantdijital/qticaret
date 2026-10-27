@@ -38,6 +38,13 @@ export const CREDENTIAL_PROVIDERS = {
     secret: secretField,
     identity: ["merchant_id"],
   },
+  // iyzico panel > API keys. The sandbox has its own keys: switching asks for both again
+  iyzico: {
+    settings: z.object({ test_mode: z.boolean() }).strict(),
+    secrets: ["api_key", "secret_key"],
+    secret: secretField,
+    identity: ["test_mode"],
+  },
 } as const satisfies Record<string, CredentialProvider>
 
 export type CredentialProviderName = keyof typeof CREDENTIAL_PROVIDERS

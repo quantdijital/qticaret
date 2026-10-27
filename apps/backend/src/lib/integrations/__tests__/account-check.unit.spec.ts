@@ -1,6 +1,13 @@
-import { fakePaytrAccount, fakeSecret, startFakePaytr } from "@qticaret/testing"
-import type { FakePaytr } from "@qticaret/testing"
+import {
+  fakeIyzicoAccount,
+  fakePaytrAccount,
+  fakeSecret,
+  startFakeIyzico,
+  startFakePaytr,
+} from "@qticaret/testing"
+import type { FakeIyzico, FakePaytr } from "@qticaret/testing"
 import { checkAccount } from "../account-check"
+import { iyzicoHealthCheck } from "../health/iyzico-check"
 import { paytrHealthCheck } from "../health/paytr-check"
 
 // The shared PayTR client reads its address once: one fake for the whole file
@@ -70,6 +77,59 @@ describe("checkAccount (adr/0027 §4)", () => {
     })
     expect(
       await paytrHealthCheck(() => Promise.resolve(details({ merchant_id: "999999" }))).check(
+        signal
+      )
+    ).toEqual({ status: "down", reason: "auth_failed" })
+  })
+})
+
+describe("checkAccount for iyzico", () => {
+  // The shared client reads its address once: one fake for the sandbox and the live service
+  const keys = fakeIyzicoAccount()
+  const details = (secrets: Partial<{ api_key: string; secret_key: string }> = {}) => ({
+    settings: { test_mode: true },
+    secrets: { api_key: keys.apiKey, secret_key: keys.secretKey, ...secrets },
+  })
+  let fake: FakeIyzico
+
+  beforeAll(async () => {
+    fake = await startFakeIyzico(keys)
+    process.env["IYZICO_BASE_URL"] = fake.url
+  })
+
+  afterAll(async () => {
+    delete process.env["IYZICO_BASE_URL"]
+    await fake.close()
+  })
+
+  it("tells valid keys from an unknown API key or a wrong secret key", async () => {
+    expect(await checkAccount("iyzico", details())).toBe("valid")
+    expect(await checkAccount("iyzico", details({ api_key: `sandbox-${fakeSecret()}` }))).toBe(
+      "merchant_invalid"
+    )
+    expect(await checkAccount("iyzico", details({ secret_key: fakeSecret() }))).toBe(
+      "secret_invalid"
+    )
+  })
+
+  it("calls iyzico unreachable only when it was not heard from", async () => {
+    for (let attempt = 0; attempt < 3; attempt++) {
+      fake.queue("/payment/iyzipos/installment", { status: 502, body: "bad gateway" })
+    }
+    expect(await checkAccount("iyzico", details())).toBe("unreachable")
+  })
+
+  it("reports health from the stored account", async () => {
+    const signal = AbortSignal.timeout(5_000)
+
+    expect(await iyzicoHealthCheck(() => Promise.resolve(null)).check(signal)).toEqual({
+      status: "not_configured",
+    })
+    expect(await iyzicoHealthCheck(() => Promise.resolve(details())).check(signal)).toEqual({
+      status: "ok",
+    })
+    expect(
+      await iyzicoHealthCheck(() => Promise.resolve(details({ secret_key: fakeSecret() }))).check(
         signal
       )
     ).toEqual({ status: "down", reason: "auth_failed" })

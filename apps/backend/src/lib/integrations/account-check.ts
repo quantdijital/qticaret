@@ -2,6 +2,7 @@ import { isProviderError } from "../errors"
 import type { ProviderErrorShape } from "../errors"
 import { errorSummary, logger } from "../logging"
 import type { CredentialProviderName } from "../../modules/integration-credentials/providers"
+import { iyzicoApi, iyzicoCredentialsOf } from "../payments/iyzico"
 import { paytrApi, paytrCredentialsOf } from "../payments/paytr"
 
 /**
@@ -25,7 +26,7 @@ export interface AccountDetails {
   secrets: Record<string, string>
 }
 
-// A person waits at the panel: PayTR gets this long, not the client's three tries
+// A person waits at the panel: the provider gets this long, not the client's three tries
 const CHECK_TIMEOUT_MS = 8_000
 
 type Checker = (account: AccountDetails, signal: AbortSignal) => Promise<AccountCheck>
@@ -35,6 +36,10 @@ const CHECKERS = {
   paytr: async (account, signal) => {
     const credentials = paytrCredentialsOf(account)
     return credentials ? paytrApi().checkCredentials(credentials, { signal }) : "merchant_invalid"
+  },
+  iyzico: async (account, signal) => {
+    const credentials = iyzicoCredentialsOf(account)
+    return credentials ? iyzicoApi().checkCredentials(credentials, { signal }) : "merchant_invalid"
   },
 } satisfies Record<CredentialProviderName, Checker>
 
@@ -57,4 +62,5 @@ export async function checkAccount(
 /** Which field the panel points at when a check refuses the details. */
 export const CHECK_FIELDS = {
   paytr: { merchant_invalid: "settings.merchant_id", secret_invalid: "secrets.merchant_key" },
+  iyzico: { merchant_invalid: "secrets.api_key", secret_invalid: "secrets.secret_key" },
 } satisfies Record<CredentialProviderName, Record<"merchant_invalid" | "secret_invalid", string>>

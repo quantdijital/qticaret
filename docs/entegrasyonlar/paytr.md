@@ -105,7 +105,7 @@ PayTR'de ters ibraz API'si ya da bildirimi bulunamadı; F6.7 PayTR için elle ka
 ## Env
 Hesap bilgileri env'de değil, panelde (adr/0027). Env'de yalnızca:
 - `CREDENTIALS_ENCRYPTION_KEY`: hesap bilgilerini şifreleyen anahtar (canlıda zorunlu).
-- `PAYTR_BASE_URL`: yalnızca yerelde ve testte sahte sunucu için; canlıda ve staging'de tanımlıysa açılış reddedilir. Gerçek adres kodda sabit (`https://www.paytr.com`).
+- `PAYTR_BASE_URL`: yalnızca geliştirici makinesinde ve testte sahte sunucu için; canlıda ve staging'de tanımlıysa açılış reddedilir. Gerçek adres kodda sabit (`https://www.paytr.com`).
 
 ## Testler
 İmzalar bilinen-cevap vektörleriyle test edilir (Python `hmac` ve `openssl` ile ayrıca hesaplandı). Sahte sunucu imzaları kendi kodumuzdan bağımsız, dokümana göre doğrular; test hesapları her çalıştırmada üretilir (`fakePaytrAccount`).

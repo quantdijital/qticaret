@@ -10,7 +10,10 @@ export interface NotifyAccountChangeInput {
   actor_id: string | null
 }
 
-const PROVIDER_NAMES: Readonly<Record<CredentialProviderName, string>> = { paytr: "PayTR" }
+const PROVIDER_NAMES: Readonly<Record<CredentialProviderName, string>> = {
+  paytr: "PayTR",
+  iyzico: "iyzico",
+}
 
 /**
  * Tells every admin, in the panel's bell, that the payment account

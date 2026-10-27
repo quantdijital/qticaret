@@ -145,6 +145,10 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "integration_credentials.secrets_required":
     "Enter every secret field; all are asked again when the account number changes or the stored ones cannot be read.",
   "integration_credentials.unknown_provider": "There is no such payment or integration provider.",
+  "iyzico.merchant_invalid":
+    "iyzico does not know this API key. Make sure it belongs to the chosen environment: a sandbox key works only with the sandbox on, a live key only with it off.",
+  "iyzico.secret_invalid":
+    "iyzico did not accept the secret key. Copy it again from the same page as the API key.",
   "media.alt_invalid": "The alt text has characters that cannot be used.",
   "media.file_id_invalid": "The file id is not valid.",
   "media.file_unknown": "File not found.",

@@ -30,6 +30,7 @@ interface AuditEntry {
 }
 
 const URL_PATH = "/admin/integrations/credentials"
+const paytrOf = (accounts: Account[]) => accounts.find(({ provider }) => provider === "paytr")
 const connect = {
   settings: { merchant_id: "100001", test_mode: true },
   secrets: { merchant_key: account.merchantKey, merchant_salt: account.merchantSalt },
@@ -78,6 +79,11 @@ medusaIntegrationTestRunner({
           state: "not_configured",
           secrets: { merchant_key: false, merchant_salt: false },
         }),
+        expect.objectContaining({
+          provider: "iyzico",
+          state: "not_configured",
+          secrets: { api_key: false, secret_key: false },
+        }),
       ])
     })
 
@@ -96,7 +102,7 @@ medusaIntegrationTestRunner({
       expect(wrongNumber.data).toMatchObject({ message: "paytr.merchant_invalid" })
       expect(wrongSalt.status).toBe(400)
       expect(wrongSalt.data).toMatchObject({ message: "paytr.secret_invalid" })
-      expect(data.accounts[0]?.state).toBe("not_configured")
+      expect(paytrOf(data.accounts)?.state).toBe("not_configured")
     })
 
     it("connects after PayTR accepts; no answer, log or audit record holds a secret", async () => {
@@ -210,7 +216,7 @@ medusaIntegrationTestRunner({
       expect(replaced.data).toMatchObject({
         message: "integration_credentials.provider_unreachable",
       })
-      expect(data.accounts[0]).toMatchObject({ state: "connected", secrets_version: 1 })
+      expect(paytrOf(data.accounts)).toMatchObject({ state: "connected", secrets_version: 1 })
     })
 
     it("tests the stored account: unreachable changes nothing, refused details show", async () => {

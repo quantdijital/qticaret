@@ -122,6 +122,47 @@ describe("planSave", () => {
   })
 })
 
+describe("planSave for iyzico", () => {
+  const keys = { api_key: `sandbox-${fakeSecret()}`, secret_key: `sandbox-${fakeSecret()}` }
+  const sandbox = { settings: { test_mode: true }, verification: "verified" as const }
+
+  it("asks for both keys again when the shop leaves the sandbox: live keys are others", () => {
+    expect(
+      reasonOf(() => planSave("iyzico", { settings: { test_mode: false } }, sandbox, keys))
+    ).toEqual({ key: "integration_credentials.secrets_required", field: "secrets.api_key" })
+    const live = { api_key: fakeSecret(), secret_key: fakeSecret() }
+    expect(
+      planSave("iyzico", { settings: { test_mode: false }, secrets: live }, sandbox, keys)
+    ).toEqual({
+      settings: { test_mode: false },
+      secrets: live,
+      needsCheck: true,
+      secretsChanged: true,
+    })
+  })
+
+  it("takes no setting but the sandbox switch", () => {
+    expect(
+      reasonOf(() =>
+        planSave("iyzico", { settings: { test_mode: true, base_url: "x" } }, undefined, null)
+      )
+    ).toMatchObject({ key: "integration_credentials.invalid" })
+  })
+
+  it("names leaving the sandbox as another account, with test mode off", () => {
+    expect(
+      accountChanges(
+        "iyzico",
+        { settings: { test_mode: true } },
+        {
+          settings: { test_mode: false },
+          secrets_changed: true,
+        }
+      )
+    ).toEqual(["account", "test_mode_off"])
+  })
+})
+
 describe("statusOf", () => {
   const record = {
     ...row,

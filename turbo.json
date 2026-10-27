@@ -11,6 +11,7 @@
     "PII_*",
     "CREDENTIALS_*",
     "PAYTR_*",
+    "IYZICO_*",
     "DB_*",
     "MEDUSA_*",
     "S3_*",

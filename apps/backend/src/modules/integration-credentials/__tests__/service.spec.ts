@@ -36,8 +36,10 @@ moduleIntegrationTestRunner<IntegrationCredentialsModuleService>({
       expect(service.isKeyConfigured()).toBe(true)
       expect(await service.describeAll()).toEqual([
         expect.objectContaining({ provider: "paytr", state: "not_configured", settings: null }),
+        expect.objectContaining({ provider: "iyzico", state: "not_configured", settings: null }),
       ])
       expect(await service.read("paytr")).toBeNull()
+      expect(await service.read("iyzico")).toBeNull()
     })
 
     it("seals a draft: the database and the status hold no secret", async () => {
@@ -171,9 +173,7 @@ moduleIntegrationTestRunner<IntegrationCredentialsModuleService>({
     it("does not open a blob moved to another provider's row", async () => {
       const draft = await connect()
 
-      expect(() =>
-        service.openDraft({ ...draft, provider: "iyzico" as unknown as typeof draft.provider })
-      ).toThrow()
+      expect(() => service.openDraft({ ...draft, provider: "iyzico" })).toThrow()
       expect(service.openDraft(draft)).toEqual({ settings, secrets })
     })
 

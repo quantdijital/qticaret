@@ -59,8 +59,8 @@ ADR-0002'nin itirazları ve bu karardaki cevapları:
    - Çözülmüş bilgiler süreç belleğinde tutulur. Platform ayarlarındaki sürümlü önbellek kalıbı kullanılır: Redis'teki sürüm işareti diğer süreçlere değişikliği bildirir.
    - Değişiklik yeniden başlatma gerektirmez.
 8. **Sağlayıcı adresi kodda.**
-   - PayTR'nin adresi `https://www.paytr.com`. `PAYTR_BASE_URL` yalnızca yerelde ve testte sahte sunucu için kullanılır; canlıda ve staging'de tanımlıysa açılış reddedilir.
-   - iyzico'da sandbox ve canlı adresler sabit iki değerdir; hangisinin kullanılacağı paneldeki moda göre seçilir. Serbest URL yok.
+   - PayTR'nin adresi `https://www.paytr.com`. `PAYTR_BASE_URL` ve `IYZICO_BASE_URL` yalnızca geliştirici makinesinde ve testte sahte sunucu içindir; canlıda ve staging'de tanımlıysa açılış reddedilir. (2026-10-27: önce "yalnızca development/test"ti; `NODE_ENV` tanımsız çalışan `medusa` CLI'ı yerelde düşürdüğü için kural "staging ve canlıda yasak" oldu.)
+   - iyzico'da sandbox ve canlı adresler sabit iki değerdir; hangisinin kullanılacağı paneldeki moda (`test_mode`) göre seçilir. Serbest URL yok. Sandbox'ın kendi anahtarları var: `test_mode` iyzico'nun kimlik alanıdır, değişince iki anahtar da yeniden istenir ve yeni adreste doğrulanır.
 9. **Kapsam.** Kural, mağazanın kendi sağlayıcı hesaplarına uygulanır: PayTR, iyzico, sonra Geliver, e-fatura ve SMS. Platformun kendi sırları (veritabanı, JWT, PII anahtarları, S3) env'de kalır.
 
 ## Alternatifler
