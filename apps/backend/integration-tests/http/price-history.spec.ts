@@ -119,9 +119,10 @@ medusaIntegrationTestRunner({
     it("records a list's start at the time it began, not at the next hourly check", async () => {
       const { variantId } = await stockedProduct(getContainer(), shop, "sinir-kupa", 1)
       await recordsOf(variantId, 1)
-      const startsAt = new Date(Date.now() + 2000)
+      // Far enough ahead that a slow runner still creates the list before it starts (CI, 2026-10-27)
+      const startsAt = new Date(Date.now() + 5000)
       await saleList(variantId, 60, { starts_at: startsAt })
-      await pause(3000)
+      await pause(Math.max(0, startsAt.getTime() - Date.now()) + 1000)
 
       expect(await recordListBoundaries(getContainer())).toBeGreaterThan(0)
       const rows = await recordsOf(variantId, 2)
