@@ -225,7 +225,12 @@ medusaIntegrationTestRunner({
         "pp_paytr_paytr",
         "pp_system_default",
       ])
-      expect(await providersOf(shop.regionId)).toEqual(["pp_paytr_paytr", "pp_system_default"])
+      // Bootstrap gives a new shop's region every card provider (iyzico since F5 V9)
+      expect(await providersOf(shop.regionId)).toEqual([
+        "pp_iyzico_iyzico",
+        "pp_paytr_paytr",
+        "pp_system_default",
+      ])
     })
 
     it("refuses Medusa's session route for its system provider: no unpaid order", async () => {

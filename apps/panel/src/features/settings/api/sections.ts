@@ -27,6 +27,8 @@ export interface InventorySettings {
 export interface PaymentSettings {
   installments_enabled: boolean
   max_installment: number
+  /** The card provider the storefront offers first; null: the first connected. */
+  card_provider: "paytr" | "iyzico" | null
 }
 
 export interface PromotionSettings {

@@ -75,7 +75,11 @@ describe("PayTR payment provider (adr/0026)", () => {
 
   beforeEach(() => {
     stored.mockResolvedValue({ ...account, testMode: true })
-    settings.mockResolvedValue({ installments_enabled: true, max_installment: 0 })
+    settings.mockResolvedValue({
+      installments_enabled: true,
+      max_installment: 0,
+      card_provider: null,
+    })
     fake.requests.length = 0
   })
 
@@ -119,9 +123,17 @@ describe("PayTR payment provider (adr/0026)", () => {
   })
 
   it("passes the shop's installment choice to PayTR", async () => {
-    settings.mockResolvedValue({ installments_enabled: true, max_installment: 6 })
+    settings.mockResolvedValue({
+      installments_enabled: true,
+      max_installment: 6,
+      card_provider: null,
+    })
     await start({ session_id: "payses_01INS", checkout })
-    settings.mockResolvedValue({ installments_enabled: false, max_installment: 6 })
+    settings.mockResolvedValue({
+      installments_enabled: false,
+      max_installment: 6,
+      card_provider: null,
+    })
     await start({ session_id: "payses_01ONE", checkout })
 
     const sent = fake.requests.filter((request) => request.path === "/odeme/api/get-token")

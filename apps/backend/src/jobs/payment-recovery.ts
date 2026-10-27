@@ -7,13 +7,15 @@ import type { RecoveryOutcome } from "../workflows/payments/recover-payment"
 
 // A run gives back at most this many; the rest wait five minutes
 const BATCH = 50
+// Providers the job can refund: iyzico joins in F5 V10. Rows of others must not fill the batch
+const REFUNDABLE = ["paytr"]
 
 /** Gives back payments that became no order (adr/0026 §6), oldest first. */
 export default async function paymentRecovery(container: MedusaContainer) {
   const pending = await container
     .resolve<PaymentRecoveryModuleService>(PAYMENT_RECOVERY_MODULE)
     .listPaymentRecoveries(
-      { status: "pending" },
+      { status: "pending", provider: REFUNDABLE },
       { select: ["id"], take: BATCH, order: { created_at: "ASC" } }
     )
   const outcomes: Partial<Record<RecoveryOutcome | "error", number>> = {}

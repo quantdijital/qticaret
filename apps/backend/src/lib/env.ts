@@ -43,6 +43,9 @@ const envSchema = z.object({
   // The shop's provider accounts (PayTR, iyzico) are stored encrypted with
   // it (adr/0027); required once deployed, locally the panel cannot save them
   CREDENTIALS_ENCRYPTION_KEY: key256.optional(),
+  // The backend's own public address: iyzico sends the shopper back to it
+  // (`/hooks/iyzico/callback`). Required once deployed; locally localhost:9000
+  BACKEND_URL: z.url({ protocol: /^https?$/ }).optional(),
   // Fake PayTR and iyzico servers in development and tests; the real addresses are fixed in code
   PAYTR_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
   IYZICO_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
@@ -136,6 +139,13 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
       message: "must differ from the PII keys",
     })
   }
+  if (deployed && !env.BACKEND_URL?.startsWith("https://")) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["BACKEND_URL"],
+      message: "is required in production and staging, as an https:// address",
+    })
+  }
   // A deployed shop pays at the provider's own address only. A fake server is for
   // a developer's machine, where Medusa's CLI runs with NODE_ENV unset
   for (const name of ["PAYTR_BASE_URL", "IYZICO_BASE_URL"] as const) {
@@ -212,4 +222,11 @@ export function s3Settings(env: Env): S3Settings | null {
     accessKeyId: S3_ACCESS_KEY_ID,
     secretAccessKey: S3_SECRET_ACCESS_KEY,
   }
+}
+
+const LOCAL_BACKEND_URL = "http://localhost:9000"
+
+/** The backend's public origin, for addresses a provider sends the shopper back to. */
+export function backendUrl(env: Pick<Env, "BACKEND_URL"> = parseEnv()): string {
+  return new URL(env.BACKEND_URL ?? LOCAL_BACKEND_URL).origin
 }

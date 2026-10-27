@@ -3,19 +3,31 @@ import type { z } from "@medusajs/framework/zod"
 import { createHttpClient } from "../../clients"
 import type { HttpClient, HttpClientOptions } from "../../clients"
 import { parseEnv } from "../../env"
-import { isProviderError } from "../../errors"
+import { ProviderError, isProviderError } from "../../errors"
+import {
+  INITIALIZE_PATH,
+  RETRIEVE_PATH,
+  checkoutFormRequest,
+  checkoutFormResult,
+  initializeAnswer,
+  retrieveAnswer,
+} from "./checkout-form"
+import type { CheckoutFormInput, CheckoutFormResult } from "./checkout-form"
 import { IYZICO_PROVIDER, iyzicoError } from "./errors"
+import { createInstallmentCache, installmentAnswer } from "./installments"
 import { iyzicoAnswer } from "./schemas"
-import { signedHeaders } from "./signatures"
+import { isResponseGenuine, signaturePrice, signedHeaders } from "./signatures"
 import type { IyzicoCredentialCheck, IyzicoCredentials } from "./types"
+import { toIyzicoPrice } from "./amounts"
+import type { Kurus } from "../../money"
 
 /**
  * iyzico's API over the platform HTTP client, signed per request
  * (IYZWSv2). The sandbox and the live service have their own addresses
  * and their own keys; the account's test mode picks one. Each has its own
  * client, so a sandbox outage never opens the live circuit breaker. The
- * shop's account comes with every call (adr/0027). The payment calls join
- * in F5 V9 and V10.
+ * shop's account comes with every call (adr/0027). Answers that move money
+ * are checked against their signature. Refund and cancel join in F5 V10.
  */
 
 export const IYZICO_SANDBOX_URL = "https://sandbox-api.iyzipay.com"
@@ -43,8 +55,12 @@ export function createIyzicoApi(
     baseUrl: liveUrl,
   })
 
-  /** One signed call; a `failure` answer throws iyzico's error code. */
-  async function post<T extends z.infer<typeof iyzicoAnswer>>(
+  /**
+   * One signed call; a `failure` answer throws iyzico's error code. The
+   * call's own `schema` reads a successful answer only: a failure carries
+   * none of its fields.
+   */
+  async function post<T>(
     credentials: IyzicoCredentials,
     path: string,
     payload: Record<string, unknown>,
@@ -60,12 +76,21 @@ export function createIyzicoApi(
       json: payload,
       ...(call.idempotent ? { idempotent: true } : {}),
       ...(call.signal ? { signal: call.signal } : {}),
-      schema,
+      schema: iyzicoAnswer.loose(),
     })
     if (answer.status !== "success") {
       throw iyzicoError(answer.errorCode)
     }
-    return answer
+    const read = schema.safeParse(answer)
+    if (!read.success) {
+      throw new ProviderError({
+        provider: IYZICO_PROVIDER,
+        providerCode: "invalid_response",
+        retryable: false,
+        cause: read.error,
+      })
+    }
+    return read.data
   }
 
   /**
@@ -103,7 +128,113 @@ export function createIyzicoApi(
     }
   }
 
-  return { checkCredentials }
+  // A signed answer that does not match was not iyzico's: nothing is decided on it
+  const forged = () =>
+    new ProviderError({
+      provider: IYZICO_PROVIDER,
+      providerCode: "signature_mismatch",
+      retryable: false,
+    })
+
+  /** Opens a checkout form; creates a payable token, so it is never sent twice. */
+  async function initializeCheckoutForm(credentials: IyzicoCredentials, input: CheckoutFormInput) {
+    const answer = await post(
+      credentials,
+      INITIALIZE_PATH,
+      checkoutFormRequest(input),
+      initializeAnswer
+    )
+    if (
+      !isResponseGenuine(
+        credentials.secretKey,
+        [answer.conversationId, answer.token],
+        answer.signature
+      )
+    ) {
+      throw forged()
+    }
+    return {
+      token: answer.token,
+      pageUrl: answer.paymentPageUrl,
+      expiresAt: new Date(Date.now() + answer.tokenExpireTime * 1000),
+    }
+  }
+
+  /**
+   * A form's result: null while nothing was paid with it (`5122`). A paid
+   * result must carry iyzico's signature over its amounts and references.
+   */
+  async function retrieveCheckoutForm(
+    credentials: IyzicoCredentials,
+    form: { conversationId: string; token: string }
+  ): Promise<CheckoutFormResult | null> {
+    let answer
+    try {
+      answer = await post(
+        credentials,
+        RETRIEVE_PATH,
+        { locale: "tr", conversationId: form.conversationId, token: form.token },
+        retrieveAnswer,
+        { idempotent: true }
+      )
+    } catch (error) {
+      if (isProviderError(error) && error.providerCode === "form_unpaid") {
+        return null
+      }
+      throw error
+    }
+    if (answer.paymentStatus === "SUCCESS") {
+      const signed = [
+        answer.paymentStatus,
+        answer.paymentId,
+        answer.currency,
+        answer.basketId,
+        answer.conversationId,
+        answer.paidPrice === undefined ? undefined : signaturePrice(answer.paidPrice),
+        answer.price === undefined ? undefined : signaturePrice(answer.price),
+        answer.token,
+      ]
+      if (
+        signed.some((value) => value === undefined) ||
+        !isResponseGenuine(credentials.secretKey, signed as string[], answer.signature)
+      ) {
+        throw forged()
+      }
+    }
+    return checkoutFormResult(answer)
+  }
+
+  const installments = createInstallmentCache()
+
+  /** The installment table for an amount, by card family, without a card number (cached briefly). */
+  async function installmentTable(credentials: IyzicoCredentials, amount: Kurus) {
+    const key = `${credentials.testMode ? "sandbox" : "live"}:${String(amount)}`
+    const cached = installments.get(key)
+    if (cached) {
+      return cached
+    }
+    const answer = await post(
+      credentials,
+      INSTALLMENT_PATH,
+      {
+        locale: "tr",
+        conversationId: `qtinst-${randomBytes(8).toString("hex")}`,
+        price: toIyzicoPrice(amount),
+      },
+      installmentAnswer,
+      { idempotent: true }
+    )
+    installments.set(key, answer)
+    return answer
+  }
+
+  return {
+    checkCredentials,
+    initializeCheckoutForm,
+    retrieveCheckoutForm,
+    installmentTable,
+    forgetInstallments: installments.clear,
+  }
 }
 
 let shared: IyzicoApi | undefined

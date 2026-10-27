@@ -61,3 +61,16 @@ export function isResponseGenuine(
 ): boolean {
   return signature !== undefined && safeEqual(signature, responseSignature(secretKey, values))
 }
+
+/**
+ * Our own signature on a callback address (not iyzico's): the session, keyed
+ * with the shop's secret key, which only we and iyzico hold.
+ */
+export const callbackSignature = (secretKey: string, sessionId: string): string =>
+  createHmac("sha256", secretKey).update(`qt-callback:${sessionId}`).digest("hex").slice(0, 32)
+
+export const isCallbackGenuine = (
+  secretKey: string,
+  sessionId: string,
+  signature: string
+): boolean => safeEqual(signature, callbackSignature(secretKey, sessionId))

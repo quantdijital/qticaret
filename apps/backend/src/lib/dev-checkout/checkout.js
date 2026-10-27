@@ -226,6 +226,11 @@ async function pay() {
       return_urls: { success: back("tamam"), failure: back("hata") },
     },
   })
+  // iyzico's page is a whole page that sends the browser back; PayTR's form lives in an iFrame
+  if (provider === "pp_iyzico_iyzico") {
+    location.href = session.data.form_url
+    return
+  }
   $("form").src = session.data.form_url
   $("form").hidden = false
   $("form").scrollIntoView({ behavior: "smooth" })
@@ -237,6 +242,9 @@ async function followReturn(params) {
   $("result").hidden = false
   const say = (...nodes) => $("result-body").replaceChildren(...nodes)
   if (failed) return say("Ödeme reddedildi. Sepet açık; yeniden ödeyebilirsiniz.")
+  // iyzico's callback says what became of a payment that is not an order yet
+  const status = params.get("payment_status")
+  if (status === "refund") return say("Ödeme alındı ama siparişe dönüşemedi; tutar iade edilecek.")
   for (let attempt = 0; attempt < 120; attempt++) {
     const { cart } = await fetch(`/dev/checkout/order?cart_id=${encodeURIComponent(id)}`, {
       credentials: "omit",
@@ -256,9 +264,11 @@ async function followReturn(params) {
       )
     }
     say(
-      attempt < 10
-        ? "Ödeme bildirimi bekleniyor…"
-        : "Bildirim gelmedi. Uzlaştırma işi (10 dakikada bir) PayTR'ye sorup siparişi açacak; sayfa beklemeye devam ediyor."
+      status === "review"
+        ? "Ödeme iyzico'nun sahtekârlık incelemesinde; onaylanınca uzlaştırma işi (10 dakikada bir) siparişi açacak."
+        : attempt < 10
+          ? "Ödeme bildirimi bekleniyor…"
+          : "Bildirim gelmedi. Uzlaştırma işi (10 dakikada bir) sağlayıcıya sorup siparişi açacak; sayfa beklemeye devam ediyor."
     )
     await new Promise((resolve) => setTimeout(resolve, attempt < 10 ? 2000 : 10000))
   }

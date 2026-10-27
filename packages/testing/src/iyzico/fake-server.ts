@@ -1,6 +1,10 @@
 import { createServer } from "node:http"
 import type { IncomingMessage, ServerResponse } from "node:http"
 import type { AddressInfo, Socket } from "node:net"
+import { createCheckoutForms } from "./checkout-form"
+import type { FakeCheckoutForm, PayOutcome } from "./checkout-form"
+import { PAGE_PATH, answerPaymentPage } from "./checkout-page"
+import { createRefunds } from "./refunds"
 import { iyzicoSign, readAuthorization } from "./signing"
 import type { IyzicoAccount } from "./signing"
 
@@ -8,11 +12,14 @@ import type { IyzicoAccount } from "./signing"
  * A local stand-in for iyzico's API (docs/07: tests never call the real
  * provider). It checks every request's IYZWSv2 signature and answers as
  * the sandbox did on 2026-10-27: an unknown API key is `1001`, a signature
- * that does not match is `1000`, failures as HTTP 200. Today it answers
- * the installment table (the connection check); the payment calls join in
- * F5 V9 and V10. Strict where iyzico is lenient: a request carrying the
- * secret key is refused.
+ * that does not match is `1000`, failures as HTTP 200. It answers the
+ * installment table (the connection check) and the Checkout Form
+ * (`checkout-form.ts`, F5 V9), with a clickable payment page, and refund
+ * and cancel (`refunds.ts`, V10). Strict where iyzico is lenient: a
+ * request carrying the secret key is refused.
  */
+
+export type { FakeCheckoutForm, PayOutcome } from "./checkout-form"
 
 /** An answer queued for the next request to a path: a body, a stall, or a dropped connection. */
 export type FakeIyzicoAnswer = { status?: number; body: unknown } | { hang: true } | { drop: true }
@@ -21,6 +28,13 @@ export interface FakeIyzico {
   url: string
   account: IyzicoAccount
   requests: { path: string; body: Record<string, unknown> }[]
+  /** Checkout forms by token. */
+  forms: Map<string, FakeCheckoutForm>
+  /** Kuruş given back per item transaction; payments cancelled whole. */
+  refunds: Map<string, number[]>
+  cancelled: Set<string>
+  /** Pays a form as its page would: the shop learns it by retrieving the form. */
+  pay: (token: string, outcome?: PayOutcome) => FakeCheckoutForm
   queue: (path: string, answer: FakeIyzicoAnswer) => void
   close: () => Promise<void>
 }
@@ -51,19 +65,20 @@ const HANDLERS: Readonly<Record<string, (body: Record<string, unknown>) => Reply
             locale: "tr",
             systemTime: Date.now(),
             conversationId: body["conversationId"],
-            installmentDetails: [
-              {
-                price: Number(body["price"]),
-                cardFamilyName: "Bonus",
-                installmentPrices: [
-                  {
-                    installmentNumber: 1,
-                    totalPrice: Number(body["price"]),
-                    installmentPrice: Number(body["price"]),
-                  },
-                ],
-              },
-            ],
+            // Two card families, totals as iyzico prices them (rates made up, fixed)
+            installmentDetails: ["Bonus", "World"].map((cardFamilyName, family) => ({
+              price: Number(body["price"]),
+              cardFamilyName,
+              installmentPrices: [1, 2, 3, 6, 9, 12].map((installmentNumber) => {
+                const rate = installmentNumber === 1 ? 0 : installmentNumber * (1 + family) * 0.01
+                const totalPrice = Math.round(Number(body["price"]) * (1 + rate) * 100) / 100
+                return {
+                  installmentNumber,
+                  totalPrice,
+                  installmentPrice: Math.round((totalPrice / installmentNumber) * 100) / 100,
+                }
+              }),
+            })),
           },
         },
 }
@@ -81,7 +96,13 @@ const send = (res: ServerResponse, reply: Reply) => {
   res.end(typeof reply.body === "string" ? reply.body : JSON.stringify(reply.body))
 }
 
-function answer(account: IyzicoAccount, req: IncomingMessage, path: string, text: string): Reply {
+function answer(
+  account: IyzicoAccount,
+  handlers: Readonly<Record<string, (body: Record<string, unknown>) => Reply>>,
+  req: IncomingMessage,
+  path: string,
+  text: string
+): Reply {
   if (text.includes(account.secretKey)) {
     return { status: 400, body: "the secret key never travels in a request" }
   }
@@ -97,7 +118,7 @@ function answer(account: IyzicoAccount, req: IncomingMessage, path: string, text
   ) {
     return failure("1000", "Geçersiz imza", body["conversationId"])
   }
-  const handler = req.method === "POST" ? HANDLERS[path] : undefined
+  const handler = req.method === "POST" ? (HANDLERS[path] ?? handlers[path]) : undefined
   return handler ? handler(body) : { status: 404, body: "not found" }
 }
 
@@ -106,11 +127,21 @@ export async function startFakeIyzico(account: IyzicoAccount, port = 0): Promise
   const requests: FakeIyzico["requests"] = []
   const queued = new Map<string, FakeIyzicoAnswer[]>()
   const sockets = new Set<Socket>()
+  let url = ""
+  const checkoutForms = createCheckoutForms(account, () => url)
+  const giveBack = createRefunds(account, checkoutForms.forms)
+  const handlers = { ...checkoutForms.handlers, ...giveBack.handlers }
 
   const server = createServer((req, res) => {
     void (async () => {
       const path = new URL(req.url ?? "/", "http://fake").pathname
       const text = await readText(req)
+      const page = PAGE_PATH.exec(path)?.[1]
+      if (page) {
+        const fields = Object.fromEntries(new URLSearchParams(text))
+        answerPaymentPage(res, req.method, checkoutForms.forms.get(page), fields, checkoutForms.pay)
+        return
+      }
       requests.push({ path, body: JSON.parse(text || "{}") as Record<string, unknown> })
       const next = queued.get(path)?.shift()
       if (next && "hang" in next) {
@@ -120,7 +151,7 @@ export async function startFakeIyzico(account: IyzicoAccount, port = 0): Promise
         req.socket.destroy()
         return
       }
-      send(res, next ?? answer(account, req, path, text))
+      send(res, next ?? answer(account, handlers, req, path, text))
     })().catch(() => {
       // A body that is not JSON: iyzico's own 500
       send(res, { status: 500, body: "error" })
@@ -132,11 +163,16 @@ export async function startFakeIyzico(account: IyzicoAccount, port = 0): Promise
   })
   await new Promise<void>((resolve) => server.listen(port, "127.0.0.1", resolve))
   const address = server.address() as AddressInfo
+  url = `http://127.0.0.1:${String(address.port)}`
 
   return {
-    url: `http://127.0.0.1:${String(address.port)}`,
+    url,
     account,
     requests,
+    forms: checkoutForms.forms,
+    refunds: giveBack.refunds,
+    cancelled: giveBack.cancelled,
+    pay: checkoutForms.pay,
     queue: (path, next) => {
       queued.set(path, [...(queued.get(path) ?? []), next])
     },

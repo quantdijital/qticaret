@@ -166,5 +166,5 @@ export const iyzicoSaveBody = (values: IyzicoFormValues): AccountSave => ({
   ...typedSecrets({ ...values }, IYZICO_SECRETS),
 })
 
-/** Where iyzico posts its notifications, set in iyzico's panel (F5 V9 handles them). */
+/** Where iyzico posts its notifications, set in iyzico's panel (the route waits for the real account). */
 export const iyzicoWebhookUrl = (origin: string): string => `${origin}/hooks/iyzico/webhook`

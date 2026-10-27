@@ -4,6 +4,8 @@ import { fromMedusaAmount } from "../../lib/money"
 import type { Kurus, MedusaAmount } from "../../lib/money"
 import { installmentLimit, installmentTable } from "../../lib/payments/installments"
 import type { InstallmentFamily } from "../../lib/payments/installments"
+import { connectedCardProviders } from "../../lib/payments/card-providers"
+import { iyzicoApi, iyzicoCredentialsOf, iyzicoInstallmentTable } from "../../lib/payments/iyzico"
 import { paytrCredentialsOf, paytrInstallmentRates } from "../../lib/payments/paytr"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-credentials"
 import type IntegrationCredentialsModuleService from "../../modules/integration-credentials/service"
@@ -92,9 +94,9 @@ async function amountOf(
 
 /**
  * The installment table a storefront shows on a product page or at the
- * cart (F5 V6): the shop's choice, PayTR's rates for the shop's account,
- * and the amount from the server. Off, or without a PayTR account, it is
- * one payment.
+ * cart (F5 V6, V10): the shop's choice, priced by the card provider it
+ * offers first (PayTR's rates, or iyzico's totals), the amount from the
+ * server. Off, or without a card provider, it is one payment.
  */
 export async function installmentsFor(
   container: MedusaContainer,
@@ -105,18 +107,37 @@ export async function installmentsFor(
   const settings = (await container
     .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
     .getSection("payments")) as unknown as PaymentSettings
-  const account = paytrCredentialsOf(
-    await container
-      .resolve<IntegrationCredentialsModuleService>(INTEGRATION_CREDENTIALS_MODULE)
-      .read("paytr")
-  )
+  const [provider] = await connectedCardProviders(container)
   const off = { enabled: false, amount, currency_code, max_count: 1, families: [] }
-  if (!settings.installments_enabled || !account || currency_code !== "try") {
+  if (!settings.installments_enabled || !provider || currency_code !== "try") {
     return off
   }
-  const rates = await paytrInstallmentRates(account)
-  const limit = installmentLimit(settings.max_installment, rates.maxInstallment)
-  const families = installmentTable(amount, rates.rates, limit)
+  const accounts = container.resolve<IntegrationCredentialsModuleService>(
+    INTEGRATION_CREDENTIALS_MODULE
+  )
+  let limit: number
+  let families: InstallmentFamily[]
+  if (provider === "iyzico") {
+    const account = iyzicoCredentialsOf(await accounts.read("iyzico"))
+    if (!account) {
+      return off
+    }
+    // A checkout form offers at most 12
+    limit = installmentLimit(settings.max_installment, 12)
+    families = iyzicoInstallmentTable(
+      amount,
+      await iyzicoApi().installmentTable(account, amount),
+      limit
+    )
+  } else {
+    const account = paytrCredentialsOf(await accounts.read("paytr"))
+    if (!account) {
+      return off
+    }
+    const rates = await paytrInstallmentRates(account)
+    limit = installmentLimit(settings.max_installment, rates.maxInstallment)
+    families = installmentTable(amount, rates.rates, limit)
+  }
   return families.length > 0
     ? { enabled: true, amount, currency_code, max_count: limit, families }
     : off

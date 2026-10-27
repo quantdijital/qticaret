@@ -16,6 +16,7 @@ import { HOSTED_CHECKOUT } from "../../lib/payments/checkout"
 import type { HostedCheckout } from "../../lib/payments/checkout"
 import { readCheckoutCartStep } from "./steps/read-checkout-cart"
 import { readPaymentCollectionStep } from "./steps/read-payment-collection"
+import { recordPaymentFormStep } from "./steps/record-payment-form"
 
 export interface StartCartPaymentInput {
   cart_id: string
@@ -71,6 +72,14 @@ export const startCartPaymentWorkflow = createWorkflow(
         }
       }),
     })
+    recordPaymentFormStep(
+      transform({ input, session }, ({ input, session }) => ({
+        provider_id: input.provider_id,
+        session_id: session.id,
+        cart_id: input.cart_id,
+        data: session.data,
+      }))
+    )
     releaseLockStep({ key: input.cart_id })
     return new WorkflowResponse(session)
   }

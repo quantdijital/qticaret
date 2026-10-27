@@ -5,11 +5,8 @@ import {
   markPaytrNotificationStep,
 } from "./steps/paytr-notification"
 import type { PaytrNotification } from "./steps/paytr-notification"
-import {
-  checkPaytrPaymentStep,
-  completePaidCartStep,
-  recordPaytrOrphanStep,
-} from "./steps/paytr-payment-check"
+import { recordPaymentOrphanStep } from "./steps/payment-orphan"
+import { checkPaytrPaymentStep, completePaidCartStep } from "./steps/paytr-payment-check"
 
 /** `ok`: answer "OK". Anything else gets no "OK", and PayTR sends the notification again. */
 export type PaytrNotificationAnswer = "ok" | "busy" | "not_ours"
@@ -32,7 +29,12 @@ export const paytrNotificationWorkflow = createWorkflow(
     const claim = claimPaytrNotificationStep({ notification: input, target })
     const verdict = checkPaytrPaymentStep({ notification: input, target, claim })
     const completion = completePaidCartStep(verdict)
-    const recoveryId = recordPaytrOrphanStep({ notification: input, verdict, completion })
+    const recoveryId = recordPaymentOrphanStep({
+      provider: "paytr",
+      reference: input.merchant_oid,
+      verdict,
+      completion,
+    })
     markPaytrNotificationStep({
       claim,
       order_id: transform({ completion }, ({ completion }) => completion.order_id),

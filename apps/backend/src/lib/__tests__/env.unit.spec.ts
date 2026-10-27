@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto"
-import { EnvValidationError, isLocalEnv, parseEnv, s3Settings } from "../env"
+import { EnvValidationError, backendUrl, isLocalEnv, parseEnv, s3Settings } from "../env"
 
 // Test-only values, generated per run so no fixed secret lives in the repo (docs/04)
 const jwtSecret = "j".repeat(16) + Math.random().toString(36).padEnd(16, "x")
@@ -79,9 +79,30 @@ describe("parseEnv", () => {
       "REDIS_URL: is required in production and staging"
     )
     expect(
-      parseEnv({ ...validEnv, ...s3Env, CREDENTIALS_ENCRYPTION_KEY: hexKey(), NODE_ENV: env })
-        .REDIS_URL
+      parseEnv({
+        ...validEnv,
+        ...s3Env,
+        CREDENTIALS_ENCRYPTION_KEY: hexKey(),
+        BACKEND_URL: "https://api.example.com",
+        NODE_ENV: env,
+      }).REDIS_URL
     ).toBe(validEnv.REDIS_URL)
+  })
+
+  it.each(["production", "staging"])("requires the backend's https address in %s", (env) => {
+    expect(errorOf({ ...validEnv, NODE_ENV: env })).toContain(
+      "BACKEND_URL: is required in production and staging, as an https:// address"
+    )
+    expect(
+      errorOf({ ...validEnv, NODE_ENV: env, BACKEND_URL: "http://api.example.com" })
+    ).toContain("BACKEND_URL: is required in production and staging")
+  })
+
+  it("puts the backend on localhost:9000 locally, and reads only its origin", () => {
+    expect(backendUrl({ BACKEND_URL: undefined })).toBe("http://localhost:9000")
+    expect(backendUrl({ BACKEND_URL: "https://api.example.com/x/" })).toBe(
+      "https://api.example.com"
+    )
   })
 
   it.each(["production", "staging"])("requires the S3 variables in %s", (env) => {

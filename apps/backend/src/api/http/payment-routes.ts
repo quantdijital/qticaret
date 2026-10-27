@@ -116,6 +116,17 @@ export const PAYMENT_ROUTES = [
     methods: ["POST" as const],
     middlewares: [rateLimit(() => RATE_LIMIT_PROFILES.webhook)],
   },
+  // iyzico's callback: the shopper's browser, once per payment; per session too
+  {
+    matcher: "/hooks/iyzico/callback",
+    methods: ["POST" as const],
+    middlewares: [
+      rateLimit(() => RATE_LIMIT_PROFILES.payment_return, {
+        identity: (req) =>
+          typeof req.query["session"] === "string" ? req.query["session"] : undefined,
+      }),
+    ],
+  },
   {
     matcher: "/admin/orders/:id/fulfillments",
     middlewares: [refuseTestPaidFulfillment],

@@ -15,6 +15,11 @@ const CODES: Readonly<Record<string, string>> = {
   // No such API key at this address ("api bilgileri bulunamadı"); a sandbox key live, too
   "1001": "api_key_invalid",
   "5004": "field_required",
+  // The basket items do not add up to the price
+  "5062": "basket_total_mismatch",
+  // Nothing was paid with this checkout form's token (yet)
+  "5122": "form_unpaid",
+  "5124": "token_unknown",
 }
 
 /** The platform's code for iyzico's `errorCode`; an unknown one stays visible as `error_<code>`. */

@@ -149,6 +149,12 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "integration_credentials.secrets_required":
     "Gizli alanların hepsini girin; hesap numarası değişince ya da kayıtlı bilgiler okunamayınca hepsi yeniden istenir.",
   "integration_credentials.unknown_provider": "Böyle bir ödeme ya da entegrasyon sağlayıcısı yok.",
+  "iyzico.not_configured": "Mağaza iyzico hesabını henüz bağlamadı.",
+  "iyzico.refund_unavailable":
+    "iyzico ödemelerinin iadesi henüz panelden yapılamıyor; iyzico panelinden yapın.",
+  "iyzico.basket_total_mismatch":
+    "Sepet tutarı iyzico'ya tutarlı gönderilemedi; ödemeyi yeniden başlatın.",
+  "iyzico.signature_mismatch": "iyzico'nun yanıtı doğrulanamadı; ödeme kabul edilmedi.",
   "iyzico.merchant_invalid":
     "iyzico bu API anahtarını tanımadı. Anahtarın seçili ortama ait olduğundan emin olun: sandbox anahtarı yalnızca sandbox açıkken, canlı anahtar yalnızca kapalıyken çalışır.",
   "iyzico.secret_invalid":

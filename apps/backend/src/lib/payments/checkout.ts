@@ -15,8 +15,14 @@ export const HOSTED_CHECKOUT = "qt_hosted_checkout"
 /** PayTR's hosted form: `pp_<identifier>_<id>` from medusa-config. */
 export const PAYTR_PAYMENT_PROVIDER_ID = "pp_paytr_paytr"
 
-/** Providers whose payments start from our route only (iyzico joins in F5 V9). */
-export const HOSTED_FORM_PROVIDERS = [PAYTR_PAYMENT_PROVIDER_ID] as const
+/** iyzico's Checkout Form (F5 V9). */
+export const IYZICO_PAYMENT_PROVIDER_ID = "pp_iyzico_iyzico"
+
+/** Providers whose payments start from our route only. */
+export const HOSTED_FORM_PROVIDERS = [
+  PAYTR_PAYMENT_PROVIDER_ID,
+  IYZICO_PAYMENT_PROVIDER_ID,
+] as const
 
 /**
  * Where a hosted form may send the shopper back: an origin the storefront

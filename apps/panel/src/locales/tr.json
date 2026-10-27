@@ -637,6 +637,10 @@
         "providerMax": "Hesabın izin verdiği en çok",
         "count_one": "{{count}} taksit",
         "count_other": "{{count}} taksit"
+      },
+      "preferred": {
+        "title": "Öncelikli sağlayıcı",
+        "hint": "Vitrin kartla ödemede önce bunu sunar; taksit tablosu da bu sağlayıcının fiyatlarıyla gösterilir."
       }
     },
     "integrations": {

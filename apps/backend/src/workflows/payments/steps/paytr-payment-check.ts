@@ -4,12 +4,9 @@ import { completeCartWorkflow } from "@medusajs/medusa/core-flows"
 import { RetryableError, isRetryable } from "../../../lib/errors"
 import { errorSummary, logger } from "../../../lib/logging"
 import { paytrApi, paytrCredentialsOf } from "../../../lib/payments/paytr"
-import { alertRecovery } from "../../../lib/payments/recovery-alert"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../../modules/integration-credentials"
 import type IntegrationCredentialsModuleService from "../../../modules/integration-credentials/service"
-import { PAYMENT_RECOVERY_MODULE } from "../../../modules/payment-recovery"
-import type PaymentRecoveryModuleService from "../../../modules/payment-recovery/service"
-import type { RecoveryInput } from "../../../modules/payment-recovery/service"
+import type { PaymentVerdict } from "./payment-orphan"
 import type { PaytrClaim, PaytrNotification, PaytrTarget } from "./paytr-notification"
 
 /**
@@ -18,23 +15,7 @@ import type { PaytrClaim, PaytrNotification, PaytrTarget } from "./paytr-notific
  * given back by the recovery job, once PayTR has had its "OK" (it refunds
  * no payment whose notification went unanswered, `007`).
  */
-export type PaytrVerdict =
-  | { kind: "skip" }
-  | {
-      kind: "complete"
-      cart_id: string
-      amount: number
-      currency_code: string
-      test_mode: boolean
-    }
-  | {
-      kind: "orphan"
-      reason: RecoveryInput["reason"]
-      amount: number
-      currency_code: string
-      test_mode: boolean
-      cart_id: string | null
-    }
+export type PaytrVerdict = PaymentVerdict
 
 export const checkPaytrPaymentStep = createStep(
   "payments-check-paytr-payment",
@@ -111,7 +92,10 @@ function completionWillFailAgain(error: unknown): boolean {
   )
 }
 
-/** Places the order under Medusa's cart lock; a completed cart returns its order. */
+/**
+ * Places the order under Medusa's cart lock; a completed cart returns its
+ * order. Any hosted form's verdict (PayTR's, iyzico's) of this shape.
+ */
 export const completePaidCartStep = createStep(
   "payments-complete-paid-cart",
   async (verdict: PaytrVerdict, { container }) => {
@@ -133,60 +117,10 @@ export const completePaidCartStep = createStep(
       throw new RetryableError("payments.completion_failed", { cause: error })
     }
     logger.warn({
-      event: "paytr.completion_refused",
+      event: "payments.completion_refused",
       cartId: verdict.cart_id,
       err: errorSummary(error),
     })
     return new StepResponse({ order_id: null, will_fail_again: true })
-  }
-)
-
-/** A payment that became no order, recorded once for the recovery job, with an alert. */
-export const recordPaytrOrphanStep = createStep(
-  "payments-record-paytr-orphan",
-  async (
-    input: {
-      notification: PaytrNotification
-      verdict: PaytrVerdict
-      completion: { order_id: string | null; will_fail_again: boolean }
-    },
-    { container }
-  ) => {
-    const { verdict, completion, notification } = input
-    const orphan: RecoveryInput | null =
-      verdict.kind === "orphan"
-        ? { provider: "paytr", reference: notification.merchant_oid, ...verdict }
-        : verdict.kind === "complete" && completion.will_fail_again
-          ? {
-              provider: "paytr",
-              reference: notification.merchant_oid,
-              reason: "completion_failed",
-              // What PayTR took for the order (its record), not the surcharge on top
-              amount: verdict.amount,
-              currency_code: verdict.currency_code,
-              test_mode: verdict.test_mode,
-              cart_id: verdict.cart_id,
-            }
-          : null
-    if (!orphan) {
-      return new StepResponse<string | null>(null)
-    }
-    const recorded = await container
-      .resolve<PaymentRecoveryModuleService>(PAYMENT_RECOVERY_MODULE)
-      .recordOrphan(orphan)
-    if (recorded.created) {
-      logger.error({
-        event: "payments.orphan_recorded",
-        provider: "paytr",
-        reference: orphan.reference,
-      })
-      // An alert that cannot be written must not lose the record: the job alerts again on refund
-      await alertRecovery(container, "orphan_recorded", { id: recorded.id, ...orphan }).catch(
-        (error: unknown) => {
-          logger.warn({ event: "payments.orphan_alert_failed", err: errorSummary(error) })
-        }
-      )
-    }
-    return new StepResponse<string | null>(recorded.id)
   }
 )

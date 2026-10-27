@@ -637,6 +637,10 @@
         "providerMax": "What the account allows",
         "count_one": "{{count}} installment",
         "count_other": "{{count}} installments"
+      },
+      "preferred": {
+        "title": "Preferred provider",
+        "hint": "The storefront offers it first for card payments; the installment table shows its prices."
       }
     },
     "integrations": {

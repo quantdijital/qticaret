@@ -10,6 +10,7 @@ import { providerAccountsQuery } from "@/features/settings/api/payments"
 import type { ProviderAccount } from "@/features/settings/api/payments"
 import { AccountBadges } from "@/features/settings/components/account-badges"
 import { InstallmentsCard } from "@/features/settings/components/installments-card"
+import { PreferredProviderRow } from "@/features/settings/components/preferred-provider"
 import { PAYMENT_GROUPS, PAYMENT_METHODS } from "@/features/settings/payment-methods"
 import type { PaymentMethod } from "@/features/settings/payment-methods"
 import { errorText } from "@/lib/errors"
@@ -69,6 +70,13 @@ export function PaymentsPage() {
   const { t } = useTranslation()
   const query = useQuery(providerAccountsQuery())
   const accounts = query.data?.accounts ?? []
+  // Stored and usable, as the backend counts them (`connectedCardProviders`)
+  const connectedCards = (["paytr", "iyzico"] as const).filter((id) =>
+    accounts.some(
+      ({ provider, state }) =>
+        provider === id && (state === "connected" || state === "unverified" || state === "rejected")
+    )
+  )
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title={t(`${P}.title`)} description={t(`${P}.subtitle`)} />
@@ -92,6 +100,7 @@ export function PaymentsPage() {
                   account={accounts.find(({ provider }) => provider === method.id)}
                 />
               ))}
+              {group === "card" ? <PreferredProviderRow connected={connectedCards} /> : null}
             </ul>
           </SectionCard>,
           // Installments follow the card providers they apply to

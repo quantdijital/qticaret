@@ -35,8 +35,8 @@ iyzico → callbackUrl (POST /hooks/iyzico/callback, gövde: token)
   - `identityNumber` zorunlu, 5–50 karakter. SSS "dummy değer gönderebilirsiniz" diyor; `11111111111`'in kendisi doğrulanamadı.
   - Tutar biçimi: örnekler `"1.0"`, SDK `.0` ekliyor. `"10.50"` kabulü doğrulanamadı.
   - Token ömrü: örnekte `tokenExpireTime: 1800` (birim yazmıyor).
-- **Callback:** iyzico `token`'ı POST'lar. Callback'in kendisinde imza: doğrulanamadı. Sonuç her zaman CF retrieve ile alınır.
-- **Yanıt imzası (doğrulanmalı):** `HMAC-SHA256(secretKey, değerler ":" ile)` hex. Fiyatlarda sondaki sıfırlar atılır.
+- **Callback:** iyzico `token`'ı alıcının tarayıcısından POST'lar; callback'in kendisi imzasız. Sonuç her zaman CF retrieve ile alınır.
+- **Yanıt imzası (initialize ve retrieve sandbox'ta doğrulandı, 2026-10-27):** `HMAC-SHA256(secretKey, değerler ":" ile)` hex. Fiyatlarda sondaki sıfırlar atılır.
   - CF initialize: `conversationId:token`.
   - CF retrieve: `paymentStatus:paymentId:currency:basketId:conversationId:paidPrice:price:token`.
   - Refund: `paymentId:price:currency:conversationId`.
@@ -86,6 +86,30 @@ iyzico → callbackUrl (POST /hooks/iyzico/callback, gövde: token)
   
   Kendi istemcimiz `lib/clients` üzerine yazılır. SDK'nın `lib/utils.js`'i ve dokümandaki örnek imza değerleri birim testinde referans alınır.
 
+- **Sandbox'ta ölçüldü (2026-10-27, F5 V9):**
+  - CF initialize `"10.5"` ve `"10.50"`'yi aynı kabul ediyor; biz iki ondalık gönderiyoruz. `paidPrice` `price`'tan küçük ya da büyük olabiliyor; biz ikisini de tutar olarak gönderiyoruz (indirim sepet satırlarında dağıtılmış).
+  - `identityNumber` için `11111111111` (ve `00000000000`) kabul edildi; TCKN toplanmıyor.
+  - Kalemler `price`'a eşit değilse `5062`.
+  - Yanıt `tokenExpireTime: 1800` (saniye), `paymentPageUrl` `sandbox-cpp.iyzipay.com`; initialize imzası (`conversationId:token`) doğrulandı.
+  - Ödenmemiş token için retrieve `5122`, bilinmeyen token `5124` (ikisi de imzasız).
+  - `callbackUrl` olarak `http://localhost:9000/...` kabul edildi; callback tarayıcıdan geldiği için yerelde gerçek sandbox ödemesi çalışıyor.
+  - Gerçek sandbox ödemesi (test kartı 5528790000000008, 3DS'siz) deneme sayfasından yapıldı: callback geldi, retrieve imzası (`paymentStatus:paymentId:currency:basketId:conversationId:paidPrice:price:token`) doğrulandı, sipariş açıldı.
+
+## Uygulama (F5 V9)
+- `pp_iyzico_iyzico` (`modules/payment-iyzico`): oturum yalnızca kendi Store ucumuzdan başlar. `conversationId` = `basketId` = `buyer.id` = oturum kimliği. Oturum verisinde token, form adresi, tutar (kuruş), para birimi, test modu ve dönüş adresleri; kişisel veri yok.
+- `callbackUrl` = `BACKEND_URL` + `/hooks/iyzico/callback?session=<oturum>&sig=<imza>`; imza oturumun mağazanın gizli anahtarıyla HMAC'i (yalnızca biz ve iyzico biliriz). Uç, imzası tutmayan adresi hiçbir şeye bakmadan ve iyzico'ya sormadan reddeder; kendi sınırı var (`payment_return`: adres başına dakikada 20, oturum başına 10 dakikada 10). `BACKEND_URL` staging ve canlıda zorunlu (https); yerelde `http://localhost:9000`.
+- Callback (`iyzicoCallbackWorkflow`): oturumun token'ı sabit zamanlı karşılaştırılır; sonuç iyzico'ya sorulur (imza, sepet = oturum). Ödenmiş, tutarı ve para birimi tutan, `fraudStatus` 1 olan ödeme sepeti tamamlar (Medusa sepet kilidi; ikinci callback aynı siparişi bulur). Ardından tarayıcı oturumun dönüş adresine gider:
+  - ödendi → başarı adresi;
+  - kart reddi ya da `fraudStatus` -1 → hata adresi (iyzico -1'i kendisi iade eder);
+  - `fraudStatus` 0 → başarı adresi + `payment_status=review` (sipariş, uzlaştırma işi onayı görünce açılır);
+  - siparişe dönüşemeyen ödeme → başarı adresi + `payment_status=refund`; oturumu silinmişse vitrinin ilk kökeni.
+- Sahipsiz ödeme `payment-recovery`'ye `provider: "iyzico"`, `reference` = iyzico'nun imzalı yanıtındaki `paymentId` ile yazılır. Kayıtlı bir ödeme bir daha asla siparişe dönüşmez (sonraki callback ya da iş, sepet yeniden tamamlanabilir olsa bile). İadesi V10'da; kurtarma işi şimdilik yalnızca PayTR satırlarını seçiyor (iyzico satırları PayTR'ninkileri bekletmesin).
+- Verilen her form `payment-forms` tablosuna yazılır (oturum, sepet, token, son geçerlilik): Medusa yeniden başlatılan ödemenin eski oturumunu siler ama form iyzico'da ödenebilir kalır. `iyzico-reconcile` işi (10 dakikada bir) 5 dakikadan eski açık formların hepsini sayfa sayfa callback'in akışıyla sorar (tarayıcısı dönmeyen alıcı, incelemedeki ödeme, silinmiş oturumun ödenmiş formu). Form ödenince, iade kaydına girince ya da ödenmeden süresi dolunca kapanır; bir günü geçen açık form uyarıyla kapanır.
+- Oturum verisi Store yanıtlarında görünür: Medusa'nın sakladığı ödeme verisinde kart bilgisi yok (yalnızca `payment_id`, taksit, fraud durumu ve satır işlemleri); panel kart bilgisini iyzico'ya sorarak gösterir (V10).
+- Webhook (V3 imzası) kullanıcının kararıyla gerçek firmaya kadar ertelendi (2026-10-27); akış callback + uzlaştırmayla eksiksiz.
+- Sağlayıcının `refundPayment`'i V10'a kadar `iyzico.refund_unavailable` döner.
+- Geliştirmede: deneme sayfası (`/dev/checkout`, ADR-0028) iyzico'yu paneldeki sandbox hesabıyla açar (tüm sayfa yönlendirmesi). Testler sahte iyzico'nun Checkout Form'unu ve tıklanabilir sayfasını (`/fake-cpp/<token>`: onayla, reddet, incelemede) kullanır.
+
 ## Kritik noktalar
 - Sepet ve alıcı sunucuda kurulur. Oturum verisi herkese açık sayılır; kişisel veri bırakılmaz (adr/0026).
 - itemTransactions (kalem ↔ paymentTransactionId) ödeme verisinde saklanır; kısmi iadenin temeli. Her sağlayıcı çıktısı verinin tamamıdır.
@@ -95,7 +119,7 @@ iyzico → callbackUrl (POST /hooks/iyzico/callback, gövde: token)
 API anahtarı ve gizli anahtar panelden girilir (Ayarlar > Ödeme > iyzico, adr/0027; V8, 2026-10-27).
 - Ayar yalnızca `test_mode` (panelde "Sandbox"); iki anahtar da gizli ve yalnızca yazılır. `test_mode` kimlik alanıdır: sandbox ↔ canlı geçişinde iki anahtar yeniden istenir.
 - Kayıttan önce bağlantı kontrolü: 1 TL için BIN'siz taksit sorgusu (salt okunur), hesabın moduna ait adreste. `1001` → "API anahtarı tanınmadı", `1000` → "gizli anahtar kabul edilmedi"; ağ/5xx → ulaşılamadı (PayTR'deki kurallar).
-- Panel bildirim adresini (`/hooks/iyzico/webhook`) ve iyzico panelindeki yerini (Ayarlar > Firma Ayarları > İşyeri Bildirimleri) gösterir; uç V9'da yazılır.
+- Panel bildirim adresini (`/hooks/iyzico/webhook`) ve iyzico panelindeki yerini (Ayarlar > Firma Ayarları > İşyeri Bildirimleri) gösterir; uç, webhook'larla birlikte gerçek firmaya kadar ertelendi.
 - Kullanıcının sandbox hesabı 2026-10-27'de panelden bağlandı ve doğrulandı; `.env`'deki `IYZICO_*` satırları artık kullanılmıyor.
 
 ## Testler

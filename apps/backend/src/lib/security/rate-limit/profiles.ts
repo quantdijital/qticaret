@@ -67,6 +67,12 @@ export const RATE_LIMIT_PROFILES = {
     perIdentity: { max: 3, windowMs: 10 * MINUTE },
   },
   webhook: { name: "webhook", perIp: { max: 600, windowMs: MINUTE } },
+  // F5 V9: a shopper's browser back from a hosted form (iyzico), once per payment
+  payment_return: {
+    name: "payment_return",
+    perIp: { max: 20, windowMs: MINUTE },
+    perIdentityAnyIp: { max: 10, windowMs: 10 * MINUTE },
+  },
   // F3.5: the storefront's 404 reports; beyond this a flood is not worth counting
   seo_report: { name: "seo_report", perIp: { max: 30, windowMs: MINUTE } },
   // F5 (adr/0027): saving or testing a provider account calls the provider
