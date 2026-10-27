@@ -48,8 +48,9 @@ Medusa module provider'ları izoledir; özel bir "settings" modülünü çağır
 ## Özel modüller (planlanan)
 | Modül | Tür | Amaç |
 |---|---|---|
-| `payment-iyzico` | Payment provider | iyzico Checkout Form, taksit, iade |
-| `payment-paytr` | Payment provider | PayTR iFrame, yedek sağlayıcı |
+| `payment-paytr` | Payment provider | PayTR iFrame, bildirim, taksit, iade (F5, adr/0026) |
+| `payment-iyzico` | Payment provider | iyzico Checkout Form, taksit, kalem bazlı iade (F5.11) |
+| `webhook-events` | Custom modül | Gelen sağlayıcı bildirimlerinin tekil kaydı, idempotency (F5; F7 de kullanır) |
 | `payment-bank-transfer` | Payment provider | Havale/EFT, manuel onay, süre aşımı iptali (F6) |
 | `payment-cod` | Payment provider | Kapıda ödeme, ek ücret, tutar sınırı (F6) |
 | `fulfillment-geliver` | Fulfillment provider | Teklif, etiket, takip, iade gönderisi |

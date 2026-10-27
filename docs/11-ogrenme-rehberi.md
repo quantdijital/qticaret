@@ -401,8 +401,8 @@ olarak yaz, sonra sor.
 | F2 | Platform çekirdeği | Feature flag, link, middleware, audit log, HTTP istemci deseni |
 | F3 | Katalog, SEO, stok | Varyant, slug, 301 yönlendirme, stok rezervasyonu, yarış durumu, asenkron içe aktarma |
 | F4 | Fiyat ve promosyon | Fiyat listesi, fiyat geçmişi, kupon, kampanya kuralları, oransal indirim dağıtımı |
-| F5 | iyzico | Payment provider, callback, webhook, idempotency, kısmi iade |
-| F6 | PayTR + havale + kapıda ödeme | HMAC, contract test, yedek sağlayıcı, manuel onaylı ödeme |
+| F5 | PayTR + iyzico + ortak ödeme altyapısı | Payment provider, HMAC, sunucudan sunucuya bildirim, callback + yanıt imzası, idempotency, uzlaştırma, kısmi ve kalem bazlı iade |
+| F6 | Havale + kapıda ödeme + yönlendirici | Contract test, yedek sağlayıcı, manuel onaylı ödeme, ters ibraz |
 | F7 | Geliver + iade yönetimi | Fulfillment provider, desi, webhook + polling, RMA |
 | F8 | E-fatura | Adapter deseni, retry, dead-letter |
 | F9 | Bildirimler | Notification provider, şablon, İYS, SPF/DKIM/DMARC |

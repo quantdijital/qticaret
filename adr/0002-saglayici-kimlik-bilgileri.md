@@ -1,7 +1,7 @@
 # ADR-0002: Sağlayıcı kimlik bilgilerinin yönetimi
 
-- **Durum:** Önerildi
-- **Tarih:** —
+- **Durum:** Kabul edildi (2026-10-27, F5 planlaması; kullanıcının kalıcı "önerileni uygula" talimatıyla, PROGRESS "Gözden geçir" listesinde). F0–F4 bu kararla yazıldı; ilk sağlayıcı anahtarları F5'te (PayTR) bu yolla gelir.
+- **Tarih:** 2026-10-27
 
 ## Bağlam
 Her tenant kendi iyzico/PayTR/Geliver/e-fatura hesabını kullanır. Medusa module provider'ları izoledir:

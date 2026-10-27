@@ -75,7 +75,7 @@
 | Uygulama/tema ekosistemi yok | Çekirdekte "uygulama gerektiren" ihtiyaçları kapatmak (madde 1, 2, 7); tema sayısı F18'de az ama kaliteli |
 | Pazaryeri entegrasyonları yok (ikas/T-Soft güçlü) | F19 ilk madde; Trendyol/HB/N11 öncelik |
 | Marka bilinirliği, referans yok | İlk müşteri vaka çalışması; geçiş hizmeti ile giriş |
-| Shop Pay benzeri cüzdan/dönüşüm aracı yok | iyzico/PayTR hosted form + kayıtlı kart (F5.11); taksit tablosu |
+| Shop Pay benzeri cüzdan/dönüşüm aracı yok | PayTR/iyzico hosted form; taksit tablosu. Satıcı tarafı kayıtlı kart iki sağlayıcıda da kart verisini bize getirdiği için kapsam dışı (adr/0026); iyzico Checkout Form'un müşteri cüzdanı F5.11'de değerlendirilir |
 | POS, mobil uygulama, sadakat yok | F19 |
 | Küresel ölçek/uptime kanıtı yok | F15 yük testi, F16 izleme, SLA (doc 12) |
 | AI içerik üretimi rakiplerde var | ADR-0005: kural motoru + opsiyonel LLM; farkımız üretim değil **kalite kapısı** |

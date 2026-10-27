@@ -3,9 +3,38 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
+**F5 — Ödeme: PayTR + iyzico (+ ortak ödeme altyapısı): planlandı (2026-10-27).**
+- Kullanıcı 2026-10-27'de iki sağlayıcının altyapısının da hazırlanmasını istedi; canlıya alma sonra. docs/03 güncellendi.
+- PayTR önce yazılıyor: ilk müşterinin firması PayTR'yi canlıda kullanıyor ve test modunda bağlanmayı kabul etti.
+- iyzico başvurusu sürüyor; iyzico görevleri PayTR'den sonra geliyor (V8–V10). Havale, kapıda ödeme, yönlendirici ve ters ibraz F6'da kaldı.
+- Plan aşağıda "F5 görev planı". ADR-0026 önerildi, ADR-0002 kabul edildi.
+- Henüz kod yok. Dal `f5-payments`, `f4-pricing-promotions` üzerinden açıldı (2026-10-27, plan dokümanları).
+
 **Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: BİTTİ** (T1a–T16; kabul kriterlerinin hepsi testlerle işaretli, docs/03; son eksik iki kanıt, danışmanın p95 ölçümü ve yedi sayfa türünün SEO sözleşme testi, kapanışta eklendi). Playwright e2e altyapısı kuruldu; CI düzeltildi. **F4 — Fiyatlandırma ve promosyon: BİTTİ** (plan ve ADR-0023/0024/0025 kabul edildi; U1 `price-history`, U4 kuponlar, U7 indirim dağılımı ve iade tutarı, U2 fiyat listeleri, U3 indirim gösterimi, U5 tek kullanımlık kodlar, U6 otomatik kampanyalar ve kargo bedava eşiği, U8 hediye kartı ve mağaza kredisi bitti (KK1–KK4 işaretli); F4 kapanış incelemesi yapıldı, bulgular düzeltildi: F4 BİTTİ). Dal `f4-pricing-promotions`. Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı. F1, F2 ve F3 dalları push edildi (kullanıcı 2026-10-26: "pushları sen önerdiğinde yapabilirsin"); PR açılmadı.
 
 ## Son oturum özeti
+**2026-10-27 (F5 planlaması, `/faz-baslat F5`).** Kod yazılmadı. Dal `f5-payments` (`f4-pricing-promotions` üzerinden) yalnızca plan dokümanlarıyla açıldı.
+- **Kapsam ve sıra (kullanıcı):** F5 artık PayTR + iyzico.
+  - PayTR önce yazılıyor: ilk müşterinin firması onu canlıda kullanıyor ve test modunda bağlanmayı kabul etti.
+  - iyzico başvurusu sürüyor; altyapısı da F5'te hazırlanıyor (F5.11), canlıya alınması sonra.
+  - Havale, kapıda ödeme, yönlendirici ve ters ibraz F6'da kaldı.
+  - docs/03, 01, 11, 12 ve 15 buna göre güncellendi.
+- **Doğrulama (üç araştırma ajanı):**
+  - Medusa 2.21.2'nin ödeme akışı GitHub v2.21.2 etiketinden incelendi; `node_modules` okuması izin kuralıyla kapalı. Planı etkileyen bulgular:
+    - istemcinin gönderdiği oturum verisi sağlayıcıya ulaşıyor ve Store yanıtında görünüyor;
+    - Medusa tutarı sepet toplamıyla karşılaştırmıyor;
+    - hazır webhook ucu imzayı doğrulamadan 200 dönüyor;
+    - telafi zincirinde çift geri ödeme riski var.
+  - PayTR (dev.paytr.com) ve iyzico (docs.iyzico.com) güncel API'leri doğrulandı. Doğrulanan bilgiler `docs/entegrasyonlar/paytr.md` ve `iyzico.md`'ye yazıldı; eski dokümandaki yanlışlar düzeltildi.
+- **Kararlar:**
+  - ADR-0026 önerildi: ödeme oturumunu ve bildirim ucunu biz yazıyoruz, onay sağlayıcıdan yeniden sorgulanarak veriliyor, sahipsiz ödeme otomatik iade ediliyor, iade tutarı kalemlerden hesaplanıyor, test modunda iade koruması var.
+  - ADR-0002 kabul edildi.
+  - Kayıtlı kart kapsam dışı.
+  - iyzico SDK'sı kullanılmayacak.
+- **Plan:** V1–V11 aşağıda, "F5 görev planı".
+  - PayTR'nin bildirim adresi hesap başına tek. Firmanın canlı hesabıyla gerçek test bu yüzden V11'de kısa bir test penceresinde yapılacak (Açık sorular).
+- **iyzico sandbox:** Kullanıcı hesap açtı, anahtarları `.env`'e yazdı. `.env` okunmadan tek bir salt okunur taksit sorgusuyla denendi: `success`, 6 satır. IYZWSv2 imzası doğru çalışıyor.
+
 **2026-10-26/27 (U8, panel dengesi, F4 kapanışı; kullanıcı yatarken "sabaha kadar çalış, izin isteme").** F4 BİTTİ; dal `f4-pricing-promotions`, son commit `87636da`, CI yeşil.
 - **U8 hediye kartı ve mağaza kredisi** (`@medusajs/loyalty-plugin` 2.21.2, `promotions.gift_cards` bayrağı): panelde Kampanyalar > Hediye kartları, müşteri sayfasında mağaza kredisi, sipariş ödemesinde kredi satırı. Bağımsız kod ve güvenlik incelemesinin bulguları düzeltildi: kendi kod üreticimiz (80 bit), kod denemesi sınırı (HEAD dahil), alışverişçiye kartın yalnızca kendi alanları, kredi yalnızca sepetin sahibine, misafire hesap yok, `claim` kapalı, denetim kaydı ve loglarda kod maskesi.
 - **Panel dengesi (kullanıcı kuralı):** `PageGrid`/`PageColumn` ile yan yana kartlar eşit, satırdaki kontroller tek boy; `e2e/layout.e2e.ts` her sayfayı ölçüyor; docs/18 §2 "Denge". Raporlar dört sekme (Özet, Ürünler, Kategoriler, Gün gün), Görünüm ayarları kartlara bölündü.
@@ -897,7 +926,59 @@
 - **Daha önce:** F1 planlaması ve F0.2–F0.8 (2026-10-24), F0.1 monorepo (2026-10-24 sabahı), SEO ve güvenlik dokümanları (2026-10-22).
 
 ## Sıradaki görev
-**Claude'un sıradaki işi:** F4 bitti (U1–U8, KK1–KK4 işaretli, kapanış incelemesi bulguları düzeltildi, madde 169). Sıradaki faz F5 (iyzico ödeme): `/faz-baslat F5`. iyzico sandbox anahtarları kullanıcıdan gelecek (secret; koda girmez). Plan aşağıda, "F4 görev planı". F4 kodu `f4-pricing-promotions` dalında (F1–F3 birleştirilmediği için `f3-catalog-seo-stock` üzerinden).
+**Claude'un sıradaki işi:** F5 V1 (ortak altyapı + PayTR istemcisi), plan aşağıda "F5 görev planı". V1–V10 sahte sunucularla, anahtarsız yapılır. Gerçek testler (Açık sorular):
+- iyzico sandbox'ı: anahtarlar `.env`'de ve çalışıyor (2026-10-27); V9'dan itibaren kullanılır.
+- PayTR: firmanın canlı hesabıyla, V11'de kısa bir test penceresinde. F4 bitti (U1–U8, KK1–KK4, madde 169); F4 kodu `f4-pricing-promotions` dalında (F1–F3 birleştirilmediği için `f3-catalog-seo-stock` üzerinden).
+
+### F5 görev planı (2026-10-27; Medusa 2.21.2 kaynağı, dev.paytr.com ve docs.iyzico.com'dan doğrulandı)
+Kararlar: ADR-0026 (barındırılan ödeme formu akışı; önerildi, kalıcı talimatla V1 başında uygulanır), ADR-0002 (anahtarlar env'de; kabul edildi). PayTR ayrıntıları `docs/entegrasyonlar/paytr.md`, iyzico ayrıntıları `docs/entegrasyonlar/iyzico.md`.
+
+| # | F5 | Görev | Bağımlılık | KK |
+|---|---|---|---|---|
+| V1 | F5.1 + F5.2 | Ortak altyapı ve PayTR istemcisi: `packages/testing` workspace paketi (sahte PayTR sunucusu: token, durum sorgusu, iade, taksit oranları; bildirimi imzalayıp gönderen yardımcı; TR fixture fabrikaları, algoritmik geçerli sahte TCKN), `lib/clients` form-encoded gövde, `client.ts` (dört imza dokümandaki örneklerle test vektörlü; tutar biçimleri tek modülde: kuruş, `"11.97"`, `"10,8"`; Zod yanıtları; `err_no` → hata anahtarı), env şeması + `env.example` + açılış kontrolü (canlıda base URL yalnızca paytr.com), health kontrolü, redaksiyon (`hash`, `utoken`, `ctoken`) | — | — |
+| V2 | F5.3 | Provider ve ödeme başlatma: `payment-paytr` (`pp_paytr_paytr`), medusa-config, bölgeye bağlama (bootstrap + mevcut bölgeler için migration-script; bağlama kümenin tamamını değiştirir, `pp_system_default` korunur). `lib/payments/basket` (saf, iyzico da kullanır): F4.7 paylarından kuruş satırları, kargo ayrı satır, 0 TL satırlar birleştirilir, kredi satırları dağıtılır, toplam = oturum tutarı. `POST /store/carts/:id/payment-session`: sepet hazır mı, alıcı, `req.ip`, dönüş adresi allowlist'i (`STORE_CORS`), `checkout` hız profili. Çekirdek `payment-sessions` ucu PayTR'ye 400. `initiatePayment`: `merchant_oid` türetme, oturumda yalnızca token/oid/beklenen tutar/para birimi/son geçerlilik. `deletePayment` hiç fırlatmaz. Store yanıtında `payment_sessions.data` ve `context` sızıntı testi | V1 | KK5 |
+| V3 | F5.4 + F5.5 | Bildirim ve sipariş: `webhook-events` modülü (sağlayıcı + olay anahtarı tekil, durum, deneme sayısı, kişisel verisiz özet, eski kayıt temizliği). `POST /hooks/paytr`: form gövde, `webhook` hız profili, imza sabit zamanlı, düz metin "OK"; işleme başarısızsa "OK" yok; bizim oturumumuza ait olmayan `merchant_oid`'e "OK" yok (paylaşılan canlı hesapta firmanın bildirimi PayTR'de bekler). `authorizePayment` = durum sorgusu (tutar, para birimi, test modu oturumla karşılaştırılır; `captured`). Sepet tamamlama sepet kilidiyle (Medusa `processPaymentWorkflow` mı kendi workflow'umuz mu, testle seçilir). Başarısız/zaman aşımı bildirimi sepeti bozmaz, sepet yeniden ödenebilir. `capturePayment`/`getPaymentStatus`/`retrievePayment`. Telafi zincirinde çift geri ödeme testi | V2 | KK2, KK3 |
+| V4 | F5.6 | Sahipsiz ödeme ve uzlaştırma: siparişe dönüşemeyen ödeme (silinmiş oturum, başka oturumla tamamlanmış sepet, tükenen stok, tutar farkı) otomatik iade + denetim kaydı + panel uyarısı; bildirimi gelmeyen açık oturumlar için zamanlanmış durum sorgusu işi (`outcome_unknown` kuralı) | V3 | KK6 |
+| V5 | F5.7 | İade ve iptal: `refundPayment` (`reference_no` = iade kimliği, belirsiz sonuçta `returns[]` eşlemesi, `000/007/008/009/010/011` anahtarları, `payment.data`'da iade kaydı, `idempotency_key`), `cancelPayment` = tam iade (iptal API'si yok). Test modunda yalnızca durum sorgusunda `test_mode=1` olan işlem iade edilebilir (canlı anahtarla firmanın gerçek ödemesi iade edilemez; testli). Satır bazlı iade defteri (F4.7'den devreden iki madde: serbest iade satırın kalanını düşürür; tutar iadenin kendi kalemlerinden, kilitli workflow'da). `POST /admin/orders/:id/refunds` (kalemler, denetim kaydı). Sipariş iptalinde tam iade testi. Panelde kalem seçerek para iadesi | V3 | KK4 |
+| V6 | F5.8 | Taksit: `GET /store/payment/installments` (varyant ya da sepet; tutar sunucuda), oranlar günde bir çekilip saklanır (Redis), `installment` hız profili; mağaza ayarı (`payments` bölümü: taksit açık/kapalı, en çok taksit → token isteği). Koşul: yalnızca iFrame kullanan hesabın oran API'sine erişimi test hesabıyla doğrulanır; yoksa PayTR'nin taksit tablosu kodu F18'e not edilir | V2 | — |
+| V7 | F5.9 | Panel: sipariş detayında PayTR işlem kartı (işlem no, taksit, kart markası, son 4 hane, test modu rozeti, iade geçmişi), Ayarlar > Ödeme (durum, test modu, kopyalanabilir bildirim adresi, taksit ayarları), Entegrasyonlar sağlık kartı, kurulum sihirbazının ödeme adımı, dashboard'da hatalı/sahipsiz ödeme sayısı (docs/06); e2e duman + iki modlu axe + denge testi | V3, V5, V6 | — |
+| V8 | F5.11 | iyzico istemcisi ve sahte sunucusu: IYZWSv2 imzası (dokümandaki örnek değer ve SDK'nın `utils.js`'i test vektörü), yanıt imzası doğrulaması (sondaki sıfırları atan fiyat biçimi), hata modeli (`errorCode` → anahtar, "Retry" sütunu), env (`IYZICO_*`; canlı anahtar sandbox URL'siyle açılmaz), health kontrolü, sahte iyzico sunucusu (CF initialize/retrieve, detail, refund, cancel, installment, webhook imzalayıcı) | V1 | — |
+| V9 | F5.11 | iyzico ödeme akışı: `payment-iyzico` (`pp_iyzico_iyzico`), aynı Store ucu ve sepet kurucusu (kargo ayrı kalem, 0 TL birleştirme), alıcı (`identityNumber`: TCKN gönderilmez, iyzico'nun kabul ettiği yer tutucu; sandbox'ta doğrulanır), `POST /hooks/iyzico/callback` (form gövde, sonuç sorgusu + yanıt imzası, tutar eşlemesi, cart complete, allowlist'li dönüş yönlendirmesi), webhook (V3 imzası, `webhook-events`), `fraudStatus` 0 → bekleyen ödeme + sorgu işi, -1 → iade edilmiş sayılır; sahipsiz ödeme ve uzlaştırma V4 kalıbıyla | V3, V4, V8 | iyzico KK'sı (sandbox) |
+| V10 | F5.11 | iyzico iade, iptal, taksit ve panel: kalem bazlı iade v1 (itemTransactions ödeme verisinde, tutarın satır kalanlarına dağıtımı, 10245/10223), aynı gün iptal (yalnızca tam tutar; sonrası iade), taksit ucunun iyzico kaynağı (BIN'siz), panel işlem kartında iyzico alanları (paymentId, taksit, kart ailesi, son 4 hane, fraud durumu), Ayarlar > Ödeme'de sağlayıcı seçimi | V5, V6, V7, V9 | iyzico KK'sı (kısmi iade) |
+| V11 | F5.10 | Kapanış: sağlayıcıdan bağımsız sözleşme test paketi (başlatma, bildirim, yetkilendirme, iade, iptal, silme; iki sağlayıcı da geçer; F6.4 genişletir), `@sandbox` etiketli gerçek testler (iyzico sandbox; PayTR test penceresi), dashboard özetinin siparişli senaryo testi (F2'den devreden), ödeme modüllerinde kapsam ≥ %80, güvenlik ve kod incelemesi, ADR-0026 uygulama notu | V1–V10, test hesapları | KK1, KK7 |
+
+Sıra: V1 → V2 → V3 → (V4, V5, V6) → V7 → V8 → V9 → V10 → V11. V8 V1'den sonra her an başlayabilir; iyzico sandbox hesabı erken açılırsa V8–V9 öne alınıp ortak altyapı iki sağlayıcıyla erken sınanır.
+
+Medusa 2.21.2 bulguları (planı etkileyenler; kaynak GitHub v2.21.2 etiketi, çünkü `node_modules` okuması izin kuralıyla kapalı):
+- **Sağlayıcının görebildikleri:** Sağlayıcı izole. Eline `amount`, `currency_code`, `data` ve `context` gelir; `context` giriş yapmış müşteriyi ve `idempotency_key`'i taşır, sepeti taşımaz.
+- **Oturum verisi:**
+  - Çekirdek oturum ucu istemciden serbest `data` alır. Sağlayıcı üzerine yazmadıkça bu veri oturumda kalır ve Store yanıtında görünür.
+  - Uçta sahiplik kontrolü yok, workflow'da kilit ve hook yok.
+  - `context` (müşteri e-postası, telefonu, adresleri) oturumda kalıcı tutuluyor; Store yanıtına çıkıp çıkmadığı doğrulanamadı (V2 testi).
+- **Tutar kontrolü yok:** Medusa ödenen tutarı sepet toplamıyla hiçbir yerde karşılaştırmıyor.
+- **Sepet değişince:** Sepet toplamı değişince oturumlar silinir, `updatePayment` çağrılmaz. `deletePayment` fırlatırsa sepet güncellemesi başarısız olur.
+- **Sipariş ve yetkilendirme sırası:**
+  - Sipariş yetkilendirmeden önce oluşur, yetkilendirme başarısızsa geri alınır.
+  - Sağlayıcı `captured` dönerse tahsilat kaydı kendiliğinden açılır.
+- **Mükerrer tamamlama:** Tamamlama sepet kimliğiyle kilitlenir (30 sn) ve `order_cart` kaydıyla korunur; ikinci çalıştırma aynı siparişi döner. Kilidi 30 sn bekleyen çalıştırma ise hata alır.
+- **Hazır webhook ucu (`/hooks/payment/:provider`):** imza doğrulamadan 200 döner, işi 5 sn gecikmeli olayla en çok 3 denemede yapar, idempotency yok. Zaten tahsil edilmiş ödeme için `captured` eylemi sipariş işlemini çiftleyebilir (çıkarım).
+- **İade:** Sağlayıcıya yalnızca `{ amount, data, context: { idempotency_key: refund.id } }` gider. Sağlayıcının her çıktısı `payment.data`'nın tamamının yerine geçer.
+- **İptal:** Sipariş iptali tahsil edilmiş ödemede iade yoluna gider. Yetkilendirme telafisi ise tahsilata bakmadan `cancelPayment` çağırır; ardından iade adımı da çalışabilir (çift geri ödeme riski, çıkarım).
+- **Bölgeye sağlayıcı bağlama:** sağlayıcı kümesinin tamamının yerine geçer; eksik ya da kapalı sağlayıcıda hata verir. Bootstrap mevcut bölgeye dokunmuyor.
+- **Bildirim gövdesi:** Medusa gövdeyi varsayılan olarak `json`, `text` ve `urlencoded` biçimlerinde okur; PayTR'nin form gövdesi ek ayar gerektirmez. `/store` altı publishable key istediği için bildirim ucu `/hooks` altında.
+- **Tahsil edilecek tutar:** `cart.total`, kredi satırları düşülmüş tutardır ve ödeme koleksiyonunun tutarına eşittir.
+
+PayTR bulguları (planı etkileyenler):
+- **Onay ve bildirim:**
+  - Siparişi yalnızca bildirim onaylar.
+  - Bildirim adresi hesap başına tek, panelden ayarlanır.
+  - İmza yalnızca `merchant_oid`, `status` ve `total_amount`'u kapsar.
+  - Mükerrer bildirim gelir; "OK" alınana kadar tekrarlanır.
+- **Test modu:** ayrı test ortamı yok, test modu canlı anahtarlarla çalışır.
+- **`merchant_oid`:** yalnızca harf ve rakam.
+- **İade:** iptal API'si yok, iade tutar bazlı. İdempotency belgelenmemiş; `reference_no` durum sorgusunda döner.
+- **Kayıtlı kart:** yalnızca Direkt API'de var; kapsam dışı.
+- **Ters ibraz:** bildirimi yok (F6.7 elle kayıt).
 
 1. **Kullanıcı:**
    - **F4 kararları:** ADR-0023/0024/0025 kabul edildi (2026-10-26). Dışarıda bekleyen: 30 gün kuralının hukukçu teyidi, hediye kartı vergisinin mali müşavir teyidi (docs/12).
@@ -980,7 +1061,37 @@ Devreden işlerin F3 görevlerine dağılımı:
 F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde: `git show 118e835:PROGRESS.md`.
 
 ## Açık sorular / bloklayıcılar
-- [ ] **F5 için iyzico sandbox anahtarları** (API key + secret key; `.env`'e kullanıcı yazar, koda/loga girmez). Gelmeden F5'in sağlayıcı iskeleti ve sahte sunucuyla testleri yazılabilir; gerçek sandbox doğrulaması anahtar ister.
+- [ ] **F5 PayTR gerçek testi (V11; kullanıcı + firma).** Firmanın hesabı canlıda kullanılıyor; firma test modunda bağlanmayı kabul etti (kullanıcı 2026-10-27).
+  - Bildirim adresi hesap başına tek olduğu için test, kısa bir pencerede yapılır:
+    1. Firma, satışın düşük olduğu bir saatte PayTR panelinden bildirim adresini bizim tünel adresimize çevirir.
+    2. Test yapılır.
+    3. Firma adresi geri alır ve panelden "Duran Bildirimleri Yeniden Başlat"ı çalıştırır.
+  - Pencere sırasında firmanın gerçek siparişlerine ait bildirimlere "OK" dönmüyoruz (ADR-0026); bu bildirimler PayTR'de bekliyor. Geri alındıktan sonra bekleyen bildirimlerin yeni adrese gidip gitmediği pencerede kontrol edilir.
+  - Pencere gerektirmeyen yol: PayTR'den ayrı bir test mağazası istemek. Firma sorabilirse bu daha temiz.
+  - Anahtarlar (`PAYTR_MERCHANT_ID`, `PAYTR_MERCHANT_KEY`, `PAYTR_MERCHANT_SALT`) yalnızca test penceresinde, kullanıcının yerel `.env`'inde tutulur. CI'a ve başka bir ortama girmez, test bitince silinir.
+  - Bu anahtar firmanın gerçek ödemelerini iade edebilir. Kod, test modunda gerçek işlemi iade etmeyi reddediyor (V5).
+  - V1–V10 bu hesap olmadan yapılır.
+- [x] **iyzico sandbox hesabı:** Kullanıcı 2026-10-27'de açtı.
+  - `IYZICO_API_KEY`, `IYZICO_SECRET_KEY` ve `IYZICO_BASE_URL` `apps/backend/.env`'de; değerler okunmadı.
+  - Aynı gün tek bir salt okunur çağrıyla denendi: BIN'siz taksit sorgusu `success` döndü, 6 satır. IYZWSv2 imzası dokümandaki formülle çalışıyor (`randomKey + path + JSON gövde`).
+  - iyzico akışı V9'dan itibaren gerçek sandbox'a karşı denenir.
+  - Açık kalan: webhook V3 imzası iyzico'ya e-postayla açtırılır (docs/12). Canlı başvuru (kullanıcı 2026-10-27'de başlattı) F5 kodunu bloklamıyor.
+- [ ] **Gözden geçir: F5 planlamasında verilen kararlar (2026-10-27; kalıcı "önerileni uygula" talimatıyla):**
+  - **ADR-0002 kabul edildi:** sağlayıcı anahtarları env'de. F0'dan beri "Önerildi"de bekliyordu; F0–F4 bu kararla yazıldı.
+  - **ADR-0026 önerildi** (V1 başında uygulanır):
+    - Ödeme oturumunu kendi Store ucumuz açar; çekirdek oturum ucu barındırılan form sağlayıcılarına kapalı.
+    - Medusa'nın `/hooks/payment/:provider` ucu yerine kendi bildirim ucumuz kullanılır; "OK" yalnızca sipariş açıldıktan sonra döner.
+    - Siparişe dönüşemeyen ödeme otomatik iade edilir.
+    - İade tutarını bizim workflow'umuz kalemlerden hesaplar.
+  - **Kayıtlı kart (eski F5.11) kapsam dışı:** iki sağlayıcıda da satıcı tarafı kart saklama, kart verisini bizim tarafımıza getiriyor (SAQ-A dışı). docs/15 düzeltildi.
+  - **iyzico'da `identityNumber`:** TCKN gönderilmez (veri en aza indirme); iyzico SSS'sinin izin verdiği yer tutucu gönderilir, sandbox'ta doğrulanır (V9).
+  - **Test modunda iade koruması:** yalnızca test işlemleri iade edilebilir (V5).
+  - **iyzico'da resmi SDK (`iyzipay`) kullanılmaz:** zaman aşımı, yeniden deneme ve yanıt imzası doğrulaması yok; eski bir HTTP kütüphanesi üzerinden yaklaşık 20 bağımlılık getiriyor. Kendi istemcimiz yazılır.
+  - **Dokümanlar:** iyzico ve PayTR dokümanlarındaki doğrulanmamış ya da yanlış maddeler düzeltildi:
+    - "merchant_oid = session id";
+    - "tutarlar kuruş";
+    - iyzico'da "gün sonu öncesi iptal" ve "2 ondalık string";
+    - "taksit için BIN gerekir".
 - [ ] **Kullanıcı kontrolü (panel):** Raporlar'ın dört sekmesi, Görünüm ayarlarının yeni düzeni, Kampanyalar > Hediye kartları (bayrak Ayarlar > Özellikler'den açılır), kod partisi "Durdur", müşteri sayfasında mağaza kredisi.
 - [ ] **PR ve birleştirme:** F1 → F2 → F3 → F4 dalları push edildi; PR açılması ve birleştirme sırası kullanıcının kararı.
 - [x] **F3 kararları:** Kullanıcı 2026-10-25'te önerilerin hepsini onayladı (ayrıntı "Sıradaki görev" madde 2).
@@ -1136,8 +1247,8 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
 | Panel P1–P6 (adr/0022) | ⏳ P1–P4 ekranları yazıldı (kullanıcı kontrolü bekliyor) |
 | F3 Katalog, SEO motoru ve stok | ✅ (KK'lar işaretli; PR ve birleştirme kullanıcının kararı) |
 | F4 Fiyatlandırma ve promosyon | ✅ (U1–U8; KK1–KK4; kapanış incelemesi 2026-10-27) |
-| F5 Ödeme: iyzico | ⬜ |
-| F6 Ödeme: PayTR + havale/EFT + kapıda ödeme + yönlendirici + ters ibraz | ⬜ |
+| F5 Ödeme: PayTR + iyzico (+ ortak ödeme altyapısı) | ⏳ planlandı (V1–V11, 2026-10-27) |
+| F6 Ödeme: havale/EFT + kapıda ödeme + yönlendirici + ters ibraz | ⬜ |
 | F7 Kargo, sipariş operasyonu, iade ve değişim | ⬜ |
 | F8 E-fatura | ⬜ |
 | F9 Bildirimler (e-posta/SMS) | ⬜ |

@@ -18,8 +18,8 @@
 | F2 | Platform çekirdek modülleri + güvenlik tabanı | Temel |
 | F3 | Katalog, SEO motoru ve stok | Ticaret |
 | F4 | Fiyatlandırma ve promosyon | Ticaret |
-| F5 | Ödeme: iyzico | Ödeme |
-| F6 | Ödeme: PayTR + havale/EFT + kapıda ödeme + yönlendirici + ters ibraz | Ödeme |
+| F5 | Ödeme: PayTR + iyzico (+ ortak ödeme altyapısı) | Ödeme |
+| F6 | Ödeme: havale/EFT + kapıda ödeme + yönlendirici + ters ibraz | Ödeme |
 | F7 | Kargo, sipariş operasyonu, iade ve değişim | Operasyon |
 | F8 | E-fatura / e-arşiv | Operasyon |
 | F9 | Bildirimler | Operasyon |
@@ -209,35 +209,40 @@ F17 öncesinde tenant'lar F16 script'leriyle elle açılır.
 
 ---
 
-## F5 — Ödeme: iyzico
-**Hedef:** Üretime hazır iyzico payment provider. Detay: `docs/entegrasyonlar/iyzico.md`
+## F5 — Ödeme: PayTR + iyzico
+**Hedef:** Üretime hazır PayTR ve iyzico payment provider'ları ve barındırılan ödeme formlarının ortak altyapısı (adr/0026). Detay: `docs/entegrasyonlar/paytr.md`, `docs/entegrasyonlar/iyzico.md`
+> Sıra değişikliği (2026-10-27, kullanıcı): ilk müşteri PayTR ile çalışıyor, test bilgisi buradan alınıyor; PayTR önce yazılır. iyzico'ya başvuru sürüyor; altyapısı da F5'te hazırlanır (F5.11), canlıya alınması sonra. Ortak parçalar (sunucuda sepet, bildirim kaydı, dönüş allowlist'i, sahte sunucular, sözleşme testleri) iki sağlayıcıya göre yazılır.
 
-- F5.1 `client.ts`: imzalı istek üretimi, sandbox/prod ayrımı (env), tip güvenli yanıtlar
-- F5.2 `initiatePayment`: Checkout Form başlatma; basket item'lar sunucudaki sepetten üretilir
-- F5.3 Callback akışı: `POST /hooks/iyzico/callback` → token ile sonuç sorgusu → cart complete workflow; başarı/başarısız dönüş URL'leri storefront origin allowlist'iyle sınırlı (open redirect yok)
-- F5.4 `authorizePayment` / `capturePayment` / `getPaymentStatus` / `retrievePayment`
-- F5.5 `refundPayment`: tam ve kısmi iade (kalem bazlı transaction ID eşlemesi)
-- F5.6 `cancelPayment`: aynı gün iptal / sonrası iade mantığı
-- F5.7 Webhook: imza doğrulama, idempotency tablosu, `getWebhookActionAndData`
-- F5.8 Taksit: `POST /store/payment/installments` (BIN + tutar → banka/taksit tablosu), cache'li, rate limitli
-- F5.9 Admin widget: sipariş detayında iyzico işlem bilgisi (paymentId, taksit, kart ailesi, son 4 hane maskeli)
-- F5.10 Mock iyzico sunucusu (`packages/testing`) + entegrasyon testleri
-- F5.11 Kayıtlı kart (iyzico kart saklama): müşteri onayıyla, kart verisi bizde değil iyzico'da (doğrula)
+- F5.1 Ortak altyapı: `packages/testing` (sahte sağlayıcı sunucusu, TR fixture fabrikaları), `lib/clients` form gövdesi, `webhook-events` modülü (sağlayıcı + olay anahtarı tekil; idempotency)
+- F5.2 `client.ts`: token ve hash hesapları, tutar biçimleri (kuruş tam sayı, TL ondalık), test modu (env), tip güvenli yanıtlar, hata kodu eşlemesi
+- F5.3 Ödeme başlatma: oturumu kendi Store ucumuz açar; sepet, alıcı, istemci IP'si ve dönüş adresleri sunucudaki sepetten; çekirdek `payment-sessions` ucu bu sağlayıcıya kapalı; ok/fail adresleri storefront origin allowlist'iyle sınırlı (open redirect yok)
+- F5.4 Bildirim akışı: `POST /hooks/paytr` → imza → idempotency kaydı → durum sorgusuyla yetkilendirme → cart complete → düz metin "OK"
+- F5.5 `authorizePayment` / `capturePayment` / `getPaymentStatus` / `retrievePayment` / `deletePayment`
+- F5.6 Sahipsiz ödeme ve uzlaştırma: siparişe dönüşemeyen ödeme (bayat oturum, başka oturumla tamamlanmış sepet, tükenen stok, tutar farkı) otomatik iade; bildirimi gelmeyen oturumlar için durum sorgusu işi
+- F5.7 `refundPayment` / `cancelPayment`: tam ve kısmi iade; tutar iadenin kalemlerinden (F4.7 defteri, kilitli workflow); çift geri ödeme koruması
+- F5.8 Taksit: `GET /store/payment/installments` (tutar sunucuda, varyant ya da sepetten), günlük önbellekli oranlar, rate limitli; mağaza taksit ayarları
+- F5.9 Panel: sipariş detayında PayTR işlem bilgisi (işlem no, taksit, kart markası, maskeli son 4 hane, iade geçmişi), kalem seçerek para iadesi, Ayarlar > Ödeme (durum, test modu, bildirim adresi, taksit)
+- F5.10 Sahte PayTR sunucusu + ortak ödeme sözleşme test paketinin temeli (F6.4 genişletir) + entegrasyon testleri
+- F5.11 `payment-iyzico` provider, aynı altyapı üzerine (adr/0026; detay `docs/entegrasyonlar/iyzico.md`): kendi istemcimiz (IYZWSv2 imzası, yanıt imzası doğrulaması); Checkout Form (sunucuda sepet, kargo ayrı kalem, 0 TL satırlar birleştirilir); `POST /hooks/iyzico/callback` → sonuç sorgusu → cart complete → dönüş adresine yönlendirme (allowlist); webhook (V3 imzası); `fraudStatus` incelemedeyse ödeme bekletilir ve sorgulanır; kalem bazlı iade (`paymentTransactionId`, itemTransactions saklanır); aynı gün iptal (yalnızca tam tutar) / sonrası iade; taksit (BIN'siz tablo); sahte iyzico sunucusu
+- Kayıtlı kart kapsam dışı: PayTR'de yalnızca Direkt API'de, iyzico'da satıcı tarafı saklama kart numarası istiyor (kart bilgisi bizde, SAQ-A dışı; adr/0026)
 
 **KK:**
-- [ ] Sandbox'ta tek çekim + taksitli ödeme uçtan uca başarılı
-- [ ] 3DS başarısız/iptal senaryosu sepeti bozmadan geri dönüyor
-- [ ] Aynı callback iki kez gelirse tek sipariş oluşuyor
-- [ ] Kısmi iade doğru kalemlerden düşüyor
+- [ ] Test modunda tek çekim + taksitli ödeme uçtan uca başarılı
+- [ ] 3DS başarısız / zaman aşımı / iptal senaryosu sepeti bozmadan geri dönüyor; sepet yeniden ödenebiliyor
+- [ ] Aynı bildirim iki kez gelirse tek sipariş oluşuyor
+- [ ] Kısmi iade doğru kalemlerden düşüyor; iadelerin toplamı ödemeyi geçmiyor
 - [ ] Tutar manipülasyonu (istemci tutarı) etkisiz (testli); allowlist dışı dönüş URL'si reddediliyor (testli)
+- [ ] Siparişe dönüşemeyen ödeme otomatik iade ediliyor (testli)
+- [ ] iyzico sandbox'ta tek çekim + taksitli ödeme uçtan uca başarılı; aynı callback iki kez gelirse tek sipariş
+- [ ] iyzico: kısmi iade doğru kalem işlemlerinden düşüyor; yanıt imzası tutmayan yanıt reddediliyor (testli)
 - [ ] Kapsam ≥ %80
 
 ---
 
-## F6 — Ödeme: PayTR + Alternatif Ödemeler + Yönlendirici + Ters İbraz
-Detay: `docs/entegrasyonlar/paytr.md`, `docs/entegrasyonlar/alternatif-odeme.md`
+## F6 — Ödeme: Alternatif Ödemeler + Yönlendirici + Ters İbraz
+Detay: `docs/entegrasyonlar/alternatif-odeme.md`
 
-- F6.1 `payment-paytr` provider: iFrame token, HMAC hash, bildirim URL'i ("OK" yanıtı), iade
+- F6.1 (iyzico, 2026-10-27'de F5.11 olarak F5'e alındı)
 - F6.2 Region'a birden fazla provider tanımlama; tenant ayarıyla birincil/yedek seçimi
 - F6.3 Yönlendirici kuralları (platform-settings): varsayılan provider, provider sağlık durumu kötüyse yedek
 - F6.4 Ortak ödeme test paketi: her provider aynı sözleşme testlerinden geçer (contract tests)

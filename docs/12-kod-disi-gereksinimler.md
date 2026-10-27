@@ -38,6 +38,9 @@
 | Kalem | Muhatap | Etkilediği faz |
 |---|---|---|
 | iyzico / PayTR: tenant hesap açılış süreci, platform referans/iş ortaklığı modeli | Sağlayıcı satış ekibi | F5, F6 |
+| PayTR test hesabı: bildirim adresi hesap başına tek ve test modu canlı anahtarlarla çalışıyor; canlı satış yapan hesapla test edilemez. Ayrı test mağazası ya da canlıya geçmemiş hesap; dev için herkese açık bildirim adresi (tünel) | Kullanıcı + PayTR | F5 (adr/0026) |
+| PayTR: yalnızca iFrame kullanan hesabın taksit oranları API'sine erişimi | PayTR | F5.8 |
+| iyzico webhook V3 imzasının açtırılması (entegrasyon@iyzico.com); sandbox hesabı | Kullanıcı + iyzico | F5.11 |
 | Geliver: tenant hesabı, kapıda ödeme desteği, iade kodu süreçleri | Geliver | F6.6, F7 |
 | E-fatura entegratörü seçimi ve fiyatlandırma | Entegratörler | F8 |
 | SMS sağlayıcısı (başlık onayı, İYS entegrasyonu) | SMS sağlayıcısı | F9 |
