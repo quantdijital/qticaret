@@ -153,6 +153,15 @@ Hesap bilgileri env'de değil, panelde (adr/0027). Env'de yalnızca:
 - `CREDENTIALS_ENCRYPTION_KEY`: hesap bilgilerini şifreleyen anahtar (canlıda zorunlu).
 - `PAYTR_BASE_URL`: yalnızca geliştirici makinesinde ve testte sahte sunucu için; canlıda ve staging'de tanımlıysa açılış reddedilir. Gerçek adres kodda sabit (`https://www.paytr.com`).
 
+## Geliştirmede elle deneme (ADR-0028)
+Gerçek PayTR `localhost`'a bildirim gönderemez; ilk müşterinin canlı hesabı da bildirimleri firmanın kendi sistemine yollar. Yerelde ödeme bu yüzden sahte PayTR'yle denenir:
+1. `pnpm dev:paytr`: sahte PayTR `127.0.0.1:9102`'de açılır, bildirimleri `http://localhost:9000/hooks/paytr`'ye yollar. Açılırken panelde girilecek hesabı yazar (mağaza no `100001`; parola ve gizli anahtar okunur, uydurma değerler: gerçek PayTR reddeder, gizli bilgi tarayıcıları (gitleaks) gerçek sanmaz).
+2. Backend `PAYTR_BASE_URL=http://127.0.0.1:9102` ile çalışır (`env.example`'da var; eski `.env`'lere bir satır eklenir).
+3. Panel > Ayarlar > Ödeme > PayTR'de bu hesap test moduyla kaydedilir (bir kez; dev veritabanında kalır).
+4. `http://localhost:9000/dev/checkout`: ürün → sepet → adres → kargo → taksit tablosu → "Öde" → sahte PayTR formu (iFrame) → dönüş sayfası siparişi bekler ve panel bağlantısını verir.
+
+Sahte formun üç düğmesi, mağazanın karşılaşacağı üç sonuçtur: **Ödemeyi onayla** (taksit seçilebilir, vade farkı `total_amount`'a eklenir; imzalı bildirim gider, sipariş açılır), **Kart reddedildi** (başarısız bildirim, hata adresine dönüş, sepet açık kalır, yeniden ödenebilir), **Ödendi, bildirim kayboldu** (bildirim gitmez; sipariş, `paytr-reconcile` işi PayTR'ye sorunca açılır: oturum 10 dakika sessiz kaldıktan sonraki ilk turda, yani 10–20 dakika içinde). HTTP testi `paytr-payment-form.spec.ts` aynı formu gerçek backend'e karşı sürer.
+
 ## Testler
 İmzalar bilinen-cevap vektörleriyle test edilir (Python `hmac` ve `openssl` ile ayrıca hesaplandı). Sahte sunucu imzaları kendi kodumuzdan bağımsız, dokümana göre doğrular; test hesapları her çalıştırmada üretilir (`fakePaytrAccount`).
 Sahte sunucu senaryoları (`packages/testing`): başarı, taksitli başarı (vade farkı), 3DS başarısız, zaman aşımı (kod 6), mükerrer bildirim, imzası bozuk bildirim, tutarı farklı ödeme, bayat oturuma gelen ödeme, kısmi iadeler ve `009`, `007`, `010`, 5xx/timeout (belirsiz sonuç → durum sorgusu).

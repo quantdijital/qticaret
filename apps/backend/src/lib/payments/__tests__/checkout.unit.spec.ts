@@ -1,4 +1,4 @@
-import { returnUrlProblem } from "../checkout"
+import { returnOrigins, returnUrlProblem } from "../checkout"
 
 const origins = ["https://magaza.example.com", "http://localhost:8000"]
 
@@ -33,5 +33,21 @@ describe("returnUrlProblem (adr/0026: no open redirect)", () => {
         returnUrlProblem({ success, failure: "https://magaza.example.com/hata" }, origins)
       ).toBe("return_urls.success")
     }
+  })
+})
+
+describe("returnOrigins", () => {
+  const env = {
+    STORE_CORS: "http://localhost:8000, https://magaza.example.com",
+    ADMIN_CORS: "http://localhost:9000",
+  }
+
+  it("is the storefront's origins, plus the backend's own in development (adr/0028)", () => {
+    expect(returnOrigins({ ...env, NODE_ENV: "production" })).toEqual([
+      "http://localhost:8000",
+      "https://magaza.example.com",
+    ])
+    expect(returnOrigins({ ...env, NODE_ENV: undefined })).not.toContain("http://localhost:9000")
+    expect(returnOrigins({ ...env, NODE_ENV: "development" })).toContain("http://localhost:9000")
   })
 })

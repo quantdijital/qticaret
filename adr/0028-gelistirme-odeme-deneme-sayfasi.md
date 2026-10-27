@@ -42,3 +42,13 @@ Kullanıcı 2026-10-27'de müşteri tarafını hiç göremediğini söyledi. Öd
 - Her F5 adımı (V2'den başlayarak) bu sayfadan elle de denenebilir; e2e'ye girmez, otomatik doğrulama HTTP testlerinde kalır.
 - `packages/testing`'in sahte PayTR'si bir ödeme sayfası kazanır; testler de aynı sayfayı kullanabilir.
 - CLAUDE.md'nin "Şu anki odak" maddesi bu istisnayı anar.
+
+## Uygulama notları (2026-10-27, F5 V7)
+
+- **Dosyalar:** uçlar `src/api/dev/checkout` (sayfa) ve `src/api/dev/checkout/order` (sepetin siparişi: Store API misafire siparişi göstermez). Sayfanın HTML, CSS ve JS'i `src/lib/dev-checkout`'ta. `src/api` altında olamazlar: Medusa'nın route yükleyicisi oradaki her `.js` dosyasını içe aktarıyor; Node da `require("./page")`'i `page.ts`'ten önce `page.js`'e çözüyor (geliştirme sunucusu bu yüzden düştü, isimler ayrıldı).
+- **Yalnızca geliştirmede:** `/dev/*` ara katmanı ve her uç `NODE_ENV=development` değilse 404 döner. HTTP testi (test ortamında) iki ucun da 404 olduğunu kanıtlar.
+- **Güvenlik:** sayfa her yanıtta yeni bir nonce ile kendi CSP'sini koyar: satır içi kod yalnızca nonce'la, çağrılar yalnızca kendi kökenine, çerçeveye alınamaz. Ayarlar JSON olarak `<` kaçışlı gömülür. İstekler `credentials: "omit"` ile gider: panel oturum çerezi `localhost`'ta paylaşılır ve CSRF koruması çerezli Store isteğini yabancı kökenden reddederdi.
+- **Dönüş adresi:** ADR-0026'nın açık yönlendirme kuralı dönüş adresini `STORE_CORS` kökenleriyle sınırlar. Sayfa backend'in kendi kökeninde (`ADMIN_CORS`) olduğundan, **yalnızca geliştirmede** `ADMIN_CORS` kökenleri de kabul edilir (`returnOrigins`). Staging ve canlıda kural değişmedi (birim testli).
+- **Sahte PayTR:** `startFakePaytr(account, { port, notifyUrl })`. Form `GET/POST /odeme/guvenli/:token`, hedefi üst pencere (PayTR'nin iFrame'i de mağazanın sayfasına döner). Geliştirme hesabı sabit ve okunur (`packages/testing/src/dev/paytr.ts`): panelde bir kez girilir; docs/04'ün "gizli bilgi tarayıcısının gerçeğinden ayıramayacağı sahte sır yok" kuralına uyar.
+- **iyzico:** V9'da eklenir (sayfada seçenek pasif).
+

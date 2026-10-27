@@ -1,5 +1,7 @@
 export { startFakePaytr } from "./paytr/fake-server"
-export type { FakeAnswer, FakePayment, FakePaytr } from "./paytr/fake-server"
+export type { FakeAnswer, FakePayment, FakePaytr, FakePaytrOptions } from "./paytr/fake-server"
+export { installmentChoices, totalWithSurcharge } from "./paytr/checkout-page"
+export type { PageOutcome } from "./paytr/checkout-page"
 export { paytrNotification, sendPaytrNotification } from "./paytr/notification"
 export type { NotificationInput } from "./paytr/notification"
 export { anyOf, fakePaytrAccount, fakeSecret, paytrSign, signNotification } from "./paytr/signing"

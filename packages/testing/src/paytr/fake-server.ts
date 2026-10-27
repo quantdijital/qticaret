@@ -1,6 +1,8 @@
 import { createServer } from "node:http"
 import type { IncomingMessage, ServerResponse } from "node:http"
 import type { AddressInfo, Socket } from "node:net"
+import { FORM_PATH, answerPaymentForm, totalWithSurcharge } from "./checkout-page"
+import type { PaymentForm } from "./checkout-page"
 import { paytrNotification, sendPaytrNotification } from "./notification"
 import { createFakePaytrHandlers } from "./handlers"
 import type { FakePayment, Fields, Reply } from "./handlers"
@@ -12,6 +14,7 @@ import type { PaytrAccount } from "./signing"
  * installment rate APIs as dev.paytr.com describes them, checks every
  * signature with the account, and keeps the payments it has seen. Strict
  * where PayTR is lenient: a request carrying the key or the salt is refused.
+ * It also serves a clickable payment form (`checkout-page.ts`, adr/0028).
  */
 
 export type { FakePayment } from "./handlers"
@@ -57,8 +60,18 @@ const send = (res: ServerResponse, reply: Reply) => {
   res.end(typeof reply.body === "string" ? reply.body : JSON.stringify(reply.body))
 }
 
-/** Starts the fake on a local port: a free one, or `port` for a dev backend's PAYTR_BASE_URL. */
-export async function startFakePaytr(account: PaytrAccount, port = 0): Promise<FakePaytr> {
+export interface FakePaytrOptions {
+  /** A free port by default; a fixed one for a dev backend's PAYTR_BASE_URL. */
+  port?: number
+  /** Where the payment form's outcome is notified, as PayTR's panel setting is. */
+  notifyUrl?: string
+}
+
+/** Starts the fake on a local port. */
+export async function startFakePaytr(
+  account: PaytrAccount,
+  options: FakePaytrOptions = {}
+): Promise<FakePaytr> {
   const payments = new Map<string, FakePayment>()
   const requests: FakePaytr["requests"] = []
   const queued = new Map<string, FakeAnswer[]>()
@@ -70,6 +83,11 @@ export async function startFakePaytr(account: PaytrAccount, port = 0): Promise<F
       const path = new URL(req.url ?? "/", "http://fake").pathname
       const fields = await readForm(req)
       requests.push({ path, fields })
+      const formToken = FORM_PATH.exec(path)?.[1]
+      if (formToken) {
+        await answerPaymentForm(res, req.method, formToken, fields, form)
+        return
+      }
       const answer = queued.get(path)?.shift()
       if (answer && "hang" in answer) {
         return
@@ -97,7 +115,7 @@ export async function startFakePaytr(account: PaytrAccount, port = 0): Promise<F
     sockets.add(socket)
     socket.on("close", () => sockets.delete(socket))
   })
-  await new Promise<void>((resolve) => server.listen(port, "127.0.0.1", resolve))
+  await new Promise<void>((resolve) => server.listen(options.port ?? 0, "127.0.0.1", resolve))
   const address = server.address() as AddressInfo
 
   const fake: FakePaytr = {
@@ -143,6 +161,22 @@ export async function startFakePaytr(account: PaytrAccount, port = 0): Promise<F
           resolve()
         })
       )
+    },
+  }
+  const form: PaymentForm = {
+    find: (token) => [...payments.values()].find((payment) => payment.formToken === token),
+    complete: async (payment, outcome, installments) => {
+      const notification = fake.pay(payment.merchantOid, {
+        status: outcome === "failed" ? "failed" : "success",
+        installments,
+        totalAmount: totalWithSurcharge(payment.paymentAmount, installments),
+      })
+      if (outcome === "silent" || !options.notifyUrl) {
+        return
+      }
+      // A shop that is down is PayTR's retry problem; the form still sends the shopper back
+      const answer = await sendPaytrNotification(options.notifyUrl, notification).catch(() => null)
+      payment.notified = answer?.body === "OK"
     },
   }
   return fake

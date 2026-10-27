@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Ödeme deneme sayfası</title>
+    <style nonce="__NONCE__">
+      __STYLE__
+    </style>
+  </head>
+  <body>
+    <header>
+      <div>
+        <h1>Ödeme deneme sayfası</h1>
+        <p>Yalnızca geliştirmede açılır. Store API'yi vitrin gibi çağırır (ADR-0028).</p>
+      </div>
+      <button id="reset" type="button">Yeni sepet</button>
+    </header>
+    <main>
+      <div>
+        <div id="error" class="error" role="alert" hidden></div>
+        <section id="result" hidden aria-live="polite">
+          <h2>Sonuç</h2>
+          <div id="result-body"></div>
+        </section>
+        <section>
+          <h2>1. Ürünler</h2>
+          <div id="products" class="products"></div>
+        </section>
+        <section>
+          <h2>2. Teslimat bilgileri</h2>
+          <form id="address" class="fields">
+            <label
+              >E-posta<input name="email" type="email" value="ayse.yilmaz@example.com" required
+            /></label>
+            <label>Telefon<input name="phone" value="05320000000" required /></label>
+            <label>Ad<input name="first_name" value="Ayşe" required /></label>
+            <label>Soyad<input name="last_name" value="Yılmaz" required /></label>
+            <label>Adres<input name="address_1" value="Atatürk Cad. No: 1" required /></label>
+            <label>Posta kodu<input name="postal_code" value="34710" /></label>
+            <label>İl<input name="province" value="İstanbul" required /></label>
+            <label>İlçe<input name="city" value="Kadıköy" required /></label>
+            <div><button type="submit">Adresi kaydet</button></div>
+          </form>
+        </section>
+        <section>
+          <h2>3. Kargo</h2>
+          <div id="shipping" class="muted">Önce adresi kaydedin.</div>
+        </section>
+        <section>
+          <h2>4. Ödeme</h2>
+          <label class="choice"
+            ><input type="radio" name="provider" value="pp_paytr_paytr" checked /> PayTR (yerelde
+            sahte PayTR: <code>pnpm dev:paytr</code>)</label
+          >
+          <label class="choice"
+            ><input type="radio" name="provider" value="pp_iyzico_iyzico" disabled /> iyzico (F5
+            V9'da)</label
+          >
+          <div id="installments" class="muted"></div>
+          <p><button id="pay" class="primary" type="button">Öde</button></p>
+          <iframe id="form" title="Ödeme formu" hidden></iframe>
+        </section>
+      </div>
+      <section>
+        <h2>Sepet</h2>
+        <div id="cart" class="muted">Sepet boş.</div>
+      </section>
+    </main>
+    <script type="application/json" id="config">
+      __CONFIG__
+    </script>
+    <script nonce="__NONCE__">
+      __SCRIPT__
+    </script>
+  </body>
+</html>

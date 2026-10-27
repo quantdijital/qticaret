@@ -6,5 +6,10 @@
     "types": ["node"],
     "noEmit": true
   },
+  // `pnpm dev:paytr` runs src/dev with the backend's ts-node (adr/0028)
+  "ts-node": {
+    "transpileOnly": true,
+    "compilerOptions": { "module": "commonjs", "moduleResolution": "node" }
+  },
   "include": ["src"]
 }

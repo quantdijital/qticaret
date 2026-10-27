@@ -22,6 +22,7 @@ Güncel faz ve görevler: `PROGRESS.md`
 - `pnpm dev` — tüm uygulamalar
 - `pnpm --filter backend dev` — sadece backend
 - `pnpm --filter panel dev` — panel (backend'e proxy)
+- `pnpm dev:paytr` — sahte PayTR; ödeme deneme sayfası `localhost:9000/dev/checkout` (adr/0028)
 - `pnpm --filter backend test:unit` / `test:integration:http` / `test:integration:modules`
 - `pnpm lint` / `pnpm typecheck` / `pnpm format`
 - `pnpm --filter backend medusa db:migrate` — migration

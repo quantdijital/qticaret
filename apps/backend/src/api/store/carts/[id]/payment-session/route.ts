@@ -1,7 +1,7 @@
 import type { MedusaResponse, MedusaStoreRequest } from "@medusajs/framework/http"
 import { ValidationError } from "../../../../../lib/errors"
 import { parseEnv } from "../../../../../lib/env"
-import { returnUrlProblem } from "../../../../../lib/payments/checkout"
+import { returnOrigins, returnUrlProblem } from "../../../../../lib/payments/checkout"
 import { startCartPaymentWorkflow } from "../../../../../workflows/payments/start-cart-payment"
 import type { StorePostCartPaymentSessionType } from "./validators"
 
@@ -15,10 +15,7 @@ export const POST = async (
   res: MedusaResponse
 ) => {
   const { provider_id, return_urls } = req.validatedBody
-  const origins = parseEnv()
-    .STORE_CORS.split(",")
-    .map((origin) => origin.trim())
-  const refused = returnUrlProblem(return_urls, origins)
+  const refused = returnUrlProblem(return_urls, returnOrigins(parseEnv()))
   if (refused) {
     throw new ValidationError("payments.return_url_invalid", { field: refused })
   }

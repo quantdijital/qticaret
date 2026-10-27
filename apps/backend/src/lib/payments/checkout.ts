@@ -1,4 +1,5 @@
 import { z } from "@medusajs/framework/zod"
+import type { Env } from "../env"
 
 /**
  * What our Store route builds on the server for a hosted payment form
@@ -39,6 +40,22 @@ export function returnUrlProblem(
     }
   }
   return null
+}
+
+const origins = (list: string) =>
+  list
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter((origin) => origin !== "")
+
+/**
+ * The storefront's origins; in development also the admin's, which is the
+ * backend's own: its payment test page (adr/0028) is served there.
+ */
+export function returnOrigins(env: Pick<Env, "NODE_ENV" | "STORE_CORS" | "ADMIN_CORS">): string[] {
+  return env.NODE_ENV === "development"
+    ? [...origins(env.STORE_CORS), ...origins(env.ADMIN_CORS)]
+    : origins(env.STORE_CORS)
 }
 
 const text = (max: number) => z.string().trim().min(1).max(max)

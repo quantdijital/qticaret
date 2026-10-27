@@ -20,6 +20,20 @@ export interface FakePayment {
   /** The shop answered "OK" to the notification; refunds need it (`007`). */
   notified: boolean
   refunds: { amount: number; referenceNo: string | null }[]
+  /** The iFrame's token, and where the form sends the shopper back. */
+  formToken: string
+  okUrl: string
+  failUrl: string
+  /** The most installments the shop allows for this payment (`max_installment`, 0 = PayTR's). */
+  maxInstallment: number
+}
+
+/** PayTR's surcharge percentages per installment count (one card family is enough here). */
+export const FAKE_INSTALLMENT_RATES: Readonly<Record<string, string>> = {
+  taksit_2: "3.49",
+  taksit_3: "4.69",
+  taksit_6: "8.29",
+  taksit_12: "15.9",
 }
 
 export type Fields = Record<string, string>
@@ -89,6 +103,7 @@ export function createFakePaytrHandlers(account: PaytrAccount, payments: Map<str
     if (!Array.isArray(basket) || basket.length === 0) {
       return { body: { status: "failed", reason: "Zorunlu alan degeri gecersiz: user_basket" } }
     }
+    const formToken = randomBytes(26).toString("hex")
     payments.set(oid, {
       merchantOid: oid,
       paymentAmount: amount,
@@ -99,8 +114,12 @@ export function createFakePaytrHandlers(account: PaytrAccount, payments: Map<str
       status: "pending",
       notified: false,
       refunds: [],
+      formToken,
+      okUrl: fields["merchant_ok_url"] ?? "",
+      failUrl: fields["merchant_fail_url"] ?? "",
+      maxInstallment: fields["no_installment"] === "1" ? 1 : Number(fields["max_installment"] ?? 0),
     })
-    return { body: { status: "success", token: randomBytes(26).toString("hex") } }
+    return { body: { status: "success", token: formToken } }
   }
 
   const status = (fields: Fields): Reply => {
@@ -187,7 +206,7 @@ export function createFakePaytrHandlers(account: PaytrAccount, payments: Map<str
     if (!signed(fields, [account.merchantId, fields["request_id"] ?? ""])) {
       return error("004", "paytr_token gonderilmedi veya gecersiz")
     }
-    const rates = { taksit_2: "3.49", taksit_3: "4.69", taksit_6: "8.29", taksit_12: "15.9" }
+    const rates = FAKE_INSTALLMENT_RATES
     return {
       body: {
         status: "success",

@@ -22,6 +22,7 @@ import { auditMutations, auditSensitiveRead } from "./http/audit"
 import { BRAND_ROUTES, STORE_BRAND_FIELDS } from "./http/brand-routes"
 import { CATALOG_SHEET_ROUTES } from "./http/catalog-sheet-routes"
 import { CONTENT_ROUTES } from "./http/content-routes"
+import { DEV_ROUTES } from "./http/dev-routes"
 import { SENSITIVE_READS } from "./http/audit/sensitive-routes"
 import { csrfProtection } from "./http/csrf"
 import { platformErrorHandler } from "./http/error-handler"
@@ -176,6 +177,8 @@ export default defineMiddlewares({
     // F5: the shop's provider accounts (adr/0027)
     ...INTEGRATION_ROUTES,
     ...PAYMENT_ROUTES,
+    // adr/0028: the payment test page, development only
+    ...DEV_ROUTES,
     ...ORDER_REFUND_ROUTES,
     // F3.11: brands
     ...BRAND_ROUTES,

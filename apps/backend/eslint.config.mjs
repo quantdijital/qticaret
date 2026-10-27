@@ -11,6 +11,14 @@ export default [
     rules: { "@typescript-eslint/no-require-imports": "off" },
   },
   {
+    // The payment test page's script runs in the browser (adr/0028)
+    files: ["src/lib/dev-checkout/checkout.js"],
+    languageOptions: {
+      sourceType: "script",
+      globals: { document: "readonly", location: "readonly", localStorage: "readonly" },
+    },
+  },
+  {
     // Medusa Admin extensions are bundled for the browser by `medusa build`:
     // the server's lib/seo barrel brings node:crypto with it
     files: ["src/admin/**/*.{ts,tsx}"],
