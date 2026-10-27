@@ -45,3 +45,8 @@ export function integrationHealth(accounts: AccountSource): ReturnType<typeof cr
   monitor ??= createHealthMonitor(defaultHealthChecks(accounts))
   return monitor
 }
+
+/** Drops the cached monitor (tests that change a provider's health between calls). */
+export function forgetIntegrationHealth(): void {
+  monitor = undefined
+}

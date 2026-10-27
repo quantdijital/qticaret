@@ -4,7 +4,7 @@ import { fromMedusaAmount } from "../../lib/money"
 import type { Kurus, MedusaAmount } from "../../lib/money"
 import { installmentLimit, installmentTable } from "../../lib/payments/installments"
 import type { InstallmentFamily } from "../../lib/payments/installments"
-import { connectedCardProviders } from "../../lib/payments/card-providers"
+import { routedCardProviders } from "../../lib/payments/card-providers"
 import { paymentSettings } from "../../lib/payments/settings"
 import { iyzicoApi, iyzicoCredentialsOf, iyzicoInstallmentTable } from "../../lib/payments/iyzico"
 import { paytrCredentialsOf, paytrInstallmentRates } from "../../lib/payments/paytr"
@@ -103,7 +103,8 @@ export async function installmentsFor(
 ): Promise<Installments> {
   const { amount, currency_code } = await amountOf(container, target, salesChannelIds)
   const settings = await paymentSettings(container)
-  const [provider] = await connectedCardProviders(container)
+  // The provider the storefront tries first prices the table (F6.3: a healthy one)
+  const provider = (await routedCardProviders(container))[0]?.provider
   const off = { enabled: false, amount, currency_code, max_count: 1, families: [] }
   if (!settings.installments_enabled || !provider || currency_code !== "try") {
     return off

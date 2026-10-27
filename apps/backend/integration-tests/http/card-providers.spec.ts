@@ -6,9 +6,11 @@ import {
   startFakePaytr,
 } from "@qticaret/testing"
 import type { FakeIyzico, FakePaytr } from "@qticaret/testing"
+import { forgetIntegrationHealth } from "../../src/lib/integrations/health"
 import { forgetPaytrInstallmentRates } from "../../src/lib/payments/paytr"
 import type { HttpClient } from "../helpers/http"
-import { connectPaytr } from "../helpers/paytr"
+import { postIyzicoCallback, startIyzicoPayment } from "../helpers/iyzico"
+import { connectPaytr, orderOfCart, readyCart } from "../helpers/paytr"
 import { stockShop, stockedProduct } from "../helpers/stock"
 import type { StockShop } from "../helpers/stock"
 import { createStorefront } from "../helpers/storefront"
@@ -31,6 +33,7 @@ interface Table {
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
     const http = api as HttpClient
+    const base = () => (api as { defaults: { baseURL?: string } }).defaults.baseURL ?? ""
     let paytr: FakePaytr
     let iyzico: FakeIyzico
     let shop: StockShop
@@ -78,6 +81,7 @@ medusaIntegrationTestRunner({
       variantId = cup.variantId
       admin = await connectPaytr(http, container, paytrAccount)
       forgetPaytrInstallmentRates()
+      forgetIntegrationHealth()
     })
 
     it("offers the connected card providers only, the shop's choice first", async () => {
@@ -90,6 +94,35 @@ medusaIntegrationTestRunner({
       expect(paytrOnly).toEqual(["pp_paytr_paytr"])
       expect(both).toEqual(["pp_paytr_paytr", "pp_iyzico_iyzico"])
       expect(iyzicoFirst).toEqual(["pp_iyzico_iyzico", "pp_paytr_paytr"])
+    })
+
+    it("puts a provider found down behind the backup, and the checkout completes with it", async () => {
+      await connectIyzico()
+      await choose({ card_provider: "paytr" })
+      forgetIntegrationHealth()
+      const healthy = await methods()
+      // PayTR stops answering: the integrations health check finds it down
+      for (let attempt = 0; attempt < 6; attempt += 1) {
+        paytr.queue("/odeme/durum-sorgu", { drop: true })
+      }
+      forgetIntegrationHealth()
+      const { data: routed } = await http.get<{
+        card_providers: string[]
+        card_providers_down: string[]
+      }>("/store/payment/methods", { headers: storefront.headers })
+      const cartId = await readyCart(getContainer(), shop, variantId)
+      const started = await startIyzicoPayment(http, storefront.headers, cartId)
+      iyzico.pay(started.token)
+      await postIyzicoCallback(base(), started.sessionId, started.token, iyzicoAccount.secretKey)
+
+      expect(healthy).toEqual(["pp_paytr_paytr", "pp_iyzico_iyzico"])
+      expect(routed).toEqual({
+        card_providers: ["pp_iyzico_iyzico", "pp_paytr_paytr"],
+        card_providers_down: ["pp_paytr_paytr"],
+        bank_transfer: null,
+        cash_on_delivery: null,
+      })
+      expect(await orderOfCart(getContainer(), cartId)).toMatch(/^order_/)
     })
 
     it("shows iyzico's own totals when iyzico comes first, up to the shop's limit", async () => {

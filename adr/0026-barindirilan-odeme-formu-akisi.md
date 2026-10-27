@@ -120,5 +120,5 @@ Karar uygulandı; uygularken öğrenilenler ve kararın genişledikleri:
   - Her iade denemesine yeni anahtar veriliyor; referansı biz sabitledik (`pending_refund`).
   - Değiştirilen oturum kalıcı siliniyor.
   - Query iç içe `raw_` değerlerini yalnızca düz alan da istenince dolduruyor.
-- **Sözleşme testleri:** `src/modules/__tests__/payment-providers.contract.unit.spec.ts` iki sağlayıcıyı aynı senaryolardan geçirir: yalnızca kendi ucumuzdan başlama, kişisel verisiz oturum, kuruş tutar, ödenince `captured`, değişmeyen/geri alınmayan oturum, referanssız iadenin reddi. F6.4 genişletir.
+- **Sözleşme testleri:** `src/modules/__tests__/payment-providers.contract.unit.spec.ts` iki barındırılan form sağlayıcısını aynı senaryolardan geçirir (çevrim dışı havale ve kapıda ödeme `offline-providers.contract.unit.spec.ts`'te, F6 W4): yalnızca kendi ucumuzdan başlama, kişisel verisiz oturum, kuruş tutar, ödenince `captured`, değişmeyen/geri alınmayan oturum, referanssız iadenin reddi. F6.4 genişletir.
 - **Ertelenenler (kullanıcı kararı):** gerçek sağlayıcı testleri (PayTR test penceresi, `@sandbox`) sunucuya çıkışa; iyzico webhook'u gerçek firmaya. Bir iyzico sandbox ödemesi elle, deneme sayfasından yapıldı (ADR-0028).

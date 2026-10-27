@@ -254,10 +254,10 @@ Detay: `docs/entegrasyonlar/alternatif-odeme.md`
   belge paketi üretimi (fatura, kargo teslim kanıtı, sözleşme onay snapshot'ı, IP/zaman) → admin kuyruğu; kaybedilen ibrazda muhasebe kaydı (F11)
 
 **KK:**
-- [ ] Birincil provider devre dışıyken checkout yedekle tamamlanıyor
-- [ ] Her provider (iyzico, PayTR, havale, kapıda ödeme) ortak contract test paketini geçiyor
-- [ ] Süresi dolan havale siparişi iptal ediliyor ve stok geri dönüyor (testli)
-- [ ] Kapıda ödeme flag kapalıyken veya tutar sınırı aşıldığında seçenek sunulmuyor (testli)
+- [x] Birincil provider devre dışıyken checkout yedekle tamamlanıyor (`card-providers`: sağlık kontrolü düşen PayTR yedeğin arkasına geçiyor, iyzico ile sipariş açılıyor)
+- [x] Her provider (iyzico, PayTR, havale, kapıda ödeme) ortak contract test paketini geçiyor (`payment-providers.contract`, `offline-providers.contract`)
+- [x] Süresi dolan havale siparişi iptal ediliyor ve stok geri dönüyor (testli) (`bank-transfer-confirm`)
+- [x] Kapıda ödeme flag kapalıyken veya tutar sınırı aşıldığında seçenek sunulmuyor (testli) (`cash-on-delivery`)
 - [ ] Ters ibraz kaydı açılan siparişin belge paketi tek tıkla iniyor
 
 ---

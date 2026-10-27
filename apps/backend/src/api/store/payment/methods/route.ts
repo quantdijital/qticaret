@@ -5,7 +5,7 @@ import { toMedusaAmount } from "../../../../lib/money"
 import type { feeFacts } from "../../../../workflows/payments/steps/payment-fee"
 import { FEE_CART_FIELDS, expectedCodFee } from "../../../../workflows/payments/steps/payment-fee"
 import type { StoreGetPaymentMethodsType } from "./validators"
-import { CARD_PROVIDER_IDS, connectedCardProviders } from "../../../../lib/payments/card-providers"
+import { CARD_PROVIDER_IDS, routedCardProviders } from "../../../../lib/payments/card-providers"
 import {
   BANK_TRANSFER_PAYMENT_PROVIDER_ID,
   COD_PAYMENT_PROVIDER_ID,
@@ -16,7 +16,8 @@ import { formatIban } from "../../../../lib/tr/iban"
 /**
  * GET /store/payment/methods (F5 V10, F6): the ways a storefront can start
  * a payment with (`POST /store/carts/:id/payment-session`). Card providers
- * with a stored account, the shop's choice first; bank transfer with the
+ * with a stored account, the shop's choice first unless the health check
+ * finds it down (then the backup leads); bank transfer with the
  * shop's account when it is on. Medusa's own list names every provider the
  * region has, set up or not.
  */
@@ -25,7 +26,7 @@ export const GET = async (
   res: MedusaResponse
 ) => {
   const [providers, bank, cod] = await Promise.all([
-    connectedCardProviders(req.scope),
+    routedCardProviders(req.scope),
     bankTransferSettings(req.scope),
     req.validatedQuery.cart_id
       ? cashOnDeliveryFor(
@@ -36,7 +37,11 @@ export const GET = async (
       : null,
   ])
   res.json({
-    card_providers: providers.map((provider) => CARD_PROVIDER_IDS[provider]),
+    // Healthy first: a provider found down is the last to try (F6.3)
+    card_providers: providers.map(({ provider }) => CARD_PROVIDER_IDS[provider]),
+    card_providers_down: providers
+      .filter(({ healthy }) => !healthy)
+      .map(({ provider }) => CARD_PROVIDER_IDS[provider]),
     bank_transfer:
       bank.enabled && bank.iban
         ? {
