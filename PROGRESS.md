@@ -23,6 +23,7 @@
 - **Bulunan ve düzeltilen hata:** env şemasına `IYZICO_BASE_URL` eklenince kullanıcının `.env`'indeki aynı adlı değişken `medusa` CLI'ını (NODE_ENV tanımsız) düşürdü; e2e'nin geçici yönetici oluşturması kırıldı. Kural "yalnızca development/test" yerine "staging ve canlıda yasak" oldu (PayTR için de); ADR-0027 §8 güncellendi.
 - **Testler:** backend birim 1585+, HTTP `integration-credentials*` 17, modül 31; panel 204 birim, e2e 25 (iyzico sayfası iki modda axe ve denge dahil).
 - **Kullanıcıya:** `.env`'deki `IYZICO_API_KEY`, `IYZICO_SECRET_KEY` ve `IYZICO_BASE_URL` artık kullanılmıyor (anahtarlar panelde); silinebilir. `IYZICO_BASE_URL` yerelde kalırsa iki mod da o adrese gider.
+- **CI'da yakalanan yarış (F2'den kalma):** `async-job` "iki çalıştırma yarışırsa iş bir kez başlar" testi CI'da düştü; aynı iş iki kez `running` olmuştu. Sebep: Medusa'nın seçicili `update*` çağrısı önce okuyup sonra id ile yazıyor, karşılaştır-ve-yaz atomik değil. Bütün iş durumu geçişleri (başlat, ilerleme, başarı, hata, süpürücü) tek `UPDATE … WHERE` oldu (`nativeUpdate`, Medusa dokümanı Context7'den doğrulandı; varlık adı `AsyncJob`). Test 5 eşzamanlı başlatmaya çıkarıldı. Aynı sınıftan V1 açığı: `recordCheck` satırı `FOR UPDATE` ile kilitliyor, önbellek commit'ten sonra temizleniyor.
 - **V8'den V9/V10'a kayanlar:** CF initialize/retrieve, detail, refund, cancel istemci çağrıları ve sahte sunucu uçları kullanıldıkları görevle gelir (kullanılmayan kod yazılmadı). Webhook V3 imzası V9'da `/hooks/iyzico/webhook` ile.
 
 ### Önceki oturum

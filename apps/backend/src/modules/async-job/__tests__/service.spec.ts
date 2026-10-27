@@ -97,13 +97,12 @@ moduleIntegrationTestRunner<AsyncJobModuleService>({
       })
     })
 
-    it("starts a queued job once when two runs race", async () => {
+    it("starts a queued job once when runs race", async () => {
       const job = await service.createAsyncJobs({ type: "audit_log.export" })
 
-      const results = await Promise.allSettled([
-        service.markRunning(job.id),
-        service.markRunning(job.id),
-      ])
+      const results = await Promise.allSettled(
+        Array.from({ length: 5 }, () => service.markRunning(job.id))
+      )
 
       expect(results.filter((result) => result.status === "fulfilled")).toHaveLength(1)
       expect((await service.retrieveAsyncJob(job.id)).attempt).toBe(1)

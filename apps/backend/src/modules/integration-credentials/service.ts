@@ -1,3 +1,4 @@
+import type { EntityManager } from "@medusajs/framework/mikro-orm/knex"
 import type { Context } from "@medusajs/framework/types"
 import {
   InjectManager,
@@ -5,17 +6,16 @@ import {
   MedusaContext,
   MedusaService,
 } from "@medusajs/framework/utils"
-import { createRedisVersionSource, createVersionedCache } from "../../lib/cache"
+import { createVersionedCache } from "../../lib/cache"
 import type { VersionedCache } from "../../lib/cache"
 import { parseKey } from "../../lib/crypto/pii"
-import { canonicalJson, keyFingerprint, openSecret, sealSecret } from "../../lib/crypto/secrets"
+import { keyFingerprint, openSecret, sealSecret } from "../../lib/crypto/secrets"
 import { ValidationError, uniqueViolationKeys } from "../../lib/errors"
 import { logger } from "../../lib/logging"
-import { createRedisClient } from "../../lib/redis"
-import type Redis from "ioredis"
 import { IntegrationCredential } from "./models/integration-credential"
 import { CREDENTIAL_PROVIDER_NAMES } from "./providers"
 import type { CredentialProviderName } from "./providers"
+import { contextOf, stampOf, storedOf, versionSource } from "./rows"
 import { planSave, statusOf } from "./rules"
 import type { SaveInput } from "./rules"
 import type {
@@ -29,28 +29,6 @@ import type {
 } from "./types"
 
 export type * from "./types"
-
-/**
- * Associated data: the provider and its settings. A blob copied onto
- * another provider's row does not open, nor one whose settings (test mode,
- * the shop number) were changed in the database behind the panel's back.
- */
-const contextOf = (provider: string, settings: Record<string, unknown>) =>
-  `integration_credentials:${provider}:${canonicalJson(settings)}`
-
-/** Names one state of the row: a check answered for an older one is not recorded. */
-const stampOf = (row: IntegrationCredentialRecord): string =>
-  `${String(row.secrets_version)}:${String(new Date(row.updated_at).getTime())}`
-
-const storedOf = (row: IntegrationCredentialRecord): StoredCredential => ({
-  settings: row.settings,
-  secret_ciphertext: row.secret_ciphertext,
-  key_id: row.key_id,
-  secrets_version: row.secrets_version,
-  verification: row.verification,
-  verified_at: row.verified_at,
-  updated_by: row.updated_by,
-})
 
 /**
  * The shop's provider accounts (adr/0027). Secrets go in sealed and come
@@ -72,22 +50,9 @@ class IntegrationCredentialsModuleService extends MedusaService({ IntegrationCre
       ? parseKey(options.encryptionKey, "integrationCredentials encryptionKey")
       : null
     this.keyId = this.key ? keyFingerprint(this.key) : null
-    const { redisUrl } = options
-    let client: Redis | undefined
-    const source = redisUrl
-      ? createRedisVersionSource(
-          () => (client ??= createRedisClient(redisUrl, "integration_credentials")),
-          options.versionKey ?? "qt:credentials:version"
-        )
-      : null
-    const env = process.env["NODE_ENV"]
-    if (!source && env !== "development" && env !== "test") {
-      // Each process sees its own writes at once and others' within maxAgeMs
-      logger.warn({ event: "integration_credentials.no_shared_version", nodeEnv: env ?? null })
-    }
     this.cache = createVersionedCache({
       name: "integration_credentials",
-      source,
+      source: versionSource(options),
       load: () => this.loadAll_(),
     })
   }
@@ -283,16 +248,39 @@ class IntegrationCredentialsModuleService extends MedusaService({ IntegrationCre
     verification: Verification,
     stamp: string
   ): Promise<boolean> {
-    const [row] = await this.listIntegrationCredentials({ provider }, { take: 1 })
+    const recorded = await this.recordCheck_(provider, verification, stamp)
+    // After the commit: a reader in between would otherwise cache the old state again
+    if (recorded) {
+      await this.cache.invalidate()
+    }
+    return recorded
+  }
+
+  /** The row stays locked from the comparison to the write: a save in between waits, then wins. */
+  @InjectTransactionManager()
+  protected async recordCheck_(
+    provider: CredentialProviderName,
+    verification: Verification,
+    stamp: string,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<boolean> {
+    const manager = sharedContext.transactionManager as EntityManager | undefined
+    await manager?.execute(
+      "SELECT id FROM integration_credential WHERE provider = ? AND deleted_at IS NULL FOR UPDATE",
+      [provider]
+    )
+    const [row] = await this.listIntegrationCredentials({ provider }, { take: 1 }, sharedContext)
     if (!row || stampOf(row) !== stamp) {
       return false
     }
-    await this.updateIntegrationCredentials({
-      id: row.id,
-      verification,
-      verified_at: verification === "verified" ? new Date() : null,
-    })
-    await this.cache.invalidate()
+    await this.updateIntegrationCredentials(
+      {
+        id: row.id,
+        verification,
+        verified_at: verification === "verified" ? new Date() : null,
+      },
+      sharedContext
+    )
     return true
   }
 
