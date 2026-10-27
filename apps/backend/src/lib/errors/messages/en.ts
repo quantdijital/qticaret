@@ -318,4 +318,6 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "payments.use_checkout_route": "This payment method starts from the shop's checkout step.",
   "paytr.not_configured": "The shop has not connected its PayTR account yet.",
   "paytr.refund_unavailable": "Refunds of PayTR payments are not supported yet.",
+  "orders.test_payment_not_shippable":
+    "This order was paid in test mode; no real money was taken, so it cannot be shipped.",
 }

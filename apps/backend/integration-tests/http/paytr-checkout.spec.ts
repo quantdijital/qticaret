@@ -1,19 +1,13 @@
-import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
-import {
-  addShippingMethodToCartWorkflow,
-  createCartWorkflow,
-  createRegionsWorkflow,
-} from "@medusajs/medusa/core-flows"
+import { createRegionsWorkflow } from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { fakePaytrAccount, startFakePaytr } from "@qticaret/testing"
 import type { FakePaytr } from "@qticaret/testing"
-import { parseEnv } from "../../src/lib/env"
 import { PAYTR_PAYMENT_PROVIDER_ID } from "../../src/lib/payments/checkout"
 import paytrRegionProvider from "../../src/migration-scripts/paytr-region-provider"
-import { createAdminUser } from "../helpers/admin"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
+import { PAYTR_ADDRESS, connectPaytr, readyCart, storeReturnUrls } from "../helpers/paytr"
 import { stockShop, stockedProduct } from "../helpers/stock"
 import { loadTrAddressFixture } from "../helpers/tr-address"
 import type { StockShop } from "../helpers/stock"
@@ -33,41 +27,6 @@ interface Session {
   data: Record<string, unknown>
 }
 
-const ADDRESS = {
-  first_name: "Ayşe",
-  last_name: "Yılmaz",
-  phone: "05320000000",
-  address_1: "Atatürk Cad. No: 1",
-  city: "Kadıköy",
-  province: "İstanbul",
-  postal_code: "34710",
-  country_code: "tr",
-}
-
-/** One cup (120 TL) with the shop's shipping (90 TL), ready to pay. */
-async function readyCart(
-  container: MedusaContainer,
-  shop: StockShop,
-  variantId: string,
-  address: Record<string, string> = ADDRESS
-): Promise<string> {
-  const { result } = await createCartWorkflow(container).run({
-    input: {
-      region_id: shop.regionId,
-      sales_channel_id: shop.salesChannelId,
-      currency_code: "try",
-      email: "ayse.yilmaz@example.com",
-      items: [{ variant_id: variantId, quantity: 1 }],
-      shipping_address: address,
-      billing_address: address,
-    },
-  })
-  await addShippingMethodToCartWorkflow(container).run({
-    input: { cart_id: result.id, options: [{ id: shop.shippingOptionId }] },
-  })
-  return result.id
-}
-
 /** F5 V2 (adr/0026): a hosted PayTR payment starts from our Store route only. */
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
@@ -76,15 +35,11 @@ medusaIntegrationTestRunner({
     let shop: StockShop
     let storefront: Storefront
     let variantId: string
-    const returnUrls = () => {
-      const origin = (parseEnv().STORE_CORS.split(",")[0] ?? "").trim()
-      return { success: `${origin}/odeme/tamam`, failure: `${origin}/odeme/hata` }
-    }
     const start = (cartId: string, body: Record<string, unknown> = {}) =>
       settle(
         http.post<{ payment_session: Session }>(
           `/store/carts/${cartId}/payment-session`,
-          { provider_id: PAYTR_PAYMENT_PROVIDER_ID, return_urls: returnUrls(), ...body },
+          { provider_id: PAYTR_PAYMENT_PROVIDER_ID, return_urls: storeReturnUrls(), ...body },
           { headers: storefront.headers }
         )
       )
@@ -113,21 +68,7 @@ medusaIntegrationTestRunner({
       fake.requests.length = 0
     })
 
-    const connectPaytr = async () => {
-      const admin = await createAdminUser(http, getContainer())
-      const saved = await settle(
-        http.post(
-          "/admin/integrations/credentials/paytr",
-          {
-            settings: { merchant_id: account.merchantId, test_mode: true },
-            secrets: { merchant_key: account.merchantKey, merchant_salt: account.merchantSalt },
-          },
-          { headers: admin.headers }
-        )
-      )
-      expect(saved.status).toBe(200)
-      fake.requests.length = 0
-    }
+    const connect = () => connectPaytr(http, getContainer(), account)
 
     it("says the shop has no PayTR account before one is connected", async () => {
       const cartId = await readyCart(getContainer(), shop, variantId)
@@ -140,7 +81,7 @@ medusaIntegrationTestRunner({
     })
 
     it("starts a payment from the stored cart; the session shows nothing personal", async () => {
-      await connectPaytr()
+      await connect()
       const cartId = await readyCart(getContainer(), shop, variantId)
 
       const started = await start(cartId)
@@ -169,7 +110,7 @@ medusaIntegrationTestRunner({
     })
 
     it("replaces the session when the payment starts again", async () => {
-      await connectPaytr()
+      await connect()
       const cartId = await readyCart(getContainer(), shop, variantId)
 
       const first = await start(cartId)
@@ -187,7 +128,7 @@ medusaIntegrationTestRunner({
     })
 
     it("places the order once PayTR has taken the money, and not before", async () => {
-      await connectPaytr()
+      await connect()
       const cartId = await readyCart(getContainer(), shop, variantId)
       const started = await start(cartId)
       const complete = () =>
@@ -208,12 +149,12 @@ medusaIntegrationTestRunner({
     })
 
     it("refuses Medusa's own session route, a foreign return address and a cart not ready", async () => {
-      await connectPaytr()
+      await connect()
       const container = getContainer()
       const cartId = await readyCart(container, shop, variantId)
       const started = await start(cartId)
       const withoutPhone = Object.fromEntries(
-        Object.entries(ADDRESS).filter(([field]) => field !== "phone")
+        Object.entries(PAYTR_ADDRESS).filter(([field]) => field !== "phone")
       )
       const noPhone = await readyCart(container, shop, variantId, withoutPhone)
       fake.requests.length = 0

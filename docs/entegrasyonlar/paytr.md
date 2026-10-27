@@ -33,6 +33,15 @@ PayTR → tarayıcı: merchant_ok_url / merchant_fail_url (yalnızca bilgilendir
 - `authorizePayment` durum sorgusudur: ödeme yoksa `pending`, tutar/para birimi/test modu oturumla eşleşirse `captured`, değilse `error`. Ödenen sepet `/store/carts/:id/complete` ile siparişe dönüşür (HTTP testi). İade ve iptal V5'e kadar `paytr.refund_unavailable`.
 - Taksit sınırı V6'ya kadar `max_installment: 0` (hesabın en çoğu).
 
+## Bildirim ve sipariş (F5 V3, 2026-10-27)
+- Uç `POST /hooks/paytr` (form gövde, `webhook` hız profili). Sıra: alan doğrulama → kayıtlı hesap (yoksa 503) → imza sabit zamanlı (tutmazsa 400, "OK" yok) → `paytrNotificationWorkflow`.
+- `merchant_oid` oturum kimliğine çevrilir (`payses01…` → `payses_01…`); bizim PayTR oturumumuz değilse 404, "OK" yok (paylaşılan hesapta başkasının bildirimi PayTR'de bekler).
+- `webhook-events` modülü: sağlayıcı + `merchant_oid:status` tekil. İşlenmiş tekrar yalnızca "OK" alır; aynı anda işlenen tekrar 409 alır (PayTR sonra yeniden dener); başarısız olan yeniden işlenir, deneme sayısı artar. Özet yalnızca referans, durum, tutar, test modu, hata kodu; 90 gün sonra silinir (`webhook-events-retention`, her gece).
+- Başarılı ödeme: `completeCartWorkflow` (Medusa'nın sepet kilidi) → `authorizePayment` durum sorgusuyla tutarı, para birimini ve test modunu oturumla karşılaştırır → sipariş. Tamamlanmış sepet aynı siparişi döner; iki eşzamanlı bildirim tek sipariş açar (HTTP testi).
+- Tamamlama başarısızsa (PayTR kaydı henüz tutmuyor, kilit) olay "başarısız" kaydedilir, "OK" dönülmez; PayTR'nin yeniden denemesi işler. Sahipsiz ödemenin iadesi V4'te.
+- Başarısız ödeme bildirimi: "OK", sepet değişmez, ödeme yeniden başlatılabilir.
+- Test modunda ödenen sipariş (ödeme verisinde `test_mode: true`) kargoya verilemez: kendi kargolama akışımız (`planShipmentStep`) ve Medusa'nın `/admin/orders/:id/fulfillments` ucu `orders.test_payment_not_shippable` ile reddeder. Panel rozeti V7'de.
+
 ## Uçlar ve imzalar
 Tüm imzalar `base64(HMAC-SHA256(key = merchant_key, mesaj))`.
 

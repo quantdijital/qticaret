@@ -327,4 +327,6 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "payments.use_checkout_route": "Bu ödeme yöntemi mağazanın ödeme adımından başlatılır.",
   "paytr.not_configured": "Mağaza PayTR hesabını henüz bağlamadı.",
   "paytr.refund_unavailable": "PayTR ödemelerinin iadesi henüz desteklenmiyor.",
+  "orders.test_payment_not_shippable":
+    "Bu sipariş test modunda ödendi; gerçek para alınmadığı için kargoya verilemez.",
 }

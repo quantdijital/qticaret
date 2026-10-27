@@ -80,5 +80,5 @@ ADR-0002'nin itirazları ve bu karardaki cevapları:
 - **Sağlık kontrolü:** PayTR kontrolü kayıtlı bilgilerle durum sorgusu yapar (`004` = sağlıklı).
 - **Medusa yükseltmesinde:** paylaşılan `container`'ın sağlayıcı çağrısında modülü çözdüğü testle yeniden doğrulanır (V2 sözleşme testi).
 - **F12 (canlıya çıkış engeli):** Bu uçlar rol modeliyle mağaza sahibine kısıtlanır; gizli alan, mağaza no ve test modu değişikliğine ikinci doğrulama (yakın zamanda giriş ya da TOTP) gelir.
-- **Test modundaki ödemeler (V3, V7):** test modu canlı anahtarla çalıştığı için, test modunda ödenen sipariş kalıcı işaret taşır; panelde rozetle görünür ve kargoya verilmesi engellenir. Test modu değişikliği bildirimle izlenir.
+- **Test modundaki ödemeler (V3, V7):** test modu canlı anahtarla çalıştığı için, test modunda ödenen sipariş kalıcı işaret taşır; panelde rozetle görünür ve kargoya verilmesi engellenir. Test modu değişikliği bildirimle izlenir. (V3, 2026-10-27: işaret ayrı bir alan değil, ödemenin kendi verisindeki `test_mode`; sipariş hangi yoldan açılırsa açılsın aynı kaynak okunur. Kargolama bizim akışımızda ve Medusa'nın çekirdek ucunda reddediliyor.)
 - **Workflow kalıcılığı:** Kaydetme ve kaldırma workflow'larında `store` ya da saklama süresi açılmaz; açılırsa şifreli blok `workflow_execution`'da kalır.

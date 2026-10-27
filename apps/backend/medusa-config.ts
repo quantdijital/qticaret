@@ -82,6 +82,8 @@ module.exports = defineConfig({
         versionKey: `qt:credentials:${namespace}:version`,
       },
     },
+    // F5 (adr/0026 §5): incoming provider notifications, each handled once
+    { resolve: "./src/modules/webhook-events" },
     // F5 (adr/0026): the hosted-form providers; the system provider stays registered
     {
       resolve: "@medusajs/medusa/payment",
