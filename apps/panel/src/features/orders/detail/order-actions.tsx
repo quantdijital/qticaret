@@ -1,4 +1,12 @@
-import { Ban, CircleDollarSign, EllipsisVertical, Loader2, PackageCheck, Truck } from "lucide-react"
+import {
+  Ban,
+  CircleDollarSign,
+  EllipsisVertical,
+  Loader2,
+  PackageCheck,
+  Truck,
+  Undo2,
+} from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
@@ -16,18 +24,27 @@ import {
   useMarkDelivered,
   useShipOrder,
 } from "@/features/orders/api/orders"
-import type { OrderDetail, OrderState } from "@/features/orders/api/orders"
+import type { OrderDetail, OrderMoney, OrderState } from "@/features/orders/api/orders"
 import { errorText } from "@/lib/errors"
+import { RefundDialog } from "./refund-dialog"
 import { ShipDialog } from "./ship-dialog"
 
-type Dialog = "ship" | "deliver" | "cancel" | "capture" | null
+type Dialog = "ship" | "deliver" | "cancel" | "capture" | "refund" | null
 
 /**
  * The next step for the order as the page's main button (ship, then mark
- * delivered); taking the payment and canceling sit in the menu, each
- * behind a question (docs/06 §6).
+ * delivered); taking the payment, giving money back and canceling sit in
+ * the menu, each behind a question (docs/06 §6).
  */
-export function OrderActions({ order, state }: { order: OrderDetail; state: OrderState }) {
+export function OrderActions({
+  order,
+  state,
+  money,
+}: {
+  order: OrderDetail
+  state: OrderState
+  money?: OrderMoney | undefined
+}) {
   const { t } = useTranslation()
   const [dialog, setDialog] = useState<Dialog>(null)
   const ship = useShipOrder(order.id)
@@ -41,6 +58,7 @@ export function OrderActions({ order, state }: { order: OrderDetail; state: Orde
   const held = state.capture
   const cancelable = state.cancelable
   const canShip = state.ship !== null && state.stage !== "awaiting_payment"
+  const refundable = money !== undefined && Number(money.refundable) > 0
 
   const done = (message: string) => () => {
     setDialog(null)
@@ -77,7 +95,7 @@ export function OrderActions({ order, state }: { order: OrderDetail; state: Orde
           {t("orders.actions.deliver")}
         </Button>
       ) : null}
-      {held.length > 0 || cancelable ? (
+      {held.length > 0 || refundable || cancelable ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="icon" aria-label={t("orders.actions.more")}>
@@ -93,6 +111,16 @@ export function OrderActions({ order, state }: { order: OrderDetail; state: Orde
               >
                 <CircleDollarSign />
                 {t("orders.actions.capture")}
+              </DropdownMenuItem>
+            ) : null}
+            {refundable ? (
+              <DropdownMenuItem
+                onSelect={() => {
+                  setDialog("refund")
+                }}
+              >
+                <Undo2 />
+                {t("orders.actions.refund")}
               </DropdownMenuItem>
             ) : null}
             {cancelable ? (
@@ -140,6 +168,10 @@ export function OrderActions({ order, state }: { order: OrderDetail; state: Orde
           capture.mutate(held, { onSuccess: done("orders.capture.done"), onError: failed })
         }}
       />
+      {/* Mounted while open: each opening is a new refund, with a key of its own */}
+      {dialog === "refund" && money ? (
+        <RefundDialog order={order} money={money} open onOpenChange={close} />
+      ) : null}
       <ConfirmDialog
         open={dialog === "cancel"}
         onOpenChange={close}

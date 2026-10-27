@@ -1164,7 +1164,8 @@
       "deliver": "Mark as delivered",
       "capture": "Capture payment",
       "cancel": "Cancel order",
-      "more": "More actions"
+      "more": "More actions",
+      "refund": "Refund money"
     },
     "ship": {
       "title": "Ship #{{number}}?",
@@ -1218,6 +1219,26 @@
     },
     "providers": {
       "pp_system_default": "Manual payment"
+    },
+    "refund": {
+      "title": "Refund for #{{number}}",
+      "description": "Refund by choosing items or entering an amount. Up to {{refundable}} can be refunded.",
+      "mode": "How to refund",
+      "modes": {
+        "items": "By items",
+        "amount": "By amount"
+      },
+      "left_one": "{{count}} unit can be refunded",
+      "left_other": "{{count}} units can be refunded",
+      "quantity": "Units of {{name}} to refund",
+      "shipping": "Refund the shipping too ({{amount}})",
+      "amount": "Amount to refund",
+      "amountHint": "The amount is spread over the items by what each was paid; at most {{refundable}}.",
+      "note": "Note",
+      "noteHint": "Optional; shown in the panel only.",
+      "choose": "Choose what to refund",
+      "confirm": "Refund {{amount}}",
+      "done": "Money refunded."
     }
   },
   "customers": {

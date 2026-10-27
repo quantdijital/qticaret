@@ -1172,7 +1172,8 @@
       "deliver": "Teslim edildi olarak işaretle",
       "capture": "Ödemeyi tahsil et",
       "cancel": "Siparişi iptal et",
-      "more": "Diğer işlemler"
+      "more": "Diğer işlemler",
+      "refund": "Para iadesi"
     },
     "ship": {
       "title": "#{{number}} kargoya verilsin mi?",
@@ -1226,6 +1227,26 @@
     },
     "providers": {
       "pp_system_default": "Manuel ödeme"
+    },
+    "refund": {
+      "title": "#{{number}} için para iadesi",
+      "description": "Ürün seçerek ya da bir tutar girerek iade edin. En çok {{refundable}} iade edilebilir.",
+      "mode": "İade şekli",
+      "modes": {
+        "items": "Ürün seçerek",
+        "amount": "Tutar girerek"
+      },
+      "left_one": "{{count}} adet iade edilebilir",
+      "left_other": "{{count}} adet iade edilebilir",
+      "quantity": "{{name}} için iade adedi",
+      "shipping": "Kargo ücretini de iade et ({{amount}})",
+      "amount": "İade tutarı",
+      "amountHint": "Tutar ürünlere ödendikleri oranda dağıtılır; en çok {{refundable}}.",
+      "note": "Not",
+      "noteHint": "İsteğe bağlı; yalnızca panelde görünür.",
+      "choose": "İade edilecekleri seçin",
+      "confirm": "{{amount}} iade et",
+      "done": "Para iadesi yapıldı."
     }
   },
   "customers": {

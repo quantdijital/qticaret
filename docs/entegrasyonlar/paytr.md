@@ -55,6 +55,13 @@ PayTR → tarayıcı: merchant_ok_url / merchant_fail_url (yalnızca bilgilendir
 - **İade işi** (`payment-recovery`, 5 dakikada bir): önce durum sorgusu; iadelerde bizim referansımız (`R<merchant_oid>`) varsa iade yapılmış sayılır (cevabı kaybolmuş iade tekrarlanmaz). Yalnızca PayTR'nin gösterdiği, alındığı test moduyla aynı moddaki ödeme iade edilir (test anahtarıyla canlı ödeme iade edilmez). İade son adım; sonrasındaki kayıt hatası bir sonraki turda PayTR'nin kaydından bulunur. Her iade ve vazgeçiş denetim kaydına ve zile düşer; 10 denemede olmazsa "elle iade gerekli".
 - **Uzlaştırma işi** (`paytr-reconcile`, 10 dakikada bir): 10 dakika ile 24 saat arası açık PayTR oturumları sorgulanır; ödenmiş olan, bildirimiyle aynı akıştan (aynı olay anahtarı) geçer, sonradan gelen bildirim yalnızca "OK" alır.
 
+## İade ve iptal (F5 V5, 2026-10-27)
+- **Sağlayıcı:** `refundPayment` önce durum sorgusu yapar (ödeme var mı, test modu oturumla aynı mı: test anahtarıyla canlı ödeme iade edilmez), aynı referansla yapılmış iade varsa tekrarlamaz, PayTR'nin mağazanın düzeltebileceği retlerini (`000/006/007/008/009/010/011`) Türkçe anahtara çevirir, iadeyi ödeme verisine (`refunds`) yazar. `cancelPayment` hiçbir şey yapmaz: ödeme her zaman yakalanmış sayılır, Medusa yakalanmış ödemeyi `refundPayment` ile geri verir; iptalde de iade etmek, sepet tamamlanamadığında çift iade olurdu.
+- **Referans:** Medusa her iade denemesine yeni bir anahtar verir (`refund.id`). Bizim iade akışımız, isteğin kendi referansını ödeme verisine (`pending_refund`) yazar; sağlayıcı onu kullanır. Belirsiz sonuçta tekrar denenen iade PayTR'de bir kez yapılır.
+- **Sipariş iadesi:** `POST /admin/orders/:id/refunds` (kalemlerin adetleri + kargo ya da serbest tutar, `reference`, not) ve `POST /admin/orders/:id/refunds/preview`. Tutar sunucuda: F4.7 payları ve `order-refunds` defteri; kalem adedi ve ödenen tutar aşılamaz, serbest tutar kalemlerin kalanını düşürür. Sipariş kilidi altında, Medusa'nın `refundPaymentWorkflow`'u ile. Denetim kaydında önce/sonra iade edilen ve iade edilebilir tutar.
+- **İptal:** Medusa'nın iptali iade başarısız olsa da siparişi iptal ediyor (hata loglanıp yutuluyor). Çekirdek `POST /admin/orders/:id/cancel` önünde: Medusa'nın iptal edeceği ödemeli sipariş önce bizim akışımızla, siparişe özgü sabit referansla iade edilir; iade başarısızsa iptal yapılmaz. Medusa'nın `POST /admin/payments/:id/refund` ucu PayTR ödemelerine kapalı.
+- **Panel:** sipariş detayında "Para iadesi" (ürün seçerek ya da tutar girerek; tutar önizlemeden, her açılışta yeni anahtar).
+
 ## Uçlar ve imzalar
 Tüm imzalar `base64(HMAC-SHA256(key = merchant_key, mesaj))`.
 

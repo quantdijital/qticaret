@@ -151,6 +151,9 @@ export interface OrderMoneyLine {
   /** What the line was paid. */
   net: string
   returned_net: string
+  /** Units given back by money refunds (F5 V5), and what those refunds gave back. */
+  refunded_units: number
+  refunded_net: string
 }
 
 export interface MoneyTotals {
@@ -216,6 +219,40 @@ export const useMarkDelivered = (id: string) =>
   })
 
 export const useCancelOrder = (id: string) => useOrderMutation(() => sdk.admin.order.cancel(id))
+
+/** A money refund: units of lines (and the shipping), or a free amount in lira. */
+export interface RefundRequest {
+  items?: { id: string; quantity: number }[]
+  shipping?: boolean
+  amount?: number
+}
+
+export interface RefundPreview {
+  /** Lira, exact ("120.00"). */
+  amount: string
+  refundable: string
+}
+
+/** What a refund would give back, worked out by the server; nothing is changed. */
+export const refundPreviewQuery = (id: string, request: RefundRequest | null) =>
+  queryOptions({
+    queryKey: ["orders", "refund-preview", id, request],
+    queryFn: async () =>
+      (
+        await sdk.client.fetch<{ refund: RefundPreview }>(
+          `/admin/orders/${encodeURIComponent(id)}/refunds/preview`,
+          { method: "POST", body: request ?? {} }
+        )
+      ).refund,
+    enabled: request !== null,
+    retry: false,
+  })
+
+/** Gives the money back; `reference` makes a refund tried again happen once. */
+export const useRefundOrder = (id: string) =>
+  useOrderMutation((body: RefundRequest & { reference: string; note?: string }) =>
+    sdk.client.fetch(`/admin/orders/${encodeURIComponent(id)}/refunds`, { method: "POST", body })
+  )
 
 export const useCapturePayment = () =>
   useOrderMutation(async (paymentIds: string[]) => {

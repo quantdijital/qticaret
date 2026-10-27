@@ -65,7 +65,7 @@ export function OrderDetailPage() {
         description={t("orders.detail.placed", { date: formatLongDate(order.created_at) })}
         badge={<StageBadge stage={state.data.stage} />}
         back={back}
-        action={<OrderActions order={order} state={state.data} />}
+        action={<OrderActions order={order} state={state.data} money={money.data} />}
       />
       <ProgressCard order={order} stage={state.data.stage} />
       <PageGrid>
