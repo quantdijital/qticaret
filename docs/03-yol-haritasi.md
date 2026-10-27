@@ -227,14 +227,14 @@ F17 öncesinde tenant'lar F16 script'leriyle elle açılır.
 - Kayıtlı kart kapsam dışı: PayTR'de yalnızca Direkt API'de, iyzico'da satıcı tarafı saklama kart numarası istiyor (kart bilgisi bizde, SAQ-A dışı; adr/0026)
 
 **KK:**
-- [ ] Test modunda tek çekim + taksitli ödeme uçtan uca başarılı
-- [ ] 3DS başarısız / zaman aşımı / iptal senaryosu sepeti bozmadan geri dönüyor; sepet yeniden ödenebiliyor
-- [ ] Aynı bildirim iki kez gelirse tek sipariş oluşuyor
-- [ ] Kısmi iade doğru kalemlerden düşüyor; iadelerin toplamı ödemeyi geçmiyor
-- [ ] Tutar manipülasyonu (istemci tutarı) etkisiz (testli); allowlist dışı dönüş URL'si reddediliyor (testli)
-- [ ] Siparişe dönüşemeyen ödeme otomatik iade ediliyor (testli)
-- [ ] iyzico sandbox'ta tek çekim + taksitli ödeme uçtan uca başarılı; aynı callback iki kez gelirse tek sipariş
-- [ ] iyzico: kısmi iade doğru kalem işlemlerinden düşüyor; yanıt imzası tutmayan yanıt reddediliyor (testli)
+- [x] Test modunda tek çekim + taksitli ödeme uçtan uca başarılı (sahte PayTR'yle: `paytr-checkout`, `paytr-payment-form` taksit + vade farkı; gerçek PayTR test penceresi sunucuya çıkışta, kullanıcı kararı 2026-10-27)
+- [x] 3DS başarısız / zaman aşımı / iptal senaryosu sepeti bozmadan geri dönüyor; sepet yeniden ödenebiliyor (`paytr-notification`, `paytr-payment-form`, `iyzico-checkout` ret)
+- [x] Aynı bildirim iki kez gelirse tek sipariş oluşuyor (`paytr-notification`)
+- [x] Kısmi iade doğru kalemlerden düşüyor; iadelerin toplamı ödemeyi geçmiyor (`order-refunds`)
+- [x] Tutar manipülasyonu (istemci tutarı) etkisiz (testli); allowlist dışı dönüş URL'si reddediliyor (testli) (`paytr-checkout`, `checkout.unit`)
+- [x] Siparişe dönüşemeyen ödeme otomatik iade ediliyor (testli) (`paytr-recovery`, `iyzico-refunds`)
+- [ ] iyzico sandbox'ta tek çekim + taksitli ödeme uçtan uca başarılı; aynı callback iki kez gelirse tek sipariş (tek çekim gerçek sandbox'ta elle yapıldı, sipariş açıldı (2026-10-27); çift callback testli (`iyzico-checkout`); taksitli gerçek sandbox ödemesi sunucu testlerine)
+- [x] iyzico: kısmi iade doğru kalem işlemlerinden düşüyor; yanıt imzası tutmayan yanıt reddediliyor (testli) (`iyzico-refunds`, `checkout-form.unit`)
 - [ ] Kapsam ≥ %80
 
 ---

@@ -105,3 +105,20 @@ F5'te iki sağlayıcı yazılır, önce PayTR. Kullanıcı 2026-10-27'de ilk mü
 - **İstemci IP'si.** `user_ip` istemcinin gerçek IP'si olmalı; değilse PayTR token'ı geçersiz olur. F16'daki proxy şartı (`trust proxy`) ödeme için de geçerli.
 - **Ters ibraz.** PayTR ters ibraz bildirimi sunmuyor; F6.7 PayTR için elle kayıtla çalışır.
 - **Medusa 2.22 yükseltmesi.** Bu ADR'nin dayandığı davranışlar yükseltmede yeniden doğrulanır: oturum verisi, tamamlama kilidi, telafi sırası.
+
+## Uygulama notu (F5 kapanışı, 2026-10-27)
+
+Karar uygulandı; uygularken öğrenilenler ve kararın genişledikleri:
+
+- **Başlatma:** tek giriş `POST /store/carts/:id/payment-session` (`startCartPaymentWorkflow`, sepet kilidi altında). Medusa'nın kendi oturum ucu vitrine kapalı. Sepet tamamlama yalnızca canlı, tutarı tutan bir barındırılan form oturumuyla (`requireHostedPayment`, `paymentMismatch`).
+- **Sonuç:** PayTR sunucudan sunucuya bildirim gönderiyor (`/hooks/paytr`, olay kaydıyla tek işlenir). iyzico'nun sonucu alıcının tarayıcısıyla gelir (`/hooks/iyzico/callback`, mağazanın gizli anahtarıyla imzalı adres). İkisinde de sonuç her zaman sağlayıcıya sorulur ve imzası doğrulanır.
+- **Uzlaştırma:** iki sağlayıcının da işi var (`paytr-reconcile`, `iyzico-reconcile`). iyzico'da Medusa'nın sildiği oturumların formları da sorulabilsin diye verilen her form `payment-forms` modülüne yazılır.
+- **Sahipsiz ödeme:** `payment-recovery`'ye bir kez yazılır, kurtarma işi iade eder. PayTR referansla tekilleştirir. iyzico tekilleştirmez: iptal, olmazsa kalem kalem iade; kısmi başarıda mağazaya bırakılır. Kayıtlı bir ödeme bir daha asla siparişe dönüşmez (güvenlik incelemesi).
+- **İade:** satır bazlı defter (`order-refunds`), referans başına bir kez. PayTR referansla tekilleştirir. iyzico'ya gidecek her parça önce deftere `sending` yazılır, kayıp yanıtta tekrar gönderilmez.
+- **Medusa 2.21.2 bulguları:**
+  - `cancelOrderWorkflow` iade hatasını yutuyor; iptalden önce kendi iademiz çalışır.
+  - Her iade denemesine yeni anahtar veriliyor; referansı biz sabitledik (`pending_refund`).
+  - Değiştirilen oturum kalıcı siliniyor.
+  - Query iç içe `raw_` değerlerini yalnızca düz alan da istenince dolduruyor.
+- **Sözleşme testleri:** `src/modules/__tests__/payment-providers.contract.unit.spec.ts` iki sağlayıcıyı aynı senaryolardan geçirir: yalnızca kendi ucumuzdan başlama, kişisel verisiz oturum, kuruş tutar, ödenince `captured`, değişmeyen/geri alınmayan oturum, referanssız iadenin reddi. F6.4 genişletir.
+- **Ertelenenler (kullanıcı kararı):** gerçek sağlayıcı testleri (PayTR test penceresi, `@sandbox`) sunucuya çıkışa; iyzico webhook'u gerçek firmaya. Bir iyzico sandbox ödemesi elle, deneme sayfasından yapıldı (ADR-0028).
