@@ -3,7 +3,7 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**F5 — Ödeme: PayTR + iyzico (+ ortak ödeme altyapısı): V1–V10 bitti (2026-10-27), sıradaki V11 (kapanış: sözleşme testleri, kapsam, inceleme).**
+**F5 — Ödeme: PayTR + iyzico (+ ortak ödeme altyapısı): BİTTİ (V1–V11, 2026-10-27).** Ertelenenler: gerçek PayTR test penceresi ve iyzico taksitli sandbox ödemesi (sunucuya çıkışta), iyzico webhook'u (gerçek firmayla). Sıradaki faz F6.
 - V1: mağaza PayTR hesabını panelden bağlıyor (kullanıcı talebi, ADR-0027 ADR-0002'nin yerini aldı); PayTR istemcisi, sahte PayTR, `packages/testing`. Commit'ler `77c88f6`, `a00fa45` ve dokümanlar.
 - Kullanıcı 2026-10-27'de iki sağlayıcının altyapısının da hazırlanmasını istedi; canlıya alma sonra. docs/03 güncellendi.
 - PayTR önce yazılıyor: ilk müşterinin firması PayTR'yi canlıda kullanıyor ve test modunda bağlanmayı kabul etti.
@@ -78,6 +78,18 @@
   - Karar: iyzico'ya her iade parçası `order_refund.provider_parts`'a yazılarak gönderiliyor (sağlayıcı defteri paylaşılan container'dan okuyor/yazıyor; adr/0027'deki hesap okuma deseninin genişlemesi). Medusa'nın kendi iyzico iadesi reddediliyor; iyzico iadesinin tek yolu sipariş iademiz ve kurtarma işi.
   - Karar: öncelikli sağlayıcı yalnızca sıra ve taksit kaynağını belirler; bağlı her kart sağlayıcısıyla ödeme başlatılabilir (zorlama yok).
   - Testler: HTTP `iyzico-refunds` 6, `card-providers` 2; panel `preferred-provider` 2.
+- **F5 V11 (kapanış):** sağlayıcıdan bağımsız sözleşme paketi (`payment-providers.contract.unit`, iki sağlayıcı × 6 senaryo), ana sayfa özetinin siparişli testi (F2'den), ADR-0026 uygulama notu, F5 KK'ları test kanıtlarıyla işaretlendi (iyzico taksitli sandbox ödemesi açık).
+  - **Kapsam (ödeme kodu: `lib/payments`, `modules/payment-*`, `workflows/payments`; birim + ödeme HTTP testleri, v8):** satır %93,4, fonksiyon %95, dal %78,2 (ilk ölçüm; ardından iyzico kurtarma yolları test edildi). KK "≥ %80" satır kapsamıyla karşılandı.
+  - **Güvenlik incelemesi (iyzico iadesi, bağımsız ajan): 2 Yüksek, 3 Orta, 3 Düşük, hepsi düzeltildi ve testli (`iyzico-refund-safety` 6):**
+    - Yüksek: başarısız/yanıtsız iadenin parçası yeni referanslı iadede görülmüyordu → paylaştırma ödemenin bütün parçalarından; `sending` parça varken ödemede iade yok; parça göndermiş iade `pending`/`refund_incomplete` kalır.
+    - Yüksek: iyzico iadeyi yaptıktan sonraki hatalar (imza, şema) "red" sayılıp parça siliniyordu → yalnızca açık red ya da hiç gitmeyen istek siler; yanıt istekle de karşılaştırılıyor.
+    - Orta: iadeye yazılmış ödemeyle sepet tamamlanabiliyordu → sağlayıcı yetkilendirmesi reddediyor.
+    - Orta: boş/tutmayan ödeme detayında kurtarma işi "iade edildi" diyordu → `detail_mismatch`.
+    - Orta: iade telafisi ödeme verisini eski kopyayla eziyordu → yalnızca `pending_refund` siliniyor.
+    - Düşük: iade kilidi 600 sn; kurtarma işi kayıt başına kilitli; iade yanıtı istekle karşılaştırılıyor.
+    - Bilgi: oturum verisinde iyzico ödeme kimliği, kalem işlem kimlikleri ve fraud durumu var (kart bilgisi yok); kabul edildi.
+  - **Kod incelemesi:** sağlayıcının defter/kurtarma erişimi ADR-0027 ekiyle belgelendi (backend CLAUDE.md'ye işlendi); para birimi iadede ödemeden; callback hatasında alıcı vitrine `payment_status=pending` ile; uzlaştırma işi hesap yoksa çıkıyor; ayar okuyucusu, oturum kimliği deseni, fiyat şeması, `pendingReferenceOf`, tamamlama adımı, sahte iyzico yardımcıları ortak; PayTR ödeme detayı ve kurtarması ayrı dosyalarda; iyzico kararı saf fonksiyon (`iyzicoVerdict`).
+  - **Açık iş:** sonucu bilinmeyen iyzico iade parçasını çözme aracı (panelde "yapıldı/yapılmadı"; şimdilik platform ekibi elle). Panelde `refund_incomplete` durumunun ayrı gösterimi.
 - **V8'den V9/V10'a kayanlar:** CF initialize/retrieve, detail, refund, cancel istemci çağrıları ve sahte sunucu uçları kullanıldıkları görevle gelir (kullanılmayan kod yazılmadı). Webhook V3 imzası V9'da `/hooks/iyzico/webhook` ile.
 
 ### Önceki oturum
@@ -1027,7 +1039,7 @@ Kararlar: ADR-0026 (barındırılan ödeme formu akışı; V1 başında kabul ed
 | V8 ✅ | F5.11 | **Bitti (2026-10-27; kullanıcının sandbox hesabı panelden bağlandı). CF/detail/refund/cancel çağrıları ve sahte uçları V9/V10'a, kullanıldıkları yere kaydı.** iyzico istemcisi ve sahte sunucusu: IYZWSv2 imzası (dokümandaki örnek değer ve SDK'nın `utils.js`'i test vektörü), yanıt imzası doğrulaması (sondaki sıfırları atan fiyat biçimi), hata modeli (`errorCode` → anahtar, "Retry" sütunu), hesap bilgileri panelden (ADR-0027: `integration-credentials`'a `iyzico` tanımı, sandbox/canlı seçimi, kayıttan önce doğrulama; yerel `.env`'deki sandbox anahtarları panele taşınır), health kontrolü, sahte iyzico sunucusu (CF initialize/retrieve, detail, refund, cancel, installment, webhook imzalayıcı) | V1 | — |
 | V9 ✅ | F5.11 | **Bitti (2026-10-27; sahte iyzico + gerçek sandbox ödemesi; webhook kullanıcı kararıyla ertelendi).** iyzico ödeme akışı: `payment-iyzico` (`pp_iyzico_iyzico`), aynı Store ucu ve sepet kurucusu (kargo ayrı kalem, 0 TL birleştirme), alıcı (`identityNumber`: TCKN gönderilmez, iyzico'nun kabul ettiği yer tutucu; sandbox'ta doğrulanır), `POST /hooks/iyzico/callback` (form gövde, sonuç sorgusu + yanıt imzası, tutar eşlemesi, cart complete, allowlist'li dönüş yönlendirmesi), webhook (V3 imzası, `webhook-events`), `fraudStatus` 0 → bekleyen ödeme + sorgu işi, -1 → iade edilmiş sayılır; sahipsiz ödeme ve uzlaştırma V4 kalıbıyla | V3, V4, V8 | iyzico KK'sı (sandbox) |
 | V10 ✅ | F5.11 | **Bitti (2026-10-27; sahte iyzico + sandbox'ta ölçülen iade).** iyzico iade, iptal, taksit ve panel: kalem bazlı iade v1 (itemTransactions ödeme verisinde, tutarın satır kalanlarına dağıtımı, 10245/10223), aynı gün iptal (yalnızca tam tutar; sonrası iade), taksit ucunun iyzico kaynağı (BIN'siz), panel işlem kartında iyzico alanları (paymentId, taksit, kart ailesi, son 4 hane, fraud durumu), Ayarlar > Ödeme'de sağlayıcı seçimi | V5, V6, V7, V9 | iyzico KK'sı (kısmi iade) |
-| V11 | F5.10 | Kapanış: sağlayıcıdan bağımsız sözleşme test paketi (başlatma, bildirim, yetkilendirme, iade, iptal, silme; iki sağlayıcı da geçer; F6.4 genişletir), `@sandbox` etiketli gerçek testler (iyzico sandbox; PayTR test penceresi), dashboard özetinin siparişli senaryo testi (F2'den devreden), ödeme modüllerinde kapsam ≥ %80, güvenlik ve kod incelemesi, ADR-0026 uygulama notu | V1–V10, test hesapları | KK1, KK7 |
+| V11 ✅ | F5.10 | **Bitti (2026-10-27; `@sandbox` testleri sunucuya ertelendi).** Kapanış: sağlayıcıdan bağımsız sözleşme test paketi (başlatma, bildirim, yetkilendirme, iade, iptal, silme; iki sağlayıcı da geçer; F6.4 genişletir), `@sandbox` etiketli gerçek testler (iyzico sandbox; PayTR test penceresi), dashboard özetinin siparişli senaryo testi (F2'den devreden), ödeme modüllerinde kapsam ≥ %80, güvenlik ve kod incelemesi, ADR-0026 uygulama notu | V1–V10, test hesapları | KK1, KK7 |
 
 Sıra: V1 → V2 → V3 → (V4, V5, V6) → V7 → V8 → V9 → V10 → V11. V8 V1'den sonra her an başlayabilir; iyzico sandbox hesabı erken açılırsa V8–V9 öne alınıp ortak altyapı iki sağlayıcıyla erken sınanır.
 

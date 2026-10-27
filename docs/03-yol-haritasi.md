@@ -235,7 +235,7 @@ F17 öncesinde tenant'lar F16 script'leriyle elle açılır.
 - [x] Siparişe dönüşemeyen ödeme otomatik iade ediliyor (testli) (`paytr-recovery`, `iyzico-refunds`)
 - [ ] iyzico sandbox'ta tek çekim + taksitli ödeme uçtan uca başarılı; aynı callback iki kez gelirse tek sipariş (tek çekim gerçek sandbox'ta elle yapıldı, sipariş açıldı (2026-10-27); çift callback testli (`iyzico-checkout`); taksitli gerçek sandbox ödemesi sunucu testlerine)
 - [x] iyzico: kısmi iade doğru kalem işlemlerinden düşüyor; yanıt imzası tutmayan yanıt reddediliyor (testli) (`iyzico-refunds`, `checkout-form.unit`)
-- [ ] Kapsam ≥ %80
+- [x] Kapsam ≥ %80 (ödeme kodunda satır %93,4, fonksiyon %95; dal %78, 2026-10-27)
 
 ---
 
