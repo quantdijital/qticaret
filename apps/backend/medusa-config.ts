@@ -30,6 +30,10 @@ module.exports = defineConfig({
   logger: new MedusaPinoLogger(baseLogger, env.LOG_LEVEL ?? DEFAULT_LOG_LEVEL),
   projectConfig: {
     databaseUrl: env.DATABASE_URL,
+    // Tests boot the whole app per suite and run every module's migrations at
+    // once: Medusa's ten connections ran out under load ("pool is probably
+    // full"). One app at a time, well inside Postgres's 100
+    ...(env.NODE_ENV === "test" ? { databaseDriverOptions: { pool: { min: 0, max: 20 } } } : {}),
     // Session store for cookie auth (adr/0004); without it sessions live in
     // process memory, so the env schema requires it when deployed.
     ...(env.REDIS_URL ? { redisUrl: env.REDIS_URL } : {}),
@@ -170,6 +174,13 @@ module.exports = defineConfig({
       resolve: "./src/modules/billing-profile",
       options: { encryptionKey: env.PII_ENCRYPTION_KEY, hashKey: env.PII_HASH_KEY },
     },
+    // F10.5 (adr/0037 §4): stock alerts, addresses encrypted and hashed
+    {
+      resolve: "./src/modules/back-in-stock",
+      options: { hashKey: env.PII_HASH_KEY, encryptionKey: env.PII_ENCRYPTION_KEY },
+    },
+    // F10.4 (adr/0037 §4): customers' saved products
+    { resolve: "./src/modules/wishlist" },
     // F10.3 (adr/0037 §6): customer segments by rules, members in Medusa groups
     { resolve: "./src/modules/customer-segments" },
     // F9 (adr/0036): commercial consent and the suppression list, addresses hashed

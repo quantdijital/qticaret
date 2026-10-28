@@ -7,6 +7,7 @@ import { loadOrderLink, loadOrderMessage } from "./order"
 import { loadParcelMessage } from "./parcel"
 import { loadReturnMessage } from "./return-request"
 import { loadSeoDigest, loadStaffOrder, loadStaffStock } from "./staff"
+import { loadStockAlert } from "./stock"
 import type { Loaded } from "./types"
 
 export type { Loaded, MessageRecipients } from "./types"
@@ -31,6 +32,8 @@ export const MESSAGE_LOADERS: { readonly [N in MessageTemplateName]: Loader<N> }
   "account.verify_email": loadVerification,
   "payment.failed": (container, id) => loadPaymentFailed(container, id),
   "marketing.announcement": loadAnnouncement,
+  "stock.alert_confirm": loadStockAlert,
+  "stock.back_in_stock": loadStockAlert,
   "staff.new_order": (container, id) => loadStaffOrder(container, id),
   "staff.bank_transfer": (container, id) => loadStaffOrder(container, id),
   "staff.low_stock": loadStaffStock,

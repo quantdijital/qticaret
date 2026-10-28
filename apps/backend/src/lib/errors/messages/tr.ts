@@ -295,6 +295,11 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "messaging.consent_evidence_required": "İznin nasıl verildiğini en az 10 karakterle yazın.",
   "carts.unknown": "Sepet bulunamadı ya da tamamlanmış.",
   "customer_segments.rules_empty": "Segment için en az bir kural seçin.",
+  "wishlist.full": "Favori listeniz dolu; önce birkaç ürünü çıkarın.",
+  "wishlist.product_unknown": "Ürün bulunamadı.",
+  "stock_alerts.not_tracked": "Bu ürün için stok bildirimi verilemiyor.",
+  "stock_alerts.in_stock": "Bu ürün şu an stokta; hemen sipariş verebilirsiniz.",
+  "stock_alerts.email_required": "Haber verebilmemiz için e-posta adresinizi yazın.",
   "messaging.no_address": "Müşterinin bu kanal için kayıtlı adresi ya da telefonu yok.",
   "messaging.suppression_unknown": "Bu adres listede yok.",
   "messaging.domains_unavailable":

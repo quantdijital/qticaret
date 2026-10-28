@@ -1017,6 +1017,10 @@
             "bank_transfer": "Ekip: havale bekleyen sipariş",
             "low_stock": "Ekip: stok azaldı",
             "seo_digest": "Ekip: haftalık SEO özeti"
+          },
+          "stock": {
+            "alert_confirm": "Stok bildirimi onayı",
+            "back_in_stock": "Yeniden stokta"
           }
         }
       }

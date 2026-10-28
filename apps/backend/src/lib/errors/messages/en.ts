@@ -290,6 +290,11 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "Write how the consent was given, in at least 10 characters.",
   "carts.unknown": "The cart was not found or is already completed.",
   "customer_segments.rules_empty": "Choose at least one rule for the segment.",
+  "wishlist.full": "Your saved list is full; remove a few products first.",
+  "wishlist.product_unknown": "The product was not found.",
+  "stock_alerts.not_tracked": "Stock alerts are not available for this product.",
+  "stock_alerts.in_stock": "This product is in stock now; you can order it.",
+  "stock_alerts.email_required": "Write your e-mail address so we can tell you.",
   "messaging.no_address": "The customer has no address or phone for this channel.",
   "messaging.suppression_unknown": "That address is not on the list.",
   "messaging.domains_unavailable":

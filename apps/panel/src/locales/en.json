@@ -1017,6 +1017,10 @@
             "bank_transfer": "Staff: bank transfer awaited",
             "low_stock": "Staff: low stock",
             "seo_digest": "Staff: weekly SEO digest"
+          },
+          "stock": {
+            "alert_confirm": "Stock alert confirmation",
+            "back_in_stock": "Back in stock"
           }
         }
       }

@@ -61,6 +61,12 @@ export const RATE_LIMIT_PROFILES = {
     perIdentityAnyIp: { max: 10, windowMs: 10 * MINUTE },
   },
   installment: { name: "installment", perIp: { max: 30, windowMs: MINUTE } },
+  // F10.5 (adr/0037 §4): a stock alert may mail a confirmation; per IP and per address
+  stock_alert: {
+    name: "stock_alert",
+    perIp: { max: 10, windowMs: 15 * MINUTE },
+    perIdentity: { max: 5, windowMs: HOUR },
+  },
   // F10.1 (adr/0037 §2): "find my order" mails the order's link; per IP and per address
   order_lookup: {
     name: "order_lookup",

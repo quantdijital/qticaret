@@ -16,6 +16,7 @@ import { OrganizeCard } from "@/features/products/detail/organize-card"
 import { PriceHistoryCard } from "@/features/products/detail/price-history-card"
 import { ProductActions } from "@/features/products/detail/product-actions"
 import { ShippingCard } from "@/features/products/detail/shipping-card"
+import { InterestCard } from "@/features/products/detail/interest-card"
 import { SummaryCard } from "@/features/products/detail/summary-card"
 import { VariantImagesCard } from "@/features/products/detail/variant-images-card"
 import { VariantsCard } from "@/features/products/detail/variants-card"
@@ -118,6 +119,7 @@ export function ProductDetailPage() {
         </PageColumn>
         <PageColumn span={4}>
           <SummaryCard product={product} />
+          <InterestCard productId={product.id} />
           <AdvisorCard
             kind="product"
             id={product.id}

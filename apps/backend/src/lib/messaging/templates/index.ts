@@ -5,6 +5,7 @@ import { orderPlaced } from "./order-placed"
 import { paymentFailed } from "./payment"
 import { returnApproved, returnRefunded, returnRequested } from "./returns"
 import { orderDelivered, orderShipped } from "./shipping"
+import { backInStock, stockAlertConfirm } from "./stock"
 import { staffBankTransfer, staffLowStock, staffNewOrder, staffSeoDigest } from "./staff"
 
 export type { ResetVars, VerifyVars } from "./account"
@@ -17,6 +18,7 @@ export type { OrderLinkVars } from "./order-link"
 export type { PaymentFailedVars } from "./payment"
 export type { ReturnVars } from "./returns"
 export type { ParcelVars } from "./shipping"
+export type { StockAlertVars } from "./stock"
 export type { StaffOrderVars, StaffSeoVars, StaffStockVars } from "./staff"
 export type { Brand, EmailContent, EmailContext, MessageKind, MessageTemplate } from "./types"
 
@@ -33,6 +35,8 @@ export const MESSAGE_TEMPLATES = {
   "account.verify_email": verifyEmail,
   "payment.failed": paymentFailed,
   "marketing.announcement": announcement,
+  "stock.alert_confirm": stockAlertConfirm,
+  "stock.back_in_stock": backInStock,
   "staff.new_order": staffNewOrder,
   "staff.bank_transfer": staffBankTransfer,
   "staff.low_stock": staffLowStock,

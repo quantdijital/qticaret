@@ -40,6 +40,12 @@ export const CUSTOMER_SEGMENT_ROUTES = [
     methods: ["DELETE" as const],
     middlewares: [requireUserActor],
   },
+  // F10.4–F10.5: a product's saved and waiting counts
+  {
+    matcher: "/admin/products/:id/interest",
+    methods: ["GET" as const],
+    middlewares: [requireUserActor],
+  },
   {
     matcher: "/admin/customer-segments/:id/refresh",
     methods: ["POST" as const],

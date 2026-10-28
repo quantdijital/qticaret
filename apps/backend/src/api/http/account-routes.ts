@@ -14,8 +14,10 @@ import {
   StorePostCheckoutConsent,
   StorePostConsent,
 } from "../store/customers/me/consents/validators"
+import { StorePostWishlistItem } from "../store/customers/me/wishlist/validators"
 import { StorePostOrderLookup } from "../store/order-lookup/validators"
-import { orderPageAccess } from "./order-access"
+import { StorePostStockAlert } from "../store/stock-alerts/validators"
+import { optionalCustomer, orderPageAccess } from "./order-access"
 import { rateLimit } from "./rate-limit"
 import { rejectRequest } from "./reject"
 
@@ -146,11 +148,46 @@ export const ACCOUNT_ROUTES = [
       validateAndTransformBody(StorePostConsent),
     ],
   },
+  // F10.4: the signed-in customer's saved products
+  {
+    matcher: "/store/customers/me/wishlist",
+    methods: ["GET" as const],
+    middlewares: [authenticate("customer", ["session", "bearer"])],
+  },
+  {
+    matcher: "/store/customers/me/wishlist",
+    methods: ["POST" as const],
+    middlewares: [
+      authenticate("customer", ["session", "bearer"]),
+      validateAndTransformBody(StorePostWishlistItem),
+    ],
+  },
+  {
+    matcher: "/store/customers/me/wishlist/:id",
+    methods: ["DELETE" as const],
+    middlewares: [authenticate("customer", ["session", "bearer"])],
+  },
   {
     matcher: "/store/carts/:id/consents",
     methods: ["POST" as const],
     middlewares: [validateAndTransformBody(StorePostCheckoutConsent)],
   },
+  // F10.5: a stock alert, signed in or a guest; counted per address too
+  {
+    matcher: "/store/stock-alerts",
+    methods: ["POST" as const],
+    middlewares: [
+      optionalCustomer,
+      rateLimit(() => RATE_LIMIT_PROFILES.stock_alert, {
+        identity: (req) => {
+          const email = (req.body as { email?: unknown } | undefined)?.email
+          return typeof email === "string" ? email.trim().toLowerCase() : undefined
+        },
+      }),
+      validateAndTransformBody(StorePostStockAlert),
+    ],
+  },
+  { matcher: "/stock-alerts/confirm", middlewares: [rateLimit(() => RATE_LIMIT_PROFILES.webhook)] },
   // adr/0038 §1: an unsubscribe link, opened or one-clicked from anywhere
   {
     matcher: "/unsubscribe",

@@ -124,6 +124,28 @@ F10 vitrinin müşteri tarafını kuruyor: hesap, e-posta doğrulama, sosyal gir
 - Segment silinince grubu da silinir; o gruba bağlı kampanyalar ve fiyat listeleri artık kimseye uygulanmaz (panel bunu onay penceresinde söyler).
 - Hata yanıtı: Medusa'nın gövde doğrulaması kuralın anahtarını `Invalid request: <anahtar>` diye sarıyordu. Mesaj yalnızca tek bir anahtar taşıyorsa hata işleyici artık anahtarı tek başına döndürüyor; panel diğer anahtarlar gibi çevirir. Bu, önceki kuralların hepsine de yarar (izin kanıtı, ayar bölümleri).
 
+## Uygulama notları (M6, favori ve stok bildirimi, 2026-10-28)
+- **`wishlist`:**
+  - Ürün ya da varyant düzeyinde tutulur; ürün düzeyindeki kayıtta `variant_id` boş metindir, böylece tekillik kuralı NULL'a takılmaz.
+  - Müşteri başına en çok 200 kayıt.
+  - Yalnızca yayındaki ürün eklenir; satıştan kalkan ürün listede görünmez.
+  - Başkasının kaydını silme isteği "silinmedi" döner.
+- **`back-in-stock`:**
+  - Adres şifreli (`PII_ENCRYPTION_KEY`), anahtarlı özet (`PII_HASH_KEY`) ve maskeli olarak tutulur. Tekillik varyant ve özet çiftine göredir.
+  - Onay token'ı yalnızca SHA-256 özetiyle saklanır ve 24 saat geçerlidir. Süresi dolmuş bekleyen istek yeniden istenince yeni bağlantı gider.
+  - Misafire her durumda aynı yanıt (202 `pending`) döner.
+  - Takip edilmeyen ya da stokta olan varyanta abonelik açılmaz.
+  - Hız sınırı IP başına 15 dakikada 10, adres başına saatte 5.
+- Onay sayfası:
+  - `GET` önce sorar (posta tarayıcısı açınca bir şey olmaz), `POST` açar.
+  - Sayfa yardımcısı çıkış sayfasıyla ortak (`api/http/simple-page.ts`).
+- Bildirim:
+  - `inventory-level.created/updated` ve `reservation-item.updated/deleted` olaylarında, stok kaleminin varyantlarından bekleyen aboneliği olanlara bakılır.
+  - Varsayılan satış kanalında satılabilir miktar sıfırın üstündeyse her aktif aboneliğe `stock.back_in_stock` gider.
+  - Abonelik yalnızca ileti gitmişse (`sent`/`duplicate`) kapanır; gidemeyen sonraki değişikliği bekler.
+  - Varyant başına kilit ve Medusa'nın tekrar anahtarı (abonelik kimliği) aynı anda gelen iki olayda tek ileti sağlar (KK2 testli).
+- Panelde ürün sayfasında "Müşteri ilgisi" kartı: favorisine ekleyen ve stok bekleyen sayıları; kişi yok, yalnızca sayı.
+
 ## Alternatifler
 
 | Seçenek | Artı | Eksi |

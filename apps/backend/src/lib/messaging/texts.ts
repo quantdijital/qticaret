@@ -10,6 +10,7 @@ export const MESSAGE_LOCALE: MessageLocale = "tr"
 
 const TR: Readonly<Record<string, string>> = {
   "footer.unsubscribe": "Bu iletileri almak istemiyorum",
+  "footer.stock": "Bu e-postayı, {{shop}} mağazasında stok bildirimi istediğiniz için aldınız.",
   "footer.order": "Bu e-posta, {{shop}} mağazasındaki siparişiniz için gönderildi.",
   "footer.account": "Bu e-posta, {{shop}} hesabınız için gönderildi.",
   "footer.staff":
@@ -51,6 +52,20 @@ const TR: Readonly<Record<string, string>> = {
   "order.total": "Toplam",
   "order.address": "Teslimat adresi",
   "order.view": "Siparişi görüntüle",
+  "stock_confirm.subject": "Stok bildirimini onaylayın",
+  "stock_confirm.preheader": "{{shop}} ürün stoğa girince size haber versin mi?",
+  "stock_confirm.heading": "Stok bildirimini onaylayın",
+  "stock_confirm.intro":
+    "{{product}} yeniden stoğa girdiğinde size haber vermemizi istediniz. Onaylamak için aşağıdaki düğmeye tıklayın.",
+  "stock_confirm.button": "Bildirimi onayla",
+  "stock_confirm.ignore":
+    "Bu isteği siz yapmadıysanız e-postayı yok sayın; onaylamadığınız sürece size stok iletisi gelmez.",
+  "back_in_stock.subject": "{{product}} yeniden stokta",
+  "back_in_stock.preheader": "{{shop}} haber veriyor: beklediğiniz ürün geldi.",
+  "back_in_stock.heading": "{{product}} yeniden stokta",
+  "back_in_stock.intro": "Beklediğiniz {{product}} yeniden satışta. Stok sınırlı olabilir.",
+  "back_in_stock.button": "Ürüne git",
+  "back_in_stock.once": "Bu bildirim tek seferliktir; bu ürün için size başka ileti gönderilmez.",
   "order_link.subject": "Siparişinizin bağlantısı (#{{number}})",
   "order_link.preheader": "{{shop}} siparişinizi görüntüleyin.",
   "order_link.heading": "Merhaba {{name}}, siparişiniz burada",
