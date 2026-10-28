@@ -5,7 +5,7 @@
 ## Aktif faz
 **F8 — E-Fatura / e-Arşiv: PLANLANDI (2026-10-28 öğlen).** Plan aşağıda "F8 görev planı"; ADR-0034 önerildi (entegratör seçimi, mali müşavir doğrulaması ve PDF kütüphanesi kullanıcı kararı). Sahte entegratörle ilerlenir; sıradaki görev E1. Dal `f8-einvoice` (`f7-shipping` üzerinden).
 
-**F7 — Kargo, sipariş operasyonu, iade ve değişim: BAŞLADI (2026-10-28 gece, otonom).** Plan aşağıda "F7 görev planı"; ADR-0031 (kargo altyapısı ve takip) kabul edildi (otonom, gözden geçir). K1–K10 bitti; sıradaki K11 (doğrudan taşıyıcı, kullanıcının kargo firması cevabına bağlı) ve K12 (kapanış incelemesi).
+**F7 — Kargo, sipariş operasyonu, iade ve değişim: BAŞLADI (2026-10-28 gece, otonom).** Plan aşağıda "F7 görev planı"; ADR-0031 (kargo altyapısı ve takip) kabul edildi (kullanıcı onayladı). K1–K10 bitti; sıradaki K11 (doğrudan taşıyıcı, kullanıcının kargo firması cevabına bağlı) ve K12 (kapanış incelemesi).
 
 **F6 — Ödeme: alternatif ödemeler + yönlendirici + ters ibraz: BİTTİ (2026-10-28 gece, otonom).** Dal `f6-alternative-payments`. W1–W6; KK1–KK5 işaretli. ADR-0029 ve ADR-0030 otonom kabul edildi (gözden geçir). Kapanışta yerelde: birim 1658, HTTP 81/81 takım (440 test), modül (ters ibraz) 1, panel 220, e2e 29.
 
@@ -32,9 +32,7 @@
   2. Toplu etiketler tek PDF olsun mu? (`pdf-lib` bağımlılığı)
   3. Geliver hesabı (gerçek deneme sunucuya çıkışta).
 - **Gözden geçirmen gereken otonom kararlar:**
-  - ADR-0031 (kargo altyapısı, bildirim ipucu, etiket özel depoda)
-  - ADR-0032 (iade talebi; değişim eki; inceleme kuralları §5 ve §7)
-  - ADR-0033 (sipariş düzenleme). Kapıda ödemeli ve havaleli siparişte kalem düzenleme kapalı, çünkü kuryenin tahsil edeceği tutar güncellenmiyor. Telefonla sipariş onayında ürün ekleme sık bir ihtiyaçsa bunu öne alabiliriz.
+  - ~~ADR-0031, ADR-0032, ADR-0033~~ kullanıcı 2026-10-28 öğlen onayladı ("önerini uygula"). Kapıda ödeme ve havalede kalem düzenleme kapalı kalıyor (kullanıcı kararı).
   - Havale/EFT ile ödenmiş ve onaylanmış siparişi müşteri artık kendisi iptal edemiyor ("mağazayla iletişime geçin"): o para kartla değil elle geri gider. Personel panelden iptal ederse iade yalnızca kayda geçer; parayı müşteriye elle göndermek gerekir.
   - `kargo_cümlesi`'nin tüm ürün açıklamalarına girmesi
   - F6 kararları
@@ -1162,7 +1160,7 @@ Doğrulananlar:
 | E9 | — | Kapanış: güvenlik ve kod incelemesi, KK işaretleri | E1–E8 | — |
 
 ### F7 görev planı (2026-10-28; Geliver uçları resmi JS SDK kaynağından, Medusa fulfillment sağlayıcı arayüzü docs.medusajs.com'dan doğrulandı; Context7 kotası dolu)
-Karar: ADR-0031 (kargo altyapısı, takip, etiketler; kabul edildi, otonom, gözden geçir). Geliver ayrıntıları `docs/entegrasyonlar/geliver.md`.
+Karar: ADR-0031 (kargo altyapısı, takip, etiketler; kabul edildi, kullanıcı onayladı). Geliver ayrıntıları `docs/entegrasyonlar/geliver.md`.
 
 Doğrulananlar:
 - Geliver: `https://api.geliver.io/api/v1`, `Authorization: Bearer`; zarf `{ result, data, message, code }`.
@@ -1362,9 +1360,9 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
   - Ücret satırının kimliği oturum verisine konmadı: varyantsız + sunucu fiyatlı satır kuralı ve `qt_` metadata reddi aynı korumayı veriyor.
   - Havale süresi dolumu son 21 günün siparişlerine bakıyor (en uzun süre 14 gün + 7 gün iş kesintisi payı).
   - Ters ibraz yalnızca kartla alınmış ödemeye açılıyor; havale ve kapıda ödemenin itirazı bankayla değil mağazayla.
-- [ ] **Gözden geçir: ADR-0032 iade talebi (2026-10-28 sabaha karşı, otonom):** kendi talep kaydımız + Medusa'nın aşamalı iadesi; süre son teslimden 14 gün (cayma süresi; mağaza ayarı ve istisnalar F13'te); mağaza kaynaklı nedenlerde (hasarlı, yanlış ürün, tarif edildiği gibi değil) kargo ücreti de iade ediliyor, diğerlerinde edilmiyor; iade kargo ücretini kimin ödediği F13'te ayar olacak.
+- [x] **Gözden geçir: ADR-0032 iade talebi (2026-10-28 sabaha karşı, otonom; kullanıcı 2026-10-28 öğlen onayladı):** kendi talep kaydımız + Medusa'nın aşamalı iadesi; süre son teslimden 14 gün (cayma süresi; mağaza ayarı ve istisnalar F13'te); mağaza kaynaklı nedenlerde (hasarlı, yanlış ürün, tarif edildiği gibi değil) kargo ücreti de iade ediliyor, diğerlerinde edilmiyor; iade kargo ücretini kimin ödediği F13'te ayar olacak.
 - [ ] **Gözden geçir: F7 K6 SEO etkisi (2026-10-28 gece):** varsayılan ürün açıklaması şablonu `{kısa_açıklama}. {fiyat_cümlesi} {kargo_cümlesi}` olduğu için `kargo_cümlesi` artık doldurulunca (Ayarlar > Kargo > Teslim süresi; varsayılan "1–2 iş gününde kargoda.") tüm ürünlerin meta açıklamasına bu cümle girer. İstemezsen şablondan çıkarılabilir (Ayarlar > SEO).
-- [ ] **Gözden geçir: F7 planlama kararları (2026-10-28 gece):** ADR-0031 (Geliver sağlayıcısı, bildirim ipucu + API'den yeniden okuma, etiket özel depoda ve yalnızca personel ucundan, iç durum tablosu, Geliver SDK'sı yerine kendi istemcimiz).
+- [x] **Gözden geçir: F7 planlama kararları (2026-10-28 gece; kullanıcı 2026-10-28 öğlen onayladı):** ADR-0031 (Geliver sağlayıcısı, bildirim ipucu + API'den yeniden okuma, etiket özel depoda ve yalnızca personel ucundan, iç durum tablosu, Geliver SDK'sı yerine kendi istemcimiz).
 - [ ] **F5 PayTR gerçek testi (V11; kullanıcı + firma).** Firmanın hesabı canlıda kullanılıyor; firma test modunda bağlanmayı kabul etti (kullanıcı 2026-10-27).
   - Bildirim adresi hesap başına tek olduğu için test, kısa bir pencerede yapılır:
     1. Firma, satışın düşük olduğu bir saatte PayTR panelinden bildirim adresini bizim tünel adresimize çevirir.

@@ -1,6 +1,6 @@
 # ADR-0033: Sipariş düzenleme
 
-- **Durum:** Kabul edildi (2026-10-28 sabah, otonom çalışma: önerilen seçenek uygulandı; kullanıcı gözden geçirecek, PROGRESS "Gözden geçir").
+- **Durum:** Kabul edildi (2026-10-28 sabah, otonom çalışma; kullanıcı 2026-10-28 öğlen onayladı; kapıda ödeme ve havalede kalem düzenlemenin kapalı kalması kullanıcı kararı).
 - **Tarih:** 2026-10-28
 - **İlgili:** F7.12; ADR-0010 (kalem bazlı para), ADR-0029 (çevrim dışı ödemeler), ADR-0032 (iade ve değişim), F8 (fatura)
 

@@ -1,6 +1,6 @@
 # ADR-0031: Kargo altyapısı, gönderi takibi ve etiketler
 
-- **Durum:** Kabul edildi (2026-10-28 gece, otonom çalışma: önerilen seçenek uygulandı; kullanıcı sabah gözden geçirecek, PROGRESS "Gözden geçir").
+- **Durum:** Kabul edildi (2026-10-28 gece, otonom çalışma; kullanıcı 2026-10-28 öğlen onayladı).
 - **Tarih:** 2026-10-28
 - **İlgili:** F7.1–F7.8, F7.10, F7.14; ADR-0027 (sağlayıcı bilgileri panelden), ADR-0029 (kapıda ödeme), docs/entegrasyonlar/geliver.md
 

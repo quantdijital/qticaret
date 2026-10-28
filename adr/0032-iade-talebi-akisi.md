@@ -1,6 +1,6 @@
 # ADR-0032: İade talebi (RMA) akışı
 
-- **Durum:** Kabul edildi (2026-10-28 sabaha karşı, otonom çalışma: önerilen seçenek uygulandı; kullanıcı sabah gözden geçirecek, PROGRESS "Gözden geçir").
+- **Durum:** Kabul edildi (2026-10-28 sabaha karşı, otonom çalışma; kullanıcı 2026-10-28 öğlen onayladı).
 - **Tarih:** 2026-10-28
 - **İlgili:** F7.9 (iade talebi), F7.11 (değişim, bu akışın üstüne kurulur), ADR-0031 (kargo), F5 V5 (kalem bazlı iade), F8 (iade faturası), F13 (cayma hakkı metinleri)
 
