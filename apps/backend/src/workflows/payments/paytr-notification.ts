@@ -1,4 +1,12 @@
-import { WorkflowResponse, createWorkflow, transform } from "@medusajs/framework/workflows-sdk"
+import {
+  WorkflowResponse,
+  createWorkflow,
+  transform,
+  when,
+} from "@medusajs/framework/workflows-sdk"
+import { emitEventStep } from "@medusajs/medusa/core-flows"
+import { PAYMENT_FAILED } from "./events"
+import type { PaymentFailedEvent } from "./events"
 import {
   claimPaytrNotificationStep,
   findPaytrSessionStep,
@@ -40,6 +48,21 @@ export const paytrNotificationWorkflow = createWorkflow(
       claim,
       order_id: transform({ completion }, ({ completion }) => completion.order_id),
       recovery_id: recoveryId,
+    })
+    // The shopper's message, from the notification's first handling only (F9)
+    when(
+      "payments-paytr-failed",
+      { input, claim, target },
+      ({ input, claim, target }) =>
+        input.status === "failed" && claim.state === "new" && target?.orphan === false
+    ).then(() => {
+      emitEventStep({
+        eventName: PAYMENT_FAILED,
+        data: transform({ target }, ({ target }): PaymentFailedEvent => ({
+          cart_id: target?.orphan === false ? target.cart_id : "",
+          provider: "paytr",
+        })),
+      })
     })
     return new WorkflowResponse(
       transform({ claim }, ({ claim }): PaytrNotificationAnswer => {

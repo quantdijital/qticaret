@@ -1,14 +1,30 @@
+import { passwordReset, verifyEmail } from "./account"
 import { orderPlaced } from "./order-placed"
+import { paymentFailed } from "./payment"
+import { returnApproved, returnRefunded, returnRequested } from "./returns"
+import { orderDelivered, orderShipped } from "./shipping"
 
+export type { ResetVars, VerifyVars } from "./account"
 export { renderEmail } from "./layout"
 export type { EmailBlock, EmailBody } from "./layout"
 export { orderSummary } from "./order-placed"
 export type { OrderVars } from "./order-placed"
+export type { PaymentFailedVars } from "./payment"
+export type { ReturnVars } from "./returns"
+export type { ParcelVars } from "./shipping"
 export type { Brand, EmailContent, MessageKind, MessageTemplate } from "./types"
 
 /** Every template the platform sends, by name (adr/0036). */
 export const MESSAGE_TEMPLATES = {
   "order.placed": orderPlaced,
+  "order.shipped": orderShipped,
+  "order.delivered": orderDelivered,
+  "return.requested": returnRequested,
+  "return.approved": returnApproved,
+  "return.refunded": returnRefunded,
+  "account.password_reset": passwordReset,
+  "account.verify_email": verifyEmail,
+  "payment.failed": paymentFailed,
 } as const
 
 export type MessageTemplateName = keyof typeof MESSAGE_TEMPLATES

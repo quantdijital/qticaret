@@ -1,11 +1,13 @@
 import { WorkflowResponse, createWorkflow, transform } from "@medusajs/framework/workflows-sdk"
 import {
   acquireLockStep,
+  emitEventStep,
   beginReturnOrderWorkflow,
   confirmReturnRequestWorkflow,
   releaseLockStep,
   requestItemReturnWorkflow,
 } from "@medusajs/medusa/core-flows"
+import { RETURN_REQUEST_APPROVED } from "./events"
 import { returnsLockKey } from "../../lib/orders/locks"
 import {
   openCarrierReturnStep,
@@ -77,6 +79,14 @@ export const approveReturnWorkflow = createWorkflow(
         },
       }))
     )
+    emitEventStep({
+      eventName: RETURN_REQUEST_APPROVED,
+      data: transform({ approved }, ({ approved }) => ({
+        id: approved.id,
+        order_id: approved.order_id,
+        kind: approved.kind,
+      })),
+    })
     releaseLockStep({ key: lockKey })
     return new WorkflowResponse(approved)
   }

@@ -1,4 +1,12 @@
-import { WorkflowResponse, createWorkflow, transform } from "@medusajs/framework/workflows-sdk"
+import {
+  WorkflowResponse,
+  createWorkflow,
+  transform,
+  when,
+} from "@medusajs/framework/workflows-sdk"
+import { emitEventStep } from "@medusajs/medusa/core-flows"
+import { PAYMENT_FAILED } from "./events"
+import type { PaymentFailedEvent } from "./events"
 import {
   checkIyzicoPaymentStep,
   closePaymentFormStep,
@@ -46,6 +54,20 @@ export const iyzicoCallbackWorkflow = createWorkflow(
       check.outcome === "paid" && !completion.order_id ? "orphan" : check.outcome
     )
     closePaymentFormStep({ session_id: input.session_id, outcome })
+    // The shopper's message; a repeated callback is sent once a day (F9)
+    when(
+      "payments-iyzico-failed",
+      { outcome, target },
+      ({ outcome, target }) => outcome === "failed" && target?.orphan === false
+    ).then(() => {
+      emitEventStep({
+        eventName: PAYMENT_FAILED,
+        data: transform({ target }, ({ target }): PaymentFailedEvent => ({
+          cart_id: target?.orphan === false ? target.cart_id : "",
+          provider: "iyzico",
+        })),
+      })
+    })
     return new WorkflowResponse(
       transform(
         { outcome, target, completion },

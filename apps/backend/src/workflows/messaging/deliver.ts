@@ -5,16 +5,11 @@ import { emailTransport, platformSender } from "../../lib/messaging/email"
 import { normalizeRecipient } from "../../lib/messaging/recipients"
 import type { MessageChannel } from "../../lib/messaging/recipients"
 import { MESSAGE_TEMPLATES } from "../../lib/messaging/templates"
-import type { Brand, MessageTemplateName } from "../../lib/messaging/templates"
+import type { Brand, MessageTemplate, MessageTemplateName } from "../../lib/messaging/templates"
 import { MESSAGING_MODULE } from "../../modules/messaging"
 import type MessagingModuleService from "../../modules/messaging/service"
 import { brandOf } from "./brand"
-
-/** Where a message may go: the order's e-mail and phone, a customer's. */
-export interface MessageRecipients {
-  email?: string | null
-  sms?: string | null
-}
+import type { MessageRecipients } from "./loaders/types"
 
 export type SendOutcome =
   | "sent"
@@ -67,7 +62,8 @@ function render<N extends MessageTemplateName>(
   vars: VarsOf<N>,
   brand: Brand
 ) {
-  const template = MESSAGE_TEMPLATES[name]
+  // The registry pairs each name with its own variables; TypeScript cannot follow N through it
+  const template = MESSAGE_TEMPLATES[name] as MessageTemplate<VarsOf<N>>
   if (channel === "email" && template.email) {
     return template.email(vars, brand)
   }

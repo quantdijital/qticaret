@@ -17,6 +17,8 @@ import { RETURN_REQUESTS_MODULE } from "../../modules/return-requests"
 import type ReturnRequestsModuleService from "../../modules/return-requests/service"
 import { COUNTED_RETURN_STATUSES, OPEN_RETURN_STATUSES } from "../../modules/return-requests/states"
 import type { ReturnKind, ReturnReason } from "../../modules/return-requests/states"
+import { RETURN_REQUEST_CREATED } from "./events"
+import type { ReturnRequestEvent } from "./events"
 import { quoteExchange } from "./exchange-quote"
 
 /**
@@ -89,7 +91,7 @@ export async function requestReturn(
       if (quote?.problem) {
         throw new ValidationError(quote.problem, { field: "items" })
       }
-      return service.createReturnRequests({
+      const created = await service.createReturnRequests({
         order_id: input.order_id,
         customer_id: input.customer_id,
         kind: input.kind,
@@ -99,6 +101,13 @@ export async function requestReturn(
         exchange_items: swaps as unknown as Record<string, unknown> | null,
         difference: quote?.difference ?? null,
       })
+      const event: ReturnRequestEvent = {
+        id: created.id,
+        order_id: input.order_id,
+        kind: input.kind,
+      }
+      await container.resolve(Modules.EVENT_BUS).emit({ name: RETURN_REQUEST_CREATED, data: event })
+      return created
     },
     { timeout: 10 }
   )

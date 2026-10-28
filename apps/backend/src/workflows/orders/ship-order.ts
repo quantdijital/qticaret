@@ -68,6 +68,8 @@ export const shipOrderWorkflow = createWorkflow("orders-ship-order", (input: Shi
         order_id: input.order_id,
         items: plan.items,
         no_notification: !input.notify,
+        // Kept on the parcel: a carrier hands it over later, when the customer's notice goes (F9)
+        metadata: { qt_notify: input.notify },
         ...(input.created_by ? { created_by: input.created_by } : {}),
         ...(carrier.location_id ? { location_id: carrier.location_id } : {}),
         // Our route's mark: a carrier provider opens no shipment without it

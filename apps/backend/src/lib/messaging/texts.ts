@@ -32,6 +32,80 @@ const TR: Readonly<Record<string, string>> = {
   "order_placed.bank_deadline":
     "Son ödeme zamanı: {{deadline}}. Ödeme gelmezse sipariş iptal edilir.",
   "order_placed.cod": "Ödemeyi ({{total}}) siparişiniz teslim edilirken kuryeye yapacaksınız.",
+  "parcel.title": "Gönderi",
+  "parcel.contents": "Kolideki ürünler",
+  "parcel.carrier": "Kargo firması: {{carrier}}",
+  "parcel.tracking": "Takip numarası: {{number}}",
+  "parcel.follow": "Kargonu takip et",
+  "order_shipped.subject": "Siparişiniz kargoya verildi (#{{number}})",
+  "order_shipped.preheader": "{{shop}} siparişinizi yola çıkardı.",
+  "order_shipped.heading": "{{name}}, siparişiniz yolda",
+  "order_shipped.intro": "#{{number}} numaralı siparişiniz kargoya verildi.",
+  "order_shipped.sms": "{{shop}}: #{{number}} numaralı siparişiniz {{carrier}} ile yola çıktı.",
+  "order_shipped.sms_link":
+    "{{shop}}: #{{number}} numaralı siparişiniz {{carrier}} ile yola çıktı. Takip: {{url}}",
+  "order_delivered.subject": "Siparişiniz teslim edildi (#{{number}})",
+  "order_delivered.preheader": "{{shop}} siparişiniz size ulaştı.",
+  "order_delivered.heading": "{{name}}, siparişiniz teslim edildi",
+  "order_delivered.intro": "#{{number}} numaralı siparişiniz teslim edildi. Güle güle kullanın.",
+  "order_delivered.returns":
+    "Bir sorun varsa teslimden sonraki 14 gün içinde hesabınızdaki sipariş sayfasından iade ya da değişim talebi açabilirsiniz.",
+  "returns.lines": "Talepteki ürünler",
+  "return_requested.subject.return": "İade talebiniz alındı (#{{number}})",
+  "return_requested.subject.exchange": "Değişim talebiniz alındı (#{{number}})",
+  "return_requested.preheader": "{{shop}} talebinizi inceleyecek.",
+  "return_requested.heading.return": "{{name}}, iade talebinizi aldık",
+  "return_requested.heading.exchange": "{{name}}, değişim talebinizi aldık",
+  "return_requested.intro.return":
+    "#{{number}} numaralı siparişiniz için iade talebinizi aldık. İnceleyip size haber vereceğiz.",
+  "return_requested.intro.exchange":
+    "#{{number}} numaralı siparişiniz için değişim talebinizi aldık. İnceleyip size haber vereceğiz.",
+  "return_approved.subject.return": "İade talebiniz onaylandı (#{{number}})",
+  "return_approved.subject.exchange": "Değişim talebiniz onaylandı (#{{number}})",
+  "return_approved.preheader": "{{shop}} talebinizi onayladı.",
+  "return_approved.heading.return": "{{name}}, iadeniz onaylandı",
+  "return_approved.heading.exchange": "{{name}}, değişiminiz onaylandı",
+  "return_approved.intro.return":
+    "#{{number}} numaralı siparişinizdeki ürünleri geri gönderebilirsiniz. Ürünler bize ulaşıp kontrol edildikten sonra ödemeniz iade edilir.",
+  "return_approved.intro.exchange":
+    "#{{number}} numaralı siparişinizdeki ürünleri geri gönderebilirsiniz. Ürünler bize ulaştığında yenileri yola çıkar.",
+  "return_approved.code_title": "Kargo kodu",
+  "return_approved.code": "Koliyi kargo şubesine teslim ederken bu kodu söyleyin: {{code}}",
+  "return_approved.no_code":
+    "Ürünleri nasıl göndereceğinizle ilgili mağaza sizinle iletişime geçecek.",
+  "return_refunded.subject.return": "İadeniz yapıldı (#{{number}})",
+  "return_refunded.subject.exchange": "Değişim farkınız iade edildi (#{{number}})",
+  "return_refunded.preheader": "{{shop}} ödemenizi iade etti.",
+  "return_refunded.heading.return": "{{name}}, iadeniz yapıldı",
+  "return_refunded.heading.exchange": "{{name}}, farkınız iade edildi",
+  "return_refunded.intro.return":
+    "#{{number}} numaralı siparişinizden iade ettiğiniz ürünlerin ödemesini geri gönderdik.",
+  "return_refunded.intro.exchange":
+    "#{{number}} numaralı siparişinizdeki değişimin farkını geri gönderdik.",
+  "return_refunded.amount": "İade tutarı",
+  "return_refunded.when": "Tutarın kartınıza yansıması bankanıza göre birkaç iş günü sürebilir.",
+  "password_reset.subject": "Şifrenizi yenileyin",
+  "password_reset.preheader": "{{shop}} hesabınız için şifre yenileme bağlantısı.",
+  "password_reset.heading": "Şifre yenileme isteği",
+  "password_reset.intro":
+    "{{shop}} hesabınız için şifre yenileme isteği aldık. Aşağıdaki bağlantı 15 dakika geçerlidir.",
+  "password_reset.button": "Şifremi yenile",
+  "password_reset.ignore": "Bu isteği siz yapmadıysanız bu e-postayı yok sayın; şifreniz değişmez.",
+  "verify_email.subject": "E-posta adresinizi doğrulayın",
+  "verify_email.preheader": "{{shop}} doğrulama kodunuz.",
+  "verify_email.heading": "E-posta adresinizi doğrulayın",
+  "verify_email.intro": "{{shop}} hesabınızı tamamlamak için bu kodu girin.",
+  "verify_email.code_title": "Doğrulama kodu",
+  "verify_email.expires": "Kod {{at}} tarihine kadar geçerlidir.",
+  "verify_email.ignore": "Bu isteği siz yapmadıysanız bu e-postayı yok sayın.",
+  "payment_failed.subject": "Ödemeniz tamamlanamadı",
+  "payment_failed.preheader": "{{shop}} siparişiniz henüz oluşmadı.",
+  "payment_failed.heading": "{{name}}, ödemeniz tamamlanamadı",
+  "payment_failed.intro":
+    "{{total}} tutarındaki ödemeniz bankanız ya da ödeme kuruluşu tarafından onaylanmadı; siparişiniz oluşmadı ve kartınızdan para çekilmedi. Sepetiniz duruyor, tekrar deneyebilirsiniz.",
+  "payment_failed.button": "Sepete dön",
+  "payment_failed.note":
+    "Sorun devam ederse farklı bir kart ya da ödeme yöntemi deneyin veya bankanızla görüşün.",
   "order_placed.sms":
     "{{shop}}: #{{number}} numaralı siparişiniz alındı. Toplam {{total}}. Teşekkür ederiz.",
 }

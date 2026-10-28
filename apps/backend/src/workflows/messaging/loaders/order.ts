@@ -12,7 +12,8 @@ import { formatIban } from "../../../lib/tr/iban"
 import { PLATFORM_SETTINGS_MODULE } from "../../../modules/platform-settings"
 import type PlatformSettingsModuleService from "../../../modules/platform-settings/service"
 import type { StoreSettings } from "../../../modules/platform-settings/sections"
-import type { MessageRecipients } from "../deliver"
+import { GREETING, firstText } from "./types"
+import type { Loaded } from "./types"
 
 const ORDER_FIELDS = [
   "id",
@@ -80,7 +81,7 @@ const textOf = (value: unknown): string => (typeof value === "string" ? value : 
 export async function loadOrderMessage(
   container: Pick<MedusaContainer, "resolve">,
   orderId: string
-): Promise<{ vars: OrderVars; recipients: MessageRecipients; receiverId: string | null } | null> {
+): Promise<Loaded<OrderVars> | null> {
   const { data } = await container
     .resolve(ContainerRegistrationKeys.QUERY)
     .graph({ entity: "order", fields: ORDER_FIELDS, filters: { id: orderId } })
@@ -109,7 +110,7 @@ export async function loadOrderMessage(
   return {
     vars: {
       number: String(order.display_id),
-      customerName: filled(address["first_name"]) || "Değerli müşterimiz",
+      customerName: firstText(address["first_name"]) ?? GREETING,
       items: order.items.flatMap((item) =>
         item
           ? [
@@ -152,5 +153,6 @@ export async function loadOrderMessage(
     },
     recipients: { email: order.email, sms: address["phone"] ?? null },
     receiverId: order.customer_id,
+    resourceType: "order",
   }
 }
