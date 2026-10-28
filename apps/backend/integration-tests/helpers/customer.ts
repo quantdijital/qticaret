@@ -64,9 +64,9 @@ export async function confirmEmail(
 /** Registers a customer through the auth and Store APIs, confirms the address and logs in. */
 export async function registerCustomer(
   http: HttpClient,
-  storefront: Storefront
+  storefront: Storefront,
+  email = `customer-${randomUUID()}@example.com`
 ): Promise<TestCustomer> {
-  const email = `customer-${randomUUID()}@example.com`
   // Throwaway credential for this test database only
   const password = randomUUID()
 

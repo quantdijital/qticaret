@@ -79,6 +79,20 @@ F10 vitrinin müşteri tarafını kuruyor: hesap, e-posta doğrulama, sosyal gir
    - Kurallı segmentler kendi modülümüzde tanımlanır; bir iş onları Medusa gruplarına yazar. Örnek kurallar: toplam harcama, son sipariş tarihi, sipariş sayısı, izin durumu.
    - Promosyon ve fiyat listesi hedeflemesi `customer.groups.id` ile çalışır; ek bir hedefleme motoru yazılmaz.
 
+## Uygulama notları (M1–M2, 2026-10-28)
+- Sipariş anahtarı API'ye yalnızca `x-order-token` başlığıyla gelir; API adreslerinde ve loglarda görünmez. E-postadaki bağlantı vitrinin `/siparis/<id>?token=` sayfasıdır; vitrin anahtarı başlığa taşır. Bu sayfada F18'de `Referrer-Policy: strict-origin-when-cross-origin` olmalı, anahtar başka siteye sızmasın.
+- Anahtar biçimi: `<bitiş, saniye, 36 tabanı>.<HMAC-SHA256, base64url>`. HMAC sipariş kimliğini, küçük harfe çevrilmiş e-postayı ve bitişi bağlar; anahtar `PII_HASH_KEY`, bağlam `order-access:v1`. Hiçbir şey saklanmaz; anahtarı geri almak için `PII_HASH_KEY` döndürülür.
+- Sipariş kapısı yetkisiz isteğe 404 döner, 401 değil. Böylece sipariş kimliğinin var olup olmadığı anlaşılmaz. Kapı `GET /store/orders/:id`'de, iptalde ve iade talebinde çalışır.
+- `POST /store/carts/:id/order-access`: tamamlanmış sepet, ödemeden sonraki 24 saat boyunca siparişin anahtarını verir.
+- `POST /store/order-lookup` (sipariş no + e-posta):
+  - Her durumda aynı 202 yanıtını döner. E-posta yanıttan sonra gönderilir, bu yüzden süre farkı da bilgi vermez.
+  - Hız sınırı IP başına 15 dakikada 10, adres başına saatte 3.
+  - Aynı sipariş için 10 dakikada en fazla bir e-posta gider.
+- Misafir siparişlerinin hesaba bağlanması:
+  - Doğrulama tamamlandığında Medusa olay yayımlamıyor. Bu yüzden bağlama, oturumlu müşterinin kendi hesabını ya da siparişlerini okuduğu ilk istekte yapılır (`GET /store/customers/me`, `GET /store/orders`). Oturum, adresin kanıtıdır.
+  - Aynı e-postalı misafir kayıtlarının siparişleri hesaba taşınır. `ILIKE`'ta `_` ve `%` kaçışlanır.
+  - Misafir kayıtları silinmez.
+
 ## Alternatifler
 
 | Seçenek | Artı | Eksi |

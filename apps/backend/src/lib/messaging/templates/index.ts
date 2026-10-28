@@ -1,5 +1,6 @@
 import { passwordReset, verifyEmail } from "./account"
 import { announcement } from "./marketing"
+import { orderLink } from "./order-link"
 import { orderPlaced } from "./order-placed"
 import { paymentFailed } from "./payment"
 import { returnApproved, returnRefunded, returnRequested } from "./returns"
@@ -12,6 +13,7 @@ export { renderEmail } from "./layout"
 export type { EmailBlock, EmailBody } from "./layout"
 export { orderSummary } from "./order-placed"
 export type { OrderVars } from "./order-placed"
+export type { OrderLinkVars } from "./order-link"
 export type { PaymentFailedVars } from "./payment"
 export type { ReturnVars } from "./returns"
 export type { ParcelVars } from "./shipping"
@@ -21,6 +23,7 @@ export type { Brand, EmailContent, MessageKind, MessageTemplate } from "./types"
 /** Every template the platform sends, by name (adr/0036). */
 export const MESSAGE_TEMPLATES = {
   "order.placed": orderPlaced,
+  "order.access_link": orderLink,
   "order.shipped": orderShipped,
   "order.delivered": orderDelivered,
   "return.requested": returnRequested,

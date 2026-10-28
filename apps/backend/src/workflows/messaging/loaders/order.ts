@@ -1,7 +1,14 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
-import type { OrderVars } from "../../../lib/messaging/templates"
+import { logger } from "../../../lib/logging"
+import type { OrderLinkVars, OrderVars } from "../../../lib/messaging/templates"
 import { fromMedusaAmount } from "../../../lib/money"
+import {
+  ORDER_ACCESS_DAYS,
+  ORDER_PATH,
+  orderAccessKey,
+  orderAccessToken,
+} from "../../../lib/orders"
 import type { MedusaAmount } from "../../../lib/money"
 import { transferDeadline } from "../../../lib/payments/bank-transfer"
 import {
@@ -12,6 +19,7 @@ import { formatIban } from "../../../lib/tr/iban"
 import { PLATFORM_SETTINGS_MODULE } from "../../../modules/platform-settings"
 import type PlatformSettingsModuleService from "../../../modules/platform-settings/service"
 import type { StoreSettings } from "../../../modules/platform-settings/sections"
+import { brandOf } from "../brand"
 import { GREETING, addressLine, personName } from "./types"
 import type { Loaded } from "./types"
 
@@ -76,6 +84,23 @@ export const lira = (amount: MedusaAmount): string =>
 const filled = (value: string | null | undefined): string => (value ?? "").trim()
 
 const textOf = (value: unknown): string => (typeof value === "string" ? value : "")
+
+/**
+ * The storefront's page of the order with its key (adr/0037 §2): a guest
+ * opens it from the e-mail, a customer too without signing in. Null until
+ * the shop has a domain, or for an order without an e-mail.
+ */
+async function orderUrlOf(
+  container: Pick<MedusaContainer, "resolve">,
+  order: { id: string; email: string | null }
+): Promise<string | null> {
+  const { storefrontUrl } = await brandOf(container)
+  if (!storefrontUrl || !order.email) {
+    return null
+  }
+  const token = orderAccessToken(orderAccessKey(), { id: order.id, email: order.email })
+  return `${storefrontUrl}${ORDER_PATH}/${encodeURIComponent(order.id)}?${new URLSearchParams({ token }).toString()}`
+}
 
 /** The order as its messages show it, and where they go; null when it is gone. */
 export async function loadOrderMessage(
@@ -152,11 +177,36 @@ export async function loadOrderMessage(
       ]
         .map(addressLine)
         .filter((line): line is string => line !== null),
-      // Guest orders get a signed link with F10's order page
-      orderUrl: null,
+      orderUrl: await orderUrlOf(container, order),
     },
     recipients: { email: order.email, sms: address["phone"] ?? null },
     receiverId: order.customer_id,
+    resourceType: "order",
+  }
+}
+
+/**
+ * The order's link a shopper asked for (adr/0037 §2), to the order's own
+ * address only; without a storefront domain there is no page to send.
+ */
+export async function loadOrderLink(
+  container: Pick<MedusaContainer, "resolve">,
+  orderId: string
+): Promise<Loaded<OrderLinkVars> | null> {
+  const loaded = await loadOrderMessage(container, orderId)
+  if (!loaded?.vars.orderUrl) {
+    logger.info({ event: "messaging.not_sent", template: "order.access_link", reason: "no_link" })
+    return null
+  }
+  return {
+    vars: {
+      number: loaded.vars.number,
+      customerName: loaded.vars.customerName,
+      orderUrl: loaded.vars.orderUrl,
+      days: ORDER_ACCESS_DAYS,
+    },
+    recipients: { email: loaded.recipients.email ?? null },
+    receiverId: loaded.receiverId,
     resourceType: "order",
   }
 }

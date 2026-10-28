@@ -3,7 +3,7 @@ import type { MessageTemplateName } from "../../../lib/messaging/templates"
 import type { VarsOf } from "../deliver"
 import { loadAnnouncement, loadPasswordReset, loadVerification } from "./account"
 import { loadPaymentFailed } from "./cart"
-import { loadOrderMessage } from "./order"
+import { loadOrderLink, loadOrderMessage } from "./order"
 import { loadParcelMessage } from "./parcel"
 import { loadReturnMessage } from "./return-request"
 import { loadSeoDigest, loadStaffOrder, loadStaffStock } from "./staff"
@@ -21,6 +21,7 @@ type Loader<N extends MessageTemplateName> = (
 /** How each template reads its values from its resource (adr/0036): one loader per template. */
 export const MESSAGE_LOADERS: { readonly [N in MessageTemplateName]: Loader<N> } = {
   "order.placed": (container, id) => loadOrderMessage(container, id),
+  "order.access_link": (container, id) => loadOrderLink(container, id),
   "order.shipped": (container, id) => loadParcelMessage(container, id),
   "order.delivered": (container, id) => loadParcelMessage(container, id),
   "return.requested": (container, id) => loadReturnMessage(container, id),

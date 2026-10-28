@@ -1,9 +1,4 @@
-import {
-  authenticate,
-  validateAndTransformBody,
-  validateAndTransformQuery,
-} from "@medusajs/framework/http"
-import type { AuthenticatedMedusaRequest } from "@medusajs/framework/http"
+import { validateAndTransformBody, validateAndTransformQuery } from "@medusajs/framework/http"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import {
   AdminGetReturnRequests,
@@ -14,28 +9,27 @@ import {
   StorePostReturnRequest,
 } from "../admin/return-requests/validators"
 import { requireUserActor } from "./actor"
+import { optionalCustomer, orderAccess, orderActor } from "./order-access"
 import { rateLimit } from "./rate-limit"
 
-const customer = authenticate("customer", ["session", "bearer"])
-
 /**
- * F7.9 (adr/0032): a signed-in shopper asks to return lines of their own
- * order (a small budget each); staff decide, receive and refund.
+ * F7.9 (adr/0032): a shopper asks to return lines of their own order (a
+ * small budget each), signed in or with the order's key from its e-mail
+ * (adr/0037 §2); staff decide, receive and refund.
  */
 export const RETURN_ROUTES = [
   {
     matcher: "/store/orders/:id/returns",
     methods: ["GET" as const],
-    middlewares: [customer],
+    middlewares: [optionalCustomer, orderAccess],
   },
   {
     matcher: "/store/orders/:id/returns",
     methods: ["POST" as const],
     middlewares: [
-      customer,
-      rateLimit(() => RATE_LIMIT_PROFILES.return_request, {
-        identity: (req) => (req as Partial<AuthenticatedMedusaRequest>).auth_context?.actor_id,
-      }),
+      optionalCustomer,
+      orderAccess,
+      rateLimit(() => RATE_LIMIT_PROFILES.return_request, { identity: orderActor }),
       validateAndTransformBody(StorePostReturnRequest),
     ],
   },

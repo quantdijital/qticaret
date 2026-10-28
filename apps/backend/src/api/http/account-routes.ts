@@ -4,7 +4,14 @@ import type {
   MedusaRequest,
   MedusaResponse,
 } from "@medusajs/framework/http"
+import { validateAndTransformBody } from "@medusajs/framework/http"
 import { Modules } from "@medusajs/framework/utils"
+import { errorSummary, logger } from "../../lib/logging"
+import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
+import { attachGuestOrdersWorkflow } from "../../workflows/orders/attach-guest-orders"
+import { StorePostOrderLookup } from "../store/order-lookup/validators"
+import { orderPageAccess } from "./order-access"
+import { rateLimit } from "./rate-limit"
 import { rejectRequest } from "./reject"
 
 interface ProviderIdentity {
@@ -67,11 +74,53 @@ export async function registrationEmailFromIdentity(
   }
 }
 
-/** F10.1 (adr/0037): a customer account is opened for the identity's own address. */
+/**
+ * A signed-in customer reading their account or orders takes in the
+ * orders they placed as a guest with the same address (adr/0037 §1):
+ * signing in proves the address. A failure only leaves them where they
+ * were. No `methods` on its routes (Medusa's own): the method is checked here.
+ */
+export async function attachGuestOrders(
+  req: MedusaRequest,
+  _res: MedusaResponse,
+  next: MedusaNextFunction
+) {
+  const auth = (req as Partial<AuthenticatedMedusaRequest>).auth_context
+  if (req.method === "GET" && auth?.actor_type === "customer" && auth.actor_id) {
+    await attachGuestOrdersWorkflow(req.scope)
+      .run({ input: { customer_id: auth.actor_id } })
+      .catch((error: unknown) => {
+        logger.warn({ event: "orders.attach_guest_failed", err: errorSummary(error) })
+      })
+  }
+  next()
+}
+
+/**
+ * F10.1 (adr/0037): a customer account is opened for the identity's own
+ * address; an order opens to its customer or the key from its e-mail.
+ */
 export const ACCOUNT_ROUTES = [
   {
     matcher: "/store/customers",
     methods: ["POST" as const],
     middlewares: [registrationEmailFromIdentity],
+  },
+  { matcher: "/store/orders/:id", middlewares: [orderPageAccess] },
+  { matcher: "/store/orders", middlewares: [attachGuestOrders] },
+  { matcher: "/store/customers/me", middlewares: [attachGuestOrders] },
+  // Counted per address too: it mails one
+  {
+    matcher: "/store/order-lookup",
+    methods: ["POST" as const],
+    middlewares: [
+      rateLimit(() => RATE_LIMIT_PROFILES.order_lookup, {
+        identity: (req) => {
+          const email = (req.body as { email?: unknown } | undefined)?.email
+          return typeof email === "string" ? email.trim().toLowerCase() : undefined
+        },
+      }),
+      validateAndTransformBody(StorePostOrderLookup),
+    ],
   },
 ]

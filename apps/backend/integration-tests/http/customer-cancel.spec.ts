@@ -179,7 +179,8 @@ medusaIntegrationTestRunner({
       expect(packed.data.message).toBe("orders.cancel_after_packing")
       expect(await statusOf(shipped)).not.toBe("canceled")
       expect(foreign.status).toBe(404)
-      expect(anonymous.status).toBe(401)
+      // Without a session or the order's key there is no such order (adr/0037 §2)
+      expect(anonymous.status).toBe(404)
       expect(await statusOf(theirs)).not.toBe("canceled")
     })
   },

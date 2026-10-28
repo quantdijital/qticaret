@@ -1,10 +1,10 @@
-import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
+import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { RETURN_REQUESTS_MODULE } from "../../../../../modules/return-requests"
 import type ReturnRequestsModuleService from "../../../../../modules/return-requests/service"
 import { liraOf } from "../../../../admin/return-requests/view"
 import { requestReturn } from "../../../../../workflows/returns/request-return"
 import type { StorePostReturnRequestType } from "../../../../admin/return-requests/validators"
+import { orderAccessOf } from "../../../../http/order-access"
 
 /**
  * What a shopper sees of their request: its state and the carrier's code,
@@ -23,15 +23,19 @@ const view = (request: Record<string, unknown>) => ({
   created_at: request["created_at"],
 })
 
-/** POST /store/orders/:id/returns (F7.9): the signed-in shopper asks to send lines back. */
+/**
+ * POST /store/orders/:id/returns (F7.9): the shopper asks to send lines
+ * back, signed in or with the order's key (adr/0037 §2).
+ */
 export async function POST(
-  req: AuthenticatedMedusaRequest<StorePostReturnRequestType>,
+  req: MedusaRequest<StorePostReturnRequestType>,
   res: MedusaResponse
 ): Promise<void> {
   const { kind, items, reason, note } = req.validatedBody
+  const access = orderAccessOf(req)
   const created = await requestReturn(req.scope, {
-    order_id: req.params["id"] ?? "",
-    customer_id: req.auth_context.actor_id,
+    order_id: access.order_id,
+    customer_id: access.customer_id ?? "",
     kind,
     items,
     reason,
@@ -40,20 +44,9 @@ export async function POST(
   res.json({ return_request: view(created) })
 }
 
-/** GET /store/orders/:id/returns: the shopper's requests on their own order. */
-export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse): Promise<void> {
-  const orderId = req.params["id"] ?? ""
-  const { data } = await req.scope.resolve(ContainerRegistrationKeys.QUERY).graph({
-    entity: "order",
-    fields: ["customer_id"],
-    filters: { id: orderId },
-  })
-  if (
-    (data[0] as { customer_id?: string | null } | undefined)?.customer_id !==
-    req.auth_context.actor_id
-  ) {
-    throw new MedusaError(MedusaError.Types.NOT_FOUND, "orders.unknown")
-  }
+/** GET /store/orders/:id/returns: the shopper's requests on their own order (`orderAccess`). */
+export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {
+  const orderId = orderAccessOf(req).order_id
   const requests = await req.scope
     .resolve<ReturnRequestsModuleService>(RETURN_REQUESTS_MODULE)
     .listReturnRequests({ order_id: orderId }, { order: { created_at: "DESC" } })

@@ -994,7 +994,8 @@
           "order": {
             "placed": "Sipariş alındı",
             "shipped": "Sipariş kargoda",
-            "delivered": "Sipariş teslim edildi"
+            "delivered": "Sipariş teslim edildi",
+            "access_link": "Sipariş bağlantısı"
           },
           "return": {
             "requested": "İade talebi alındı",
@@ -1939,9 +1940,17 @@
         "account": "hesabından",
         "panel": "panelden",
         "import": "aktarımla",
-        "iys": "İYS'den"
+        "iys": "İYS'den",
+        "unsubscribe": "abonelikten çıkışla"
       },
-      "saved": "İleti izni kaydedildi."
+      "saved": "İleti izni kaydedildi.",
+      "evidenceTitle": "{{channel}} izni nasıl verildi?",
+      "evidenceDescription": "İzin, müşterinin açık onayıyla verilir. Nasıl ve ne zaman verdiğini yazın; İYS ve bir şikâyet bu kaydı ister.",
+      "evidence": "Kanıt",
+      "evidencePlaceholder": "Ör. 28 Ekim'de mağazada imzalı formla",
+      "evidenceShort": "En az 10 karakterle nasıl verildiğini yazın.",
+      "grant": "İzni kaydet",
+      "cancel": "Vazgeç"
     }
   },
   "categories": {

@@ -50,6 +50,13 @@ const TR: Readonly<Record<string, string>> = {
   "order.total": "Toplam",
   "order.address": "Teslimat adresi",
   "order.view": "Siparişi görüntüle",
+  "order_link.subject": "Siparişinizin bağlantısı (#{{number}})",
+  "order_link.preheader": "{{shop}} siparişinizi görüntüleyin.",
+  "order_link.heading": "Merhaba {{name}}, siparişiniz burada",
+  "order_link.intro":
+    "#{{number}} numaralı siparişinizi görmek, iptal etmek ya da iade talebi açmak için aşağıdaki düğmeye tıklayın. Bağlantı {{days}} gün geçerlidir.",
+  "order_link.ignore":
+    "Bu bağlantıyı siz istemediyseniz e-postayı yok sayın; bağlantı yalnızca bu adrese gönderildi.",
   "bank.title": "Havale bilgileri",
   "bank.holder": "Alıcı: {{holder}}",
   "bank.bank": "Banka: {{bank}}",

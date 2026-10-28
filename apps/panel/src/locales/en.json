@@ -994,7 +994,8 @@
           "order": {
             "placed": "Order placed",
             "shipped": "Order shipped",
-            "delivered": "Order delivered"
+            "delivered": "Order delivered",
+            "access_link": "Order link"
           },
           "return": {
             "requested": "Return requested",
@@ -1931,9 +1932,17 @@
         "account": "in their account",
         "panel": "in the panel",
         "import": "by import",
-        "iys": "from İYS"
+        "iys": "from İYS",
+        "unsubscribe": "by unsubscribing"
       },
-      "saved": "Consent saved."
+      "saved": "Consent saved.",
+      "evidenceTitle": "How was the {{channel}} consent given?",
+      "evidenceDescription": "Consent is the customer's explicit yes. Write how and when they gave it; İYS and any complaint ask for this record.",
+      "evidence": "Proof",
+      "evidencePlaceholder": "E.g. signed form in the shop on 28 October",
+      "evidenceShort": "Write how it was given, in at least 10 characters.",
+      "grant": "Record consent",
+      "cancel": "Cancel"
     }
   },
   "categories": {

@@ -467,13 +467,9 @@ medusaIntegrationTestRunner({
       const hardHeaders = signResendReport(resendSecret, hard)
 
       const forged = await post(hard, { ...hardHeaders, "svix-signature": "v1,c2FodGU=" })
-      const soft = await post(
-        report("email.bounced", { type: "Transient", subType: "MailboxFull" }),
-        signResendReport(
-          resendSecret,
-          report("email.bounced", { type: "Transient", subType: "MailboxFull" })
-        )
-      )
+      // One body, signed as sent: its time is part of it
+      const softBody = report("email.bounced", { type: "Transient", subType: "MailboxFull" })
+      const soft = await post(softBody, signResendReport(resendSecret, softBody))
       const listedAfterSoft = await getContainer()
         .resolve<MessagingModuleService>(MESSAGING_MODULE)
         .isSuppressed("email", "geri-donen@example.com")

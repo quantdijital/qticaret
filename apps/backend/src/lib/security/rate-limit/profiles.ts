@@ -61,6 +61,12 @@ export const RATE_LIMIT_PROFILES = {
     perIdentityAnyIp: { max: 10, windowMs: 10 * MINUTE },
   },
   installment: { name: "installment", perIp: { max: 30, windowMs: MINUTE } },
+  // F10.1 (adr/0037 §2): "find my order" mails the order's link; per IP and per address
+  order_lookup: {
+    name: "order_lookup",
+    perIp: { max: 10, windowMs: 15 * MINUTE },
+    perIdentity: { max: 3, windowMs: HOUR },
+  },
   // F7.13: a shopper cancelling an order; each may ask a provider for a refund
   order_cancel: {
     name: "order_cancel",
