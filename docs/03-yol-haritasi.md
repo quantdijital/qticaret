@@ -287,7 +287,7 @@ Detay: `docs/entegrasyonlar/geliver.md`
 - [ ] İade talebinden para iadesi + stok + iade faturasına kadar akış çalışıyor
 - [x] Webhook ve polling aynı güncellemeyi iki kez uygulamıyor (`geliver-tracking`: aynı anda gelen bildirim ve sorgu tek olay, tek Medusa gönderisi)
 - [ ] Değişim akışı: fark tutarı doğru hesaplanıyor, stok iki yönde doğru (testli)
-- [ ] Kargoya verilmiş sipariş müşteri tarafından iptal edilemiyor; verilmemiş olan iptal edilip iade ediliyor (testli)
+- [x] Kargoya verilmiş sipariş müşteri tarafından iptal edilemiyor; verilmemiş olan iptal edilip iade ediliyor (testli) (`customer-cancel`; misafir siparişi F9/F10'daki sipariş bağlantısıyla)
 - [ ] Doğrudan taşıyıcı adaptörü contract test paketini geçiyor; etiket PDF'i yetkisiz URL ile açılamıyor
 
 ---

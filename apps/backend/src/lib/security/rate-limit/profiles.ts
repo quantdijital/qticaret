@@ -61,6 +61,12 @@ export const RATE_LIMIT_PROFILES = {
     perIdentityAnyIp: { max: 10, windowMs: 10 * MINUTE },
   },
   installment: { name: "installment", perIp: { max: 30, windowMs: MINUTE } },
+  // F7.13: a shopper cancelling an order; each may ask a provider for a refund
+  order_cancel: {
+    name: "order_cancel",
+    perIp: { max: 20, windowMs: 10 * MINUTE },
+    perIdentity: { max: 5, windowMs: 10 * MINUTE },
+  },
   // F7.7: shipping picked orders at once, each asking a carrier for a label
   bulk_ship: {
     name: "bulk_ship",

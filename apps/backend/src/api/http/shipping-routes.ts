@@ -1,5 +1,6 @@
 import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { validateAndTransformBody } from "@medusajs/framework/http"
+import { authenticate, validateAndTransformBody } from "@medusajs/framework/http"
+import type { AuthenticatedMedusaRequest } from "@medusajs/framework/http"
 import { ValidationError } from "../../lib/errors"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import {
@@ -38,6 +39,17 @@ export const SHIPPING_ROUTES = [
   // No `methods` on purpose: a method-scoped middleware may sort after the core route
   { matcher: "/admin/orders/:id/fulfillments", middlewares: [refuseReservedAdditionalData] },
   { matcher: "/admin/fulfillments", middlewares: [refuseReservedAdditionalData] },
+  // F7.13: a signed-in shopper cancels their own order before it is packed
+  {
+    matcher: "/store/orders/:id/cancel",
+    methods: ["POST" as const],
+    middlewares: [
+      authenticate("customer", ["session", "bearer"]),
+      rateLimit(() => RATE_LIMIT_PROFILES.order_cancel, {
+        identity: (req) => (req as Partial<AuthenticatedMedusaRequest>).auth_context?.actor_id,
+      }),
+    ],
+  },
   // F7.8: the shop's shipping options, staff only
   {
     matcher: "/admin/shipping-setup/options",
