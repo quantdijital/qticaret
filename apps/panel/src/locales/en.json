@@ -227,7 +227,8 @@
       "attributes": "Product attributes",
       "locations": "Locations",
       "integrations": "Integrations",
-      "notifications": "Notifications"
+      "notifications": "Notifications",
+      "sms": "SMS"
     },
     "appearance": {
       "title": "Appearance",
@@ -903,25 +904,7 @@
     },
     "notifications": {
       "title": "Notifications",
-      "description": "The e-mails and texts your customers get. E-mail goes through the platform; texts need the shop's own Netgsm account.",
-      "sms": {
-        "name": "Netgsm",
-        "keys": {
-          "title": "SMS account",
-          "description": "The user code and password Netgsm gives. Turn on API access under Settings > API in the Netgsm panel; the server's IP may need allowing."
-        },
-        "usercode": "User code",
-        "password": "Password",
-        "msgheader": "Sender name (header)",
-        "msgheaderHint": "Type your approved Netgsm header exactly (2–11 characters). Texts go out under it."
-      },
-      "netgsm": {
-        "checks": {
-          "merchant_invalid": "Netgsm took the login, but this sender name is not on the account. Type the approved header exactly.",
-          "secret_invalid": "Netgsm did not accept this user code and password, or API access is off."
-        },
-        "rejected": "Netgsm no longer accepts the stored details; no text can be sent. Enter the current ones."
-      },
+      "description": "Settings for the messages your customers and you get. The SMS account is set up under SMS.",
       "suppressions": {
         "title": "Addresses not sent to",
         "description": "E-mails that bounced for good or were marked as spam land here by themselves; nothing goes to them again. You can add an address a customer asked to leave alone.",
@@ -937,6 +920,35 @@
           "complaint": "Spam complaint",
           "manual": "Added by hand"
         }
+      }
+    },
+    "sms": {
+      "title": "SMS",
+      "subtitle": "Order and shipping texts go from the shop's own SMS account; the sender name is registered to your company.",
+      "providersTitle": "SMS services",
+      "providersDescription": "Connect the service texts go through. Without a connected account no text goes; e-mails still do.",
+      "manage": "Manage",
+      "connect": "Connect",
+      "providers": {
+        "netgsm": {
+          "name": "Netgsm",
+          "description": "Texts from the shop's own Netgsm account, under your approved header. Campaign texts are checked against İYS."
+        }
+      },
+      "netgsm": {
+        "keys": {
+          "title": "SMS account",
+          "description": "The user code and password Netgsm gives. Turn on API access under Settings > API in the Netgsm panel; the server's IP may need allowing."
+        },
+        "usercode": "User code",
+        "password": "Password",
+        "msgheader": "Sender name (header)",
+        "msgheaderHint": "Type your approved Netgsm header exactly (2–11 characters). Texts go out under it.",
+        "checks": {
+          "merchant_invalid": "Netgsm took the login, but this sender name is not on the account. Type the approved header exactly.",
+          "secret_invalid": "Netgsm did not accept this user code and password, or API access is off."
+        },
+        "rejected": "Netgsm no longer accepts the stored details; no text can be sent. Enter the current ones."
       }
     }
   },

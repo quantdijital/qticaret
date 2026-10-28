@@ -295,7 +295,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "messaging.suppression_unknown": "Bu adres listede yok.",
   "messaging.recipient_invalid": "Adres ya da telefon numarası geçerli değil.",
   "messaging.email_off": "E-posta gönderimi bu mağazada açık değil.",
-  "messaging.sms_off": "SMS hesabı bağlı değil. Ayarlar > Bildirimler'den Netgsm hesabını girin.",
+  "messaging.sms_off": "SMS hesabı bağlı değil. Ayarlar > SMS'ten Netgsm hesabını girin.",
   "netgsm.msgheader_invalid":
     "Gönderici adı 2–11 karakter olmalı; Netgsm'de onaylı başlığınızı aynen yazın.",
   "netgsm.merchant_invalid":

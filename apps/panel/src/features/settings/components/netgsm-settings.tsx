@@ -15,11 +15,11 @@ import { netgsmFormSchema, netgsmFormValues, netgsmSaveBody } from "@/features/s
 import type { NetgsmFormValues } from "@/features/settings/netgsm"
 import { nothingStored } from "@/features/settings/payments"
 
-const N = "settings.notifications"
-const S = `${N}.sms`
+const N = "settings.sms"
+const S = `${N}.netgsm`
 
 /**
- * Settings > Notifications > SMS (adr/0036): the shop's own Netgsm
+ * Settings > SMS > Netgsm (adr/0036): the shop's own Netgsm
  * account, since its sender name is registered to its company. Netgsm
  * checks the login and the sender name before anything is saved.
  */
@@ -31,7 +31,7 @@ export function NetgsmSettings({
   keyConfigured: boolean
 }) {
   const { t } = useTranslation()
-  const name = t(`${S}.name`)
+  const name = t(`${N}.providers.netgsm.name`)
   const actions = useAccountActions("netgsm", name, N)
   const form = useForm<NetgsmFormValues>({
     resolver: zodResolver(netgsmFormSchema(account)),

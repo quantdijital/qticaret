@@ -19,7 +19,7 @@ void startFakeNetgsm(account, { port }).then((fake) => {
     [
       `Sahte Netgsm ${fake.url} adresinde.`,
       `Backend: NETGSM_BASE_URL=${fake.url}`,
-      "Panel > Ayarlar > Bildirimler > SMS:",
+      "Panel > Ayarlar > SMS > Netgsm:",
       `  Kullanıcı kodu: ${account.usercode}`,
       `  Şifre: ${account.password}`,
       `  Gönderici adı: ${account.headers[0] ?? ""}`,

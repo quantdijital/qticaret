@@ -227,7 +227,8 @@
       "attributes": "Ürün özellikleri",
       "locations": "Depolar",
       "integrations": "Entegrasyonlar",
-      "notifications": "Bildirimler"
+      "notifications": "Bildirimler",
+      "sms": "SMS"
     },
     "appearance": {
       "title": "Görünüm",
@@ -903,25 +904,7 @@
     },
     "notifications": {
       "title": "Bildirimler",
-      "description": "Müşterilere giden e-posta ve SMS'ler. E-postalar platform üzerinden gider; SMS için mağazanın kendi Netgsm hesabı gerekir.",
-      "sms": {
-        "name": "Netgsm",
-        "keys": {
-          "title": "SMS hesabı",
-          "description": "Netgsm'in verdiği kullanıcı kodu ve şifre. Netgsm panelinde Ayarlar > API işlemleri'nden API erişimini açın; sunucu IP'si için izin gerekebilir."
-        },
-        "usercode": "Kullanıcı kodu",
-        "password": "Şifre",
-        "msgheader": "Gönderici adı (başlık)",
-        "msgheaderHint": "Netgsm'de onaylı başlığınızı aynen yazın (2–11 karakter). SMS'ler bu adla gider."
-      },
-      "netgsm": {
-        "checks": {
-          "merchant_invalid": "Netgsm girişi doğru ama bu gönderici adı hesabınızda yok. Netgsm panelindeki onaylı başlığı aynen yazın.",
-          "secret_invalid": "Netgsm bu kullanıcı kodu ve şifreyi kabul etmedi ya da API erişimi kapalı."
-        },
-        "rejected": "Netgsm kayıtlı bilgileri artık kabul etmiyor; SMS gönderilemiyor. Güncel bilgileri girin."
-      },
+      "description": "Müşterilere ve size giden iletilerin ayarları. SMS hesabı SMS bölümünde kurulur.",
       "suppressions": {
         "title": "Gönderilmeyen adresler",
         "description": "Kalıcı olarak geri dönen ya da spam olarak işaretlenen e-postalar buraya kendiliğinden girer; bu adreslere bir daha ileti gönderilmez. Müşteri isterse adresini siz de ekleyebilirsiniz.",
@@ -937,6 +920,35 @@
           "complaint": "Spam şikâyeti",
           "manual": "Elle eklendi"
         }
+      }
+    },
+    "sms": {
+      "title": "SMS",
+      "subtitle": "Müşterilere sipariş ve kargo SMS'leri mağazanın kendi SMS hesabından gider; gönderici adı firmanıza kayıtlıdır.",
+      "providersTitle": "SMS hizmetleri",
+      "providersDescription": "SMS'lerin gönderileceği hizmeti bağlayın. Bağlı hesap yoksa SMS gönderilmez; e-postalar yine gider.",
+      "manage": "Yönet",
+      "connect": "Bağla",
+      "providers": {
+        "netgsm": {
+          "name": "Netgsm",
+          "description": "Mağazanın kendi Netgsm hesabıyla, onaylı başlığınızdan SMS. Kampanya SMS'leri İYS kontrolüyle gider."
+        }
+      },
+      "netgsm": {
+        "keys": {
+          "title": "SMS hesabı",
+          "description": "Netgsm'in verdiği kullanıcı kodu ve şifre. Netgsm panelinde Ayarlar > API işlemleri'nden API erişimini açın; sunucu IP'si için izin gerekebilir."
+        },
+        "usercode": "Kullanıcı kodu",
+        "password": "Şifre",
+        "msgheader": "Gönderici adı (başlık)",
+        "msgheaderHint": "Netgsm'de onaylı başlığınızı aynen yazın (2–11 karakter). SMS'ler bu adla gider.",
+        "checks": {
+          "merchant_invalid": "Netgsm girişi doğru ama bu gönderici adı hesabınızda yok. Netgsm panelindeki onaylı başlığı aynen yazın.",
+          "secret_invalid": "Netgsm bu kullanıcı kodu ve şifreyi kabul etmedi ya da API erişimi kapalı."
+        },
+        "rejected": "Netgsm kayıtlı bilgileri artık kabul etmiyor; SMS gönderilemiyor. Güncel bilgileri girin."
       }
     }
   },

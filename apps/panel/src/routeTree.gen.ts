@@ -58,6 +58,8 @@ import { Route as AuthSettingsPaymentsIndexRouteImport } from './routes/_auth/se
 import { Route as AuthSettingsPaymentsProviderRouteImport } from './routes/_auth/settings/payments/$provider'
 import { Route as AuthSettingsShippingIndexRouteImport } from './routes/_auth/settings/shipping/index'
 import { Route as AuthSettingsShippingCarrierRouteImport } from './routes/_auth/settings/shipping/$carrier'
+import { Route as AuthSettingsSmsIndexRouteImport } from './routes/_auth/settings/sms/index'
+import { Route as AuthSettingsSmsProviderRouteImport } from './routes/_auth/settings/sms/$provider'
 
 const AuthRoute = AuthRouteImport.update({
   id: '/_auth',
@@ -312,6 +314,16 @@ const AuthSettingsShippingCarrierRoute =
     path: '/shipping/$carrier',
     getParentRoute: () => AuthSettingsRoute,
   } as any)
+const AuthSettingsSmsIndexRoute = AuthSettingsSmsIndexRouteImport.update({
+  id: '/sms/',
+  path: '/sms/',
+  getParentRoute: () => AuthSettingsRoute,
+} as any)
+const AuthSettingsSmsProviderRoute = AuthSettingsSmsProviderRouteImport.update({
+  id: '/sms/$provider',
+  path: '/sms/$provider',
+  getParentRoute: () => AuthSettingsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthIndexRoute
@@ -359,9 +371,11 @@ export interface FileRoutesByFullPath {
   '/promotions/price-lists/new': typeof AuthPromotionsPriceListsNewRoute
   '/settings/payments/$provider': typeof AuthSettingsPaymentsProviderRoute
   '/settings/shipping/$carrier': typeof AuthSettingsShippingCarrierRoute
+  '/settings/sms/$provider': typeof AuthSettingsSmsProviderRoute
   '/promotions/price-lists/': typeof AuthPromotionsPriceListsIndexRoute
   '/settings/payments/': typeof AuthSettingsPaymentsIndexRoute
   '/settings/shipping/': typeof AuthSettingsShippingIndexRoute
+  '/settings/sms/': typeof AuthSettingsSmsIndexRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
@@ -407,9 +421,11 @@ export interface FileRoutesByTo {
   '/promotions/price-lists/new': typeof AuthPromotionsPriceListsNewRoute
   '/settings/payments/$provider': typeof AuthSettingsPaymentsProviderRoute
   '/settings/shipping/$carrier': typeof AuthSettingsShippingCarrierRoute
+  '/settings/sms/$provider': typeof AuthSettingsSmsProviderRoute
   '/promotions/price-lists': typeof AuthPromotionsPriceListsIndexRoute
   '/settings/payments': typeof AuthSettingsPaymentsIndexRoute
   '/settings/shipping': typeof AuthSettingsShippingIndexRoute
+  '/settings/sms': typeof AuthSettingsSmsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -459,9 +475,11 @@ export interface FileRoutesById {
   '/_auth/promotions/price-lists/new': typeof AuthPromotionsPriceListsNewRoute
   '/_auth/settings/payments/$provider': typeof AuthSettingsPaymentsProviderRoute
   '/_auth/settings/shipping/$carrier': typeof AuthSettingsShippingCarrierRoute
+  '/_auth/settings/sms/$provider': typeof AuthSettingsSmsProviderRoute
   '/_auth/promotions/price-lists/': typeof AuthPromotionsPriceListsIndexRoute
   '/_auth/settings/payments/': typeof AuthSettingsPaymentsIndexRoute
   '/_auth/settings/shipping/': typeof AuthSettingsShippingIndexRoute
+  '/_auth/settings/sms/': typeof AuthSettingsSmsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -511,9 +529,11 @@ export interface FileRouteTypes {
     | '/promotions/price-lists/new'
     | '/settings/payments/$provider'
     | '/settings/shipping/$carrier'
+    | '/settings/sms/$provider'
     | '/promotions/price-lists/'
     | '/settings/payments/'
     | '/settings/shipping/'
+    | '/settings/sms/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/login'
@@ -559,9 +579,11 @@ export interface FileRouteTypes {
     | '/promotions/price-lists/new'
     | '/settings/payments/$provider'
     | '/settings/shipping/$carrier'
+    | '/settings/sms/$provider'
     | '/promotions/price-lists'
     | '/settings/payments'
     | '/settings/shipping'
+    | '/settings/sms'
   id:
     | '__root__'
     | '/_auth'
@@ -610,9 +632,11 @@ export interface FileRouteTypes {
     | '/_auth/promotions/price-lists/new'
     | '/_auth/settings/payments/$provider'
     | '/_auth/settings/shipping/$carrier'
+    | '/_auth/settings/sms/$provider'
     | '/_auth/promotions/price-lists/'
     | '/_auth/settings/payments/'
     | '/_auth/settings/shipping/'
+    | '/_auth/settings/sms/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -965,6 +989,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSettingsShippingCarrierRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
+    '/_auth/settings/sms/': {
+      id: '/_auth/settings/sms/'
+      path: '/sms'
+      fullPath: '/settings/sms/'
+      preLoaderRoute: typeof AuthSettingsSmsIndexRouteImport
+      parentRoute: typeof AuthSettingsRoute
+    }
+    '/_auth/settings/sms/$provider': {
+      id: '/_auth/settings/sms/$provider'
+      path: '/sms/$provider'
+      fullPath: '/settings/sms/$provider'
+      preLoaderRoute: typeof AuthSettingsSmsProviderRouteImport
+      parentRoute: typeof AuthSettingsRoute
+    }
   }
 }
 
@@ -1000,8 +1038,10 @@ interface AuthSettingsRouteChildren {
   AuthSettingsIndexRoute: typeof AuthSettingsIndexRoute
   AuthSettingsPaymentsProviderRoute: typeof AuthSettingsPaymentsProviderRoute
   AuthSettingsShippingCarrierRoute: typeof AuthSettingsShippingCarrierRoute
+  AuthSettingsSmsProviderRoute: typeof AuthSettingsSmsProviderRoute
   AuthSettingsPaymentsIndexRoute: typeof AuthSettingsPaymentsIndexRoute
   AuthSettingsShippingIndexRoute: typeof AuthSettingsShippingIndexRoute
+  AuthSettingsSmsIndexRoute: typeof AuthSettingsSmsIndexRoute
 }
 
 const AuthSettingsRouteChildren: AuthSettingsRouteChildren = {
@@ -1018,8 +1058,10 @@ const AuthSettingsRouteChildren: AuthSettingsRouteChildren = {
   AuthSettingsIndexRoute: AuthSettingsIndexRoute,
   AuthSettingsPaymentsProviderRoute: AuthSettingsPaymentsProviderRoute,
   AuthSettingsShippingCarrierRoute: AuthSettingsShippingCarrierRoute,
+  AuthSettingsSmsProviderRoute: AuthSettingsSmsProviderRoute,
   AuthSettingsPaymentsIndexRoute: AuthSettingsPaymentsIndexRoute,
   AuthSettingsShippingIndexRoute: AuthSettingsShippingIndexRoute,
+  AuthSettingsSmsIndexRoute: AuthSettingsSmsIndexRoute,
 }
 
 const AuthSettingsRouteWithChildren = AuthSettingsRoute._addFileChildren(

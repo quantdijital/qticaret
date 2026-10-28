@@ -29,7 +29,7 @@ export function netgsmFormSchema(account: NetgsmAccount | undefined) {
     .object({
       usercode: z.string(),
       password: z.string(),
-      msgheader: z.string().trim().regex(HEADER, "settings.notifications.sms.msgheaderHint"),
+      msgheader: z.string().trim().regex(HEADER, "settings.sms.netgsm.msgheaderHint"),
     })
     .superRefine((values, ctx) => {
       checkSecrets(values, SECRETS, nothingStored(account), ctx, SECRET)
