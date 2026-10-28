@@ -4,10 +4,11 @@ import { useTranslation } from "react-i18next"
 import { PageHeader } from "@/components/patterns/page-header"
 import { ErrorState, LoadingRows } from "@/components/patterns/states"
 import { providerAccountsQuery } from "@/features/settings/api/payments"
-import type { ArasAccount, GeliverAccount } from "@/features/settings/api/payments"
+import type { ArasAccount, GeliverAccount, YurticiAccount } from "@/features/settings/api/payments"
 import { ArasSettings } from "@/features/settings/components/aras-settings"
 import { AccountBadges } from "@/features/settings/components/account-badges"
 import { GeliverSettings } from "@/features/settings/components/geliver-settings"
+import { YurticiSettings } from "@/features/settings/components/yurtici-settings"
 import { accountKey } from "@/features/settings/payments"
 import { errorText } from "@/lib/errors"
 
@@ -37,6 +38,12 @@ export function ShippingCarrierPage() {
         <ArasSettings
           key={accountKey(account)}
           account={account as ArasAccount | undefined}
+          keyConfigured={query.data.key_configured}
+        />
+      ) : carrier === "yurtici" ? (
+        <YurticiSettings
+          key={accountKey(account)}
+          account={account as YurticiAccount | undefined}
           keyConfigured={query.data.key_configured}
         />
       ) : (

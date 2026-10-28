@@ -5,7 +5,8 @@ import { checkSecrets, nothingStored, typedSecrets } from "@/features/settings/p
 /**
  * The Aras Kargo page's form (adr/0035): the user name and password,
  * written once; the customer code and the service address in the clear;
- * test mode. A new customer code is another account: both secrets again.
+ * test mode. Another code, address or mode is another account: both
+ * secrets again (the server asks the same).
  */
 
 const ARAS_SECRETS = ["username", "password"] as const
@@ -30,8 +31,19 @@ export const arasFormValues = (account: ArasAccount | undefined): ArasFormValues
   test_mode: account?.settings?.test_mode ?? true,
 })
 
-const secretsRequired = (account: ArasAccount | undefined, customerCode: string): boolean =>
-  nothingStored(account) || (account?.settings?.customer_code ?? "") !== customerCode.trim()
+/** The secrets are asked again: nothing usable is stored, or the account itself changes. */
+export function arasSecretsRequired(
+  account: ArasAccount | undefined,
+  values: Pick<ArasFormValues, "customer_code" | "service_url" | "test_mode">
+): boolean {
+  const stored = account?.settings
+  return (
+    nothingStored(account) ||
+    (stored?.customer_code ?? "") !== values.customer_code.trim() ||
+    (stored?.service_url ?? "") !== values.service_url.trim() ||
+    stored?.test_mode !== values.test_mode
+  )
+}
 
 export function arasFormSchema(account: ArasAccount | undefined) {
   return z
@@ -52,13 +64,7 @@ export function arasFormSchema(account: ArasAccount | undefined) {
       test_mode: z.boolean(),
     })
     .superRefine((values, ctx) => {
-      checkSecrets(
-        values,
-        ARAS_SECRETS,
-        secretsRequired(account, values.customer_code),
-        ctx,
-        SECRET
-      )
+      checkSecrets(values, ARAS_SECRETS, arasSecretsRequired(account, values), ctx, SECRET)
     })
 }
 

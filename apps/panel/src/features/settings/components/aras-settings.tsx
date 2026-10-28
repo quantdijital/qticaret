@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { Controller, useForm } from "react-hook-form"
+import { Controller, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { Field, FormSection } from "@/components/patterns/form-section"
 import { LeaveGuard } from "@/components/patterns/leave-guard"
@@ -7,14 +7,18 @@ import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
 import type { ArasAccount } from "@/features/settings/api/payments"
 import { useAccountActions } from "@/features/settings/account-actions"
-import { arasFormSchema, arasFormValues, arasSaveBody } from "@/features/settings/aras"
+import {
+  arasFormSchema,
+  arasFormValues,
+  arasSaveBody,
+  arasSecretsRequired,
+} from "@/features/settings/aras"
 import type { ArasFormValues } from "@/features/settings/aras"
 import {
   AccountAlert,
   AccountFooter,
   SecretField,
 } from "@/features/settings/components/account-form"
-import { nothingStored } from "@/features/settings/payments"
 
 const S = "settings.shipping"
 const A = `${S}.aras`
@@ -23,7 +27,7 @@ const A = `${S}.aras`
  * Settings > Shipping > Aras Kargo (adr/0035), in the order the shop sets
  * it up: the details from Aras's integration document, then test mode
  * until going live. Aras checks the user name and password before anything
- * is saved; a new customer code asks for both again.
+ * is saved; another customer code, address or mode asks for both again.
  */
 export function ArasSettings({
   account,
@@ -43,8 +47,16 @@ export function ArasSettings({
   const state = account?.state ?? "not_configured"
   const locked = !keyConfigured || actions.busy
   const message = (key: string | undefined) => (key ? t(key, { name }) : undefined)
-  const kept = (secret: "username" | "password") =>
-    account?.secrets[secret] === true && !nothingStored(account)
+  const [customerCode, serviceUrl, testMode] = useWatch({
+    control: form.control,
+    name: ["customer_code", "service_url", "test_mode"],
+  })
+  const required = arasSecretsRequired(account, {
+    customer_code: customerCode,
+    service_url: serviceUrl,
+    test_mode: testMode,
+  })
+  const kept = (secret: "username" | "password") => account?.secrets[secret] === true && !required
 
   return (
     <form

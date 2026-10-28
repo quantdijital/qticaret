@@ -35,6 +35,8 @@ export type ArasAccount = ProviderAccount<{
   customer_code: string
   service_url: string
 }>
+/** Yurtiçi Kargo on the shop's own contract, with its door account when it has one (adr/0035). */
+export type YurticiAccount = ProviderAccount<{ test_mode: boolean }>
 
 interface AccountsResponse {
   key_configured: boolean

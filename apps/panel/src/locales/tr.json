@@ -720,6 +720,10 @@
         "aras": {
           "name": "Aras Kargo",
           "description": "Mağazanın kendi Aras Kargo sözleşmesiyle gönderi, etiket ve takip. Bilgiler Aras'ın verdiği entegrasyon belgesinde."
+        },
+        "yurtici": {
+          "name": "Yurtiçi Kargo",
+          "description": "Mağazanın kendi Yurtiçi Kargo sözleşmesiyle gönderi ve takip; koli etiketini panel hazırlar. Bilgiler Yurtiçi'nin verdiği web servis belgesinde."
         }
       },
       "geliver": {
@@ -760,7 +764,8 @@
           "manual": "Kendi gönderimim",
           "geliver": "Geliver",
           "pickup": "Mağazadan teslim",
-          "aras": "Aras Kargo"
+          "aras": "Aras Kargo",
+          "yurtici": "Yurtiçi Kargo"
         },
         "pricing": "Ücret",
         "pricings": {
@@ -824,7 +829,36 @@
           "description": "Test modunda gönderiler Aras'ın test sistemine gider; gerçek kurye gelmez."
         },
         "testMode": "Test modu",
-        "testModeHint": "Kapatınca gönderiler gerçek Aras hesabına açılır."
+        "testModeHint": "Kapatınca gönderiler gerçek Aras hesabına açılır.",
+        "checks": {
+          "merchant_invalid": "Aras Kargo bu kullanıcı adını kabul etmedi. Bilgileri Aras'ın verdiği entegrasyon belgesinden yeniden kopyalayın.",
+          "secret_invalid": "Aras Kargo bu kullanıcı adı ve şifreyi kabul etmedi. Bilgileri Aras'ın verdiği entegrasyon belgesinden yeniden kopyalayın."
+        },
+        "rejected": "Aras Kargo kayıtlı bilgileri artık kabul etmiyor; gönderi açılamaz. Aras'ın verdiği güncel bilgileri girin."
+      },
+      "yurtici": {
+        "keys": {
+          "title": "Web servis bilgileri",
+          "description": "Yurtiçi Kargo'nun sözleşmeyle verdiği web servis kullanıcı adı ve şifresi. Test ve canlı hesap ayrıdır. Yurtiçi, servise bağlanan sunucunun IP adresine izin vermeli; adresi platform desteğinden alın."
+        },
+        "username": "Kullanıcı adı",
+        "password": "Şifre",
+        "door": {
+          "title": "Kapıda ödeme hesabı",
+          "description": "Yurtiçi, tahsilatlı teslimat (kapıda ödeme) gönderileri için ayrı bir kullanıcı adı ve şifre verir. Kapıda ödemeli siparişler bu hesapla gönderilir; hesap girilmezse bu siparişler Yurtiçi ile gönderilemez.",
+          "hint": "İsteğe bağlı; kullanıcı adı ve şifreyi birlikte girin."
+        },
+        "live": {
+          "title": "Canlıya geçiş",
+          "description": "Test modunda gönderiler Yurtiçi'nin test sistemine gider; gerçek kurye gelmez."
+        },
+        "testMode": "Test modu",
+        "testModeHint": "Kapatınca gönderiler gerçek Yurtiçi hesabına açılır. Test ve canlı bilgileri ayrı olduğundan yeniden istenir.",
+        "checks": {
+          "merchant_invalid": "Yurtiçi Kargo kapıda ödeme hesabının kullanıcı adı ve şifresini kabul etmedi. Bilgileri Yurtiçi'nin bu hesap için verdiği belgeden yeniden kopyalayın.",
+          "secret_invalid": "Yurtiçi Kargo bu kullanıcı adı ve şifreyi kabul etmedi. Bilgileri Yurtiçi'nin verdiği web servis belgesinden yeniden kopyalayın."
+        },
+        "rejected": "Yurtiçi Kargo kayıtlı bilgileri artık kabul etmiyor; gönderi açılamaz. Yurtiçi'nin verdiği güncel bilgileri girin."
       }
     },
     "integrations": {

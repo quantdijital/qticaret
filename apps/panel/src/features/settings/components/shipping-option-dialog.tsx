@@ -33,7 +33,7 @@ import { errorText } from "@/lib/errors"
 import { formatMoneyInput, parseMoneyInput } from "@/lib/money-input"
 
 const S = "settings.shipping.options"
-const CARRIERS = ["manual", "geliver", "aras", "pickup"] as const
+const CARRIERS = ["manual", "geliver", "aras", "yurtici", "pickup"] as const
 const PRICINGS = ["flat", "cheapest", "fastest", "table"] as const
 type Carrier = (typeof CARRIERS)[number]
 type Pricing = (typeof PRICINGS)[number]
@@ -43,6 +43,7 @@ const PRICINGS_OF: Readonly<Record<Carrier, readonly Pricing[]>> = {
   manual: ["flat"],
   geliver: PRICINGS,
   aras: ["flat", "table"],
+  yurtici: ["flat", "table"],
   pickup: ["flat"],
 }
 
@@ -65,7 +66,7 @@ const schema = z
   })
 type Values = z.infer<typeof schema>
 
-/** The server's body for the form: Geliver quotes, Geliver and Aras price by the table. */
+/** The server's body for the form: Geliver quotes; Geliver and the contract carriers price by the table. */
 function newOption(values: Values): NewShippingOption {
   const chosen = pricingFor(values.carrier, values.pricing)
   const pricing: NewShippingOption["pricing"] =

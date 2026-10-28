@@ -720,6 +720,10 @@
         "aras": {
           "name": "Aras Kargo",
           "description": "Parcels, labels and tracking on the shop's own Aras Kargo contract. The details are in Aras's integration document."
+        },
+        "yurtici": {
+          "name": "Yurtiçi Kargo",
+          "description": "Parcels and tracking on the shop's own Yurtiçi Kargo contract; the panel draws the parcel label. The details are in Yurtiçi's web service document."
         }
       },
       "geliver": {
@@ -760,7 +764,8 @@
           "manual": "I ship it myself",
           "geliver": "Geliver",
           "pickup": "Pickup from the shop",
-          "aras": "Aras Kargo"
+          "aras": "Aras Kargo",
+          "yurtici": "Yurtiçi Kargo"
         },
         "pricing": "Price",
         "pricings": {
@@ -824,7 +829,36 @@
           "description": "In test mode parcels go to Aras's test system; no courier comes."
         },
         "testMode": "Test mode",
-        "testModeHint": "Turned off, parcels open on the real Aras account."
+        "testModeHint": "Turned off, parcels open on the real Aras account.",
+        "checks": {
+          "merchant_invalid": "Aras Kargo did not accept this user name. Copy it again from Aras's integration document.",
+          "secret_invalid": "Aras Kargo did not accept this user name and password. Copy them again from Aras's integration document."
+        },
+        "rejected": "Aras Kargo no longer accepts the stored details; no parcel can be opened. Enter the current details Aras gave."
+      },
+      "yurtici": {
+        "keys": {
+          "title": "Web service details",
+          "description": "The web service user name and password Yurtiçi Kargo gives with the contract. Test and live accounts differ. Yurtiçi must allow the IP address of the server that calls it; ask platform support for it."
+        },
+        "username": "User name",
+        "password": "Password",
+        "door": {
+          "title": "Cash on delivery account",
+          "description": "Yurtiçi gives a separate user name and password for parcels paid at the door. Orders paid at the door go out on this account; without it they cannot ship with Yurtiçi.",
+          "hint": "Optional; enter the user name and password together."
+        },
+        "live": {
+          "title": "Going live",
+          "description": "In test mode parcels go to Yurtiçi's test system; no courier comes."
+        },
+        "testMode": "Test mode",
+        "testModeHint": "Turned off, parcels open on the real Yurtiçi account. Test and live details differ, so they are asked again.",
+        "checks": {
+          "merchant_invalid": "Yurtiçi Kargo did not accept the cash on delivery account's user name and password. Copy them again from the document Yurtiçi gave for that account.",
+          "secret_invalid": "Yurtiçi Kargo did not accept this user name and password. Copy them again from Yurtiçi's web service document."
+        },
+        "rejected": "Yurtiçi Kargo no longer accepts the stored details; no parcel can be opened. Enter the current details Yurtiçi gave."
       }
     },
     "integrations": {

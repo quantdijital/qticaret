@@ -60,6 +60,8 @@ export function SecretField({
   kept,
   error,
   registration,
+  optional = false,
+  hint,
 }: {
   id: string
   label: string
@@ -68,14 +70,18 @@ export function SecretField({
   kept: boolean
   error: string | undefined
   registration: UseFormRegisterReturn
+  /** A secret the shop may leave blank (a second account it may not have). */
+  optional?: boolean
+  /** Shown in place of the usual hint while nothing is stored. */
+  hint?: string
 }) {
   const { t } = useTranslation()
   return (
     <Field
       label={label}
       htmlFor={id}
-      hint={kept ? t(`${A}.secretStored`) : t(`${A}.secretHint`, { name })}
-      required={!kept}
+      hint={kept ? t(`${A}.secretStored`) : (hint ?? t(`${A}.secretHint`, { name }))}
+      required={!kept && !optional}
       error={error}
     >
       <Input
