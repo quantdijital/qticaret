@@ -282,6 +282,12 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "Aras Kargo did not accept this user name. Copy it again from the integration details Aras gave.",
   "aras.secret_invalid":
     "Aras Kargo did not accept this user name and password. Copy them again from Aras's integration document; test and live accounts differ.",
+  "yurtici.merchant_invalid":
+    "Yurtiçi Kargo did not accept the cash on delivery account's user name and password. Copy them again from the document Yurtiçi gave for that account.",
+  "yurtici.secret_invalid":
+    "Yurtiçi Kargo did not accept this user name and password. Copy them again from Yurtiçi's web service document; test and live accounts differ.",
+  "yurtici.cod_account_missing":
+    "Shipping an order paid at the door with Yurtiçi Kargo needs the cash on delivery account. Enter it under Settings > Shipping > Yurtiçi Kargo.",
   "geliver.merchant_invalid":
     "Geliver did not accept this API token. Copy it again from the API tokens page of the Geliver panel.",
   "geliver.secret_invalid":

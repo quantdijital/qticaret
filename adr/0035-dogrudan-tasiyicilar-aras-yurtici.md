@@ -93,3 +93,40 @@ Mağaza kendi kurumsal kargo sözleşmesiyle (müşteri kodu, kendi fiyatları, 
   - durum kodları;
   - kapıda ödeme hesabının ayrı olup olmadığı.
 - E-fatura (F8) geldiğinde Yurtiçi'nin `ttDocumentId` ve Aras'ın `InvoiceNumber` alanları fatura numarasıyla doldurulur.
+
+## Uygulama notu (K11c, 2026-10-28)
+
+- **Servis tanımı doğrulandı:** Yurtiçi'nin canlı servis tanımı (WSDL) 2026-10-28'de okundu: ad alanı `http://yurticikargo.com.tr/ShippingOrderDispatcherServices`, `createShipment` / `queryShipment` / `cancelShipment`, `ShippingOrderVO` alanları, boş SOAPAction. Alt öğeler niteliksiz (JAX-WS).
+- **Adresler:**
+  - Test: `https://testws.yurticikargo.com`.
+  - Canlı: `https://ws.yurticikargo.com`.
+  - Topluluk belgelerindeki `http://…:9090` test adresi kullanılmıyor, çünkü şifre düz metin giderdi.
+- **Kapıda ödeme hesabı:** Yurtiçi tahsilatlı teslimat için ayrı kullanıcı adı ve şifre veriyor. Bunun için `integration-credentials`'a **isteğe bağlı gizli alan** eklendi (`optional`, ADR-0027'nin genişlemesi):
+  - Alanlar birlikte girilir ya da hiç girilmez.
+  - Panel hangisinin kayıtlı olduğunu görür.
+  - Hesap doğrulaması iki girişi de dener; `merchant_invalid` kapıda ödeme hesabıdır.
+  - Kapıda ödemeli sipariş bu hesapla açılır. Hesap yoksa açık bir hata döner (`yurtici.cod_account_missing`).
+  - Takip önce ana hesapla sorar; ana hesap kodu tanımazsa kapıda ödeme hesabıyla sorar.
+- **Etiket:** Bizim çizdiğimiz HTML sayfası (100×150 mm). İçinde şunlar var:
+  - `cargoKey`'in Code128 barkodu (`lib/shipping/code128.ts`, bağımlılıksız);
+  - alıcı;
+  - sipariş numarası;
+  - desi ve kg;
+  - kapıda tahsil tutarı.
+
+  Değerler kaçışlı yazılır ve sayfada betik çalışmaz (`default-src 'none'`). Gönderici basılmaz: Yurtiçi göndericiyi hesaptan bilir, sağlayıcı da mağazanın yalnızca birim ve fiyat tablosu ayarlarını okur (`apps/backend/CLAUDE.md` istisnası). Etiketin şubede kabulü gerçek hesapla doğrulanacak.
+- **Belirsiz sonuçta geri çekme:** `createShipment` yanıtı gelmezse (`outcome_unknown`) gönderi aynı kodla `cancelShipment` ile geri çekilir. Açık red durumunda geri çekme yapılmaz. Aras'ta da `SetOrder` artık aynı korumanın içinde.
+- **Güvenlik incelemesi (K11d, 2026-10-28):** bağımsız inceleme 6 bulgu verdi; 4'ü düzeltildi.
+  - **Aras durum okuma:** durum yalnızca adı DURUM/STATU içeren sütunlardan okunur. Önceden alıcı adı ya da adres ("Teslim Edildi") gönderiyi teslim edilmiş gösterebiliyordu.
+  - **Aras servis adresi:** artık hesabın kimliğinde (`identity`: müşteri kodu, servis adresi, test modu). Değişince kullanıcı adı ve şifre yeniden istenir, doğrulanır ve yöneticiler uyarılır. Adres yalnızca 443 numaralı porttan kabul edilir ve her okumada yeniden denetlenir. Mağazanın girdiği adres korumalı taşıma (`safeTransport`) ile çağrılır.
+  - **XML okuyucu:** etiket uzunluğu 4 KB ile sınırlı. Geçersiz karakter referansı `XmlRefused` verir. Aras hesap kontrolünde ayrıştırma hatası sağlayıcı hatası sayılır.
+  - **Yurtiçi takip bağlantısı:** yalnızca `yurticikargo.com` alanlarından ve https ile kabul edilir, en çok 2048 karakter. Uymayan bağlantı yerine gönderi numarasından Yurtiçi sayfası kurulur.
+  - **Ertelenen 1:** Zaman aşımından sonraki geri çekme, taşıyıcı ilk isteği bitirmeden ulaşırsa "bulunamadı" alıp kaybolabilir. Etkisi küçük: kod hiçbir etikete basılmadığı için koli alınmaz. Gecikmeli yeniden deneme K12'de değerlendirilecek.
+  - **Ertelenen 2:** Yurtiçi kapıda ödeme hesabı tek başına silinemiyor; silmek için tüm hesabı kaldırıp yeniden bağlamak gerekiyor. Gerekirse "kapıda ödeme hesabını kaldır" eklenir.
+- **Gerçek Yurtiçi hesabıyla denenecekler:**
+  - hatalı girişin dönüş biçimi (şimdi SOAP fault ya da kod satırı olmayan yanıt "kabul edilmedi" sayılıyor);
+  - `operationCode` dışındaki olay metinleri (dağıtımda, teslim edilemedi, iade);
+  - `ttDocumentId` için sipariş numarasının kabulü;
+  - etiketin şubede okutulması;
+  - desi/kg alanlarının sözleşmede açık olması.
+

@@ -3,14 +3,13 @@ import type { AddressInfo, Server } from "node:net"
 import {
   arasCredentialsOf,
   arasOrderFields,
-  arasReceiverOf,
   arasStatusOf,
   createArasApi,
   isArasServiceUrl,
-  localPhone,
 } from ".."
 import type { ArasCredentials } from ".."
 import { xmlElement } from "../../../clients/xml"
+import { localPhone, receiverOf } from "../../receiver"
 
 const credentials: ArasCredentials = {
   username: "magaza",
@@ -52,12 +51,21 @@ describe("Aras (adr/0035)", () => {
   it("takes a service address on Aras's own hosts only", () => {
     expect(isArasServiceUrl("https://customerws.araskargo.com.tr")).toBe(true)
     expect(isArasServiceUrl("http://customerws.araskargo.com.tr")).toBe(false)
+    expect(isArasServiceUrl("https://customerws.araskargo.com.tr:8443")).toBe(false)
+    expect(isArasServiceUrl("https://customerws.araskargo.com.tr:443/x")).toBe(true)
+    // A stored address no longer Aras's is not used at all
+    expect(
+      arasCredentialsOf({
+        settings: { service_url: "https://evil.example" },
+        secrets: { username: "u", password: "p" },
+      })
+    ).toBeNull()
     expect(isArasServiceUrl("https://araskargo.com.tr.evil.example")).toBe(false)
     expect(isArasServiceUrl("https://user:pw@customerws.araskargo.com.tr")).toBe(false)
   })
 
   it("writes the receiver as Medusa keeps a Turkish address, the phone as a courier dials it", () => {
-    expect(arasReceiverOf(address)).toEqual({
+    expect(receiverOf(address)).toEqual({
       name: "Ayşe Yılmaz",
       address: "Moda Mah., Atatürk Cad. No: 5",
       quarter: "Moda Mah.",
@@ -67,8 +75,8 @@ describe("Aras (adr/0035)", () => {
     })
     expect(localPhone("0532 123 45 67")).toBe("05321234567")
     expect(localPhone("123")).toBe("")
-    expect(() => arasReceiverOf({ ...address, phone: "" })).toThrow("phone")
-    expect(() => arasReceiverOf({ ...address, country_code: "de" })).toThrow("country_code")
+    expect(() => receiverOf({ ...address, phone: "" })).toThrow("phone")
+    expect(() => receiverOf({ ...address, country_code: "de" })).toThrow("country_code")
   })
 
   it("asks the courier to collect at the door only when the order is paid there", () => {
@@ -76,7 +84,7 @@ describe("Aras (adr/0035)", () => {
       arasOrderFields(credentials, {
         integrationCode: "QT01ABCDEF",
         waybill: "1042",
-        receiver: arasReceiverOf(address),
+        receiver: receiverOf(address),
         desi: 1.5,
         kg: 0.45,
         cashOnDelivery,
@@ -106,6 +114,10 @@ describe("Aras (adr/0035)", () => {
     expect(arasStatusOf([{ DURUMU: "Teslim Edildi" }]).status).toBe("delivered")
     expect(arasStatusOf([{ DURUMU: "Teslim Edilemedi" }]).status).toBe("failed")
     expect(arasStatusOf([{ DURUMU: "Göndericiye İade" }]).status).toBe("returned")
+    // What the shopper typed is not Aras's word on the parcel
+    expect(
+      arasStatusOf([{ ALICI: "Teslim Edildi", ADRES: "Dağıtım Sok.", DURUMU: "Yolda" }]).status
+    ).toBe("in_transit")
   })
 })
 
@@ -152,7 +164,7 @@ describe("Aras client (adr/0035)", () => {
     const input = {
       integrationCode: "QT01ABCDEF",
       waybill: "1042",
-      receiver: arasReceiverOf(address),
+      receiver: receiverOf(address),
       desi: 1,
       kg: 1,
       cashOnDelivery: null,

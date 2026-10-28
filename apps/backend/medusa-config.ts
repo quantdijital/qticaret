@@ -116,6 +116,7 @@ module.exports = defineConfig({
           { resolve: "@medusajs/medusa/fulfillment-manual", id: "manual" },
           { resolve: "./src/modules/fulfillment-geliver", id: "geliver" },
           { resolve: "./src/modules/fulfillment-aras", id: "aras" },
+          { resolve: "./src/modules/fulfillment-yurtici", id: "yurtici" },
         ],
       },
     },

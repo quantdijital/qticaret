@@ -1,5 +1,5 @@
 import { z } from "@medusajs/framework/zod"
-import { createHttpClient } from "../../clients"
+import { createHttpClient, safeTransport } from "../../clients"
 import type { HttpClient, HttpClientOptions } from "../../clients"
 import { findAll, findFirst, parseXml, soapEnvelope, textOf } from "../../clients/xml"
 import type { XmlFields, XmlNode } from "../../clients/xml"
@@ -24,7 +24,7 @@ export const ARAS_LIVE_URL = "https://customerws.araskargo.com.tr"
 const PATH = "/arascargoservice/arascargoservice.asmx"
 const NAMESPACE = "http://tempuri.org/"
 
-/** An address Aras gives: its own hosts only (the panel stores it; adr/0035). */
+/** An address Aras gives: its own hosts only, on https's own port (the panel stores it; adr/0035). */
 export const isArasServiceUrl = (value: string): boolean => {
   try {
     const url = new URL(value)
@@ -32,6 +32,7 @@ export const isArasServiceUrl = (value: string): boolean => {
       url.protocol === "https:" &&
       url.username === "" &&
       url.password === "" &&
+      url.port === "" &&
       /(^|\.)araskargo\.com\.tr$/.test(url.hostname)
     )
   } catch {
@@ -60,7 +61,14 @@ export function createArasApi(options: Partial<Omit<HttpClientOptions, "provider
       fake ?? credentials.serviceUrl ?? (credentials.testMode ? ARAS_TEST_URL : ARAS_LIVE_URL)
     let client = clients.get(base)
     if (!client) {
-      client = createHttpClient({ ...options, baseUrl: base, provider: ARAS_PROVIDER })
+      // An address the shop entered goes through the guarded transport (no private address)
+      const entered = fake === undefined && credentials.serviceUrl !== null
+      client = createHttpClient({
+        ...options,
+        baseUrl: base,
+        provider: ARAS_PROVIDER,
+        ...(entered ? { transport: safeTransport } : {}),
+      })
       clients.set(base, client)
     }
     return client
@@ -194,7 +202,13 @@ export function createArasApi(options: Partial<Omit<HttpClientOptions, "provider
         ...(options.signal ? { signal: options.signal } : {}),
         schema: z.string(),
       })
-      return findFirst(parseXml(tree), "Fault") ? "secret_invalid" : "valid"
+      let answer: XmlNode
+      try {
+        answer = parseXml(tree)
+      } catch {
+        throw invalid()
+      }
+      return findFirst(answer, "Fault") ? "secret_invalid" : "valid"
     } catch (error) {
       // A .NET service answers a refused login with a fault (HTTP 500)
       if (isProviderError(error) && error.providerCode === "http_500") {

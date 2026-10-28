@@ -288,7 +288,7 @@ Detay: `docs/entegrasyonlar/geliver.md`
 - [x] Webhook ve polling aynı güncellemeyi iki kez uygulamıyor (`geliver-tracking`: aynı anda gelen bildirim ve sorgu tek olay, tek Medusa gönderisi)
 - [x] Değişim akışı: fark tutarı doğru hesaplanıyor, stok iki yönde doğru (testli) (`exchanges`: aynı fiyatta 0, pahalıda tahsilat sonrası onay, ucuzda teslimde iade; yeni varyant onayda ayrılıyor, eski teslimde stoğa dönüyor; taşıyıcı reddinde Medusa değişimi geri alınıyor)
 - [x] Kargoya verilmiş sipariş müşteri tarafından iptal edilemiyor; verilmemiş olan iptal edilip iade ediliyor (testli) (`customer-cancel`; misafir siparişi F9/F10'daki sipariş bağlantısıyla)
-- [ ] Doğrudan taşıyıcı adaptörü contract test paketini geçiyor; etiket PDF'i yetkisiz URL ile açılamıyor
+- [x] Doğrudan taşıyıcı adaptörü contract test paketini geçiyor; etiket PDF'i yetkisiz URL ile açılamıyor (`carrier-contract`: Geliver, Aras ve Yurtiçi aynı 4 sözleşmeyi geçiyor; etiket yalnızca personel ucundan kısa ömürlü bağlantıyla, oturumsuz istek 401; gerçek hesaplarla deneme sunucuya çıkışta)
 
 ---
 

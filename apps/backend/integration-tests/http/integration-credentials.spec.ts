@@ -94,6 +94,11 @@ medusaIntegrationTestRunner({
           state: "not_configured",
           secrets: { username: false, password: false },
         }),
+        expect.objectContaining({
+          provider: "yurtici",
+          state: "not_configured",
+          secrets: { username: false, password: false, cod_username: false, cod_password: false },
+        }),
       ])
     })
 

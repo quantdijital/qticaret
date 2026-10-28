@@ -8,6 +8,7 @@ import { geliverHealthCheck } from "./geliver-check"
 import { iyzicoHealthCheck } from "./iyzico-check"
 import { paytrHealthCheck } from "./paytr-check"
 import { redisHealthCheck } from "./redis-check"
+import { yurticiHealthCheck } from "./yurtici-check"
 
 export { createHealthMonitor, runHealthChecks } from "./health"
 export type {
@@ -23,6 +24,7 @@ export { geliverHealthCheck } from "./geliver-check"
 export { iyzicoHealthCheck } from "./iyzico-check"
 export { paytrHealthCheck } from "./paytr-check"
 export { redisHealthCheck } from "./redis-check"
+export { yurticiHealthCheck } from "./yurtici-check"
 
 /** The shop's stored provider accounts (adr/0027), as the checks read them. */
 export interface AccountSource {
@@ -41,6 +43,7 @@ export function defaultHealthChecks(accounts: AccountSource): IntegrationHealthC
     iyzicoHealthCheck(() => accounts.read("iyzico")),
     geliverHealthCheck(() => accounts.read("geliver")),
     arasHealthCheck(() => accounts.read("aras")),
+    yurticiHealthCheck(() => accounts.read("yurtici")),
   ]
 }
 

@@ -5,8 +5,9 @@ import type { ArasRow } from "./client"
  * Where an Aras parcel stands (adr/0035). Aras's tracking answer is a
  * DataSet whose columns come with the contract, so the status is read
  * from the words Aras shows shoppers ("Teslim Edildi", "Dağıtımda"), in
- * any column of the latest row, and the tracking number from a column
- * named for it. To confirm with a real account (PROGRESS).
+ * the latest row's status columns only: the receiver's name and address
+ * are the shopper's own words and say nothing. The tracking number comes
+ * from a column named for it. To confirm with a real account (PROGRESS).
  */
 
 const RULES: readonly [RegExp, ShipmentStatus][] = [
@@ -20,6 +21,8 @@ const RULES: readonly [RegExp, ShipmentStatus][] = [
 ]
 
 const TRACKING_COLUMN = /TAKIP|BARKOD|KARGO_?NO|CARGO_?KEY/i
+// Aras's own words about the parcel; never a name, an address or a note
+const STATUS_COLUMN = /DURUM|STATU/i
 
 /** Aras's public tracking page for a parcel. */
 export const arasTrackingUrl = (number: string): string =>
@@ -32,7 +35,9 @@ export function arasStatusOf(rows: readonly Record<string, string>[]): {
   tracking_url: string | null
 } {
   const row: ArasRow = rows[rows.length - 1] ?? {}
-  const values = Object.values(row).map((value) => value.toLocaleUpperCase("tr"))
+  const values = Object.entries(row)
+    .filter(([column]) => STATUS_COLUMN.test(column))
+    .map(([, value]) => value.toLocaleUpperCase("tr"))
   // "Teslim edilemedi" reads as failed, not delivered: the longer phrase first
   const failed = values.some((value) => RULES[4]?.[0].test(value))
   const rule = failed

@@ -56,7 +56,7 @@ export async function shopShippingOptions(container: MedusaContainer) {
         pricing:
           option.price_type === "flat"
             ? ("flat" as const)
-            : choice === "geliver-table" || choice === "aras-table"
+            : typeof choice === "string" && choice.endsWith("-table")
               ? ("table" as const)
               : choice === "geliver-fastest"
                 ? ("fastest" as const)

@@ -32,6 +32,8 @@ export class XmlRefused extends Error {
 
 const MAX_DEPTH = 64
 const MAX_NODES = 100_000
+// No tag of theirs comes near it; it keeps the attribute reader linear in practice
+const MAX_TAG = 4096
 
 // Characters XML 1.0 does not allow at all (a control character in a name or an address)
 // eslint-disable-next-line no-control-regex
@@ -105,13 +107,21 @@ const ENTITIES: Readonly<Record<string, string>> = {
   apos: "'",
 }
 
+/** A character reference XML allows: a Unicode scalar value, not a surrogate. */
+function character(code: number, ref: string): string {
+  if (!Number.isInteger(code) || code > 0x10ffff || (code >= 0xd800 && code <= 0xdfff)) {
+    throw new XmlRefused(`invalid character reference &${ref};`)
+  }
+  return String.fromCodePoint(code)
+}
+
 function unescape(text: string): string {
-  return text.replace(/&(#x[0-9A-Fa-f]+|#[0-9]+|[A-Za-z]+);/g, (_, ref: string) => {
+  return text.replace(/&(#x[0-9A-Fa-f]{1,8}|#[0-9]{1,10}|[A-Za-z]{1,16});/g, (_, ref: string) => {
     if (ref.startsWith("#x")) {
-      return String.fromCodePoint(Number.parseInt(ref.slice(2), 16))
+      return character(Number.parseInt(ref.slice(2), 16), ref)
     }
     if (ref.startsWith("#")) {
-      return String.fromCodePoint(Number.parseInt(ref.slice(1), 10))
+      return character(Number.parseInt(ref.slice(1), 10), ref)
     }
     const known = ENTITIES[ref]
     if (known === undefined) {
@@ -173,6 +183,9 @@ export function parseXml(source: string): XmlNode {
     const close = source.indexOf(">", open)
     if (close === -1) {
       throw new XmlRefused("unclosed tag")
+    }
+    if (close - open > MAX_TAG) {
+      throw new XmlRefused("tag too long")
     }
     const tag = source.slice(open + 1, close)
     at = close + 1

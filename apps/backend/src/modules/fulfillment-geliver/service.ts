@@ -20,25 +20,11 @@ import {
   geliverRecipientOf,
   parcelLinesOf,
 } from "../../lib/shipping/geliver"
-import type { OrderItemRow } from "../../lib/shipping/geliver"
-import { MissingMeasures, parcelOf } from "../../lib/shipping/parcel"
 import { tablePrice } from "../../lib/shipping/rates"
-import type { ParcelLine } from "../../lib/shipping/parcel"
-import { shippingRates, storeUnits, storedGeliverAccount } from "./account"
+import { packedParcelOf, parcelFor } from "../../lib/shipping/shop"
+import { shippingRates, storedGeliverAccount } from "./account"
 import { GELIVER_OPTIONS, choiceOf, isGeliverOption } from "./options"
 import { pickOffer, shipmentData } from "./shipment"
-
-/** A parcel the lines make, or why it cannot be priced or shipped. */
-async function parcelFor(lines: ParcelLine[]) {
-  try {
-    return parcelOf(lines, await storeUnits())
-  } catch (error) {
-    if (error instanceof MissingMeasures) {
-      throw new ValidationError("shipping.dimensions_missing", { field: "items" })
-    }
-    throw error
-  }
-}
 
 /**
  * Geliver as a Medusa fulfillment provider (`geliver_geliver`, adr/0031).
@@ -123,12 +109,7 @@ class GeliverFulfillmentService extends AbstractFulfillmentProviderService {
       throw new ValidationError("shipping.use_ship_route")
     }
     const credentials = await storedGeliverAccount()
-    // The lines packed into this fulfillment, at the quantities packed
-    const packed = new Map(items.map((item) => [item.line_item_id, item.quantity ?? 0]))
-    const rows = (order?.items ?? []) as OrderItemRow[]
-    const parcel = await parcelFor(
-      parcelLinesOf(rows.map((row) => ({ ...row, quantity: packed.get(row.id) ?? 0 })))
-    )
+    const parcel = await packedParcelOf(items, order?.items)
     let recipient
     try {
       recipient = geliverRecipientOf(order?.shipping_address, order?.email)

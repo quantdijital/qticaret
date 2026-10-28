@@ -3,6 +3,7 @@ import { ValidationError } from "../../lib/errors"
 import type { CarrierName } from "../../lib/shipping/carriers"
 import { arasApi, arasCredentialsOf, arasStatusOf } from "../../lib/shipping/aras"
 import { geliverApi, geliverCredentialsOf, geliverStatusOf } from "../../lib/shipping/geliver"
+import { yurticiApi, yurticiCredentialsOf, yurticiStatusOf } from "../../lib/shipping/yurtici"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-credentials"
 import type { CredentialProviderName } from "../../modules/integration-credentials/providers"
 import type IntegrationCredentialsModuleService from "../../modules/integration-credentials/service"
@@ -50,20 +51,35 @@ const readAras: Reader = async (container, providerShipmentId) => {
   return arasStatusOf(await arasApi().cargoInfo(account, providerShipmentId))
 }
 
+const readYurtici: Reader = async (container, providerShipmentId) => {
+  const account = yurticiCredentialsOf(await credentials(container, "yurtici"))
+  if (!account) {
+    throw new ValidationError("shipping.carrier_not_connected")
+  }
+  const api = yurticiApi()
+  const delivery = await api.query(account.main, account.testMode, providerShipmentId)
+  // A parcel paid at the door went out on the door account: only that one knows it
+  return yurticiStatusOf(
+    !delivery.found && account.cod
+      ? await api.query(account.cod, account.testMode, providerShipmentId)
+      : delivery
+  )
+}
+
 /**
  * How each carrier is asked about a parcel (adr/0035): the shop's account
- * read at the call, the answer mapped to our statuses. A carrier without
- * a reader yet is not tracked.
+ * read at the call, the answer mapped to our statuses.
  */
-const READERS: Partial<Record<CarrierName, Reader>> = {
+const READERS: Record<CarrierName, Reader> = {
   geliver: readGeliver,
   aras: readAras,
+  yurtici: readYurtici,
 }
 
 export function carrierReader(provider: string): Reader {
-  const reader = READERS[provider as CarrierName]
-  if (!reader) {
+  // Own keys only: the provider comes from a stored row
+  if (!Object.hasOwn(READERS, provider)) {
     throw new ValidationError("shipping.carrier_unknown")
   }
-  return reader
+  return READERS[provider as CarrierName]
 }

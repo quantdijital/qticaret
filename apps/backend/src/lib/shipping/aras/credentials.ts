@@ -1,3 +1,5 @@
+import { isArasServiceUrl } from "./client"
+
 /** The shop's Aras Kargo contract as the client takes it (adr/0035). */
 export interface ArasCredentials {
   username: string
@@ -12,7 +14,8 @@ export interface ArasCredentials {
 /**
  * The account as the panel stored it (adr/0027): the user name and the
  * password sealed, the customer code, the mode and the address in the
- * clear. Null when the user name or the password is missing.
+ * clear. Null when the user name or the password is missing, or the
+ * stored address is not one of Aras's (checked again at every read).
  */
 export function arasCredentialsOf(
   account: { settings: Record<string, unknown>; secrets: Record<string, string> } | null
@@ -26,11 +29,15 @@ export function arasCredentialsOf(
     const value = account.settings[key]
     return typeof value === "string" && value.trim() !== "" ? value.trim() : null
   }
+  const serviceUrl = text("service_url")
+  if (serviceUrl !== null && !isArasServiceUrl(serviceUrl)) {
+    return null
+  }
   return {
     username,
     password,
     customerCode: text("customer_code"),
     testMode: account.settings["test_mode"] === true,
-    serviceUrl: text("service_url"),
+    serviceUrl,
   }
 }

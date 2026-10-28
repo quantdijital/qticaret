@@ -32,3 +32,14 @@ export {
   startFakeAras,
 } from "./aras/fake-server"
 export type { FakeAras, FakeArasAccount, FakeArasOrder } from "./aras/fake-server"
+export {
+  TRACKING_STEPS as YURTICI_TRACKING_STEPS,
+  fakeYurticiAccounts,
+  startFakeYurtici,
+} from "./yurtici/fake-server"
+export type {
+  FakeYurtici,
+  FakeYurticiAccounts,
+  FakeYurticiLogin,
+  FakeYurticiShipment,
+} from "./yurtici/fake-server"

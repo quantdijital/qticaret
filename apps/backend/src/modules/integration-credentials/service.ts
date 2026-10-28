@@ -112,7 +112,7 @@ class IntegrationCredentialsModuleService extends MedusaService({ IntegrationCre
     const rows = await this.listIntegrationCredentials({}, {}, sharedContext)
     return CREDENTIAL_PROVIDER_NAMES.map((provider) => {
       const row = rows.find((candidate) => candidate.provider === provider)
-      return statusOf(provider, row, row !== undefined && this.open(row) !== null)
+      return statusOf(provider, row, row ? this.open(row) : null)
     })
   }
 
@@ -122,7 +122,7 @@ class IntegrationCredentialsModuleService extends MedusaService({ IntegrationCre
     @MedusaContext() sharedContext: Context = {}
   ): Promise<CredentialStatus> {
     const [row] = await this.listIntegrationCredentials({ provider }, { take: 1 }, sharedContext)
-    return statusOf(provider, row, row !== undefined && this.open(row) !== null)
+    return statusOf(provider, row, row ? this.open(row) : null)
   }
 
   /**

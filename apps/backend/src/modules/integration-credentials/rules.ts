@@ -57,7 +57,13 @@ export function planSave(
   const sameAccount =
     current !== null && definition.identity.every((name) => stored?.[name] === settings[name])
   const kept = sameAccount ? current : {}
-  const missing = names.find((name) => !(given[name] ?? kept[name]))
+  const secrets = { ...kept, ...given }
+  const optional: readonly string[] = definition.optional
+  // The optional ones come together: some of them given asks for the rest
+  const wanted = optional.some((name) => secrets[name])
+    ? names
+    : names.filter((name) => !optional.includes(name))
+  const missing = wanted.find((name) => !secrets[name])
   if (missing) {
     throw new ValidationError("integration_credentials.secrets_required", {
       field: `secrets.${missing}`,
@@ -68,17 +74,21 @@ export function planSave(
   const secretsChanged = Object.keys(given).length > 0
   return {
     settings,
-    secrets: { ...kept, ...given },
+    secrets,
     needsCheck: !sameAccount || secretsChanged || row?.verification !== "verified",
     secretsChanged,
   }
 }
 
-/** What the panel sees of a provider's account: never a secret, nor any part of one. */
+/**
+ * What the panel sees of a provider's account: which secrets are stored,
+ * never a secret nor any part of one. `stored` is null when they no
+ * longer open.
+ */
 export function statusOf(
   provider: CredentialProviderName,
   row: IntegrationCredentialRecord | undefined,
-  readable: boolean
+  stored: Record<string, string> | null
 ): CredentialStatus {
   const names = CREDENTIAL_PROVIDERS[provider].secrets
   if (!row) {
@@ -95,13 +105,13 @@ export function statusOf(
   }
   return {
     provider,
-    state: !readable
+    state: !stored
       ? "unreadable"
       : row.verification === "verified"
         ? "connected"
         : row.verification,
     settings: row.settings,
-    secrets: Object.fromEntries(names.map((name) => [name, readable])),
+    secrets: Object.fromEntries(names.map((name) => [name, Boolean(stored?.[name])])),
     secrets_version: row.secrets_version,
     verified_at: row.verified_at,
     updated_at: row.updated_at,

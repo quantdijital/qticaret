@@ -69,4 +69,13 @@ describe("xml (adr/0035)", () => {
     expect(refused("<a><b>")).toThrow(XmlRefused)
     expect(refused("<x>".repeat(70) + "</x>".repeat(70))).toThrow(XmlRefused)
   })
+
+  it("refuses a character no text can hold and a tag no answer has, quickly", () => {
+    const refused = (source: string) => () => parseXml(source)
+    expect(refused("<a>&#x110000;</a>")).toThrow(XmlRefused)
+    expect(refused("<a>&#xD800;</a>")).toThrow(XmlRefused)
+    const started = Date.now()
+    expect(refused(`<a ${"b".repeat(5_000_000)}></a>`)).toThrow(XmlRefused)
+    expect(Date.now() - started).toBeLessThan(1000)
+  })
 })

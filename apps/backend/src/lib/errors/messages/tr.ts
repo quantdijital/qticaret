@@ -289,6 +289,12 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Aras Kargo bu kullanıcı adını kabul etmedi. Kullanıcı adını Aras'ın verdiği entegrasyon bilgilerinden yeniden kopyalayın.",
   "aras.secret_invalid":
     "Aras Kargo bu kullanıcı adı ve şifreyi kabul etmedi. Bilgileri Aras'ın verdiği entegrasyon belgesinden yeniden kopyalayın; test ve canlı hesap ayrıdır.",
+  "yurtici.merchant_invalid":
+    "Yurtiçi Kargo, tahsilatlı teslimat (kapıda ödeme) hesabının kullanıcı adı ve şifresini kabul etmedi. Bilgileri Yurtiçi'nin bu hesap için verdiği belgeden yeniden kopyalayın.",
+  "yurtici.secret_invalid":
+    "Yurtiçi Kargo bu kullanıcı adı ve şifreyi kabul etmedi. Bilgileri Yurtiçi'nin verdiği web servis belgesinden yeniden kopyalayın; test ve canlı hesap ayrıdır.",
+  "yurtici.cod_account_missing":
+    "Kapıda ödemeli siparişi Yurtiçi Kargo ile göndermek için tahsilatlı teslimat hesabı gerekir. Ayarlar > Kargo > Yurtiçi Kargo'dan girin.",
   "geliver.merchant_invalid":
     "Geliver bu API anahtarını kabul etmedi. Anahtarı Geliver panelindeki API anahtarları sayfasından yeniden kopyalayın.",
   "geliver.secret_invalid":

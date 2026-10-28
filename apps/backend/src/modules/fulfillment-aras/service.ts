@@ -12,12 +12,13 @@ import { AbstractFulfillmentProviderService } from "@medusajs/framework/utils"
 import { ValidationError } from "../../lib/errors"
 import { errorSummary, logger } from "../../lib/logging"
 import { toMedusaAmount } from "../../lib/money"
-import { arasApi, arasCredentialsOf, arasReceiverOf } from "../../lib/shipping/aras"
+import { arasApi, arasCredentialsOf } from "../../lib/shipping/aras"
 import type { ArasCredentials } from "../../lib/shipping/aras"
 import { shipInputOf } from "../../lib/shipping/carriers"
-import { AddressIncomplete, parcelLinesOf } from "../../lib/shipping/geliver/mappers"
-import type { OrderItemRow } from "../../lib/shipping/geliver/mappers"
+import { parcelLinesOf } from "../../lib/shipping/geliver/mappers"
+import { shipmentReceiverOf } from "../../lib/shipping/receiver"
 import {
+  packedParcelOf,
   parcelFor,
   shipmentCode,
   storedCarrierAccount,
@@ -42,10 +43,10 @@ const storedArasAccount = (): Promise<ArasCredentials> =>
  * Aras Kargo as a Medusa fulfillment provider (`aras_aras`, adr/0035), on
  * the shop's own contract. On our "ship" route it hands the parcel's order
  * to Aras under our code and takes its label; the order is withdrawn when
- * the label cannot be had. The account and the shop's units come from the
- * shared container at the time of the call; what the courier collects
- * comes from our workflow (`additional_data`), so Medusa's own fulfillment
- * route cannot open one.
+ * the label cannot be had or Aras's answer never came. The account and
+ * the shop's units come from the shared container at the time of the
+ * call; what the courier collects comes from our workflow
+ * (`additional_data`), so Medusa's own fulfillment route cannot open one.
  */
 class ArasFulfillmentService extends AbstractFulfillmentProviderService {
   static override identifier = "aras"
@@ -96,35 +97,21 @@ class ArasFulfillmentService extends AbstractFulfillmentProviderService {
       throw new ValidationError("shipping.use_ship_route")
     }
     const credentials = await storedArasAccount()
-    const packed = new Map(items.map((item) => [item.line_item_id, item.quantity ?? 0]))
-    const rows = (order?.items ?? []) as OrderItemRow[]
-    const parcel = await parcelFor(
-      parcelLinesOf(rows.map((row) => ({ ...row, quantity: packed.get(row.id) ?? 0 })))
-    )
-    let receiver
-    try {
-      receiver = arasReceiverOf(order?.shipping_address)
-    } catch (error) {
-      if (error instanceof AddressIncomplete) {
-        throw new ValidationError("shipping.address_incomplete", {
-          field: `shipping_address.${error.field}`,
-        })
-      }
-      throw error
-    }
+    const parcel = await packedParcelOf(items, order?.items)
+    const receiver = shipmentReceiverOf(order?.shipping_address)
     const api = arasApi()
     const code = shipmentCode()
     const number = String(order?.display_id ?? order?.id ?? "")
-    await api.setOrder(credentials, {
-      integrationCode: code,
-      waybill: number,
-      receiver,
-      desi: parcel.desi,
-      kg: parcel.weight_kg,
-      cashOnDelivery: ship.cash_on_delivery,
-      description: `Sipariş ${number}`,
-    })
     try {
+      await api.setOrder(credentials, {
+        integrationCode: code,
+        waybill: number,
+        receiver,
+        desi: parcel.desi,
+        kg: parcel.weight_kg,
+        cashOnDelivery: ship.cash_on_delivery,
+        description: `Sipariş ${number}`,
+      })
       const pdf = await api.label(credentials, code)
       return {
         data: {
@@ -136,7 +123,7 @@ class ArasFulfillmentService extends AbstractFulfillmentProviderService {
         labels: [],
       }
     } catch (error) {
-      // No label: the order is withdrawn at Aras, nothing is left behind
+      // No label, or an answer that never came: withdrawn at Aras, nothing is left behind
       await api.cancel(credentials, code).catch((cancel: unknown) => {
         logger.warn({
           event: "aras.order_withdraw_failed",

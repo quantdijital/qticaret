@@ -15,6 +15,8 @@ export interface CredentialProvider {
   secret: z.ZodType<string>
   /** Settings naming the account itself: changing one asks for every secret again. */
   identity: readonly string[]
+  /** Secrets the shop may leave out, all together or none: a second account it may not have. */
+  optional: readonly string[]
 }
 
 // Printable ASCII without spaces: what a provider console copies out
@@ -38,6 +40,7 @@ export const CREDENTIAL_PROVIDERS = {
     secrets: ["merchant_key", "merchant_salt"],
     secret: secretField,
     identity: ["merchant_id"],
+    optional: [],
   },
   // iyzico panel > API keys. The sandbox has its own keys: switching asks for both again
   iyzico: {
@@ -45,6 +48,7 @@ export const CREDENTIAL_PROVIDERS = {
     secrets: ["api_key", "secret_key"],
     secret: secretField,
     identity: ["test_mode"],
+    optional: [],
   },
   // Geliver panel > API tokens (adr/0031). Test shipments use the same token: a flag per shipment
   geliver: {
@@ -55,6 +59,7 @@ export const CREDENTIAL_PROVIDERS = {
       .trim()
       .regex(/^[\x21-\x7E]{16,2048}$/, "integration_credentials.secret_invalid"),
     identity: [],
+    optional: [],
   },
   // Aras Kargo's customer service account, given with the shop's contract (adr/0035)
   aras: {
@@ -77,7 +82,21 @@ export const CREDENTIAL_PROVIDERS = {
       .string()
       .trim()
       .regex(/^[\x21-\x7E]{1,128}$/, "integration_credentials.secret_invalid"),
-    identity: ["customer_code"],
+    // Another code, address or mode is another account: the logins again, a check, an alert
+    identity: ["customer_code", "service_url", "test_mode"],
+    optional: [],
+  },
+  // Yurtiçi Kargo's web service logins, given with the shop's contract (adr/0035). Parcels
+  // paid at the door go out on a separate account Yurtiçi gives for them; test logins differ
+  yurtici: {
+    settings: z.object({ test_mode: z.boolean() }).strict(),
+    secrets: ["username", "password", "cod_username", "cod_password"],
+    secret: z
+      .string()
+      .trim()
+      .regex(/^[\x21-\x7E]{1,128}$/, "integration_credentials.secret_invalid"),
+    identity: ["test_mode"],
+    optional: ["cod_username", "cod_password"],
   },
 } as const satisfies Record<string, CredentialProvider>
 

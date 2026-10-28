@@ -6,6 +6,7 @@ import { iyzicoApi, iyzicoCredentialsOf } from "../payments/iyzico"
 import { paytrApi, paytrCredentialsOf } from "../payments/paytr"
 import { arasApi, arasCredentialsOf } from "../shipping/aras"
 import { geliverApi, geliverCredentialsOf } from "../shipping/geliver"
+import { yurticiApi, yurticiCredentialsOf } from "../shipping/yurtici"
 
 /**
  * Asks a provider whether the shop's account details work (adr/0027 §4).
@@ -51,6 +52,21 @@ const CHECKERS = {
     const credentials = arasCredentialsOf(account)
     return credentials ? arasApi().checkCredentials(credentials, { signal }) : "secret_invalid"
   },
+  // The shop's login, then its door account when it gave one: `merchant_invalid` is that one
+  yurtici: async (account, signal) => {
+    const credentials = yurticiCredentialsOf(account)
+    if (!credentials) {
+      return "secret_invalid"
+    }
+    const api = yurticiApi()
+    if ((await api.checkLogin(credentials.main, credentials.testMode, { signal })) !== "valid") {
+      return "secret_invalid"
+    }
+    return credentials.cod &&
+      (await api.checkLogin(credentials.cod, credentials.testMode, { signal })) !== "valid"
+      ? "merchant_invalid"
+      : "valid"
+  },
 } satisfies Record<CredentialProviderName, Checker>
 
 export async function checkAccount(
@@ -77,4 +93,6 @@ export const CHECK_FIELDS = {
   geliver: { merchant_invalid: "secrets.api_token", secret_invalid: "secrets.api_token" },
   // A refused login is the user name or the password; the panel points at the password
   aras: { merchant_invalid: "secrets.username", secret_invalid: "secrets.password" },
+  // The main login, or the door account's (see its checker)
+  yurtici: { merchant_invalid: "secrets.cod_password", secret_invalid: "secrets.password" },
 } satisfies Record<CredentialProviderName, Record<"merchant_invalid" | "secret_invalid", string>>

@@ -20,6 +20,7 @@ import {
   ARAS_FULFILLMENT_PROVIDER_ID,
   GELIVER_FULFILLMENT_PROVIDER_ID,
   MANUAL_FULFILLMENT_PROVIDER_ID,
+  YURTICI_FULFILLMENT_PROVIDER_ID,
 } from "../../lib/shipping/carriers"
 
 /**
@@ -35,7 +36,16 @@ export type OptionPricing =
   | { type: "quote"; choice: "cheapest" | "fastest" }
   | { type: "table" }
 
-export type OptionCarrier = "manual" | "geliver" | "aras" | "pickup"
+export type OptionCarrier = "manual" | "geliver" | "aras" | "yurtici" | "pickup"
+
+// The shop's own contracts (adr/0035): a flat price or the shop's table, never a quote
+const CONTRACTS = {
+  aras: ARAS_FULFILLMENT_PROVIDER_ID,
+  yurtici: YURTICI_FULFILLMENT_PROVIDER_ID,
+} as const
+
+const isContract = (carrier: OptionCarrier): carrier is keyof typeof CONTRACTS =>
+  Object.hasOwn(CONTRACTS, carrier)
 
 export interface ShopOptionInput {
   name: string
@@ -157,10 +167,11 @@ export function shippingOptionInput(
   place: { service_zone_id: string; shipping_profile_id: string; region_id: string | null }
 ) {
   const { pricing } = input
+  const contract = isContract(input.carrier) ? input.carrier : null
   // Only Geliver quotes; a contract carrier takes a flat price or the table; the rest a flat price
   if (
-    (input.carrier === "aras" && pricing.type === "quote") ||
-    (input.carrier !== "geliver" && input.carrier !== "aras" && pricing.type !== "flat")
+    (contract && pricing.type === "quote") ||
+    (input.carrier !== "geliver" && !contract && pricing.type !== "flat")
   ) {
     throw new ValidationError("shipping.manual_flat_only", { field: "pricing" })
   }
@@ -172,8 +183,8 @@ export function shippingOptionInput(
               ? "geliver-table"
               : GELIVER_DATA[pricing.type === "quote" ? pricing.choice : "cheapest"],
         }
-      : input.carrier === "aras"
-        ? { id: pricing.type === "table" ? "aras-table" : "aras-flat" }
+      : contract
+        ? { id: `${contract}-${pricing.type === "table" ? "table" : "flat"}` }
         : {}
   return {
     name: input.name,
@@ -182,8 +193,8 @@ export function shippingOptionInput(
     provider_id:
       input.carrier === "geliver"
         ? GELIVER_FULFILLMENT_PROVIDER_ID
-        : input.carrier === "aras"
-          ? ARAS_FULFILLMENT_PROVIDER_ID
+        : contract
+          ? CONTRACTS[contract]
           : MANUAL_FULFILLMENT_PROVIDER_ID,
     data,
     type: { label: input.name, description: input.name, code: input.carrier },

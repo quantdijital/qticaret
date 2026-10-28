@@ -9,6 +9,6 @@ export {
 export type { ArasApi, ArasRow } from "./client"
 export { arasCredentialsOf } from "./credentials"
 export type { ArasCredentials } from "./credentials"
-export { arasOrderFields, arasReceiverOf, localPhone } from "./mappers"
-export type { ArasOrderInput, ArasReceiver } from "./mappers"
+export { arasOrderFields } from "./mappers"
+export type { ArasOrderInput } from "./mappers"
 export { arasStatusOf, arasTrackingUrl } from "./status"

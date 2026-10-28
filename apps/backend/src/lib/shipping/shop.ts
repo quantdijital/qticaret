@@ -8,6 +8,8 @@ import type { AccountDetails } from "../integrations/account-check"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
 import type { ShippingSettings, StoreSettings } from "../../modules/platform-settings/sections"
+import { parcelLinesOf } from "./geliver/mappers"
+import type { OrderItemRow } from "./geliver/mappers"
 import { MissingMeasures, parcelOf } from "./parcel"
 import type { ParcelLine, ParcelUnits } from "./parcel"
 import type { Kurus } from "../money"
@@ -57,6 +59,17 @@ export async function parcelFor(lines: ParcelLine[]) {
     }
     throw error
   }
+}
+
+/** The parcel a fulfillment packs: the order's lines at the quantities packed. */
+export function packedParcelOf(
+  packedItems: readonly { line_item_id?: string | null; quantity?: number | null }[],
+  orderItems: readonly OrderItemRow[] | null | undefined
+) {
+  const packed = new Map(packedItems.map((item) => [item.line_item_id, item.quantity ?? 0]))
+  return parcelFor(
+    parcelLinesOf((orderItems ?? []).map((row) => ({ ...row, quantity: packed.get(row.id) ?? 0 })))
+  )
 }
 
 /** The parcel priced by the shop's table, tax included; refused past its last band without a rate. */

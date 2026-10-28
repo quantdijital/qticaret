@@ -163,6 +163,44 @@ describe("planSave for iyzico", () => {
   })
 })
 
+describe("planSave for Yurtiçi: a door account the shop may not have", () => {
+  const main = { username: `yk-${fakeSecret()}`, password: fakeSecret() }
+  const cod = { cod_username: `yk-${fakeSecret()}`, cod_password: fakeSecret() }
+  const live = { settings: { test_mode: false }, verification: "verified" as const }
+
+  it("saves the main login alone", () => {
+    expect(
+      planSave("yurtici", { settings: { test_mode: false }, secrets: main }, undefined, null)
+    ).toMatchObject({ secrets: main, needsCheck: true })
+  })
+
+  it("asks for both parts of the door account once one is given", () => {
+    expect(
+      reasonOf(() =>
+        planSave(
+          "yurtici",
+          { settings: { test_mode: false }, secrets: { cod_username: cod.cod_username } },
+          live,
+          main
+        )
+      )
+    ).toEqual({ key: "integration_credentials.secrets_required", field: "secrets.cod_password" })
+    expect(
+      planSave("yurtici", { settings: { test_mode: false }, secrets: cod }, live, main).secrets
+    ).toEqual({ ...main, ...cod })
+  })
+
+  it("shows the door account as not stored until it is", () => {
+    const record = { ...live, provider: "yurtici" } as unknown as IntegrationCredentialRecord
+    expect(statusOf("yurtici", record, main).secrets).toEqual({
+      username: true,
+      password: true,
+      cod_username: false,
+      cod_password: false,
+    })
+  })
+})
+
 describe("statusOf", () => {
   const record = {
     ...row,
@@ -174,7 +212,7 @@ describe("statusOf", () => {
   } as unknown as IntegrationCredentialRecord
 
   it("shows which secrets are stored, never their values", () => {
-    const status = statusOf("paytr", record, true)
+    const status = statusOf("paytr", record, stored)
 
     expect(status).toMatchObject({
       state: "connected",
@@ -187,11 +225,11 @@ describe("statusOf", () => {
   })
 
   it("tells nothing stored, unchecked and unreadable apart", () => {
-    expect(statusOf("paytr", undefined, false).state).toBe("not_configured")
-    expect(statusOf("paytr", { ...record, verification: "unverified" }, true).state).toBe(
+    expect(statusOf("paytr", undefined, null).state).toBe("not_configured")
+    expect(statusOf("paytr", { ...record, verification: "unverified" }, stored).state).toBe(
       "unverified"
     )
-    expect(statusOf("paytr", record, false)).toMatchObject({
+    expect(statusOf("paytr", record, null)).toMatchObject({
       state: "unreadable",
       secrets: { merchant_key: false, merchant_salt: false },
     })
