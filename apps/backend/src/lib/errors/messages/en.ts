@@ -218,6 +218,18 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The chosen items do not match what can be returned: at most what was shipped and not yet returned of each.",
   "returns.window_closed": "The return period for this order is over, or it has not shipped yet.",
   "returns.already_open": "This order already has an open return request.",
+  "returns.exchange_variant_invalid":
+    "An exchange needs another option of the same product that is for sale.",
+  "returns.exchange_same_variant":
+    "An exchange needs a different option; pick another size or colour.",
+  "returns.exchange_out_of_stock": "The option asked for is out of stock.",
+  "returns.exchange_price_changed":
+    "The exchange's price difference changed; look at the new one and approve again.",
+  "returns.exchange_difference_due":
+    "The shopper owes a difference; collect it and tick it before approving.",
+  "returns.exchange_no_shipping": "The order has no shipping option to send the exchange with.",
+  "returns.exchange_awaiting_return":
+    "The new item ships once the exchanged one reaches the warehouse; receive the return first.",
   "returns.use_return_requests":
     "Returns, exchanges and claims are handled from the return requests screen only.",
   "returns.carrier_refused": "The carrier did not open the return; try again shortly.",

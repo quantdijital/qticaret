@@ -7,6 +7,8 @@ import { cancelRefundReference } from "../../../lib/orders/locks"
 import { SHIPPING_PAYMENT_FIELDS, shippingBlock } from "../../../lib/payments/shippable"
 import { ORDER_REFUNDS_MODULE } from "../../../modules/order-refunds"
 import type OrderRefundsModuleService from "../../../modules/order-refunds/service"
+import { RETURN_REQUESTS_MODULE } from "../../../modules/return-requests"
+import type ReturnRequestsModuleService from "../../../modules/return-requests/service"
 
 /**
  * What "ship" means for the order now (lib/dashboard/order-state): a
@@ -15,7 +17,9 @@ import type OrderRefundsModuleService from "../../../modules/order-refunds/servi
  * (F7.10: an order in several parcels), never more. An order paid in a
  * provider's test mode, or whose payment is still awaited, is refused;
  * so is one whose cancel already gave the money back, should Medusa's
- * cancel have failed after it (security review 2026-10-28). Reads only.
+ * cancel have failed after it (security review 2026-10-28), and one whose
+ * exchange still waits for the parcel coming back (adr/0032 §6: the new
+ * variant goes once the old one is in). Reads only.
  */
 /** A part of what is left: each line once, at most what is left of it; a packed parcel goes whole. */
 function partOf(plan: ShipmentPlan, wanted: { id: string; quantity: number }[]): ShipmentPlan {
@@ -63,6 +67,15 @@ export const planShipmentStep = createStep(
       )
     if (cancelRefund) {
       throw new ValidationError("orders.ship_canceled_refund")
+    }
+    const [awaited] = await container
+      .resolve<ReturnRequestsModuleService>(RETURN_REQUESTS_MODULE)
+      .listReturnRequests(
+        { order_id: input.order_id, kind: "exchange", status: "approved" },
+        { take: 1, select: ["id"] }
+      )
+    if (awaited) {
+      throw new ValidationError("returns.exchange_awaiting_return")
     }
     const plan = orderState(order).ship
     if (!plan || plan.items.length === 0) {

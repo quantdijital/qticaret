@@ -1,5 +1,5 @@
 import { model } from "@medusajs/framework/utils"
-import { RETURN_REASONS, RETURN_STATUSES } from "../states"
+import { RETURN_KINDS, RETURN_REASONS, RETURN_STATUSES } from "../states"
 
 /**
  * A shopper's request to send an order back (F7.9, adr/0032), from the
@@ -12,12 +12,22 @@ export const ReturnRequest = model
     id: model.id({ prefix: "rreq" }).primaryKey(),
     order_id: model.text(),
     customer_id: model.text().nullable(),
+    kind: model.enum([...RETURN_KINDS]).default("return"),
     status: model.enum([...RETURN_STATUSES]).default("requested"),
     reason: model.enum([...RETURN_REASONS]),
     /** The shopper's own words. */
     note: model.text().nullable(),
     /** The lines asked for: `[{ line_item_id, quantity }]`. */
     items: model.json(),
+    /** An exchange's wanted variants: `[{ line_item_id, variant_id, quantity }]`. */
+    exchange_items: model.json().nullable(),
+    /**
+     * An exchange's cost in kuruş, positive when the shopper owes: as
+     * quoted when asked, as Medusa confirmed it once approved.
+     */
+    difference: model.number().nullable(),
+    /** Medusa's exchange, opened on approval. */
+    exchange_id: model.text().nullable(),
     decision_note: model.text().nullable(),
     decided_by: model.text().nullable(),
     decided_at: model.dateTime().nullable(),

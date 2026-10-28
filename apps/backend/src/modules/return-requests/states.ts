@@ -9,6 +9,10 @@ export const RETURN_REASONS = [
 ] as const
 export type ReturnReason = (typeof RETURN_REASONS)[number]
 
+/** Money back for what came back, or another variant of it (adr/0032 §6). */
+export const RETURN_KINDS = ["return", "exchange"] as const
+export type ReturnKind = (typeof RETURN_KINDS)[number]
+
 export const RETURN_STATUSES = [
   "requested",
   "approved",

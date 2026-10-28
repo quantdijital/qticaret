@@ -15,6 +15,7 @@ import {
   releaseLockStep,
 } from "@medusajs/medusa/core-flows"
 import { ValidationError } from "../../lib/errors"
+import { kurus } from "../../lib/money"
 import { cameBack } from "../../lib/orders/returns"
 import type { ReturnLine } from "../../lib/orders/returns"
 import { RETURN_REQUESTS_MODULE } from "../../modules/return-requests"
@@ -132,8 +133,9 @@ export function receivedProblem(
  * Gives the money for what came back, sound or damaged (adr/0032): through
  * our refund, line by line, under the request's own reference (tried
  * again, refunded once), with the shipping when staff said so on receipt.
- * Under the order's returns lock, so two clicks refund once and
- * `return.refunded` is announced once, as the request turns refunded.
+ * An exchange (§6) gives back what the shop owes on the swap, and only
+ * when it owes. Under the order's returns lock, so two clicks refund once
+ * and `return.refunded` is announced once, as the request turns refunded.
  */
 export async function refundReturn(
   container: MedusaContainer,
@@ -154,7 +156,8 @@ export async function refundReturn(
       if (request?.status === "refunded") {
         return request
       }
-      if (request?.status !== "received") {
+      const owed = request?.kind === "exchange" ? -(request.difference ?? 0) : null
+      if (request?.status !== "received" || (owed !== null && owed <= 0)) {
         throw new ValidationError("returns.status_invalid")
       }
       const reference = `return${request.id.replace(/[^A-Za-z0-9]/g, "")}`.slice(0, 40)
@@ -162,10 +165,10 @@ export async function refundReturn(
         input: {
           order_id: request.order_id,
           reference,
-          request: {
-            items: asMedusaLines(cameBack(request)),
-            shipping: request.refund_shipping,
-          },
+          request:
+            owed === null
+              ? { items: asMedusaLines(cameBack(request)), shipping: request.refund_shipping }
+              : { amount: kurus(owed) },
           note: `return ${request.id}`,
           created_by: input.staff_id,
         },

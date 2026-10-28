@@ -286,7 +286,7 @@ Detay: `docs/entegrasyonlar/geliver.md`
 - [x] Ölçüsü eksik ürünle kargo hesabı açıklayıcı hata veriyor (`geliver-shipping`: `shipping.dimensions_missing`)
 - [ ] İade talebinden para iadesi + stok + iade faturasına kadar akış çalışıyor (para iadesi + stok testli: `return-requests`; iade faturası F8'de `return.refunded` olayına bağlanınca işaretlenir)
 - [x] Webhook ve polling aynı güncellemeyi iki kez uygulamıyor (`geliver-tracking`: aynı anda gelen bildirim ve sorgu tek olay, tek Medusa gönderisi)
-- [ ] Değişim akışı: fark tutarı doğru hesaplanıyor, stok iki yönde doğru (testli)
+- [x] Değişim akışı: fark tutarı doğru hesaplanıyor, stok iki yönde doğru (testli) (`exchanges`: aynı fiyatta 0, pahalıda tahsilat sonrası onay, ucuzda teslimde iade; yeni varyant onayda ayrılıyor, eski teslimde stoğa dönüyor; taşıyıcı reddinde Medusa değişimi geri alınıyor)
 - [x] Kargoya verilmiş sipariş müşteri tarafından iptal edilemiyor; verilmemiş olan iptal edilip iade ediliyor (testli) (`customer-cancel`; misafir siparişi F9/F10'daki sipariş bağlantısıyla)
 - [ ] Doğrudan taşıyıcı adaptörü contract test paketini geçiyor; etiket PDF'i yetkisiz URL ile açılamıyor
 

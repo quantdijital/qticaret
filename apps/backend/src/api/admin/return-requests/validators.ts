@@ -1,5 +1,9 @@
 import { z } from "@medusajs/framework/zod"
-import { RETURN_REASONS, RETURN_STATUSES } from "../../../modules/return-requests/states"
+import {
+  RETURN_KINDS,
+  RETURN_REASONS,
+  RETURN_STATUSES,
+} from "../../../modules/return-requests/states"
 
 const line = z
   .object({
@@ -7,16 +11,35 @@ const line = z
     quantity: z.number().int().positive().max(10_000),
   })
   .strict()
-const lines = z.array(line).min(1).max(200)
 
-/** A shopper's request: which lines of their order, why, and their own words (adr/0032). */
+/**
+ * A shopper's request: which lines of their order, why, and their own
+ * words (adr/0032); for an exchange (§6), the variant each line goes
+ * back for. Never a price: the swap is priced on the server.
+ */
 export const StorePostReturnRequest = z
   .object({
-    items: lines,
+    kind: z.enum(RETURN_KINDS).default("return"),
+    items: z
+      .array(
+        line.extend({
+          variant_id: z
+            .string()
+            .regex(/^variant_[0-9A-Za-z]{1,40}$/)
+            .optional(),
+        })
+      )
+      .min(1)
+      .max(200),
     reason: z.enum(RETURN_REASONS),
     note: z.string().trim().max(1000).optional(),
   })
   .strict()
+  .refine(
+    (body) =>
+      body.items.every((item) => (body.kind === "exchange") === (item.variant_id !== undefined)),
+    { message: "returns.exchange_variant_invalid", path: ["items"] }
+  )
 export type StorePostReturnRequestType = z.infer<typeof StorePostReturnRequest>
 
 export const AdminGetReturnRequests = z
@@ -32,8 +55,12 @@ export const AdminGetReturnRequests = z
   .strict()
 export type AdminGetReturnRequestsType = z.infer<typeof AdminGetReturnRequests>
 
+/** Approval; for an exchange the shopper owes on, staff say they collected it (adr/0032 §6). */
 export const AdminPostReturnApprove = z
-  .object({ note: z.string().trim().max(1000).optional() })
+  .object({
+    note: z.string().trim().max(1000).optional(),
+    difference_collected: z.boolean().default(false),
+  })
   .strict()
 export type AdminPostReturnApproveType = z.infer<typeof AdminPostReturnApprove>
 

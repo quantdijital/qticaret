@@ -2,15 +2,22 @@ import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/frame
 import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
 import { RETURN_REQUESTS_MODULE } from "../../../../../modules/return-requests"
 import type ReturnRequestsModuleService from "../../../../../modules/return-requests/service"
+import { liraOf } from "../../../../admin/return-requests/view"
 import { requestReturn } from "../../../../../workflows/returns/request-return"
 import type { StorePostReturnRequestType } from "../../../../admin/return-requests/validators"
 
-/** What a shopper sees of their request: its state and the carrier's code, never staff notes' authors. */
+/**
+ * What a shopper sees of their request: its state and the carrier's code,
+ * an exchange's variants and cost (exact lira), never staff notes' authors.
+ */
 const view = (request: Record<string, unknown>) => ({
   id: request["id"],
+  kind: request["kind"],
   status: request["status"],
   reason: request["reason"],
   items: request["items"],
+  exchange_items: request["exchange_items"],
+  difference: typeof request["difference"] === "number" ? liraOf(request["difference"]) : null,
   return_code: request["return_code"],
   decision_note: request["decision_note"],
   created_at: request["created_at"],
@@ -21,10 +28,11 @@ export async function POST(
   req: AuthenticatedMedusaRequest<StorePostReturnRequestType>,
   res: MedusaResponse
 ): Promise<void> {
-  const { items, reason, note } = req.validatedBody
+  const { kind, items, reason, note } = req.validatedBody
   const created = await requestReturn(req.scope, {
     order_id: req.params["id"] ?? "",
     customer_id: req.auth_context.actor_id,
+    kind,
     items,
     reason,
     note: note ?? null,

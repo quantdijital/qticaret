@@ -18,7 +18,8 @@ import { returnRequestView } from "../../view"
  * POST /admin/return-requests/:id/receive (adr/0032): what reached the
  * warehouse goes back in stock (the damaged part does not), then its money
  * is given back. A refund that fails leaves the request received, with
- * the reason: "refund" tries it again.
+ * the reason: "refund" tries it again. An exchange (adr/0032 §6) gives
+ * back only what the shop owes on the swap, and no shipping.
  */
 export async function POST(
   req: AuthenticatedMedusaRequest<AdminPostReturnReceiveType>,
@@ -40,9 +41,20 @@ export async function POST(
   if (problem) {
     throw new ValidationError(problem, { field: "items" })
   }
-  await receiveReturnWorkflow(req.scope).run({
-    input: { id, staff_id: req.auth_context.actor_id, items, damaged, refund_shipping },
+  const exchange = request.kind === "exchange"
+  const { result: received } = await receiveReturnWorkflow(req.scope).run({
+    input: {
+      id,
+      staff_id: req.auth_context.actor_id,
+      items,
+      damaged,
+      refund_shipping: refund_shipping && !exchange,
+    },
   })
+  if (exchange && (request.difference ?? 0) >= 0) {
+    res.json({ return_request: returnRequestView(received), refund_error: null })
+    return
+  }
   try {
     const refunded = await refundReturn(req.scope, { id, staff_id: req.auth_context.actor_id })
     res.json({ return_request: returnRequestView(refunded), refund_error: null })

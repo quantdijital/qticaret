@@ -9,7 +9,8 @@ import { INTEGRATION_CREDENTIALS_MODULE } from "../../../modules/integration-cre
 import type IntegrationCredentialsModuleService from "../../../modules/integration-credentials/service"
 import { RETURN_REQUESTS_MODULE } from "../../../modules/return-requests"
 import type ReturnRequestsModuleService from "../../../modules/return-requests/service"
-import type { ReturnStatus } from "../../../modules/return-requests/states"
+import type { ExchangeLine } from "../../../lib/orders/exchanges"
+import type { ReturnKind, ReturnStatus } from "../../../modules/return-requests/states"
 import { SHIPMENT_TRACKING_MODULE } from "../../../modules/shipment-tracking"
 import type ShipmentTrackingModuleService from "../../../modules/shipment-tracking/service"
 
@@ -19,8 +20,12 @@ const requests = (container: Pick<MedusaContainer, "resolve">) =>
 export interface RequestFacts {
   id: string
   order_id: string
+  kind: ReturnKind
   status: ReturnStatus
   items: { line_item_id: string; quantity: number }[]
+  exchange_items: ExchangeLine[] | null
+  /** An exchange's cost as quoted (kuruş, positive when the shopper owes). */
+  difference: number | null
   return_id: string | null
   /** Where the parcel comes back to: the warehouse it left from, else the shop's default. */
   location_id: string | null
@@ -84,7 +89,10 @@ export const readReturnRequestStep = createStep(
       id: request.id,
       order_id: request.order_id,
       status: request.status,
+      kind: request.kind,
       items: request.items as unknown as RequestFacts["items"],
+      exchange_items: request.exchange_items as unknown as ExchangeLine[] | null,
+      difference: request.difference,
       return_id: request.return_id,
       location_id:
         left ??

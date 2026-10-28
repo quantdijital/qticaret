@@ -221,6 +221,19 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "returns.window_closed":
     "Bu sipariş için iade süresi doldu ya da sipariş henüz kargoya verilmedi.",
   "returns.already_open": "Bu sipariş için açık bir iade talebi zaten var.",
+  "returns.exchange_variant_invalid":
+    "Değişim için aynı ürünün satıştaki başka bir seçeneği seçilmeli.",
+  "returns.exchange_same_variant":
+    "Değişimde aynı seçenek seçilemez; başka beden ya da renk seçin.",
+  "returns.exchange_out_of_stock": "İstenen seçenek stokta yok.",
+  "returns.exchange_price_changed":
+    "Değişimin fiyat farkı değişti; yeni farkı görüp tekrar onaylayın.",
+  "returns.exchange_difference_due":
+    "Müşteri fark ödeyecek; onaydan önce farkı tahsil edip işaretleyin.",
+  "returns.exchange_no_shipping":
+    "Siparişin kargo seçeneği bulunamadı; değişim gönderisi açılamıyor.",
+  "returns.exchange_awaiting_return":
+    "Değişimdeki ürün depoya ulaşmadan yeni ürün kargoya verilemez; önce iadeyi teslim alın.",
   "returns.use_return_requests":
     "İade, değişim ve talepler yalnızca iade talepleri ekranından yürütülür.",
   "returns.carrier_refused": "Kargo firması iade gönderisini açmadı; birazdan tekrar deneyin.",

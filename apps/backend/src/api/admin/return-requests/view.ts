@@ -1,8 +1,16 @@
 import { kurus, toMedusaAmount } from "../../../lib/money"
 
-/** A request as staff see it: its refund as exact lira, like every amount the panel reads. */
-export const returnRequestView = <T extends { refund_amount: number | null }>(request: T) => ({
+/** Kuruş as exact lira, signed: an exchange's difference may be the shop's to pay. */
+export const liraOf = (amount: number): string =>
+  amount < 0 ? `-${toMedusaAmount(kurus(-amount))}` : toMedusaAmount(kurus(amount))
+
+/** A request as staff see it: its refund and an exchange's difference as exact lira. */
+export const returnRequestView = <
+  T extends { refund_amount: number | null; difference: number | null },
+>(
+  request: T
+) => ({
   ...request,
-  refund_amount:
-    request.refund_amount === null ? null : toMedusaAmount(kurus(request.refund_amount)),
+  refund_amount: request.refund_amount === null ? null : liraOf(request.refund_amount),
+  difference: request.difference === null ? null : liraOf(request.difference),
 })
