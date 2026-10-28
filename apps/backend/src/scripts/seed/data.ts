@@ -20,7 +20,7 @@ export const DEMO_LOCATION_ADDRESS = {
 
 export const DEMO_FULFILLMENT_SET_NAME = "Ana Depo gönderileri"
 export const DEMO_SERVICE_ZONE_NAME = "Türkiye"
-export const MANUAL_FULFILLMENT_PROVIDER_ID = "manual_manual"
+export { MANUAL_FULFILLMENT_PROVIDER_ID } from "../../lib/shipping/carriers"
 
 export const DEMO_SHIPPING_OPTIONS = [
   { name: "Standart Kargo", code: "standart", description: "2-4 iş günü", price: 90 },

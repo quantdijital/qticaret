@@ -102,7 +102,8 @@ medusaIntegrationTestRunner({
         expect(answer.type).toBe("entity")
         expect(answer.seo).toMatchObject({
           description:
-            "Yıkanmış ketenden rahat kesim gömlek. Yaz için ideal. 899,00 TL'den başlayan fiyatlarla.",
+            // The shipping sentence from the default delivery days (F7.8)
+            "Yıkanmış ketenden rahat kesim gömlek. Yaz için ideal. 899,00 TL'den başlayan fiyatlarla. 1–2 iş gününde kargoda.",
           canonical: "https://magaza.example.com/urun/keten-gomlek",
           robots: "index,follow",
           openGraph: { type: "product", url: "https://magaza.example.com/urun/keten-gomlek" },

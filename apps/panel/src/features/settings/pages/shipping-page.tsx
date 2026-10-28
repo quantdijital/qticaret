@@ -6,6 +6,10 @@ import { SectionCard } from "@/components/patterns/section-card"
 import { ErrorState, LoadingRows } from "@/components/patterns/states"
 import { Button } from "@/components/ui/button"
 import { providerAccountsQuery } from "@/features/settings/api/payments"
+import { sectionQuery } from "@/features/settings/api/sections"
+import type { ShippingSettings } from "@/features/settings/api/sections"
+import { ShippingOptionsCard } from "@/features/settings/components/shipping-options-card"
+import { DeliveryCard, RatesCard } from "@/features/settings/components/shipping-rules-cards"
 import { AccountBadges } from "@/features/settings/components/account-badges"
 import { SHIPPING_CARRIERS } from "@/features/settings/shipping-carriers"
 import { errorText } from "@/lib/errors"
@@ -13,12 +17,15 @@ import { errorText } from "@/lib/errors"
 const S = "settings.shipping"
 
 /**
- * Settings > Shipping (F7, adr/0031): the carriers the shop ships with.
- * Each opens its own page, where the shop connects its account.
+ * Settings > Shipping (F7, adr/0031): the carriers the shop ships with
+ * (each opens its own page, where the shop connects its account), the
+ * options shoppers choose from, and the shop's delivery days and price
+ * table (F7.8).
  */
 export function ShippingPage() {
   const { t } = useTranslation()
   const query = useQuery(providerAccountsQuery())
+  const rules = useQuery(sectionQuery<ShippingSettings>("shipping"))
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title={t(`${S}.title`)} description={t(`${S}.subtitle`)} />
@@ -68,6 +75,17 @@ export function ShippingPage() {
             })}
           </ul>
         </SectionCard>
+      )}
+      <ShippingOptionsCard />
+      {rules.data ? (
+        <div className="grid gap-6 lg:grid-cols-2 lg:items-stretch">
+          <DeliveryCard key={JSON.stringify(rules.data.values)} saved={rules.data.values} />
+          <RatesCard key={`rates-${JSON.stringify(rules.data.values)}`} saved={rules.data.values} />
+        </div>
+      ) : rules.isError ? (
+        <ErrorState text={errorText(t, rules.error)} onRetry={() => void rules.refetch()} />
+      ) : (
+        <LoadingRows rows={3} />
       )}
     </div>
   )

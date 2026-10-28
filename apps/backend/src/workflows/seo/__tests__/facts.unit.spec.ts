@@ -123,4 +123,33 @@ describe("productFacts", () => {
       [null, null],
     ])
   })
+
+  it("gives an offer the shop's shipping rate and days when its table prices the variant (F7.8)", () => {
+    const settings = {
+      handling_days_min: 1,
+      handling_days_max: 2,
+      transit_days_min: 1,
+      transit_days_max: 3,
+      rate_table: [{ max_desi: 2, price: 4_990 }],
+      over_desi_price: 0,
+    }
+    const units = { weight_unit: "g", dimension_unit: "cm" } as const
+    const measured = row({
+      variants: (row().variants ?? []).map((variant, index) =>
+        // One in a 1 desi box, the other without measures
+        index === 0 && variant
+          ? { ...variant, weight: 500, length: 20, width: 15, height: 10 }
+          : variant
+      ),
+    })
+
+    const facts = productFacts(measured, null, "", undefined, { settings, units })
+
+    expect(facts.delivery).toEqual({ handling: [1, 2], transit: [1, 3] })
+    expect(facts.variants.map((variant) => [variant.id, variant.shippingRate])).toEqual([
+      ["variant_a", null],
+      ["variant_b", 49.9],
+    ])
+    expect(productFacts(measured, null, "").delivery).toBeNull()
+  })
 })

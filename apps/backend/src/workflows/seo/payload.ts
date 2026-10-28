@@ -5,6 +5,7 @@ import {
   plainText,
   priceSentence,
   resolveSeoPayload,
+  shippingSentence,
 } from "../../lib/seo/resolve"
 import { deepestCategory } from "../../lib/catalog"
 import type { SeoPayload, SeoSubject } from "../../lib/seo/resolve"
@@ -12,7 +13,10 @@ import type { UrlOwner } from "../../modules/url-registry/validation"
 import { CATALOG_ENTITY_TYPES } from "../catalog/entity-paths"
 import { priceDisplays } from "../pricing/price-display"
 import { PRODUCT_FACT_FIELDS, productFacts } from "./facts"
-import type { FactRow } from "./facts"
+import type { FactRow, ShippingFacts } from "./facts"
+import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
+import type { ShippingSettings, StoreSettings } from "../../modules/platform-settings/sections"
+import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
 import type { Condition } from "../../lib/seo/jsonld"
 import { highlightText } from "./highlight"
 import { contentSubject, landingSubject } from "./payload-content"
@@ -55,6 +59,19 @@ function primaryCategory(product: ProductRow): CategoryRow | null {
   return categories.find((row) => row.id === chosen) ?? deepestCategory(categories) ?? null
 }
 
+/** The shop's shipping rules and product units, for offers and the shipping sentence (F7.8). */
+async function shippingFactsOf(container: MedusaContainer): Promise<ShippingFacts> {
+  const settings = container.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
+  const [shipping, store] = await Promise.all([
+    settings.getSection("shipping") as Promise<unknown> as Promise<ShippingSettings>,
+    settings.getSection("store") as Promise<unknown> as Promise<StoreSettings>,
+  ])
+  return {
+    settings: shipping,
+    units: { weight_unit: store.weight_unit, dimension_unit: store.dimension_unit },
+  }
+}
+
 async function productSubject(container: MedusaContainer, id: string, path: string) {
   const product = await rowOf<ProductRow>(
     container,
@@ -93,7 +110,14 @@ async function productSubject(container: MedusaContainer, id: string, path: stri
     (product.variants ?? []).flatMap((variant) => (variant ? [variant.id] : [])),
     "try"
   )
-  const facts = productFacts(product, product.brand?.name ?? null, plainText(description), displays)
+  const shipping = await shippingFactsOf(container)
+  const facts = productFacts(
+    product,
+    product.brand?.name ?? null,
+    plainText(description),
+    displays,
+    shipping
+  )
   const subject: SeoSubject = {
     kind: "product",
     path,
@@ -105,8 +129,10 @@ async function productSubject(container: MedusaContainer, id: string, path: stri
       fiyat_cümlesi: priceSentence(facts.variants.flatMap((variant) => variant.price ?? [])),
       öne_çıkan_attribute: highlightText(product.attribute_values ?? []),
       marka: product.brand?.name ?? null,
-      // Shipping offers (F7) fill this
-      kargo_cümlesi: null,
+      kargo_cümlesi: shippingSentence(
+        shipping.settings.handling_days_min,
+        shipping.settings.handling_days_max
+      ),
     },
     overrides: product.seo_meta ?? null,
     image: await imageOf(

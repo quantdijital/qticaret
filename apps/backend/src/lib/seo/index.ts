@@ -21,5 +21,6 @@ export {
   plainText,
   priceSentence,
   resolveSeoPayload,
+  shippingSentence,
 } from "./resolve"
 export type { RobotsValue, SeoOverrides, SeoPayload, SeoShop, SeoSubject } from "./resolve"

@@ -17,3 +17,12 @@ if (!("ResizeObserver" in globalThis)) {
     disconnect = noResize
   }
 }
+
+// jsdom has no pointer capture or scrolling; Radix's Select calls both when it
+// opens. A test never drags, and nothing scrolls, so the stand-ins do nothing
+const elementProto = Element.prototype as unknown as Record<string, unknown>
+for (const name of ["hasPointerCapture", "releasePointerCapture", "scrollIntoView"]) {
+  if (typeof elementProto[name] !== "function") {
+    elementProto[name] = () => false
+  }
+}

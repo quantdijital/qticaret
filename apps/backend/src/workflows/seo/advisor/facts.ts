@@ -120,11 +120,7 @@ function productFacts(row: ProductRow): NonNullable<AdvisorFacts["product"]> {
     primaryCategory: Boolean(row.product_extension?.primary_category_id),
     physical,
     missingDimensions:
-      physical &&
-      variants.some(
-        (variant) =>
-          missingDimensions(row, variant as Parameters<typeof missingDimensions>[1]).length > 0
-      ),
+      physical && variants.some((variant) => missingDimensions(row, variant).length > 0),
     missingAttributes: (row.attribute_template?.definitions ?? []).flatMap((definition) =>
       definition?.is_required && definition.scope !== "variant" && !filled.has(definition.id)
         ? [definition.label]

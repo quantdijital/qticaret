@@ -140,6 +140,19 @@ export function priceSentence(amounts: readonly number[]): string {
     : `${formatLira(lowest)}'den başlayan fiyatlarla.`
 }
 
+/**
+ * The `kargo_cümlesi` token (docs/13 §3, F7.8): when an order leaves, in
+ * working days ("1–2 iş gününde kargoda."); "Aynı gün kargoda." for none.
+ */
+export function shippingSentence(handlingMin: number, handlingMax: number): string {
+  if (handlingMax <= 0) {
+    return "Aynı gün kargoda."
+  }
+  return handlingMin === handlingMax || handlingMin <= 0
+    ? `${String(handlingMax)} iş gününde kargoda.`
+    : `${String(handlingMin)}–${String(handlingMax)} iş gününde kargoda.`
+}
+
 function absolute(host: string | null, path: string): string | null {
   return host ? new URL(path, `https://${host}`).href : null
 }

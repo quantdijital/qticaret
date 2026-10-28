@@ -22,8 +22,9 @@ import {
 } from "../../lib/shipping/geliver"
 import type { OrderItemRow } from "../../lib/shipping/geliver"
 import { MissingMeasures, parcelOf } from "../../lib/shipping/parcel"
+import { tablePrice } from "../../lib/shipping/rates"
 import type { ParcelLine } from "../../lib/shipping/parcel"
-import { storeUnits, storedGeliverAccount } from "./account"
+import { shippingRates, storeUnits, storedGeliverAccount } from "./account"
 import { GELIVER_OPTIONS, choiceOf, isGeliverOption } from "./options"
 import { pickOffer, shipmentData } from "./shipment"
 
@@ -77,14 +78,28 @@ class GeliverFulfillmentService extends AbstractFulfillmentProviderService {
     return Promise.resolve(isGeliverOption(data.data?.["id"]))
   }
 
-  /** The service's price for the cart's parcel, tax included (Geliver quotes what the shop pays). */
+  /**
+   * The cart's parcel priced, tax included: by the shop's table for the
+   * table option, else what Geliver quotes for the option's service.
+   */
   override async calculatePrice(
     optionData: Record<string, unknown>,
     _data: Record<string, unknown>,
     context: CalculateShippingOptionPriceContext
   ): Promise<CalculatedShippingOptionPrice> {
-    const credentials = await storedGeliverAccount()
     const parcel = await parcelFor(parcelLinesOf(context.items))
+    if (optionData["id"] === "geliver-table") {
+      const rates = await shippingRates()
+      const price = tablePrice(rates.rate_table, rates.over_desi_price, parcel.desi)
+      if (price === null) {
+        throw new ValidationError("shipping.no_rate")
+      }
+      return {
+        calculated_amount: Number(toMedusaAmount(price)),
+        is_calculated_price_tax_inclusive: true,
+      }
+    }
+    const credentials = await storedGeliverAccount()
     const quote = chooseQuote(await geliverApi().quotes(credentials, parcel), choiceOf(optionData))
     if (!quote) {
       throw new ValidationError("shipping.no_offer")

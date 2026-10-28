@@ -740,6 +740,67 @@
           "secret_invalid": "Geliver did not accept this API token. Copy it again from the Geliver panel."
         },
         "rejected": "Geliver no longer accepts the stored API token; no shipment can be created. Get a new token from the Geliver panel and enter it."
+      },
+      "options": {
+        "title": "Shipping options",
+        "description": "Shoppers pick one of these at checkout: who carries it and how it is priced.",
+        "add": "Add option",
+        "addTitle": "New shipping option",
+        "editTitle": "Edit shipping option",
+        "dialogDescription": "The name shoppers see at checkout, who carries the parcel and the price.",
+        "name": "Name",
+        "nameHint": "Shown at checkout, e.g. \"Standard shipping\".",
+        "nameRequired": "Enter a name.",
+        "carrier": "Carrier",
+        "carriers": {
+          "manual": "I ship it myself",
+          "geliver": "Geliver",
+          "pickup": "Pickup from the shop"
+        },
+        "pricing": "Price",
+        "pricings": {
+          "flat": "Flat price",
+          "cheapest": "Geliver: cheapest offer",
+          "fastest": "Geliver: fastest offer",
+          "table": "Price table (desi)"
+        },
+        "amount": "Price (TL)",
+        "amountHint": "Tax included; 0 for free.",
+        "amountInvalid": "Enter the amount with at most two decimals.",
+        "free": "Free",
+        "none": "No shipping option yet; shoppers cannot order. Add one.",
+        "edit": "Edit {{name}}",
+        "remove": "Remove {{name}}",
+        "removeTitle": "Remove {{name}}?",
+        "removeDescription": "Shoppers no longer see it; orders already placed keep theirs.",
+        "removeConfirm": "Remove",
+        "removed": "Shipping option removed."
+      },
+      "rules": {
+        "deliveryTitle": "Delivery time",
+        "deliveryDescription": "When an order ships and how many days it takes. The shipping sentence on product pages and the delivery details given to search engines come from here.",
+        "handling": "Shipping out",
+        "handlingHint": "Working days after the order.",
+        "transit": "In transit",
+        "transitHint": "The carrier's usual time.",
+        "min": "Fewest",
+        "max": "Most",
+        "days": "days",
+        "daysInvalid": "Enter the days as a number.",
+        "daysOrder": "The fewest days cannot be more than the most.",
+        "ratesTitle": "Price table",
+        "ratesDescription": "What options priced by the table charge by the parcel's desi (tax included).",
+        "noRates": "No rows yet.",
+        "upTo": "Up to",
+        "desi": "desi:",
+        "maxDesi": "Desi limit of row {{number}}",
+        "priceOf": "Price of row {{number}}",
+        "removeRate": "Remove row {{number}}",
+        "addRate": "Add row",
+        "over": "Past the last row, per desi (TL)",
+        "overHint": "Left empty, parcels past the table cannot ship with such an option.",
+        "desiInvalid": "Enter the desi limit.",
+        "priceInvalid": "Enter the amount with at most two decimals."
       }
     },
     "integrations": {

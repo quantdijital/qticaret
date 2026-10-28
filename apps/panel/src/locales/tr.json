@@ -740,6 +740,67 @@
           "secret_invalid": "Geliver bu API anahtarını kabul etmedi. Anahtarı Geliver panelinden yeniden kopyalayın."
         },
         "rejected": "Geliver kayıtlı API anahtarını artık kabul etmiyor; gönderi oluşturulamaz. Geliver panelinden yeni bir anahtar alıp girin."
+      },
+      "options": {
+        "title": "Kargo seçenekleri",
+        "description": "Müşteriler ödeme sırasında bunlardan birini seçer: kimin taşıdığı ve nasıl fiyatlandığıyla.",
+        "add": "Seçenek ekle",
+        "addTitle": "Yeni kargo seçeneği",
+        "editTitle": "Kargo seçeneğini düzenle",
+        "dialogDescription": "Müşterinin ödeme sayfasında gördüğü ad, kargoyu kimin taşıdığı ve ücret.",
+        "name": "Ad",
+        "nameHint": "Ödeme sayfasında görünür, ör. \"Standart Kargo\".",
+        "nameRequired": "Bir ad girin.",
+        "carrier": "Taşıyan",
+        "carriers": {
+          "manual": "Kendi gönderimim",
+          "geliver": "Geliver",
+          "pickup": "Mağazadan teslim"
+        },
+        "pricing": "Ücret",
+        "pricings": {
+          "flat": "Sabit ücret",
+          "cheapest": "Geliver: en uygun teklif",
+          "fastest": "Geliver: en hızlı teklif",
+          "table": "Ücret tablosu (desi)"
+        },
+        "amount": "Ücret (TL)",
+        "amountHint": "KDV dahil; 0 ücretsiz.",
+        "amountInvalid": "Tutarı en çok iki ondalıkla girin.",
+        "free": "Ücretsiz",
+        "none": "Henüz kargo seçeneği yok; müşteriler sipariş veremez. Bir seçenek ekleyin.",
+        "edit": "{{name}} seçeneğini düzenle",
+        "remove": "{{name}} seçeneğini kaldır",
+        "removeTitle": "{{name}} kaldırılsın mı?",
+        "removeDescription": "Müşteriler bu seçeneği artık görmez; verilmiş siparişler etkilenmez.",
+        "removeConfirm": "Kaldır",
+        "removed": "Kargo seçeneği kaldırıldı."
+      },
+      "rules": {
+        "deliveryTitle": "Teslim süresi",
+        "deliveryDescription": "Siparişin ne zaman kargoya verildiği ve kaç günde ulaştığı. Ürün sayfalarındaki kargo cümlesi ve arama motorlarına verilen teslim bilgisi buradan gelir.",
+        "handling": "Kargoya verme",
+        "handlingHint": "Sipariş gününden sonra iş günü.",
+        "transit": "Taşıma",
+        "transitHint": "Kargo firmasının ortalama süresi.",
+        "min": "En az",
+        "max": "En çok",
+        "days": "gün",
+        "daysInvalid": "Gün sayısını rakamla girin.",
+        "daysOrder": "En az gün, en çok günden büyük olamaz.",
+        "ratesTitle": "Ücret tablosu",
+        "ratesDescription": "\"Ücret tablosu\" ile fiyatlanan seçeneklerde kolinin desisine göre alınan ücret (KDV dahil).",
+        "noRates": "Henüz satır yok.",
+        "upTo": "En çok",
+        "desi": "desi:",
+        "maxDesi": "{{number}}. satırın desi sınırı",
+        "priceOf": "{{number}}. satırın ücreti",
+        "removeRate": "{{number}}. satırı kaldır",
+        "addRate": "Satır ekle",
+        "over": "Son satırın üstünde, desi başına (TL)",
+        "overHint": "Boş bırakırsanız tablonun üstündeki koliler bu seçenekle gönderilemez.",
+        "desiInvalid": "Desi sınırını girin.",
+        "priceInvalid": "Tutarı en çok iki ondalıkla girin."
       }
     },
     "integrations": {

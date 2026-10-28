@@ -198,6 +198,14 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "shipping.additional_data_reserved": "This request cannot carry the platform's own fields.",
   "shipping.cod_single_parcel":
     "An order paid at the door ships with a carrier as one parcel: the courier collects the whole amount with one parcel.",
+  "shipping.no_rate":
+    "This parcel is past the shop's shipping price table; shipping cannot be priced.",
+  "shipping.days_order": "The fewest days cannot be more than the most.",
+  "shipping.rate_table_order": "The price table's desi limits must rise, with at most one decimal.",
+  "shipping.setup_incomplete":
+    "The shop has no default warehouse or shipping profile; choose a warehouse under Settings > Locations first.",
+  "shipping.manual_flat_only": "An option the shop ships itself can only have a flat price.",
+  "shipping.amount_invalid": "Enter the amount with at most two decimals.",
   "shipping.carrier_not_connected":
     "The shipping service is not connected. Connect the account under Settings > Shipping.",
   "shipping.dimensions_missing":

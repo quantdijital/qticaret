@@ -47,6 +47,16 @@ export interface CashOnDeliverySettings {
   shipping_option_ids: string[]
 }
 
+/** Shipping rules (F7.8): working days to leave and to arrive, the price table by desi (kuruş). */
+export interface ShippingSettings {
+  handling_days_min: number
+  handling_days_max: number
+  transit_days_min: number
+  transit_days_max: number
+  rate_table: { max_desi: number; price: number }[]
+  over_desi_price: number
+}
+
 /** Promotion rules (F4.4, F4.5): codes per cart, free shipping from a basket total. */
 export interface PromotionSettings {
   combine_codes: boolean

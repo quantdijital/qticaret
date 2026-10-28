@@ -198,6 +198,16 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "shipping.additional_data_reserved": "Bu istek platformun kendi alanlarını taşıyamaz.",
   "shipping.cod_single_parcel":
     "Kapıda ödemeli sipariş kargo firmasıyla tek koli olarak gönderilir: kurye tutarın tamamını bir kolide tahsil eder.",
+  "shipping.no_rate":
+    "Bu koli mağazanın kargo ücret tablosunun dışında kalıyor; kargo ücreti hesaplanamıyor.",
+  "shipping.days_order": "En az gün, en çok günden büyük olamaz.",
+  "shipping.rate_table_order":
+    "Ücret tablosunun desi sınırları artan sırada ve en fazla bir ondalıkla olmalı.",
+  "shipping.setup_incomplete":
+    "Mağazanın varsayılan deposu ya da kargo profili yok; önce Ayarlar > Depolar'dan bir depo seçin.",
+  "shipping.manual_flat_only":
+    "Mağazanın kendi gönderdiği seçenek yalnızca sabit ücretle fiyatlanabilir.",
+  "shipping.amount_invalid": "Tutarı en çok iki ondalıkla girin.",
   "shipping.carrier_not_connected":
     "Kargo hizmeti bağlı değil. Ayarlar > Kargo'dan hesabı bağlayın.",
   "shipping.dimensions_missing":

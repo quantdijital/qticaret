@@ -6,6 +6,8 @@
  * are full schema.org URLs. The storefront escapes `<` when it prints
  * them (F18).
  */
+import { shippingDetailsOf } from "./jsonld-shipping"
+import type { DeliveryFacts } from "./jsonld-shipping"
 
 export type JsonLd = Record<string, unknown>
 
@@ -52,7 +54,11 @@ export interface VariantFacts {
   availability: Availability
   /** The values of the properties the group varies by ({ size: "M" }). */
   properties: Partial<Record<VariesBy, string>>
+  /** Gross TRY the shop charges to ship one (its price table, F7.8); null: not known. */
+  shippingRate?: number | null
 }
+
+export type { DeliveryFacts } from "./jsonld-shipping"
 
 export interface ProductFacts {
   name: string
@@ -65,6 +71,8 @@ export interface ProductFacts {
   groupId: string
   variesBy: VariesBy[]
   variants: VariantFacts[]
+  /** How long an order takes; with a variant's shipping rate it makes `shippingDetails`. */
+  delivery?: DeliveryFacts | null
 }
 
 export interface ListingFacts {
@@ -76,7 +84,12 @@ export interface ListingFacts {
 
 const price = (amount: number): string => amount.toFixed(2)
 
-function offerOf(variant: VariantFacts, url: string, condition: Condition): JsonLd | null {
+function offerOf(
+  variant: VariantFacts,
+  url: string,
+  condition: Condition,
+  delivery?: DeliveryFacts | null
+): JsonLd | null {
   if (variant.price === null || !(variant.price > 0)) {
     return null
   }
@@ -100,6 +113,10 @@ function offerOf(variant: VariantFacts, url: string, condition: Condition): Json
         }),
     availability: `${SCHEMA}/${variant.availability}`,
     itemCondition: `${SCHEMA}/${CONDITIONS[condition]}`,
+    // Only with a rate the shop's table gives: a guessed rate would mislead (docs/13 §5)
+    ...(delivery && typeof variant.shippingRate === "number"
+      ? { shippingDetails: shippingDetailsOf(variant.shippingRate, delivery) }
+      : {}),
   }
 }
 
@@ -120,7 +137,7 @@ function variantProduct(
   url: string,
   single: boolean
 ): JsonLd {
-  const offer = offerOf(variant, url, facts.condition)
+  const offer = offerOf(variant, url, facts.condition, facts.delivery)
   return compact({
     "@type": "Product",
     ...(single ? { "@context": SCHEMA } : {}),

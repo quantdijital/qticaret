@@ -7,7 +7,7 @@ import { INTEGRATION_CREDENTIALS_MODULE } from "../integration-credentials"
 import type IntegrationCredentialsModuleService from "../integration-credentials/service"
 import { PLATFORM_SETTINGS_MODULE } from "../platform-settings"
 import type PlatformSettingsModuleService from "../platform-settings/service"
-import type { StoreSettings } from "../platform-settings/sections"
+import type { ShippingSettings, StoreSettings } from "../platform-settings/sections"
 
 /**
  * The shop's Geliver account at the time of the call (adr/0027, adr/0031),
@@ -25,10 +25,14 @@ export async function storedGeliverAccount(): Promise<GeliverCredentials> {
   return account
 }
 
+const settings = () => container.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
+
 /** The units the shop keeps product weights and measures in (Settings > Store), read per call. */
 export async function storeUnits(): Promise<ParcelUnits> {
-  const store = (await container
-    .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
-    .getSection("store")) as unknown as StoreSettings
+  const store = (await settings().getSection("store")) as unknown as StoreSettings
   return { weight_unit: store.weight_unit, dimension_unit: store.dimension_unit }
 }
+
+/** The shop's price table by desi (Settings > Shipping, F7.8), read per call. */
+export const shippingRates = async (): Promise<ShippingSettings> =>
+  (await settings().getSection("shipping")) as unknown as ShippingSettings

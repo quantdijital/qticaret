@@ -4,6 +4,10 @@ import type { Kurus } from "../../lib/money"
 import type { PriceDisplay } from "../../lib/pricing"
 import { VARIES_BY_PROPERTIES } from "../../lib/seo/jsonld"
 import type { Availability, Condition, ProductFacts, VariesBy } from "../../lib/seo/jsonld"
+import { MissingMeasures, parcelOf } from "../../lib/shipping/parcel"
+import type { ParcelUnits } from "../../lib/shipping/parcel"
+import { tablePrice } from "../../lib/shipping/rates"
+import type { ShippingSettings } from "../../modules/platform-settings/sections"
 
 /**
  * The facts a product's structured data is built from (F3.12): its
@@ -29,6 +33,10 @@ export const PRODUCT_FACT_FIELDS = [
   "variants.upc",
   "variants.barcode",
   "variants.manage_inventory",
+  "variants.weight",
+  "variants.length",
+  "variants.width",
+  "variants.height",
   "variants.allow_backorder",
   "variants.variant_extension.mpn",
   "variants.options.value",
@@ -69,6 +77,10 @@ export interface FactRow {
         barcode?: string | null
         manage_inventory?: boolean | null
         allow_backorder?: boolean | null
+        weight?: number | null
+        length?: number | null
+        width?: number | null
+        height?: number | null
         variant_extension?: { mpn?: string | null } | null
         options?:
           ({ value?: string | null; option?: { title?: string | null } | null } | null)[] | null
@@ -147,16 +159,55 @@ function propertiesByOption(row: FactRow): Map<string, VariesBy> {
 
 const lira = (amount: Kurus): number => Number(toMedusaAmount(amount))
 
+/** The shop's shipping rules and units, for each offer's `shippingDetails` (F7.8). */
+export interface ShippingFacts {
+  settings: ShippingSettings
+  units: ParcelUnits
+}
+
+/** What the shop's table charges to ship one of the variant; null without measures or a band. */
+function shippingRateOf(variant: Variant, shipping: ShippingFacts): number | null {
+  try {
+    const parcel = parcelOf(
+      [
+        {
+          title: variant.id,
+          quantity: 1,
+          weight: variant.weight ?? null,
+          length: variant.length ?? null,
+          width: variant.width ?? null,
+          height: variant.height ?? null,
+        },
+      ],
+      shipping.units
+    )
+    const rate = tablePrice(
+      shipping.settings.rate_table,
+      shipping.settings.over_desi_price,
+      parcel.desi
+    )
+    return rate === null ? null : Number(toMedusaAmount(rate))
+  } catch (error) {
+    if (error instanceof MissingMeasures) {
+      return null
+    }
+    throw error
+  }
+}
+
 /**
  * A product's facts for its structured data. With `displays` (F4.3) an
  * offer carries the price the shopper pays now and, where the 30-day rule
  * allows, the price struck through; without, the variant's own price.
+ * With `shipping` (F7.8) an offer whose variant the shop's table prices
+ * carries its shipping details.
  */
 export function productFacts(
   row: FactRow,
   brand: string | null,
   description: string,
-  displays?: ReadonlyMap<string, PriceDisplay>
+  displays?: ReadonlyMap<string, PriceDisplay>,
+  shipping?: ShippingFacts
 ): ProductFacts {
   const byOption = propertiesByOption(row)
   const images = [...(row.images ?? [])]
@@ -190,6 +241,7 @@ export function productFacts(
         ...priceOf(variant, displays),
         availability: availabilityOf(variant),
         properties,
+        shippingRate: shipping ? shippingRateOf(variant, shipping) : null,
       }
     })
   const used = new Set(variants.flatMap((variant) => Object.keys(variant.properties)))
@@ -204,5 +256,11 @@ export function productFacts(
       (property, index, all) => used.has(property) && all.indexOf(property) === index
     ),
     variants,
+    delivery: shipping
+      ? {
+          handling: [shipping.settings.handling_days_min, shipping.settings.handling_days_max],
+          transit: [shipping.settings.transit_days_min, shipping.settings.transit_days_max],
+        }
+      : null,
   }
 }

@@ -1,5 +1,8 @@
 import { z } from "@medusajs/framework/zod"
 
+/** Medusa's manual provider: the shop ships the parcel itself. */
+export const MANUAL_FULFILLMENT_PROVIDER_ID = "manual_manual"
+
 /** Geliver as Medusa's fulfillment module names it: `<identifier>_<id>` from medusa-config. */
 export const GELIVER_FULFILLMENT_PROVIDER_ID = "geliver_geliver"
 
