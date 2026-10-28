@@ -91,6 +91,10 @@ const envSchema = z.object({
   APPLE_AUTH_CALLBACK_URL: z.url({ protocol: /^https?$/ }).optional(),
   // A fake Apple in tests; refused when deployed
   APPLE_AUTH_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
+  // Medusa's own admin screens (/app): off; the shop works in our panel
+  // (adr/0022 §3). "on" opens them for the platform team for a while (a
+  // staff invite until F12 brings it to the panel)
+  MEDUSA_ADMIN: z.enum(["on", "off"]).optional(),
   // Medusa's level names; unset means Medusa's default, `http`
   LOG_LEVEL: z.enum(LOG_LEVELS).optional(),
   // docs/13 §6: "off" keeps search engines out (robots.txt, noindex) on an

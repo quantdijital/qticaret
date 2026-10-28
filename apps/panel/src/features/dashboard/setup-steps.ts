@@ -23,9 +23,7 @@ export type SetupStepKey =
 
 export interface SetupStep {
   key: SetupStepKey
-  /** The Medusa Admin screen that completes it, until the panel has its own (docs/03 P2). */
-  advancedPath: string
-  /** The panel's own screen for it, once there is one; preferred over the advanced one. */
+  /** The panel's screen that completes it; none for a step set up with the shop (currency, region). */
   panelPath?: string
   isDone: (facts: SetupFacts) => boolean
 }
@@ -36,29 +34,27 @@ const isStoreNamed = ({ storeName }: SetupFacts): boolean => {
 }
 
 export const SETUP_STEPS: readonly SetupStep[] = [
-  { key: "storeName", advancedPath: "/settings/store", isDone: isStoreNamed },
-  { key: "currency", advancedPath: "/settings/store", isDone: (facts) => facts.hasDefaultCurrency },
-  { key: "region", advancedPath: "/settings/regions", isDone: (facts) => facts.regionCount > 0 },
+  { key: "storeName", panelPath: "/settings/store", isDone: isStoreNamed },
+  // Set when the shop is installed (bootstrap); support finishes it if missing
+  { key: "currency", isDone: (facts) => facts.hasDefaultCurrency },
+  { key: "region", isDone: (facts) => facts.regionCount > 0 },
   {
     key: "location",
-    advancedPath: "/settings/locations",
+    panelPath: "/settings/locations",
     isDone: (facts) => facts.locationCount > 0,
   },
   {
     key: "shipping",
-    advancedPath: "/settings/locations",
+    panelPath: "/settings/shipping",
     isDone: (facts) => facts.shippingOptionCount > 0,
   },
   {
     key: "payment",
-    // Medusa's admin has no screen for it: the panel's own is the only one
-    advancedPath: "/settings/regions",
     panelPath: "/settings/payments",
     isDone: (facts) => facts.paymentAccountCount > 0,
   },
   {
     key: "product",
-    advancedPath: "/products/create",
     panelPath: "/products/new",
     isDone: (facts) => facts.publishedProductCount > 0,
   },

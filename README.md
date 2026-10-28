@@ -16,7 +16,7 @@ pnpm env:init          # infra/docker/.env, apps/backend/.env(.test) — secret'
 pnpm db:up             # geliştirme servisleri (aşağıdaki tablo)
 pnpm install
 pnpm --filter @qticaret/backend medusa db:migrate
-pnpm --filter @qticaret/backend dev     # http://localhost:9000/app
+pnpm --filter @qticaret/backend dev     # API http://localhost:9000; panel: pnpm --filter panel dev (http://localhost:5173)
 ```
 Admin kullanıcısı. `EPOSTA` yerine kendi adresini yaz. Şifre ekrana yazılmadan sorulur ve shell
 geçmişine düşmez. Komut çalışırken şifre `ps` çıktısında görünebilir, bu yüzden bunu yalnızca yerel makinede yap:

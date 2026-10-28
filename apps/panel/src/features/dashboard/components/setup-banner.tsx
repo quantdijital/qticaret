@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
-import { ArrowRight, ArrowUpRight, X } from "lucide-react"
+import { ArrowRight, X } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Stepper } from "@/components/patterns/stepper"
@@ -9,7 +9,6 @@ import { Progress } from "@/components/ui/progress"
 import { setupFactsQuery } from "@/features/dashboard/api/setup"
 import { setupStatus } from "@/features/dashboard/setup-steps"
 import type { SetupStatus, SetupStepKey } from "@/features/dashboard/setup-steps"
-import { advancedPanelUrl } from "@/lib/advanced-panel"
 
 const HIDDEN_KEY = "qt.panel.setup-hidden"
 
@@ -44,12 +43,9 @@ function NextStep({ status, selected }: { status: SetupStatus; selected: SetupSt
           </Link>
         </Button>
       ) : (
-        <Button asChild size="sm" className="shrink-0">
-          <a href={advancedPanelUrl(entry.step.advancedPath)} target="_blank" rel="noreferrer">
-            {t("dashboard.setup.continue")}
-            <ArrowUpRight />
-          </a>
-        </Button>
+        <span className="shrink-0 text-[13px] text-muted-foreground">
+          {t("dashboard.setup.byInstall")}
+        </span>
       )}
     </div>
   )

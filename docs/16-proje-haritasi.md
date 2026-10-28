@@ -116,14 +116,8 @@ Her modülün iç yapısı aynıdır (örnek: billing-profile):
 | [seo/](../apps/backend/src/lib/seo) | Türkçe slug, SEO başlık şablonları, Google'da başlık genişliği |
 | [redis/](../apps/backend/src/lib/redis), [cache/](../apps/backend/src/lib/cache) | Kendi Redis istemcimiz, tenant ad alanı; ayarların süreç içi cache'i |
 
-### 2.5 `src/admin/`: admin paneline eklenenler
-- `routes/home/`: "Başlangıç" sayfası (`/app/home`): kurulum kontrol listesi, hızlı işlemler, ürün sayıları. Kontrol listesi kuralları `setup-steps.ts`'te ([docs/17](17-yonetici-paneli-kullanilabilirlik.md)).
-- `widgets/customer-billing-profile.tsx`: müşteri detay sayfasındaki fatura bilgisi kutusu.
-- `widgets/default-language.tsx`: admin'i ilk açılışta Türkçe yapar.
-- `routes/settings/features`, `routes/settings/seo`, `routes/settings/attribute-templates`, `routes/settings/async-jobs`: Ayarlar > Özellikler, SEO, Ürün özellikleri ve İşler sayfaları.
-- `widgets/product-attributes.tsx`: ürün sayfasındaki özellik formu (`components/product-attributes/`).
-- `lib/sdk.ts` (Medusa JS SDK, oturum çerezi), `lib/errors.ts` (API hata anahtarını Türkçe metne çevirir), `components/page-states.tsx` (yükleniyor ve hata durumları).
-- `i18n/tr.json`, `en.json`: bizim eklediğimiz parçaların metinleri.
+### 2.5 `src/admin/`: kaldırıldı (2026-10-28)
+Medusa'nın kendi yönetim ekranına yazılan eklentiler (Başlangıç sayfası, ürün ve müşteri kutuları, Türkçe metin ezmeleri) silindi; karşılıkları kendi panelimizde (`apps/panel`). Medusa'nın yönetim ekranı (`/app`) varsayılan olarak kapalı (adr/0022 §3 eki); platform ekibi gerektiğinde `MEDUSA_ADMIN=on` ile açar.
 
 ### 2.6 `src/scripts/`: elle çalıştırılan işler
 
@@ -154,7 +148,7 @@ Her modülün iç yapısı aynıdır (örnek: billing-profile):
 | Hangi modüller açık? | [medusa-config.ts](../apps/backend/medusa-config.ts) |
 | Bir tablo nasıl oluştu? | `src/modules/<ad>/migrations/` |
 | TCKN nasıl saklanıyor? | [lib/crypto/pii.ts](../apps/backend/src/lib/crypto/pii.ts), [modules/billing-profile/service.ts](../apps/backend/src/modules/billing-profile/service.ts) |
-| Admin'deki Türkçe metinler | [src/admin/i18n/tr.json](../apps/backend/src/admin/i18n/tr.json) |
+| Paneldeki Türkçe metinler | [apps/panel/src/locales/tr.json](../apps/panel/src/locales/tr.json) |
 | Yerel servislerin portları | [infra/docker/compose.dev.yml](../infra/docker/compose.dev.yml) (bölüm 5) |
 | Bu özelliğin kabul kriteri ne, karşılandı mı? | [docs/03](03-yol-haritasi.md) (F2 bölümünde `[x]` işaretli olanlar) |
 | Güvenlik kuralı ne diyor? | [docs/04](04-guvenlik.md) |

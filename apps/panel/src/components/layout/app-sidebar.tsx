@@ -1,6 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link, useRouterState } from "@tanstack/react-router"
-import { ArrowUpRight } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import {
   Sidebar,
@@ -17,7 +16,6 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar"
 import { tasksQuery } from "@/features/dashboard/api/tasks"
-import { advancedPanelUrl } from "@/lib/advanced-panel"
 import { formatCount } from "@/lib/format"
 import { cn } from "@/lib/utils"
 import { NAV_GROUPS, SETTINGS_ITEM, isActive } from "./navigation"
@@ -106,15 +104,6 @@ export function AppSidebar() {
       <SidebarFooter className="gap-0.5 border-t border-sidebar-border px-3 py-3">
         <SidebarMenu className="gap-0.5">
           <NavLink item={SETTINGS_ITEM} pathname={pathname} />
-          <SidebarMenuItem>
-            {/* The platform team's door to what this panel does not cover yet (adr/0022 §3) */}
-            <SidebarMenuButton asChild tooltip={t("nav.advanced")} className={ITEM_CLASS}>
-              <a href={advancedPanelUrl("/")} target="_blank" rel="noreferrer">
-                <ArrowUpRight />
-                <span>{t("nav.advanced")}</span>
-              </a>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
       <SidebarRail />

@@ -25,6 +25,9 @@ if (!s3 && !isLocalEnv(env)) {
 }
 
 module.exports = defineConfig({
+  // adr/0022 §3: the shop works in our panel; Medusa's own admin is off
+  // unless the platform team opens it (MEDUSA_ADMIN=on)
+  admin: { disable: env.MEDUSA_ADMIN !== "on" },
   // Core, modules and scripts log through the platform logger: JSON,
   // redacted, with the request ID (docs/10)
   logger: new MedusaPinoLogger(baseLogger, env.LOG_LEVEL ?? DEFAULT_LOG_LEVEL),

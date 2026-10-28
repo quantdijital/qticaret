@@ -1,7 +1,7 @@
 # 06 — Panel UX
 
 > Yönetici paneli bizim uygulamamızdır: `apps/panel` (adr/0022). Görsel dil, token'lar ve klasör yapısı [docs/18](18-panel-tasarim-sistemi.md)'de; bu belge ilkeleri, sözlüğü ve ekran planını tutar.
-> Medusa Admin saklanır, mağaza sahibine gösterilmez; yeni hiçbir ekran oraya yazılmaz. Storefront UX'i F18'de ayrı dokümanla ele alınır.
+> Medusa Admin varsayılan olarak kapalıdır (`admin.disable`, 2026-10-28, adr/0022 §3 eki); panelde ona bağlantı yoktur. Platform ekibi gerektiğinde `MEDUSA_ADMIN=on` ile geçici olarak açar. Storefront UX'i F18'de ayrı dokümanla ele alınır.
 
 ## Araçlar
 - Yığın ve sürümler: docs/18 §1 (React, Tailwind v4, shadcn/ui, TanStack Router/Query/Table, RHF + Zod, Recharts, i18next)

@@ -36,3 +36,19 @@
 - `@medusajs/js-sdk` ve `@medusajs/types` sürümleri backend'le birlikte yükseltilir.
 - Playwright e2e altyapısı panelle birlikte kurulur (PROGRESS'teki açık karar kapanır).
 - Her yeni ekran docs/06 kontrol listesinden ve tasarım sistemi kurallarından geçer; "AI slop" kara listesi (docs/18 §3) inceleme ölçütüdür.
+
+## Ek: Medusa Admin kapatıldı (2026-10-28)
+- **Karar:** Kullanıcı "gelişmiş paneli hem bizim panelden hem normal kullanım alanlarından kaldırabiliriz" dedi. §3'teki "F7 sonrası tenant'larda kapatılır" koşulu da sağlanmıştı.
+- **Panelden kaldırılanlar:**
+  - sol menüdeki "Gelişmiş panel" bağlantısı;
+  - komut menüsündeki kayıt;
+  - kullanılmayan "Hazırlanıyor" sayfası;
+  - bağlantı yardımcısı.
+  Kurulum kartındaki adımlar artık panelin kendi ekranlarını açıyor. Para birimi ve satış bölgesi kurulumda verildiği için bu iki adımda düğme yok, açıklama var.
+- **Backend:**
+  - `admin.disable` varsayılan olarak açık; `/app` 404 döner.
+  - `MEDUSA_ADMIN=on` ortam değeriyle platform ekibi Medusa'nın ekranını geçici olarak açabilir. Örneğin personel daveti F12'de panele gelene kadar bu yolla yapılır.
+  - `src/admin` eklentileri, ona ait çekirdek metin denetim betiği ve yalnızca onların kullandığı bağımlılıklar silindi: `@medusajs/admin-sdk`, `@medusajs/ui`, `@tanstack/react-query`, `react-hook-form`, `@hookform/resolvers`, `react-i18next`, `react-router-dom`.
+  - Medusa'nın ekranı açılırsa gerektirdiği `react`, `react-dom`, `vite` ve `@medusajs/dashboard` kaldı.
+- **Kalanlar:** Panel hata cümleleri (`forDashboard`, adr/0021 §4) panelin oturum çereziyle gelen istekleri için çalışmaya devam ediyor.
+- **Gözden geçir:** Personel daveti, roller, bölge ve vergi ayarları gibi işler F12'ye kadar panelde yok. Gerekirse platform ekibi `MEDUSA_ADMIN=on` kullanır.

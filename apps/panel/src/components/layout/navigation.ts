@@ -17,8 +17,7 @@ import type { LucideIcon } from "lucide-react"
 
 /**
  * The panel's map (docs/06 ekran planı): one place for the sidebar, the
- * command menu and the top bar's title. `advanced` is where the job lives
- * in Medusa Admin until its panel screen ships (adr/0022 §3).
+ * command menu and the top bar's title.
  */
 
 export interface NavItem {
@@ -27,7 +26,6 @@ export interface NavItem {
   icon: LucideIcon
   /** Only this path, not its children. */
   exact?: boolean
-  advanced: string
 }
 
 export interface NavGroup {
@@ -39,42 +37,37 @@ export interface NavGroup {
 export const NAV_GROUPS: NavGroup[] = [
   {
     key: null,
-    items: [{ key: "dashboard", to: "/", icon: LayoutDashboard, exact: true, advanced: "/" }],
+    items: [{ key: "dashboard", to: "/", icon: LayoutDashboard, exact: true }],
   },
   {
     key: "sales",
     items: [
-      { key: "orders", to: "/orders", icon: ShoppingBag, advanced: "/orders" },
-      { key: "customers", to: "/customers", icon: Users, advanced: "/customers" },
+      { key: "orders", to: "/orders", icon: ShoppingBag },
+      { key: "customers", to: "/customers", icon: Users },
     ],
   },
   {
     key: "catalog",
     items: [
-      { key: "products", to: "/products", icon: Package, advanced: "/products" },
-      { key: "categories", to: "/categories", icon: FolderTree, advanced: "/categories" },
-      { key: "brands", to: "/brands", icon: Tag, advanced: "/products" },
-      { key: "inventory", to: "/inventory", icon: Warehouse, advanced: "/inventory" },
-      { key: "reviews", to: "/reviews", icon: MessageSquareText, advanced: "/products" },
+      { key: "products", to: "/products", icon: Package },
+      { key: "categories", to: "/categories", icon: FolderTree },
+      { key: "brands", to: "/brands", icon: Tag },
+      { key: "inventory", to: "/inventory", icon: Warehouse },
+      { key: "reviews", to: "/reviews", icon: MessageSquareText },
     ],
   },
   {
     key: "growth",
     items: [
-      { key: "promotions", to: "/promotions", icon: BadgePercent, advanced: "/promotions" },
-      { key: "seo", to: "/seo", icon: Search, advanced: "/settings/seo" },
-      { key: "content", to: "/content", icon: FileText, advanced: "/" },
-      { key: "reports", to: "/reports", icon: ChartColumnBig, advanced: "/" },
+      { key: "promotions", to: "/promotions", icon: BadgePercent },
+      { key: "seo", to: "/seo", icon: Search },
+      { key: "content", to: "/content", icon: FileText },
+      { key: "reports", to: "/reports", icon: ChartColumnBig },
     ],
   },
 ]
 
-export const SETTINGS_ITEM: NavItem = {
-  key: "settings",
-  to: "/settings",
-  icon: Settings,
-  advanced: "/settings",
-}
+export const SETTINGS_ITEM: NavItem = { key: "settings", to: "/settings", icon: Settings }
 
 export const ALL_NAV_ITEMS: NavItem[] = [
   ...NAV_GROUPS.flatMap((group) => group.items),

@@ -1,6 +1,5 @@
 import { useNavigate } from "@tanstack/react-router"
 import {
-  ArrowUpRight,
   BadgePercent,
   FolderPlus,
   LogOut,
@@ -20,10 +19,8 @@ import {
   CommandItem,
   CommandList,
   CommandSeparator,
-  CommandShortcut,
 } from "@/components/ui/command"
 import { useLogout } from "@/features/auth/api/me"
-import { advancedPanelUrl } from "@/lib/advanced-panel"
 import { ALL_NAV_ITEMS } from "./navigation"
 
 // The jobs people start most, a keystroke away (docs/06 §5)
@@ -117,16 +114,6 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
           >
             <Palette />
             {t("command.appearance")}
-          </CommandItem>
-          <CommandItem
-            value={t("nav.advanced")}
-            onSelect={() => {
-              run(() => window.open(advancedPanelUrl("/"), "_blank", "noreferrer"))
-            }}
-          >
-            <ArrowUpRight />
-            {t("nav.advanced")}
-            <CommandShortcut>↗</CommandShortcut>
           </CommandItem>
           <CommandItem
             value={t("nav.logout")}
