@@ -208,6 +208,15 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The shop has no default warehouse or shipping profile; choose a warehouse under Settings > Locations first.",
   "shipping.manual_flat_only": "An option the shop ships itself can only have a flat price.",
   "shipping.amount_invalid": "Enter the amount with at most two decimals.",
+  "returns.unknown": "Return request not found.",
+  "returns.status_invalid": "The return request is not in a state for this.",
+  "returns.items_invalid":
+    "The chosen items do not match what can be returned: at most what was shipped and not yet returned of each.",
+  "returns.window_closed": "The return period for this order is over, or it has not shipped yet.",
+  "returns.already_open": "This order already has an open return request.",
+  "returns.carrier_refused": "The carrier did not open the return; try again shortly.",
+  "returns.refund_failed":
+    'The items were received but the refund failed; use "Try the refund again".',
   "shipping.carrier_not_connected":
     "The shipping service is not connected. Connect the account under Settings > Shipping.",
   "shipping.dimensions_missing":

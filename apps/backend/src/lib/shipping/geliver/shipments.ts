@@ -98,5 +98,21 @@ export function shipmentCalls(call: GeliverCall) {
     await call(credentials, { method: "DELETE", path: ["shipments", id] }, z.unknown())
   }
 
-  return { createShipment, shipment, waitForOffers, acceptOffer, cancelShipment }
+  /**
+   * A return of a delivered shipment, its label bought at once (adr/0032):
+   * the shopper hands the parcel over with its code. Not repeated on a
+   * failure whose outcome is unknown.
+   */
+  const createReturn = (credentials: GeliverCredentials, shipmentId: string) =>
+    call(
+      credentials,
+      {
+        method: "POST",
+        path: ["shipments", shipmentId],
+        json: { isReturn: true, willAccept: true, count: 1 },
+      },
+      geliverTransaction
+    )
+
+  return { createShipment, shipment, waitForOffers, acceptOffer, cancelShipment, createReturn }
 }

@@ -210,6 +210,16 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "shipping.manual_flat_only":
     "Mağazanın kendi gönderdiği seçenek yalnızca sabit ücretle fiyatlanabilir.",
   "shipping.amount_invalid": "Tutarı en çok iki ondalıkla girin.",
+  "returns.unknown": "İade talebi bulunamadı.",
+  "returns.status_invalid": "İade talebi bu işlem için uygun durumda değil.",
+  "returns.items_invalid":
+    "Seçilen ürünler iade edilebilecek olanlarla uyuşmuyor: her üründen en çok gönderilen ve henüz iade edilmemiş adet kadar.",
+  "returns.window_closed":
+    "Bu sipariş için iade süresi doldu ya da sipariş henüz kargoya verilmedi.",
+  "returns.already_open": "Bu sipariş için açık bir iade talebi zaten var.",
+  "returns.carrier_refused": "Kargo firması iade gönderisini açmadı; birazdan tekrar deneyin.",
+  "returns.refund_failed":
+    'Ürünler teslim alındı ama para iadesi yapılamadı; "Para iadesini tekrar dene" ile yineleyin.',
   "shipping.carrier_not_connected":
     "Kargo hizmeti bağlı değil. Ayarlar > Kargo'dan hesabı bağlayın.",
   "shipping.dimensions_missing":

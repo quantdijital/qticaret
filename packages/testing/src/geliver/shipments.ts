@@ -177,6 +177,31 @@ export function createShipments(labelBase: () => string) {
         }
       : failed(404, "NOT_FOUND", "label not found")
 
+  /** `POST /shipments/:id { isReturn }`: a return of a delivered shipment, its label bought. */
+  const createReturn: Handler = ({ params, body }) => {
+    const original = shipments.get(params[0] ?? "")
+    if (!original) {
+      return failed(404, "NOT_FOUND", "shipment not found")
+    }
+    if (body["isReturn"] !== true) {
+      return failed(400, "VALIDATION_ERROR", "only returns are made here")
+    }
+    const returned: FakeShipment = {
+      ...original,
+      id: randomUUID(),
+      request: { ...original.request, isReturn: true, returnOf: original.id },
+      statusCode: "OFFER_ACCEPTED",
+      offersRead: true,
+      acceptedOfferID: original.acceptedOfferID,
+      step: 0,
+      trackingNumber: String(Math.floor(1e11 + Math.random() * 9e11)),
+      labelURL: null,
+    }
+    returned.labelURL = `${labelBase()}/labels/${returned.id}.pdf`
+    shipments.set(returned.id, returned)
+    return ok({ id: randomUUID(), shipment: { ...view(returned), isReturn: true } })
+  }
+
   return {
     shipments,
     held,
@@ -187,6 +212,7 @@ export function createShipments(labelBase: () => string) {
       "POST /shipments": create,
       "GET /shipments/:id": read,
       "DELETE /shipments/:id": cancel,
+      "POST /shipments/:id": createReturn,
       "POST /transactions": accept,
     } satisfies Record<string, Handler>,
   }
