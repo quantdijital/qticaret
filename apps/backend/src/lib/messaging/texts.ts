@@ -66,6 +66,13 @@ const TR: Readonly<Record<string, string>> = {
   "back_in_stock.intro": "Beklediğiniz {{product}} yeniden satışta. Stok sınırlı olabilir.",
   "back_in_stock.button": "Ürüne git",
   "back_in_stock.once": "Bu bildirim tek seferliktir; bu ürün için size başka ileti gönderilmez.",
+  "cart_reminder.subject": "Sepetinizdeki ürünler sizi bekliyor",
+  "cart_reminder.preheader": "{{shop}} sepetinizi sizin için sakladı.",
+  "cart_reminder.heading": "{{name}}, sepetinizi unutmayın",
+  "cart_reminder.intro": "{{shop}} mağazasında sepetinize eklediğiniz ürünler hâlâ sizi bekliyor.",
+  "cart_reminder.button": "Sepetime dön",
+  "cart_reminder.note":
+    "Bağlantı {{days}} gün geçerlidir ve sepetinizi bir kez açar. Fiyat ve stok, döndüğünüz anki durumuna göre gösterilir.",
   "order_link.subject": "Siparişinizin bağlantısı (#{{number}})",
   "order_link.preheader": "{{shop}} siparişinizi görüntüleyin.",
   "order_link.heading": "Merhaba {{name}}, siparişiniz burada",

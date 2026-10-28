@@ -294,6 +294,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "wishlist.product_unknown": "The product was not found.",
   "messaging.email_domain_refuses":
     "This e-mail address's domain takes no mail; check the address.",
+  "cart_reminders.link_invalid":
+    "This link is invalid, expired or already used. You can reach your cart from the shop.",
   "stock_alerts.not_tracked": "Stock alerts are not available for this product.",
   "stock_alerts.in_stock": "This product is in stock now; you can order it.",
   "stock_alerts.email_required": "Write your e-mail address so we can tell you.",

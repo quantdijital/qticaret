@@ -36,7 +36,10 @@ describe.each(templates.map((template) => [template.name, template] as const))(
     it("says whether it needs consent: commercial ones say how to stop them", () => {
       if (template.kind === "commercial") {
         expect(template.email?.(template.sample, brand).text).toMatch(/izn/i)
-        expect(template.sms?.(template.sample, brand)).toMatch(/Ret/)
+        // An e-mail-only one (a cart reminder) has no text to say it in
+        if (template.sms) {
+          expect(template.sms(template.sample, brand)).toMatch(/Ret/)
+        }
       }
       expect(["transactional", "commercial"]).toContain(template.kind)
     })

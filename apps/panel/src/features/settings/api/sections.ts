@@ -97,6 +97,14 @@ export interface NotificationSettings {
   email_daily_limit: number
 }
 
+/** Settings > Marketing (F10). */
+export interface MarketingSettings {
+  /** A shopper who left a cart gets one reminder, with e-mail consent only (F10.7). */
+  abandoned_cart_enabled: boolean
+  /** How long a cart stays unchanged before it counts as left. */
+  abandoned_cart_delay_minutes: number
+}
+
 export const sectionQuery = <T>(section: string) =>
   queryOptions({
     queryKey: ["settings", section],

@@ -99,6 +99,34 @@ F10'un pazarlama tarafı mağazanın verisini dış servislere taşır: Google, 
   - Ticari e-postada `List-Unsubscribe` ve `List-Unsubscribe-Post: List-Unsubscribe=One-Click` başlıkları ile altbilgide "Bu iletileri almak istemiyorum" bağlantısı bulunur.
   - `BACKEND_URL` yoksa (yerelde) bağlantı da başlık da konmaz.
 
+## Uygulama notları (M10, terk edilmiş sepet, 2026-10-29)
+- **Ayar:**
+  - `marketing` bölümü: `abandoned_cart_enabled` (varsayılan kapalı) ve `abandoned_cart_delay_minutes` (30–1440, varsayılan 60).
+  - Panelde Ayarlar > Pazarlama (Satış ve teslimat grubunda).
+  - Mağazanın alan adı yoksa iş hiç çalışmaz; bağlantının açılacağı sayfa yoktur.
+- **İş (`cart-reminders`, 15 dakikada bir, tur başına en çok 100 sepet):**
+  - Aday sepet: e-postası ve satırı olan, tamamlanmamış, ayarlanan süreden eski ve 7 günden yeni.
+  - Daha önce hatırlatılan sepet atlanır.
+  - Sepetin son değişikliğinden sonra aynı e-postayla sipariş vermiş alışverişçinin sepeti atlanır.
+- **Sepet başına tek hatırlatma (`cart-reminders` modülü, `cart_reminder` tablosu):**
+  - Gönderimden önce sepet "talep edilir" (benzersiz `cart_id`), sonuç satıra yazılır.
+  - `sent`, `no_consent`, `suppressed`, `invalid_recipient`: hatırlatma hakkı kullanılmış sayılır.
+  - Kanal kapalı, günlük kota dolu ya da sağlayıcı hatası: talep silinir, sonraki tur yeniden dener.
+  - Gönderim hata fırlatırsa talep silinir. E-posta geri alınamayacağı için başka telafi yoktur.
+- **İzin:** Şablon (`cart.reminder`) ticari iletidir. `deliver()` e-posta izni (`granted`) ve bastırma listesini denetler. İzinsiz adrese gitmez (KK3, testli).
+- **Geri dönüş bağlantısı:**
+  - Biçim: `<vitrin>/sepet/geri-don?token=…`.
+  - Token 32 rastgele bayttır; yalnızca SHA-256 özeti saklanır, 7 gün geçerlidir.
+  - `POST /store/cart-reminders/redeem` sepet kimliğini bir kez döndürür. Kullanılmış, süresi dolmuş ya da bilinmeyen token ile tamamlanmış sepet `cart_reminders.link_invalid` (404) alır.
+  - Hız sınırı: `cart_return` profili, IP başına 15 dakikada 30 istek.
+  - Token hiçbir iş akışı kaydında tutulmaz (testli).
+  - "İmzalı token" yerine rastgele token ve saklanan özet kullanıldı. İkisi de tahmin edilemez, bu yol tek kullanımı da sağlar.
+- **F18 için not:** Vitrinin geri dönüş sayfası token'ı sayfa açılınca değil, alışverişçi düğmeye basınca kullanmalı. Aksi halde e-posta güvenlik tarayıcıları bağlantıyı açıp token'ı tüketir.
+- **Panel:**
+  - Son 30 günün özeti: gönderilen, sepete dönen, siparişe dönüşen (`GET /admin/cart-reminders/summary`).
+  - Bildirimler > şablon önizlemesinde "Terk edilmiş sepet hatırlatması".
+- **Bilinen sınır:** Aynı token'la aynı anda gelen iki istek ikisi de sepeti açabilir (satır kilidi yok). Etkisi aynı sepetin iki kez açılmasıdır.
+
 ## Alternatifler
 
 | Seçenek | Artı | Eksi |

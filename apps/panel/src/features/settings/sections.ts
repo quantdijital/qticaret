@@ -4,6 +4,7 @@ import {
   FileClock,
   ListChecks,
   ListTodo,
+  Megaphone,
   MessageSquare,
   Palette,
   Plug,
@@ -47,6 +48,7 @@ export const SETTINGS_GROUPS: readonly SettingsGroup[] = [
       { key: "payments", to: "/settings/payments", icon: CreditCard },
       { key: "shipping", to: "/settings/shipping", icon: Truck },
       { key: "locations", to: "/settings/locations", icon: Warehouse },
+      { key: "marketing", to: "/settings/marketing", icon: Megaphone },
     ],
   },
   {

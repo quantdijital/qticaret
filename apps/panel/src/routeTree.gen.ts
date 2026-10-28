@@ -50,6 +50,7 @@ import { Route as AuthSettingsFeaturesRouteImport } from './routes/_auth/setting
 import { Route as AuthSettingsIntegrationsRouteImport } from './routes/_auth/settings/integrations'
 import { Route as AuthSettingsJobsRouteImport } from './routes/_auth/settings/jobs'
 import { Route as AuthSettingsLocationsRouteImport } from './routes/_auth/settings/locations'
+import { Route as AuthSettingsMarketingRouteImport } from './routes/_auth/settings/marketing'
 import { Route as AuthSettingsNotificationsRouteImport } from './routes/_auth/settings/notifications'
 import { Route as AuthSettingsSeoRouteImport } from './routes/_auth/settings/seo'
 import { Route as AuthSettingsStoreRouteImport } from './routes/_auth/settings/store'
@@ -269,6 +270,11 @@ const AuthSettingsLocationsRoute = AuthSettingsLocationsRouteImport.update({
   path: '/locations',
   getParentRoute: () => AuthSettingsRoute,
 } as any)
+const AuthSettingsMarketingRoute = AuthSettingsMarketingRouteImport.update({
+  id: '/marketing',
+  path: '/marketing',
+  getParentRoute: () => AuthSettingsRoute,
+} as any)
 const AuthSettingsNotificationsRoute =
   AuthSettingsNotificationsRouteImport.update({
     id: '/notifications',
@@ -374,6 +380,7 @@ export interface FileRoutesByFullPath {
   '/settings/integrations': typeof AuthSettingsIntegrationsRoute
   '/settings/jobs': typeof AuthSettingsJobsRoute
   '/settings/locations': typeof AuthSettingsLocationsRoute
+  '/settings/marketing': typeof AuthSettingsMarketingRoute
   '/settings/notifications': typeof AuthSettingsNotificationsRoute
   '/settings/seo': typeof AuthSettingsSeoRoute
   '/settings/store': typeof AuthSettingsStoreRoute
@@ -427,6 +434,7 @@ export interface FileRoutesByTo {
   '/settings/integrations': typeof AuthSettingsIntegrationsRoute
   '/settings/jobs': typeof AuthSettingsJobsRoute
   '/settings/locations': typeof AuthSettingsLocationsRoute
+  '/settings/marketing': typeof AuthSettingsMarketingRoute
   '/settings/notifications': typeof AuthSettingsNotificationsRoute
   '/settings/seo': typeof AuthSettingsSeoRoute
   '/settings/store': typeof AuthSettingsStoreRoute
@@ -484,6 +492,7 @@ export interface FileRoutesById {
   '/_auth/settings/integrations': typeof AuthSettingsIntegrationsRoute
   '/_auth/settings/jobs': typeof AuthSettingsJobsRoute
   '/_auth/settings/locations': typeof AuthSettingsLocationsRoute
+  '/_auth/settings/marketing': typeof AuthSettingsMarketingRoute
   '/_auth/settings/notifications': typeof AuthSettingsNotificationsRoute
   '/_auth/settings/seo': typeof AuthSettingsSeoRoute
   '/_auth/settings/store': typeof AuthSettingsStoreRoute
@@ -541,6 +550,7 @@ export interface FileRouteTypes {
     | '/settings/integrations'
     | '/settings/jobs'
     | '/settings/locations'
+    | '/settings/marketing'
     | '/settings/notifications'
     | '/settings/seo'
     | '/settings/store'
@@ -594,6 +604,7 @@ export interface FileRouteTypes {
     | '/settings/integrations'
     | '/settings/jobs'
     | '/settings/locations'
+    | '/settings/marketing'
     | '/settings/notifications'
     | '/settings/seo'
     | '/settings/store'
@@ -650,6 +661,7 @@ export interface FileRouteTypes {
     | '/_auth/settings/integrations'
     | '/_auth/settings/jobs'
     | '/_auth/settings/locations'
+    | '/_auth/settings/marketing'
     | '/_auth/settings/notifications'
     | '/_auth/settings/seo'
     | '/_auth/settings/store'
@@ -969,6 +981,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSettingsLocationsRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
+    '/_auth/settings/marketing': {
+      id: '/_auth/settings/marketing'
+      path: '/marketing'
+      fullPath: '/settings/marketing'
+      preLoaderRoute: typeof AuthSettingsMarketingRouteImport
+      parentRoute: typeof AuthSettingsRoute
+    }
     '/_auth/settings/notifications': {
       id: '/_auth/settings/notifications'
       path: '/notifications'
@@ -1089,6 +1108,7 @@ interface AuthSettingsRouteChildren {
   AuthSettingsIntegrationsRoute: typeof AuthSettingsIntegrationsRoute
   AuthSettingsJobsRoute: typeof AuthSettingsJobsRoute
   AuthSettingsLocationsRoute: typeof AuthSettingsLocationsRoute
+  AuthSettingsMarketingRoute: typeof AuthSettingsMarketingRoute
   AuthSettingsNotificationsRoute: typeof AuthSettingsNotificationsRoute
   AuthSettingsSeoRoute: typeof AuthSettingsSeoRoute
   AuthSettingsStoreRoute: typeof AuthSettingsStoreRoute
@@ -1109,6 +1129,7 @@ const AuthSettingsRouteChildren: AuthSettingsRouteChildren = {
   AuthSettingsIntegrationsRoute: AuthSettingsIntegrationsRoute,
   AuthSettingsJobsRoute: AuthSettingsJobsRoute,
   AuthSettingsLocationsRoute: AuthSettingsLocationsRoute,
+  AuthSettingsMarketingRoute: AuthSettingsMarketingRoute,
   AuthSettingsNotificationsRoute: AuthSettingsNotificationsRoute,
   AuthSettingsSeoRoute: AuthSettingsSeoRoute,
   AuthSettingsStoreRoute: AuthSettingsStoreRoute,

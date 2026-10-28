@@ -227,7 +227,8 @@
       "locations": "Depolar",
       "integrations": "Entegrasyonlar",
       "notifications": "Bildirimler",
-      "sms": "SMS"
+      "sms": "SMS",
+      "marketing": "Pazarlama"
     },
     "appearance": {
       "title": "Görünüm",
@@ -1020,6 +1021,9 @@
           "stock": {
             "alert_confirm": "Stok bildirimi onayı",
             "back_in_stock": "Yeniden stokta"
+          },
+          "cart": {
+            "reminder": "Terk edilmiş sepet hatırlatması"
           }
         }
       },
@@ -1090,7 +1094,30 @@
       "integrations": "Bağlı dış servislerin çalışıp çalışmadığı",
       "features": "Açılıp kapatılabilen mağaza özellikleri",
       "jobs": "Dışa aktarma gibi uzun süren işler ve dosyaları",
-      "audit": "Panelde kim neyi ne zaman değiştirdi"
+      "audit": "Panelde kim neyi ne zaman değiştirdi",
+      "marketing": "Terk edilmiş sepet hatırlatması"
+    },
+    "marketing": {
+      "title": "Pazarlama",
+      "description": "Müşteriyi alışverişe geri getiren, izinle gönderilen iletiler.",
+      "abandonedCart": {
+        "title": "Terk edilmiş sepet hatırlatması",
+        "description": "Sepetine ürün ekleyip ayrılan müşteriye bir kez e-posta gider. Yalnızca e-posta izni olan adreslere gönderilir; içindeki bağlantı sepeti bir kez açar ve 7 gün geçerlidir.",
+        "enabled": "Hatırlatma gönder",
+        "enabledHint": "Mağazanın alan adı ve e-posta göndericisi tanımlı olmalı.",
+        "delay": "Sepet bu kadar süre değişmezse gönder",
+        "minutes_one": "{{count}} dakika",
+        "minutes_other": "{{count}} dakika",
+        "hours_one": "{{count}} saat",
+        "hours_other": "{{count}} saat",
+        "saved": "Hatırlatma ayarı kaydedildi.",
+        "stats": {
+          "title": "Son 30 gün",
+          "sent": "Gönderilen hatırlatma",
+          "returned": "Sepete dönen",
+          "ordered": "Siparişe dönüşen"
+        }
+      }
     }
   },
   "status": {

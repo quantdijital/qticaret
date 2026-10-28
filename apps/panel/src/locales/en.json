@@ -227,7 +227,8 @@
       "locations": "Locations",
       "integrations": "Integrations",
       "notifications": "Notifications",
-      "sms": "SMS"
+      "sms": "SMS",
+      "marketing": "Marketing"
     },
     "appearance": {
       "title": "Appearance",
@@ -1020,6 +1021,9 @@
           "stock": {
             "alert_confirm": "Stock alert confirmation",
             "back_in_stock": "Back in stock"
+          },
+          "cart": {
+            "reminder": "Abandoned cart reminder"
           }
         }
       },
@@ -1090,7 +1094,30 @@
       "integrations": "Whether the connected services are working",
       "features": "Shop features you can turn on or off",
       "jobs": "Long jobs such as exports, and their files",
-      "audit": "Who changed what in the panel, and when"
+      "audit": "Who changed what in the panel, and when",
+      "marketing": "Abandoned cart reminders"
+    },
+    "marketing": {
+      "title": "Marketing",
+      "description": "Messages, sent with consent, that bring shoppers back.",
+      "abandonedCart": {
+        "title": "Abandoned cart reminder",
+        "description": "A shopper who leaves items in the cart gets one e-mail. Only addresses with e-mail consent get it; its link opens the cart once and lasts 7 days.",
+        "enabled": "Send reminders",
+        "enabledHint": "The shop's domain and e-mail sender must be set up.",
+        "delay": "Send once the cart is unchanged for",
+        "minutes_one": "{{count}} minute",
+        "minutes_other": "{{count}} minutes",
+        "hours_one": "{{count}} hour",
+        "hours_other": "{{count}} hours",
+        "saved": "Reminder settings saved.",
+        "stats": {
+          "title": "Last 30 days",
+          "sent": "Reminders sent",
+          "returned": "Back to the cart",
+          "ordered": "Became an order"
+        }
+      }
     }
   },
   "status": {

@@ -177,6 +177,8 @@ module.exports = defineConfig({
       resolve: "./src/modules/billing-profile",
       options: { encryptionKey: env.PII_ENCRYPTION_KEY, hashKey: env.PII_HASH_KEY },
     },
+    // F10.7 (adr/0038 §1): one reminder per cart left behind, its link opening the cart once
+    { resolve: "./src/modules/cart-reminders" },
     // F10.10 (adr/0037 §4): product questions and answers, moderated
     { resolve: "./src/modules/product-qa" },
     // F10.6 (adr/0037 §4): purchasers' reviews, moderated, and their ratings

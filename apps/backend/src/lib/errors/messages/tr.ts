@@ -299,6 +299,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "wishlist.product_unknown": "Ürün bulunamadı.",
   "messaging.email_domain_refuses":
     "Bu e-posta adresinin alan adı e-posta almıyor; adresi kontrol edin.",
+  "cart_reminders.link_invalid":
+    "Bu bağlantı geçersiz, süresi dolmuş ya da kullanılmış. Sepetinize mağazadan ulaşabilirsiniz.",
   "stock_alerts.not_tracked": "Bu ürün için stok bildirimi verilemiyor.",
   "stock_alerts.in_stock": "Bu ürün şu an stokta; hemen sipariş verebilirsiniz.",
   "stock_alerts.email_required": "Haber verebilmemiz için e-posta adresinizi yazın.",

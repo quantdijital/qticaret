@@ -3,6 +3,7 @@ import { bankTransferSection } from "./bank-transfer"
 import { cashOnDeliverySection } from "./cash-on-delivery"
 import type { SectionDefinition } from "./define"
 import { inventorySection } from "./inventory"
+import { marketingSection } from "./marketing"
 import { notificationsSection } from "./notifications"
 import { paymentsSection } from "./payments"
 import { promotionsSection } from "./promotions"
@@ -15,6 +16,7 @@ export type { AppearanceSettings } from "./appearance"
 export type { BankTransferSettings } from "./bank-transfer"
 export type { CashOnDeliverySettings } from "./cash-on-delivery"
 export type { InventorySettings } from "./inventory"
+export type { MarketingSettings } from "./marketing"
 export type { NotificationSettings } from "./notifications"
 export type { PaymentSettings } from "./payments"
 export type { PromotionSettings } from "./promotions"
@@ -35,6 +37,7 @@ export const SECTIONS = {
   cash_on_delivery: cashOnDeliverySection,
   shipping: shippingSection,
   notifications: notificationsSection,
+  marketing: marketingSection,
 } as const
 
 export type SectionName = keyof typeof SECTIONS
