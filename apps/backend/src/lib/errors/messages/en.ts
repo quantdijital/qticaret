@@ -19,6 +19,11 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "cart.metadata_reserved": "This line detail is set by the shop only.",
   "bank_transfer.not_this_order": "This order was not paid by bank transfer.",
   "bank_transfer.order_canceled": "A cancelled order's transfer cannot be confirmed.",
+  "orders.ship_items_invalid":
+    "The chosen lines do not match what is left to ship: at most what is left of each line can go.",
+  "orders.ship_packed_first":
+    "The packed parcel must go first; then the remaining lines can be chosen.",
+  "orders.ship_failed": "The order could not be shipped; try again from its page.",
   "orders.payment_awaited":
     "The order's payment has not come yet; it can be shipped once the transfer is confirmed.",
   "cash_on_delivery.disabled": "The shop does not offer cash on delivery.",

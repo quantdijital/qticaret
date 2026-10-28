@@ -22,7 +22,20 @@ export interface BoardOrder {
   items: number
   stage: Lifecycle
   customer: { name: string | null; place: string | null }
+  /** The latest carrier parcel (adr/0031); null when none. */
+  shipping: { status: ShipmentStatus; tracking_number: string | null } | null
 }
+
+/** Where a carrier's parcel stands (adr/0031), as the server names it. */
+export type ShipmentStatus =
+  | "created"
+  | "picked_up"
+  | "in_transit"
+  | "out_for_delivery"
+  | "delivered"
+  | "returned"
+  | "failed"
+  | "canceled"
 
 export interface OrderBoard {
   orders: BoardOrder[]
@@ -195,7 +208,7 @@ export const orderMoneyQuery = (id: string) =>
   })
 
 /** A change to an order; the order lists and the dashboard read again once it settles. */
-export function useOrderMutation<T>(run: (input: T) => Promise<unknown>) {
+export function useOrderMutation<T, R = unknown>(run: (input: T) => Promise<R>) {
   const client = useQueryClient()
   return useMutation({
     mutationFn: run,
@@ -207,13 +220,17 @@ export function useOrderMutation<T>(run: (input: T) => Promise<unknown>) {
   })
 }
 
-/** Packs what is left (or a packed parcel) and hands it over, as one step on the server. */
+/**
+ * Packs what is left, a part of it (F7.10), or a packed parcel, and hands
+ * it over, as one step on the server; with a carrier, its label is bought.
+ */
 export const useShipOrder = (id: string) =>
-  useOrderMutation(({ notify }: { notify: boolean }) =>
-    sdk.client.fetch(`/admin/orders/${encodeURIComponent(id)}/ship`, {
-      method: "POST",
-      body: { notify },
-    })
+  useOrderMutation(
+    ({ notify, items }: { notify: boolean; items?: { id: string; quantity: number }[] }) =>
+      sdk.client.fetch(`/admin/orders/${encodeURIComponent(id)}/ship`, {
+        method: "POST",
+        body: { notify, ...(items ? { items } : {}) },
+      })
   )
 
 export const useMarkDelivered = (id: string) =>

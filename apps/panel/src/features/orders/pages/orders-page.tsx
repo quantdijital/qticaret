@@ -1,7 +1,9 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link, getRouteApi, useNavigate } from "@tanstack/react-router"
-import { Info, Inbox } from "lucide-react"
+import { Info, Inbox, Loader2, Truck } from "lucide-react"
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
+import { toast } from "sonner"
 import { DataTable } from "@/components/patterns/data-table"
 import type { Column } from "@/components/patterns/data-table"
 import { FilterTabs } from "@/components/patterns/filter-tabs"
@@ -12,7 +14,11 @@ import { SearchInput } from "@/components/patterns/search-input"
 import { ErrorState } from "@/components/patterns/states"
 import { ORDER_PAGE_SIZE, ORDER_STAGES, orderBoardQuery } from "@/features/orders/api/orders"
 import type { BoardOrder, OrderStage } from "@/features/orders/api/orders"
+import { MAX_BULK_SHIP, useShipOrders } from "@/features/orders/api/shipping"
+import type { ShipResult } from "@/features/orders/api/shipping"
 import { CustomerCell } from "@/features/orders/components/customer-cell"
+import { ShipResultsDialog } from "@/features/orders/components/ship-results-dialog"
+import { ShippingBadge } from "@/features/orders/components/shipping-badge"
 import { StageBadge } from "@/features/orders/components/stage-badge"
 import { errorText } from "@/lib/errors"
 import { formatDateTime, formatMoney, formatRelative } from "@/lib/format"
@@ -71,6 +77,12 @@ function useColumns(): Column<BoardOrder>[] {
       ),
     },
     {
+      key: "shipping",
+      header: t("orders.columns.shipping"),
+      className: "hidden md:table-cell",
+      cell: (order) => <ShippingBadge shipping={order.shipping} />,
+    },
+    {
       key: "items",
       header: t("orders.columns.items"),
       className: "hidden lg:table-cell",
@@ -92,6 +104,58 @@ function useColumns(): Column<BoardOrder>[] {
   ]
 }
 
+/**
+ * Above the list while orders to ship are picked (F7.7): how many,
+ * letting go, and "Kargoya ver" for all of them at once.
+ */
+function ShipBar({
+  picked,
+  onClear,
+  onShipped,
+}: {
+  picked: ReadonlyMap<string, BoardOrder>
+  onClear: () => void
+  onShipped: (results: ShipResult[]) => void
+}) {
+  const { t } = useTranslation()
+  const ship = useShipOrders()
+  const tooMany = picked.size > MAX_BULK_SHIP
+  return (
+    <div
+      role="region"
+      aria-label={t("orders.bulkShip.region")}
+      className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t bg-muted/60 px-5 py-2.5 text-sm"
+    >
+      <span className="font-medium" aria-live="polite">
+        {t("orders.bulkShip.selected", { count: picked.size })}
+      </span>
+      {tooMany ? (
+        <span className="text-destructive-text">
+          {t("orders.bulkShip.tooMany", { max: MAX_BULK_SHIP })}
+        </span>
+      ) : null}
+      <span className="ml-auto flex gap-2">
+        <Button variant="ghost" size="sm" disabled={ship.isPending} onClick={onClear}>
+          {t("orders.bulkShip.clear")}
+        </Button>
+        <Button
+          size="sm"
+          disabled={tooMany || ship.isPending}
+          onClick={() => {
+            ship.mutate(
+              { orderIds: [...picked.keys()], notify: true },
+              { onSuccess: onShipped, onError: (failure) => toast.error(errorText(t, failure)) }
+            )
+          }}
+        >
+          {ship.isPending ? <Loader2 className="animate-spin" /> : <Truck />}
+          {t("orders.bulkShip.ship")}
+        </Button>
+      </span>
+    </div>
+  )
+}
+
 /** Every order by stage (docs/06 §4): what needs packing first, then the rest. */
 export function OrdersPage() {
   const { t } = useTranslation()
@@ -102,6 +166,13 @@ export function OrdersPage() {
   const q = search.q ?? ""
   const board = useQuery(orderBoardQuery({ stage, q, page }))
   const columns = useColumns()
+  // Orders picked to ship at once (F7.7), kept with their row for the results' numbers
+  const [picked, setPicked] = useState<Map<string, BoardOrder>>(new Map())
+  const [results, setResults] = useState<{
+    list: ShipResult[]
+    orders: Map<string, BoardOrder>
+  } | null>(null)
+  const selectable = stage === "to_ship"
   const setSearch = (next: { q?: string; stage?: OrderStage; page?: number }) => {
     const nextStage = next.stage ?? stage
     void navigate({
@@ -131,6 +202,7 @@ export function OrdersPage() {
           label={t("orders.views")}
           value={stage}
           onChange={(next) => {
+            setPicked(new Map())
             setSearch({ stage: next, page: 1 })
           }}
           tabs={ORDER_STAGES.map((key) => ({
@@ -154,6 +226,18 @@ export function OrdersPage() {
             </p>
           ) : null}
         </div>
+        {selectable && picked.size > 0 ? (
+          <ShipBar
+            picked={picked}
+            onClear={() => {
+              setPicked(new Map())
+            }}
+            onShipped={(list) => {
+              setResults({ list, orders: picked })
+              setPicked(new Map())
+            }}
+          />
+        ) : null}
         {board.isError ? (
           <div className="px-5 pb-5">
             <ErrorState text={errorText(t, board.error)} onRetry={() => void board.refetch()} />
@@ -169,6 +253,28 @@ export function OrdersPage() {
               onRowClick={(order) => {
                 void navigate({ to: "/orders/$id", params: { id: order.id } })
               }}
+              {...(selectable
+                ? {
+                    selection: {
+                      selected: new Set(picked.keys()),
+                      onChange: (next: Set<string>) => {
+                        const rows = new Map([
+                          ...picked,
+                          ...(board.data?.orders ?? []).map((order) => [order.id, order] as const),
+                        ])
+                        setPicked(
+                          new Map(
+                            [...next].flatMap((id) => {
+                              const row = rows.get(id)
+                              return row ? [[id, row] as const] : []
+                            })
+                          )
+                        )
+                      },
+                      rowLabel: (order: BoardOrder) => `#${String(order.display_id)}`,
+                    },
+                  }
+                : {})}
               empty={
                 <div className="flex flex-col items-center gap-3 text-center">
                   <Inbox className="size-8 text-muted-foreground" aria-hidden="true" />
@@ -195,6 +301,13 @@ export function OrdersPage() {
           </>
         )}
       </section>
+      <ShipResultsDialog
+        results={results?.list ?? null}
+        orders={results?.orders ?? new Map()}
+        onClose={() => {
+          setResults(null)
+        }}
+      />
     </div>
   )
 }

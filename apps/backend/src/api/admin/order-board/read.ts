@@ -5,6 +5,9 @@ import type { LifecycleOrder } from "../../../lib/dashboard"
 import { createSingleFlight } from "../../../lib/cache"
 import { fromMedusaAmount, toMedusaAmount } from "../../../lib/money"
 import type { MedusaAmount } from "../../../lib/money"
+import { SHIPMENT_TRACKING_MODULE } from "../../../modules/shipment-tracking"
+import type ShipmentTrackingModuleService from "../../../modules/shipment-tracking/service"
+import type { ShipmentStatus } from "../../../modules/shipment-tracking/states"
 import { MAX_ORDERS_READ, NOT_ORDERS } from "../dashboard/orders"
 import { ORDER_BOARD_PAGE } from "./validators"
 import type { AdminGetOrderBoardType } from "./validators"
@@ -31,6 +34,32 @@ interface DisplayRow extends LifecycleOrder {
     city?: string | null
     province?: string | null
   } | null
+}
+
+/** Each order's latest carrier parcel (F7.7, adr/0031): where it stands and its tracking number. */
+async function shippingOf(
+  scope: MedusaContainer,
+  orderIds: string[]
+): Promise<Map<string, { status: ShipmentStatus; tracking_number: string | null }>> {
+  if (orderIds.length === 0) {
+    return new Map()
+  }
+  const parcels = await scope
+    .resolve<ShipmentTrackingModuleService>(SHIPMENT_TRACKING_MODULE)
+    .listTrackedShipments(
+      { order_id: orderIds, status: { $ne: "canceled" } },
+      { select: ["order_id", "status", "tracking_number"], order: { created_at: "DESC" } }
+    )
+  const latest = new Map<string, { status: ShipmentStatus; tracking_number: string | null }>()
+  for (const parcel of parcels) {
+    if (!latest.has(parcel.order_id)) {
+      latest.set(parcel.order_id, {
+        status: parcel.status,
+        tracking_number: parcel.tracking_number,
+      })
+    }
+  }
+  return latest
 }
 
 const customerOf = (address: DisplayRow["shipping_address"]) => ({
@@ -81,6 +110,7 @@ export async function readOrderBoard(scope: MedusaContainer, params: AdminGetOrd
       })
     : { data: [] }
   const byId = new Map((full as unknown as DisplayRow[]).map((order) => [order.id, order]))
+  const shipping = await shippingOf(scope, ids)
   return {
     orders: slice.page.flatMap(({ id, stage }) => {
       const order = byId.get(id)
@@ -95,6 +125,7 @@ export async function readOrderBoard(scope: MedusaContainer, params: AdminGetOrd
               items: (order.items ?? []).reduce((sum, item) => sum + (item?.quantity ?? 0), 0),
               stage,
               customer: customerOf(order.shipping_address),
+              shipping: shipping.get(id) ?? null,
             },
           ]
         : []

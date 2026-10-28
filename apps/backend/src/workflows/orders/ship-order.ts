@@ -23,6 +23,8 @@ export interface ShipOrderInput {
   notify: boolean
   /** The staff member, recorded on the shipment. */
   created_by?: string | undefined
+  /** A part of what is left (F7.10); the whole of it when absent. */
+  items?: { id: string; quantity: number }[] | undefined
 }
 
 /**
@@ -42,7 +44,9 @@ export const shipOrderWorkflow = createWorkflow("orders-ship-order", (input: Shi
   const lockKey = transform({ input }, ({ input }) => `orders:ship:${input.order_id}`)
   acquireLockStep({ key: lockKey, timeout: 10, ttl: 60 })
 
-  const plan = planShipmentStep({ order_id: input.order_id })
+  const plan = planShipmentStep(
+    transform({ input }, ({ input }) => ({ order_id: input.order_id, items: input.items }))
+  )
   const carrier = planCarrierStep({ order_id: input.order_id })
 
   const sender = when(
@@ -102,9 +106,10 @@ export const shipOrderWorkflow = createWorkflow("orders-ship-order", (input: Shi
 
   releaseLockStep({ key: lockKey })
   return new WorkflowResponse(
-    transform({ input, carrier }, ({ input, carrier }) => ({
+    transform({ input, carrier, plan, packed }, ({ input, carrier, plan, packed }) => ({
       order_id: input.order_id,
       carrier: carrier.carrier,
+      fulfillment_id: plan.fulfillment_id ?? packed?.id ?? null,
     }))
   )
 })

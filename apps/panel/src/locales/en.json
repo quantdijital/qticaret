@@ -1292,7 +1292,8 @@
       "customer": "Customer",
       "stage": "Status",
       "items": "Items",
-      "total": "Total"
+      "total": "Total",
+      "shipping": "Shipping"
     },
     "itemsCount_one": "{{count}} item",
     "itemsCount_other": "{{count}} items",
@@ -1332,7 +1333,8 @@
       "title": "Ship #{{number}}?",
       "description": "These items go into the parcel and the order becomes \"Shipped\".",
       "notify": "Send the customer a shipping notice",
-      "done": "Order shipped."
+      "done": "Order shipped.",
+      "quantityOf": "Quantity of {{name}} to ship"
     },
     "deliver": {
       "title": "Was the order delivered?",
@@ -1479,6 +1481,28 @@
         "status": "Status",
         "amount": "Amount"
       }
+    },
+    "shipping": {
+      "created": "Label ready",
+      "picked_up": "Shipped",
+      "in_transit": "Shipped",
+      "out_for_delivery": "Out for delivery",
+      "delivered": "Delivered",
+      "returned": "Returned",
+      "failed": "Problem",
+      "canceled": "Canceled"
+    },
+    "bulkShip": {
+      "region": "Picked orders",
+      "selected_one": "{{count}} order picked",
+      "selected_other": "{{count}} orders picked",
+      "tooMany": "At most {{max}} orders can be shipped at once.",
+      "clear": "Clear",
+      "ship": "Ship",
+      "resultsTitle": "Shipped orders",
+      "resultsSummary": "{{shipped}} orders shipped, {{failed}} could not be.",
+      "label": "Label",
+      "failed": "Could not be shipped."
     }
   },
   "customers": {

@@ -17,6 +17,7 @@ export async function POST(
       order_id: orderId,
       notify: req.validatedBody.notify,
       created_by: req.auth_context.actor_id || undefined,
+      items: req.validatedBody.items,
     },
   })
   res.json(result)

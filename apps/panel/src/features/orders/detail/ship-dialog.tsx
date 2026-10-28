@@ -3,6 +3,7 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Input } from "@/components/ui/input"
 import {
   Dialog,
   DialogContent,
@@ -18,20 +19,40 @@ import { formatCount } from "@/lib/format"
 interface ShipDialogProps {
   order: OrderDetail
   items: { id: string; quantity: number }[]
+  /** A parcel already packed goes whole: its lines cannot be changed. */
+  packed: boolean
   open: boolean
   busy: boolean
   onOpenChange: (open: boolean) => void
-  onConfirm: (notify: boolean) => void
+  /** `items` only when a part of what is left goes (F7.10). */
+  onConfirm: (notify: boolean, items?: { id: string; quantity: number }[]) => void
 }
 
 /**
- * "Kargoya ver": what goes in the parcel, and whether the customer hears
- * of it. Carrier labels and tracking come with the carrier integrations (F7).
+ * "Kargoya ver": what goes in the parcel (all that is left, or fewer of
+ * each line for an order in several parcels), and whether the customer
+ * hears of it. With a carrier the parcel's label is bought (adr/0031).
  */
-export function ShipDialog({ order, items, open, busy, onOpenChange, onConfirm }: ShipDialogProps) {
+export function ShipDialog({
+  order,
+  items,
+  packed,
+  open,
+  busy,
+  onOpenChange,
+  onConfirm,
+}: ShipDialogProps) {
   const { t } = useTranslation()
   const [notify, setNotify] = useState(true)
+  const [counts, setCounts] = useState<Record<string, number>>({})
   const byId = new Map(order.items.map((item) => [item.id, item]))
+  const countOf = (id: string, left: number) => Math.min(Math.max(counts[id] ?? left, 0), left)
+  const chosen = items
+    .map(({ id, quantity }) => ({ id, quantity: countOf(id, quantity) }))
+    .filter((item) => item.quantity > 0)
+  const whole =
+    chosen.length === items.length &&
+    chosen.every((item, index) => item.quantity === items[index]?.quantity)
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
@@ -51,7 +72,25 @@ export function ShipDialog({ order, items, open, busy, onOpenChange, onConfirm }
                     <span className="truncate text-xs text-muted-foreground">{item.subtitle}</span>
                   ) : null}
                 </span>
-                <span className="text-sm tabular-nums">× {formatCount(quantity)}</span>
+                {packed ? (
+                  <span className="text-sm tabular-nums">× {formatCount(quantity)}</span>
+                ) : (
+                  <span className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                    <Input
+                      type="number"
+                      inputMode="numeric"
+                      min={0}
+                      max={quantity}
+                      aria-label={t("orders.ship.quantityOf", { name: item?.title ?? "" })}
+                      className="h-8 w-16 text-right tabular-nums"
+                      value={countOf(id, quantity)}
+                      onChange={(event) => {
+                        setCounts({ ...counts, [id]: Number(event.target.value) || 0 })
+                      }}
+                    />
+                    <span className="tabular-nums">/ {formatCount(quantity)}</span>
+                  </span>
+                )}
               </li>
             )
           })}
@@ -76,9 +115,9 @@ export function ShipDialog({ order, items, open, busy, onOpenChange, onConfirm }
             {t("common.cancel")}
           </Button>
           <Button
-            disabled={busy}
+            disabled={busy || chosen.length === 0}
             onClick={() => {
-              onConfirm(notify)
+              onConfirm(notify, whole ? undefined : chosen)
             }}
           >
             {busy ? <Loader2 className="animate-spin" /> : <Truck />}

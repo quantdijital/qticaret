@@ -1,8 +1,11 @@
 import { validateAndTransformBody, validateAndTransformQuery } from "@medusajs/framework/http"
+import type { AuthenticatedMedusaRequest } from "@medusajs/framework/http"
+import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import { requireUserActor } from "../http/actor"
+import { rateLimit } from "../http/rate-limit"
 import { AdminGetDashboardNoQuery, AdminGetDashboardOverview } from "./dashboard/validators"
 import { AdminGetOrderBoard } from "./order-board/validators"
-import { AdminPostShipOrder } from "./orders/[id]/ship/validators"
+import { AdminPostShipOrder, AdminPostShipOrders } from "./orders/[id]/ship/validators"
 import { AdminPostPriceListDiscount } from "./price-lists/[id]/discount/validators"
 import { AdminPostPromotionOffer } from "./promotions/[id]/offer/validators"
 import { AdminGetPriceHistory } from "./products/[id]/price-history/validators"
@@ -48,6 +51,18 @@ export const PANEL_ROUTES = [
     matcher: "/admin/orders/:id/ship",
     methods: ["POST" as const],
     middlewares: [requireUserActor, validateAndTransformBody(AdminPostShipOrder)],
+  },
+  // F7.7: several orders at once; each may ask a carrier, so a small budget per staff member
+  {
+    matcher: "/admin/order-board/ship",
+    methods: ["POST" as const],
+    middlewares: [
+      requireUserActor,
+      rateLimit(() => RATE_LIMIT_PROFILES.bulk_ship, {
+        identity: (req) => (req as Partial<AuthenticatedMedusaRequest>).auth_context?.actor_id,
+      }),
+      validateAndTransformBody(AdminPostShipOrders),
+    ],
   },
   {
     matcher: "/admin/products/:id/price-history",

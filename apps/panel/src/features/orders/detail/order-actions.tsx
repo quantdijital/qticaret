@@ -152,13 +152,19 @@ export function OrderActions({
       ) : null}
 
       <ShipDialog
+        // A fresh dialog each time it opens: no counts left from the last one
+        key={dialog === "ship" ? "ship-open" : "ship-closed"}
         order={order}
         items={toShip}
+        packed={(state.ship?.fulfillment_id ?? null) !== null}
         open={dialog === "ship"}
         busy={ship.isPending}
         onOpenChange={close}
-        onConfirm={(notify) => {
-          ship.mutate({ notify }, { onSuccess: done("orders.ship.done"), onError: failed })
+        onConfirm={(notify, items) => {
+          ship.mutate(
+            { notify, ...(items ? { items } : {}) },
+            { onSuccess: done("orders.ship.done"), onError: failed }
+          )
         }}
       />
       <ConfirmDialog

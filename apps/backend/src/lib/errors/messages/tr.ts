@@ -22,6 +22,11 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "cart.metadata_reserved": "Bu satır bilgisi yalnızca mağaza tarafından yazılır.",
   "bank_transfer.not_this_order": "Bu siparişin ödemesi havale/EFT ile değil.",
   "bank_transfer.order_canceled": "İptal edilmiş siparişin havalesi onaylanamaz.",
+  "orders.ship_items_invalid":
+    "Seçilen kalemler gönderilecek olanlarla uyuşmuyor: her kalemden en çok kalan adet kadar gönderilebilir.",
+  "orders.ship_packed_first":
+    "Önce paketlenmiş koli kargoya verilmeli; ardından kalan kalemler seçilebilir.",
+  "orders.ship_failed": "Sipariş kargoya verilemedi; sipariş sayfasından tekrar deneyin.",
   "orders.payment_awaited":
     "Siparişin ödemesi henüz gelmedi; havale onaylanınca kargoya verilebilir.",
   "cash_on_delivery.disabled": "Mağaza kapıda ödemeyi sunmuyor.",

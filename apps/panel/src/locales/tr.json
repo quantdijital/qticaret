@@ -1300,7 +1300,8 @@
       "customer": "Müşteri",
       "stage": "Durum",
       "items": "Ürün",
-      "total": "Tutar"
+      "total": "Tutar",
+      "shipping": "Kargo"
     },
     "itemsCount_one": "{{count}} ürün",
     "itemsCount_other": "{{count}} ürün",
@@ -1340,7 +1341,8 @@
       "title": "#{{number}} kargoya verilsin mi?",
       "description": "Aşağıdaki ürünler pakete girer ve sipariş \"Kargoda\" olur.",
       "notify": "Müşteriye kargo bildirimi gönder",
-      "done": "Sipariş kargoya verildi."
+      "done": "Sipariş kargoya verildi.",
+      "quantityOf": "{{name}} için gönderilecek adet"
     },
     "deliver": {
       "title": "Sipariş teslim edildi mi?",
@@ -1487,6 +1489,28 @@
         "status": "Durum",
         "amount": "Tutar"
       }
+    },
+    "shipping": {
+      "created": "Etiket hazır",
+      "picked_up": "Kargoda",
+      "in_transit": "Kargoda",
+      "out_for_delivery": "Dağıtımda",
+      "delivered": "Teslim edildi",
+      "returned": "İade",
+      "failed": "Sorunlu",
+      "canceled": "İptal"
+    },
+    "bulkShip": {
+      "region": "Seçilen siparişler",
+      "selected_one": "{{count}} sipariş seçildi",
+      "selected_other": "{{count}} sipariş seçildi",
+      "tooMany": "Bir seferde en çok {{max}} sipariş kargoya verilebilir.",
+      "clear": "Seçimi kaldır",
+      "ship": "Kargoya ver",
+      "resultsTitle": "Kargoya verilenler",
+      "resultsSummary": "{{shipped}} sipariş kargoya verildi, {{failed}} sipariş verilemedi.",
+      "label": "Etiket",
+      "failed": "Kargoya verilemedi."
     }
   },
   "customers": {

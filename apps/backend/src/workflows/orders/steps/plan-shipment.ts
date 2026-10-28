@@ -8,13 +8,34 @@ import { SHIPPING_PAYMENT_FIELDS, shippingBlock } from "../../../lib/payments/sh
 /**
  * What "ship" means for the order now (lib/dashboard/order-state): a
  * packed parcel handed over, or what is left packed into a new one. The
- * items come from the order, never from the request. An order paid in a
+ * items come from the order; a request may name a part of what is left
+ * (F7.10: an order in several parcels), never more. An order paid in a
  * provider's test mode, or whose payment is still awaited, is refused.
  * Reads only.
  */
+/** A part of what is left: each line once, at most what is left of it; a packed parcel goes whole. */
+function partOf(plan: ShipmentPlan, wanted: { id: string; quantity: number }[]): ShipmentPlan {
+  if (plan.fulfillment_id) {
+    throw new ValidationError("orders.ship_packed_first", { field: "items" })
+  }
+  const left = new Map(plan.items.map((item) => [item.id, item.quantity]))
+  const ids = new Set(wanted.map((item) => item.id))
+  if (
+    wanted.length === 0 ||
+    ids.size !== wanted.length ||
+    wanted.some((item) => item.quantity < 1 || item.quantity > (left.get(item.id) ?? 0))
+  ) {
+    throw new ValidationError("orders.ship_items_invalid", { field: "items" })
+  }
+  return { fulfillment_id: null, items: wanted }
+}
+
 export const planShipmentStep = createStep(
   "orders-plan-shipment",
-  async (input: { order_id: string }, { container }) => {
+  async (
+    input: { order_id: string; items?: { id: string; quantity: number }[] | undefined },
+    { container }
+  ) => {
     const query = container.resolve(ContainerRegistrationKeys.QUERY)
     const { data } = await query.graph({
       entity: "order",
@@ -34,6 +55,6 @@ export const planShipmentStep = createStep(
     if (!plan || plan.items.length === 0) {
       throw new ValidationError("orders.nothing_to_ship")
     }
-    return new StepResponse<ShipmentPlan>(plan)
+    return new StepResponse<ShipmentPlan>(input.items ? partOf(plan, input.items) : plan)
   }
 )

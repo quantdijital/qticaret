@@ -61,6 +61,12 @@ export const RATE_LIMIT_PROFILES = {
     perIdentityAnyIp: { max: 10, windowMs: 10 * MINUTE },
   },
   installment: { name: "installment", perIp: { max: 30, windowMs: MINUTE } },
+  // F7.7: shipping picked orders at once, each asking a carrier for a label
+  bulk_ship: {
+    name: "bulk_ship",
+    perIp: { max: 10, windowMs: MINUTE },
+    perIdentityAnyIp: { max: 30, windowMs: 10 * MINUTE },
+  },
   // F6: a checkout page's ways to pay; each may run the providers' health check
   payment_methods: { name: "payment_methods", perIp: { max: 60, windowMs: MINUTE } },
   sms: {
