@@ -38,6 +38,11 @@ module.exports = defineConfig({
       authCors: env.AUTH_CORS,
       jwtSecret: env.JWT_SECRET,
       cookieSecret: env.COOKIE_SECRET,
+      // adr/0037 §1: a customer's e-mail login works once the address is
+      // confirmed; Medusa refuses it before (`verification_required`)
+      authVerificationsPerActor: {
+        customer: [{ entity_type: "email", auth_provider: "emailpass" }],
+      },
     },
   },
   // F4.8 (ADR-0025): gift cards and store credit; its routes answer only with

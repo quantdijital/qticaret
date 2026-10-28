@@ -1,6 +1,7 @@
+import { randomUUID } from "node:crypto"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import type { TestCustomer } from "../helpers/customer"
-import { registerCustomer } from "../helpers/customer"
+import { confirmEmail, registerCustomer } from "../helpers/customer"
 import type { HttpClient, HttpResponse } from "../helpers/http"
 import { settle } from "../helpers/http"
 import type { Storefront } from "../helpers/storefront"
@@ -10,6 +11,11 @@ jest.setTimeout(120 * 1000)
 
 interface MeResponse {
   customer: { id: string }
+}
+
+interface LoginResponse {
+  token: string
+  verification_required?: boolean
 }
 
 function sessionCookie(response: HttpResponse<unknown>): string {
@@ -25,7 +31,8 @@ function sessionCookie(response: HttpResponse<unknown>): string {
 /**
  * adr/0004: web storefronts use an httpOnly session cookie created from the
  * login token; mobile and third-party clients use the bearer token. Both
- * resolve the same customer.
+ * resolve the same customer. adr/0037: an e-mail login works once its
+ * address is confirmed.
  */
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
@@ -100,6 +107,37 @@ medusaIntegrationTestRunner({
       })
 
       expect(response.data.customer.id).toBe(customer.id)
+    })
+
+    it("opens an account for the registering address only, and lets it in once confirmed", async () => {
+      const email = `kayit-${randomUUID()}@example.com`
+      // Throwaway credential for this test database only
+      const password = randomUUID()
+      const registration = await http.post<{ token: string }>("/auth/customer/emailpass/register", {
+        email,
+        password,
+      })
+      const bearer = (token: string) => ({
+        ...storefront.headers,
+        authorization: `Bearer ${token}`,
+      })
+      // A stranger's address in the body opens nothing in their name
+      const created = await http.post<{ customer: { email: string } }>(
+        "/store/customers",
+        { email: "baskasi@example.com", first_name: "Ayşe" },
+        { headers: bearer(registration.data.token) }
+      )
+      const early = await http.post<LoginResponse>("/auth/customer/emailpass", { email, password })
+      const earlyMe = await me(bearer(early.data.token))
+      await confirmEmail(http, getContainer(), registration.data.token, email)
+      const login = await http.post<LoginResponse>("/auth/customer/emailpass", { email, password })
+      const later = await me(bearer(login.data.token))
+
+      expect(created.data.customer.email).toBe(email)
+      expect(early.data.verification_required).toBe(true)
+      expect(earlyMe.status).toBe(401)
+      expect(login.data.verification_required).toBeUndefined()
+      expect(later.status).toBe(200)
     })
   },
 })

@@ -10,6 +10,8 @@ export interface Storefront {
   salesChannelId: string
   /** Header set for Store API requests. */
   headers: { "x-publishable-api-key": string }
+  /** The test's backend, for what a shopper's mailbox would show (a verification code). */
+  container: MedusaContainer
 }
 
 /** Publishable key bound to the store's default sales channel. */
@@ -35,7 +37,7 @@ export async function createStorefront(container: MedusaContainer): Promise<Stor
     input: { id: key.id, add: [salesChannelId] },
   })
 
-  return { salesChannelId, headers: { "x-publishable-api-key": key.token } }
+  return { salesChannelId, headers: { "x-publishable-api-key": key.token }, container }
 }
 
 export interface TestProductInput {

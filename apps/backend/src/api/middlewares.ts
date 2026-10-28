@@ -19,6 +19,7 @@ import { AdminPostProductAttributes } from "./admin/products/[id]/attributes/val
 import { AdminPostProductCatalog } from "./admin/products/[id]/catalog/validators"
 import { AdminPostFeature, validateSectionBody } from "./admin/platform-settings/validators"
 import { auditMutations, auditSensitiveRead } from "./http/audit"
+import { ACCOUNT_ROUTES } from "./http/account-routes"
 import { BANK_TRANSFER_ROUTES } from "./http/bank-transfer-routes"
 import { BRAND_ROUTES, STORE_BRAND_FIELDS } from "./http/brand-routes"
 import { CATALOG_SHEET_ROUTES } from "./http/catalog-sheet-routes"
@@ -191,6 +192,7 @@ export default defineMiddlewares({
     ...CHARGEBACK_ROUTES,
     ...SHIPPING_ROUTES,
     ...MESSAGING_ROUTES,
+    ...ACCOUNT_ROUTES,
     ...RETURN_ROUTES,
     ...CORE_RETURN_ROUTES,
     ...ORDER_EDIT_ROUTES,

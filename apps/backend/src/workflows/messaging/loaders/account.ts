@@ -14,6 +14,9 @@ type Extra = Readonly<Record<string, string>>
 /** The storefront page a reset link opens (F18 builds it), with the token and the address. */
 export const RESET_PATH = "/hesap/sifre-yenile"
 
+/** The storefront page that confirms an address (F18 builds it), with Medusa's code. */
+export const VERIFY_PATH = "/hesap/dogrula"
+
 /**
  * A customer's reset link (auth.password_reset). The link needs the
  * storefront's address: without a domain there is nowhere to send them,
@@ -44,7 +47,11 @@ export async function loadPasswordReset(
   }
 }
 
-/** The code to confirm an e-mail address (auth.verification_requested), to the address itself. */
+/**
+ * The code to confirm an e-mail address (auth.verification_requested), to
+ * the address itself: a link to the storefront's page once there is a
+ * domain, and the code to paste either way.
+ */
 export async function loadVerification(
   container: Container,
   _resourceId: string,
@@ -57,10 +64,14 @@ export async function loadVerification(
   const store = (await container
     .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
     .getSection("store")) as unknown as StoreSettings
+  const { storefrontUrl } = await brandOf(container)
   const expires = expiresAt ? new Date(expiresAt) : null
   return {
     vars: {
       code,
+      verifyUrl: storefrontUrl
+        ? `${storefrontUrl}${VERIFY_PATH}?${new URLSearchParams({ code }).toString()}`
+        : null,
       expiresAt:
         expires && !Number.isNaN(expires.getTime())
           ? new Intl.DateTimeFormat("tr-TR", {

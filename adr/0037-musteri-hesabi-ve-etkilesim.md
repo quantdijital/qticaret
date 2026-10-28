@@ -13,7 +13,8 @@ F10 vitrinin müşteri tarafını kuruyor: hesap, e-posta doğrulama, sosyal gir
   - Ayar: `projectConfig.http.authVerificationsPerActor: { customer: [{ entity_type: "email", auth_provider: "emailpass" }] }`, 2.16'dan beri.
   - Açıkken `POST /auth/customer/emailpass`, `/callback` ve kimliksiz token'la `/auth/token/refresh` doğrulanmamış hesaba giriş vermez. Yanıt 200 döner: `{ verification_required: true, token }`. Token'ın `actor_id`'si boştur.
   - Uçlar: `POST /auth/verification/request` (`entity_id`, `entity_type`) ve `POST /auth/verification/confirm` (`code`).
-  - Kod tek kullanımlıktır, 15 dakika geçerlidir ve yalnızca özeti saklanır. Doğrulama `auth_identity.verifications[].verified_at` alanında tutulur; müşteride bir "doğrulandı" alanı yok.
+  - Kod 32 baytlık rastgele değerdir (base64url, 43 karakter), tek kullanımlıktır, 15 dakika geçerlidir ve yalnızca SHA-256 özeti saklanır; tahminle bulunamaz. Doğrulama `auth_identity.verifications[].verified_at` alanında tutulur; müşteride bir "doğrulandı" alanı yok.
+  - Giriş doğrulamayı yalnızca bildirir, kod göndermez. Vitrin `verification_required` alınca `/auth/verification/request` çağırır.
 - **Açıklar (çekirdekte, bizim kapatmamız gereken):**
   - `request` ucu, `entity_id`'nin isteyen kimliğin kendi adresi olup olmadığına bakmaz. F9'daki abonemiz (`account-messages`) kodu `entity_id`'ye gönderiyor. Kayıt token'ı alan herkes mağaza adına herhangi bir adrese kod yollatabiliyor.
   - Kayıt token'ı `POST /store/customers`'a doğrulamadan önce gidebilir. Gövdedeki `email` kimliğin adresine bağlı değildir; başkasının adresiyle müşteri kaydı açılabilir.

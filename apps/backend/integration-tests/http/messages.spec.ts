@@ -244,13 +244,15 @@ medusaIntegrationTestRunner({
 
       await reset()
       await new Promise((resolve) => setTimeout(resolve, 500))
-      const withoutDomain = sentTo(customer.email).length
+      const resets = () =>
+        sentTo(customer.email).filter(({ template }) => template === "account.password_reset")
+      const withoutDomain = resets().length
       await getContainer()
         .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
         .saveSection("seo", { canonical_host: "magaza.example.com" }, null)
       await reset()
       const [mail] = await eventually(
-        () => Promise.resolve(sentTo(customer.email)),
+        () => Promise.resolve(resets()),
         (found) => found.length > 0
       )
 
@@ -268,7 +270,8 @@ medusaIntegrationTestRunner({
       const executions: { rows: { count: number }[] } = await getContainer()
         .resolve(ContainerRegistrationKeys.PG_CONNECTION)
         .raw("select count(*)::int as count from workflow_execution where context::text like ?", [
-          `%${token.slice(0, 40)}%`,
+          // The tail: every JWT starts with the same header
+          `%${token.slice(-40)}%`,
         ])
       expect(token.length).toBeGreaterThan(40)
       expect(executions.rows[0]?.count).toBe(0)
@@ -298,7 +301,7 @@ medusaIntegrationTestRunner({
         () => Promise.resolve(sentTo(email)),
         (found) => found.length > 0
       )
-      const code = /Doğrulama kodu\s+(\S+)/.exec(mail?.text ?? "")?.[1] ?? ""
+      const code = /yapıştırın:\s+(\S+)/.exec(mail?.text ?? "")?.[1] ?? ""
       const confirmed = await settle(
         http.post<{ verified_at?: string }>("/auth/verification/confirm", { code })
       )

@@ -43,32 +43,36 @@ medusaIntegrationTestRunner({
     // is unit-tested (src/api/http/__tests__/error-handler.unit.spec.ts).
     describe("duplicates", () => {
       it("refuses a taken e-mail on the store API without the value", async () => {
-        const taken = await registerCustomer(http, storefront)
+        const email = `customer-${randomUUID()}@example.com`
         const registration = await http.post<{ token: string }>(
           "/auth/customer/emailpass/register",
-          { email: `customer-${randomUUID()}@example.com`, password: randomUUID() }
+          { email, password: randomUUID() }
         )
-
-        // A second identity claims the first customer's e-mail
-        const response = await settle(
-          http.post<ErrorBody>(
-            "/store/customers",
-            { email: taken.email },
-            {
-              headers: {
-                ...storefront.headers,
-                authorization: `Bearer ${registration.data.token}`,
-              },
-            }
+        // The account is opened for the identity's own address whatever the
+        // body says (adr/0037), so the address is taken by opening it twice
+        const open = () =>
+          settle(
+            http.post<ErrorBody>(
+              "/store/customers",
+              { email },
+              {
+                headers: {
+                  ...storefront.headers,
+                  authorization: `Bearer ${registration.data.token}`,
+                },
+              }
+            )
           )
-        )
+        const first = await open()
+        const response = await open()
 
+        expect(first.status).toBe(200)
         expect(response.status).toBe(422)
         expect(response.data).toMatchObject({
           type: "duplicate_error",
           request_id: requestIdOf(response),
         })
-        expect(JSON.stringify(response.data)).not.toContain(taken.email)
+        expect(JSON.stringify(response.data)).not.toContain(email)
       })
 
       it("keeps Medusa's database message on the admin API", async () => {

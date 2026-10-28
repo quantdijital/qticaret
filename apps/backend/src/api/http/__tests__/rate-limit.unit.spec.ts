@@ -222,6 +222,10 @@ describe("authProfile", () => {
     expect(reset({ identifier: "c@d.co" })).toBe("c@d.co")
     // A decoy e-mail does not take the target's place in the count
     expect(reset({ identifier: "victim@d.co", email: "decoy-1@x.co" })).toBe("victim@d.co")
+    // A verification request counts against the address it would mail
+    const verify = (body: unknown) =>
+      authIdentity(request({ path: "/auth/verification/request", body }))
+    expect(verify({ entity_id: "e@f.co", email: "decoy-2@x.co" })).toBe("e@f.co")
   })
 
   it("defines every profile the security doc names", () => {

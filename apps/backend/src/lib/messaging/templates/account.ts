@@ -7,9 +7,11 @@ export interface ResetVars {
   resetUrl: string
 }
 
-/** An e-mail address to confirm with the code the shopper types back. */
+/** An e-mail address to confirm: a link to the storefront's page, and the code it carries. */
 export interface VerifyVars {
   code: string
+  /** The storefront's confirmation page with the code; null until the shop has a domain. */
+  verifyUrl: string | null
   /** When the code stops working, as the shopper reads it; null when not given. */
   expiresAt: string | null
 }
@@ -48,7 +50,20 @@ export const verifyEmail: MessageTemplate<VerifyVars> = {
       heading: messageText("verify_email.heading"),
       blocks: [
         { kind: "paragraph", text: messageText("verify_email.intro", { shop: brand.shopName }) },
-        { kind: "details", title: messageText("verify_email.code_title"), lines: [vars.code] },
+        ...(vars.verifyUrl
+          ? [
+              {
+                kind: "button" as const,
+                label: messageText("verify_email.button"),
+                url: vars.verifyUrl,
+              },
+            ]
+          : []),
+        {
+          kind: "details",
+          title: messageText("verify_email.code_title"),
+          lines: [messageText("verify_email.code_hint"), vars.code],
+        },
         ...(vars.expiresAt
           ? [
               {
@@ -61,5 +76,9 @@ export const verifyEmail: MessageTemplate<VerifyVars> = {
       ],
       footer: messageText("footer.account", { shop: brand.shopName }),
     }),
-  sample: { code: "482913", expiresAt: "28 Ekim 2026 18:15" },
+  sample: {
+    code: "OrnekDogrulamaKodu",
+    verifyUrl: "https://magaza.example/hesap/dogrula?code=OrnekDogrulamaKodu",
+    expiresAt: "28 Ekim 2026 18:15",
+  },
 }

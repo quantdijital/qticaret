@@ -284,6 +284,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "aras.secret_invalid":
     "Aras Kargo did not accept this user name and password. Copy them again from Aras's integration document; test and live accounts differ.",
   "customers.unknown": "Customer not found.",
+  "account.login_email_missing":
+    "This sign-in has no e-mail address; the account could not be opened.",
   "messaging.no_address": "The customer has no address or phone for this channel.",
   "messaging.suppression_unknown": "That address is not on the list.",
   "messaging.domains_unavailable":

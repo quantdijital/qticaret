@@ -179,12 +179,19 @@ export function authProfile(req: MedusaRequest): RateLimitProfile {
 
 /**
  * The account a request targets, from the field its route reads: emailpass
- * login and registration read `email`, a reset reads `identifier`. Counting
+ * login and registration read `email`, a reset reads `identifier`, a
+ * verification request `entity_id`. Counting
  * another field would let a decoy value keep the real target's count at zero.
  */
 export function authIdentity(req: MedusaRequest): string | undefined {
   const body = req.body as Record<string, unknown> | undefined
-  const field = authProfile(req) === RATE_LIMIT_PROFILES.password_reset ? "identifier" : "email"
+  // A verification request names its address `entity_id` (adr/0037 §1)
+  const field =
+    authProfile(req) === RATE_LIMIT_PROFILES.password_reset
+      ? "identifier"
+      : routePath(req) === "/auth/verification/request"
+        ? "entity_id"
+        : "email"
   const value = body?.[field]
   return typeof value === "string" ? value : undefined
 }
