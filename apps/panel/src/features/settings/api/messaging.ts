@@ -76,3 +76,36 @@ export const checkSenderDomain = () =>
 
 export const removeSenderDomain = () =>
   sdk.client.fetch<SenderDomainView>(DOMAIN_PATH, { method: "DELETE" })
+
+export interface MessageTemplateSummary {
+  name: string
+  kind: "transactional" | "commercial"
+  channels: ("email" | "sms")[]
+}
+
+export interface MessagePreview {
+  name: string
+  kind: "transactional" | "commercial"
+  email: { subject: string; html: string; text: string } | null
+  sms: string | null
+}
+
+/** Every message the shop sends (F9.3), with its kind and channels. */
+export const messageTemplatesQuery = () =>
+  queryOptions({
+    queryKey: ["messaging", "templates"],
+    queryFn: () =>
+      sdk.client.fetch<{ templates: MessageTemplateSummary[] }>("/admin/messaging/templates"),
+    staleTime: Infinity,
+  })
+
+/** A template with made-up values in the shop's brand; nothing is sent. */
+export const messagePreviewQuery = (name: string) =>
+  queryOptions({
+    queryKey: ["messaging", "templates", name, "preview"],
+    queryFn: () =>
+      sdk.client.fetch<MessagePreview>(
+        `/admin/messaging/templates/${encodeURIComponent(name)}/preview`
+      ),
+    enabled: name !== "",
+  })

@@ -10,6 +10,12 @@ export interface AnnouncementVars {
   url: string | null
 }
 
+/** A line the SMS runs into the next one: ends with a full stop unless it has its own. */
+const sentence = (text: string): string => {
+  const trimmed = text.trim()
+  return /[.!?…]$/.test(trimmed) ? trimmed : `${trimmed}.`
+}
+
 /**
  * A shop's announcement (F9.5): commercial, so it goes only to recipients
  * who consented on the channel, and says how to stop them (İYS).
@@ -34,7 +40,11 @@ export const announcement: MessageTemplate<AnnouncementVars> = {
       }),
     }),
   sms: (vars, brand) =>
-    messageText("announcement.sms", { shop: brand.shopName, title: vars.title, body: vars.body }),
+    messageText("announcement.sms", {
+      shop: brand.shopName,
+      title: sentence(vars.title),
+      body: sentence(vars.body),
+    }),
   sample: {
     title: "Hafta sonuna özel %20 indirim",
     body: "Seçili ürünlerde pazar gecesine kadar sepette %20 indirim.",

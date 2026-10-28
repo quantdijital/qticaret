@@ -20,6 +20,7 @@
     "seed:demo": "NODE_ENV=${NODE_ENV:-development} medusa exec ./src/scripts/seed-demo.ts",
     "seed:demo-orders": "NODE_ENV=${NODE_ENV:-development} medusa exec ./src/scripts/seed-demo-orders.ts",
     "tr-address:import": "medusa exec ./src/scripts/import-tr-address.ts",
+    "messaging:samples": "medusa exec ./src/scripts/messaging-samples.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit && tsc --noEmit -p src/admin",
     "test": "pnpm test:unit",

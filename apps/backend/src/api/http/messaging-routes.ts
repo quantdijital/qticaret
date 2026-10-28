@@ -34,6 +34,11 @@ export const MESSAGING_ROUTES = [
     middlewares: [requireUserActor],
   },
   {
+    matcher: "/admin/messaging/templates*",
+    methods: ["GET" as const],
+    middlewares: [requireUserActor],
+  },
+  {
     matcher: "/admin/messaging/sender-domain",
     methods: ["GET" as const, "DELETE" as const],
     middlewares: [requireUserActor],

@@ -300,6 +300,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "messaging.domain_invalid": "Alan adını https:// ve yol olmadan yazın, ör. magaza.com.tr.",
   "messaging.local_part_invalid":
     "Adresin @ öncesi kısmı küçük harf, rakam, nokta, tire ve alt çizgiden oluşmalı (en çok 32).",
+  "messaging.template_unknown": "Böyle bir ileti şablonu yok.",
   "messaging.recipient_invalid": "Adres ya da telefon numarası geçerli değil.",
   "messaging.email_off": "E-posta gönderimi bu mağazada açık değil.",
   "messaging.sms_off": "SMS hesabı bağlı değil. Ayarlar > SMS'ten Netgsm hesabını girin.",

@@ -3,6 +3,7 @@ import { PageHeader } from "@/components/patterns/page-header"
 import { SenderDomainCard } from "@/features/settings/components/sender-domain-card"
 import { StaffAlertsCard } from "@/features/settings/components/staff-alerts-card"
 import { SuppressionsCard } from "@/features/settings/components/suppressions-card"
+import { TemplatePreviewCard } from "@/features/settings/components/template-preview-card"
 
 const N = "settings.notifications"
 
@@ -10,7 +11,7 @@ const N = "settings.notifications"
  * Settings > Notifications (F9, adr/0036): how the shop's messages reach
  * its customers and staff. The SMS account has its own section (Settings
  * > SMS); here, the staff's alerts, the domain e-mail goes from and the
- * addresses no message goes to.
+ * addresses no message goes to, and how each message reads.
  */
 export function NotificationsPage() {
   const { t } = useTranslation()
@@ -20,6 +21,7 @@ export function NotificationsPage() {
       <StaffAlertsCard />
       <SenderDomainCard />
       <SuppressionsCard />
+      <TemplatePreviewCard />
     </div>
   )
 }

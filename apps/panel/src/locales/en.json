@@ -971,6 +971,53 @@
             "hint": "Every Monday morning: products' SEO scores and what needs work first."
           }
         }
+      },
+      "templates": {
+        "title": "Message templates",
+        "description": "How the messages to your customers and staff read. Shown with sample values in your shop's name, logo and colour; nothing is sent.",
+        "choose": "Template",
+        "email": "E-mail",
+        "subject": "Subject",
+        "emailFrame": "Preview of the {{name}} e-mail",
+        "sms": "SMS",
+        "smsLength_one": "{{count}} character",
+        "smsLength_other": "{{count}} characters",
+        "kind": {
+          "transactional": "Transactional",
+          "commercial": "Commercial"
+        },
+        "kindHint": {
+          "transactional": "Needs no consent: the order or the account calls for it.",
+          "commercial": "Goes only to recipients who consented on that channel."
+        },
+        "names": {
+          "order": {
+            "placed": "Order placed",
+            "shipped": "Order shipped",
+            "delivered": "Order delivered"
+          },
+          "return": {
+            "requested": "Return requested",
+            "approved": "Return approved",
+            "refunded": "Return refunded"
+          },
+          "account": {
+            "password_reset": "Password reset",
+            "verify_email": "E-mail verification"
+          },
+          "payment": {
+            "failed": "Payment failed"
+          },
+          "marketing": {
+            "announcement": "Campaign announcement"
+          },
+          "staff": {
+            "new_order": "Staff: new order",
+            "bank_transfer": "Staff: bank transfer awaited",
+            "low_stock": "Staff: low stock",
+            "seo_digest": "Staff: weekly SEO digest"
+          }
+        }
       }
     },
     "sms": {

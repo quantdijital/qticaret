@@ -971,6 +971,53 @@
             "hint": "Her pazartesi sabahı ürünlerin SEO puanı ve önce bakılacaklar."
           }
         }
+      },
+      "templates": {
+        "title": "İleti şablonları",
+        "description": "Müşterilere ve ekibinize giden iletilerin nasıl göründüğü. Örnek değerlerle, mağazanızın adı, logosu ve rengiyle gösterilir; hiçbir şey gönderilmez.",
+        "choose": "Şablon",
+        "email": "E-posta",
+        "subject": "Konu",
+        "emailFrame": "{{name}} e-postasının önizlemesi",
+        "sms": "SMS",
+        "smsLength_one": "{{count}} karakter",
+        "smsLength_other": "{{count}} karakter",
+        "kind": {
+          "transactional": "Bilgilendirme",
+          "commercial": "Ticari"
+        },
+        "kindHint": {
+          "transactional": "İzin gerekmez; siparişin ya da hesabın gereği gönderilir.",
+          "commercial": "Yalnızca o kanalda izin veren alıcılara gider."
+        },
+        "names": {
+          "order": {
+            "placed": "Sipariş alındı",
+            "shipped": "Sipariş kargoda",
+            "delivered": "Sipariş teslim edildi"
+          },
+          "return": {
+            "requested": "İade talebi alındı",
+            "approved": "İade talebi onaylandı",
+            "refunded": "İade ödendi"
+          },
+          "account": {
+            "password_reset": "Şifre sıfırlama",
+            "verify_email": "E-posta doğrulama"
+          },
+          "payment": {
+            "failed": "Ödeme alınamadı"
+          },
+          "marketing": {
+            "announcement": "Kampanya duyurusu"
+          },
+          "staff": {
+            "new_order": "Ekip: yeni sipariş",
+            "bank_transfer": "Ekip: havale bekleyen sipariş",
+            "low_stock": "Ekip: stok azaldı",
+            "seo_digest": "Ekip: haftalık SEO özeti"
+          }
+        }
       }
     },
     "sms": {
