@@ -47,6 +47,11 @@ export { fakeResendSecret, signResendReport, startFakeMail } from "./email/fake-
 export type { FakeMail, FakeMailMessage } from "./email/fake-mail"
 export { tinyPdf } from "./pdf"
 export { fakeNetgsmAccount, startFakeNetgsm } from "./netgsm/fake-server"
-export type { FakeNetgsm, FakeNetgsmAccount, FakeNetgsmMessage } from "./netgsm/fake-server"
+export type {
+  FakeIysRecord,
+  FakeNetgsm,
+  FakeNetgsmAccount,
+  FakeNetgsmMessage,
+} from "./netgsm/fake-server"
 export { fakeAppleAccount, startFakeApple } from "./apple/fake-server"
 export type { FakeApple, FakeAppleAccount, FakeAppleSignIn } from "./apple/fake-server"

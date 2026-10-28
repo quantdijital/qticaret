@@ -64,4 +64,22 @@ describe("NetgsmSettings", () => {
       })
     })
   })
+
+  it("adds the İYS brand code, and takes digits only", async () => {
+    renderSettings(connected)
+    await userEvent.type(field("netgsm-iys-brand-code"), "MARKA1")
+    await userEvent.click(saveButton())
+    expect(await screen.findByText(/yalnızca rakam/)).toBeInTheDocument()
+
+    await userEvent.clear(field("netgsm-iys-brand-code"))
+    await userEvent.type(field("netgsm-iys-brand-code"), "654321")
+    await userEvent.click(saveButton())
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith("/admin/integrations/credentials/netgsm", {
+        method: "POST",
+        body: { settings: { msgheader: "MAGAZA", iys_brand_code: "654321" } },
+      })
+    })
+  })
 })

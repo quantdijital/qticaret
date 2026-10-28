@@ -115,19 +115,19 @@ export function AbandonedCartCard() {
               icon={MailCheck}
               label={t(`${C}.stats.sent`)}
               value={formatCount(counts.sent)}
-              className="px-0"
+              className="justify-between px-0"
             />
             <KpiTile
               icon={ShoppingCart}
               label={t(`${C}.stats.returned`)}
               value={formatCount(counts.returned)}
-              className="px-0"
+              className="justify-between px-0"
             />
             <KpiTile
               icon={ShoppingBag}
               label={t(`${C}.stats.ordered`)}
               value={formatCount(counts.ordered)}
-              className="px-0"
+              className="justify-between px-0"
             />
           </div>
         ) : (

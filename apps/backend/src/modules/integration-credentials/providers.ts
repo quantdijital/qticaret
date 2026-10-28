@@ -106,6 +106,12 @@ export const CREDENTIAL_PROVIDERS = {
           .string()
           .trim()
           .regex(/^[0-9A-Za-zÇĞİÖŞÜçğıöşü .-]{2,11}$/, "netgsm.msgheader_invalid"),
+        // F10 M11: the number İYS gave the shop's brand; consents reach İYS under it
+        iys_brand_code: z
+          .string()
+          .trim()
+          .regex(/^\d{1,12}$/, "netgsm.iys_brand_code_invalid")
+          .optional(),
       })
       .strict(),
     secrets: ["usercode", "password"],

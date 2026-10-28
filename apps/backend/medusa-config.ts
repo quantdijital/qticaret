@@ -193,7 +193,10 @@ module.exports = defineConfig({
     // F10.3 (adr/0037 §6): customer segments by rules, members in Medusa groups
     { resolve: "./src/modules/customer-segments" },
     // F9 (adr/0036): commercial consent and the suppression list, addresses hashed
-    { resolve: "./src/modules/messaging", options: { hashKey: env.PII_HASH_KEY } },
+    {
+      resolve: "./src/modules/messaging",
+      options: { hashKey: env.PII_HASH_KEY, encryptionKey: env.PII_ENCRYPTION_KEY },
+    },
     // Locks shared by every process of the tenant (adr/0020)
     ...lockingModules(env.REDIS_URL, namespace),
     // Without it Medusa keeps files on local disk (dev and test only)

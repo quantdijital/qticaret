@@ -127,6 +127,45 @@ F10'un pazarlama tarafı mağazanın verisini dış servislere taşır: Google, 
   - Bildirimler > şablon önizlemesinde "Terk edilmiş sepet hatırlatması".
 - **Bilinen sınır:** Aynı token'la aynı anda gelen iki istek ikisi de sepeti açabilir (satır kilidi yok). Etkisi aynı sepetin iki kez açılmasıdır.
 
+## Uygulama notları (M11, İYS iletimi, 2026-10-29)
+- **Netgsm'in İYS API'si** (resmî PHP paketi `netgsm/netiys` kaynağından doğrulandı):
+  - İstek: `POST https://api.netgsm.com.tr/iys/add`, JSON. Gövde `{ header: { username, password, brandCode }, body: { data: [ … ] } }`.
+  - Kayıt alanları:
+    - `type`: `MESAJ`, `ARAMA` ya da `EPOSTA`;
+    - `source`: `HS_…`;
+    - `recipient`: `+905XXXXXXXXX` ya da e-posta;
+    - `status`: `ONAY` ya da `RET`;
+    - `consentDate`: `YYYY-MM-DD HH:mm:ss`;
+    - `recipientType`: `BIREYSEL` ya da `TACIR`.
+  - Yanıt: `code` 0 ve `uid`, ya da bir kod ve hata.
+  - Sorgulama ucu `/iys/search` sahte sunucuda var; henüz kullanılmıyor.
+- **Hesap:**
+  - Netgsm hesap ayarlarına `iys_brand_code` (yalnızca rakam) eklendi. Panelde Ayarlar > SMS > Netgsm > İYS bölümünden girilir.
+  - Marka kodu yoksa izinler `pending` kalır ve iletilmez.
+- **Adres:**
+  - İzin kaydı adresi özetin yanında `PII_ENCRYPTION_KEY` ile şifreli olarak da tutar (`recipient_encrypted`). Bu kopya yalnızca İYS'ye iletmek için çözülür.
+  - Hiçbir uç bu alanı döndürmez.
+  - Bu değişiklikten önceki satırların şifreli adresi yok. Bunlar `failed` ve `no_address` olarak işaretlenir.
+- **Eşleme:**
+  - Kanal: e-posta `EPOSTA`, SMS `MESAJ`, arama `ARAMA`.
+  - Kaynak:
+    - vitrin (checkout, hesap, abonelikten çıkış): `HS_WEB`;
+    - panel: `HS_FIZIKSEL_ORTAM`;
+    - içe aktarma: `HS_EORTAM`.
+  - İYS'den gelen değişiklik (`iys`) geri gönderilmez (`not_required`).
+  - Tarih Türkiye saatiyle yazılır. Alıcı tipi `BIREYSEL`.
+- **İş (`iys-sync`, 10 dakikada bir, tur başına en çok 200):**
+  - Bekleyen satırlar en eskiden başlayarak tek tek iletilir. Kanun izin için 3 iş günü verir.
+  - Başarı `sent` ve `iys_sent_at` olarak, İYS'nin reddi `failed` ve `iys_error` (`iys_70` gibi) olarak işaretlenir.
+  - Hesap reddi (`iys_30` giriş, `iys_40` marka kodu) ya da ulaşılamama turu durdurur; satırlar bekler.
+  - İletim sırasında yeniden değişen satırın işareti atlanır; yeni cevap beklemeye devam eder.
+  - Telafi yok: İYS aynı izni yeniden almakta sakınca görmez, satır yanıttan sonra işaretlenir.
+- **Panel:** Ayarlar > SMS'te "İYS iletimi" kartı: bekleyen, iletilen, reddedilen; marka kodu yoksa uyarı (`GET /admin/messaging/iys`).
+- **Kod düzeni:** Mesajlaşma servisi 300 satır sınırı için ikiye bölündü: izin kayıtları `ConsentRecords` taban sınıfında, bastırma listesi `MessagingModuleService`'te. Tipler `modules/messaging/types.ts` dosyasında.
+- **Gözden geçir:**
+  - Panelden girilen iznin İYS kaynağı her zaman `HS_FIZIKSEL_ORTAM`. Telefonla ya da ıslak imzayla alınan izin için panelde kaynak seçimi gerekebilir.
+  - İYS'den gelen değişikliklerin (vatandaşın İYS'den ret vermesi) Netgsm web kancasıyla alınması sonraya kaldı.
+
 ## Alternatifler
 
 | Seçenek | Artı | Eksi |

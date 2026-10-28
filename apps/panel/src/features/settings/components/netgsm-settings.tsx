@@ -91,6 +91,25 @@ export function NetgsmSettings({
           </Field>
         </fieldset>
       </FormSection>
+      <FormSection title={t(`${S}.iys.title`)} description={t(`${S}.iys.description`)}>
+        <fieldset disabled={locked} className="flex min-w-0 flex-col gap-5">
+          <Field
+            label={t(`${S}.iysBrandCode`)}
+            htmlFor="netgsm-iys-brand-code"
+            hint={t(`${S}.iysBrandCodeHint`)}
+            error={message(errors.iysBrandCode?.message)}
+          >
+            <Input
+              id="netgsm-iys-brand-code"
+              autoComplete="off"
+              inputMode="numeric"
+              maxLength={12}
+              className="sm:w-64"
+              {...form.register("iysBrandCode")}
+            />
+          </Field>
+        </fieldset>
+      </FormSection>
       <AccountFooter
         actions={actions}
         name={name}

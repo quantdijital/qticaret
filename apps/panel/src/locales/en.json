@@ -1060,13 +1060,27 @@
           "merchant_invalid": "Netgsm took the login, but this sender name is not on the account. Type the approved header exactly.",
           "secret_invalid": "Netgsm did not accept this user code and password, or API access is off."
         },
-        "rejected": "Netgsm no longer accepts the stored details; no text can be sent. Enter the current ones."
+        "rejected": "Netgsm no longer accepts the stored details; no text can be sent. Enter the current ones.",
+        "iys": {
+          "title": "İYS",
+          "description": "Customers' commercial message consents (e-mail and SMS) reach the İleti Yönetim Sistemi (İYS) through Netgsm. By law, consents must be uploaded to İYS within 3 business days."
+        },
+        "iysBrandCode": "İYS brand code",
+        "iysBrandCodeHint": "The number İYS gave your brand (digits only). Left empty, consents are not sent to İYS and wait."
       },
       "limit": {
         "title": "Daily SMS limit",
         "description": "The most texts the shop sends a day. A guard on cost and abuse: at 80% the panel's bell warns, at the limit no text goes until the next day. Each number also has an hourly (5) and a daily (10) limit.",
         "label": "Texts a day at most",
         "saved": "Daily SMS limit saved."
+      },
+      "iysCard": {
+        "title": "İYS upload",
+        "description": "How the commercial message consents are reaching İYS. They are sent every 10 minutes.",
+        "noBrandCode": "No İYS brand code yet; consents wait to be sent. Add it on the Netgsm account page.",
+        "pending": "Waiting",
+        "sent": "Sent",
+        "failed": "Refused"
       }
     },
     "groups": {

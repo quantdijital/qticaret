@@ -1060,13 +1060,27 @@
           "merchant_invalid": "Netgsm girişi doğru ama bu gönderici adı hesabınızda yok. Netgsm panelindeki onaylı başlığı aynen yazın.",
           "secret_invalid": "Netgsm bu kullanıcı kodu ve şifreyi kabul etmedi ya da API erişimi kapalı."
         },
-        "rejected": "Netgsm kayıtlı bilgileri artık kabul etmiyor; SMS gönderilemiyor. Güncel bilgileri girin."
+        "rejected": "Netgsm kayıtlı bilgileri artık kabul etmiyor; SMS gönderilemiyor. Güncel bilgileri girin.",
+        "iys": {
+          "title": "İYS",
+          "description": "Müşterilerin ticari ileti izinleri (e-posta ve SMS) Netgsm üzerinden İleti Yönetim Sistemi'ne (İYS) iletilir. Kanun gereği izinler 3 iş günü içinde İYS'ye yüklenmelidir."
+        },
+        "iysBrandCode": "İYS marka kodu",
+        "iysBrandCodeHint": "İYS'de markanıza verilen numara (yalnızca rakam). Boş kalırsa izinler İYS'ye iletilmez, bekler."
       },
       "limit": {
         "title": "Günlük SMS sınırı",
         "description": "Mağazanın bir günde gönderebileceği en çok SMS. Maliyete ve kötüye kullanıma karşı korur: %80'e gelince panelin ziline uyarı düşer, sınıra ulaşınca ertesi güne kadar SMS gitmez. Her numaranın ayrıca saatlik (5) ve günlük (10) sınırı vardır.",
         "label": "Günde en çok SMS",
         "saved": "Günlük SMS sınırı kaydedildi."
+      },
+      "iysCard": {
+        "title": "İYS iletimi",
+        "description": "Ticari ileti izinlerinin İYS'ye iletilme durumu. İzinler 10 dakikada bir iletilir.",
+        "noBrandCode": "İYS marka kodu girilmedi; izinler iletilmeyi bekliyor. Netgsm hesabı sayfasından ekleyin.",
+        "pending": "Bekleyen",
+        "sent": "İletilen",
+        "failed": "Reddedilen"
       }
     },
     "groups": {

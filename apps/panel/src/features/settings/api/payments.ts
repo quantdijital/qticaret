@@ -36,7 +36,7 @@ export type ArasAccount = ProviderAccount<{
   service_url: string
 }>
 /** The shop's Netgsm SMS account and its sender name (adr/0036). */
-export type NetgsmAccount = ProviderAccount<{ msgheader: string }>
+export type NetgsmAccount = ProviderAccount<{ msgheader: string; iys_brand_code?: string }>
 /** Yurtiçi Kargo on the shop's own contract, with its door account when it has one (adr/0035). */
 export type YurticiAccount = ProviderAccount<{ test_mode: boolean }>
 

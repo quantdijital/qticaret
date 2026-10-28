@@ -23,6 +23,8 @@ export const MESSAGING_ROUTES = [
     bodyParser: { preserveRawBody: true },
     middlewares: [rateLimit(() => RATE_LIMIT_PROFILES.webhook)],
   },
+  // F10 M11: how the consents are reaching İYS
+  { matcher: "/admin/messaging/iys", methods: ["GET" as const], middlewares: [requireUserActor] },
   {
     matcher: "/admin/messaging/suppressions",
     methods: ["GET" as const],

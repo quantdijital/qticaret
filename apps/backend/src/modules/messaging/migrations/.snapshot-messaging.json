@@ -265,6 +265,22 @@
           "enumItems": [],
           "mappedType": "text"
         },
+        "recipient_encrypted": {
+          "name": "recipient_encrypted",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
         "customer_id": {
           "name": "customer_id",
           "type": "text",
@@ -361,6 +377,38 @@
           "enumItems": ["pending", "sent", "failed", "not_required"],
           "mappedType": "enum"
         },
+        "iys_error": {
+          "name": "iys_error",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
+        "iys_sent_at": {
+          "name": "iys_sent_at",
+          "type": "timestamptz",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamptz",
@@ -439,6 +487,15 @@
           "primary": false,
           "unique": false,
           "expression": "CREATE INDEX IF NOT EXISTS \"IDX_message_consent_customer_id\" ON \"message_consent\" (\"customer_id\") WHERE deleted_at IS NULL"
+        },
+        {
+          "keyName": "IDX_message_consent_iys_status_changed_at",
+          "columnNames": [],
+          "composite": false,
+          "constraint": false,
+          "primary": false,
+          "unique": false,
+          "expression": "CREATE INDEX IF NOT EXISTS \"IDX_message_consent_iys_status_changed_at\" ON \"message_consent\" (\"iys_status\", \"changed_at\") WHERE deleted_at IS NULL"
         },
         {
           "keyName": "message_consent_pkey",

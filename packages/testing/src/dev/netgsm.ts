@@ -10,6 +10,7 @@ const account = {
   usercode: "8500000000",
   password: "gelistirme-sahte-netgsm-sifresi",
   headers: ["MAGAZA"],
+  brandCode: "100000",
 }
 
 const port = Number(process.env["FAKE_NETGSM_PORT"] ?? 9106)
@@ -23,6 +24,7 @@ void startFakeNetgsm(account, { port }).then((fake) => {
       `  Kullanıcı kodu: ${account.usercode}`,
       `  Şifre: ${account.password}`,
       `  Gönderici adı: ${account.headers[0] ?? ""}`,
+      `  İYS marka kodu: ${account.brandCode}`,
       "",
     ].join("\n")
   )

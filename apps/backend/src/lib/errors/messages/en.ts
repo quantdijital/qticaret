@@ -316,6 +316,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "messaging.email_off": "E-mail is not set up for this shop.",
   "messaging.sms_off":
     "No SMS account is connected. Enter the Netgsm account under Settings > SMS.",
+  "netgsm.iys_brand_code_invalid": "The İYS brand code is digits only.",
   "netgsm.msgheader_invalid":
     "The sender name must be 2–11 characters; type your approved Netgsm header exactly.",
   "netgsm.merchant_invalid":

@@ -3,7 +3,7 @@ import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/util
 import { hashPii, parseKey } from "../../lib/crypto/pii"
 import { parseEnv } from "../../lib/env"
 import { MESSAGING_MODULE } from "../../modules/messaging"
-import type { ConsentEvidence } from "../../modules/messaging/service"
+import type { ConsentEvidence } from "../../modules/messaging/types"
 import type MessagingModuleService from "../../modules/messaging/service"
 
 type Container = Pick<MedusaContainer, "resolve">
