@@ -28,24 +28,22 @@ vi.mock("@tanstack/react-router", () => ({
 }))
 
 describe("Settings menu", () => {
-  it("shows the sections in groups, the current page's group open and the others closed", async () => {
+  it("shows every group open with its sections, the current page marked, and closes one on a click", async () => {
     render(<SettingsLayout />)
-    const menu = screen.getAllByRole("navigation", { name: "Ayarlar" })[0]
-    expect(menu).toBeDefined()
 
-    const messages = screen.getByRole("button", { name: "Müşteri iletişimi" })
     const shop = screen.getByRole("button", { name: "Mağaza" })
-    expect(messages).toHaveAttribute("aria-expanded", "true")
-    expect(shop).toHaveAttribute("aria-expanded", "false")
+    for (const name of ["Mağaza", "Satış ve teslimat", "Müşteri iletişimi", "Sistem"]) {
+      expect(screen.getByRole("button", { name })).toHaveAttribute("aria-expanded", "true")
+    }
     expect(screen.getByRole("link", { name: "SMS" })).toHaveAttribute("aria-current", "page")
-    expect(screen.queryByRole("link", { name: "Görünüm" })).toBeNull()
-
-    await userEvent.click(shop)
-    expect(shop).toHaveAttribute("aria-expanded", "true")
     expect(screen.getByRole("link", { name: "Görünüm" })).toHaveAttribute(
       "href",
       "/settings/appearance"
     )
+
+    await userEvent.click(shop)
+    expect(shop).toHaveAttribute("aria-expanded", "false")
+    expect(screen.queryByRole("link", { name: "Görünüm" })).toBeNull()
   })
 })
 

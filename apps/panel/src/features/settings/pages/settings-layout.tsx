@@ -11,14 +11,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { SETTINGS_GROUPS, groupOf, inSection } from "@/features/settings/sections"
+import { SETTINGS_GROUPS, inSection } from "@/features/settings/sections"
 import { cn } from "@/lib/utils"
 
-/** The groups as a list on wide screens: each opens and closes, the current one open. */
+/** The groups as a list on wide screens: all open at first, each can be closed. */
 function GroupedMenu({ pathname }: { pathname: string }) {
   const { t } = useTranslation()
-  const current = groupOf(pathname)?.key
-  // A group opened or closed by hand stays so; the others follow the page: its own open
+  // Every group starts open (the shop sees all its settings); one closed by hand stays closed
   const [toggled, setToggled] = useState<ReadonlyMap<string, boolean>>(() => new Map())
   return (
     <ul className="flex flex-col gap-1">
@@ -35,7 +34,7 @@ function GroupedMenu({ pathname }: { pathname: string }) {
         </Link>
       </li>
       {SETTINGS_GROUPS.map((group) => {
-        const expanded = toggled.get(group.key) ?? group.key === current
+        const expanded = toggled.get(group.key) ?? true
         const listId = `settings-group-${group.key}`
         return (
           <li key={group.key}>
