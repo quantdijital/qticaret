@@ -2,7 +2,7 @@ import { addShippingMethodToCartWorkflow, createCartWorkflow } from "@medusajs/m
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { startFakeGeliver } from "@qticaret/testing"
 import type { FakeGeliver } from "@qticaret/testing"
-import { geliverShop } from "../helpers/geliver"
+import { geliverOrder, geliverShop, shipOrder } from "../helpers/geliver"
 import type { GeliverShop } from "../helpers/geliver"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
@@ -100,6 +100,18 @@ medusaIntegrationTestRunner({
       })
       expect(changed).toMatchObject({ name: "Hızlı Kargo (1 gün)", amount: "59.90" })
       expect(gone).toBeUndefined()
+    })
+
+    it("keeps an option orders still to ship need, and lets it go once they left", async () => {
+      const orderId = await geliverOrder(getContainer(), setup)
+
+      const kept = await send("delete", `/admin/shipping-setup/options/${setup.optionId}`)
+      await shipOrder(http, setup, orderId)
+      const gone = await send("delete", `/admin/shipping-setup/options/${setup.optionId}`)
+
+      expect(kept.data.message).toBe("shipping.option_in_use")
+      expect(gone.status).toBe(200)
+      expect((await options()).find(({ id }) => id === setup.optionId)).toBeUndefined()
     })
 
     it("prices a Geliver option by the shop's table, and says when the parcel is past it", async () => {

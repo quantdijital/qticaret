@@ -10,6 +10,7 @@ import { returnsLockKey } from "./request-return"
 import {
   openCarrierReturnStep,
   readReturnRequestStep,
+  returnRequestOrderStep,
   storeReturnLabelStep,
   updateReturnRequestStep,
 } from "./steps/return-request"
@@ -19,14 +20,17 @@ import {
  * for the asked lines (no shipping method: Medusa opens no carrier return
  * itself), the carrier's return and its label when the order went with
  * Geliver, and the request approved with the code the shopper hands the
- * parcel over with. A step that fails undoes the ones before it.
+ * parcel over with. A step that fails undoes the ones before it. The
+ * request is read under the order's returns lock: a second click finds
+ * it approved already.
  */
 export const approveReturnWorkflow = createWorkflow(
   "returns-approve",
   (input: { id: string; staff_id: string; note?: string | null }) => {
-    const request = readReturnRequestStep({ id: input.id, status: "requested" })
-    const lockKey = transform({ request }, ({ request }) => returnsLockKey(request.order_id))
+    const orderId = returnRequestOrderStep({ id: input.id })
+    const lockKey = transform({ orderId }, ({ orderId }) => returnsLockKey(orderId))
     acquireLockStep({ key: lockKey, timeout: 10, ttl: 120 })
+    const request = readReturnRequestStep({ id: input.id, status: "requested" })
     const change = beginReturnOrderWorkflow.runAsStep({
       input: transform({ request, input }, ({ request, input }) => ({
         order_id: request.order_id,
@@ -49,7 +53,10 @@ export const approveReturnWorkflow = createWorkflow(
       })),
     })
     const carrier = openCarrierReturnStep(
-      transform({ request }, ({ request }) => ({ order_id: request.order_id }))
+      transform({ request }, ({ request }) => ({
+        order_id: request.order_id,
+        items: request.items,
+      }))
     )
     const label = storeReturnLabelStep(
       transform({ carrier }, ({ carrier }) => ({ source: carrier?.label_source ?? null }))
@@ -57,14 +64,17 @@ export const approveReturnWorkflow = createWorkflow(
     const approved = updateReturnRequestStep(
       transform({ input, returnId, carrier, label }, ({ input, returnId, carrier, label }) => ({
         id: input.id,
-        status: "approved",
-        decided_by: input.staff_id,
-        decided_at: new Date(),
-        decision_note: input.note ?? null,
-        return_id: returnId,
-        return_code: carrier?.code ?? null,
-        return_shipment_id: carrier?.shipment_id ?? null,
-        return_label_file_id: label,
+        from: "requested" as const,
+        changes: {
+          status: "approved",
+          decided_by: input.staff_id,
+          decided_at: new Date(),
+          decision_note: input.note ?? null,
+          return_id: returnId,
+          return_code: carrier?.code ?? null,
+          return_shipment_id: carrier?.shipment_id ?? null,
+          return_label_file_id: label,
+        },
       }))
     )
     releaseLockStep({ key: lockKey })

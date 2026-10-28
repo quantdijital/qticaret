@@ -2,17 +2,18 @@ import { validateAndTransformBody } from "@medusajs/framework/http"
 import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { Modules } from "@medusajs/framework/utils"
 import { errorSummary, logger } from "../../lib/logging"
-import { bankTransferLockKey } from "../../lib/payments/bank-transfer"
+import { cancelLockKeys } from "../../lib/orders/locks"
 import { AdminPostBankTransferConfirm } from "../admin/orders/[id]/bank-transfer/confirm/validators"
 import { requireUserActor } from "./actor"
 
 /**
- * Medusa's cancel of an order takes the lock the bank transfer's
- * confirmation and expiry take (adr/0029): money confirmed while the order
- * is being cancelled, or the other way round, waits its turn. Held until
- * the answer has gone.
+ * Medusa's cancel of an order takes the order's cancel locks: the one the
+ * bank transfer's confirmation and expiry take (adr/0029), so money
+ * confirmed while the order is being cancelled waits its turn, and the
+ * ship lock, so no parcel is packed while the money goes back (security
+ * review 2026-10-28). Held until the answer has gone.
  */
-export async function holdBankTransferLock(
+export async function holdCancelLocks(
   req: MedusaRequest,
   res: MedusaResponse,
   next: MedusaNextFunction
@@ -25,7 +26,7 @@ export async function holdBankTransferLock(
   const state = { started: false }
   try {
     await req.scope.resolve(Modules.LOCKING).execute(
-      bankTransferLockKey(req.params["id"] ?? ""),
+      cancelLockKeys(req.params["id"] ?? ""),
       () =>
         new Promise<void>((resolve) => {
           state.started = true

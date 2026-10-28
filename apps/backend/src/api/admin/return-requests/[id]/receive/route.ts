@@ -1,6 +1,7 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { MedusaError } from "@medusajs/framework/utils"
 import { ValidationError } from "../../../../../lib/errors"
+import { I18N_KEY } from "../../../../../lib/errors/http"
 import { serverErrorMessage } from "../../../../../lib/errors/messages"
 import { errorSummary, logger } from "../../../../../lib/logging"
 import { RETURN_REQUESTS_MODULE } from "../../../../../modules/return-requests"
@@ -11,12 +12,13 @@ import {
   refundReturn,
 } from "../../../../../workflows/returns/receive-return"
 import type { AdminPostReturnReceiveType } from "../../validators"
+import { returnRequestView } from "../../view"
 
 /**
  * POST /admin/return-requests/:id/receive (adr/0032): what reached the
- * warehouse goes back in stock, then its money is given back. A refund
- * that fails leaves the request received, with the reason: "refund" tries
- * it again.
+ * warehouse goes back in stock (the damaged part does not), then its money
+ * is given back. A refund that fails leaves the request received, with
+ * the reason: "refund" tries it again.
  */
 export async function POST(
   req: AuthenticatedMedusaRequest<AdminPostReturnReceiveType>,
@@ -29,26 +31,28 @@ export async function POST(
   if (!request) {
     throw new MedusaError(MedusaError.Types.NOT_FOUND, "returns.unknown")
   }
+  const { items, damaged, refund_shipping } = req.validatedBody
   const problem = receivedProblem(
     request.items as unknown as { line_item_id: string; quantity: number }[],
-    req.validatedBody.items
+    items,
+    damaged
   )
   if (problem) {
     throw new ValidationError(problem, { field: "items" })
   }
   await receiveReturnWorkflow(req.scope).run({
-    input: { id, staff_id: req.auth_context.actor_id, items: req.validatedBody.items },
+    input: { id, staff_id: req.auth_context.actor_id, items, damaged, refund_shipping },
   })
   try {
     const refunded = await refundReturn(req.scope, { id, staff_id: req.auth_context.actor_id })
-    res.json({ return_request: refunded, refund_error: null })
+    res.json({ return_request: returnRequestView(refunded), refund_error: null })
   } catch (error) {
     logger.warn({ event: "returns.refund_failed", returnRequestId: id, err: errorSummary(error) })
     const key = (error as { safeMessage?: unknown }).safeMessage
     res.json({
-      return_request: { ...request, status: "received" },
+      return_request: returnRequestView({ ...request, status: "received" }),
       refund_error:
-        typeof key === "string"
+        typeof key === "string" && I18N_KEY.test(key)
           ? serverErrorMessage(key, "tr")
           : serverErrorMessage("returns.refund_failed", "tr"),
     })

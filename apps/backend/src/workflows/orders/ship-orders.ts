@@ -1,4 +1,5 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
+import { I18N_KEY } from "../../lib/errors/http"
 import { serverErrorMessage } from "../../lib/errors/messages"
 import { errorSummary, logger } from "../../lib/logging"
 import { shipOrderWorkflow } from "./ship-order"
@@ -14,15 +15,11 @@ export interface ShipResult {
   message: string | null
 }
 
-// An i18n key as our errors and Medusa's carry them (`orders.unknown`)
-const KEY = /^[a-z_]+\.[a-z_]+$/
-
+// Only an i18n key as our errors and Medusa's carry them (`orders.unknown`), never other text
 const keyOf = (error: unknown): string => {
   const { safeMessage, message } = (error ?? {}) as { safeMessage?: unknown; message?: unknown }
-  if (typeof safeMessage === "string") {
-    return safeMessage
-  }
-  return typeof message === "string" && KEY.test(message) ? message : "orders.ship_failed"
+  const key = typeof safeMessage === "string" ? safeMessage : message
+  return typeof key === "string" && I18N_KEY.test(key) ? key : "orders.ship_failed"
 }
 
 /**

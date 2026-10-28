@@ -10,6 +10,7 @@ import {
   createOrderShipmentWorkflow,
   releaseLockStep,
 } from "@medusajs/medusa/core-flows"
+import { shipLockKey } from "../../lib/orders/locks"
 import { SHIP_ROUTE_MARK } from "../../lib/shipping/carriers"
 import { ensureGeliverSenderStep } from "../shipping/steps/geliver-sender"
 import { planCarrierStep } from "../shipping/steps/plan-carrier"
@@ -41,7 +42,7 @@ export interface ShipOrderInput {
  * (`orderState().pickup`).
  */
 export const shipOrderWorkflow = createWorkflow("orders-ship-order", (input: ShipOrderInput) => {
-  const lockKey = transform({ input }, ({ input }) => `orders:ship:${input.order_id}`)
+  const lockKey = transform({ input }, ({ input }) => shipLockKey(input.order_id))
   // Long enough for a carrier: offers, the label's purchase and its download
   acquireLockStep({ key: lockKey, timeout: 10, ttl: 180 })
 

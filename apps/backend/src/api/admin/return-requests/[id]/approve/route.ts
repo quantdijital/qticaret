@@ -1,6 +1,7 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { approveReturnWorkflow } from "../../../../../workflows/returns/approve-return"
 import type { AdminPostReturnApproveType } from "../../validators"
+import { returnRequestView } from "../../view"
 
 /** POST /admin/return-requests/:id/approve: Medusa's return and the carrier's return code (adr/0032). */
 export async function POST(
@@ -14,5 +15,5 @@ export async function POST(
       note: req.validatedBody.note ?? null,
     },
   })
-  res.json({ return_request: result })
+  res.json({ return_request: returnRequestView(result) })
 }

@@ -3,6 +3,8 @@ import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { startFakeGeliver } from "@qticaret/testing"
 import type { FakeGeliver } from "@qticaret/testing"
 import { pollShipments } from "../../src/jobs/shipment-tracking"
+import { SHIPMENT_TRACKING_MODULE } from "../../src/modules/shipment-tracking"
+import type ShipmentTrackingModuleService from "../../src/modules/shipment-tracking/service"
 import { registerCustomer } from "../helpers/customer"
 import type { TestCustomer } from "../helpers/customer"
 import { geliverOrder, geliverShop, shipOrder } from "../helpers/geliver"
@@ -36,8 +38,8 @@ medusaIntegrationTestRunner({
 
     const query = () => getContainer().resolve(ContainerRegistrationKeys.QUERY)
     /** A Geliver order of the customer's, paid (captured), shipped and, unless told, delivered. */
-    const deliveredOrder = async (deliver = true) => {
-      const orderId = await geliverOrder(getContainer(), setup)
+    const deliveredOrder = async (deliver = true, quantity = 1) => {
+      const orderId = await geliverOrder(getContainer(), setup, setup.variantId, quantity)
       await getContainer()
         .resolve(Modules.ORDER)
         .updateOrders(orderId, { customer_id: customer.id })
@@ -124,7 +126,7 @@ medusaIntegrationTestRunner({
       )
       const received = await staff<{ return_request: Request; refund_error: string | null }>(
         `/admin/return-requests/${asked.data.return_request.id}/receive`,
-        { items: [{ line_item_id: lineId, quantity: 1 }] }
+        { items: [{ line_item_id: lineId, quantity: 1 }], refund_shipping: true }
       )
       const { data: listed } = await http.get<{ return_requests: Request[] }>(
         `/admin/return-requests?order_id=${orderId}`,
@@ -138,7 +140,7 @@ medusaIntegrationTestRunner({
       expect(approved.data.return_request.return_id).toEqual(expect.any(String))
       expect(label.status).toBe(200)
       expect(received.data.refund_error).toBeNull()
-      // The shop's fault: the 120 TL line and its 60 TL shipping come back
+      // Staff found it the shop's fault: the 120 TL line and its 60 TL shipping come back
       expect(listed.return_requests[0]).toMatchObject({
         status: "refunded",
         refund_amount: "180.00",
@@ -176,6 +178,120 @@ medusaIntegrationTestRunner({
       })
       expect(tooMany.data.message).toBe("returns.items_invalid")
       expect(early.data.message).toBe("returns.window_closed")
+    })
+
+    it("refunds a damaged unit without restocking it, and the shipping only when staff say so", async () => {
+      const { orderId, lineId } = await deliveredOrder(true, 2)
+      const before = await stocked()
+      const asked = await ask(orderId, {
+        items: [{ line_item_id: lineId, quantity: 2 }],
+        reason: "damaged",
+      })
+      const id = asked.data.return_request.id
+      await staff(`/admin/return-requests/${id}/approve`)
+
+      const tooMany = await staff(`/admin/return-requests/${id}/receive`, {
+        items: [{ line_item_id: lineId, quantity: 2 }],
+        damaged: [{ line_item_id: lineId, quantity: 1 }],
+      })
+      const received = await staff<{ refund_error: string | null }>(
+        `/admin/return-requests/${id}/receive`,
+        {
+          items: [{ line_item_id: lineId, quantity: 1 }],
+          damaged: [{ line_item_id: lineId, quantity: 1 }],
+        }
+      )
+      const again = await staff<{ return_request: Request }>(`/admin/return-requests/${id}/refund`)
+
+      expect(tooMany.data.message).toBe("returns.items_invalid")
+      expect(received.data.refund_error).toBeNull()
+      // Two units of 120 TL back, the shipping kept: staff did not tick it
+      expect(again.data.return_request).toMatchObject({
+        status: "refunded",
+        refund_amount: "240.00",
+      })
+      // Only the sound unit is sellable again
+      expect(await stocked()).toBe((before ?? 0) + 1)
+    })
+
+    it("approves once when two clicks race, and keeps the request when the carrier refuses", async () => {
+      const { orderId, lineId } = await deliveredOrder()
+      const asked = await ask(orderId, {
+        items: [{ line_item_id: lineId, quantity: 1 }],
+        reason: "changed_mind",
+      })
+      const id = asked.data.return_request.id
+      const [parcel] = await getContainer()
+        .resolve<ShipmentTrackingModuleService>(SHIPMENT_TRACKING_MODULE)
+        .listTrackedShipments({ order_id: orderId })
+      fake.queue(`POST /shipments/${parcel?.provider_shipment_id ?? ""}`, {
+        status: 400,
+        body: { result: false, code: "RETURN_NOT_ALLOWED" },
+      })
+
+      const refused = await staff(`/admin/return-requests/${id}/approve`)
+      const { data: undone } = await query().graph({
+        entity: "order",
+        fields: ["items.detail.return_requested_quantity", "returns.id", "returns.status"],
+        filters: { id: orderId },
+      })
+      const clicks = await Promise.all([
+        staff(`/admin/return-requests/${id}/approve`),
+        staff(`/admin/return-requests/${id}/approve`),
+      ])
+      const { data: after } = await query().graph({
+        entity: "order",
+        fields: ["returns.id", "returns.status"],
+        filters: { id: orderId },
+      })
+      const open = (row: unknown) =>
+        ((row as { returns?: { status: string }[] }).returns ?? []).filter(
+          (each) => each.status !== "canceled"
+        )
+
+      expect(refused.status).toBeGreaterThanOrEqual(400)
+      // Medusa's return undone with it: nothing held against the line
+      expect(
+        (undone[0] as { items: { detail: { return_requested_quantity: number } }[] }).items[0]
+          ?.detail.return_requested_quantity
+      ).toBe(0)
+      expect(open(undone[0])).toHaveLength(0)
+      expect(clicks.map((click) => click.status).sort()).toEqual([200, 400])
+      expect(clicks.find((click) => click.status === 400)?.data.message).toBe(
+        "returns.status_invalid"
+      )
+      expect(open(after[0])).toHaveLength(1)
+    })
+
+    it("hides another shopper's order, and closes Medusa's own return routes", async () => {
+      const { orderId, lineId } = await deliveredOrder()
+      const someoneElse = await registerCustomer(http, await createStorefront(getContainer()))
+
+      const foreign = await settle(
+        http.post<{ message?: string }>(
+          `/store/orders/${orderId}/returns`,
+          { items: [{ line_item_id: lineId, quantity: 1 }], reason: "other" },
+          { headers: someoneElse.headers }
+        )
+      )
+      const listed = await settle(
+        http.get(`/store/orders/${orderId}/returns`, { headers: someoneElse.headers })
+      )
+      const storeReturn = await settle(
+        http.post(
+          "/store/returns",
+          { order_id: orderId, items: [{ id: lineId, quantity: 1 }] },
+          { headers: someoneElse.headers }
+        )
+      )
+      const adminReturn = await staff("/admin/returns", { order_id: orderId })
+      const adminExchange = await staff("/admin/exchanges", { order_id: orderId })
+
+      expect(foreign.status).toBe(404)
+      expect(listed.status).toBe(404)
+      expect(storeReturn.status).toBe(404)
+      expect(adminReturn.data.message).toBe("returns.use_return_requests")
+      expect(adminExchange.data.message).toBe("returns.use_return_requests")
     })
   },
 })

@@ -3,15 +3,19 @@ import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { LIFECYCLE_FIELDS, ORDER_STATE_FIELDS, orderState } from "../../../lib/dashboard"
 import type { ShipmentPlan, StateOrder } from "../../../lib/dashboard"
 import { ValidationError } from "../../../lib/errors"
+import { cancelRefundReference } from "../../../lib/orders/locks"
 import { SHIPPING_PAYMENT_FIELDS, shippingBlock } from "../../../lib/payments/shippable"
+import { ORDER_REFUNDS_MODULE } from "../../../modules/order-refunds"
+import type OrderRefundsModuleService from "../../../modules/order-refunds/service"
 
 /**
  * What "ship" means for the order now (lib/dashboard/order-state): a
  * packed parcel handed over, or what is left packed into a new one. The
  * items come from the order; a request may name a part of what is left
  * (F7.10: an order in several parcels), never more. An order paid in a
- * provider's test mode, or whose payment is still awaited, is refused.
- * Reads only.
+ * provider's test mode, or whose payment is still awaited, is refused;
+ * so is one whose cancel already gave the money back, should Medusa's
+ * cancel have failed after it (security review 2026-10-28). Reads only.
  */
 /** A part of what is left: each line once, at most what is left of it; a packed parcel goes whole. */
 function partOf(plan: ShipmentPlan, wanted: { id: string; quantity: number }[]): ShipmentPlan {
@@ -50,6 +54,15 @@ export const planShipmentStep = createStep(
     const blocked = shippingBlock(order as Parameters<typeof shippingBlock>[0])
     if (blocked) {
       throw new ValidationError(blocked)
+    }
+    const [cancelRefund] = await container
+      .resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE)
+      .listOrderRefunds(
+        { reference: cancelRefundReference(input.order_id), status: ["pending", "done"] },
+        { take: 1, select: ["id"] }
+      )
+    if (cancelRefund) {
+      throw new ValidationError("orders.ship_canceled_refund")
     }
     const plan = orderState(order).ship
     if (!plan || plan.items.length === 0) {

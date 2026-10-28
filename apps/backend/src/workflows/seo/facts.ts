@@ -163,10 +163,21 @@ const lira = (amount: Kurus): number => Number(toMedusaAmount(amount))
 export interface ShippingFacts {
   settings: ShippingSettings
   units: ParcelUnits
+  /**
+   * Shoppers can pick an option priced by the table: only then is its rate
+   * one checkout charges (security review 2026-10-28).
+   */
+  table_offered: boolean
 }
 
-/** What the shop's table charges to ship one of the variant; null without measures or a band. */
+/**
+ * What the shop's table charges to ship one of the variant; null when no
+ * option shoppers see is priced by it, or without measures or a band.
+ */
 function shippingRateOf(variant: Variant, shipping: ShippingFacts): number | null {
+  if (!shipping.table_offered) {
+    return null
+  }
   try {
     const parcel = parcelOf(
       [

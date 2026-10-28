@@ -67,6 +67,12 @@ export const RATE_LIMIT_PROFILES = {
     perIp: { max: 20, windowMs: 10 * MINUTE },
     perIdentity: { max: 5, windowMs: 10 * MINUTE },
   },
+  // F7.9: a shopper asking to return lines of an order; a budget of its own
+  return_request: {
+    name: "return_request",
+    perIp: { max: 20, windowMs: 10 * MINUTE },
+    perIdentity: { max: 5, windowMs: 10 * MINUTE },
+  },
   // F7.7: shipping picked orders at once, each asking a carrier for a label
   bulk_ship: {
     name: "bulk_ship",

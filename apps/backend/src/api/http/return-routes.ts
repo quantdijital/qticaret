@@ -9,6 +9,7 @@ import {
   AdminGetReturnRequests,
   AdminPostReturnApprove,
   AdminPostReturnReceive,
+  AdminPostReturnRefund,
   AdminPostReturnReject,
   StorePostReturnRequest,
 } from "../admin/return-requests/validators"
@@ -32,7 +33,7 @@ export const RETURN_ROUTES = [
     methods: ["POST" as const],
     middlewares: [
       customer,
-      rateLimit(() => RATE_LIMIT_PROFILES.order_cancel, {
+      rateLimit(() => RATE_LIMIT_PROFILES.return_request, {
         identity: (req) => (req as Partial<AuthenticatedMedusaRequest>).auth_context?.actor_id,
       }),
       validateAndTransformBody(StorePostReturnRequest),
@@ -61,7 +62,7 @@ export const RETURN_ROUTES = [
   {
     matcher: "/admin/return-requests/:id/refund",
     methods: ["POST" as const],
-    middlewares: [requireUserActor],
+    middlewares: [requireUserActor, validateAndTransformBody(AdminPostReturnRefund)],
   },
   {
     matcher: "/admin/return-requests/:id/label",

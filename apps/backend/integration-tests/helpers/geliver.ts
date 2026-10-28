@@ -89,17 +89,18 @@ export async function geliverShop(
   }
 }
 
-/** An order of one `variantId`, shipped with the Geliver option, paid with the system provider. */
+/** An order of `variantId` (one unit, unless told), shipped with the Geliver option, paid with the system provider. */
 export const geliverOrder = (
   container: MedusaContainer,
   setup: GeliverShop,
-  variantId = setup.variantId
+  variantId = setup.variantId,
+  quantity = 1
 ) =>
   placeOrder(container, {
     regionId: setup.shop.regionId,
     salesChannelId: setup.shop.salesChannelId,
     shippingOptionId: setup.optionId,
-    items: [{ variant_id: variantId, quantity: 1 }],
+    items: [{ variant_id: variantId, quantity }],
     address: PAYTR_ADDRESS,
   })
 

@@ -12,6 +12,7 @@ import type { SeoPayload, SeoSubject } from "../../lib/seo/resolve"
 import type { UrlOwner } from "../../modules/url-registry/validation"
 import { CATALOG_ENTITY_TYPES } from "../catalog/entity-paths"
 import { priceDisplays } from "../pricing/price-display"
+import { shopShippingOptions } from "../shipping/shipping-options"
 import { PRODUCT_FACT_FIELDS, productFacts } from "./facts"
 import type { FactRow, ShippingFacts } from "./facts"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
@@ -59,16 +60,22 @@ function primaryCategory(product: ProductRow): CategoryRow | null {
   return categories.find((row) => row.id === chosen) ?? deepestCategory(categories) ?? null
 }
 
-/** The shop's shipping rules and product units, for offers and the shipping sentence (F7.8). */
+/**
+ * The shop's shipping rules and product units, for offers and the
+ * shipping sentence (F7.8), and whether shoppers see an option the table
+ * prices.
+ */
 async function shippingFactsOf(container: MedusaContainer): Promise<ShippingFacts> {
   const settings = container.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
-  const [shipping, store] = await Promise.all([
+  const [shipping, store, options] = await Promise.all([
     settings.getSection("shipping") as Promise<unknown> as Promise<ShippingSettings>,
     settings.getSection("store") as Promise<unknown> as Promise<StoreSettings>,
+    shopShippingOptions(container),
   ])
   return {
     settings: shipping,
     units: { weight_unit: store.weight_unit, dimension_unit: store.dimension_unit },
+    table_offered: options.some((option) => option.pricing === "table" && option.in_store),
   }
 }
 

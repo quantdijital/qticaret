@@ -1,7 +1,13 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, MedusaError, Modules } from "@medusajs/framework/utils"
 import { ValidationError } from "../../lib/errors"
-import { linesProblem, returnable, windowOpen } from "../../lib/orders/returns"
+import {
+  RETURN_ORDER_FIELDS,
+  cameBack,
+  linesProblem,
+  returnable,
+  windowOpen,
+} from "../../lib/orders/returns"
 import type { ReturnLine, ReturnOrderFacts } from "../../lib/orders/returns"
 import { RETURN_REQUESTS_MODULE } from "../../modules/return-requests"
 import type ReturnRequestsModuleService from "../../modules/return-requests/service"
@@ -31,15 +37,7 @@ export async function requestReturn(
     async () => {
       const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
         entity: "order",
-        fields: [
-          "customer_id",
-          "status",
-          "items.id",
-          "items.detail.shipped_quantity",
-          "fulfillments.shipped_at",
-          "fulfillments.delivered_at",
-          "fulfillments.canceled_at",
-        ],
+        fields: ["customer_id", "status", ...RETURN_ORDER_FIELDS],
         filters: { id: input.order_id },
       })
       const order = data[0] as
@@ -53,7 +51,7 @@ export async function requestReturn(
       const service = container.resolve<ReturnRequestsModuleService>(RETURN_REQUESTS_MODULE)
       const earlier = await service.listReturnRequests(
         { order_id: input.order_id, status: [...COUNTED_RETURN_STATUSES] },
-        { select: ["status", "items", "received_items"] }
+        { select: ["status", "items", "received_items", "damaged_items"] }
       )
       if (
         earlier.some((request) =>
@@ -63,9 +61,7 @@ export async function requestReturn(
         throw new ValidationError("returns.already_open")
       }
       // A request that came back counts what came back; one still open, what it asked
-      const asked = earlier.flatMap(
-        (request) => (request.received_items ?? request.items) as unknown as ReturnLine[]
-      )
+      const asked = earlier.flatMap(cameBack)
       const problem = linesProblem(returnable(order, asked), input.items)
       if (problem) {
         throw new ValidationError(problem, { field: "items" })

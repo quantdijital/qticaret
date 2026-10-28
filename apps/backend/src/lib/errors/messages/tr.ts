@@ -24,6 +24,10 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "bank_transfer.order_canceled": "İptal edilmiş siparişin havalesi onaylanamaz.",
   "orders.cancel_after_packing":
     "Paketlenmiş ya da kargoya verilmiş sipariş iptal edilemez; ürün elinize ulaşınca iade talebi oluşturun.",
+  "orders.cancel_contact_shop":
+    "Havale/EFT ile ödenmiş sipariş buradan iptal edilemez; iptal ve ücret iadesi için mağazayla iletişime geçin.",
+  "orders.ship_canceled_refund":
+    "Bu siparişin iptali için ücret iadesi yapılmış; kargoya verilemez. Siparişi iptal edin.",
   "orders.ship_items_invalid":
     "Seçilen kalemler gönderilecek olanlarla uyuşmuyor: her kalemden en çok kalan adet kadar gönderilebilir.",
   "orders.ship_packed_first":
@@ -217,6 +221,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "returns.window_closed":
     "Bu sipariş için iade süresi doldu ya da sipariş henüz kargoya verilmedi.",
   "returns.already_open": "Bu sipariş için açık bir iade talebi zaten var.",
+  "returns.use_return_requests":
+    "İade, değişim ve talepler yalnızca iade talepleri ekranından yürütülür.",
   "returns.carrier_refused": "Kargo firması iade gönderisini açmadı; birazdan tekrar deneyin.",
   "returns.refund_failed":
     'Ürünler teslim alındı ama para iadesi yapılamadı; "Para iadesini tekrar dene" ile yineleyin.',
@@ -227,6 +233,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "shipping.no_offer":
     "Bu gönderi için kargo teklifi alınamadı. Seçilen kargo hizmeti bu koliyi taşımıyor olabilir.",
   "shipping.option_invalid": "Kargo seçeneği bu hizmete ait değil.",
+  "shipping.option_in_use":
+    "Bu kargo seçeneğiyle gönderilmeyi bekleyen siparişler var; önce onlar kargoya verilmeli.",
   "shipping.use_ship_route":
     'Bu kargo hizmetiyle gönderi, sipariş sayfasındaki "Kargoya ver" ile açılır.',
   "shipping.address_incomplete":

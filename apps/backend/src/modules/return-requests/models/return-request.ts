@@ -27,8 +27,12 @@ export const ReturnRequest = model
     return_code: model.text().nullable(),
     return_shipment_id: model.text().nullable(),
     return_label_file_id: model.text().nullable(),
-    /** The lines that came back: `[{ line_item_id, quantity }]`. */
+    /** The lines that came back sound, back in stock: `[{ line_item_id, quantity }]`. */
     received_items: model.json().nullable(),
+    /** The lines that came back broken, refunded but never restocked. */
+    damaged_items: model.json().nullable(),
+    /** Staff decided on receipt that the shipping comes back too (adr/0032 §5). */
+    refund_shipping: model.boolean().default(false),
     received_at: model.dateTime().nullable(),
     refund_amount: model.number().nullable(),
     refund_reference: model.text().nullable(),

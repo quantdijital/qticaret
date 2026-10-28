@@ -24,10 +24,3 @@ export const OPEN_RETURN_STATUSES = ["requested", "approved"] as const
 
 /** Requests whose lines count against what can still be returned. */
 export const COUNTED_RETURN_STATUSES = ["requested", "approved", "received", "refunded"] as const
-
-/** Reasons the shop is answerable for: the parcel's shipping comes back too. */
-export const SHOP_FAULT_REASONS: readonly ReturnReason[] = [
-  "damaged",
-  "wrong_item",
-  "not_as_described",
-]

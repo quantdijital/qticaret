@@ -7,6 +7,7 @@ import type {
 } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { ValidationError } from "../../lib/errors"
+import { cancelRefundReference } from "../../lib/orders/locks"
 import { isCheckoutProvider } from "../../lib/payments/checkout"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import { readOrderMoney } from "../../workflows/orders/order-money"
@@ -16,7 +17,7 @@ import {
   AdminPostOrderRefundPreview,
 } from "../admin/orders/[id]/refunds/validators"
 import { requireUserActor } from "./actor"
-import { holdBankTransferLock } from "./bank-transfer-routes"
+import { holdCancelLocks } from "./bank-transfer-routes"
 import { rateLimit } from "./rate-limit"
 
 /** Medusa's own payment refund: a payment our route started is given back line by line, through ours. */
@@ -83,7 +84,7 @@ async function refundBeforeCancel(
       await refundOrderWorkflow(req.scope).run({
         input: {
           order_id: orderId,
-          reference: `cancel${orderId.replace(/[^A-Za-z0-9]/g, "")}`.slice(0, 40),
+          reference: cancelRefundReference(orderId),
           request: { amount: refundable },
           note: "order canceled",
           created_by: (req as Partial<AuthenticatedMedusaRequest>).auth_context?.actor_id ?? null,
@@ -123,5 +124,5 @@ export const ORDER_REFUND_ROUTES = [
   { matcher: "/admin/payments/:id/refund", middlewares: [refuseHostedPaymentRefund] },
   // Cash on delivery's "collected" (adr/0029): Medusa's capture, by staff only
   { matcher: "/admin/payments/:id/capture", middlewares: [requireUserActor] },
-  { matcher: "/admin/orders/:id/cancel", middlewares: [holdBankTransferLock, refundBeforeCancel] },
+  { matcher: "/admin/orders/:id/cancel", middlewares: [holdCancelLocks, refundBeforeCancel] },
 ]

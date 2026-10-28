@@ -5,6 +5,7 @@ import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { firstLineOf, orderOne, stockShop, stockedProduct } from "../helpers/stock"
 import type { StockShop } from "../helpers/stock"
+import { medusaReturn } from "../helpers/medusa-return"
 
 jest.setTimeout(120 * 1000)
 
@@ -63,20 +64,11 @@ medusaIntegrationTestRunner({
       expect(shipped.status).toBe(200)
       expect(await level(itemId)).toEqual({ stocked: 1, reserved: 0 })
 
-      const begun = await post<{ return: { id: string } }>("/admin/returns", {
+      await medusaReturn(getContainer(), {
         order_id: orderId,
         location_id: shop.locationId,
+        items: [{ id: lineId, quantity: 1 }],
       })
-      const returnId = begun.data.return.id
-      for (const [path, body] of [
-        [`/admin/returns/${returnId}/request-items`, { items: [{ id: lineId, quantity: 1 }] }],
-        [`/admin/returns/${returnId}/request`, {}],
-        [`/admin/returns/${returnId}/receive`, {}],
-        [`/admin/returns/${returnId}/receive-items`, { items: [{ id: lineId, quantity: 1 }] }],
-        [`/admin/returns/${returnId}/receive/confirm`, {}],
-      ] as const) {
-        expect((await post(path, body)).status).toBe(200)
-      }
       expect(await level(itemId)).toEqual({ stocked: 2, reserved: 0 })
     })
   },

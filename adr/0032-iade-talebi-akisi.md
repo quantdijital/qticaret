@@ -32,20 +32,35 @@ Medusa v2'nin iade modeli (Kaynak: core-flows v2.21.2) şöyle çalışıyor:
 2. **Neden kodları sabit liste:** hasarlı geldi, yanlış ürün, tarif edildiği gibi değil, fikrim değişti, beden/ölçü uymadı, diğer. Metinleri storefront ve panelde i18n.
 3. **Talep kuralları (Store, oturum açmış müşteri, kendi siparişi):**
    - Yalnızca teslim edilmiş ya da kargodaki kalemler, gönderilenden önceki talepler düşülerek iade edilebilir.
-   - Süre son teslimden itibaren 14 gündür (mesafeli satış cayma süresi). Mağazaya özel süre ve istisnalar F13'te ayara bağlanır.
+   - Süre son teslimden itibaren 14 gündür (mesafeli satış cayma süresi). Teslim edildi işaretlenmeyen koli çıkışından 30 gün sonra teslim edilmiş sayılır; süre böylece sonsuza kadar açık kalmaz. Mağazaya özel süre ve istisnalar F13'te ayara bağlanır.
+   - Daha önce istenenler düşülürken talep sayısı ile Medusa'nın o kalemdeki iade sayılarından büyüğü alınır.
    - Sipariş kilidi altında çalışır, aynı anda tek talep açılır.
 4. **Onay (panel, personel):**
    - Medusa iadesi aşamalı iş akışlarıyla açılır ve onaylanır, kargo yöntemi olmadan: Medusa iade gönderisini kendisi açmaz.
-   - Sipariş Geliver'le gittiyse iade gönderisi Geliver'de açılır (`POST /shipments/:id { isReturn }`). Barkod ya da takip numarası müşteriye iade kodu olarak verilir; etiket özel depoya yazılır.
+   - Sipariş Geliver'le gittiyse iade gönderisi Geliver'de açılır (`POST /shipments/:id { isReturn }`). İade, istenen kalemlerin en çoğunu taşımış koliye açılır (çok kolili sipariş). Barkod ya da takip numarası müşteriye iade kodu olarak verilir; etiket özel depoya yazılır.
    - Mağaza kendi gönderdiyse iade kodu olmadan onaylanır. Doğrudan taşıyıcı (F7.14) gelince onun iade kodu kullanılır.
    - Ret bir notla kapanır.
 5. **Depoya varış (panel):**
-   - Personel gelen kalemleri ve adetlerini girer (eksik ya da hasarlı gelen düşülebilir).
-   - Medusa teslim alma iş akışları çalışır; stok geri girer.
-   - Para iadesi kendi iade akışımızla kalem bazında yapılır (F4.7 payları, sağlayıcı kuralları, `return<talep>` referansıyla bir kez).
-   - Kargo ücreti iade edilmez. Hasarlı ya da yanlış ürün gibi mağazadan kaynaklı nedenlerde bunu iade akışında personel seçer.
-   - `return.refunded` olayı yayınlanır. İade faturası F8'de bu olaya bağlanır.
-6. **Değişim (F7.11)** bu akışın üstüne kurulur: talepte "değişim" seçeneği ve yeni varyant. Medusa'nın exchange iş akışları ayrı bir görevde doğrulanır.
+   - Personel her kalem için sağlam ve hasarlı gelen adedi ayrı girer; eksik gelen düşülür.
+   - Medusa teslim alma iş akışları çalışır: sağlamlar stoğa döner, hasarlılar Medusa'nın "dismiss" yoluyla sayılır ama stoğa dönmez.
+   - Para iadesi kendi iade akışımızla kalem bazında, sağlam ve hasarlı adetlerin toplamı için yapılır (F4.7 payları, sağlayıcı kuralları, `return<talep>` referansıyla bir kez).
+   - Kargo ücreti varsayılan olarak iade edilmez. Teslim almada personel "kargo ücretini de iade et"i seçer; panel bunu hasarlı, yanlış ve tarif edildiği gibi olmayan üründe işaretli önerir. Müşterinin seçtiği neden tutarı tek başına belirlemez (kural 5).
+   - `return.refunded` olayı talep "refunded"a geçerken bir kez yayınlanır. İade faturası F8'de bu olaya bağlanır.
+   - Onay, teslim alma ve para iadesi siparişin iade kilidi altında talebi yeniden okur; durum yazımı beklenen durumdan yapılır. İki tıklama ikinci Medusa iadesi ya da ikinci para iadesi açmaz.
+6. **Değişim (F7.11)** bu akışın üstüne kurulur (ek, 2026-10-28; Medusa v2.21.2 exchange iş akışları kaynaktan doğrulandı):
+   - Talebin türü `exchange` olur ve iade edilen her ürün için aynı ürünün başka varyantı (beden, renk) aynı adetle istenir.
+   - **Onayda** Medusa'nın değişimi açılır:
+     - iade edilecek kalemler istenir;
+     - yeni kalemler Medusa'nın güncel fiyatıyla eklenir;
+     - yeni kalemler için siparişin kargo seçeneğiyle ücretsiz bir giden kargo yöntemi eklenir, böylece stokları ayrılır;
+     - değişim onaylanır, iade gönderisi iadedeki gibi açılır.
+   - **Fark tutarı** Medusa'nın sipariş özetinden okunur (yeni kalemler eksi iade edilenler) ve talepte saklanır.
+     - Mağaza borçluysa (ucuz varyant) fark, teslim almada kendi iade akışımızla geri verilir.
+     - Müşteri borçluysa onay farkı gösterir. Tahsilat bağlantısı bildirimler ve storefront'la gelir (F9/F18); o zamana kadar mağaza farkı başka yolla alır ya da talebi reddeder.
+   - **Teslim almada** iade edilen kalemler stoğa döner. Yeni kalemler siparişin "Kargoya ver"iyle gider (sipariş planı onları gönderilecek kalem olarak görür).
+7. **Medusa'nın kendi iade, değişim ve talep (claim) rotaları kapalıdır** (güvenlik incelemesi 2026-10-28):
+   - `/store/returns` sipariş kimliğini bilen herkese iade açtığı için 404 döner.
+   - `/admin/returns`, `/admin/exchanges`, `/admin/claims` altındaki değişiklikler reddedilir (okumalar denetimli kalır). Akışlarımız Medusa iş akışlarını doğrudan çağırır, bu rotaları kullanmaz.
 
 ## Alternatifler
 

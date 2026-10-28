@@ -1,5 +1,8 @@
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
+import { cancelRefundReference } from "../../src/lib/orders/locks"
+import { ORDER_REFUNDS_MODULE } from "../../src/modules/order-refunds"
+import type OrderRefundsModuleService from "../../src/modules/order-refunds/service"
 import { placeOrder } from "../../src/scripts/seed/orders/place"
 import { createAdminUser } from "../helpers/admin"
 import { registerCustomer } from "../helpers/customer"
@@ -87,7 +90,7 @@ medusaIntegrationTestRunner({
       expect(await reserved()).toBe((before ?? 1) - 1)
     })
 
-    it("gives back money already taken: a confirmed bank transfer is refunded on the record", async () => {
+    it("sends a shopper whose bank transfer the shop confirmed to the shop: that money goes back by hand", async () => {
       await http.post(
         "/admin/platform-settings/bank_transfer",
         {
@@ -121,20 +124,40 @@ medusaIntegrationTestRunner({
       )
 
       const canceled = await cancel(orderId)
-      const { data: refunds } = await http.get<{ refunds: { amount: string; status: string }[] }>(
+      const { data: refunds } = await http.get<{ refunds: unknown[] }>(
         `/admin/orders/${orderId}/payment-details`,
         { headers: admin.headers }
       )
 
-      expect(canceled.data).toMatchObject({ canceled: true })
-      expect(await statusOf(orderId)).toBe("canceled")
-      expect(refunds.refunds).toEqual([
-        expect.objectContaining({
-          amount: "210.00",
+      // A refund written down only would leave the shopper without the money
+      expect(canceled.data.message).toBe("orders.cancel_contact_shop")
+      expect(await statusOf(orderId)).not.toBe("canceled")
+      expect(refunds.refunds).toEqual([])
+    })
+
+    it("never ships an order whose cancel already gave the money back", async () => {
+      const orderId = await ownOrder()
+      // Medusa's cancel failed after our refund went through
+      await getContainer()
+        .resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE)
+        .createOrderRefunds({
+          order_id: orderId,
+          reference: cancelRefundReference(orderId),
+          payment_id: "pay_cancelled",
+          amount: 21_000,
           status: "done",
-          note: "canceled by the customer",
-        }),
-      ])
+          lines: [] as unknown as Record<string, unknown>,
+        })
+
+      const shipped = await settle(
+        http.post<{ message?: string }>(
+          `/admin/orders/${orderId}/ship`,
+          { notify: false },
+          { headers: admin.headers }
+        )
+      )
+
+      expect(shipped.data.message).toBe("orders.ship_canceled_refund")
     })
 
     it("refuses a packed order (a return instead) and another shopper's order", async () => {

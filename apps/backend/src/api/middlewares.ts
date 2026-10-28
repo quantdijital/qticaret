@@ -23,6 +23,7 @@ import { BANK_TRANSFER_ROUTES } from "./http/bank-transfer-routes"
 import { BRAND_ROUTES, STORE_BRAND_FIELDS } from "./http/brand-routes"
 import { CATALOG_SHEET_ROUTES } from "./http/catalog-sheet-routes"
 import { CHARGEBACK_ROUTES } from "./http/chargeback-routes"
+import { CORE_RETURN_ROUTES } from "./http/core-return-routes"
 import { RETURN_ROUTES } from "./http/return-routes"
 import { SHIPPING_ROUTES } from "./http/shipping-routes"
 import { CONTENT_ROUTES } from "./http/content-routes"
@@ -188,6 +189,7 @@ export default defineMiddlewares({
     ...CHARGEBACK_ROUTES,
     ...SHIPPING_ROUTES,
     ...RETURN_ROUTES,
+    ...CORE_RETURN_ROUTES,
     // F3.11: brands
     ...BRAND_ROUTES,
     ...CONTENT_ROUTES,

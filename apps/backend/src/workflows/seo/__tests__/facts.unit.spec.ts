@@ -143,13 +143,24 @@ describe("productFacts", () => {
       ),
     })
 
-    const facts = productFacts(measured, null, "", undefined, { settings, units })
+    const facts = productFacts(measured, null, "", undefined, {
+      settings,
+      units,
+      table_offered: true,
+    })
+    // No option shoppers see is priced by the table: its rate is not one checkout charges
+    const unoffered = productFacts(measured, null, "", undefined, {
+      settings,
+      units,
+      table_offered: false,
+    })
 
     expect(facts.delivery).toEqual({ handling: [1, 2], transit: [1, 3] })
     expect(facts.variants.map((variant) => [variant.id, variant.shippingRate])).toEqual([
       ["variant_a", null],
       ["variant_b", 49.9],
     ])
+    expect(unoffered.variants.map((variant) => variant.shippingRate)).toEqual([null, null])
     expect(productFacts(measured, null, "").delivery).toBeNull()
   })
 })

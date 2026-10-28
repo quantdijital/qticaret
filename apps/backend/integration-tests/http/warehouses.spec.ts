@@ -6,6 +6,7 @@ import { settle } from "../helpers/http"
 import { firstLineOf, orderOne, stockShop, stockedProduct } from "../helpers/stock"
 import type { StockShop } from "../helpers/stock"
 import { loadTrAddressFixture } from "../helpers/tr-address"
+import { medusaReturn } from "../helpers/medusa-return"
 
 jest.setTimeout(120 * 1000)
 
@@ -176,14 +177,12 @@ medusaIntegrationTestRunner({
         location_id: shop.locationId,
       })
       const returnsTo = await locations().createStockLocations({ name: "İade Depo" })
-      const begun = await post<{ return: { id: string } }>("/admin/returns", {
+      await medusaReturn(getContainer(), {
         order_id: orderId,
         location_id: returnsTo.id,
-      })
-      await post(`/admin/returns/${begun.data.return.id}/request-items`, {
         items: [{ id: lineId, quantity: 1 }],
+        receive: false,
       })
-      await post(`/admin/returns/${begun.data.return.id}/request`)
       const pending = await remove(returnsTo.id)
       expect(pending.status).toBe(409)
       expect(pending.data.message).toBe("stock.location_has_returns")

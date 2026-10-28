@@ -1,139 +1,190 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { MedusaError } from "@medusajs/framework/utils"
-import { WorkflowResponse, createWorkflow, transform } from "@medusajs/framework/workflows-sdk"
+import { MedusaError, Modules } from "@medusajs/framework/utils"
+import {
+  WorkflowResponse,
+  createWorkflow,
+  transform,
+  when,
+} from "@medusajs/framework/workflows-sdk"
 import {
   acquireLockStep,
   beginReceiveReturnWorkflow,
   confirmReturnReceiveWorkflow,
+  dismissItemReturnRequestWorkflow,
   receiveItemReturnRequestWorkflow,
   releaseLockStep,
 } from "@medusajs/medusa/core-flows"
-import { Modules } from "@medusajs/framework/utils"
 import { ValidationError } from "../../lib/errors"
+import { cameBack } from "../../lib/orders/returns"
+import type { ReturnLine } from "../../lib/orders/returns"
 import { RETURN_REQUESTS_MODULE } from "../../modules/return-requests"
 import type ReturnRequestsModuleService from "../../modules/return-requests/service"
-import { SHOP_FAULT_REASONS } from "../../modules/return-requests/states"
 import { refundOrderWorkflow } from "../orders/refund-order"
 import { returnsLockKey } from "./request-return"
-import { readReturnRequestStep, updateReturnRequestStep } from "./steps/return-request"
+import {
+  readReturnRequestStep,
+  returnRequestOrderStep,
+  updateReturnRequestStep,
+} from "./steps/return-request"
 
 /** Fired when a return's money is given back: the return invoice hangs off it (F8). */
 export const RETURN_REFUNDED = "return.refunded"
 
+export interface ReceiveInput {
+  id: string
+  staff_id: string
+  /** Back in sellable stock. */
+  items: ReturnLine[]
+  /** Came back broken: counted and refunded, never restocked (Medusa's dismissal). */
+  damaged: ReturnLine[]
+  /** The staff's call (adr/0032 §5): the parcel's shipping comes back too. */
+  refund_shipping: boolean
+}
+
+const asMedusaLines = (lines: readonly ReturnLine[]) =>
+  lines.map((line) => ({ id: line.line_item_id, quantity: line.quantity }))
+
 /**
  * The parcel reached the warehouse (adr/0032): the lines that came back
- * received through Medusa's own receiving, which puts them back in stock,
- * and the request marked received. Its refund follows on its own
- * (`refundReturn`), so a refund that fails leaves the stock counted.
+ * received through Medusa's own receiving, which puts the sound ones back
+ * in stock and leaves the damaged ones out, and the request marked
+ * received. Its refund follows on its own (`refundReturn`), so a refund
+ * that fails leaves the stock counted. Read under the order's returns
+ * lock: a second receive finds it received already.
  */
-export const receiveReturnWorkflow = createWorkflow(
-  "returns-receive",
-  (input: {
-    id: string
-    staff_id: string
-    items: { line_item_id: string; quantity: number }[]
-  }) => {
-    const request = readReturnRequestStep({ id: input.id, status: "approved" })
-    const lockKey = transform({ request }, ({ request }) => returnsLockKey(request.order_id))
-    acquireLockStep({ key: lockKey, timeout: 10, ttl: 120 })
-    const returnId = transform({ request }, ({ request }) => request.return_id ?? "")
-    beginReceiveReturnWorkflow.runAsStep({
-      input: transform({ returnId, input }, ({ returnId, input }) => ({
-        return_id: returnId,
-        created_by: input.staff_id,
-      })),
-    })
+export const receiveReturnWorkflow = createWorkflow("returns-receive", (input: ReceiveInput) => {
+  const orderId = returnRequestOrderStep({ id: input.id })
+  const lockKey = transform({ orderId }, ({ orderId }) => returnsLockKey(orderId))
+  acquireLockStep({ key: lockKey, timeout: 10, ttl: 120 })
+  const request = readReturnRequestStep({ id: input.id, status: "approved" })
+  const returnId = transform({ request }, ({ request }) => request.return_id ?? "")
+  beginReceiveReturnWorkflow.runAsStep({
+    input: transform({ returnId, input }, ({ returnId, input }) => ({
+      return_id: returnId,
+      created_by: input.staff_id,
+    })),
+  })
+  when("returns-receive-sound", { input }, ({ input }) => input.items.length > 0).then(() => {
     receiveItemReturnRequestWorkflow.runAsStep({
       input: transform({ returnId, input }, ({ returnId, input }) => ({
         return_id: returnId,
-        items: input.items.map((item) => ({ id: item.line_item_id, quantity: item.quantity })),
+        items: asMedusaLines(input.items),
       })),
     })
-    confirmReturnReceiveWorkflow.runAsStep({
+  })
+  when("returns-receive-damaged", { input }, ({ input }) => input.damaged.length > 0).then(() => {
+    dismissItemReturnRequestWorkflow.runAsStep({
       input: transform({ returnId, input }, ({ returnId, input }) => ({
         return_id: returnId,
-        confirmed_by: input.staff_id,
+        items: asMedusaLines(input.damaged),
       })),
     })
-    const received = updateReturnRequestStep(
-      transform({ input }, ({ input }) => ({
-        id: input.id,
+  })
+  confirmReturnReceiveWorkflow.runAsStep({
+    input: transform({ returnId, input }, ({ returnId, input }) => ({
+      return_id: returnId,
+      confirmed_by: input.staff_id,
+    })),
+  })
+  const received = updateReturnRequestStep(
+    transform({ input }, ({ input }) => ({
+      id: input.id,
+      from: "approved" as const,
+      changes: {
         status: "received",
         received_items: input.items,
+        damaged_items: input.damaged,
+        refund_shipping: input.refund_shipping,
         received_at: new Date(),
-      }))
-    )
-    releaseLockStep({ key: lockKey })
-    return new WorkflowResponse(received)
-  }
-)
+      },
+    }))
+  )
+  releaseLockStep({ key: lockKey })
+  return new WorkflowResponse(received)
+})
 
-/** What came back may only be what was asked: each line once, no more of it. */
+/**
+ * What came back may only be what was asked: each line once in each list,
+ * sound and damaged together no more than asked of it, something at all.
+ */
 export function receivedProblem(
-  asked: readonly { line_item_id: string; quantity: number }[],
-  received: readonly { line_item_id: string; quantity: number }[]
+  asked: readonly ReturnLine[],
+  sound: readonly ReturnLine[],
+  damaged: readonly ReturnLine[]
 ): string | null {
   const limit = new Map(asked.map((line) => [line.line_item_id, line.quantity]))
-  const ids = new Set(received.map((line) => line.line_item_id))
-  return received.length === 0 ||
-    ids.size !== received.length ||
-    received.some(
-      (line) => line.quantity < 1 || line.quantity > (limit.get(line.line_item_id) ?? 0)
-    )
+  const unique = (lines: readonly ReturnLine[]) =>
+    new Set(lines.map((line) => line.line_item_id)).size === lines.length
+  const total = new Map<string, number>()
+  for (const line of [...sound, ...damaged]) {
+    total.set(line.line_item_id, (total.get(line.line_item_id) ?? 0) + line.quantity)
+  }
+  return total.size === 0 ||
+    !unique(sound) ||
+    !unique(damaged) ||
+    [...sound, ...damaged].some((line) => line.quantity < 1) ||
+    [...total].some(([id, quantity]) => quantity > (limit.get(id) ?? 0))
     ? "returns.items_invalid"
     : null
 }
 
 /**
- * Gives the money for what came back (adr/0032): through our refund, line
- * by line, under the request's own reference (tried again, refunded
- * once). Shipping comes back too when the shop was at fault. The request
- * is marked refunded and `return.refunded` announced.
+ * Gives the money for what came back, sound or damaged (adr/0032): through
+ * our refund, line by line, under the request's own reference (tried
+ * again, refunded once), with the shipping when staff said so on receipt.
+ * Under the order's returns lock, so two clicks refund once and
+ * `return.refunded` is announced once, as the request turns refunded.
  */
 export async function refundReturn(
   container: MedusaContainer,
   input: { id: string; staff_id: string }
 ) {
   const service = container.resolve<ReturnRequestsModuleService>(RETURN_REQUESTS_MODULE)
-  const [request] = await service.listReturnRequests({ id: input.id }, { take: 1 })
-  if (!request) {
+  const [found] = await service.listReturnRequests(
+    { id: input.id },
+    { take: 1, select: ["order_id"] }
+  )
+  if (!found) {
     throw new MedusaError(MedusaError.Types.NOT_FOUND, "returns.unknown")
   }
-  if (request.status === "refunded") {
-    return request
-  }
-  if (request.status !== "received") {
-    throw new ValidationError("returns.status_invalid")
-  }
-  const reference = `return${request.id.replace(/[^A-Za-z0-9]/g, "")}`.slice(0, 40)
-  const lines = (request.received_items ?? []) as unknown as {
-    line_item_id: string
-    quantity: number
-  }[]
-  const { result } = await refundOrderWorkflow(container).run({
-    input: {
-      order_id: request.order_id,
-      reference,
-      request: {
-        items: lines.map((line) => ({ id: line.line_item_id, quantity: line.quantity })),
-        shipping: SHOP_FAULT_REASONS.includes(request.reason),
-      },
-      note: `return ${request.id}`,
-      created_by: input.staff_id,
+  return container.resolve(Modules.LOCKING).execute(
+    returnsLockKey(found.order_id),
+    async () => {
+      const [request] = await service.listReturnRequests({ id: input.id }, { take: 1 })
+      if (request?.status === "refunded") {
+        return request
+      }
+      if (request?.status !== "received") {
+        throw new ValidationError("returns.status_invalid")
+      }
+      const reference = `return${request.id.replace(/[^A-Za-z0-9]/g, "")}`.slice(0, 40)
+      const { result } = await refundOrderWorkflow(container).run({
+        input: {
+          order_id: request.order_id,
+          reference,
+          request: {
+            items: asMedusaLines(cameBack(request)),
+            shipping: request.refund_shipping,
+          },
+          note: `return ${request.id}`,
+          created_by: input.staff_id,
+        },
+      })
+      const amount = result.amount
+      const refunded = await service.updateReturnRequests({
+        id: request.id,
+        status: "refunded",
+        refund_reference: reference,
+        refund_amount: amount,
+      })
+      await container.resolve(Modules.EVENT_BUS).emit({
+        name: RETURN_REFUNDED,
+        data: { id: request.id, order_id: request.order_id, amount, reference },
+      })
+      return refunded
     },
-  })
-  const amount = result.amount
-  const refunded = await service.updateReturnRequests({
-    id: request.id,
-    status: "refunded",
-    refund_reference: reference,
-    refund_amount: amount,
-  })
-  await container.resolve(Modules.EVENT_BUS).emit({
-    name: RETURN_REFUNDED,
-    data: { id: request.id, order_id: request.order_id, amount, reference },
-  })
-  return refunded
+    { timeout: 30 }
+  )
 }
 
 /** Turns down a request still waiting for the shop's decision (adr/0032), with a note for the shopper. */

@@ -24,6 +24,33 @@
 ## Son oturum özeti
 > **Sabah için (kullanıcıya):** GitHub Actions 2026-10-27 ~23:45'ten beri işleri başlatmıyor: "recent account payments have failed or your spending limit needs to be increased" (Billing & plans). CI'ı yalnızca hesap sahibi açabilir. O zamandan sonraki commit'ler yerelde doğrulandı (birim + HTTP + e2e); faturalama düzelince son commit'te CI yeniden çalıştırılmalı.
 
+**2026-10-28 gece–sabah (otonom; F6 kapanışı, F7 K1–K8).** Kullanıcı yatarken çalışıldı; dallar `f6-alternative-payments` (kapandı, push) ve `f7-shipping` (push).
+- **Sabah cevabın gereken sorular (Açık sorular):**
+  1. İlk müşterinin anlaşmalı kargo firması (F7.14, K11 buna bağlı).
+  2. Toplu etiketler tek PDF olsun mu? (`pdf-lib` bağımlılığı)
+  3. Geliver hesabı (gerçek deneme sunucuya çıkışta).
+- **Gözden geçirmen gereken otonom kararlar:**
+  - ADR-0031 (kargo altyapısı, bildirim ipucu, etiket özel depoda)
+  - ADR-0032 (iade talebi; değişim eki; inceleme kuralları §5 ve §7)
+  - Havale/EFT ile ödenmiş ve onaylanmış siparişi müşteri artık kendisi iptal edemiyor ("mağazayla iletişime geçin"): o para kartla değil elle geri gider. Personel panelden iptal ederse iade yalnızca kayda geçer; parayı müşteriye elle göndermek gerekir.
+  - `kargo_cümlesi`'nin tüm ürün açıklamalarına girmesi
+  - F6 kararları
+- **Yapılanlar:**
+  - F6 kapanış düzeltmeleri.
+  - F7:
+    - Geliver hesap bağlama;
+    - sağlayıcı (desi, teklif, tablo fiyatı);
+    - "Kargoya ver" Geliver'le (etiket özel depoda);
+    - takip (bildirim + sorgu, tek kayıt);
+    - toplu ve kısmi gönderim;
+    - kargo seçenekleri, teslim süresi ve ücret tablosu (JSON-LD `shippingDetails`);
+    - müşteri iptali;
+    - iade talebi uçtan uca (onay, Geliver iade kodu, teslim, stok, para iadesi) ve panel kuyrukları.
+  - Bağımsız güvenlik incelemesi (K1–K4): bulgular uygulandı.
+  - Bağımsız güvenlik incelemesi (K5–K8): 1 yüksek, 6 orta, 9 düşük bulgu; hepsi uygulandı ya da not edildi (F7 planında K8 satırının altında).
+  - KK işaretli: KK1, KK2, KK4, KK6. KK3 iade faturası (F8) bekliyor; KK5 (değişim) ve KK7 (doğrudan taşıyıcı) açık.
+- **Not:** Geliver'i dev ortamda denerken turbo `GELIVER_BASE_URL`'i iletmediği için bir istek gerçek api.geliver.io'ya uydurma geliştirme anahtarıyla gitti ve reddedildi (zararsız); turbo.json'a `GELIVER_*` eklendi.
+
 **2026-10-27 gece (otonom; F5 kapanışı, F6 başlangıcı).** Kullanıcı yatarken: "izin istemeden çalışmaya devam edersin, kritik bir şey olursa sabah sorarım."
 - F5 kapandı (yukarıda V11; CI yeşil `fcd06e7`).
 - **F6 W6 (kapanış): kod ve güvenlik incelemesi bulguları uygulandı (2026-10-28 gece).**
@@ -1130,6 +1157,7 @@ Doğrulananlar:
 | K6 ✅ | F7.8 | **Bitti (2026-10-28 gece).** `shipping` ayar bölümü (kargoya verme ve taşıma günleri, desi ücret tablosu + son bandın üstü desi başına), Geliver'e "ücret tablosu" seçeneği (`geliver-table`: fiyat tablodan, gönderi en uygun teklifle), kargo seçenekleri yönetimi (`/admin/shipping-setup/options`: kendi gönderimim / Geliver / mağazadan teslim; sabit, Geliver teklifi ya da tablo; varsayılan depoda bölge yoksa kurulur; teslim alma ayrı "pickup" setinde), ürün JSON-LD'sinde `shippingDetails` (tablo varyantı fiyatlıyorsa: ücret, TR, kargoya verme ve taşıma günleri; tahmin yazılmaz), SEO `kargo_cümlesi` ("1–2 iş gününde kargoda."; varsayılan ürün açıklaması şablonunda olduğu için tüm ürünlerin açıklamasına girer). Panelde Ayarlar > Kargo: seçenekler kartı (ekle/düzenle/kaldır), teslim süresi ve ücret tablosu kartları. Karar: mağazadan teslim ayrı bayrak değil, bir kargo seçeneği türü (seçenek varsa sunulur). Koli birleştirme: satırlar tek kolide (hacim toplamı); taşıyıcı sınırını aşan sipariş K5'in kısmi gönderimiyle bölünür. Testler: HTTP 4, birim 6, panel 3 | K2 | — |
 | K7 ✅ | F7.13 | **Bitti (2026-10-28 gece).** `POST /store/orders/:id/cancel` (oturum açmış müşteri, kendi siparişi; `order_cancel` hız profili): havale onayı ve süre dolumuyla aynı sipariş kilidi altında, paketlenmiş ya da kargoya verilmiş sipariş `orders.cancel_after_packing` (iade talebine yönlendirir), alınmış para kendi iade akışımızla geri verilir (tekrarında bir kez), sonra Medusa'nın iptali stoku ve bekleyen ödemeyi bırakır; başkasının siparişi 404. Karar: misafir siparişinin iptali oturum gerektirdiği için F9/F10'daki sipariş bağlantısıyla gelir. Testler: HTTP 3 (KK6) | — | KK6 |
 | K8 ✅ | F7.9 | **Bitti (2026-10-28 sabaha karşı).** ADR-0032 (otonom kabul). `return-requests` modülü (sipariş başına tek açık talep, kısmi tekil indeks). Store: `POST/GET /store/orders/:id/returns` (oturum açmış müşteri, kendi siparişi; gönderilen kalemler, son teslimden 14 gün, önceki talepler düşülerek). Panel ucu: kuyruk, onay (Medusa'nın aşamalı iadesi, parselin çıktığı depoda; Geliver'le gittiyse iade gönderisi ve etiketi, kodu müşteriye), ret (müşterinin okuduğu not), teslim alma (Medusa teslim alma, stok geri girer) ve ardından para iadesi (kendi iade akışımız, kalem bazında, mağaza kaynaklı nedenlerde kargo dahil, `return<talep>` referansıyla bir kez; `return.refunded` olayı), başarısız iadede "tekrar dene", iade etiketi (personel, hassas okuma). Panelde Siparişler > İade talepleri (durum sekmeleri, işlemler, teslim alma penceresi). Testler: HTTP 2 (uçtan uca: talep → onay + Geliver kodu → teslim + stok → 180 TL iade; ret notu, fazla adet, kargoya verilmemiş), modül 1, birim 3, panel 1 | K3, K4 | KK3 (para iadesi + stok testli; iade faturası F8'de `return.refunded`'a bağlanır) |
+| — | inceleme | **K5–K8 güvenlik incelemesi (2026-10-28 sabah, bağımsız ajan) ve düzeltmeler:**<br>• **Y1** müşteri iptali "Kargoya ver"le yarışabiliyordu (para geri, koli yolda): iptal (müşteri ve personel) artık hem kargo hem havale kilidini alıyor (`cancelLockKeys`); iptal iadesi yapılmış sipariş kargoya verilemiyor (`orders.ship_canceled_refund`).<br>• **O1** onay ve teslim alma durumu kilitten önce okuyordu: talep kilit altında yeniden okunuyor, durum yazımı beklenen durumdan; para iadesi de kilit altında, `return.refunded` bir kez.<br>• **O2** kargo ücreti iadesini müşterinin seçtiği neden belirliyordu: artık personelin teslim almadaki seçimi (`refund_shipping`, varsayılan hayır; panel mağaza kaynaklı nedende işaretli önerir).<br>• **O3** hasarlı ürün: sağlam ve hasarlı adet ayrı; hasarlı Medusa'nın `dismiss` yoluyla stoğa girmeden iade ediliyor (`damaged_items`, migration).<br>• **O4** Medusa'nın kendi iade/değişim/claim rotaları: `/store/returns` 404, admin değişiklikleri `returns.use_return_requests`.<br>• **O5** onaylanmış havalede müşteri iptali reddediliyor (`orders.cancel_contact_shop`).<br>• **O6** JSON-LD kargo ücreti yalnızca mağazada açık bir tablo seçeneği varken.<br>• **D1–D9:** olay bir kez; iade gönderisi kalemlerin çıktığı koliye; iade edilebilir adette Medusa'nın iade sayıları; teslim işaretlenmeyen koli 30 günde teslim sayılır; hata metinlerinde anahtar kontrolü; iade talepleri listesi denetimli okuma; bekleyen siparişi olan kargo seçeneği silinemiyor (`shipping.option_in_use`); iade talebine ayrı hız profili ve boş gövdeli uçlara Zod; testler (başkasının siparişi, eşzamanlı onay, Geliver reddinde Medusa iadesinin geri alınması).<br>• **Sunucuda denenecek:** Geliver `isReturn` kapıda ödemeli gönderinin tahsilatını iade gönderisine taşıyor mu (taşırsa kurye mağazadan tahsil eder); iade gönderisi açılırken sonucu belirsiz kalan çağrının etiketi. Testler: HTTP +6, birim +5, panel +1 | K5–K8 | — |
 | K9 | F7.11 | Değişim: Medusa exchange akışı, fark tutarı (tahsilat/iade), iade + yeni gönderi, stok iki yönde | K8 | KK5 |
 | K10 | F7.12 | Sipariş düzenleme: Medusa order edit (adres, kalem, miktar, fiyat düzeltme), ödeme farkı, faturalı siparişte kısıt, denetim | — | — |
 | K11 | F7.14 | Doğrudan taşıyıcı adaptörü: ilk müşterinin anlaşmalı firması (**kullanıcıya soruldu**), ortak sözleşme paketi | K2–K4 | KK7 |
@@ -1298,7 +1326,7 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
 ## Açık sorular / bloklayıcılar
 - [ ] **Soru (F7.14): ilk müşterinin anlaşmalı kargo firması hangisi?** Yurtiçi, Aras, MNG, PTT ya da Sürat'ten biri. Doğrudan taşıyıcı adaptörü (K11) bu cevaba bağlı; K1–K10 beklemeden ilerler. Firmanın API erişimi (müşteri numarası, test ortamı) de gerekecek (docs/12).
 - [ ] **Soru (F7.7): toplu etiketler tek PDF olsun mu?** Şimdi toplu "Kargoya ver" sonrası her siparişin etiketi ayrı indiriliyor. Tek dosyada birleştirmek için PDF kütüphanesi gerekir (öneri: `pdf-lib`, MIT, bağımlılıksız). Onaylarsan eklenir; Geliver'in toplu etiket ucu varsa (gerçek hesapla bakılacak) ona gerek kalmaz.
-- [ ] **Geliver hesabı (F7; kullanıcı).** K1–K10 sahte Geliver'le yazılır (ödemelerdeki gibi). Gerçek hesapla deneme sunucuya çıkışta. Doğrulanacaklar: takip durum kodları (SDK listelemiyor), bildirim imzası (SDK'da uygulanmamış), kapıda ödeme tahsilatının raporlandığı alan.
+- [ ] **Geliver hesabı (F7; kullanıcı).** K1–K10 sahte Geliver'le yazılır (ödemelerdeki gibi). Gerçek hesapla deneme sunucuya çıkışta. Doğrulanacaklar: takip durum kodları (SDK listelemiyor), bildirim imzası (SDK'da uygulanmamış), kapıda ödeme tahsilatının raporlandığı alan, kapıda ödemeli gönderinin iadesinde (`isReturn`) tahsilatın iade gönderisine taşınıp taşınmadığı.
 - [ ] **Gözden geçir: F6 kararları (2026-10-27/28 gece; kalıcı "önerileni uygula" talimatıyla):**
   - ADR-0029 (çevrim dışı ödemeler) ve ADR-0030 (ters ibraz kaydı, HTML belge paketi) otonom kabul edildi.
   - Kapıda ödeme ek ücret satırının başlığı Türkçe sabit ("Kapıda ödeme ücreti"); kiracı dili F19'da.

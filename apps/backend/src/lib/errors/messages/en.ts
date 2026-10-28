@@ -21,6 +21,10 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "bank_transfer.order_canceled": "A cancelled order's transfer cannot be confirmed.",
   "orders.cancel_after_packing":
     "An order packed or shipped cannot be cancelled; once it arrives, ask for a return.",
+  "orders.cancel_contact_shop":
+    "An order paid by bank transfer cannot be cancelled here; contact the shop to cancel it and get the money back.",
+  "orders.ship_canceled_refund":
+    "This order's cancellation has already been refunded; it cannot be shipped. Cancel the order.",
   "orders.ship_items_invalid":
     "The chosen lines do not match what is left to ship: at most what is left of each line can go.",
   "orders.ship_packed_first":
@@ -214,6 +218,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The chosen items do not match what can be returned: at most what was shipped and not yet returned of each.",
   "returns.window_closed": "The return period for this order is over, or it has not shipped yet.",
   "returns.already_open": "This order already has an open return request.",
+  "returns.use_return_requests":
+    "Returns, exchanges and claims are handled from the return requests screen only.",
   "returns.carrier_refused": "The carrier did not open the return; try again shortly.",
   "returns.refund_failed":
     'The items were received but the refund failed; use "Try the refund again".',
@@ -224,6 +230,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "shipping.no_offer":
     "No carrier offer came for this shipment. The chosen service may not carry this parcel.",
   "shipping.option_invalid": "The shipping option does not belong to this service.",
+  "shipping.option_in_use":
+    "Orders waiting to ship use this shipping option; they must be shipped first.",
   "shipping.use_ship_route":
     'Shipments with this service are opened with "Ship" on the order page.',
   "shipping.address_incomplete":

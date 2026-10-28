@@ -11,6 +11,7 @@ import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { stockShop, stockedProduct } from "../helpers/stock"
 import type { StockShop } from "../helpers/stock"
+import { medusaReturn } from "../helpers/medusa-return"
 
 jest.setTimeout(240 * 1000)
 
@@ -66,7 +67,7 @@ medusaIntegrationTestRunner({
       return response.data
     }
 
-    // Through Medusa's own return screens: ask, confirm, receive
+    // Through Medusa's own return workflows: ask, confirm, receive
     async function giveBack(
       orderId: string,
       shop: StockShop,
@@ -74,23 +75,14 @@ medusaIntegrationTestRunner({
       quantity = 1,
       shippingCost?: number
     ) {
-      const begun = (await post("/admin/returns", {
+      await medusaReturn(getContainer(), {
         order_id: orderId,
         location_id: shop.locationId,
-      })) as { return: { id: string } }
-      const id = begun.return.id
-      const items = [{ id: itemId, quantity }]
-      await post(`/admin/returns/${id}/request-items`, { items })
-      if (shippingCost !== undefined) {
-        await post(`/admin/returns/${id}/shipping-method`, {
-          shipping_option_id: shop.shippingOptionId,
-          custom_amount: shippingCost,
-        })
-      }
-      await post(`/admin/returns/${id}/request`)
-      await post(`/admin/returns/${id}/receive`)
-      await post(`/admin/returns/${id}/receive-items`, { items })
-      await post(`/admin/returns/${id}/receive/confirm`)
+        items: [{ id: itemId, quantity }],
+        ...(shippingCost === undefined
+          ? {}
+          : { shipping: { option_id: shop.shippingOptionId, amount: shippingCost } }),
+      })
     }
 
     const refundPayment = (paymentId: string, amount: Kurus) =>
