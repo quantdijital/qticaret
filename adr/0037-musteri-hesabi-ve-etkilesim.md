@@ -182,6 +182,35 @@ F10 vitrinin müşteri tarafını kuruyor: hesap, e-posta doğrulama, sosyal gir
   - "Bakılacaklar" görünümü yeni soruları ve onay bekleyen cevabı olan soruları birlikte gösterir.
   - Satır başına onay ya da ret ve mağaza adına cevap kutusu.
 
+## Uygulama notları (M9, kötüye kullanım, 2026-10-28)
+- **Yorum, soru ve abonelik:**
+  - Hız profilleri M6–M8'de kuruldu: `review_write`, `stock_alert`, `order_lookup`.
+  - Bağlantı içeren yorum, soru ve cevaplar M7–M8'den beri onaysız yayımlanmaz.
+- **Günlük e-posta sınırı (`notifications.email_daily_limit`):**
+  - Varsayılan 5000; 100 ile 200 000 arasında; panelde Ayarlar > Bildirimler.
+  - Mağazanın günlük sayacı Redis'te tutulur. %80'de personel zilde bir kez uyarılır (`messaging.email_daily_limit`).
+  - Sınır aşılınca o gün hiçbir e-posta gitmez: sipariş, sıfırlama ve personel uyarıları dahil. Kayıtta `over_quota` olarak görünür.
+- **Alan adı denetimi (`requireMailDomain`):**
+  - Hangi uçlarda: kayıt (`/auth/customer/emailpass/register`), misafir sepeti (`POST /store/carts` ve `/store/carts/:id`), stok bildirimi.
+  - Ne yapar: e-posta alan adının posta alıp almadığına bakar.
+    - MX kaydı varsa alır.
+    - MX yoksa alan adının kendi adresine bakılır (RFC 5321).
+    - "null MX" (RFC 7505), olmayan alan adı ve ayrılmış adlar reddedilir: `.invalid`, `.test`, `.localhost`, `.example`, `.local`.
+  - Hata anahtarı: `messaging.email_domain_refuses`.
+  - DNS'e 2 saniye süre verilir. Yavaş ya da hatalı DNS adresi geçirir; yalnızca net "yok" cevabı reddeder.
+  - Önbellek süreç içinde tutulur: "alır" cevabı 24 saat, "almaz" cevabı 1 saat.
+  - `EMAIL_DOMAIN_CHECK=off` denetimi kapatır. `NODE_ENV=test` altında varsayılan olarak kapalıdır, çünkü testlerin adresleri uydurmadır.
+- **Checkout'ta SMS şişirme:**
+  - "Siparişiniz alındı" SMS'i, alışverişçinin yazdığı herhangi bir numaraya gider.
+  - Bir IP (IPv6'da /64) bir saatte 10'dan fazla sepet tamamlarsa o sepetlere `qt_sms_held` işareti konur. Bu siparişlerin SMS'i gönderilmez (`over_quota`), e-postası gider.
+  - IP adresi hiçbir yerde saklanmaz.
+  - `qt_` önekli metadata yalnızca sunucunundur. Vitrin bunu artık sepetin kendisinde de yazamaz; önceden yalnızca satırlarda engelleniyordu.
+  - Sayaç hata verirse checkout durmaz.
+- **Captcha işareti:** `smsAllowance` bir IP saatte 3 istekten fazlasını yaptığında `challenge` döndürür. Captcha sağlayıcısını ve vitrinde gösterimini F15 seçer. Captcha'nın gerekeceği uçlar: kayıt, stok bildirimi, siparişimi bul, yorum ve soru.
+- **Gözden geçir:**
+  - Sınır aşılınca işlemsel e-postalar da duruyor. Ayrı bir işlemsel kota gerekebilir.
+  - Mobil operatörlerin ortak IP'si (CGNAT) arkasındaki alışverişçiler yoğun saatte sipariş SMS'ini kaybedebilir; e-posta yine gider.
+
 ## Alternatifler
 
 | Seçenek | Artı | Eksi |

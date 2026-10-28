@@ -72,7 +72,8 @@ function identityKey(identity: string): string {
   return hashPii(identity.trim().toLowerCase(), identityHashKey, "rate_limit").slice(0, 32)
 }
 
-const clientBucket = (req: MedusaRequest): string =>
+/** The visitor's address as limits count it (IPv6 by its /64). */
+export const clientBucket = (req: MedusaRequest): string =>
   ipBucket(req.ip) ?? ipBucket(req.socket.remoteAddress) ?? "unknown"
 
 /** Seconds until the request may be tried again, or null when it is within every limit. */

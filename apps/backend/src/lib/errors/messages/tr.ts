@@ -297,6 +297,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "customer_segments.rules_empty": "Segment için en az bir kural seçin.",
   "wishlist.full": "Favori listeniz dolu; önce birkaç ürünü çıkarın.",
   "wishlist.product_unknown": "Ürün bulunamadı.",
+  "messaging.email_domain_refuses":
+    "Bu e-posta adresinin alan adı e-posta almıyor; adresi kontrol edin.",
   "stock_alerts.not_tracked": "Bu ürün için stok bildirimi verilemiyor.",
   "stock_alerts.in_stock": "Bu ürün şu an stokta; hemen sipariş verebilirsiniz.",
   "stock_alerts.email_required": "Haber verebilmemiz için e-posta adresinizi yazın.",

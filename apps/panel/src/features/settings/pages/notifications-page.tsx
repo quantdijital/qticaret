@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next"
 import { PageHeader } from "@/components/patterns/page-header"
+import { EmailLimitCard } from "@/features/settings/components/email-limit-card"
 import { SenderDomainCard } from "@/features/settings/components/sender-domain-card"
 import { StaffAlertsCard } from "@/features/settings/components/staff-alerts-card"
 import { SuppressionsCard } from "@/features/settings/components/suppressions-card"
@@ -20,6 +21,7 @@ export function NotificationsPage() {
       <PageHeader title={t(`${N}.title`)} description={t(`${N}.description`)} />
       <StaffAlertsCard />
       <SenderDomainCard />
+      <EmailLimitCard />
       <SuppressionsCard />
       <TemplatePreviewCard />
     </div>

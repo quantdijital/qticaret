@@ -28,6 +28,11 @@ export const NOTIFICATION_MESSAGES: Readonly<
       description:
         "Bugün {{count}}/{{limit}} SMS gönderildi. Sınıra ulaşınca SMS gitmez; Ayarlar > SMS'ten değiştirebilirsiniz.",
     },
+    "messaging.email_daily_limit": {
+      title: "Günlük e-posta sınırının %80'i doldu",
+      description:
+        "Bugün {{count}}/{{limit}} e-posta gönderildi. Sınıra ulaşınca e-posta gitmez; Ayarlar > Bildirimler'den değiştirebilirsiniz.",
+    },
     "orders.bank_transfer_pending": {
       title: "Havale bekleniyor: #{{number}}",
       description: "{{total}} tutarındaki ödeme gelince siparişi onaylayın.",
@@ -54,6 +59,11 @@ export const NOTIFICATION_MESSAGES: Readonly<
       title: "80% of today's SMS limit used",
       description:
         "{{count}}/{{limit}} texts sent today. At the limit no text goes; change it under Settings > SMS.",
+    },
+    "messaging.email_daily_limit": {
+      title: "80% of today's e-mail limit used",
+      description:
+        "{{count}}/{{limit}} e-mails sent today. At the limit no e-mail goes; change it under Settings > Notifications.",
     },
     "orders.bank_transfer_pending": {
       title: "Bank transfer awaited: #{{number}}",

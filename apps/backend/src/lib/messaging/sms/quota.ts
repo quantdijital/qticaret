@@ -20,6 +20,24 @@ export const SMS_LIMITS = {
 const HOUR = 60 * 60 * 1000
 const DAY = 24 * HOUR
 
+/**
+ * The cart's mark that its order's texts are held (F10 M9): checkout
+ * sends "order received" to any phone typed in, so one address
+ * completing more carts in an hour than `perIpHour` gets no texts for
+ * them; the e-mail still goes. Under `qt_`: a storefront cannot set it.
+ */
+export const CHECKOUT_SMS_HELD = "qt_sms_held"
+
+/** Counts a cart completed from the visitor's address; false once it is past the hour's limit. */
+export async function checkoutSmsAllowed(
+  store: RateLimitStore,
+  ipBucket: string,
+  scale = 1
+): Promise<boolean> {
+  const visits = await store.hit(`sms:checkout:${ipBucket}`, HOUR)
+  return visits.count <= SMS_LIMITS.perIpHour * scale
+}
+
 export interface SmsAllowance {
   allowed: boolean
   /** Which limit refused it. */

@@ -15,7 +15,8 @@
 | Webhook endpoint'leri | Sahte istek, DoS | İmza/HMAC, IP allowlist (varsa), rate limit, hızlı 200 + kuyruk |
 | Dosya yükleme / dışa aktarma | SVG-XSS, MIME sahteciliği, EXIF sızıntısı, CSV formül enjeksiyonu, XXE, zip bomb | Tür doğrulama, yeniden kodlama, EXIF temizleme, hücre kaçışlama, güvenli XML parser |
 | Sunucu taraflı istekler | SSRF (webhook, geçişte görsel indirme, feed, LLM/entegrasyon URL'leri) | `lib/security/safe-fetch`: iç IP aralıkları ve DNS rebinding reddi |
-| Mesajlaşma | SMS pumping (OTP/şifre sıfırlama ile fatura şişirme) | Telefon + IP + hesap başına SMS kotası, captcha eşiği |
+| Mesajlaşma | SMS pumping (OTP/şifre sıfırlama ile fatura şişirme; checkout'ta yazılan numaraya sipariş SMS'i) | Telefon + IP + hesap başına SMS kotası, captcha eşiği; IP başına saatte 10'dan fazla tamamlanan sepetin SMS'i tutulur (adr/0037 M9) |
+| Mesajlaşma | Uydurma adreslere giden e-postaların geri dönmesi, gönderici itibarının düşmesi | E-posta alan adının MX denetimi (kayıt, misafir sepeti, stok bildirimi), mağazanın günlük e-posta sınırı (adr/0037 M9) |
 | Tenant alan adları | Subdomain takeover, yanlış tenant'a yönlenme | Kapatmada DNS temizliği doğrulaması, sahiplik kanıtı |
 | Bağımlılıklar | Supply-chain saldırısı | Lockfile, Renovate bekleme süresi, audit, SBOM, imaj taraması |
 | Tenant izolasyonu | Yanlış tenant'a erişim, kaynak çalma | Instance-per-tenant, ayrı DB kullanıcıları, ağ izolasyonu |

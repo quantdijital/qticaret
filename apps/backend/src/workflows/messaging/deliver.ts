@@ -19,7 +19,7 @@ import { MESSAGING_MODULE } from "../../modules/messaging"
 import type MessagingModuleService from "../../modules/messaging/service"
 import { brandOf } from "./brand"
 import { senderAddress } from "./sender-domain"
-import { withinSmsQuota } from "./sms-quota"
+import { withinQuota } from "./quota"
 import type { MessageRecipients } from "./loaders/types"
 
 export type SendOutcome =
@@ -43,6 +43,8 @@ export interface DeliverInput<N extends MessageTemplateName> {
   vars: VarsOf<N>
   /** Sets one send apart from another of the same template and resource (a second reset). */
   key?: string
+  /** Channels held back for this send (a checkout's texts from a flooding address, F10 M9). */
+  held?: MessageChannel[]
 }
 
 type Container = Pick<MedusaContainer, "resolve">
@@ -91,8 +93,9 @@ function render<N extends MessageTemplateName>(
 /**
  * Sends a template's message on each of its channels the recipient has
  * an address for (adr/0036). In order: the channel is on, the address is
- * one, it is not suppressed, a commercial message has consent; then Medusa
- * sends it once per template, channel, resource and key. What is not sent
+ * one, it is not suppressed, a commercial message has consent, the channel
+ * is not held, and a new send fits the day's quota; then Medusa sends it
+ * once per template, channel, resource and key. What is not sent
  * is logged with its reason and a masked address; nothing logs the
  * message itself. A provider's failure is logged and left for the retry.
  */
@@ -132,6 +135,10 @@ export async function deliver<N extends MessageTemplateName>(
       notSent("no_consent", recipient.masked)
       continue
     }
+    if (input.held?.includes(channel)) {
+      notSent("over_quota", recipient.masked)
+      continue
+    }
     const key = [template.name, channel, input.resource.id, input.key].filter(Boolean).join(":")
     const notifications = container.resolve(Modules.NOTIFICATION)
     const rows = notifications as unknown as NotificationRows
@@ -148,7 +155,7 @@ export async function deliver<N extends MessageTemplateName>(
       // to record the result: a failed attempt is cleared and sent as a new one
       await rows.deleteNotifications([previous.id])
     }
-    if (channel === "sms" && !(await withinSmsQuota(container, recipient.hash))) {
+    if (!(await withinQuota(container, channel, recipient.hash))) {
       notSent("over_quota", recipient.masked)
       continue
     }

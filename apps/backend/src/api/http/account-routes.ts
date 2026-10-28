@@ -17,6 +17,7 @@ import {
 import { StorePostWishlistItem } from "../store/customers/me/wishlist/validators"
 import { StorePostOrderLookup } from "../store/order-lookup/validators"
 import { StorePostStockAlert } from "../store/stock-alerts/validators"
+import { requireMailDomain } from "./mail-domain"
 import { optionalCustomer, orderPageAccess } from "./order-access"
 import { rateLimit } from "./rate-limit"
 import { rejectRequest } from "./reject"
@@ -185,8 +186,12 @@ export const ACCOUNT_ROUTES = [
         },
       }),
       validateAndTransformBody(StorePostStockAlert),
+      requireMailDomain(),
     ],
   },
+  // F10 M9: an address whose domain takes no mail opens no account; no
+  // `methods`, so it runs before Medusa's own route
+  { matcher: "/auth/customer/emailpass/register", middlewares: [requireMailDomain()] },
   { matcher: "/stock-alerts/confirm", middlewares: [rateLimit(() => RATE_LIMIT_PROFILES.webhook)] },
   // adr/0038 §1: an unsubscribe link, opened or one-clicked from anywhere
   {

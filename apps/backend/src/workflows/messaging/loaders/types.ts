@@ -10,6 +10,8 @@ export interface Loaded<V> {
   recipients: MessageRecipients
   receiverId: string | null
   resourceType: string
+  /** Channels this message may not use (a checkout's texts held, F10 M9). */
+  held?: MessageChannel[]
 }
 
 /** The first value with text in it, trimmed; null when none has any. */

@@ -292,6 +292,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "customer_segments.rules_empty": "Choose at least one rule for the segment.",
   "wishlist.full": "Your saved list is full; remove a few products first.",
   "wishlist.product_unknown": "The product was not found.",
+  "messaging.email_domain_refuses":
+    "This e-mail address's domain takes no mail; check the address.",
   "stock_alerts.not_tracked": "Stock alerts are not available for this product.",
   "stock_alerts.in_stock": "This product is in stock now; you can order it.",
   "stock_alerts.email_required": "Write your e-mail address so we can tell you.",

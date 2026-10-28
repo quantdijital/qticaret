@@ -70,6 +70,9 @@ const envSchema = z.object({
     .string()
     .regex(/^whsec_[A-Za-z0-9+/=]{16,200}$/, "must be a Resend signing secret (whsec_…)")
     .optional(),
+  // F10 M9: whether a shopper's e-mail domain must take mail (its MX); on
+  // unless NODE_ENV=test, where the tests' made-up domains would fail it
+  EMAIL_DOMAIN_CHECK: z.enum(["on", "off"]).optional(),
   // A fake Netgsm on a developer's machine (adr/0036)
   NETGSM_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
   // F10.2 (adr/0037 §3): the shop's own OAuth clients, made at provisioning;

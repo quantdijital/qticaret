@@ -1,5 +1,5 @@
 import { createMemoryStore } from "../../../security/rate-limit"
-import { SMS_LIMITS, smsAllowance } from "../quota"
+import { SMS_LIMITS, checkoutSmsAllowed, smsAllowance } from "../quota"
 
 describe("SMS quotas (F9.8)", () => {
   it("refuses a number past its hour, and lets another through", async () => {
@@ -42,5 +42,17 @@ describe("SMS quotas (F9.8)", () => {
 
     expect(results.map(({ challenge }) => challenge).indexOf(true)).toBe(SMS_LIMITS.perIpChallenge)
     expect(results.at(-1)).toMatchObject({ allowed: false, reason: "ip" })
+  })
+
+  it("holds a checkout's texts once its address completes too many carts in an hour (F10 M9)", async () => {
+    const store = createMemoryStore()
+    const results = []
+    for (let i = 0; i <= SMS_LIMITS.perIpHour; i += 1) {
+      results.push(await checkoutSmsAllowed(store, "203.0.113.0"))
+    }
+
+    expect(results.indexOf(false)).toBe(SMS_LIMITS.perIpHour)
+    expect(await checkoutSmsAllowed(store, "198.51.100.0")).toBe(true)
+    expect(await checkoutSmsAllowed(store, "203.0.113.0", 100)).toBe(true)
   })
 })

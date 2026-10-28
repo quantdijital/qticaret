@@ -11,10 +11,12 @@ import { StoreGetInstallments } from "../store/payment/installments/validators"
 import { StoreGetPaymentMethods } from "../store/payment/methods/validators"
 import { isFeeLine } from "../../lib/payments/cod"
 import type { FeeCart } from "../../lib/payments/cod"
+import { holdFloodingCheckoutSms } from "./checkout-sms"
+import { requireMailDomain } from "./mail-domain"
 import { rateLimit } from "./rate-limit"
 
 const FEE_LINE_FIELDS = ["items.id", "items.metadata", "items.variant_id", "items.is_custom_price"]
-// Line metadata keys the server alone writes (the fee line's `qt_fee`)
+// Metadata keys the server alone writes (the fee line's `qt_fee`, the cart's `qt_sms_held`)
 const RESERVED_METADATA_PREFIX = "qt_"
 
 /**
@@ -115,8 +117,9 @@ const reservedKeys = (metadata: unknown): boolean =>
   Object.keys(metadata).some((key) => key.startsWith(RESERVED_METADATA_PREFIX))
 
 /**
- * Line metadata under `qt_` is the server's (the fee line's marker): a
- * storefront adding, changing or creating a cart with lines may not set it.
+ * Metadata under `qt_` is the server's (the fee line's marker, a cart's
+ * held texts): a storefront creating or changing a cart or its lines may
+ * not set it.
  */
 function refuseReservedMetadata(
   req: MedusaRequest,
@@ -159,9 +162,14 @@ export const PAYMENT_ROUTES = [
     matcher: "/store/carts/:id/line-items",
     middlewares: [refuseReservedMetadata],
   },
+  // F10 M9: a guest's e-mail must have a domain that takes mail
   {
     matcher: "/store/carts",
-    middlewares: [refuseReservedMetadata],
+    middlewares: [refuseReservedMetadata, requireMailDomain()],
+  },
+  {
+    matcher: "/store/carts/:id",
+    middlewares: [refuseReservedMetadata, requireMailDomain()],
   },
   // F6 W3: which ways to pay a cart can take (cash on delivery by its cart)
   {
@@ -178,7 +186,7 @@ export const PAYMENT_ROUTES = [
   },
   {
     matcher: "/store/carts/:id/complete",
-    middlewares: [checkoutLimit, requireCheckoutPayment],
+    middlewares: [checkoutLimit, requireCheckoutPayment, holdFloodingCheckoutSms],
   },
   // PayTR's notifications (adr/0026 §5): its retries stay well inside the budget
   {

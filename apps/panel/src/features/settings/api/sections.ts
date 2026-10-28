@@ -93,6 +93,8 @@ export interface NotificationSettings {
   alert_seo_digest: boolean
   /** Texts the shop sends a day at most (F9.8). */
   sms_daily_limit: number
+  /** E-mails the shop sends a day at most (F10 M9): a guard on bounces from made-up addresses. */
+  email_daily_limit: number
 }
 
 export const sectionQuery = <T>(section: string) =>

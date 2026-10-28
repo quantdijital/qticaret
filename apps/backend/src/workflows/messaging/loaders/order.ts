@@ -15,6 +15,7 @@ import {
   BANK_TRANSFER_PAYMENT_PROVIDER_ID,
   COD_PAYMENT_PROVIDER_ID,
 } from "../../../lib/payments/checkout"
+import { CHECKOUT_SMS_HELD } from "../../../lib/messaging/sms/quota"
 import { formatIban } from "../../../lib/tr/iban"
 import { PLATFORM_SETTINGS_MODULE } from "../../../modules/platform-settings"
 import type PlatformSettingsModuleService from "../../../modules/platform-settings/service"
@@ -47,6 +48,7 @@ const ORDER_FIELDS = [
   "shipping_address.phone",
   "payment_collections.payment_sessions.provider_id",
   "payment_collections.payment_sessions.data",
+  "cart.metadata",
 ]
 
 interface OrderRow {
@@ -73,6 +75,7 @@ interface OrderRow {
           ({ provider_id: string; data?: Record<string, unknown> | null } | null)[] | null
       } | null)[]
     | null
+  cart?: { metadata?: Record<string, unknown> | null } | null
 }
 
 /** Lira as a Turkish shopper reads it: `₺1.234,50`. */
@@ -182,6 +185,8 @@ export async function loadOrderMessage(
     recipients: { email: order.email, sms: address["phone"] ?? null },
     receiverId: order.customer_id,
     resourceType: "order",
+    // Checkout held its texts: its address completed too many carts (F10 M9)
+    ...(order.cart?.metadata?.[CHECKOUT_SMS_HELD] === true ? { held: ["sms" as const] } : {}),
   }
 }
 

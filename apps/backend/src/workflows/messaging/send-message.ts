@@ -35,6 +35,7 @@ export const sendMessageStep = createStep(
         receiverId: loaded.receiverId,
         vars: loaded.vars,
         ...(input.key ? { key: input.key } : {}),
+        ...(loaded.held ? { held: loaded.held } : {}),
       })
     )
   }
