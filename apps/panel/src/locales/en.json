@@ -1055,6 +1055,33 @@
         "label": "Texts a day at most",
         "saved": "Daily SMS limit saved."
       }
+    },
+    "groups": {
+      "shop": "Shop",
+      "selling": "Selling and delivery",
+      "messages": "Talking to customers",
+      "system": "System"
+    },
+    "home": {
+      "title": "Settings",
+      "description": "Your shop's settings, by subject. Open the section you want to change.",
+      "all": "All settings",
+      "menu": "Settings section"
+    },
+    "sectionHints": {
+      "store": "Shop name, contact details, time zone and units",
+      "appearance": "The panel's brand colour, corners and density",
+      "seo": "Domain, URL style, title and description templates",
+      "attributes": "Attribute templates for products",
+      "payments": "Card, bank transfer and cash on delivery",
+      "shipping": "Carriers, options and rates",
+      "locations": "Warehouses that hold stock, and their addresses",
+      "notifications": "E-mail sender, alerts and message templates",
+      "sms": "SMS service and daily sending limit",
+      "integrations": "Whether the connected services are working",
+      "features": "Shop features you can turn on or off",
+      "jobs": "Long jobs such as exports, and their files",
+      "audit": "Who changed what in the panel, and when"
     }
   },
   "status": {
@@ -1556,6 +1583,12 @@
       "regularBasis": "The price history begins after the discount did, so the price without a sale is used.",
       "table": "Prices from {{from}} to today",
       "unchanged": "The price has not changed in the last 90 days."
+    },
+    "interest": {
+      "title": "Customer interest",
+      "wishlist": "Saved by",
+      "waiting": "Waiting for stock",
+      "waitingFor": "Waiting for stock · {{variant}}"
     }
   },
   "orders": {

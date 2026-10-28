@@ -1055,6 +1055,33 @@
         "label": "Günde en çok SMS",
         "saved": "Günlük SMS sınırı kaydedildi."
       }
+    },
+    "groups": {
+      "shop": "Mağaza",
+      "selling": "Satış ve teslimat",
+      "messages": "Müşteri iletişimi",
+      "system": "Sistem"
+    },
+    "home": {
+      "title": "Ayarlar",
+      "description": "Mağazanızın ayarları, konularına göre. Değiştirmek istediğiniz bölümü açın.",
+      "all": "Tüm ayarlar",
+      "menu": "Ayar bölümü"
+    },
+    "sectionHints": {
+      "store": "Mağaza adı, iletişim bilgileri, saat dilimi ve ölçü birimleri",
+      "appearance": "Panelin marka rengi, köşeleri ve yoğunluğu",
+      "seo": "Alan adı, adres yapısı, başlık ve açıklama şablonları",
+      "attributes": "Ürünlerde kullanılan özellik şablonları",
+      "payments": "Kart, havale ve kapıda ödeme yöntemleri",
+      "shipping": "Kargo firmaları, seçenekler ve ücretler",
+      "locations": "Stoğun tutulduğu depolar ve adresleri",
+      "notifications": "E-posta gönderici, uyarılar ve ileti şablonları",
+      "sms": "SMS hizmeti ve günlük gönderim sınırı",
+      "integrations": "Bağlı dış servislerin çalışıp çalışmadığı",
+      "features": "Açılıp kapatılabilen mağaza özellikleri",
+      "jobs": "Dışa aktarma gibi uzun süren işler ve dosyaları",
+      "audit": "Panelde kim neyi ne zaman değiştirdi"
     }
   },
   "status": {
@@ -1564,6 +1591,12 @@
       "regularBasis": "Fiyat geçmişi indirim başladıktan sonra tutulmaya başladığı için indirimsiz fiyat kullanılıyor.",
       "table": "{{from}} tarihinden bugüne fiyatlar",
       "unchanged": "Son 90 günde fiyat değişmedi."
+    },
+    "interest": {
+      "title": "Müşteri ilgisi",
+      "wishlist": "Favorisine ekleyen",
+      "waiting": "Stok bekleyen",
+      "waitingFor": "Stok bekleyen · {{variant}}"
     }
   },
   "orders": {

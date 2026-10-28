@@ -18,6 +18,7 @@ export const SECTIONS = [
   "/reports/daily",
 ]
 export const SETTINGS = [
+  "/settings",
   "/settings/store",
   "/settings/payments",
   "/settings/payments/paytr",
@@ -26,6 +27,11 @@ export const SETTINGS = [
   "/settings/payments/cash_on_delivery",
   "/settings/shipping",
   "/settings/shipping/geliver",
+  "/settings/shipping/aras",
+  "/settings/shipping/yurtici",
+  "/settings/notifications",
+  "/settings/sms",
+  "/settings/sms/netgsm",
   "/orders/chargebacks",
   "/orders/returns",
   "/settings/integrations",

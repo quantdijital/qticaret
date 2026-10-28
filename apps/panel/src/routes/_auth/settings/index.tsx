@@ -1,8 +1,7 @@
-import { createFileRoute, redirect } from "@tanstack/react-router"
+import { createFileRoute } from "@tanstack/react-router"
+import { SettingsHomePage } from "@/features/settings/pages/settings-home-page"
 
-// Settings has no page of its own: the first section opens
+// Settings' first page: every section in its group
 export const Route = createFileRoute("/_auth/settings/")({
-  beforeLoad: () => {
-    throw redirect({ to: "/settings/store" })
-  },
+  component: SettingsHomePage,
 })
