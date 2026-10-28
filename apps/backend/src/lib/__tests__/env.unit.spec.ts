@@ -180,6 +180,26 @@ describe("parseEnv", () => {
     ).toContain("GELIVER_BASE_URL: is not allowed on staging or production")
   })
 
+  it("sends e-mail through Mailpit on a developer's machine only, and through Resend with its key", () => {
+    const mailpit = {
+      EMAIL_TRANSPORT: "mailpit",
+      MAILPIT_URL: "http://127.0.0.1:58025",
+      EMAIL_FROM: "bildirim@magaza.test",
+    }
+    const deployed = { ...validEnv, ...s3Env, CREDENTIALS_ENCRYPTION_KEY: hexKey() }
+
+    expect(parseEnv({ ...validEnv, ...mailpit, NODE_ENV: "test" }).EMAIL_TRANSPORT).toBe("mailpit")
+    expect(errorOf({ ...deployed, ...mailpit, NODE_ENV: "production" })).toContain(
+      "MAILPIT_URL: is not allowed on staging or production"
+    )
+    expect(
+      errorOf({ ...validEnv, EMAIL_TRANSPORT: "resend", EMAIL_FROM: "a@b.example" })
+    ).toContain("RESEND_API_KEY: is required for resend")
+    expect(errorOf({ ...validEnv, EMAIL_TRANSPORT: "resend" })).toContain(
+      "EMAIL_FROM: is required with EMAIL_TRANSPORT"
+    )
+  })
+
   it("lets a fake PayTR address on a developer's machine only", () => {
     const fake = { PAYTR_BASE_URL: "http://127.0.0.1:4010" }
 

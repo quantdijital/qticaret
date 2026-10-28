@@ -1,20 +1,20 @@
 # Bildirimler: SMS ve E-posta
 
 ## Provider'lar
-- `notification-email`: Resend/SES; dev'de SMTP → Mailpit
+- `notification-email`: Resend; dev'de Mailpit'in HTTP gönderim ucu (SMTP kütüphanesi yok)
 - `notification-sms`: Netgsm (veya benzeri); provider deseniyle değiştirilebilir
 
 ## Kanallar
 Medusa Notification modülünde kanal başına bir provider (email, sms).
 
 ## Şablonlar
-- E-posta: React Email; marka bilgisi `platform-settings`'ten
+- E-posta: kendi şablonlarımız (bağımlılıksız, kaçışlı tablo HTML + düz metin); marka bilgisi `platform-settings`'ten
 - SMS: kısa, i18n anahtarlı; 160 karakter hedef, Türkçe karakter kodlamasına dikkat (karakter sayısı/maliyet)
 
 ## İşlemsel vs ticari
 - İşlemsel (sipariş, kargo, şifre): izin gerekmez.
-- Ticari (kampanya): İYS izni zorunlu; `legal-consent` modülünden kontrol edilir, izin yoksa gönderim engellenir ve loglanır.
+- Ticari (kampanya): İYS izni zorunlu; `messaging` modülünden kontrol edilir, izin yoksa gönderim engellenir ve loglanır.
 
-## Env
-`EMAIL_PROVIDER`, `RESEND_API_KEY` / SES bilgileri, `EMAIL_FROM`,
-`SMS_PROVIDER`, `NETGSM_USERCODE`, `NETGSM_PASSWORD`, `NETGSM_HEADER`
+## Env ve hesaplar (ADR-0036)
+- E-posta platformun: `EMAIL_TRANSPORT` (`resend` ya da geliştirmede `mailpit`), `EMAIL_FROM`, `RESEND_API_KEY`, `MAILPIT_URL`.
+- SMS mağazanın: Netgsm kullanıcı kodu, şifre ve gönderici başlığı panelden girilir (`integration-credentials` `netgsm`, ADR-0027); env'de değil.

@@ -3,6 +3,8 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
+**F9 — Bildirimler: BAŞLADI (2026-10-28 akşam).** Plan aşağıda "F9 görev planı"; ADR-0036 önerildi ve otonom kabul edildi (gözden geçir). Dal `f9-notifications`. N1 bitti.
+
 **F8 — E-Fatura / e-Arşiv: PLANLANDI, ASKIDA (2026-10-28 öğlen).** Kullanıcı e-fatura tarafını netleştirdikten sonra başlanacak ("şimdilik askıya alabilirsin"). Plan aşağıda "F8 görev planı"; ADR-0034 önerildi.
 
 **F7 K11 — Doğrudan taşıyıcılar (Aras, Yurtiçi): BİTTİ (2026-10-28 öğleden sonra; K11a–K11d, KK7 işaretli).** Kullanıcı: "Elimde Aras var, Yurtiçi ileride olacak; entegrasyonlarını yapalım, kullanıcı bilgileri sonradan girilebilir olsun; sadece Geliver'e bağlı kalmayalım." ADR-0035 kabul edildi. Sıra K11a → K11b → K11c → K11d.
@@ -1145,7 +1147,23 @@
 - **Daha önce:** F1 planlaması ve F0.2–F0.8 (2026-10-24), F0.1 monorepo (2026-10-24 sabahı), SEO ve güvenlik dokümanları (2026-10-22).
 
 ## Sıradaki görev
-**Claude'un sıradaki işi:** F9 (Bildirimler) planı (`/faz-baslat F9`). F7 kapandı, yalnızca KK3 kaldı; KK3 iade faturası olduğu için F8'i bekliyor. F8 askıda ve kullanıcı e-faturayı netleştirince açılır. F8 askıda (kullanıcı e-faturayı netleştirecek); F7 KK3 F8'i bekliyor. Plan aşağıda "F7 görev planı". Dal `f7-shipping` (`f6-alternative-payments` üzerinden). Kullanıcı 2026-10-27 gece: "izin istemeden çalışmaya devam edersin, kritik bir şey olursa sabah sorarım."
+**Claude'un sıradaki işi:** F9 N2–N3 (şablonların geri kalanı ve olay aboneleri; ADR-0036). Dal `f9-notifications` (`f7-shipping` üzerinden). F7 kapandı, yalnızca KK3 kaldı; KK3 iade faturası olduğu için F8'i bekliyor. F8 askıda ve kullanıcı e-faturayı netleştirince açılır. F8 askıda (kullanıcı e-faturayı netleştirecek); F7 KK3 F8'i bekliyor. Plan aşağıda "F7 görev planı". Dal `f7-shipping` (`f6-alternative-payments` üzerinden). Kullanıcı 2026-10-27 gece: "izin istemeden çalışmaya devam edersin, kritik bir şey olursa sabah sorarım."
+
+### F9 görev planı (2026-10-28; Netgsm uçları resmî SDK kaynağından, Mailpit gönderim ucu v1.31.4 kaynağından, Resend ve Svix imzası resmî belgelerden doğrulandı; Medusa bildirim API'leri 2.21.2 kaynağından)
+Karar: ADR-0036 (önerildi, otonom kabul). Ayrıntı `docs/entegrasyonlar/sms.md`.
+
+| # | F9 | Görev | Bağımlılık | KK |
+|---|---|---|---|---|
+| N1 ✅ | F9.1 | **Bitti (2026-10-28 akşam).** Gönderim altyapısı:<br>- `notification-email` sağlayıcısı: Resend ve Mailpit HTTP göndericileri; `EMAIL_TRANSPORT`, `RESEND_API_KEY` ve `EMAIL_FROM` env şemasında. Mailpit staging ve canlıda reddedilir.<br>- medusa-config'de `email` ve `sms` kanalları; `feed` yerel sağlayıcıda kalır.<br>- `messaging` modülü: ileti izni ve bastırma listesi.<br>- `sendMessage` adımı: bastırma, izin ve kota kontrolü, ardından `createNotifications` (`idempotency_key`). Gönderilmeyen ileti maskeli logla kaydedilir.<br>- Sahte e-posta sunucusu (Mailpit API'sinin karşılığı, `packages/testing`).<br>**Bulgu:** Medusa 2.21.2 başarısız bir anahtarı aynı anahtarla yeniden denediğinde hiç kaydetmediği bir kimlikle gönderiyor, sonucu kaydedemiyor ("Notification … not found"). Bu yüzden başarısız deneme silinip yeni kayıtla gönderiliyor; testli.<br>Testler: modül 4, birim 6 (+env 1), HTTP 3 (`messages`). Şablon çekirdeği (yerleşim, katalog, "Siparişiniz alındı" e-posta + SMS metni) N2'den öne alındı | — | KK3 (altyapı) |
+| N2 | F9.3 | Şablon sistemi (bağımlılıksız):<br>- Yerleşim: logo ve marka rengi `appearance`'tan, mağaza adı ve iletişim bilgisi `store`'dan. Tablo HTML, satır içi stil, kaçışlı değerler, düz metin eşi.<br>- Metin kataloğu (TR). SMS şablonlarında 160 karakter hedefi ve TR kodlama hesabı.<br>- Panel için örnek veriyle önizleme ucu. | N1 | KK1 |
+| N3 | F9.4 | Olaylar ve aboneler:<br>- Sipariş alındı: kart, havale bekleniyor ve kapıda ödeme ayrı metinlerle.<br>- Ödeme başarısız, kargoya verildi, teslim edildi.<br>- İade ya da değişim talebi alındı ve onaylandı; değişim ve iade bizim olaylarımız.<br>- Ödeme başarısız: Medusa'da olay yok; bizim olayımız.<br>- Şifre sıfırlama (`auth.password_reset`).<br>- E-posta doğrulama (`auth.verification_requested`, Medusa'da yerleşik): şablon ve abone hazır; açılması F10.1'de.<br>- HTTP testleri her olayın doğru şablonla tek kez gittiğini sahte Mailpit'te okur. | N2 | KK1 |
+| N4 | F9.2 | SMS (Netgsm):<br>- XML istemcisi; `filter` alanı 0 ya da 11.<br>- `integration-credentials` `netgsm`: kullanıcı kodu ve şifre gizli, gönderici başlığı açık. Başlık sorgusuyla doğrulama ve sağlık kontrolü.<br>- Sahte Netgsm (`pnpm dev:netgsm`).<br>- Sipariş ve kargo SMS'leri (müşteri telefonuna).<br>- Panelde Ayarlar > Bildirimler > SMS. | N1 | KK2 |
+| N5 | F9.5 | İşlemsel ve ticari ayrımı:<br>- Şablon türünü kendisi taşır.<br>- İzin kaydı: panelde müşteri detayında görme ve düzeltme; denetim kaydına yazılır.<br>- Ticari ileti izinsiz gitmez ve loglanır; ticari SMS ayrıca `filter=11` ile gider.<br>- Testler: izinsiz alıcıya ticari SMS ve e-posta gitmez. | N1, N4 | KK2 |
+| N6 | F9.6 | Geri dönen ve şikâyet edilen adresler:<br>- `/hooks/resend`: Svix imzası, 5 dakika tolerans, `webhook-events` ile tek işlem.<br>- Kalıcı geri dönüş ve şikâyet bastırma listesine yazılır; listedeki adrese gönderim yapılmaz.<br>- Panelde liste ve listeden çıkarma (denetim kaydıyla).<br>- Alan adı doğrulama: Resend alan adı API'si; SPF, DKIM ve DMARC kayıtları panelde, "Doğrula" düğmesi. Sahte Resend. | N1 | KK3 |
+| N7 | F9.7 | Mağaza içi uyarılar:<br>- Yeni sipariş, onay bekleyen havale, düşük stok (mevcut zile e-posta eklenir), haftalık SEO özeti (iş), başarısız fatura için kanca (F8).<br>- Yeni `notifications` ayar bölümü: yönetici e-postaları ve açık olan uyarılar. | N2 | — |
+| N8 | F9.8 | SMS kotası:<br>- Gönderimde numara başına (saatlik ve günlük) ve mağaza başına (günlük) sınır; kullanıcının tetiklediği SMS uçlarında IP başına sınır. Mevcut hız sınırı deposu kullanılır.<br>- %80'de maliyet uyarısı; aşımda captcha işareti (sağlayıcı F15'te).<br>- Test: aynı numaraya sınır üstü istek reddedilir. | N4 | KK4 |
+| N9 | — | Panel: Ayarlar > Bildirimler: e-posta gönderici ve alan adı durumu, SMS hesabı, şablon önizleme, uyarı alıcıları, bastırma listesi. | N2, N4, N6, N7 | — |
+| N10 | — | Kapanış: bağımsız güvenlik incelemesi (şablon kaçışı, web kancası, kota, log maskeleme), KK işaretleri. | N1–N9 | — |
 
 ### F8 görev planı (2026-10-28; Medusa olay adları v2.21.2 kaynağından, GİB listesi ve UBL-TR sürümü web kaynaklarından doğrulandı; Context7 kotası dolu)
 Karar: ADR-0034 (önerildi). Ayrıntı `docs/entegrasyonlar/e-fatura.md`.
@@ -1360,6 +1378,7 @@ Devreden işlerin F3 görevlerine dağılımı:
 F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde: `git show 118e835:PROGRESS.md`.
 
 ## Açık sorular / bloklayıcılar
+- [ ] **Gözden geçir: ADR-0036 bildirim altyapısı (2026-10-28 akşam, otonom kabul).** E-posta gönderim hesabı platformun (Resend, ortam değişkeni; mağaza kendi alan adını doğrular); SMS hesabı mağazanın (Netgsm, panelden). Şablonlar bağımlılıksız (React Email yerine kendi tablo HTML'imiz). Ticari ileti izni yeni `messaging` modülünde (İYS karşılığı); İYS'ye iletim ve vitrinde izin alma F10'da, captcha sağlayıcısı F15'te. Canlıda Resend hesabı ve platform gönderim alan adı gerekecek.
 - [x] **Soru (F7.14): ilk müşterinin anlaşmalı kargo firması hangisi?** Cevap (2026-10-28): Aras var, Yurtiçi ileride; ikisi de entegre edilecek, bilgiler sonradan panelden (ADR-0035). **Gerçek hesapla denenecekler:** Aras canlı servis adresi (varsayılan `customerws.araskargo.com.tr`, panelden değiştirilebilir), takip yanıtının (`GetCargoInfo`) sütun adları ve durum metinleri (`lib/shipping/aras/status.ts`), etiket biçimi (`ZebraPdf` mi `Images` mı), kapıda ödeme alanları (`CodCollectionType`, `CodBillingType`, `PayorTypeCode`), hatalı girişin nasıl döndüğü (şimdi SOAP fault sayılıyor); Yurtiçi IP izni (sunucunun çıkış IP'si Yurtiçi'ye bildirilmeli), hatalı girişin dönüş biçimi, olay metinleri (dağıtımda / teslim edilemedi / iade), kapıda ödeme hesabı ve `ttDocumentId`'ye sipariş numarası, bizim çizdiğimiz etiketin şubede okutulması (ADR-0035 uygulama notu). Eski soru metni: Yurtiçi, Aras, MNG, PTT ya da Sürat'ten biri. Doğrudan taşıyıcı adaptörü (K11) bu cevaba bağlı; K1–K10 beklemeden ilerler. Firmanın API erişimi (müşteri numarası, test ortamı) de gerekecek (docs/12).
 - [ ] **Soru (F8): e-fatura entegratörü hangisi?** İlk gerçek adaptör (E8) ve test hesabı buna bağlı; E1–E7 sahte entegratörle ilerler. Entegratörün toplu kayıtlı kullanıcı listesi vermesi gerekir (GİB listesi herkese açık indirilemiyor, ADR-0034 §3).
 - [ ] **Soru (F8): mali müşavir doğrulaması.** TCKN'siz bireysel alıcıda varsayılan değer, indirim ve kargonun faturada gösterimi, hediye kartı/mağaza kredisinin KDV'si, faturalı siparişin iptalinde iptal mi iade faturası mı (docs/12). Varsayılanlar ADR-0034'te; doğrulanınca kesinleşir.
@@ -1591,7 +1610,7 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
 | F6 Ödeme: havale/EFT + kapıda ödeme + yönlendirici + ters ibraz | ✅ (W1–W6; KK1–KK5; 2026-10-28) |
 | F7 Kargo, sipariş operasyonu, iade ve değişim | ✅ KK3 hariç (K1–K12, 2026-10-28; KK3 iade faturası F8'i bekliyor) |
 | F8 E-fatura | ⛔ askıda (kullanıcı e-faturayı netleştirecek; plan hazır, ADR-0034 önerildi) |
-| F9 Bildirimler (e-posta/SMS) | ⬜ |
+| F9 Bildirimler (e-posta/SMS) | ⏳ N1 bitti (2026-10-28) |
 | F10 Müşteri hesabı, etkileşim, pazarlama ve SEO ölçümü | ⬜ |
 | F11 Raporlama, muhasebe ve dış API | ⬜ |
 | F12 Admin genişletmeleri (ekranlar panel hattı P5'te) | ⬜ |

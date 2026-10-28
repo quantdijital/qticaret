@@ -53,6 +53,18 @@ const envSchema = z.object({
   // A fake Aras or Yurtiçi on a developer's machine (adr/0035); refused when deployed
   ARAS_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
   YURTICI_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
+  // F9 (adr/0036): where e-mail leaves us. Unset sends none; Mailpit only on
+  // a developer's machine, Resend once deployed
+  EMAIL_TRANSPORT: z.enum(["resend", "mailpit"]).optional(),
+  // The platform's sender until the shop's own domain is verified
+  EMAIL_FROM: z.email().max(254).optional(),
+  RESEND_API_KEY: z
+    .string()
+    .regex(/^re_[A-Za-z0-9_]{8,200}$/, "must be a Resend API key (re_…)")
+    .optional(),
+  // Mailpit's web address (its HTTP send endpoint), and a fake Resend in tests
+  MAILPIT_URL: z.url({ protocol: /^https?$/ }).optional(),
+  RESEND_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
   // Medusa's level names; unset means Medusa's default, `http`
   LOG_LEVEL: z.enum(LOG_LEVELS).optional(),
   // docs/13 §6: "off" keeps search engines out (robots.txt, noindex) on an
@@ -150,6 +162,24 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
       message: "is required in production and staging, as an https:// address",
     })
   }
+  // A chosen transport needs its sender and its address or key
+  if (env.EMAIL_TRANSPORT !== undefined && env.EMAIL_FROM === undefined) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["EMAIL_FROM"],
+      message: "is required with EMAIL_TRANSPORT",
+    })
+  }
+  if (env.EMAIL_TRANSPORT === "resend" && env.RESEND_API_KEY === undefined) {
+    ctx.addIssue({ code: "custom", path: ["RESEND_API_KEY"], message: "is required for resend" })
+  }
+  if (env.EMAIL_TRANSPORT === "mailpit" && (deployed || env.MAILPIT_URL === undefined)) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["EMAIL_TRANSPORT"],
+      message: "mailpit needs MAILPIT_URL and is not allowed on staging or production",
+    })
+  }
   // A deployed shop pays and ships at the provider's own address only. A fake server
   // is for a developer's machine, where Medusa's CLI runs with NODE_ENV unset
   for (const name of [
@@ -158,6 +188,8 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
     "GELIVER_BASE_URL",
     "ARAS_BASE_URL",
     "YURTICI_BASE_URL",
+    "MAILPIT_URL",
+    "RESEND_BASE_URL",
   ] as const) {
     if (env[name] !== undefined && (env.NODE_ENV === "production" || env.NODE_ENV === "staging")) {
       ctx.addIssue({

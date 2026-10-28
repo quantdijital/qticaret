@@ -58,7 +58,8 @@ Mağazanın kendi sağlayıcı hesapları (PayTR, iyzico, sonra Geliver, e-fatur
 | `einvoice` | Custom modül + provider deseni | e-Arşiv/e-Fatura, adaptör tabanlı |
 | `platform-settings` | Custom modül | Feature flag'ler, mağaza ayarları, künye (secret İÇERMEZ) |
 | `product-attributes` | Custom modül | Sektörel attribute şablonları (ör. çelik tipi, beden) |
-| `legal-consent` | Custom modül | Sözleşme sürümleri, onay kayıtları, çerez onayı, İYS izinleri |
+| `legal-consent` | Custom modül | Sözleşme sürümleri, onay kayıtları, çerez onayı (İYS ileti izinleri `messaging`'de, ADR-0036) |
+| `messaging` | Custom modül | Ticari ileti izni (İYS karşılığı, geçmişiyle) ve bastırma listesi; adresler yalnızca anahtarlı özetle (ADR-0036) |
 | `audit-log` | Custom modül | Admin işlemlerinin denetim kaydı |
 | `tr-address` | Custom modül | İl/ilçe/mahalle referans verisi |
 | `seo-redirects` | Custom modül | 301/302/410, regex kurallar, zincir düzleştirme, 404 günlüğü + hedef önerisi (F3) |

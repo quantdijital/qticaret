@@ -16,6 +16,8 @@ export interface PlaceOrderInput {
   items: { variant_id: string; quantity: number }[]
   /** Codes applied to the cart, as a shopper types them (F4.4). */
   promo_codes?: string[] | undefined
+  /** Where the order's messages go; none by default, so no message is sent. */
+  email?: string | undefined
   /** Turkish address fields as F1.4 stores them: il in province, ilçe in city. */
   address: {
     first_name: string
@@ -45,6 +47,7 @@ export async function placeOrder(
       currency_code: "try",
       items: input.items,
       ...(input.promo_codes ? { promo_codes: input.promo_codes } : {}),
+      ...(input.email ? { email: input.email } : {}),
       shipping_address: { ...input.address, country_code: "tr" },
       billing_address: { ...input.address, country_code: "tr" },
     },

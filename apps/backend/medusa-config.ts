@@ -108,6 +108,25 @@ module.exports = defineConfig({
         ],
       },
     },
+    // F9 (adr/0036): one provider per channel. Configuring the module drops
+    // Medusa's default, so the panel bell's local `feed` provider is named again
+    {
+      resolve: "@medusajs/medusa/notification",
+      options: {
+        providers: [
+          {
+            resolve: "@medusajs/medusa/notification-local",
+            id: "local",
+            options: { name: "Local Notification Provider", channels: ["feed"] },
+          },
+          {
+            resolve: "./src/modules/notification-email",
+            id: "email",
+            options: { channels: ["email"] },
+          },
+        ],
+      },
+    },
     // F7 (adr/0031): Geliver beside Medusa's manual provider, which the seed's options use
     {
       resolve: "@medusajs/medusa/fulfillment",
@@ -124,6 +143,8 @@ module.exports = defineConfig({
       resolve: "./src/modules/billing-profile",
       options: { encryptionKey: env.PII_ENCRYPTION_KEY, hashKey: env.PII_HASH_KEY },
     },
+    // F9 (adr/0036): commercial consent and the suppression list, addresses hashed
+    { resolve: "./src/modules/messaging", options: { hashKey: env.PII_HASH_KEY } },
     // Locks shared by every process of the tenant (adr/0020)
     ...lockingModules(env.REDIS_URL, namespace),
     // Without it Medusa keeps files on local disk (dev and test only)

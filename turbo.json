@@ -18,7 +18,9 @@
     "DB_*",
     "MEDUSA_*",
     "S3_*",
-    "SMTP_*",
+    "EMAIL_*",
+    "MAILPIT_*",
+    "RESEND_*",
     "TEST_*"
   ],
   "tasks": {
