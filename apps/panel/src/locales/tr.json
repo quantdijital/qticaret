@@ -1000,6 +1000,12 @@
           "secret_invalid": "Netgsm bu kullanıcı kodu ve şifreyi kabul etmedi ya da API erişimi kapalı."
         },
         "rejected": "Netgsm kayıtlı bilgileri artık kabul etmiyor; SMS gönderilemiyor. Güncel bilgileri girin."
+      },
+      "limit": {
+        "title": "Günlük SMS sınırı",
+        "description": "Mağazanın bir günde gönderebileceği en çok SMS. Maliyete ve kötüye kullanıma karşı korur: %80'e gelince panelin ziline uyarı düşer, sınıra ulaşınca ertesi güne kadar SMS gitmez. Her numaranın ayrıca saatlik (5) ve günlük (10) sınırı vardır.",
+        "label": "Günde en çok SMS",
+        "saved": "Günlük SMS sınırı kaydedildi."
       }
     }
   },

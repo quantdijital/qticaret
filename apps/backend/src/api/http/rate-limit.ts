@@ -29,6 +29,11 @@ export function rateLimitPrefix(databaseUrl: string, nodeEnv?: string): string {
   return `qt:rl:${tenantNamespace(databaseUrl, nodeEnv)}:`
 }
 
+/** The tenant's shared counters (Redis, or process memory while it is down): for SMS quotas too. */
+export function sharedRateLimitStore(): RateLimitStore {
+  return defaultStore()
+}
+
 function defaultStore(): RateLimitStore {
   if (sharedStore) {
     return sharedStore

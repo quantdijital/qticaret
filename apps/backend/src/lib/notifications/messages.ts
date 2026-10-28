@@ -23,6 +23,11 @@ export const NOTIFICATION_MESSAGES: Readonly<
       title: "Düşük stok: {{name}}",
       description: "{{available}} adet kaldı (eşik {{threshold}}).",
     },
+    "messaging.sms_daily_limit": {
+      title: "Günlük SMS sınırının %80'i doldu",
+      description:
+        "Bugün {{count}}/{{limit}} SMS gönderildi. Sınıra ulaşınca SMS gitmez; Ayarlar > SMS'ten değiştirebilirsiniz.",
+    },
     "orders.bank_transfer_pending": {
       title: "Havale bekleniyor: #{{number}}",
       description: "{{total}} tutarındaki ödeme gelince siparişi onaylayın.",
@@ -45,6 +50,11 @@ export const NOTIFICATION_MESSAGES: Readonly<
     },
   },
   en: {
+    "messaging.sms_daily_limit": {
+      title: "80% of today's SMS limit used",
+      description:
+        "{{count}}/{{limit}} texts sent today. At the limit no text goes; change it under Settings > SMS.",
+    },
     "orders.bank_transfer_pending": {
       title: "Bank transfer awaited: #{{number}}",
       description: "Confirm the order once the {{total}} payment arrives.",

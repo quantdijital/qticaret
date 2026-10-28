@@ -7,6 +7,7 @@ import { ErrorState, LoadingRows } from "@/components/patterns/states"
 import { Button } from "@/components/ui/button"
 import { providerAccountsQuery } from "@/features/settings/api/payments"
 import { AccountBadges } from "@/features/settings/components/account-badges"
+import { SmsLimitCard } from "@/features/settings/components/sms-limit-card"
 import { SMS_PROVIDERS } from "@/features/settings/sms-providers"
 import { errorText } from "@/lib/errors"
 
@@ -69,6 +70,7 @@ export function SmsPage() {
           </ul>
         </SectionCard>
       )}
+      <SmsLimitCard />
     </div>
   )
 }

@@ -34,6 +34,9 @@ jest.setTimeout(120 * 1000)
 
 const SHOPPER = "ayse.yilmaz@example.com"
 
+// SMS quotas count in Redis across runs (F9.8): each run texts numbers of its own
+const randomPhone = () => `053${String(Math.floor(10_000_000 + Math.random() * 89_999_999))}`
+
 /** F9 N1 (adr/0036): one path out for every message, once per event, never to a suppressed address. */
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
@@ -45,13 +48,14 @@ medusaIntegrationTestRunner({
     let shop: StockShop
     let variantId: string
 
+    let phone = randomPhone()
     const order = (email: string | null = SHOPPER) =>
       placeOrder(getContainer(), {
         regionId: shop.regionId,
         salesChannelId: shop.salesChannelId,
         shippingOptionId: shop.shippingOptionId,
         items: [{ variant_id: variantId, quantity: 2 }],
-        address: PAYTR_ADDRESS,
+        address: { ...PAYTR_ADDRESS, phone },
         email: email ?? undefined,
       })
     const sentTo = (address: string) => fake.messages.filter(({ to }) => to.includes(address))
@@ -93,6 +97,13 @@ medusaIntegrationTestRunner({
         .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
         .saveSection("store", { contact_email: "destek@magaza.example" }, null)
       admin = await createAdminUser(http, container)
+      phone = randomPhone()
+      // The shop's day counts every run's texts too: far above them here
+      await http.post(
+        "/admin/platform-settings/notifications",
+        { sms_daily_limit: 100_000 },
+        { headers: admin.headers }
+      )
       fake.messages.length = 0
       netgsm.messages.length = 0
     })
@@ -339,7 +350,7 @@ medusaIntegrationTestRunner({
       const outcome = await resend(before)
 
       expect(wrongHeader.data.message).toBe("netgsm.merchant_invalid")
-      expect(sms).toMatchObject({ to: "905320000000", header: "MAGAZA", filter: "0" })
+      expect(sms).toMatchObject({ to: `9${phone}`, header: "MAGAZA", filter: "0" })
       expect(sms?.text).toMatch(/: #\d+ numaralı siparişiniz alındı\. Toplam ₺/)
       expect(after).not.toBe(before)
       // The first order went before the account: its SMS goes now, its e-mail went already
@@ -365,7 +376,7 @@ medusaIntegrationTestRunner({
       )
       const [customer] = await getContainer()
         .resolve(Modules.CUSTOMER)
-        .createCustomers([{ email: "izinli@example.com", phone: "05321112233", first_name: "Can" }])
+        .createCustomers([{ email: "izinli@example.com", phone, first_name: "Can" }])
       const customerId = customer?.id ?? ""
       const announce = (key: string) =>
         sendMessageWorkflow(getContainer()).run({
@@ -462,6 +473,43 @@ medusaIntegrationTestRunner({
           .resolve<MessagingModuleService>(MESSAGING_MODULE)
           .isSuppressed("email", "geri-donen@example.com")
       ).toBe(false)
+    })
+
+    it("refuses a text past the number's hourly limit", async () => {
+      await settle(
+        http.post(
+          "/admin/integrations/credentials/netgsm",
+          {
+            settings: { msgheader: "MAGAZA" },
+            secrets: { usercode: netgsm.account.usercode, password: netgsm.account.password },
+          },
+          { headers: admin.headers }
+        )
+      )
+      const [customer] = await getContainer()
+        .resolve(Modules.CUSTOMER)
+        .createCustomers([{ email: "kota@example.com", phone, first_name: "Kota" }])
+      const customerId = customer?.id ?? ""
+      await http.post(
+        `/admin/customers/${customerId}/consents`,
+        { channel: "sms", status: "granted" },
+        { headers: admin.headers }
+      )
+      const outcomes: unknown[] = []
+      for (let round = 1; round <= 6; round += 1) {
+        const { result } = await sendMessageWorkflow(getContainer()).run({
+          input: {
+            template: "marketing.announcement",
+            resource_id: customerId,
+            key: `kota-${String(round)}`,
+            extra: { title: "Duyuru", body: `Tur ${String(round)}` },
+          },
+        })
+        outcomes.push((result as { sms?: string }).sms)
+      }
+
+      expect(outcomes).toEqual(["sent", "sent", "sent", "sent", "sent", "over_quota"])
+      expect(netgsm.messages.filter(({ to }) => to === `9${phone}`)).toHaveLength(5)
     })
 
     it("tries a failed send again with the same key, and sends it once", async () => {

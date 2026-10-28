@@ -91,6 +91,8 @@ export interface NotificationSettings {
   alert_bank_transfer: boolean
   alert_low_stock: boolean
   alert_seo_digest: boolean
+  /** Texts the shop sends a day at most (F9.8). */
+  sms_daily_limit: number
 }
 
 export const sectionQuery = <T>(section: string) =>

@@ -13,6 +13,7 @@ import { MESSAGING_MODULE } from "../../modules/messaging"
 import type MessagingModuleService from "../../modules/messaging/service"
 import { brandOf } from "./brand"
 import { senderAddress } from "./sender-domain"
+import { withinSmsQuota } from "./sms-quota"
 import type { MessageRecipients } from "./loaders/types"
 
 export type SendOutcome =
@@ -22,6 +23,7 @@ export type SendOutcome =
   | "invalid_recipient"
   | "suppressed"
   | "no_consent"
+  | "over_quota"
   | "failed"
 
 type Templates = typeof MESSAGE_TEMPLATES
@@ -138,6 +140,10 @@ export async function deliver<N extends MessageTemplateName>(
       // Medusa 2.21.2 sends a failed key again under an id it never stores, then fails
       // to record the result: a failed attempt is cleared and sent as a new one
       await rows.deleteNotifications([previous.id])
+    }
+    if (channel === "sms" && !(await withinSmsQuota(container, recipient.hash))) {
+      notSent("over_quota", recipient.masked)
+      continue
     }
     brand ??= await brandOf(container)
     const content = render(input.template, channel, input.vars, brand)
