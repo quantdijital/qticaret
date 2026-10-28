@@ -301,6 +301,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "stock_alerts.in_stock": "Bu ürün şu an stokta; hemen sipariş verebilirsiniz.",
   "stock_alerts.email_required": "Haber verebilmemiz için e-posta adresinizi yazın.",
   "reviews.not_purchased": "Yalnızca teslim aldığınız ürünlere yorum yazabilirsiniz.",
+  "questions.unknown": "Soru bulunamadı.",
+  "questions.answer_purchasers_only": "Yalnızca ürünü teslim almış müşteriler cevap yazabilir.",
   "messaging.no_address": "Müşterinin bu kanal için kayıtlı adresi ya da telefonu yok.",
   "messaging.suppression_unknown": "Bu adres listede yok.",
   "messaging.domains_unavailable":

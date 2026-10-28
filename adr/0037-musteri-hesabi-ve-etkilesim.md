@@ -164,6 +164,24 @@ F10 vitrinin müşteri tarafını kuruyor: hesap, e-posta doğrulama, sosyal gir
   - Satır başına onay ya da ret, işaretleyerek toplu işlem.
   - Yıldızlar ekran okuyucuya "5 üzerinden N" diye okunur.
 
+## Uygulama notları (M8, soru-cevap, 2026-10-28)
+- `product-qa` modülü: soru ve cevap. Sorudaki `answer_count` onaylı cevap sayısıdır.
+- Soru: doğrulanmış hesaptan, yayındaki ürüne, 10–1000 karakter; onay bekler.
+- Cevap:
+  - Mağazanın cevabı mağaza adıyla verilir, hemen yayımlanır ve soruyu da onaylar.
+  - Müşteri cevabı yalnızca ürünü teslim almış müşteriden gelir (`questions.answer_purchasers_only`) ve onay bekler.
+- Hız sınırı: yorumla ortak bütçe (müşteri başına saatte 10, IP başına 20).
+- `QAPage` (Google'ın kuralları resmî belgeden doğrulandı):
+  - Yalnızca tek sorunun kendi sayfasında üretilir: `GET /store/product-questions/:id`; yol `<ürün yolu>/sorular/<id>` ve sayfayı F18 kurar.
+  - En az bir onaylı cevap ve mağazanın alan adı gerekir.
+  - Mağazanın cevabı `acceptedAnswer` (yazarı `Organization`), müşterilerinki `suggestedAnswer` olur.
+  - Sorunun `name` alanı ilk cümlesidir.
+  - Ürün sayfası (birden çok soru) hiçbir zaman `QAPage` taşımaz (testli).
+- Panel:
+  - Yorumlar ekranı "Yorumlar ve sorular" oldu; Sorular sekmesi eklendi.
+  - "Bakılacaklar" görünümü yeni soruları ve onay bekleyen cevabı olan soruları birlikte gösterir.
+  - Satır başına onay ya da ret ve mağaza adına cevap kutusu.
+
 ## Alternatifler
 
 | Seçenek | Artı | Eksi |

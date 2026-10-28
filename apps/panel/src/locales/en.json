@@ -35,8 +35,6 @@
     "orders": "Orders",
     "customers": "Customers",
     "settings": "Settings",
-    "advanced": "Advanced panel",
-    "advancedHint": "For what this panel does not cover yet",
     "account": "Account",
     "logout": "Sign out",
     "collapse": "Collapse menu",
@@ -52,7 +50,7 @@
     "reports": "Reports",
     "brands": "Brands",
     "content": "Content",
-    "reviews": "Reviews"
+    "reviews": "Reviews and questions"
   },
   "login": {
     "title": "Sign in",
@@ -120,10 +118,10 @@
           "description": "Connect your PayTR or iyzico account so customers can pay by card."
         }
       },
-      "openInAdvanced": "Open in the advanced panel",
       "subtitle": "Steps to complete before you start selling",
       "hide": "Hide",
-      "continue": "Continue"
+      "continue": "Continue",
+      "byInstall": "Done when the shop is installed; if missing, write to our support team."
     },
     "subtitle": "{{date}} · Your shop at a glance",
     "addProduct": "Add product",
@@ -1024,6 +1022,12 @@
             "back_in_stock": "Back in stock"
           }
         }
+      },
+      "emailLimit": {
+        "title": "Daily e-mail limit",
+        "description": "The most e-mails the shop sends in a day. Bounces from orders with made-up addresses hurt the sender's reputation; you are warned in the bell at 80% of the limit, and past it no more e-mail goes that day.",
+        "label": "At most a day",
+        "saved": "E-mail limit saved."
       }
     },
     "sms": {
@@ -1141,45 +1145,6 @@
     "shipped": "In transit",
     "delivered": "Delivered",
     "canceled": "Canceled"
-  },
-  "upcoming": {
-    "badge": "In progress",
-    "description": "This screen is being built in the new panel. Until then, do the same job in the advanced panel.",
-    "open": "Open in the advanced panel",
-    "planned": "What this screen will have",
-    "features": {
-      "orders": [
-        "Filters by status, payment and shipping",
-        "Bulk labels and status updates",
-        "Order detail: payment, shipment and invoice at a glance",
-        "Returns and exchanges"
-      ],
-      "customers": [
-        "Customer list and search",
-        "Order history and total spend",
-        "Customer groups",
-        "Addresses and billing details"
-      ],
-      "products": [
-        "Product list with images and quick filters",
-        "Step-by-step product wizard",
-        "Variants, prices and stock",
-        "SEO suggestions in a side panel"
-      ],
-      "categories": [
-        "Drag and drop category tree",
-        "Category page and SEO fields",
-        "Add products to a category in bulk"
-      ],
-      "inventory": [
-        "Stock per location",
-        "Low stock list and thresholds",
-        "Stock movement history",
-        "Bulk stock updates"
-      ],
-      "promotions": ["Coupons and campaigns", "Usage statistics", "Bulk coupon codes"],
-      "reports": ["Sales, VAT and stock reports", "Period comparisons", "Excel and CSV export"]
-    }
   },
   "leave": {
     "title": "You have unsaved changes",
@@ -3484,7 +3449,7 @@
     "added": "{{amount}} of credit added."
   },
   "reviews": {
-    "title": "Reviews",
+    "title": "Reviews and questions",
     "description": "Reviews from customers who received the product. A review you approve shows on the storefront and in the stars on search results.",
     "views": "Review state",
     "tabs": {
@@ -3509,6 +3474,34 @@
       "pending": "No reviews waiting.",
       "approved": "No approved reviews yet.",
       "rejected": "No rejected reviews."
+    },
+    "sections": "Customers' words",
+    "sectionReviews": "Reviews",
+    "sectionQuestions": "Questions",
+    "questions": {
+      "description": "Customers' questions about products. An answer in the shop's name shows at once; answers from customers who received the product wait for you.",
+      "views": "Question state",
+      "tabs": {
+        "pending": "To look at",
+        "approved": "Published",
+        "rejected": "Rejected"
+      },
+      "decideQuestion": "Decide on the question",
+      "decideAnswer": "Decide on {{author}}'s answer",
+      "byShop": "Shop",
+      "answerStatus": {
+        "pending": "Waiting",
+        "rejected": "Rejected"
+      },
+      "answerLabel": "Answer in the shop's name",
+      "answerPlaceholder": "Your answer in the shop's name (at least 10 characters)",
+      "answer": "Answer",
+      "answered": "Answer published.",
+      "empty": {
+        "pending": "No questions or answers to look at.",
+        "approved": "No published questions.",
+        "rejected": "No rejected questions."
+      }
     }
   }
 }

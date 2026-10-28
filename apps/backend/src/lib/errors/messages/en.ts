@@ -296,6 +296,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "stock_alerts.in_stock": "This product is in stock now; you can order it.",
   "stock_alerts.email_required": "Write your e-mail address so we can tell you.",
   "reviews.not_purchased": "You can review only products you have received.",
+  "questions.unknown": "The question was not found.",
+  "questions.answer_purchasers_only": "Only customers who received the product can answer.",
   "messaging.no_address": "The customer has no address or phone for this channel.",
   "messaging.suppression_unknown": "That address is not on the list.",
   "messaging.domains_unavailable":

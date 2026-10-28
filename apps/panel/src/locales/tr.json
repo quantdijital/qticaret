@@ -35,8 +35,6 @@
     "orders": "Siparişler",
     "customers": "Müşteriler",
     "settings": "Ayarlar",
-    "advanced": "Gelişmiş panel",
-    "advancedHint": "Henüz bu panele taşınmamış işler için",
     "account": "Hesap",
     "logout": "Çıkış yap",
     "collapse": "Menüyü daralt",
@@ -52,7 +50,7 @@
     "reports": "Raporlar",
     "brands": "Markalar",
     "content": "İçerik",
-    "reviews": "Yorumlar"
+    "reviews": "Yorumlar ve sorular"
   },
   "login": {
     "title": "Giriş yap",
@@ -120,10 +118,10 @@
           "description": "PayTR ya da iyzico hesabınızı bağlayın; müşteri kartla ödeyebilsin."
         }
       },
-      "openInAdvanced": "Gelişmiş panelde aç",
       "subtitle": "Satışa başlamadan önce tamamlanacak adımlar",
       "hide": "Gizle",
-      "continue": "Devam et"
+      "continue": "Devam et",
+      "byInstall": "Mağaza kurulurken tamamlanır; eksikse destek ekibimize yazın."
     },
     "subtitle": "{{date}} · Mağazanızın özeti",
     "addProduct": "Ürün ekle",
@@ -1024,6 +1022,12 @@
             "back_in_stock": "Yeniden stokta"
           }
         }
+      },
+      "emailLimit": {
+        "title": "Günlük e-posta sınırı",
+        "description": "Mağazanın bir günde gönderebileceği en çok e-posta. Uydurma adreslerle verilen siparişlerin geri dönen postaları gönderici itibarını düşürür; sınırın %80'inde zilde uyarı görürsünüz, aşılınca o gün başka e-posta gitmez.",
+        "label": "Günde en çok",
+        "saved": "E-posta sınırı kaydedildi."
       }
     },
     "sms": {
@@ -1141,53 +1145,6 @@
     "shipped": "Kargoda",
     "delivered": "Teslim edildi",
     "canceled": "İptal edildi"
-  },
-  "upcoming": {
-    "badge": "Hazırlanıyor",
-    "description": "Bu ekran yeni panelde hazırlanıyor. O zamana kadar aynı işi gelişmiş panelde yapabilirsiniz.",
-    "open": "Gelişmiş panelde aç",
-    "planned": "Bu ekranda olacaklar",
-    "features": {
-      "orders": [
-        "Durum, ödeme ve kargoya göre filtreler",
-        "Toplu kargo etiketi ve durum güncelleme",
-        "Sipariş detayı: ödeme, gönderi ve fatura tek bakışta",
-        "İade ve değişim talepleri"
-      ],
-      "customers": [
-        "Müşteri listesi ve arama",
-        "Sipariş geçmişi ve toplam harcama",
-        "Müşteri grupları",
-        "Adres ve fatura bilgileri"
-      ],
-      "products": [
-        "Görselli ürün listesi ve hızlı filtreler",
-        "Adım adım ürün ekleme sihirbazı",
-        "Varyant, fiyat ve stok düzenleme",
-        "SEO önerileri yan panelde"
-      ],
-      "categories": [
-        "Sürükle bırak kategori ağacı",
-        "Kategori sayfası ve SEO alanları",
-        "Ürünleri kategoriye toplu ekleme"
-      ],
-      "inventory": [
-        "Depo bazlı stok",
-        "Düşük stok listesi ve eşikler",
-        "Stok hareket geçmişi",
-        "Toplu stok güncelleme"
-      ],
-      "promotions": [
-        "Kupon ve kampanya oluşturma",
-        "Kullanım istatistikleri",
-        "Toplu kupon kodu üretimi"
-      ],
-      "reports": [
-        "Satış, KDV ve stok raporları",
-        "Dönem karşılaştırmaları",
-        "Excel ve CSV dışa aktarma"
-      ]
-    }
   },
   "leave": {
     "title": "Kaydedilmemiş değişiklikler var",
@@ -3492,7 +3449,7 @@
     "added": "{{amount}} kredi eklendi."
   },
   "reviews": {
-    "title": "Yorumlar",
+    "title": "Yorumlar ve sorular",
     "description": "Ürünü teslim almış müşterilerin yorumları. Onayladığınız yorum vitrinde ve arama sonuçlarındaki yıldızlarda görünür.",
     "views": "Yorum durumu",
     "tabs": {
@@ -3517,6 +3474,34 @@
       "pending": "Onay bekleyen yorum yok.",
       "approved": "Henüz onaylanan yorum yok.",
       "rejected": "Reddedilen yorum yok."
+    },
+    "sections": "Müşteri yazıları",
+    "sectionReviews": "Yorumlar",
+    "sectionQuestions": "Sorular",
+    "questions": {
+      "description": "Müşterilerin ürünler hakkındaki soruları. Mağaza adına verdiğiniz cevap hemen görünür; ürünü teslim almış müşterilerin cevapları onayınızı bekler.",
+      "views": "Soru durumu",
+      "tabs": {
+        "pending": "Bakılacaklar",
+        "approved": "Yayında",
+        "rejected": "Reddedilen"
+      },
+      "decideQuestion": "Soru için karar",
+      "decideAnswer": "{{author}} cevabı için karar",
+      "byShop": "Mağaza",
+      "answerStatus": {
+        "pending": "Onay bekliyor",
+        "rejected": "Reddedildi"
+      },
+      "answerLabel": "Mağaza adına cevap",
+      "answerPlaceholder": "Mağaza adına cevabınız (en az 10 karakter)",
+      "answer": "Cevapla",
+      "answered": "Cevap yayımlandı.",
+      "empty": {
+        "pending": "Bakılacak soru ya da cevap yok.",
+        "approved": "Yayında soru yok.",
+        "rejected": "Reddedilen soru yok."
+      }
     }
   }
 }

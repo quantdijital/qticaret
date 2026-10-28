@@ -14,6 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Skeleton } from "@/components/ui/skeleton"
 import { REVIEW_PAGE_SIZE, moderateReviews, reviewsQuery } from "@/features/reviews/api/reviews"
 import type { ReviewRow, ReviewStatus } from "@/features/reviews/api/reviews"
+import { ReviewsNav } from "@/features/reviews/components/reviews-nav"
 import { errorText } from "@/lib/errors"
 import { formatDate } from "@/lib/format"
 
@@ -155,6 +156,7 @@ export function ReviewsPage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title={t(`${R}.title`)} description={t(`${R}.description`)} />
+      <ReviewsNav />
       <section className="overflow-hidden rounded-lg border bg-card shadow-card">
         <FilterTabs
           label={t(`${R}.views`)}
