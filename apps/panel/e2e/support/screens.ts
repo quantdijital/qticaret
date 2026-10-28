@@ -27,6 +27,7 @@ export const SETTINGS = [
   "/settings/shipping",
   "/settings/shipping/geliver",
   "/orders/chargebacks",
+  "/orders/returns",
   "/settings/integrations",
   "/settings/appearance",
   "/settings/locations",

@@ -1564,6 +1564,50 @@
       "resultsSummary": "{{shipped}} orders shipped, {{failed}} could not be.",
       "label": "Label",
       "failed": "Could not be shipped."
+    },
+    "returns": {
+      "queue": "Returns",
+      "queueDescription": "Shoppers' return requests, those waiting for a decision first. Once approved the shopper hands the parcel over with the return code; receive it when it reaches the warehouse and its money goes back by itself.",
+      "columns": {
+        "order": "Order",
+        "date": "Requested",
+        "reason": "Reason",
+        "status": "Status",
+        "code": "Return code",
+        "refund": "Refund"
+      },
+      "reasons": {
+        "damaged": "Arrived damaged",
+        "wrong_item": "Wrong item",
+        "not_as_described": "Not as described",
+        "changed_mind": "Changed my mind",
+        "size_issue": "Size did not fit",
+        "other": "Other"
+      },
+      "status": {
+        "requested": "Awaiting decision",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "received": "Received",
+        "refunded": "Refunded",
+        "canceled": "Canceled"
+      },
+      "actions": "Return request actions",
+      "approve": "Approve",
+      "approved": "Return approved; the shopper sees the return code.",
+      "reject": "Reject",
+      "rejectTitle": "Reject the return request of #{{number}}?",
+      "rejectDescription": "The shopper reads this note on the request.",
+      "rejectNote": "Why",
+      "rejected": "Return request rejected.",
+      "receive": "Receive",
+      "receiveTitle": "The return of #{{number}} arrived",
+      "receiveDescription": "Enter what came; anything missing is left out. Received items go back in stock and their money is refunded.",
+      "receivedOf": "Quantity of {{name}} received",
+      "refunded": "Items received, money refunded.",
+      "retryRefund": "Try the refund again",
+      "label": "Download return label",
+      "empty": "No return requests in this state."
     }
   },
   "customers": {

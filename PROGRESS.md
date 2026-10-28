@@ -3,7 +3,7 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**F7 — Kargo, sipariş operasyonu, iade ve değişim: BAŞLADI (2026-10-28 gece, otonom).** Plan aşağıda "F7 görev planı"; ADR-0031 (kargo altyapısı ve takip) kabul edildi (otonom, gözden geçir). K1–K7 bitti; sıradaki K8 (iade talebi, RMA).
+**F7 — Kargo, sipariş operasyonu, iade ve değişim: BAŞLADI (2026-10-28 gece, otonom).** Plan aşağıda "F7 görev planı"; ADR-0031 (kargo altyapısı ve takip) kabul edildi (otonom, gözden geçir). K1–K8 bitti; sıradaki K9 (değişim).
 
 **F6 — Ödeme: alternatif ödemeler + yönlendirici + ters ibraz: BİTTİ (2026-10-28 gece, otonom).** Dal `f6-alternative-payments`. W1–W6; KK1–KK5 işaretli. ADR-0029 ve ADR-0030 otonom kabul edildi (gözden geçir). Kapanışta yerelde: birim 1658, HTTP 81/81 takım (440 test), modül (ters ibraz) 1, panel 220, e2e 29.
 
@@ -1107,7 +1107,7 @@
 - **Daha önce:** F1 planlaması ve F0.2–F0.8 (2026-10-24), F0.1 monorepo (2026-10-24 sabahı), SEO ve güvenlik dokümanları (2026-10-22).
 
 ## Sıradaki görev
-**Claude'un sıradaki işi:** F7 K8 (iade talebi, RMA: müşteri talebi + neden kodu, panelde onay/ret, iade kodu, depoya varış, iade akışı; ADR-0032), plan aşağıda "F7 görev planı". Dal `f7-shipping` (`f6-alternative-payments` üzerinden). Kullanıcı 2026-10-27 gece: "izin istemeden çalışmaya devam edersin, kritik bir şey olursa sabah sorarım."
+**Claude'un sıradaki işi:** F7 K9 (değişim: Medusa exchange akışı, fark tutarı, iade + yeni gönderi, stok iki yönde; ADR-0032 §6), plan aşağıda "F7 görev planı". Dal `f7-shipping` (`f6-alternative-payments` üzerinden). Kullanıcı 2026-10-27 gece: "izin istemeden çalışmaya devam edersin, kritik bir şey olursa sabah sorarım."
 
 ### F7 görev planı (2026-10-28; Geliver uçları resmi JS SDK kaynağından, Medusa fulfillment sağlayıcı arayüzü docs.medusajs.com'dan doğrulandı; Context7 kotası dolu)
 Karar: ADR-0031 (kargo altyapısı, takip, etiketler; kabul edildi, otonom, gözden geçir). Geliver ayrıntıları `docs/entegrasyonlar/geliver.md`.
@@ -1129,7 +1129,7 @@ Doğrulananlar:
 | K5 ✅ | F7.7, F7.10 | **Bitti (2026-10-28 gece).** Sipariş listesinde "Kargo" sütunu (son taşıyıcı kolisinin durumu, takip no üzerine gelince), "Hazırlanacak" sekmesinde seçim ve toplu "Kargoya ver" (`POST /admin/order-board/ship`, en çok 20 sipariş, her sipariş kendi iş akışında; sonuç penceresinde sipariş başına etiket ya da sebep cümlesi; `bulk_ship` hız profili), kısmi gönderim ("Kargoya ver" penceresinde kalem başına adet; sunucu kalanla doğrular, paketlenmiş koli bütün gider). Karar: toplu etiketler tek PDF'te birleştirilmedi (yeni bağımlılık gerekir, "Açık sorular"da). Testler: HTTP 2, panel 4 | K3, K4 | — |
 | K6 ✅ | F7.8 | **Bitti (2026-10-28 gece).** `shipping` ayar bölümü (kargoya verme ve taşıma günleri, desi ücret tablosu + son bandın üstü desi başına), Geliver'e "ücret tablosu" seçeneği (`geliver-table`: fiyat tablodan, gönderi en uygun teklifle), kargo seçenekleri yönetimi (`/admin/shipping-setup/options`: kendi gönderimim / Geliver / mağazadan teslim; sabit, Geliver teklifi ya da tablo; varsayılan depoda bölge yoksa kurulur; teslim alma ayrı "pickup" setinde), ürün JSON-LD'sinde `shippingDetails` (tablo varyantı fiyatlıyorsa: ücret, TR, kargoya verme ve taşıma günleri; tahmin yazılmaz), SEO `kargo_cümlesi` ("1–2 iş gününde kargoda."; varsayılan ürün açıklaması şablonunda olduğu için tüm ürünlerin açıklamasına girer). Panelde Ayarlar > Kargo: seçenekler kartı (ekle/düzenle/kaldır), teslim süresi ve ücret tablosu kartları. Karar: mağazadan teslim ayrı bayrak değil, bir kargo seçeneği türü (seçenek varsa sunulur). Koli birleştirme: satırlar tek kolide (hacim toplamı); taşıyıcı sınırını aşan sipariş K5'in kısmi gönderimiyle bölünür. Testler: HTTP 4, birim 6, panel 3 | K2 | — |
 | K7 ✅ | F7.13 | **Bitti (2026-10-28 gece).** `POST /store/orders/:id/cancel` (oturum açmış müşteri, kendi siparişi; `order_cancel` hız profili): havale onayı ve süre dolumuyla aynı sipariş kilidi altında, paketlenmiş ya da kargoya verilmiş sipariş `orders.cancel_after_packing` (iade talebine yönlendirir), alınmış para kendi iade akışımızla geri verilir (tekrarında bir kez), sonra Medusa'nın iptali stoku ve bekleyen ödemeyi bırakır; başkasının siparişi 404. Karar: misafir siparişinin iptali oturum gerektirdiği için F9/F10'daki sipariş bağlantısıyla gelir. Testler: HTTP 3 (KK6) | — | KK6 |
-| K8 | F7.9 | İade talebi (RMA): müşteri talebi + neden kodu, panelde onay/ret, iade kodu (Geliver iade gönderisi), depoya varış kontrolü, iade workflow'u (para + stok + iade faturası olayı, F8) (+ ADR-0032) | K3, K4 | KK3 |
+| K8 ✅ | F7.9 | **Bitti (2026-10-28 sabaha karşı).** ADR-0032 (otonom kabul). `return-requests` modülü (sipariş başına tek açık talep, kısmi tekil indeks). Store: `POST/GET /store/orders/:id/returns` (oturum açmış müşteri, kendi siparişi; gönderilen kalemler, son teslimden 14 gün, önceki talepler düşülerek). Panel ucu: kuyruk, onay (Medusa'nın aşamalı iadesi, parselin çıktığı depoda; Geliver'le gittiyse iade gönderisi ve etiketi, kodu müşteriye), ret (müşterinin okuduğu not), teslim alma (Medusa teslim alma, stok geri girer) ve ardından para iadesi (kendi iade akışımız, kalem bazında, mağaza kaynaklı nedenlerde kargo dahil, `return<talep>` referansıyla bir kez; `return.refunded` olayı), başarısız iadede "tekrar dene", iade etiketi (personel, hassas okuma). Panelde Siparişler > İade talepleri (durum sekmeleri, işlemler, teslim alma penceresi). Testler: HTTP 2 (uçtan uca: talep → onay + Geliver kodu → teslim + stok → 180 TL iade; ret notu, fazla adet, kargoya verilmemiş), modül 1, birim 3, panel 1 | K3, K4 | KK3 (para iadesi + stok testli; iade faturası F8'de `return.refunded`'a bağlanır) |
 | K9 | F7.11 | Değişim: Medusa exchange akışı, fark tutarı (tahsilat/iade), iade + yeni gönderi, stok iki yönde | K8 | KK5 |
 | K10 | F7.12 | Sipariş düzenleme: Medusa order edit (adres, kalem, miktar, fiyat düzeltme), ödeme farkı, faturalı siparişte kısıt, denetim | — | — |
 | K11 | F7.14 | Doğrudan taşıyıcı adaptörü: ilk müşterinin anlaşmalı firması (**kullanıcıya soruldu**), ortak sözleşme paketi | K2–K4 | KK7 |
@@ -1305,6 +1305,7 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
   - Ücret satırının kimliği oturum verisine konmadı: varyantsız + sunucu fiyatlı satır kuralı ve `qt_` metadata reddi aynı korumayı veriyor.
   - Havale süresi dolumu son 21 günün siparişlerine bakıyor (en uzun süre 14 gün + 7 gün iş kesintisi payı).
   - Ters ibraz yalnızca kartla alınmış ödemeye açılıyor; havale ve kapıda ödemenin itirazı bankayla değil mağazayla.
+- [ ] **Gözden geçir: ADR-0032 iade talebi (2026-10-28 sabaha karşı, otonom):** kendi talep kaydımız + Medusa'nın aşamalı iadesi; süre son teslimden 14 gün (cayma süresi; mağaza ayarı ve istisnalar F13'te); mağaza kaynaklı nedenlerde (hasarlı, yanlış ürün, tarif edildiği gibi değil) kargo ücreti de iade ediliyor, diğerlerinde edilmiyor; iade kargo ücretini kimin ödediği F13'te ayar olacak.
 - [ ] **Gözden geçir: F7 K6 SEO etkisi (2026-10-28 gece):** varsayılan ürün açıklaması şablonu `{kısa_açıklama}. {fiyat_cümlesi} {kargo_cümlesi}` olduğu için `kargo_cümlesi` artık doldurulunca (Ayarlar > Kargo > Teslim süresi; varsayılan "1–2 iş gününde kargoda.") tüm ürünlerin meta açıklamasına bu cümle girer. İstemezsen şablondan çıkarılabilir (Ayarlar > SEO).
 - [ ] **Gözden geçir: F7 planlama kararları (2026-10-28 gece):** ADR-0031 (Geliver sağlayıcısı, bildirim ipucu + API'den yeniden okuma, etiket özel depoda ve yalnızca personel ucundan, iç durum tablosu, Geliver SDK'sı yerine kendi istemcimiz).
 - [ ] **F5 PayTR gerçek testi (V11; kullanıcı + firma).** Firmanın hesabı canlıda kullanılıyor; firma test modunda bağlanmayı kabul etti (kullanıcı 2026-10-27).
@@ -1521,7 +1522,7 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
 | F4 Fiyatlandırma ve promosyon | ✅ (U1–U8; KK1–KK4; kapanış incelemesi 2026-10-27) |
 | F5 Ödeme: PayTR + iyzico (+ ortak ödeme altyapısı) | ✅ (V1–V11; gerçek sağlayıcı testleri sunucuya çıkışta) |
 | F6 Ödeme: havale/EFT + kapıda ödeme + yönlendirici + ters ibraz | ✅ (W1–W6; KK1–KK5; 2026-10-28) |
-| F7 Kargo, sipariş operasyonu, iade ve değişim | ⏳ K1–K7 bitti (2026-10-28); sıradaki K8 |
+| F7 Kargo, sipariş operasyonu, iade ve değişim | ⏳ K1–K8 bitti (2026-10-28); sıradaki K9 |
 | F8 E-fatura | ⬜ |
 | F9 Bildirimler (e-posta/SMS) | ⬜ |
 | F10 Müşteri hesabı, etkileşim, pazarlama ve SEO ölçümü | ⬜ |

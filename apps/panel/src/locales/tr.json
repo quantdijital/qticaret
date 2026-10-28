@@ -1572,6 +1572,50 @@
       "resultsSummary": "{{shipped}} sipariş kargoya verildi, {{failed}} sipariş verilemedi.",
       "label": "Etiket",
       "failed": "Kargoya verilemedi."
+    },
+    "returns": {
+      "queue": "İade talepleri",
+      "queueDescription": "Müşterilerin iade talepleri; karar bekleyenler önce. Onaylanan iadede müşteri kargoya iade koduyla verir; ürün depoya ulaşınca teslim alın, para iadesi kendiliğinden yapılır.",
+      "columns": {
+        "order": "Sipariş",
+        "date": "Talep tarihi",
+        "reason": "Sebep",
+        "status": "Durum",
+        "code": "İade kodu",
+        "refund": "İade tutarı"
+      },
+      "reasons": {
+        "damaged": "Hasarlı geldi",
+        "wrong_item": "Yanlış ürün",
+        "not_as_described": "Tarif edildiği gibi değil",
+        "changed_mind": "Fikrim değişti",
+        "size_issue": "Beden/ölçü uymadı",
+        "other": "Diğer"
+      },
+      "status": {
+        "requested": "Karar bekliyor",
+        "approved": "Onaylandı",
+        "rejected": "Reddedildi",
+        "received": "Teslim alındı",
+        "refunded": "Para iade edildi",
+        "canceled": "İptal"
+      },
+      "actions": "İade talebi işlemleri",
+      "approve": "Onayla",
+      "approved": "İade onaylandı; iade kodu müşteriye gösterilir.",
+      "reject": "Reddet",
+      "rejectTitle": "#{{number}} iade talebi reddedilsin mi?",
+      "rejectDescription": "Müşteri bu notu iade talebinde görür.",
+      "rejectNote": "Ret sebebi",
+      "rejected": "İade talebi reddedildi.",
+      "receive": "Teslim al",
+      "receiveTitle": "#{{number}} iadesi depoya ulaştı",
+      "receiveDescription": "Gelen adetleri girin; eksik gelen düşülür. Teslim alınan ürünler stoğa döner ve tutarları iade edilir.",
+      "receivedOf": "{{name}} için gelen adet",
+      "refunded": "Ürünler teslim alındı, para iade edildi.",
+      "retryRefund": "Para iadesini tekrar dene",
+      "label": "İade etiketini indir",
+      "empty": "Bu durumda iade talebi yok."
     }
   },
   "customers": {

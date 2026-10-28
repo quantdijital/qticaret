@@ -192,9 +192,14 @@ export function OrdersPage() {
         title={t("nav.orders")}
         description={t("orders.description")}
         action={
-          <Button asChild variant="outline" size="sm">
-            <Link to="/orders/chargebacks">{t("orders.chargeback.queue")}</Link>
-          </Button>
+          <span className="flex flex-wrap gap-2">
+            <Button asChild variant="outline" size="sm">
+              <Link to="/orders/returns">{t("orders.returns.queue")}</Link>
+            </Button>
+            <Button asChild variant="outline" size="sm">
+              <Link to="/orders/chargebacks">{t("orders.chargeback.queue")}</Link>
+            </Button>
+          </span>
         }
       />
       <section className="overflow-hidden rounded-lg border bg-card shadow-card">
