@@ -1,9 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link, getRouteApi, useNavigate } from "@tanstack/react-router"
-import { EllipsisVertical } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { toast } from "sonner"
 import { DataTable } from "@/components/patterns/data-table"
 import type { Column } from "@/components/patterns/data-table"
 import { FilterTabs } from "@/components/patterns/filter-tabs"
@@ -12,21 +10,12 @@ import { Pagination } from "@/components/patterns/pagination"
 import { ErrorState } from "@/components/patterns/states"
 import { StatusBadge } from "@/components/patterns/status-badge"
 import type { StatusTone } from "@/components/patterns/status-badge"
-import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
-  RETURN_PAGE_SIZE,
-  returnRequestsQuery,
-  useApproveReturn,
-  useRetryRefund,
-  useReturnLabel,
-} from "@/features/orders/api/returns"
+import { RETURN_PAGE_SIZE, returnRequestsQuery } from "@/features/orders/api/returns"
 import type { ReturnRequest, ReturnStatus } from "@/features/orders/api/returns"
+import { ReturnActions } from "@/features/orders/components/return-actions"
+import type { Open } from "@/features/orders/components/return-actions"
+import { ApproveExchangeDialog } from "@/features/orders/detail/exchange-dialog"
+import { differenceText } from "@/features/orders/exchange-text"
 import { ReceiveReturnDialog, RejectReturnDialog } from "@/features/orders/detail/return-dialogs"
 import { errorText } from "@/lib/errors"
 import { formatDateTime, formatMoney } from "@/lib/format"
@@ -44,108 +33,6 @@ const TONE: Record<ReturnStatus, StatusTone> = {
   refunded: "success",
   rejected: "neutral",
   canceled: "neutral",
-}
-
-type Open = { kind: "reject" | "receive"; request: ReturnRequest } | null
-
-function Actions({ request, onOpen }: { request: ReturnRequest; onOpen: (open: Open) => void }) {
-  const { t } = useTranslation()
-  const approve = useApproveReturn()
-  const retry = useRetryRefund()
-  const label = useReturnLabel()
-  const failed = (failure: unknown) => toast.error(errorText(t, failure))
-  const items: { key: string; label: string; run: () => void }[] = []
-  if (request.status === "requested") {
-    items.push(
-      {
-        key: "approve",
-        label: t(`${R}.approve`),
-        run: () => {
-          approve.mutate(request.id, {
-            onSuccess: () => toast.success(t(`${R}.approved`)),
-            onError: failed,
-          })
-        },
-      },
-      {
-        key: "reject",
-        label: t(`${R}.reject`),
-        run: () => {
-          onOpen({ kind: "reject", request })
-        },
-      }
-    )
-  }
-  if (request.status === "approved") {
-    items.push({
-      key: "receive",
-      label: t(`${R}.receive`),
-      run: () => {
-        onOpen({ kind: "receive", request })
-      },
-    })
-  }
-  if (request.status === "received") {
-    items.push({
-      key: "refund",
-      label: t(`${R}.retryRefund`),
-      run: () => {
-        retry.mutate(request.id, {
-          onSuccess: () => toast.success(t(`${R}.refunded`)),
-          onError: failed,
-        })
-      },
-    })
-  }
-  if (request.return_label_file_id) {
-    items.push({
-      key: "label",
-      label: t(`${R}.label`),
-      run: () => {
-        const tab = window.open("", "_blank")
-        label.mutate(request.id, {
-          onSuccess: (url) => {
-            if (tab) {
-              tab.opener = null
-              tab.location.href = url
-            } else {
-              window.location.assign(url)
-            }
-          },
-          onError: (failure) => {
-            tab?.close()
-            failed(failure)
-          },
-        })
-      },
-    })
-  }
-  if (items.length === 0) {
-    return null
-  }
-  return (
-    <span className="flex justify-end">
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button
-            size="icon-sm"
-            variant="outline"
-            aria-label={t(`${R}.actions`)}
-            disabled={approve.isPending || retry.isPending}
-          >
-            <EllipsisVertical />
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          {items.map((item) => (
-            <DropdownMenuItem key={item.key} onSelect={item.run}>
-              {item.label}
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </span>
-  )
 }
 
 /**
@@ -198,7 +85,14 @@ export function ReturnsPage() {
       key: "reason",
       header: t(`${R}.columns.reason`),
       className: "hidden md:table-cell",
-      cell: (row) => t(`${R}.reasons.${row.reason}`),
+      cell: (row) => (
+        <span className="flex items-center gap-2">
+          {t(`${R}.reasons.${row.reason}`)}
+          {row.kind === "exchange" ? (
+            <StatusBadge tone="info">{t(`${R}.exchange.badge`)}</StatusBadge>
+          ) : null}
+        </span>
+      ),
     },
     {
       key: "status",
@@ -219,13 +113,18 @@ export function ReturnsPage() {
       key: "refund",
       header: t(`${R}.columns.refund`),
       align: "right",
-      cell: (row) => (row.refund_amount ? formatMoney(row.refund_amount, "try") : "—"),
+      cell: (row) =>
+        row.refund_amount
+          ? formatMoney(row.refund_amount, "try")
+          : row.kind === "exchange"
+            ? differenceText(t, row.difference)
+            : "—",
     },
     {
       key: "actions",
       header: "",
       align: "right",
-      cell: (row) => <Actions request={row} onOpen={setOpen} />,
+      cell: (row) => <ReturnActions request={row} onOpen={setOpen} />,
     },
   ]
   return (
@@ -275,6 +174,14 @@ export function ReturnsPage() {
       </section>
       {open?.kind === "reject" ? (
         <RejectReturnDialog
+          request={open.request}
+          onClose={() => {
+            setOpen(null)
+          }}
+        />
+      ) : null}
+      {open?.kind === "exchange" ? (
+        <ApproveExchangeDialog
           request={open.request}
           onClose={() => {
             setOpen(null)

@@ -12,10 +12,21 @@ export interface ReturnLine {
   quantity: number
 }
 
+/** A line asked back for another variant (adr/0032 §6), named for staff. */
+export interface ExchangeLine extends ReturnLine {
+  variant_id: string
+  title: string | null
+}
+
 export interface ReturnRequest {
   id: string
   order_id: string
   order_display_id: number | null
+  /** A return gives money back; an exchange sends another variant. */
+  kind: "return" | "exchange"
+  exchange_items: ExchangeLine[] | null
+  /** Exact lira: positive when the shopper owes, negative when the shop does. */
+  difference: string | null
   status: ReturnStatus
   reason: ReturnReason
   note: string | null
@@ -24,6 +35,8 @@ export interface ReturnRequest {
   return_code: string | null
   return_label_file_id: string | null
   received_items: ReturnLine[] | null
+  damaged_items: ReturnLine[] | null
+  refund_shipping: boolean
   refund_amount: string | null
   created_at: string
 }
@@ -87,9 +100,13 @@ function useReturnMutation<T, R = unknown>(run: (input: T) => Promise<R>) {
 const url = (id: string, action: string) =>
   `/admin/return-requests/${encodeURIComponent(id)}/${action}`
 
+/** Approves a request; for an exchange the shopper owes on, staff say they collected it. */
 export const useApproveReturn = () =>
-  useReturnMutation((id: string) =>
-    sdk.client.fetch(url(id, "approve"), { method: "POST", body: {} })
+  useReturnMutation(({ id, collected }: { id: string; collected?: boolean }) =>
+    sdk.client.fetch(url(id, "approve"), {
+      method: "POST",
+      body: collected === undefined ? {} : { difference_collected: collected },
+    })
   )
 
 export const useRejectReturn = () =>
@@ -97,12 +114,21 @@ export const useRejectReturn = () =>
     sdk.client.fetch(url(id, "reject"), { method: "POST", body: { note } })
   )
 
+export interface ReceiveInput {
+  id: string
+  /** Back in stock. */
+  items: ReturnLine[]
+  /** Broken: refunded, not restocked. */
+  damaged: ReturnLine[]
+  refund_shipping: boolean
+}
+
 /** Receives what came back; a refund that failed comes back as its reason. */
 export const useReceiveReturn = () =>
-  useReturnMutation(({ id, items }: { id: string; items: ReturnLine[] }) =>
+  useReturnMutation(({ id, ...body }: ReceiveInput) =>
     sdk.client.fetch<{ refund_error: string | null }>(url(id, "receive"), {
       method: "POST",
-      body: { items },
+      body,
     })
   )
 

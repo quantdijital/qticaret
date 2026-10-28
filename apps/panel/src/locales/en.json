@@ -1574,7 +1574,7 @@
         "reason": "Reason",
         "status": "Status",
         "code": "Return code",
-        "refund": "Refund"
+        "refund": "Amount"
       },
       "reasons": {
         "damaged": "Arrived damaged",
@@ -1602,12 +1602,30 @@
       "rejected": "Return request rejected.",
       "receive": "Receive",
       "receiveTitle": "The return of #{{number}} arrived",
-      "receiveDescription": "Enter what came; anything missing is left out. Received items go back in stock and their money is refunded.",
-      "receivedOf": "Quantity of {{name}} received",
+      "receiveDescription": "Enter how many came back sound and how many damaged; anything missing is left out. Sound ones go back in stock, damaged ones do not; both are refunded.",
+      "lineColumn": "Product",
+      "soundColumn": "Sound",
+      "damagedColumn": "Damaged",
+      "soundOf": "Sound units back for {{name}}",
+      "damagedOf": "Damaged units back for {{name}}",
+      "refundShipping": "Refund the shipping too",
+      "refundShippingHint": "Suggested when the item was damaged, wrong or not as described; your call.",
       "refunded": "Items received, money refunded.",
       "retryRefund": "Try the refund again",
       "label": "Download return label",
-      "empty": "No return requests in this state."
+      "empty": "No return requests in this state.",
+      "exchange": {
+        "badge": "Exchange",
+        "approveTitle": "Approve the exchange of #{{number}}?",
+        "approveDescription": "The shopper sends the item with the return code; the new item is set aside from stock and ships once the return reaches the warehouse.",
+        "swap": "{{to}} instead of {{from}}",
+        "even": "No difference",
+        "shopperOwes": "The shopper pays {{amount}}",
+        "shopOwes": "{{amount}} goes back to the shopper",
+        "collected": "I collected the difference",
+        "collectedHint": "Tick it once paid by bank transfer or otherwise; the difference is recorded as paid on the order.",
+        "approved": "Exchange approved; the shopper sees the return code."
+      }
     }
   },
   "customers": {

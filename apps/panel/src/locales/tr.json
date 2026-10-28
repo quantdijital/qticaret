@@ -1582,7 +1582,7 @@
         "reason": "Sebep",
         "status": "Durum",
         "code": "İade kodu",
-        "refund": "İade tutarı"
+        "refund": "Tutar"
       },
       "reasons": {
         "damaged": "Hasarlı geldi",
@@ -1610,12 +1610,30 @@
       "rejected": "İade talebi reddedildi.",
       "receive": "Teslim al",
       "receiveTitle": "#{{number}} iadesi depoya ulaştı",
-      "receiveDescription": "Gelen adetleri girin; eksik gelen düşülür. Teslim alınan ürünler stoğa döner ve tutarları iade edilir.",
-      "receivedOf": "{{name}} için gelen adet",
+      "receiveDescription": "Sağlam ve hasarlı gelen adetleri girin; eksik gelen düşülür. Sağlamlar stoğa döner, hasarlılar dönmez; ikisinin tutarı da iade edilir.",
+      "lineColumn": "Ürün",
+      "soundColumn": "Sağlam",
+      "damagedColumn": "Hasarlı",
+      "soundOf": "{{name}} için sağlam gelen adet",
+      "damagedOf": "{{name}} için hasarlı gelen adet",
+      "refundShipping": "Kargo ücretini de iade et",
+      "refundShippingHint": "Hasarlı, yanlış ya da tarif edildiği gibi olmayan üründe önerilir; karar sizin.",
       "refunded": "Ürünler teslim alındı, para iade edildi.",
       "retryRefund": "Para iadesini tekrar dene",
       "label": "İade etiketini indir",
-      "empty": "Bu durumda iade talebi yok."
+      "empty": "Bu durumda iade talebi yok.",
+      "exchange": {
+        "badge": "Değişim",
+        "approveTitle": "#{{number}} değişimi onaylansın mı?",
+        "approveDescription": "Müşteri ürünü iade kodu ile gönderir; yeni ürün stoktan ayrılır ve iade depoya ulaşınca kargoya verilir.",
+        "swap": "{{from}} yerine {{to}}",
+        "even": "Fark yok",
+        "shopperOwes": "Müşteri {{amount}} ödeyecek",
+        "shopOwes": "Müşteriye {{amount}} iade edilecek",
+        "collected": "Farkı müşteriden aldım",
+        "collectedHint": "Havale/EFT ya da başka yolla tahsil ettiyseniz işaretleyin; fark siparişe ödendi olarak işlenir.",
+        "approved": "Değişim onaylandı; iade kodu müşteriye gösterilir."
+      }
     }
   },
   "customers": {
