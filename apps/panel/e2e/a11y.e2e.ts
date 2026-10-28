@@ -26,6 +26,7 @@ const SCREENS = [
   "/settings/shipping/geliver",
   "/settings/shipping/aras",
   "/settings/shipping/yurtici",
+  "/settings/notifications",
   "/orders/chargebacks",
   "/orders/returns",
   "/settings/integrations",

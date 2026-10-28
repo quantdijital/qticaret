@@ -65,6 +65,8 @@ const envSchema = z.object({
   // Mailpit's web address (its HTTP send endpoint), and a fake Resend in tests
   MAILPIT_URL: z.url({ protocol: /^https?$/ }).optional(),
   RESEND_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
+  // A fake Netgsm on a developer's machine (adr/0036)
+  NETGSM_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
   // Medusa's level names; unset means Medusa's default, `http`
   LOG_LEVEL: z.enum(LOG_LEVELS).optional(),
   // docs/13 §6: "off" keeps search engines out (robots.txt, noindex) on an
@@ -190,6 +192,7 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
     "YURTICI_BASE_URL",
     "MAILPIT_URL",
     "RESEND_BASE_URL",
+    "NETGSM_BASE_URL",
   ] as const) {
     if (env[name] !== undefined && (env.NODE_ENV === "production" || env.NODE_ENV === "staging")) {
       ctx.addIssue({

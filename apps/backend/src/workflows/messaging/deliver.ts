@@ -6,6 +6,9 @@ import { normalizeRecipient } from "../../lib/messaging/recipients"
 import type { MessageChannel } from "../../lib/messaging/recipients"
 import { MESSAGE_TEMPLATES } from "../../lib/messaging/templates"
 import type { Brand, MessageTemplate, MessageTemplateName } from "../../lib/messaging/templates"
+import { netgsmAccountOf } from "../../lib/messaging/sms/netgsm"
+import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-credentials"
+import type IntegrationCredentialsModuleService from "../../modules/integration-credentials/service"
 import { MESSAGING_MODULE } from "../../modules/messaging"
 import type MessagingModuleService from "../../modules/messaging/service"
 import { brandOf } from "./brand"
@@ -47,13 +50,15 @@ interface NotificationRows {
   deleteNotifications: (ids: string[]) => Promise<void>
 }
 
-/** Whether the channel can send at all on this instance. */
-function channelReady(channel: MessageChannel): boolean {
+/** Whether the channel can send at all: the instance's e-mail, the shop's SMS account. */
+async function channelReady(container: Container, channel: MessageChannel): Promise<boolean> {
   if (channel === "email") {
     return emailTransport() !== null && platformSender() !== null
   }
-  // SMS opens with the shop's Netgsm account (F9 N4)
-  return false
+  const account = await container
+    .resolve<IntegrationCredentialsModuleService>(INTEGRATION_CREDENTIALS_MODULE)
+    .read("netgsm")
+  return netgsmAccountOf(account) !== null
 }
 
 function render<N extends MessageTemplateName>(
@@ -99,7 +104,7 @@ export async function deliver<N extends MessageTemplateName>(
       logger.info({ event: "messaging.not_sent", ...fields, reason, to: masked ?? null })
       outcomes[channel] = reason
     }
-    if (!channelReady(channel)) {
+    if (!(await channelReady(container, channel))) {
       notSent("channel_off")
       continue
     }
@@ -144,15 +149,14 @@ export async function deliver<N extends MessageTemplateName>(
           // Ids only: the rendered message is never stored
           data: { resource_type: input.resource.type, resource_id: input.resource.id },
           content,
-          ...(channel === "email"
-            ? {
-                provider_data: {
+          provider_data:
+            channel === "email"
+              ? {
                   from_email: platformSender(),
                   from_name: brand.shopName,
                   reply_to: brand.contactEmail,
-                },
-              }
-            : {}),
+                }
+              : { commercial: template.kind === "commercial" },
           trigger_type: template.name,
           resource_type: input.resource.type,
           resource_id: input.resource.id,

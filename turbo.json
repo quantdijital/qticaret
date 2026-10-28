@@ -21,6 +21,7 @@
     "EMAIL_*",
     "MAILPIT_*",
     "RESEND_*",
+    "NETGSM_*",
     "TEST_*"
   ],
   "tasks": {

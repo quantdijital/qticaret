@@ -98,6 +98,24 @@ export const CREDENTIAL_PROVIDERS = {
     identity: ["test_mode"],
     optional: ["cod_username", "cod_password"],
   },
+  // Netgsm's SMS account (adr/0036): the shop's own, its sender name registered to its company
+  netgsm: {
+    settings: z
+      .object({
+        msgheader: z
+          .string()
+          .trim()
+          .regex(/^[0-9A-Za-zÇĞİÖŞÜçğıöşü .-]{2,11}$/, "netgsm.msgheader_invalid"),
+      })
+      .strict(),
+    secrets: ["usercode", "password"],
+    secret: z
+      .string()
+      .trim()
+      .regex(/^[\x21-\x7E]{1,128}$/, "integration_credentials.secret_invalid"),
+    identity: [],
+    optional: [],
+  },
 } as const satisfies Record<string, CredentialProvider>
 
 export type CredentialProviderName = keyof typeof CREDENTIAL_PROVIDERS

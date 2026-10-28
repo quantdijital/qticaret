@@ -1,7 +1,7 @@
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
-import { startFakeMail } from "@qticaret/testing"
-import type { FakeMail } from "@qticaret/testing"
+import { startFakeMail, startFakeNetgsm } from "@qticaret/testing"
+import type { FakeMail, FakeNetgsm } from "@qticaret/testing"
 import { placeOrder } from "../../src/scripts/seed/orders/place"
 import { MESSAGING_MODULE } from "../../src/modules/messaging"
 import { RETURN_REQUESTS_MODULE } from "../../src/modules/return-requests"
@@ -35,6 +35,7 @@ medusaIntegrationTestRunner({
     const http = api as HttpClient
     let admin: { headers: Record<string, string> }
     let fake: FakeMail
+    let netgsm: FakeNetgsm
     let shop: StockShop
     let variantId: string
 
@@ -55,16 +56,18 @@ medusaIntegrationTestRunner({
 
     beforeAll(async () => {
       fake = await startFakeMail()
+      netgsm = await startFakeNetgsm()
+      process.env["NETGSM_BASE_URL"] = netgsm.url
       process.env["EMAIL_TRANSPORT"] = "mailpit"
       process.env["MAILPIT_URL"] = fake.url
       process.env["EMAIL_FROM"] = "bildirim@platform.example"
     })
 
     afterAll(async () => {
-      for (const name of ["EMAIL_TRANSPORT", "MAILPIT_URL", "EMAIL_FROM"]) {
+      for (const name of ["EMAIL_TRANSPORT", "MAILPIT_URL", "EMAIL_FROM", "NETGSM_BASE_URL"]) {
         Reflect.deleteProperty(process.env, name)
       }
-      await fake.close()
+      await Promise.all([fake.close(), netgsm.close()])
     })
 
     beforeEach(async () => {
@@ -78,6 +81,7 @@ medusaIntegrationTestRunner({
         .saveSection("store", { contact_email: "destek@magaza.example" }, null)
       admin = await createAdminUser(http, container)
       fake.messages.length = 0
+      netgsm.messages.length = 0
     })
 
     it("tells the shopper the order was placed, once, from the shop, and stores no message", async () => {
@@ -297,6 +301,37 @@ medusaIntegrationTestRunner({
       expect(
         sentTo("odendi@example.com").filter(({ template }) => template === "payment.failed")
       ).toHaveLength(0)
+    })
+
+    it("texts the shopper too once the shop connects its Netgsm account, and checks its sender name", async () => {
+      const connect = (msgheader: string) =>
+        settle(
+          http.post<{ message?: string }>(
+            "/admin/integrations/credentials/netgsm",
+            {
+              settings: { msgheader },
+              secrets: { usercode: netgsm.account.usercode, password: netgsm.account.password },
+            },
+            { headers: admin.headers }
+          )
+        )
+      const before = await order()
+      const wrongHeader = await connect("BASKA")
+      await connect("MAGAZA")
+      const after = await order()
+      const [sms] = await eventually(
+        () => Promise.resolve(netgsm.messages),
+        (found) => found.length > 0
+      )
+      const outcome = await resend(before)
+
+      expect(wrongHeader.data.message).toBe("netgsm.merchant_invalid")
+      expect(sms).toMatchObject({ to: "905320000000", header: "MAGAZA", filter: "0" })
+      expect(sms?.text).toMatch(/: #\d+ numaralı siparişiniz alındı\. Toplam ₺/)
+      expect(after).not.toBe(before)
+      // The first order went before the account: its SMS goes now, its e-mail went already
+      expect(netgsm.messages).toHaveLength(2)
+      expect(outcome.result).toMatchObject({ email: "duplicate", sms: "sent" })
     })
 
     it("tries a failed send again with the same key, and sends it once", async () => {

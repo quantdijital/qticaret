@@ -225,7 +225,8 @@
       "audit": "Audit log",
       "attributes": "Product attributes",
       "locations": "Locations",
-      "integrations": "Integrations"
+      "integrations": "Integrations",
+      "notifications": "Notifications"
     },
     "appearance": {
       "title": "Appearance",
@@ -874,7 +875,10 @@
       "checks": {
         "redis": "Cache (Redis)",
         "paytr": "PayTR",
-        "iyzico": "iyzico"
+        "iyzico": "iyzico",
+        "netgsm": "Netgsm (SMS)",
+        "aras": "Aras Kargo",
+        "yurtici": "Yurtiçi Kargo"
       },
       "kinds": {
         "cache": "Cache and sessions",
@@ -895,6 +899,28 @@
       },
       "latency": "{{ms}} ms",
       "manage": "Manage account"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "description": "The e-mails and texts your customers get. E-mail goes through the platform; texts need the shop's own Netgsm account.",
+      "sms": {
+        "name": "Netgsm",
+        "keys": {
+          "title": "SMS account",
+          "description": "The user code and password Netgsm gives. Turn on API access under Settings > API in the Netgsm panel; the server's IP may need allowing."
+        },
+        "usercode": "User code",
+        "password": "Password",
+        "msgheader": "Sender name (header)",
+        "msgheaderHint": "Type your approved Netgsm header exactly (2–11 characters). Texts go out under it."
+      },
+      "netgsm": {
+        "checks": {
+          "merchant_invalid": "Netgsm took the login, but this sender name is not on the account. Type the approved header exactly.",
+          "secret_invalid": "Netgsm did not accept this user code and password, or API access is off."
+        },
+        "rejected": "Netgsm no longer accepts the stored details; no text can be sent. Enter the current ones."
+      }
     }
   },
   "status": {

@@ -68,6 +68,8 @@ export interface HttpRequest<T> {
    * handed to `schema` as text, for the caller to read (adr/0035).
    */
   xml?: string
+  /** The answer is handed to `schema` as text whatever was sent (a provider answering plain lines). */
+  textAnswer?: boolean
   /** Marks a POST or PATCH as safe to repeat (it carries an idempotency key). */
   idempotent?: boolean
   /** Logged instead of the path when it holds secrets or identifiers (`/services/:token`). */
@@ -156,7 +158,7 @@ export function createHttpClient(options: HttpClientOptions): HttpClient {
       method,
       headers,
       body: serializeBody(method, request.json, request.form, request.xml),
-      text: request.xml !== undefined,
+      text: request.xml !== undefined || request.textAnswer === true,
       repeatable: request.idempotent ?? IDEMPOTENT_METHODS.has(method),
       fields: { event: "http_client.request", provider, method, path },
     }

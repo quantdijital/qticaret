@@ -16,6 +16,7 @@ const PROVIDER_NAMES: Readonly<Record<CredentialProviderName, string>> = {
   geliver: "Geliver",
   aras: "Aras Kargo",
   yurtici: "Yurtiçi Kargo",
+  netgsm: "Netgsm",
 }
 
 /**

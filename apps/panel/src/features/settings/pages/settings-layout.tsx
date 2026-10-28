@@ -7,6 +7,7 @@ const SECTIONS = [
   { key: "store", to: "/settings/store" },
   { key: "payments", to: "/settings/payments" },
   { key: "shipping", to: "/settings/shipping" },
+  { key: "notifications", to: "/settings/notifications" },
   { key: "integrations", to: "/settings/integrations" },
   { key: "locations", to: "/settings/locations" },
   { key: "appearance", to: "/settings/appearance" },

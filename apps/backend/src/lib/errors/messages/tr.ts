@@ -290,6 +290,15 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Aras Kargo bu kullanıcı adını kabul etmedi. Kullanıcı adını Aras'ın verdiği entegrasyon bilgilerinden yeniden kopyalayın.",
   "aras.secret_invalid":
     "Aras Kargo bu kullanıcı adı ve şifreyi kabul etmedi. Bilgileri Aras'ın verdiği entegrasyon belgesinden yeniden kopyalayın; test ve canlı hesap ayrıdır.",
+  "messaging.recipient_invalid": "Adres ya da telefon numarası geçerli değil.",
+  "messaging.email_off": "E-posta gönderimi bu mağazada açık değil.",
+  "messaging.sms_off": "SMS hesabı bağlı değil. Ayarlar > Bildirimler'den Netgsm hesabını girin.",
+  "netgsm.msgheader_invalid":
+    "Gönderici adı 2–11 karakter olmalı; Netgsm'de onaylı başlığınızı aynen yazın.",
+  "netgsm.merchant_invalid":
+    "Netgsm girişi doğru ama bu gönderici adı hesabınızda yok. Netgsm panelindeki onaylı başlığı aynen yazın.",
+  "netgsm.secret_invalid":
+    "Netgsm bu kullanıcı adı ve şifreyi kabul etmedi ya da API erişimi kapalı. Netgsm panelinde Ayarlar > API işlemleri'nden API erişimini ve IP iznini kontrol edin.",
   "yurtici.merchant_invalid":
     "Yurtiçi Kargo, tahsilatlı teslimat (kapıda ödeme) hesabının kullanıcı adı ve şifresini kabul etmedi. Bilgileri Yurtiçi'nin bu hesap için verdiği belgeden yeniden kopyalayın.",
   "yurtici.secret_invalid":

@@ -124,6 +124,11 @@ module.exports = defineConfig({
             id: "email",
             options: { channels: ["email"] },
           },
+          {
+            resolve: "./src/modules/notification-sms",
+            id: "sms",
+            options: { channels: ["sms"] },
+          },
         ],
       },
     },

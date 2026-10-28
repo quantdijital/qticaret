@@ -7,6 +7,7 @@ import { arasHealthCheck } from "./aras-check"
 import { geliverHealthCheck } from "./geliver-check"
 import { iyzicoHealthCheck } from "./iyzico-check"
 import { paytrHealthCheck } from "./paytr-check"
+import { netgsmHealthCheck } from "./netgsm-check"
 import { redisHealthCheck } from "./redis-check"
 import { yurticiHealthCheck } from "./yurtici-check"
 
@@ -23,6 +24,7 @@ export { arasHealthCheck } from "./aras-check"
 export { geliverHealthCheck } from "./geliver-check"
 export { iyzicoHealthCheck } from "./iyzico-check"
 export { paytrHealthCheck } from "./paytr-check"
+export { netgsmHealthCheck } from "./netgsm-check"
 export { redisHealthCheck } from "./redis-check"
 export { yurticiHealthCheck } from "./yurtici-check"
 
@@ -44,6 +46,7 @@ export function defaultHealthChecks(accounts: AccountSource): IntegrationHealthC
     geliverHealthCheck(() => accounts.read("geliver")),
     arasHealthCheck(() => accounts.read("aras")),
     yurticiHealthCheck(() => accounts.read("yurtici")),
+    netgsmHealthCheck(() => accounts.read("netgsm")),
   ]
 }
 

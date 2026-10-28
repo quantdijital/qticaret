@@ -11,6 +11,7 @@
     "dev:paytr": "pnpm --filter backend dev:paytr",
     "dev:aras": "pnpm --filter backend dev:aras",
     "dev:geliver": "pnpm --filter backend dev:geliver",
+    "dev:netgsm": "pnpm --filter backend dev:netgsm",
     "dev:yurtici": "pnpm --filter backend dev:yurtici",
     "build": "turbo run build",
     "lint": "turbo run lint",

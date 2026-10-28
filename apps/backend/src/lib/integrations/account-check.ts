@@ -6,6 +6,7 @@ import { iyzicoApi, iyzicoCredentialsOf } from "../payments/iyzico"
 import { paytrApi, paytrCredentialsOf } from "../payments/paytr"
 import { arasApi, arasCredentialsOf } from "../shipping/aras"
 import { geliverApi, geliverCredentialsOf } from "../shipping/geliver"
+import { netgsmAccountOf, netgsmApi } from "../messaging/sms/netgsm"
 import { yurticiApi, yurticiCredentialsOf } from "../shipping/yurtici"
 
 /**
@@ -67,6 +68,11 @@ const CHECKERS = {
       ? "merchant_invalid"
       : "valid"
   },
+  // `merchant_invalid`: the login works, the sender name is not on it
+  netgsm: async (account, signal) => {
+    const credentials = netgsmAccountOf(account)
+    return credentials ? netgsmApi().checkAccount(credentials, { signal }) : "secret_invalid"
+  },
 } satisfies Record<CredentialProviderName, Checker>
 
 export async function checkAccount(
@@ -95,4 +101,5 @@ export const CHECK_FIELDS = {
   aras: { merchant_invalid: "secrets.username", secret_invalid: "secrets.password" },
   // The main login, or the door account's (see its checker)
   yurtici: { merchant_invalid: "secrets.cod_password", secret_invalid: "secrets.password" },
+  netgsm: { merchant_invalid: "settings.msgheader", secret_invalid: "secrets.password" },
 } satisfies Record<CredentialProviderName, Record<"merchant_invalid" | "secret_invalid", string>>

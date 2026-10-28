@@ -225,7 +225,8 @@
       "audit": "Denetim kaydı",
       "attributes": "Ürün özellikleri",
       "locations": "Depolar",
-      "integrations": "Entegrasyonlar"
+      "integrations": "Entegrasyonlar",
+      "notifications": "Bildirimler"
     },
     "appearance": {
       "title": "Görünüm",
@@ -874,7 +875,10 @@
       "checks": {
         "redis": "Önbellek (Redis)",
         "paytr": "PayTR",
-        "iyzico": "iyzico"
+        "iyzico": "iyzico",
+        "netgsm": "Netgsm (SMS)",
+        "aras": "Aras Kargo",
+        "yurtici": "Yurtiçi Kargo"
       },
       "kinds": {
         "cache": "Önbellek ve oturumlar",
@@ -895,6 +899,28 @@
       },
       "latency": "{{ms}} ms",
       "manage": "Hesabı yönet"
+    },
+    "notifications": {
+      "title": "Bildirimler",
+      "description": "Müşterilere giden e-posta ve SMS'ler. E-postalar platform üzerinden gider; SMS için mağazanın kendi Netgsm hesabı gerekir.",
+      "sms": {
+        "name": "Netgsm",
+        "keys": {
+          "title": "SMS hesabı",
+          "description": "Netgsm'in verdiği kullanıcı kodu ve şifre. Netgsm panelinde Ayarlar > API işlemleri'nden API erişimini açın; sunucu IP'si için izin gerekebilir."
+        },
+        "usercode": "Kullanıcı kodu",
+        "password": "Şifre",
+        "msgheader": "Gönderici adı (başlık)",
+        "msgheaderHint": "Netgsm'de onaylı başlığınızı aynen yazın (2–11 karakter). SMS'ler bu adla gider."
+      },
+      "netgsm": {
+        "checks": {
+          "merchant_invalid": "Netgsm girişi doğru ama bu gönderici adı hesabınızda yok. Netgsm panelindeki onaylı başlığı aynen yazın.",
+          "secret_invalid": "Netgsm bu kullanıcı kodu ve şifreyi kabul etmedi ya da API erişimi kapalı."
+        },
+        "rejected": "Netgsm kayıtlı bilgileri artık kabul etmiyor; SMS gönderilemiyor. Güncel bilgileri girin."
+      }
     }
   },
   "status": {
