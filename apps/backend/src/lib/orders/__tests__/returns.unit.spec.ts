@@ -44,6 +44,10 @@ describe("returns (adr/0032)", () => {
     expect(returnable(returned, [])).toEqual(new Map([["line_a", 1]]))
   })
 
+  it("leaves out units already refunded without coming back", () => {
+    expect(returnable(order, [], new Map([["line_a", 1]]))).toEqual(new Map([["line_a", 2]]))
+  })
+
   it("counts a received request by what came back, sound and damaged together", () => {
     const asked = [{ line_item_id: "line_a", quantity: 3 }]
     expect(cameBack({ items: asked })).toEqual(asked)

@@ -62,12 +62,12 @@ export async function cancelOrderForCustomer(
       if (order.status === "completed" || packed) {
         throw new ValidationError("orders.cancel_after_packing")
       }
-      const takenByHand = (order.payment_collections ?? []).some((collection) =>
-        (collection?.payments ?? []).some(
-          (payment) =>
-            Boolean(payment?.captured_at) && isOfflineProvider(payment?.provider_id ?? "")
-        )
+      const taken = (order.payment_collections ?? []).flatMap((collection) =>
+        (collection?.payments ?? []).filter((payment) => Boolean(payment?.captured_at))
       )
+      // Offline money, or a difference staff collected by hand (an edit): it goes back by hand
+      const takenByHand =
+        taken.length > 1 || taken.some((payment) => isOfflineProvider(payment?.provider_id ?? ""))
       if (takenByHand) {
         throw new ValidationError("orders.cancel_contact_shop")
       }

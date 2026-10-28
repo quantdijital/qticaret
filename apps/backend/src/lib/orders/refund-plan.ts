@@ -18,6 +18,12 @@ export interface RefundRequest {
   shipping?: boolean
   /** A free amount, spread over the lines by what each still holds. */
   amount?: Kurus
+  /**
+   * What the order no longer costs after an edit or a swap made it cheaper
+   * (adr/0033, adr/0032 §6): its lines already say so, so it is booked
+   * against none of them; only what was paid caps it.
+   */
+  balance?: Kurus
 }
 
 export interface PlannedLine {
@@ -66,6 +72,15 @@ export function planRefund(
   refundable: Kurus
 ): { lines: PlannedLine[]; total: Kurus } {
   let lines: PlannedLine[]
+  if (request.balance !== undefined) {
+    if (request.balance <= 0) {
+      throw new ValidationError("orders.refund_empty")
+    }
+    if (request.balance > refundable) {
+      throw new ValidationError("orders.refund_exceeds_paid", { field: "amount" })
+    }
+    return { lines: [], total: request.balance }
+  }
   if (request.amount !== undefined) {
     const open = shares
       .map((line) => ({ line, remaining: remainingOf(line, refunded) }))

@@ -1,11 +1,18 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys, MedusaError, QueryContext } from "@medusajs/framework/utils"
+import {
+  ContainerRegistrationKeys,
+  MedusaError,
+  Modules,
+  QueryContext,
+} from "@medusajs/framework/utils"
 import { ValidationError } from "../../lib/errors"
+import { returnsLockKey } from "../../lib/orders/locks"
 import { fromMedusaAmount } from "../../lib/money"
 import type { MedusaAmount } from "../../lib/money"
 import { exchangeDifference, exchangeProblem } from "../../lib/orders/exchanges"
 import type { ExchangeLine, ExchangeOrderLine, ExchangeVariant } from "../../lib/orders/exchanges"
 import { RETURN_REQUESTS_MODULE } from "../../modules/return-requests"
+import { readOrderMoney } from "../orders/order-money"
 import type ReturnRequestsModuleService from "../../modules/return-requests/service"
 
 interface OrderRow {
@@ -83,6 +90,8 @@ export async function quoteExchange(
       "items.product_id",
       "items.variant_id",
       "items.unit_price",
+      // A price an order edit corrected reaches the item only with it (adr/0033)
+      "items.detail.unit_price",
     ],
     filters: { id: orderId },
   })
@@ -110,6 +119,10 @@ export async function quoteExchange(
       }),
     },
   })
+  const { lines: shares } = await readOrderMoney(container, orderId)
+  const discounted = new Set(
+    shares.filter((line) => line.kind === "item" && line.discount > 0).map((line) => line.id)
+  )
   const lines = new Map<string, ExchangeOrderLine>(
     (order.items ?? []).flatMap((item) =>
       item
@@ -121,6 +134,7 @@ export async function quoteExchange(
                 product_id: item.product_id ?? null,
                 variant_id: item.variant_id ?? null,
                 unit_price: kurusOf(item.unit_price),
+                discounted: discounted.has(item.id),
               },
             ] as const,
           ]
@@ -154,20 +168,30 @@ export async function quoteExchange(
  */
 export async function requoteExchange(
   container: MedusaContainer,
-  request: { id: string; order_id: string; exchange_items: unknown; difference: number | null }
+  request: { id: string; order_id: string }
 ): Promise<void> {
-  const { problem, difference } = await quoteExchange(
-    container,
-    request.order_id,
-    (request.exchange_items ?? []) as ExchangeLine[]
+  const service = container.resolve<ReturnRequestsModuleService>(RETURN_REQUESTS_MODULE)
+  // Under the returns lock, and only while it waits: an approved swap keeps its cost
+  await container.resolve(Modules.LOCKING).execute(
+    returnsLockKey(request.order_id),
+    async () => {
+      const [current] = await service.listReturnRequests({ id: request.id }, { take: 1 })
+      if (current?.status !== "requested") {
+        throw new ValidationError("returns.status_invalid")
+      }
+      const { problem, difference } = await quoteExchange(
+        container,
+        current.order_id,
+        (current.exchange_items ?? []) as unknown as ExchangeLine[]
+      )
+      if (problem) {
+        throw new ValidationError(problem)
+      }
+      if (difference !== current.difference) {
+        await service.updateReturnRequests({ id: current.id, difference })
+        throw new ValidationError("returns.exchange_price_changed")
+      }
+    },
+    { timeout: 10 }
   )
-  if (problem) {
-    throw new ValidationError(problem)
-  }
-  if (difference !== request.difference) {
-    await container
-      .resolve<ReturnRequestsModuleService>(RETURN_REQUESTS_MODULE)
-      .updateReturnRequests({ id: request.id, difference })
-    throw new ValidationError("returns.exchange_price_changed")
-  }
 }

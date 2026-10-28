@@ -57,6 +57,30 @@ class OrderRefundsModuleService extends MedusaService({ OrderRefund }) {
   }
 
   /** Lines given back by the refunds that went through, or are going through now. */
+  /**
+   * Units given money back without coming back: refunds that were no
+   * return's (the refund window, a goodwill gesture). They cannot be asked
+   * back again (security review 2026-10-28).
+   */
+  async keptUnits(orderId: string): Promise<Map<string, number>> {
+    const refunds = await this.listOrderRefunds(
+      { order_id: orderId, status: ["pending", "done"] },
+      { select: ["lines", "reference"] }
+    )
+    const units = new Map<string, number>()
+    for (const refund of refunds) {
+      if (refund.reference.startsWith("return")) {
+        continue
+      }
+      for (const line of refund.lines as unknown as RefundLine[]) {
+        if (line.quantity > 0) {
+          units.set(line.id, (units.get(line.id) ?? 0) + line.quantity)
+        }
+      }
+    }
+    return units
+  }
+
   async refundedLines(orderId: string): Promise<RefundedLines> {
     const refunds = await this.listOrderRefunds(
       { order_id: orderId, status: ["pending", "done"] },

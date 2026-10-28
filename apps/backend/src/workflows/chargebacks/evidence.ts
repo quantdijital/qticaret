@@ -14,6 +14,9 @@ const ORDER_FIELDS = [
   "items.title",
   "items.quantity",
   "items.total",
+  // An order edit's quantity and price reach the item only with its detail (adr/0033)
+  "items.detail.quantity",
+  "items.detail.unit_price",
   "shipping_address.first_name",
   "shipping_address.last_name",
   "shipping_address.address_1",

@@ -148,6 +148,26 @@ export async function existingCartAddresses(req: MedusaRequest): Promise<Existin
   }
 }
 
+/** An order's stored addresses (F7.12, adr/0033), for partial updates. */
+export async function existingOrderAddresses(req: MedusaRequest): Promise<ExistingAddresses> {
+  const orderId = req.params["id"]
+  if (!orderId) {
+    return {}
+  }
+  const { data } = await req.scope.resolve(ContainerRegistrationKeys.QUERY).graph({
+    entity: "order",
+    fields: [
+      ...ADDRESS_FIELDS.map((field) => `shipping_address.${field}`),
+      ...ADDRESS_FIELDS.map((field) => `billing_address.${field}`),
+    ],
+    filters: { id: orderId },
+  })
+  return {
+    shipping_address: data[0]?.shipping_address ?? null,
+    billing_address: data[0]?.billing_address ?? null,
+  }
+}
+
 /** A warehouse's stored address (F3.7), for partial updates. */
 export async function existingLocationAddress(req: MedusaRequest): Promise<ExistingAddresses> {
   const locationId = req.params["id"]

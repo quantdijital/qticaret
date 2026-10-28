@@ -21,7 +21,7 @@ import type { ReturnLine } from "../../lib/orders/returns"
 import { RETURN_REQUESTS_MODULE } from "../../modules/return-requests"
 import type ReturnRequestsModuleService from "../../modules/return-requests/service"
 import { refundOrderWorkflow } from "../orders/refund-order"
-import { returnsLockKey } from "./request-return"
+import { returnsLockKey } from "../../lib/orders/locks"
 import {
   readReturnRequestStep,
   returnRequestOrderStep,
@@ -129,6 +129,19 @@ export function receivedProblem(
     : null
 }
 
+/** Every unit asked came back, sound or damaged. */
+export function receivedWhole(
+  asked: unknown,
+  sound: readonly ReturnLine[],
+  damaged: readonly ReturnLine[]
+): boolean {
+  const came = new Map<string, number>()
+  for (const line of [...sound, ...damaged]) {
+    came.set(line.line_item_id, (came.get(line.line_item_id) ?? 0) + line.quantity)
+  }
+  return (asked as ReturnLine[]).every((line) => came.get(line.line_item_id) === line.quantity)
+}
+
 /**
  * Gives the money for what came back, sound or damaged (adr/0032): through
  * our refund, line by line, under the request's own reference (tried
@@ -168,7 +181,7 @@ export async function refundReturn(
           request:
             owed === null
               ? { items: asMedusaLines(cameBack(request)), shipping: request.refund_shipping }
-              : { amount: kurus(owed) },
+              : { balance: kurus(owed) },
           note: `return ${request.id}`,
           created_by: input.staff_id,
         },

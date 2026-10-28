@@ -1,4 +1,4 @@
-import { receivedProblem } from "../receive-return"
+import { receivedProblem, receivedWhole } from "../receive-return"
 
 const asked = [
   { line_item_id: "ordli_a", quantity: 2 },
@@ -38,5 +38,18 @@ describe("receivedProblem (adr/0032)", () => {
       )
     ).toBe(problem)
     expect(receivedProblem(asked, [], [])).toBe(problem)
+  })
+})
+
+describe("receivedWhole (adr/0032 §6)", () => {
+  it("is whole only when every unit asked came back, sound or damaged", () => {
+    const one = (line_item_id: string, quantity: number) => [{ line_item_id, quantity }]
+    expect(
+      receivedWhole(asked, one("ordli_a", 1), [
+        { line_item_id: "ordli_a", quantity: 1 },
+        { line_item_id: "ordli_b", quantity: 1 },
+      ])
+    ).toBe(true)
+    expect(receivedWhole(asked, one("ordli_a", 2), [])).toBe(false)
   })
 })

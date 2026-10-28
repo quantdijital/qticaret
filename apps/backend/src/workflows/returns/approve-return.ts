@@ -6,7 +6,7 @@ import {
   releaseLockStep,
   requestItemReturnWorkflow,
 } from "@medusajs/medusa/core-flows"
-import { returnsLockKey } from "./request-return"
+import { returnsLockKey } from "../../lib/orders/locks"
 import {
   openCarrierReturnStep,
   readReturnRequestStep,

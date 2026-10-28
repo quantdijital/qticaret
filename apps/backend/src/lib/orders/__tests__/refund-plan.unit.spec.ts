@@ -75,6 +75,16 @@ describe("planRefund (F5 V5)", () => {
     ).toMatchObject({ total: kurus(16800) })
   })
 
+  it("books what an edit or a swap took off against no line, within what was paid", () => {
+    expect(planRefund(shares, nothing, { balance: kurus(4000) }, kurus(21000))).toEqual({
+      lines: [],
+      total: kurus(4000),
+    })
+    expect(reasonOf(() => planRefund(shares, nothing, { balance: kurus(4000) }, kurus(3000)))).toBe(
+      "orders.refund_exceeds_paid"
+    )
+  })
+
   it("refuses an empty refund, an unknown line and more than was paid", () => {
     expect(reasonOf(() => planRefund(shares, nothing, { items: [] }, kurus(21000)))).toBe(
       "orders.refund_empty"

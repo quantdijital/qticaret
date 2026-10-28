@@ -28,6 +28,20 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Havale/EFT ile ödenmiş sipariş buradan iptal edilemez; iptal ve ücret iadesi için mağazayla iletişime geçin.",
   "orders.ship_canceled_refund":
     "Bu siparişin iptali için ücret iadesi yapılmış; kargoya verilemez. Siparişi iptal edin.",
+  "orders.edit_nothing": "Düzenlenecek bir şey seçilmedi.",
+  "orders.edit_items_invalid":
+    "Düzenlenen kalemler bu siparişe ait değil ya da birden fazla kez seçildi.",
+  "orders.edit_after_packing":
+    "Paketlenmiş, kargoya verilmiş ya da iptal edilmiş sipariş düzenlenemez.",
+  "orders.edit_payment_unsupported":
+    "Bu siparişin kalemleri düzenlenemez: yalnızca kartla ödenmiş siparişler düzenlenir. Kapıda ödeme ve havalede siparişi iptal edip yenisini oluşturun.",
+  "orders.edit_difference_changed":
+    "Düzenlemenin fiyat farkı değişti; önizlemeyi yenileyip tekrar deneyin.",
+  "orders.edit_difference_due":
+    "Müşteri fark ödeyecek; kaydetmeden önce farkı tahsil edip işaretleyin.",
+  "orders.edit_price_kurus": "Fiyat en çok iki ondalık basamak olabilir.",
+  "orders.use_order_edit":
+    "Sipariş düzenleme yalnızca sipariş sayfasındaki düzenleme penceresinden yapılır.",
   "orders.ship_items_invalid":
     "Seçilen kalemler gönderilecek olanlarla uyuşmuyor: her kalemden en çok kalan adet kadar gönderilebilir.",
   "orders.ship_packed_first":
@@ -234,6 +248,15 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Siparişin kargo seçeneği bulunamadı; değişim gönderisi açılamıyor.",
   "returns.exchange_awaiting_return":
     "Değişimdeki ürün depoya ulaşmadan yeni ürün kargoya verilemez; önce iadeyi teslim alın.",
+  "orders.edit_balance_open":
+    "Siparişte düzenlemeden ayrı bir ödeme farkı var (önceki bir iade ya da tahsilat); bu siparişin kalemleri düzenlenemez.",
+  "orders.edit_reference_invalid": "Düzenleme anahtarı geçersiz; pencereyi kapatıp yeniden açın.",
+  "returns.exchange_incomplete":
+    "Değişimde istenen bütün ürünler gelmeden teslim alınamaz; eksik ürün için müşteriyle görüşün.",
+  "returns.exchange_discounted_price":
+    "İndirimle alınmış ürün yalnızca aynı fiyatlı bir seçenekle değiştirilebilir; farklı fiyatta iade talebi açıp yeni sipariş verin.",
+  "returns.exchange_balance_open":
+    "Siparişte değişimden ayrı bir ödeme farkı var; değişim onaylanamıyor.",
   "returns.use_return_requests":
     "İade, değişim ve talepler yalnızca iade talepleri ekranından yürütülür.",
   "returns.carrier_refused": "Kargo firması iade gönderisini açmadı; birazdan tekrar deneyin.",

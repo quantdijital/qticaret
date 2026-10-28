@@ -19,8 +19,10 @@ export const ORDER_MONEY_FIELDS = [
   "items.adjustments.raw_amount",
   "items.adjustments.is_tax_inclusive",
   "items.adjustments.version",
-  // Medusa fills an item's quantity only with its detail requested
+  // Medusa fills an item's quantity only with its detail requested, and puts
+  // a price an order edit corrected (adr/0033) on the item only with it too
   "items.detail.quantity",
+  "items.detail.unit_price",
   "items.detail.return_received_quantity",
   "items.detail.return_dismissed_quantity",
   "shipping_methods.id",

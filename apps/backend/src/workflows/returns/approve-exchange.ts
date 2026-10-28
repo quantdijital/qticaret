@@ -14,7 +14,7 @@ import {
   orderExchangeRequestItemReturnWorkflow,
   releaseLockStep,
 } from "@medusajs/medusa/core-flows"
-import { returnsLockKey } from "./request-return"
+import { returnsLockKey } from "../../lib/orders/locks"
 import { checkExchangeStep, exchangeSettledStep, exchangeStartStep } from "./steps/exchange"
 import {
   openCarrierReturnStep,

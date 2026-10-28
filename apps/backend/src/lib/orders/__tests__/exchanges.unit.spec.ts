@@ -4,7 +4,13 @@ import type { ExchangeOrderLine, ExchangeVariant } from "../exchanges"
 const lines = new Map<string, ExchangeOrderLine>([
   [
     "ordli_m",
-    { id: "ordli_m", product_id: "prod_shirt", variant_id: "variant_m", unit_price: 50_000 },
+    {
+      id: "ordli_m",
+      product_id: "prod_shirt",
+      variant_id: "variant_m",
+      unit_price: 50_000,
+      discounted: false,
+    },
   ],
 ])
 const variants = new Map<string, ExchangeVariant>([
@@ -36,6 +42,19 @@ describe("exchanges (adr/0032 §6)", () => {
     )
     expect(exchangeProblem(lines, variants, swap("variant_l", 2))).toBe(
       "returns.exchange_out_of_stock"
+    )
+  })
+
+  it("swaps a line bought with a discount only at the same price", () => {
+    const discounted = new Map(
+      [...lines].map(([id, line]) => [id, { ...line, discounted: true }] as const)
+    )
+    expect(exchangeProblem(discounted, variants, swap("variant_l"))).toBeNull()
+    expect(exchangeProblem(discounted, variants, swap("variant_xl"))).toBe(
+      "returns.exchange_discounted_price"
+    )
+    expect(exchangeProblem(discounted, variants, swap("variant_s"))).toBe(
+      "returns.exchange_discounted_price"
     )
   })
 

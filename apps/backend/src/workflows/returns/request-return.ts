@@ -1,6 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, MedusaError, Modules } from "@medusajs/framework/utils"
 import { ValidationError } from "../../lib/errors"
+import { returnsLockKey } from "../../lib/orders/locks"
 import {
   RETURN_ORDER_FIELDS,
   cameBack,
@@ -10,13 +11,13 @@ import {
 } from "../../lib/orders/returns"
 import type { ExchangeLine } from "../../lib/orders/exchanges"
 import type { ReturnLine, ReturnOrderFacts } from "../../lib/orders/returns"
+import { ORDER_REFUNDS_MODULE } from "../../modules/order-refunds"
+import type OrderRefundsModuleService from "../../modules/order-refunds/service"
 import { RETURN_REQUESTS_MODULE } from "../../modules/return-requests"
 import type ReturnRequestsModuleService from "../../modules/return-requests/service"
 import { COUNTED_RETURN_STATUSES, OPEN_RETURN_STATUSES } from "../../modules/return-requests/states"
 import type { ReturnKind, ReturnReason } from "../../modules/return-requests/states"
 import { quoteExchange } from "./exchange-quote"
-
-export const returnsLockKey = (orderId: string): string => `returns:${orderId}`
 
 /**
  * A shopper asks to send lines of their own order back (F7.9, adr/0032):
@@ -69,7 +70,10 @@ export async function requestReturn(
       // A request that came back counts what came back; one still open, what it asked
       const asked = earlier.flatMap(cameBack)
       const lines = input.items.map(({ line_item_id, quantity }) => ({ line_item_id, quantity }))
-      const problem = linesProblem(returnable(order, asked), lines)
+      const kept = await container
+        .resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE)
+        .keptUnits(input.order_id)
+      const problem = linesProblem(returnable(order, asked, kept), lines)
       if (problem) {
         throw new ValidationError(problem, { field: "items" })
       }

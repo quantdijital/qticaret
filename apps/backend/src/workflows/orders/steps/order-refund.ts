@@ -1,3 +1,4 @@
+import type { MedusaContainer } from "@medusajs/framework/types"
 import type { UpdatePaymentDTO } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, MedusaError, Modules } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
@@ -46,12 +47,14 @@ const kurusOf = (amount: Amount) =>
 const sumOf = (rows: ({ raw_amount?: Amount } | null)[] | null | undefined) =>
   kurus((rows ?? []).reduce((sum, row) => sum + kurusOf(row?.raw_amount), 0))
 
-/** The payment that can give `amount` back, a hosted form's first (adr/0026). */
-async function paymentFor(
-  container: Parameters<Parameters<typeof createStep>[1]>[1]["container"],
-  orderId: string,
-  amount: number
-): Promise<string> {
+/**
+ * What each of the order's payments can still give back, a hosted form's
+ * first (adr/0026): kuruş taken less kuruş refunded.
+ */
+export async function paymentRemainders(
+  container: Pick<MedusaContainer, "resolve">,
+  orderId: string
+): Promise<{ id: string; remaining: number }[]> {
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "order",
     fields: [
@@ -70,16 +73,29 @@ async function paymentFor(
   if (!order) {
     throw new MedusaError(MedusaError.Types.NOT_FOUND, "orders.unknown")
   }
-  const payments = (order.payment_collections ?? [])
+  return (order.payment_collections ?? [])
     .flatMap((collection) => collection?.payments ?? [])
     .filter((payment): payment is PaymentRow => payment !== null)
-    .filter((payment) => subtractKurus(sumOf(payment.captures), sumOf(payment.refunds)) >= amount)
     .sort(
       (a, b) =>
         Number((HOSTED_FORM_PROVIDERS as readonly string[]).includes(b.provider_id ?? "")) -
         Number((HOSTED_FORM_PROVIDERS as readonly string[]).includes(a.provider_id ?? ""))
     )
-  const payment = payments[0]
+    .map((payment) => ({
+      id: payment.id,
+      remaining: subtractKurus(sumOf(payment.captures), sumOf(payment.refunds)),
+    }))
+}
+
+/** The payment that can give `amount` back, a hosted form's first (adr/0026). */
+async function paymentFor(
+  container: Pick<MedusaContainer, "resolve">,
+  orderId: string,
+  amount: number
+): Promise<string> {
+  const payment = (await paymentRemainders(container, orderId)).find(
+    (each) => each.remaining >= amount
+  )
   if (!payment) {
     // One payment gives a refund back; splitting one over several is not done
     throw new ValidationError("orders.refund_exceeds_paid", { field: "amount" })

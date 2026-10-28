@@ -25,6 +25,17 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "An order paid by bank transfer cannot be cancelled here; contact the shop to cancel it and get the money back.",
   "orders.ship_canceled_refund":
     "This order's cancellation has already been refunded; it cannot be shipped. Cancel the order.",
+  "orders.edit_nothing": "Nothing was chosen to change.",
+  "orders.edit_items_invalid": "The edited lines are not this order's, or one was chosen twice.",
+  "orders.edit_after_packing": "An order packed, shipped or cancelled cannot be edited.",
+  "orders.edit_payment_unsupported":
+    "This order's lines cannot be edited: only orders paid by card can. For cash on delivery and bank transfer, cancel the order and place a new one.",
+  "orders.edit_difference_changed":
+    "The edit's price difference changed; refresh the preview and try again.",
+  "orders.edit_difference_due":
+    "The shopper owes a difference; collect it and tick it before saving.",
+  "orders.edit_price_kurus": "A price may have at most two decimals.",
+  "orders.use_order_edit": "Orders are edited from the edit dialog on the order page only.",
   "orders.ship_items_invalid":
     "The chosen lines do not match what is left to ship: at most what is left of each line can go.",
   "orders.ship_packed_first":
@@ -230,6 +241,15 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "returns.exchange_no_shipping": "The order has no shipping option to send the exchange with.",
   "returns.exchange_awaiting_return":
     "The new item ships once the exchanged one reaches the warehouse; receive the return first.",
+  "orders.edit_balance_open":
+    "The order has a balance apart from this edit (an earlier refund or collection); its lines cannot be edited.",
+  "orders.edit_reference_invalid": "The edit key is invalid; close the dialog and open it again.",
+  "returns.exchange_incomplete":
+    "An exchange is received only once every item asked has come back; talk to the shopper about the missing one.",
+  "returns.exchange_discounted_price":
+    "An item bought with a discount can be swapped only for an option at the same price; otherwise ask for a return and place a new order.",
+  "returns.exchange_balance_open":
+    "The order has a balance apart from the exchange; it cannot be approved.",
   "returns.use_return_requests":
     "Returns, exchanges and claims are handled from the return requests screen only.",
   "returns.carrier_refused": "The carrier did not open the return; try again shortly.",

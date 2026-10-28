@@ -75,10 +75,14 @@ export function cameBack(request: {
   return [...total].map(([line_item_id, quantity]) => ({ line_item_id, quantity }))
 }
 
-/** Each line's quantity still returnable, by line id. */
+/**
+ * Each line's quantity still returnable, by line id; `kept` are units
+ * already refunded without coming back (the refund window).
+ */
 export function returnable(
   order: ReturnOrderFacts,
-  asked: readonly ReturnLine[]
+  asked: readonly ReturnLine[],
+  kept: ReadonlyMap<string, number> = new Map()
 ): Map<string, number> {
   const taken = new Map<string, number>()
   for (const line of asked) {
@@ -95,7 +99,10 @@ export function returnable(
       (detail?.return_requested_quantity ?? 0) +
       (detail?.return_received_quantity ?? 0) +
       (detail?.return_dismissed_quantity ?? 0)
-    const quantity = (detail?.shipped_quantity ?? 0) - Math.max(taken.get(item.id) ?? 0, inMedusa)
+    const quantity =
+      (detail?.shipped_quantity ?? 0) -
+      Math.max(taken.get(item.id) ?? 0, inMedusa) -
+      (kept.get(item.id) ?? 0)
     if (quantity > 0) {
       left.set(item.id, quantity)
     }

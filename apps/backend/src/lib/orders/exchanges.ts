@@ -6,7 +6,10 @@ import type { ReturnLine } from "./returns"
  * never the shopper's: what the swap costs is the new variant's price
  * today less the line's price at purchase (Medusa's own exchange sums,
  * where a returned unit counts at its unit price), so a size swap at the
- * same price costs nothing, a coupon included. Pure, so tested on its own.
+ * same price costs nothing, a coupon included. A line sold with a
+ * discount swaps only at the same price: Medusa counts both sides at list
+ * price, so a dearer or cheaper swap would ignore what the coupon took off
+ * (security review 2026-10-28). Pure, so tested on its own.
  */
 
 export interface ExchangeLine extends ReturnLine {
@@ -20,6 +23,8 @@ export interface ExchangeOrderLine {
   variant_id: string | null
   /** Kuruş, KDV included, as the order sold it. */
   unit_price: number
+  /** Sold with a discount: its swap keeps the price (the new line would carry none). */
+  discounted: boolean
 }
 
 export interface ExchangeVariant {
@@ -52,6 +57,9 @@ export function exchangeProblem(
     }
     if (variant.price === null) {
       return "returns.exchange_variant_invalid"
+    }
+    if (sold.discounted && variant.price !== sold.unit_price) {
+      return "returns.exchange_discounted_price"
     }
     if ((needed.get(variant.id) ?? 0) > variant.available) {
       return "returns.exchange_out_of_stock"

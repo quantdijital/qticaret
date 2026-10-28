@@ -7,11 +7,13 @@ import type {
 } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { ValidationError } from "../../lib/errors"
+import { kurus } from "../../lib/money"
 import { cancelRefundReference } from "../../lib/orders/locks"
 import { isCheckoutProvider } from "../../lib/payments/checkout"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import { readOrderMoney } from "../../workflows/orders/order-money"
 import { refundOrderWorkflow } from "../../workflows/orders/refund-order"
+import { paymentRemainders } from "../../workflows/orders/steps/order-refund"
 import {
   AdminPostOrderRefund,
   AdminPostOrderRefundPreview,
@@ -79,17 +81,26 @@ async function refundBeforeCancel(
       next()
       return
     }
-    const { refundable } = await readOrderMoney(req.scope, orderId)
-    if (refundable > 0) {
+    // One refund per payment: an edit's collected difference is a payment of its own
+    let left = (await readOrderMoney(req.scope, orderId)).refundable
+    const payments = (await paymentRemainders(req.scope, orderId)).filter(
+      (payment) => payment.remaining > 0
+    )
+    for (const [part, payment] of payments.entries()) {
+      const amount = Math.min(left, payment.remaining)
+      if (amount <= 0) {
+        break
+      }
       await refundOrderWorkflow(req.scope).run({
         input: {
           order_id: orderId,
-          reference: cancelRefundReference(orderId),
-          request: { amount: refundable },
+          reference: cancelRefundReference(orderId, part),
+          request: { amount: kurus(amount) },
           note: "order canceled",
           created_by: (req as Partial<AuthenticatedMedusaRequest>).auth_context?.actor_id ?? null,
         },
       })
+      left = kurus(left - amount)
     }
     next()
   } catch (error) {

@@ -9,6 +9,7 @@ import type ReturnRequestsModuleService from "../../../../../modules/return-requ
 import {
   receiveReturnWorkflow,
   receivedProblem,
+  receivedWhole,
   refundReturn,
 } from "../../../../../workflows/returns/receive-return"
 import type { AdminPostReturnReceiveType } from "../../validators"
@@ -40,6 +41,10 @@ export async function POST(
   )
   if (problem) {
     throw new ValidationError(problem, { field: "items" })
+  }
+  // A swap sends the new item for each that came back: all of it, or it waits (adr/0032 §6)
+  if (request.kind === "exchange" && !receivedWhole(request.items, items, damaged)) {
+    throw new ValidationError("returns.exchange_incomplete", { field: "items" })
   }
   const exchange = request.kind === "exchange"
   const { result: received } = await receiveReturnWorkflow(req.scope).run({

@@ -47,7 +47,13 @@ interface BalanceRow {
   items?: ({ id: string; unit_price: MedusaAmount } | null)[] | null
   shipping_methods?: ({ shipping_option_id?: string | null } | null)[] | null
   payment_collections?:
-    ({ id: string; status?: string | null; created_at?: string | Date | null } | null)[] | null
+    | ({
+        id: string
+        status?: string | null
+        amount?: MedusaAmount | null
+        created_at?: string | Date | null
+      } | null)[]
+    | null
 }
 
 async function balanceOf(container: Pick<MedusaContainer, "resolve">, orderId: string) {
@@ -57,15 +63,22 @@ async function balanceOf(container: Pick<MedusaContainer, "resolve">, orderId: s
       "summary",
       "items.id",
       "items.unit_price",
+      // A price an order edit corrected reaches the item only with it (adr/0033)
+      "items.detail.unit_price",
       "shipping_methods.shipping_option_id",
       "payment_collections.id",
       "payment_collections.status",
+      "payment_collections.amount",
       "payment_collections.created_at",
     ],
     filters: { id: orderId },
   })
   return data[0] as BalanceRow | undefined
 }
+
+// Query may hand dates back as Date objects: compared by time, not by text
+const timeOf = (value: unknown): number =>
+  value instanceof Date || typeof value === "string" ? new Date(value).getTime() : 0
 
 const pendingOf = (row: BalanceRow | undefined): number =>
   fromMedusaAmount(row?.summary?.pending_difference ?? 0, { allowRounding: true })
@@ -129,7 +142,14 @@ export const exchangeSettledStep = createStep(
     })
     const collection = (row?.payment_collections ?? [])
       .filter((each) => each?.status === "not_paid")
-      .sort((a, b) => String(b?.created_at).localeCompare(String(a?.created_at)))[0]
+      .sort((a, b) => timeOf(b?.created_at) - timeOf(a?.created_at))[0]
+    // What Medusa asks the shopper for is the swap's cost alone, else an older balance rides along
+    if (
+      difference > 0 &&
+      fromMedusaAmount(collection?.amount ?? 0, { allowRounding: true }) !== difference
+    ) {
+      throw new ValidationError("returns.exchange_balance_open")
+    }
     return new StepResponse({
       difference,
       return_id: (data[0] as { return_id?: string | null } | undefined)?.return_id ?? null,

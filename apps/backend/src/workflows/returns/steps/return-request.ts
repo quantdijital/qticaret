@@ -14,6 +14,10 @@ import type { ReturnKind, ReturnStatus } from "../../../modules/return-requests/
 import { SHIPMENT_TRACKING_MODULE } from "../../../modules/shipment-tracking"
 import type ShipmentTrackingModuleService from "../../../modules/shipment-tracking/service"
 
+// Query may hand dates back as Date objects: compared by time, not by text
+const timeOf = (value: unknown): number =>
+  value instanceof Date || typeof value === "string" ? new Date(value).getTime() : 0
+
 const requests = (container: Pick<MedusaContainer, "resolve">) =>
   container.resolve<ReturnRequestsModuleService>(RETURN_REQUESTS_MODULE)
 
@@ -84,7 +88,7 @@ export const readReturnRequestStep = createStep(
       )?.fulfillments ?? []
     )
       .filter((fulfillment) => fulfillment && !fulfillment.canceled_at && fulfillment.location_id)
-      .sort((a, b) => String(b?.created_at).localeCompare(String(a?.created_at)))[0]?.location_id
+      .sort((a, b) => timeOf(b?.created_at) - timeOf(a?.created_at))[0]?.location_id
     return new StepResponse<RequestFacts>({
       id: request.id,
       order_id: request.order_id,

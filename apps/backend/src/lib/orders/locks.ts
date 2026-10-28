@@ -14,6 +14,15 @@ export const cancelLockKeys = (orderId: string): string[] => [
   shipLockKey(orderId),
 ]
 
-/** The reference a cancel's refund is made under: tried again, refunded once (F5 V5). */
-export const cancelRefundReference = (orderId: string): string =>
-  `cancel${orderId.replace(/[^A-Za-z0-9]/g, "")}`.slice(0, 40)
+/** An order's returns lock: its requests are opened, decided, received and refunded one at a time. */
+export const returnsLockKey = (orderId: string): string => `returns:${orderId}`
+
+/**
+ * The reference a cancel's refund is made under: tried again, refunded
+ * once (F5 V5). A cancel refunding several payments (an edit's collected
+ * difference) numbers the later ones.
+ */
+export const cancelRefundReference = (orderId: string, part = 0): string => {
+  const base = `cancel${orderId.replace(/[^A-Za-z0-9]/g, "")}`
+  return part === 0 ? base.slice(0, 40) : `${base.slice(0, 37)}p${String(part)}`
+}
