@@ -1,6 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ValidationError } from "../../lib/errors"
 import type { CarrierName } from "../../lib/shipping/carriers"
+import { arasApi, arasCredentialsOf, arasStatusOf } from "../../lib/shipping/aras"
 import { geliverApi, geliverCredentialsOf, geliverStatusOf } from "../../lib/shipping/geliver"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-credentials"
 import type { CredentialProviderName } from "../../modules/integration-credentials/providers"
@@ -41,6 +42,14 @@ const readGeliver: Reader = async (container, providerShipmentId) => {
   }
 }
 
+const readAras: Reader = async (container, providerShipmentId) => {
+  const account = arasCredentialsOf(await credentials(container, "aras"))
+  if (!account) {
+    throw new ValidationError("shipping.carrier_not_connected")
+  }
+  return arasStatusOf(await arasApi().cargoInfo(account, providerShipmentId))
+}
+
 /**
  * How each carrier is asked about a parcel (adr/0035): the shop's account
  * read at the call, the answer mapped to our statuses. A carrier without
@@ -48,6 +57,7 @@ const readGeliver: Reader = async (container, providerShipmentId) => {
  */
 const READERS: Partial<Record<CarrierName, Reader>> = {
   geliver: readGeliver,
+  aras: readAras,
 }
 
 export function carrierReader(provider: string): Reader {

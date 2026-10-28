@@ -50,6 +50,9 @@ const envSchema = z.object({
   PAYTR_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
   IYZICO_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
   GELIVER_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
+  // A fake Aras or Yurtiçi on a developer's machine (adr/0035); refused when deployed
+  ARAS_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
+  YURTICI_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
   // Medusa's level names; unset means Medusa's default, `http`
   LOG_LEVEL: z.enum(LOG_LEVELS).optional(),
   // docs/13 §6: "off" keeps search engines out (robots.txt, noindex) on an
@@ -149,7 +152,13 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
   }
   // A deployed shop pays and ships at the provider's own address only. A fake server
   // is for a developer's machine, where Medusa's CLI runs with NODE_ENV unset
-  for (const name of ["PAYTR_BASE_URL", "IYZICO_BASE_URL", "GELIVER_BASE_URL"] as const) {
+  for (const name of [
+    "PAYTR_BASE_URL",
+    "IYZICO_BASE_URL",
+    "GELIVER_BASE_URL",
+    "ARAS_BASE_URL",
+    "YURTICI_BASE_URL",
+  ] as const) {
     if (env[name] !== undefined && (env.NODE_ENV === "production" || env.NODE_ENV === "staging")) {
       ctx.addIssue({
         code: "custom",

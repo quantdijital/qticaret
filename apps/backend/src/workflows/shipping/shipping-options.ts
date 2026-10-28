@@ -14,9 +14,10 @@ import {
   updateShippingOptionsWorkflow,
 } from "@medusajs/medusa/core-flows"
 import { ValidationError } from "../../lib/errors"
-import { fromMedusaAmount, toMedusaAmount } from "../../lib/money"
-import type { Kurus, MedusaAmount } from "../../lib/money"
+import { toMedusaAmount } from "../../lib/money"
+import type { Kurus } from "../../lib/money"
 import {
+  ARAS_FULFILLMENT_PROVIDER_ID,
   GELIVER_FULFILLMENT_PROVIDER_ID,
   MANUAL_FULFILLMENT_PROVIDER_ID,
 } from "../../lib/shipping/carriers"
@@ -34,7 +35,7 @@ export type OptionPricing =
   | { type: "quote"; choice: "cheapest" | "fastest" }
   | { type: "table" }
 
-export type OptionCarrier = "manual" | "geliver" | "pickup"
+export type OptionCarrier = "manual" | "geliver" | "aras" | "pickup"
 
 export interface ShopOptionInput {
   name: string
@@ -156,8 +157,11 @@ export function shippingOptionInput(
   place: { service_zone_id: string; shipping_profile_id: string; region_id: string | null }
 ) {
   const { pricing } = input
-  // Only Geliver quotes or prices by the table; the shop's own parcels and pickup take a flat price
-  if (input.carrier !== "geliver" && pricing.type !== "flat") {
+  // Only Geliver quotes; a contract carrier takes a flat price or the table; the rest a flat price
+  if (
+    (input.carrier === "aras" && pricing.type === "quote") ||
+    (input.carrier !== "geliver" && input.carrier !== "aras" && pricing.type !== "flat")
+  ) {
     throw new ValidationError("shipping.manual_flat_only", { field: "pricing" })
   }
   const data =
@@ -168,7 +172,9 @@ export function shippingOptionInput(
               ? "geliver-table"
               : GELIVER_DATA[pricing.type === "quote" ? pricing.choice : "cheapest"],
         }
-      : {}
+      : input.carrier === "aras"
+        ? { id: pricing.type === "table" ? "aras-table" : "aras-flat" }
+        : {}
   return {
     name: input.name,
     service_zone_id: place.service_zone_id,
@@ -176,7 +182,9 @@ export function shippingOptionInput(
     provider_id:
       input.carrier === "geliver"
         ? GELIVER_FULFILLMENT_PROVIDER_ID
-        : MANUAL_FULFILLMENT_PROVIDER_ID,
+        : input.carrier === "aras"
+          ? ARAS_FULFILLMENT_PROVIDER_ID
+          : MANUAL_FULFILLMENT_PROVIDER_ID,
     data,
     type: { label: input.name, description: input.name, code: input.carrier },
     rules: [
@@ -231,69 +239,3 @@ export const updateShopShippingOptionWorkflow = createWorkflow(
     return new WorkflowResponse(input.id)
   }
 )
-
-interface OptionRow {
-  id: string
-  name: string
-  provider_id?: string | null
-  price_type?: string | null
-  data?: Record<string, unknown> | null
-  prices?: ({ currency_code?: string | null; amount?: MedusaAmount } | null)[] | null
-  rules?: ({ attribute?: string | null; value?: unknown } | null)[] | null
-  service_zone?: { fulfillment_set?: { type?: string | null } | null } | null
-}
-
-const ruleIs = (option: OptionRow, attribute: string, value: string) =>
-  (option.rules ?? []).some(
-    (rule) => rule?.attribute === attribute && JSON.stringify(rule.value).includes(value)
-  )
-
-/** The shop's options as the panel lists them: sending, not returns; amounts as lira. */
-export async function shopShippingOptions(container: MedusaContainer) {
-  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
-    entity: "shipping_option",
-    fields: [
-      "id",
-      "name",
-      "provider_id",
-      "price_type",
-      "data",
-      "prices.currency_code",
-      "prices.amount",
-      "rules.attribute",
-      "rules.value",
-      "service_zone.fulfillment_set.type",
-    ],
-  })
-  return (data as unknown as OptionRow[])
-    .filter((option) => !ruleIs(option, "is_return", "true"))
-    .map((option) => {
-      const geliver = option.provider_id === GELIVER_FULFILLMENT_PROVIDER_ID
-      const price = (option.prices ?? []).find((each) => each?.currency_code === "try")
-      const choice = option.data?.["id"]
-      return {
-        id: option.id,
-        name: option.name,
-        carrier: geliver
-          ? ("geliver" as const)
-          : option.service_zone?.fulfillment_set?.type === "pickup"
-            ? ("pickup" as const)
-            : option.provider_id === MANUAL_FULFILLMENT_PROVIDER_ID
-              ? ("manual" as const)
-              : null,
-        pricing:
-          option.price_type === "flat"
-            ? ("flat" as const)
-            : choice === "geliver-table"
-              ? ("table" as const)
-              : choice === "geliver-fastest"
-                ? ("fastest" as const)
-                : ("cheapest" as const),
-        amount:
-          option.price_type === "flat" && price?.amount !== undefined
-            ? toMedusaAmount(fromMedusaAmount(price.amount, { allowRounding: true }))
-            : null,
-        in_store: ruleIs(option, "enabled_in_store", "true"),
-      }
-    })
-}

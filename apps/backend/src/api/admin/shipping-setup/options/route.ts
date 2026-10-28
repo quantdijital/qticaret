@@ -1,9 +1,7 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { liraToKurus } from "../../../validation/lira"
-import {
-  createShopShippingOptionWorkflow,
-  shopShippingOptions,
-} from "../../../../workflows/shipping/shipping-options"
+import { createShopShippingOptionWorkflow } from "../../../../workflows/shipping/shipping-options"
+import { shopShippingOptions } from "../../../../workflows/shipping/shop-options"
 import type { AdminPostShippingOptionType } from "./validators"
 
 /** GET /admin/shipping-setup/options (F7.8): the shop's shipping options, as the panel lists them. */

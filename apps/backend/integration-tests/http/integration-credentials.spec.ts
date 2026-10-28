@@ -89,6 +89,11 @@ medusaIntegrationTestRunner({
           state: "not_configured",
           secrets: { api_token: false },
         }),
+        expect.objectContaining({
+          provider: "aras",
+          state: "not_configured",
+          secrets: { username: false, password: false },
+        }),
       ])
     })
 

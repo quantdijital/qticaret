@@ -262,6 +262,9 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "returns.carrier_refused": "Kargo firması iade gönderisini açmadı; birazdan tekrar deneyin.",
   "returns.refund_failed":
     'Ürünler teslim alındı ama para iadesi yapılamadı; "Para iadesini tekrar dene" ile yineleyin.',
+  "aras.customer_code_invalid": "Müşteri kodu en çok 20 harf ve rakam olabilir.",
+  "aras.service_url_invalid":
+    "Servis adresi Aras Kargo'nun https ile başlayan bir adresi olmalı (araskargo.com.tr).",
   "shipping.carrier_unknown": "Bu gönderinin kargo firması tanınmıyor; takip edilemiyor.",
   "shipping.carrier_not_connected":
     "Kargo hizmeti bağlı değil. Ayarlar > Kargo'dan hesabı bağlayın.",
@@ -282,6 +285,10 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Mağazanın iletişim e-postası girilmemiş; kargo hizmeti gönderici için istiyor. Ayarlar > Mağaza'dan ekleyin.",
   "shipping.location_unknown": "Gönderinin çıkacağı depo bulunamadı.",
   "shipping.label_unavailable": "Bu gönderinin etiketi yok.",
+  "aras.merchant_invalid":
+    "Aras Kargo bu kullanıcı adını kabul etmedi. Kullanıcı adını Aras'ın verdiği entegrasyon bilgilerinden yeniden kopyalayın.",
+  "aras.secret_invalid":
+    "Aras Kargo bu kullanıcı adı ve şifreyi kabul etmedi. Bilgileri Aras'ın verdiği entegrasyon belgesinden yeniden kopyalayın; test ve canlı hesap ayrıdır.",
   "geliver.merchant_invalid":
     "Geliver bu API anahtarını kabul etmedi. Anahtarı Geliver panelindeki API anahtarları sayfasından yeniden kopyalayın.",
   "geliver.secret_invalid":

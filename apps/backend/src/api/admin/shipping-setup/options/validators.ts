@@ -9,7 +9,7 @@ const name = z.string().trim().min(1).max(80)
 export const AdminPostShippingOption = z
   .object({
     name,
-    carrier: z.enum(["manual", "geliver", "pickup"]),
+    carrier: z.enum(["manual", "geliver", "aras", "pickup"]),
     pricing: z.discriminatedUnion("type", [
       z.object({ type: z.literal("flat"), amount }).strict(),
       z.object({ type: z.literal("quote"), choice: z.enum(["cheapest", "fastest"]) }).strict(),

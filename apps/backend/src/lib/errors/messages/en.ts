@@ -255,6 +255,9 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "returns.carrier_refused": "The carrier did not open the return; try again shortly.",
   "returns.refund_failed":
     'The items were received but the refund failed; use "Try the refund again".',
+  "aras.customer_code_invalid": "The customer code may hold up to 20 letters and digits.",
+  "aras.service_url_invalid":
+    "The service address must be one of Aras Kargo's own https addresses (araskargo.com.tr).",
   "shipping.carrier_unknown": "This parcel's carrier is not known; it cannot be tracked.",
   "shipping.carrier_not_connected":
     "The shipping service is not connected. Connect the account under Settings > Shipping.",
@@ -275,6 +278,10 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The shop has no contact email; the shipping service needs one for the sender. Add it under Settings > Store.",
   "shipping.location_unknown": "The warehouse the shipment leaves from was not found.",
   "shipping.label_unavailable": "This shipment has no label.",
+  "aras.merchant_invalid":
+    "Aras Kargo did not accept this user name. Copy it again from the integration details Aras gave.",
+  "aras.secret_invalid":
+    "Aras Kargo did not accept this user name and password. Copy them again from Aras's integration document; test and live accounts differ.",
   "geliver.merchant_invalid":
     "Geliver did not accept this API token. Copy it again from the API tokens page of the Geliver panel.",
   "geliver.secret_invalid":

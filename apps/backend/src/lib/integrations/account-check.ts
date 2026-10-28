@@ -4,6 +4,7 @@ import { errorSummary, logger } from "../logging"
 import type { CredentialProviderName } from "../../modules/integration-credentials/providers"
 import { iyzicoApi, iyzicoCredentialsOf } from "../payments/iyzico"
 import { paytrApi, paytrCredentialsOf } from "../payments/paytr"
+import { arasApi, arasCredentialsOf } from "../shipping/aras"
 import { geliverApi, geliverCredentialsOf } from "../shipping/geliver"
 
 /**
@@ -46,6 +47,10 @@ const CHECKERS = {
     const credentials = geliverCredentialsOf(account)
     return credentials ? geliverApi().checkCredentials(credentials, { signal }) : "secret_invalid"
   },
+  aras: async (account, signal) => {
+    const credentials = arasCredentialsOf(account)
+    return credentials ? arasApi().checkCredentials(credentials, { signal }) : "secret_invalid"
+  },
 } satisfies Record<CredentialProviderName, Checker>
 
 export async function checkAccount(
@@ -70,4 +75,6 @@ export const CHECK_FIELDS = {
   iyzico: { merchant_invalid: "secrets.api_key", secret_invalid: "secrets.secret_key" },
   // One token: whatever Geliver refuses is the token
   geliver: { merchant_invalid: "secrets.api_token", secret_invalid: "secrets.api_token" },
+  // A refused login is the user name or the password; the panel points at the password
+  aras: { merchant_invalid: "secrets.username", secret_invalid: "secrets.password" },
 } satisfies Record<CredentialProviderName, Record<"merchant_invalid" | "secret_invalid", string>>

@@ -26,3 +26,9 @@ export type {
 } from "./geliver/fake-server"
 export { TEST_STEPS } from "./geliver/shipments"
 export { FAKE_SERVICES, fakeDesi, fakePrice } from "./geliver/prices"
+export {
+  TRACKING_STEPS as ARAS_TRACKING_STEPS,
+  fakeArasAccount,
+  startFakeAras,
+} from "./aras/fake-server"
+export type { FakeAras, FakeArasAccount, FakeArasOrder } from "./aras/fake-server"

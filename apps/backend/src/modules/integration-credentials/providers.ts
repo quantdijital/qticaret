@@ -1,4 +1,5 @@
 import { z } from "@medusajs/framework/zod"
+import { isArasServiceUrl } from "../../lib/shipping/aras/client"
 
 /**
  * Which providers the shop can connect and what each one asks for
@@ -54,6 +55,29 @@ export const CREDENTIAL_PROVIDERS = {
       .trim()
       .regex(/^[\x21-\x7E]{16,2048}$/, "integration_credentials.secret_invalid"),
     identity: [],
+  },
+  // Aras Kargo's customer service account, given with the shop's contract (adr/0035)
+  aras: {
+    settings: z
+      .object({
+        test_mode: z.boolean(),
+        customer_code: z
+          .string()
+          .trim()
+          .regex(/^[0-9A-Za-z]{0,20}$/, "aras.customer_code_invalid"),
+        // Only Aras's own hosts: the server calls it with the shop's password
+        service_url: z
+          .string()
+          .trim()
+          .refine((value) => value === "" || isArasServiceUrl(value), "aras.service_url_invalid"),
+      })
+      .strict(),
+    secrets: ["username", "password"],
+    secret: z
+      .string()
+      .trim()
+      .regex(/^[\x21-\x7E]{1,128}$/, "integration_credentials.secret_invalid"),
+    identity: ["customer_code"],
   },
 } as const satisfies Record<string, CredentialProvider>
 
