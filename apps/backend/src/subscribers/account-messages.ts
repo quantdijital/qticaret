@@ -1,6 +1,9 @@
 import type { SubscriberArgs, SubscriberConfig } from "@medusajs/framework"
+import type { MedusaContainer } from "@medusajs/framework/types"
+import { Modules } from "@medusajs/framework/utils"
 import { hashPii, parseKey } from "../lib/crypto/pii"
 import { parseEnv } from "../lib/env"
+import { logger } from "../lib/logging"
 import { sendMessageWorkflow } from "../workflows/messaging/send-message"
 
 interface AuthEvent {
@@ -20,6 +23,26 @@ const digest = (secret: string): string =>
     0,
     32
   )
+
+/**
+ * Whether the address is the login of the identity asking: Medusa's
+ * `/auth/verification/request` takes any address (2.21.2), and a code goes
+ * nowhere else, or anyone could have the shop mail strangers (adr/0037 §1).
+ */
+async function ownsAddress(
+  container: MedusaContainer,
+  authIdentityId: string,
+  address: string
+): Promise<boolean> {
+  const identity = await container
+    .resolve(Modules.AUTH)
+    .retrieveAuthIdentity(authIdentityId, { relations: ["provider_identities"] })
+    .catch(() => null)
+  const wanted = address.trim().toLowerCase()
+  return (identity?.provider_identities ?? []).some(
+    (each) => each.provider === "emailpass" && each.entity_id.trim().toLowerCase() === wanted
+  )
+}
 
 /**
  * A customer's account messages (F9.4): the password reset link and the
@@ -44,13 +67,20 @@ export default async function accountMessages({
     })
     return
   }
-  if (data.entity_type !== "email" || !data.code) {
+  if (data.entity_type !== "email" || !data.code || !data.auth_identity_id) {
+    return
+  }
+  if (!(await ownsAddress(container, data.auth_identity_id, data.entity_id))) {
+    logger.warn({
+      event: "messaging.verification_foreign_address",
+      auth_identity_id: data.auth_identity_id,
+    })
     return
   }
   await sendMessageWorkflow(container).run({
     input: {
       template: "account.verify_email",
-      resource_id: data.auth_identity_id ?? digest(data.entity_id),
+      resource_id: data.auth_identity_id,
       key: digest(data.code),
       extra: {
         email: data.entity_id,

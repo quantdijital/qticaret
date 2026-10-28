@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto"
+import { createHash, randomUUID } from "node:crypto"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import {
@@ -274,33 +274,44 @@ medusaIntegrationTestRunner({
       expect(executions.rows[0]?.count).toBe(0)
     })
 
-    it("sends the code that confirms an e-mail address, and stores no code", async () => {
-      const code = String(100_000 + Math.floor(Math.random() * 900_000))
-      await getContainer()
-        .resolve(Modules.EVENT_BUS)
-        .emit({
-          name: "auth.verification_requested",
-          data: {
-            entity_id: "dogrula@example.com",
-            entity_type: "email",
-            code_provider: "emailpass",
-            auth_identity_id: "authid_test",
-            code,
-            expires_at: new Date(Date.now() + 15 * 60 * 1000),
-          },
-        })
+    it("sends the code that confirms an address to the login asking only, and stores no code", async () => {
+      const email = `dogrula-${String(Date.now())}@example.com`
+      const {
+        data: { token },
+      } = await http.post<{ token: string }>("/auth/customer/emailpass/register", {
+        email,
+        password: randomUUID(),
+      })
+      const ask = (address: string) =>
+        settle(
+          http.post(
+            "/auth/verification/request",
+            { entity_id: address, entity_type: "email" },
+            { headers: { authorization: `Bearer ${token}` } }
+          )
+        )
+
+      // Medusa takes any address here (2.21.2): a stranger's gets nothing from the shop
+      const foreign = await ask("yabanci@example.com")
+      const own = await ask(email)
       const [mail] = await eventually(
-        () => Promise.resolve(sentTo("dogrula@example.com")),
+        () => Promise.resolve(sentTo(email)),
         (found) => found.length > 0
+      )
+      const code = /Doğrulama kodu\s+(\S+)/.exec(mail?.text ?? "")?.[1] ?? ""
+      const confirmed = await settle(
+        http.post<{ verified_at?: string }>("/auth/verification/confirm", { code })
       )
       const rows = await getContainer()
         .resolve(Modules.NOTIFICATION)
         .listNotifications({ template: "account.verify_email" })
 
-      expect(mail?.text).toContain(code)
+      expect([foreign.status, own.status]).toEqual([201, 201])
+      expect(sentTo("yabanci@example.com")).toHaveLength(0)
       expect(mail?.subject).toBe("E-posta adresinizi doğrulayın")
+      expect(confirmed.data.verified_at).toBeTruthy()
       expect(JSON.stringify(rows)).not.toContain(code)
-      // Nor an unkeyed digest of it, which a million guesses would undo
+      // Nor an unkeyed digest of it, which guessing every code would undo
       const plainDigest = createHash("sha256").update(code).digest("hex").slice(0, 24)
       expect(JSON.stringify(rows)).not.toContain(plainDigest)
     })
