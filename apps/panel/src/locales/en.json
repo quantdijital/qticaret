@@ -946,6 +946,31 @@
           "failure": "Failed",
           "temporary_failure": "Temporary issue"
         }
+      },
+      "alerts": {
+        "title": "Shop alerts",
+        "description": "Which of the bell's alerts also come by e-mail. The bell shows them all anyway.",
+        "emails": "E-mails that get alerts",
+        "emailsHint": "Up to 5 addresses, one per line or comma-separated. Left empty, alerts show in the panel only.",
+        "saved": "Alert settings saved.",
+        "items": {
+          "alert_new_order": {
+            "title": "New order",
+            "hint": "Every time an order is placed."
+          },
+          "alert_bank_transfer": {
+            "title": "Bank transfer awaited",
+            "hint": "Orders paid by bank transfer waiting for the money to be confirmed."
+          },
+          "alert_low_stock": {
+            "title": "Low stock",
+            "hint": "When a product's stock falls to its threshold."
+          },
+          "alert_seo_digest": {
+            "title": "Weekly SEO digest",
+            "hint": "Every Monday morning: products' SEO scores and what needs work first."
+          }
+        }
       }
     },
     "sms": {

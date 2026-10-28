@@ -946,6 +946,31 @@
           "failure": "Doğrulanamadı",
           "temporary_failure": "Geçici sorun"
         }
+      },
+      "alerts": {
+        "title": "Mağaza uyarıları",
+        "description": "Panelin zilindeki uyarılardan hangilerinin e-postayla da gelsin. Zil hepsini her durumda gösterir.",
+        "emails": "Uyarı alacak e-postalar",
+        "emailsHint": "En çok 5 adres; her satıra ya da virgülle bir adres. Boş bırakırsanız uyarılar yalnızca panelde görünür.",
+        "saved": "Uyarı ayarları kaydedildi.",
+        "items": {
+          "alert_new_order": {
+            "title": "Yeni sipariş",
+            "hint": "Her sipariş verildiğinde."
+          },
+          "alert_bank_transfer": {
+            "title": "Havale bekleyen sipariş",
+            "hint": "Havale/EFT ile verilen ve paranın onayını bekleyen siparişler."
+          },
+          "alert_low_stock": {
+            "title": "Stok azaldı",
+            "hint": "Bir ürünün stoku eşiğe indiğinde."
+          },
+          "alert_seo_digest": {
+            "title": "Haftalık SEO özeti",
+            "hint": "Her pazartesi sabahı ürünlerin SEO puanı ve önce bakılacaklar."
+          }
+        }
       }
     },
     "sms": {

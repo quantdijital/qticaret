@@ -84,6 +84,15 @@ export interface SeoSettings {
 
 const sectionUrl = (section: string) => `/admin/platform-settings/${section}`
 
+/** Who on the staff hears of what by e-mail (F9.7); the bell shows alerts anyway. */
+export interface NotificationSettings {
+  staff_emails: string[]
+  alert_new_order: boolean
+  alert_bank_transfer: boolean
+  alert_low_stock: boolean
+  alert_seo_digest: boolean
+}
+
 export const sectionQuery = <T>(section: string) =>
   queryOptions({
     queryKey: ["settings", section],

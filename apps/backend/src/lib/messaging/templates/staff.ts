@@ -1,0 +1,164 @@
+import { messageText } from "../texts"
+import { renderEmail } from "./layout"
+import type { MessageTemplate } from "./types"
+
+/**
+ * The shop's own alerts by e-mail (F9.7, adr/0036): to the staff the
+ * shop listed under Settings > Notifications, beside the panel's bell.
+ * Transactional; nothing about a customer beyond what the order page has.
+ */
+
+export interface StaffOrderVars {
+  number: string
+  customer: string
+  total: string
+  payment: "card" | "bank_transfer" | "cash_on_delivery"
+  items: number
+}
+
+export interface StaffStockVars {
+  name: string
+  available: number
+  threshold: number
+}
+
+export interface StaffSeoVars {
+  products: number
+  average: number | null
+  critical: number
+  poor: number
+  lowest: { title: string; score: number }[]
+}
+
+const FOOTER = (shop: string) => messageText("footer.staff", { shop })
+
+/** "Yeni sipariş #1042": who, how much, how it is paid. */
+export const staffNewOrder: MessageTemplate<StaffOrderVars> = {
+  name: "staff.new_order",
+  kind: "transactional",
+  channels: ["email"],
+  retry: true,
+  email: (vars, brand) =>
+    renderEmail(brand, {
+      subject: messageText("staff_order.subject", { number: vars.number, total: vars.total }),
+      preheader: messageText("staff_order.preheader", { customer: vars.customer }),
+      heading: messageText("staff_order.heading", { number: vars.number }),
+      blocks: [
+        {
+          kind: "summary",
+          rows: [
+            { label: messageText("staff.customer"), value: vars.customer },
+            { label: messageText("staff.items"), value: String(vars.items) },
+            {
+              label: messageText("staff.payment"),
+              value: messageText(`staff.payments.${vars.payment}`),
+            },
+            { label: messageText("order.total"), value: vars.total, strong: true },
+          ],
+        },
+      ],
+      footer: FOOTER(brand.shopName),
+    }),
+  sample: { number: "1042", customer: "Ayşe Yılmaz", total: "₺389,80", payment: "card", items: 3 },
+}
+
+/** "Havale bekleniyor": confirm the money in the panel when it comes. */
+export const staffBankTransfer: MessageTemplate<StaffOrderVars> = {
+  name: "staff.bank_transfer",
+  kind: "transactional",
+  channels: ["email"],
+  retry: true,
+  email: (vars, brand) =>
+    renderEmail(brand, {
+      subject: messageText("staff_transfer.subject", { number: vars.number, total: vars.total }),
+      preheader: messageText("staff_transfer.preheader"),
+      heading: messageText("staff_transfer.heading", { number: vars.number }),
+      blocks: [
+        {
+          kind: "paragraph",
+          text: messageText("staff_transfer.intro", { customer: vars.customer, total: vars.total }),
+        },
+      ],
+      footer: FOOTER(brand.shopName),
+    }),
+  sample: {
+    number: "1042",
+    customer: "Ayşe Yılmaz",
+    total: "₺389,80",
+    payment: "bank_transfer",
+    items: 3,
+  },
+}
+
+/** "Stok azaldı": the same alert as the bell's. */
+export const staffLowStock: MessageTemplate<StaffStockVars> = {
+  name: "staff.low_stock",
+  kind: "transactional",
+  channels: ["email"],
+  retry: true,
+  email: (vars, brand) =>
+    renderEmail(brand, {
+      subject: messageText("staff_stock.subject", { name: vars.name }),
+      preheader: messageText("staff_stock.preheader", { available: vars.available }),
+      heading: messageText("staff_stock.heading", { name: vars.name }),
+      blocks: [
+        {
+          kind: "paragraph",
+          text: messageText("staff_stock.intro", {
+            available: vars.available,
+            threshold: vars.threshold,
+          }),
+        },
+      ],
+      footer: FOOTER(brand.shopName),
+    }),
+  sample: { name: "Örnek ürün / Mavi M", available: 2, threshold: 5 },
+}
+
+/** Monday's SEO summary: the shop's average score and what needs work first. */
+export const staffSeoDigest: MessageTemplate<StaffSeoVars> = {
+  name: "staff.seo_digest",
+  kind: "transactional",
+  channels: ["email"],
+  retry: true,
+  email: (vars, brand) =>
+    renderEmail(brand, {
+      subject: messageText("staff_seo.subject", {
+        average: vars.average === null ? "—" : String(vars.average),
+      }),
+      preheader: messageText("staff_seo.preheader", { critical: vars.critical }),
+      heading: messageText("staff_seo.heading"),
+      blocks: [
+        {
+          kind: "summary",
+          rows: [
+            { label: messageText("staff_seo.products"), value: String(vars.products) },
+            {
+              label: messageText("staff_seo.average"),
+              value: vars.average === null ? "—" : `${String(vars.average)}/100`,
+              strong: true,
+            },
+            { label: messageText("staff_seo.critical"), value: String(vars.critical) },
+            { label: messageText("staff_seo.poor"), value: String(vars.poor) },
+          ],
+        },
+        ...(vars.lowest.length > 0
+          ? [
+              {
+                kind: "details" as const,
+                title: messageText("staff_seo.lowest"),
+                lines: vars.lowest.map(({ title, score }) => `${title}: ${String(score)}/100`),
+              },
+            ]
+          : []),
+      ],
+      footer: FOOTER(brand.shopName),
+    }),
+  sample: {
+    products: 120,
+    average: 74,
+    critical: 6,
+    poor: 9,
+    lowest: [{ title: "Örnek ürün", score: 41 }],
+  },
+}

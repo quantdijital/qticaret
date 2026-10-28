@@ -23,6 +23,10 @@ export const NOTIFICATION_MESSAGES: Readonly<
       title: "Düşük stok: {{name}}",
       description: "{{available}} adet kaldı (eşik {{threshold}}).",
     },
+    "orders.bank_transfer_pending": {
+      title: "Havale bekleniyor: #{{number}}",
+      description: "{{total}} tutarındaki ödeme gelince siparişi onaylayın.",
+    },
     "integrations.account_changed": {
       title: "{{provider}} hesap bilgileri değişti",
       description: "{{who}}: {{what}}",
@@ -41,6 +45,10 @@ export const NOTIFICATION_MESSAGES: Readonly<
     },
   },
   en: {
+    "orders.bank_transfer_pending": {
+      title: "Bank transfer awaited: #{{number}}",
+      description: "Confirm the order once the {{total}} payment arrives.",
+    },
     "stock.low_stock": {
       title: "Low stock: {{name}}",
       description: "{{available}} left (threshold {{threshold}}).",

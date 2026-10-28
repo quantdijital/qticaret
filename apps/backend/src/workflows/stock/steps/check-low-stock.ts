@@ -2,6 +2,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { notificationText } from "../../../lib/notifications/messages"
+import { alertStaff } from "../../messaging/staff"
 import { lowStockThresholds } from "../../../lib/stock"
 import { STOCK_LEDGER_MODULE } from "../../../modules/stock-ledger"
 import type StockLedgerModuleService from "../../../modules/stock-ledger/service"
@@ -46,7 +47,11 @@ export const watchLock = (inventoryItemId: string) => `stock-low:${inventoryItem
  * disarmed. The alert's key is its arming: a retry after a failed disarm
  * finds the alert already sent.
  */
-async function checkItem(container: MedusaContainer, id: string, threshold: number) {
+async function checkItem(
+  container: MedusaContainer,
+  id: string,
+  threshold: number
+): Promise<{ name: string; available: number; arming: string } | null> {
   const ledger = container.resolve<StockLedgerModuleService>(STOCK_LEDGER_MODULE)
   return container.resolve(Modules.LOCKING).execute(
     watchLock(id),
@@ -59,12 +64,13 @@ async function checkItem(container: MedusaContainer, id: string, threshold: numb
         } else if (!watch.armed_at) {
           await ledger.updateStockWatches({ id: watch.id, armed_at: new Date() })
         }
-        return false
+        return null
       }
       // Never above the line since it last alerted, or since it was made
       if (!watch?.armed_at) {
-        return false
+        return null
       }
+      const arming = new Date(watch.armed_at).toISOString()
       const name = await nameOf(container, id)
       await container.resolve(Modules.NOTIFICATION).createNotifications({
         to: "",
@@ -72,7 +78,7 @@ async function checkItem(container: MedusaContainer, id: string, threshold: numb
         template: "admin-ui",
         trigger_type: "stock.low",
         resource_id: id,
-        idempotency_key: `stock.low:${id}:${new Date(watch.armed_at).toISOString()}`,
+        idempotency_key: `stock.low:${id}:${arming}`,
         data: {
           kind: "low_stock",
           inventory_item_id: id,
@@ -84,7 +90,7 @@ async function checkItem(container: MedusaContainer, id: string, threshold: numb
         },
       })
       await ledger.updateStockWatches({ id: watch.id, armed_at: null })
-      return true
+      return { name, available, arming }
     },
     { timeout: 10 }
   )
@@ -107,8 +113,20 @@ export const checkLowStockStep = createStep(
     const thresholds = await lowStockThresholds(container, ids)
     const alerted: string[] = []
     for (const id of ids) {
-      if (await checkItem(container, id, thresholds.of(id))) {
+      const threshold = thresholds.of(id)
+      const alert = await checkItem(container, id, threshold)
+      if (alert) {
         alerted.push(id)
+        // The staff's e-mail too (F9.7), outside the item's lock; it never fails the stock change
+        await alertStaff(container, {
+          template: "staff.low_stock",
+          resource_id: `${id}:${alert.arming}`,
+          extra: {
+            name: alert.name,
+            available: String(alert.available),
+            threshold: String(threshold),
+          },
+        })
       }
     }
     return new StepResponse(alerted)

@@ -6,6 +6,7 @@ import { loadPaymentFailed } from "./cart"
 import { loadOrderMessage } from "./order"
 import { loadParcelMessage } from "./parcel"
 import { loadReturnMessage } from "./return-request"
+import { loadSeoDigest, loadStaffOrder, loadStaffStock } from "./staff"
 import type { Loaded } from "./types"
 
 export type { Loaded, MessageRecipients } from "./types"
@@ -29,4 +30,8 @@ export const MESSAGE_LOADERS: { readonly [N in MessageTemplateName]: Loader<N> }
   "account.verify_email": loadVerification,
   "payment.failed": (container, id) => loadPaymentFailed(container, id),
   "marketing.announcement": loadAnnouncement,
+  "staff.new_order": (container, id) => loadStaffOrder(container, id),
+  "staff.bank_transfer": (container, id) => loadStaffOrder(container, id),
+  "staff.low_stock": loadStaffStock,
+  "staff.seo_digest": (container) => loadSeoDigest(container),
 }

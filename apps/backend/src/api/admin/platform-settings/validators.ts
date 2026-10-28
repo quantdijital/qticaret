@@ -14,6 +14,7 @@ const SECTION_VALIDATORS = {
   bank_transfer: validateAndTransformBody(SECTIONS.bank_transfer.patch),
   cash_on_delivery: validateAndTransformBody(SECTIONS.cash_on_delivery.patch),
   shipping: validateAndTransformBody(SECTIONS.shipping.patch),
+  notifications: validateAndTransformBody(SECTIONS.notifications.patch),
 } as const
 
 /**
