@@ -13,6 +13,8 @@ import type { UrlOwner } from "../../modules/url-registry/validation"
 import { CATALOG_ENTITY_TYPES } from "../catalog/entity-paths"
 import { priceDisplays } from "../pricing/price-display"
 import { shopShippingOptions } from "../shipping/shop-options"
+import { PRODUCT_REVIEWS_MODULE } from "../../modules/product-reviews"
+import type ProductReviewsModuleService from "../../modules/product-reviews/service"
 import { PRODUCT_FACT_FIELDS, productFacts } from "./facts"
 import type { FactRow, ShippingFacts } from "./facts"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
@@ -118,13 +120,22 @@ async function productSubject(container: MedusaContainer, id: string, path: stri
     "try"
   )
   const shipping = await shippingFactsOf(container)
-  const facts = productFacts(
-    product,
-    product.brand?.name ?? null,
-    plainText(description),
-    displays,
-    shipping
-  )
+  const facts = {
+    ...productFacts(
+      product,
+      product.brand?.name ?? null,
+      plainText(description),
+      displays,
+      shipping
+    ),
+    // F10.6: the stars of the approved reviews the page shows
+    rating:
+      (
+        await container
+          .resolve<ProductReviewsModuleService>(PRODUCT_REVIEWS_MODULE)
+          .ratingsOf([product.id])
+      ).get(product.id) ?? null,
+  }
   const subject: SeoSubject = {
     kind: "product",
     path,

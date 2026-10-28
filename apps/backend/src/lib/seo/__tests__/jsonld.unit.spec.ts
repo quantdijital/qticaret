@@ -173,6 +173,40 @@ describe("productJsonLd", () => {
   })
 })
 
+describe("productJsonLd's rating (F10.6)", () => {
+  const stars = {
+    "@type": "AggregateRating",
+    ratingValue: "4.5",
+    reviewCount: 2,
+    bestRating: 5,
+    worstRating: 1,
+  }
+
+  it("gives a product and a product group the stars of their approved reviews", () => {
+    const rating = { average: 4.5, count: 2 }
+    const single = productJsonLd(facts({ rating }), URL)
+    const group = productJsonLd(
+      facts({
+        rating,
+        variants: [variant(), variant({ id: "variant_02", name: "Keten Gömlek – L" })],
+      }),
+      URL
+    )
+
+    expect(single["aggregateRating"]).toEqual(stars)
+    expect(group["aggregateRating"]).toEqual(stars)
+    // Not repeated on each variant inside the group
+    expect(JSON.stringify(group["hasVariant"])).not.toContain("AggregateRating")
+  })
+
+  it("claims no stars without a review", () => {
+    expect(productJsonLd(facts({ rating: null }), URL)).not.toHaveProperty("aggregateRating")
+    expect(productJsonLd(facts({ rating: { average: 0, count: 0 } }), URL)).not.toHaveProperty(
+      "aggregateRating"
+    )
+  })
+})
+
 describe("listing, breadcrumb and site blocks", () => {
   it("lists a category's first products in order", () => {
     const block = listingJsonLd(

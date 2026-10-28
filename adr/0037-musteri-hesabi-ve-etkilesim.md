@@ -146,6 +146,24 @@ F10 vitrinin müşteri tarafını kuruyor: hesap, e-posta doğrulama, sosyal gir
   - Varyant başına kilit ve Medusa'nın tekrar anahtarı (abonelik kimliği) aynı anda gelen iki olayda tek ileti sağlar (KK2 testli).
 - Panelde ürün sayfasında "Müşteri ilgisi" kartı: favorisine ekleyen ve stok bekleyen sayıları; kişi yok, yalnızca sayı.
 
+## Uygulama notları (M7, yorumlar, 2026-10-28)
+- `product-reviews` modülü: yorum ve ürün başına toplam (onaylı sayısı ve puan toplamı). Ortalama, bir ondalıkla.
+- Yorum yazmak için kanıt: müşterinin iptal edilmemiş bir siparişinde o ürünün bir kalemi teslim edilmiş olmalı (`items.detail.delivered_quantity > 0`); yorum bu siparişe bağlanır.
+- Müşteri başına ürüne bir yorum. Değiştirilen yorum yeniden onay bekler; o arada yıldızlardan düşer.
+- Yazar vitrinde "Ad S." biçiminde görünür.
+- Bağlantı ya da adres gibi okunan metin `has_link` ile işaretlenir; panelde uyarı rozetiyle görünür.
+- Puan 1–5 tam sayı. Metin 10–2000 karakter, başlık en çok 100; denetim karakterleri atılır.
+- Hız sınırı: IP başına saatte 20, müşteri başına saatte 10.
+- Doğrulanmamış e-posta zaten oturum açamadığı için yorum yazamaz (KK6). Kayıt token'ıyla yapılan istek 401 alır (testli).
+- JSON-LD:
+  - Onaylı yorum varsa tek varyantlı `Product`'a, çok varyantlıda `ProductGroup`'a `aggregateRating` (ratingValue, reviewCount, bestRating 5, worstRating 1) eklenir; varyantlara tekrarlanmaz.
+  - Mağazanın alan adı yoksa JSON-LD hiç üretilmez (mevcut kural).
+  - Onay ya da ret, vitrinin önbellekteki yanıtlarını hemen unutturur.
+- Panel: Katalog > Yorumlar.
+  - Bekleyen, onaylanan ve reddedilen sekmeleri; bekleyenler eskiden yeniye.
+  - Satır başına onay ya da ret, işaretleyerek toplu işlem.
+  - Yıldızlar ekran okuyucuya "5 üzerinden N" diye okunur.
+
 ## Alternatifler
 
 | Seçenek | Artı | Eksi |

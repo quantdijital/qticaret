@@ -38,6 +38,7 @@ import { Route as AuthReportsIndexRouteImport } from './routes/_auth/reports/ind
 import { Route as AuthReportsCategoriesRouteImport } from './routes/_auth/reports/categories'
 import { Route as AuthReportsDailyRouteImport } from './routes/_auth/reports/daily'
 import { Route as AuthReportsProductsRouteImport } from './routes/_auth/reports/products'
+import { Route as AuthReviewsIndexRouteImport } from './routes/_auth/reviews/index'
 import { Route as AuthSeoIndexRouteImport } from './routes/_auth/seo/index'
 import { Route as AuthSeoRedirectsRouteImport } from './routes/_auth/seo/redirects'
 import { Route as AuthSettingsIndexRouteImport } from './routes/_auth/settings/index'
@@ -206,6 +207,11 @@ const AuthReportsProductsRoute = AuthReportsProductsRouteImport.update({
   path: '/products',
   getParentRoute: () => AuthReportsRoute,
 } as any)
+const AuthReviewsIndexRoute = AuthReviewsIndexRouteImport.update({
+  id: '/reviews/',
+  path: '/reviews/',
+  getParentRoute: () => AuthRoute,
+} as any)
 const AuthSeoIndexRoute = AuthSeoIndexRouteImport.update({
   id: '/seo/',
   path: '/seo/',
@@ -371,6 +377,7 @@ export interface FileRoutesByFullPath {
   '/products/': typeof AuthProductsIndexRoute
   '/promotions/': typeof AuthPromotionsIndexRoute
   '/reports/': typeof AuthReportsIndexRoute
+  '/reviews/': typeof AuthReviewsIndexRoute
   '/seo/': typeof AuthSeoIndexRoute
   '/settings/': typeof AuthSettingsIndexRoute
   '/content/landings/$id': typeof AuthContentLandingsIdRoute
@@ -422,6 +429,7 @@ export interface FileRoutesByTo {
   '/products': typeof AuthProductsIndexRoute
   '/promotions': typeof AuthPromotionsIndexRoute
   '/reports': typeof AuthReportsIndexRoute
+  '/reviews': typeof AuthReviewsIndexRoute
   '/seo': typeof AuthSeoIndexRoute
   '/settings': typeof AuthSettingsIndexRoute
   '/content/landings/$id': typeof AuthContentLandingsIdRoute
@@ -477,6 +485,7 @@ export interface FileRoutesById {
   '/_auth/products/': typeof AuthProductsIndexRoute
   '/_auth/promotions/': typeof AuthPromotionsIndexRoute
   '/_auth/reports/': typeof AuthReportsIndexRoute
+  '/_auth/reviews/': typeof AuthReviewsIndexRoute
   '/_auth/seo/': typeof AuthSeoIndexRoute
   '/_auth/settings/': typeof AuthSettingsIndexRoute
   '/_auth/content/landings/$id': typeof AuthContentLandingsIdRoute
@@ -532,6 +541,7 @@ export interface FileRouteTypes {
     | '/products/'
     | '/promotions/'
     | '/reports/'
+    | '/reviews/'
     | '/seo/'
     | '/settings/'
     | '/content/landings/$id'
@@ -583,6 +593,7 @@ export interface FileRouteTypes {
     | '/products'
     | '/promotions'
     | '/reports'
+    | '/reviews'
     | '/seo'
     | '/settings'
     | '/content/landings/$id'
@@ -637,6 +648,7 @@ export interface FileRouteTypes {
     | '/_auth/products/'
     | '/_auth/promotions/'
     | '/_auth/reports/'
+    | '/_auth/reviews/'
     | '/_auth/seo/'
     | '/_auth/settings/'
     | '/_auth/content/landings/$id'
@@ -860,6 +872,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/reports/products'
       preLoaderRoute: typeof AuthReportsProductsRouteImport
       parentRoute: typeof AuthReportsRoute
+    }
+    '/_auth/reviews/': {
+      id: '/_auth/reviews/'
+      path: '/reviews'
+      fullPath: '/reviews/'
+      preLoaderRoute: typeof AuthReviewsIndexRouteImport
+      parentRoute: typeof AuthRoute
     }
     '/_auth/seo/': {
       id: '/_auth/seo/'
@@ -1112,6 +1131,7 @@ interface AuthRouteChildren {
   AuthOrdersIndexRoute: typeof AuthOrdersIndexRoute
   AuthProductsIndexRoute: typeof AuthProductsIndexRoute
   AuthPromotionsIndexRoute: typeof AuthPromotionsIndexRoute
+  AuthReviewsIndexRoute: typeof AuthReviewsIndexRoute
   AuthSeoIndexRoute: typeof AuthSeoIndexRoute
   AuthContentLandingsIdRoute: typeof AuthContentLandingsIdRoute
   AuthPromotionsPriceListsIdRoute: typeof AuthPromotionsPriceListsIdRoute
@@ -1144,6 +1164,7 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthOrdersIndexRoute: AuthOrdersIndexRoute,
   AuthProductsIndexRoute: AuthProductsIndexRoute,
   AuthPromotionsIndexRoute: AuthPromotionsIndexRoute,
+  AuthReviewsIndexRoute: AuthReviewsIndexRoute,
   AuthSeoIndexRoute: AuthSeoIndexRoute,
   AuthContentLandingsIdRoute: AuthContentLandingsIdRoute,
   AuthPromotionsPriceListsIdRoute: AuthPromotionsPriceListsIdRoute,

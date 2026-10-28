@@ -73,7 +73,21 @@ export interface ProductFacts {
   variants: VariantFacts[]
   /** How long an order takes; with a variant's shipping rate it makes `shippingDetails`. */
   delivery?: DeliveryFacts | null
+  /** Approved reviews (F10.6): `aggregateRating`, only when the page shows them. */
+  rating?: { average: number; count: number } | null
 }
+
+/** The stars a product's page shows, as Google reads them; none without a review. */
+const aggregateRating = (rating: ProductFacts["rating"]): JsonLd | undefined =>
+  rating && rating.count > 0
+    ? {
+        "@type": "AggregateRating",
+        ratingValue: rating.average.toFixed(1),
+        reviewCount: rating.count,
+        bestRating: 5,
+        worstRating: 1,
+      }
+    : undefined
 
 export interface ListingFacts {
   name: string
@@ -150,6 +164,7 @@ function variantProduct(
     brand: single && facts.brand ? { "@type": "Brand", name: facts.brand } : undefined,
     ...variant.properties,
     offers: offer,
+    aggregateRating: single ? aggregateRating(facts.rating) : undefined,
   })
 }
 
@@ -171,6 +186,7 @@ export function productJsonLd(facts: ProductFacts, url: string): JsonLd {
     image: facts.images,
     brand: facts.brand ? { "@type": "Brand", name: facts.brand } : undefined,
     productGroupID: facts.groupId,
+    aggregateRating: aggregateRating(facts.rating),
     variesBy: facts.variesBy.map((property) => `${SCHEMA}/${property}`),
     hasVariant: facts.variants.map((variant) =>
       variantProduct(facts, variant, `${url}?variant=${encodeURIComponent(variant.id)}`, false)

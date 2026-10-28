@@ -174,6 +174,8 @@ module.exports = defineConfig({
       resolve: "./src/modules/billing-profile",
       options: { encryptionKey: env.PII_ENCRYPTION_KEY, hashKey: env.PII_HASH_KEY },
     },
+    // F10.6 (adr/0037 §4): purchasers' reviews, moderated, and their ratings
+    { resolve: "./src/modules/product-reviews" },
     // F10.5 (adr/0037 §4): stock alerts, addresses encrypted and hashed
     {
       resolve: "./src/modules/back-in-stock",

@@ -4,6 +4,7 @@ import {
   FileText,
   FolderTree,
   LayoutDashboard,
+  MessageSquareText,
   Package,
   Search,
   Settings,
@@ -54,6 +55,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { key: "categories", to: "/categories", icon: FolderTree, advanced: "/categories" },
       { key: "brands", to: "/brands", icon: Tag, advanced: "/products" },
       { key: "inventory", to: "/inventory", icon: Warehouse, advanced: "/inventory" },
+      { key: "reviews", to: "/reviews", icon: MessageSquareText, advanced: "/products" },
     ],
   },
   {

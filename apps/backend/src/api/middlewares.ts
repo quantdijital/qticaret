@@ -28,6 +28,7 @@ import { CHARGEBACK_ROUTES } from "./http/chargeback-routes"
 import { CORE_RETURN_ROUTES } from "./http/core-return-routes"
 import { ORDER_EDIT_ROUTES } from "./http/order-edit-routes"
 import { RETURN_ROUTES } from "./http/return-routes"
+import { REVIEW_ROUTES } from "./http/review-routes"
 import { MESSAGING_ROUTES } from "./http/messaging-routes"
 import { SHIPPING_ROUTES } from "./http/shipping-routes"
 import { CONTENT_ROUTES } from "./http/content-routes"
@@ -195,6 +196,7 @@ export default defineMiddlewares({
     ...MESSAGING_ROUTES,
     ...ACCOUNT_ROUTES,
     ...CUSTOMER_SEGMENT_ROUTES,
+    ...REVIEW_ROUTES,
     ...RETURN_ROUTES,
     ...CORE_RETURN_ROUTES,
     ...ORDER_EDIT_ROUTES,

@@ -51,7 +51,8 @@
     "seo": "SEO",
     "reports": "Raporlar",
     "brands": "Markalar",
-    "content": "İçerik"
+    "content": "İçerik",
+    "reviews": "Yorumlar"
   },
   "login": {
     "title": "Giriş yap",
@@ -3489,5 +3490,33 @@
     "note": "Not (isteğe bağlı)",
     "submit": "Ekle",
     "added": "{{amount}} kredi eklendi."
+  },
+  "reviews": {
+    "title": "Yorumlar",
+    "description": "Ürünü teslim almış müşterilerin yorumları. Onayladığınız yorum vitrinde ve arama sonuçlarındaki yıldızlarda görünür.",
+    "views": "Yorum durumu",
+    "tabs": {
+      "pending": "Onay bekleyen",
+      "approved": "Onaylanan",
+      "rejected": "Reddedilen"
+    },
+    "stars": "5 üzerinden {{rating}}",
+    "hasLink": "Bağlantı içeriyor",
+    "select": "{{author}} yorumunu seç",
+    "approve": "Onayla",
+    "reject": "Reddet",
+    "approveSelected": "Seçilenleri onayla",
+    "rejectSelected": "Seçilenleri reddet",
+    "selected_one": "{{count}} yorum seçili",
+    "selected_other": "{{count}} yorum seçili",
+    "approved_one": "{{count}} yorum onaylandı.",
+    "approved_other": "{{count}} yorum onaylandı.",
+    "rejected_one": "{{count}} yorum reddedildi.",
+    "rejected_other": "{{count}} yorum reddedildi.",
+    "empty": {
+      "pending": "Onay bekleyen yorum yok.",
+      "approved": "Henüz onaylanan yorum yok.",
+      "rejected": "Reddedilen yorum yok."
+    }
   }
 }

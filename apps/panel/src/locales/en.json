@@ -51,7 +51,8 @@
     "seo": "SEO",
     "reports": "Reports",
     "brands": "Brands",
-    "content": "Content"
+    "content": "Content",
+    "reviews": "Reviews"
   },
   "login": {
     "title": "Sign in",
@@ -3481,5 +3482,33 @@
     "note": "Note (optional)",
     "submit": "Add",
     "added": "{{amount}} of credit added."
+  },
+  "reviews": {
+    "title": "Reviews",
+    "description": "Reviews from customers who received the product. A review you approve shows on the storefront and in the stars on search results.",
+    "views": "Review state",
+    "tabs": {
+      "pending": "Waiting",
+      "approved": "Approved",
+      "rejected": "Rejected"
+    },
+    "stars": "{{rating}} out of 5",
+    "hasLink": "Contains a link",
+    "select": "Select {{author}}'s review",
+    "approve": "Approve",
+    "reject": "Reject",
+    "approveSelected": "Approve selected",
+    "rejectSelected": "Reject selected",
+    "selected_one": "{{count}} review selected",
+    "selected_other": "{{count}} reviews selected",
+    "approved_one": "{{count}} review approved.",
+    "approved_other": "{{count}} reviews approved.",
+    "rejected_one": "{{count}} review rejected.",
+    "rejected_other": "{{count}} reviews rejected.",
+    "empty": {
+      "pending": "No reviews waiting.",
+      "approved": "No approved reviews yet.",
+      "rejected": "No rejected reviews."
+    }
   }
 }
