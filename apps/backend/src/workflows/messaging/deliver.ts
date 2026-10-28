@@ -1,7 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
 import { errorSummary, logger } from "../../lib/logging"
-import { emailTransport, platformSender } from "../../lib/messaging/email"
+import { emailTransport } from "../../lib/messaging/email"
 import { normalizeRecipient } from "../../lib/messaging/recipients"
 import type { MessageChannel } from "../../lib/messaging/recipients"
 import { MESSAGE_TEMPLATES } from "../../lib/messaging/templates"
@@ -12,6 +12,7 @@ import type IntegrationCredentialsModuleService from "../../modules/integration-
 import { MESSAGING_MODULE } from "../../modules/messaging"
 import type MessagingModuleService from "../../modules/messaging/service"
 import { brandOf } from "./brand"
+import { senderAddress } from "./sender-domain"
 import type { MessageRecipients } from "./loaders/types"
 
 export type SendOutcome =
@@ -53,7 +54,7 @@ interface NotificationRows {
 /** Whether the channel can send at all: the instance's e-mail, the shop's SMS account. */
 async function channelReady(container: Container, channel: MessageChannel): Promise<boolean> {
   if (channel === "email") {
-    return emailTransport() !== null && platformSender() !== null
+    return emailTransport() !== null && (await senderAddress(container)) !== null
   }
   const account = await container
     .resolve<IntegrationCredentialsModuleService>(INTEGRATION_CREDENTIALS_MODULE)
@@ -152,7 +153,7 @@ export async function deliver<N extends MessageTemplateName>(
           provider_data:
             channel === "email"
               ? {
-                  from_email: platformSender(),
+                  from_email: await senderAddress(container),
                   from_name: brand.shopName,
                   reply_to: brand.contactEmail,
                 }

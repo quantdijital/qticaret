@@ -28,6 +28,10 @@ export interface FakeMail {
   messages: FakeMailMessage[]
   /** The next send answers with this HTTP status (an outage, a refusal). */
   failNext: (status: number) => void
+  /** Sender domains added at the fake Resend, by id. */
+  domains: Map<string, { id: string; name: string; status: string; published: boolean }>
+  /** The shop published the domain's DNS records: its next check verifies it. */
+  publish: (name: string) => void
   close: () => Promise<void>
 }
 
@@ -51,6 +55,40 @@ export async function startFakeMail(options: { port?: number } = {}): Promise<Fa
   const messages: FakeMailMessage[] = []
   const byKey = new Map<string, string>()
   const failures: number[] = []
+  const domains: FakeMail["domains"] = new Map()
+  const recordsOf = (name: string, status: string) => [
+    {
+      record: "DKIM",
+      name: "resend._domainkey",
+      type: "TXT",
+      ttl: "Auto",
+      status,
+      value: `p=sahte-${name}`,
+    },
+    {
+      record: "SPF",
+      name: "send",
+      type: "MX",
+      ttl: "Auto",
+      status,
+      value: "feedback-smtp.us-east-1.amazonses.com",
+      priority: 10,
+    },
+    {
+      record: "SPF",
+      name: "send",
+      type: "TXT",
+      ttl: "Auto",
+      status,
+      value: "v=spf1 include:amazonses.com ~all",
+    },
+  ]
+  const domainView = (domain: { id: string; name: string; status: string }) => ({
+    id: domain.id,
+    name: domain.name,
+    status: domain.status,
+    records: recordsOf(domain.name, domain.status),
+  })
   const sockets = new Set<Socket>()
 
   const server = createServer((req, res) => {
@@ -63,6 +101,33 @@ export async function startFakeMail(options: { port?: number } = {}): Promise<Fa
       const failure = failures.shift()
       if (failure !== undefined) {
         reply(failure, { name: "internal_server_error", message: "sahte hata" })
+        return
+      }
+      const domainPath = /^\/domains\/([\w-]+)(\/verify)?$/.exec(req.url ?? "")
+      if (
+        req.headers.authorization !== `Bearer ${apiKey}` &&
+        (req.url === "/domains" || domainPath)
+      ) {
+        reply(401, { name: "missing_api_key", message: "API key is invalid" })
+        return
+      }
+      if (domainPath) {
+        const domain = domains.get(domainPath[1] ?? "")
+        if (!domain) {
+          reply(404, { name: "not_found", message: "domain not found" })
+          return
+        }
+        if (req.method === "POST" && domainPath[2]) {
+          domain.status = domain.published ? "verified" : "pending"
+          reply(200, { object: "domain", id: domain.id })
+          return
+        }
+        if (req.method === "DELETE") {
+          domains.delete(domain.id)
+          reply(200, { object: "domain", id: domain.id, deleted: true })
+          return
+        }
+        reply(200, domainView(domain))
         return
       }
       let body: Json
@@ -86,6 +151,17 @@ export async function startFakeMail(options: { port?: number } = {}): Promise<Fa
           template: headers["X-Qt-Template"] ?? "",
         })
         reply(200, { ID: id })
+        return
+      }
+      if (req.method === "POST" && req.url === "/domains") {
+        const name = typeof body["name"] === "string" ? body["name"] : ""
+        if ([...domains.values()].some((each) => each.name === name)) {
+          reply(422, { name: "validation_error", message: "domain exists" })
+          return
+        }
+        const domain = { id: randomUUID(), name, status: "not_started", published: false }
+        domains.set(domain.id, domain)
+        reply(200, domainView(domain))
         return
       }
       if (req.method === "POST" && req.url === "/emails") {
@@ -133,6 +209,14 @@ export async function startFakeMail(options: { port?: number } = {}): Promise<Fa
     messages,
     failNext: (status) => {
       failures.push(status)
+    },
+    domains,
+    publish: (name) => {
+      for (const domain of domains.values()) {
+        if (domain.name === name) {
+          domain.published = true
+        }
+      }
     },
     close: async () => {
       for (const socket of sockets) {

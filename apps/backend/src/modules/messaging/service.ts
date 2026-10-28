@@ -12,6 +12,7 @@ import type { MessageChannel } from "../../lib/messaging/recipients"
 import { MessageConsent } from "./models/message-consent"
 import { MessageConsentEvent } from "./models/message-consent-event"
 import { MessageSuppression } from "./models/message-suppression"
+import { SenderDomain } from "./models/sender-domain"
 
 export interface MessagingModuleOptions {
   /** 64 hex characters (PII_HASH_KEY): addresses are kept only as this keyed hash. */
@@ -55,6 +56,7 @@ class MessagingModuleService extends MedusaService({
   MessageConsent,
   MessageConsentEvent,
   MessageSuppression,
+  SenderDomain,
 }) {
   private readonly hashKey: Buffer
 

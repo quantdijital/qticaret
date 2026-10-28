@@ -1,0 +1,189 @@
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { Copy } from "lucide-react"
+import { useState } from "react"
+import { useTranslation } from "react-i18next"
+import { toast } from "sonner"
+import { SectionCard } from "@/components/patterns/section-card"
+import { StatusBadge } from "@/components/patterns/status-badge"
+import type { StatusTone } from "@/components/patterns/status-badge"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Skeleton } from "@/components/ui/skeleton"
+import {
+  addSenderDomain,
+  checkSenderDomain,
+  removeSenderDomain,
+  senderDomainQuery,
+} from "@/features/settings/api/messaging"
+import type { DnsRecord, SenderDomainView } from "@/features/settings/api/messaging"
+import { errorText } from "@/lib/errors"
+
+const D = "settings.notifications.domain"
+
+const TONE: Record<NonNullable<SenderDomainView["domain"]>["status"], StatusTone> = {
+  verified: "success",
+  not_started: "warning",
+  pending: "warning",
+  temporary_failure: "warning",
+  failure: "danger",
+}
+
+/** One DNS record to publish, its value copied rather than typed. */
+function RecordRow({ record, suggested }: { record: DnsRecord; suggested?: boolean }) {
+  const { t } = useTranslation()
+  return (
+    <li className="flex flex-col gap-1 px-3 py-2.5">
+      <span className="flex items-center gap-2 text-xs text-muted-foreground">
+        <span className="font-medium text-foreground">{record.type}</span>
+        <span className="font-mono">{record.name}</span>
+        {record.priority === undefined ? null : (
+          <span>{t(`${D}.priority`, { value: String(record.priority) })}</span>
+        )}
+        {suggested ? <span>· {t(`${D}.suggested`)}</span> : null}
+      </span>
+      <span className="flex items-start gap-2">
+        <code className="min-w-0 flex-1 break-all rounded bg-muted px-2 py-1 font-mono text-xs">
+          {record.value}
+        </code>
+        <Button
+          size="icon"
+          variant="ghost"
+          aria-label={t(`${D}.copy`, { name: record.name })}
+          onClick={() => {
+            void navigator.clipboard.writeText(record.value).then(() => {
+              toast.success(t(`${D}.copied`))
+            })
+          }}
+        >
+          <Copy aria-hidden="true" />
+        </Button>
+      </span>
+    </li>
+  )
+}
+
+/**
+ * Settings > Notifications: the domain the shop's e-mail goes from (F9.6,
+ * adr/0036). Until the shop's own domain is verified at Resend, e-mail
+ * goes from the platform's address under the shop's name.
+ */
+export function SenderDomainCard() {
+  const { t } = useTranslation()
+  const client = useQueryClient()
+  const query = useQuery(senderDomainQuery())
+  const [name, setName] = useState("")
+  const [localPart, setLocalPart] = useState("bildirim")
+  const done = (view: SenderDomainView) => {
+    client.setQueryData(senderDomainQuery().queryKey, view)
+  }
+  const failed = (failure: unknown) => {
+    toast.error(errorText(t, failure))
+  }
+  const add = useMutation({
+    mutationFn: () => addSenderDomain({ name: name.trim(), local_part: localPart.trim() }),
+    onSuccess: done,
+    onError: failed,
+  })
+  const check = useMutation({
+    mutationFn: checkSenderDomain,
+    onSuccess: (view) => {
+      done(view)
+      toast[view.domain?.status === "verified" ? "success" : "warning"](
+        t(view.domain?.status === "verified" ? `${D}.verified` : `${D}.notYet`)
+      )
+    },
+    onError: failed,
+  })
+  const remove = useMutation({ mutationFn: removeSenderDomain, onSuccess: done, onError: failed })
+  const view = query.data
+  const busy = add.isPending || check.isPending || remove.isPending
+  return (
+    <SectionCard title={t(`${D}.title`)} description={t(`${D}.description`)}>
+      {!view ? (
+        <Skeleton className="h-24" />
+      ) : (
+        <div className="flex flex-col gap-4">
+          <p className="text-sm">
+            {t(`${D}.sender`)} <span className="font-mono">{view.sender ?? t(`${D}.none`)}</span>
+          </p>
+          {!view.available ? (
+            <p className="text-[13px] text-muted-foreground">{t(`${D}.unavailable`)}</p>
+          ) : !view.domain ? (
+            <form
+              className="grid gap-2 sm:grid-cols-[minmax(0,10rem)_minmax(0,1fr)_auto]"
+              onSubmit={(event) => {
+                event.preventDefault()
+                add.mutate()
+              }}
+            >
+              <label htmlFor="sender-local" className="sr-only">
+                {t(`${D}.localPart`)}
+              </label>
+              <Input
+                id="sender-local"
+                value={localPart}
+                onChange={(event) => {
+                  setLocalPart(event.target.value)
+                }}
+              />
+              <label htmlFor="sender-domain" className="sr-only">
+                {t(`${D}.name`)}
+              </label>
+              <Input
+                id="sender-domain"
+                placeholder="magaza.com.tr"
+                value={name}
+                onChange={(event) => {
+                  setName(event.target.value)
+                }}
+              />
+              <Button type="submit" variant="outline" disabled={busy || name.trim() === ""}>
+                {t(`${D}.add`)}
+              </Button>
+            </form>
+          ) : (
+            <>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm font-medium">{view.domain.name}</span>
+                <StatusBadge tone={TONE[view.domain.status]}>
+                  {t(`${D}.statuses.${view.domain.status}`)}
+                </StatusBadge>
+              </div>
+              {view.domain.status === "verified" ? null : (
+                <p className="text-[13px] text-muted-foreground">{t(`${D}.publish`)}</p>
+              )}
+              <ul className="flex flex-col divide-y rounded-md border">
+                {view.domain.records.map((record) => (
+                  <RecordRow
+                    key={`${record.type}-${record.name}-${record.value}`}
+                    record={record}
+                  />
+                ))}
+                <RecordRow record={view.dmarc} suggested />
+              </ul>
+              <div className="flex flex-wrap justify-end gap-2">
+                <Button
+                  variant="outline"
+                  disabled={busy}
+                  onClick={() => {
+                    remove.mutate()
+                  }}
+                >
+                  {t(`${D}.remove`)}
+                </Button>
+                <Button
+                  disabled={busy}
+                  onClick={() => {
+                    check.mutate()
+                  }}
+                >
+                  {t(`${D}.check`)}
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
+      )}
+    </SectionCard>
+  )
+}

@@ -920,6 +920,32 @@
           "complaint": "Spam complaint",
           "manual": "Added by hand"
         }
+      },
+      "domain": {
+        "title": "Sender domain",
+        "description": "Have e-mail go from your shop's own domain. Until it is verified, e-mail goes from the platform's address under your shop's name; customers' replies reach your contact e-mail.",
+        "sender": "Sending from:",
+        "none": "none",
+        "unavailable": "Here e-mail goes to the development mailbox (Mailpit); the domain is verified on the live shop.",
+        "localPart": "Part before @",
+        "name": "Domain",
+        "add": "Add the domain",
+        "publish": "Add the records below to your domain's DNS, then press \"Verify\". DNS can take a few hours to spread.",
+        "priority": "priority {{value}}",
+        "suggested": "suggested",
+        "copy": "Copy the value of {{name}}",
+        "copied": "Copied.",
+        "check": "Verify",
+        "remove": "Remove the domain",
+        "verified": "The domain is verified; e-mail now goes from it.",
+        "notYet": "The records are not visible yet; try again a little later.",
+        "statuses": {
+          "not_started": "Not verified",
+          "pending": "Waiting",
+          "verified": "Verified",
+          "failure": "Failed",
+          "temporary_failure": "Temporary issue"
+        }
       }
     },
     "sms": {

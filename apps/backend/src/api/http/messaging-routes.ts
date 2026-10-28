@@ -1,5 +1,7 @@
 import { validateAndTransformBody, validateAndTransformQuery } from "@medusajs/framework/http"
+import type { AuthenticatedMedusaRequest } from "@medusajs/framework/http"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
+import { AdminPostSenderDomain } from "../admin/messaging/sender-domain/validators"
 import {
   AdminGetSuppressions,
   AdminPostSuppression,
@@ -30,5 +32,26 @@ export const MESSAGING_ROUTES = [
     matcher: "/admin/messaging/suppressions/:id",
     methods: ["DELETE" as const],
     middlewares: [requireUserActor],
+  },
+  {
+    matcher: "/admin/messaging/sender-domain",
+    methods: ["GET" as const, "DELETE" as const],
+    middlewares: [requireUserActor],
+  },
+  {
+    matcher: "/admin/messaging/sender-domain",
+    methods: ["POST" as const],
+    middlewares: [requireUserActor, validateAndTransformBody(AdminPostSenderDomain)],
+  },
+  // Each asks Resend: a small budget per staff member
+  {
+    matcher: "/admin/messaging/sender-domain/check",
+    methods: ["POST" as const],
+    middlewares: [
+      requireUserActor,
+      rateLimit(() => RATE_LIMIT_PROFILES.bulk_ship, {
+        identity: (req) => (req as Partial<AuthenticatedMedusaRequest>).auth_context?.actor_id,
+      }),
+    ],
   },
 ]

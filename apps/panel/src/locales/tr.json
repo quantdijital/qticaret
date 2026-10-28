@@ -920,6 +920,32 @@
           "complaint": "Spam şikâyeti",
           "manual": "Elle eklendi"
         }
+      },
+      "domain": {
+        "title": "Gönderici alan adı",
+        "description": "E-postalar mağazanızın kendi alan adından gitsin. Alan adı doğrulanana kadar e-postalar platformun adresinden, mağazanızın adıyla gider; müşteri yanıtları iletişim e-postanıza ulaşır.",
+        "sender": "Şu an gönderen adres:",
+        "none": "yok",
+        "unavailable": "Bu ortamda e-postalar geliştirme posta kutusuna (Mailpit) gider; alan adı canlı ortamda doğrulanır.",
+        "localPart": "Adresin @ öncesi",
+        "name": "Alan adı",
+        "add": "Alan adını ekle",
+        "publish": "Aşağıdaki kayıtları alan adınızın DNS ayarlarına ekleyin, sonra \"Doğrula\"ya basın. DNS'in yayılması birkaç saat sürebilir.",
+        "priority": "öncelik {{value}}",
+        "suggested": "önerilir",
+        "copy": "{{name}} kaydının değerini kopyala",
+        "copied": "Kopyalandı.",
+        "check": "Doğrula",
+        "remove": "Alan adını kaldır",
+        "verified": "Alan adı doğrulandı; e-postalar artık bu adresten gidiyor.",
+        "notYet": "Kayıtlar henüz görünmüyor; biraz sonra yeniden deneyin.",
+        "statuses": {
+          "not_started": "Doğrulanmadı",
+          "pending": "Bekleniyor",
+          "verified": "Doğrulandı",
+          "failure": "Doğrulanamadı",
+          "temporary_failure": "Geçici sorun"
+        }
       }
     },
     "sms": {

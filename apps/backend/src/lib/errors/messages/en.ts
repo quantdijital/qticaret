@@ -286,6 +286,13 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "customers.unknown": "Customer not found.",
   "messaging.no_address": "The customer has no address or phone for this channel.",
   "messaging.suppression_unknown": "That address is not on the list.",
+  "messaging.domains_unavailable":
+    "A sender domain is verified only while e-mail goes through Resend (deployed shops).",
+  "messaging.domain_exists": "A sender domain is already set; remove it first.",
+  "messaging.domain_missing": "No sender domain has been added yet.",
+  "messaging.domain_invalid": "Type the domain without https:// or a path, e.g. shop.example.com.",
+  "messaging.local_part_invalid":
+    "The part before @ may hold lower-case letters, digits, dots, dashes and underscores (up to 32).",
   "messaging.recipient_invalid": "The address or phone number is not valid.",
   "messaging.email_off": "E-mail is not set up for this shop.",
   "messaging.sms_off":

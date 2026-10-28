@@ -293,6 +293,13 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "customers.unknown": "Müşteri bulunamadı.",
   "messaging.no_address": "Müşterinin bu kanal için kayıtlı adresi ya da telefonu yok.",
   "messaging.suppression_unknown": "Bu adres listede yok.",
+  "messaging.domains_unavailable":
+    "Gönderici alan adı yalnızca e-postalar Resend üzerinden giderken doğrulanır (canlı ortam).",
+  "messaging.domain_exists": "Zaten bir gönderici alan adı var; önce onu kaldırın.",
+  "messaging.domain_missing": "Henüz bir gönderici alan adı eklenmedi.",
+  "messaging.domain_invalid": "Alan adını https:// ve yol olmadan yazın, ör. magaza.com.tr.",
+  "messaging.local_part_invalid":
+    "Adresin @ öncesi kısmı küçük harf, rakam, nokta, tire ve alt çizgiden oluşmalı (en çok 32).",
   "messaging.recipient_invalid": "Adres ya da telefon numarası geçerli değil.",
   "messaging.email_off": "E-posta gönderimi bu mağazada açık değil.",
   "messaging.sms_off": "SMS hesabı bağlı değil. Ayarlar > SMS'ten Netgsm hesabını girin.",
