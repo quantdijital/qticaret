@@ -716,6 +716,10 @@
         "geliver": {
           "name": "Geliver",
           "description": "Offers from several carriers through one account; labels and tracking through Geliver."
+        },
+        "aras": {
+          "name": "Aras Kargo",
+          "description": "Parcels, labels and tracking on the shop's own Aras Kargo contract. The details are in Aras's integration document."
         }
       },
       "geliver": {
@@ -755,7 +759,8 @@
         "carriers": {
           "manual": "I ship it myself",
           "geliver": "Geliver",
-          "pickup": "Pickup from the shop"
+          "pickup": "Pickup from the shop",
+          "aras": "Aras Kargo"
         },
         "pricing": "Price",
         "pricings": {
@@ -801,6 +806,25 @@
         "overHint": "Left empty, parcels past the table cannot ship with such an option.",
         "desiInvalid": "Enter the desi limit.",
         "priceInvalid": "Enter the amount with at most two decimals."
+      },
+      "aras": {
+        "keys": {
+          "title": "Integration details",
+          "description": "The web service user name and password Aras Kargo gives with the contract. Test and live accounts differ."
+        },
+        "username": "User name",
+        "password": "Password",
+        "customerCode": "Customer code",
+        "customerCodeHint": "The customer code Aras gave the shop; tracking asks for it.",
+        "serviceUrl": "Service address",
+        "serviceUrlHint": "Fill in if Aras gave another address (araskargo.com.tr only). Blank uses the test or live default.",
+        "serviceUrlInvalid": "Must be one of Aras Kargo's https addresses.",
+        "live": {
+          "title": "Going live",
+          "description": "In test mode parcels go to Aras's test system; no courier comes."
+        },
+        "testMode": "Test mode",
+        "testModeHint": "Turned off, parcels open on the real Aras account."
       }
     },
     "integrations": {

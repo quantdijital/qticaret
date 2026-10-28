@@ -13,7 +13,7 @@ export const shippingOptionNamesQuery = () =>
 export interface ShopShippingOption {
   id: string
   name: string
-  carrier: "manual" | "geliver" | "pickup" | null
+  carrier: "manual" | "geliver" | "aras" | "pickup" | null
   pricing: "flat" | "cheapest" | "fastest" | "table"
   amount: string | null
   in_store: boolean
@@ -22,7 +22,7 @@ export interface ShopShippingOption {
 /** What a new option is: who carries it and how it is priced (the server checks the pair). */
 export interface NewShippingOption {
   name: string
-  carrier: "manual" | "geliver" | "pickup"
+  carrier: "manual" | "geliver" | "aras" | "pickup"
   pricing:
     | { type: "flat"; amount: number }
     | { type: "quote"; choice: "cheapest" | "fastest" }

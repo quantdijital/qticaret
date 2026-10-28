@@ -4,7 +4,8 @@ import { useTranslation } from "react-i18next"
 import { PageHeader } from "@/components/patterns/page-header"
 import { ErrorState, LoadingRows } from "@/components/patterns/states"
 import { providerAccountsQuery } from "@/features/settings/api/payments"
-import type { GeliverAccount } from "@/features/settings/api/payments"
+import type { ArasAccount, GeliverAccount } from "@/features/settings/api/payments"
+import { ArasSettings } from "@/features/settings/components/aras-settings"
 import { AccountBadges } from "@/features/settings/components/account-badges"
 import { GeliverSettings } from "@/features/settings/components/geliver-settings"
 import { accountKey } from "@/features/settings/payments"
@@ -32,6 +33,12 @@ export function ShippingCarrierPage() {
         <ErrorState text={errorText(t, query.error)} onRetry={() => void query.refetch()} />
       ) : !query.data ? (
         <LoadingRows rows={4} />
+      ) : carrier === "aras" ? (
+        <ArasSettings
+          key={accountKey(account)}
+          account={account as ArasAccount | undefined}
+          keyConfigured={query.data.key_configured}
+        />
       ) : (
         <GeliverSettings
           key={accountKey(account)}

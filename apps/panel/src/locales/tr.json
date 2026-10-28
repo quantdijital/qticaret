@@ -716,6 +716,10 @@
         "geliver": {
           "name": "Geliver",
           "description": "Birden çok kargo firmasının teklifini tek hesaptan alır; etiket ve takip Geliver üzerinden."
+        },
+        "aras": {
+          "name": "Aras Kargo",
+          "description": "Mağazanın kendi Aras Kargo sözleşmesiyle gönderi, etiket ve takip. Bilgiler Aras'ın verdiği entegrasyon belgesinde."
         }
       },
       "geliver": {
@@ -755,7 +759,8 @@
         "carriers": {
           "manual": "Kendi gönderimim",
           "geliver": "Geliver",
-          "pickup": "Mağazadan teslim"
+          "pickup": "Mağazadan teslim",
+          "aras": "Aras Kargo"
         },
         "pricing": "Ücret",
         "pricings": {
@@ -801,6 +806,25 @@
         "overHint": "Boş bırakırsanız tablonun üstündeki koliler bu seçenekle gönderilemez.",
         "desiInvalid": "Desi sınırını girin.",
         "priceInvalid": "Tutarı en çok iki ondalıkla girin."
+      },
+      "aras": {
+        "keys": {
+          "title": "Entegrasyon bilgileri",
+          "description": "Aras Kargo'nun sözleşmeyle verdiği web servis kullanıcı adı ve şifresi. Test ve canlı hesap ayrıdır."
+        },
+        "username": "Kullanıcı adı",
+        "password": "Şifre",
+        "customerCode": "Müşteri kodu",
+        "customerCodeHint": "Aras'ın mağazaya verdiği müşteri kodu; takip sorgusunda kullanılır.",
+        "serviceUrl": "Servis adresi",
+        "serviceUrlHint": "Aras farklı bir adres verdiyse yazın (yalnızca araskargo.com.tr). Boşsa test ya da canlı varsayılan kullanılır.",
+        "serviceUrlInvalid": "Aras Kargo'nun https ile başlayan bir adresi olmalı.",
+        "live": {
+          "title": "Canlıya geçiş",
+          "description": "Test modunda gönderiler Aras'ın test sistemine gider; gerçek kurye gelmez."
+        },
+        "testMode": "Test modu",
+        "testModeHint": "Kapatınca gönderiler gerçek Aras hesabına açılır."
       }
     },
     "integrations": {

@@ -33,8 +33,22 @@ import { errorText } from "@/lib/errors"
 import { formatMoneyInput, parseMoneyInput } from "@/lib/money-input"
 
 const S = "settings.shipping.options"
-const CARRIERS = ["manual", "geliver", "pickup"] as const
+const CARRIERS = ["manual", "geliver", "aras", "pickup"] as const
 const PRICINGS = ["flat", "cheapest", "fastest", "table"] as const
+type Carrier = (typeof CARRIERS)[number]
+type Pricing = (typeof PRICINGS)[number]
+
+// Geliver quotes; a contract carrier (adr/0035) takes a flat price or the shop's table
+const PRICINGS_OF: Readonly<Record<Carrier, readonly Pricing[]>> = {
+  manual: ["flat"],
+  geliver: PRICINGS,
+  aras: ["flat", "table"],
+  pickup: ["flat"],
+}
+
+/** The pricing the carrier takes: the one chosen, or a flat price when it takes no other. */
+const pricingFor = (carrier: Carrier, pricing: Pricing): Pricing =>
+  PRICINGS_OF[carrier].includes(pricing) ? pricing : "flat"
 
 const schema = z
   .object({
@@ -45,20 +59,21 @@ const schema = z
   })
   .superRefine((values, ctx) => {
     const amount = parseMoneyInput(values.amount)
-    if (values.pricing === "flat" && (amount === null || amount < 0)) {
+    if (pricingFor(values.carrier, values.pricing) === "flat" && (amount === null || amount < 0)) {
       ctx.addIssue({ code: "custom", path: ["amount"], message: `${S}.amountInvalid` })
     }
   })
 type Values = z.infer<typeof schema>
 
-/** The server's body for the form: only Geliver quotes or prices by the table. */
+/** The server's body for the form: Geliver quotes, Geliver and Aras price by the table. */
 function newOption(values: Values): NewShippingOption {
+  const chosen = pricingFor(values.carrier, values.pricing)
   const pricing: NewShippingOption["pricing"] =
-    values.carrier !== "geliver" || values.pricing === "flat"
+    chosen === "flat"
       ? { type: "flat", amount: parseMoneyInput(values.amount) ?? 0 }
-      : values.pricing === "table"
+      : chosen === "table"
         ? { type: "table" }
-        : { type: "quote", choice: values.pricing }
+        : { type: "quote", choice: chosen }
   return { name: values.name.trim(), carrier: values.carrier, pricing }
 }
 
@@ -91,7 +106,7 @@ export function ShippingOptionDialog({
   })
   const carrier = useWatch({ control: form.control, name: "carrier" })
   const pricing = useWatch({ control: form.control, name: "pricing" })
-  const flat = carrier !== "geliver" || pricing === "flat"
+  const flat = pricingFor(carrier, pricing) === "flat"
   const { errors } = form.formState
   const busy = create.isPending || update.isPending
   const done = () => {
@@ -151,18 +166,18 @@ export function ShippingOptionDialog({
               />
             </Field>
           )}
-          {option || carrier !== "geliver" ? null : (
+          {option || PRICINGS_OF[carrier].length === 1 ? null : (
             <Field label={t(`${S}.pricing`)} htmlFor="shipping-option-pricing">
               <Controller
                 control={form.control}
                 name="pricing"
                 render={({ field }) => (
-                  <Select value={field.value} onValueChange={field.onChange}>
+                  <Select value={pricingFor(carrier, field.value)} onValueChange={field.onChange}>
                     <SelectTrigger id="shipping-option-pricing" className="w-full">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {PRICINGS.map((each) => (
+                      {PRICINGS_OF[carrier].map((each) => (
                         <SelectItem key={each} value={each}>
                           {t(`${S}.pricings.${each}`)}
                         </SelectItem>
