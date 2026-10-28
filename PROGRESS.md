@@ -9,7 +9,7 @@
 
 **CI:** GitHub Actions'ın aylık kotası doldu (kullanıcı 2026-10-28); doğrulama yerelde (lint, tip, birim, HTTP, modül, panel, e2e). Kota yenilenince son commit'te CI yeniden çalıştırılır.
 
-**F7 — Kargo, sipariş operasyonu, iade ve değişim: BAŞLADI (2026-10-28 gece, otonom).** Plan aşağıda "F7 görev planı"; ADR-0031 (kargo altyapısı ve takip) kabul edildi (kullanıcı onayladı). K1–K10 bitti; sıradaki K11 (doğrudan taşıyıcı, kullanıcının kargo firması cevabına bağlı) ve K12 (kapanış incelemesi).
+**F7 — Kargo, sipariş operasyonu, iade ve değişim: BİTTİ, KK3 hariç (2026-10-28 öğleden sonra).** KK3 iade faturası F8'i bekliyor. Plan aşağıda "F7 görev planı"; ADR-0031 (kargo altyapısı ve takip) kabul edildi (kullanıcı onayladı). K1–K12 bitti; doğrudan taşıyıcılar (Aras, Yurtiçi) dahil.
 
 **F6 — Ödeme: alternatif ödemeler + yönlendirici + ters ibraz: BİTTİ (2026-10-28 gece, otonom).** Dal `f6-alternative-payments`. W1–W6; KK1–KK5 işaretli. ADR-0029 ve ADR-0030 otonom kabul edildi (gözden geçir). Kapanışta yerelde: birim 1658, HTTP 81/81 takım (440 test), modül (ters ibraz) 1, panel 220, e2e 29.
 
@@ -1145,7 +1145,7 @@
 - **Daha önce:** F1 planlaması ve F0.2–F0.8 (2026-10-24), F0.1 monorepo (2026-10-24 sabahı), SEO ve güvenlik dokümanları (2026-10-22).
 
 ## Sıradaki görev
-**Claude'un sıradaki işi:** F7 K12 kapanışı. KK3 iade faturası F8'i bekliyor ve F8 askıda; bu yüzden F7, KK3 dışında kapanır. Sonra docs/03'teki sıradaki faz F9 planlanır, F8 kullanıcı e-faturayı netleştirince açılır. F8 askıda (kullanıcı e-faturayı netleştirecek); F7 KK3 F8'i bekliyor. Plan aşağıda "F7 görev planı". Dal `f7-shipping` (`f6-alternative-payments` üzerinden). Kullanıcı 2026-10-27 gece: "izin istemeden çalışmaya devam edersin, kritik bir şey olursa sabah sorarım."
+**Claude'un sıradaki işi:** F9 (Bildirimler) planı (`/faz-baslat F9`). F7 kapandı, yalnızca KK3 kaldı; KK3 iade faturası olduğu için F8'i bekliyor. F8 askıda ve kullanıcı e-faturayı netleştirince açılır. F8 askıda (kullanıcı e-faturayı netleştirecek); F7 KK3 F8'i bekliyor. Plan aşağıda "F7 görev planı". Dal `f7-shipping` (`f6-alternative-payments` üzerinden). Kullanıcı 2026-10-27 gece: "izin istemeden çalışmaya devam edersin, kritik bir şey olursa sabah sorarım."
 
 ### F8 görev planı (2026-10-28; Medusa olay adları v2.21.2 kaynağından, GİB listesi ve UBL-TR sürümü web kaynaklarından doğrulandı; Context7 kotası dolu)
 Karar: ADR-0034 (önerildi). Ayrıntı `docs/entegrasyonlar/e-fatura.md`.
@@ -1197,7 +1197,7 @@ Doğrulananlar:
 | K11c ✅ | F7.14 | **Bitti (2026-10-28 öğleden sonra).** Yurtiçi sağlayıcısı (`yurtici_yurtici`; WSDL canlıdan okundu): `createShipment` (`cargoKey` = bizim `QT` kodumuz), `queryShipment` (operationCode 0–6 + olay metinleri), `cancelShipment` (önceden iptal edilmiş = tamam), yanıt gelmezse aynı kodla geri çekme (Aras'ta da). Kapıda ödemeli sipariş Yurtiçi'nin ayrı tahsilatlı hesabıyla açılır; `integration-credentials`'a isteğe bağlı gizli alan (ikisi birlikte ya da hiç) eklendi. Etiketi biz çiziyoruz: HTML 100×150 mm, Code128 barkod (`lib/shipping/code128.ts`, bağımlılıksız), betik yok. Sahte Yurtiçi (`pnpm dev:yurtici`, port 9105). Panelde Ayarlar > Kargo > Yurtiçi Kargo (ana hesap, kapıda ödeme hesabı, test modu) ve kargo seçeneğinde Yurtiçi (sabit/tablo). Aras sayfasının eksik doğrulama metinleri eklendi. Ortak parçalar: alıcı adresi (`lib/shipping/receiver.ts`), paketlenen koli (`packedParcelOf`). Testler: birim +12 (Yurtiçi 9, Code128 3), hesap kuralları +3, HTTP 5 (`yurtici-shipping`), panel 4, e2e listesine sayfa | K11a | KK7 |
 | K11d ✅ | F7.14 | **Bitti (2026-10-28 öğleden sonra).** Ortak sözleşme test paketi (`integration-tests/http/carrier-contract.spec.ts`): Geliver, Aras ve Yurtiçi aynı dört sözleşmeyi geçiyor (12 test). Sözleşmeler: hesap kaldırılınca gönderi açılmaz; gönderi yalnızca bizim yolumuzdan açılır; etiket özel depoda tutulur, oturumsuz istek 401 alır; fulfillment'ta sır yoktur; takip sonuna kadar sürer; taşıyıcı koliyi açtıktan sonraki hatada taşıyıcıda açık koli kalmaz; zamanında iptalde koli geri çekilir. Bağımsız güvenlik incelemesi yapıldı: 6 bulgudan 4'ü düzeltildi (Aras durumu yalnızca durum sütunlarından okunuyor, Aras servis adresi hesap kimliğinde ve korumalı taşımada, XML okuyucuda etiket sınırı ve karakter denetimi, Yurtiçi takip bağlantısı yalnızca kendi alanından). 2 düşük bulgu ertelendi (ADR-0035 uygulama notu). F7 KK7 işaretlendi | K11b, K11c | KK7 |
 | K11 (eski satır) | F7.14 | Doğrudan taşıyıcı adaptörü: ilk müşterinin anlaşmalı firması (**kullanıcıya soruldu**), ortak sözleşme paketi | K2–K4 | KK7 |
-| K12 ⏳ | — | Kapanış: güvenlik ve kod incelemesi, KK işaretleri. **2026-10-28 öğlen:** K1–K10 için üç bağımsız güvenlik incelemesi yapıldı ve bulgular uygulandı. Yerelde tam doğrulama: HTTP 90 takım ve 478 test, birim 1696, panel 238, e2e 33 (sipariş düzenleme penceresinin erişilebilirlik kontrolü eklendi; ürün arama düğmesine etiket verildi). KK1, KK2, KK4, KK5 ve KK6 işaretli. KK3 iade faturası için F8'i, KK7 doğrudan taşıyıcı (K11) için kullanıcının kargo firması cevabını bekliyor; F7 bu ikisiyle kapanır | K1–K11 | — |
+| K12 ✅ | — | **Kapandı (2026-10-28 öğleden sonra), KK3 hariç.** K1–K10 için üç, K11 için bir bağımsız güvenlik incelemesi yapıldı; bulgular uygulandı ya da ADR-0035'te ertelendi. Son yerel doğrulama (K11 sonrası): HTTP tam takım 92 dosyanın 90'ı ilk koşuda geçti (iki dosya bağlantı havuzu dolunca açılışta düştü, yeniden koşuda geçti). Ayrıca: sözleşme testi 12, birim 1725, panel 246, e2e 35. KK1, KK2 ve KK4–KK7 işaretli. KK3 (iade faturası) F8'e bağlı; F8 açılınca `return.refunded` olayına bağlanıp işaretlenir | K1–K11 | — |
 
 **F7 ara güvenlik incelemesi (K1–K4, 2026-10-28 gece, bağımsız ajan): yüksek yok; bulgular uygulandı.**
 - M1: Medusa'nın fulfillment uçları (`/admin/orders/:id/fulfillments`, `/admin/fulfillments`) `qt_` ile başlayan `additional_data`'yı reddediyor (`shipping.additional_data_reserved`); sahte `qt_ship` testi.
@@ -1589,8 +1589,8 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
 | F4 Fiyatlandırma ve promosyon | ✅ (U1–U8; KK1–KK4; kapanış incelemesi 2026-10-27) |
 | F5 Ödeme: PayTR + iyzico (+ ortak ödeme altyapısı) | ✅ (V1–V11; gerçek sağlayıcı testleri sunucuya çıkışta) |
 | F6 Ödeme: havale/EFT + kapıda ödeme + yönlendirici + ters ibraz | ✅ (W1–W6; KK1–KK5; 2026-10-28) |
-| F7 Kargo, sipariş operasyonu, iade ve değişim | ⏳ K1–K10 bitti (2026-10-28); K11 kullanıcı cevabı bekliyor, K12 kapanış |
-| F8 E-fatura | ⬜ |
+| F7 Kargo, sipariş operasyonu, iade ve değişim | ✅ KK3 hariç (K1–K12, 2026-10-28; KK3 iade faturası F8'i bekliyor) |
+| F8 E-fatura | ⛔ askıda (kullanıcı e-faturayı netleştirecek; plan hazır, ADR-0034 önerildi) |
 | F9 Bildirimler (e-posta/SMS) | ⬜ |
 | F10 Müşteri hesabı, etkileşim, pazarlama ve SEO ölçümü | ⬜ |
 | F11 Raporlama, muhasebe ve dış API | ⬜ |
