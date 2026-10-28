@@ -1638,6 +1638,7 @@
       "priceOf": "Unit price of {{name}}",
       "remove": "Take {{name}} off",
       "shopPrice": "Shop price",
+      "addLabel": "Product to add",
       "addPlaceholder": "Search a product to add",
       "addEmpty": "No product found.",
       "addQuantity": "Quantity to add",

@@ -176,7 +176,12 @@ export function EditOrderDialog({ order, onClose }: { order: OrderDetail; onClos
         </div>
         <div className="flex items-center gap-3">
           <div className="min-w-0 flex-1">
+            {/* A combobox takes its name from a label, not from what it shows */}
+            <label htmlFor="order-edit-add" className="sr-only">
+              {t(`${E}.addLabel`)}
+            </label>
             <SearchPicker
+              id="order-edit-add"
               value={picked}
               onChange={setPicked}
               search={searchVariants}

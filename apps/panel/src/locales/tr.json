@@ -1646,6 +1646,7 @@
       "priceOf": "{{name}} birim fiyatı",
       "remove": "{{name}} kalemini çıkar",
       "shopPrice": "Mağaza fiyatı",
+      "addLabel": "Eklenecek ürün",
       "addPlaceholder": "Eklenecek ürünü arayın",
       "addEmpty": "Ürün bulunamadı.",
       "addQuantity": "Eklenecek adet",

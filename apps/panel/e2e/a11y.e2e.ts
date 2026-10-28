@@ -85,3 +85,17 @@ test("bulk edit's bar and dialog have no serious accessibility issue", async ({ 
   await expect(page.getByRole("dialog", { name: "Stoğu değiştir" })).toBeVisible()
   expect(await seriousIssues(page)).toEqual([])
 })
+
+test("an order's edit dialog has no serious accessibility issue", async ({ page }) => {
+  // An order still to ship can be edited (adr/0033)
+  await page.goto("/orders?stage=to_ship")
+  await page.waitForLoadState("networkidle")
+  const first = page.getByRole("table").getByRole("link").first()
+  test.skip((await first.count()) === 0, "no order waiting to ship in this database")
+  await first.click()
+  await expect(pageHeading(page)).toBeVisible()
+  await page.getByRole("button", { name: "Diğer işlemler" }).click()
+  await page.getByRole("menuitem", { name: "Siparişi düzenle" }).click()
+  await expect(page.getByRole("dialog")).toBeVisible()
+  expect(await seriousIssues(page)).toEqual([])
+})
