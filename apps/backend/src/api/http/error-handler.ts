@@ -1,6 +1,11 @@
 import { getHttpResponseFromError } from "@medusajs/framework/http"
 import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { DEFAULT_VALIDATION_MESSAGE, lockTimeoutError, toHttpError } from "../../lib/errors"
+import {
+  DEFAULT_VALIDATION_MESSAGE,
+  I18N_KEY,
+  lockTimeoutError,
+  toHttpError,
+} from "../../lib/errors"
 import { currentRequestId, logger } from "../../lib/logging"
 import { forDashboard } from "./dashboard-messages"
 import { INTERNAL_ERROR_BODY, sanitizeErrorResponse } from "./error-response"
@@ -59,6 +64,16 @@ const isZodError = (error: unknown): boolean => {
   return fields?.name === "ZodError" && Array.isArray(fields.issues) && fields.issues.length > 0
 }
 
+/**
+ * Medusa's body validation wraps a rule's message: `Invalid request: <key>`.
+ * One of our keys alone is given back as the key, so clients and the
+ * panel read it like any other; anything longer is left as it is.
+ */
+function unwrapValidationKey(body: ErrorBody): ErrorBody {
+  const key = /^Invalid request: (\S+)$/.exec(body.message)?.[1]
+  return key && I18N_KEY.test(key) ? { ...body, message: key } : body
+}
+
 function resolveError(error: unknown, path: string): ResolvedError {
   const own = toHttpError(lockTimeoutError(error) ?? error)
   if (own) {
@@ -87,7 +102,7 @@ function resolveError(error: unknown, path: string): ResolvedError {
   const sanitized = sanitizeErrorResponse(statusCode, body as ErrorBody, path)
   // A database message quotes row values; its kind is enough to debug
   const reason = sanitized.dbError === null ? sanitized.body.message : `db_${sanitized.dbError}`
-  return { status: sanitized.status, body: sanitized.body, reason }
+  return { status: sanitized.status, body: unwrapValidationKey(sanitized.body), reason }
 }
 
 function logError(

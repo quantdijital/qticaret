@@ -101,6 +101,26 @@ describe("platformErrorHandler", () => {
       })
     })
 
+    it("gives a rule's key back from Medusa's body validation, and leaves longer text alone", () => {
+      const keyed = handle(
+        new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          "Invalid request: customer_segments.rules_empty"
+        )
+      )
+      const prose = handle(
+        new MedusaError(
+          MedusaError.Types.INVALID_DATA,
+          "Invalid request: Expected number, received string"
+        )
+      )
+
+      expect(keyed.body).toMatchObject({ message: "customer_segments.rules_empty" })
+      expect(prose.body).toMatchObject({
+        message: "Invalid request: Expected number, received string",
+      })
+    })
+
     it("maps a ProviderError to 502 and logs it as a failure", () => {
       const providerError = new ProviderError({
         provider: "iyzico",

@@ -22,6 +22,7 @@ import { Route as AuthContentIndexRouteImport } from './routes/_auth/content/ind
 import { Route as AuthContentIdRouteImport } from './routes/_auth/content/$id'
 import { Route as AuthCustomersIndexRouteImport } from './routes/_auth/customers/index'
 import { Route as AuthCustomersIdRouteImport } from './routes/_auth/customers/$id'
+import { Route as AuthCustomersGroupsRouteImport } from './routes/_auth/customers/groups'
 import { Route as AuthOrdersIndexRouteImport } from './routes/_auth/orders/index'
 import { Route as AuthOrdersIdRouteImport } from './routes/_auth/orders/$id'
 import { Route as AuthOrdersChargebacksRouteImport } from './routes/_auth/orders/chargebacks'
@@ -123,6 +124,11 @@ const AuthCustomersIndexRoute = AuthCustomersIndexRouteImport.update({
 const AuthCustomersIdRoute = AuthCustomersIdRouteImport.update({
   id: '/customers/$id',
   path: '/customers/$id',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthCustomersGroupsRoute = AuthCustomersGroupsRouteImport.update({
+  id: '/customers/groups',
+  path: '/customers/groups',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthOrdersIndexRoute = AuthOrdersIndexRouteImport.update({
@@ -335,6 +341,7 @@ export interface FileRoutesByFullPath {
   '/brands/$id': typeof AuthBrandsIdRoute
   '/content/$id': typeof AuthContentIdRoute
   '/customers/$id': typeof AuthCustomersIdRoute
+  '/customers/groups': typeof AuthCustomersGroupsRoute
   '/orders/$id': typeof AuthOrdersIdRoute
   '/orders/chargebacks': typeof AuthOrdersChargebacksRoute
   '/orders/returns': typeof AuthOrdersReturnsRoute
@@ -385,6 +392,7 @@ export interface FileRoutesByTo {
   '/brands/$id': typeof AuthBrandsIdRoute
   '/content/$id': typeof AuthContentIdRoute
   '/customers/$id': typeof AuthCustomersIdRoute
+  '/customers/groups': typeof AuthCustomersGroupsRoute
   '/orders/$id': typeof AuthOrdersIdRoute
   '/orders/chargebacks': typeof AuthOrdersChargebacksRoute
   '/orders/returns': typeof AuthOrdersReturnsRoute
@@ -439,6 +447,7 @@ export interface FileRoutesById {
   '/_auth/brands/$id': typeof AuthBrandsIdRoute
   '/_auth/content/$id': typeof AuthContentIdRoute
   '/_auth/customers/$id': typeof AuthCustomersIdRoute
+  '/_auth/customers/groups': typeof AuthCustomersGroupsRoute
   '/_auth/orders/$id': typeof AuthOrdersIdRoute
   '/_auth/orders/chargebacks': typeof AuthOrdersChargebacksRoute
   '/_auth/orders/returns': typeof AuthOrdersReturnsRoute
@@ -493,6 +502,7 @@ export interface FileRouteTypes {
     | '/brands/$id'
     | '/content/$id'
     | '/customers/$id'
+    | '/customers/groups'
     | '/orders/$id'
     | '/orders/chargebacks'
     | '/orders/returns'
@@ -543,6 +553,7 @@ export interface FileRouteTypes {
     | '/brands/$id'
     | '/content/$id'
     | '/customers/$id'
+    | '/customers/groups'
     | '/orders/$id'
     | '/orders/chargebacks'
     | '/orders/returns'
@@ -596,6 +607,7 @@ export interface FileRouteTypes {
     | '/_auth/brands/$id'
     | '/_auth/content/$id'
     | '/_auth/customers/$id'
+    | '/_auth/customers/groups'
     | '/_auth/orders/$id'
     | '/_auth/orders/chargebacks'
     | '/_auth/orders/returns'
@@ -735,6 +747,13 @@ declare module '@tanstack/react-router' {
       path: '/customers/$id'
       fullPath: '/customers/$id'
       preLoaderRoute: typeof AuthCustomersIdRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/customers/groups': {
+      id: '/_auth/customers/groups'
+      path: '/customers/groups'
+      fullPath: '/customers/groups'
+      preLoaderRoute: typeof AuthCustomersGroupsRouteImport
       parentRoute: typeof AuthRoute
     }
     '/_auth/orders/': {
@@ -1077,6 +1096,7 @@ interface AuthRouteChildren {
   AuthBrandsIdRoute: typeof AuthBrandsIdRoute
   AuthContentIdRoute: typeof AuthContentIdRoute
   AuthCustomersIdRoute: typeof AuthCustomersIdRoute
+  AuthCustomersGroupsRoute: typeof AuthCustomersGroupsRoute
   AuthOrdersIdRoute: typeof AuthOrdersIdRoute
   AuthOrdersChargebacksRoute: typeof AuthOrdersChargebacksRoute
   AuthOrdersReturnsRoute: typeof AuthOrdersReturnsRoute
@@ -1108,6 +1128,7 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthBrandsIdRoute: AuthBrandsIdRoute,
   AuthContentIdRoute: AuthContentIdRoute,
   AuthCustomersIdRoute: AuthCustomersIdRoute,
+  AuthCustomersGroupsRoute: AuthCustomersGroupsRoute,
   AuthOrdersIdRoute: AuthOrdersIdRoute,
   AuthOrdersChargebacksRoute: AuthOrdersChargebacksRoute,
   AuthOrdersReturnsRoute: AuthOrdersReturnsRoute,

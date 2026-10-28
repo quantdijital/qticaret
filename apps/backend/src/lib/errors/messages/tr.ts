@@ -294,6 +294,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "account.login_email_missing": "Bu oturumun bir e-posta adresi yok; hesap açılamadı.",
   "messaging.consent_evidence_required": "İznin nasıl verildiğini en az 10 karakterle yazın.",
   "carts.unknown": "Sepet bulunamadı ya da tamamlanmış.",
+  "customer_segments.rules_empty": "Segment için en az bir kural seçin.",
   "messaging.no_address": "Müşterinin bu kanal için kayıtlı adresi ya da telefonu yok.",
   "messaging.suppression_unknown": "Bu adres listede yok.",
   "messaging.domains_unavailable":

@@ -111,6 +111,19 @@ F10 vitrinin müşteri tarafını kuruyor: hesap, e-posta doğrulama, sosyal gir
   - Kurulmamış sağlayıcıya istek reddedilir (testli).
 - Hesap bağlama: Sosyal kimliğin ilk `POST /store/customers` isteğinde aynı adresle `has_account` bir müşteri varsa ve o adresin e-posta doğrulaması tamamlanmışsa (`auth_verification.verified_at`), yeni hesap açılmaz; kimlik var olan müşteriye bağlanır (`app_metadata.customer_id`, telafili workflow). Doğrulanmamış hesaba bağlanmaz; Medusa'nın "zaten hesabı var" hatası döner. Sosyalden sosyale bağlama yok.
 
+## Uygulama notları (M5, segmentler, 2026-10-28)
+- `customer-segments` modülü:
+  - Segment satırı adını, kurallarını, kendi Medusa grubunu, üye sayısını ve son güncelleme zamanını tutar.
+  - Grup, `metadata.managed_by = "segment"` ile işaretlenir; panel bu grubun üyelerini elle değiştirmeye izin vermez.
+- Kurallar (`lib/customers/segments.ts`, hepsi birlikte uygulanır): en az harcama (kuruş), en az sipariş, son N günde sipariş, N gündür sipariş yok (daha önce sipariş vermiş olmak şartıyla), üye ya da misafir, kampanya e-postası izni.
+- Doldurma:
+  - Gece 03:00 UTC'de çalışan iş ya da "Şimdi güncelle" doldurur.
+  - Müşteriler ve siparişler 1000'lik sayfalarla okunur, en fazla 200.000 kayıt; aşılırsa log yazılır.
+  - Harcama, iptal ve taslak dışındaki siparişlerin `total`'ıdır. İadeler düşülmez; F11 raporlarıyla birlikte gözden geçir.
+  - Grup üyeliği Medusa'nın `linkCustomersToCustomerGroupWorkflow`'u ile değişir, telafisiyle birlikte.
+- Segment silinince grubu da silinir; o gruba bağlı kampanyalar ve fiyat listeleri artık kimseye uygulanmaz (panel bunu onay penceresinde söyler).
+- Hata yanıtı: Medusa'nın gövde doğrulaması kuralın anahtarını `Invalid request: <anahtar>` diye sarıyordu. Mesaj yalnızca tek bir anahtar taşıyorsa hata işleyici artık anahtarı tek başına döndürüyor; panel diğer anahtarlar gibi çevirir. Bu, önceki kuralların hepsine de yarar (izin kanıtı, ayar bölümleri).
+
 ## Alternatifler
 
 | Seçenek | Artı | Eksi |

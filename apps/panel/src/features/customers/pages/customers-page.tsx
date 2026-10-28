@@ -17,6 +17,7 @@ import {
   customersQuery,
 } from "@/features/customers/api/customers"
 import type { CustomerKind, CustomerListItem } from "@/features/customers/api/customers"
+import { CustomersNav } from "@/features/customers/components/customers-nav"
 import { customerName, initialsOf } from "@/features/customers/names"
 import { errorText } from "@/lib/errors"
 import { formatDate } from "@/lib/format"
@@ -102,6 +103,7 @@ export function CustomersPage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title={t("nav.customers")} description={t("customers.description")} />
+      <CustomersNav />
       <section className="overflow-hidden rounded-lg border bg-card shadow-card">
         <FilterTabs
           label={t("customers.views")}

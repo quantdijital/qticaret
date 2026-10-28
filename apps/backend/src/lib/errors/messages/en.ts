@@ -289,6 +289,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "messaging.consent_evidence_required":
     "Write how the consent was given, in at least 10 characters.",
   "carts.unknown": "The cart was not found or is already completed.",
+  "customer_segments.rules_empty": "Choose at least one rule for the segment.",
   "messaging.no_address": "The customer has no address or phone for this channel.",
   "messaging.suppression_unknown": "That address is not on the list.",
   "messaging.domains_unavailable":

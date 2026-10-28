@@ -170,6 +170,8 @@ module.exports = defineConfig({
       resolve: "./src/modules/billing-profile",
       options: { encryptionKey: env.PII_ENCRYPTION_KEY, hashKey: env.PII_HASH_KEY },
     },
+    // F10.3 (adr/0037 §6): customer segments by rules, members in Medusa groups
+    { resolve: "./src/modules/customer-segments" },
     // F9 (adr/0036): commercial consent and the suppression list, addresses hashed
     { resolve: "./src/modules/messaging", options: { hashKey: env.PII_HASH_KEY } },
     // Locks shared by every process of the tenant (adr/0020)
