@@ -33,6 +33,8 @@ export interface FakeGeliver {
   shipments: Map<string, FakeShipment>
   /** Moves a test shipment one step on, as a read at Geliver does. */
   advance: (shipmentId: string) => void
+  /** Pins a test shipment where it stands: reads no longer move it on. */
+  hold: (shipmentId: string) => void
   /** The shipment as Geliver answers it (a notification's body carries the same). */
   view: (shipmentId: string) => unknown
   /** Queues an answer for the next `METHOD /path` (the path as requested). */
@@ -140,6 +142,9 @@ export async function startFakeGeliver(
       if (shipment) {
         shipments.advance(shipment)
       }
+    },
+    hold: (id) => {
+      shipments.held.add(id)
     },
     view: (id) => {
       const shipment = shipments.shipments.get(id)

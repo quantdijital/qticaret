@@ -1,20 +1,13 @@
-import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
-import {
-  addShippingMethodToCartWorkflow,
-  createCartWorkflow,
-  createShippingOptionsWorkflow,
-} from "@medusajs/medusa/core-flows"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { addShippingMethodToCartWorkflow, createCartWorkflow } from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { startFakeGeliver } from "@qticaret/testing"
 import type { FakeGeliver } from "@qticaret/testing"
-import { ensureLocationCarriers } from "../../src/scripts/bootstrap/location-carriers"
-import { placeOrder } from "../../src/scripts/seed/orders/place"
-import { createAdminUser } from "../helpers/admin"
+import { geliverOrder, geliverProduct, geliverShop, shipOrder } from "../helpers/geliver"
+import type { GeliverShop } from "../helpers/geliver"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { PAYTR_ADDRESS } from "../helpers/paytr"
-import { stockShop, stockedProduct } from "../helpers/stock"
-import type { StockShop } from "../helpers/stock"
 import { createStorefront } from "../helpers/storefront"
 import type { Storefront } from "../helpers/storefront"
 import { loadTrAddressFixture } from "../helpers/tr-address"
@@ -32,44 +25,16 @@ medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
     const http = api as HttpClient
     let fake: FakeGeliver
-    let shop: StockShop
+    let setup: GeliverShop
     let storefront: Storefront
-    let admin: { headers: Record<string, string> }
     let optionId: string
     let variantId: string
+    let admin: GeliverShop["admin"]
+    let shop: GeliverShop["shop"]
 
-    /** A product of 450 g in a 35 × 8 × 4 cm box (1 desi), or one with no measures. */
-    const product = async (measured = true) => {
-      const { variantId: id } = await stockedProduct(
-        getContainer(),
-        shop,
-        `bicak-${String(Date.now())}-${String(Math.random()).slice(2, 6)}`,
-        10,
-        120
-      )
-      if (measured) {
-        await getContainer()
-          .resolve(Modules.PRODUCT)
-          .updateProductVariants(id, { weight: 450, length: 35, width: 8, height: 4 })
-      }
-      return id
-    }
-    const order = (variant = variantId) =>
-      placeOrder(getContainer(), {
-        regionId: shop.regionId,
-        salesChannelId: shop.salesChannelId,
-        shippingOptionId: optionId,
-        items: [{ variant_id: variant, quantity: 1 }],
-        address: PAYTR_ADDRESS,
-      })
-    const ship = (orderId: string) =>
-      settle(
-        http.post<{ order_id: string; carrier: string | null; message?: string }>(
-          `/admin/orders/${orderId}/ship`,
-          { notify: false },
-          { headers: admin.headers }
-        )
-      )
+    const product = (measured = true) => geliverProduct(getContainer(), shop, measured)
+    const order = (variant = variantId) => geliverOrder(getContainer(), setup, variant)
+    const ship = (orderId: string) => shipOrder(http, setup, orderId)
     const fulfillmentsOf = async (orderId: string) => {
       const { data } = await getContainer()
         .resolve(ContainerRegistrationKeys.QUERY)
@@ -102,44 +67,9 @@ medusaIntegrationTestRunner({
     beforeEach(async () => {
       const container = getContainer()
       await loadTrAddressFixture(container)
-      shop = await stockShop(container)
       storefront = await createStorefront(container)
-      admin = await createAdminUser(http, container)
-      await http.post(
-        "/admin/integrations/credentials/geliver",
-        { settings: { test_mode: true }, secrets: { api_token: fake.token } },
-        { headers: admin.headers }
-      )
-      await http.post(
-        "/admin/platform-settings/store",
-        { contact_email: "magaza@example.com" },
-        { headers: admin.headers }
-      )
-      await ensureLocationCarriers(container)
-      const { data: options } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
-        entity: "shipping_option",
-        fields: ["service_zone_id"],
-        filters: { id: shop.shippingOptionId },
-      })
-      const { result } = await createShippingOptionsWorkflow(container).run({
-        input: [
-          {
-            name: "Geliver",
-            price_type: "calculated",
-            provider_id: "geliver_geliver",
-            service_zone_id: (options[0] as { service_zone_id: string }).service_zone_id,
-            shipping_profile_id: shop.shippingProfileId,
-            data: { id: "geliver-cheapest" },
-            type: { label: "Geliver", description: "Geliver", code: "geliver" },
-            rules: [
-              { attribute: "enabled_in_store", operator: "eq", value: "true" },
-              { attribute: "is_return", operator: "eq", value: "false" },
-            ],
-          },
-        ],
-      })
-      optionId = result[0]?.id ?? ""
-      variantId = await product()
+      setup = await geliverShop(http, container, fake)
+      ;({ shop, admin, optionId, variantId } = setup)
       fake.requests.length = 0
       fake.shipments.clear()
       fake.addresses.clear()

@@ -90,6 +90,8 @@ module.exports = defineConfig({
     { resolve: "./src/modules/payment-forms" },
     // F6.7 (adr/0030): cardholders' disputes of order payments
     { resolve: "./src/modules/chargebacks" },
+    // F7.5 (adr/0031): carriers' parcels and their statuses
+    { resolve: "./src/modules/shipment-tracking" },
     // F5 V5: refunds line by line, each made once
     { resolve: "./src/modules/order-refunds" },
     // F5 (adr/0026): the hosted-form providers; the system provider stays registered

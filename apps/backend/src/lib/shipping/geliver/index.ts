@@ -18,3 +18,4 @@ export {
   senderMarker,
 } from "./mappers"
 export type { AddressRow, OrderItemRow } from "./mappers"
+export { geliverStatusOf } from "./status"

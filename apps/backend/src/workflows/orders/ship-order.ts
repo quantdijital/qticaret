@@ -14,6 +14,7 @@ import { SHIP_ROUTE_MARK } from "../../lib/shipping/carriers"
 import { ensureGeliverSenderStep } from "../shipping/steps/geliver-sender"
 import { planCarrierStep } from "../shipping/steps/plan-carrier"
 import { storeShipmentLabelStep } from "../shipping/steps/store-label"
+import { trackShipmentStep } from "../shipping/steps/track"
 import { planShipmentStep } from "./steps/plan-shipment"
 
 export interface ShipOrderInput {
@@ -78,9 +79,12 @@ export const shipOrderWorkflow = createWorkflow("orders-ship-order", (input: Shi
     { carrier, packed },
     ({ carrier, packed }) => carrier.carrier === "geliver" && Boolean(packed?.id)
   ).then(() => {
-    storeShipmentLabelStep(
-      transform({ packed }, ({ packed }) => ({ fulfillment_id: packed?.id ?? "" }))
-    )
+    const fulfillment = transform({ input, packed }, ({ input, packed }) => ({
+      fulfillment_id: packed?.id ?? "",
+      order_id: input.order_id,
+    }))
+    storeShipmentLabelStep(fulfillment)
+    trackShipmentStep(fulfillment)
   })
 
   when("orders-ship-hand-over", { carrier }, ({ carrier }) => carrier.carrier !== "geliver").then(

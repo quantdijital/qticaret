@@ -11,7 +11,13 @@ import {
   AccountFooter,
   SecretField,
 } from "@/features/settings/components/account-form"
-import { geliverFormSchema, geliverFormValues, geliverSaveBody } from "@/features/settings/geliver"
+import { NotificationAddress } from "@/features/settings/components/notification-address"
+import {
+  geliverFormSchema,
+  geliverFormValues,
+  geliverSaveBody,
+  geliverWebhookUrl,
+} from "@/features/settings/geliver"
 import type { GeliverFormValues } from "@/features/settings/geliver"
 import { nothingStored } from "@/features/settings/payments"
 
@@ -20,7 +26,8 @@ const G = `${S}.geliver`
 
 /**
  * Settings > Shipping > Geliver (F7, adr/0031), in the order the shop sets
- * it up: the API token, then test shipments until going live. One token
+ * it up: the API token, the tracking notification address, then test
+ * shipments until going live. One token
  * serves both: Geliver marks a test shipment on the shipment itself, so
  * switching asks for nothing again. Geliver checks the token before
  * anything is saved.
@@ -66,6 +73,17 @@ export function GeliverSettings({
             registration={form.register("api_token")}
           />
         </fieldset>
+      </FormSection>
+      <FormSection
+        title={t(`${G}.notification.title`)}
+        description={t(`${G}.notification.description`)}
+      >
+        <NotificationAddress
+          id="geliver-webhook-url"
+          url={geliverWebhookUrl(window.location.origin)}
+          label={t(`${G}.notification.title`)}
+          hint={t(`${G}.notification.where`)}
+        />
       </FormSection>
       <FormSection title={t(`${G}.live.title`)} description={t(`${G}.live.description`)}>
         <fieldset disabled={locked} className="flex min-w-0 items-start justify-between gap-4">

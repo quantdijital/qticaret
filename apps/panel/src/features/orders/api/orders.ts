@@ -112,6 +112,8 @@ const DETAIL_FIELDS = [
   "fulfillments.shipped_at",
   "fulfillments.delivered_at",
   "fulfillments.canceled_at",
+  "fulfillments.labels.tracking_number",
+  "fulfillments.labels.tracking_url",
 ].join(",")
 
 export const orderQuery = (id: string) =>

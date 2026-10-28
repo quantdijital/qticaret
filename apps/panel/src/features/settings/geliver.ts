@@ -30,3 +30,6 @@ export const geliverSaveBody = (values: GeliverFormValues): AccountSave => ({
   settings: { test_mode: values.test_mode },
   ...typedSecrets({ ...values }, GELIVER_SECRETS),
 })
+
+/** Where Geliver posts tracking updates (`TRACK_UPDATED`), set in Geliver's panel. */
+export const geliverWebhookUrl = (origin: string): string => `${origin}/hooks/geliver`

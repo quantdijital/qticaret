@@ -14,12 +14,31 @@ const STEPS: { key: "placed" | "paid" | "shipped" | "delivered"; icon: LucideIco
   { key: "delivered", icon: PackageCheck },
 ]
 
+// Asked for in the order's fields; the SDK's fulfillment type does not name them
+interface Labelled {
+  labels?: { tracking_number: string; tracking_url: string }[] | null
+}
+
+/** The carriers' tracking numbers of the order's live parcels, each with its page when given. */
+function trackingOf(order: OrderDetail): { number: string; url: string | null }[] {
+  return (order.fulfillments ?? [])
+    .filter((fulfillment) => !fulfillment.canceled_at)
+    .flatMap((fulfillment) => (fulfillment as Labelled).labels ?? [])
+    .filter((label) => label.tracking_number)
+    .map((label) => ({
+      number: label.tracking_number,
+      // Only a web page: a label's address is the carrier's, never a script
+      url: /^https?:\/\//.test(label.tracking_url) ? label.tracking_url : null,
+    }))
+}
+
 /** The order's way from checkout to the door, each step with when it happened. */
 export function ProgressCard({ order, stage }: { order: OrderDetail; stage: Lifecycle }) {
   const { t } = useTranslation()
   const when = milestones(order, stage)
   const canceled = stage === "canceled"
   const reached = STEPS.filter((step) => when[step.key]).length
+  const tracking = trackingOf(order)
 
   return (
     <section className="rounded-lg border bg-card px-5 py-5 shadow-card">
@@ -75,6 +94,28 @@ export function ProgressCard({ order, stage }: { order: OrderDetail; stage: Life
           )
         })}
       </ol>
+      {tracking.length > 0 ? (
+        <p className="mt-5 flex flex-wrap gap-x-4 gap-y-1 border-t pt-4 text-sm">
+          <span className="text-muted-foreground">{t("orders.progress.tracking")}</span>
+          {tracking.map((each) =>
+            each.url ? (
+              <a
+                key={each.number}
+                href={each.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium tabular-nums underline-offset-4 hover:underline"
+              >
+                {each.number}
+              </a>
+            ) : (
+              <span key={each.number} className="font-medium tabular-nums">
+                {each.number}
+              </span>
+            )
+          )}
+        </p>
+      ) : null}
     </section>
   )
 }

@@ -724,6 +724,11 @@
           "description": "Create a token on the API tokens page of your Geliver panel (app.geliver.io/apitokens) and copy it. It is stored encrypted and never shown again once saved."
         },
         "apiToken": "API token",
+        "notification": {
+          "title": "Tracking notifications",
+          "description": "Geliver reports shipment status changes to this address; the order updates by itself when it ships and when it is delivered. Without notifications, shipments are still checked every half hour.",
+          "where": "Paste it into the Geliver panel's webhook settings for the TRACK_UPDATED event."
+        },
         "live": {
           "title": "Test shipments and going live",
           "description": "Try the shipping flow with Geliver's test shipments before you open your shop."
@@ -1301,7 +1306,8 @@
       "paid": "Payment received",
       "shipped": "Shipped",
       "delivered": "Delivered",
-      "next": "Next step"
+      "next": "Next step",
+      "tracking": "Tracking number"
     },
     "payment": {
       "notPaid": "Not paid",

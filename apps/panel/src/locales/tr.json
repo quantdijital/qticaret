@@ -724,6 +724,11 @@
           "description": "Geliver panelinizde API anahtarları sayfasından (app.geliver.io/apitokens) yeni bir anahtar oluşturup kopyalayın. Şifreli saklanır; kaydedildikten sonra hiçbir yerde gösterilmez."
         },
         "apiToken": "API anahtarı",
+        "notification": {
+          "title": "Takip bildirimleri",
+          "description": "Geliver gönderi durum değişikliklerini bu adrese bildirir; sipariş kargoya verildiğinde ve teslim edildiğinde kendiliğinden güncellenir. Bildirim gelmese de gönderiler yarım saatte bir sorgulanır.",
+          "where": "Geliver panelinin webhook ayarlarına TRACK_UPDATED olayı için yapıştırın."
+        },
         "live": {
           "title": "Test gönderileri ve canlıya geçiş",
           "description": "Mağazanızı açmadan önce gönderi akışını Geliver'in test gönderileriyle deneyin."
@@ -1309,7 +1314,8 @@
       "paid": "Ödeme alındı",
       "shipped": "Kargoya verildi",
       "delivered": "Teslim edildi",
-      "next": "Sıradaki adım"
+      "next": "Sıradaki adım",
+      "tracking": "Takip numarası"
     },
     "payment": {
       "notPaid": "Ödenmedi",

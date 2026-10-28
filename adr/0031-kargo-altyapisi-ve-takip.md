@@ -49,8 +49,9 @@ Geliver'in resmi SDK'sından okunanlar (`GeliverApp/geliver-js`):
    - `shipment-tracking` modülü gönderinin iç durumunu ve olay geçmişini tutar.
    - İç durumlar: `created`, `picked_up`, `in_transit`, `out_for_delivery`, `delivered`, `returned`, `failed`, `canceled`.
    - **Bildirime güvenilmez, ipucu sayılır:**
-     - Bildirim adresi mağazaya özel, tahmin edilemez bir anahtar taşır (`/hooks/geliver/:token`).
-     - Gövdedeki gönderi kimliği yalnızca o gönderiyi Geliver API'sinden yeniden okumak için kullanılır. Durum her zaman API'nin yanıtından yazılır.
+     - Adres `POST /hooks/geliver`; sır taşımaz. Medusa'nın istek günlüğü yolu ve sorgu dizesini olduğu gibi yazar, adresteki bir anahtar günlüğe düşerdi.
+     - Gövdedeki gönderi kimliği yalnızca izlediğimiz bir gönderiyi Geliver API'sinden yeniden okumak için kullanılır. Durum her zaman API'nin yanıtından yazılır.
+     - Bildirimle bir gönderi en çok dakikada bir yeniden okunur; uç webhook hız sınırının içindedir. Kötüye kullanım en fazla API okuması üretir, durum yazamaz.
    - Bildirim gelmeyen açık gönderileri zamanlanmış iş aynı yoldan sorar.
    - Bir durum geçişi gönderi başına tek kez uygulanır: tekil indeks ve kilit, ileri doğru geçiş. Bildirim ve sorgu aynı güncellemeyi iki kez uygulamaz (KK).
    - `picked_up` Medusa'nın gönderi kaydını (`createOrderShipmentWorkflow`), `delivered` teslim kaydını (`markOrderFulfillmentAsDeliveredWorkflow`) tetikler.
@@ -64,7 +65,8 @@ Geliver'in resmi SDK'sından okunanlar (`GeliverApp/geliver-js`):
 
 | Seçenek | Artı | Eksi |
 |---|---|---|
-| **Bildirim ipucu + API'den yeniden okuma (seçilen)** | İmza olmadan da sahte durum yazılamaz | Her bildirim bir API çağrısı |
+| **Bildirim ipucu + API'den yeniden okuma (seçilen)** | İmza olmadan da sahte durum yazılamaz | Her bildirim bir API çağrısı (gönderi başına dakikada en çok bir) |
+| Adreste gizli anahtar | Yabancı istekleri baştan eler | Medusa'nın istek günlüğüne düşer; yeniden okuma zaten yeterli |
 | Bildirim gövdesini doğrudan yazmak | Hızlı | İmza yok: adresi bilen herkes "teslim edildi" yazar |
 | Yalnızca sorgu (bildirim yok) | En basit | Gecikme; çok gönderide gereksiz yük |
 | Geliver SDK'sı | Hazır tipler | 4xx'i de tekrar deniyor, redaksiyon yok, yeni bağımlılık |

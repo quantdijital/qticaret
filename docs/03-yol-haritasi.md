@@ -282,10 +282,10 @@ Detay: `docs/entegrasyonlar/geliver.md`
 - F7.14 **Doğrudan taşıyıcı adaptörü:** ilk müşterinin anlaşmalı kargo firması (Yurtiçi/Aras/MNG/PTT/Sürat'ten biri) için aynı fulfillment arayüzüyle doğrudan entegrasyon; Geliver aracılığından bağımsızlık
 
 **KK:**
-- [ ] Test ortamında sipariş → etiket → takip ilerlemesi → "teslim edildi" akışı çalışıyor
-- [ ] Ölçüsü eksik ürünle kargo hesabı açıklayıcı hata veriyor
+- [x] Test ortamında sipariş → etiket → takip ilerlemesi → "teslim edildi" akışı çalışıyor (`geliver-tracking`: sahte Geliver'in test gönderisi her okumada ilerliyor; taşıyıcı alınca Medusa gönderisi, teslimde Medusa teslimi; gerçek hesapla deneme sunucuya çıkışta)
+- [x] Ölçüsü eksik ürünle kargo hesabı açıklayıcı hata veriyor (`geliver-shipping`: `shipping.dimensions_missing`)
 - [ ] İade talebinden para iadesi + stok + iade faturasına kadar akış çalışıyor
-- [ ] Webhook ve polling aynı güncellemeyi iki kez uygulamıyor
+- [x] Webhook ve polling aynı güncellemeyi iki kez uygulamıyor (`geliver-tracking`: aynı anda gelen bildirim ve sorgu tek olay, tek Medusa gönderisi)
 - [ ] Değişim akışı: fark tutarı doğru hesaplanıyor, stok iki yönde doğru (testli)
 - [ ] Kargoya verilmiş sipariş müşteri tarafından iptal edilemiyor; verilmemiş olan iptal edilip iade ediliyor (testli)
 - [ ] Doğrudan taşıyıcı adaptörü contract test paketini geçiyor; etiket PDF'i yetkisiz URL ile açılamıyor

@@ -42,6 +42,8 @@ const CANCELLABLE = new Set([
 
 export function createShipments(labelBase: () => string) {
   const shipments = new Map<string, FakeShipment>()
+  // Shipments whose reads do not move them on (a test pins one where it stands)
+  const held = new Set<string>()
 
   const view = (shipment: FakeShipment) => {
     const accepted = shipment.offers.find((offer) => offer["id"] === shipment.acceptedOfferID)
@@ -129,7 +131,7 @@ export function createShipments(labelBase: () => string) {
     }
     if (!shipment.offersRead) {
       shipment.offersRead = true
-    } else if (shipment.test) {
+    } else if (shipment.test && !held.has(shipment.id)) {
       advance(shipment)
     }
     return ok(view(shipment))
@@ -177,6 +179,7 @@ export function createShipments(labelBase: () => string) {
 
   return {
     shipments,
+    held,
     advance,
     view,
     label,
