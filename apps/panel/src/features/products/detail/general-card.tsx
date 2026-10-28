@@ -86,7 +86,7 @@ export function GeneralCard({
         hint={t("products.detail.handleHint")}
         error={message(errors.handle?.message)}
       >
-        <div className="flex items-center rounded-md border bg-background focus-within:ring-2 focus-within:ring-ring/40">
+        <div className="flex items-center rounded-md border bg-background">
           <span className="border-r px-3 font-mono text-[13px] text-muted-foreground">
             {prefix}
           </span>

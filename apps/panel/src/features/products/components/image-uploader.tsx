@@ -37,7 +37,7 @@ function DropZone({ onFiles, busy }: { onFiles: (files: File[]) => void; busy: b
       }}
       onDrop={drop}
       className={cn(
-        "flex cursor-pointer flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed px-6 py-10 text-center transition-colors focus-within:ring-2 focus-within:ring-ring/40",
+        "flex cursor-pointer flex-col items-center justify-center gap-3 rounded-lg border-2 border-dashed px-6 py-10 text-center transition-colors has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-solid has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ring",
         over ? "border-primary bg-accent" : "border-border hover:border-input hover:bg-muted/50"
       )}
     >

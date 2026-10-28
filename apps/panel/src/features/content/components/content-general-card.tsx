@@ -62,14 +62,14 @@ export function ContentGeneralCard({ entry }: { entry: ContentDetail }) {
         htmlFor="content-handle"
         hint={t("content.handleHint")}
       >
-        <div className="flex items-center rounded-md border focus-within:ring-2 focus-within:ring-ring/50">
+        <div className="flex items-center rounded-md border">
           <span className="pl-3 font-mono text-[13px] text-muted-foreground">
             {pathPrefix(entry.kind)}
           </span>
           <Input
             id="content-handle"
             spellCheck={false}
-            className="border-0 pl-0 font-mono text-[13px] shadow-none focus-visible:ring-0"
+            className="border-0 pl-0 font-mono text-[13px] shadow-none"
             {...form.register("handle")}
           />
         </div>

@@ -96,7 +96,7 @@ Tek kaynak: `apps/panel/src/theme/tokens.css`. Üç katman; bileşenler yalnızc
 | `--dialog-width-sm/md/lg` | 420 / 560 / 760 px | sabit |
 | `--overlay` | nötr-900 %40 | sabit |
 | `--shadow-overlay` | tek gölge | sabit |
-| `--focus-ring` | marka, 2 px, 2 px ofset | sabit |
+| `--focus-ring` | marka, 2 px, 2 px ofset | sabit. Yalnızca klavyeyle (Tab) gezerken düğme benzeri kontrollerde görünür; yazı alanlarında halka ya da renkli kenarlık yok, fare/dokunmada hiç yok (`lib/input-mode.ts`, kullanıcı kararı 2026-10-28) |
 
 Bir bileşenin boyutu, çizgisi ya da köşesi sabit kodlanmaz; token'dan okunur. Yeni bir değer gerekiyorsa önce token eklenir.
 
@@ -193,7 +193,7 @@ Kurallar:
 ## 8. Erişilebilirlik ve performans
 
 - Kontrast AA; tema motoru garanti eder, axe testi doğrular: `e2e/a11y.e2e.ts` her ekranı açık ve koyu modda denetler (kayıtlı mod ne olursa olsun; CI'ın yeni mağazası açık, geliştiricininki koyu olabilir).
-- Her etkileşimli öğe klavyeyle; odak halkası token'dan; diyaloglar ESC ile kapanır, odak tuzağı.
+- Her etkileşimli öğe klavyeyle; odak çizgisi token'dan ve yalnızca klavye modunda; diyaloglar ESC ile kapanır, odak tuzağı.
 - `aria-live` ile sonuç bildirimi; tablo başlıkları `scope`.
 - İlk yükleme: kod bölme route başına; grafik kütüphanesi yalnızca dashboard'da yüklenir.
 - Her üç durum: iskelet, boş, hata (docs/06).

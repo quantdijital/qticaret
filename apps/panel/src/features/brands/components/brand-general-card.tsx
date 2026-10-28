@@ -59,12 +59,12 @@ export function BrandGeneralCard({ brand }: { brand: Brand }) {
         <Input id="brand-name" maxLength={120} {...form.register("name")} />
       </Field>
       <Field label={t("brands.handle")} htmlFor="brand-handle" hint={t("brands.handleHint")}>
-        <div className="flex items-center rounded-md border focus-within:ring-2 focus-within:ring-ring/50">
+        <div className="flex items-center rounded-md border">
           <span className="pl-3 font-mono text-[13px] text-muted-foreground">{prefix}</span>
           <Input
             id="brand-handle"
             spellCheck={false}
-            className="border-0 pl-0 font-mono text-[13px] shadow-none focus-visible:ring-0"
+            className="border-0 pl-0 font-mono text-[13px] shadow-none"
             {...form.register("handle")}
           />
         </div>

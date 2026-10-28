@@ -74,14 +74,14 @@ export function LandingGeneralCard({ landing }: { landing: LandingDetail }) {
         htmlFor="landing-handle"
         hint={t("content.handleHint")}
       >
-        <div className="flex items-center rounded-md border focus-within:ring-2 focus-within:ring-ring/50">
+        <div className="flex items-center rounded-md border">
           <span className="max-w-[60%] shrink-0 truncate pl-3 font-mono text-[13px] text-muted-foreground">
             {prefixOf(landing)}
           </span>
           <Input
             id="landing-handle"
             spellCheck={false}
-            className="min-w-0 flex-1 border-0 pl-0 font-mono text-[13px] shadow-none focus-visible:ring-0"
+            className="min-w-0 flex-1 border-0 pl-0 font-mono text-[13px] shadow-none"
             {...form.register("handle")}
           />
         </div>

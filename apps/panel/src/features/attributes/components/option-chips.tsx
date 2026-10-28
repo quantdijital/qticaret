@@ -30,7 +30,7 @@ export function OptionChips({
     setText("")
   }
   return (
-    <div className="flex min-h-9 flex-wrap items-center gap-1.5 rounded-md border bg-background px-2 py-1.5 focus-within:ring-2 focus-within:ring-ring/40">
+    <div className="flex min-h-9 flex-wrap items-center gap-1.5 rounded-md border bg-background px-2 py-1.5">
       {value.map((option) => (
         <span
           key={option.value}

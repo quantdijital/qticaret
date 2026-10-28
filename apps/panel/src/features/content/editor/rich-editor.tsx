@@ -71,7 +71,7 @@ export function RichEditor({
   }, [editor, value])
 
   return (
-    <div className="rounded-md border focus-within:ring-2 focus-within:ring-ring/50">
+    <div className="rounded-md border">
       <Toolbar
         editor={editor}
         onLink={() => {

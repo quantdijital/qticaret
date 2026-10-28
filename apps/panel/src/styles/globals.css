@@ -158,3 +158,13 @@
     }
   }
 }
+
+/*
+ * Focus (docs/18): fields show no ring or coloured border; controls show a
+ * thin outline to a keyboard user only. Once the mouse or a finger is used,
+ * no outline at all, even where a menu hands focus back to its button
+ * (`lib/input-mode.ts`). Outside the layers, so it wins over utilities.
+ */
+html[data-input="pointer"] :focus-visible {
+  outline: none;
+}
