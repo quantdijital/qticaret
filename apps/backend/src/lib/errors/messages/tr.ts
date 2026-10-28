@@ -262,6 +262,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "returns.carrier_refused": "Kargo firması iade gönderisini açmadı; birazdan tekrar deneyin.",
   "returns.refund_failed":
     'Ürünler teslim alındı ama para iadesi yapılamadı; "Para iadesini tekrar dene" ile yineleyin.',
+  "shipping.carrier_unknown": "Bu gönderinin kargo firması tanınmıyor; takip edilemiyor.",
   "shipping.carrier_not_connected":
     "Kargo hizmeti bağlı değil. Ayarlar > Kargo'dan hesabı bağlayın.",
   "shipping.dimensions_missing":

@@ -63,6 +63,11 @@ export interface HttpRequest<T> {
   json?: unknown
   /** Form fields, sent URL-encoded; instead of `json`. */
   form?: FormValues
+  /**
+   * An XML document (a SOAP envelope), instead of `json`: its answer is
+   * handed to `schema` as text, for the caller to read (adr/0035).
+   */
+  xml?: string
   /** Marks a POST or PATCH as safe to repeat (it carries an idempotency key). */
   idempotent?: boolean
   /** Logged instead of the path when it holds secrets or identifiers (`/services/:token`). */
@@ -95,6 +100,8 @@ interface Prepared {
   method: string
   headers: Record<string, string>
   body: string | undefined
+  /** The answer is text for the caller to read (XML), not JSON. */
+  text: boolean
   repeatable: boolean
   fields: LogFields
 }
@@ -137,10 +144,10 @@ export function createHttpClient(options: HttpClientOptions): HttpClient {
     const url = buildUrl(baseUrl, request.path, request.query)
     const requestId = currentRequestId()
     const headers = mergeHeaders(
-      { accept: "application/json" },
+      { accept: request.xml === undefined ? "application/json" : "text/xml" },
       options.defaultHeaders,
       request.headers,
-      contentTypeHeader(request.json, request.form),
+      contentTypeHeader(request.json, request.form, request.xml),
       requestId === undefined ? undefined : { "x-request-id": requestId }
     )
     const path = options.hidePaths ? "[hidden]" : (request.logPath ?? url.pathname)
@@ -148,7 +155,8 @@ export function createHttpClient(options: HttpClientOptions): HttpClient {
       url,
       method,
       headers,
-      body: serializeBody(method, request.json, request.form),
+      body: serializeBody(method, request.json, request.form, request.xml),
+      text: request.xml !== undefined,
       repeatable: request.idempotent ?? IDEMPOTENT_METHODS.has(method),
       fields: { event: "http_client.request", provider, method, path },
     }
@@ -202,7 +210,7 @@ export function createHttpClient(options: HttpClientOptions): HttpClient {
       breaker.recordSuccess()
     }
     if (status >= 200 && status < 300) {
-      return { value: parse(response, schema) }
+      return { value: parse(response, schema, prepared.text) }
     }
     const retryable =
       status === 429 || (prepared.repeatable && (status === 503 || GATEWAY_STATUSES.has(status)))
@@ -218,8 +226,8 @@ export function createHttpClient(options: HttpClientOptions): HttpClient {
     }
   }
 
-  function parse<T>(response: TransportResponse, schema: z.ZodType<T>): T {
-    const body = parseJsonBody(response.text)
+  function parse<T>(response: TransportResponse, schema: z.ZodType<T>, text: boolean): T {
+    const body = text ? { value: response.text } : parseJsonBody(response.text)
     // No cause for invalid JSON: V8's SyntaxError quotes the body
     if (body === "invalid") {
       throw failure("invalid_response", false)

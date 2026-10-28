@@ -35,11 +35,11 @@ export interface ShipOrderInput {
  * shipment undoes the packing and the order is never left half done. A
  * lock per order keeps two clicks from packing twice.
  *
- * With Geliver (adr/0031) packing opens the shipment at Geliver from the
- * warehouse's sender address, buys its label and keeps the PDF privately;
- * the order is handed over when the carrier picks the parcel up (its
- * tracking), not here: such a parcel is not offered for shipping again
- * (`orderState().pickup`).
+ * With a carrier (Geliver from the warehouse's sender address, adr/0031;
+ * the shop's own contract, adr/0035) packing opens the shipment there,
+ * gets its label and keeps it privately; the order is handed over when
+ * the carrier picks the parcel up (its tracking), not here: such a parcel
+ * is not offered for shipping again (`orderState().pickup`).
  */
 export const shipOrderWorkflow = createWorkflow("orders-ship-order", (input: ShipOrderInput) => {
   const lockKey = transform({ input }, ({ input }) => shipLockKey(input.order_id))
@@ -70,12 +70,12 @@ export const shipOrderWorkflow = createWorkflow("orders-ship-order", (input: Shi
         no_notification: !input.notify,
         ...(input.created_by ? { created_by: input.created_by } : {}),
         ...(carrier.location_id ? { location_id: carrier.location_id } : {}),
-        // Our route's mark: the carrier provider opens no shipment without it
-        ...(sender
+        // Our route's mark: a carrier provider opens no shipment without it
+        ...(carrier.carrier
           ? {
               additional_data: {
                 [SHIP_ROUTE_MARK]: {
-                  sender_address_id: sender.sender_address_id,
+                  sender_address_id: sender?.sender_address_id ?? null,
                   cash_on_delivery: carrier.cash_on_delivery,
                 },
               },
@@ -86,9 +86,9 @@ export const shipOrderWorkflow = createWorkflow("orders-ship-order", (input: Shi
   )
 
   when(
-    "shipping-geliver-label",
+    "shipping-carrier-label",
     { carrier, packed },
-    ({ carrier, packed }) => carrier.carrier === "geliver" && Boolean(packed?.id)
+    ({ carrier, packed }) => carrier.carrier !== null && Boolean(packed?.id)
   ).then(() => {
     const fulfillment = transform({ input, packed }, ({ input, packed }) => ({
       fulfillment_id: packed?.id ?? "",
@@ -99,18 +99,16 @@ export const shipOrderWorkflow = createWorkflow("orders-ship-order", (input: Shi
     trackShipmentStep(fulfillment)
   })
 
-  when("orders-ship-hand-over", { carrier }, ({ carrier }) => carrier.carrier !== "geliver").then(
-    () => {
-      const shipment = transform({ input, plan, packed }, ({ input, plan, packed }) => ({
-        order_id: input.order_id,
-        fulfillment_id: plan.fulfillment_id ?? packed?.id ?? "",
-        items: plan.items,
-        no_notification: !input.notify,
-        ...(input.created_by ? { created_by: input.created_by } : {}),
-      }))
-      createOrderShipmentWorkflow.runAsStep({ input: shipment })
-    }
-  )
+  when("orders-ship-hand-over", { carrier }, ({ carrier }) => carrier.carrier === null).then(() => {
+    const shipment = transform({ input, plan, packed }, ({ input, plan, packed }) => ({
+      order_id: input.order_id,
+      fulfillment_id: plan.fulfillment_id ?? packed?.id ?? "",
+      items: plan.items,
+      no_notification: !input.notify,
+      ...(input.created_by ? { created_by: input.created_by } : {}),
+    }))
+    createOrderShipmentWorkflow.runAsStep({ input: shipment })
+  })
 
   releaseLockStep({ key: lockKey })
   return new WorkflowResponse(

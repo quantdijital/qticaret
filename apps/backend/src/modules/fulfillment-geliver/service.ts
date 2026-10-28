@@ -118,7 +118,8 @@ class GeliverFulfillmentService extends AbstractFulfillmentProviderService {
     additionalData?: Record<string, unknown>
   ): Promise<CreateFulfillmentResult> {
     const ship = shipInputOf(additionalData)
-    if (!ship) {
+    // Geliver ships from the warehouse's sender address our route found for it
+    if (!ship?.sender_address_id) {
       throw new ValidationError("shipping.use_ship_route")
     }
     const credentials = await storedGeliverAccount()

@@ -74,8 +74,12 @@ export type FormValues = Readonly<Record<string, string>>
 /** The content type of the body `serializeBody` builds from the same arguments. */
 export function contentTypeHeader(
   json: unknown,
-  form?: FormValues
+  form?: FormValues,
+  xml?: string
 ): Record<string, string> | undefined {
+  if (xml !== undefined) {
+    return { "content-type": "text/xml; charset=utf-8" }
+  }
   if (form !== undefined) {
     return { "content-type": "application/x-www-form-urlencoded" }
   }
@@ -83,20 +87,28 @@ export function contentTypeHeader(
 }
 
 /**
- * The request body: JSON, or form fields encoded as
- * `application/x-www-form-urlencoded` (PayTR's APIs take forms). One or
- * the other, never both.
+ * The request body: JSON, form fields encoded as
+ * `application/x-www-form-urlencoded` (PayTR's APIs take forms), or an
+ * XML document as written (SOAP carriers, adr/0035). One of them, never
+ * two.
  */
 export function serializeBody(
   method: string,
   json: unknown,
-  form?: FormValues
+  form?: FormValues,
+  xml?: string
 ): string | undefined {
-  if (json === undefined && form === undefined) {
+  if (json === undefined && form === undefined && xml === undefined) {
     return undefined
   }
   if (method === "GET" || method === "HEAD") {
     throw new HttpClientMisuse(`http client: ${method} cannot carry a body`)
+  }
+  if (xml !== undefined) {
+    if (json !== undefined || form !== undefined) {
+      throw new HttpClientMisuse("http client: a request has one body, not two")
+    }
+    return xml
   }
   if (form !== undefined) {
     if (json !== undefined) {

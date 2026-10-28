@@ -1,14 +1,13 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, MedusaError, Modules } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
-import { geliverApi, geliverCredentialsOf, geliverStatusOf } from "../../../lib/shipping/geliver"
-import { INTEGRATION_CREDENTIALS_MODULE } from "../../../modules/integration-credentials"
-import type IntegrationCredentialsModuleService from "../../../modules/integration-credentials/service"
+import { carrierOf } from "../../../lib/shipping/carriers"
 import { SHIPMENT_TRACKING_MODULE } from "../../../modules/shipment-tracking"
 import type ShipmentTrackingModuleService from "../../../modules/shipment-tracking/service"
 import { movesOn, withCarrier } from "../../../modules/shipment-tracking/states"
 import type { ShipmentStatus } from "../../../modules/shipment-tracking/states"
-import { ValidationError } from "../../../lib/errors"
+import { carrierReader } from "../carrier-status"
+import type { CarrierReading } from "../carrier-status"
 
 const tracking = (container: Pick<MedusaContainer, "resolve">) =>
   container.resolve<ShipmentTrackingModuleService>(SHIPMENT_TRACKING_MODULE)
@@ -22,13 +21,14 @@ export const trackShipmentStep = createStep(
       .retrieveFulfillment(input.fulfillment_id)
     const data: Record<string, unknown> = fulfillment.data ?? {}
     const shipmentId = data["shipment_id"]
-    if (typeof shipmentId !== "string") {
+    const provider = carrierOf(fulfillment.provider_id)
+    if (typeof shipmentId !== "string" || !provider) {
       return new StepResponse(null, null)
     }
     const tracked = await tracking(container).createTrackedShipments({
       fulfillment_id: input.fulfillment_id,
       order_id: input.order_id,
-      provider: "geliver",
+      provider,
       provider_shipment_id: shipmentId,
       test: data["test"] === true,
     })
@@ -43,6 +43,8 @@ export const trackShipmentStep = createStep(
 
 export interface TrackedFacts {
   id: string
+  /** The carrier asked about it (`tracked_shipment.provider`). */
+  provider: string
   order_id: string
   fulfillment_id: string
   provider_shipment_id: string
@@ -88,6 +90,7 @@ export const readTrackedShipmentStep = createStep(
       | undefined
     return new StepResponse<TrackedFacts>({
       id: tracked.id,
+      provider: tracked.provider,
       order_id: tracked.order_id,
       fulfillment_id: tracked.fulfillment_id,
       provider_shipment_id: tracked.provider_shipment_id,
@@ -106,17 +109,13 @@ export const readTrackedShipmentStep = createStep(
   }
 )
 
-export interface CarrierReading {
-  status: ShipmentStatus
-  provider_status: string | null
-  tracking_number: string | null
-  tracking_url: string | null
-}
+export type { CarrierReading }
 
 /**
- * Asks the carrier where the parcel is (adr/0031: what Geliver's API says,
- * never a notification's body). A parcel whose fulfillment was cancelled
- * is not asked about: it ends as cancelled. Reads only.
+ * Asks the carrier where the parcel is (adr/0031: what its API says, never
+ * a notification's body; adr/0035: each carrier through its reader). A
+ * parcel whose fulfillment was cancelled is not asked about: it ends as
+ * cancelled. Reads only.
  */
 export const readCarrierStatusStep = createStep(
   "shipping-read-carrier-status",
@@ -129,20 +128,9 @@ export const readCarrierStatusStep = createStep(
         tracking_url: null,
       })
     }
-    const account = geliverCredentialsOf(
-      await container
-        .resolve<IntegrationCredentialsModuleService>(INTEGRATION_CREDENTIALS_MODULE)
-        .read("geliver")
+    return new StepResponse<CarrierReading>(
+      await carrierReader(tracked.provider)(container, tracked.provider_shipment_id)
     )
-    if (!account) {
-      throw new ValidationError("shipping.carrier_not_connected")
-    }
-    const shipment = await geliverApi().shipment(account, tracked.provider_shipment_id)
-    return new StepResponse<CarrierReading>({
-      ...geliverStatusOf(shipment),
-      tracking_number: shipment.trackingNumber ?? null,
-      tracking_url: shipment.trackingUrl ?? null,
-    })
   }
 )
 

@@ -20,7 +20,8 @@ export const useLabelLink = (orderId: string) =>
 export interface ShipResult {
   order_id: string
   ok: boolean
-  carrier: "geliver" | null
+  /** The carrier asked for the label: Geliver or the shop's own contract (adr/0035). */
+  carrier: "geliver" | "aras" | "yurtici" | null
   /** A carrier's parcel waiting for its pickup: its label to print. */
   fulfillment_id: string | null
   /** Why it was not shipped: its key, and the sentence to show. */

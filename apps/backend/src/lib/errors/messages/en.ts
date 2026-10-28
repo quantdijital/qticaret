@@ -255,6 +255,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "returns.carrier_refused": "The carrier did not open the return; try again shortly.",
   "returns.refund_failed":
     'The items were received but the refund failed; use "Try the refund again".',
+  "shipping.carrier_unknown": "This parcel's carrier is not known; it cannot be tracked.",
   "shipping.carrier_not_connected":
     "The shipping service is not connected. Connect the account under Settings > Shipping.",
   "shipping.dimensions_missing":

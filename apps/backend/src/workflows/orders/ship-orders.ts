@@ -2,12 +2,13 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { I18N_KEY } from "../../lib/errors/http"
 import { serverErrorMessage } from "../../lib/errors/messages"
 import { errorSummary, logger } from "../../lib/logging"
+import type { CarrierName } from "../../lib/shipping/carriers"
 import { shipOrderWorkflow } from "./ship-order"
 
 export interface ShipResult {
   order_id: string
   ok: boolean
-  carrier: "geliver" | null
+  carrier: CarrierName | null
   /** A carrier's parcel waiting for its pickup: its label to print. */
   fulfillment_id: string | null
   /** Why it was not shipped: the error's i18n key, and its sentence for the panel. */

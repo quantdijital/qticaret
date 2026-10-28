@@ -20,12 +20,38 @@ export const forgetLabelSourceStep = createStep(
   (input: { fulfillment_id: string }) => new StepResponse(null, input.fulfillment_id),
   async (fulfillmentId, { container }) => {
     if (fulfillmentId) {
-      await container
-        .resolve(Modules.FULFILLMENT)
-        .updateFulfillment(fulfillmentId, { data: { label_source: null } })
+      await container.resolve(Modules.FULFILLMENT).updateFulfillment(fulfillmentId, {
+        data: { label_source: null, label_base64: null, label_type: null },
+      })
     }
   }
 )
+
+// What a carrier hands over as its label: a PDF, or a page we drew (a contract carrier's barcode)
+const LABEL_TYPES: Readonly<Record<string, string>> = {
+  "application/pdf": "pdf",
+  "text/html": "html",
+}
+
+/**
+ * The parcel's label as its carrier left it on the fulfillment: an address
+ * to download it from (Geliver), or the label itself (adr/0035).
+ */
+async function labelOf(
+  data: Record<string, unknown>
+): Promise<{ bytes: Buffer; type: string; extension: string } | null> {
+  const source = data["label_source"]
+  if (typeof source === "string") {
+    return { bytes: await downloadLabel(source), type: "application/pdf", extension: "pdf" }
+  }
+  const base64 = data["label_base64"]
+  const type = typeof data["label_type"] === "string" ? data["label_type"] : ""
+  const extension = LABEL_TYPES[type]
+  if (typeof base64 !== "string" || !extension) {
+    return null
+  }
+  return { bytes: Buffer.from(base64, "base64"), type, extension }
+}
 
 export const storeShipmentLabelStep = createStep(
   "shipping-store-label",
@@ -33,22 +59,27 @@ export const storeShipmentLabelStep = createStep(
     const fulfillments = container.resolve(Modules.FULFILLMENT)
     const fulfillment = await fulfillments.retrieveFulfillment(input.fulfillment_id)
     const data: Record<string, unknown> = fulfillment.data ?? {}
-    const source = data["label_source"]
-    if (typeof source !== "string") {
+    const label = await labelOf(data)
+    if (!label) {
       return new StepResponse(null, null)
     }
-    const pdf = await downloadLabel(source)
     const upload = await container.resolve(Modules.FILE).getUploadStream({
       // Not guessable: a local or development store guards files by their name only
-      filename: `etiket-${randomUUID()}.pdf`,
-      mimeType: "application/pdf",
+      filename: `etiket-${randomUUID()}.${label.extension}`,
+      mimeType: label.type,
       access: "private",
     })
-    upload.writeStream.end(pdf)
+    upload.writeStream.end(label.bytes)
     await upload.promise
-    // Geliver's address for the label is dropped (Medusa merges `data`: set to null)
+    // The carrier's label leaves the fulfillment (Medusa merges `data`: set to null)
     await fulfillments.updateFulfillment(input.fulfillment_id, {
-      data: { ...data, label_source: null, label_file_id: upload.fileKey },
+      data: {
+        ...data,
+        label_source: null,
+        label_base64: null,
+        label_type: null,
+        label_file_id: upload.fileKey,
+      },
     })
     return new StepResponse(
       { label_file_id: upload.fileKey },
@@ -61,7 +92,13 @@ export const storeShipmentLabelStep = createStep(
     }
     await container.resolve(Modules.FILE).deleteFiles(stored.file)
     await container.resolve(Modules.FULFILLMENT).updateFulfillment(stored.fulfillment_id, {
-      data: { ...stored.data, label_source: null, label_file_id: null },
+      data: {
+        ...stored.data,
+        label_source: null,
+        label_base64: null,
+        label_type: null,
+        label_file_id: null,
+      },
     })
   }
 )

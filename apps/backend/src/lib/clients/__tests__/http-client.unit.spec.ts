@@ -1,3 +1,4 @@
+import { z } from "@medusajs/framework/zod"
 import { isProviderError } from "../../errors"
 import { runWithRequestContext } from "../../logging"
 import { TransportRefusal } from "../transport"
@@ -33,6 +34,23 @@ describe("createHttpClient", () => {
     expect(new URLSearchParams(provider.requests[0]?.body)).toEqual(
       new URLSearchParams({ merchant_oid: "SIP001", note: "a&b=ç" })
     )
+  })
+
+  it("sends an XML document as written and hands its answer back as text (SOAP carriers)", async () => {
+    provider.setHandler((_req, res) => {
+      res.writeHead(200, { "content-type": "text/xml" }).end("<ok>1</ok>")
+    })
+
+    const text = await client().http.request({
+      method: "POST",
+      path: "/service.asmx",
+      xml: "<Envelope/>",
+      schema: z.string(),
+    })
+
+    expect(text).toBe("<ok>1</ok>")
+    expect(provider.requests[0]?.headers["content-type"]).toBe("text/xml; charset=utf-8")
+    expect(provider.requests[0]?.body).toBe("<Envelope/>")
   })
 
   it("refuses a request with both a JSON and a form body before sending it", async () => {

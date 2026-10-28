@@ -4,12 +4,13 @@ import { ValidationError } from "../../../lib/errors"
 import { fromMedusaAmount } from "../../../lib/money"
 import type { MedusaAmount } from "../../../lib/money"
 import { COD_PAYMENT_PROVIDER_ID } from "../../../lib/payments/checkout"
-import { GELIVER_FULFILLMENT_PROVIDER_ID, isCarrierProvider } from "../../../lib/shipping/carriers"
+import { carrierOf, isCarrierProvider } from "../../../lib/shipping/carriers"
+import type { CarrierName } from "../../../lib/shipping/carriers"
 
 /** Who carries the order's parcel, from where, and what the courier collects. */
 export interface CarrierPlan {
   /** A carrier we open shipments with; null for the manual provider (the shop ships itself). */
-  carrier: "geliver" | null
+  carrier: CarrierName | null
   location_id: string | null
   /** Kuruş collected at the door: the authorized, uncaptured cash-on-delivery payment. */
   cash_on_delivery: number | null
@@ -87,7 +88,7 @@ export const planCarrierStep = createStep(
           !payment.captured_at &&
           !payment.canceled_at
       )
-    const carrier = option?.provider_id === GELIVER_FULFILLMENT_PROVIDER_ID ? "geliver" : null
+    const carrier = carrierOf(option?.provider_id)
     const carried = (order.fulfillments ?? []).some(
       (fulfillment) =>
         fulfillment && !fulfillment.canceled_at && isCarrierProvider(fulfillment.provider_id)
