@@ -292,6 +292,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Aras Kargo bu kullanıcı adı ve şifreyi kabul etmedi. Bilgileri Aras'ın verdiği entegrasyon belgesinden yeniden kopyalayın; test ve canlı hesap ayrıdır.",
   "customers.unknown": "Müşteri bulunamadı.",
   "messaging.no_address": "Müşterinin bu kanal için kayıtlı adresi ya da telefonu yok.",
+  "messaging.suppression_unknown": "Bu adres listede yok.",
   "messaging.recipient_invalid": "Adres ya da telefon numarası geçerli değil.",
   "messaging.email_off": "E-posta gönderimi bu mağazada açık değil.",
   "messaging.sms_off": "SMS hesabı bağlı değil. Ayarlar > Bildirimler'den Netgsm hesabını girin.",

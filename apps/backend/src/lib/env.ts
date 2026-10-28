@@ -65,6 +65,11 @@ const envSchema = z.object({
   // Mailpit's web address (its HTTP send endpoint), and a fake Resend in tests
   MAILPIT_URL: z.url({ protocol: /^https?$/ }).optional(),
   RESEND_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
+  // Signs Resend's delivery reports (`/hooks/resend`); without it the hook refuses all
+  RESEND_WEBHOOK_SECRET: z
+    .string()
+    .regex(/^whsec_[A-Za-z0-9+/=]{16,200}$/, "must be a Resend signing secret (whsec_…)")
+    .optional(),
   // A fake Netgsm on a developer's machine (adr/0036)
   NETGSM_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
   // Medusa's level names; unset means Medusa's default, `http`

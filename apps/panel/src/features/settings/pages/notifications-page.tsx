@@ -6,6 +6,7 @@ import { providerAccountsQuery } from "@/features/settings/api/payments"
 import type { NetgsmAccount } from "@/features/settings/api/payments"
 import { AccountBadges } from "@/features/settings/components/account-badges"
 import { NetgsmSettings } from "@/features/settings/components/netgsm-settings"
+import { SuppressionsCard } from "@/features/settings/components/suppressions-card"
 import { accountKey } from "@/features/settings/payments"
 import { errorText } from "@/lib/errors"
 
@@ -39,6 +40,7 @@ export function NotificationsPage() {
           keyConfigured={query.data.key_configured}
         />
       )}
+      <SuppressionsCard />
     </div>
   )
 }

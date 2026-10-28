@@ -1,6 +1,11 @@
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
-import { startFakeMail, startFakeNetgsm } from "@qticaret/testing"
+import {
+  fakeResendSecret,
+  signResendReport,
+  startFakeMail,
+  startFakeNetgsm,
+} from "@qticaret/testing"
 import type { FakeMail, FakeNetgsm } from "@qticaret/testing"
 import { placeOrder } from "../../src/scripts/seed/orders/place"
 import { MESSAGING_MODULE } from "../../src/modules/messaging"
@@ -36,6 +41,7 @@ medusaIntegrationTestRunner({
     let admin: { headers: Record<string, string> }
     let fake: FakeMail
     let netgsm: FakeNetgsm
+    const resendSecret = fakeResendSecret()
     let shop: StockShop
     let variantId: string
 
@@ -61,10 +67,17 @@ medusaIntegrationTestRunner({
       process.env["EMAIL_TRANSPORT"] = "mailpit"
       process.env["MAILPIT_URL"] = fake.url
       process.env["EMAIL_FROM"] = "bildirim@platform.example"
+      process.env["RESEND_WEBHOOK_SECRET"] = resendSecret
     })
 
     afterAll(async () => {
-      for (const name of ["EMAIL_TRANSPORT", "MAILPIT_URL", "EMAIL_FROM", "NETGSM_BASE_URL"]) {
+      for (const name of [
+        "EMAIL_TRANSPORT",
+        "MAILPIT_URL",
+        "EMAIL_FROM",
+        "NETGSM_BASE_URL",
+        "RESEND_WEBHOOK_SECRET",
+      ]) {
         Reflect.deleteProperty(process.env, name)
       }
       await Promise.all([fake.close(), netgsm.close()])
@@ -392,6 +405,63 @@ medusaIntegrationTestRunner({
       const mails = sentTo("izinli@example.com")
       expect(mails).toHaveLength(2)
       expect(mails[0]?.text).toContain("ticari ileti izniniz olduğu için")
+    })
+
+    it("puts a hard bounce on the list from Resend's signed report, once, and sends there no more", async () => {
+      const report = (type: string, bounce?: Record<string, string>) =>
+        JSON.stringify({
+          type,
+          created_at: new Date().toISOString(),
+          data: { email_id: "e1", to: ["geri-donen@example.com"], ...(bounce ? { bounce } : {}) },
+        })
+      const post = (body: string, headers: Record<string, string>) =>
+        settle(http.post("/hooks/resend", body, { headers }))
+      const hard = report("email.bounced", { type: "Permanent", subType: "General" })
+      const hardHeaders = signResendReport(resendSecret, hard)
+
+      const forged = await post(hard, { ...hardHeaders, "svix-signature": "v1,c2FodGU=" })
+      const soft = await post(
+        report("email.bounced", { type: "Transient", subType: "MailboxFull" }),
+        signResendReport(
+          resendSecret,
+          report("email.bounced", { type: "Transient", subType: "MailboxFull" })
+        )
+      )
+      const listedAfterSoft = await getContainer()
+        .resolve<MessagingModuleService>(MESSAGING_MODULE)
+        .isSuppressed("email", "geri-donen@example.com")
+      const first = await post(hard, hardHeaders)
+      const again = await post(hard, hardHeaders)
+      const outcome = (await resend(await order("geri-donen@example.com"))).result
+      const { data: list } = await http.get<{
+        suppressions: { id: string; recipient_masked: string; reason: string; source: string }[]
+      }>("/admin/messaging/suppressions", { headers: admin.headers })
+
+      expect(forged.status).toBe(401)
+      expect(soft.status).toBe(200)
+      expect(listedAfterSoft).toBe(false)
+      expect([first.status, again.status]).toEqual([200, 200])
+      expect(outcome).toMatchObject({ email: "suppressed" })
+      expect(list.suppressions).toEqual([
+        expect.objectContaining({
+          recipient_masked: "ge***@example.com",
+          reason: "bounce",
+          source: "resend",
+        }),
+      ])
+      expect(JSON.stringify(list)).not.toContain("geri-donen@")
+
+      const removed = await settle(
+        http.delete(`/admin/messaging/suppressions/${list.suppressions[0]?.id ?? ""}`, {
+          headers: admin.headers,
+        })
+      )
+      expect(removed.status).toBe(200)
+      expect(
+        await getContainer()
+          .resolve<MessagingModuleService>(MESSAGING_MODULE)
+          .isSuppressed("email", "geri-donen@example.com")
+      ).toBe(false)
     })
 
     it("tries a failed send again with the same key, and sends it once", async () => {

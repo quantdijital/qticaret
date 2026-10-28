@@ -21,7 +21,8 @@
     "delete": "Delete",
     "clear": "Clear",
     "more": "More actions",
-    "notifications": "Notifications"
+    "notifications": "Notifications",
+    "previous": "Previous"
   },
   "errors": {
     "generic": "The action could not be completed. Try again in a moment.",
@@ -920,6 +921,22 @@
           "secret_invalid": "Netgsm did not accept this user code and password, or API access is off."
         },
         "rejected": "Netgsm no longer accepts the stored details; no text can be sent. Enter the current ones."
+      },
+      "suppressions": {
+        "title": "Addresses not sent to",
+        "description": "E-mails that bounced for good or were marked as spam land here by themselves; nothing goes to them again. You can add an address a customer asked to leave alone.",
+        "address": "E-mail address",
+        "placeholder": "name@example.com",
+        "add": "Add to the list",
+        "added": "Address added to the list.",
+        "removed": "Address taken off the list; messages may go to it again.",
+        "remove": "Take {{address}} off the list",
+        "empty": "No addresses on the list.",
+        "reasons": {
+          "bounce": "Bounced",
+          "complaint": "Spam complaint",
+          "manual": "Added by hand"
+        }
       }
     }
   },

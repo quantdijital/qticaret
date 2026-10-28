@@ -21,7 +21,8 @@
     "delete": "Sil",
     "clear": "Temizle",
     "more": "Diğer işlemler",
-    "notifications": "Bildirimler"
+    "notifications": "Bildirimler",
+    "previous": "Önceki"
   },
   "errors": {
     "generic": "İşlem tamamlanamadı. Biraz sonra tekrar deneyin.",
@@ -920,6 +921,22 @@
           "secret_invalid": "Netgsm bu kullanıcı kodu ve şifreyi kabul etmedi ya da API erişimi kapalı."
         },
         "rejected": "Netgsm kayıtlı bilgileri artık kabul etmiyor; SMS gönderilemiyor. Güncel bilgileri girin."
+      },
+      "suppressions": {
+        "title": "Gönderilmeyen adresler",
+        "description": "Kalıcı olarak geri dönen ya da spam olarak işaretlenen e-postalar buraya kendiliğinden girer; bu adreslere bir daha ileti gönderilmez. Müşteri isterse adresini siz de ekleyebilirsiniz.",
+        "address": "E-posta adresi",
+        "placeholder": "ornek@alan.com",
+        "add": "Listeye ekle",
+        "added": "Adres listeye eklendi.",
+        "removed": "Adres listeden çıkarıldı; iletiler yeniden gidebilir.",
+        "remove": "{{address}} adresini listeden çıkar",
+        "empty": "Listede adres yok.",
+        "reasons": {
+          "bounce": "Geri döndü",
+          "complaint": "Spam şikâyeti",
+          "manual": "Elle eklendi"
+        }
       }
     }
   },

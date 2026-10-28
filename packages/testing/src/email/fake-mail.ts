@@ -1,4 +1,4 @@
-import { randomBytes, randomUUID } from "node:crypto"
+import { createHmac, randomBytes, randomUUID } from "node:crypto"
 import { createServer } from "node:http"
 import type { AddressInfo, Socket } from "node:net"
 
@@ -144,5 +144,26 @@ export async function startFakeMail(options: { port?: number } = {}): Promise<Fa
         })
       )
     },
+  }
+}
+
+/** A Resend signing secret for one run: `whsec_` and random base64, never a real one. */
+export const fakeResendSecret = (): string => `whsec_${randomBytes(24).toString("base64")}`
+
+/** Signs a report as Resend does (Svix): HMAC-SHA256 over `id.timestamp.body`. */
+export function signResendReport(
+  secret: string,
+  body: string,
+  options: { id?: string; at?: Date } = {}
+): Record<string, string> {
+  const id = options.id ?? `msg_${randomBytes(8).toString("hex")}`
+  const timestamp = String(Math.floor((options.at ?? new Date()).getTime() / 1000))
+  const key = Buffer.from(secret.slice("whsec_".length), "base64")
+  const signature = createHmac("sha256", key).update(`${id}.${timestamp}.${body}`).digest("base64")
+  return {
+    "svix-id": id,
+    "svix-timestamp": timestamp,
+    "svix-signature": `v1,${signature}`,
+    "content-type": "application/json",
   }
 }
