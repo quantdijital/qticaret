@@ -22,7 +22,7 @@ import {
   storedCarrierAccount,
   tablePriceOf,
 } from "../../lib/shipping/shop"
-import { yurticiApi, yurticiCredentialsOf, yurticiLabelHtml } from "../../lib/shipping/yurtici"
+import { yurticiApi, yurticiCredentialsOf, yurticiLabelPdf } from "../../lib/shipping/yurtici"
 import type { YurticiCredentials, YurticiLogin } from "../../lib/shipping/yurtici"
 
 /**
@@ -58,7 +58,7 @@ function loginFor(credentials: YurticiCredentials, cashOnDelivery: unknown): Yur
 /**
  * Yurtiçi Kargo as a Medusa fulfillment provider (`yurtici_yurtici`,
  * adr/0035), on the shop's own contract. On our "ship" route it opens the
- * parcel under our cargo key and draws its label (Yurtiçi gives none: the
+ * parcel under our cargo key and draws its PDF label (Yurtiçi gives none: the
  * branch scans the key). The account and the shop's units come from the
  * shared container at the time of the call; what the courier collects
  * comes from our workflow (`additional_data`), so Medusa's own
@@ -144,14 +144,14 @@ class YurticiFulfillmentService extends AbstractFulfillmentProviderService {
       })
       throw error
     }
-    const label = yurticiLabelHtml({ ...shipment, test: credentials.testMode })
+    const label = await yurticiLabelPdf({ ...shipment, test: credentials.testMode })
     return {
       data: {
         shipment_id: cargoKey,
         test: credentials.testMode,
         cash_on_delivery: ship.cash_on_delivery,
-        label_base64: Buffer.from(label, "utf8").toString("base64"),
-        label_type: "text/html",
+        label_base64: Buffer.from(label).toString("base64"),
+        label_type: "application/pdf",
       },
       labels: [],
     }

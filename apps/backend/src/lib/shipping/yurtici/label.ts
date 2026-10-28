@@ -1,14 +1,15 @@
-import { escapeXml } from "../../clients/xml"
-import { code128Svg } from "../code128"
+import { rgb } from "pdf-lib"
+import type { PDFFont, PDFPage } from "pdf-lib"
+import { MM, newPdf, printable, wrapText } from "../../pdf"
+import { code128Bars } from "../code128"
 import type { Receiver } from "../receiver"
 
 /**
  * The parcel's label for Yurtiçi (adr/0035): Yurtiçi gives none, its
- * branch scans the cargo key on the box. A page to print on a 100×150 mm
- * label: the key as a Code 128 barcode, the receiver, the order and what
- * the courier collects. Every value is escaped and the page runs nothing
- * (its policy allows inline style only). Turkish text: the label is for
- * a Turkish carrier's branch.
+ * branch scans the cargo key on the box. A 100×150 mm PDF page, as label
+ * printers take it: the key as a Code 128 barcode, the receiver, the
+ * order and what the courier collects. Turkish text: the label is for a
+ * Turkish carrier's branch.
  */
 
 export interface YurticiLabelInput {
@@ -22,54 +23,124 @@ export interface YurticiLabelInput {
   test: boolean
 }
 
+const WIDTH = 100 * MM
+const HEIGHT = 150 * MM
+const MARGIN = 5 * MM
+const INNER = WIDTH - 2 * MARGIN
+// Three dots of a 203 dpi printer per module, 18 mm tall
+const MODULE = 0.375 * MM
+const BAR_HEIGHT = 18 * MM
+const BLACK = rgb(0, 0, 0)
+
 const lira = (amount: number): string =>
   new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY" }).format(amount / 100)
 
 const measure = (value: number): string =>
   new Intl.NumberFormat("tr-TR", { maximumFractionDigits: 2 }).format(value)
 
-const STYLE = [
-  "@page{size:100mm 150mm;margin:0}",
-  "*{box-sizing:border-box}",
-  "body{margin:0;font:12pt/1.35 Arial,Helvetica,sans-serif;color:#000;background:#fff}",
-  ".label{width:100mm;height:150mm;padding:5mm;display:flex;flex-direction:column;gap:3mm}",
-  ".head{display:flex;justify-content:space-between;align-items:baseline;border-bottom:.6mm solid #000;padding-bottom:2mm}",
-  ".carrier{font-size:16pt;font-weight:700}",
-  ".test{font-weight:700;border:.5mm solid #000;padding:0 2mm}",
-  ".code{text-align:center}",
-  ".key{font:700 14pt/1 monospace;letter-spacing:.5mm;margin-top:1mm}",
-  ".title{font-size:9pt;text-transform:uppercase;letter-spacing:.3mm}",
-  ".name{font-size:15pt;font-weight:700}",
-  ".cod{border:.6mm solid #000;padding:2mm;font-size:14pt;font-weight:700;text-align:center}",
-  ".meta{display:flex;justify-content:space-between;border-top:.3mm solid #000;padding-top:2mm;margin-top:auto}",
-].join("")
+/** Writes top-down on the page: `y` is the distance from the top edge. */
+class Pen {
+  y = MARGIN
 
-export function yurticiLabelHtml(input: YurticiLabelInput): string {
-  const text = (value: string) => escapeXml(value)
-  const { receiver } = input
-  const cod =
-    input.cashOnDelivery !== null && input.cashOnDelivery > 0
-      ? `<div class="cod">KAPIDA TAHSİLAT: ${text(lira(input.cashOnDelivery))}</div>`
-      : ""
-  return [
-    "<!doctype html>",
-    '<html lang="tr"><head><meta charset="utf-8">',
-    `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'">`,
-    `<title>Yurtiçi Kargo ${text(input.cargoKey)}</title>`,
-    `<style>${STYLE}</style></head><body><main class="label">`,
-    '<div class="head"><span class="carrier">Yurtiçi Kargo</span>',
-    input.test ? '<span class="test">TEST</span>' : "",
-    "</div>",
-    `<div class="code">${code128Svg(input.cargoKey)}<div class="key">${text(input.cargoKey)}</div></div>`,
-    '<div><div class="title">Alıcı</div>',
-    `<div class="name">${text(receiver.name)}</div>`,
-    `<div>${text(receiver.address)}</div>`,
-    `<div><strong>${text(receiver.town)} / ${text(receiver.city)}</strong></div>`,
-    `<div>${text(receiver.phone)}</div></div>`,
-    cod,
-    '<div class="meta">',
-    `<span>Sipariş ${text(input.orderNumber)}</span>`,
-    `<span>${text(measure(input.desi))} desi · ${text(measure(input.kg))} kg · 1/1</span>`,
-    "</div></main></body></html>",
-  ].join("")
+  constructor(private readonly page: PDFPage) {}
+
+  text(value: string, font: PDFFont, size: number, options: { x?: number; center?: boolean } = {}) {
+    const text = printable(font, value)
+    const width = font.widthOfTextAtSize(text, size)
+    const x = options.center ? (WIDTH - width) / 2 : (options.x ?? MARGIN)
+    this.page.drawText(text, { x, y: HEIGHT - this.y - size, size, font, color: BLACK })
+    return width
+  }
+
+  line(thickness: number) {
+    this.page.drawLine({
+      start: { x: MARGIN, y: HEIGHT - this.y },
+      end: { x: WIDTH - MARGIN, y: HEIGHT - this.y },
+      thickness,
+      color: BLACK,
+    })
+  }
+
+  gap(points: number) {
+    this.y += points
+  }
+}
+
+export async function yurticiLabelPdf(input: YurticiLabelInput): Promise<Uint8Array> {
+  const { doc, regular, bold } = await newPdf()
+  doc.setTitle(`Yurtiçi Kargo ${input.cargoKey}`)
+  const page = doc.addPage([WIDTH, HEIGHT])
+  const pen = new Pen(page)
+
+  pen.text("Yurtiçi Kargo", bold, 16)
+  if (input.test) {
+    const size = 11
+    const width = bold.widthOfTextAtSize("TEST", size)
+    const x = WIDTH - MARGIN - width - 4 * MM
+    page.drawRectangle({
+      x: x - 2 * MM,
+      y: HEIGHT - pen.y - size - 1.5 * MM,
+      width: width + 4 * MM,
+      height: size + 2.5 * MM,
+      borderColor: BLACK,
+      borderWidth: 1.4,
+    })
+    pen.text("TEST", bold, size, { x })
+  }
+  pen.gap(16 + 2 * MM)
+  pen.line(1.7)
+  pen.gap(3 * MM)
+
+  const { modules, bars } = code128Bars(input.cargoKey)
+  const left = (WIDTH - modules * MODULE) / 2
+  for (const bar of bars) {
+    page.drawRectangle({
+      x: left + bar.x * MODULE,
+      y: HEIGHT - pen.y - BAR_HEIGHT,
+      width: bar.width * MODULE,
+      height: BAR_HEIGHT,
+      color: BLACK,
+    })
+  }
+  pen.gap(BAR_HEIGHT + 1.5 * MM)
+  pen.text(input.cargoKey, bold, 13, { center: true })
+  pen.gap(13 + 4 * MM)
+
+  pen.text("ALICI", regular, 8)
+  pen.gap(8 + 1.5 * MM)
+  for (const line of wrapText(bold, 14, input.receiver.name, INNER)) {
+    pen.text(line, bold, 14)
+    pen.gap(14 + 1 * MM)
+  }
+  for (const line of wrapText(regular, 11, input.receiver.address, INNER)) {
+    pen.text(line, regular, 11)
+    pen.gap(11 + 1 * MM)
+  }
+  pen.text(`${input.receiver.town} / ${input.receiver.city}`, bold, 11)
+  pen.gap(11 + 1 * MM)
+  pen.text(input.receiver.phone, regular, 11)
+  pen.gap(11 + 3 * MM)
+
+  if (input.cashOnDelivery !== null && input.cashOnDelivery > 0) {
+    const size = 13
+    page.drawRectangle({
+      x: MARGIN,
+      y: HEIGHT - pen.y - size - 4 * MM,
+      width: INNER,
+      height: size + 4 * MM,
+      borderColor: BLACK,
+      borderWidth: 1.7,
+    })
+    pen.gap(2 * MM)
+    pen.text(`KAPIDA TAHSİLAT: ${lira(input.cashOnDelivery)}`, bold, size, { center: true })
+  }
+
+  pen.y = HEIGHT - MARGIN - 10 - 2 * MM
+  pen.line(0.85)
+  pen.gap(2 * MM)
+  pen.text(`Sipariş ${input.orderNumber}`, regular, 10)
+  const meta = `${measure(input.desi)} desi · ${measure(input.kg)} kg · 1/1`
+  pen.text(meta, regular, 10, { x: WIDTH - MARGIN - regular.widthOfTextAtSize(meta, 10) })
+
+  return doc.save()
 }

@@ -1,4 +1,5 @@
-import { CircleAlert, CircleCheck, Download } from "lucide-react"
+import { CircleAlert, CircleCheck, Download, Printer } from "lucide-react"
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -11,7 +12,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import type { BoardOrder } from "@/features/orders/api/orders"
-import { useLabelLink } from "@/features/orders/api/shipping"
+import { bulkLabels, useLabelLink } from "@/features/orders/api/shipping"
 import type { ShipResult } from "@/features/orders/api/shipping"
 import { errorText } from "@/lib/errors"
 
@@ -50,6 +51,49 @@ function LabelButton({ orderId, fulfillmentId }: { orderId: string; fulfillmentI
   )
 }
 
+/** Every waiting parcel's label in one PDF, in a new tab to print at once (F7.7). */
+function PrintAllButton({ fulfillmentIds }: { fulfillmentIds: string[] }) {
+  const { t } = useTranslation()
+  const [busy, setBusy] = useState(false)
+  return (
+    <Button
+      variant="outline"
+      disabled={busy}
+      onClick={() => {
+        // Opened at the click, so the browser lets it; filled once the file arrives
+        const tab = window.open("", "_blank")
+        setBusy(true)
+        bulkLabels(fulfillmentIds)
+          .then(({ url, missing }) => {
+            if (tab) {
+              tab.opener = null
+              tab.location.href = url
+            } else {
+              window.location.assign(url)
+            }
+            // The tab keeps its own copy once loaded
+            setTimeout(() => {
+              URL.revokeObjectURL(url)
+            }, 60_000)
+            if (missing > 0) {
+              toast.warning(t(`${S}.labelsMissing`, { count: missing }))
+            }
+          })
+          .catch((failure: unknown) => {
+            tab?.close()
+            toast.error(errorText(t, failure))
+          })
+          .finally(() => {
+            setBusy(false)
+          })
+      }}
+    >
+      <Printer aria-hidden="true" />
+      {t(`${S}.printAll`, { count: fulfillmentIds.length })}
+    </Button>
+  )
+}
+
 /** What "Kargoya ver" did to each picked order (F7.7): shipped with its label, or why not. */
 export function ShipResultsDialog({
   results,
@@ -63,6 +107,9 @@ export function ShipResultsDialog({
 }) {
   const { t } = useTranslation()
   const failed = (results ?? []).filter((result) => !result.ok).length
+  const labelled = (results ?? []).flatMap((result) =>
+    result.ok && result.carrier && result.fulfillment_id ? [result.fulfillment_id] : []
+  )
   return (
     <Dialog
       open={results !== null}
@@ -107,6 +154,7 @@ export function ShipResultsDialog({
           ))}
         </ul>
         <DialogFooter>
+          {labelled.length > 1 ? <PrintAllButton fulfillmentIds={labelled} /> : null}
           <Button onClick={onClose}>{t("common.close")}</Button>
         </DialogFooter>
       </DialogContent>

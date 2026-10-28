@@ -42,3 +42,24 @@ export const useShipOrders = () =>
         })
       ).results
   )
+
+/**
+ * The picked parcels' labels as one PDF to print (F7.7): an address for a
+ * tab, made in the browser from the answer, and how many had no label.
+ * The caller revokes the address once the tab has it.
+ */
+export async function bulkLabels(fulfillmentIds: readonly string[]) {
+  const query = new URLSearchParams(fulfillmentIds.map((id) => ["fulfillment_id", id]))
+  const response = await fetch(`/admin/shipping-labels?${query.toString()}`, {
+    credentials: "same-origin",
+  })
+  if (!response.ok) {
+    const body = (await response.json().catch(() => null)) as { message?: string } | null
+    throw Object.assign(new Error("labels failed"), {
+      status: response.status,
+      message: body?.message ?? "",
+    })
+  }
+  const missing = Number(response.headers.get("x-labels-missing") ?? "0")
+  return { url: URL.createObjectURL(await response.blob()), missing }
+}

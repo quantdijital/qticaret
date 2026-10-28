@@ -1630,7 +1630,11 @@
       "resultsTitle": "Kargoya verilenler",
       "resultsSummary": "{{shipped}} sipariş kargoya verildi, {{failed}} sipariş verilemedi.",
       "label": "Etiket",
-      "failed": "Kargoya verilemedi."
+      "failed": "Kargoya verilemedi.",
+      "printAll_one": "{{count}} etiketi yazdır",
+      "printAll_other": "{{count}} etiketin hepsini yazdır",
+      "labelsMissing_one": "{{count}} gönderinin etiketi okunamadı; onu sipariş sayfasından indirin.",
+      "labelsMissing_other": "{{count}} gönderinin etiketi okunamadı; onları sipariş sayfalarından indirin."
     },
     "returns": {
       "queue": "İade talepleri",

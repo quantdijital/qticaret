@@ -187,7 +187,7 @@ medusaIntegrationTestRunner({
         test: true,
         label_base64: null,
       })
-      expect(packed?.data["label_file_id"]).toEqual(expect.stringMatching(/\.html$/))
+      expect(packed?.data["label_file_id"]).toEqual(expect.stringMatching(/\.pdf$/))
       expect(label.status).toBe(200)
       expect(arrived?.shipped_at).toBeTruthy()
       expect(arrived?.delivered_at).toBeTruthy()

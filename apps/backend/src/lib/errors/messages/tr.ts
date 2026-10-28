@@ -284,6 +284,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "shipping.sender_contact_missing":
     "Mağazanın iletişim e-postası girilmemiş; kargo hizmeti gönderici için istiyor. Ayarlar > Mağaza'dan ekleyin.",
   "shipping.location_unknown": "Gönderinin çıkacağı depo bulunamadı.",
+  "shipping.fulfillment_invalid": "Etiketi istenen gönderi geçerli değil.",
   "shipping.label_unavailable": "Bu gönderinin etiketi yok.",
   "aras.merchant_invalid":
     "Aras Kargo bu kullanıcı adını kabul etmedi. Kullanıcı adını Aras'ın verdiği entegrasyon bilgilerinden yeniden kopyalayın.",

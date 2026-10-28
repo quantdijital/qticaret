@@ -1,4 +1,5 @@
 import { randomBytes } from "node:crypto"
+import { tinyPdf } from "../pdf"
 import { createServer } from "node:http"
 import type { AddressInfo, Socket } from "node:net"
 
@@ -60,8 +61,8 @@ const FAULT = envelope(
   "<soap:Fault><faultcode>soap:Server</faultcode><faultstring>Kullanıcı adı veya şifre hatalı</faultstring></soap:Fault>"
 )
 
-// The smallest PDF a label check reads as one
-const PDF = Buffer.from("%PDF-1.4\n%sahte-aras-etiketi\n%%EOF\n").toString("base64")
+// A real one-page PDF, so a merged print counts it
+const PDF = tinyPdf("sahte-aras-etiketi").toString("base64")
 
 export async function startFakeAras(
   account: FakeArasAccount = fakeArasAccount(),

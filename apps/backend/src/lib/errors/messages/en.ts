@@ -277,6 +277,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "shipping.sender_contact_missing":
     "The shop has no contact email; the shipping service needs one for the sender. Add it under Settings > Store.",
   "shipping.location_unknown": "The warehouse the shipment leaves from was not found.",
+  "shipping.fulfillment_invalid": "That shipment is not a valid one to print a label for.",
   "shipping.label_unavailable": "This shipment has no label.",
   "aras.merchant_invalid":
     "Aras Kargo did not accept this user name. Copy it again from the integration details Aras gave.",

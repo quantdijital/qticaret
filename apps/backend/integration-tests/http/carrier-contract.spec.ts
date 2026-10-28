@@ -241,6 +241,11 @@ medusaIntegrationTestRunner({
         const labelPath = `/admin/orders/${orderId}/fulfillments/${packed?.id ?? ""}/label`
         const label = await settle(http.get<{ url: string }>(labelPath, { headers: admin.headers }))
         const anonymous = await settle(http.get(labelPath))
+        const bulkPath = `/admin/shipping-labels?fulfillment_id=${packed?.id ?? ""}`
+        const bulk = await settle(
+          http.get<string>(bulkPath, { headers: admin.headers, responseType: "text" })
+        )
+        const bulkAnonymous = await settle(http.get(bulkPath))
         for (let read = 0; read < 8; read += 1) {
           clock += 30 * MINUTE
           await pollShipments(getContainer(), new Date(clock))
@@ -258,6 +263,12 @@ medusaIntegrationTestRunner({
         // The label opens for staff by a short-lived link, never for anyone else
         expect(label.status).toBe(200)
         expect(anonymous.status).toBe(401)
+        // Picked parcels print as one PDF (F7.7, pdf-lib): every carrier's label merges
+        expect(bulk.status).toBe(200)
+        expect(bulk.headers["content-type"]).toMatch(/^application\/pdf/)
+        expect(bulk.headers["x-labels-missing"]).toBe("0")
+        expect(bulk.data.startsWith("%PDF-")).toBe(true)
+        expect(bulkAnonymous.status).toBe(401)
         for (const secret of carrier.secrets()) {
           expect(JSON.stringify(packed?.data)).not.toContain(secret)
         }

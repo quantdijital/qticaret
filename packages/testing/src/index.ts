@@ -45,3 +45,4 @@ export type {
 } from "./yurtici/fake-server"
 export { startFakeMail } from "./email/fake-mail"
 export type { FakeMail, FakeMailMessage } from "./email/fake-mail"
+export { tinyPdf } from "./pdf"

@@ -1,5 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
+import { mergePdfs } from "../../lib/pdf"
 
 /**
  * A short-lived link to a fulfillment's stored label (adr/0031), when the
@@ -27,4 +28,42 @@ export async function shipmentLabel(
     return null
   }
   return (await container.resolve(Modules.FILE).retrieveFile(key)).url
+}
+
+/**
+ * The stored labels of up to 20 parcels as one PDF to print (F7.7, with
+ * pdf-lib): in the order asked, every page of each. A parcel with no
+ * label, or one that cannot be read, is left out and counted.
+ */
+export async function bulkLabels(
+  container: MedusaContainer,
+  fulfillmentIds: readonly string[]
+): Promise<{ pdf: Uint8Array; missing: number } | null> {
+  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+    entity: "fulfillment",
+    fields: ["id", "data"],
+    filters: { id: [...fulfillmentIds] },
+  })
+  const keys = new Map(
+    (data as { id: string; data?: Record<string, unknown> | null }[]).map((row) => [
+      row.id,
+      row.data?.["label_file_id"],
+    ])
+  )
+  const files = container.resolve(Modules.FILE)
+  const parts: Uint8Array[] = []
+  for (const id of fulfillmentIds) {
+    const key = keys.get(id)
+    if (typeof key === "string") {
+      parts.push(await files.getAsBuffer(key))
+    }
+  }
+  if (parts.length === 0) {
+    return null
+  }
+  const { pdf, skipped } = await mergePdfs(parts)
+  if (skipped.length === parts.length) {
+    return null
+  }
+  return { pdf, missing: fulfillmentIds.length - parts.length + skipped.length }
 }

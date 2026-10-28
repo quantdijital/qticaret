@@ -1,3 +1,4 @@
+import { tinyPdf } from "../pdf"
 import { randomUUID } from "node:crypto"
 import { FAKE_SERVICES, fakeDesi, fakePrice } from "./prices"
 import type { Handler, Reply } from "./routes"
@@ -172,7 +173,7 @@ export function createShipments(labelBase: () => string) {
           body: null,
           bytes: {
             type: "application/pdf",
-            data: Buffer.from(`%PDF-1.4\n% etiket ${id}\n%%EOF\n`, "latin1"),
+            data: tinyPdf(`etiket ${id}`),
           },
         }
       : failed(404, "NOT_FOUND", "label not found")

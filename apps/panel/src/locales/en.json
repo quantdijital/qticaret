@@ -1622,7 +1622,11 @@
       "resultsTitle": "Shipped orders",
       "resultsSummary": "{{shipped}} orders shipped, {{failed}} could not be.",
       "label": "Label",
-      "failed": "Could not be shipped."
+      "failed": "Could not be shipped.",
+      "printAll_one": "Print {{count}} label",
+      "printAll_other": "Print all {{count}} labels",
+      "labelsMissing_one": "{{count}} parcel's label could not be read; download it from its order page.",
+      "labelsMissing_other": "{{count}} parcels' labels could not be read; download them from their order pages."
     },
     "returns": {
       "queue": "Returns",

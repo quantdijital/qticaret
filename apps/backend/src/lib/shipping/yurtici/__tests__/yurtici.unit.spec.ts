@@ -3,11 +3,12 @@ import type { FakeYurtici } from "@qticaret/testing"
 import {
   createYurticiApi,
   yurticiCredentialsOf,
-  yurticiLabelHtml,
+  yurticiLabelPdf,
   yurticiShipmentFields,
   yurticiStatusOf,
 } from ".."
 import type { YurticiDelivery, YurticiShipmentInput } from ".."
+import { PDFDocument } from "pdf-lib"
 import { receiverOf } from "../../receiver"
 
 const address = {
@@ -121,21 +122,24 @@ describe("Yurtiçi (adr/0035)", () => {
     }
   })
 
-  it("draws a label that escapes what the shopper typed and runs nothing", () => {
-    const html = yurticiLabelHtml({
+  it("draws a 100×150 mm PDF label, whatever the shopper typed", async () => {
+    const pdf = await yurticiLabelPdf({
       ...shipment("QT01ABCDEF", 24_990),
-      receiver: { ...receiverOf(address), name: `<script>alert("x")</script>` },
+      receiver: {
+        ...receiverOf(address),
+        name: `Ayşe <script> \u0007 Yılmaz 😀 ${"uzun ".repeat(40)}`,
+      },
       test: true,
     })
+    const doc = await PDFDocument.load(pdf, { updateMetadata: false })
+    const [page] = doc.getPages()
 
-    expect(html).toContain("default-src 'none'")
-    expect(html).not.toContain("<script>")
-    expect(html).toContain("&lt;script&gt;")
-    expect(html).toContain("<svg")
-    expect(html).toContain("QT01ABCDEF")
-    expect(html).toMatch(/KAPIDA TAHSİLAT: ₺249,90/)
-    expect(html).toContain("1,5 desi · 0,45 kg · 1/1")
-    expect(yurticiLabelHtml({ ...shipment("QT01ABCDEF"), test: false })).not.toContain("TAHSİLAT")
+    expect(Buffer.from(pdf.subarray(0, 5)).toString()).toBe("%PDF-")
+    expect(doc.getPageCount()).toBe(1)
+    expect(page?.getWidth()).toBeCloseTo(283.46, 1)
+    expect(page?.getHeight()).toBeCloseTo(425.2, 1)
+    expect(doc.getTitle()).toBe("Yurtiçi Kargo QT01ABCDEF")
+    expect(doc.getProducer()).toBe("Quant Ticaret")
   })
 })
 

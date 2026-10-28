@@ -5,6 +5,7 @@ import { requireUserActor } from "../http/actor"
 import { rateLimit } from "../http/rate-limit"
 import { AdminGetDashboardNoQuery, AdminGetDashboardOverview } from "./dashboard/validators"
 import { AdminGetOrderBoard } from "./order-board/validators"
+import { AdminGetBulkLabels } from "./shipping-labels/validators"
 import { AdminPostShipOrder, AdminPostShipOrders } from "./orders/[id]/ship/validators"
 import { AdminPostPriceListDiscount } from "./price-lists/[id]/discount/validators"
 import { AdminPostPromotionOffer } from "./promotions/[id]/offer/validators"
@@ -62,6 +63,18 @@ export const PANEL_ROUTES = [
         identity: (req) => (req as Partial<AuthenticatedMedusaRequest>).auth_context?.actor_id,
       }),
       validateAndTransformBody(AdminPostShipOrders),
+    ],
+  },
+  // The picked parcels' labels in one PDF: recipients' addresses, a recorded read (SENSITIVE_READS)
+  {
+    matcher: "/admin/shipping-labels",
+    methods: ["GET" as const],
+    middlewares: [
+      requireUserActor,
+      rateLimit(() => RATE_LIMIT_PROFILES.bulk_ship, {
+        identity: (req) => (req as Partial<AuthenticatedMedusaRequest>).auth_context?.actor_id,
+      }),
+      validateAndTransformQuery(AdminGetBulkLabels, {}),
     ],
   },
   {

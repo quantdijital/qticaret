@@ -107,14 +107,14 @@ Mağaza kendi kurumsal kargo sözleşmesiyle (müşteri kodu, kendi fiyatları, 
   - Hesap doğrulaması iki girişi de dener; `merchant_invalid` kapıda ödeme hesabıdır.
   - Kapıda ödemeli sipariş bu hesapla açılır. Hesap yoksa açık bir hata döner (`yurtici.cod_account_missing`).
   - Takip önce ana hesapla sorar; ana hesap kodu tanımazsa kapıda ödeme hesabıyla sorar.
-- **Etiket:** Bizim çizdiğimiz HTML sayfası (100×150 mm). İçinde şunlar var:
+- **Etiket:** Bizim çizdiğimiz sayfa (100×150 mm). 2026-10-28 akşamdan beri PDF (`pdf-lib`, kullanıcı onayı; Türkçe için Noto Sans alt kümesi), toplu yazdırmada diğer taşıyıcıların PDF'leriyle tek dosyada birleşir. İçinde şunlar var:
   - `cargoKey`'in Code128 barkodu (`lib/shipping/code128.ts`, bağımlılıksız);
   - alıcı;
   - sipariş numarası;
   - desi ve kg;
   - kapıda tahsil tutarı.
 
-  Değerler kaçışlı yazılır ve sayfada betik çalışmaz (`default-src 'none'`). Gönderici basılmaz: Yurtiçi göndericiyi hesaptan bilir, sağlayıcı da mağazanın yalnızca birim ve fiyat tablosu ayarlarını okur (`apps/backend/CLAUDE.md` istisnası). Etiketin şubede kabulü gerçek hesapla doğrulanacak.
+  Yazı tipinde olmayan karakter "?" basılır, kontrol karakterleri atılır. Gönderici basılmaz: Yurtiçi göndericiyi hesaptan bilir, sağlayıcı da mağazanın yalnızca birim ve fiyat tablosu ayarlarını okur (`apps/backend/CLAUDE.md` istisnası). Etiketin şubede kabulü gerçek hesapla doğrulanacak.
 - **Belirsiz sonuçta geri çekme:** `createShipment` yanıtı gelmezse (`outcome_unknown`) gönderi aynı kodla `cancelShipment` ile geri çekilir. Açık red durumunda geri çekme yapılmaz. Aras'ta da `SetOrder` artık aynı korumanın içinde.
 - **Güvenlik incelemesi (K11d, 2026-10-28):** bağımsız inceleme 6 bulgu verdi; 4'ü düzeltildi.
   - **Aras durum okuma:** durum yalnızca adı DURUM/STATU içeren sütunlardan okunur. Önceden alıcı adı ya da adres ("Teslim Edildi") gönderiyi teslim edilmiş gösterebiliyordu.

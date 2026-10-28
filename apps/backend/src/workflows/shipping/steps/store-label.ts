@@ -27,10 +27,9 @@ export const forgetLabelSourceStep = createStep(
   }
 )
 
-// What a carrier hands over as its label: a PDF, or a page we drew (a contract carrier's barcode)
+// What a carrier hands over as its label: a PDF, its own or one we drew (Yurtiçi's barcode)
 const LABEL_TYPES: Readonly<Record<string, string>> = {
   "application/pdf": "pdf",
-  "text/html": "html",
 }
 
 /**

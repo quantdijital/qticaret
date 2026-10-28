@@ -39,6 +39,25 @@ export function code128Values(text: string): number[] {
   return [START_B, ...values, check, STOP]
 }
 
+/** The barcode's bars by module, quiet zones included: what any drawing of it needs. */
+export function code128Bars(text: string): {
+  modules: number
+  bars: { x: number; width: number }[]
+} {
+  let x = QUIET
+  const bars: { x: number; width: number }[] = []
+  for (const value of code128Values(text)) {
+    Array.from(CODE128_PATTERNS[value] ?? "", Number).forEach((width, index) => {
+      // Even places are bars, odd places the spaces between them
+      if (index % 2 === 0) {
+        bars.push({ x, width })
+      }
+      x += width
+    })
+  }
+  return { modules: x + QUIET, bars }
+}
+
 /**
  * The barcode as an SVG drawing, one unit per module; `moduleMm` sets the
  * printed width of a module (0.375 mm is three dots of a 203 dpi printer).
@@ -47,22 +66,14 @@ export function code128Svg(text: string, options: { moduleMm?: number; heightMm?
   const moduleMm = options.moduleMm ?? 0.375
   const heightMm = options.heightMm ?? 18
   const height = Math.round(heightMm / moduleMm)
-  let x = QUIET
-  const bars: string[] = []
-  for (const value of code128Values(text)) {
-    Array.from(CODE128_PATTERNS[value] ?? "", Number).forEach((width, index) => {
-      // Even places are bars, odd places the spaces between them
-      if (index % 2 === 0) {
-        bars.push(`M${String(x)} 0h${String(width)}v${String(height)}h-${String(width)}z`)
-      }
-      x += width
-    })
-  }
-  const width = x + QUIET
+  const { modules, bars } = code128Bars(text)
+  const path = bars
+    .map(({ x, width }) => `M${String(x)} 0h${String(width)}v${String(height)}h-${String(width)}z`)
+    .join("")
   return (
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${String(width)} ${String(height)}" ` +
-    `width="${(width * moduleMm).toFixed(2)}mm" height="${String(heightMm)}mm" ` +
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${String(modules)} ${String(height)}" ` +
+    `width="${(modules * moduleMm).toFixed(2)}mm" height="${String(heightMm)}mm" ` +
     `shape-rendering="crispEdges" aria-hidden="true">` +
-    `<path fill="#000" d="${bars.join("")}"/></svg>`
+    `<path fill="#000" d="${path}"/></svg>`
   )
 }
