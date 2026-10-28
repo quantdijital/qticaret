@@ -4,11 +4,15 @@ import type {
   MedusaRequest,
   MedusaResponse,
 } from "@medusajs/framework/http"
-import { validateAndTransformBody } from "@medusajs/framework/http"
+import { authenticate, validateAndTransformBody } from "@medusajs/framework/http"
 import { Modules } from "@medusajs/framework/utils"
 import { errorSummary, logger } from "../../lib/logging"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import { attachGuestOrdersWorkflow } from "../../workflows/orders/attach-guest-orders"
+import {
+  StorePostCheckoutConsent,
+  StorePostConsent,
+} from "../store/customers/me/consents/validators"
 import { StorePostOrderLookup } from "../store/order-lookup/validators"
 import { orderPageAccess } from "./order-access"
 import { rateLimit } from "./rate-limit"
@@ -109,6 +113,31 @@ export const ACCOUNT_ROUTES = [
   { matcher: "/store/orders/:id", middlewares: [orderPageAccess] },
   { matcher: "/store/orders", middlewares: [attachGuestOrders] },
   { matcher: "/store/customers/me", middlewares: [attachGuestOrders] },
+  // adr/0038 §2: consent from the account and at checkout; the explicit
+  // authenticate keeps the route closed whatever core's /me matchers do
+  {
+    matcher: "/store/customers/me/consents",
+    methods: ["GET" as const],
+    middlewares: [authenticate("customer", ["session", "bearer"])],
+  },
+  {
+    matcher: "/store/customers/me/consents",
+    methods: ["POST" as const],
+    middlewares: [
+      authenticate("customer", ["session", "bearer"]),
+      validateAndTransformBody(StorePostConsent),
+    ],
+  },
+  {
+    matcher: "/store/carts/:id/consents",
+    methods: ["POST" as const],
+    middlewares: [validateAndTransformBody(StorePostCheckoutConsent)],
+  },
+  // adr/0038 §1: an unsubscribe link, opened or one-clicked from anywhere
+  {
+    matcher: "/unsubscribe",
+    middlewares: [rateLimit(() => RATE_LIMIT_PROFILES.webhook)],
+  },
   // Counted per address too: it mails one
   {
     matcher: "/store/order-lookup",

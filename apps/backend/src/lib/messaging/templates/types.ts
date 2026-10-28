@@ -21,6 +21,12 @@ export interface Brand {
   storefrontUrl: string | null
 }
 
+/** What a send knows of its recipient that the template does not: their way out. */
+export interface EmailContext {
+  /** The recipient's one-click unsubscribe link; commercial messages only (adr/0038 §1). */
+  unsubscribeUrl: string | null
+}
+
 export interface EmailContent {
   subject: string
   html: string
@@ -37,7 +43,7 @@ export interface MessageTemplate<V> {
    * false when it carries a secret only the event had (a reset link).
    */
   retry: boolean
-  email?: (vars: V, brand: Brand) => EmailContent
+  email?: (vars: V, brand: Brand, context?: EmailContext) => EmailContent
   sms?: (vars: V, brand: Brand) => string
   /** Values for the panel's preview: made up, never a real customer's. */
   sample: V

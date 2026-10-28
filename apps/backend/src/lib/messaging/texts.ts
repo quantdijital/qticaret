@@ -9,6 +9,7 @@ import type { MessageLocale } from "../errors/messages"
 export const MESSAGE_LOCALE: MessageLocale = "tr"
 
 const TR: Readonly<Record<string, string>> = {
+  "footer.unsubscribe": "Bu iletileri almak istemiyorum",
   "footer.order": "Bu e-posta, {{shop}} mağazasındaki siparişiniz için gönderildi.",
   "footer.account": "Bu e-posta, {{shop}} hesabınız için gönderildi.",
   "footer.staff":

@@ -180,7 +180,9 @@ medusaIntegrationTestRunner({
           ({ to, template }) => to.includes(email) && template === "order_access_link"
         )
 
-      const wrong = await ask("baskasi@example.com")
+      // A fresh stranger each run: the per-address limit outlives a run in Redis
+      const stranger = `baskasi-${String(Date.now())}@example.com`
+      const wrong = await ask(stranger)
       const right = await ask(email.toUpperCase())
       const [mail] = await eventually(
         () => Promise.resolve(links()),
@@ -192,7 +194,7 @@ medusaIntegrationTestRunner({
 
       expect([wrong.status, right.status]).toEqual([202, 202])
       expect(wrong.data).toEqual(right.data)
-      expect(fake.messages.some(({ to }) => to.includes("baskasi@example.com"))).toBe(false)
+      expect(fake.messages.some(({ to }) => to.includes(stranger))).toBe(false)
       expect(links()).toHaveLength(1)
       expect(opened.status).toBe(200)
     })

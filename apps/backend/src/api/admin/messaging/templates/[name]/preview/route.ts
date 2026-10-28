@@ -22,7 +22,13 @@ export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse):
   res.json({
     name: template.name,
     kind: template.kind,
-    email: template.email ? template.email(template.sample, brand) : null,
+    email: template.email
+      ? template.email(template.sample, brand, {
+          // A made-up way out, so a commercial message shows its footer link
+          unsubscribeUrl:
+            template.kind === "commercial" ? "https://magaza.example/unsubscribe?t=ornek" : null,
+        })
+      : null,
     sms: template.sms ? template.sms(template.sample, brand) : null,
   })
 }

@@ -43,6 +43,36 @@ describe("ConsentCard", () => {
     expect(screen.getByRole("switch", { name: "SMS" })).toBeDisabled()
   })
 
+  it("asks how a consent was given before it records the grant", async () => {
+    fetchMock.mockResolvedValue({
+      consents: { ...consents, email: { address: true, consent: null } },
+    })
+    renderCard()
+    await userEvent.click(await screen.findByRole("switch", { name: "E-posta" }))
+    const dialog = await screen.findByRole("dialog", { name: "E-posta izni nasıl verildi?" })
+    await userEvent.type(screen.getByLabelText(/Kanıt/), "kısa")
+    await userEvent.click(screen.getByRole("button", { name: "İzni kaydet" }))
+
+    expect(await screen.findByRole("alert")).toHaveTextContent("En az 10 karakterle")
+    await userEvent.type(screen.getByLabelText(/Kanıt/), " değil: mağazada imzalı form")
+    await userEvent.click(screen.getByRole("button", { name: "İzni kaydet" }))
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith("/admin/customers/cus_1/consents", {
+        method: "POST",
+        body: {
+          channel: "email",
+          status: "granted",
+          evidence: "kısa değil: mağazada imzalı form",
+        },
+      })
+    })
+    // Recorded: the question closes
+    await waitFor(() => {
+      expect(dialog).not.toBeInTheDocument()
+    })
+  })
+
   it("records a withdrawal the customer asked for", async () => {
     renderCard()
     await userEvent.click(await screen.findByRole("switch", { name: "E-posta" }))

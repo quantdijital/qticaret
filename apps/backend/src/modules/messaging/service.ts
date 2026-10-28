@@ -3,12 +3,14 @@ import {
   InjectManager,
   InjectTransactionManager,
   MedusaContext,
+  MedusaError,
   MedusaService,
 } from "@medusajs/framework/utils"
 import { hashPii, parseKey } from "../../lib/crypto/pii"
 import { ValidationError, uniqueViolationKeys } from "../../lib/errors"
 import { maskRecipient, normalizeRecipient } from "../../lib/messaging/recipients"
 import type { MessageChannel } from "../../lib/messaging/recipients"
+import { CheckoutConsent } from "./models/checkout-consent"
 import { MessageConsent } from "./models/message-consent"
 import { MessageConsentEvent } from "./models/message-consent-event"
 import { MessageSuppression } from "./models/message-suppression"
@@ -21,7 +23,10 @@ export interface MessagingModuleOptions {
 
 export type ConsentChannel = MessageChannel | "call"
 export type ConsentStatus = "granted" | "revoked"
-export type ConsentSource = "checkout" | "account" | "panel" | "import" | "iys"
+export type ConsentSource = "checkout" | "account" | "panel" | "import" | "iys" | "unsubscribe"
+
+/** How a consent was given or withdrawn; never an address (adr/0038 §2). */
+export type ConsentEvidence = Record<string, string>
 
 export interface ConsentInput {
   channel: ConsentChannel
@@ -31,6 +36,7 @@ export interface ConsentInput {
   customer_id?: string | null
   /** The staff member, when the panel changed it. */
   changed_by?: string | null
+  evidence?: ConsentEvidence | null
 }
 
 export interface SuppressionInput {
@@ -40,6 +46,12 @@ export interface SuppressionInput {
   source: "resend" | "netgsm" | "panel"
   detail?: string | null
   created_by?: string | null
+}
+
+// No parameters: a call with the generated writer's arguments does not
+// compile, and one that gets past the types still throws
+function refuseWrite(): never {
+  throw new MedusaError(MedusaError.Types.NOT_ALLOWED, "consent events are append-only")
 }
 
 /** A call's consent is kept against the phone number, like an SMS's. */
@@ -53,6 +65,7 @@ const addressChannel = (channel: ConsentChannel): MessageChannel =>
  * the database or an error.
  */
 class MessagingModuleService extends MedusaService({
+  CheckoutConsent,
   MessageConsent,
   MessageConsentEvent,
   MessageSuppression,
@@ -175,7 +188,8 @@ class MessagingModuleService extends MedusaService({
           },
           sharedContext
         )
-    await this.createMessageConsentEvents(
+    // The generated writer itself is closed below: events are written only here
+    await super.createMessageConsentEvents(
       {
         consent_id: consent.id,
         channel: input.channel,
@@ -183,10 +197,58 @@ class MessagingModuleService extends MedusaService({
         source: input.source,
         changed_at: now,
         changed_by: input.changed_by ?? null,
+        evidence: input.evidence ?? null,
       },
       sharedContext
     )
     return { id: consent.id, changed: true }
+  }
+
+  /**
+   * Withdraws a consent found by its keyed hash: an unsubscribe link names
+   * the recipient so, never by address. No consent, nothing to withdraw.
+   */
+  @InjectTransactionManager()
+  async revokeByHash(
+    channel: ConsentChannel,
+    recipientHash: string,
+    source: ConsentSource,
+    evidence: ConsentEvidence | null = null,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<{ changed: boolean }> {
+    const [row] = await this.listMessageConsents(
+      { channel, recipient_hash: recipientHash },
+      { take: 1 },
+      sharedContext
+    )
+    if (row?.status !== "granted") {
+      return { changed: false }
+    }
+    const now = new Date()
+    await this.updateMessageConsents(
+      {
+        id: row.id,
+        status: "revoked",
+        source,
+        changed_at: now,
+        changed_by: null,
+        iys_status: "pending",
+      },
+      sharedContext
+    )
+    await super.createMessageConsentEvents(
+      {
+        consent_id: row.id,
+        channel,
+        status: "revoked",
+        source,
+        changed_at: now,
+        changed_by: null,
+        evidence,
+      },
+      sharedContext
+    )
+    return { changed: true }
   }
 
   /** Whether nothing may go to the address on the channel. */
@@ -248,6 +310,15 @@ class MessagingModuleService extends MedusaService({
     )
     return { id: created.id, created: true }
   }
+
+  // A consent's history is proof: written only by recordConsent and
+  // revokeByHash, never changed or removed. Field initialisers run after
+  // the base constructor, so these replace the generated methods.
+  override createMessageConsentEvents = refuseWrite
+  override updateMessageConsentEvents = refuseWrite
+  override deleteMessageConsentEvents = refuseWrite
+  override softDeleteMessageConsentEvents = refuseWrite
+  override restoreMessageConsentEvents = refuseWrite
 
   /** Takes the address off the list, keeping who did it; messages may go to it again. */
   @InjectTransactionManager()

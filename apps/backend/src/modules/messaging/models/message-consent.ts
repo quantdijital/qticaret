@@ -14,7 +14,7 @@ export const MessageConsent = model
     recipient_masked: model.text(),
     customer_id: model.text().nullable(),
     status: model.enum(["granted", "revoked"]),
-    source: model.enum(["checkout", "account", "panel", "import", "iys"]),
+    source: model.enum(["checkout", "account", "panel", "import", "iys", "unsubscribe"]),
     changed_at: model.dateTime(),
     /** The staff member who changed it from the panel; null when the recipient did. */
     changed_by: model.text().nullable(),

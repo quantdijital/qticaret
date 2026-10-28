@@ -8,14 +8,23 @@ interface Sender {
   from_email: string
   from_name: string
   reply_to: string | null
+  /** A commercial e-mail's one-click way out (RFC 8058); an https or http address. */
+  list_unsubscribe: string | null
 }
 
 const senderOf = (data: Record<string, unknown> | null | undefined): Sender | null => {
   const from = data?.["from_email"]
   const name = data?.["from_name"]
   const replyTo = data?.["reply_to"]
+  const leave = data?.["list_unsubscribe"]
   return typeof from === "string" && typeof name === "string"
-    ? { from_email: from, from_name: name, reply_to: typeof replyTo === "string" ? replyTo : null }
+    ? {
+        from_email: from,
+        from_name: name,
+        reply_to: typeof replyTo === "string" ? replyTo : null,
+        list_unsubscribe:
+          typeof leave === "string" && /^https?:\/\/[^\s<>,]+$/.test(leave) ? leave : null,
+      }
     : null
 }
 
@@ -66,6 +75,14 @@ class EmailNotificationService extends AbstractNotificationProviderService {
       text: content.text ?? "",
       template: notification.template,
       idempotencyKey: key,
+      ...(sender.list_unsubscribe
+        ? {
+            headers: {
+              "List-Unsubscribe": `<${sender.list_unsubscribe}>`,
+              "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+            },
+          }
+        : {}),
     })
     return { id }
   }

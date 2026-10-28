@@ -18,7 +18,7 @@ export type { PaymentFailedVars } from "./payment"
 export type { ReturnVars } from "./returns"
 export type { ParcelVars } from "./shipping"
 export type { StaffOrderVars, StaffSeoVars, StaffStockVars } from "./staff"
-export type { Brand, EmailContent, MessageKind, MessageTemplate } from "./types"
+export type { Brand, EmailContent, EmailContext, MessageKind, MessageTemplate } from "./types"
 
 /** Every template the platform sends, by name (adr/0036). */
 export const MESSAGE_TEMPLATES = {

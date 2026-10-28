@@ -81,6 +81,24 @@ F10'un pazarlama tarafı mağazanın verisini dış servislere taşır: Google, 
      - sahte sağlayıcıyla testler.
    - Gerçek sağlayıcı kullanıcının seçimine ve veri işleme sözleşmesine (docs/12) bağlıdır. ADR-0005 gereği kural motoru canlıda kullanıldıktan sonra açılır.
 
+## Uygulama notları (M3, 2026-10-28)
+- **İzin kanıtı:**
+  - Her izin olayında `evidence` alanı var.
+  - Vitrinden gelen izinde metin sürümü (`text_version`) ve IP'nin anahtarlı özeti (`ip_hash`, `PII_HASH_KEY`) tutulur. Checkout izninde bunlara sipariş ve sepet kimliği eklenir. Panelden verilen izinde personelin notu (`note`, en az 10 karakter) zorunludur.
+  - Hiçbir kanıtta adres yok.
+  - İzin olaylarının üretilen yazıcıları kapalı: güncelleme, silme ve geri getirme `NOT_ALLOWED` döner. Olay yalnızca `recordConsent` ve `revokeByHash` ile yazılır (denetim kaydının deseni).
+- **Vitrin uçları:**
+  - `GET` ve `POST /store/customers/me/consents`.
+  - `POST /store/carts/:id/consents` (`email`, `sms`, `text_version`). İşaretli kutular sepette `checkout_consent` satırında bekler. `order.placed` olayında siparişin e-postası ve telefonu için kaydedilir, sonra satır silinir.
+  - İşaretsiz kutu var olan izni geri almaz.
+- **Abonelikten çıkış:**
+  - Bağlantı `BACKEND_URL/unsubscribe?t=<alıcı özeti>.<HMAC>` biçimindedir. Adres içermez ve süresi dolmaz (RFC 8058).
+  - `GET` yalnızca bir onay sayfası gösterir. E-posta tarayıcıları bağlantıyı açtığında kimsenin izni gitmesin diye geri alma bu adımda yapılmaz.
+  - `POST` (sayfadaki düğme ya da posta istemcisinin tek tıkla çıkışı) e-posta iznini `unsubscribe` kaynağıyla geri alır.
+  - Sayfanın CSP'si: `default-src 'none'`, `form-action 'self'`; ayrıca `noindex`.
+  - Ticari e-postada `List-Unsubscribe` ve `List-Unsubscribe-Post: List-Unsubscribe=One-Click` başlıkları ile altbilgide "Bu iletileri almak istemiyorum" bağlantısı bulunur.
+  - `BACKEND_URL` yoksa (yerelde) bağlantı da başlık da konmaz.
+
 ## Alternatifler
 
 | Seçenek | Artı | Eksi |

@@ -20,6 +20,8 @@ export interface OutgoingEmail {
   template: string
   /** The same key sends once: Resend keeps it for 24 hours. */
   idempotencyKey: string
+  /** Extra headers our sends set: the unsubscribe pair (RFC 8058) only. */
+  headers?: Record<"List-Unsubscribe" | "List-Unsubscribe-Post", string>
 }
 
 export interface EmailTransport {
@@ -87,6 +89,7 @@ export function createResendTransport(
             { name: "template", value: tagOf(email.template) },
             { name: "tenant", value: tenant },
           ],
+          ...(email.headers ? { headers: email.headers } : {}),
         },
         // Resend sends a key once: a repeat after a lost answer is safe
         idempotent: true,
@@ -117,7 +120,11 @@ export function createMailpitTransport(
           Subject: headerText(email.subject, 998),
           Text: email.text,
           HTML: email.html,
-          Headers: { "X-Qt-Template": email.template, "X-Qt-Key": email.idempotencyKey },
+          Headers: {
+            "X-Qt-Template": email.template,
+            "X-Qt-Key": email.idempotencyKey,
+            ...email.headers,
+          },
           Tags: [tagOf(email.template)],
         },
         idempotent: true,

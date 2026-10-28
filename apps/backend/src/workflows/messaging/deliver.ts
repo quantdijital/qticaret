@@ -5,7 +5,13 @@ import { emailTransport } from "../../lib/messaging/email"
 import { normalizeRecipient } from "../../lib/messaging/recipients"
 import type { MessageChannel } from "../../lib/messaging/recipients"
 import { MESSAGE_TEMPLATES } from "../../lib/messaging/templates"
-import type { Brand, MessageTemplate, MessageTemplateName } from "../../lib/messaging/templates"
+import type {
+  Brand,
+  EmailContext,
+  MessageTemplate,
+  MessageTemplateName,
+} from "../../lib/messaging/templates"
+import { unsubscribeUrl } from "../../lib/messaging/unsubscribe"
 import { netgsmAccountOf } from "../../lib/messaging/sms/netgsm"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-credentials"
 import type IntegrationCredentialsModuleService from "../../modules/integration-credentials/service"
@@ -68,12 +74,13 @@ function render<N extends MessageTemplateName>(
   name: N,
   channel: MessageChannel,
   vars: VarsOf<N>,
-  brand: Brand
+  brand: Brand,
+  context: EmailContext
 ) {
   // The registry pairs each name with its own variables; TypeScript cannot follow N through it
   const template = MESSAGE_TEMPLATES[name] as MessageTemplate<VarsOf<N>>
   if (channel === "email" && template.email) {
-    return template.email(vars, brand)
+    return template.email(vars, brand, context)
   }
   if (channel === "sms" && template.sms) {
     return { text: template.sms(vars, brand) }
@@ -146,7 +153,10 @@ export async function deliver<N extends MessageTemplateName>(
       continue
     }
     brand ??= await brandOf(container)
-    const content = render(input.template, channel, input.vars, brand)
+    // A commercial e-mail carries its recipient's way out, in the body and the headers
+    const leave =
+      template.kind === "commercial" && channel === "email" ? unsubscribeUrl(recipient.hash) : null
+    const content = render(input.template, channel, input.vars, brand, { unsubscribeUrl: leave })
     try {
       const created = await notifications.createNotifications([
         {
@@ -162,6 +172,7 @@ export async function deliver<N extends MessageTemplateName>(
                   from_email: await senderAddress(container),
                   from_name: brand.shopName,
                   reply_to: brand.contactEmail,
+                  ...(leave ? { list_unsubscribe: leave } : {}),
                 }
               : { commercial: template.kind === "commercial" },
           trigger_type: template.name,

@@ -27,6 +27,8 @@ export interface EmailBody {
   blocks: EmailBlock[]
   /** Why the recipient gets it (transactional) or how to stop it (commercial). */
   footer: string
+  /** A commercial message's one-click way out (adr/0038 §1); shown under the footer. */
+  unsubscribe?: { label: string; url: string | null } | null
 }
 
 const e = (value: string): string => escapeXml(value)
@@ -93,6 +95,10 @@ export function renderEmail(brand: Brand, body: EmailBody): EmailContent {
     ? `<img src="${e(brand.logoUrl)}" alt="${e(brand.shopName)}" height="32" style="display:block;height:32px;border:0">`
     : `<span style="${FONT}font-size:18px;font-weight:bold;color:#ffffff">${e(brand.shopName)}</span>`
   const contact = [brand.contactEmail, brand.contactPhone].filter(Boolean).join(" · ")
+  const leave =
+    body.unsubscribe && linkable(body.unsubscribe.url)
+      ? { label: body.unsubscribe.label, url: body.unsubscribe.url }
+      : null
   const html = [
     `<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${e(body.subject)}</title></head>`,
     `<body style="margin:0;padding:0;background:#f3f4f6">`,
@@ -103,7 +109,7 @@ export function renderEmail(brand: Brand, body: EmailBody): EmailContent {
     `<tr><td style="padding:24px"><h1 style="${FONT}font-size:20px;line-height:28px;margin:0 0 16px;color:#111827">${e(body.heading)}</h1>`,
     body.blocks.map((block) => blockHtml(block, color)).join(""),
     `</td></tr>`,
-    `<tr><td style="padding:16px 24px;border-top:1px solid #e5e7eb"><p style="${FONT}font-size:12px;line-height:18px;margin:0;color:${MUTED}">${e(body.footer)}${contact ? `<br>${e(brand.shopName)} · ${e(contact)}` : ""}</p></td></tr>`,
+    `<tr><td style="padding:16px 24px;border-top:1px solid #e5e7eb"><p style="${FONT}font-size:12px;line-height:18px;margin:0;color:${MUTED}">${e(body.footer)}${contact ? `<br>${e(brand.shopName)} · ${e(contact)}` : ""}${leave ? `<br><a href="${e(leave.url)}" style="color:${MUTED};text-decoration:underline">${e(leave.label)}</a>` : ""}</p></td></tr>`,
     `</table></td></tr></table></body></html>`,
   ].join("")
   const text = [
@@ -112,6 +118,7 @@ export function renderEmail(brand: Brand, body: EmailBody): EmailContent {
     "—",
     body.footer,
     contact ? `${brand.shopName} · ${contact}` : brand.shopName,
+    ...(leave ? [`${leave.label}: ${leave.url}`] : []),
   ].join("\n\n")
   return { subject: body.subject, html, text }
 }

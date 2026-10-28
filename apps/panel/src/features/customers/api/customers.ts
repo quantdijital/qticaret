@@ -91,7 +91,7 @@ export interface ConsentState {
   address: boolean
   consent: {
     status: "granted" | "revoked"
-    source: "checkout" | "account" | "panel" | "import" | "iys"
+    source: "checkout" | "account" | "panel" | "import" | "iys" | "unsubscribe"
     changed_at: string
   } | null
 }
@@ -110,10 +110,13 @@ export const customerConsentsQuery = (customerId: string) =>
       ).consents,
   })
 
-/** Records a consent the customer gave or withdrew outside the storefront. */
+/**
+ * Records a consent the customer gave or withdrew outside the storefront;
+ * a grant says how the customer gave it (the proof İYS asks for).
+ */
 export const saveCustomerConsent = async (
   customerId: string,
-  body: { channel: ConsentChannel; status: "granted" | "revoked" }
+  body: { channel: ConsentChannel; status: "granted" | "revoked"; evidence?: string }
 ) =>
   (
     await sdk.client.fetch<{ consents: CustomerConsents }>(

@@ -18,6 +18,8 @@ export interface PlaceOrderInput {
   promo_codes?: string[] | undefined
   /** Where the order's messages go; none by default, so no message is sent. */
   email?: string | undefined
+  /** What the shopper does on the cart before paying (a test ticks consent boxes, F10). */
+  beforeComplete?: ((cartId: string) => Promise<void>) | undefined
   /** Turkish address fields as F1.4 stores them: il in province, ilçe in city. */
   address: {
     first_name: string
@@ -63,6 +65,7 @@ export async function placeOrder(
   await createPaymentSessionsWorkflow(container).run({
     input: { payment_collection_id: collection.id, provider_id: SYSTEM_PAYMENT_PROVIDER_ID },
   })
+  await input.beforeComplete?.(cart.id)
   const { result } = await completeCartWorkflow(container).run({ input: { id: cart.id } })
   return result.id
 }

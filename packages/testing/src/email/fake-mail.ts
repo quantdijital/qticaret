@@ -23,6 +23,8 @@ export interface FakeMailMessage {
   tenant: string
   /** The `Idempotency-Key` it came with; "" without one. */
   key: string
+  /** The extra headers the sender set (List-Unsubscribe). */
+  headers: Record<string, string>
 }
 
 export interface FakeMail {
@@ -155,6 +157,7 @@ export async function startFakeMail(options: { port?: number } = {}): Promise<Fa
           template: headers["X-Qt-Template"] ?? "",
           tenant: "",
           key: headers["X-Qt-Key"] ?? "",
+          headers,
         })
         reply(200, { ID: id })
         return
@@ -194,6 +197,7 @@ export async function startFakeMail(options: { port?: number } = {}): Promise<Fa
           template: tags.find((tag) => tag.name === "template")?.value ?? "",
           tenant: tags.find((tag) => tag.name === "tenant")?.value ?? "",
           key: typeof key === "string" ? key : "",
+          headers: (body["headers"] ?? {}) as Record<string, string>,
         })
         if (typeof key === "string") {
           byKey.set(key, id)

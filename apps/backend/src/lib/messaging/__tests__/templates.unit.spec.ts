@@ -57,3 +57,25 @@ describe("marketing.announcement SMS", () => {
     expect(sms("Son gün!", "Kaçırmayın…")).toContain(": Son gün! Kaçırmayın… Ret")
   })
 })
+
+describe("a commercial e-mail's way out", () => {
+  const render = (unsubscribeUrl: string | null) =>
+    MESSAGE_TEMPLATES["marketing.announcement"].email?.(
+      { title: "Yeni sezon", body: "İndirim.", url: null },
+      brand,
+      { unsubscribeUrl }
+    )
+
+  it("links the recipient's unsubscribe page in the footer and the plain text", () => {
+    const mail = render("https://api.magaza.example/unsubscribe?t=abc")
+    expect(mail?.html).toContain('href="https://api.magaza.example/unsubscribe?t=abc"')
+    expect(mail?.text).toContain(
+      "Bu iletileri almak istemiyorum: https://api.magaza.example/unsubscribe?t=abc"
+    )
+  })
+
+  it("draws no link without one, nor for an address that is no web link", () => {
+    expect(render(null)?.html).not.toContain("almak istemiyorum")
+    expect(render("javascript:alert(1)")?.html).not.toContain("javascript:")
+  })
+})

@@ -64,6 +64,40 @@ moduleIntegrationTestRunner<MessagingModuleService>({
         expect(row?.recipient_masked).toBe("+905*** *** ** 67")
       })
 
+      it("keeps the proof with the change, and lets no one rewrite or remove it", async () => {
+        await service.recordConsent({
+          channel: "email",
+          address: "kanit@example.com",
+          status: "granted",
+          source: "panel",
+          changed_by: "user_1",
+          evidence: { note: "Mağazada imzalı form" },
+        })
+        const [event] = await service.listMessageConsentEvents({ source: "panel" })
+
+        expect(event?.evidence).toEqual({ note: "Mağazada imzalı form" })
+        expect(() => service.updateMessageConsentEvents()).toThrow("append-only")
+        expect(() => service.deleteMessageConsentEvents()).toThrow("append-only")
+        expect(() => service.createMessageConsentEvents()).toThrow("append-only")
+      })
+
+      it("withdraws a consent found by its keyed hash, as an unsubscribe link names it", async () => {
+        await service.recordConsent({
+          channel: "email",
+          address: "cik@example.com",
+          status: "granted",
+          source: "checkout",
+        })
+        const hash = service.recipientOf("email", "cik@example.com")?.hash ?? ""
+
+        const first = await service.revokeByHash("email", hash, "unsubscribe")
+        const again = await service.revokeByHash("email", hash, "unsubscribe")
+        const unknown = await service.revokeByHash("email", "0".repeat(64), "unsubscribe")
+
+        expect([first.changed, again.changed, unknown.changed]).toEqual([true, false, false])
+        expect(await service.consentOf("email", "cik@example.com")).toBe("revoked")
+      })
+
       it("refuses what is no address of the channel", async () => {
         await expect(
           service.recordConsent({

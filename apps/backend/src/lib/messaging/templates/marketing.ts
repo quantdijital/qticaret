@@ -25,7 +25,7 @@ export const announcement: MessageTemplate<AnnouncementVars> = {
   kind: "commercial",
   channels: ["email", "sms"],
   retry: false,
-  email: (vars, brand) =>
+  email: (vars, brand, context) =>
     renderEmail(brand, {
       subject: vars.title,
       preheader: vars.title,
@@ -38,6 +38,10 @@ export const announcement: MessageTemplate<AnnouncementVars> = {
         shop: brand.shopName,
         contact: brand.contactEmail ?? brand.shopName,
       }),
+      unsubscribe: {
+        label: messageText("footer.unsubscribe"),
+        url: context?.unsubscribeUrl ?? null,
+      },
     }),
   sms: (vars, brand) =>
     messageText("announcement.sms", {

@@ -420,12 +420,24 @@ medusaIntegrationTestRunner({
             consents: Record<string, { consent: { status: string; source: string } | null }>
           }>(
             `/admin/customers/${customerId}/consents`,
-            { channel, status },
+            {
+              channel,
+              status,
+              ...(status === "granted" ? { evidence: "Telefonda sözlü onay, 28 Ekim" } : {}),
+            },
             { headers: admin.headers }
           )
         )
 
       const without = await announce("c1")
+      // A grant without proof is refused (adr/0038 §2)
+      const unproven = await settle(
+        http.post<{ message?: string }>(
+          `/admin/customers/${customerId}/consents`,
+          { channel: "email", status: "granted" },
+          { headers: admin.headers }
+        )
+      )
       await consent("email", "granted")
       const granted = await consent("sms", "granted")
       const withConsent = await announce("c2")
@@ -433,6 +445,7 @@ medusaIntegrationTestRunner({
       const smsRevoked = await announce("c3")
 
       expect(without.result).toEqual({ email: "no_consent", sms: "no_consent" })
+      expect(unproven.status).toBe(400)
       expect(granted.data.consents["sms"]?.consent).toMatchObject({
         status: "granted",
         source: "panel",
@@ -536,7 +549,7 @@ medusaIntegrationTestRunner({
       const customerId = customer?.id ?? ""
       await http.post(
         `/admin/customers/${customerId}/consents`,
-        { channel: "sms", status: "granted" },
+        { channel: "sms", status: "granted", evidence: "Mağazada imzalı form" },
         { headers: admin.headers }
       )
       const outcomes: unknown[] = []
