@@ -156,25 +156,28 @@ export function StepChart(props: StepChartProps) {
           ))}
         </LineChart>
       </ChartContainer>
-      <table className="sr-only">
-        <caption>{tableCaption}</caption>
-        <thead>
-          <tr>
-            <th scope="col" />
-            <th scope="col">{names.value}</th>
-            <th scope="col">{names.reference}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((point) => (
-            <tr key={point.at}>
-              <th scope="row">{formatTime(point.at)}</th>
-              <td>{formatValue(point.value)}</td>
-              <td>{formatValue(point.reference)}</td>
+      {/* A table ignores the 1px box sr-only gives it: the box hides it, rows and all */}
+      <div className="sr-only">
+        <table>
+          <caption>{tableCaption}</caption>
+          <thead>
+            <tr>
+              <th scope="col" />
+              <th scope="col">{names.value}</th>
+              <th scope="col">{names.reference}</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {data.map((point) => (
+              <tr key={point.at}>
+                <th scope="row">{formatTime(point.at)}</th>
+                <td>{formatValue(point.value)}</td>
+                <td>{formatValue(point.reference)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }

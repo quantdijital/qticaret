@@ -149,25 +149,28 @@ export function TrendChart({
           />
         </ComposedChart>
       </ChartContainer>
-      <table className="sr-only">
-        <caption>{tableCaption}</caption>
-        <thead>
-          <tr>
-            <th scope="col" />
-            <th scope="col">{currentLabel}</th>
-            <th scope="col">{previousLabel}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((point) => (
-            <tr key={point.label}>
-              <th scope="row">{point.label}</th>
-              <td>{formatValue(point.current)}</td>
-              <td>{formatValue(point.previous)}</td>
+      {/* A table ignores the 1px box sr-only gives it: the box hides it, rows and all */}
+      <div className="sr-only">
+        <table>
+          <caption>{tableCaption}</caption>
+          <thead>
+            <tr>
+              <th scope="col" />
+              <th scope="col">{currentLabel}</th>
+              <th scope="col">{previousLabel}</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {data.map((point) => (
+              <tr key={point.label}>
+                <th scope="row">{point.label}</th>
+                <td>{formatValue(point.current)}</td>
+                <td>{formatValue(point.previous)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </>
   )
 }
