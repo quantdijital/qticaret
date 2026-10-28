@@ -3,6 +3,8 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
+**F10 — Müşteri hesabı, etkileşim, pazarlama ve SEO ölçümü: BAŞLADI (2026-10-28 akşam).** Plan aşağıda "F10 görev planı" (M1–M17); ADR-0037 ve ADR-0038 önerildi, otonom kabul (gözden geçir). Dal `f10-customer-marketing`.
+
 **F9 — Bildirimler: BİTTİ (2026-10-28 akşam, N1–N10; KK1–KK4 işaretli).** Plan aşağıda "F9 görev planı"; ADR-0036 ve ekindeki "her mağazaya ayrı Resend hesabı" kararı otonom kabul edildi (gözden geçir). Dal `f9-notifications`. Gerçek Resend ve Netgsm hesaplarıyla deneme sunucuya çıkışta. Sıradaki faz F10.
 
 **F8 — E-Fatura / e-Arşiv: PLANLANDI, ASKIDA (2026-10-28 öğlen).** Kullanıcı e-fatura tarafını netleştirdikten sonra başlanacak ("şimdilik askıya alabilirsin"). Plan aşağıda "F8 görev planı"; ADR-0034 önerildi.
@@ -1157,7 +1159,34 @@
 - **Daha önce:** F1 planlaması ve F0.2–F0.8 (2026-10-24), F0.1 monorepo (2026-10-24 sabahı), SEO ve güvenlik dokümanları (2026-10-22).
 
 ## Sıradaki görev
-**Claude'un sıradaki işi:** F10 başlangıcı (`/faz-baslat F10`: yol haritasından görev planı, Medusa API doğrulaması, ADR). GitHub'ın ücretli özellikleri 2026-11-01'e kadar kapalı (kullanıcı, 2026-10-28): CI çalışmaz, her doğrulama yerelde. Dal `f9-notifications` (`f7-shipping` üzerinden). F7 kapandı, yalnızca KK3 kaldı; KK3 iade faturası olduğu için F8'i bekliyor. F8 askıda ve kullanıcı e-faturayı netleştirince açılır. F8 askıda (kullanıcı e-faturayı netleştirecek); F7 KK3 F8'i bekliyor. Plan aşağıda "F7 görev planı". Dal `f7-shipping` (`f6-alternative-payments` üzerinden). Kullanıcı 2026-10-27 gece: "izin istemeden çalışmaya devam edersin, kritik bir şey olursa sabah sorarım."
+**Claude'un sıradaki işi:** F10 M1 (önce F9'dan kalan doğrulama kodu açığı: kod yalnızca kimliğin kendi adresine), ardından M2 (misafir sipariş erişimi). GitHub'ın ücretli özellikleri 2026-11-01'e kadar kapalı (kullanıcı, 2026-10-28): CI çalışmaz, her doğrulama yerelde. Dal `f9-notifications` (`f7-shipping` üzerinden). F7 kapandı, yalnızca KK3 kaldı; KK3 iade faturası olduğu için F8'i bekliyor. F8 askıda ve kullanıcı e-faturayı netleştirince açılır. F8 askıda (kullanıcı e-faturayı netleştirecek); F7 KK3 F8'i bekliyor. Plan aşağıda "F7 görev planı". Dal `f7-shipping` (`f6-alternative-payments` üzerinden). Kullanıcı 2026-10-27 gece: "izin istemeden çalışmaya devam edersin, kritik bir şey olursa sabah sorarım."
+
+### F10 görev planı (2026-10-28; Medusa 2.21.2 API'leri v2.21.2 kaynağından ve docs.medusajs.com'dan doğrulandı: e-posta doğrulama, Google sağlayıcısı, müşteri grupları, stok/sepet/sipariş olayları, store uçları; dış API'ler her görevin başında resmî belgeden doğrulanır)
+Kararlar: ADR-0037 (müşteri hesabı, misafir sipariş erişimi, etkileşim modülleri) ve ADR-0038 (pazarlama ve ölçüm); ikisi de önerildi, otonom kabul (gözden geçir). Dal `f10-customer-marketing` (`f9-notifications` üzerinden).
+
+Doğrulamada çıkan iki açık (çekirdek davranışı, bizim kapatmamız gereken):
+- `POST /auth/verification/request` hedef adresin isteyen kimliğe ait olup olmadığına bakmıyor; F9'daki `account-messages` kodu `entity_id`'ye gönderiyor. Kayıt token'ı alan herkes mağaza adına herhangi bir adrese kod yollatabilir (giriş hız sınırı var, yalnızca IP başına). **M1'in ilk adımı.**
+- `GET /store/orders/:id` kimlik istemiyor (sipariş kimliği anahtar). Adres ve e-posta döner. **M2.**
+
+| # | F10 | Görev | Bağımlılık | KK |
+|---|---|---|---|---|
+| M1 | F10.1 | Hesap güvenliği ve e-posta doğrulama: doğrulama kodu yalnızca kimliğin kendi adresine (F9 açığı), `authVerificationsPerActor` açık, `POST /store/customers`'ta e-posta kimlikten, doğrulama isteğine kimlik başına hız sınırı, doğrulanınca aynı e-postalı misafir siparişlerinin hesaba bağlanması; test yardımcıları kodu sahte posta kutusundan onaylar; kayıt → doğrulama → giriş → sipariş geçmişi → adres defteri sözleşme testleri | — | KK6 (taban) |
+| M2 | F10.1 | Misafir sipariş erişimi: `GET /store/orders/:id` yalnızca sahibine ya da imzalı sipariş token'ına; şablonlarda `orderUrl`; "siparişimi bul" (bağlantıyı e-postayla yollar); misafir iptali (K7'den) ve iade talebi token'la | M1 | — |
+| M3 | F10.7 (kısmen), F9 devri | Vitrinde izin: hesap ve checkout izin uçları (kanıtla), izin olayları değiştirilemez, panelde izin kanıt notu; tek tıkla çıkış ucu ve `List-Unsubscribe` başlıkları (ticari e-postalar) | M1 | — |
+| M4 | F10.2 | Sosyal giriş: Google (resmî sağlayıcı, ortamdan), Apple (kendi sağlayıcımız, ES256 + JWKS, sahte Apple), `authMethodsPerActor`, hesap bağlama kuralı (iki taraf da doğrulanmışsa) | M1 | — |
+| M5 | F10.3 | Müşteri grupları ve segmentler: panelde grup listesi/üyelik, kurallı segment modülü + iş (Medusa gruplarına yazar), promosyon ve fiyat listesi ekranlarında grup seçimi | — | — |
+| M6 | F10.4, F10.5 | `wishlist` ve `back-in-stock` modülleri: store uçları, misafir aboneliğinde çift onay, stok olaylarından tek bildirim (`product.back_in_stock` şablonu), panelde sayılar | M1 | KK2 |
+| M7 | F10.6 | `product-reviews`: doğrulanmış alıcı denetimi (teslim edilmiş kalem), moderasyon ekranı, onaylıların ortalaması Store API'de ve JSON-LD `aggregateRating`'de, danışman etkisi | M1 | KK1, KK6 |
+| M8 | F10.10 | `product-qa`: doğrulanmış hesap sorar, mağaza ya da doğrulanmış alıcı cevaplar, moderasyon, tek soru sayfası için `QAPage` yükü | M1, M7 | KK6 |
+| M9 | F10.12 | Kötüye kullanım: yorum/soru/abonelik hız profilleri, bağlantılı içerik moderasyona, captcha işareti (F15'e hazır), F9 devri: vitrin SMS'inde IP sayacı, misafir e-postasına günlük sınır ve MX denetimi | M6–M8 | KK6 |
+| M10 | F10.7 | Terk edilmiş sepet: iş, izin ve bastırma denetimi, sepet başına tek hatırlatma (kendi tablomuz), tek kullanımlık geri dönüş token'ı, şablon, panel ayarı | M3 | KK3 |
+| M11 | F9 devri | İYS iletimi: Netgsm İYS API istemcisi (görev başında doğrulanır), bekleyen izinleri ileten iş, sahte İYS, panelde durum | M3 | — |
+| M12 | F10.8 | `marketing-feeds`: `FeedFormatter` (Google, Meta, Akakçe, Cimri), JSON-LD ile aynı kaynak, worker işi → özel depo, token'lı uç, Google şema doğrulaması ve fiyat eşitliği testi | — | KK4 |
+| M13 | F10.8, F10.11 | Google bağlantısı (platform OAuth uygulaması, mağaza başına yenileme token'ı, `state` + PKCE) ve Merchant API ürün gönderimi; sahte Google | M12 | — |
+| M14 | F10.9 | Sunucu taraflı dönüşümler: sepete çerez onayı ucu → sipariş, Meta Conversions API ve GA4 Measurement Protocol (satın alma, iade), panelden kimlik bilgileri, özetleme, `event_id` | M3 | KK5 |
+| M15 | F10.11 | `seo-insights`: Search Analytics, site haritası gönderimi, kotalı URL Inspection, CrUX; danışman S-GSC-01 ve S-CWV-01; panel SEO kartları | M13 | KK7 |
+| M16 | F10.13 | LLM taslak altyapısı: `ContentDraftProvider`, bayrak (kapalı), kota, kişisel veri süzgeci, taslak kaydı, kural motoru kapısı, onaysız yayım engeli; sahte sağlayıcı (gerçek sağlayıcı kullanıcının seçimi, ADR-0005) | — | KK8 |
+| M17 | — | Kapanış: bağımsız güvenlik incelemesi, KK işaretleri, tam doğrulama | M1–M16 | — |
 
 ### F9 görev planı (2026-10-28; Netgsm uçları resmî SDK kaynağından, Mailpit gönderim ucu v1.31.4 kaynağından, Resend ve Svix imzası resmî belgelerden doğrulandı; Medusa bildirim API'leri 2.21.2 kaynağından)
 Karar: ADR-0036 (önerildi, otonom kabul). Ayrıntı `docs/entegrasyonlar/sms.md`.
@@ -1388,6 +1417,8 @@ Devreden işlerin F3 görevlerine dağılımı:
 F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde: `git show 118e835:PROGRESS.md`.
 
 ## Açık sorular / bloklayıcılar
+- [ ] **Gözden geçir: ADR-0037 ve ADR-0038 (F10, 2026-10-28 akşam, otonom kabul).** Öne çıkanlar: e-posta doğrulama açık (doğrulanmamış hesap giriş yapamaz); misafir siparişi yalnızca imzalı bağlantıyla görünür; Google ve Apple OAuth istemcileri mağaza başına kurulumda açılır ve ortamdan okunur (panelden değil, ADR-0027'ye bilinçli istisna); iki taraf da doğrulanmışsa sosyal hesap var olan hesaba bağlanır; yorum yalnızca teslim almış alıcıdan; stok bildirimi işlemsel (çift onaylı, avukat görüşüyle değişebilir); feed'ler token'lı uçtan; dönüşüm olayları çerez onayına bağlı; platformun tek Google OAuth uygulaması (GSC + Merchant); LLM yalnızca altyapı, gerçek sağlayıcı senin seçimin.
+- [ ] **Soru (F10, bloklamıyor; sahte sunucularla ilerleniyor):** (1) Apple ile giriş için Apple Developer hesabı var mı? (2) Platform adına Google Cloud projesi ve OAuth uygulama doğrulaması (Search Console, Merchant). (3) İYS marka kodu ve Netgsm İYS erişimi. (4) Akakçe ve Cimri'nin güncel XML şemaları (satıcı panelinden). (5) LLM sağlayıcı seçimi (F10.13; ADR-0005 gereği kural motoru canlıda kullanıldıktan sonra açılır).
 - [ ] **Gözden geçir: her mağazaya ayrı Resend hesabı (2026-10-28 akşam, F9 N10 güvenlik incelemesinden; ADR-0036 ek).** Alan adı eklemek tam yetkili anahtar istediği için paylaşılan hesapta bir mağazanın ele geçmesi ötekilerin alan adlarını ve gönderilmiş iletilerini açıyordu. Kurulumda (F16) her mağazaya ayrı Resend hesabı/takımı, anahtarı ve web kancası sırrı; varsayılan gönderici `<slug>.bildirim.<platform-alanı>`. Kod değişmedi; ek olarak her gönderim `tenant` etiketi taşıyor ve web kancası başkasının raporunu yok sayıyor. Ertelenenler: misafir adreslerine günlük e-posta sınırı ve MX denetimi (F10), vitrin SMS'lerinde IP sayacı (F10/F15), Redis yokken SMS sayacının kapalı başarısızlığı (F16'da Redis HA), panelden izinde kanıt alanı ve rol kısıtı (F10/F12), `List-Unsubscribe` (F10).
 - [ ] **Gözden geçir: ADR-0036 bildirim altyapısı (2026-10-28 akşam, otonom kabul).** E-posta gönderim hesabı platformun (Resend, ortam değişkeni; mağaza kendi alan adını doğrular); SMS hesabı mağazanın (Netgsm, panelden). Şablonlar bağımlılıksız (React Email yerine kendi tablo HTML'imiz). Ticari ileti izni yeni `messaging` modülünde (İYS karşılığı); İYS'ye iletim ve vitrinde izin alma F10'da, captcha sağlayıcısı F15'te. Canlıda Resend hesabı ve platform gönderim alan adı gerekecek.
 - [x] **Soru (F7.14): ilk müşterinin anlaşmalı kargo firması hangisi?** Cevap (2026-10-28): Aras var, Yurtiçi ileride; ikisi de entegre edilecek, bilgiler sonradan panelden (ADR-0035). **Gerçek hesapla denenecekler:** Aras canlı servis adresi (varsayılan `customerws.araskargo.com.tr`, panelden değiştirilebilir), takip yanıtının (`GetCargoInfo`) sütun adları ve durum metinleri (`lib/shipping/aras/status.ts`), etiket biçimi (`ZebraPdf` mi `Images` mı), kapıda ödeme alanları (`CodCollectionType`, `CodBillingType`, `PayorTypeCode`), hatalı girişin nasıl döndüğü (şimdi SOAP fault sayılıyor); Yurtiçi IP izni (sunucunun çıkış IP'si Yurtiçi'ye bildirilmeli), hatalı girişin dönüş biçimi, olay metinleri (dağıtımda / teslim edilemedi / iade), kapıda ödeme hesabı ve `ttDocumentId`'ye sipariş numarası, bizim çizdiğimiz etiketin şubede okutulması (ADR-0035 uygulama notu). Eski soru metni: Yurtiçi, Aras, MNG, PTT ya da Sürat'ten biri. Doğrudan taşıyıcı adaptörü (K11) bu cevaba bağlı; K1–K10 beklemeden ilerler. Firmanın API erişimi (müşteri numarası, test ortamı) de gerekecek (docs/12).
@@ -1622,7 +1653,7 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
 | F7 Kargo, sipariş operasyonu, iade ve değişim | ✅ KK3 hariç (K1–K12, 2026-10-28; KK3 iade faturası F8'i bekliyor) |
 | F8 E-fatura | ⛔ askıda (kullanıcı e-faturayı netleştirecek; plan hazır, ADR-0034 önerildi) |
 | F9 Bildirimler (e-posta/SMS) | ✅ (N1–N10; KK1–KK4; 2026-10-28; gerçek Resend/Netgsm denemesi sunucuya çıkışta) |
-| F10 Müşteri hesabı, etkileşim, pazarlama ve SEO ölçümü | ⬜ |
+| F10 Müşteri hesabı, etkileşim, pazarlama ve SEO ölçümü | ⏳ planlandı (M1–M17, 2026-10-28) |
 | F11 Raporlama, muhasebe ve dış API | ⬜ |
 | F12 Admin genişletmeleri (ekranlar panel hattı P5'te) | ⬜ |
 | F13 Uyum & yasal özellikler | ⬜ |

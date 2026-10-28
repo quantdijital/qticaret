@@ -1,0 +1,107 @@
+# ADR-0038: Pazarlama ve ölçüm: terk edilmiş sepet, İYS, ürün feed'leri, dönüşüm olayları, Search Console
+
+- **Durum:** Önerildi (2026-10-28; kullanıcının "önerileni uygula" kuralıyla otonom kabul edilir, PROGRESS "Gözden geçir"de)
+- **Tarih:** 2026-10-28
+- **İlgili:** F10.7–F10.9, F10.11, F10.13; ADR-0036 (izin ve bildirimler), ADR-0027 (hesaplar panelden), ADR-0014 (iş altyapısı), ADR-0005 (LLM), docs/entegrasyonlar/pazarlama.md, docs/13 §10, docs/14
+
+## Bağlam
+
+F10'un pazarlama tarafı mağazanın verisini dış servislere taşır: Google, Meta, fiyat karşılaştırma siteleri ve İYS. Kısıtlar:
+
+- **Kişisel veri:** dönüşüm olayları çerez onayına bağlıdır. Ticari ileti izne bağlıdır ve izin İYS'ye iletilmelidir (6563 sayılı Kanun).
+- **Tek kaynak:** feed'deki fiyat, stok ve GTIN, sayfa JSON-LD'siyle aynı yerden üretilmelidir. Google otomatik ürün güncellemeleri bu eşleşmeye bakar (docs/13 §10).
+- **Content API for Shopping** 18 Ağustos 2026'da kapandı. Yeni entegrasyon yalnızca Merchant API ile yapılır.
+- **Medusa'da:**
+  - Sepet tamamlanma olayı yok; `order.placed` kullanılır.
+  - Sipariş düzeyinde iade olayı yok. `payment.refunded {id}` ve bizim `return.refunded` olayımız var.
+  - Sepette `updated_at`'e dokunan her yazım hatırlatma zamanlamasını kaydırır. Müşteri `metadata`'ya yazabildiği için güvenilen işaret oraya konmaz.
+- **Dış API'ler** her görevin başında resmî belgeden doğrulanır: Merchant API, Meta Conversions API, GA4 Measurement Protocol, Search Console, CrUX, Netgsm İYS.
+
+## Karar
+
+1. **Terk edilmiş sepet (F10.7).**
+   - 15 dakikada bir iş. Hedef: e-postası olan, tamamlanmamış, son değişikliği ayarlanan süreden (varsayılan 1 saat) eski ve 7 günden yeni sepetler.
+   - Hatırlatma ticari iletidir. Alıcının e-posta kanalında izni (`granted`) yoksa gitmez. Bastırma listesi de geçerlidir.
+   - Sepet başına tek hatırlatma. Bu kayıt kendi tablomuzda tutulur, sepete yazılmaz.
+   - Geri dönüş bağlantısı tek kullanımlık, süreli ve imzalı bir token taşır; sepeti açar, kullanılınca geçersiz olur.
+   - Her ticari e-postaya F9'dan devredilenler eklenir:
+     - `List-Unsubscribe` ve `List-Unsubscribe-Post` başlıkları;
+     - tek tıkla çıkış ucu (RFC 8058). Ucu imzalı token korur; çıkış izni geri alır ve izin olayına yazar.
+2. **İzin vitrinde alınır ve İYS'ye iletilir.**
+   - Store uçları:
+     - checkout'ta ve hesapta e-posta ve SMS izni verme veya geri alma;
+     - kayıt olayına kaynak, zaman, metin sürümü ve IP özeti kanıt olarak yazılır.
+   - İzin olayları değiştirilemez: güncelleme ve silme kapalı, denetim kaydı gibi.
+   - Panelden verilen izin kanıt notu ister.
+   - İletim:
+     - Bekleyen değişiklikleri (`iys_status: pending`) bir iş İYS'ye iletir. Yol mağazanın Netgsm hesabının İYS API'si ve marka kodudur (ADR-0036 §6).
+     - Sonuç izin kaydına yazılır.
+     - Sahte İYS sunucusuyla test edilir.
+3. **Ürün feed'leri (F10.8) ve Merchant API.**
+   - `marketing-feeds` modülü, `FeedFormatter` arayüzü: Google (RSS 2.0 + `g:` ad alanı), Meta (CSV), Akakçe ve Cimri (XML). Yeni hedef yeni bir biçimleyicidir.
+   - Ürün, fiyat (KDV dahil), stok ve GTIN, JSON-LD'yi üreten aynı fonksiyondan okunur. Eşitlik testlidir (KK4).
+   - Üretim:
+     - Worker'da periyodik iş (ADR-0014), çıktı özel dosya deposuna.
+     - Dış dünyaya `/feeds/:token/<hedef>` ucundan sunulur; token tahmin edilemez, panelden yenilenir, sabit zamanlı karşılaştırılır.
+     - Varsayılan olarak dışarıda kalanlar: yayında olmayan, stokta olmayan ve kısıtlı kategorideki ürünler (F13.4).
+   - Merchant API'ye ürün gönderimi Google bağlantısıyla yapılır (madde 5). Feed dosyası yedek olarak kalır.
+4. **Sunucu taraflı dönüşüm olayları (F10.9).**
+   - Vitrin, çerez onayının durumunu (`analytics`, `marketing`, zamanı) sepete kendi ucumuzla yazar; kendi tablomuzda tutulur, sipariş oluşunca siparişe geçer. Onay müşterinin kendi beyanıdır, kaynağı vitrindir.
+   - Onay yoksa olay gönderilmez (KK5). Kural olay başına değerlendirilir:
+     - Meta: `marketing`;
+     - GA4: `analytics`.
+   - Kimlik bilgileri panelden girilir (`integration-credentials`, ADR-0027):
+     - Meta piksel kimliği ve erişim anahtarı;
+     - GA4 ölçüm kimliği ve API sırrı.
+   - E-posta ve telefon sağlayıcının istediği biçimde normalleştirilir ve SHA-256 ile özetlenir. Ham hali ne gider ne loglanır.
+   - `event_id` sipariş kimliğidir; tarayıcı pikseliyle çift sayım önlenir.
+   - Olaylar:
+     - satın alma: `order.placed`;
+     - iade: `return.refunded` ve `payment.refunded`.
+5. **Google bağlantısı: Search Console, Merchant API (F10.11, F10.8).**
+   - Platformun tek bir Google Cloud OAuth uygulaması vardır. Hassas kapsamlar için Google doğrulaması kod dışı gereksinimdir (docs/12).
+   - Mağaza Search Console mülkünü ve Merchant hesabını panelden bağlar:
+     - OAuth `state` ve PKCE kullanılır;
+     - yenileme token'ı `integration-credentials`'ta şifreli durur;
+     - kapsamlar en dar olanlardır.
+   - `seo-insights` modülü:
+     - Search Analytics (günlük);
+     - site haritası gönderimi;
+     - URL Inspection kotayla: 2.000/gün/site; önce yeni ve değişen ürünler, kalanı örneklem.
+     - CrUX haftalık. CrUX herkese açık veridir, platformun API anahtarıyla okunur.
+   - Sonuçlar danışmanın S-GSC-01 ve S-CWV-01 kurallarını besler (docs/14). Panelde SEO kartları gösterilir.
+6. **LLM taslakları (F10.13), ADR-0005'e uygun.**
+   - Bu fazda yazılanlar:
+     - `ContentDraftProvider` arayüzü;
+     - `ai_content_drafts` bayrağı, kapalı başlar;
+     - aylık kota;
+     - kişisel veri süzgeci: istemde yalnızca ürün ve içerik alanları, e-posta, telefon, ad ve adres biçimleri reddedilir;
+     - "AI taslak" kaydı ve kural motoru kapısı;
+     - onaysız yayımlamanın engeli;
+     - sahte sağlayıcıyla testler.
+   - Gerçek sağlayıcı kullanıcının seçimine ve veri işleme sözleşmesine (docs/12) bağlıdır. ADR-0005 gereği kural motoru canlıda kullanıldıktan sonra açılır.
+
+## Alternatifler
+
+| Seçenek | Artı | Eksi |
+|---|---|---|
+| Hatırlatma işaretini sepet `metadata`'sına yazmak (Medusa rehberi) | Tablo yok | Yazım `updated_at`'i değiştirir; müşteri `metadata`'ya yazabilir |
+| Feed'i herkese açık sabit URL'den sunmak | Basit | Rakip kataloğu ve fiyatları toplu çeker; tahmin edilebilir URL |
+| Çerez onayını yalnızca vitrinde uygulamak | Sunucu basit | Sunucu olayı onaydan bağımsız gider; KK5 sağlanmaz |
+| Her mağazaya kendi Google Cloud projesi | Tam yalıtım | Mağaza sahibinden OAuth uygulaması ve doğrulaması beklenemez |
+| İYS'ye doğrudan bağlanmak | Aracı yok | Mağaza başına ayrı İYS API erişimi gerekir; Netgsm aynı hesapla sunuyor |
+
+## Sonuçlar
+
+- Kod dışı gereksinimler (docs/12):
+  - platform Google Cloud projesi ve OAuth doğrulaması;
+  - mağazanın Merchant Center ve Search Console mülkü;
+  - İYS marka kodu;
+  - Meta ve GA4 hesapları;
+  - Akakçe ve Cimri'nin güncel XML şemaları (mağazanın satıcı panelinden);
+  - LLM sağlayıcısı ve veri işleme sözleşmesi.
+- Vitrin (F18) çerez onayını ve izin kutularını sepet/hesap uçlarına yazar. Sözleşme `packages/types`'a girer.
+- Panel:
+  - Ayarlar > Pazarlama: feed'ler ve token, Meta, GA4, terk edilmiş sepet;
+  - Ayarlar > Entegrasyonlar: Google bağlantısı;
+  - SEO paneli: GSC ve CWV kartları.
