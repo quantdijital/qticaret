@@ -8,6 +8,7 @@ import { authenticate, validateAndTransformBody } from "@medusajs/framework/http
 import { Modules } from "@medusajs/framework/utils"
 import { errorSummary, logger } from "../../lib/logging"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
+import { linkSocialIdentityWorkflow } from "../../workflows/account/link-social-identity"
 import { attachGuestOrdersWorkflow } from "../../workflows/orders/attach-guest-orders"
 import {
   StorePostCheckoutConsent,
@@ -41,7 +42,9 @@ export function loginEmailOf(identities: readonly ProviderIdentity[]): string | 
  * `POST /store/customers` takes the e-mail from the registering identity,
  * whatever the body says: Medusa takes any address there (2.21.2), so a
  * registration token could open an account in a stranger's name
- * (adr/0037 §1). Runs after Medusa's authentication and body validation.
+ * (adr/0037 §1). A first social sign-in joins the confirmed account of its
+ * address instead, if there is one (§3). Runs after Medusa's
+ * authentication and body validation.
  */
 export async function registrationEmailFromIdentity(
   req: MedusaRequest,
@@ -60,7 +63,8 @@ export async function registrationEmailFromIdentity(
     const identity = await req.scope
       .resolve(Modules.AUTH)
       .retrieveAuthIdentity(authIdentityId, { relations: ["provider_identities"] })
-    const email = loginEmailOf(identity.provider_identities ?? [])
+    const identities = identity.provider_identities ?? []
+    const email = loginEmailOf(identities)
     if (!email) {
       rejectRequest(
         req,
@@ -70,6 +74,20 @@ export async function registrationEmailFromIdentity(
         "login_email_missing"
       )
       return
+    }
+    // A social sign-in whose address already has a confirmed account joins it (adr/0037 §3)
+    if (!identities.some((each) => each.provider === "emailpass")) {
+      const { result: linked } = await linkSocialIdentityWorkflow(req.scope).run({
+        input: {
+          auth_identity_id: identity.id,
+          app_metadata: identity.app_metadata ?? null,
+          email,
+        },
+      })
+      if (linked) {
+        res.json({ customer: linked })
+        return
+      }
     }
     body["email"] = email
     next()

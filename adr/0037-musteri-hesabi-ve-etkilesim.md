@@ -93,6 +93,24 @@ F10 vitrinin müşteri tarafını kuruyor: hesap, e-posta doğrulama, sosyal gir
   - Aynı e-postalı misafir kayıtlarının siparişleri hesaba taşınır. `ILIKE`'ta `_` ve `%` kaçışlanır.
   - Misafir kayıtları silinmez.
 
+## Uygulama notları (M4, sosyal giriş, 2026-10-28)
+- Apple'ın REST API'si resmî belgeden doğrulandı:
+  - `GET /auth/authorize`: `response_mode=form_post`, `scope=name email`, `state`, `nonce`.
+  - `POST /auth/token`: form gövdesi, ES256 istemci sırrı (`iss` takım, `sub` Services ID, `aud` `https://appleid.apple.com`, `kid` anahtar).
+  - `GET /auth/keys` (JWKS, RS256).
+- Kendi sağlayıcımız `auth-apple`:
+  - İstemci sırrı her token isteğinde 5 dakikalık üretilir.
+  - Kimlik token'ında şunlar doğrulanır: imza (`kid` ile anahtar; bilinmeyen `kid` görülünce anahtar listesi yeniden okunur, aksi halde saatte bir), `iss`, `aud`, `exp`, girişin `nonce`'u ve `email_verified`.
+  - Ad, yalnızca ilk girişte gelen `user` alanından alınır; iki kısa düz metin olarak, denetim karakterleri ve `<`/`>` atılarak saklanır.
+  - Yönlendirme adresi hiçbir zaman istekten alınmaz.
+  - Zaman aşımı 5 saniye, en çok 2 deneme: müşteri giriş sayfasında bekliyor.
+- Google için Medusa'nın resmî sağlayıcısı kullanılıyor. Bilinen bir kusuru var: kod değişiminde istemci sırrını ve kodu POST gövdesinde değil URL sorgusunda gönderiyor. Bağlantı TLS üzerinde ve log'u bizde değil; yine de gözden geçir: istemci sırrı mağaza başına ve yalnızca bu iş için. Sorun olursa Apple'ınki gibi kendi sağlayıcımıza geçilir.
+- Sağlayıcıların açılıp kapanması:
+  - Her sağlayıcı yalnızca ortam değişkenlerinin hepsi doluysa kaydolur (`lib/auth/providers.ts`).
+  - `authMethodsPerActor`: personel yalnızca e-posta; müşteri e-posta ve kurulmuş sosyal sağlayıcılar.
+  - Kurulmamış sağlayıcıya istek reddedilir (testli).
+- Hesap bağlama: Sosyal kimliğin ilk `POST /store/customers` isteğinde aynı adresle `has_account` bir müşteri varsa ve o adresin e-posta doğrulaması tamamlanmışsa (`auth_verification.verified_at`), yeni hesap açılmaz; kimlik var olan müşteriye bağlanır (`app_metadata.customer_id`, telafili workflow). Doğrulanmamış hesaba bağlanmaz; Medusa'nın "zaten hesabı var" hatası döner. Sosyalden sosyale bağlama yok.
+
 ## Alternatifler
 
 | Seçenek | Artı | Eksi |

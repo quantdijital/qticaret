@@ -1,4 +1,10 @@
-import { defineConfig, loadEnv } from "@medusajs/framework/utils"
+import {
+  ContainerRegistrationKeys,
+  Modules,
+  defineConfig,
+  loadEnv,
+} from "@medusajs/framework/utils"
+import { customerAuthProviders } from "./src/lib/auth/providers"
 import { isLocalEnv, parseEnv, s3Settings } from "./src/lib/env"
 import { DEFAULT_LOG_LEVEL, MedusaPinoLogger, baseLogger, logger } from "./src/lib/logging"
 import { lockingModules, tenantNamespace } from "./src/lib/redis"
@@ -6,6 +12,7 @@ import { lockingModules, tenantNamespace } from "./src/lib/redis"
 loadEnv(process.env["NODE_ENV"] ?? "development", process.cwd())
 
 const env = parseEnv()
+const auth = customerAuthProviders(env)
 // Redis keys of this tenant, a test run apart from dev (lib/redis/namespace.ts)
 const namespace = tenantNamespace(env.DATABASE_URL, env.NODE_ENV)
 // Tests keep files local (CI has no object store); elsewhere S3 when set,
@@ -43,6 +50,9 @@ module.exports = defineConfig({
       authVerificationsPerActor: {
         customer: [{ entity_type: "email", auth_provider: "emailpass" }],
       },
+      // adr/0037 §3: staff log in with e-mail only; customers also with the
+      // social providers this shop has set up
+      authMethodsPerActor: { user: ["emailpass"], customer: auth.ids },
     },
   },
   // F4.8 (ADR-0025): gift cards and store credit; its routes answer only with
@@ -101,6 +111,13 @@ module.exports = defineConfig({
     { resolve: "./src/modules/return-requests" },
     // F5 V5: refunds line by line, each made once
     { resolve: "./src/modules/order-refunds" },
+    // F10.2 (adr/0037 §3): configuring the module drops Medusa's default, so
+    // e-mail is named again; Google and Apple only once their clients are set
+    {
+      resolve: "@medusajs/medusa/auth",
+      dependencies: [Modules.CACHE, ContainerRegistrationKeys.LOGGER],
+      options: { providers: auth.providers },
+    },
     // F5 (adr/0026): the hosted-form providers; the system provider stays registered
     {
       resolve: "@medusajs/medusa/payment",

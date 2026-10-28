@@ -5,9 +5,7 @@ import {
   createStep,
   createWorkflow,
 } from "@medusajs/framework/workflows-sdk"
-
-/** `ILIKE` reads `_` and `%` as wildcards, and e-mail addresses carry `_`. */
-const literal = (value: string): string => value.replace(/[\\%_]/g, (char) => `\\${char}`)
+import { likeLiteral } from "../../lib/db/like"
 
 /**
  * Finds the orders placed as a guest with the customer's address. Only for
@@ -30,7 +28,7 @@ const findGuestOrdersStep = createStep(
     const { data: guests } = await query.graph({
       entity: "customer",
       fields: ["id", "orders.id"],
-      filters: { email: { $ilike: literal(customer.email) }, has_account: false },
+      filters: { email: { $ilike: likeLiteral(customer.email) }, has_account: false },
     })
     const orders = (guests as { id: string; orders?: ({ id: string } | null)[] | null }[]).flatMap(
       (guest) =>

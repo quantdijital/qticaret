@@ -72,6 +72,25 @@ const envSchema = z.object({
     .optional(),
   // A fake Netgsm on a developer's machine (adr/0036)
   NETGSM_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
+  // F10.2 (adr/0037 §3): the shop's own OAuth clients, made at provisioning;
+  // a provider is on once its values are all set
+  GOOGLE_AUTH_CLIENT_ID: z.string().max(200).optional(),
+  GOOGLE_AUTH_CLIENT_SECRET: z.string().max(200).optional(),
+  GOOGLE_AUTH_CALLBACK_URL: z.url({ protocol: /^https?$/ }).optional(),
+  // Apple's Services ID, team, key and its .p8 private key (PEM, `\n` for line breaks)
+  APPLE_AUTH_CLIENT_ID: z.string().max(200).optional(),
+  APPLE_AUTH_TEAM_ID: z
+    .string()
+    .regex(/^[A-Z0-9]{10}$/, "must be a 10-character team id")
+    .optional(),
+  APPLE_AUTH_KEY_ID: z
+    .string()
+    .regex(/^[A-Z0-9]{10}$/, "must be a 10-character key id")
+    .optional(),
+  APPLE_AUTH_PRIVATE_KEY: z.string().max(4000).optional(),
+  APPLE_AUTH_CALLBACK_URL: z.url({ protocol: /^https?$/ }).optional(),
+  // A fake Apple in tests; refused when deployed
+  APPLE_AUTH_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
   // Medusa's level names; unset means Medusa's default, `http`
   LOG_LEVEL: z.enum(LOG_LEVELS).optional(),
   // docs/13 §6: "off" keeps search engines out (robots.txt, noindex) on an
@@ -206,6 +225,7 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
     "MAILPIT_URL",
     "RESEND_BASE_URL",
     "NETGSM_BASE_URL",
+    "APPLE_AUTH_BASE_URL",
   ] as const) {
     if (env[name] !== undefined && (env.NODE_ENV === "production" || env.NODE_ENV === "staging")) {
       ctx.addIssue({
