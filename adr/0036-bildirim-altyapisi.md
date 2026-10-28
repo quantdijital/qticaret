@@ -110,3 +110,28 @@ F9 müşteriye ve mağazaya giden iletileri kuruyor: işlemsel e-posta ve SMS, m
 - Canlıda Resend hesabı ve platform gönderim alan adı gerekir (kod dışı gereksinim, docs/12).
 - Gerçek Netgsm ve Resend hesaplarıyla deneme sunucuya çıkışta yapılır. Testler sahte Netgsm ve Mailpit ile çalışır.
 - İYS'ye izin iletimi ve vitrinde izin alma F10'da; captcha sağlayıcısı F15'te.
+
+## Ek: F9 N10 güvenlik incelemesi (2026-10-28)
+Bağımsız inceleme kritik bulgu çıkarmadı. Şablon kaçışı, web kancası imzası, log maskeleme ve yönetici uçlarının yetkisi temiz. Yüksek ve orta bulgular, Resend hesabının mağazalar arasında paylaşılmasından geliyordu.
+
+- **Karar: her mağazaya ayrı Resend hesabı (takımı) ve anahtarı.** §2'deki "platformun hesabı" yerine geçer.
+  - Gerekçe: alan adı eklemek ve doğrulamak tam yetkili anahtar ister. Alan adına bağlı gönderim anahtarı bu uçları çağıramaz. Paylaşılan hesapta tek bir mağaza örneğinin ele geçmesi, öteki mağazaların alan adlarını silmeye, onların adına imzalı e-posta göndermeye ve gönderilmiş iletileri (şifre sıfırlama bağlantıları dahil) okumaya yeter. Bu, örnek başına mağaza modelinin (ADR-0001, docs/04) yalıtım sözünü bozar.
+  - Kurulumda (F16/F17) her mağazaya bir Resend hesabı açılır; anahtarı ve web kancası sırrı yalnızca o mağazanın ortamına girer.
+  - Mağaza kendi alan adını doğrulayana kadar varsayılan gönderici, platform alan adının mağazaya ait alt alan adıdır (ör. `<mağaza>.bildirim.<platform-alanı>`) ve kurulumda o mağazanın hesabında doğrulanır. Böylece bir mağazanın geri dönüş ve şikâyet oranı ya da yanıltıcı görünen adı ötekilerin itibarını etkilemez.
+  - Kod değişmez: örnek zaten tek anahtar, tek web kancası sırrı ve tek gönderici okur. Değişen kurulum adımıdır (docs/08, docs/12).
+- **Uygulandı (ikinci savunma hattı, hesap paylaşılsa da geçerli):**
+  - Her gönderim `tenant` etiketi taşır (mağaza örneğinin `BACKEND_URL` host'u). Web kancası etiketi bu mağazanın olmayan raporu kaydetmeden yok sayar. Başkasının geri dönüşü bu mağazanın listesine girmez, müşterileri bu mağazanın panelinde görünmez.
+  - Resend'e giden `Idempotency-Key` aynı etiketle başlar. Aynı personel adresine giden iki mağazanın özeti çakışmaz.
+  - Canlıda ve staging'de `EMAIL_TRANSPORT=resend` ise `RESEND_WEBHOOK_SECRET` zorunlu. Sırsız kurulumda bastırma listesi sessizce kapalı kalırdı.
+  - Müşterinin yazdığı ad ve adres iletide yalnızca bağlantı gibi okunmuyorsa yer alır: adda `://`, `www.`, `@`, alan adı biçimi, rakam ya da 40 karakterden uzunluk; adres satırında `://`, `www.` ya da `@` varsa satır atlanır, karşılama "Değerli müşterimiz"e döner. Sipariş veren herkes başkasının adresine mağaza adıyla oltalama metni gönderemesin diye.
+  - E-posta doğrulama kodunun ve sıfırlama bağlantısının bildirim kaydındaki izi artık anahtarlı özet (`PII_HASH_KEY`). Altı haneli kod düz SHA-256'dan milyon denemeyle bulunabiliyordu. Sıfırlama bağlantısının iş akışı kaydında (`workflow_execution`) da durmadığı test edildi.
+  - SMS yalnızca cep telefonuna (`+905…`) gider. Sabit hat ve 0850 numaraları kotayı boşuna harcamaz.
+  - Başlıklar: görünen ad ve konu, bütün denetim karakterlerinden ve U+2028/U+2029'dan temizlenir.
+  - Gönderici alan adı: ikinci alan adı Resend'e gitmeden reddedilir; Resend'de artık olmayan alan adı (404) yerelde de kaldırılır; geri çekme başarısız olursa log Resend kimliğini yazar; alan adı ekleme de personel başına hız sınırında.
+  - Netgsm başlık sorgusunun JSON yanıtında yalnızca değerler gönderici adı sayılır; anahtarlar ve durum alanları (`code`, `description` …) sayılmaz.
+- **Ertelenenler (gözden geçir):**
+  - Misafir adreslerine mağaza başına günlük e-posta sınırı ve MX denetimi: F10'da vitrin sipariş akışının kötüye kullanım önlemleriyle (captcha F15). O zamana kadar checkout'un IP başına hız sınırı ve bastırma listesi geçerli.
+  - Ziyaretçinin tetiklediği SMS'lerde IP sayacı (§8): sipariş SMS'i şimdilik numara ve mağaza sınırıyla korunuyor. IP kovası sipariş anında saklanıp F10'daki ilk vitrin SMS ucuyla bağlanacak; captcha F15'te.
+  - Redis düştüğünde SMS sayaçları bellekte sıfırdan başlıyor (kapanmadan açık kalma değil, sınır gevşer). Canlıda Redis yüksek erişilebilir kurulur (F16). Maliyet sorun olursa SMS sayacı Redis yokken kapalı başarısızlığa çevrilir.
+  - Panelden izin verme: kanıt alanı, yalnızca sahip rolü ve izin olaylarının değiştirilemezliği F10 (İYS iletimi) ve F12 (roller) ile.
+  - Ticari e-postada `List-Unsubscribe` / `List-Unsubscribe-Post` başlıkları ve tek tıkla ret bağlantısı F10 kampanyalarıyla.

@@ -1,5 +1,10 @@
 import { fakeResendSecret, signResendReport } from "@qticaret/testing"
-import { resendEvent, suppressionOf, verifyResendSignature } from "../email/resend-webhook"
+import {
+  isOwnReport,
+  resendEvent,
+  suppressionOf,
+  verifyResendSignature,
+} from "../email/resend-webhook"
 
 describe("Resend's reports (adr/0036)", () => {
   const secret = fakeResendSecret()
@@ -48,5 +53,21 @@ describe("Resend's reports (adr/0036)", () => {
     expect(event("email.bounced", { type: "Transient", subType: "MailboxFull" })).toBeNull()
     expect(event("email.complained")).toEqual({ reason: "complaint", detail: null })
     expect(event("email.delivered")).toBeNull()
+  })
+})
+
+describe("isOwnReport", () => {
+  const report = (tags?: Record<string, string>) =>
+    resendEvent.parse({
+      type: "email.bounced",
+      data: { to: "a@example.com", ...(tags ? { tags } : {}) },
+    })
+
+  it("takes a report about this shop's own send only", () => {
+    expect(
+      isOwnReport(report({ template: "order_placed", tenant: "magaza_example" }), "magaza_example")
+    ).toBe(true)
+    expect(isOwnReport(report({ tenant: "baska_magaza" }), "magaza_example")).toBe(false)
+    expect(isOwnReport(report(), "magaza_example")).toBe(false)
   })
 })

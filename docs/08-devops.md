@@ -33,7 +33,7 @@ Script **idempotent** olmalı (yarıda kalırsa tekrar çalıştırılabilir).
 - **Alan adı:** varsayılan `<slug>.<platform-domain>`; tenant domain'i DNS TXT sahiplik doğrulamasıyla bağlanır, otomatik SSL; bağlanınca platform alt alan adı 301 (SEO + güvenlik)
 - **Kapatma sonrası:** DNS/sertifika kayıtları temizlenir, alt alan adı devralma (subdomain takeover) kontrolü
 - **SEO dosyaları:** sitemap/robots worker'da üretilir, S3'ten storefront proxy'ler; CDN cache kısa TTL
-- **E-posta:** tenant alan adı için SPF/DKIM/DMARC doğrulaması (F9.6)
+- **E-posta:** her tenant'a ayrı Resend hesabı (takımı), anahtarı ve web kancası sırrı; anahtar tenant'lar arasında paylaşılmaz (adr/0036 ek). Varsayılan gönderici `<slug>.bildirim.<platform-domain>`, kurulumda o hesapta doğrulanır; tenant kendi alan adını panelden SPF/DKIM/DMARC ile doğrular (F9.6). Kapatmada hesabın anahtarı iptal edilir.
 - **Destek erişimi:** süreli, gerekçeli, audit log'lu; tenant'a bildirim
 - **Kapatma:** veri dışa aktarma paketi → saklama süresi → silme, secret iptali, DNS temizliği
 - **Maliyet:** tenant başına kaynak/maliyet raporu; boşta tenant optimizasyonu ayrı ADR

@@ -1,5 +1,6 @@
-import { createHash } from "node:crypto"
 import type { SubscriberArgs, SubscriberConfig } from "@medusajs/framework"
+import { hashPii, parseKey } from "../lib/crypto/pii"
+import { parseEnv } from "../lib/env"
 import { sendMessageWorkflow } from "../workflows/messaging/send-message"
 
 interface AuthEvent {
@@ -12,9 +13,13 @@ interface AuthEvent {
   expires_at?: string | Date
 }
 
-// The secret itself never names a notification row: a short digest of it does
+// The secret itself never names a notification row: a keyed digest of it
+// does, so a six-digit code cannot be found again by trying every one
 const digest = (secret: string): string =>
-  createHash("sha256").update(secret).digest("hex").slice(0, 24)
+  hashPii(secret, parseKey(parseEnv().PII_HASH_KEY, "PII_HASH_KEY"), "messaging.secret").slice(
+    0,
+    32
+  )
 
 /**
  * A customer's account messages (F9.4): the password reset link and the

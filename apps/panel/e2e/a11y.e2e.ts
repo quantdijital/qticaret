@@ -39,6 +39,9 @@ const SCREENS = [
 async function seriousIssues(page: Page): Promise<string[]> {
   const results = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+    // A message preview runs no script, axe's included (it would wait there forever);
+    // what it shows is the shop's e-mail, not the panel
+    .exclude('iframe[sandbox=""]')
     .analyze()
   return results.violations
     .filter((violation) => violation.impact === "serious" || violation.impact === "critical")

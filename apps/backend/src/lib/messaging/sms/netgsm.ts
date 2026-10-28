@@ -49,6 +49,28 @@ const refused = (code: string) =>
 /** A Turkish mobile number as Netgsm takes it: 90 and ten digits. */
 const netgsmNumber = (phone: string): string => phone.replace(/\D/g, "").replace(/^0/, "90")
 
+// Fields of an answer that say how it went, not which names the account has
+const STATUS_FIELDS = new Set(["code", "description", "error", "message", "status"])
+
+/**
+ * The sender names in a JSON answer, wherever the account's version puts
+ * them: the strings in its lists and values, never a key, nor a status field.
+ */
+function headerNames(value: unknown, depth = 0): string[] {
+  if (typeof value === "string") {
+    return value.length <= 40 ? [value] : []
+  }
+  if (depth > 3 || typeof value !== "object" || value === null) {
+    return []
+  }
+  const entries = Array.isArray(value)
+    ? value.map((each): [string, unknown] => ["", each])
+    : Object.entries(value)
+  return entries.flatMap(([key, each]) =>
+    STATUS_FIELDS.has(key.toLowerCase()) ? [] : headerNames(each, depth + 1)
+  )
+}
+
 export function createNetgsmApi(options: Partial<Omit<HttpClientOptions, "provider">> = {}) {
   const client: HttpClient = createHttpClient({
     ...options,
@@ -118,10 +140,7 @@ export function createNetgsmApi(options: Partial<Omit<HttpClientOptions, "provid
       if (String(code) === "30") {
         return "secret_invalid"
       }
-      names =
-        JSON.stringify(parsed)
-          .match(/"[^"]{1,40}"/g)
-          ?.map((each) => each.slice(1, -1)) ?? []
+      names = headerNames(parsed)
     } catch {
       // An older plain answer: a code, or the names one per line
       if (/^30\b/.test(trimmed)) {

@@ -52,12 +52,22 @@ export const resendEvent = z
           .object({ type: z.string().max(40).optional(), subType: z.string().max(40).optional() })
           .loose()
           .optional(),
+        // The send's tags, as a map (Resend's report format)
+        tags: z.record(z.string().max(256), z.string().max(256)).optional(),
       })
       .loose(),
   })
   .loose()
 
 export type ResendEvent = z.infer<typeof resendEvent>
+
+/**
+ * Whether the report is about this shop's own send: Resend reports every
+ * send of the account to each webhook, and another shop's bounce is not
+ * this shop's to act on (nor its customers' addresses to list).
+ */
+export const isOwnReport = (event: ResendEvent, tenant: string): boolean =>
+  event.data.tags?.["tenant"] === tenant
 
 /** Whether the report puts its addresses on the list, and why: a hard bounce or a complaint. */
 export function suppressionOf(

@@ -4,7 +4,7 @@ import type { PaymentFailedVars } from "../../../lib/messaging/templates"
 import type { MedusaAmount } from "../../../lib/money"
 import { brandOf } from "../brand"
 import { lira } from "./order"
-import { GREETING, firstText } from "./types"
+import { GREETING, personName } from "./types"
 import type { Loaded } from "./types"
 
 /** The storefront's cart page (F18 builds it). */
@@ -39,7 +39,7 @@ export async function loadPaymentFailed(
   const { storefrontUrl } = await brandOf(container)
   return {
     vars: {
-      customerName: firstText(cart.shipping_address?.first_name) ?? GREETING,
+      customerName: personName(cart.shipping_address?.first_name) ?? GREETING,
       total: lira(cart.total),
       cartUrl: storefrontUrl ? `${storefrontUrl}${CART_PATH}` : null,
     },

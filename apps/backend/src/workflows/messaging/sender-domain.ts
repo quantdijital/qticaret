@@ -8,6 +8,7 @@ import {
 import { parseEnv } from "../../lib/env"
 import { ValidationError } from "../../lib/errors"
 import { errorSummary, logger } from "../../lib/logging"
+import { isProviderError } from "../../lib/errors"
 import { platformSender } from "../../lib/messaging/email"
 import { createResendDomains } from "../../lib/messaging/email/resend-domains"
 import type { ResendDomain, ResendDomains } from "../../lib/messaging/email/resend-domains"
@@ -55,6 +56,21 @@ export async function senderAddress(container: Container): Promise<string | null
   return domain?.status === "verified" ? `${domain.local_part}@${domain.name}` : platformSender()
 }
 
+/** Resend no longer has it: removed there already, by hand or by an earlier attempt. */
+const goneAtResend = (error: unknown): boolean =>
+  isProviderError(error) && ["not_found", "http_404"].includes(error.providerCode)
+
+/** A shop has one sender domain: a second is refused before Resend hears of it. */
+const requireNoSenderDomainStep = createStep(
+  "messaging-require-no-sender-domain",
+  async (_input: undefined, { container }) => {
+    if (await currentSenderDomain(container)) {
+      throw new ValidationError("messaging.domain_exists")
+    }
+    return new StepResponse(undefined)
+  }
+)
+
 /** Adds the domain at Resend; undone by removing it there when the record cannot be kept. */
 const addResendDomainStep = createStep(
   "messaging-add-resend-domain",
@@ -67,7 +83,12 @@ const addResendDomainStep = createStep(
       await requireDomains()
         .remove(resendId)
         .catch((error: unknown) => {
-          logger.warn({ event: "messaging.domain_withdraw_failed", err: errorSummary(error) })
+          // The id lets someone remove it at Resend by hand
+          logger.warn({
+            event: "messaging.domain_withdraw_failed",
+            resend_id: resendId,
+            err: errorSummary(error),
+          })
         })
     }
   }
@@ -100,6 +121,7 @@ const saveSenderDomainStep = createStep(
 export const addSenderDomainWorkflow = createWorkflow(
   "messaging-add-sender-domain",
   (input: { name: string; local_part: string }) => {
+    requireNoSenderDomainStep()
     const domain = addResendDomainStep({ name: input.name })
     return new WorkflowResponse(saveSenderDomainStep({ domain, local_part: input.local_part }))
   }
@@ -130,6 +152,12 @@ export async function removeSenderDomain(container: Container) {
   if (!domain) {
     return
   }
-  await requireDomains().remove(domain.resend_id)
+  await requireDomains()
+    .remove(domain.resend_id)
+    .catch((error: unknown) => {
+      if (!goneAtResend(error)) {
+        throw error
+      }
+    })
   await messagingOf(container).deleteSenderDomains([domain.id])
 }

@@ -18,7 +18,9 @@ export function normalizeRecipient(channel: MessageChannel, address: string): st
     const email = address.trim().toLowerCase()
     return EMAIL.test(email) && email.length <= 254 ? email : null
   }
-  return normalizeTrPhone(address)
+  // An SMS reaches a mobile only: a landline or a 0850 line would spend the quota for nothing
+  const phone = normalizeTrPhone(address)
+  return phone?.startsWith("+905") ? phone : null
 }
 
 /** What the panel shows of an address: enough to recognise it, not to use it. */

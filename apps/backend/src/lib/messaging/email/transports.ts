@@ -33,12 +33,16 @@ type TransportOptions = Partial<Omit<HttpClientOptions, "provider" | "baseUrl">>
   baseUrl?: string
 }
 
+/** A header's text on one line: control characters and line separators become spaces. */
+export const headerText = (value: string, max: number): string =>
+  value
+    .replace(/[\p{Cc}\u2028\u2029]+/gu, " ")
+    .trim()
+    .slice(0, max)
+
 /** A display name as one header word: no line break, quotes and backslashes escaped. */
 export function mailbox(address: { email: string; name: string }): string {
-  const name = address.name
-    .replace(/[\r\n\t]+/g, " ")
-    .trim()
-    .slice(0, 100)
+  const name = headerText(address.name, 100)
   return name === ""
     ? address.email
     : `"${name.replace(/[\\"]/g, (char) => `\\${char}`)}" <${address.email}>`
@@ -55,7 +59,7 @@ const resendErrorCode = (body: unknown): string | undefined => {
 
 export function createResendTransport(
   apiKey: string,
-  options: TransportOptions = {}
+  { tenant, ...options }: TransportOptions & { tenant: string }
 ): EmailTransport {
   const client = createHttpClient({
     ...options,
@@ -70,15 +74,19 @@ export function createResendTransport(
       const answer = await client.request({
         method: "POST",
         path: "/emails",
-        headers: { "idempotency-key": email.idempotencyKey },
+        // Resend keeps keys per account, which other shops may share
+        headers: { "idempotency-key": `${tenant}:${email.idempotencyKey}`.slice(0, 256) },
         json: {
           from: mailbox(email.from),
           to: [email.to],
-          subject: email.subject,
+          subject: headerText(email.subject, 998),
           html: email.html,
           text: email.text,
           ...(email.replyTo ? { reply_to: email.replyTo } : {}),
-          tags: [{ name: "template", value: tagOf(email.template) }],
+          tags: [
+            { name: "template", value: tagOf(email.template) },
+            { name: "tenant", value: tenant },
+          ],
         },
         // Resend sends a key once: a repeat after a lost answer is safe
         idempotent: true,
@@ -106,7 +114,7 @@ export function createMailpitTransport(
           From: { Email: email.from.email, Name: email.from.name },
           To: [{ Email: email.to }],
           ReplyTo: email.replyTo ? [{ Email: email.replyTo }] : [],
-          Subject: email.subject,
+          Subject: headerText(email.subject, 998),
           Text: email.text,
           HTML: email.html,
           Headers: { "X-Qt-Template": email.template, "X-Qt-Key": email.idempotencyKey },

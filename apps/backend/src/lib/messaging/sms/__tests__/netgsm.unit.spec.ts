@@ -79,6 +79,11 @@ describe("Netgsm (adr/0036)", () => {
     expect(await api().checkAccount(account)).toBe("valid")
     expect(await api().checkAccount({ ...account, msgheader: "magaza" })).toBe("valid")
     expect(await api().checkAccount({ ...account, msgheader: "BASKA" })).toBe("merchant_invalid")
+    // The answer's own keys and status code are not names on the account
+    expect(await api().checkAccount({ ...account, msgheader: "MSGHEADER" })).toBe(
+      "merchant_invalid"
+    )
+    expect(await api().checkAccount({ ...account, msgheader: "00" })).toBe("merchant_invalid")
     expect(await api().checkAccount({ ...account, password: "yanlis" })).toBe("secret_invalid")
   })
 })

@@ -1,7 +1,9 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { parseEnv } from "../../../lib/env"
 import { logger } from "../../../lib/logging"
+import { tenantTag } from "../../../lib/messaging/email"
 import {
+  isOwnReport,
   recipientsOf,
   resendEvent,
   suppressionOf,
@@ -18,10 +20,10 @@ const header = (req: MedusaRequest, name: string): string => {
 }
 
 /**
- * Resend's delivery reports (F9.6, adr/0036). A signed report is handled
- * once (its Svix id): a hard bounce or a spam complaint puts its addresses
- * on the suppression list, so nothing goes to them again. Anything else
- * is acknowledged and left.
+ * Resend's delivery reports (F9.6, adr/0036). A signed report about this
+ * shop's own send (its tenant tag) is handled once (its Svix id): a hard
+ * bounce or a spam complaint puts its addresses on the suppression list,
+ * so nothing goes to them again. Anything else is acknowledged and left.
  */
 export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
   const secret = parseEnv().RESEND_WEBHOOK_SECRET
@@ -54,6 +56,11 @@ export const POST = async (req: MedusaRequest, res: MedusaResponse) => {
     return
   }
   const event = parsed.data
+  // Another shop's send on a shared account: acknowledged, not even recorded
+  if (!isOwnReport(event, tenantTag())) {
+    res.json({ ok: true })
+    return
+  }
   const events = req.scope.resolve<WebhookEventsModuleService>(WEBHOOK_EVENTS_MODULE)
   const claim = await events.claim("resend", id, { type: event.type })
   if (claim.state === "done" || claim.state === "busy") {

@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import {
@@ -8,6 +9,7 @@ import {
 } from "@qticaret/testing"
 import type { FakeMail, FakeNetgsm } from "@qticaret/testing"
 import { placeOrder } from "../../src/scripts/seed/orders/place"
+import { tenantTag } from "../../src/lib/messaging/email"
 import { MESSAGING_MODULE } from "../../src/modules/messaging"
 import { RETURN_REQUESTS_MODULE } from "../../src/modules/return-requests"
 import type ReturnRequestsModuleService from "../../src/modules/return-requests/service"
@@ -260,8 +262,16 @@ medusaIntegrationTestRunner({
       const rows = await getContainer()
         .resolve(Modules.NOTIFICATION)
         .listNotifications({ template: "account.password_reset" })
-      // The token names no stored row and sits in no stored data
+      // The token names no stored row and sits in no stored data, a workflow's included
       expect(JSON.stringify(rows)).not.toMatch(/token=|eyJ/)
+      const token = /token=([^"&]+)/.exec(mail?.html ?? "")?.[1] ?? ""
+      const executions: { rows: { count: number }[] } = await getContainer()
+        .resolve(ContainerRegistrationKeys.PG_CONNECTION)
+        .raw("select count(*)::int as count from workflow_execution where context::text like ?", [
+          `%${token.slice(0, 40)}%`,
+        ])
+      expect(token.length).toBeGreaterThan(40)
+      expect(executions.rows[0]?.count).toBe(0)
     })
 
     it("sends the code that confirms an e-mail address, and stores no code", async () => {
@@ -290,6 +300,9 @@ medusaIntegrationTestRunner({
       expect(mail?.text).toContain(code)
       expect(mail?.subject).toBe("E-posta adresinizi doğrulayın")
       expect(JSON.stringify(rows)).not.toContain(code)
+      // Nor an unkeyed digest of it, which a million guesses would undo
+      const plainDigest = createHash("sha256").update(code).digest("hex").slice(0, 24)
+      expect(JSON.stringify(rows)).not.toContain(plainDigest)
     })
 
     it("tells the shopper a payment was refused once a day, and not once the cart is paid", async () => {
@@ -419,11 +432,20 @@ medusaIntegrationTestRunner({
     })
 
     it("puts a hard bounce on the list from Resend's signed report, once, and sends there no more", async () => {
-      const report = (type: string, bounce?: Record<string, string>) =>
+      const report = (
+        type: string,
+        bounce?: Record<string, string>,
+        { tenant = tenantTag(), to = "geri-donen@example.com" } = {}
+      ) =>
         JSON.stringify({
           type,
           created_at: new Date().toISOString(),
-          data: { email_id: "e1", to: ["geri-donen@example.com"], ...(bounce ? { bounce } : {}) },
+          data: {
+            email_id: "e1",
+            to: [to],
+            ...(bounce ? { bounce } : {}),
+            tags: { template: "order_placed", tenant },
+          },
         })
       const post = (body: string, headers: Record<string, string>) =>
         settle(http.post("/hooks/resend", body, { headers }))
@@ -441,6 +463,16 @@ medusaIntegrationTestRunner({
       const listedAfterSoft = await getContainer()
         .resolve<MessagingModuleService>(MESSAGING_MODULE)
         .isSuppressed("email", "geri-donen@example.com")
+      // Another shop's send on a shared Resend account: its bounce is not this shop's
+      const othersBody = report(
+        "email.bounced",
+        { type: "Permanent", subType: "General" },
+        { tenant: "baska_magaza", to: "baskasi@example.com" }
+      )
+      const others = await post(othersBody, signResendReport(resendSecret, othersBody))
+      const othersListed = await getContainer()
+        .resolve<MessagingModuleService>(MESSAGING_MODULE)
+        .isSuppressed("email", "baskasi@example.com")
       const first = await post(hard, hardHeaders)
       const again = await post(hard, hardHeaders)
       const outcome = (await resend(await order("geri-donen@example.com"))).result
@@ -451,6 +483,8 @@ medusaIntegrationTestRunner({
       expect(forged.status).toBe(401)
       expect(soft.status).toBe(200)
       expect(listedAfterSoft).toBe(false)
+      expect(others.status).toBe(200)
+      expect(othersListed).toBe(false)
       expect([first.status, again.status]).toEqual([200, 200])
       expect(outcome).toMatchObject({ email: "suppressed" })
       expect(list.suppressions).toEqual([

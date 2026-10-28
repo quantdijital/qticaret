@@ -198,6 +198,17 @@ describe("parseEnv", () => {
     expect(errorOf({ ...validEnv, EMAIL_TRANSPORT: "resend" })).toContain(
       "EMAIL_FROM: is required with EMAIL_TRANSPORT"
     )
+    // A live shop hears of its bounces, or keeps mailing dead addresses
+    const resend = {
+      EMAIL_TRANSPORT: "resend",
+      EMAIL_FROM: "bildirim@magaza.example",
+      RESEND_API_KEY: `re_${hexKey().slice(0, 20)}`,
+      BACKEND_URL: "https://api.magaza.example",
+    }
+    expect(errorOf({ ...deployed, ...resend, NODE_ENV: "production" })).toContain(
+      "RESEND_WEBHOOK_SECRET: is required for resend in production and staging"
+    )
+    expect(parseEnv({ ...validEnv, ...resend, NODE_ENV: "test" }).EMAIL_TRANSPORT).toBe("resend")
   })
 
   it("lets a fake PayTR address on a developer's machine only", () => {

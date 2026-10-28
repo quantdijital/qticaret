@@ -9,6 +9,11 @@ import {
 import { requireUserActor } from "./actor"
 import { rateLimit } from "./rate-limit"
 
+const perStaff = () =>
+  rateLimit(() => RATE_LIMIT_PROFILES.provider_check, {
+    identity: (req) => (req as Partial<AuthenticatedMedusaRequest>).auth_context?.actor_id,
+  })
+
 /** F9 (adr/0036): Resend's signed delivery reports and the suppression list. */
 export const MESSAGING_ROUTES = [
   // The signature covers the exact bytes Resend sent
@@ -43,20 +48,15 @@ export const MESSAGING_ROUTES = [
     methods: ["GET" as const, "DELETE" as const],
     middlewares: [requireUserActor],
   },
+  // Each asks Resend: a small budget per staff member
   {
     matcher: "/admin/messaging/sender-domain",
     methods: ["POST" as const],
-    middlewares: [requireUserActor, validateAndTransformBody(AdminPostSenderDomain)],
+    middlewares: [requireUserActor, perStaff(), validateAndTransformBody(AdminPostSenderDomain)],
   },
-  // Each asks Resend: a small budget per staff member
   {
     matcher: "/admin/messaging/sender-domain/check",
     methods: ["POST" as const],
-    middlewares: [
-      requireUserActor,
-      rateLimit(() => RATE_LIMIT_PROFILES.bulk_ship, {
-        identity: (req) => (req as Partial<AuthenticatedMedusaRequest>).auth_context?.actor_id,
-      }),
-    ],
+    middlewares: [requireUserActor, perStaff()],
   },
 ]

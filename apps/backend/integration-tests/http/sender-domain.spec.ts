@@ -110,5 +110,15 @@ medusaIntegrationTestRunner({
       expect(removed.data).toMatchObject({ sender: "bildirim@platform.example", domain: null })
       expect(fake.domains.size).toBe(0)
     })
+
+    it("lets go of a domain Resend no longer has", async () => {
+      await send<View>("post", PATH, { name: "eski.example.com" })
+      // Removed at Resend by hand: the shop must not be stuck sending from it
+      fake.domains.clear()
+      const removed = await send<View>("delete", PATH)
+
+      expect(removed.status).toBe(200)
+      expect(removed.data).toMatchObject({ sender: "bildirim@platform.example", domain: null })
+    })
   },
 })

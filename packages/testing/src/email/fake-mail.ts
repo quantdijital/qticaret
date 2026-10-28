@@ -19,6 +19,10 @@ export interface FakeMailMessage {
   text: string
   /** Our template's name, as the sender marked it. */
   template: string
+  /** The sending shop's tag (Resend only; "" from Mailpit). */
+  tenant: string
+  /** The `Idempotency-Key` it came with; "" without one. */
+  key: string
 }
 
 export interface FakeMail {
@@ -149,6 +153,8 @@ export async function startFakeMail(options: { port?: number } = {}): Promise<Fa
           html: textOf(body["HTML"]),
           text: textOf(body["Text"]),
           template: headers["X-Qt-Template"] ?? "",
+          tenant: "",
+          key: headers["X-Qt-Key"] ?? "",
         })
         reply(200, { ID: id })
         return
@@ -186,6 +192,8 @@ export async function startFakeMail(options: { port?: number } = {}): Promise<Fa
           html: textOf(body["html"]),
           text: textOf(body["text"]),
           template: tags.find((tag) => tag.name === "template")?.value ?? "",
+          tenant: tags.find((tag) => tag.name === "tenant")?.value ?? "",
+          key: typeof key === "string" ? key : "",
         })
         if (typeof key === "string") {
           byKey.set(key, id)

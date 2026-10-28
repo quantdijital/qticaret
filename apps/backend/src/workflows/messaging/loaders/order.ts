@@ -12,7 +12,7 @@ import { formatIban } from "../../../lib/tr/iban"
 import { PLATFORM_SETTINGS_MODULE } from "../../../modules/platform-settings"
 import type PlatformSettingsModuleService from "../../../modules/platform-settings/service"
 import type { StoreSettings } from "../../../modules/platform-settings/sections"
-import { GREETING, firstText } from "./types"
+import { GREETING, addressLine, personName } from "./types"
 import type { Loaded } from "./types"
 
 const ORDER_FIELDS = [
@@ -110,7 +110,7 @@ export async function loadOrderMessage(
   return {
     vars: {
       number: String(order.display_id),
-      customerName: firstText(address["first_name"]) ?? GREETING,
+      customerName: personName(textOf(address["first_name"])) ?? GREETING,
       items: order.items.flatMap((item) =>
         item
           ? [
@@ -144,10 +144,14 @@ export async function loadOrderMessage(
             }
           : null,
       address: [
-        [filled(address["first_name"]), filled(address["last_name"])].filter(Boolean).join(" "),
+        [personName(filled(address["first_name"])), personName(filled(address["last_name"]))]
+          .filter(Boolean)
+          .join(" "),
         [filled(address["address_2"]), filled(address["address_1"])].filter(Boolean).join(", "),
         [filled(address["city"]), filled(address["province"])].filter(Boolean).join(" / "),
-      ].filter(Boolean),
+      ]
+        .map(addressLine)
+        .filter((line): line is string => line !== null),
       // Guest orders get a signed link with F10's order page
       orderUrl: null,
     },

@@ -44,7 +44,7 @@
 | Geliver: tenant hesabı, kapıda ödeme desteği, iade kodu süreçleri | Geliver | F6.6, F7 |
 | E-fatura entegratörü seçimi ve fiyatlandırma | Entegratörler | F8 |
 | SMS sağlayıcısı (başlık onayı, İYS entegrasyonu) | SMS sağlayıcısı | F9 |
-| E-posta gönderim servisi (alan adı doğrulama, hacim) | Resend/SES vb. | F9.6 |
+| E-posta gönderim servisi: tenant başına ayrı Resend hesabı/takımı (adr/0036 ek), alan adı doğrulama, hacim | Resend | F9.6, F16 |
 | Hosting, CDN/WAF sağlayıcıları | Sağlayıcılar | ADR-0003, F15.7, F16 |
 | Doğrudan kargo firması API erişimi (ilk müşterinin anlaşmalı firması) | Kargo firması | F7.14 |
 | Google Search Console, Merchant Center, CrUX API erişimi (tenant mülkü, OAuth uygulaması; platform için Google Cloud projesi) | Google | F10.11, F10.8 |

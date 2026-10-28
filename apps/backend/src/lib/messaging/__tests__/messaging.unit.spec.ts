@@ -1,6 +1,6 @@
 import { startFakeMail } from "@qticaret/testing"
 import type { FakeMail } from "@qticaret/testing"
-import { createMailpitTransport, createResendTransport, mailbox } from "../email"
+import { createMailpitTransport, createResendTransport, headerText, mailbox } from "../email"
 import type { OutgoingEmail } from "../email"
 import { maskRecipient, normalizeRecipient } from "../recipients"
 import { MESSAGE_TEMPLATES, renderEmail } from "../templates"
@@ -73,12 +73,19 @@ describe("messages (adr/0036)", () => {
       '"Ayşe \\"Usta\\" Bcc: x@y.example" <a@b.example>'
     )
     expect(mailbox({ email: "a@b.example", name: "  " })).toBe("a@b.example")
+    expect(mailbox({ email: "a@b.example", name: "Ayşe\u2028Bcc:\u0000x\u0085" })).toBe(
+      '"Ayşe Bcc: x" <a@b.example>'
+    )
+    expect(headerText("Sipariş\r\n\u2029Bcc: x", 998)).toBe("Sipariş Bcc: x")
   })
 
   it("keeps one spelling per address and shows only a hint of it", () => {
     expect(normalizeRecipient("email", " Ayse@Example.COM ")).toBe("ayse@example.com")
     expect(normalizeRecipient("email", "not-an-address")).toBeNull()
     expect(normalizeRecipient("sms", "0532 123 45 67")).toBe("+905321234567")
+    // A landline or a business line takes no SMS
+    expect(normalizeRecipient("sms", "0212 123 45 67")).toBeNull()
+    expect(normalizeRecipient("sms", "0850 123 45 67")).toBeNull()
     expect(maskRecipient("email", "ayse@example.com")).toBe("ay***@example.com")
     expect(maskRecipient("sms", "+905321234567")).toBe("+905*** *** ** 67")
     expect(() => messageText("does.not_exist")).toThrow("does.not_exist")
@@ -111,11 +118,17 @@ describe("e-mail transports (adr/0036)", () => {
   })
 
   it("sends through Resend with its key, once per idempotency key", async () => {
-    const resend = createResendTransport(fake.apiKey, { baseUrl: fake.url })
+    const resend = createResendTransport(fake.apiKey, {
+      baseUrl: fake.url,
+      tenant: "magaza_example",
+    })
 
     const first = await resend.send(email)
     const again = await resend.send(email)
-    const refused = await createResendTransport("re_yanlis_anahtar_000", { baseUrl: fake.url })
+    const refused = await createResendTransport("re_yanlis_anahtar_000", {
+      baseUrl: fake.url,
+      tenant: "magaza_example",
+    })
       .send(email)
       .catch((error: unknown) => error)
 
@@ -126,6 +139,9 @@ describe("e-mail transports (adr/0036)", () => {
       to: ["ayse@example.com"],
       replyTo: ["destek@magaza.example"],
       template: "order_placed",
+      // Another shop on the same Resend account keeps its own keys and reports
+      tenant: "magaza_example",
+      key: "magaza_example:order.placed:email:order_1",
     })
     expect(refused).toMatchObject({ providerCode: "missing_api_key" })
   })

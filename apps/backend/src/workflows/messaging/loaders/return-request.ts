@@ -3,7 +3,7 @@ import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import type { ReturnVars } from "../../../lib/messaging/templates"
 import { RETURN_REQUESTS_MODULE } from "../../../modules/return-requests"
 import type ReturnRequestsModuleService from "../../../modules/return-requests/service"
-import { GREETING, firstText } from "./types"
+import { GREETING, firstText, personName } from "./types"
 import type { Loaded } from "./types"
 
 interface OrderRow {
@@ -57,7 +57,7 @@ export async function loadReturnMessage(
   return {
     vars: {
       number: String(order.display_id),
-      customerName: firstText(order.shipping_address?.first_name) ?? GREETING,
+      customerName: personName(order.shipping_address?.first_name) ?? GREETING,
       kind: request.kind,
       items: asked.map((each) => {
         const line = lines.get(each.line_item_id)

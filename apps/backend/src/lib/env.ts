@@ -180,6 +180,14 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
   if (env.EMAIL_TRANSPORT === "resend" && env.RESEND_API_KEY === undefined) {
     ctx.addIssue({ code: "custom", path: ["RESEND_API_KEY"], message: "is required for resend" })
   }
+  // Without it bounces are never heard of, and mail keeps going to dead addresses
+  if (deployed && env.EMAIL_TRANSPORT === "resend" && env.RESEND_WEBHOOK_SECRET === undefined) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["RESEND_WEBHOOK_SECRET"],
+      message: "is required for resend in production and staging",
+    })
+  }
   if (env.EMAIL_TRANSPORT === "mailpit" && (deployed || env.MAILPIT_URL === undefined)) {
     ctx.addIssue({
       code: "custom",

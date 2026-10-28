@@ -327,10 +327,10 @@ Detay: `docs/entegrasyonlar/sms.md`
 - F9.8 **SMS kotası:** telefon, IP ve hesap başına SMS tetikleme limiti (OTP/şifre sıfırlama/stok bildirimi), eşik aşımında captcha; maliyet uyarısı (SMS pumping koruması)
 
 **KK:**
-- [ ] Tüm olaylar Mailpit'te doğru şablonla görünüyor
-- [ ] İzni olmayan müşteriye ticari SMS gitmiyor (testli)
-- [ ] Bounce alan adrese tekrar gönderim yapılmıyor
-- [ ] Aynı numaraya limit üstü SMS isteği reddediliyor (testli)
+- [x] Tüm olaylar Mailpit'te doğru şablonla görünüyor (`messages`: her olay sahte Mailpit'te kendi şablonuyla bir kez; `message-templates`: 14 şablonun önizlemesi; `messaging:samples` ile gerçek Mailpit'te 14 e-posta elle kontrol edildi, 2026-10-28)
+- [x] İzni olmayan müşteriye ticari SMS gitmiyor (testli: `messages`, izinsiz alıcıya ne SMS ne e-posta; izinliye ticari SMS İYS filtresi 11 ile)
+- [x] Bounce alan adrese tekrar gönderim yapılmıyor (`messages`: Resend'in imzalı kalıcı geri dönüş raporu adresi listeye alır, sonraki ileti `suppressed`; geçici geri dönüş ve başka mağazanın raporu almaz)
+- [x] Aynı numaraya limit üstü SMS isteği reddediliyor (testli: `messages` numara başına saatlik sınır, birim testinde günlük ve mağaza sınırı)
 
 ---
 

@@ -2,7 +2,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import type { ParcelVars } from "../../../lib/messaging/templates"
 import { carrierOf } from "../../../lib/shipping/carriers"
-import { GREETING, firstText } from "./types"
+import { GREETING, firstText, personName } from "./types"
 import type { Loaded } from "./types"
 
 const FIELDS = [
@@ -92,7 +92,7 @@ export async function loadParcelMessage(
   return {
     vars: {
       number: String(order.display_id),
-      customerName: firstText(order.shipping_address?.first_name) ?? GREETING,
+      customerName: personName(order.shipping_address?.first_name) ?? GREETING,
       carrier: carrierName(row),
       trackingNumber: label?.tracking_number ?? null,
       trackingUrl: httpUrl(label?.tracking_url),
