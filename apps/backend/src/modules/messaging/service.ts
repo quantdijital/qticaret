@@ -84,6 +84,25 @@ class MessagingModuleService extends MedusaService({
     return recipient
   }
 
+  /** The recipient's answer with where and when it came; null when it never gave one. */
+  @InjectManager()
+  async consentRecordOf(
+    channel: ConsentChannel,
+    address: string,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<{ status: ConsentStatus; source: ConsentSource; changed_at: Date } | null> {
+    const recipient = this.recipientOf(channel, address)
+    if (!recipient) {
+      return null
+    }
+    const [row] = await this.listMessageConsents(
+      { channel, recipient_hash: recipient.hash },
+      { take: 1, select: ["status", "source", "changed_at"] },
+      sharedContext
+    )
+    return row ? { status: row.status, source: row.source, changed_at: row.changed_at } : null
+  }
+
   /** The recipient's answer on the channel; null when it never gave one. */
   @InjectManager()
   async consentOf(

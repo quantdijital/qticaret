@@ -330,8 +330,68 @@ medusaIntegrationTestRunner({
       expect(sms?.text).toMatch(/: #\d+ numaralı siparişiniz alındı\. Toplam ₺/)
       expect(after).not.toBe(before)
       // The first order went before the account: its SMS goes now, its e-mail went already
-      expect(netgsm.messages).toHaveLength(2)
-      expect(outcome.result).toMatchObject({ email: "duplicate", sms: "sent" })
+      const both = await eventually(
+        () => Promise.resolve(netgsm.messages),
+        (found) => found.length === 2
+      )
+      // One text per order, whichever sent the first: its own event late, or the send again
+      expect(both.map(({ text }) => /#(\d+)/.exec(text)?.[1]).sort()).toEqual(["1", "2"])
+      expect(outcome.result).toMatchObject({ email: "duplicate" })
+    })
+
+    it("sends a commercial message only with consent on the channel, which staff can record", async () => {
+      await settle(
+        http.post(
+          "/admin/integrations/credentials/netgsm",
+          {
+            settings: { msgheader: "MAGAZA" },
+            secrets: { usercode: netgsm.account.usercode, password: netgsm.account.password },
+          },
+          { headers: admin.headers }
+        )
+      )
+      const [customer] = await getContainer()
+        .resolve(Modules.CUSTOMER)
+        .createCustomers([{ email: "izinli@example.com", phone: "05321112233", first_name: "Can" }])
+      const customerId = customer?.id ?? ""
+      const announce = (key: string) =>
+        sendMessageWorkflow(getContainer()).run({
+          input: {
+            template: "marketing.announcement",
+            resource_id: customerId,
+            key,
+            extra: { title: "Hafta sonu indirimi", body: "Seçili ürünlerde %20." },
+          },
+        })
+      const consent = (channel: string, status: string) =>
+        settle(
+          http.post<{
+            consents: Record<string, { consent: { status: string; source: string } | null }>
+          }>(
+            `/admin/customers/${customerId}/consents`,
+            { channel, status },
+            { headers: admin.headers }
+          )
+        )
+
+      const without = await announce("c1")
+      await consent("email", "granted")
+      const granted = await consent("sms", "granted")
+      const withConsent = await announce("c2")
+      await consent("sms", "revoked")
+      const smsRevoked = await announce("c3")
+
+      expect(without.result).toEqual({ email: "no_consent", sms: "no_consent" })
+      expect(granted.data.consents["sms"]?.consent).toMatchObject({
+        status: "granted",
+        source: "panel",
+      })
+      expect(withConsent.result).toEqual({ email: "sent", sms: "sent" })
+      expect(smsRevoked.result).toEqual({ email: "sent", sms: "no_consent" })
+      expect(netgsm.messages.map(({ filter }) => filter)).toEqual(["11"])
+      const mails = sentTo("izinli@example.com")
+      expect(mails).toHaveLength(2)
+      expect(mails[0]?.text).toContain("ticari ileti izniniz olduğu için")
     })
 
     it("tries a failed send again with the same key, and sends it once", async () => {

@@ -1,7 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import type { MessageTemplateName } from "../../../lib/messaging/templates"
 import type { VarsOf } from "../deliver"
-import { loadPasswordReset, loadVerification } from "./account"
+import { loadAnnouncement, loadPasswordReset, loadVerification } from "./account"
 import { loadPaymentFailed } from "./cart"
 import { loadOrderMessage } from "./order"
 import { loadParcelMessage } from "./parcel"
@@ -28,4 +28,5 @@ export const MESSAGE_LOADERS: { readonly [N in MessageTemplateName]: Loader<N> }
   "account.password_reset": loadPasswordReset,
   "account.verify_email": loadVerification,
   "payment.failed": (container, id) => loadPaymentFailed(container, id),
+  "marketing.announcement": loadAnnouncement,
 }

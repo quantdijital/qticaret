@@ -1,10 +1,12 @@
 import { passwordReset, verifyEmail } from "./account"
+import { announcement } from "./marketing"
 import { orderPlaced } from "./order-placed"
 import { paymentFailed } from "./payment"
 import { returnApproved, returnRefunded, returnRequested } from "./returns"
 import { orderDelivered, orderShipped } from "./shipping"
 
 export type { ResetVars, VerifyVars } from "./account"
+export type { AnnouncementVars } from "./marketing"
 export { renderEmail } from "./layout"
 export type { EmailBlock, EmailBody } from "./layout"
 export { orderSummary } from "./order-placed"
@@ -25,6 +27,7 @@ export const MESSAGE_TEMPLATES = {
   "account.password_reset": passwordReset,
   "account.verify_email": verifyEmail,
   "payment.failed": paymentFailed,
+  "marketing.announcement": announcement,
 } as const
 
 export type MessageTemplateName = keyof typeof MESSAGE_TEMPLATES

@@ -7,6 +7,8 @@ export const SENSITIVE_READS: readonly [string, string, boolean, (readonly strin
   ["/admin/customers/:id/addresses", "customer", false],
   ["/admin/customers/:id/addresses/:address_id", "customer", false],
   ["/admin/customers/:id/billing-profile", "customer", false],
+  // F9.5: whether a customer takes commercial messages
+  ["/admin/customers/:id/consents", "customer", false],
   ["/admin/customer-groups/:id", "customer_group", false],
   ["/admin/orders", "order", true],
   ["/admin/dashboard/recent-orders", "order", true],

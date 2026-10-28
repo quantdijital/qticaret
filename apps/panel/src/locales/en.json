@@ -1781,6 +1781,26 @@
       "billing": "Billing details",
       "billingHint": "The tax number is shown masked.",
       "noBilling": "No billing details."
+    },
+    "consents": {
+      "title": "Message consent",
+      "description": "Campaign e-mails and texts go only to customers who agreed. Record what the customer told you by phone or in the shop; each change is kept with who made it.",
+      "channels": {
+        "email": "E-mail",
+        "sms": "SMS"
+      },
+      "granted": "Agreed · {{source}} · {{date}}",
+      "revoked": "Withdrawn · {{source}} · {{date}}",
+      "none": "No answer yet: no campaign goes.",
+      "noAddress": "No address or phone for this channel.",
+      "sources": {
+        "checkout": "at checkout",
+        "account": "in their account",
+        "panel": "in the panel",
+        "import": "by import",
+        "iys": "from İYS"
+      },
+      "saved": "Consent saved."
     }
   },
   "categories": {

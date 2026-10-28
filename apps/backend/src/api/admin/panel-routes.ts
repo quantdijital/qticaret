@@ -6,6 +6,7 @@ import { rateLimit } from "../http/rate-limit"
 import { AdminGetDashboardNoQuery, AdminGetDashboardOverview } from "./dashboard/validators"
 import { AdminGetOrderBoard } from "./order-board/validators"
 import { AdminGetBulkLabels } from "./shipping-labels/validators"
+import { AdminPostCustomerConsent } from "./customers/[id]/consents/validators"
 import { AdminPostShipOrder, AdminPostShipOrders } from "./orders/[id]/ship/validators"
 import { AdminPostPriceListDiscount } from "./price-lists/[id]/discount/validators"
 import { AdminPostPromotionOffer } from "./promotions/[id]/offer/validators"
@@ -76,6 +77,17 @@ export const PANEL_ROUTES = [
       }),
       validateAndTransformQuery(AdminGetBulkLabels, {}),
     ],
+  },
+  // F9.5: a customer's commercial consent, recorded by staff (audited as every write)
+  {
+    matcher: "/admin/customers/:id/consents",
+    methods: ["POST" as const],
+    middlewares: [requireUserActor, validateAndTransformBody(AdminPostCustomerConsent)],
+  },
+  {
+    matcher: "/admin/customers/:id/consents",
+    methods: ["GET" as const],
+    middlewares: [requireUserActor],
   },
   {
     matcher: "/admin/products/:id/price-history",

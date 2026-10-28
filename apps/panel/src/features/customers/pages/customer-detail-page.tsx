@@ -20,6 +20,7 @@ import { orderBoardQuery } from "@/features/orders/api/orders"
 import { useFeature } from "@/features/settings/api/features"
 import { errorText } from "@/lib/errors"
 import { formatDate, formatMoney } from "@/lib/format"
+import { ConsentCard } from "@/features/customers/components/consent-card"
 
 const route = getRouteApi("/_auth/customers/$id")
 
@@ -212,6 +213,7 @@ export function CustomerDetailPage() {
         </PageColumn>
         <PageColumn span={4}>
           <ContactCard customer={customer} />
+          <ConsentCard customerId={customer.id} />
           <AddressesCard customer={customer} />
           <BillingCard customerId={customer.id} />
           {/* Store credit is for members: a guest cannot sign in to spend it */}

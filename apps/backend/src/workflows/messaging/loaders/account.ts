@@ -1,6 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { logger } from "../../../lib/logging"
-import type { ResetVars, VerifyVars } from "../../../lib/messaging/templates"
+import type { AnnouncementVars, ResetVars, VerifyVars } from "../../../lib/messaging/templates"
 import { PLATFORM_SETTINGS_MODULE } from "../../../modules/platform-settings"
 import type PlatformSettingsModuleService from "../../../modules/platform-settings/service"
 import type { StoreSettings } from "../../../modules/platform-settings/sections"
@@ -72,5 +73,34 @@ export async function loadVerification(
     recipients: { email },
     receiverId: null,
     resourceType: "auth_identity",
+  }
+}
+
+/**
+ * A shop's announcement to one customer (F9.5): the words come with the
+ * send (F10's campaigns), the addresses from the customer. Whether it may
+ * go is deliver()'s: commercial, so only with consent on the channel.
+ */
+export async function loadAnnouncement(
+  container: Container,
+  customerId: string,
+  extra: Extra
+): Promise<Loaded<AnnouncementVars> | null> {
+  const { title, body, url } = extra
+  if (!title || !body) {
+    return null
+  }
+  const { data } = await container
+    .resolve(ContainerRegistrationKeys.QUERY)
+    .graph({ entity: "customer", fields: ["email", "phone"], filters: { id: customerId } })
+  const customer = data[0] as { email: string | null; phone: string | null } | undefined
+  if (!customer) {
+    return null
+  }
+  return {
+    vars: { title, body, url: url ?? null },
+    recipients: { email: customer.email, sms: customer.phone },
+    receiverId: customerId,
+    resourceType: "customer",
   }
 }

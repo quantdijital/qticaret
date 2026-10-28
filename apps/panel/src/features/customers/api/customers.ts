@@ -83,3 +83,41 @@ export const billingProfileQuery = (customerId: string) =>
         `/admin/customers/${encodeURIComponent(customerId)}/billing-profile`
       ),
   })
+
+export type ConsentChannel = "email" | "sms"
+
+export interface ConsentState {
+  /** Whether the customer has an address for the channel at all. */
+  address: boolean
+  consent: {
+    status: "granted" | "revoked"
+    source: "checkout" | "account" | "panel" | "import" | "iys"
+    changed_at: string
+  } | null
+}
+
+export type CustomerConsents = Record<ConsentChannel, ConsentState>
+
+/** Whether the customer takes commercial e-mail and SMS (F9.5): a recorded read. */
+export const customerConsentsQuery = (customerId: string) =>
+  queryOptions({
+    queryKey: ["customers", "consents", customerId],
+    queryFn: async () =>
+      (
+        await sdk.client.fetch<{ consents: CustomerConsents }>(
+          `/admin/customers/${encodeURIComponent(customerId)}/consents`
+        )
+      ).consents,
+  })
+
+/** Records a consent the customer gave or withdrew outside the storefront. */
+export const saveCustomerConsent = async (
+  customerId: string,
+  body: { channel: ConsentChannel; status: "granted" | "revoked" }
+) =>
+  (
+    await sdk.client.fetch<{ consents: CustomerConsents }>(
+      `/admin/customers/${encodeURIComponent(customerId)}/consents`,
+      { method: "POST", body }
+    )
+  ).consents

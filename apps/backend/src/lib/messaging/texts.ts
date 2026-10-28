@@ -11,6 +11,10 @@ export const MESSAGE_LOCALE: MessageLocale = "tr"
 const TR: Readonly<Record<string, string>> = {
   "footer.order": "Bu e-posta, {{shop}} mağazasındaki siparişiniz için gönderildi.",
   "footer.account": "Bu e-posta, {{shop}} hesabınız için gönderildi.",
+  "footer.commercial":
+    "Bu e-postayı {{shop}} ticari ileti izniniz olduğu için aldınız. İzninizi hesabınızdan ya da {{contact}} adresine yazarak dilediğiniz an geri alabilirsiniz.",
+  "announcement.button": "Mağazaya git",
+  "announcement.sms": "{{shop}}: {{title}} {{body}} Ret için mağazayla iletişime geçin.",
   "order.subtotal": "Ara toplam",
   "order.shipping": "Kargo",
   "order.discount": "İndirim",

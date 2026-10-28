@@ -1,0 +1,43 @@
+import { messageText } from "../texts"
+import { renderEmail } from "./layout"
+import type { MessageTemplate } from "./types"
+
+/** A commercial message the shop writes (a campaign, F10): sent only with consent. */
+export interface AnnouncementVars {
+  title: string
+  body: string
+  /** Where the button leads on the storefront; null for none. */
+  url: string | null
+}
+
+/**
+ * A shop's announcement (F9.5): commercial, so it goes only to recipients
+ * who consented on the channel, and says how to stop them (İYS).
+ */
+export const announcement: MessageTemplate<AnnouncementVars> = {
+  name: "marketing.announcement",
+  kind: "commercial",
+  channels: ["email", "sms"],
+  retry: false,
+  email: (vars, brand) =>
+    renderEmail(brand, {
+      subject: vars.title,
+      preheader: vars.title,
+      heading: vars.title,
+      blocks: [
+        { kind: "paragraph", text: vars.body },
+        { kind: "button", label: messageText("announcement.button"), url: vars.url },
+      ],
+      footer: messageText("footer.commercial", {
+        shop: brand.shopName,
+        contact: brand.contactEmail ?? brand.shopName,
+      }),
+    }),
+  sms: (vars, brand) =>
+    messageText("announcement.sms", { shop: brand.shopName, title: vars.title, body: vars.body }),
+  sample: {
+    title: "Hafta sonuna özel %20 indirim",
+    body: "Seçili ürünlerde pazar gecesine kadar sepette %20 indirim.",
+    url: null,
+  },
+}

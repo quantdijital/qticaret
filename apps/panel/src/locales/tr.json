@@ -1789,6 +1789,26 @@
       "billing": "Fatura bilgisi",
       "billingHint": "Vergi numarası gizlenerek gösterilir.",
       "noBilling": "Fatura bilgisi girilmemiş."
+    },
+    "consents": {
+      "title": "İleti izinleri",
+      "description": "Kampanya e-postası ve SMS'i yalnızca izin veren müşteriye gider. Müşterinin size telefonla ya da mağazada söylediğini buraya kaydedin; her değişiklik kimin yaptığıyla saklanır.",
+      "channels": {
+        "email": "E-posta",
+        "sms": "SMS"
+      },
+      "granted": "İzin var · {{source}} · {{date}}",
+      "revoked": "İzin geri alındı · {{source}} · {{date}}",
+      "none": "Kayıt yok: kampanya iletisi gitmez.",
+      "noAddress": "Bu kanal için adres ya da telefon yok.",
+      "sources": {
+        "checkout": "ödeme sırasında",
+        "account": "hesabından",
+        "panel": "panelden",
+        "import": "aktarımla",
+        "iys": "İYS'den"
+      },
+      "saved": "İleti izni kaydedildi."
     }
   },
   "categories": {
