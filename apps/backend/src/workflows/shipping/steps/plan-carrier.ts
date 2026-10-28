@@ -1,9 +1,10 @@
 import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
+import { ValidationError } from "../../../lib/errors"
 import { fromMedusaAmount } from "../../../lib/money"
 import type { MedusaAmount } from "../../../lib/money"
 import { COD_PAYMENT_PROVIDER_ID } from "../../../lib/payments/checkout"
-import { GELIVER_FULFILLMENT_PROVIDER_ID } from "../../../lib/shipping/carriers"
+import { GELIVER_FULFILLMENT_PROVIDER_ID, isCarrierProvider } from "../../../lib/shipping/carriers"
 
 /** Who carries the order's parcel, from where, and what the courier collects. */
 export interface CarrierPlan {
@@ -16,6 +17,7 @@ export interface CarrierPlan {
 
 interface OrderRow {
   shipping_methods?: ({ shipping_option_id?: string | null } | null)[] | null
+  fulfillments?: ({ provider_id?: string | null; canceled_at?: unknown } | null)[] | null
   payment_collections?:
     | ({
         payments?:
@@ -39,16 +41,20 @@ interface OptionRow {
 /**
  * Reads how the order ships (adr/0031): the provider of its shipping
  * option and the warehouse behind it, and whether its courier collects a
- * cash-on-delivery payment (adr/0029). Reads only.
+ * cash-on-delivery payment (adr/0029). The courier collects the whole
+ * payment with one parcel: an order paid at the door goes with a carrier
+ * in one parcel only. Reads only.
  */
 export const planCarrierStep = createStep(
   "shipping-plan-carrier",
-  async (input: { order_id: string }, { container }) => {
+  async (input: { order_id: string; partial: boolean }, { container }) => {
     const query = container.resolve(ContainerRegistrationKeys.QUERY)
     const { data } = await query.graph({
       entity: "order",
       fields: [
         "shipping_methods.shipping_option_id",
+        "fulfillments.provider_id",
+        "fulfillments.canceled_at",
         "payment_collections.payments.provider_id",
         "payment_collections.payments.amount",
         "payment_collections.payments.raw_amount",
@@ -81,8 +87,16 @@ export const planCarrierStep = createStep(
           !payment.captured_at &&
           !payment.canceled_at
       )
+    const carrier = option?.provider_id === GELIVER_FULFILLMENT_PROVIDER_ID ? "geliver" : null
+    const carried = (order.fulfillments ?? []).some(
+      (fulfillment) =>
+        fulfillment && !fulfillment.canceled_at && isCarrierProvider(fulfillment.provider_id)
+    )
+    if (carrier && cod && (input.partial || carried)) {
+      throw new ValidationError("shipping.cod_single_parcel")
+    }
     return new StepResponse<CarrierPlan>({
-      carrier: option?.provider_id === GELIVER_FULFILLMENT_PROVIDER_ID ? "geliver" : null,
+      carrier,
       location_id: option?.service_zone?.fulfillment_set?.location?.id ?? null,
       cash_on_delivery: cod
         ? fromMedusaAmount(cod.raw_amount ?? cod.amount ?? 0, { allowRounding: true })

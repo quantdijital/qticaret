@@ -44,14 +44,16 @@ Geliver'in resmi SDK'sından okunanlar (`GeliverApp/geliver-js`):
    - Etiket PDF'i indirilip **özel** dosya deposuna yazılır; herkese açık adresi yoktur.
    - Panel etiketi yalnızca personel ucundan alır (`requireUserActor`, hassas okuma olarak denetim kaydı). Etikette alıcının adı, adresi ve telefonu var.
    - Medusa'nın gönderi kaydı ("kargoya verildi") etiket basılınca değil, taşıyıcı paketi aldığında atılır.
-   - Kapıda ödemeli siparişin gönderisi `productPaymentOnDelivery` ve sipariş tutarıyla oluşturulur.
+   - Kapıda ödemeli siparişin gönderisi `productPaymentOnDelivery` ve ödeme tutarıyla oluşturulur. Kurye tutarın tamamını bir kolide tahsil ettiği için böyle bir sipariş taşıyıcıyla tek koli gider: kısmi ya da ikinci koli reddedilir.
 4. **Takip (F7.5, F7.6):**
    - `shipment-tracking` modülü gönderinin iç durumunu ve olay geçmişini tutar.
    - İç durumlar: `created`, `picked_up`, `in_transit`, `out_for_delivery`, `delivered`, `returned`, `failed`, `canceled`.
    - **Bildirime güvenilmez, ipucu sayılır:**
      - Adres `POST /hooks/geliver`; sır taşımaz. Medusa'nın istek günlüğü yolu ve sorgu dizesini olduğu gibi yazar, adresteki bir anahtar günlüğe düşerdi.
      - Gövdedeki gönderi kimliği yalnızca izlediğimiz bir gönderiyi Geliver API'sinden yeniden okumak için kullanılır. Durum her zaman API'nin yanıtından yazılır.
-     - Bildirimle bir gönderi en çok dakikada bir yeniden okunur; uç webhook hız sınırının içindedir. Kötüye kullanım en fazla API okuması üretir, durum yazamaz.
+     - Bildirimle bir gönderi en çok dakikada bir yeniden okunur (kilit altında); uç webhook hız sınırının içindedir. Kötüye kullanım en fazla API okuması üretir, durum yazamaz.
+     - Geliver'in test gönderisi her okumada bir adım ilerler. Bu yüzden dağıtılmış bir mağazada test kolileri bildirimle okunmaz, yalnızca sorgu işiyle ilerler.
+     - Medusa'nın kendi fulfillment uçlarında `qt_` ile başlayan `additional_data` reddedilir: `qt_ship` işareti yalnızca bizim iş akışımızdan gelir.
    - Bildirim gelmeyen açık gönderileri zamanlanmış iş aynı yoldan sorar.
    - Bir durum geçişi gönderi başına tek kez uygulanır: tekil indeks ve kilit, ileri doğru geçiş. Bildirim ve sorgu aynı güncellemeyi iki kez uygulamaz (KK).
    - `picked_up` Medusa'nın gönderi kaydını (`createOrderShipmentWorkflow`), `delivered` teslim kaydını (`markOrderFulfillmentAsDeliveredWorkflow`) tetikler.

@@ -195,6 +195,9 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "This card's bank takes no refunds; pay the customer back another way.",
   "iyzico.refund_same_day":
     "iyzico makes no partial refund on the day of the payment; try again tomorrow, or refund it whole.",
+  "shipping.additional_data_reserved": "This request cannot carry the platform's own fields.",
+  "shipping.cod_single_parcel":
+    "An order paid at the door ships with a carrier as one parcel: the courier collects the whole amount with one parcel.",
   "shipping.carrier_not_connected":
     "The shipping service is not connected. Connect the account under Settings > Shipping.",
   "shipping.dimensions_missing":

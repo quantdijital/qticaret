@@ -42,12 +42,14 @@ export interface OfferWait {
   intervalMs: number
   timeoutMs: number
   sleep: (ms: number) => Promise<void>
+  now: () => number
 }
 
 const DEFAULT_WAIT: OfferWait = {
   intervalMs: 1_000,
   timeoutMs: 20_000,
   sleep: (ms) => new Promise((resolve) => setTimeout(resolve, ms)),
+  now: () => Date.now(),
 }
 
 /** Every offer gathered: Geliver is done asking the carriers. */
@@ -73,9 +75,11 @@ export function shipmentCalls(call: GeliverCall) {
     created: GeliverShipment,
     wait: Partial<OfferWait> = {}
   ): Promise<GeliverShipment> {
-    const { intervalMs, timeoutMs, sleep } = { ...DEFAULT_WAIT, ...wait }
+    const { intervalMs, timeoutMs, sleep, now } = { ...DEFAULT_WAIT, ...wait }
+    // By the clock: a slow read counts against the wait as much as the pause
+    const deadline = now() + timeoutMs
     let current = created
-    for (let waited = 0; !offersComplete(current) && waited < timeoutMs; waited += intervalMs) {
+    while (!offersComplete(current) && now() < deadline) {
       await sleep(intervalMs)
       current = await shipment(credentials, created.id)
     }

@@ -26,6 +26,8 @@ async function fetchBytes(url: URL): Promise<{ status: number; body: Buffer }> {
   if (url.protocol !== "https:") {
     throw failure("label_url_invalid")
   }
+  // Redirects within the origin only: a hop elsewhere could leave https with a person's label
+  // (to be widened to Geliver's file hosts, by name, once a real account shows them)
   const answer = await safeFetch(url, { timeoutMs: TIMEOUT_MS, maxResponseBytes: MAX_LABEL_BYTES })
   return { status: answer.status, body: answer.body }
 }

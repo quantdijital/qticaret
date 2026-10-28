@@ -54,6 +54,8 @@ export interface TrackedFacts {
   items: { id: string; quantity: number }[]
   shipped: boolean
   delivered: boolean
+  /** Its fulfillment was cancelled (or is gone): the parcel's way ends here. */
+  canceled: boolean
 }
 
 /** The tracked parcel and its fulfillment as Medusa holds it: packed lines, shipped, delivered. */
@@ -84,9 +86,6 @@ export const readTrackedShipmentStep = createStep(
           items?: ({ line_item_id?: string | null; quantity?: number | null } | null)[] | null
         }
       | undefined
-    if (!fulfillment || fulfillment.canceled_at) {
-      throw new ValidationError("shipping.shipment_canceled")
-    }
     return new StepResponse<TrackedFacts>({
       id: tracked.id,
       order_id: tracked.order_id,
@@ -97,11 +96,12 @@ export const readTrackedShipmentStep = createStep(
       tracking_url: tracked.tracking_url,
       status_at: tracked.status_at,
       checked_at: tracked.checked_at,
-      items: (fulfillment.items ?? []).flatMap((item) =>
+      items: (fulfillment?.items ?? []).flatMap((item) =>
         item?.line_item_id ? [{ id: item.line_item_id, quantity: item.quantity ?? 0 }] : []
       ),
-      shipped: Boolean(fulfillment.shipped_at),
-      delivered: Boolean(fulfillment.delivered_at),
+      shipped: Boolean(fulfillment?.shipped_at),
+      delivered: Boolean(fulfillment?.delivered_at),
+      canceled: !fulfillment || Boolean(fulfillment.canceled_at),
     })
   }
 )
@@ -113,10 +113,22 @@ export interface CarrierReading {
   tracking_url: string | null
 }
 
-/** Asks the carrier where the parcel is (adr/0031: what Geliver's API says, never a notification's body). Reads only. */
+/**
+ * Asks the carrier where the parcel is (adr/0031: what Geliver's API says,
+ * never a notification's body). A parcel whose fulfillment was cancelled
+ * is not asked about: it ends as cancelled. Reads only.
+ */
 export const readCarrierStatusStep = createStep(
   "shipping-read-carrier-status",
   async (tracked: TrackedFacts, { container }) => {
+    if (tracked.canceled) {
+      return new StepResponse<CarrierReading>({
+        status: "canceled",
+        provider_status: "fulfillment_canceled",
+        tracking_number: null,
+        tracking_url: null,
+      })
+    }
     const account = geliverCredentialsOf(
       await container
         .resolve<IntegrationCredentialsModuleService>(INTEGRATION_CREDENTIALS_MODULE)
@@ -210,7 +222,7 @@ export const recordShipmentStatusStep = createStep(
       status_at: before.tracked.status_at ? new Date(before.tracked.status_at) : null,
       tracking_number: before.tracked.tracking_number,
       tracking_url: before.tracked.tracking_url,
-      checked_at: before.tracked.checked_at ? new Date(before.tracked.checked_at) : null,
+      // The check's time stays: a parcel that fails is not asked about again at once
     })
   }
 )

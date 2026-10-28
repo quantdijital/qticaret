@@ -1135,6 +1135,18 @@ Doğrulananlar:
 | K11 | F7.14 | Doğrudan taşıyıcı adaptörü: ilk müşterinin anlaşmalı firması (**kullanıcıya soruldu**), ortak sözleşme paketi | K2–K4 | KK7 |
 | K12 | — | Kapanış: güvenlik ve kod incelemesi, KK işaretleri | K1–K11 | — |
 
+**F7 ara güvenlik incelemesi (K1–K4, 2026-10-28 gece, bağımsız ajan): yüksek yok; bulgular uygulandı.**
+- M1: Medusa'nın fulfillment uçları (`/admin/orders/:id/fulfillments`, `/admin/fulfillments`) `qt_` ile başlayan `additional_data`'yı reddediyor (`shipping.additional_data_reserved`); sahte `qt_ship` testi.
+- M2: kapıda ödemesi bekleyen sipariş taşıyıcıyla tek koli gider: kısmi ya da ikinci koli `shipping.cod_single_parcel` (kurye tutarın tamamını her kolide istemesin); test.
+- M3: iptal edilen fulfillment'ın kolisi takipte `canceled` kapanır; başarısız sorgu kontrol zamanını yazar (yarım saat sonra yeniden); hiç sorgulanmamışlar önce; testler.
+- L1: bildirimin dakikalık sınırı kilit altında okunup yazılıyor (Medusa'nın seçicili güncellemesi okuyup yazıyor, atomik değil); aynı anda üç bildirim tek okuma (test).
+- L2: gönderici adımının telafisi yalnızca adres kimliğini taşır, hesabı yeniden okur.
+- L3: etiket alınamazsa ya da sonraki adım düşerse Geliver'in etiket adresi fulfillment verisinden silinir (`forgetLabelSourceStep`).
+- L4: "Kargoya ver" kilidi 180 sn; teklif beklemesi saatle sınırlı.
+- L5: etiket dosya adı rastgele. L6: geri çekme hatası Geliver gönderi kimliği ve sipariş numarasıyla günlükte.
+- L7: dağıtılmış ortamda test kolileri bildirimle değil yalnızca sorgu işiyle ilerler.
+- Kabul edilen: I1 (Store'da fulfillment `data`'sı müşterinin kendi siparişinin Geliver kimliklerini taşır; etiket adresi saklanınca silinir), I2 (etiket yalnızca aynı köken yönlendirmesiyle iner; Geliver başka alana yönlendiriyorsa gerçek hesapta alan adıyla açılacak), I3 (bildirim cevabı işi bitirince; sınırlar yeterli).
+
 ### F6 görev planı (2026-10-27; Medusa 2.21.2 kaynağından doğrulandı, Context7 kotası dolu)
 Doğrulananlar (medusa-researcher, GitHub v2.21.2):
 - `pending_authorization` havale gibi yöntemler için: sipariş `awaiting` oluşur, `Payment` yok; `processPaymentWorkflow` sipariş varken oturumu yeniden yetkilendirir.

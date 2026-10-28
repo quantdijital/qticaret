@@ -136,6 +136,53 @@ medusaIntegrationTestRunner({
       expect(order.items[0]?.detail.shipped_quantity).toBe(1)
     })
 
+    it("asks once for notifications at once, and ends a parcel whose fulfillment was cancelled", async () => {
+      const { orderId, tracked } = await shippedOrder()
+      const reads = () =>
+        fake.requests.filter(
+          ({ method, path }) =>
+            method === "GET" && path === `/shipments/${tracked.provider_shipment_id}`
+        ).length
+      const before = reads()
+
+      await Promise.all([
+        notify(tracked.provider_shipment_id),
+        notify(tracked.provider_shipment_id),
+        notify(tracked.provider_shipment_id),
+      ])
+      const asked = reads() - before
+      const { data } = await getContainer()
+        .resolve(ContainerRegistrationKeys.QUERY)
+        .graph({ entity: "order", fields: ["fulfillments.id"], filters: { id: orderId } })
+      const fulfillmentId =
+        (data[0] as { fulfillments: { id: string }[] }).fulfillments[0]?.id ?? ""
+      await http.post(
+        `/admin/orders/${orderId}/fulfillments/${fulfillmentId}/cancel`,
+        {},
+        { headers: setup.admin.headers }
+      )
+      await poll()
+      const [ended] = await tracking().listTrackedShipments({ id: tracked.id })
+
+      expect(asked).toBe(1)
+      expect(ended?.status).toBe("canceled")
+      expect(await poll()).toBe(0)
+    })
+
+    it("marks a parcel the carrier fails on as asked, so it waits its turn", async () => {
+      const { tracked } = await shippedOrder()
+      fake.queue(`GET /shipments/${tracked.provider_shipment_id}`, {
+        status: 404,
+        body: { result: false, code: "NOT_FOUND" },
+      })
+
+      await poll()
+      const [row] = await tracking().listTrackedShipments({ id: tracked.id })
+
+      expect(row?.status).toBe("created")
+      expect(row?.checked_at).not.toBeNull()
+    })
+
     it("acknowledges what is not a tracked parcel and refuses what is not a notification", async () => {
       const unknown = await notify("ffffffff-0000-4000-8000-000000000000")
       const other = await notify("", { event: "SOMETHING_ELSE", data: { id: "x" } })

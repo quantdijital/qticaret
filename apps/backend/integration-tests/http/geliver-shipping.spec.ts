@@ -192,10 +192,24 @@ medusaIntegrationTestRunner({
         { headers: storefront.headers }
       )
       await ship(await order())
+      const { data: lines } = await getContainer()
+        .resolve(ContainerRegistrationKeys.QUERY)
+        .graph({ entity: "order", fields: ["items.id"], filters: { id: placed.data.order.id } })
+      const lineId = (lines[0] as { items: { id: string }[] }).items[0]?.id ?? ""
 
+      // The courier collects the whole payment with one parcel: no part of it ships alone
+      const part = await settle(
+        http.post<{ message?: string }>(
+          `/admin/orders/${placed.data.order.id}/ship`,
+          { notify: false, items: [{ id: lineId, quantity: 1 }] },
+          { headers: admin.headers }
+        )
+      )
       await ship(placed.data.order.id)
       const shipments = [...fake.shipments.values()]
 
+      expect(part.data.message).toBe("shipping.cod_single_parcel")
+      expect(shipments).toHaveLength(2)
       expect(new Set(shipments.map((each) => each.request["senderAddressID"])).size).toBe(1)
       expect(fake.addresses.size).toBe(1)
       // 120 TL and 60 TL shipping, collected by the courier
@@ -205,7 +219,7 @@ medusaIntegrationTestRunner({
       })
     })
 
-    it("opens no Geliver shipment from Medusa's own route", async () => {
+    it("opens no Geliver shipment from Medusa's own route, even with our mark forged", async () => {
       const orderId = await order()
       const { data } = await getContainer()
         .resolve(ContainerRegistrationKeys.QUERY)
@@ -219,9 +233,21 @@ medusaIntegrationTestRunner({
           { headers: admin.headers }
         )
       )
+      const forged = await settle(
+        http.post(
+          `/admin/orders/${orderId}/fulfillments`,
+          {
+            items: items.map(({ id }) => ({ id, quantity: 1 })),
+            additional_data: { qt_ship: { sender_address_id: "any", cash_on_delivery: 1 } },
+          },
+          { headers: admin.headers }
+        )
+      )
 
       expect(medusas.status).toBe(400)
       expect(JSON.stringify(medusas.data)).toMatch(/shipping\.use_ship_route/)
+      expect(forged.status).toBe(400)
+      expect(JSON.stringify(forged.data)).toMatch(/shipping\.additional_data_reserved/)
       expect(fake.shipments.size).toBe(0)
     })
 

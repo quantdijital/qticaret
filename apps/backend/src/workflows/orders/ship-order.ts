@@ -13,7 +13,7 @@ import {
 import { SHIP_ROUTE_MARK } from "../../lib/shipping/carriers"
 import { ensureGeliverSenderStep } from "../shipping/steps/geliver-sender"
 import { planCarrierStep } from "../shipping/steps/plan-carrier"
-import { storeShipmentLabelStep } from "../shipping/steps/store-label"
+import { forgetLabelSourceStep, storeShipmentLabelStep } from "../shipping/steps/store-label"
 import { trackShipmentStep } from "../shipping/steps/track"
 import { planShipmentStep } from "./steps/plan-shipment"
 
@@ -42,12 +42,18 @@ export interface ShipOrderInput {
  */
 export const shipOrderWorkflow = createWorkflow("orders-ship-order", (input: ShipOrderInput) => {
   const lockKey = transform({ input }, ({ input }) => `orders:ship:${input.order_id}`)
-  acquireLockStep({ key: lockKey, timeout: 10, ttl: 60 })
+  // Long enough for a carrier: offers, the label's purchase and its download
+  acquireLockStep({ key: lockKey, timeout: 10, ttl: 180 })
 
   const plan = planShipmentStep(
     transform({ input }, ({ input }) => ({ order_id: input.order_id, items: input.items }))
   )
-  const carrier = planCarrierStep({ order_id: input.order_id })
+  const carrier = planCarrierStep(
+    transform({ input }, ({ input }) => ({
+      order_id: input.order_id,
+      partial: Boolean(input.items),
+    }))
+  )
 
   const sender = when(
     "shipping-geliver-sender",
@@ -87,6 +93,7 @@ export const shipOrderWorkflow = createWorkflow("orders-ship-order", (input: Shi
       fulfillment_id: packed?.id ?? "",
       order_id: input.order_id,
     }))
+    forgetLabelSourceStep(fulfillment)
     storeShipmentLabelStep(fulfillment)
     trackShipmentStep(fulfillment)
   })

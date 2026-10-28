@@ -195,6 +195,9 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Bu kartın bankası iade kabul etmiyor; müşteriye başka yolla ödeme yapın.",
   "iyzico.refund_same_day":
     "iyzico ödemenin alındığı gün kısmi iade yapmıyor; yarın tekrar deneyin ya da tamamını iade edin.",
+  "shipping.additional_data_reserved": "Bu istek platformun kendi alanlarını taşıyamaz.",
+  "shipping.cod_single_parcel":
+    "Kapıda ödemeli sipariş kargo firmasıyla tek koli olarak gönderilir: kurye tutarın tamamını bir kolide tahsil eder.",
   "shipping.carrier_not_connected":
     "Kargo hizmeti bağlı değil. Ayarlar > Kargo'dan hesabı bağlayın.",
   "shipping.dimensions_missing":

@@ -8,7 +8,7 @@ import {
   geliverSenderOf,
   sameSender,
 } from "../../../lib/shipping/geliver"
-import type { AddressRow, GeliverCredentials } from "../../../lib/shipping/geliver"
+import type { AddressRow } from "../../../lib/shipping/geliver"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../../modules/integration-credentials"
 import type IntegrationCredentialsModuleService from "../../../modules/integration-credentials/service"
 import { PLATFORM_SETTINGS_MODULE } from "../../../modules/platform-settings"
@@ -77,17 +77,23 @@ export const ensureGeliverSenderStep = createStep(
       sameSender(stored, wanted)
     )
     if (existing) {
-      return new StepResponse({ sender_address_id: existing.id }, null)
+      return new StepResponse({ sender_address_id: existing.id }, null as string | null)
     }
     const created = await api.createSenderAddress(account, wanted)
-    return new StepResponse<
-      { sender_address_id: string },
-      { id: string; account: GeliverCredentials } | null
-    >({ sender_address_id: created.id }, { id: created.id, account })
+    // Only the id is kept for undoing: the account is read again then (docs/04: no secret in step data)
+    return new StepResponse({ sender_address_id: created.id }, created.id)
   },
-  async (made) => {
-    if (made) {
-      await geliverApi().deleteAddress(made.account, made.id)
+  async (madeId, { container }) => {
+    if (!madeId) {
+      return
+    }
+    const account = geliverCredentialsOf(
+      await container
+        .resolve<IntegrationCredentialsModuleService>(INTEGRATION_CREDENTIALS_MODULE)
+        .read("geliver")
+    )
+    if (account) {
+      await geliverApi().deleteAddress(account, madeId)
     }
   }
 )

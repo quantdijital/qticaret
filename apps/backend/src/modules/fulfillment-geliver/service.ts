@@ -152,7 +152,13 @@ class GeliverFulfillmentService extends AbstractFulfillmentProviderService {
     } catch (error) {
       // No label bought: the shipment is withdrawn at Geliver, nothing is left behind
       await api.cancelShipment(credentials, created.id).catch((cancel: unknown) => {
-        logger.warn({ event: "geliver.shipment_withdraw_failed", err: errorSummary(cancel) })
+        // Ids only: support finds the shipment (and a label maybe paid for) at Geliver
+        logger.warn({
+          event: "geliver.shipment_withdraw_failed",
+          geliverShipmentId: created.id,
+          orderDisplayId: order?.display_id ?? null,
+          err: errorSummary(cancel),
+        })
       })
       throw error
     }
