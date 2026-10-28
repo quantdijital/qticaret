@@ -166,6 +166,48 @@ F10'un pazarlama tarafı mağazanın verisini dış servislere taşır: Google, 
   - Panelden girilen iznin İYS kaynağı her zaman `HS_FIZIKSEL_ORTAM`. Telefonla ya da ıslak imzayla alınan izin için panelde kaynak seçimi gerekebilir.
   - İYS'den gelen değişikliklerin (vatandaşın İYS'den ret vermesi) Netgsm web kancasıyla alınması sonraya kaldı.
 
+## Uygulama notları (M12, ürün feed'leri, 2026-10-29)
+- **Kaynak:**
+  - Feed kalemleri, sayfanın JSON-LD'sini üreten `productFacts` fonksiyonundan çıkar: fiyat (30 gün kuralıyla üstü çizili fiyat dahil), stok, kodlar ve kargo ücreti.
+  - Varyant bağlantısı, JSON-LD teklifinin adresiyle aynıdır (`?variant=`).
+  - Eşitlik testli (KK4): feed fiyatı ile `/store/seo/resolve` teklif fiyatı aynı.
+- **Dışarıda kalanlar:**
+  - yayında olmayan, mağaza adresi olmayan ürünler;
+  - fiyatı olmayan, stokta olmayan varyantlar;
+  - görseli olmayan kalemler (Google ve Meta reddeder);
+  - Google'da ön sipariş (`availability_date` zorunlu, katalogda tarih yok).
+  - Kısıtlı kategori dışlaması F13.4 ile gelecek.
+- **Biçimleyiciler (`lib/feeds`, `FeedFormatter`: `accepts` + `render`):**
+  - Google:
+    - RSS 2.0 ve `g:` ad alanı;
+    - indirimde `price` üstü çizili fiyat, `sale_price` ödenen fiyat;
+    - GTIN de MPN de yoksa `identifier_exists=no`;
+    - `damaged` durumu `used` olarak yazılır;
+    - renk, beden, malzeme ve desen eklenir. Cinsiyet ve yaş grubu eklenmez: Google sabit kelimeler ister, mağazanın kendi değerleri onlar değil.
+  - Meta:
+    - CSV;
+    - formül enjeksiyonuna karşı `= + - @` ile başlayan hücreler kaçışlanır.
+- **Şema denetimi (`googleFeedProblems`):**
+  - Google belirtiminin zorunlu alanlarını ve değerlerini denetler.
+  - Üretimde sorun sayısı loglanır; testte sıfır olması beklenir.
+  - Belirtim resmî kaynaktan doğrulandı: support.google.com/merchants/answer/7052112.
+- **Erişim:**
+  - `GET /feeds/:token/:target`; hız profili `feed`, IP başına 15 dakikada 60 istek.
+  - Token tek tanedir: anahtarlı özetiyle sabit zamanlı karşılaştırılır. Şifreli kopyası, panelin adresi yeniden gösterebilmesi için tutulur.
+  - Yanlış token ile bulunmayan feed aynı 404'ü alır.
+  - Yanıt başlıkları: `X-Robots-Tag: noindex`, `Cache-Control: private, max-age=300`.
+- **Üretim:**
+  - `marketing-feeds` işi iki saatte bir çalışır; panelden "Şimdi güncelle" ile de tetiklenir.
+  - Dosyalar özel depoya yazılır. Yeni dosya kaydedilince eskisi silinir; kaydedilemezse yenisi silinir.
+  - Mağaza alan adı yoksa ya da feed'ler kapalıysa üretim yapılmaz.
+- **Panel:**
+  - Ayarlar > Pazarlama > Ürün feed'leri: aç, kapat, adresi yenile (onaylı), şimdi güncelle.
+  - Kopyalanabilir adresler; ürün sayısı ve son güncelleme zamanı.
+  - Alan adı yoksa uyarı.
+- **Bekleyen dış bilgi:**
+  - Akakçe ve Cimri herkese açık bir XML biçimi yayımlamıyor. Biçim, mağazanın satıcı panelinden alınınca her biri tek bir biçimleyici olarak eklenecek.
+  - Merchant API ile gönderim M13'te.
+
 ## Alternatifler
 
 | Seçenek | Artı | Eksi |

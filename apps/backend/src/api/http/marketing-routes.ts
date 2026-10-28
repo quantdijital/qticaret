@@ -19,4 +19,11 @@ export const MARKETING_ROUTES = [
     methods: ["GET" as const],
     middlewares: [requireUserActor],
   },
+  // F10.8 (adr/0038 §3): feeds fetched by address alone; turned on and off by staff
+  { matcher: "/feeds/*", middlewares: [rateLimit(() => RATE_LIMIT_PROFILES.feed)] },
+  ...[
+    "/admin/marketing-feeds",
+    "/admin/marketing-feeds/token",
+    "/admin/marketing-feeds/generate",
+  ].map((matcher) => ({ matcher, middlewares: [requireUserActor] })),
 ]

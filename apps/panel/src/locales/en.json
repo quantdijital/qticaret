@@ -1109,11 +1109,11 @@
       "features": "Shop features you can turn on or off",
       "jobs": "Long jobs such as exports, and their files",
       "audit": "Who changed what in the panel, and when",
-      "marketing": "Abandoned cart reminders"
+      "marketing": "Abandoned cart reminders and product feeds"
     },
     "marketing": {
       "title": "Marketing",
-      "description": "Messages, sent with consent, that bring shoppers back.",
+      "description": "Consented messages and product lists that bring shoppers in.",
       "abandonedCart": {
         "title": "Abandoned cart reminder",
         "description": "A shopper who leaves items in the cart gets one e-mail. Only addresses with e-mail consent get it; its link opens the cart once and lasts 7 days.",
@@ -1131,6 +1131,42 @@
           "returned": "Back to the cart",
           "ordered": "Became an order"
         }
+      },
+      "feeds": {
+        "title": "Product feeds",
+        "description": "Your product list for Google Merchant Center and the Meta (Facebook, Instagram) catalog. Prices, stock and codes come from the same source as the product pages and are refreshed every two hours; products out of stock or without an image are left out.",
+        "off": "Feeds are off. Turning them on makes an address for Google and Meta for each target.",
+        "turnOn": "Turn feeds on",
+        "turnOff": "Turn off",
+        "renew": "Renew address",
+        "generate": "Refresh now",
+        "building": "The first feed is being built; it appears here in a few minutes.",
+        "generated_one": "{{items}} product · refreshed {{when}}",
+        "generated_other": "{{items}} products · refreshed {{when}}",
+        "comparison": "Akakçe and Cimri feeds will be added once their current XML formats are taken from your seller panel.",
+        "targets": {
+          "google": "Google Merchant Center",
+          "meta": "Meta catalog"
+        },
+        "done": {
+          "issue": "Feed addresses are ready.",
+          "off": "Feeds turned off.",
+          "generate": "Feeds refreshed."
+        },
+        "confirm": {
+          "issue": {
+            "title": "Renew the address?",
+            "description": "The old addresses stop working at once. Replace them in Google Merchant Center and Meta with the new ones.",
+            "action": "Renew address"
+          },
+          "off": {
+            "title": "Turn the feeds off?",
+            "description": "The addresses and the built files are removed; Google and Meta can no longer fetch your products this way.",
+            "action": "Turn feeds off"
+          }
+        },
+        "noDomain": "The shop has no domain yet; feeds link to product pages, so they cannot be built. Enter the domain under Settings > SEO.",
+        "notYet": "Not built yet."
       }
     }
   },

@@ -1109,11 +1109,11 @@
       "features": "Açılıp kapatılabilen mağaza özellikleri",
       "jobs": "Dışa aktarma gibi uzun süren işler ve dosyaları",
       "audit": "Panelde kim neyi ne zaman değiştirdi",
-      "marketing": "Terk edilmiş sepet hatırlatması"
+      "marketing": "Terk edilmiş sepet hatırlatması ve ürün feed'leri"
     },
     "marketing": {
       "title": "Pazarlama",
-      "description": "Müşteriyi alışverişe geri getiren, izinle gönderilen iletiler.",
+      "description": "Müşteriyi alışverişe getiren izinli iletiler ve ürün listeleri.",
       "abandonedCart": {
         "title": "Terk edilmiş sepet hatırlatması",
         "description": "Sepetine ürün ekleyip ayrılan müşteriye bir kez e-posta gider. Yalnızca e-posta izni olan adreslere gönderilir; içindeki bağlantı sepeti bir kez açar ve 7 gün geçerlidir.",
@@ -1131,6 +1131,42 @@
           "returned": "Sepete dönen",
           "ordered": "Siparişe dönüşen"
         }
+      },
+      "feeds": {
+        "title": "Ürün feed'leri",
+        "description": "Google Merchant Center ve Meta (Facebook, Instagram) kataloğu için ürün listeniz. Fiyat, stok ve kodlar ürün sayfalarındakiyle aynı kaynaktan, iki saatte bir güncellenir; stokta olmayan ve görseli olmayan ürünler listelenmez.",
+        "off": "Feed'ler kapalı. Açınca her hedef için Google'a ve Meta'ya vereceğiniz bir adres oluşur.",
+        "turnOn": "Feed'leri aç",
+        "turnOff": "Kapat",
+        "renew": "Adresi yenile",
+        "generate": "Şimdi güncelle",
+        "building": "İlk feed hazırlanıyor; birkaç dakika içinde burada görünür.",
+        "generated_one": "{{items}} ürün · {{when}} güncellendi",
+        "generated_other": "{{items}} ürün · {{when}} güncellendi",
+        "comparison": "Akakçe ve Cimri feed'leri, bu sitelerin güncel XML biçimi satıcı panelinizden alındığında eklenecek.",
+        "targets": {
+          "google": "Google Merchant Center",
+          "meta": "Meta katalog"
+        },
+        "done": {
+          "issue": "Feed adresleri hazır.",
+          "off": "Feed'ler kapatıldı.",
+          "generate": "Feed'ler güncellendi."
+        },
+        "confirm": {
+          "issue": {
+            "title": "Adres yenilensin mi?",
+            "description": "Eski adresler hemen çalışmaz olur. Google Merchant Center ve Meta'daki adresleri yenileriyle değiştirmeniz gerekir.",
+            "action": "Adresi yenile"
+          },
+          "off": {
+            "title": "Feed'ler kapatılsın mı?",
+            "description": "Adresler ve oluşturulmuş dosyalar silinir; Google ve Meta ürünlerinizi bu yoldan alamaz.",
+            "action": "Feed'leri kapat"
+          }
+        },
+        "noDomain": "Mağazanın alan adı tanımlı değil; feed'ler ürün sayfalarına bağlantı verdiği için oluşturulamıyor. Ayarlar > SEO'dan alan adını girin.",
+        "notYet": "Henüz oluşturulmadı."
       }
     }
   },

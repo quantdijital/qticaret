@@ -67,7 +67,7 @@ function primaryCategory(product: ProductRow): CategoryRow | null {
  * shipping sentence (F7.8), and whether shoppers see an option the table
  * prices.
  */
-async function shippingFactsOf(container: MedusaContainer): Promise<ShippingFacts> {
+export async function shippingFactsOf(container: MedusaContainer): Promise<ShippingFacts> {
   const settings = container.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
   const [shipping, store, options] = await Promise.all([
     settings.getSection("shipping") as Promise<unknown> as Promise<ShippingSettings>,
