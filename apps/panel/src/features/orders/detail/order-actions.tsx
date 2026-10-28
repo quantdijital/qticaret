@@ -4,6 +4,7 @@ import {
   EllipsisVertical,
   Loader2,
   PackageCheck,
+  Pencil,
   ShieldAlert,
   Truck,
   Undo2,
@@ -24,10 +25,11 @@ import { useCapturePayment } from "@/features/orders/api/payments"
 import type { OrderDetail, OrderMoney, OrderState } from "@/features/orders/api/orders"
 import { errorText } from "@/lib/errors"
 import { ChargebackDialog } from "./chargeback-dialog"
+import { EditOrderDialog } from "./edit-dialog"
 import { RefundDialog } from "./refund-dialog"
 import { ShipDialog } from "./ship-dialog"
 
-type Dialog = "ship" | "deliver" | "cancel" | "capture" | "refund" | "chargeback" | null
+type Dialog = "ship" | "deliver" | "cancel" | "capture" | "refund" | "chargeback" | "edit" | null
 
 /**
  * The next step for the order as the page's main button (ship, then mark
@@ -106,6 +108,17 @@ export function OrderActions({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            {/* Lines change only before anything is packed (adr/0033), as a cancel does */}
+            {cancelable ? (
+              <DropdownMenuItem
+                onSelect={() => {
+                  setDialog("edit")
+                }}
+              >
+                <Pencil />
+                {t("orders.actions.edit")}
+              </DropdownMenuItem>
+            ) : null}
             {held.length > 0 ? (
               <DropdownMenuItem
                 onSelect={() => {
@@ -194,6 +207,14 @@ export function OrderActions({
           paid={money.paid}
           open
           onOpenChange={close}
+        />
+      ) : null}
+      {dialog === "edit" ? (
+        <EditOrderDialog
+          order={order}
+          onClose={() => {
+            setDialog(null)
+          }}
         />
       ) : null}
       {/* Mounted while open: each opening is a new refund, with a key of its own */}

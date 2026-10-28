@@ -1388,7 +1388,8 @@
       "cancel": "Cancel order",
       "more": "More actions",
       "refund": "Refund money",
-      "chargeback": "Record a chargeback"
+      "chargeback": "Record a chargeback",
+      "edit": "Edit order"
     },
     "ship": {
       "title": "Ship #{{number}}?",
@@ -1626,6 +1627,32 @@
         "collectedHint": "Tick it once paid by bank transfer or otherwise; the difference is recorded as paid on the order.",
         "approved": "Exchange approved; the shopper sees the return code."
       }
+    },
+    "edit": {
+      "title": "Edit order #{{number}}",
+      "description": "Change a quantity (0 takes the line off), correct a price or add products. The difference is worked out before saving; the shipping stays as it is.",
+      "line": "Product",
+      "quantity": "Qty",
+      "price": "Unit price (₺)",
+      "quantityOf": "Quantity of {{name}}",
+      "priceOf": "Unit price of {{name}}",
+      "remove": "Take {{name}} off",
+      "shopPrice": "Shop price",
+      "addPlaceholder": "Search a product to add",
+      "addEmpty": "No product found.",
+      "addQuantity": "Quantity to add",
+      "add": "Add",
+      "preview": "Work out the difference",
+      "done": "Order edited."
+    },
+    "address": {
+      "edit": "Edit",
+      "title": "Delivery address of #{{number}}",
+      "description": "The delivery address can change until the order is packed.",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "nameRequired": "First and last name are required.",
+      "saved": "Delivery address updated."
     }
   },
   "customers": {

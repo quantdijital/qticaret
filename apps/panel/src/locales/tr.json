@@ -1396,7 +1396,8 @@
       "cancel": "Siparişi iptal et",
       "more": "Diğer işlemler",
       "refund": "Para iadesi",
-      "chargeback": "Ters ibraz kaydı aç"
+      "chargeback": "Ters ibraz kaydı aç",
+      "edit": "Siparişi düzenle"
     },
     "ship": {
       "title": "#{{number}} kargoya verilsin mi?",
@@ -1634,6 +1635,32 @@
         "collectedHint": "Havale/EFT ya da başka yolla tahsil ettiyseniz işaretleyin; fark siparişe ödendi olarak işlenir.",
         "approved": "Değişim onaylandı; iade kodu müşteriye gösterilir."
       }
+    },
+    "edit": {
+      "title": "#{{number}} siparişini düzenle",
+      "description": "Miktarı değiştirin (0 kalemi çıkarır), fiyatı düzeltin ya da ürün ekleyin. Kaydetmeden önce fark hesaplanır; kargo ücreti değişmez.",
+      "line": "Ürün",
+      "quantity": "Adet",
+      "price": "Birim fiyat (₺)",
+      "quantityOf": "{{name}} adedi",
+      "priceOf": "{{name}} birim fiyatı",
+      "remove": "{{name}} kalemini çıkar",
+      "shopPrice": "Mağaza fiyatı",
+      "addPlaceholder": "Eklenecek ürünü arayın",
+      "addEmpty": "Ürün bulunamadı.",
+      "addQuantity": "Eklenecek adet",
+      "add": "Ekle",
+      "preview": "Farkı hesapla",
+      "done": "Sipariş düzenlendi."
+    },
+    "address": {
+      "edit": "Düzenle",
+      "title": "#{{number}} teslimat adresi",
+      "description": "Sipariş paketlenene kadar teslimat adresi değiştirilebilir.",
+      "firstName": "Ad",
+      "lastName": "Soyad",
+      "nameRequired": "Ad ve soyad gerekli.",
+      "saved": "Teslimat adresi güncellendi."
     }
   },
   "customers": {

@@ -110,7 +110,7 @@ export function OrderDetailPage() {
         </PageColumn>
         <PageColumn span={4}>
           <CustomerCard order={order} />
-          <AddressCard order={order} />
+          <AddressCard order={order} editable={state.data.cancelable} />
           <PaymentCard
             order={order}
             {...(money.data ? { money: money.data } : {})}

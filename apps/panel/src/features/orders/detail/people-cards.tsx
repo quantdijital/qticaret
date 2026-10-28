@@ -1,8 +1,11 @@
-import { Mail, MapPin, Phone, UserRound } from "lucide-react"
+import { Mail, MapPin, Pencil, Phone, UserRound } from "lucide-react"
+import { useState } from "react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { SectionCard } from "@/components/patterns/section-card"
+import { Button } from "@/components/ui/button"
 import type { OrderDetail } from "@/features/orders/api/orders"
+import { AddressDialog } from "./address-dialog"
 
 type Address = NonNullable<OrderDetail["shipping_address"]>
 
@@ -60,14 +63,48 @@ export function CustomerCard({ order }: { order: OrderDetail }) {
   )
 }
 
-/** Where the parcel goes, and the invoice address when it differs. */
-export function AddressCard({ order }: { order: OrderDetail }) {
+/**
+ * Where the parcel goes, and the invoice address when it differs; the
+ * delivery address changes while nothing is packed (adr/0033).
+ */
+export function AddressCard({
+  order,
+  editable = false,
+}: {
+  order: OrderDetail
+  editable?: boolean
+}) {
   const { t } = useTranslation()
+  const [editing, setEditing] = useState(false)
   const shipping = order.shipping_address ? addressLines(order.shipping_address) : []
   const billing = order.billing_address ? addressLines(order.billing_address) : []
   const sameBilling = billing.join("|") === shipping.join("|")
   return (
-    <SectionCard title={t("orders.detail.delivery")}>
+    <SectionCard
+      title={t("orders.detail.delivery")}
+      action={
+        editable ? (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              setEditing(true)
+            }}
+          >
+            <Pencil />
+            {t("orders.address.edit")}
+          </Button>
+        ) : null
+      }
+    >
+      {editing ? (
+        <AddressDialog
+          order={order}
+          onClose={() => {
+            setEditing(false)
+          }}
+        />
+      ) : null}
       <div className="flex flex-col gap-4">
         {shipping.length ? (
           <Line icon={MapPin}>

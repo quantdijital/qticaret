@@ -96,6 +96,8 @@ const DETAIL_FIELDS = [
   "items.unit_price",
   "items.total",
   "items.detail.quantity",
+  // A price an order edit corrected reaches the item only with it (adr/0033)
+  "items.detail.unit_price",
   "items.detail.fulfilled_quantity",
   "items.detail.shipped_quantity",
   "items.detail.delivered_quantity",
