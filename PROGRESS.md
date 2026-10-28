@@ -3,6 +3,8 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
+**F8 — E-Fatura / e-Arşiv: PLANLANDI (2026-10-28 öğlen).** Plan aşağıda "F8 görev planı"; ADR-0034 önerildi (entegratör seçimi, mali müşavir doğrulaması ve PDF kütüphanesi kullanıcı kararı). Sahte entegratörle ilerlenir; sıradaki görev E1. Dal `f8-einvoice` (`f7-shipping` üzerinden).
+
 **F7 — Kargo, sipariş operasyonu, iade ve değişim: BAŞLADI (2026-10-28 gece, otonom).** Plan aşağıda "F7 görev planı"; ADR-0031 (kargo altyapısı ve takip) kabul edildi (otonom, gözden geçir). K1–K10 bitti; sıradaki K11 (doğrudan taşıyıcı, kullanıcının kargo firması cevabına bağlı) ve K12 (kapanış incelemesi).
 
 **F6 — Ödeme: alternatif ödemeler + yönlendirici + ters ibraz: BİTTİ (2026-10-28 gece, otonom).** Dal `f6-alternative-payments`. W1–W6; KK1–KK5 işaretli. ADR-0029 ve ADR-0030 otonom kabul edildi (gözden geçir). Kapanışta yerelde: birim 1658, HTTP 81/81 takım (440 test), modül (ters ibraz) 1, panel 220, e2e 29.
@@ -1137,7 +1139,27 @@
 - **Daha önce:** F1 planlaması ve F0.2–F0.8 (2026-10-24), F0.1 monorepo (2026-10-24 sabahı), SEO ve güvenlik dokümanları (2026-10-22).
 
 ## Sıradaki görev
-**Claude'un sıradaki işi:** F7 K12 (kapanış: bağımsız güvenlik incelemesi K9–K10, e2e, KK işaretleri); K11 kullanıcının kargo firması cevabını bekliyor. Plan aşağıda "F7 görev planı". Dal `f7-shipping` (`f6-alternative-payments` üzerinden). Kullanıcı 2026-10-27 gece: "izin istemeden çalışmaya devam edersin, kritik bir şey olursa sabah sorarım."
+**Claude'un sıradaki işi:** F8 E1 (`einvoice` modülü), plan aşağıda "F8 görev planı". F7'de K11 kullanıcının kargo firması cevabını, KK3 F8'i bekliyor. Plan aşağıda "F7 görev planı". Dal `f7-shipping` (`f6-alternative-payments` üzerinden). Kullanıcı 2026-10-27 gece: "izin istemeden çalışmaya devam edersin, kritik bir şey olursa sabah sorarım."
+
+### F8 görev planı (2026-10-28; Medusa olay adları v2.21.2 kaynağından, GİB listesi ve UBL-TR sürümü web kaynaklarından doğrulandı; Context7 kotası dolu)
+Karar: ADR-0034 (önerildi). Ayrıntı `docs/entegrasyonlar/e-fatura.md`.
+
+Doğrulananlar:
+- Medusa olayları: `order.placed`, `shipment.created`, `order.canceled`, `order-edit.confirmed`, `order.exchange_created`; kendi olayımız `return.refunded`. Modül, link, iş akışı, olay aboneliği, zamanlanmış iş ve özel dosya deposu projede zaten kullanılıyor; yeni Medusa API'si yok.
+- GİB kayıtlı kullanıcı listesi herkese açık toplu indirilemiyor: e-Fatura Portalı'nda girişle (XML/CSV) ya da entegratörden. Herkese açık olan güvenlik kodlu tek VKN sorgusu. Mükellef tablosu bu yüzden entegratörün toplu listesinden beslenir (ADR-0034 §3).
+- UBL-TR 1.2.1 güncel; kod listeleri 14 Eylül 2026'da güncellendi. XSD ve şematron GİB e-Belge portalındaki paketten.
+
+| # | F8 | Görev | Bağımlılık | KK |
+|---|---|---|---|---|
+| E1 | F8.1 | `einvoice` modülü: fatura kaydı (tür, belge tipi, durum, UUID, numara, deneme, son hata, iade bağları; tekillik), mükellef tablosu, numara sırası (mağaza + yıl, kilitli); `einvoice` ayar bölümü (tetikleme anı, seri, açık/kapalı); migration ve modül testleri | — | KK3 (tekillik) |
+| E2 | F8.2 | UBL-TR yazıcısı (bağımlılıksız, kaçışlı): satış ve iade faturası, KDV dökümü, indirim kalemde, kargo satırı, e-Arşiv internet satışı bilgileri, iade için `BillingReference`. GİB paketinin XSD'si depoya (sürümüyle); `xmllint` ile şema testi (yoksa atlanır, CI'da zorunlu). Birim testleri fixture'larla | E1 | KK4 (XSD kısmı) |
+| E3 | F8.3, F8.7 | Belge tipi: fatura profilindeki VKN + yerel mükellef tablosu; `InvoiceAdapter` arayüzü; sahte entegratör (`packages/testing`, `pnpm dev:einvoice`); `integration-credentials`'a `einvoice` hesabı ve sağlık kontrolü; mükellef listesi işi (günlük, bozuk dosya, liste yokken yedek sorgu) | E1 | KK5 |
+| E4 | F8.4 | `invoice-create-for-order` iş akışı: tip, tekillik, numara, UBL, iletim, kayıt; hata siparişi bozmaz (`failed` + artan aralıklı yeniden deneme işi, N denemede panel uyarısı); sonucu bilinmeyen iletim önce durum sorgusu; tetikleme (`shipment.created` varsayılan, `order.placed` seçenek; havale ve kapıda ödeme beklenir) | E2, E3 | KK1 (sahte), KK2, KK3 |
+| E5 | F8.5 | İade ve iptal: `return.refunded` ve iade defteri iade faturası (asıl faturaya bağ), değişimde iade + yeni satış faturası, faturalı siparişin iptali (iptal/iade, adaptör), faturalı sipariş düzenlenemez (ADR-0033 §8) | E4 | F7 KK3 |
+| E6 | F8.8 | Fatura görüntüsü: UBL'den HTML (mağaza logosu ve unvanı), özel depo, kısa ömürlü bağlantı; PDF kütüphanesi onaylanırsa PDF | E4 | — |
+| E7 | F8.6 | Panel: sipariş sayfasında fatura kartı (durum, görüntü/PDF, yeniden dene), Siparişler > Faturalar (başarısızlar önce), Ayarlar > E-Fatura (hesap, seri, tetikleme, test modu) | E4–E6 | — |
+| E8 | — | İlk gerçek entegratör adaptörü (kullanıcının seçimiyle) ve sunucuda GİB test ortamı / şematron doğrulaması | E3, kullanıcı | KK1, KK4 |
+| E9 | — | Kapanış: güvenlik ve kod incelemesi, KK işaretleri | E1–E8 | — |
 
 ### F7 görev planı (2026-10-28; Geliver uçları resmi JS SDK kaynağından, Medusa fulfillment sağlayıcı arayüzü docs.medusajs.com'dan doğrulandı; Context7 kotası dolu)
 Karar: ADR-0031 (kargo altyapısı, takip, etiketler; kabul edildi, otonom, gözden geçir). Geliver ayrıntıları `docs/entegrasyonlar/geliver.md`.
@@ -1329,6 +1351,9 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
 
 ## Açık sorular / bloklayıcılar
 - [ ] **Soru (F7.14): ilk müşterinin anlaşmalı kargo firması hangisi?** Yurtiçi, Aras, MNG, PTT ya da Sürat'ten biri. Doğrudan taşıyıcı adaptörü (K11) bu cevaba bağlı; K1–K10 beklemeden ilerler. Firmanın API erişimi (müşteri numarası, test ortamı) de gerekecek (docs/12).
+- [ ] **Soru (F8): e-fatura entegratörü hangisi?** İlk gerçek adaptör (E8) ve test hesabı buna bağlı; E1–E7 sahte entegratörle ilerler. Entegratörün toplu kayıtlı kullanıcı listesi vermesi gerekir (GİB listesi herkese açık indirilemiyor, ADR-0034 §3).
+- [ ] **Soru (F8): mali müşavir doğrulaması.** TCKN'siz bireysel alıcıda varsayılan değer, indirim ve kargonun faturada gösterimi, hediye kartı/mağaza kredisinin KDV'si, faturalı siparişin iptalinde iptal mi iade faturası mı (docs/12). Varsayılanlar ADR-0034'te; doğrulanınca kesinleşir.
+- [ ] **Soru (F8 + F7.7): PDF kütüphanesi (`pdf-lib`, MIT, bağımlılıksız) eklensin mi?** Fatura PDF'i ve toplu kargo etiketlerinin tek dosyada birleştirilmesi bununla çözülür. Onay gelene kadar fatura görüntüsü HTML.
 - [ ] **Soru (F7.7): toplu etiketler tek PDF olsun mu?** Şimdi toplu "Kargoya ver" sonrası her siparişin etiketi ayrı indiriliyor. Tek dosyada birleştirmek için PDF kütüphanesi gerekir (öneri: `pdf-lib`, MIT, bağımlılıksız). Onaylarsan eklenir; Geliver'in toplu etiket ucu varsa (gerçek hesapla bakılacak) ona gerek kalmaz.
 - [ ] **Geliver hesabı (F7; kullanıcı).** K1–K10 sahte Geliver'le yazılır (ödemelerdeki gibi). Gerçek hesapla deneme sunucuya çıkışta. Doğrulanacaklar: takip durum kodları (SDK listelemiyor), bildirim imzası (SDK'da uygulanmamış), kapıda ödeme tahsilatının raporlandığı alan, kapıda ödemeli gönderinin iadesinde (`isReturn`) tahsilatın iade gönderisine taşınıp taşınmadığı.
 - [ ] **Gözden geçir: F6 kararları (2026-10-27/28 gece; kalıcı "önerileni uygula" talimatıyla):**
