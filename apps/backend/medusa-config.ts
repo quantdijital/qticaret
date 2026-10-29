@@ -177,6 +177,8 @@ module.exports = defineConfig({
       resolve: "./src/modules/billing-profile",
       options: { encryptionKey: env.PII_ENCRYPTION_KEY, hashKey: env.PII_HASH_KEY },
     },
+    // F10.13 (adr/0005): drafts a provider wrote, shown only once staff approve them
+    { resolve: "./src/modules/content-drafts" },
     // F10.11 (docs/13 §10): what Search Console and CrUX say of the shop
     { resolve: "./src/modules/seo-insights" },
     // F10.9 (adr/0038 §4): measurement consent per cart and order, and the events sent

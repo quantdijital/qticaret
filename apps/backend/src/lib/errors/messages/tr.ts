@@ -335,6 +335,10 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Bu Search Console mülkü bağlı Google hesabının okuyabildikleri arasında değil.",
   "google.not_configured": "Google bağlantısı bu mağaza için henüz kurulmadı.",
   "google.not_connected": "Önce Google hesabını bağlayın.",
+  "content_drafts.no_provider": "Taslak sağlayıcısı henüz tanımlı değil.",
+  "content_drafts.quota_reached": "Bu ayın taslak hakkı doldu; gelecek ay yenilenir.",
+  "content_drafts.not_open": "Bu taslak artık onay beklemiyor.",
+  "content_drafts.unknown_product": "Ürün bulunamadı.",
   "meta.pixel_id_invalid": "Piksel numarası yalnızca rakamlardan oluşur.",
   "meta.test_event_code_invalid": "Test olayı kodu yalnızca harf ve rakamdan oluşur.",
   "meta.merchant_invalid":

@@ -33,6 +33,12 @@ export const GIFT_CARDS = "promotions.gift_cards"
 /** Paying at the door (F6, adr/0029): off until the shop sets its fee and couriers. */
 export const CASH_ON_DELIVERY = "payments.cash_on_delivery"
 
+/**
+ * Content drafts from a model (F10.13, adr/0005): the platform's to turn on,
+ * once a provider and its data processing agreement are chosen.
+ */
+export const CONTENT_AI_DRAFTS = "content.ai_drafts"
+
 export const FEATURES: Readonly<Record<string, FeatureDefinition>> = Object.freeze({
   // F3.2: products that need no shipping (e-books, gift codes, courses, services)
   [NON_PHYSICAL_PRODUCTS]: {
@@ -75,6 +81,14 @@ export const FEATURES: Readonly<Record<string, FeatureDefinition>> = Object.free
     owner: "tenant",
     labelKey: "qticaret.features.payments_cash_on_delivery.label",
     descriptionKey: "qticaret.features.payments_cash_on_delivery.description",
+  },
+  // F10.13: off; the shop turns it on, and it works only once the platform has
+  // set a provider and its data processing agreement (CONTENT_DRAFT_PROVIDER)
+  [CONTENT_AI_DRAFTS]: {
+    default: false,
+    owner: "tenant",
+    labelKey: "qticaret.features.content_ai_drafts.label",
+    descriptionKey: "qticaret.features.content_ai_drafts.description",
   },
 })
 

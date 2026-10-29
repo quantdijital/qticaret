@@ -1,0 +1,63 @@
+import type { EntityManager } from "@medusajs/framework/mikro-orm/knex"
+import type { Context } from "@medusajs/framework/types"
+import {
+  InjectManager,
+  InjectTransactionManager,
+  MedusaContext,
+  MedusaService,
+  generateEntityId,
+} from "@medusajs/framework/utils"
+import { ContentDraft } from "./models/content-draft"
+import { DraftUsage } from "./models/draft-usage"
+
+const monthOf = (now: Date) => now.toISOString().slice(0, 7)
+
+/** Content drafts and the month's use of them (F10.13, adr/0005). */
+class ContentDraftsModuleService extends MedusaService({ ContentDraft, DraftUsage }) {
+  /**
+   * Counts one draft against the month, if the quota has room: one
+   * statement, so two asks at once cannot both take the last one.
+   */
+  @InjectTransactionManager()
+  async claimQuota(
+    quota: number,
+    now: Date = new Date(),
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<boolean> {
+    const manager = sharedContext.transactionManager as EntityManager | undefined
+    if (!manager) {
+      throw new Error("content_drafts: the quota is claimed in a transaction")
+    }
+    const month = monthOf(now)
+    // The month's row, made once even when two asks open it together
+    await manager.execute(
+      `INSERT INTO draft_usage (id, month, count, created_at, updated_at)
+       VALUES (?, ?, 0, now(), now())
+       ON CONFLICT (month) WHERE deleted_at IS NULL DO NOTHING`,
+      [generateEntityId(undefined, "dusage"), month]
+    )
+    const claimed: unknown[] = await manager.execute(
+      `UPDATE draft_usage SET count = count + 1, updated_at = now()
+       WHERE month = ? AND deleted_at IS NULL AND count < ?
+       RETURNING id`,
+      [month, quota]
+    )
+    return claimed.length > 0
+  }
+
+  /** Drafts asked for this month. */
+  @InjectManager()
+  async usedThisMonth(
+    now: Date = new Date(),
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<number> {
+    const [row] = await this.listDraftUsages(
+      { month: monthOf(now) },
+      { take: 1, select: ["count"] },
+      sharedContext
+    )
+    return row?.count ?? 0
+  }
+}
+
+export default ContentDraftsModuleService

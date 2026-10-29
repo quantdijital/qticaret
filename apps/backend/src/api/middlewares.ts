@@ -34,6 +34,7 @@ import { REVIEW_ROUTES } from "./http/review-routes"
 import { MESSAGING_ROUTES } from "./http/messaging-routes"
 import { SHIPPING_ROUTES } from "./http/shipping-routes"
 import { CONTENT_ROUTES } from "./http/content-routes"
+import { CONTENT_DRAFT_ROUTES } from "./http/content-draft-routes"
 import { DEV_ROUTES } from "./http/dev-routes"
 import { SENSITIVE_READS } from "./http/audit/sensitive-routes"
 import { csrfProtection } from "./http/csrf"
@@ -207,6 +208,7 @@ export default defineMiddlewares({
     // F3.11: brands
     ...BRAND_ROUTES,
     ...CONTENT_ROUTES,
+    ...CONTENT_DRAFT_ROUTES,
     // F3.9: product sheets
     ...CATALOG_SHEET_ROUTES,
     // F3.7: warehouses

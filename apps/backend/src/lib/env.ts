@@ -98,6 +98,12 @@ const envSchema = z.object({
   // shop; each shop connects its Google account with it. Off until both are set
   GOOGLE_OAUTH_CLIENT_ID: z.string().max(200).optional(),
   GOOGLE_OAUTH_CLIENT_SECRET: z.string().max(200).optional(),
+  // F10.13 (adr/0005): which content draft provider writes drafts. Only "fake"
+  // so far (no model, development and tests); refused when deployed until a real
+  // provider and its data processing agreement are chosen (docs/12)
+  CONTENT_DRAFT_PROVIDER: z.enum(["fake"]).optional(),
+  // How many drafts a month the shop may ask for
+  CONTENT_DRAFT_MONTHLY_QUOTA: z.coerce.number().int().min(0).max(100_000).optional(),
   // F10.11: the platform's API key for CrUX (Chrome's field data); off until set
   CRUX_API_KEY: z.string().max(200).optional(),
   // A fake Google (OAuth and Merchant API) in tests; refused when deployed
@@ -247,6 +253,7 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
     "GOOGLE_BASE_URL",
     "META_GRAPH_BASE_URL",
     "GA4_BASE_URL",
+    "CONTENT_DRAFT_PROVIDER",
   ] as const) {
     if (env[name] !== undefined && (env.NODE_ENV === "production" || env.NODE_ENV === "staging")) {
       ctx.addIssue({

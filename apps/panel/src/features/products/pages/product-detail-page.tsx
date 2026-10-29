@@ -10,6 +10,7 @@ import { AttributesCard } from "@/features/attributes/components/attributes-card
 import { ProductSeoCard } from "@/features/products/detail/product-seo-card"
 import { ProductStatusBadge } from "@/features/products/components/product-status-badge"
 import { CatalogCard } from "@/features/products/detail/catalog-card"
+import { ContentDraftsCard } from "@/features/products/detail/content-drafts-card"
 import { GeneralCard } from "@/features/products/detail/general-card"
 import { MediaCard } from "@/features/products/detail/media-card"
 import { OrganizeCard } from "@/features/products/detail/organize-card"
@@ -116,6 +117,7 @@ export function ProductDetailPage() {
           <div id="product-seo" className="scroll-mt-20">
             <ProductSeoCard product={product} />
           </div>
+          <ContentDraftsCard productId={product.id} />
         </PageColumn>
         <PageColumn span={4}>
           <SummaryCard product={product} />

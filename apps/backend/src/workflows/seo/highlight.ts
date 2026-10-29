@@ -59,7 +59,8 @@ const FORMATS: Readonly<Record<string, (value: HighlightValue, definition: Defin
     multi_select: (value) => optionLabels(value),
   }
 
-function textOf(value: HighlightValue): string {
+/** An attribute's value as a shopper reads it; empty when it has none. */
+export function textOf(value: HighlightValue): string {
   const definition = value.definition
   const type = definition?.type ?? ""
   const format = Object.hasOwn(FORMATS, type) ? FORMATS[type] : undefined

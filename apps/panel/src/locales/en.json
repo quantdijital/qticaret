@@ -437,6 +437,12 @@
             "label": "Cash on delivery",
             "description": "Shoppers can pay the courier on delivery. The fee, the limit and the couriers that collect are under Settings > Payment > Cash on delivery."
           }
+        },
+        "content": {
+          "ai_drafts": {
+            "label": "AI content drafts",
+            "description": "A model drafts product descriptions and search texts; drafts reach the page only once approved. Only the products' facts, without personal data, go to the provider; it works once the platform has set one up."
+          }
         }
       }
     },
@@ -1741,6 +1747,42 @@
       "wishlist": "Saved by",
       "waiting": "Waiting for stock",
       "waitingFor": "Waiting for stock · {{variant}}"
+    },
+    "drafts": {
+      "title": "Content drafts",
+      "description": "Drafts written by a model; nothing reaches the page until approved. {{used}}/{{limit}} drafts this month.",
+      "noProvider": "No draft provider is set up yet.",
+      "ask": {
+        "product_description": "Draft a description",
+        "seo_title": "Draft a search title",
+        "seo_description": "Draft a search description"
+      },
+      "kinds": {
+        "product_description": "Product description",
+        "seo_title": "Search title",
+        "seo_description": "Search description"
+      },
+      "status": {
+        "draft": "Awaiting approval",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "refused": "Failed the rules"
+      },
+      "source": "AI draft",
+      "problems": {
+        "length": "Length does not fit a search result",
+        "too_short": "Description too short",
+        "noise": "Capitals, repeats or piled-up symbols",
+        "link": "Contains a link",
+        "personal_data": "Contains what reads as personal data"
+      },
+      "refused": "The draft failed the SEO rules; it is not offered.",
+      "approve": "Approve and apply",
+      "reject": "Reject",
+      "decided": {
+        "approve": "Draft approved and applied to the page.",
+        "reject": "Draft rejected."
+      }
     }
   },
   "orders": {

@@ -73,7 +73,7 @@ F10'un pazarlama tarafı mağazanın verisini dış servislere taşır: Google, 
 6. **LLM taslakları (F10.13), ADR-0005'e uygun.**
    - Bu fazda yazılanlar:
      - `ContentDraftProvider` arayüzü;
-     - `ai_content_drafts` bayrağı, kapalı başlar;
+     - `content.ai_drafts` bayrağı, kapalı başlar;
      - aylık kota;
      - kişisel veri süzgeci: istemde yalnızca ürün ve içerik alanları, e-posta, telefon, ad ve adres biçimleri reddedilir;
      - "AI taslak" kaydı ve kural motoru kapısı;
@@ -337,6 +337,25 @@ F10'un pazarlama tarafı mağazanın verisini dış servislere taşır: Google, 
 | Çerez onayını yalnızca vitrinde uygulamak | Sunucu basit | Sunucu olayı onaydan bağımsız gider; KK5 sağlanmaz |
 | Her mağazaya kendi Google Cloud projesi | Tam yalıtım | Mağaza sahibinden OAuth uygulaması ve doğrulaması beklenemez |
 | İYS'ye doğrudan bağlanmak | Aracı yok | Mağaza başına ayrı İYS API erişimi gerekir; Netgsm aynı hesapla sunuyor |
+
+## Uygulama notları (M16, içerik taslakları, 2026-10-29)
+- **İki kapı:**
+  - Platform: `CONTENT_DRAFT_PROVIDER` tanımlı değilse taslak istenemez (`content_drafts.no_provider`). Sağlayıcı ancak seçimi ve veri işleme sözleşmesi tamamlanınca tanımlanır. Şimdilik yalnızca `fake` var; canlı ortamda reddedilir.
+  - Mağaza: `content.ai_drafts` bayrağı mağazanındır (`owner: "tenant"`), kapalı başlar. Platform sahipli olsaydı F17'deki paket kurulumuna kadar açılamazdı; sağlayıcı kapısı platformun kararını zaten taşıyor.
+- **Kota:**
+  - `CONTENT_DRAFT_MONTHLY_QUOTA` (varsayılan 200), ay UTC'ye göre.
+  - Sağlayıcıya sormadan önce tek SQL ifadesiyle düşülür; aynı anda gelen iki istek son hakkı paylaşamaz (modül testi).
+  - Sağlayıcı hata verse de hak iade edilmez: istek gitmiş olabilir.
+  - Personel başına ayrıca hız sınırı var (`content_draft`: IP başına 10 dakikada 30, kişi başına 20).
+- **İstem:**
+  - Yalnızca ürünün kendi alanları: ad, alt başlık, marka, kategori, mağaza adı, özellikler, mevcut açıklama.
+  - Her değer kişisel veri süzgecinden geçer (e-posta, telefon, IBAN, kart, TCKN). İstem kayıtta saklanır; mağaza neyin gittiğini görebilir.
+- **Kural motoru kapısı:** Taslak, alanının danışman kurallarından geçmezse `refused` olarak saklanır ve önerilmez (uzunluk, çok kısa, gürültü, bağlantı, kişisel veri).
+- **Yayım:**
+  - Taslak yalnızca personel onaylayınca sayfaya çıkar: açıklama `updateProductsWorkflow` ile, arama başlığı ve açıklaması `upsertSeoMetaWorkflow` ile. İkisi de kendi telafisiyle geri alınır, karar kaydı da geri döner.
+  - Onay bekleyen olmayan taslak ikinci kez karara bağlanamaz (`content_drafts.not_open`).
+- **Panel:** Ürün detayında İçerik taslakları kartı. Bayrak kapalıyken kart görünmez; sağlayıcı yoksa uyarı gösterir.
+- **Testler:** HTTP 3 (`content-drafts`: bayrak kapalıyken ret, onaysız yayım yok, istemde kişisel veri yok, kota), modül 2 (kota yarışı, ay geçişi), birim 4, panel 2.
 
 ## Sonuçlar
 

@@ -437,6 +437,12 @@
             "label": "Kapıda ödeme",
             "description": "Müşteri ödemeyi teslimatta kuryeye yapabilir. Ücret, üst tutar ve kapıda tahsilat yapan kargo seçenekleri Ayarlar > Ödeme > Kapıda ödeme'de."
           }
+        },
+        "content": {
+          "ai_drafts": {
+            "label": "Yapay zekâ içerik taslakları",
+            "description": "Ürün açıklaması ve arama metinleri için bir model taslak yazar; taslaklar onaylanmadan sayfaya çıkmaz. Ürünlerin kişisel veri içermeyen bilgileri sağlayıcıya gider; sağlayıcı platform tarafından tanımlanınca çalışır."
+          }
         }
       }
     },
@@ -1741,6 +1747,42 @@
       "wishlist": "Favorisine ekleyen",
       "waiting": "Stok bekleyen",
       "waitingFor": "Stok bekleyen · {{variant}}"
+    },
+    "drafts": {
+      "title": "İçerik taslakları",
+      "description": "Modelle yazılan taslaklar; onaylamadan sayfaya çıkmaz. Bu ay {{used}}/{{limit}} taslak.",
+      "noProvider": "Taslak sağlayıcısı henüz tanımlı değil.",
+      "ask": {
+        "product_description": "Açıklama taslağı",
+        "seo_title": "Arama başlığı taslağı",
+        "seo_description": "Arama açıklaması taslağı"
+      },
+      "kinds": {
+        "product_description": "Ürün açıklaması",
+        "seo_title": "Arama başlığı",
+        "seo_description": "Arama açıklaması"
+      },
+      "status": {
+        "draft": "Onay bekliyor",
+        "approved": "Onaylandı",
+        "rejected": "Reddedildi",
+        "refused": "Kurallardan geçmedi"
+      },
+      "source": "AI taslağı",
+      "problems": {
+        "length": "Uzunluk arama sonucuna uymuyor",
+        "too_short": "Açıklama çok kısa",
+        "noise": "Büyük harf, tekrar ya da işaret kalabalığı",
+        "link": "Bağlantı içeriyor",
+        "personal_data": "Kişisel veriye benzeyen bilgi içeriyor"
+      },
+      "refused": "Taslak SEO kurallarından geçmedi; önerilmedi.",
+      "approve": "Onayla ve uygula",
+      "reject": "Reddet",
+      "decided": {
+        "approve": "Taslak onaylandı ve sayfaya uygulandı.",
+        "reject": "Taslak reddedildi."
+      }
     }
   },
   "orders": {
