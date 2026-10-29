@@ -178,11 +178,17 @@ describe("rateLimitPrefix", () => {
   })
 
   it("names a test run apart from dev on the same database", () => {
-    expect(rateLimitPrefix("postgres://localhost/qticaret", "test")).toBe(
+    expect(rateLimitPrefix("postgres://localhost/qticaret", "test", undefined)).toBe(
       "qt:rl:localhost:5432/qticaret/test:"
     )
-    expect(rateLimitPrefix("postgres://localhost/qticaret", "development")).toBe(
+    expect(rateLimitPrefix("postgres://localhost/qticaret", "development", "a1b2c3d4")).toBe(
       "qt:rl:localhost:5432/qticaret:"
+    )
+  })
+
+  it("gives an integration test file a run of its own, so runs never fill each other's limits", () => {
+    expect(rateLimitPrefix("postgres://localhost/qticaret", "test", "a1b2c3d4")).toBe(
+      "qt:rl:localhost:5432/qticaret/test/a1b2c3d4:"
     )
   })
 

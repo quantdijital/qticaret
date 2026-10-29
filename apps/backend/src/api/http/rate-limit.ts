@@ -24,9 +24,18 @@ import { routePath } from "./request-path"
 
 let sharedStore: RateLimitStore | undefined
 
-/** Counters live under the tenant's namespace (see `tenantNamespace`). */
-export function rateLimitPrefix(databaseUrl: string, nodeEnv?: string): string {
-  return `qt:rl:${tenantNamespace(databaseUrl, nodeEnv)}:`
+/**
+ * Counters live under the tenant's namespace (see `tenantNamespace`). An
+ * integration test file counts under a run of its own (`QT_TEST_RUN`), so
+ * one run's sign-ups never fill the next one's limits.
+ */
+export function rateLimitPrefix(
+  databaseUrl: string,
+  nodeEnv?: string,
+  testRun: string | undefined = process.env["QT_TEST_RUN"]
+): string {
+  const run = nodeEnv === "test" && testRun ? `/${testRun}` : ""
+  return `qt:rl:${tenantNamespace(databaseUrl, nodeEnv)}${run}:`
 }
 
 /** The tenant's shared counters (Redis, or process memory while it is down): for SMS quotas too. */

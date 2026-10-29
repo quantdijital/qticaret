@@ -23,7 +23,7 @@ const SHOPPER = "ayse.yilmaz@example.com"
 const HOUR = 60 * 60 * 1000
 const DAY = 24 * HOUR
 
-// Counters live in Redis across runs: each run texts numbers of its own
+// Counters live in Redis for the whole file (QT_TEST_RUN): each test texts numbers of its own
 const randomPhone = () => `053${String(Math.floor(10_000_000 + Math.random() * 89_999_999))}`
 
 /** Hits a counter until it is at least `count`; returns where it stands. */
@@ -81,7 +81,7 @@ medusaIntegrationTestRunner({
       variantId = (await stockedProduct(container, shop, `kupa-${String(Date.now())}`, 10, 120))
         .variantId
       admin = await createAdminUser(http, container)
-      // The shop's day counts every run's messages: far above them unless a test says otherwise
+      // The shop's day counts every test's messages in the file: far above them unless one says otherwise
       await settings({ sms_daily_limit: 100_000, email_daily_limit: 200_000 })
       fake.messages.length = 0
       netgsm.messages.length = 0
@@ -108,7 +108,7 @@ medusaIntegrationTestRunner({
         { headers: admin.headers }
       )
       // This address has completed its hour's carts already (the test client's, either
-      // family); for the hour, no other test's checkout over HTTP texts either
+      // family); for the hour, no later checkout over HTTP in this file texts either
       const limit = SMS_LIMITS.perIpHour * perIpScale()
       for (const address of ["127.0.0.1", "::1"]) {
         await fillTo(`sms:checkout:${ipBucket(address) ?? ""}`, HOUR, limit)
@@ -152,7 +152,7 @@ medusaIntegrationTestRunner({
         () => Promise.resolve(fake.messages.filter(({ to }) => to.includes(SHOPPER))),
         (found) => found.length > 0
       )
-      // Today's count from every run so far; the next e-mail is the one at 80%
+      // Today's count from this file's tests so far; the next e-mail is the one at 80%
       const day = new Date().toISOString().slice(0, 10)
       const sent = await fillTo(`email:shop:${day}`, DAY, 99)
       const limit = Math.floor(1.25 * (sent + 1))

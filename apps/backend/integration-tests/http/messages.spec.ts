@@ -36,7 +36,7 @@ jest.setTimeout(120 * 1000)
 
 const SHOPPER = "ayse.yilmaz@example.com"
 
-// SMS quotas count in Redis across runs (F9.8): each run texts numbers of its own
+// SMS quotas count in Redis for the whole file (F9.8, QT_TEST_RUN): each test texts numbers of its own
 const randomPhone = () => `053${String(Math.floor(10_000_000 + Math.random() * 89_999_999))}`
 
 /** F9 N1 (adr/0036): one path out for every message, once per event, never to a suppressed address. */
@@ -100,7 +100,7 @@ medusaIntegrationTestRunner({
         .saveSection("store", { contact_email: "destek@magaza.example" }, null)
       admin = await createAdminUser(http, container)
       phone = randomPhone()
-      // The shop's day counts every run's texts too: far above them here
+      // The shop's day counts every test's texts in the file: far above them here
       await http.post(
         "/admin/platform-settings/notifications",
         { sms_daily_limit: 100_000 },
