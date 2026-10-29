@@ -3,7 +3,9 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**F10 — Müşteri hesabı, etkileşim, pazarlama ve SEO ölçümü: BAŞLADI (2026-10-28 akşam).** Plan aşağıda "F10 görev planı" (M1–M17); ADR-0037 ve ADR-0038 önerildi, otonom kabul (gözden geçir). Dal `f10-customer-marketing`.
+**F11 — Raporlama, muhasebe ve dış entegrasyon API'si: BAŞLADI (2026-10-29).** Plan aşağıda "F11 görev planı" (R1–R9); ADR-0039 önerildi, otonom kabul (gözden geçir). Dal `f11-reporting`.
+
+**F10 — Müşteri hesabı, etkileşim, pazarlama ve SEO ölçümü: BİTTİ (2026-10-29; M1–M17, KK1–KK8 işaretli).** ADR-0037 ve ADR-0038 otonom kabul (gözden geçir). Dal `f10-customer-marketing`. Kapanışta yerelde: birim 1843, HTTP 114/114 dosya (584 test), modül 28 (205), panel 296, e2e 42. Kapanış güvenlik incelemesi (3 bağımsız alan) 1 yüksek, 2 orta, 12 düşük buldu; hepsi düzeltildi (sipariş devir uçları kapatıldı, çift onaylı izin, açık e-posta payı, Google bağlantısı personele bağlı, yorum sürüm denetimi vb.).
 
 **F9 — Bildirimler: BİTTİ (2026-10-28 akşam, N1–N10; KK1–KK4 işaretli).** Plan aşağıda "F9 görev planı"; ADR-0036 ve ekindeki "her mağazaya ayrı Resend hesabı" kararı otonom kabul edildi (gözden geçir). Dal `f9-notifications`. Gerçek Resend ve Netgsm hesaplarıyla deneme sunucuya çıkışta. Sıradaki faz F10.
 
@@ -1159,7 +1161,22 @@
 - **Daha önce:** F1 planlaması ve F0.2–F0.8 (2026-10-24), F0.1 monorepo (2026-10-24 sabahı), SEO ve güvenlik dokümanları (2026-10-22).
 
 ## Sıradaki görev
-**Claude'un sıradaki işi:** F10 M17 (kapanış: bağımsız güvenlik incelemesi, KK işaretleri, tam doğrulama). Dal `f10-customer-marketing`. GitHub'ın ücretli özellikleri 2026-11-01'e kadar kapalı (kullanıcı, 2026-10-28): CI çalışmaz, her doğrulama yerelde. Dal `f9-notifications` (`f7-shipping` üzerinden). F7 kapandı, yalnızca KK3 kaldı; KK3 iade faturası olduğu için F8'i bekliyor. F8 askıda ve kullanıcı e-faturayı netleştirince açılır. F8 askıda (kullanıcı e-faturayı netleştirecek); F7 KK3 F8'i bekliyor. Plan aşağıda "F7 görev planı". Dal `f7-shipping` (`f6-alternative-payments` üzerinden). Kullanıcı 2026-10-27 gece: "izin istemeden çalışmaya devam edersin, kritik bir şey olursa sabah sorarım."
+**Claude'un sıradaki işi:** F11 R1 (rapor altyapısı: Türkiye saatiyle tarih aralığı, `report.export` XLSX/CSV). Dal `f11-reporting`. GitHub'ın ücretli özellikleri 2026-11-01'e kadar kapalı (kullanıcı, 2026-10-28): CI çalışmaz, her doğrulama yerelde. Dal `f9-notifications` (`f7-shipping` üzerinden). F7 kapandı, yalnızca KK3 kaldı; KK3 iade faturası olduğu için F8'i bekliyor. F8 askıda ve kullanıcı e-faturayı netleştirince açılır. F8 askıda (kullanıcı e-faturayı netleştirecek); F7 KK3 F8'i bekliyor. Plan aşağıda "F7 görev planı". Dal `f7-shipping` (`f6-alternative-payments` üzerinden). Kullanıcı 2026-10-27 gece: "izin istemeden çalışmaya devam edersin, kritik bir şey olursa sabah sorarım."
+
+### F11 görev planı (2026-10-29; Medusa 2.21.2 API'leri Context7, docs.medusajs.com ve v2.21.2 kaynağından doğrulandı: secret API anahtarları, sipariş toplamları ve `summary`, olay adları, envanter alanları, OAS aracı; ayrıntı ADR-0039 "Doğrulanan" bölümü)
+Karar: ADR-0039 (önerildi, otonom kabul). Dal `f11-reporting` (`f10-customer-marketing` üzerinden). Yeni bağımlılık yok: XLSX projenin yazıcısıyla, OpenAPI Zod 4'ün `z.toJSONSchema`'sıyla.
+
+| # | F11 | Görev | Bağımlılık | KK |
+|---|---|---|---|---|
+| R1 | F11.1 | Rapor altyapısı: Türkiye saatiyle tarih aralığı (`from`/`to`, ≤366 gün) ve hazır dönemler, sayfalı sipariş okuma, saf toplama yardımcıları; `report.export` async işi (XLSX + CSV `;`/BOM, formül kaçışı); panelde tarih seçici ve "Dışa aktar" | — | KK1, KK5 |
+| R2 | F11.2 | Satış raporları: ciro, adet, ortalama sepet, ürün/kategori/marka, iade ve değişim oranı, promosyon etkisi; trafik kaynağı (sepete ilk geliş bilgisi: `/store/carts/:id/tracking`'e utm/yönlendiren; sınıflama); panel Satış sekmesi | R1 | KK1 |
+| R3 | F11.3 | Finans raporları: KDV oranına göre döküm, ödeme yöntemine göre tahsilat ve iade, ters ibraz listesi; PayTR/iyzico mutabakat işi (resmî raporlama uçları görev başında doğrulanır, sahte sunucularla); panel Finans sekmesi | R1 | KK1 |
+| R4 | F11.4 | Stok raporları: varyanta birim maliyet (`variant_extension`, panel varyant formu ve toplu düzenleme), stok değeri (maliyetsizler ayrı), devir hızı (`stock-ledger`), hareketsiz stok; panel Stok sekmesi | R1 | KK1 |
+| R5 | F11.5 | Muhasebe: aylık standart paket (satış, iade, tahsilat, KDV özeti; XLSX + CSV zip); `accounting` modülü, `AccountingAdapter`, `accounting_sync` (tekil), artan aralıklı yeniden deneme işi ve zil; sahte adaptör; panel Ayarlar > Muhasebe | R3 | KK2 |
+| R6 | F11.6 | Dış API: **önce** `api-key` aktörüne varsayılan kapalı kapsam katmanı (Medusa secret anahtarı bütün `/admin`'i açar), `api_key_scope`, anahtar başına hız sınırı, `sk_…` log redaksiyonu; panel Ayarlar > Dış API (oluştur, bir kez göster, iptal, denetim kaydı); OpenAPI `GET /admin/openapi.json` | — | KK4 |
+| R7 | F11.7 | `tenant-webhooks`: abonelik (şifreli sır, bir kez gösterilir), olay alt kümesi, HMAC imza, `safe-fetch`, artan aralıklı yeniden deneme, 8 başarısızlıkta devre dışı + zil, teslim logu; panel | R6 | KK3 |
+| R8 | F11.8 | Arama terimleri: Store ürün aramasında terim + sonuç sayısı günlük toplam (kişisel veri süzgeci, 180 gün), rapor ve S-SEARCH-01 | R1 | — |
+| R9 | — | Kapanış: bağımsız güvenlik incelemesi, KK işaretleri, tam doğrulama | R1–R8 | — |
 
 ### F10 görev planı (2026-10-28; Medusa 2.21.2 API'leri v2.21.2 kaynağından ve docs.medusajs.com'dan doğrulandı: e-posta doğrulama, Google sağlayıcısı, müşteri grupları, stok/sepet/sipariş olayları, store uçları; dış API'ler her görevin başında resmî belgeden doğrulanır)
 Kararlar: ADR-0037 (müşteri hesabı, misafir sipariş erişimi, etkileşim modülleri) ve ADR-0038 (pazarlama ve ölçüm); ikisi de önerildi, otonom kabul (gözden geçir). Dal `f10-customer-marketing` (`f9-notifications` üzerinden).
@@ -1186,7 +1203,7 @@ Doğrulamada çıkan iki açık (çekirdek davranışı, bizim kapatmamız gerek
 | M14 ✅ | F10.9 | **Bitti (2026-10-29 gece).** Vitrin çerez onayı `POST /store/carts/:id/tracking` (IP/UA yalnızca pazarlama izniyle, şifreli; siparişe taşınır). Meta CAPI `Purchase` (em/ph SHA-256, `event_id` = sipariş), GA4 MP `purchase` ve `refund` (`return.refunded`, `order.canceled`); izin yoksa hiçbir şey gitmez (KK5 testli). Olay önce sahiplenilir (yarış testte yakalandı), 30 dk'da bir yeniden deneme, 3 günde tarayıcı bilgisi silinir. Meta ve GA4 hesapları `integration-credentials`'ta; panelde Ayarlar > Pazarlama > Dönüşüm ölçümü. Testler: HTTP 4 (`conversions`) + 1 güncellenen, birim 3, panel 1. | M3 | KK5 |
 | M15 ✅ | F10.11 | **Bitti (2026-10-29 sabah).** Google bağlantısına `auth/webmasters` kapsamı (verilen kapsamlar saklanır; eski bağlantıya "Yeniden bağla"), mülk seçimi `sites.list`'ten. `seo-insights` modülü ve 02:30 UTC işi: site haritası gönderimi, Search Analytics (28+28 gün, sayfaya göre), gecelik 100 sayfalık URL Inspection, CrUX (platform `CRUX_API_KEY`). Danışman S-GSC-01 ve S-CWV-01 mağaza denetiminde (KK7 testli). Panel: SEO sayfasında Google Arama ve Core Web Vitals kartları, Ayarlar > SEO > Search Console. Sahte Google'a Search Console ve CrUX eklendi. Testler: HTTP 3 (`seo-insights`), birim 3, panel 3. | M13 | KK7 |
 | M16 ✅ | F10.13 | **Bitti (2026-10-29 sabah).** `content-drafts` modülü (taslak + aylık kullanım; kota tek SQL ifadesiyle), `ContentDraftProvider` ve sahte sağlayıcı, kişisel veri süzgeci (e-posta, telefon, IBAN, kart, TCKN), istem saklanır, kural motoru kapısı (`refused`), onay ürün ve SEO workflow'larıyla (telafili). İki kapı: platformun sağlayıcısı (`CONTENT_DRAFT_PROVIDER`) ve mağazanın `content.ai_drafts` bayrağı (kapalı). Hız sınırı `content_draft`. Panel: ürün detayında İçerik taslakları kartı. Testler: HTTP 3, modül 2, birim 4, panel 2. Ayrıntı adr/0038 M16 notları. | — | KK8 |
-| M17 | — | Kapanış: bağımsız güvenlik incelemesi, KK işaretleri, tam doğrulama | M1–M16 | — |
+| M17 ✅ | — | **Bitti (2026-10-29).** Bağımsız güvenlik incelemesi üç alanda; bulguların hepsi düzeltildi ve testlendi. KK1–KK8 işaretlendi. Tam doğrulama yeşil. Ek: etiket boyutu ayarı, sipariş listesinde seçilen kargo ve etiket yeniden basma, test ödemesi test kargoyla (kullanıcı istekleri). | M1–M16 | KK1–KK8 |
 
 ### F9 görev planı (2026-10-28; Netgsm uçları resmî SDK kaynağından, Mailpit gönderim ucu v1.31.4 kaynağından, Resend ve Svix imzası resmî belgelerden doğrulandı; Medusa bildirim API'leri 2.21.2 kaynağından)
 Karar: ADR-0036 (önerildi, otonom kabul). Ayrıntı `docs/entegrasyonlar/sms.md`.
@@ -1418,6 +1435,12 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
 
 ## Açık sorular / bloklayıcılar
 - [ ] **Bekleyen dış bilgi: Google Cloud kurulumu (2026-10-29; adr/0038 M13).** Platformun Google Cloud projesi ve OAuth web istemcisi (`GOOGLE_OAUTH_CLIENT_ID/SECRET`), OAuth onay ekranı doğrulaması (`auth/content` hassas kapsam) ve her mağazanın `BACKEND_URL/google/callback` adresinin yönlendirme adresi olarak kaydı. O zamana kadar panel "henüz açılmadı" der.
+- [ ] **Gözden geçir: ADR-0039 (F11, 2026-10-29, otonom kabul).**
+  - Stok değeri yalnızca girilen birim maliyetle hesaplanır; maliyeti olmayan varyantlar ayrı sayılır, satış fiyatıyla tahmin yapılmaz.
+  - Muhasebe önce standart aylık paket; Paraşüt/Logo/Mikro adaptörü mağaza programını seçince.
+  - Dış API anahtarları varsayılan kapalı kapsamla.
+  - Webhook gövdesinde kişisel veri yok.
+  - Trafik kaynağı vitrinin (F18) sepete yazacağı ilk geliş bilgisinden.
 - [ ] **Gözden geçir: çift onaylı izin (2026-10-29, M17 güvenlik incelemesi; adr/0038 M17 notu).**
   - Ödemede işaretlenen izinler artık hep onay bağlantısıyla kaydediliyor; giriş yapmış müşteri de bir onay e-postası alıyor. Hesapta telefona verilen izin onay SMS'i istiyor.
   - SMS kanalı (Netgsm) kurulu değilse telefon izni onaylanamaz.
@@ -1667,8 +1690,8 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
 | F7 Kargo, sipariş operasyonu, iade ve değişim | ✅ KK3 hariç (K1–K12, 2026-10-28; KK3 iade faturası F8'i bekliyor) |
 | F8 E-fatura | ⛔ askıda (kullanıcı e-faturayı netleştirecek; plan hazır, ADR-0034 önerildi) |
 | F9 Bildirimler (e-posta/SMS) | ✅ (N1–N10; KK1–KK4; 2026-10-28; gerçek Resend/Netgsm denemesi sunucuya çıkışta) |
-| F10 Müşteri hesabı, etkileşim, pazarlama ve SEO ölçümü | ⏳ planlandı (M1–M17, 2026-10-28) |
-| F11 Raporlama, muhasebe ve dış API | ⬜ |
+| F10 Müşteri hesabı, etkileşim, pazarlama ve SEO ölçümü | ✅ bitti (2026-10-29) |
+| F11 Raporlama, muhasebe ve dış API | 🟡 |
 | F12 Admin genişletmeleri (ekranlar panel hattı P5'te) | ⬜ |
 | F13 Uyum & yasal özellikler | ⬜ |
 | F14 Veri taşıma ve geçiş araçları | ⬜ |

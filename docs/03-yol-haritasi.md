@@ -353,14 +353,14 @@ Detay: `docs/entegrasyonlar/pazarlama.md`, `docs/13-seo-mimarisi.md` §9–10
 - F10.13 **LLM içerik taslakları** (adr/0005): `ContentDraftProvider` arayüzü + ilk sağlayıcı; açıklama/meta/alt/Soru-Cevap/paylaşım metni taslakları; kota, flag, "AI taslak" etiketi, kural motorundan geçiş
 
 **KK:**
-- [ ] Yalnızca ürünü satın almış müşteri yorum yazabiliyor; onaylanmamış yorum Store API'de görünmüyor
-- [ ] Stok girişi sonrası abonelere tek bildirim gidiyor
-- [ ] İzni olmayan müşteriye terk edilmiş sepet iletisi gitmiyor (testli)
-- [ ] Google Merchant feed'i şema doğrulamasından geçiyor; feed fiyatı sayfa JSON-LD fiyatıyla aynı (testli)
-- [ ] Çerez onayı yokken dönüşüm olayı gönderilmiyor (testli)
-- [ ] Doğrulanmamış e-posta ile yorum/soru yazılamıyor (testli)
-- [ ] GSC verisi panelde; indekslenmeyen ürün listesi advisor'da görünüyor
-- [ ] LLM taslağı onaysız yayımlanamıyor; prompt'a kişisel veri gitmiyor (testli)
+- [x] Yalnızca ürünü satın almış müşteri yorum yazabiliyor; onaylanmamış yorum Store API'de görünmüyor (2026-10-29; `product-reviews.spec`)
+- [x] Stok girişi sonrası abonelere tek bildirim gidiyor (2026-10-29; `stock-alerts.spec`)
+- [x] İzni olmayan müşteriye terk edilmiş sepet iletisi gitmiyor (testli; 2026-10-29, `cart-reminders.spec`)
+- [x] Google Merchant feed'i şema doğrulamasından geçiyor; feed fiyatı sayfa JSON-LD fiyatıyla aynı (testli; 2026-10-29, `marketing-feeds.spec`)
+- [x] Çerez onayı yokken dönüşüm olayı gönderilmiyor (testli; 2026-10-29, `conversions.spec`)
+- [x] Doğrulanmamış e-posta ile yorum/soru yazılamıyor (testli; 2026-10-29, `product-reviews.spec`, `product-qa.spec`)
+- [x] GSC verisi panelde; indekslenmeyen ürün listesi advisor'da görünüyor (2026-10-29; `seo-insights.spec`, panel SEO kartları)
+- [x] LLM taslağı onaysız yayımlanamıyor; prompt'a kişisel veri gitmiyor (testli; 2026-10-29, `content-drafts.spec`)
 
 ---
 
