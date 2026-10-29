@@ -1,3 +1,4 @@
+import { accountingPackage } from "./accounting-package"
 import { auditLogExport } from "./audit-log-export"
 import { catalogBulkEdit } from "./catalog-bulk-edit"
 import { catalogExport } from "./catalog-export"
@@ -17,6 +18,7 @@ const erase = <Input>(type: JobType<Input>): JobType => type as unknown as JobTy
 
 /** The kinds of long task (adr/0014); a phase adding one adds it here. */
 const JOB_TYPES: Readonly<Record<string, JobType>> = Object.freeze({
+  "accounting.package": erase(accountingPackage),
   "audit_log.export": erase(auditLogExport),
   "catalog.bulk_edit": erase(catalogBulkEdit),
   "catalog.export": erase(catalogExport),

@@ -228,7 +228,8 @@
       "integrations": "Integrations",
       "notifications": "Notifications",
       "sms": "SMS",
-      "marketing": "Marketing"
+      "marketing": "Marketing",
+      "accounting": "Accounting"
     },
     "appearance": {
       "title": "Appearance",
@@ -1151,7 +1152,8 @@
       "features": "Shop features you can turn on or off",
       "jobs": "Long jobs such as exports, and their files",
       "audit": "Who changed what in the panel, and when",
-      "marketing": "Cart reminders, product feeds, Merchant Center and conversion measurement"
+      "marketing": "Cart reminders, product feeds, Merchant Center and conversion measurement",
+      "accounting": "The month's package for the accountant"
     },
     "marketing": {
       "title": "Marketing",
@@ -1302,6 +1304,25 @@
           },
           "rejected": "GA4 no longer accepts the stored secret. Enter a new one."
         }
+      }
+    },
+    "accounting": {
+      "title": "Accounting",
+      "subtitle": "Sales, refunds, collections and VAT for the accountant's monthly records.",
+      "package": {
+        "title": "Monthly accounting package",
+        "hint": "The chosen month's records in one zip: an Excel file and the same tables as CSV.",
+        "contents": {
+          "sales": "Sales: per order, base and VAT by VAT rate",
+          "returns": "Refunds: money given back, by payment method",
+          "collections": "Collections: payments taken, by payment method",
+          "vat": "VAT summary: base and VAT per rate"
+        },
+        "privacy": "Individual customers' names are not in it; corporate customers' registered names and tax ids are. Each package is recorded in the audit log.",
+        "month": "Month",
+        "download": "Download the package",
+        "later": "The package is being made; download it from Settings > Jobs when it is done.",
+        "failed": "The package could not be made."
       }
     }
   },

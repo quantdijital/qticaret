@@ -1,10 +1,7 @@
-import type { MedusaContainer } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { turkishDay, turkishDayStart } from "../../../lib/dashboard"
 import { ValidationError } from "../../../lib/errors"
 import { fromMedusaAmount } from "../../../lib/money"
-import type { MedusaAmount } from "../../../lib/money"
 import {
   IYZICO_PAYMENT_PROVIDER_ID,
   PAYTR_PAYMENT_PROVIDER_ID,
@@ -13,6 +10,8 @@ import { aroundDay } from "../../../lib/payments/statements"
 import type { ShopPayment, StatementProvider } from "../../../lib/payments/statements"
 import { PAYMENT_RECOVERY_MODULE } from "../../../modules/payment-recovery"
 import type PaymentRecoveryModuleService from "../../../modules/payment-recovery/service"
+import { paymentsMovedBetween } from "../moved-payments"
+import type { MovedAmount } from "../moved-payments"
 
 const PROVIDER_IDS: Readonly<Record<StatementProvider, string>> = {
   paytr: PAYTR_PAYMENT_PROVIDER_ID,
@@ -25,51 +24,11 @@ const REFERENCE_KEYS: Readonly<Record<StatementProvider, string>> = {
   iyzico: "payment_id",
 }
 
-const PAGE = 500
 const DAY_MS = 24 * 60 * 60 * 1000
 
-interface Moved {
-  amount: MedusaAmount
-  created_at: string | Date
-}
-
-interface PaymentRow {
-  id: string
-  provider_id: string
-  data: Record<string, unknown> | null
-  captures: (Moved | null)[] | null
-  refunds: (Moved | null)[] | null
-  payment_collection: { order?: { id: string; display_id: number } | null } | null
-}
-
-/** The ids of the payments that took or gave back money in the window, any provider. */
-async function paymentsMovedBetween(container: MedusaContainer, from: Date, to: Date) {
-  const payments = container.resolve(Modules.PAYMENT)
-  const window = { created_at: { $gte: from.toISOString(), $lt: to.toISOString() } }
-  const ids = new Set<string>()
-  for (const list of [
-    (skip: number) => payments.listCaptures(window, { relations: ["payment"], take: PAGE, skip }),
-    (skip: number) => payments.listRefunds(window, { relations: ["payment"], take: PAGE, skip }),
-  ]) {
-    for (let skip = 0; ; skip += PAGE) {
-      const rows = await list(skip)
-      for (const row of rows as { payment?: { id?: string } | null }[]) {
-        // Typed as always there; a row whose payment did not load is skipped, not trusted
-        if (row.payment?.id) {
-          ids.add(row.payment.id)
-        }
-      }
-      if (rows.length < PAGE) {
-        break
-      }
-    }
-  }
-  return [...ids]
-}
-
-const inWindow = (moved: (Moved | null)[] | null, from: Date, to: Date) =>
+const inWindow = (moved: (MovedAmount | null)[] | null, from: Date, to: Date) =>
   (moved ?? [])
-    .filter((entry): entry is Moved => entry !== null)
+    .filter((entry): entry is MovedAmount => entry !== null)
     .map((entry) => ({ at: new Date(entry.created_at), amount: entry.amount }))
     .filter(({ at }) => at >= from && at < to)
     .map(({ at, amount }) => ({
@@ -106,27 +65,7 @@ export const statementPaymentsStep = createStep(
       throw new ValidationError("statements.day_invalid")
     }
     const to = new Date(last.getTime() + DAY_MS)
-    const ids = await paymentsMovedBetween(container, from, to)
-    const query = container.resolve(ContainerRegistrationKeys.QUERY)
-    const rows: PaymentRow[] = []
-    for (let start = 0; start < ids.length; start += PAGE) {
-      const { data } = await query.graph({
-        entity: "payment",
-        fields: [
-          "id",
-          "provider_id",
-          "data",
-          "captures.amount",
-          "captures.created_at",
-          "refunds.amount",
-          "refunds.created_at",
-          "payment_collection.order.id",
-          "payment_collection.order.display_id",
-        ],
-        filters: { id: ids.slice(start, start + PAGE) },
-      })
-      rows.push(...(data as unknown as PaymentRow[]))
-    }
+    const rows = await paymentsMovedBetween(container, from, to)
     const key = REFERENCE_KEYS[input.provider]
     const payments: ShopPayment[] = rows.flatMap((row) => {
       const reference = row.data?.[key]

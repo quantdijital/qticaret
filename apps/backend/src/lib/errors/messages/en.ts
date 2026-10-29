@@ -336,6 +336,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The date range is not valid: it cannot start after it ends, lie in the future or run over 366 days.",
   "catalog_import.cost_invalid":
     "The cost must be between 0 and 10,000,000, with two decimals at most.",
+  "accounting.month_invalid": "The month is not valid: one that has begun, two years back at most.",
   "catalog.cost_invalid":
     "The cost must be between 0 and 10,000,000 TL, with two decimals at most.",
   "statements.day_invalid":

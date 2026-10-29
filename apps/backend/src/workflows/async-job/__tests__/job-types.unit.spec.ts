@@ -9,6 +9,7 @@ jest.mock("../../seo/advisor/publish-gate", () => ({ publishGate: jest.fn() }))
 describe("job types", () => {
   it("knows its types by own key only", () => {
     expect(JOB_TYPE_KEYS).toEqual([
+      "accounting.package",
       "audit_log.export",
       "catalog.bulk_edit",
       "catalog.export",

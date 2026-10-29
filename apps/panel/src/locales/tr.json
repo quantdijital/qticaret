@@ -228,7 +228,8 @@
       "integrations": "Entegrasyonlar",
       "notifications": "Bildirimler",
       "sms": "SMS",
-      "marketing": "Pazarlama"
+      "marketing": "Pazarlama",
+      "accounting": "Muhasebe"
     },
     "appearance": {
       "title": "Görünüm",
@@ -1151,7 +1152,8 @@
       "features": "Açılıp kapatılabilen mağaza özellikleri",
       "jobs": "Dışa aktarma gibi uzun süren işler ve dosyaları",
       "audit": "Panelde kim neyi ne zaman değiştirdi",
-      "marketing": "Sepet hatırlatması, ürün feed'leri, Merchant Center ve dönüşüm ölçümü"
+      "marketing": "Sepet hatırlatması, ürün feed'leri, Merchant Center ve dönüşüm ölçümü",
+      "accounting": "Mali müşavire aylık paket"
     },
     "marketing": {
       "title": "Pazarlama",
@@ -1302,6 +1304,25 @@
           },
           "rejected": "GA4 kayıtlı anahtarı artık kabul etmiyor. Yeni bir anahtar girin."
         }
+      }
+    },
+    "accounting": {
+      "title": "Muhasebe",
+      "subtitle": "Mali müşavirin aylık kayıtları için satış, iade, tahsilat ve KDV dökümü.",
+      "package": {
+        "title": "Aylık muhasebe paketi",
+        "hint": "Seçilen ayın kayıtları tek zip dosyasında: bir Excel dosyası ve aynı tablolar CSV olarak.",
+        "contents": {
+          "sales": "Satışlar: sipariş başına, KDV oranına göre matrah ve KDV",
+          "returns": "İadeler: yapılan iadeler, ödeme yöntemiyle",
+          "collections": "Tahsilatlar: alınan ödemeler, ödeme yöntemiyle",
+          "vat": "KDV özeti: oran başına matrah ve KDV"
+        },
+        "privacy": "Bireysel müşterilerin adı pakette yer almaz; kurumsal müşterilerin unvanı ve VKN'si yer alır. Her paket denetim kaydına düşer.",
+        "month": "Ay",
+        "download": "Paketi indir",
+        "later": "Paket hazırlanıyor; bitince Ayarlar > İşler'den indirebilirsiniz.",
+        "failed": "Paket hazırlanamadı."
       }
     }
   },

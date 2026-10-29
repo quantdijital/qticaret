@@ -1,5 +1,6 @@
 import {
   Bell,
+  Calculator,
   CreditCard,
   FileClock,
   ListChecks,
@@ -46,6 +47,7 @@ export const SETTINGS_GROUPS: readonly SettingsGroup[] = [
     key: "selling",
     sections: [
       { key: "payments", to: "/settings/payments", icon: CreditCard },
+      { key: "accounting", to: "/settings/accounting", icon: Calculator },
       { key: "shipping", to: "/settings/shipping", icon: Truck },
       { key: "locations", to: "/settings/locations", icon: Warehouse },
       { key: "marketing", to: "/settings/marketing", icon: Megaphone },

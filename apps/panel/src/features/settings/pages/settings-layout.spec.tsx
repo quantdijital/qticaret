@@ -56,6 +56,6 @@ describe("Settings home", () => {
       "href",
       "/settings/shipping"
     )
-    expect(screen.getAllByRole("link")).toHaveLength(14)
+    expect(screen.getAllByRole("link")).toHaveLength(15)
   })
 })
