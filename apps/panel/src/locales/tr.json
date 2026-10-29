@@ -1323,6 +1323,44 @@
         "download": "Paketi indir",
         "later": "Paket hazırlanıyor; bitince Ayarlar > İşler'den indirebilirsiniz.",
         "failed": "Paket hazırlanamadı."
+      },
+      "program": {
+        "title": "Muhasebe programı",
+        "hint": "Satışlar, tahsilatlar ve iadeler seçilen programa beş dakikada bir aktarılır. Aktarılamayan kayıt artan aralıklarla yeniden denenir; sipariş akışı hiç beklemez.",
+        "label": "Muhasebe programı",
+        "adapters": {
+          "none": "Yok: yalnızca aylık paket",
+          "fake": "Deneme programı (geliştirme)"
+        },
+        "upcoming": {
+          "parasut": "Paraşüt (yakında)",
+          "logo": "Logo (yakında)",
+          "mikro": "Mikro (yakında)"
+        },
+        "none": "Kayıtlar bir programa aktarılmıyor; mali müşavire aylık paketi gönderin. Paraşüt, Logo ya da Mikro mağazanın seçimine göre eklenecek.",
+        "counts": {
+          "pending_one": "{{count}} bekliyor",
+          "pending_other": "{{count}} bekliyor",
+          "synced_one": "{{count}} aktarıldı",
+          "synced_other": "{{count}} aktarıldı",
+          "stopped_one": "{{count}} durdu",
+          "stopped_other": "{{count}} durdu"
+        },
+        "sources": {
+          "sale": "Satış",
+          "payment": "Tahsilat",
+          "refund": "İade"
+        },
+        "lastError": "{{attempts}} deneme · son hata {{code}} · {{when}}",
+        "retry": "Yeniden dene",
+        "retried": "Kayıt bir sonraki aktarımda yeniden denenecek.",
+        "saved": "Muhasebe programı kaydedildi.",
+        "sends": {
+          "sale": "Satış: sipariş verildiğinde, KDV oranlarıyla; kurumsal müşterinin cari kartı da",
+          "payment": "Tahsilat: ödeme alındığında, ödeme yöntemiyle",
+          "refund": "İade: para geri verildiğinde",
+          "once": "Her kayıt programa bir kez gider; yeniden denemede aynı kayıt yeniden oluşmaz."
+        }
       }
     }
   },
@@ -3688,6 +3726,10 @@
       "title": "{{provider}} dökümü {{day}} günü tutmuyor",
       "description_one": "{{count}} fark var; Raporlar > Finans'ta.",
       "description_other": "{{count}} fark var; Raporlar > Finans'ta."
+    },
+    "accountingSync": {
+      "title": "Bir kayıt muhasebe programına aktarılamadı",
+      "description": "Defalarca denendi; Ayarlar > Muhasebe'den yeniden deneyin."
     }
   },
   "content": {

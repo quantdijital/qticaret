@@ -1,6 +1,7 @@
 import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { validateAndTransformBody } from "@medusajs/framework/http"
 import { z } from "@medusajs/framework/zod"
+import { fakeAccountingAllowed } from "../../../lib/accounting/adapters"
 import { SECTIONS, isSectionName } from "../../../modules/platform-settings/sections"
 
 // Each section's body: any subset of its fields; unknown fields are refused
@@ -16,6 +17,12 @@ const SECTION_VALIDATORS = {
   shipping: validateAndTransformBody(SECTIONS.shipping.patch),
   notifications: validateAndTransformBody(SECTIONS.notifications.patch),
   marketing: validateAndTransformBody(SECTIONS.marketing.patch),
+  // The fake program is for a developer's machine and the tests, never a live shop
+  accounting: validateAndTransformBody(
+    SECTIONS.accounting.patch.refine((body) => body.adapter !== "fake" || fakeAccountingAllowed(), {
+      message: "accounting.adapter_unavailable",
+    })
+  ),
 } as const
 
 /**

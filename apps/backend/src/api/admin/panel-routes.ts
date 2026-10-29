@@ -4,6 +4,7 @@ import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import { requireUserActor } from "../http/actor"
 import { rateLimit } from "../http/rate-limit"
 import { AdminGetDashboardNoQuery, AdminGetDashboardOverview } from "./dashboard/validators"
+import { AdminPostAccountingRetry } from "./accounting/validators"
 import { AdminGetReportRange } from "./reports/validators"
 import { AdminPostStatementCheck } from "./reports/statements/validators"
 import { AdminGetOrderBoard } from "./order-board/validators"
@@ -16,6 +17,7 @@ import { AdminGetPriceHistory } from "./products/[id]/price-history/validators"
 import { AdminGetStockBoard } from "./stock-board/validators"
 
 const NO_QUERY_READS = [
+  "/admin/accounting",
   "/admin/dashboard/tasks",
   "/admin/dashboard/recent-orders",
   "/admin/dashboard/catalog-health",
@@ -102,6 +104,12 @@ export const PANEL_ROUTES = [
       }),
       validateAndTransformQuery(AdminGetBulkLabels, {}),
     ],
+  },
+  // F11.5: a stopped accounting record tried again (audited as every write)
+  {
+    matcher: "/admin/accounting/syncs/:id/retry",
+    methods: ["POST" as const],
+    middlewares: [requireUserActor, validateAndTransformBody(AdminPostAccountingRetry)],
   },
   // F9.5: a customer's commercial consent, recorded by staff (audited as every write)
   {

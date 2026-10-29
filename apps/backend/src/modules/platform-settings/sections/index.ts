@@ -1,3 +1,4 @@
+import { accountingSection } from "./accounting"
 import { appearanceSection } from "./appearance"
 import { bankTransferSection } from "./bank-transfer"
 import { cashOnDeliverySection } from "./cash-on-delivery"
@@ -12,6 +13,7 @@ import { shippingSection } from "./shipping"
 import { storeSection } from "./store"
 
 export { DEFAULT_ROBOTS_TXT } from "./seo"
+export type { AccountingSettings } from "./accounting"
 export type { AppearanceSettings } from "./appearance"
 export type { BankTransferSettings } from "./bank-transfer"
 export type { CashOnDeliverySettings } from "./cash-on-delivery"
@@ -38,6 +40,7 @@ export const SECTIONS = {
   shipping: shippingSection,
   notifications: notificationsSection,
   marketing: marketingSection,
+  accounting: accountingSection,
 } as const
 
 export type SectionName = keyof typeof SECTIONS

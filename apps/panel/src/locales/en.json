@@ -1323,6 +1323,44 @@
         "download": "Download the package",
         "later": "The package is being made; download it from Settings > Jobs when it is done.",
         "failed": "The package could not be made."
+      },
+      "program": {
+        "title": "Accounting program",
+        "hint": "Sales, collections and refunds go to the chosen program every five minutes. A record it refuses is tried again later and later; the order flow never waits.",
+        "label": "Accounting program",
+        "adapters": {
+          "none": "None: the monthly package only",
+          "fake": "Test program (development)"
+        },
+        "upcoming": {
+          "parasut": "Paraşüt (coming)",
+          "logo": "Logo (coming)",
+          "mikro": "Mikro (coming)"
+        },
+        "none": "Records go to no program; send the accountant the monthly package. Paraşüt, Logo or Mikro will be added as the shop chooses.",
+        "counts": {
+          "pending_one": "{{count}} waiting",
+          "pending_other": "{{count}} waiting",
+          "synced_one": "{{count}} sent",
+          "synced_other": "{{count}} sent",
+          "stopped_one": "{{count}} stopped",
+          "stopped_other": "{{count}} stopped"
+        },
+        "sources": {
+          "sale": "Sale",
+          "payment": "Collection",
+          "refund": "Refund"
+        },
+        "lastError": "{{attempts}} tries · last error {{code}} · {{when}}",
+        "retry": "Try again",
+        "retried": "The record will be tried again on the next run.",
+        "saved": "Accounting program saved.",
+        "sends": {
+          "sale": "Sale: when an order is placed, with its VAT rates; a corporate customer's card too",
+          "payment": "Collection: when a payment is taken, with its method",
+          "refund": "Refund: when money is given back",
+          "once": "Each record goes to the program once; a retry never makes it again."
+        }
       }
     }
   },
@@ -3688,6 +3726,10 @@
       "title": "The {{provider}} statement of {{day}} does not agree",
       "description_one": "{{count}} difference, in Reports > Finance.",
       "description_other": "{{count}} differences, in Reports > Finance."
+    },
+    "accountingSync": {
+      "title": "A record could not be sent to the accounting program",
+      "description": "It was tried many times; try it again from Settings > Accounting."
     }
   },
   "content": {

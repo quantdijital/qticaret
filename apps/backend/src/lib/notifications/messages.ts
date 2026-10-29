@@ -53,6 +53,10 @@ export const NOTIFICATION_MESSAGES: Readonly<
       title: "{{provider}} ödemesi iade edilemedi",
       description: "{{amount}} ({{reference}}) {{provider}} panelinden elle iade edilmeli.",
     },
+    "accounting.sync_stopped": {
+      title: "Bir {{source}} muhasebe programına aktarılamadı",
+      description: "Defalarca denendi; Ayarlar > Muhasebe'den yeniden deneyin.",
+    },
     "payments.statement_mismatch": {
       title: "{{provider}} dökümü {{day}} günü tutmuyor",
       description: "{{count}} fark var; Raporlar > Finans'ta listelendi.",
@@ -92,6 +96,10 @@ export const NOTIFICATION_MESSAGES: Readonly<
     "payments.orphan_refund_failed": {
       title: "{{provider}} payment could not be refunded",
       description: "{{amount}} ({{reference}}) must be refunded by hand in the {{provider}} panel.",
+    },
+    "accounting.sync_stopped": {
+      title: "A {{source}} could not be sent to the accounting program",
+      description: "It was tried many times; try it again from Settings > Accounting.",
     },
     "payments.statement_mismatch": {
       title: "The {{provider}} statement of {{day}} does not agree",

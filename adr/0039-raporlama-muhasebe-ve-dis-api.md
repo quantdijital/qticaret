@@ -127,6 +127,11 @@ Kısıtlar:
 - **Okuma:** `inventory_item` → `variants` → `variant_extension.cost` tek `query.graph` sorgusunda gelir (HTTP testiyle doğrulandı). Dönem başı ve sonu stok `stock-ledger`'ın `stockedAt` yöntemiyle okunur: anından önceki son hareket, yoksa sonraki ilk hareketin başlangıç adedi, hiç hareket yoksa bugünkü adet.
 - **Liste:** Panel her listenin ilk 20 satırını gösterir; Excel ve CSV bütün kalemleri içerir.
 
+## Muhasebe: uygulama (2026-10-29)
+- **Paket:** `accounting.package` işi tek zip üretir (`muhasebe-paketi-AAAA-MM.xlsx` + `satislar`, `iadeler`, `tahsilatlar`, `kdv-ozeti` CSV'leri). Ay Türkiye saatiyle sayılır, en çok 24 ay geriye gider. İptal ve test ödemeli siparişler girmez. Kurumsal müşterinin VKN'si `revealTaxId` ile açılır; paket `sensitive_read` denetim kaydı yazar, iş sonucu kişisel veri sayılır.
+- **Aktarım:** `accounting_sync` (kaynak türü `sale`/`payment`/`refund`, kaynak kimliği, program) tekildir. Kuyruğa alma `ON CONFLICT DO NOTHING`, sahiplenme `FOR UPDATE SKIP LOCKED` ve 10 dakikalık kirayla yapılır. Başarısızlıkta 1, 5, 15 dakika, sonra 1, 3, 6, 12 saat beklenir; 8. denemede kayıt durur ve zil çalar. Gönderim iş akışının son adımıdır ve referans olarak kaydın kimliğini taşır; adaptör aynı referansı aynı kayıt sayar, kaybolan yanıttan sonraki yeniden deneme mükerrer kayıt üretmez (KK2).
+- **Program seçimi:** `accounting` ayar bölümü (`none` | `fake`). Sahte program canlı ve hazırlık ortamında seçilemez.
+
 ## Sağlayıcı mutabakatı: doğrulanan uçlar ve uygulama (2026-10-29)
 - **PayTR:** `POST /rapor/islem-dokumu`, en çok 3 gün. **iyzico:** `GET /v2/reporting/payment/transactions`, gün ve sayfa ile. Ayrıntı: `docs/entegrasyonlar/paytr.md`, `docs/entegrasyonlar/iyzico.md`.
 - **Pencere:** D günü için iki taraf da D-1..D+1 okunur. Gece yarısında alınıp sağlayıcının ertesi güne yazdığı ödeme böylece eşleşir.

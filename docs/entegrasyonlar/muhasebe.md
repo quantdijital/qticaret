@@ -18,6 +18,7 @@ interface AccountingAdapter {
   Unique: (kaynak tipi, kaynak id, adaptör) → mükerrer aktarım yok.
 - Tetik: fatura kesildiğinde (F8) veya tenant ayarına göre günlük toplu aktarım (job).
 - Hata → retry (artan aralık) → dead-letter + admin uyarısı; sipariş akışı asla bloklanmaz.
+- **Uygulama (F11 R5, 2026-10-29):** `src/modules/accounting`, `src/lib/accounting` (arayüz, sahte program), `src/workflows/accounting`, `src/jobs/accounting-sync.ts`, `src/subscribers/accounting-queue.ts`. Ayrıntı ve kurallar: adr/0039 "Muhasebe: uygulama". Satış kaydı şimdilik sipariş verildiğinde kuyruğa girer; F8 gelince fatura kesildiğinde girecek.
 
 ## Tenant dış API'si
 - Medusa'nın secret API key mekanizması kullanılır (Context7 ile doğrula); kendi anahtar sistemi yazılmaz.

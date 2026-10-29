@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
-import { Bell, PackageMinus, Scale, ShieldAlert } from "lucide-react"
+import { Bell, Calculator, PackageMinus, Scale, ShieldAlert } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
@@ -49,6 +49,15 @@ function useAlertText(data: Record<string, unknown>) {
       link: isConnectable(provider)
         ? { to: "/settings/payments/$provider" as const, search: {}, params: { provider } }
         : { to: "/settings/payments" as const, search: {}, params: {} },
+    }
+  }
+  if (data["kind"] === "accounting_sync") {
+    return {
+      title: t("notifications.accountingSync.title"),
+      description: t("notifications.accountingSync.description"),
+      Icon: Calculator,
+      tone: "bg-destructive-soft text-destructive-text",
+      link: { to: "/settings/accounting" as const, search: {}, params: {} },
     }
   }
   if (data["kind"] === "statement_check") {
