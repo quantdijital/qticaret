@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto"
 import { moduleIntegrationTestRunner } from "@medusajs/test-utils"
 import { anyOf, fakeSecret } from "@qticaret/testing"
 import { INTEGRATION_CREDENTIALS_MODULE } from ".."
+import { CREDENTIAL_PROVIDER_NAMES } from "../providers"
 import type IntegrationCredentialsModuleService from "../service"
 
 jest.setTimeout(120 * 1000)
@@ -34,14 +35,19 @@ moduleIntegrationTestRunner<IntegrationCredentialsModuleService>({
 
     it("starts with every provider unconnected", async () => {
       expect(service.isKeyConfigured()).toBe(true)
-      expect(await service.describeAll()).toEqual([
-        expect.objectContaining({ provider: "paytr", state: "not_configured", settings: null }),
-        expect.objectContaining({ provider: "iyzico", state: "not_configured", settings: null }),
-        expect.objectContaining({ provider: "geliver", state: "not_configured", settings: null }),
-        expect.objectContaining({ provider: "aras", state: "not_configured", settings: null }),
-        expect.objectContaining({ provider: "yurtici", state: "not_configured", settings: null }),
-        expect.objectContaining({ provider: "netgsm", state: "not_configured", settings: null }),
-      ])
+      expect(await service.describeAll()).toEqual(
+        CREDENTIAL_PROVIDER_NAMES.map(
+          (provider) =>
+            expect.objectContaining({
+              provider,
+              state: "not_configured",
+              settings: null,
+            }) as unknown
+        )
+      )
+      expect(CREDENTIAL_PROVIDER_NAMES).toEqual(
+        expect.arrayContaining(["paytr", "iyzico", "geliver", "aras", "yurtici", "netgsm"])
+      )
       expect(await service.read("paytr")).toBeNull()
       expect(await service.read("iyzico")).toBeNull()
     })

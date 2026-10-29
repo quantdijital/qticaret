@@ -8,7 +8,10 @@ jest.setTimeout(60 * 1000)
 moduleIntegrationTestRunner<MessagingModuleService>({
   moduleName: MESSAGING_MODULE,
   resolve: "./src/modules/messaging",
-  moduleOptions: { hashKey: randomBytes(32).toString("hex") },
+  moduleOptions: {
+    hashKey: randomBytes(32).toString("hex"),
+    encryptionKey: randomBytes(32).toString("hex"),
+  },
   testSuite: ({ service }) => {
     describe("consent (adr/0036)", () => {
       it("finds an address however it is written, and stores no plaintext", async () => {
@@ -107,6 +110,33 @@ moduleIntegrationTestRunner<MessagingModuleService>({
             source: "panel",
           })
         ).rejects.toMatchObject({ safeMessage: "messaging.recipient_invalid" })
+      })
+    })
+
+    describe("double opt-in (security review 2026-10-29)", () => {
+      it("records a requested consent once its link is confirmed, and only once", async () => {
+        const { token } = await service.requestConsent({
+          channel: "sms",
+          address: "0532 765 43 21",
+          status: "granted",
+          source: "account",
+          customer_id: "cus_9",
+          evidence: { text_version: "test" },
+        })
+        const before = await service.consentOf("sms", "+905327654321")
+        const [kept] = await service.listConsentRequests({ customer_id: "cus_9" })
+
+        const confirmed = await service.confirmConsentRequest(token)
+        const again = await service.confirmConsentRequest(token)
+        const unknown = await service.confirmConsentRequest(`${token}x`)
+
+        expect(before).toBeNull()
+        expect(JSON.stringify(kept)).not.toMatch(/765|4321/)
+        expect(JSON.stringify(kept)).not.toContain(token)
+        expect(confirmed).toEqual({ channel: "sms", status: "granted" })
+        expect(again).toBeNull()
+        expect(unknown).toBeNull()
+        expect(await service.consentOf("sms", "+905327654321")).toBe("granted")
       })
     })
 
