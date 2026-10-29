@@ -37,6 +37,10 @@ export type ArasAccount = ProviderAccount<{
 }>
 /** The shop's Netgsm SMS account and its sender name (adr/0036). */
 export type NetgsmAccount = ProviderAccount<{ msgheader: string; iys_brand_code?: string }>
+/** Meta's pixel for server-side events (F10.9); a Test Events code while trying it out. */
+export type MetaAccount = ProviderAccount<{ pixel_id: string; test_event_code?: string }>
+/** GA4's web stream for server-side events (F10.9). */
+export type Ga4Account = ProviderAccount<{ measurement_id: string }>
 /** Yurtiçi Kargo on the shop's own contract, with its door account when it has one (adr/0035). */
 export type YurticiAccount = ProviderAccount<{ test_mode: boolean }>
 

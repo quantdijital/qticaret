@@ -1109,7 +1109,7 @@
       "features": "Açılıp kapatılabilen mağaza özellikleri",
       "jobs": "Dışa aktarma gibi uzun süren işler ve dosyaları",
       "audit": "Panelde kim neyi ne zaman değiştirdi",
-      "marketing": "Terk edilmiş sepet, ürün feed'leri ve Google Merchant Center"
+      "marketing": "Sepet hatırlatması, ürün feed'leri, Merchant Center ve dönüşüm ölçümü"
     },
     "marketing": {
       "title": "Pazarlama",
@@ -1195,6 +1195,52 @@
           "state_invalid": "Bağlantı isteğinin süresi doldu; yeniden deneyin.",
           "no_refresh_token": "Google kalıcı erişim vermedi; yeniden deneyin.",
           "failed": "Google bağlantısı kurulamadı; yeniden deneyin."
+        }
+      },
+      "conversions": {
+        "title": "Dönüşüm ölçümü",
+        "description": "Siparişler reklam ve analiz araçlarına sunucudan bildirilir; tarayıcıdaki engelleyiciler sayımı bozmaz. Her olay, müşterinin çerez bildiriminde verdiği izinle gider: Meta'ya pazarlama, GA4'e analiz izni gerekir.",
+        "connect": "Bağla",
+        "manage": "Yönet",
+        "providers": {
+          "meta": {
+            "name": "Meta (Facebook, Instagram)",
+            "description": "Siparişler Meta pikselinize Conversions API ile bildirilir; tarayıcı pikseliyle aynı sipariş bir kez sayılır."
+          },
+          "ga4": {
+            "name": "Google Analytics 4",
+            "description": "Siparişler ve iadeler GA4 web akışınıza Measurement Protocol ile bildirilir."
+          }
+        },
+        "meta": {
+          "keys": {
+            "title": "Piksel ve erişim anahtarı",
+            "description": "Meta Olay Yöneticisi > Veri kaynakları > pikseliniz > Ayarlar'dan piksel numarasını alın; aynı sayfada Conversions API için bir erişim anahtarı oluşturun."
+          },
+          "pixelId": "Piksel numarası",
+          "pixelIdHint": "Yalnızca rakamlardan oluşan piksel numarası.",
+          "accessToken": "Erişim anahtarı",
+          "testEventCode": "Test olayı kodu",
+          "testEventCodeHint": "Olay Yöneticisi > Test olayları'ndaki kod; denemeler bitince silin. Boşken olaylar gerçek olarak sayılır.",
+          "checks": {
+            "merchant_invalid": "Meta bu piksel numarasını tanımıyor ya da anahtar bu piksele erişemiyor.",
+            "secret_invalid": "Meta bu erişim anahtarını kabul etmedi."
+          },
+          "rejected": "Meta kayıtlı anahtarı artık kabul etmiyor; olaylar gönderilemiyor. Yeni bir anahtar girin."
+        },
+        "ga4": {
+          "keys": {
+            "title": "Web akışı",
+            "description": "Google Analytics > Yönetici > Veri akışları > web akışınız: ölçüm kimliğini alın, Measurement Protocol API gizli anahtarları bölümünden bir anahtar oluşturun."
+          },
+          "measurementId": "Ölçüm kimliği",
+          "measurementIdHint": "G- ile başlayan kimlik, örneğin G-ABC123XYZ.",
+          "apiSecret": "API gizli anahtarı",
+          "checks": {
+            "merchant_invalid": "GA4 bu ölçüm kimliğini tanımıyor.",
+            "secret_invalid": "GA4 bu anahtarı kabul etmedi."
+          },
+          "rejected": "GA4 kayıtlı anahtarı artık kabul etmiyor. Yeni bir anahtar girin."
         }
       }
     }

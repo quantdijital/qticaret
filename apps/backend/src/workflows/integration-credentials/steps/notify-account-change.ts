@@ -18,6 +18,8 @@ const PROVIDER_NAMES: Readonly<Record<CredentialProviderName, string>> = {
   yurtici: "Yurtiçi Kargo",
   netgsm: "Netgsm",
   google: "Google",
+  meta: "Meta",
+  ga4: "Google Analytics 4",
 }
 
 /**

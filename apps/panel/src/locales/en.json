@@ -1109,7 +1109,7 @@
       "features": "Shop features you can turn on or off",
       "jobs": "Long jobs such as exports, and their files",
       "audit": "Who changed what in the panel, and when",
-      "marketing": "Abandoned carts, product feeds and Google Merchant Center"
+      "marketing": "Cart reminders, product feeds, Merchant Center and conversion measurement"
     },
     "marketing": {
       "title": "Marketing",
@@ -1195,6 +1195,52 @@
           "state_invalid": "The connection request expired; try again.",
           "no_refresh_token": "Google gave no lasting access; try again.",
           "failed": "Google could not be connected; try again."
+        }
+      },
+      "conversions": {
+        "title": "Conversion measurement",
+        "description": "Orders are told to ad and analytics tools from the server, so browser blockers do not skew the counts. Each event goes with the consent the shopper gave in the cookie banner: Meta needs marketing consent, GA4 analytics consent.",
+        "connect": "Connect",
+        "manage": "Manage",
+        "providers": {
+          "meta": {
+            "name": "Meta (Facebook, Instagram)",
+            "description": "Orders are told to your Meta pixel through the Conversions API; the browser pixel's event for the same order counts once."
+          },
+          "ga4": {
+            "name": "Google Analytics 4",
+            "description": "Orders and refunds are told to your GA4 web stream through the Measurement Protocol."
+          }
+        },
+        "meta": {
+          "keys": {
+            "title": "Pixel and access token",
+            "description": "Take the pixel id from Meta Events Manager > Data sources > your pixel > Settings; create a Conversions API access token on the same page."
+          },
+          "pixelId": "Pixel id",
+          "pixelIdHint": "The pixel's number, digits only.",
+          "accessToken": "Access token",
+          "testEventCode": "Test event code",
+          "testEventCodeHint": "The code from Events Manager > Test events; clear it once you are done. Empty, events count for real.",
+          "checks": {
+            "merchant_invalid": "Meta does not know this pixel, or the token cannot reach it.",
+            "secret_invalid": "Meta did not accept this access token."
+          },
+          "rejected": "Meta no longer accepts the stored token; events cannot be sent. Enter a new one."
+        },
+        "ga4": {
+          "keys": {
+            "title": "Web stream",
+            "description": "Google Analytics > Admin > Data streams > your web stream: take the measurement id, and create a key under Measurement Protocol API secrets."
+          },
+          "measurementId": "Measurement id",
+          "measurementIdHint": "The id starting with G-, such as G-ABC123XYZ.",
+          "apiSecret": "API secret",
+          "checks": {
+            "merchant_invalid": "GA4 does not know this measurement id.",
+            "secret_invalid": "GA4 did not accept this secret."
+          },
+          "rejected": "GA4 no longer accepts the stored secret. Enter a new one."
         }
       }
     }

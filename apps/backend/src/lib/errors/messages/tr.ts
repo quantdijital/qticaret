@@ -331,6 +331,12 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "google.no_refresh_token": "Google kalıcı erişim vermedi; bağlantıyı yeniden başlatın.",
   "google.not_configured": "Google bağlantısı bu mağaza için henüz kurulmadı.",
   "google.not_connected": "Önce Google hesabını bağlayın.",
+  "meta.pixel_id_invalid": "Piksel numarası yalnızca rakamlardan oluşur.",
+  "meta.test_event_code_invalid": "Test olayı kodu yalnızca harf ve rakamdan oluşur.",
+  "meta.merchant_invalid":
+    "Meta bu piksel numarasını tanımıyor ya da anahtar bu piksele erişemiyor.",
+  "meta.secret_invalid": "Meta bu erişim anahtarını kabul etmedi.",
+  "google_analytics.measurement_id_invalid": "Ölçüm kimliği G- ile başlar, örneğin G-ABC123XYZ.",
   "netgsm.iys_brand_code_invalid": "İYS marka kodu yalnızca rakamlardan oluşur.",
   "netgsm.msgheader_invalid":
     "Gönderici adı 2–11 karakter olmalı; Netgsm'de onaylı başlığınızı aynen yazın.",

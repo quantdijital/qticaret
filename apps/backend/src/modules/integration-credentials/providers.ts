@@ -149,6 +149,49 @@ export const CREDENTIAL_PROVIDERS = {
     identity: [],
     optional: [],
   },
+  // F10.9 (adr/0038 §4): Meta's pixel for Conversions API events; a Test
+  // Events code while the shop tries it out
+  meta: {
+    settings: z
+      .object({
+        pixel_id: z
+          .string()
+          .trim()
+          .regex(/^\d{5,20}$/, "meta.pixel_id_invalid"),
+        test_event_code: z
+          .string()
+          .trim()
+          .regex(/^[A-Za-z0-9]{1,40}$/, "meta.test_event_code_invalid")
+          .optional(),
+      })
+      .strict(),
+    secrets: ["access_token"],
+    secret: z
+      .string()
+      .trim()
+      .regex(/^[\x21-\x7E]{8,512}$/, "integration_credentials.secret_invalid"),
+    identity: ["pixel_id"],
+    optional: [],
+  },
+  // F10.9: GA4's web stream for Measurement Protocol events
+  ga4: {
+    settings: z
+      .object({
+        measurement_id: z
+          .string()
+          .trim()
+          .toUpperCase()
+          .regex(/^G-[A-Z0-9]{4,20}$/, "google_analytics.measurement_id_invalid"),
+      })
+      .strict(),
+    secrets: ["api_secret"],
+    secret: z
+      .string()
+      .trim()
+      .regex(/^[\x21-\x7E]{8,512}$/, "integration_credentials.secret_invalid"),
+    identity: ["measurement_id"],
+    optional: [],
+  },
 } as const satisfies Record<string, CredentialProvider>
 
 export type CredentialProviderName = keyof typeof CREDENTIAL_PROVIDERS

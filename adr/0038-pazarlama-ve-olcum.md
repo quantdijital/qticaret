@@ -244,6 +244,41 @@ F10'un pazarlama tarafı mağazanın verisini dış servislere taşır: Google, 
   - Bağlantı kaldırılınca Merchant Center'daki ürünler orada kalır; süreleri dolana ya da mağaza silene kadar.
   - Search Console (M15) aynı bağlantıyı ek kapsamla kullanacak.
 
+## Uygulama notları (M14, sunucu taraflı dönüşüm olayları, 2026-10-29)
+- **Çerez onayı:**
+  - `POST /store/carts/:id/tracking` şunları alır: `analytics`, `marketing`, `ga_client_id` (`_ga`), `fbp`, `fbc` ve `page_url`. Biçimleri kalıpla denetlenir.
+  - IP ve tarayıcı bilgisi (user agent) istekten alınır; yalnızca pazarlama izniyle ve şifreli olarak tutulur.
+  - Kayıt `conversions` modülünün `tracking_consent` tablosundadır; sipariş oluşunca siparişe taşınır.
+  - Onay müşterinin kendi beyanıdır; kaynağı vitrinin çerez bildirimidir (F18 kurar).
+- **Kural (KK5, testli):**
+  - Meta yalnızca pazarlama izniyle gider.
+  - GA4 yalnızca analiz izni ve GA4 istemci kimliğiyle gider. Reklam izinleri (`ad_user_data`, `ad_personalization`) pazarlama iznine göre `GRANTED` ya da `DENIED` olur.
+  - İzin yoksa hiçbir olay gönderilmez ve kayıt da açılmaz.
+- **Meta Conversions API** (resmî belgeden):
+  - `POST graph.facebook.com/v26.0/{pixel}/events?access_token=` ile `Purchase` gönderilir. `event_id` sipariş kimliğidir; tarayıcı pikseliyle çift sayımı önler.
+  - E-posta ve telefon normalleştirilip SHA-256 ile özetlenir. Telefon, ülke koduyla rakamlardan oluşur.
+  - IP, tarayıcı bilgisi, `fbp` ve `fbc` özetlenmez (Meta öyle ister).
+  - Test Events kodu panelden girilebilir.
+  - Hesap denetimi: piksel kaydı okunur; `190` token reddi, `100` piksel reddi demektir.
+  - Meta'da iade olayı yok.
+- **GA4 Measurement Protocol:**
+  - `POST /mp/collect?measurement_id=&api_secret=` ile `purchase` gönderilir; `transaction_id` sipariş kimliğidir.
+  - İade `refund` olayıyla gider:
+    - `return.refunded` olayında iade tutarıyla (kuruştan lira);
+    - `order.canceled` olayında siparişin tamamıyla.
+  - GA4 her isteğe 2xx döndüğü için hesap denetimi yalnızca biçimdir.
+- **Bir kez gönderim:**
+  - Her olay benzersiz bir `event_key` ile önce sahiplenilir (`pending`), sonra gönderilir.
+  - Medusa'nın veri yolu aynı olayı aynı anda iki kez teslim ettiğinde yalnızca biri gönderir. Bu yarış testte yakalandı ve düzeltildi.
+  - Başarısız olay ya da 10 dakikadır askıda kalan olay koşullu bir SQL güncellemesiyle yeniden sahiplenilir.
+- **Yeniden deneme ve saklama:**
+  - `conversions-retry` işi 30 dakikada bir başarısız olayları en çok 5 kez ve 3 gün boyunca yeniden dener.
+  - Meta'nın olayı gidince ya da 3 gün geçince IP, tarayıcı bilgisi ve Meta çerezleri silinir.
+- **Panel:**
+  - Ayarlar > Pazarlama > Dönüşüm ölçümü.
+  - Meta ve GA4'ün her biri kendi hesap sayfasında, diğer sağlayıcılarla aynı düzende: durum rozeti; kaydet, denetle, bağlantıyı kes.
+- **Gözden geçir:** GA4'te API sırrının doğruluğu ancak GA4 raporlarında görülür.
+
 ## Alternatifler
 
 | Seçenek | Artı | Eksi |

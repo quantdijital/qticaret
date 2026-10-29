@@ -8,6 +8,7 @@ import { arasApi, arasCredentialsOf } from "../shipping/aras"
 import { geliverApi, geliverCredentialsOf } from "../shipping/geliver"
 import { netgsmAccountOf, netgsmApi } from "../messaging/sms/netgsm"
 import { yurticiApi, yurticiCredentialsOf } from "../shipping/yurtici"
+import { conversionsApi, metaAccountOf } from "../conversions/client"
 import { googleApi } from "../google/client"
 import { googleClientOf } from "../google/oauth"
 
@@ -110,6 +111,28 @@ const CHECKERS = {
       throw error
     }
   },
+  // Meta's code 190: a token it does not take; 100: a pixel it does not know or the token cannot reach
+  meta: async (account, signal) => {
+    const credentials = metaAccountOf(account)
+    if (!credentials) {
+      return "secret_invalid"
+    }
+    try {
+      await conversionsApi().readPixel(credentials, signal)
+      return "valid"
+    } catch (error) {
+      if (isProviderError(error) && error.providerCode === "meta_190") {
+        return "secret_invalid"
+      }
+      if (isProviderError(error) && error.providerCode === "meta_100") {
+        return "merchant_invalid"
+      }
+      throw error
+    }
+  },
+  // GA4 answers every Measurement Protocol request alike: nothing to ask it,
+  // only the form was checked
+  ga4: () => Promise.resolve("valid"),
 } satisfies Record<CredentialProviderName, Checker>
 
 export async function checkAccount(
@@ -140,4 +163,6 @@ export const CHECK_FIELDS = {
   yurtici: { merchant_invalid: "secrets.cod_password", secret_invalid: "secrets.password" },
   netgsm: { merchant_invalid: "settings.msgheader", secret_invalid: "secrets.password" },
   google: { merchant_invalid: "settings.merchant_id", secret_invalid: "secrets.refresh_token" },
+  meta: { merchant_invalid: "settings.pixel_id", secret_invalid: "secrets.access_token" },
+  ga4: { merchant_invalid: "settings.measurement_id", secret_invalid: "secrets.api_secret" },
 } satisfies Record<CredentialProviderName, Record<"merchant_invalid" | "secret_invalid", string>>

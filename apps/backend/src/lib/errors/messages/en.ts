@@ -326,6 +326,12 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "google.no_refresh_token": "Google gave no lasting access; start the connection again.",
   "google.not_configured": "The Google connection is not set up for this shop yet.",
   "google.not_connected": "Connect the Google account first.",
+  "meta.pixel_id_invalid": "The pixel id is digits only.",
+  "meta.test_event_code_invalid": "The test event code is letters and digits only.",
+  "meta.merchant_invalid": "Meta does not know this pixel, or the token cannot reach it.",
+  "meta.secret_invalid": "Meta did not accept this access token.",
+  "google_analytics.measurement_id_invalid":
+    "The measurement id starts with G-, such as G-ABC123XYZ.",
   "netgsm.iys_brand_code_invalid": "The İYS brand code is digits only.",
   "netgsm.msgheader_invalid":
     "The sender name must be 2–11 characters; type your approved Netgsm header exactly.",

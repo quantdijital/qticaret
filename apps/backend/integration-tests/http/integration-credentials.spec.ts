@@ -110,6 +110,17 @@ medusaIntegrationTestRunner({
           state: "not_configured",
           secrets: { refresh_token: false },
         }),
+        // F10.9: the pixel and the web stream purchases are told to
+        expect.objectContaining({
+          provider: "meta",
+          state: "not_configured",
+          secrets: { access_token: false },
+        }),
+        expect.objectContaining({
+          provider: "ga4",
+          state: "not_configured",
+          secrets: { api_secret: false },
+        }),
       ])
     })
 
