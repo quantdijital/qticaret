@@ -56,6 +56,10 @@ export interface VariantFacts {
   properties: Partial<Record<VariesBy, string>>
   /** Gross TRY the shop charges to ship one (its price table, F7.8); null: not known. */
   shippingRate?: number | null
+  /** Units available to sell; null when the variant keeps no stock count (feeds, F10.8). */
+  stock?: number | null
+  /** One unit's parcel in desi; null without its measures (feeds, F10.8). */
+  desi?: number | null
 }
 
 export type { DeliveryFacts } from "./jsonld-shipping"

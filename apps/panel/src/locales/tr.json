@@ -1146,8 +1146,8 @@
       },
       "feeds": {
         "title": "Ürün feed'leri",
-        "description": "Google Merchant Center ve Meta (Facebook, Instagram) kataloğu için ürün listeniz. Fiyat, stok ve kodlar ürün sayfalarındakiyle aynı kaynaktan, iki saatte bir güncellenir; stokta olmayan ve görseli olmayan ürünler listelenmez.",
-        "off": "Feed'ler kapalı. Açınca her hedef için Google'a ve Meta'ya vereceğiniz bir adres oluşur.",
+        "description": "Google Merchant Center, Meta (Facebook, Instagram) kataloğu, Cimri ve Akakçe için ürün listeniz. Fiyat, stok ve kodlar ürün sayfalarındakiyle aynı kaynaktan, iki saatte bir güncellenir; stokta olmayan ve görseli olmayan ürünler listelenmez.",
+        "off": "Feed'ler kapalı. Açınca her hedef için o siteye vereceğiniz bir adres oluşur.",
         "turnOn": "Feed'leri aç",
         "turnOff": "Kapat",
         "renew": "Adresi yenile",
@@ -1155,10 +1155,17 @@
         "building": "İlk feed hazırlanıyor; birkaç dakika içinde burada görünür.",
         "generated_one": "{{items}} ürün · {{when}} güncellendi",
         "generated_other": "{{items}} ürün · {{when}} güncellendi",
-        "comparison": "Akakçe ve Cimri feed'leri, bu sitelerin güncel XML biçimi satıcı panelinizden alındığında eklenecek.",
         "targets": {
           "google": "Google Merchant Center",
-          "meta": "Meta katalog"
+          "meta": "Meta katalog",
+          "cimri": "Cimri",
+          "akakce": "Akakçe"
+        },
+        "short": {
+          "google": "Google",
+          "meta": "Meta",
+          "cimri": "Cimri",
+          "akakce": "Akakçe"
         },
         "done": {
           "issue": "Feed adresleri hazır.",
@@ -1168,17 +1175,28 @@
         "confirm": {
           "issue": {
             "title": "Adres yenilensin mi?",
-            "description": "Eski adresler hemen çalışmaz olur. Google Merchant Center ve Meta'daki adresleri yenileriyle değiştirmeniz gerekir.",
+            "description": "Eski adresler hemen çalışmaz olur. Google Merchant Center, Meta, Cimri ve Akakçe'deki adresleri yenileriyle değiştirmeniz gerekir.",
             "action": "Adresi yenile"
           },
           "off": {
             "title": "Feed'ler kapatılsın mı?",
-            "description": "Adresler ve oluşturulmuş dosyalar silinir; Google ve Meta ürünlerinizi bu yoldan alamaz.",
+            "description": "Adresler ve oluşturulmuş dosyalar silinir; bu siteler ürünlerinizi bu yoldan alamaz.",
             "action": "Feed'leri kapat"
           }
         },
         "noDomain": "Mağazanın alan adı tanımlı değil; feed'ler ürün sayfalarına bağlantı verdiği için oluşturulamıyor. Ayarlar > SEO'dan alan adını girin.",
         "notYet": "Henüz oluşturulmadı."
+      },
+      "feedRules": {
+        "title": "Feed kuralları",
+        "description": "Hangi feed'in hangi kategorileri dışarıda bıraktığı ve Akakçe'de gösterilen aynı gün kargo saati. Kargo ücreti kargo ayarlarınızdan (desi tablosu ya da sabit ücret, ücretsiz kargo sınırıyla), hazırlık süresi gönderim gününüzden alınır.",
+        "exclusions": "Dışarıda bırakılan kategoriler",
+        "exclusionsHint": "İşaretlediğiniz kategori ve altındaki tüm kategorilerdeki ürünler {{target}} feed'ine girmez.",
+        "cutoff": "Aynı gün kargo saati",
+        "cutoffHint": "Bu saate kadar verilen siparişler aynı gün kargoya veriliyorsa seçin; Akakçe ürünlerinizde gösterir.",
+        "noCutoff": "Aynı gün kargo yok",
+        "until": "{{hour}} öncesi siparişler",
+        "saved": "Feed kuralları kaydedildi; feed'ler bir sonraki güncellemede bunlara göre oluşur."
       },
       "google": {
         "title": "Google Merchant Center",

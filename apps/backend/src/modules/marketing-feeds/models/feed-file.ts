@@ -4,7 +4,7 @@ import { model } from "@medusajs/framework/utils"
 export const FeedFile = model
   .define("feed_file", {
     id: model.id({ prefix: "feedfile" }).primaryKey(),
-    /** google, meta; Akakçe and Cimri once their formats are in hand. */
+    /** google, meta, cimri, akakce (lib/feeds/targets). */
     target: model.text(),
     file_key: model.text(),
     item_count: model.number(),

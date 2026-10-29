@@ -1,6 +1,7 @@
 import type { ProductFacts, VariantFacts } from "../../seo/jsonld"
 import { productJsonLd } from "../../seo/jsonld"
 import { feedItemsOf, googleFeedProblems } from ".."
+import type { FeedShop } from ".."
 import { googleFeed } from "../google"
 import { metaFeed } from "../meta"
 
@@ -30,7 +31,14 @@ const facts = (variants: VariantFacts[], over: Partial<ProductFacts> = {}): Prod
 })
 
 const URL = "https://magaza.example.com/urun/keten-gomlek"
-const SHOP = { name: "Örnek Mağaza", url: "https://magaza.example.com" }
+const SHOP: FeedShop = {
+  name: "Örnek Mağaza",
+  url: "https://magaza.example.com",
+  handlingDays: { min: 1, max: 2 },
+  flatShipping: null,
+  freeShippingFrom: null,
+  sameDayCutoffHour: null,
+}
 
 describe("product feeds (F10.8, KK4)", () => {
   it("lists each variant with an offer and stock, at the page's own address and price", () => {

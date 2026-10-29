@@ -1,4 +1,5 @@
-import type { FeedItem } from "../feeds"
+import { shippingCost } from "../feeds"
+import type { FeedItem, FeedShop } from "../feeds"
 
 /**
  * A feed item as Merchant API's `ProductInput` (F10 M13, adr/0038 §3):
@@ -44,8 +45,9 @@ const compact = (value: Record<string, unknown>): Record<string, unknown> =>
     )
   )
 
-export function productInputOf(item: FeedItem): ProductInput {
+export function productInputOf(item: FeedItem, shop: FeedShop): ProductInput {
   const onSale = item.strikethrough !== null
+  const shipping = shippingCost(item, shop)
   const identified = item.gtin !== null || (item.brand !== null && item.mpn !== null)
   return {
     offerId: item.id,
@@ -64,14 +66,16 @@ export function productInputOf(item: FeedItem): ProductInput {
       mpn: item.mpn,
       identifierExists: identified ? null : false,
       itemGroupId: item.groupId,
+      productTypes: item.categoryPath.length > 0 ? [item.categoryPath.join(" > ")] : null,
       price: price(onSale ? (item.strikethrough ?? item.price) : item.price),
       salePrice: onSale ? price(item.price) : null,
       color: item.properties.color,
       size: item.properties.size,
       material: item.properties.material,
       pattern: item.properties.pattern,
-      shipping:
-        item.shippingRate === null ? null : [{ country: "TR", price: price(item.shippingRate) }],
+      shipping: shipping === null ? null : [{ country: "TR", price: price(shipping) }],
+      minHandlingTime: String(shop.handlingDays.min),
+      maxHandlingTime: String(shop.handlingDays.max),
     }),
   }
 }

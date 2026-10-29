@@ -31,6 +31,7 @@ const COLUMNS = [
   "gtin",
   "mpn",
   "item_group_id",
+  "product_type",
   "color",
   "size",
 ] as const
@@ -58,6 +59,7 @@ function row(item: FeedItem): string {
     gtin: item.gtin,
     mpn: item.mpn,
     item_group_id: item.groupId,
+    product_type: item.categoryPath.join(" > ") || null,
     color: item.properties.color ?? null,
     size: item.properties.size ?? null,
   }

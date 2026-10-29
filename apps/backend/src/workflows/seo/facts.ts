@@ -126,11 +126,12 @@ function priceOf(variant: Variant, displays: ReadonlyMap<string, PriceDisplay> |
   }
 }
 
-function availabilityOf(variant: Variant): Availability {
+/** Units available at every location; null when the variant keeps no stock count. */
+function stockOf(variant: Variant): number | null {
   if (variant.manage_inventory === false) {
-    return "InStock"
+    return null
   }
-  const available = (variant.inventory_items ?? []).reduce(
+  return (variant.inventory_items ?? []).reduce(
     (total, item) =>
       total +
       (item?.inventory?.location_levels ?? []).reduce(
@@ -139,6 +140,13 @@ function availabilityOf(variant: Variant): Availability {
       ),
     0
   )
+}
+
+function availabilityOf(variant: Variant): Availability {
+  const available = stockOf(variant)
+  if (available === null) {
+    return "InStock"
+  }
   return available > 0 ? "InStock" : variant.allow_backorder ? "BackOrder" : "OutOfStock"
 }
 
@@ -175,11 +183,18 @@ export interface ShippingFacts {
  * option shoppers see is priced by it, or without measures or a band.
  */
 function shippingRateOf(variant: Variant, shipping: ShippingFacts): number | null {
-  if (!shipping.table_offered) {
+  const desi = shipping.table_offered ? desiOf(variant, shipping.units) : null
+  if (desi === null) {
     return null
   }
+  const rate = tablePrice(shipping.settings.rate_table, shipping.settings.over_desi_price, desi)
+  return rate === null ? null : Number(toMedusaAmount(rate))
+}
+
+/** One unit's parcel in desi; null without its measures. */
+function desiOf(variant: Variant, units: ParcelUnits): number | null {
   try {
-    const parcel = parcelOf(
+    return parcelOf(
       [
         {
           title: variant.id,
@@ -190,14 +205,8 @@ function shippingRateOf(variant: Variant, shipping: ShippingFacts): number | nul
           height: variant.height ?? null,
         },
       ],
-      shipping.units
-    )
-    const rate = tablePrice(
-      shipping.settings.rate_table,
-      shipping.settings.over_desi_price,
-      parcel.desi
-    )
-    return rate === null ? null : Number(toMedusaAmount(rate))
+      units
+    ).desi
   } catch (error) {
     if (error instanceof MissingMeasures) {
       return null
@@ -253,6 +262,8 @@ export function productFacts(
         availability: availabilityOf(variant),
         properties,
         shippingRate: shipping ? shippingRateOf(variant, shipping) : null,
+        stock: stockOf(variant),
+        desi: shipping ? desiOf(variant, shipping.units) : null,
       }
     })
   const used = new Set(variants.flatMap((variant) => Object.keys(variant.properties)))

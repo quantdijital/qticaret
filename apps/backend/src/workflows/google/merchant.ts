@@ -7,7 +7,7 @@ import {
   createWorkflow,
 } from "@medusajs/framework/workflows-sdk"
 import { ValidationError, isProviderError } from "../../lib/errors"
-import { googleFeedFormatter } from "../../lib/feeds"
+import { excludedBy, googleFeedFormatter } from "../../lib/feeds"
 import { googleApi } from "../../lib/google/client"
 import { productInputName, productInputOf } from "../../lib/google/merchant"
 import { googleClientOf } from "../../lib/google/oauth"
@@ -17,7 +17,7 @@ import { GOOGLE_MERCHANT_MODULE } from "../../modules/google-merchant"
 import type GoogleMerchantModuleService from "../../modules/google-merchant/service"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-credentials"
 import type IntegrationCredentialsModuleService from "../../modules/integration-credentials/service"
-import { catalogItems } from "../marketing/feeds"
+import { catalogItems, feedShopOf } from "../marketing/feed-catalog"
 import { brandOf } from "../messaging/brand"
 
 /** Calls to Merchant API in one run at most; the rest go in the next. */
@@ -127,13 +127,18 @@ const syncMerchantProductsStep = createStep(
         })
         await credentials.store(draft, null, null)
       }
-      const items = (await catalogItems(container, brand.storefrontUrl)).filter(
-        googleFeedFormatter.accepts
+      // What the Google feed lists, as it says it: its exclusions and the shop's shipping too
+      const [catalog, { shop, exclusions }] = await Promise.all([
+        catalogItems(container, brand.storefrontUrl),
+        feedShopOf(container, { shopName: brand.shopName, storefrontUrl: brand.storefrontUrl }),
+      ])
+      const items = catalog.filter(
+        (item) => googleFeedFormatter.accepts(item) && !excludedBy(item, exclusions.google)
       )
       const sent = await merchant.sentOffers()
       let calls = 0
       for (const item of items) {
-        const productInput = productInputOf(item)
+        const productInput = productInputOf(item, shop)
         const hash = hashOf(productInput)
         if (sent.get(item.id) === hash || calls >= MAX_CALLS) {
           continue

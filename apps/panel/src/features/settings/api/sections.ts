@@ -103,7 +103,15 @@ export interface MarketingSettings {
   abandoned_cart_enabled: boolean
   /** How long a cart stays unchanged before it counts as left. */
   abandoned_cart_delay_minutes: number
+  /** Categories (and those under them) each feed leaves out (F10.8). */
+  feed_exclusions: Record<FeedTargetName, string[]>
+  /** An order placed before this hour leaves the same day (Akakçe); null: not promised. */
+  feed_same_day_cutoff_hour: number | null
 }
+
+/** The places the shop's catalog is sent, in the order the panel shows them. */
+export const FEED_TARGET_NAMES = ["google", "meta", "cimri", "akakce"] as const
+export type FeedTargetName = (typeof FEED_TARGET_NAMES)[number]
 
 export const sectionQuery = <T>(section: string) =>
   queryOptions({

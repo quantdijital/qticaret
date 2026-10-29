@@ -10,7 +10,13 @@ interface OptionRow {
   provider_id?: string | null
   price_type?: string | null
   data?: Record<string, unknown> | null
-  prices?: ({ currency_code?: string | null; amount?: MedusaAmount } | null)[] | null
+  prices?:
+    | ({
+        currency_code?: string | null
+        amount?: MedusaAmount
+        price_rules?: ({ attribute?: string | null } | null)[] | null
+      } | null)[]
+    | null
   rules?: ({ attribute?: string | null; value?: unknown } | null)[] | null
   service_zone?: { fulfillment_set?: { type?: string | null } | null } | null
 }
@@ -32,6 +38,7 @@ export async function shopShippingOptions(container: MedusaContainer) {
       "data",
       "prices.currency_code",
       "prices.amount",
+      "prices.price_rules.attribute",
       "rules.attribute",
       "rules.value",
       "service_zone.fulfillment_set.type",
@@ -41,7 +48,11 @@ export async function shopShippingOptions(container: MedusaContainer) {
     .filter((option) => !ruleIs(option, "is_return", "true"))
     .map((option) => {
       const carrier = carrierOf(option.provider_id)
-      const price = (option.prices ?? []).find((each) => each?.currency_code === "try")
+      // The shop's own price, not the free one from a basket total (F4.5), which carries a rule
+      const price = (option.prices ?? []).find(
+        (each) =>
+          each?.currency_code === "try" && !(each.price_rules ?? []).some((rule) => rule !== null)
+      )
       const choice = option.data?.["id"]
       return {
         id: option.id,

@@ -50,7 +50,7 @@
 | Google Search Console, Merchant Center, CrUX API erişimi (tenant mülkü, OAuth uygulaması; platform için Google Cloud projesi) | Google | F10.11, F10.8 |
 | Sosyal giriş: mağaza başına Google OAuth istemcisi (onay ekranında mağaza adı) ve Apple Developer hesabı + Services ID (adr/0037) | Google, Apple | F10.2, F16 |
 | İYS marka kodu ve Netgsm İYS API erişimi (izinlerin iletimi, adr/0038) | İYS, Netgsm | F10 |
-| Akakçe ve Cimri güncel XML feed şemaları (satıcı panelinden) | Karşılaştırma siteleri | F10.8 |
+| Akakçe ve Cimri satıcı hesapları; feed adresinin satıcı paneline girilmesi (biçimler önceki siteden alındı, adr/0038 M12 eki) | Karşılaştırma siteleri | F10.8 |
 | Meta (piksel + Conversions API anahtarı) ve GA4 (ölçüm kimliği + API sırrı) hesapları | Meta, Google | F10.9 |
 | IndexNow anahtarı (tenant başına) | — | F3.15 |
 | LLM sağlayıcı seçimi ve fiyatlandırma (opsiyonel özellik) | Sağlayıcı | F10.13 |

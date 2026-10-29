@@ -1,96 +1,22 @@
 import { randomUUID } from "node:crypto"
-import type { MedusaContainer } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
+import { Modules } from "@medusajs/framework/utils"
 import {
   StepResponse,
   WorkflowResponse,
   createStep,
   createWorkflow,
 } from "@medusajs/framework/workflows-sdk"
-import { FEED_FORMATTERS, feedItemsOf, googleFeedProblems } from "../../lib/feeds"
-import type { FeedItem } from "../../lib/feeds"
+import { FEED_FORMATTERS, excludedBy, googleFeedProblems } from "../../lib/feeds"
 import { errorSummary, logger } from "../../lib/logging"
-import { plainText } from "../../lib/seo/resolve"
 import { MARKETING_FEEDS_MODULE } from "../../modules/marketing-feeds"
 import type MarketingFeedsModuleService from "../../modules/marketing-feeds/service"
-import { URL_REGISTRY_MODULE } from "../../modules/url-registry"
-import type UrlRegistryModuleService from "../../modules/url-registry/service"
-import { CATALOG_ENTITY_TYPES, CATALOG_LOCALE } from "../catalog/entity-paths"
 import { brandOf } from "../messaging/brand"
-import { priceDisplays } from "../pricing/price-display"
-import { PRODUCT_FACT_FIELDS, productFacts } from "../seo/facts"
-import type { FactRow } from "../seo/facts"
-import { shippingFactsOf } from "../seo/payload"
-
-/** Products read at a time. */
-const PAGE = 200
-
-interface FeedProductRow extends FactRow {
-  id: string
-  description?: string | null
-  brand?: { name: string } | null
-}
+import { catalogItems, feedShopOf } from "./feed-catalog"
 
 /**
- * Every published product with a storefront address, as feed items: the
- * same facts, prices (the 30-day rule's too) and shipping rates the page's
- * JSON-LD is built from (docs/13 §10).
- */
-export async function catalogItems(
-  container: MedusaContainer,
-  storefront: string
-): Promise<FeedItem[]> {
-  const query = container.resolve(ContainerRegistrationKeys.QUERY)
-  const urls = container.resolve<UrlRegistryModuleService>(URL_REGISTRY_MODULE)
-  const shipping = await shippingFactsOf(container)
-  const items: FeedItem[] = []
-  for (let skip = 0; ; skip += PAGE) {
-    const { data } = await query.graph({
-      entity: "product",
-      fields: ["id", "title", "description", "brand.name", ...PRODUCT_FACT_FIELDS],
-      filters: { status: "published" },
-      pagination: { skip, take: PAGE, order: { created_at: "ASC" } },
-    })
-    const rows = data as FeedProductRow[]
-    const entries = await urls.listUrlEntries(
-      {
-        locale: CATALOG_LOCALE,
-        entity_type: CATALOG_ENTITY_TYPES.product,
-        entity_id: rows.map((row) => row.id),
-        status: "active",
-      },
-      { select: ["entity_id", "path"], take: rows.length }
-    )
-    const paths = new Map(entries.map((entry) => [entry.entity_id, entry.path]))
-    const displays = await priceDisplays(
-      container,
-      rows.flatMap((row) =>
-        (row.variants ?? []).flatMap((variant) => (variant ? [variant.id] : []))
-      ),
-      "try"
-    )
-    for (const row of rows) {
-      const path = paths.get(row.id)
-      if (path) {
-        const facts = productFacts(
-          row,
-          row.brand?.name ?? null,
-          plainText(row.description ?? ""),
-          displays,
-          shipping
-        )
-        items.push(...feedItemsOf(facts, `${storefront}${path}`))
-      }
-    }
-    if (rows.length < PAGE) {
-      return items
-    }
-  }
-}
-
-/**
- * Writes each target's feed to the shop's private storage and records it;
- * the file it replaces goes once the new one is recorded. Nothing while
+ * Writes each target's feed to the shop's private storage and records it,
+ * without the categories the shop keeps out of it; the file it replaces
+ * goes once the new one is recorded. Nothing while
  * feeds are off or the shop has no storefront domain to link to. A file
  * written but not recorded is removed again.
  */
@@ -102,11 +28,17 @@ const generateFeedsStep = createStep(
     if (!brand.storefrontUrl || (await feeds.currentToken()) === null) {
       return new StepResponse({ items: 0, generated: false })
     }
-    const items = await catalogItems(container, brand.storefrontUrl)
+    const storefront = { shopName: brand.shopName, storefrontUrl: brand.storefrontUrl }
+    const [items, { shop, exclusions }] = await Promise.all([
+      catalogItems(container, brand.storefrontUrl),
+      feedShopOf(container, storefront),
+    ])
     const files = container.resolve(Modules.FILE)
     for (const formatter of FEED_FORMATTERS) {
-      const listed = items.filter(formatter.accepts)
-      const body = formatter.render(listed, { name: brand.shopName, url: brand.storefrontUrl })
+      const listed = items.filter(
+        (item) => formatter.accepts(item) && !excludedBy(item, exclusions[formatter.target])
+      )
+      const body = formatter.render(listed, shop)
       if (formatter.target === "google") {
         const problems = googleFeedProblems(body)
         if (problems.length > 0) {

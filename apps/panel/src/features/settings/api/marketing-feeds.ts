@@ -1,9 +1,10 @@
 import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
+import type { FeedTargetName } from "@/features/settings/api/sections"
 import { sdk } from "@/lib/sdk"
 
-/** A feed the shop gives Google or Meta (F10.8). */
+/** A feed the shop gives Google, Meta, Cimri or Akakçe (F10.8). */
 export interface FeedTarget {
-  target: "google" | "meta"
+  target: FeedTargetName
   /** The address with its token; null while the feeds are off. */
   url: string | null
   item_count: number | null

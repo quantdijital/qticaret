@@ -87,6 +87,79 @@ medusaIntegrationTestRunner({
       )
     })
 
+    it("gives Cimri and Akakçe their feeds, without the categories the shop keeps out", async () => {
+      const container = getContainer()
+      const products = container.resolve(Modules.PRODUCT)
+      const stamp = String(Date.now())
+      const [kitchen] = await products.createProductCategories([
+        { name: "Mutfak", handle: `mutfak-${stamp}`, is_active: true },
+      ])
+      const [pans] = await products.createProductCategories([
+        {
+          name: "Tavalar",
+          handle: `tavalar-${stamp}`,
+          is_active: true,
+          parent_category_id: kitchen?.id ?? null,
+        },
+      ])
+      const handle = `tava-${stamp}`
+      const { productId } = await stockedProduct(container, shop, handle, 6, 349.9)
+      await products.updateProducts(productId, {
+        images: [{ url: "https://cdn.example.com/tava.jpg" }],
+        category_ids: [pans?.id ?? ""],
+      })
+      const settings = container.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
+      await settings.saveSection("marketing", { feed_same_day_cutoff_hour: 16 }, null)
+      await http.post("/admin/marketing-feeds/token", {}, { headers: admin.headers })
+      await http.post("/admin/marketing-feeds/generate", {}, { headers: admin.headers })
+      const before = await status()
+      const akakce = await fetchFeed(pathOf(before, "akakce"))
+      const cimri = await fetchFeed(pathOf(before, "cimri"))
+      const google = await fetchFeed(pathOf(before, "google"))
+      // The parent category kept out of Akakçe takes the product under it along
+      await settings.saveSection(
+        "marketing",
+        { feed_exclusions: { akakce: [kitchen?.id ?? ""] } },
+        null
+      )
+      await http.post("/admin/marketing-feeds/generate", {}, { headers: admin.headers })
+      const after = await status()
+      const akakceAfter = await fetchFeed(pathOf(after, "akakce"))
+      const cimriAfter = await fetchFeed(pathOf(after, "cimri"))
+
+      expect(akakce.status).toBe(200)
+      expect(akakce.data).toContain(`<url>https://magaza.example.com/urun/${handle}</url>`)
+      expect(akakce.data).toContain("<price>349.90</price>")
+      expect(akakce.data).toContain("<quantity>6</quantity>")
+      expect(akakce.data).toContain("<productCategory>Tavalar</productCategory>")
+      expect(akakce.data).toContain("<expressDeliveryTime>16</expressDeliveryTime>")
+      expect(cimri.data).toContain(`<link>https://magaza.example.com/urun/${handle}</link>`)
+      expect(cimri.data).toContain("<g:price>349.90 TRY</g:price>")
+      expect(google.data).toContain("<g:product_type>Mutfak &gt; Tavalar</g:product_type>")
+      expect(akakceAfter.data).not.toContain(handle)
+      expect(cimriAfter.data).toContain(handle)
+      expect(after.targets.map((each) => each.target)).toEqual([
+        "google",
+        "meta",
+        "cimri",
+        "akakce",
+      ])
+    })
+
+    it("refuses exclusions that are not category ids, and an hour outside the day", async () => {
+      const save = (values: Record<string, unknown>) =>
+        settle(
+          http.post<{ message?: string }>("/admin/platform-settings/marketing", values, {
+            headers: admin.headers,
+          })
+        )
+      const odd = await save({ feed_exclusions: { akakce: ["'; drop table"] } })
+      const late = await save({ feed_same_day_cutoff_hour: 24 })
+      const unknown = await save({ feed_exclusions: { trendyol: [] } })
+
+      expect([odd.status, late.status, unknown.status]).toEqual([400, 400, 400])
+    })
+
     it("takes two builds at once, the schedule's and the panel's", async () => {
       await http.post("/admin/marketing-feeds/token", {}, { headers: admin.headers })
       const generate = () =>
@@ -105,7 +178,7 @@ medusaIntegrationTestRunner({
       await http.post("/admin/marketing-feeds/generate", {}, { headers: admin.headers })
       const second = pathOf(await status(), "google")
       const wrong = second.replace(/\/feeds\/[^/]+\//, "/feeds/yanlis-anahtar/")
-      const unknownTarget = second.replace(/\/google$/, "/akakce")
+      const unknownTarget = second.replace(/\/google$/, "/bilinmeyen")
 
       const replaced = await fetchFeed(first)
       const current = await fetchFeed(second)

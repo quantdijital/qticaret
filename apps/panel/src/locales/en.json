@@ -1146,8 +1146,8 @@
       },
       "feeds": {
         "title": "Product feeds",
-        "description": "Your product list for Google Merchant Center and the Meta (Facebook, Instagram) catalog. Prices, stock and codes come from the same source as the product pages and are refreshed every two hours; products out of stock or without an image are left out.",
-        "off": "Feeds are off. Turning them on makes an address for Google and Meta for each target.",
+        "description": "Your product list for Google Merchant Center, the Meta (Facebook, Instagram) catalog, Cimri and Akakçe. Prices, stock and codes come from the same source as the product pages and are refreshed every two hours; products out of stock or without an image are left out.",
+        "off": "Feeds are off. Turning them on makes an address to give each site.",
         "turnOn": "Turn feeds on",
         "turnOff": "Turn off",
         "renew": "Renew address",
@@ -1155,10 +1155,17 @@
         "building": "The first feed is being built; it appears here in a few minutes.",
         "generated_one": "{{items}} product · refreshed {{when}}",
         "generated_other": "{{items}} products · refreshed {{when}}",
-        "comparison": "Akakçe and Cimri feeds will be added once their current XML formats are taken from your seller panel.",
         "targets": {
           "google": "Google Merchant Center",
-          "meta": "Meta catalog"
+          "meta": "Meta catalog",
+          "cimri": "Cimri",
+          "akakce": "Akakçe"
+        },
+        "short": {
+          "google": "Google",
+          "meta": "Meta",
+          "cimri": "Cimri",
+          "akakce": "Akakçe"
         },
         "done": {
           "issue": "Feed addresses are ready.",
@@ -1168,17 +1175,28 @@
         "confirm": {
           "issue": {
             "title": "Renew the address?",
-            "description": "The old addresses stop working at once. Replace them in Google Merchant Center and Meta with the new ones.",
+            "description": "The old addresses stop working at once. Replace them in Google Merchant Center, Meta, Cimri and Akakçe with the new ones.",
             "action": "Renew address"
           },
           "off": {
             "title": "Turn the feeds off?",
-            "description": "The addresses and the built files are removed; Google and Meta can no longer fetch your products this way.",
+            "description": "The addresses and the built files are removed; these sites can no longer fetch your products this way.",
             "action": "Turn feeds off"
           }
         },
         "noDomain": "The shop has no domain yet; feeds link to product pages, so they cannot be built. Enter the domain under Settings > SEO.",
         "notYet": "Not built yet."
+      },
+      "feedRules": {
+        "title": "Feed rules",
+        "description": "Which categories each feed leaves out, and the same-day dispatch hour Akakçe shows. Shipping comes from your shipping settings (the desi table or a flat rate, with the free shipping threshold), handling time from your dispatch days.",
+        "exclusions": "Categories left out",
+        "exclusionsHint": "Products in the categories you tick, and in every category under them, stay out of the {{target}} feed.",
+        "cutoff": "Same-day dispatch until",
+        "cutoffHint": "Pick it if orders placed before this hour leave the same day; Akakçe shows it on your products.",
+        "noCutoff": "No same-day dispatch",
+        "until": "Orders before {{hour}}",
+        "saved": "Feed rules saved; the feeds follow them from their next refresh."
       },
       "google": {
         "title": "Google Merchant Center",

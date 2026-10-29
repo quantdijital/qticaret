@@ -204,9 +204,24 @@ F10'un pazarlama tarafı mağazanın verisini dış servislere taşır: Google, 
   - Ayarlar > Pazarlama > Ürün feed'leri: aç, kapat, adresi yenile (onaylı), şimdi güncelle.
   - Kopyalanabilir adresler; ürün sayısı ve son güncelleme zamanı.
   - Alan adı yoksa uyarı.
-- **Bekleyen dış bilgi:**
-  - Akakçe ve Cimri herkese açık bir XML biçimi yayımlamıyor. Biçim, mağazanın satıcı panelinden alınınca her biri tek bir biçimleyici olarak eklenecek.
-  - Merchant API ile gönderim M13'te.
+- **Merchant API ile gönderim** M13'te.
+
+## Uygulama notları (M12 eki, Akakçe, Cimri ve feed kuralları, 2026-10-29)
+- **Biçimlerin kaynağı:** Akakçe ve Cimri herkese açık şema yayımlamıyor. Biçimler, mağazanın önceki sitesinin (WordPress eklentisi) bu sitelere gönderdiği ve kabul edilen feed'lerden alındı.
+  - **Cimri:** RSS 2.0 ve `g:` ad alanı. Alanlar: başlık, bağlantı, açıklama, `g:id`, `g:condition`, `g:price` (`1299.90 TRY`), `g:availability` (`in stock`), `g:image_link`, `g:brand` (yoksa mağaza adı), `g:mpn` (SKU, yoksa kimlik), `g:gtin`.
+  - **Akakçe:** `<products><product>` yapısı. Alanlar: `sku`, `name`, `url`, `imgUrl`, `additionalimages`, `description`, `distributor`, `listPrice` ve `price` (noktalı), `shipPrice` ve `shipmentVolume` (virgüllü; desi, ölçü yoksa 1), `dayOfDelivery` (hazırlık süresinin üst sınırı), `expressDeliveryTime` (yalnızca mağaza aynı gün saati verdiyse), `quantity` (stok sayılmıyorsa 99), `productBrand`, `productCategory` (birincil kategorinin adı), `barcode`.
+  - İkisi de yalnızca şimdi alınabilen ve görseli olan ürünleri listeler.
+- **Kargo ücreti (tüm feed'ler ve Merchant API):**
+  - Önce desi tablosunun ücreti (tablo fiyatlı seçenek vitrinde açıksa).
+  - Yoksa vitrinde açık, mağazadan teslim olmayan en ucuz sabit ücretli seçenek. Ücretsiz kargo sınırını geçen ürün için 0.
+  - İkisi de yoksa ücret yazılmaz.
+  - Sabit seçeneğin fiyatı, ücretsiz kargo kuralı taşıyan 0 fiyatı değil mağazanın kendi fiyatıdır (`shopShippingOptions` artık kurallı fiyatı atlar; panel listesi de bundan yararlanır).
+- **Google ve Meta eklemeleri:** `g:product_type` / `product_type` (birincil kategori yolu, `Mutfak > Tavalar`). `g:min_handling_time` / `g:max_handling_time` kargo ayarlarındaki gönderim günlerinden. Merchant API aynı değerleri `productTypes`, `shipping`, `minHandlingTime`, `maxHandlingTime` olarak alır (products_v1 başvurusundan doğrulandı).
+  - Eklentideki sektöre özel Google kategori eşlemesi ve reklam grubu etiketleri alınmadı (CLAUDE.md: sektöre özel kod yok).
+- **Feed kuralları (`marketing` bölümü):**
+  - `feed_exclusions`: hedef başına dışarıda bırakılan kategori kimlikleri. Bir kategori, altındaki tüm kategorileri de kapsar (`mpath`). Merchant API gönderimi Google'ın listesine uyar.
+  - `feed_same_day_cutoff_hour`: 1–23 ya da boş; Akakçe'nin `expressDeliveryTime` alanı.
+  - Panel: Ayarlar > Pazarlama > Feed kuralları. Hedef seçilir, kategori ağacından işaretlenir, saat seçilir.
 
 ## Uygulama notları (M13, Google bağlantısı ve Merchant API, 2026-10-29)
 - **Platform OAuth istemcisi:**
@@ -330,7 +345,6 @@ F10'un pazarlama tarafı mağazanın verisini dış servislere taşır: Google, 
   - mağazanın Merchant Center ve Search Console mülkü;
   - İYS marka kodu;
   - Meta ve GA4 hesapları;
-  - Akakçe ve Cimri'nin güncel XML şemaları (mağazanın satıcı panelinden);
   - LLM sağlayıcısı ve veri işleme sözleşmesi.
 - Vitrin (F18) çerez onayını ve izin kutularını sepet/hesap uçlarına yazar. Sözleşme `packages/types`'a girer.
 - Panel:

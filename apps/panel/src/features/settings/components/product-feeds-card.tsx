@@ -16,7 +16,7 @@ const F = "settings.marketing.feeds"
 
 /**
  * Settings > Marketing: the product feeds the shop gives Google Merchant
- * Center and Meta (F10.8, adr/0038 §3), built from the same facts as its
+ * Center, Meta, Cimri and Akakçe (F10.8, adr/0038 §3), built from the same facts as its
  * pages every two hours. Their address carries a token: a new one stops
  * the old address at once.
  */
@@ -78,7 +78,6 @@ export function ProductFeedsCard() {
               </div>
             ) : null
           )}
-          <p className="text-[13px] text-muted-foreground">{t(`${F}.comparison`)}</p>
           <div className="grid gap-2 sm:flex sm:justify-end">
             <Button
               variant="outline"

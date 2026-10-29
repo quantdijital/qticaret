@@ -1,6 +1,6 @@
 import { escapeXml } from "../clients/xml"
-import type { FeedFormatter, FeedItem } from "./items"
-import { feedPrice, feedText } from "./items"
+import type { FeedFormatter, FeedItem, FeedShop } from "./items"
+import { feedPrice, feedText, shippingCost } from "./items"
 
 /**
  * Google Merchant Center's feed (F10.8, docs/13 §10): RSS 2.0 with its
@@ -31,8 +31,9 @@ const tag = (name: string, value: string | null | undefined): string =>
 const identified = (item: FeedItem): boolean =>
   item.gtin !== null || (item.brand !== null && item.mpn !== null)
 
-function itemXml(item: FeedItem): string {
+function itemXml(item: FeedItem, shop: FeedShop): string {
   const onSale = item.strikethrough !== null
+  const shipping = shippingCost(item, shop)
   return [
     "<item>",
     tag("id", item.id),
@@ -51,10 +52,13 @@ function itemXml(item: FeedItem): string {
     tag("mpn", item.mpn),
     identified(item) ? "" : tag("identifier_exists", "no"),
     tag("item_group_id", item.groupId),
+    tag("product_type", item.categoryPath.join(" > ")),
     ...PROPERTIES.map((property) => tag(property, item.properties[property])),
-    item.shippingRate === null
+    shipping === null
       ? ""
-      : `<g:shipping><g:country>TR</g:country><g:price>${feedPrice(item.shippingRate)}</g:price></g:shipping>`,
+      : `<g:shipping><g:country>TR</g:country><g:price>${feedPrice(shipping)}</g:price></g:shipping>`,
+    tag("min_handling_time", String(shop.handlingDays.min)),
+    tag("max_handling_time", String(shop.handlingDays.max)),
     "</item>",
   ].join("")
 }
@@ -72,7 +76,7 @@ export const googleFeed: FeedFormatter = {
       `<title>${escapeXml(shop.name)}</title>`,
       `<link>${escapeXml(shop.url)}</link>`,
       `<description>${escapeXml(shop.name)}</description>`,
-      ...items.map(itemXml),
+      ...items.map((item) => itemXml(item, shop)),
       "</channel></rss>",
       "",
     ].join("\n"),

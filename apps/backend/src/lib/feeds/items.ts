@@ -1,4 +1,5 @@
 import type { Availability, Condition, ProductFacts, VariesBy } from "../seo/jsonld"
+import type { FeedTarget } from "./targets"
 
 /**
  * One variant as every feed lists it (F10.8, adr/0038 §3), read from the
@@ -26,15 +27,35 @@ export interface FeedItem {
   gtin: string | null
   mpn: string | null
   properties: Partial<Record<VariesBy, string>>
-  /** Gross TRY the shop charges to ship one; null when its table does not say. */
+  /** Gross TRY the shop's desi table charges to ship one; null when it does not say. */
   shippingRate: number | null
+  /** The variant's own code; null when it has none. */
+  sku: string | null
+  /** Units available; null when the variant keeps no stock count. */
+  stock: number | null
+  /** One unit's parcel in desi; null without its measures. */
+  desi: number | null
+  /** The primary category's path, top first: "Mutfak > Bıçaklar". */
+  categoryPath: string[]
+  /** Every category the product is in, with their parents: what a feed's exclusions match. */
+  categoryIds: string[]
+}
+
+/** Where the product sits in the catalog, for feeds that name it and for exclusions. */
+export interface FeedPlace {
+  path: string[]
+  ids: string[]
 }
 
 /**
  * The feed items of a product: each variant with an offer on the page (a
  * price above zero) that is not out of stock.
  */
-export function feedItemsOf(facts: ProductFacts, url: string): FeedItem[] {
+export function feedItemsOf(
+  facts: ProductFacts,
+  url: string,
+  place: FeedPlace = { path: [], ids: [] }
+): FeedItem[] {
   const single = facts.variants.length === 1
   return facts.variants.flatMap((variant) => {
     if (variant.price === null || !(variant.price > 0) || variant.availability === "OutOfStock") {
@@ -62,6 +83,11 @@ export function feedItemsOf(facts: ProductFacts, url: string): FeedItem[] {
         mpn: variant.mpn,
         properties: variant.properties,
         shippingRate: typeof variant.shippingRate === "number" ? variant.shippingRate : null,
+        sku: variant.sku,
+        stock: typeof variant.stock === "number" ? variant.stock : null,
+        desi: typeof variant.desi === "number" ? variant.desi : null,
+        categoryPath: place.path,
+        categoryIds: place.ids,
       },
     ]
   })
@@ -80,11 +106,40 @@ export interface FeedShop {
   name: string
   /** The storefront's address. */
   url: string
+  /** Working days to get an order out of the door (Settings > Shipping). */
+  handlingDays: { min: number; max: number }
+  /** The cheapest flat-rate delivery shoppers can pick, gross TRY; null: none. */
+  flatShipping: number | null
+  /** Flat-rate shipping is free from this basket total (Settings > Promotions); null: never. */
+  freeShippingFrom: number | null
+  /** An order placed before this hour leaves the same day (Akakçe); null: not promised. */
+  sameDayCutoffHour: number | null
 }
+
+/**
+ * What shipping one unit costs a shopper: the shop's desi table when it
+ * prices the item, else its cheapest flat rate, free past the basket
+ * total the shop set; null when neither says.
+ */
+export function shippingCost(item: FeedItem, shop: FeedShop): number | null {
+  if (item.shippingRate !== null) {
+    return item.shippingRate
+  }
+  if (shop.flatShipping === null) {
+    return null
+  }
+  return shop.freeShippingFrom !== null && item.price >= shop.freeShippingFrom
+    ? 0
+    : shop.flatShipping
+}
+
+/** Whether the item is in a category the shop keeps out of a feed. */
+export const excludedBy = (item: FeedItem, categoryIds: readonly string[]): boolean =>
+  categoryIds.some((id) => item.categoryIds.includes(id))
 
 /** One target's file (adr/0038 §3): a new target is a new formatter. */
 export interface FeedFormatter {
-  target: string
+  target: FeedTarget
   contentType: string
   extension: string
   /** Whether the target lists the item at all. */
