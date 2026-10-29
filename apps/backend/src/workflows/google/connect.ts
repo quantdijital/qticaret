@@ -56,6 +56,8 @@ export const startGoogleConnectWorkflow = createWorkflow(
 interface Exchanged {
   refresh_token: string
   email: string | null
+  /** What the shop allowed, space-separated: Search Console may be missing. */
+  scopes: string | null
   user_id: string
 }
 
@@ -85,6 +87,7 @@ const exchangeGoogleCodeStep = createStep(
     const exchanged: Exchanged = {
       refresh_token: answer.refreshToken,
       email: answer.email,
+      scopes: answer.scopes,
       user_id: taken.user_id,
     }
     return new StepResponse(exchanged, answer.refreshToken)
@@ -114,7 +117,11 @@ const storeGoogleConnectionStep = createStep(
     const current = await credentials.read("google")
     const kept = current?.settings ?? {}
     const draft = await credentials.draft("google", {
-      settings: { ...kept, ...(input.email ? { email: input.email } : {}) },
+      settings: {
+        ...kept,
+        ...(input.email ? { email: input.email } : {}),
+        ...(input.scopes ? { scopes: input.scopes.slice(0, 2000) } : {}),
+      },
       secrets: { refresh_token: input.refresh_token },
     })
     const previous = await credentials.store(draft, "verified", input.user_id)

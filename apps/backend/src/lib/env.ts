@@ -98,6 +98,8 @@ const envSchema = z.object({
   // shop; each shop connects its Google account with it. Off until both are set
   GOOGLE_OAUTH_CLIENT_ID: z.string().max(200).optional(),
   GOOGLE_OAUTH_CLIENT_SECRET: z.string().max(200).optional(),
+  // F10.11: the platform's API key for CrUX (Chrome's field data); off until set
+  CRUX_API_KEY: z.string().max(200).optional(),
   // A fake Google (OAuth and Merchant API) in tests; refused when deployed
   GOOGLE_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
   // F10.9: fake Meta Graph and GA4 Measurement Protocol in tests; refused when deployed

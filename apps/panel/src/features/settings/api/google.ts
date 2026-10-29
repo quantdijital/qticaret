@@ -8,6 +8,8 @@ export interface GoogleStatus {
   connected: boolean
   email: string | null
   merchant_id: string | null
+  /** F10.11: whether the shop allowed Search Console, and its property. */
+  search_console: { granted: boolean; site: string | null }
   last_sync: {
     at: string
     sent: number
@@ -41,6 +43,28 @@ export function useGoogleAction() {
         : action.kind === "sync"
           ? sdk.client.fetch("/admin/google/merchant/sync", { method: "POST" })
           : sdk.client.fetch("/admin/google", { method: "DELETE" }),
+    onSuccess: async () => {
+      await client.invalidateQueries({ queryKey: ["google"] })
+    },
+  })
+}
+
+/** The Search Console properties the connected account can read. */
+export const searchConsoleSitesQuery = (enabled: boolean) =>
+  queryOptions({
+    queryKey: ["google", "search-console", "sites"],
+    queryFn: () =>
+      sdk.client.fetch<{ sites: { site_url: string; permission: string }[] }>(
+        "/admin/google/search-console/sites"
+      ),
+    enabled,
+  })
+
+export function useSaveSearchConsoleSite() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (site: string) =>
+      sdk.client.fetch("/admin/google/search-console", { method: "POST", body: { site } }),
     onSuccess: async () => {
       await client.invalidateQueries({ queryKey: ["google"] })
     },

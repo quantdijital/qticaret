@@ -18,3 +18,7 @@ export const GoogleCallbackQuery = z.object({
   error: z.string().max(100).optional(),
 })
 export type GoogleCallbackQueryType = z.infer<typeof GoogleCallbackQuery>
+
+/** The shop's Search Console property: a domain or a URL prefix, as Search Console writes it. */
+export const AdminPostSearchConsoleSite = z.object({ site: z.string().trim().max(300) }).strict()
+export type AdminPostSearchConsoleSiteType = z.infer<typeof AdminPostSearchConsoleSite>

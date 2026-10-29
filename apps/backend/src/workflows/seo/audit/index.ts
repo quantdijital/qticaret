@@ -1,6 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import type { AuditFinding } from "../../../lib/seo/audit"
 import { duplicateFinding, notFoundFinding, productFindings } from "./catalog"
+import { insightFindings } from "./insights"
 import { redirectFinding } from "./redirects"
 import { siteFindings } from "./site"
 
@@ -17,6 +18,7 @@ const CHECKS: readonly Check[] = [
   duplicateFinding,
   productFindings,
   redirectFinding,
+  insightFindings,
 ]
 
 /**

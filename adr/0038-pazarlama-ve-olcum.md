@@ -279,6 +279,40 @@ F10'un pazarlama tarafı mağazanın verisini dış servislere taşır: Google, 
   - Meta ve GA4'ün her biri kendi hesap sayfasında, diğer sağlayıcılarla aynı düzende: durum rozeti; kaydet, denetle, bağlantıyı kes.
 - **Gözden geçir:** GA4'te API sırrının doğruluğu ancak GA4 raporlarında görülür.
 
+## Uygulama notları (M15, Search Console ve CrUX, 2026-10-29)
+- **Bağlantı:**
+  - Google bağlantısı (M13) Search Console'un tam kapsamını da ister (`auth/webmasters`), çünkü site haritası göndermek salt okuma kapsamıyla yapılamaz.
+  - Verilen kapsamlar hesap ayarlarında (`scopes`) tutulur. Bu kapsam olmadan bağlanmış hesaba panel "Yeniden bağla" der.
+  - Mülk (`gsc_site`), hesabın okuyabildiği mülkler arasından seçilir: `sites.list` ile listelenir; doğrulanmamış kullanıcı yetkisi sayılmaz.
+- **Gece işi (`seo-insights`, 02:30 UTC, denetimden önce):** Her parça kendi başına çalışır ve sonucu `insight_run` tablosuna yazılır.
+  - Site haritası gönderimi: `PUT …/sites/{mülk}/sitemaps/{vitrin}/sitemap.xml`.
+  - Search Analytics:
+    - sayfaya göre son 28 gün ile önceki 28 gün;
+    - Search Console yaklaşık iki gün geriden geldiği için dönem 3 gün önce biter;
+    - en çok 5000 satır;
+    - tamamı her gece yenilenir.
+  - URL Inspection:
+    - kapsam: ürün ve kategori sayfaları;
+    - sıra: hiç incelenmemiş olanlar önce, sonra 30 günden eskiler;
+    - gecelik bütçe 100; Search Console'un sınırı mülk başına günde 2000.
+  - CrUX:
+    - platformun `CRUX_API_KEY` anahtarıyla, vitrin kaynağının telefon ve masaüstü p75 değerleri (LCP, INP, CLS);
+    - yeterli veri yoksa (404) "veri yok" kaydedilir.
+- **Danışman (KK7, testli):** S-GSC-01 ve S-CWV-01 mağaza denetimine eklendi. Eşikler docs/14'ten.
+  - S-GSC-01:
+    - dizinde olmayan site haritası sayfası;
+    - tıklaması %30 ve üzeri düşen sayfa (önceki dönemde en az 20 tıklama);
+    - 500 ve üzeri gösterimde tıklama oranı %1'in altında kalan sayfa.
+  - S-CWV-01: LCP 2500 ms, INP 200 ms, CLS 0,1 üstü.
+  - 7 günden eski veriyle bulgu üretilmez; bağlantı kaldırılınca eski veri bulgu bırakmaz.
+- **Panel:**
+  - SEO sayfasında "Google Arama" kartı: tıklama ve gösterimde önceki döneme göre değişim, tıklama oranı, ortalama sıra, dizindeki inceleme sayısı, tıklaması en çok düşen sayfalar, "Şimdi güncelle".
+  - SEO sayfasında "Core Web Vitals" kartı: telefon ve masaüstü, Google çizgilerine göre iyi / geliştirilmeli / kötü.
+  - Ayarlar > SEO > Search Console: mülk seçimi.
+- **Bekleyen dış bilgi:**
+  - platformun CrUX API anahtarı;
+  - OAuth onay ekranında `auth/webmasters` kapsamının doğrulanması (M13 ile aynı süreç).
+
 ## Alternatifler
 
 | Seçenek | Artı | Eksi |

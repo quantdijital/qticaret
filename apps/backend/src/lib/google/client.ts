@@ -68,7 +68,12 @@ export function createGoogleApi(
   async function exchangeCode(
     client: GoogleClient,
     input: { code: string; verifier: string; redirectUri: string }
-  ): Promise<{ refreshToken: string | null; accessToken: string; email: string | null }> {
+  ): Promise<{
+    refreshToken: string | null
+    accessToken: string
+    email: string | null
+    scopes: string | null
+  }> {
     const answer = await oauth.request({
       method: "POST",
       path: "/token",
@@ -87,6 +92,7 @@ export function createGoogleApi(
       refreshToken: answer.refresh_token ?? null,
       accessToken: answer.access_token,
       email: emailOfIdToken(answer.id_token),
+      scopes: answer.scope ?? null,
     }
   }
 

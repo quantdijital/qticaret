@@ -13,7 +13,9 @@ import { CatalogHealthCard } from "@/features/dashboard/components/catalog-healt
 import { redirectCountsQuery } from "@/features/seo/api/redirects"
 import { AdvisorSummaryCard } from "@/features/seo/advisor/summary-card"
 import { AuditCard } from "@/features/seo/audit/audit-card"
+import { SearchConsoleCard } from "@/features/seo/components/search-console-card"
 import { SitemapCard } from "@/features/seo/components/sitemap-card"
+import { WebVitalsCard } from "@/features/seo/components/web-vitals-card"
 import { sectionQuery } from "@/features/settings/api/sections"
 import type { SeoSettings } from "@/features/settings/api/sections"
 import { useStoreName } from "@/features/settings/api/store"
@@ -162,6 +164,8 @@ export function SeoOverviewPage() {
         <CatalogHealthCard className={spanOf(5)} />
         <RedirectsCard className={spanOf(6)} />
         <SitemapCard className={spanOf(6)} />
+        <SearchConsoleCard className={spanOf(7)} />
+        <WebVitalsCard className={spanOf(5)} />
         <AdvisorSummaryCard className={spanOf(12)} />
         <AuditCard className={spanOf(12)} />
       </PageGrid>

@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { sectionQuery, useSaveSection } from "@/features/settings/api/sections"
 import type { SeoSettings } from "@/features/settings/api/sections"
 import { useStoreName } from "@/features/settings/api/store"
+import { SearchConsoleCard } from "@/features/settings/components/search-console-card"
 import { TemplateField } from "@/features/settings/components/template-field"
 import { UrlStyleCard } from "@/features/settings/components/url-style-card"
 import { TEMPLATE_TOKENS } from "@/features/settings/seo-sample"
@@ -205,6 +206,7 @@ export function SeoPage() {
           <UrlStyleCard saved={query.data.values.url_style} />
           <TemplatesCard saved={query.data.values} storeName={storeName} />
           <CrawlersCard saved={query.data.values} />
+          <SearchConsoleCard />
         </>
       )}
     </div>

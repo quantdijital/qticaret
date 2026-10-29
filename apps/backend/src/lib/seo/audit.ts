@@ -17,6 +17,9 @@ export const AUDIT_RULES = {
   "S-ORPHAN-01": "high",
   "S-REDIR-01": "medium",
   "S-IMG-01": "medium",
+  // F10.11: from Search Console and CrUX
+  "S-GSC-01": "high",
+  "S-CWV-01": "high",
 } as const satisfies Record<string, Severity>
 export type AuditRuleId = keyof typeof AUDIT_RULES
 

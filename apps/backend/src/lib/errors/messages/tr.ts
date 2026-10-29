@@ -329,6 +329,10 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "google.state_invalid":
     "Google bağlantısının süresi doldu ya da zaten kullanıldı; yeniden bağlayın.",
   "google.no_refresh_token": "Google kalıcı erişim vermedi; bağlantıyı yeniden başlatın.",
+  "google.search_console_scope":
+    "Google hesabı Search Console izni verilmeden bağlanmış; Search Console için yeniden bağlayın.",
+  "google.gsc_site_invalid":
+    "Bu Search Console mülkü bağlı Google hesabının okuyabildikleri arasında değil.",
   "google.not_configured": "Google bağlantısı bu mağaza için henüz kurulmadı.",
   "google.not_connected": "Önce Google hesabını bağlayın.",
   "meta.pixel_id_invalid": "Piksel numarası yalnızca rakamlardan oluşur.",

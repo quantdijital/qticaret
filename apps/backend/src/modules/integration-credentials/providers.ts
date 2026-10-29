@@ -139,6 +139,15 @@ export const CREDENTIAL_PROVIDERS = {
           .string()
           .regex(/^accounts\/\d{1,20}\/dataSources\/\d{1,20}$/)
           .optional(),
+        // F10.11: what the shop allowed, and its Search Console property
+        scopes: z.string().max(2000).optional(),
+        gsc_site: z
+          .string()
+          .regex(
+            /^(sc-domain:[a-z0-9.-]{1,253}|https?:\/\/[^\s/]{1,253}\/)$/,
+            "google.gsc_site_invalid"
+          )
+          .optional(),
       })
       .strict(),
     secrets: ["refresh_token"],

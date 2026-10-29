@@ -324,6 +324,10 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The Google connection no longer works; connect the Google account again.",
   "google.state_invalid": "The Google connection expired or was already used; connect again.",
   "google.no_refresh_token": "Google gave no lasting access; start the connection again.",
+  "google.search_console_scope":
+    "The Google account was connected without Search Console; connect it again for Search Console.",
+  "google.gsc_site_invalid":
+    "This Search Console property is not one the connected Google account can read.",
   "google.not_configured": "The Google connection is not set up for this shop yet.",
   "google.not_connected": "Connect the Google account first.",
   "meta.pixel_id_invalid": "The pixel id is digits only.",

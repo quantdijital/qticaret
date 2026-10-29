@@ -14,8 +14,20 @@ export const GOOGLE_PROVIDER = "google"
 /** Where Google sends the shop back: the backend, on the panel's own host (adr/0022 §4). */
 export const GOOGLE_CALLBACK_PATH = "/google/callback"
 
-/** Merchant Center's API, and the account's address to show which one is connected. */
-export const GOOGLE_SCOPES = ["https://www.googleapis.com/auth/content", "openid", "email"] as const
+/**
+ * Merchant Center's API; Search Console's, whole (submitting a sitemap
+ * needs more than read-only, F10.11); and the account's address, to show
+ * which one is connected.
+ */
+export const GOOGLE_SCOPES = [
+  "https://www.googleapis.com/auth/content",
+  "https://www.googleapis.com/auth/webmasters",
+  "openid",
+  "email",
+] as const
+
+/** Search Console's scope: a connection made before F10.11 lacks it and is made again. */
+export const SEARCH_CONSOLE_SCOPE = "https://www.googleapis.com/auth/webmasters"
 
 export interface GoogleClient {
   clientId: string
@@ -36,6 +48,9 @@ export function googleHosts(env: Env = parseEnv()) {
     accounts: fake ?? "https://accounts.google.com",
     oauth: fake ?? "https://oauth2.googleapis.com",
     merchant: fake ?? "https://merchantapi.googleapis.com",
+    webmasters: fake ?? "https://www.googleapis.com",
+    searchConsole: fake ?? "https://searchconsole.googleapis.com",
+    crux: fake ?? "https://chromeuxreport.googleapis.com",
   }
 }
 

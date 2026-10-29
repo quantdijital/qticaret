@@ -383,6 +383,18 @@
         "moved_one": "{{count}} page moved to its new address.",
         "moved_other": "{{count}} pages moved to their new addresses.",
         "failed": "The addresses could not be moved; run the check again. Details in Settings > Jobs."
+      },
+      "searchConsole": {
+        "title": "Search Console",
+        "description": "The shop's Google Search Console property. Every night the sitemap is submitted, the pages' clicks and impressions read, and pages inspected for the index; the SEO page and the audit show the results.",
+        "notConnected": "Search Console is read with the Google account connected under Marketing.",
+        "goConnect": "Connect the Google account",
+        "notGranted": "The Google account was connected without Search Console. Connect it again for Search Console.",
+        "reconnect": "Connect again",
+        "noSites": "The connected Google account reads no Search Console property. Add the shop's domain to Search Console and verify it.",
+        "site": "Search Console property",
+        "choose": "Choose a property",
+        "saved": "Search Console property saved."
       }
     },
     "features": {
@@ -3064,6 +3076,15 @@
           "title_one": "{{amount}} product image has no alt text",
           "title_other": "{{amount}} product images have no alt text",
           "why": "An image without alt text is blank to image search and screen readers. Add it in the product page's Images section."
+        },
+        "S-GSC-01": {
+          "title_one": "Search Console sees trouble on {{amount}} page",
+          "title_other": "Search Console sees trouble on {{amount}} pages",
+          "why": "Sitemap pages Google has not indexed never show in search results. A page whose clicks fall fast is losing rank or interest. A page shown often but rarely clicked has a title and description that do not draw searchers in."
+        },
+        "S-CWV-01": {
+          "title": "Pages are slow for real visitors",
+          "why": "Google uses the speed and stability Chrome's users measure (Core Web Vitals) in ranking. Values are the 75th percentile of the last 28 days; the good lines are LCP 2.5 s, INP 200 ms, CLS 0.1."
         }
       },
       "reasons": {
@@ -3113,7 +3134,47 @@
         "S-IMG-01": {
           "no_alt_one": "{{amount}} image without alt text",
           "no_alt_other": "{{amount}} images without alt text"
+        },
+        "S-GSC-01": {
+          "not_indexed": "Not in Google's index: {{target}}",
+          "clicks_dropped_one": "{{amount}} click fewer in 28 days",
+          "clicks_dropped_other": "{{amount}} clicks fewer in 28 days",
+          "low_ctr_one": "Under 1% click rate over {{amount}} impression",
+          "low_ctr_other": "Under 1% click rate over {{amount}} impressions"
+        },
+        "S-CWV-01": {
+          "lcp": "{{subject}} the largest content shows at {{target}} ms (good: up to 2500 ms).",
+          "inp": "{{subject}} a tap takes {{target}} ms to answer (good: up to 200 ms).",
+          "cls": "{{subject}} the layout shifts {{target}} (good: up to 0.1)."
         }
+      }
+    },
+    "searchConsole": {
+      "title": "Google Search",
+      "hint": "The last 28 days from Search Console, against the 28 before.",
+      "period": "Search Console, the 28 days to {{end}}, against the 28 before.",
+      "refresh": "Refresh now",
+      "refreshed": "Search Console and CrUX figures refreshed.",
+      "empty": "No figures yet. Choose the Search Console property; figures refresh every night.",
+      "setUp": "Settings > SEO",
+      "clicks": "Clicks",
+      "impressions": "Impressions",
+      "summary": "Click rate {{ctr}}, average position {{position}}. {{indexed}} of {{inspected}} inspected pages are in Google's index.",
+      "dropped": "Pages that lost the most clicks"
+    },
+    "vitals": {
+      "title": "Core Web Vitals",
+      "hint": "What Chrome's users measured (CrUX), the 75th percentile of the last 28 days.",
+      "empty": "Not measured yet; figures refresh every night.",
+      "noData": "Too few visits for CrUX.",
+      "formFactors": {
+        "PHONE": "On phones",
+        "DESKTOP": "On desktops"
+      },
+      "metrics": {
+        "lcp_ms": "LCP",
+        "inp_ms": "INP",
+        "cls": "CLS"
       }
     }
   },

@@ -1,5 +1,5 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { googleClientOf } from "../../../lib/google/oauth"
+import { SEARCH_CONSOLE_SCOPE, googleClientOf } from "../../../lib/google/oauth"
 import { GOOGLE_MERCHANT_MODULE } from "../../../modules/google-merchant"
 import type GoogleMerchantModuleService from "../../../modules/google-merchant/service"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../../modules/integration-credentials"
@@ -27,6 +27,13 @@ export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse):
       state: status?.state ?? "not_configured",
       email: typeof settings["email"] === "string" ? settings["email"] : null,
       merchant_id: typeof settings["merchant_id"] === "string" ? settings["merchant_id"] : null,
+      // F10.11: a connection made before Search Console was asked for lacks its scope
+      search_console: {
+        granted:
+          typeof settings["scopes"] === "string" &&
+          settings["scopes"].split(" ").includes(SEARCH_CONSOLE_SCOPE),
+        site: typeof settings["gsc_site"] === "string" ? settings["gsc_site"] : null,
+      },
       last_sync: sync
         ? {
             at: sync.created_at,

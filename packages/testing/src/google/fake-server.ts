@@ -23,10 +23,38 @@ export interface FakeGoogle {
   inserts: { count: number }
   dataSources: string[]
   revoked: string[]
-  /** Plays the consent screen: the address Google sends the browser back to. */
-  consent: (authorizationUrl: string, answer?: "allow" | "deny") => Promise<string>
+  /** Search Console (F10.11): the properties the account reaches, with its permission. */
+  sites: { siteUrl: string; permissionLevel: string }[]
+  /** Search Analytics' rows by page for a period; none unless a test says. */
+  searchRows: (range: { startDate: string; endDate: string }) => {
+    keys: string[]
+    clicks: number
+    impressions: number
+    ctr: number
+    position: number
+  }[]
+  /** URL Inspection's verdict by URL; PASS when not named. */
+  inspections: Map<string, { verdict: string; coverageState: string }>
+  /** URLs inspected, in order. */
+  inspected: string[]
+  /** Sitemaps submitted, as `<property> <sitemap>`. */
+  sitemaps: string[]
+  /** CrUX: the API key it takes, and p75 per form factor (none: no data). */
+  cruxKey: string
+  crux: Map<string, { lcp: number; inp: number; cls: string }>
+  /**
+   * Plays the consent screen: the address Google sends the browser back to.
+   * `scopes`: what the shop allows (all asked for, unless a test says less).
+   */
+  consent: (
+    authorizationUrl: string,
+    answer?: "allow" | "deny",
+    scopes?: string[]
+  ) => Promise<string>
   close: () => Promise<void>
 }
+
+const WEBMASTERS = "https://www.googleapis.com/auth/webmasters"
 
 const randomId = (bytes = 16) => randomBytes(bytes).toString("base64url")
 
@@ -34,9 +62,19 @@ export async function startFakeGoogle(): Promise<FakeGoogle> {
   const client = { clientId: `${randomId(8)}.apps.googleusercontent.com`, clientSecret: randomId() }
   const merchantId = String(100_000_000 + Math.floor(Math.random() * 800_000_000))
   const email = `magaza-${randomId(4).toLowerCase()}@example.com`
-  const codes = new Map<string, { challenge: string; redirectUri: string }>()
-  const refreshTokens = new Set<string>()
-  const accessTokens = new Set<string>()
+  const codes = new Map<string, { challenge: string; redirectUri: string; scope: string }>()
+  // Each token with the scopes the shop allowed
+  const refreshTokens = new Map<string, string>()
+  const accessTokens = new Map<string, string>()
+  const fake = {
+    sites: [{ siteUrl: "sc-domain:magaza.example.com", permissionLevel: "siteOwner" }],
+    searchRows: (() => []) as FakeGoogle["searchRows"],
+    inspections: new Map<string, { verdict: string; coverageState: string }>(),
+    inspected: [] as string[],
+    sitemaps: [] as string[],
+    cruxKey: randomId(),
+    crux: new Map<string, { lcp: number; inp: number; cls: string }>(),
+  }
   const products = new Map<string, Record<string, unknown>>()
   const inserts = { count: 0 }
   const dataSources: string[] = []
@@ -89,24 +127,22 @@ export async function startFakeGoogle(): Promise<FakeGoogle> {
           }
           const refresh = `1//${randomId(24)}`
           const access = `ya29.${randomId(24)}`
-          refreshTokens.add(refresh)
-          accessTokens.add(access)
+          refreshTokens.set(refresh, code.scope)
+          accessTokens.set(access, code.scope)
           json(res, 200, {
             access_token: access,
             expires_in: 3599,
             refresh_token: refresh,
-            scope: "https://www.googleapis.com/auth/content openid email",
+            scope: code.scope,
             token_type: "Bearer",
             id_token: idToken(),
           })
           return
         }
-        if (
-          form.get("grant_type") === "refresh_token" &&
-          refreshTokens.has(form.get("refresh_token") ?? "")
-        ) {
+        const granted = refreshTokens.get(form.get("refresh_token") ?? "")
+        if (form.get("grant_type") === "refresh_token" && granted !== undefined) {
           const access = `ya29.${randomId(24)}`
-          accessTokens.add(access)
+          accessTokens.set(access, granted)
           json(res, 200, { access_token: access, expires_in: 3599, token_type: "Bearer" })
           return
         }
@@ -120,8 +156,77 @@ export async function startFakeGoogle(): Promise<FakeGoogle> {
         json(res, 200, {})
         return
       }
-      if (!accessTokens.has(bearer)) {
+      if (req.method === "POST" && url.pathname === "/v1/records:queryRecord") {
+        if (url.searchParams.get("key") !== fake.cruxKey) {
+          apiError(res, 400, "INVALID_ARGUMENT")
+          return
+        }
+        const asked = JSON.parse(body) as { formFactor?: string }
+        const metrics = fake.crux.get(asked.formFactor ?? "")
+        if (!metrics) {
+          apiError(res, 404, "NOT_FOUND")
+          return
+        }
+        json(res, 200, {
+          record: {
+            key: asked,
+            metrics: {
+              largest_contentful_paint: { percentiles: { p75: metrics.lcp } },
+              interaction_to_next_paint: { percentiles: { p75: metrics.inp } },
+              cumulative_layout_shift: { percentiles: { p75: metrics.cls } },
+            },
+          },
+        })
+        return
+      }
+      const scope = accessTokens.get(bearer)
+      if (scope === undefined) {
         apiError(res, 401, "UNAUTHENTICATED")
+        return
+      }
+      const consoleCall =
+        url.pathname.startsWith("/webmasters/v3/") || url.pathname.startsWith("/v1/urlInspection/")
+      if (consoleCall && !scope.split(" ").includes(WEBMASTERS)) {
+        apiError(res, 403, "PERMISSION_DENIED")
+        return
+      }
+      if (req.method === "GET" && url.pathname === "/webmasters/v3/sites") {
+        json(res, 200, { siteEntry: fake.sites })
+        return
+      }
+      const sitePath = /^\/webmasters\/v3\/sites\/([^/]+)\/(.+)$/.exec(url.pathname)
+      const site = sitePath?.[1] ? decodeURIComponent(sitePath[1]) : ""
+      const known = fake.sites.some((each) => each.siteUrl === site)
+      if (sitePath && !known) {
+        apiError(res, 403, "PERMISSION_DENIED")
+        return
+      }
+      if (req.method === "PUT" && sitePath?.[2]?.startsWith("sitemaps/")) {
+        fake.sitemaps.push(`${site} ${decodeURIComponent(sitePath[2].slice("sitemaps/".length))}`)
+        res.writeHead(204).end()
+        return
+      }
+      if (req.method === "POST" && sitePath?.[2] === "searchAnalytics/query") {
+        const asked = JSON.parse(body) as { startDate: string; endDate: string }
+        json(res, 200, { rows: fake.searchRows(asked), responseAggregationType: "byPage" })
+        return
+      }
+      if (req.method === "POST" && url.pathname === "/v1/urlInspection/index:inspect") {
+        const asked = JSON.parse(body) as { inspectionUrl: string; siteUrl: string }
+        if (!fake.sites.some((each) => each.siteUrl === asked.siteUrl)) {
+          apiError(res, 403, "PERMISSION_DENIED")
+          return
+        }
+        fake.inspected.push(asked.inspectionUrl)
+        const verdict = fake.inspections.get(asked.inspectionUrl) ?? {
+          verdict: "PASS",
+          coverageState: "Submitted and indexed",
+        }
+        json(res, 200, {
+          inspectionResult: {
+            indexStatusResult: { ...verdict, lastCrawlTime: new Date().toISOString() },
+          },
+        })
         return
       }
       const account = /^\/(?:accounts|datasources|products)\/v1\/accounts\/(\d+)/.exec(
@@ -199,7 +304,24 @@ export async function startFakeGoogle(): Promise<FakeGoogle> {
     inserts,
     dataSources,
     revoked,
-    consent: (authorizationUrl, answer = "allow") => {
+    get sites() {
+      return fake.sites
+    },
+    set sites(value) {
+      fake.sites = value
+    },
+    get searchRows() {
+      return fake.searchRows
+    },
+    set searchRows(value) {
+      fake.searchRows = value
+    },
+    inspections: fake.inspections,
+    inspected: fake.inspected,
+    sitemaps: fake.sitemaps,
+    cruxKey: fake.cruxKey,
+    crux: fake.crux,
+    consent: (authorizationUrl, answer = "allow", scopes) => {
       const asked = new URL(authorizationUrl)
       const params = asked.searchParams
       const redirect = new URL(params.get("redirect_uri") ?? "")
@@ -218,6 +340,7 @@ export async function startFakeGoogle(): Promise<FakeGoogle> {
       codes.set(code, {
         challenge: params.get("code_challenge") ?? "",
         redirectUri: params.get("redirect_uri") ?? "",
+        scope: (scopes ?? (params.get("scope") ?? "").split(" ")).join(" "),
       })
       redirect.searchParams.set("code", code)
       return Promise.resolve(redirect.toString())

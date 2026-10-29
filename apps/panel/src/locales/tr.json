@@ -383,6 +383,18 @@
         "moved_one": "{{count}} sayfa yeni adresine taşındı.",
         "moved_other": "{{count}} sayfa yeni adresine taşındı.",
         "failed": "Adresler taşınamadı; kontrolü yeniden çalıştırın. Ayrıntı Ayarlar > İşler'de."
+      },
+      "searchConsole": {
+        "title": "Search Console",
+        "description": "Mağazanın Google Search Console mülkü. Her gece site haritası gönderilir, sayfaların tıklama ve gösterimleri alınır ve sayfaların dizinde olup olmadığı incelenir; sonuçlar SEO sayfasında ve denetimde görünür.",
+        "notConnected": "Search Console, Pazarlama'da bağlanan Google hesabıyla okunur.",
+        "goConnect": "Google hesabını bağla",
+        "notGranted": "Google hesabı Search Console izni verilmeden bağlanmış. Search Console için hesabı yeniden bağlayın.",
+        "reconnect": "Yeniden bağla",
+        "noSites": "Bağlı Google hesabının okuyabildiği bir Search Console mülkü yok. Mağazanın alan adını Search Console'a ekleyip doğrulayın.",
+        "site": "Search Console mülkü",
+        "choose": "Mülk seçin",
+        "saved": "Search Console mülkü kaydedildi."
       }
     },
     "features": {
@@ -3064,6 +3076,15 @@
           "title_one": "{{amount}} ürün görselinin alt metni yok",
           "title_other": "{{amount}} ürün görselinin alt metni yok",
           "why": "Alt metinsiz görsel, görsel aramasında ve ekran okuyucularda boş kalır. Ürün sayfasının Görseller bölümünden eklenir."
+        },
+        "S-GSC-01": {
+          "title_one": "Search Console {{amount}} sayfada sorun görüyor",
+          "title_other": "Search Console {{amount}} sayfada sorun görüyor",
+          "why": "Google'ın dizine eklemediği site haritası sayfaları arama sonuçlarında hiç çıkmaz. Tıklaması hızla düşen sayfa sıralama ya da ilgi kaybediyor. Çok gösterilip az tıklanan sayfanın başlığı ve açıklaması arayana yeterince çekici gelmiyor."
+        },
+        "S-CWV-01": {
+          "title": "Gerçek ziyaretçiler için sayfalar yavaş",
+          "why": "Google, Chrome kullanıcılarının ölçtüğü hızı ve kararlılığı (Core Web Vitals) sıralamada kullanır. Değerler son 28 günün %75'lik dilimidir; iyi sınırlar LCP 2,5 sn, INP 200 ms, CLS 0,1."
         }
       },
       "reasons": {
@@ -3113,7 +3134,47 @@
         "S-IMG-01": {
           "no_alt_one": "{{amount}} görselin alt metni yok",
           "no_alt_other": "{{amount}} görselin alt metni yok"
+        },
+        "S-GSC-01": {
+          "not_indexed": "Google dizine eklemedi: {{target}}",
+          "clicks_dropped_one": "Tıklama 28 günde {{amount}} azaldı",
+          "clicks_dropped_other": "Tıklama 28 günde {{amount}} azaldı",
+          "low_ctr_one": "{{amount}} gösterimde tıklama oranı %1'in altında",
+          "low_ctr_other": "{{amount}} gösterimde tıklama oranı %1'in altında"
+        },
+        "S-CWV-01": {
+          "lcp": "{{subject}} en büyük içerik {{target}} ms'de görünüyor (iyi: en çok 2500 ms).",
+          "inp": "{{subject}} dokunuşa yanıt {{target}} ms sürüyor (iyi: en çok 200 ms).",
+          "cls": "{{subject}} sayfa kayması {{target}} (iyi: en çok 0,1)."
         }
+      }
+    },
+    "searchConsole": {
+      "title": "Google Arama",
+      "hint": "Search Console'dan son 28 gün, önceki 28 günle karşılaştırmalı.",
+      "period": "Search Console, {{end}} tarihine kadar son 28 gün; önceki 28 günle karşılaştırmalı.",
+      "refresh": "Şimdi güncelle",
+      "refreshed": "Search Console ve CrUX verileri güncellendi.",
+      "empty": "Henüz veri yok. Search Console mülkünü seçin; veriler her gece güncellenir.",
+      "setUp": "Ayarlar > SEO",
+      "clicks": "Tıklama",
+      "impressions": "Gösterim",
+      "summary": "Tıklama oranı {{ctr}}, ortalama sıra {{position}}. İncelenen {{inspected}} sayfanın {{indexed}} tanesi Google dizininde.",
+      "dropped": "Tıklaması en çok düşen sayfalar"
+    },
+    "vitals": {
+      "title": "Core Web Vitals",
+      "hint": "Chrome kullanıcılarının ölçtüğü değerler (CrUX), son 28 günün %75'lik dilimi.",
+      "empty": "Henüz ölçülmedi; veriler her gece güncellenir.",
+      "noData": "CrUX'ta yeterli ziyaret yok.",
+      "formFactors": {
+        "PHONE": "Telefonda",
+        "DESKTOP": "Masaüstünde"
+      },
+      "metrics": {
+        "lcp_ms": "LCP",
+        "inp_ms": "INP",
+        "cls": "CLS"
       }
     }
   },

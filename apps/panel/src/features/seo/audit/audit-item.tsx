@@ -20,6 +20,7 @@ const NAMED: ReadonlySet<AuditRuleId> = new Set([
   "S-REDIR-01",
   "S-ROBOTS-01",
   "S-IMG-01",
+  "S-GSC-01",
 ])
 
 /** A way to the place the item is fixed; the link inside keeps its route's types. */
@@ -169,7 +170,8 @@ function ItemAction({ ruleId, item }: { ruleId: AuditRuleId; item: AuditItem }) 
 export function AuditItemRow({ ruleId, item }: { ruleId: AuditRuleId; item: AuditItem }) {
   const { t } = useTranslation()
   const values = {
-    subject: item.subject,
+    // A Core Web Vital's item names a form factor (PHONE), worded here
+    subject: ruleId === "S-CWV-01" ? t(`seo.vitals.formFactors.${item.subject}`) : item.subject,
     count: item.count ?? 0,
     amount: formatCount(item.count ?? 0),
     target: item.target ?? "",
