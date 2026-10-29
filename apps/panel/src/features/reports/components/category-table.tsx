@@ -1,7 +1,5 @@
-import { Download } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { SectionCard } from "@/components/patterns/section-card"
-import { Button } from "@/components/ui/button"
 import {
   Table,
   TableBody,
@@ -12,7 +10,7 @@ import {
 } from "@/components/ui/table"
 import type { DashboardOverview } from "@/features/dashboard/api/overview"
 import { useCategoryName } from "@/features/reports/category-name"
-import { downloadCsv } from "@/lib/csv"
+import { ReportExportButton } from "@/features/reports/components/report-export"
 import { formatMoney, formatPercent } from "@/lib/format"
 
 type Category = DashboardOverview["categories"][number]
@@ -23,35 +21,15 @@ export function CategoryTable({ report }: { report: DashboardOverview }) {
   const nameOf = useCategoryName()
   const total = Number(report.totals.sales.current)
   const shareOf = (row: Category) => (total > 0 ? Number(row.sales) / total : 0)
-  const exportCsv = () => {
-    downloadCsv(`kategoriler-${report.period.key}.csv`, [
-      [
-        t("reports.categories.category"),
-        t("reports.categories.share"),
-        t("reports.categories.sales"),
-      ],
-      ...report.categories.map((row) => [
-        nameOf(row),
-        Math.round(shareOf(row) * 1000) / 10,
-        Number(row.sales),
-      ]),
-    ])
-  }
   return (
     <SectionCard
       title={t("reports.categories.title")}
       description={t("reports.categories.hint")}
       flush
       action={
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={report.categories.length === 0}
-          onClick={exportCsv}
-        >
-          <Download />
-          {t("reports.csv")}
-        </Button>
+        report.categories.length > 0 ? (
+          <ReportExportButton format="csv" table="categories" size="sm" />
+        ) : null
       }
     >
       {report.categories.length === 0 ? (

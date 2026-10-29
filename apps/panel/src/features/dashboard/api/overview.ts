@@ -11,7 +11,7 @@ interface Compared<T> {
 
 /** `GET /admin/dashboard/overview`: a period against the one before; amounts are decimal strings. */
 export interface DashboardOverview {
-  period: { key: PeriodKey; granularity: "hour" | "day"; from: string; to: string }
+  period: { key: PeriodKey | "range"; granularity: "hour" | "day"; from: string; to: string }
   currency_code: string
   capped: boolean
   totals: {

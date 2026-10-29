@@ -335,6 +335,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Bu Search Console mülkü bağlı Google hesabının okuyabildikleri arasında değil.",
   "google.not_configured": "Google bağlantısı bu mağaza için henüz kurulmadı.",
   "google.not_connected": "Önce Google hesabını bağlayın.",
+  "reports.range_invalid":
+    "Tarih aralığı geçersiz: başlangıç bitişten sonra, gelecekte ya da 366 günden uzun olamaz.",
   "content_drafts.no_provider": "Taslak sağlayıcısı henüz tanımlı değil.",
   "content_drafts.quota_reached": "Bu ayın taslak hakkı doldu; gelecek ay yenilenir.",
   "content_drafts.not_open": "Bu taslak artık onay beklemiyor.",

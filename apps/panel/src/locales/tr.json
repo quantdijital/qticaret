@@ -1348,7 +1348,16 @@
       "today": "dünün aynı saatlerine göre",
       "7d": "önceki 7 güne göre",
       "30d": "önceki 30 güne göre",
-      "90d": "önceki 90 güne göre"
+      "90d": "önceki 90 güne göre",
+      "range": "önceki eşit döneme göre"
+    },
+    "custom": {
+      "label": "Tarih aralığı",
+      "chosen": "{{from}} – {{to}}",
+      "from": "Başlangıç",
+      "to": "Bitiş",
+      "hint": "Türkiye saatiyle; en çok 366 gün.",
+      "apply": "Uygula"
     }
   },
   "stage": {
@@ -2564,7 +2573,12 @@
   },
   "reports": {
     "description": "Seçtiğiniz dönemin satışları: özet, ürünler, kategoriler ve gün gün",
-    "csv": "CSV indir",
+    "export": {
+      "excel": "Excel olarak indir",
+      "csv": "CSV indir",
+      "later": "Dosya hazırlanıyor; hazır olunca Ayarlar > İşler'den indirebilirsiniz.",
+      "failed": "Rapor dosyası hazırlanamadı."
+    },
     "daily": {
       "title": "Gün gün satış",
       "titleHourly": "Saat saat satış",

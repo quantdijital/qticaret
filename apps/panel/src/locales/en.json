@@ -1348,7 +1348,16 @@
       "today": "vs the same hours yesterday",
       "7d": "vs the previous 7 days",
       "30d": "vs the previous 30 days",
-      "90d": "vs the previous 90 days"
+      "90d": "vs the previous 90 days",
+      "range": "vs the equal period before"
+    },
+    "custom": {
+      "label": "Date range",
+      "chosen": "{{from}} – {{to}}",
+      "from": "From",
+      "to": "To",
+      "hint": "In Türkiye's time; up to 366 days.",
+      "apply": "Apply"
     }
   },
   "stage": {
@@ -2564,7 +2573,12 @@
   },
   "reports": {
     "description": "The chosen period's sales: summary, products, categories and day by day",
-    "csv": "Download CSV",
+    "export": {
+      "excel": "Download as Excel",
+      "csv": "Download CSV",
+      "later": "The file is being made; once ready, download it from Settings > Jobs.",
+      "failed": "The report file could not be made."
+    },
     "daily": {
       "title": "Sales by day",
       "titleHourly": "Sales by hour",

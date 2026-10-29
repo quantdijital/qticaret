@@ -1,10 +1,8 @@
 import { Link } from "@tanstack/react-router"
-import { Download } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { SearchInput } from "@/components/patterns/search-input"
 import { SectionCard } from "@/components/patterns/section-card"
-import { Button } from "@/components/ui/button"
 import {
   Table,
   TableBody,
@@ -18,7 +16,7 @@ import type { DashboardOverview } from "@/features/dashboard/api/overview"
 import { ProductThumb } from "@/features/products/components/product-thumb"
 import { rankedProducts } from "@/features/reports/rank"
 import type { ProductSort, ReportProduct } from "@/features/reports/rank"
-import { downloadCsv } from "@/lib/csv"
+import { ReportExportButton } from "@/features/reports/components/report-export"
 import { formatCount, formatMoney, formatPercent } from "@/lib/format"
 
 const SORTS: readonly ProductSort[] = ["sales", "units"]
@@ -76,47 +74,21 @@ function ProductRow({ product, report }: { product: ReportProduct; report: Dashb
   )
 }
 
-function exportProducts(report: DashboardOverview, rows: ReportProduct[], header: string[]) {
-  const total = Number(report.totals.sales.current)
-  downloadCsv(`urunler-${report.period.key}.csv`, [
-    header,
-    ...rows.map((row) => [
-      row.rank,
-      row.title,
-      row.units,
-      Math.round(row.average * 100) / 100,
-      total > 0 ? Math.round((Number(row.sales) / total) * 1000) / 10 : 0,
-      Number(row.sales),
-    ]),
-  ])
-}
-
 /** Every product sold in the period: searched by name, ordered by sales or units. */
 export function ProductTable({ report }: { report: DashboardOverview }) {
   const { t } = useTranslation()
   const [query, setQuery] = useState("")
   const [sort, setSort] = useState<ProductSort>("sales")
   const rows = rankedProducts(report.top_products, sort, query)
-  const header = ["#", "product", "units", "average", "share", "sales"].map((key) =>
-    key === "#" ? key : t(`reports.products.${key}`)
-  )
   return (
     <SectionCard
       title={t("reports.products.title")}
       description={t("reports.products.hint")}
       flush
       action={
-        <Button
-          variant="outline"
-          size="sm"
-          disabled={rows.length === 0}
-          onClick={() => {
-            exportProducts(report, rows, header)
-          }}
-        >
-          <Download />
-          {t("reports.csv")}
-        </Button>
+        report.top_products.length > 0 ? (
+          <ReportExportButton format="csv" table="products" size="sm" />
+        ) : null
       }
     >
       {report.top_products.length === 0 ? (

@@ -1,7 +1,19 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { createSingleFlight } from "../../../../lib/cache"
-import { LIFECYCLE_FIELDS, buildOverview, periodWindow } from "../../../../lib/dashboard"
-import type { Overview, OverviewLimits, OverviewOrder, PeriodKey } from "../../../../lib/dashboard"
+import {
+  LIFECYCLE_FIELDS,
+  buildOverview,
+  periodWindow,
+  rangeWindow,
+} from "../../../../lib/dashboard"
+import type {
+  Overview,
+  OverviewLimits,
+  OverviewOrder,
+  PeriodKey,
+  PeriodWindow,
+} from "../../../../lib/dashboard"
+import { ValidationError } from "../../../../lib/errors"
 import { ordersBetween } from "../orders"
 
 // Statuses and amounts only: no customer, address or email (adr/0011)
@@ -24,7 +36,7 @@ const FIELDS = [
 const TTL_MS = 60_000
 
 export type DashboardOverview = Overview & {
-  period: { key: PeriodKey; granularity: "hour" | "day"; from: string; to: string }
+  period: { key: PeriodKey | "range"; granularity: "hour" | "day"; from: string; to: string }
   currency_code: string
   capped: boolean
 }
@@ -32,21 +44,39 @@ export type DashboardOverview = Overview & {
 // The shop sells in lira (adr/0007); orders in other currencies wait for F19
 const CURRENCY = "try"
 
-/** The period's numbers, uncached; reports ask for longer lists than the dashboard. */
+/** A report reads a year of orders: past this many the answer says it is capped. */
+export const MAX_REPORT_ORDERS = 50_000
+
+/** A preset period, or days a report names (Turkish days, `YYYY-MM-DD`, F11.1). */
+export type ReportRange = { period: PeriodKey } | { from: string; to: string }
+
+/** The range's window; a range that is no range is the caller's error. */
+export function windowOf(range: ReportRange, now: Date = new Date()): PeriodWindow {
+  if ("period" in range) {
+    return periodWindow(range.period, now)
+  }
+  const window = rangeWindow(range.from, range.to, now)
+  if (!window) {
+    throw new ValidationError("reports.range_invalid", { field: "from" })
+  }
+  return window
+}
+
+/** The window's numbers, uncached; reports ask for longer lists and more orders than the dashboard. */
 export async function computeOverview(
   scope: MedusaContainer,
-  key: PeriodKey,
-  limits?: OverviewLimits
+  window: PeriodWindow,
+  limits?: OverviewLimits,
+  maxOrders?: number
 ): Promise<DashboardOverview> {
-  const window = periodWindow(key)
   const [current, previous] = await Promise.all([
-    ordersBetween<OverviewOrder>(scope, FIELDS, window.from, window.to),
-    ordersBetween<OverviewOrder>(scope, FIELDS, window.previousFrom, window.previousTo),
+    ordersBetween<OverviewOrder>(scope, FIELDS, window.from, window.to, maxOrders),
+    ordersBetween<OverviewOrder>(scope, FIELDS, window.previousFrom, window.previousTo, maxOrders),
   ])
   const inLira = (rows: OverviewOrder[]) => rows.filter((row) => row.currency_code === CURRENCY)
   return {
     period: {
-      key,
+      key: window.key,
       granularity: window.granularity,
       from: window.from.toISOString(),
       to: window.to.toISOString(),
@@ -57,19 +87,28 @@ export async function computeOverview(
   }
 }
 
+const keyOf = (range: ReportRange): string =>
+  "period" in range ? range.period : `${range.from}..${range.to}`
+
 /**
- * A period's overview, cached a minute per period; requests missing the
+ * A range's overview, cached a minute per range; requests missing the
  * cache together wait for one computation. One reader per list length.
  */
-function cachedOverview(limits?: OverviewLimits) {
-  const cache = new Map<PeriodKey, { at: number; value: DashboardOverview }>()
+function cachedOverview(limits?: OverviewLimits, maxOrders?: number) {
+  const cache = new Map<string, { at: number; value: DashboardOverview }>()
   const computing = createSingleFlight<DashboardOverview>()
-  const read = async (scope: MedusaContainer, key: PeriodKey): Promise<DashboardOverview> => {
+  const read = async (scope: MedusaContainer, range: ReportRange): Promise<DashboardOverview> => {
+    const window = windowOf(range)
+    const key = keyOf(range)
     const hit = cache.get(key)
     if (hit && Date.now() - hit.at < TTL_MS) {
       return hit.value
     }
-    const value = await computing(key, () => computeOverview(scope, key, limits))
+    const value = await computing(key, () => computeOverview(scope, window, limits, maxOrders))
+    // A named range's cache is dropped with the rest after a minute: keep at most a few
+    if (cache.size > 50) {
+      cache.clear()
+    }
     cache.set(key, { at: Date.now(), value })
     return value
   }
@@ -81,9 +120,11 @@ function cachedOverview(limits?: OverviewLimits) {
 
 const dashboard = cachedOverview()
 // Reports list every product sold (up to a page a person reads) and every category
-const report = cachedOverview({ products: 100, categories: 20 })
+export const REPORT_LIMITS: OverviewLimits = { products: 100, categories: 20 }
+const report = cachedOverview(REPORT_LIMITS, MAX_REPORT_ORDERS)
 
-export const readDashboardOverview = dashboard.read
+export const readDashboardOverview = (scope: MedusaContainer, period: PeriodKey) =>
+  dashboard.read(scope, { period })
 export const readSalesReport = report.read
 
 /** Tests start from empty caches. */

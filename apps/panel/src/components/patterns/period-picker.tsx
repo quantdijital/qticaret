@@ -3,7 +3,8 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 
 interface PeriodPickerProps<T extends string> {
   periods: readonly T[]
-  value: T
+  /** Null while none of them is chosen (a report's own range of days). */
+  value: T | null
   onChange: (value: T) => void
 }
 
@@ -17,7 +18,7 @@ export function PeriodPicker<T extends string>({ periods, value, onChange }: Per
     <ToggleGroup
       type="single"
       variant="outline"
-      value={value}
+      value={value ?? ""}
       aria-label={t("period.label")}
       onValueChange={(next) => {
         if (next) {

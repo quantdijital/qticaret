@@ -14,7 +14,8 @@ const TURKEY_OFFSET_MS = 3 * HOUR_MS
 const DAYS: Record<Exclude<PeriodKey, "today">, number> = { "7d": 7, "30d": 30, "90d": 90 }
 
 export interface PeriodWindow {
-  key: PeriodKey
+  /** A preset, or "range" for days a report named (F11.1). */
+  key: PeriodKey | "range"
   granularity: "hour" | "day"
   from: Date
   to: Date
@@ -60,6 +61,65 @@ export function periodWindow(key: PeriodKey, now: Date = new Date()): PeriodWind
     previousTo: new Date(now.getTime() - days * DAY_MS),
     buckets: times(days, from, DAY_MS),
     bucketMs: DAY_MS,
+  }
+}
+
+/** The longest range a report reads at once (F11.1, adr/0039): a year and a day. */
+export const MAX_RANGE_DAYS = 366
+
+const DAY_TEXT = /^(\d{4})-(\d{2})-(\d{2})$/
+
+/** Midnight in Turkey of a `YYYY-MM-DD` day, as an instant; null for one that is no date. */
+export function turkishDayStart(day: string): Date | null {
+  const match = DAY_TEXT.exec(day)
+  if (!match) {
+    return null
+  }
+  const [, year, month, date] = match.map(Number) as [number, number, number, number]
+  const utc = Date.UTC(year, month - 1, date)
+  const back = new Date(utc)
+  // 2026-02-30 is no day: Date would roll it into March
+  if (back.getUTCMonth() !== month - 1 || back.getUTCDate() !== date) {
+    return null
+  }
+  return new Date(utc - TURKEY_OFFSET_MS)
+}
+
+/** A day as Turkey names it, `YYYY-MM-DD`, for an instant. */
+export function turkishDay(at: Date): string {
+  return new Date(at.getTime() + TURKEY_OFFSET_MS).toISOString().slice(0, 10)
+}
+
+/**
+ * Days a report names (F11.1): `from` to `to`, both included, as Turkey
+ * counts days; by hour when it is one day, else by day. A range that runs
+ * into today ends now. Against the same number of days just before it.
+ * Null for a range that is no range: a bad date, backwards, in the future
+ * or longer than MAX_RANGE_DAYS.
+ */
+export function rangeWindow(from: string, to: string, now: Date = new Date()): PeriodWindow | null {
+  const start = turkishDayStart(from)
+  const last = turkishDayStart(to)
+  if (!start || !last || last < start || start > now) {
+    return null
+  }
+  const days = Math.round((last.getTime() - start.getTime()) / DAY_MS) + 1
+  if (days > MAX_RANGE_DAYS) {
+    return null
+  }
+  const end = Math.min(last.getTime() + DAY_MS, now.getTime())
+  const span = days * DAY_MS
+  const hourly = days === 1
+  const step = hourly ? HOUR_MS : DAY_MS
+  return {
+    key: "range",
+    granularity: hourly ? "hour" : "day",
+    from: start,
+    to: new Date(end),
+    previousFrom: new Date(start.getTime() - span),
+    previousTo: new Date(end - span),
+    buckets: times(Math.ceil((end - start.getTime()) / step), start.getTime(), step),
+    bucketMs: step,
   }
 }
 

@@ -330,6 +330,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "This Search Console property is not one the connected Google account can read.",
   "google.not_configured": "The Google connection is not set up for this shop yet.",
   "google.not_connected": "Connect the Google account first.",
+  "reports.range_invalid":
+    "The date range is not valid: it cannot start after it ends, lie in the future or run over 366 days.",
   "content_drafts.no_provider": "No draft provider is set up yet.",
   "content_drafts.quota_reached": "This month's drafts are used up; they renew next month.",
   "content_drafts.not_open": "This draft is no longer waiting for approval.",

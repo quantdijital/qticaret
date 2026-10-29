@@ -1,7 +1,5 @@
-import { Download } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { SectionCard } from "@/components/patterns/section-card"
-import { Button } from "@/components/ui/button"
 import {
   Table,
   TableBody,
@@ -11,7 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import type { DashboardOverview } from "@/features/dashboard/api/overview"
-import { downloadCsv } from "@/lib/csv"
+import { ReportExportButton } from "@/features/reports/components/report-export"
 import { formatBucket, formatCount, formatMoney } from "@/lib/format"
 
 const average = (sales: string, orders: number) => (orders > 0 ? Number(sales) / orders : 0)
@@ -21,34 +19,13 @@ export function DailyTable({ report }: { report: DashboardOverview }) {
   const { t } = useTranslation()
   const money = (amount: number | string) => formatMoney(amount, report.currency_code)
   const rows = [...report.series].reverse()
-  const exportCsv = () => {
-    downloadCsv(`satislar-${report.period.key}.csv`, [
-      [
-        t("reports.daily.date"),
-        t("reports.daily.orders"),
-        t("reports.daily.units"),
-        t("reports.daily.sales"),
-      ],
-      ...report.series.map((row) => [
-        formatBucket(row.bucket, report.period.granularity),
-        row.orders,
-        row.units,
-        Number(row.sales),
-      ]),
-    ])
-  }
   return (
     <SectionCard
       title={t(
         report.period.granularity === "hour" ? "reports.daily.titleHourly" : "reports.daily.title"
       )}
       flush
-      action={
-        <Button variant="outline" size="sm" onClick={exportCsv}>
-          <Download />
-          {t("reports.csv")}
-        </Button>
-      }
+      action={<ReportExportButton format="csv" table="daily" size="sm" />}
     >
       <Table>
         <TableHeader>

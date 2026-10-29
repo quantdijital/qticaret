@@ -14,6 +14,7 @@ describe("job types", () => {
       "catalog.export",
       "catalog.import",
       "promotion.codes",
+      "report.export",
       "seo.audit",
       "seo.sitemap",
       "seo.url_style",

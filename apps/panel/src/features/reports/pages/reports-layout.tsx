@@ -1,23 +1,20 @@
-import { Outlet, getRouteApi, useNavigate } from "@tanstack/react-router"
+import { Outlet } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
 import { PageHeader } from "@/components/patterns/page-header"
-import { PeriodPicker } from "@/components/patterns/period-picker"
 import { SectionNav } from "@/components/patterns/section-nav"
-import { DEFAULT_PERIOD, PERIODS } from "@/features/dashboard/period"
+import { ReportExportButton } from "@/features/reports/components/report-export"
+import { ReportRangePicker } from "@/features/reports/components/report-range-picker"
 import { useReport } from "@/features/reports/use-report"
 import { formatCount } from "@/lib/format"
 
-const route = getRouteApi("/_auth/reports")
-
 /**
- * Reports (docs/06 §4): one period, four reports as tabs (summary,
- * products, categories, day by day), each table downloadable as CSV. The
- * period stays in the address as the tabs change. No personal data.
+ * Reports (docs/06 §4, F11.1): a preset period or a range of days, four
+ * reports as tabs (summary, products, categories, day by day); every
+ * table as one Excel file, or a table as CSV, made on the server. The
+ * range stays in the address as the tabs change. No personal data.
  */
 export function ReportsLayout() {
   const { t } = useTranslation()
-  const { period = DEFAULT_PERIOD } = route.useSearch()
-  const navigate = useNavigate()
   const report = useReport()
   return (
     <div className="flex flex-col gap-[var(--grid-gap)]">
@@ -25,17 +22,10 @@ export function ReportsLayout() {
         title={t("nav.reports")}
         description={t("reports.description")}
         action={
-          <PeriodPicker
-            periods={PERIODS}
-            value={period}
-            onChange={(next) => {
-              void navigate({
-                to: ".",
-                search: { period: next === DEFAULT_PERIOD ? undefined : next },
-                replace: true,
-              })
-            }}
-          />
+          <div className="flex flex-wrap items-center gap-2">
+            <ReportRangePicker />
+            <ReportExportButton format="xlsx" />
+          </div>
         }
       />
       <SectionNav
@@ -51,7 +41,7 @@ export function ReportsLayout() {
       <Outlet />
       {report.data?.capped ? (
         <p className="text-xs text-muted-foreground">
-          {t("dashboard.capped", { count: formatCount(5000) })}
+          {t("dashboard.capped", { count: formatCount(50_000) })}
         </p>
       ) : null}
     </div>
