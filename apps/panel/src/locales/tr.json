@@ -4256,5 +4256,13 @@
         "rejected": "Reddedilen soru yok."
       }
     }
+  },
+  "staff": {
+    "roles": {
+      "owner": "Sahip",
+      "admin": "Yönetici",
+      "operations": "Operasyon",
+      "readonly": "Salt okunur"
+    }
   }
 }

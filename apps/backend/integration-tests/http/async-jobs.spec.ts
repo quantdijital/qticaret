@@ -68,6 +68,11 @@ medusaIntegrationTestRunner({
         result.data.url.endsWith(path.split("/").pop() ?? "")
       )
       const csv = readFileSync(file ?? "", "utf8")
+      // Personal data: the asker's file (and the owner's), not another admin's
+      const other = await createAdminUser(http, getContainer(), "admin")
+      const othersTry = await settle(
+        http.get(`/admin/async-jobs/${job.id}/result`, { headers: other.headers })
+      )
       const { data: reads } = await http.get<{ audit_entries: { resource_id: string }[] }>(
         "/admin/audit-log?resource_type=async_job",
         { headers: admin.headers }
@@ -82,6 +87,7 @@ medusaIntegrationTestRunner({
       expect(csv.startsWith("﻿id;created_at;kind;action;")).toBe(true)
       expect(csv).toContain(";sensitive_read;GET /admin/audit-log;")
       expect(reads.audit_entries.map((entry) => entry.resource_id)).toContain(job.id)
+      expect(othersTry.status).toBe(404)
     })
 
     it("keeps exports from API keys, one export at a time, and checks the input", async () => {

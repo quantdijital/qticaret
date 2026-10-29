@@ -32,7 +32,8 @@ export function useLogin() {
       await sdk.auth.login("user", "emailpass", { email, password })
     },
     onSuccess: async () => {
-      await client.invalidateQueries({ queryKey: CURRENT_USER_KEY })
+      // Who signed in, and their role
+      await client.invalidateQueries({ queryKey: ["auth"] })
     },
   })
 }

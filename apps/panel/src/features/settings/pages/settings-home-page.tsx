@@ -3,7 +3,8 @@ import { ChevronRight } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { PageHeader } from "@/components/patterns/page-header"
 import { SectionCard } from "@/components/patterns/section-card"
-import { SETTINGS_GROUPS } from "@/features/settings/sections"
+import { useCapabilities } from "@/features/auth/api/staff"
+import { visibleGroups } from "@/features/settings/sections"
 
 /**
  * Settings' first page: every section in its group, each a link with a
@@ -11,12 +12,13 @@ import { SETTINGS_GROUPS } from "@/features/settings/sections"
  */
 export function SettingsHomePage() {
   const { t } = useTranslation()
+  const groups = visibleGroups(useCapabilities())
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title={t("settings.home.title")} description={t("settings.home.description")} />
       {/* One card per group across the page, its links two by two: no card is left half empty */}
       <div className="flex flex-col gap-6">
-        {SETTINGS_GROUPS.map((group) => (
+        {groups.map((group) => (
           <SectionCard key={group.key} title={t(`settings.groups.${group.key}`)} flush>
             <ul className="grid lg:grid-cols-2">
               {group.sections.map((section) => {

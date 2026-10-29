@@ -68,6 +68,7 @@ import { slugHandles } from "./validation/catalog-handles"
 import { rejectStoreSeoFields } from "./validation/seo-fields"
 import { rejectSensitiveFields } from "./validation/sensitive-fields"
 import { guardApiKeys } from "./http/api-key-guard"
+import { guardStaffRoles } from "./http/staff-guard"
 import { recordSearchTerms } from "./http/search-terms"
 import { closePresignedUploads, hideJobResultFiles } from "./validation/upload-routes"
 import {
@@ -116,13 +117,15 @@ export default defineMiddlewares({
     },
     // F2.5: admin mutations are recorded once answered (adr/0011); tax ids
     // are never expanded through `fields`. F11.6: a secret API key reaches
-    // only its scopes' routes (Medusa's own authentication has run by now)
+    // only its scopes' routes, F12.6: a staff member only their role's
+    // (Medusa's own authentication has run by now)
     {
       matcher: "/admin/*",
       middlewares: [
         rateLimit(() => RATE_LIMIT_PROFILES.admin_default),
         adminLimitGuard,
         guardApiKeys,
+        guardStaffRoles,
         rejectSensitiveFields,
         auditMutations,
       ],
@@ -150,8 +153,8 @@ export default defineMiddlewares({
       ],
     },
     // F2.3: settings sections and flags, each body checked by its own schema
-    // (adr/0012); people only until roles arrive (F12): robots.txt or a flag
-    // is not a change for an integration key
+    // (adr/0012); people only, by role (adr/0040): robots.txt or a flag is
+    // not a change for an integration key
     {
       matcher: "/admin/platform-settings/:section",
       methods: ["POST"],

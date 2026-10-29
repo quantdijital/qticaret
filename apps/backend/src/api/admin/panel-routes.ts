@@ -27,6 +27,7 @@ const NO_QUERY_READS = [
   "/admin/order-board/:id",
   "/admin/orders/:id/money",
   "/admin/price-lists/:id/lines",
+  "/admin/staff/me",
 ]
 
 /**

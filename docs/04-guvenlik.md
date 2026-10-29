@@ -91,7 +91,7 @@
   - Blok sağlayıcıya bağlıdır (AAD). Anahtar değişirse kayıt "yeniden girilmeli" olur.
   - Gizli alanlar yalnızca yazılır: yanıt, log ve denetim kaydında değer ya da parçası yer almaz; denetimde yalnızca sürüm numarası görünür.
   - Workflow girdisi ve adımları yalnızca şifreli bloğu taşır.
-  - Uçlar personele açık (secret API anahtarı reddedilir) ve sağlayıcıyı çağıran kayıt ile test uçları `provider_check` hız profilinde. Rol kısıtı F12'de.
+  - Uçlar personele açık (secret API anahtarı reddedilir) ve sağlayıcıyı çağıran kayıt ile test uçları `provider_check` hız profilinde. Hesabı yalnızca sahip (owner) değiştirir (adr/0040); bağlantı testi yöneticiye de açık.
 - Açılışta Zod ile env doğrulama; secret değerleri asla loglanmaz (`src/lib/logging` redaksiyonu, kurallar docs/10 "Loglama").
 - Repo'da gitleaks (pre-commit + CI). CI loglarında secret maskeleme.
 - Claude Code `.env*` dosyalarını okuyamaz (`.claude/settings.json` deny).
@@ -99,8 +99,13 @@
 ### Kimlik doğrulama ve yetki
 - Medusa auth modülü kullanılır; kendi auth sistemi yazılmaz.
 - Store API kimlik modeli (cookie session mı, bearer JWT mi) `adr/0004` ile karara bağlanır; karar F1'de verilir, F10.1 uygular.
-- Admin: 2FA (TOTP) — Medusa'da yerleşik değilse auth provider/middleware ile eklenir (ADR).
-- Rol bazlı yetki: owner / admin / operasyon / salt-okunur; her admin route'unda rol kontrolü middleware'de.
+- Admin: 2FA (TOTP), Medusa 2.21'in yerleşik MFA'sıyla; bütün personel için zorunlu (adr/0040, F12 Y3).
+- Rol bazlı yetki: owner / admin / operasyon / salt-okunur; her admin route'unda rol kontrolü middleware'de (adr/0040).
+  - Genel `/admin/*` koruması (`api/http/staff-guard.ts`) API anahtarı korumasından sonra, Express'in yönlendirdiği yolu küçük harfle okuyup `lib/staff/permissions.ts` tablosundan karar verir. Rol her istekte okunur, değişiklik en geç bir saniyede bütün süreçlerde geçerlidir.
+  - Sahibe ayrılanlar: sağlayıcı hesapları, API anahtarları, giden webhook'lar, muhasebe programı seçimi, havale IBAN'ı, Google bağlantısı, personel ve davetler.
+  - Operasyon ve salt-okunur personel denetim kaydını, hesapları, webhook'ları, personel listesini ve iş akışı kayıtlarını okuyamaz. Operasyon yalnızca listedeki operasyon uçlarına yazar (sipariş gönderimi, iade talebi kabulü, stok, moderasyon); para hareketi (iade, iptal, havale onayı), katalog ve ayarlar kapalıdır. Yeni bir uç bu iki rol için kapalı gelir; kendi yazma uçlarımızın her biri için operasyon kararı birim testinde kayıtlıdır.
+  - Rolü olmayan kullanıcı salt-okunur sayılır; personeli hiç olmayan mağazada ilk kullanıcı sahip olur; son sahip rolünü bırakamaz.
+  - Kişisel veri içeren iş sonucunu (muhasebe paketi, denetim kaydı dışa aktarımı) yalnızca isteyen kişi ve sahip indirir.
 - Oturum token'ları httpOnly + Secure + SameSite cookie. localStorage'da token yok. Cookie oturumu kullanılan her yerde CSRF token.
 - Müşteri kaydında e-posta doğrulama; doğrulanmamış hesap yorum, stok bildirimi ve favori gibi yazma işlemleri yapamaz.
 - Başarısız giriş denemelerinde artan gecikme + kilit (admin ve müşteri). Şifre sıfırlama token'ı tek kullanımlık, kısa ömürlü.

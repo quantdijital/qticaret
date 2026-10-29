@@ -23,7 +23,7 @@ Medusa 2.21.2'de doğrulananlar (v2.21.2 kaynağı ve docs.medusajs.com; Context
   - Rotalar `policies` ile korunuyor.
   - Roller oturum jetonuna giriş anında yazılıyor; rol değişikliği yeniden girişe kadar geçmiyor.
   - Belge sayfası yok, `policies` alanı tip belgesinde gizli.
-  - Çekirdek yönetim uçlarının ne kadarının politika taşıdığı doğrulanmadı.
+  - Çekirdek yönetim uçları politika taşıyor (ör. siparişlerde 21 girdinin 16'sı; bazı okumalar taşımıyor). Bu, ileride Medusa RBAC'ine geçişi kolaylaştırır.
 - **Davet:** `POST /admin/invites` `metadata` alır. Kabul, aktörü olmayan bir kimlikle `POST /admin/invites/accept` üzerinden yapılır.
 - **Kullanıcı modeli:** Kullanıcıda durum alanı yok. Kişi kendi hesabını silemez.
 
@@ -54,13 +54,13 @@ Medusa 2.21.2'de doğrulananlar (v2.21.2 kaynağı ve docs.medusajs.com; Context
 4. **Davet ve personel ekranı.**
    - **Davet:** Medusa davetleri kullanılır, istenen rol davetin `metadata`'sına yazılır. Kabulde (`user.created` ya da davet kabul olayı; Y2'de doğrulanır) rol atanır.
    - **Panel ekranları:** Ayarlar > Ekip (liste, rol, 2FA durumu, davet, rol değiştir, çıkar) ve `/invite` kabul sayfası. Medusa Admin'e gerek kalmaz.
-   - **Denetim kaydı:** Rol değişiklikleri, davetler ve 2FA sıfırlama `security` olarak yazılır.
+   - **Denetim kaydı:** Rol değişiklikleri, davetler ve 2FA sıfırlama panelden `mutation`, sistemden (göç betiği, sunucu betiği) `system` olarak yazılır.
 5. **API anahtarları değişmez.** Anahtarlar personel rolüne değil kendi kapsamlarına tabidir (ADR-0039 §6). Personel korumasından önce anahtar koruması çalışır.
 
 ## Alternatifler
 | Seçenek | Artı | Eksi |
 |---|---|---|
-| Medusa RBAC'i açmak (`MEDUSA_FF_RBAC`) | Medusa'nın kendi modeli; davetle rol; rol yönetimi uçları hazır | Belgesiz ve bayrak arkasında; rol değişikliği yeniden girişe kadar geçmez; çekirdek uçların politika kapsamı belirsiz; 2.22 yükseltmesinde değişebilir |
+| Medusa RBAC'i açmak (`MEDUSA_FF_RBAC`) | Medusa'nın kendi modeli; çekirdek uçlar politika taşıyor; davetle rol; rol yönetimi uçları hazır | Belgesiz ve bayrak arkasında; rol değişikliği yeniden girişe kadar geçmez; okuma uçlarının bir kısmı politikasız; 2.22 yükseltmesinde değişebilir |
 | Kendi katmanımız, serbest rol/politika tanımı | Esnek | Docs/04'ün istediği dört rol için gereksiz karmaşıklık; yanlış yapılandırma riski |
 | **Kendi katmanımız, sabit dört rol + rota tablosu** | API anahtarı katmanıyla aynı desen; değişiklik anında geçerli; kapalı varsayılan (operasyon, salt-okunur) | Medusa yeni uç ekledikçe tablo gözden geçirilmeli (admin için kara liste, diğerleri için beyaz liste bu riski azaltır) |
 | 2FA'yı kendimiz yazmak | — | Medusa yerleşik sunuyor; gereksiz |

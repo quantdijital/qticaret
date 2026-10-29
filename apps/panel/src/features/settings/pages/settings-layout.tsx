@@ -11,12 +11,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { SETTINGS_GROUPS, inSection } from "@/features/settings/sections"
+import { useCapabilities } from "@/features/auth/api/staff"
+import { inSection, visibleGroups } from "@/features/settings/sections"
 import { cn } from "@/lib/utils"
 
 /** The groups as a list on wide screens: all open at first, each can be closed. */
 function GroupedMenu({ pathname }: { pathname: string }) {
   const { t } = useTranslation()
+  const groups = visibleGroups(useCapabilities())
   // Every group starts open (the shop sees all its settings); one closed by hand stays closed
   const [toggled, setToggled] = useState<ReadonlyMap<string, boolean>>(() => new Map())
   return (
@@ -33,7 +35,7 @@ function GroupedMenu({ pathname }: { pathname: string }) {
           {t("settings.home.all")}
         </Link>
       </li>
-      {SETTINGS_GROUPS.map((group) => {
+      {groups.map((group) => {
         const expanded = toggled.get(group.key) ?? true
         const listId = `settings-group-${group.key}`
         return (
@@ -84,10 +86,11 @@ function GroupedMenu({ pathname }: { pathname: string }) {
 /** The groups as one picker on a phone: a long row of tabs does not fit. */
 function GroupedPicker({ pathname }: { pathname: string }) {
   const { t } = useTranslation()
+  const groups = visibleGroups(useCapabilities())
   const navigate = useNavigate()
-  const current = SETTINGS_GROUPS.flatMap((group) => group.sections).find((section) =>
-    inSection(pathname, section)
-  )
+  const current = groups
+    .flatMap((group) => group.sections)
+    .find((section) => inSection(pathname, section))
   return (
     <Select
       value={current?.to ?? "/settings"}
@@ -100,7 +103,7 @@ function GroupedPicker({ pathname }: { pathname: string }) {
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="/settings">{t("settings.home.all")}</SelectItem>
-        {SETTINGS_GROUPS.map((group) => (
+        {groups.map((group) => (
           <SelectGroup key={group.key}>
             <SelectLabel>{t(`settings.groups.${group.key}`)}</SelectLabel>
             {group.sections.map((section) => (

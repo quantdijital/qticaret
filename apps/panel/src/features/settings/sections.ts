@@ -17,11 +17,14 @@ import {
   Warehouse,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
+import type { Capability } from "@/features/auth/api/staff"
 
 export interface SettingsSection {
   key: string
   to: string
   icon: LucideIcon
+  /** Offered only to a role that may (adr/0040); the API refuses the others anyway. */
+  needs?: Capability
 }
 
 export interface SettingsGroup {
@@ -38,40 +41,48 @@ export const SETTINGS_GROUPS: readonly SettingsGroup[] = [
   {
     key: "shop",
     sections: [
-      { key: "store", to: "/settings/store", icon: Store },
-      { key: "appearance", to: "/settings/appearance", icon: Palette },
-      { key: "seo", to: "/settings/seo", icon: Search },
-      { key: "attributes", to: "/settings/attributes", icon: ListChecks },
+      { key: "store", to: "/settings/store", icon: Store, needs: "settings" },
+      { key: "appearance", to: "/settings/appearance", icon: Palette, needs: "settings" },
+      { key: "seo", to: "/settings/seo", icon: Search, needs: "settings" },
+      { key: "attributes", to: "/settings/attributes", icon: ListChecks, needs: "settings" },
     ],
   },
   {
     key: "selling",
     sections: [
-      { key: "payments", to: "/settings/payments", icon: CreditCard },
-      { key: "accounting", to: "/settings/accounting", icon: Calculator },
-      { key: "shipping", to: "/settings/shipping", icon: Truck },
-      { key: "locations", to: "/settings/locations", icon: Warehouse },
-      { key: "marketing", to: "/settings/marketing", icon: Megaphone },
+      { key: "payments", to: "/settings/payments", icon: CreditCard, needs: "settings" },
+      { key: "accounting", to: "/settings/accounting", icon: Calculator, needs: "settings" },
+      { key: "shipping", to: "/settings/shipping", icon: Truck, needs: "settings" },
+      { key: "locations", to: "/settings/locations", icon: Warehouse, needs: "settings" },
+      { key: "marketing", to: "/settings/marketing", icon: Megaphone, needs: "settings" },
     ],
   },
   {
     key: "messages",
     sections: [
-      { key: "notifications", to: "/settings/notifications", icon: Bell },
-      { key: "sms", to: "/settings/sms", icon: MessageSquare },
+      { key: "notifications", to: "/settings/notifications", icon: Bell, needs: "settings" },
+      { key: "sms", to: "/settings/sms", icon: MessageSquare, needs: "settings" },
     ],
   },
   {
     key: "system",
     sections: [
       { key: "integrations", to: "/settings/integrations", icon: Plug },
-      { key: "api", to: "/settings/api", icon: KeyRound },
-      { key: "features", to: "/settings/features", icon: ToggleRight },
+      { key: "api", to: "/settings/api", icon: KeyRound, needs: "keys" },
+      { key: "features", to: "/settings/features", icon: ToggleRight, needs: "settings" },
       { key: "jobs", to: "/settings/jobs", icon: ListTodo },
-      { key: "audit", to: "/settings/audit", icon: FileClock },
+      { key: "audit", to: "/settings/audit", icon: FileClock, needs: "audit" },
     ],
   },
 ]
+
+/** The groups with the sections a role is offered; a group left empty goes. */
+export function visibleGroups(can: (capability: Capability) => boolean): readonly SettingsGroup[] {
+  return SETTINGS_GROUPS.map((group) => ({
+    ...group,
+    sections: group.sections.filter((section) => !section.needs || can(section.needs)),
+  })).filter((group) => group.sections.length > 0)
+}
 
 /** Whether the page at `pathname` belongs to the section. */
 export const inSection = (pathname: string, section: SettingsSection): boolean =>

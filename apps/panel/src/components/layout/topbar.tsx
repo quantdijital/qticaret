@@ -17,6 +17,7 @@ import { Kbd, KbdGroup } from "@/components/ui/kbd"
 import { Separator } from "@/components/ui/separator"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { useCurrentUser, useLogout } from "@/features/auth/api/me"
+import { useStaff } from "@/features/auth/api/staff"
 import { NotificationBell } from "@/features/notifications/notification-bell"
 import { seoSettingsQuery } from "@/features/settings/api/seo"
 import { CommandMenu } from "./command-menu"
@@ -76,6 +77,7 @@ function AccountMenu() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const user = useCurrentUser()
+  const staff = useStaff()
   const logout = useLogout(() => void navigate({ to: "/login" }))
   const fullName = [user?.first_name, user?.last_name].filter(Boolean).join(" ")
   const name = fullName !== "" ? fullName : (user?.email ?? "")
@@ -96,15 +98,24 @@ function AccountMenu() {
         <DropdownMenuLabel className="font-normal">
           <span className="block truncate text-sm font-medium">{name}</span>
           <span className="block truncate text-xs text-muted-foreground">{user?.email}</span>
+          {staff ? (
+            <span className="mt-1 block text-xs text-muted-foreground">
+              {t(`staff.roles.${staff.role}`)}
+            </span>
+          ) : null}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link to="/settings/appearance">
-            <Palette />
-            {t("command.appearance")}
-          </Link>
-        </DropdownMenuItem>
-        <DropdownMenuSeparator />
+        {staff?.can.settings ? (
+          <>
+            <DropdownMenuItem asChild>
+              <Link to="/settings/appearance">
+                <Palette />
+                {t("command.appearance")}
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+          </>
+        ) : null}
         <DropdownMenuItem
           onSelect={() => {
             logout.mutate()

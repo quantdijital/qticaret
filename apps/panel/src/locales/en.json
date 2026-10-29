@@ -4256,5 +4256,13 @@
         "rejected": "No rejected questions."
       }
     }
+  },
+  "staff": {
+    "roles": {
+      "owner": "Owner",
+      "admin": "Admin",
+      "operations": "Operations",
+      "readonly": "Read only"
+    }
   }
 }

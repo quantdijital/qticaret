@@ -8,8 +8,7 @@ import { rejectRequest } from "./reject"
 
 /**
  * For routes meant for people, not integrations: a secret API key is
- * refused. The audit log shows every staff member's IP address; until roles
- * arrive (F12) only signed-in admin users read it.
+ * refused. Which people is the role layer's (staff-guard.ts, adr/0040).
  */
 export function requireUserActor(
   req: MedusaRequest,

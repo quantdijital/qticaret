@@ -1,0 +1,282 @@
+import { readFileSync, readdirSync, statSync } from "node:fs"
+import { join, relative } from "node:path"
+import { STAFF_ROLES, capabilitiesOf, decide } from "../permissions"
+
+const allowed = (...args: Parameters<typeof decide>) => decide(...args).allowed
+
+describe("staff roles", () => {
+  it("lets the owner do anything", () => {
+    for (const [method, path] of [
+      ["POST", "/admin/integrations/credentials/paytr"],
+      ["POST", "/admin/api-access"],
+      ["DELETE", "/admin/users/user_1"],
+      ["POST", "/admin/platform-settings/bank_transfer"],
+    ] as const) {
+      expect(allowed("owner", method, path)).toBe(true)
+    }
+  })
+
+  it.each([
+    ["POST", "/admin/integrations/credentials/paytr"],
+    ["DELETE", "/admin/integrations/credentials/iyzico"],
+    ["GET", "/admin/api-access"],
+    ["POST", "/admin/api-access/key_1/revoke"],
+    ["POST", "/admin/api-keys"],
+    ["POST", "/admin/webhooks"],
+    ["DELETE", "/admin/webhooks/whsub_1"],
+    ["POST", "/admin/platform-settings/accounting"],
+    ["POST", "/admin/platform-settings/bank_transfer"],
+    ["POST", "/admin/google/connect"],
+    ["DELETE", "/admin/google"],
+    ["POST", "/admin/users/user_1"],
+    ["DELETE", "/admin/users/user_1"],
+    ["POST", "/admin/invites"],
+    ["GET", "/admin/invites"],
+    ["POST", "/admin/staff/user_1"],
+  ] as const)("keeps %s %s the owner's alone", (method, path) => {
+    expect(decide("admin", method, path)).toEqual({ allowed: false, reason: "owner_only" })
+  })
+
+  it.each([
+    ["POST", "/admin/platform-settings/store"],
+    ["POST", "/admin/integrations/credentials/paytr/check"],
+    ["GET", "/admin/integrations/credentials"],
+    ["GET", "/admin/webhooks"],
+    ["GET", "/admin/audit-log"],
+    ["GET", "/admin/users"],
+    ["POST", "/admin/products/prod_1"],
+    ["POST", "/admin/orders/order_1/refunds"],
+    ["POST", "/admin/some-route-medusa-adds-later"],
+  ] as const)("lets an admin %s %s", (method, path) => {
+    expect(allowed("admin", method, path)).toBe(true)
+  })
+
+  it("lets operations read and run the day, never change the shop's settings (KK1)", () => {
+    expect(allowed("operations", "GET", "/admin/orders")).toBe(true)
+    expect(allowed("operations", "GET", "/admin/products/prod_1")).toBe(true)
+    expect(allowed("operations", "POST", "/admin/orders/order_1/ship")).toBe(true)
+    expect(allowed("operations", "POST", "/admin/orders/order_1")).toBe(true)
+    expect(
+      allowed("operations", "POST", "/admin/orders/order_1/fulfillments/ful_1/mark-as-delivered")
+    ).toBe(true)
+    expect(allowed("operations", "POST", "/admin/inventory-items/location-levels/batch")).toBe(true)
+    expect(allowed("operations", "POST", "/admin/return-requests/rr_1/receive")).toBe(true)
+    expect(allowed("operations", "POST", "/admin/product-reviews/moderate")).toBe(true)
+
+    for (const path of [
+      "/admin/platform-settings/store",
+      "/admin/platform-settings/seo",
+      "/admin/features/content.ai_drafts",
+      "/admin/stores/store_1",
+      "/admin/products/prod_1",
+      "/admin/orders/order_1/refunds",
+      "/admin/orders/order_1/cancel",
+      "/admin/orders/order_1/bank-transfer/confirm",
+      "/admin/return-requests/rr_1/refund",
+      "/admin/some-route-medusa-adds-later",
+    ]) {
+      expect(decide("operations", "POST", path)).toEqual({ allowed: false, reason: "unlisted" })
+    }
+  })
+
+  it.each([
+    ["GET", "/admin/audit-log"],
+    ["GET", "/admin/integrations/credentials"],
+    ["GET", "/admin/webhooks"],
+    ["GET", "/admin/users"],
+    ["GET", "/admin/users/user_1"],
+    ["GET", "/admin/staff"],
+    ["GET", "/admin/workflows-executions"],
+  ] as const)("keeps %s %s from operations and read-only staff", (method, path) => {
+    expect(decide("operations", method, path)).toEqual({ allowed: false, reason: "private" })
+    expect(decide("readonly", method, path)).toEqual({ allowed: false, reason: "private" })
+  })
+
+  it("lets every role read who it is", () => {
+    for (const role of STAFF_ROLES) {
+      expect(allowed(role, "GET", "/admin/users/me")).toBe(true)
+      expect(allowed(role, "GET", "/admin/staff/me")).toBe(true)
+    }
+  })
+
+  it("lets read-only staff read and export, nothing more", () => {
+    expect(allowed("readonly", "GET", "/admin/reports/sales")).toBe(true)
+    expect(allowed("readonly", "HEAD", "/admin/orders")).toBe(true)
+    expect(allowed("readonly", "POST", "/admin/orders/order_1/ship")).toBe(false)
+    expect(allowed("readonly", "POST", "/admin/async-jobs", { jobType: "report.export" })).toBe(
+      true
+    )
+    expect(allowed("readonly", "POST", "/admin/async-jobs", { jobType: "catalog.import" })).toBe(
+      false
+    )
+    expect(allowed("readonly", "POST", "/admin/async-jobs")).toBe(false)
+    expect(
+      allowed("operations", "POST", "/admin/async-jobs", { jobType: "accounting.package" })
+    ).toBe(false)
+  })
+
+  it("tells the panel what each role may do, as the API decides it", () => {
+    expect(capabilitiesOf("owner")).toEqual({
+      settings: true,
+      catalog: true,
+      marketing: true,
+      orders: true,
+      money: true,
+      stock: true,
+      moderation: true,
+      accounts: true,
+      keys: true,
+      staff: true,
+      audit: true,
+    })
+    expect(capabilitiesOf("admin")).toMatchObject({
+      settings: true,
+      accounts: false,
+      keys: false,
+      staff: false,
+      audit: true,
+    })
+    expect(capabilitiesOf("operations")).toEqual({
+      settings: false,
+      catalog: false,
+      marketing: false,
+      orders: true,
+      money: false,
+      stock: true,
+      moderation: true,
+      accounts: false,
+      keys: false,
+      staff: false,
+      audit: false,
+    })
+    expect(Object.values(capabilitiesOf("readonly")).every((can) => !can)).toBe(true)
+  })
+})
+
+/**
+ * Every write route of ours, with whether `operations` may call it. A new
+ * route fails this test until its line is added: the role table is
+ * decided for it, not left to the default.
+ */
+const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
+  "POST /admin/accounting/syncs/:id/retry": false,
+  "POST /admin/api-access/:id/revoke": false,
+  "POST /admin/api-access": false,
+  "POST /admin/async-jobs": false,
+  "POST /admin/attribute-templates/:id": false,
+  "DELETE /admin/attribute-templates/:id": false,
+  "POST /admin/attribute-templates": false,
+  "POST /admin/brands/:id": false,
+  "DELETE /admin/brands/:id": false,
+  "POST /admin/brands": false,
+  "POST /admin/catalog/imports": false,
+  "POST /admin/chargebacks/:id": false,
+  "POST /admin/chargebacks": false,
+  "POST /admin/content-drafts/:id/approve": false,
+  "POST /admin/content-drafts/:id/reject": false,
+  "POST /admin/content-drafts": false,
+  "POST /admin/content/:id": false,
+  "DELETE /admin/content/:id": false,
+  "POST /admin/content": false,
+  "POST /admin/customer-segments/:id/refresh": false,
+  "POST /admin/customer-segments/:id": false,
+  "DELETE /admin/customer-segments/:id": false,
+  "POST /admin/customer-segments": false,
+  "POST /admin/customers/:id/consents": false,
+  "POST /admin/features/:key": false,
+  "POST /admin/google/connect": false,
+  "POST /admin/google/merchant": false,
+  "POST /admin/google/merchant/sync": false,
+  "DELETE /admin/google": false,
+  "POST /admin/google/search-console": false,
+  "POST /admin/integrations/credentials/:provider/check": false,
+  "POST /admin/integrations/credentials/:provider": false,
+  "DELETE /admin/integrations/credentials/:provider": false,
+  "POST /admin/landings/:id": false,
+  "DELETE /admin/landings/:id": false,
+  "POST /admin/landings": false,
+  "POST /admin/marketing-feeds/generate": false,
+  "POST /admin/marketing-feeds/token": false,
+  "DELETE /admin/marketing-feeds/token": false,
+  "POST /admin/media/:id": false,
+  "POST /admin/media": false,
+  "POST /admin/messaging/sender-domain/check": false,
+  "POST /admin/messaging/sender-domain": false,
+  "DELETE /admin/messaging/sender-domain": false,
+  "DELETE /admin/messaging/suppressions/:id": false,
+  "POST /admin/messaging/suppressions": false,
+  "POST /admin/order-board/ship": true,
+  "POST /admin/orders/:id/bank-transfer/confirm": false,
+  "POST /admin/orders/:id/edit/preview": false,
+  "POST /admin/orders/:id/edit": false,
+  "POST /admin/orders/:id/refunds/preview": false,
+  "POST /admin/orders/:id/refunds": false,
+  "POST /admin/orders/:id/ship": true,
+  "POST /admin/platform-settings/:section": false,
+  "POST /admin/price-lists/:id/discount": false,
+  "POST /admin/product-answers/moderate": true,
+  "POST /admin/product-questions/:id/answer": true,
+  "POST /admin/product-questions/moderate": true,
+  "POST /admin/product-reviews/moderate": true,
+  "POST /admin/products/:id/attributes": false,
+  "POST /admin/products/:id/brand": false,
+  "POST /admin/products/:id/catalog": false,
+  "POST /admin/promotions/:id/code-batches/:campaign_id/revoke": false,
+  "POST /admin/promotions/:id/offer": false,
+  "POST /admin/reports/statements": false,
+  "POST /admin/return-requests/:id/approve": true,
+  "POST /admin/return-requests/:id/receive": true,
+  "POST /admin/return-requests/:id/refund": false,
+  "POST /admin/return-requests/:id/reject": true,
+  "PUT /admin/seo/:entity_type/:entity_id": false,
+  "POST /admin/seo/assessments/:kind/:id/fix": false,
+  "POST /admin/seo/insights/refresh": false,
+  "DELETE /admin/seo/not-found/:id": false,
+  "POST /admin/seo/old-paths/release": false,
+  "POST /admin/seo/redirect-file": false,
+  "POST /admin/seo/redirects/:id": false,
+  "DELETE /admin/seo/redirects/:id": false,
+  "POST /admin/seo/redirects": false,
+  "POST /admin/shipping-setup/options/:id": false,
+  "DELETE /admin/shipping-setup/options/:id": false,
+  "POST /admin/shipping-setup/options": false,
+  "POST /admin/stock-items/:id/watch": true,
+  "POST /admin/warehouses/:id/default": false,
+  "POST /admin/warehouses/:id": false,
+  "POST /admin/warehouses": false,
+  "POST /admin/webhooks/:id": false,
+  "DELETE /admin/webhooks/:id": false,
+  "POST /admin/webhooks": false,
+}
+
+const ADMIN_DIR = join(__dirname, "../../../api/admin")
+const HANDLER = /^export (?:async function|function|const|let) (POST|PUT|PATCH|DELETE)\b/gm
+
+function routeFiles(dir: string): string[] {
+  return readdirSync(dir).flatMap((name) => {
+    const path = join(dir, name)
+    if (statSync(path).isDirectory()) {
+      return routeFiles(path)
+    }
+    return name === "route.ts" ? [path] : []
+  })
+}
+
+describe("every write route of ours has a decision for operations", () => {
+  const found = routeFiles(ADMIN_DIR).flatMap((file) => {
+    const path = `/admin/${relative(ADMIN_DIR, join(file, ".."))}`.replace(/\[(\w+)\]/g, ":$1")
+    return [...readFileSync(file, "utf8").matchAll(HANDLER)].map(
+      ([, method = ""]) => `${method} ${path}`
+    )
+  })
+
+  it("lists them all", () => {
+    expect(found.filter((route) => !(route in OPERATIONS_WRITE_ROUTES))).toEqual([])
+  })
+
+  it.each(Object.entries(OPERATIONS_WRITE_ROUTES))("%s → %s", (route, expected) => {
+    const [method = "", path = ""] = route.split(" ")
+    const sample = path.replace(/:\w+/g, "x1")
+    expect(allowed("operations", method, sample)).toBe(expected)
+  })
+})

@@ -120,8 +120,14 @@ medusaIntegrationTestRunner({
       })
 
       // The address was only typed: its owner confirms from it before anything is recorded
+      // The order's own mail goes to the same address, sometimes first
       const mail = await eventually(
-        () => Promise.resolve(fake.messages.find(({ to }) => to.includes(email))),
+        () =>
+          Promise.resolve(
+            fake.messages.find(
+              ({ to, template }) => to.includes(email) && template === "consent_confirm"
+            )
+          ),
         (found) => found !== undefined
       )
       const beforeConfirming = await messaging().consentOf("email", email)

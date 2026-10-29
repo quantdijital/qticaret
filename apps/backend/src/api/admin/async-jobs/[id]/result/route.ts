@@ -6,11 +6,13 @@ import type AsyncJobModuleService from "../../../../../modules/async-job/service
 import { jobType } from "../../../../../workflows/async-job/types"
 import { auditContext, auditService } from "../../../../http/audit/context"
 import { rejectRequest } from "../../../../http/reject"
+import { staffRoleOf } from "../../../../http/staff-guard"
 
 /**
  * A short-lived link to the job's result file (adr/0014). A result with
- * personal data is a sensitive read: recorded first, refused (503) when the
- * record cannot be written. The link itself is never logged.
+ * personal data is the asker's (and the owner's) alone, and a sensitive
+ * read: recorded first, refused (503) when the record cannot be written.
+ * The link itself is never logged.
  */
 export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse): Promise<void> {
   const service = req.scope.resolve<AsyncJobModuleService>(ASYNC_JOB_MODULE)
@@ -19,7 +21,16 @@ export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse):
   if (job.status !== "succeeded" || !job.result_file_id || expired) {
     throw new MedusaError(MedusaError.Types.NOT_FOUND, "async_job.result_unavailable")
   }
-  if (jobType(job.type)?.containsPersonalData ?? true) {
+  const personal = jobType(job.type)?.containsPersonalData ?? true
+  // A file with personal data goes to whoever asked for it, or the owner (adr/0040)
+  if (
+    personal &&
+    job.requested_by !== req.auth_context.actor_id &&
+    (await staffRoleOf(req)) !== "owner"
+  ) {
+    throw new MedusaError(MedusaError.Types.NOT_FOUND, "async_job.result_unavailable")
+  }
+  if (personal) {
     try {
       await auditService(req).record({
         kind: "sensitive_read",

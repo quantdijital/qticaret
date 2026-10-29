@@ -24,8 +24,8 @@ const PROVIDER_NAMES: Readonly<Record<CredentialProviderName, string>> = {
 
 /**
  * Tells every admin, in the panel's bell, that a provider account
- * (payment, shipping) changed, by whom (adr/0027 §6): until roles arrive (F12) any staff
- * member can change it, so nobody should do it unseen. The last step of
+ * (payment, shipping) changed, by whom (adr/0027 §6): only the owner can
+ * change one (adr/0040), and nobody should do it unseen. The last step of
  * its workflows; when the alert cannot be written, the change is undone.
  */
 export const notifyAccountChangeStep = createStep(

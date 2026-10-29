@@ -7,6 +7,12 @@ import { SettingsHomePage } from "./settings-home-page"
 import { SettingsLayout } from "./settings-layout"
 
 const path = vi.hoisted(() => ({ current: "/settings/sms/netgsm" }))
+// What the signed-in role may (adr/0040): the owner unless a test says otherwise
+const staff = vi.hoisted(() => ({ allowed: (capability: string) => capability !== "" }))
+
+vi.mock("@/features/auth/api/staff", () => ({
+  useCapabilities: () => staff.allowed,
+}))
 
 // Links as plain anchors and the address from the test: rendered without a router
 vi.mock("@tanstack/react-router", () => ({
@@ -57,5 +63,17 @@ describe("Settings home", () => {
       "/settings/shipping"
     )
     expect(screen.getAllByRole("link")).toHaveLength(16)
+  })
+
+  it("offers operations staff only what they may use: no settings to change", () => {
+    staff.allowed = (capability) => ["orders", "stock", "moderation"].includes(capability)
+    render(<SettingsHomePage />)
+
+    expect(screen.getAllByRole("link").map((link) => link.getAttribute("href"))).toEqual([
+      "/settings/integrations",
+      "/settings/jobs",
+    ])
+    expect(screen.queryByRole("heading", { name: "Satış ve teslimat" })).toBeNull()
+    staff.allowed = () => true
   })
 })

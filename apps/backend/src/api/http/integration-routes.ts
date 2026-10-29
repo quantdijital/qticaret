@@ -9,9 +9,9 @@ import { requireUserActor } from "./actor"
 import { rateLimit } from "./rate-limit"
 
 /**
- * F5 (adr/0027): the shop's provider accounts. Staff only until roles
- * arrive (F12): an integration key cannot replace the payment account,
- * nor have the server test it. Saving and testing call the provider, so
+ * F5 (adr/0027): the shop's provider accounts. Staff only, changed by the
+ * owner alone (adr/0040): an integration key cannot replace the payment
+ * account, nor have the server test it. Saving and testing call the provider, so
  * each has a small budget, per address and per staff member.
  */
 const providerCalls = rateLimit(() => RATE_LIMIT_PROFILES.provider_check, {

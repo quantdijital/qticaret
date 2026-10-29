@@ -349,6 +349,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "webhook.url_internal": "Adres mağazanın iç ağına ya da yerel bir sunucuya gidemez.",
   "webhook.url_invalid": "Adres geçersiz.",
   "webhook.url_port": "Adres yalnızca 443 numaralı bağlantı noktasını kullanabilir.",
+  "staff.forbidden": "Rolünüz bu işlem için yetkili değil.",
+  "staff.last_owner": "Mağazanın son sahibi rolünü bırakamaz; önce başka birini sahip yapın.",
   "api_key.fields_not_allowed": "Anahtarla alan seçilemez (fields); uç kendi alanlarını döner.",
   "api_key.scope_denied": "Bu anahtar bu işlem için yetkili değil.",
   "api_key.scopes_required": "Anahtar için en az bir izin seçin.",

@@ -3,8 +3,8 @@ import { expect, test as setup } from "@playwright/test"
 import { createTemporaryAdmin } from "./support/admin"
 import { ADMIN_FILE, AUTH_DIR, SESSION_FILE } from "./support/paths"
 
-// Medusa's CLI boots the whole backend to make the user: tens of seconds on a busy machine
-const CLI_TIMEOUT_MS = 120_000
+// Medusa's CLI boots the whole backend twice (the user, then its role): tens of seconds each
+const CLI_TIMEOUT_MS = 180_000
 
 /** One temporary admin per run, signed in through the login page as a person would. */
 setup("signs a temporary admin in", async ({ page }) => {
