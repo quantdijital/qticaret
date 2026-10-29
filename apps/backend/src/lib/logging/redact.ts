@@ -117,6 +117,11 @@ const TEXT_PATTERNS: readonly (readonly [
     ),
     (_match, name = "", separator = "") => `${name}${separator}${REDACTED}`,
   ],
+  // An OAuth answer in a query string (`/google/callback?code=…&state=…`): used once,
+  // but a log keeps neither
+  [/(?<=[?&](?:code|state)=)[^\s&"#]{1,2048}/g, () => REDACTED],
+  // A feed's address carries its token in the path (F10.8)
+  [/(?<=\/feeds\/)[A-Za-z0-9_-]{16,128}(?![A-Za-z0-9_-])/g, () => REDACTED],
   // Authorization header values; case-sensitive so "basic shipping" stays
   [/\b(Bearer|Basic)\s+[A-Za-z0-9._~+/=-]{6,}/g, (_match, scheme = "") => `${scheme} ${REDACTED}`],
   [/(?<![A-Za-z0-9_-])eyJ[A-Za-z0-9_-]{4,}\.[A-Za-z0-9_-]{4,}\.[A-Za-z0-9_-]*/g, () => REDACTED],

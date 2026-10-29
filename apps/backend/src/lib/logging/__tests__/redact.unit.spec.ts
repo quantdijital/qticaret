@@ -290,6 +290,16 @@ describe("redactText", () => {
     ["password holding an @", "postgres://u:p@ss@db:5432/x", `postgres://${REDACTED}@db:5432/x`],
     ["national mobile with spaces", "phone 0532 123 45 67", `phone ${REDACTED}`],
     ["TCKN", `tckn ${VALID_TCKN} given`, `tckn ${REDACTED} given`],
+    [
+      "Google's answer in a callback's query",
+      "GET /google/callback?state=st-for-a-test&code=4/code-for-a-test 303",
+      `GET /google/callback?state=${REDACTED}&code=${REDACTED} 303`,
+    ],
+    [
+      "feed token in its address",
+      "GET /feeds/feed-token-for-a-redaction-test/google 404",
+      `GET /feeds/${REDACTED}/google 404`,
+    ],
   ])("masks a %s", (_label, input, expected) => {
     expect(redactText(input)).toBe(expected)
   })

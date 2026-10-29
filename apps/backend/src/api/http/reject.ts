@@ -3,7 +3,7 @@ import { currentRequestId, logger } from "../../lib/logging"
 import { forDashboard } from "./dashboard-messages"
 import type { ErrorBody } from "./error-response"
 import { ensureRequestId } from "./request-id"
-import { requestPath } from "./request-path"
+import { loggedPath, requestPath } from "./request-path"
 import { applySecurityHeaders } from "./security-headers"
 
 export interface Rejection {
@@ -22,7 +22,7 @@ export function logRejection(req: MedusaRequest, requestId: string, rejection: R
       // before `requestContext` ran (body parsing, auth) need it here
       ...(currentRequestId() === undefined ? { request_id: requestId } : {}),
       method: req.method,
-      path: requestPath(req),
+      path: loggedPath(requestPath(req)),
       ...rejection,
     },
     "request rejected"

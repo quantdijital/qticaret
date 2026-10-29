@@ -12,6 +12,7 @@ import { INTERNAL_ERROR_BODY, sanitizeErrorResponse } from "./error-response"
 import type { ErrorBody } from "./error-response"
 import { logRejection } from "./reject"
 import { ensureRequestId } from "./request-id"
+import { loggedPath, requestPath } from "./request-path"
 import { applySecurityHeaders } from "./security-headers"
 
 /**
@@ -126,7 +127,7 @@ function logError(
       event: "http.request_failed",
       ...(currentRequestId() === undefined ? { request_id: requestId } : {}),
       method: req.method,
-      path: req.path,
+      path: loggedPath(requestPath(req)),
       status: resolved.status,
       type: resolved.body.type,
       err: error,
@@ -162,7 +163,12 @@ export function platformErrorHandler(
   // that is already streaming can only be cut off
   if (res.headersSent) {
     logger.error(
-      { event: "http.response_failed", request_id: requestId, path: req.path, err: error },
+      {
+        event: "http.response_failed",
+        request_id: requestId,
+        path: loggedPath(requestPath(req)),
+        err: error,
+      },
       "response failed after headers were sent"
     )
     res.destroy()

@@ -152,6 +152,19 @@ medusaIntegrationTestRunner({
       expect(executions.rows[0]?.count).toBe(0)
     })
 
+    it("reminds an address once a week, however many carts it leaves behind", async () => {
+      const email = address("cok-sepet")
+      await grant(email)
+      const carts = [await leftCart(email, 5), await leftCart(email, 4), await leftCart(email, 3)]
+
+      await cartReminders(getContainer())
+      const later = await leftCart(email, 2)
+      await cartReminders(getContainer())
+
+      expect(mailsTo(email)).toHaveLength(1)
+      expect((await Promise.all([...carts, later].map(outcomeOf))).flat()).toEqual(["sent"])
+    })
+
     it("sends nothing without consent, nor for a fresh cart or a shopper who ordered since", async () => {
       const unconsented = address("izinsiz")
       const fresh = address("taze")

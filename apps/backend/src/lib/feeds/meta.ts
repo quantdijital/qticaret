@@ -1,3 +1,4 @@
+import { escapeCsvCell } from "../security/csv"
 import type { FeedFormatter, FeedItem } from "./items"
 import { feedPrice, feedText } from "./items"
 
@@ -36,12 +37,6 @@ const COLUMNS = [
   "size",
 ] as const
 
-// Quoted when it holds a comma, a quote or a line; a leading = + - @ cannot start a formula
-function cell(value: string | null): string {
-  const text = (value ?? "").replace(/^[=+\-@]/, "'$&")
-  return /[",\n\r]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text
-}
-
 function row(item: FeedItem): string {
   const onSale = item.strikethrough !== null
   const values: Record<(typeof COLUMNS)[number], string | null> = {
@@ -63,7 +58,9 @@ function row(item: FeedItem): string {
     color: item.properties.color ?? null,
     size: item.properties.size ?? null,
   }
-  return COLUMNS.map((column) => cell(values[column])).join(",")
+  // The exports' own escape (docs/04): no cell starts a formula, mid-cell after `;` either,
+  // whoever opens the file in Excel
+  return COLUMNS.map((column) => escapeCsvCell(values[column])).join(",")
 }
 
 export const metaFeed: FeedFormatter = {

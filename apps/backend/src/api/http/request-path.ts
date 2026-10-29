@@ -14,6 +14,12 @@ export function requestPath(req: MedusaRequest): string {
   return end === -1 ? url : url.slice(0, end)
 }
 
+// A feed's address carries its token (F10.8): the logs keep the route, never the token
+const FEED_PATH = /^\/feeds\/[^/]+/
+
+/** The request path as logs keep it: a path that carries a secret has it masked. */
+export const loggedPath = (path: string): string => path.replace(FEED_PATH, "/feeds/:token")
+
 // `POST http://host/path HTTP/1.1` is a valid request line; Express routes its path
 const ABSOLUTE_FORM = /^[a-z][a-z0-9+.-]*:\/\/[^/]*/i
 

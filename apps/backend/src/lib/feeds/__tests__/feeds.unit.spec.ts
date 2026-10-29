@@ -106,14 +106,22 @@ describe("product feeds (F10.8, KK4)", () => {
 
   it("writes Meta's CSV, quoting what needs it and starting no formula", () => {
     const csv = metaFeed.render(
-      feedItemsOf(facts([variant({})], { name: '=HYPERLINK("x")', description: "Bir, iki" }), URL),
+      feedItemsOf(
+        facts([variant({ properties: { size: "\t+SUM(A1)" } })], {
+          name: '=HYPERLINK("x")',
+          description: "Bir, iki; -cmd|' /C calc'!A0",
+        }),
+        URL
+      ),
       SHOP
     )
     const [header, line] = csv.split("\n")
 
     expect(header?.startsWith("id,title,description,availability,condition,price")).toBe(true)
     expect(line).toContain(`"'=HYPERLINK(""x"")"`)
-    expect(line).toContain('"Bir, iki"')
+    // A formula after a semicolon, where Turkish Excel splits, and one behind a tab start neither
+    expect(line).toContain(`"Bir, iki; '-cmd|' /C calc'!A0"`)
+    expect(line).toContain(`"'\t+SUM(A1)"`)
     expect(line).toContain("in stock,new,499.90 TRY")
   })
 })
