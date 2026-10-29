@@ -8,6 +8,8 @@ import { fromMedusaAmount } from "../../src/lib/money"
 import type { MedusaAmount } from "../../src/lib/money"
 import { advanceOrder } from "../../src/scripts/seed/orders/advance"
 import { placeOrder } from "../../src/scripts/seed/orders/place"
+import { CHARGEBACKS_MODULE } from "../../src/modules/chargebacks"
+import type ChargebacksModuleService from "../../src/modules/chargebacks/service"
 import { RETURN_REQUESTS_MODULE } from "../../src/modules/return-requests"
 import type ReturnRequestsModuleService from "../../src/modules/return-requests/service"
 import { createAdminUser } from "../helpers/admin"
@@ -33,6 +35,12 @@ interface Report {
     brands: { name: string | null }[]
     promotions: unknown[]
   }
+}
+
+interface FinanceReport {
+  vat: { rate: number; base: string; tax: string; gross: string }[]
+  payments: { method: string; captured: string; refunded: string }[]
+  chargebacks: { order_display_id: number | null; amount: string; reason: string }[]
 }
 
 interface Job {
@@ -107,7 +115,7 @@ medusaIntegrationTestRunner({
     })
 
     afterAll(() => {
-      for (const path of filesNamed(/satis-raporu-.*\.(csv|xlsx)$/)) {
+      for (const path of filesNamed(/(satis|finans)-raporu-.*\.(csv|xlsx)$/)) {
         rmSync(path, { force: true })
       }
     })
@@ -180,6 +188,82 @@ medusaIntegrationTestRunner({
       expect(report.data.details.brands).toEqual([expect.objectContaining({ name: null })])
     })
 
+    it("splits a period's sales by VAT rate and its money by payment method, with its disputes", async () => {
+      const { variantId } = await stockedProduct(
+        getContainer(),
+        shop,
+        `finans-${String(Date.now())}`,
+        20,
+        240
+      )
+      const paid = await order(variantId, 2)
+      await order(variantId, 1)
+      const { data } = await getContainer()
+        .resolve(ContainerRegistrationKeys.QUERY)
+        .graph({
+          entity: "order",
+          fields: ["display_id", "total", "payment_collections.payments.id"],
+          filters: { id: paid },
+        })
+      const row = data[0] as unknown as {
+        display_id: number
+        total: MedusaAmount
+        payment_collections: { payments: { id: string }[] }[]
+      }
+      const paymentId = row.payment_collections[0]?.payments[0]?.id ?? ""
+      await http.post(`/admin/payments/${paymentId}/capture`, {}, { headers: admin.headers })
+      await getContainer().resolve<ChargebacksModuleService>(CHARGEBACKS_MODULE).createChargebacks({
+        order_id: paid,
+        payment_id: paymentId,
+        provider: "pp_system_default",
+        amount: 1_000,
+        currency_code: "try",
+        reason: "not_received",
+      })
+      const expected = await salesOfToday()
+
+      const report = await get<FinanceReport>(
+        `/admin/reports/finance?from=${today()}&to=${today()}`
+      )
+      const gross = report.data.vat.reduce(
+        (sum, rate) => sum + fromMedusaAmount(rate.gross as MedusaAmount),
+        0
+      )
+      const system = report.data.payments.find((method) => method.method === "system")
+      const file = await settled(
+        (
+          await http.post<{ async_job: Job }>(
+            "/admin/async-jobs",
+            { type: "report.export", input: { report: "finance", period: "today" } },
+            { headers: admin.headers }
+          )
+        ).data.async_job.id
+      )
+      const wrongTable = await settle(
+        http.post(
+          "/admin/async-jobs",
+          { type: "report.export", input: { report: "finance", format: "csv", table: "daily" } },
+          { headers: admin.headers }
+        )
+      )
+
+      // KK1: the rates add up to what the orders total, to the kuruş
+      expect(gross).toBe(expected)
+      expect(report.data.vat.every((rate) => typeof rate.rate === "number")).toBe(true)
+      expect(fromMedusaAmount(system?.captured as MedusaAmount)).toBe(
+        fromMedusaAmount(row.total, { allowRounding: true })
+      )
+      expect(report.data.chargebacks).toEqual([
+        expect.objectContaining({
+          order_display_id: row.display_id,
+          amount: "10.00",
+          reason: "not_received",
+        }),
+      ])
+      expect(file).toMatchObject({ status: "succeeded" })
+      expect(wrongTable.status).toBe(400)
+    })
+
     it("refuses a range that is no range, and anyone but staff", async () => {
       const lone = await get(`/admin/reports/sales?from=${today()}`)
       const both = await get(`/admin/reports/sales?period=7d&from=${today()}&to=${today()}`)
@@ -219,7 +303,8 @@ medusaIntegrationTestRunner({
       const result = await http.get<{ url: string }>(`/admin/async-jobs/${job.id}/result`, {
         headers: admin.headers,
       })
-      const file = filesNamed(/satis-raporu-.*\.csv$/).find((path) =>
+      // A CSV's name says which table it is
+      const file = filesNamed(/satis-raporu-urunler-.*\.csv$/).find((path) =>
         result.data.url.endsWith(path.split("/").pop() ?? "")
       )
       const csv = readFileSync(file ?? "", "utf8")

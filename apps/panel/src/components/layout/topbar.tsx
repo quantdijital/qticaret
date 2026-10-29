@@ -46,7 +46,7 @@ export function Topbar() {
         onClick={() => {
           setCommandOpen(true)
         }}
-        className="flex h-9 w-full max-w-md items-center gap-2 rounded-md border bg-background px-3 text-sm text-muted-foreground transition-colors hover:border-input hover:text-foreground"
+        className="flex h-9 w-full max-w-md min-w-0 items-center gap-2 rounded-md border bg-background px-3 text-sm text-muted-foreground transition-colors hover:border-input hover:text-foreground"
       >
         <Search className="size-4" />
         <span className="flex-1 truncate text-left">{t("command.trigger")}</span>

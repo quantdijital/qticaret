@@ -145,7 +145,7 @@ const keyOf = (range: ReportRange): string =>
  * A range's numbers, cached a minute per range; requests missing the
  * cache together wait for one computation.
  */
-function cached<T>(compute: (scope: MedusaContainer, window: PeriodWindow) => Promise<T>) {
+export function cached<T>(compute: (scope: MedusaContainer, window: PeriodWindow) => Promise<T>) {
   const cache = new Map<string, { at: number; value: T }>()
   const computing = createSingleFlight<T>()
   const read = async (scope: MedusaContainer, range: ReportRange): Promise<T> => {

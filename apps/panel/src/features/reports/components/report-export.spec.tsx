@@ -40,7 +40,13 @@ describe("ReportExportButton", () => {
       method: "POST",
       body: {
         type: "report.export",
-        input: { from: "2026-10-01", to: "2026-10-07", format: "csv", table: "products" },
+        input: {
+          from: "2026-10-01",
+          to: "2026-10-07",
+          report: "sales",
+          format: "csv",
+          table: "products",
+        },
       },
     })
   })

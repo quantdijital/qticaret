@@ -38,6 +38,7 @@ import { Route as AuthReportsIndexRouteImport } from './routes/_auth/reports/ind
 import { Route as AuthReportsBrandsRouteImport } from './routes/_auth/reports/brands'
 import { Route as AuthReportsCategoriesRouteImport } from './routes/_auth/reports/categories'
 import { Route as AuthReportsDailyRouteImport } from './routes/_auth/reports/daily'
+import { Route as AuthReportsFinanceRouteImport } from './routes/_auth/reports/finance'
 import { Route as AuthReportsMarketingRouteImport } from './routes/_auth/reports/marketing'
 import { Route as AuthReportsProductsRouteImport } from './routes/_auth/reports/products'
 import { Route as AuthReviewsIndexRouteImport } from './routes/_auth/reviews/index'
@@ -210,6 +211,11 @@ const AuthReportsCategoriesRoute = AuthReportsCategoriesRouteImport.update({
 const AuthReportsDailyRoute = AuthReportsDailyRouteImport.update({
   id: '/daily',
   path: '/daily',
+  getParentRoute: () => AuthReportsRoute,
+} as any)
+const AuthReportsFinanceRoute = AuthReportsFinanceRouteImport.update({
+  id: '/finance',
+  path: '/finance',
   getParentRoute: () => AuthReportsRoute,
 } as any)
 const AuthReportsMarketingRoute = AuthReportsMarketingRouteImport.update({
@@ -391,6 +397,7 @@ export interface FileRoutesByFullPath {
   '/reports/brands': typeof AuthReportsBrandsRoute
   '/reports/categories': typeof AuthReportsCategoriesRoute
   '/reports/daily': typeof AuthReportsDailyRoute
+  '/reports/finance': typeof AuthReportsFinanceRoute
   '/reports/marketing': typeof AuthReportsMarketingRoute
   '/reports/products': typeof AuthReportsProductsRoute
   '/reviews/questions': typeof AuthReviewsQuestionsRoute
@@ -448,6 +455,7 @@ export interface FileRoutesByTo {
   '/reports/brands': typeof AuthReportsBrandsRoute
   '/reports/categories': typeof AuthReportsCategoriesRoute
   '/reports/daily': typeof AuthReportsDailyRoute
+  '/reports/finance': typeof AuthReportsFinanceRoute
   '/reports/marketing': typeof AuthReportsMarketingRoute
   '/reports/products': typeof AuthReportsProductsRoute
   '/reviews/questions': typeof AuthReviewsQuestionsRoute
@@ -509,6 +517,7 @@ export interface FileRoutesById {
   '/_auth/reports/brands': typeof AuthReportsBrandsRoute
   '/_auth/reports/categories': typeof AuthReportsCategoriesRoute
   '/_auth/reports/daily': typeof AuthReportsDailyRoute
+  '/_auth/reports/finance': typeof AuthReportsFinanceRoute
   '/_auth/reports/marketing': typeof AuthReportsMarketingRoute
   '/_auth/reports/products': typeof AuthReportsProductsRoute
   '/_auth/reviews/questions': typeof AuthReviewsQuestionsRoute
@@ -570,6 +579,7 @@ export interface FileRouteTypes {
     | '/reports/brands'
     | '/reports/categories'
     | '/reports/daily'
+    | '/reports/finance'
     | '/reports/marketing'
     | '/reports/products'
     | '/reviews/questions'
@@ -627,6 +637,7 @@ export interface FileRouteTypes {
     | '/reports/brands'
     | '/reports/categories'
     | '/reports/daily'
+    | '/reports/finance'
     | '/reports/marketing'
     | '/reports/products'
     | '/reviews/questions'
@@ -687,6 +698,7 @@ export interface FileRouteTypes {
     | '/_auth/reports/brands'
     | '/_auth/reports/categories'
     | '/_auth/reports/daily'
+    | '/_auth/reports/finance'
     | '/_auth/reports/marketing'
     | '/_auth/reports/products'
     | '/_auth/reviews/questions'
@@ -935,6 +947,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthReportsDailyRouteImport
       parentRoute: typeof AuthReportsRoute
     }
+    '/_auth/reports/finance': {
+      id: '/_auth/reports/finance'
+      path: '/finance'
+      fullPath: '/reports/finance'
+      preLoaderRoute: typeof AuthReportsFinanceRouteImport
+      parentRoute: typeof AuthReportsRoute
+    }
     '/_auth/reports/marketing': {
       id: '/_auth/reports/marketing'
       path: '/marketing'
@@ -1145,6 +1164,7 @@ interface AuthReportsRouteChildren {
   AuthReportsBrandsRoute: typeof AuthReportsBrandsRoute
   AuthReportsCategoriesRoute: typeof AuthReportsCategoriesRoute
   AuthReportsDailyRoute: typeof AuthReportsDailyRoute
+  AuthReportsFinanceRoute: typeof AuthReportsFinanceRoute
   AuthReportsMarketingRoute: typeof AuthReportsMarketingRoute
   AuthReportsProductsRoute: typeof AuthReportsProductsRoute
   AuthReportsIndexRoute: typeof AuthReportsIndexRoute
@@ -1154,6 +1174,7 @@ const AuthReportsRouteChildren: AuthReportsRouteChildren = {
   AuthReportsBrandsRoute: AuthReportsBrandsRoute,
   AuthReportsCategoriesRoute: AuthReportsCategoriesRoute,
   AuthReportsDailyRoute: AuthReportsDailyRoute,
+  AuthReportsFinanceRoute: AuthReportsFinanceRoute,
   AuthReportsMarketingRoute: AuthReportsMarketingRoute,
   AuthReportsProductsRoute: AuthReportsProductsRoute,
   AuthReportsIndexRoute: AuthReportsIndexRoute,

@@ -11,7 +11,17 @@ import { errorText } from "@/lib/errors"
 import { sdk } from "@/lib/sdk"
 
 export type ReportTable =
-  "summary" | "daily" | "products" | "categories" | "brands" | "promotions" | "sources" | "returns"
+  | "summary"
+  | "daily"
+  | "products"
+  | "categories"
+  | "brands"
+  | "promotions"
+  | "sources"
+  | "returns"
+  | "vat"
+  | "payments"
+  | "chargebacks"
 
 const E = "reports.export"
 
@@ -22,11 +32,14 @@ const E = "reports.export"
  * Settings > Jobs keeps the file for a week too.
  */
 export function ReportExportButton({
+  report = "sales",
   format,
-  table = "daily",
+  table,
   size,
 }: {
+  report?: "sales" | "finance"
   format: "xlsx" | "csv"
+  /** The CSV's table; an xlsx has every table of the report. */
   table?: ReportTable
   size?: "sm" | "default"
 }) {
@@ -38,7 +51,13 @@ export function ReportExportButton({
     try {
       const { async_job: started } = await sdk.client.fetch<{ async_job: SheetJob }>(
         "/admin/async-jobs",
-        { method: "POST", body: { type: "report.export", input: { ...range, format, table } } }
+        {
+          method: "POST",
+          body: {
+            type: "report.export",
+            input: { ...range, report, format, ...(table ? { table } : {}) },
+          },
+        }
       )
       const job = await finishedJob(started.id)
       if (job.status === "succeeded") {

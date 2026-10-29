@@ -2572,7 +2572,7 @@
     "limited": "The newest {{total}} promotions are shown."
   },
   "reports": {
-    "description": "The chosen period's sales: summary, products, categories, brands, campaigns and sources, day by day",
+    "description": "The chosen period's sales, where they came from, their VAT and collections",
     "export": {
       "excel": "Download as Excel",
       "csv": "Download CSV",
@@ -2649,7 +2649,8 @@
       "categories": "Categories",
       "daily": "Day by day",
       "brands": "Brands",
-      "marketing": "Campaigns and sources"
+      "marketing": "Campaigns and sources",
+      "finance": "Finance"
     },
     "share": "Share",
     "sales": "Sales",
@@ -2668,6 +2669,52 @@
         "unbrandedHint": "{{share}} of sales",
         "total": "Total sales",
         "totalHint": "Cancellations left out"
+      }
+    },
+    "finance": {
+      "tiles": {
+        "label": "Finance report summary",
+        "vat": "VAT charged",
+        "vatHint": "Lines and shipping, cancellations left out",
+        "captured": "Captured",
+        "capturedHint": "On this period's orders",
+        "refunded": "Refunded",
+        "refundedHint": "On this period's orders",
+        "disputes": "Open disputes"
+      },
+      "vat": {
+        "title": "Sales by VAT rate",
+        "hint": "Each line's and shipping's own rate; amounts after discounts, from VAT-inclusive prices.",
+        "rate": "Rate",
+        "base": "Base",
+        "tax": "VAT",
+        "gross": "Total"
+      },
+      "payments": {
+        "title": "Collections by payment method",
+        "hint": "Captured and refunded on this period's orders.",
+        "method": "Method",
+        "captured": "Captured",
+        "refunded": "Refunded",
+        "net": "Net"
+      },
+      "methods": {
+        "paytr": "PayTR",
+        "iyzico": "iyzico",
+        "bank-transfer": "Bank transfer",
+        "cod": "Cash on delivery",
+        "gift-card": "Gift card",
+        "system": "System (test)"
+      },
+      "chargebacks": {
+        "title": "Disputes",
+        "hint": "Disputes opened in this period, and where they stand.",
+        "order": "Order",
+        "reason": "Reason",
+        "status": "Status",
+        "due": "Due",
+        "amount": "Amount",
+        "empty": "No disputes in this period."
       }
     },
     "marketing": {

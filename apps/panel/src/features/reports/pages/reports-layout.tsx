@@ -1,4 +1,4 @@
-import { Outlet } from "@tanstack/react-router"
+import { Outlet, useRouterState } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
 import { PageHeader } from "@/components/patterns/page-header"
 import { SectionNav } from "@/components/patterns/section-nav"
@@ -17,6 +17,10 @@ import { formatCount } from "@/lib/format"
 export function ReportsLayout() {
   const { t } = useTranslation()
   const report = useReport()
+  // The finance tab's file is the finance report; every other tab's, the sales report
+  const finance = useRouterState({
+    select: (state) => state.location.pathname.endsWith("/reports/finance"),
+  })
   return (
     <div className="flex flex-col gap-[var(--grid-gap)]">
       <PageHeader
@@ -25,7 +29,7 @@ export function ReportsLayout() {
         action={
           <div className="flex flex-wrap items-center gap-2">
             <ReportRangePicker />
-            <ReportExportButton format="xlsx" />
+            <ReportExportButton report={finance ? "finance" : "sales"} format="xlsx" />
           </div>
         }
       />
@@ -39,6 +43,7 @@ export function ReportsLayout() {
           { to: "/reports/brands", label: t("reports.tabs.brands") },
           { to: "/reports/marketing", label: t("reports.tabs.marketing") },
           { to: "/reports/daily", label: t("reports.tabs.daily") },
+          { to: "/reports/finance", label: t("reports.tabs.finance") },
         ]}
       />
       <Outlet />

@@ -2572,7 +2572,7 @@
     "limited": "En yeni {{total}} kampanya gösteriliyor."
   },
   "reports": {
-    "description": "Seçtiğiniz dönemin satışları: özet, ürünler, kategoriler, markalar, kampanya ve kaynak, gün gün",
+    "description": "Seçtiğiniz dönemin satışları, nereden geldikleri, KDV'si ve tahsilatı",
     "export": {
       "excel": "Excel olarak indir",
       "csv": "CSV indir",
@@ -2649,7 +2649,8 @@
       "categories": "Kategoriler",
       "daily": "Gün gün",
       "brands": "Markalar",
-      "marketing": "Kampanya ve kaynak"
+      "marketing": "Kampanya ve kaynak",
+      "finance": "Finans"
     },
     "share": "Pay",
     "sales": "Satış",
@@ -2668,6 +2669,52 @@
         "unbrandedHint": "Satışın {{share}} kadarı",
         "total": "Toplam satış",
         "totalHint": "İptaller hariç"
+      }
+    },
+    "finance": {
+      "tiles": {
+        "label": "Finans raporunun özeti",
+        "vat": "Hesaplanan KDV",
+        "vatHint": "Satır ve kargo, iptaller hariç",
+        "captured": "Tahsil edilen",
+        "capturedHint": "Bu dönemin siparişlerinden",
+        "refunded": "İade edilen",
+        "refundedHint": "Bu dönemin siparişlerinden",
+        "disputes": "Açık ters ibraz"
+      },
+      "vat": {
+        "title": "KDV oranına göre satış",
+        "hint": "Satırların ve kargonun kendi oranıyla; tutarlar indirim sonrası, KDV dahil fiyattan.",
+        "rate": "Oran",
+        "base": "Matrah",
+        "tax": "KDV",
+        "gross": "Toplam"
+      },
+      "payments": {
+        "title": "Ödeme yöntemine göre tahsilat",
+        "hint": "Bu dönemin siparişlerinde tahsil edilen ve iade edilen.",
+        "method": "Yöntem",
+        "captured": "Tahsil",
+        "refunded": "İade",
+        "net": "Net"
+      },
+      "methods": {
+        "paytr": "PayTR",
+        "iyzico": "iyzico",
+        "bank-transfer": "Havale/EFT",
+        "cod": "Kapıda ödeme",
+        "gift-card": "Hediye kartı",
+        "system": "Sistem (deneme)"
+      },
+      "chargebacks": {
+        "title": "Ters ibrazlar",
+        "hint": "Bu dönemde açılan itirazlar ve durumları.",
+        "order": "Sipariş",
+        "reason": "Sebep",
+        "status": "Durum",
+        "due": "Son gün",
+        "amount": "Tutar",
+        "empty": "Bu dönemde ters ibraz yok."
       }
     },
     "marketing": {
