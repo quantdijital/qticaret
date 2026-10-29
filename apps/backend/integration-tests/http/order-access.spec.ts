@@ -128,6 +128,25 @@ medusaIntegrationTestRunner({
       expect(own.status).toBe(200)
     })
 
+    it("gives another signed-in customer nothing through Medusa's order transfer", async () => {
+      const orderId = await guestOrder()
+      const transfer = (step: string) =>
+        settle(
+          http.post<OrderBody>(
+            `/store/orders/${orderId}/transfer/${step}`,
+            step === "request" ? {} : { token: "x".repeat(32) },
+            { headers: { ...storefront.headers, ...customer.headers } }
+          )
+        )
+
+      const answers = await Promise.all(
+        ["request", "accept", "decline", "cancel"].map((step) => transfer(step))
+      )
+
+      expect(answers.map(({ status }) => status)).toEqual([404, 404, 404, 404])
+      expect(answers.every(({ data }) => data.order === undefined)).toBe(true)
+    })
+
     it("hands the key out from the cart for a day only", async () => {
       const orderId = await guestOrder()
       const cartId = await cartOf(orderId)

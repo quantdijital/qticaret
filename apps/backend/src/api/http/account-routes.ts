@@ -5,7 +5,7 @@ import type {
   MedusaResponse,
 } from "@medusajs/framework/http"
 import { authenticate, validateAndTransformBody } from "@medusajs/framework/http"
-import { Modules } from "@medusajs/framework/utils"
+import { MedusaError, Modules } from "@medusajs/framework/utils"
 import { errorSummary, logger } from "../../lib/logging"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import { linkSocialIdentityWorkflow } from "../../workflows/account/link-social-identity"
@@ -122,10 +122,25 @@ export async function attachGuestOrders(
 }
 
 /**
+ * Medusa's order transfer answers any signed-in customer with the whole
+ * order, addresses and phone included, for its id alone (security review
+ * 2026-10-29). A shopper's guest orders join their account through
+ * `attachGuestOrders` instead; the transfer routes are not there.
+ */
+function hideOrderTransfer(_req: MedusaRequest, _res: MedusaResponse, next: MedusaNextFunction) {
+  next(new MedusaError(MedusaError.Types.NOT_FOUND, "Not found"))
+}
+
+/**
  * F10.1 (adr/0037): a customer account is opened for the identity's own
  * address; an order opens to its customer or the key from its e-mail.
  */
 export const ACCOUNT_ROUTES = [
+  // No `methods` on purpose: a method-scoped middleware may sort after the core route
+  ...["/store/orders/:id/transfer", "/store/orders/:id/transfer/*"].map((matcher) => ({
+    matcher,
+    middlewares: [hideOrderTransfer],
+  })),
   {
     matcher: "/store/customers",
     methods: ["POST" as const],
