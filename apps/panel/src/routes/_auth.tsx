@@ -1,6 +1,7 @@
 import { Outlet, createFileRoute, redirect } from "@tanstack/react-router"
 import { AppShell } from "@/components/layout/app-shell"
 import { currentUserQuery } from "@/features/auth/api/me"
+import { StaffGate } from "@/features/auth/pages/no-role-page"
 import { appearanceQuery } from "@/features/settings/api/appearance"
 import { applyAppearance, rememberAppearance } from "@/theme"
 
@@ -22,8 +23,10 @@ export const Route = createFileRoute("/_auth")({
     return { user }
   },
   component: () => (
-    <AppShell>
-      <Outlet />
-    </AppShell>
+    <StaffGate>
+      <AppShell>
+        <Outlet />
+      </AppShell>
+    </StaffGate>
   ),
 })

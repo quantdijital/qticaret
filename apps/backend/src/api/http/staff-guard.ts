@@ -4,7 +4,7 @@ import type {
   MedusaRequest,
   MedusaResponse,
 } from "@medusajs/framework/http"
-import { decide } from "../../lib/staff"
+import { decide, isSelfRoute } from "../../lib/staff"
 import type { StaffRole } from "../../lib/staff"
 import { STAFF_ROLES_MODULE } from "../../modules/staff-roles"
 import type StaffRolesModuleService from "../../modules/staff-roles/service"
@@ -16,8 +16,11 @@ const userOf = (req: MedusaRequest): string | undefined => {
   return auth?.actor_type === "user" ? auth.actor_id : undefined
 }
 
-/** The signed-in staff member's role, or undefined for anyone else (a key, nobody). */
-export async function staffRoleOf(req: MedusaRequest): Promise<StaffRole | undefined> {
+/**
+ * The signed-in staff member's role: undefined for anyone else (a key,
+ * nobody), null for a user without one.
+ */
+export async function staffRoleOf(req: MedusaRequest): Promise<StaffRole | null | undefined> {
   const userId = userOf(req)
   return userId
     ? req.scope.resolve<StaffRolesModuleService>(STAFF_ROLES_MODULE).roleOf(userId)
@@ -37,8 +40,17 @@ export async function guardStaffRoles(
   next: MedusaNextFunction
 ): Promise<void> {
   const role = await staffRoleOf(req)
-  if (!role) {
+  if (role === undefined) {
     next()
+    return
+  }
+  if (role === null) {
+    // Removed from the staff, their session still open: who they are, nothing more
+    if (isSelfRoute(req.method, routePath(req))) {
+      next()
+      return
+    }
+    rejectRequest(req, res, 403, { type: "not_allowed", message: "staff.no_role" }, "staff_no_role")
     return
   }
   const body = req.body as { type?: unknown } | undefined

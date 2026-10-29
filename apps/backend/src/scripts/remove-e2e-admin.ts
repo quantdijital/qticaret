@@ -1,13 +1,13 @@
 import type { ExecArgs } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
-import { removeUserAccountWorkflow } from "@medusajs/medusa/core-flows"
 import { logger } from "../lib/logging"
+import { removeStaffMemberWorkflow } from "../workflows/staff/remove-member"
 
 // Only the addresses the panel's e2e setup makes (apps/panel/e2e/support/admin.ts)
 const E2E_ADMIN = /^e2e-\d{13}-[0-9a-f]{6}@example\.com$/
 
 /**
- * Removes the admin an e2e run made, with its login (`medusa exec
+ * Removes the admin an e2e run made, with its role and login (`medusa exec
  * ./src/scripts/remove-e2e-admin.ts <email>`). A user cannot delete
  * itself through the API; anything but an e2e address is refused.
  */
@@ -20,6 +20,6 @@ export default async function removeE2eAdmin({ container, args }: ExecArgs) {
   if (!user) {
     return
   }
-  await removeUserAccountWorkflow(container).run({ input: { userId: user.id } })
+  await removeStaffMemberWorkflow(container).run({ input: { user_id: user.id } })
   logger.info({ event: "e2e.admin_removed" })
 }

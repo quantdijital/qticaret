@@ -346,6 +346,18 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The address cannot point inside the shop's network or to a local server.",
   "webhook.url_invalid": "The address is not valid.",
   "webhook.url_port": "The address can use port 443 only.",
+  "staff.no_role": "Your account has no role in this shop; ask the shop's owner.",
+  "staff.unknown": "No such team member.",
+  "staff.remove_self": "You cannot remove yourself from the team.",
+  "staff.invite_member": "This address already has an account.",
+  "staff.invite_pending": "This address has an open invitation; send it again.",
+  "staff.invite_failed": "The invitation could not be made.",
+  "staff.invite_unknown": "No such invitation.",
+  "staff.invite_invalid":
+    "The invitation link is not valid or has expired; ask the shop's owner for a new one.",
+  "staff.invite_login": "The account must use the invited e-mail address.",
+  "staff.email_invalid": "The e-mail address is not valid.",
+  "staff.name_required": "First and last name are required.",
   "staff.forbidden": "Your role does not allow this.",
   "staff.last_owner":
     "The shop's last owner cannot give up the role; make someone else owner first.",

@@ -37,7 +37,7 @@ Medusa 2.21.2'de doğrulananlar (v2.21.2 kaynağı ve docs.medusajs.com; Context
      - `admin`: `owner`'a ayrılanlar dışında her şey. Varsayılan izinli, kara liste.
      - `operations`: Her şeyi okur (personel listesi, denetim kaydı ve hesap ayrıntıları hariç). Yazma yalnızca beyaz listedeki operasyon uçlarında: sipariş, kargo, iade/değişim, stok, yorum/soru moderasyonu, bildirim okundu. Ayarları değiştiremez (KK1). Varsayılan ret.
      - `readonly`: yalnızca okur, aynı hariç tutmalarla. Kendi hesabının 2FA uçlarına yazabilir.
-   - **Rolü olmayan kullanıcı:** `readonly` sayılır (kapalı varsayılan).
+   - **Rolü olmayan kullanıcı:** Hiçbir yere erişemez; yalnızca kim olduğunu ve rolünün olmadığını görür (`staff.no_role`). Ekipten çıkarılan kişinin açık oturumu da bir sonraki istekte bu duruma düşer (Y2'de Y1'in "salt-okunur say" kararı daraltıldı).
    - **İlk rol ataması:** Göç betiği en eski kullanıcıya `owner`, diğerlerine `admin` verir.
    - **Son owner koruması:** Son `owner`'ın rolü düşürülemez ve silinemez.
    - **Panel bilgisi:** Panel kullanıcının rolünü ve yetenek listesini `GET /admin/staff/me`'den alır. Yetkisiz düğmeler gizlenir; API her durumda yeniden denetler.
@@ -52,8 +52,10 @@ Medusa 2.21.2'de doğrulananlar (v2.21.2 kaynağı ve docs.medusajs.com; Context
    - **Kural:** Son 5 dakikada 2FA kodu girilmiş olmalı.
    - **Nasıl:** Medusa'nın oturum içi yeniden doğrulama desteği Y4'ün başında doğrulanır. Yoksa kendi ucumuz (`POST /admin/staff/step-up {code}`) kodu auth modülünün etkeni üzerinden doğrular ve zamanı oturuma yazar.
 4. **Davet ve personel ekranı.**
-   - **Davet:** Medusa davetleri kullanılır, istenen rol davetin `metadata`'sına yazılır. Kabulde (`user.created` ya da davet kabul olayı; Y2'de doğrulanır) rol atanır.
-   - **Panel ekranları:** Ayarlar > Ekip (liste, rol, 2FA durumu, davet, rol değiştir, çıkar) ve `/invite` kabul sayfası. Medusa Admin'e gerek kalmaz.
+   - **Davet:** Medusa davetleri kullanılır, istenen rol davetin `metadata`'sına yazılır. Medusa kabulde rolü taşımaz ve daveti siler (2.21.2 kaynağı). Bu yüzden kabul kendi ucumuzdan yapılır: `POST /admin/staff/invites/accept` önce davetin rolünü okur, sonra Medusa'nın `acceptInviteWorkflow`'unu çalıştırır, ardından rolü verir; adımlar telafilidir. Medusa'nın kendi kabul ucuyla açılan kullanıcının rolü olmaz, hiçbir yere erişemez.
+   - **Kabul koşulları:** Giriş kaydı davet edilen adrese ait olmalıdır; bağlantıyı başkasına iletmek başka birini personel yapmaz. Davetle sahip rolü verilmez; sahip ekipten, sahip tarafından yapılır.
+   - **Bağlantı:** Davet e-postayla gider (`staff.invite` şablonu). Bağlantı yalnızca oluşturma ve yeniden gönderme yanıtında sahibe de gösterilir; e-posta kurulu değilse elle iletilir. Bağlantı 24 saat geçerlidir (Medusa varsayılanı).
+   - **Panel ekranları:** Ayarlar > Ekip (liste, rol, davet, rol değiştir, çıkar; sahip olmaya ve kendi rolünü değiştirmeye ek onay) ve `/invite` kabul sayfası. Medusa Admin'e gerek kalmaz.
    - **Denetim kaydı:** Rol değişiklikleri, davetler ve 2FA sıfırlama panelden `mutation`, sistemden (göç betiği, sunucu betiği) `system` olarak yazılır.
 5. **API anahtarları değişmez.** Anahtarlar personel rolüne değil kendi kapsamlarına tabidir (ADR-0039 §6). Personel korumasından önce anahtar koruması çalışır.
 

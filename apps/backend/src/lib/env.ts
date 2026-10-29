@@ -336,3 +336,11 @@ const LOCAL_BACKEND_URL = "http://localhost:9000"
 export function backendUrl(env: Pick<Env, "BACKEND_URL"> = parseEnv()): string {
   return new URL(env.BACKEND_URL ?? LOCAL_BACKEND_URL).origin
 }
+
+// The panel's dev server (`vite --strictPort`); deployed, it shares the backend's host (adr/0022)
+const LOCAL_PANEL_URL = "http://localhost:5173"
+
+/** The panel's origin, for links staff open (an invitation). */
+export function panelUrl(env: Pick<Env, "BACKEND_URL" | "NODE_ENV"> = parseEnv()): string {
+  return isLocalEnv(env) && !env.BACKEND_URL ? LOCAL_PANEL_URL : backendUrl(env)
+}

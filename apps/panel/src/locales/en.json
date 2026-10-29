@@ -230,7 +230,8 @@
       "sms": "SMS",
       "marketing": "Marketing",
       "accounting": "Accounting",
-      "api": "External API"
+      "api": "External API",
+      "team": "Team"
     },
     "appearance": {
       "title": "Appearance",
@@ -1057,7 +1058,8 @@
             "new_order": "Staff: new order",
             "bank_transfer": "Staff: bank transfer awaited",
             "low_stock": "Staff: low stock",
-            "seo_digest": "Staff: weekly SEO digest"
+            "seo_digest": "Staff: weekly SEO digest",
+            "invite": "Team: panel invitation"
           },
           "stock": {
             "alert_confirm": "Stock alert confirmation",
@@ -1155,7 +1157,8 @@
       "audit": "Who changed what in the panel, and when",
       "marketing": "Cart reminders, product feeds, Merchant Center and conversion measurement",
       "accounting": "The month's package for the accountant",
-      "api": "API keys for your own systems"
+      "api": "API keys for your own systems",
+      "team": "Who uses the panel, with which role, and invitations"
     },
     "marketing": {
       "title": "Marketing",
@@ -1475,6 +1478,49 @@
         "deleteTitle": "Delete the subscription?",
         "deleteHint": "Events stop going to {{url}}; waiting deliveries are not sent either."
       }
+    },
+    "team": {
+      "title": "Team",
+      "description": "The people who use the panel and their roles. An invited person opens their account from the link in the e-mail.",
+      "invite": "Invite",
+      "members": "Team members",
+      "membersHint": "Only the shop's owner changes roles; the shop always keeps at least one owner.",
+      "you": "You",
+      "since": "since {{date}}",
+      "roleOf": "Role of {{name}}",
+      "removeOf": "Remove {{name}} from the team",
+      "noRole": "No role",
+      "changed": "Role updated for {{name}}.",
+      "ownerTitle": "Make them an owner?",
+      "ownerHint": "{{name}} will be an owner of the shop: payment and integration accounts, API keys and the team will be theirs to manage too.",
+      "selfTitle": "Change your own role?",
+      "selfHint": "Your role will be {{role}}; you will no longer do what is the owner's.",
+      "confirmChange": "Change role",
+      "removeTitle": "Remove from the team?",
+      "removeHint": "{{name}} will not get into the panel again; their open session stops working at once.",
+      "remove": "Remove from team",
+      "removed": "Removed from the team.",
+      "invites": "Open invitations",
+      "invitesHint": "Links work for 24 hours; send an expired invitation again.",
+      "noInvites": "No open invitations.",
+      "expires": "valid until {{when}}",
+      "expired": "expired",
+      "expiredBadge": "Expired",
+      "resend": "Send again",
+      "withdraw": "Withdraw",
+      "withdrawTitle": "Withdraw the invitation?",
+      "withdrawHint": "The link sent to {{email}} will stop working.",
+      "withdrawn": "Invitation withdrawn.",
+      "resentTitle": "Invitation sent again",
+      "inviteTitle": "Invite to the team",
+      "inviteHint": "The invited person opens their account from the link in the e-mail and gets the role you choose.",
+      "invitedHint": "The invitation e-mail was sent. If it does not arrive, pass this link on yourself.",
+      "email": "E-mail",
+      "role": "Role",
+      "send": "Send invitation",
+      "done": "Done",
+      "copy": "Copy link",
+      "linkHint": "The link works for 24 hours, and only for an account with the invited e-mail address."
     }
   },
   "status": {
@@ -4263,6 +4309,29 @@
       "admin": "Admin",
       "operations": "Operations",
       "readonly": "Read only"
+    },
+    "roleHints": {
+      "owner": "Everything: payment and integration accounts, API keys and the team included.",
+      "admin": "All of the shop's work and settings; accounts, keys and the team aside.",
+      "operations": "Prepares and ships orders, takes returns in, looks after stock and reviews; cannot change settings or move money.",
+      "readonly": "Sees everything and downloads reports; changes nothing."
+    },
+    "noRole": {
+      "title": "Your account has no role",
+      "text": "You have no role in this shop's panel, or you were removed from the team. Ask the shop's owner."
     }
+  },
+  "invite": {
+    "title": "Join the team",
+    "subtitle": "{{email}} was invited as {{role}}. Create your account.",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "passwordHint": "At least 10 characters.",
+    "submit": "Create account and sign in",
+    "invalidTitle": "The invitation is not valid",
+    "invalid": "The link is not valid or has expired. Ask the shop's owner for a new invitation.",
+    "wrongLogin": "The account must use the invited e-mail address.",
+    "required": "This field is required.",
+    "passwordShort": "The password must be at least 10 characters."
   }
 }

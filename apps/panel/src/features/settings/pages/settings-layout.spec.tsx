@@ -62,7 +62,7 @@ describe("Settings home", () => {
       "href",
       "/settings/shipping"
     )
-    expect(screen.getAllByRole("link")).toHaveLength(16)
+    expect(screen.getAllByRole("link")).toHaveLength(17)
   })
 
   it("offers operations staff only what they may use: no settings to change", () => {

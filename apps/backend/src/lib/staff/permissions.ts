@@ -9,11 +9,16 @@
  *   routes listed here (orders, shipping, returns, stock, moderation).
  *   Refused by default: a new route is closed to it until listed.
  * - `readonly`: reads all but the private, writes nothing but read-only jobs.
- * A user without a role reads as `readonly`.
+ * A user without a role (removed from the staff, or made outside the
+ * panel) reaches nothing but who they are.
  */
 
 export const STAFF_ROLES = ["owner", "admin", "operations", "readonly"] as const
 export type StaffRole = (typeof STAFF_ROLES)[number]
+
+/** The roles an invitation gives; an owner is made by an owner, from the team (adr/0040 §3). */
+export const INVITABLE_ROLES = ["admin", "operations", "readonly"] as const
+export type InvitableRole = (typeof INVITABLE_ROLES)[number]
 
 type Method = "GET" | "HEAD" | "OPTIONS" | "POST" | "PUT" | "PATCH" | "DELETE"
 
@@ -128,6 +133,10 @@ const matches = (rules: readonly Rule[], method: string, path: string, facts: Re
       (rule.when ? rule.when(facts) : true)
   )
 
+/** Whether the route is one every signed-in user may call about themselves. */
+export const isSelfRoute = (method: string, path: string): boolean =>
+  matches(SELF, method.toUpperCase(), path, {})
+
 export interface Decision {
   allowed: boolean
   /** Why, for the log: the list that decided. */
@@ -183,17 +192,19 @@ const CAPABILITY_PROBES = {
   moderation: ["POST", "/admin/product-reviews/moderate"],
   accounts: ["POST", "/admin/integrations/credentials/:provider"],
   keys: ["POST", "/admin/api-access"],
-  staff: ["POST", "/admin/staff/:id"],
+  team: ["GET", "/admin/staff"],
+  staff: ["POST", "/admin/staff/members/:id"],
   audit: ["GET", "/admin/audit-log"],
 } as const satisfies Record<string, readonly [Method, string]>
 
 export type Capability = keyof typeof CAPABILITY_PROBES
 
-export function capabilitiesOf(role: StaffRole): Record<Capability, boolean> {
+/** What a role may do; a user without one, nothing. */
+export function capabilitiesOf(role: StaffRole | null): Record<Capability, boolean> {
   return Object.fromEntries(
     Object.entries(CAPABILITY_PROBES).map(([name, [method, path]]) => [
       name,
-      decide(role, method, path).allowed,
+      role !== null && decide(role, method, path).allowed,
     ])
   ) as Record<Capability, boolean>
 }

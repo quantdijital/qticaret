@@ -65,19 +65,34 @@ class StaffRolesModuleService extends MedusaService({ StaffRole }) {
     return new Map(rows.map((row) => [row.user_id, row.role]))
   }
 
-  /** A user's role; one without a row reads as `readonly`, unless the shop has no staff yet. */
-  async roleOf(userId: string): Promise<Role> {
+  /**
+   * A user's role, or null for one without (removed, or made outside the
+   * panel): they reach nothing. A shop with no staff yet makes its first
+   * user owner.
+   */
+  async roleOf(userId: string): Promise<Role | null> {
     const roles = await this.cache.get()
     const role = roles.get(userId)
     if (role) {
       return role
     }
     if (roles.size > 0) {
-      return "readonly"
+      return null
     }
     const claimed = await this.claimFirstOwner_(userId)
     await this.cache.invalidate()
-    return claimed ? "owner" : ((await this.cache.get()).get(userId) ?? "readonly")
+    return claimed ? "owner" : ((await this.cache.get()).get(userId) ?? null)
+  }
+
+  /** The roles of several users at once (the team list). */
+  async rolesOf(userIds: readonly string[]): Promise<Map<string, Role>> {
+    const roles = await this.cache.get()
+    return new Map(
+      userIds.flatMap((id) => {
+        const role = roles.get(id)
+        return role ? [[id, role] as const] : []
+      })
+    )
   }
 
   /** The first user of a shop without staff becomes its owner; one at a time. */

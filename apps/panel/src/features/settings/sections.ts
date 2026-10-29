@@ -14,6 +14,7 @@ import {
   Store,
   ToggleRight,
   Truck,
+  Users,
   Warehouse,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
@@ -67,6 +68,7 @@ export const SETTINGS_GROUPS: readonly SettingsGroup[] = [
   {
     key: "system",
     sections: [
+      { key: "team", to: "/settings/team", icon: Users, needs: "team" },
       { key: "integrations", to: "/settings/integrations", icon: Plug },
       { key: "api", to: "/settings/api", icon: KeyRound, needs: "keys" },
       { key: "features", to: "/settings/features", icon: ToggleRight, needs: "settings" },

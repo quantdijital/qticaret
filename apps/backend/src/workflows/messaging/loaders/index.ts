@@ -8,7 +8,7 @@ import { loadConsentRequest } from "./consent"
 import { loadOrderLink, loadOrderMessage } from "./order"
 import { loadParcelMessage } from "./parcel"
 import { loadReturnMessage } from "./return-request"
-import { loadSeoDigest, loadStaffOrder, loadStaffStock } from "./staff"
+import { loadSeoDigest, loadStaffInvite, loadStaffOrder, loadStaffStock } from "./staff"
 import { loadStockAlert } from "./stock"
 import type { Loaded } from "./types"
 
@@ -42,4 +42,5 @@ export const MESSAGE_LOADERS: { readonly [N in MessageTemplateName]: Loader<N> }
   "staff.bank_transfer": (container, id) => loadStaffOrder(container, id),
   "staff.low_stock": loadStaffStock,
   "staff.seo_digest": (container) => loadSeoDigest(container),
+  "staff.invite": loadStaffInvite,
 }

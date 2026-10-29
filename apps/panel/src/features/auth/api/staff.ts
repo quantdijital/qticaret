@@ -14,12 +14,14 @@ export type Capability =
   | "moderation"
   | "accounts"
   | "keys"
+  | "team"
   | "staff"
   | "audit"
 
 export interface StaffMe {
   user_id: string
-  role: StaffRole
+  /** Null: removed from the staff, or never given a role; they reach nothing. */
+  role: StaffRole | null
   can: Record<Capability, boolean>
 }
 

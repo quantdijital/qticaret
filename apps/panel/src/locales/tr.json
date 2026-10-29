@@ -230,7 +230,8 @@
       "sms": "SMS",
       "marketing": "Pazarlama",
       "accounting": "Muhasebe",
-      "api": "Dış API"
+      "api": "Dış API",
+      "team": "Ekip"
     },
     "appearance": {
       "title": "Görünüm",
@@ -1057,7 +1058,8 @@
             "new_order": "Ekip: yeni sipariş",
             "bank_transfer": "Ekip: havale bekleyen sipariş",
             "low_stock": "Ekip: stok azaldı",
-            "seo_digest": "Ekip: haftalık SEO özeti"
+            "seo_digest": "Ekip: haftalık SEO özeti",
+            "invite": "Ekip: panel daveti"
           },
           "stock": {
             "alert_confirm": "Stok bildirimi onayı",
@@ -1155,7 +1157,8 @@
       "audit": "Panelde kim neyi ne zaman değiştirdi",
       "marketing": "Sepet hatırlatması, ürün feed'leri, Merchant Center ve dönüşüm ölçümü",
       "accounting": "Mali müşavire aylık paket",
-      "api": "Kendi sistemleriniz için API anahtarları"
+      "api": "Kendi sistemleriniz için API anahtarları",
+      "team": "Panele kimlerin hangi rolle girdiği ve davetler"
     },
     "marketing": {
       "title": "Pazarlama",
@@ -1475,6 +1478,49 @@
         "deleteTitle": "Abonelik silinsin mi?",
         "deleteHint": "{{url}} adresine artık olay gönderilmez; bekleyen teslimler de gönderilmez."
       }
+    },
+    "team": {
+      "title": "Ekip",
+      "description": "Panele giren kişiler ve rolleri. Davet edilen kişi e-postadaki bağlantıyla hesabını açar.",
+      "invite": "Davet et",
+      "members": "Ekip üyeleri",
+      "membersHint": "Rolleri yalnızca mağaza sahibi değiştirir; mağazanın her zaman en az bir sahibi olur.",
+      "you": "Siz",
+      "since": "{{date}} tarihinden beri",
+      "roleOf": "{{name}} rolü",
+      "removeOf": "{{name}} kişisini ekipten çıkar",
+      "noRole": "Rol yok",
+      "changed": "{{name}} için rol güncellendi.",
+      "ownerTitle": "Mağaza sahibi yapılsın mı?",
+      "ownerHint": "{{name}} mağaza sahibi olacak: ödeme ve entegrasyon hesapları, API anahtarları ve ekip onun da yönetiminde olacak.",
+      "selfTitle": "Kendi rolünüz değişsin mi?",
+      "selfHint": "Rolünüz {{role}} olacak; sahibe ayrılan işleri artık yapamayacaksınız.",
+      "confirmChange": "Rolü değiştir",
+      "removeTitle": "Ekipten çıkarılsın mı?",
+      "removeHint": "{{name}} panele bir daha giremeyecek; açık oturumu da hemen işlemez olur.",
+      "remove": "Ekipten çıkar",
+      "removed": "Kişi ekipten çıkarıldı.",
+      "invites": "Bekleyen davetler",
+      "invitesHint": "Bağlantılar 24 saat geçerlidir; süresi dolan daveti yeniden gönderin.",
+      "noInvites": "Bekleyen davet yok.",
+      "expires": "{{when}} tarihine kadar geçerli",
+      "expired": "süresi doldu",
+      "expiredBadge": "Süresi doldu",
+      "resend": "Yeniden gönder",
+      "withdraw": "Geri çek",
+      "withdrawTitle": "Davet geri çekilsin mi?",
+      "withdrawHint": "{{email}} adresine gönderilen bağlantı artık çalışmayacak.",
+      "withdrawn": "Davet geri çekildi.",
+      "resentTitle": "Davet yeniden gönderildi",
+      "inviteTitle": "Ekibe davet et",
+      "inviteHint": "Davet edilen kişi e-postadaki bağlantıyla hesabını açar ve seçtiğiniz rolle girer.",
+      "invitedHint": "Davet e-postası gönderildi. E-posta ulaşmazsa bu bağlantıyı kendiniz iletin.",
+      "email": "E-posta",
+      "role": "Rol",
+      "send": "Davet gönder",
+      "done": "Tamam",
+      "copy": "Bağlantıyı kopyala",
+      "linkHint": "Bağlantı 24 saat geçerlidir ve yalnızca davet edilen e-posta adresiyle hesap açılır."
     }
   },
   "status": {
@@ -4263,6 +4309,29 @@
       "admin": "Yönetici",
       "operations": "Operasyon",
       "readonly": "Salt okunur"
+    },
+    "roleHints": {
+      "owner": "Her şey: ödeme ve entegrasyon hesapları, API anahtarları ve ekip dahil.",
+      "admin": "Mağazanın bütün işleri ve ayarları; hesaplar, anahtarlar ve ekip hariç.",
+      "operations": "Siparişleri hazırlar ve gönderir, iadeleri teslim alır, stok ve yorumlarla ilgilenir; ayarları ve para hareketlerini değiştiremez.",
+      "readonly": "Her şeyi görür ve rapor indirir; hiçbir şeyi değiştiremez."
+    },
+    "noRole": {
+      "title": "Hesabınızın rolü yok",
+      "text": "Bu mağazanın panelinde size bir rol verilmemiş ya da ekipten çıkarılmışsınız. Mağaza sahibine başvurun."
     }
+  },
+  "invite": {
+    "title": "Ekibe katılın",
+    "subtitle": "{{email}} adresi {{role}} olarak davet edildi. Hesabınızı oluşturun.",
+    "firstName": "Ad",
+    "lastName": "Soyad",
+    "passwordHint": "En az 10 karakter.",
+    "submit": "Hesabı oluştur ve gir",
+    "invalidTitle": "Davet geçerli değil",
+    "invalid": "Bağlantı geçersiz ya da süresi dolmuş. Mağaza sahibinden yeni bir davet isteyin.",
+    "wrongLogin": "Hesap davet edilen e-posta adresiyle açılmalı.",
+    "required": "Bu alan gerekli.",
+    "passwordShort": "Şifre en az 10 karakter olmalı."
   }
 }

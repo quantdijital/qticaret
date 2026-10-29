@@ -8,17 +8,18 @@ moduleIntegrationTestRunner<StaffRolesModuleService>({
   moduleName: STAFF_ROLES_MODULE,
   resolve: "./src/modules/staff-roles",
   testSuite: ({ service }) => {
-    it("makes the first user of a shop without staff its owner, and no one after", async () => {
+    it("makes the first user of a shop without staff its owner, and gives no one else a role", async () => {
       const [first, second] = await Promise.all([
         service.roleOf("user_first"),
         service.roleOf("user_second"),
       ])
 
-      expect([first, second].sort()).toEqual(["owner", "readonly"])
+      // The other reaches nothing until given a role
+      expect([first, second]).toEqual(expect.arrayContaining(["owner", null]))
       expect(await service.listStaffRoles({}, { select: ["role"] })).toEqual([
         expect.objectContaining({ role: "owner" }),
       ])
-      expect(await service.roleOf("user_third")).toBe("readonly")
+      expect(await service.roleOf("user_third")).toBeNull()
     })
 
     it("gives a role at once, and changes it", async () => {
@@ -57,7 +58,7 @@ moduleIntegrationTestRunner<StaffRolesModuleService>({
 
       await service.removeRole("user_gone")
 
-      expect(await service.roleOf("user_gone")).toBe("readonly")
+      expect(await service.roleOf("user_gone")).toBeNull()
     })
   },
 })

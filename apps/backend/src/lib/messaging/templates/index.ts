@@ -8,7 +8,13 @@ import { paymentFailed } from "./payment"
 import { returnApproved, returnRefunded, returnRequested } from "./returns"
 import { orderDelivered, orderShipped } from "./shipping"
 import { backInStock, stockAlertConfirm } from "./stock"
-import { staffBankTransfer, staffLowStock, staffNewOrder, staffSeoDigest } from "./staff"
+import {
+  staffBankTransfer,
+  staffInvite,
+  staffLowStock,
+  staffNewOrder,
+  staffSeoDigest,
+} from "./staff"
 
 export type { ResetVars, VerifyVars } from "./account"
 export type { AnnouncementVars } from "./marketing"
@@ -23,7 +29,7 @@ export type { PaymentFailedVars } from "./payment"
 export type { ReturnVars } from "./returns"
 export type { ParcelVars } from "./shipping"
 export type { StockAlertVars } from "./stock"
-export type { StaffOrderVars, StaffSeoVars, StaffStockVars } from "./staff"
+export type { StaffInviteVars, StaffOrderVars, StaffSeoVars, StaffStockVars } from "./staff"
 export type { Brand, EmailContent, EmailContext, MessageKind, MessageTemplate } from "./types"
 
 /** Every template the platform sends, by name (adr/0036). */
@@ -47,6 +53,7 @@ export const MESSAGE_TEMPLATES = {
   "staff.bank_transfer": staffBankTransfer,
   "staff.low_stock": staffLowStock,
   "staff.seo_digest": staffSeoDigest,
+  "staff.invite": staffInvite,
 } as const
 
 export type MessageTemplateName = keyof typeof MESSAGE_TEMPLATES

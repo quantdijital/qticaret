@@ -98,7 +98,7 @@ function AccountMenu() {
         <DropdownMenuLabel className="font-normal">
           <span className="block truncate text-sm font-medium">{name}</span>
           <span className="block truncate text-xs text-muted-foreground">{user?.email}</span>
-          {staff ? (
+          {staff?.role ? (
             <span className="mt-1 block text-xs text-muted-foreground">
               {t(`staff.roles.${staff.role}`)}
             </span>

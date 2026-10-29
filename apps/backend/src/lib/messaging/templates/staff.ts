@@ -22,6 +22,13 @@ export interface StaffStockVars {
   threshold: number
 }
 
+/** An invitation to the shop's panel: the link only the invitation knew. */
+export interface StaffInviteVars {
+  inviteUrl: string
+  /** The role as the invitee reads it. */
+  role: "admin" | "operations" | "readonly"
+}
+
 export interface StaffSeoVars {
   products: number
   average: number | null
@@ -161,4 +168,31 @@ export const staffSeoDigest: MessageTemplate<StaffSeoVars> = {
     poor: 9,
     lowest: [{ title: "Örnek ürün", score: 41 }],
   },
+}
+
+/** "Ekibe davet edildiniz": the panel's page that makes the account, good for a day (F12.6). */
+export const staffInvite: MessageTemplate<StaffInviteVars> = {
+  name: "staff.invite",
+  kind: "transactional",
+  channels: ["email"],
+  retry: false,
+  email: (vars, brand) =>
+    renderEmail(brand, {
+      subject: messageText("staff_invite.subject", { shop: brand.shopName }),
+      preheader: messageText("staff_invite.preheader", { shop: brand.shopName }),
+      heading: messageText("staff_invite.heading", { shop: brand.shopName }),
+      blocks: [
+        {
+          kind: "paragraph",
+          text: messageText("staff_invite.intro", {
+            shop: brand.shopName,
+            role: messageText(`staff_invite.roles.${vars.role}`),
+          }),
+        },
+        { kind: "button", label: messageText("staff_invite.button"), url: vars.inviteUrl },
+        { kind: "note", text: messageText("staff_invite.ignore") },
+      ],
+      footer: FOOTER(brand.shopName),
+    }),
+  sample: { inviteUrl: "https://magaza.example/invite?token=ornek", role: "operations" },
 }

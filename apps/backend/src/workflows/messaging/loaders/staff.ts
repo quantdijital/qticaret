@@ -1,6 +1,12 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
-import type { StaffOrderVars, StaffSeoVars, StaffStockVars } from "../../../lib/messaging/templates"
+import { inviteLink } from "../../../lib/staff"
+import type {
+  StaffInviteVars,
+  StaffOrderVars,
+  StaffSeoVars,
+  StaffStockVars,
+} from "../../../lib/messaging/templates"
 import { SEO_ADVISOR_MODULE } from "../../../modules/seo-advisor"
 import type SeoAdvisorModuleService from "../../../modules/seo-advisor/service"
 import { loadOrderMessage } from "./order"
@@ -92,4 +98,30 @@ export async function loadSeoDigest(container: Container): Promise<Loaded<StaffS
     ...STAFF,
     resourceType: "seo_digest",
   }
+}
+
+const INVITE_ROLES = new Set(["admin", "operations", "readonly"])
+
+/**
+ * An invitation (F12.6, adr/0040): to the invited address, a link to the
+ * panel's page with the token only the invitation knew.
+ */
+export function loadStaffInvite(
+  _container: Container,
+  _inviteId: string,
+  extra: Readonly<Record<string, string>>
+): Promise<Loaded<StaffInviteVars> | null> {
+  const { email, token, role = "" } = extra
+  if (!email || !token || !INVITE_ROLES.has(role)) {
+    return Promise.resolve(null)
+  }
+  return Promise.resolve({
+    vars: {
+      inviteUrl: inviteLink(token),
+      role: role as StaffInviteVars["role"],
+    },
+    recipients: { email },
+    receiverId: null,
+    resourceType: "invite",
+  })
 }

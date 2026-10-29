@@ -104,7 +104,8 @@
   - Genel `/admin/*` koruması (`api/http/staff-guard.ts`) API anahtarı korumasından sonra, Express'in yönlendirdiği yolu küçük harfle okuyup `lib/staff/permissions.ts` tablosundan karar verir. Rol her istekte okunur, değişiklik en geç bir saniyede bütün süreçlerde geçerlidir.
   - Sahibe ayrılanlar: sağlayıcı hesapları, API anahtarları, giden webhook'lar, muhasebe programı seçimi, havale IBAN'ı, Google bağlantısı, personel ve davetler.
   - Operasyon ve salt-okunur personel denetim kaydını, hesapları, webhook'ları, personel listesini ve iş akışı kayıtlarını okuyamaz. Operasyon yalnızca listedeki operasyon uçlarına yazar (sipariş gönderimi, iade talebi kabulü, stok, moderasyon); para hareketi (iade, iptal, havale onayı), katalog ve ayarlar kapalıdır. Yeni bir uç bu iki rol için kapalı gelir; kendi yazma uçlarımızın her biri için operasyon kararı birim testinde kayıtlıdır.
-  - Rolü olmayan kullanıcı salt-okunur sayılır; personeli hiç olmayan mağazada ilk kullanıcı sahip olur; son sahip rolünü bırakamaz.
+  - Rolü olmayan kullanıcı hiçbir yere erişemez (ekipten çıkarılanın açık oturumu dahil); personeli hiç olmayan mağazada ilk kullanıcı sahip olur; son sahip rolünü bırakamaz.
+  - Davet: rol davetin metadata'sında, kabul kendi ucumuzda; giriş kaydı davet edilen adrese ait olmalı; davetle sahip verilmez.
   - Kişisel veri içeren iş sonucunu (muhasebe paketi, denetim kaydı dışa aktarımı) yalnızca isteyen kişi ve sahip indirir.
 - Oturum token'ları httpOnly + Secure + SameSite cookie. localStorage'da token yok. Cookie oturumu kullanılan her yerde CSRF token.
 - Müşteri kaydında e-posta doğrulama; doğrulanmamış hesap yorum, stok bildirimi ve favori gibi yazma işlemleri yapamaz.

@@ -32,7 +32,9 @@ describe("staff roles", () => {
     ["DELETE", "/admin/users/user_1"],
     ["POST", "/admin/invites"],
     ["GET", "/admin/invites"],
-    ["POST", "/admin/staff/user_1"],
+    ["POST", "/admin/staff/members/user_1"],
+    ["DELETE", "/admin/staff/members/user_1"],
+    ["POST", "/admin/staff/invites"],
   ] as const)("keeps %s %s the owner's alone", (method, path) => {
     expect(decide("admin", method, path)).toEqual({ allowed: false, reason: "owner_only" })
   })
@@ -126,6 +128,7 @@ describe("staff roles", () => {
       moderation: true,
       accounts: true,
       keys: true,
+      team: true,
       staff: true,
       audit: true,
     })
@@ -133,6 +136,7 @@ describe("staff roles", () => {
       settings: true,
       accounts: false,
       keys: false,
+      team: true,
       staff: false,
       audit: true,
     })
@@ -146,10 +150,12 @@ describe("staff roles", () => {
       moderation: true,
       accounts: false,
       keys: false,
+      team: false,
       staff: false,
       audit: false,
     })
     expect(Object.values(capabilitiesOf("readonly")).every((can) => !can)).toBe(true)
+    expect(Object.values(capabilitiesOf(null)).every((can) => !can)).toBe(true)
   })
 })
 
@@ -240,6 +246,12 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/shipping-setup/options/:id": false,
   "DELETE /admin/shipping-setup/options/:id": false,
   "POST /admin/shipping-setup/options": false,
+  "POST /admin/staff/invites/:id/resend": false,
+  "DELETE /admin/staff/invites/:id": false,
+  "POST /admin/staff/invites/accept": false,
+  "POST /admin/staff/invites": false,
+  "POST /admin/staff/members/:id": false,
+  "DELETE /admin/staff/members/:id": false,
   "POST /admin/stock-items/:id/watch": true,
   "POST /admin/warehouses/:id/default": false,
   "POST /admin/warehouses/:id": false,

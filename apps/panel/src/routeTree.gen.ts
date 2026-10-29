@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/_auth'
+import { Route as InviteRouteImport } from './routes/invite'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AuthIndexRouteImport } from './routes/_auth/index'
 import { Route as AuthCategoriesRouteImport } from './routes/_auth/categories'
@@ -60,6 +61,7 @@ import { Route as AuthSettingsLocationsRouteImport } from './routes/_auth/settin
 import { Route as AuthSettingsNotificationsRouteImport } from './routes/_auth/settings/notifications'
 import { Route as AuthSettingsSeoRouteImport } from './routes/_auth/settings/seo'
 import { Route as AuthSettingsStoreRouteImport } from './routes/_auth/settings/store'
+import { Route as AuthSettingsTeamRouteImport } from './routes/_auth/settings/team'
 import { Route as AuthContentLandingsIdRouteImport } from './routes/_auth/content/landings/$id'
 import { Route as AuthPromotionsPriceListsIndexRouteImport } from './routes/_auth/promotions/price-lists/index'
 import { Route as AuthPromotionsPriceListsIdRouteImport } from './routes/_auth/promotions/price-lists/$id'
@@ -75,6 +77,11 @@ import { Route as AuthSettingsSmsProviderRouteImport } from './routes/_auth/sett
 
 const AuthRoute = AuthRouteImport.update({
   id: '/_auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InviteRoute = InviteRouteImport.update({
+  id: '/invite',
+  path: '/invite',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -329,6 +336,11 @@ const AuthSettingsStoreRoute = AuthSettingsStoreRouteImport.update({
   path: '/store',
   getParentRoute: () => AuthSettingsRoute,
 } as any)
+const AuthSettingsTeamRoute = AuthSettingsTeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => AuthSettingsRoute,
+} as any)
 const AuthContentLandingsIdRoute = AuthContentLandingsIdRouteImport.update({
   id: '/content/landings/$id',
   path: '/content/landings/$id',
@@ -401,6 +413,7 @@ const AuthSettingsSmsProviderRoute = AuthSettingsSmsProviderRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthIndexRoute
+  '/invite': typeof InviteRoute
   '/login': typeof LoginRoute
   '/categories': typeof AuthCategoriesRoute
   '/inventory': typeof AuthInventoryRoute
@@ -440,6 +453,7 @@ export interface FileRoutesByFullPath {
   '/settings/notifications': typeof AuthSettingsNotificationsRoute
   '/settings/seo': typeof AuthSettingsSeoRoute
   '/settings/store': typeof AuthSettingsStoreRoute
+  '/settings/team': typeof AuthSettingsTeamRoute
   '/brands/': typeof AuthBrandsIndexRoute
   '/content/': typeof AuthContentIndexRoute
   '/customers/': typeof AuthCustomersIndexRoute
@@ -464,6 +478,7 @@ export interface FileRoutesByFullPath {
   '/settings/sms/': typeof AuthSettingsSmsIndexRoute
 }
 export interface FileRoutesByTo {
+  '/invite': typeof InviteRoute
   '/login': typeof LoginRoute
   '/categories': typeof AuthCategoriesRoute
   '/inventory': typeof AuthInventoryRoute
@@ -502,6 +517,7 @@ export interface FileRoutesByTo {
   '/settings/notifications': typeof AuthSettingsNotificationsRoute
   '/settings/seo': typeof AuthSettingsSeoRoute
   '/settings/store': typeof AuthSettingsStoreRoute
+  '/settings/team': typeof AuthSettingsTeamRoute
   '/brands': typeof AuthBrandsIndexRoute
   '/content': typeof AuthContentIndexRoute
   '/customers': typeof AuthCustomersIndexRoute
@@ -528,6 +544,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_auth': typeof AuthRouteWithChildren
+  '/invite': typeof InviteRoute
   '/login': typeof LoginRoute
   '/_auth/categories': typeof AuthCategoriesRoute
   '/_auth/inventory': typeof AuthInventoryRoute
@@ -568,6 +585,7 @@ export interface FileRoutesById {
   '/_auth/settings/notifications': typeof AuthSettingsNotificationsRoute
   '/_auth/settings/seo': typeof AuthSettingsSeoRoute
   '/_auth/settings/store': typeof AuthSettingsStoreRoute
+  '/_auth/settings/team': typeof AuthSettingsTeamRoute
   '/_auth/brands/': typeof AuthBrandsIndexRoute
   '/_auth/content/': typeof AuthContentIndexRoute
   '/_auth/customers/': typeof AuthCustomersIndexRoute
@@ -595,6 +613,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/invite'
     | '/login'
     | '/categories'
     | '/inventory'
@@ -634,6 +653,7 @@ export interface FileRouteTypes {
     | '/settings/notifications'
     | '/settings/seo'
     | '/settings/store'
+    | '/settings/team'
     | '/brands/'
     | '/content/'
     | '/customers/'
@@ -658,6 +678,7 @@ export interface FileRouteTypes {
     | '/settings/sms/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/invite'
     | '/login'
     | '/categories'
     | '/inventory'
@@ -696,6 +717,7 @@ export interface FileRouteTypes {
     | '/settings/notifications'
     | '/settings/seo'
     | '/settings/store'
+    | '/settings/team'
     | '/brands'
     | '/content'
     | '/customers'
@@ -721,6 +743,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_auth'
+    | '/invite'
     | '/login'
     | '/_auth/categories'
     | '/_auth/inventory'
@@ -761,6 +784,7 @@ export interface FileRouteTypes {
     | '/_auth/settings/notifications'
     | '/_auth/settings/seo'
     | '/_auth/settings/store'
+    | '/_auth/settings/team'
     | '/_auth/brands/'
     | '/_auth/content/'
     | '/_auth/customers/'
@@ -787,6 +811,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   AuthRoute: typeof AuthRouteWithChildren
+  InviteRoute: typeof InviteRoute
   LoginRoute: typeof LoginRoute
 }
 
@@ -797,6 +822,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/invite': {
+      id: '/invite'
+      path: '/invite'
+      fullPath: '/invite'
+      preLoaderRoute: typeof InviteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -1149,6 +1181,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSettingsStoreRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
+    '/_auth/settings/team': {
+      id: '/_auth/settings/team'
+      path: '/team'
+      fullPath: '/settings/team'
+      preLoaderRoute: typeof AuthSettingsTeamRouteImport
+      parentRoute: typeof AuthSettingsRoute
+    }
     '/_auth/content/landings/$id': {
       id: '/_auth/content/landings/$id'
       path: '/content/landings/$id'
@@ -1277,6 +1316,7 @@ interface AuthSettingsRouteChildren {
   AuthSettingsNotificationsRoute: typeof AuthSettingsNotificationsRoute
   AuthSettingsSeoRoute: typeof AuthSettingsSeoRoute
   AuthSettingsStoreRoute: typeof AuthSettingsStoreRoute
+  AuthSettingsTeamRoute: typeof AuthSettingsTeamRoute
   AuthSettingsIndexRoute: typeof AuthSettingsIndexRoute
   AuthSettingsMarketingProviderRoute: typeof AuthSettingsMarketingProviderRoute
   AuthSettingsPaymentsProviderRoute: typeof AuthSettingsPaymentsProviderRoute
@@ -1301,6 +1341,7 @@ const AuthSettingsRouteChildren: AuthSettingsRouteChildren = {
   AuthSettingsNotificationsRoute: AuthSettingsNotificationsRoute,
   AuthSettingsSeoRoute: AuthSettingsSeoRoute,
   AuthSettingsStoreRoute: AuthSettingsStoreRoute,
+  AuthSettingsTeamRoute: AuthSettingsTeamRoute,
   AuthSettingsIndexRoute: AuthSettingsIndexRoute,
   AuthSettingsMarketingProviderRoute: AuthSettingsMarketingProviderRoute,
   AuthSettingsPaymentsProviderRoute: AuthSettingsPaymentsProviderRoute,
@@ -1388,6 +1429,7 @@ const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRouteWithChildren,
+  InviteRoute: InviteRoute,
   LoginRoute: LoginRoute,
 }
 export const routeTree = rootRouteImport
