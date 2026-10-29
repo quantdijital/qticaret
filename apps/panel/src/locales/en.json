@@ -2591,7 +2591,7 @@
     "limited": "The newest {{total}} promotions are shown."
   },
   "reports": {
-    "description": "The chosen period's sales, where they came from, their VAT and collections",
+    "description": "The chosen period's sales, where they came from, their VAT, collections and stock",
     "export": {
       "excel": "Download as Excel",
       "csv": "Download CSV",
@@ -2669,7 +2669,8 @@
       "daily": "Day by day",
       "brands": "Brands",
       "marketing": "Campaigns and sources",
-      "finance": "Finance"
+      "finance": "Finance",
+      "stock": "Stock"
     },
     "share": "Share",
     "sales": "Sales",
@@ -2831,6 +2832,55 @@
         "total": "The period's sales",
         "totalHint": "The total spread over categories"
       }
+    },
+    "stock": {
+      "tiles": {
+        "label": "Stock report summary",
+        "value": "Stock value",
+        "valueHint_one": "From {{count}} variant's cost",
+        "valueHint_other": "From {{count}} variants' costs",
+        "units": "Units on hand",
+        "unitsHint": "All locations, now",
+        "uncosted": "Without a cost",
+        "uncostedHint_one": "{{count}} unit left out of the value",
+        "uncostedHint_other": "{{count}} units left out of the value",
+        "idle": "Idle stock",
+        "idleHint": "Not sold in {{days}} days · {{value}}"
+      },
+      "item": "Product",
+      "onHand": "Units",
+      "cost": "Cost",
+      "worth": "Value",
+      "sold": "Sold",
+      "turnover": "Turnover",
+      "value": {
+        "title": "Most valuable stock",
+        "hint": "Unit cost × units on hand, VAT excluded.",
+        "empty": "No product in stock has a cost."
+      },
+      "slow": {
+        "title": "Slowest turning stock",
+        "hint": "Units sold in the period / the average stock at its start and end.",
+        "empty": "No product had stock in this period."
+      },
+      "idle": {
+        "title": "Not sold in {{days}} days",
+        "hint": "In stock and not sold for {{days}} days; new products left out.",
+        "empty": "No idle stock."
+      },
+      "uncosted": {
+        "title": "Without a cost",
+        "hint": "In stock with no unit cost; left out of the stock value. Enter it on the product page or with bulk edit.",
+        "empty": "Every product in stock has a cost."
+      },
+      "views": {
+        "value": "Most valuable",
+        "slow": "Slowest",
+        "idle": "Idle",
+        "uncosted": "No cost"
+      },
+      "lists": "Stock lists",
+      "more": "The first {{shown}} rows; the CSV and the Excel file have them all."
     }
   },
   "seo": {

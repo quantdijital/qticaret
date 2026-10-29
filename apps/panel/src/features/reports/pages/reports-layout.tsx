@@ -8,18 +8,23 @@ import { useReport } from "@/features/reports/use-report"
 import { formatCount } from "@/lib/format"
 
 /**
- * Reports (docs/06 §4, F11.1–F11.2): a preset period or a range of days,
+ * Reports (docs/06 §4, F11.1–F11.4): a preset period or a range of days,
  * reports as tabs (summary, products, categories, brands, promotions and
- * traffic sources, day by day); every
+ * traffic sources, day by day, finance, stock); every
  * table as one Excel file, or a table as CSV, made on the server. The
  * range stays in the address as the tabs change. No personal data.
  */
 export function ReportsLayout() {
   const { t } = useTranslation()
   const report = useReport()
-  // The finance tab's file is the finance report; every other tab's, the sales report
-  const finance = useRouterState({
-    select: (state) => state.location.pathname.endsWith("/reports/finance"),
+  // The finance and stock tabs' files are their own reports; every other tab's, the sales report
+  const kind = useRouterState({
+    select: (state) =>
+      state.location.pathname.endsWith("/reports/finance")
+        ? ("finance" as const)
+        : state.location.pathname.endsWith("/reports/stock")
+          ? ("stock" as const)
+          : ("sales" as const),
   })
   return (
     <div className="flex flex-col gap-[var(--grid-gap)]">
@@ -29,7 +34,7 @@ export function ReportsLayout() {
         action={
           <div className="flex flex-wrap items-center gap-2">
             <ReportRangePicker />
-            <ReportExportButton report={finance ? "finance" : "sales"} format="xlsx" />
+            <ReportExportButton report={kind} format="xlsx" />
           </div>
         }
       />
@@ -44,6 +49,7 @@ export function ReportsLayout() {
           { to: "/reports/marketing", label: t("reports.tabs.marketing") },
           { to: "/reports/daily", label: t("reports.tabs.daily") },
           { to: "/reports/finance", label: t("reports.tabs.finance") },
+          { to: "/reports/stock", label: t("reports.tabs.stock") },
         ]}
       />
       <Outlet />

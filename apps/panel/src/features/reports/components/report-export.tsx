@@ -22,6 +22,9 @@ export type ReportTable =
   | "vat"
   | "payments"
   | "chargebacks"
+  | "stock"
+  | "idle"
+  | "uncosted"
 
 const E = "reports.export"
 
@@ -37,7 +40,7 @@ export function ReportExportButton({
   table,
   size,
 }: {
-  report?: "sales" | "finance"
+  report?: "sales" | "finance" | "stock"
   format: "xlsx" | "csv"
   /** The CSV's table; an xlsx has every table of the report. */
   table?: ReportTable

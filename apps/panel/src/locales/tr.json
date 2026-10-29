@@ -2591,7 +2591,7 @@
     "limited": "En yeni {{total}} kampanya gösteriliyor."
   },
   "reports": {
-    "description": "Seçtiğiniz dönemin satışları, nereden geldikleri, KDV'si ve tahsilatı",
+    "description": "Seçtiğiniz dönemin satışları, nereden geldikleri, KDV'si, tahsilatı ve stoğu",
     "export": {
       "excel": "Excel olarak indir",
       "csv": "CSV indir",
@@ -2669,7 +2669,8 @@
       "daily": "Gün gün",
       "brands": "Markalar",
       "marketing": "Kampanya ve kaynak",
-      "finance": "Finans"
+      "finance": "Finans",
+      "stock": "Stok"
     },
     "share": "Pay",
     "sales": "Satış",
@@ -2831,6 +2832,55 @@
         "total": "Dönemin satışı",
         "totalHint": "Kategorilere dağılan toplam"
       }
+    },
+    "stock": {
+      "tiles": {
+        "label": "Stok raporunun özeti",
+        "value": "Stok değeri",
+        "valueHint_one": "{{count}} varyantın maliyetiyle",
+        "valueHint_other": "{{count}} varyantın maliyetiyle",
+        "units": "Eldeki adet",
+        "unitsHint": "Bütün depolarda, şu an",
+        "uncosted": "Maliyeti girilmemiş",
+        "uncostedHint_one": "{{count}} adet değere katılmadı",
+        "uncostedHint_other": "{{count}} adet değere katılmadı",
+        "idle": "Hareketsiz stok",
+        "idleHint": "{{days}} gündür satılmayan · {{value}}"
+      },
+      "item": "Ürün",
+      "onHand": "Adet",
+      "cost": "Maliyet",
+      "worth": "Değer",
+      "sold": "Satılan",
+      "turnover": "Devir",
+      "value": {
+        "title": "En değerli stok",
+        "hint": "Birim maliyet × eldeki adet, KDV hariç.",
+        "empty": "Maliyeti girilmiş ve stokta olan ürün yok."
+      },
+      "slow": {
+        "title": "En yavaş dönen stok",
+        "hint": "Dönemde satılan adet / dönem başı ve sonundaki ortalama stok.",
+        "empty": "Bu dönemde stoğu olan ürün yok."
+      },
+      "idle": {
+        "title": "{{days}} gündür satılmayan",
+        "hint": "Stokta olup {{days}} gündür hiç satılmayan ürünler; yeni eklenenler hariç.",
+        "empty": "Hareketsiz stok yok."
+      },
+      "uncosted": {
+        "title": "Maliyeti girilmemiş",
+        "hint": "Stokta olup birim maliyeti girilmemiş ürünler; stok değerine katılmıyorlar. Ürün sayfasından ya da toplu düzenlemeyle girin.",
+        "empty": "Stoktaki her ürünün maliyeti girilmiş."
+      },
+      "views": {
+        "value": "En değerli",
+        "slow": "En yavaş dönen",
+        "idle": "Hareketsiz",
+        "uncosted": "Maliyetsiz"
+      },
+      "lists": "Stok listeleri",
+      "more": "İlk {{shown}} satır; hepsi CSV'de ve Excel dosyasında."
     }
   },
   "seo": {

@@ -19,6 +19,9 @@ export interface MovementInput {
   actor_id?: string | null
 }
 
+// Items asked about in one statement
+const ITEMS_PER_READ = 1_000
+
 function refuseWrite(): never {
   throw new MedusaError(MedusaError.Types.NOT_ALLOWED, "stock movements are append-only")
 }
@@ -42,6 +45,44 @@ class StockLedgerModuleService extends MedusaService({ StockMovement, StockWatch
       sharedContext
     )
     return last ?? null
+  }
+
+  /**
+   * What was on the shelf of each item at `at`, its locations together
+   * (F11.4): a level's last movement up to then, or, for a level whose
+   * first movement came later, the quantity that movement started from.
+   * An item with no movement at all is left out: its level has not changed
+   * since the ledger began, so it is what it is now.
+   */
+  @InjectManager()
+  async stockedAt(
+    itemIds: readonly string[],
+    at: Date,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<Map<string, number>> {
+    const manager = sharedContext.manager as {
+      execute: (sql: string, params: unknown[]) => Promise<unknown>
+    }
+    const stocked = new Map<string, number>()
+    for (let start = 0; start < itemIds.length; start += ITEMS_PER_READ) {
+      const ids = itemIds.slice(start, start + ITEMS_PER_READ)
+      const rows = (await manager.execute(
+        `SELECT inventory_item_id, sum(quantity)::integer AS stocked FROM (
+           SELECT DISTINCT ON (inventory_item_id, location_id) inventory_item_id,
+                  CASE WHEN created_at <= ? THEN stocked_after
+                       ELSE stocked_after - delta_stocked END AS quantity
+             FROM stock_movement
+            WHERE deleted_at IS NULL AND inventory_item_id IN (${ids.map(() => "?").join(", ")})
+            ORDER BY inventory_item_id, location_id, (created_at <= ?) DESC,
+                     CASE WHEN created_at <= ? THEN -seq ELSE seq END
+         ) levels GROUP BY inventory_item_id`,
+        [at, ...ids, at, at]
+      )) as { inventory_item_id: string; stocked: number }[]
+      for (const row of rows) {
+        stocked.set(row.inventory_item_id, row.stocked)
+      }
+    }
+    return stocked
   }
 
   async recordMovement(input: MovementInput): Promise<StockMovementRecord> {

@@ -2,6 +2,7 @@ import { readFileSync, rmSync } from "node:fs"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { clearDashboardCache } from "../../src/api/admin/dashboard/overview/read"
+import { clearStockCache } from "../../src/api/admin/reports/stock/read"
 import { turkishDay } from "../../src/lib/dashboard"
 import { CSV_BOM } from "../../src/lib/security"
 import { fromMedusaAmount } from "../../src/lib/money"
@@ -115,9 +116,82 @@ medusaIntegrationTestRunner({
     })
 
     afterAll(() => {
-      for (const path of filesNamed(/(satis|finans)-raporu-.*\.(csv|xlsx)$/)) {
+      for (const path of filesNamed(/(satis|finans|stok)-raporu-.*\.(csv|xlsx)$/)) {
         rmSync(path, { force: true })
       }
+    })
+
+    it("values stock at its unit cost, counts what has none apart, and turns it over", async () => {
+      clearStockCache()
+      const stamp = String(Date.now())
+      const costed = await stockedProduct(getContainer(), shop, `stok-${stamp}`, 10, 200)
+      await stockedProduct(getContainer(), shop, `maliyetsiz-${stamp}`, 4, 80)
+      const saved = await settle(
+        http.post(
+          `/admin/products/${costed.productId}/catalog`,
+          { variants: { [costed.variantId]: { cost: 75.5 } } },
+          { headers: admin.headers }
+        )
+      )
+      await advanceOrder(getContainer(), await order(costed.variantId, 3), "delivered")
+      await advanceOrder(getContainer(), await order(costed.variantId, 2), "canceled")
+
+      const report = await get<{
+        totals: Record<string, unknown>
+        value: Record<string, unknown>[]
+        uncosted: Record<string, unknown>[]
+        idle: unknown[]
+      }>("/admin/reports/stock?period=today")
+      const row = report.data.value.find((entry) => entry["product_title"] === `stok-${stamp}`)
+      const file = await settled(
+        (
+          await http.post<{ async_job: Job }>(
+            "/admin/async-jobs",
+            { type: "report.export", input: { report: "stock", format: "csv", table: "idle" } },
+            { headers: admin.headers }
+          )
+        ).data.async_job.id
+      )
+      const book = await settled(
+        (
+          await http.post<{ async_job: Job }>(
+            "/admin/async-jobs",
+            { type: "report.export", input: { report: "stock", period: "today" } },
+            { headers: admin.headers }
+          )
+        ).data.async_job.id
+      )
+      const foreign = await settle(
+        http.post(
+          "/admin/async-jobs",
+          { type: "report.export", input: { report: "stock", format: "csv", table: "vat" } },
+          { headers: admin.headers }
+        )
+      )
+
+      expect(saved.status).toBe(200)
+      expect(row).toMatchObject({
+        sku: null,
+        on_hand: 7,
+        cost: "75.50",
+        value: "528.50",
+        // The canceled order sold nothing
+        sold: 3,
+        idle: false,
+      })
+      expect(row?.["turnover"]).toEqual(expect.any(Number))
+      expect(report.data.uncosted).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ product_title: `maliyetsiz-${stamp}`, on_hand: 4, cost: null }),
+        ])
+      )
+      expect(report.data.totals).toMatchObject({ value: "528.50", costed_items: 1 })
+      // Made today: not idle, whatever it sold
+      expect(report.data.idle).toEqual([])
+      expect(file).toMatchObject({ status: "succeeded" })
+      expect(filesNamed(/stok-raporu-hareketsiz-stok-.*\.csv$/)).not.toHaveLength(0)
+      expect(book.result_summary).toMatchObject({ report: "stock", format: "xlsx", capped: false })
+      expect(foreign.status).toBe(400)
     })
 
     it("totals a range of days as the orders themselves do, canceled ones left out", async () => {

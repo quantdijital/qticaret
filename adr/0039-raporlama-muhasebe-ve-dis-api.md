@@ -122,6 +122,11 @@ Kısıtlar:
   - Ödeme modülünde `listCaptures` ve `listRefunds` var; `created_at` süzgeci ISO metin alır, `payment` ilişkisi gelir (tip denetimiyle doğrulandı).
   - `query.graph` `payment` varlığında `captures`, `refunds` ve `payment_collection.order.{id, display_id}` alanlarını döner (HTTP testiyle doğrulandı).
 
+## Stok raporu: uygulama (2026-10-29)
+- **Maliyet:** `variant_extension.cost` (kuruş, KDV hariç). Katalog ucundan (`POST /admin/products/:id/catalog`, `variants.<id>.cost` lira) ve toplu düzenlemeden yazılır. Vitrin `fields` ile `variant_extension`'a dokunamaz.
+- **Okuma:** `inventory_item` → `variants` → `variant_extension.cost` tek `query.graph` sorgusunda gelir (HTTP testiyle doğrulandı). Dönem başı ve sonu stok `stock-ledger`'ın `stockedAt` yöntemiyle okunur: anından önceki son hareket, yoksa sonraki ilk hareketin başlangıç adedi, hiç hareket yoksa bugünkü adet.
+- **Liste:** Panel her listenin ilk 20 satırını gösterir; Excel ve CSV bütün kalemleri içerir.
+
 ## Sağlayıcı mutabakatı: doğrulanan uçlar ve uygulama (2026-10-29)
 - **PayTR:** `POST /rapor/islem-dokumu`, en çok 3 gün. **iyzico:** `GET /v2/reporting/payment/transactions`, gün ve sayfa ile. Ayrıntı: `docs/entegrasyonlar/paytr.md`, `docs/entegrasyonlar/iyzico.md`.
 - **Pencere:** D günü için iki taraf da D-1..D+1 okunur. Gece yarısında alınıp sağlayıcının ertesi güne yazdığı ödeme böylece eşleşir.

@@ -35,14 +35,17 @@ export const PANEL_ROUTES = [
     methods: ["GET" as const],
     middlewares: [requireUserActor, validateAndTransformQuery(AdminGetDashboardOverview, {})],
   },
-  // F11.1, F11.3: reports over a preset period or the days asked for
-  ...["/admin/reports/sales", "/admin/reports/finance", "/admin/reports/statements"].map(
-    (matcher) => ({
-      matcher,
-      methods: ["GET" as const],
-      middlewares: [requireUserActor, validateAndTransformQuery(AdminGetReportRange, {})],
-    })
-  ),
+  // F11.1, F11.3, F11.4: reports over a preset period or the days asked for
+  ...[
+    "/admin/reports/sales",
+    "/admin/reports/finance",
+    "/admin/reports/statements",
+    "/admin/reports/stock",
+  ].map((matcher) => ({
+    matcher,
+    methods: ["GET" as const],
+    middlewares: [requireUserActor, validateAndTransformQuery(AdminGetReportRange, {})],
+  })),
   // F11.3: a day's statement checked again asks the provider: the provider check's budget
   {
     matcher: "/admin/reports/statements",

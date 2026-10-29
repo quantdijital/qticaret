@@ -7,23 +7,30 @@ import { XLSX_MIME, writeXlsx } from "../../../lib/sheets"
 import type { SheetCell, SheetSpec } from "../../../lib/sheets"
 import { computeSalesReport, windowOf } from "../../../api/admin/dashboard/overview/read"
 import { computeFinanceReport } from "../../../api/admin/reports/finance/read"
+import { computeStockRows, stockView } from "../../../api/admin/reports/stock/read"
 import { REPORT_RANGE_FIELDS, checkRange, rangeOf } from "../../../api/admin/reports/validators"
 import { FINANCE_SHEETS, FINANCE_TABLES, financeTables } from "./report-finance-tables"
+import { STOCK_SHEETS, STOCK_TABLES, stockTables } from "./report-stock-tables"
 import { SALES_SHEETS, SALES_TABLES, salesTables } from "./report-tables"
 import type { JobType } from "./types"
 
 const input = z
   .object({
     ...REPORT_RANGE_FIELDS,
-    report: z.enum(["sales", "finance"]).default("sales"),
+    report: z.enum(["sales", "finance", "stock"]).default("sales"),
     format: z.enum(["xlsx", "csv"]).default("xlsx"),
     // A CSV holds one of the report's tables; an xlsx has them all, a sheet each
-    table: z.enum([...SALES_TABLES, ...FINANCE_TABLES]).optional(),
+    table: z.enum([...SALES_TABLES, ...FINANCE_TABLES, ...STOCK_TABLES]).optional(),
   })
   .strict()
   .superRefine(checkRange)
   .superRefine((query, ctx) => {
-    const own: readonly string[] = query.report === "finance" ? FINANCE_TABLES : SALES_TABLES
+    const own: readonly string[] =
+      query.report === "finance"
+        ? FINANCE_TABLES
+        : query.report === "stock"
+          ? STOCK_TABLES
+          : SALES_TABLES
     if (query.table && !own.includes(query.table)) {
       ctx.addIssue({ code: "custom", path: ["table"], message: "async_job.input_invalid" })
     }
@@ -38,7 +45,7 @@ interface Built {
 }
 
 /**
- * A report as a file (F11.1, F11.3, adr/0039): the same numbers as the
+ * A report as a file (F11.1, F11.3, F11.4, adr/0039): the same numbers as the
  * panel's, over the same days; an xlsx with a sheet per table, or one
  * table as CSV (`;`, BOM, decimal comma for Turkish Excel). Every text
  * cell is escaped against formulas (docs/04); no personal data.
@@ -60,6 +67,16 @@ export const reportExport: JobType<z.infer<typeof input>> = {
         sheets: FINANCE_SHEETS,
         first: "vat",
         summary: { capped: report.capped },
+      }
+    } else if (query.report === "stock") {
+      // Every stock item, not the page's lists
+      const { rows, capped } = await computeStockRows(container, window)
+      built = {
+        name: "stok-raporu",
+        tables: stockTables(rows.map(stockView)),
+        sheets: STOCK_SHEETS,
+        first: "stock",
+        summary: { items: rows.length, capped },
       }
     } else {
       const report = await computeSalesReport(container, window)
