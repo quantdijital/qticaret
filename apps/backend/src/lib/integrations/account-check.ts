@@ -8,6 +8,8 @@ import { arasApi, arasCredentialsOf } from "../shipping/aras"
 import { geliverApi, geliverCredentialsOf } from "../shipping/geliver"
 import { netgsmAccountOf, netgsmApi } from "../messaging/sms/netgsm"
 import { yurticiApi, yurticiCredentialsOf } from "../shipping/yurtici"
+import { googleApi } from "../google/client"
+import { googleClientOf } from "../google/oauth"
 
 /**
  * Asks a provider whether the shop's account details work (adr/0027 §4).
@@ -73,6 +75,41 @@ const CHECKERS = {
     const credentials = netgsmAccountOf(account)
     return credentials ? netgsmApi().checkAccount(credentials, { signal }) : "secret_invalid"
   },
+  // `secret_invalid`: Google no longer takes the refresh token; `merchant_invalid`:
+  // the account cannot reach the Merchant Center account the shop named
+  google: async (account) => {
+    const client = googleClientOf()
+    const refreshToken = account.secrets["refresh_token"]
+    if (!client || !refreshToken) {
+      return "secret_invalid"
+    }
+    const api = googleApi()
+    let token: string
+    try {
+      token = await api.accessToken(client, refreshToken)
+    } catch (error) {
+      if (isProviderError(error) && error.providerCode === "invalid_grant") {
+        return "secret_invalid"
+      }
+      throw error
+    }
+    const merchantId = account.settings["merchant_id"]
+    if (typeof merchantId !== "string") {
+      return "valid"
+    }
+    try {
+      await api.readAccount(token, merchantId)
+      return "valid"
+    } catch (error) {
+      if (
+        isProviderError(error) &&
+        ["PERMISSION_DENIED", "NOT_FOUND", "http_403", "http_404"].includes(error.providerCode)
+      ) {
+        return "merchant_invalid"
+      }
+      throw error
+    }
+  },
 } satisfies Record<CredentialProviderName, Checker>
 
 export async function checkAccount(
@@ -102,4 +139,5 @@ export const CHECK_FIELDS = {
   // The main login, or the door account's (see its checker)
   yurtici: { merchant_invalid: "secrets.cod_password", secret_invalid: "secrets.password" },
   netgsm: { merchant_invalid: "settings.msgheader", secret_invalid: "secrets.password" },
+  google: { merchant_invalid: "settings.merchant_id", secret_invalid: "secrets.refresh_token" },
 } satisfies Record<CredentialProviderName, Record<"merchant_invalid" | "secret_invalid", string>>

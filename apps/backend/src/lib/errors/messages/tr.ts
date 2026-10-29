@@ -321,6 +321,16 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "messaging.recipient_invalid": "Adres ya da telefon numarası geçerli değil.",
   "messaging.email_off": "E-posta gönderimi bu mağazada açık değil.",
   "messaging.sms_off": "SMS hesabı bağlı değil. Ayarlar > SMS'ten Netgsm hesabını girin.",
+  "google.merchant_id_invalid": "Merchant Center hesap numarası yalnızca rakamlardan oluşur.",
+  "google.merchant_invalid":
+    "Bağlı Google hesabı bu Merchant Center hesabına erişemiyor. Hesap numarasını ve hesaptaki yetkinizi kontrol edin.",
+  "google.secret_invalid":
+    "Google bağlantısı artık geçerli değil; Google hesabını yeniden bağlayın.",
+  "google.state_invalid":
+    "Google bağlantısının süresi doldu ya da zaten kullanıldı; yeniden bağlayın.",
+  "google.no_refresh_token": "Google kalıcı erişim vermedi; bağlantıyı yeniden başlatın.",
+  "google.not_configured": "Google bağlantısı bu mağaza için henüz kurulmadı.",
+  "google.not_connected": "Önce Google hesabını bağlayın.",
   "netgsm.iys_brand_code_invalid": "İYS marka kodu yalnızca rakamlardan oluşur.",
   "netgsm.msgheader_invalid":
     "Gönderici adı 2–11 karakter olmalı; Netgsm'de onaylı başlığınızı aynen yazın.",

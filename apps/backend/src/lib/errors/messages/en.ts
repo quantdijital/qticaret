@@ -317,6 +317,15 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "messaging.email_off": "E-mail is not set up for this shop.",
   "messaging.sms_off":
     "No SMS account is connected. Enter the Netgsm account under Settings > SMS.",
+  "google.merchant_id_invalid": "The Merchant Center account number is digits only.",
+  "google.merchant_invalid":
+    "The connected Google account cannot reach this Merchant Center account. Check the number and your access to it.",
+  "google.secret_invalid":
+    "The Google connection no longer works; connect the Google account again.",
+  "google.state_invalid": "The Google connection expired or was already used; connect again.",
+  "google.no_refresh_token": "Google gave no lasting access; start the connection again.",
+  "google.not_configured": "The Google connection is not set up for this shop yet.",
+  "google.not_connected": "Connect the Google account first.",
   "netgsm.iys_brand_code_invalid": "The İYS brand code is digits only.",
   "netgsm.msgheader_invalid":
     "The sender name must be 2–11 characters; type your approved Netgsm header exactly.",

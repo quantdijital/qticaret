@@ -1109,7 +1109,7 @@
       "features": "Shop features you can turn on or off",
       "jobs": "Long jobs such as exports, and their files",
       "audit": "Who changed what in the panel, and when",
-      "marketing": "Abandoned cart reminders and product feeds"
+      "marketing": "Abandoned carts, product feeds and Google Merchant Center"
     },
     "marketing": {
       "title": "Marketing",
@@ -1167,6 +1167,35 @@
         },
         "noDomain": "The shop has no domain yet; feeds link to product pages, so they cannot be built. Enter the domain under Settings > SEO.",
         "notYet": "Not built yet."
+      },
+      "google": {
+        "title": "Google Merchant Center",
+        "description": "Your products are sent to your Merchant Center account through Merchant API so they show on Google Shopping: only what changed, every two hours. It can replace the feed address or run beside it.",
+        "notConfigured": "The Google connection is not open on the platform yet; once it is, you can connect here.",
+        "notConnected": "Connect with the Google account that reaches your Merchant Center. You allow it on Google's own screen; your password is not shared with us.",
+        "connect": "Connect Google account",
+        "connectedAs": "Connected Google account:",
+        "merchantId": "Merchant Center account number",
+        "merchantIdHint": "The number under your account name at the top right of Merchant Center. It is checked with Google as you save.",
+        "merchantSaved": "Merchant Center account saved.",
+        "synced": "Last sent {{when}}: {{sent}} sent, {{removed}} removed, {{failed}} refused.",
+        "syncError": "The last run {{when}} stopped; check the Google connection and your access to the account.",
+        "syncNow": "Send now",
+        "syncDone": "Products sent to Merchant Center.",
+        "disconnect": "Disconnect",
+        "disconnected": "Google disconnected.",
+        "confirm": {
+          "title": "Disconnect Google?",
+          "description": "Access ends at Google too and products are no longer sent. The products in Merchant Center stay there until you remove them or they lapse.",
+          "action": "Disconnect"
+        },
+        "outcome": {
+          "connected": "Google account connected.",
+          "denied": "Access was not allowed on Google; nothing was connected.",
+          "state_invalid": "The connection request expired; try again.",
+          "no_refresh_token": "Google gave no lasting access; try again.",
+          "failed": "Google could not be connected; try again."
+        }
       }
     }
   },

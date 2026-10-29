@@ -55,3 +55,5 @@ export type {
 } from "./netgsm/fake-server"
 export { fakeAppleAccount, startFakeApple } from "./apple/fake-server"
 export type { FakeApple, FakeAppleAccount, FakeAppleSignIn } from "./apple/fake-server"
+export { startFakeGoogle } from "./google/fake-server"
+export type { FakeGoogle } from "./google/fake-server"

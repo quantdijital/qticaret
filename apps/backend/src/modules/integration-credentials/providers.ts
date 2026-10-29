@@ -122,6 +122,33 @@ export const CREDENTIAL_PROVIDERS = {
     identity: [],
     optional: [],
   },
+  // F10 M13 (adr/0038 §5): the shop's Google account, connected through the
+  // platform's OAuth client: the refresh token comes from Google's consent
+  // screen, never typed. The Merchant Center account and its API data source
+  // follow once the shop names the account
+  google: {
+    settings: z
+      .object({
+        email: z.email().max(254).optional(),
+        merchant_id: z
+          .string()
+          .trim()
+          .regex(/^\d{1,20}$/, "google.merchant_id_invalid")
+          .optional(),
+        data_source: z
+          .string()
+          .regex(/^accounts\/\d{1,20}\/dataSources\/\d{1,20}$/)
+          .optional(),
+      })
+      .strict(),
+    secrets: ["refresh_token"],
+    secret: z
+      .string()
+      .trim()
+      .regex(/^[\x21-\x7E]{8,512}$/, "integration_credentials.secret_invalid"),
+    identity: [],
+    optional: [],
+  },
 } as const satisfies Record<string, CredentialProvider>
 
 export type CredentialProviderName = keyof typeof CREDENTIAL_PROVIDERS

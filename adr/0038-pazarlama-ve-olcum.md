@@ -208,6 +208,42 @@ F10'un pazarlama tarafı mağazanın verisini dış servislere taşır: Google, 
   - Akakçe ve Cimri herkese açık bir XML biçimi yayımlamıyor. Biçim, mağazanın satıcı panelinden alınınca her biri tek bir biçimleyici olarak eklenecek.
   - Merchant API ile gönderim M13'te.
 
+## Uygulama notları (M13, Google bağlantısı ve Merchant API, 2026-10-29)
+- **Platform OAuth istemcisi:**
+  - `GOOGLE_OAUTH_CLIENT_ID` ve `GOOGLE_OAUTH_CLIENT_SECRET` platformun tek Google Cloud web istemcisidir; her mağaza onunla bağlanır.
+  - Yönlendirme adresi `BACKEND_URL/google/callback`. Panel ve backend aynı adreste (adr/0022 §4), dönüş panelin `/settings/marketing?google=<sonuç>` sayfasına.
+  - İkisi tanımlı değilse bağlantı sunulmaz.
+  - `GOOGLE_BASE_URL` sahte Google içindir; canlıda reddedilir.
+- **Akış** (Google OAuth 2.0 web sunucusu akışı, resmî belgeden):
+  - `state` ve PKCE S256. Doğrulayıcı sunucuda şifreli tutulur; `state` özetiyle bulunur, 10 dakika geçerlidir, bir kez kullanılır ve personele bağlıdır (`google_oauth_state`).
+  - Kapsam: `auth/content`, `openid` ve `email`. Bağlı hesabın adresi ID token'dan okunur; token uç noktasından geldiği için yeniden doğrulanmaz.
+  - `access_type=offline` ve `prompt=consent` ile her seferinde yenileme token'ı alınır.
+  - Kod takası bir adımdır; telafisi token'ı Google'da iptal etmektir. Saklama ayrı bir adımdır; telafisi hesabı eski haline koymaktır.
+- **Saklama:**
+  - Yenileme token'ı `integration-credentials` içinde `google` sağlayıcısı olarak tutulur (adr/0027 anahtarı ve denetimi).
+  - Ayarlar: `email`, `merchant_id` ve otomatik oluşturulan `data_source`.
+  - Hesap denetimi:
+    - token yenilenmezse (`invalid_grant`) `secret_invalid`;
+    - Merchant hesabına erişilemezse (`PERMISSION_DENIED`, `NOT_FOUND`) `merchant_invalid`.
+  - Hiçbir yanıt token döndürmez (testli).
+- **Merchant API** (`products_v1` ve `datasources_v1` referanslarından):
+  - İlk gönderimde bir API veri kaynağı oluşturulur: `contentLanguage` tr, `feedLabel` TR, `countries` [TR].
+  - Ürünler `productInputs:insert` ile gönderilir. Kalemler Google feed'iyle aynıdır (`googleFeedFormatter.accepts`).
+  - Fiyat kuruş üzerinden mikro birime çevrilir: 249,90 → `249900000`.
+  - `merchant_offer` tablosu gönderilenin özetini tutar. Değişmeyen kalem yeniden gönderilmez; satıştan kalkan kalem silinir. Silme adı base64url `tr~TR~<offerId>`.
+  - Bir turda en çok 1000 çağrı yapılır.
+  - Google'ın bir kalemi reddetmesi (`INVALID_ARGUMENT`) sayılır ve geçilir. Hesap reddi ya da ulaşılamama turu durdurur; son tur `merchant_sync` tablosuna yazılır.
+- **İş:** `google-merchant-sync`, iki saatte bir (feed'den 30 dakika sonra).
+- **Panel:** Ayarlar > Pazarlama > Google Merchant Center:
+  - platform istemcisi yoksa bilgi;
+  - "Google hesabını bağla" (Google'ın ekranına yönlendirir);
+  - bağlı hesap, Merchant hesap numarası (Google'la denetlenerek kaydedilir), son gönderim, "Şimdi gönder", "Bağlantıyı kaldır" (onaylı; erişim Google'da iptal edilir);
+  - dönüş sonucu bir kez bildirim olarak gösterilir.
+- **Gözden geçir / dış bilgi:**
+  - Platformun Google Cloud projesi, OAuth onay ekranı doğrulaması (hassas kapsam: `auth/content`) ve her mağaza adresinin yönlendirme adresi olarak kaydı kurulumda yapılmalı.
+  - Bağlantı kaldırılınca Merchant Center'daki ürünler orada kalır; süreleri dolana ya da mağaza silene kadar.
+  - Search Console (M15) aynı bağlantıyı ek kapsamla kullanacak.
+
 ## Alternatifler
 
 | Seçenek | Artı | Eksi |

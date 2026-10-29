@@ -94,6 +94,12 @@ const envSchema = z.object({
   APPLE_AUTH_CALLBACK_URL: z.url({ protocol: /^https?$/ }).optional(),
   // A fake Apple in tests; refused when deployed
   APPLE_AUTH_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
+  // F10 M13 (adr/0038 §5): the platform's own Google OAuth client, one for every
+  // shop; each shop connects its Google account with it. Off until both are set
+  GOOGLE_OAUTH_CLIENT_ID: z.string().max(200).optional(),
+  GOOGLE_OAUTH_CLIENT_SECRET: z.string().max(200).optional(),
+  // A fake Google (OAuth and Merchant API) in tests; refused when deployed
+  GOOGLE_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
   // Medusa's own admin screens (/app): off; the shop works in our panel
   // (adr/0022 §3). "on" opens them for the platform team for a while (a
   // staff invite until F12 brings it to the panel)
@@ -233,6 +239,7 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
     "RESEND_BASE_URL",
     "NETGSM_BASE_URL",
     "APPLE_AUTH_BASE_URL",
+    "GOOGLE_BASE_URL",
   ] as const) {
     if (env[name] !== undefined && (env.NODE_ENV === "production" || env.NODE_ENV === "staging")) {
       ctx.addIssue({

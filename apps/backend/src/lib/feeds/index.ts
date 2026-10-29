@@ -6,6 +6,8 @@ export { feedItemsOf, feedPrice, feedText } from "./items"
 export type { FeedFormatter, FeedItem, FeedShop } from "./items"
 export { GOOGLE_NAMESPACE } from "./google"
 export { googleFeedProblems } from "./validate"
+/** Google's formatter: what it lists is what Merchant API receives too (F10 M13). */
+export { googleFeed as googleFeedFormatter } from "./google"
 
 /**
  * Every feed the shop publishes (adr/0038 §3). Akakçe and Cimri join as

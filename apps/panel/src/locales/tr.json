@@ -1109,7 +1109,7 @@
       "features": "Açılıp kapatılabilen mağaza özellikleri",
       "jobs": "Dışa aktarma gibi uzun süren işler ve dosyaları",
       "audit": "Panelde kim neyi ne zaman değiştirdi",
-      "marketing": "Terk edilmiş sepet hatırlatması ve ürün feed'leri"
+      "marketing": "Terk edilmiş sepet, ürün feed'leri ve Google Merchant Center"
     },
     "marketing": {
       "title": "Pazarlama",
@@ -1167,6 +1167,35 @@
         },
         "noDomain": "Mağazanın alan adı tanımlı değil; feed'ler ürün sayfalarına bağlantı verdiği için oluşturulamıyor. Ayarlar > SEO'dan alan adını girin.",
         "notYet": "Henüz oluşturulmadı."
+      },
+      "google": {
+        "title": "Google Merchant Center",
+        "description": "Ürünleriniz Google Alışveriş'te görünsün diye Merchant API ile Merchant Center hesabınıza gönderilir: yalnızca değişenler, iki saatte bir. Feed adresi yerine ya da yanında kullanılabilir.",
+        "notConfigured": "Google bağlantısı platform tarafında henüz açılmadı; açılınca buradan bağlayabilirsiniz.",
+        "notConnected": "Merchant Center hesabınıza erişimi olan Google hesabıyla bağlanın. Google'ın kendi ekranında izin verirsiniz; şifreniz bizimle paylaşılmaz.",
+        "connect": "Google hesabını bağla",
+        "connectedAs": "Bağlı Google hesabı:",
+        "merchantId": "Merchant Center hesap numarası",
+        "merchantIdHint": "Merchant Center'ın sağ üst köşesinde, hesap adınızın altındaki numara. Kaydederken Google'la denetlenir.",
+        "merchantSaved": "Merchant Center hesabı kaydedildi.",
+        "synced": "Son gönderim {{when}}: {{sent}} ürün gönderildi, {{removed}} kaldırıldı, {{failed}} reddedildi.",
+        "syncError": "Son gönderim {{when}} yarıda kaldı; Google bağlantısını ve hesap yetkisini kontrol edin.",
+        "syncNow": "Şimdi gönder",
+        "syncDone": "Ürünler Merchant Center'a gönderildi.",
+        "disconnect": "Bağlantıyı kaldır",
+        "disconnected": "Google bağlantısı kaldırıldı.",
+        "confirm": {
+          "title": "Google bağlantısı kaldırılsın mı?",
+          "description": "Erişim Google'da da sonlandırılır ve ürünler artık gönderilmez. Merchant Center'daki ürünler, siz silene ya da süreleri dolana kadar orada kalır.",
+          "action": "Bağlantıyı kaldır"
+        },
+        "outcome": {
+          "connected": "Google hesabı bağlandı.",
+          "denied": "Google'da izin verilmedi; bağlantı kurulmadı.",
+          "state_invalid": "Bağlantı isteğinin süresi doldu; yeniden deneyin.",
+          "no_refresh_token": "Google kalıcı erişim vermedi; yeniden deneyin.",
+          "failed": "Google bağlantısı kurulamadı; yeniden deneyin."
+        }
       }
     }
   },

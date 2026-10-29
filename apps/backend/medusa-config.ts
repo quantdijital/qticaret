@@ -177,6 +177,11 @@ module.exports = defineConfig({
       resolve: "./src/modules/billing-profile",
       options: { encryptionKey: env.PII_ENCRYPTION_KEY, hashKey: env.PII_HASH_KEY },
     },
+    // F10 M13 (adr/0038 §5): the Google connection under way and the Merchant Center offers
+    {
+      resolve: "./src/modules/google-merchant",
+      options: { encryptionKey: env.PII_ENCRYPTION_KEY },
+    },
     // F10.8 (adr/0038 §3): product feeds, their token hashed and encrypted, files private
     {
       resolve: "./src/modules/marketing-feeds",

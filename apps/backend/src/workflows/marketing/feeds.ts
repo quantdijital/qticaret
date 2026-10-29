@@ -36,7 +36,10 @@ interface FeedProductRow extends FactRow {
  * same facts, prices (the 30-day rule's too) and shipping rates the page's
  * JSON-LD is built from (docs/13 §10).
  */
-async function catalogItems(container: MedusaContainer, storefront: string): Promise<FeedItem[]> {
+export async function catalogItems(
+  container: MedusaContainer,
+  storefront: string
+): Promise<FeedItem[]> {
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
   const urls = container.resolve<UrlRegistryModuleService>(URL_REGISTRY_MODULE)
   const shipping = await shippingFactsOf(container)

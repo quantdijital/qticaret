@@ -26,6 +26,7 @@ import { BRAND_ROUTES, STORE_BRAND_FIELDS } from "./http/brand-routes"
 import { CATALOG_SHEET_ROUTES } from "./http/catalog-sheet-routes"
 import { CHARGEBACK_ROUTES } from "./http/chargeback-routes"
 import { CORE_RETURN_ROUTES } from "./http/core-return-routes"
+import { GOOGLE_ROUTES } from "./http/google-routes"
 import { MARKETING_ROUTES } from "./http/marketing-routes"
 import { ORDER_EDIT_ROUTES } from "./http/order-edit-routes"
 import { RETURN_ROUTES } from "./http/return-routes"
@@ -199,6 +200,7 @@ export default defineMiddlewares({
     ...CUSTOMER_SEGMENT_ROUTES,
     ...REVIEW_ROUTES,
     ...MARKETING_ROUTES,
+    ...GOOGLE_ROUTES,
     ...RETURN_ROUTES,
     ...CORE_RETURN_ROUTES,
     ...ORDER_EDIT_ROUTES,

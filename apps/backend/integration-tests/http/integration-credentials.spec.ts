@@ -104,6 +104,12 @@ medusaIntegrationTestRunner({
           state: "not_configured",
           secrets: { usercode: false, password: false },
         }),
+        // F10 M13: connected through Google's consent screen, never typed
+        expect.objectContaining({
+          provider: "google",
+          state: "not_configured",
+          secrets: { refresh_token: false },
+        }),
       ])
     })
 
