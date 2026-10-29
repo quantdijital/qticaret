@@ -8,8 +8,9 @@ import { useReport } from "@/features/reports/use-report"
 import { formatCount } from "@/lib/format"
 
 /**
- * Reports (docs/06 §4, F11.1): a preset period or a range of days, four
- * reports as tabs (summary, products, categories, day by day); every
+ * Reports (docs/06 §4, F11.1–F11.2): a preset period or a range of days,
+ * reports as tabs (summary, products, categories, brands, promotions and
+ * traffic sources, day by day); every
  * table as one Excel file, or a table as CSV, made on the server. The
  * range stays in the address as the tabs change. No personal data.
  */
@@ -35,6 +36,8 @@ export function ReportsLayout() {
           { to: "/reports", label: t("reports.tabs.summary") },
           { to: "/reports/products", label: t("reports.tabs.products") },
           { to: "/reports/categories", label: t("reports.tabs.categories") },
+          { to: "/reports/brands", label: t("reports.tabs.brands") },
+          { to: "/reports/marketing", label: t("reports.tabs.marketing") },
           { to: "/reports/daily", label: t("reports.tabs.daily") },
         ]}
       />

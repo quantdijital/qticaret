@@ -14,6 +14,9 @@ import type {
   PeriodWindow,
 } from "../../../../lib/dashboard"
 import { ValidationError } from "../../../../lib/errors"
+import type { SalesOrder } from "../../../../lib/reports/sales"
+import { SALES_DETAIL_FIELDS, salesDetails } from "../../reports/sales/details"
+import type { SalesDetails } from "../../reports/sales/details"
 import { ordersBetween } from "../orders"
 
 // Statuses and amounts only: no customer, address or email (adr/0011)
@@ -47,6 +50,9 @@ const CURRENCY = "try"
 /** A report reads a year of orders: past this many the answer says it is capped. */
 export const MAX_REPORT_ORDERS = 50_000
 
+// Reports list every product sold (up to a page a person reads) and every category
+export const REPORT_LIMITS: OverviewLimits = { products: 100, categories: 20 }
+
 /** A preset period, or days a report names (Turkish days, `YYYY-MM-DD`, F11.1). */
 export type ReportRange = { period: PeriodKey } | { from: string; to: string }
 
@@ -62,18 +68,30 @@ export function windowOf(range: ReportRange, now: Date = new Date()): PeriodWind
   return window
 }
 
-/** The window's numbers, uncached; reports ask for longer lists and more orders than the dashboard. */
-export async function computeOverview(
+/** The window's orders in lira with the given fields, the previous window's too. */
+async function readWindow(
   scope: MedusaContainer,
   window: PeriodWindow,
-  limits?: OverviewLimits,
+  fields: string[],
   maxOrders?: number
-): Promise<DashboardOverview> {
+) {
   const [current, previous] = await Promise.all([
-    ordersBetween<OverviewOrder>(scope, FIELDS, window.from, window.to, maxOrders),
-    ordersBetween<OverviewOrder>(scope, FIELDS, window.previousFrom, window.previousTo, maxOrders),
+    ordersBetween<OverviewOrder>(scope, fields, window.from, window.to, maxOrders),
+    ordersBetween<OverviewOrder>(scope, fields, window.previousFrom, window.previousTo, maxOrders),
   ])
   const inLira = (rows: OverviewOrder[]) => rows.filter((row) => row.currency_code === CURRENCY)
+  return {
+    current: inLira(current.rows),
+    previous: inLira(previous.rows),
+    capped: current.count > current.rows.length || previous.count > previous.rows.length,
+  }
+}
+
+function assemble(
+  window: PeriodWindow,
+  read: Awaited<ReturnType<typeof readWindow>>,
+  limits?: OverviewLimits
+): DashboardOverview {
   return {
     period: {
       key: window.key,
@@ -82,8 +100,41 @@ export async function computeOverview(
       to: window.to.toISOString(),
     },
     currency_code: CURRENCY,
-    capped: current.count > current.rows.length || previous.count > previous.rows.length,
-    ...buildOverview(window, inLira(current.rows), inLira(previous.rows), limits),
+    capped: read.capped,
+    ...buildOverview(window, read.current, read.previous, limits),
+  }
+}
+
+/** The window's numbers, uncached; the dashboard's. */
+export async function computeOverview(
+  scope: MedusaContainer,
+  window: PeriodWindow,
+  limits?: OverviewLimits
+): Promise<DashboardOverview> {
+  return assemble(window, await readWindow(scope, window, FIELDS), limits)
+}
+
+export type SalesReport = DashboardOverview & { details: SalesDetails }
+
+/**
+ * The sales report's numbers (F11.1–F11.2), uncached: the dashboard's
+ * over up to MAX_REPORT_ORDERS orders, with every product and category,
+ * and brands, promotions, returns and traffic sources.
+ */
+export async function computeSalesReport(
+  scope: MedusaContainer,
+  window: PeriodWindow
+): Promise<SalesReport> {
+  const read = await readWindow(
+    scope,
+    window,
+    [...FIELDS, ...SALES_DETAIL_FIELDS],
+    MAX_REPORT_ORDERS
+  )
+  const sold = read.current.filter((order) => order.status !== "canceled")
+  return {
+    ...assemble(window, read, REPORT_LIMITS),
+    details: await salesDetails(scope, sold as unknown as SalesOrder[]),
   }
 }
 
@@ -91,21 +142,21 @@ const keyOf = (range: ReportRange): string =>
   "period" in range ? range.period : `${range.from}..${range.to}`
 
 /**
- * A range's overview, cached a minute per range; requests missing the
- * cache together wait for one computation. One reader per list length.
+ * A range's numbers, cached a minute per range; requests missing the
+ * cache together wait for one computation.
  */
-function cachedOverview(limits?: OverviewLimits, maxOrders?: number) {
-  const cache = new Map<string, { at: number; value: DashboardOverview }>()
-  const computing = createSingleFlight<DashboardOverview>()
-  const read = async (scope: MedusaContainer, range: ReportRange): Promise<DashboardOverview> => {
+function cached<T>(compute: (scope: MedusaContainer, window: PeriodWindow) => Promise<T>) {
+  const cache = new Map<string, { at: number; value: T }>()
+  const computing = createSingleFlight<T>()
+  const read = async (scope: MedusaContainer, range: ReportRange): Promise<T> => {
     const window = windowOf(range)
     const key = keyOf(range)
     const hit = cache.get(key)
     if (hit && Date.now() - hit.at < TTL_MS) {
       return hit.value
     }
-    const value = await computing(key, () => computeOverview(scope, window, limits, maxOrders))
-    // A named range's cache is dropped with the rest after a minute: keep at most a few
+    const value = await computing(key, () => compute(scope, window))
+    // Named ranges come and go: keep at most a few
     if (cache.size > 50) {
       cache.clear()
     }
@@ -118,10 +169,8 @@ function cachedOverview(limits?: OverviewLimits, maxOrders?: number) {
   return { read, clear }
 }
 
-const dashboard = cachedOverview()
-// Reports list every product sold (up to a page a person reads) and every category
-export const REPORT_LIMITS: OverviewLimits = { products: 100, categories: 20 }
-const report = cachedOverview(REPORT_LIMITS, MAX_REPORT_ORDERS)
+const dashboard = cached((scope, window) => computeOverview(scope, window))
+const report = cached(computeSalesReport)
 
 export const readDashboardOverview = (scope: MedusaContainer, period: PeriodKey) =>
   dashboard.read(scope, { period })

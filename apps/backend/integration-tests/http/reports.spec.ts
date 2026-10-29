@@ -8,12 +8,16 @@ import { fromMedusaAmount } from "../../src/lib/money"
 import type { MedusaAmount } from "../../src/lib/money"
 import { advanceOrder } from "../../src/scripts/seed/orders/advance"
 import { placeOrder } from "../../src/scripts/seed/orders/place"
+import { RETURN_REQUESTS_MODULE } from "../../src/modules/return-requests"
+import type ReturnRequestsModuleService from "../../src/modules/return-requests/service"
 import { createAdminUser } from "../helpers/admin"
 import { filesNamed } from "../helpers/files"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { stockShop, stockedProduct } from "../helpers/stock"
 import type { StockShop } from "../helpers/stock"
+import { createStorefront } from "../helpers/storefront"
+import type { Storefront } from "../helpers/storefront"
 import { loadTrAddressFixture } from "../helpers/tr-address"
 
 jest.setTimeout(180 * 1000)
@@ -23,6 +27,12 @@ interface Report {
   totals: { sales: { current: string }; orders: { current: number } }
   top_products: { title: string; units: number; sales: string }[]
   series: { bucket: string }[]
+  details: {
+    sources: { source: string; orders: number; sales: string }[]
+    returns: { orders: number; returned: number; exchanged: number; return_rate: number }
+    brands: { name: string | null }[]
+    promotions: unknown[]
+  }
 }
 
 interface Job {
@@ -37,17 +47,30 @@ medusaIntegrationTestRunner({
     const http = api as HttpClient
     let shop: StockShop
     let admin: { headers: Record<string, string> }
+    let storefront: Storefront
     const today = () => turkishDay(new Date())
 
     const get = <T>(url: string) => settle(http.get<T>(url, { headers: admin.headers }))
-    const order = async (variantId: string, quantity: number) =>
+    const order = async (
+      variantId: string,
+      quantity: number,
+      beforeComplete?: (cartId: string) => Promise<void>
+    ) =>
       placeOrder(getContainer(), {
         regionId: shop.regionId,
         salesChannelId: shop.salesChannelId,
         shippingOptionId: shop.shippingOptionId,
         items: [{ variant_id: variantId, quantity }],
         address: { first_name: "Ayşe", last_name: "Yılmaz", address_1: "Demo Sokak 1" },
+        beforeComplete,
       })
+    /** The storefront telling where the cart's shopper first landed from. */
+    const landed = (cartId: string, body: Record<string, unknown>) =>
+      settle(
+        http.post<{ recorded: boolean }>(`/store/carts/${cartId}/source`, body, {
+          headers: storefront.headers,
+        })
+      )
     /** What the orders of the day say they total, read apart from the report (KK1). */
     const salesOfToday = async () => {
       const { data } = await getContainer()
@@ -79,6 +102,7 @@ medusaIntegrationTestRunner({
       const container = getContainer()
       await loadTrAddressFixture(container)
       shop = await stockShop(container)
+      storefront = await createStorefront(container)
       admin = await createAdminUser(http, container)
     })
 
@@ -109,6 +133,51 @@ medusaIntegrationTestRunner({
       // KK1: to the kuruş
       expect(fromMedusaAmount(report.data.totals.sales.current as MedusaAmount)).toBe(expected)
       expect(report.data.top_products[0]?.units).toBe(3)
+    })
+
+    it("tells sales by where the shopper first landed from, and the orders that came back", async () => {
+      const { variantId } = await stockedProduct(
+        getContainer(),
+        shop,
+        `kaynak-${String(Date.now())}`,
+        20,
+        120
+      )
+      const answers: boolean[] = []
+      const searched = await order(variantId, 1, async (cartId) => {
+        for (const body of [
+          { referrer: "https://www.google.com.tr/search?q=kupa" },
+          // A later landing of the same cart changes nothing
+          { utm_source: "bulten", utm_medium: "email" },
+        ]) {
+          answers.push((await landed(cartId, body)).data.recorded)
+        }
+      })
+      await order(variantId, 2, async (cartId) => {
+        await landed(cartId, { utm_source: "google", utm_medium: "cpc", gclid: true })
+      })
+      await order(variantId, 1)
+      await getContainer()
+        .resolve<ReturnRequestsModuleService>(RETURN_REQUESTS_MODULE)
+        .createReturnRequests({
+          order_id: searched,
+          kind: "return",
+          status: "requested",
+          reason: "damaged",
+          items: {},
+        })
+      const bad = await landed("cart_01UNKNOWN0000000000000000", { utm_source: "x" })
+
+      const report = await get<Report>(`/admin/reports/sales?from=${today()}&to=${today()}`)
+      const bySource = Object.fromEntries(
+        report.data.details.sources.map((row) => [row.source, row.orders])
+      )
+
+      expect(answers).toEqual([true, false])
+      expect(bad.status).toBe(404)
+      expect(bySource).toMatchObject({ organic_search: 1, paid_search: 1, unknown: 1, email: 0 })
+      expect(report.data.details.returns).toMatchObject({ orders: 3, returned: 1, exchanged: 0 })
+      expect(report.data.details.brands).toEqual([expect.objectContaining({ name: null })])
     })
 
     it("refuses a range that is no range, and anyone but staff", async () => {

@@ -2572,7 +2572,7 @@
     "limited": "En yeni {{total}} kampanya gösteriliyor."
   },
   "reports": {
-    "description": "Seçtiğiniz dönemin satışları: özet, ürünler, kategoriler ve gün gün",
+    "description": "Seçtiğiniz dönemin satışları: özet, ürünler, kategoriler, markalar, kampanya ve kaynak, gün gün",
     "export": {
       "excel": "Excel olarak indir",
       "csv": "CSV indir",
@@ -2647,7 +2647,66 @@
       "summary": "Özet",
       "products": "Ürünler",
       "categories": "Kategoriler",
-      "daily": "Gün gün"
+      "daily": "Gün gün",
+      "brands": "Markalar",
+      "marketing": "Kampanya ve kaynak"
+    },
+    "share": "Pay",
+    "sales": "Satış",
+    "brands": {
+      "title": "Markalara göre satış",
+      "hint": "Ürünün markasına göre; markası olmayan ürünler ayrı satırda.",
+      "brand": "Marka",
+      "unbranded": "Markasız",
+      "empty": "Bu dönemde satış yok.",
+      "tiles": {
+        "label": "Marka raporunun özeti",
+        "count": "Satış yapan marka",
+        "countHint": "Bu dönemde en az bir ürünü satılan",
+        "best": "En çok satan marka",
+        "unbranded": "Markasız ürün satışı",
+        "unbrandedHint": "Satışın {{share}} kadarı",
+        "total": "Toplam satış",
+        "totalHint": "İptaller hariç"
+      }
+    },
+    "marketing": {
+      "orders": "Sipariş",
+      "tiles": {
+        "label": "İade ve kampanya özeti",
+        "returnRate": "İade oranı",
+        "exchangeRate": "Değişim oranı",
+        "ofOrders_one": "{{orders}} siparişten {{count}} tanesi",
+        "ofOrders_other": "{{orders}} siparişten {{count}} tanesi",
+        "refunded": "İade edilen tutar",
+        "refundedHint": "Bu dönemin siparişlerinden",
+        "discount": "Verilen indirim",
+        "discountHint": "Kodlu ve otomatik kampanyalar"
+      },
+      "promotions": {
+        "title": "Kampanyalar",
+        "hint": "Her kodun kullanıldığı siparişler, verdiği indirim ve o siparişlerin satışı.",
+        "code": "Kod",
+        "discount": "İndirim",
+        "automatic": "Otomatik kampanya",
+        "empty": "Bu dönemde kampanyalı sipariş yok."
+      },
+      "sources": {
+        "title": "Trafik kaynakları",
+        "hint": "Siparişi veren müşterinin mağazaya ilk geldiği yer. Vitrin bu bilgiyi gönderene kadar \"Bilinmiyor\" görünür.",
+        "source": "Kaynak",
+        "empty": "Bu dönemde satış yok.",
+        "names": {
+          "organic_search": "Organik arama (SEO)",
+          "paid_search": "Ücretli arama",
+          "social": "Sosyal medya",
+          "paid_social": "Ücretli sosyal medya",
+          "email": "E-posta",
+          "referral": "Yönlendiren site",
+          "direct": "Doğrudan",
+          "unknown": "Bilinmiyor"
+        }
+      }
     },
     "viewProducts": "Tüm ürünler",
     "viewCategories": "Tüm kategoriler",

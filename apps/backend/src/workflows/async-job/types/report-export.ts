@@ -6,17 +6,21 @@ import type { MedusaAmount } from "../../../lib/money"
 import { CSV_BOM, toCsv } from "../../../lib/security"
 import { XLSX_MIME, writeXlsx } from "../../../lib/sheets"
 import type { SheetCell, SheetSpec } from "../../../lib/sheets"
-import {
-  MAX_REPORT_ORDERS,
-  REPORT_LIMITS,
-  computeOverview,
-  windowOf,
-} from "../../../api/admin/dashboard/overview/read"
-import type { DashboardOverview } from "../../../api/admin/dashboard/overview/read"
+import { computeSalesReport, windowOf } from "../../../api/admin/dashboard/overview/read"
+import type { SalesReport } from "../../../api/admin/dashboard/overview/read"
 import { REPORT_RANGE_FIELDS, checkRange, rangeOf } from "../../../api/admin/reports/validators"
 import type { JobType } from "./types"
 
-const TABLES = ["summary", "daily", "products", "categories"] as const
+const TABLES = [
+  "summary",
+  "daily",
+  "products",
+  "categories",
+  "brands",
+  "promotions",
+  "sources",
+  "returns",
+] as const
 type Table = (typeof TABLES)[number]
 
 const input = z
@@ -46,7 +50,18 @@ const round = (value: number, digits: number) => {
 }
 
 /** Each table's rows, header first, with the panel's report's columns. */
-function tables(report: DashboardOverview): Record<Table, SheetCell[][]> {
+const SOURCE_NAMES: Record<string, string> = {
+  organic_search: "Organik arama",
+  paid_search: "Ücretli arama",
+  social: "Sosyal medya",
+  paid_social: "Ücretli sosyal medya",
+  email: "E-posta",
+  referral: "Yönlendiren site",
+  direct: "Doğrudan",
+  unknown: "Bilinmiyor",
+}
+
+function tables(report: SalesReport): Record<Table, SheetCell[][]> {
   const hourly = report.period.granularity === "hour"
   const { totals } = report
   const total = lira(totals.sales.current)
@@ -109,6 +124,41 @@ function tables(report: DashboardOverview): Record<Table, SheetCell[][]> {
         lira(row.sales),
       ]),
     ],
+    brands: [
+      ["Marka", "Pay (%)", "Ciro (TL)"],
+      ...report.details.brands.map((row) => [
+        row.name ?? "Markasız",
+        share(lira(row.sales)),
+        lira(row.sales),
+      ]),
+    ],
+    promotions: [
+      ["Kod", "Sipariş", "İndirim (TL)", "Ciro (TL)"],
+      ...report.details.promotions.map((row) => [
+        row.code ?? "Otomatik kampanya",
+        row.orders,
+        lira(row.discount),
+        lira(row.sales),
+      ]),
+    ],
+    sources: [
+      ["Kaynak", "Sipariş", "Pay (%)", "Ciro (TL)"],
+      ...report.details.sources.map((row) => [
+        SOURCE_NAMES[row.source] ?? row.source,
+        row.orders,
+        share(lira(row.sales)),
+        lira(row.sales),
+      ]),
+    ],
+    returns: [
+      ["Ölçü", "Değer"],
+      ["Sipariş", report.details.returns.orders],
+      ["İade isteyen sipariş", report.details.returns.returned],
+      ["İade oranı (%)", round(report.details.returns.return_rate * 100, 1)],
+      ["Değişim isteyen sipariş", report.details.returns.exchanged],
+      ["Değişim oranı (%)", round(report.details.returns.exchange_rate * 100, 1)],
+      ["İade edilen tutar (TL)", lira(report.details.returns.refunded)],
+    ],
   }
 }
 
@@ -117,6 +167,10 @@ const SHEETS: Record<Table, { name: string; widths: number[] }> = {
   daily: { name: "Günlük", widths: [18, 10, 10, 14, 20, 22] },
   products: { name: "Ürünler", widths: [8, 48, 10, 18, 10, 14] },
   categories: { name: "Kategoriler", widths: [32, 10, 14] },
+  brands: { name: "Markalar", widths: [32, 10, 14] },
+  promotions: { name: "Promosyonlar", widths: [24, 10, 14, 14] },
+  sources: { name: "Trafik kaynakları", widths: [24, 10, 10, 14] },
+  returns: { name: "İade ve değişim", widths: [26, 14] },
 }
 
 /**
@@ -133,7 +187,7 @@ export const reportExport: JobType<z.infer<typeof input>> = {
   execute: async ({ container, progress, resultFile }, query) => {
     const window = windowOf(rangeOf(query))
     await progress(10)
-    const report = await computeOverview(container, window, REPORT_LIMITS, MAX_REPORT_ORDERS)
+    const report = await computeSalesReport(container, window)
     const all = tables(report)
     const stamp = `${turkishDay(window.from)}_${turkishDay(new Date(window.to.getTime() - 1))}`
     const file = await resultFile(

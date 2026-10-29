@@ -1,6 +1,7 @@
 import { validateAndTransformBody } from "@medusajs/framework/http"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import { StorePostCartReminderRedeem } from "../store/cart-reminders/redeem/validators"
+import { StorePostCartSource } from "../store/carts/[id]/source/validators"
 import { StorePostCartTracking } from "../store/carts/[id]/tracking/validators"
 import { requireUserActor } from "./actor"
 import { rateLimit } from "./rate-limit"
@@ -27,6 +28,15 @@ export const MARKETING_ROUTES = [
     middlewares: [
       rateLimit(() => RATE_LIMIT_PROFILES.checkout, { identity: (req) => req.params["id"] }),
       validateAndTransformBody(StorePostCartTracking),
+    ],
+  },
+  // F11.2 (adr/0039 §2): where the cart's shopper first landed from, within the checkout's budget
+  {
+    matcher: "/store/carts/:id/source",
+    methods: ["POST" as const],
+    middlewares: [
+      rateLimit(() => RATE_LIMIT_PROFILES.checkout, { identity: (req) => req.params["id"] }),
+      validateAndTransformBody(StorePostCartSource),
     ],
   },
   // F10.8 (adr/0038 §3): feeds fetched by address alone; turned on and off by staff

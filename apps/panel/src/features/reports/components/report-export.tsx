@@ -10,7 +10,8 @@ import { jobResultUrl } from "@/features/settings/api/activity"
 import { errorText } from "@/lib/errors"
 import { sdk } from "@/lib/sdk"
 
-export type ReportTable = "summary" | "daily" | "products" | "categories"
+export type ReportTable =
+  "summary" | "daily" | "products" | "categories" | "brands" | "promotions" | "sources" | "returns"
 
 const E = "reports.export"
 

@@ -2572,7 +2572,7 @@
     "limited": "The newest {{total}} promotions are shown."
   },
   "reports": {
-    "description": "The chosen period's sales: summary, products, categories and day by day",
+    "description": "The chosen period's sales: summary, products, categories, brands, campaigns and sources, day by day",
     "export": {
       "excel": "Download as Excel",
       "csv": "Download CSV",
@@ -2647,7 +2647,66 @@
       "summary": "Summary",
       "products": "Products",
       "categories": "Categories",
-      "daily": "Day by day"
+      "daily": "Day by day",
+      "brands": "Brands",
+      "marketing": "Campaigns and sources"
+    },
+    "share": "Share",
+    "sales": "Sales",
+    "brands": {
+      "title": "Sales by brand",
+      "hint": "By the product's brand; products without one on their own row.",
+      "brand": "Brand",
+      "unbranded": "No brand",
+      "empty": "No sales in this period.",
+      "tiles": {
+        "label": "Brand report summary",
+        "count": "Brands that sold",
+        "countHint": "At least one product sold in this period",
+        "best": "Best-selling brand",
+        "unbranded": "Sales without a brand",
+        "unbrandedHint": "{{share}} of sales",
+        "total": "Total sales",
+        "totalHint": "Cancellations left out"
+      }
+    },
+    "marketing": {
+      "orders": "Orders",
+      "tiles": {
+        "label": "Returns and campaigns summary",
+        "returnRate": "Return rate",
+        "exchangeRate": "Exchange rate",
+        "ofOrders_one": "{{count}} of {{orders}} orders",
+        "ofOrders_other": "{{count}} of {{orders}} orders",
+        "refunded": "Refunded",
+        "refundedHint": "On this period's orders",
+        "discount": "Discount given",
+        "discountHint": "Codes and automatic campaigns"
+      },
+      "promotions": {
+        "title": "Campaigns",
+        "hint": "The orders each code went on, the discount it gave and those orders' sales.",
+        "code": "Code",
+        "discount": "Discount",
+        "automatic": "Automatic campaign",
+        "empty": "No campaign orders in this period."
+      },
+      "sources": {
+        "title": "Traffic sources",
+        "hint": "Where the ordering shopper first landed from. \"Unknown\" until the storefront sends it.",
+        "source": "Source",
+        "empty": "No sales in this period.",
+        "names": {
+          "organic_search": "Organic search (SEO)",
+          "paid_search": "Paid search",
+          "social": "Social media",
+          "paid_social": "Paid social media",
+          "email": "E-mail",
+          "referral": "Referring site",
+          "direct": "Direct",
+          "unknown": "Unknown"
+        }
+      }
     },
     "viewProducts": "All products",
     "viewCategories": "All categories",
