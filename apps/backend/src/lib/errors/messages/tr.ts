@@ -340,12 +340,16 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "reports.range_invalid":
     "Tarih aralığı geçersiz: başlangıç bitişten sonra, gelecekte ya da 366 günden uzun olamaz.",
   "catalog_import.cost_invalid": "Maliyet 0 ile 10.000.000 arasında, en fazla 2 ondalıklı olmalı.",
+  "webhook.event_scope":
+    "Bu anahtar seçilen olayların verisini okuyamaz: sipariş ve iade olayları için sipariş okuma, stok olayı için katalog okuma izni gerekir.",
   "webhook.events_required": "Abonelik için en az bir olay seçin.",
+  "webhook.limit": "En çok 20 webhook aboneliği açılabilir; kullanılmayanları silin.",
   "webhook.unknown": "Webhook aboneliği bulunamadı.",
   "webhook.url_https": "Adres https ile başlamalı.",
   "webhook.url_internal": "Adres mağazanın iç ağına ya da yerel bir sunucuya gidemez.",
   "webhook.url_invalid": "Adres geçersiz.",
   "webhook.url_port": "Adres yalnızca 443 numaralı bağlantı noktasını kullanabilir.",
+  "api_key.fields_not_allowed": "Anahtarla alan seçilemez (fields); uç kendi alanlarını döner.",
   "api_key.scope_denied": "Bu anahtar bu işlem için yetkili değil.",
   "api_key.scopes_required": "Anahtar için en az bir izin seçin.",
   "api_key.title_invalid": "Anahtar adı geçersiz.",

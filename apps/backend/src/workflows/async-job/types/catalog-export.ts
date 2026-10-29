@@ -87,10 +87,7 @@ export const catalogExport: JobType<z.infer<typeof input>> = {
       await file.write(CSV_BOM)
       for await (const row of rows) {
         // Turkish Excel reads `1.5` as a date: numbers go out with a decimal comma, as the import reads them
-        const cells = row.map((cell) =>
-          typeof cell === "number" ? String(cell).replace(".", ",") : cell
-        )
-        await file.write(toCsv([cells], ";"))
+        await file.write(toCsv([row], ";", { decimalComma: true }))
       }
     }
     return { summary: { format, ...totals } }

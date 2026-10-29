@@ -1,20 +1,23 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { TENANT_WEBHOOKS_MODULE } from "../../../modules/tenant-webhooks"
 import type TenantWebhooksModuleService from "../../../modules/tenant-webhooks/service"
+import { MAX_SUBSCRIPTIONS } from "../../../modules/tenant-webhooks/service"
 import type { AdminPostWebhookType } from "./validators"
-import { SUBSCRIPTION_FIELDS, subscriptionView } from "./view"
+import { SUBSCRIPTION_FIELDS, ownedBy, subscriptionView } from "./view"
 
 /**
  * GET /admin/webhooks (F11.7): the shop's subscriptions. Staff, or a key
- * with `webhooks:manage` (the scope layer lets only such keys here).
+ * with `webhooks:manage` (the scope layer lets only such keys here), which
+ * sees its own only.
  */
 export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse): Promise<void> {
   const rows = await req.scope
     .resolve<TenantWebhooksModuleService>(TENANT_WEBHOOKS_MODULE)
-    .listWebhookSubscriptions(
-      {},
-      { select: SUBSCRIPTION_FIELDS, order: { created_at: "DESC" }, take: 100 }
-    )
+    .listWebhookSubscriptions(ownedBy(req), {
+      select: SUBSCRIPTION_FIELDS,
+      order: { created_at: "DESC" },
+      take: MAX_SUBSCRIPTIONS,
+    })
   res.json({ subscriptions: rows.map(subscriptionView) })
 }
 

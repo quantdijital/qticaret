@@ -5,9 +5,10 @@ export const CHECK_STATUSES = ["matched", "mismatched", "failed"] as const
 
 /**
  * A day's payment statement checked against the shop (F11.3, adr/0039
- * §3): one per provider and Turkish day, replaced when the day is checked
- * again. The issues name references, order numbers and amounts only;
- * nothing about the shopper or the card.
+ * §3): one per provider, Turkish day and mode, replaced when the day is
+ * checked again. A test account's check is kept apart: a sandbox check
+ * never replaces a live day's result. The issues name references, order
+ * numbers and amounts only; nothing about the shopper or the card.
  */
 export const StatementCheck = model
   .define("statement_check", {
@@ -15,6 +16,8 @@ export const StatementCheck = model
     provider: model.enum([...STATEMENT_PROVIDERS]),
     /** `YYYY-MM-DD`, as Turkey counts days. */
     day: model.text(),
+    /** Checked with the provider's test account: compared against test payments only. */
+    test_mode: model.boolean().default(false),
     status: model.enum([...CHECK_STATUSES]),
     /** The shop's payments taken that day that the statement agrees with. */
     matched: model.number().default(0),
@@ -27,6 +30,6 @@ export const StatementCheck = model
     checked_at: model.dateTime(),
   })
   .indexes([
-    { on: ["provider", "day"], unique: true, where: "deleted_at IS NULL" },
+    { on: ["provider", "day", "test_mode"], unique: true, where: "deleted_at IS NULL" },
     { on: ["day"] },
   ])

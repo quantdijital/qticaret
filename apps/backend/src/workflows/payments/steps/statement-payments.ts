@@ -41,7 +41,8 @@ const inWindow = (moved: (MovedAmount | null)[] | null, from: Date, to: Date) =>
  * took or gave back money on the day or either side of it, in the
  * account's mode (a test payment moved no money), each with its order.
  * `known` names the statement's references that became no order and are
- * in the recovery records (adr/0026 §6).
+ * being or were given back by the recovery job (adr/0026 §6); one whose
+ * refund failed is money kept without an order, and stays an issue.
  */
 export const statementPaymentsStep = createStep(
   "payments-statement-payments",
@@ -95,7 +96,7 @@ export const statementPaymentsStep = createStep(
             await container
               .resolve<PaymentRecoveryModuleService>(PAYMENT_RECOVERY_MODULE)
               .listPaymentRecoveries(
-                { provider: input.provider, reference: unknown },
+                { provider: input.provider, reference: unknown, status: ["pending", "refunded"] },
                 { select: ["reference"] }
               )
           ).map((recovery) => recovery.reference)

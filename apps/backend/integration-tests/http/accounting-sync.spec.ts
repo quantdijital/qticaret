@@ -1,8 +1,10 @@
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
-import { syncAccounting } from "../../src/jobs/accounting-sync"
+import { sweepAccounting, syncAccounting } from "../../src/jobs/accounting-sync"
 import { fakeAccountingLedger } from "../../src/lib/accounting"
 import { ACCOUNTING_MODULE } from "../../src/modules/accounting"
+import { AUDIT_LOG_MODULE } from "../../src/modules/audit-log"
+import type AuditLogModuleService from "../../src/modules/audit-log/service"
 import type AccountingModuleService from "../../src/modules/accounting/service"
 import { MAX_ATTEMPTS } from "../../src/modules/accounting/service"
 import { advanceOrder } from "../../src/scripts/seed/orders/advance"
@@ -21,6 +23,7 @@ import { loadTrAddressFixture } from "../helpers/tr-address"
 jest.setTimeout(180 * 1000)
 
 const minutesLater = (minutes: number) => new Date(Date.now() + minutes * 60_000)
+const NONE = { synced: 0, skipped: 0, failed: 0, stopped: 0 }
 
 /** F11.5 (adr/0039 §5; KK2): records to the accounting program, tried until they go, never twice. */
 medusaIntegrationTestRunner({
@@ -65,7 +68,7 @@ medusaIntegrationTestRunner({
       await new Promise((resolve) => setTimeout(resolve, 300))
 
       expect(await rows()).toEqual([])
-      expect(await syncAccounting(getContainer())).toEqual({ synced: 0, failed: 0, stopped: 0 })
+      expect(await syncAccounting(getContainer())).toEqual(NONE)
     })
 
     it("tries a record the program refused later, and never makes it twice (KK2)", async () => {
@@ -92,10 +95,10 @@ medusaIntegrationTestRunner({
       })
 
       expect(queued.map((row) => row.source_type).sort()).toEqual(["payment", "sale"])
-      expect(first).toEqual({ synced: 1, failed: 1, stopped: 0 })
+      expect(first).toEqual({ ...NONE, synced: 1, failed: 1 })
       expect(waiting).toMatchObject({ attempts: 1, external_ref: null })
-      expect(tooSoon).toEqual({ synced: 0, failed: 0, stopped: 0 })
-      expect(later).toEqual({ synced: 1, failed: 0, stopped: 0 })
+      expect(tooSoon).toEqual(NONE)
+      expect(later).toEqual({ ...NONE, synced: 1 })
       expect(again).toBe(0)
       expect(fakeAccountingLedger.of("sale")).toHaveLength(1)
       expect(fakeAccountingLedger.of("payment")).toHaveLength(1)
@@ -134,11 +137,11 @@ medusaIntegrationTestRunner({
       const after = await syncAccounting(getContainer())
 
       expect(stopped).toMatchObject({ status: "stopped", attempts: MAX_ATTEMPTS })
-      expect(page.data.counts).toEqual({ pending: 0, synced: 0, stopped: 1 })
+      expect(page.data.counts).toEqual({ pending: 0, synced: 0, stopped: 1, skipped: 0 })
       expect(page.data.stopped.map((row) => row.id)).toEqual([stopped?.id])
       expect(bell.filter(({ data }) => data?.["kind"] === "accounting_sync")).toHaveLength(1)
       expect(retried.status).toBe(200)
-      expect(after).toEqual({ synced: 1, failed: 0, stopped: 0 })
+      expect(after).toEqual({ ...NONE, synced: 1 })
     })
 
     it("sends a corporate customer's card with the sale, read when it is sent", async () => {
@@ -162,10 +165,89 @@ medusaIntegrationTestRunner({
       await syncAccounting(getContainer())
 
       const [customer] = fakeAccountingLedger.of("customer")
+      const reads = await getContainer()
+        .resolve<AuditLogModuleService>(AUDIT_LOG_MODULE)
+        .listAuditEntries({ action: "accounting.tax_id_sent" })
       expect(customer?.body).toMatchObject({ kind: "corporate", tax_id: VKN })
+      // Read when sent, and recorded against the customer
+      expect(reads).toEqual([
+        expect.objectContaining({ kind: "sensitive_read", resource_id: customerId }),
+      ])
       expect(fakeAccountingLedger.of("sale")[0]?.body).toMatchObject({
         customer: { external_id: customer?.external_id },
       })
+    })
+
+    it("cancels a sent sale whose order is canceled, and sends none canceled before it went", async () => {
+      await pick("fake")
+      const sent = await order("ayse@example.com")
+      await eventually(rows, (list) => list.length === 1)
+      await syncAccounting(getContainer())
+      await advanceOrder(getContainer(), sent, "canceled")
+      const early = await order("mehmet@example.com")
+      await advanceOrder(getContainer(), early, "canceled")
+      await eventually(rows, (list) => list.length === 4)
+
+      await syncAccounting(getContainer())
+      await syncAccounting(getContainer(), minutesLater(2))
+      const state = (await rows()).map(({ source_type, source_id, status }) => ({
+        source_type,
+        source_id,
+        status,
+      }))
+      const skipped = await records().listAccountingSyncs(
+        { source_id: early, source_type: "sale" },
+        { select: ["last_error"] }
+      )
+
+      expect(state).toEqual(
+        expect.arrayContaining([
+          { source_type: "sale", source_id: sent, status: "synced" },
+          { source_type: "cancel", source_id: sent, status: "synced" },
+          { source_type: "sale", source_id: early, status: "skipped" },
+          { source_type: "cancel", source_id: early, status: "skipped" },
+        ])
+      )
+      expect(skipped[0]?.last_error).toBe("accounting.order_canceled")
+      expect(fakeAccountingLedger.of("sale")).toHaveLength(1)
+      expect(fakeAccountingLedger.of("cancel")).toEqual([
+        expect.objectContaining({
+          body: expect.objectContaining({
+            sale: { external_id: fakeAccountingLedger.of("sale")[0]?.external_id },
+          }) as unknown,
+        }),
+      ])
+    })
+
+    it("sweeps up money taken with no event, never what came before the program", async () => {
+      // No program yet (an earlier test's pick may still be read from memory)
+      expect((await pick("none")).status).toBe(200)
+      const before = await order("once@example.com")
+      // Its event is handled while no program is picked
+      await new Promise((resolve) => setTimeout(resolve, 500))
+      await pick("fake")
+      const placed = await order("ayse@example.com")
+      await eventually(rows, (list) => list.length === 1)
+      // A card payment is taken as it is authorized: Medusa records it, no event follows
+      const { data } = await getContainer()
+        .resolve(ContainerRegistrationKeys.QUERY)
+        .graph({
+          entity: "order",
+          fields: ["payment_collections.payments.id"],
+          filters: { id: placed },
+        })
+      const paymentId =
+        (data[0] as unknown as { payment_collections: { payments: { id: string }[] }[] })
+          .payment_collections[0]?.payments[0]?.id ?? ""
+      await getContainer().resolve(Modules.PAYMENT).capturePayment({ payment_id: paymentId })
+
+      const swept = await sweepAccounting(getContainer(), minutesLater(1))
+      const again = await sweepAccounting(getContainer(), minutesLater(1))
+      const queued = await rows()
+
+      expect([swept, again]).toEqual([1, 0])
+      expect(queued.map((row) => row.source_type).sort()).toEqual(["payment", "sale"])
+      expect(queued.some((row) => row.source_id === before)).toBe(false)
     })
   },
 })

@@ -1,13 +1,16 @@
 import { model } from "@medusajs/framework/utils"
 
-export const SYNC_SOURCES = ["sale", "payment", "refund"] as const
-export const SYNC_STATUSES = ["pending", "synced", "stopped"] as const
+export const SYNC_SOURCES = ["sale", "payment", "refund", "cancel"] as const
+export const SYNC_STATUSES = ["pending", "synced", "stopped", "skipped"] as const
 
 /**
  * One record sent to the shop's accounting program (F11.5, adr/0039 §5):
- * a sale (an order), a payment (a capture) or a refund, once per program.
- * Tried again later and later until it goes through; after MAX_ATTEMPTS it
- * stops and staff are told. Its id is the reference the program dedupes on.
+ * a sale (an order), a payment (a capture), a refund, or a sale's
+ * cancellation (the order, canceled), once per program. Tried again later
+ * and later until it goes through; after MAX_ATTEMPTS it stops and staff
+ * are told. One with nothing to send (a sale canceled before it went, an
+ * order in another currency) is skipped, its reason in `last_error`. Its
+ * id is the reference the program dedupes on.
  */
 export const AccountingSync = model
   .define("accounting_sync", {

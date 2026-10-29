@@ -1346,12 +1346,15 @@
           "synced_one": "{{count}} sent",
           "synced_other": "{{count}} sent",
           "stopped_one": "{{count}} stopped",
-          "stopped_other": "{{count}} stopped"
+          "stopped_other": "{{count}} stopped",
+          "skipped_one": "{{count}} skipped",
+          "skipped_other": "{{count}} skipped"
         },
         "sources": {
           "sale": "Sale",
           "payment": "Collection",
-          "refund": "Refund"
+          "refund": "Refund",
+          "cancel": "Sale cancellation"
         },
         "lastError": "{{attempts}} tries · last error {{code}} · {{when}}",
         "retry": "Try again",
@@ -1361,6 +1364,7 @@
           "sale": "Sale: when an order is placed, with its VAT rates; a corporate customer's card too",
           "payment": "Collection: when a payment is taken, with its method",
           "refund": "Refund: when money is given back",
+          "cancel": "Cancellation: when a sent sale's order is canceled; an order canceled before it went, or not in lira, is never sent",
           "once": "Each record goes to the program once; a retry never makes it again."
         }
       }
@@ -1458,6 +1462,12 @@
           "delivered": "Delivered",
           "pending": "Waiting",
           "stopped": "Stopped"
+        },
+        "failure": {
+          "unreachable": "Address unreachable",
+          "timeout": "No answer in time",
+          "response_too_large": "Answer too large",
+          "redirect": "Redirects are not followed"
         },
         "attempts_one": "{{count}} try",
         "attempts_other": "{{count}} tries",
@@ -3049,7 +3059,7 @@
       "tiles": {
         "label": "Search report summary",
         "searches": "Searches",
-        "searchesHint": "Product searches on the storefront",
+        "searchesHint": "Counted once per visitor a day",
         "zero": "Searches with no result",
         "zeroHint": "{{share}} of searches",
         "terms": "Distinct terms",

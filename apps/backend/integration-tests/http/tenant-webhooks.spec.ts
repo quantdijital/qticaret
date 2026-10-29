@@ -10,7 +10,7 @@ import { createSafeFetch } from "../../src/lib/security/safe-fetch/safe-fetch"
 import { webhookTransport } from "../../src/lib/webhooks"
 import { TENANT_WEBHOOKS_MODULE } from "../../src/modules/tenant-webhooks"
 import type TenantWebhooksModuleService from "../../src/modules/tenant-webhooks/service"
-import { MAX_STREAK } from "../../src/modules/tenant-webhooks/service"
+import { MAX_STREAK, MAX_SUBSCRIPTIONS } from "../../src/modules/tenant-webhooks/service"
 import { placeOrder } from "../../src/scripts/seed/orders/place"
 import { createAdminUser } from "../helpers/admin"
 import { eventually } from "../helpers/eventually"
@@ -217,7 +217,7 @@ medusaIntegrationTestRunner({
       expect(on.data.subscription).toMatchObject({ status: "active", failure_streak: 0 })
     })
 
-    it("lets a key with the webhooks scope manage them, and no other key", async () => {
+    it("lets a key manage its own subscriptions, to the events its scopes read", async () => {
       const key = (scopes: string[]) =>
         settle(
           http.post<{ token: string }>(
@@ -229,22 +229,73 @@ medusaIntegrationTestRunner({
       const basic = (token: string) => ({
         authorization: `Basic ${Buffer.from(`${token}:`).toString("base64")}`,
       })
-      const manager = (await key(["webhooks:manage"])).data.token
+      const manager = (await key(["webhooks:manage", "catalog:read"])).data.token
       const reader = (await key(["orders:read"])).data.token
+      const staffs = await subscribe({
+        url: "https://muhasebe.example.com/qt",
+        events: ["order.placed"],
+      })
 
       const made = await settle(
-        http.post(
+        http.post<{ subscription: { id: string } }>(
           "/admin/webhooks",
           { url: "https://erp.example.com/qt", events: ["stock.changed"] },
           { headers: basic(manager) }
         )
       )
-      const listed = await settle(http.get("/admin/webhooks", { headers: basic(manager) }))
+      const orders = await settle(
+        http.post<{ message: string }>(
+          "/admin/webhooks",
+          { url: "https://erp.example.com/qt", events: ["order.placed"] },
+          { headers: basic(manager) }
+        )
+      )
+      const listed = await settle(
+        http.get<{ subscriptions: { id: string }[] }>("/admin/webhooks", {
+          headers: basic(manager),
+        })
+      )
+      const others = await settle(
+        http.get(`/admin/webhooks/${staffs.data.subscription.id}`, { headers: basic(manager) })
+      )
+      const repoint = await settle(
+        http.post(
+          `/admin/webhooks/${staffs.data.subscription.id}`,
+          { url: "https://kotu.example.com/x" },
+          { headers: basic(manager) }
+        )
+      )
       const refused = await settle(http.get("/admin/webhooks", { headers: basic(reader) }))
+      const staffList = await http.get<{ subscriptions: { id: string }[] }>("/admin/webhooks", {
+        headers: admin.headers,
+      })
 
       expect(made.status).toBe(201)
-      expect(listed.status).toBe(200)
+      expect(orders.status).toBe(403)
+      expect(orders.data.message).toBe("webhook.event_scope")
+      expect(listed.data.subscriptions.map((row) => row.id)).toEqual([made.data.subscription.id])
+      expect([others.status, repoint.status]).toEqual([404, 404])
       expect(refused.status).toBe(403)
+      expect(staffList.data.subscriptions).toHaveLength(2)
+    })
+
+    it("keeps a shop to its share of subscriptions", async () => {
+      const hooksService = hooks()
+      for (let n = 0; n < MAX_SUBSCRIPTIONS; n++) {
+        await hooksService.subscribe({
+          url: `https://hooks${String(n)}.example.com/qt`,
+          events: ["order.placed"],
+          created_by: null,
+        })
+      }
+
+      const over = await subscribe({
+        url: "https://one-more.example.com/qt",
+        events: ["order.placed"],
+      })
+
+      expect(over.status).toBe(400)
+      expect(over.data.message).toBe("webhook.limit")
     })
   },
 })

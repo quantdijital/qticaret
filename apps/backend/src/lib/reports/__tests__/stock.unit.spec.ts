@@ -47,6 +47,20 @@ describe("stock report", () => {
     })
   })
 
+  it("values a fractional shelf to the kuruş, and never fails on a typo's size", () => {
+    const rows = stockRows(
+      [
+        item("half", { on_hand: 0.5, cost: kurus(333) }),
+        item("huge", { on_hand: 1_000_000_000, cost: kurus(1_000_000_000) }),
+      ],
+      motion(),
+      { idleDays: 90, now: NOW }
+    )
+
+    expect(rows.map((row) => row.value)).toEqual([167, null])
+    expect(stockTotals(rows)).toMatchObject({ value: "1.67", costed_items: 1, uncosted_items: 1 })
+  })
+
   it("turns over the period's sales against its average stock", () => {
     const [row] = stockRows(
       [item("a", { on_hand: 6 })],

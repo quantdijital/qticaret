@@ -242,6 +242,9 @@ describe("redactText", () => {
   it.each([
     ["Bearer token", "auth Bearer abc.def-123", `auth Bearer ${REDACTED}`],
     ["Basic credentials", "Basic dXNlcjpwYXNz", `Basic ${REDACTED}`],
+    // Made up here, the shape of a real one
+    ["secret API key", `key sk_${"Ab3".repeat(8)} refused`, `key ${REDACTED} refused`],
+    ["webhook secret", `secret whsec_${"a1".repeat(12)}.`, `secret ${REDACTED}.`],
     [
       "JWT",
       "token eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxMjMifQ.c2lnbmF0dXJl end",

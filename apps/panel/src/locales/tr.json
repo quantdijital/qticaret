@@ -1346,12 +1346,15 @@
           "synced_one": "{{count}} aktarıldı",
           "synced_other": "{{count}} aktarıldı",
           "stopped_one": "{{count}} durdu",
-          "stopped_other": "{{count}} durdu"
+          "stopped_other": "{{count}} durdu",
+          "skipped_one": "{{count}} atlandı",
+          "skipped_other": "{{count}} atlandı"
         },
         "sources": {
           "sale": "Satış",
           "payment": "Tahsilat",
-          "refund": "İade"
+          "refund": "İade",
+          "cancel": "Satış iptali"
         },
         "lastError": "{{attempts}} deneme · son hata {{code}} · {{when}}",
         "retry": "Yeniden dene",
@@ -1361,6 +1364,7 @@
           "sale": "Satış: sipariş verildiğinde, KDV oranlarıyla; kurumsal müşterinin cari kartı da",
           "payment": "Tahsilat: ödeme alındığında, ödeme yöntemiyle",
           "refund": "İade: para geri verildiğinde",
+          "cancel": "İptal: aktarılmış satışın siparişi iptal edilince; aktarılmadan iptal edilen ya da TL dışındaki sipariş hiç gönderilmez",
           "once": "Her kayıt programa bir kez gider; yeniden denemede aynı kayıt yeniden oluşmaz."
         }
       }
@@ -1458,6 +1462,12 @@
           "delivered": "Teslim edildi",
           "pending": "Bekliyor",
           "stopped": "Durdu"
+        },
+        "failure": {
+          "unreachable": "Adrese ulaşılamadı",
+          "timeout": "Zamanında yanıt gelmedi",
+          "response_too_large": "Yanıt çok büyük",
+          "redirect": "Yönlendirme kabul edilmez"
         },
         "attempts_one": "{{count}} deneme",
         "attempts_other": "{{count}} deneme",
@@ -3049,7 +3059,7 @@
       "tiles": {
         "label": "Arama raporunun özeti",
         "searches": "Arama",
-        "searchesHint": "Vitrindeki ürün aramaları",
+        "searchesHint": "Ziyaretçi başına günde bir kez sayılır",
         "zero": "Sonuçsuz arama",
         "zeroHint": "Sonuçsuz oranı {{share}}",
         "terms": "Farklı terim",

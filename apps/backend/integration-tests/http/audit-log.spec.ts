@@ -161,26 +161,34 @@ medusaIntegrationTestRunner({
     })
 
     it("records a secret API key as the actor and other routes by field names only", async () => {
-      const { result } = await createApiKeysWorkflow(getContainer()).run({
-        input: { api_keys: [{ title: "integration", type: "secret", created_by: "user_test" }] },
-      })
-      const token = result[0]?.token ?? ""
-      const name = `Gizli Bölge ${randomUUID()}`
-
-      const created = await http.post<{ region: { id: string } }>(
-        "/admin/regions",
-        { name, currency_code: "try" },
-        { headers: { authorization: `Basic ${Buffer.from(`${token}:`).toString("base64")}` } }
+      // A key reaches its scopes' routes only (F11.6): a webhook it may open
+      const made = await http.post<{ key: { id: string }; token: string }>(
+        "/admin/api-access",
+        { title: "integration", scopes: ["webhooks:manage", "catalog:read"] },
+        { headers: admin.headers }
       )
-      const [entry] = await entries({ actor_id: result[0]?.id ?? "", kind: "mutation" })
+      const secretPath = `gizli-${randomUUID()}`
 
-      expect(created.status).toBe(200)
+      const created = await settle(
+        http.post(
+          "/admin/webhooks",
+          { url: `https://hooks.example.com/${secretPath}`, events: ["stock.changed"] },
+          {
+            headers: {
+              authorization: `Basic ${Buffer.from(`${made.data.token}:`).toString("base64")}`,
+            },
+          }
+        )
+      )
+      const [entry] = await entries({ actor_id: made.data.key.id, kind: "mutation" })
+
+      expect(created.status).toBe(201)
       expect(entry).toMatchObject({
-        action: "POST /admin/regions",
+        action: "POST /admin/webhooks",
         actor_type: "api-key",
-        changes: { fields: ["name", "currency_code"] },
+        changes: { fields: ["url", "events"] },
       })
-      expect(JSON.stringify(entry)).not.toContain("Gizli")
+      expect(JSON.stringify(entry)).not.toContain(secretPath)
     })
 
     it("records reading the audit log itself, and pages at most 100 entries", async () => {

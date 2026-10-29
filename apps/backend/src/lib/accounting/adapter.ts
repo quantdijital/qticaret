@@ -47,10 +47,20 @@ export interface MoneyInput {
   amount: string
 }
 
+/** A sale sent before whose order was canceled: the program cancels its record of it. */
+export interface CancelInput {
+  reference: string
+  /** The sale as the program knows it. */
+  sale: AccountingRef
+  order_display_id: number
+  day: string
+}
+
 export interface AccountingAdapter {
   readonly id: string
   upsertCustomer(input: CustomerInput): Promise<AccountingRef>
   pushSale(input: SaleInput): Promise<AccountingRef>
+  cancelSale(input: CancelInput): Promise<AccountingRef>
   pushPayment(input: MoneyInput): Promise<AccountingRef>
   pushReturn(input: MoneyInput): Promise<AccountingRef>
   healthCheck(): Promise<"ok" | "down">

@@ -263,18 +263,23 @@ describe("uploadSizeGate", () => {
 })
 
 describe("rejectAmbiguousPath", () => {
-  it.each(["/auth\\customer\\emailpass\\reset-password#", "/admin/products#x", "/admin\\products"])(
-    "refuses %s",
-    (path) => {
-      const result = run(rejectAmbiguousPath, request({ path }))
+  it.each([
+    "/auth\\customer\\emailpass\\reset-password#",
+    "/admin/products#x",
+    "/admin\\products",
+    "/admin/gift-cards/../orders",
+    "/admin/gift-cards/%2e%2E/orders",
+    "/admin/./orders",
+    "/admin/webhooks/%2E",
+  ])("refuses %s", (path) => {
+    const result = run(rejectAmbiguousPath, request({ path }))
 
-      expect(result.status()).toBe(400)
-      expect(result.body()).toMatchObject({ message: "errors.invalid_request" })
-    }
-  )
+    expect(result.status()).toBe(400)
+    expect(result.body()).toMatchObject({ message: "errors.invalid_request" })
+  })
 
   it("lets an ordinary path through, encoded characters included", () => {
-    const req = request({ path: "/admin/products/prod%5F01?q=%23" })
+    const req = request({ path: "/admin/products/prod%5F01.v2?q=%23/../" })
 
     expect(run(rejectAmbiguousPath, req).next).toHaveBeenCalled()
   })

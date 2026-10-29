@@ -22,7 +22,12 @@ moduleIntegrationTestRunner<AccountingModuleService>({
       const other = await service.enqueue("other", [sale])
 
       expect([first, again, other]).toEqual([2, 0, 1])
-      expect(await service.counts("fake")).toEqual({ pending: 2, synced: 0, stopped: 0 })
+      expect(await service.counts("fake")).toEqual({
+        pending: 2,
+        synced: 0,
+        stopped: 0,
+        skipped: 0,
+      })
     })
 
     it("gives each due record to one of two workers taking at once", async () => {
@@ -47,20 +52,51 @@ moduleIntegrationTestRunner<AccountingModuleService>({
     it("tries a failing record later and later, stops it after the last, and starts it again", async () => {
       await service.enqueue("fake", [{ source_type: "refund", source_id: "ref_1" }])
       const [row] = await service.claimDue("fake", 1)
-      const id = row?.id ?? ""
+      if (!row) {
+        throw new Error("nothing claimed")
+      }
 
-      expect(await service.markFailed(id, 0, "unavailable")).toBe("pending")
+      expect(await service.markFailed(row, "unavailable")).toBe("pending")
       expect(await service.claimDue("fake", 1)).toEqual([])
-      expect(await service.claimDue("fake", 1, later(2))).toHaveLength(1)
-      expect(await service.markFailed(id, MAX_ATTEMPTS - 1, "unavailable")).toBe("stopped")
+      const [again] = await service.claimDue("fake", 1, later(2))
+      expect(again).toMatchObject({ id: row.id, attempts: 1 })
+      expect(await service.markFailed({ ...row, ...again, attempts: MAX_ATTEMPTS - 1 }, "x")).toBe(
+        "stopped"
+      )
       expect(await service.claimDue("fake", 1, later(24 * 60))).toEqual([])
 
-      expect(await service.retry(id)).toBe(true)
-      expect(await service.retry(id)).toBe(false)
+      expect(await service.retry(row.id)).toBe(true)
+      expect(await service.retry(row.id)).toBe(false)
       const [back] = await service.claimDue("fake", 1)
-      await service.markSynced(back?.id ?? "", "ext_1")
+      expect(back && (await service.markSynced(back, "ext_1"))).toBe(true)
 
-      expect(await service.counts("fake")).toEqual({ pending: 0, synced: 1, stopped: 0 })
+      expect(await service.counts("fake")).toEqual({
+        pending: 0,
+        synced: 1,
+        stopped: 0,
+        skipped: 0,
+      })
+    })
+
+    it("lets a worker whose claim ran out change nothing (KK2)", async () => {
+      await service.enqueue("fake", [{ source_type: "sale", source_id: "order_slow" }])
+      const [slow] = await service.claimDue("fake", 1)
+      // The slow worker's lease runs out; another takes the record and sends it
+      const [fast] = await service.claimDue("fake", 1, later(11))
+      if (!slow || !fast) {
+        throw new Error("nothing claimed")
+      }
+
+      const sent = await service.markSynced(fast, "ext_fast")
+      const lateFailure = await service.markFailed(slow, "timeout")
+      const lateSuccess = await service.markSynced(slow, "ext_slow")
+      const skipped = await service.markSkipped(slow, "accounting.order_canceled")
+
+      expect([sent, lateFailure, lateSuccess, skipped]).toEqual([true, null, false, false])
+      expect(await service.recordOf("fake", "sale", "order_slow")).toMatchObject({
+        status: "synced",
+        external_ref: "ext_fast",
+      })
     })
   },
 })

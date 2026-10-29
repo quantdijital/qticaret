@@ -378,11 +378,11 @@ Detay: `docs/entegrasyonlar/muhasebe.md`
 - F11.8 Dahili arama terimleri raporu: çok aranan/sonuçsuz terimler → advisor S-SEARCH-01 ve odak kelime adayları
 
 **KK:**
-- [ ] Rapor toplamları sipariş verisiyle tutarlı (fixture ile testli)
-- [ ] Muhasebe adaptörü hata verirse aktarım "beklemede" kalıp yeniden deneniyor, mükerrer kayıt oluşmuyor
-- [ ] Giden webhook imzalı; başarısız teslim artan aralıkla yeniden deneniyor; iç IP hedefi reddediliyor
-- [ ] İptal edilen API anahtarı anında reddediliyor ve hiçbir logda görünmüyor
-- [ ] Dışa aktarılan raporda formül enjeksiyonu yok (testli)
+- [x] Rapor toplamları sipariş verisiyle tutarlı (fixture ile testli; 2026-10-29, `reports.spec`: satış, KDV ve ödeme yöntemi toplamları kuruşu kuruşuna siparişlerle aynı)
+- [x] Muhasebe adaptörü hata verirse aktarım "beklemede" kalıp yeniden deneniyor, mükerrer kayıt oluşmuyor (2026-10-29; `accounting-sync.spec`, modül testi: kirası dolmuş işçi kaydı değiştiremez)
+- [x] Giden webhook imzalı; başarısız teslim artan aralıkla yeniden deneniyor; iç IP hedefi reddediliyor (2026-10-29; `tenant-webhooks.spec`, `webhooks.unit.spec`)
+- [x] İptal edilen API anahtarı anında reddediliyor ve hiçbir logda görünmüyor (2026-10-29; `api-access.spec`, `redact.unit.spec`)
+- [x] Dışa aktarılan raporda formül enjeksiyonu yok (testli; 2026-10-29, `reports.spec` `=HYPERLINK` ürün adıyla, `files.unit.spec`)
 
 ---
 

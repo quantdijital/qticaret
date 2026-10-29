@@ -73,7 +73,7 @@ export function AccountingProgramCard({ className }: { className?: string }) {
             </SelectContent>
           </Select>
           <ul className="flex list-disc flex-col gap-1 pl-5 text-[13px] text-muted-foreground">
-            {(["sale", "payment", "refund", "once"] as const).map((key) => (
+            {(["sale", "payment", "refund", "cancel", "once"] as const).map((key) => (
               <li key={key}>{t(`${A}.sends.${key}`)}</li>
             ))}
           </ul>
@@ -88,6 +88,11 @@ export function AccountingProgramCard({ className }: { className?: string }) {
               <StatusBadge tone={data.counts.stopped > 0 ? "danger" : "neutral"}>
                 {t(`${A}.counts.stopped`, { count: data.counts.stopped })}
               </StatusBadge>
+              {data.counts.skipped > 0 ? (
+                <StatusBadge tone="neutral">
+                  {t(`${A}.counts.skipped`, { count: data.counts.skipped })}
+                </StatusBadge>
+              ) : null}
             </div>
           ) : (
             <p className="mt-auto text-[13px] text-muted-foreground">{t(`${A}.none`)}</p>

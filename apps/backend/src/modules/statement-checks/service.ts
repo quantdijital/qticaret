@@ -7,6 +7,7 @@ import type { CHECK_STATUSES } from "./models/statement-check"
 export interface CheckResult {
   provider: StatementProvider
   day: string
+  test_mode: boolean
   status: (typeof CHECK_STATUSES)[number]
   matched: number
   sales: number
@@ -23,6 +24,7 @@ const FIELDS = [
   "id",
   "provider",
   "day",
+  "test_mode",
   "status",
   "matched",
   "sales",
@@ -33,10 +35,17 @@ const FIELDS = [
 
 const stored = (row: Record<string, unknown>): StoredCheck => row as unknown as StoredCheck
 
-/** Payment statements checked against the shop (F11.3): one result per provider and day. */
+/** Payment statements checked against the shop (F11.3): one result per provider, day and mode. */
 class StatementChecksModuleService extends MedusaService({ StatementCheck }) {
-  async checkOf(provider: StatementProvider, day: string): Promise<StoredCheck | null> {
-    const [row] = await this.listStatementChecks({ provider, day }, { take: 1, select: FIELDS })
+  async checkOf(
+    provider: StatementProvider,
+    day: string,
+    testMode = false
+  ): Promise<StoredCheck | null> {
+    const [row] = await this.listStatementChecks(
+      { provider, day, test_mode: testMode },
+      { take: 1, select: FIELDS }
+    )
     return row ? stored(row) : null
   }
 
@@ -46,7 +55,7 @@ class StatementChecksModuleService extends MedusaService({ StatementCheck }) {
    */
   async record(result: CheckResult): Promise<{ id: string; previous: StoredCheck | null }> {
     const data = { ...result, issues: result.issues as unknown as Record<string, unknown> }
-    const previous = await this.checkOf(result.provider, result.day)
+    const previous = await this.checkOf(result.provider, result.day, result.test_mode)
     if (previous) {
       await this.updateStatementChecks({ id: previous.id, ...data })
       return { id: previous.id, previous }

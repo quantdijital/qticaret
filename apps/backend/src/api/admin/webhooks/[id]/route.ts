@@ -1,9 +1,10 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { MedusaError } from "@medusajs/framework/utils"
+import { shownFailure } from "../../../../lib/webhooks"
 import { TENANT_WEBHOOKS_MODULE } from "../../../../modules/tenant-webhooks"
 import type TenantWebhooksModuleService from "../../../../modules/tenant-webhooks/service"
 import type { AdminPostWebhookUpdateType } from "../validators"
-import { SUBSCRIPTION_FIELDS, subscriptionView } from "../view"
+import { SUBSCRIPTION_FIELDS, ownedBy, subscriptionView } from "../view"
 
 // The delivery log a person reads at once; older ones stay until the retention job
 const DELIVERIES_SHOWN = 50
@@ -11,8 +12,9 @@ const DELIVERIES_SHOWN = 50
 async function subscriptionOf(req: AuthenticatedMedusaRequest) {
   const id = (req.params as Record<string, string | undefined>)["id"] ?? ""
   const hooks = req.scope.resolve<TenantWebhooksModuleService>(TENANT_WEBHOOKS_MODULE)
+  // A key's own only: another's reads as unknown
   const [row] = await hooks.listWebhookSubscriptions(
-    { id },
+    { id, ...ownedBy(req) },
     { select: SUBSCRIPTION_FIELDS, take: 1 }
   )
   if (!row) {
@@ -43,7 +45,13 @@ export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse):
       take: DELIVERIES_SHOWN,
     }
   )
-  res.json({ subscription: subscriptionView(row), deliveries })
+  res.json({
+    subscription: subscriptionView(row),
+    deliveries: deliveries.map((delivery) => ({
+      ...delivery,
+      last_error: shownFailure(delivery.last_error),
+    })),
+  })
 }
 
 /** POST /admin/webhooks/:id: a new address or events, or turned on again (its streak cleared). */

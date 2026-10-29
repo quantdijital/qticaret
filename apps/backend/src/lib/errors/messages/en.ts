@@ -336,13 +336,17 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The date range is not valid: it cannot start after it ends, lie in the future or run over 366 days.",
   "catalog_import.cost_invalid":
     "The cost must be between 0 and 10,000,000, with two decimals at most.",
+  "webhook.event_scope":
+    "This key cannot read the data of the chosen events: order and return events need order reading, the stock event needs catalog reading.",
   "webhook.events_required": "Pick at least one event for the subscription.",
+  "webhook.limit": "At most 20 webhook subscriptions can be open; delete the unused ones.",
   "webhook.unknown": "No such webhook subscription.",
   "webhook.url_https": "The address must start with https.",
   "webhook.url_internal":
     "The address cannot point inside the shop's network or to a local server.",
   "webhook.url_invalid": "The address is not valid.",
   "webhook.url_port": "The address can use port 443 only.",
+  "api_key.fields_not_allowed": "A key cannot pick fields; each route returns its own.",
   "api_key.scope_denied": "This key is not allowed to do this.",
   "api_key.scopes_required": "Pick at least one permission for the key.",
   "api_key.title_invalid": "The key's name is not valid.",

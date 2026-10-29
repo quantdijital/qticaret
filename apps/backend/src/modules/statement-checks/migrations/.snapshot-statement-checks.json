@@ -52,6 +52,22 @@
           "enumItems": [],
           "mappedType": "text"
         },
+        "test_mode": {
+          "name": "test_mode",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "false",
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "boolean"
+        },
         "status": {
           "name": "status",
           "type": "text",
@@ -210,13 +226,13 @@
           "expression": "CREATE INDEX IF NOT EXISTS \"IDX_statement_check_deleted_at\" ON \"statement_check\" (\"deleted_at\") WHERE deleted_at IS NULL"
         },
         {
-          "keyName": "IDX_statement_check_provider_day_unique",
+          "keyName": "IDX_statement_check_provider_day_test_mode_unique",
           "columnNames": [],
           "composite": false,
           "constraint": false,
           "primary": false,
           "unique": false,
-          "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_statement_check_provider_day_unique\" ON \"statement_check\" (\"provider\", \"day\") WHERE deleted_at IS NULL"
+          "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_statement_check_provider_day_test_mode_unique\" ON \"statement_check\" (\"provider\", \"day\", \"test_mode\") WHERE deleted_at IS NULL"
         },
         {
           "keyName": "IDX_statement_check_day",

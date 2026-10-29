@@ -12,9 +12,14 @@ import { deliverWebhookWorkflow } from "../workflows/webhooks/deliver"
 const STOCK_FEED = "stock_ledger"
 // How long the delivery log keeps what is done with
 const LOG_DAYS = 30
-// Movements and deliveries taken per run; the next run takes the rest
+// Movements taken per run; the next run takes the rest
 const MOVEMENTS = 500
-const DELIVERIES = 50
+// Deliveries taken at a time, at most a few of one subscription, sent side by
+// side: a receiver that answers slowly holds up its own deliveries only
+const CHUNK = 10
+const PER_SUBSCRIPTION = 3
+// A run takes no more after this: inside the minute between runs, far inside a claim's lease
+const RUN_BUDGET_MS = 45_000
 
 /**
  * The stock ledger's new movements as `stock.changed` (F11.7): read after
@@ -87,37 +92,72 @@ async function alertDisabled(container: MedusaContainer, delivery: DueDelivery) 
     })
 }
 
-/** Sends the deliveries due (F11.7): each signed; a failure later and later (KK3). */
-export async function deliverWebhooks(container: MedusaContainer, now: Date = new Date()) {
-  const counts = { delivered: 0, failed: 0, disabled: 0 }
+interface Counts {
+  delivered: number
+  failed: number
+  disabled: number
+}
+
+async function deliverOne(
+  container: MedusaContainer,
+  delivery: DueDelivery,
+  at: () => Date,
+  counts: Counts
+) {
   const hooks = container.resolve<TenantWebhooksModuleService>(TENANT_WEBHOOKS_MODULE)
-  // Turned off during this run: what it had claimed waits for it to be turned on again
-  const off = new Set<string>()
-  for (const delivery of await hooks.claimDue(DELIVERIES, now)) {
-    if (off.has(delivery.subscription_id)) {
-      continue
-    }
-    const { result } = await deliverWebhookWorkflow(container).run({ input: delivery })
-    if (result.ok && result.status !== null) {
-      await hooks.markDelivered(
-        delivery,
-        { status: result.status, duration_ms: result.duration_ms },
-        now
-      )
-      counts.delivered += 1
-      continue
-    }
-    const outcome = await hooks.markFailed(
+  const { result } = await deliverWebhookWorkflow(container).run({ input: delivery })
+  if (result.ok && result.status !== null) {
+    await hooks.markDelivered(
       delivery,
-      { status: result.status, duration_ms: result.duration_ms, code: result.code ?? "error" },
-      now
+      { status: result.status, duration_ms: result.duration_ms },
+      at()
     )
-    counts.failed += 1
-    if (outcome.disabled) {
-      off.add(delivery.subscription_id)
-      counts.disabled += 1
-      await alertDisabled(container, delivery)
+    counts.delivered += 1
+    return
+  }
+  const code = result.code ?? "error"
+  // The cause in full here; the delivery log shows the shop a coarser one (url.ts)
+  logger.info({
+    event: "webhooks.delivery_failed",
+    subscription_id: delivery.subscription_id,
+    code,
+  })
+  const outcome = await hooks.markFailed(
+    delivery,
+    { status: result.status, duration_ms: result.duration_ms, code },
+    at()
+  )
+  counts.failed += 1
+  if (outcome.disabled) {
+    counts.disabled += 1
+    await alertDisabled(container, delivery)
+  }
+}
+
+/**
+ * Sends the deliveries due (F11.7): each signed; a failure later and later
+ * (KK3). Taken a few at a time with a fresh lease, until none is due or the
+ * run's time is up; a subscription turned off stops being taken.
+ */
+export async function deliverWebhooks(container: MedusaContainer, now: Date = new Date()) {
+  const counts: Counts = { delivered: 0, failed: 0, disabled: 0 }
+  const hooks = container.resolve<TenantWebhooksModuleService>(TENANT_WEBHOOKS_MODULE)
+  const started = Date.now()
+  // The run's clock: `now` moved on by the time the run has taken
+  const at = () => new Date(now.getTime() + (Date.now() - started))
+  while (Date.now() - started < RUN_BUDGET_MS) {
+    const due = await hooks.claimDue(CHUNK, at(), PER_SUBSCRIPTION)
+    if (due.length === 0) {
+      break
     }
+    await Promise.all(
+      due.map((delivery) =>
+        deliverOne(container, delivery, at, counts).catch((error: unknown) => {
+          // Due again once its lease ends
+          logger.warn({ event: "webhooks.delivery_error", err: errorSummary(error) })
+        })
+      )
+    )
   }
   return counts
 }

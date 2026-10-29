@@ -8,6 +8,7 @@ jest.setTimeout(120 * 1000)
 const result = (over: Partial<CheckResult> = {}): CheckResult => ({
   provider: "paytr",
   day: "2026-10-28",
+  test_mode: false,
   status: "matched",
   matched: 3,
   sales: 3,
@@ -41,6 +42,17 @@ moduleIntegrationTestRunner<StatementChecksModuleService>({
         status: "mismatched",
         issues: [issue],
         error_code: null,
+      })
+    })
+
+    it("keeps a test account's check apart: it never replaces the live day", async () => {
+      const live = await service.record(result({ status: "mismatched" }))
+      const sandbox = await service.record(result({ test_mode: true }))
+
+      expect(sandbox.id).not.toBe(live.id)
+      expect(await service.checkOf("paytr", "2026-10-28")).toMatchObject({ status: "mismatched" })
+      expect(await service.checkOf("paytr", "2026-10-28", true)).toMatchObject({
+        status: "matched",
       })
     })
 

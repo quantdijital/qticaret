@@ -12,7 +12,6 @@ import type { ScopedRoute } from "./scopes"
 const LIST_QUERY = z.object({
   limit: z.number().int().min(1).max(100).optional().describe("Sayfadaki kayıt (en çok 100)"),
   offset: z.number().int().min(0).optional().describe("Atlanan kayıt"),
-  fields: z.string().optional().describe("Dönecek alanlar, virgülle (Medusa `fields`)"),
   order: z.string().optional().describe("Sıralama alanı; azalan için başına `-`"),
 })
 
@@ -82,6 +81,7 @@ function operation(route: ScopedRoute) {
     responses: {
       "200": { description: "Medusa'nın yanıtı" },
       "401": { description: "Anahtar yok, yanlış ya da iptal edilmiş" },
+      "400": { description: "Gövde ya da sorgu geçersiz; `fields` gönderildi" },
       "403": { description: "Bu uç anahtarın kapsamında değil" },
       "429": { description: "Anahtarın dakikalık istek sınırı aşıldı" },
     },
@@ -100,7 +100,7 @@ export function openApiDocument(serverUrl: string) {
       title: "Mağaza dış API'si",
       version: "1",
       description:
-        "Anahtar Basic kimlik doğrulamada kullanıcı adı olarak gönderilir (parola boş). Her anahtar yalnızca kapsamındaki uçlara erişir.",
+        "Anahtar Basic kimlik doğrulamada kullanıcı adı olarak gönderilir (parola boş). Her anahtar yalnızca kapsamındaki uçlara erişir ve her ucun kendi alanlarını okur: `fields` parametresi anahtarla kabul edilmez.",
     },
     servers: [{ url: serverUrl }],
     components: { securitySchemes: { apiKey: { type: "http", scheme: "basic" } } },

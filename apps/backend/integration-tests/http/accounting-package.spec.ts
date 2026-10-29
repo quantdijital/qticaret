@@ -137,7 +137,11 @@ medusaIntegrationTestRunner({
       expect(sales).not.toContain(`#${String((await customerOf(canceled)).display_id)};`)
       expect(text("tahsilatlar-")).toContain(`#${String(buyer.display_id)};`)
       expect(audit).toEqual([
-        expect.objectContaining({ kind: "sensitive_read", resource_id: month() }),
+        expect.objectContaining({
+          kind: "sensitive_read",
+          resource_id: month(),
+          changes: expect.objectContaining({ customers: [buyer.customer_id] }) as unknown,
+        }),
       ])
     })
 

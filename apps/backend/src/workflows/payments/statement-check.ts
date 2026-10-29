@@ -94,7 +94,12 @@ export const statementCheckWorkflow = createWorkflow(
       }))
     )
     const result = transform({ input, statement, shop }, ({ input, statement, shop }) => {
-      const base = { provider: input.provider, day: input.day, checked_at: new Date() }
+      const base = {
+        provider: input.provider,
+        day: input.day,
+        test_mode: statement.test_mode,
+        checked_at: new Date(),
+      }
       if (statement.error_code !== null) {
         return {
           ...base,

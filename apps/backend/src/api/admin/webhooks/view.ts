@@ -1,3 +1,6 @@
+import type { MedusaRequest } from "@medusajs/framework/http"
+import { apiKeyOf } from "../../http/api-key-guard"
+
 /** A subscription as the panel and an integration read it: never its secret. */
 export const subscriptionView = (row: {
   id: string
@@ -26,3 +29,13 @@ export const SUBSCRIPTION_FIELDS = [
   "disabled_at",
   "created_at",
 ]
+
+/**
+ * The subscriptions a caller may see and change: staff all of them, a key
+ * only those it made itself, never staff's (their addresses, re-pointing
+ * their queued deliveries).
+ */
+export const ownedBy = (req: MedusaRequest): { created_by?: string } => {
+  const keyId = apiKeyOf(req)
+  return keyId ? { created_by: keyId } : {}
+}

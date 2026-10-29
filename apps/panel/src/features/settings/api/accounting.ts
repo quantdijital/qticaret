@@ -8,10 +8,10 @@ export interface AccountingStatus {
   adapter: AccountingAdapterId
   active: boolean
   adapters: { id: AccountingAdapterId; available: boolean }[]
-  counts: { pending: number; synced: number; stopped: number }
+  counts: { pending: number; synced: number; stopped: number; skipped: number }
   stopped: {
     id: string
-    source_type: "sale" | "payment" | "refund"
+    source_type: "sale" | "payment" | "refund" | "cancel"
     source_id: string
     attempts: number
     last_error: string | null

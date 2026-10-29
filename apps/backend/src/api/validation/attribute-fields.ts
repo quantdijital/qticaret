@@ -69,10 +69,11 @@ export function restrictStoreRelation(relation: RegExp, leaves: readonly string[
 /**
  * A variant's extension holds its unit cost (F11.4), the shop's own: no
  * storefront asks for any of it (the MPN reaches structured data through
- * the server, not through `fields`).
+ * the server, not through `fields`). Matched anywhere in a token and in
+ * any case: no spelling of the link reaches it.
  */
 export const rejectStoreVariantExtension = restrictStoreRelation(
-  /(^|\.)\*?variant_extension\b/,
+  /variant_extension/i,
   [],
   "variant_extension_fields"
 )

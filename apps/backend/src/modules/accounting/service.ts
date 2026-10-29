@@ -18,6 +18,8 @@ export interface ClaimedSync {
   source_type: SyncSource
   source_id: string
   attempts: number
+  /** Until when this claim holds it: a mark of a claim another worker has since taken is refused. */
+  lease: Date
 }
 
 interface Executor {
@@ -86,38 +88,103 @@ class AccountingModuleService extends MedusaService({ AccountingSync }) {
            WHERE adapter = ? AND status = 'pending' AND next_attempt_at <= ? AND deleted_at IS NULL
            ORDER BY next_attempt_at, id LIMIT ?
            FOR UPDATE SKIP LOCKED)
-        RETURNING id, adapter, source_type, source_id, attempts`,
+        RETURNING id, adapter, source_type, source_id, attempts, next_attempt_at AS lease`,
       [minutesFrom(now, LEASE_MINUTES), adapter, now, limit]
     )) as ClaimedSync[]
   }
 
-  async markSynced(id: string, externalRef: string, now: Date = new Date()): Promise<void> {
-    await this.updateAccountingSyncs({
-      id,
+  /**
+   * Leaves a claimed record as `changes` say, only while the claim holds:
+   * a worker whose lease ran out (and whose record another worker took)
+   * changes nothing. Whether it did.
+   */
+  @InjectTransactionManager()
+  private async settle(
+    row: ClaimedSync,
+    changes: {
+      status: SyncStatus
+      attempts: number
+      next_attempt_at: Date
+      external_ref: string | null
+      last_error: string | null
+      synced_at: Date | null
+    },
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<boolean> {
+    const manager = sharedContext.transactionManager as Executor
+    const rows = (await manager.execute(
+      `UPDATE accounting_sync
+          SET status = ?, attempts = ?, next_attempt_at = ?, external_ref = ?, last_error = ?,
+              synced_at = ?, updated_at = now()
+        WHERE id = ? AND status = 'pending' AND next_attempt_at = ? AND deleted_at IS NULL
+       RETURNING id`,
+      [
+        changes.status,
+        changes.attempts,
+        changes.next_attempt_at,
+        changes.external_ref,
+        changes.last_error,
+        changes.synced_at,
+        row.id,
+        row.lease,
+      ]
+    )) as unknown[]
+    return rows.length > 0
+  }
+
+  /** Sent: the program's id kept. False when the claim had run out. */
+  markSynced(row: ClaimedSync, externalRef: string, now: Date = new Date()): Promise<boolean> {
+    return this.settle(row, {
       status: "synced",
+      attempts: row.attempts,
+      next_attempt_at: now,
       external_ref: externalRef,
       last_error: null,
       synced_at: now,
     })
   }
 
-  /** One more failed try: later again, or stopped after the last; the status it is left in. */
+  /** Nothing to send, for `code`'s reason. False when the claim had run out. */
+  markSkipped(row: ClaimedSync, code: string, now: Date = new Date()): Promise<boolean> {
+    return this.settle(row, {
+      status: "skipped",
+      attempts: row.attempts,
+      next_attempt_at: now,
+      external_ref: null,
+      last_error: code.slice(0, 120),
+      synced_at: null,
+    })
+  }
+
+  /**
+   * One more failed try: later again, or stopped after the last; the
+   * status it is left in, or null when the claim had run out.
+   */
   async markFailed(
-    id: string,
-    attempts: number,
+    row: ClaimedSync,
     code: string,
     now: Date = new Date()
-  ): Promise<SyncStatus> {
-    const tried = attempts + 1
-    const stopped = tried >= MAX_ATTEMPTS
-    await this.updateAccountingSyncs({
-      id,
+  ): Promise<SyncStatus | null> {
+    const tried = row.attempts + 1
+    const status = tried >= MAX_ATTEMPTS ? "stopped" : "pending"
+    const done = await this.settle(row, {
+      status,
       attempts: tried,
-      last_error: code.slice(0, 120),
-      status: stopped ? "stopped" : "pending",
       next_attempt_at: minutesFrom(now, BACKOFF_MINUTES[tried - 1] ?? 720),
+      external_ref: null,
+      last_error: code.slice(0, 120),
+      synced_at: null,
     })
-    return stopped ? "stopped" : "pending"
+    return done ? status : null
+  }
+
+  /** A program's record of a source: how far it went, and its id there. */
+  async recordOf(adapter: string, sourceType: SyncSource, sourceId: string) {
+    const [row] = await this.listAccountingSyncs(
+      { adapter, source_type: sourceType, source_id: sourceId },
+      { select: ["id", "status", "external_ref"], take: 1 }
+    )
+    return row ?? null
   }
 
   /** Staff ask a stopped record to be tried again, from the start. */
@@ -128,6 +195,24 @@ class AccountingModuleService extends MedusaService({ AccountingSync }) {
     }
     await this.updateAccountingSyncs({ id, status: "pending", attempts: 0, next_attempt_at: now })
     return true
+  }
+
+  /**
+   * When the first record for a program was queued: its books start there,
+   * and a sweep never reaches before it (what came before the shop picked
+   * the program is not sent). Null while nothing is queued.
+   */
+  @InjectManager()
+  async firstQueuedAt(
+    adapter: string,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<Date | null> {
+    const manager = sharedContext.manager as Executor
+    const [row] = (await manager.execute(
+      `SELECT min(created_at) AS first FROM accounting_sync WHERE adapter = ? AND deleted_at IS NULL`,
+      [adapter]
+    )) as { first: Date | null }[]
+    return row?.first ? new Date(row.first) : null
   }
 
   /** How many records are in each state, for a program. */
@@ -142,7 +227,7 @@ class AccountingModuleService extends MedusaService({ AccountingSync }) {
         WHERE adapter = ? AND deleted_at IS NULL GROUP BY status`,
       [adapter]
     )) as { status: SyncStatus; count: number }[]
-    const counts: Record<SyncStatus, number> = { pending: 0, synced: 0, stopped: 0 }
+    const counts: Record<SyncStatus, number> = { pending: 0, synced: 0, stopped: 0, skipped: 0 }
     for (const row of rows) {
       counts[row.status] = row.count
     }

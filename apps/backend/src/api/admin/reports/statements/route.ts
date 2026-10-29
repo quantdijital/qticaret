@@ -17,6 +17,7 @@ import type { AdminPostStatementCheckType } from "./validators"
 const view = (check: CheckResult) => ({
   provider: check.provider,
   day: check.day,
+  test_mode: check.test_mode,
   status: check.status,
   matched: check.matched,
   sales: check.sales,
@@ -32,8 +33,9 @@ const view = (check: CheckResult) => ({
 /**
  * GET /admin/reports/statements (F11.3, adr/0039 §3): the period's days
  * as PayTR's and iyzico's statements and the shop's payments agree, and
- * which providers are connected live. Staff only; references, order
- * numbers and amounts, nothing personal.
+ * which providers are connected live. Each provider's checks of the mode
+ * its account is in now: a live shop never sees its sandbox days. Staff
+ * only; references, order numbers and amounts, nothing personal.
  */
 export async function GET(
   req: AuthenticatedMedusaRequest<unknown, AdminGetReportRangeType>,
@@ -53,7 +55,11 @@ export async function GET(
       }
     })
   )
-  res.json({ checks: checks.map(view), providers })
+  const modes = new Map(providers.map((provider) => [provider.provider, provider.test_mode]))
+  res.json({
+    checks: checks.filter((check) => check.test_mode === modes.get(check.provider)).map(view),
+    providers,
+  })
 }
 
 /** POST /admin/reports/statements: checks a closed day again, now (a provider call). */

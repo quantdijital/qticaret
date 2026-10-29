@@ -144,6 +144,8 @@ const TEXT_PATTERNS: readonly (readonly [
   ],
   // A Medusa secret API key (F11.6, KK4): never in a log, whole or in part
   [/(?<![A-Za-z0-9])sk_[A-Za-z0-9]{16,}/g, () => REDACTED],
+  // A webhook's signing secret (F11.7), should one be quoted in a message
+  [/(?<![A-Za-z0-9])whsec_[0-9a-f]{16,}/gi, () => REDACTED],
   // Turkish mobiles with or without +90/0; landlines only with a prefix
   [new RegExp(String.raw`(?<![A-Za-z0-9])${PHONE_PREFIX}?5${PHONE_REST}`, "g"), () => REDACTED],
   [new RegExp(String.raw`(?<![A-Za-z0-9])${PHONE_PREFIX}[2-4]${PHONE_REST}`, "g"), () => REDACTED],

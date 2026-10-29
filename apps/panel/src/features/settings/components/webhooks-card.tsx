@@ -73,7 +73,10 @@ function DeliveriesDialog({ id, onClose }: { id: string; onClose: () => void }) 
                 </span>
                 <span className="ml-auto text-xs text-muted-foreground tabular-nums">
                   {[
-                    row.last_status === null ? row.last_error : `HTTP ${String(row.last_status)}`,
+                    row.last_status !== null
+                      ? `HTTP ${String(row.last_status)}`
+                      : row.last_error &&
+                        t(`${W}.failure.${row.last_error}`, { defaultValue: row.last_error }),
                     row.last_duration_ms === null
                       ? null
                       : `${formatCount(row.last_duration_ms)} ms`,

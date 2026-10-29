@@ -166,6 +166,14 @@ describe("escapeCsvCell", () => {
     expect(toCsv([["a;b", "c"]], ";")).toBe('"a;b";c\r\n')
   })
 
+  it("writes numbers with a decimal comma for Turkish Excel, negatives still numbers", () => {
+    expect(toCsv([["-150,5 TL", -150.5, 0.25, "=1+1"]], ";", { decimalComma: true })).toBe(
+      `"'-150,5 TL";-150,5;0,25;'=1+1\r\n`
+    )
+    // In a comma file the decimal comma is quoted
+    expect(toCsv([[-1.5, "a"]], ",", { decimalComma: true })).toBe('"-1,5",a\r\n')
+  })
+
   it("joins rows with CRLF and ends with one", () => {
     expect(
       toCsv([

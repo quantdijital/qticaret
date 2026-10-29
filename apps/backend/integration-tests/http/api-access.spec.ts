@@ -1,3 +1,4 @@
+import { request as httpRequest } from "node:http"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { createAdminUser } from "../helpers/admin"
 import type { HttpClient } from "../helpers/http"
@@ -92,6 +93,54 @@ medusaIntegrationTestRunner({
       expect(closed.status).toBe(403)
       expect(written.status).toBe(200)
       expect(read.status).toBe(200)
+    })
+
+    it("judges the path Express routes, and lets a key name no fields", async () => {
+      const reader = await make(["orders:read", "catalog:read"])
+      // The path as written, never folded by a client's URL parser
+      const raw = (path: string) =>
+        new Promise<number>((resolve, reject) => {
+          const base = new URL((api as { defaults: { baseURL: string } }).defaults.baseURL)
+          const req = httpRequest(
+            {
+              hostname: base.hostname,
+              port: base.port,
+              path,
+              method: "GET",
+              headers: basic(reader.token),
+            },
+            (res) => {
+              res.resume()
+              resolve(res.statusCode ?? 0)
+            }
+          )
+          req.on("error", reject)
+          req.end()
+        })
+
+      const escaped = await raw("/admin/gift-cards/%2e%2e/orders")
+      const dotted = await raw("/admin/gift-cards/../orders")
+      const plain = await raw("/admin/orders")
+      const cost = await call(
+        "get",
+        "/admin/products?fields=*variants.variant_extension",
+        reader.token
+      )
+      const payments = await call(
+        "get",
+        "/admin/orders?fields=+payment_collections.payments.data",
+        reader.token
+      )
+      // A person may still pick fields
+      const staff = await settle(
+        http.get("/admin/products?fields=id,title", { headers: admin.headers })
+      )
+
+      expect([escaped, dotted]).toEqual([400, 400])
+      expect(plain).toBe(200)
+      expect([cost.status, payments.status]).toEqual([400, 400])
+      expect(cost.data).toMatchObject({ message: "api_key.fields_not_allowed" })
+      expect(staff.status).toBe(200)
     })
 
     it("refuses a revoked key at once, and never logs a key (KK4)", async () => {

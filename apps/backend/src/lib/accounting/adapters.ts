@@ -1,4 +1,4 @@
-import { parseEnv } from "../env"
+import { isLocalEnv, parseEnv } from "../env"
 import type { AccountingAdapter } from "./adapter"
 import { fakeAccountingAdapter } from "./fake"
 
@@ -6,10 +6,13 @@ import { fakeAccountingAdapter } from "./fake"
 export const ACCOUNTING_ADAPTERS = ["none", "fake"] as const
 export type AccountingAdapterId = (typeof ACCOUNTING_ADAPTERS)[number]
 
-/** Whether the fake program may be picked: never where the shop runs live. */
+/**
+ * Whether the fake program may be picked: in development and tests only.
+ * An unset NODE_ENV counts as deployed: records marked sent into a
+ * process's memory would never reach the books.
+ */
 export function fakeAccountingAllowed(): boolean {
-  const env = parseEnv().NODE_ENV
-  return env !== "production" && env !== "staging"
+  return isLocalEnv(parseEnv())
 }
 
 /** The adapter a setting names, or null when none is (or the fake one, deployed). */

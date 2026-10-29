@@ -18,9 +18,16 @@ export interface TermCount {
   zero_results: number
 }
 
+/** Distinct terms a day keeps: a shop's searches fit, a flood of made-up ones stops here. */
+export const MAX_TERMS_A_DAY = 5000
+
 /** Storefront search terms by day (F11.8): counted, ranked, kept 180 days. */
 class SearchTermsModuleService extends MedusaService({ SearchTermDay }) {
-  /** One search of `term` on `day`, and whether it found nothing; one statement, safe at once. */
+  /**
+   * One search of `term` on `day`, and whether it found nothing; one
+   * statement, safe at once. A term new to a day that already holds
+   * MAX_TERMS_A_DAY is not added; known ones still count.
+   */
   @InjectTransactionManager()
   async record(
     day: string,
@@ -32,12 +39,15 @@ class SearchTermsModuleService extends MedusaService({ SearchTermDay }) {
     const zero = found === 0 ? 1 : 0
     await manager.execute(
       `INSERT INTO search_term_day (id, day, term, searches, zero_results, created_at, updated_at)
-       VALUES (?, ?, ?, 1, ?, now(), now())
+       SELECT ?, ?, ?, 1, ?, now(), now()
+        WHERE EXISTS (SELECT 1 FROM search_term_day
+                       WHERE day = ? AND term = ? AND deleted_at IS NULL)
+           OR (SELECT count(*) FROM search_term_day WHERE day = ? AND deleted_at IS NULL) < ?
        ON CONFLICT (day, term) WHERE deleted_at IS NULL
        DO UPDATE SET searches = search_term_day.searches + 1,
                      zero_results = search_term_day.zero_results + EXCLUDED.zero_results,
                      updated_at = now()`,
-      [generateEntityId(undefined, "stday"), day, term, zero]
+      [generateEntityId(undefined, "stday"), day, term, zero, day, term, day, MAX_TERMS_A_DAY]
     )
   }
 

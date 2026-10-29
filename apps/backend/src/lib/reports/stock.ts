@@ -41,6 +41,20 @@ const DAY_MS = 24 * 60 * 60 * 1000
 
 const round2 = (value: number) => Math.round(value * 100) / 100
 
+// An item's stock worth more than this (10 billion lira) is a typo, not a
+// shelf: counted with those without a cost, so 5000 items still add up
+// inside a safe integer and one wrong number never fails the report
+const MAX_ITEM_VALUE = 1_000_000_000_000
+
+/** Unit cost × units on the shelf, to the kuruş (a quantity may be fractional). */
+function valueOf(cost: Kurus | null, shelf: number): Kurus | null {
+  if (cost === null) {
+    return null
+  }
+  const value = Math.round(cost * shelf)
+  return Number.isSafeInteger(value) && value <= MAX_ITEM_VALUE ? kurus(value) : null
+}
+
 export function stockRows(
   items: readonly StockItem[],
   motion: StockMotion,
@@ -61,7 +75,7 @@ export function stockRows(
       start,
       end,
       turnover: average > 0 ? round2(sold / average) : null,
-      value: item.cost === null ? null : kurus(item.cost * shelf),
+      value: valueOf(item.cost, shelf),
       idle: shelf > 0 && !lately && item.created_at.getTime() < idleSince,
     }
   })

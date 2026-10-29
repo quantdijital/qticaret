@@ -401,7 +401,7 @@ medusaIntegrationTestRunner({
       expect(csv).not.toMatch(/(^|;)=HYPERLINK/m)
       // A decimal comma, as Turkish Excel reads numbers
       // Its share is of the orders' total, shipping included, as the panel counts it
-      expect(csv).toMatch(/;1;"99,5";"[\d,]+";"99,5"/)
+      expect(csv).toMatch(/;1;99,5;[\d,]+;99,5/)
       expect(xlsx).toMatchObject({ status: "succeeded" })
     })
   },

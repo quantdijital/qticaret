@@ -50,9 +50,20 @@ export const escapeFormulaStart = (text: string): string => text.replace(LEADING
 /** `escapeFormulaStart` undone, exactly. */
 export const unescapeFormulaStart = (text: string): string => text.replace(LEADING_ESCAPED, "$1")
 
-export function escapeCsvCell(value: unknown): string {
+export interface CsvOptions {
+  /**
+   * Numbers with a decimal comma (`1,5`): Turkish Excel reads `1.5` as a
+   * date. Still numbers: never escaped, a negative stays a negative.
+   */
+  decimalComma?: boolean
+}
+
+export function escapeCsvCell(value: unknown, options: CsvOptions = {}): string {
   if (value === null || value === undefined) {
     return ""
+  }
+  if (typeof value === "number" && options.decimalComma) {
+    return String(value).replace(".", ",")
   }
   if (typeof value === "number" || typeof value === "bigint" || typeof value === "boolean") {
     return String(value)
@@ -67,16 +78,27 @@ export type CsvDelimiter = "," | ";"
  * Cells joined by `delimiter`. Turkish Excel opens `;` files as columns and
  * `,` files as one column; exports for Turkish users use `;` and a BOM.
  */
-export function toCsvRow(values: readonly unknown[], delimiter: CsvDelimiter = ","): string {
-  return values.map(escapeCsvCell).join(delimiter)
+export function toCsvRow(
+  values: readonly unknown[],
+  delimiter: CsvDelimiter = ",",
+  options: CsvOptions = {}
+): string {
+  const cell =
+    options.decimalComma && delimiter === ","
+      ? // A decimal comma in a comma file is quoted, or it splits the cell
+        (value: unknown) =>
+          typeof value === "number" ? `"${escapeCsvCell(value, options)}"` : escapeCsvCell(value)
+      : (value: unknown) => escapeCsvCell(value, options)
+  return values.map(cell).join(delimiter)
 }
 
 /** Rows joined with CRLF, ending with one (RFC 4180). */
 export function toCsv(
   rows: readonly (readonly unknown[])[],
-  delimiter: CsvDelimiter = ","
+  delimiter: CsvDelimiter = ",",
+  options: CsvOptions = {}
 ): string {
-  return rows.map((row) => `${toCsvRow(row, delimiter)}\r\n`).join("")
+  return rows.map((row) => `${toCsvRow(row, delimiter, options)}\r\n`).join("")
 }
 
 /** A UTF-8 byte order mark: Excel reads Turkish letters right only with it. */

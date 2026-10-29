@@ -5,6 +5,7 @@ export type { AccountingAdapterId } from "./adapters"
 export type {
   AccountingAdapter,
   AccountingRef,
+  CancelInput,
   CustomerInput,
   MoneyInput,
   SaleInput,

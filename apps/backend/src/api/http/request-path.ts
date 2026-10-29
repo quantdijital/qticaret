@@ -57,6 +57,18 @@ function trimTrailingSlashes(path: string): string {
 // Express picks and the path our checks read would differ
 const AMBIGUOUS_TARGET = /[\\#]/
 
+/**
+ * A `.` or `..` segment, as written or escaped (`%2e%2E`): Express routes
+ * it as an ordinary segment (`/admin/gift-cards/../orders` runs the gift
+ * card route with the id `..`), a URL parser removes it. No client sends one.
+ */
+function hasDotSegment(path: string): boolean {
+  return path.split("/").some((segment) => {
+    const decoded = decodedSegment(segment)
+    return decoded === "." || decoded === ".."
+  })
+}
+
 /** Refuses request targets Express and our path checks could read differently. */
 export function rejectAmbiguousPath(
   req: MedusaRequest,
@@ -64,7 +76,8 @@ export function rejectAmbiguousPath(
   next: MedusaNextFunction
 ) {
   const fields = req as { originalUrl?: string; url?: string }
-  if (AMBIGUOUS_TARGET.test(fields.originalUrl ?? fields.url ?? "")) {
+  const target = fields.originalUrl ?? fields.url ?? ""
+  if (AMBIGUOUS_TARGET.test(target) || hasDotSegment(requestPath(req))) {
     rejectRequest(
       req,
       res,

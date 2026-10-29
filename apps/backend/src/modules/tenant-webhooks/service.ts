@@ -1,7 +1,9 @@
 import type { Context } from "@medusajs/framework/types"
 import {
+  InjectManager,
   InjectTransactionManager,
   MedusaContext,
+  MedusaError,
   MedusaService,
   generateEntityId,
 } from "@medusajs/framework/utils"
@@ -34,6 +36,8 @@ export interface DueDelivery {
 /** Tries before a delivery stops; and failures in a row before a subscription is turned off. */
 export const MAX_ATTEMPTS = 8
 export const MAX_STREAK = 8
+/** Subscriptions a shop keeps: enough for its systems, too few to crowd the sender. */
+export const MAX_SUBSCRIPTIONS = 20
 // Minutes after each failed try: 1, 5, 30 minutes, then 2, 6, 12 and 24 hours
 const BACKOFF_MINUTES = [1, 5, 30, 120, 360, 720, 1440]
 // While a claimed delivery is being sent, no other worker takes it
@@ -58,6 +62,10 @@ class TenantWebhooksModuleService extends MedusaService({
 
   /** A subscription and its secret; the secret is returned here only. */
   async subscribe(input: { url: string; events: WebhookEvent[]; created_by: string | null }) {
+    const [, count] = await this.listAndCountWebhookSubscriptions({}, { select: ["id"], take: 1 })
+    if (count >= MAX_SUBSCRIPTIONS) {
+      throw new MedusaError(MedusaError.Types.NOT_ALLOWED, "webhook.limit")
+    }
     const id = generateEntityId(undefined, "whsub")
     const secret = newWebhookSecret()
     const subscription = await this.createWebhookSubscriptions({
@@ -101,23 +109,32 @@ class TenantWebhooksModuleService extends MedusaService({
   }
 
   /**
-   * Takes up to `limit` deliveries due now of active subscriptions, in one
-   * statement: two workers never take the same one; a taken one is due
-   * again only after the lease.
+   * Takes up to `limit` deliveries due now of active subscriptions, at most
+   * `perSubscription` of each (a slow receiver never holds up the others),
+   * in one statement: two workers never take the same one; a taken one is
+   * due again only after the lease.
    */
   @InjectTransactionManager()
   async claimDue(
     limit: number,
     now: Date = new Date(),
+    perSubscription = limit,
     @MedusaContext() sharedContext: Context = {}
   ): Promise<DueDelivery[]> {
     const manager = sharedContext.transactionManager as Executor
+    // The ranking reads without locks (a window function cannot lock); the
+    // claim locks and checks each row again
     return (await manager.execute(
-      `WITH due AS (
-         SELECT d.id FROM webhook_delivery d
+      `WITH ranked AS (
+         SELECT d.id, row_number() OVER (PARTITION BY d.subscription_id
+                                         ORDER BY d.next_attempt_at, d.id) AS n
+           FROM webhook_delivery d
            JOIN webhook_subscription s ON s.id = d.subscription_id
           WHERE d.status = 'pending' AND d.next_attempt_at <= ? AND d.deleted_at IS NULL
-            AND s.status = 'active' AND s.deleted_at IS NULL
+            AND s.status = 'active' AND s.deleted_at IS NULL),
+       due AS (
+         SELECT d.id FROM webhook_delivery d JOIN ranked r ON r.id = d.id
+          WHERE r.n <= ? AND d.status = 'pending' AND d.next_attempt_at <= ?
           ORDER BY d.next_attempt_at, d.id LIMIT ?
           FOR UPDATE OF d SKIP LOCKED)
        UPDATE webhook_delivery d SET next_attempt_at = ?, updated_at = now()
@@ -125,7 +142,7 @@ class TenantWebhooksModuleService extends MedusaService({
         WHERE d.id = due.id AND s.id = d.subscription_id
        RETURNING d.id, d.subscription_id, d.event, d.payload, d.attempts, d.created_at,
                  s.url, s.secret_encrypted`,
-      [now, limit, minutesFrom(now, LEASE_MINUTES)]
+      [now, perSubscription, now, limit, minutesFrom(now, LEASE_MINUTES)]
     )) as DueDelivery[]
   }
 
@@ -224,12 +241,15 @@ class TenantWebhooksModuleService extends MedusaService({
   }
 
   /** Whether any active subscription takes an event: no feed is read for nobody. */
-  async anyTakes(event: WebhookEvent): Promise<boolean> {
-    const rows = await this.listWebhookSubscriptions(
-      { status: "active" },
-      { select: ["events"], take: 500 }
-    )
-    return rows.some((row) => row.events.includes(event))
+  @InjectManager()
+  async anyTakes(event: WebhookEvent, @MedusaContext() sharedContext: Context = {}) {
+    const manager = sharedContext.manager as Executor
+    const [row] = (await manager.execute(
+      `SELECT EXISTS (SELECT 1 FROM webhook_subscription
+                       WHERE deleted_at IS NULL AND status = 'active' AND ? = ANY(events)) AS takes`,
+      [event]
+    )) as { takes: boolean }[]
+    return row?.takes === true
   }
 }
 

@@ -129,16 +129,7 @@ function movesOf(payments: readonly MovedPayment[], from: Date, to: Date) {
 
 // Turkish Excel reads `1.5` as a date: numbers go out with a decimal comma
 const csvOf = (rows: SheetCell[][]) =>
-  Buffer.from(
-    CSV_BOM +
-      toCsv(
-        rows.map((row) =>
-          row.map((cell) => (typeof cell === "number" ? String(cell).replace(".", ",") : cell))
-        ),
-        ";"
-      ),
-    "utf8"
-  )
+  Buffer.from(CSV_BOM + toCsv(rows, ";", { decimalComma: true }), "utf8")
 
 /**
  * The month's standard accounting package (F11.5, adr/0039 §5): one zip
@@ -209,7 +200,7 @@ export const accountingPackage: JobType<z.infer<typeof input>> = {
       await file.write(chunk)
     }
     await container.resolve<AuditLogModuleService>(AUDIT_LOG_MODULE).record({
-      // A corporate customer's tax id was read for it
+      // Corporate customers' tax ids were read for it: whose, by customer id
       kind: "sensitive_read",
       action: "accounting.package_made",
       actor_type: "user",
@@ -217,7 +208,13 @@ export const accountingPackage: JobType<z.infer<typeof input>> = {
       resource_type: "accounting_package",
       resource_id: month,
       outcome: 200,
-      changes: { month, orders: orders.length, corporate: parties.size, job: job.id },
+      changes: {
+        month,
+        orders: orders.length,
+        corporate: parties.size,
+        customers: [...parties.keys()],
+        job: job.id,
+      },
     })
     await progress(100)
     return {

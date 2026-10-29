@@ -3,6 +3,7 @@ import { ProviderError } from "../errors"
 import type {
   AccountingAdapter,
   AccountingRef,
+  CancelInput,
   CustomerInput,
   MoneyInput,
   SaleInput,
@@ -15,7 +16,7 @@ import type {
  * an unreachable program would. Never offered where the shop runs live.
  */
 
-export type FakeRecordKind = "customer" | "sale" | "payment" | "return"
+export type FakeRecordKind = "customer" | "sale" | "cancel" | "payment" | "return"
 
 export interface FakeRecord {
   kind: FakeRecordKind
@@ -76,6 +77,7 @@ export const fakeAccountingAdapter: AccountingAdapter = {
   upsertCustomer: (input: CustomerInput) =>
     fakeAccountingLedger.write("customer", input.reference, input.party),
   pushSale: (input: SaleInput) => fakeAccountingLedger.write("sale", input.reference, input),
+  cancelSale: (input: CancelInput) => fakeAccountingLedger.write("cancel", input.reference, input),
   pushPayment: (input: MoneyInput) => fakeAccountingLedger.write("payment", input.reference, input),
   pushReturn: (input: MoneyInput) => fakeAccountingLedger.write("return", input.reference, input),
   healthCheck: () => Promise.resolve("ok"),

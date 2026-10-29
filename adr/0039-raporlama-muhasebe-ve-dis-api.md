@@ -129,7 +129,7 @@ Kısıtlar:
 
 ## Arama terimleri: uygulama (2026-10-29)
 - **Sayım:** `GET /store/products` rota ara katmanı (`api/http/search-terms.ts`) ilk sayfadaki `q`'yu normalleştirir ve Medusa'nın yanıt gövdesindeki `count`'ı okuyup `search_term_day`'e (gün + terim tekil, `ON CONFLICT` artırım) yazar. Yazım yanıtı beklemez.
-- **Kişisel veri:** e-posta, web adresi, 6+ haneli sayı dizisi, görünmez karakterler içeren ya da 2–60 karakter dışındaki terim tutulmaz; IP, oturum, sepet hiç tutulmaz. 180 gün sonra silinir.
+- **Kişisel veri:** e-posta, web adresi, 6+ haneli sayı dizisi, görünmez karakterler içeren ya da 2–60 karakter dışındaki terim tutulmaz; Raporda IP, oturum, sepet hiç tutulmaz; tekrar sayımını önleyen sayaç bir gün boyunca yalnızca adres+terimin anahtarlı özetini tutar. 180 gün sonra silinir.
 - **Danışman:** S-SEARCH-01 (bilgi), son 30 günde en az 3 kez sonuçsuz aranan terimler, ilk 20'si listelenir.
 
 ## Giden webhook'lar: uygulama (2026-10-29)
@@ -139,7 +139,7 @@ Kısıtlar:
 - **Yeniden deneme ve kapanma:** teslim başına 8 deneme; abonelikte 8 ardışık başarısızlık aboneliği kapatır ve zil çalar. Yeniden açma serinin sayacını sıfırlar.
 
 ## Dış API: uygulama (2026-10-29)
-- **Kapsam katmanı:** `api/http/api-key-guard.ts`, genel `/admin/*` ara katmanı. Medusa'nın genel kimlik doğrulaması önce çalışır (çekirdek genel ara katmanları uygulamanınkilerden önce; Context7), `auth_context.actor_type === "api-key"` olan istek `lib/api-access/scopes.ts` tablosundaki uçlardan kapsamına girenlere geçer, geri kalanı 403 alır. Yol `originalUrl`'den okunur: bağlı eşleştiricide `req.path` yalnızca kalan parçadır.
+- **Kapsam katmanı:** `api/http/api-key-guard.ts`, genel `/admin/*` ara katmanı. Medusa'nın genel kimlik doğrulaması önce çalışır (çekirdek genel ara katmanları uygulamanınkilerden önce; Context7), `auth_context.actor_type === "api-key"` olan istek `lib/api-access/scopes.ts` tablosundaki uçlardan kapsamına girenlere geçer, geri kalanı 403 alır. Yol Express'in yönlendirdiği ham yoldur (bkz. kapanış eki): bağlı eşleştiricide `req.path` yalnızca kalan parçadır, URL ayrıştırıcısı da `..`'yı katlar.
 - **Kapsamlar:** `orders:read` (sipariş listesi ve ayrıntısı), `catalog:read` (ürün, kategori, stok kalemi, depo), `stock:write` (depo stok adedi, tekil ve toplu), `webhooks:manage` (R7'nin uçları). Kapsam kaydı olmayan anahtar (ör. Medusa'nın kendi `/admin/api-keys` ucuyla açılmış) hiçbir uca geçemez.
 - **Anahtar yaşamı:** `createScopedApiKeyWorkflow` Medusa'nın `createApiKeysWorkflow`'unu adım olarak çalıştırır ve kapsamları telafili adımla yazar. Ham anahtar yalnızca oluşturma yanıtındadır. İptal `revokeApiKeysWorkflow`; bir sonraki istek 401 alır (KK4).
 - **Günlük:** `sk_` ile başlayan 16+ karakter serbest metinde maskelenir; Basic başlığı zaten anahtar adıyla maskeleniyor.
@@ -147,22 +147,68 @@ Kısıtlar:
 
 ## Muhasebe: uygulama (2026-10-29)
 - **Paket:** `accounting.package` işi tek zip üretir (`muhasebe-paketi-AAAA-MM.xlsx` + `satislar`, `iadeler`, `tahsilatlar`, `kdv-ozeti` CSV'leri). Ay Türkiye saatiyle sayılır, en çok 24 ay geriye gider. İptal ve test ödemeli siparişler girmez. Kurumsal müşterinin VKN'si `revealTaxId` ile açılır; paket `sensitive_read` denetim kaydı yazar, iş sonucu kişisel veri sayılır.
-- **Aktarım:** `accounting_sync` (kaynak türü `sale`/`payment`/`refund`, kaynak kimliği, program) tekildir. Kuyruğa alma `ON CONFLICT DO NOTHING`, sahiplenme `FOR UPDATE SKIP LOCKED` ve 10 dakikalık kirayla yapılır. Başarısızlıkta 1, 5, 15 dakika, sonra 1, 3, 6, 12 saat beklenir; 8. denemede kayıt durur ve zil çalar. Gönderim iş akışının son adımıdır ve referans olarak kaydın kimliğini taşır; adaptör aynı referansı aynı kayıt sayar, kaybolan yanıttan sonraki yeniden deneme mükerrer kayıt üretmez (KK2).
-- **Program seçimi:** `accounting` ayar bölümü (`none` | `fake`). Sahte program canlı ve hazırlık ortamında seçilemez.
+- **Aktarım:** `accounting_sync` (kaynak türü `sale`/`payment`/`refund`/`cancel`, kaynak kimliği, program) tekildir. Kuyruğa alma `ON CONFLICT DO NOTHING`, sahiplenme `FOR UPDATE SKIP LOCKED` ve 10 dakikalık kirayla yapılır. Başarısızlıkta 1, 5, 15 dakika, sonra 1, 3, 6, 12 saat beklenir; 8. denemede kayıt durur ve zil çalar. Gönderim iş akışının son adımıdır ve referans olarak kaydın kimliğini taşır; adaptör aynı referansı aynı kayıt sayar, kaybolan yanıttan sonraki yeniden deneme mükerrer kayıt üretmez (KK2).
+- **Program seçimi:** `accounting` ayar bölümü (`none` | `fake`). Sahte program yalnızca geliştirme ve test ortamında seçilebilir.
 
 ## Sağlayıcı mutabakatı: doğrulanan uçlar ve uygulama (2026-10-29)
 - **PayTR:** `POST /rapor/islem-dokumu`, en çok 3 gün. **iyzico:** `GET /v2/reporting/payment/transactions`, gün ve sayfa ile. Ayrıntı: `docs/entegrasyonlar/paytr.md`, `docs/entegrasyonlar/iyzico.md`.
 - **Pencere:** D günü için iki taraf da D-1..D+1 okunur. Gece yarısında alınıp sağlayıcının ertesi güne yazdığı ödeme böylece eşleşir.
 - **Kurallar** (`lib/payments/statements/match.ts`):
   - D'de yakalanan her ödeme sağlayıcıda aynı tutarda satış olmalı; yoksa `missing_at_provider`, tutar farklıysa `amount_mismatch`.
-  - Sağlayıcının D'deki her satışı mağazanın bir ödemesi olmalı; yoksa `unknown_at_shop`. Siparişe dönüşmeyip kurtarma kaydına (`payment-recovery`) girmiş ödeme bilinir sayılır.
+  - Sağlayıcının D'deki her satışı mağazanın bir ödemesi olmalı; yoksa `unknown_at_shop`. Siparişe dönüşmeyip kurtarma kaydına (`payment-recovery`) girmiş ve iadesi süren ya da yapılmış ödeme bilinir sayılır.
   - D'de iki taraftan birinde iadesi olan referansın penceredeki iade toplamları eşit olmalı; değilse `refund_mismatch`.
 - **Mod:** Hesabın moduyla aynı moddaki ödemeler karşılaştırılır. Sabah işi (08.30, dünü ve okunamamış ya da hiç denetlenmemiş son 3 günü) yalnızca canlı hesaplarda çalışır. Deneme hesabı elle denetlenebilir.
-- **Kayıt:** `statement-checks` modülü, sağlayıcı ve gün başına tek sonuç (`matched`, `mismatched`, `failed`). Yeniden denetim öncekinin yerine geçer. İş akışında kaydın telafisi önceki sonucu geri koyar.
+- **Kayıt:** `statement-checks` modülü, sağlayıcı, gün ve mod başına tek sonuç (`matched`, `mismatched`, `failed`). Yeniden denetim öncekinin yerine geçer. İş akışında kaydın telafisi önceki sonucu geri koyar.
 - **Görünürlük:**
   - Fark çıkınca zile düşer.
   - Raporlar > Finans'ta sağlayıcı durumu ve farklı günler listelenir; "Yeniden denetle" (`POST /admin/reports/statements`) en geç dünü, en çok bir yıl öncesini alır ve sağlayıcı kontrolü bütçesiyle sınırlıdır.
   - Kişisel veri yok: referans, sipariş numarası, tutar.
+
+## Kapanış güvenlik incelemesi: ek kararlar (2026-10-29)
+Üç bağımsız inceleme (dış API ve webhook'lar; muhasebe ve mutabakat; raporlar, maliyet ve arama) 1 yüksek, 9 orta, 9 düşük bulgu çıkardı. Kararlar:
+
+**Dış API**
+- **Yol:** Kapsam katmanı Express'in yönlendirdiği ham yolu okur (`routePathKeepingCase`). URL ayrıştırıcısı `/admin/gift-cards/%2e%2e/orders`'ı `/admin/orders`'a katlıyordu; Express ise hediye kartı ucunu çalıştırıyordu. `.` ve `..` bölümleri (yazılmış ya da `%2e`) her istekte 400 alır.
+- **`fields`:** Anahtar `fields` gönderemez (400 `api_key.fields_not_allowed`). Her uç kendi varsayılan alanlarını döner. Yönetim uçları bağları serbestçe açar: birim maliyet, ödeme verisi, müşteri bağları. Uç bazında izin listesi yerine tek ve kapalı kural seçildi.
+
+**Webhook'lar**
+- **Sahiplik:** Anahtar yalnızca kendi açtığı abonelikleri görür, değiştirir ve siler. Başkasınınki 404 alır.
+- **Olay kapsamı:** Sipariş ve iade olayları `orders:read`, stok olayı `catalog:read` ister. `webhooks:manage` tek başına veri okuma yolu değildir.
+- **Sınır ve hız:** Mağaza başına en çok 20 abonelik. Teslim onar onar alınır, bir abonelikten en çok 3 teslim, yan yana gönderilir. Bir tur 45 saniyeyi geçmez; yavaş alıcı yalnızca kendi teslimlerini bekletir.
+- **Teslim kaydı:** Panel ve API ağ hatasını kaba kodla gösterir (`unreachable`, `timeout`, `redirect`). Ayrıntı sunucu günlüğündedir, böylece iç ad taraması yapılamaz. Tek etiketli adlar ile `.local`, `.lan`, `.home.arpa`, `.intranet`, `.corp`, `.home` uzantıları abone olurken reddedilir.
+- **Günlük:** `whsec_` sırları da maskelenir.
+
+**Muhasebe**
+- **Kira (yüksek bulgu):** Kayıtlar tek tek sahiplenilir; her gönderimin 10 dakikalık kirası kendi başlangıcından sayılır. Tur 4 dakikayı geçmez. Sonuç yazımları (gönderildi, atlandı, başarısız) yalnızca kira hâlâ o işçideyse uygulanır. Süresi dolmuş işçi hiçbir şeyi değiştiremez (KK2). Adaptörlerin çağrıları bu kiranın çok içinde zaman aşımına uğramalıdır.
+- **Kaçan kayıt:** Medusa, yetkilendirmede tahsil edilen kart ödemesini (PayTR, iyzico) `payment.captured` olayı olmadan kaydediyor (2.21.2 kaynağından doğrulandı). Bu yüzden:
+  - `order.placed` siparişin o andaki tahsilatlarını da kuyruğa alır.
+  - Saatlik tarama son 26 saatin siparişlerini, iptallerini, tahsilatlarını ve iadelerini yeniden kuyruğa sunar; var olan dokunulmaz.
+  - Tarama programın ilk kaydından geriye gitmez, böylece program seçilmeden önceki kayıtlar gönderilmez.
+- **İptal:** Yeni kaynak türü `cancel` (`order.canceled`).
+  - Satış aktarılmışsa programda iptal edilir (`cancelSale`).
+  - Satış hâlâ yoldaysa beklenir.
+  - Hiç gitmemişse "atlandı" olur.
+  - İptal edilmiş ya da TL dışındaki siparişin satışı gönderilmez; durumu `skipped`, nedeni `last_error`'da.
+- **VKN:** Gönderim adımında açılır; okuma adımının çıktısında (iş akışı motorunun sakladığı veride) bulunmaz. Her açılış müşteri kimliğiyle `sensitive_read` kaydı yazar; kayıt yazılamazsa açılmaz. Aylık paketin denetim kaydı VKN'si okunan müşterilerin kimliklerini listeler.
+- **Sahte program:** Yalnızca `development` ve `test` ortamlarında seçilebilir. Tanımsız NODE_ENV canlı sayılır.
+
+**Mutabakat**
+- **Mod ayrımı:** Sonuçlar sağlayıcı, gün ve mod (`test_mode`) başına tutulur. Deneme hesabıyla yapılan denetim canlı günün sonucunun yerine geçemez. Liste her sağlayıcının o anki modundaki sonuçları gösterir.
+- **Kurtarma kaydı:** Yalnızca `pending` ya da `refunded` olan kurtarma kaydı "bilinir" sayılır. İadesi başarısız olmuş, yani siparişsiz kalmış para fark olarak çıkar.
+- **Sayfalama:** Tahsilat ve iade sayfalaması `id` sırasıyla yapılır.
+- **PayTR tutarları:** PayTR'nin iki tutarından (`islem_tutari`, `odeme_tutari`) biriyle eşleşme bilerek kabul edilir. Taksit farkı sağlayıcının tahsil ettiği toplamı siparişten ayırabilir.
+
+**Raporlar ve arama**
+- **Arama sayımı:** Bir ziyaretçinin (IPv6'da /64) aynı araması günde bir kez sayılır. Bir ziyaretçi günde en çok 30 yeni terim ekler. Sayaçlar paylaşılan hız sınırı deposundadır ve yalnızca adres+terimin anahtarlı özetini tutar. Bir gün en çok 5.000 farklı terim tutar; bilinen terimler sayılmaya devam eder.
+- **Kişisel veri süzgeci:** Terim NFKC ile katlanır. Her yazıdaki rakamlar ve harf olmayan her ayraç telefon/numara sayılır. `@` çevresinde boşluk ve plaka biçimi de tutulmaz. Yanıt sarmalayıcısı hata verse de yanıt gider.
+- **Stok değeri:** Kesirli adet kuruşa yuvarlanır. 10 milyar TL'yi aşan kalem yazım hatası sayılır ve maliyetsizlerle gösterilir, rapor düşmez.
+- **CSV:** Sayılar ondalık virgülle ve sayı olarak yazılır (`toCsv(..., { decimalComma })`). Negatif tutar metne dönmez.
+- **Vitrin:** `variant_extension` her yazımda ve büyük-küçük harften bağımsız reddedilir.
+
+**Sonraya kalan**
+- Anahtarın kendi `fields` izin listesi (bir entegrasyon ihtiyaç duyarsa).
+- Webhook sırrını döndürme (şimdilik sil ve yeniden aç).
+- Paketi yalnızca isteyen kişinin indirmesi (F12 rolleri).
 
 ## Alternatifler
 

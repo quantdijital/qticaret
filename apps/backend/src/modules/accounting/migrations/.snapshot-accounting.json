@@ -49,7 +49,7 @@
           "scale": null,
           "default": null,
           "comment": null,
-          "enumItems": ["sale", "payment", "refund"],
+          "enumItems": ["sale", "payment", "refund", "cancel"],
           "mappedType": "enum"
         },
         "source_id": {
@@ -81,7 +81,7 @@
           "scale": null,
           "default": "'pending'",
           "comment": null,
-          "enumItems": ["pending", "synced", "stopped"],
+          "enumItems": ["pending", "synced", "stopped", "skipped"],
           "mappedType": "enum"
         },
         "attempts": {

@@ -18,7 +18,7 @@ const status: AccountingStatus = {
     { id: "none", available: true },
     { id: "fake", available: true },
   ],
-  counts: { pending: 2, synced: 5, stopped: 1 },
+  counts: { pending: 2, synced: 5, stopped: 1, skipped: 0 },
   stopped: [
     {
       id: "acsync_1",
