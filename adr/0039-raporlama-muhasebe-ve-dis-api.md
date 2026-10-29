@@ -127,6 +127,12 @@ Kısıtlar:
 - **Okuma:** `inventory_item` → `variants` → `variant_extension.cost` tek `query.graph` sorgusunda gelir (HTTP testiyle doğrulandı). Dönem başı ve sonu stok `stock-ledger`'ın `stockedAt` yöntemiyle okunur: anından önceki son hareket, yoksa sonraki ilk hareketin başlangıç adedi, hiç hareket yoksa bugünkü adet.
 - **Liste:** Panel her listenin ilk 20 satırını gösterir; Excel ve CSV bütün kalemleri içerir.
 
+## Giden webhook'lar: uygulama (2026-10-29)
+- **Kayıtlar:** `webhook_subscription` (adres, olaylar, `PII_ENCRYPTION_KEY` ile şifreli sır, durum, ardışık başarısızlık), `webhook_delivery` (abonelik + `event_id` tekil; durum, deneme, sonraki deneme, son durum kodu, süre, kod), `webhook_cursor` (stok defterinin okunduğu `seq`).
+- **Kaynaklar:** sipariş ve iade olayları dinleyiciden; stok değişikliği dakikalık işin defteri imleçle okumasından (stok iş akışlarına dokunulmadı). Abonesi olmayan olay kuyruğa girmez.
+- **Gönderim:** `deliverWebhookWorkflow` tek adım; gönderici `lib/webhooks/transport.ts` üzerinden `safe-fetch` (yönlendirme kapalı, 10 sn, yanıt en çok 64 KB). Adres oluştururken https, 443, kimlik bilgisi yok, iç IP ya da `localhost`/`.internal` değil; teslimde `safe-fetch` bağlandığı adresi yeniden denetler (KK3). Testler göndericiyi kendi alıcısına yönlendirir; canlıdaki koruma gevşetilmez.
+- **Yeniden deneme ve kapanma:** teslim başına 8 deneme; abonelikte 8 ardışık başarısızlık aboneliği kapatır ve zil çalar. Yeniden açma serinin sayacını sıfırlar.
+
 ## Dış API: uygulama (2026-10-29)
 - **Kapsam katmanı:** `api/http/api-key-guard.ts`, genel `/admin/*` ara katmanı. Medusa'nın genel kimlik doğrulaması önce çalışır (çekirdek genel ara katmanları uygulamanınkilerden önce; Context7), `auth_context.actor_type === "api-key"` olan istek `lib/api-access/scopes.ts` tablosundaki uçlardan kapsamına girenlere geçer, geri kalanı 403 alır. Yol `originalUrl`'den okunur: bağlı eşleştiricide `req.path` yalnızca kalan parçadır.
 - **Kapsamlar:** `orders:read` (sipariş listesi ve ayrıntısı), `catalog:read` (ürün, kategori, stok kalemi, depo), `stock:write` (depo stok adedi, tekil ve toplu), `webhooks:manage` (R7'nin uçları). Kapsam kaydı olmayan anahtar (ör. Medusa'nın kendi `/admin/api-keys` ucuyla açılmış) hiçbir uca geçemez.

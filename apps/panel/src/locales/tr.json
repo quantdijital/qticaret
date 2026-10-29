@@ -1420,6 +1420,50 @@
         "copy": "Anahtarı kopyala",
         "copyFailed": "Kopyalanamadı; anahtarı seçip kopyalayın.",
         "done": "Kopyaladım, kapat"
+      },
+      "webhooks": {
+        "title": "Webhook abonelikleri",
+        "hint": "Mağazadaki olaylar kendi sistemlerinize imzalı olarak gönderilir. Gövdede kişisel veri yer almaz. Yanıt vermeyen adrese artan aralıklarla yeniden denenir; arka arkaya 8 başarısızlıkta abonelik kapanır.",
+        "new": "Yeni abonelik",
+        "empty": "Henüz abonelik yok.",
+        "newTitle": "Yeni webhook aboneliği",
+        "newHint": "Olayların gönderileceği https adresini ve olayları seçin.",
+        "madeHint": "İmza sırrını şimdi kopyalayıp alıcı sisteme girin.",
+        "url": "Adres",
+        "urlHint": "https ile başlamalı; mağazanın iç ağına ya da yerel bir sunucuya gidemez.",
+        "eventsLabel": "Olaylar",
+        "subscribe": "Aboneliği oluştur",
+        "secretOnce": "Bu sır bir daha gösterilmeyecek.",
+        "copy": "Sırrı kopyala",
+        "verify": "Her istekte X-Webhook-Signature başlığı t=<zaman>,v1=<imza> biçimindedir; imza, sırla HMAC-SHA256(zaman + \".\" + gövde)'dir. Eski zamanlı istekleri reddedin. X-Webhook-Id aynı teslimin yeniden denemesinde değişmez.",
+        "events": {
+          "order_placed": "Sipariş verildi",
+          "order_canceled": "Sipariş iptal edildi",
+          "order_fulfilled": "Sipariş hazırlandı",
+          "return_requested": "İade istendi",
+          "return_received": "İade teslim alındı",
+          "stock_changed": "Stok değişti"
+        },
+        "status": {
+          "active": "Etkin",
+          "disabled": "Kapandı"
+        },
+        "streak_one": "{{count}} başarısız deneme",
+        "streak_other": "{{count}} başarısız deneme",
+        "reactivate": "Yeniden aç",
+        "reactivated": "Abonelik yeniden açıldı.",
+        "log": "Teslimler",
+        "noDeliveries": "Henüz teslim yok.",
+        "deliveryStatus": {
+          "delivered": "Teslim edildi",
+          "pending": "Bekliyor",
+          "stopped": "Durdu"
+        },
+        "attempts_one": "{{count}} deneme",
+        "attempts_other": "{{count}} deneme",
+        "delete": "Sil",
+        "deleteTitle": "Abonelik silinsin mi?",
+        "deleteHint": "{{url}} adresine artık olay gönderilmez; bekleyen teslimler de gönderilmez."
       }
     }
   },
@@ -3789,6 +3833,10 @@
     "accountingSync": {
       "title": "Bir kayıt muhasebe programına aktarılamadı",
       "description": "Defalarca denendi; Ayarlar > Muhasebe'den yeniden deneyin."
+    },
+    "webhookDisabled": {
+      "title": "{{host}} webhook aboneliği kapatıldı",
+      "description": "Arka arkaya 8 teslim başarısız oldu; Ayarlar > Dış API'den açabilirsiniz."
     }
   },
   "content": {

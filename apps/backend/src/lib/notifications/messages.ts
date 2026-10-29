@@ -53,6 +53,10 @@ export const NOTIFICATION_MESSAGES: Readonly<
       title: "{{provider}} ödemesi iade edilemedi",
       description: "{{amount}} ({{reference}}) {{provider}} panelinden elle iade edilmeli.",
     },
+    "webhooks.disabled": {
+      title: "{{host}} webhook aboneliği kapatıldı",
+      description: "Arka arkaya 8 teslim başarısız oldu; Ayarlar > Dış API'den açabilirsiniz.",
+    },
     "accounting.sync_stopped": {
       title: "Bir {{source}} muhasebe programına aktarılamadı",
       description: "Defalarca denendi; Ayarlar > Muhasebe'den yeniden deneyin.",
@@ -96,6 +100,10 @@ export const NOTIFICATION_MESSAGES: Readonly<
     "payments.orphan_refund_failed": {
       title: "{{provider}} payment could not be refunded",
       description: "{{amount}} ({{reference}}) must be refunded by hand in the {{provider}} panel.",
+    },
+    "webhooks.disabled": {
+      title: "The {{host}} webhook subscription was turned off",
+      description: "Eight deliveries in a row failed; turn it on again in Settings > External API.",
     },
     "accounting.sync_stopped": {
       title: "A {{source}} could not be sent to the accounting program",

@@ -1420,6 +1420,50 @@
         "copy": "Copy the key",
         "copyFailed": "Could not copy; select the key and copy it.",
         "done": "Copied, close"
+      },
+      "webhooks": {
+        "title": "Webhook subscriptions",
+        "hint": "The shop's events go to your own systems, signed. Bodies carry no personal data. An address that does not answer is tried again later and later; eight failures in a row turn the subscription off.",
+        "new": "New subscription",
+        "empty": "No subscriptions yet.",
+        "newTitle": "New webhook subscription",
+        "newHint": "Pick the https address events go to, and the events.",
+        "madeHint": "Copy the signing secret now and enter it in the receiving system.",
+        "url": "Address",
+        "urlHint": "It must start with https and cannot point inside the shop's network or to a local server.",
+        "eventsLabel": "Events",
+        "subscribe": "Make the subscription",
+        "secretOnce": "This secret will not be shown again.",
+        "copy": "Copy the secret",
+        "verify": "Every request carries X-Webhook-Signature as t=<time>,v1=<signature>, the signature being HMAC-SHA256(time + \".\" + body) with the secret. Refuse requests with an old time. X-Webhook-Id stays the same when a delivery is tried again.",
+        "events": {
+          "order_placed": "Order placed",
+          "order_canceled": "Order canceled",
+          "order_fulfilled": "Order fulfilled",
+          "return_requested": "Return requested",
+          "return_received": "Return received",
+          "stock_changed": "Stock changed"
+        },
+        "status": {
+          "active": "Active",
+          "disabled": "Turned off"
+        },
+        "streak_one": "{{count}} failed try",
+        "streak_other": "{{count}} failed tries",
+        "reactivate": "Turn on again",
+        "reactivated": "The subscription is on again.",
+        "log": "Deliveries",
+        "noDeliveries": "No deliveries yet.",
+        "deliveryStatus": {
+          "delivered": "Delivered",
+          "pending": "Waiting",
+          "stopped": "Stopped"
+        },
+        "attempts_one": "{{count}} try",
+        "attempts_other": "{{count}} tries",
+        "delete": "Delete",
+        "deleteTitle": "Delete the subscription?",
+        "deleteHint": "Events stop going to {{url}}; waiting deliveries are not sent either."
       }
     }
   },
@@ -3789,6 +3833,10 @@
     "accountingSync": {
       "title": "A record could not be sent to the accounting program",
       "description": "It was tried many times; try it again from Settings > Accounting."
+    },
+    "webhookDisabled": {
+      "title": "The {{host}} webhook subscription was turned off",
+      "description": "Eight deliveries in a row failed; turn it on again in Settings > External API."
     }
   },
   "content": {

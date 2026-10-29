@@ -17,6 +17,7 @@ import {
 } from "@/features/settings/api/api-access"
 import type { ApiKeyRow } from "@/features/settings/api/api-access"
 import { ApiKeyDialog } from "@/features/settings/components/api-key-dialog"
+import { WebhooksCard } from "@/features/settings/components/webhooks-card"
 import { errorText } from "@/lib/errors"
 import { formatDate } from "@/lib/format"
 
@@ -135,6 +136,7 @@ export function ApiAccessPage() {
           </div>
         </SectionCard>
       </div>
+      <WebhooksCard />
       <ApiKeyDialog open={creating} onOpenChange={setCreating} />
       <ConfirmDialog
         open={revoking !== null}

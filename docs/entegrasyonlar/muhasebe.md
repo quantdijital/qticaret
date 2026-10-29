@@ -33,6 +33,7 @@ interface AccountingAdapter {
 - Teslim worker'da; 2xx dışı yanıt → artan aralıkla retry → N denemede devre dışı + admin uyarısı.
 - Teslim logu (durum kodu, süre, deneme) saklanır; gövdedeki kişisel veri logda maskelenir.
 - Hedef URL'de SSRF koruması: özel/iç IP aralıkları reddedilir.
+- **Uygulama (F11 R7, 2026-10-29):** başlıklar `X-Webhook-Id`, `X-Webhook-Event`, `X-Webhook-Signature: t=<zaman>,v1=<imza>`. Olaylar `order.placed`, `order.canceled`, `order.fulfilled`, `return.requested`, `return.received`, `stock.changed`. Gövdede kişisel veri yok, teslim kaydında gövde tutulmuyor. Ayrıntı: adr/0039 "Giden webhook'lar: uygulama".
 
 ## Env
 `ACCOUNTING_PROVIDER`, `ACCOUNTING_API_KEY`, `ACCOUNTING_BASE_URL` (adaptöre göre ek alanlar)

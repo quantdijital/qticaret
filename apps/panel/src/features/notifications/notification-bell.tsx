@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
-import { Bell, Calculator, PackageMinus, Scale, ShieldAlert } from "lucide-react"
+import { Bell, Calculator, PackageMinus, Scale, ShieldAlert, Webhook } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
@@ -49,6 +49,15 @@ function useAlertText(data: Record<string, unknown>) {
       link: isConnectable(provider)
         ? { to: "/settings/payments/$provider" as const, search: {}, params: { provider } }
         : { to: "/settings/payments" as const, search: {}, params: {} },
+    }
+  }
+  if (data["kind"] === "webhook_disabled") {
+    return {
+      title: t("notifications.webhookDisabled.title", { host: text(data["host"]) }),
+      description: t("notifications.webhookDisabled.description"),
+      Icon: Webhook,
+      tone: "bg-destructive-soft text-destructive-text",
+      link: { to: "/settings/api" as const, search: {}, params: {} },
     }
   }
   if (data["kind"] === "accounting_sync") {

@@ -185,6 +185,11 @@ module.exports = defineConfig({
     { resolve: "./src/modules/accounting" },
     // F11.6 (adr/0039 §6): what each secret API key may reach; a key without a scope reaches nothing
     { resolve: "./src/modules/api-key-scopes" },
+    // F11.7 (adr/0039 §7): events sent to the shop's own systems, signed, tried until answered
+    {
+      resolve: "./src/modules/tenant-webhooks",
+      options: { encryptionKey: env.PII_ENCRYPTION_KEY },
+    },
     // F10.13 (adr/0005): drafts a provider wrote, shown only once staff approve them
     { resolve: "./src/modules/content-drafts" },
     // F10.11 (docs/13 §10): what Search Console and CrUX say of the shop
