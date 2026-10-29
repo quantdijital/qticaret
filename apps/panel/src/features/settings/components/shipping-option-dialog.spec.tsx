@@ -70,6 +70,8 @@ describe("shipping settings (F7.8)", () => {
           transit_days_max: 3,
           rate_table: [],
           over_desi_price: 0,
+          label_format: "100x150",
+          label_custom: { width_mm: 100, height_mm: 150 },
         }}
       />
     )

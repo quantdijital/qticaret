@@ -23,7 +23,19 @@ export interface BoardOrder {
   stage: Lifecycle
   customer: { name: string | null; place: string | null }
   /** The latest carrier parcel (adr/0031); null when none. */
-  shipping: { status: ShipmentStatus; tracking_number: string | null } | null
+  shipping: {
+    status: ShipmentStatus
+    tracking_number: string | null
+    /** Its label's parcel, to print while it waits for the carrier. */
+    fulfillment_id: string
+  } | null
+  /** How the shopper chose it to go; null when the order has no shipping. */
+  delivery: {
+    name: string
+    /** A carrier that issues a label; null: the shop's own delivery or collection. */
+    carrier: "geliver" | "aras" | "yurtici" | null
+    pickup: boolean
+  } | null
 }
 
 /** Where a carrier's parcel stands (adr/0031), as the server names it. */

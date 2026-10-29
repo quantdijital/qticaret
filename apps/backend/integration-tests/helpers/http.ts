@@ -10,7 +10,7 @@ export interface HttpResponse<T> {
 
 export interface RequestConfig {
   headers?: Record<string, string>
-  responseType?: "json" | "text"
+  responseType?: "json" | "text" | "arraybuffer"
   /** A body for DELETE, which axios takes here. */
   data?: unknown
 }

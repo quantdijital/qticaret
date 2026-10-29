@@ -833,6 +833,27 @@
         "desiInvalid": "Desi sınırını girin.",
         "priceInvalid": "Tutarı en çok iki ondalıkla girin."
       },
+      "labels": {
+        "title": "Kargo etiketi",
+        "description": "Kargo etiketlerinin basılacağı kâğıt. Yurtiçi etiketini panel bu boyutta çizer; Aras ve Geliver'in kendi etiketi bu boyuta orantılı sığdırılır.",
+        "format": "Etiket boyutu",
+        "formatHint": "Termal etiket yazıcınızın rulosundaki etiket ölçüsünü seçin; normal yazıcı kullanıyorsanız A4'ü seçin.",
+        "formats": {
+          "100x150": "100 × 150 mm (termal, en yaygın)",
+          "100x100": "100 × 100 mm (termal)",
+          "80x80": "80 × 80 mm (termal)",
+          "a4": "A4, sayfada 4 etiket (normal yazıcı)",
+          "custom": "Özel ölçü"
+        },
+        "custom": "Etiket ölçüsü (en × boy)",
+        "customHint": "En az 70 × 70 mm; daha küçükte barkod ve adres okunaklı sığmaz.",
+        "width": "En (mm)",
+        "height": "Boy (mm)",
+        "sizeInvalid": "En 70–210 mm, boy 70–297 mm arasında tam sayı olmalı.",
+        "printerHint": "Yazdırırken yazıcı ayarlarında aynı kâğıt boyutunu seçin ve ölçeklemeyi %100 (gerçek boyut) yapın.",
+        "preview_one": "{{width}} × {{height}} mm, sayfada {{count}} etiket",
+        "preview_other": "{{width}} × {{height}} mm, sayfada {{count}} etiket"
+      },
       "aras": {
         "keys": {
           "title": "Entegrasyon bilgileri",
@@ -1998,6 +2019,11 @@
       "returned": "İade",
       "failed": "Sorunlu",
       "canceled": "İptal"
+    },
+    "delivery": {
+      "labelled": "Etiket kargoya verince çıkar",
+      "pickup": "Mağazadan teslim",
+      "own": "Kendi gönderiniz, etiketsiz"
     },
     "bulkShip": {
       "region": "Seçilen siparişler",

@@ -14,7 +14,7 @@ function renderAlert(parcels: string[]) {
   const client = new QueryClient({ defaultOptions: { mutations: { retry: false } } })
   return render(
     <QueryClientProvider client={client}>
-      <PickupAlert orderId="order_1" parcels={parcels} />
+      <PickupAlert parcels={parcels} />
     </QueryClientProvider>
   )
 }
@@ -25,18 +25,30 @@ describe("PickupAlert", () => {
     fetchMock.mockResolvedValue({ url: "https://files.example.com/etiket.pdf" })
   })
 
-  it("says the parcel waits for its pickup and opens its label", async () => {
+  it("says the parcel waits for its pickup and opens its label on the shop's label size", async () => {
     const tab = { opener: {}, location: { href: "" }, close: vi.fn() }
     vi.spyOn(window, "open").mockReturnValue(tab as unknown as Window)
+    const labels = vi.fn().mockResolvedValue(
+      new Response(new Blob(["%PDF-"], { type: "application/pdf" }), {
+        headers: { "x-labels-missing": "0" },
+      })
+    )
+    vi.stubGlobal("fetch", labels)
+    vi.stubGlobal(
+      "URL",
+      Object.assign(URL, { createObjectURL: () => "blob:etiket", revokeObjectURL: vi.fn() })
+    )
     renderAlert(["ful_1"])
 
     expect(screen.getByText(/kargo firması teslim aldığında/)).toBeInTheDocument()
     await userEvent.click(screen.getByRole("button", { name: "Etiketi indir" }))
 
     await waitFor(() => {
-      expect(tab.location.href).toBe("https://files.example.com/etiket.pdf")
+      expect(tab.location.href).toBe("blob:etiket")
     })
-    expect(fetchMock).toHaveBeenCalledWith("/admin/orders/order_1/fulfillments/ful_1/label")
+    expect(labels).toHaveBeenCalledWith("/admin/shipping-labels?fulfillment_id=ful_1", {
+      credentials: "same-origin",
+    })
     expect(tab.opener).toBeNull()
   })
 

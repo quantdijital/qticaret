@@ -83,8 +83,13 @@ medusaIntegrationTestRunner({
         notify: false,
       })
       const board = await http.get<{
-        orders: { id: string; shipping: { status: string } | null }[]
+        orders: {
+          id: string
+          shipping: { status: string; fulfillment_id: string } | null
+          delivery: { carrier: string | null } | null
+        }[]
       }>("/admin/order-board", { headers: setup.admin.headers })
+      const listed = board.data.orders.filter(({ id }) => id === first || id === second)
 
       expect(data.results).toEqual([
         expect.objectContaining({ order_id: first, ok: true, carrier: "geliver" }),
@@ -92,14 +97,15 @@ medusaIntegrationTestRunner({
         expect.objectContaining({ ok: false, error: expect.any(String) as unknown }),
       ])
       expect(data.results[0]?.fulfillment_id).toEqual(expect.any(String))
-      expect(
-        board.data.orders
-          .filter(({ id }) => id === first || id === second)
-          .map(({ shipping }) => shipping)
-      ).toEqual([
-        { status: "created", tracking_number: null },
-        { status: "created", tracking_number: null },
-      ])
+      expect(listed.map(({ shipping }) => shipping?.status)).toEqual(["created", "created"])
+      // Each parcel's label prints again from the list; the option shows who carries it
+      expect(listed.map(({ shipping }) => shipping?.fulfillment_id).sort()).toEqual(
+        data.results
+          .slice(0, 2)
+          .map(({ fulfillment_id }) => fulfillment_id)
+          .sort()
+      )
+      expect(listed.map(({ delivery }) => delivery?.carrier)).toEqual(["geliver", "geliver"])
     })
   },
 })

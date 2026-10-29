@@ -1,7 +1,11 @@
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
+import { PDFDocument } from "pdf-lib"
 import { startFakeAras, startFakeGeliver, startFakeYurtici } from "@qticaret/testing"
 import { pollShipments } from "../../src/jobs/shipment-tracking"
+import { MM } from "../../src/lib/pdf"
+import { PLATFORM_SETTINGS_MODULE } from "../../src/modules/platform-settings"
+import type PlatformSettingsModuleService from "../../src/modules/platform-settings/service"
 import { ensureLocationCarriers } from "../../src/scripts/bootstrap/location-carriers"
 import { placeOrder } from "../../src/scripts/seed/orders/place"
 import { createAdminUser } from "../helpers/admin"
@@ -246,6 +250,15 @@ medusaIntegrationTestRunner({
           http.get<string>(bulkPath, { headers: admin.headers, responseType: "text" })
         )
         const bulkAnonymous = await settle(http.get(bulkPath))
+        // On the shop's label size: four to an A4 sheet for an office printer
+        await getContainer()
+          .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
+          .saveSection("shipping", { label_format: "a4" }, null)
+        const sheet = await http.get<ArrayBuffer>(bulkPath, {
+          headers: admin.headers,
+          responseType: "arraybuffer",
+        })
+        const [a4] = (await PDFDocument.load(sheet.data)).getPages()
         for (let read = 0; read < 8; read += 1) {
           clock += 30 * MINUTE
           await pollShipments(getContainer(), new Date(clock))
@@ -269,6 +282,9 @@ medusaIntegrationTestRunner({
         expect(bulk.headers["x-labels-missing"]).toBe("0")
         expect(bulk.data.startsWith("%PDF-")).toBe(true)
         expect(bulkAnonymous.status).toBe(401)
+        expect(
+          [a4?.getWidth(), a4?.getHeight()].map((side) => Math.round((side ?? 0) / MM))
+        ).toEqual([210, 297])
         for (const secret of carrier.secrets()) {
           expect(JSON.stringify(packed?.data)).not.toContain(secret)
         }

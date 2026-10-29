@@ -80,3 +80,16 @@ Geliver'in resmi SDK'sından okunanlar (`GeliverApp/geliver-js`):
 - Geliver'in takip durum kodları SDK'da listelenmiyor. Eşleme gönderi durumundan (`CREATED` … `DELIVERED`, `RETURNED`, `FAILED`) yapılır; gerçek hesapla doğrulanacak (sunucuya çıkışta).
 - Kapıda ödeme tahsilatının kargo mutabakatı (ADR-0029) Geliver'in raporladığı alana bağlanır; alan gerçek hesapla netleşene kadar "Tahsil et" elle kalır.
 - İade (RMA), değişim, sipariş düzenleme ve müşteri iptali ayrı bir ADR'de (F7.9, F7.11–F7.13).
+
+## Ek: etiket boyutu ve baskı (2026-10-29)
+- **Ayar:** Ayarlar > Kargo > Kargo etiketi (`shipping.label_format`, `label_custom`).
+  - Hazır ölçüler: 100×150 mm (varsayılan), 100×100, 80×80, A4 (sayfada 4 etiket, kesme çizgileriyle).
+  - Özel ölçü: en 70–210 mm, boy 70–297 mm. 70 mm'nin altında barkod, alıcı ve adres okunaklı sığmıyor; kullanıcının önerdiği 50×50 bu yüzden yok.
+- **Yurtiçi etiketi** gönderi açılırken seçilen ölçüde çizilir. Yazılar sayfaya göre küçülür; barkod modülü 0,375 mm'yi geçmez, yalnızca genişlik gerektirirse incelir; barkod en az 10 mm yüksek kalır.
+- **Baskı (tekli ve toplu):** `imposePdfs` ile her etiket sayfası seçilen sayfaya orantılı sığdırılır, büyütülmez, gerekirse çeyrek döndürülür. Aras ve Geliver'in kendi etiketi böylece aynı kâğıda basılır.
+  - Hiçbir şey çizilmemiş etiket sayfası basılmaz, "okunamadı" sayılır.
+  - Yerleştirilemeyen etiket yalnızca kendini düşürür.
+- **Sipariş listesi:**
+  - Kargoya verilmeden önce müşterinin seçtiği kargo ve etiket çıkıp çıkmayacağı gösterilir.
+  - "Etiket hazır" siparişler seçilince etiketleri yeniden toplu yazdırılır; "Kargoya ver" yalnızca henüz verilmemişleri gönderir.
+

@@ -132,6 +132,8 @@ describe("productFacts", () => {
       transit_days_max: 3,
       rate_table: [{ max_desi: 2, price: 4_990 }],
       over_desi_price: 0,
+      label_format: "100x150" as const,
+      label_custom: { width_mm: 100, height_mm: 150 },
     }
     const units = { weight_unit: "g", dimension_unit: "cm" } as const
     const measured = row({

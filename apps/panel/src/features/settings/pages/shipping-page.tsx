@@ -10,6 +10,7 @@ import { sectionQuery } from "@/features/settings/api/sections"
 import type { ShippingSettings } from "@/features/settings/api/sections"
 import { ShippingOptionsCard } from "@/features/settings/components/shipping-options-card"
 import { DeliveryCard, RatesCard } from "@/features/settings/components/shipping-rules-cards"
+import { LabelSizeCard } from "@/features/settings/components/label-size-card"
 import { AccountBadges } from "@/features/settings/components/account-badges"
 import { SHIPPING_CARRIERS } from "@/features/settings/shipping-carriers"
 import { errorText } from "@/lib/errors"
@@ -19,8 +20,8 @@ const S = "settings.shipping"
 /**
  * Settings > Shipping (F7, adr/0031): the carriers the shop ships with
  * (each opens its own page, where the shop connects its account), the
- * options shoppers choose from, and the shop's delivery days and price
- * table (F7.8).
+ * options shoppers choose from, the shop's delivery days and price table
+ * (F7.8), and the size its parcels' labels print at.
  */
 export function ShippingPage() {
   const { t } = useTranslation()
@@ -78,10 +79,19 @@ export function ShippingPage() {
       )}
       <ShippingOptionsCard />
       {rules.data ? (
-        <div className="grid gap-6 lg:grid-cols-2 lg:items-stretch">
-          <DeliveryCard key={JSON.stringify(rules.data.values)} saved={rules.data.values} />
-          <RatesCard key={`rates-${JSON.stringify(rules.data.values)}`} saved={rules.data.values} />
-        </div>
+        <>
+          <div className="grid gap-6 lg:grid-cols-2 lg:items-stretch">
+            <DeliveryCard key={JSON.stringify(rules.data.values)} saved={rules.data.values} />
+            <RatesCard
+              key={`rates-${JSON.stringify(rules.data.values)}`}
+              saved={rules.data.values}
+            />
+          </div>
+          <LabelSizeCard
+            key={`labels-${JSON.stringify(rules.data.values)}`}
+            saved={rules.data.values}
+          />
+        </>
       ) : rules.isError ? (
         <ErrorState text={errorText(t, rules.error)} onRetry={() => void rules.refetch()} />
       ) : (

@@ -19,7 +19,14 @@ export interface ShippingSettings {
   rate_table: ShippingRate[]
   /** Kuruş for every desi past the last band; 0: such a parcel is not offered this way. */
   over_desi_price: number
+  /** The page labels are printed on: a label printer's roll, or A4 with four to a sheet. */
+  label_format: LabelFormat
+  /** The roll's own size when `label_format` is `custom`, in millimetres. */
+  label_custom: { width_mm: number; height_mm: number }
 }
+
+export const LABEL_FORMATS = ["100x150", "100x100", "80x80", "a4", "custom"] as const
+export type LabelFormat = (typeof LABEL_FORMATS)[number]
 
 const days = (max: number) => z.number().int().min(0).max(max)
 
@@ -46,6 +53,14 @@ export const shippingSection = defineSection<ShippingSettings>(
       )
       .max(20),
     over_desi_price: z.number().int().min(0).max(100_000),
+    label_format: z.enum(LABEL_FORMATS),
+    // Smaller than 70 mm a barcode, the receiver and the address no longer fit legibly
+    label_custom: z
+      .object({
+        width_mm: z.number().int().min(70).max(210),
+        height_mm: z.number().int().min(70).max(297),
+      })
+      .strict(),
   },
   {
     handling_days_min: 1,
@@ -54,6 +69,8 @@ export const shippingSection = defineSection<ShippingSettings>(
     transit_days_max: 3,
     rate_table: [],
     over_desi_price: 0,
+    label_format: "100x150",
+    label_custom: { width_mm: 100, height_mm: 150 },
   },
   (values, ctx) => {
     if (values.handling_days_min > values.handling_days_max) {

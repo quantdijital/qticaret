@@ -1,7 +1,5 @@
 import { CircleAlert, CircleCheck, Download, Printer } from "lucide-react"
-import { useState } from "react"
 import { useTranslation } from "react-i18next"
-import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -12,37 +10,22 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import type { BoardOrder } from "@/features/orders/api/orders"
-import { bulkLabels, useLabelLink } from "@/features/orders/api/shipping"
 import type { ShipResult } from "@/features/orders/api/shipping"
-import { errorText } from "@/lib/errors"
+import { usePrintLabels } from "@/features/orders/components/print-labels"
 
 const S = "orders.bulkShip"
 
-/** One shipped order's label: opened in a new tab, as the order page does. */
-function LabelButton({ orderId, fulfillmentId }: { orderId: string; fulfillmentId: string }) {
+/** One shipped order's label, on the shop's label size, in a new tab. */
+function LabelButton({ fulfillmentId }: { fulfillmentId: string }) {
   const { t } = useTranslation()
-  const label = useLabelLink(orderId)
+  const labels = usePrintLabels()
   return (
     <Button
       size="sm"
       variant="outline"
-      disabled={label.isPending}
+      disabled={labels.busy}
       onClick={() => {
-        const tab = window.open("", "_blank")
-        label.mutate(fulfillmentId, {
-          onSuccess: (url) => {
-            if (tab) {
-              tab.opener = null
-              tab.location.href = url
-            } else {
-              window.location.assign(url)
-            }
-          },
-          onError: (failure) => {
-            tab?.close()
-            toast.error(errorText(t, failure))
-          },
-        })
+        labels.print([fulfillmentId])
       }}
     >
       <Download aria-hidden="true" />
@@ -52,40 +35,22 @@ function LabelButton({ orderId, fulfillmentId }: { orderId: string; fulfillmentI
 }
 
 /** Every waiting parcel's label in one PDF, in a new tab to print at once (F7.7). */
-function PrintAllButton({ fulfillmentIds }: { fulfillmentIds: string[] }) {
+export function PrintAllButton({
+  fulfillmentIds,
+  size,
+}: {
+  fulfillmentIds: string[]
+  size?: "sm" | "default"
+}) {
   const { t } = useTranslation()
-  const [busy, setBusy] = useState(false)
+  const labels = usePrintLabels()
   return (
     <Button
       variant="outline"
-      disabled={busy}
+      size={size ?? "default"}
+      disabled={labels.busy}
       onClick={() => {
-        // Opened at the click, so the browser lets it; filled once the file arrives
-        const tab = window.open("", "_blank")
-        setBusy(true)
-        bulkLabels(fulfillmentIds)
-          .then(({ url, missing }) => {
-            if (tab) {
-              tab.opener = null
-              tab.location.href = url
-            } else {
-              window.location.assign(url)
-            }
-            // The tab keeps its own copy once loaded
-            setTimeout(() => {
-              URL.revokeObjectURL(url)
-            }, 60_000)
-            if (missing > 0) {
-              toast.warning(t(`${S}.labelsMissing`, { count: missing }))
-            }
-          })
-          .catch((failure: unknown) => {
-            tab?.close()
-            toast.error(errorText(t, failure))
-          })
-          .finally(() => {
-            setBusy(false)
-          })
+        labels.print(fulfillmentIds)
       }}
     >
       <Printer aria-hidden="true" />
@@ -147,9 +112,7 @@ export function ShipResultsDialog({
                   </span>
                 )}
               </span>
-              {result.fulfillment_id ? (
-                <LabelButton orderId={result.order_id} fulfillmentId={result.fulfillment_id} />
-              ) : null}
+              {result.fulfillment_id ? <LabelButton fulfillmentId={result.fulfillment_id} /> : null}
             </li>
           ))}
         </ul>

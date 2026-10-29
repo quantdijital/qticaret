@@ -55,7 +55,14 @@ export interface ShippingSettings {
   transit_days_max: number
   rate_table: { max_desi: number; price: number }[]
   over_desi_price: number
+  /** The page labels print on: a label printer's roll, or A4 with four to a sheet. */
+  label_format: LabelFormat
+  /** The roll's size when `label_format` is `custom`. */
+  label_custom: { width_mm: number; height_mm: number }
 }
+
+export const LABEL_FORMATS = ["100x150", "100x100", "80x80", "a4", "custom"] as const
+export type LabelFormat = (typeof LABEL_FORMATS)[number]
 
 /** Promotion rules (F4.4, F4.5): codes per cart, free shipping from a basket total. */
 export interface PromotionSettings {

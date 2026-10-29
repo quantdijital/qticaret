@@ -1,14 +1,25 @@
 /**
  * A real one-page PDF, the smallest pdf-lib reads, for fake carriers'
- * labels: a merged print of them counts their pages. Offsets are counted,
+ * labels: a frame, "SAHTE ETIKET" and the note, so a print made from it
+ * shows a label and a merged print counts its page. Offsets are counted,
  * so the cross-reference table is right.
  */
 export function tinyPdf(note: string): Buffer {
-  const head = `%PDF-1.4\n% ${note.replace(/[\r\n]/g, " ")}\n`
+  // Plain ASCII in a PDF string: no parentheses or backslashes to escape
+  const text = note.replace(/[^\x20-\x7e]/g, " ").replace(/[()\\]/g, "")
+  const content = [
+    "q 1.5 w 10 10 263 405 re S Q",
+    "BT /F1 18 Tf 20 375 Td (SAHTE ETIKET) Tj ET",
+    `BT /F1 11 Tf 20 350 Td (${text}) Tj ET`,
+    "BT /F1 8 Tf 20 24 Td (Gercek kargo firmasi kendi etiketini gonderir.) Tj ET",
+  ].join("\n")
+  const head = `%PDF-1.4\n% ${text}\n`
   const objects = [
     "<< /Type /Catalog /Pages 2 0 R >>",
     "<< /Type /Pages /Kids [3 0 R] /Count 1 >>",
-    "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 283 425] >>",
+    "<< /Type /Page /Parent 2 0 R /MediaBox [0 0 283 425] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>",
+    `<< /Length ${String(Buffer.byteLength(content, "latin1"))} >>\nstream\n${content}\nendstream`,
+    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>",
   ]
   let body = head
   const offsets: number[] = []

@@ -833,6 +833,27 @@
         "desiInvalid": "Enter the desi limit.",
         "priceInvalid": "Enter the amount with at most two decimals."
       },
+      "labels": {
+        "title": "Shipping label",
+        "description": "The paper parcels' labels print on. The panel draws Yurtiçi's label at this size; Aras's and Geliver's own labels are fitted to it.",
+        "format": "Label size",
+        "formatHint": "Pick the label size on your label printer's roll; with an office printer, pick A4.",
+        "formats": {
+          "100x150": "100 × 150 mm (thermal, most common)",
+          "100x100": "100 × 100 mm (thermal)",
+          "80x80": "80 × 80 mm (thermal)",
+          "a4": "A4, 4 labels a sheet (office printer)",
+          "custom": "Custom size"
+        },
+        "custom": "Label size (width × height)",
+        "customHint": "At least 70 × 70 mm; smaller, the barcode and the address no longer fit legibly.",
+        "width": "Width (mm)",
+        "height": "Height (mm)",
+        "sizeInvalid": "Width 70–210 mm and height 70–297 mm, whole numbers.",
+        "printerHint": "When printing, pick the same paper size in the printer settings and set scaling to 100% (actual size).",
+        "preview_one": "{{width}} × {{height}} mm, {{count}} label a page",
+        "preview_other": "{{width}} × {{height}} mm, {{count}} labels a page"
+      },
       "aras": {
         "keys": {
           "title": "Integration details",
@@ -1998,6 +2019,11 @@
       "returned": "Returned",
       "failed": "Problem",
       "canceled": "Canceled"
+    },
+    "delivery": {
+      "labelled": "Label comes when shipped",
+      "pickup": "Collected at the shop",
+      "own": "Your own delivery, no label"
     },
     "bulkShip": {
       "region": "Picked orders",

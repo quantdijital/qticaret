@@ -18,7 +18,8 @@ import { MAX_BULK_SHIP, useShipOrders } from "@/features/orders/api/shipping"
 import type { ShipResult } from "@/features/orders/api/shipping"
 import { CustomerCell } from "@/features/orders/components/customer-cell"
 import { ShipResultsDialog } from "@/features/orders/components/ship-results-dialog"
-import { ShippingBadge } from "@/features/orders/components/shipping-badge"
+import { PrintAllButton } from "@/features/orders/components/ship-results-dialog"
+import { OrderShipping } from "@/features/orders/components/shipping-badge"
 import { StageBadge } from "@/features/orders/components/stage-badge"
 import { errorText } from "@/lib/errors"
 import { formatDateTime, formatMoney, formatRelative } from "@/lib/format"
@@ -31,17 +32,23 @@ function useColumns(): Column<BoardOrder>[] {
     {
       key: "order",
       header: t("orders.columns.order"),
+      // On phones the customer's name sits under the number; its own column comes back from sm up
       cell: (order) => (
-        <Link
-          to="/orders/$id"
-          params={{ id: order.id }}
-          className="tabular font-medium hover:underline"
-          onClick={(event) => {
-            event.stopPropagation()
-          }}
-        >
-          #{order.display_id}
-        </Link>
+        <div className="flex min-w-0 flex-col">
+          <Link
+            to="/orders/$id"
+            params={{ id: order.id }}
+            className="tabular font-medium hover:underline"
+            onClick={(event) => {
+              event.stopPropagation()
+            }}
+          >
+            #{order.display_id}
+          </Link>
+          <span className="max-w-32 truncate text-xs text-muted-foreground sm:hidden">
+            {order.customer.name ?? t("orders.noName")}
+          </span>
+        </div>
       ),
     },
     {
@@ -61,17 +68,21 @@ function useColumns(): Column<BoardOrder>[] {
     {
       key: "customer",
       header: t("orders.columns.customer"),
+      className: "hidden sm:table-cell",
       cell: (order) => <CustomerCell customer={order.customer} />,
     },
     {
       key: "stage",
       header: t("orders.columns.stage"),
-      // On phones the total sits under the stage; its own column comes back from sm up
+      // On phones the total and the shipping sit under the stage; their columns come back wider
       cell: (order) => (
         <div className="flex flex-col items-start gap-1">
           <StageBadge stage={order.stage} />
           <span className="tabular text-xs font-medium sm:hidden">
             {formatMoney(order.total, order.currency_code)}
+          </span>
+          <span className="max-w-36 md:hidden">
+            <OrderShipping order={order} />
           </span>
         </div>
       ),
@@ -80,7 +91,7 @@ function useColumns(): Column<BoardOrder>[] {
       key: "shipping",
       header: t("orders.columns.shipping"),
       className: "hidden md:table-cell",
-      cell: (order) => <ShippingBadge shipping={order.shipping} />,
+      cell: (order) => <OrderShipping order={order} />,
     },
     {
       key: "items",
@@ -106,7 +117,8 @@ function useColumns(): Column<BoardOrder>[] {
 
 /**
  * Above the list while orders to ship are picked (F7.7): how many,
- * letting go, and "Kargoya ver" for all of them at once.
+ * letting go, the labels of those already given to a carrier to print
+ * again, and "Kargoya ver" for the rest at once.
  */
 function ShipBar({
   picked,
@@ -119,7 +131,12 @@ function ShipBar({
 }) {
   const { t } = useTranslation()
   const ship = useShipOrders()
-  const tooMany = picked.size > MAX_BULK_SHIP
+  // A parcel waiting for its carrier has its label already; the rest are to ship
+  const labelled = [...picked.values()].flatMap((order) =>
+    order.shipping?.status === "created" ? [order.shipping.fulfillment_id] : []
+  )
+  const toShip = [...picked.values()].filter((order) => order.shipping?.status !== "created")
+  const tooMany = toShip.length > MAX_BULK_SHIP
   return (
     <div
       role="region"
@@ -134,16 +151,17 @@ function ShipBar({
           {t("orders.bulkShip.tooMany", { max: MAX_BULK_SHIP })}
         </span>
       ) : null}
-      <span className="ml-auto flex gap-2">
+      <span className="ml-auto flex w-full flex-wrap justify-end gap-2 sm:w-auto">
         <Button variant="ghost" size="sm" disabled={ship.isPending} onClick={onClear}>
           {t("orders.bulkShip.clear")}
         </Button>
+        {labelled.length > 0 ? <PrintAllButton fulfillmentIds={labelled} size="sm" /> : null}
         <Button
           size="sm"
-          disabled={tooMany || ship.isPending}
+          disabled={toShip.length === 0 || tooMany || ship.isPending}
           onClick={() => {
             ship.mutate(
-              { orderIds: [...picked.keys()], notify: true },
+              { orderIds: toShip.map((order) => order.id), notify: true },
               { onSuccess: onShipped, onError: (failure) => toast.error(errorText(t, failure)) }
             )
           }}

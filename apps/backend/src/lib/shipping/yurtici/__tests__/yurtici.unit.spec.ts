@@ -9,6 +9,7 @@ import {
 } from ".."
 import type { YurticiDelivery, YurticiShipmentInput } from ".."
 import { PDFDocument } from "pdf-lib"
+import { MM } from "../../../pdf"
 import { receiverOf } from "../../receiver"
 
 const address = {
@@ -140,6 +141,29 @@ describe("Yurtiçi (adr/0035)", () => {
     expect(page?.getHeight()).toBeCloseTo(425.2, 1)
     expect(doc.getTitle()).toBe("Yurtiçi Kargo QT01ABCDEF")
     expect(doc.getProducer()).toBe("Quant Ticaret")
+  })
+
+  it("draws the label on the shop's own roll size", async () => {
+    const sizes = await Promise.all(
+      [
+        { width_mm: 100, height_mm: 100 },
+        { width_mm: 80, height_mm: 80 },
+        { width_mm: 70, height_mm: 70 },
+      ].map(async (size) => {
+        const pdf = await yurticiLabelPdf(
+          { ...shipment("QT01ABCDEFGHIJKLMN", 24_990), test: false },
+          size
+        )
+        const [page] = (await PDFDocument.load(pdf)).getPages()
+        return [Math.round((page?.getWidth() ?? 0) / MM), Math.round((page?.getHeight() ?? 0) / MM)]
+      })
+    )
+
+    expect(sizes).toEqual([
+      [100, 100],
+      [80, 80],
+      [70, 70],
+    ])
   })
 })
 

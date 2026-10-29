@@ -92,9 +92,7 @@ export function OrderDetailPage() {
           state={details.data.bank_transfer}
         />
       ) : null}
-      {state.data.pickup.length > 0 ? (
-        <PickupAlert orderId={order.id} parcels={state.data.pickup} />
-      ) : null}
+      {state.data.pickup.length > 0 ? <PickupAlert parcels={state.data.pickup} /> : null}
       {hosted?.test_mode ? (
         <Alert>
           <AlertDescription>{t("orders.detail.testPaid")}</AlertDescription>

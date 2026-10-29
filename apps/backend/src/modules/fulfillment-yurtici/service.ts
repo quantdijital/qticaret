@@ -14,11 +14,13 @@ import { errorSummary, logger } from "../../lib/logging"
 import { toMedusaAmount } from "../../lib/money"
 import { shipInputOf } from "../../lib/shipping/carriers"
 import { parcelLinesOf } from "../../lib/shipping/geliver/mappers"
+import { labelSizeOf } from "../../lib/shipping/label-sheet"
 import { shipmentReceiverOf } from "../../lib/shipping/receiver"
 import {
   packedParcelOf,
   parcelFor,
   shipmentCode,
+  shippingRates,
   storedCarrierAccount,
   tablePriceOf,
 } from "../../lib/shipping/shop"
@@ -144,7 +146,10 @@ class YurticiFulfillmentService extends AbstractFulfillmentProviderService {
       })
       throw error
     }
-    const label = await yurticiLabelPdf({ ...shipment, test: credentials.testMode })
+    const label = await yurticiLabelPdf(
+      { ...shipment, test: credentials.testMode },
+      labelSizeOf(await shippingRates())
+    )
     return {
       data: {
         shipment_id: cargoKey,
