@@ -1914,7 +1914,7 @@
       "installmentCount_other": "{{count}} taksit",
       "singlePayment": "Tek çekim",
       "providerUnreachable": "Ödeme sağlayıcısına şu an ulaşılamadı; kart ve taksit bilgisi sonra görünür.",
-      "testPaid": "Bu sipariş test modunda ödendi: gerçek para alınmadı, kargoya verilemez.",
+      "testPaid": "Bu sipariş test modunda ödendi: gerçek para alınmadı. Yalnızca test modundaki bir kargo firmasıyla kargoya verilebilir; gerçek kurye gelmez.",
       "fraud": "Sahtekârlık kontrolü",
       "fraudStatus": {
         "review": "iyzico inceliyor; onaylanmadan kargoya vermeyin",

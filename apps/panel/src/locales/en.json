@@ -1914,7 +1914,7 @@
       "installmentCount_other": "{{count}} installments",
       "singlePayment": "One payment",
       "providerUnreachable": "The payment provider could not be reached; card and installments show later.",
-      "testPaid": "This order was paid in test mode: no real money was taken, so it cannot be shipped.",
+      "testPaid": "This order was paid in test mode: no real money was taken. It ships only with a carrier in test mode, where no real courier comes.",
       "fraud": "Fraud check",
       "fraudStatus": {
         "review": "iyzico is reviewing it; do not ship before approval",

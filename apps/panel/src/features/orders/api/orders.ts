@@ -161,6 +161,8 @@ export interface OrderState {
   deliver: string[]
   capture: string[]
   cancelable: boolean
+  /** It goes with a carrier in test mode: an order paid in test mode may still ship that way. */
+  test_carrier: boolean
 }
 
 export const orderStateQuery = (id: string) =>

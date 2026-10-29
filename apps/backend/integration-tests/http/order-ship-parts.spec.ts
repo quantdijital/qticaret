@@ -1,4 +1,5 @@
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import type { Knex } from "@medusajs/framework/mikro-orm/knex"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { startFakeGeliver } from "@qticaret/testing"
 import type { FakeGeliver } from "@qticaret/testing"
@@ -29,6 +30,27 @@ medusaIntegrationTestRunner({
 
     const post = <T>(path: string, body: unknown) =>
       settle(http.post<T & { message?: string }>(path, body, { headers: setup.admin.headers }))
+    /** Marks the order's payment as one taken in a provider's test mode: no real money. */
+    const paidInTest = async (orderId: string) => {
+      const { data } = await getContainer()
+        .resolve(ContainerRegistrationKeys.QUERY)
+        .graph({
+          entity: "order",
+          fields: ["payment_collections.payments.id"],
+          filters: { id: orderId },
+        })
+      const ids = (
+        data[0] as { payment_collections: { payments: { id: string }[] }[] }
+      ).payment_collections.flatMap((collection) => collection.payments.map(({ id }) => id))
+      // Our hosted-form providers keep it in the payment's data, which Medusa's update does not type
+      await getContainer()
+        .resolve<Knex>(ContainerRegistrationKeys.PG_CONNECTION)
+        .raw(
+          `update payment set data = coalesce(data, '{}'::jsonb) || '{"test_mode": true}'::jsonb where id = any(?)`,
+          [ids]
+        )
+      return ids.length
+    }
 
     beforeAll(async () => {
       fake = await startFakeGeliver()
@@ -72,6 +94,31 @@ medusaIntegrationTestRunner({
       expect(tooMany.data.message).toBe("orders.ship_items_invalid")
       expect(rest.status).toBe(200)
       expect(state).toMatchObject({ ship: null, stage: "shipped" })
+    })
+
+    it("ships a test payment only with a carrier in test mode, where nothing leaves the shop", async () => {
+      const withCarrier = await geliverOrder(getContainer(), setup)
+      const ownDelivery = await placeOrder(getContainer(), {
+        regionId: setup.shop.regionId,
+        salesChannelId: setup.shop.salesChannelId,
+        shippingOptionId: setup.shop.shippingOptionId,
+        items: [{ variant_id: setup.variantId, quantity: 1 }],
+        address: PAYTR_ADDRESS,
+        email: `test-odeme-${String(Date.now())}@example.com`,
+      })
+      const marked = [await paidInTest(withCarrier), await paidInTest(ownDelivery)]
+      const state = await http.get<{ test_carrier: boolean }>(`/admin/order-board/${withCarrier}`, {
+        headers: setup.admin.headers,
+      })
+
+      const shipped = await post<{ carrier?: string }>(`/admin/orders/${withCarrier}/ship`, {})
+      const refused = await post(`/admin/orders/${ownDelivery}/ship`, {})
+
+      expect(marked.every((count) => count > 0)).toBe(true)
+      expect(state.data.test_carrier).toBe(true)
+      expect(shipped.status).toBe(200)
+      expect(shipped.data.carrier).toBe("geliver")
+      expect(refused.data.message).toBe("orders.test_payment_not_shippable")
     })
 
     it("ships picked orders at once, reporting each, and lists where each parcel stands", async () => {

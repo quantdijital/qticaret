@@ -60,7 +60,9 @@ export function OrderActions({
   const parcels = state.deliver
   const held = state.capture
   const cancelable = state.cancelable
-  const canShip = state.ship !== null && state.stage !== "awaiting_payment" && !testPaid
+  // No real money moved in test mode: only a carrier in test mode, where no courier comes, takes it
+  const canShip =
+    state.ship !== null && state.stage !== "awaiting_payment" && (!testPaid || state.test_carrier)
   const refundable = money !== undefined && Number(money.refundable) > 0
   // A dispute is against money taken (F6.7)
   const disputable = money !== undefined && Number(money.paid) > 0

@@ -5,6 +5,7 @@ import type { ShipmentPlan, StateOrder } from "../../../lib/dashboard"
 import { ValidationError } from "../../../lib/errors"
 import { cancelRefundReference } from "../../../lib/orders/locks"
 import { SHIPPING_PAYMENT_FIELDS, shippingBlock } from "../../../lib/payments/shippable"
+import { shipsWithTestCarrier } from "../test-shipping"
 import { ORDER_REFUNDS_MODULE } from "../../../modules/order-refunds"
 import type OrderRefundsModuleService from "../../../modules/order-refunds/service"
 import { RETURN_REQUESTS_MODULE } from "../../../modules/return-requests"
@@ -54,9 +55,16 @@ export const planShipmentStep = createStep(
     if (!order) {
       throw new MedusaError(MedusaError.Types.NOT_FOUND, "orders.unknown")
     }
-    // adr/0027, adr/0029: no real money (test mode), or the money not in yet (a bank transfer)
+    // adr/0027, adr/0029: no real money (test mode), or the money not in yet (a bank transfer);
+    // a test payment may still go with a carrier in test mode, where nothing leaves the shop
     const blocked = shippingBlock(order as Parameters<typeof shippingBlock>[0])
-    if (blocked) {
+    if (
+      blocked &&
+      !(
+        blocked === "orders.test_payment_not_shippable" &&
+        (await shipsWithTestCarrier(container, input.order_id))
+      )
+    ) {
       throw new ValidationError(blocked)
     }
     const [cancelRefund] = await container
