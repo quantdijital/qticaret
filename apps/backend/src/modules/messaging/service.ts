@@ -2,16 +2,18 @@ import type { Context } from "@medusajs/framework/types"
 import { InjectManager, InjectTransactionManager, MedusaContext } from "@medusajs/framework/utils"
 import { uniqueViolationKeys } from "../../lib/errors"
 import type { MessageChannel } from "../../lib/messaging/recipients"
-import { ConsentRecords } from "./consent-records"
+import { ConsentRequests } from "./consent-requests"
 import type { SuppressionInput } from "./types"
 
 /**
  * Who takes which messages (adr/0036): commercial consent per channel,
- * with its history (`ConsentRecords`), and the addresses nothing goes to.
+ * with its history (`ConsentRecords`) and the double opt-in of addresses
+ * no one has shown are theirs (`ConsentRequests`), and the addresses
+ * nothing goes to.
  * An address is stored only as a keyed hash and a masked form; plaintext
  * never reaches the database or an error.
  */
-class MessagingModuleService extends ConsentRecords {
+class MessagingModuleService extends ConsentRequests {
   /** Whether nothing may go to the address on the channel. */
   @InjectManager()
   async isSuppressed(

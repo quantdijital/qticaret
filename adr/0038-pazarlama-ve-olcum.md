@@ -357,6 +357,23 @@ F10'un pazarlama tarafı mağazanın verisini dış servislere taşır: Google, 
 - **Panel:** Ürün detayında İçerik taslakları kartı. Bayrak kapalıyken kart görünmez; sağlayıcı yoksa uyarı gösterir.
 - **Testler:** HTTP 3 (`content-drafts`: bayrak kapalıyken ret, onaysız yayım yok, istemde kişisel veri yok, kota), modül 2 (kota yarışı, ay geçişi), birim 4, panel 2.
 
+## Uygulama notları (M17, çift onaylı izin, 2026-10-29)
+- **Sorun (kapanış güvenlik incelemesi):** İzin, sahibi olduğu kanıtlanmamış bir adres için kaydedilip İYS'ye bildiriliyordu.
+  - Hesaba yazılan herhangi bir telefon numarası için izin verilebiliyor ya da o numaranın izni geri çekilebiliyordu.
+  - Ödemede yazılan herhangi bir e-posta için de izin verilebiliyordu.
+- **Kural:**
+  - Hesaptaki **e-posta** izni doğrudan kaydedilir: adres, sahibinin doğruladığı giriş adresidir.
+  - **Ödemede** işaretlenen e-posta ve SMS izinleri ile hesapta **telefona** verilen izin, adresin sahibine onay bağlantısı gönderir.
+  - Hesaptaki telefon izni yalnızca kayıt müşterinin kendi kaydıysa doğrudan geri çekilir.
+- **Onay isteği (`consent_request`):**
+  - Adres şifreli ve anahtarlı özetiyle saklanır, bağlantının token'ı yalnızca özetiyle tutulur. Kanıt bilgisi isteğin üzerinde durur.
+  - Bağlantı 7 gün geçerlidir ve bir kez kullanılır; tek bir koşullu `UPDATE … RETURNING` ifadesiyle tüketilir.
+- **Onay sayfası:** `/consents/confirm?t=` önce sorar, izni POST kaydeder; böylece e-posta tarayıcıları bağlantıyı açsa bile izin kaydedilmez. Kayda `confirmed_at` eklenir. İYS'ye yalnızca onaylanan izin gider.
+- **Gönderim:**
+  - Onay iletisi `consent.confirm` şablonuyla e-posta ve SMS olarak gider.
+  - Herkesin tetikleyebildiği e-postaların günlük payına (%25) dahildir.
+  - Token yalnızca iletide bulunur; hiçbir workflow onu saklamaz.
+
 ## Sonuçlar
 
 - Kod dışı gereksinimler (docs/12):

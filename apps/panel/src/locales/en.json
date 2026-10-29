@@ -1063,6 +1063,9 @@
           },
           "cart": {
             "reminder": "Abandoned cart reminder"
+          },
+          "consent": {
+            "confirm": "Campaign consent confirmation"
           }
         }
       },

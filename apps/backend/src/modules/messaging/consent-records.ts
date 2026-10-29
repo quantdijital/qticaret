@@ -11,6 +11,7 @@ import { ValidationError, uniqueViolationKeys } from "../../lib/errors"
 import { maskRecipient, normalizeRecipient } from "../../lib/messaging/recipients"
 import type { MessageChannel } from "../../lib/messaging/recipients"
 import { CheckoutConsent } from "./models/checkout-consent"
+import { ConsentRequest } from "./models/consent-request"
 import { MessageConsent } from "./models/message-consent"
 import { MessageConsentEvent } from "./models/message-consent-event"
 import { MessageSuppression } from "./models/message-suppression"
@@ -42,6 +43,7 @@ const addressChannel = (channel: ConsentChannel): MessageChannel =>
  */
 export class ConsentRecords extends MedusaService({
   CheckoutConsent,
+  ConsentRequest,
   MessageConsent,
   MessageConsentEvent,
   MessageSuppression,
@@ -170,6 +172,7 @@ export class ConsentRecords extends MedusaService({
     }
   }
 
+  // Protected for the confirmation of a consent request, in its own transaction
   @InjectTransactionManager()
   protected async recordConsent_(
     input: ConsentInput,

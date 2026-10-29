@@ -208,6 +208,8 @@ export const ACCOUNT_ROUTES = [
   // `methods`, so it runs before Medusa's own route
   { matcher: "/auth/customer/emailpass/register", middlewares: [requireMailDomain()] },
   { matcher: "/stock-alerts/confirm", middlewares: [rateLimit(() => RATE_LIMIT_PROFILES.webhook)] },
+  // A consent request's link (double opt-in): opened from a message, by address alone
+  { matcher: "/consents/confirm", middlewares: [rateLimit(() => RATE_LIMIT_PROFILES.webhook)] },
   // adr/0038 §1: an unsubscribe link, opened or one-clicked from anywhere
   {
     matcher: "/unsubscribe",

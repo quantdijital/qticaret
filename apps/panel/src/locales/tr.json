@@ -1063,6 +1063,9 @@
           },
           "cart": {
             "reminder": "Terk edilmiş sepet hatırlatması"
+          },
+          "consent": {
+            "confirm": "Kampanya izni onayı"
           }
         }
       },

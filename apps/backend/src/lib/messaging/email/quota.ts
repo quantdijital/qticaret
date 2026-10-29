@@ -25,6 +25,7 @@ export const OPEN_TEMPLATES: readonly string[] = [
   "order.access_link",
   "stock.alert_confirm",
   "cart.reminder",
+  "consent.confirm",
 ]
 
 const DAY = 24 * 60 * 60 * 1000

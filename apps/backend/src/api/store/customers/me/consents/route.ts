@@ -1,5 +1,6 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ValidationError } from "../../../../../lib/errors"
+import { askToConfirmConsent } from "../../../../../workflows/messaging/consent-confirmation"
 import { MESSAGING_MODULE } from "../../../../../modules/messaging"
 import type MessagingModuleService from "../../../../../modules/messaging/service"
 import {
@@ -18,7 +19,11 @@ export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse):
 /**
  * POST /store/customers/me/consents: the customer gives or withdraws
  * consent for campaign messages on a channel, kept with the text's version
- * and a keyed hash of the IP; İYS hears of it (F10 M11).
+ * and a keyed hash of the IP; İYS hears of it (F10 M11). The e-mail is the
+ * login its owner confirmed, so it is recorded at once. The phone was only
+ * typed: giving consent for it, or withdrawing one not this customer's own,
+ * waits for the number's owner to confirm by SMS (double opt-in, security
+ * review 2026-10-29), and the answer says so with `pending`.
  */
 export async function POST(
   req: AuthenticatedMedusaRequest<StorePostConsentType>,
@@ -30,13 +35,50 @@ export async function POST(
   if (!address) {
     throw new ValidationError("messaging.no_address", { field: "channel" })
   }
-  await req.scope.resolve<MessagingModuleService>(MESSAGING_MODULE).recordConsent({
+  const messaging = req.scope.resolve<MessagingModuleService>(MESSAGING_MODULE)
+  const evidence = storefrontEvidence(req.ip ?? req.socket.remoteAddress ?? "", textVersion)
+  if (
+    channel === "email" ||
+    (status === "revoked" && (await ownConsent(req, customerId, address)))
+  ) {
+    await messaging.recordConsent({
+      channel,
+      address,
+      status,
+      source: "account",
+      customer_id: customerId,
+      evidence,
+    })
+    res.json({ consents: await customerConsents(req.scope, customerId), pending: null })
+    return
+  }
+  await askToConfirmConsent(req.scope, {
     channel,
     address,
     status,
     source: "account",
     customer_id: customerId,
-    evidence: storefrontEvidence(req.ip ?? req.socket.remoteAddress ?? "", textVersion),
+    evidence,
   })
-  res.json({ consents: await customerConsents(req.scope, customerId) })
+  res
+    .status(202)
+    .json({ consents: await customerConsents(req.scope, customerId), pending: channel })
+}
+
+/** Whether the phone's consent on record is this customer's own, which they may withdraw at once. */
+async function ownConsent(
+  req: AuthenticatedMedusaRequest,
+  customerId: string,
+  phone: string
+): Promise<boolean> {
+  const messaging = req.scope.resolve<MessagingModuleService>(MESSAGING_MODULE)
+  const recipient = messaging.recipientOf("sms", phone)
+  if (!recipient) {
+    return false
+  }
+  const [row] = await messaging.listMessageConsents(
+    { channel: "sms", recipient_hash: recipient.hash },
+    { take: 1, select: ["customer_id"] }
+  )
+  return row?.customer_id === customerId
 }

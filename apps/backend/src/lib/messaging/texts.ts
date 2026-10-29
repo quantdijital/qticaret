@@ -52,6 +52,21 @@ const TR: Readonly<Record<string, string>> = {
   "order.total": "Toplam",
   "order.address": "Teslimat adresi",
   "order.view": "Siparişi görüntüle",
+  "consent_confirm.subject": "Kampanya iletilerine izninizi onaylayın",
+  "consent_confirm.preheader": "{{shop}} size kampanya iletisi göndermeden önce soruyor.",
+  "consent_confirm.intro":
+    "{{shop}} kampanya ve fırsat iletileri için bu adrese izin verildi. İzni siz verdiyseniz aşağıdaki düğmeyle onaylayın.",
+  "consent_confirm.button": "İznimi onayla",
+  "consent_confirm.ignore":
+    "Bu isteği siz yapmadıysanız iletiyi yok sayın; onaylamadığınız sürece size kampanya iletisi gelmez.",
+  "consent_confirm.sms":
+    "{{shop}}: Kampanya SMS'lerine izin verildi. Onaylamak için: {{url}} Siz istemediyseniz yok sayın.",
+  "consent_revoke.subject": "Kampanya iletileri iznini geri çekmeyi onaylayın",
+  "consent_revoke.intro":
+    "{{shop}} kampanya iletileri için bu adresin izni geri çekilmek istendi. Siz istediyseniz aşağıdaki düğmeyle onaylayın.",
+  "consent_revoke.button": "İznimi geri çek",
+  "consent_revoke.sms":
+    "{{shop}}: Kampanya SMS izninizin geri çekilmesi istendi. Onaylamak için: {{url}}",
   "stock_confirm.subject": "Stok bildirimini onaylayın",
   "stock_confirm.preheader": "{{shop}} ürün stoğa girince size haber versin mi?",
   "stock_confirm.heading": "Stok bildirimini onaylayın",

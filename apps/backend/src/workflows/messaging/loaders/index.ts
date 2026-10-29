@@ -4,6 +4,7 @@ import type { VarsOf } from "../deliver"
 import { loadAnnouncement, loadPasswordReset, loadVerification } from "./account"
 import { loadPaymentFailed } from "./cart"
 import { loadCartReminder } from "./cart-reminder"
+import { loadConsentRequest } from "./consent"
 import { loadOrderLink, loadOrderMessage } from "./order"
 import { loadParcelMessage } from "./parcel"
 import { loadReturnMessage } from "./return-request"
@@ -34,6 +35,7 @@ export const MESSAGE_LOADERS: { readonly [N in MessageTemplateName]: Loader<N> }
   "payment.failed": (container, id) => loadPaymentFailed(container, id),
   "marketing.announcement": loadAnnouncement,
   "cart.reminder": loadCartReminder,
+  "consent.confirm": loadConsentRequest,
   "stock.alert_confirm": loadStockAlert,
   "stock.back_in_stock": loadStockAlert,
   "staff.new_order": (container, id) => loadStaffOrder(container, id),

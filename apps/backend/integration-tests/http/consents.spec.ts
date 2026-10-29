@@ -39,6 +39,7 @@ medusaIntegrationTestRunner({
     let storefront: Storefront
     let variantId: string
     const MAIL_ENV = ["EMAIL_TRANSPORT", "RESEND_API_KEY", "RESEND_BASE_URL", "EMAIL_FROM"]
+    const backend = process.env["BACKEND_URL"]
     const messaging = () => getContainer().resolve<MessagingModuleService>(MESSAGING_MODULE)
 
     beforeAll(async () => {
@@ -48,12 +49,19 @@ medusaIntegrationTestRunner({
         RESEND_API_KEY: fake.apiKey,
         RESEND_BASE_URL: fake.url,
         EMAIL_FROM: "bildirim@platform.example",
+        // A confirmation's link is a backend page
+        BACKEND_URL: "https://api.magaza.example",
       })
     })
 
     afterAll(async () => {
       for (const name of MAIL_ENV) {
         Reflect.deleteProperty(process.env, name)
+      }
+      if (backend === undefined) {
+        Reflect.deleteProperty(process.env, "BACKEND_URL")
+      } else {
+        process.env["BACKEND_URL"] = backend
       }
       await fake.close()
     })
@@ -111,15 +119,58 @@ medusaIntegrationTestRunner({
         },
       })
 
-      await eventually(
-        () => messaging().consentOf("email", email),
-        (status) => status === "granted"
+      // The address was only typed: its owner confirms from it before anything is recorded
+      const mail = await eventually(
+        () => Promise.resolve(fake.messages.find(({ to }) => to.includes(email))),
+        (found) => found !== undefined
+      )
+      const beforeConfirming = await messaging().consentOf("email", email)
+      const token = /consents\/confirm\?t=([\w-]{43})/.exec(mail?.html ?? "")?.[1] ?? ""
+      const page = await settle(
+        http.get<string>(`/consents/confirm?t=${token}`, { responseType: "text" })
+      )
+      const afterOpening = await messaging().consentOf("email", email)
+      const confirmed = await settle(
+        http.post<string>(`/consents/confirm?t=${token}`, undefined, { responseType: "text" })
+      )
+      const again = await settle(
+        http.post<string>(`/consents/confirm?t=${token}`, undefined, { responseType: "text" })
       )
       const [event] = await messaging().listMessageConsentEvents({ source: "checkout" })
 
+      expect(mail?.template).toBe("consent_confirm")
+      expect(beforeConfirming).toBeNull()
+      // A mail scanner opening the link records nothing: the page asks
+      expect(page.status).toBe(200)
+      expect(afterOpening).toBeNull()
+      expect(confirmed.status).toBe(200)
+      expect(again.status).toBe(400)
+      expect(await messaging().consentOf("email", email)).toBe("granted")
       expect(await messaging().consentOf("sms", "05321234567")).toBeNull()
-      expect(event?.evidence).toMatchObject({ order_id: orderId, text_version: "2026-10" })
+      expect(event?.evidence).toMatchObject({
+        order_id: orderId,
+        text_version: "2026-10",
+        confirmed_at: expect.any(String) as unknown,
+      })
       expect(await messaging().listCheckoutConsents({})).toHaveLength(0)
+    })
+
+    it("asks a typed phone's owner before its consent counts, from the account", async () => {
+      const customer = await registerCustomer(http, storefront)
+      const phone = `0532${String(Date.now()).slice(-7)}`
+      await getContainer().resolve(Modules.CUSTOMER).updateCustomers(customer.id, { phone })
+      const asked = await http.post<ConsentsBody & { pending: string | null }>(
+        "/store/customers/me/consents",
+        { channel: "sms", status: "granted", text_version: "2026-10" },
+        { headers: customer.headers }
+      )
+      const [request] = await messaging().listConsentRequests({ customer_id: customer.id })
+
+      expect(asked.status).toBe(202)
+      expect(asked.data.pending).toBe("sms")
+      expect(await messaging().consentOf("sms", phone)).toBeNull()
+      expect(request).toMatchObject({ channel: "sms", status: "granted", confirmed_at: null })
+      expect(JSON.stringify(request)).not.toContain(phone)
     })
 
     it("gives a campaign e-mail a one-click way out that withdraws the consent", async () => {

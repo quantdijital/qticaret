@@ -7,6 +7,7 @@ import {
 } from "@medusajs/framework/workflows-sdk"
 import { MESSAGING_MODULE } from "../../modules/messaging"
 import type MessagingModuleService from "../../modules/messaging/service"
+import { askToConfirmConsent } from "./consent-confirmation"
 
 interface OrderRow {
   id: string
@@ -17,10 +18,12 @@ interface OrderRow {
 }
 
 /**
- * Records the boxes ticked at checkout for the order's own e-mail and
- * phone, with the cart's proof, then lets the cart's row go. An unticked
- * box changes nothing: it is no withdrawal. Nothing to undo: a consent
- * recorded stays a fact, and recording it again is no change.
+ * Asks the order's own e-mail and phone to confirm the boxes ticked at
+ * checkout, with the cart's proof, then lets the cart's row go: the
+ * addresses were only typed, so each consent is recorded, and told to
+ * İYS, once its owner confirms it from the address (double opt-in,
+ * security review 2026-10-29). An unticked box changes nothing: it is no
+ * withdrawal. Nothing to undo: a confirmation sent cannot be called back.
  */
 const recordCheckoutConsentsStep = createStep(
   "messaging-record-checkout-consents",
@@ -33,12 +36,12 @@ const recordCheckoutConsentsStep = createStep(
     const order = data[0] as OrderRow | undefined
     const cartId = order?.cart?.id
     if (!order || !cartId) {
-      return new StepResponse({ recorded: 0 })
+      return new StepResponse({ requested: 0 })
     }
     const messaging = container.resolve<MessagingModuleService>(MESSAGING_MODULE)
     const [ticked] = await messaging.listCheckoutConsents({ cart_id: cartId }, { take: 1 })
     if (!ticked) {
-      return new StepResponse({ recorded: 0 })
+      return new StepResponse({ requested: 0 })
     }
     const evidence = {
       text_version: ticked.text_version,
@@ -53,11 +56,11 @@ const recordCheckoutConsentsStep = createStep(
         ? { channel: "sms" as const, address: order.shipping_address.phone }
         : null,
     ].filter((each) => each !== null)
-    let recorded = 0
+    let requested = 0
     for (const { channel, address } of wanted) {
       // An address that is none of the channel's is left out, not an error
       if (messaging.recipientOf(channel, address)) {
-        await messaging.recordConsent({
+        await askToConfirmConsent(container, {
           channel,
           address,
           status: "granted",
@@ -65,11 +68,11 @@ const recordCheckoutConsentsStep = createStep(
           customer_id: order.customer_id,
           evidence,
         })
-        recorded += 1
+        requested += 1
       }
     }
     await messaging.deleteCheckoutConsents([ticked.id])
-    return new StepResponse({ recorded })
+    return new StepResponse({ requested })
   }
 )
 

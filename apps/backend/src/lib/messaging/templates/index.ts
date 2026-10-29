@@ -1,5 +1,6 @@
 import { passwordReset, verifyEmail } from "./account"
 import { cartReminder } from "./cart-reminder"
+import { consentConfirm } from "./consent"
 import { announcement } from "./marketing"
 import { orderLink } from "./order-link"
 import { orderPlaced } from "./order-placed"
@@ -12,6 +13,7 @@ import { staffBankTransfer, staffLowStock, staffNewOrder, staffSeoDigest } from 
 export type { ResetVars, VerifyVars } from "./account"
 export type { AnnouncementVars } from "./marketing"
 export type { CartReminderVars } from "./cart-reminder"
+export type { ConsentConfirmVars } from "./consent"
 export { renderEmail } from "./layout"
 export type { EmailBlock, EmailBody } from "./layout"
 export { orderSummary } from "./order-placed"
@@ -38,6 +40,7 @@ export const MESSAGE_TEMPLATES = {
   "payment.failed": paymentFailed,
   "marketing.announcement": announcement,
   "cart.reminder": cartReminder,
+  "consent.confirm": consentConfirm,
   "stock.alert_confirm": stockAlertConfirm,
   "stock.back_in_stock": backInStock,
   "staff.new_order": staffNewOrder,
