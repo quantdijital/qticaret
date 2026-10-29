@@ -56,7 +56,10 @@ medusaIntegrationTestRunner({
         { headers: admin.headers }
       )
       const back = new URL(await google.consent(data.url, "allow", scopes))
-      await fetch(`${base()}${back.pathname}${back.search}`, { redirect: "manual" })
+      await fetch(`${base()}${back.pathname}${back.search}`, {
+        redirect: "manual",
+        headers: admin.headers,
+      })
     }
     const sites = () =>
       settle(

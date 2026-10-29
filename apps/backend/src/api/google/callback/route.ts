@@ -13,8 +13,9 @@ const BACK = "/settings/marketing"
 /**
  * GET /google/callback (F10 M13): where Google sends the staff member back
  * from its consent screen. The `state` names the connection under way
- * (used once); the code becomes the shop's refresh token. Whatever
- * happens, the browser goes back to the panel with one word of outcome.
+ * (used once, by the staff member signed in who started it); the code
+ * becomes the shop's refresh token. Whatever happens, the browser goes
+ * back to the panel with one word of outcome.
  */
 export async function GET(
   req: MedusaRequest<unknown, GoogleCallbackQueryType>,
@@ -34,7 +35,16 @@ export async function GET(
     return
   }
   try {
-    await finishGoogleConnectWorkflow(req.scope).run({ input: { state, code } })
+    // A user's session only: a customer's or an integration key's is no staff member
+    const actor = (req as { auth_context?: { actor_type?: string; actor_id?: string } })
+      .auth_context
+    await finishGoogleConnectWorkflow(req.scope).run({
+      input: {
+        state,
+        code,
+        user_id: actor?.actor_type === "user" ? (actor.actor_id ?? null) : null,
+      },
+    })
     back("connected")
   } catch (failure) {
     logger.warn({ event: "google.connect_failed", err: errorSummary(failure) })

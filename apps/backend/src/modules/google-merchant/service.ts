@@ -1,4 +1,5 @@
 import { createHash, randomBytes } from "node:crypto"
+import type { EntityManager } from "@medusajs/framework/mikro-orm/knex"
 import type { Context } from "@medusajs/framework/types"
 import {
   InjectManager,
@@ -47,21 +48,30 @@ class GoogleMerchantModuleService extends MedusaService({
     return state
   }
 
-  /** The verifier of a `state`, once; null for one unknown, used or past its ten minutes. */
+  /**
+   * The verifier of a `state`, once; null for one unknown, used or past its
+   * ten minutes. Taken in one statement, so two callbacks at once cannot
+   * both have it (security review 2026-10-29).
+   */
   @InjectTransactionManager()
   async takeState(
     state: string,
     @MedusaContext() sharedContext: Context = {}
   ): Promise<{ verifier: string; user_id: string } | null> {
-    const [row] = await this.listGoogleOauthStates(
-      { state_hash: hashOf(state) },
-      { take: 1 },
-      sharedContext
+    const manager = sharedContext.transactionManager as EntityManager | undefined
+    if (!manager) {
+      throw new Error("google-merchant: a state is taken in a transaction")
+    }
+    const [row] = await manager.execute<
+      { verifier_encrypted: string; user_id: string; expires_at: Date | string }[]
+    >(
+      `DELETE FROM google_oauth_state WHERE state_hash = ? AND deleted_at IS NULL
+       RETURNING verifier_encrypted, user_id, expires_at`,
+      [hashOf(state)]
     )
     if (!row) {
       return null
     }
-    await this.deleteGoogleOauthStates([row.id], sharedContext)
     return new Date(row.expires_at) > new Date()
       ? {
           verifier: decryptPii(row.verifier_encrypted, this.encryptionKey, CONTEXT),

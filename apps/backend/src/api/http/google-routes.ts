@@ -1,4 +1,8 @@
-import { validateAndTransformBody, validateAndTransformQuery } from "@medusajs/framework/http"
+import {
+  authenticate,
+  validateAndTransformBody,
+  validateAndTransformQuery,
+} from "@medusajs/framework/http"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import {
   AdminPostGoogleMerchant,
@@ -37,6 +41,8 @@ export const GOOGLE_ROUTES = [
     methods: ["GET" as const],
     middlewares: [
       rateLimit(() => RATE_LIMIT_PROFILES.webhook),
+      // The staff member's own session: only who started the connection may finish it
+      authenticate("user", ["session", "bearer"], { allowUnauthenticated: true }),
       validateAndTransformQuery(GoogleCallbackQuery, {}),
     ],
   },

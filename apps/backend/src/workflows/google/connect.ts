@@ -18,6 +18,7 @@ import { GOOGLE_MERCHANT_MODULE } from "../../modules/google-merchant"
 import type GoogleMerchantModuleService from "../../modules/google-merchant/service"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-credentials"
 import type IntegrationCredentialsModuleService from "../../modules/integration-credentials/service"
+import type { CredentialDraft } from "../../modules/integration-credentials/types"
 
 const redirectUri = () => `${backendUrl()}${GOOGLE_CALLBACK_PATH}`
 
@@ -53,27 +54,29 @@ export const startGoogleConnectWorkflow = createWorkflow(
   (input: { user_id: string }) => new WorkflowResponse(startGoogleConnectStep(input))
 )
 
-interface Exchanged {
-  refresh_token: string
-  email: string | null
-  /** What the shop allowed, space-separated: Search Console may be missing. */
-  scopes: string | null
-  user_id: string
+interface FinishInput {
+  state: string
+  code: string
+  /** The staff member back from Google's screen: only the one who started may finish. */
+  user_id: string | null
 }
 
 /**
  * Trades the code Google sent back for the shop's refresh token, with the
- * verifier of its `state` (used once). Undone by revoking the token at
- * Google, so a connection that is not kept leaves no access behind.
+ * verifier of its `state` (used once, by the staff member who started
+ * it), and seals it at once with the account's settings (adr/0027): no
+ * step's output or input holds it in the clear. Undone by revoking the
+ * token at Google, so a connection that is not kept leaves no access
+ * behind.
  */
 const exchangeGoogleCodeStep = createStep(
   "google-exchange-code",
-  async (input: { state: string; code: string }, { container }) => {
+  async (input: FinishInput, { container }) => {
     const client = requireClient()
     const taken = await container
       .resolve<GoogleMerchantModuleService>(GOOGLE_MERCHANT_MODULE)
       .takeState(input.state)
-    if (!taken) {
+    if (!taken || !input.user_id || taken.user_id !== input.user_id) {
       throw new ValidationError("google.state_invalid")
     }
     const answer = await googleApi().exchangeCode(client, {
@@ -84,18 +87,30 @@ const exchangeGoogleCodeStep = createStep(
     if (!answer.refreshToken) {
       throw new ValidationError("google.no_refresh_token")
     }
-    const exchanged: Exchanged = {
-      refresh_token: answer.refreshToken,
-      email: answer.email,
-      scopes: answer.scopes,
-      user_id: taken.user_id,
-    }
-    return new StepResponse(exchanged, answer.refreshToken)
+    const credentials = container.resolve<IntegrationCredentialsModuleService>(
+      INTEGRATION_CREDENTIALS_MODULE
+    )
+    const kept = (await credentials.read("google"))?.settings ?? {}
+    const draft = await credentials.draft("google", {
+      settings: {
+        ...kept,
+        ...(answer.email ? { email: answer.email } : {}),
+        ...(answer.scopes ? { scopes: answer.scopes.slice(0, 2000) } : {}),
+      },
+      secrets: { refresh_token: answer.refreshToken },
+    })
+    return new StepResponse({ draft, email: answer.email, user_id: taken.user_id }, draft)
   },
-  async (refreshToken) => {
-    if (refreshToken) {
+  async (draft, { container }) => {
+    if (!draft) {
+      return
+    }
+    const token = container
+      .resolve<IntegrationCredentialsModuleService>(INTEGRATION_CREDENTIALS_MODULE)
+      .openDraft(draft).secrets["refresh_token"]
+    if (token) {
       await googleApi()
-        .revoke(refreshToken)
+        .revoke(token)
         .catch((error: unknown) => {
           logger.warn({ event: "google.revoke_failed", err: errorSummary(error) })
         })
@@ -104,27 +119,19 @@ const exchangeGoogleCodeStep = createStep(
 )
 
 /**
- * Keeps the refresh token with the shop's provider accounts (adr/0027),
- * encrypted; the Merchant Center account named before stays. Undone by
+ * Keeps the sealed refresh token with the shop's provider accounts
+ * (adr/0027); the Merchant Center account named before stays. Undone by
  * putting the account back as it was.
  */
 const storeGoogleConnectionStep = createStep(
   "google-store-connection",
-  async (input: Exchanged, { container }) => {
-    const credentials = container.resolve<IntegrationCredentialsModuleService>(
-      INTEGRATION_CREDENTIALS_MODULE
-    )
-    const current = await credentials.read("google")
-    const kept = current?.settings ?? {}
-    const draft = await credentials.draft("google", {
-      settings: {
-        ...kept,
-        ...(input.email ? { email: input.email } : {}),
-        ...(input.scopes ? { scopes: input.scopes.slice(0, 2000) } : {}),
-      },
-      secrets: { refresh_token: input.refresh_token },
-    })
-    const previous = await credentials.store(draft, "verified", input.user_id)
+  async (
+    input: { draft: CredentialDraft; email: string | null; user_id: string },
+    { container }
+  ) => {
+    const previous = await container
+      .resolve<IntegrationCredentialsModuleService>(INTEGRATION_CREDENTIALS_MODULE)
+      .store(input.draft, "verified", input.user_id)
     return new StepResponse({ connected: true, email: input.email }, { previous })
   },
   async (undo, { container }) => {
@@ -139,7 +146,7 @@ const storeGoogleConnectionStep = createStep(
 /** Google's answer to the consent screen, made the shop's connection (F10 M13). */
 export const finishGoogleConnectWorkflow = createWorkflow(
   "google-finish-connect",
-  (input: { state: string; code: string }) =>
+  (input: FinishInput) =>
     new WorkflowResponse(storeGoogleConnectionStep(exchangeGoogleCodeStep(input)))
 )
 

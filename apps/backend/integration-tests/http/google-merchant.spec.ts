@@ -43,8 +43,9 @@ medusaIntegrationTestRunner({
     const status = async () =>
       (await http.get<{ google: GoogleStatus }>("/admin/google", { headers: admin.headers })).data
         .google
-    const callback = async (path: string) => {
-      const answer = await fetch(`${base()}${path}`, { redirect: "manual" })
+    /** Google's redirect back, in the staff member's browser: their session goes with it. */
+    const callback = async (path: string, headers: Record<string, string> = admin.headers) => {
+      const answer = await fetch(`${base()}${path}`, { redirect: "manual", headers })
       return { status: answer.status, location: answer.headers.get("location") ?? "" }
     }
     const consentPath = async (answer: "allow" | "deny" = "allow") => {
@@ -100,6 +101,8 @@ medusaIntegrationTestRunner({
     })
 
     it("connects the shop's Google account through state and PKCE, each used once", async () => {
+      // Someone else holding the address, without the staff member's session, finishes nothing
+      const stranger = await callback(await consentPath(), {})
       const path = await consentPath()
       const connected = await callback(path)
       const replayed = await callback(path)
@@ -107,6 +110,7 @@ medusaIntegrationTestRunner({
       const after = await status()
       const raw = await http.get("/admin/google", { headers: admin.headers })
 
+      expect(stranger.location).toBe("/settings/marketing?google=state_invalid")
       expect(connected).toEqual({ status: 303, location: "/settings/marketing?google=connected" })
       expect(replayed.location).toBe("/settings/marketing?google=state_invalid")
       expect(denied.location).toBe("/settings/marketing?google=denied")
