@@ -1,7 +1,7 @@
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { CATALOG_EXTENSION_MODULE } from "../../../modules/catalog-extension"
 import type CatalogExtensionModuleService from "../../../modules/catalog-extension/service"
-import type { ExtensionFields, ProductCatalogPlan } from "./plan-product-catalog"
+import type { ExtensionFields, ProductCatalogPlan, VariantFields } from "./plan-product-catalog"
 
 export interface WrittenCatalog {
   /** Rows made now, to be linked: the product's extension and new variant ones. */
@@ -13,7 +13,7 @@ interface Undo {
   createdProductExtension: string | null
   createdVariantExtensions: string[]
   restoreProduct: ({ id: string } & Partial<ExtensionFields>) | null
-  restoreVariants: { id: string; mpn: string | null }[]
+  restoreVariants: ({ id: string } & Partial<VariantFields>)[]
 }
 
 async function writeProduct(
@@ -23,7 +23,7 @@ async function writeProduct(
 ): Promise<void> {
   const { id, set, previous } = plan.product
   if (Object.keys(set).length === 0) {
-    // Only MPNs changed: no product row is made for nothing
+    // Only variants changed: no product row is made for nothing
     return
   }
   if (id) {
@@ -43,14 +43,14 @@ async function writeVariants(
     change.id ? [{ ...change, id: change.id }] : []
   )
   if (existing.length > 0) {
-    await service.updateVariantExtensions(existing.map(({ id, mpn }) => ({ id, mpn })))
-    undo.restoreVariants = existing.map(({ id, previous }) => ({ id, mpn: previous }))
+    await service.updateVariantExtensions(existing.map(({ id, set }) => ({ id, ...set })))
+    undo.restoreVariants = existing.map(({ id, previous }) => ({ id, ...previous }))
   }
   const fresh = plan.variants.filter((change) => !change.id)
   if (fresh.length === 0) {
     return []
   }
-  const created = await service.createVariantExtensions(fresh.map(({ mpn }) => ({ mpn })))
+  const created = await service.createVariantExtensions(fresh.map(({ set }) => set))
   undo.createdVariantExtensions = created.map((row) => row.id)
   return created.map((row, index) => {
     const change = fresh[index]

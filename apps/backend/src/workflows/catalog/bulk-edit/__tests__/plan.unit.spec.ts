@@ -403,3 +403,56 @@ describe("bulk edit: alt texts", () => {
     ).toEqual({ kind: "unchanged" })
   })
 })
+
+describe("bulk edit: unit cost", () => {
+  const costed = (id: string, cost: number | null): BulkVariant => ({
+    id,
+    variant_extension: cost === null ? null : { cost },
+  })
+  const cost = (change: Omit<Extract<BulkChange, { action: "cost" }>, "action">) =>
+    ({ action: "cost", ...change }) as BulkChange
+
+  it("sets every variant's cost, in lira as the catalog save takes it", () => {
+    const plan = planBulkChange(
+      product({ variants: [costed("var_1", 12000), costed("var_2", null)] }),
+      cost({ mode: "set", value: 99.9 }),
+      context
+    )
+
+    expect(writeOf(plan)).toEqual({
+      action: "cost",
+      variants: { var_1: { cost: 99.9 }, var_2: { cost: 99.9 } },
+    })
+    expect(plan.kind === "write" ? plan.diff : null).toEqual({
+      "variant:var_1:cost": { before: 120, after: 99.9 },
+      "variant:var_2:cost": { before: null, after: 99.9 },
+    })
+  })
+
+  it("changes by a percent only the variants that have a cost, to the kuruş", () => {
+    const plan = planBulkChange(
+      product({ variants: [costed("var_1", 3333), costed("var_2", null)] }),
+      cost({ mode: "percent", value: 10 }),
+      context
+    )
+
+    // 33,33 × 1,10 = 36,663 → 36,66
+    expect(writeOf(plan)).toEqual({ action: "cost", variants: { var_1: { cost: 36.66 } } })
+  })
+
+  it("clears costs, and leaves out a product with none to change by a percent", () => {
+    const cleared = planBulkChange(
+      product({ variants: [costed("var_1", 500), costed("var_2", null)] }),
+      cost({ mode: "clear" }),
+      context
+    )
+    const none = planBulkChange(
+      product({ variants: [costed("var_1", null)] }),
+      cost({ mode: "percent", value: -20 }),
+      context
+    )
+
+    expect(writeOf(cleared)).toEqual({ action: "cost", variants: { var_1: { cost: null } } })
+    expect(none).toEqual({ kind: "skipped", key: "bulk_edit.no_cost" })
+  })
+})

@@ -1424,7 +1424,8 @@
       "optionValues": "Add at least one value to each option.",
       "tooManyVariants": "A product can have at most 100 variants.",
       "optionRequired": "Add at least one option, or turn options off.",
-      "optionDuplicate": "An option with this name already exists."
+      "optionDuplicate": "An option with this name already exists.",
+      "cost": "The cost must be between 0 and 10,000,000 ₺."
     },
     "media": {
       "card": "Images",
@@ -1570,7 +1571,7 @@
       "saved": "Changes saved.",
       "mediaSaved": "Images updated.",
       "variants": "Variants, price and stock",
-      "variantsHint": "Stock is the quantity at the shop's default location.",
+      "variantsHint": "Stock is the quantity at the shop's default location. Cost is VAT excluded and used only in stock reports.",
       "variantsSaved": "Variants saved.",
       "reserved": "Reserved",
       "summary": "Summary",
@@ -1591,7 +1592,9 @@
         "digital": "Digital product: no shipping or package size needed.",
         "service": "Service: no shipping or package size needed."
       },
-      "backorder": "Sell past stock"
+      "backorder": "Sell past stock",
+      "cost": "Cost",
+      "costHint": "Unit cost, VAT excluded; used in reports only, never shown to customers."
     },
     "catalog": {
       "card": "Catalog details",
@@ -1686,7 +1689,8 @@
         "status": "Change status",
         "category": "Edit category",
         "seo_template": "Apply SEO template",
-        "alt_text": "Fill missing alt texts"
+        "alt_text": "Fill missing alt texts",
+        "cost": "Change cost"
       },
       "price": {
         "mode": "Price change",
@@ -1755,7 +1759,22 @@
         "quantity": "Enter zero or a positive whole number.",
         "adjust": "Enter a whole number above zero.",
         "category": "Choose a category.",
-        "seoFields": "Choose at least one field."
+        "seoFields": "Choose at least one field.",
+        "cost": "Enter a cost between 0 and 10,000,000 ₺."
+      },
+      "cost": {
+        "mode": "Cost change",
+        "modes": {
+          "set": "Set the cost",
+          "percent": "Change by percent",
+          "clear": "Remove the cost"
+        },
+        "amount": "Unit cost (₺, VAT excluded)",
+        "hints": {
+          "set": "Every variant of the selected products gets the same cost.",
+          "percent": "Only variants with a cost change."
+        },
+        "clearHint": "The selected products' variants lose their cost; they leave the stock value."
       }
     },
     "priceHistory": {

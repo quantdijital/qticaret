@@ -1424,7 +1424,8 @@
       "optionValues": "Her seçeneğe en az bir değer ekleyin.",
       "tooManyVariants": "Bir üründe en çok 100 varyant olabilir.",
       "optionRequired": "En az bir seçenek ekleyin ya da seçenekleri kapatın.",
-      "optionDuplicate": "Bu adla bir seçenek zaten var."
+      "optionDuplicate": "Bu adla bir seçenek zaten var.",
+      "cost": "Maliyet 0 ile 10.000.000 ₺ arasında olmalı."
     },
     "media": {
       "card": "Görseller",
@@ -1570,7 +1571,7 @@
       "saved": "Değişiklikler kaydedildi.",
       "mediaSaved": "Görseller güncellendi.",
       "variants": "Varyantlar, fiyat ve stok",
-      "variantsHint": "Stok, mağazanın varsayılan depo adresindeki adettir.",
+      "variantsHint": "Stok, mağazanın varsayılan depo adresindeki adettir. Maliyet KDV hariçtir ve yalnızca stok raporlarında kullanılır.",
       "variantsSaved": "Varyantlar kaydedildi.",
       "reserved": "Siparişe ayrılan",
       "summary": "Özet",
@@ -1591,7 +1592,9 @@
         "digital": "Dijital ürün: kargo ve paket ölçüsü gerekmez.",
         "service": "Hizmet: kargo ve paket ölçüsü gerekmez."
       },
-      "backorder": "Stoksuz satış"
+      "backorder": "Stoksuz satış",
+      "cost": "Maliyet",
+      "costHint": "KDV hariç birim maliyet; yalnızca raporlarda kullanılır, müşteri görmez."
     },
     "catalog": {
       "card": "Katalog bilgileri",
@@ -1686,7 +1689,8 @@
         "status": "Yayın durumunu değiştir",
         "category": "Kategoriyi düzenle",
         "seo_template": "SEO şablonunu uygula",
-        "alt_text": "Eksik alt metinleri doldur"
+        "alt_text": "Eksik alt metinleri doldur",
+        "cost": "Maliyeti değiştir"
       },
       "price": {
         "mode": "Fiyat değişikliği",
@@ -1755,7 +1759,22 @@
         "quantity": "Sıfır ya da pozitif bir tam sayı girin.",
         "adjust": "Sıfırdan büyük bir tam sayı girin.",
         "category": "Bir kategori seçin.",
-        "seoFields": "En az bir alan seçin."
+        "seoFields": "En az bir alan seçin.",
+        "cost": "0 ile 10.000.000 ₺ arasında bir maliyet girin."
+      },
+      "cost": {
+        "mode": "Maliyet değişikliği",
+        "modes": {
+          "set": "Maliyeti belirle",
+          "percent": "Yüzde değiştir",
+          "clear": "Maliyeti sil"
+        },
+        "amount": "Birim maliyet (₺, KDV hariç)",
+        "hints": {
+          "set": "Seçilen ürünlerin bütün varyantlarına aynı maliyet yazılır.",
+          "percent": "Yalnızca maliyeti girilmiş varyantlar değişir."
+        },
+        "clearHint": "Seçilen ürünlerin varyantlarındaki maliyet silinir; stok değerine katılmazlar."
       }
     },
     "priceHistory": {

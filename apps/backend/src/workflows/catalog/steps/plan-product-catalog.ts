@@ -2,6 +2,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { ValidationError } from "../../../lib/errors"
+import { fromMedusaAmount } from "../../../lib/money"
 import type { PRODUCT_CONDITIONS } from "../../../modules/catalog-extension/models/product-extension"
 import { PLATFORM_SETTINGS_MODULE } from "../../../modules/platform-settings"
 import { NON_PHYSICAL_PRODUCTS } from "../../../modules/platform-settings/features"
@@ -18,7 +19,16 @@ export interface SetProductCatalogInput {
   kind?: ProductKind | undefined
   primary_category_id?: string | null | undefined
   successor_product_id?: string | null | undefined
-  variants?: Record<string, { mpn: string | null }> | undefined
+  /** Per variant: the MPN, and the unit cost in lira (VAT excluded, F11.4). */
+  variants?:
+    | Record<string, { mpn?: string | null | undefined; cost?: number | null | undefined }>
+    | undefined
+}
+
+/** A variant's own fields; the cost in kuruş. */
+export interface VariantFields {
+  mpn: string | null
+  cost: number | null
 }
 
 export interface ExtensionFields {
@@ -32,7 +42,12 @@ export interface ProductCatalogPlan {
   product_id: string
   /** The product's extension: its row (null: none yet), what changes, what it was. */
   product: { id: string | null; set: Partial<ExtensionFields>; previous: Partial<ExtensionFields> }
-  variants: { variant_id: string; id: string | null; mpn: string | null; previous: string | null }[]
+  variants: {
+    variant_id: string
+    id: string | null
+    set: Partial<VariantFields>
+    previous: Partial<VariantFields>
+  }[]
   /** Profile links and inventory items the kind asks to change (F3.2). */
   shipping: ShippingChanges
 }
@@ -45,7 +60,7 @@ interface ProductRow extends ShippingRow {
   variants?: (
     | (ShippingVariant & {
         id: string
-        variant_extension?: { id: string; mpn: string | null } | null
+        variant_extension?: ({ id: string } & VariantFields) | null
       })
     | null
   )[]
@@ -144,6 +159,27 @@ async function kindShipping(
   return shippingChanges(product, kind, defaultProfile)
 }
 
+/** What a variant's save changes and what it was: only fields asked for and different. */
+function variantChangesOf(
+  asked: NonNullable<SetProductCatalogInput["variants"]>[string],
+  extension: VariantFields | null
+): { set: Partial<VariantFields>; previous: Partial<VariantFields> } {
+  const now: VariantFields = { mpn: extension?.mpn ?? null, cost: extension?.cost ?? null }
+  const wanted: Partial<VariantFields> = {
+    ...(asked.mpn === undefined ? {} : { mpn: asked.mpn }),
+    ...(asked.cost === undefined
+      ? {}
+      : { cost: asked.cost === null ? null : fromMedusaAmount(asked.cost) }),
+  }
+  const keys = (Object.keys(wanted) as (keyof VariantFields)[]).filter(
+    (key) => wanted[key] !== now[key]
+  )
+  return {
+    set: Object.fromEntries(keys.map((key) => [key, wanted[key]])),
+    previous: Object.fromEntries(keys.map((key) => [key, now[key]])),
+  }
+}
+
 /** Checks a catalog save against the product and works out the rows to write; writes nothing. */
 export const planProductCatalogStep = createStep(
   "catalog-plan-product-catalog",
@@ -173,17 +209,17 @@ export const planProductCatalogStep = createStep(
     const variants = new Map(
       (product.variants ?? []).flatMap((variant) => (variant ? [[variant.id, variant]] : []))
     )
-    const variantChanges = Object.entries(input.variants ?? {}).flatMap(([variantId, { mpn }]) => {
+    const variantChanges = Object.entries(input.variants ?? {}).flatMap(([variantId, asked]) => {
       const variant = variants.get(variantId)
       if (!variant) {
         throw new ValidationError("catalog.variant_unknown", { field: "variants" })
       }
       const extension = variant.variant_extension ?? null
-      const previous = extension?.mpn ?? null
-      // Nothing to write: the same MPN, or clearing one that was never set
-      return mpn === previous
+      const { set, previous } = variantChangesOf(asked, extension)
+      // Nothing to write: the same values, or clearing ones that were never set
+      return Object.keys(set).length === 0
         ? []
-        : [{ variant_id: variantId, id: extension?.id ?? null, mpn, previous }]
+        : [{ variant_id: variantId, id: extension?.id ?? null, set, previous }]
     })
     const extension = product.product_extension ?? null
     const { set, previous } = changesOf(input, extension)

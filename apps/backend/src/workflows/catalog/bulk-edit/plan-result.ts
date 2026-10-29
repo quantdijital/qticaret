@@ -26,6 +26,8 @@ export type BulkWrite =
     }
   | { action: "seo_template"; values: { seo_title?: null; seo_description?: null } }
   | { action: "alt_text"; alts: { id: string; alt: string }[] }
+  /** Unit costs by variant, in lira as the catalog save takes them; null clears one. */
+  | { action: "cost"; variants: Record<string, { cost: number | null }> }
 
 /** A field's value before and after, by a key naming it (`variant:<id>:price:try`). */
 export type BulkDiff = Record<string, { before: unknown; after: unknown }>

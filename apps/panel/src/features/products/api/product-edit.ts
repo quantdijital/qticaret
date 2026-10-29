@@ -22,6 +22,8 @@ export interface ProductCatalog {
     title: string | null
     sku: string | null
     mpn: string | null
+    /** Unit cost in lira, VAT excluded (F11.4); staff only. */
+    cost: number | null
     gtin: string | null
   }[]
 }
@@ -60,6 +62,8 @@ export interface VariantEdit {
   stock: { inventoryItemId: string; quantity: number; hasLevel: boolean } | null
   /** Whether it sells past its stock (preorder); null leaves it alone. */
   backorder: boolean | null
+  /** The unit cost in lira (F11.4); null clears it, undefined leaves it alone. */
+  cost?: number | null
 }
 
 const CURRENCY = "try"
@@ -114,6 +118,16 @@ export function useSaveVariants(productId: string) {
       )
       if (update.length > 0) {
         await sdk.admin.product.batchVariants(productId, { update })
+      }
+      // Unit costs are the catalog's (F11.4), saved last: a refused price leaves them as they were
+      const costs = edits.flatMap((edit) =>
+        edit.cost === undefined ? [] : [[edit.variantId, { cost: edit.cost }] as const]
+      )
+      if (costs.length > 0) {
+        await sdk.client.fetch(catalogUrl(productId), {
+          method: "POST",
+          body: { variants: Object.fromEntries(costs) },
+        })
       }
     },
     // A save that failed half-way (stock written, prices refused) still changed the product

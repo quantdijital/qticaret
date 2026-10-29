@@ -18,7 +18,7 @@ interface VariantRowProps {
   preorderOn: boolean
 }
 
-/** One variant's price, stock, held count and preorder switch. */
+/** One variant's price, unit cost, stock, held count and preorder switch. */
 export function VariantRow({
   variant,
   index,
@@ -30,7 +30,7 @@ export function VariantRow({
   const { t } = useTranslation()
   const level = levelAt(variant, locationId)
   const rowErrors = form.formState.errors.rows?.[index]
-  const error = rowErrors?.price?.message ?? rowErrors?.stock?.message
+  const error = rowErrors?.price?.message ?? rowErrors?.cost?.message ?? rowErrors?.stock?.message
   const label = (key: string) => `${variant.title ?? ""} ${t(key)}`
   return (
     <tr className="border-t align-top">
@@ -52,6 +52,20 @@ export function VariantRow({
             aria-label={label("products.wizard.price")}
             className="pr-7 text-right tabular-nums"
             {...form.register(`rows.${index}.price`)}
+          />
+          <span className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 text-xs text-muted-foreground">
+            ₺
+          </span>
+        </div>
+      </td>
+      <td className="px-3 py-2">
+        <div className="relative">
+          <Input
+            inputMode="decimal"
+            aria-label={label("products.detail.cost")}
+            placeholder="—"
+            className="pr-7 text-right tabular-nums"
+            {...form.register(`rows.${index}.cost`)}
           />
           <span className="pointer-events-none absolute top-1/2 right-2.5 -translate-y-1/2 text-xs text-muted-foreground">
             ₺

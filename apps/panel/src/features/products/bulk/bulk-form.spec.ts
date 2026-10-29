@@ -17,6 +17,21 @@ describe("bulk edit form", () => {
     ).toEqual({ change: { action: "price", mode: "amount", value: 2.5 } })
   })
 
+  it("sets, changes by a percent or removes a unit cost; zero is a cost", () => {
+    expect(bulkChangeOf("cost", form({ value: "0" }))).toEqual({
+      change: { action: "cost", mode: "set", value: 0 },
+    })
+    expect(
+      bulkChangeOf("cost", form({ costMode: "percent", direction: "down", value: "10" }))
+    ).toEqual({ change: { action: "cost", mode: "percent", value: -10 } })
+    expect(bulkChangeOf("cost", form({ costMode: "clear", value: "unused" }))).toEqual({
+      change: { action: "cost", mode: "clear" },
+    })
+    expect(bulkChangeOf("cost", form({ value: "-5" }))).toEqual({
+      error: "products.bulk.errors.cost",
+    })
+  })
+
   it("names what the server would refuse on the form", () => {
     expect(bulkChangeOf("price", form({ value: "0" }))).toEqual({
       error: "products.bulk.errors.price",

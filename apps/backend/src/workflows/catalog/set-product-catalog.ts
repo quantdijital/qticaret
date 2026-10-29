@@ -16,8 +16,8 @@ import { writeProductCatalogStep } from "./steps/write-product-catalog"
 const SUCCESSOR_LOCK = "catalog:successors"
 
 /**
- * Saves a product's catalog fields and its variants' MPNs (F3.1), and with
- * the kind its shipping set-up (F3.2). A lock
+ * Saves a product's catalog fields and its variants' MPNs (F3.1) and unit
+ * costs (F11.4), and with the kind its shipping set-up (F3.2). A lock
  * per product keeps two first saves from making two extension rows; every
  * step undoes itself if a later one fails.
  */

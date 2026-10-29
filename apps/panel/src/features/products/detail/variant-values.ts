@@ -4,6 +4,7 @@ import type { ProductDetail } from "@/features/products/api/products"
 import { formatMoneyInput, parseMoneyInput } from "@/lib/money-input"
 
 const CURRENCY = "try"
+const MAX_COST = 10_000_000
 
 const rowSchema = z.object({
   price: z
@@ -13,6 +14,17 @@ const rowSchema = z.object({
     message: "products.errors.stock",
   }),
   backorder: z.boolean(),
+  // Unit cost, VAT excluded (F11.4): empty means not entered
+  cost: z.string().refine(
+    (text) => {
+      if (text.trim() === "") {
+        return true
+      }
+      const value = parseMoneyInput(text)
+      return value !== null && value >= 0 && value <= MAX_COST
+    },
+    { message: "products.errors.cost" }
+  ),
 })
 export const variantsSchema = z.object({ rows: z.array(rowSchema) })
 export type VariantValues = z.infer<typeof variantsSchema>
@@ -31,8 +43,12 @@ export function levelAt(variant: Variant, locationId: string | null) {
   }
 }
 
-/** The form's rows as stored: TRY price, stock at the default location, preorder. */
-export function savedRows(variants: Variant[], locationId: string | null): VariantValues {
+/** The form's rows as stored: TRY price, stock at the default location, preorder, unit cost. */
+export function savedRows(
+  variants: Variant[],
+  locationId: string | null,
+  costs: ReadonlyMap<string, number | null> = new Map()
+): VariantValues {
   return {
     rows: variants.map((variant) => {
       const amount = variant.prices?.find((price) => price.currency_code === CURRENCY)?.amount
@@ -40,10 +56,13 @@ export function savedRows(variants: Variant[], locationId: string | null): Varia
         price: typeof amount === "number" ? formatMoneyInput(amount) : "",
         stock: String(levelAt(variant, locationId).stocked),
         backorder: Boolean(variant.allow_backorder),
+        cost: costInput(costs.get(variant.id) ?? null),
       }
     }),
   }
 }
+
+const costInput = (cost: number | null) => (cost === null ? "" : formatMoneyInput(cost))
 
 type DirtyRows = (Partial<Record<keyof VariantValues["rows"][number], boolean>> | undefined)[]
 
@@ -63,7 +82,8 @@ export function variantEdits(
     const priceChanged = Boolean(changed?.price)
     const stockChanged = Boolean(changed?.stock) && locationId !== null
     const backorderChanged = Boolean(changed?.backorder)
-    if (!row || (!priceChanged && !stockChanged && !backorderChanged)) {
+    const costChanged = Boolean(changed?.cost)
+    if (!row || (!priceChanged && !stockChanged && !backorderChanged && !costChanged)) {
       return []
     }
     const level = levelAt(variant, locationId)
@@ -85,6 +105,7 @@ export function variantEdits(
               }
             : null,
         backorder: backorderChanged ? row.backorder : null,
+        ...(costChanged ? { cost: parseMoneyInput(row.cost) } : {}),
       },
     ]
   })

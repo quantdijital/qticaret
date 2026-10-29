@@ -7,7 +7,8 @@ import type { ProductListParams } from "@/features/products/api/products"
 /** Products one run takes; the server refuses more. */
 export const MAX_BULK_PRODUCTS = 1000
 
-export type BulkAction = "price" | "stock" | "status" | "category" | "seo_template" | "alt_text"
+export type BulkAction =
+  "price" | "stock" | "status" | "category" | "seo_template" | "alt_text" | "cost"
 
 /** The change as the job takes it (`catalog.bulk_edit`). */
 export type BulkChange =
@@ -17,6 +18,8 @@ export type BulkChange =
   | { action: "category"; mode: "add" | "remove" | "primary"; category_id: string }
   | { action: "seo_template"; fields: ("seo_title" | "seo_description")[] }
   | { action: "alt_text" }
+  /** F11.4: the variants' unit cost in lira, VAT excluded; `percent` leaves one without a cost. */
+  | { action: "cost"; mode: "set" | "percent" | "clear"; value?: number }
 
 export interface BulkSummary {
   action: BulkAction

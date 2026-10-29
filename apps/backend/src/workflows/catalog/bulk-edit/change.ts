@@ -3,7 +3,8 @@ import { z } from "@medusajs/framework/zod"
 /**
  * One change applied to many products at once (F3.10): the base TRY price,
  * stock at the default warehouse, the status, a category, the SEO texts
- * given back to the shop's templates, or the images' missing alt texts.
+ * given back to the shop's templates, the images' missing alt texts, or
+ * the variants' unit cost (F11.4).
  */
 
 /** Products one run takes; the panel selects at most this many. */
@@ -12,6 +13,8 @@ export const MAX_BULK_PRODUCTS = 1000
 // Amounts and quantities as the sheet takes them (F3.9)
 export const MAX_AMOUNT = 1_000_000_000
 export const MAX_QUANTITY = 1_000_000_000
+// A unit cost in lira, as the product page takes it
+export const MAX_COST = 10_000_000
 // A price falls by at most 99% and rises by at most 1000%
 const MIN_PERCENT = -99
 const MAX_PERCENT = 1000
@@ -75,7 +78,23 @@ const seoTemplate = z
 
 const altText = z.object({ action: z.literal("alt_text") }).strict()
 
-export const BulkChange = z.union([price, stock, status, category, seoTemplate, altText])
+const cost = z
+  .object({
+    action: z.literal("cost"),
+    /** `set` every variant's unit cost (lira, VAT excluded), change one by a `percent`, or `clear` it. */
+    mode: z.enum(["set", "percent", "clear"]),
+    value: amount.optional(),
+  })
+  .strict()
+  .refine(({ mode, value }) =>
+    mode === "clear"
+      ? value === undefined
+      : mode === "set"
+        ? value !== undefined && value >= 0 && value <= MAX_COST
+        : value !== undefined && value !== 0 && value >= MIN_PERCENT && value <= MAX_PERCENT
+  )
+
+export const BulkChange = z.union([price, stock, status, category, seoTemplate, altText, cost])
 export type BulkChange = z.infer<typeof BulkChange>
 export type BulkAction = BulkChange["action"]
 

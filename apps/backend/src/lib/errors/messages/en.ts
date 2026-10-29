@@ -69,6 +69,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "bulk_edit.alt_not_filled":
     "Some images' alt text could not be written; add it on the product page.",
   "bulk_edit.category_unknown": "The chosen category was not found.",
+  "bulk_edit.cost_out_of_range": "The new cost is over the limit.",
+  "bulk_edit.no_cost": "Its variants have no cost; enter one before changing it by a percent.",
   "bulk_edit.no_location": "No default warehouse is set for stock.",
   "bulk_edit.no_price": "Its variants have no TRY price; enter a price first.",
   "bulk_edit.price_out_of_range": "The new price would fall below zero or pass the limit.",
@@ -332,6 +334,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "google.not_connected": "Connect the Google account first.",
   "reports.range_invalid":
     "The date range is not valid: it cannot start after it ends, lie in the future or run over 366 days.",
+  "catalog.cost_invalid":
+    "The cost must be between 0 and 10,000,000 TL, with two decimals at most.",
   "statements.day_invalid":
     "This day cannot be checked: yesterday at the latest, a year back at most.",
   "statements.account_missing":

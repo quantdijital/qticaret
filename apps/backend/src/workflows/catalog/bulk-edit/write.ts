@@ -63,7 +63,8 @@ export interface WriteOrigin {
 /**
  * One product's change, through the workflow the panel's own save uses
  * (its hooks and checks included): Medusa's for prices and status, ours
- * for stock (ledger reason `bulk_edit`), categories, SEO and alt texts.
+ * for stock (ledger reason `bulk_edit`), categories, SEO, alt texts and
+ * unit costs.
  */
 export async function writeBulkChange(
   container: MedusaContainer,
@@ -113,6 +114,11 @@ export async function writeBulkChange(
     case "alt_text":
       await setProductAltsWorkflow(container).run({
         input: { product_id: productId, alts: write.alts },
+      })
+      return
+    case "cost":
+      await setProductCatalogWorkflow(container).run({
+        input: { product_id: productId, variants: write.variants },
       })
       return
   }

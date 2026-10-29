@@ -8,11 +8,13 @@ import { Skeleton } from "@/components/ui/skeleton"
 import type { BulkAction } from "@/features/products/api/bulk"
 import { categoriesQuery } from "@/features/products/api/lookups"
 import { treeOrder } from "@/features/products/category-order"
+import { Choices } from "@/features/products/bulk/bulk-choices"
+import { BulkCostFields } from "@/features/products/bulk/bulk-cost-fields"
 import { bulkChangeOf, examplePrice } from "@/features/products/bulk/bulk-form"
 import type { BulkForm } from "@/features/products/bulk/bulk-form"
 import { formatMoney } from "@/lib/format"
 
-interface FieldsProps {
+export interface FieldsProps {
   form: BulkForm
   onChange: (patch: Partial<BulkForm>) => void
   /** The i18n key of what is wrong, once the person tried to apply. */
@@ -21,39 +23,6 @@ interface FieldsProps {
 
 // A price change shown on this example, so the direction and size are plain
 const EXAMPLE_PRICE = 100
-
-function Choices<V extends string>({
-  label,
-  value,
-  options,
-  onChange,
-}: {
-  label: string
-  value: V
-  options: readonly { value: V; label: string }[]
-  onChange: (value: V) => void
-}) {
-  return (
-    <RadioGroup
-      aria-label={label}
-      value={value}
-      onValueChange={(next) => {
-        onChange(next as V)
-      }}
-      className="grid gap-2 sm:grid-cols-3"
-    >
-      {options.map((option) => (
-        <label
-          key={option.value}
-          className="flex cursor-pointer items-center gap-2.5 rounded-md border px-3 py-2.5 text-[13px] has-[[data-state=checked]]:border-primary has-[[data-state=checked]]:bg-accent"
-        >
-          <RadioGroupItem value={option.value} />
-          {option.label}
-        </label>
-      ))}
-    </RadioGroup>
-  )
-}
 
 function PriceFields({ form, onChange, error }: FieldsProps) {
   const { t } = useTranslation()
@@ -267,5 +236,7 @@ export function BulkFields({ action, ...props }: FieldsProps & { action: BulkAct
       return <SeoFields {...props} />
     case "alt_text":
       return <p className="text-sm text-muted-foreground">{t("products.bulk.alt.hint")}</p>
+    case "cost":
+      return <BulkCostFields {...props} />
   }
 }

@@ -9,6 +9,7 @@ import { parseCountInput, parseDecimalInput, parseMoneyInput } from "@/lib/money
 
 export interface BulkForm {
   priceMode: "set" | "percent" | "amount"
+  costMode: "set" | "percent" | "clear"
   stockMode: "set" | "add" | "remove"
   direction: "up" | "down"
   /** The number as typed ("1.250,50", "15"). */
@@ -22,6 +23,7 @@ export interface BulkForm {
 
 export const EMPTY_BULK_FORM: BulkForm = {
   priceMode: "set",
+  costMode: "set",
   stockMode: "set",
   direction: "up",
   value: "",
@@ -33,6 +35,7 @@ export const EMPTY_BULK_FORM: BulkForm = {
 }
 
 const MAX_AMOUNT = 1_000_000_000
+const MAX_COST = 10_000_000
 const MAX_QUANTITY = 1_000_000_000
 const MAX_RISE_PERCENT = 1000
 const MAX_FALL_PERCENT = 99
@@ -61,6 +64,29 @@ function priceChange(form: BulkForm): BulkFormResult {
   return value !== null && value > 0 && value <= MAX_AMOUNT
     ? { change: { action: "price", mode: "amount", value: sign * value } }
     : { error: "products.bulk.errors.price" }
+}
+
+function costChange(form: BulkForm): BulkFormResult {
+  if (form.costMode === "clear") {
+    return { change: { action: "cost", mode: "clear" } }
+  }
+  if (form.costMode === "set") {
+    const value = parseMoneyInput(form.value)
+    return value !== null && value >= 0 && value <= MAX_COST
+      ? { change: { action: "cost", mode: "set", value } }
+      : { error: "products.bulk.errors.cost" }
+  }
+  const value = parseDecimalInput(form.value, 2)
+  const max = form.direction === "up" ? MAX_RISE_PERCENT : MAX_FALL_PERCENT
+  return value !== null && value > 0 && value <= max
+    ? {
+        change: {
+          action: "cost",
+          mode: "percent",
+          value: form.direction === "up" ? value : -value,
+        },
+      }
+    : { error: form.direction === "up" ? "products.bulk.errors.rise" : "products.bulk.errors.fall" }
 }
 
 function stockChange(form: BulkForm): BulkFormResult {
@@ -103,6 +129,8 @@ export function bulkChangeOf(action: BulkAction, form: BulkForm): BulkFormResult
     }
     case "alt_text":
       return { change: { action: "alt_text" } }
+    case "cost":
+      return costChange(form)
   }
 }
 

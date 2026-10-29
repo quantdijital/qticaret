@@ -25,6 +25,8 @@ export interface BulkVariant {
   manage_inventory?: boolean | null
   options?: { value: string; option_id: string }[] | null
   prices?: PriceRow[] | null
+  /** The unit cost in kuruş (F11.4). */
+  variant_extension?: { cost?: number | null } | null
   inventory_items?:
     | {
         inventory_item_id: string
@@ -50,6 +52,7 @@ const FIELDS: Readonly<Record<BulkAction, readonly string[]>> = {
     "variants.inventory_items.inventory.location_levels.stocked_quantity",
   ],
   status: BASE,
+  cost: [...BASE, "variants.id", "variants.variant_extension.cost"],
   category: [...BASE, "categories.id", "categories.mpath", "product_extension.primary_category_id"],
   seo_template: [...BASE, "seo_meta.seo_title", "seo_meta.seo_description"],
   alt_text: [

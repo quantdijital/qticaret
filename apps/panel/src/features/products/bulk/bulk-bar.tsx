@@ -16,7 +16,7 @@ import type { ProductListParams } from "@/features/products/api/products"
 import { errorText } from "@/lib/errors"
 import { formatCount } from "@/lib/format"
 
-const CATALOG_ACTIONS = ["price", "stock", "status", "category"] as const
+const CATALOG_ACTIONS = ["price", "cost", "stock", "status", "category"] as const
 const SEO_ACTIONS = ["seo_template", "alt_text"] as const
 
 interface BulkBarProps {

@@ -2,6 +2,7 @@ import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { createAdminUser } from "../helpers/admin"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
+import { createStorefront } from "../helpers/storefront"
 
 jest.setTimeout(120 * 1000)
 
@@ -17,7 +18,7 @@ interface Catalog {
   primary_category_id: string | null
   successor: { id: string; title: string; handle: string } | null
   categories: { id: string; name: string }[]
-  variants: { id: string; mpn: string | null; gtin: string | null }[]
+  variants: { id: string; mpn: string | null; cost: number | null; gtin: string | null }[]
 }
 
 // Two sizes; `codes` gives each its barcodes (Medusa keeps them unique across variants)
@@ -87,8 +88,15 @@ medusaIntegrationTestRunner({
         expect(initial.data).toMatchObject({ condition: "new", primary_category_id: null })
         expect(initial.data.variants).toEqual(
           expect.arrayContaining([
-            { id: first?.id, title: "20 cm", sku: null, mpn: null, gtin: "4006381333931" },
-            { id: second?.id, title: "25 cm", sku: null, mpn: null, gtin: null },
+            {
+              id: first?.id,
+              title: "20 cm",
+              sku: null,
+              mpn: null,
+              cost: null,
+              gtin: "4006381333931",
+            },
+            { id: second?.id, title: "25 cm", sku: null, mpn: null, cost: null, gtin: null },
           ])
         )
         expect(saved.status).toBe(200)
@@ -100,6 +108,43 @@ medusaIntegrationTestRunner({
         })
         expect(kept.data).toMatchObject({ condition: "refurbished", primary_category_id: knives })
         expect(kept.data.variants.find((variant) => variant.id === first?.id)?.mpn).toBeNull()
+      })
+
+      it("keeps a variant's unit cost apart from its MPN, for staff only", async () => {
+        const created = await createProduct(product("Ekmek Bıçağı"))
+        const first = created.variants.find((variant) => variant.title === "20 cm")
+        const variant = (catalog: Catalog) =>
+          catalog.variants.find((entry) => entry.id === first?.id)
+
+        const costed = await setCatalog(created.id, {
+          variants: { [first?.id ?? ""]: { mpn: "EB-20", cost: 125.5 } },
+        })
+        const named = await setCatalog(created.id, {
+          variants: { [first?.id ?? ""]: { mpn: "EB-20X" } },
+        })
+        const tooFine = await setCatalog(created.id, {
+          variants: { [first?.id ?? ""]: { cost: 1.234 } },
+        })
+        const negative = await setCatalog(created.id, {
+          variants: { [first?.id ?? ""]: { cost: -1 } },
+        })
+        const cleared = await setCatalog(created.id, {
+          variants: { [first?.id ?? ""]: { cost: null } },
+        })
+        const storefront = await createStorefront(getContainer())
+        const asked = await settle(
+          http.get("/store/products?fields=%2Bvariants.variant_extension.cost", {
+            headers: storefront.headers,
+          })
+        )
+
+        expect(variant(costed.data)).toMatchObject({ mpn: "EB-20", cost: 125.5 })
+        expect(variant(named.data)).toMatchObject({ mpn: "EB-20X", cost: 125.5 })
+        expect(tooFine.data.message).toBe("catalog.cost_invalid")
+        expect(negative.data.message).toBe("catalog.cost_invalid")
+        expect(variant(cleared.data)).toMatchObject({ mpn: "EB-20X", cost: null })
+        // A storefront cannot ask for it
+        expect(asked.status).toBe(400)
       })
 
       it("takes a primary category only from the product's own", async () => {

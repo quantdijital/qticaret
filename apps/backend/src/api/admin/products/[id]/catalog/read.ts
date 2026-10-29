@@ -13,7 +13,7 @@ interface ProductRow {
         ean: string | null
         upc: string | null
         barcode: string | null
-        variant_extension?: { mpn: string | null } | null
+        variant_extension?: { mpn: string | null; cost: number | null } | null
       } | null)[]
     | null
   product_extension?: {
@@ -23,6 +23,9 @@ interface ProductRow {
     successor_product_id: string | null
   } | null
 }
+
+/** Kuruş as the panel's money fields take it. */
+const costInLira = (kurus: number | null) => (kurus === null ? null : kurus / 100)
 
 const present = <T>(items: (T | null)[] | null | undefined): T[] =>
   (items ?? []).filter((item): item is T => item !== null)
@@ -43,7 +46,8 @@ async function productTitle(scope: MedusaContainer, id: string | null) {
 /**
  * A product's catalog fields (F3.1) with what the admin shows beside them:
  * its categories to pick the primary one from, the successor's title, and
- * each variant's MPN and the GTIN structured data would use. A primary
+ * each variant's MPN, unit cost (lira, VAT excluded; F11.4) and the GTIN
+ * structured data would use. A primary
  * category the product no longer has reads as unset.
  */
 export async function readProductCatalog(scope: MedusaContainer, productId: string) {
@@ -61,6 +65,7 @@ export async function readProductCatalog(scope: MedusaContainer, productId: stri
       "variants.upc",
       "variants.barcode",
       "variants.variant_extension.mpn",
+      "variants.variant_extension.cost",
       "product_extension.*",
     ],
     filters: { id: productId },
@@ -83,6 +88,7 @@ export async function readProductCatalog(scope: MedusaContainer, productId: stri
       title: variant.title,
       sku: variant.sku,
       mpn: variant.variant_extension?.mpn ?? null,
+      cost: costInLira(variant.variant_extension?.cost ?? null),
       gtin: variantGtin(variant),
     })),
   }

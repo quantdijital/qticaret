@@ -3,7 +3,12 @@ import type { AuditedResource, GraphQuery, Resolver, Snapshot } from "../types"
 import { ID } from "../types"
 
 interface ProductRow {
-  variants?: ({ id: string; variant_extension?: { mpn: string | null } | null } | null)[] | null
+  variants?:
+    | ({
+        id: string
+        variant_extension?: { mpn: string | null; cost?: number | null } | null
+      } | null)[]
+    | null
   product_extension?: {
     condition: string
     kind?: string | null
@@ -15,13 +20,19 @@ interface ProductRow {
 /**
  * A product's catalog fields (F3.1, adr/0011), as stored: the IDs it holds
  * even when the category or successor they name is gone, and one
- * `mpn.<variant id>` per variant. An unknown product reads as nothing.
+ * `mpn.<variant id>` and `cost.<variant id>` (kuruş) per variant. An
+ * unknown product reads as nothing.
  */
 async function catalogSnapshot(scope: Resolver, productId: string): Promise<Snapshot> {
   const query = scope.resolve(ContainerRegistrationKeys.QUERY) as GraphQuery
   const { data } = await query.graph({
     entity: "product",
-    fields: ["product_extension.*", "variants.id", "variants.variant_extension.mpn"],
+    fields: [
+      "product_extension.*",
+      "variants.id",
+      "variants.variant_extension.mpn",
+      "variants.variant_extension.cost",
+    ],
     filters: { id: productId },
   })
   const product = data[0] as ProductRow | undefined
@@ -35,8 +46,13 @@ async function catalogSnapshot(scope: Resolver, productId: string): Promise<Snap
     primary_category_id: extension?.primary_category_id ?? null,
     successor_product_id: extension?.successor_product_id ?? null,
     ...Object.fromEntries(
-      (product.variants ?? []).flatMap((variant) =>
-        variant ? [[`mpn.${variant.id}`, variant.variant_extension?.mpn ?? null]] : []
+      (product.variants ?? []).flatMap((variant): [string, string | number | null][] =>
+        variant
+          ? [
+              [`mpn.${variant.id}`, variant.variant_extension?.mpn ?? null],
+              [`cost.${variant.id}`, variant.variant_extension?.cost ?? null],
+            ]
+          : []
       )
     ),
   }

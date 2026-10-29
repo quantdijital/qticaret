@@ -23,8 +23,18 @@ const mpn = z
     message: "catalog.mpn_invalid",
   })
 
+// A unit cost in lira, VAT excluded (F11.4): to the kuruş, ten million at most
+const cost = z
+  .number()
+  .refine(
+    (value) =>
+      value >= 0 && value <= 10_000_000 && Math.abs(value * 100 - Math.round(value * 100)) < 1e-6,
+    { message: "catalog.cost_invalid" }
+  )
+
 /**
- * A product's catalog fields (F3.1). Fields left out keep their values,
+ * A product's catalog fields (F3.1) and its variants' MPNs and unit costs
+ * (F11.4). Fields left out keep their values,
  * null clears one; whether the IDs fit the product is the workflow's check.
  */
 export const AdminPostProductCatalog = z
@@ -35,7 +45,10 @@ export const AdminPostProductCatalog = z
     primary_category_id: id.nullable().optional(),
     successor_product_id: id.nullable().optional(),
     variants: z
-      .record(id, z.object({ mpn: mpn.nullable() }).strict())
+      .record(
+        id,
+        z.object({ mpn: mpn.nullable().optional(), cost: cost.nullable().optional() }).strict()
+      )
       .refine((variants) => Object.keys(variants).length <= MAX_VARIANTS, {
         message: "catalog.variants_too_many",
       })

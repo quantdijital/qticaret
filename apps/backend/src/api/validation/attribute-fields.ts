@@ -66,6 +66,17 @@ export function restrictStoreRelation(relation: RegExp, leaves: readonly string[
   }
 }
 
+/**
+ * A variant's extension holds its unit cost (F11.4), the shop's own: no
+ * storefront asks for any of it (the MPN reaches structured data through
+ * the server, not through `fields`).
+ */
+export const rejectStoreVariantExtension = restrictStoreRelation(
+  /(^|\.)\*?variant_extension\b/,
+  [],
+  "variant_extension_fields"
+)
+
 /** Product attributes: `.definition.template` or `.definition.values` would reach other products. */
 export const restrictStoreAttributeFields = restrictStoreRelation(
   ATTRIBUTE_RELATION,

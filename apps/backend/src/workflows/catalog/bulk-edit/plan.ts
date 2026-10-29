@@ -8,7 +8,7 @@ import {
 } from "../../../lib/money"
 import type { Kurus } from "../../../lib/money"
 import { baseTryOf, nextPrices, pricesOf } from "../prices"
-import { MAX_AMOUNT } from "./change"
+import { MAX_AMOUNT, MAX_COST } from "./change"
 import type { BulkChange } from "./change"
 import { altWrites } from "./plan-alt"
 import { UNCHANGED, skipped, writing } from "./plan-result"
@@ -139,6 +139,48 @@ function planSeoTemplate(
   )
 }
 
+// Every variant's unit cost; a percent leaves a variant without one as it is
+function planCost(product: BulkProduct, change: Extract<BulkChange, { action: "cost" }>): BulkPlan {
+  const variants = product.variants ?? []
+  const writes: Record<string, { cost: number | null }> = {}
+  const diff: BulkDiff = {}
+  let uncosted = 0
+  for (const variant of variants) {
+    const stored = variant.variant_extension?.cost ?? null
+    const current = stored === null ? null : (stored as Kurus)
+    let next: Kurus | null = null
+    if (change.mode === "set") {
+      next = fromMedusaAmount(change.value ?? 0, { allowRounding: true })
+    } else if (change.mode === "percent") {
+      if (current === null) {
+        uncosted += 1
+        continue
+      }
+      next = multiplyByRateBps(
+        current,
+        BPS_PER_WHOLE + Math.round((change.value ?? 0) * PERCENT_BPS)
+      )
+    }
+    if (next !== null && next > MAX_COST * 100) {
+      return skipped("bulk_edit.cost_out_of_range")
+    }
+    if (next !== current) {
+      const after = next === null ? null : lira(next)
+      writes[variant.id] = { cost: after }
+      diff[`variant:${variant.id}:cost`] = {
+        before: current === null ? null : lira(current),
+        after,
+      }
+    }
+  }
+  if (Object.keys(writes).length > 0) {
+    return writing({ action: "cost", variants: writes }, diff)
+  }
+  return variants.length > 0 && uncosted === variants.length
+    ? skipped("bulk_edit.no_cost")
+    : UNCHANGED
+}
+
 export function planBulkChange(
   product: BulkProduct,
   change: BulkChange,
@@ -164,5 +206,7 @@ export function planBulkChange(
       return planSeoTemplate(product, change)
     case "alt_text":
       return altWrites(product)
+    case "cost":
+      return planCost(product, change)
   }
 }

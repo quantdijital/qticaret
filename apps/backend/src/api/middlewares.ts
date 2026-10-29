@@ -58,7 +58,11 @@ import { STOCK_ROUTES } from "./http/stock-routes"
 import { uploadValidator } from "./http/upload-validator"
 import { StorePostBillingProfile } from "./store/customers/me/billing-profile/validators"
 import { GetTrDistricts, GetTrNeighborhoods, GetTrProvinces } from "./tr-address/validators"
-import { STORE_ATTRIBUTE_FIELDS, restrictStoreAttributeFields } from "./validation/attribute-fields"
+import {
+  STORE_ATTRIBUTE_FIELDS,
+  rejectStoreVariantExtension,
+  restrictStoreAttributeFields,
+} from "./validation/attribute-fields"
 import { slugHandles } from "./validation/catalog-handles"
 import { rejectStoreSeoFields } from "./validation/seo-fields"
 import { rejectSensitiveFields } from "./validation/sensitive-fields"
@@ -101,6 +105,7 @@ export default defineMiddlewares({
         storeLimitGuard,
         rejectSensitiveFields,
         restrictStoreAttributeFields,
+        rejectStoreVariantExtension,
         restrictStoreMediaFields,
         rejectStoreSeoFields,
         restrictStoreGiftCardFields,

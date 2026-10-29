@@ -25,16 +25,16 @@ describe("variant edits", () => {
 
   it("reads the stored rows: price, stock at the default location, preorder off", () => {
     expect(values.rows).toEqual([
-      { price: "249,00", stock: "4", backorder: false },
-      { price: "249,00", stock: "0", backorder: false },
+      { price: "249,00", stock: "4", backorder: false, cost: "" },
+      { price: "249,00", stock: "0", backorder: false, cost: "" },
     ])
   })
 
   it("sends only what was changed, a new level where there is none", () => {
     const changed = {
       rows: [
-        { price: "249,00", stock: "4", backorder: true },
-        { price: "299,90", stock: "7", backorder: false },
+        { price: "249,00", stock: "4", backorder: true, cost: "" },
+        { price: "299,90", stock: "7", backorder: false, cost: "" },
       ],
     }
     const edits = variantEdits(
@@ -53,6 +53,26 @@ describe("variant edits", () => {
       }),
     ])
     expect(variantEdits(variants, values, undefined, "sloc_1")).toEqual([])
+  })
+
+  it("sends a unit cost only when it changed, an emptied one as cleared", () => {
+    const costed = savedRows(variants, "sloc_1", new Map([["a", 120.5]]))
+    const changed = {
+      rows: [
+        { ...values.rows[0], price: "249,00", stock: "4", backorder: false, cost: "" },
+        { ...values.rows[1], price: "249,00", stock: "0", backorder: false, cost: "88,90" },
+      ],
+    }
+    const edits = variantEdits(variants, changed, [{ cost: true }, { cost: true }], "sloc_1")
+
+    expect(costed.rows[0]?.cost).toBe("120,50")
+    expect(edits).toEqual([
+      expect.objectContaining({ variantId: "a", cost: null, amount: null }),
+      expect.objectContaining({ variantId: "b", cost: 88.9, amount: null }),
+    ])
+    expect(variantEdits(variants, values, [{ price: true }], "sloc_1")[0]).not.toHaveProperty(
+      "cost"
+    )
   })
 
   it("writes no stock without a default location", () => {

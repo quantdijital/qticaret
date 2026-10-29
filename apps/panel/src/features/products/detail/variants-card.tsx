@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { CardForm } from "@/components/patterns/card-form"
 import { shopDefaultsQuery } from "@/features/products/api/lookups"
-import { useSaveVariants } from "@/features/products/api/product-edit"
+import { productCatalogQuery, useSaveVariants } from "@/features/products/api/product-edit"
 import type { ProductDetail } from "@/features/products/api/products"
 import { useFeature } from "@/features/settings/api/features"
 import { errorText } from "@/lib/errors"
@@ -14,7 +14,7 @@ import { VariantRow } from "./variant-row"
 import { savedRows, variantEdits, variantsSchema } from "./variant-values"
 import type { VariantValues } from "./variant-values"
 
-/** Price, stock and preorder per variant, edited in place and saved together. */
+/** Price, unit cost, stock and preorder per variant, edited in place and saved together. */
 export function VariantsCard({
   product,
   className,
@@ -32,7 +32,10 @@ export function VariantsCard({
   // Selling past stock needs the preorder flag; a variant already on can still be turned off
   const preorderOn = useFeature("stock.preorder")
   const preorder = preorderOn || variants.some((variant) => variant.allow_backorder)
-  const saved = savedRows(variants, locationId)
+  // Unit costs are the catalog's (F11.4); the rows wait for them so an edit starts from them
+  const catalog = useQuery(productCatalogQuery(product.id))
+  const costs = new Map((catalog.data?.variants ?? []).map((row) => [row.id, row.cost]))
+  const saved = savedRows(variants, locationId, costs)
   const form = useForm<VariantValues>({
     resolver: zodResolver(variantsSchema),
     values: saved,
@@ -71,11 +74,14 @@ export function VariantsCard({
       }}
     >
       <div className="-mx-5 overflow-x-auto border-y">
-        <table className={cn("w-full text-sm", preorder ? "min-w-[46rem]" : "min-w-[40rem]")}>
+        <table className={cn("w-full text-sm", preorder ? "min-w-[50rem]" : "min-w-[44rem]")}>
           <thead className="bg-muted/60">
             <tr>
               <th className={cn(head, "pl-5")}>{t("products.wizard.variant")}</th>
-              <th className={cn(head, "w-36")}>{t("products.wizard.price")}</th>
+              <th className={cn(head, "w-32")}>{t("products.wizard.price")}</th>
+              <th className={cn(head, "w-32")} title={t("products.detail.costHint")}>
+                {t("products.detail.cost")}
+              </th>
               <th className={cn(head, "w-28")}>{t("products.wizard.stock")}</th>
               <th className={cn(head, "w-32 text-right", !preorder && "pr-5")}>
                 {t("products.detail.reserved")}

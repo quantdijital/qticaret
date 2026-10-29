@@ -199,6 +199,40 @@ medusaIntegrationTestRunner({
       })
     })
 
+    it("sets, raises and clears the variants' unit cost through the catalog save", async () => {
+      const cup = await stockedProduct(getContainer(), shop, "toplu-maliyet", 4)
+      const costOf = async () => {
+        const product = await productOf(cup.productId, ["variants.variant_extension.cost"])
+        const [variant] = product["variants"] as { variant_extension?: { cost: number | null } }[]
+        return variant?.variant_extension?.cost ?? null
+      }
+
+      const set = await bulk([cup.productId], { action: "cost", mode: "set", value: 40 })
+      const afterSet = await costOf()
+      const raised = await bulk([cup.productId], { action: "cost", mode: "percent", value: 12.5 })
+      const afterRaise = await costOf()
+      const cleared = await bulk([cup.productId], { action: "cost", mode: "clear" })
+      const bad = await settle(
+        http.post(
+          "/admin/async-jobs",
+          {
+            type: "catalog.bulk_edit",
+            input: { product_ids: [cup.productId], change: { action: "cost", mode: "set" } },
+          },
+          { headers: admin.headers }
+        )
+      )
+
+      expect(set.result_summary).toMatchObject({ changed: 1, failed: 0 })
+      // Kuruş in the store: 40,00 ₺ and then 45,00 ₺
+      expect(afterSet).toBe(4000)
+      expect(raised.result_summary).toMatchObject({ changed: 1 })
+      expect(afterRaise).toBe(4500)
+      expect(cleared.result_summary).toMatchObject({ changed: 1 })
+      expect(await costOf()).toBeNull()
+      expect(bad.status).toBe(400)
+    })
+
     it("takes drafts live through the SEO gate and the measurement rule", async () => {
       const ready = await stockedProduct(getContainer(), shop, "toplu-hazir", 1)
       const { result } = await createProductsWorkflow(getContainer()).run({

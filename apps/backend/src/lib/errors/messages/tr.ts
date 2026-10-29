@@ -72,6 +72,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "brands.unknown": "Marka bulunamadı.",
   "bulk_edit.alt_not_filled": "Bazı görsellerin alt metni yazılamadı; ürün sayfasından ekleyin.",
   "bulk_edit.category_unknown": "Seçilen kategori bulunamadı.",
+  "bulk_edit.cost_out_of_range": "Yeni maliyet üst sınırı aşar.",
+  "bulk_edit.no_cost": "Varyantlarının maliyeti yok; yüzdeyle değiştirmeden önce maliyet girin.",
   "bulk_edit.no_location": "Stok için varsayılan bir depo seçilmemiş.",
   "bulk_edit.no_price": "Varyantlarının TL fiyatı yok; önce fiyat girin.",
   "bulk_edit.price_out_of_range": "Yeni fiyat sıfırın altına iner ya da üst sınırı aşar.",
@@ -337,6 +339,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "google.not_connected": "Önce Google hesabını bağlayın.",
   "reports.range_invalid":
     "Tarih aralığı geçersiz: başlangıç bitişten sonra, gelecekte ya da 366 günden uzun olamaz.",
+  "catalog.cost_invalid": "Maliyet 0 ile 10.000.000 TL arasında, en çok iki ondalıkla olmalı.",
   "statements.day_invalid": "Bu gün denetlenemez: en geç dün, en fazla bir yıl öncesi olabilir.",
   "statements.account_missing": "Bu ödeme sağlayıcısı bağlı değil; önce hesabı bağlayın.",
   "content_drafts.no_provider": "Taslak sağlayıcısı henüz tanımlı değil.",
