@@ -28,6 +28,8 @@ export interface ExistingVariant {
   inventoryItemId: string | null
   /** Stocked quantity by location. */
   levels: Record<string, number>
+  /** Unit cost in kuruş (F11.4); null when none was entered. */
+  cost: number | null
 }
 
 export interface CurrentFields {
@@ -74,6 +76,7 @@ interface ProductRow extends Omit<
         ean: string | null
         options?: { value: string; option_id: string }[] | null
         prices?: PriceRow[] | null
+        variant_extension?: { cost?: number | null } | null
         inventory_items?:
           | {
               inventory_item_id: string
@@ -126,6 +129,7 @@ const FIELDS = [
   "variants.inventory_items.inventory_item_id",
   "variants.inventory_items.inventory.location_levels.location_id",
   "variants.inventory_items.inventory.location_levels.stocked_quantity",
+  "variants.variant_extension.cost",
   "attribute_template.handle",
   "attribute_values.value_text",
   "attribute_values.value_number",
@@ -209,6 +213,7 @@ function existingOf(row: ProductRow): ExistingProduct {
           Number(level.stocked_quantity),
         ])
       ),
+      cost: variant.variant_extension?.cost ?? null,
     })),
   }
 }

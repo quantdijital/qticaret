@@ -77,6 +77,7 @@ const existing: ExistingProduct = {
       ],
       inventoryItemId: "iitem_s",
       levels: { sloc_1: 2 },
+      cost: null,
     },
     {
       id: "var_m",
@@ -86,6 +87,7 @@ const existing: ExistingProduct = {
       prices: [],
       inventoryItemId: null,
       levels: {},
+      cost: null,
     },
   ],
 }
@@ -139,6 +141,35 @@ describe("import plan", () => {
     ])
     // The warehouse has 2 already
     expect(plan?.stock).toEqual([])
+  })
+
+  it("plans a unit cost only where it changes, a new variant's by its options", () => {
+    const fresh = planImport(
+      product({ fields: { title: "Kupa" }, variants: [{ line: 2, options: [], cost: 42.5 }] }),
+      refs()
+    )
+    const { plan } = planImport(
+      product({
+        fields: { title: "Kupa" },
+        variants: [
+          { line: 2, options: [["Beden", "S"]], sku: "K-S", cost: 30 },
+          { line: 3, options: [["Beden", "M"]], cost: 0 },
+        ],
+      }),
+      refs({
+        products: new Map([
+          ["kupa", { ...existing, variants: existing.variants.map((v) => ({ ...v, cost: 3000 })) }],
+        ]),
+      })
+    )
+
+    expect(fresh.plan?.costs).toEqual([
+      { variantId: null, key: expect.any(String) as unknown, cost: 42.5 },
+    ])
+    // S has 30,00 ₺ already; M's is new
+    expect(plan?.costs).toEqual([
+      { variantId: "var_m", key: expect.any(String) as unknown, cost: 0 },
+    ])
   })
 
   it.each([

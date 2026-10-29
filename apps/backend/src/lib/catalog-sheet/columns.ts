@@ -34,6 +34,7 @@ export type ColumnKey =
   | "sku"
   | "barcode"
   | "price"
+  | "cost"
   | "stock"
 
 export interface ColumnSpec {
@@ -84,6 +85,8 @@ export const SHEET_COLUMNS: readonly ColumnSpec[] = [
   { key: "sku", header: "SKU", scope: "variant", width: 16 },
   { key: "barcode", header: "Barkod", scope: "variant", width: 16 },
   { key: "price", header: "Fiyat", scope: "variant", width: 12, unit: "currency" },
+  // F11.4: the unit cost, VAT excluded; staff only, never in a feed
+  { key: "cost", header: "Maliyet", scope: "variant", width: 12, unit: "currency" },
   { key: "stock", header: "Stok", scope: "variant", width: 8 },
 ]
 

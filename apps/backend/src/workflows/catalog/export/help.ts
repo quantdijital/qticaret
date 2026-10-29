@@ -36,6 +36,10 @@ export const HELP_ROWS: readonly SheetCell[][] = [
     "Fiyat (TRY)",
     "Satış fiyatı, en fazla 2 ondalık (ör. 1.250,50). Diğer para birimlerindeki fiyatlar korunur.",
   ],
+  [
+    "Maliyet (TRY)",
+    "Birim maliyet, KDV hariç, en fazla 2 ondalık. Yalnızca stok raporlarında kullanılır; müşteri görmez.",
+  ],
   ["Stok", "Varsayılan depodaki adet."],
   [
     "Genel",

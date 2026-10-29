@@ -339,6 +339,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "google.not_connected": "Önce Google hesabını bağlayın.",
   "reports.range_invalid":
     "Tarih aralığı geçersiz: başlangıç bitişten sonra, gelecekte ya da 366 günden uzun olamaz.",
+  "catalog_import.cost_invalid": "Maliyet 0 ile 10.000.000 arasında, en fazla 2 ondalıklı olmalı.",
   "catalog.cost_invalid": "Maliyet 0 ile 10.000.000 TL arasında, en çok iki ondalıkla olmalı.",
   "statements.day_invalid": "Bu gün denetlenemez: en geç dün, en fazla bir yıl öncesi olabilir.",
   "statements.account_missing": "Bu ödeme sağlayıcısı bağlı değil; önce hesabı bağlayın.",

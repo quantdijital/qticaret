@@ -182,6 +182,48 @@ medusaIntegrationTestRunner({
       })
     })
 
+    it("keeps unit costs from the sheet, exports them, and finds them unchanged again", async () => {
+      await stockedProduct(getContainer(), shop, "maliyetli-kupa", 3)
+      const costOf = async (handle: string) => {
+        const { data } = await getContainer()
+          .resolve(ContainerRegistrationKeys.QUERY)
+          .graph({
+            entity: "product",
+            fields: ["variants.variant_extension.cost"],
+            filters: { handle },
+          })
+        const product = data[0] as
+          { variants: { variant_extension?: { cost: number | null } | null }[] } | undefined
+        return product?.variants[0]?.variant_extension?.cost ?? null
+      }
+
+      const applied = await sheets.upload(
+        await xlsxOf([
+          row({ handle: "maliyetli-kupa", cost: 42.5 }),
+          row({ handle: "maliyetli-kase", title: "Maliyetli Kase", cost: 12 }),
+        ]),
+        "apply"
+      )
+      const queued = await http.post<{ async_job: SheetJob }>(
+        "/admin/async-jobs",
+        { type: "catalog.export", input: { format: "xlsx" } },
+        { headers: admin.headers }
+      )
+      const file = await sheets.fileBytes(await sheets.settled(queued.data.async_job.id))
+      const raw = await readXlsx(file, { maxRows: 10_000, maxCells: 200 })
+      const cells = raw.ok
+        ? raw.rows.find((each) => each.cells[at("handle")] === "maliyetli-kupa")?.cells
+        : []
+      const again = await sheets.upload(file, "apply")
+
+      expect(applied.result_summary).toMatchObject({ create: 1, update: 1, failed: 0 })
+      // Kuruş in the store
+      expect(await costOf("maliyetli-kupa")).toBe(4250)
+      expect(await costOf("maliyetli-kase")).toBe(1200)
+      expect(cells?.[at("cost")]).toBe("42.5")
+      expect(again.result_summary).toMatchObject({ create: 0, update: 0, failed: 0 })
+    })
+
     it("undoes a new product whose later step fails", async () => {
       const plan: ImportPlan = {
         handle: "geri-alinan",
@@ -204,6 +246,7 @@ medusaIntegrationTestRunner({
         ],
         variantUpdates: [],
         stock: [],
+        costs: [],
         seo: { seo_title: "Geri alınan ürün" },
         // A template that is not there: the attribute step fails after the product was made
         attributes: { template_id: "atmpl_yok", values: {} },

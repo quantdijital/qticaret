@@ -1,7 +1,6 @@
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
-import { optionKey } from "../plan-variants"
 import type { StockLine } from "../plan-variants"
+import { keyedVariants } from "./keyed-variants"
 
 export interface ImportStockInput {
   product_id: string
@@ -39,33 +38,13 @@ export const resolveImportStockStep = createStep(
     if (!location || input.stock.length === 0) {
       return new StepResponse(levels)
     }
-    const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
-      entity: "product",
-      fields: [
-        "options.id",
-        "options.title",
-        "variants.id",
-        "variants.options.value",
-        "variants.options.option_id",
-        "variants.inventory_items.inventory_item_id",
-        "variants.inventory_items.inventory.location_levels.location_id",
-      ],
-      filters: { id: input.product_id },
-    })
-    const product = data[0] as
-      | { options?: { id: string; title: string }[] | null; variants?: VariantRow[] | null }
-      | undefined
-    const titleOf = new Map((product?.options ?? []).map((option) => [option.id, option.title]))
-    const variants = product?.variants ?? []
-    const keyOf = (variant: VariantRow) =>
-      optionKey(
-        Object.fromEntries(
-          (variant.options ?? []).map((value) => [titleOf.get(value.option_id) ?? "", value.value])
-        )
-      )
+    const variants = await keyedVariants<VariantRow>(container, input.product_id, [
+      "variants.inventory_items.inventory_item_id",
+      "variants.inventory_items.inventory.location_levels.location_id",
+    ])
     for (const line of input.stock) {
       const variant = variants.find((each) =>
-        line.variantId ? each.id === line.variantId : keyOf(each) === line.key
+        line.variantId ? each.id === line.variantId : each.key === line.key
       )
       const item = variant?.inventory_items?.[0]
       if (!item) {

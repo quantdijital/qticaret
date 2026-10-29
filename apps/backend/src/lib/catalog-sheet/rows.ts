@@ -26,6 +26,8 @@ export const SHEET_LIMITS = {
 } as const
 
 const MAX_AMOUNT = 1_000_000_000
+// As the product page takes a unit cost
+const MAX_COST = 10_000_000
 
 export interface SheetProblem {
   line: number
@@ -58,6 +60,8 @@ export interface SheetVariant {
   sku?: string
   barcode?: string
   price?: number
+  /** Unit cost in lira, VAT excluded (F11.4). */
+  cost?: number
   stock?: number
 }
 
@@ -101,6 +105,8 @@ const VARIANT_PARSERS = {
   sku: (raw: string) => textCell(raw, SHEET_LIMITS.sku),
   barcode: (raw: string) => textCell(raw, SHEET_LIMITS.barcode),
   price: decimal(2, "catalog_import.price_invalid"),
+  cost: (raw: string) =>
+    decimalCell(raw, { max: MAX_COST, decimals: 2, key: "catalog_import.cost_invalid" }),
   stock: decimal(0, "catalog_import.stock_invalid"),
 } as const
 

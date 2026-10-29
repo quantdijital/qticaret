@@ -70,7 +70,8 @@ const isUnchanged = (plan: ImportPlan): boolean =>
   plan.primaryCategoryId === undefined &&
   plan.seo === null &&
   plan.attributes === null &&
-  plan.stock.length === 0
+  plan.stock.length === 0 &&
+  plan.costs.length === 0
 
 // A product that exists going live (the plan holds the status only when it changes)
 const goesLive = (plan: ImportPlan): boolean =>

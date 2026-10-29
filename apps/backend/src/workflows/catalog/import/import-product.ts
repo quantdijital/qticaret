@@ -17,6 +17,7 @@ import { upsertSeoMetaWorkflow } from "../../seo/upsert-seo-meta"
 import { writeStockLevelsWorkflow } from "../../stock/write-levels"
 import { setProductCatalogWorkflow } from "../set-product-catalog"
 import type { ImportPlan } from "./plan"
+import { resolveImportCostsStep } from "./steps/resolve-import-costs"
 import { resolveImportStockStep } from "./steps/resolve-import-stock"
 
 export interface ImportProductInput {
@@ -100,13 +101,25 @@ function writeExtras(input: Input, productId: WorkflowData<string>) {
       })),
     })
   })
-  when("import-primary-category", { input }, ({ input }) =>
-    Boolean(input.plan.primaryCategoryId)
+  // The primary category and the unit costs (F11.4) in one catalog save: a workflow runs once as a step
+  const costs = resolveImportCostsStep(
+    transform({ input, productId }, ({ input, productId }) => ({
+      product_id: productId,
+      costs: input.plan.costs,
+    }))
+  )
+  when(
+    "import-catalog",
+    { input, costs },
+    ({ input, costs }) => Boolean(input.plan.primaryCategoryId) || Object.keys(costs).length > 0
   ).then(() => {
     setProductCatalogWorkflow.runAsStep({
-      input: transform({ input, productId }, ({ input, productId }) => ({
+      input: transform({ input, productId, costs }, ({ input, productId, costs }) => ({
         product_id: productId,
-        primary_category_id: input.plan.primaryCategoryId ?? null,
+        ...(input.plan.primaryCategoryId
+          ? { primary_category_id: input.plan.primaryCategoryId }
+          : {}),
+        ...(Object.keys(costs).length > 0 ? { variants: costs } : {}),
       })),
     })
   })
@@ -157,7 +170,7 @@ function writeStock(input: Input, productId: WorkflowData<string>) {
 
 /**
  * Writes one sheet product (F3.9): made or changed, its variants, brand,
- * SEO fields, attributes and stock, each through the workflow the panel's
+ * SEO fields, attributes, unit costs and stock, each through the workflow the panel's
  * own save uses (their hooks and checks included), nested so that a step
  * failing undoes the product's earlier ones. One product per run: a bad
  * row costs its product, not the import.

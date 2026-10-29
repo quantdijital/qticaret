@@ -52,6 +52,7 @@ export const EXPORT_FIELDS = [
   "variants.prices.max_quantity",
   "variants.inventory_items.inventory.location_levels.location_id",
   "variants.inventory_items.inventory.location_levels.stocked_quantity",
+  "variants.variant_extension.cost",
 ]
 
 interface AttributeValueRow {
@@ -84,6 +85,8 @@ interface VariantRow {
         } | null
       }[]
     | null
+  /** The unit cost in kuruş (F11.4). */
+  variant_extension?: { cost?: number | null } | null
 }
 
 export interface ExportProductRow {
@@ -210,9 +213,13 @@ function variantCells(product: ExportProductRow, variant: VariantRow, locationId
     // The sheet's barcode is the variant's EAN: what an import writes back
     barcode: variant.ean ?? null,
     price: price ? Number(price.amount) : null,
+    cost: costInLira(variant.variant_extension?.cost ?? null),
     stock: level ? Number(level.stocked_quantity) : null,
   }
 }
+
+// The sheet writes lira, as the import reads it back
+const costInLira = (kurus: number | null) => (kurus === null ? null : kurus / 100)
 
 /** The product's rows, its variants in their order. */
 export function productRows(

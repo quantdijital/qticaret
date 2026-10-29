@@ -1,4 +1,5 @@
 import type { SheetProblem, SheetProduct, SheetVariant } from "../../../lib/catalog-sheet"
+import { fromMedusaAmount } from "../../../lib/money"
 import { CURRENCY, baseTryOf, nextPrices } from "../prices"
 import type { ExistingProduct, ExistingVariant, ImportReferences } from "./references"
 
@@ -10,6 +11,7 @@ import type { ExistingProduct, ExistingVariant, ImportReferences } from "./refer
  * there is; a row that finds none is a new variant, with values the
  * product's options already have (new values are added in the panel).
  * Prices: the TRY price is replaced, the others kept, as the panel does.
+ * Unit costs (F11.4) go through the catalog save once the variants exist.
  */
 
 // What the panel's wizard gives a product without options (Medusa needs one)
@@ -22,6 +24,13 @@ export interface StockLine {
   quantity: number
 }
 
+/** A unit cost in lira, as the catalog save takes it; a new variant found by `key`. */
+export interface CostLine {
+  variantId: string | null
+  key: string
+  cost: number
+}
+
 export interface VariantsPlan {
   /** A new product's options; null for one that exists. */
   options: { title: string; values: string[] }[] | null
@@ -29,6 +38,7 @@ export interface VariantsPlan {
   variantCreates: Record<string, unknown>[]
   variantUpdates: Record<string, unknown>[]
   stock: StockLine[]
+  costs: CostLine[]
 }
 
 /** The variant's option values as one key, whatever their order or case. */
@@ -57,6 +67,7 @@ const isEmptyRow = (variant: SheetVariant) =>
   !variant.sku &&
   !variant.barcode &&
   variant.price === undefined &&
+  variant.cost === undefined &&
   variant.stock === undefined
 
 const codes = (variant: SheetVariant) => ({
@@ -99,6 +110,7 @@ function newProduct(sheet: SheetProduct): VariantsPlan {
     })),
     variantUpdates: [],
     stock: stockLines(sheet.variants, () => null, optionsOf),
+    costs: costLines(sheet.variants, () => null, optionsOf),
   }
 }
 
@@ -111,6 +123,18 @@ function stockLines(
     variant.stock === undefined
       ? []
       : [{ variantId: idOf(variant), key: optionKey(optionsOf(variant)), quantity: variant.stock }]
+  )
+}
+
+function costLines(
+  variants: readonly SheetVariant[],
+  idOf: (variant: SheetVariant) => string | null,
+  optionsOf: (variant: SheetVariant) => Record<string, string>
+): CostLine[] {
+  return variants.flatMap((variant) =>
+    variant.cost === undefined
+      ? []
+      : [{ variantId: idOf(variant), key: optionKey(optionsOf(variant)), cost: variant.cost }]
   )
 }
 
@@ -194,6 +218,16 @@ function matchedRow(
       )
     )
   }
+  // The cost it has already is no change
+  if (variant.cost !== undefined && fromMedusaAmount(variant.cost) !== match.cost) {
+    plan.costs.push(
+      ...costLines(
+        [variant],
+        () => match.id,
+        () => match.options
+      )
+    )
+  }
 }
 
 function existingProduct(
@@ -202,7 +236,13 @@ function existingProduct(
   locationId: string | null,
   problems: SheetProblem[]
 ): VariantsPlan {
-  const plan: VariantsPlan = { options: null, variantCreates: [], variantUpdates: [], stock: [] }
+  const plan: VariantsPlan = {
+    options: null,
+    variantCreates: [],
+    variantUpdates: [],
+    stock: [],
+    costs: [],
+  }
   const context = { found: new Set<string>(), locationId }
   for (const variant of sheet.variants) {
     if (isEmptyRow(variant)) {
@@ -226,6 +266,13 @@ function existingProduct(
       })
       plan.stock.push(
         ...stockLines(
+          [variant],
+          () => null,
+          () => options
+        )
+      )
+      plan.costs.push(
+        ...costLines(
           [variant],
           () => null,
           () => options

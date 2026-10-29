@@ -110,6 +110,18 @@ describe("sheet products", () => {
     })
   })
 
+  it("reads a unit cost in lira, and refuses one past the product page's bound", () => {
+    const { products, problems } = productsOf(header, [
+      row(2, { handle: "kupa", title: "Kupa", cost: "42,50" }),
+      row(3, { handle: "tava", title: "Tava", cost: "10.000.001" }),
+    ])
+
+    expect(products[0]?.variants[0]).toMatchObject({ cost: 42.5 })
+    expect(problems.map((problem) => [problem.line, problem.key])).toEqual([
+      [3, "catalog_import.cost_invalid"],
+    ])
+  })
+
   it("leaves out a product with a problem in any row and says where", () => {
     const { products, problems } = productsOf(header, [
       row(2, { handle: "a", title: "A", option1_name: "Renk", option1_value: "Mavi" }),
