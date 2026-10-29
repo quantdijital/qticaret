@@ -185,6 +185,8 @@ module.exports = defineConfig({
     { resolve: "./src/modules/accounting" },
     // F11.6 (adr/0039 §6): what each secret API key may reach; a key without a scope reaches nothing
     { resolve: "./src/modules/api-key-scopes" },
+    // F11.8 (adr/0039 §8): storefront search terms by day, counts only, 180 days
+    { resolve: "./src/modules/search-terms" },
     // F11.7 (adr/0039 §7): events sent to the shop's own systems, signed, tried until answered
     {
       resolve: "./src/modules/tenant-webhooks",

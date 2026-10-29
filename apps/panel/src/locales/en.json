@@ -2753,7 +2753,7 @@
     "limited": "The newest {{total}} promotions are shown."
   },
   "reports": {
-    "description": "The chosen period's sales, where they came from, their VAT, collections and stock",
+    "description": "The chosen period's sales, where they came from, their VAT, collections, stock and storefront searches",
     "export": {
       "excel": "Download as Excel",
       "csv": "Download CSV",
@@ -2832,7 +2832,8 @@
       "brands": "Brands",
       "marketing": "Campaigns and sources",
       "finance": "Finance",
-      "stock": "Stock"
+      "stock": "Stock",
+      "search": "Search"
     },
     "share": "Share",
     "sales": "Sales",
@@ -3043,6 +3044,32 @@
       },
       "lists": "Stock lists",
       "more": "The first {{shown}} rows; the CSV and the Excel file have them all."
+    },
+    "search": {
+      "tiles": {
+        "label": "Search report summary",
+        "searches": "Searches",
+        "searchesHint": "Product searches on the storefront",
+        "zero": "Searches with no result",
+        "zeroHint": "{{share}} of searches",
+        "terms": "Distinct terms",
+        "termsHint": "Searches that may hold personal data are not counted",
+        "zeroTerms": "Terms with no result",
+        "zeroTermsHint": "A product, page or focus keyword to add"
+      },
+      "term": "Term",
+      "searchCount": "Searches",
+      "zeroCount": "No result",
+      "top": {
+        "title": "Most searched",
+        "hint": "What shoppers search for most on the storefront."
+      },
+      "zero": {
+        "title": "Searches with no result",
+        "hint": "Terms searched that found nothing: a product, page or focus keyword missing.",
+        "empty": "No search found nothing in this period."
+      },
+      "empty": "No one searched the storefront in this period."
     }
   },
   "seo": {
@@ -3564,6 +3591,11 @@
         "S-CWV-01": {
           "title": "Pages are slow for real visitors",
           "why": "Google uses the speed and stability Chrome's users measure (Core Web Vitals) in ranking. Values are the 75th percentile of the last 28 days; the good lines are LCP 2.5 s, INP 200 ms, CLS 0.1."
+        },
+        "S-SEARCH-01": {
+          "title_one": "{{amount}} term is searched and not found",
+          "title_other": "{{amount}} terms are searched and not found",
+          "why": "Terms shoppers often search on the storefront and find nothing for; a product, category or content page for them, or a page's focus keyword updated, can turn them into sales."
         }
       },
       "reasons": {
@@ -3625,6 +3657,10 @@
           "lcp": "{{subject}} the largest content shows at {{target}} ms (good: up to 2500 ms).",
           "inp": "{{subject}} a tap takes {{target}} ms to answer (good: up to 200 ms).",
           "cls": "{{subject}} the layout shifts {{target}} (good: up to 0.1)."
+        },
+        "S-SEARCH-01": {
+          "zero_results_one": "Searched {{amount}} time with no result in the last 30 days",
+          "zero_results_other": "Searched {{amount}} times with no result in the last 30 days"
         }
       }
     },

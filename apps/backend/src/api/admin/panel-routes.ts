@@ -46,6 +46,7 @@ export const PANEL_ROUTES = [
     "/admin/reports/finance",
     "/admin/reports/statements",
     "/admin/reports/stock",
+    "/admin/reports/search",
   ].map((matcher) => ({
     matcher,
     methods: ["GET" as const],

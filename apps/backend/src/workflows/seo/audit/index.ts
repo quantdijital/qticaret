@@ -3,6 +3,7 @@ import type { AuditFinding } from "../../../lib/seo/audit"
 import { duplicateFinding, notFoundFinding, productFindings } from "./catalog"
 import { insightFindings } from "./insights"
 import { redirectFinding } from "./redirects"
+import { searchFinding } from "./search"
 import { siteFindings } from "./site"
 
 const SEVERITY_ORDER = ["critical", "high", "medium", "low", "info"] as const
@@ -19,6 +20,7 @@ const CHECKS: readonly Check[] = [
   productFindings,
   redirectFinding,
   insightFindings,
+  searchFinding,
 ]
 
 /**

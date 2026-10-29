@@ -24,7 +24,9 @@ export function ReportsLayout() {
         ? ("finance" as const)
         : state.location.pathname.endsWith("/reports/stock")
           ? ("stock" as const)
-          : ("sales" as const),
+          : state.location.pathname.endsWith("/reports/search")
+            ? ("search" as const)
+            : ("sales" as const),
   })
   return (
     <div className="flex flex-col gap-[var(--grid-gap)]">
@@ -34,7 +36,8 @@ export function ReportsLayout() {
         action={
           <div className="flex flex-wrap items-center gap-2">
             <ReportRangePicker />
-            <ReportExportButton report={kind} format="xlsx" />
+            {/* Searches have no file: their lists are the page */}
+            {kind === "search" ? null : <ReportExportButton report={kind} format="xlsx" />}
           </div>
         }
       />
@@ -50,6 +53,7 @@ export function ReportsLayout() {
           { to: "/reports/daily", label: t("reports.tabs.daily") },
           { to: "/reports/finance", label: t("reports.tabs.finance") },
           { to: "/reports/stock", label: t("reports.tabs.stock") },
+          { to: "/reports/search", label: t("reports.tabs.search") },
         ]}
       />
       <Outlet />

@@ -127,6 +127,11 @@ Kısıtlar:
 - **Okuma:** `inventory_item` → `variants` → `variant_extension.cost` tek `query.graph` sorgusunda gelir (HTTP testiyle doğrulandı). Dönem başı ve sonu stok `stock-ledger`'ın `stockedAt` yöntemiyle okunur: anından önceki son hareket, yoksa sonraki ilk hareketin başlangıç adedi, hiç hareket yoksa bugünkü adet.
 - **Liste:** Panel her listenin ilk 20 satırını gösterir; Excel ve CSV bütün kalemleri içerir.
 
+## Arama terimleri: uygulama (2026-10-29)
+- **Sayım:** `GET /store/products` rota ara katmanı (`api/http/search-terms.ts`) ilk sayfadaki `q`'yu normalleştirir ve Medusa'nın yanıt gövdesindeki `count`'ı okuyup `search_term_day`'e (gün + terim tekil, `ON CONFLICT` artırım) yazar. Yazım yanıtı beklemez.
+- **Kişisel veri:** e-posta, web adresi, 6+ haneli sayı dizisi, görünmez karakterler içeren ya da 2–60 karakter dışındaki terim tutulmaz; IP, oturum, sepet hiç tutulmaz. 180 gün sonra silinir.
+- **Danışman:** S-SEARCH-01 (bilgi), son 30 günde en az 3 kez sonuçsuz aranan terimler, ilk 20'si listelenir.
+
 ## Giden webhook'lar: uygulama (2026-10-29)
 - **Kayıtlar:** `webhook_subscription` (adres, olaylar, `PII_ENCRYPTION_KEY` ile şifreli sır, durum, ardışık başarısızlık), `webhook_delivery` (abonelik + `event_id` tekil; durum, deneme, sonraki deneme, son durum kodu, süre, kod), `webhook_cursor` (stok defterinin okunduğu `seq`).
 - **Kaynaklar:** sipariş ve iade olayları dinleyiciden; stok değişikliği dakikalık işin defteri imleçle okumasından (stok iş akışlarına dokunulmadı). Abonesi olmayan olay kuyruğa girmez.

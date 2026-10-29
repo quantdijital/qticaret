@@ -41,6 +41,7 @@ import { Route as AuthReportsDailyRouteImport } from './routes/_auth/reports/dai
 import { Route as AuthReportsFinanceRouteImport } from './routes/_auth/reports/finance'
 import { Route as AuthReportsMarketingRouteImport } from './routes/_auth/reports/marketing'
 import { Route as AuthReportsProductsRouteImport } from './routes/_auth/reports/products'
+import { Route as AuthReportsSearchRouteImport } from './routes/_auth/reports/search'
 import { Route as AuthReportsStockRouteImport } from './routes/_auth/reports/stock'
 import { Route as AuthReviewsIndexRouteImport } from './routes/_auth/reviews/index'
 import { Route as AuthReviewsQuestionsRouteImport } from './routes/_auth/reviews/questions'
@@ -231,6 +232,11 @@ const AuthReportsProductsRoute = AuthReportsProductsRouteImport.update({
   path: '/products',
   getParentRoute: () => AuthReportsRoute,
 } as any)
+const AuthReportsSearchRoute = AuthReportsSearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => AuthReportsRoute,
+} as any)
 const AuthReportsStockRoute = AuthReportsStockRouteImport.update({
   id: '/stock',
   path: '/stock',
@@ -418,6 +424,7 @@ export interface FileRoutesByFullPath {
   '/reports/finance': typeof AuthReportsFinanceRoute
   '/reports/marketing': typeof AuthReportsMarketingRoute
   '/reports/products': typeof AuthReportsProductsRoute
+  '/reports/search': typeof AuthReportsSearchRoute
   '/reports/stock': typeof AuthReportsStockRoute
   '/reviews/questions': typeof AuthReviewsQuestionsRoute
   '/seo/redirects': typeof AuthSeoRedirectsRoute
@@ -479,6 +486,7 @@ export interface FileRoutesByTo {
   '/reports/finance': typeof AuthReportsFinanceRoute
   '/reports/marketing': typeof AuthReportsMarketingRoute
   '/reports/products': typeof AuthReportsProductsRoute
+  '/reports/search': typeof AuthReportsSearchRoute
   '/reports/stock': typeof AuthReportsStockRoute
   '/reviews/questions': typeof AuthReviewsQuestionsRoute
   '/seo/redirects': typeof AuthSeoRedirectsRoute
@@ -544,6 +552,7 @@ export interface FileRoutesById {
   '/_auth/reports/finance': typeof AuthReportsFinanceRoute
   '/_auth/reports/marketing': typeof AuthReportsMarketingRoute
   '/_auth/reports/products': typeof AuthReportsProductsRoute
+  '/_auth/reports/search': typeof AuthReportsSearchRoute
   '/_auth/reports/stock': typeof AuthReportsStockRoute
   '/_auth/reviews/questions': typeof AuthReviewsQuestionsRoute
   '/_auth/seo/redirects': typeof AuthSeoRedirectsRoute
@@ -609,6 +618,7 @@ export interface FileRouteTypes {
     | '/reports/finance'
     | '/reports/marketing'
     | '/reports/products'
+    | '/reports/search'
     | '/reports/stock'
     | '/reviews/questions'
     | '/seo/redirects'
@@ -670,6 +680,7 @@ export interface FileRouteTypes {
     | '/reports/finance'
     | '/reports/marketing'
     | '/reports/products'
+    | '/reports/search'
     | '/reports/stock'
     | '/reviews/questions'
     | '/seo/redirects'
@@ -734,6 +745,7 @@ export interface FileRouteTypes {
     | '/_auth/reports/finance'
     | '/_auth/reports/marketing'
     | '/_auth/reports/products'
+    | '/_auth/reports/search'
     | '/_auth/reports/stock'
     | '/_auth/reviews/questions'
     | '/_auth/seo/redirects'
@@ -1004,6 +1016,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthReportsProductsRouteImport
       parentRoute: typeof AuthReportsRoute
     }
+    '/_auth/reports/search': {
+      id: '/_auth/reports/search'
+      path: '/search'
+      fullPath: '/reports/search'
+      preLoaderRoute: typeof AuthReportsSearchRouteImport
+      parentRoute: typeof AuthReportsRoute
+    }
     '/_auth/reports/stock': {
       id: '/_auth/reports/stock'
       path: '/stock'
@@ -1224,6 +1243,7 @@ interface AuthReportsRouteChildren {
   AuthReportsFinanceRoute: typeof AuthReportsFinanceRoute
   AuthReportsMarketingRoute: typeof AuthReportsMarketingRoute
   AuthReportsProductsRoute: typeof AuthReportsProductsRoute
+  AuthReportsSearchRoute: typeof AuthReportsSearchRoute
   AuthReportsStockRoute: typeof AuthReportsStockRoute
   AuthReportsIndexRoute: typeof AuthReportsIndexRoute
 }
@@ -1235,6 +1255,7 @@ const AuthReportsRouteChildren: AuthReportsRouteChildren = {
   AuthReportsFinanceRoute: AuthReportsFinanceRoute,
   AuthReportsMarketingRoute: AuthReportsMarketingRoute,
   AuthReportsProductsRoute: AuthReportsProductsRoute,
+  AuthReportsSearchRoute: AuthReportsSearchRoute,
   AuthReportsStockRoute: AuthReportsStockRoute,
   AuthReportsIndexRoute: AuthReportsIndexRoute,
 }

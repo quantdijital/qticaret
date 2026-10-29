@@ -16,6 +16,7 @@ export type AuditRuleId =
   | "S-ORPHAN-01"
   | "S-REDIR-01"
   | "S-IMG-01"
+  | "S-SEARCH-01"
   | "S-GSC-01"
   | "S-CWV-01"
 

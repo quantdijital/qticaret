@@ -68,6 +68,7 @@ import { slugHandles } from "./validation/catalog-handles"
 import { rejectStoreSeoFields } from "./validation/seo-fields"
 import { rejectSensitiveFields } from "./validation/sensitive-fields"
 import { guardApiKeys } from "./http/api-key-guard"
+import { recordSearchTerms } from "./http/search-terms"
 import { closePresignedUploads, hideJobResultFiles } from "./validation/upload-routes"
 import {
   ROOT,
@@ -168,6 +169,12 @@ export default defineMiddlewares({
       middlewares: [
         allowFields(...STORE_ATTRIBUTE_FIELDS, ...STORE_BRAND_FIELDS, ...STORE_MEDIA_FIELDS),
       ],
+    },
+    // F11.8: the product list's searches counted for the report and the advisor
+    {
+      matcher: "/store/products",
+      methods: ["GET"],
+      middlewares: [recordSearchTerms],
     },
     {
       matcher: "/admin/attribute-templates",

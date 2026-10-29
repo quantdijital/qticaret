@@ -2753,7 +2753,7 @@
     "limited": "En yeni {{total}} kampanya gösteriliyor."
   },
   "reports": {
-    "description": "Seçtiğiniz dönemin satışları, nereden geldikleri, KDV'si, tahsilatı ve stoğu",
+    "description": "Seçtiğiniz dönemin satışları, nereden geldikleri, KDV'si, tahsilatı, stoğu ve vitrindeki aramalar",
     "export": {
       "excel": "Excel olarak indir",
       "csv": "CSV indir",
@@ -2832,7 +2832,8 @@
       "brands": "Markalar",
       "marketing": "Kampanya ve kaynak",
       "finance": "Finans",
-      "stock": "Stok"
+      "stock": "Stok",
+      "search": "Arama"
     },
     "share": "Pay",
     "sales": "Satış",
@@ -3043,6 +3044,32 @@
       },
       "lists": "Stok listeleri",
       "more": "İlk {{shown}} satır; hepsi CSV'de ve Excel dosyasında."
+    },
+    "search": {
+      "tiles": {
+        "label": "Arama raporunun özeti",
+        "searches": "Arama",
+        "searchesHint": "Vitrindeki ürün aramaları",
+        "zero": "Sonuçsuz arama",
+        "zeroHint": "Sonuçsuz oranı {{share}}",
+        "terms": "Farklı terim",
+        "termsHint": "Kişisel veri içeren aramalar sayılmaz",
+        "zeroTerms": "Sonuçsuz terim",
+        "zeroTermsHint": "Ürün, sayfa ya da odak kelime fırsatı"
+      },
+      "term": "Terim",
+      "searchCount": "Arama",
+      "zeroCount": "Sonuçsuz",
+      "top": {
+        "title": "En çok arananlar",
+        "hint": "Müşterilerin vitrinde en çok aradığı terimler."
+      },
+      "zero": {
+        "title": "Sonuçsuz aramalar",
+        "hint": "Aranıp hiçbir şey bulunamayan terimler: eksik ürün, sayfa ya da odak kelime fırsatı.",
+        "empty": "Bu dönemde sonuçsuz arama yok."
+      },
+      "empty": "Bu dönemde vitrinde arama yapılmadı."
     }
   },
   "seo": {
@@ -3564,6 +3591,11 @@
         "S-CWV-01": {
           "title": "Gerçek ziyaretçiler için sayfalar yavaş",
           "why": "Google, Chrome kullanıcılarının ölçtüğü hızı ve kararlılığı (Core Web Vitals) sıralamada kullanır. Değerler son 28 günün %75'lik dilimidir; iyi sınırlar LCP 2,5 sn, INP 200 ms, CLS 0,1."
+        },
+        "S-SEARCH-01": {
+          "title_one": "{{amount}} terim aranıp bulunamıyor",
+          "title_other": "{{amount}} terim aranıp bulunamıyor",
+          "why": "Müşterilerin vitrinde sık arayıp hiçbir sonuç bulamadığı terimler; bunlar için ürün, kategori ya da içerik sayfası açmak ya da mevcut sayfanın odak kelimesini güncellemek satışa dönüşebilir."
         }
       },
       "reasons": {
@@ -3625,6 +3657,10 @@
           "lcp": "{{subject}} en büyük içerik {{target}} ms'de görünüyor (iyi: en çok 2500 ms).",
           "inp": "{{subject}} dokunuşa yanıt {{target}} ms sürüyor (iyi: en çok 200 ms).",
           "cls": "{{subject}} sayfa kayması {{target}} (iyi: en çok 0,1)."
+        },
+        "S-SEARCH-01": {
+          "zero_results_one": "Son 30 günde {{amount}} kez sonuçsuz arandı",
+          "zero_results_other": "Son 30 günde {{amount}} kez sonuçsuz arandı"
         }
       }
     },

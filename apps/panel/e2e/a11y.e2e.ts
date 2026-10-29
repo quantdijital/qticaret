@@ -40,6 +40,7 @@ const SCREENS = [
   "/reports/products",
   "/reports/finance",
   "/reports/stock",
+  "/reports/search",
   "/settings/accounting",
   "/settings/api",
 ]
