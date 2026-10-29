@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto"
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys, getVariantAvailability } from "@medusajs/framework/utils"
 import { ValidationError } from "../../../lib/errors"
@@ -72,7 +73,8 @@ export async function POST(
         input: {
           template: "stock.alert_confirm",
           resource_id: alert.id,
-          key: alert.token.slice(0, 12),
+          // A digest, never part of the token: the notification row keeps its key in the clear
+          key: createHash("sha256").update(alert.token).digest("hex").slice(0, 16),
           extra: { token: alert.token },
         },
       })

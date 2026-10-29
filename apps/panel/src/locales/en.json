@@ -3769,6 +3769,8 @@
     "approved_other": "{{count}} reviews approved.",
     "rejected_one": "{{count}} review rejected.",
     "rejected_other": "{{count}} reviews rejected.",
+    "changed_one": "{{count}} review was changed by its author while you read it; read it again and decide.",
+    "changed_other": "{{count}} reviews were changed by their authors while you read them; read them again and decide.",
     "empty": {
       "pending": "No reviews waiting.",
       "approved": "No approved reviews yet.",

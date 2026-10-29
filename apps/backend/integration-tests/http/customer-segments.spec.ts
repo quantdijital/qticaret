@@ -29,7 +29,8 @@ medusaIntegrationTestRunner({
     let loyal: TestCustomer
     let newcomer: TestCustomer
 
-    const orderFor = async (email: string, customerId?: string) => {
+    /** A paid order: a sale counts the money taken (an unpaid one counts for no one). */
+    const orderFor = async (email: string, customerId?: string, paid = true) => {
       const orderId = await placeOrder(getContainer(), {
         regionId: shop.regionId,
         salesChannelId: shop.salesChannelId,
@@ -38,6 +39,22 @@ medusaIntegrationTestRunner({
         address: PAYTR_ADDRESS,
         email,
       })
+      if (paid) {
+        const { data } = await getContainer()
+          .resolve(ContainerRegistrationKeys.QUERY)
+          .graph({
+            entity: "order",
+            fields: ["payment_collections.payments.id"],
+            filters: { id: orderId },
+          })
+        const paymentId = (data[0] as { payment_collections: { payments: { id: string }[] }[] })
+          .payment_collections[0]?.payments[0]?.id
+        await http.post(
+          `/admin/payments/${paymentId ?? ""}/capture`,
+          {},
+          { headers: admin.headers }
+        )
+      }
       if (customerId) {
         await getContainer()
           .resolve(Modules.ORDER)
@@ -102,6 +119,9 @@ medusaIntegrationTestRunner({
     })
 
     it("takes spending in kuruş, and lets a segment go with its group", async () => {
+      // Two orders placed but not paid (cash at the door, a transfer awaited): they spend nothing
+      await orderFor(newcomer.email, newcomer.id, false)
+      await orderFor(newcomer.email, newcomer.id, false)
       const created = await post<SegmentBody>("/admin/customer-segments", {
         name: `Çok harcayan ${String(Date.now())}`,
         // Two orders of 120 TL and shipping: over 200 TL

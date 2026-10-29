@@ -126,13 +126,24 @@ export function ReviewsPage() {
   const status: ReviewStatus = search.status ?? "pending"
   const page = (search.page ?? 1) - 1
   const list = useQuery(reviewsQuery(status, page))
+  /** The picked reviews as shown, each with the version the decision is on. */
+  const seen = (ids: ReadonlySet<string>) =>
+    (list.data?.reviews ?? [])
+      .filter((review) => ids.has(review.id))
+      .map(({ id, updated_at }) => ({ id, updated_at }))
   const [selected, setSelected] = useState<ReadonlySet<string>>(() => new Set())
   const moderate = useMutation({
     mutationFn: moderateReviews,
-    onSuccess: async ({ moderated }, { status: next }) => {
-      toast.success(
-        t(next === "approved" ? `${R}.approved` : `${R}.rejected`, { count: moderated })
-      )
+    onSuccess: async ({ moderated, changed }, { status: next }) => {
+      if (moderated > 0) {
+        toast.success(
+          t(next === "approved" ? `${R}.approved` : `${R}.rejected`, { count: moderated })
+        )
+      }
+      // Changed by its author while shown: left waiting, to be read again
+      if (changed.length > 0) {
+        toast.warning(t(`${R}.changed`, { count: changed.length }))
+      }
       setSelected(new Set())
       await client.invalidateQueries({ queryKey: ["reviews"] })
     },
@@ -177,7 +188,7 @@ export function ReviewsPage() {
               size="sm"
               disabled={moderate.isPending}
               onClick={() => {
-                moderate.mutate({ ids: [...selected], status: "approved" })
+                moderate.mutate({ reviews: seen(selected), status: "approved" })
               }}
             >
               {t(`${R}.approveSelected`)}
@@ -187,7 +198,7 @@ export function ReviewsPage() {
               variant="outline"
               disabled={moderate.isPending}
               onClick={() => {
-                moderate.mutate({ ids: [...selected], status: "rejected" })
+                moderate.mutate({ reviews: seen(selected), status: "rejected" })
               }}
             >
               {t(`${R}.rejectSelected`)}
@@ -228,7 +239,10 @@ export function ReviewsPage() {
                     })
                   }}
                   onModerate={(next) => {
-                    moderate.mutate({ ids: [review.id], status: next })
+                    moderate.mutate({
+                      reviews: [{ id: review.id, updated_at: review.updated_at }],
+                      status: next,
+                    })
                   }}
                 />
               ))}

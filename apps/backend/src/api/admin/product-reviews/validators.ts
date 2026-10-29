@@ -6,11 +6,22 @@ export const AdminGetReviews = z.object({
 })
 export type AdminGetReviewsType = z.infer<typeof AdminGetReviews>
 
-/** Reviews approved or rejected at once; a rejection may say why (for the shop's own record). */
+/**
+ * Reviews approved or rejected at once, each as staff saw it (its
+ * `updated_at` from the list); a rejection may say why (for the shop's
+ * own record).
+ */
 export const AdminPostModerateReviews = z
   .object({
-    ids: z
-      .array(z.string().regex(/^prev_[A-Za-z0-9]{1,40}$/))
+    reviews: z
+      .array(
+        z
+          .object({
+            id: z.string().regex(/^prev_[A-Za-z0-9]{1,40}$/),
+            updated_at: z.iso.datetime({ offset: true }),
+          })
+          .strict()
+      )
       .min(1)
       .max(100),
     status: z.enum(["approved", "rejected"]),

@@ -2,7 +2,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
 import { sharedRateLimitStore } from "../../api/http/rate-limit"
 import { logger } from "../../lib/logging"
-import { emailAllowance } from "../../lib/messaging/email/quota"
+import { OPEN_TEMPLATES, emailAllowance } from "../../lib/messaging/email/quota"
 import type { MessageChannel } from "../../lib/messaging/recipients"
 import { smsAllowance } from "../../lib/messaging/sms/quota"
 import { notificationText } from "../../lib/notifications/messages"
@@ -34,13 +34,15 @@ async function warnStaff(
 /**
  * Whether one more message may go on the channel. A text: its number's
  * own hourly and daily limits and the shop's daily limit (F9.8). An
- * e-mail: the shop's daily limit (F10 M9). Reaching 80% of the day's
- * limit tells staff in the bell, once a day; past it nothing goes.
+ * e-mail: the shop's daily limit (F10 M9), and for one anyone can ask
+ * for, its share of it. Reaching 80% of the day's limit tells staff in
+ * the bell, once a day; past it nothing goes.
  */
 export async function withinQuota(
   container: Container,
   channel: MessageChannel,
-  recipientKey: string
+  recipientKey: string,
+  template: string
 ): Promise<boolean> {
   const settings = (await container
     .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
@@ -52,7 +54,10 @@ export async function withinQuota(
           numberKey: recipientKey.slice(0, 32),
           dailyLimit: limit,
         })
-      : await emailAllowance(sharedRateLimitStore(), { dailyLimit: limit })
+      : await emailAllowance(sharedRateLimitStore(), {
+          dailyLimit: limit,
+          open: OPEN_TEMPLATES.includes(template),
+        })
   if (!allowance.allowed) {
     logger.warn({
       event: `messaging.${channel}_quota`,

@@ -13,6 +13,20 @@ describe("e-mail quota (F10 M9)", () => {
     expect(results.map(({ allowed }) => allowed)).toEqual([true, true, true, true, true, false])
   })
 
+  it("keeps e-mails anyone can ask for to a quarter of the day, the rest for orders", async () => {
+    const store = createMemoryStore()
+    const open = []
+    for (let i = 0; i < 4; i += 1) {
+      open.push(await emailAllowance(store, { dailyLimit: 8, open: true }))
+    }
+    const order = await emailAllowance(store, { dailyLimit: 8 })
+
+    expect(open.map(({ allowed }) => allowed)).toEqual([true, true, false, false])
+    expect(open[2]?.reason).toBe("open")
+    // The refused ones took nothing from the day: the order's e-mail is the third
+    expect(order).toMatchObject({ allowed: true, shopToday: 3 })
+  })
+
   it("starts each day afresh", async () => {
     const store = createMemoryStore()
     const today = new Date("2026-10-28T10:00:00Z")

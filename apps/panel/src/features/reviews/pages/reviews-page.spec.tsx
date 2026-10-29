@@ -30,6 +30,7 @@ const row = (id: string, more: Partial<ReviewRow> = {}): ReviewRow => ({
   has_link: false,
   reject_reason: null,
   created_at: "2026-10-28T10:00:00Z",
+  updated_at: "2026-10-28T10:05:00Z",
   product: { id: "prod_1", title: "Şef bıçağı", thumbnail: null },
   ...more,
 })
@@ -53,7 +54,7 @@ describe("ReviewsPage", () => {
               reviews: [row("prev_1"), row("prev_2", { author_name: "Ali V.", has_link: true })],
               count: 2,
             }
-          : { moderated: 1 }
+          : { moderated: 1, changed: [] }
       )
     )
   })
@@ -79,7 +80,10 @@ describe("ReviewsPage", () => {
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith("/admin/product-reviews/moderate", {
         method: "POST",
-        body: { ids: ["prev_1"], status: "approved" },
+        body: {
+          reviews: [{ id: "prev_1", updated_at: "2026-10-28T10:05:00Z" }],
+          status: "approved",
+        },
       })
     })
     await userEvent.click(screen.getByRole("checkbox", { name: "Ayşe Y. yorumunu seç" }))
@@ -89,7 +93,13 @@ describe("ReviewsPage", () => {
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith("/admin/product-reviews/moderate", {
         method: "POST",
-        body: { ids: ["prev_1", "prev_2"], status: "rejected" },
+        body: {
+          reviews: [
+            { id: "prev_1", updated_at: "2026-10-28T10:05:00Z" },
+            { id: "prev_2", updated_at: "2026-10-28T10:05:00Z" },
+          ],
+          status: "rejected",
+        },
       })
     })
   })

@@ -42,6 +42,8 @@ export async function GET(
       has_link: row.has_link,
       reject_reason: row.reject_reason,
       created_at: row.created_at,
+      // The version staff see: moderation applies to it only
+      updated_at: row.updated_at,
       product: products.get(row.product_id) ?? { id: row.product_id, title: null, thumbnail: null },
     })),
     count,

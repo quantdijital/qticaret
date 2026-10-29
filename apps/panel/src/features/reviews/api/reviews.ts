@@ -17,6 +17,8 @@ export interface ReviewRow {
   has_link: boolean
   reject_reason: string | null
   created_at: string
+  /** The version shown: an approval applies to it only. */
+  updated_at: string
   product: { id: string; title: string | null; thumbnail: string | null }
 }
 
@@ -31,13 +33,16 @@ export const reviewsQuery = (status: ReviewStatus, page: number) =>
     placeholderData: keepPreviousData,
   })
 
-/** Approves or rejects reviews at once. */
+/**
+ * Approves or rejects reviews at once, as shown: one its author changed
+ * since stays waiting and comes back in `changed`.
+ */
 export const moderateReviews = (body: {
-  ids: string[]
+  reviews: { id: string; updated_at: string }[]
   status: "approved" | "rejected"
   reason?: string
 }) =>
-  sdk.client.fetch<{ moderated: number }>("/admin/product-reviews/moderate", {
+  sdk.client.fetch<{ moderated: number; changed: string[] }>("/admin/product-reviews/moderate", {
     method: "POST",
     body,
   })

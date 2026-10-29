@@ -1,3 +1,4 @@
+import type { EntityManager } from "@medusajs/framework/mikro-orm/knex"
 import type { Context } from "@medusajs/framework/types"
 import {
   InjectManager,
@@ -68,33 +69,57 @@ class ProductReviewsModuleService extends MedusaService({ ProductReview, Product
     return { id: existing.id }
   }
 
-  /** Approves or rejects reviews, and sums each touched product's approved ones again. */
+  /**
+   * Approves or rejects reviews as staff saw them, and sums each touched
+   * product's approved ones again. One whose author changed it since
+   * (`updated_at` moved) is left as it is and returned in `changed`: each
+   * is decided in one conditional statement, so new text never goes out
+   * on an approval of the old (security review 2026-10-29).
+   */
   @InjectTransactionManager()
   async moderate(
-    input: { ids: string[]; status: "approved" | "rejected"; by: string; reason?: string | null },
+    input: {
+      reviews: { id: string; updated_at: string }[]
+      status: "approved" | "rejected"
+      by: string
+      reason?: string | null
+    },
     @MedusaContext() sharedContext: Context = {}
-  ): Promise<{ products: string[] }> {
-    const reviews = await this.listProductReviews(
-      { id: input.ids },
-      { select: ["id", "product_id"] },
-      sharedContext
-    )
+  ): Promise<{ products: string[]; changed: string[] }> {
+    const manager = sharedContext.transactionManager as EntityManager | undefined
+    if (!manager) {
+      throw new Error("product-reviews: moderation runs in a transaction")
+    }
     const now = new Date()
-    await this.updateProductReviews(
-      reviews.map((review) => ({
-        id: review.id,
-        status: input.status,
-        reject_reason: input.status === "rejected" ? (input.reason ?? null) : null,
-        moderated_by: input.by,
-        moderated_at: now,
-      })),
-      sharedContext
-    )
-    const products = [...new Set(reviews.map((review) => review.product_id))]
+    const decided: { id: string; product_id: string }[] = []
+    const changed: string[] = []
+    for (const review of input.reviews) {
+      const [row] = await manager.execute<{ id: string; product_id: string }[]>(
+        `UPDATE product_review
+         SET status = ?, reject_reason = ?, moderated_by = ?, moderated_at = ?, updated_at = ?
+         WHERE id = ? AND updated_at = ? AND deleted_at IS NULL
+         RETURNING id, product_id`,
+        [
+          input.status,
+          input.status === "rejected" ? (input.reason ?? null) : null,
+          input.by,
+          now,
+          now,
+          review.id,
+          new Date(review.updated_at),
+        ]
+      )
+      if (row) {
+        decided.push(row)
+      } else {
+        changed.push(review.id)
+      }
+    }
+    const products = [...new Set(decided.map((review) => review.product_id))]
     for (const productId of products) {
       await this.recountRating_(productId, sharedContext)
     }
-    return { products }
+    return { products, changed }
   }
 
   /** Each product's average and count of approved reviews; none for a product without one. */

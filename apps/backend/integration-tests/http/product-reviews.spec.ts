@@ -43,6 +43,32 @@ medusaIntegrationTestRunner({
           { headers }
         )
       )
+    /** The queue as staff see it, and their decision on the reviews as seen there. */
+    const queue = async () =>
+      (
+        await http.get<{ reviews: { id: string; updated_at: string; body: string }[] }>(
+          "/admin/product-reviews?status=pending",
+          { headers: admin.headers }
+        )
+      ).data.reviews
+    const decide = (
+      seen: { id: string; updated_at: string }[],
+      status: "approved" | "rejected",
+      reason?: string
+    ) =>
+      http.post<{ moderated: number; changed: string[] }>(
+        "/admin/product-reviews/moderate",
+        { reviews: seen, status, ...(reason ? { reason } : {}) },
+        { headers: admin.headers }
+      )
+    const moderate = async (ids: string[], status: "approved" | "rejected", reason?: string) => {
+      const seen = (await queue()).filter((each) => ids.includes(each.id))
+      return decide(
+        seen.map(({ id, updated_at }) => ({ id, updated_at })),
+        status,
+        reason
+      )
+    }
     const storeReviews = () =>
       http.get<StoreReviews>(`/store/products/${productId}/reviews`, {
         headers: storefront.headers,
@@ -96,11 +122,7 @@ medusaIntegrationTestRunner({
         "/admin/product-reviews?status=pending",
         { headers: admin.headers }
       )
-      await http.post(
-        "/admin/product-reviews/moderate",
-        { ids: [written.data.review?.id ?? ""], status: "approved" },
-        { headers: admin.headers }
-      )
+      await moderate([written.data.review?.id ?? ""], "approved")
       const afterApproval = await storeReviews()
       // Structured data needs absolute URLs: the shop's domain
       await getContainer()
@@ -129,11 +151,7 @@ medusaIntegrationTestRunner({
       await deliver(await orderFor(customer))
       const first = await review({ rating: 5, body: "Harika bir ürün, tavsiye ederim." })
       const id = first.data.review?.id ?? ""
-      await http.post(
-        "/admin/product-reviews/moderate",
-        { ids: [id], status: "approved" },
-        { headers: admin.headers }
-      )
+      await moderate([id], "approved")
       const changed = await review({
         rating: 2,
         body: "Bir ay sonra sapı gevşedi, bakın: https://kotu.example",
@@ -143,17 +161,31 @@ medusaIntegrationTestRunner({
         "/admin/product-reviews?status=pending",
         { headers: admin.headers }
       )
-      await http.post(
-        "/admin/product-reviews/moderate",
-        { ids: [id], status: "rejected", reason: "Bağlantı içeriyor" },
-        { headers: admin.headers }
-      )
+      await moderate([id], "rejected", "Bağlantı içeriyor")
       const afterRejection = await storeReviews()
 
       expect(changed.data.review?.id).toBe(id)
       expect(whileWaiting.data).toMatchObject({ rating: null, reviews: [] })
       expect(queue.reviews.find((each) => each.id === id)?.has_link).toBe(true)
       expect(afterRejection.data).toMatchObject({ rating: null, reviews: [] })
+    })
+
+    it("approves a review only as staff saw it: text changed since stays waiting", async () => {
+      await deliver(await orderFor(customer))
+      const first = await review({ rating: 5, body: "Harika bir ürün, tavsiye ederim." })
+      const id = first.data.review?.id ?? ""
+      const [seen] = await queue()
+      // The author changes it while staff are reading the old text
+      await review({ rating: 5, body: "Harika, şuradan daha ucuz: https://baska.example" })
+      const approval = await decide(
+        seen ? [{ id: seen.id, updated_at: seen.updated_at }] : [],
+        "approved"
+      )
+      const shown = await storeReviews()
+
+      expect(seen?.id).toBe(id)
+      expect(approval.data).toMatchObject({ moderated: 0, changed: [id] })
+      expect(shown.data).toMatchObject({ rating: null, reviews: [] })
     })
 
     it("lets no one write without a confirmed sign-in, and checks what is written", async () => {

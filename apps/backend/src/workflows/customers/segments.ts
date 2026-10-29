@@ -78,19 +78,40 @@ async function customerFacts(container: Container, rules: SegmentRules): Promise
   if (needsOrders(rules)) {
     const orders = await readAll<{
       customer_id: string | null
-      total: MedusaAmount | null
       created_at: string | Date
-    }>(container, "order", ["customer_id", "total", "created_at"], {
-      status: { $nin: NOT_SALES },
-      is_draft_order: false,
-    })
+      payment_collections?:
+        | ({
+            captured_amount?: MedusaAmount | null
+            refunded_amount?: MedusaAmount | null
+          } | null)[]
+        | null
+    }>(
+      container,
+      "order",
+      [
+        "customer_id",
+        "created_at",
+        "payment_collections.captured_amount",
+        "payment_collections.refunded_amount",
+      ],
+      { status: { $nin: NOT_SALES }, is_draft_order: false }
+    )
+    const lira = (amount: MedusaAmount | null | undefined) =>
+      amount ? fromMedusaAmount(amount, { allowRounding: true }) : 0
     for (const order of orders) {
       const entry = order.customer_id ? facts.get(order.customer_id) : undefined
-      if (!entry) {
+      // A sale is money taken and kept: an order unpaid yet (cash at the door, a bank
+      // transfer awaited) puts no one in a group with its prices (security review 2026-10-29)
+      const kept = (order.payment_collections ?? []).reduce(
+        (sum, collection) =>
+          sum + lira(collection?.captured_amount) - lira(collection?.refunded_amount),
+        0
+      )
+      if (!entry || kept <= 0) {
         continue
       }
       entry.orders += 1
-      entry.spent += order.total ? fromMedusaAmount(order.total, { allowRounding: true }) : 0
+      entry.spent += kept
       const at = new Date(order.created_at)
       if (!entry.lastOrderAt || at > entry.lastOrderAt) {
         entry.lastOrderAt = at

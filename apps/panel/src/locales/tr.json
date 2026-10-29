@@ -3769,6 +3769,8 @@
     "approved_other": "{{count}} yorum onaylandı.",
     "rejected_one": "{{count}} yorum reddedildi.",
     "rejected_other": "{{count}} yorum reddedildi.",
+    "changed_one": "{{count}} yorum siz bakarken yazarı tarafından değiştirildi; yeni hâlini okuyup yeniden karar verin.",
+    "changed_other": "{{count}} yorum siz bakarken yazarları tarafından değiştirildi; yeni hâllerini okuyup yeniden karar verin.",
     "empty": {
       "pending": "Onay bekleyen yorum yok.",
       "approved": "Henüz onaylanan yorum yok.",
