@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto"
 import type { MedusaContainer } from "@medusajs/framework/types"
+import { Modules } from "@medusajs/framework/utils"
 import {
   StepResponse,
   WorkflowResponse,
@@ -116,17 +117,22 @@ const syncMerchantProductsStep = createStep(
     const result: MerchantSyncResult = { ...idle, ran: true }
     try {
       const token = await api.accessToken(client, refreshToken)
-      const stored = account.settings["data_source"]
-      let dataSource: string
-      if (typeof stored === "string") {
-        dataSource = stored
-      } else {
-        dataSource = await api.createDataSource(token, merchantId)
-        const draft = await credentials.draft("google", {
-          settings: { ...account.settings, data_source: dataSource },
+      // One data source, even when the schedule's run and the panel's start together
+      const dataSource = await container
+        .resolve(Modules.LOCKING)
+        .execute("google:merchant-data-source", async () => {
+          const settings = (await credentials.read("google"))?.settings ?? account.settings
+          const stored = settings["data_source"]
+          if (typeof stored === "string") {
+            return stored
+          }
+          const created = await api.createDataSource(token, merchantId)
+          const draft = await credentials.draft("google", {
+            settings: { ...settings, data_source: created },
+          })
+          await credentials.store(draft, null, null)
+          return created
         })
-        await credentials.store(draft, null, null)
-      }
       // What the Google feed lists, as it says it: its exclusions and the shop's shipping too
       const [catalog, { shop, exclusions }] = await Promise.all([
         catalogItems(container, brand.storefrontUrl),

@@ -3,6 +3,7 @@ import {
   validateAndTransformBody,
   validateAndTransformQuery,
 } from "@medusajs/framework/http"
+import type { AuthenticatedMedusaRequest } from "@medusajs/framework/http"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import {
   AdminPostGoogleMerchant,
@@ -12,23 +13,33 @@ import {
 import { requireUserActor } from "./actor"
 import { rateLimit } from "./rate-limit"
 
+/**
+ * Calls to Google from the panel: a small budget per address and per staff
+ * member, as the other providers' checks have (Merchant API's and URL
+ * Inspection's quotas are the shop's; security review 2026-10-29).
+ */
+const googleCalls = rateLimit(() => RATE_LIMIT_PROFILES.provider_check, {
+  identity: (req) => (req as Partial<AuthenticatedMedusaRequest>).auth_context?.actor_id,
+})
+
 /** F10 M13 (adr/0038 §5): the shop's Google account, connected and used by staff only. */
 export const GOOGLE_ROUTES = [
+  ...["/admin/google", "/admin/google/connect", "/admin/seo/insights"].map((matcher) => ({
+    matcher,
+    middlewares: [requireUserActor],
+  })),
   ...[
-    "/admin/google",
-    "/admin/google/connect",
     "/admin/google/merchant/sync",
     "/admin/google/search-console/sites",
-    "/admin/seo/insights",
     "/admin/seo/insights/refresh",
   ].map((matcher) => ({
     matcher,
-    middlewares: [requireUserActor],
+    middlewares: [requireUserActor, googleCalls],
   })),
   {
     matcher: "/admin/google/merchant",
     methods: ["POST" as const],
-    middlewares: [requireUserActor, validateAndTransformBody(AdminPostGoogleMerchant)],
+    middlewares: [requireUserActor, googleCalls, validateAndTransformBody(AdminPostGoogleMerchant)],
   },
   {
     matcher: "/admin/google/search-console",

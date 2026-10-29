@@ -531,7 +531,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "payments.use_checkout_route": "This payment method starts from the shop's checkout step.",
   "paytr.not_configured": "The shop has not connected its PayTR account yet.",
   "orders.test_payment_not_shippable":
-    "This order was paid in test mode; no real money was taken, so it cannot be shipped.",
+    "This order was paid in test mode, no real money was taken: it ships only with a carrier in test mode (Aras, Yurtiçi, Geliver). Its shipping option is your own delivery or a carrier in live mode.",
   "paytr.refund_locked":
     "PayTR is not taking a refund of this payment right now (a payout is running); try again later.",
   "paytr.refund_exceeds_payment": "The refund is more than what is left of the payment.",

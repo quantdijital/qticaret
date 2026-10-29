@@ -33,10 +33,33 @@ const ASKS: Record<DraftKind, string> = {
 
 const clip = (text: string, max: number) => (text.length > max ? `${text.slice(0, max)}…` : text)
 
+// Filtered whole, then clipped: a number cut at the edge cannot slip half through
+const clean = (text: string, max: number) => clip(redactPersonalData(text.trim()), max)
+const cleanOrNull = (text: string | null, max: number) => (text ? clean(text, max) : null)
+
+/**
+ * The facts as they may leave the shop: every value and label filtered of
+ * personal data, then clipped. What a provider gets, beside the prompt
+ * made of them (security review 2026-10-29).
+ */
+export function draftFacts(facts: ProductDraftFacts): ProductDraftFacts {
+  return {
+    name: clean(facts.name, 300),
+    subtitle: cleanOrNull(facts.subtitle, 300),
+    brand: cleanOrNull(facts.brand, 300),
+    category: cleanOrNull(facts.category, 300),
+    attributes: facts.attributes
+      .slice(0, 30)
+      .map((each) => ({ label: clean(each.label, 100), value: clean(each.value, 300) })),
+    description: cleanOrNull(facts.description, 2000),
+    shopName: clean(facts.shopName, 300),
+  }
+}
+
 /** The prompt for a draft: the ask, then the product's facts, filtered. */
-export function draftPrompt(kind: DraftKind, facts: ProductDraftFacts): string {
-  const line = (label: string, value: string | null) =>
-    value ? `${label}: ${redactPersonalData(clip(value.trim(), 300))}` : null
+export function draftPrompt(kind: DraftKind, raw: ProductDraftFacts): string {
+  const facts = draftFacts(raw)
+  const line = (label: string, value: string | null) => (value ? `${label}: ${value}` : null)
   return [
     ASKS[kind],
     "",
@@ -46,10 +69,8 @@ export function draftPrompt(kind: DraftKind, facts: ProductDraftFacts): string {
     line("Marka", facts.brand),
     line("Kategori", facts.category),
     line("Mağaza", facts.shopName),
-    ...facts.attributes.slice(0, 30).map((each) => line(each.label, each.value)),
-    facts.description
-      ? `Mevcut açıklama: ${redactPersonalData(clip(facts.description.trim(), 2000))}`
-      : null,
+    ...facts.attributes.map((each) => line(each.label, each.value)),
+    facts.description ? `Mevcut açıklama: ${facts.description}` : null,
   ]
     .filter((each): each is string => each !== null)
     .join("\n")

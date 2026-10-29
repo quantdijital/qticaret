@@ -10,7 +10,7 @@ import {
 } from "@medusajs/framework/workflows-sdk"
 import { updateProductsWorkflow } from "@medusajs/medusa/core-flows"
 import { draftProblems } from "../../lib/content-drafts/gate"
-import { draftPrompt } from "../../lib/content-drafts/prompts"
+import { draftFacts, draftPrompt } from "../../lib/content-drafts/prompts"
 import type { DraftKind, ProductDraftFacts } from "../../lib/content-drafts/prompts"
 import { contentDraftProvider, draftMonthlyQuota } from "../../lib/content-drafts/provider"
 import { ValidationError } from "../../lib/errors"
@@ -96,7 +96,8 @@ const generateDraftStep = createStep(
     }
     const drafts = container.resolve<ContentDraftsModuleService>(CONTENT_DRAFTS_MODULE)
     const quota = draftMonthlyQuota()
-    const facts = await productFacts(container, input.entity_id)
+    // Filtered before anything is made of them: the provider sees no more than the prompt
+    const facts = draftFacts(await productFacts(container, input.entity_id))
     if (!(await drafts.claimQuota(quota))) {
       throw new ValidationError("content_drafts.quota_reached")
     }

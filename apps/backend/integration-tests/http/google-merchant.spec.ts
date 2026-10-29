@@ -119,6 +119,23 @@ medusaIntegrationTestRunner({
       expect(JSON.stringify(raw.data)).not.toContain("1//")
     })
 
+    it("takes the Google account through its consent screen only, not as typed keys", async () => {
+      await callback(await consentPath())
+      const typed = await settle(
+        http.post(
+          "/admin/integrations/credentials/google",
+          { settings: { gsc_site: "sc-domain:baska.example.com" }, secrets: {} },
+          { headers: admin.headers }
+        )
+      )
+      const removed = await settle(
+        http.delete("/admin/integrations/credentials/google", { headers: admin.headers })
+      )
+
+      expect([typed.status, removed.status]).toEqual([404, 404])
+      expect(await status()).toMatchObject({ connected: true })
+    })
+
     it("names the Merchant Center account only when the Google account reaches it", async () => {
       await connect()
       const wrong = await settle(

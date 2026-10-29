@@ -1,5 +1,5 @@
 import { draftProblems } from "../gate"
-import { draftPrompt } from "../prompts"
+import { draftFacts, draftPrompt } from "../prompts"
 import type { ProductDraftFacts } from "../prompts"
 import { fakeDraftProvider } from "../provider"
 import { hasPersonalData, redactPersonalData } from "../redact"
@@ -42,6 +42,19 @@ describe("content drafts (F10.13, adr/0005)", () => {
     expect(prompt).toContain("Ad: Keten Gömlek")
     expect(prompt).toContain("Malzeme: Keten")
     expect(hasPersonalData(prompt)).toBe(false)
+  })
+
+  it("filters the facts a provider gets too: labels, and a number at the edge of the clip", () => {
+    const facts = draftFacts({
+      ...FACTS,
+      attributes: [{ label: "İletişim ayse.yilmaz@example.com", value: "Keten" }],
+      // The phone straddles the 2,000th character: filtered whole before the cut
+      description: `${"a ".repeat(996)}0532 123 45 67 sonra`,
+    })
+
+    expect(JSON.stringify(facts)).not.toContain("ayse.yilmaz@example.com")
+    expect(facts.description).not.toMatch(/0532|123 45/)
+    expect(hasPersonalData(JSON.stringify(facts))).toBe(false)
   })
 
   it("offers a draft only when the advisor's rules for its field pass", () => {

@@ -541,7 +541,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "payments.use_checkout_route": "Bu ödeme yöntemi mağazanın ödeme adımından başlatılır.",
   "paytr.not_configured": "Mağaza PayTR hesabını henüz bağlamadı.",
   "orders.test_payment_not_shippable":
-    "Bu sipariş test modunda ödendi; gerçek para alınmadığı için kargoya verilemez.",
+    "Bu sipariş test modunda ödendi, gerçek para alınmadı: yalnızca test modundaki bir kargo firmasıyla (Aras, Yurtiçi, Geliver) gönderilebilir. Bu siparişin kargo seçeneği kendi gönderiminiz ya da canlı moddaki bir firma.",
   "paytr.refund_locked":
     "PayTR şu an bu ödemenin iadesini kabul etmiyor (hesap kesimi sürüyor); biraz sonra tekrar deneyin.",
   "paytr.refund_exceeds_payment": "İade tutarı ödemeden kalanı aşıyor.",
