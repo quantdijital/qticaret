@@ -39,10 +39,16 @@ medusaIntegrationTestRunner({
       const preview = await get<Preview>(`${PATH}/order.placed/preview`)
 
       expect(list.status).toBe(200)
-      expect(list.data.templates).toHaveLength(18)
+      expect(list.data.templates).toHaveLength(19)
       expect(list.data.templates).toContainEqual({
         name: "marketing.announcement",
         kind: "commercial",
+        channels: ["email", "sms"],
+      })
+      // Double opt-in's confirmation, by e-mail or SMS as the consent was asked for
+      expect(list.data.templates).toContainEqual({
+        name: "consent.confirm",
+        kind: "transactional",
         channels: ["email", "sms"],
       })
       expect(preview.status).toBe(200)

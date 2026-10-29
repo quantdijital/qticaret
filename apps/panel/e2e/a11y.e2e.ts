@@ -99,10 +99,15 @@ test("bulk edit's bar and dialog have no serious accessibility issue", async ({ 
 })
 
 test("an order's edit dialog has no serious accessibility issue", async ({ page }) => {
-  // An order still to ship can be edited (adr/0033)
+  // An order still to ship can be edited (adr/0033), unless its parcel is packed with a label
   await page.goto("/orders?stage=to_ship")
   await page.waitForLoadState("networkidle")
-  const first = page.getByRole("table").getByRole("link").first()
+  const first = page
+    .getByRole("table")
+    .getByRole("row")
+    .filter({ hasNotText: "Etiket hazır" })
+    .getByRole("link")
+    .first()
   test.skip((await first.count()) === 0, "no order waiting to ship in this database")
   await first.click()
   await expect(pageHeading(page)).toBeVisible()
