@@ -179,6 +179,8 @@ module.exports = defineConfig({
     },
     // F11.2 (adr/0039 §2): where carts came from, for the sales report
     { resolve: "./src/modules/traffic-sources" },
+    // F11.3 (adr/0039 §3): PayTR's and iyzico's statements checked against the shop's payments
+    { resolve: "./src/modules/statement-checks" },
     // F10.13 (adr/0005): drafts a provider wrote, shown only once staff approve them
     { resolve: "./src/modules/content-drafts" },
     // F10.11 (docs/13 §10): what Search Console and CrUX say of the shop

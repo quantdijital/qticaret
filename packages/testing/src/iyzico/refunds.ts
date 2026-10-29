@@ -14,10 +14,20 @@ import type { IyzicoAccount } from "./signing"
 
 const lira = (kurus: number) => String(kurus / 100)
 
+/** Money given back: a refund of an item transaction, or a cancel of the whole payment. */
+export interface GivenBack {
+  kind: "REFUND" | "CANCEL"
+  form: FakeCheckoutForm
+  amount: number
+  at: number
+}
+
 export function createRefunds(account: IyzicoAccount, forms: Map<string, FakeCheckoutForm>) {
   /** Kuruş given back per item transaction, in order. */
   const refunds = new Map<string, number[]>()
   const cancelled = new Set<string>()
+  /** Every refund and cancel as it happened, for the statement. */
+  const log: GivenBack[] = []
 
   const failure = (body: Body, errorCode: string, errorMessage: string) =>
     failed(body, errorCode, errorMessage, { retryable: false })
@@ -57,6 +67,7 @@ export function createRefunds(account: IyzicoAccount, forms: Map<string, FakeChe
       )
     }
     refunds.set(id, [...before, amount])
+    log.push({ kind: "REFUND", form: found.form, amount, at: Date.now() })
     const conversationId = typeof body["conversationId"] === "string" ? body["conversationId"] : ""
     const currency = found.form.currency
     return {
@@ -89,6 +100,7 @@ export function createRefunds(account: IyzicoAccount, forms: Map<string, FakeChe
       return failure(body, "FAKE_NOT_CANCELLABLE", "Ödeme iptal edilemez")
     }
     cancelled.add(paymentId)
+    log.push({ kind: "CANCEL", form, amount: kurusOf(form.price), at: Date.now() })
     return {
       body: {
         status: "success",
@@ -141,6 +153,7 @@ export function createRefunds(account: IyzicoAccount, forms: Map<string, FakeChe
   return {
     refunds,
     cancelled,
+    log,
     handlers: {
       "/payment/refund": refund,
       "/payment/cancel": cancel,

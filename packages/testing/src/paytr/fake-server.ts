@@ -5,19 +5,20 @@ import { FORM_PATH, answerPaymentForm, totalWithSurcharge } from "./checkout-pag
 import type { PaymentForm } from "./checkout-page"
 import { paytrNotification, sendPaytrNotification } from "./notification"
 import { createFakePaytrHandlers } from "./handlers"
-import type { FakePayment, Fields, Reply } from "./handlers"
+import type { FakePayment, FakeRefundEntry, Fields, Reply } from "./handlers"
 import type { PaytrAccount } from "./signing"
 
 /**
  * A local stand-in for www.paytr.com (docs/07: tests never call the real
- * provider). It answers the iFrame token, status query, refund and
- * installment rate APIs as dev.paytr.com describes them, checks every
+ * provider). It answers the iFrame token, status query, refund,
+ * installment rate and transaction statement (`statement.ts`, F11.3)
+ * APIs as dev.paytr.com describes them, checks every
  * signature with the account, and keeps the payments it has seen. Strict
  * where PayTR is lenient: a request carrying the key or the salt is refused.
  * It also serves a clickable payment form (`checkout-page.ts`, adr/0028).
  */
 
-export type { FakePayment } from "./handlers"
+export type { FakePayment, FakeRefundEntry } from "./handlers"
 
 const SECRET_FIELDS = ["merchant_key", "merchant_salt"]
 
@@ -28,6 +29,8 @@ export interface FakePaytr {
   url: string
   account: PaytrAccount
   payments: Map<string, FakePayment>
+  /** Every refund with its time, as the statement lists them. */
+  refundLog: FakeRefundEntry[]
   requests: { path: string; fields: Record<string, string> }[]
   queue: (path: string, answer: FakeAnswer) => void
   /** Completes a payment as the iFrame would; returns the notification PayTR sends. */
@@ -76,7 +79,8 @@ export async function startFakePaytr(
   const requests: FakePaytr["requests"] = []
   const queued = new Map<string, FakeAnswer[]>()
   const sockets = new Set<Socket>()
-  const handlers = createFakePaytrHandlers(account, payments)
+  const refundLog: FakeRefundEntry[] = []
+  const handlers = createFakePaytrHandlers(account, payments, refundLog)
 
   const server = createServer((req, res) => {
     void (async () => {
@@ -122,6 +126,7 @@ export async function startFakePaytr(
     url: `http://127.0.0.1:${String(address.port)}`,
     account,
     payments,
+    refundLog,
     requests,
     queue: (path, answer) => {
       queued.set(path, [...(queued.get(path) ?? []), answer])
@@ -134,6 +139,9 @@ export async function startFakePaytr(
       payment.status = outcome.status ?? "success"
       payment.installments = outcome.installments ?? 1
       payment.totalAmount = outcome.totalAmount ?? payment.paymentAmount
+      if (payment.status === "success") {
+        payment.paidAt = Date.now()
+      }
       return paytrNotification(account, {
         merchantOid,
         status: payment.status === "failed" ? "failed" : "success",

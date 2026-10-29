@@ -337,6 +337,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "google.not_connected": "Önce Google hesabını bağlayın.",
   "reports.range_invalid":
     "Tarih aralığı geçersiz: başlangıç bitişten sonra, gelecekte ya da 366 günden uzun olamaz.",
+  "statements.day_invalid": "Bu gün denetlenemez: en geç dün, en fazla bir yıl öncesi olabilir.",
+  "statements.account_missing": "Bu ödeme sağlayıcısı bağlı değil; önce hesabı bağlayın.",
   "content_drafts.no_provider": "Taslak sağlayıcısı henüz tanımlı değil.",
   "content_drafts.quota_reached": "Bu ayın taslak hakkı doldu; gelecek ay yenilenir.",
   "content_drafts.not_open": "Bu taslak artık onay beklemiyor.",

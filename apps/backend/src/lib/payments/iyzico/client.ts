@@ -17,6 +17,7 @@ import { IYZICO_PROVIDER, iyzicoError } from "./errors"
 import { createInstallmentCache, installmentAnswer } from "./installments"
 import { refundCalls } from "./refund-calls"
 import { iyzicoAnswer } from "./schemas"
+import { statementCalls } from "./statement"
 import { isResponseGenuine, signaturePrice, signedHeaders } from "./signatures"
 import type { IyzicoCredentialCheck, IyzicoCredentials } from "./types"
 import { toIyzicoPrice } from "./amounts"
@@ -57,6 +58,23 @@ export function createIyzicoApi(
     baseUrl: liveUrl,
   })
 
+  /** A `failure` answer throws iyzico's error code; a success is read by the call's schema. */
+  function readAnswer<T>(answer: z.infer<typeof iyzicoAnswer>, schema: z.ZodType<T>): T {
+    if (answer.status !== "success") {
+      throw iyzicoError(answer.errorCode)
+    }
+    const read = schema.safeParse(answer)
+    if (!read.success) {
+      throw new ProviderError({
+        provider: IYZICO_PROVIDER,
+        providerCode: "invalid_response",
+        retryable: false,
+        cause: read.error,
+      })
+    }
+    return read.data
+  }
+
   /**
    * One signed call; a `failure` answer throws iyzico's error code. The
    * call's own `schema` reads a successful answer only: a failure carries
@@ -80,19 +98,24 @@ export function createIyzicoApi(
       ...(call.signal ? { signal: call.signal } : {}),
       schema: iyzicoAnswer.loose(),
     })
-    if (answer.status !== "success") {
-      throw iyzicoError(answer.errorCode)
-    }
-    const read = schema.safeParse(answer)
-    if (!read.success) {
-      throw new ProviderError({
-        provider: IYZICO_PROVIDER,
-        providerCode: "invalid_response",
-        retryable: false,
-        cause: read.error,
-      })
-    }
-    return read.data
+    return readAnswer(answer, schema)
+  }
+
+  /** A signed GET (the reports): the signature covers the path, never the query. */
+  async function get<T>(
+    credentials: IyzicoCredentials,
+    path: string,
+    query: Record<string, string>,
+    schema: z.ZodType<T>
+  ): Promise<T> {
+    const answer = await (credentials.testMode ? sandbox : live).request({
+      method: "GET",
+      path,
+      query,
+      headers: signedHeaders(credentials, path, ""),
+      schema: iyzicoAnswer.loose(),
+    })
+    return readAnswer(answer, schema)
   }
 
   /**
@@ -232,6 +255,7 @@ export function createIyzicoApi(
 
   return {
     ...refundCalls(post, forged),
+    ...statementCalls(get),
     checkCredentials,
     initializeCheckoutForm,
     retrieveCheckoutForm,

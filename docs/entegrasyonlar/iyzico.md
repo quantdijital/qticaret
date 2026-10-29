@@ -126,6 +126,17 @@ iyzico → callbackUrl (POST /hooks/iyzico/callback, gövde: token)
 - **Öncelikli sağlayıcı:** Ayarlar > Ödeme'de iki kart sağlayıcısı bağlıyken seçilir (`payments.card_provider`). `GET /store/payment/methods` bağlı sağlayıcıları seçilen önde olacak şekilde listeler; Medusa'nın kendi listesi bağlı olmayanları da sayar.
 - **Panel:** sipariş sayfası iyzico ödemesini iyzico'ya sorarak gösterir (işlem no = `paymentId`, kart markası ve son 4 hane, taksit, sahtekârlık kontrolü 0/-1 ise uyarı); yapılan iadeler kendi kaydımızdan.
 
+## Günlük işlem raporu (mutabakat, F11.3, 2026-10-29)
+- **Uç:** `GET /v2/reporting/payment/transactions?transactionDate=YYYY-MM-DD&page=N` (docs.iyzico.com "Reporting Service"). Sayfalar 1'den başlar.
+- **Yanıt:** `transactions[]`, `currentPage`, `totalPageCount`. Satır alanları `transactionType` (`PAYMENT`, `REFUND`, `CANCEL`), `transactionStatus` (1/2 onaylı, 0 incelemede, -1 incelemede reddedildi), `transactionDate` (`yyyy-MM-dd HH:mm:ss`), `paymentId`, `conversationId`, `basketId`, `price`, `paidPrice`, `transactionCurrency`, `installment`, `afterSettlement` ve diğerleri. Geriye en fazla 2 yıl gidilebilir.
+- **İmza:** GET isteğinde imza yalnızca yol üzerinden atılır: `randomKey + "/v2/reporting/payment/transactions"`, sorgu ve gövde imzaya girmez. Belge bunu söylemiyor; resmî iyzipay-php `IyziAuthV2Generator::getPayload` ve `ReportingPaymentTransaction` (istek `null` ile imzalanır) böyle yapıyor.
+- **Okuma:**
+  - Satış `price` ile karşılaştırılır: sepet tutarı, taksit farkı hariç.
+  - -1 durumlu ödeme para almamıştır, satılmış sayılmaz.
+  - `CANCEL` ödemenin tamamının iadesidir.
+  - Referans `paymentId`'dir; mağaza tarafında ödemenin verisindeki `payment_id` ile eşlenir.
+  - Sayfa sayısı 200'de kesilir.
+
 ## Kritik noktalar
 - Sepet ve alıcı sunucuda kurulur. Oturum verisi herkese açık sayılır; kişisel veri bırakılmaz (adr/0026).
 - itemTransactions (kalem ↔ paymentTransactionId) ödeme verisinde saklanır; kısmi iadenin temeli. Her sağlayıcı çıktısı verinin tamamıdır.

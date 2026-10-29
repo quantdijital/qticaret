@@ -24,3 +24,4 @@ export {
   signedHeaders,
 } from "./signatures"
 export type { IyzicoCredentialCheck, IyzicoCredentials } from "./types"
+export { STATEMENT_PATH as IYZICO_STATEMENT_PATH, readIyzicoStatement } from "./statement"

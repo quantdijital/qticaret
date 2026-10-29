@@ -124,6 +124,18 @@ Tüm imzalar `base64(HMAC-SHA256(key = merchant_key, mesaj))`.
 - Yanıtta `status` "success", `is_test` (test işlemi 1), `merchant_oid`, `return_amount`, gönderildiyse `reference_no`. Hata hem "failed" (sipariş yok) hem "error" olarak geçiyor, ikisi de karşılanır.
 - İstemci iadeyi kendiliğinden yeniden göndermez: yanıt kaybolursa `outcome_unknown` döner, çağıran `reference_no`'yu durum sorgusunda arar.
 
+## İşlem Dökümü (mutabakat, F11.3, 2026-10-29)
+- **Uç:** `POST https://www.paytr.com/rapor/islem-dokumu` (dev.paytr.com/islem-dokumu). Form alanları `merchant_id`, `start_date`, `end_date` (`YYYY-MM-DD hh:mm:ss`), `paytr_token`. Aralık **en fazla 3 gün**.
+- **İmza:** `base64(HMAC-SHA256(merchant_key, merchant_id + start_date + end_date + merchant_salt))`. Resmî Postman koleksiyonu da bu sırayı kullanıyor.
+- **Yanıt:**
+  - `success`: satırlar `islem_tipi` (`S` satış, `I` iade), `islem_tutari`, `odeme_tutari`, `net_tutar`, `kesinti_tutari`, `kesinti_orani`, `islem_tarihi` (`13.01.2021`), `para_birimi`, `taksit`, `kart_marka`, `kart_no` (maskeli), `siparis_no` (= `merchant_oid`), `odeme_tipi` alanlarını taşır.
+  - `failed`: aralıkta işlem yok.
+  - `error`: `err_no` ve `err_msg`; numaralar belgelenmemiş, `error_<no>` olarak görünür kalır.
+- **Belgelenmeyen:** satırları hangi anahtarın tuttuğu ne sayfada ne Postman'de var; resmî örnekler yanıtı olduğu gibi basıyor. Okuyucu yanıttaki her diziyi ya da satır alanı taşıyan her nesneyi satır sayar, satırın kendisini sıkı okur. Okunamayan tek satır bütün dökümü `invalid_response` yapar.
+- **Tutar:** `islem_tutari` ile `odeme_tutari`'ndan hangisinin vade farkını içerdiği belgelenmemiş. Satış, ikisinden biri mağazanın tutarına eşitse tutar sayılır.
+- **İstemci:** rapor ayrı bir HTTP istemcisinden gider (60 sn zaman aşımı, 20 MB yanıt, kendi devre kesicisi). Resmî örnek 90 sn bekliyor; yavaş rapor ödeme çağrılarının devre kesicisini açmaz.
+- **Gözden geçir:** satırları tutan anahtar ve vade farkının hangi alanda olduğu ilk canlı hesapta doğrulanır.
+
 ## Taksit
 - Oran API'si (`taksit-oranlari`) BIN istemez; ürün sayfası için genel tablo alınabilir. Oranlar günlük değişebilir: günde bir çekilip saklanır.
 - Yanıt: `status`, `request_id`, `max_inst_non_bus` (mağazanın en çok taksiti), `oranlar` (kart ailesi: axess, world, maximum, cardfinans, paraf, advantage, combo, bonus). `oranlar`'ın iç yapısı belgelenmemiş; bilinen biçim `{aile: {taksit_<n>: oran}}`, istemci buna göre okur (doğrulanamadı, V6). Eksik alanda `err_no` `006`.

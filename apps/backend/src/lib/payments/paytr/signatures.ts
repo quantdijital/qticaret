@@ -90,6 +90,14 @@ export function refundHash(
   )
 }
 
+/** İşlem Dökümü; the dates as sent, `YYYY-MM-DD hh:mm:ss`. */
+export function statementHash(secrets: PaytrSecrets, startDate: string, endDate: string): string {
+  return paytrHmac(
+    secrets.merchantKey,
+    secrets.merchantId + startDate + endDate + secrets.merchantSalt
+  )
+}
+
 /** Taksit Oranları Sorgulama. */
 export function installmentRatesHash(secrets: PaytrSecrets, requestId: string): string {
   return paytrHmac(secrets.merchantKey, secrets.merchantId + requestId + secrets.merchantSalt)

@@ -29,6 +29,8 @@ export interface FakeCheckoutForm {
     installment: number
     /** What the card paid, surcharge included. */
     paidPrice: string
+    /** When it was paid (ms), for the statement. */
+    paidAt: number
   }
 }
 
@@ -151,6 +153,7 @@ export function createCheckoutForms(account: IyzicoAccount, pageBase: () => stri
       fraudStatus: outcome.fraudStatus ?? 1,
       installment: outcome.installment ?? 1,
       paidPrice: outcome.paidPrice ?? form.paidPrice,
+      paidAt: Date.now(),
     }
     return form
   }

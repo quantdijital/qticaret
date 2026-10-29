@@ -1,5 +1,6 @@
 import { randomBytes } from "node:crypto"
 import { paytrSign } from "./signing"
+import { fakeStatement } from "./statement"
 import type { PaytrAccount } from "./signing"
 
 /**
@@ -17,6 +18,8 @@ export interface FakePayment {
   testMode: boolean
   installments: number
   status: "pending" | "success" | "failed"
+  /** When it was paid (ms), for the statement. */
+  paidAt?: number
   /** The shop answered "OK" to the notification; refunds need it (`007`). */
   notified: boolean
   refunds: { amount: number; referenceNo: string | null }[]
@@ -60,7 +63,18 @@ const error = (errNo: string, message: string): Reply => ({
   body: { status: "error", err_no: errNo, err_msg: message },
 })
 
-export function createFakePaytrHandlers(account: PaytrAccount, payments: Map<string, FakePayment>) {
+/** A refund as it happened (ms), for the statement. */
+export interface FakeRefundEntry {
+  merchantOid: string
+  amount: number
+  at: number
+}
+
+export function createFakePaytrHandlers(
+  account: PaytrAccount,
+  payments: Map<string, FakePayment>,
+  refundLog: FakeRefundEntry[]
+) {
   const signed = (fields: Fields, parts: readonly string[]) =>
     fields["paytr_token"] === paytrSign(account, parts)
 
@@ -188,6 +202,7 @@ export function createFakePaytrHandlers(account: PaytrAccount, payments: Map<str
     }
     const referenceNo = fields["reference_no"] ?? null
     payment.refunds.push({ amount, referenceNo })
+    refundLog.push({ merchantOid: oid, amount, at: Date.now() })
     return {
       body: {
         status: "success",
@@ -222,5 +237,6 @@ export function createFakePaytrHandlers(account: PaytrAccount, payments: Map<str
     "/odeme/durum-sorgu": status,
     "/odeme/iade": refund,
     "/odeme/taksit-oranlari": installments,
+    "/rapor/islem-dokumu": fakeStatement(account, payments, refundLog),
   } as Readonly<Record<string, (fields: Fields) => Reply>>
 }

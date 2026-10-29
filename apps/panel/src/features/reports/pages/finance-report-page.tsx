@@ -14,6 +14,7 @@ import {
 import { financeReportQuery } from "@/features/reports/api/finance"
 import type { FinanceReport } from "@/features/reports/api/finance"
 import { ReportExportButton } from "@/features/reports/components/report-export"
+import { StatementChecksCard } from "@/features/reports/components/statement-checks-card"
 import { ReportTiles } from "@/features/reports/components/report-tiles"
 import type { ReportTile } from "@/features/reports/components/report-tiles"
 import { useReportRange } from "@/features/reports/use-report"
@@ -132,7 +133,7 @@ export function FinanceReportPage() {
                 <TableBody>
                   {data.payments.map((row) => (
                     <TableRow key={row.method}>
-                      <TableCell className="pl-5 font-medium">
+                      <TableCell className="pl-5 font-medium whitespace-normal">
                         {t(`${F}.methods.${row.method}`, { defaultValue: row.method })}
                       </TableCell>
                       <TableCell className="text-right tabular-nums">
@@ -150,6 +151,7 @@ export function FinanceReportPage() {
               </Table>
             </SectionCard>
           </div>
+          <StatementChecksCard currencyCode={data.currency_code} />
           <SectionCard
             title={t(`${F}.chargebacks.title`)}
             description={t(`${F}.chargebacks.hint`)}

@@ -5,6 +5,7 @@ import { createCheckoutForms } from "./checkout-form"
 import type { FakeCheckoutForm, PayOutcome } from "./checkout-form"
 import { PAGE_PATH, answerPaymentPage } from "./checkout-page"
 import { createRefunds } from "./refunds"
+import { createStatement } from "./statement"
 import { iyzicoSign, readAuthorization } from "./signing"
 import type { IyzicoAccount } from "./signing"
 
@@ -14,9 +15,10 @@ import type { IyzicoAccount } from "./signing"
  * the sandbox did on 2026-10-27: an unknown API key is `1001`, a signature
  * that does not match is `1000`, failures as HTTP 200. It answers the
  * installment table (the connection check) and the Checkout Form
- * (`checkout-form.ts`, F5 V9), with a clickable payment page, and refund
- * and cancel (`refunds.ts`, V10). Strict where iyzico is lenient: a
- * request carrying the secret key is refused.
+ * (`checkout-form.ts`, F5 V9), with a clickable payment page, refund
+ * and cancel (`refunds.ts`, V10), and the daily transactions report
+ * (`statement.ts`, F11.3). Strict where iyzico is lenient: a request
+ * carrying the secret key is refused.
  */
 
 export type { FakeCheckoutForm, PayOutcome } from "./checkout-form"
@@ -99,6 +101,7 @@ const send = (res: ServerResponse, reply: Reply) => {
 function answer(
   account: IyzicoAccount,
   handlers: Readonly<Record<string, (body: Record<string, unknown>) => Reply>>,
+  reads: Readonly<Record<string, (query: URLSearchParams) => Reply>>,
   req: IncomingMessage,
   path: string,
   text: string
@@ -118,6 +121,11 @@ function answer(
   ) {
     return failure("1000", "Geçersiz imza", body["conversationId"])
   }
+  // A GET (the reports) was signed over its path alone, as checked above
+  const read = req.method === "GET" ? reads[path] : undefined
+  if (read) {
+    return read(new URL(req.url ?? "/", "http://fake").searchParams)
+  }
   const handler = req.method === "POST" ? (HANDLERS[path] ?? handlers[path]) : undefined
   return handler ? handler(body) : { status: 404, body: "not found" }
 }
@@ -131,6 +139,9 @@ export async function startFakeIyzico(account: IyzicoAccount, port = 0): Promise
   const checkoutForms = createCheckoutForms(account, () => url)
   const giveBack = createRefunds(account, checkoutForms.forms)
   const handlers = { ...checkoutForms.handlers, ...giveBack.handlers }
+  const reads = {
+    "/v2/reporting/payment/transactions": createStatement(checkoutForms.forms, giveBack.log),
+  }
 
   const server = createServer((req, res) => {
     void (async () => {
@@ -151,7 +162,7 @@ export async function startFakeIyzico(account: IyzicoAccount, port = 0): Promise
         req.socket.destroy()
         return
       }
-      send(res, next ?? answer(account, handlers, req, path, text))
+      send(res, next ?? answer(account, handlers, reads, req, path, text))
     })().catch(() => {
       // A body that is not JSON: iyzico's own 500
       send(res, { status: 500, body: "error" })

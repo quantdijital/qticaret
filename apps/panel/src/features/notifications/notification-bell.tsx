@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
-import { Bell, PackageMinus, ShieldAlert } from "lucide-react"
+import { Bell, PackageMinus, Scale, ShieldAlert } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
@@ -49,6 +49,23 @@ function useAlertText(data: Record<string, unknown>) {
       link: isConnectable(provider)
         ? { to: "/settings/payments/$provider" as const, search: {}, params: { provider } }
         : { to: "/settings/payments" as const, search: {}, params: {} },
+    }
+  }
+  if (data["kind"] === "statement_check") {
+    const provider = text(data["provider"])
+    const day = text(data["day"])
+    return {
+      title: t("notifications.statementCheck.title", {
+        provider: t(`settings.payments.methods.${provider}.name`, { defaultValue: provider }),
+        day: day.split("-").reverse().join("."),
+      }),
+      description: t("notifications.statementCheck.description", {
+        count: amount(data["issues"]),
+      }),
+      Icon: Scale,
+      tone: "bg-warning-soft text-warning-text",
+      // The day itself on the finance report, where its differences are listed
+      link: { to: "/reports/finance" as const, search: { from: day, to: day }, params: {} },
     }
   }
   return {

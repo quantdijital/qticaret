@@ -2715,6 +2715,45 @@
         "due": "Son gün",
         "amount": "Tutar",
         "empty": "Bu dönemde ters ibraz yok."
+      },
+      "statements": {
+        "title": "Sağlayıcı mutabakatı",
+        "hint": "Her sabah 08.30'da PayTR ve iyzico'nun dünkü dökümü siparişlerin ödemeleriyle karşılaştırılır.",
+        "states": {
+          "live": "Canlı",
+          "testMode": "Deneme modu",
+          "notConnected": "Bağlı değil"
+        },
+        "waiting": "Bu dönemde henüz denetlenmiş gün yok.",
+        "notChecked": "Canlı modda bağlı olmadığı için denetlenmiyor.",
+        "days": "{{matched}} gün tuttu · {{mismatched}} gün fark · {{failed}} gün okunamadı",
+        "none": "Bu dönemde denetlenmiş gün yok. Mutabakat, sağlayıcı canlı modda bağlıyken her sabah çalışır.",
+        "allMatched": "Bu dönemde denetlenen bütün günler tuttu.",
+        "kind": "Fark",
+        "order": "Sipariş",
+        "reference": "Referans",
+        "shop": "Mağaza",
+        "provider": "Sağlayıcı",
+        "status": {
+          "matched": "Tuttu",
+          "mismatched": "Fark var",
+          "failed": "Okunamadı"
+        },
+        "errors": {
+          "account_missing": "Hesap bağlı değil",
+          "other": "Döküm okunamadı ({{code}})"
+        },
+        "differences_one": "{{count}} fark",
+        "differences_other": "{{count}} fark",
+        "recheck": "Yeniden denetle",
+        "nowMatched": "Gün yeniden denetlendi; döküm artık tutuyor.",
+        "checkedAgain": "Gün yeniden denetlendi.",
+        "kinds": {
+          "missing_at_provider": "Sağlayıcıda yok",
+          "unknown_at_shop": "Mağazada karşılığı yok",
+          "amount_mismatch": "Tutar farklı",
+          "refund_mismatch": "İade farklı"
+        }
       }
     },
     "marketing": {
@@ -3554,6 +3593,11 @@
         "test_mode_off": "test modu kapatıldı",
         "removed": "bağlantı kaldırıldı"
       }
+    },
+    "statementCheck": {
+      "title": "{{provider}} dökümü {{day}} günü tutmuyor",
+      "description_one": "{{count}} fark var; Raporlar > Finans'ta.",
+      "description_other": "{{count}} fark var; Raporlar > Finans'ta."
     }
   },
   "content": {

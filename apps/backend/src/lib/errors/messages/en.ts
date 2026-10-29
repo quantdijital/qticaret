@@ -332,6 +332,10 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "google.not_connected": "Connect the Google account first.",
   "reports.range_invalid":
     "The date range is not valid: it cannot start after it ends, lie in the future or run over 366 days.",
+  "statements.day_invalid":
+    "This day cannot be checked: yesterday at the latest, a year back at most.",
+  "statements.account_missing":
+    "This payment provider is not connected; connect the account first.",
   "content_drafts.no_provider": "No draft provider is set up yet.",
   "content_drafts.quota_reached": "This month's drafts are used up; they renew next month.",
   "content_drafts.not_open": "This draft is no longer waiting for approval.",

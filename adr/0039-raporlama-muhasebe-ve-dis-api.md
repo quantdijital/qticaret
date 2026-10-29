@@ -118,6 +118,23 @@ Kısıtlar:
   - Olay yüklerinin tipi yoktur; elle tiplenir.
 - **OpenAPI:** Resmî `@medusajs/medusa-oas-cli` Zod okumaz, JSDoc `@oas` yorumları ister. Karar §6'daki gibi kalır: dış API'ye açılan dar uç kümesi için şema, kendi Zod doğrulayıcılarımızdan `z.toJSONSchema` ile üretilir.
 - **Maliyet:** Çekirdekte varyant maliyeti yok (doğrulandı); `variant_extension`'a eklenir. `InventoryLevel`: `stocked_quantity`, `reserved_quantity`, `incoming_quantity`, `available_quantity`.
+- **Ödeme hareketleri (F11.3):**
+  - Ödeme modülünde `listCaptures` ve `listRefunds` var; `created_at` süzgeci ISO metin alır, `payment` ilişkisi gelir (tip denetimiyle doğrulandı).
+  - `query.graph` `payment` varlığında `captures`, `refunds` ve `payment_collection.order.{id, display_id}` alanlarını döner (HTTP testiyle doğrulandı).
+
+## Sağlayıcı mutabakatı: doğrulanan uçlar ve uygulama (2026-10-29)
+- **PayTR:** `POST /rapor/islem-dokumu`, en çok 3 gün. **iyzico:** `GET /v2/reporting/payment/transactions`, gün ve sayfa ile. Ayrıntı: `docs/entegrasyonlar/paytr.md`, `docs/entegrasyonlar/iyzico.md`.
+- **Pencere:** D günü için iki taraf da D-1..D+1 okunur. Gece yarısında alınıp sağlayıcının ertesi güne yazdığı ödeme böylece eşleşir.
+- **Kurallar** (`lib/payments/statements/match.ts`):
+  - D'de yakalanan her ödeme sağlayıcıda aynı tutarda satış olmalı; yoksa `missing_at_provider`, tutar farklıysa `amount_mismatch`.
+  - Sağlayıcının D'deki her satışı mağazanın bir ödemesi olmalı; yoksa `unknown_at_shop`. Siparişe dönüşmeyip kurtarma kaydına (`payment-recovery`) girmiş ödeme bilinir sayılır.
+  - D'de iki taraftan birinde iadesi olan referansın penceredeki iade toplamları eşit olmalı; değilse `refund_mismatch`.
+- **Mod:** Hesabın moduyla aynı moddaki ödemeler karşılaştırılır. Sabah işi (08.30, dünü ve okunamamış ya da hiç denetlenmemiş son 3 günü) yalnızca canlı hesaplarda çalışır. Deneme hesabı elle denetlenebilir.
+- **Kayıt:** `statement-checks` modülü, sağlayıcı ve gün başına tek sonuç (`matched`, `mismatched`, `failed`). Yeniden denetim öncekinin yerine geçer. İş akışında kaydın telafisi önceki sonucu geri koyar.
+- **Görünürlük:**
+  - Fark çıkınca zile düşer.
+  - Raporlar > Finans'ta sağlayıcı durumu ve farklı günler listelenir; "Yeniden denetle" (`POST /admin/reports/statements`) en geç dünü, en çok bir yıl öncesini alır ve sağlayıcı kontrolü bütçesiyle sınırlıdır.
+  - Kişisel veri yok: referans, sipariş numarası, tutar.
 
 ## Alternatifler
 

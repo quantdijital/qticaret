@@ -17,6 +17,7 @@ import {
 } from "./fields"
 import { installmentRatesResponse, refundResponse, statusResponse, tokenResponse } from "./schemas"
 import { installmentRatesHash, refundHash, statusQueryHash, tokenRequestHash } from "./signatures"
+import { statementCall } from "./statement"
 import type {
   PaytrCredentialCheck,
   PaytrCredentials,
@@ -44,6 +45,14 @@ export function createPaytrApi(
   options: Partial<Omit<HttpClientOptions, "provider" | "errorCode">> = {}
 ) {
   const http: HttpClient = createHttpClient({
+    ...options,
+    provider: PAYTR_PROVIDER,
+    baseUrl: options.baseUrl ?? PAYTR_BASE_URL,
+  })
+  // The statement is a report: PayTR's sample waits 90 s for it, and it may be long
+  const reports: HttpClient = createHttpClient({
+    timeoutMs: 60_000,
+    maxResponseBytes: 20 * 1024 * 1024,
     ...options,
     provider: PAYTR_PROVIDER,
     baseUrl: options.baseUrl ?? PAYTR_BASE_URL,
@@ -220,7 +229,14 @@ export function createPaytrApi(
     }
   }
 
-  return { requestToken, queryStatus, refund, installmentRates, checkCredentials }
+  return {
+    requestToken,
+    queryStatus,
+    refund,
+    installmentRates,
+    checkCredentials,
+    statement: statementCall(reports),
+  }
 }
 
 let shared: PaytrApi | undefined

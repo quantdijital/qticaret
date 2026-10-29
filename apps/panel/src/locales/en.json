@@ -2715,6 +2715,45 @@
         "due": "Due",
         "amount": "Amount",
         "empty": "No disputes in this period."
+      },
+      "statements": {
+        "title": "Provider reconciliation",
+        "hint": "Each morning at 08:30, yesterday's PayTR and iyzico statements are compared with the orders' payments.",
+        "states": {
+          "live": "Live",
+          "testMode": "Test mode",
+          "notConnected": "Not connected"
+        },
+        "waiting": "No day in this period has been checked yet.",
+        "notChecked": "Not checked: it is not connected in live mode.",
+        "days": "{{matched}} days agreed · {{mismatched}} with differences · {{failed}} unreadable",
+        "none": "No day in this period was checked. Reconciliation runs each morning while a provider is connected in live mode.",
+        "allMatched": "Every day checked in this period agreed.",
+        "kind": "Difference",
+        "order": "Order",
+        "reference": "Reference",
+        "shop": "Shop",
+        "provider": "Provider",
+        "status": {
+          "matched": "Agreed",
+          "mismatched": "Differences",
+          "failed": "Unreadable"
+        },
+        "errors": {
+          "account_missing": "Account not connected",
+          "other": "Statement could not be read ({{code}})"
+        },
+        "differences_one": "{{count}} difference",
+        "differences_other": "{{count}} differences",
+        "recheck": "Check again",
+        "nowMatched": "The day was checked again; the statement now agrees.",
+        "checkedAgain": "The day was checked again.",
+        "kinds": {
+          "missing_at_provider": "Not at the provider",
+          "unknown_at_shop": "No match in the shop",
+          "amount_mismatch": "Amount differs",
+          "refund_mismatch": "Refund differs"
+        }
       }
     },
     "marketing": {
@@ -3554,6 +3593,11 @@
         "test_mode_off": "test mode turned off",
         "removed": "disconnected"
       }
+    },
+    "statementCheck": {
+      "title": "The {{provider}} statement of {{day}} does not agree",
+      "description_one": "{{count}} difference, in Reports > Finance.",
+      "description_other": "{{count}} differences, in Reports > Finance."
     }
   },
   "content": {

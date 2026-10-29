@@ -53,6 +53,10 @@ export const NOTIFICATION_MESSAGES: Readonly<
       title: "{{provider}} ödemesi iade edilemedi",
       description: "{{amount}} ({{reference}}) {{provider}} panelinden elle iade edilmeli.",
     },
+    "payments.statement_mismatch": {
+      title: "{{provider}} dökümü {{day}} günü tutmuyor",
+      description: "{{count}} fark var; Raporlar > Finans'ta listelendi.",
+    },
   },
   en: {
     "messaging.sms_daily_limit": {
@@ -88,6 +92,10 @@ export const NOTIFICATION_MESSAGES: Readonly<
     "payments.orphan_refund_failed": {
       title: "{{provider}} payment could not be refunded",
       description: "{{amount}} ({{reference}}) must be refunded by hand in the {{provider}} panel.",
+    },
+    "payments.statement_mismatch": {
+      title: "The {{provider}} statement of {{day}} does not agree",
+      description: "{{count}} differences, listed in Reports > Finance.",
     },
   },
 }

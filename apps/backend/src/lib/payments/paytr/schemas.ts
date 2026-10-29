@@ -8,10 +8,10 @@ import { parsePaytrLira } from "./amounts"
  * the documentation does not show them in every answer.
  */
 
-const text = z.union([z.string(), z.number()]).transform(String)
+export const text = z.union([z.string(), z.number()]).transform(String)
 
 /** Lira as PayTR writes it ("10,8", "9.76") read into kuruş; any other form fails the answer. */
-const lira = z.union([z.string(), z.number()]).transform((value, ctx) => {
+export const lira = z.union([z.string(), z.number()]).transform((value, ctx) => {
   try {
     return parsePaytrLira(value)
   } catch {

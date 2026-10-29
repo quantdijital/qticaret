@@ -10,7 +10,7 @@ import { ProviderError } from "../../errors"
 
 export const PAYTR_PROVIDER = "paytr"
 
-export type PaytrEndpoint = "status" | "refund" | "installments" | "token"
+export type PaytrEndpoint = "status" | "refund" | "installments" | "token" | "statement"
 
 const STATUS_CODES: Readonly<Record<string, string>> = {
   "001": "merchant_invalid",
@@ -41,6 +41,8 @@ const TABLES: Readonly<Record<PaytrEndpoint, Readonly<Record<string, string>>>> 
   refund: REFUND_CODES,
   installments: { "006": "field_invalid" },
   token: {},
+  // İşlem Dökümü documents no numbers: each stays visible as `error_<no>`
+  statement: {},
 }
 
 // Worth trying again later; every other answer stands until something changes
