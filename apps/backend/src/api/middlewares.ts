@@ -66,6 +66,7 @@ import {
 import { slugHandles } from "./validation/catalog-handles"
 import { rejectStoreSeoFields } from "./validation/seo-fields"
 import { rejectSensitiveFields } from "./validation/sensitive-fields"
+import { guardApiKeys } from "./http/api-key-guard"
 import { closePresignedUploads, hideJobResultFiles } from "./validation/upload-routes"
 import {
   ROOT,
@@ -112,12 +113,14 @@ export default defineMiddlewares({
       ],
     },
     // F2.5: admin mutations are recorded once answered (adr/0011); tax ids
-    // are never expanded through `fields`
+    // are never expanded through `fields`. F11.6: a secret API key reaches
+    // only its scopes' routes (Medusa's own authentication has run by now)
     {
       matcher: "/admin/*",
       middlewares: [
         rateLimit(() => RATE_LIMIT_PROFILES.admin_default),
         adminLimitGuard,
+        guardApiKeys,
         rejectSensitiveFields,
         auditMutations,
       ],

@@ -127,6 +127,13 @@ Kısıtlar:
 - **Okuma:** `inventory_item` → `variants` → `variant_extension.cost` tek `query.graph` sorgusunda gelir (HTTP testiyle doğrulandı). Dönem başı ve sonu stok `stock-ledger`'ın `stockedAt` yöntemiyle okunur: anından önceki son hareket, yoksa sonraki ilk hareketin başlangıç adedi, hiç hareket yoksa bugünkü adet.
 - **Liste:** Panel her listenin ilk 20 satırını gösterir; Excel ve CSV bütün kalemleri içerir.
 
+## Dış API: uygulama (2026-10-29)
+- **Kapsam katmanı:** `api/http/api-key-guard.ts`, genel `/admin/*` ara katmanı. Medusa'nın genel kimlik doğrulaması önce çalışır (çekirdek genel ara katmanları uygulamanınkilerden önce; Context7), `auth_context.actor_type === "api-key"` olan istek `lib/api-access/scopes.ts` tablosundaki uçlardan kapsamına girenlere geçer, geri kalanı 403 alır. Yol `originalUrl`'den okunur: bağlı eşleştiricide `req.path` yalnızca kalan parçadır.
+- **Kapsamlar:** `orders:read` (sipariş listesi ve ayrıntısı), `catalog:read` (ürün, kategori, stok kalemi, depo), `stock:write` (depo stok adedi, tekil ve toplu), `webhooks:manage` (R7'nin uçları). Kapsam kaydı olmayan anahtar (ör. Medusa'nın kendi `/admin/api-keys` ucuyla açılmış) hiçbir uca geçemez.
+- **Anahtar yaşamı:** `createScopedApiKeyWorkflow` Medusa'nın `createApiKeysWorkflow`'unu adım olarak çalıştırır ve kapsamları telafili adımla yazar. Ham anahtar yalnızca oluşturma yanıtındadır. İptal `revokeApiKeysWorkflow`; bir sonraki istek 401 alır (KK4).
+- **Günlük:** `sk_` ile başlayan 16+ karakter serbest metinde maskelenir; Basic başlığı zaten anahtar adıyla maskeleniyor.
+- **OpenAPI:** `GET /admin/openapi.json`, kapsam tablosundan ve kendi Zod şemalarımızdan `z.toJSONSchema` ile; her işlemde `x-scope`.
+
 ## Muhasebe: uygulama (2026-10-29)
 - **Paket:** `accounting.package` işi tek zip üretir (`muhasebe-paketi-AAAA-MM.xlsx` + `satislar`, `iadeler`, `tahsilatlar`, `kdv-ozeti` CSV'leri). Ay Türkiye saatiyle sayılır, en çok 24 ay geriye gider. İptal ve test ödemeli siparişler girmez. Kurumsal müşterinin VKN'si `revealTaxId` ile açılır; paket `sensitive_read` denetim kaydı yazar, iş sonucu kişisel veri sayılır.
 - **Aktarım:** `accounting_sync` (kaynak türü `sale`/`payment`/`refund`, kaynak kimliği, program) tekildir. Kuyruğa alma `ON CONFLICT DO NOTHING`, sahiplenme `FOR UPDATE SKIP LOCKED` ve 10 dakikalık kirayla yapılır. Başarısızlıkta 1, 5, 15 dakika, sonra 1, 3, 6, 12 saat beklenir; 8. denemede kayıt durur ve zil çalar. Gönderim iş akışının son adımıdır ve referans olarak kaydın kimliğini taşır; adaptör aynı referansı aynı kayıt sayar, kaybolan yanıttan sonraki yeniden deneme mükerrer kayıt üretmez (KK2).

@@ -48,6 +48,7 @@ import { Route as AuthSeoIndexRouteImport } from './routes/_auth/seo/index'
 import { Route as AuthSeoRedirectsRouteImport } from './routes/_auth/seo/redirects'
 import { Route as AuthSettingsIndexRouteImport } from './routes/_auth/settings/index'
 import { Route as AuthSettingsAccountingRouteImport } from './routes/_auth/settings/accounting'
+import { Route as AuthSettingsApiRouteImport } from './routes/_auth/settings/api'
 import { Route as AuthSettingsAppearanceRouteImport } from './routes/_auth/settings/appearance'
 import { Route as AuthSettingsAttributesRouteImport } from './routes/_auth/settings/attributes'
 import { Route as AuthSettingsAuditRouteImport } from './routes/_auth/settings/audit'
@@ -265,6 +266,11 @@ const AuthSettingsAccountingRoute = AuthSettingsAccountingRouteImport.update({
   path: '/accounting',
   getParentRoute: () => AuthSettingsRoute,
 } as any)
+const AuthSettingsApiRoute = AuthSettingsApiRouteImport.update({
+  id: '/api',
+  path: '/api',
+  getParentRoute: () => AuthSettingsRoute,
+} as any)
 const AuthSettingsAppearanceRoute = AuthSettingsAppearanceRouteImport.update({
   id: '/appearance',
   path: '/appearance',
@@ -416,6 +422,7 @@ export interface FileRoutesByFullPath {
   '/reviews/questions': typeof AuthReviewsQuestionsRoute
   '/seo/redirects': typeof AuthSeoRedirectsRoute
   '/settings/accounting': typeof AuthSettingsAccountingRoute
+  '/settings/api': typeof AuthSettingsApiRoute
   '/settings/appearance': typeof AuthSettingsAppearanceRoute
   '/settings/attributes': typeof AuthSettingsAttributesRoute
   '/settings/audit': typeof AuthSettingsAuditRoute
@@ -476,6 +483,7 @@ export interface FileRoutesByTo {
   '/reviews/questions': typeof AuthReviewsQuestionsRoute
   '/seo/redirects': typeof AuthSeoRedirectsRoute
   '/settings/accounting': typeof AuthSettingsAccountingRoute
+  '/settings/api': typeof AuthSettingsApiRoute
   '/settings/appearance': typeof AuthSettingsAppearanceRoute
   '/settings/attributes': typeof AuthSettingsAttributesRoute
   '/settings/audit': typeof AuthSettingsAuditRoute
@@ -540,6 +548,7 @@ export interface FileRoutesById {
   '/_auth/reviews/questions': typeof AuthReviewsQuestionsRoute
   '/_auth/seo/redirects': typeof AuthSeoRedirectsRoute
   '/_auth/settings/accounting': typeof AuthSettingsAccountingRoute
+  '/_auth/settings/api': typeof AuthSettingsApiRoute
   '/_auth/settings/appearance': typeof AuthSettingsAppearanceRoute
   '/_auth/settings/attributes': typeof AuthSettingsAttributesRoute
   '/_auth/settings/audit': typeof AuthSettingsAuditRoute
@@ -604,6 +613,7 @@ export interface FileRouteTypes {
     | '/reviews/questions'
     | '/seo/redirects'
     | '/settings/accounting'
+    | '/settings/api'
     | '/settings/appearance'
     | '/settings/attributes'
     | '/settings/audit'
@@ -664,6 +674,7 @@ export interface FileRouteTypes {
     | '/reviews/questions'
     | '/seo/redirects'
     | '/settings/accounting'
+    | '/settings/api'
     | '/settings/appearance'
     | '/settings/attributes'
     | '/settings/audit'
@@ -727,6 +738,7 @@ export interface FileRouteTypes {
     | '/_auth/reviews/questions'
     | '/_auth/seo/redirects'
     | '/_auth/settings/accounting'
+    | '/_auth/settings/api'
     | '/_auth/settings/appearance'
     | '/_auth/settings/attributes'
     | '/_auth/settings/audit'
@@ -1041,6 +1053,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSettingsAccountingRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
+    '/_auth/settings/api': {
+      id: '/_auth/settings/api'
+      path: '/api'
+      fullPath: '/settings/api'
+      preLoaderRoute: typeof AuthSettingsApiRouteImport
+      parentRoute: typeof AuthSettingsRoute
+    }
     '/_auth/settings/appearance': {
       id: '/_auth/settings/appearance'
       path: '/appearance'
@@ -1226,6 +1245,7 @@ const AuthReportsRouteWithChildren = AuthReportsRoute._addFileChildren(
 
 interface AuthSettingsRouteChildren {
   AuthSettingsAccountingRoute: typeof AuthSettingsAccountingRoute
+  AuthSettingsApiRoute: typeof AuthSettingsApiRoute
   AuthSettingsAppearanceRoute: typeof AuthSettingsAppearanceRoute
   AuthSettingsAttributesRoute: typeof AuthSettingsAttributesRoute
   AuthSettingsAuditRoute: typeof AuthSettingsAuditRoute
@@ -1249,6 +1269,7 @@ interface AuthSettingsRouteChildren {
 
 const AuthSettingsRouteChildren: AuthSettingsRouteChildren = {
   AuthSettingsAccountingRoute: AuthSettingsAccountingRoute,
+  AuthSettingsApiRoute: AuthSettingsApiRoute,
   AuthSettingsAppearanceRoute: AuthSettingsAppearanceRoute,
   AuthSettingsAttributesRoute: AuthSettingsAttributesRoute,
   AuthSettingsAuditRoute: AuthSettingsAuditRoute,

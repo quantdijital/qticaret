@@ -229,7 +229,8 @@
       "notifications": "Notifications",
       "sms": "SMS",
       "marketing": "Marketing",
-      "accounting": "Accounting"
+      "accounting": "Accounting",
+      "api": "External API"
     },
     "appearance": {
       "title": "Appearance",
@@ -1153,7 +1154,8 @@
       "jobs": "Long jobs such as exports, and their files",
       "audit": "Who changed what in the panel, and when",
       "marketing": "Cart reminders, product feeds, Merchant Center and conversion measurement",
-      "accounting": "The month's package for the accountant"
+      "accounting": "The month's package for the accountant",
+      "api": "API keys for your own systems"
     },
     "marketing": {
       "title": "Marketing",
@@ -1361,6 +1363,63 @@
           "refund": "Refund: when money is given back",
           "once": "Each record goes to the program once; a retry never makes it again."
         }
+      }
+    },
+    "api": {
+      "title": "External API",
+      "subtitle": "Keys for the shop's own systems (ERP, warehouse, accounting); each key reaches only what it is allowed.",
+      "keys": "API keys",
+      "keysHint": "A key is shown once, when it is made; its masked form stays here.",
+      "new": "New key",
+      "empty": "No keys yet.",
+      "active": "Active",
+      "revoked": "Revoked",
+      "made": "Made on {{date}}",
+      "revoke": "Revoke",
+      "revokeTitle": "Revoke {{name}}?",
+      "revokeHint": "Requests with the key are refused at once. This cannot be undone; make a new key if needed.",
+      "revokedToast": "Key revoked.",
+      "scopes": {
+        "orders_read": {
+          "name": "Read orders",
+          "hint": "The order list and an order's details"
+        },
+        "catalog_read": {
+          "name": "Read products and stock",
+          "hint": "Products, categories, stock items and quantities at locations"
+        },
+        "stock_write": {
+          "name": "Write stock",
+          "hint": "Update stock quantities at locations"
+        },
+        "webhooks_manage": {
+          "name": "Manage webhooks",
+          "hint": "Manage the shop's outgoing event subscriptions"
+        }
+      },
+      "connect": {
+        "title": "How to connect",
+        "hint": "The shop's admin API, reachable with a key only on the routes it is allowed.",
+        "auth": "The key is sent as the user name in Basic authentication; the password stays empty.",
+        "rules": {
+          "closed": "Every route not allowed is closed to the key (403).",
+          "limit": "A key may send 600 requests a minute.",
+          "revoke": "A revoked key is refused on its next request."
+        },
+        "openapi": "Download the OpenAPI file"
+      },
+      "create": {
+        "title": "New API key",
+        "hint": "Name the key and pick what it may reach.",
+        "madeHint": "Copy the key now and enter it in the other system.",
+        "name": "Name",
+        "nameHint": "The system that uses it (e.g. Warehouse program)",
+        "scopes": "Permissions",
+        "submit": "Make the key",
+        "once": "This key will not be shown again.",
+        "copy": "Copy the key",
+        "copyFailed": "Could not copy; select the key and copy it.",
+        "done": "Copied, close"
       }
     }
   },

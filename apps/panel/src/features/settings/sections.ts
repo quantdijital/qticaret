@@ -3,6 +3,7 @@ import {
   Calculator,
   CreditCard,
   FileClock,
+  KeyRound,
   ListChecks,
   ListTodo,
   Megaphone,
@@ -64,6 +65,7 @@ export const SETTINGS_GROUPS: readonly SettingsGroup[] = [
     key: "system",
     sections: [
       { key: "integrations", to: "/settings/integrations", icon: Plug },
+      { key: "api", to: "/settings/api", icon: KeyRound },
       { key: "features", to: "/settings/features", icon: ToggleRight },
       { key: "jobs", to: "/settings/jobs", icon: ListTodo },
       { key: "audit", to: "/settings/audit", icon: FileClock },

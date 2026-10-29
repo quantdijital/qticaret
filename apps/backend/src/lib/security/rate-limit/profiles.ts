@@ -123,6 +123,12 @@ export const RATE_LIMIT_PROFILES = {
   },
   // F3.5: the storefront's 404 reports; beyond this a flood is not worth counting
   seo_report: { name: "seo_report", perIp: { max: 30, windowMs: MINUTE } },
+  // F11.6: a secret API key's calls, wherever it calls from (adr/0039 §6)
+  api_key: {
+    name: "api_key",
+    perIp: { max: 1200, windowMs: MINUTE },
+    perIdentityAnyIp: { max: 600, windowMs: MINUTE },
+  },
   // F5 (adr/0027): saving or testing a provider account calls the provider
   // and per staff member from any address: not an oracle for other people's details
   provider_check: {

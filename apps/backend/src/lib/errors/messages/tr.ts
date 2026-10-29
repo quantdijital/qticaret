@@ -340,6 +340,10 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "reports.range_invalid":
     "Tarih aralığı geçersiz: başlangıç bitişten sonra, gelecekte ya da 366 günden uzun olamaz.",
   "catalog_import.cost_invalid": "Maliyet 0 ile 10.000.000 arasında, en fazla 2 ondalıklı olmalı.",
+  "api_key.scope_denied": "Bu anahtar bu işlem için yetkili değil.",
+  "api_key.scopes_required": "Anahtar için en az bir izin seçin.",
+  "api_key.title_invalid": "Anahtar adı geçersiz.",
+  "api_key.unknown": "API anahtarı bulunamadı.",
   "accounting.adapter_unavailable": "Bu muhasebe programı bu ortamda seçilemez.",
   "accounting.sync_unknown": "Aktarım kaydı bulunamadı.",
   "accounting.source_missing": "Aktarılacak kayıt artık yok.",

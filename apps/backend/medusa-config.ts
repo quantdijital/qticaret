@@ -183,6 +183,8 @@ module.exports = defineConfig({
     { resolve: "./src/modules/statement-checks" },
     // F11.5 (adr/0039 §5): records sent to the shop's accounting program, until they go through
     { resolve: "./src/modules/accounting" },
+    // F11.6 (adr/0039 §6): what each secret API key may reach; a key without a scope reaches nothing
+    { resolve: "./src/modules/api-key-scopes" },
     // F10.13 (adr/0005): drafts a provider wrote, shown only once staff approve them
     { resolve: "./src/modules/content-drafts" },
     // F10.11 (docs/13 §10): what Search Console and CrUX say of the shop

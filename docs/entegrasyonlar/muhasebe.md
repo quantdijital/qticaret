@@ -24,7 +24,8 @@ interface AccountingAdapter {
 - Medusa'nın secret API key mekanizması kullanılır (Context7 ile doğrula); kendi anahtar sistemi yazılmaz.
 - Anahtar oluşturma/iptal audit log'a düşer; anahtar yalnızca oluşturulduğu anda bir kez gösterilir.
 - Rate limit anahtar başına.
-- OpenAPI dokümanı `packages/types` sözleşmesinden üretilir.
+- OpenAPI dokümanı açık uçların kendi Zod şemalarından `z.toJSONSchema` ile üretilir (`GET /admin/openapi.json`; adr/0039 "Dış API: uygulama").
+- **Uygulama (F11 R6, 2026-10-29):** anahtar varsayılan olarak hiçbir uca geçemez; yalnızca kapsamındaki uçlar açıktır (`orders:read`, `catalog:read`, `stock:write`, `webhooks:manage`). Panelde Ayarlar > Dış API.
 
 ## Giden webhook'lar (`tenant-webhooks`)
 - Abonelik: URL + olay listesi + imza secret'ı (secret yalnızca oluşturulurken gösterilir).

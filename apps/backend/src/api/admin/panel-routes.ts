@@ -5,6 +5,7 @@ import { requireUserActor } from "../http/actor"
 import { rateLimit } from "../http/rate-limit"
 import { AdminGetDashboardNoQuery, AdminGetDashboardOverview } from "./dashboard/validators"
 import { AdminPostAccountingRetry } from "./accounting/validators"
+import { AdminPostApiKey, AdminPostApiKeyRevoke } from "./api-access/validators"
 import { AdminGetReportRange } from "./reports/validators"
 import { AdminPostStatementCheck } from "./reports/statements/validators"
 import { AdminGetOrderBoard } from "./order-board/validators"
@@ -18,6 +19,8 @@ import { AdminGetStockBoard } from "./stock-board/validators"
 
 const NO_QUERY_READS = [
   "/admin/accounting",
+  "/admin/api-access",
+  "/admin/openapi.json",
   "/admin/dashboard/tasks",
   "/admin/dashboard/recent-orders",
   "/admin/dashboard/catalog-health",
@@ -104,6 +107,17 @@ export const PANEL_ROUTES = [
       }),
       validateAndTransformQuery(AdminGetBulkLabels, {}),
     ],
+  },
+  // F11.6: API keys are made and revoked by people only (audited as every write)
+  {
+    matcher: "/admin/api-access",
+    methods: ["POST" as const],
+    middlewares: [requireUserActor, validateAndTransformBody(AdminPostApiKey)],
+  },
+  {
+    matcher: "/admin/api-access/:id/revoke",
+    methods: ["POST" as const],
+    middlewares: [requireUserActor, validateAndTransformBody(AdminPostApiKeyRevoke)],
   },
   // F11.5: a stopped accounting record tried again (audited as every write)
   {

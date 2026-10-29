@@ -229,7 +229,8 @@
       "notifications": "Bildirimler",
       "sms": "SMS",
       "marketing": "Pazarlama",
-      "accounting": "Muhasebe"
+      "accounting": "Muhasebe",
+      "api": "Dış API"
     },
     "appearance": {
       "title": "Görünüm",
@@ -1153,7 +1154,8 @@
       "jobs": "Dışa aktarma gibi uzun süren işler ve dosyaları",
       "audit": "Panelde kim neyi ne zaman değiştirdi",
       "marketing": "Sepet hatırlatması, ürün feed'leri, Merchant Center ve dönüşüm ölçümü",
-      "accounting": "Mali müşavire aylık paket"
+      "accounting": "Mali müşavire aylık paket",
+      "api": "Kendi sistemleriniz için API anahtarları"
     },
     "marketing": {
       "title": "Pazarlama",
@@ -1361,6 +1363,63 @@
           "refund": "İade: para geri verildiğinde",
           "once": "Her kayıt programa bir kez gider; yeniden denemede aynı kayıt yeniden oluşmaz."
         }
+      }
+    },
+    "api": {
+      "title": "Dış API",
+      "subtitle": "Mağazanın kendi sistemleri (ERP, depo, muhasebe) için anahtarlar; her anahtar yalnızca izin verilen alanlara erişir.",
+      "keys": "API anahtarları",
+      "keysHint": "Anahtar yalnızca oluşturulduğu an bir kez gösterilir; burada maskeli hâli durur.",
+      "new": "Yeni anahtar",
+      "empty": "Henüz anahtar yok.",
+      "active": "Etkin",
+      "revoked": "İptal edildi",
+      "made": "{{date}} tarihinde oluşturuldu",
+      "revoke": "İptal et",
+      "revokeTitle": "{{name}} iptal edilsin mi?",
+      "revokeHint": "Anahtarla gelen istekler hemen reddedilir. Bu geri alınamaz; gerekirse yeni anahtar oluşturun.",
+      "revokedToast": "Anahtar iptal edildi.",
+      "scopes": {
+        "orders_read": {
+          "name": "Siparişleri okuma",
+          "hint": "Sipariş listesi ve sipariş ayrıntısı"
+        },
+        "catalog_read": {
+          "name": "Ürün ve stok okuma",
+          "hint": "Ürünler, kategoriler, stok kalemleri ve depolardaki adetler"
+        },
+        "stock_write": {
+          "name": "Stok yazma",
+          "hint": "Depolardaki stok adetlerini güncelleme"
+        },
+        "webhooks_manage": {
+          "name": "Webhook yönetimi",
+          "hint": "Mağazadan giden olay aboneliklerini yönetme"
+        }
+      },
+      "connect": {
+        "title": "Nasıl bağlanılır",
+        "hint": "Mağazanın yönetici API'si, anahtarla yalnızca izin verilen uçlarda kullanılabilir.",
+        "auth": "Anahtar, Basic kimlik doğrulamada kullanıcı adı olarak gönderilir; parola boş kalır.",
+        "rules": {
+          "closed": "İzin verilmeyen her uç anahtara kapalıdır (403).",
+          "limit": "Anahtar başına dakikada 600 istek sınırı vardır.",
+          "revoke": "İptal edilen anahtar bir sonraki istekte reddedilir."
+        },
+        "openapi": "OpenAPI dosyasını indir"
+      },
+      "create": {
+        "title": "Yeni API anahtarı",
+        "hint": "Anahtarın adını ve erişebileceği alanları seçin.",
+        "madeHint": "Anahtarı şimdi kopyalayıp diğer sisteme girin.",
+        "name": "Ad",
+        "nameHint": "Hangi sistemin kullandığı (ör. Depo programı)",
+        "scopes": "İzinler",
+        "submit": "Anahtarı oluştur",
+        "once": "Bu anahtar bir daha gösterilmeyecek.",
+        "copy": "Anahtarı kopyala",
+        "copyFailed": "Kopyalanamadı; anahtarı seçip kopyalayın.",
+        "done": "Kopyaladım, kapat"
       }
     }
   },

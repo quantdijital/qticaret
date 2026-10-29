@@ -142,6 +142,8 @@ const TEXT_PATTERNS: readonly (readonly [
     /(\/store\/gift-cards\/)([^/?#\s"]+)/gi,
     (_match, path = "", code = "") => `${path}${REDACTED}${code.slice(-4)}`,
   ],
+  // A Medusa secret API key (F11.6, KK4): never in a log, whole or in part
+  [/(?<![A-Za-z0-9])sk_[A-Za-z0-9]{16,}/g, () => REDACTED],
   // Turkish mobiles with or without +90/0; landlines only with a prefix
   [new RegExp(String.raw`(?<![A-Za-z0-9])${PHONE_PREFIX}?5${PHONE_REST}`, "g"), () => REDACTED],
   [new RegExp(String.raw`(?<![A-Za-z0-9])${PHONE_PREFIX}[2-4]${PHONE_REST}`, "g"), () => REDACTED],
