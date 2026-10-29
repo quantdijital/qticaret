@@ -43,6 +43,10 @@ const envSchema = z.object({
   // The shop's provider accounts (PayTR, iyzico) are stored encrypted with
   // it (adr/0027); required once deployed, locally the panel cannot save them
   CREDENTIALS_ENCRYPTION_KEY: key256.optional(),
+  // F12.6 (adr/0040): Medusa's MFA seals each staff member's TOTP secret with it
+  AUTH_MFA_ENCRYPTION_KEY: key256.optional(),
+  // Local only: `off` lets a developer sign in without 2FA; ignored when deployed
+  ADMIN_MFA: z.enum(["on", "off"]).optional(),
   // The backend's own public address: iyzico sends the shopper back to it
   // (`/hooks/iyzico/callback`). Required once deployed; locally localhost:9000
   BACKEND_URL: z.url({ protocol: /^https?$/ }).optional(),
@@ -190,6 +194,14 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
     ctx.addIssue({
       code: "custom",
       path: ["CREDENTIALS_ENCRYPTION_KEY"],
+      message: "is required in production and staging",
+    })
+  }
+  // Staff 2FA is compulsory where the shop runs (adr/0040): no key, no start
+  if (deployed && env.AUTH_MFA_ENCRYPTION_KEY === undefined) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["AUTH_MFA_ENCRYPTION_KEY"],
       message: "is required in production and staging",
     })
   }

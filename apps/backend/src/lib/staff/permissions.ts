@@ -60,6 +60,8 @@ const OWNER_ONLY: readonly Rule[] = [
   { methods: ["DELETE"], path: "/admin/google" },
   // Where shoppers' transfers go
   { methods: WRITES, path: "/admin/platform-settings/bank_transfer" },
+  // Whether the team must pass 2FA (adr/0040)
+  { methods: WRITES, path: "/admin/platform-settings/security" },
   // The shop's people
   { methods: WRITES, path: "/admin/users*" },
   { methods: "*", path: "/admin/invites*" },
@@ -125,6 +127,26 @@ function patternOf(path: string): RegExp {
   return pattern
 }
 
+/**
+ * The path as a route parameter reads it: Express decodes `:section`, so
+ * `/admin/platform-settings/bank%5Ftransfer` runs the `bank_transfer`
+ * section. What a list refuses is matched in both forms; what a list
+ * allows, in the raw form only.
+ */
+function decodedPath(path: string): string {
+  return path
+    .split("/")
+    .map((segment) => {
+      try {
+        return decodeURIComponent(segment)
+      } catch {
+        return segment
+      }
+    })
+    .join("/")
+    .toLowerCase()
+}
+
 const matches = (rules: readonly Rule[], method: string, path: string, facts: RequestFacts) =>
   rules.some(
     (rule) =>
@@ -160,13 +182,16 @@ export function decide(
   if (role === "owner") {
     return { allowed: true, reason: "owner" }
   }
-  if (matches(OWNER_ONLY, verb, path, facts)) {
+  const decoded = decodedPath(path)
+  const refused = (rules: readonly Rule[]) =>
+    matches(rules, verb, path, facts) || matches(rules, verb, decoded, facts)
+  if (refused(OWNER_ONLY)) {
     return { allowed: false, reason: "owner_only" }
   }
   if (role === "admin") {
     return { allowed: true, reason: "admin" }
   }
-  if (matches(PRIVATE, verb, path, facts)) {
+  if (refused(PRIVATE)) {
     return { allowed: false, reason: "private" }
   }
   if (READS.has(verb)) {
@@ -192,6 +217,7 @@ const CAPABILITY_PROBES = {
   moderation: ["POST", "/admin/product-reviews/moderate"],
   accounts: ["POST", "/admin/integrations/credentials/:provider"],
   keys: ["POST", "/admin/api-access"],
+  security: ["POST", "/admin/platform-settings/security"],
   team: ["GET", "/admin/staff"],
   staff: ["POST", "/admin/staff/members/:id"],
   audit: ["GET", "/admin/audit-log"],

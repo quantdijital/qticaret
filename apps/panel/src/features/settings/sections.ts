@@ -11,6 +11,7 @@ import {
   Palette,
   Plug,
   Search,
+  ShieldCheck,
   Store,
   ToggleRight,
   Truck,
@@ -68,6 +69,7 @@ export const SETTINGS_GROUPS: readonly SettingsGroup[] = [
   {
     key: "system",
     sections: [
+      { key: "security", to: "/settings/security", icon: ShieldCheck },
       { key: "team", to: "/settings/team", icon: Users, needs: "team" },
       { key: "integrations", to: "/settings/integrations", icon: Plug },
       { key: "api", to: "/settings/api", icon: KeyRound, needs: "keys" },

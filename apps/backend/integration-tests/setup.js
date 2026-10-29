@@ -10,4 +10,7 @@ if (process.env.TEST_TYPE?.startsWith("integration")) {
   // Each test file counts in a Redis namespace of its own: back-to-back runs
   // would otherwise share an hour's sign-up limit and turn each other away
   process.env.QT_TEST_RUN = require("node:crypto").randomUUID().slice(0, 8)
+  // Staff sign in with a password alone, as before 2FA; the 2FA suite turns
+  // it on (adr/0040). Locally only: ignored where the shop runs
+  process.env.ADMIN_MFA ??= "off"
 }

@@ -24,15 +24,43 @@ export interface Credentials {
   password: string
 }
 
-/** Email and password → session cookie (js-sdk session mode calls /auth/session). */
+/** The second step a sign-in asks for when 2FA is on (adr/0040 §2). */
+export interface MfaChallenge {
+  id: string
+  methods: string[]
+}
+
+/**
+ * Email and password → session cookie (js-sdk session mode calls
+ * /auth/session). With 2FA on, the session waits for the code: the
+ * challenge comes back for `useVerifyChallenge`.
+ */
 export function useLogin() {
   const client = useQueryClient()
   return useMutation({
-    mutationFn: async ({ email, password }: Credentials) => {
-      await sdk.auth.login("user", "emailpass", { email, password })
+    mutationFn: async ({ email, password }: Credentials): Promise<MfaChallenge | null> => {
+      const result = await sdk.auth.login("user", "emailpass", { email, password })
+      return typeof result === "object" && "mfa_required" in result ? result.mfa_challenge : null
     },
     onSuccess: async () => {
       // Who signed in, and their role
+      await client.invalidateQueries({ queryKey: ["auth"] })
+    },
+  })
+}
+
+/** The sign-in's code: an authenticator's six digits or one recovery code; the session is then whole. */
+export function useVerifyChallenge() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: async (input: {
+      id: string
+      method: "totp" | "recovery_code"
+      code: string
+    }): Promise<void> => {
+      await sdk.auth.mfa.verifyChallenge(input.id, { method: input.method, code: input.code })
+    },
+    onSuccess: async () => {
       await client.invalidateQueries({ queryKey: ["auth"] })
     },
   })

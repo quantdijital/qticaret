@@ -26,6 +26,9 @@ describe("staff roles", () => {
     ["DELETE", "/admin/webhooks/whsub_1"],
     ["POST", "/admin/platform-settings/accounting"],
     ["POST", "/admin/platform-settings/bank_transfer"],
+    ["POST", "/admin/platform-settings/bank%5ftransfer"],
+    ["POST", "/admin/platform-settings/%61ccounting"],
+    ["POST", "/admin/platform-settings/security"],
     ["POST", "/admin/google/connect"],
     ["DELETE", "/admin/google"],
     ["POST", "/admin/users/user_1"],
@@ -89,6 +92,7 @@ describe("staff roles", () => {
     ["GET", "/admin/users/user_1"],
     ["GET", "/admin/staff"],
     ["GET", "/admin/workflows-executions"],
+    ["GET", "/admin/staff/%6d%65mbers"],
   ] as const)("keeps %s %s from operations and read-only staff", (method, path) => {
     expect(decide("operations", method, path)).toEqual({ allowed: false, reason: "private" })
     expect(decide("readonly", method, path)).toEqual({ allowed: false, reason: "private" })
@@ -128,6 +132,7 @@ describe("staff roles", () => {
       moderation: true,
       accounts: true,
       keys: true,
+      security: true,
       team: true,
       staff: true,
       audit: true,
@@ -136,6 +141,7 @@ describe("staff roles", () => {
       settings: true,
       accounts: false,
       keys: false,
+      security: false,
       team: true,
       staff: false,
       audit: true,
@@ -150,6 +156,7 @@ describe("staff roles", () => {
       moderation: true,
       accounts: false,
       keys: false,
+      security: false,
       team: false,
       staff: false,
       audit: false,

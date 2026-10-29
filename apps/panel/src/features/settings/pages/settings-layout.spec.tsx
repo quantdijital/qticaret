@@ -62,7 +62,7 @@ describe("Settings home", () => {
       "href",
       "/settings/shipping"
     )
-    expect(screen.getAllByRole("link")).toHaveLength(17)
+    expect(screen.getAllByRole("link")).toHaveLength(18)
   })
 
   it("offers operations staff only what they may use: no settings to change", () => {
@@ -70,6 +70,7 @@ describe("Settings home", () => {
     render(<SettingsHomePage />)
 
     expect(screen.getAllByRole("link").map((link) => link.getAttribute("href"))).toEqual([
+      "/settings/security",
       "/settings/integrations",
       "/settings/jobs",
     ])

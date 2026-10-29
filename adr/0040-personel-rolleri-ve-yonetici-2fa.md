@@ -41,12 +41,21 @@ Medusa 2.21.2'de doğrulananlar (v2.21.2 kaynağı ve docs.medusajs.com; Context
    - **İlk rol ataması:** Göç betiği en eski kullanıcıya `owner`, diğerlerine `admin` verir.
    - **Son owner koruması:** Son `owner`'ın rolü düşürülemez ve silinemez.
    - **Panel bilgisi:** Panel kullanıcının rolünü ve yetenek listesini `GET /admin/staff/me`'den alır. Yetkisiz düğmeler gizlenir; API her durumda yeniden denetler.
-2. **2FA: Medusa'nın yerleşik MFA'sı, zorunlu.**
+2. **2FA: Medusa'nın yerleşik MFA'sı; ekip için zorunluluk sahibin anahtarı (kullanıcı kararı, 2026-10-29: "aç kapa şeklinde yap").**
+   - **Anahtarlar (Ayarlar > Güvenlik):**
+     - "Ekip için zorunlu" yalnızca sahibin anahtarıdır (`security.staff_mfa_required`, varsayılan açık); her iki yönde onay ister, denetim kaydına düşer.
+     - Kapalıyken 2FA kurmamış personel şifreyle girer; kuranlardan Medusa yine kod ister.
+     - Her kişi kendi 2FA'sını aynı sayfadan açar (kurulum) ya da kapatır. Zorunluluk açıkken kendi 2FA'sını kapatamaz.
+   - **Sunucu betikleri:** sahip panele giremezse zorunluluk `set-staff-mfa.ts on|off`, bir kişinin 2FA'sı `reset-staff-mfa.ts <email>` ile değiştirilir.
    - **Açma:** `AUTH_MFA_ENCRYPTION_KEY` ortam değişkeniyle açılır. Canlıda zorunlu, env şemasında.
    - **Zorunluluk:** Bütün personel için. Etkeni olmayan kullanıcı giriş yapabilir ama yalnızca kendi 2FA kaydı, `users/me` ve çıkış uçlarına geçer; diğer her uç 403 `staff.mfa_required` döner. Panel kullanıcıyı "2FA'yı kur" ekranına götürür (KK1: 2FA'sız owner girişi engellenir).
    - **Yerel geliştirme:** Yalnızca `development`/`test`'te `ADMIN_MFA=off` ile kapatılabilir; canlıda yok sayılır ve günlüğe uyarı yazılır.
    - **Panel akışı:** Girişte kod adımı, kurtarma koduyla giriş. Ayarlar > Hesabım > Güvenlik: kurulum (QR + elle girilecek sır), kurtarma kodları, etkeni yenileme.
    - **e2e:** Testler TOTP kodunu Node `crypto` ile kendisi üretir (RFC 6238; bağımlılık yok).
+   - **Uygulama (Y3a, 2026-10-29):**
+     - Oturum giriş anındaki `auth_context`'i saklar; belirteç yenileme MFA alanlarını yeniden okumaz (2.21.2 kaynağı). Bu yüzden zorunluluk "bu oturum kodu geçti mi" (`mfa_challenge_completed_at`) sorusuna bakar. Kurulumu bitiren kişi çıkıp kodla yeniden girer; kurulumdan önce açılmış oturumlar da böylece kapanır.
+     - Uygulamada görünen ad (issuer) panelin adresidir; kurtarma kodu sayısı Medusa'nın varsayılanı (10).
+     - Yerelde anahtar `pnpm env:init` ile `.env` ve `.env.test`'e üretilir. Entegrasyon testleri `ADMIN_MFA=off` ile başlar, 2FA takımı açar. e2e, ortamda 2FA açıksa kurulum ekranından anahtarı okuyup kodu kendisi üretir.
 3. **Yeniden doğrulama (ADR-0027'nin ikinci doğrulaması).**
    - **Hangi işlemler:** Hesapların gizli alanı, mağaza/üye işyeri numarası ve test modu değişikliği; API anahtarı oluşturma; owner rolü verme ve alma.
    - **Kural:** Son 5 dakikada 2FA kodu girilmiş olmalı.

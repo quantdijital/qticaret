@@ -361,6 +361,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "staff.invite_login": "Hesap, davet edilen e-posta adresiyle açılmalı.",
   "staff.email_invalid": "E-posta adresi geçersiz.",
   "staff.name_required": "Ad ve soyad gerekli.",
+  "staff.mfa_required":
+    "Devam etmek için iki adımlı doğrulamayı kurun ya da kodla yeniden giriş yapın.",
   "staff.forbidden": "Rolünüz bu işlem için yetkili değil.",
   "staff.last_owner": "Mağazanın son sahibi rolünü bırakamaz; önce başka birini sahip yapın.",
   "api_key.fields_not_allowed": "Anahtarla alan seçilemez (fields); uç kendi alanlarını döner.",

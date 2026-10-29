@@ -63,6 +63,10 @@ medusaIntegrationTestRunner({
         scopes: ["orders:read"],
       })
       const iban = await admin.post("/admin/platform-settings/bank_transfer", { enabled: false })
+      // Express decodes the section from the path: the escaped name is the same section
+      const escaped = await admin.post("/admin/platform-settings/bank%5Ftransfer", {
+        enabled: false,
+      })
       const store = await admin.post("/admin/platform-settings/store", {
         timezone: "Europe/Istanbul",
       })
@@ -71,7 +75,9 @@ medusaIntegrationTestRunner({
         scopes: ["orders:read"],
       })
 
-      expect([account.status, key.status, iban.status]).toEqual([403, 403, 403])
+      expect([account.status, key.status, iban.status, escaped.status]).toEqual([
+        403, 403, 403, 403,
+      ])
       // Express routes regardless of case: the same route, refused the same way
       expect([403, 404]).toContain(upper.status)
       expect(store.status).toBe(200)

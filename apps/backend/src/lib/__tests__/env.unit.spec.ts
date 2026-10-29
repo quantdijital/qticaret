@@ -83,6 +83,7 @@ describe("parseEnv", () => {
         ...validEnv,
         ...s3Env,
         CREDENTIALS_ENCRYPTION_KEY: hexKey(),
+        AUTH_MFA_ENCRYPTION_KEY: hexKey(),
         BACKEND_URL: "https://api.example.com",
         NODE_ENV: env,
       }).REDIS_URL
@@ -135,6 +136,16 @@ describe("parseEnv", () => {
     }
   )
 
+  it.each(["production", "staging"])("requires the staff 2FA key in %s (adr/0040)", (env) => {
+    expect(errorOf({ ...validEnv, NODE_ENV: env })).toContain(
+      "AUTH_MFA_ENCRYPTION_KEY: is required in production and staging"
+    )
+    expect(errorOf({ ...validEnv, AUTH_MFA_ENCRYPTION_KEY: "short" })).toContain(
+      "AUTH_MFA_ENCRYPTION_KEY: must be 64 hex characters (32 bytes)"
+    )
+    expect(parseEnv(validEnv).AUTH_MFA_ENCRYPTION_KEY).toBeUndefined()
+  })
+
   it("keeps the provider account key apart from the PII keys", () => {
     expect(
       errorOf({ ...validEnv, CREDENTIALS_ENCRYPTION_KEY: validEnv.PII_HASH_KEY.toUpperCase() })
@@ -158,6 +169,7 @@ describe("parseEnv", () => {
         ...s3Env,
         ...fake,
         CREDENTIALS_ENCRYPTION_KEY: hexKey(),
+        AUTH_MFA_ENCRYPTION_KEY: hexKey(),
         NODE_ENV: "staging",
       })
     ).toContain("IYZICO_BASE_URL: is not allowed on staging or production")
@@ -175,6 +187,7 @@ describe("parseEnv", () => {
         ...s3Env,
         ...fake,
         CREDENTIALS_ENCRYPTION_KEY: hexKey(),
+        AUTH_MFA_ENCRYPTION_KEY: hexKey(),
         NODE_ENV: "production",
       })
     ).toContain("GELIVER_BASE_URL: is not allowed on staging or production")
@@ -186,7 +199,12 @@ describe("parseEnv", () => {
       MAILPIT_URL: "http://127.0.0.1:58025",
       EMAIL_FROM: "bildirim@magaza.test",
     }
-    const deployed = { ...validEnv, ...s3Env, CREDENTIALS_ENCRYPTION_KEY: hexKey() }
+    const deployed = {
+      ...validEnv,
+      ...s3Env,
+      CREDENTIALS_ENCRYPTION_KEY: hexKey(),
+      AUTH_MFA_ENCRYPTION_KEY: hexKey(),
+    }
 
     expect(parseEnv({ ...validEnv, ...mailpit, NODE_ENV: "test" }).EMAIL_TRANSPORT).toBe("mailpit")
     expect(errorOf({ ...deployed, ...mailpit, NODE_ENV: "production" })).toContain(
@@ -224,6 +242,7 @@ describe("parseEnv", () => {
         ...s3Env,
         ...fake,
         CREDENTIALS_ENCRYPTION_KEY: hexKey(),
+        AUTH_MFA_ENCRYPTION_KEY: hexKey(),
         NODE_ENV: "production",
       })
     ).toContain("PAYTR_BASE_URL: is not allowed on staging or production")

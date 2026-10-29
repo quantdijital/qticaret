@@ -14,6 +14,7 @@ export type Capability =
   | "moderation"
   | "accounts"
   | "keys"
+  | "security"
   | "team"
   | "staff"
   | "audit"
@@ -23,6 +24,8 @@ export interface StaffMe {
   /** Null: removed from the staff, or never given a role; they reach nothing. */
   role: StaffRole | null
   can: Record<Capability, boolean>
+  /** 2FA: whether this environment can ask it, the shop requires it, it is set up, this session passed it. */
+  mfa: { available: boolean; required: boolean; enabled: boolean; passed: boolean }
 }
 
 export const STAFF_KEY = ["auth", "staff"] as const

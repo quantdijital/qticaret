@@ -358,6 +358,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "staff.invite_login": "The account must use the invited e-mail address.",
   "staff.email_invalid": "The e-mail address is not valid.",
   "staff.name_required": "First and last name are required.",
+  "staff.mfa_required": "Set up two-step verification, or sign in again with your code, to go on.",
   "staff.forbidden": "Your role does not allow this.",
   "staff.last_owner":
     "The shop's last owner cannot give up the role; make someone else owner first.",

@@ -123,7 +123,13 @@ module.exports = defineConfig({
     {
       resolve: "@medusajs/medusa/auth",
       dependencies: [Modules.CACHE, ContainerRegistrationKeys.LOGGER],
-      options: { providers: auth.providers },
+      options: {
+        providers: auth.providers,
+        // F12.6 (adr/0040): staff TOTP, sealed with its own key
+        ...(env.AUTH_MFA_ENCRYPTION_KEY
+          ? { mfa: { encryption_key: env.AUTH_MFA_ENCRYPTION_KEY } }
+          : {}),
+      },
     },
     // F5 (adr/0026): the hosted-form providers; the system provider stays registered
     {

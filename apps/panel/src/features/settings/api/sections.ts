@@ -17,6 +17,11 @@ export interface StoreSettings {
   dimension_unit: "cm" | "mm"
 }
 
+/** Staff security (F12.6, adr/0040): whether every staff member must pass 2FA; the owner's switch. */
+export interface SecuritySettings {
+  staff_mfa_required: boolean
+}
+
 /** Stock rules (F3.8): the shop's default low-stock threshold. */
 export interface InventorySettings {
   low_stock_threshold: number

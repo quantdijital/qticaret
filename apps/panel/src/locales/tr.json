@@ -59,7 +59,20 @@
     "password": "Şifre",
     "submit": "Giriş yap",
     "failed": "E-posta ya da şifre hatalı.",
-    "required": "Bu alan gerekli."
+    "required": "Bu alan gerekli.",
+    "mfa": {
+      "title": "İki adımlı doğrulama",
+      "subtitle": "Doğrulama uygulamanızdaki kodu girin.",
+      "code": "Doğrulama kodu",
+      "codeHint": "Uygulamadaki 6 haneli kod.",
+      "recoveryCode": "Kurtarma kodu",
+      "recoveryHint": "Kurulumda kaydettiğiniz kodlardan biri; her kod bir kez kullanılır.",
+      "submit": "Doğrula ve gir",
+      "back": "Başka hesapla gir",
+      "useRecovery": "Kurtarma kodu kullan",
+      "useApp": "Uygulamadaki kodu kullan",
+      "wrong": "Kod doğru değil ya da süresi geçti; yeniden deneyin."
+    }
   },
   "dashboard": {
     "title": "Genel bakış",
@@ -231,7 +244,8 @@
       "marketing": "Pazarlama",
       "accounting": "Muhasebe",
       "api": "Dış API",
-      "team": "Ekip"
+      "team": "Ekip",
+      "security": "Güvenlik"
     },
     "appearance": {
       "title": "Görünüm",
@@ -1158,7 +1172,8 @@
       "marketing": "Sepet hatırlatması, ürün feed'leri, Merchant Center ve dönüşüm ölçümü",
       "accounting": "Mali müşavire aylık paket",
       "api": "Kendi sistemleriniz için API anahtarları",
-      "team": "Panele kimlerin hangi rolle girdiği ve davetler"
+      "team": "Panele kimlerin hangi rolle girdiği ve davetler",
+      "security": "İki adımlı doğrulamanız ve ekip için zorunluluk"
     },
     "marketing": {
       "title": "Pazarlama",
@@ -1521,6 +1536,42 @@
       "done": "Tamam",
       "copy": "Bağlantıyı kopyala",
       "linkHint": "Bağlantı 24 saat geçerlidir ve yalnızca davet edilen e-posta adresiyle hesap açılır."
+    },
+    "security": {
+      "title": "Güvenlik",
+      "description": "Kendi hesabınızın iki adımlı doğrulaması ve ekibin girişte kod kullanıp kullanmayacağı.",
+      "mine": {
+        "title": "İki adımlı doğrulamam",
+        "onHint": "Girişte şifrenizin yanında uygulamadaki kod istenir.",
+        "offHint2": "Açarsanız girişte şifrenizin yanında telefonunuzdaki uygulamanın kodu istenir.",
+        "lockedOn": "Mağazada bütün ekip için zorunlu; kapatmak için önce aşağıdaki zorunluluğun kapatılması gerekir.",
+        "unavailable": "Bu ortamda iki adımlı doğrulama kullanılamıyor.",
+        "notSet": "Bu hesapta iki adımlı doğrulama kapalı.",
+        "newCodes": "Yeni kurtarma kodları",
+        "change": "Telefonu değiştir",
+        "changeTitle": "Telefonu değiştir",
+        "changeHint": "Şu anki uygulamanın kodunu girin; ardından yeni telefonla kurulum açılır.",
+        "turnOff": "Kapat",
+        "offTitle": "İki adımlı doğrulama kapatılsın mı?",
+        "offHint": "Uygulamadaki kodu girin. Kapatınca girişte yalnızca şifre istenir.",
+        "turnedOff": "İki adımlı doğrulama kapatıldı."
+      },
+      "team": {
+        "title": "Ekip için zorunlu",
+        "hint": "Açıkken ekipte iki adımlı doğrulamayı kurmayan kimse panele giremez; ilk girişte kurulum ekranı açılır.",
+        "ownerOnly": "Bu ayarı yalnızca mağaza sahibi değiştirir.",
+        "unavailable": "Bu ortamda iki adımlı doğrulama kullanılamıyor.",
+        "onState": "Ekipteki herkes girişte kod kullanıyor.",
+        "offState": "Kurmayan personel yalnızca şifreyle girebilir; kuranlardan yine kod istenir.",
+        "onTitle": "Ekip için zorunlu olsun mu?",
+        "onConfirm": "Kurulumu olmayan herkesten bir sonraki girişte kurulum istenecek.",
+        "offTitle": "Zorunluluk kaldırılsın mı?",
+        "offConfirm": "Kurmayan personel yalnızca şifreyle girebilecek. Şifresi ele geçirilen bir hesap ek bir engelle karşılaşmaz.",
+        "turnOn": "Zorunlu yap",
+        "turnOff": "Zorunluluğu kaldır",
+        "turnedOn": "Ekip için zorunlu.",
+        "turnedOff": "Zorunluluk kaldırıldı."
+      }
     }
   },
   "status": {
@@ -4333,5 +4384,40 @@
     "wrongLogin": "Hesap davet edilen e-posta adresiyle açılmalı.",
     "required": "Bu alan gerekli.",
     "passwordShort": "Şifre en az 10 karakter olmalı."
+  },
+  "security": {
+    "setup": {
+      "app": {
+        "title": "İki adımlı doğrulamayı kurun",
+        "text": "Mağaza paneline girerken şifrenizin yanında telefonunuzdaki doğrulama uygulamasının kodu da istenir. Google Authenticator, Microsoft Authenticator ya da 1Password gibi bir uygulamayla aşağıdaki kodu okutun."
+      },
+      "codes": {
+        "title": "Kurtarma kodlarınızı saklayın",
+        "text": "Telefonunuz yanınızda olmadığında bu kodlardan biriyle girebilirsiniz. Kodlar bir daha gösterilmeyecek."
+      },
+      "done": {
+        "title": "Kurulum tamam",
+        "text": "Güvenlik için çıkış yapıp şifreniz ve uygulamadaki kodla yeniden girin."
+      },
+      "qr": "Doğrulama uygulaması için QR kodu",
+      "manual": "Kodu okutamıyorsanız bu anahtarı uygulamaya elle girin:",
+      "key": "Kurulum anahtarı",
+      "copyKey": "Anahtarı kopyala",
+      "code": "Uygulamadaki 6 haneli kod",
+      "confirm": "Doğrula",
+      "kept": "Kodları güvenli bir yere kaydettim",
+      "next": "Devam",
+      "signInAgain": "Yeniden giriş yap",
+      "later": "Şimdi değil, çıkış yap",
+      "wrong": "Kod doğru değil; uygulamadaki güncel kodu girin.",
+      "startFailed": "Kurulum başlatılamadı. Yeniden deneyin; sorun sürerse çıkış yapıp yeniden girin."
+    },
+    "codes": {
+      "label": "Kurtarma kodları",
+      "copy": "Kopyala",
+      "download": "İndir",
+      "file": "kurtarma-kodlari.txt",
+      "hint": "Her kod bir kez kullanılır. Yeni kod ürettiğinizde eskileri geçersiz olur."
+    }
   }
 }

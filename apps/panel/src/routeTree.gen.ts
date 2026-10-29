@@ -17,6 +17,7 @@ import { Route as AuthCategoriesRouteImport } from './routes/_auth/categories'
 import { Route as AuthInventoryRouteImport } from './routes/_auth/inventory'
 import { Route as AuthReportsRouteImport } from './routes/_auth/reports'
 import { Route as AuthSettingsRouteImport } from './routes/_auth/settings'
+import { Route as SecuritySetupRouteImport } from './routes/security/setup'
 import { Route as AuthBrandsIndexRouteImport } from './routes/_auth/brands/index'
 import { Route as AuthBrandsIdRouteImport } from './routes/_auth/brands/$id'
 import { Route as AuthContentIndexRouteImport } from './routes/_auth/content/index'
@@ -59,6 +60,7 @@ import { Route as AuthSettingsIntegrationsRouteImport } from './routes/_auth/set
 import { Route as AuthSettingsJobsRouteImport } from './routes/_auth/settings/jobs'
 import { Route as AuthSettingsLocationsRouteImport } from './routes/_auth/settings/locations'
 import { Route as AuthSettingsNotificationsRouteImport } from './routes/_auth/settings/notifications'
+import { Route as AuthSettingsSecurityRouteImport } from './routes/_auth/settings/security'
 import { Route as AuthSettingsSeoRouteImport } from './routes/_auth/settings/seo'
 import { Route as AuthSettingsStoreRouteImport } from './routes/_auth/settings/store'
 import { Route as AuthSettingsTeamRouteImport } from './routes/_auth/settings/team'
@@ -113,6 +115,11 @@ const AuthSettingsRoute = AuthSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
   getParentRoute: () => AuthRoute,
+} as any)
+const SecuritySetupRoute = SecuritySetupRouteImport.update({
+  id: '/security/setup',
+  path: '/security/setup',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthBrandsIndexRoute = AuthBrandsIndexRouteImport.update({
   id: '/brands/',
@@ -326,6 +333,11 @@ const AuthSettingsNotificationsRoute =
     path: '/notifications',
     getParentRoute: () => AuthSettingsRoute,
   } as any)
+const AuthSettingsSecurityRoute = AuthSettingsSecurityRouteImport.update({
+  id: '/security',
+  path: '/security',
+  getParentRoute: () => AuthSettingsRoute,
+} as any)
 const AuthSettingsSeoRoute = AuthSettingsSeoRouteImport.update({
   id: '/seo',
   path: '/seo',
@@ -419,6 +431,7 @@ export interface FileRoutesByFullPath {
   '/inventory': typeof AuthInventoryRoute
   '/reports': typeof AuthReportsRouteWithChildren
   '/settings': typeof AuthSettingsRouteWithChildren
+  '/security/setup': typeof SecuritySetupRoute
   '/brands/$id': typeof AuthBrandsIdRoute
   '/content/$id': typeof AuthContentIdRoute
   '/customers/$id': typeof AuthCustomersIdRoute
@@ -451,6 +464,7 @@ export interface FileRoutesByFullPath {
   '/settings/jobs': typeof AuthSettingsJobsRoute
   '/settings/locations': typeof AuthSettingsLocationsRoute
   '/settings/notifications': typeof AuthSettingsNotificationsRoute
+  '/settings/security': typeof AuthSettingsSecurityRoute
   '/settings/seo': typeof AuthSettingsSeoRoute
   '/settings/store': typeof AuthSettingsStoreRoute
   '/settings/team': typeof AuthSettingsTeamRoute
@@ -482,6 +496,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/categories': typeof AuthCategoriesRoute
   '/inventory': typeof AuthInventoryRoute
+  '/security/setup': typeof SecuritySetupRoute
   '/': typeof AuthIndexRoute
   '/brands/$id': typeof AuthBrandsIdRoute
   '/content/$id': typeof AuthContentIdRoute
@@ -515,6 +530,7 @@ export interface FileRoutesByTo {
   '/settings/jobs': typeof AuthSettingsJobsRoute
   '/settings/locations': typeof AuthSettingsLocationsRoute
   '/settings/notifications': typeof AuthSettingsNotificationsRoute
+  '/settings/security': typeof AuthSettingsSecurityRoute
   '/settings/seo': typeof AuthSettingsSeoRoute
   '/settings/store': typeof AuthSettingsStoreRoute
   '/settings/team': typeof AuthSettingsTeamRoute
@@ -550,6 +566,7 @@ export interface FileRoutesById {
   '/_auth/inventory': typeof AuthInventoryRoute
   '/_auth/reports': typeof AuthReportsRouteWithChildren
   '/_auth/settings': typeof AuthSettingsRouteWithChildren
+  '/security/setup': typeof SecuritySetupRoute
   '/_auth/': typeof AuthIndexRoute
   '/_auth/brands/$id': typeof AuthBrandsIdRoute
   '/_auth/content/$id': typeof AuthContentIdRoute
@@ -583,6 +600,7 @@ export interface FileRoutesById {
   '/_auth/settings/jobs': typeof AuthSettingsJobsRoute
   '/_auth/settings/locations': typeof AuthSettingsLocationsRoute
   '/_auth/settings/notifications': typeof AuthSettingsNotificationsRoute
+  '/_auth/settings/security': typeof AuthSettingsSecurityRoute
   '/_auth/settings/seo': typeof AuthSettingsSeoRoute
   '/_auth/settings/store': typeof AuthSettingsStoreRoute
   '/_auth/settings/team': typeof AuthSettingsTeamRoute
@@ -619,6 +637,7 @@ export interface FileRouteTypes {
     | '/inventory'
     | '/reports'
     | '/settings'
+    | '/security/setup'
     | '/brands/$id'
     | '/content/$id'
     | '/customers/$id'
@@ -651,6 +670,7 @@ export interface FileRouteTypes {
     | '/settings/jobs'
     | '/settings/locations'
     | '/settings/notifications'
+    | '/settings/security'
     | '/settings/seo'
     | '/settings/store'
     | '/settings/team'
@@ -682,6 +702,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/categories'
     | '/inventory'
+    | '/security/setup'
     | '/'
     | '/brands/$id'
     | '/content/$id'
@@ -715,6 +736,7 @@ export interface FileRouteTypes {
     | '/settings/jobs'
     | '/settings/locations'
     | '/settings/notifications'
+    | '/settings/security'
     | '/settings/seo'
     | '/settings/store'
     | '/settings/team'
@@ -749,6 +771,7 @@ export interface FileRouteTypes {
     | '/_auth/inventory'
     | '/_auth/reports'
     | '/_auth/settings'
+    | '/security/setup'
     | '/_auth/'
     | '/_auth/brands/$id'
     | '/_auth/content/$id'
@@ -782,6 +805,7 @@ export interface FileRouteTypes {
     | '/_auth/settings/jobs'
     | '/_auth/settings/locations'
     | '/_auth/settings/notifications'
+    | '/_auth/settings/security'
     | '/_auth/settings/seo'
     | '/_auth/settings/store'
     | '/_auth/settings/team'
@@ -813,6 +837,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRouteWithChildren
   InviteRoute: typeof InviteRoute
   LoginRoute: typeof LoginRoute
+  SecuritySetupRoute: typeof SecuritySetupRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -872,6 +897,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/settings'
       preLoaderRoute: typeof AuthSettingsRouteImport
       parentRoute: typeof AuthRoute
+    }
+    '/security/setup': {
+      id: '/security/setup'
+      path: '/security/setup'
+      fullPath: '/security/setup'
+      preLoaderRoute: typeof SecuritySetupRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_auth/brands/': {
       id: '/_auth/brands/'
@@ -1167,6 +1199,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSettingsNotificationsRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
+    '/_auth/settings/security': {
+      id: '/_auth/settings/security'
+      path: '/security'
+      fullPath: '/settings/security'
+      preLoaderRoute: typeof AuthSettingsSecurityRouteImport
+      parentRoute: typeof AuthSettingsRoute
+    }
     '/_auth/settings/seo': {
       id: '/_auth/settings/seo'
       path: '/seo'
@@ -1314,6 +1353,7 @@ interface AuthSettingsRouteChildren {
   AuthSettingsJobsRoute: typeof AuthSettingsJobsRoute
   AuthSettingsLocationsRoute: typeof AuthSettingsLocationsRoute
   AuthSettingsNotificationsRoute: typeof AuthSettingsNotificationsRoute
+  AuthSettingsSecurityRoute: typeof AuthSettingsSecurityRoute
   AuthSettingsSeoRoute: typeof AuthSettingsSeoRoute
   AuthSettingsStoreRoute: typeof AuthSettingsStoreRoute
   AuthSettingsTeamRoute: typeof AuthSettingsTeamRoute
@@ -1339,6 +1379,7 @@ const AuthSettingsRouteChildren: AuthSettingsRouteChildren = {
   AuthSettingsJobsRoute: AuthSettingsJobsRoute,
   AuthSettingsLocationsRoute: AuthSettingsLocationsRoute,
   AuthSettingsNotificationsRoute: AuthSettingsNotificationsRoute,
+  AuthSettingsSecurityRoute: AuthSettingsSecurityRoute,
   AuthSettingsSeoRoute: AuthSettingsSeoRoute,
   AuthSettingsStoreRoute: AuthSettingsStoreRoute,
   AuthSettingsTeamRoute: AuthSettingsTeamRoute,
@@ -1431,6 +1472,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRouteWithChildren,
   InviteRoute: InviteRoute,
   LoginRoute: LoginRoute,
+  SecuritySetupRoute: SecuritySetupRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -29,7 +29,7 @@
 | `lib/security`: safe-fetch (SSRF), timing-safe compare, upload validator, CSV kaçışlama, güvenli XML | F2.9 | Tüm fazlar bu kütüphaneyi kullanır |
 | Rate limit middleware (Redis), güvenlik header'ları, CORS, hata sanitizasyonu, pino redaksiyon | F2.10 | Route eklenmeden önce hazır |
 | Audit log (mutasyon + hassas veri okuma) | F2.5 | |
-| Admin 2FA (TOTP), rol tabanlı yetki | F12.6 + ADR | Canlı öncesi zorunlu |
+| Admin 2FA (TOTP), rol tabanlı yetki | F12.6 + ADR | Canlı öncesi hazır; ekip için zorunluluk sahibin anahtarı (varsayılan açık) |
 | Pentest, yük testi, fraud-guard, WAF | F15 | Doğrulama |
 
 ## Zorunlu kurallar
@@ -99,9 +99,9 @@
 ### Kimlik doğrulama ve yetki
 - Medusa auth modülü kullanılır; kendi auth sistemi yazılmaz.
 - Store API kimlik modeli (cookie session mı, bearer JWT mi) `adr/0004` ile karara bağlanır; karar F1'de verilir, F10.1 uygular.
-- Admin: 2FA (TOTP), Medusa 2.21'in yerleşik MFA'sıyla; bütün personel için zorunlu (adr/0040, F12 Y3).
+- Admin: 2FA (TOTP), Medusa 2.21'in yerleşik MFA'sıyla (adr/0040). Ekip için zorunluluk sahibin Ayarlar > Güvenlik'teki anahtarıdır (varsayılan açık; kullanıcı kararı 2026-10-29). Kodu bu oturumda geçmemiş kişi yalnızca kendini görür (`staff.mfa_required`); kurulumdan sonra kodla yeniden girilir. `AUTH_MFA_ENCRYPTION_KEY` canlıda zorunlu; `ADMIN_MFA=off` yalnızca yerelde. API anahtarlarından 2FA istenmez (kendi kapsamları var).
 - Rol bazlı yetki: owner / admin / operasyon / salt-okunur; her admin route'unda rol kontrolü middleware'de (adr/0040).
-  - Genel `/admin/*` koruması (`api/http/staff-guard.ts`) API anahtarı korumasından sonra, Express'in yönlendirdiği yolu küçük harfle okuyup `lib/staff/permissions.ts` tablosundan karar verir. Rol her istekte okunur, değişiklik en geç bir saniyede bütün süreçlerde geçerlidir.
+  - Genel `/admin/*` koruması (`api/http/staff-guard.ts`) API anahtarı korumasından sonra, Express'in yönlendirdiği yolu küçük harfle okuyup `lib/staff/permissions.ts` tablosundan karar verir. Yasaklayan listeler yolu çözülmüş haliyle de denetler: Express rota parametresini çözer (`/admin/platform-settings/bank%5Ftransfer` aynı bölümdür). Rol her istekte okunur, değişiklik en geç bir saniyede bütün süreçlerde geçerlidir.
   - Sahibe ayrılanlar: sağlayıcı hesapları, API anahtarları, giden webhook'lar, muhasebe programı seçimi, havale IBAN'ı, Google bağlantısı, personel ve davetler.
   - Operasyon ve salt-okunur personel denetim kaydını, hesapları, webhook'ları, personel listesini ve iş akışı kayıtlarını okuyamaz. Operasyon yalnızca listedeki operasyon uçlarına yazar (sipariş gönderimi, iade talebi kabulü, stok, moderasyon); para hareketi (iade, iptal, havale onayı), katalog ve ayarlar kapalıdır. Yeni bir uç bu iki rol için kapalı gelir; kendi yazma uçlarımızın her biri için operasyon kararı birim testinde kayıtlıdır.
   - Rolü olmayan kullanıcı hiçbir yere erişemez (ekipten çıkarılanın açık oturumu dahil); personeli hiç olmayan mağazada ilk kullanıcı sahip olur; son sahip rolünü bırakamaz.

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link, useNavigate } from "@tanstack/react-router"
-import { ExternalLink, LogOut, Palette, Search } from "lucide-react"
+import { ExternalLink, LogOut, Palette, Search, ShieldCheck } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
@@ -105,17 +105,21 @@ function AccountMenu() {
           ) : null}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link to="/settings/security">
+            <ShieldCheck />
+            {t("settings.sections.security")}
+          </Link>
+        </DropdownMenuItem>
         {staff?.can.settings ? (
-          <>
-            <DropdownMenuItem asChild>
-              <Link to="/settings/appearance">
-                <Palette />
-                {t("command.appearance")}
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-          </>
+          <DropdownMenuItem asChild>
+            <Link to="/settings/appearance">
+              <Palette />
+              {t("command.appearance")}
+            </Link>
+          </DropdownMenuItem>
         ) : null}
+        <DropdownMenuSeparator />
         <DropdownMenuItem
           onSelect={() => {
             logout.mutate()

@@ -29,7 +29,7 @@ export async function createAdminUser(
   http: HttpClient,
   container: MedusaContainer,
   role: StaffRole = "owner"
-): Promise<{ headers: Record<string, string>; userId: string }> {
+): Promise<{ headers: Record<string, string>; userId: string; email: string; password: string }> {
   const email = `admin-${randomUUID()}@example.com`
   // Throwaway credential for this test database only
   const password = randomUUID()
@@ -43,5 +43,10 @@ export async function createAdminUser(
   })
   await container.resolve<StaffRolesModuleService>(STAFF_ROLES_MODULE).setRole(user.id, role, null)
   const login = await http.post<TokenResponse>("/auth/user/emailpass", { email, password })
-  return { headers: { authorization: `Bearer ${login.data.token}` }, userId: user.id }
+  return {
+    headers: { authorization: `Bearer ${login.data.token}` },
+    userId: user.id,
+    email,
+    password,
+  }
 }

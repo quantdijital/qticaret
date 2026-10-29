@@ -59,7 +59,20 @@
     "password": "Password",
     "submit": "Sign in",
     "failed": "Wrong email or password.",
-    "required": "This field is required."
+    "required": "This field is required.",
+    "mfa": {
+      "title": "Two-step verification",
+      "subtitle": "Enter the code from your authenticator app.",
+      "code": "Verification code",
+      "codeHint": "The 6-digit code in the app.",
+      "recoveryCode": "Recovery code",
+      "recoveryHint": "One of the codes you kept at setup; each works once.",
+      "submit": "Verify and sign in",
+      "back": "Sign in with another account",
+      "useRecovery": "Use a recovery code",
+      "useApp": "Use the app's code",
+      "wrong": "The code is not right or has expired; try again."
+    }
   },
   "dashboard": {
     "title": "Overview",
@@ -231,7 +244,8 @@
       "marketing": "Marketing",
       "accounting": "Accounting",
       "api": "External API",
-      "team": "Team"
+      "team": "Team",
+      "security": "Security"
     },
     "appearance": {
       "title": "Appearance",
@@ -1158,7 +1172,8 @@
       "marketing": "Cart reminders, product feeds, Merchant Center and conversion measurement",
       "accounting": "The month's package for the accountant",
       "api": "API keys for your own systems",
-      "team": "Who uses the panel, with which role, and invitations"
+      "team": "Who uses the panel, with which role, and invitations",
+      "security": "Your two-step verification and the team's requirement"
     },
     "marketing": {
       "title": "Marketing",
@@ -1521,6 +1536,42 @@
       "done": "Done",
       "copy": "Copy link",
       "linkHint": "The link works for 24 hours, and only for an account with the invited e-mail address."
+    },
+    "security": {
+      "title": "Security",
+      "description": "Your own two-step verification, and whether the team signs in with a code.",
+      "mine": {
+        "title": "My two-step verification",
+        "onHint": "Signing in asks for the app's code besides your password.",
+        "offHint2": "Turned on, signing in asks for the code of the app on your phone besides your password.",
+        "lockedOn": "Required for the whole team in this shop; the requirement below must be lifted first to turn it off.",
+        "unavailable": "Two-step verification is not available in this environment.",
+        "notSet": "Two-step verification is off on this account.",
+        "newCodes": "New recovery codes",
+        "change": "Change phone",
+        "changeTitle": "Change phone",
+        "changeHint": "Enter the current app's code; setup with the new phone opens next.",
+        "turnOff": "Turn off",
+        "offTitle": "Turn two-step verification off?",
+        "offHint": "Enter the app's code. Turned off, signing in asks for the password only.",
+        "turnedOff": "Two-step verification turned off."
+      },
+      "team": {
+        "title": "Required for the team",
+        "hint": "On, no one on the team reaches the panel without setting two-step verification up; setup opens at the first sign-in.",
+        "ownerOnly": "Only the shop's owner changes this.",
+        "unavailable": "Two-step verification is not available in this environment.",
+        "onState": "Everyone on the team signs in with a code.",
+        "offState": "Staff who did not set it up sign in with a password alone; those who did are still asked for the code.",
+        "onTitle": "Require it for the team?",
+        "onConfirm": "Everyone without a setup will be asked to set it up at their next sign-in.",
+        "offTitle": "Lift the requirement?",
+        "offConfirm": "Staff without a setup will sign in with a password alone. An account whose password is stolen meets no further barrier.",
+        "turnOn": "Require",
+        "turnOff": "Lift requirement",
+        "turnedOn": "Required for the team.",
+        "turnedOff": "Requirement lifted."
+      }
     }
   },
   "status": {
@@ -4333,5 +4384,40 @@
     "wrongLogin": "The account must use the invited e-mail address.",
     "required": "This field is required.",
     "passwordShort": "The password must be at least 10 characters."
+  },
+  "security": {
+    "setup": {
+      "app": {
+        "title": "Set up two-step verification",
+        "text": "Signing in to the shop's panel asks for a code from the authenticator app on your phone besides your password. Scan the code below with an app such as Google Authenticator, Microsoft Authenticator or 1Password."
+      },
+      "codes": {
+        "title": "Keep your recovery codes",
+        "text": "When your phone is not at hand, sign in with one of these codes. They will not be shown again."
+      },
+      "done": {
+        "title": "All set",
+        "text": "For safety, sign out and sign in again with your password and the app's code."
+      },
+      "qr": "QR code for the authenticator app",
+      "manual": "Cannot scan it? Type this key into the app:",
+      "key": "Setup key",
+      "copyKey": "Copy key",
+      "code": "The 6-digit code in the app",
+      "confirm": "Verify",
+      "kept": "I have kept the codes somewhere safe",
+      "next": "Continue",
+      "signInAgain": "Sign in again",
+      "later": "Not now, sign out",
+      "wrong": "The code is not right; enter the app's current code.",
+      "startFailed": "Setup could not start. Try again; if it persists, sign out and in again."
+    },
+    "codes": {
+      "label": "Recovery codes",
+      "copy": "Copy",
+      "download": "Download",
+      "file": "recovery-codes.txt",
+      "hint": "Each code works once. Making new codes voids the old ones."
+    }
   }
 }
