@@ -87,6 +87,16 @@ medusaIntegrationTestRunner({
       )
     })
 
+    it("takes two builds at once, the schedule's and the panel's", async () => {
+      await http.post("/admin/marketing-feeds/token", {}, { headers: admin.headers })
+      const generate = () =>
+        settle(http.post("/admin/marketing-feeds/generate", {}, { headers: admin.headers }))
+      const both = await Promise.all([generate(), generate(), generate()])
+
+      expect(both.map(({ status }) => status)).toEqual([200, 200, 200])
+      expect((await status()).targets.every((each) => each.item_count !== null)).toBe(true)
+    })
+
     it("opens nothing with a wrong or replaced token, nor once the feeds are off", async () => {
       await http.post("/admin/marketing-feeds/token", {}, { headers: admin.headers })
       await http.post("/admin/marketing-feeds/generate", {}, { headers: admin.headers })

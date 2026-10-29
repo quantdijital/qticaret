@@ -7,6 +7,7 @@ import {
   MedusaService,
 } from "@medusajs/framework/utils"
 import { decryptPii, encryptPii, hashPii, parseKey } from "../../lib/crypto/pii"
+import { uniqueViolationKeys } from "../../lib/errors"
 import { safeEqual } from "../../lib/security/timing-safe"
 import { FeedAccess } from "./models/feed-access"
 import { FeedFile } from "./models/feed-file"
@@ -77,9 +78,29 @@ class MarketingFeedsModuleService extends MedusaService({ FeedAccess, FeedFile }
     return access !== undefined && safeEqual(this.hashOf(token), access.token_hash)
   }
 
-  /** Records a target's new file; returns the key of the one it replaced, to remove. */
+  /**
+   * Records a target's new file; returns the key of the one it replaced, to
+   * remove. Two builds at once (the schedule and the panel's button) both
+   * find no row: the second insert meets the first and is done again as an
+   * update.
+   */
+  async recordFile(input: {
+    target: string
+    file_key: string
+    item_count: number
+  }): Promise<string | null> {
+    try {
+      return await this.recordFile_(input)
+    } catch (error) {
+      if (!uniqueViolationKeys(error)?.includes("target")) {
+        throw error
+      }
+      return this.recordFile_(input)
+    }
+  }
+
   @InjectTransactionManager()
-  async recordFile(
+  protected async recordFile_(
     input: { target: string; file_key: string; item_count: number },
     @MedusaContext() sharedContext: Context = {}
   ): Promise<string | null> {
