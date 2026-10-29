@@ -392,9 +392,9 @@ Detay: `docs/06-admin-ux.md`. adr/0022'den sonra bu fazın ekranları panel hatt
 - F12.1 Dashboard widget'ları: günlük ciro, bekleyen siparişler, kargoya hazır, başarısız ödeme/fatura, düşük stok, SEO skoru özeti
 - F12.2 "Entegrasyonlar" sayfası: provider durumu, bağlantı testi, son hatalar (secret göstermez)
 - F12.3 Sipariş operasyon ekranı: filtreler (ödeme/kargo/fatura durumu), toplu işlemler, sipariş düzenleme/iptal/değişim giriş noktaları
-- F12.4 Ayarlar: feature flag'ler, attribute şablonları, yasal metin sürümleri, mağaza künyesi, SEO ayarları (desenler, şablonlar, robots, canonical host)
+- F12.4 Ayarlar: feature flag'ler, attribute şablonları, yasal metin sürümleri, mağaza künyesi, SEO ayarları (desenler, şablonlar, robots, canonical host) — yasal metin sürümleri ve mağaza künyesi F13.1 `legal-consent` ile gelir
 - F12.5 Audit log görüntüleyici (mutasyon + okuma kayıtları)
-- F12.6 Rol bazlı yetki: owner, admin, operasyon, salt-okunur; **admin 2FA (TOTP)** — Medusa'da yerleşik değilse ADR + uygulama. Ödeme ve entegrasyon hesapları (Ayarlar > Ödeme, adr/0027) yalnızca owner'a; gizli alan, mağaza no ve test modu değişikliğinde ikinci doğrulama. **Bu madde bitmeden personeli olan mağaza ödemeyle canlıya alınmaz.**
+- F12.6 Rol bazlı yetki: owner, admin, operasyon, salt-okunur; **admin 2FA (TOTP)** — Medusa 2.21'de yerleşik (MFA); roller kendi katmanımızla (ADR-0040). Ödeme ve entegrasyon hesapları (Ayarlar > Ödeme, adr/0027) yalnızca owner'a; gizli alan, mağaza no ve test modu değişikliğinde ikinci doğrulama. **Bu madde bitmeden personeli olan mağaza ödemeyle canlıya alınmaz.**
 - F12.7 Ekran bütünlüğü: önceki fazlarda eklenen ekranların menü yapısı, terim sözlüğü ve UX kontrol listesine uyumu
 - F12.8 Sipariş iç notları ve müşteri iletişim geçmişi
 - F12.9 Global arama: sipariş no, müşteri, ürün, takip no

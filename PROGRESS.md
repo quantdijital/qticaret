@@ -3,6 +3,8 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
+**F12 — Admin genişletmeleri: BAŞLADI (2026-10-29).** Plan aşağıda "F12 görev planı" (Y1–Y13); ADR-0040 önerildi, otonom kabul (gözden geçir). Önce F12.6 (roller, 2FA, yeniden doğrulama): canlıya çıkış engeli. Dal `f12-admin` (`f11-reporting` üzerinden).
+
 **F11 — Raporlama, muhasebe ve dış entegrasyon API'si: BİTTİ (2026-10-29; R1–R9, KK1–KK5 işaretli).** Plan aşağıda "F11 görev planı"; ADR-0039 otonom kabul (gözden geçir). Dal `f11-reporting`, push yok (2026-11-01'e kadar). Kapanışta yerelde: birim 1959, HTTP 121/121 dosya (619 test; tam koşuda bağlantı havuzu zaman aşımına düşen 3 dosya tek başına yeniden koşuldu), modül 32 dosya (222), panel 304, e2e 47. Kapanış güvenlik incelemesi (3 bağımsız alan) 1 yüksek, 9 orta, 9 düşük buldu; 3 düşük bulgu sonraya bırakıldı, kalan hepsi düzeltildi (ayrıntı R9). Sıradaki faz F12 (F8 askıda).
 
 **F10 — Müşteri hesabı, etkileşim, pazarlama ve SEO ölçümü: BİTTİ (2026-10-29; M1–M17, KK1–KK8 işaretli).** ADR-0037 ve ADR-0038 otonom kabul (gözden geçir). Dal `f10-customer-marketing`. Kapanışta yerelde: birim 1843, HTTP 114/114 dosya (584 test), modül 28 (205), panel 296, e2e 42. Kapanış güvenlik incelemesi (3 bağımsız alan) 1 yüksek, 2 orta, 12 düşük buldu; hepsi düzeltildi (sipariş devir uçları kapatıldı, çift onaylı izin, açık e-posta payı, Google bağlantısı personele bağlı, yorum sürüm denetimi vb.).
@@ -1166,7 +1168,26 @@
 - **Daha önce:** F1 planlaması ve F0.2–F0.8 (2026-10-24), F0.1 monorepo (2026-10-24 sabahı), SEO ve güvenlik dokümanları (2026-10-22).
 
 ## Sıradaki görev
-**Claude'un sıradaki işi:** F12 (Admin genişletmeleri) başlat: `/faz-baslat F12`. F11 bitti (2026-10-29, dal `f11-reporting`, push yok). GitHub'ın ücretli özellikleri 2026-11-01'e kadar kapalı (kullanıcı, 2026-10-28): CI çalışmaz, her doğrulama yerelde. Dal `f9-notifications` (`f7-shipping` üzerinden). F7 kapandı, yalnızca KK3 kaldı; KK3 iade faturası olduğu için F8'i bekliyor. F8 askıda ve kullanıcı e-faturayı netleştirince açılır. F8 askıda (kullanıcı e-faturayı netleştirecek); F7 KK3 F8'i bekliyor. Plan aşağıda "F7 görev planı". Dal `f7-shipping` (`f6-alternative-payments` üzerinden). Kullanıcı 2026-10-27 gece: "izin istemeden çalışmaya devam edersin, kritik bir şey olursa sabah sorarım."
+**Claude'un sıradaki işi:** F12 Y1 (personel rolleri: `staff-roles` modülü, `/admin/*` rol koruması, `GET /admin/staff/me`). Plan aşağıda "F12 görev planı". F11 bitti (2026-10-29, dal `f11-reporting`, push yok). GitHub'ın ücretli özellikleri 2026-11-01'e kadar kapalı (kullanıcı, 2026-10-28): CI çalışmaz, her doğrulama yerelde. Dal `f9-notifications` (`f7-shipping` üzerinden). F7 kapandı, yalnızca KK3 kaldı; KK3 iade faturası olduğu için F8'i bekliyor. F8 askıda ve kullanıcı e-faturayı netleştirince açılır. F8 askıda (kullanıcı e-faturayı netleştirecek); F7 KK3 F8'i bekliyor. Plan aşağıda "F7 görev planı". Dal `f7-shipping` (`f6-alternative-payments` üzerinden). Kullanıcı 2026-10-27 gece: "izin istemeden çalışmaya devam edersin, kritik bir şey olursa sabah sorarım."
+
+### F12 görev planı (2026-10-29; Medusa 2.21.2 v2.21.2 kaynağından ve docs.medusajs.com'dan doğrulandı (Context7 kotası dolu): yerleşik MFA/TOTP ve kurtarma kodları, `rbac` bayrağı arkasındaki rol modülü, davetler, `/admin/search` ve liste uçlarındaki `q`; ayrıntı ADR-0040)
+Karar: ADR-0040 (önerildi, otonom kabul). Envanter: ekranların çoğu panel hattında yazıldı (özet, entegrasyonlar, denetim kaydı, özellikler, SEO, içerik, Soru-Cevap); eksikler aşağıda. Yasal metin sürümleri ve mağaza künyesi (F12.4'ün parçası) F13.1 `legal-consent` ile gelir. Sıra: önce F12.6 (canlıya çıkış engeli), sonra ekran işleri.
+
+| # | F12 | Görev | Bağımlılık | KK |
+|---|---|---|---|---|
+| Y1 | F12.6 | Personel rolleri: `staff-roles` modülü (`owner`/`admin`/`operations`/`readonly`), göç betiği (en eski kullanıcı owner, diğerleri admin), `/admin/*` rol koruması ve `lib/staff/permissions.ts` tablosu (admin kara liste, operasyon/salt-okunur beyaz liste; ham yol), `GET /admin/staff/me` (rol + yetenekler), panelde yetkiye göre gizleme. Önce: çekirdek uçların Medusa `policies` taşıyıp taşımadığına bakılır (ADR-0040 alternatif). Testler: operasyon ayar değiştiremez, salt-okunur yazamaz, admin owner uçlarına geçemez, son owner korunur, her uç kalıbının tabloda kararı var. | — | KK1 (rol) |
+| Y2 | F12.6 | Ekip ekranı: Ayarlar > Ekip (liste, rol, 2FA durumu, davet, rol değiştir, çıkar; son owner korunur), rol davetin `metadata`'sında, kabulde atanır; panelde `/invite` kabul sayfası (Medusa Admin'e gerek kalmaz). Denetim kaydı `security`. | Y1 | — |
+| Y3 | F12.6 | 2FA: Medusa MFA açılır (`AUTH_MFA_ENCRYPTION_KEY`, canlıda zorunlu), bütün personel için zorunlu (etkensiz kullanıcı yalnızca kurulum uçlarına; `staff.mfa_required`), panel girişinde kod adımı ve kurtarma kodu, Hesabım > Güvenlik (kurulum, kurtarma kodları, yenileme), e2e TOTP yardımcısı (Node `crypto`). QR: bağımlılık onayına bağlı (Açık sorular). | Y1 | KK1 (2FA) |
+| Y4 | F12.6 | Yeniden doğrulama: hesapların gizli alanı, mağaza numarası, test modu, API anahtarı oluşturma ve owner rolü için son 5 dakikada kod; tam VKN gösterimi owner/admin. ADR-0027 canlıya çıkış engeli kalkar. | Y1, Y3 | — |
+| Y5 | F12.5 | Denetim kaydı: kişi, kaynak ve tarih süzgeçleri, ayrıntı paneli (değişiklikler, istek kimliği, tarayıcı), owner/admin'e açık. | Y1 | — |
+| Y6 | F12.2 | Entegrasyonlar sayfası: bütün sağlayıcılar (havale, kapıda ödeme, Resend, Netgsm, Google GSC/Merchant, Meta/GA4, muhasebe programı, pazar yeri feed'leri), sayfadan bağlantı testi, son hatalar geçmişi; sır yok. | Y1 | — |
+| Y7 | F12.1 | Özet: başarısız ödeme (kurtarma), durmuş muhasebe aktarımı ve kapanmış webhook sayaçları, fatura sayacı F8'e kadar gizli; SEO skoru kartı; görev satırları süzgeçli bağlantılarla; ölü `summary.ts` temizliği; kurulum şeridinin yükleniyor/hata durumu. | — | — |
+| Y8 | F12.3 | Sipariş operasyonu: ödeme ve kargo durumuna ayrı süzgeçler (fatura F8 ile), toplu işlemler (etiket yeniden yazdır, teslim edildi), sipariş ayrıntısından değişim girişi. | Y1 | — |
+| Y9 | F12.8 | Sipariş iç notları (`order-notes` modülü; yazan, zaman; yazanı ve owner siler) ve müşteri iletişim geçmişi (Medusa `notification` kayıtları sipariş ve müşteri bazında; gönderilmeyenlerin nedeni de kayda). | Y1 | — |
+| Y10 | F12.9 | Global arama (⌘K): sipariş no (#), müşteri, ürün/SKU (Medusa `/admin/search`) ve takip no (`shipment-tracking`); role göre sonuç. | Y1 | — |
+| Y11 | F12.10 | SEO kurulum kontrol listesi: künye ve politikalar (F13'e bağlantı), canonical host, robots, mağaza geneli OG görseli (yeni ayar), GSC, Merchant, IndexNow; tamamlanan madde kaybolur; özet ve SEO sayfasında. | — | KK3 |
+| Y12 | F12.4, F12.7, F12.11 | Ekran bütünlüğü: menü yapısı, terim sözlüğü, docs/18 §9 ve docs/06 kontrol listesi bütün ekranlarda (üç durum, Türkçe, mobil, koyu), içerik ekranları gözden. | Y1–Y11 | KK2 |
+| Y13 | — | Kapanış: bağımsız güvenlik incelemesi, KK işaretleri, tam doğrulama | Y1–Y12 | — |
 
 ### F11 görev planı (2026-10-29; Medusa 2.21.2 API'leri Context7, docs.medusajs.com ve v2.21.2 kaynağından doğrulandı: secret API anahtarları, sipariş toplamları ve `summary`, olay adları, envanter alanları, OAS aracı; ayrıntı ADR-0039 "Doğrulanan" bölümü)
 Karar: ADR-0039 (önerildi, otonom kabul). Dal `f11-reporting` (`f10-customer-marketing` üzerinden). Yeni bağımlılık yok: XLSX projenin yazıcısıyla, OpenAPI Zod 4'ün `z.toJSONSchema`'sıyla.
@@ -1439,6 +1460,12 @@ Devreden işlerin F3 görevlerine dağılımı:
 F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde: `git show 118e835:PROGRESS.md`.
 
 ## Açık sorular / bloklayıcılar
+- [ ] **Bağımlılık onayı (F12 Y3; kullanıcı):** 2FA kurulumunda QR kodu için `uqr` (bağımlılıksız, MIT; unjs) öneriliyor. Onaysız da ilerlenir: ekran sırrı ve `otpauth` bağlantısını elle girilecek biçimde gösterir, QR onayla eklenir.
+- [ ] **Gözden geçir: ADR-0040 (F12, 2026-10-29, otonom kabul).**
+  - Roller Medusa'nın deneysel RBAC'i yerine kendi ince katmanımızla, sabit dört rol (owner, admin, operasyon, salt-okunur); değişiklik anında geçerli.
+  - 2FA Medusa'nın yerleşik TOTP'si; bütün personel için zorunlu (yalnızca owner değil).
+  - Ödeme/entegrasyon hesabı, API anahtarı ve owner rolü değişikliğinde son 5 dakikada kod istenir.
+  - Mevcut kullanıcılardan en eskisi owner, diğerleri admin olur.
 - [ ] **Bekleyen dış bilgi: Google Cloud kurulumu (2026-10-29; adr/0038 M13).** Platformun Google Cloud projesi ve OAuth web istemcisi (`GOOGLE_OAUTH_CLIENT_ID/SECRET`), OAuth onay ekranı doğrulaması (`auth/content` hassas kapsam) ve her mağazanın `BACKEND_URL/google/callback` adresinin yönlendirme adresi olarak kaydı. O zamana kadar panel "henüz açılmadı" der.
 - [ ] **Gözden geçir: ADR-0039 (F11, 2026-10-29, otonom kabul).**
   - Stok değeri yalnızca girilen birim maliyetle hesaplanır; maliyeti olmayan varyantlar ayrı sayılır, satış fiyatıyla tahmin yapılmaz.
@@ -1719,7 +1746,7 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
 | F9 Bildirimler (e-posta/SMS) | ✅ (N1–N10; KK1–KK4; 2026-10-28; gerçek Resend/Netgsm denemesi sunucuya çıkışta) |
 | F10 Müşteri hesabı, etkileşim, pazarlama ve SEO ölçümü | ✅ bitti (2026-10-29) |
 | F11 Raporlama, muhasebe ve dış API | ✅ (R1–R9; KK1–KK5; 2026-10-29) |
-| F12 Admin genişletmeleri (ekranlar panel hattı P5'te) | ⬜ |
+| F12 Admin genişletmeleri (ekranlar panel hattı P5'te) | 🟡 (Y1–Y13 planlandı, 2026-10-29) |
 | F13 Uyum & yasal özellikler | ⬜ |
 | F14 Veri taşıma ve geçiş araçları | ⬜ |
 | F15 Sertleştirme (güvenlik/dolandırıcılık/yük) | ⬜ |
