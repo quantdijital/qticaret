@@ -4,6 +4,8 @@ import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { DEMO_SHOPIFY, startFakeShopify } from "@qticaret/testing"
 import type { FakeShopify } from "@qticaret/testing"
+import { MEDIA_MODULE } from "../../src/modules/media"
+import type MediaModuleService from "../../src/modules/media/service"
 import { MESSAGING_MODULE } from "../../src/modules/messaging"
 import type MessagingModuleService from "../../src/modules/messaging/service"
 import { MIGRATION_MODULE } from "../../src/modules/migration"
@@ -54,6 +56,20 @@ medusaIntegrationTestRunner({
     beforeAll(async () => {
       shopify = await startFakeShopify(app, { data: structuredClone(DEMO_SHOPIFY) })
       process.env["SHOPIFY_BASE_URL"] = shopify.url
+      // The pan: a picture, one at the cloud's metadata address (KK4), a file that is no picture
+      const [pan, spoon] = shopify.data.products
+      const picture = (n: number, url: string) => ({
+        id: `gid://shopify/MediaImage/${String(n)}`,
+        image: { url },
+      })
+      pan?.children?.splice(
+        0,
+        1,
+        picture(1, `${shopify.url}/images/tava.png`),
+        picture(2, "http://169.254.169.254/latest/meta-data/gorsel.png"),
+        picture(3, `${shopify.url}/images/notlar.txt`)
+      )
+      spoon?.children?.unshift(picture(4, `${shopify.url}/images/kasik.png`))
     })
 
     afterAll(async () => {
@@ -91,9 +107,11 @@ medusaIntegrationTestRunner({
         customer: { read: 2, created: 2 },
         consent: { created: 1 },
         order: { read: 2, created: 2 },
+        image: { read: 4, created: 4 },
         review: { read: 0 },
         page: { read: 3 },
       })
+      expect(shopify.imageHits).toEqual([])
       expect(shopify.bulkRuns).toEqual([
         "collections",
         "products",
@@ -106,11 +124,16 @@ medusaIntegrationTestRunner({
       const parcel = { weight: 500, length: 30, width: 20, height: 10 }
       const applied = await run({ mode: "apply", defaults: parcel })
       expect(applied.status).toBe("succeeded")
+      expect((applied.result_summary as { counts: Counts }).counts).toMatchObject({
+        image: { read: 4, created: 2, skipped: 2 },
+      })
+      // The metadata address is refused before any request
+      expect(shopify.imageHits.sort()).toEqual(["kasik.png", "notlar.txt", "tava.png"])
       const { data: products } = await getContainer()
         .resolve(ContainerRegistrationKeys.QUERY)
         .graph({
           entity: "product",
-          fields: ["handle", "status", "weight", "length", "brand.name"],
+          fields: ["handle", "status", "weight", "length", "thumbnail", "images.url"],
           filters: { handle: ["dokum-tava", "ahsap-kasik"] },
         })
       // The pan's own weight, the owner's measurements; the draft stays a draft
@@ -122,6 +145,21 @@ medusaIntegrationTestRunner({
         ["ahsap-kasik", "draft", 50, 30],
         ["dokum-tava", "published", 1500, 30],
       ])
+      // Each product's picture, stored here, its thumbnail, with an alt text from its name
+      const pictured = products as {
+        handle: string
+        thumbnail: string
+        images: { url: string }[]
+      }[]
+      for (const product of pictured) {
+        expect(product.images).toHaveLength(1)
+        expect(product.thumbnail).toBe(product.images[0]?.url)
+        expect(product.thumbnail.startsWith(shopify.url)).toBe(false)
+      }
+      const assets = await getContainer()
+        .resolve<MediaModuleService>(MEDIA_MODULE)
+        .listMediaAssets({ url: pictured.map((product) => product.thumbnail) })
+      expect(assets.map((asset) => asset.alt).sort()).toEqual(["Ahşap Kaşık", "Döküm Tava"])
 
       const [ayse] = await getContainer()
         .resolve<ICustomerModuleService>(Modules.CUSTOMER)
@@ -147,8 +185,12 @@ medusaIntegrationTestRunner({
       ])
       expect(pages[0]?.source).toBe("shopify:demo-magaza.myshopify.com")
 
+      const hits = shopify.imageHits.length
       const again = await run({ mode: "apply", defaults: parcel })
+      // The pictures stored are not fetched again; the refused file is tried again
+      expect(shopify.imageHits.slice(hits)).toEqual(["notlar.txt"])
       expect((again.result_summary as { counts: Counts }).counts).toMatchObject({
+        image: { found: 2, created: 0, skipped: 2 },
         category: { created: 0, found: 2 },
         product: { created: 0, failed: 0 },
         customer: { created: 0, found: 2 },

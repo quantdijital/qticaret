@@ -142,6 +142,7 @@ export const MIGRATION_KINDS = [
   "category",
   "brand",
   "product",
+  "image",
   "customer",
   "order",
   "review",

@@ -125,7 +125,7 @@ export function productsOf(nodes: readonly BulkNode[]): SourceProduct[] {
         seo_description: text(node, "seo.description", 1_000),
         images: own
           .map((child) => text(child, "image.url", 2048))
-          .filter((url): url is string => url?.startsWith("https://") === true)
+          .filter((url): url is string => url !== null && /^https?:\/\//.test(url))
           .slice(0, 50),
         options,
         variants,

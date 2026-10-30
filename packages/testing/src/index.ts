@@ -76,7 +76,7 @@ export type {
   FakeSalesInvoice,
 } from "./parasut/fake-server"
 export { DEMO_SHOPIFY } from "./shopify/demo"
-export { jsonlOf, startFakeShopify } from "./shopify/fake-server"
+export { FAKE_SHOPIFY_PNG, jsonlOf, startFakeShopify } from "./shopify/fake-server"
 export type {
   FakeShopify,
   FakeShopifyApp,

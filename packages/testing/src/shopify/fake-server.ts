@@ -35,9 +35,17 @@ export interface FakeShopifyApp {
   clientSecret: string
 }
 
+/** A real 64×48 PNG: what the fake serves at `/images/{name}` (a store's picture). */
+export const FAKE_SHOPIFY_PNG = Buffer.from(
+  "iVBORw0KGgoAAAANSUhEUgAAAEAAAAAwCAIAAAAuKetIAAAACXBIWXMAAAPoAAAD6AG1e1JrAAAAfUlEQVRoge2SAQkAURSDFsdMl9OAF2M8/sAAOhY/TpO6gQugvqK7EHdJ3cAFUF/RXYi7pG7gAqiv6C7EXVI3cAHUV3QX4i6pG7gA6iu6C3GX1A1cAPUV3YW4S+oGLoD6iu5C3CV1AxdAfUV3Ie6SuoELoL6iuxB3Sd3AxwN+3U6I0+Jnnj8AAAAASUVORK5CYII=",
+  "base64"
+)
+
 export interface FakeShopify {
   /** The origin the backend takes as `SHOPIFY_BASE_URL`. */
   url: string
+  /** Pictures asked for, by name: `/images/tava.png` → "tava.png". */
+  imageHits: string[]
   data: FakeShopifyData
   /** The bulk queries asked for, by their list ("products"). */
   bulkRuns: string[]
@@ -107,6 +115,7 @@ export async function startFakeShopify(
   const tokens = new Set<string>()
   const operations = new Map<string, Operation>()
   const bulkRuns: string[] = []
+  const imageHits: string[] = []
   const sockets = new Set<Socket>()
   let refused = false
   let throttled = 0
@@ -195,6 +204,15 @@ export async function startFakeShopify(
         json(res, answer.status, answer.body)
         return
       }
+      // Any `.png`/`.jpg` name is a picture; `.txt` is a file that is not one
+      const image = /^\/images\/([a-z0-9-]+\.(?:png|jpg|txt))$/.exec(url.pathname)?.[1]
+      if (image && req.method === "GET") {
+        imageHits.push(image)
+        const picture = !image.endsWith(".txt")
+        res.writeHead(200, { "content-type": picture ? "image/png" : "text/plain" })
+        res.end(picture ? FAKE_SHOPIFY_PNG : "bir görsel değil")
+        return
+      }
       const file = /^\/files\/([0-9]+)\.jsonl$/.exec(url.pathname)?.[1]
       if (file && req.method === "GET") {
         const operation = operations.get(`gid://shopify/BulkOperation/${file}`)
@@ -233,6 +251,7 @@ export async function startFakeShopify(
 
   return {
     url: origin,
+    imageHits,
     data,
     bulkRuns,
     refuseShop: (value) => {

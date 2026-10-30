@@ -40,6 +40,7 @@ const KIND_TEXT: Readonly<Record<keyof RunCounts, string>> = {
   category: "Kategoriler",
   brand: "Markalar",
   product: "Ürünler",
+  image: "Görseller",
   customer: "Müşteriler",
   consent: "Ticari ileti izinleri",
   order: "Geçmiş siparişler",

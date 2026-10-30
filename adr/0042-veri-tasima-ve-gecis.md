@@ -112,3 +112,12 @@ Elimizde olanlar:
 2. **Okuma.** GraphQL Admin API `2026-10`, her liste için toplu sorgu (bulk operation). Sorgu maliyeti ve 25.000 nesnelik sayfalama sınırı aşılır; JSONL dosyası yalnızca `storage.googleapis.com`'dan indirilir.
 3. **Para birimi.** TRY dışında satan mağaza okunmadan reddedilir; fiyat çevrilmez.
 4. **Eşleme ayrıntısı** `docs/entegrasyonlar/shopify.md`. Kısaca: koleksiyon kategori, satıcı marka, yalnızca Türkiye adresleri, yalnızca tarihli izin, tanıtıcı platformun slug kuralına çevrilir (eski adres 301 için kalır), Shopify'ın kendi yorumu yoktur.
+
+## Uygulama notları (G4 görseller, 2026-10-31)
+
+1. **İndirme.** Her görsel `safeFetch` ile indirilir: yalnızca genel adresler, her yönlendirme yeniden denetlenir (en çok 3), 20 saniye, 10 MB (KK4). İç ağ ya da bulut meta veri adresi (`169.254.169.254`) istek atılmadan reddedilir. Yalnızca geliştirme ve testteki sahte Shopify'ın kendi adresine doğrudan, yönlendirmesiz gidilir.
+2. **Medya hattı.** Görsel panel yüklemesiyle aynı denetimden geçer: türü baytlarından (JPEG, PNG, WebP, AVIF), boyut ve piksel sınırı, EXIF/GPS temizliği ve yeniden kodlama. Genel dosya olarak saklanır, `registerMediaWorkflow` ile kaydedilir, ürün güncelleme iş akışıyla ürüne eklenir; sürümler (WebP/AVIF, paylaşım görseli) mevcut aboneyle üretilir.
+3. **Sıra ve alt metin.** Ürünün kendi görsellerinden sonra, kaynağın sırasıyla eklenir; ürünün küçük görseli yoksa ilki olur. Alt metin ürün adından üretilir (toplu düzenlemenin kuralıyla).
+4. **Tekrarsızlık.** Her görsel (ürün + adres) ayrı hatırlanır; ikinci çalıştırma saklananı indirmez, reddedileni yeniden dener.
+5. **Hata.** Reddedilen ya da ulaşılamayan görsel ürünü durdurmaz; raporun "Notlar" sayfasında nedeniyle yazar.
+6. **Eski görsel adresi.** Eski görseller çoğunlukla başka bir alan adında (ör. Shopify CDN) durur; oraya gelen istek bu siteye hiç ulaşmaz, 301 verilemez. Eski sitenin kendi alan adındaki görsel adresleri G5'teki adres envanteriyle (eski sitenin alan adı bilinince) yönlendirilir; görsel kayıtları kaynak adresi tutar.

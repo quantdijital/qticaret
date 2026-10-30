@@ -723,4 +723,10 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The Shopify store sells in a currency other than lira; prices are never converted.",
   "shopify.shop_domain_invalid": "The store address takes the form your-store.myshopify.com.",
   "shopify.client_id_invalid": "The client ID is not valid.",
+  "migration.image_address_refused":
+    "The picture's address was refused: it leads inside the network or somewhere not allowed.",
+  "migration.image_too_large": "The picture is over 10 MB; it did not move.",
+  "migration.image_unreachable":
+    "The picture could not be reached; it did not move. You can add it by hand.",
+  "migration.image_not_accepted": "Not an accepted picture (JPEG, PNG, WebP, AVIF), or unreadable.",
 }

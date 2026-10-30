@@ -12,6 +12,7 @@ import type { ImportHooks } from "../catalog/import/run"
 import { migrateBrands } from "./brands"
 import { migrateCategories } from "./categories"
 import { migrateCustomers, migrateOrders } from "./customers"
+import { migrateImages } from "./images"
 import { migrateProducts } from "./products"
 import { emptyCounts } from "./report"
 import type { KindCounts, ReportProblem, RunCounts } from "./report"
@@ -30,7 +31,8 @@ export interface MigrationHooks {
 const SPAN = {
   category: [0, 4],
   brand: [4, 8],
-  product: [8, 70],
+  product: [8, 50],
+  image: [50, 70],
   customer: [70, 85],
   order: [85, 92],
   review: [92, 99],
@@ -80,7 +82,7 @@ const counted = (values: Partial<KindCounts>): KindCounts => ({ ...emptyCounts()
 /**
  * A shop's old platform moved here (F14, adr/0042): categories and brands
  * first (the products name them), the products through the catalog import
- * in groups, then customers, their old orders and the reviews; the other
+ * in groups and their pictures, then customers, their old orders and the reviews; the other
  * pages are kept for their addresses (F14.7). A live product without its
  * measurements takes the owner's `defaults`, else comes as a draft; each
  * is named in the report. A dry run writes nothing and
@@ -164,6 +166,16 @@ export async function runMigration(
     productRows.push(...rows)
   }
   await keep("product", productCounts)
+
+  const images = await migrateImages(
+    container,
+    source.id,
+    products,
+    apply,
+    spanOf(hooks, SPAN.image)
+  )
+  problems.push(...images.problems.map((problem) => ({ ...problem, kind: "image" as const })))
+  await keep("image", images.counts)
 
   const customers = await migrateCustomers(
     container,

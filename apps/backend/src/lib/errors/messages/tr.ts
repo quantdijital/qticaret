@@ -727,4 +727,10 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Shopify mağazası Türk lirası dışında bir para birimiyle satıyor; fiyatlar çevrilmeden taşınamaz.",
   "shopify.shop_domain_invalid": "Mağaza adresi magaza-adi.myshopify.com biçiminde olmalı.",
   "shopify.client_id_invalid": "İstemci kimliği (Client ID) geçersiz.",
+  "migration.image_address_refused":
+    "Görsel adresi reddedildi: iç ağa ya da izin verilmeyen bir adrese gidiyor.",
+  "migration.image_too_large": "Görsel 10 MB'tan büyük; taşınmadı.",
+  "migration.image_unreachable": "Görsele ulaşılamadı; taşınmadı. Ürüne elle ekleyebilirsiniz.",
+  "migration.image_not_accepted":
+    "Dosya kabul edilen bir görsel değil (JPEG, PNG, WebP, AVIF) ya da okunamadı.",
 }
