@@ -50,6 +50,10 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "orders.nothing_to_deliver": "Teslim edilecek, mağazanın kendi teslimatında bir koli yok.",
   "orders.deliver_failed":
     "Sipariş teslim edildi olarak işaretlenemedi; sipariş sayfasından tekrar deneyin.",
+  "orders.note_unknown": "Not bulunamadı; silinmiş olabilir.",
+  "orders.note_not_yours": "Bu notu yalnızca yazan kişi ya da mağaza sahibi silebilir.",
+  "orders.note_empty": "Not boş olamaz.",
+  "orders.note_too_long": "Not en çok 2000 karakter olabilir.",
   "orders.ship_failed": "Sipariş kargoya verilemedi; sipariş sayfasından tekrar deneyin.",
   "orders.payment_awaited":
     "Siparişin ödemesi henüz gelmedi; havale onaylanınca kargoya verilebilir.",

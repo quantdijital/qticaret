@@ -3,7 +3,11 @@ import { InjectManager, InjectTransactionManager, MedusaContext } from "@medusaj
 import { uniqueViolationKeys } from "../../lib/errors"
 import type { MessageChannel } from "../../lib/messaging/recipients"
 import { ConsentRequests } from "./consent-requests"
-import type { SuppressionInput } from "./types"
+import type { SkipInput, SuppressionInput } from "./types"
+
+interface Executor {
+  execute: (sql: string, params: unknown[]) => Promise<unknown>
+}
 
 /**
  * Who takes which messages (adr/0036): commercial consent per channel,
@@ -83,6 +87,56 @@ class MessagingModuleService extends ConsentRequests {
   ): Promise<void> {
     await this.updateMessageSuppressions({ id, removed_by: removedBy }, sharedContext)
     await this.softDeleteMessageSuppressions([id], {}, sharedContext)
+  }
+
+  /** Notes a send that did not go out; the same send noted again keeps its latest reason. */
+  async noteSkip(input: SkipInput): Promise<void> {
+    try {
+      await this.noteSkip_(input)
+    } catch (error) {
+      if (!uniqueViolationKeys(error)?.includes("send_key")) {
+        throw error
+      }
+      await this.noteSkip_(input)
+    }
+  }
+
+  @InjectTransactionManager()
+  protected async noteSkip_(
+    input: SkipInput,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<void> {
+    const [row] = await this.listMessageSkips(
+      { send_key: input.send_key },
+      { take: 1, select: ["id"] },
+      sharedContext
+    )
+    if (row) {
+      await this.updateMessageSkips(
+        { id: row.id, reason: input.reason, recipient_masked: input.recipient_masked },
+        sharedContext
+      )
+      return
+    }
+    await this.createMessageSkips(input, sharedContext)
+  }
+
+  /** The send went out after all: what was noted against it goes. */
+  @InjectTransactionManager()
+  async clearSkip(sendKey: string, @MedusaContext() sharedContext: Context = {}): Promise<void> {
+    const manager = sharedContext.transactionManager as Executor
+    await manager.execute(`DELETE FROM message_skip WHERE send_key = ?`, [sendKey])
+  }
+
+  /** Skips last noted before `before` go; returns how many. */
+  @InjectTransactionManager()
+  async pruneSkips(before: Date, @MedusaContext() sharedContext: Context = {}): Promise<number> {
+    const manager = sharedContext.transactionManager as Executor
+    const rows = (await manager.execute(
+      `DELETE FROM message_skip WHERE updated_at < ? RETURNING id`,
+      [before]
+    )) as unknown[]
+    return rows.length
   }
 }
 

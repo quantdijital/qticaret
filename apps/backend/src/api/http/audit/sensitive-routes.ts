@@ -18,6 +18,10 @@ export const SENSITIVE_READS: readonly [string, string, boolean, (readonly strin
   ["/admin/orders/:id", "order", false],
   ["/admin/orders/:id/preview", "order", false],
   ["/admin/orders/:id/changes", "order", false],
+  // F12.8: the team's notes are free text; what a customer was sent is theirs
+  ["/admin/orders/:id/notes", "order", false],
+  ["/admin/orders/:id/messages", "order", false],
+  ["/admin/customers/:id/messages", "customer", false],
   // F6.7: a dispute's evidence holds the order's delivery address
   ["/admin/chargebacks/:id/evidence", "chargeback", false],
   // F7 (adr/0031): a parcel's label holds the recipient's address and phone

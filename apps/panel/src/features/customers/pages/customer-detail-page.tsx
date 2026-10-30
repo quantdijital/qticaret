@@ -29,6 +29,7 @@ import { errorText } from "@/lib/errors"
 import { formatDate, formatMoney } from "@/lib/format"
 import { ConsentCard } from "@/features/customers/components/consent-card"
 import { CustomerGroupsCard } from "@/features/customers/components/customer-groups-card"
+import { MessageHistoryCard } from "@/features/customers/components/message-history-card"
 
 const route = getRouteApi("/_auth/customers/$id")
 
@@ -195,7 +196,10 @@ function BillingCard({ customerId }: { customerId: string }) {
   )
 }
 
-/** One customer (docs/06 §4): their orders on the left, how to reach and bill them on the right. */
+/**
+ * One customer (docs/06 §4): their orders and what they were sent on the
+ * left, how to reach and bill them on the right.
+ */
 export function CustomerDetailPage() {
   const { t } = useTranslation()
   const storeCredit = useFeature(GIFT_CARDS_FLAG)
@@ -239,6 +243,7 @@ export function CustomerDetailPage() {
       <PageGrid>
         <PageColumn span={8}>
           <OrdersCard customerId={customer.id} />
+          <MessageHistoryCard customerId={customer.id} />
         </PageColumn>
         <PageColumn span={4}>
           <ContactCard customer={customer} />

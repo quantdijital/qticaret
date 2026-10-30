@@ -118,6 +118,8 @@ module.exports = defineConfig({
     { resolve: "./src/modules/return-requests" },
     // F5 V5: refunds line by line, each made once
     { resolve: "./src/modules/order-refunds" },
+    // F12.8: staff notes on orders
+    { resolve: "./src/modules/order-notes" },
     // F10.2 (adr/0037 §3): configuring the module drops Medusa's default, so
     // e-mail is named again; Google and Apple only once their clients are set
     {

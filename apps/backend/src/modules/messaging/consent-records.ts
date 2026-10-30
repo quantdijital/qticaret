@@ -14,6 +14,7 @@ import { CheckoutConsent } from "./models/checkout-consent"
 import { ConsentRequest } from "./models/consent-request"
 import { MessageConsent } from "./models/message-consent"
 import { MessageConsentEvent } from "./models/message-consent-event"
+import { MessageSkip } from "./models/message-skip"
 import { MessageSuppression } from "./models/message-suppression"
 import { SenderDomain } from "./models/sender-domain"
 import type {
@@ -46,6 +47,7 @@ export class ConsentRecords extends MedusaService({
   ConsentRequest,
   MessageConsent,
   MessageConsentEvent,
+  MessageSkip,
   MessageSuppression,
   SenderDomain,
 }) {

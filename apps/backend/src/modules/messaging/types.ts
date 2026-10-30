@@ -1,4 +1,5 @@
 import type { MessageChannel } from "../../lib/messaging/recipients"
+import type { MessageSkipReason } from "./models/message-skip"
 
 export interface MessagingModuleOptions {
   /** 64 hex characters (PII_HASH_KEY): addresses are kept only as this keyed hash. */
@@ -32,4 +33,16 @@ export interface SuppressionInput {
   source: "resend" | "netgsm" | "panel"
   detail?: string | null
   created_by?: string | null
+}
+
+/** A message not sent and why (F12.8); the address arrives masked, if at all. */
+export interface SkipInput {
+  send_key: string
+  template: string
+  channel: MessageChannel
+  reason: MessageSkipReason
+  resource_type: string
+  resource_id: string
+  receiver_id: string | null
+  recipient_masked: string | null
 }

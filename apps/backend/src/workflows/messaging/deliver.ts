@@ -16,8 +16,11 @@ import { netgsmAccountOf } from "../../lib/messaging/sms/netgsm"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-credentials"
 import type IntegrationCredentialsModuleService from "../../modules/integration-credentials/service"
 import { MESSAGING_MODULE } from "../../modules/messaging"
+import type { MessageSkipReason } from "../../modules/messaging/models/message-skip"
 import type MessagingModuleService from "../../modules/messaging/service"
+import type { SkipInput } from "../../modules/messaging/types"
 import { brandOf } from "./brand"
+import { HISTORY_RESOURCE_TYPES, isCustomerTemplate } from "./history"
 import { senderAddress } from "./sender-domain"
 import { withinQuota } from "./quota"
 import type { MessageRecipients } from "./loaders/types"
@@ -61,6 +64,40 @@ interface NotificationRows {
   deleteNotifications: (ids: string[]) => Promise<void>
 }
 
+/**
+ * Whether a message not sent is noted: one the panel's history shows, to
+ * a customer it knows or about an order (F12.8). Not the team's alerts,
+ * and not an anonymous request's (a reset link), which no history reads
+ * and anyone could repeat.
+ */
+const shownInHistory = (
+  name: string,
+  input: { receiverId: string | null; resource: { type: string } }
+) =>
+  isCustomerTemplate(name) &&
+  (input.receiverId !== null || HISTORY_RESOURCE_TYPES.has(input.resource.type))
+
+// The history is the panel's: a write that fails does not stop the message
+async function noteSkip(messaging: MessagingModuleService, input: SkipInput): Promise<void> {
+  try {
+    await messaging.noteSkip(input)
+  } catch (error) {
+    logger.warn({
+      event: "messaging.skip_not_noted",
+      template: input.template,
+      err: errorSummary(error),
+    })
+  }
+}
+
+async function clearSkip(messaging: MessagingModuleService, key: string): Promise<void> {
+  try {
+    await messaging.clearSkip(key)
+  } catch (error) {
+    logger.warn({ event: "messaging.skip_not_cleared", err: errorSummary(error) })
+  }
+}
+
 /** Whether the channel can send at all: the instance's e-mail, the shop's SMS account. */
 async function channelReady(container: Container, channel: MessageChannel): Promise<boolean> {
   if (channel === "email") {
@@ -96,8 +133,9 @@ function render<N extends MessageTemplateName>(
  * one, it is not suppressed, a commercial message has consent, the channel
  * is not held, and a new send fits the day's quota; then Medusa sends it
  * once per template, channel, resource and key. What is not sent
- * is logged with its reason and a masked address; nothing logs the
- * message itself. A provider's failure is logged and left for the retry.
+ * is logged with its reason and a masked address, and noted for the
+ * panel's history (F12.8); nothing logs the message itself. A provider's
+ * failure is logged and left for the retry.
  */
 export async function deliver<N extends MessageTemplateName>(
   container: Container,
@@ -113,35 +151,10 @@ export async function deliver<N extends MessageTemplateName>(
       continue
     }
     const fields = { template: template.name, channel, resource_id: input.resource.id }
-    const notSent = (reason: SendOutcome, masked?: string) => {
-      logger.info({ event: "messaging.not_sent", ...fields, reason, to: masked ?? null })
-      outcomes[channel] = reason
-    }
-    if (!(await channelReady(container, channel))) {
-      notSent("channel_off")
-      continue
-    }
-    const to = normalizeRecipient(channel, address)
-    const recipient = messaging.recipientOf(channel, address)
-    if (!to || !recipient) {
-      notSent("invalid_recipient")
-      continue
-    }
-    if (await messaging.isSuppressed(channel, to)) {
-      notSent("suppressed", recipient.masked)
-      continue
-    }
-    if (template.kind === "commercial" && (await messaging.consentOf(channel, to)) !== "granted") {
-      notSent("no_consent", recipient.masked)
-      continue
-    }
-    if (input.held?.includes(channel)) {
-      notSent("over_quota", recipient.masked)
-      continue
-    }
     const key = [template.name, channel, input.resource.id, input.key].filter(Boolean).join(":")
     const notifications = container.resolve(Modules.NOTIFICATION)
     const rows = notifications as unknown as NotificationRows
+    // Gone out already: whatever holds a send now, this one is not a message not sent
     const [previous] = await rows.listNotifications(
       { idempotency_key: key },
       { take: 1, select: ["id", "status"] }
@@ -150,13 +163,55 @@ export async function deliver<N extends MessageTemplateName>(
       outcomes[channel] = "duplicate"
       continue
     }
+    const notSent = async (reason: MessageSkipReason, masked?: string) => {
+      logger.info({ event: "messaging.not_sent", ...fields, reason, to: masked ?? null })
+      outcomes[channel] = reason
+      // A shop without an SMS account sends no texts: its choice, not each message's story
+      if (
+        shownInHistory(template.name, input) &&
+        !(reason === "channel_off" && channel === "sms")
+      ) {
+        await noteSkip(messaging, {
+          send_key: key,
+          template: template.name,
+          channel,
+          reason,
+          resource_type: input.resource.type,
+          resource_id: input.resource.id,
+          receiver_id: input.receiverId,
+          recipient_masked: masked ?? null,
+        })
+      }
+    }
+    if (!(await channelReady(container, channel))) {
+      await notSent("channel_off")
+      continue
+    }
+    const to = normalizeRecipient(channel, address)
+    const recipient = messaging.recipientOf(channel, address)
+    if (!to || !recipient) {
+      await notSent("invalid_recipient")
+      continue
+    }
+    if (await messaging.isSuppressed(channel, to)) {
+      await notSent("suppressed", recipient.masked)
+      continue
+    }
+    if (template.kind === "commercial" && (await messaging.consentOf(channel, to)) !== "granted") {
+      await notSent("no_consent", recipient.masked)
+      continue
+    }
+    if (input.held?.includes(channel)) {
+      await notSent("over_quota", recipient.masked)
+      continue
+    }
     if (previous) {
       // Medusa 2.21.2 sends a failed key again under an id it never stores, then fails
       // to record the result: a failed attempt is cleared and sent as a new one
       await rows.deleteNotifications([previous.id])
     }
     if (!(await withinQuota(container, channel, recipient.hash, template.name))) {
-      notSent("over_quota", recipient.masked)
+      await notSent("over_quota", recipient.masked)
       continue
     }
     brand ??= await brandOf(container)
@@ -190,6 +245,9 @@ export async function deliver<N extends MessageTemplateName>(
         },
       ])
       outcomes[channel] = created.length > 0 ? "sent" : "duplicate"
+      if (created.length > 0) {
+        await clearSkip(messaging, key)
+      }
     } catch (error) {
       logger.warn({
         event: "messaging.send_failed",

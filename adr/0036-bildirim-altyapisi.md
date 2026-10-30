@@ -135,3 +135,16 @@ Bağımsız inceleme kritik bulgu çıkarmadı. Şablon kaçışı, web kancası
   - Redis düştüğünde SMS sayaçları bellekte sıfırdan başlıyor (kapanmadan açık kalma değil, sınır gevşer). Canlıda Redis yüksek erişilebilir kurulur (F16). Maliyet sorun olursa SMS sayacı Redis yokken kapalı başarısızlığa çevrilir.
   - Panelden izin verme: kanıt alanı, yalnızca sahip rolü ve izin olaylarının değiştirilemezliği F10 (İYS iletimi) ve F12 (roller) ile.
   - Ticari e-postada `List-Unsubscribe` / `List-Unsubscribe-Post` başlıkları ve tek tıkla ret bağlantısı F10 kampanyalarıyla.
+
+## Ek: İletişim geçmişi ve gönderilmeyen iletiler (F12.8, 2026-10-30)
+- Panelde sipariş ve müşteri sayfasında iletişim geçmişi var. Gönderilenler Medusa'nın `notification` kayıtlarından okunur: sipariş için siparişin, kolilerinin ve iade taleplerinin kayıtları, müşteri için `receiver_id`. Ekibe giden `staff.*` iletileri müşterinin geçmişine girmez. Adres yalnızca maskeli döner, ileti metni zaten saklanmaz.
+- Gönderilmeyenler `messaging` modülündeki `message_skip` tablosuna yazılır: şablon, kanal, neden (`channel_off`, `invalid_recipient`, `suppressed`, `no_consent`, `over_quota`), kaynak, alıcı, maskeli adres.
+  - Gönderim anahtarı (Medusa'nın `idempotency_key`'i) başına bir satır tutulur; aynı gönderim yeniden denenirse son nedeni kalır. Gönderim sonradan giderse satır silinir.
+  - Yalnızca geçmişin okuduğu iletiler yazılır: alıcısı bilinen müşteri ya da sipariş, koli veya iade talebi. Ekip uyarıları ve anonim istekler (şifre sıfırlama) yazılmaz; ikincisini herkes tekrarlayabilir, hiçbir geçmiş okumaz.
+  - Daha önce gitmiş bir gönderim yeniden denenirse (olay yeniden teslimi) sonuç `duplicate` olur ve "gönderilmedi" yazılmaz. Yineleme denetimi bu yüzden öteki denetimlerden önce yapılır.
+  - SMS hesabı olmayan mağazanın SMS'leri (`channel_off`, SMS) yazılmaz. SMS göndermemek mağazanın tercihi, her siparişte "gönderilmedi" demek gürültü olurdu. E-postanın kapalı olması bir arızadır, o yazılır.
+  - Kayıt yazılamazsa ileti yine gider; yalnızca uyarı loglanır.
+  - Satırlar 180 gün tutulur (`message-skips-retention`, her gece).
+- Sağlayıcı hatası (`failure`) Medusa'nın kaydında kalır; panel "Gönderim servisi iletiyi kabul etmedi" der.
+- Okumalar kayıtlı okumadır (`SENSITIVE_READS`): müşterinin hangi iletiyi aldığı kişisel veridir.
+

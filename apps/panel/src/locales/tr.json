@@ -2701,6 +2701,21 @@
       "delivered_other": "{{count}} sipariş teslim edildi olarak işaretlendi.",
       "notDelivered_one": "{{count}} sipariş işaretlenemedi: {{reason}}",
       "notDelivered_other": "{{count}} sipariş işaretlenemedi: {{reason}}"
+    },
+    "notes": {
+      "title": "İç notlar",
+      "text": "Yalnızca ekip görür; müşteriye gösterilmez.",
+      "empty": "Henüz not yok.",
+      "new": "Yeni not",
+      "placeholder": "Örneğin: müşteri aradı, paketin kapıya bırakılmasını istedi.",
+      "length": "{{count}}/{{max}}",
+      "add": "Notu ekle",
+      "remove": "Notu sil",
+      "removeTitle": "Not silinsin mi?",
+      "removeText": "Not ekipten kaldırılır; kimin sildiği kayıtta kalır.",
+      "removed": "Not silindi.",
+      "unnamed": "Ekip üyesi",
+      "formerMember": "Ekipten ayrılan kişi"
     }
   },
   "customers": {
@@ -2851,6 +2866,31 @@
       "segment": "segment",
       "empty": "Henüz grup yok; Müşteriler > Gruplar ve segmentler ekranından ekleyin.",
       "saved": "Gruplar güncellendi."
+    },
+    "messages": {
+      "title": "İletişim geçmişi",
+      "orderText": "Bu sipariş için müşteriye giden e-posta ve SMS'ler; gönderilmeyenler nedeniyle birlikte.",
+      "customerText": "Müşteriye giden e-posta ve SMS'ler; gönderilmeyenler nedeniyle birlikte.",
+      "empty": "Henüz ileti yok.",
+      "limited": "Son 50 ileti gösteriliyor.",
+      "channel": {
+        "email": "E-posta",
+        "sms": "SMS"
+      },
+      "state": {
+        "sent": "Gönderildi",
+        "pending": "Gönderiliyor",
+        "failed": "Gönderilemedi",
+        "skipped": "Gönderilmedi"
+      },
+      "reason": {
+        "channel_off": "E-posta gönderimi kurulu değil.",
+        "invalid_recipient": "Adres geçerli değil.",
+        "suppressed": "Adres engellenenler listesinde (geri dönen ya da şikâyet eden adres).",
+        "no_consent": "Müşterinin bu kanalda ticari ileti izni yok.",
+        "over_quota": "Günlük gönderim sınırı doldu.",
+        "provider": "Gönderim servisi iletiyi kabul etmedi."
+      }
     }
   },
   "categories": {

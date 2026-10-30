@@ -2701,6 +2701,21 @@
       "delivered_other": "{{count}} orders marked delivered.",
       "notDelivered_one": "{{count}} order could not be marked: {{reason}}",
       "notDelivered_other": "{{count}} orders could not be marked: {{reason}}"
+    },
+    "notes": {
+      "title": "Internal notes",
+      "text": "Only the team sees them; never shown to the customer.",
+      "empty": "No notes yet.",
+      "new": "New note",
+      "placeholder": "For example: the customer called and asked for the parcel to be left at the door.",
+      "length": "{{count}}/{{max}}",
+      "add": "Add note",
+      "remove": "Remove note",
+      "removeTitle": "Remove this note?",
+      "removeText": "The note is removed for the team; who removed it stays on record.",
+      "removed": "Note removed.",
+      "unnamed": "Team member",
+      "formerMember": "Former team member"
     }
   },
   "customers": {
@@ -2851,6 +2866,31 @@
       "segment": "segment",
       "empty": "No groups yet; add them under Customers > Groups and segments.",
       "saved": "Groups updated."
+    },
+    "messages": {
+      "title": "Communication history",
+      "orderText": "E-mails and texts sent to the customer about this order, and the ones not sent with the reason.",
+      "customerText": "E-mails and texts sent to the customer, and the ones not sent with the reason.",
+      "empty": "No messages yet.",
+      "limited": "Showing the latest 50 messages.",
+      "channel": {
+        "email": "E-mail",
+        "sms": "SMS"
+      },
+      "state": {
+        "sent": "Sent",
+        "pending": "Sending",
+        "failed": "Failed",
+        "skipped": "Not sent"
+      },
+      "reason": {
+        "channel_off": "E-mail sending is not set up.",
+        "invalid_recipient": "The address is not valid.",
+        "suppressed": "The address is on the suppression list (bounced or complained).",
+        "no_consent": "The customer has not agreed to marketing messages on this channel.",
+        "over_quota": "The daily sending limit was reached.",
+        "provider": "The sending service did not accept the message."
+      }
     }
   },
   "categories": {

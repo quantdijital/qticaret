@@ -12,7 +12,9 @@ import { PickupAlert } from "@/features/orders/detail/pickup-alert"
 import { orderMoneyQuery, orderQuery, orderStateQuery } from "@/features/orders/api/orders"
 import { orderPaymentDetailsQuery } from "@/features/orders/api/payments"
 import { StageBadge } from "@/features/orders/components/stage-badge"
+import { MessageHistoryCard } from "@/features/customers/components/message-history-card"
 import { ItemsCard } from "@/features/orders/detail/items-card"
+import { NotesCard } from "@/features/orders/detail/notes-card"
 import { OrderActions } from "@/features/orders/detail/order-actions"
 import { PaymentCard } from "@/features/orders/detail/payment-card"
 import { AddressCard, CustomerCard } from "@/features/orders/detail/people-cards"
@@ -26,7 +28,8 @@ const route = getRouteApi("/_auth/orders/$id")
 
 /**
  * One order (docs/06 §4): where it stands and the next step at the top,
- * the parcel and the money on the left, the customer on the right.
+ * the parcel, the money and what the customer was sent on the left, the
+ * customer and the team's notes on the right.
  */
 export function OrderDetailPage() {
   const { t } = useTranslation()
@@ -108,6 +111,7 @@ export function OrderDetailPage() {
           {refunds.length > 0 ? (
             <RefundsCard refunds={refunds} currency={order.currency_code} />
           ) : null}
+          <MessageHistoryCard orderId={order.id} />
         </PageColumn>
         <PageColumn span={4}>
           <CustomerCard order={order} />
@@ -118,6 +122,8 @@ export function OrderDetailPage() {
             {...(money.error ? { moneyError: { onRetry: () => void money.refetch() } } : {})}
             hosted={hosted}
           />
+          {/* Last: the column's last card grows, and the note box sits at its foot */}
+          <NotesCard orderId={order.id} />
         </PageColumn>
       </PageGrid>
     </div>

@@ -43,6 +43,10 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The packed parcel must go first; then the remaining lines can be chosen.",
   "orders.nothing_to_deliver": "No parcel of the shop's own delivery waits to be delivered.",
   "orders.deliver_failed": "The order could not be marked delivered; try again on its page.",
+  "orders.note_unknown": "Note not found; it may have been removed.",
+  "orders.note_not_yours": "Only the note's author or the shop owner can remove it.",
+  "orders.note_empty": "A note cannot be empty.",
+  "orders.note_too_long": "A note can be at most 2000 characters.",
   "orders.ship_failed": "The order could not be shipped; try again from its page.",
   "orders.payment_awaited":
     "The order's payment has not come yet; it can be shipped once the transfer is confirmed.",

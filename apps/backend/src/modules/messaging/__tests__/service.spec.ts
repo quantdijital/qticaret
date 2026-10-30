@@ -170,5 +170,46 @@ moduleIntegrationTestRunner<MessagingModuleService>({
         expect(removed).toMatchObject({ reason: "bounce", removed_by: "user_1" })
       })
     })
+
+    describe("messages not sent (F12.8)", () => {
+      const skip = {
+        send_key: "order.placed:email:order_1",
+        template: "order.placed",
+        channel: "email" as const,
+        reason: "channel_off" as const,
+        resource_type: "order",
+        resource_id: "order_1",
+        receiver_id: "cus_1",
+        recipient_masked: null,
+      }
+
+      it("keeps one per send with its latest reason, until it goes out", async () => {
+        await service.noteSkip(skip)
+        await service.noteSkip({
+          ...skip,
+          reason: "suppressed",
+          recipient_masked: "ay***@example.com",
+        })
+
+        const rows = await service.listMessageSkips({ resource_id: "order_1" })
+        expect(rows).toEqual([
+          expect.objectContaining({ reason: "suppressed", recipient_masked: "ay***@example.com" }),
+        ])
+
+        await service.clearSkip(skip.send_key)
+        expect(await service.listMessageSkips({ resource_id: "order_1" })).toEqual([])
+      })
+
+      it("lets old ones go", async () => {
+        await service.noteSkip({
+          ...skip,
+          send_key: "order.placed:email:order_2",
+          resource_id: "order_2",
+        })
+
+        expect(await service.pruneSkips(new Date(Date.now() - 60_000))).toBe(0)
+        expect(await service.pruneSkips(new Date(Date.now() + 60_000))).toBe(1)
+      })
+    })
   },
 })
