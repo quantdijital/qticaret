@@ -156,10 +156,11 @@
     - IP ve user agent kişisel veridir; saklama süresi docs/12, silme işi F13.
 - Hassas alanlar için DB seviyesinde şifreleme gerekirse (TCKN) uygulama katmanında AES-256-GCM.
 - Saklama süreleri job'u: süresi dolan kişisel veriler anonimleştirilir (muhasebe kayıtları korunur).
-- Veri işleme envanteri `docs/kvkk-envanter.md` (F13'te oluşturulur).
+- Veri işleme envanteri ve saklama süreleri: `docs/kvkk-envanter.md` (F13.5); gecelik `compliance-retention` işi.
 - **Veri ihlali müdahalesi:** KVKK'ya göre ihlal, öğrenildikten sonra 72 saat içinde Kurul'a bildirilir; ilgili kişilere de bildirim gerekir
-  (kesin yükümlülük KVKK danışmanıyla doğrulanır). Runbook F13.10: tespit → sınırlama → etki analizi → tenant bilgilendirme şablonu →
-  Kurul bildirimi → olay sonrası rapor. Tenant veri sorumlusu, platform veri işleyen olduğundan bildirim sorumluluğu sözleşmede netleşir.
+  (kesin yükümlülük KVKK danışmanıyla doğrulanır). Kılavuz: `docs/runbooks/veri-ihlali.md` (tespit → sınırlama → etki analizi →
+  mağazaya bildirim → Kurul bildirimi → ilgili kişilere bildirim → olay sonrası rapor); tatbikatlar `docs/runbooks/tatbikatlar/`.
+  Tenant veri sorumlusu, platform veri işleyen olduğundan bildirim sorumluluğu sözleşmede netleşir.
 
 ### Altyapı
 - Container'lar non-root, salt-okunur dosya sistemi (mümkün olduğunca).
