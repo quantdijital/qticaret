@@ -563,7 +563,8 @@
         "seo.audit": "SEO denetimi",
         "catalog.import": "Ürün içe aktarma",
         "catalog.export": "Ürün dışa aktarma",
-        "catalog.bulk_edit": "Toplu düzenleme"
+        "catalog.bulk_edit": "Toplu düzenleme",
+        "customer.data_export": "Müşteri verisi dışa aktarımı"
       }
     },
     "audit": {
@@ -3131,6 +3132,49 @@
         "no_consent": "Müşterinin bu kanalda ticari ileti izni yok.",
         "over_quota": "Günlük gönderim sınırı doldu.",
         "provider": "Gönderim servisi iletiyi kabul etmedi."
+      }
+    },
+    "privacy": {
+      "title": "KVKK talepleri",
+      "hint": "Müşterinin verilerinin kopyasını ya da silinmesini istemesi. Yasa 30 gün içinde yanıt ister.",
+      "empty": "Talep yok.",
+      "record": "Talep kaydet",
+      "recordTitle": "KVKK talebi kaydet",
+      "recordHint": "Talebi geldiği gibi kaydedin. İşlem yapmadan önce talep edenin bu müşteri olduğundan emin olun.",
+      "kind": "Talep",
+      "kinds": {
+        "export": "Verilerinin kopyası",
+        "erasure": "Verilerinin silinmesi"
+      },
+      "channel": "Nasıl geldi",
+      "channels": {
+        "email": "E-posta",
+        "phone": "Telefon",
+        "letter": "Dilekçe",
+        "in_person": "Yüz yüze",
+        "other": "Diğer"
+      },
+      "receivedOn": "Geldiği gün",
+      "received": "{{channel}} · {{date}}",
+      "status": {
+        "open": "Açık · son gün {{date}}",
+        "completed": "Yanıtlandı",
+        "rejected": "Reddedildi"
+      },
+      "prepare": "Dosyayı hazırla",
+      "preparing": "Hazırlanıyor",
+      "download": "Dosyayı indir",
+      "sent": "Gönderildi",
+      "reject": "Reddet",
+      "erase": "Verileri sil",
+      "eraseTitle": "Müşterinin verileri silinsin mi?",
+      "eraseDescription": "Ad, e-posta, telefon, adresler, fatura bilgisi, siparişlerdeki kişisel bilgiler ve iç notlar kalıcı olarak silinir; müşteri bir daha giriş yapamaz. Tutarlar ve muhasebe kayıtları korunur, sözleşme kopyaları yasal süre dolana kadar saklanır. Bu işlem geri alınamaz.",
+      "eraseConfirm": "Kalıcı olarak sil",
+      "erased": "Müşterinin verileri silindi.",
+      "recorded": "Talep kaydedildi.",
+      "closed": {
+        "completed": "Talep yanıtlandı.",
+        "rejected": "Talep reddedildi."
       }
     }
   },

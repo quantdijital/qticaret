@@ -563,7 +563,8 @@
         "seo.audit": "SEO audit",
         "catalog.import": "Product import",
         "catalog.export": "Product export",
-        "catalog.bulk_edit": "Bulk edit"
+        "catalog.bulk_edit": "Bulk edit",
+        "customer.data_export": "Customer data export"
       }
     },
     "audit": {
@@ -3131,6 +3132,49 @@
         "no_consent": "The customer has not agreed to marketing messages on this channel.",
         "over_quota": "The daily sending limit was reached.",
         "provider": "The sending service did not accept the message."
+      }
+    },
+    "privacy": {
+      "title": "KVKK requests",
+      "hint": "The customer asking for a copy of their data or its erasure. The law asks for an answer within 30 days.",
+      "empty": "No requests.",
+      "record": "Record request",
+      "recordTitle": "Record a KVKK request",
+      "recordHint": "Record the request as it came. Before acting, make sure the person asking is this customer.",
+      "kind": "Request",
+      "kinds": {
+        "export": "Copy of their data",
+        "erasure": "Erasure of their data"
+      },
+      "channel": "How it came",
+      "channels": {
+        "email": "E-mail",
+        "phone": "Phone",
+        "letter": "Letter",
+        "in_person": "In person",
+        "other": "Other"
+      },
+      "receivedOn": "Received on",
+      "received": "{{channel}} · {{date}}",
+      "status": {
+        "open": "Open · due {{date}}",
+        "completed": "Answered",
+        "rejected": "Rejected"
+      },
+      "prepare": "Prepare the file",
+      "preparing": "Preparing",
+      "download": "Download the file",
+      "sent": "Sent",
+      "reject": "Reject",
+      "erase": "Erase data",
+      "eraseTitle": "Erase this customer's data?",
+      "eraseDescription": "Name, e-mail, phone, addresses, invoice details, the personal details on their orders and internal notes are deleted for good; the customer can no longer sign in. Amounts and accounting records stay, contract copies until the legal period ends. This cannot be undone.",
+      "eraseConfirm": "Erase for good",
+      "erased": "The customer's data was erased.",
+      "recorded": "Request recorded.",
+      "closed": {
+        "completed": "Request answered.",
+        "rejected": "Request rejected."
       }
     }
   },

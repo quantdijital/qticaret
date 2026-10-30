@@ -30,6 +30,7 @@ import { formatDate, formatMoney } from "@/lib/format"
 import { ConsentCard } from "@/features/customers/components/consent-card"
 import { CustomerGroupsCard } from "@/features/customers/components/customer-groups-card"
 import { MessageHistoryCard } from "@/features/customers/components/message-history-card"
+import { PrivacyRequestsCard } from "@/features/customers/components/privacy-requests-card"
 
 const route = getRouteApi("/_auth/customers/$id")
 
@@ -251,6 +252,7 @@ export function CustomerDetailPage() {
           <CustomerGroupsCard customerId={customer.id} />
           <AddressesCard customer={customer} />
           <BillingCard customerId={customer.id} />
+          <PrivacyRequestsCard customerId={customer.id} />
           {/* Store credit is for members: a guest cannot sign in to spend it */}
           {storeCredit && customer.has_account ? (
             <StoreCreditCard customerId={customer.id} />

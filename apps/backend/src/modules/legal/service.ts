@@ -10,10 +10,16 @@ import type { AcceptedDocument } from "./models/legal-consent"
 import { LegalDocument } from "./models/legal-document"
 import type { LegalStatus } from "./models/legal-document"
 import { LegalOrderCopy } from "./models/legal-order-copy"
+import { PrivacyRequest } from "./models/privacy-request"
 
 export { LEGAL_STATUSES } from "./models/legal-document"
 export type { LegalStatus } from "./models/legal-document"
 export type { AcceptedDocument } from "./models/legal-consent"
+export {
+  PRIVACY_REQUEST_CHANNELS,
+  PRIVACY_REQUEST_KINDS,
+  PRIVACY_REQUEST_STATUSES,
+} from "./models/privacy-request"
 
 export interface LegalModuleOptions {
   /** PII_ENCRYPTION_KEY: the shopper's IP and the order's copies are encrypted with it. */
@@ -48,6 +54,7 @@ class LegalModuleService extends MedusaService({
   LegalOrderCopy,
   CookieConsent,
   AgeDeclaration,
+  PrivacyRequest,
 }) {
   private readonly encryptionKey: Buffer
   private readonly hashKey: Buffer

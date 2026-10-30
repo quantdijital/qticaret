@@ -263,6 +263,8 @@ const CAPABILITY_PROBES = {
   staff: ["POST", "/admin/staff/members/:id"],
   audit: ["GET", "/admin/audit-log"],
   taxId: ["POST", "/admin/customers/:id/billing-profile/reveal"],
+  // F13.5: recording and answering a customer's KVKK requests
+  privacy: ["POST", "/admin/customers/:id/privacy-requests"],
 } as const satisfies Record<string, readonly [Method, string]>
 
 export type Capability = keyof typeof CAPABILITY_PROBES

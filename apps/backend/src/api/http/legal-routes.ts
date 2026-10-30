@@ -2,6 +2,11 @@ import { validateAndTransformBody, validateAndTransformQuery } from "@medusajs/f
 import { AdminPostCategoryRestriction } from "../admin/category-restrictions/validators"
 import { AdminGetDashboardNoQuery } from "../admin/dashboard/validators"
 import {
+  AdminPostPrivacyRequest,
+  AdminPostPrivacyRequestClose,
+  AdminPostPrivacyRequestEmpty,
+} from "../admin/privacy-requests/validators"
+import {
   AdminPostLegalDraft,
   AdminPostLegalPreview,
   AdminPostLegalPublish,
@@ -15,6 +20,7 @@ import { StorePostCookieConsent } from "../store/consents/cookies/validators"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import { rateLimit } from "./rate-limit"
 import { requireUserActor } from "./actor"
+import { requireReauth } from "./reauth"
 import { optionalCustomer, orderAccess } from "./order-access"
 
 const noQuery = validateAndTransformQuery(AdminGetDashboardNoQuery, {})
@@ -117,6 +123,37 @@ export const LEGAL_ROUTES = [
     matcher: "/admin/category-restrictions/:category_id",
     methods: ["POST" as const],
     middlewares: [requireUserActor, validateAndTransformBody(AdminPostCategoryRestriction)],
+  },
+  // F13.5: a customer's KVKK requests, recorded and answered by staff
+  {
+    matcher: "/admin/customers/:id/privacy-requests",
+    methods: ["GET" as const],
+    middlewares: [requireUserActor, noQuery],
+  },
+  {
+    matcher: "/admin/customers/:id/privacy-requests",
+    methods: ["POST" as const],
+    middlewares: [requireUserActor, validateAndTransformBody(AdminPostPrivacyRequest)],
+  },
+  {
+    matcher: "/admin/privacy-requests/:id/export",
+    methods: ["POST" as const],
+    middlewares: [requireUserActor, validateAndTransformBody(AdminPostPrivacyRequestEmpty)],
+  },
+  // No way back: the staff member proves themselves again (adr/0040 §3)
+  {
+    matcher: "/admin/privacy-requests/:id/erase",
+    methods: ["POST" as const],
+    middlewares: [
+      requireUserActor,
+      requireReauth(),
+      validateAndTransformBody(AdminPostPrivacyRequestEmpty),
+    ],
+  },
+  {
+    matcher: "/admin/privacy-requests/:id/close",
+    methods: ["POST" as const],
+    middlewares: [requireUserActor, validateAndTransformBody(AdminPostPrivacyRequestClose)],
   },
   ...["/admin/orders/:id/legal", "/admin/orders/:id/legal/:kind"].map((matcher) => ({
     matcher,

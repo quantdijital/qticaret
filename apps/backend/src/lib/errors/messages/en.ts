@@ -449,6 +449,10 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "age.birth_date_invalid": "Enter a valid date of birth.",
   "age.not_required": "This cart needs no declaration of age.",
   "platform_settings.min_age_invalid": "The age limit must be a whole number from 18 to 25.",
+  "privacy_requests.unknown": "The KVKK request was not found.",
+  "privacy_requests.not_open":
+    "This request was already answered, or this action is not for its kind.",
+  "privacy_requests.received_in_future": "The request cannot have been received in the future.",
   "legal.title_invalid": "The title cannot contain invisible control characters.",
   "orders.unknown": "Order not found.",
   "paytr.merchant_id_invalid":

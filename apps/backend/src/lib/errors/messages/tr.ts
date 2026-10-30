@@ -450,6 +450,9 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "age.birth_date_invalid": "Geçerli bir doğum tarihi girin.",
   "age.not_required": "Bu sepet için yaş beyanı gerekmiyor.",
   "platform_settings.min_age_invalid": "Yaş sınırı 18 ile 25 arasında bir tam sayı olmalı.",
+  "privacy_requests.unknown": "KVKK talebi bulunamadı.",
+  "privacy_requests.not_open": "Bu talep zaten yanıtlandı ya da bu işlem bu talep türü için değil.",
+  "privacy_requests.received_in_future": "Talebin alındığı zaman ileri bir tarih olamaz.",
   "legal.title_invalid": "Başlık görünmeyen kontrol karakterleri içeremez.",
   "orders.unknown": "Sipariş bulunamadı.",
   "paytr.merchant_id_invalid":

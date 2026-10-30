@@ -172,6 +172,7 @@ describe("staff roles", () => {
       staff: true,
       audit: true,
       taxId: true,
+      privacy: true,
     })
     expect(capabilitiesOf("admin")).toMatchObject({
       settings: true,
@@ -182,6 +183,7 @@ describe("staff roles", () => {
       staff: false,
       audit: true,
       taxId: true,
+      privacy: true,
     })
     expect(capabilitiesOf("operations")).toEqual({
       settings: false,
@@ -198,6 +200,7 @@ describe("staff roles", () => {
       staff: false,
       audit: false,
       taxId: false,
+      privacy: false,
     })
     expect(Object.values(capabilitiesOf("readonly")).every((can) => !can)).toBe(true)
     expect(Object.values(capabilitiesOf(null)).every((can) => !can)).toBe(true)
@@ -282,6 +285,10 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/products/:id/brand": false,
   "POST /admin/products/:id/catalog": false,
   "POST /admin/category-restrictions/:category_id": false,
+  "POST /admin/customers/:id/privacy-requests": false,
+  "POST /admin/privacy-requests/:id/export": false,
+  "POST /admin/privacy-requests/:id/close": false,
+  "POST /admin/privacy-requests/:id/erase": false,
   "POST /admin/promotions/:id/code-batches/:campaign_id/revoke": false,
   "POST /admin/promotions/:id/offer": false,
   "POST /admin/reports/statements": false,

@@ -93,7 +93,8 @@ Her parça ayrı çalışır; biri hata verse de diğerleri yapılır. Bir geced
 ## Açık konular
 
 - **Danışman onayı:** Bu dosyadaki sürelerin tamamı. Sipariş ve fatura için 10 yıl, sözleşme kopyası için 3 yıl, İYS kanıtı için 3 yıl, denetim kaydının kendisi için süre (docs/12).
-- **Silme ve anonimleştirme akışı (L9):** müşteri, adresler, fatura profili (bugün yumuşak siliniyor, şifreli VKN kalıyor), siparişlerin kişisel alanları, notlar, yorumlar ve sorular.
+- **Silme ve anonimleştirme (L9, yapıldı):** müşteri sayfasındaki KVKK talebiyle (`POST /admin/privacy-requests/:id/erase`, yeniden doğrulamalı). Müşteri kaydı yer tutucuyla kalır (`anonim-<id>@kvkk.invalid`), adresleri ve fatura profili kalıcı silinir, giriş kaldırılır. Siparişlerin e-postası ve adresleri (il, ilçe, ülke kalır), değişiklik geçmişindeki eski değerler, iç notlar ve iade notları temizlenir. Sepetler, gönderilen iletilerin alıcısı, stok bildirimleri, favoriler ve çift onay talepleri silinir. Yorum ve sorular "Anonim" adıyla kalır. İleti izni kayıtları (İYS kanıtı), engelleme listesi ve ters ibraz notları korunur. Sözleşme kopyası ve onayın IP'si 3 yıl dolana kadar kalır.
 - **GA istemci kimliği:** `tracking_consent.ga_client_id` hiç temizlenmiyor. İadede GA4'e olay gittiği için iade süresi bitene kadar gerekli. Öneri: siparişten iade süresi + 30 gün sonra boşalt.
 - **Medusa `notification`:** İletinin işlenmiş metni saklanıyor mu, doğrulanacak. Saklanıyorsa süre konacak.
 - **Terk edilmiş sepet:** Medusa sepetinin kendisi (e-posta, adres) silinmiyor. Öneri: 90 gün sonra adres ve e-postayı temizle (L9 ile).
+- **Medusa `workflow_execution`:** Medusa bazı iş akışlarının girdisini (müşteri oluşturma gibi) bu tabloda saklayabiliyor. Saklama süresi (`retentionTime`) ayarı F16'da konmalı; silme akışı bu tabloya dokunmuyor.

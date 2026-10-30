@@ -16,6 +16,27 @@ export const RETENTION_DAYS = {
   stockAlert: 180,
   /** A double opt-in request after its link expired: the consent keeps its own proof. */
   consentRequest: 30,
+  /**
+   * An order's contract copy and the consent's IP address: kept this long
+   * even when the customer asks to be erased (distance sales regulation).
+   */
+  contract: 1095,
+} as const
+
+/** The address an erased customer and their orders are left with: unique, deliverable nowhere. */
+export const erasedEmail = (customerId: string): string =>
+  `anonim-${customerId.toLowerCase()}@kvkk.invalid`
+
+/** What an erased person's addresses keep: the place for the books, never the person. */
+export const ERASED_ADDRESS = {
+  first_name: "Anonim",
+  last_name: null,
+  company: null,
+  address_1: null,
+  address_2: null,
+  postal_code: null,
+  phone: null,
+  metadata: null,
 } as const
 
 const DAY_MS = 24 * 60 * 60 * 1000

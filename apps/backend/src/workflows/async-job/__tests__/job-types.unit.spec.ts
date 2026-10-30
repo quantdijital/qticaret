@@ -14,6 +14,7 @@ describe("job types", () => {
       "catalog.bulk_edit",
       "catalog.export",
       "catalog.import",
+      "customer.data_export",
       "promotion.codes",
       "report.export",
       "seo.audit",
