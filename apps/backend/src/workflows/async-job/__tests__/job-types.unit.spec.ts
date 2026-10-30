@@ -15,6 +15,7 @@ describe("job types", () => {
       "catalog.export",
       "catalog.import",
       "customer.data_export",
+      "migration.invites",
       "migration.run",
       "migration.sitemap",
       "migration.urls",

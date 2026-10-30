@@ -1356,7 +1356,8 @@
           },
           "account": {
             "password_reset": "Şifre sıfırlama",
-            "verify_email": "E-posta doğrulama"
+            "verify_email": "E-posta doğrulama",
+            "migration_invite": "Taşınan müşteriye hesap daveti"
           },
           "payment": {
             "failed": "Ödeme alınamadı"

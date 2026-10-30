@@ -6,6 +6,7 @@ import { loadPaymentFailed } from "./cart"
 import { loadCartReminder } from "./cart-reminder"
 import { loadConsentRequest } from "./consent"
 import { loadInvoiceMessage } from "./invoice"
+import { loadMigrationInvite } from "./migration"
 import { loadOrderLink, loadOrderMessage } from "./order"
 import { loadParcelMessage } from "./parcel"
 import { loadReturnMessage } from "./return-request"
@@ -40,6 +41,7 @@ export const MESSAGE_LOADERS: { readonly [N in MessageTemplateName]: Loader<N> }
   "return.refunded": (container, id) => loadReturnMessage(container, id),
   "account.password_reset": loadPasswordReset,
   "account.verify_email": loadVerification,
+  "account.migration_invite": (container, id) => loadMigrationInvite(container, id),
   "payment.failed": (container, id) => loadPaymentFailed(container, id),
   "marketing.announcement": loadAnnouncement,
   "cart.reminder": loadCartReminder,

@@ -1356,7 +1356,8 @@
           },
           "account": {
             "password_reset": "Password reset",
-            "verify_email": "E-mail verification"
+            "verify_email": "E-mail verification",
+            "migration_invite": "Moved customer's account invitation"
           },
           "payment": {
             "failed": "Payment failed"

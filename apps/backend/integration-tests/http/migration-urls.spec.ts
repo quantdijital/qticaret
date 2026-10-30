@@ -208,7 +208,7 @@ medusaIntegrationTestRunner({
               fields: ["data"],
               filters: { trigger_type: "migration.not_found_seen" },
             })
-        ).data as { data: { kind: string; count: number; known: number } }[]
+        ).data as unknown as { data: { kind: string; count: number; known: number } }[]
       expect((await bells()).map((bell) => bell.data)).toMatchObject([
         { kind: "migration_not_found", count: 2, known: 1 },
       ])

@@ -4,6 +4,7 @@ import { catalogBulkEdit } from "./catalog-bulk-edit"
 import { catalogExport } from "./catalog-export"
 import { catalogImport } from "./catalog-import"
 import { customerDataExport } from "./customer-data-export"
+import { migrationInvites } from "./migration-invites"
 import { migrationRun } from "./migration-run"
 import { migrationSitemap } from "./migration-sitemap"
 import { migrationUrls } from "./migration-urls"
@@ -28,6 +29,7 @@ const JOB_TYPES: Readonly<Record<string, JobType>> = Object.freeze({
   "catalog.export": erase(catalogExport),
   "catalog.import": erase(catalogImport),
   "customer.data_export": erase(customerDataExport),
+  "migration.invites": erase(migrationInvites),
   "migration.run": erase(migrationRun),
   "migration.sitemap": erase(migrationSitemap),
   "migration.urls": erase(migrationUrls),

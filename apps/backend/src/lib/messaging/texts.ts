@@ -187,6 +187,16 @@ const TR: Readonly<Record<string, string>> = {
   "staff_invite.roles.admin": "yönetici",
   "staff_invite.roles.operations": "operasyon görevlisi",
   "staff_invite.roles.readonly": "salt okunur kullanıcı",
+  "migration_invite.subject": "{{shop}} yenilendi: hesabınızı açın",
+  "migration_invite.preheader": "Önceki siparişleriniz yeni mağazada sizi bekliyor.",
+  "migration_invite.heading": "Mağazamız yeni adresinde",
+  "migration_invite.intro":
+    "{{shop}} yeni altyapısına taşındı. Daha önce alışveriş yaptığınız için hesabınızı burada açmanızı rica ediyoruz.",
+  "migration_invite.orders":
+    "Hesabınızı aynı e-posta adresiyle açtığınızda önceki siparişleriniz ve adresleriniz hesabınızda görünür.",
+  "migration_invite.button": "Hesabımı aç",
+  "migration_invite.password":
+    "Güvenliğiniz için eski şifreniz taşınmadı; hesabı açarken yeni bir şifre belirleyeceksiniz.",
   "password_reset.subject": "Şifrenizi yenileyin",
   "password_reset.preheader": "{{shop}} hesabınız için şifre yenileme bağlantısı.",
   "password_reset.heading": "Şifre yenileme isteği",

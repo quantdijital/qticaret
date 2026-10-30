@@ -7,6 +7,11 @@ export interface ResetVars {
   resetUrl: string
 }
 
+/** Moved from the shop's old platform (F14.5): the storefront's sign-up page, the address filled in. */
+export interface MigrationInviteVars {
+  registerUrl: string
+}
+
 /** An e-mail address to confirm: a link to the storefront's page, and the code it carries. */
 export interface VerifyVars {
   code: string
@@ -81,4 +86,34 @@ export const verifyEmail: MessageTemplate<VerifyVars> = {
     verifyUrl: "https://magaza.example/hesap/dogrula?code=OrnekDogrulamaKodu",
     expiresAt: "28 Ekim 2026 18:15",
   },
+}
+
+/**
+ * "Hesabınızı yeni mağazada açın" (F14.5, adr/0042 §6): a customer moved
+ * from the shop's old platform, whose password could not move, asked to
+ * open their account here. Nothing of an offer in it: it is about their
+ * account and their earlier orders, so it goes as a transactional message.
+ */
+export const migrationInvite: MessageTemplate<MigrationInviteVars> = {
+  name: "account.migration_invite",
+  kind: "transactional",
+  channels: ["email"],
+  retry: true,
+  email: (vars, brand) =>
+    renderEmail(brand, {
+      subject: messageText("migration_invite.subject", { shop: brand.shopName }),
+      preheader: messageText("migration_invite.preheader", { shop: brand.shopName }),
+      heading: messageText("migration_invite.heading"),
+      blocks: [
+        {
+          kind: "paragraph",
+          text: messageText("migration_invite.intro", { shop: brand.shopName }),
+        },
+        { kind: "paragraph", text: messageText("migration_invite.orders") },
+        { kind: "button", label: messageText("migration_invite.button"), url: vars.registerUrl },
+        { kind: "note", text: messageText("migration_invite.password") },
+      ],
+      footer: messageText("footer.account", { shop: brand.shopName }),
+    }),
+  sample: { registerUrl: "https://magaza.example/hesap/kayit?email=ornek%40example.com" },
 }

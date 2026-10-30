@@ -1,4 +1,4 @@
-import { passwordReset, verifyEmail } from "./account"
+import { migrationInvite, passwordReset, verifyEmail } from "./account"
 import { cartReminder } from "./cart-reminder"
 import { consentConfirm } from "./consent"
 import { orderInvoiced } from "./invoice"
@@ -18,7 +18,7 @@ import {
   staffSeoDigest,
 } from "./staff"
 
-export type { ResetVars, VerifyVars } from "./account"
+export type { MigrationInviteVars, ResetVars, VerifyVars } from "./account"
 export type { AnnouncementVars } from "./marketing"
 export type { CartReminderVars } from "./cart-reminder"
 export type { ConsentConfirmVars } from "./consent"
@@ -54,6 +54,8 @@ export const MESSAGE_TEMPLATES = {
   "return.refunded": returnRefunded,
   "account.password_reset": passwordReset,
   "account.verify_email": verifyEmail,
+  // F14.5 (adr/0042 §6): a moved customer asked to open their account here
+  "account.migration_invite": migrationInvite,
   "payment.failed": paymentFailed,
   "marketing.announcement": announcement,
   "cart.reminder": cartReminder,

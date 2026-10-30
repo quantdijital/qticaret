@@ -18,6 +18,11 @@ export const MigrationItem = model
     status: model.enum([...ITEM_STATUSES]),
     error_code: model.text().nullable(),
     old_url: model.text().nullable(),
+    /** A moved customer asked to open their account (F14.5): queued, then told. */
+    invite_queued_at: model.dateTime().nullable(),
+    invited_at: model.dateTime().nullable(),
+    /** Its account, opened here, took what moved with it (old orders, reviews, addresses). */
+    adopted_at: model.dateTime().nullable(),
   })
   .indexes([
     { on: ["source", "kind", "source_key"], unique: true, where: "deleted_at IS NULL" },

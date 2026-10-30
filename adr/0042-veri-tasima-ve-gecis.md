@@ -142,3 +142,11 @@ Elimizde olanlar:
 1. Sahip alan adını yeni siteye yönelttiğinde "kesim yapıldı" der (`POST /admin/migrations/cutover`); tarih ve kim kaydedilir.
 2. Kesimden sonra 30 gün, her sabah (`migration-not-found-watch`, 06:20) vitrinin son bakıştan bu yana gördüğü 404'ler (en çok istenen 1.000) adres envanterine `not_found` kaynağıyla eklenir; sahip onlara da aynı tabloda 301 ya da 410 kararı verir.
 3. Yeni 404 varsa yöneticilerin zili çalar: kaç adres ve kaçının eski sitenin bilinen adresi olduğu. Yeni 404 yoksa çalmaz; 30 gün geçince izleme durur.
+
+## Uygulama notları (G6 hesap daveti, 2026-10-31)
+
+1. **Sıfırlama bağlantısı değil, kayıt daveti (§6'dan sapma).** Medusa'nın şifre sıfırlama anahtarı 15 dakika geçerli ve yalnızca e-posta/şifre girişi olan kimlikte çalışır; taşınan müşterinin girişi yoktur, toplu bir davet de saatler sonra açılır. Davet bu yüzden vitrinin kayıt sayfasına gider (`/hesap/kayit?email=`, F18 yapar); hesap açılırken e-posta doğrulanır, sahiplik böyle kanıtlanır.
+2. **İleti.** `account.migration_invite`, işlemsel (hesap ve önceki siparişler hakkında; teklif yok). Hesabı olan müşteriye (taşımadan önce ya da arada açılmış) gitmez; vitrin adresi yoksa hiçbiri gitmez.
+3. **Kota.** Davetler günlük e-posta sınırının en çok yarısını kullanır, siparişler kalanını. Sahip başlatınca bütün taşınan müşteriler sıraya girer; günün payı hemen, kalanı her sabah 09:00'da gider. Gönderilemeyen ertesi gün yeniden denenir; kimseye iki kez gitmez.
+4. **Sahiplenme.** Hesap sahibi girişte (misafir siparişlerinin hesaba katıldığı an, adr/0037 §1) aynı e-postalı taşınmış kaydın geçmiş siparişlerini, yorumlarını (hesabın kendi yorumu olan ürününki hariç), ileti izinlerini ve hesabın hiç adresi yoksa adreslerini alır; taşınmış kayıt başına bir kez.
+5. Davetin başlatılması yeniden doğrulama ister ve denetim kaydına yazılır.

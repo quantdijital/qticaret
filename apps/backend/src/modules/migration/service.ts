@@ -150,6 +150,23 @@ class MigrationModuleService extends MedusaService({
     }
   }
 
+  /**
+   * Queues every moved customer not queued before for the invitation to
+   * open their account (F14.5); how many joined the queue.
+   */
+  @InjectTransactionManager()
+  async queueInvites(@MedusaContext() sharedContext: Context = {}): Promise<number> {
+    const manager = sharedContext.transactionManager as Executor
+    const rows = (await manager.execute(
+      `UPDATE migration_item SET invite_queued_at = now(), updated_at = now()
+       WHERE kind = 'customer' AND status = 'done' AND target_id IS NOT NULL
+         AND invite_queued_at IS NULL AND deleted_at IS NULL
+       RETURNING id`,
+      []
+    )) as unknown[]
+    return rows.length
+  }
+
   /** Adds a kind's counts to the run's, as the run goes. */
   async count(runId: string, kind: string, delta: Readonly<Record<string, number>>) {
     const run = await this.retrieveMigrationRun(runId, { select: ["counts"] })

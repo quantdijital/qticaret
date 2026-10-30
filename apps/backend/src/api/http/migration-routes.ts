@@ -92,6 +92,21 @@ export const MIGRATION_ROUTES = [
     middlewares: [requireUserActor, validateAndTransformBody(z.object({}).strict())],
   },
   {
+    matcher: "/admin/migrations/invites",
+    methods: ["GET" as const],
+    middlewares: [validateAndTransformQuery(z.object({}).strict(), {})],
+  },
+  // F14.5: it mails the shop's customers
+  {
+    matcher: "/admin/migrations/invites",
+    methods: ["POST" as const],
+    middlewares: [
+      requireUserActor,
+      validateAndTransformBody(z.object({}).strict()),
+      requireReauth(),
+    ],
+  },
+  {
     matcher: "/admin/migrations/urls/apply",
     methods: ["POST" as const],
     middlewares: [
