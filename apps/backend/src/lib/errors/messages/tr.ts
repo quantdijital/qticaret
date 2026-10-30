@@ -453,6 +453,18 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "privacy_requests.unknown": "KVKK talebi bulunamadı.",
   "privacy_requests.not_open": "Bu talep zaten yanıtlandı ya da bu işlem bu talep türü için değil.",
   "privacy_requests.received_in_future": "Talebin alındığı zaman ileri bir tarih olamaz.",
+  "privacy_requests.orders_open":
+    "Müşterinin henüz teslim edilmemiş ya da iptal edilmemiş bir siparişi var; sipariş tamamlanınca silin.",
+  "privacy_requests.returns_open":
+    "Müşterinin süren bir iade talebi var; talep sonuçlanınca silin.",
+  "privacy_requests.accounting_pending":
+    "Müşterinin muhasebe programına henüz aktarılmamış bir satışı var; aktarım bitince silin.",
+  "privacy_requests.erase_to_complete":
+    "Silme talebi yalnızca veriler silinerek yanıtlanır; reddetmek için Reddet'i kullanın.",
+  "privacy_requests.export_missing":
+    "Önce dosyayı hazırlayın; talep dosya gönderilince yanıtlanır.",
+  "audit_log.forget_too_recent":
+    "Denetim kaydındaki istemci bilgisi bu kadar yeni kayıtlarda silinemez.",
   "legal.title_invalid": "Başlık görünmeyen kontrol karakterleri içeremez.",
   "orders.unknown": "Sipariş bulunamadı.",
   "paytr.merchant_id_invalid":

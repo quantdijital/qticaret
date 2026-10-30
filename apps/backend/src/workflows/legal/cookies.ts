@@ -39,12 +39,12 @@ export const cookieConsentView = (row: {
  */
 const recordCookieConsentStep = createStep(
   "legal-record-cookie-consent",
-  async (input: { visitor_id: string } & CookieChoice, { container }) => {
+  async (input: { visitor_hash: string } & CookieChoice, { container }) => {
     if (input.policy_version !== (await cookiePolicyVersion(container))) {
       throw new ConflictError("legal.version_changed")
     }
-    const { visitor_id: visitorId, ...choice } = input
-    const row = await legal(container).recordCookieConsent(visitorId, choice)
+    const { visitor_hash: visitorHash, ...choice } = input
+    const row = await legal(container).recordCookieConsent(visitorHash, choice)
     return new StepResponse(cookieConsentView(row), row.id)
   },
   async (id, { container }) => {
@@ -57,6 +57,6 @@ const recordCookieConsentStep = createStep(
 /** adr/0041 §5: the cookie banner's answer, kept for the visitor. */
 export const recordCookieConsentWorkflow = createWorkflow(
   "legal-record-cookie-consent",
-  (input: { visitor_id: string } & CookieChoice) =>
+  (input: { visitor_hash: string } & CookieChoice) =>
     new WorkflowResponse(recordCookieConsentStep(input))
 )

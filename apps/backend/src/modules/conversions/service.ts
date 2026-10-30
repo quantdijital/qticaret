@@ -107,6 +107,34 @@ class ConversionsModuleService extends MedusaService({ TrackingConsent, Conversi
     }
   }
 
+  /**
+   * Holds the order's consent to the answer in force (F13.8): what it no
+   * longer allows goes, the GA4 id with analytics and Meta's details with
+   * marketing, so no later event reads more.
+   */
+  @InjectTransactionManager()
+  async holdOrderTo(
+    orderId: string,
+    flags: { analytics: boolean; marketing: boolean },
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<void> {
+    const [row] = await this.listTrackingConsents({ order_id: orderId }, { take: 1 }, sharedContext)
+    if (!row || (row.analytics === flags.analytics && row.marketing === flags.marketing)) {
+      return
+    }
+    await this.updateTrackingConsents(
+      {
+        id: row.id,
+        analytics: flags.analytics,
+        marketing: flags.marketing,
+        ...(flags.analytics ? {} : { ga_client_id: null }),
+        ...(flags.marketing ? {} : { fbp: null, fbc: null, client_encrypted: null }),
+        ...(flags.analytics || flags.marketing ? {} : { page_url: null }),
+      },
+      sharedContext
+    )
+  }
+
   /** The order's consent, with the browser's details decrypted to send; null without one. */
   @InjectManager()
   async ofOrder(

@@ -11,6 +11,7 @@ import { ConflictError } from "../../lib/errors"
 import { LEGAL_MODULE } from "../../modules/legal"
 import type LegalModuleService from "../../modules/legal/service"
 import type { PRIVACY_REQUEST_CHANNELS, PRIVACY_REQUEST_KINDS } from "../../modules/legal/service"
+import { acquireLockStep, releaseLockStep } from "@medusajs/medusa/core-flows"
 import { enqueueAsyncJobWorkflow } from "../async-job/enqueue-async-job"
 
 export interface RecordPrivacyRequestInput {
@@ -29,6 +30,8 @@ const recordPrivacyRequestStep = createStep(
       entity: "customer",
       fields: ["id"],
       filters: { id: input.customer_id },
+      // One Medusa's own deletion closed still holds their data: it can be asked for
+      withDeleted: true,
     })
     if (data.length === 0) {
       throw new MedusaError(MedusaError.Types.NOT_FOUND, "customers.unknown")
@@ -119,16 +122,22 @@ export const startDataExportWorkflow = createWorkflow(
   }
 )
 
+interface CloseInput {
+  request_id: string
+  status: "completed" | "rejected"
+  by: string
+  /** Set by the erasure itself: the only way an erasure request is completed. */
+  erasing?: boolean
+}
+
 /**
  * Answers a request: done (the copy sent, the data erased) or refused (the
- * asker not who they claimed). Undone, it is open again.
+ * asker not who they claimed). An erasure is done only by erasing, a copy
+ * only once its file was made. Undone, it is open again.
  */
 export const closePrivacyRequestStep = createStep(
   "legal-close-privacy-request",
-  async (
-    input: { request_id: string; status: "completed" | "rejected"; by: string },
-    { container }
-  ) => {
+  async (input: CloseInput, { container }) => {
     const service = container.resolve<LegalModuleService>(LEGAL_MODULE)
     const [request] = await service.listPrivacyRequests({ id: input.request_id }, { take: 1 })
     if (!request) {
@@ -136,6 +145,14 @@ export const closePrivacyRequestStep = createStep(
     }
     if (request.status !== "open") {
       throw new ConflictError("privacy_requests.not_open")
+    }
+    if (input.status === "completed") {
+      if (request.kind === "erasure" && !input.erasing) {
+        throw new ConflictError("privacy_requests.erase_to_complete")
+      }
+      if (request.kind === "export" && !request.job_id) {
+        throw new ConflictError("privacy_requests.export_missing")
+      }
     }
     const closed = await service.updatePrivacyRequests({
       id: input.request_id,
@@ -159,6 +176,12 @@ export const closePrivacyRequestStep = createStep(
 
 export const closePrivacyRequestWorkflow = createWorkflow(
   "legal-close-privacy-request",
-  (input: { request_id: string; status: "completed" | "rejected"; by: string }) =>
-    new WorkflowResponse(closePrivacyRequestStep(input))
+  (input: { request_id: string; status: "completed" | "rejected"; by: string }) => {
+    // The erasure's own lock: a refusal cannot cross an erasure under way
+    const key = transform({ input }, ({ input }) => `privacy-request:${input.request_id}`)
+    acquireLockStep({ key, timeout: 5, ttl: 30 })
+    const closed = closePrivacyRequestStep(input)
+    releaseLockStep({ key })
+    return new WorkflowResponse(closed)
+  }
 )

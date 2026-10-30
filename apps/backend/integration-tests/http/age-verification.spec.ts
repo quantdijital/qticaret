@@ -137,6 +137,17 @@ medusaIntegrationTestRunner({
       const rows = await container
         .resolve<LegalModuleService>(LEGAL_MODULE)
         .listAgeDeclarations({ cart_id: cartId })
+      // A completed cart, or one that is none, tells nothing of what it held
+      const closed = await settle(
+        http.get<{ message?: string }>(`/store/carts/${cartId}/age-declaration`, {
+          headers: storefront.headers,
+        })
+      )
+      const unknown = await settle(
+        http.get<{ message?: string }>(`/store/carts/cart_yok/age-declaration`, {
+          headers: storefront.headers,
+        })
+      )
 
       expect(flagOff.status).toBe(400)
       expect(flagOff.data.message).toBe("catalog.restriction_disabled")
@@ -156,6 +167,8 @@ medusaIntegrationTestRunner({
       expect(record.data.age_declaration).toMatchObject({ min_age: 21 })
       // Only the limit and the time are kept, never the date of birth
       expect(JSON.stringify(rows)).not.toContain("1990")
+      expect(closed.status).toBe(404)
+      expect(unknown.status).toBe(404)
     })
   },
 })

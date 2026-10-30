@@ -1,6 +1,10 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { parseEnv } from "../../../../lib/env"
-import { newVisitorId, visitorCookie, visitorIdOf } from "../../../../lib/legal/visitor"
+import {
+  newVisitorId,
+  secureCookies,
+  visitorCookie,
+  visitorIdOf,
+} from "../../../../lib/legal/visitor"
 import { LEGAL_MODULE } from "../../../../modules/legal"
 import type LegalModuleService from "../../../../modules/legal/service"
 import {
@@ -16,7 +20,7 @@ import type { StorePostCookieConsentType } from "./validators"
  * there is no answer, or one given under an older policy.
  */
 export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {
-  const visitorId = visitorIdOf(req.headers.cookie)
+  const visitorId = visitorIdOf(req.headers.cookie, secureCookies())
   const [latest, policyVersion] = await Promise.all([
     visitorId
       ? req.scope.resolve<LegalModuleService>(LEGAL_MODULE).latestCookieConsent(visitorId)
@@ -36,11 +40,13 @@ export async function POST(
   req: MedusaRequest<StorePostCookieConsentType>,
   res: MedusaResponse
 ): Promise<void> {
-  const visitorId = visitorIdOf(req.headers.cookie) ?? newVisitorId()
+  const secure = secureCookies()
+  const visitorId = visitorIdOf(req.headers.cookie, secure) ?? newVisitorId()
+  const visitorHash = req.scope.resolve<LegalModuleService>(LEGAL_MODULE).visitorHash(visitorId)
   const { result } = await recordCookieConsentWorkflow(req.scope).run({
-    input: { visitor_id: visitorId, ...req.validatedBody },
+    // Only the hash: the cookie itself never reaches the workflow engine
+    input: { visitor_hash: visitorHash, ...req.validatedBody },
   })
-  const secure = req.secure || parseEnv().NODE_ENV === "production"
   res.setHeader("Set-Cookie", visitorCookie(visitorId, secure))
   res.setHeader("Cache-Control", "no-store")
   res.json({ consent: result })

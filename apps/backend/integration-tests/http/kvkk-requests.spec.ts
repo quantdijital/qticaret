@@ -1,5 +1,9 @@
 import type { ICartModuleService, ICustomerModuleService } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
+import {
+  createOrderFulfillmentWorkflow,
+  markOrderFulfillmentAsDeliveredWorkflow,
+} from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { customerData } from "../../src/workflows/legal/customer-data"
 import { createAdminUser } from "../helpers/admin"
@@ -103,15 +107,53 @@ medusaIntegrationTestRunner({
       )
       const erasureId = erasure.data.privacy_request.id
       const unproved = await post(`/admin/privacy-requests/${erasureId}/erase`, {}, admin.plain)
+      // An order on its way still needs its address
+      const underWay = await post(`/admin/privacy-requests/${erasureId}/erase`)
+      const closedWithout = await post(`/admin/privacy-requests/${erasureId}/close`, {
+        status: "completed",
+      })
+      const query = container.resolve(ContainerRegistrationKeys.QUERY)
+      const { data: lines } = await query.graph({
+        entity: "order",
+        fields: ["items.id"],
+        filters: { id: orderId },
+      })
+      const items = (lines[0] as unknown as { items: { id: string }[] }).items
+      const { result: parcel } = await createOrderFulfillmentWorkflow(container).run({
+        input: {
+          order_id: orderId,
+          // One of each, as the cart was
+          items: items.map((item) => ({ id: item.id, quantity: 1 })),
+        },
+      })
+      // As "Kargoya ver" leaves it: the carrier's label stored as a private file
+      const [label] = await container.resolve(Modules.FILE).createFiles([
+        {
+          filename: "etiket.pdf",
+          mimeType: "application/pdf",
+          content: Buffer.from("Ayşe Yılmaz, Bağdat Cad. No: 7").toString("base64"),
+          access: "private",
+        },
+      ])
+      await container
+        .resolve(Modules.FULFILLMENT)
+        .updateFulfillment(parcel.id, { data: { label_file_id: label?.id } })
+      await markOrderFulfillmentAsDeliveredWorkflow(container).run({
+        input: { orderId, fulfillmentId: parcel.id },
+      })
       const erased = await post(`/admin/privacy-requests/${erasureId}/erase`)
       const again = await post(`/admin/privacy-requests/${erasureId}/erase`)
+      const labelLeft = await container
+        .resolve(Modules.FILE)
+        .retrieveFile(label?.id ?? "")
+        .then(() => true)
+        .catch(() => false)
 
       const [gone] = await customers.listCustomers({ id: customer.id }, { withDeleted: true })
       const addresses = await customers.listCustomerAddresses(
         { customer_id: customer.id },
         { withDeleted: true }
       )
-      const query = container.resolve(ContainerRegistrationKeys.QUERY)
       const { data: orders } = await query.graph({
         entity: "order",
         fields: ["email", "total", "shipping_address.*"],
@@ -125,6 +167,10 @@ medusaIntegrationTestRunner({
         await db.select("*").from("customer_address"),
         await db.select("*").from("billing_profile"),
         await db.select("*").from("order_note"),
+        await db.select("*").from("fulfillment_address"),
+        await db.select("*").from("fulfillment"),
+        await db.select("*").from("provider_identity"),
+        await db.select("*").from("auth_identity"),
       ])
       const login = await settle(
         http.post("/auth/customer/emailpass", {
@@ -142,7 +188,11 @@ medusaIntegrationTestRunner({
       expect(closed.status).toBe(200)
       expect(closedAgain.status).toBe(409)
       expect(unproved.status).toBe(428)
+      expect(underWay.status).toBe(409)
+      expect(underWay.data.message).toBe("privacy_requests.orders_open")
+      expect(closedWithout.data.message).toBe("privacy_requests.erase_to_complete")
       expect(erased.status).toBe(200)
+      expect(labelLeft).toBe(false)
       expect(again.status).toBe(409)
       expect(gone).toMatchObject({ first_name: null, last_name: null, phone: null })
       expect(gone?.email).toMatch(/@kvkk\.invalid$/)

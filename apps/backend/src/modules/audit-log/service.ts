@@ -27,6 +27,8 @@ interface Executor {
 export const AUDIT_ACTOR_TYPES = ["user", "api-key", "system"] as const
 
 const KINDS = new Set<AuditKind>(["mutation", "sensitive_read", "system"])
+// The shortest any retention period may keep who sent a request
+const MIN_CLIENT_DAYS = 365
 // The viewer's filter lists them all; more than this is not a list to choose from
 const MAX_RESOURCE_TYPES = 200
 // Bounds so one request cannot write an unbounded row
@@ -140,7 +142,15 @@ class AuditLogModuleService extends MedusaService({ AuditEntry }) {
    * were cleared.
    */
   @InjectManager()
-  async forgetClients(before: Date, @MedusaContext() sharedContext: Context = {}): Promise<number> {
+  async forgetClients(
+    before: Date,
+    now: Date = new Date(),
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<number> {
+    // Never a period shorter than a year: an investigation needs them (docs/kvkk-envanter.md)
+    if (now.getTime() - before.getTime() < MIN_CLIENT_DAYS * 86_400_000) {
+      throw new MedusaError(MedusaError.Types.INVALID_DATA, "audit_log.forget_too_recent")
+    }
     const manager = sharedContext.manager as Executor
     const rows = (await manager.execute(
       `WITH cleared AS (

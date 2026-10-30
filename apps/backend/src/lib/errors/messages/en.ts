@@ -453,6 +453,17 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "privacy_requests.not_open":
     "This request was already answered, or this action is not for its kind.",
   "privacy_requests.received_in_future": "The request cannot have been received in the future.",
+  "privacy_requests.orders_open":
+    "The customer has an order neither delivered nor canceled; erase once it is done.",
+  "privacy_requests.returns_open": "The customer has a return under way; erase once it is settled.",
+  "privacy_requests.accounting_pending":
+    "A sale of the customer's is not in the accounting program yet; erase once it is sent.",
+  "privacy_requests.erase_to_complete":
+    "An erasure request is answered only by erasing; use Reject to refuse it.",
+  "privacy_requests.export_missing":
+    "Prepare the file first; the request is answered once it is sent.",
+  "audit_log.forget_too_recent":
+    "The audit log's client details cannot be cleared on entries this recent.",
   "legal.title_invalid": "The title cannot contain invisible control characters.",
   "orders.unknown": "Order not found.",
   "paytr.merchant_id_invalid":

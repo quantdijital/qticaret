@@ -116,5 +116,20 @@ moduleIntegrationTestRunner<AuditLogModuleService>({
       }
       expect(await service.retrieveAuditEntry(entry.id)).toMatchObject({ action: "job.run" })
     })
+
+    it("forgets who sent a request only after a year at the least", async () => {
+      const entry = await service.record({ kind: "system", action: "job.run", ip: "203.0.113.7" })
+      const day = 86_400_000
+      const now = new Date(Date.now() + 800 * day)
+
+      expect(
+        await messageOf(() => service.forgetClients(new Date(now.getTime() - 100 * day), now))
+      ).toBe("audit_log.forget_too_recent")
+      expect(await service.forgetClients(new Date(now.getTime() - 730 * day), now)).toBe(1)
+      expect(await service.retrieveAuditEntry(entry.id)).toMatchObject({
+        ip: null,
+        action: "job.run",
+      })
+    })
   },
 })

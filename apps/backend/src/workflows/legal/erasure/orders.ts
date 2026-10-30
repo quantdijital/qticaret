@@ -10,8 +10,11 @@ import { CONVERSIONS_MODULE } from "../../../modules/conversions"
 import type ConversionsModuleService from "../../../modules/conversions/service"
 import { LEGAL_MODULE } from "../../../modules/legal"
 import type LegalModuleService from "../../../modules/legal/service"
+import { logger } from "../../../lib/logging"
 import { ORDER_NOTES_MODULE } from "../../../modules/order-notes"
 import type OrderNotesModuleService from "../../../modules/order-notes/service"
+import { ORDER_REFUNDS_MODULE } from "../../../modules/order-refunds"
+import type OrderRefundsModuleService from "../../../modules/order-refunds/service"
 import { RETURN_REQUESTS_MODULE } from "../../../modules/return-requests"
 import type ReturnRequestsModuleService from "../../../modules/return-requests/service"
 
@@ -22,6 +25,62 @@ interface OrderRow {
   created_at: string | Date
   shipping_address?: { id: string } | null
   billing_address?: { id: string } | null
+  fulfillments?:
+    | ({
+        id: string
+        data?: Record<string, unknown> | null
+        delivery_address?: { id: string } | null
+      } | null)[]
+    | null
+}
+
+// The fulfillment module passes `updateFulfillment`'s fields to its own row (2.21)
+interface FulfillmentRecords {
+  updateFulfillment: (id: string, data: Record<string, unknown>) => Promise<unknown>
+}
+
+/** A stored label's file goes; a file already gone is no failure. */
+async function deleteFile(container: Container, fileId: unknown): Promise<void> {
+  if (typeof fileId !== "string" || !fileId) {
+    return
+  }
+  try {
+    await container.resolve(Modules.FILE).deleteFiles(fileId)
+  } catch {
+    logger.warn({ event: "legal.erasure_file_missing" })
+  }
+}
+
+/**
+ * The parcels: Medusa keeps the address each one went to, and the shop
+ * keeps its label (name, address, phone on a PDF). Both go; the parcel's
+ * carrier and tracking stay.
+ */
+async function eraseParcels(container: Container, rows: OrderRow[]) {
+  const fulfillments = container.resolve(Modules.FULFILLMENT) as unknown as FulfillmentRecords
+  const parcels = rows.flatMap((row) =>
+    (row.fulfillments ?? []).flatMap((each) => (each ? [each] : []))
+  )
+  for (const parcel of parcels) {
+    const data = parcel.data ?? {}
+    if (data["label_file_id"]) {
+      await deleteFile(container, data["label_file_id"])
+      // Medusa merges `data`: the key is written over, not left out
+      await fulfillments.updateFulfillment(parcel.id, { data: { label_file_id: null } })
+    }
+  }
+  const addressIds = parcels.flatMap((parcel) =>
+    parcel.delivery_address?.id ? [parcel.delivery_address.id] : []
+  )
+  if (addressIds.length > 0) {
+    // Medusa's fulfillment module has no writer for a parcel's address (2.21:
+    // `updateFulfillment` ignores it), and the tenant's one database holds it:
+    // its personal columns are cleared directly, nothing else is touched
+    await container
+      .resolve(ContainerRegistrationKeys.PG_CONNECTION)("fulfillment_address")
+      .whereIn("id", addressIds)
+      .update({ ...ERASED_ADDRESS, updated_at: new Date() })
+  }
 }
 
 type ActionDetails = Record<string, unknown> & {
@@ -81,8 +140,9 @@ async function eraseHistory(orders: IOrderModuleService, orderIds: string[]): Pr
 
 /**
  * The customer's orders, erased (adr/0041 §6; KK3): their e-mail and
- * addresses, the change history that kept them, the staff's notes, the
- * return requests' notes and the measurement consent. Amounts, lines, tax
+ * addresses, the change history that kept them, the parcels' addresses
+ * and labels, the staff's notes, the return requests' notes and labels,
+ * the refunds' notes and the measurement consent. Amounts, lines, tax
  * and the place (city, province, country) stay for the books. A contract's
  * copy and its consent stay while the law keeps them. Medusa's own order
  * update would write the old values into a new change: the module's
@@ -91,7 +151,15 @@ async function eraseHistory(orders: IOrderModuleService, orderIds: string[]): Pr
 export async function eraseOrders(container: Container, customerId: string, now: Date) {
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "order",
-    fields: ["id", "created_at", "shipping_address.id", "billing_address.id"],
+    fields: [
+      "id",
+      "created_at",
+      "shipping_address.id",
+      "billing_address.id",
+      "fulfillments.id",
+      "fulfillments.data",
+      "fulfillments.delivery_address.id",
+    ],
     filters: { customer_id: customerId },
   })
   const rows = data as OrderRow[]
@@ -123,12 +191,29 @@ export async function eraseOrders(container: Container, customerId: string, now:
     )
     await notes.softDeleteOrderNotes(written.map((note) => note.id))
   }
+  await eraseParcels(container, rows)
   const returns = container.resolve<ReturnRequestsModuleService>(RETURN_REQUESTS_MODULE)
-  const asked = await returns.listReturnRequests({ order_id: orderIds }, { select: ["id"] })
+  const asked = await returns.listReturnRequests(
+    { order_id: orderIds },
+    { select: ["id", "return_label_file_id"] }
+  )
+  for (const request of asked) {
+    await deleteFile(container, request.return_label_file_id)
+  }
   if (asked.length > 0) {
     await returns.updateReturnRequests(
-      asked.map((request) => ({ id: request.id, note: null, decision_note: null }))
+      asked.map((request) => ({
+        id: request.id,
+        note: null,
+        decision_note: null,
+        return_label_file_id: null,
+      }))
     )
+  }
+  const refunds = container.resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE)
+  const refunded = await refunds.listOrderRefunds({ order_id: orderIds }, { select: ["id"] })
+  if (refunded.length > 0) {
+    await refunds.updateOrderRefunds(refunded.map((refund) => ({ id: refund.id, note: null })))
   }
   const conversions = container.resolve<ConversionsModuleService>(CONVERSIONS_MODULE)
   const tracked = await conversions.listTrackingConsents({ order_id: orderIds }, { select: ["id"] })

@@ -56,11 +56,11 @@ moduleIntegrationTestRunner<LegalModuleService>({
 
     it("keeps the cart's last consent with its IP encrypted, and an order's copy once", async () => {
       const accepted = { kind: "distance_sales", version: 1, document_id: "ldoc_1", body_hash: "a" }
-      await service.recordConsent("cart_1", [accepted], "203.0.113.7")
+      await service.recordConsent("cart_1", [accepted], service.sealIp("cart_1", "203.0.113.7"))
       const again = await service.recordConsent(
         "cart_1",
         [{ ...accepted, version: 2 }],
-        "203.0.113.8"
+        service.sealIp("cart_1", "203.0.113.8")
       )
       const [stored] = await service.listLegalConsents({ cart_id: "cart_1" })
       const copy = {
@@ -90,20 +90,42 @@ moduleIntegrationTestRunner<LegalModuleService>({
       expect(await service.readOrderCopy("order_1", "pre_information")).toBeNull()
     })
 
+    it("reads an unreadable copy or IP as not intact or unknown, never as an error", async () => {
+      const { id } = await service.keepOrderCopy({
+        order_id: "order_2",
+        kind: "distance_sales",
+        version: 1,
+        document_id: "ldoc_1",
+        title: "Mesafeli satış sözleşmesi",
+        html: "<p>Alıcı</p>",
+      })
+      // Sealed for another order: the key context does not match this one's
+      await service.updateLegalOrderCopies({
+        id,
+        html_encrypted: service.sealIp("cart_9", "203.0.113.9") ?? "",
+      })
+
+      expect(await service.readOrderCopy("order_2", "distance_sales")).toMatchObject({
+        html: "",
+        intact: false,
+      })
+      expect(service.ipOf({ cart_id: "cart_1", ip_encrypted: "bozuk" })).toBeNull()
+    })
+
     it("keeps every cookie banner answer by the visitor's hash, the latest in force", async () => {
-      const first = await service.recordCookieConsent("visitor-a", {
+      const first = await service.recordCookieConsent(service.visitorHash("visitor-a"), {
         analytics: true,
         marketing: true,
         policy_version: 1,
       })
-      await service.recordCookieConsent("visitor-b", {
+      await service.recordCookieConsent(service.visitorHash("visitor-b"), {
         analytics: false,
         marketing: false,
         policy_version: 1,
       })
       // A withdrawal: a new answer, the first kept as it was
       await new Promise((resolve) => setTimeout(resolve, 5))
-      await service.recordCookieConsent("visitor-a", {
+      await service.recordCookieConsent(service.visitorHash("visitor-a"), {
         analytics: true,
         marketing: false,
         policy_version: 1,

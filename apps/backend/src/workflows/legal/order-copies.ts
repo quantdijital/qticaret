@@ -7,7 +7,7 @@ import {
   createWorkflow,
 } from "@medusajs/framework/workflows-sdk"
 import { isLegalKind } from "../../lib/legal"
-import { logger } from "../../lib/logging"
+import { errorSummary, logger } from "../../lib/logging"
 import { LEGAL_MODULE } from "../../modules/legal"
 import type LegalModuleService from "../../modules/legal/service"
 import type { AcceptedDocument } from "../../modules/legal/service"
@@ -88,32 +88,54 @@ export const keepOrderContractsWorkflow = createWorkflow(
 )
 
 const SWEEP_DAYS = 7
+const PAGE = 200
 
 /**
  * The orders whose contracts the event did not keep (a failure, a restart
- * between): consents of the last week still waiting for their order, whose
- * cart became one.
+ * between). Read from the orders of the last week, which nobody can flood,
+ * not from the consents: an order whose cart's consent still waits for it.
+ * One order failing is logged and the rest go on.
  */
 export async function keepMissedOrderContracts(container: MedusaContainer): Promise<number> {
+  const query = container.resolve(ContainerRegistrationKeys.QUERY)
   const service = container.resolve<LegalModuleService>(LEGAL_MODULE)
-  const waiting = await service.listLegalConsents(
-    { order_id: null, given_at: { $gte: new Date(Date.now() - SWEEP_DAYS * 86_400_000) } },
-    { select: ["cart_id"], take: 500 }
-  )
-  if (waiting.length === 0) {
-    return 0
-  }
-  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
-    entity: "cart",
-    fields: ["id", "order.id"],
-    filters: { id: waiting.map((each) => each.cart_id) },
-  })
+  const since = new Date(Date.now() - SWEEP_DAYS * 86_400_000)
   let kept = 0
-  for (const cart of data as { order?: { id: string } | null }[]) {
-    if (cart.order?.id) {
-      await keepOrderContractsWorkflow(container).run({ input: { order_id: cart.order.id } })
-      kept += 1
+  for (let skip = 0; ; skip += PAGE) {
+    const { data } = await query.graph({
+      entity: "order",
+      fields: ["id", "cart.id"],
+      filters: { created_at: { $gte: since } },
+      pagination: { skip, take: PAGE, order: { created_at: "ASC" } },
+    })
+    const orders = data as { id: string; cart?: { id: string } | null }[]
+    const byCart = new Map(
+      orders.flatMap((order) => (order.cart?.id ? [[order.cart.id, order.id] as const] : []))
+    )
+    const waiting = byCart.size
+      ? await service.listLegalConsents(
+          { order_id: null, cart_id: [...byCart.keys()] },
+          { select: ["cart_id"] }
+        )
+      : []
+    for (const consent of waiting) {
+      const orderId = byCart.get(consent.cart_id)
+      if (!orderId) {
+        continue
+      }
+      try {
+        await keepOrderContractsWorkflow(container).run({ input: { order_id: orderId } })
+        kept += 1
+      } catch (error) {
+        logger.error({
+          event: "legal.order_contracts_sweep_order_failed",
+          orderId,
+          err: errorSummary(error),
+        })
+      }
+    }
+    if (orders.length < PAGE) {
+      return kept
     }
   }
-  return kept
 }

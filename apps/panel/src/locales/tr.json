@@ -1985,7 +1985,7 @@
       },
       "publish": {
         "title": "Sürüm {{version}} yayımlansın mı?",
-        "text": "Metni avukatınıza kontrol ettirdiğinizden emin olun. Yayımlanan sürüm değiştirilemez; müşteriler bundan sonra bu metni görür ve siparişte onaylar.",
+        "text": "Metni avukatınıza kontrol ettirdiğinizden emin olun. Yayımlanan sürüm değiştirilemez; müşteriler bundan sonra bu metni görür ve siparişte onaylar. O sırada ödeme adımında olan müşterilerden yeni metni yeniden onaylamaları istenir; kartla ödemesi tam o anda süren bir siparişin parası iade edilir. Yoğun olmayan bir saatte yayımlayın.",
         "done": "Metin yayımlandı."
       },
       "discard": {

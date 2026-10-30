@@ -15,6 +15,27 @@ import type MessagingModuleService from "../../modules/messaging/service"
 type Container = Pick<MedusaContainer, "resolve">
 
 const BATCH = 500
+// A night's work at most; a larger backlog is finished the nights after
+const MAX_BATCHES = 40
+
+/** Deletes in batches until nothing old is left or the night's share is done. */
+async function drain(
+  next: () => Promise<{ id: string }[]>,
+  remove: (ids: string[]) => Promise<unknown>
+): Promise<number> {
+  let deleted = 0
+  for (let batch = 0; batch < MAX_BATCHES; batch++) {
+    const rows = await next()
+    if (rows.length > 0) {
+      await remove(rows.map((row) => row.id))
+      deleted += rows.length
+    }
+    if (rows.length < BATCH) {
+      break
+    }
+  }
+  return deleted
+}
 
 /** Of these carts, the ones that became an order: their records are the order's evidence. */
 async function orderedCarts(container: Container, cartIds: string[]): Promise<Set<string>> {
@@ -33,10 +54,10 @@ async function orderedCarts(container: Container, cartIds: string[]): Promise<Se
   )
 }
 
-/** A store of cart-held records: the old ones, and how to delete some. */
+/** A store of cart-held records: a page of the old ones after an id, and how to delete some. */
 interface CartRecords {
   name: string
-  old: (cutoff: Date) => Promise<{ id: string; cart_id: string | null }[]>
+  old: (cutoff: Date, after: string) => Promise<{ id: string; cart_id: string | null }[]>
   remove: (ids: string[]) => Promise<void>
 }
 
@@ -44,28 +65,35 @@ function cartRecordStores(container: Container): CartRecords[] {
   const legal = container.resolve<LegalModuleService>(LEGAL_MODULE)
   const messaging = container.resolve<MessagingModuleService>(MESSAGING_MODULE)
   const conversions = container.resolve<ConversionsModuleService>(CONVERSIONS_MODULE)
-  const page = { select: ["id", "cart_id"], take: BATCH }
+  // By id: rows kept (an order's) are stepped over, never read again
+  const page = { select: ["id", "cart_id"], take: BATCH, order: { id: "ASC" as const } }
   return [
     {
       name: "legal_consent",
-      old: (cutoff) => legal.listLegalConsents({ order_id: null, given_at: { $lt: cutoff } }, page),
+      old: (cutoff, after) =>
+        legal.listLegalConsents(
+          { order_id: null, given_at: { $lt: cutoff }, id: { $gt: after } },
+          page
+        ),
       remove: (ids) => legal.deleteLegalConsents(ids),
     },
     {
       name: "age_declaration",
-      old: (cutoff) => legal.listAgeDeclarations({ declared_at: { $lt: cutoff } }, page),
+      old: (cutoff, after) =>
+        legal.listAgeDeclarations({ declared_at: { $lt: cutoff }, id: { $gt: after } }, page),
       remove: (ids) => legal.deleteAgeDeclarations(ids),
     },
     {
       name: "checkout_consent",
-      old: (cutoff) => messaging.listCheckoutConsents({ given_at: { $lt: cutoff } }, page),
+      old: (cutoff, after) =>
+        messaging.listCheckoutConsents({ given_at: { $lt: cutoff }, id: { $gt: after } }, page),
       remove: (ids) => messaging.deleteCheckoutConsents(ids),
     },
     {
       name: "tracking_consent",
-      old: (cutoff) =>
+      old: (cutoff, after) =>
         conversions.listTrackingConsents(
-          { cart_id: { $ne: null }, order_id: null, given_at: { $lt: cutoff } },
+          { cart_id: { $ne: null }, order_id: null, given_at: { $lt: cutoff }, id: { $gt: after } },
           page
         ),
       remove: (ids) => conversions.deleteTrackingConsents(ids),
@@ -85,16 +113,25 @@ export async function forgetAbandonedCarts(
   const cutoff = cutoffOf(RETENTION_DAYS.abandonedCart, now)
   const deleted: Record<string, number> = {}
   for (const store of cartRecordStores(container)) {
-    const rows = await store.old(cutoff)
-    const ordered = await orderedCarts(
-      container,
-      rows.flatMap((row) => (row.cart_id ? [row.cart_id] : []))
-    )
-    const due = rows.filter((row) => !row.cart_id || !ordered.has(row.cart_id))
-    if (due.length > 0) {
-      await store.remove(due.map((row) => row.id))
+    let after = ""
+    let count = 0
+    for (let batch = 0; batch < MAX_BATCHES; batch++) {
+      const rows = await store.old(cutoff, after)
+      const ordered = await orderedCarts(
+        container,
+        rows.flatMap((row) => (row.cart_id ? [row.cart_id] : []))
+      )
+      const due = rows.filter((row) => !row.cart_id || !ordered.has(row.cart_id))
+      if (due.length > 0) {
+        await store.remove(due.map((row) => row.id))
+        count += due.length
+      }
+      after = rows.at(-1)?.id ?? after
+      if (rows.length < BATCH) {
+        break
+      }
     }
-    deleted[store.name] = due.length
+    deleted[store.name] = count
   }
   return deleted
 }
@@ -102,21 +139,18 @@ export async function forgetAbandonedCarts(
 /** Deletes cookie banner answers older than the proof is kept (adr/0041 §5). */
 export async function forgetOldCookieConsents(container: Container, now: Date): Promise<number> {
   const legal = container.resolve<LegalModuleService>(LEGAL_MODULE)
-  const old = await legal.listCookieConsents(
-    { given_at: { $lt: cutoffOf(RETENTION_DAYS.cookieConsent, now) } },
-    { select: ["id"], take: BATCH }
+  const cutoff = cutoffOf(RETENTION_DAYS.cookieConsent, now)
+  return drain(
+    () => legal.listCookieConsents({ given_at: { $lt: cutoff } }, { select: ["id"], take: BATCH }),
+    (ids) => legal.deleteCookieConsents(ids)
   )
-  if (old.length > 0) {
-    await legal.deleteCookieConsents(old.map((row) => row.id))
-  }
-  return old.length
 }
 
 /** Clears the IP address and browser of audit entries past their period (adr/0011). */
 export async function forgetAuditClients(container: Container, now: Date): Promise<number> {
   return container
     .resolve<AuditLogModuleService>(AUDIT_LOG_MODULE)
-    .forgetClients(cutoffOf(RETENTION_DAYS.auditClient, now))
+    .forgetClients(cutoffOf(RETENTION_DAYS.auditClient, now), now)
 }
 
 /**
@@ -126,32 +160,32 @@ export async function forgetAuditClients(container: Container, now: Date): Promi
 export async function forgetSettledStockAlerts(container: Container, now: Date): Promise<number> {
   const alerts = container.resolve<BackInStockModuleService>(BACK_IN_STOCK_MODULE)
   const cutoff = cutoffOf(RETENTION_DAYS.stockAlert, now)
-  const [settled, unconfirmed] = await Promise.all([
-    alerts.listStockAlerts(
-      { status: ["notified", "cancelled"], updated_at: { $lt: cutoff } },
-      { select: ["id"], take: BATCH }
-    ),
-    alerts.listStockAlerts(
-      { status: "pending", confirm_expires_at: { $lt: cutoff } },
-      { select: ["id"], take: BATCH }
-    ),
-  ])
-  const ids = [...settled, ...unconfirmed].map((alert) => alert.id)
-  if (ids.length > 0) {
-    await alerts.deleteStockAlerts(ids)
-  }
-  return ids.length
+  const page = { select: ["id"], take: BATCH }
+  const settled = await drain(
+    () =>
+      alerts.listStockAlerts(
+        { status: ["notified", "cancelled"], updated_at: { $lt: cutoff } },
+        page
+      ),
+    (ids) => alerts.deleteStockAlerts(ids)
+  )
+  const unconfirmed = await drain(
+    () => alerts.listStockAlerts({ status: "pending", confirm_expires_at: { $lt: cutoff } }, page),
+    (ids) => alerts.deleteStockAlerts(ids)
+  )
+  return settled + unconfirmed
 }
 
 /** Deletes double opt-in requests a while after their link expired, confirmed or not. */
 export async function forgetSpentConsentRequests(container: Container, now: Date): Promise<number> {
   const messaging = container.resolve<MessagingModuleService>(MESSAGING_MODULE)
-  const spent = await messaging.listConsentRequests(
-    { expires_at: { $lt: cutoffOf(RETENTION_DAYS.consentRequest, now) } },
-    { select: ["id"], take: BATCH }
+  const cutoff = cutoffOf(RETENTION_DAYS.consentRequest, now)
+  return drain(
+    () =>
+      messaging.listConsentRequests(
+        { expires_at: { $lt: cutoff } },
+        { select: ["id"], take: BATCH }
+      ),
+    (ids) => messaging.deleteConsentRequests(ids)
   )
-  if (spent.length > 0) {
-    await messaging.deleteConsentRequests(spent.map((request) => request.id))
-  }
-  return spent.length
 }

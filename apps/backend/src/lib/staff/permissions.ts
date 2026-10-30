@@ -55,6 +55,8 @@ const SELF: readonly Rule[] = [
  * removal; an invitation made here carries no role. `/admin/staff` does both.
  */
 const REPLACED: readonly Rule[] = [
+  // Only closes the record, the data left in it: erasure is a KVKK request's (F13.5)
+  { methods: ["DELETE"], path: "/admin/customers/:id" },
   { methods: ["DELETE"], path: "/admin/users/:id" },
   { methods: ["POST"], path: "/admin/invites" },
   { methods: ["POST"], path: "/admin/invites/:id/resend" },

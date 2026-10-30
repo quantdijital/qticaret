@@ -13,9 +13,13 @@ export interface LegalValues {
 
 const TOKEN = /\{([\p{L}\p{N}_]+)\}/gu
 
+// Control and format characters (a right-to-left override in a name) would
+// make a contract read otherwise than it says: a filled value drops them
+const INVISIBLE = /[\p{Cc}\p{Cf}]/gu
+
 const fillText = (text: string, values: LegalValues["text"]): string =>
   text.replace(TOKEN, (_whole, name: string) => {
-    const value = values[name]?.trim()
+    const value = values[name]?.replace(INVISIBLE, "").trim()
     if (!value) {
       return MISSING_VALUE
     }

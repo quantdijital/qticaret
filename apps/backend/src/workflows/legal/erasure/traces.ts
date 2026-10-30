@@ -5,6 +5,8 @@ import type {
 } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
 import { ERASED_ADDRESS, erasedEmail } from "../../../lib/compliance/retention"
+import { ASYNC_JOB_MODULE } from "../../../modules/async-job"
+import type AsyncJobModuleService from "../../../modules/async-job/service"
 import { BACK_IN_STOCK_MODULE } from "../../../modules/back-in-stock"
 import type BackInStockModuleService from "../../../modules/back-in-stock/service"
 import { LEGAL_MODULE } from "../../../modules/legal"
@@ -141,9 +143,30 @@ async function eraseContributions(container: Container, customerId: string) {
   await saved.deleteWishlistItems(kept.map((row) => row.id))
 }
 
+/** Copies of the customer's data made for an earlier request: their files go now, not in a week. */
+async function eraseExports(container: Container, customerId: string) {
+  const jobs = container.resolve<AsyncJobModuleService>(ASYNC_JOB_MODULE)
+  const made = await jobs.listAsyncJobs(
+    { type: "customer.data_export", result_file_id: { $ne: null } },
+    { select: ["id", "input", "result_file_id"] }
+  )
+  const theirs = made.filter(
+    (job) => (job.input as { customer_id?: unknown } | null)?.customer_id === customerId
+  )
+  for (const job of theirs) {
+    if (job.result_file_id) {
+      await container.resolve(Modules.FILE).deleteFiles(job.result_file_id)
+    }
+  }
+  if (theirs.length > 0) {
+    await jobs.updateAsyncJobs(theirs.map((job) => ({ id: job.id, result_file_id: null })))
+  }
+}
+
 /**
  * The customer's traces beside their orders (adr/0041 §6): carts, messages,
- * reviews and questions, stock alerts, saved products. `addresses` are the
+ * reviews and questions, stock alerts, saved products, earlier copies of
+ * their data. `addresses` are the
  * e-mails messages went to (a guest's before an account). Run again, it
  * changes nothing more.
  */
@@ -151,5 +174,6 @@ export async function eraseTraces(container: Container, customerId: string, addr
   const carts = await eraseCarts(container, customerId)
   const messages = await eraseMessages(container, customerId, addresses)
   await eraseContributions(container, customerId)
+  await eraseExports(container, customerId)
   return { carts, messages }
 }

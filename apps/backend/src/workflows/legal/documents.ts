@@ -103,15 +103,11 @@ const publishDraftStep = createStep(
     }
     assertTokens(input.kind, draft.body as unknown as ContentDoc)
     const previous = await service.versionOf(input.kind, "published")
-    if (previous) {
-      await service.updateLegalDocuments({ id: previous.id, status: "retired" })
-    }
-    const published = await service.updateLegalDocuments({
-      id: draft.id,
-      status: "published",
+    const published = await service.publishDraft({
+      draft_id: draft.id,
+      previous_id: previous?.id ?? null,
       body_hash: bodyHashOf(draft.body),
-      published_at: new Date(),
-      published_by: input.actor_id,
+      by: input.actor_id,
     })
     return new StepResponse(published, { draftId: draft.id, previousId: previous?.id ?? null })
   },

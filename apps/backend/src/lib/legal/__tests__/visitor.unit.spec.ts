@@ -9,11 +9,14 @@ describe("the storefront's visitor cookie (F13.8)", () => {
     expect(visitorIdOf("qt_vid=kısa")).toBeNull()
     expect(visitorIdOf(`qt_vid=${id}x`)).toBeNull()
     expect(visitorIdOf(undefined)).toBeNull()
+    // Over HTTPS only the prefixed cookie counts: a plain one may come from a subdomain
+    expect(visitorIdOf(`qt_vid=${id}`, true)).toBeNull()
+    expect(visitorIdOf(`__Host-qt_vid=${id}`, true)).toBe(id)
   })
 
   it("keeps it from scripts and other sites for thirteen months, over HTTPS when live", () => {
     expect(visitorCookie("abc", true)).toBe(
-      "qt_vid=abc; Path=/; Max-Age=34214400; HttpOnly; SameSite=Lax; Secure"
+      "__Host-qt_vid=abc; Path=/; Max-Age=34214400; HttpOnly; SameSite=Lax; Secure"
     )
     expect(visitorCookie("abc", false)).not.toContain("Secure")
   })

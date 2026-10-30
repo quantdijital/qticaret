@@ -67,7 +67,8 @@ export interface RecordConsentInput {
   cart_id: string
   sales_channel_ids: string[]
   documents: { kind: LegalKind; version: number }[]
-  ip: string | null
+  /** Sealed by the route: the plain address never reaches the workflow engine. */
+  ip_encrypted: string | null
 }
 
 interface Previous {
@@ -123,7 +124,7 @@ const recordConsentStep = createStep(
         document_id: document.id,
         body_hash: document.body_hash ?? null,
       })),
-      input.ip
+      input.ip_encrypted
     )
     return new StepResponse(
       {

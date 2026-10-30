@@ -60,6 +60,16 @@ describe("legal texts (adr/0041 §1)", () => {
     expect(filled.content[1]).toEqual(lines[0])
     expect(JSON.stringify(filled.content[2])).toContain('"text":"—"')
   })
+
+  it("drops control and direction characters from a filled value", () => {
+    const filled = fillLegalDoc(doc(p("Alıcı: {alıcı_adı}"), p("{alıcı_telefonu}")), {
+      text: { alıcı_adı: "Ayşe‮İ\u0007 Yılmaz", alıcı_telefonu: "​⁦" },
+      blocks: {},
+    })
+
+    expect(filled.content[0]).toEqual(p("Alıcı: Ayşeİ Yılmaz"))
+    expect(filled.content[1]).toEqual(p("—"))
+  })
 })
 
 describe("the shop's legal identity (F13.9)", () => {

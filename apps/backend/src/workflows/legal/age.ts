@@ -6,7 +6,6 @@ import {
   createStep,
   createWorkflow,
 } from "@medusajs/framework/workflows-sdk"
-import { ageOn } from "../../lib/catalog"
 import { ValidationError } from "../../lib/errors"
 import { LEGAL_MODULE } from "../../modules/legal"
 import type LegalModuleService from "../../modules/legal/service"
@@ -76,7 +75,8 @@ export async function assertAgeDeclared(container: Container, cartId: string): P
 export interface DeclareAgeInput {
   cart_id: string
   sales_channel_ids: string[]
-  birth_date: string
+  /** Whole years, worked out by the route: the date of birth never reaches the workflow engine. */
+  age: number
 }
 
 /**
@@ -99,11 +99,7 @@ const declareAgeStep = createStep(
     if (!check.required) {
       throw new ValidationError("age.not_required")
     }
-    const age = ageOn(input.birth_date, new Date())
-    if (age === null) {
-      throw new ValidationError("age.birth_date_invalid", { field: "birth_date" })
-    }
-    if (age < check.min_age) {
+    if (input.age < check.min_age) {
       throw new ValidationError("age.under_limit", { field: "birth_date" })
     }
     const service = container.resolve<LegalModuleService>(LEGAL_MODULE)

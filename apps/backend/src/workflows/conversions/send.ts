@@ -147,7 +147,11 @@ async function heldToCurrentAnswer<
   const answer = await container
     .resolve<LegalModuleService>(LEGAL_MODULE)
     .currentCookieConsent(consent.cookieConsentId)
-  return answer ? { ...consent, ...heldToCookieConsent(consent, answer) } : consent
+  // An answer since deleted proves nothing: no consent
+  return {
+    ...consent,
+    ...heldToCookieConsent(consent, answer ?? { analytics: false, marketing: false }),
+  }
 }
 
 /**
@@ -170,6 +174,10 @@ const sendPurchaseConversionsStep = createStep(
       await conversions.moveToOrder(found.cartId, found.order.id)
     }
     const consent = await heldToCurrentAnswer(container, await conversions.ofOrder(found.order.id))
+    if (consent) {
+      // The answer in force when the order was placed is the order's from now on: a later refund reads it
+      await conversions.holdOrderTo(found.order.id, consent)
+    }
     const connected = await accounts(container)
     const api = conversionsApi()
     const base = { order_id: found.order.id, kind: "purchase" }
@@ -225,7 +233,7 @@ const sendRefundConversionStep = createStep(
   "conversions-send-refund",
   async (input: { order_id: string; refund_id: string; amount: number | null }, { container }) => {
     const conversions = container.resolve<ConversionsModuleService>(CONVERSIONS_MODULE)
-    const consent = await conversions.ofOrder(input.order_id)
+    const consent = await heldToCurrentAnswer(container, await conversions.ofOrder(input.order_id))
     const clientId = consent?.analytics ? consent.gaClientId : null
     if (!consent || !clientId) {
       return new StepResponse({ ga4: "no_consent" })

@@ -1985,7 +1985,7 @@
       },
       "publish": {
         "title": "Publish version {{version}}?",
-        "text": "Make sure your lawyer has checked the text. A published version cannot be changed; customers see and accept this text from now on.",
+        "text": "Make sure your lawyer has checked the text. A published version cannot be changed; customers see and accept this text from now on. Customers at the payment step at that moment are asked to accept the new text again; an order whose card payment is under way at that very moment is refunded. Publish at a quiet hour.",
         "done": "Text published."
       },
       "discard": {

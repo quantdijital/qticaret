@@ -1,4 +1,6 @@
 import type { MedusaResponse, MedusaStoreRequest } from "@medusajs/framework/http"
+import { LEGAL_MODULE } from "../../../../../modules/legal"
+import type LegalModuleService from "../../../../../modules/legal/service"
 import { recordLegalConsentWorkflow } from "../../../../../workflows/legal/consent"
 import type { StorePostLegalConsentsType } from "./validators"
 
@@ -12,12 +14,15 @@ export async function POST(
   req: MedusaStoreRequest<StorePostLegalConsentsType>,
   res: MedusaResponse
 ): Promise<void> {
+  const cartId = req.params["id"] ?? ""
   const { result } = await recordLegalConsentWorkflow(req.scope).run({
     input: {
-      cart_id: req.params["id"] ?? "",
+      cart_id: cartId,
       sales_channel_ids: req.publishable_key_context.sales_channel_ids,
       documents: req.validatedBody.documents,
-      ip: req.ip ?? req.socket.remoteAddress ?? null,
+      ip_encrypted: req.scope
+        .resolve<LegalModuleService>(LEGAL_MODULE)
+        .sealIp(cartId, req.ip ?? req.socket.remoteAddress ?? null),
     },
   })
   res.json({ consent: result })

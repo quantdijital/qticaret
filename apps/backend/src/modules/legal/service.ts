@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto"
-import { MedusaService } from "@medusajs/framework/utils"
+import type { Context } from "@medusajs/framework/types"
+import { InjectTransactionManager, MedusaContext, MedusaService } from "@medusajs/framework/utils"
 import { decryptPii, encryptPii, hashPii, parseKey } from "../../lib/crypto/pii"
 import { uniqueViolationKeys } from "../../lib/errors"
 import type { LegalKind } from "../../lib/legal/tokens"
@@ -66,14 +67,15 @@ class LegalModuleService extends MedusaService({
     this.hashKey = parseKey(options.hashKey, "legal hashKey")
   }
 
-  private visitorHash(visitorId: string): string {
+  /** The keyed hash a visitor is known by; the id itself is never stored or handed on. */
+  visitorHash(visitorId: string): string {
     return hashPii(visitorId, this.hashKey, "legal.visitor")
   }
 
   /** Keeps the visitor's answer to the cookie banner beside the ones before. */
-  async recordCookieConsent(visitorId: string, choice: CookieChoice) {
+  async recordCookieConsent(visitorHash: string, choice: CookieChoice) {
     return this.createCookieConsents({
-      visitor_hash: this.visitorHash(visitorId),
+      visitor_hash: visitorHash,
       ...choice,
       given_at: new Date(),
     })
@@ -119,11 +121,40 @@ class LegalModuleService extends MedusaService({
     return (last?.version ?? 0) + 1
   }
 
+  /**
+   * Puts the draft in force and retires the version before, in one
+   * transaction: the kind is never without a published text in between.
+   */
+  @InjectTransactionManager()
+  async publishDraft(
+    input: { draft_id: string; previous_id: string | null; body_hash: string; by: string | null },
+    @MedusaContext() sharedContext: Context = {}
+  ) {
+    if (input.previous_id) {
+      await this.updateLegalDocuments({ id: input.previous_id, status: "retired" }, sharedContext)
+    }
+    return this.updateLegalDocuments(
+      {
+        id: input.draft_id,
+        status: "published",
+        body_hash: input.body_hash,
+        published_at: new Date(),
+        published_by: input.by,
+      },
+      sharedContext
+    )
+  }
+
   /** Records what the shopper accepted for the cart; the last answer replaces the one before. */
-  async recordConsent(cartId: string, documents: AcceptedDocument[], ip: string | null) {
+  /** The shopper's IP address sealed for the cart's consent, before it goes anywhere else. */
+  sealIp(cartId: string, ip: string | null): string | null {
+    return ip ? encryptPii(ip, this.encryptionKey, ipContext(cartId)) : null
+  }
+
+  async recordConsent(cartId: string, documents: AcceptedDocument[], ipEncrypted: string | null) {
     const values = {
       documents: documents as unknown as Record<string, unknown>,
-      ip_encrypted: ip ? encryptPii(ip, this.encryptionKey, ipContext(cartId)) : null,
+      ip_encrypted: ipEncrypted,
       given_at: new Date(),
     }
     const replace = async () => {
@@ -167,11 +198,17 @@ class LegalModuleService extends MedusaService({
     }
   }
 
-  /** The IP address the consent was given from; null when none was seen. */
+  /** The IP address the consent was given from; null when none was seen or it cannot be read. */
   ipOf(consent: { cart_id: string; ip_encrypted: string | null }): string | null {
-    return consent.ip_encrypted
-      ? decryptPii(consent.ip_encrypted, this.encryptionKey, ipContext(consent.cart_id))
-      : null
+    if (!consent.ip_encrypted) {
+      return null
+    }
+    try {
+      return decryptPii(consent.ip_encrypted, this.encryptionKey, ipContext(consent.cart_id))
+    } catch {
+      // A key changed or a value tampered with: shown as unknown, never a failed page
+      return null
+    }
   }
 
   /**
@@ -215,14 +252,19 @@ class LegalModuleService extends MedusaService({
     if (!row) {
       return null
     }
-    const html = decryptPii(row.html_encrypted, this.encryptionKey, copyContext(orderId, kind))
+    let html: string | null = null
+    try {
+      html = decryptPii(row.html_encrypted, this.encryptionKey, copyContext(orderId, kind))
+    } catch {
+      // Unreadable (a key changed, the row tampered with): said so, never a failed page
+    }
     return {
       kind,
       version: row.version,
       title: row.title,
-      html,
+      html: html ?? "",
       html_hash: row.html_hash,
-      intact: sha256(html) === row.html_hash,
+      intact: html !== null && sha256(html) === row.html_hash,
       created_at: new Date(row.created_at).toISOString(),
     }
   }

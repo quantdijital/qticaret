@@ -1,7 +1,8 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
 import { ValidationError } from "../../../../../lib/errors"
-import { heldToCookieConsent, visitorIdOf } from "../../../../../lib/legal/visitor"
+import { logger } from "../../../../../lib/logging"
+import { heldToCookieConsent, secureCookies, visitorIdOf } from "../../../../../lib/legal/visitor"
 import { CONVERSIONS_MODULE } from "../../../../../modules/conversions"
 import type ConversionsModuleService from "../../../../../modules/conversions/service"
 import { LEGAL_MODULE } from "../../../../../modules/legal"
@@ -31,12 +32,16 @@ export async function POST(
     throw new MedusaError(MedusaError.Types.NOT_FOUND, "carts.unknown")
   }
   const body = req.validatedBody
-  const visitorId = visitorIdOf(req.headers.cookie)
+  const visitorId = visitorIdOf(req.headers.cookie, secureCookies())
   const answer = visitorId
     ? await req.scope.resolve<LegalModuleService>(LEGAL_MODULE).latestCookieConsent(visitorId)
     : null
   if (!answer && (body.analytics === undefined || body.marketing === undefined)) {
     throw new ValidationError("legal.cookie_consent_missing", { field: "analytics" })
+  }
+  if (!answer) {
+    // A storefront sending no cookie skips the banner's own record: counted, to be found
+    logger.info({ event: "conversions.tracking_without_cookie_answer" })
   }
   const flags = answer
     ? heldToCookieConsent(body, answer)

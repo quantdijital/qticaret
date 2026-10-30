@@ -1,4 +1,5 @@
 import { randomBytes } from "node:crypto"
+import { isLocalEnv, parseEnv } from "../env"
 
 /**
  * The storefront's own visitor cookie (F13.8, adr/0041 §5): a random id
@@ -8,16 +9,22 @@ import { randomBytes } from "node:crypto"
  */
 export const VISITOR_COOKIE = "qt_vid"
 
+// Over HTTPS the cookie takes the `__Host-` prefix: the browser then refuses
+// one set by another subdomain (no Domain, Path=/, Secure), so no visitor
+// can be handed an id chosen for them
+const HOST_COOKIE = `__Host-${VISITOR_COOKIE}`
+
 /** Thirteen months, the longest a cookie consent is asked to last. */
 export const VISITOR_MAX_AGE_SECONDS = 396 * 24 * 60 * 60
 
 const VISITOR_ID = /^[A-Za-z0-9_-]{32}$/
 
-/** The visitor's id from a `Cookie` header; null without one, or with one not ours. */
-export function visitorIdOf(cookieHeader: string | undefined): string | null {
+/** The visitor's id from a `Cookie` header (the `__Host-` one over HTTPS); null without one, or with one not ours. */
+export function visitorIdOf(cookieHeader: string | undefined, secure = false): string | null {
+  const wanted = secure ? HOST_COOKIE : VISITOR_COOKIE
   for (const part of (cookieHeader ?? "").split(";")) {
     const [name, ...value] = part.trim().split("=")
-    if (name === VISITOR_COOKIE) {
+    if (name === wanted) {
       const id = value.join("=")
       return VISITOR_ID.test(id) ? id : null
     }
@@ -25,13 +32,16 @@ export function visitorIdOf(cookieHeader: string | undefined): string | null {
   return null
 }
 
+/** Secure cookies everywhere but on a developer's machine, as the session cookie is set. */
+export const secureCookies = (): boolean => !isLocalEnv(parseEnv())
+
 /** A new visitor id: 24 random bytes, 32 characters. */
 export const newVisitorId = (): string => randomBytes(24).toString("base64url")
 
 /** The `Set-Cookie` value that keeps the id for another thirteen months. */
 export function visitorCookie(id: string, secure: boolean): string {
   return [
-    `${VISITOR_COOKIE}=${id}`,
+    `${secure ? HOST_COOKIE : VISITOR_COOKIE}=${id}`,
     "Path=/",
     `Max-Age=${String(VISITOR_MAX_AGE_SECONDS)}`,
     "HttpOnly",

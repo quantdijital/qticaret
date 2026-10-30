@@ -22,6 +22,7 @@ describe("staff roles", () => {
     ["POST", "/admin/invites"],
     ["POST", "/admin/invites/invite_1/resend"],
     ["DELETE", "/admin/invites/invite_1"],
+    ["DELETE", "/admin/customers/cus_1"],
   ] as const)(
     "keeps Medusa's %s %s from everyone: /admin/staff does it with its guards",
     (method, path) => {

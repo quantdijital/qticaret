@@ -41,11 +41,17 @@ const CONTRACT_FIELDS = [
 
 type SessionRow = { provider_id?: string | null; status?: string | null } | null
 
-/** The way an order is paid, from its payment's provider: a card unless offline. */
-function paymentOf(sessions: SessionRow[]): ContractPayment {
+/**
+ * The way an order is paid, from its payment's provider: a card unless
+ * offline; none when nothing was paid through one (a gift card in full).
+ */
+function paymentOf(sessions: SessionRow[]): ContractPayment | null {
   const providers = sessions.flatMap((session) =>
     session?.provider_id ? [session.provider_id] : []
   )
+  if (providers.length === 0) {
+    return null
+  }
   if (providers.includes(BANK_TRANSFER_PAYMENT_PROVIDER_ID)) {
     return "bank_transfer"
   }
