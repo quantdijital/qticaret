@@ -10,9 +10,11 @@ import type { PackageDefaults } from "../../lib/migration/types"
 import { enqueueAsyncJobWorkflow } from "../async-job/enqueue-async-job"
 
 export interface StartMigrationInput {
-  source: "bundle" | "shopify"
+  source: "bundle" | "shopify" | "feed"
   /** A bundle: the uploaded file, stored private under the migration's prefix. */
   source_file_id: string | null
+  /** A feed: its address. */
+  feed_url?: string | null
   mode: "check" | "apply"
   defaults: PackageDefaults | null
   requested_by: string | null
@@ -44,6 +46,7 @@ export const startMigrationWorkflow = createWorkflow(
         input: {
           source: input.source,
           ...(input.source_file_id ? { source_file_id: input.source_file_id } : {}),
+          ...(input.feed_url ? { feed_url: input.feed_url } : {}),
           mode: input.mode,
           defaults: input.defaults,
         },

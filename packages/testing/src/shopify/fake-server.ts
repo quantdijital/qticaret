@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto"
 import { createServer } from "node:http"
 import type { IncomingMessage, ServerResponse } from "node:http"
 import type { AddressInfo, Socket } from "node:net"
+import { merchantFeed } from "./feed"
 import { sitemapFile } from "./sitemap"
 
 /**
@@ -212,6 +213,11 @@ export async function startFakeShopify(
         const picture = !image.endsWith(".txt")
         res.writeHead(200, { "content-type": picture ? "image/png" : "text/plain" })
         res.end(picture ? FAKE_SHOPIFY_PNG : "bir görsel değil")
+        return
+      }
+      if (url.pathname === "/feeds/merchant.xml" && req.method === "GET") {
+        res.writeHead(200, { "content-type": "application/rss+xml" })
+        res.end(merchantFeed(origin))
         return
       }
       const sitemap = /^\/(sitemap[a-z0-9_]*\.xml(?:\.gz)?)$/.exec(url.pathname)?.[1]

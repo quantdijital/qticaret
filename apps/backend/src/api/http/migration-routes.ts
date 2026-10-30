@@ -4,6 +4,7 @@ import { z } from "@medusajs/framework/zod"
 import {
   AdminGetMigrationUrls,
   AdminGetMigrations,
+  AdminPostFeedMigration,
   AdminPostMigrationQuery,
   AdminPostMigrationSitemap,
   AdminPostMigrationUrlDecision,
@@ -45,6 +46,15 @@ export const MIGRATION_ROUTES = [
     middlewares: [
       requireUserActor,
       validateAndTransformBody(AdminPostShopifyMigration),
+      requireReauth(applyingStore),
+    ],
+  },
+  {
+    matcher: "/admin/migrations/feed",
+    methods: ["POST" as const],
+    middlewares: [
+      requireUserActor,
+      validateAndTransformBody(AdminPostFeedMigration),
       requireReauth(applyingStore),
     ],
   },

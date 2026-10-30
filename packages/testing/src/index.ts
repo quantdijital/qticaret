@@ -83,3 +83,4 @@ export type {
   FakeShopifyData,
   FakeShopifyNode,
 } from "./shopify/fake-server"
+export { merchantFeed } from "./shopify/feed"

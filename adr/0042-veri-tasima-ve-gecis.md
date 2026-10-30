@@ -150,3 +150,10 @@ Elimizde olanlar:
 3. **Kota.** Davetler günlük e-posta sınırının en çok yarısını kullanır, siparişler kalanını. Sahip başlatınca bütün taşınan müşteriler sıraya girer; günün payı hemen, kalanı her sabah 09:00'da gider. Gönderilemeyen ertesi gün yeniden denenir; kimseye iki kez gitmez.
 4. **Sahiplenme.** Hesap sahibi girişte (misafir siparişlerinin hesaba katıldığı an, adr/0037 §1) aynı e-postalı taşınmış kaydın geçmiş siparişlerini, yorumlarını (hesabın kendi yorumu olan ürününki hariç), ileti izinlerini ve hesabın hiç adresi yoksa adreslerini alır; taşınmış kayıt başına bir kez.
 5. Davetin başlatılması yeniden doğrulama ister ve denetim kaydına yazılır.
+
+## Uygulama notları (G7a Merchant akışı, 2026-10-31)
+
+1. **Türk platformlarının ortak kapısı.** Ticimax, ikas, IdeaSoft ve T-Soft'un hepsi Google Merchant ürün akışı (RSS 2.0, `g:` öznitelikleri; Merchant Center ürün verisi belirtimi) yayımlar. Platforma özel dışa aktarma biçimleri herkese açık belgelenmediği için hazır eşlemeler yerine bu belgelenmiş standart okunur; katalog (ürün, varyant, kategori yolu, marka, görsel, eski adres) her platformdan aynı yolla gelir.
+2. **Okuma.** Sahip akışın adresini verir (`POST /admin/migrations/feed`); `safeFetch` ile, 100 MB sınırla indirilir; güvenli XML okuyucu varlıkları çözmediği için başlık, marka ve kategori yolundaki `&amp;`, `&gt;` metin olarak çözülür.
+3. **Eşleme.** Aynı `item_group_id` kalemleri tek ürünün varyantlarıdır; ürün adı grubun ortak başlığıdır (kelime sınırında kesilir). Grup içinde değişen renk, beden, malzeme, desen seçenek olur. `sale_price` varsa satış fiyatıdır (üstü çizili fiyat taşınmaz). `out_of_stock` stok 0; diğerlerinde stok bilinmez. `product_type` "A > B" kategori yolu; tanıtıcı eski adresin son parçası (uzantısız). TRY dışında fiyatlı ya da fiyatsız kalem taşınmaz, raporun notlarında yazar.
+4. Kaynak kimliği `feed:<akışın alan adı>`; aynı akış yeniden okununca tekrarsızdır.

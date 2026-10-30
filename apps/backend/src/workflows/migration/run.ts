@@ -109,6 +109,8 @@ export async function runMigration(
   }
   const beat = (kind: keyof typeof SPAN) => () => hooks.progress(SPAN[kind][0])
 
+  // What the source left out as it read
+  problems.push(...(source.notes?.() ?? []))
   const categories = await listOf(source.categories(), beat("category"))
   const tree = await migrateCategories(
     container,

@@ -44,6 +44,14 @@ const input = z.discriminatedUnion("source", [
     .strict(),
   // The store and its account are the connected one's (integration-credentials), never the input's
   z.object({ source: z.literal("shopify"), ...shared }).strict(),
+  // The old site's product feed (F14.3), fetched under the SSRF rules
+  z
+    .object({
+      source: z.literal("feed"),
+      feed_url: z.url({ protocol: /^https?$/ }).max(2048),
+      ...shared,
+    })
+    .strict(),
 ])
 
 /**

@@ -1,4 +1,5 @@
 import { randomBytes } from "node:crypto"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { DEMO_SHOPIFY, startFakeShopify } from "@qticaret/testing"
 import type { FakeShopify } from "@qticaret/testing"
@@ -9,8 +10,9 @@ import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { sheetClient } from "../helpers/sheets"
 import type { SheetJob } from "../helpers/sheets"
+import { stockShop } from "../helpers/stock"
 
-jest.setTimeout(300 * 1000)
+jest.setTimeout(600 * 1000)
 
 /** F14.7 (adr/0042 §8): the old site's sitemap and Search Console's top pages into the inventory. */
 medusaIntegrationTestRunner({
@@ -93,6 +95,68 @@ medusaIntegrationTestRunner({
       const refused = await upload("ad,soyad\nAyşe,Kaya\n")
       expect(refused.status).toBe(400)
       expect(refused.data.message).toBe("migration.search_console_invalid")
+    })
+
+    it("moves the old site's Merchant feed: variants, categories, brand, pictures, old addresses", async () => {
+      await stockShop(getContainer())
+      const start = (body: Record<string, unknown>) =>
+        settle(
+          http.post<{ async_job: SheetJob }>(
+            "/admin/migrations/feed",
+            { url: `${shopify.url}/feeds/merchant.xml`, ...body },
+            { headers: owner.headers }
+          )
+        )
+      const checked = await settled((await start({ mode: "check" })).data.async_job.id)
+      expect(checked.status).toBe("succeeded")
+      expect(
+        (checked.result_summary as { counts: Record<string, Record<string, number>> }).counts
+      ).toMatchObject({
+        category: { read: 2, created: 3 },
+        brand: { read: 1, created: 1 },
+        product: { read: 2, created: 2, failed: 0 },
+        image: { read: 3, created: 3 },
+        customer: { read: 0 },
+      })
+
+      const parcel = { weight: 500, length: 30, width: 20, height: 10 }
+      const applied = await settled(
+        (await start({ mode: "apply", defaults: parcel })).data.async_job.id
+      )
+      expect(applied.status).toBe("succeeded")
+      const { data } = await getContainer()
+        .resolve(ContainerRegistrationKeys.QUERY)
+        .graph({
+          entity: "product",
+          fields: ["handle", "title", "status", "weight", "images.url", "variants.sku"],
+          filters: { handle: ["dokum-tava", "ahsap-kasik"] },
+        })
+      const products = data as {
+        handle: string
+        title: string
+        status: string
+        weight: number
+        images: unknown[]
+        variants: { sku: string }[]
+      }[]
+      expect(
+        products
+          .map((product) => [
+            product.handle,
+            product.title,
+            product.status,
+            product.images.length,
+            product.variants.length,
+          ])
+          .sort()
+      ).toEqual([
+        ["ahsap-kasik", "Ahşap Kaşık", "published", 1, 1],
+        ["dokum-tava", "Döküm Tava", "published", 2, 2],
+      ])
+      expect((await inventory()).map((row) => row.address).sort()).toEqual([
+        "/ahsap-kasik.html",
+        "/urun/dokum-tava",
+      ])
     })
   },
 })

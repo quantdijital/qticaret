@@ -742,4 +742,14 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "This address cannot be fetched: it leads inside the network or somewhere not allowed.",
   "migration.search_console_invalid":
     "The Search Console file could not be read; upload the zip from Performance > Export > CSV, or its pages CSV.",
+  "migration.feed_invalid":
+    "The product feed could not be read; it must be Google Merchant XML (RSS 2.0, g: attributes).",
+  "migration.feed_unreachable":
+    "The product feed could not be reached; open its address in a browser and try again.",
+  "migration.feed_address_refused":
+    "This address cannot be fetched: it leads inside the network or somewhere not allowed.",
+  "migration.feed_currency":
+    "The item is priced in a currency other than lira; prices are never converted.",
+  "migration.feed_item_invalid":
+    "The item's title, address or price could not be read; it did not move.",
 }

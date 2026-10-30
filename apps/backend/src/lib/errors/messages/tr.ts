@@ -745,4 +745,12 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Bu adres alınamaz: iç ağa ya da izin verilmeyen bir adrese gidiyor.",
   "migration.search_console_invalid":
     "Search Console dosyası okunamadı; Performans > Dışa aktar > CSV'den gelen zip'i ya da sayfalar CSV'sini yükleyin.",
+  "migration.feed_invalid":
+    "Ürün akışı okunamadı; Google Merchant (RSS 2.0, g: alanları) biçiminde bir XML olmalı.",
+  "migration.feed_unreachable": "Ürün akışına ulaşılamadı; adresi tarayıcıda açıp deneyin.",
+  "migration.feed_address_refused":
+    "Bu adres alınamaz: iç ağa ya da izin verilmeyen bir adrese gidiyor.",
+  "migration.feed_currency":
+    "Ürün Türk lirası dışında bir para birimiyle; fiyat çevrilmeden taşınmadı.",
+  "migration.feed_item_invalid": "Ürünün adı, adresi ya da fiyatı okunamadı; taşınmadı.",
 }

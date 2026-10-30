@@ -64,3 +64,9 @@ export const AdminPostMigrationSitemap = z
   .object({ url: z.url({ protocol: /^https?$/ }).max(2048) })
   .strict()
 export type AdminPostMigrationSitemapType = z.infer<typeof AdminPostMigrationSitemap>
+
+/** `POST /admin/migrations/feed`: the old site's product feed (Google Merchant XML), checked or applied. */
+export const AdminPostFeedMigration = AdminPostShopifyMigration.extend({
+  url: z.url({ protocol: /^https?$/ }).max(2048),
+}).strict()
+export type AdminPostFeedMigrationType = z.infer<typeof AdminPostFeedMigration>

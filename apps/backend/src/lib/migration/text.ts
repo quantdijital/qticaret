@@ -34,6 +34,10 @@ function entity(_whole: string, body: string): string {
   return NAMED[body.toLowerCase()] ?? `&${body};`
 }
 
+/** A text's XML or HTML entities read (`&amp;` → `&`); the secure XML reader leaves them. */
+export const decodeEntities = (text: string): string =>
+  text.replace(/&(#x?[0-9a-f]{1,6}|[a-z]{2,8});/gi, entity)
+
 export function htmlToText(html: string | null | undefined): string | null {
   const text = (html ?? "")
     .replace(HIDDEN, "")

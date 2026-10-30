@@ -163,6 +163,8 @@ export interface MigrationSource {
   orders(): AsyncIterable<SourceOrder>
   reviews(): AsyncIterable<SourceReview>
   pages(): AsyncIterable<SourcePage>
+  /** Records the source left out as it read them, and why: the report's notes. */
+  notes?(): readonly (StepProblem & { kind: MigrationKind })[]
 }
 
 /**
