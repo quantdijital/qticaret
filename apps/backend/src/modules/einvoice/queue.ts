@@ -52,6 +52,11 @@ export interface InvoiceProgress {
   document_type?: DocumentType | null
   job_id?: string | null
   job_started_at?: Date | null
+  /** Known before the PDF is ready: kept as soon as the program gives them. */
+  number?: string | null
+  uuid?: string | null
+  cancellable_until?: Date | null
+  program_difference?: number | null
 }
 
 export interface IssuedInvoice {
@@ -61,6 +66,8 @@ export interface IssuedInvoice {
   issued_at: Date
   cancellable_until: Date | null
   program_difference: number | null
+  /** The PDF in the private store. */
+  pdf_file_id?: string | null
 }
 
 interface Executor {
@@ -94,6 +101,7 @@ const SETTLED = [
   "issued_at",
   "cancellable_until",
   "program_difference",
+  "pdf_file_id",
 ] as const
 type Settled = Partial<Record<(typeof SETTLED)[number], unknown>>
 
@@ -230,10 +238,12 @@ export class InvoiceQueueService extends MedusaService({ Invoice, ParasutConnect
   async markFailed(
     row: ClaimedInvoice,
     code: string,
-    now: Date = new Date()
+    now: Date = new Date(),
+    options: { stop?: boolean } = {}
   ): Promise<InvoiceStatus | null> {
     const tried = row.attempts + 1
-    const status = tried >= MAX_ATTEMPTS ? "failed" : row.status
+    // `stop`: not tried again on its own (an outcome not known: staff look first)
+    const status = tried >= MAX_ATTEMPTS || options.stop ? "failed" : row.status
     const done = await this.settle(row, {
       status,
       attempts: tried,

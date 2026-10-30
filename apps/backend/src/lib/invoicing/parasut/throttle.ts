@@ -2,14 +2,15 @@ import { RetryableError } from "../../errors"
 import type { RateLimitStore } from "../../security/rate-limit"
 
 /**
- * Paraşüt takes at most 10 requests in 10 seconds (API v4). Every process
- * of the shop counts in one window (Redis when there is one) and waits
- * for the next window past 9, one short of the limit for a clock that
- * runs a little apart from Paraşüt's.
+ * Paraşüt takes at most 10 requests in 10 seconds (API v4); how it counts
+ * them is not documented. Every process of the shop counts in one fixed
+ * window (Redis when there is one) and waits for the next past 5: two
+ * windows back to back then hold 10 at most, however Paraşüt slides its
+ * own. About three invoices a minute, enough for a small shop's day.
  */
 
 const WINDOW_MS = 10_000
-const LIMIT = 9
+const LIMIT = 5
 // Windows waited before giving the turn up: the caller tries again later
 const MAX_WAITS = 4
 

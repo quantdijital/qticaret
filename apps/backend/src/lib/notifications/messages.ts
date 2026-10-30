@@ -61,6 +61,11 @@ export const NOTIFICATION_MESSAGES: Readonly<
       title: "Bir {{source}} muhasebe programına aktarılamadı",
       description: "Defalarca denendi; Ayarlar > Muhasebe'den yeniden deneyin.",
     },
+    "einvoice.issue_stopped": {
+      title: "#{{order}} siparişinin faturası kesilemedi",
+      description:
+        "Kendiliğinden yeniden denenmeyecek; sipariş sayfasındaki fatura kartından bakın.",
+    },
     "payments.statement_mismatch": {
       title: "{{provider}} dökümü {{day}} günü tutmuyor",
       description: "{{count}} fark var; Raporlar > Finans'ta listelendi.",
@@ -108,6 +113,11 @@ export const NOTIFICATION_MESSAGES: Readonly<
     "accounting.sync_stopped": {
       title: "A {{source}} could not be sent to the accounting program",
       description: "It was tried many times; try it again from Settings > Accounting.",
+    },
+    "einvoice.issue_stopped": {
+      title: "Order #{{order}}'s invoice could not be issued",
+      description:
+        "It will not be tried again on its own; see the invoice card on the order's page.",
     },
     "payments.statement_mismatch": {
       title: "The {{provider}} statement of {{day}} does not agree",

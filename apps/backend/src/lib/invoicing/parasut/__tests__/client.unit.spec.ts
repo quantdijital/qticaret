@@ -162,7 +162,7 @@ describe("Paraşüt client against the fake server (adr/0034)", () => {
     expect(await codeOf(api.inboxOf(token, "1"))).toBe("unauthorized")
   })
 
-  it("waits its turn past nine requests in ten seconds, all processes in one window", async () => {
+  it("waits its turn past five requests in a ten-second window, all processes in one", async () => {
     let clock = 0
     const store = createMemoryStore(() => clock)
     const waits: number[] = []
@@ -171,7 +171,7 @@ describe("Paraşüt client against the fake server (adr/0034)", () => {
       clock += ms
       return Promise.resolve()
     })
-    for (let n = 0; n < 9; n++) {
+    for (let n = 0; n < 5; n++) {
       await throttle()
     }
     const before = waits.length
@@ -184,7 +184,7 @@ describe("Paraşüt client against the fake server (adr/0034)", () => {
   it("gives the turn up when the window never opens, for the caller to try later", async () => {
     const store = createMemoryStore(() => 0)
     const throttle = parasutThrottle(store, fake.companyId, () => Promise.resolve())
-    for (let n = 0; n < 9; n++) {
+    for (let n = 0; n < 5; n++) {
       await throttle()
     }
 
