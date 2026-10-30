@@ -267,7 +267,8 @@
       "api": "External API",
       "team": "Team",
       "security": "Security",
-      "legal": "Legal texts"
+      "legal": "Legal texts",
+      "einvoice": "E-invoice"
     },
     "appearance": {
       "title": "Appearance",
@@ -1469,7 +1470,8 @@
       "api": "API keys for your own systems",
       "team": "Who uses the panel, with which role, and invitations",
       "security": "Your two-step verification and the team's requirement",
-      "legal": "Contracts, policies and the privacy notice"
+      "legal": "Contracts, policies and the privacy notice",
+      "einvoice": "Invoicing program and moment"
     },
     "marketing": {
       "title": "Marketing",
@@ -2009,6 +2011,96 @@
         "minAge": "Lowest age",
         "minAgeHint": "The legal limit is 18 for most products; you may ask more (25 at most).",
         "invalid": "Enter a whole number from 18 to 25."
+      }
+    },
+    "einvoice": {
+      "title": "E-invoice",
+      "subtitle": "Who issues the orders' invoices, and when.",
+      "program": {
+        "title": "Invoicing program",
+        "description": "The program that issues the invoices, and when. Only the owner can change it.",
+        "provider": "Issued by",
+        "trigger": "Issued when",
+        "providers": {
+          "none": "Off",
+          "parasut": "Paraşüt",
+          "external": "My own program (write-back)",
+          "fake": "Fake program (development)"
+        },
+        "triggers": {
+          "shipped": "The parcel leaves",
+          "placed": "The order is placed"
+        },
+        "hints": {
+          "none": "No invoice is issued; if you issue invoices elsewhere, enter them on the order's invoice card.",
+          "parasut": "Invoices are issued in your Paraşüt account; Paraşüt decides e-Fatura or e-Arşiv.",
+          "external": "Invoices are issued in your own program (e.g. through BirFatura) or by hand; their number and PDF are written back here.",
+          "fake": "The fake program works in development only; it issues no real invoice."
+        },
+        "triggerHints": {
+          "shipped": "Issued when the parcel leaves; until then the order can be edited and a cancellation leaves no invoice.",
+          "placed": "Issued once paid; a transfer once confirmed, cash on delivery when the order is placed."
+        },
+        "listed": "Invoices issued and stopped are listed in Orders > Invoices; a stopped invoice rings the bell."
+      },
+      "parasut": {
+        "title": "Paraşüt connection",
+        "description": "Your Paraşüt password never comes here; you paste the one-time code Paraşüt gives.",
+        "unavailable": "Paraşüt cannot be connected on this server yet. Ask the platform's administrator.",
+        "status": {
+          "connected": "Connected",
+          "broken": "Connection lost"
+        },
+        "company": "Company {{id}}",
+        "since": "since {{when}}",
+        "broken": "Paraşüt refused the connection. Connect again with a new code.",
+        "steps": {
+          "open": "Open Paraşüt with \"Allow on Paraşüt\" and allow the platform.",
+          "copy": "Copy the code Paraşüt shows.",
+          "paste": "Paste your company number (the number in Paraşüt's address: …/123456/…) and the code, and connect."
+        },
+        "companyId": "Company number",
+        "code": "Authorization code",
+        "openParasut": "Allow on Paraşüt",
+        "connect": "Connect",
+        "reconnect": "Connect again",
+        "connected": "Paraşüt connected.",
+        "check": "Test",
+        "checkOk": "The Paraşüt connection works.",
+        "checkFailed": "Paraşüt could not be reached ({{code}}).",
+        "disconnect": "Disconnect",
+        "disconnected": "Paraşüt disconnected.",
+        "working": "Invoices are issued in this Paraşüt account. If the connection fails, test it first; if it stays broken, connect again with a new code."
+      },
+      "external": {
+        "title": "Your own program",
+        "description": "Your program connects with a key you open in Settings > External API.",
+        "read": "It reads the invoices waiting and their contents (invoices:read).",
+        "write": "It writes back the number and PDF of the invoice it issued (invoices:write).",
+        "event": "It can hear of an invoice waiting through the invoice.requested event.",
+        "manual": "If your program is not connected (e.g. Luca), enter the number and PDF on the order's invoice card.",
+        "keys": "External API keys"
+      },
+      "none": {
+        "title": "No invoices issued",
+        "description": "Pick a program and the orders' invoices are issued on their own, or wait for you.",
+        "parasut": "Paraşüt: issued in your Paraşüt account; the PDF comes to the order and the customer.",
+        "external": "My own program: issued through BirFatura and the like, or by hand; the number and PDF are written here.",
+        "manual": "Even when off, you can enter an invoice's number and PDF on the order's invoice card."
+      },
+      "carriers": {
+        "title": "Carriers' details",
+        "description": "An e-Arşiv names the carrier of the parcel by its registered name and tax id. Both are on the carrier's own invoice to you.",
+        "names": {
+          "aras": "Aras Kargo",
+          "yurtici": "Yurtiçi Kargo",
+          "geliver": "Sent through Geliver",
+          "manual": "Parcels you send yourself"
+        },
+        "titleLabel": "Registered name",
+        "taxId": "Tax id",
+        "both": "Enter the name and the tax id together, or leave both empty.",
+        "taxIdInvalid": "A tax id has 10 digits (11 for a T.C. kimlik)."
       }
     }
   },

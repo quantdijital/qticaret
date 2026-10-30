@@ -267,7 +267,8 @@
       "api": "Dış API",
       "team": "Ekip",
       "security": "Güvenlik",
-      "legal": "Yasal metinler"
+      "legal": "Yasal metinler",
+      "einvoice": "E-Fatura"
     },
     "appearance": {
       "title": "Görünüm",
@@ -1469,7 +1470,8 @@
       "api": "Kendi sistemleriniz için API anahtarları",
       "team": "Panele kimlerin hangi rolle girdiği ve davetler",
       "security": "İki adımlı doğrulamanız ve ekip için zorunluluk",
-      "legal": "Sözleşmeler, politikalar ve aydınlatma metni"
+      "legal": "Sözleşmeler, politikalar ve aydınlatma metni",
+      "einvoice": "Fatura programı ve kesim anı"
     },
     "marketing": {
       "title": "Pazarlama",
@@ -2009,6 +2011,96 @@
         "minAge": "En düşük yaş",
         "minAgeHint": "Yasal sınır çoğu ürün için 18; daha yüksek bir yaş isteyebilirsiniz (en çok 25).",
         "invalid": "18 ile 25 arasında bir tam sayı girin."
+      }
+    },
+    "einvoice": {
+      "title": "E-Fatura",
+      "subtitle": "Siparişlerin faturasını kimin, ne zaman keseceği.",
+      "program": {
+        "title": "Fatura programı",
+        "description": "Faturayı kesen program ve kesim anı. Yalnızca mağaza sahibi değiştirebilir.",
+        "provider": "Faturayı kesen",
+        "trigger": "Kesim anı",
+        "providers": {
+          "none": "Kapalı",
+          "parasut": "Paraşüt",
+          "external": "Kendi programım (geri yazma)",
+          "fake": "Sahte program (geliştirme)"
+        },
+        "triggers": {
+          "shipped": "Kargoya verilince",
+          "placed": "Sipariş onaylanınca"
+        },
+        "hints": {
+          "none": "Fatura kesilmez; faturalarınızı başka yerden kesiyorsanız siparişin fatura kartından elle işleyebilirsiniz.",
+          "parasut": "Fatura, Paraşüt hesabınızda kesilir; e-Fatura mı e-Arşiv mi olacağına Paraşüt karar verir.",
+          "external": "Fatura kendi programınızda (ör. BirFatura üzerinden) ya da elle kesilir; numarası ve PDF'i buraya geri yazılır.",
+          "fake": "Sahte program yalnızca geliştirme ortamında çalışır; gerçek fatura kesmez."
+        },
+        "triggerHints": {
+          "shipped": "Paket kargoya verildiğinde kesilir; o ana kadar sipariş düzenlenebilir ve iptal faturayı etkilemez.",
+          "placed": "Ödeme alınınca kesilir; havalede ödeme onaylanınca, kapıda ödemede sipariş verilince."
+        },
+        "listed": "Kesilen ve kesilemeyen faturalar Siparişler > Faturalar'da listelenir; kesilemeyen fatura zil ile bildirilir."
+      },
+      "parasut": {
+        "title": "Paraşüt bağlantısı",
+        "description": "Paraşüt şifreniz buraya girilmez; Paraşüt'ün verdiği tek kullanımlık kodu yapıştırırsınız.",
+        "unavailable": "Paraşüt bağlantısı bu sunucuda henüz açılmadı. Platform yöneticisine başvurun.",
+        "status": {
+          "connected": "Bağlı",
+          "broken": "Bağlantı koptu"
+        },
+        "company": "Firma no {{id}}",
+        "since": "{{when}} tarihinden beri",
+        "broken": "Paraşüt bağlantıyı reddetti. Yeni bir kodla yeniden bağlayın.",
+        "steps": {
+          "open": "\"Paraşüt'te izin ver\" ile Paraşüt'ü açın ve platforma izin verin.",
+          "copy": "Paraşüt'ün gösterdiği kodu kopyalayın.",
+          "paste": "Firma numaranızı (Paraşüt adresindeki sayı: …/123456/…) ve kodu yapıştırıp bağlayın."
+        },
+        "companyId": "Firma numarası",
+        "code": "Yetki kodu",
+        "openParasut": "Paraşüt'te izin ver",
+        "connect": "Bağla",
+        "reconnect": "Yeniden bağla",
+        "connected": "Paraşüt bağlandı.",
+        "check": "Dene",
+        "checkOk": "Paraşüt bağlantısı çalışıyor.",
+        "checkFailed": "Paraşüt'e ulaşılamadı ({{code}}).",
+        "disconnect": "Kaldır",
+        "disconnected": "Paraşüt bağlantısı kaldırıldı.",
+        "working": "Faturalar bu Paraşüt hesabında kesilir. Bağlantı sorun çıkarırsa önce deneyin, düzelmezse yeni bir kodla yeniden bağlayın."
+      },
+      "external": {
+        "title": "Kendi programınız",
+        "description": "Programınız, Ayarlar > Dış API'den açacağınız bir anahtarla bağlanır.",
+        "read": "Bekleyen faturaları ve içeriklerini okur (invoices:read).",
+        "write": "Kestiği faturanın numarasını ve PDF'ini geri yazar (invoices:write).",
+        "event": "Fatura beklediğinde invoice.requested olayıyla haber alabilir.",
+        "manual": "Programınız bağlı değilse (ör. Luca), siparişin fatura kartından numarayı ve PDF'i elle girersiniz.",
+        "keys": "Dış API anahtarları"
+      },
+      "none": {
+        "title": "Fatura kesilmiyor",
+        "description": "Bir program seçince siparişlerin faturası kendiliğinden kesilir ya da sizi bekler.",
+        "parasut": "Paraşüt: fatura Paraşüt hesabınızda kesilir, PDF'i siparişe ve müşteriye gelir.",
+        "external": "Kendi programım: BirFatura gibi bir aracıyla ya da elle kesilir, numarası ve PDF'i buraya yazılır.",
+        "manual": "Kapalıyken de siparişin fatura kartından numarayı ve PDF'i elle girebilirsiniz."
+      },
+      "carriers": {
+        "title": "Kargo firmalarının bilgileri",
+        "description": "e-Arşiv faturada paketi taşıyan firmanın unvanı ve VKN'si yazılır. Bunlar kargo firmasının size kestiği faturada bulunur.",
+        "names": {
+          "aras": "Aras Kargo",
+          "yurtici": "Yurtiçi Kargo",
+          "geliver": "Geliver ile gönderilenler",
+          "manual": "Kendi gönderdiğiniz paketler"
+        },
+        "titleLabel": "Unvan",
+        "taxId": "VKN / TCKN",
+        "both": "Unvanı ve VKN'yi birlikte girin ya da ikisini de boş bırakın.",
+        "taxIdInvalid": "VKN 10, TCKN 11 haneden oluşur."
       }
     }
   },

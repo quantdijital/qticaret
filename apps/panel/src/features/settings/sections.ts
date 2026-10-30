@@ -3,6 +3,7 @@ import {
   Calculator,
   CreditCard,
   FileClock,
+  FileText,
   KeyRound,
   ListChecks,
   ListTodo,
@@ -57,6 +58,8 @@ export const SETTINGS_GROUPS: readonly SettingsGroup[] = [
     sections: [
       { key: "payments", to: "/settings/payments", icon: CreditCard, needs: "settings" },
       { key: "accounting", to: "/settings/accounting", icon: Calculator, needs: "settings" },
+      // F8: who issues the shop's invoices
+      { key: "einvoice", to: "/settings/einvoice", icon: FileText, needs: "settings" },
       { key: "shipping", to: "/settings/shipping", icon: Truck, needs: "settings" },
       { key: "locations", to: "/settings/locations", icon: Warehouse, needs: "settings" },
       { key: "marketing", to: "/settings/marketing", icon: Megaphone, needs: "settings" },
