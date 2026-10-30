@@ -110,6 +110,7 @@
   - Kişisel veri içeren iş sonucunu (muhasebe paketi, denetim kaydı dışa aktarımı) yalnızca isteyen kişi ve sahip indirir.
 - Oturum token'ları httpOnly + Secure + SameSite cookie. localStorage'da token yok. Cookie oturumu kullanılan her yerde CSRF token.
 - Müşteri kaydında e-posta doğrulama; doğrulanmamış hesap yorum, stok bildirimi ve favori gibi yazma işlemleri yapamaz.
+  - Kod, adresi yalnızca onu isteyen kimliğin oturumunda doğrular (`POST /auth/verification/confirm` o kimliğin token'ıyla; F15.1). Medusa kodu tek başına kabul ediyordu: birinin adresiyle kayıt açan, adres sahibine e-postadaki bağlantıyı açtırarak adresi kendi hesabına doğrulatabilirdi. Oturumsuz onay 401, başka kimliğin kodu bilinmeyen kod gibi 400 alır. Vitrin doğrulama sayfası, oturum yoksa önce girişi ister (doğrulanmamış hesabın girişi `verification_required` ve kimliksiz bir token döner; onay onunla yapılır).
 - Başarısız giriş denemelerinde artan gecikme + kilit (admin ve müşteri). Şifre sıfırlama token'ı tek kullanımlık, kısa ömürlü.
 - Şifre politikası: uzunluk odaklı (min 10), sızmış şifre listesi kontrolü (k-anonymity API veya yerel liste; ADR-0003'e göre).
 

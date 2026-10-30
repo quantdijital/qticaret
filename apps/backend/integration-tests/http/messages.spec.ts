@@ -303,7 +303,11 @@ medusaIntegrationTestRunner({
       )
       const code = /yapıştırın:\s+(\S+)/.exec(mail?.text ?? "")?.[1] ?? ""
       const confirmed = await settle(
-        http.post<{ verified_at?: string }>("/auth/verification/confirm", { code })
+        http.post<{ verified_at?: string }>(
+          "/auth/verification/confirm",
+          { code },
+          { headers: { authorization: `Bearer ${token}` } }
+        )
       )
       const rows = await getContainer()
         .resolve(Modules.NOTIFICATION)

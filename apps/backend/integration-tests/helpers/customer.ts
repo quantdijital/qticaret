@@ -55,7 +55,12 @@ export async function confirmEmail(
         }, 10_000)
       ),
     ])
-    await http.post("/auth/verification/confirm", { code })
+    // In the asking identity's session, as the storefront confirms it (F15.1)
+    await http.post(
+      "/auth/verification/confirm",
+      { code },
+      { headers: { authorization: `Bearer ${token}` } }
+    )
   } finally {
     bus.unsubscribe("auth.verification_requested", listener, { subscriberId })
   }

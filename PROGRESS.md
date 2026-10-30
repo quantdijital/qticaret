@@ -1184,7 +1184,7 @@
 
 | # | F15 | Görev | Bağımlılık | KK |
 |---|---|---|---|---|
-| H1 | F15.1 | Kimlik doğrulama sertleştirmesi: e-posta doğrulama onayını isteyen kimliğe bağlama (F14 kapanışından devreden; Medusa `/auth/verification/confirm`), şifre değişince eski kimliksiz anahtarların yenilenmemesi; önceki fazların ADR'lerindeki "sonraya kalanlar" taraması ve kapatılması | — | KK1 |
+| H1 ◐ | F15.1 | **Doğrulama kodunun oturuma bağlanması bitti (2026-10-31; ADR-0037 ek, HTTP 1/1, kayıt kullanan 24 takım 142/142).** Kimlik doğrulama sertleştirmesi: e-posta doğrulama onayını isteyen kimliğe bağlama (F14 kapanışından devreden; Medusa `/auth/verification/confirm`), şifre değişince eski kimliksiz anahtarların yenilenmemesi; önceki fazların ADR'lerindeki "sonraya kalanlar" taraması ve kapatılması | — | KK1 |
 | H2 | F15.2 | Güvenlik tabanı uçtan uca: hız sınırı, güvenlik başlıkları, CORS, CSRF, yükleme, SSRF için tek HTTP takımı; staging için OWASP ZAP yapılandırması (CI açılınca çalışır) | — | KK1 |
 | H3 | F15.3 | k6 senaryoları (ürün gezinme, sepet, sahte sağlayıcıyla checkout, webhook patlaması 1000/dk, sitemap/robots), yerelde ölçüm, `docs/perf-raporlari/` | — | KK2 |
 | H4 | F15.4 | Gözlemlenebilirlik: OpenTelemetry izleri, yavaş sorgu logu, hata izleme (Türkiye'de kendi barındırılan; ADR). **Yeni bağımlılık: kullanıcı onayı** | — | — |

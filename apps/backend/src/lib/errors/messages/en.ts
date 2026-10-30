@@ -765,4 +765,6 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "Another product here holds this handle; the product did not move (nothing is written over). Change the handle at the source or remove the product here.",
   "migration.url_path_reserved":
     "This old address is the site's home page or a reserved path; it was not tied to a record.",
+  "account.verification_session_required":
+    "Sign in to your account first to confirm your address; the link works only in your session.",
 }

@@ -765,4 +765,6 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Bu tanıtıcı sitede başka bir ürüne ait; ürün taşınmadı (üzerine yazılmaz). Tanıtıcıyı kaynakta değiştirin ya da buradaki ürünü kaldırın.",
   "migration.url_path_reserved":
     "Bu eski adres sitenin ana sayfası ya da ayrılmış bir yolu; bir kayda bağlanmadı.",
+  "account.verification_session_required":
+    "Adresinizi doğrulamak için önce hesabınıza giriş yapın; bağlantı ancak oturumunuzda çalışır.",
 }

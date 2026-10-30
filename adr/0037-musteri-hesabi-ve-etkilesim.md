@@ -227,3 +227,10 @@ F10 vitrinin müşteri tarafını kuruyor: hesap, e-posta doğrulama, sosyal gir
 - Vitrin (F18) giriş yanıtında `verification_required`'ı ve sipariş sayfasında token'ı ele alır. Sözleşme `packages/types`'a yazılır.
 - Kurulumda (F16) mağaza başına Google ve Apple OAuth istemcisi açılır. Apple Developer hesabı kod dışı gereksinimdir (docs/12).
 - Panel: yorum ve soru moderasyonu ekranları, müşteri grupları ve segmentler, müşteri sayfasında favori ve abonelik sayıları.
+
+## Ek (2026-10-31, F15.1): doğrulama kodu yalnızca kendi oturumunda
+
+F14 kapanış incelemesi, Medusa 2.21.2'nin `POST /auth/verification/confirm` ucunun kodu tek başına kabul ettiğini gösterdi (kaynak: `providers/verification/token.ts`; `auth_identity_id` denetlenmiyor, rota oturumsuz isteğe açık). Birinin adresiyle kayıt açan, adres sahibine e-postadaki doğrulama bağlantısını açtırarak adresi kendi hesabına doğrulatabilir ve o adresle verilmiş misafir siparişlerini (§1) alabilirdi.
+
+Karar: onay, kodu isteyen kimliğin token'ıyla yapılır (`api/http/verification.ts`). Oturum yoksa 401 (`account.verification_session_required`). Kod başka bir kimliğinse yanıt bilinmeyen kodunkiyle aynıdır (400), kod sahibinin kim olduğu sızmaz. Kod kaydı, Medusa'nın kendi sakladığı SHA-256 özetiyle bulunur. Vitrin (F18) doğrulama sayfasında oturum yoksa girişi ister. Test: `integration-tests/http/account-verification.spec.ts`.
+
