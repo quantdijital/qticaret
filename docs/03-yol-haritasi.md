@@ -402,9 +402,9 @@ Detay: `docs/06-admin-ux.md`. adr/0022'den sonra bu fazın ekranları panel hatt
 - F12.11 İçerik yönetimi ekranları: sayfalar, blog, facet landing (özgünlük göstergesi), Soru-Cevap moderasyonu
 
 **KK:**
-- [ ] Operasyon rolü ayarları değiştiremiyor (testli); 2FA'sız owner girişi engelleniyor
-- [ ] Tüm admin sayfaları Türkçe, boş/hata/yükleniyor durumları tasarlanmış
-- [ ] Kurulum kontrol listesindeki eksikler panelde görünüyor ve tamamlanınca kayboluyor
+- [x] Operasyon rolü ayarları değiştiremiyor (testli); 2FA'sız owner girişi engelleniyor (2026-10-30; `staff-roles.spec` KK1, `staff-mfa.spec` KK1; anahtar kapalıyken de 2FA'sı olanın yarım oturumu reddedilir)
+- [x] Tüm admin sayfaları Türkçe, boş/hata/yükleniyor durumları tasarlanmış (2026-10-30; `theme/house-rules.spec` TR/EN eşleşmesi, e2e eksik anahtar koruyucusu; bütün ekranlar açık/koyu axe ve 375 px denetiminde; hata durumu olmayan 8 kart ve 3 rapor düzeltildi)
+- [x] Kurulum kontrol listesindeki eksikler panelde görünüyor ve tamamlanınca kayboluyor (2026-10-30; `seo-setup.spec`, `setup-checklist-card.spec`; künye maddesi F13'e kadar "yakında" notuyla açık)
 
 ---
 
