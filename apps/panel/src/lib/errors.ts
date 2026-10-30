@@ -1,3 +1,4 @@
+import { isReauthCancelled } from "./reauth"
 import type { TFunction } from "i18next"
 
 interface ApiFailure {
@@ -12,6 +13,10 @@ interface ApiFailure {
  * generic line so no internals reach the screen.
  */
 export function errorText(t: TFunction, error: unknown): string {
+  // The person closed the step-up dialog: nothing went wrong
+  if (isReauthCancelled(error)) {
+    return t("reauth.cancelled")
+  }
   const failure = error as ApiFailure | null
   const status = failure?.status
   const message = failure?.message

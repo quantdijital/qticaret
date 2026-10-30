@@ -162,6 +162,13 @@ const TR: Readonly<Record<string, string>> = {
     "#{{number}} numaralı siparişinizdeki değişimin farkını geri gönderdik.",
   "return_refunded.amount": "İade tutarı",
   "return_refunded.when": "Tutarın kartınıza yansıması bankanıza göre birkaç iş günü sürebilir.",
+  "staff_reset.subject": "{{shop}} paneli şifrenizi yenileyin",
+  "staff_reset.preheader": "{{shop}} yönetim paneli için şifre yenileme bağlantısı.",
+  "staff_reset.heading": "Şifre yenileme isteği",
+  "staff_reset.intro":
+    "{{shop}} yönetim panelindeki hesabınız için şifre yenileme isteği aldık. Aşağıdaki bağlantı 15 dakika geçerlidir.",
+  "staff_reset.button": "Şifremi yenile",
+  "staff_reset.ignore": "Bu isteği siz yapmadıysanız e-postayı yok sayın; şifreniz değişmez.",
   "staff_invite.subject": "{{shop}} ekibine davet edildiniz",
   "staff_invite.preheader": "{{shop}} yönetim paneli için hesabınızı oluşturun.",
   "staff_invite.heading": "{{shop}} yönetim paneline davet",

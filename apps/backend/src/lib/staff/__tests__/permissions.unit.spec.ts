@@ -9,11 +9,30 @@ describe("staff roles", () => {
     for (const [method, path] of [
       ["POST", "/admin/integrations/credentials/paytr"],
       ["POST", "/admin/api-access"],
-      ["DELETE", "/admin/users/user_1"],
+      ["DELETE", "/admin/staff/members/user_1"],
       ["POST", "/admin/platform-settings/bank_transfer"],
     ] as const) {
       expect(allowed("owner", method, path)).toBe(true)
     }
+  })
+
+  it.each([
+    ["DELETE", "/admin/users/user_1"],
+    ["DELETE", "/admin/users/user%5F1"],
+    ["POST", "/admin/invites"],
+    ["POST", "/admin/invites/invite_1/resend"],
+    ["DELETE", "/admin/invites/invite_1"],
+  ] as const)(
+    "keeps Medusa's %s %s from everyone: /admin/staff does it with its guards",
+    (method, path) => {
+      for (const role of STAFF_ROLES) {
+        expect(decide(role, method, path)).toEqual({ allowed: false, reason: "replaced" })
+      }
+    }
+  )
+
+  it("leaves Medusa's invitation acceptance to the invited", () => {
+    expect(allowed("owner", "POST", "/admin/invites/accept")).toBe(true)
   })
 
   it.each([
@@ -32,8 +51,6 @@ describe("staff roles", () => {
     ["POST", "/admin/google/connect"],
     ["DELETE", "/admin/google"],
     ["POST", "/admin/users/user_1"],
-    ["DELETE", "/admin/users/user_1"],
-    ["POST", "/admin/invites"],
     ["GET", "/admin/invites"],
     ["POST", "/admin/staff/members/user_1"],
     ["DELETE", "/admin/staff/members/user_1"],
@@ -136,6 +153,7 @@ describe("staff roles", () => {
       team: true,
       staff: true,
       audit: true,
+      taxId: true,
     })
     expect(capabilitiesOf("admin")).toMatchObject({
       settings: true,
@@ -145,6 +163,7 @@ describe("staff roles", () => {
       team: true,
       staff: false,
       audit: true,
+      taxId: true,
     })
     expect(capabilitiesOf("operations")).toEqual({
       settings: false,
@@ -160,6 +179,7 @@ describe("staff roles", () => {
       team: false,
       staff: false,
       audit: false,
+      taxId: false,
     })
     expect(Object.values(capabilitiesOf("readonly")).every((can) => !can)).toBe(true)
     expect(Object.values(capabilitiesOf(null)).every((can) => !can)).toBe(true)
@@ -196,6 +216,7 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "DELETE /admin/customer-segments/:id": false,
   "POST /admin/customer-segments": false,
   "POST /admin/customers/:id/consents": false,
+  "POST /admin/customers/:id/billing-profile/reveal": false,
   "POST /admin/features/:key": false,
   "POST /admin/google/connect": false,
   "POST /admin/google/merchant": false,
@@ -259,6 +280,7 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/staff/invites": false,
   "POST /admin/staff/members/:id": false,
   "DELETE /admin/staff/members/:id": false,
+  "POST /admin/staff/members/:id/reset-mfa": false,
   "POST /admin/stock-items/:id/watch": true,
   "POST /admin/warehouses/:id/default": false,
   "POST /admin/warehouses/:id": false,

@@ -29,6 +29,11 @@ export interface StaffInviteVars {
   role: "admin" | "operations" | "readonly"
 }
 
+/** A staff member's password reset: the link only the event knew. */
+export interface StaffResetVars {
+  resetUrl: string
+}
+
 export interface StaffSeoVars {
   products: number
   average: number | null
@@ -195,4 +200,25 @@ export const staffInvite: MessageTemplate<StaffInviteVars> = {
       footer: FOOTER(brand.shopName),
     }),
   sample: { inviteUrl: "https://magaza.example/invite?token=ornek", role: "operations" },
+}
+
+/** A staff member's password reset: the panel's page, good for 15 minutes (F12.6). */
+export const staffPasswordReset: MessageTemplate<StaffResetVars> = {
+  name: "staff.password_reset",
+  kind: "transactional",
+  channels: ["email"],
+  retry: false,
+  email: (vars, brand) =>
+    renderEmail(brand, {
+      subject: messageText("staff_reset.subject", { shop: brand.shopName }),
+      preheader: messageText("staff_reset.preheader", { shop: brand.shopName }),
+      heading: messageText("staff_reset.heading"),
+      blocks: [
+        { kind: "paragraph", text: messageText("staff_reset.intro", { shop: brand.shopName }) },
+        { kind: "button", label: messageText("staff_reset.button"), url: vars.resetUrl },
+        { kind: "note", text: messageText("staff_reset.ignore") },
+      ],
+      footer: FOOTER(brand.shopName),
+    }),
+  sample: { resetUrl: "https://magaza.example/reset-password?token=ornek" },
 }

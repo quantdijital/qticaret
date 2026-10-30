@@ -52,7 +52,7 @@ export function Stepper({ steps, currentKey, onSelect, className }: StepperProps
               className={cn(
                 "relative z-10 flex size-8 shrink-0 items-center justify-center rounded-full border-2 text-xs font-semibold transition-colors",
                 step.done && "border-primary bg-primary text-primary-foreground",
-                current && "border-primary bg-card text-primary ring-4 ring-primary/15",
+                current && "border-primary bg-card text-primary-text ring-4 ring-primary/15",
                 !step.done && !current && "border-border bg-card text-muted-foreground",
                 onSelect && "cursor-pointer hover:border-primary"
               )}

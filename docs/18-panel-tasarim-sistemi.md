@@ -83,6 +83,8 @@ Tek kaynak: `apps/panel/src/theme/tokens.css`. Üç katman; bileşenler yalnızc
 ### 4.2 Anlamsal (tema bunları değiştirir; shadcn adları)
 `--background`, `--foreground`, `--card`, `--card-foreground`, `--popover`, `--muted`, `--muted-foreground`, `--primary`, `--primary-foreground`, `--secondary`, `--accent`, `--destructive`, `--success`, `--warning`, `--info`, `--border`, `--input`, `--ring`, `--chart-1 … --chart-5`, `--sidebar-*`.
 
+`--primary-text`: marka renginde metin (bağlantı düğmesi, "Göster", adım göstergesi). Dolgunun kendi açıklığından başlar, her yüzeyde (arka plan, kart, açılır pencere, muted) AA'yı tutturana kadar kayar; marka rengi metin olarak doğrudan `--primary` ile yazılmaz (2026-10-29, şifre yenileme sayfasındaki bağlantı koyu kırmızı markada AA'yı kaçırıyordu).
+
 ### 4.3 Bileşen ve yerleşim (ayarlardan yönetilir)
 | Token | Varsayılan | Kaynak |
 | --- | --- | --- |

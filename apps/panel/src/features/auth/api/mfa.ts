@@ -1,5 +1,6 @@
 import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
 import { STAFF_KEY } from "@/features/auth/api/staff"
+import { reauthHeaders, withReauth } from "@/lib/reauth"
 import { sdk } from "@/lib/sdk"
 
 /** A factor being set up: its secret, once, for the authenticator app (F12.6, adr/0040 §2). */
@@ -51,22 +52,45 @@ export function useStartFactor() {
   })
 }
 
-/** The factor confirmed with the app's first code: it is on from here. */
+/**
+ * The factor confirmed with the app's first code: it is on from here. The
+ * password comes with it (adr/0040 §3): a session alone must not enrol an
+ * app of its own.
+ */
 export function useConfirmFactor() {
   const client = useQueryClient()
   return useMutation({
-    mutationFn: async (input: { id: string; code: string }) => {
-      await sdk.auth.mfa.verify(input.id, { code: input.code })
+    mutationFn: async (input: { id: string; code: string; password: string }) => {
+      await sdk.client.fetch(`/auth/mfa/factors/${encodeURIComponent(input.id)}/verify`, {
+        method: "POST",
+        body: { code: input.code },
+        headers: reauthHeaders({ method: "password", secret: input.password }),
+      })
     },
     onSuccess: () => client.invalidateQueries({ queryKey: STAFF_KEY }),
   })
 }
 
-/** New recovery codes, shown once; the earlier ones stop working. */
+const recoveryCodes = async (headers?: Record<string, string>) =>
+  (
+    await sdk.client.fetch<{ recovery_codes: string[] }>("/auth/mfa/recovery-codes", {
+      method: "POST",
+      body: {},
+      ...(headers ? { headers } : {}),
+    })
+  ).recovery_codes
+
+/**
+ * New recovery codes, shown once; the earlier ones stop working. They ask
+ * for the app's code (adr/0040 §3): right after a setup its own code is
+ * given, later the dialog asks for one.
+ */
 export function useRecoveryCodes() {
   return useMutation({
-    mutationFn: async (): Promise<string[]> =>
-      (await sdk.auth.mfa.generateRecoveryCodes({})).recovery_codes,
+    mutationFn: (setupCode?: string): Promise<string[]> =>
+      setupCode
+        ? recoveryCodes(reauthHeaders({ method: "totp", secret: setupCode }))
+        : withReauth((extra) => recoveryCodes(extra.headers)),
   })
 }
 
@@ -75,7 +99,12 @@ export function useDisableFactor() {
   const client = useQueryClient()
   return useMutation({
     mutationFn: async (input: { id: string; code: string }) => {
-      await sdk.auth.mfa.disable(input.id, { method: "totp", code: input.code })
+      // The code typed is the proof the API asks for (adr/0040 §3)
+      await sdk.auth.mfa.disable(
+        input.id,
+        { method: "totp", code: input.code },
+        reauthHeaders({ method: "totp", secret: input.code })
+      )
     },
     onSuccess: () => client.invalidateQueries({ queryKey: ["auth"] }),
   })

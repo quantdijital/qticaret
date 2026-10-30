@@ -15,6 +15,8 @@ import { AdminGetAsyncJobs, AdminPostAsyncJob } from "./admin/async-jobs/validat
 import { AdminGetAuditLog } from "./admin/audit-log/validators"
 import { AdminGetHomeSummary } from "./admin/home/summary/validators"
 import { PANEL_ROUTES } from "./admin/panel-routes"
+import { AdminPostRevealTaxId } from "./admin/customers/[id]/billing-profile/reveal/validators"
+import { REAUTH_ROUTES } from "./http/reauth-routes"
 import { STAFF_ROUTES } from "./http/staff-routes"
 import { WEBHOOK_ROUTES } from "./http/webhook-routes"
 import { AdminPostProductAttributes } from "./admin/products/[id]/attributes/validators"
@@ -219,6 +221,12 @@ export default defineMiddlewares({
     // F11.7: outgoing webhooks
     ...WEBHOOK_ROUTES,
     ...STAFF_ROUTES,
+    ...REAUTH_ROUTES,
+    {
+      matcher: "/admin/customers/:id/billing-profile/reveal",
+      methods: ["POST"],
+      middlewares: [validateAndTransformBody(AdminPostRevealTaxId)],
+    },
     ...MESSAGING_ROUTES,
     ...ACCOUNT_ROUTES,
     ...CUSTOMER_SEGMENT_ROUTES,

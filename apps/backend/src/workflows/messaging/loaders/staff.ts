@@ -1,9 +1,11 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { panelUrl } from "../../../lib/env"
 import { inviteLink } from "../../../lib/staff"
 import type {
   StaffInviteVars,
   StaffOrderVars,
+  StaffResetVars,
   StaffSeoVars,
   StaffStockVars,
 } from "../../../lib/messaging/templates"
@@ -123,5 +125,29 @@ export function loadStaffInvite(
     recipients: { email },
     receiverId: null,
     resourceType: "invite",
+  })
+}
+
+/**
+ * A staff member's reset link (auth.password_reset, actor `user`): the
+ * panel's page with the token and the address. Medusa sends the event only
+ * for a login that exists.
+ */
+export function loadStaffPasswordReset(
+  _container: Container,
+  _resourceId: string,
+  extra: Readonly<Record<string, string>>
+): Promise<Loaded<StaffResetVars> | null> {
+  const { email, token } = extra
+  if (!email || !token) {
+    return Promise.resolve(null)
+  }
+  return Promise.resolve({
+    vars: {
+      resetUrl: `${panelUrl()}/reset-password?${new URLSearchParams({ token, email }).toString()}`,
+    },
+    recipients: { email },
+    receiverId: null,
+    resourceType: "auth_identity",
   })
 }

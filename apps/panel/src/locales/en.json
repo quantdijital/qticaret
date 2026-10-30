@@ -72,7 +72,8 @@
       "useRecovery": "Use a recovery code",
       "useApp": "Use the app's code",
       "wrong": "The code is not right or has expired; try again."
-    }
+    },
+    "forgot": "Forgot password"
   },
   "dashboard": {
     "title": "Overview",
@@ -1073,7 +1074,8 @@
             "bank_transfer": "Staff: bank transfer awaited",
             "low_stock": "Staff: low stock",
             "seo_digest": "Staff: weekly SEO digest",
-            "invite": "Team: panel invitation"
+            "invite": "Team: panel invitation",
+            "password_reset": "Team: password reset"
           },
           "stock": {
             "alert_confirm": "Stock alert confirmation",
@@ -1535,7 +1537,14 @@
       "send": "Send invitation",
       "done": "Done",
       "copy": "Copy link",
-      "linkHint": "The link works for 24 hours, and only for an account with the invited e-mail address."
+      "linkHint": "The link works for 24 hours, and only for an account with the invited e-mail address.",
+      "mfaOn": "2FA on",
+      "mfaOff": "2FA off",
+      "resetMfa": "Reset 2FA",
+      "resetMfaOf": "Reset 2FA for {{name}}",
+      "resetMfaTitle": "Reset two-step verification?",
+      "resetMfaHint": "Use it when {{name}} lost their phone: their 2FA turns off; if the shop requires it, they set it up again at their next sign-in.",
+      "mfaReset": "Two-step verification reset."
     },
     "security": {
       "title": "Security",
@@ -2455,7 +2464,9 @@
     "billing": {
       "individual": "Individual",
       "corporate": "Company",
-      "taxOffice": "{{office}} tax office"
+      "taxOffice": "{{office}} tax office",
+      "reveal": "Show",
+      "hide": "Hide"
     },
     "detail": {
       "title": "Customer",
@@ -4404,6 +4415,9 @@
       "key": "Setup key",
       "copyKey": "Copy key",
       "code": "The 6-digit code in the app",
+      "password": "Your password",
+      "passwordHint": "Asked so that only the account's owner can set this up.",
+      "wrongPassword": "The password is not right; try again.",
       "confirm": "Verify",
       "kept": "I have kept the codes somewhere safe",
       "next": "Continue",
@@ -4419,5 +4433,28 @@
       "file": "recovery-codes.txt",
       "hint": "Each code works once. Making new codes voids the old ones."
     }
+  },
+  "reset": {
+    "title": "Forgot password",
+    "subtitle": "Enter your panel account's e-mail address; we will send a reset link.",
+    "send": "Send link",
+    "sent": "If an account uses this address, a reset link was sent. It works for 15 minutes.",
+    "newTitle": "New password",
+    "newSubtitle": "Set a new password for your panel account.",
+    "newPassword": "New password",
+    "save": "Save password",
+    "changed": "Your password changed. Sign in with the new one.",
+    "toLogin": "Sign in",
+    "expired": "The link is not valid or has expired; ask for a new one.",
+    "back": "Back to sign in"
+  },
+  "reauth": {
+    "title": "Prove it is you",
+    "withCode": "Enter the code from your authenticator app to go on.",
+    "withPassword": "Enter your password to go on.",
+    "failed": "The code is not right; try again.",
+    "failedPassword": "The password is not right; try again.",
+    "confirm": "Verify",
+    "cancelled": "Nothing was done."
   }
 }

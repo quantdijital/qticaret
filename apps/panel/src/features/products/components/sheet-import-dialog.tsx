@@ -29,7 +29,7 @@ function FilePicker({ file, onChange }: { file: File | null; onChange: (file: Fi
       <span className="min-w-0 flex-1 truncate">
         {file ? file.name : t("products.sheets.noFile")}
       </span>
-      <span className="font-medium text-primary">{t("products.sheets.chooseFile")}</span>
+      <span className="font-medium text-primary-text">{t("products.sheets.chooseFile")}</span>
       <input
         type="file"
         accept={ACCEPT}

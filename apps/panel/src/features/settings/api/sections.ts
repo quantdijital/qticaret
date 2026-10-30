@@ -1,4 +1,5 @@
 import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
+import { withReauth } from "@/lib/reauth"
 import { sdk } from "@/lib/sdk"
 
 /** A platform settings section as stored, defaults filled in (adr/0012). */
@@ -136,8 +137,15 @@ export const sectionQuery = <T>(section: string) =>
 export function useSaveSection<T>(section: string) {
   const client = useQueryClient()
   return useMutation({
+    // The owner's sections (bank account, 2FA requirement) ask to prove oneself again
     mutationFn: (values: Partial<T>) =>
-      sdk.client.fetch<SectionResponse<T>>(sectionUrl(section), { method: "POST", body: values }),
+      withReauth((extra) =>
+        sdk.client.fetch<SectionResponse<T>>(sectionUrl(section), {
+          method: "POST",
+          body: values,
+          ...extra,
+        })
+      ),
     onSuccess: (saved) => {
       client.setQueryData(["settings", section], saved)
     },

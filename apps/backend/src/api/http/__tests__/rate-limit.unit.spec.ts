@@ -120,6 +120,7 @@ describe("rateLimit", () => {
         keys.push(key)
         return Promise.resolve({ count: 1, resetMs: 1000 })
       },
+      peek: () => Promise.resolve(0),
     }
 
     await run(
@@ -131,7 +132,10 @@ describe("rateLimit", () => {
   })
 
   it("fails open and logs when the store is down", async () => {
-    const store: RateLimitStore = { hit: () => Promise.reject(new Error("redis down")) }
+    const store: RateLimitStore = {
+      hit: () => Promise.reject(new Error("redis down")),
+      peek: () => Promise.reject(new Error("redis down")),
+    }
 
     const result = await run(
       rateLimit(() => PROFILE, { store: () => store }),

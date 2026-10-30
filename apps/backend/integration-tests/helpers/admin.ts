@@ -23,13 +23,21 @@ function authIdentityIdOf(token: string): string {
 
 /**
  * Registers a staff member through the auth API and returns bearer headers.
- * The shop's owner unless another role is asked for (adr/0040).
+ * The shop's owner unless another role is asked for (adr/0040). `headers`
+ * also carry the password as the proof sensitive changes ask for
+ * (adr/0040 §3); `plain` is the bearer alone, to test that ask.
  */
 export async function createAdminUser(
   http: HttpClient,
   container: MedusaContainer,
   role: StaffRole = "owner"
-): Promise<{ headers: Record<string, string>; userId: string; email: string; password: string }> {
+): Promise<{
+  headers: Record<string, string>
+  plain: Record<string, string>
+  userId: string
+  email: string
+  password: string
+}> {
   const email = `admin-${randomUUID()}@example.com`
   // Throwaway credential for this test database only
   const password = randomUUID()
@@ -43,8 +51,10 @@ export async function createAdminUser(
   })
   await container.resolve<StaffRolesModuleService>(STAFF_ROLES_MODULE).setRole(user.id, role, null)
   const login = await http.post<TokenResponse>("/auth/user/emailpass", { email, password })
+  const plain = { authorization: `Bearer ${login.data.token}` }
   return {
-    headers: { authorization: `Bearer ${login.data.token}` },
+    headers: { ...plain, "x-reauth-method": "password", "x-reauth-secret": password },
+    plain,
     userId: user.id,
     email,
     password,

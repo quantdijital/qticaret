@@ -14,6 +14,19 @@ describe("createMemoryStore", () => {
     expect(await store.hit("k", 1000)).toEqual({ count: 1, resetMs: 1000 })
   })
 
+  it("reads a window's count without adding to it, and nothing once it ends", async () => {
+    let now = 0
+    const store = createMemoryStore(() => now)
+
+    expect(await store.peek("k")).toBe(0)
+    await store.hit("k", 1000)
+    await store.hit("k", 1000)
+    expect(await store.peek("k")).toBe(2)
+    expect(await store.peek("k")).toBe(2)
+    now = 1000
+    expect(await store.peek("k")).toBe(0)
+  })
+
   it("keeps keys apart", async () => {
     const store = createMemoryStore()
 
@@ -38,7 +51,8 @@ describe("createMemoryStore", () => {
 describe("withFallback", () => {
   const failing = () => {
     const hit = jest.fn(() => Promise.reject(new Error("redis down")))
-    return { hit }
+    const peek = jest.fn(() => Promise.reject(new Error("redis down")))
+    return { hit, peek }
   }
 
   it("counts in the fallback while the primary is down, and tries it again after the cooldown", async () => {
@@ -66,10 +80,14 @@ describe("withFallback", () => {
   })
 
   it("uses the primary while it answers", async () => {
-    const primary = { hit: jest.fn(() => Promise.resolve({ count: 7, resetMs: 10 })) }
+    const primary = {
+      hit: jest.fn(() => Promise.resolve({ count: 7, resetMs: 10 })),
+      peek: jest.fn(() => Promise.resolve(7)),
+    }
     const store = withFallback(primary, createMemoryStore())
 
     expect(await store.hit("k", 1000)).toEqual({ count: 7, resetMs: 10 })
+    expect(await store.peek("k")).toBe(7)
   })
 })
 
@@ -98,6 +116,14 @@ withRedis("createRedisStore", () => {
     expect(second.count).toBe(2)
     expect(second.resetMs).toBeGreaterThan(0)
     expect(second.resetMs).toBeLessThanOrEqual(2000)
+  })
+
+  it("reads a count without adding to it", async () => {
+    await store.hit("peeked", 2000)
+
+    expect(await store.peek("peeked")).toBe(1)
+    expect(await store.peek("peeked")).toBe(1)
+    expect(await store.peek("never")).toBe(0)
   })
 
   it("starts over once the window expires", async () => {

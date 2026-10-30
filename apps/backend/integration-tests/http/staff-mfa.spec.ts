@@ -1,6 +1,7 @@
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { createAdminUser } from "../helpers/admin"
 import type { HttpClient } from "../helpers/http"
+import { setUpTotp } from "../helpers/mfa"
 import { settle } from "../helpers/http"
 import { totp } from "../helpers/totp"
 
@@ -12,6 +13,13 @@ interface Login {
 }
 
 const bearer = (token: string) => ({ authorization: `Bearer ${token}` })
+
+// The proof a sensitive change asks of someone with 2FA: the step before the sign-in's code
+const withCode = (headers: Record<string, string>, secret: string) => ({
+  ...headers,
+  "x-reauth-method": "totp",
+  "x-reauth-secret": totp(secret, -1),
+})
 
 /** F12.6 (adr/0040 §2; KK1): no staff member past their own page without 2FA. */
 medusaIntegrationTestRunner({
@@ -26,26 +34,6 @@ medusaIntegrationTestRunner({
       process.env["ADMIN_MFA"] = "off"
     })
 
-    /** What the setup page does: a TOTP factor, confirmed with its first code. */
-    async function setUp(token: string): Promise<{ secret: string; codes: string[] }> {
-      const started = await http.post<{ mfa_factor: { id: string }; secret: string }>(
-        "/auth/mfa/factors",
-        { provider: "totp", label: "Panel" },
-        { headers: bearer(token) }
-      )
-      await http.post(
-        `/auth/mfa/factors/${started.data.mfa_factor.id}/verify`,
-        { code: totp(started.data.secret) },
-        { headers: bearer(token) }
-      )
-      const codes = await http.post<{ recovery_codes: string[] }>(
-        "/auth/mfa/recovery-codes",
-        {},
-        { headers: bearer(token) }
-      )
-      return { secret: started.data.secret, codes: codes.data.recovery_codes }
-    }
-
     const signIn = (email: string, password: string) =>
       http.post<Login>("/auth/user/emailpass", { email, password })
 
@@ -58,7 +46,7 @@ medusaIntegrationTestRunner({
       const me = await http.get<{ mfa: Record<string, boolean> }>("/admin/staff/me", {
         headers: owner.headers,
       })
-      const { secret, codes } = await setUp(owner.headers["authorization"]?.slice(7) ?? "")
+      const { secret, codes } = await setUpTotp(http, owner)
       const login = await signIn(owner.email, owner.password)
       const challenge = login.data.mfa_challenge
       const wrong = await settle(
@@ -101,7 +89,7 @@ medusaIntegrationTestRunner({
 
     it("takes a recovery code once, for a phone left at home", async () => {
       const member = await createAdminUser(http, getContainer(), "admin")
-      const { codes } = await setUp(member.headers["authorization"]?.slice(7) ?? "")
+      const { codes } = await setUpTotp(http, member)
       const code = codes[0] ?? ""
 
       const first = await signIn(member.email, member.password)
@@ -151,7 +139,7 @@ medusaIntegrationTestRunner({
 
     it("lets the owner switch 2FA off for the team, and no one else", async () => {
       const owner = await createAdminUser(http, getContainer())
-      const { secret } = await setUp(owner.headers["authorization"]?.slice(7) ?? "")
+      const { secret } = await setUpTotp(http, owner)
       const login = await signIn(owner.email, owner.password)
       const passed = await http.post<{ token: string }>(
         `/auth/mfa/challenges/${login.data.mfa_challenge?.id ?? ""}/verify`,
@@ -165,7 +153,8 @@ medusaIntegrationTestRunner({
         )
 
       const before = await settle(http.get("/admin/orders?limit=1", { headers: member.headers }))
-      const byOwner = await switchTo(bearer(passed.data.token), false)
+      // Turning it off asks the owner for a code (adr/0040 §3)
+      const byOwner = await switchTo(withCode(bearer(passed.data.token), secret), false)
       const after = await settle(http.get("/admin/orders?limit=1", { headers: member.headers }))
       const me = await http.get<{ mfa: Record<string, boolean> }>("/admin/staff/me", {
         headers: member.headers,
@@ -185,17 +174,18 @@ medusaIntegrationTestRunner({
 
     it("asks no 2FA of an API key: it has its own scopes", async () => {
       const owner = await createAdminUser(http, getContainer())
-      const { secret } = await setUp(owner.headers["authorization"]?.slice(7) ?? "")
+      const { secret } = await setUpTotp(http, owner)
       const login = await signIn(owner.email, owner.password)
       const passed = await http.post<{ token: string }>(
         `/auth/mfa/challenges/${login.data.mfa_challenge?.id ?? ""}/verify`,
         { method: "totp", code: totp(secret, 1) },
         { headers: bearer(login.data.token) }
       )
+      // A new key asks for the code again (adr/0040 §3): the step before the sign-in's
       const made = await http.post<{ token: string }>(
         "/admin/api-access",
         { title: "Depo", scopes: ["orders:read"] },
-        { headers: bearer(passed.data.token) }
+        { headers: withCode(bearer(passed.data.token), secret) }
       )
 
       const read = await settle(

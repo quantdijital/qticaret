@@ -70,6 +70,15 @@ function statusVars(mode: ResolvedMode, dark: Oklch): ThemeVariables {
   return vars
 }
 
+/**
+ * The brand as text (links, "Göster"): the fill's own lightness, moved only
+ * as far as AA on the surface it reads worst on (muted: the darkest light one,
+ * the lightest dark one).
+ */
+function primaryText(brand: Brand, fill: Oklch, surface: Oklch): Oklch {
+  return standOut(brand, surface, AA_TEXT, fill.l)
+}
+
 function lightVars(brand: Brand, n: Neutral, dark: Oklch): ThemeVariables {
   const primary = readableFill(brand, [0.4, 0.62], dark)
   const primaryCss = css(primary.color)
@@ -82,6 +91,9 @@ function lightVars(brand: Brand, n: Neutral, dark: Oklch): ThemeVariables {
     "--popover-foreground": n(950),
     "--primary": primaryCss,
     "--primary-foreground": css(textOn(primary.color, dark)),
+    "--primary-text": css(
+      primaryText(brand, primary.color, oklch(NEUTRAL[100], NEUTRAL_CHROMA, brand.h))
+    ),
     "--secondary": n(100),
     "--secondary-foreground": n(900),
     "--muted": n(100),
@@ -109,6 +121,7 @@ function darkVars(brand: Brand, n: Neutral, dark: Oklch): ThemeVariables {
     "--popover-foreground": n(50),
     "--primary": primaryCss,
     "--primary-foreground": css(textOn(primary.color, dark)),
+    "--primary-text": css(primaryText(brand, primary.color, oklch(0.24, NEUTRAL_CHROMA, brand.h))),
     "--secondary": surface(0.24),
     "--secondary-foreground": n(100),
     "--muted": surface(0.24),

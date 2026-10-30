@@ -1,4 +1,5 @@
 import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
+import { withReauth } from "@/lib/reauth"
 import { sdk } from "@/lib/sdk"
 
 /** What a key may reach (F11.6, adr/0039 §6); every other admin route is closed to it. */
@@ -31,10 +32,13 @@ export function useCreateApiKey() {
   const client = useQueryClient()
   return useMutation({
     mutationFn: (body: { title: string; scopes: ApiScope[] }) =>
-      sdk.client.fetch<{ key: ApiKeyRow; token: string }>("/admin/api-access", {
-        method: "POST",
-        body,
-      }),
+      withReauth((extra) =>
+        sdk.client.fetch<{ key: ApiKeyRow; token: string }>("/admin/api-access", {
+          method: "POST",
+          body,
+          ...extra,
+        })
+      ),
     onSuccess: () => client.invalidateQueries({ queryKey: KEY }),
   })
 }

@@ -45,22 +45,28 @@ async function ownsAddress(
 }
 
 /**
- * A customer's account messages (F9.4): the password reset link and the
+ * Account messages (F9.4): a customer's or a staff member's password reset link, and the
  * e-mail verification code (Medusa's own events). The secret goes to the
- * loader only, never into a stored row. Staff resets wait for the panel's
- * own page (F12).
+ * loader only, never into a stored row. A staff member's reset goes to the
+ * panel's own page (F12.6).
  */
 export default async function accountMessages({
   event: { name, data },
   container,
 }: SubscriberArgs<AuthEvent>) {
   if (name === "auth.password_reset") {
-    if (data.actor_type !== "customer" || !data.token) {
+    const template =
+      data.actor_type === "customer"
+        ? "account.password_reset"
+        : data.actor_type === "user"
+          ? "staff.password_reset"
+          : null
+    if (!template || !data.token) {
       return
     }
     await sendMessageWorkflow(container).run({
       input: {
-        template: "account.password_reset",
+        template,
         resource_id: digest(data.token),
         extra: { email: data.entity_id, token: data.token },
       },

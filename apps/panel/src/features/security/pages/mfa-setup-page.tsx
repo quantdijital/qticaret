@@ -29,6 +29,7 @@ export function MfaSetupPage() {
   const recovery = useRecoveryCodes()
   const [step, setStep] = useState<Step>("app")
   const [code, setCode] = useState("")
+  const [password, setPassword] = useState("")
   const [kept, setKept] = useState(false)
   const started = useRef(false)
 
@@ -58,10 +59,11 @@ export function MfaSetupPage() {
               onSubmit={(event) => {
                 event.preventDefault()
                 confirm.mutate(
-                  { id: factor.id, code: code.trim() },
+                  { id: factor.id, code: code.trim(), password },
                   {
                     onSuccess: () => {
-                      recovery.mutate(undefined, {
+                      // The setup's own code proves the person for their first codes
+                      recovery.mutate(code.trim(), {
                         onSuccess: () => {
                           setStep("codes")
                         },
@@ -85,9 +87,27 @@ export function MfaSetupPage() {
                   }}
                 />
               </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="setup-password">{t("security.setup.password")}</Label>
+                <Input
+                  id="setup-password"
+                  type="password"
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(event) => {
+                    setPassword(event.target.value)
+                  }}
+                />
+                <p className="text-xs text-muted-foreground">{t("security.setup.passwordHint")}</p>
+              </div>
               <Button
                 type="submit"
-                disabled={!/^\d{6}$/.test(code.trim()) || confirm.isPending || recovery.isPending}
+                disabled={
+                  !/^\d{6}$/.test(code.trim()) ||
+                  password === "" ||
+                  confirm.isPending ||
+                  recovery.isPending
+                }
               >
                 {confirm.isPending || recovery.isPending ? (
                   <Loader2 className="animate-spin" />
@@ -148,10 +168,12 @@ export function MfaSetupPage() {
         ) : null}
         {failure ? (
           <p role="alert" className="text-sm text-destructive">
-            {(failure as { status?: number }).status === 400 ||
-            (failure as { status?: number }).status === 401
-              ? t("security.setup.wrong")
-              : errorText(t, failure)}
+            {(failure as { status?: number }).status === 428
+              ? t("security.setup.wrongPassword")
+              : (failure as { status?: number }).status === 400 ||
+                  (failure as { status?: number }).status === 401
+                ? t("security.setup.wrong")
+                : errorText(t, failure)}
           </p>
         ) : null}
         {step !== "done" ? (

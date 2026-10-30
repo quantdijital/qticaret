@@ -6,6 +6,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "async_job.result_unavailable": "This job has no result to download, or it expired.",
   "async_job.type_unknown": "There is no such job type.",
   "audit_log.kind_invalid": "The entry kind is not valid.",
+  "billing_profile.unknown": "This customer has no billing details.",
   "billing_profile.tax_id_invalid": "The tax or national ID number is not valid.",
   "billing_profile.tax_office_required": "Enter the tax office.",
   "bank_transfer.not_configured":
@@ -359,6 +360,10 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "staff.email_invalid": "The e-mail address is not valid.",
   "staff.name_required": "First and last name are required.",
   "staff.mfa_required": "Set up two-step verification, or sign in again with your code, to go on.",
+  "staff.reset_self": "Turn your own two-step verification off from Settings > Security.",
+  "staff.reauth_required": "Prove it is you again for this change.",
+  "staff.reauth_failed": "The code or password is not right.",
+  "staff.reauth_locked": "Too many tries; try again a little later.",
   "staff.forbidden": "Your role does not allow this.",
   "staff.last_owner":
     "The shop's last owner cannot give up the role; make someone else owner first.",

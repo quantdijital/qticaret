@@ -47,6 +47,18 @@ const SELF: readonly Rule[] = [
   { methods: ["GET"], path: "/admin/staff/me" },
 ]
 
+/**
+ * Medusa's own ways round this layer, for no one, the owner included: a user
+ * deleted here skips the last-owner guard, the step-up and the role's
+ * removal; an invitation made here carries no role. `/admin/staff` does both.
+ */
+const REPLACED: readonly Rule[] = [
+  { methods: ["DELETE"], path: "/admin/users/:id" },
+  { methods: ["POST"], path: "/admin/invites" },
+  { methods: ["POST"], path: "/admin/invites/:id/resend" },
+  { methods: ["DELETE"], path: "/admin/invites/:id" },
+]
+
 /** The owner's alone (adr/0027, adr/0040 §1). */
 const OWNER_ONLY: readonly Rule[] = [
   // The shop's provider accounts; their connection check stays the admin's
@@ -162,7 +174,16 @@ export const isSelfRoute = (method: string, path: string): boolean =>
 export interface Decision {
   allowed: boolean
   /** Why, for the log: the list that decided. */
-  reason: "self" | "owner" | "owner_only" | "admin" | "private" | "read" | "listed" | "unlisted"
+  reason:
+    | "self"
+    | "replaced"
+    | "owner"
+    | "owner_only"
+    | "admin"
+    | "private"
+    | "read"
+    | "listed"
+    | "unlisted"
 }
 
 /**
@@ -179,12 +200,15 @@ export function decide(
   if (matches(SELF, verb, path, facts)) {
     return { allowed: true, reason: "self" }
   }
-  if (role === "owner") {
-    return { allowed: true, reason: "owner" }
-  }
   const decoded = decodedPath(path)
   const refused = (rules: readonly Rule[]) =>
     matches(rules, verb, path, facts) || matches(rules, verb, decoded, facts)
+  if (refused(REPLACED)) {
+    return { allowed: false, reason: "replaced" }
+  }
+  if (role === "owner") {
+    return { allowed: true, reason: "owner" }
+  }
   if (refused(OWNER_ONLY)) {
     return { allowed: false, reason: "owner_only" }
   }
@@ -221,6 +245,7 @@ const CAPABILITY_PROBES = {
   team: ["GET", "/admin/staff"],
   staff: ["POST", "/admin/staff/members/:id"],
   audit: ["GET", "/admin/audit-log"],
+  taxId: ["POST", "/admin/customers/:id/billing-profile/reveal"],
 } as const satisfies Record<string, readonly [Method, string]>
 
 export type Capability = keyof typeof CAPABILITY_PROBES

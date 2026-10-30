@@ -1,8 +1,6 @@
 {
   "permissions": {
     "allow": [
-      "Bash(pnpm install)",
-      "Bash(pnpm lint*)",
       "Bash(pnpm typecheck*)",
       "Bash(pnpm test*)",
       "Bash(pnpm format*)",
@@ -12,15 +10,14 @@
       "Bash(git log*)",
       "Bash(git add*)",
       "Bash(git commit*)",
-      "Bash(docker compose*)"
-    ],
-    "ask": [
-      "Bash(pnpm add*)",
-      "Bash(pnpm remove*)",
-      "Bash(*db:migrate*)",
-      "Bash(git push*)",
-      "Bash(git checkout*)",
-      "Bash(git reset*)"
+      "Bash(docker compose*)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(npx tsc --noEmit *)",
+      "Bash(pnpm exec tsc --noEmit)",
+      "Bash(pnpm exec tsc --noEmit *)",
+      "Bash(pnpm lint)",
+      "mcp__context7__query-docs",
+      "mcp__context7__resolve-library-id"
     ],
     "deny": [
       "Read(./.env)",
@@ -39,7 +36,8 @@
       "Bash(pnpm publish*)",
       "Bash(curl*)",
       "Bash(wget*)"
-    ]
+    ],
+    "ask": []
   },
   "hooks": {
     "PostToolUse": [

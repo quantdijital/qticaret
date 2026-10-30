@@ -1,4 +1,5 @@
 import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
+import { withReauth } from "@/lib/reauth"
 import { sdk } from "@/lib/sdk"
 
 /**
@@ -87,7 +88,9 @@ function useAccountMutation<T>(call: (input: T) => Promise<AccountAnswer>) {
 /** Saves after the provider accepted the details; refused ones come back as a 400 with the reason. */
 export const useSaveAccount = (provider: string) =>
   useAccountMutation((body: AccountSave) =>
-    sdk.client.fetch<AccountAnswer>(accountUrl(provider), { method: "POST", body })
+    withReauth((extra) =>
+      sdk.client.fetch<AccountAnswer>(accountUrl(provider), { method: "POST", body, ...extra })
+    )
   )
 
 /** "Test the connection" with what is stored. */
@@ -98,8 +101,11 @@ export const useCheckAccount = (provider: string) =>
 
 export const useRemoveAccount = (provider: string) =>
   useAccountMutation(async () => ({
-    ...(await sdk.client.fetch<{ account: ProviderAccount }>(accountUrl(provider), {
-      method: "DELETE",
-    })),
+    ...(await withReauth((extra) =>
+      sdk.client.fetch<{ account: ProviderAccount }>(accountUrl(provider), {
+        method: "DELETE",
+        ...extra,
+      })
+    )),
     check: null,
   }))

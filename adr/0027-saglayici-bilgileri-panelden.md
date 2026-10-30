@@ -54,7 +54,7 @@ ADR-0002'nin itirazları ve bu karardaki cevapları:
    - Kayıt silinebilir. Silinen kayıtla sağlayıcı "yapılandırılmamış" gibi davranır.
    - Uçlar personele açık (`requireUserActor`); secret API anahtarı ne kaydedebilir ne test ettirebilir (sağlık ucu dahil). Hız sınırı adres başına ve personel başına.
    - Her bağlama, hesap/gizli bilgi değişikliği, test modu değişikliği ve kaldırma, bütün yöneticilere panelin zilinde bildirilir: kim, ne yaptı. Bildirim yazılamazsa değişiklik geri alınır.
-   - **Canlıya çıkış engeli:** Rol kısıtı (yalnızca mağaza sahibi) ve gizli alan değişikliğinde ikinci doğrulama F12.6'da gelir. O zamana kadar personeli olan bir mağaza ödeme alacak şekilde canlıya alınmaz (F16 kontrol listesi).
+   - **Canlıya çıkış engeli:** Rol kısıtı (yalnızca mağaza sahibi) ve gizli alan değişikliğinde ikinci doğrulama F12.6'da gelir. O zamana kadar personeli olan bir mağaza ödeme alacak şekilde canlıya alınmaz (F16 kontrol listesi). **Kalktı (2026-10-29, F12 Y4):** hesaplar yalnızca sahibe açık, gizli alan yazma ve silme yeniden doğrulama istiyor (adr/0040 §1, §3).
 7. **Önbellek.**
    - Çözülmüş bilgiler süreç belleğinde tutulur. Platform ayarlarındaki sürümlü önbellek kalıbı kullanılır: Redis'teki sürüm işareti diğer süreçlere değişikliği bildirir.
    - Değişiklik yeniden başlatma gerektirmez.

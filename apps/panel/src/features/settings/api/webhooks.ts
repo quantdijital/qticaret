@@ -1,4 +1,5 @@
 import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
+import { withReauth } from "@/lib/reauth"
 import { sdk } from "@/lib/sdk"
 
 /** The events a subscription can take (F11.7); their texts under `settings.api.webhooks.events`. */
@@ -55,14 +56,18 @@ export const webhookQuery = (id: string) =>
       ),
   })
 
+/** A new address for the shop's events: asked to prove oneself again (adr/0040 §3). */
 export function useSubscribeWebhook() {
   const client = useQueryClient()
   return useMutation({
     mutationFn: (body: { url: string; events: WebhookEvent[] }) =>
-      sdk.client.fetch<{ subscription: WebhookSubscription; secret: string }>("/admin/webhooks", {
-        method: "POST",
-        body,
-      }),
+      withReauth((extra) =>
+        sdk.client.fetch<{ subscription: WebhookSubscription; secret: string }>("/admin/webhooks", {
+          method: "POST",
+          body,
+          ...extra,
+        })
+      ),
     onSuccess: () => client.invalidateQueries({ queryKey: KEY }),
   })
 }

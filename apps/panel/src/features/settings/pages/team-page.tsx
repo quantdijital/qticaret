@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
-import { Trash2, UserPlus } from "lucide-react"
+import { ShieldOff, Trash2, UserPlus } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
@@ -24,6 +24,7 @@ import {
   teamQuery,
   useChangeRole,
   useRemoveMember,
+  useResetMemberMfa,
 } from "@/features/settings/api/team"
 import type { TeamMember } from "@/features/settings/api/team"
 import { InviteDialog } from "@/features/settings/components/invite-dialog"
@@ -54,11 +55,13 @@ function MemberRow({
   manage,
   onChange,
   onRemove,
+  onResetMfa,
 }: {
   member: TeamMember
   manage: boolean
   onChange: (change: Change) => void
   onRemove: (member: TeamMember) => void
+  onResetMfa: (member: TeamMember) => void
 }) {
   const { t } = useTranslation()
   return (
@@ -67,6 +70,9 @@ function MemberRow({
         <span className="flex items-center gap-2 text-sm font-medium">
           <span className="truncate">{nameOf(member)}</span>
           {member.you ? <StatusBadge tone="info">{t(`${T}.you`)}</StatusBadge> : null}
+          <StatusBadge tone={member.mfa ? "success" : "neutral"}>
+            {t(member.mfa ? `${T}.mfaOn` : `${T}.mfaOff`)}
+          </StatusBadge>
         </span>
         <span className="truncate text-xs text-muted-foreground">
           {member.email} · {t(`${T}.since`, { date: formatDate(member.created_at) })}
@@ -96,6 +102,21 @@ function MemberRow({
         ) : (
           <StatusBadge tone="warning">{t(`${T}.noRole`)}</StatusBadge>
         )}
+        {manage && !member.you && member.mfa ? (
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label={t(`${T}.resetMfaOf`, { name: nameOf(member) })}
+            onClick={() => {
+              onResetMfa(member)
+            }}
+          >
+            <ShieldOff />
+          </Button>
+        ) : manage ? (
+          // The row keeps the button's room: the role pickers stay in one column
+          <span aria-hidden className="size-9" />
+        ) : null}
         {manage && !member.you ? (
           <Button
             variant="ghost"
@@ -127,6 +148,8 @@ export function TeamPage() {
   const manage = useCan("staff")
   const change = useChangeRole()
   const remove = useRemoveMember()
+  const resetMfa = useResetMemberMfa()
+  const [resetting, setResetting] = useState<TeamMember | null>(null)
   const [inviting, setInviting] = useState(false)
   const [confirming, setConfirming] = useState<Change | null>(null)
   const [removing, setRemoving] = useState<TeamMember | null>(null)
@@ -184,6 +207,7 @@ export function TeamPage() {
                   }
                 }}
                 onRemove={setRemoving}
+                onResetMfa={setResetting}
               />
             ))}
           </ul>
@@ -209,6 +233,27 @@ export function TeamPage() {
             apply(confirming)
           }
           setConfirming(null)
+        }}
+      />
+      <ConfirmDialog
+        open={resetting !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setResetting(null)
+          }
+        }}
+        title={t(`${T}.resetMfaTitle`)}
+        description={t(`${T}.resetMfaHint`, { name: resetting ? nameOf(resetting) : "" })}
+        confirmLabel={t(`${T}.resetMfa`)}
+        destructive
+        onConfirm={() => {
+          if (resetting) {
+            resetMfa.mutate(resetting.id, {
+              onSuccess: () => toast.success(t(`${T}.mfaReset`)),
+              onError: (failure) => toast.error(errorText(t, failure)),
+            })
+          }
+          setResetting(null)
         }}
       />
       <ConfirmDialog

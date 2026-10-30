@@ -29,6 +29,8 @@ setup("signs a temporary admin in", async ({ page }) => {
   if (new URL(page.url()).pathname === "/security/setup") {
     const key = (await page.getByLabel("Kurulum anahtarı").innerText()).replace(/\s+/g, "")
     await page.getByLabel("Uygulamadaki 6 haneli kod").fill(totp(key))
+    // Setting it up asks the password too: a session alone must not enrol an app
+    await page.getByLabel("Şifreniz").fill(admin.password)
     await page.getByRole("button", { name: "Doğrula" }).click()
     await page.getByRole("checkbox", { name: "Kodları güvenli bir yere kaydettim" }).check()
     await page.getByRole("button", { name: "Devam" }).click()

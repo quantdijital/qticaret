@@ -35,6 +35,11 @@ export const STAFF_ROUTES = [
     middlewares: [requireUserActor],
   },
   {
+    matcher: "/admin/staff/members/:id/reset-mfa",
+    methods: ["POST" as const],
+    middlewares: [requireUserActor],
+  },
+  {
     matcher: "/admin/staff/invites",
     methods: ["POST" as const],
     middlewares: [requireUserActor, validateAndTransformBody(AdminPostStaffInvite)],

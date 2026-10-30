@@ -72,7 +72,8 @@
       "useRecovery": "Kurtarma kodu kullan",
       "useApp": "Uygulamadaki kodu kullan",
       "wrong": "Kod doğru değil ya da süresi geçti; yeniden deneyin."
-    }
+    },
+    "forgot": "Şifremi unuttum"
   },
   "dashboard": {
     "title": "Genel bakış",
@@ -1073,7 +1074,8 @@
             "bank_transfer": "Ekip: havale bekleyen sipariş",
             "low_stock": "Ekip: stok azaldı",
             "seo_digest": "Ekip: haftalık SEO özeti",
-            "invite": "Ekip: panel daveti"
+            "invite": "Ekip: panel daveti",
+            "password_reset": "Ekip: şifre yenileme"
           },
           "stock": {
             "alert_confirm": "Stok bildirimi onayı",
@@ -1535,7 +1537,14 @@
       "send": "Davet gönder",
       "done": "Tamam",
       "copy": "Bağlantıyı kopyala",
-      "linkHint": "Bağlantı 24 saat geçerlidir ve yalnızca davet edilen e-posta adresiyle hesap açılır."
+      "linkHint": "Bağlantı 24 saat geçerlidir ve yalnızca davet edilen e-posta adresiyle hesap açılır.",
+      "mfaOn": "2FA açık",
+      "mfaOff": "2FA kapalı",
+      "resetMfa": "2FA'yı sıfırla",
+      "resetMfaOf": "{{name}} için 2FA'yı sıfırla",
+      "resetMfaTitle": "İki adımlı doğrulama sıfırlansın mı?",
+      "resetMfaHint": "{{name}} telefonunu kaybettiyse kullanın: 2FA'sı kapanır; mağazada zorunluysa bir sonraki girişte yeniden kurar.",
+      "mfaReset": "İki adımlı doğrulama sıfırlandı."
     },
     "security": {
       "title": "Güvenlik",
@@ -2455,7 +2464,9 @@
     "billing": {
       "individual": "Bireysel",
       "corporate": "Kurumsal",
-      "taxOffice": "{{office}} Vergi Dairesi"
+      "taxOffice": "{{office}} Vergi Dairesi",
+      "reveal": "Göster",
+      "hide": "Gizle"
     },
     "detail": {
       "title": "Müşteri",
@@ -4404,6 +4415,9 @@
       "key": "Kurulum anahtarı",
       "copyKey": "Anahtarı kopyala",
       "code": "Uygulamadaki 6 haneli kod",
+      "password": "Şifreniz",
+      "passwordHint": "Kurulumu yalnızca hesabın sahibi yapabilsin diye şifreniz de sorulur.",
+      "wrongPassword": "Şifre doğru değil; yeniden deneyin.",
       "confirm": "Doğrula",
       "kept": "Kodları güvenli bir yere kaydettim",
       "next": "Devam",
@@ -4419,5 +4433,28 @@
       "file": "kurtarma-kodlari.txt",
       "hint": "Her kod bir kez kullanılır. Yeni kod ürettiğinizde eskileri geçersiz olur."
     }
+  },
+  "reset": {
+    "title": "Şifremi unuttum",
+    "subtitle": "Panel hesabınızın e-posta adresini girin; şifre yenileme bağlantısı gönderelim.",
+    "send": "Bağlantıyı gönder",
+    "sent": "Bu adresle bir hesap varsa şifre yenileme bağlantısı gönderildi. Bağlantı 15 dakika geçerlidir.",
+    "newTitle": "Yeni şifre",
+    "newSubtitle": "Panel hesabınız için yeni şifrenizi belirleyin.",
+    "newPassword": "Yeni şifre",
+    "save": "Şifreyi kaydet",
+    "changed": "Şifreniz değişti. Yeni şifrenizle giriş yapabilirsiniz.",
+    "toLogin": "Giriş yap",
+    "expired": "Bağlantı geçersiz ya da süresi dolmuş; yeni bir bağlantı isteyin.",
+    "back": "Giriş sayfasına dön"
+  },
+  "reauth": {
+    "title": "Kimliğinizi doğrulayın",
+    "withCode": "Bu işlem için doğrulama uygulamanızdaki kodu girin.",
+    "withPassword": "Bu işlem için şifrenizi girin.",
+    "failed": "Kod doğru değil; yeniden deneyin.",
+    "failedPassword": "Şifre doğru değil; yeniden deneyin.",
+    "confirm": "Doğrula",
+    "cancelled": "İşlem yapılmadı."
   }
 }

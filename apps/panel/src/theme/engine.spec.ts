@@ -52,7 +52,12 @@ const SIDEBAR_TEXT_PAIRS: [Var, Var][] = [
   ["--sidebar-primary-foreground", "--sidebar-primary"],
 ]
 
-const TEXT_PAIRS: [Var, Var][] = [...BASE_TEXT_PAIRS, ...STATUS_TEXT_PAIRS]
+// The brand as text: links on every surface
+const PRIMARY_TEXT_PAIRS: [Var, Var][] = ["--background", "--card", "--popover", "--muted"].map(
+  (surface): [Var, Var] => ["--primary-text", surface as Var]
+)
+
+const TEXT_PAIRS: [Var, Var][] = [...BASE_TEXT_PAIRS, ...STATUS_TEXT_PAIRS, ...PRIMARY_TEXT_PAIRS]
 
 describe("resolveTheme", () => {
   it.each(MODES)("keeps the navigation readable in every sidebar style in %s mode", (mode) => {

@@ -1,5 +1,6 @@
 import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
 import type { StaffRole } from "@/features/auth/api/staff"
+import { withReauth } from "@/lib/reauth"
 import { sdk } from "@/lib/sdk"
 
 export type InvitableRole = Exclude<StaffRole, "owner">
@@ -16,6 +17,8 @@ export interface TeamMember {
   /** Null: the user reaches nothing until the owner gives a role. */
   role: StaffRole | null
   you: boolean
+  /** Whether their 2FA is on. */
+  mfa: boolean
 }
 
 export interface TeamInvite {
@@ -56,22 +59,34 @@ function useTeamMutation<Input, Output>(call: (input: Input) => Promise<Output>)
   })
 }
 
+// An owner made or unmade, a member's 2FA reset: the owner proves themselves again
 export const useChangeRole = () =>
   useTeamMutation(({ id, role }: { id: string; role: StaffRole }) =>
-    sdk.client.fetch(`/admin/staff/members/${encodeURIComponent(id)}`, {
-      method: "POST",
-      body: { role },
-    })
+    withReauth((extra) =>
+      sdk.client.fetch(`/admin/staff/members/${encodeURIComponent(id)}`, {
+        method: "POST",
+        body: { role },
+        ...extra,
+      })
+    )
   )
 
 export const useRemoveMember = () =>
   useTeamMutation((id: string) =>
-    sdk.client.fetch(`/admin/staff/members/${encodeURIComponent(id)}`, { method: "DELETE" })
+    withReauth((extra) =>
+      sdk.client.fetch(`/admin/staff/members/${encodeURIComponent(id)}`, {
+        method: "DELETE",
+        ...extra,
+      })
+    )
   )
 
+/** Someone new on the team: asked to prove oneself again (adr/0040 §3). */
 export const useInvite = () =>
   useTeamMutation((body: { email: string; role: InvitableRole }) =>
-    sdk.client.fetch<MadeInvite>("/admin/staff/invites", { method: "POST", body })
+    withReauth((extra) =>
+      sdk.client.fetch<MadeInvite>("/admin/staff/invites", { method: "POST", body, ...extra })
+    )
   )
 
 export const useResendInvite = () =>
@@ -85,4 +100,16 @@ export const useResendInvite = () =>
 export const useWithdrawInvite = () =>
   useTeamMutation((id: string) =>
     sdk.client.fetch(`/admin/staff/invites/${encodeURIComponent(id)}`, { method: "DELETE" })
+  )
+
+/** A member's 2FA turned off by the owner: their phone lost (they set it up again). */
+export const useResetMemberMfa = () =>
+  useTeamMutation((id: string) =>
+    withReauth((extra) =>
+      sdk.client.fetch(`/admin/staff/members/${encodeURIComponent(id)}/reset-mfa`, {
+        method: "POST",
+        body: {},
+        ...extra,
+      })
+    )
   )

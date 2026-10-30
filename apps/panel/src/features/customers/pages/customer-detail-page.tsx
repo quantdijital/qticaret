@@ -3,15 +3,22 @@ import { Link, getRouteApi } from "@tanstack/react-router"
 import { Building2, Mail, MapPin, Phone, ReceiptText, ShoppingBag } from "lucide-react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
+import { toast } from "sonner"
 import { AsyncBody } from "@/components/patterns/async-body"
 import { PageColumn, PageGrid } from "@/components/patterns/page-grid"
 import { PageHeader } from "@/components/patterns/page-header"
 import { SectionCard } from "@/components/patterns/section-card"
 import { ErrorState } from "@/components/patterns/states"
 import { StatusBadge } from "@/components/patterns/status-badge"
+import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { billingProfileQuery, customerQuery } from "@/features/customers/api/customers"
+import {
+  billingProfileQuery,
+  customerQuery,
+  useRevealTaxId,
+} from "@/features/customers/api/customers"
 import type { CustomerDetail } from "@/features/customers/api/customers"
+import { useCan } from "@/features/auth/api/staff"
 import { customerName } from "@/features/customers/names"
 import { GIFT_CARDS_FLAG } from "@/features/gift-cards/api/gift-cards"
 import { StoreCreditCard } from "@/features/gift-cards/components/store-credit-card"
@@ -138,6 +145,8 @@ function BillingCard({ customerId }: { customerId: string }) {
   const { t } = useTranslation()
   const query = useQuery(billingProfileQuery(customerId))
   const profile = query.data?.billing_profile
+  const mayReveal = useCan("taxId")
+  const reveal = useRevealTaxId(customerId)
   return (
     <SectionCard
       title={t("customers.detail.billing")}
@@ -151,7 +160,26 @@ function BillingCard({ customerId }: { customerId: string }) {
             <span className="block font-medium">{profile.legal_name}</span>
             <span className="block text-muted-foreground">
               {t(`customers.billing.${profile.type}`)} · {profile.tax_id_kind.toUpperCase()}{" "}
-              <span className="font-mono">{profile.tax_id_masked}</span>
+              <span className="font-mono">{reveal.data?.tax_id ?? profile.tax_id_masked}</span>
+              {mayReveal ? (
+                <Button
+                  variant="link"
+                  size="sm"
+                  className="ml-2 h-auto px-0"
+                  disabled={reveal.isPending}
+                  onClick={() => {
+                    if (reveal.data) {
+                      reveal.reset()
+                    } else {
+                      reveal.mutate(undefined, {
+                        onError: (failure) => toast.error(errorText(t, failure)),
+                      })
+                    }
+                  }}
+                >
+                  {t(reveal.data ? "customers.billing.hide" : "customers.billing.reveal")}
+                </Button>
+              ) : null}
             </span>
             {profile.tax_office ? (
               <span className="block text-muted-foreground">

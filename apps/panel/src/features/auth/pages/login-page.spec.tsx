@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
+import type { ReactNode } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import { LoginPage } from "./login-page"
@@ -12,6 +13,7 @@ vi.mock("@/lib/sdk", () => ({
   sdk: { auth: { login: auth.login, mfa: { verifyChallenge: auth.verifyChallenge } } },
 }))
 vi.mock("@tanstack/react-router", () => ({
+  Link: ({ to, children }: { to: string; children: ReactNode }) => <a href={to}>{children}</a>,
   useNavigate: () => navigate,
   useSearch: () => ({}),
 }))

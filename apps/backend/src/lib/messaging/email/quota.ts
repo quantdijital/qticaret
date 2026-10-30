@@ -22,6 +22,7 @@ export const EMAIL_OPEN_SHARE = 0.25
 export const OPEN_TEMPLATES: readonly string[] = [
   "account.verify_email",
   "account.password_reset",
+  "staff.password_reset",
   "order.access_link",
   "stock.alert_confirm",
   "cart.reminder",

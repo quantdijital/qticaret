@@ -2,6 +2,7 @@ import type { CSSProperties, ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar"
 import { AppSidebar } from "./app-sidebar"
+import { ReauthHost } from "./reauth-host"
 import { Topbar } from "./topbar"
 
 // shadcn's sidebar reads its widths from these two; the layout tokens feed them
@@ -33,6 +34,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           {children}
         </div>
       </SidebarInset>
+      <ReauthHost />
     </SidebarProvider>
   )
 }

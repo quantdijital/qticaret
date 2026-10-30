@@ -6,6 +6,7 @@ import { createAdminUser } from "../helpers/admin"
 import { eventually } from "../helpers/eventually"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
+import { setUpTotp } from "../helpers/mfa"
 
 jest.setTimeout(120 * 1000)
 
@@ -15,7 +16,7 @@ interface Made {
 }
 
 interface Team {
-  staff: { id: string; email: string; role: string | null; you: boolean }[]
+  staff: { id: string; email: string; role: string | null; you: boolean; mfa: boolean }[]
   invites: { id: string; email: string; role: string }[] | null
 }
 
@@ -185,6 +186,73 @@ medusaIntegrationTestRunner({
       expect(after.status).toBe(403)
       expect(after.data.message).toBe("staff.no_role")
       expect(self.data.message).toBe("staff.remove_self")
+    })
+
+    it("lets the owner turn off a member's 2FA, their phone lost", async () => {
+      const owner = call((await createAdminUser(http, getContainer())).headers)
+      const admin = call((await createAdminUser(http, getContainer(), "admin")).headers)
+      const member = await createAdminUser(http, getContainer(), "operations")
+      await setUpTotp(http, member)
+      const mfaOf = async () =>
+        (await owner.get<Team>("/admin/staff")).data.staff.find((row) => row.id === member.userId)
+          ?.mfa
+
+      const before = await mfaOf()
+      const byAdmin = await admin.post(`/admin/staff/members/${member.userId}/reset-mfa`)
+      const reset = await owner.post<{ factors: number }>(
+        `/admin/staff/members/${member.userId}/reset-mfa`
+      )
+      const after = await mfaOf()
+      const login = await http.post<{ mfa_challenge?: unknown }>("/auth/user/emailpass", {
+        email: member.email,
+        password: member.password,
+      })
+      const self = await owner.post<{ message: string }>(
+        `/admin/staff/members/${(await owner.get<Team>("/admin/staff")).data.staff.find((row) => row.you)?.id ?? ""}/reset-mfa`
+      )
+
+      expect(before).toBe(true)
+      expect(byAdmin.status).toBe(403)
+      expect(reset.data.factors).toBe(1)
+      expect(after).toBe(false)
+      expect(login.data.mfa_challenge).toBeUndefined()
+      expect(self.data.message).toBe("staff.reset_self")
+    })
+
+    it("sends a staff member a reset link to the panel, and the new password works", async () => {
+      const member = await createAdminUser(http, getContainer(), "admin")
+      const password = randomUUID()
+
+      const asked = await anyone.post("/auth/user/emailpass/reset-password", {
+        identifier: member.email,
+      })
+      const mail = await eventually(
+        () =>
+          Promise.resolve(
+            fake.messages.find(
+              ({ to, template }) => to.includes(member.email) && template === "staff_password_reset"
+            )
+          ),
+        (found) => found !== undefined
+      )
+      const link = /href="([^"]*\/reset-password\?[^"]*)"/.exec(mail?.html ?? "")?.[1] ?? ""
+      const resetToken = new URL(link.replace(/&amp;/g, "&")).searchParams.get("token") ?? ""
+      const changed = await call({ authorization: `Bearer ${resetToken}` }).post(
+        "/auth/user/emailpass/update",
+        { password }
+      )
+      const oldPassword = await settle(
+        http.post("/auth/user/emailpass", { email: member.email, password: member.password })
+      )
+      const newPassword = await settle(
+        http.post("/auth/user/emailpass", { email: member.email, password })
+      )
+
+      expect(asked.status).toBeLessThan(300)
+      expect(link).toContain("/reset-password?")
+      expect(changed.status).toBe(200)
+      expect(oldPassword.status).toBe(401)
+      expect(newPassword.status).toBe(200)
     })
 
     it("sends an invitation again with a new link, and withdraws one", async () => {

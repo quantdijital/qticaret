@@ -15,6 +15,7 @@
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
+  --color-primary-text: var(--primary-text);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
@@ -134,7 +135,7 @@
       @apply border-l-2 pl-4 text-muted-foreground italic;
     }
     & a {
-      @apply text-primary underline underline-offset-2;
+      @apply text-primary-text underline underline-offset-2;
     }
     & table {
       @apply w-full border-collapse text-sm;

@@ -17,6 +17,8 @@ export interface WindowCount {
 
 export interface RateLimitStore {
   hit: (key: string, windowMs: number) => Promise<WindowCount>
+  /** Hits in the key's current window, without one more: 0 when it has none. */
+  peek: (key: string) => Promise<number>
   /** Resolves once the store can count; until then hits wait for the connection, up to the command timeout. */
   ready?: () => Promise<void>
   close?: () => Promise<void>
@@ -60,6 +62,10 @@ export function createMemoryStore(
       }
       return Promise.resolve({ count: window.count, resetMs: window.endsAt - time })
     },
+    peek: (key) => {
+      const window = windows.get(key)
+      return Promise.resolve(window && window.endsAt > now() ? window.count : 0)
+    },
   }
 }
 
@@ -93,6 +99,17 @@ export function withFallback(
         }
       }
       return fallback.hit(key, windowMs)
+    },
+    peek: async (key) => {
+      if (now() >= skipUntil) {
+        try {
+          return await primary.peek(key)
+        } catch (error) {
+          skipUntil = now() + cooldownMs
+          onError?.(error)
+        }
+      }
+      return fallback.peek(key)
     },
     ...(primary.ready ? { ready: primary.ready } : {}),
     ...(primary.close ? { close: primary.close } : {}),
@@ -128,6 +145,7 @@ export function createRedisStore(redisUrl: string, prefix = "qt:rl:"): RateLimit
       const [count, ttl] = await client.rateLimitHit(`${prefix}${key}`, String(windowMs))
       return { count, resetMs: ttl }
     },
+    peek: async (key) => Number((await client.get(`${prefix}${key}`)) ?? 0),
     ready: () =>
       client.status === "ready"
         ? Promise.resolve()

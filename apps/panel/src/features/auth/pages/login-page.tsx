@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useNavigate, useSearch } from "@tanstack/react-router"
+import { Link, useNavigate, useSearch } from "@tanstack/react-router"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
@@ -107,6 +107,9 @@ export function LoginPage() {
             ) : null}
             <Button type="submit" className="mt-2" disabled={login.isPending}>
               {t("login.submit")}
+            </Button>
+            <Button asChild variant="link" className="h-auto self-start px-0">
+              <Link to="/reset-password">{t("login.forgot")}</Link>
             </Button>
           </form>
         )}

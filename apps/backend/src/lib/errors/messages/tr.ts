@@ -10,6 +10,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "async_job.result_unavailable": "Bu işin indirilebilir bir sonucu yok ya da süresi doldu.",
   "async_job.type_unknown": "Böyle bir iş tipi yok.",
   "audit_log.kind_invalid": "Kayıt türü geçerli değil.",
+  "billing_profile.unknown": "Bu müşterinin fatura bilgisi yok.",
   "billing_profile.tax_id_invalid": "Vergi ya da TC kimlik numarası geçerli değil.",
   "billing_profile.tax_office_required": "Vergi dairesini girin.",
   "bank_transfer.not_configured":
@@ -363,6 +364,10 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "staff.name_required": "Ad ve soyad gerekli.",
   "staff.mfa_required":
     "Devam etmek için iki adımlı doğrulamayı kurun ya da kodla yeniden giriş yapın.",
+  "staff.reset_self": "Kendi iki adımlı doğrulamanızı Ayarlar > Güvenlik'ten kapatın.",
+  "staff.reauth_required": "Bu değişiklik için kimliğinizi yeniden doğrulayın.",
+  "staff.reauth_failed": "Doğrulama kodu ya da şifre doğru değil.",
+  "staff.reauth_locked": "Çok fazla deneme yapıldı; biraz sonra yeniden deneyin.",
   "staff.forbidden": "Rolünüz bu işlem için yetkili değil.",
   "staff.last_owner": "Mağazanın son sahibi rolünü bırakamaz; önce başka birini sahip yapın.",
   "api_key.fields_not_allowed": "Anahtarla alan seçilemez (fields); uç kendi alanlarını döner.",

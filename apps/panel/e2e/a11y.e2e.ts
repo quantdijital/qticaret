@@ -45,6 +45,7 @@ const SCREENS = [
   "/settings/api",
   "/settings/team",
   "/settings/security",
+  "/reset-password",
 ]
 
 async function seriousIssues(page: Page): Promise<string[]> {

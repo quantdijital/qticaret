@@ -24,6 +24,7 @@ const team: Team = {
       created_at: "2026-10-24T09:00:00Z",
       role: "owner",
       you: true,
+      mfa: true,
     },
     {
       id: "user_ops",
@@ -33,6 +34,7 @@ const team: Team = {
       created_at: "2026-10-28T09:00:00Z",
       role: "operations",
       you: false,
+      mfa: true,
     },
   ],
   invites: [
@@ -75,6 +77,9 @@ describe("TeamPage", () => {
     // Nobody removes themselves: only the other member has the button
     expect(screen.getAllByRole("button", { name: /ekipten çıkar/ })).toHaveLength(1)
     expect(screen.getByRole("button", { name: "Davet et" })).toBeInTheDocument()
+    // Another's 2FA, for a phone lost; one's own goes through Settings > Security
+    expect(screen.getAllByRole("button", { name: /2FA'yı sıfırla/ })).toHaveLength(1)
+    expect(screen.getAllByText("2FA açık")).toHaveLength(2)
     expect(screen.getByText("yeni@example.com")).toBeInTheDocument()
   })
 

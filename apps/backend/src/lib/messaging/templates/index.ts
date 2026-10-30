@@ -13,6 +13,7 @@ import {
   staffInvite,
   staffLowStock,
   staffNewOrder,
+  staffPasswordReset,
   staffSeoDigest,
 } from "./staff"
 
@@ -29,7 +30,13 @@ export type { PaymentFailedVars } from "./payment"
 export type { ReturnVars } from "./returns"
 export type { ParcelVars } from "./shipping"
 export type { StockAlertVars } from "./stock"
-export type { StaffInviteVars, StaffOrderVars, StaffSeoVars, StaffStockVars } from "./staff"
+export type {
+  StaffInviteVars,
+  StaffOrderVars,
+  StaffResetVars,
+  StaffSeoVars,
+  StaffStockVars,
+} from "./staff"
 export type { Brand, EmailContent, EmailContext, MessageKind, MessageTemplate } from "./types"
 
 /** Every template the platform sends, by name (adr/0036). */
@@ -54,6 +61,7 @@ export const MESSAGE_TEMPLATES = {
   "staff.low_stock": staffLowStock,
   "staff.seo_digest": staffSeoDigest,
   "staff.invite": staffInvite,
+  "staff.password_reset": staffPasswordReset,
 } as const
 
 export type MessageTemplateName = keyof typeof MESSAGE_TEMPLATES

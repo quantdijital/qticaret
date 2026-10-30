@@ -1,4 +1,5 @@
-import { keepPreviousData, queryOptions } from "@tanstack/react-query"
+import { keepPreviousData, queryOptions, useMutation } from "@tanstack/react-query"
+import { withReauth } from "@/lib/reauth"
 import { sdk } from "@/lib/sdk"
 
 export const CUSTOMER_PAGE_SIZE = 20
@@ -83,6 +84,21 @@ export const billingProfileQuery = (customerId: string) =>
         `/admin/customers/${encodeURIComponent(customerId)}/billing-profile`
       ),
   })
+
+/** The full tax id, for an invoice by hand: owner and admin, proved again, recorded (F12.6). */
+export function useRevealTaxId(customerId: string) {
+  return useMutation({
+    mutationFn: () =>
+      withReauth((extra) =>
+        sdk.client.fetch<{ tax_id: string; kind: "tckn" | "vkn" }>(
+          `/admin/customers/${encodeURIComponent(customerId)}/billing-profile/reveal`,
+          { method: "POST", body: {}, ...extra }
+        )
+      ),
+    // The number is not kept once nothing shows it
+    gcTime: 0,
+  })
+}
 
 export type ConsentChannel = "email" | "sms"
 
