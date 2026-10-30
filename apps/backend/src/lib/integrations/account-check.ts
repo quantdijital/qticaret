@@ -11,6 +11,7 @@ import { yurticiApi, yurticiCredentialsOf } from "../shipping/yurtici"
 import { conversionsApi, metaAccountOf } from "../conversions/client"
 import { googleApi } from "../google/client"
 import { googleClientOf } from "../google/oauth"
+import { checkShopify, shopifyCredentialsOf } from "../migration/shopify/client"
 
 /**
  * Asks a provider whether the shop's account details work (adr/0027 §4).
@@ -133,6 +134,11 @@ const CHECKERS = {
   // GA4 answers every Measurement Protocol request alike: nothing to ask it,
   // only the form was checked
   ga4: () => Promise.resolve("valid"),
+  // F14: a day's token for the store, then its name
+  shopify: async (account, signal) => {
+    const credentials = shopifyCredentialsOf(account)
+    return credentials ? checkShopify(credentials, signal) : "secret_invalid"
+  },
 } satisfies Record<CredentialProviderName, Checker>
 
 export async function checkAccount(
@@ -165,4 +171,6 @@ export const CHECK_FIELDS = {
   google: { merchant_invalid: "settings.merchant_id", secret_invalid: "secrets.refresh_token" },
   meta: { merchant_invalid: "settings.pixel_id", secret_invalid: "secrets.access_token" },
   ga4: { merchant_invalid: "settings.measurement_id", secret_invalid: "secrets.api_secret" },
+  // Another organization's store is the domain's; a refused token, the secret
+  shopify: { merchant_invalid: "settings.shop_domain", secret_invalid: "secrets.client_secret" },
 } satisfies Record<CredentialProviderName, Record<"merchant_invalid" | "secret_invalid", string>>

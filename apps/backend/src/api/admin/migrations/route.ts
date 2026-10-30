@@ -63,6 +63,7 @@ export async function POST(req: AuthenticatedMedusaRequest, res: MedusaResponse)
   await upload.promise
   const { result } = await startMigrationWorkflow(req.scope).run({
     input: {
+      source: "bundle",
       source_file_id: upload.fileKey,
       mode,
       defaults,

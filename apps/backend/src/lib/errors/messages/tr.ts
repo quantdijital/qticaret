@@ -721,4 +721,10 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Ürünün ölçüsü kaynakta yoktu; varsayılan paket ölçüsü kullanıldı.",
   "migration.product_drafted_no_parcel":
     "Ürünün ağırlığı ya da ölçüleri yok; taslak olarak alındı. Ölçüleri girip yayınlayın.",
+  "migration.shopify_not_connected":
+    "Shopify mağazası bağlı değil; önce Ayarlar > Entegrasyonlar'dan bağlayın.",
+  "migration.shopify_currency":
+    "Shopify mağazası Türk lirası dışında bir para birimiyle satıyor; fiyatlar çevrilmeden taşınamaz.",
+  "shopify.shop_domain_invalid": "Mağaza adresi magaza-adi.myshopify.com biçiminde olmalı.",
+  "shopify.client_id_invalid": "İstemci kimliği (Client ID) geçersiz.",
 }

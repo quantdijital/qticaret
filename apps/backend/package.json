@@ -10,6 +10,7 @@
     "dev": "medusa develop",
     "dev:paytr": "ts-node ../../packages/testing/src/dev/paytr.ts",
     "dev:parasut": "ts-node ../../packages/testing/src/dev/parasut.ts",
+    "dev:shopify": "ts-node ../../packages/testing/src/dev/shopify.ts",
     "dev:aras": "ts-node ../../packages/testing/src/dev/aras.ts",
     "dev:geliver": "ts-node ../../packages/testing/src/dev/geliver.ts",
     "dev:netgsm": "ts-node ../../packages/testing/src/dev/netgsm.ts",

@@ -20,6 +20,7 @@ const PROVIDER_NAMES: Readonly<Record<CredentialProviderName, string>> = {
   google: "Google",
   meta: "Meta",
   ga4: "Google Analytics 4",
+  shopify: "Shopify",
 }
 
 /**

@@ -201,6 +201,28 @@ export const CREDENTIAL_PROVIDERS = {
     identity: ["measurement_id"],
     optional: [],
   },
+  // F14 (adr/0042): the shop's own Shopify store, read once to move it here. An app the
+  // owner makes in Shopify's Dev Dashboard and installs on the store (read scopes only);
+  // its client id and secret buy a token for a day (client credentials grant)
+  shopify: {
+    settings: z
+      .object({
+        shop_domain: z
+          .string()
+          .trim()
+          .toLowerCase()
+          .regex(/^[a-z0-9][a-z0-9-]{0,60}\.myshopify\.com$/, "shopify.shop_domain_invalid"),
+        client_id: z
+          .string()
+          .trim()
+          .regex(/^[A-Za-z0-9_-]{16,64}$/, "shopify.client_id_invalid"),
+      })
+      .strict(),
+    secrets: ["client_secret"],
+    secret: secretField,
+    identity: ["shop_domain", "client_id"],
+    optional: [],
+  },
 } as const satisfies Record<string, CredentialProvider>
 
 export type CredentialProviderName = keyof typeof CREDENTIAL_PROVIDERS

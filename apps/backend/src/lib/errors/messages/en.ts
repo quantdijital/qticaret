@@ -717,4 +717,10 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The source had no measurements; the default parcel was used.",
   "migration.product_drafted_no_parcel":
     "No weight or measurements; brought in as a draft. Add them and publish.",
+  "migration.shopify_not_connected":
+    "No Shopify store is connected; connect it under Settings > Integrations first.",
+  "migration.shopify_currency":
+    "The Shopify store sells in a currency other than lira; prices are never converted.",
+  "shopify.shop_domain_invalid": "The store address takes the form your-store.myshopify.com.",
+  "shopify.client_id_invalid": "The client ID is not valid.",
 }

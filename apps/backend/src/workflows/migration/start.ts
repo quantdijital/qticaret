@@ -10,8 +10,9 @@ import type { PackageDefaults } from "../../lib/migration/types"
 import { enqueueAsyncJobWorkflow } from "../async-job/enqueue-async-job"
 
 export interface StartMigrationInput {
-  /** The uploaded migration file, stored private under the migration's prefix. */
-  source_file_id: string
+  source: "bundle" | "shopify"
+  /** A bundle: the uploaded file, stored private under the migration's prefix. */
+  source_file_id: string | null
   mode: "check" | "apply"
   defaults: PackageDefaults | null
   requested_by: string | null
@@ -20,8 +21,8 @@ export interface StartMigrationInput {
 /** Owns the uploaded file until its job does: a queue that refuses it deletes it (customers are in it). */
 const ownFileStep = createStep(
   "migration-own-file",
-  (fileId: string) => new StepResponse(fileId, fileId),
-  async (fileId: string | undefined, { container }) => {
+  (fileId: string | null) => new StepResponse(fileId, fileId),
+  async (fileId: string | null | undefined, { container }) => {
     if (fileId) {
       await container.resolve(Modules.FILE).deleteFiles(fileId)
     }
@@ -41,8 +42,8 @@ export const startMigrationWorkflow = createWorkflow(
       input: transform({ input }, ({ input }) => ({
         type: "migration.run",
         input: {
-          source: "bundle",
-          source_file_id: input.source_file_id,
+          source: input.source,
+          ...(input.source_file_id ? { source_file_id: input.source_file_id } : {}),
           mode: input.mode,
           defaults: input.defaults,
         },

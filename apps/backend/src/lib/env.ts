@@ -118,6 +118,8 @@ const envSchema = z.object({
   PARASUT_CLIENT_SECRET: z.string().max(200).optional(),
   // A fake Paraşüt on a developer's machine and in tests; refused when deployed
   PARASUT_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
+  // F14 (adr/0042): a fake Shopify for a migration on a developer's machine
+  SHOPIFY_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
   // F10.9: fake Meta Graph and GA4 Measurement Protocol in tests; refused when deployed
   META_GRAPH_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
   GA4_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
@@ -270,6 +272,7 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
     "APPLE_AUTH_BASE_URL",
     "GOOGLE_BASE_URL",
     "PARASUT_BASE_URL",
+    "SHOPIFY_BASE_URL",
     "META_GRAPH_BASE_URL",
     "GA4_BASE_URL",
     "CONTENT_DRAFT_PROVIDER",

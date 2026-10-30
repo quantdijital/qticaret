@@ -121,6 +121,12 @@ medusaIntegrationTestRunner({
           state: "not_configured",
           secrets: { api_secret: false },
         }),
+        // F14: the store a migration reads
+        expect.objectContaining({
+          provider: "shopify",
+          state: "not_configured",
+          secrets: { client_secret: false },
+        }),
       ])
     })
 

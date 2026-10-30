@@ -105,3 +105,10 @@ Elimizde olanlar:
 8. **Erişim.**
    - `/admin/migrations*` yalnızca sahibe açıktır. Uygulama (`mode=apply`) yeniden doğrulama ister; kanıt başlıkta gelir, gövde ham dosyadır.
    - API anahtarlarına açık değildir. İş `catalog.write` grubundadır: katalog içe aktarma ve toplu düzenlemeyle yan yana çalışmaz.
+
+## Uygulama notları (G3 Shopify, 2026-10-31)
+
+1. **Erişim.** Yalnızca Dev Dashboard uygulaması ve client credentials grant (günlük anahtar). 1 Ocak 2026'dan beri yeni eski tip özel uygulama açılamıyor; eski statik anahtarlar desteklenmez. Hesap `integration-credentials`'ta (`shopify`: mağaza adresi, Client ID; gizli: Client secret); iş girdisinde mağaza bilgisi yoktur.
+2. **Okuma.** GraphQL Admin API `2026-10`, her liste için toplu sorgu (bulk operation). Sorgu maliyeti ve 25.000 nesnelik sayfalama sınırı aşılır; JSONL dosyası yalnızca `storage.googleapis.com`'dan indirilir.
+3. **Para birimi.** TRY dışında satan mağaza okunmadan reddedilir; fiyat çevrilmez.
+4. **Eşleme ayrıntısı** `docs/entegrasyonlar/shopify.md`. Kısaca: koleksiyon kategori, satıcı marka, yalnızca Türkiye adresleri, yalnızca tarihli izin, tanıtıcı platformun slug kuralına çevrilir (eski adres 301 için kalır), Shopify'ın kendi yorumu yoktur.

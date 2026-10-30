@@ -75,3 +75,11 @@ export type {
   FakeParasutUser,
   FakeSalesInvoice,
 } from "./parasut/fake-server"
+export { DEMO_SHOPIFY } from "./shopify/demo"
+export { jsonlOf, startFakeShopify } from "./shopify/fake-server"
+export type {
+  FakeShopify,
+  FakeShopifyApp,
+  FakeShopifyData,
+  FakeShopifyNode,
+} from "./shopify/fake-server"
