@@ -277,12 +277,26 @@ export function articleJsonLd(facts: ArticleFacts, url: string): JsonLd {
   })
 }
 
+/** The shop's legal identity as the structured data shows it (F13.9). */
+export interface SiteIdentity {
+  legalName: string | null
+  taxID: string | null
+  address: string | null
+  email: string | null
+  telephone: string | null
+  sameAs: readonly string[]
+}
+
 /**
  * The home page's blocks (docs/13 §5): the shop as an `OnlineStore` (the
- * most specific organisation type for a web shop) and the `WebSite`
- * without a search action (Google dropped the sitelinks search box).
+ * most specific organisation type for a web shop) with its legal identity
+ * where given (F13.9), and the `WebSite` without a search action (Google
+ * dropped the sitelinks search box).
  */
-export function siteJsonLd(shop: { name: string; url: string; logo: string | null }): JsonLd[] {
+export function siteJsonLd(
+  shop: { name: string; url: string; logo: string | null },
+  identity?: SiteIdentity
+): JsonLd[] {
   return [
     compact({
       "@context": SCHEMA,
@@ -290,6 +304,14 @@ export function siteJsonLd(shop: { name: string; url: string; logo: string | nul
       name: shop.name,
       url: shop.url,
       logo: shop.logo,
+      legalName: identity?.legalName ?? undefined,
+      taxID: identity?.taxID ?? undefined,
+      address: identity?.address
+        ? { "@type": "PostalAddress", streetAddress: identity.address, addressCountry: "TR" }
+        : undefined,
+      email: identity?.email ?? undefined,
+      telephone: identity?.telephone ?? undefined,
+      sameAs: identity?.sameAs.length ? [...identity.sameAs] : undefined,
     }),
     { "@context": SCHEMA, "@type": "WebSite", name: shop.name, url: shop.url },
   ]

@@ -16,6 +16,8 @@ export interface DashboardTasks {
   webhooks_disabled: number | null
   /** SEO setup items the shop can do now (F12.10). */
   seo_setup_open: number
+  /** The legal identity's required details still missing (F13.9); 0 once complete. */
+  legal_identity_missing: number
   capped: boolean
 }
 

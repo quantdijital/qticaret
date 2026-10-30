@@ -50,14 +50,15 @@ medusaIntegrationTestRunner({
 
       // No Google client in tests: those wait for the platform, not the shop
       expect(await open()).toEqual([
-        ["legal", "coming"],
+        ["legal_identity", null],
+        ["legal_texts", null],
         ["canonical_host", null],
         ["share_image", null],
         ["search_console", "google_platform"],
         ["merchant", "google_platform"],
         ["indexnow", null],
       ])
-      expect(await tasks()).toBe(3)
+      expect(await tasks()).toBe(5)
 
       const stranger = await saveSeo({ default_og_image: "https://evil.example/x.png" })
       expect(stranger.status).toBe(400)
@@ -80,11 +81,12 @@ medusaIntegrationTestRunner({
       expect(flag.status).toBe(200)
 
       expect(await open()).toEqual([
-        ["legal", "coming"],
+        ["legal_identity", null],
+        ["legal_texts", null],
         ["search_console", "google_platform"],
         ["merchant", "google_platform"],
       ])
-      expect(await tasks()).toBe(0)
+      expect(await tasks()).toBe(2)
 
       // A robots.txt that shuts the shop opens the item again
       expect((await saveSeo({ robots_txt: "User-agent: *\nDisallow: /" })).status).toBe(200)

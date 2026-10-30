@@ -38,7 +38,8 @@ describe("SetupChecklistCard", () => {
 
   it("lists only what is missing, each with where it is done or what holds it", async () => {
     renderCard([
-      entry("legal", false, "coming"),
+      entry("legal_identity", false),
+      entry("legal_texts", true),
       entry("canonical_host", true),
       entry("robots", true),
       entry("share_image", false),
@@ -47,15 +48,15 @@ describe("SetupChecklistCard", () => {
       entry("indexnow", true),
     ])
 
-    expect(await screen.findByText("3/7 tamam")).toBeInTheDocument()
+    expect(await screen.findByText("4/8 tamam")).toBeInTheDocument()
     expect(screen.queryByText("Mağaza alan adı")).toBeNull()
     expect(screen.getByText("Paylaşım görseli")).toBeInTheDocument()
-    expect(screen.getByText(/ekranı yakında geliyor/)).toBeInTheDocument()
+    expect(screen.getByText("Mağaza künyesi")).toBeInTheDocument()
     expect(screen.getByText(/Önce Google hesabınızı bağlayın/)).toBeInTheDocument()
-    // The share image and Search Console have a way in; the platform's Google does not
+    // The identity, the share image and Search Console have a way in; the platform's Google does not
     expect(
       screen.getAllByRole("link", { name: /Tamamla/ }).map((link) => link.getAttribute("href"))
-    ).toEqual(["/settings/seo", "/settings/marketing"])
+    ).toEqual(["/settings/store", "/settings/seo", "/settings/marketing"])
   })
 
   it("shows staff who cannot change settings what is missing, not the way in", async () => {

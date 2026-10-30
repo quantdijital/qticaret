@@ -8,24 +8,21 @@ import { RETURN_WINDOW_DAYS } from "../../lib/orders/returns"
 import { LEGAL_MODULE } from "../../modules/legal"
 import type LegalModuleService from "../../modules/legal/service"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
-import type { SeoSettings, StoreSettings } from "../../modules/platform-settings/sections"
+import type { SeoSettings } from "../../modules/platform-settings/sections"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
+import { legalIdentity } from "./identity"
 
 type Container = Pick<MedusaContainer, "resolve">
 
 const DATE = new Intl.DateTimeFormat("tr-TR", { timeZone: "Europe/Istanbul", dateStyle: "short" })
 
-/**
- * The shop's values for its texts' tokens (adr/0041 §1). The legal identity
- * (title, MERSİS, tax number, address, KEP, ETBİS) comes with its settings
- * (F13.9); until then those show as "—".
- */
+/** The shop's values for its texts' tokens (adr/0041 §1): its legal identity and contact details. */
 export async function shopLegalValues(
   container: Container
 ): Promise<Record<ShopToken, string | null>> {
   const settings = container.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
-  const [store, seo, { data: stores }] = await Promise.all([
-    settings.getSection("store") as Promise<unknown> as Promise<StoreSettings>,
+  const [identity, seo, { data: stores }] = await Promise.all([
+    legalIdentity(container),
     settings.getSection("seo") as Promise<unknown> as Promise<SeoSettings>,
     container
       .resolve(ContainerRegistrationKeys.QUERY)
@@ -33,15 +30,15 @@ export async function shopLegalValues(
   ])
   return {
     mağaza_adı: (stores[0] as { name?: string } | undefined)?.name ?? null,
-    mağaza_unvanı: null,
-    mersis: null,
-    vkn: null,
-    vergi_dairesi: null,
-    adres: null,
-    kep: null,
-    etbis: null,
-    e_posta: store.contact_email,
-    telefon: store.contact_phone,
+    mağaza_unvanı: identity.company_title,
+    mersis: identity.mersis,
+    vkn: identity.tax_number,
+    vergi_dairesi: identity.tax_office,
+    adres: identity.address,
+    kep: identity.kep,
+    etbis: identity.etbis,
+    e_posta: identity.contact_email,
+    telefon: identity.contact_phone,
     alan_adı: seo.canonical_host,
     iade_süresi: String(RETURN_WINDOW_DAYS),
     bugün: DATE.format(new Date()),

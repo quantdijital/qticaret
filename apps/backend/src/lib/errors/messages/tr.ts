@@ -450,6 +450,11 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "platform_settings.feature_unknown": "Böyle bir özellik yok.",
   "platform_settings.host_invalid": "Alan adını https:// ve yol olmadan yazın, ör. magaza.com.tr.",
   "platform_settings.invalid": "Girilen değer geçerli değil.",
+  "platform_settings.mersis_invalid": "MERSİS numarası 16 rakamdan oluşur.",
+  "platform_settings.tax_number_invalid":
+    "Geçerli bir vergi kimlik numarası (10 hane) ya da T.C. kimlik numarası (11 hane) girin.",
+  "platform_settings.kep_invalid": "Geçerli bir KEP adresi girin, ör. unvan@hs01.kep.tr.",
+  "platform_settings.etbis_invalid": "ETBİS kayıt numarası harf, rakam ve tireden oluşur.",
   "platform_settings.phone_invalid": "Geçerli bir Türkiye telefon numarası girin.",
   "platform_settings.robots_invalid":
     "robots.txt yalnızca User-agent, Allow, Disallow, Sitemap, Crawl-delay satırları ve yorum içerebilir.",

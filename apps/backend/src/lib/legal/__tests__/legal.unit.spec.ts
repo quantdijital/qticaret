@@ -1,6 +1,6 @@
 import type { Block, ContentDoc } from "../../content"
 import { contentDoc, renderDoc } from "../../content"
-import { LEGAL_KINDS, checkLegalDoc, fillLegalDoc, starterOf } from ".."
+import { LEGAL_KINDS, checkLegalDoc, fillLegalDoc, identityGaps, starterOf } from ".."
 
 const doc = (...content: Block[]): ContentDoc => ({ type: "doc", content })
 const p = (text: string): Block => ({ type: "paragraph", content: [{ type: "text", text }] })
@@ -51,5 +51,26 @@ describe("legal texts (adr/0041 §1)", () => {
     expect(filled.content[0]).toEqual(p("Satıcı: Örnek Ltd. Şti., MERSİS: —"))
     expect(filled.content[1]).toEqual(lines[0])
     expect(JSON.stringify(filled.content[2])).toContain('"text":"—"')
+  })
+})
+
+describe("the shop's legal identity (F13.9)", () => {
+  const complete = {
+    company_title: "Örnek Ticaret Ltd. Şti.",
+    address: "Örnek Mah. 1. Sok. No: 2, Kadıköy / İstanbul",
+    tax_office: "Kadıköy",
+    tax_number: "1234567890",
+    contact_email: "destek@ornek.com",
+    contact_phone: null,
+  }
+
+  it("asks for the title, address, tax details and one way to reach the shop", () => {
+    expect(identityGaps(complete)).toEqual([])
+    expect(
+      identityGaps({ ...complete, company_title: " ", contact_email: null, contact_phone: null })
+    ).toEqual(["company_title", "contact"])
+    expect(
+      identityGaps({ ...complete, contact_email: null, contact_phone: "+905320000000" })
+    ).toEqual([])
   })
 })

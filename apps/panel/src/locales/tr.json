@@ -193,6 +193,10 @@
       "seoSetup": {
         "label": "SEO kurulumunda eksik",
         "hint": "Arama motorları için kalan adımlar"
+      },
+      "legalIdentity": {
+        "label": "Mağaza künyesi eksik",
+        "hint": "Yasanın istediği eksik alanlar"
       }
     },
     "recent": {
@@ -343,6 +347,32 @@
         "kg": "Kilogram (kg)",
         "cm": "Santimetre (cm)",
         "mm": "Milimetre (mm)"
+      },
+      "legal": {
+        "title": "Künye",
+        "hint": "Yasanın bir internet mağazasından istediği bilgiler. Mağazanın altbilgisinde, arama motorlarına verilen yapılandırılmış veride ve yasal metinlerde kullanılır.",
+        "missing": "Eksik: {{fields}}.",
+        "gaps": {
+          "company_title": "unvan",
+          "address": "adres",
+          "tax_office": "vergi dairesi",
+          "tax_number": "vergi numarası",
+          "contact": "iletişim e-postası ya da telefonu (yukarıdaki kart)"
+        },
+        "fields": {
+          "company_title": "Unvan",
+          "tax_office": "Vergi dairesi",
+          "tax_number": "Vergi no ya da T.C. kimlik no",
+          "address": "Açık adres",
+          "mersis": "MERSİS numarası",
+          "kep": "KEP adresi",
+          "etbis": "ETBİS kayıt numarası",
+          "same_as": "Sosyal medya hesapları"
+        },
+        "taxNumberHint": "Şirketler için 10 haneli vergi numarası; şahıs işletmeleri için 11 haneli T.C. kimlik numarası.",
+        "mersisHint": "16 hane. Şahıs işletmesinin MERSİS numarası yoksa boş bırakın.",
+        "etbisHint": "Elektronik Ticaret Bilgi Sistemi'ne kayıt olduktan sonra verilen numara.",
+        "sameAsHint": "Her satıra bir https adresi; en çok 10."
       }
     },
     "seo": {
@@ -4271,14 +4301,17 @@
       "progress": "{{done}}/{{total}} tamam",
       "go": "Tamamla",
       "blocked": {
-        "coming": "Yasal bilgiler ve politikalar ekranı yakında geliyor; şimdilik yapılacak bir şey yok.",
         "google_platform": "Google bağlantısı bu ortamda henüz açılmadı; platform ekibi açacak.",
         "google_account": "Önce Google hesabınızı bağlayın; ardından bu adım aynı ekrandan tamamlanır."
       },
       "items": {
-        "legal": {
-          "title": "Künye ve politikalar",
-          "hint": "Şirket bilgileri, iade ve kargo politikası."
+        "legal_identity": {
+          "title": "Mağaza künyesi",
+          "hint": "Unvan, adres ve vergi bilgileri; mağazanın altbilgisinde ve yapılandırılmış veride görünür."
+        },
+        "legal_texts": {
+          "title": "Zorunlu yasal metinler",
+          "hint": "Mesafeli satış sözleşmesi, ön bilgilendirme formu, KVKK aydınlatma metni ve iade politikası yayında olmalı."
         },
         "canonical_host": {
           "title": "Mağaza alan adı",

@@ -2,10 +2,17 @@ import { queryOptions } from "@tanstack/react-query"
 import { sdk } from "@/lib/sdk"
 
 export type SeoSetupItem =
-  "legal" | "canonical_host" | "robots" | "share_image" | "search_console" | "merchant" | "indexnow"
+  | "legal_identity"
+  | "legal_texts"
+  | "canonical_host"
+  | "robots"
+  | "share_image"
+  | "search_console"
+  | "merchant"
+  | "indexnow"
 
 /** Why an open item cannot be done from the panel yet. */
-export type SeoSetupBlock = "coming" | "google_platform" | "google_account"
+export type SeoSetupBlock = "google_platform" | "google_account"
 
 export interface SeoSetupEntry {
   key: SeoSetupItem

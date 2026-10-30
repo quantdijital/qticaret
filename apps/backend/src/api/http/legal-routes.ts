@@ -45,6 +45,11 @@ export const LEGAL_ROUTES = [
     middlewares: [requireUserActor, validateAndTransformBody(AdminPostLegalPreview)],
   },
   {
+    matcher: "/store/legal-identity",
+    methods: ["GET" as const],
+    middlewares: [validateAndTransformQuery(AdminGetDashboardNoQuery, {})],
+  },
+  {
     matcher: "/store/legal/:kind",
     methods: ["GET" as const],
     middlewares: [validateAndTransformQuery(AdminGetDashboardNoQuery, {})],

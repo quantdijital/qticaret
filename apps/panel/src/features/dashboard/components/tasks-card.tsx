@@ -6,6 +6,7 @@ import {
   CircleCheck,
   Clock,
   FilePen,
+  Landmark,
   PackageMinus,
   RotateCcw,
   SearchCheck,
@@ -33,6 +34,7 @@ interface TaskRow {
     | "accountingStopped"
     | "webhooksDisabled"
     | "seoSetup"
+    | "legalIdentity"
   icon: LucideIcon
   count: number
   to: string
@@ -112,6 +114,18 @@ function rows(tasks: DashboardTasks, reach: Reach): TaskRow[] {
             icon: Webhook,
             count: tasks.webhooks_disabled,
             to: "/settings/api",
+            urgent: true,
+          },
+        ]
+      : []),
+    // F13.9: the law asks a web shop to show who it is; gone once complete
+    ...(tasks.legal_identity_missing > 0 && reach.settings
+      ? [
+          {
+            key: "legalIdentity" as const,
+            icon: Landmark,
+            count: tasks.legal_identity_missing,
+            to: "/settings/store",
             urgent: true,
           },
         ]

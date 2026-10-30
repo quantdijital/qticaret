@@ -11,6 +11,7 @@ import type PaymentRecoveryModuleService from "../../../../modules/payment-recov
 import { TENANT_WEBHOOKS_MODULE } from "../../../../modules/tenant-webhooks"
 import type TenantWebhooksModuleService from "../../../../modules/tenant-webhooks/service"
 import { activeAccountingAdapter } from "../../../../workflows/accounting/active-adapter"
+import { legalIdentity } from "../../../../workflows/legal/identity"
 import { seoSetupChecklist } from "../../../../workflows/seo/setup-checklist"
 
 // Open orders and stock records read at most (docs/04); past this the
@@ -34,7 +35,8 @@ const available = (row: StockRow): number =>
  * running low, products left as drafts, payments that became no order
  * (F5 V4); records the accounting program refused and hooks turned off
  * after failing (F12.1), null where the shop uses neither; SEO setup
- * items the shop can do now (F12.10). Counts only; no personal data.
+ * items the shop can do now (F12.10); the legal identity's missing
+ * details (F13.9). Counts only; no personal data.
  */
 export async function readDashboardTasks(scope: MedusaContainer) {
   const query = scope.resolve(ContainerRegistrationKeys.QUERY)
@@ -51,6 +53,7 @@ export async function readDashboardTasks(scope: MedusaContainer) {
     [, hooksOff],
     counts,
     seoSetup,
+    identity,
   ] = await Promise.all([
     query.graph({
       entity: "order",
@@ -79,6 +82,8 @@ export async function readDashboardTasks(scope: MedusaContainer) {
       : Promise.resolve(null),
     // F12.10: the SEO setup items the shop can do now
     seoSetupChecklist(scope),
+    // F13.9: what the legal identity still lacks
+    legalIdentity(scope),
   ])
   const orders = open.data as LifecycleOrder[]
   const stages = orders.map(lifecycleOf)
@@ -97,6 +102,7 @@ export async function readDashboardTasks(scope: MedusaContainer) {
     accounting_stopped: counts ? counts.stopped : null,
     webhooks_disabled: hookCount > 0 ? hooksOff : null,
     seo_setup_open: actionableCount(seoSetup),
+    legal_identity_missing: identity.gaps.length,
     capped:
       (open.metadata?.count ?? 0) > orders.length || (stock.metadata?.count ?? 0) > items.length,
   }

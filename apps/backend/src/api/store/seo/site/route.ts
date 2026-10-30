@@ -7,7 +7,18 @@ import type { AppearanceSettings } from "../../../../modules/platform-settings/s
 import type PlatformSettingsModuleService from "../../../../modules/platform-settings/service"
 import { SEO_SITEMAPS_MODULE } from "../../../../modules/seo-sitemaps"
 import type SeoSitemapsModuleService from "../../../../modules/seo-sitemaps/service"
+import { legalIdentity } from "../../../../workflows/legal/identity"
+import type { LegalIdentity } from "../../../../workflows/legal/identity"
 import { shopOf } from "../../../../workflows/seo/payload-sources"
+
+const identityOf = (identity: LegalIdentity) => ({
+  legalName: identity.company_title,
+  taxID: identity.tax_number,
+  address: identity.address,
+  email: identity.contact_email,
+  telephone: identity.contact_phone,
+  sameAs: identity.same_as,
+})
 
 /**
  * `GET /store/seo/site` (docs/13 §2.2, §5, §6): what the storefront's edge
@@ -15,12 +26,12 @@ import { shopOf } from "../../../../workflows/seo/payload-sources"
  * there), whether this instance may be indexed (if not, `X-Robots-Tag:
  * noindex` on every page), the IndexNow key to serve when the shop
  * announces its changes, and the home page's structured data, the shop
- * as an `OnlineStore` and its `WebSite`. No blocks until the canonical
+ * as an `OnlineStore` (with its legal identity, F13.9) and its `WebSite`. No blocks until the canonical
  * host is set: they need absolute URLs. And the robots value of the
  * storefront's own pages (search results, cart, account).
  */
 export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {
-  const shop = await shopOf(req.scope)
+  const [shop, identity] = await Promise.all([shopOf(req.scope), legalIdentity(req.scope)])
   const appearance = (await req.scope
     .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
     .getSection("appearance")) as unknown as AppearanceSettings
@@ -37,7 +48,9 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
     indexnow_key: announcing
       ? await req.scope.resolve<SeoSitemapsModuleService>(SEO_SITEMAPS_MODULE).indexNowKey()
       : null,
-    jsonLd: url ? siteJsonLd({ name: shop.name, url, logo: appearance.logo_light_url }) : [],
+    jsonLd: url
+      ? siteJsonLd({ name: shop.name, url, logo: appearance.logo_light_url }, identityOf(identity))
+      : [],
     system_pages: SYSTEM_PAGES,
   })
 }

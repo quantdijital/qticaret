@@ -20,6 +20,7 @@ import { sectionQuery, useSaveSection } from "@/features/settings/api/sections"
 import type { StoreSettings } from "@/features/settings/api/sections"
 import { storeQuery, useRenameStore } from "@/features/settings/api/store"
 import { errorText } from "@/lib/errors"
+import { LegalIdentityCard } from "@/features/settings/components/legal-identity-card"
 
 // The zones a Turkish shop meets first; the browser knows the rest
 const PREFERRED_ZONES = [
@@ -226,7 +227,7 @@ function RegionCard({ saved }: { saved: StoreSettings }) {
   )
 }
 
-/** Settings > Store: the shop's name and contact, its time zone and units. */
+/** Settings > Store: the shop's name and contact, its legal identity (F13.9), its time zone and units. */
 export function StorePage() {
   const { t } = useTranslation()
   const store = useQuery(storeQuery())
@@ -251,6 +252,11 @@ export function StorePage() {
             storeId={store.data.id}
             name={store.data.name}
             saved={section.data.values}
+          />
+          <LegalIdentityCard
+            hasContact={Boolean(
+              section.data.values.contact_email ?? section.data.values.contact_phone
+            )}
           />
           <RegionCard saved={section.data.values} />
         </>

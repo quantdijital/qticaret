@@ -9,6 +9,18 @@ export interface SectionResponse<T> {
   version: number
 }
 
+/** The shop's legal identity (F13.9): public, shown in the footer and the legal texts. */
+export interface LegalSettings {
+  company_title: string | null
+  mersis: string | null
+  tax_office: string | null
+  tax_number: string | null
+  address: string | null
+  kep: string | null
+  etbis: string | null
+  same_as: string[]
+}
+
 export interface StoreSettings {
   contact_email: string | null
   /** E.164; the server accepts Turkish forms and normalises them. */

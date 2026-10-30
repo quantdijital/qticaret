@@ -7,7 +7,8 @@ import { isCrawlable, parseRobots } from "./robots-match"
  */
 
 export const SEO_SETUP_ITEMS = [
-  "legal",
+  "legal_identity",
+  "legal_texts",
   "canonical_host",
   "robots",
   "share_image",
@@ -19,14 +20,16 @@ export type SeoSetupItem = (typeof SEO_SETUP_ITEMS)[number]
 
 /** Why an open item cannot be done from the panel yet. */
 export type SeoSetupBlock =
-  /** The legal details and policies screens come with F13. */
-  | "coming"
   /** The platform has no Google client in this environment. */
   | "google_platform"
   /** Search Console and Merchant Center need the Google account first. */
   | "google_account"
 
 export interface SeoSetupFacts {
+  /** The shop's legal identity is complete (F13.9). */
+  legalIdentity: boolean
+  /** The legal texts a shop must show are published (F13.1). */
+  legalTexts: boolean
   canonicalHost: string | null
   robotsTxt: string
   shareImage: string | null
@@ -60,8 +63,8 @@ const googleBlock = (google: SeoSetupFacts["google"]): SeoSetupBlock | null =>
 
 export function seoSetup(facts: SeoSetupFacts): SeoSetupEntry[] {
   const done: Record<SeoSetupItem, boolean> = {
-    // Nothing records the legal details before F13
-    legal: false,
+    legal_identity: facts.legalIdentity,
+    legal_texts: facts.legalTexts,
     canonical_host: facts.canonicalHost !== null,
     robots: robotsOpen(facts.robotsTxt),
     share_image: facts.shareImage !== null,
@@ -74,11 +77,11 @@ export function seoSetup(facts: SeoSetupFacts): SeoSetupEntry[] {
       return null
     }
     switch (key) {
-      case "legal":
-        return "coming"
       case "search_console":
       case "merchant":
         return googleBlock(facts.google)
+      case "legal_identity":
+      case "legal_texts":
       case "canonical_host":
       case "robots":
       case "share_image":
@@ -89,8 +92,6 @@ export function seoSetup(facts: SeoSetupFacts): SeoSetupEntry[] {
   return SEO_SETUP_ITEMS.map((key) => ({ key, done: done[key], blocked: blocked(key) }))
 }
 
-/** Open items the shop can take on now: not waiting for a later phase or the platform. */
+/** Open items the shop can take on now: not waiting for the platform. */
 export const actionableCount = (entries: readonly SeoSetupEntry[]): number =>
-  entries.filter(
-    (entry) => !entry.done && entry.blocked !== "coming" && entry.blocked !== "google_platform"
-  ).length
+  entries.filter((entry) => !entry.done && entry.blocked !== "google_platform").length

@@ -3,6 +3,8 @@ import { robotsOpen, seoSetup } from "../setup-checklist"
 import type { SeoSetupFacts } from "../setup-checklist"
 
 const FRESH: SeoSetupFacts = {
+  legalIdentity: false,
+  legalTexts: false,
   canonicalHost: null,
   robotsTxt: DEFAULT_ROBOTS_TXT,
   shareImage: null,
@@ -18,7 +20,8 @@ const open = (facts: SeoSetupFacts) =>
 describe("seoSetup", () => {
   it("leaves a new shop's robots done and says what holds the rest", () => {
     expect(open(FRESH)).toEqual([
-      ["legal", "coming"],
+      ["legal_identity", null],
+      ["legal_texts", null],
       ["canonical_host", null],
       ["share_image", null],
       ["search_console", "google_account"],
@@ -34,13 +37,15 @@ describe("seoSetup", () => {
   it("drops each item once it is done", () => {
     expect(
       open({
+        legalIdentity: true,
+        legalTexts: true,
         canonicalHost: "magaza.com.tr",
         robotsTxt: DEFAULT_ROBOTS_TXT,
         shareImage: "https://cdn.magaza.com.tr/paylasim.jpg",
         google: { platform: true, connected: true, searchConsole: true, merchant: true },
         indexNow: true,
       })
-    ).toEqual([["legal", "coming"]])
+    ).toEqual([])
   })
 })
 

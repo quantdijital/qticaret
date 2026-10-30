@@ -11,11 +11,17 @@ import type { SeoSetupEntry, SeoSetupItem } from "@/features/seo/api/setup"
 
 const C = "seo.setup"
 
-// Where each item is done; the legal details come with their own screen (F13)
+// Where each item is done
 const WHERE: Record<
-  Exclude<SeoSetupItem, "legal">,
-  "/settings/seo" | "/settings/marketing" | "/settings/features"
+  SeoSetupItem,
+  | "/settings/store"
+  | "/settings/legal"
+  | "/settings/seo"
+  | "/settings/marketing"
+  | "/settings/features"
 > = {
+  legal_identity: "/settings/store",
+  legal_texts: "/settings/legal",
   canonical_host: "/settings/seo",
   robots: "/settings/seo",
   share_image: "/settings/seo",
@@ -26,7 +32,7 @@ const WHERE: Record<
 
 function Item({ entry, mayAct }: { entry: SeoSetupEntry; mayAct: boolean }) {
   const { t } = useTranslation()
-  const where = entry.key === "legal" ? null : WHERE[entry.key]
+  const where = WHERE[entry.key]
   return (
     <li className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t px-5 py-3">
       <CircleDashed className="size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
@@ -37,7 +43,7 @@ function Item({ entry, mayAct }: { entry: SeoSetupEntry; mayAct: boolean }) {
         </span>
       </div>
       {/* Google's items open where its account is connected, even while that is the step */}
-      {where && mayAct && entry.blocked !== "google_platform" ? (
+      {mayAct && entry.blocked !== "google_platform" ? (
         <Button asChild variant="outline" size="sm" className="ml-8 shrink-0 sm:ml-0">
           <Link to={where}>
             {t(`${C}.go`)}

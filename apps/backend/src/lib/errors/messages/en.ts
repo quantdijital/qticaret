@@ -449,6 +449,11 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "platform_settings.feature_unknown": "There is no such feature.",
   "platform_settings.host_invalid": "Enter the domain without https:// or a path, e.g. shop.com.",
   "platform_settings.invalid": "The value is not valid.",
+  "platform_settings.mersis_invalid": "A MERSİS number is 16 digits.",
+  "platform_settings.tax_number_invalid":
+    "Enter a valid tax number (10 digits) or Turkish ID number (11 digits).",
+  "platform_settings.kep_invalid": "Enter a valid KEP address, e.g. title@hs01.kep.tr.",
+  "platform_settings.etbis_invalid": "An ETBİS registration number is letters, digits and dashes.",
   "platform_settings.phone_invalid": "Enter a valid Turkish phone number.",
   "platform_settings.robots_invalid":
     "robots.txt may only hold User-agent, Allow, Disallow, Sitemap, Crawl-delay lines and comments.",

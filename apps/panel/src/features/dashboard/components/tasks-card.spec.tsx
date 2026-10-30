@@ -36,6 +36,7 @@ const tasks = (more: Partial<DashboardTasks> = {}): DashboardTasks => ({
   accounting_stopped: null,
   webhooks_disabled: null,
   seo_setup_open: 0,
+  legal_identity_missing: 0,
   capped: false,
   ...more,
 })
@@ -70,9 +71,17 @@ describe("TasksCard", () => {
   })
 
   it("counts refused accounting records, turned-off hooks and SEO setup for those who can set them right", async () => {
-    renderCard(tasks({ accounting_stopped: 3, webhooks_disabled: 1, seo_setup_open: 2 }))
+    renderCard(
+      tasks({
+        accounting_stopped: 3,
+        webhooks_disabled: 1,
+        seo_setup_open: 2,
+        legal_identity_missing: 1,
+      })
+    )
 
     expect(await hrefOf("Aktarılamayan muhasebe kayıtları")).toBe("/settings/accounting")
+    expect(await hrefOf("Mağaza künyesi eksik")).toBe("/settings/store")
     expect(await hrefOf("Durdurulan webhook'lar")).toBe("/settings/api")
     expect(await hrefOf("SEO kurulumunda eksik")).toBe("/seo")
   })

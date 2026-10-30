@@ -21,6 +21,18 @@ export type LegalKind = (typeof LEGAL_KINDS)[number]
 export const isLegalKind = (value: string): value is LegalKind =>
   (LEGAL_KINDS as readonly string[]).includes(value)
 
+/**
+ * What a web shop must have published before it sells (adr/0041 §1): the
+ * contracts of an order, the privacy notice and the return policy. The
+ * SEO setup checklist asks for them too.
+ */
+export const REQUIRED_KINDS: readonly LegalKind[] = [
+  "distance_sales",
+  "pre_information",
+  "privacy_notice",
+  "return_policy",
+]
+
 /** The contracts made with an order: their copy is kept with it, filled with the order (F13.2). */
 export const ORDER_KINDS: ReadonlySet<LegalKind> = new Set(["pre_information", "distance_sales"])
 

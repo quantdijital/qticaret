@@ -193,6 +193,10 @@
       "seoSetup": {
         "label": "SEO setup to finish",
         "hint": "Steps left for search engines"
+      },
+      "legalIdentity": {
+        "label": "Legal identity incomplete",
+        "hint": "Required details missing"
       }
     },
     "recent": {
@@ -343,6 +347,32 @@
         "kg": "Kilogram (kg)",
         "cm": "Centimetre (cm)",
         "mm": "Millimetre (mm)"
+      },
+      "legal": {
+        "title": "Legal identity",
+        "hint": "What the law asks a web shop to show. Used in the shop's footer, the structured data given to search engines and the legal texts.",
+        "missing": "Missing: {{fields}}.",
+        "gaps": {
+          "company_title": "company title",
+          "address": "address",
+          "tax_office": "tax office",
+          "tax_number": "tax number",
+          "contact": "contact e-mail or phone (the card above)"
+        },
+        "fields": {
+          "company_title": "Company title",
+          "tax_office": "Tax office",
+          "tax_number": "Tax number or Turkish ID number",
+          "address": "Full address",
+          "mersis": "MERSİS number",
+          "kep": "KEP address",
+          "etbis": "ETBİS registration number",
+          "same_as": "Social media accounts"
+        },
+        "taxNumberHint": "A company's 10-digit tax number; a sole trader's 11-digit Turkish ID number.",
+        "mersisHint": "16 digits. Leave empty if a sole trader has none.",
+        "etbisHint": "The number given after registering with the Electronic Commerce Information System.",
+        "sameAsHint": "One https address per line; up to 10."
       }
     },
     "seo": {
@@ -4271,14 +4301,17 @@
       "progress": "{{done}}/{{total}} done",
       "go": "Finish",
       "blocked": {
-        "coming": "The legal details and policies screen is coming; nothing to do yet.",
         "google_platform": "Google is not enabled in this environment yet; the platform team will enable it.",
         "google_account": "Connect your Google account first; this step is then finished on the same screen."
       },
       "items": {
-        "legal": {
-          "title": "Legal details and policies",
-          "hint": "Company details, return and shipping policy."
+        "legal_identity": {
+          "title": "Legal identity",
+          "hint": "Company title, address and tax details; shown in the footer and the structured data."
+        },
+        "legal_texts": {
+          "title": "Required legal texts",
+          "hint": "The distance sales contract, pre-information form, privacy notice and return policy must be published."
         },
         "canonical_host": {
           "title": "Shop domain",

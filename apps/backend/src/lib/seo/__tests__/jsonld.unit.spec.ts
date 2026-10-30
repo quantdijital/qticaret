@@ -250,4 +250,26 @@ describe("listing, breadcrumb and site blocks", () => {
     })
     expect(site).not.toHaveProperty("potentialAction")
   })
+
+  it("names the shop's legal identity where it is given (F13.9)", () => {
+    const [store] = siteJsonLd(
+      { name: "Demo Mağaza", url: "https://magaza.example.com/", logo: null },
+      {
+        legalName: "Demo Ticaret Ltd. Şti.",
+        taxID: "1234567890",
+        address: "Örnek Mah. 1. Sok. No: 2, Kadıköy / İstanbul",
+        email: "destek@magaza.example.com",
+        telephone: null,
+        sameAs: ["https://instagram.com/demo"],
+      }
+    )
+    expect(store).toMatchObject({
+      legalName: "Demo Ticaret Ltd. Şti.",
+      taxID: "1234567890",
+      address: { "@type": "PostalAddress", addressCountry: "TR" },
+      email: "destek@magaza.example.com",
+      sameAs: ["https://instagram.com/demo"],
+    })
+    expect(store).not.toHaveProperty("telephone")
+  })
 })

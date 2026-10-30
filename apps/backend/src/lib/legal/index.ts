@@ -1,4 +1,6 @@
 export { MISSING_VALUE, fillLegalDoc } from "./fill"
+export { IDENTITY_FIELDS, identityGaps } from "./identity"
+export type { IdentityFacts, IdentityField } from "./identity"
 export type { LegalValues } from "./fill"
 export { starterOf } from "./starters"
 export {
@@ -6,6 +8,7 @@ export {
   LEGAL_KINDS,
   ORDER_KINDS,
   ORDER_TOKENS,
+  REQUIRED_KINDS,
   SHOP_TOKENS,
   checkLegalDoc,
   isLegalKind,
