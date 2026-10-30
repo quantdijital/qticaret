@@ -26,7 +26,7 @@ export async function GET(
         skip: offset,
         take: limit,
         order: { created_at: "DESC" },
-        select: ["id", "rating", "title", "body", "author_name", "created_at"],
+        select: ["id", "rating", "title", "body", "author_name", "origin", "created_at"],
       }
     ),
     reviews.ratingsOf([productId]),
@@ -40,8 +40,8 @@ export async function GET(
       body: row.body,
       author_name: row.author_name,
       created_at: row.created_at,
-      // Only a customer who received the product writes one
-      verified_purchase: true,
+      // Only a customer who received the product writes one here; one migrated was not checked here
+      verified_purchase: row.origin === "storefront",
     })),
     count,
     offset,

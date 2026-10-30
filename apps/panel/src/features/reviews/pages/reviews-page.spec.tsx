@@ -26,6 +26,7 @@ const row = (id: string, more: Partial<ReviewRow> = {}): ReviewRow => ({
   author_name: "Ayşe Y.",
   customer_id: "cus_1",
   order_id: "order_1",
+  origin: "storefront",
   status: "pending",
   has_link: false,
   reject_reason: null,

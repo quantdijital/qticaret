@@ -24,6 +24,10 @@ export interface ConsentInput {
   /** The staff member, when the panel changed it. */
   changed_by?: string | null
   evidence?: ConsentEvidence | null
+  /** When it was given, for one recorded elsewhere first (a migration, F14); else now. */
+  given_at?: Date | null
+  /** Only for an address without an answer yet: an old record never overrides a newer one. */
+  only_new?: boolean
 }
 
 export interface SuppressionInput {

@@ -186,10 +186,10 @@ export class ConsentRecords extends MedusaService({
       { take: 1 },
       sharedContext
     )
-    if (row?.status === input.status) {
+    if (row && (input.only_new || row.status === input.status)) {
       return { id: row.id, changed: false }
     }
-    const now = new Date()
+    const now = input.given_at ?? new Date()
     const values = {
       status: input.status,
       source: input.source,

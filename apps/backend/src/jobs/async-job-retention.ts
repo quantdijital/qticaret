@@ -9,8 +9,9 @@ const BATCH = 500
 // A run handles this many batches; the rest waits for the next day
 const MAX_BATCHES = 20
 
-// An import's sheet goes when its run ends; a run that never ended (a crash,
-// the sweeper failing it) leaves it: one failed in the last days is cleared
+// An import's sheet (a migration's file: customers too) goes when its run
+// ends; a run that never ended (a crash, the sweeper failing it) or one
+// cancelled while queued leaves it: one in the last days is cleared
 const SHEET_WINDOW_MS = 3 * 24 * 60 * 60 * 1000
 
 async function deleteStaleSheets(
@@ -19,7 +20,7 @@ async function deleteStaleSheets(
 ): Promise<number> {
   const jobs = await service.listAsyncJobs(
     {
-      type: "catalog.import",
+      type: ["catalog.import", "migration.run"],
       status: ["failed", "cancelled"],
       created_at: { $gt: new Date(Date.now() - SHEET_WINDOW_MS) },
     },

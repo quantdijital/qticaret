@@ -80,6 +80,8 @@ const OWNER_ONLY: readonly Rule[] = [
   { methods: ["DELETE"], path: "/admin/google" },
   // Where shoppers' transfers go
   { methods: WRITES, path: "/admin/platform-settings/bank_transfer" },
+  // A shop's data moved in from its old platform, its customers too (F14, adr/0042 §9)
+  { methods: "*", path: "/admin/migrations*" },
   // Whether the team must pass 2FA (adr/0040)
   { methods: WRITES, path: "/admin/platform-settings/security" },
   // The shop's people

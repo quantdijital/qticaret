@@ -13,6 +13,8 @@ import { LEGAL_MODULE } from "../../../modules/legal"
 import type LegalModuleService from "../../../modules/legal/service"
 import { MESSAGING_MODULE } from "../../../modules/messaging"
 import type MessagingModuleService from "../../../modules/messaging/service"
+import { MIGRATION_MODULE } from "../../../modules/migration"
+import type MigrationModuleService from "../../../modules/migration/service"
 import { PRODUCT_QA_MODULE } from "../../../modules/product-qa"
 import type ProductQaModuleService from "../../../modules/product-qa/service"
 import { PRODUCT_REVIEWS_MODULE } from "../../../modules/product-reviews"
@@ -143,6 +145,28 @@ async function eraseContributions(container: Container, customerId: string) {
   await saved.deleteWishlistItems(kept.map((row) => row.id))
 }
 
+/**
+ * Their orders from the shop's old platform (F14, adr/0042 §4), by their
+ * account or an e-mail of theirs (a guest's there): the e-mail goes;
+ * amounts and lines stay, as an order's do.
+ */
+async function eraseLegacyOrders(container: Container, customerId: string, addresses: string[]) {
+  const migration = container.resolve<MigrationModuleService>(MIGRATION_MODULE)
+  const [byCustomer, byAddress] = await Promise.all([
+    migration.listLegacyOrders({ customer_id: customerId }, { select: ["id"] }),
+    addresses.length
+      ? migration.listLegacyOrders(
+          { email: addresses.map((address) => address.trim().toLowerCase()) },
+          { select: ["id"] }
+        )
+      : [],
+  ])
+  const ids = [...new Set([...byCustomer, ...byAddress].map((row) => row.id))]
+  if (ids.length > 0) {
+    await migration.updateLegacyOrders(ids.map((id) => ({ id, email: erasedEmail(customerId) })))
+  }
+}
+
 /** Copies of the customer's data made for an earlier request: their files go now, not in a week. */
 async function eraseExports(container: Container, customerId: string) {
   const jobs = container.resolve<AsyncJobModuleService>(ASYNC_JOB_MODULE)
@@ -165,8 +189,8 @@ async function eraseExports(container: Container, customerId: string) {
 
 /**
  * The customer's traces beside their orders (adr/0041 §6): carts, messages,
- * reviews and questions, stock alerts, saved products, earlier copies of
- * their data. `addresses` are the
+ * reviews and questions, stock alerts, saved products, orders from the
+ * old platform, earlier copies of their data. `addresses` are the
  * e-mails messages went to (a guest's before an account). Run again, it
  * changes nothing more.
  */
@@ -174,6 +198,7 @@ export async function eraseTraces(container: Container, customerId: string, addr
   const carts = await eraseCarts(container, customerId)
   const messages = await eraseMessages(container, customerId, addresses)
   await eraseContributions(container, customerId)
+  await eraseLegacyOrders(container, customerId, addresses)
   await eraseExports(container, customerId)
   return { carts, messages }
 }

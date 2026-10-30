@@ -702,4 +702,19 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "payments.max_installment_invalid": "The most installments is 2 to 12 (0: what PayTR allows).",
   "payments.installments_unknown": "No product or cart found for the installment table.",
   "payments.installments_target": "Give a cart, or a product and a region, for installments.",
+  // F14 (adr/0042): moving a shop from its old platform
+  "migration.bundle_invalid":
+    "The migration file could not be read or is not in the format; the field is named.",
+  "migration.email_invalid": "The e-mail address is not valid; the customer was not moved.",
+  "migration.product_not_written": "The product could not be written; see the Products sheet.",
+  "migration.review_product_missing":
+    "The review's product did not move, so the review did not either.",
+  "migration.review_duplicate":
+    "This customer already reviewed this product; the second review did not move.",
+  "migration.parcel_incomplete":
+    "The default parcel takes its weight, length, width and height together.",
+  "migration.product_parcel_defaulted":
+    "The source had no measurements; the default parcel was used.",
+  "migration.product_drafted_no_parcel":
+    "No weight or measurements; brought in as a draft. Add them and publish.",
 }

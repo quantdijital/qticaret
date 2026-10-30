@@ -15,6 +15,7 @@ describe("job types", () => {
       "catalog.export",
       "catalog.import",
       "customer.data_export",
+      "migration.run",
       "promotion.codes",
       "report.export",
       "seo.audit",
@@ -53,7 +54,11 @@ describe("job types", () => {
     expect(type).toMatchObject({ singleton: true, containsPersonalData: false, resultTtlDays: 7 })
     expect(type?.internal).toBeUndefined()
     // Never beside an import: both write products
-    expect(exclusiveTypes("catalog.bulk_edit")).toEqual(["catalog.bulk_edit", "catalog.import"])
+    expect(exclusiveTypes("catalog.bulk_edit")).toEqual([
+      "catalog.bulk_edit",
+      "catalog.import",
+      "migration.run",
+    ])
     expect(queueLockKey("catalog.import")).toBe(queueLockKey("catalog.bulk_edit"))
     expect(exclusiveTypes("seo.audit")).toEqual(["seo.audit"])
     expect(

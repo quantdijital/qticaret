@@ -35,6 +35,7 @@ import { CORE_RETURN_ROUTES } from "./http/core-return-routes"
 import { GOOGLE_ROUTES } from "./http/google-routes"
 import { EINVOICE_ROUTES } from "./http/einvoice-routes"
 import { INVOICE_ROUTES } from "./http/invoice-routes"
+import { MIGRATION_ROUTES } from "./http/migration-routes"
 import { MARKETING_ROUTES } from "./http/marketing-routes"
 import { ORDER_EDIT_ROUTES } from "./http/order-edit-routes"
 import { RETURN_ROUTES } from "./http/return-routes"
@@ -262,6 +263,7 @@ export default defineMiddlewares({
     ...CONTENT_DRAFT_ROUTES,
     // F3.9: product sheets
     ...CATALOG_SHEET_ROUTES,
+    ...MIGRATION_ROUTES,
     // F3.7: warehouses
     ...STOCK_ROUTES,
     // F3.3: product images

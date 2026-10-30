@@ -21,6 +21,20 @@ export interface ReviewInput {
   has_link: boolean
 }
 
+/** A review the shop's old platform showed (F14), as it was. */
+export interface MigratedReview {
+  product_id: string
+  customer_id: string | null
+  rating: number
+  title: string | null
+  body: string
+  author_name: string
+  has_link: boolean
+  /** Shown on the old site: approved here; one waiting there waits here. */
+  published: boolean
+  created_at: Date
+}
+
 export interface Rating {
   average: number
   count: number
@@ -52,6 +66,8 @@ class ProductReviewsModuleService extends MedusaService({ ProductReview, Product
     )
     const values = {
       ...input,
+      // One migrated, written again here, is now the purchase verified here
+      origin: "storefront" as const,
       status: "pending" as const,
       reject_reason: null,
       moderated_by: null,
@@ -120,6 +136,43 @@ class ProductReviewsModuleService extends MedusaService({ ProductReview, Product
       await this.recountRating_(productId, sharedContext)
     }
     return { products, changed }
+  }
+
+  /**
+   * Reviews brought from the shop's old platform (F14, adr/0042), dated as
+   * they were written; the stars of the products they touch summed again.
+   */
+  @InjectTransactionManager()
+  async addMigratedReviews(
+    reviews: readonly MigratedReview[],
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<string[]> {
+    if (reviews.length === 0) {
+      return []
+    }
+    const created = await this.createProductReviews(
+      reviews.map((review) => ({
+        product_id: review.product_id,
+        customer_id: review.customer_id,
+        order_id: null,
+        rating: review.rating,
+        title: review.title,
+        body: review.body,
+        author_name: review.author_name,
+        has_link: review.has_link,
+        origin: "migration" as const,
+        status: review.published ? ("approved" as const) : ("pending" as const),
+        created_at: review.created_at,
+      })),
+      sharedContext
+    )
+    const touched = new Set(
+      reviews.filter((review) => review.published).map((review) => review.product_id)
+    )
+    for (const productId of touched) {
+      await this.recountRating_(productId, sharedContext)
+    }
+    return created.map((review) => review.id)
   }
 
   /** Each product's average and count of approved reviews; none for a product without one. */

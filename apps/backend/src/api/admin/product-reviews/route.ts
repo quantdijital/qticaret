@@ -38,6 +38,7 @@ export async function GET(
       author_name: row.author_name,
       customer_id: row.customer_id,
       order_id: row.order_id,
+      origin: row.origin,
       status: row.status,
       has_link: row.has_link,
       reject_reason: row.reject_reason,

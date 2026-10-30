@@ -11,8 +11,10 @@ export interface ReviewRow {
   title: string | null
   body: string
   author_name: string
-  customer_id: string
-  order_id: string
+  /** None for one migrated whose author did not move (F14). */
+  customer_id: string | null
+  order_id: string | null
+  origin: "storefront" | "migration"
   status: ReviewStatus
   has_link: boolean
   reject_reason: string | null

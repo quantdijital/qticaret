@@ -60,6 +60,9 @@ describe("staff roles", () => {
     ["POST", "/admin/staff/members/user_1"],
     ["DELETE", "/admin/staff/members/user_1"],
     ["POST", "/admin/staff/invites"],
+    ["POST", "/admin/migrations"],
+    ["GET", "/admin/migrations"],
+    ["POST", "/admin/%6digrations"],
   ] as const)("keeps %s %s the owner's alone", (method, path) => {
     expect(decide("admin", method, path)).toEqual({ allowed: false, reason: "owner_only" })
   })
@@ -235,6 +238,7 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "DELETE /admin/brands/:id": false,
   "POST /admin/brands": false,
   "POST /admin/catalog/imports": false,
+  "POST /admin/migrations": false,
   "POST /admin/chargebacks/:id": false,
   "POST /admin/chargebacks": false,
   "POST /admin/content-drafts/:id/approve": false,

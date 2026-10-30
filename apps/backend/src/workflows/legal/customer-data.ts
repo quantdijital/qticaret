@@ -10,6 +10,8 @@ import { PRODUCT_QA_MODULE } from "../../modules/product-qa"
 import type ProductQaModuleService from "../../modules/product-qa/service"
 import { PRODUCT_REVIEWS_MODULE } from "../../modules/product-reviews"
 import type ProductReviewsModuleService from "../../modules/product-reviews/service"
+import { MIGRATION_MODULE } from "../../modules/migration"
+import type MigrationModuleService from "../../modules/migration/service"
 import { RETURN_REQUESTS_MODULE } from "../../modules/return-requests"
 import type ReturnRequestsModuleService from "../../modules/return-requests/service"
 import { WISHLIST_MODULE } from "../../modules/wishlist"
@@ -94,7 +96,7 @@ export async function customerData(container: Container, customerId: string) {
   const orderIds = (orders as { id: string }[]).map((order) => order.id)
   const legal = container.resolve<LegalModuleService>(LEGAL_MODULE)
   const byCustomer = { customer_id: customerId }
-  const [consents, legalConsents, returns, reviews, questions, alerts, saved, sent] =
+  const [consents, legalConsents, returns, reviews, questions, alerts, saved, sent, legacy] =
     await Promise.all([
       container.resolve<MessagingModuleService>(MESSAGING_MODULE).listMessageConsents(byCustomer, {
         select: ["channel", "status", "recipient_masked", "updated_at"],
@@ -130,6 +132,9 @@ export async function customerData(container: Container, customerId: string) {
           filters: { receiver_id: customerId },
         })
         .then(({ data }) => data as Record<string, unknown>[]),
+      container.resolve<MigrationModuleService>(MIGRATION_MODULE).listLegacyOrders(byCustomer, {
+        select: ["number", "placed_at", "currency_code", "total", "status", "email", "lines"],
+      }),
     ])
   const { addresses, billing_profile: billing, ...profile } = customer
   return {
@@ -138,6 +143,7 @@ export async function customerData(container: Container, customerId: string) {
     adresler: addresses ?? [],
     fatura_bilgisi: billing ?? null,
     siparişler: orders,
+    önceki_platform_siparişleri: legacy.map((order) => ({ ...order, lines: order.lines["lines"] })),
     ileti_izinleri: consents,
     sözleşme_onayları: legalConsents.map((consent) => ({
       sipariş: consent.order_id,

@@ -708,4 +708,17 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "En çok taksit 2 ile 12 arasında olmalı (0: PayTR'nin izin verdiği en çok).",
   "payments.installments_unknown": "Taksit tablosu için ürün ya da sepet bulunamadı.",
   "payments.installments_target": "Taksit için ya sepet ya da ürün ve bölge verin.",
+  // F14 (adr/0042): moving a shop from its old platform
+  "migration.bundle_invalid":
+    "Taşıma dosyası okunamadı ya da biçimi uymuyor; sorunlu alan belirtildi.",
+  "migration.email_invalid": "E-posta adresi geçersiz; müşteri taşınmadı.",
+  "migration.product_not_written": "Ürün yazılamadı; ayrıntı Ürünler sayfasında.",
+  "migration.review_product_missing": "Yorumun ürünü taşınmadı; yorum da taşınmadı.",
+  "migration.review_duplicate": "Bu müşterinin bu ürüne yorumu zaten var; ikinci yorum taşınmadı.",
+  "migration.parcel_incomplete":
+    "Varsayılan paket için ağırlık, uzunluk, genişlik ve yüksekliğin dördü birlikte verilmeli.",
+  "migration.product_parcel_defaulted":
+    "Ürünün ölçüsü kaynakta yoktu; varsayılan paket ölçüsü kullanıldı.",
+  "migration.product_drafted_no_parcel":
+    "Ürünün ağırlığı ya da ölçüleri yok; taslak olarak alındı. Ölçüleri girip yayınlayın.",
 }

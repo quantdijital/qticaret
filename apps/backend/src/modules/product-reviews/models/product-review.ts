@@ -3,15 +3,19 @@ import { model } from "@medusajs/framework/utils"
 /**
  * A customer's review of a product they received (F10.6, adr/0037 §4).
  * Every review waits for the shop before the storefront shows it; a
- * changed one waits again. One per customer and product.
+ * changed one waits again. One per customer and product. One brought
+ * from the shop's old platform (F14, adr/0042) has no order here, and a
+ * customer only when its author moved too: it is not a purchase verified
+ * here, and the storefront says so.
  */
 export const ProductReview = model
   .define("product_review", {
     id: model.id({ prefix: "prev" }).primaryKey(),
     product_id: model.text(),
-    customer_id: model.text(),
-    /** The order the product was received with: the proof of purchase. */
-    order_id: model.text(),
+    customer_id: model.text().nullable(),
+    /** The order the product was received with: the proof of purchase; none for one migrated. */
+    order_id: model.text().nullable(),
+    origin: model.enum(["storefront", "migration"]).default("storefront"),
     /** 1 to 5. */
     rating: model.number(),
     title: model.text().nullable(),
