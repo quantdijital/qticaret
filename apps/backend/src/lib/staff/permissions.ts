@@ -275,6 +275,8 @@ const CAPABILITY_PROBES = {
   taxId: ["POST", "/admin/customers/:id/billing-profile/reveal"],
   // F13.5: recording and answering a customer's KVKK requests
   privacy: ["POST", "/admin/customers/:id/privacy-requests"],
+  // F8: an invoice's PDF, the buyer and their tax id on it
+  invoices: ["GET", "/admin/invoices/:id/pdf"],
 } as const satisfies Record<string, readonly [Method, string]>
 
 export type Capability = keyof typeof CAPABILITY_PROBES

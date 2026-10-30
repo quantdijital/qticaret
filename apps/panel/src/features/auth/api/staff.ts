@@ -20,6 +20,7 @@ export type Capability =
   | "audit"
   | "taxId"
   | "privacy"
+  | "invoices"
 
 export interface StaffMe {
   user_id: string

@@ -145,3 +145,21 @@ UBL-TR yazıcısı, GİB XSD doğrulaması, entegratörün toplu listesinden bes
 - F7 KK3 (iade faturası) mali müşavir cevabından sonra kapanır.
 - Paraşüt'ten platform istemcisi istenecek (docs/12 satırı). Yetki kodu akışının platform istemcisine açılıp açılmadığı da sorulacak.
 - Fatura kayıtları F11 muhasebe aktarımına ve raporlara kaynak olur.
+
+## Uygulama notları (F8, 2026-10-30)
+
+- Fatura kaydı, kuyruğu ve servis üç katmanda: kuyruk (`queue.ts`), kayıt işlemleri (`records.ts`: geri yazma, PDF, yeniden deneme, iptal isteği), Paraşüt bağlantısı (`service.ts`).
+- Fatura, açıldığı Paraşüt firmasının numarasını taşır (`company_id`); bağlı firma değişirse o fatura başka firmada izlenmez ve iptal edilmez, personel bakar.
+- Paraşüt sayacı sabit 10 saniyelik pencerede 5 istektir: iki pencere arka arkaya gelse de kayan 10 saniyede 10'u geçmez (Paraşüt'ün sayma biçimi belgelenmemiş). Dakikada yaklaşık 3 fatura.
+- Sipariş iptali faturaya "iptal istendi" işareti koyar; Paraşüt'le fatura başına konuşan tek yer olan iş onu geri alır (§10). İş ayrıca siparişin iptal edildiğini her adımda kendisi de görür; saat başı tarama kaçan iptalleri de yakalar.
+- Müşteriye `order.invoiced` e-postası gider; PDF eklenmez, sipariş sayfasından indirilir (`GET /store/orders/:id/invoice/pdf`).
+
+## Kapanış güvenlik incelemesi (2026-10-30)
+
+Üç bağımsız inceleme (bağlantı ve istemci; kesme akışı; geri yazma ve panel): 1 yüksek, 8 orta, 15 düşük.
+
+- **Yüksek:** Paraşüt'ün yaptığı ama yanıtı okunamayan bir yazma (geçersiz ya da çok büyük yanıt) yeniden gönderiliyordu. Artık yalnızca kesin ret yeniden denenir; sonucu belirsiz her yazma personel için durur. Yazmaların yanıtından yalnızca yeni kimlik okunur.
+- **Orta (hepsi düzeltildi):** müşteri ve posta kutusu yalnızca birebir eşleşmeyle alınır; fatura firmasına bağlandı; kira her yazmadan önce yenilenir ve kira kaybolsa da Paraşüt'teki fatura sahiplenilir; test modunda ödenmiş siparişe fatura kesilmez; iptal edilmiş sipariş faturadan önce görülür ve tarama kaçanı yakalar; içerik (alıcı, vergi no) yalnızca bekleyen fatura için verilir ve personel yeniden doğrulanır; reddedilen PDF depoda kalmaz.
+- **Düşük (düzeltildi):** PDF yalnızca Paraşüt alan adlarından; platform istemcisi reddi mağaza bağlantılarını koparmaz; yanıtı kaybolan jeton yenilemesi adlandırılır; hata kodları HTTP durumundan; panel PDF yüklemesi CSRF'ten geçer (yalnızca o yol, yalnızca PDF); dosya adı süzülür; PDF operasyon ve salt okunur rollere kapalı; kesim tarihi sınırlı ve numaradaki yılla aynı; PDF yüklemesi kilitli; iptali istenen siparişe e-belge başlatılmaz ve "faturanız hazır" gitmez; geç kalınan iptalde numara saklanır; geri alınamayan kesilmiş fatura iade belgesine bırakılır; bir faturanın beklenmeyen hatası işi durdurmaz; dış programa geri çekilen fatura bildirilir (`invoice.withdrawn`).
+- **Sonraya:** numara tekilliği bütün sağlayıcılar için ortak (bir mağaza programını değiştirirse çakışabilir); vergi numarası açılışının müşteri bazındaki denetim kaydı "sistem" diye yazılır (uç düzeyindeki kayıt kişiyi adlandırır); `PARASUT_BASE_URL` yalnızca staging ve production'da reddedilir (diğer sahte sunucu adresleri gibi; dağıtımda `NODE_ENV` zorunlu, F16).
+

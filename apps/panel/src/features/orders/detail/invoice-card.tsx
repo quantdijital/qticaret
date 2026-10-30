@@ -8,6 +8,7 @@ import type { StatusTone } from "@/components/patterns/status-badge"
 import { StatusBadge } from "@/components/patterns/status-badge"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useCan } from "@/features/auth/api/staff"
 import { invoicePdfUrl, orderInvoicesQuery, useRetryInvoice } from "@/features/orders/api/invoices"
 import type { InvoiceRecord } from "@/features/orders/api/invoices"
 import { InvoiceEntryDialog } from "@/features/orders/detail/invoice-entry-dialog"
@@ -44,6 +45,8 @@ export function InvoiceCard({ orderId }: { orderId: string }) {
   const retry = useRetryInvoice()
   const [entry, setEntry] = useState<"full" | "pdf" | null>(null)
   const [opening, setOpening] = useState(false)
+  // The PDF names the buyer and their tax id: not for every role (adr/0034 §9)
+  const mayOpen = useCan("invoices")
   const invoice = query.data?.invoices.find((row) => row.kind === "sale") ?? null
   const fail = (failure: unknown) => toast.error(errorText(t, failure))
   const openPdf = async (id: string) => {
@@ -112,7 +115,7 @@ export function InvoiceCard({ orderId }: { orderId: string }) {
             </p>
           ) : null}
           <div className="grid gap-2 sm:grid-cols-2">
-            {invoice.has_pdf ? (
+            {invoice.has_pdf && mayOpen ? (
               <Button variant="outline" disabled={opening} onClick={() => void openPdf(invoice.id)}>
                 {opening ? <Loader2 className="animate-spin" /> : <FileDown />}
                 {t(`${V}.pdf`)}

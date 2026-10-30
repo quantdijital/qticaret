@@ -31,10 +31,14 @@ const invoice = (changes: Partial<InvoiceRecord>): InvoiceRecord => ({
   ...changes,
 })
 
-const renderCard = (row: InvoiceRecord | null) => {
+const renderCard = (row: InvoiceRecord | null, mayOpen = true) => {
   fetchMock.mockImplementation((url: string) =>
     Promise.resolve(
-      url === "/admin/invoices" ? { invoices: row ? [row] : [], count: row ? 1 : 0 } : {}
+      url === "/admin/invoices"
+        ? { invoices: row ? [row] : [], count: row ? 1 : 0 }
+        : url === "/admin/staff/me"
+          ? { role: mayOpen ? "owner" : "operations", can: { invoices: mayOpen } }
+          : {}
     )
   )
   return render(
@@ -60,7 +64,7 @@ describe("InvoiceCard", () => {
     )
     expect(await screen.findByText("SHT2026000000042")).toBeInTheDocument()
     expect(screen.getByText("e-Arşiv")).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: "PDF'i aç" })).toBeInTheDocument()
+    expect(await screen.findByRole("button", { name: "PDF'i aç" })).toBeInTheDocument()
     unmount()
 
     renderCard(invoice({ status: "failed", attempts: 1, last_error: "einvoice.outcome_unknown" }))
@@ -72,6 +76,15 @@ describe("InvoiceCard", () => {
         body: {},
       })
     })
+  })
+
+  it("offers the PDF only to a role that may read it", async () => {
+    renderCard(invoice({ status: "issued", number: "SHT2026000000042", has_pdf: true }), false)
+    expect(await screen.findByText("SHT2026000000042")).toBeInTheDocument()
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith("/admin/staff/me")
+    })
+    expect(screen.queryByRole("button", { name: "PDF'i aç" })).not.toBeInTheDocument()
   })
 
   it("takes an invoice issued elsewhere by its GİB number, refusing another form", async () => {

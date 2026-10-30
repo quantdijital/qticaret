@@ -39,7 +39,13 @@ medusaIntegrationTestRunner({
       const preview = await get<Preview>(`${PATH}/order.placed/preview`)
 
       expect(list.status).toBe(200)
-      expect(list.data.templates).toHaveLength(21)
+      expect(list.data.templates).toHaveLength(22)
+      // The buyer's invoice is ready (F8)
+      expect(list.data.templates).toContainEqual({
+        name: "order.invoiced",
+        kind: "transactional",
+        channels: ["email"],
+      })
       expect(list.data.templates).toContainEqual({
         name: "marketing.announcement",
         kind: "commercial",

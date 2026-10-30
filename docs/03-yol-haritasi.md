@@ -305,11 +305,11 @@ Detay: `docs/entegrasyonlar/e-fatura.md`
 - F8.8 Fatura PDF'i bizde saklanır ve bizden sunulur (Paraşüt'ün ya da geri yazılan PDF; private depolama, kısa ömürlü erişim). _UBL'den kendi PDF şablonumuz sonraki aşama._
 
 **KK:**
-- [ ] Test ortamında bireysel (e-Arşiv) ve kurumsal (e-Fatura) fatura kesiliyor
-- [ ] Entegratör hata verirse sipariş akışı bozulmuyor, fatura "beklemede" kalıp retry ediliyor
-- [ ] Aynı sipariş için mükerrer fatura oluşmuyor
+- [x] Test ortamında bireysel (e-Arşiv) ve kurumsal (e-Fatura) fatura kesiliyor (sahte Paraşüt'le, E3; gerçek Paraşüt hesabıyla deneme sunucuya çıkışta)
+- [x] Entegratör hata verirse sipariş akışı bozulmuyor, fatura "beklemede" kalıp retry ediliyor (E3; `einvoice-issue.spec.ts`)
+- [x] Aynı sipariş için mükerrer fatura oluşmuyor (E1, E3, kapanış incelemesi; modül ve HTTP testleri)
 - [ ] Ürettiğimiz UBL-TR, entegratörün ve GİB test aracının şema doğrulamasından geçiyor (_kendi UBL'imizle birlikte sonraki aşama, ADR-0034_)
-- [ ] Mükellef listesi güncel; entegratör kapalıyken tip belirleme çalışıyor (testli) (_Paraşüt yolunda: Paraşüt kapalıyken fatura beklemede kalıp yeniden deneniyor, sipariş etkilenmiyor; ADR-0034_)
+- [ ] Mükellef listesi güncel; entegratör kapalıyken tip belirleme çalışıyor (testli) (_Paraşüt yolunda: Paraşüt kapalıyken fatura beklemede kalıp yeniden deneniyor, sipariş etkilenmiyor; ADR-0034_) — Paraşüt yolunda karşılandı (E3)
 
 ---
 

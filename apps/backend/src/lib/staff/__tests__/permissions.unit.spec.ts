@@ -181,6 +181,7 @@ describe("staff roles", () => {
       audit: true,
       taxId: true,
       privacy: true,
+      invoices: true,
     })
     expect(capabilitiesOf("admin")).toMatchObject({
       settings: true,
@@ -192,6 +193,7 @@ describe("staff roles", () => {
       audit: true,
       taxId: true,
       privacy: true,
+      invoices: true,
     })
     expect(capabilitiesOf("operations")).toEqual({
       settings: false,
@@ -209,6 +211,7 @@ describe("staff roles", () => {
       audit: false,
       taxId: false,
       privacy: false,
+      invoices: false,
     })
     expect(Object.values(capabilitiesOf("readonly")).every((can) => !can)).toBe(true)
     expect(Object.values(capabilitiesOf(null)).every((can) => !can)).toBe(true)
