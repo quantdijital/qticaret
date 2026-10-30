@@ -73,6 +73,17 @@ medusaIntegrationTestRunner({
       const othersTry = await settle(
         http.get(`/admin/async-jobs/${job.id}/result`, { headers: other.headers })
       )
+      // The job itself is the asker's too: whom the log was searched for shows to no one else
+      const ops = await createAdminUser(http, getContainer(), "operations")
+      const listed = async (headers: Record<string, string>) =>
+        (
+          await http.get<{ async_jobs: { id: string }[] }>("/admin/async-jobs", { headers })
+        ).data.async_jobs.map((each) => each.id)
+      const othersList = await listed(other.headers)
+      const opsList = await listed(ops.headers)
+      const othersOne = await settle(
+        http.get(`/admin/async-jobs/${job.id}`, { headers: other.headers })
+      )
       const { data: reads } = await http.get<{ audit_entries: { resource_id: string }[] }>(
         "/admin/audit-log?resource_type=async_job",
         { headers: admin.headers }
@@ -88,6 +99,10 @@ medusaIntegrationTestRunner({
       expect(csv).toContain(";sensitive_read;GET /admin/audit-log;")
       expect(reads.audit_entries.map((entry) => entry.resource_id)).toContain(job.id)
       expect(othersTry.status).toBe(404)
+      expect(othersList).not.toContain(job.id)
+      expect(opsList).not.toContain(job.id)
+      expect(othersOne.status).toBe(404)
+      expect(await listed(admin.headers)).toContain(job.id)
     })
 
     it("keeps exports from API keys, one export at a time, and checks the input", async () => {

@@ -91,10 +91,13 @@ export const useInvite = () =>
 
 export const useResendInvite = () =>
   useTeamMutation((id: string) =>
-    sdk.client.fetch<MadeInvite>(`/admin/staff/invites/${encodeURIComponent(id)}/resend`, {
-      method: "POST",
-      body: {},
-    })
+    withReauth((extra) =>
+      sdk.client.fetch<MadeInvite>(`/admin/staff/invites/${encodeURIComponent(id)}/resend`, {
+        method: "POST",
+        body: {},
+        ...extra,
+      })
+    )
   )
 
 export const useWithdrawInvite = () =>

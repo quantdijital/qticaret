@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { startFakeMail } from "@qticaret/testing"
 import type { FakeMail } from "@qticaret/testing"
+import removeOrphanLogin from "../../src/scripts/remove-orphan-login"
 import { createAdminUser } from "../helpers/admin"
 import { eventually } from "../helpers/eventually"
 import type { HttpClient } from "../helpers/http"
@@ -20,7 +21,9 @@ interface Team {
   invites: { id: string; email: string; role: string }[] | null
 }
 
-const tokenOf = (link: string) => new URL(link).searchParams.get("token") ?? ""
+// The token after `#`: no access log keeps it
+const tokenOf = (link: string) =>
+  new URLSearchParams(new URL(link).hash.slice(1)).get("token") ?? ""
 
 /** F12.6 (adr/0040 §4): the team, invited with a role and taken off again. */
 medusaIntegrationTestRunner({
@@ -35,6 +38,8 @@ medusaIntegrationTestRunner({
       delete: <T>(url: string) => settle(http.delete<T>(url, { headers })),
     })
     const anyone = call({})
+    const infoOf = <T = unknown>(link: string) =>
+      anyone.post<T>("/admin/staff/invites/info", { token: tokenOf(link) })
 
     /** What the invitation page does: a login for the address, then the invitation accepted. */
     async function accept(link: string, email: string) {
@@ -84,9 +89,7 @@ medusaIntegrationTestRunner({
         email,
         role: "admin",
       })
-      const info = await anyone.get<{ email: string; role: string }>(
-        `/admin/staff/invites/info?token=${tokenOf(made.data.link)}`
-      )
+      const info = await infoOf<{ email: string; role: string }>(made.data.link)
       const mail = await eventually(
         () => Promise.resolve(fake.messages.find(({ to }) => to.includes(email))),
         (found) => found !== undefined
@@ -96,12 +99,22 @@ medusaIntegrationTestRunner({
       const settings = await call(headers).post("/admin/platform-settings/store", {
         timezone: "Europe/Istanbul",
       })
-      const used = await anyone.get(`/admin/staff/invites/info?token=${tokenOf(made.data.link)}`)
+      const used = await infoOf(made.data.link)
+      // Medusa's own acceptance (any login, no role) answers for no one, a fresh login's included
+      const stranger = await http.post<{ token: string }>("/auth/user/emailpass/register", {
+        email: `yabanci.${randomUUID().slice(0, 8)}@example.com`,
+        password: randomUUID(),
+      })
+      const core = await call({ authorization: `Bearer ${stranger.data.token}` }).post(
+        `/admin/invites/accept?token=${tokenOf(made.data.link)}`,
+        { first_name: "Yabancı", last_name: "Kişi" }
+      )
 
       expect(made.status).toBe(201)
+      expect(made.data.link).toMatch(/\/invite#token=/)
+      expect(core.status).toBe(404)
       expect(made.data.invite).toMatchObject({ email, role: "operations", expired: false })
       expect(made.data).not.toHaveProperty("invite.token")
-      expect(made.data.link).toMatch(/\/invite\?token=/)
       expect(again.data.message).toBe("staff.invite_pending")
       expect(info.data).toEqual({ email, role: "operations" })
       expect(mail?.template).toBe("staff_invite")
@@ -164,6 +177,20 @@ medusaIntegrationTestRunner({
       expect(asOps.status).toBe(403)
       expect([adminChanges.status, adminInvites.status]).toEqual([403, 403])
       expect(promoted.status).toBe(200)
+      // Which role was given, before and after, in the audit log
+      // Written once the answer has gone
+      const logged = await eventually(
+        async () =>
+          (
+            await owner.get<{ audit_entries: { changes: { diff?: unknown } | null }[] }>(
+              `/admin/audit-log?resource_type=staff_role&resource_id=${opsUser.userId}`
+            )
+          ).data.audit_entries,
+        (entries) => entries.length > 0
+      )
+      expect(logged[0]?.changes?.diff).toEqual({
+        role: { before: "operations", after: "admin" },
+      })
       expect(lastOwner.status).toBe(400)
       expect(lastOwner.data.message).toBe("staff.last_owner")
       expect(inviteMember.data.message).toBe("staff.invite_member")
@@ -235,8 +262,10 @@ medusaIntegrationTestRunner({
           ),
         (found) => found !== undefined
       )
-      const link = /href="([^"]*\/reset-password\?[^"]*)"/.exec(mail?.html ?? "")?.[1] ?? ""
-      const resetToken = new URL(link.replace(/&amp;/g, "&")).searchParams.get("token") ?? ""
+      // The token after `#`: no access log keeps it
+      const link = /href="([^"]*\/reset-password#[^"]*)"/.exec(mail?.html ?? "")?.[1] ?? ""
+      const resetToken =
+        new URLSearchParams(new URL(link.replace(/&amp;/g, "&")).hash.slice(1)).get("token") ?? ""
       const changed = await call({ authorization: `Bearer ${resetToken}` }).post(
         "/auth/user/emailpass/update",
         { password }
@@ -249,10 +278,31 @@ medusaIntegrationTestRunner({
       )
 
       expect(asked.status).toBeLessThan(300)
-      expect(link).toContain("/reset-password?")
+      expect(link).toContain("/reset-password#")
       expect(changed.status).toBe(200)
       expect(oldPassword.status).toBe(401)
       expect(newPassword.status).toBe(200)
+    })
+
+    it("lets support clear a login someone made for an invited address first", async () => {
+      const owner = call((await createAdminUser(http, getContainer())).headers)
+      const email = `once.${randomUUID().slice(0, 8)}@example.com`
+      const made = await owner.post<Made>("/admin/staff/invites", { email, role: "readonly" })
+      // A stranger registers the address first: no staff, but the invitee is stuck
+      await http.post("/auth/user/emailpass/register", { email, password: randomUUID() })
+      const stuck = await settle(
+        http.post("/auth/user/emailpass/register", { email, password: randomUUID() })
+      )
+
+      await removeOrphanLogin({ container: getContainer(), args: [email] })
+      const { accepted } = await accept(made.data.link, email)
+
+      expect(stuck.status).not.toBe(200)
+      expect(accepted.status).toBe(201)
+      // A login that is someone's is never removed
+      await expect(removeOrphanLogin({ container: getContainer(), args: [email] })).rejects.toThrow(
+        /in use/
+      )
     })
 
     it("sends an invitation again with a new link, and withdraws one", async () => {
@@ -263,14 +313,10 @@ medusaIntegrationTestRunner({
       })
 
       const resent = await owner.post<Made>(`/admin/staff/invites/${made.data.invite.id}/resend`)
-      const oldLink = await anyone.get(`/admin/staff/invites/info?token=${tokenOf(made.data.link)}`)
-      const newLink = await anyone.get(
-        `/admin/staff/invites/info?token=${tokenOf(resent.data.link)}`
-      )
+      const oldLink = await infoOf(made.data.link)
+      const newLink = await infoOf(resent.data.link)
       const withdrawn = await owner.delete(`/admin/staff/invites/${made.data.invite.id}`)
-      const afterWithdrawal = await anyone.get(
-        `/admin/staff/invites/info?token=${tokenOf(resent.data.link)}`
-      )
+      const afterWithdrawal = await infoOf(resent.data.link)
 
       expect(resent.status).toBe(200)
       expect(resent.data.link).not.toBe(made.data.link)

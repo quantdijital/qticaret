@@ -60,6 +60,8 @@ export function useStartFactor() {
 export function useConfirmFactor() {
   const client = useQueryClient()
   return useMutation({
+    // The password is not kept in the mutation cache once the screen is gone
+    gcTime: 0,
     mutationFn: async (input: { id: string; code: string; password: string }) => {
       await sdk.client.fetch(`/auth/mfa/factors/${encodeURIComponent(input.id)}/verify`, {
         method: "POST",
@@ -87,6 +89,8 @@ const recoveryCodes = async (headers?: Record<string, string>) =>
  */
 export function useRecoveryCodes() {
   return useMutation({
+    // Nor the codes, nor the setup code that asked for them
+    gcTime: 0,
     mutationFn: (setupCode?: string): Promise<string[]> =>
       setupCode
         ? recoveryCodes(reauthHeaders({ method: "totp", secret: setupCode }))

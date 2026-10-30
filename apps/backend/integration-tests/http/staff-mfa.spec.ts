@@ -159,8 +159,12 @@ medusaIntegrationTestRunner({
       const me = await http.get<{ mfa: Record<string, boolean> }>("/admin/staff/me", {
         headers: member.headers,
       })
-      // Off: who set it up is still asked for the code at sign-in
+      // Off: who set it up is still asked for the code at sign-in, and the
+      // password's half-way session reaches nothing until it is given
       const ownerAgain = await signIn(owner.email, owner.password)
+      const halfWay = await settle(
+        http.get("/admin/orders?limit=1", { headers: bearer(ownerAgain.data.token) })
+      )
       await switchTo(bearer(passed.data.token), true)
       const memberMayNot = await switchTo(member.headers, false)
 
@@ -169,6 +173,8 @@ medusaIntegrationTestRunner({
       expect(after.status).toBe(200)
       expect(me.data.mfa).toMatchObject({ available: true, required: false })
       expect(ownerAgain.data.mfa_challenge).toBeDefined()
+      // Medusa refuses it before our layer (requireMfa on every authenticated route, 2.20+)
+      expect([401, 403]).toContain(halfWay.status)
       expect(memberMayNot.status).toBe(403)
     })
 

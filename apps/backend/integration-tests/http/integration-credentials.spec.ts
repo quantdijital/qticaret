@@ -300,10 +300,10 @@ medusaIntegrationTestRunner({
       expect(alerts.map((alert) => alert["changes"])).toEqual(
         expect.arrayContaining([["connected"], ["test_mode_off"], ["removed"]])
       )
-      expect(alerts[0]).toMatchObject({
-        provider: "paytr",
-        actor: expect.stringMatching(/@example\.com$/) as string,
-      })
+      // Named, never by e-mail: every role reads the bell
+      expect(alerts[0]).toMatchObject({ provider: "paytr", actor: null })
+      expect(alerts[0]?.["actor_id"]).toEqual(expect.stringMatching(/^user_/))
+      expect(JSON.stringify(alerts)).not.toContain("@example.com")
       expect(JSON.stringify(alerts)).not.toMatch(SECRETS)
     })
 

@@ -144,7 +144,8 @@ export function loadStaffPasswordReset(
   }
   return Promise.resolve({
     vars: {
-      resetUrl: `${panelUrl()}/reset-password?${new URLSearchParams({ token, email }).toString()}`,
+      // After `#`, as an invitation's: no access log or Referer sees the token
+      resetUrl: `${panelUrl()}/reset-password#${new URLSearchParams({ token, email }).toString()}`,
     },
     recipients: { email },
     receiverId: null,

@@ -41,6 +41,8 @@ export function ReauthHost() {
   const close = (proof: { method: ReauthMethod; secret: string } | null) => {
     ask?.answer(proof)
     setAsk(null)
+    // What was typed goes with the dialog
+    setSecret("")
   }
   const ready =
     method === "totp"

@@ -4343,7 +4343,8 @@
         "test_mode_on": "test mode turned on",
         "test_mode_off": "test mode turned off",
         "removed": "disconnected"
-      }
+      },
+      "owner": "The owner"
     },
     "statementCheck": {
       "title": "The {{provider}} statement of {{day}} does not agree",
@@ -4797,7 +4798,8 @@
       "copy": "Copy",
       "download": "Download",
       "file": "recovery-codes.txt",
-      "hint": "Each code works once. Making new codes voids the old ones."
+      "hint": "Each code works once. Making new codes voids the old ones.",
+      "done": "Kept them, hide"
     }
   },
   "reset": {

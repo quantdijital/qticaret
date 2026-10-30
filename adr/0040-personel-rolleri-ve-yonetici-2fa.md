@@ -86,7 +86,14 @@ Medusa 2.21.2'de doğrulananlar (v2.21.2 kaynağı ve docs.medusajs.com; Context
    - **Panel:** Hassas çağrılar `withReauth` ile sarılır. 428 gelince kabuktaki `ReauthHost` penceresi kodu (ya da kurtarma kodunu, 2FA yoksa şifreyi) ister, çağrı başlıklarla yeniden yapılır. Kanıt yalnızca o istekte kullanılır, saklanmaz. Kapatılan pencere işlemi yapmaz. 2FA kurulum sayfası kabuğun dışında olduğu için şifreyi pencereyle değil, kurulum formunda kodun yanında ister.
 4. **Davet ve personel ekranı.**
    - **Davet:** Medusa davetleri kullanılır, istenen rol davetin `metadata`'sına yazılır. Medusa kabulde rolü taşımaz ve daveti siler (2.21.2 kaynağı). Bu yüzden kabul kendi ucumuzdan yapılır: `POST /admin/staff/invites/accept` önce davetin rolünü okur, sonra Medusa'nın `acceptInviteWorkflow`'unu çalıştırır, ardından rolü verir; adımlar telafilidir. Medusa'nın kendi kabul ucuyla açılan kullanıcının rolü olmaz, hiçbir yere erişemez.
-   - **Kabul koşulları:** Giriş kaydı davet edilen adrese ait olmalıdır; bağlantıyı başkasına iletmek başka birini personel yapmaz. Davetle sahip rolü verilmez; sahip ekipten, sahip tarafından yapılır.
+   - **Kabul koşulları:** Giriş kaydı davet edilen adrese ait olmalıdır. Davetle sahip rolü verilmez; sahip ekipten, sahip tarafından yapılır.
+   - **Bağlantı taşıyana çalışır (F12 Y13 düzeltmesi):** Medusa herkesin her adres için giriş kaydı açmasına izin verdiğinden, bağlantıyı eline geçiren kişi davet edilen adresle kayıt açıp daveti kabul edebilir. Bu yüzden bağlantı bir paroladır:
+     - jeton adresin `#` sonrasında taşınır, sayfa okuyunca adres çubuğundan ve geçmişten siler;
+     - bilgi ucu gövdeli `POST`tur, böylece jeton erişim günlüğüne düşmez;
+     - yeniden gönderim yeniden doğrulama ister;
+     - Medusa'nın kendi `POST /admin/invites/accept` ucu kapalıdır.
+     Adres sahipliğini kabulde ayrıca kanıtlamak (adrese giden kod) açık karar olarak duruyor.
+   - Davet edilen adres için önceden açılmış, kimseye bağlı olmayan bir giriş kaydı kabulü engeller; destek `scripts/remove-orphan-login.ts` ile kaldırır.
    - **Bağlantı:** Davet e-postayla gider (`staff.invite` şablonu). Bağlantı yalnızca oluşturma ve yeniden gönderme yanıtında sahibe de gösterilir; e-posta kurulu değilse elle iletilir. Bağlantı 24 saat geçerlidir (Medusa varsayılanı).
    - **Panel ekranları:** Ayarlar > Ekip (liste, rol, davet, rol değiştir, çıkar; sahip olmaya ve kendi rolünü değiştirmeye ek onay) ve `/invite` kabul sayfası. Medusa Admin'e gerek kalmaz.
    - **Denetim kaydı:** Rol değişiklikleri, davetler ve 2FA sıfırlama panelden `mutation`, sistemden (göç betiği, sunucu betiği) `system` olarak yazılır.

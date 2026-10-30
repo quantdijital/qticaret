@@ -24,5 +24,5 @@ export type AdminPostStaffInviteType = z.infer<typeof AdminPostStaffInvite>
 export const AdminPostStaffAccept = z.object({ token, first_name: name, last_name: name }).strict()
 export type AdminPostStaffAcceptType = z.infer<typeof AdminPostStaffAccept>
 
-export const AdminGetStaffInviteInfo = z.object({ token }).strict()
-export type AdminGetStaffInviteInfoType = z.infer<typeof AdminGetStaffInviteInfo>
+export const AdminPostStaffInviteInfo = z.object({ token }).strict()
+export type AdminPostStaffInviteInfoType = z.infer<typeof AdminPostStaffInviteInfo>

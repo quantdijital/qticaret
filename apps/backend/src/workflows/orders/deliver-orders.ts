@@ -1,8 +1,9 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { markOrderFulfillmentAsDeliveredWorkflow } from "@medusajs/medusa/core-flows"
 import { serverErrorMessage } from "../../lib/errors/messages"
 import { errorSummary, logger } from "../../lib/logging"
+import { shipLockKey } from "../../lib/orders/locks"
 import { carrierOf } from "../../lib/shipping/carriers"
 
 export interface DeliverResult {
@@ -23,18 +24,11 @@ interface FulfillmentRow {
   canceled_at?: string | Date | null
 }
 
-/**
- * "Teslim edildi" for several orders (F12.3): each one's parcels handed
- * over and not yet delivered, of the shop's own delivery only. A carrier's
- * parcel is delivered by its tracking (adr/0031); marked by hand, the
- * carrier's later "delivered" would find it done. One order failing does
- * not stop the rest.
- */
-export async function deliverOrders(
+/** The orders' parcels still to mark delivered: handed over, not delivered, the shop's own. */
+async function parcelsToDeliver(
   container: MedusaContainer,
-  orderIds: string[]
-): Promise<DeliverResult[]> {
-  const ids = [...new Set(orderIds)]
+  ids: string[]
+): Promise<Map<string, FulfillmentRow[]>> {
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "order",
     fields: [
@@ -47,7 +41,7 @@ export async function deliverOrders(
     ],
     filters: { id: ids },
   })
-  const orders = new Map(
+  return new Map(
     (data as { id: string; fulfillments?: (FulfillmentRow | null)[] | null }[]).map((order) => [
       order.id,
       (order.fulfillments ?? []).filter(
@@ -60,6 +54,21 @@ export async function deliverOrders(
       ),
     ])
   )
+}
+
+/**
+ * "Teslim edildi" for several orders (F12.3): each one's parcels handed
+ * over and not yet delivered, of the shop's own delivery only. A carrier's
+ * parcel is delivered by its tracking (adr/0031); marked by hand, the
+ * carrier's later "delivered" would find it done. One order failing does
+ * not stop the rest.
+ */
+export async function deliverOrders(
+  container: MedusaContainer,
+  orderIds: string[]
+): Promise<DeliverResult[]> {
+  const ids = [...new Set(orderIds)]
+  const orders = await parcelsToDeliver(container, ids)
   const results: DeliverResult[] = []
   for (const orderId of ids) {
     const parcels = orders.get(orderId)
@@ -76,12 +85,15 @@ export async function deliverOrders(
     }
     let delivered = 0
     try {
-      for (const parcel of parcels) {
-        await markOrderFulfillmentAsDeliveredWorkflow(container).run({
-          input: { orderId, fulfillmentId: parcel.id },
-        })
-        delivered += 1
-      }
+      // Under the order's ship lock, read again: two people marking it at once deliver it once
+      await container.resolve(Modules.LOCKING).execute(shipLockKey(orderId), async () => {
+        for (const parcel of (await parcelsToDeliver(container, [orderId])).get(orderId) ?? []) {
+          await markOrderFulfillmentAsDeliveredWorkflow(container).run({
+            input: { orderId, fulfillmentId: parcel.id },
+          })
+          delivered += 1
+        }
+      })
       results.push({ order_id: orderId, ok: true, delivered, error: null, message: null })
     } catch (error) {
       logger.warn({ event: "orders.bulk_deliver_failed", orderId, err: errorSummary(error) })

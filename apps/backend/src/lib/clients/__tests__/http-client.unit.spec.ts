@@ -194,6 +194,17 @@ describe("createHttpClient", () => {
       expect(error).toMatchObject({ providerCode: "card_declined", retryable: false })
     })
 
+    it("keeps a provider's sentence out: only a short token is its code", async () => {
+      provider.setHandler(json(403, { error: { code: "The caller <x@example.com> may not" } }))
+      const errorCode = (body: unknown) => (body as { error?: { code?: string } }).error?.code
+
+      const error = await errorOf(
+        client({ errorCode }).http.request({ method: "POST", path: "/pay", schema: Item })
+      )
+
+      expect(error).toMatchObject({ providerCode: "http_403" })
+    })
+
     it("refuses a body that does not match the schema or is not JSON", async () => {
       provider.setHandler(sequence(json(200, { id: 42 }), (_req, res) => res.end("<html>")))
       const { http } = client()

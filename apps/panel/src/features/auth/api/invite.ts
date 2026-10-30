@@ -40,8 +40,12 @@ async function call<T>(
 export const inviteInfoQuery = (token: string) =>
   queryOptions({
     queryKey: ["invite", token],
+    // The token in the body: a URL's query lands in access logs
     queryFn: () =>
-      call<InviteInfo>(`/admin/staff/invites/info?${new URLSearchParams({ token }).toString()}`),
+      call<InviteInfo>("/admin/staff/invites/info", {
+        method: "POST",
+        body: JSON.stringify({ token }),
+      }),
     retry: false,
     staleTime: Infinity,
   })

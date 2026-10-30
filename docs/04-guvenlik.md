@@ -139,6 +139,7 @@
 - Güvenlik header'ları: HSTS, X-Content-Type-Options, X-Frame-Options/frame-ancestors, Referrer-Policy, CSP (admin), Permissions-Policy.
   - API yanıtlarında `src/api/http/security-headers.ts` uygulanır: `default-src 'none'; frame-ancestors 'none'`, nosniff, DENY, `no-referrer`, Permissions-Policy, yerel ortam dışında HSTS. `X-Powered-By` kaldırılır.
   - Medusa'nın bizim middleware'lerimizden önce yazdığı yanıtlar (admin auth 401, CORS preflight, `/app` ve `/static` dosyaları) bu header'ları alamaz. Admin CSP dahil hepsi F16'da reverse proxy'de eklenir.
+  - Panelin kendi HTML'i (`apps/panel`, giriş, 2FA kurulumu, yeniden doğrulama penceresi, ekip ekranları) de API başlıklarını almaz. F16'da vekil sunucu panele `frame-ancestors 'none'`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer` ve panel CSP'si ekler; e2e bir denetim bunu doğrular (F12 Y13 incelemesi).
   - Medusa, store preflight'ında da publishable key ister; izinli origin bile 400 alır ve allow header'ı dönmez. Tarayıcıdan doğrudan store çağrısı yapacak storefront (F18) için bu doğrulanıp çözülmelidir.
 - Hata yanıtları iç detay sızdırmaz (stack trace, SQL, sağlayıcı ham yanıtı).
 - Toplu sorgularda sayfalama limiti zorunlu (max 100). Store API'de `fields` ile hassas alan sızdırmama testi.

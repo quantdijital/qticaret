@@ -1,11 +1,20 @@
-import { Check, Copy, Download } from "lucide-react"
+import { Check, Copy, Download, EyeOff } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 
-/** Recovery codes, shown once: to copy or to keep as a file (adr/0040 §2). */
-export function RecoveryCodes({ codes }: { codes: readonly string[] }) {
+/**
+ * Recovery codes, shown once: to copy or to keep as a file (adr/0040 §2).
+ * `onDone` puts them away once kept, so they do not stay on an open screen.
+ */
+export function RecoveryCodes({
+  codes,
+  onDone,
+}: {
+  codes: readonly string[]
+  onDone?: () => void
+}) {
   const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
   const text = codes.join("\n")
@@ -51,6 +60,12 @@ export function RecoveryCodes({ codes }: { codes: readonly string[] }) {
           <Download />
           {t("security.codes.download")}
         </Button>
+        {onDone ? (
+          <Button variant="ghost" size="sm" onClick={onDone}>
+            <EyeOff />
+            {t("security.codes.done")}
+          </Button>
+        ) : null}
       </div>
       <p className="text-[13px] text-muted-foreground">{t("security.codes.hint")}</p>
     </div>

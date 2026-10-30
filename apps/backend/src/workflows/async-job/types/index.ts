@@ -36,6 +36,9 @@ export const jobType = (key: string): JobType | undefined =>
 
 export const JOB_TYPE_KEYS = Object.keys(JOB_TYPES)
 
+/** The kinds only their asker and the owner see (an audit log export). */
+export const PRIVATE_JOB_TYPES = JOB_TYPE_KEYS.filter((key) => JOB_TYPES[key]?.privateToAsker)
+
 /** The kinds one of this kind cannot run beside (itself, and its group's). */
 export function exclusiveTypes(key: string): string[] {
   const group = jobType(key)?.group

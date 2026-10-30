@@ -43,7 +43,10 @@ interface PendingEntry {
   fields: string[]
 }
 
-async function writeEntry({ req, res, match, before, entry, fields }: PendingEntry) {
+async function writeEntry({ req, res, match, before, entry: sent, fields }: PendingEntry) {
+  // A path no route answered names no kind of thing: anyone could make up
+  // kinds by the hundred and push the real ones out of the viewer's filter
+  const entry = !match && res.statusCode === 404 ? { ...sent, resource_type: null } : sent
   let changes: Record<string, unknown> = { fields }
   // Read again whatever the status: a failed request may still have changed something
   if (match && before) {

@@ -299,6 +299,8 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/staff/invites/:id/resend": false,
   "DELETE /admin/staff/invites/:id": false,
   "POST /admin/staff/invites/accept": false,
+  // Read-only, before an account exists: no session, so no role decides it
+  "POST /admin/staff/invites/info": false,
   "POST /admin/staff/invites": false,
   "POST /admin/staff/members/:id": false,
   "DELETE /admin/staff/members/:id": false,

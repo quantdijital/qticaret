@@ -4343,7 +4343,8 @@
         "test_mode_on": "test modu açıldı",
         "test_mode_off": "test modu kapatıldı",
         "removed": "bağlantı kaldırıldı"
-      }
+      },
+      "owner": "Mağaza sahibi"
     },
     "statementCheck": {
       "title": "{{provider}} dökümü {{day}} günü tutmuyor",
@@ -4797,7 +4798,8 @@
       "copy": "Kopyala",
       "download": "İndir",
       "file": "kurtarma-kodlari.txt",
-      "hint": "Her kod bir kez kullanılır. Yeni kod ürettiğinizde eskileri geçersiz olur."
+      "hint": "Her kod bir kez kullanılır. Yeni kod ürettiğinizde eskileri geçersiz olur.",
+      "done": "Kaydettim, gizle"
     }
   },
   "reset": {

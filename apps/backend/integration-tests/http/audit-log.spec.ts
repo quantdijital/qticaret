@@ -244,6 +244,8 @@ medusaIntegrationTestRunner({
       const byKey = await list({ actor_type: "api-key" })
       const bySystem = await list({ actor_type: "system" })
       const unknown = await list({ actor_type: "robot" })
+      // A made-up path is recorded, but names no kind of thing for the filter
+      await settle(http.post("/admin/uydurma-alan", {}, { headers: admin.headers }))
       const types = await http.get<{ resource_types: string[] }>(
         "/admin/audit-log/resource-types",
         { headers: admin.headers }
@@ -257,6 +259,7 @@ medusaIntegrationTestRunner({
       expect(unknown.status).toBe(400)
       // Reading the log is recorded as an `audit_log` entry: it is in the list too
       expect(types.data.resource_types).toEqual(expect.arrayContaining(["audit_log", "webhook"]))
+      expect(types.data.resource_types).not.toContain("uydurma_alan")
       expect(typesByOps.status).toBe(403)
     })
 

@@ -8,6 +8,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "async_job.input_invalid": "İş için verilen seçenekler geçerli değil.",
   "async_job.not_queued": "İş zaten başlamış.",
   "async_job.result_unavailable": "Bu işin indirilebilir bir sonucu yok ya da süresi doldu.",
+  "async_job.unknown": "İş bulunamadı.",
   "async_job.type_unknown": "Böyle bir iş tipi yok.",
   "audit_log.kind_invalid": "Kayıt türü geçerli değil.",
   "billing_profile.unknown": "Bu müşterinin fatura bilgisi yok.",

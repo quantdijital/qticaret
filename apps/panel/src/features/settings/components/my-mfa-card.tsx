@@ -169,7 +169,14 @@ export function MyMfaCard() {
               {t(`${S}.change`)}
             </Button>
           </div>
-          {recovery.data ? <RecoveryCodes codes={recovery.data} /> : null}
+          {recovery.data ? (
+            <RecoveryCodes
+              codes={recovery.data}
+              onDone={() => {
+                recovery.reset()
+              }}
+            />
+          ) : null}
         </div>
       ) : (
         <p className="text-sm text-muted-foreground">{t(`${S}.notSet`)}</p>

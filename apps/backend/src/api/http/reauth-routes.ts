@@ -46,12 +46,13 @@ export const REAUTH_ROUTES = [
       ),
     ],
   },
-  // Someone new on the team: their access outlives the session that asked
-  {
-    matcher: "/admin/staff/invites",
+  // Someone new on the team: their access outlives the session that asked.
+  // A resend hands out a fresh link too, an expired invitation's included
+  ...["/admin/staff/invites", "/admin/staff/invites/:id/resend"].map((matcher) => ({
+    matcher,
     methods: ["POST" as const],
     middlewares: [requireReauth()],
-  },
+  })),
   // An owner made or unmade, an owner taken off, a member's 2FA reset
   {
     matcher: "/admin/staff/members/:id",

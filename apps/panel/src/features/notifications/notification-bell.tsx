@@ -31,7 +31,9 @@ function useAlertText(data: Record<string, unknown>) {
   }
   if (data["kind"] === "provider_account") {
     const changes = Array.isArray(data["changes"]) ? data["changes"].map(text) : []
-    const who = text(data["actor"])
+    // Only an owner changes an account (adr/0040): one without a name is "the owner"
+    const who =
+      text(data["actor"]) || (data["actor_id"] ? t("notifications.providerAccount.owner") : "")
     const provider = text(data["provider"])
     return {
       title: t("notifications.providerAccount.title", {

@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { useNavigate, useSearch } from "@tanstack/react-router"
 import { useForm } from "react-hook-form"
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { z } from "zod"
 import { LoadingRows } from "@/components/patterns/states"
@@ -10,6 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { InviteFailure, acceptInvite, inviteInfoQuery } from "@/features/auth/api/invite"
 import { useLogin } from "@/features/auth/api/me"
+import { linkParams } from "@/lib/link-params"
 
 // docs/04: length first, ten characters at least
 const MIN_PASSWORD = 10
@@ -58,7 +60,9 @@ function Field({
 export function InvitePage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const { token } = useSearch({ from: "/invite" })
+  const search = useSearch({ from: "/invite" })
+  // From the link's fragment; an older link's query still works
+  const [token] = useState(() => linkParams().get("token") ?? search.token)
   const info = useQuery({ ...inviteInfoQuery(token ?? ""), enabled: Boolean(token) })
   const login = useLogin()
   const accept = useMutation({ mutationFn: acceptInvite })

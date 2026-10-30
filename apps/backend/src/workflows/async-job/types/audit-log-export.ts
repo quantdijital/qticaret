@@ -62,6 +62,8 @@ export const auditLogExport: JobType<z.infer<typeof input>> = {
   singleton: true,
   resultTtlDays: 7,
   containsPersonalData: true,
+  // Whom the log was searched for is no one else's business, that person's least
+  privateToAsker: true,
   execute: async ({ container, job, progress, resultFile }, filters) => {
     const service = container.resolve<AuditLogModuleService>(AUDIT_LOG_MODULE)
     const { created_after, created_before, ...fields } = filters

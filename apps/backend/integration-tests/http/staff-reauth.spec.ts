@@ -112,7 +112,15 @@ medusaIntegrationTestRunner({
       const hook = { url: "https://erp.example.com/qt", events: ["order.placed"] }
 
       const inviteBare = await post("/admin/staff/invites", invite, owner.plain)
-      const invited = await post("/admin/staff/invites", invite, owner.headers)
+      const invited = await post<{ invite: { id: string } }>(
+        "/admin/staff/invites",
+        invite,
+        owner.headers
+      )
+      // A fresh link for someone, an expired invitation's too, asks the same
+      const resend = `/admin/staff/invites/${invited.data.invite.id}/resend`
+      const resendBare = await post(resend, {}, owner.plain)
+      const resent = await post(resend, {}, owner.headers)
       const hookBare = await post("/admin/webhooks", hook, owner.plain)
       const hooked = await post<{ subscription: { id: string } }>(
         "/admin/webhooks",
@@ -141,6 +149,7 @@ medusaIntegrationTestRunner({
       )
 
       expect([inviteBare.status, invited.status]).toEqual([428, 201])
+      expect([resendBare.status, resent.status]).toEqual([428, 200])
       expect([hookBare.status, hooked.status]).toEqual([428, 201])
       expect([eventsOnly.status, moved.status]).toEqual([200, 428])
       expect(escaped.status).toBe(428)

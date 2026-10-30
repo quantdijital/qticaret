@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { sdk } from "@/lib/sdk"
+import { linkParams } from "@/lib/link-params"
 
 // docs/04: length first, ten characters at least
 const MIN_PASSWORD = 10
@@ -114,7 +115,9 @@ function NewPasswordForm({ token }: { token: string }) {
  */
 export function ResetPasswordPage() {
   const { t } = useTranslation()
-  const { token } = useSearch({ from: "/reset-password" })
+  const search = useSearch({ from: "/reset-password" })
+  // From the link's fragment; an older link's query still works
+  const [token] = useState(() => linkParams().get("token") ?? search.token)
   return (
     <div className="flex min-h-svh items-center justify-center bg-background p-6">
       <div className="w-full max-w-sm rounded-lg border bg-card p-6">

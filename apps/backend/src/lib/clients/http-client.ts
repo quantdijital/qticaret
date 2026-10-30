@@ -36,6 +36,8 @@ import type { Transport, TransportResponse } from "./transport"
  * the provider's status for it before trying again.
  */
 
+// What a provider's error code may be: a short token such as `PERMISSION_DENIED` or `10051`
+const PROVIDER_CODE = /^[A-Za-z0-9_.-]{1,60}$/
 export interface HttpClientOptions {
   provider: string
   baseUrl: string
@@ -200,7 +202,9 @@ export function createHttpClient(options: HttpClientOptions): HttpClient {
       )
     }
     const body = parseJsonBody(response.text)
-    const code = body === "invalid" ? undefined : options.errorCode?.(body.value, status)
+    const said = body === "invalid" ? undefined : options.errorCode?.(body.value, status)
+    // A provider's word, never its sentence: it reaches logs, the failure log and the panel
+    const code = said !== undefined && PROVIDER_CODE.test(said) ? said : undefined
     return failure(code ?? `http_${String(status)}`, false)
   }
 

@@ -199,7 +199,7 @@ export const staffInvite: MessageTemplate<StaffInviteVars> = {
       ],
       footer: FOOTER(brand.shopName),
     }),
-  sample: { inviteUrl: "https://magaza.example/invite?token=ornek", role: "operations" },
+  sample: { inviteUrl: "https://magaza.example/invite#token=ornek", role: "operations" },
 }
 
 /** A staff member's password reset: the panel's page, good for 15 minutes (F12.6). */
@@ -220,5 +220,5 @@ export const staffPasswordReset: MessageTemplate<StaffResetVars> = {
       ],
       footer: FOOTER(brand.shopName),
     }),
-  sample: { resetUrl: "https://magaza.example/reset-password?token=ornek" },
+  sample: { resetUrl: "https://magaza.example/reset-password#token=ornek" },
 }

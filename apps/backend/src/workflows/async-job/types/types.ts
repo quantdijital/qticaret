@@ -41,6 +41,11 @@ export interface JobType<Input = unknown> {
   /** Downloading the result is a personal data read (adr/0011). */
   containsPersonalData: boolean
   /**
+   * The job itself is its asker's and the owner's alone, not only its file:
+   * its filters say whom it is about (an audit log export of one person).
+   */
+  privateToAsker?: boolean
+  /**
    * Queued only by its own route (an import queued with the file it was
    * sent), never through `POST /admin/async-jobs`, whose input it would trust.
    */

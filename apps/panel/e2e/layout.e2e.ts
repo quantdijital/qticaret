@@ -32,7 +32,13 @@ test("keeps every page's cards and controls level", async ({ page, guard }) => {
     await expect(page.locator('main [data-slot="skeleton"], main [aria-busy="true"]')).toHaveCount(
       0
     )
-    const issues = await layoutIssues(page)
+    let issues = await layoutIssues(page)
+    if (issues.length > 0) {
+      // A card filled after the rest (a product's price history) is measured again once it is
+      await page.waitForTimeout(1_500)
+      await page.waitForLoadState("networkidle")
+      issues = await layoutIssues(page)
+    }
     if (issues.length > 0) {
       found[path] = issues
     }
