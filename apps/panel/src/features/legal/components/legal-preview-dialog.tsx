@@ -14,16 +14,20 @@ const FRAME_STYLE =
   "blockquote{margin:0 0 16px;padding:8px 12px;border-left:3px solid GrayText}"
 
 /**
- * The text as customers will read it, its tokens filled (a contract with a
- * made-up order). The server's HTML, in a frame that runs nothing.
+ * The text as customers read it, its tokens filled (a contract with a
+ * made-up order, or the copy an order kept). The server's HTML, in a
+ * frame that runs nothing.
  */
 export function LegalPreviewDialog({
   title,
   html,
+  description,
   onClose,
 }: {
   title: string
   html: string
+  /** What the reader is looking at; a preview's note by default. */
+  description?: string
   onClose: () => void
 }) {
   const { t } = useTranslation()
@@ -39,7 +43,7 @@ export function LegalPreviewDialog({
       <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{t("settings.legal.preview.hint")}</DialogDescription>
+          <DialogDescription>{description ?? t("settings.legal.preview.hint")}</DialogDescription>
         </DialogHeader>
         <iframe
           title={t("settings.legal.preview.frame", { title })}

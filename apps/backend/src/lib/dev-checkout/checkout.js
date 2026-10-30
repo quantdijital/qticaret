@@ -1,11 +1,11 @@
 // The payment test page's script (adr/0028): plain browser JavaScript, no build.
-/* global showBankTransfer, showCashOnDelivery, followReturn */
+/* global showBankTransfer, showCashOnDelivery, followReturn, loadContracts, acceptContracts */
 const config = JSON.parse(document.getElementById("config").textContent)
 const CART_KEY = "qt-dev-checkout-cart"
 const $ = (id) => document.getElementById(id)
 const money = (amount) =>
   new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY" }).format(Number(amount ?? 0))
-const state = { region: null, cart: null }
+const state = { region: null, cart: null, contracts: [] }
 
 function el(tag, props = {}, ...children) {
   const node = Object.assign(document.createElement(tag), props)
@@ -196,7 +196,7 @@ async function loadShipping() {
                     })
                   ).cart
                   renderCart()
-                  await loadInstallments()
+                  await Promise.all([loadInstallments(), loadContracts()])
                 }),
             }),
             `${option.name} · ${money(option.calculated_price?.calculated_amount ?? option.amount)}`
@@ -221,6 +221,7 @@ async function pay() {
   const provider = document.querySelector("input[name=provider]:checked").value
   const back = (result) => `${location.origin}/dev/checkout?sonuc=${result}&sepet=${state.cart.id}`
   const offline = provider === "pp_bank-transfer_bank-transfer" || provider === "pp_cod_cod"
+  await acceptContracts()
   const { payment_session: session } = await api(`/store/carts/${state.cart.id}/payment-session`, {
     method: "POST",
     body: offline
@@ -252,6 +253,10 @@ async function pay() {
 
 $("address").addEventListener("submit", (event) => run(() => saveAddress(event)))
 $("pay").addEventListener("click", () => run(pay))
+// The contracts name the way to pay
+document
+  .querySelectorAll("input[name=provider]")
+  .forEach((input) => input.addEventListener("change", () => run(loadContracts)))
 $("reset").addEventListener("click", () => {
   localStorage.removeItem(CART_KEY)
   location.href = "/dev/checkout"
@@ -265,7 +270,7 @@ run(async () => {
   if (!state.region) throw new Error("Bölge yok: pnpm --filter backend seed:demo")
   await Promise.all([loadProducts(), loadCart()])
   if (state.cart?.shipping_address) await loadShipping()
-  if (state.cart?.shipping_methods?.length) await loadInstallments()
+  if (state.cart?.shipping_methods?.length) await Promise.all([loadInstallments(), loadContracts()])
   const params = new URLSearchParams(location.search)
   if (params.get("sepet")) await followReturn(params)
 })

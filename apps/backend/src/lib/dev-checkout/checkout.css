@@ -152,6 +152,28 @@ iframe {
   border-radius: 8px;
   background: #fff;
 }
+details {
+  border: 1px solid #e7e5e4;
+  border-radius: 8px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  background: #fff;
+}
+.contract {
+  max-height: 260px;
+  overflow: auto;
+  font-size: 13px;
+}
+.contract table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.contract th,
+.contract td {
+  border-bottom: 1px solid #e7e5e4;
+  padding: 4px 6px;
+  text-align: left;
+}
 [hidden] {
   display: none !important;
 }

@@ -2917,6 +2917,20 @@
       "removed": "Note removed.",
       "unnamed": "Team member",
       "formerMember": "Former team member"
+    },
+    "contracts": {
+      "title": "Contract consent",
+      "none": "The shop had no published contracts when this order was placed; no consent was recorded.",
+      "givenAt": "Accepted at",
+      "ip": "IP address",
+      "pending": "The contract copies are being prepared.",
+      "open": "{{title}} · version {{version}}",
+      "copyHint": "The copy kept with the order, version {{version}}. Its hash (SHA-256) matches the text as kept: {{hash}}…",
+      "copyBroken": "Warning: this copy does not match the hash it was kept with (SHA-256 {{hash}}…); the text may have been changed.",
+      "kinds": {
+        "pre_information": "Pre-information form",
+        "distance_sales": "Distance sales contract"
+      }
     }
   },
   "customers": {

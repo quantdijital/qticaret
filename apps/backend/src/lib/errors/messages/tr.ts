@@ -434,6 +434,12 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "legal.draft_missing": "Bu metnin taslağı yok.",
   "legal.token_invalid":
     "Metinde tanınmayan ya da yarım kalmış bir belirteç var; belirteçler {mağaza_unvanı} biçiminde ve listedeki adlarla yazılır.",
+  "legal.consent_missing":
+    "Ödemeye geçmeden önce mesafeli satış sözleşmesini ve ön bilgilendirme formunu onaylayın.",
+  "legal.version_changed":
+    "Sözleşme metni güncellendi; lütfen yeni metni okuyup yeniden onaylayın.",
+  "legal.nothing_to_accept": "Mağazanın onaylanacak yayında sözleşmesi yok.",
+  "legal.copy_unknown": "Bu siparişle saklanan böyle bir sözleşme yok.",
   "legal.title_invalid": "Başlık görünmeyen kontrol karakterleri içeremez.",
   "orders.unknown": "Sipariş bulunamadı.",
   "paytr.merchant_id_invalid":

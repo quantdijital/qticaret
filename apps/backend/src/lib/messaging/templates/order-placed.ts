@@ -17,6 +17,8 @@ export interface OrderVars {
   bank: { holder: string; bank: string; iban: string; deadline: string | null } | null
   address: string[]
   orderUrl: string | null
+  /** The order keeps the contracts the shopper accepted (F13.2); its page shows them. */
+  contracts: boolean
 }
 
 export function orderSummary(vars: OrderVars): EmailBlock[] {
@@ -81,6 +83,9 @@ export const orderPlaced: MessageTemplate<OrderVars> = {
         ...paymentBlocks(vars),
         ...orderSummary(vars),
         { kind: "button", label: messageText("order.view"), url: vars.orderUrl },
+        ...(vars.contracts && vars.orderUrl
+          ? [{ kind: "note" as const, text: messageText("order_placed.contracts") }]
+          : []),
       ],
       footer: messageText("footer.order", { shop: brand.shopName }),
     }),
@@ -110,5 +115,6 @@ export const orderPlaced: MessageTemplate<OrderVars> = {
     },
     address: ["Ayşe Yılmaz", "Moda Mah., Atatürk Cad. No: 5", "Kadıköy / İstanbul"],
     orderUrl: null,
+    contracts: true,
   },
 }

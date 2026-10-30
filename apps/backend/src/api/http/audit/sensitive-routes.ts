@@ -23,6 +23,9 @@ export const SENSITIVE_READS: readonly [string, string, boolean, (readonly strin
   // F12.8: the team's notes are free text; what a customer was sent is theirs
   ["/admin/orders/:id/notes", "order", false],
   ["/admin/orders/:id/messages", "order", false],
+  // F13.2: the shopper's IP address and the contracts filled with the order
+  ["/admin/orders/:id/legal", "order", false],
+  ["/admin/orders/:id/legal/:kind", "order", false],
   ["/admin/customers/:id/messages", "customer", false],
   // F6.7: a dispute's evidence holds the order's delivery address
   ["/admin/chargebacks/:id/evidence", "chargeback", false],

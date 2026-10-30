@@ -49,7 +49,15 @@
           <div id="shipping" class="muted">Önce adresi kaydedin.</div>
         </section>
         <section>
-          <h2>4. Ödeme</h2>
+          <h2>4. Sözleşmeler</h2>
+          <div id="contracts" class="muted">Önce kargoyu seçin.</div>
+          <label class="choice" id="accept-row" hidden
+            ><input type="checkbox" id="accept" /> Ön bilgilendirme formunu ve mesafeli satış
+            sözleşmesini okudum, onaylıyorum.</label
+          >
+        </section>
+        <section>
+          <h2>5. Ödeme</h2>
           <label class="choice"
             ><input type="radio" name="provider" value="pp_paytr_paytr" checked /> PayTR (yerelde
             sahte PayTR: <code>pnpm dev:paytr</code>)</label

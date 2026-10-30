@@ -2,7 +2,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import type { Block, ContentDoc } from "../../lib/content"
 import { renderDoc } from "../../lib/content"
-import { LEGAL_KINDS, fillLegalDoc } from "../../lib/legal"
+import { LEGAL_KINDS, fillLegalDoc, linesTable } from "../../lib/legal"
 import type { LegalKind, OrderToken, ShopToken } from "../../lib/legal"
 import { LEGAL_MODULE } from "../../modules/legal"
 import type LegalModuleService from "../../modules/legal/service"
@@ -43,27 +43,6 @@ export async function shopLegalValues(
     alan_adı: seo.canonical_host,
     iade_süresi: String(policy.withdrawal_days),
     bugün: DATE.format(new Date()),
-  }
-}
-
-const cell = (text: string, header = false) => ({
-  type: header ? ("tableHeader" as const) : ("tableCell" as const),
-  content: [{ type: "paragraph" as const, content: [{ type: "text" as const, text }] }],
-})
-
-/** The order's lines as a table: what, how many, the line's total. */
-export function linesTable(
-  lines: readonly { title: string; quantity: number; total: string }[]
-): Block {
-  return {
-    type: "table",
-    content: [
-      { type: "tableRow", content: [cell("Ürün", true), cell("Adet", true), cell("Tutar", true)] },
-      ...lines.map((line) => ({
-        type: "tableRow" as const,
-        content: [cell(line.title), cell(String(line.quantity)), cell(line.total)],
-      })),
-    ],
   }
 }
 

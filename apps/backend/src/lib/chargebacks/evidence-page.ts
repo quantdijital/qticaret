@@ -43,6 +43,13 @@ export interface EvidencePayment {
   test_mode: boolean
 }
 
+/** The shopper's consent to the contracts and the copies kept with the order (F13.2). */
+export interface EvidenceContracts {
+  given_at: string
+  ip: string | null
+  copies: { title: string; version: number; html: string; html_hash: string; intact: boolean }[]
+}
+
 export interface EvidenceRefund {
   created_at: string
   reference: string
@@ -90,7 +97,9 @@ const rows = (pairs: [string, string][]) =>
 const STYLE = `body{font:14px/1.5 system-ui,sans-serif;color:#111;max-width:820px;margin:32px auto;padding:0 24px}
 h1{font-size:22px;margin:0 0 4px}h2{font-size:16px;margin:28px 0 8px;border-bottom:1px solid #ddd;padding-bottom:4px}
 p.lead{color:#555;margin:0 0 16px}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid #eee;vertical-align:top}
-th{width:38%;color:#444;font-weight:600}.note{color:#555;font-size:13px}@media print{body{margin:0}}`
+th{width:38%;color:#444;font-weight:600}.note{color:#555;font-size:13px}code{font-size:12px;word-break:break-all}
+section.contract{border:1px solid #ddd;border-radius:6px;padding:4px 16px;margin:16px 0}h3{font-size:15px}
+@media print{body{margin:0}section.contract{break-before:page}}`
 
 function paymentSection(payment: EvidencePayment | null, currency: string): string {
   if (!payment?.available) {
@@ -138,6 +147,28 @@ function refundsSection(refunds: readonly EvidenceRefund[], currency: string): s
     : `<p class="note">Bu sipariş için iade yapılmadı.</p>`
 }
 
+/**
+ * When and from where the contracts were accepted, and each copy as the
+ * order made it. A copy that no longer matches its hash is named, not shown.
+ */
+function contractsSection(contracts: EvidenceContracts | null): string {
+  if (!contracts) {
+    return `<p class="note">Bu sipariş verilirken mağazanın yayında sözleşme metni yoktu; onay kaydı tutulmadı.</p>`
+  }
+  const summary = rows([
+    ["Onay zamanı", date(contracts.given_at)],
+    ["Alıcının IP adresi", escape(contracts.ip ?? "—")],
+    ...contracts.copies.map((copy): [string, string] => [
+      `${copy.title} (sürüm ${String(copy.version)})`,
+      `SHA-256 <code>${escape(copy.html_hash)}</code>${copy.intact ? "" : " · özet tutmuyor"}`,
+    ]),
+  ])
+  const copies = contracts.copies
+    .filter((copy) => copy.intact)
+    .map((copy) => `<section class="contract"><h3>${escape(copy.title)}</h3>${copy.html}</section>`)
+  return summary + copies.join("")
+}
+
 function addressSection(address: Record<string, string | null>): string {
   return rows([
     ["Alıcı", escape(`${address["first_name"] ?? ""} ${address["last_name"] ?? ""}`.trim() || "—")],
@@ -159,6 +190,7 @@ export function renderEvidence(input: {
   order: EvidenceOrder
   payment: EvidencePayment | null
   refunds: readonly EvidenceRefund[]
+  contracts: EvidenceContracts | null
   generatedAt: Date
 }): string {
   const { chargeback, order } = input
@@ -192,7 +224,6 @@ export function renderEvidence(input: {
 <h2>Ödeme (sağlayıcının kaydı)</h2>${paymentSection(input.payment, currency)}
 <h2>Kargo ve teslim</h2>${shipmentsSection(order)}
 <h2>İadeler</h2>${refundsSection(input.refunds, currency)}
-<h2>Sözleşme onayı ve erişim kaydı</h2>
-<p class="note">Mesafeli satış sözleşmesi ve ön bilgilendirme onaylarının kaydı ile alıcının IP adresi bu sürümde saklanmıyor; yasal metin onayları geldiğinde (F13) bu bölüm otomatik dolar.</p>
+<h2>Sözleşme onayı ve erişim kaydı</h2>${contractsSection(input.contracts)}
 </body></html>`
 }

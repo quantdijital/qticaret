@@ -2,6 +2,8 @@ export { MISSING_VALUE, fillLegalDoc } from "./fill"
 export { IDENTITY_FIELDS, identityGaps } from "./identity"
 export type { IdentityFacts, IdentityField } from "./identity"
 export type { LegalValues } from "./fill"
+export { CONTRACT_PAYMENTS, linesTable, orderLegalValues } from "./order-values"
+export type { ContractPayment, OrderContractFacts, OrderLegalValues } from "./order-values"
 export { starterOf } from "./starters"
 export {
   BLOCK_TOKENS,

@@ -38,7 +38,9 @@ export function devCheckoutPage(config: DevCheckoutConfig, nonce: string): strin
   // Read per request, so an edit shows on reload; functions as replacements: `$` is no pattern
   const template = read("checkout.html")
     .replace("__STYLE__", () => read("checkout.css"))
-    .replace("__SCRIPT__", () => `${read("checkout.js")}\n${read("checkout-result.js")}`)
+    .replace("__SCRIPT__", () =>
+      ["checkout.js", "checkout-contracts.js", "checkout-result.js"].map(read).join("\n")
+    )
   const json = JSON.stringify(config).replace(/</g, "\\u003c")
   return template.replace(/__NONCE__/g, () => nonce).replace("__CONFIG__", () => json)
 }

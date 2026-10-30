@@ -17,6 +17,8 @@ import {
 } from "../../../lib/payments/checkout"
 import { CHECKOUT_SMS_HELD } from "../../../lib/messaging/sms/quota"
 import { formatIban } from "../../../lib/tr/iban"
+import { LEGAL_MODULE } from "../../../modules/legal"
+import type LegalModuleService from "../../../modules/legal/service"
 import { PLATFORM_SETTINGS_MODULE } from "../../../modules/platform-settings"
 import type PlatformSettingsModuleService from "../../../modules/platform-settings/service"
 import type { StoreSettings } from "../../../modules/platform-settings/sections"
@@ -48,6 +50,7 @@ const ORDER_FIELDS = [
   "shipping_address.phone",
   "payment_collections.payment_sessions.provider_id",
   "payment_collections.payment_sessions.data",
+  "cart.id",
   "cart.metadata",
 ]
 
@@ -75,7 +78,7 @@ interface OrderRow {
           ({ provider_id: string; data?: Record<string, unknown> | null } | null)[] | null
       } | null)[]
     | null
-  cart?: { metadata?: Record<string, unknown> | null } | null
+  cart?: { id?: string; metadata?: Record<string, unknown> | null } | null
 }
 
 /** Lira as a Turkish shopper reads it: `₺1.234,50`. */
@@ -103,6 +106,20 @@ async function orderUrlOf(
   }
   const token = orderAccessToken(orderAccessKey(), { id: order.id, email: order.email })
   return `${storefrontUrl}${ORDER_PATH}/${encodeURIComponent(order.id)}?${new URLSearchParams({ token }).toString()}`
+}
+
+/** Whether the shopper accepted the contracts at checkout: the order keeps them (F13.2). */
+async function hasContracts(
+  container: Pick<MedusaContainer, "resolve">,
+  cartId: string | undefined
+): Promise<boolean> {
+  if (!cartId) {
+    return false
+  }
+  const [consent] = await container
+    .resolve<LegalModuleService>(LEGAL_MODULE)
+    .listLegalConsents({ cart_id: cartId }, { take: 1, select: ["id"] })
+  return consent !== undefined
 }
 
 /** The order as its messages show it, and where they go; null when it is gone. */
@@ -181,6 +198,7 @@ export async function loadOrderMessage(
         .map(addressLine)
         .filter((line): line is string => line !== null),
       orderUrl: await orderUrlOf(container, order),
+      contracts: await hasContracts(container, order.cart?.id),
     },
     recipients: { email: order.email, sms: address["phone"] ?? null },
     receiverId: order.customer_id,

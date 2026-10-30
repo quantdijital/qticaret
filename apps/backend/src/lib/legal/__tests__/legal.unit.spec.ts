@@ -1,6 +1,14 @@
 import type { Block, ContentDoc } from "../../content"
 import { contentDoc, renderDoc } from "../../content"
-import { LEGAL_KINDS, checkLegalDoc, fillLegalDoc, identityGaps, starterOf } from ".."
+import {
+  LEGAL_KINDS,
+  checkLegalDoc,
+  fillLegalDoc,
+  identityGaps,
+  orderLegalValues,
+  starterOf,
+} from ".."
+import type { OrderContractFacts } from ".."
 
 const doc = (...content: Block[]): ContentDoc => ({ type: "doc", content })
 const p = (text: string): Block => ({ type: "paragraph", content: [{ type: "text", text }] })
@@ -72,5 +80,60 @@ describe("the shop's legal identity (F13.9)", () => {
     expect(
       identityGaps({ ...complete, contact_email: null, contact_phone: "+905320000000" })
     ).toEqual([])
+  })
+})
+
+describe("an order's contract values (F13.2)", () => {
+  // Medusa's amounts are lira
+  const order: OrderContractFacts = {
+    display_id: 1042,
+    created_at: "2026-10-30T09:15:00.000Z",
+    email: "ayse@ornek.com",
+    item_total: 500,
+    shipping_total: 59.9,
+    discount_total: 0,
+    total: 559.9,
+    items: [{ product_title: "Pamuklu Tişört", variant_title: "M", quantity: 2, total: 500 }, null],
+    shipping_address: {
+      first_name: "Ayşe",
+      last_name: "Yılmaz",
+      address_1: "Atatürk Cad. No: 5",
+      address_2: "Moda Mah.",
+      city: "Kadıköy",
+      province: "İstanbul",
+      postal_code: "34710",
+      phone: "+905320000000",
+    },
+    billing_address: null,
+    payment: "bank_transfer",
+  }
+
+  it("fills the buyer, the addresses, the lines and the totals as the order holds them", () => {
+    const { text, blocks } = orderLegalValues(order)
+
+    expect(text).toMatchObject({
+      alıcı_adı: "Ayşe Yılmaz",
+      alıcı_telefon: "+905320000000",
+      teslimat_adresi: "Moda Mah., Atatürk Cad. No: 5, Kadıköy / İstanbul, 34710",
+      // No billing address given: the delivery one
+      fatura_adresi: "Moda Mah., Atatürk Cad. No: 5, Kadıköy / İstanbul, 34710",
+      sipariş_no: "#1042",
+      sipariş_tarihi: "30.10.2026 12:15",
+      toplam: "₺559,90",
+      indirim: "₺0,00",
+      ödeme_yöntemi: "Havale / EFT",
+    })
+    expect(JSON.stringify(blocks["sipariş_kalemleri"])).toContain("Pamuklu Tişört · M")
+  })
+
+  it("leaves a cart's number, date and way to pay to show as missing", () => {
+    const { text } = orderLegalValues({
+      ...order,
+      display_id: null,
+      created_at: null,
+      payment: null,
+    })
+
+    expect([text.sipariş_no, text.sipariş_tarihi, text.ödeme_yöntemi]).toEqual(["", "", ""])
   })
 })

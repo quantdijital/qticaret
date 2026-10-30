@@ -1,7 +1,15 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { renderEvidence } from "../../lib/chargebacks/evidence-page"
-import type { EvidenceChargeback, EvidenceOrder } from "../../lib/chargebacks/evidence-page"
+import type {
+  EvidenceChargeback,
+  EvidenceContracts,
+  EvidenceOrder,
+} from "../../lib/chargebacks/evidence-page"
+import { isLegalKind } from "../../lib/legal"
+import { LEGAL_MODULE } from "../../modules/legal"
+import type LegalModuleService from "../../modules/legal/service"
+import { orderLegalRecord } from "../legal/order-record"
 import { orderPaymentDetails } from "../payments/payment-details"
 
 const ORDER_FIELDS = [
@@ -60,8 +68,8 @@ const shipmentsOf = (row: OrderRow): EvidenceOrder["fulfillments"] =>
  * The evidence for a dispute (adr/0030), as one self-contained HTML
  * document the shop sends to the provider (or prints to PDF): the order,
  * its delivery address, the provider's own record of the disputed
- * payment, the shipments and the refunds made. What the platform does not
- * keep yet (the shopper's consent records, F13) is named, not left out.
+ * payment, the shipments, the refunds made, and the contracts the shopper
+ * accepted with the IP address they accepted from (F13.2).
  */
 export async function chargebackEvidence(
   container: MedusaContainer,
@@ -76,12 +84,37 @@ export async function chargebackEvidence(
   if (!row) {
     throw new Error(`order ${chargeback.order_id} of chargeback ${chargeback.id} is gone`)
   }
-  const details = await orderPaymentDetails(container, chargeback.order_id)
+  const [details, contracts] = await Promise.all([
+    orderPaymentDetails(container, chargeback.order_id),
+    contractsOf(container, chargeback.order_id),
+  ])
   return renderEvidence({
     chargeback,
     order: { ...row, fulfillments: shipmentsOf(row) },
     payment: details.payments.find((each) => each.payment_id === chargeback.payment_id) ?? null,
     refunds: details.refunds,
+    contracts,
     generatedAt: new Date(),
   })
+}
+
+async function contractsOf(
+  container: MedusaContainer,
+  orderId: string
+): Promise<EvidenceContracts | null> {
+  const record = await orderLegalRecord(container, orderId)
+  if (!record) {
+    return null
+  }
+  const legal = container.resolve<LegalModuleService>(LEGAL_MODULE)
+  const copies = await Promise.all(
+    record.copies.flatMap((copy) =>
+      isLegalKind(copy.kind) ? [legal.readOrderCopy(orderId, copy.kind)] : []
+    )
+  )
+  return {
+    given_at: record.given_at,
+    ip: record.ip,
+    copies: copies.flatMap((copy) => (copy ? [copy] : [])),
+  }
 }

@@ -110,6 +110,8 @@ const TR: Readonly<Record<string, string>> = {
   "order_placed.bank_deadline":
     "Son ödeme zamanı: {{deadline}}. Ödeme gelmezse sipariş iptal edilir.",
   "order_placed.cod": "Ödemeyi ({{total}}) siparişiniz teslim edilirken kuryeye yapacaksınız.",
+  "order_placed.contracts":
+    "Onayladığınız mesafeli satış sözleşmesi ve ön bilgilendirme formu sipariş sayfanızda; istediğiniz zaman açıp kaydedebilirsiniz.",
   "parcel.title": "Gönderi",
   "parcel.contents": "Kolideki ürünler",
   "parcel.carrier": "Kargo firması: {{carrier}}",

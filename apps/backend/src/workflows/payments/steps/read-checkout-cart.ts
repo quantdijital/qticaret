@@ -2,6 +2,7 @@ import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/util
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { checkoutProblem } from "../../../lib/checkout"
 import { ConflictError, ValidationError } from "../../../lib/errors"
+import { assertConsented } from "../../legal/consent"
 import { itemAmounts, lineShares, shippingAmounts } from "../../../lib/orders"
 import type { LineShare } from "../../../lib/orders"
 import type { HostedCheckout } from "../../../lib/payments/checkout"
@@ -58,7 +59,8 @@ interface CartRow {
  * The cart a payment starts from, read on the server (adr/0026 §1): its
  * lines' shares in kuruş, the buyer from the shipping address (the
  * billing address when it has no phone), and its payment collection.
- * A cart that is not ready says what it misses, field by field.
+ * A cart that is not ready says what it misses, field by field; one whose
+ * contracts were not accepted as published now is not paid for.
  */
 export const readCheckoutCartStep = createStep(
   "payments-read-checkout-cart",
@@ -104,6 +106,8 @@ export const readCheckoutCartStep = createStep(
     if (!phone) {
       throw new ValidationError("cart.phone_required", { field: "shipping_address.phone" })
     }
+    // No payment is taken for a cart whose contracts were not accepted (adr/0041 §2)
+    await assertConsented(container, cart.id)
 
     const names = new Map([
       ...items.map((item) => [item.id, itemName(item)] as const),

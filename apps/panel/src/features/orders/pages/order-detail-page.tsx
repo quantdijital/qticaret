@@ -17,6 +17,7 @@ import { ItemsCard } from "@/features/orders/detail/items-card"
 import { NotesCard } from "@/features/orders/detail/notes-card"
 import { OrderActions } from "@/features/orders/detail/order-actions"
 import { PaymentCard } from "@/features/orders/detail/payment-card"
+import { ContractsCard } from "@/features/orders/detail/contracts-card"
 import { AddressCard, CustomerCard } from "@/features/orders/detail/people-cards"
 import { ProgressCard } from "@/features/orders/detail/progress-card"
 import { RefundsCard } from "@/features/orders/detail/refunds-card"
@@ -29,7 +30,7 @@ const route = getRouteApi("/_auth/orders/$id")
 /**
  * One order (docs/06 §4): where it stands and the next step at the top,
  * the parcel, the money and what the customer was sent on the left, the
- * customer and the team's notes on the right.
+ * customer, the contracts they accepted and the team's notes on the right.
  */
 export function OrderDetailPage() {
   const { t } = useTranslation()
@@ -122,6 +123,7 @@ export function OrderDetailPage() {
             {...(money.error ? { moneyError: { onRetry: () => void money.refetch() } } : {})}
             hosted={hosted}
           />
+          <ContractsCard orderId={order.id} />
           {/* Last: the column's last card grows, and the note box sits at its foot */}
           <NotesCard orderId={order.id} />
         </PageColumn>

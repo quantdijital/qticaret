@@ -68,6 +68,15 @@ describe("messages (adr/0036)", () => {
     )
   })
 
+  it("points to the accepted contracts on the order's page, when it has a page and them", () => {
+    const sample = orderPlaced.sample
+    const page = "https://magaza.example/siparis/order_1?token=t"
+
+    expect(emailOf({ ...sample, orderUrl: page }).text).toContain("mesafeli satış sözleşmesi")
+    expect(emailOf({ ...sample, orderUrl: page, contracts: false }).text).not.toContain("sözleşme")
+    expect(emailOf({ ...sample, orderUrl: null }).text).not.toContain("sözleşme")
+  })
+
   it("writes a sender's name as one header word", () => {
     expect(mailbox({ email: "a@b.example", name: 'Ayşe "Usta"\r\nBcc: x@y.example' })).toBe(
       '"Ayşe \\"Usta\\" Bcc: x@y.example" <a@b.example>'

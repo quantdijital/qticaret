@@ -2917,6 +2917,20 @@
       "removed": "Not silindi.",
       "unnamed": "Ekip üyesi",
       "formerMember": "Ekipten ayrılan kişi"
+    },
+    "contracts": {
+      "title": "Sözleşme onayı",
+      "none": "Bu sipariş verilirken mağazanın yayında sözleşmesi yoktu; onay kaydı tutulmadı.",
+      "givenAt": "Onay zamanı",
+      "ip": "IP adresi",
+      "pending": "Sözleşme kopyaları hazırlanıyor.",
+      "open": "{{title}} · sürüm {{version}}",
+      "copyHint": "Siparişle saklanan kopya, sürüm {{version}}. Özeti (SHA-256) saklandığı günkü metinle aynı: {{hash}}…",
+      "copyBroken": "Uyarı: bu kopya saklandığı günkü özetle (SHA-256 {{hash}}…) uyuşmuyor; metin sonradan değişmiş olabilir.",
+      "kinds": {
+        "pre_information": "Ön bilgilendirme formu",
+        "distance_sales": "Mesafeli satış sözleşmesi"
+      }
     }
   },
   "customers": {

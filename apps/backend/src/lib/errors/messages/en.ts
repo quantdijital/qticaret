@@ -433,6 +433,12 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "legal.draft_missing": "This text has no draft.",
   "legal.token_invalid":
     "The text has an unknown or broken token; tokens are written like {mağaza_unvanı}, with the names in the list.",
+  "legal.consent_missing":
+    "Accept the distance sales contract and the pre-information form before paying.",
+  "legal.version_changed":
+    "The contract has been updated; please read the new text and accept it again.",
+  "legal.nothing_to_accept": "The shop has no published contract to accept.",
+  "legal.copy_unknown": "No such contract is kept with this order.",
   "legal.title_invalid": "The title cannot contain invisible control characters.",
   "orders.unknown": "Order not found.",
   "paytr.merchant_id_invalid":
