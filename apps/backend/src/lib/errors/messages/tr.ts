@@ -35,6 +35,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Düzenlenen kalemler bu siparişe ait değil ya da birden fazla kez seçildi.",
   "orders.edit_after_packing":
     "Paketlenmiş, kargoya verilmiş ya da iptal edilmiş sipariş düzenlenemez.",
+  "orders.edit_invoiced":
+    "Bu siparişin faturası kesildi ya da kesiliyor; sipariş artık düzenlenemez.",
   "orders.edit_payment_unsupported":
     "Bu siparişin kalemleri düzenlenemez: yalnızca kartla ödenmiş siparişler düzenlenir. Kapıda ödeme ve havalede siparişi iptal edip yenisini oluşturun.",
   "orders.edit_difference_changed":

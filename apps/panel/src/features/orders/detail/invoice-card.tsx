@@ -94,6 +94,10 @@ export function InvoiceCard({ orderId }: { orderId: string }) {
               })}
             </p>
           ) : null}
+          {invoice.status === "issued" &&
+          invoice.last_error === "einvoice.return_document_needed" ? (
+            <p className="text-[13px] text-destructive-text">{t(`${V}.returnNeeded`)}</p>
+          ) : null}
           {invoice.status === "pending" && external ? (
             <p className="text-[13px] text-muted-foreground">{t(`${V}.waitingExternal`)}</p>
           ) : null}

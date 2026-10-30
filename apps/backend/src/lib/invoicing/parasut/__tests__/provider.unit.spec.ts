@@ -94,6 +94,7 @@ describe("Paraşüt as the invoice program (adr/0034 §4, §7)", () => {
       job_id: null,
       job_started_at: null,
       number: null,
+      cancellable_until: null,
     }
   })
 

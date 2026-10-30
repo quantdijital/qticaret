@@ -18,6 +18,7 @@ export interface ProgramState {
   job_id: string | null
   job_started_at: Date | null
   number: string | null
+  cancellable_until: Date | null
 }
 
 export interface KeptProgress {
@@ -56,6 +57,12 @@ export type AdvanceOutcome =
 export interface InvoiceProvider {
   readonly id: "parasut" | "fake"
   advance(state: ProgramState, context: AdvanceContext): Promise<AdvanceOutcome>
+  /**
+   * Undoes the invoice at the program, its order canceled (adr/0034 §10):
+   * a draft deleted, an e-Arşiv cancelled within its days; `too_late` when
+   * it stands (an e-Fatura, or past the days) and a return document is due.
+   */
+  cancel(state: ProgramState, now: Date): Promise<"cancelled" | "too_late">
 }
 
 /** The kuruş the program's total is off ours by; null when they agree or it said none. */

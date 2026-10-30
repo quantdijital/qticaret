@@ -66,6 +66,10 @@ export const NOTIFICATION_MESSAGES: Readonly<
       description:
         "Kendiliğinden yeniden denenmeyecek; sipariş sayfasındaki fatura kartından bakın.",
     },
+    "einvoice.return_needed": {
+      title: "İptal edilen #{{order}} siparişinin faturası duruyor",
+      description: "Fatura artık iptal edilemiyor; iade belgesi düzenleyin.",
+    },
     "payments.statement_mismatch": {
       title: "{{provider}} dökümü {{day}} günü tutmuyor",
       description: "{{count}} fark var; Raporlar > Finans'ta listelendi.",
@@ -118,6 +122,10 @@ export const NOTIFICATION_MESSAGES: Readonly<
       title: "Order #{{order}}'s invoice could not be issued",
       description:
         "It will not be tried again on its own; see the invoice card on the order's page.",
+    },
+    "einvoice.return_needed": {
+      title: "Canceled order #{{order}}'s invoice stands",
+      description: "It can no longer be cancelled; issue a return document.",
     },
     "payments.statement_mismatch": {
       title: "The {{provider}} statement of {{day}} does not agree",

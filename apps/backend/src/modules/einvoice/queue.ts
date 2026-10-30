@@ -1,10 +1,5 @@
 import type { Context } from "@medusajs/framework/types"
-import {
-  InjectManager,
-  InjectTransactionManager,
-  MedusaContext,
-  MedusaService,
-} from "@medusajs/framework/utils"
+import { InjectTransactionManager, MedusaContext, MedusaService } from "@medusajs/framework/utils"
 import { uniqueViolationKeys } from "../../lib/errors"
 import { Invoice } from "./models/invoice"
 import { ParasutConnection } from "./models/parasut-connection"
@@ -35,12 +30,14 @@ export interface ClaimedInvoice {
   kind: InvoiceKind
   source_id: string
   provider: InvoiceProviderId
-  status: "pending" | "issuing"
+  /** `issued`: claimed only to be undone, its order canceled. */
+  status: "pending" | "issuing" | "issued"
   attempts: number
   external_id: string | null
   document_id: string | null
   job_id: string | null
   job_started_at: Date | null
+  cancel_requested_at: Date | null
   /** Until when this claim holds it: a change after another worker took it is refused. */
   lease: Date
 }
@@ -102,6 +99,7 @@ const SETTLED = [
   "cancellable_until",
   "program_difference",
   "pdf_file_id",
+  "cancel_requested_at",
 ] as const
 type Settled = Partial<Record<(typeof SETTLED)[number], unknown>>
 
@@ -159,12 +157,14 @@ export class InvoiceQueueService extends MedusaService({ Invoice, ParasutConnect
       `UPDATE invoice SET next_attempt_at = ?, updated_at = now()
         WHERE id IN (
           SELECT id FROM invoice
-           WHERE status IN ('pending', 'issuing') AND provider <> 'external'
-             AND next_attempt_at <= ? AND deleted_at IS NULL
+           WHERE (status IN ('pending', 'issuing')
+                  OR (status = 'issued' AND cancel_requested_at IS NOT NULL))
+             AND provider <> 'external' AND next_attempt_at <= ? AND deleted_at IS NULL
            ORDER BY next_attempt_at, id LIMIT ?
            FOR UPDATE SKIP LOCKED)
         RETURNING id, order_id, kind, source_id, provider, status, attempts, external_id,
-                  document_id, job_id, job_started_at, next_attempt_at AS lease`,
+                  document_id, job_id, job_started_at, cancel_requested_at,
+                  next_attempt_at AS lease`,
       [minutesFrom(now, LEASE_MINUTES), now, limit]
     )) as ClaimedInvoice[]
   }
@@ -230,6 +230,26 @@ export class InvoiceQueueService extends MedusaService({ Invoice, ParasutConnect
     })
   }
 
+  /** Undone at its program (or never sent there): the order was canceled. */
+  markCancelled(row: ClaimedInvoice, now: Date = new Date()) {
+    return this.settle(row, {
+      status: "cancelled",
+      cancel_requested_at: null,
+      last_error: null,
+      next_attempt_at: now,
+    })
+  }
+
+  /** Too late to undo at its program: issued it stays, for a return document (staff told). */
+  markCancelTooLate(row: ClaimedInvoice, code: string, now: Date = new Date()) {
+    return this.settle(row, {
+      status: "issued",
+      cancel_requested_at: null,
+      last_error: code,
+      next_attempt_at: now,
+    })
+  }
+
   /**
    * One more failed try: later again, or stopped after the last. What the
    * program made so far stays, so the next try carries on from it. The
@@ -251,44 +271,5 @@ export class InvoiceQueueService extends MedusaService({ Invoice, ParasutConnect
       last_error: code.slice(0, 120),
     })
     return done ? status : null
-  }
-
-  /** Staff ask a stopped invoice to be tried again: it carries on from where it stopped. */
-  async retry(id: string, now: Date = new Date()): Promise<boolean> {
-    const [row] = await this.listInvoices({ id, status: "failed" }, { take: 1 })
-    if (!row) {
-      return false
-    }
-    await this.updateInvoices({
-      id,
-      status: row.job_id ? "issuing" : "pending",
-      attempts: 0,
-      next_attempt_at: now,
-    })
-    return true
-  }
-
-  /** How many invoices are in each state. */
-  @InjectManager()
-  async counts(
-    @MedusaContext() sharedContext: Context = {}
-  ): Promise<Record<InvoiceStatus, number>> {
-    const manager = sharedContext.manager as Executor
-    const rows = (await manager.execute(
-      `SELECT status, count(*)::integer AS count FROM invoice
-        WHERE deleted_at IS NULL GROUP BY status`,
-      []
-    )) as { status: InvoiceStatus; count: number }[]
-    const counts: Record<InvoiceStatus, number> = {
-      pending: 0,
-      issuing: 0,
-      issued: 0,
-      failed: 0,
-      cancelled: 0,
-    }
-    for (const row of rows) {
-      counts[row.status] = row.count
-    }
-    return counts
   }
 }

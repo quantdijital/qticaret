@@ -1,10 +1,11 @@
 import type { Context } from "@medusajs/framework/types"
 import { InjectTransactionManager, MedusaContext } from "@medusajs/framework/utils"
 import { decryptPii, encryptPii, parseKey } from "../../lib/crypto/pii"
-import { ConflictError, isProviderError, uniqueViolationKeys } from "../../lib/errors"
-import { InvoiceQueueService } from "./queue"
+import { isProviderError } from "../../lib/errors"
+import { InvoiceRecordsService } from "./records"
 
 export { MAX_ATTEMPTS } from "./queue"
+export type { WrittenBack } from "./records"
 export type {
   ClaimedInvoice,
   DocumentType,
@@ -47,17 +48,8 @@ interface Executor {
 // Refusals that mean the platform no longer holds the shop's company
 const REVOKED = new Set(["invalid_grant", "invalid_client", "unauthorized"])
 
-export interface WrittenBack {
-  number: string
-  uuid: string | null
-  document_type: "e_invoice" | "e_archive"
-  issued_at: Date
-}
-
-export type WriteBackProblem = "einvoice.not_external" | "einvoice.cancelled"
-
 /** Orders' invoices (F8, adr/0034), and the shop's Paraşüt connection (§5). */
-class EinvoiceModuleService extends InvoiceQueueService {
+class EinvoiceModuleService extends InvoiceRecordsService {
   private readonly encryptionKey: Buffer
 
   constructor(container: Record<string, unknown>, options: EinvoiceModuleOptions) {
@@ -219,73 +211,6 @@ class EinvoiceModuleService extends InvoiceQueueService {
       ]
     )
     return { company_id: row.company_id, token: tokens.accessToken }
-  }
-
-  /**
-   * An external program's invoice, written back (adr/0034 §9): the number
-   * it issued under, once. The same number again is the same answer;
-   * another number, or a number another invoice holds, is a conflict.
-   */
-  @InjectTransactionManager()
-  async recordWriteBack(
-    id: string,
-    input: WrittenBack,
-    @MedusaContext() sharedContext: Context = {}
-  ): Promise<{ changed: boolean } | null> {
-    const manager = sharedContext.transactionManager as Executor
-    const [row] = (await manager.execute(
-      `SELECT provider, status, number FROM invoice WHERE id = ? AND deleted_at IS NULL FOR UPDATE`,
-      [id]
-    )) as { provider: string; status: string; number: string | null }[]
-    if (!row) {
-      return null
-    }
-    if (row.provider !== "external") {
-      throw new ConflictError("einvoice.not_external")
-    }
-    if (row.status === "cancelled") {
-      throw new ConflictError("einvoice.cancelled")
-    }
-    if (row.status === "issued") {
-      if (row.number === input.number) {
-        return { changed: false }
-      }
-      throw new ConflictError("einvoice.already_issued")
-    }
-    try {
-      await manager.execute(
-        `UPDATE invoice
-            SET status = 'issued', number = ?, uuid = ?, document_type = ?, issued_at = ?,
-                last_error = NULL, updated_at = now()
-          WHERE id = ?`,
-        [input.number, input.uuid, input.document_type, input.issued_at, id]
-      )
-    } catch (error) {
-      if (uniqueViolationKeys(error)?.includes("number")) {
-        throw new ConflictError("einvoice.number_taken")
-      }
-      throw error
-    }
-    return { changed: true }
-  }
-
-  /**
-   * The PDF of an external program's issued invoice, kept in the private
-   * store; the key of the one it replaces, to remove, or null.
-   */
-  async attachPdf(id: string, fileId: string): Promise<{ previous: string | null } | null> {
-    const [row] = await this.listInvoices({ id }, { take: 1 })
-    if (!row) {
-      return null
-    }
-    if (row.provider !== "external") {
-      throw new ConflictError("einvoice.not_external")
-    }
-    if (row.status !== "issued") {
-      throw new ConflictError("einvoice.not_issued")
-    }
-    await this.updateInvoices({ id, pdf_file_id: fileId })
-    return { previous: row.pdf_file_id }
   }
 }
 

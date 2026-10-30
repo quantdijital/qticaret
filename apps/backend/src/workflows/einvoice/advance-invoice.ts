@@ -18,7 +18,7 @@ import { fakeInvoicingAllowed } from "../../lib/invoicing"
 import type { InvoiceDraft } from "../../lib/invoicing"
 import { fakeInvoiceProvider } from "../../lib/invoicing/fake"
 import { parasutProvider } from "../../lib/invoicing/parasut/provider"
-import type { AdvanceOutcome, InvoiceProvider } from "../../lib/invoicing/provider"
+import type { AdvanceOutcome, InvoiceProvider, ProgramState } from "../../lib/invoicing/provider"
 import { EINVOICE_MODULE } from "../../modules/einvoice"
 import type EinvoiceModuleService from "../../modules/einvoice/service"
 import type { ClaimedInvoice, InvoiceStatus } from "../../modules/einvoice/service"
@@ -90,6 +90,33 @@ async function tellCustomer(container: Container, invoiceId: string) {
   }
 }
 
+/**
+ * The order was canceled (adr/0034 §10): the invoice undone at its
+ * program, or, too late for that, left issued for a return document.
+ * Undoing a tax document is not undone again; a failure is tried later.
+ */
+async function undo(
+  container: Container,
+  claim: ClaimedInvoice,
+  state: ProgramState
+): Promise<AdvancedInvoice> {
+  const invoices = container.resolve<EinvoiceModuleService>(EINVOICE_MODULE)
+  const now = new Date()
+  let result: "cancelled" | "too_late"
+  try {
+    result = await providerFor(container, claim.provider).cancel(state, now)
+  } catch (error) {
+    logger.warn({ event: "einvoice.cancel_failed", invoice_id: claim.id, err: errorSummary(error) })
+    const code = codeOf(error)
+    return { status: (await invoices.markFailed(claim, code, now)) ?? "lost", code }
+  }
+  if (result === "cancelled") {
+    return { status: (await invoices.markCancelled(claim, now)) ? "cancelled" : "lost", code: null }
+  }
+  const code = "einvoice.return_document_needed"
+  return { status: (await invoices.markCancelTooLate(claim, code, now)) ? "issued" : "lost", code }
+}
+
 async function settle(
   container: Container,
   claim: ClaimedInvoice,
@@ -153,8 +180,10 @@ const advanceInvoiceStep = createStep(
     if (!row || new Date(row.next_attempt_at).getTime() !== lease.getTime()) {
       return new StepResponse<AdvancedInvoice>({ status: "lost", code: null })
     }
-    if (row.status !== "pending" && row.status !== "issuing") {
-      return new StepResponse<AdvancedInvoice>({ status: row.status, code: null })
+    const status = row.status
+    const undoing = status === "issued" && row.cancel_requested_at !== null
+    if (status !== "pending" && status !== "issuing" && !undoing) {
+      return new StepResponse<AdvancedInvoice>({ status, code: null })
     }
     const claim: ClaimedInvoice = {
       id: row.id,
@@ -162,35 +191,42 @@ const advanceInvoiceStep = createStep(
       kind: row.kind,
       source_id: row.source_id,
       provider: row.provider,
-      status: row.status,
+      status: status === "issued" ? "issued" : status === "issuing" ? "issuing" : "pending",
       attempts: row.attempts,
       external_id: row.external_id,
       document_id: row.document_id,
       job_id: row.job_id,
       job_started_at: row.job_started_at ? new Date(row.job_started_at) : null,
+      cancel_requested_at: row.cancel_requested_at ? new Date(row.cancel_requested_at) : null,
       lease,
+    }
+    const state = {
+      ...claim,
+      document_type: row.document_type,
+      number: row.number,
+      cancellable_until: row.cancellable_until ? new Date(row.cancellable_until) : null,
+    }
+    if (claim.cancel_requested_at) {
+      return new StepResponse(await undo(container, claim, state))
     }
     let draft: InvoiceDraft | null = null
     const now = () => new Date()
     let outcome: AdvanceOutcome
     try {
-      outcome = await providerFor(container, row.provider).advance(
-        { ...claim, document_type: row.document_type, number: row.number },
-        {
-          draft: async () => {
-            if (!draft) {
-              const result = await invoiceDraftFor(container, row)
-              if ("problems" in result) {
-                throw new ValidationError(result.problems[0] ?? "einvoice.no_lines")
-              }
-              draft = result.draft
+      outcome = await providerFor(container, row.provider).advance(state, {
+        draft: async () => {
+          if (!draft) {
+            const result = await invoiceDraftFor(container, row)
+            if ("problems" in result) {
+              throw new ValidationError(result.problems[0] ?? "einvoice.no_lines")
             }
-            return draft
-          },
-          keep: (progress) => invoices.keep(claim, progress, now()),
-          now,
-        }
-      )
+            draft = result.draft
+          }
+          return draft
+        },
+        keep: (progress) => invoices.keep(claim, progress, now()),
+        now,
+      })
     } catch (error) {
       // Counted here, with the claim as it now stands: a code, never a message that may quote data
       logger.warn({

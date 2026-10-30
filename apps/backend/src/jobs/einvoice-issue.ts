@@ -5,6 +5,7 @@ import { notificationText } from "../lib/notifications/messages"
 import { EINVOICE_MODULE } from "../modules/einvoice"
 import type EinvoiceModuleService from "../modules/einvoice/service"
 import { advanceInvoiceWorkflow } from "../workflows/einvoice/advance-invoice"
+import { alertReturnNeeded } from "../workflows/einvoice/cancel-invoice"
 import { orderOf, queueSaleInvoice } from "../workflows/einvoice/queue-invoices"
 
 // Invoices moved on per run at most; the next run takes the rest
@@ -71,6 +72,9 @@ export async function issueInvoices(container: MedusaContainer, now: Date = new 
     counts.moved += 1
     if (result.status === "issued") {
       counts.issued += 1
+    }
+    if (result.code === "einvoice.return_document_needed") {
+      await alertReturnNeeded(container, row.id, row.order_id)
     }
     if (result.status === "failed") {
       counts.stopped += 1

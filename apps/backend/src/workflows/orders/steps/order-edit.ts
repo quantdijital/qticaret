@@ -5,6 +5,8 @@ import { fromMedusaAmount } from "../../../lib/money"
 import type { MedusaAmount } from "../../../lib/money"
 import { cancelRefundReference } from "../../../lib/orders/locks"
 import { isOfflineProvider } from "../../../lib/payments/checkout"
+import { EINVOICE_MODULE } from "../../../modules/einvoice"
+import type EinvoiceModuleService from "../../../modules/einvoice/service"
 import { ORDER_REFUNDS_MODULE } from "../../../modules/order-refunds"
 import type OrderRefundsModuleService from "../../../modules/order-refunds/service"
 
@@ -80,6 +82,18 @@ export const checkOrderEditStep = createStep(
     const packed = (order.fulfillments ?? []).some((each) => each && !each.canceled_at)
     if (order.status === "canceled" || order.status === "completed" || packed) {
       throw new ValidationError("orders.edit_after_packing")
+    }
+    // An invoice on its way or issued names the order as it was (adr/0033 §8, adr/0034)
+    const [invoiced] = await container.resolve<EinvoiceModuleService>(EINVOICE_MODULE).listInvoices(
+      {
+        order_id: input.order_id,
+        kind: "sale",
+        status: ["pending", "issuing", "issued", "failed"],
+      },
+      { select: ["id"], take: 1 }
+    )
+    if (invoiced) {
+      throw new ValidationError("orders.edit_invoiced")
     }
     const refunds = await container
       .resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE)

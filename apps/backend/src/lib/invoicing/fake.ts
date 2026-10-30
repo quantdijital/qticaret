@@ -20,6 +20,14 @@ async function fakePdf(number: string): Promise<Buffer> {
 
 export const fakeInvoiceProvider: InvoiceProvider = {
   id: "fake",
+  cancel: (state, now) =>
+    Promise.resolve(
+      !state.number ||
+        (state.document_type === "e_archive" &&
+          (state.cancellable_until?.getTime() ?? 0) > now.getTime())
+        ? "cancelled"
+        : "too_late"
+    ),
   async advance(state, context) {
     const draft = await context.draft()
     const number = `TST${String(context.now().getUTCFullYear())}${state.id.slice(-9).toUpperCase()}`

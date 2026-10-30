@@ -3125,7 +3125,8 @@
         "program": "Program",
         "when": "Tarih",
         "total": "Tutar"
-      }
+      },
+      "returnNeeded": "Sipariş iptal edildi ama fatura artık iptal edilemiyor (e-Fatura ya da 7 gün geçti). İade belgesi düzenleyin."
     }
   },
   "customers": {
@@ -4796,6 +4797,10 @@
     "einvoiceStopped": {
       "title": "#{{order}} siparişinin faturası kesilemedi",
       "description": "Kendiliğinden yeniden denenmeyecek; sipariş sayfasındaki fatura kartından bakın."
+    },
+    "einvoiceReturnNeeded": {
+      "title": "İptal edilen #{{order}} siparişinin faturası duruyor",
+      "description": "Fatura artık iptal edilemiyor; iade belgesi düzenleyin."
     }
   },
   "content": {

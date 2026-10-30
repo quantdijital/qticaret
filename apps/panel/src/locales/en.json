@@ -3125,7 +3125,8 @@
         "program": "Program",
         "when": "Date",
         "total": "Total"
-      }
+      },
+      "returnNeeded": "The order was canceled but its invoice can no longer be cancelled (an e-Fatura, or past seven days). Issue a return document."
     }
   },
   "customers": {
@@ -4796,6 +4797,10 @@
     "einvoiceStopped": {
       "title": "Order #{{order}}'s invoice could not be issued",
       "description": "It will not be tried again on its own; see the invoice card on the order's page."
+    },
+    "einvoiceReturnNeeded": {
+      "title": "Canceled order #{{order}}'s invoice stands",
+      "description": "It can no longer be cancelled; issue a return document."
     }
   },
   "content": {

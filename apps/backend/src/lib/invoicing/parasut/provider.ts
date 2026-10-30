@@ -1,5 +1,5 @@
 import { turkishDay } from "../../dashboard/period"
-import { isProviderError } from "../../errors"
+import { RetryableError, isProviderError } from "../../errors"
 import { differenceOf } from "../provider"
 import type { AdvanceContext, AdvanceOutcome, InvoiceProvider, ProgramState } from "../provider"
 import type { InvoiceBuyer } from "../types"
@@ -137,8 +137,46 @@ export function parasutProvider(session: ParasutSession): InvoiceProvider {
     return { next: "issued", progress, pdf: await downloadParasutPdf(link) }
   }
 
+  /** Its order canceled: the draft deleted, or the e-Arşiv cancelled while it still can be. */
+  async function cancel(state: ProgramState, now: Date): Promise<"cancelled" | "too_late"> {
+    const externalId = state.external_id
+    if (!externalId) {
+      return "cancelled"
+    }
+    if (!state.document_id) {
+      try {
+        await session((api, token) => api.deleteSalesInvoice(token, externalId))
+        return "cancelled"
+      } catch (error) {
+        if (isProviderError(error) && error.providerCode === "not_found") {
+          return "cancelled"
+        }
+        // Refused: an e-document was made of it meanwhile, read below
+        if (!isProviderError(error) || error.providerCode !== "validation_failed") {
+          throw error
+        }
+      }
+    }
+    const invoice = await session((api, token) => api.readSalesInvoice(token, externalId))
+    if (invoice.cancelled) {
+      return "cancelled"
+    }
+    const document = invoice.document
+    if (!document) {
+      // Still being made: asked about again on the next try
+      throw new RetryableError("einvoice.cancel_waiting")
+    }
+    const until = Date.parse(document.cancellable_until ?? "")
+    if (document.type !== "e_archives" || !(until > now.getTime())) {
+      return "too_late"
+    }
+    await session((api, token) => api.cancelSalesInvoice(token, externalId))
+    return "cancelled"
+  }
+
   return {
     id: "parasut",
+    cancel,
     async advance(state, context) {
       let externalId = state.external_id
       if (!externalId) {

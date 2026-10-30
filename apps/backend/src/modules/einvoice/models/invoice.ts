@@ -53,6 +53,12 @@ export const Invoice = model
     gross_total: model.bigNumber(),
     /** The program's total less ours, in kuruş, when they differ (a rounding). */
     program_difference: model.number().nullable(),
+    /**
+     * The order was canceled: the job undoes the invoice at its program
+     * (a draft deleted, an e-Arşiv cancelled within its days) or, too
+     * late for that, leaves it issued for a return document (adr/0034 §10).
+     */
+    cancel_requested_at: model.dateTime().nullable(),
     /** A return's invoice: the sale's it returns. */
     original_invoice_id: model.text().nullable(),
   })

@@ -17,6 +17,7 @@ describe("the fake invoice program (development and tests)", () => {
       job_id: null,
       job_started_at: null,
       number: null,
+      cancellable_until: null,
     }
     const context = (kind: "person" | "company") => ({
       draft: () => Promise.resolve(draft(kind)),

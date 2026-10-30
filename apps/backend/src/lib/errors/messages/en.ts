@@ -30,6 +30,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "orders.edit_nothing": "Nothing was chosen to change.",
   "orders.edit_items_invalid": "The edited lines are not this order's, or one was chosen twice.",
   "orders.edit_after_packing": "An order packed, shipped or cancelled cannot be edited.",
+  "orders.edit_invoiced":
+    "This order's invoice is issued or on its way; the order can no longer be edited.",
   "orders.edit_payment_unsupported":
     "This order's lines cannot be edited: only orders paid by card can. For cash on delivery and bank transfer, cancel the order and place a new one.",
   "orders.edit_difference_changed":

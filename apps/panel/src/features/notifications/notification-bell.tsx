@@ -70,6 +70,15 @@ function useAlertText(data: Record<string, unknown>) {
       link: { to: "/settings/api" as const, search: {}, params: {} },
     }
   }
+  if (data["kind"] === "einvoice_return_needed") {
+    return {
+      title: t("notifications.einvoiceReturnNeeded.title", { order: text(data["display_id"]) }),
+      description: t("notifications.einvoiceReturnNeeded.description"),
+      Icon: FileWarning,
+      tone: "bg-destructive-soft text-destructive-text",
+      link: { to: "/orders/$id" as const, search: {}, params: { id: text(data["order_id"]) } },
+    }
+  }
   if (data["kind"] === "einvoice_stopped") {
     const order = text(data["order_id"])
     return {
