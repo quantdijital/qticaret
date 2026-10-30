@@ -729,4 +729,9 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "migration.image_unreachable":
     "The picture could not be reached; it did not move. You can add it by hand.",
   "migration.image_not_accepted": "Not an accepted picture (JPEG, PNG, WebP, AVIF), or unreadable.",
+  "migration.url_path_taken":
+    "This old address belongs to another record here; it was not redirected.",
+  "migration.url_rules_refused":
+    "The redirect rules could not be written; review the decisions and apply again.",
+  "migration.url_target_not_live": "The target must be a live page here (not another redirect).",
 }

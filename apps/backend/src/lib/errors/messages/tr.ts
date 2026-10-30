@@ -733,4 +733,9 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "migration.image_unreachable": "Görsele ulaşılamadı; taşınmadı. Ürüne elle ekleyebilirsiniz.",
   "migration.image_not_accepted":
     "Dosya kabul edilen bir görsel değil (JPEG, PNG, WebP, AVIF) ya da okunamadı.",
+  "migration.url_path_taken": "Bu eski adres sitede başka bir kayda ait; yönlendirilmedi.",
+  "migration.url_rules_refused":
+    "Yönlendirme kuralları yazılamadı; kararları gözden geçirip yeniden uygulayın.",
+  "migration.url_target_not_live":
+    "Hedef, sitede yayında olan bir sayfa olmalı (başka bir yönlendirme değil).",
 }

@@ -19,7 +19,7 @@ export interface Redirect {
   status: RedirectStatus
   query_policy: QueryPolicy
   query_keep: string[]
-  origin: "manual" | "import"
+  origin: "manual" | "import" | "migration"
   hit_count: number
   last_hit_at: string | null
   created_at: string

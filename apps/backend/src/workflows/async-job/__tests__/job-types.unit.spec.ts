@@ -16,6 +16,7 @@ describe("job types", () => {
       "catalog.import",
       "customer.data_export",
       "migration.run",
+      "migration.urls",
       "promotion.codes",
       "report.export",
       "seo.audit",
@@ -58,6 +59,7 @@ describe("job types", () => {
       "catalog.bulk_edit",
       "catalog.import",
       "migration.run",
+      "migration.urls",
     ])
     expect(queueLockKey("catalog.import")).toBe(queueLockKey("catalog.bulk_edit"))
     expect(exclusiveTypes("seo.audit")).toEqual(["seo.audit"])

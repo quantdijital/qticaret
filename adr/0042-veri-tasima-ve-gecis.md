@@ -121,3 +121,12 @@ Elimizde olanlar:
 4. **Tekrarsızlık.** Her görsel (ürün + adres) ayrı hatırlanır; ikinci çalıştırma saklananı indirmez, reddedileni yeniden dener.
 5. **Hata.** Reddedilen ya da ulaşılamayan görsel ürünü durdurmaz; raporun "Notlar" sayfasında nedeniyle yazar.
 6. **Eski görsel adresi.** Eski görseller çoğunlukla başka bir alan adında (ör. Shopify CDN) durur; oraya gelen istek bu siteye hiç ulaşmaz, 301 verilemez. Eski sitenin kendi alan adındaki görsel adresleri G5'teki adres envanteriyle (eski sitenin alan adı bilinince) yönlendirilir; görsel kayıtları kaynak adresi tutar.
+
+## Uygulama notları (G5a adres envanteri, 2026-10-31)
+
+1. **Envanter.** `migration_url`: eski adres (kuralların sakladığı biçimde normalleştirilmiş yol, varsa sıralı sorgu dizesi), kaynakları (taşıma kaydı, site haritası, Search Console), tıklama, taşınan kayıt, sahibin kararı ve son uygulamanın sonucu. Taşıma uygulanınca kayıtların eski adresleri envantere girer.
+2. **Kayda bağlı eski yol, kural değil.** Ürün, kategori ve markanın eski yolu adres kaydına o kaydın ayrılmış yolu olarak eklenir (adr/0017). Çözümleme onu kaydın güncel yoluna 301'ler; kaydın adresi sonradan değişse de zincir oluşmaz. Taslak kaydın eski yolu, kayıt yayına girene kadar 404 verir. Sitede başka bir kayda ait yol alınmaz (raporda).
+3. **Sahibin kararı.** Kayda bağlanmayan adres için 301 (hedef sitede yayında bir sayfa olmalı; başka bir yönlendirme değil) ya da 410. Kararlar uygulamada kural içe aktarmasından (`origin: "migration"`) geçer: önce kuru denetim, sorunlu satırlar ayrılır, kalanı yazılır; yazma da sorun bulursa hiçbiri yazılmaz ve raporda yazar.
+4. **Sorgu dizeli adres** (`/urun.php?id=12`) kural olamaz: sorgu atılırsa farklı ürünler tek yola iner. Raporda "sunucu kuralı gerekir"; sahip karar verdiyse (gördüm) hazırlık ölçütünü kilitlemez.
+5. **Hazır (KK3).** Search Console'un en çok tıklanan ilk 100 adresinin hepsi bir şeye yanıt vermeli (sayfa, 301 ya da 410). Tıklama verisi yoksa "hazır" denmez.
+6. **Erişim.** Envanter, karar ve uygulama yalnızca sahibin; uygulama yeniden doğrulama ister ve `migration.urls` işi olarak taşıma ve katalog içe aktarmayla yan yana çalışmaz. Uygulama sonunda vitrinin çözümleme önbelleği boşaltılır, site haritası yenilenir.

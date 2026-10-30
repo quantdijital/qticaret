@@ -1,8 +1,8 @@
 import { model } from "@medusajs/framework/utils"
 import { QUERY_POLICIES, REDIRECT_MATCHES } from "../../../lib/seo/redirects"
 
-/** Where a rule came from: written in the panel, or a file (and later a migration, F14). */
-export const REDIRECT_ORIGINS = ["manual", "import"] as const
+/** Where a rule came from: written in the panel, a file, or a migration's address decisions (F14). */
+export const REDIRECT_ORIGINS = ["manual", "import", "migration"] as const
 
 /**
  * A redirect rule (adr/0017, docs/13 §4):

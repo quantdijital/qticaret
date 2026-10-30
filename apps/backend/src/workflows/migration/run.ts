@@ -17,6 +17,7 @@ import { migrateProducts } from "./products"
 import { emptyCounts } from "./report"
 import type { KindCounts, ReportProblem, RunCounts } from "./report"
 import { migrateReviews } from "./reviews"
+import { inventoryFromItems } from "./urls"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -229,6 +230,10 @@ export async function runMigration(
     )
   }
   await keep("page", { read: pages.length, skipped: pages.length })
+  if (apply) {
+    // Every old address the records had, for the 301s (F14.7)
+    await inventoryFromItems(container, source.id)
+  }
   await hooks.progress(100)
   return { counts, productRows, problems }
 }

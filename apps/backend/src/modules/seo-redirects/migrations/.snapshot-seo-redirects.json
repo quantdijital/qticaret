@@ -319,7 +319,7 @@
           "scale": null,
           "default": "'manual'",
           "comment": null,
-          "enumItems": ["manual", "import"],
+          "enumItems": ["manual", "import", "migration"],
           "mappedType": "enum"
         },
         "hit_count": {

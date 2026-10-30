@@ -9,6 +9,8 @@ import { LegacyOrder } from "./models/legacy-order"
 import { MigrationItem } from "./models/migration-item"
 import type { ITEM_STATUSES } from "./models/migration-item"
 import { MigrationRun } from "./models/migration-run"
+import { MigrationUrl } from "./models/migration-url"
+import type { URL_ORIGINS } from "./models/migration-url"
 
 export type ItemStatus = (typeof ITEM_STATUSES)[number]
 
@@ -32,6 +34,16 @@ export interface LegacyOrderInput {
   lines: { title: string; sku: string | null; quantity: number; total: string }[]
 }
 
+export interface InventoryUrl {
+  address: string
+  path: string
+  query: string | null
+  origin: (typeof URL_ORIGINS)[number]
+  clicks?: number | null
+  entity_type?: string | null
+  entity_id?: string | null
+}
+
 interface Executor {
   execute: (sql: string, params: unknown[]) => Promise<unknown>
 }
@@ -40,7 +52,12 @@ interface Executor {
 const CHUNK = 200
 
 /** A shop's data moved from its old platform (F14, adr/0042 §3, §4). */
-class MigrationModuleService extends MedusaService({ MigrationRun, MigrationItem, LegacyOrder }) {
+class MigrationModuleService extends MedusaService({
+  MigrationRun,
+  MigrationItem,
+  LegacyOrder,
+  MigrationUrl,
+}) {
   /** What a source's records became here, by their keys: the ones a run met before. */
   async targetsOf(source: string, kind: string, keys: readonly string[]) {
     const found = new Map<string, { target_id: string | null; status: ItemStatus }>()
@@ -89,6 +106,43 @@ class MigrationModuleService extends MedusaService({ MigrationRun, MigrationItem
           item.status,
           item.error_code ?? null,
           item.old_url ?? null,
+        ])
+      )
+    }
+  }
+
+  /**
+   * Adds old addresses to the inventory (F14.7); one met again gains the
+   * new origin, the larger click count and a record it had none of. The
+   * owner's decision is never touched.
+   */
+  @InjectTransactionManager()
+  async addUrls(
+    urls: readonly InventoryUrl[],
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<void> {
+    const manager = sharedContext.transactionManager as Executor
+    for (let start = 0; start < urls.length; start += CHUNK) {
+      const chunk = urls.slice(start, start + CHUNK)
+      await manager.execute(
+        `INSERT INTO migration_url
+           (id, address, path, query, origins, clicks, entity_type, entity_id, created_at, updated_at)
+         VALUES ${chunk.map(() => "(?, ?, ?, ?, ARRAY[?]::text[], ?, ?, ?, now(), now())").join(", ")}
+         ON CONFLICT (address) WHERE deleted_at IS NULL DO UPDATE
+           SET origins = ARRAY(SELECT DISTINCT unnest(migration_url.origins || EXCLUDED.origins)),
+               clicks = GREATEST(migration_url.clicks, EXCLUDED.clicks),
+               entity_type = COALESCE(migration_url.entity_type, EXCLUDED.entity_type),
+               entity_id = COALESCE(migration_url.entity_id, EXCLUDED.entity_id),
+               updated_at = now()`,
+        chunk.flatMap((url) => [
+          generateEntityId(undefined, "murl"),
+          url.address,
+          url.path,
+          url.query,
+          url.origin,
+          url.clicks ?? 0,
+          url.entity_type ?? null,
+          url.entity_id ?? null,
         ])
       )
     }

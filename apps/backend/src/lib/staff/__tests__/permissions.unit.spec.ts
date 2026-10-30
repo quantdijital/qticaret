@@ -240,6 +240,8 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/catalog/imports": false,
   "POST /admin/migrations": false,
   "POST /admin/migrations/shopify": false,
+  "POST /admin/migrations/urls/:id/decision": false,
+  "POST /admin/migrations/urls/apply": false,
   "POST /admin/chargebacks/:id": false,
   "POST /admin/chargebacks": false,
   "POST /admin/content-drafts/:id/approve": false,

@@ -14,6 +14,8 @@ export interface ImportRedirectsInput {
   rows: ImportRow[]
   /** Checks and counts without keeping anything. */
   dry_run: boolean
+  /** A file the shop sent (the default), or a migration's decisions (F14.7). */
+  origin?: "import" | "migration"
 }
 
 export interface ImportResult {
@@ -76,7 +78,12 @@ async function checkRow(
 }
 
 /** Writes a checked row and closes the chains it ends, so the next rows see it. */
-async function writeRow(container: MedusaContainer, row: CheckedRow, undo: Undo): Promise<void> {
+async function writeRow(
+  container: MedusaContainer,
+  row: CheckedRow,
+  undo: Undo,
+  origin: "import" | "migration"
+): Promise<void> {
   const service = container.resolve<Service>(SEO_REDIRECTS_MODULE)
   const { fields, existing } = row
   const moved = await retargets(container, fields, existing?.id ?? null)
@@ -84,7 +91,7 @@ async function writeRow(container: MedusaContainer, row: CheckedRow, undo: Undo)
     await service.updateSeoRedirects({ id: existing.id, ...fields })
     undo.updated.push({ id: existing.id, previous: fieldsOfRule(toRedirectRule(existing)) })
   } else {
-    const created = await service.createSeoRedirects({ ...fields, origin: "import" })
+    const created = await service.createSeoRedirects({ ...fields, origin })
     undo.created.push(created.id)
   }
   if (moved.length > 0) {
@@ -127,7 +134,7 @@ export const importRedirectsStep = createStep(
         try {
           const ready = await checkRow(container, row, seen)
           if (!input.dry_run && result.problems.length === 0) {
-            await writeRow(container, ready, undo)
+            await writeRow(container, ready, undo, input.origin ?? "import")
           }
           checked.push(ready)
           result[ready.existing ? "updated" : "created"] += 1

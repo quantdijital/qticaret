@@ -1,8 +1,11 @@
 import { validateAndTransformBody, validateAndTransformQuery } from "@medusajs/framework/http"
 import type { MedusaRequest } from "@medusajs/framework/http"
+import { z } from "@medusajs/framework/zod"
 import {
+  AdminGetMigrationUrls,
   AdminGetMigrations,
   AdminPostMigrationQuery,
+  AdminPostMigrationUrlDecision,
   AdminPostShopifyMigration,
 } from "../admin/migrations/validators"
 import type {
@@ -48,5 +51,30 @@ export const MIGRATION_ROUTES = [
     matcher: "/admin/migrations",
     methods: ["GET" as const],
     middlewares: [validateAndTransformQuery(AdminGetMigrations, {})],
+  },
+  // F14.7: the old site's addresses; applying them writes the shop's redirects
+  {
+    matcher: "/admin/migrations/urls",
+    methods: ["GET" as const],
+    middlewares: [validateAndTransformQuery(AdminGetMigrationUrls, {})],
+  },
+  {
+    matcher: "/admin/migrations/urls/summary",
+    methods: ["GET" as const],
+    middlewares: [validateAndTransformQuery(z.object({}).strict(), {})],
+  },
+  {
+    matcher: "/admin/migrations/urls/:id/decision",
+    methods: ["POST" as const],
+    middlewares: [requireUserActor, validateAndTransformBody(AdminPostMigrationUrlDecision)],
+  },
+  {
+    matcher: "/admin/migrations/urls/apply",
+    methods: ["POST" as const],
+    middlewares: [
+      requireUserActor,
+      validateAndTransformBody(z.object({}).strict()),
+      requireReauth(),
+    ],
   },
 ]
