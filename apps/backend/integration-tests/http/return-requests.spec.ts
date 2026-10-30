@@ -181,6 +181,34 @@ medusaIntegrationTestRunner({
       expect(early.data.message).toBe("returns.window_closed")
     })
 
+    it("takes a product outside the right of withdrawal back only as faulty, and keeps the shop's own period (F13.6)", async () => {
+      const { orderId, lineId } = await deliveredOrder()
+      const { data } = await query().graph({
+        entity: "product_variant",
+        fields: ["product_id"],
+        filters: { id: setup.variantId },
+      })
+      const productId = (data[0] as { product_id: string }).product_id
+      await staff(`/admin/products/${productId}/catalog`, { withdrawal_excluded: true })
+
+      const changedMind = await ask(orderId, {
+        items: [{ line_item_id: lineId, quantity: 1 }],
+        reason: "changed_mind",
+      })
+      const shortPeriod = await staff("/admin/platform-settings/returns", { withdrawal_days: 7 })
+      const faulty = await ask(orderId, {
+        items: [{ line_item_id: lineId, quantity: 1 }],
+        reason: "damaged",
+      })
+      await staff(`/admin/products/${productId}/catalog`, { withdrawal_excluded: false })
+
+      expect(changedMind.status).toBe(400)
+      expect(changedMind.data.message).toBe("returns.withdrawal_excluded")
+      // Never fewer than the law's 14 days
+      expect(shortPeriod.status).toBe(400)
+      expect(faulty.status).toBe(200)
+    })
+
     it("refunds a damaged unit without restocking it, and the shipping only when staff say so", async () => {
       const { orderId, lineId } = await deliveredOrder(true, 2)
       const before = await stocked()

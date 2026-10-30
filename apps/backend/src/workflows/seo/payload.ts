@@ -36,6 +36,7 @@ import {
 } from "./payload-sources"
 import type { MediaRow } from "./payload-sources"
 import type { CategoryRow, SeoMetaRow } from "./payload-sources"
+import { returnPolicy } from "../returns/policy"
 
 /**
  * Loads what a page's `seo` object needs (adr/0015) and builds it with
@@ -119,14 +120,18 @@ async function productSubject(container: MedusaContainer, id: string, path: stri
     (product.variants ?? []).flatMap((variant) => (variant ? [variant.id] : [])),
     "try"
   )
-  const shipping = await shippingFactsOf(container)
+  const [shipping, returns] = await Promise.all([
+    shippingFactsOf(container),
+    returnPolicy(container),
+  ])
   const facts = {
     ...productFacts(
       product,
       product.brand?.name ?? null,
       plainText(description),
       displays,
-      shipping
+      shipping,
+      returns
     ),
     // F10.6: the stars of the approved reviews the page shows
     rating:

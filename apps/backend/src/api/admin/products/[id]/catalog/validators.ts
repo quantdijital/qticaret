@@ -44,6 +44,8 @@ export const AdminPostProductCatalog = z
     kind: z.enum(PRODUCT_KINDS).optional(),
     primary_category_id: id.nullable().optional(),
     successor_product_id: id.nullable().optional(),
+    // F13.6: hygiene, made to order; a faulty item still comes back
+    withdrawal_excluded: z.boolean().optional(),
     variants: z
       .record(
         id,

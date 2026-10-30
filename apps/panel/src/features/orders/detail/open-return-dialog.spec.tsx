@@ -22,6 +22,7 @@ const RETURNABLE: Returnable = {
       variant_title: "M",
       variant_id: "variant_m",
       returnable: 2,
+      withdrawal_excluded: false,
       variants: [
         { id: "variant_l", title: "L" },
         { id: "variant_s", title: "S" },
@@ -33,7 +34,17 @@ const RETURNABLE: Returnable = {
       variant_title: null,
       variant_id: "variant_k",
       returnable: 0,
+      withdrawal_excluded: false,
       variants: [],
+    },
+    {
+      line_item_id: "item_3",
+      title: "İsme Özel Kolye",
+      variant_title: null,
+      variant_id: "variant_n",
+      returnable: 1,
+      withdrawal_excluded: true,
+      variants: [{ id: "variant_o", title: "Altın" }],
     },
   ],
 }
@@ -107,6 +118,36 @@ describe("OpenReturnDialog", () => {
         reason: "damaged",
         items: [{ line_item_id: "item_1", quantity: 1 }],
         note: "Telefonla bildirdi",
+      },
+    })
+  })
+
+  it("takes a product outside the right of withdrawal back only as faulty, never exchanged", async () => {
+    const user = userEvent.setup()
+    renderDialog()
+    const dialog = screen.getByRole("dialog")
+    const submit = within(dialog).getByRole("button", { name: "Talebi aç" })
+
+    expect(within(dialog).getByText(/cayma hakkı dışında/)).toBeInTheDocument()
+    await user.type(within(dialog).getByLabelText("İsme Özel Kolye"), "1")
+    await chooseReason(user, "Fikrim değişti")
+    expect(within(dialog).getByRole("status")).toHaveTextContent("yalnızca hasarlı")
+    expect(submit).toBeDisabled()
+
+    await user.click(within(dialog).getByRole("radio", { name: "Değişim" }))
+    expect(within(dialog).getByRole("status")).toHaveTextContent("değişim yapılamaz")
+
+    await user.click(within(dialog).getByRole("radio", { name: "İade" }))
+    await chooseReason(user, "Hasarlı geldi")
+    expect(within(dialog).queryByRole("status")).toBeNull()
+    await user.click(submit)
+
+    expect(fetchMock).toHaveBeenCalledWith("/admin/orders/order_1/return-requests", {
+      method: "POST",
+      body: {
+        kind: "return",
+        reason: "damaged",
+        items: [{ line_item_id: "item_3", quantity: 1 }],
       },
     })
   })

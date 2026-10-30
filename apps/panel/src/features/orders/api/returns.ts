@@ -154,6 +154,9 @@ export const RETURN_REASONS: readonly ReturnReason[] = [
   "other",
 ]
 
+/** Reasons a product outside the right of withdrawal still comes back for (F13.4). */
+export const DEFECT_REASONS: readonly ReturnReason[] = ["damaged", "wrong_item", "not_as_described"]
+
 /** What staff may ask back for the shopper (F12.3), by the shopper's own rules. */
 export interface Returnable {
   window_open: boolean
@@ -165,6 +168,8 @@ export interface Returnable {
     variant_title: string | null
     variant_id: string | null
     returnable: number
+    /** Outside the right of withdrawal (F13.4): back only as faulty, never exchanged. */
+    withdrawal_excluded: boolean
     /** The product's other variants, for an exchange. */
     variants: { id: string; title: string | null }[]
   }[]

@@ -1,14 +1,26 @@
 /**
  * What a shopper may still send back (F7.9, adr/0032): of each line, what
  * was shipped, less what earlier requests already asked for (or Medusa's
- * own returns hold, whichever is more); and for how long: 14 days after
- * the last parcel arrived (the distance-sale withdrawal period; the
- * shop's own terms come with F13). A parcel still on its way can be asked
- * about already; one never marked delivered counts as arrived 30 days
- * after it left. Pure, so tested on its own.
+ * own returns hold, whichever is more); and for how long: the shop's
+ * withdrawal period (14 days at least, F13.6) after the last parcel
+ * arrived. A parcel still on its way can be asked about already; one never
+ * marked delivered counts as arrived 30 days after it left. A product
+ * outside the right of withdrawal comes back only as faulty or wrong.
+ * Pure, so tested on its own.
  */
 
+/** The law's withdrawal period, and the shop's until it sets its own (F13.6). */
 export const RETURN_WINDOW_DAYS = 14
+
+/**
+ * Reasons that are the shop's fault (a faulty, wrong or misdescribed item):
+ * these come back even for a product outside the right of withdrawal.
+ */
+export const DEFECT_REASONS: ReadonlySet<string> = new Set([
+  "damaged",
+  "wrong_item",
+  "not_as_described",
+])
 
 /** A parcel nobody marked delivered is taken as arrived this long after it left. */
 export const UNMARKED_ARRIVAL_DAYS = 30
@@ -19,6 +31,7 @@ export interface ReturnOrderFacts {
   items?:
     | ({
         id: string
+        product_id?: string | null
         detail?: {
           shipped_quantity?: number | null
           return_requested_quantity?: number | null
@@ -44,6 +57,7 @@ export interface ReturnLine {
 /** The order fields `returnable` and `windowOpen` read. */
 export const RETURN_ORDER_FIELDS = [
   "items.id",
+  "items.product_id",
   "items.detail.shipped_quantity",
   "items.detail.return_requested_quantity",
   "items.detail.return_received_quantity",
@@ -111,7 +125,11 @@ export function returnable(
 }
 
 /** Whether a return can still be asked for: something shipped, and within the window once arrived. */
-export function windowOpen(order: ReturnOrderFacts, now: Date): boolean {
+export function windowOpen(
+  order: ReturnOrderFacts,
+  now: Date,
+  days: number = RETURN_WINDOW_DAYS
+): boolean {
   const live = (order.fulfillments ?? []).filter(
     (fulfillment): fulfillment is NonNullable<typeof fulfillment> =>
       Boolean(fulfillment?.shipped_at) && !fulfillment?.canceled_at
@@ -127,7 +145,25 @@ export function windowOpen(order: ReturnOrderFacts, now: Date): boolean {
         : new Date(fulfillment.shipped_at ?? 0).getTime() + UNMARKED_ARRIVAL_DAYS * DAY
     )
   )
-  return now.getTime() - last <= RETURN_WINDOW_DAYS * DAY
+  return now.getTime() - last <= days * DAY
+}
+
+/**
+ * Why the lines cannot come back as a withdrawal (an i18n key); null when
+ * they can: a product outside the right of withdrawal comes back only as
+ * a faulty or wrong item, and is never exchanged.
+ */
+export function withdrawalProblem(
+  wanted: readonly ReturnLine[],
+  excluded: ReadonlySet<string>,
+  request: { kind: "return" | "exchange"; reason: string }
+): string | null {
+  if (!wanted.some((line) => excluded.has(line.line_item_id))) {
+    return null
+  }
+  return request.kind === "return" && DEFECT_REASONS.has(request.reason)
+    ? null
+    : "returns.withdrawal_excluded"
 }
 
 /** Why the lines cannot be asked for (an i18n key); null when they can. */

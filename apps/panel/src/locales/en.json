@@ -1080,6 +1080,20 @@
           "secret_invalid": "Yurtiçi Kargo did not accept this user name and password. Copy them again from Yurtiçi's web service document."
         },
         "rejected": "Yurtiçi Kargo no longer accepts the stored details; no parcel can be opened. Enter the current details Yurtiçi gave."
+      },
+      "returns": {
+        "title": "Return terms",
+        "description": "How long a shopper may withdraw and who pays the return shipping. The return policy text and the products' details for search engines show them.",
+        "days": "Withdrawal period (days)",
+        "daysHint": "After delivery; the law asks for at least {{min}} days. You may give more.",
+        "daysInvalid": "Enter a whole number from 14 to 365.",
+        "payer": "Return shipping paid by",
+        "payerHint": "Free returns stand out in search results.",
+        "payers": {
+          "shop": "The shop (free returns)",
+          "customer": "The shopper"
+        },
+        "excludedHint": "Mark products that cannot be returned once opened for hygiene, or that are made to order, as \"Outside the right of withdrawal\" on their page; they come back only when faulty."
       }
     },
     "integrations": {
@@ -2291,7 +2305,9 @@
         "physical": "Physical product",
         "digital": "Digital product",
         "service": "Service"
-      }
+      },
+      "withdrawalExcluded": "Outside the right of withdrawal",
+      "withdrawalExcludedHint": "A hygiene product or made to order; it comes back only when faulty."
     },
     "variantImages": {
       "title": "Variant images",
@@ -2827,7 +2843,10 @@
         "reasonPlaceholder": "Choose a reason",
         "note": "Note (optional)",
         "submit": "Open the request",
-        "done": "Request opened; the shopper was e-mailed."
+        "done": "Request opened; the shopper was e-mailed.",
+        "excluded": "outside the right of withdrawal",
+        "excludedReason": "One of the chosen products is outside the right of withdrawal; it comes back only as damaged, wrong or not as described.",
+        "excludedExchange": "One of the chosen products is outside the right of withdrawal and cannot be exchanged. If it is faulty, open a return."
       }
     },
     "edit": {

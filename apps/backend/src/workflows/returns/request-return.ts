@@ -8,6 +8,7 @@ import {
   linesProblem,
   returnable,
   windowOpen,
+  withdrawalProblem,
 } from "../../lib/orders/returns"
 import type { ExchangeLine } from "../../lib/orders/exchanges"
 import type { ReturnLine, ReturnOrderFacts } from "../../lib/orders/returns"
@@ -20,6 +21,7 @@ import type { ReturnKind, ReturnReason } from "../../modules/return-requests/sta
 import { RETURN_REQUEST_CREATED } from "./events"
 import type { ReturnRequestEvent } from "./events"
 import { quoteExchange } from "./exchange-quote"
+import { excludedLines, returnPolicy } from "./policy"
 
 /**
  * A shopper asks to send lines of their own order back (F7.9, adr/0032):
@@ -54,7 +56,8 @@ export async function requestReturn(
       if (order?.customer_id !== input.customer_id) {
         throw new MedusaError(MedusaError.Types.NOT_FOUND, "orders.unknown")
       }
-      if (order.status === "canceled" || !windowOpen(order, now)) {
+      const policy = await returnPolicy(container)
+      if (order.status === "canceled" || !windowOpen(order, now, policy.withdrawal_days)) {
         throw new ValidationError("returns.window_closed")
       }
       const service = container.resolve<ReturnRequestsModuleService>(RETURN_REQUESTS_MODULE)
@@ -75,7 +78,9 @@ export async function requestReturn(
       const kept = await container
         .resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE)
         .keptUnits(input.order_id)
-      const problem = linesProblem(returnable(order, asked, kept), lines)
+      const problem =
+        linesProblem(returnable(order, asked, kept), lines) ??
+        withdrawalProblem(lines, await excludedLines(container, order.items ?? []), input)
       if (problem) {
         throw new ValidationError(problem, { field: "items" })
       }

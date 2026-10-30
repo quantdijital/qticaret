@@ -79,7 +79,35 @@ export interface ProductFacts {
   delivery?: DeliveryFacts | null
   /** Approved reviews (F10.6): `aggregateRating`, only when the page shows them. */
   rating?: { average: number; count: number } | null
+  /** The shop's return policy for this product (F13.6): `hasMerchantReturnPolicy`. */
+  returnPolicy?: ReturnPolicyFacts | null
 }
+
+export interface ReturnPolicyFacts {
+  /** The withdrawal period in days. */
+  days: number
+  /** The shop pays to send it back. */
+  freeReturn: boolean
+  /** Outside the right of withdrawal (hygiene, made to order). */
+  excluded: boolean
+}
+
+/** Google's `MerchantReturnPolicy` for Türkiye, as the shop's settings make it (docs/13 §5). */
+const returnPolicyOf = (policy: ReturnPolicyFacts): JsonLd =>
+  policy.excluded
+    ? {
+        "@type": "MerchantReturnPolicy",
+        applicableCountry: "TR",
+        returnPolicyCategory: `${SCHEMA}/MerchantReturnNotPermitted`,
+      }
+    : {
+        "@type": "MerchantReturnPolicy",
+        applicableCountry: "TR",
+        returnPolicyCategory: `${SCHEMA}/MerchantReturnFiniteReturnWindow`,
+        merchantReturnDays: policy.days,
+        returnMethod: `${SCHEMA}/ReturnByMail`,
+        returnFees: `${SCHEMA}/${policy.freeReturn ? "FreeReturn" : "ReturnFeesCustomerResponsibility"}`,
+      }
 
 /** The stars a product's page shows, as Google reads them; none without a review. */
 const aggregateRating = (rating: ProductFacts["rating"]): JsonLd | undefined =>
@@ -106,7 +134,8 @@ function offerOf(
   variant: VariantFacts,
   url: string,
   condition: Condition,
-  delivery?: DeliveryFacts | null
+  delivery?: DeliveryFacts | null,
+  returns?: ReturnPolicyFacts | null
 ): JsonLd | null {
   if (variant.price === null || !(variant.price > 0)) {
     return null
@@ -135,6 +164,7 @@ function offerOf(
     ...(delivery && typeof variant.shippingRate === "number"
       ? { shippingDetails: shippingDetailsOf(variant.shippingRate, delivery) }
       : {}),
+    ...(returns ? { hasMerchantReturnPolicy: returnPolicyOf(returns) } : {}),
   }
 }
 
@@ -155,7 +185,7 @@ function variantProduct(
   url: string,
   single: boolean
 ): JsonLd {
-  const offer = offerOf(variant, url, facts.condition, facts.delivery)
+  const offer = offerOf(variant, url, facts.condition, facts.delivery, facts.returnPolicy)
   return compact({
     "@type": "Product",
     ...(single ? { "@context": SCHEMA } : {}),

@@ -251,6 +251,52 @@ describe("listing, breadcrumb and site blocks", () => {
     expect(site).not.toHaveProperty("potentialAction")
   })
 
+  it("gives each offer the shop's return policy, or none for a product outside withdrawal (F13.6)", () => {
+    const facts = {
+      name: "Kupa",
+      description: "Seramik kupa",
+      images: [],
+      brand: null,
+      condition: "new" as const,
+      groupId: "kupa",
+      variesBy: [],
+      variants: [
+        {
+          id: "variant_1",
+          name: "Kupa",
+          sku: null,
+          gtin: null,
+          mpn: null,
+          image: null,
+          price: 100,
+          strikethrough: null,
+          availability: "InStock" as const,
+          properties: {},
+        },
+      ],
+    }
+    const offerOf = (returnPolicy: { days: number; freeReturn: boolean; excluded: boolean }) =>
+      (
+        productJsonLd({ ...facts, returnPolicy }, "https://magaza.example.com/urun/kupa") as {
+          offers: { hasMerchantReturnPolicy: Record<string, unknown> }
+        }
+      ).offers.hasMerchantReturnPolicy
+
+    expect(offerOf({ days: 30, freeReturn: true, excluded: false })).toEqual({
+      "@type": "MerchantReturnPolicy",
+      applicableCountry: "TR",
+      returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+      merchantReturnDays: 30,
+      returnMethod: "https://schema.org/ReturnByMail",
+      returnFees: "https://schema.org/FreeReturn",
+    })
+    expect(offerOf({ days: 14, freeReturn: false, excluded: true })).toEqual({
+      "@type": "MerchantReturnPolicy",
+      applicableCountry: "TR",
+      returnPolicyCategory: "https://schema.org/MerchantReturnNotPermitted",
+    })
+  })
+
   it("names the shop's legal identity where it is given (F13.9)", () => {
     const [store] = siteJsonLd(
       { name: "Demo Mağaza", url: "https://magaza.example.com/", logo: null },

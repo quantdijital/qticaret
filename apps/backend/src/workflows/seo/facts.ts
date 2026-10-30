@@ -7,7 +7,7 @@ import type { Availability, Condition, ProductFacts, VariesBy } from "../../lib/
 import { MissingMeasures, parcelOf } from "../../lib/shipping/parcel"
 import type { ParcelUnits } from "../../lib/shipping/parcel"
 import { tablePrice } from "../../lib/shipping/rates"
-import type { ShippingSettings } from "../../modules/platform-settings/sections"
+import type { ReturnsSettings, ShippingSettings } from "../../modules/platform-settings/sections"
 
 /**
  * The facts a product's structured data is built from (F3.12): its
@@ -21,6 +21,7 @@ export const PRODUCT_FACT_FIELDS = [
   "images.url",
   "images.rank",
   "product_extension.condition",
+  "product_extension.withdrawal_excluded",
   "attribute_template.definitions.scope",
   "attribute_template.definitions.option_title",
   "attribute_template.definitions.varies_by",
@@ -55,7 +56,7 @@ export interface FactRow {
   handle: string
   thumbnail?: string | null
   images?: ({ url: string; rank?: number | null } | null)[] | null
-  product_extension?: { condition?: Condition | null } | null
+  product_extension?: { condition?: Condition | null; withdrawal_excluded?: boolean | null } | null
   attribute_template?: {
     definitions?:
       | ({
@@ -227,7 +228,8 @@ export function productFacts(
   brand: string | null,
   description: string,
   displays?: ReadonlyMap<string, PriceDisplay>,
-  shipping?: ShippingFacts
+  shipping?: ShippingFacts,
+  returns?: ReturnsSettings
 ): ProductFacts {
   const byOption = propertiesByOption(row)
   const images = [...(row.images ?? [])]
@@ -282,6 +284,14 @@ export function productFacts(
       ? {
           handling: [shipping.settings.handling_days_min, shipping.settings.handling_days_max],
           transit: [shipping.settings.transit_days_min, shipping.settings.transit_days_max],
+        }
+      : null,
+    // F13.6: the shop's return policy, this product's exclusion
+    returnPolicy: returns
+      ? {
+          days: returns.withdrawal_days,
+          freeReturn: returns.return_shipping === "shop",
+          excluded: row.product_extension?.withdrawal_excluded === true,
         }
       : null,
   }

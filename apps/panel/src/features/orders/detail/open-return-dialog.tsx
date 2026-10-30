@@ -1,4 +1,4 @@
-import { Loader2 } from "lucide-react"
+import { CircleAlert, Loader2 } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { RETURN_REASONS, useOpenReturnRequest } from "@/features/orders/api/returns"
+import { DEFECT_REASONS, RETURN_REASONS, useOpenReturnRequest } from "@/features/orders/api/returns"
 import type { OpenRequest, ReturnReason, Returnable } from "@/features/orders/api/returns"
 import { errorText } from "@/lib/errors"
 
@@ -58,9 +58,14 @@ export function OpenReturnDialog({
   const [picks, setPicks] = useState<Record<string, Pick>>({})
   const lines = returnable.lines.filter((line) => line.returnable > 0)
   const chosen = lines.filter((line) => (picks[line.line_item_id]?.quantity ?? 0) > 0)
+  // The server's rule (lib/orders/returns.ts): such a product comes back only as faulty
+  const excludedPicked = chosen.some((line) => line.withdrawal_excluded)
+  const withdrawalBlocked =
+    excludedPicked && (kind === "exchange" || (reason !== "" && !DEFECT_REASONS.includes(reason)))
   const ready =
     chosen.length > 0 &&
     reason !== "" &&
+    !withdrawalBlocked &&
     (kind === "return" || chosen.every((line) => picks[line.line_item_id]?.variant))
 
   const pick = (lineId: string, next: Partial<Pick>) => {
@@ -147,7 +152,11 @@ export function OpenReturnDialog({
                         {line.title ?? "—"}
                       </label>
                       <span className="text-xs text-muted-foreground">
-                        {[line.variant_title, t(`${O}.left`, { count: line.returnable })]
+                        {[
+                          line.variant_title,
+                          t(`${O}.left`, { count: line.returnable }),
+                          line.withdrawal_excluded ? t(`${O}.excluded`) : null,
+                        ]
                           .filter(Boolean)
                           .join(" · ")}
                       </span>
@@ -217,6 +226,15 @@ export function OpenReturnDialog({
               </SelectContent>
             </Select>
           </div>
+          {withdrawalBlocked ? (
+            <p
+              role="status"
+              className="flex items-start gap-2 rounded-md bg-warning-soft px-3 py-2 text-[13px] text-warning-text"
+            >
+              <CircleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+              {t(kind === "exchange" ? `${O}.excludedExchange` : `${O}.excludedReason`)}
+            </p>
+          ) : null}
           <div className="flex flex-col gap-2">
             <Label htmlFor="return-note">{t(`${O}.note`)}</Label>
             <Textarea

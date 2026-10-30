@@ -15,6 +15,8 @@ export interface ProductCatalog {
   condition: ProductCondition
   kind: ProductKind
   primary_category_id: string | null
+  /** Outside the right of withdrawal (F13.4): returned only when faulty. */
+  withdrawal_excluded: boolean
   successor: { id: string; title: string; handle: string } | null
   categories: { id: string; name: string }[]
   variants: {
@@ -43,6 +45,7 @@ export function useSaveCatalog(id: string) {
       condition?: ProductCondition
       kind?: ProductKind
       primary_category_id?: string | null
+      withdrawal_excluded?: boolean
     }) => sdk.client.fetch<ProductCatalog>(catalogUrl(id), { method: "POST", body }),
     onSuccess: async (catalog) => {
       client.setQueryData(["products", "catalog", id], catalog)

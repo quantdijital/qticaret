@@ -11,6 +11,7 @@ import type { ShippingSettings } from "@/features/settings/api/sections"
 import { ShippingOptionsCard } from "@/features/settings/components/shipping-options-card"
 import { DeliveryCard, RatesCard } from "@/features/settings/components/shipping-rules-cards"
 import { LabelSizeCard } from "@/features/settings/components/label-size-card"
+import { ReturnsCard } from "@/features/settings/components/returns-card"
 import { AccountBadges } from "@/features/settings/components/account-badges"
 import { SHIPPING_CARRIERS } from "@/features/settings/shipping-carriers"
 import { errorText } from "@/lib/errors"
@@ -21,7 +22,8 @@ const S = "settings.shipping"
  * Settings > Shipping (F7, adr/0031): the carriers the shop ships with
  * (each opens its own page, where the shop connects its account), the
  * options shoppers choose from, the shop's delivery days and price table
- * (F7.8), and the size its parcels' labels print at.
+ * (F7.8), the size its parcels' labels print at, and its return rules
+ * (F13.4).
  */
 export function ShippingPage() {
   const { t } = useTranslation()
@@ -97,6 +99,7 @@ export function ShippingPage() {
       ) : (
         <LoadingRows rows={3} />
       )}
+      <ReturnsCard />
     </div>
   )
 }

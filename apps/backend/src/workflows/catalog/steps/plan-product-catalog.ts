@@ -19,6 +19,8 @@ export interface SetProductCatalogInput {
   kind?: ProductKind | undefined
   primary_category_id?: string | null | undefined
   successor_product_id?: string | null | undefined
+  /** Outside the right of withdrawal (F13.6). */
+  withdrawal_excluded?: boolean | undefined
   /** Per variant: the MPN, and the unit cost in lira (VAT excluded, F11.4). */
   variants?:
     | Record<string, { mpn?: string | null | undefined; cost?: number | null | undefined }>
@@ -36,6 +38,7 @@ export interface ExtensionFields {
   kind: ProductKind
   primary_category_id: string | null
   successor_product_id: string | null
+  withdrawal_excluded: boolean
 }
 
 export interface ProductCatalogPlan {
@@ -110,7 +113,13 @@ async function checkSuccessor(container: MedusaContainer, productId: string, suc
   throw new ValidationError("catalog.successor_loop", { field: "successor_product_id" })
 }
 
-const EXTENSION_KEYS = ["condition", "kind", "primary_category_id", "successor_product_id"] as const
+const EXTENSION_KEYS = [
+  "condition",
+  "kind",
+  "primary_category_id",
+  "successor_product_id",
+  "withdrawal_excluded",
+] as const
 
 /** The fields the save sends (absent ones keep their values) and what they hold now. */
 function changesOf(input: SetProductCatalogInput, current: ExtensionFields | null) {

@@ -79,6 +79,15 @@ export interface ShippingSettings {
   label_custom: { width_mm: number; height_mm: number }
 }
 
+/** Return rules (F13.4, adr/0041): the right of withdrawal's days and who pays the return. */
+export interface ReturnsSettings {
+  /** The law's 14 days or longer; the return policy's {iade_süresi} reads it. */
+  withdrawal_days: number
+  return_shipping: "shop" | "customer"
+}
+
+export const MIN_WITHDRAWAL_DAYS = 14
+
 export const LABEL_FORMATS = ["100x150", "100x100", "80x80", "a4", "custom"] as const
 export type LabelFormat = (typeof LABEL_FORMATS)[number]
 

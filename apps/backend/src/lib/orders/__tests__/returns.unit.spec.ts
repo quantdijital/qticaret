@@ -1,4 +1,4 @@
-import { cameBack, linesProblem, returnable, windowOpen } from "../returns"
+import { cameBack, linesProblem, returnable, windowOpen, withdrawalProblem } from "../returns"
 
 const DAY = 24 * 60 * 60 * 1000
 const now = new Date("2026-10-28T12:00:00.000Z")
@@ -69,6 +69,30 @@ describe("returns (adr/0032)", () => {
       windowOpen({ ...order, fulfillments: [{ shipped_at: ago(20), delivered_at: null }] }, now)
     ).toBe(true)
     expect(windowOpen({ ...order, fulfillments: [] }, now)).toBe(false)
+  })
+
+  it("keeps the shop's own longer period (F13.6)", () => {
+    const arrived = (days: number) => ({
+      ...order,
+      fulfillments: [{ shipped_at: ago(days + 2), delivered_at: ago(days) }],
+    })
+    expect(windowOpen(arrived(20), now, 30)).toBe(true)
+    expect(windowOpen(arrived(31), now, 30)).toBe(false)
+  })
+
+  it("takes a product outside the right of withdrawal back only as faulty or wrong, never exchanged", () => {
+    const lines = [{ line_item_id: "line_a", quantity: 1 }]
+    const excluded = new Set(["line_a"])
+    expect(
+      withdrawalProblem(lines, new Set(), { kind: "return", reason: "changed_mind" })
+    ).toBeNull()
+    expect(withdrawalProblem(lines, excluded, { kind: "return", reason: "changed_mind" })).toBe(
+      "returns.withdrawal_excluded"
+    )
+    expect(withdrawalProblem(lines, excluded, { kind: "return", reason: "damaged" })).toBeNull()
+    expect(withdrawalProblem(lines, excluded, { kind: "exchange", reason: "size_issue" })).toBe(
+      "returns.withdrawal_excluded"
+    )
   })
 
   it("takes a parcel never marked delivered as arrived 30 days after it left", () => {

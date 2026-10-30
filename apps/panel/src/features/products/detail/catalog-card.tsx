@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Switch } from "@/components/ui/switch"
 import {
   PRODUCT_CONDITIONS,
   PRODUCT_KINDS,
@@ -33,6 +34,7 @@ interface Values {
   condition: ProductCondition
   kind: ProductKind
   primary_category_id: string
+  withdrawal_excluded: boolean
 }
 
 function CatalogForm({ productId, catalog }: { productId: string; catalog: ProductCatalog }) {
@@ -44,6 +46,7 @@ function CatalogForm({ productId, catalog }: { productId: string; catalog: Produ
     condition: catalog.condition,
     kind: catalog.kind,
     primary_category_id: catalog.primary_category_id ?? "",
+    withdrawal_excluded: catalog.withdrawal_excluded,
   }
   const form = useForm<Values>({ values: saved, resetOptions: { keepDirtyValues: true } })
   const { dirtyFields } = form.formState
@@ -56,6 +59,9 @@ function CatalogForm({ productId, catalog }: { productId: string; catalog: Produ
         ...(dirtyFields.kind ? { kind: values.kind } : {}),
         ...(dirtyFields.primary_category_id
           ? { primary_category_id: values.primary_category_id || null }
+          : {}),
+        ...(dirtyFields.withdrawal_excluded
+          ? { withdrawal_excluded: values.withdrawal_excluded }
           : {}),
       },
       {
@@ -156,11 +162,36 @@ function CatalogForm({ productId, catalog }: { productId: string; catalog: Produ
           )}
         />
       </Field>
+      <div className="flex items-start justify-between gap-4 border-t pt-4">
+        <div className="flex min-w-0 flex-col gap-0.5">
+          <label htmlFor="catalog-withdrawal" className="text-sm font-medium">
+            {t("products.catalog.withdrawalExcluded")}
+          </label>
+          <span id="catalog-withdrawal-hint" className="text-[13px] text-muted-foreground">
+            {t("products.catalog.withdrawalExcludedHint")}
+          </span>
+        </div>
+        <Controller
+          control={form.control}
+          name="withdrawal_excluded"
+          render={({ field }) => (
+            <Switch
+              id="catalog-withdrawal"
+              aria-describedby="catalog-withdrawal-hint"
+              checked={field.value}
+              onCheckedChange={field.onChange}
+            />
+          )}
+        />
+      </div>
     </CardForm>
   )
 }
 
-/** Condition and primary category, the fields search results and feeds read (F3.1). */
+/**
+ * Condition and primary category, the fields search results and feeds read
+ * (F3.1), and whether the product is outside the right of withdrawal (F13.4).
+ */
 export function CatalogCard({ productId }: { productId: string }) {
   const catalog = useQuery(productCatalogQuery(productId))
   if (!catalog.data) {

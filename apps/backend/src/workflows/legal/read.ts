@@ -4,12 +4,12 @@ import type { Block, ContentDoc } from "../../lib/content"
 import { renderDoc } from "../../lib/content"
 import { LEGAL_KINDS, fillLegalDoc } from "../../lib/legal"
 import type { LegalKind, OrderToken, ShopToken } from "../../lib/legal"
-import { RETURN_WINDOW_DAYS } from "../../lib/orders/returns"
 import { LEGAL_MODULE } from "../../modules/legal"
 import type LegalModuleService from "../../modules/legal/service"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import type { SeoSettings } from "../../modules/platform-settings/sections"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
+import { returnPolicy } from "../returns/policy"
 import { legalIdentity } from "./identity"
 
 type Container = Pick<MedusaContainer, "resolve">
@@ -21,8 +21,9 @@ export async function shopLegalValues(
   container: Container
 ): Promise<Record<ShopToken, string | null>> {
   const settings = container.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
-  const [identity, seo, { data: stores }] = await Promise.all([
+  const [identity, policy, seo, { data: stores }] = await Promise.all([
     legalIdentity(container),
+    returnPolicy(container),
     settings.getSection("seo") as Promise<unknown> as Promise<SeoSettings>,
     container
       .resolve(ContainerRegistrationKeys.QUERY)
@@ -40,7 +41,7 @@ export async function shopLegalValues(
     e_posta: identity.contact_email,
     telefon: identity.contact_phone,
     alan_adı: seo.canonical_host,
-    iade_süresi: String(RETURN_WINDOW_DAYS),
+    iade_süresi: String(policy.withdrawal_days),
     bugün: DATE.format(new Date()),
   }
 }

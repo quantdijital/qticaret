@@ -1080,6 +1080,20 @@
           "secret_invalid": "Yurtiçi Kargo bu kullanıcı adı ve şifreyi kabul etmedi. Bilgileri Yurtiçi'nin verdiği web servis belgesinden yeniden kopyalayın."
         },
         "rejected": "Yurtiçi Kargo kayıtlı bilgileri artık kabul etmiyor; gönderi açılamaz. Yurtiçi'nin verdiği güncel bilgileri girin."
+      },
+      "returns": {
+        "title": "İade koşulları",
+        "description": "Müşterinin cayma hakkını kullanabileceği süre ve iade kargosunu kimin ödediği. İade politikası metni ve ürünlerin arama motorlarına verilen bilgisi bunları gösterir.",
+        "days": "Cayma süresi (gün)",
+        "daysHint": "Teslimattan sonra; yasa en az {{min}} gün ister. Daha uzun süre verebilirsiniz.",
+        "daysInvalid": "14 ile 365 arasında bir tam sayı girin.",
+        "payer": "İade kargosunu ödeyen",
+        "payerHint": "Ücretsiz iade arama sonuçlarında öne çıkar.",
+        "payers": {
+          "shop": "Mağaza (ücretsiz iade)",
+          "customer": "Müşteri"
+        },
+        "excludedHint": "Hijyen gereği açılınca iade edilemeyen ya da kişiye özel hazırlanan ürünleri ürün sayfasında \"Cayma hakkı dışında\" olarak işaretleyin; bunlar yalnızca kusurlu çıkarsa geri alınır."
       }
     },
     "integrations": {
@@ -2291,7 +2305,9 @@
         "physical": "Fiziksel ürün",
         "digital": "Dijital ürün",
         "service": "Hizmet"
-      }
+      },
+      "withdrawalExcluded": "Cayma hakkı dışında",
+      "withdrawalExcludedHint": "Hijyen ürünü ya da kişiye özel hazırlanıyor; yalnızca kusurlu çıkarsa geri alınır."
     },
     "variantImages": {
       "title": "Varyant görselleri",
@@ -2827,7 +2843,10 @@
         "reasonPlaceholder": "Neden seçin",
         "note": "Not (isteğe bağlı)",
         "submit": "Talebi aç",
-        "done": "Talep açıldı; müşteriye e-posta gönderildi."
+        "done": "Talep açıldı; müşteriye e-posta gönderildi.",
+        "excluded": "cayma hakkı dışında",
+        "excludedReason": "Seçtiğiniz ürünlerden biri cayma hakkı dışında; yalnızca hasarlı, yanlış ya da açıklamasına uymayan ürün nedeniyle iade alınabilir.",
+        "excludedExchange": "Seçtiğiniz ürünlerden biri cayma hakkı dışında; değişim yapılamaz. Kusurluysa iade olarak açın."
       }
     },
     "edit": {

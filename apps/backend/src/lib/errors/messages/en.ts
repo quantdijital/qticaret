@@ -237,6 +237,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "returns.status_invalid": "The return request is not in a state for this.",
   "returns.items_invalid":
     "The chosen items do not match what can be returned: at most what was shipped and not yet returned of each.",
+  "returns.withdrawal_excluded":
+    "This product has no right of withdrawal (hygiene or made to order); it can come back only as damaged, wrong or not as described.",
   "returns.window_closed": "The return period for this order is over, or it has not shipped yet.",
   "returns.already_open": "This order already has an open return request.",
   "returns.exchange_variant_invalid":
@@ -454,6 +456,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "Enter a valid tax number (10 digits) or Turkish ID number (11 digits).",
   "platform_settings.kep_invalid": "Enter a valid KEP address, e.g. title@hs01.kep.tr.",
   "platform_settings.etbis_invalid": "An ETBİS registration number is letters, digits and dashes.",
+  "platform_settings.withdrawal_days_invalid":
+    "The withdrawal period must be a whole number of days between 14 and 365; the law asks for at least 14.",
   "platform_settings.phone_invalid": "Enter a valid Turkish phone number.",
   "platform_settings.robots_invalid":
     "robots.txt may only hold User-agent, Allow, Disallow, Sitemap, Crawl-delay lines and comments.",

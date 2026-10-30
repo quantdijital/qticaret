@@ -7,6 +7,7 @@ import type OrderRefundsModuleService from "../../modules/order-refunds/service"
 import { RETURN_REQUESTS_MODULE } from "../../modules/return-requests"
 import type ReturnRequestsModuleService from "../../modules/return-requests/service"
 import { COUNTED_RETURN_STATUSES, OPEN_RETURN_STATUSES } from "../../modules/return-requests/states"
+import { excludedLines, returnPolicy } from "./policy"
 
 interface LineFacts {
   id: string
@@ -55,6 +56,10 @@ export async function returnableLines(
     .resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE)
     .keptUnits(orderId)
   const left = returnable(order, earlier.flatMap(cameBack), kept)
+  const [policy, excluded] = await Promise.all([
+    returnPolicy(container),
+    excludedLines(container, order.items ?? []),
+  ])
   const items = ((order as { items?: (LineFacts | null)[] | null }).items ?? []).filter(
     (item): item is LineFacts => item !== null
   )
@@ -82,7 +87,7 @@ export async function returnableLines(
     ])
   )
   return {
-    window_open: order.status !== "canceled" && windowOpen(order, now),
+    window_open: order.status !== "canceled" && windowOpen(order, now, policy.withdrawal_days),
     open_request: earlier.some((request) =>
       (OPEN_RETURN_STATUSES as readonly string[]).includes(request.status)
     ),
@@ -92,6 +97,8 @@ export async function returnableLines(
       variant_title: item.variant_title ?? null,
       variant_id: item.variant_id ?? null,
       returnable: left.get(item.id) ?? 0,
+      // Outside the right of withdrawal: back only as faulty or wrong (F13.6)
+      withdrawal_excluded: excluded.has(item.id),
       // An exchange goes for another variant of the same product (adr/0032 §6)
       variants: (item.product_id ? (variantsOf.get(item.product_id) ?? []) : []).filter(
         (variant) => variant.id !== item.variant_id
