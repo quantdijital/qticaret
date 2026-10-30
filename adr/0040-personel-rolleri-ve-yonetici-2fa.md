@@ -1,6 +1,6 @@
 # ADR-0040: Personel rolleri, yönetici 2FA ve yeniden doğrulama
 
-- **Durum:** Önerildi (2026-10-29; kullanıcının "önerileni uygula" kuralıyla otonom kabul edilir, PROGRESS "Gözden geçir"de)
+- **Durum:** Kabul edildi (önerildi 2026-10-29, otonom uygulandı; kullanıcı 2026-10-30 bütün otonom kararları kabul etti)
 - **Tarih:** 2026-10-29
 - **İlgili:** F12.6; ADR-0027 (hesaplar panelden; canlıya çıkış engeli), ADR-0039 §6 (API anahtarı kapsamları), ADR-0022 (kendi panelimiz), docs/04 (yönetici hesapları), docs/06 (kontrol listesi: "rol kontrolü hem UI'da hem API'de")
 

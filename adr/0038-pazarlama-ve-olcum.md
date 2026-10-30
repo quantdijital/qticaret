@@ -1,6 +1,6 @@
 # ADR-0038: Pazarlama ve ölçüm: terk edilmiş sepet, İYS, ürün feed'leri, dönüşüm olayları, Search Console
 
-- **Durum:** Önerildi (2026-10-28; kullanıcının "önerileni uygula" kuralıyla otonom kabul edilir, PROGRESS "Gözden geçir"de)
+- **Durum:** Kabul edildi (önerildi 2026-10-28, otonom uygulandı; kullanıcı 2026-10-30 bütün otonom kararları kabul etti)
 - **Tarih:** 2026-10-28
 - **İlgili:** F10.7–F10.9, F10.11, F10.13; ADR-0036 (izin ve bildirimler), ADR-0027 (hesaplar panelden), ADR-0014 (iş altyapısı), ADR-0005 (LLM), docs/entegrasyonlar/pazarlama.md, docs/13 §10, docs/14
 

@@ -1,6 +1,6 @@
 # ADR-0003: Hosting, bölge ve veri yerleşimi
 
-- **Durum:** Önerildi (karar bekliyor — en geç F15 başlamadan kabul edilmeli)
+- **Durum:** Kısmen kabul edildi (2026-10-30): soru 1 kararlaştı; 2–5 F16 başında kararlaştırılır.
 - **Tarih:** 2026-10-21
 
 ## Bağlam
@@ -16,7 +16,9 @@ Bu yüzden hosting seçimi doğrudan şunları belirler:
 Ayrıca dış servislerin (e-posta, Sentry, CDN) veri işleme yeri de aynı değerlendirmeye girer.
 
 ## Karar
-_Henüz verilmedi._ Karar verilirken aşağıdaki sorular yanıtlanır:
+**Kullanıcı kararı (2026-10-30):** kişisel veri barındıran bileşenler (Postgres, dosya deposu, yedekler) **Türkiye'de** tutulur. Böylece KVKK m.9 kapsamındaki yurt dışı aktarım yükü veritabanı ve dosyalar için doğmaz. Dış servislerin (e-posta, hata izleme, CDN) yurt dışında işlediği veri ayrı değerlendirilir ve aydınlatma metninde yazılır.
+
+Kalan sorular F16 başında yanıtlanır:
 1. Kişisel veri barındıran bileşenler (Postgres, S3, yedekler) Türkiye'de mi tutulacak?
 2. Orkestrasyon: yönetilen Kubernetes mi, daha basit bir PaaS/self-hosted araç mı?
 3. Postgres: tenant başına ayrı sunucu mu, paylaşımlı küme üzerinde ayrı veritabanları mı?

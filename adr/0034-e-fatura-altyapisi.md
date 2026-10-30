@@ -1,79 +1,145 @@
 # ADR-0034: E-Fatura / e-Arşiv altyapısı
 
-- **Durum:** Önerildi (2026-10-28, F8 planlaması). Aşağıdaki "Kullanıcı kararı" maddeleri cevaplanınca kabul edilir; diğer maddeler önerilen seçenekle uygulanır.
-- **Tarih:** 2026-10-28
-- **İlgili:** F8.1–F8.8; ADR-0010 (kalem bazlı para), ADR-0027 (sağlayıcı hesapları panelden), ADR-0032 (iade ve değişim), ADR-0033 (sipariş düzenleme); docs/entegrasyonlar/e-fatura.md; docs/12 (mali müşavir maddeleri)
+- **Durum:** Kabul edildi (2026-10-30, yeniden yazıldı). İlk sürüm 2026-10-28'de önerildi: kendi UBL'imiz ve ince entegratör adaptörü. Kullanıcı 2026-10-30'da bunun yerine önerilen yolu seçti ("önerine uyuyorum başlayabiliriz"). Önceki karar aşağıda "Önceki karar"da özetlenir.
+- **Tarih:** 2026-10-28, yeniden 2026-10-30
+- **İlgili:** F8.1–F8.8; ADR-0010 (kalem bazlı para), ADR-0027 (sağlayıcı hesapları panelden), ADR-0032 (iade ve değişim), ADR-0033 (sipariş düzenleme), ADR-0039 (muhasebe aktarımı, dış API, web kancaları), ADR-0041 (KVKK); docs/entegrasyonlar/e-fatura.md; docs/mali-musavir-sorulari.md
 
 ## Bağlam
 
-F8 her satış için e-Fatura (alıcı e-fatura mükellefiyse) ya da e-Arşiv faturası, her iade için de iade faturası istiyor. Fatura mantığı, UBL-TR üretimi, mükellef bilgisi ve PDF bizde kalacak; entegratör yalnızca imza ve GİB'e iletim yapacak (docs/entegrasyonlar/e-fatura.md).
+F8 her satış için e-Fatura (alıcı e-fatura mükellefiyse) ya da e-Arşiv faturası, iadeler için de iade belgesi istiyor.
 
-Planlamada doğrulananlar:
-- **GİB kayıtlı kullanıcı listesi herkese açık toplu indirilemiyor.** Liste e-Fatura Portalı'nda giriş yapan kullanıcıya "Araçlar > Sisteme Kayıtlılar" altında XML/CSV olarak veriliyor. Entegratörler listeyi GİB'in merkezinden alıyor. Herkese açık olan yalnızca güvenlik kodlu tek VKN sorgusu. Yol haritasındaki "GİB listesini periyodik indir" maddesi bu yüzden doğrudan uygulanamaz.
-- **UBL-TR 1.2.1 güncel paket.** Kod listeleri 14 Eylül 2026'da güncellendi. Şema (XSD) ve iş kuralları (şematron) GİB e-Belge portalındaki paketten alınır.
-- **Medusa olayları (v2.21.2 kaynağı):** `order.placed`, `shipment.created`, `order.canceled`, `order-edit.confirmed`, `order.exchange_created`; kendi olayımız `return.refunded` (ADR-0032).
+İlk planda UBL-TR üretimi, mükellef listesi ve PDF bizdeydi; entegratör yalnızca imzalayıp iletecekti. Platformların bu işi nasıl çözdüğüne bakıldı (2026-10-30): ikas ve Ticimax ağırlıkla muhasebe ve fatura programlarına bağlanıyor ya da BirFatura gibi aracılara açık uç veriyor. Bu yolun bize getirdikleri:
+- **Ağır iş programda kalır.** UBL yazıcısı, GİB şema ve iş kuralları, kod listesi güncellemeleri, mükellef listesi ve fatura PDF'i bizim işimiz olmaz.
+- **Muhasebe zaten oradadır.** KOBİ'lerin çoğu Paraşüt kullanıyor. Fatura orada kesilince satış kaydı da orada oluşur; çift kayıt olmaz.
+- **İlk müşteri faturasını Luca'da elle kesiyor.** Kullanıcı kararıyla Luca entegre edilmiyor. Bu müşteriye fatura numarasını ve PDF'i elle işlemek yeter.
+
+Paraşüt API v4, resmî tanımından (`https://apidocs.parasut.com/swagger.json`, Swagger 2.0, son değişiklik kaydı 2021-10-11) doğrulandı:
+- **Kimlik:**
+  - OAuth2. Token adresi `https://api.parasut.com/oauth/token`; `password`, `authorization_code` ve `refresh_token` akışları var.
+  - Erişim jetonu 2 saat geçerli. Her yenilemede yeni bir yenileme jetonu döner ve sonraki yenilemede o kullanılır.
+  - İstemci kimliği ve sırrı `destek@parasut.com`'dan istenir.
+- **Adres ve sınır:** `https://api.parasut.com/v4/{company_id}/...`. En çok 10 saniyede 10 istek. Sayfa en çok 25 kayıt.
+- **Biçim:** JSON:API. Fatura satırları `relationships.details.data[]` içinde, kendi `attributes`'larıyla gönderilir.
+- **Akış:**
+  1. `contacts` (kişi ya da şirket, VKN veya TCKN);
+  2. `sales_invoices`: `item_type: invoice | refund …`, para birimi `TRL`; satırda miktar, KDV hariç birim fiyat, KDV oranı, tutar olarak indirim; `order_no` ve `order_date` birlikte;
+  3. `GET /e_invoice_inboxes?filter[vkn]=`: posta kutusu varsa e-Fatura, yoksa e-Arşiv;
+  4. `POST /e_invoices` (ilişki adı `invoice`) ya da `POST /e_archives` (ilişki adı `sales_invoice`). e-Arşiv'de internet satışında `internet_sale` (adres, ödeme tipi `KREDIKARTI/BANKAKARTI | EFT/HAVALE | KAPIDAODEME | ODEMEARACISI`, ödeme aracısı, ödeme tarihi) ve kargolu satışta `shipment` (taşıyıcı unvanı, VKN, tarih) zorunlu;
+  5. iki çağrı da bir `trackable_jobs` kaydı döner: `pending | running | done | error`, hatalar metin dizisi. Kayıt numarası 15 dakika kullanılabilir. Sonra fatura `?include=active_e_document` ile okunur;
+  6. PDF: `GET /e_archives/{id}/pdf` ya da `/e_invoices/{id}/pdf`. Hazır olana kadar 204 döner. Hazır olunca 1 saat geçerli bir adres döner; bu adres müşteriye verilmez, dosya indirilip saklanır.
+- **İptal:** yalnızca `DELETE /sales_invoices/{id}/cancel`. e-Arşiv `cancellable_until`'e kadar, yani resmîleştikten sonra 7 gün içinde iptal edilebilir (Paraşüt yardım merkezi). Gönderen e-Faturayı iptal edemez.
+- **Doğrulanamayanlar:**
+  - deneme ortamı;
+  - 429 yanıtı ve web kancaları (tanımda yok; durum sorgulanarak izlenir);
+  - satırın ürün kaydı olmadan kabul edilip edilmediği;
+  - iade faturasının asıl faturaya bağlanma biçimi;
+  - iptal çağrısının e-Arşivi GİB'de de iptal edip etmediği.
+
+  Bunlar gerçek hesapla ilk denemede doğrulanır. O zamana kadar sahte sunucu tanıma göre davranır.
 
 ## Karar
 
-1. **`einvoice` modülü.**
-   - `invoice` kaydı: sipariş, tür (`sale`, `return`), belge tipi (`e_invoice`, `e_archive`), durum (`pending`, `issued`, `failed`, `cancelled`), UUID, numara, deneme sayısı, son hata kodu, kesim zamanı, iadede asıl faturaya ve iade talebine bağ.
-   - Tekillik: (sipariş, tür, kaynak) üzerinde. Kaynak satışta sipariş, iadede iade talebi ya da iade defteri kaydı. Aynı sipariş için ikinci satış faturası oluşamaz (KK3).
-   - UBL XML'i ve PDF özel depoda; kayıtta yalnızca dosya anahtarları. Kişisel veri kayıtta yok, belgede var.
-2. **UBL-TR üretimi bizde, bağımlılıksız:**
-   - kendi kaçışlı XML yazıcımız;
-   - tutarlar F4.7 kalem paylarından (indirim kaleme dağıtılmış, kargo ayrı satır, KDV oranına göre döküm);
-   - e-Arşiv'de internet satışı bilgileri (web adresi, ödeme şekli, taşıyıcı, gönderim tarihi);
-   - iade faturasında asıl faturaya `BillingReference`.
-   - Şema doğrulaması testte GİB paketinin XSD'siyle yapılır (sistemdeki `xmllint`; yoksa test atlanır, CI'da zorunlu). Şematron ve GİB test aracı sunucuda, gerçek entegratörle.
-3. **Belge tipi:**
-   - Alıcının fatura profilinde (F1.5) VKN varsa ve alıcı e-fatura mükellefiyse e-Fatura, değilse e-Arşiv.
-   - Mükellef bilgisi yerel tabloda tutulur. Kaynağı entegratörün toplu kullanıcı listesidir (`downloadTaxpayers`, günlük iş); tek VKN sorgusu (`isEInvoiceTaxpayer`) yalnızca yedektir.
-   - Entegratör kapalıyken yerel tablo karar verir (KK5). Liste hiç yoksa tip "beklemede" kalır, iş yeniden dener.
-4. **Entegratör adaptörü (`InvoiceAdapter`):**
-   - `sendInvoice`, `cancelInvoice`, `getStatus`, `downloadTaxpayers`, `isEInvoiceTaxpayer`; isteğe bağlı `getPdf`.
-   - Hesap bilgileri panelden (`integration-credentials`, ADR-0027).
-   - İlk geliştirme sahte entegratörle yapılır (`packages/testing`, ödeme ve kargodaki gibi). Gerçek adaptör, kullanıcının seçtiği entegratörle eklenir.
-5. **Akış (`invoice-create-for-order` iş akışı):**
-   - sırayla: oku, tip belirle, tekillik kontrolü, numara ver, UBL üret ve doğrula, ilet, kaydet, PDF üret;
-   - entegratör hatası siparişi bozmaz: fatura `failed` olur ve artan aralıkla yeniden denenir;
-   - N denemeden sonra panelde uyarı ("ölü mektup", KK2);
-   - `outcome_unknown` olan iletim ikinci kez gönderilmez; önce durum sorulur (F5 V10 kuralı).
-6. **Tetikleme:** Mağaza ayarı: sipariş onayında (`order.placed`; havale onayı ve kapıda ödeme tahsilatı beklenir) ya da kargoya verilince (`shipment.created`). Varsayılan "kargoya verilince", çünkü düzenleme ve iptal o ana kadar faturayı etkilemez.
-7. **İade, iptal ve değişiklik:**
-   - Para iadesi (`return.refunded` ve iade defteri) iade faturası keser.
-   - Kesilmiş faturası olan siparişin iptali GİB kurallarına göre iptal ya da iade faturasıdır; adaptör soyutlar, mali müşavirle doğrulanır.
-   - Faturası kesilmiş sipariş düzenlenemez (ADR-0033 §8).
-   - Değişimde iade faturası ve yeni satış faturası kesilir (F7.11, KK3).
-8. **Numara:** Fatura numarası bizde verilir: 3 harfli seri, yıl ve 9 haneli sıra (GİB biçimi). Sıra mağaza ve yıl başına tutulur ve kilit altında artar; boşluk bırakmaz, iptal edilen numara tekrar kullanılmaz.
-9. **PDF:**
-   - UBL'den kendi şablonumuzla (mağaza logosu ve unvanı) üretilir, özel depoda saklanır, kısa ömürlü bağlantıyla verilir.
-   - PDF üretimi için bir kütüphane gerekir (öneri: `pdf-lib`, MIT, bağımlılıksız). O gelene kadar fatura görüntüsü HTML olarak üretilir; ters ibraz belge paketindeki gibi yeni bağımlılık yoktur.
-   - Entegratörün PDF'i isteğe bağlı yedektir.
-10. **Panel:**
-    - sipariş sayfasında fatura kartı (durum, PDF, "yeniden dene");
-    - Siparişler > Faturalar (başarısızlar önce);
-    - Ayarlar > E-Fatura (entegratör hesabı, seri, tetikleme anı, test modu).
+1. **Fatura sağlayıcısı mağaza ayarıdır.** Ayarlar > E-Fatura'da şu seçenekler var:
+   - `parasut`: faturayı sistem Paraşüt'te keser.
+   - `external`: mağazanın kendi programı keser ve sonucu sisteme geri yazar. Elle işlemek de bu seçenektir (Luca).
+   - `none`: kapalı.
+   - `fake`: yalnızca geliştirme ve testte seçilebilir.
 
-## Kullanıcı kararı gereken maddeler
+   Kendi UBL'imiz ve doğrudan entegratör sonraki aşamadır (F17'de bir entegratörle bayilik gündeme gelirse); aynı arayüze yeni bir sağlayıcı olarak eklenir.
+2. **`einvoice` modülü ve fatura kaydı.**
+   - Alanlar:
+     - sipariş, tür (`sale | return`) ve kaynak (satışta sipariş; iadede iade talebi ya da iade defteri kaydı);
+     - sağlayıcı ve belge tipi (`e_invoice | e_archive`, öğrenilene kadar boş);
+     - durum (`pending`: bekliyor; `issuing`: programda sürüyor; `issued`; `failed`; `cancelled`);
+     - Paraşüt'teki fatura ve e-belge kimlikleri, iş kaydı ve başladığı an;
+     - fatura numarası, ETTN, kesim zamanı, iptal edilebileceği son an;
+     - deneme sayısı, sonraki deneme zamanı, son hata kodu;
+     - PDF'in özel depodaki dosyası;
+     - toplamlar (KDV hariç, KDV, genel toplam; mutabakat için).
+   - Tekillik (sipariş, tür, kaynak) üzerindedir. Aynı sipariş için ikinci satış faturası oluşamaz (KK3).
+   - Kayıtta kişisel veri yoktur. Alıcı bilgisi gönderim anında siparişten ve fatura profilinden okunur. VKN ve TCKN yalnızca o an açılır (F11'deki gibi).
+3. **Faturanın içeriği bizde hesaplanır.** `lib/invoicing` sağlayıcıdan bağımsız bir fatura taslağı üretir:
+   - satırlar: ürün adı ve varyant, miktar, KDV hariç birim fiyat, KDV oranı, tutar olarak indirim;
+   - kargo bedeli ve kapıda ödeme bedeli ayrı satır;
+   - alıcı (kişi ya da şirket, kimlik, vergi dairesi, adres, e-posta);
+   - internet satışı bilgileri (vitrin adresi, ödeme tipi, ödeme aracısı, ödeme tarihi);
+   - gönderim (taşıyıcının unvanı ve VKN'si, gönderim tarihi);
+   - sipariş numarası ve tarihi.
 
-- **Entegratör seçimi ve test hesabı** (docs/12). İlk gerçek adaptör buna bağlı; seçilene kadar sahte entegratörle ilerlenir.
-- **Mali müşavir doğrulaması** (docs/12):
-  - TCKN'siz bireysel alıcıda varsayılan değer;
-  - indirim ve kargonun faturada gösterimi;
-  - hediye kartı ve mağaza kredisinin KDV'si;
-  - iptal mi iade faturası mı.
-- **PDF kütüphanesi onayı** (`pdf-lib`). Onaylanırsa toplu kargo etiketlerini tek PDF'te birleştirme işi de aynı bağımlılıkla çözülür (F7 açık sorusu).
+   Tutarlar F4.7 kalem paylarından ve sunucuda hesaplanır; istemciden tutar alınmaz. Paraşüt'ün toplamıyla kuruş farkı kayda geçer ve panelde gösterilir; hangi toplamın esas olduğu mali müşavire soruldu. Varsayılanlar (TCKN'siz alıcıda `11111111111`, kargo ve kapıda ödeme bedeli %20 KDV'li satır, indirim kalemde) mali müşavir cevaplarına göre değişir.
+4. **Sağlayıcı arayüzü (`InvoiceProvider`):**
+   - `start(taslak)`: Paraşüt'te müşteriyi bulur ya da açar, satış faturasını açar, posta kutusuna bakar ve e-belgeyi başlatır. İş kaydını döner.
+   - `check(ref)`: bekliyor, kesildi (numara, ETTN, iptal sınırı) ya da başarısız (kod).
+   - `pdf(ref)`: dosya ya da "henüz hazır değil".
+   - `cancel(ref)` ve `healthCheck()`.
+
+   Her uzak adımın sonucu hemen kayda yazılır. Yeniden deneme kaldığı yerden sürer: satış faturası açılmışsa yeniden açılmaz, e-belge başlamışsa yeniden başlatılmaz.
+5. **Paraşüt bağlantısı (ADR-0027):**
+   - İstemci kimliği ve sırrı platformundur ve ortamdan okunur (`PARASUT_CLIENT_ID`, `PARASUT_CLIENT_SECRET`), Google bağlantısındaki gibi.
+   - Mağaza firma numarasını panelden girer ve Paraşüt'e bağlanır. Önerilen yol yetki kodu akışıdır: Paraşüt'ün sayfası açılır, verdiği kod panele yapıştırılır. Böylece mağazanın Paraşüt parolası bizde tutulmaz.
+   - Paraşüt bu akışı platform istemcisine açmazsa parola akışına geçilir: ayrı bir API kullanıcısı açılır, parolası `integration-credentials`'ta şifreli tutulur.
+   - Jetonlar şifreli saklanır. Yenileme jetonu her kullanımda değişir ve kilit altında yenilenir.
+   - Yenileme reddedilirse bağlantı "koptu" olur ve panel yeniden bağlanmayı ister.
+6. **İstemci (`lib/clients` tabanı):**
+   - zaman aşımı, yeniden deneme ve günlüklerde redaksiyon (alıcı verisi ve jeton yazılmaz);
+   - mağaza başına 10 saniyede 10 istek sınırı (Redis), 429 ve 5xx'te artan aralıkla bekleme;
+   - yalnızca `api.parasut.com`'a gider.
+   - PDF adresi yalnızca HTTPS ve izinli bir alan adındaysa indirilir. Alan adı ilk gerçek denemede görülüp izin listesine yazılır; o zamana kadar yalnızca Paraşüt'ün kendi alan adı.
+7. **Akış:**
+   - **`invoice-issue` iş akışı:** taslağı kur, tekilliği denetle, sağlayıcıyla başlat, kaydet. Girdisi yalnızca kimliklerdir; kişisel veri iş akışı kaydına girmez (F13'ten ders).
+   - **`invoice-check` işi** dakikada bir çalışır. Bekleyen işleri sorar. 15 dakikayı geçen işte faturanın etkin e-belgesine bakar. Kesilen faturanın PDF'ini özel depoya indirir. Müşteriye e-postayla bildirir; PDF sipariş sayfasından da indirilir.
+   - **Hata siparişi bozmaz.**
+     - Fatura `failed` olur ve artan aralıkla yeniden denenir.
+     - N denemeden sonra panelde uyarı çıkar (KK2).
+     - Sonucu bilinmeyen bir başlatma ikinci kez gönderilmez; önce Paraşüt'teki kayıt sorulur.
+   - **Telafi:**
+     - Resmîleşmemiş satış faturası, e-belge başlatılamadan kalıcı olarak düşerse Paraşüt'ten silinir.
+     - Resmîleşmiş bir fatura iş akışı hatasında kendiliğinden iptal edilmez. Vergi belgesidir; iptali yalnızca kural (iptal edilen sipariş) ya da personel başlatır.
+
+     "Dış servis çağıran her adımın telafisi olur" kuralına bu bilinçli bir istisnadır.
+8. **Tetikleme:** Mağaza ayarı sipariş onayı (`order.placed`) ya da kargoya verme (`shipment.created`); varsayılan kargoya verme. Havalede ödeme onayı beklenir.
+9. **Geri yazma (`external`):**
+   - **Bekleyen faturalar:** `GET /admin/invoices?status=pending`. Taslağı da döner. Kapsamı `invoices:read` olan API anahtarlarına açıktır (F11'in kapsamlı anahtarları). Alıcı bilgisi kişisel veri olduğu için bu kapsam ayrıca verilir.
+   - **Kesildi bildirimi:** `POST /admin/invoices/:id/issued`, gövdesinde numara, ETTN, belge tipi ve kesim zamanı. Aynı numarayla tekrar gelirse 200, farklı numarayla 409 döner.
+   - **PDF:** `POST /admin/invoices/:id/pdf`, yalnızca `application/pdf`, en çok 5 MB, `%PDF-` ile başlamalı. Kapsam `invoices:write`.
+   - **Web kancası:** `invoice.requested` olayı F11 web kancalarıyla gider; bağlayıcılar yoklamak zorunda kalmaz.
+   - **Panelde "Faturayı elle işle":** numara ve PDF girilir. İlk müşteri (Luca) bunu kullanır.
+10. **İptal ve iade:**
+    - Faturası kesilmiş sipariş iptal edilince e-Arşiv iptal sınırı içindeyse iptal edilir.
+    - Sınır geçtiyse ya da belge e-Faturaysa iade belgesi gerekir. Biçimi mali müşavir cevabına bağlıdır (soru 5.1–5.4): Paraşüt'te `item_type: refund` ya da gider pusulası.
+    - Değişimde iade ve yeni satış belgesi düzenlenir.
+    - Faturası kesilmiş sipariş düzenlenemez (ADR-0033 §8).
+11. **Muhasebe (ADR-0039):** Mağaza hem fatura hem muhasebe için Paraşüt kullanıyorsa satış faturası satış kaydının kendisidir. İleride yazılacak Paraşüt muhasebe adaptörü satışı ikinci kez göndermez; fatura kaydının kimliğini kullanır, yalnızca tahsilatı yazar.
+12. **Sahte Paraşüt** (`packages/testing`, `pnpm dev:parasut`):
+    - üç token akışı ve dönen yenileme jetonu;
+    - müşteri, satış faturası, posta kutusu sorgusu (sabit bir VKN listesi e-Fatura mükellefi sayılır);
+    - e-Fatura ve e-Arşiv; birkaç sorguda `pending → running → done` ilerleyen iş kaydı;
+    - önce 204 sonra adres dönen PDF; iptal;
+    - 10 sn/10 istek aşımında 429;
+    - özel değerlerle hata senaryoları (doğrulama hatası, iş hatası, zaman aşımı).
+
+## Bu kararla kapsam ve kabul kriterleri
+
+- **F8.2 (UBL bizde), F8.7 (mükellef listesi bizde) ve F8.8 (PDF bizde)** sonraki aşamaya kaldı.
+  - Paraşüt yolunda belge tipini posta kutusu sorgusu, PDF'i Paraşüt verir. PDF bizde saklanır ve bizden sunulur.
+  - **KK4** (UBL şema doğrulaması) kendi UBL'imizle birlikte sonraki aşamaya kalır.
+  - **KK5** şöyle yorumlanır: Paraşüt kapalıyken fatura beklemede kalır ve yeniden denenir; sipariş akışı etkilenmez. Yerel mükellef tablosu yoktur.
+- **KK1** sahte Paraşüt'le testte, gerçek hesapla sunucuya çıkışta işaretlenir. Deneme ortamı doğrulanamadı.
+
+## Önceki karar (2026-10-28, yerini bu karar aldı)
+
+UBL-TR yazıcısı, GİB XSD doğrulaması, entegratörün toplu listesinden beslenen yerel mükellef tablosu, kendi fatura numarası sırası ve UBL'den PDF bizde olacaktı; entegratör yalnızca imza ve iletim yapacaktı. Avantajı entegratör değiştirmenin kolaylığıydı. Bakım yükü (şema, kod listeleri, iade belgesi) ve ilk müşteride karşılığı olmaması nedeniyle ertelendi.
 
 ## Alternatifler
 
 | Seçenek | Artı | Eksi |
 |---|---|---|
-| **UBL ve mantık bizde, entegratör ince adaptör (seçilen)** | Entegratör değişimi bir adaptör işi; fatura tutarları ödeme ve iade defteriyle aynı kaynaktan | UBL-TR ve şema güncellemeleri bizim sorumluluğumuz |
-| Entegratörün kendi fatura nesnesi (JSON) | Hızlı başlangıç | Entegratöre bağımlılık; tutar mantığı iki yerde |
-| Mükellef bilgisini her faturada entegratöre sormak | Basit | Entegratör kapalıyken fatura kesilemez (KK5'e aykırı) |
+| **Paraşüt + geri yazma ucu (seçilen)** | UBL, mükellef listesi, PDF ve mevzuat güncellemesi programda; muhasebe kaydı tek yerde; uç her programa açık | Mağaza Paraşüt'e ya da aracıya ayrıca öder; istek sınırı düşük; web kancası yok, yoklama gerekir |
+| Kendi UBL'imiz + ince entegratör adaptörü (önceki karar) | Entegratör değişimi kolay; ileride bayilik geliri | En büyük ve en çok bakım isteyen iş; ilk müşteride karşılığı yok |
+| Yalnızca geri yazma ucu | En az iş | Paraşüt kullanan mağaza da bir aracı bulmak zorunda kalır |
 
 ## Sonuçlar
 
-- F7 KK3 (iade faturası) bu fazda kapanır.
-- F11 (muhasebe) fatura kayıtlarını kaynak alır.
-- UBL-TR paket güncellemeleri (kod listeleri) izlenir; şema dosyaları sürümüyle depoda tutulur.
+- F7 KK3 (iade faturası) mali müşavir cevabından sonra kapanır.
+- Paraşüt'ten platform istemcisi istenecek (docs/12 satırı). Yetki kodu akışının platform istemcisine açılıp açılmadığı da sorulacak.
+- Fatura kayıtları F11 muhasebe aktarımına ve raporlara kaynak olur.

@@ -1,6 +1,6 @@
 # ADR-0036: Bildirim altyapısı: e-posta, SMS ve ileti izni
 
-- **Durum:** Önerildi (2026-10-28; kullanıcının "önerileni uygula" kuralıyla otonom kabul edilir, PROGRESS "Gözden geçir"de)
+- **Durum:** Kabul edildi (önerildi 2026-10-28, otonom uygulandı; kullanıcı 2026-10-30 bütün otonom kararları kabul etti)
 - **Tarih:** 2026-10-28
 - **İlgili:** F9, docs/entegrasyonlar/sms.md, ADR-0027 (hesaplar panelden), ADR-0020 (panel zili), ADR-0026 §5 (gelen bildirim kaydı), docs/04 (hız sınırı)
 

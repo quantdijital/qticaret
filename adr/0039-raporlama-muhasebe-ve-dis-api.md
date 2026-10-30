@@ -1,6 +1,6 @@
 # ADR-0039: Raporlama, muhasebe aktarımı, dış API ve giden webhook'lar
 
-- **Durum:** Önerildi (2026-10-29; kullanıcının "önerileni uygula" kuralıyla otonom kabul edilir, PROGRESS "Gözden geçir"de)
+- **Durum:** Kabul edildi (önerildi 2026-10-29, otonom uygulandı; kullanıcı 2026-10-30 bütün otonom kararları kabul etti)
 - **Tarih:** 2026-10-29
 - **İlgili:** F11.1–F11.8; ADR-0014 (iş altyapısı), ADR-0018 (tablo dışa aktarma), ADR-0027 (hesaplar panelden), ADR-0029 (ödeme yöntemleri), ADR-0034 (e-fatura, askıda), docs/entegrasyonlar/muhasebe.md, docs/04, docs/14 (S-SEARCH-01)
 

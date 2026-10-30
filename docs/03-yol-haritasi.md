@@ -296,20 +296,20 @@ Detay: `docs/entegrasyonlar/geliver.md`
 Detay: `docs/entegrasyonlar/e-fatura.md`
 
 - F8.1 `einvoice` modülü: Invoice modeli (sipariş ref, UUID, numara, durum, PDF url, hata)
-- F8.2 **UBL-TR üretimi bizde** (`einvoice/ubl`): fatura/iade faturası XML'i, KDV dökümü, indirim/kargo satırları (mali müşavirle doğrula); `InvoiceAdapter` arayüzü entegratöre yalnızca imza+iletim bırakır; ilk adaptör
-- F8.3 Fatura tipi belirleme: alıcı VKN'li ve e-fatura mükellefi ise e-Fatura, değilse e-Arşiv
+- F8.2 Fatura sağlayıcısı (ADR-0034, 2026-10-30): ilk sağlayıcı **Paraşüt** (fatura içeriği bizde hesaplanır, UBL ve iletim Paraşüt'te) ve dış programlar için **geri yazma ucu** (elle işleme dahil). _Kendi UBL-TR üretimimiz sonraki aşama._
+- F8.3 Fatura tipi belirleme: alıcı VKN'li ve e-fatura mükellefi ise e-Fatura, değilse e-Arşiv (Paraşüt yolunda posta kutusu sorgusuyla)
 - F8.4 Workflow: tetikleme zamanı tenant ayarı (sipariş/kargo); retry + dead-letter
 - F8.5 İade/iptal faturası akışı (değişim dahil, F7.11)
 - F8.6 Admin: fatura durumu widget'ı, PDF indir, "yeniden dene"
-- F8.7 **Mükellef sorgusu bizde:** GİB'in yayımladığı e-fatura kayıtlı kullanıcı listesini periyodik indirip yerel tabloda tutan job; entegratör sorgusu yalnızca yedek
-- F8.8 **Fatura PDF'i bizde:** UBL'den PDF üretimi (worker), tenant logosu/şablonu; private depolama + presigned erişim; entegratör PDF'i opsiyonel
+- F8.7 _Sonraki aşama (kendi UBL'imizle):_ mükellef sorgusu bizde (GİB listesi herkese açık toplu indirilemiyor, ADR-0034)
+- F8.8 Fatura PDF'i bizde saklanır ve bizden sunulur (Paraşüt'ün ya da geri yazılan PDF; private depolama, kısa ömürlü erişim). _UBL'den kendi PDF şablonumuz sonraki aşama._
 
 **KK:**
 - [ ] Test ortamında bireysel (e-Arşiv) ve kurumsal (e-Fatura) fatura kesiliyor
 - [ ] Entegratör hata verirse sipariş akışı bozulmuyor, fatura "beklemede" kalıp retry ediliyor
 - [ ] Aynı sipariş için mükerrer fatura oluşmuyor
-- [ ] Ürettiğimiz UBL-TR, entegratörün ve GİB test aracının şema doğrulamasından geçiyor
-- [ ] Mükellef listesi güncel; entegratör kapalıyken tip belirleme çalışıyor (testli)
+- [ ] Ürettiğimiz UBL-TR, entegratörün ve GİB test aracının şema doğrulamasından geçiyor (_kendi UBL'imizle birlikte sonraki aşama, ADR-0034_)
+- [ ] Mükellef listesi güncel; entegratör kapalıyken tip belirleme çalışıyor (testli) (_Paraşüt yolunda: Paraşüt kapalıyken fatura beklemede kalıp yeniden deneniyor, sipariş etkilenmiyor; ADR-0034_)
 
 ---
 
@@ -421,11 +421,11 @@ Detay: `docs/06-admin-ux.md`. adr/0022'den sonra bu fazın ekranları panel hatt
 - F13.10 **Veri ihlali müdahale runbook'u:** tespit → sınırlama → etki analizi → tenant bilgilendirme şablonu → KVKK Kurulu bildirimi (72 saat) → ilgili kişi bildirimi → olay sonrası rapor; masa başı tatbikat (docs/04)
 
 **KK:**
-- [ ] Her siparişte ilgili sözleşme snapshot'ı ve onay kaydı mevcut
-- [ ] Flag açıkken yaş onayı olmadan kısıtlı ürünlü sepet tamamlanamıyor
-- [ ] Anonimleştirme sonrası siparişin muhasebe verisi korunuyor, kişisel veri temizleniyor
-- [ ] Künye eksik mağazada admin uyarısı görünüyor
-- [ ] İhlal runbook'u dokümante; tatbikat yapıldı ve kaydı var
+- [x] Her siparişte ilgili sözleşme snapshot'ı ve onay kaydı mevcut (L5; `legal-consent.spec.ts`)
+- [x] Flag açıkken yaş onayı olmadan kısıtlı ürünlü sepet tamamlanamıyor (L7; `age-verification.spec.ts`)
+- [x] Anonimleştirme sonrası siparişin muhasebe verisi korunuyor, kişisel veri temizleniyor (L9, L11; `kvkk-requests.spec.ts`)
+- [x] Künye eksik mağazada admin uyarısı görünüyor (L3)
+- [ ] İhlal runbook'u dokümante; tatbikat yapıldı ve kaydı var (kılavuz L10'da hazır; masa başı tatbikat kullanıcıyla yapılacak)
 
 ---
 

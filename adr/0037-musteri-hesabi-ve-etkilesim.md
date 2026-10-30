@@ -1,6 +1,6 @@
 # ADR-0037: Müşteri hesabı, misafir sipariş erişimi ve etkileşim modülleri
 
-- **Durum:** Önerildi (2026-10-28; kullanıcının "önerileni uygula" kuralıyla otonom kabul edilir, PROGRESS "Gözden geçir"de)
+- **Durum:** Kabul edildi (önerildi 2026-10-28, otonom uygulandı; kullanıcı 2026-10-30 bütün otonom kararları kabul etti)
 - **Tarih:** 2026-10-28
 - **İlgili:** F10.1–F10.6, F10.10, F10.12; ADR-0004 (Store API kimlik modeli), ADR-0036 (bildirimler ve izin), ADR-0027 (hesaplar panelden), docs/13 §5 (JSON-LD), docs/04
 

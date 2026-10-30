@@ -1,6 +1,6 @@
 # ADR-0041: Yasal metinler, onay kayıtları, kısıtlı ürünler ve KVKK talepleri
 
-- **Durum:** Önerildi (2026-10-30; kullanıcının "önerileni uygula" kuralıyla otonom kabul edilir, PROGRESS "Gözden geçir"de)
+- **Durum:** Kabul edildi (önerildi 2026-10-30, otonom uygulandı; kullanıcı 2026-10-30 bütün otonom kararları kabul etti)
 - **Tarih:** 2026-10-30
 - **İlgili:** F13; ADR-0003 (KVKK ve yurt dışı aktarım), ADR-0009 (TCKN şifreleme, kalıcı silme açık), ADR-0011 (denetim kaydı saklama), ADR-0019 (içerik belgesi), ADR-0030 (ters ibraz kanıtı), ADR-0032 (cayma süresi ve istisnalar), ADR-0036 (`legal-consent` F13'te), ADR-0038 §2 ve §4 (ödeme ve çerez onayı), docs/12 (avukat, KVKK danışmanı), docs/13 (JSON-LD), docs/04 (ihlal bildirimi)
 
