@@ -11,6 +11,7 @@ import { AdminPostStatementCheck } from "./reports/statements/validators"
 import { AdminGetOrderBoard } from "./order-board/validators"
 import { AdminGetBulkLabels } from "./shipping-labels/validators"
 import { AdminPostCustomerConsent } from "./customers/[id]/consents/validators"
+import { AdminPostDeliverOrders } from "./order-board/deliver/validators"
 import { AdminPostShipOrder, AdminPostShipOrders } from "./orders/[id]/ship/validators"
 import { AdminPostPriceListDiscount } from "./price-lists/[id]/discount/validators"
 import { AdminPostPromotionOffer } from "./promotions/[id]/offer/validators"
@@ -85,6 +86,12 @@ export const PANEL_ROUTES = [
     matcher: "/admin/orders/:id/ship",
     methods: ["POST" as const],
     middlewares: [requireUserActor, validateAndTransformBody(AdminPostShipOrder)],
+  },
+  // F12.3: the shop's own deliveries marked delivered at once; people only
+  {
+    matcher: "/admin/order-board/deliver",
+    methods: ["POST" as const],
+    middlewares: [requireUserActor, validateAndTransformBody(AdminPostDeliverOrders)],
   },
   // F7.7: several orders at once; each may ask a carrier, so a small budget per staff member
   {

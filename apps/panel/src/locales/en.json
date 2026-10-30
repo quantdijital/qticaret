@@ -2556,7 +2556,6 @@
       "selected_other": "{{count}} orders picked",
       "tooMany": "At most {{max}} orders can be shipped at once.",
       "clear": "Clear",
-      "ship": "Ship",
       "resultsTitle": "Shipped orders",
       "resultsSummary": "{{shipped}} orders shipped, {{failed}} could not be.",
       "label": "Label",
@@ -2654,6 +2653,33 @@
       "lastName": "Last name",
       "nameRequired": "First and last name are required.",
       "saved": "Delivery address updated."
+    },
+    "filters": {
+      "any": "{{what}}: any",
+      "payment": "Payment",
+      "shipping": "Shipping",
+      "payments": {
+        "paid": "Paid",
+        "awaiting": "Awaiting payment",
+        "refunded": "Refunded"
+      },
+      "shippings": {
+        "none": "Not sent",
+        "label": "Label ready",
+        "on_the_way": "On the way",
+        "delivered": "Delivered",
+        "problem": "Problem (returned, not delivered)"
+      }
+    },
+    "bulk": {
+      "ship_one": "Ship ({{count}})",
+      "ship_other": "Ship ({{count}})",
+      "deliver_one": "Delivered ({{count}})",
+      "deliver_other": "Delivered ({{count}})",
+      "delivered_one": "{{count}} order marked delivered.",
+      "delivered_other": "{{count}} orders marked delivered.",
+      "notDelivered_one": "{{count}} order could not be marked: {{reason}}",
+      "notDelivered_other": "{{count}} orders could not be marked: {{reason}}"
     }
   },
   "customers": {

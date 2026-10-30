@@ -36,7 +36,8 @@ Dashboard, Siparişler (aşama sekmeleri + detay: kargoya ver, teslim edildi, ta
 ## Planlanan ekranlar (panel hattı P1–P6 ve ilgili fazlar)
 | Ekran | Desen (docs/18 §7) | İçerik |
 |---|---|---|
-| Dashboard | StatCard + grafik + kurulum ilerlemesi (P1) | Bugünkü satış, bekleyen ve kargoya hazır sipariş, düşük stok, haftalık grafik, sıradaki kurulum adımı; hatalı ödeme/fatura sayıları ilgili fazda |
+| Dashboard | StatCard + grafik + kurulum ilerlemesi (P1) | Dönem sayıları, satış eğrisi; bekleyen işler süzgeçli listelere açılır (aktarılamayan muhasebe kaydı ve durdurulan web kancası yalnızca kullanılıyorsa ve rol düzeltebiliyorsa, F12.1); son siparişler, çok satanlar ve mağaza SEO puanı; sıradaki kurulum adımı (yalnızca ayar yetkisi olanlara; okunamazsa tekrar dene); fatura sayısı F8'de |
+| Sipariş listesi | DataTable + sekmeler (F7.7, F12.3) | Aşama sekmeleri; arama yanında ödeme (ödendi / bekliyor / iade edildi) ve kargo (gönderilmedi / etiket hazır / yolda / teslim edildi / sorunlu) süzgeçleri, adreste; sekme sayıları süzülmüş kümeyi sayar. Her aşamada seçim; toplu çubuk seçilenlerden uygun olanları sayar: etiketleri yazdır, "Teslim edildi" (yalnızca mağazanın kendi teslimatı; kargo firmasının kolisi takiple teslim olur), "Kargoya ver" |
 | Sipariş detay | Sayfa (P4, F7) | Kalemler, ödeme/kargo/fatura durumu tek bakışta, kargo takip zaman çizelgesi, yasal onay kaydı, iç notlar |
 | Ürün sihirbazı ve düzenleme | Wizard + FormSection (P3, F3) | Temel bilgi → görseller → fiyat ve stok → özellikler (şablon) → katalog ve SEO → yayınla; düzenlemede aynı bölümler |
 | Entegrasyonlar | Sayfa | Gruplu kartlar (ödeme, kargo, iletişim, Google ve pazarlama, muhasebe, altyapı); her satırda durum ve nedeni, canlı yanıt, bağlantı testi, ayar sayfasına bağlantı ve son hatalar (kodlarıyla, açılır liste). Yalnızca sahip ve yönetici (F12.2, adr/0002 ek) |

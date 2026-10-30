@@ -1,6 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
-import { LIFECYCLE_FIELDS, boardSlice } from "../../../lib/dashboard"
+import { LIFECYCLE_FIELDS, boardSlice, lifecycleOf } from "../../../lib/dashboard"
+import { paymentFilterOf, shippingFilterOf } from "../../../lib/dashboard/board-filters"
 import type { LifecycleOrder } from "../../../lib/dashboard"
 import { createSingleFlight } from "../../../lib/cache"
 import { fromMedusaAmount, toMedusaAmount } from "../../../lib/money"
@@ -131,6 +132,32 @@ async function shippingOf(
   return latest
 }
 
+/**
+ * The orders where the money and the parcel stand as asked (F12.3), before
+ * the stages are counted: the tabs count what the filters leave. Parcels
+ * are read only when the shipping filter asks.
+ */
+async function filtered(
+  scope: MedusaContainer,
+  rows: StageRow[],
+  params: AdminGetOrderBoardType
+): Promise<StageRow[]> {
+  const byPayment = params.payment
+    ? rows.filter((row) => paymentFilterOf(row) === params.payment)
+    : rows
+  if (!params.shipping) {
+    return byPayment
+  }
+  const parcels = await shippingOf(
+    scope,
+    byPayment.map((row) => row.id)
+  )
+  return byPayment.filter(
+    (row) =>
+      shippingFilterOf(lifecycleOf(row), parcels.get(row.id)?.status ?? null) === params.shipping
+  )
+}
+
 const customerOf = (address: DisplayRow["shipping_address"]) => ({
   name: [address?.first_name, address?.last_name].filter(Boolean).join(" ") || null,
   place: address?.province ?? address?.city ?? null,
@@ -157,7 +184,7 @@ export async function readOrderBoard(scope: MedusaContainer, params: AdminGetOrd
       pagination: { skip: 0, take: MAX_ORDERS_READ, order: { created_at: "DESC" } },
     })
   )
-  const rows = data as unknown as StageRow[]
+  const rows = await filtered(scope, data as unknown as StageRow[], params)
   const slice = boardSlice(rows, params.stage, params.offset, ORDER_BOARD_PAGE)
   const ids = slice.page.map((row) => row.id)
   const { data: full } = ids.length
@@ -209,7 +236,7 @@ export async function readOrderBoard(scope: MedusaContainer, params: AdminGetOrd
     counts: slice.counts,
     offset: params.offset,
     limit: ORDER_BOARD_PAGE,
-    limited: (metadata?.count ?? rows.length) > rows.length,
+    limited: (metadata?.count ?? data.length) > data.length,
   }
 }
 

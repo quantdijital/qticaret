@@ -2556,7 +2556,6 @@
       "selected_other": "{{count}} sipariş seçildi",
       "tooMany": "Bir seferde en çok {{max}} sipariş kargoya verilebilir.",
       "clear": "Seçimi kaldır",
-      "ship": "Kargoya ver",
       "resultsTitle": "Kargoya verilenler",
       "resultsSummary": "{{shipped}} sipariş kargoya verildi, {{failed}} sipariş verilemedi.",
       "label": "Etiket",
@@ -2654,6 +2653,33 @@
       "lastName": "Soyad",
       "nameRequired": "Ad ve soyad gerekli.",
       "saved": "Teslimat adresi güncellendi."
+    },
+    "filters": {
+      "any": "{{what}}: tümü",
+      "payment": "Ödeme",
+      "shipping": "Kargo",
+      "payments": {
+        "paid": "Ödendi",
+        "awaiting": "Ödeme bekliyor",
+        "refunded": "İade edildi"
+      },
+      "shippings": {
+        "none": "Gönderilmedi",
+        "label": "Etiket hazır",
+        "on_the_way": "Yolda",
+        "delivered": "Teslim edildi",
+        "problem": "Sorunlu (geri döndü, teslim edilemedi)"
+      }
+    },
+    "bulk": {
+      "ship_one": "Kargoya ver ({{count}})",
+      "ship_other": "Kargoya ver ({{count}})",
+      "deliver_one": "Teslim edildi ({{count}})",
+      "deliver_other": "Teslim edildi ({{count}})",
+      "delivered_one": "{{count}} sipariş teslim edildi olarak işaretlendi.",
+      "delivered_other": "{{count}} sipariş teslim edildi olarak işaretlendi.",
+      "notDelivered_one": "{{count}} sipariş işaretlenemedi: {{reason}}",
+      "notDelivered_other": "{{count}} sipariş işaretlenemedi: {{reason}}"
     }
   },
   "customers": {

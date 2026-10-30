@@ -163,5 +163,62 @@ medusaIntegrationTestRunner({
       }
       expect(recorded).toBeGreaterThan(0)
     })
+
+    it("filters by where the money and the parcel stand, and marks the shop's own deliveries delivered at once (F12.3)", async () => {
+      const container = getContainer()
+      const { regionId, salesChannelId } = await seedDemo(container)
+      const option = await firstId(container, "shipping_option", {
+        name: DEMO_SHIPPING_OPTIONS[0].name,
+      })
+      const variant = await firstId(container, "product_variant")
+      const place = async (stage: DemoStage, lastName: string) => {
+        const orderId = await placeOrder(container, {
+          regionId,
+          salesChannelId,
+          shippingOptionId: option,
+          items: [{ variant_id: variant, quantity: 1 }],
+          address: { first_name: "Elif", last_name: lastName, address_1: "Demo Sokak 2" },
+        })
+        await advanceOrder(container, orderId, stage)
+        return orderId
+      }
+      const toShip = await place("to_ship", "Yıldız")
+      const onTheWay = await place("shipped", "Aydın")
+      const done = await place("delivered", "Koç")
+
+      const paid = await get("/admin/order-board?payment=paid")
+      const waiting = await get("/admin/order-board?payment=awaiting")
+      const notSent = await get("/admin/order-board?shipping=none")
+      const going = await get("/admin/order-board?shipping=on_the_way")
+      const unknown = await get("/admin/order-board?shipping=lost")
+      const deliver = (orderIds: string[], headers = admin.headers) =>
+        settle(
+          http.post<{
+            results: { order_id: string; ok: boolean; delivered: number; error: string | null }[]
+          }>("/admin/order-board/deliver", { order_ids: orderIds }, { headers })
+        )
+      const ops = await createAdminUser(http, container, "readonly")
+      const byReadonly = await deliver([onTheWay], ops.headers)
+      const marked = await deliver([onTheWay, toShip])
+      const delivered = await get("/admin/order-board?shipping=delivered")
+
+      expect(paid.data.count).toBe(3)
+      expect(waiting.data.count).toBe(0)
+      expect(notSent.data.orders.map((order) => order.id)).toEqual([toShip])
+      expect(going.data.orders.map((order) => order.id)).toEqual([onTheWay])
+      // The tabs count what the filters leave
+      expect(going.data.counts).toMatchObject({ all: 1, shipped: 1, to_ship: 0 })
+      expect(unknown.status).toBe(400)
+      expect(byReadonly.status).toBe(403)
+      expect(marked.data.results).toEqual([
+        { order_id: onTheWay, ok: true, delivered: 1, error: null, message: null },
+        expect.objectContaining({
+          order_id: toShip,
+          ok: false,
+          error: "orders.nothing_to_deliver",
+        }),
+      ])
+      expect(delivered.data.orders.map((order) => order.id).sort()).toEqual([onTheWay, done].sort())
+    })
   },
 })

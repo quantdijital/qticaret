@@ -17,6 +17,27 @@ export interface ShipResult {
 /** The most orders one "Kargoya ver" takes (the server's limit). */
 export const MAX_BULK_SHIP = 20
 
+/** One order's outcome of "Teslim edildi" for several (F12.3). */
+export interface DeliverResult {
+  order_id: string
+  ok: boolean
+  delivered: number
+  error: string | null
+  message: string | null
+}
+
+/** "Teslim edildi" for the picked orders: the shop's own deliveries, each whole. */
+export const useDeliverOrders = () =>
+  useOrderMutation(
+    async (orderIds: string[]) =>
+      (
+        await sdk.client.fetch<{ results: DeliverResult[] }>("/admin/order-board/deliver", {
+          method: "POST",
+          body: { order_ids: orderIds },
+        })
+      ).results
+  )
+
 export const useShipOrders = () =>
   useOrderMutation(
     async ({ orderIds, notify }: { orderIds: string[]; notify: boolean }) =>

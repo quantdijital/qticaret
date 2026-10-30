@@ -242,6 +242,7 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "DELETE /admin/messaging/suppressions/:id": false,
   "POST /admin/messaging/suppressions": false,
   "POST /admin/order-board/ship": true,
+  "POST /admin/order-board/deliver": true,
   "POST /admin/orders/:id/bank-transfer/confirm": false,
   "POST /admin/orders/:id/edit/preview": false,
   "POST /admin/orders/:id/edit": false,

@@ -41,6 +41,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The chosen lines do not match what is left to ship: at most what is left of each line can go.",
   "orders.ship_packed_first":
     "The packed parcel must go first; then the remaining lines can be chosen.",
+  "orders.nothing_to_deliver": "No parcel of the shop's own delivery waits to be delivered.",
+  "orders.deliver_failed": "The order could not be marked delivered; try again on its page.",
   "orders.ship_failed": "The order could not be shipped; try again from its page.",
   "orders.payment_awaited":
     "The order's payment has not come yet; it can be shipped once the transfer is confirmed.",

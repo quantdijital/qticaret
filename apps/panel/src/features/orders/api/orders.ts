@@ -59,19 +59,36 @@ export interface OrderBoard {
   limited: boolean
 }
 
+/** Where the money stands, apart from the stage (F12.3). */
+export const PAYMENT_FILTERS = ["paid", "awaiting", "refunded"] as const
+export type PaymentFilter = (typeof PAYMENT_FILTERS)[number]
+
+/** Where the parcel stands, apart from the stage (F12.3). */
+export const SHIPPING_FILTERS = ["none", "label", "on_the_way", "delivered", "problem"] as const
+export type ShippingFilter = (typeof SHIPPING_FILTERS)[number]
+
 export interface OrderBoardParams {
   stage: OrderStage
   q: string
   page: number
   /** One customer's orders, for their page. */
   customerId?: string | undefined
+  payment?: PaymentFilter | undefined
+  shipping?: ShippingFilter | undefined
 }
 
 export const ORDER_PAGE_SIZE = 20
 
-export const orderBoardQuery = ({ stage, q, page, customerId }: OrderBoardParams) =>
+export const orderBoardQuery = ({
+  stage,
+  q,
+  page,
+  customerId,
+  payment,
+  shipping,
+}: OrderBoardParams) =>
   queryOptions({
-    queryKey: ["orders", "board", { stage, q, page, customerId }],
+    queryKey: ["orders", "board", { stage, q, page, customerId, payment, shipping }],
     queryFn: () =>
       sdk.client.fetch<OrderBoard>("/admin/order-board", {
         query: {
@@ -79,6 +96,8 @@ export const orderBoardQuery = ({ stage, q, page, customerId }: OrderBoardParams
           offset: page * ORDER_PAGE_SIZE,
           ...(q ? { q } : {}),
           ...(customerId ? { customer_id: customerId } : {}),
+          ...(payment ? { payment } : {}),
+          ...(shipping ? { shipping } : {}),
         },
       }),
     placeholderData: keepPreviousData,

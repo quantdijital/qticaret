@@ -47,6 +47,9 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Seçilen kalemler gönderilecek olanlarla uyuşmuyor: her kalemden en çok kalan adet kadar gönderilebilir.",
   "orders.ship_packed_first":
     "Önce paketlenmiş koli kargoya verilmeli; ardından kalan kalemler seçilebilir.",
+  "orders.nothing_to_deliver": "Teslim edilecek, mağazanın kendi teslimatında bir koli yok.",
+  "orders.deliver_failed":
+    "Sipariş teslim edildi olarak işaretlenemedi; sipariş sayfasından tekrar deneyin.",
   "orders.ship_failed": "Sipariş kargoya verilemedi; sipariş sayfasından tekrar deneyin.",
   "orders.payment_awaited":
     "Siparişin ödemesi henüz gelmedi; havale onaylanınca kargoya verilebilir.",
