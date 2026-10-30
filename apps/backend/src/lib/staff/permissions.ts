@@ -93,6 +93,8 @@ const PRIVATE: readonly Rule[] = [
   { methods: "*", path: "/admin/audit-log*" },
   { methods: "*", path: "/admin/integrations/credentials*" },
   { methods: "*", path: "/admin/einvoice/parasut*" },
+  // An invoice's contents: the buyer and their tax id (adr/0034 §9)
+  { methods: "*", path: "/admin/invoices/:id/draft" },
   // What each provider failed at: the shop's set-up, for those who set it up
   { methods: "*", path: "/admin/integrations/overview" },
   { methods: "*", path: "/admin/webhooks*" },

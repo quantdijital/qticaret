@@ -4,7 +4,15 @@
  * list here, every other route stays closed to them.
  */
 
-export const API_SCOPES = ["orders:read", "catalog:read", "stock:write", "webhooks:manage"] as const
+export const API_SCOPES = [
+  "orders:read",
+  "catalog:read",
+  "stock:write",
+  "webhooks:manage",
+  // F8 (adr/0034 §9): an invoicing program (BirFatura and the like) writes invoices back
+  "invoices:read",
+  "invoices:write",
+] as const
 export type ApiScope = (typeof API_SCOPES)[number]
 
 export interface ScopedRoute {
@@ -92,6 +100,26 @@ export const SCOPED_ROUTES: readonly ScopedRoute[] = [
     method: "DELETE",
     path: "/admin/webhooks/:id",
     summary: "Webhook aboneliğini sil",
+  },
+  { scope: "invoices:read", method: "GET", path: "/admin/invoices", summary: "Faturaları listele" },
+  { scope: "invoices:read", method: "GET", path: "/admin/invoices/:id", summary: "Fatura kaydı" },
+  {
+    scope: "invoices:read",
+    method: "GET",
+    path: "/admin/invoices/:id/draft",
+    summary: "Kesilecek faturanın içeriği (alıcı dahil)",
+  },
+  {
+    scope: "invoices:write",
+    method: "POST",
+    path: "/admin/invoices/:id/issued",
+    summary: "Kesilen faturanın numarasını bildir",
+  },
+  {
+    scope: "invoices:write",
+    method: "POST",
+    path: "/admin/invoices/:id/pdf",
+    summary: "Kesilen faturanın PDF'ini yükle",
   },
 ]
 

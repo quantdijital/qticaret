@@ -1,12 +1,15 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { fakeInvoicingAllowed } from "../../lib/invoicing"
+import { errorSummary, logger } from "../../lib/logging"
 import { COD_PAYMENT_PROVIDER_ID } from "../../lib/payments/checkout"
 import { EINVOICE_MODULE } from "../../modules/einvoice"
 import type EinvoiceModuleService from "../../modules/einvoice/service"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import type { InvoicingSettings } from "../../modules/platform-settings/sections"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
+import { TENANT_WEBHOOKS_MODULE } from "../../modules/tenant-webhooks"
+import type TenantWebhooksModuleService from "../../modules/tenant-webhooks/service"
 import { invoiceTotalsOf } from "./draft-source"
 
 type Container = Pick<MedusaContainer, "resolve">
@@ -87,14 +90,40 @@ export async function queueSaleInvoice(
   if (lines?.currency.toLowerCase() !== "try") {
     return "not_due"
   }
-  const { created } = await container.resolve<EinvoiceModuleService>(EINVOICE_MODULE).enqueue({
+  const { id, created } = await container.resolve<EinvoiceModuleService>(EINVOICE_MODULE).enqueue({
     order_id: orderId,
     kind: "sale",
     source_id: orderId,
     provider: settings.provider,
     totals: lines.totals,
   })
+  if (created && settings.provider === "external") {
+    await announce(container, id, orderId, lines.totals.gross)
+  }
   return created ? "queued" : "already"
+}
+
+/**
+ * Tells the shop's own program an invoice waits for it (`invoice.requested`,
+ * adr/0034 §9): ids and the total, never the buyer; the program reads the
+ * rest with its key. A failure is logged: the program can list what waits.
+ */
+async function announce(container: Container, invoiceId: string, orderId: string, total: string) {
+  try {
+    const hooks = container.resolve<TenantWebhooksModuleService>(TENANT_WEBHOOKS_MODULE)
+    if (!(await hooks.anyTakes("invoice.requested"))) {
+      return
+    }
+    await hooks.enqueue("invoice.requested", `invoice.requested:${invoiceId}`, {
+      invoice_id: invoiceId,
+      order_id: orderId,
+      kind: "sale",
+      total,
+      currency_code: "try",
+    })
+  } catch (error) {
+    logger.warn({ event: "einvoice.announce_failed", err: errorSummary(error) })
+  }
 }
 
 /** The order a parcel or a payment belongs to; null when none. */

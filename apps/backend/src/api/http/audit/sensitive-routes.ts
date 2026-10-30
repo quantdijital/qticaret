@@ -35,6 +35,9 @@ export const SENSITIVE_READS: readonly [string, string, boolean, (readonly strin
   // F7.9 (adr/0032): so does a return's label; the list names shoppers and their notes
   ["/admin/return-requests", "return_request", true],
   ["/admin/return-requests/:id/label", "return_request", false],
+  // F8 (adr/0034 §9): an invoice's contents name its buyer, tax id and all; its PDF too
+  ["/admin/invoices/:id/draft", "invoice", false],
+  ["/admin/invoices/:id/pdf", "invoice", false],
   ["/admin/draft-orders", "draft_order", true],
   ["/admin/draft-orders/:id", "draft_order", false],
   ["/admin/returns", "return", true],
