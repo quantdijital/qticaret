@@ -112,6 +112,12 @@ const envSchema = z.object({
   CRUX_API_KEY: z.string().max(200).optional(),
   // A fake Google (OAuth and Merchant API) in tests; refused when deployed
   GOOGLE_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
+  // F8 (adr/0034 §5): the platform's Paraşüt API client, asked of Paraşüt once; each
+  // shop connects its own company with it. Off until both are set
+  PARASUT_CLIENT_ID: z.string().max(200).optional(),
+  PARASUT_CLIENT_SECRET: z.string().max(200).optional(),
+  // A fake Paraşüt on a developer's machine and in tests; refused when deployed
+  PARASUT_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
   // F10.9: fake Meta Graph and GA4 Measurement Protocol in tests; refused when deployed
   META_GRAPH_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
   GA4_BASE_URL: z.url({ protocol: /^https?$/ }).optional(),
@@ -263,6 +269,7 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
     "NETGSM_BASE_URL",
     "APPLE_AUTH_BASE_URL",
     "GOOGLE_BASE_URL",
+    "PARASUT_BASE_URL",
     "META_GRAPH_BASE_URL",
     "GA4_BASE_URL",
     "CONTENT_DRAFT_PROVIDER",
