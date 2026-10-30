@@ -125,6 +125,9 @@ export function OrdersPage() {
             <Button asChild variant="outline" size="sm">
               <Link to="/orders/chargebacks">{t("orders.chargeback.queue")}</Link>
             </Button>
+            <Button asChild variant="outline" size="sm">
+              <Link to="/orders/invoices">{t("orders.invoice.queue")}</Link>
+            </Button>
           </span>
         }
       />

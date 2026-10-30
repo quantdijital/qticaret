@@ -3114,6 +3114,16 @@
         "einvoice_store_url_missing": "The shop's storefront address is not entered (Settings > SEO).",
         "einvoice_tax_office_missing": "The corporate buyer has no tax office.",
         "einvoice_address_missing": "The order has no billing address."
+      },
+      "queue": "Invoices",
+      "queueDescription": "The orders' invoices; the stopped ones first.",
+      "empty": "No invoice in this view.",
+      "columns": {
+        "order": "Order",
+        "status": "Status",
+        "program": "Program",
+        "when": "Date",
+        "total": "Total"
       }
     }
   },

@@ -1,4 +1,5 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { EINVOICE_MODULE } from "../../../modules/einvoice"
 import type EinvoiceModuleService from "../../../modules/einvoice/service"
 import { invoiceView } from "./view"
@@ -21,5 +22,28 @@ export async function GET(
       skip: offset,
       order: { status: "ASC", created_at: "DESC" },
     })
-  res.json({ invoices: rows.map(invoiceView), count, limit, offset })
+  // The orders' numbers, for the list to name them by
+  const orderIds = [...new Set(rows.map((row) => row.order_id))]
+  const { data } = orderIds.length
+    ? await req.scope.resolve(ContainerRegistrationKeys.QUERY).graph({
+        entity: "order",
+        fields: ["id", "display_id"],
+        filters: { id: orderIds },
+      })
+    : { data: [] }
+  const numbers = new Map(
+    (data as unknown as { id: string; display_id: number }[]).map((order) => [
+      order.id,
+      order.display_id,
+    ])
+  )
+  res.json({
+    invoices: rows.map((row) => ({
+      ...invoiceView(row),
+      order_display_id: numbers.get(row.order_id) ?? null,
+    })),
+    count,
+    limit,
+    offset,
+  })
 }

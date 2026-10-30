@@ -19,6 +19,8 @@ export interface InvoiceRecord {
   total: string
   program_difference: number | null
   created_at: string
+  /** In a list: the order's number. */
+  order_display_id?: number | null
 }
 
 export interface InvoicePage {
@@ -29,6 +31,7 @@ export interface InvoicePage {
 }
 
 export const INVOICE_STATUSES = ["failed", "pending", "issuing", "issued", "cancelled"] as const
+export const INVOICE_PAGE_SIZE = 20
 export type InvoiceStatus = (typeof INVOICE_STATUSES)[number]
 
 const KEY = ["invoices"] as const

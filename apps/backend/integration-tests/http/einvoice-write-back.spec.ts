@@ -18,6 +18,7 @@ jest.setTimeout(180 * 1000)
 interface Invoice {
   id: string
   order_id: string
+  order_display_id: number | null
   status: string
   number: string | null
   has_pdf: boolean
@@ -143,6 +144,9 @@ medusaIntegrationTestRunner({
         .getAsBuffer(row?.pdf_file_id ?? "")
 
       expect(waiting.data.invoices.map((invoice) => invoice.order_id)).toContain(orderId)
+      expect(
+        waiting.data.invoices.find((invoice) => invoice.order_id === orderId)?.order_display_id
+      ).toEqual(expect.any(Number))
       expect(draft.data.draft.buyer.name).toBe("Ayşe Yılmaz")
       expect(draft.data.draft.totals.gross).toBe(Number(queued?.gross_total).toFixed(2))
       expect(readerWrites.status).toBe(403)
