@@ -19,6 +19,15 @@ export const SECTIONS = [
   "/reports/products",
   "/reports/categories",
   "/reports/daily",
+  "/reports/finance",
+  "/reports/stock",
+  "/reports/search",
+  "/reports/brands",
+  "/reports/marketing",
+  "/seo/redirects",
+  "/products/new",
+  "/promotions/new",
+  "/promotions/price-lists/new",
 ]
 export const SETTINGS = [
   "/settings",
@@ -45,4 +54,11 @@ export const SETTINGS = [
   "/settings/features",
   "/settings/jobs",
   "/settings/audit",
+  "/settings/accounting",
+  "/settings/api",
+  "/settings/marketing",
+  "/settings/marketing/meta",
+  "/settings/marketing/ga4",
+  "/settings/security",
+  "/settings/team",
 ]

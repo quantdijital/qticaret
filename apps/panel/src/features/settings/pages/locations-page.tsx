@@ -63,11 +63,12 @@ function LocationCard({
 }) {
   const { t } = useTranslation()
   return (
-    <li className="flex gap-4 rounded-lg border bg-card p-5 shadow-card">
+    // On a phone the actions take a row of their own under the address
+    <li className="flex flex-wrap items-start gap-x-4 gap-y-3 rounded-lg border bg-card p-5 shadow-card">
       <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-muted">
         <Warehouse className="size-5 text-muted-foreground" aria-hidden="true" />
       </span>
-      <div className="flex min-w-0 flex-1 flex-col gap-2">
+      <div className="flex min-w-0 flex-[1_1_12rem] flex-col gap-2">
         <div className="flex flex-wrap items-center gap-2">
           <h3 className="truncate text-[15px] font-semibold">{location.name}</h3>
           {isDefault ? (
@@ -76,7 +77,7 @@ function LocationCard({
         </div>
         <AddressLines location={location} />
       </div>
-      <div className="flex shrink-0 items-start gap-1">
+      <div className="ml-14 flex shrink-0 items-start gap-1 sm:ml-0">
         <Button variant="outline" size="sm" onClick={onEdit}>
           <Pencil />
           {t("common.edit")}

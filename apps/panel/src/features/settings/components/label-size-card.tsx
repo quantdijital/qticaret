@@ -162,7 +162,7 @@ export function LabelSizeCard({ saved }: { saved: ShippingSettings }) {
               }}
             >
               {Array.from({ length: page.labels }, (_, index) => (
-                <span key={index} className="rounded-[2px] bg-muted" />
+                <span key={index} className="rounded-sm bg-muted" />
               ))}
             </div>
           </div>

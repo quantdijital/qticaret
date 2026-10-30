@@ -213,3 +213,5 @@ Kurallar:
 - [ ] Mobil genişlikte (375 px) çalışıyor.
 - [ ] Denge (§2): yan yana kartlar `PageGrid`/`PageColumn` ile; satırdaki kontroller tek boy; `e2e/layout.e2e.ts` geçti; ekran görüntüsüne bakıldı.
 - [ ] Açık ve koyu modda, keskin ve yuvarlak köşede bakıldı.
+
+Testle korunanlar (F12 Y12): sabit renk, hex ve px köşe yasağı, TR/EN anahtar eşleşmesi ve Türkçe metinde ünlem yok (`src/theme/house-rules.spec.ts`; bilinçli istisnalar gerekçesiyle listede). Geliştirmede bulunmayan çeviri anahtarı konsola yazılır, e2e koruyucusu bunu hata sayar. Bütün ekranlar açık ve koyu modda axe'tan (`e2e/a11y.e2e.ts`), 375 px'te taşma denetiminden (`e2e/phone.e2e.ts`, listelerin ilk kaydı dahil) ve denge ölçümünden (`e2e/layout.e2e.ts`) geçer; ekran listesi `e2e/support/screens.ts`. Tailwind'in gölge ölçeği (`shadow-xs` ile `shadow-xl` arası) tema gölgelerine bağlıdır (`--shadow-card`, `--shadow-overlay`). Yana kayan tablo kutusu yalnızca kaydığında klavyeyle odaklanır.

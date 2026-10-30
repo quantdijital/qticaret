@@ -66,14 +66,14 @@ describe("TasksCard", () => {
     expect(await hrefOf("Stoku azalan")).toBe("/inventory?view=low")
     // Neither in use: no row for them
     expect(screen.queryByText("Aktarılamayan muhasebe kayıtları")).toBeNull()
-    expect(screen.queryByText("Durdurulan web kancaları")).toBeNull()
+    expect(screen.queryByText("Durdurulan webhook'lar")).toBeNull()
   })
 
   it("counts refused accounting records, turned-off hooks and SEO setup for those who can set them right", async () => {
     renderCard(tasks({ accounting_stopped: 3, webhooks_disabled: 1, seo_setup_open: 2 }))
 
     expect(await hrefOf("Aktarılamayan muhasebe kayıtları")).toBe("/settings/accounting")
-    expect(await hrefOf("Durdurulan web kancaları")).toBe("/settings/api")
+    expect(await hrefOf("Durdurulan webhook'lar")).toBe("/settings/api")
     expect(await hrefOf("SEO kurulumunda eksik")).toBe("/seo")
   })
 
@@ -83,7 +83,7 @@ describe("TasksCard", () => {
 
     await screen.findByText("Kargoya hazırlanacak")
     expect(screen.queryByText("Aktarılamayan muhasebe kayıtları")).toBeNull()
-    expect(screen.queryByText("Durdurulan web kancaları")).toBeNull()
+    expect(screen.queryByText("Durdurulan webhook'lar")).toBeNull()
     expect(screen.queryByText("SEO kurulumunda eksik")).toBeNull()
   })
 })

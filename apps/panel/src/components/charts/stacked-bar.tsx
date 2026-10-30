@@ -46,7 +46,7 @@ export function StackedBar({ segments }: { segments: Segment[] }) {
           <li key={segment.key} className="flex items-center gap-2.5 text-sm">
             <span
               aria-hidden="true"
-              className="size-2.5 shrink-0 rounded-[3px]"
+              className="size-2.5 shrink-0 rounded-sm"
               style={{ background: segment.color }}
             />
             <span className="min-w-0 flex-1 truncate">{segment.label}</span>

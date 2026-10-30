@@ -24,11 +24,21 @@
 | Kavram | Kullan | Kullanma |
 |---|---|---|
 | Order | Sipariş | Order, talep |
-| Fulfillment | Gönderi | Fulfillment, teslimat paketi |
-| Refund | İade (para) | Geri ödeme |
+| Fulfillment | Gönderi | Fulfillment, teslimat paketi, gönderim |
+| Parcel | Koli (fiziksel paket; etiket koliye basılır) | Paket, kargo paketi |
+| Refund | İade (para), "para iadesi" | Geri ödeme |
 | Return | İade (ürün) | Geri gönderim |
+| Return request | İade talebi (değişim de bunun bir türü) | İade isteği |
+| Chargeback | Ters ibraz | Chargeback, itiraz |
 | Payment provider | Ödeme sağlayıcı | POS firması |
 | Invoice | Fatura | e-belge |
+| Staff | Ekip, ekip üyesi | Personel, kullanıcı |
+| Audit log | Denetim kaydı | Log, işlem geçmişi |
+| Webhook | Webhook | Web kancası |
+| Product feed | Ürün feed'i | Ürün akışı |
+| Message (e-posta/SMS) | İleti; gönderilmesi "gönderim" | Mesaj, bildirim (bildirim zildeki ekip uyarısıdır) |
+
+"Gönderim" yalnızca bir iletinin ya da verinin gönderilmesi için kullanılır; ürünün yola çıkışı "gönderi"dir.
 
 ## Yapılan ekranlar (2026-10-25)
 Dashboard, Siparişler (aşama sekmeleri + detay: kargoya ver, teslim edildi, tahsil et, iptal), Müşteriler (liste + detay, maskeli fatura bilgisi), Ürünler (liste, 5 adımlı sihirbaz, kart kart kaydeden detay, özellikler), Kategoriler (ağaç + düzenleyici), Stok (azalan/tükenen, satır içi raf adedi), Kampanyalar (yüzde/tutar/ücretsiz kargo, kod/otomatik, tarih, sınır), Raporlar (KPI, ürün performansı, gün gün satış, CSV), SEO (arama önizlemesi, katalog sağlığı), Ayarlar (Mağaza, Görünüm, SEO, Ürün özellikleri, Özellikler, İşler, Denetim kaydı). Komut menüsünde sık işler. Telefonda listeler sütun katlayarak sığar.

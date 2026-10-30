@@ -1,52 +1,15 @@
 import AxeBuilder from "@axe-core/playwright"
 import type { Page } from "@playwright/test"
 import { expect, pageHeading, test } from "./support/guard"
+import { SECTIONS, SETTINGS } from "./support/screens"
 import { MODES, inMode } from "./support/theme"
 
 /**
- * Screens a person spends the most time on; WCAG 2.1 A and AA rules (docs/06,
- * docs/18). The product wizard carries the stepper the dashboard's setup
- * card shows only to a shop not yet set up.
+ * Every screen a shop uses (support/screens.ts), light and dark; WCAG 2.1
+ * A and AA rules (docs/06, docs/18 §9). The product wizard carries the
+ * stepper the dashboard's setup card shows only to a shop not yet set up.
  */
-const SCREENS = [
-  "/",
-  "/products",
-  "/products/new",
-  "/orders",
-  "/customers/groups",
-  "/reviews",
-  "/reviews/questions",
-  "/promotions/price-lists",
-  "/promotions/gift-cards",
-  "/promotions/price-lists/new",
-  "/settings",
-  "/settings/store",
-  "/settings/payments",
-  "/settings/payments/paytr",
-  "/settings/payments/iyzico",
-  "/settings/payments/bank_transfer",
-  "/settings/payments/cash_on_delivery",
-  "/settings/shipping",
-  "/settings/shipping/geliver",
-  "/settings/shipping/aras",
-  "/settings/shipping/yurtici",
-  "/settings/notifications",
-  "/settings/sms",
-  "/settings/sms/netgsm",
-  "/orders/chargebacks",
-  "/orders/returns",
-  "/settings/integrations",
-  "/settings/appearance",
-  "/reports/products",
-  "/reports/finance",
-  "/reports/stock",
-  "/reports/search",
-  "/settings/accounting",
-  "/settings/api",
-  "/settings/team",
-  "/settings/security",
-  "/reset-password",
-]
+const SCREENS = [...SECTIONS, ...SETTINGS, "/reset-password"]
 
 async function seriousIssues(page: Page): Promise<string[]> {
   const results = await new AxeBuilder({ page })

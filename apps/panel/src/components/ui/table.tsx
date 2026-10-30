@@ -1,9 +1,44 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 
+/**
+ * Whether the box scrolls sideways (a wide table on a narrow screen): then
+ * a keyboard must reach it to scroll it (WCAG 2.1.1, axe's
+ * scrollable-region-focusable); a table that fits adds no tab stop.
+ */
+function useScrollsSideways(ref: React.RefObject<HTMLDivElement | null>): boolean {
+  const [scrolls, setScrolls] = React.useState(false)
+  React.useEffect(() => {
+    const box = ref.current
+    if (!box || typeof ResizeObserver === "undefined") {
+      return
+    }
+    const measure = () => {
+      setScrolls(box.scrollWidth > box.clientWidth)
+    }
+    const observer = new ResizeObserver(measure)
+    observer.observe(box)
+    const table = box.firstElementChild
+    if (table) {
+      observer.observe(table)
+    }
+    return () => {
+      observer.disconnect()
+    }
+  }, [ref])
+  return scrolls
+}
+
 function Table({ className, ...props }: React.ComponentProps<"table">) {
+  const box = React.useRef<HTMLDivElement>(null)
+  const scrolls = useScrollsSideways(box)
   return (
-    <div data-slot="table-container" className="relative w-full overflow-x-auto">
+    <div
+      ref={box}
+      data-slot="table-container"
+      className="relative w-full overflow-x-auto"
+      {...(scrolls ? { tabIndex: 0 } : {})}
+    >
       <table
         data-slot="table"
         className={cn("w-full caption-bottom text-sm", className)}

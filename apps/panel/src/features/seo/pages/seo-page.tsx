@@ -7,6 +7,7 @@ import { PageGrid } from "@/components/patterns/page-grid"
 import { PageHeader } from "@/components/patterns/page-header"
 import { spanOf } from "@/components/patterns/page-spans"
 import { SectionCard } from "@/components/patterns/section-card"
+import { ErrorState } from "@/components/patterns/states"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { CatalogHealthCard } from "@/features/dashboard/components/catalog-health-card"
@@ -22,6 +23,7 @@ import type { SeoSettings } from "@/features/settings/api/sections"
 import { useStoreName } from "@/features/settings/api/store"
 import { renderSample } from "@/features/settings/seo-sample"
 import { formatCount } from "@/lib/format"
+import { errorText } from "@/lib/errors"
 
 function Check({ ok, children }: { ok: boolean; children: ReactNode }) {
   const Icon = ok ? CircleCheck : TriangleAlert
@@ -159,6 +161,8 @@ export function SeoOverviewPage() {
                 </Check>
               </ul>
             </div>
+          ) : seo.isError ? (
+            <ErrorState text={errorText(t, seo.error)} onRetry={() => void seo.refetch()} />
           ) : (
             <Skeleton className="h-56" />
           )}

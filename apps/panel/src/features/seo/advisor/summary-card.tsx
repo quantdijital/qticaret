@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router"
 import { TriangleAlert } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { SectionCard } from "@/components/patterns/section-card"
+import { ErrorState } from "@/components/patterns/states"
 import { Skeleton } from "@/components/ui/skeleton"
 import { advisorSummaryQuery } from "@/features/seo/api/advisor"
 import type { Grade } from "@/features/seo/api/advisor"
@@ -11,6 +12,7 @@ import { formatCount } from "@/lib/format"
 import { cn } from "@/lib/utils"
 import { GRADE_TEXT } from "./grades"
 import { ScoreRing } from "./score-ring"
+import { errorText } from "@/lib/errors"
 
 const GRADES: Grade[] = ["excellent", "good", "needs_work", "poor"]
 
@@ -37,7 +39,9 @@ export function AdvisorSummaryCard({ className }: { className?: string }) {
       description={t("seo.advisor.summaryHint")}
       className={className}
     >
-      {!data ? (
+      {summary.isError ? (
+        <ErrorState text={errorText(t, summary.error)} onRetry={() => void summary.refetch()} />
+      ) : !data ? (
         <Skeleton className="h-48" />
       ) : data.products === 0 || data.average === null ? (
         <p className="text-[13px] text-muted-foreground">{t("seo.advisor.noAssessments")}</p>

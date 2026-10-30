@@ -4,6 +4,7 @@ import { Boxes, CircleDollarSign, Hourglass, PackageX } from "lucide-react"
 import { useState } from "react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
+import { ErrorState } from "@/components/patterns/states"
 import { SectionCard } from "@/components/patterns/section-card"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
@@ -24,6 +25,7 @@ import type { ReportTile } from "@/features/reports/components/report-tiles"
 import { useReportRange } from "@/features/reports/use-report"
 import { formatCount, formatMoney } from "@/lib/format"
 import { cn } from "@/lib/utils"
+import { errorText } from "@/lib/errors"
 
 const S = "reports.stock"
 // Rows a list shows; the files have every item
@@ -254,9 +256,13 @@ export function StockReportPage() {
   const { t } = useTranslation()
   const report = useQuery(stockReportQuery(useReportRange()))
   const data = report.data
+  const tiles = useStockTiles(data)
+  if (report.isError) {
+    return <ErrorState text={errorText(t, report.error)} onRetry={() => void report.refetch()} />
+  }
   return (
     <>
-      <ReportTiles label={t(`${S}.tiles.label`)} tiles={useStockTiles(data)} />
+      <ReportTiles label={t(`${S}.tiles.label`)} tiles={tiles} />
       {data ? <StockLists data={data} /> : <Skeleton className="h-96 rounded-lg" />}
     </>
   )

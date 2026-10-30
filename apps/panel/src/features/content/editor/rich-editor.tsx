@@ -82,7 +82,8 @@ export function RichEditor({
         }}
         onCard={setCarding}
       />
-      <EditorContent editor={editor} />
+      {/* A long text scrolls inside, under a toolbar that stays in reach; the page beside keeps its height */}
+      <EditorContent editor={editor} className="max-h-[min(70vh,48rem)] overflow-y-auto" />
       <div className="flex justify-end border-t px-3 py-1.5 text-xs text-muted-foreground tabular-nums">
         {t("content.editor.words", { count: words, words: formatCount(words) })}
       </div>

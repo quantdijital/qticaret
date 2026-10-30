@@ -3,9 +3,11 @@ import { CircleAlert, Clock, ShieldCheck, TriangleAlert } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { KpiTile } from "@/components/patterns/kpi-tile"
 import { SectionCard } from "@/components/patterns/section-card"
+import { ErrorState } from "@/components/patterns/states"
 import { Skeleton } from "@/components/ui/skeleton"
 import { iysSummaryQuery } from "@/features/settings/api/iys"
 import { formatCount } from "@/lib/format"
+import { errorText } from "@/lib/errors"
 
 const C = "settings.sms.iysCard"
 
@@ -20,7 +22,9 @@ export function IysCard() {
   const iys = summary.data?.iys
   return (
     <SectionCard title={t(`${C}.title`)} description={t(`${C}.description`)}>
-      {!iys ? (
+      {summary.isError ? (
+        <ErrorState text={errorText(t, summary.error)} onRetry={() => void summary.refetch()} />
+      ) : !iys ? (
         <Skeleton className="h-24" />
       ) : (
         <div className="flex flex-col gap-4">

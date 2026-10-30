@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { Landmark, Receipt, ShieldAlert, Undo2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
+import { ErrorState } from "@/components/patterns/states"
 import { SectionCard } from "@/components/patterns/section-card"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
@@ -19,6 +20,7 @@ import { ReportTiles } from "@/features/reports/components/report-tiles"
 import type { ReportTile } from "@/features/reports/components/report-tiles"
 import { useReportRange } from "@/features/reports/use-report"
 import { formatCount, formatDate, formatMoney } from "@/lib/format"
+import { errorText } from "@/lib/errors"
 
 const F = "reports.finance"
 const OPEN = ["open", "evidence_submitted"]
@@ -69,10 +71,14 @@ export function FinanceReportPage() {
   const { t } = useTranslation()
   const report = useQuery(financeReportQuery(useReportRange()))
   const data = report.data
+  const tiles = useFinanceTiles(data)
+  if (report.isError) {
+    return <ErrorState text={errorText(t, report.error)} onRetry={() => void report.refetch()} />
+  }
   const money = (amount: string) => formatMoney(amount, data?.currency_code ?? "try")
   return (
     <>
-      <ReportTiles label={t(`${F}.tiles.label`)} tiles={useFinanceTiles(data)} />
+      <ReportTiles label={t(`${F}.tiles.label`)} tiles={tiles} />
       {!data ? (
         <Skeleton className="h-96 rounded-lg" />
       ) : (

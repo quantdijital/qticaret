@@ -1,8 +1,10 @@
 import { queryOptions, useQuery } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
 import { SectionCard } from "@/components/patterns/section-card"
+import { ErrorState } from "@/components/patterns/states"
 import { Skeleton } from "@/components/ui/skeleton"
 import { sdk } from "@/lib/sdk"
+import { errorText } from "@/lib/errors"
 
 interface Interest {
   wishlist: number
@@ -28,7 +30,9 @@ export function InterestCard({ productId }: { productId: string }) {
   const data = query.data
   return (
     <SectionCard title={t(`${I}.title`)}>
-      {!data ? (
+      {query.isError ? (
+        <ErrorState text={errorText(t, query.error)} onRetry={() => void query.refetch()} />
+      ) : !data ? (
         <Skeleton className="h-12" />
       ) : (
         <dl className="flex flex-col gap-2 text-sm">

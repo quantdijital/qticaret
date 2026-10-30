@@ -10,8 +10,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { ErrorState } from "@/components/patterns/states"
 import { Skeleton } from "@/components/ui/skeleton"
 import { messagePreviewQuery, messageTemplatesQuery } from "@/features/settings/api/messaging"
+import { errorText } from "@/lib/errors"
 
 const P = "settings.notifications.templates"
 
@@ -50,7 +52,9 @@ export function TemplatePreviewCard() {
         ) : null
       }
     >
-      {!message ? (
+      {preview.isError ? (
+        <ErrorState text={errorText(t, preview.error)} onRetry={() => void preview.refetch()} />
+      ) : !message ? (
         <Skeleton className="h-96" />
       ) : (
         <div className="flex flex-col gap-5">

@@ -2,9 +2,11 @@ import { useQuery } from "@tanstack/react-query"
 import { useTranslation } from "react-i18next"
 import { SectionCard } from "@/components/patterns/section-card"
 import { StatusBadge } from "@/components/patterns/status-badge"
+import { ErrorState } from "@/components/patterns/states"
 import { Skeleton } from "@/components/ui/skeleton"
 import { insightsQuery, vitalGrade } from "@/features/seo/api/insights"
 import type { VitalKey } from "@/features/seo/api/insights"
+import { errorText } from "@/lib/errors"
 
 const V = "seo.vitals"
 const KEYS: readonly VitalKey[] = ["lcp_ms", "inp_ms", "cls"]
@@ -28,7 +30,9 @@ export function WebVitalsCard({ className }: { className?: string }) {
   const vitals = query.data?.insights.vitals
   return (
     <SectionCard title={t(`${V}.title`)} description={t(`${V}.hint`)} className={className}>
-      {!vitals ? (
+      {query.isError ? (
+        <ErrorState text={errorText(t, query.error)} onRetry={() => void query.refetch()} />
+      ) : !vitals ? (
         <Skeleton className="h-40" />
       ) : vitals.length === 0 ? (
         <p className="text-[13px] text-muted-foreground">{t(`${V}.empty`)}</p>

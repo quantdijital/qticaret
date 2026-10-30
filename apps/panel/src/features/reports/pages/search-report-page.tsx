@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { Hash, Lightbulb, Search, SearchX } from "lucide-react"
 import { useTranslation } from "react-i18next"
+import { ErrorState } from "@/components/patterns/states"
 import { SectionCard } from "@/components/patterns/section-card"
 import { Skeleton } from "@/components/ui/skeleton"
 import {
@@ -17,6 +18,7 @@ import { ReportTiles } from "@/features/reports/components/report-tiles"
 import type { ReportTile } from "@/features/reports/components/report-tiles"
 import { useReportRange } from "@/features/reports/use-report"
 import { formatCount, formatPercent } from "@/lib/format"
+import { errorText } from "@/lib/errors"
 
 const S = "reports.search"
 // Rows each list shows: the two cards stand side by side at the same height
@@ -121,9 +123,13 @@ export function SearchReportPage() {
   const { t } = useTranslation()
   const report = useQuery(searchReportQuery(useReportRange()))
   const data = report.data
+  const tiles = useSearchTiles(data)
+  if (report.isError) {
+    return <ErrorState text={errorText(t, report.error)} onRetry={() => void report.refetch()} />
+  }
   return (
     <>
-      <ReportTiles label={t(`${S}.tiles.label`)} tiles={useSearchTiles(data)} />
+      <ReportTiles label={t(`${S}.tiles.label`)} tiles={tiles} />
       {!data ? (
         <Skeleton className="h-96 rounded-lg" />
       ) : (

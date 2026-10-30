@@ -5,7 +5,15 @@ import { SECTIONS, SETTINGS } from "./support/screens"
 // A page takes a few seconds on a CI runner: a test that walks many gets that much per page
 const PER_PAGE_MS = 10_000
 // The lists whose first record opens a detail page
-const DETAILS = ["/orders", "/customers", "/products", "/promotions", "/promotions/price-lists"]
+const DETAILS = [
+  "/orders",
+  "/customers",
+  "/products",
+  "/promotions",
+  "/promotions/price-lists",
+  "/brands",
+  "/content",
+]
 
 /**
  * Docs/18 §2 "Denge": on a desktop screen no page has cards side by side
@@ -13,7 +21,7 @@ const DETAILS = ["/orders", "/customers", "/products", "/promotions", "/promotio
  * heights (support/layout.ts measures both). Read only.
  */
 test("keeps every page's cards and controls level", async ({ page, guard }) => {
-  const pages = [...SECTIONS, ...SETTINGS, "/products/new", "/promotions/new"]
+  const pages = [...SECTIONS, ...SETTINGS]
   test.setTimeout((pages.length + DETAILS.length * 2) * PER_PAGE_MS)
   await page.setViewportSize({ width: 1440, height: 900 })
   const found: Record<string, string[]> = {}
