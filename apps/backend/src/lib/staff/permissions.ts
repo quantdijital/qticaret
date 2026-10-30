@@ -106,6 +106,7 @@ const OPERATIONS_WRITES: readonly Rule[] = [
   { methods: ["POST"], path: "/admin/orders/:id/ship" },
   { methods: ["POST"], path: "/admin/order-board/ship" },
   { methods: ["POST"], path: "/admin/order-board/deliver" },
+  { methods: ["POST"], path: "/admin/orders/:id/return-requests" },
   { methods: ["POST"], path: "/admin/orders/:id/fulfillments*" },
   { methods: ["POST"], path: "/admin/fulfillments*" },
   // A return asked for: taken in, approved or refused; giving money back is the admin's

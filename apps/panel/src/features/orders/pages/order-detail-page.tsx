@@ -18,6 +18,7 @@ import { PaymentCard } from "@/features/orders/detail/payment-card"
 import { AddressCard, CustomerCard } from "@/features/orders/detail/people-cards"
 import { ProgressCard } from "@/features/orders/detail/progress-card"
 import { RefundsCard } from "@/features/orders/detail/refunds-card"
+import { ReturnsCard } from "@/features/orders/detail/returns-card"
 import { errorText } from "@/lib/errors"
 import { formatLongDate } from "@/lib/format"
 
@@ -101,6 +102,8 @@ export function OrderDetailPage() {
       <ProgressCard order={order} stage={state.data.stage} />
       <PageGrid>
         <PageColumn span={8}>
+          {/* A request waiting for a decision first: the column's last card grows, not this one */}
+          <ReturnsCard orderId={order.id} />
           <ItemsCard order={order} {...(money.data ? { money: money.data } : {})} />
           {refunds.length > 0 ? (
             <RefundsCard refunds={refunds} currency={order.currency_code} />

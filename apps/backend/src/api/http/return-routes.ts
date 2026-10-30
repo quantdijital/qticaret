@@ -58,6 +58,17 @@ export const RETURN_ROUTES = [
     methods: ["POST" as const],
     middlewares: [requireUserActor, validateAndTransformBody(AdminPostReturnRefund)],
   },
+  // F12.3: staff open one for the shopper who called, by the shopper's rules
+  {
+    matcher: "/admin/orders/:id/return-requests",
+    methods: ["POST" as const],
+    middlewares: [requireUserActor, validateAndTransformBody(StorePostReturnRequest)],
+  },
+  {
+    matcher: "/admin/orders/:id/returnable",
+    methods: ["GET" as const],
+    middlewares: [requireUserActor],
+  },
   {
     matcher: "/admin/return-requests/:id/label",
     methods: ["GET" as const],

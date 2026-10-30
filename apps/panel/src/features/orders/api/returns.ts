@@ -143,3 +143,52 @@ export const useReturnLabel = () =>
     mutationFn: async (id: string) =>
       (await sdk.client.fetch<{ url: string }>(url(id, "label"))).url,
   })
+
+/** The reasons a request can give, as the server takes them. */
+export const RETURN_REASONS: readonly ReturnReason[] = [
+  "damaged",
+  "wrong_item",
+  "not_as_described",
+  "changed_mind",
+  "size_issue",
+  "other",
+]
+
+/** What staff may ask back for the shopper (F12.3), by the shopper's own rules. */
+export interface Returnable {
+  window_open: boolean
+  /** A request is open: one at a time. */
+  open_request: boolean
+  lines: {
+    line_item_id: string
+    title: string | null
+    variant_title: string | null
+    variant_id: string | null
+    returnable: number
+    /** The product's other variants, for an exchange. */
+    variants: { id: string; title: string | null }[]
+  }[]
+}
+
+export const returnableQuery = (orderId: string) =>
+  queryOptions({
+    queryKey: [...KEY, "returnable", orderId],
+    queryFn: () =>
+      sdk.client.fetch<Returnable>(`/admin/orders/${encodeURIComponent(orderId)}/returnable`),
+  })
+
+export interface OpenRequest {
+  kind: "return" | "exchange"
+  items: { line_item_id: string; quantity: number; variant_id?: string }[]
+  reason: ReturnReason
+  note?: string
+}
+
+/** A request opened for the shopper who called (F12.3); it then waits in the queue like theirs. */
+export const useOpenReturnRequest = (orderId: string) =>
+  useReturnMutation((body: OpenRequest) =>
+    sdk.client.fetch(`/admin/orders/${encodeURIComponent(orderId)}/return-requests`, {
+      method: "POST",
+      body,
+    })
+  )

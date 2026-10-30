@@ -2625,6 +2625,27 @@
         "collected": "Farkı müşteriden aldım",
         "collectedHint": "Havale/EFT ya da başka yolla tahsil ettiyseniz işaretleyin; fark siparişe ödendi olarak işlenir.",
         "approved": "Değişim onaylandı; iade kodu müşteriye gösterilir."
+      },
+      "card": {
+        "title": "İade ve değişim",
+        "text": "Bu siparişin iade ve değişim talepleri."
+      },
+      "open": {
+        "button": "İade ya da değişim talebi aç",
+        "title": "İade ya da değişim talebi aç",
+        "description": "Müşteri adına açılır: aynı kurallar geçerli, müşteriye e-posta gider ve talep İade talepleri kuyruğunda bekler.",
+        "kind": "Talep türü",
+        "return": "İade",
+        "exchange": "Değişim",
+        "left_one": "{{count}} adet iade edilebilir",
+        "left_other": "{{count}} adet iade edilebilir",
+        "variant": "Yerine gidecek seçenek",
+        "noVariant": "Bu ürünün başka seçeneği yok; değişim yapılamaz.",
+        "reason": "Neden",
+        "reasonPlaceholder": "Neden seçin",
+        "note": "Not (isteğe bağlı)",
+        "submit": "Talebi aç",
+        "done": "Talep açıldı; müşteriye e-posta gönderildi."
       }
     },
     "edit": {

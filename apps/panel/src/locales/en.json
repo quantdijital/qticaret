@@ -2625,6 +2625,27 @@
         "collected": "I collected the difference",
         "collectedHint": "Tick it once paid by bank transfer or otherwise; the difference is recorded as paid on the order.",
         "approved": "Exchange approved; the shopper sees the return code."
+      },
+      "card": {
+        "title": "Returns and exchanges",
+        "text": "This order's return and exchange requests."
+      },
+      "open": {
+        "button": "Open a return or exchange request",
+        "title": "Open a return or exchange request",
+        "description": "Opened for the shopper: the same rules apply, the shopper gets an e-mail and the request waits in the returns queue.",
+        "kind": "Request type",
+        "return": "Return",
+        "exchange": "Exchange",
+        "left_one": "{{count}} unit can be returned",
+        "left_other": "{{count}} units can be returned",
+        "variant": "Variant to send instead",
+        "noVariant": "This product has no other variant; it cannot be exchanged.",
+        "reason": "Reason",
+        "reasonPlaceholder": "Choose a reason",
+        "note": "Note (optional)",
+        "submit": "Open the request",
+        "done": "Request opened; the shopper was e-mailed."
       }
     },
     "edit": {

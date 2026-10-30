@@ -5,6 +5,7 @@ import type { FakeGeliver } from "@qticaret/testing"
 import { pollShipments } from "../../src/jobs/shipment-tracking"
 import { SHIPMENT_TRACKING_MODULE } from "../../src/modules/shipment-tracking"
 import type ShipmentTrackingModuleService from "../../src/modules/shipment-tracking/service"
+import { createAdminUser } from "../helpers/admin"
 import { registerCustomer } from "../helpers/customer"
 import type { TestCustomer } from "../helpers/customer"
 import { geliverOrder, geliverShop, shipOrder } from "../helpers/geliver"
@@ -292,6 +293,61 @@ medusaIntegrationTestRunner({
       expect(storeReturn.status).toBe(404)
       expect(adminReturn.data.message).toBe("returns.use_return_requests")
       expect(adminExchange.data.message).toBe("returns.use_return_requests")
+    })
+
+    it("lets staff open one for the shopper who called, by the shopper's own rules (F12.3)", async () => {
+      const { orderId, lineId } = await deliveredOrder()
+      const readonly = await createAdminUser(http, getContainer(), "readonly")
+      const options = await settle(
+        http.get<{
+          window_open: boolean
+          open_request: boolean
+          lines: { line_item_id: string; title: string | null; returnable: number }[]
+        }>(`/admin/orders/${orderId}/returnable`, { headers: setup.admin.headers })
+      )
+      const body = {
+        kind: "return",
+        items: [{ line_item_id: lineId, quantity: 1 }],
+        reason: "damaged",
+      }
+      const tooMany = await staff(`/admin/orders/${orderId}/return-requests`, {
+        ...body,
+        items: [{ line_item_id: lineId, quantity: 5 }],
+      })
+      const byReadonly = await settle(
+        http.post(`/admin/orders/${orderId}/return-requests`, body, { headers: readonly.headers })
+      )
+      const opened = await staff<{ return_request: Request }>(
+        `/admin/orders/${orderId}/return-requests`,
+        body
+      )
+      const twice = await staff(`/admin/orders/${orderId}/return-requests`, body)
+      const after = await settle(
+        http.get<{ open_request: boolean; lines: { returnable: number }[] }>(
+          `/admin/orders/${orderId}/returnable`,
+          { headers: setup.admin.headers }
+        )
+      )
+      // The shopper sees it as their own
+      const shopperSees = await settle(
+        http.get<{ return_requests: { id: string }[] }>(`/store/orders/${orderId}/returns`, {
+          headers: customer.headers,
+        })
+      )
+
+      expect(options.data).toMatchObject({ window_open: true, open_request: false })
+      expect(options.data.lines).toEqual([
+        expect.objectContaining({ line_item_id: lineId, returnable: 1 }),
+      ])
+      expect(tooMany.status).toBe(400)
+      expect(byReadonly.status).toBe(403)
+      expect(opened.status).toBe(201)
+      expect(opened.data.return_request.status).toBe("requested")
+      expect(twice.data.message).toBe("returns.already_open")
+      expect(after.data.open_request).toBe(true)
+      expect(shopperSees.data.return_requests.map((request) => request.id)).toEqual([
+        opened.data.return_request.id,
+      ])
     })
   },
 })

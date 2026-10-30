@@ -4,11 +4,13 @@ import {
   EllipsisVertical,
   Loader2,
   PackageCheck,
+  PackageOpen,
   Pencil,
   ShieldAlert,
   Truck,
   Undo2,
 } from "lucide-react"
+import { useQuery } from "@tanstack/react-query"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
@@ -20,16 +22,20 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { useCan } from "@/features/auth/api/staff"
 import { useCancelOrder, useMarkDelivered, useShipOrder } from "@/features/orders/api/orders"
 import { useCapturePayment } from "@/features/orders/api/payments"
+import { returnableQuery } from "@/features/orders/api/returns"
 import type { OrderDetail, OrderMoney, OrderState } from "@/features/orders/api/orders"
 import { errorText } from "@/lib/errors"
 import { ChargebackDialog } from "./chargeback-dialog"
 import { EditOrderDialog } from "./edit-dialog"
+import { OpenReturnDialog } from "./open-return-dialog"
 import { RefundDialog } from "./refund-dialog"
 import { ShipDialog } from "./ship-dialog"
 
-type Dialog = "ship" | "deliver" | "cancel" | "capture" | "refund" | "chargeback" | "edit" | null
+type Dialog =
+  "ship" | "deliver" | "cancel" | "capture" | "refund" | "chargeback" | "edit" | "return" | null
 
 /**
  * The next step for the order as the page's main button (ship, then mark
@@ -54,6 +60,15 @@ export function OrderActions({
   const deliver = useMarkDelivered(order.id)
   const cancel = useCancelOrder(order.id)
   const capture = useCapturePayment()
+  // F12.3: a request opened for the shopper who called, by the shopper's own rules
+  const returnable = useQuery(returnableQuery(order.id))
+  const mayReturn = useCan("orders")
+  const openable =
+    mayReturn &&
+    returnable.data !== undefined &&
+    returnable.data.window_open &&
+    !returnable.data.open_request &&
+    returnable.data.lines.some((line) => line.returnable > 0)
 
   // What the server says can be done now (`/admin/order-board/:id`)
   const toShip = state.ship?.items ?? []
@@ -102,7 +117,7 @@ export function OrderActions({
           {t("orders.actions.deliver")}
         </Button>
       ) : null}
-      {held.length > 0 || refundable || disputable || cancelable ? (
+      {held.length > 0 || refundable || disputable || cancelable || openable ? (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="icon" aria-label={t("orders.actions.more")}>
@@ -141,6 +156,16 @@ export function OrderActions({
                 {t("orders.actions.refund")}
               </DropdownMenuItem>
             ) : null}
+            {openable ? (
+              <DropdownMenuItem
+                onSelect={() => {
+                  setDialog("return")
+                }}
+              >
+                <PackageOpen />
+                {t("orders.returns.open.button")}
+              </DropdownMenuItem>
+            ) : null}
             {disputable ? (
               <DropdownMenuItem
                 onSelect={() => {
@@ -166,6 +191,15 @@ export function OrderActions({
         </DropdownMenu>
       ) : null}
 
+      {dialog === "return" && returnable.data ? (
+        <OpenReturnDialog
+          orderId={order.id}
+          returnable={returnable.data}
+          onClose={() => {
+            setDialog(null)
+          }}
+        />
+      ) : null}
       <ShipDialog
         // A fresh dialog each time it opens: no counts left from the last one
         key={dialog === "ship" ? "ship-open" : "ship-closed"}
