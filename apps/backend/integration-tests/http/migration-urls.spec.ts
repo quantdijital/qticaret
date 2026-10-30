@@ -1,9 +1,11 @@
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { MIGRATION_MODULE } from "../../src/modules/migration"
 import type MigrationModuleService from "../../src/modules/migration/service"
 import { SEO_REDIRECTS_MODULE } from "../../src/modules/seo-redirects"
 import type SeoRedirectsModuleService from "../../src/modules/seo-redirects/service"
 import { oldAddressOf } from "../../src/lib/migration/addresses"
+import { watchNotFound } from "../../src/workflows/migration/watch"
 import { bundle, fileOf } from "../fixtures/migration-bundle"
 import { createAdminUser } from "../helpers/admin"
 import type { HttpClient } from "../helpers/http"
@@ -166,6 +168,60 @@ medusaIntegrationTestRunner({
         redirect: 0,
         refused: 0,
       })
+    })
+
+    it("watches the storefront's 404s for thirty days after cutover, ringing the bell", async () => {
+      const marked = await post<{ cutover: { cutover_at: string; watch_until: string } }>(
+        "/admin/migrations/cutover",
+        {}
+      )
+      expect(marked.status).toBe(200)
+      const at = new Date(marked.data.cutover.cutover_at)
+      expect(new Date(marked.data.cutover.watch_until).getTime() - at.getTime()).toBe(
+        30 * 24 * 60 * 60 * 1000
+      )
+      await migration().addUrls([
+        { address: "/products/eski", path: "/products/eski", query: null, origin: "sitemap" },
+      ])
+      const later = new Date(at.getTime() + 60_000)
+      await getContainer()
+        .resolve<SeoRedirectsModuleService>(SEO_REDIRECTS_MODULE)
+        .createSeoNotFounds(
+          ["/products/eski", "/hic-bilinmeyen"].map((path) => ({
+            path,
+            hits: 3,
+            first_seen_at: later,
+            last_seen_at: later,
+          }))
+        )
+
+      const tomorrow = new Date(at.getTime() + 24 * 60 * 60 * 1000)
+      expect(await watchNotFound(getContainer(), tomorrow)).toEqual({ paths: 2, known: 1 })
+      const found = await migration().listMigrationUrls({ address: "/hic-bilinmeyen" })
+      expect(found[0]?.origins).toEqual(["not_found"])
+      const bells = async () =>
+        (
+          await getContainer()
+            .resolve(ContainerRegistrationKeys.QUERY)
+            .graph({
+              entity: "notification",
+              fields: ["data"],
+              filters: { trigger_type: "migration.not_found_seen" },
+            })
+        ).data as { data: { kind: string; count: number; known: number } }[]
+      expect((await bells()).map((bell) => bell.data)).toMatchObject([
+        { kind: "migration_not_found", count: 2, known: 1 },
+      ])
+
+      // Nothing new since the last look: no bell; past the thirty days: no look
+      expect(await watchNotFound(getContainer(), new Date(tomorrow.getTime() + 60_000))).toEqual({
+        paths: 0,
+        known: 0,
+      })
+      expect(await bells()).toHaveLength(1)
+      expect(
+        await watchNotFound(getContainer(), new Date(at.getTime() + 31 * 24 * 60 * 60 * 1000))
+      ).toBeNull()
     })
   },
 })

@@ -1,6 +1,7 @@
 import { model } from "@medusajs/framework/utils"
 
-export const URL_ORIGINS = ["source", "sitemap", "search_console"] as const
+// `not_found`: a 404 the storefront answered after cutover (F14.7's watch)
+export const URL_ORIGINS = ["source", "sitemap", "search_console", "not_found"] as const
 export const URL_DECISIONS = ["auto", "redirect", "gone"] as const
 
 /**

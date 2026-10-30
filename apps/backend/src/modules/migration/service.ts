@@ -6,6 +6,7 @@ import {
   generateEntityId,
 } from "@medusajs/framework/utils"
 import { LegacyOrder } from "./models/legacy-order"
+import { MigrationCutover } from "./models/migration-cutover"
 import { MigrationItem } from "./models/migration-item"
 import type { ITEM_STATUSES } from "./models/migration-item"
 import { MigrationRun } from "./models/migration-run"
@@ -57,6 +58,7 @@ class MigrationModuleService extends MedusaService({
   MigrationItem,
   LegacyOrder,
   MigrationUrl,
+  MigrationCutover,
 }) {
   /** What a source's records became here, by their keys: the ones a run met before. */
   async targetsOf(source: string, kind: string, keys: readonly string[]) {

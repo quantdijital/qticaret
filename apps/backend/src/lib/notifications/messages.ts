@@ -61,6 +61,11 @@ export const NOTIFICATION_MESSAGES: Readonly<
       title: "Bir {{source}} muhasebe programına aktarılamadı",
       description: "Defalarca denendi; Ayarlar > Muhasebe'den yeniden deneyin.",
     },
+    "migration.not_found_seen": {
+      title: "Kesimden sonra {{count}} adres 404 verdi",
+      description:
+        "{{known}} tanesi eski sitenin bilinen adresi; Ayarlar > Taşıma'dan 301 ya da 410 kararı verin.",
+    },
     "einvoice.issue_stopped": {
       title: "#{{order}} siparişinin faturası kesilemedi",
       description:
@@ -117,6 +122,11 @@ export const NOTIFICATION_MESSAGES: Readonly<
     "accounting.sync_stopped": {
       title: "A {{source}} could not be sent to the accounting program",
       description: "It was tried many times; try it again from Settings > Accounting.",
+    },
+    "migration.not_found_seen": {
+      title: "{{count}} addresses answered 404 since cutover",
+      description:
+        "{{known}} were the old site's known addresses; decide a 301 or 410 in Settings > Migration.",
     },
     "einvoice.issue_stopped": {
       title: "Order #{{order}}'s invoice could not be issued",

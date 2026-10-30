@@ -82,6 +82,16 @@ export const MIGRATION_ROUTES = [
     middlewares: [requireUserActor],
   },
   {
+    matcher: "/admin/migrations/cutover",
+    methods: ["GET" as const],
+    middlewares: [validateAndTransformQuery(z.object({}).strict(), {})],
+  },
+  {
+    matcher: "/admin/migrations/cutover",
+    methods: ["POST" as const],
+    middlewares: [requireUserActor, validateAndTransformBody(z.object({}).strict())],
+  },
+  {
     matcher: "/admin/migrations/urls/apply",
     methods: ["POST" as const],
     middlewares: [

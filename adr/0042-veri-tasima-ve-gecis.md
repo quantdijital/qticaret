@@ -136,3 +136,9 @@ Elimizde olanlar:
 1. **Site haritası.** Sahip eski sitenin site haritası adresini verir; `migration.sitemap` işi onu `safeFetch` ile indirir (iç ağ reddi, her yönlendirme denetlenir, 50 MB, gzip açılmış boyutla sınırlı), güvenli XML okuyucuyla okur (DTD ve varlık reddi). Dizin (`sitemapindex`) ve alt haritalar en çok 50 dosya, 100.000 adres. Yalnızca eski sitenin kendi alan adındaki (www farkı yok sayılır) haritalar ve adresler alınır.
 2. **Search Console.** Performans > Dışa aktar > CSV'den gelen zip (içindeki `Pages.csv` / `Sayfalar.csv`) ya da sayfalar CSV'si yüklenir; Türkçe ve İngilizce başlıklar okunur. Aynı adresin farklı yazılışları (sondaki eğik çizgi) tek adres olur, tıklamaları toplanır. CSRF istisnası yalnızca bu yol ve `text/csv`, `application/zip`, `application/octet-stream` türleri için.
 3. Envantere eklenen adres eski kaydı ve sahibin kararını değiştirmez; yalnızca kaynağı ve (büyük olan) tıklaması güncellenir.
+
+## Uygulama notları (G5c kesim sonrası izleme, 2026-10-31)
+
+1. Sahip alan adını yeni siteye yönelttiğinde "kesim yapıldı" der (`POST /admin/migrations/cutover`); tarih ve kim kaydedilir.
+2. Kesimden sonra 30 gün, her sabah (`migration-not-found-watch`, 06:20) vitrinin son bakıştan bu yana gördüğü 404'ler (en çok istenen 1.000) adres envanterine `not_found` kaynağıyla eklenir; sahip onlara da aynı tabloda 301 ya da 410 kararı verir.
+3. Yeni 404 varsa yöneticilerin zili çalar: kaç adres ve kaçının eski sitenin bilinen adresi olduğu. Yeni 404 yoksa çalmaz; 30 gün geçince izleme durur.
