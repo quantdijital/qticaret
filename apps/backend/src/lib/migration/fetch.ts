@@ -1,5 +1,16 @@
+import { isLocalEnv, parseEnv } from "../env"
 import { ValidationError } from "../errors"
 import { isSafeFetchError, safeFetch } from "../security/safe-fetch"
+
+/**
+ * The fake provider's origin a developer's machine or a test reaches
+ * directly (`SHOPIFY_BASE_URL`); never outside an explicit development or
+ * test environment, whatever is set.
+ */
+export function fakeOrigin(): string | undefined {
+  const env = parseEnv()
+  return isLocalEnv(env) ? env.SHOPIFY_BASE_URL : undefined
+}
 
 /**
  * A file at an address the owner gave (an old site's feed), under the

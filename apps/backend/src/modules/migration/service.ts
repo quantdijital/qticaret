@@ -87,8 +87,10 @@ class MigrationModuleService extends MedusaService({
     @MedusaContext() sharedContext: Context = {}
   ): Promise<void> {
     const manager = sharedContext.transactionManager as Executor
-    for (let start = 0; start < items.length; start += CHUNK) {
-      const chunk = items.slice(start, start + CHUNK)
+    // One statement may not touch a row twice: a key met twice keeps its last line
+    const lines = [...new Map(items.map((item) => [item.source_key, item])).values()]
+    for (let start = 0; start < lines.length; start += CHUNK) {
+      const chunk = lines.slice(start, start + CHUNK)
       await manager.execute(
         `INSERT INTO migration_item
            (id, source, kind, source_key, target_id, status, error_code, old_url, created_at, updated_at)
@@ -115,8 +117,8 @@ class MigrationModuleService extends MedusaService({
 
   /**
    * Adds old addresses to the inventory (F14.7); one met again gains the
-   * new origin, the larger click count and a record it had none of. The
-   * owner's decision is never touched.
+   * new origin, the larger click count and the record a later run tied it
+   * to. The owner's decision is never touched.
    */
   @InjectTransactionManager()
   async addUrls(
@@ -124,8 +126,20 @@ class MigrationModuleService extends MedusaService({
     @MedusaContext() sharedContext: Context = {}
   ): Promise<void> {
     const manager = sharedContext.transactionManager as Executor
-    for (let start = 0; start < urls.length; start += CHUNK) {
-      const chunk = urls.slice(start, start + CHUNK)
+    // One statement may not touch a row twice: an address met twice is one, its clicks the larger
+    const merged = new Map<string, InventoryUrl>()
+    for (const url of urls) {
+      const seen = merged.get(url.address)
+      merged.set(url.address, {
+        ...url,
+        clicks: Math.max(seen?.clicks ?? 0, url.clicks ?? 0),
+        entity_type: url.entity_type ?? seen?.entity_type ?? null,
+        entity_id: url.entity_id ?? seen?.entity_id ?? null,
+      })
+    }
+    const lines = [...merged.values()]
+    for (let start = 0; start < lines.length; start += CHUNK) {
+      const chunk = lines.slice(start, start + CHUNK)
       await manager.execute(
         `INSERT INTO migration_url
            (id, address, path, query, origins, clicks, entity_type, entity_id, created_at, updated_at)
@@ -133,8 +147,8 @@ class MigrationModuleService extends MedusaService({
          ON CONFLICT (address) WHERE deleted_at IS NULL DO UPDATE
            SET origins = ARRAY(SELECT DISTINCT unnest(migration_url.origins || EXCLUDED.origins)),
                clicks = GREATEST(migration_url.clicks, EXCLUDED.clicks),
-               entity_type = COALESCE(migration_url.entity_type, EXCLUDED.entity_type),
-               entity_id = COALESCE(migration_url.entity_id, EXCLUDED.entity_id),
+               entity_type = COALESCE(EXCLUDED.entity_type, migration_url.entity_type),
+               entity_id = COALESCE(EXCLUDED.entity_id, migration_url.entity_id),
                updated_at = now()`,
         chunk.flatMap((url) => [
           generateEntityId(undefined, "murl"),

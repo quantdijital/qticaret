@@ -23,6 +23,8 @@ export interface ReviewInput {
 
 /** A review the shop's old platform showed (F14), as it was. */
 export interface MigratedReview {
+  /** Its source and key there: one already written is not written again. */
+  source_ref: string
   product_id: string
   customer_id: string | null
   rating: number
@@ -150,8 +152,20 @@ class ProductReviewsModuleService extends MedusaService({ ProductReview, Product
     if (reviews.length === 0) {
       return []
     }
+    // Written by a run that stopped before it noted them: the same rows, not new ones
+    const written = new Map(
+      (
+        await this.listProductReviews(
+          { source_ref: reviews.map((review) => review.source_ref) },
+          { select: ["id", "source_ref"] },
+          sharedContext
+        )
+      ).map((row) => [row.source_ref ?? "", row.id])
+    )
+    const fresh = reviews.filter((review) => !written.has(review.source_ref))
     const created = await this.createProductReviews(
-      reviews.map((review) => ({
+      fresh.map((review) => ({
+        source_ref: review.source_ref,
         product_id: review.product_id,
         customer_id: review.customer_id,
         order_id: null,
@@ -167,12 +181,15 @@ class ProductReviewsModuleService extends MedusaService({ ProductReview, Product
       sharedContext
     )
     const touched = new Set(
-      reviews.filter((review) => review.published).map((review) => review.product_id)
+      fresh.filter((review) => review.published).map((review) => review.product_id)
     )
     for (const productId of touched) {
       await this.recountRating_(productId, sharedContext)
     }
-    return created.map((review) => review.id)
+    created.forEach((row, index) => {
+      written.set(fresh[index]?.source_ref ?? "", row.id)
+    })
+    return reviews.map((review) => written.get(review.source_ref) ?? "")
   }
 
   /** Each product's average and count of approved reviews; none for a product without one. */

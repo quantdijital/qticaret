@@ -132,9 +132,15 @@ export async function customerData(container: Container, customerId: string) {
           filters: { receiver_id: customerId },
         })
         .then(({ data }) => data as Record<string, unknown>[]),
-      container.resolve<MigrationModuleService>(MIGRATION_MODULE).listLegacyOrders(byCustomer, {
-        select: ["number", "placed_at", "currency_code", "total", "status", "email", "lines"],
-      }),
+      // Theirs by the account, and by their address (a guest's on the old platform)
+      container
+        .resolve<MigrationModuleService>(MIGRATION_MODULE)
+        .listLegacyOrders(
+          typeof customer["email"] === "string" && customer["email"] !== ""
+            ? { $or: [byCustomer, { email: customer["email"].trim().toLowerCase() }] }
+            : byCustomer,
+          { select: ["number", "placed_at", "currency_code", "total", "status", "email", "lines"] }
+        ),
     ])
   const { addresses, billing_profile: billing, ...profile } = customer
   return {

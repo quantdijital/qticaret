@@ -156,17 +156,23 @@ export async function runMigration(
   const batches = batchesOf(products)
   const productSpan = spanOf(hooks, SPAN.product)
   for (const [index, batch] of batches.entries()) {
-    const { summary, rows } = await migrateProducts(container, source.id, batch, refs, mode, {
+    const {
+      summary,
+      rows,
+      moved,
+      problems: left,
+    } = await migrateProducts(container, source.id, batch, refs, mode, {
       origin: hooks.origin,
       audit: (action, changes) => hooks.audit(`products_${action}`, changes),
       progress: (percent) => productSpan(index + percent / 100, batches.length),
     })
-    productCounts.created += summary.create
-    productCounts.updated += summary.update
-    productCounts.found += summary.unchanged
-    productCounts.skipped += summary.problems
-    productCounts.failed += summary.failed
+    productCounts.created += summary?.create ?? 0
+    productCounts.updated += summary?.update ?? 0
+    productCounts.found += (summary?.unchanged ?? 0) + moved
+    productCounts.skipped += (summary?.problems ?? 0) + left.length
+    productCounts.failed += summary?.failed ?? 0
     productRows.push(...rows)
+    problems.push(...left.map((problem) => ({ ...problem, kind: "product" as const })))
   }
   await keep("product", productCounts)
 

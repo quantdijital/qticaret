@@ -233,6 +233,22 @@
           "enumItems": ["storefront", "migration"],
           "mappedType": "enum"
         },
+        "source_ref": {
+          "name": "source_ref",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
         "rating": {
           "name": "rating",
           "type": "integer",
@@ -464,6 +480,15 @@
           "primary": false,
           "unique": false,
           "expression": "CREATE INDEX IF NOT EXISTS \"IDX_product_review_status\" ON \"product_review\" (\"status\") WHERE deleted_at IS NULL"
+        },
+        {
+          "keyName": "IDX_product_review_source_ref_unique",
+          "columnNames": [],
+          "composite": false,
+          "constraint": false,
+          "primary": false,
+          "unique": false,
+          "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_product_review_source_ref_unique\" ON \"product_review\" (\"source_ref\") WHERE deleted_at IS NULL AND source_ref IS NOT NULL"
         },
         {
           "keyName": "product_review_pkey",

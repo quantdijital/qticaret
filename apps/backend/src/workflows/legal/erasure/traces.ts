@@ -13,6 +13,7 @@ import { LEGAL_MODULE } from "../../../modules/legal"
 import type LegalModuleService from "../../../modules/legal/service"
 import { MESSAGING_MODULE } from "../../../modules/messaging"
 import type MessagingModuleService from "../../../modules/messaging/service"
+import { erasedKeyOf } from "../../../lib/migration/erased"
 import { MIGRATION_MODULE } from "../../../modules/migration"
 import type MigrationModuleService from "../../../modules/migration/service"
 import { PRODUCT_QA_MODULE } from "../../../modules/product-qa"
@@ -164,6 +165,23 @@ async function eraseLegacyOrders(container: Container, customerId: string, addre
   const ids = [...new Set([...byCustomer, ...byAddress].map((row) => row.id))]
   if (ids.length > 0) {
     await migration.updateLegacyOrders(ids.map((id) => ({ id, email: erasedEmail(customerId) })))
+  }
+  // The migration's record of them keeps a digest of their key: a run again leaves them erased
+  const moved = await migration.listMigrationItems(
+    { kind: "customer", target_id: customerId },
+    { select: ["id", "source_key"] }
+  )
+  if (moved.length > 0) {
+    await migration.updateMigrationItems(
+      moved.map((item) => ({
+        id: item.id,
+        source_key: erasedKeyOf(item.source_key),
+        target_id: null,
+        status: "skipped" as const,
+        error_code: "migration.customer_erased",
+        old_url: null,
+      }))
+    )
   }
 }
 

@@ -117,18 +117,34 @@ medusaIntegrationTestRunner({
       // A server rule must take a query address: the owner's word marks it seen
       expect((await decide("/urun.php?id=12", { decision: "gone" })).status).toBe(200)
 
+      // A record's old path that is the home page is never kept for it
+      const [movedProduct] = await migration().listMigrationItems({
+        kind: "product",
+        status: "done",
+      })
+      await migration().addUrls([
+        {
+          address: "/",
+          path: "/",
+          query: null,
+          origin: "source",
+          entity_type: "product",
+          entity_id: movedProduct?.target_id ?? "",
+        },
+      ])
       expect((await post("/admin/migrations/urls/apply", {}, owner.plain)).status).toBe(428)
       const queued = await post<{ async_job: SheetJob }>("/admin/migrations/urls/apply", {})
       expect(queued.status).toBe(202)
       const job = await settled(queued.data.async_job.id)
       expect(job.status).toBe("succeeded")
       expect((job.result_summary as { counts: Record<string, number> }).counts).toMatchObject({
-        reserve: 2,
+        reserve: 3,
         redirect: 1,
         gone: 1,
         unsupported: 1,
         taken: 0,
-        refused: 0,
+        // The home page, refused for a record
+        refused: 1,
       })
 
       // The old product path follows its record; the owner's rules answer
@@ -152,6 +168,8 @@ medusaIntegrationTestRunner({
         outcome: "reserved",
         action: "covered",
       })
+      const root = (await migration().listMigrationUrls({ address: "/" }))[0]
+      expect(root?.outcome).toBe("migration.url_path_reserved")
 
       const after = (await get<{ summary: Summary }>("/admin/migrations/urls/summary")).summary
       expect(after).toMatchObject({
@@ -160,13 +178,13 @@ medusaIntegrationTestRunner({
         top: { checked: 3, unanswered: [] },
       })
 
-      // Applied again, nothing new: every address answers now
+      // Applied again, nothing new: every address answers now but the home page, refused again
       const again = await post<{ async_job: SheetJob }>("/admin/migrations/urls/apply", {})
       const second = await settled(again.data.async_job.id)
       expect((second.result_summary as { counts: Record<string, number> }).counts).toMatchObject({
-        reserve: 0,
+        reserve: 1,
         redirect: 0,
-        refused: 0,
+        refused: 1,
       })
     })
 

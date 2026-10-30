@@ -52,6 +52,8 @@ export async function migrateBrands(
       : known.get(nameKey(brand.name))
     if (found) {
       counts.found += 1
+      // Found by an earlier run under another name: products name it by this one
+      known.set(nameKey(brand.name), found)
     } else if (!apply) {
       counts.created += planned.has(nameKey(brand.name)) ? 0 : 1
       planned.add(nameKey(brand.name))

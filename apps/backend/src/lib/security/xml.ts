@@ -26,8 +26,9 @@ export interface SafeXmlOptions {
 // A document type declaration is where entities are defined: refused outright
 const DOCTYPE = /<!DOCTYPE|<!ENTITY/i
 // Opening, closing and self-closing tags; comments and CDATA that look like
-// tags count too, which can only refuse more
-const TAG = /<(\/?)[A-Za-z_][^>]*?(\/?)>/g
+// tags count too, which can only refuse more. A tag's text holds no `<`, so
+// every scan stops at the next one: linear on a file of unclosed `<a<a<a`
+const TAG = /<(\/?)[A-Za-z_][^<>]*?(\/?)>/g
 
 function tooDeep(text: string): boolean {
   let depth = 0

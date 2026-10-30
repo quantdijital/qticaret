@@ -16,6 +16,8 @@ export const ProductReview = model
     /** The order the product was received with: the proof of purchase; none for one migrated. */
     order_id: model.text().nullable(),
     origin: model.enum(["storefront", "migration"]).default("storefront"),
+    /** A migrated one's source and key there: written once, however often its run is. */
+    source_ref: model.text().nullable(),
     /** 1 to 5. */
     rating: model.number(),
     title: model.text().nullable(),
@@ -33,4 +35,5 @@ export const ProductReview = model
     { on: ["product_id", "customer_id"], unique: true, where: "deleted_at IS NULL" },
     { on: ["product_id", "status"], where: "deleted_at IS NULL" },
     { on: ["status"], where: "deleted_at IS NULL" },
+    { on: ["source_ref"], unique: true, where: "deleted_at IS NULL AND source_ref IS NOT NULL" },
   ])

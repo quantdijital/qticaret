@@ -74,8 +74,16 @@ export async function stateOf(container: Container, path: string): Promise<Addre
   switch (resolution.type) {
     case "entity":
       return { state: "live" }
-    case "redirect":
-      return { state: "redirected", location: resolution.location }
+    case "redirect": {
+      // A chain that ends where nothing answers answers nothing either
+      const end = parseRequestPath(resolution.location)
+      const last = end
+        ? (await followPath(container as MedusaContainer, end, { countHits: false })).resolution
+        : null
+      return last?.type === "entity" || last?.type === "gone"
+        ? { state: "redirected", location: resolution.location }
+        : { state: "not_found" }
+    }
     case "gone":
       return { state: "gone" }
     case "not_found":

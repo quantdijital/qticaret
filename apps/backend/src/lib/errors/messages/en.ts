@@ -754,4 +754,15 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The item's title, address or price could not be read; it did not move.",
   "migration.customers_sheet_invalid":
     "The customer list could not be read; it must be xlsx or CSV with an e-mail column.",
+  "migration.claim_invalid":
+    "The invitation link is not valid or has expired; ask the shop for a new one.",
+  "migration.claim_not_yours":
+    "This invitation was sent to another address; sign in with the address it came to.",
+  "migration.claim_used": "Your earlier account details were already taken with this invitation.",
+  "migration.customer_erased":
+    "This customer asked for their data to be erased; they were not moved again.",
+  "migration.product_handle_taken":
+    "Another product here holds this handle; the product did not move (nothing is written over). Change the handle at the source or remove the product here.",
+  "migration.url_path_reserved":
+    "This old address is the site's home page or a reserved path; it was not tied to a record.",
 }

@@ -2,6 +2,7 @@ import type { ICustomerModuleService, MedusaContainer } from "@medusajs/framewor
 import { Modules } from "@medusajs/framework/utils"
 import { createCustomersWorkflow } from "@medusajs/medusa/core-flows"
 import { isValidationError } from "../../lib/errors"
+import { erasedKeyOf } from "../../lib/migration/erased"
 import type {
   SourceAddress,
   SourceCustomer,
@@ -116,14 +117,25 @@ export async function migrateCustomers(
   const ids = new Map<string, string>()
   const skipped: string[] = []
   const unique = new Map<string, SourceCustomer>()
+  // Erased here (KVKK): their record keeps only a digest of their key, and they stay erased
+  const erased = await container.resolve<MigrationModuleService>(MIGRATION_MODULE).targetsOf(
+    source,
+    "customer",
+    customers.map((customer) => erasedKeyOf(customer.source_key))
+  )
+  const gone: string[] = []
   for (const customer of customers) {
+    if (erased.has(erasedKeyOf(customer.source_key))) {
+      gone.push(customer.source_key)
+      continue
+    }
     if (!EMAIL.test(customer.email.trim())) {
       skipped.push(customer.source_key)
       continue
     }
     unique.set(emailKey(customer.email), customer)
   }
-  counts.skipped = skipped.length
+  counts.skipped = skipped.length + gone.length
   const all = [...unique.values()]
   for (let start = 0; start < all.length; start += BATCH) {
     const batch = all.slice(start, start + BATCH)
@@ -187,7 +199,11 @@ export async function migrateCustomers(
   return {
     counts,
     ids,
-    problems: skipped.map((key) => ({ source_key: key, key: "migration.email_invalid" })),
+    problems: [
+      ...skipped.map((key) => ({ source_key: key, key: "migration.email_invalid" })),
+      // Named by their digest: the report keeps no key of an erased person
+      ...gone.map((key) => ({ source_key: erasedKeyOf(key), key: "migration.customer_erased" })),
+    ],
   }
 }
 

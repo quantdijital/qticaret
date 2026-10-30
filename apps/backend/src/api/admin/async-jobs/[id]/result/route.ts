@@ -7,6 +7,7 @@ import { jobType } from "../../../../../workflows/async-job/types"
 import { auditContext, auditService } from "../../../../http/audit/context"
 import { rejectRequest } from "../../../../http/reject"
 import { staffRoleOf } from "../../../../http/staff-guard"
+import { publicInput } from "../../serialize"
 
 /**
  * A short-lived link to the job's result file (adr/0014). A result with
@@ -38,7 +39,7 @@ export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse):
         resource_type: "async_job",
         resource_id: job.id,
         // What was exported, never the link
-        changes: { type: job.type, input: job.input },
+        changes: { type: job.type, input: publicInput(job.input) },
         ...auditContext(req),
       })
     } catch (error) {

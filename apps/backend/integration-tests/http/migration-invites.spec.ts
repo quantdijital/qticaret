@@ -11,6 +11,7 @@ import { PLATFORM_SETTINGS_MODULE } from "../../src/modules/platform-settings"
 import type PlatformSettingsModuleService from "../../src/modules/platform-settings/service"
 import { PRODUCT_REVIEWS_MODULE } from "../../src/modules/product-reviews"
 import type ProductReviewsModuleService from "../../src/modules/product-reviews/service"
+import { forgetMovedCustomers } from "../../src/workflows/migration/retention"
 import { bundle, fileOf } from "../fixtures/migration-bundle"
 import { createAdminUser } from "../helpers/admin"
 import { registerCustomer } from "../helpers/customer"
@@ -89,9 +90,9 @@ medusaIntegrationTestRunner({
         (messages) => messages.length > 0
       )
       expect(sent).toHaveLength(1)
-      expect(sent[0]?.html).toContain(
-        `https://magaza.example.com/hesap/kayit?email=${encodeURIComponent(AYSE)}`
-      )
+      // The sign-up page with the claim key; no address in the link
+      expect(sent[0]?.html).toContain("https://magaza.example.com/hesap/kayit?davet=")
+      expect(sent[0]?.html).not.toContain(encodeURIComponent(AYSE))
       expect(mail.messages.some((message) => message.to.includes("zaten@example.com"))).toBe(false)
       const status = await http.get<{ invites: Record<string, number> }>(
         "/admin/migrations/invites",
@@ -110,22 +111,47 @@ medusaIntegrationTestRunner({
       expect(mail.messages.filter((message) => message.to.includes(AYSE))).toHaveLength(1)
     })
 
-    it("gives a moved customer's account their old orders, reviews, consent and addresses at sign-in", async () => {
+    it("gives a moved customer's account what moved only with the invitation's key", async () => {
       await move()
       const [guest] = await customers().listCustomers({ email: AYSE, has_account: false })
+      const queued = await post<{ async_job: SheetJob }>("/admin/migrations/invites", {})
+      await settled(queued.data.async_job.id)
+      const mailed = await eventually(
+        () => Promise.resolve(mail.messages.find((message) => message.to.includes(AYSE))),
+        (message) => message !== undefined
+      )
+      const token = decodeURIComponent(/davet=([^"&<\s]+)/.exec(mailed?.html ?? "")?.[1] ?? "")
+      expect(token).not.toBe("")
+
       const store = await createStorefront(getContainer())
       const account = await registerCustomer(http, store, AYSE)
-      expect(account.id).not.toBe(guest?.id)
-
       const me = () =>
         http.get<{ customer: { addresses: { address_1: string }[] } }>("/store/customers/me", {
           headers: account.headers,
         })
+      const claim = (headers: Record<string, string>, body: Record<string, unknown>) =>
+        settle(
+          http.post<{ claimed?: Record<string, number>; message?: string }>(
+            "/store/customers/me/migration-claim",
+            body,
+            { headers }
+          )
+        )
+      // A confirmed address alone takes nothing (closing review)
       await me()
-      const orders = await eventually(
-        () => migration().listLegacyOrders({ customer_id: account.id }),
-        (rows) => rows.length > 0
-      )
+      expect(await migration().listLegacyOrders({ customer_id: account.id })).toHaveLength(0)
+
+      // Another account, the key forwarded to it: not its record
+      const stranger = await registerCustomer(http, store)
+      const foreign = await claim(stranger.headers, { token })
+      expect(foreign.status).toBe(400)
+      expect(foreign.data.message).toBe("migration.claim_not_yours")
+      expect((await claim(account.headers, { token: `${token}x` })).status).toBe(400)
+
+      const taken = await claim(account.headers, { token })
+      expect(taken.status).toBe(200)
+      expect(taken.data.claimed).toMatchObject({ orders: 1, reviews: 1, addresses: 1 })
+      const orders = await migration().listLegacyOrders({ customer_id: account.id })
       expect(orders.map((order) => order.number)).toEqual(["1001"])
       const reviews = await getContainer()
         .resolve<ProductReviewsModuleService>(PRODUCT_REVIEWS_MODULE)
@@ -140,10 +166,13 @@ medusaIntegrationTestRunner({
         target_id: guest?.id ?? "",
       })
       expect(item?.adopted_at).not.toBeNull()
-
-      // Signed in again: nothing twice
       const { data } = await me()
       expect(data.customer.addresses.map((address) => address.address_1)).toEqual(["Atatürk Cd. 1"])
+
+      // Taken once
+      const again = await claim(account.headers, { token })
+      expect(again.status).toBe(409)
+      expect(again.data.message).toBe("migration.claim_used")
     })
 
     it("moves the old platform's customer list, its own export, nobody twice", async () => {
@@ -182,6 +211,30 @@ medusaIntegrationTestRunner({
       expect(ayse).toMatchObject({ first_name: "Ayşe", last_name: "Kaya", has_account: false })
       expect(ayse?.addresses.map((address) => address.city)).toEqual(["Kadıköy"])
       expect(await upload("apply")).toMatchObject({ customer: { created: 0, found: 2 } })
+    })
+
+    it("forgets the moved customers' records ninety days after cutover, an open invitation's after it lapses", async () => {
+      await move()
+      const marked = await post<{ cutover: { cutover_at: string } }>(
+        "/admin/migrations/cutover",
+        {}
+      )
+      const at = new Date(marked.data.cutover.cutover_at).getTime()
+      const day = 24 * 60 * 60 * 1000
+      const count = async () => (await migration().listMigrationItems({ kind: "customer" })).length
+      const before = await count()
+      expect(before).toBeGreaterThan(0)
+      expect(await forgetMovedCustomers(getContainer(), new Date(at + 89 * day))).toBe(0)
+      // One invited lately waits for its key to lapse
+      const [recent] = await migration().listMigrationItems({ kind: "customer", status: "done" })
+      await migration().updateMigrationItems({
+        id: recent?.id ?? "",
+        invited_at: new Date(at + 80 * day),
+      })
+      expect(await forgetMovedCustomers(getContainer(), new Date(at + 91 * day))).toBe(before - 1)
+      expect(await count()).toBe(1)
+      expect(await forgetMovedCustomers(getContainer(), new Date(at + 141 * day))).toBe(1)
+      expect(await migration().listMigrationItems({ kind: "product" })).not.toHaveLength(0)
     })
   },
 })

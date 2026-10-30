@@ -1,9 +1,19 @@
 import { serverErrorMessage } from "../../../lib/errors/messages"
 import type { AsyncJobRecord } from "../../../modules/async-job/service"
 
+/** An address a job reads (an old site's feed): its site only, as its path or query may hold a key. */
+function originOf(value: unknown): unknown {
+  try {
+    return typeof value === "string" ? `${new URL(value).origin}/…` : value
+  } catch {
+    return null
+  }
+}
+
 // A file the job reads (an import's sheet) stays out like its result's key; a
-// list of records (a bulk edit's thousand products) is shown by its length
-function publicInput(input: unknown): unknown {
+// list of records (a bulk edit's thousand products) is shown by its length;
+// an address by its site
+export function publicInput(input: unknown): unknown {
   if (input === null || typeof input !== "object" || Array.isArray(input)) {
     return input
   }
@@ -11,6 +21,9 @@ function publicInput(input: unknown): unknown {
     Object.entries(input).flatMap(([key, value]): [string, unknown][] => {
       if (key.endsWith("_file_id")) {
         return []
+      }
+      if (key.endsWith("_url")) {
+        return [[key, originOf(value)]]
       }
       return key.endsWith("_ids") && Array.isArray(value)
         ? [[`${key.slice(0, -"_ids".length)}_count`, value.length]]

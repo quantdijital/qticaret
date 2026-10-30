@@ -23,6 +23,8 @@ Shopify için ayrıntı: `docs/entegrasyonlar/shopify.md`. Paket biçimi ve eşl
 - **Şifreler taşınmaz.** Müşterilere hesap açma daveti gider (aşağıda).
 - **İleti izinleri.** Yalnızca kaynak tarihiyle veriyorsa taşınır; İYS'ye bildirilir.
 - **Tekrarsızlık.** Her çalıştırma kaynak kayıtlarını kimlikleriyle hatırlar; yeniden çalıştırmak hiçbir şeyi iki kez yazmaz. Yarıda kalan bir çalıştırma aynen yeniden başlatılır.
+- **Taşınmış ürün yeniden yazılmaz.** Yeniden çalıştırma yalnızca yeni ürünleri ekler; bir kez taşınmış ürünün fiyatı, stoku ve durumu buradaki hâliyle kalır. Bu yüzden ana uygulamadan sonra ürün değişiklikleri eski platformda değil, burada yapılır.
+- **Tanıtıcı çakışması.** Sitede aynı tanıtıcılı başka bir ürün varsa (elle eklenmiş) kaynaktaki ürün taşınmaz, raporun Notlar sayfasında yazar; üzerine asla yazılmaz.
 
 ## Kesimden 2 hafta önce
 
@@ -45,13 +47,13 @@ Shopify için ayrıntı: `docs/entegrasyonlar/shopify.md`. Paket biçimi ve eşl
 ## Kesim günü
 
 1. Eski platformda yeni sipariş ve yeni üye almayı durdurun (bakım modu ya da duyuru). Dondurma süresi kısa tutulur (birkaç saat).
-2. Son değişiklikleri almak için taşımayı **bir kez daha uygulayın**: yalnızca yeni ve değişen kayıtlar yazılır.
+2. Ana uygulamadan bu yana eski platformda açılan yeni ürünleri, müşterileri ve siparişleri almak için taşımayı **bir kez daha uygulayın**: yalnızca yeni kayıtlar yazılır (taşınmış ürünlere dokunulmaz).
 3. Eski adresleri bir kez daha **uygulayın**; **Kesime hazır** olduğunu görün.
 4. Alan adının DNS kaydını yeni siteye yöneltin (TTL'i bir gün önceden 300 saniyeye indirin). SSL sertifikasının yeni sitede hazır olduğunu doğrulayın.
 5. Yeni sitede birkaç eski adresi tarayıcıda açın: 301 ile doğru sayfaya gitmeli.
 6. Panelde **Kesim yapıldı**'ya basın: 30 günlük 404 izlemesi başlar.
 7. Search Console'da yeni site haritasını gönderin; alan adı değiştiyse "Adres değişikliği" aracını kullanın.
-8. Hazırsanız **Davetleri başlat**: taşınan ve hesabı olmayan müşterilere hesap açma e-postası gider (günlük e-posta sınırının yarısı kadar, her gün; siparişler kalan payı kullanır).
+8. Hazırsanız **Davetleri başlat**: taşınan müşterilere hesap açma e-postası gider (günlük e-posta sınırının yarısı kadar, her gün; siparişler kalan payı kullanır). Davet, 60 gün geçerli kişisel bir anahtar taşır: müşteri bu bağlantıyla hesabını açınca (ya da açık hesabıyla girince) eski siparişleri, adresleri ve yorumları hesabına geçer. Anahtarsız giriş taşınan veriyi almaz (güvenlik).
 
 ## Kesimden sonra (30 gün)
 

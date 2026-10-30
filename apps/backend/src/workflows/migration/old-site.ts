@@ -1,7 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { parseEnv } from "../../lib/env"
 import { ValidationError } from "../../lib/errors"
 import { oldAddressOf } from "../../lib/migration/addresses"
+import { fakeOrigin } from "../../lib/migration/fetch"
 import {
   MAX_SITEMAP_BYTES,
   onSite,
@@ -77,7 +77,7 @@ export async function importSitemap(
   container: Container,
   address: string,
   progress: StepProgress,
-  fake: string | undefined = parseEnv().SHOPIFY_BASE_URL
+  fake: string | undefined = fakeOrigin()
 ): Promise<{ files: number; addresses: number; elsewhere: number }> {
   let site: URL
   try {

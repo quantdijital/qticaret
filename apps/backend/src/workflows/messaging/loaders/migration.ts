@@ -1,6 +1,9 @@
 import type { ICustomerModuleService, MedusaContainer } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
 import type { MigrationInviteVars } from "../../../lib/messaging/templates"
+import { claimToken } from "../../../lib/migration/claim"
+import { MIGRATION_MODULE } from "../../../modules/migration"
+import type MigrationModuleService from "../../../modules/migration/service"
 import { brandOf } from "../brand"
 import type { Loaded } from "./types"
 
@@ -10,30 +13,31 @@ type Container = Pick<MedusaContainer, "resolve">
 export const REGISTER_PATH = "/hesap/kayit"
 
 /**
- * A moved customer's invitation (F14.5): to their own address, while no
- * account has that address yet (one opened meanwhile needs none). The link
- * needs the storefront's address: without a domain nothing is sent.
+ * A moved customer's invitation (F14.5): to their own address, with the
+ * key that lets the account they open (or have opened) take what moved;
+ * none once the record was taken. No address in the link. The link needs
+ * the storefront's address: without a domain nothing is sent.
  */
 export async function loadMigrationInvite(
   container: Container,
   customerId: string
 ): Promise<Loaded<MigrationInviteVars> | null> {
-  const customers = container.resolve<ICustomerModuleService>(Modules.CUSTOMER)
-  const [customer] = await customers.listCustomers({ id: customerId }, { take: 1 })
+  const [customer] = await container
+    .resolve<ICustomerModuleService>(Modules.CUSTOMER)
+    .listCustomers({ id: customerId, has_account: false }, { take: 1 })
+  const [item] = await container
+    .resolve<MigrationModuleService>(MIGRATION_MODULE)
+    .listMigrationItems(
+      { kind: "customer", target_id: customerId },
+      { take: 1, select: ["adopted_at"] }
+    )
   const { storefrontUrl } = await brandOf(container)
-  if (!customer?.email || customer.has_account || !storefrontUrl) {
-    return null
-  }
-  const accounts = await customers.listCustomers(
-    { email: customer.email, has_account: true },
-    { take: 1, select: ["id"] }
-  )
-  if (accounts.length > 0) {
+  if (!customer?.email || !item || item.adopted_at || !storefrontUrl) {
     return null
   }
   return {
     vars: {
-      registerUrl: `${storefrontUrl}${REGISTER_PATH}?${new URLSearchParams({ email: customer.email }).toString()}`,
+      registerUrl: `${storefrontUrl}${REGISTER_PATH}?${new URLSearchParams({ davet: claimToken(customer.id) }).toString()}`,
     },
     recipients: { email: customer.email },
     receiverId: customer.id,

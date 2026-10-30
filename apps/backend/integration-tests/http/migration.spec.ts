@@ -12,6 +12,7 @@ import { MIGRATION_MODULE } from "../../src/modules/migration"
 import type MigrationModuleService from "../../src/modules/migration/service"
 import { PRODUCT_REVIEWS_MODULE } from "../../src/modules/product-reviews"
 import type ProductReviewsModuleService from "../../src/modules/product-reviews/service"
+import { eraseCustomer } from "../../src/workflows/legal/erasure/customer"
 import { eraseTraces } from "../../src/workflows/legal/erasure/traces"
 import { createAdminUser } from "../helpers/admin"
 import type { HttpClient } from "../helpers/http"
@@ -159,6 +160,31 @@ medusaIntegrationTestRunner({
         erasedEmail(ayse?.id ?? ""),
         erasedEmail(ayse?.id ?? ""),
       ])
+      // Erased whole, then the migration run again: she stays erased, her key no longer kept
+      await eraseCustomer(getContainer(), ayse?.id ?? "")
+      const after = await run("apply")
+      expect(after).toMatchObject({ customer: { created: 0, skipped: 2 }, consent: { created: 0 } })
+      expect(await customers.listCustomers({ email: "ayse.tasinan@example.com" })).toHaveLength(0)
+      const items = await migration().listMigrationItems({ kind: "customer" })
+      expect(items.some((item) => item.source_key === "cus-1")).toBe(false)
+    })
+
+    it("never writes over a product: one moved stays as the shop keeps it, another's handle is left", async () => {
+      const catalog = getContainer().resolve(Modules.PRODUCT)
+      const [own] = await catalog.createProducts([
+        { title: "Elle eklenen kapak", handle: "tasinan-kapak", status: "draft" },
+      ])
+      const first = await run("apply")
+      expect(first).toMatchObject({ product: { read: 2, created: 1, skipped: 1 } })
+      const [pan] = await catalog.listProducts({ handle: "tasinan-dokum-tava" })
+      await catalog.updateProducts(pan?.id ?? "", { title: "Burada değişti" })
+
+      const again = await run("apply")
+      expect(again).toMatchObject({ product: { created: 0, found: 1, skipped: 1 } })
+      const [kept] = await catalog.listProducts({ id: pan?.id ?? "" })
+      expect(kept?.title).toBe("Burada değişti")
+      const [mine] = await catalog.listProducts({ id: own?.id ?? "" })
+      expect(mine?.title).toBe("Elle eklenen kapak")
     })
 
     it("is the owner's, asks them again to apply, and keeps no file it read", async () => {

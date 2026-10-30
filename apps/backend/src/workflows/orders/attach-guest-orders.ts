@@ -6,7 +6,6 @@ import {
   createWorkflow,
 } from "@medusajs/framework/workflows-sdk"
 import { likeLiteral } from "../../lib/db/like"
-import { adoptMigratedStep } from "../migration/adopt"
 
 /**
  * Finds the orders placed as a guest with the customer's address. Only for
@@ -61,16 +60,15 @@ const moveOrdersStep = createStep(
 
 /**
  * A signed-in customer's own guest orders (adr/0037 §1): the orders placed
- * before the account, with the same address, join it, and so does what a
- * migration moved with that address (F14.5). The guest records stay, so
+ * before the account, with the same address, join it. What a migration
+ * moved with that address waits for the invitation's key (F14.5): a
+ * confirmed address alone does not take it. The guest records stay, so
  * nothing Medusa keeps about them is lost.
  */
 export const attachGuestOrdersWorkflow = createWorkflow(
   "orders-attach-guest-orders",
   (input: { customer_id: string }) => {
     const orders = findGuestOrdersStep(input)
-    const moved = moveOrdersStep({ orders, to: input.customer_id })
-    adoptMigratedStep(input)
-    return new WorkflowResponse(moved)
+    return new WorkflowResponse(moveOrdersStep({ orders, to: input.customer_id }))
   }
 )

@@ -89,6 +89,12 @@ export const RATE_LIMIT_PROFILES = {
     perIp: { max: 10, windowMs: 15 * MINUTE },
     perIdentity: { max: 3, windowMs: HOUR },
   },
+  // F14.5: a moved customer's claim key, guessed at nowhere: a few tries an hour
+  migration_claim: {
+    name: "migration_claim",
+    perIp: { max: 10, windowMs: 15 * MINUTE },
+    perIdentity: { max: 5, windowMs: HOUR },
+  },
   // F7.13: a shopper cancelling an order; each may ask a provider for a refund
   order_cancel: {
     name: "order_cancel",

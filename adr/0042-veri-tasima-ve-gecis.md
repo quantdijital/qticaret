@@ -164,3 +164,32 @@ Elimizde olanlar:
 2. Müşteri küçük harfli e-postasıyla anahtarlanır: liste yeniden yüklenince kimse iki kez taşınmaz. Aynı e-posta birden çok satırdaysa sonuncusu geçer.
 3. İzin sütunu yalnızca tarih içeriyorsa izindir ("Evet" tek başına değildir; gelecek tarih de değildir). Türkçe tarih (31.12.2024 10:30) Türkiye saatiyle okunur.
 4. Dosya taşıma işi nasıl biterse bitsin silinir (paket gibi); CSRF istisnası yalnızca bu yol ve tablo türleri için.
+
+## Kapanış güvenlik incelemesi (G9, 2026-10-31)
+
+Üç bağımsız inceleme (dış istekler ve dosya ayrıştırma; yetki, KVKK ve hesap güvenliği; motorun bütünlüğü): 2 yüksek, 8 orta, 17 düşük bulgu.
+
+**Yüksek (ikisi de düzeltildi)**
+
+1. **Taşınan verinin başkası tarafından sahiplenilmesi.** Kurbanın e-postasıyla kayıt olup ona giden doğrulama kodunu onaylatan biri, girişte taşınan adresleri, telefonu ve geçmiş siparişleri alabiliyordu (davet e-postası kurbanı bu tıklamaya hazırlıyordu). Artık sahiplenme girişte kendiliğinden olmaz: davet, taşınan kaydı açan imzalı, 60 gün geçerli, tek kullanımlık bir anahtar taşır (`/hesap/kayit?davet=`). Oturum açmış hesap anahtarı `POST /store/customers/me/migration-claim` ile sunar. Kaydın e-postası hesabın giriş kimliğindeki e-postayla aynı olmalıdır. Bağlantıda e-posta yoktur. Vitrin (F18) giriş sonrası bu çağrıyı yapar.
+2. **Ürünün üzerine yazılması.** Ürünler tanıtıcıyla eşleniyordu: aynı tanıtıcılı elle eklenmiş ürünün üzerine yazılabiliyor, yeniden çalıştırma burada değiştirilmiş fiyat, stok ve durumu eski değere döndürüyordu. Artık taşınmış ürün yeniden çalıştırmada gönderilmez; tanıtıcısı başka bir ürüne ait ürün taşınmaz ve raporda yazar.
+
+**Orta (hepsi düzeltildi)**
+
+- XML derinlik denetimi ve HTML temizleyicide kapanmamış girdide karesel yavaşlık (tek geçişli tarama; zaman sınırlı test). Varyant gruplamada kalem başına dizi kopyası.
+- KVKK silmesinden sonra yeniden çalıştırma müşteriyi geri getiriyordu ve müşteri listesinde düz e-posta kaynak anahtarı kalıyordu: silmede anahtar `erased:<HMAC>` olur, yeniden çalıştırma o müşteriyi atlar.
+- Paket tanıtıcıları küçük harfe çevrilmiyordu (eşleme kayboluyordu).
+- Tek `INSERT … ON CONFLICT` içinde yinelenen anahtar tüm çalıştırmayı düşürüyordu (ayıklanıyor).
+- Yorum ekleme ile kaydetme arasında çökme yorumları yineliyordu (yoruma tekil `source_ref`).
+- Ayrılmış yol, ana sayfa ya da ayrılmış yollara bağlanabiliyordu (kural kaynağı denetimi).
+
+**Düşük (düzeltilenler)** sahte adres kısayolu yalnızca açık geliştirme/test ortamında; toplu indirmede yönlendirme yasak ve boyut sınırı; bozuk görsel adı; akış URL'si iş girdisinde ve denetim kaydında yalnızca sitesiyle; veri dökümünde yalnızca e-postayla bağlı geçmiş siparişler; Shopify tutarlarının katı okunması; sıfır fiyatın reddi; akışta indirim tarihleri; yeniden adlandırılmış marka; paketlerin `source_id`'si; 404'te biten yönlendirme zinciri "yanıt vermiyor"; envanterde yeni kayıt bağı öncelikli; taşınan müşteri kayıtlarının saklama süresi (kesimden 90 gün sonra, davet anahtarı dolunca).
+
+**Sonraya kalanlar (gözden geçir)**
+
+- Medusa'nın e-posta doğrulama onayı kodu isteyen oturuma bağlamıyor (F10'dan beri, adr/0037). Taşımaya özgü etkisi anahtarla kapandı; genel düzeltme (onayı isteyen kimliğe bağlamak) F15'te.
+- 512 MB'lık Shopify toplu dosyası ve 100 MB'lık akış bellekte açılıyor; satır satır okuma büyük mağazayla ilk geçişte.
+- Görsel eklendikten sonra kayıt yazılmadan çökme görseli yineleyebilir (düşük olasılık; elle silinir).
+- Taşınan izin kanıtı yalnızca kaynağı içeriyor (kayıt başına anahtar ve çalıştırma yok).
+- Rolü düşürülen sahip 7 gün boyunca kendi raporunu indirebilir; iş ile dosya yüklemesi arasında süreç ölürse yükleme 3 günden sonra temizlenmiyor (genel arka plan işi davranışı).
+- Taşınan ve yayında görünen yorumlar onay kuyruğundan geçmez (eski sitede yayındaydılar); bağlantı içeren yorum da onaylı gelir.

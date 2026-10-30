@@ -49,10 +49,26 @@ moduleIntegrationTestRunner<MigrationModuleService>({
         // A later run without the address keeps the one known
         old_url: "/u/1",
       })
-      expect([...found.entries()]).toEqual([
+      expect([...found.entries()].sort(([a], [b]) => a.localeCompare(b))).toEqual([
         ["p1", { target_id: "prod_1", status: "done" }],
         ["p2", { target_id: "prod_2", status: "done" }],
       ])
+    })
+
+    it("takes a key or an address met twice in one call as one (one statement touches a row once)", async () => {
+      await service.remember("bundle", "product", [
+        { source_key: "p9", target_id: null, status: "failed" },
+        { source_key: "p9", target_id: "prod_9", status: "done" },
+      ])
+      expect(await service.targetsOf("bundle", "product", ["p9"])).toEqual(
+        new Map([["p9", { target_id: "prod_9", status: "done" }]])
+      )
+      await service.addUrls([
+        { address: "/a", path: "/a", query: null, origin: "sitemap", clicks: 3 },
+        { address: "/a", path: "/a", query: null, origin: "sitemap", clicks: 7 },
+      ])
+      const [row] = await service.listMigrationUrls({ address: "/a" })
+      expect(row?.clicks).toBe(7)
     })
 
     it("never forgets a target a later failure does not name", async () => {

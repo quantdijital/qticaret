@@ -442,10 +442,10 @@ Detay: `docs/06-admin-ux.md`. adr/0022'den sonra bu fazın ekranları panel hatt
 - F14.7 **SEO geçiş protokolü:** eski site URL envanteri (sitemap + tarama + GSC dışa aktarımı), eşleme raporu (eşleşmeyenler için karar), kesim öncesi kontrol listesi, kesim sonrası 30 gün 404/GSC izleme ve uyarılar
 
 **KK:**
-- [ ] Örnek veriyle Shopify geçişi dry-run + gerçek çalıştırma yapılıyor; sayımlar eşleşiyor
-- [ ] Yarıda kalan geçiş tekrar çalıştırılınca mükerrer kayıt oluşmuyor
-- [ ] Eski ürün URL'leri 301 ile yeni adreslere çözülüyor; en çok trafik alan ilk 100 URL'nin tamamı eşlenmiş
-- [ ] Görsel indirme iç IP'ye yönlendiren URL'yi reddediyor (testli)
+- [x] Örnek veriyle Shopify geçişi dry-run + gerçek çalıştırma yapılıyor; sayımlar eşleşiyor (sahte Shopify sunucusuyla, `migration-shopify.spec`; gerçek mağazayla ilk geçişte)
+- [x] Yarıda kalan geçiş tekrar çalıştırılınca mükerrer kayıt oluşmuyor (`migration_item` kaynak anahtarıyla; paket, Shopify, akış ve müşteri listesi testleri ikinci çalıştırmada hiçbir şey eklemiyor)
+- [x] Eski ürün URL'leri 301 ile yeni adreslere çözülüyor; en çok trafik alan ilk 100 URL'nin tamamı eşlenmiş (`migration-urls.spec`: ayrılmış eski yol vitrinde 301, "kesime hazır" ilk 100 tıklama adresine bağlı; envanter kaynak kayıtları + site haritası + Search Console, tarama sonraya)
+- [x] Görsel indirme iç IP'ye yönlendiren URL'yi reddediyor (testli: `169.254.169.254` istek atılmadan reddediliyor; yönlendirmenin her adımı `safeFetch`'in kendi testleriyle denetleniyor)
 
 ---
 

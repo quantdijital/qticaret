@@ -36,8 +36,10 @@ export const date = (value: unknown, path: string): Date | null => {
 /** A decimal amount as the shop showed it ("1299.90"), or null. */
 export const amount = (value: unknown, path: string): string | null => {
   const found = at(value, path)
-  const number = typeof found === "string" || typeof found === "number" ? Number(found) : NaN
-  return Number.isFinite(number) && number >= 0 && number < 1e10 ? number.toFixed(2) : null
+  const text =
+    typeof found === "number" ? String(found) : typeof found === "string" ? found.trim() : ""
+  // A plain decimal only: no exponent, no hex, no third decimal rounded away, not empty
+  return /^\d{1,10}(\.\d{1,2})?$/.test(text) ? Number(text).toFixed(2) : null
 }
 
 /** Children of each parent, in the file's order. */
@@ -45,7 +47,12 @@ export function childrenOf(nodes: readonly BulkNode[]): Map<string, BulkNode[]> 
   const children = new Map<string, BulkNode[]>()
   for (const node of nodes) {
     if (node.__parentId) {
-      children.set(node.__parentId, [...(children.get(node.__parentId) ?? []), node])
+      const own = children.get(node.__parentId)
+      if (own) {
+        own.push(node)
+      } else {
+        children.set(node.__parentId, [node])
+      }
     }
   }
   return children

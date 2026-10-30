@@ -1,9 +1,9 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { updateProductsWorkflow } from "@medusajs/medusa/core-flows"
-import { parseEnv } from "../../lib/env"
 import { isValidationError } from "../../lib/errors"
 import { sanitizeImage, suggestedAlts } from "../../lib/media"
+import { fakeOrigin } from "../../lib/migration/fetch"
 import type { SourceProduct, StepProblem, StepProgress } from "../../lib/migration/types"
 import { isSafeFetchError, safeFetch } from "../../lib/security/safe-fetch"
 import {
@@ -102,7 +102,13 @@ async function download(address: string, fake: string | undefined): Promise<Buff
  */
 async function storeImage(container: Container, address: string, fake: string | undefined) {
   const bytes = await download(address, fake)
-  const name = decodeURIComponent(new URL(address).pathname.split("/").pop() ?? "") || "gorsel"
+  const last = new URL(address).pathname.split("/").pop() ?? ""
+  let name = "gorsel"
+  try {
+    name = decodeURIComponent(last) || name
+  } catch {
+    // A broken escape ("%E0") names nothing: the picture keeps the plain name
+  }
   let type
   try {
     type = validateUpload({ buffer: bytes, originalname: name })
@@ -167,7 +173,7 @@ export async function migrateImages(
   products: readonly SourceProduct[],
   apply: boolean,
   progress: StepProgress,
-  fake: string | undefined = parseEnv().SHOPIFY_BASE_URL
+  fake: string | undefined = fakeOrigin()
 ): Promise<{ counts: ImageCounts; problems: StepProblem[] }> {
   const migration = container.resolve<MigrationModuleService>(MIGRATION_MODULE)
   const query = container.resolve(ContainerRegistrationKeys.QUERY)

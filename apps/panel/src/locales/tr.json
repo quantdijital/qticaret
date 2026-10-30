@@ -2277,7 +2277,7 @@
         "description": "Şifreler taşınamaz: taşınan müşterilere hesaplarını açmaları için e-posta gider. Günlük e-posta sınırının yarısı kadarı her gün gönderilir; siparişler kalan payı kullanır.",
         "start": "Davetleri başlat",
         "confirmTitle": "Davetler başlasın mı?",
-        "confirmText": "Taşınan ve hesabı olmayan her müşteriye bir kez e-posta gider.",
+        "confirmText": "Taşınan ve eski kaydını henüz almamış her müşteriye bir kez e-posta gider; bağlantıdaki kişisel anahtar 60 gün geçerlidir.",
         "started": "Davetler başladı.",
         "counts": {
           "queued": "Sırada",

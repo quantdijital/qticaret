@@ -755,4 +755,14 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "migration.feed_item_invalid": "Ürünün adı, adresi ya da fiyatı okunamadı; taşınmadı.",
   "migration.customers_sheet_invalid":
     'Müşteri listesi okunamadı; xlsx ya da CSV olmalı ve bir e-posta sütunu ("E-posta") içermeli.',
+  "migration.claim_invalid":
+    "Davet bağlantısı geçersiz ya da süresi dolmuş; mağazadan yeni bir davet isteyin.",
+  "migration.claim_not_yours":
+    "Bu davet başka bir e-posta adresine gönderilmiş; davetin geldiği adresle giriş yapın.",
+  "migration.claim_used": "Bu davetle önceki hesap bilgileriniz zaten alındı.",
+  "migration.customer_erased": "Bu müşteri bilgilerinin silinmesini istedi; yeniden taşınmadı.",
+  "migration.product_handle_taken":
+    "Bu tanıtıcı sitede başka bir ürüne ait; ürün taşınmadı (üzerine yazılmaz). Tanıtıcıyı kaynakta değiştirin ya da buradaki ürünü kaldırın.",
+  "migration.url_path_reserved":
+    "Bu eski adres sitenin ana sayfası ya da ayrılmış bir yolu; bir kayda bağlanmadı.",
 }

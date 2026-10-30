@@ -14,6 +14,7 @@ import {
   StorePostCheckoutConsent,
   StorePostConsent,
 } from "../store/customers/me/consents/validators"
+import { StorePostMigrationClaim } from "../store/customers/me/migration-claim/validators"
 import { StorePostWishlistItem } from "../store/customers/me/wishlist/validators"
 import { StorePostOrderLookup } from "../store/order-lookup/validators"
 import { StorePostStockAlert } from "../store/stock-alerts/validators"
@@ -162,6 +163,16 @@ export const ACCOUNT_ROUTES = [
     middlewares: [
       authenticate("customer", ["session", "bearer"]),
       validateAndTransformBody(StorePostConsent),
+    ],
+  },
+  // F14.5: a moved customer's record, taken with the invitation's key
+  {
+    matcher: "/store/customers/me/migration-claim",
+    methods: ["POST" as const],
+    middlewares: [
+      authenticate("customer", ["session", "bearer"]),
+      rateLimit(() => RATE_LIMIT_PROFILES.migration_claim),
+      validateAndTransformBody(StorePostMigrationClaim),
     ],
   },
   // F10.4: the signed-in customer's saved products

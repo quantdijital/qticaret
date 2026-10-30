@@ -1,5 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { uniqueViolationKeys } from "../../lib/errors"
+import { parseSource } from "../../lib/seo/redirects"
 import type { StepProgress } from "../../lib/migration/types"
 import { MIGRATION_MODULE } from "../../modules/migration"
 import type MigrationModuleService from "../../modules/migration/service"
@@ -35,6 +36,10 @@ interface Row {
  * record holds stays its.
  */
 async function reserve(container: Container, row: Row): Promise<string> {
+  // As a rule's source would be checked: never the home page, a backend path or a reserved word
+  if (!parseSource(row.path, "exact").ok) {
+    return "migration.url_path_reserved"
+  }
   const registry = container.resolve<UrlRegistryModuleService>(URL_REGISTRY_MODULE)
   const owner = { entity_type: row.entity_type ?? "", entity_id: row.entity_id ?? "" }
   const [held] = await registry.listUrlEntries(
@@ -153,6 +158,7 @@ export async function applyUrls(
       if (action === "reserve") {
         const outcome = await reserve(container, row)
         counts.taken += outcome === "migration.url_path_taken" ? 1 : 0
+        counts.refused += outcome === "migration.url_path_reserved" ? 1 : 0
         outcomes.set(row.id, outcome)
       } else if (action === "redirect" || action === "gone") {
         rules.push(row)

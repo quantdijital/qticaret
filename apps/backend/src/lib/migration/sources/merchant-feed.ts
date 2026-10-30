@@ -51,6 +51,22 @@ function moneyOf(text: string | null): { amount: string; lira: boolean } | null 
   }
 }
 
+/** Whether a sale's dates ("2026-10-01T00:00+03:00/2026-10-31T23:59+03:00") hold now; none, it does. */
+function onSale(range: string | null, now: Date = new Date()): boolean {
+  if (!range) {
+    return true
+  }
+  const [from, to] = range.split("/").map((part) => new Date(part.trim()).getTime())
+  return (
+    from !== undefined &&
+    to !== undefined &&
+    !Number.isNaN(from) &&
+    !Number.isNaN(to) &&
+    from <= now.getTime() &&
+    now.getTime() <= to
+  )
+}
+
 const GRAMS: Readonly<Record<string, number>> = { g: 1, kg: 1000, oz: 28.349523125, lb: 453.59237 }
 
 /** "1.5 kg" in grams. */
@@ -125,7 +141,12 @@ export function feedRecords(xml: string): FeedRecords {
       continue
     }
     const group = first(item, "item_group_id", 50) ?? id
-    groups.set(group, [...(groups.get(group) ?? []), item])
+    const members = groups.get(group)
+    if (members) {
+      members.push(item)
+    } else {
+      groups.set(group, [item])
+    }
   }
   const categories = new Map<string, SourceCategory>()
   const brands = new Map<string, SourceBrand>()
@@ -154,10 +175,13 @@ export function feedRecords(xml: string): FeedRecords {
     )
     const variants: SourceVariant[] = items.flatMap((item) => {
       // A sale price is what the item sells for; the regular one is only crossed out
-      const sale = moneyOf(first(item, "sale_price", 40))
+      // A sale with its dates holds only between them
+      const sale = onSale(first(item, "sale_price_effective_date", 120))
+        ? moneyOf(first(item, "sale_price", 40))
+        : null
       const regular = moneyOf(first(item, "price", 40))
       const price = sale ?? regular
-      if (!price?.lira) {
+      if (!price?.lira || Number(price.amount) === 0) {
         notes.push({
           kind: "product",
           source_key: first(item, "id") ?? group,

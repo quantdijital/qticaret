@@ -128,6 +128,7 @@ export async function migrateReviews(
     if (apply) {
       const ids = await service.addMigratedReviews(
         fresh.map(({ review, productId, customerId }) => ({
+          source_ref: `${source} ${review.source_key}`,
           product_id: productId,
           customer_id: customerId,
           rating: review.rating,

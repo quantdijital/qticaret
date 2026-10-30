@@ -55,7 +55,8 @@ const GRAMS: Readonly<Record<string, number>> = {
 
 function variantOf(node: BulkNode): SourceVariant | null {
   const price = amount(node, "price")
-  if (!node.id || price === null) {
+  // A price of nothing is no price to sell at
+  if (!node.id || price === null || Number(price) === 0) {
     return null
   }
   const options: Record<string, string> = {}

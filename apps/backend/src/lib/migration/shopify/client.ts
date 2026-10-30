@@ -1,7 +1,7 @@
 import { z } from "@medusajs/framework/zod"
 import { createHttpClient } from "../../clients"
 import type { HttpClientOptions } from "../../clients"
-import { parseEnv } from "../../env"
+import { isLocalEnv, parseEnv } from "../../env"
 import type { Env } from "../../env"
 import { ProviderError } from "../../errors"
 
@@ -44,8 +44,12 @@ export function shopifyCredentialsOf(account: {
 /** The store's own origin; a fake Shopify's in development and tests (`SHOPIFY_BASE_URL`). */
 export const shopifyOrigin = (
   shopDomain: string,
-  env: Pick<Env, "SHOPIFY_BASE_URL"> = parseEnv()
-): string => (env.SHOPIFY_BASE_URL ?? `https://${shopDomain}`).replace(/\/+$/, "")
+  env: Pick<Env, "SHOPIFY_BASE_URL" | "NODE_ENV"> = parseEnv()
+): string =>
+  ((isLocalEnv(env) ? env.SHOPIFY_BASE_URL : undefined) ?? `https://${shopDomain}`).replace(
+    /\/+$/,
+    ""
+  )
 
 const Token = z.object({
   access_token: z.string().min(1).max(1024),

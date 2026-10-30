@@ -2277,7 +2277,7 @@
         "description": "Passwords cannot move: moved customers get an e-mail to open their accounts. Half of the daily e-mail limit goes each day; orders keep the rest.",
         "start": "Start the invitations",
         "confirmTitle": "Start the invitations?",
-        "confirmText": "Each moved customer without an account gets one e-mail.",
+        "confirmText": "Each moved customer who has not taken their earlier record gets one e-mail; its personal key lasts 60 days.",
         "started": "The invitations started.",
         "counts": {
           "queued": "Queued",

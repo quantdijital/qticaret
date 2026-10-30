@@ -1,7 +1,7 @@
 import { z } from "@medusajs/framework/zod"
-import { parseEnv } from "../../env"
 import { ProviderError } from "../../errors"
 import { safeFetch } from "../../security/safe-fetch"
+import { fakeOrigin } from "../fetch"
 import { SHOPIFY_PROVIDER } from "./client"
 import type { ShopifyApi } from "./client"
 
@@ -81,11 +81,18 @@ async function download(address: string, fake: string | undefined): Promise<Buff
     throw failure("bulk_url_invalid")
   }
   if (fake && new URL(fake).origin === url.origin) {
-    const answer = await fetch(url, { signal: AbortSignal.timeout(DOWNLOAD_TIMEOUT_MS) })
+    const answer = await fetch(url, {
+      redirect: "error",
+      signal: AbortSignal.timeout(DOWNLOAD_TIMEOUT_MS),
+    })
     if (answer.status !== 200) {
       throw failure(`bulk_http_${String(answer.status)}`)
     }
-    return Buffer.from(await answer.arrayBuffer())
+    const bytes = Buffer.from(await answer.arrayBuffer())
+    if (bytes.length > MAX_FILE_BYTES) {
+      throw failure("bulk_too_large")
+    }
+    return bytes
   }
   // Shopify's files live in Google's storage; a link elsewhere is not followed
   if (url.protocol !== "https:" || url.hostname !== "storage.googleapis.com") {
@@ -140,7 +147,7 @@ export async function bulkNodes(
 ): Promise<BulkNode[]> {
   const sleep = options.sleep ?? wait
   const now = options.now ?? Date.now
-  const fake = "fake" in options ? options.fake : parseEnv().SHOPIFY_BASE_URL
+  const fake = "fake" in options ? options.fake : fakeOrigin()
   const started = await api.graphql(RUN, { query }, Started, { read: false })
   const operation = started.bulkOperationRunQuery.bulkOperation
   if (!operation || started.bulkOperationRunQuery.userErrors.length > 0) {

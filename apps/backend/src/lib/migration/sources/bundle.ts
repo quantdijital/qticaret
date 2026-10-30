@@ -20,6 +20,8 @@ const optional = <T extends z.ZodType>(schema: T) =>
   schema.nullish().transform((value) => value ?? null)
 const key = text(255)
 const amount = z.string().regex(/^\d{1,10}(\.\d{1,2})?$/)
+// What a variant sells for: never nothing
+const price = amount.refine((value) => Number(value) > 0)
 const date = z.iso.datetime({ offset: true }).transform((value) => new Date(value))
 // A path on the old site, never another site: "/urun/tava"
 const oldPath = z
@@ -41,7 +43,7 @@ const variant = z.strictObject({
   source_key: key,
   sku: optional(text(255)),
   barcode: optional(text(64)),
-  price: amount,
+  price,
   compare_at_price: optional(amount),
   stock: optional(z.number().int().min(0).max(10_000_000)),
   options: z.record(text(255), text(255)).default({}),
@@ -50,7 +52,8 @@ const variant = z.strictObject({
 
 const product = z.strictObject({
   source_key: key,
-  handle: text(255),
+  // The catalog stores handles in lower case: the migration finds a product by the same
+  handle: text(255).transform((value) => value.toLowerCase()),
   title: text(255),
   description: optional(z.string().max(50_000)),
   status: z.enum(["published", "draft"]),
@@ -137,6 +140,11 @@ const page = z.strictObject({ source_key: key, title: text(255), old_url: oldPat
 export const bundleSchema = z.strictObject({
   format: z.literal(BUNDLE_FORMAT),
   version: z.literal(1),
+  // Which shop's data it is: two unrelated bundles keep their records apart
+  source_id: z
+    .string()
+    .regex(/^[a-z0-9-]{1,40}$/)
+    .optional(),
   categories: z.array(category).max(MAX.categories).default([]),
   brands: z.array(brand).max(MAX.brands).default([]),
   products: z.array(product).max(MAX.products).default([]),
@@ -181,7 +189,7 @@ export function bundleSource(buffer: Buffer): MigrationSource {
       },
     })
   return {
-    id: "bundle",
+    id: bundle.source_id ? `bundle:${bundle.source_id}` : "bundle",
     categories: listOf(bundle.categories),
     brands: listOf(bundle.brands),
     products: listOf(bundle.products),

@@ -1,7 +1,11 @@
 import type { ICustomerModuleService } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
-import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
-import { likeLiteral } from "../../lib/db/like"
+import { Modules } from "@medusajs/framework/utils"
+import {
+  StepResponse,
+  WorkflowResponse,
+  createStep,
+  createWorkflow,
+} from "@medusajs/framework/workflows-sdk"
 import { MESSAGING_MODULE } from "../../modules/messaging"
 import type MessagingModuleService from "../../modules/messaging/service"
 import { MIGRATION_MODULE } from "../../modules/migration"
@@ -41,42 +45,21 @@ const ADDRESS_FIELDS = [
 
 /**
  * A signed-in customer's own moved record (F14.5, adr/0042 §5): the
- * customer the migration made with their address, as a guest, gives the
- * account what moved with it: the old platform's orders, the reviews (but
- * one of a product the account reviewed itself), the consents, and the
- * addresses when the account has none. Signing in proved the address, as
- * for guest orders (adr/0037 §1). Done once per moved record.
+ * record the invitation's key names (checked by the route: the key, and
+ * the account's login address) gives the account what moved with it: the
+ * old platform's orders, the reviews (but one of a product the account
+ * reviewed itself), the consents, and the addresses when the account has
+ * none. Once per moved record; nothing when it was taken already.
  */
 export const adoptMigratedStep = createStep(
   "migration-adopt-moved-customer",
-  async (input: { customer_id: string }, { container }) => {
-    const query = container.resolve(ContainerRegistrationKeys.QUERY)
-    const { data } = await query.graph({
-      entity: "customer",
-      fields: ["id", "email", "has_account"],
-      filters: { id: input.customer_id },
-    })
-    const account = data[0] as { email: string | null; has_account: boolean } | undefined
-    if (!account?.has_account || !account.email) {
-      return new StepResponse(null)
-    }
+  async (input: { customer_id: string; moved_id: string }, { container }) => {
     const customers = container.resolve<ICustomerModuleService>(Modules.CUSTOMER)
-    const guests = await customers.listCustomers(
-      { email: { $ilike: likeLiteral(account.email) }, has_account: false },
-      { select: ["id"] }
-    )
     const migration = container.resolve<MigrationModuleService>(MIGRATION_MODULE)
-    const items = guests.length
-      ? await migration.listMigrationItems(
-          {
-            kind: "customer",
-            status: "done",
-            target_id: guests.map((guest) => guest.id),
-            adopted_at: null,
-          },
-          { select: ["id", "target_id"] }
-        )
-      : []
+    const items = await migration.listMigrationItems(
+      { kind: "customer", status: "done", target_id: input.moved_id, adopted_at: null },
+      { select: ["id", "target_id"] }
+    )
     if (items.length === 0) {
       return new StepResponse(null)
     }
@@ -167,4 +150,11 @@ export const adoptMigratedStep = createStep(
     }
     await migration.updateMigrationItems(undo.items.map((id) => ({ id, adopted_at: null })))
   }
+)
+
+/** The moved record a claim names, taken by the signed-in account (F14.5). */
+export const adoptMigratedWorkflow = createWorkflow(
+  "migration-adopt",
+  (input: { customer_id: string; moved_id: string }) =>
+    new WorkflowResponse(adoptMigratedStep(input))
 )
