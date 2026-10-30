@@ -1808,8 +1808,8 @@
   },
   "command": {
     "title": "Command menu",
-    "description": "Go to a page or run an action.",
-    "placeholder": "Search pages or actions…",
+    "description": "Find an order, customer, product or parcel; go to a page or run an action.",
+    "placeholder": "Order number, customer, product, SKU, tracking number or page…",
     "empty": "No results.",
     "pages": "Pages",
     "actions": "Actions",
@@ -1821,6 +1821,14 @@
       "lowStock": "Low stock",
       "addPromotion": "Create promotion",
       "addCategory": "Add category"
+    },
+    "search": {
+      "searching": "Searching…",
+      "orders": "Orders",
+      "parcels": "Parcel tracking",
+      "parcelOf": "Order #{{number}}",
+      "customers": "Customers",
+      "products": "Products"
     }
   },
   "topbar": {

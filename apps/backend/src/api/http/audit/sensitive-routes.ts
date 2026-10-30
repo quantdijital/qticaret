@@ -15,6 +15,8 @@ export const SENSITIVE_READS: readonly [string, string, boolean, (readonly strin
   ["/admin/orders", "order", true],
   ["/admin/dashboard/recent-orders", "order", true],
   ["/admin/order-board", "order", true],
+  // F12.9: the search box finds customers and orders by name
+  ["/admin/global-search", "customer", true],
   ["/admin/orders/:id", "order", false],
   ["/admin/orders/:id/preview", "order", false],
   ["/admin/orders/:id/changes", "order", false],

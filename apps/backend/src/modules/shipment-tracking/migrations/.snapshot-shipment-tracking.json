@@ -287,6 +287,15 @@
           "expression": "CREATE INDEX IF NOT EXISTS \"IDX_tracked_shipment_order_id\" ON \"tracked_shipment\" (\"order_id\") WHERE deleted_at IS NULL"
         },
         {
+          "keyName": "IDX_tracked_shipment_tracking_number",
+          "columnNames": [],
+          "composite": false,
+          "constraint": false,
+          "primary": false,
+          "unique": false,
+          "expression": "CREATE INDEX IF NOT EXISTS \"IDX_tracked_shipment_tracking_number\" ON \"tracked_shipment\" (\"tracking_number\") WHERE deleted_at IS NULL"
+        },
+        {
           "keyName": "tracked_shipment_pkey",
           "columnNames": ["id"],
           "composite": false,

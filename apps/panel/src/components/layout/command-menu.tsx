@@ -9,7 +9,7 @@ import {
   Truck,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next"
 import {
   CommandDialog,
@@ -21,6 +21,7 @@ import {
   CommandSeparator,
 } from "@/components/ui/command"
 import { useLogout } from "@/features/auth/api/me"
+import { SearchResults } from "@/features/search/search-results"
 import { ALL_NAV_ITEMS } from "./navigation"
 
 // The jobs people start most, a keystroke away (docs/06 §5)
@@ -38,40 +39,63 @@ interface CommandMenuProps {
   onOpenChange: (open: boolean) => void
 }
 
-/** ⌘K / Ctrl+K anywhere: jump to a page or run a common action. */
+/**
+ * ⌘K / Ctrl+K anywhere: find an order, a customer, a product or a parcel
+ * (F12.9), jump to a page or run a common action.
+ */
 export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const logout = useLogout(() => void navigate({ to: "/login" }))
+  const [search, setSearch] = useState("")
+  // Closed, it forgets what was typed: a new opening starts empty
+  const change = (next: boolean) => {
+    if (!next) {
+      setSearch("")
+    }
+    onOpenChange(next)
+  }
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (event.key.toLowerCase() === "k" && (event.metaKey || event.ctrlKey)) {
         event.preventDefault()
-        onOpenChange(!open)
+        change(!open)
       }
     }
     window.addEventListener("keydown", onKey)
     return () => {
       window.removeEventListener("keydown", onKey)
     }
-  }, [open, onOpenChange])
+  })
 
   const run = (action: () => void) => {
-    onOpenChange(false)
+    change(false)
     action()
   }
 
   return (
     <CommandDialog
       open={open}
-      onOpenChange={onOpenChange}
+      onOpenChange={change}
+      // Held near the top: results arriving grow it downwards instead of moving it
+      className="top-[12vh] translate-y-0 sm:max-w-xl"
       title={t("command.title")}
       description={t("command.description")}
     >
-      <CommandInput placeholder={t("command.placeholder")} />
+      <CommandInput
+        placeholder={t("command.placeholder")}
+        value={search}
+        onValueChange={setSearch}
+      />
       <CommandList>
         <CommandEmpty>{t("command.empty")}</CommandEmpty>
+        <SearchResults
+          search={search}
+          onPick={() => {
+            change(false)
+          }}
+        />
         <CommandGroup heading={t("command.pages")}>
           {ALL_NAV_ITEMS.map((item) => (
             <CommandItem

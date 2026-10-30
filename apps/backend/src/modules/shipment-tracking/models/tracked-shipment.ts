@@ -29,4 +29,6 @@ export const TrackedShipment = model
     { on: ["provider", "provider_shipment_id"], unique: true },
     { on: ["status", "checked_at"] },
     { on: ["order_id"] },
+    // F12.9: the panel's search finds a parcel by it
+    { on: ["tracking_number"] },
   ])

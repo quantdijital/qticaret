@@ -9,6 +9,7 @@ import { AdminPostApiKey, AdminPostApiKeyRevoke } from "./api-access/validators"
 import { AdminGetReportRange } from "./reports/validators"
 import { AdminPostStatementCheck } from "./reports/statements/validators"
 import { AdminGetOrderBoard } from "./order-board/validators"
+import { AdminGetGlobalSearch } from "./global-search/validators"
 import { AdminGetBulkLabels } from "./shipping-labels/validators"
 import { AdminPostCustomerConsent } from "./customers/[id]/consents/validators"
 import { AdminPostDeliverOrders } from "./order-board/deliver/validators"
@@ -76,6 +77,12 @@ export const PANEL_ROUTES = [
     matcher: "/admin/order-board",
     methods: ["GET" as const],
     middlewares: [requireUserActor, validateAndTransformQuery(AdminGetOrderBoard, {})],
+  },
+  // F12.9: the search box; customers' names, a recorded read (SENSITIVE_READS)
+  {
+    matcher: "/admin/global-search",
+    methods: ["GET" as const],
+    middlewares: [requireUserActor, validateAndTransformQuery(AdminGetGlobalSearch, {})],
   },
   {
     matcher: "/admin/stock-board",

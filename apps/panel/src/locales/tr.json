@@ -1808,8 +1808,8 @@
   },
   "command": {
     "title": "Komut menüsü",
-    "description": "Bir sayfaya gidin ya da bir işlem çalıştırın.",
-    "placeholder": "Sayfa ya da işlem arayın…",
+    "description": "Sipariş, müşteri, ürün ya da kargo arayın; bir sayfaya gidin ya da bir işlem çalıştırın.",
+    "placeholder": "Sipariş no, müşteri, ürün, SKU, takip no ya da sayfa…",
     "empty": "Sonuç bulunamadı.",
     "pages": "Sayfalar",
     "actions": "İşlemler",
@@ -1821,6 +1821,14 @@
       "lowStock": "Azalan stok",
       "addPromotion": "Kampanya oluştur",
       "addCategory": "Kategori ekle"
+    },
+    "search": {
+      "searching": "Aranıyor…",
+      "orders": "Siparişler",
+      "parcels": "Kargo takibi",
+      "parcelOf": "Sipariş #{{number}}",
+      "customers": "Müşteriler",
+      "products": "Ürünler"
     }
   },
   "topbar": {
