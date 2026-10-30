@@ -3,6 +3,7 @@ import { MedusaService } from "@medusajs/framework/utils"
 import { decryptPii, encryptPii, hashPii, parseKey } from "../../lib/crypto/pii"
 import { uniqueViolationKeys } from "../../lib/errors"
 import type { LegalKind } from "../../lib/legal/tokens"
+import { AgeDeclaration } from "./models/age-declaration"
 import { CookieConsent } from "./models/cookie-consent"
 import { LegalConsent } from "./models/legal-consent"
 import type { AcceptedDocument } from "./models/legal-consent"
@@ -46,6 +47,7 @@ class LegalModuleService extends MedusaService({
   LegalConsent,
   LegalOrderCopy,
   CookieConsent,
+  AgeDeclaration,
 }) {
   private readonly encryptionKey: Buffer
   private readonly hashKey: Buffer
@@ -134,6 +136,27 @@ class LegalModuleService extends MedusaService({
         throw error
       }
       return again
+    }
+  }
+
+  /** Records that the cart's buyer declared reaching `minAge`; declared again, the last counts. */
+  async recordAgeDeclaration(cartId: string, minAge: number) {
+    const values = { min_age: minAge, declared_at: new Date() }
+    const [existing] = await this.listAgeDeclarations({ cart_id: cartId }, { take: 1 })
+    if (existing) {
+      return this.updateAgeDeclarations({ id: existing.id, ...values })
+    }
+    try {
+      return await this.createAgeDeclarations({ cart_id: cartId, ...values })
+    } catch (error) {
+      if (!uniqueViolationKeys(error)?.includes("cart_id")) {
+        throw error
+      }
+      const [stored] = await this.listAgeDeclarations({ cart_id: cartId }, { take: 1 })
+      if (!stored) {
+        throw error
+      }
+      return this.updateAgeDeclarations({ id: stored.id, ...values })
     }
   }
 

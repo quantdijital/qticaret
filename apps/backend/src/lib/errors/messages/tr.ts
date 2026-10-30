@@ -441,6 +441,15 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Sözleşme metni güncellendi; lütfen yeni metni okuyup yeniden onaylayın.",
   "legal.nothing_to_accept": "Mağazanın onaylanacak yayında sözleşmesi yok.",
   "legal.copy_unknown": "Bu siparişle saklanan böyle bir sözleşme yok.",
+  "catalog.restriction_disabled":
+    "Ürün ya da kategoriyi yaş sınırlı işaretlemek için önce Ayarlar > Özellikler'den “Kısıtlı ürünler” özelliğini açın.",
+  "catalog.category_unknown": "Kategori bulunamadı.",
+  "age.declaration_missing":
+    "Sepetinizde yaş sınırlı ürün var; ödemeye geçmeden önce yaşınızı beyan edin.",
+  "age.under_limit": "Bu ürünler yalnızca yaş sınırını geçenlere satılabilir.",
+  "age.birth_date_invalid": "Geçerli bir doğum tarihi girin.",
+  "age.not_required": "Bu sepet için yaş beyanı gerekmiyor.",
+  "platform_settings.min_age_invalid": "Yaş sınırı 18 ile 25 arasında bir tam sayı olmalı.",
   "legal.title_invalid": "Başlık görünmeyen kontrol karakterleri içeremez.",
   "orders.unknown": "Sipariş bulunamadı.",
   "paytr.merchant_id_invalid":

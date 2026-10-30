@@ -2,6 +2,7 @@ import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/util
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import { checkoutProblem } from "../../../lib/checkout"
 import { ConflictError, ValidationError } from "../../../lib/errors"
+import { assertAgeDeclared } from "../../legal/age"
 import { assertConsented } from "../../legal/consent"
 import { itemAmounts, lineShares, shippingAmounts } from "../../../lib/orders"
 import type { LineShare } from "../../../lib/orders"
@@ -60,7 +61,8 @@ interface CartRow {
  * lines' shares in kuruş, the buyer from the shipping address (the
  * billing address when it has no phone), and its payment collection.
  * A cart that is not ready says what it misses, field by field; one whose
- * contracts were not accepted as published now is not paid for.
+ * contracts were not accepted as published now, or whose restricted
+ * product's buyer has not declared their age, is not paid for.
  */
 export const readCheckoutCartStep = createStep(
   "payments-read-checkout-cart",
@@ -108,6 +110,7 @@ export const readCheckoutCartStep = createStep(
     }
     // No payment is taken for a cart whose contracts were not accepted (adr/0041 §2)
     await assertConsented(container, cart.id)
+    await assertAgeDeclared(container, cart.id)
 
     const names = new Map([
       ...items.map((item) => [item.id, itemName(item)] as const),

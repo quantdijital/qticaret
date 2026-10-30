@@ -18,6 +18,17 @@ export interface OrderConsent {
   }[]
 }
 
+/** The age the buyer declared for a restricted product (F13.3): the limit then, and when. */
+export interface OrderAgeDeclaration {
+  min_age: number
+  declared_at: string
+}
+
+export interface OrderLegalRecord {
+  consent: OrderConsent | null
+  age_declaration: OrderAgeDeclaration | null
+}
+
 /** `GET /admin/orders/:id/legal/:kind`: the copy as the order made it. */
 export interface OrderContractCopy {
   kind: ContractKind
@@ -32,11 +43,10 @@ export interface OrderContractCopy {
 
 const base = (orderId: string) => `/admin/orders/${encodeURIComponent(orderId)}/legal`
 
-export const orderConsentQuery = (orderId: string) =>
+export const orderLegalQuery = (orderId: string) =>
   queryOptions({
     queryKey: ["orders", "legal", orderId],
-    queryFn: async () =>
-      (await sdk.client.fetch<{ consent: OrderConsent | null }>(base(orderId))).consent,
+    queryFn: () => sdk.client.fetch<OrderLegalRecord>(base(orderId)),
   })
 
 export const orderContractQuery = (orderId: string, kind: ContractKind) =>

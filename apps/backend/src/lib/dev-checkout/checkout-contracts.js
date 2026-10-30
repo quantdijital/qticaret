@@ -1,6 +1,6 @@
-// The payment test page's contracts step (adr/0028, adr/0041 §2): with checkout.js, one script.
+// The payment test page's contracts and age step (adr/0028, adr/0041 §2, §4): with checkout.js, one script.
 /* global $, el, api, state */
-/* exported loadContracts, acceptContracts */
+/* exported loadContracts, acceptContracts, loadAgeCheck, declareAge */
 
 const CONTRACT_KINDS = ["pre_information", "distance_sales"]
 const PAYMENT_OF = {
@@ -49,4 +49,27 @@ async function acceptContracts() {
     method: "POST",
     body: { documents: state.contracts.map(({ kind, version }) => ({ kind, version })) },
   })
+}
+
+/** Whether the cart asks the buyer's age: a restricted product while the shop checks ages. */
+async function loadAgeCheck() {
+  if (!state.cart) return
+  const { age_check: check } = await api(`/store/carts/${state.cart.id}/age-declaration`)
+  state.ageRequired = check.required && !check.declared
+  $("age-row").hidden = !check.required
+  $("age-limit").textContent = check.required
+    ? `Sepette yaş sınırlı ürün var: ${check.min_age} yaşını doldurduğunuzu beyan edin.`
+    : ""
+}
+
+/** The declaration before the payment: the date of birth is checked and not kept. */
+async function declareAge() {
+  if (!state.ageRequired) return
+  if (!$("age-confirm").checked || !$("birth-date").value)
+    throw new Error("Doğum tarihinizi girip yaş beyanını onaylayın.")
+  await api(`/store/carts/${state.cart.id}/age-declaration`, {
+    method: "POST",
+    body: { birth_date: $("birth-date").value, confirmed: true },
+  })
+  state.ageRequired = false
 }

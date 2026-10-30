@@ -490,6 +490,10 @@
           "non_physical": {
             "label": "Digital and service products",
             "description": "Sell products that need no shipping (e-books, gift codes, courses, services); they ask for no shipping or measurements."
+          },
+          "restricted": {
+            "label": "Restricted products",
+            "description": "Products and categories can be marked adults only (weapons and blades, alcohol, tobacco, adult content). Marked products are told to search engines as adult-oriented and stay out of the product feeds."
           }
         },
         "seo": {
@@ -524,6 +528,12 @@
           "ai_drafts": {
             "label": "AI content drafts",
             "description": "A model drafts product descriptions and search texts; drafts reach the page only once approved. Only the products' facts, without personal data, go to the provider; it works once the platform has set one up."
+          }
+        },
+        "compliance": {
+          "age_verification": {
+            "label": "Age verification",
+            "description": "When a cart holds an adults-only product, the shopper declares their age with their date of birth before paying; under the limit, no payment is taken. The date of birth is not kept. The limit is in Settings > Legal texts."
           }
         }
       }
@@ -1991,6 +2001,13 @@
       "preview": {
         "hint": "As customers will see it; contracts are filled with a made-up order.",
         "frame": "Preview of {{title}}"
+      },
+      "age": {
+        "title": "Age verification",
+        "description": "The lowest age a buyer of an adults-only product declares. The date of birth is checked at checkout and not kept.",
+        "minAge": "Lowest age",
+        "minAgeHint": "The legal limit is 18 for most products; you may ask more (25 at most).",
+        "invalid": "Enter a whole number from 18 to 25."
       }
     }
   },
@@ -2937,7 +2954,9 @@
       "kinds": {
         "pre_information": "Pre-information form",
         "distance_sales": "Distance sales contract"
-      }
+      },
+      "age": "Age declared",
+      "ageValue": "{{age}} or over · {{date}}"
     }
   },
   "customers": {
@@ -5027,5 +5046,19 @@
     "failedPassword": "The password is not right; try again.",
     "confirm": "Verify",
     "cancelled": "Nothing was done."
+  },
+  "restrictions": {
+    "label": "Age limit",
+    "reason": "Reason",
+    "none": "None",
+    "options": {
+      "weapon": "Weapons and blades",
+      "alcohol": "Alcoholic drinks",
+      "tobacco": "Tobacco and nicotine",
+      "adult_content": "Adult content",
+      "other": "Other"
+    },
+    "productHint": "Sold to adults only; search engines are told, and it stays out of the feeds.",
+    "categoryHint": "This category, its children and every product in them are sold to adults only."
   }
 }

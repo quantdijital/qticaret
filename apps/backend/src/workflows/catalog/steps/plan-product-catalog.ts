@@ -1,11 +1,15 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
+import type { Restriction } from "../../../lib/catalog"
 import { ValidationError } from "../../../lib/errors"
 import { fromMedusaAmount } from "../../../lib/money"
 import type { PRODUCT_CONDITIONS } from "../../../modules/catalog-extension/models/product-extension"
 import { PLATFORM_SETTINGS_MODULE } from "../../../modules/platform-settings"
-import { NON_PHYSICAL_PRODUCTS } from "../../../modules/platform-settings/features"
+import {
+  NON_PHYSICAL_PRODUCTS,
+  RESTRICTED_PRODUCTS,
+} from "../../../modules/platform-settings/features"
 import type PlatformSettingsModuleService from "../../../modules/platform-settings/service"
 import { NO_SHIPPING_CHANGES, SHIPPING_FIELDS, shippingChanges } from "../shipping-kind"
 import type { ProductKind, ShippingChanges, ShippingRow } from "../shipping-kind"
@@ -21,6 +25,8 @@ export interface SetProductCatalogInput {
   successor_product_id?: string | null | undefined
   /** Outside the right of withdrawal (F13.6). */
   withdrawal_excluded?: boolean | undefined
+  /** Sold to adults only, and why (F13.4); null clears it. */
+  restriction?: Restriction | null | undefined
   /** Per variant: the MPN, and the unit cost in lira (VAT excluded, F11.4). */
   variants?:
     | Record<string, { mpn?: string | null | undefined; cost?: number | null | undefined }>
@@ -39,6 +45,7 @@ export interface ExtensionFields {
   primary_category_id: string | null
   successor_product_id: string | null
   withdrawal_excluded: boolean
+  restriction: Restriction | null
 }
 
 export interface ProductCatalogPlan {
@@ -119,6 +126,7 @@ const EXTENSION_KEYS = [
   "primary_category_id",
   "successor_product_id",
   "withdrawal_excluded",
+  "restriction",
 ] as const
 
 /** The fields the save sends (absent ones keep their values) and what they hold now. */
@@ -230,6 +238,13 @@ export const planProductCatalogStep = createStep(
         ? []
         : [{ variant_id: variantId, id: extension?.id ?? null, set, previous }]
     })
+    // F13.4: marking needs the flag; clearing a mark never does
+    if (input.restriction) {
+      const settings = container.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
+      if (!(await settings.isFeatureEnabled(RESTRICTED_PRODUCTS))) {
+        throw new ValidationError("catalog.restriction_disabled", { field: "restriction" })
+      }
+    }
     const extension = product.product_extension ?? null
     const { set, previous } = changesOf(input, extension)
     const plan: ProductCatalogPlan = {

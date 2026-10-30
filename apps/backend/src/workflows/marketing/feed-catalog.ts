@@ -18,6 +18,7 @@ import { priceDisplays } from "../pricing/price-display"
 import { PRODUCT_FACT_FIELDS, productFacts } from "../seo/facts"
 import type { FactRow } from "../seo/facts"
 import { shippingFactsOf } from "../seo/payload"
+import { markedCategories } from "../catalog/restrictions"
 import { shopShippingOptions } from "../shipping/shop-options"
 
 /** Products read at a time. */
@@ -72,9 +73,10 @@ export async function catalogItems(
 ): Promise<FeedItem[]> {
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
   const urls = container.resolve<UrlRegistryModuleService>(URL_REGISTRY_MODULE)
-  const [shipping, { data: categoryRows }] = await Promise.all([
+  const [shipping, { data: categoryRows }, restricted] = await Promise.all([
     shippingFactsOf(container),
     query.graph({ entity: "product_category", fields: ["id", "name"] }),
+    markedCategories(container),
   ])
   const names = new Map((categoryRows as CategoryRow[]).map((row) => [row.id, row.name]))
   const items: FeedItem[] = []
@@ -120,8 +122,11 @@ export async function catalogItems(
           row.brand?.name ?? null,
           plainText(row.description ?? ""),
           displays,
-          shipping
+          shipping,
+          undefined,
+          restricted
         )
+        // A product sold to adults only has no item (adr/0041 §4)
         items.push(...feedItemsOf(facts, `${storefront}${path}`, placeOf(row, names)))
       }
     }

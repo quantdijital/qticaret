@@ -297,6 +297,18 @@ describe("listing, breadcrumb and site blocks", () => {
     })
   })
 
+  it("names a product sold to adults only on each of its products (F13.4)", () => {
+    const adult = "https://schema.org/WeaponConsideration"
+    const single = productJsonLd(
+      facts({ adultConsideration: adult }),
+      "https://magaza.example.com/u"
+    )
+    const plain = productJsonLd(facts(), "https://magaza.example.com/u")
+
+    expect(JSON.stringify(single)).toContain(`"hasAdultConsideration":"${adult}"`)
+    expect(JSON.stringify(plain)).not.toContain("hasAdultConsideration")
+  })
+
   it("names the shop's legal identity where it is given (F13.9)", () => {
     const [store] = siteJsonLd(
       { name: "Demo Mağaza", url: "https://magaza.example.com/", logo: null },

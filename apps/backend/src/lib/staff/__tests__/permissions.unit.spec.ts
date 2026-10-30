@@ -281,6 +281,7 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/products/:id/attributes": false,
   "POST /admin/products/:id/brand": false,
   "POST /admin/products/:id/catalog": false,
+  "POST /admin/category-restrictions/:category_id": false,
   "POST /admin/promotions/:id/code-batches/:campaign_id/revoke": false,
   "POST /admin/promotions/:id/offer": false,
   "POST /admin/reports/statements": false,

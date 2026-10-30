@@ -20,6 +20,7 @@ const SECTION_VALIDATORS = {
   security: validateAndTransformBody(SECTIONS.security.patch),
   legal: validateAndTransformBody(SECTIONS.legal.patch),
   returns: validateAndTransformBody(SECTIONS.returns.patch),
+  compliance: validateAndTransformBody(SECTIONS.compliance.patch),
   // The fake program is for a developer's machine and the tests, never a live shop
   accounting: validateAndTransformBody(
     SECTIONS.accounting.patch.refine((body) => body.adapter !== "fake" || fakeAccountingAllowed(), {

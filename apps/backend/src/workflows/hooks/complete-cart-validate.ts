@@ -11,6 +11,7 @@ import type { PaymentFacts } from "../../lib/payments/consistency"
 import { kurus } from "../../lib/money"
 import { enteredCodes } from "../../lib/promotions"
 import { hasStaleShipping } from "../checkout/stale-shipping"
+import { assertAgeDeclared } from "../legal/age"
 import { assertConsented } from "../legal/consent"
 import { expectedCodFee } from "../payments/steps/payment-fee"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
@@ -25,8 +26,9 @@ type CartRow = Parameters<typeof checkoutProblem>[0] &
 
 // One handler per hook: the checkout rules of lib/checkout (F3.2), a payment
 // for the cart's current total (F5), the payment fee (F6), shipping at its
-// current price (F4.5), the one-code rule (F4.4) and the contracts accepted
-// as published now (F13.2), read fresh for the cart being completed.
+// current price (F4.5), the one-code rule (F4.4), the contracts accepted
+// as published now (F13.2) and a restricted product's buyer's age (F13.3),
+// read fresh for the cart being completed.
 // Throwing stops the checkout. The hook's cart is typed
 // loosely: only its id is used
 completeCartWorkflow.hooks.validate(async ({ cart }: { cart: { id: string } }, { container }) => {
@@ -61,6 +63,8 @@ completeCartWorkflow.hooks.validate(async ({ cart }: { cart: { id: string } }, {
   }
   // Accepted at the payment's start too; a contract published since stops it (adr/0041 §2)
   await assertConsented(container, cart.id)
+  // A restricted product's buyer declared their age (adr/0041 §4)
+  await assertAgeDeclared(container, cart.id)
   // The rule is checked as codes are sent too; requests racing each other
   // can each see an empty cart, so it is checked once more here (ADR-0024)
   if (enteredCodes(row.promotions).length > 1) {

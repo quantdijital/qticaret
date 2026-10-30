@@ -22,6 +22,7 @@ interface ProductRow {
     primary_category_id: string | null
     successor_product_id: string | null
     withdrawal_excluded?: boolean | null
+    restriction?: string | null
   } | null
 }
 
@@ -82,6 +83,7 @@ export async function readProductCatalog(scope: MedusaContainer, productId: stri
     condition: extension?.condition ?? "new",
     kind: extension?.kind ?? "physical",
     withdrawal_excluded: extension?.withdrawal_excluded ?? false,
+    restriction: extension?.restriction ?? null,
     primary_category_id: categories.some((category) => category.id === primary) ? primary : null,
     successor: await productTitle(scope, extension?.successor_product_id ?? null),
     categories,

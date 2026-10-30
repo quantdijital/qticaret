@@ -1,4 +1,5 @@
 import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
+import type { Restriction } from "@/features/categories/api/restrictions"
 import { sdk } from "@/lib/sdk"
 
 /** Saving what the product page edits beyond the product's own fields. */
@@ -17,6 +18,8 @@ export interface ProductCatalog {
   primary_category_id: string | null
   /** Outside the right of withdrawal (F13.4): returned only when faulty. */
   withdrawal_excluded: boolean
+  /** Sold to adults only, and why (F13.4); a category's mark is not shown here. */
+  restriction: Restriction | null
   successor: { id: string; title: string; handle: string } | null
   categories: { id: string; name: string }[]
   variants: {
@@ -46,6 +49,7 @@ export function useSaveCatalog(id: string) {
       kind?: ProductKind
       primary_category_id?: string | null
       withdrawal_excluded?: boolean
+      restriction?: Restriction | null
     }) => sdk.client.fetch<ProductCatalog>(catalogUrl(id), { method: "POST", body }),
     onSuccess: async (catalog) => {
       client.setQueryData(["products", "catalog", id], catalog)

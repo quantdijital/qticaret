@@ -1,4 +1,6 @@
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { CATALOG_EXTENSION_MODULE } from "../../../../modules/catalog-extension"
+import type CatalogExtensionModuleService from "../../../../modules/catalog-extension/service"
 import type { AuditedResource, GraphQuery, Resolver, Snapshot } from "../types"
 import { ID } from "../types"
 
@@ -14,6 +16,8 @@ interface ProductRow {
     kind?: string | null
     primary_category_id: string | null
     successor_product_id: string | null
+    withdrawal_excluded?: boolean | null
+    restriction?: string | null
   } | null
 }
 
@@ -45,6 +49,8 @@ async function catalogSnapshot(scope: Resolver, productId: string): Promise<Snap
     kind: extension?.kind ?? "physical",
     primary_category_id: extension?.primary_category_id ?? null,
     successor_product_id: extension?.successor_product_id ?? null,
+    withdrawal_excluded: extension?.withdrawal_excluded ?? false,
+    restriction: extension?.restriction ?? null,
     ...Object.fromEntries(
       (product.variants ?? []).flatMap((variant): [string, string | number | null][] =>
         variant
@@ -58,6 +64,14 @@ async function catalogSnapshot(scope: Resolver, productId: string): Promise<Snap
   }
 }
 
+/** A category's adults-only mark (F13.4): its reason, or none. */
+async function categoryRestrictionSnapshot(scope: Resolver, categoryId: string): Promise<Snapshot> {
+  const [row] = await (
+    scope.resolve(CATALOG_EXTENSION_MODULE) as CatalogExtensionModuleService
+  ).listCategoryRestrictions({ category_id: categoryId }, { take: 1, select: ["restriction"] })
+  return { restriction: row?.restriction ?? null }
+}
+
 export const CATALOG_RESOURCES: readonly AuditedResource[] = [
   {
     method: "POST",
@@ -66,5 +80,14 @@ export const CATALOG_RESOURCES: readonly AuditedResource[] = [
     resourceType: "product",
     resourceId: (params) => params["id"] ?? null,
     snapshot: ({ scope, params }) => catalogSnapshot(scope, params["id"] ?? ""),
+  },
+  {
+    method: "POST",
+    route: "POST /admin/category-restrictions/:category_id",
+    pattern: new RegExp(`^/admin/category-restrictions/(?<category_id>${ID})$`, "i"),
+    resourceType: "product_category",
+    resourceId: (params) => params["category_id"] ?? null,
+    snapshot: ({ scope, params }) =>
+      categoryRestrictionSnapshot(scope, params["category_id"] ?? ""),
   },
 ]

@@ -54,11 +54,19 @@ describe("ContractsCard", () => {
 
   it("shows when and from where the contracts were accepted, and opens the copy kept", async () => {
     fetchMock.mockImplementation((url: string) =>
-      Promise.resolve(url.endsWith("/legal") ? { consent: CONSENT } : { document: COPY })
+      Promise.resolve(
+        url.endsWith("/legal")
+          ? {
+              consent: CONSENT,
+              age_declaration: { min_age: 18, declared_at: "2026-10-30T09:14:00.000Z" },
+            }
+          : { document: COPY }
+      )
     )
     renderCard()
 
     expect(await screen.findByText("203.0.113.7")).toBeInTheDocument()
+    expect(screen.getByText(/18 yaş ve üstü/)).toBeInTheDocument()
     // The copy is a recorded read: asked for only when opened
     expect(fetchMock).toHaveBeenCalledTimes(1)
     await userEvent.click(
@@ -72,7 +80,7 @@ describe("ContractsCard", () => {
   })
 
   it("says so when the order was placed without contracts to accept", async () => {
-    fetchMock.mockResolvedValue({ consent: null })
+    fetchMock.mockResolvedValue({ consent: null, age_declaration: null })
     renderCard()
 
     expect(await screen.findByText(/yayında sözleşmesi yoktu/)).toBeInTheDocument()

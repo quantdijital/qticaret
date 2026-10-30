@@ -1,4 +1,5 @@
 import { model } from "@medusajs/framework/utils"
+import { RESTRICTIONS } from "../../../lib/catalog/restrictions"
 
 export const PRODUCT_CONDITIONS = ["new", "refurbished", "used", "damaged"] as const
 export const PRODUCT_KINDS = ["physical", "digital", "service"] as const
@@ -15,7 +16,9 @@ export const PRODUCT_KINDS = ["physical", "digital", "service"] as const
  * - `successor_product_id`: where the product's URL points once it is no
  *   longer sold (a 301, docs/13 §2.4);
  * - `withdrawal_excluded`: outside the right of withdrawal (hygiene, made to
- *   order; F13.6, adr/0041 §3). A faulty or wrong item still comes back.
+ *   order; F13.6, adr/0041 §3). A faulty or wrong item still comes back;
+ * - `restriction`: sold to adults only, and why (F13.4, adr/0041 §4); a
+ *   category's mark reaches the product too.
  */
 export const ProductExtension = model.define("product_extension", {
   id: model.id({ prefix: "pext" }).primaryKey(),
@@ -24,4 +27,5 @@ export const ProductExtension = model.define("product_extension", {
   primary_category_id: model.text().nullable(),
   successor_product_id: model.text().nullable(),
   withdrawal_excluded: model.boolean().default(false),
+  restriction: model.enum([...RESTRICTIONS]).nullable(),
 })

@@ -39,6 +39,16 @@ export const CASH_ON_DELIVERY = "payments.cash_on_delivery"
  */
 export const CONTENT_AI_DRAFTS = "content.ai_drafts"
 
+/**
+ * Marking products and categories as sold to adults only (F13.4, adr/0041
+ * §4): marked products name their adult consideration in JSON-LD and stay
+ * out of the feeds.
+ */
+export const RESTRICTED_PRODUCTS = "catalog.restricted"
+
+/** Asking a cart with a restricted product for the buyer's age (F13.3, adr/0041 §4). */
+export const AGE_VERIFICATION = "compliance.age_verification"
+
 export const FEATURES: Readonly<Record<string, FeatureDefinition>> = Object.freeze({
   // F3.2: products that need no shipping (e-books, gift codes, courses, services)
   [NON_PHYSICAL_PRODUCTS]: {
@@ -89,6 +99,20 @@ export const FEATURES: Readonly<Record<string, FeatureDefinition>> = Object.free
     owner: "tenant",
     labelKey: "qticaret.features.content_ai_drafts.label",
     descriptionKey: "qticaret.features.content_ai_drafts.description",
+  },
+  // F13.4: off until the shop sells something to adults only
+  [RESTRICTED_PRODUCTS]: {
+    default: false,
+    owner: "tenant",
+    labelKey: "qticaret.features.catalog_restricted.label",
+    descriptionKey: "qticaret.features.catalog_restricted.description",
+  },
+  // F13.3: off by default; on, a cart with a restricted product asks for the buyer's age
+  [AGE_VERIFICATION]: {
+    default: false,
+    owner: "tenant",
+    labelKey: "qticaret.features.compliance_age_verification.label",
+    descriptionKey: "qticaret.features.compliance_age_verification.description",
   },
 })
 

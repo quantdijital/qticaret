@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button"
 import { legalOverviewQuery } from "@/features/legal/api"
 import type { LegalKind, LegalOverviewRow } from "@/features/legal/api"
 import { LegalStatus } from "@/features/legal/components/legal-status"
+import { AgeLimitCard } from "@/features/legal/components/age-limit-card"
 import { errorText } from "@/lib/errors"
 
 const L = "settings.legal"
@@ -46,7 +47,8 @@ function Row({ row }: { row: LegalOverviewRow }) {
 
 /**
  * Settings > Legal texts (F13.1, adr/0041): each text the shop shows its
- * customers, whether it is published and whether a draft waits.
+ * customers, whether it is published and whether a draft waits; and the
+ * age limit of restricted products while the shop checks ages (F13.3).
  */
 export function LegalListPage() {
   const { t } = useTranslation()
@@ -75,6 +77,7 @@ export function LegalListPage() {
           </SectionCard>
         ))
       )}
+      <AgeLimitCard />
     </div>
   )
 }

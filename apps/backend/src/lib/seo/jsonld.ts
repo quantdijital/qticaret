@@ -81,6 +81,8 @@ export interface ProductFacts {
   rating?: { average: number; count: number } | null
   /** The shop's return policy for this product (F13.6): `hasMerchantReturnPolicy`. */
   returnPolicy?: ReturnPolicyFacts | null
+  /** Sold to adults only (F13.4): schema.org's consideration, `hasAdultConsideration`. */
+  adultConsideration?: string | null
 }
 
 export interface ReturnPolicyFacts {
@@ -199,6 +201,7 @@ function variantProduct(
     ...variant.properties,
     offers: offer,
     aggregateRating: single ? aggregateRating(facts.rating) : undefined,
+    hasAdultConsideration: facts.adultConsideration ?? undefined,
   })
 }
 
@@ -221,6 +224,7 @@ export function productJsonLd(facts: ProductFacts, url: string): JsonLd {
     brand: facts.brand ? { "@type": "Brand", name: facts.brand } : undefined,
     productGroupID: facts.groupId,
     aggregateRating: aggregateRating(facts.rating),
+    hasAdultConsideration: facts.adultConsideration ?? undefined,
     variesBy: facts.variesBy.map((property) => `${SCHEMA}/${property}`),
     hasVariant: facts.variants.map((variant) =>
       variantProduct(facts, variant, `${url}?variant=${encodeURIComponent(variant.id)}`, false)

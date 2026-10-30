@@ -62,6 +62,14 @@ describe("product feeds (F10.8, KK4)", () => {
     )
   })
 
+  it("keeps a product sold to adults only out of every feed (F13.4)", () => {
+    const product = facts([variant({})], {
+      adultConsideration: "https://schema.org/AlcoholConsideration",
+    })
+
+    expect(feedItemsOf(product, URL)).toEqual([])
+  })
+
   it("writes a Google feed its specification takes, a sale with the price struck through", () => {
     const items = feedItemsOf(
       facts([variant({}), variant({ id: "variant_2", strikethrough: 599.9, gtin: null })], {

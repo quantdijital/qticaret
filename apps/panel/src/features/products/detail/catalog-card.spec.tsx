@@ -16,6 +16,7 @@ const CATALOG: ProductCatalog = {
   kind: "physical",
   primary_category_id: null,
   withdrawal_excluded: false,
+  restriction: null,
   successor: null,
   categories: [],
   variants: [],
@@ -45,6 +46,32 @@ describe("CatalogCard", () => {
       expect(fetchMock).toHaveBeenCalledWith("/admin/products/prod_1/catalog", {
         method: "POST",
         body: { withdrawal_excluded: true },
+      })
+    })
+  })
+
+  it("offers the age limit once the shop sells to adults only, sending the reason", async () => {
+    fetchMock.mockImplementation((url: string, init?: { body?: Partial<ProductCatalog> }) =>
+      Promise.resolve(
+        url.includes("/catalog")
+          ? { ...CATALOG, ...init?.body }
+          : { features: [{ key: "catalog.restricted", enabled: true }] }
+      )
+    )
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <CatalogCard productId="prod_1" />
+      </QueryClientProvider>
+    )
+
+    await userEvent.click(await screen.findByRole("combobox", { name: "Yaş sınırı" }))
+    await userEvent.click(await screen.findByRole("option", { name: "Silah ve kesici alet" }))
+    await userEvent.click(screen.getByRole("button", { name: "Kaydet" }))
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith("/admin/products/prod_1/catalog", {
+        method: "POST",
+        body: { restriction: "weapon" },
       })
     })
   })

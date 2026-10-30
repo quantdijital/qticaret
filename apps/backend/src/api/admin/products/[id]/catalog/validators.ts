@@ -1,4 +1,5 @@
 import { z } from "@medusajs/framework/zod"
+import { RESTRICTIONS } from "../../../../../lib/catalog"
 import { isCleanText } from "../../../../../lib/security"
 import {
   PRODUCT_CONDITIONS,
@@ -46,6 +47,8 @@ export const AdminPostProductCatalog = z
     successor_product_id: id.nullable().optional(),
     // F13.6: hygiene, made to order; a faulty item still comes back
     withdrawal_excluded: z.boolean().optional(),
+    // F13.4: adults only, and why; needs the catalog.restricted flag (checked in the workflow)
+    restriction: z.enum(RESTRICTIONS).nullable().optional(),
     variants: z
       .record(
         id,

@@ -1,4 +1,5 @@
 import { validateAndTransformBody, validateAndTransformQuery } from "@medusajs/framework/http"
+import { AdminPostCategoryRestriction } from "../admin/category-restrictions/validators"
 import { AdminGetDashboardNoQuery } from "../admin/dashboard/validators"
 import {
   AdminPostLegalDraft,
@@ -9,7 +10,10 @@ import {
   StoreGetCartContract,
   StorePostLegalConsents,
 } from "../store/carts/[id]/legal-consents/validators"
+import { StorePostAgeDeclaration } from "../store/carts/[id]/age-declaration/validators"
 import { StorePostCookieConsent } from "../store/consents/cookies/validators"
+import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
+import { rateLimit } from "./rate-limit"
 import { requireUserActor } from "./actor"
 import { optionalCustomer, orderAccess } from "./order-access"
 
@@ -87,6 +91,32 @@ export const LEGAL_ROUTES = [
     matcher: "/store/consents/cookies",
     methods: ["POST" as const],
     middlewares: [validateAndTransformBody(StorePostCookieConsent)],
+  },
+  // F13.3: a restricted cart's buyer declares their age; the date of birth is not kept
+  {
+    matcher: "/store/carts/:id/age-declaration",
+    methods: ["GET" as const],
+    middlewares: [noQuery],
+  },
+  {
+    matcher: "/store/carts/:id/age-declaration",
+    methods: ["POST" as const],
+    middlewares: [
+      // The checkout's budget, per address and per cart
+      rateLimit(() => RATE_LIMIT_PROFILES.checkout, { identity: (req) => req.params["id"] }),
+      validateAndTransformBody(StorePostAgeDeclaration),
+    ],
+  },
+  // F13.4: categories marked adults only (who may is the role table's)
+  {
+    matcher: "/admin/category-restrictions",
+    methods: ["GET" as const],
+    middlewares: [requireUserActor, noQuery],
+  },
+  {
+    matcher: "/admin/category-restrictions/:category_id",
+    methods: ["POST" as const],
+    middlewares: [requireUserActor, validateAndTransformBody(AdminPostCategoryRestriction)],
   },
   ...["/admin/orders/:id/legal", "/admin/orders/:id/legal/:kind"].map((matcher) => ({
     matcher,

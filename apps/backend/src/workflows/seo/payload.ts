@@ -36,6 +36,7 @@ import {
 } from "./payload-sources"
 import type { MediaRow } from "./payload-sources"
 import type { CategoryRow, SeoMetaRow } from "./payload-sources"
+import { markedCategories } from "../catalog/restrictions"
 import { returnPolicy } from "../returns/policy"
 
 /**
@@ -120,9 +121,10 @@ async function productSubject(container: MedusaContainer, id: string, path: stri
     (product.variants ?? []).flatMap((variant) => (variant ? [variant.id] : [])),
     "try"
   )
-  const [shipping, returns] = await Promise.all([
+  const [shipping, returns, restricted] = await Promise.all([
     shippingFactsOf(container),
     returnPolicy(container),
+    markedCategories(container),
   ])
   const facts = {
     ...productFacts(
@@ -131,7 +133,8 @@ async function productSubject(container: MedusaContainer, id: string, path: stri
       plainText(description),
       displays,
       shipping,
-      returns
+      returns,
+      restricted
     ),
     // F10.6: the stars of the approved reviews the page shows
     rating:

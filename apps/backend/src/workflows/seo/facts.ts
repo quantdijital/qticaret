@@ -1,4 +1,5 @@
-import { variantGtin } from "../../lib/catalog"
+import { ADULT_CONSIDERATIONS, restrictionOf, variantGtin } from "../../lib/catalog"
+import type { Restriction } from "../../lib/catalog"
 import { toMedusaAmount } from "../../lib/money"
 import type { Kurus } from "../../lib/money"
 import type { PriceDisplay } from "../../lib/pricing"
@@ -22,6 +23,9 @@ export const PRODUCT_FACT_FIELDS = [
   "images.rank",
   "product_extension.condition",
   "product_extension.withdrawal_excluded",
+  "product_extension.restriction",
+  "categories.id",
+  "categories.mpath",
   "attribute_template.definitions.scope",
   "attribute_template.definitions.option_title",
   "attribute_template.definitions.varies_by",
@@ -56,7 +60,12 @@ export interface FactRow {
   handle: string
   thumbnail?: string | null
   images?: ({ url: string; rank?: number | null } | null)[] | null
-  product_extension?: { condition?: Condition | null; withdrawal_excluded?: boolean | null } | null
+  product_extension?: {
+    condition?: Condition | null
+    withdrawal_excluded?: boolean | null
+    restriction?: string | null
+  } | null
+  categories?: ({ id: string; mpath?: string | null } | null)[] | null
   attribute_template?: {
     definitions?:
       | ({
@@ -229,7 +238,9 @@ export function productFacts(
   description: string,
   displays?: ReadonlyMap<string, PriceDisplay>,
   shipping?: ShippingFacts,
-  returns?: ReturnsSettings
+  returns?: ReturnsSettings,
+  /** The categories marked adults only; null while the shop has the flag off (F13.4). */
+  restricted?: ReadonlyMap<string, Restriction> | null
 ): ProductFacts {
   const byOption = propertiesByOption(row)
   const images = [...(row.images ?? [])]
@@ -294,5 +305,18 @@ export function productFacts(
           excluded: row.product_extension?.withdrawal_excluded === true,
         }
       : null,
+    adultConsideration: adultConsiderationOf(row, restricted),
   }
+}
+
+/** schema.org's adult consideration for a product sold to adults only (F13.4), or null. */
+function adultConsiderationOf(
+  row: FactRow,
+  restricted: ReadonlyMap<string, Restriction> | null | undefined
+): string | null {
+  if (!restricted) {
+    return null
+  }
+  const restriction = restrictionOf(row.product_extension?.restriction, row.categories, restricted)
+  return restriction ? ADULT_CONSIDERATIONS[restriction] : null
 }

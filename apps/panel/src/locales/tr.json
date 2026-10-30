@@ -490,6 +490,10 @@
           "non_physical": {
             "label": "Dijital ve hizmet ürünleri",
             "description": "Kargo gerektirmeyen ürünler (e-kitap, hediye kodu, kurs, hizmet) satılabilir; bu ürünlerde kargo ve ölçü istenmez."
+          },
+          "restricted": {
+            "label": "Kısıtlı ürünler",
+            "description": "Ürün ve kategoriler yaş sınırlı (silah ve kesici alet, alkol, tütün, yetişkin içeriği) işaretlenebilir. İşaretli ürünler arama motorlarına yetişkinlere yönelik olarak bildirilir ve ürün feed'lerine girmez."
           }
         },
         "seo": {
@@ -524,6 +528,12 @@
           "ai_drafts": {
             "label": "Yapay zekâ içerik taslakları",
             "description": "Ürün açıklaması ve arama metinleri için bir model taslak yazar; taslaklar onaylanmadan sayfaya çıkmaz. Ürünlerin kişisel veri içermeyen bilgileri sağlayıcıya gider; sağlayıcı platform tarafından tanımlanınca çalışır."
+          }
+        },
+        "compliance": {
+          "age_verification": {
+            "label": "Yaş doğrulama",
+            "description": "Sepette yaş sınırlı ürün varsa müşteri ödemeden önce doğum tarihini girerek yaşını beyan eder; sınırın altındaysa ödeme alınmaz. Doğum tarihi saklanmaz. Sınır Ayarlar > Yasal metinler'de."
           }
         }
       }
@@ -1991,6 +2001,13 @@
       "preview": {
         "hint": "Müşterilerin göreceği biçimde; sözleşmelerde örnek bir siparişle doldurulmuştur.",
         "frame": "{{title}} önizlemesi"
+      },
+      "age": {
+        "title": "Yaş doğrulama",
+        "description": "Yaş sınırlı ürün alan müşterinin beyan etmesi gereken en düşük yaş. Doğum tarihi ödemede denetlenir, saklanmaz.",
+        "minAge": "En düşük yaş",
+        "minAgeHint": "Yasal sınır çoğu ürün için 18; daha yüksek bir yaş isteyebilirsiniz (en çok 25).",
+        "invalid": "18 ile 25 arasında bir tam sayı girin."
       }
     }
   },
@@ -2937,7 +2954,9 @@
       "kinds": {
         "pre_information": "Ön bilgilendirme formu",
         "distance_sales": "Mesafeli satış sözleşmesi"
-      }
+      },
+      "age": "Yaş beyanı",
+      "ageValue": "{{age}} yaş ve üstü · {{date}}"
     }
   },
   "customers": {
@@ -5027,5 +5046,19 @@
     "failedPassword": "Şifre doğru değil; yeniden deneyin.",
     "confirm": "Doğrula",
     "cancelled": "İşlem yapılmadı."
+  },
+  "restrictions": {
+    "label": "Yaş sınırı",
+    "reason": "Neden",
+    "none": "Yok",
+    "options": {
+      "weapon": "Silah ve kesici alet",
+      "alcohol": "Alkollü içki",
+      "tobacco": "Tütün ve nikotin ürünleri",
+      "adult_content": "Yetişkin içeriği",
+      "other": "Diğer"
+    },
+    "productHint": "Yalnızca yetişkinlere satılır; arama motorlarına bildirilir, feed'lere girmez.",
+    "categoryHint": "Bu kategori, alt kategorileri ve içlerindeki ürünler yalnızca yetişkinlere satılır."
   }
 }

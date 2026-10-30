@@ -23,6 +23,8 @@ import type {
   ProductCondition,
   ProductKind,
 } from "@/features/products/api/product-edit"
+import type { Restriction } from "@/features/categories/api/restrictions"
+import { RestrictionSelect } from "@/features/categories/components/restriction-select"
 import { useFeature } from "@/features/settings/api/features"
 import { errorText } from "@/lib/errors"
 import { CardForm } from "@/components/patterns/card-form"
@@ -35,6 +37,7 @@ interface Values {
   kind: ProductKind
   primary_category_id: string
   withdrawal_excluded: boolean
+  restriction: Restriction | null
 }
 
 function CatalogForm({ productId, catalog }: { productId: string; catalog: ProductCatalog }) {
@@ -42,11 +45,14 @@ function CatalogForm({ productId, catalog }: { productId: string; catalog: Produ
   const save = useSaveCatalog(productId)
   // The kind shows once the shop sells digital or service products, or this one is one
   const kinds = useFeature("catalog.non_physical") || catalog.kind !== "physical"
+  // F13.4: the age limit shows once the shop sells to adults only, or this product is marked
+  const restricted = useFeature("catalog.restricted") || catalog.restriction !== null
   const saved: Values = {
     condition: catalog.condition,
     kind: catalog.kind,
     primary_category_id: catalog.primary_category_id ?? "",
     withdrawal_excluded: catalog.withdrawal_excluded,
+    restriction: catalog.restriction,
   }
   const form = useForm<Values>({ values: saved, resetOptions: { keepDirtyValues: true } })
   const { dirtyFields } = form.formState
@@ -63,6 +69,7 @@ function CatalogForm({ productId, catalog }: { productId: string; catalog: Produ
         ...(dirtyFields.withdrawal_excluded
           ? { withdrawal_excluded: values.withdrawal_excluded }
           : {}),
+        ...(dirtyFields.restriction ? { restriction: values.restriction } : {}),
       },
       {
         onSuccess: () => {
@@ -162,6 +169,25 @@ function CatalogForm({ productId, catalog }: { productId: string; catalog: Produ
           )}
         />
       </Field>
+      {restricted ? (
+        <Field
+          label={t("restrictions.label")}
+          htmlFor="catalog-restriction"
+          hint={t("restrictions.productHint")}
+        >
+          <Controller
+            control={form.control}
+            name="restriction"
+            render={({ field }) => (
+              <RestrictionSelect
+                id="catalog-restriction"
+                value={field.value}
+                onChange={field.onChange}
+              />
+            )}
+          />
+        </Field>
+      ) : null}
       <div className="flex items-start justify-between gap-4 border-t pt-4">
         <div className="flex min-w-0 flex-col gap-0.5">
           <label htmlFor="catalog-withdrawal" className="text-sm font-medium">
@@ -190,7 +216,8 @@ function CatalogForm({ productId, catalog }: { productId: string; catalog: Produ
 
 /**
  * Condition and primary category, the fields search results and feeds read
- * (F3.1), and whether the product is outside the right of withdrawal (F13.4).
+ * (F3.1), whether the product is sold to adults only and is outside the
+ * right of withdrawal (F13.4, F13.6).
  */
 export function CatalogCard({ productId }: { productId: string }) {
   const catalog = useQuery(productCatalogQuery(productId))

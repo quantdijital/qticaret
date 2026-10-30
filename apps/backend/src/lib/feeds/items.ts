@@ -49,13 +49,17 @@ export interface FeedPlace {
 
 /**
  * The feed items of a product: each variant with an offer on the page (a
- * price above zero) that is not out of stock.
+ * price above zero) that is not out of stock. A product sold to adults
+ * only stays out (adr/0041 §4): feeds have rules of their own for it.
  */
 export function feedItemsOf(
   facts: ProductFacts,
   url: string,
   place: FeedPlace = { path: [], ids: [] }
 ): FeedItem[] {
+  if (facts.adultConsideration) {
+    return []
+  }
   const single = facts.variants.length === 1
   return facts.variants.flatMap((variant) => {
     if (variant.price === null || !(variant.price > 0) || variant.availability === "OutOfStock") {

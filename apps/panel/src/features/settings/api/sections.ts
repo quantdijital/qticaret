@@ -88,6 +88,11 @@ export interface ReturnsSettings {
 
 export const MIN_WITHDRAWAL_DAYS = 14
 
+/** Who restricted products are sold to (F13.3): the lowest age a buyer declares. */
+export interface ComplianceSettings {
+  min_age: number
+}
+
 export const LABEL_FORMATS = ["100x150", "100x100", "80x80", "a4", "custom"] as const
 export type LabelFormat = (typeof LABEL_FORMATS)[number]
 

@@ -6,7 +6,7 @@ import { SectionCard } from "@/components/patterns/section-card"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { LegalPreviewDialog } from "@/features/legal/components/legal-preview-dialog"
-import { orderConsentQuery, orderContractQuery } from "@/features/orders/api/legal"
+import { orderContractQuery, orderLegalQuery } from "@/features/orders/api/legal"
 import type { ContractKind } from "@/features/orders/api/legal"
 import { errorText } from "@/lib/errors"
 import { formatDateTime } from "@/lib/format"
@@ -60,28 +60,43 @@ function CopyDialog({
 /**
  * The contracts the shopper accepted at checkout (F13.2, adr/0041 §2):
  * when, from which IP address, which versions, and the copy of each the
- * order keeps, filled with its details.
+ * order keeps, filled with its details; and the age the buyer declared
+ * for a restricted product (F13.3).
  */
 export function ContractsCard({ orderId }: { orderId: string }) {
   const { t } = useTranslation()
-  const query = useQuery(orderConsentQuery(orderId))
+  const query = useQuery(orderLegalQuery(orderId))
   const [open, setOpen] = useState<ContractKind | null>(null)
-  const consent = query.data
+  const consent = query.data?.consent ?? null
+  const age = query.data?.age_declaration ?? null
   return (
     <SectionCard title={t(`${C}.title`)}>
       {query.isPending ? (
         <Skeleton className="h-20 rounded-md" />
       ) : query.isError ? (
         <p className="text-[13px] text-muted-foreground">{errorText(t, query.error)}</p>
-      ) : !consent ? (
+      ) : !consent && !age ? (
         <p className="text-[13px] text-muted-foreground">{t(`${C}.none`)}</p>
       ) : (
         <div className="flex flex-col gap-3">
           <dl className="flex flex-col divide-y">
-            <Row label={t(`${C}.givenAt`)} value={formatDateTime(consent.given_at)} />
-            <Row label={t(`${C}.ip`)} value={consent.ip ?? "—"} />
+            {consent ? (
+              <>
+                <Row label={t(`${C}.givenAt`)} value={formatDateTime(consent.given_at)} />
+                <Row label={t(`${C}.ip`)} value={consent.ip ?? "—"} />
+              </>
+            ) : null}
+            {age ? (
+              <Row
+                label={t(`${C}.age`)}
+                value={t(`${C}.ageValue`, {
+                  age: age.min_age,
+                  date: formatDateTime(age.declared_at),
+                })}
+              />
+            ) : null}
           </dl>
-          {consent.copies.length === 0 ? (
+          {!consent ? null : consent.copies.length === 0 ? (
             <p className="flex items-center gap-2 text-[13px] text-muted-foreground">
               <Loader2 className="size-4 animate-spin" aria-hidden="true" />
               {t(`${C}.pending`)}

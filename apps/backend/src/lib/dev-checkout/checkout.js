@@ -1,5 +1,5 @@
 // The payment test page's script (adr/0028): plain browser JavaScript, no build.
-/* global showBankTransfer, showCashOnDelivery, followReturn, loadContracts, acceptContracts */
+/* global showBankTransfer, showCashOnDelivery, followReturn, loadContracts, acceptContracts, loadAgeCheck, declareAge */
 const config = JSON.parse(document.getElementById("config").textContent)
 const CART_KEY = "qt-dev-checkout-cart"
 const $ = (id) => document.getElementById(id)
@@ -196,7 +196,7 @@ async function loadShipping() {
                     })
                   ).cart
                   renderCart()
-                  await Promise.all([loadInstallments(), loadContracts()])
+                  await Promise.all([loadInstallments(), loadContracts(), loadAgeCheck()])
                 }),
             }),
             `${option.name} · ${money(option.calculated_price?.calculated_amount ?? option.amount)}`
@@ -222,6 +222,7 @@ async function pay() {
   const back = (result) => `${location.origin}/dev/checkout?sonuc=${result}&sepet=${state.cart.id}`
   const offline = provider === "pp_bank-transfer_bank-transfer" || provider === "pp_cod_cod"
   await acceptContracts()
+  await declareAge()
   const { payment_session: session } = await api(`/store/carts/${state.cart.id}/payment-session`, {
     method: "POST",
     body: offline
@@ -270,7 +271,8 @@ run(async () => {
   if (!state.region) throw new Error("Bölge yok: pnpm --filter backend seed:demo")
   await Promise.all([loadProducts(), loadCart()])
   if (state.cart?.shipping_address) await loadShipping()
-  if (state.cart?.shipping_methods?.length) await Promise.all([loadInstallments(), loadContracts()])
+  if (state.cart?.shipping_methods?.length)
+    await Promise.all([loadInstallments(), loadContracts(), loadAgeCheck()])
   const params = new URLSearchParams(location.search)
   if (params.get("sepet")) await followReturn(params)
 })

@@ -440,6 +440,15 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The contract has been updated; please read the new text and accept it again.",
   "legal.nothing_to_accept": "The shop has no published contract to accept.",
   "legal.copy_unknown": "No such contract is kept with this order.",
+  "catalog.restriction_disabled":
+    "Turn on “Restricted products” in Settings > Features before marking a product or category adults only.",
+  "catalog.category_unknown": "The category was not found.",
+  "age.declaration_missing":
+    "Your cart holds an adults-only product; declare your age before paying.",
+  "age.under_limit": "These products are sold only to buyers over the age limit.",
+  "age.birth_date_invalid": "Enter a valid date of birth.",
+  "age.not_required": "This cart needs no declaration of age.",
+  "platform_settings.min_age_invalid": "The age limit must be a whole number from 18 to 25.",
   "legal.title_invalid": "The title cannot contain invisible control characters.",
   "orders.unknown": "Order not found.",
   "paytr.merchant_id_invalid":
