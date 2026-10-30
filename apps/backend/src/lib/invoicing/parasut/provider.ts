@@ -1,8 +1,15 @@
 import { turkishDay } from "../../dashboard/period"
 import { RetryableError, isProviderError } from "../../errors"
 import { differenceOf } from "../provider"
-import type { AdvanceContext, AdvanceOutcome, InvoiceProvider, ProgramState } from "../provider"
+import type {
+  AdvanceContext,
+  AdvanceOutcome,
+  CancelOutcome,
+  InvoiceProvider,
+  ProgramState,
+} from "../provider"
 import type { InvoiceBuyer } from "../types"
+import { outcomeUnsure } from "./api"
 import type { EDocumentType, ParasutApi } from "./api"
 import { contactAttributes, eArchiveAttributes, hasOwnTaxId, salesInvoiceBody } from "./payload"
 import { downloadParasutPdf } from "./pdf"
@@ -15,16 +22,20 @@ import { downloadParasutPdf } from "./pdf"
  * never sent again, it stops for staff to look at Paraşüt first.
  */
 
-/** Runs calls with a live token (`withParasut`): reads, and at most one write, the last. */
-export type ParasutSession = <T>(run: (api: ParasutApi, token: string) => Promise<T>) => Promise<T>
+/**
+ * Runs calls with a live token for the connected company (`withParasut`):
+ * reads, and at most one write, the last.
+ */
+export type ParasutSession = <T>(
+  run: (api: ParasutApi, token: string, companyId: string) => Promise<T>
+) => Promise<T>
 
 // Paraşüt keeps a job's id usable for 15 minutes: after that the invoice is read instead
 const JOB_LIFE_MS = 15 * 60_000
 // How long a started e-document may take to show before staff are asked to look
 const DOCUMENT_PATIENCE_MS = 6 * 3_600_000
 
-const unknownOutcome = (error: unknown) =>
-  isProviderError(error) && error.providerCode === "outcome_unknown"
+const STOP_UNSURE = { next: "failed", code: "einvoice.outcome_unknown", stop: true } as const
 
 const PROGRAM_TYPES: Readonly<Record<EDocumentType, "e_invoice" | "e_archive">> = {
   e_invoices: "e_invoice",
@@ -42,27 +53,51 @@ async function contactFor(session: ParasutSession, buyer: InvoiceBuyer): Promise
   return found ?? session((api, token) => api.createContact(token, contactAttributes(buyer)))
 }
 
+/** The company the invoice was made in, when it is not the one connected now: never mixed. */
+const otherCompany = (state: ProgramState, companyId: string) =>
+  state.company_id !== null && state.company_id !== companyId
+
 export function parasutProvider(session: ParasutSession): InvoiceProvider {
-  /** The contact and the sales invoice: the invoice is kept the moment Paraşüt has it. */
+  /**
+   * The contact and the sales invoice: the lease made fresh before each
+   * write, the invoice kept the moment Paraşüt has it (adopted even when
+   * the lease ran out, so no invoice made at Paraşüt is ever lost here).
+   */
   async function createInvoice(context: AdvanceContext): Promise<AdvanceOutcome | string> {
     const draft = await context.draft()
-    const contactId = await contactFor(session, draft.buyer)
-    let created
+    let contactId: string
+    let created: { id: string; gross_total: string | null; company: string }
     try {
-      created = await session((api, token) =>
-        api.createSalesInvoice(token, salesInvoiceBody(draft, contactId, turkishDay(context.now())))
-      )
+      if (!(await context.keep({}))) {
+        return { next: "waiting" }
+      }
+      contactId = await contactFor(session, draft.buyer)
+      if (!(await context.keep({}))) {
+        return { next: "waiting" }
+      }
+      created = await session(async (api, token, company) => ({
+        ...(await api.createSalesInvoice(
+          token,
+          salesInvoiceBody(draft, contactId, turkishDay(context.now()))
+        )),
+        company,
+      }))
     } catch (error) {
-      if (unknownOutcome(error)) {
-        return { next: "failed", code: "einvoice.outcome_unknown", stop: true }
+      if (outcomeUnsure(error)) {
+        return STOP_UNSURE
       }
       throw error
     }
     const kept = await context.keep({
       external_id: created.id,
+      company_id: created.company,
       program_difference: differenceOf(draft, created.gross_total),
     })
-    return kept ? created.id : { next: "waiting" }
+    if (!kept) {
+      await context.adopt(created.id, created.company)
+      return { next: "waiting" }
+    }
+    return created.id
   }
 
   /** e-Fatura to the buyer's inbox, or e-Arşiv: the job that makes it. */
@@ -76,12 +111,16 @@ export function parasutProvider(session: ParasutSession): InvoiceProvider {
       : null
     const type: EDocumentType = inbox ? "e_invoices" : "e_archives"
     const attributes = inbox ? { scenario: "basic", to: inbox } : eArchiveAttributes(draft)
+    // An e-document cannot be taken back: never started for an order canceled meanwhile
+    if ((await context.cancelRequested()) || !(await context.keep({}))) {
+      return { next: "waiting" }
+    }
     const startedAt = context.now()
     let jobId: string | null
     try {
       jobId = await session((api, token) => api.startEDocument(token, type, invoiceId, attributes))
     } catch (error) {
-      if (!unknownOutcome(error)) {
+      if (!outcomeUnsure(error)) {
         throw error
       }
       // Never started twice: the invoice is read until its e-document shows
@@ -138,18 +177,22 @@ export function parasutProvider(session: ParasutSession): InvoiceProvider {
   }
 
   /** Its order canceled: the draft deleted, or the e-Arşiv cancelled while it still can be. */
-  async function cancel(state: ProgramState, now: Date): Promise<"cancelled" | "too_late"> {
+  async function cancel(state: ProgramState, now: Date): Promise<CancelOutcome> {
     const externalId = state.external_id
     if (!externalId) {
-      return "cancelled"
+      return { result: "cancelled" }
+    }
+    const company = await session((_api, _token, companyId) => Promise.resolve(companyId))
+    if (otherCompany(state, company)) {
+      throw new RetryableError("einvoice.company_changed")
     }
     if (!state.document_id) {
       try {
         await session((api, token) => api.deleteSalesInvoice(token, externalId))
-        return "cancelled"
+        return { result: "cancelled" }
       } catch (error) {
         if (isProviderError(error) && error.providerCode === "not_found") {
-          return "cancelled"
+          return { result: "cancelled" }
         }
         // Refused: an e-document was made of it meanwhile, read below
         if (!isProviderError(error) || error.providerCode !== "validation_failed") {
@@ -159,7 +202,7 @@ export function parasutProvider(session: ParasutSession): InvoiceProvider {
     }
     const invoice = await session((api, token) => api.readSalesInvoice(token, externalId))
     if (invoice.cancelled) {
-      return "cancelled"
+      return { result: "cancelled" }
     }
     const document = invoice.document
     if (!document) {
@@ -168,16 +211,31 @@ export function parasutProvider(session: ParasutSession): InvoiceProvider {
     }
     const until = Date.parse(document.cancellable_until ?? "")
     if (document.type !== "e_archives" || !(until > now.getTime())) {
-      return "too_late"
+      return {
+        result: "too_late",
+        progress: {
+          document_id: document.id,
+          document_type: PROGRAM_TYPES[document.type],
+          ...(document.invoice_number ? { number: document.invoice_number } : {}),
+          uuid: document.uuid ?? null,
+        },
+      }
     }
     await session((api, token) => api.cancelSalesInvoice(token, externalId))
-    return "cancelled"
+    return { result: "cancelled" }
   }
 
   return {
     id: "parasut",
     cancel,
     async advance(state, context) {
+      if (state.company_id) {
+        const company = await session((_api, _token, companyId) => Promise.resolve(companyId))
+        if (otherCompany(state, company)) {
+          // Made in the company connected before: staff look before anything is sent elsewhere
+          return { next: "failed", code: "einvoice.company_changed", stop: true }
+        }
+      }
       let externalId = state.external_id
       if (!externalId) {
         const created = await createInvoice(context)

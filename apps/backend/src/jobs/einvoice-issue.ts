@@ -5,7 +5,11 @@ import { notificationText } from "../lib/notifications/messages"
 import { EINVOICE_MODULE } from "../modules/einvoice"
 import type EinvoiceModuleService from "../modules/einvoice/service"
 import { advanceInvoiceWorkflow } from "../workflows/einvoice/advance-invoice"
-import { alertReturnNeeded } from "../workflows/einvoice/cancel-invoice"
+import type { AdvancedInvoice } from "../workflows/einvoice/advance-invoice"
+import {
+  alertReturnNeeded,
+  requestInvoiceCancelWorkflow,
+} from "../workflows/einvoice/cancel-invoice"
 import { orderOf, queueSaleInvoice } from "../workflows/einvoice/queue-invoices"
 
 // Invoices moved on per run at most; the next run takes the rest
@@ -66,9 +70,20 @@ export async function issueInvoices(container: MedusaContainer, now: Date = new 
     if (!row) {
       break
     }
-    const { result } = await advanceInvoiceWorkflow(container).run({
-      input: { invoice_id: row.id, lease: row.lease.toISOString() },
-    })
+    let result: AdvancedInvoice
+    try {
+      ;({ result } = await advanceInvoiceWorkflow(container).run({
+        input: { invoice_id: row.id, lease: row.lease.toISOString() },
+      }))
+    } catch (error) {
+      // One invoice's surprise never stops the others: its lease runs out and it is tried again
+      logger.error({
+        event: "einvoice.advance_crashed",
+        invoice_id: row.id,
+        err: errorSummary(error),
+      })
+      continue
+    }
     counts.moved += 1
     if (result.status === "issued") {
       counts.issued += 1
@@ -94,7 +109,7 @@ export async function sweepInvoices(container: MedusaContainer, now: Date = new 
   const since = new Date(now.getTime() - SWEEP_HOURS * 3_600_000)
   const window = { $gte: since, $lte: now }
   const page = { take: SWEEP_LIMIT }
-  const [parcels, orders, payments] = await Promise.all([
+  const [parcels, orders, payments, canceled] = await Promise.all([
     query.graph({
       entity: "fulfillment",
       fields: ["id"],
@@ -113,6 +128,12 @@ export async function sweepInvoices(container: MedusaContainer, now: Date = new 
       filters: { captured_at: window },
       pagination: page,
     }),
+    query.graph({
+      entity: "order",
+      fields: ["id"],
+      filters: { canceled_at: window },
+      pagination: page,
+    }),
   ])
   let queued = 0
   const queue = async (orderId: string | null, moment: "placed" | "paid" | "shipped") => {
@@ -128,6 +149,10 @@ export async function sweepInvoices(container: MedusaContainer, now: Date = new 
   }
   for (const row of payments.data as { id: string }[]) {
     await queue(await orderOf(container, "payment", row.id), "paid")
+  }
+  // An order canceled whose event was missed: its invoice undone all the same (adr/0034 §10)
+  for (const row of canceled.data as { id: string }[]) {
+    await requestInvoiceCancelWorkflow(container).run({ input: { order_id: row.id } })
   }
   return queued
 }

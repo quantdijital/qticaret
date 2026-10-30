@@ -1,30 +1,23 @@
-import { randomUUID } from "node:crypto"
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { Modules } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import {
   StepResponse,
   WorkflowResponse,
   createStep,
   createWorkflow,
 } from "@medusajs/framework/workflows-sdk"
-import {
-  ValidationError,
-  isProviderError,
-  isRetryableError,
-  isValidationError,
-} from "../../lib/errors"
+import { ValidationError } from "../../lib/errors"
 import { errorSummary, logger } from "../../lib/logging"
-import { fakeInvoicingAllowed } from "../../lib/invoicing"
 import type { InvoiceDraft } from "../../lib/invoicing"
-import { fakeInvoiceProvider } from "../../lib/invoicing/fake"
-import { parasutProvider } from "../../lib/invoicing/parasut/provider"
-import type { AdvanceOutcome, InvoiceProvider, ProgramState } from "../../lib/invoicing/provider"
+import type { AdvanceOutcome } from "../../lib/invoicing/provider"
 import { EINVOICE_MODULE } from "../../modules/einvoice"
 import type EinvoiceModuleService from "../../modules/einvoice/service"
-import type { ClaimedInvoice, InvoiceStatus } from "../../modules/einvoice/service"
-import { sendMessageWorkflow } from "../messaging/send-message"
+import type { ClaimedInvoice } from "../../modules/einvoice/service"
 import { invoiceDraftFor } from "./draft-source"
-import { withParasut } from "./parasut-session"
+import { cancelRequested, codeOf, providerFor, settle, undo } from "./settle-invoice"
+import type { AdvancedInvoice } from "./settle-invoice"
+
+export type { AdvancedInvoice } from "./settle-invoice"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -34,134 +27,15 @@ export interface AdvanceInvoiceInput {
   lease: string
 }
 
-/** Where the invoice stands after the step; `lost` when another worker holds it now. */
-export interface AdvancedInvoice {
-  status: InvoiceStatus | "lost"
-  code: string | null
-}
-
-/** A code for the record, never a message that may quote data. */
-function codeOf(error: unknown): string {
-  if (isProviderError(error)) {
-    return `parasut.${error.providerCode}`
-  }
-  if (isValidationError(error) || isRetryableError(error)) {
-    return error.safeMessage
-  }
-  return "einvoice.error"
-}
-
-function providerFor(container: Container, id: string): InvoiceProvider {
-  if (id === "parasut") {
-    return parasutProvider((run) => withParasut(container, run))
-  }
-  if (id === "fake" && fakeInvoicingAllowed()) {
-    return fakeInvoiceProvider
-  }
-  // An invoice queued for a fake program cannot go out from a live shop
-  throw new ValidationError("einvoice.provider_unavailable")
-}
-
-/** The PDF into the shop's private storage (it names the buyer); its key. */
-async function storePdf(container: Container, pdf: Buffer): Promise<string> {
-  const upload = await container.resolve(Modules.FILE).getUploadStream({
-    // Not guessable: a local or development store guards files by their name only
-    filename: `fatura-${randomUUID()}.pdf`,
-    mimeType: "application/pdf",
-    access: "private",
+/** Whether the order was canceled: an invoice queued just before never goes out unmarked. */
+async function orderCanceled(container: Container, orderId: string): Promise<boolean> {
+  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+    entity: "order",
+    fields: ["status", "canceled_at"],
+    filters: { id: orderId },
   })
-  upload.writeStream.end(pdf)
-  await upload.promise
-  return upload.fileKey
-}
-
-/** "Faturanız hazır" to the buyer; an invoice issued stays issued whatever the message does. */
-async function tellCustomer(container: Container, invoiceId: string) {
-  try {
-    await sendMessageWorkflow(container as MedusaContainer).run({
-      input: { template: "order.invoiced", resource_id: invoiceId },
-    })
-  } catch (error) {
-    logger.warn({
-      event: "einvoice.message_failed",
-      invoice_id: invoiceId,
-      err: errorSummary(error),
-    })
-  }
-}
-
-/**
- * The order was canceled (adr/0034 §10): the invoice undone at its
- * program, or, too late for that, left issued for a return document.
- * Undoing a tax document is not undone again; a failure is tried later.
- */
-async function undo(
-  container: Container,
-  claim: ClaimedInvoice,
-  state: ProgramState
-): Promise<AdvancedInvoice> {
-  const invoices = container.resolve<EinvoiceModuleService>(EINVOICE_MODULE)
-  const now = new Date()
-  let result: "cancelled" | "too_late"
-  try {
-    result = await providerFor(container, claim.provider).cancel(state, now)
-  } catch (error) {
-    logger.warn({ event: "einvoice.cancel_failed", invoice_id: claim.id, err: errorSummary(error) })
-    const code = codeOf(error)
-    return { status: (await invoices.markFailed(claim, code, now)) ?? "lost", code }
-  }
-  if (result === "cancelled") {
-    return { status: (await invoices.markCancelled(claim, now)) ? "cancelled" : "lost", code: null }
-  }
-  const code = "einvoice.return_document_needed"
-  return { status: (await invoices.markCancelTooLate(claim, code, now)) ? "issued" : "lost", code }
-}
-
-async function settle(
-  container: Container,
-  claim: ClaimedInvoice,
-  outcome: AdvanceOutcome,
-  now: Date
-): Promise<AdvancedInvoice> {
-  const invoices = container.resolve<EinvoiceModuleService>(EINVOICE_MODULE)
-  switch (outcome.next) {
-    case "issuing":
-      return {
-        status: (await invoices.markIssuing(claim, outcome.progress, now)) ? "issuing" : "lost",
-        code: null,
-      }
-    case "waiting":
-      return {
-        status: (await invoices.markWaiting(claim, now)) ? claim.status : "lost",
-        code: null,
-      }
-    case "issued": {
-      const { progress } = outcome
-      const done = await invoices.markIssued(
-        claim,
-        {
-          ...progress,
-          uuid: progress.uuid ?? null,
-          document_type: progress.document_type ?? "e_archive",
-          issued_at: now,
-          cancellable_until: progress.cancellable_until ?? null,
-          program_difference: progress.program_difference ?? null,
-          pdf_file_id: await storePdf(container, outcome.pdf),
-        },
-        now
-      )
-      if (done) {
-        await tellCustomer(container, claim.id)
-      }
-      return { status: done ? "issued" : "lost", code: null }
-    }
-    case "failed": {
-      const status = await invoices.markFailed(claim, outcome.code, now, {
-        stop: outcome.stop === true,
-      })
-      return { status: status ?? "lost", code: outcome.code }
-    }
-  }
+  const order = data[0] as { status?: string | null; canceled_at?: unknown } | undefined
+  return !order || order.status === "canceled" || Boolean(order.canceled_at)
 }
 
 /**
@@ -198,6 +72,7 @@ const advanceInvoiceStep = createStep(
       job_id: row.job_id,
       job_started_at: row.job_started_at ? new Date(row.job_started_at) : null,
       cancel_requested_at: row.cancel_requested_at ? new Date(row.cancel_requested_at) : null,
+      company_id: row.company_id,
       lease,
     }
     const state = {
@@ -205,6 +80,11 @@ const advanceInvoiceStep = createStep(
       document_type: row.document_type,
       number: row.number,
       cancellable_until: row.cancellable_until ? new Date(row.cancellable_until) : null,
+    }
+    if (!claim.cancel_requested_at && (await orderCanceled(container, row.order_id))) {
+      // Its cancellation came before its invoice: marked now, undone below
+      await invoices.requestCancel(row.order_id)
+      claim.cancel_requested_at = new Date()
     }
     if (claim.cancel_requested_at) {
       return new StepResponse(await undo(container, claim, state))
@@ -225,6 +105,17 @@ const advanceInvoiceStep = createStep(
           return draft
         },
         keep: (progress) => invoices.keep(claim, progress, now()),
+        adopt: async (externalId, companyId) => {
+          if (!(await invoices.adopt(row.id, externalId, companyId))) {
+            // Made at the program while another worker held the record: staff reconcile it
+            logger.error({
+              event: "einvoice.orphan_invoice",
+              invoice_id: row.id,
+              external_id: externalId,
+            })
+          }
+        },
+        cancelRequested: () => cancelRequested(container, row.id),
         now,
       })
     } catch (error) {

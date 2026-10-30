@@ -19,10 +19,13 @@ export interface ProgramState {
   job_started_at: Date | null
   number: string | null
   cancellable_until: Date | null
+  /** The program's company it was made in (Paraşüt's firm); null before. */
+  company_id: string | null
 }
 
 export interface KeptProgress {
   external_id?: string
+  company_id?: string
   document_id?: string
   document_type?: ProgramDocument
   job_id?: string | null
@@ -38,8 +41,20 @@ export interface AdvanceContext {
   draft: () => Promise<InvoiceDraft>
   /** Keeps what the program made; false when the claim was lost (stop at once). */
   keep: (progress: KeptProgress) => Promise<boolean>
+  /**
+   * Keeps the program's invoice even when the claim was lost, unless the
+   * record has one already (then it is logged as an orphan for staff).
+   */
+  adopt: (externalId: string, companyId: string) => Promise<void>
+  /** Whether its order was canceled meanwhile: nothing irreversible is started then. */
+  cancelRequested: () => Promise<boolean>
   now: () => Date
 }
+
+export type CancelOutcome =
+  | { result: "cancelled" }
+  /** It stands: a return document is due. What the program holds of it, to keep. */
+  | { result: "too_late"; progress: KeptProgress }
 
 export type AdvanceOutcome =
   /** Started at the program: asked about again shortly. */
@@ -62,7 +77,7 @@ export interface InvoiceProvider {
    * a draft deleted, an e-Arşiv cancelled within its days; `too_late` when
    * it stands (an e-Fatura, or past the days) and a return document is due.
    */
-  cancel(state: ProgramState, now: Date): Promise<"cancelled" | "too_late">
+  cancel(state: ProgramState, now: Date): Promise<CancelOutcome>
 }
 
 /** The kuruş the program's total is off ours by; null when they agree or it said none. */

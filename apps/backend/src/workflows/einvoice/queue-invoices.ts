@@ -3,6 +3,7 @@ import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { fakeInvoicingAllowed } from "../../lib/invoicing"
 import { errorSummary, logger } from "../../lib/logging"
 import { COD_PAYMENT_PROVIDER_ID } from "../../lib/payments/checkout"
+import { paidInTestMode } from "../../lib/payments/test-mode"
 import { EINVOICE_MODULE } from "../../modules/einvoice"
 import type EinvoiceModuleService from "../../modules/einvoice/service"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
@@ -25,7 +26,12 @@ interface OrderRow {
   payment_collections?:
     | ({
         payments?:
-          ({ provider_id?: string | null; captured_at?: string | Date | null } | null)[] | null
+          | ({
+              provider_id?: string | null
+              captured_at?: string | Date | null
+              data?: unknown
+            } | null)[]
+          | null
       } | null)[]
     | null
 }
@@ -76,11 +82,13 @@ export async function queueSaleInvoice(
       "canceled_at",
       "payment_collections.payments.provider_id",
       "payment_collections.payments.captured_at",
+      "payment_collections.payments.data",
     ],
     filters: { id: orderId },
   })
   const order = data[0] as OrderRow | undefined
-  if (!order || order.status === "canceled" || order.canceled_at) {
+  // Nothing real was sold in a provider's test mode: no tax document for it
+  if (!order || order.status === "canceled" || order.canceled_at || paidInTestMode(order)) {
     return "not_due"
   }
   if (moment !== "shipped" && !paid(order)) {

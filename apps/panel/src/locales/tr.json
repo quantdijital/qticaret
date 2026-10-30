@@ -1772,7 +1772,8 @@
           "return_requested": "İade istendi",
           "return_received": "İade teslim alındı",
           "stock_changed": "Stok değişti",
-          "invoice_requested": "Fatura bekliyor"
+          "invoice_requested": "Fatura bekliyor",
+          "invoice_withdrawn": "Fatura geri çekildi"
         },
         "status": {
           "active": "Etkin",

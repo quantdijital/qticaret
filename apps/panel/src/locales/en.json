@@ -1772,7 +1772,8 @@
           "return_requested": "Return requested",
           "return_received": "Return received",
           "stock_changed": "Stock changed",
-          "invoice_requested": "Invoice waiting"
+          "invoice_requested": "Invoice waiting",
+          "invoice_withdrawn": "Invoice withdrawn"
         },
         "status": {
           "active": "Active",

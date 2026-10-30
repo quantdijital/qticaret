@@ -170,6 +170,11 @@ describe("csrfProtection", () => {
     expect(run(csrfProtection, admin("/admin/catalog/imports", xlsx)).next).toHaveBeenCalled()
     expect(run(csrfProtection, admin("/admin/catalog/imports", "text/csv")).next).toHaveBeenCalled()
     expect(run(csrfProtection, admin("/admin/catalog/imports", "text/plain")).status()).toBe(403)
+    // An invoice's PDF (F8): only as a PDF, only on an invoice's own PDF path
+    const pdf = "application/pdf"
+    expect(run(csrfProtection, admin("/admin/invoices/inv_1/pdf", pdf)).next).toHaveBeenCalled()
+    expect(run(csrfProtection, admin("/admin/invoices/inv_1/issued", pdf)).status()).toBe(403)
+    expect(run(csrfProtection, admin("/admin/catalog/imports", pdf)).status()).toBe(403)
     expect(run(csrfProtection, admin("/admin/products", xlsx)).status()).toBe(403)
   })
 

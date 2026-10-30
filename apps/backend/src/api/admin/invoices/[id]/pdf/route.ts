@@ -1,7 +1,8 @@
 import { randomUUID } from "node:crypto"
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { MedusaError, Modules } from "@medusajs/framework/utils"
-import { ValidationError } from "../../../../../lib/errors"
+import { ConflictError, ValidationError } from "../../../../../lib/errors"
+import { pdfFilename } from "../../../../../lib/invoicing/filename"
 import { EINVOICE_MODULE } from "../../../../../modules/einvoice"
 import type EinvoiceModuleService from "../../../../../modules/einvoice/service"
 import { attachInvoicePdfWorkflow } from "../../../../../workflows/einvoice/write-back"
@@ -18,11 +19,26 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
   if (!req.headers["content-type"]?.startsWith("application/pdf")) {
     throw new ValidationError("einvoice.pdf_invalid")
   }
+  const id = req.params["id"] ?? ""
+  // Refused before a byte is kept: a PDF naming its buyer never lies about unreferenced
+  const [row] = await req.scope
+    .resolve<EinvoiceModuleService>(EINVOICE_MODULE)
+    .listInvoices({ id }, { select: ["provider", "status"], take: 1 })
+  if (!row) {
+    throw new MedusaError(MedusaError.Types.NOT_FOUND, "einvoice.unknown")
+  }
+  if (row.provider !== "external") {
+    throw new ConflictError("einvoice.not_external")
+  }
+  if (row.status !== "issued") {
+    throw new ConflictError("einvoice.not_issued")
+  }
   const bytes = await readRawBody(req, MAX_PDF_BYTES)
   if (bytes.subarray(0, 5).toString("latin1") !== "%PDF-") {
     throw new ValidationError("einvoice.pdf_invalid")
   }
-  const upload = await req.scope.resolve(Modules.FILE).getUploadStream({
+  const files = req.scope.resolve(Modules.FILE)
+  const upload = await files.getUploadStream({
     // Not guessable: a local or development store guards files by their name only
     filename: `fatura-${randomUUID()}.pdf`,
     mimeType: "application/pdf",
@@ -30,9 +46,14 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
   })
   upload.writeStream.end(bytes)
   await upload.promise
-  await attachInvoicePdfWorkflow(req.scope).run({
-    input: { invoice_id: req.params["id"] ?? "", file_id: upload.fileKey },
-  })
+  try {
+    await attachInvoicePdfWorkflow(req.scope).run({
+      input: { invoice_id: id, file_id: upload.fileKey },
+    })
+  } catch (error) {
+    await files.deleteFiles([upload.fileKey]).catch(() => undefined)
+    throw error
+  }
   res.json({ has_pdf: true })
 }
 
@@ -46,7 +67,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
   }
   const pdf = await req.scope.resolve(Modules.FILE).getAsBuffer(row.pdf_file_id)
   res.setHeader("Content-Type", "application/pdf")
-  res.setHeader("Content-Disposition", `attachment; filename="fatura-${row.number ?? row.id}.pdf"`)
+  res.setHeader("Content-Disposition", `attachment; filename="${pdfFilename(row.number, row.id)}"`)
   res.setHeader("Cache-Control", "no-store")
   res.send(pdf)
 }

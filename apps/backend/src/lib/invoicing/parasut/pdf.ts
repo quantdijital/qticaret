@@ -26,7 +26,11 @@ async function fetchBytes(
     const answer = await fetch(url, { signal: AbortSignal.timeout(TIMEOUT_MS) })
     return { status: answer.status, body: Buffer.from(await answer.arrayBuffer()) }
   }
-  if (url.protocol !== "https:") {
+  // Paraşüt's own hosts only, until a real account shows where its files live (adr/0034 §6)
+  if (
+    url.protocol !== "https:" ||
+    !(url.hostname === "parasut.com" || url.hostname.endsWith(".parasut.com"))
+  ) {
     throw failure("pdf_url_invalid")
   }
   // Redirects within the origin only (to be widened to Paraşüt's file hosts, by name, once

@@ -21,6 +21,10 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
   if (row.provider !== "external") {
     throw new ConflictError("einvoice.not_external")
   }
+  // What waits to be issued only: a key never pages through the shop's buyers of the past
+  if (row.status !== "pending" && row.status !== "failed") {
+    throw new ConflictError("einvoice.not_pending")
+  }
   const result = await invoiceDraftFor(req.scope, row)
   res.setHeader("Cache-Control", "no-store")
   res.json(

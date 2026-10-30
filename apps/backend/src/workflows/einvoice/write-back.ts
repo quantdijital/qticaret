@@ -66,7 +66,13 @@ const removePreviousPdfStep = createStep(
   "einvoice-remove-previous-pdf",
   async (input: { previous: string | null }, { container }) => {
     if (input.previous) {
-      await container.resolve(Modules.FILE).deleteFiles([input.previous])
+      // The new PDF is on the record already: an old file left over is only logged
+      await container
+        .resolve(Modules.FILE)
+        .deleteFiles([input.previous])
+        .catch((error: unknown) => {
+          logger.warn({ event: "einvoice.pdf_cleanup_failed", err: errorSummary(error) })
+        })
     }
     return new StepResponse(null)
   }

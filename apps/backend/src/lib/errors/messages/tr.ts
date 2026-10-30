@@ -401,6 +401,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "einvoice.parasut_not_connected": "Paraşüt hesabı bağlı değil (Ayarlar > E-Fatura).",
   "einvoice.parasut_disconnected":
     "Paraşüt bağlantıyı reddetti; hesabı yeniden bağlayın (Ayarlar > E-Fatura).",
+  "einvoice.parasut_refresh_unknown":
+    "Paraşüt jeton yenilemesinin yanıtı alınamadı; sorun sürerse hesabı yeniden bağlayın.",
   "einvoice.parasut_code_refused":
     "Paraşüt bu kodu kabul etmedi. Paraşüt sayfasından yeni bir kod alıp yapıştırın.",
   "einvoice.parasut_company_refused": "Bu Paraşüt hesabı bu firma numarasına erişemiyor.",
@@ -420,6 +422,10 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "einvoice.pdf_invalid": "Yalnızca PDF dosyası yüklenebilir.",
   "einvoice.pdf_missing": "Bu faturanın PDF'i yok.",
   "einvoice.not_failed": "Yalnızca durmuş bir fatura yeniden denenebilir.",
+  "einvoice.not_pending": "Faturanın içeriği yalnızca kesilmeyi beklerken okunabilir.",
+  "einvoice.number_year": "Fatura numarasındaki yıl, kesim tarihinin yılıyla aynı olmalı.",
+  "einvoice.company_changed":
+    "Fatura başka bir Paraşüt firmasında açılmış; bağlı firma değişti. Paraşüt'e bakın.",
   "accounting.sync_unknown": "Aktarım kaydı bulunamadı.",
   "accounting.source_missing": "Aktarılacak kayıt artık yok.",
   "accounting.month_invalid": "Ay geçersiz: başlamış bir ay olmalı, en fazla iki yıl öncesi.",

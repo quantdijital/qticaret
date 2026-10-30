@@ -180,6 +180,22 @@
           "enumItems": [],
           "mappedType": "text"
         },
+        "company_id": {
+          "name": "company_id",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
         "document_id": {
           "name": "document_id",
           "type": "text",

@@ -34,6 +34,8 @@ export const Invoice = model
     last_error: model.text().nullable(),
     /** The program's invoice. */
     external_id: model.text().nullable(),
+    /** The program's company it was made in: never followed in another (adr/0034 §5). */
+    company_id: model.text().nullable(),
     /** The program's e-Fatura or e-Arşiv. */
     document_id: model.text().nullable(),
     /** The program's job issuing it, and when it started (Paraşüt's lasts 15 minutes). */

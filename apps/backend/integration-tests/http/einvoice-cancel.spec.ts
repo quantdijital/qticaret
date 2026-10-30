@@ -148,6 +148,26 @@ medusaIntegrationTestRunner({
       )
     })
 
+    it("sees an order canceled whose event was missed, before anything goes to Paraşüt", async () => {
+      const orderId = await paidOrder()
+      await advanceOrder(getContainer(), orderId, "canceled")
+      const row = await eventually(
+        () => invoiceOf(orderId),
+        (found) => found?.cancel_requested_at !== null
+      )
+      // As if the event never came: the mark taken off again
+      await getContainer()
+        .resolve<EinvoiceModuleService>(EINVOICE_MODULE)
+        .updateInvoices({ id: row?.id ?? "", cancel_requested_at: null })
+      const before = parasut.requests.length
+      const undone = await runUntil(orderId, (status) => status === "cancelled")
+
+      expect(undone).toMatchObject({ status: "cancelled" })
+      expect(parasut.requests.slice(before).filter((request) => request.method !== "GET")).toEqual(
+        []
+      )
+    })
+
     it("leaves an e-Arşiv past its days issued, and rings the bell for a return document", async () => {
       const orderId = await paidOrder()
       const issued = await runUntil(orderId, (status) => status === "issued")

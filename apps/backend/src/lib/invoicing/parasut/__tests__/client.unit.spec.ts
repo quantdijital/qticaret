@@ -190,4 +190,13 @@ describe("Paraşüt client against the fake server (adr/0034)", () => {
 
     await expect(throttle()).rejects.toThrow("einvoice.rate_limited")
   })
+
+  it("downloads a PDF from Paraşüt's own hosts only", async () => {
+    expect(
+      await codeOf(downloadParasutPdf("https://files.example.com/fatura.pdf", undefined))
+    ).toBe("pdf_url_invalid")
+    expect(await codeOf(downloadParasutPdf("http://uygulama.parasut.com/f.pdf", undefined))).toBe(
+      "pdf_url_invalid"
+    )
+  })
 })

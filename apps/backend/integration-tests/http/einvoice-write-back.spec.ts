@@ -31,7 +31,7 @@ medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
     const http = api as HttpClient
     let shop: StockShop
-    let owner: { headers: Record<string, string> }
+    let owner: { headers: Record<string, string>; plain: Record<string, string> }
     let variantId: string
 
     const basic = (token: string) => ({
@@ -138,6 +138,12 @@ medusaIntegrationTestRunner({
           headers: { ...basic(writer), "content-type": "application/pdf" },
         })
       )
+      const draftAfter = await settle(
+        http.get(`/admin/invoices/${id}/draft`, { headers: basic(reader) })
+      )
+      const staffWithoutProof = await settle(
+        http.get(`/admin/invoices/${id}/draft`, { headers: owner.plain })
+      )
       const row = await invoiceOf(orderId)
       const stored = await getContainer()
         .resolve(Modules.FILE)
@@ -159,6 +165,9 @@ medusaIntegrationTestRunner({
       expect(pdf.status).toBe(200)
       expect(row).toMatchObject({ status: "issued", number: "ABC2026000000123" })
       expect(stored.subarray(0, 5).toString()).toBe("%PDF-")
+      // Once issued its buyer is not read through the program's door; staff prove themselves
+      expect(draftAfter.status).toBe(409)
+      expect(staffWithoutProof.status).toBe(428)
     })
   },
 })

@@ -10,6 +10,8 @@ import { errorSummary, logger } from "../../lib/logging"
 import { notificationText } from "../../lib/notifications/messages"
 import { EINVOICE_MODULE } from "../../modules/einvoice"
 import type EinvoiceModuleService from "../../modules/einvoice/service"
+import { TENANT_WEBHOOKS_MODULE } from "../../modules/tenant-webhooks"
+import type TenantWebhooksModuleService from "../../modules/tenant-webhooks/service"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -46,6 +48,25 @@ export async function alertReturnNeeded(container: Container, invoiceId: string,
 }
 
 /**
+ * Tells the shop's own program an invoice it was asked for is no longer
+ * wanted (`invoice.withdrawn`): ids only. Its write-back is refused from
+ * now on; one it issued meanwhile needs a return document.
+ */
+async function announceWithdrawn(container: Container, invoiceId: string, orderId: string) {
+  try {
+    const hooks = container.resolve<TenantWebhooksModuleService>(TENANT_WEBHOOKS_MODULE)
+    if (await hooks.anyTakes("invoice.withdrawn")) {
+      await hooks.enqueue("invoice.withdrawn", `invoice.withdrawn:${invoiceId}`, {
+        invoice_id: invoiceId,
+        order_id: orderId,
+      })
+    }
+  } catch (error) {
+    logger.warn({ event: "einvoice.announce_failed", err: errorSummary(error) })
+  }
+}
+
+/**
  * Asks for a canceled order's invoice to be undone (adr/0034 §10). The
  * job does it at the program, the one place that talks to it per
  * invoice; an invoice the shop's own program issued is staff's to answer
@@ -54,11 +75,14 @@ export async function alertReturnNeeded(container: Container, invoiceId: string,
 const requestCancelStep = createStep(
   "einvoice-request-cancel",
   async (input: { order_id: string }, { container }) => {
-    const { needs_document } = await container
+    const { needs_document, withdrawn } = await container
       .resolve<EinvoiceModuleService>(EINVOICE_MODULE)
       .requestCancel(input.order_id)
     for (const id of needs_document) {
       await alertReturnNeeded(container, id, input.order_id)
+    }
+    for (const id of withdrawn) {
+      await announceWithdrawn(container, id, input.order_id)
     }
     return new StepResponse({ needs_document: needs_document.length })
   }

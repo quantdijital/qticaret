@@ -49,7 +49,12 @@ export function InvoiceCard({ orderId }: { orderId: string }) {
   const openPdf = async (id: string) => {
     setOpening(true)
     try {
-      window.open(await invoicePdfUrl(id), "_blank", "noopener")
+      const url = await invoicePdfUrl(id)
+      window.open(url, "_blank", "noopener")
+      // The new tab holds its own copy once it has loaded: the link is let go after a while
+      window.setTimeout(() => {
+        URL.revokeObjectURL(url)
+      }, 60_000)
     } catch (failure) {
       fail(failure)
     } finally {

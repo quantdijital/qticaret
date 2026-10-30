@@ -397,6 +397,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "einvoice.parasut_not_connected": "No Paraşüt account is connected (Settings > E-invoice).",
   "einvoice.parasut_disconnected":
     "Paraşüt refused the connection; connect the account again (Settings > E-invoice).",
+  "einvoice.parasut_refresh_unknown":
+    "Paraşüt's answer to a token refresh was lost; if it keeps failing, connect the account again.",
   "einvoice.parasut_code_refused":
     "Paraşüt did not accept this code. Get a new code from Paraşüt's page and paste it.",
   "einvoice.parasut_company_refused": "This Paraşüt account cannot reach this company number.",
@@ -416,6 +418,10 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "einvoice.pdf_invalid": "Only a PDF file can be uploaded.",
   "einvoice.pdf_missing": "This invoice has no PDF.",
   "einvoice.not_failed": "Only a stopped invoice can be tried again.",
+  "einvoice.not_pending": "An invoice's contents can be read only while it waits to be issued.",
+  "einvoice.number_year": "The year in the invoice number must be the issue date's year.",
+  "einvoice.company_changed":
+    "The invoice was opened in another Paraşüt company; the connected company changed. Look at Paraşüt.",
   "accounting.sync_unknown": "No such transfer record.",
   "accounting.source_missing": "The record to send is no longer there.",
   "accounting.month_invalid": "The month is not valid: one that has begun, two years back at most.",

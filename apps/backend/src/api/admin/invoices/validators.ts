@@ -20,6 +20,9 @@ export type AdminGetInvoicesType = z.infer<typeof AdminGetInvoices>
  * letters or digits, the year, nine digits), its ETTN, e-Fatura or
  * e-Arşiv, and when.
  */
+// No e-invoice predates the platform; one dated ahead is a typo
+const EARLIEST = Date.parse("2020-01-01T00:00:00Z")
+
 export const AdminPostInvoiceIssued = z
   .object({
     number: z
@@ -36,10 +39,21 @@ export const AdminPostInvoiceIssued = z
       )
       .nullish(),
     document_type: z.enum(["e_invoice", "e_archive"]),
-    issued_at: z.coerce
-      .date()
-      .refine((at) => at.getTime() <= Date.now() + 86_400_000, "einvoice.issued_at_invalid"),
+    issued_at: z.iso
+      .datetime({ offset: true })
+      .transform((text) => new Date(text))
+      .refine(
+        (at) => at.getTime() >= EARLIEST && at.getTime() <= Date.now() + 86_400_000,
+        "einvoice.issued_at_invalid"
+      ),
   })
   .strict()
+  // GİB numbers by the year: an invoice's number names the year it was issued in
+  .refine(
+    (body) =>
+      body.number.slice(3, 7) ===
+      String(new Date(body.issued_at.getTime() + 3 * 3_600_000).getUTCFullYear()),
+    { message: "einvoice.number_year", path: ["number"] }
+  )
 
 export type AdminPostInvoiceIssuedType = z.infer<typeof AdminPostInvoiceIssued>

@@ -25,8 +25,8 @@ export const fakeInvoiceProvider: InvoiceProvider = {
       !state.number ||
         (state.document_type === "e_archive" &&
           (state.cancellable_until?.getTime() ?? 0) > now.getTime())
-        ? "cancelled"
-        : "too_late"
+        ? { result: "cancelled" as const }
+        : { result: "too_late" as const, progress: {} }
     ),
   async advance(state, context) {
     const draft = await context.draft()

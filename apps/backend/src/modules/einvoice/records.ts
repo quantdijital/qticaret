@@ -73,8 +73,18 @@ export class InvoiceRecordsService extends InvoiceQueueService {
    * The PDF of an external program's issued invoice, kept in the private
    * store; the key of the one it replaces, to remove, or null.
    */
-  async attachPdf(id: string, fileId: string): Promise<{ previous: string | null } | null> {
-    const [row] = await this.listInvoices({ id }, { take: 1 })
+  @InjectTransactionManager()
+  async attachPdf(
+    id: string,
+    fileId: string,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<{ previous: string | null } | null> {
+    const manager = sharedContext.transactionManager as Executor
+    // Locked: two uploads at once never both take the same file for the one they replace
+    const [row] = (await manager.execute(
+      `SELECT provider, status, pdf_file_id FROM invoice WHERE id = ? AND deleted_at IS NULL FOR UPDATE`,
+      [id]
+    )) as { provider: string; status: string; pdf_file_id: string | null }[]
     if (!row) {
       return null
     }
@@ -84,7 +94,10 @@ export class InvoiceRecordsService extends InvoiceQueueService {
     if (row.status !== "issued") {
       throw new ConflictError("einvoice.not_issued")
     }
-    await this.updateInvoices({ id, pdf_file_id: fileId })
+    await manager.execute(`UPDATE invoice SET pdf_file_id = ?, updated_at = now() WHERE id = ?`, [
+      fileId,
+      id,
+    ])
     return { previous: row.pdf_file_id }
   }
 
@@ -128,6 +141,28 @@ export class InvoiceRecordsService extends InvoiceQueueService {
   }
 
   /**
+   * Keeps the program's invoice on its record whatever the claim, unless
+   * the record holds one already: an invoice made at the program is never
+   * lost here. False when it held another (the caller logs the orphan).
+   */
+  @InjectTransactionManager()
+  async adopt(
+    id: string,
+    externalId: string,
+    companyId: string,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<boolean> {
+    const manager = sharedContext.transactionManager as Executor
+    const rows = (await manager.execute(
+      `UPDATE invoice SET external_id = ?, company_id = ?, updated_at = now()
+        WHERE id = ? AND (external_id IS NULL OR external_id = ?) AND deleted_at IS NULL
+       RETURNING id`,
+      [externalId, companyId, id, externalId]
+    )) as unknown[]
+    return rows.length > 0
+  }
+
+  /**
    * The order was canceled (adr/0034 §10). An external program's invoice
    * not yet issued is cancelled here; one issued is left for a return
    * document, and its id returned for staff to be told. A program's own
@@ -139,18 +174,20 @@ export class InvoiceRecordsService extends InvoiceQueueService {
     orderId: string,
     now: Date = new Date(),
     @MedusaContext() sharedContext: Context = {}
-  ): Promise<{ needs_document: string[] }> {
+  ): Promise<{ needs_document: string[]; withdrawn: string[] }> {
     const manager = sharedContext.transactionManager as Executor
-    await manager.execute(
+    const withdrawn = (await manager.execute(
       `UPDATE invoice SET status = 'cancelled', updated_at = now()
         WHERE order_id = ? AND kind = 'sale' AND provider = 'external' AND status = 'pending'
-          AND deleted_at IS NULL`,
+          AND deleted_at IS NULL
+       RETURNING id`,
       [orderId]
-    )
+    )) as { id: string }[]
+    // Once: asked again (the hourly sweep), an invoice already marked rings no bell twice
     const issued = (await manager.execute(
       `UPDATE invoice SET last_error = 'einvoice.return_document_needed', updated_at = now()
         WHERE order_id = ? AND kind = 'sale' AND provider = 'external' AND status = 'issued'
-          AND deleted_at IS NULL
+          AND last_error IS DISTINCT FROM 'einvoice.return_document_needed' AND deleted_at IS NULL
        RETURNING id`,
       [orderId]
     )) as { id: string }[]
@@ -165,6 +202,9 @@ export class InvoiceRecordsService extends InvoiceQueueService {
           AND cancel_requested_at IS NULL AND deleted_at IS NULL`,
       [now, now, now, orderId]
     )
-    return { needs_document: issued.map((row) => row.id) }
+    return {
+      needs_document: issued.map((row) => row.id),
+      withdrawn: withdrawn.map((row) => row.id),
+    }
   }
 }

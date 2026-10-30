@@ -1,5 +1,6 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { MedusaError, Modules } from "@medusajs/framework/utils"
+import { pdfFilename } from "../../../../../../lib/invoicing/filename"
 import { issuedInvoiceOf } from "../issued"
 
 /** GET /store/orders/:id/invoice/pdf: the invoice's PDF, from the shop's private storage. */
@@ -12,7 +13,7 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
   res.setHeader("Content-Type", "application/pdf")
   res.setHeader(
     "Content-Disposition",
-    `attachment; filename="fatura-${invoice.number ?? "siparis"}.pdf"`
+    `attachment; filename="${pdfFilename(invoice.number, invoice.id)}"`
   )
   res.setHeader("Cache-Control", "no-store")
   res.send(pdf)

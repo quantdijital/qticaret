@@ -14,6 +14,7 @@ export const WEBHOOK_EVENTS = [
   "stock.changed",
   // F8 (adr/0034 §9): an invoice for the shop's own program to issue and write back
   "invoice.requested",
+  "invoice.withdrawn",
 ] as const
 export type WebhookEvent = (typeof WEBHOOK_EVENTS)[number]
 
@@ -30,4 +31,5 @@ export const EVENT_SCOPES: Readonly<Record<WebhookEvent, ApiScope>> = {
   "return.received": "orders:read",
   "stock.changed": "catalog:read",
   "invoice.requested": "invoices:read",
+  "invoice.withdrawn": "invoices:read",
 }

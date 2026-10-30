@@ -2,6 +2,9 @@ import { z } from "@medusajs/framework/zod"
 import { createHttpClient } from "../../clients"
 import type { HttpClientOptions } from "../../clients"
 import { PARASUT_PROVIDER, parasutOrigin } from "./oauth"
+import { Created, Invoice, InvoiceAttributes, Job, Many, Pdf, apiError } from "./schemas"
+
+export { outcomeUnsure } from "./schemas"
 
 /**
  * Paraşüt's API v4 under `/v4/{company_id}` (JSON:API; apidocs.parasut.com
@@ -11,67 +14,6 @@ import { PARASUT_PROVIDER, parasutOrigin } from "./oauth"
  */
 
 export type EDocumentType = "e_archives" | "e_invoices"
-
-const Id = z.string().min(1).max(100)
-
-const Resource = <T extends z.ZodType>(attributes: T) =>
-  z.looseObject({ id: Id, type: z.string(), attributes })
-
-const One = <T extends z.ZodType>(attributes: T) => z.looseObject({ data: Resource(attributes) })
-
-const Many = <T extends z.ZodType>(attributes: T) =>
-  z.looseObject({ data: z.array(Resource(attributes)).max(25) })
-
-const Amount = z.union([z.string(), z.number()]).transform(String)
-
-const InvoiceAttributes = z.looseObject({
-  gross_total: Amount.optional(),
-  cancelled: z.boolean().optional(),
-})
-
-const DocumentAttributes = z.looseObject({
-  uuid: z.string().max(100).nullish(),
-  invoice_number: z.string().max(100).nullish(),
-  cancellable_until: z.string().max(50).nullish(),
-})
-
-const Invoice = z.looseObject({
-  data: z.looseObject({
-    id: Id,
-    attributes: InvoiceAttributes,
-    relationships: z
-      .looseObject({
-        active_e_document: z
-          .looseObject({
-            data: z.object({ id: Id, type: z.enum(["e_archives", "e_invoices"]) }).nullish(),
-          })
-          .optional(),
-      })
-      .optional(),
-  }),
-  included: z.array(Resource(DocumentAttributes)).max(10).optional(),
-})
-
-const Job = One(
-  z.looseObject({
-    status: z.enum(["pending", "running", "done", "error"]),
-    errors: z.array(z.string().max(500)).max(20).nullish(),
-  })
-)
-
-const Pdf = One(z.looseObject({ url: z.string().max(2000) }))
-
-/** Paraşüt's word for a refusal: an OAuth `error`, or the first JSON:API error's title. */
-const apiError = (body: unknown): string | undefined => {
-  const errors = (body as { errors?: { title?: unknown }[] } | null)?.errors
-  const title = Array.isArray(errors) ? errors[0]?.title : undefined
-  return typeof title === "string"
-    ? title
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "_")
-        .slice(0, 60)
-    : undefined
-}
 
 // A path segment Paraşüt gave us (an id), never bent into another path
 const SEGMENT = /^[A-Za-z0-9_-]{1,100}$/
@@ -131,7 +73,11 @@ export function createParasutApi(
       })
     },
 
-    /** The company's contact with this tax id (or e-mail), or null. */
+    /**
+     * The company's contact with exactly this tax id (or e-mail, any
+     * case), or null. Paraşüt's filter may match part of a value: a
+     * near match is never taken for the buyer.
+     */
     async findContact(
       token: string,
       by: { taxNumber: string } | { email: string }
@@ -140,10 +86,17 @@ export function createParasutApi(
         "taxNumber" in by ? { "filter[tax_number]": by.taxNumber } : { "filter[email]": by.email }
       const answer = await call(token, {
         path: ["contacts"],
-        query: { ...filter, "page[size]": "1" },
-        schema: Many(z.looseObject({})),
+        query: { ...filter, "page[size]": "25" },
+        schema: Many(
+          z.looseObject({ tax_number: z.string().nullish(), email: z.string().nullish() })
+        ),
       })
-      return answer.data[0]?.id ?? null
+      const exact = answer.data.find((contact) =>
+        "taxNumber" in by
+          ? contact.attributes.tax_number === by.taxNumber
+          : contact.attributes.email?.toLowerCase() === by.email.toLowerCase()
+      )
+      return exact?.id ?? null
     },
 
     async createContact(token: string, attributes: Record<string, unknown>): Promise<string> {
@@ -151,7 +104,7 @@ export function createParasutApi(
         method: "POST",
         path: ["contacts"],
         json: { data: { type: "contacts", attributes } },
-        schema: One(z.looseObject({})),
+        schema: Created,
       })
       return answer.data.id
     },
@@ -164,9 +117,13 @@ export function createParasutApi(
         method: "POST",
         path: ["sales_invoices"],
         json: { data: { type: "sales_invoices", ...body } },
-        schema: One(InvoiceAttributes),
+        schema: Created,
       })
-      return { id: answer.data.id, gross_total: answer.data.attributes.gross_total ?? null }
+      const totals = InvoiceAttributes.safeParse(answer.data["attributes"])
+      return {
+        id: answer.data.id,
+        gross_total: totals.success ? (totals.data.gross_total ?? null) : null,
+      }
     },
 
     /** The invoice, and the e-document it became (null until a job made one). */
@@ -212,9 +169,15 @@ export function createParasutApi(
       const answer = await call(token, {
         path: ["e_invoice_inboxes"],
         query: { "filter[vkn]": taxId },
-        schema: Many(z.looseObject({ e_invoice_address: z.string().max(200) })),
+        schema: Many(
+          z.looseObject({ vkn: z.string().nullish(), e_invoice_address: z.string().max(200) })
+        ),
       })
-      return answer.data[0]?.attributes.e_invoice_address ?? null
+      // Only this tax id's own inbox: an e-Fatura sent to another can never be taken back
+      return (
+        answer.data.find((inbox) => inbox.attributes.vkn === taxId)?.attributes.e_invoice_address ??
+        null
+      )
     },
 
     /** Starts the job that makes an e-Arşiv or e-Fatura of an invoice; its id. */
@@ -236,7 +199,7 @@ export function createParasutApi(
             relationships: { [relation]: { data: { id: invoiceId, type: "sales_invoices" } } },
           },
         },
-        schema: Job,
+        schema: Created,
       })
       return answer.data.id
     },

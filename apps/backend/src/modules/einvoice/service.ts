@@ -30,7 +30,9 @@ export interface ParasutTokenPair {
 
 /** Why no call can be made: nothing connected, or Paraşüt refused the connection since. */
 export type ParasutAccessProblem =
-  "einvoice.parasut_not_connected" | "einvoice.parasut_disconnected"
+  | "einvoice.parasut_not_connected"
+  | "einvoice.parasut_disconnected"
+  | "einvoice.parasut_refresh_unknown"
 
 interface StoredConnection {
   id: string
@@ -45,8 +47,11 @@ interface Executor {
   execute: (sql: string, params: unknown[]) => Promise<unknown>
 }
 
-// Refusals that mean the platform no longer holds the shop's company
-const REVOKED = new Set(["invalid_grant", "invalid_client", "unauthorized"])
+// Refusals that mean the shop took its company back. `invalid_client` is the platform's own
+// client refused: every shop's would break with it, so it is thrown, the connections left as they are
+const REVOKED = new Set(["invalid_grant", "unauthorized"])
+// A refresh whose answer was lost: Paraşüt may have turned the refresh token over already
+const UNSURE = new Set(["outcome_unknown", "invalid_response", "response_too_large"])
 
 /** Orders' invoices (F8, adr/0034), and the shop's Paraşüt connection (§5). */
 class EinvoiceModuleService extends InvoiceRecordsService {
@@ -189,6 +194,14 @@ class EinvoiceModuleService extends InvoiceRecordsService {
     try {
       tokens = await refresh(this.unseal(row.company_id, "refresh", row.refresh_token_encrypted))
     } catch (error) {
+      if (isProviderError(error) && UNSURE.has(error.providerCode)) {
+        // Kept so the panel can say why the next refresh may be refused
+        await manager.execute(
+          `UPDATE parasut_connection SET last_error = 'refresh_outcome_unknown', updated_at = now() WHERE id = ?`,
+          [row.id]
+        )
+        return { problem: "einvoice.parasut_refresh_unknown" }
+      }
       if (!isProviderError(error) || !REVOKED.has(error.providerCode)) {
         throw error
       }

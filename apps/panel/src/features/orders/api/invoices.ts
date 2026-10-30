@@ -115,5 +115,5 @@ export async function invoicePdfUrl(id: string): Promise<string> {
   if (!response.ok) {
     await failed(response)
   }
-  return URL.createObjectURL(await response.blob())
+  return URL.createObjectURL(new Blob([await response.arrayBuffer()], { type: "application/pdf" }))
 }

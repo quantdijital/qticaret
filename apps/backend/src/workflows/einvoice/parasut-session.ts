@@ -36,7 +36,7 @@ export const parasutApiFor = (companyId: string): ParasutApi =>
  */
 export async function withParasut<T>(
   container: Container,
-  run: (api: ParasutApi, token: string) => Promise<T>
+  run: (api: ParasutApi, token: string, companyId: string) => Promise<T>
 ): Promise<T> {
   const client = requireParasutClient()
   const oauth = createParasutOauth()
@@ -54,11 +54,12 @@ export async function withParasut<T>(
   const first = await access()
   const api = parasutApiFor(first.company_id)
   try {
-    return await run(api, first.token)
+    return await run(api, first.token, first.company_id)
   } catch (error) {
     if (!isProviderError(error) || error.providerCode !== "unauthorized") {
       throw error
     }
-    return run(api, (await access(first.token)).token)
+    const second = await access(first.token)
+    return run(api, second.token, second.company_id)
   }
 }

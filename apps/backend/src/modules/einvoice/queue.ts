@@ -38,6 +38,7 @@ export interface ClaimedInvoice {
   job_id: string | null
   job_started_at: Date | null
   cancel_requested_at: Date | null
+  company_id: string | null
   /** Until when this claim holds it: a change after another worker took it is refused. */
   lease: Date
 }
@@ -45,6 +46,7 @@ export interface ClaimedInvoice {
 /** What a step learned from the program, kept as it learns it. */
 export interface InvoiceProgress {
   external_id?: string | null
+  company_id?: string | null
   document_id?: string | null
   document_type?: DocumentType | null
   job_id?: string | null
@@ -100,6 +102,7 @@ const SETTLED = [
   "program_difference",
   "pdf_file_id",
   "cancel_requested_at",
+  "company_id",
 ] as const
 type Settled = Partial<Record<(typeof SETTLED)[number], unknown>>
 
@@ -163,7 +166,7 @@ export class InvoiceQueueService extends MedusaService({ Invoice, ParasutConnect
            ORDER BY next_attempt_at, id LIMIT ?
            FOR UPDATE SKIP LOCKED)
         RETURNING id, order_id, kind, source_id, provider, status, attempts, external_id,
-                  document_id, job_id, job_started_at, cancel_requested_at,
+                  document_id, job_id, job_started_at, cancel_requested_at, company_id,
                   next_attempt_at AS lease`,
       [minutesFrom(now, LEASE_MINUTES), now, limit]
     )) as ClaimedInvoice[]
@@ -225,6 +228,7 @@ export class InvoiceQueueService extends MedusaService({ Invoice, ParasutConnect
     return this.settle(row, {
       ...issued,
       status: "issued",
+      attempts: 0,
       last_error: null,
       next_attempt_at: now,
     })
@@ -241,9 +245,16 @@ export class InvoiceQueueService extends MedusaService({ Invoice, ParasutConnect
   }
 
   /** Too late to undo at its program: issued it stays, for a return document (staff told). */
-  markCancelTooLate(row: ClaimedInvoice, code: string, now: Date = new Date()) {
+  markCancelTooLate(
+    row: ClaimedInvoice,
+    code: string,
+    held: InvoiceProgress & { number?: string; uuid?: string | null },
+    now: Date = new Date()
+  ) {
     return this.settle(row, {
+      ...held,
       status: "issued",
+      attempts: 0,
       cancel_requested_at: null,
       last_error: code,
       next_attempt_at: now,

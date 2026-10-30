@@ -18,10 +18,13 @@ describe("the fake invoice program (development and tests)", () => {
       job_started_at: null,
       number: null,
       cancellable_until: null,
+      company_id: null,
     }
     const context = (kind: "person" | "company") => ({
       draft: () => Promise.resolve(draft(kind)),
       keep: () => Promise.resolve(true),
+      adopt: () => Promise.resolve(),
+      cancelRequested: () => Promise.resolve(false),
       now: () => new Date("2026-10-31T09:00:00Z"),
     })
 

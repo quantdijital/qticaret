@@ -36,6 +36,9 @@ const SHEET_TYPES = [
   "application/octet-stream",
 ]
 
+// An invoice issued elsewhere (F8, adr/0034 §9): its PDF as the body, on its own path only
+const INVOICE_PDF_PATH = /^\/admin\/invoices\/[^/]+\/pdf$/
+
 type Area = "store" | "admin" | "auth"
 
 const areaOf = (path: string): Area | null => {
@@ -86,7 +89,8 @@ function isAllowedAdminBody(req: MedusaRequest): boolean {
     !hasBody(req) ||
     type.startsWith("application/json") ||
     (type.startsWith("multipart/form-data") && MULTIPART_PATH.test(routePath(req))) ||
-    (SHEET_TYPES.some((sheet) => type.startsWith(sheet)) && SHEET_PATH.test(routePath(req)))
+    (SHEET_TYPES.some((sheet) => type.startsWith(sheet)) && SHEET_PATH.test(routePath(req))) ||
+    (type.startsWith("application/pdf") && INVOICE_PDF_PATH.test(routePath(req)))
   )
 }
 
