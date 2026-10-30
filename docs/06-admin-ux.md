@@ -56,7 +56,7 @@ Dashboard, Siparişler (aşama sekmeleri + detay: kargoya ver, teslim edildi, ta
 | Stok | DataTable (P3, F3) | Depo bazlı stok, düşük stok listesi, hareket geçmişi |
 | Fiyat geçmişi | Ürün sayfası bölümü (F4) | Varyant fiyat grafiği, son 30 gün en düşük |
 | SEO ve paylaşım | Ürün/kategori/marka sayfasında yan panel (F3) | Skor, bulgular + "neden önemli", tek tık düzeltmeler, SERP/WhatsApp/Instagram önizleme, UTM'li paylaşım bağlantısı |
-| SEO paneli | Sayfa | Mağaza skoru, en düşük varlıklar, 404 + 301 oluştur, zincir/mükerrer/öksüz, GSC/CWV kartları, denetim raporu, kurulum kontrol listesi (F3, F10, F12) |
+| SEO paneli | Sayfa | Başta kurulum kontrol listesi (yalnızca eksikler; tamamlanan kalkar, hepsi bitince kart gider; F12.10); mağaza skoru, en düşük varlıklar, 404 + 301 oluştur, zincir/mükerrer/öksüz, GSC/CWV kartları, denetim raporu (F3, F10, F12) |
 | Markalar | Sayfa | Marka listesi/detay, SEO alanları (F3) |
 | İçerik | Sayfa | Sayfalar, blog, facet landing (özgünlük göstergesi, parti yayını) (F3) |
 | Soru-Cevap moderasyonu | Sayfa | Bekleyen sorular/cevaplar, toplu onay (F10) |

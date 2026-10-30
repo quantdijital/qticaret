@@ -35,6 +35,7 @@ const tasks = (more: Partial<DashboardTasks> = {}): DashboardTasks => ({
   orphan_payments: { refunding: 0, by_hand: 0 },
   accounting_stopped: null,
   webhooks_disabled: null,
+  seo_setup_open: 0,
   capped: false,
   ...more,
 })
@@ -68,19 +69,21 @@ describe("TasksCard", () => {
     expect(screen.queryByText("Durdurulan web kancaları")).toBeNull()
   })
 
-  it("counts refused accounting records and turned-off hooks for those who can set them right", async () => {
-    renderCard(tasks({ accounting_stopped: 3, webhooks_disabled: 1 }))
+  it("counts refused accounting records, turned-off hooks and SEO setup for those who can set them right", async () => {
+    renderCard(tasks({ accounting_stopped: 3, webhooks_disabled: 1, seo_setup_open: 2 }))
 
     expect(await hrefOf("Aktarılamayan muhasebe kayıtları")).toBe("/settings/accounting")
     expect(await hrefOf("Durdurulan web kancaları")).toBe("/settings/api")
+    expect(await hrefOf("SEO kurulumunda eksik")).toBe("/seo")
   })
 
   it("leaves them out for operations staff, who cannot act on them", async () => {
     reach.can = new Set(["orders", "stock"])
-    renderCard(tasks({ accounting_stopped: 3, webhooks_disabled: 1 }))
+    renderCard(tasks({ accounting_stopped: 3, webhooks_disabled: 1, seo_setup_open: 2 }))
 
     await screen.findByText("Kargoya hazırlanacak")
     expect(screen.queryByText("Aktarılamayan muhasebe kayıtları")).toBeNull()
     expect(screen.queryByText("Durdurulan web kancaları")).toBeNull()
+    expect(screen.queryByText("SEO kurulumunda eksik")).toBeNull()
   })
 })

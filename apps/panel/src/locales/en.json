@@ -189,6 +189,10 @@
       "webhooksDisabled": {
         "label": "Webhooks turned off",
         "hint": "Addresses turned off after failing again and again."
+      },
+      "seoSetup": {
+        "label": "SEO setup to finish",
+        "hint": "Steps left for search engines"
       }
     },
     "recent": {
@@ -425,6 +429,16 @@
         "site": "Search Console property",
         "choose": "Choose a property",
         "saved": "Search Console property saved."
+      },
+      "shareImage": {
+        "title": "Share image",
+        "hint": "Shown when a link to a page without its own image is shared on WhatsApp, Instagram or X.",
+        "none": "No share image",
+        "size": "1200×630 pixels recommended; your logo and shop name in the middle, with space at the edges.",
+        "choose": "Choose a share image",
+        "add": "Upload image",
+        "replace": "Replace image",
+        "remove": "Remove"
       }
     },
     "features": {
@@ -4119,6 +4133,47 @@
         "lcp_ms": "LCP",
         "inp_ms": "INP",
         "cls": "CLS"
+      }
+    },
+    "setup": {
+      "title": "SEO setup",
+      "text": "What to do once so search engines find, trust and show your shop correctly. A finished item leaves the list.",
+      "progress": "{{done}}/{{total}} done",
+      "go": "Finish",
+      "blocked": {
+        "coming": "The legal details and policies screen is coming; nothing to do yet.",
+        "google_platform": "Google is not enabled in this environment yet; the platform team will enable it.",
+        "google_account": "Connect your Google account first; this step is then finished on the same screen."
+      },
+      "items": {
+        "legal": {
+          "title": "Legal details and policies",
+          "hint": "Company details, return and shipping policy."
+        },
+        "canonical_host": {
+          "title": "Shop domain",
+          "hint": "The domain page addresses are shown with (canonical)."
+        },
+        "robots": {
+          "title": "robots.txt",
+          "hint": "Search engines must be able to crawl the home page, and the sitemap must be named."
+        },
+        "share_image": {
+          "title": "Share image",
+          "hint": "The image shown when a page without its own image is shared."
+        },
+        "search_console": {
+          "title": "Google Search Console",
+          "hint": "Connect the site to see clicks and index status in search."
+        },
+        "merchant": {
+          "title": "Google Merchant Center",
+          "hint": "Choose the account for products to appear on Google Shopping."
+        },
+        "indexnow": {
+          "title": "IndexNow",
+          "hint": "Turn it on to tell Bing and Yandex about changed pages at once."
+        }
       }
     }
   },

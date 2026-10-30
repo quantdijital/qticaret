@@ -8,6 +8,7 @@ import {
   FilePen,
   PackageMinus,
   RotateCcw,
+  SearchCheck,
   Truck,
   Webhook,
 } from "lucide-react"
@@ -31,6 +32,7 @@ interface TaskRow {
     | "orphanPayments"
     | "accountingStopped"
     | "webhooksDisabled"
+    | "seoSetup"
   icon: LucideIcon
   count: number
   to: string
@@ -111,6 +113,18 @@ function rows(tasks: DashboardTasks, reach: Reach): TaskRow[] {
             count: tasks.webhooks_disabled,
             to: "/settings/api",
             urgent: true,
+          },
+        ]
+      : []),
+    // F12.10: gone once the shop has set up what it can
+    ...(tasks.seo_setup_open > 0 && reach.settings
+      ? [
+          {
+            key: "seoSetup" as const,
+            icon: SearchCheck,
+            count: tasks.seo_setup_open,
+            to: "/seo",
+            urgent: false,
           },
         ]
       : []),

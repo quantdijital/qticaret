@@ -14,6 +14,8 @@ export interface DashboardTasks {
   accounting_stopped: number | null
   /** Hooks turned off after failing (F12.1); null while the shop has none. */
   webhooks_disabled: number | null
+  /** SEO setup items the shop can do now (F12.10). */
+  seo_setup_open: number
   capped: boolean
 }
 

@@ -13,6 +13,7 @@ import { sectionQuery, useSaveSection } from "@/features/settings/api/sections"
 import type { SeoSettings } from "@/features/settings/api/sections"
 import { useStoreName } from "@/features/settings/api/store"
 import { SearchConsoleCard } from "@/features/settings/components/search-console-card"
+import { ShareImageCard } from "@/features/settings/components/share-image-card"
 import { TemplateField } from "@/features/settings/components/template-field"
 import { UrlStyleCard } from "@/features/settings/components/url-style-card"
 import { TEMPLATE_TOKENS } from "@/features/settings/seo-sample"
@@ -188,7 +189,10 @@ function CrawlersCard({ saved }: { saved: SeoSettings }) {
   )
 }
 
-/** Settings > SEO (docs/13): the shop's address, URL shape, templates and who may crawl it. */
+/**
+ * Settings > SEO (docs/13): the shop's address and share image, URL shape,
+ * templates and who may crawl it.
+ */
 export function SeoPage() {
   const { t } = useTranslation()
   const query = useQuery(sectionQuery<SeoSettings>("seo"))
@@ -203,6 +207,7 @@ export function SeoPage() {
       ) : (
         <>
           <AddressCard saved={query.data.values} />
+          <ShareImageCard saved={query.data.values} />
           <UrlStyleCard saved={query.data.values.url_style} />
           <TemplatesCard saved={query.data.values} storeName={storeName} />
           <CrawlersCard saved={query.data.values} />

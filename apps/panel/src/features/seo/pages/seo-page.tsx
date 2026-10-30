@@ -14,6 +14,7 @@ import { redirectCountsQuery } from "@/features/seo/api/redirects"
 import { AdvisorSummaryCard } from "@/features/seo/advisor/summary-card"
 import { AuditCard } from "@/features/seo/audit/audit-card"
 import { SearchConsoleCard } from "@/features/seo/components/search-console-card"
+import { SetupChecklistCard } from "@/features/seo/components/setup-checklist-card"
 import { SitemapCard } from "@/features/seo/components/sitemap-card"
 import { WebVitalsCard } from "@/features/seo/components/web-vitals-card"
 import { sectionQuery } from "@/features/settings/api/sections"
@@ -117,9 +118,9 @@ function RedirectsCard({ className }: { className?: string }) {
 }
 
 /**
- * SEO (docs/13, docs/14): how the shop looks in search today, what its
- * catalog still lacks, its redirects and sitemap, the advisor's score and
- * the store-wide audit.
+ * SEO (docs/13, docs/14): what setup still lacks, how the shop looks in
+ * search today, what its catalog still lacks, its redirects and sitemap,
+ * the advisor's score and the store-wide audit.
  */
 export function SeoOverviewPage() {
   const { t } = useTranslation()
@@ -137,6 +138,7 @@ export function SeoOverviewPage() {
         }
       />
       <PageGrid>
+        <SetupChecklistCard className={spanOf(12)} />
         <SectionCard
           title={t("seo.search")}
           description={t("seo.searchHint")}

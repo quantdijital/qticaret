@@ -189,6 +189,10 @@
       "webhooksDisabled": {
         "label": "Durdurulan web kancaları",
         "hint": "Art arda başarısız olduğu için kapatılan adresler."
+      },
+      "seoSetup": {
+        "label": "SEO kurulumunda eksik",
+        "hint": "Arama motorları için kalan adımlar"
       }
     },
     "recent": {
@@ -425,6 +429,16 @@
         "site": "Search Console mülkü",
         "choose": "Mülk seçin",
         "saved": "Search Console mülkü kaydedildi."
+      },
+      "shareImage": {
+        "title": "Paylaşım görseli",
+        "hint": "Kendi görseli olmayan bir sayfanın bağlantısı WhatsApp, Instagram ya da X'te paylaşıldığında bu görsel görünür.",
+        "none": "Paylaşım görseli yok",
+        "size": "1200×630 piksel önerilir; logonuz ve mağaza adınız ortada, kenarlarda boşluk bırakın.",
+        "choose": "Paylaşım görseli seç",
+        "add": "Görsel yükle",
+        "replace": "Görseli değiştir",
+        "remove": "Kaldır"
       }
     },
     "features": {
@@ -4119,6 +4133,47 @@
         "lcp_ms": "LCP",
         "inp_ms": "INP",
         "cls": "CLS"
+      }
+    },
+    "setup": {
+      "title": "SEO kurulumu",
+      "text": "Arama motorlarının mağazanızı bulması, güvenmesi ve doğru göstermesi için bir kez yapılacaklar. Tamamlanan madde listeden kalkar.",
+      "progress": "{{done}}/{{total}} tamam",
+      "go": "Tamamla",
+      "blocked": {
+        "coming": "Yasal bilgiler ve politikalar ekranı yakında geliyor; şimdilik yapılacak bir şey yok.",
+        "google_platform": "Google bağlantısı bu ortamda henüz açılmadı; platform ekibi açacak.",
+        "google_account": "Önce Google hesabınızı bağlayın; ardından bu adım aynı ekrandan tamamlanır."
+      },
+      "items": {
+        "legal": {
+          "title": "Künye ve politikalar",
+          "hint": "Şirket bilgileri, iade ve kargo politikası."
+        },
+        "canonical_host": {
+          "title": "Mağaza alan adı",
+          "hint": "Sayfa adreslerinin hangi alan adıyla gösterileceği (canonical)."
+        },
+        "robots": {
+          "title": "robots.txt",
+          "hint": "Arama motorları ana sayfayı tarayabilmeli ve site haritası belirtilmeli."
+        },
+        "share_image": {
+          "title": "Paylaşım görseli",
+          "hint": "Kendi görseli olmayan sayfalar paylaşıldığında görünen görsel."
+        },
+        "search_console": {
+          "title": "Google Search Console",
+          "hint": "Aramadaki tıklamaları ve dizin durumunu görmek için siteyi bağlayın."
+        },
+        "merchant": {
+          "title": "Google Merchant Center",
+          "hint": "Ürünlerin Google Alışveriş'te görünmesi için hesabı seçin."
+        },
+        "indexnow": {
+          "title": "IndexNow",
+          "hint": "Değişen sayfaları Bing ve Yandex'e anında bildirmek için açın."
+        }
       }
     }
   },

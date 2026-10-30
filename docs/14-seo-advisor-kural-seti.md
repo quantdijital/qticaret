@@ -180,6 +180,10 @@ Kural adları ortak ve ürün kurallarıyla çakışmasın diye farklıdır (MET
 - **Ürün listesi:** "SEO" sütunu (skor), filtre (< 70, kritik bulgu var), toplu işlemler: başlık şablonu uygula, alt metinleri doldur, birincil kategori ata.
 - **SEO paneli (route):** mağaza skoru ve dağılım, en düşük 20 varlık, 404 isabetleri + "301 oluştur", zincir/döngü listesi, mükerrerler, öksüzler, GSC ve CWV kartları (F10.11), son denetim raporu indir.
 - **Kurulum kontrol listesi (onboarding):** künye, iade/kargo politikası, canonical host, robots ön ayarı, varsayılan OG görseli, GSC bağlama, Merchant Center bağlama, IndexNow anahtarı. Eksik kaldıkça panelde görünür.
+  - Uygulandı (F12.10, `GET /admin/seo/setup`, kurallar `lib/seo/setup-checklist.ts`): SEO sayfasının başında yalnızca eksik maddeler, her biri tamamlandığı ekrana bağlantıyla; hepsi bitince kart kalkar. Genel bakıştaki bekleyen işlerde "SEO kurulumunda eksik" sayısı (yalnızca şimdi yapılabilenler, ayar yetkisi olana).
+  - robots maddesi: Googlebot ana sayfayı tarayabiliyor ve dosyada `Sitemap:` satırı var. Siteyi kapatan bir robots.txt maddeyi yeniden açar.
+  - Paylaşım görseli: SEO ayarlarında mağaza geneli görsel (`default_og_image`, medya kütüphanesinden; kaydedilince gece temizliğinden korunur). Kendi görseli ve ana görseli olmayan sayfa bunu paylaşır.
+  - Künye ve politikalar F13'ün ekranlarıyla tamamlanır; o zamana kadar madde "yakında" notuyla açık kalır ve bekleyen işler sayısına girmez. Google maddeleri platformun Google istemcisi yoksa yine sayılmaz.
 - İçe aktarmada (F3.9) satır bazlı ön değerlendirme: dosya yüklenince "bu dosyadaki ürünlerin %40'ında görsel yok" gibi özet.
 - Tüm metinler i18n; terim sözlüğü `docs/06`.
 

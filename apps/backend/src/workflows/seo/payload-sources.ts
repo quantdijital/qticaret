@@ -95,7 +95,10 @@ export async function trailOf(container: MedusaContainer, last: CategoryRow, wit
   })
 }
 
-/** The share image: the page's own upload, else the main image (a file gone since stands aside). */
+/**
+ * The share image: the page's own upload, else the main image (a file gone
+ * since stands aside), else the shop's share image (F12.10).
+ */
 export async function imageOf(
   container: MedusaContainer,
   meta: SeoMetaRow | null | undefined,
@@ -107,10 +110,13 @@ export async function imageOf(
   if (own) {
     return { url: own, alt: meta?.og_image_alt ?? null }
   }
-  if (!fallback) {
-    return null
+  if (fallback) {
+    return typeof fallback === "string" ? { url: fallback, alt: null } : fallback
   }
-  return typeof fallback === "string" ? { url: fallback, alt: null } : fallback
+  const shop = (await container
+    .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
+    .getSection("seo")) as unknown as SeoSettings
+  return shop.default_og_image ? { url: shop.default_og_image, alt: null } : null
 }
 
 export interface MediaRow {

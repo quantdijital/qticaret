@@ -93,6 +93,8 @@ export interface SeoSettings {
   description_templates: { product: string }
   robots_txt: string
   ai_crawler_preset: "ai_search_visible" | "block_training" | "none"
+  /** A page without its own image shares this one (F12.10); from the media library. */
+  default_og_image: string | null
 }
 
 const sectionUrl = (section: string) => `/admin/platform-settings/${section}`

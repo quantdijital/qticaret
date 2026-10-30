@@ -63,9 +63,14 @@ export interface SeoSettings {
   description_templates: { product: string }
   robots_txt: string
   ai_crawler_preset: "ai_search_visible" | "block_training" | "none"
+  /** The share image of a page without its own (F12.10): one of the shop's media library. */
+  default_og_image: string | null
 }
 
-/** SEO settings (F2.3, docs/13): canonical host, URL style, title and description templates, robots. */
+/**
+ * SEO settings (F2.3, docs/13): canonical host, URL style, title and
+ * description templates, robots, the shop's share image (F12.10).
+ */
 export const seoSection = defineSection<SeoSettings>(
   "seo",
   {
@@ -98,6 +103,13 @@ export const seoSection = defineSection<SeoSettings>(
       .strict(),
     robots_txt: z.string().refine(isRobotsTxt, { message: "platform_settings.robots_invalid" }),
     ai_crawler_preset: z.enum(["ai_search_visible", "block_training", "none"]),
+    // Checked against the media library when saved (update-platform-settings)
+    default_og_image: z
+      .string()
+      .trim()
+      .max(2048)
+      .regex(/^https?:\/\/\S+$/i, { message: "platform_settings.url_invalid" })
+      .nullable(),
   },
   {
     canonical_host: null,
@@ -114,6 +126,7 @@ export const seoSection = defineSection<SeoSettings>(
     description_templates: { product: "{kısa_açıklama}. {fiyat_cümlesi} {kargo_cümlesi}" },
     robots_txt: DEFAULT_ROBOTS_TXT,
     ai_crawler_preset: "ai_search_visible",
+    default_og_image: null,
   },
   (values, ctx) => {
     const templates: [string, TemplateEntity, string][] = [
