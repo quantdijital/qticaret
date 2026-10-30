@@ -3,7 +3,7 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
-**F14 — Veri taşıma ve geçiş araçları: SÜRÜYOR (2026-10-31; G1–G8 bitti, G9 kapanış incelemesi düzeltildi; tam doğrulama koşuyor).** Dal `f14-migration` (`f8-einvoice` üzerinden), push yok. Plan aşağıda "F14 görev planı"; ADR-0042 (otonom öneri, uygulama notlarıyla; gözden geçir). Sıradaki: G9 kapanış güvenlik incelemesi ve tam doğrulama.
+**F14 — Veri taşıma ve geçiş araçları: BİTTİ (2026-10-31; G1–G9, KK1–KK4 işaretli).** Dal `f14-migration` (`f8-einvoice` üzerinden), push yok. Plan aşağıda "F14 görev planı"; ADR-0042 (otonom öneri, uygulama notları ve kapanış incelemesiyle; gözden geçir). Kaynaklar: geçiş paketi (JSON), Shopify (Dev Dashboard uygulaması, toplu sorgu), Google Merchant akışı (Ticimax, ikas, IdeaSoft, T-Soft), müşteri listesi (xlsx/CSV). Panel: Ayarlar > Taşıma. Runbook: `docs/runbooks/gecis.md`. **Vitrin (F18) için açık iş:** `/hesap/kayit?davet=` sayfası giriş/kayıt sonrası `POST /store/customers/me/migration-claim` çağırmalı. Sıradaki faz: F15 (plan aşağıda).
 
 **F13 — Uyum ve yasal özellikler: BİTTİ, KK5 hariç (2026-10-30; L1–L11, KK1–KK4 işaretli).** KK5 masa başı ihlal tatbikatı kullanıcıyla yapılacak (kılavuz hazır). Plan aşağıda "F13 görev planı"; ADR-0041 kabul edildi. Avukat onaylı metinler ve KVKK danışmanının süre onayı kod dışı girdi olarak açık. Dal `f13-compliance` (`f12-admin` üzerinden), push yok (2026-11-01'e kadar). Kapanışta yerelde: birim 2180, HTTP 136/136 dosya (666 test; tam koşuda veritabanı bağlantısı kopan 3 dosya tek başına yeniden koşuldu; biri, saklama testi, L11'in denetim kaydı kuralını gerçek bir hatayla yakaladı: kural sunucu saatine bakıyordu, artık işin saatine bakıyor ve modül testi var), modül legal ve audit-log, panel 361; e2e yeniden koşulmadı (L11'de panelde yalnızca bir uyarı metni değişti). Kapanış güvenlik incelemesi (3 bağımsız alan) 2 yüksek, 8 orta, 19 düşük buldu: yüksek ve ortaların hepsi düzeltildi; düşüklerden 4'ü sonraya (ayrıntı L11). Sıradaki faz: F8 (yeni planla).
 
@@ -1178,7 +1178,21 @@
 - **Daha önce:** F1 planlaması ve F0.2–F0.8 (2026-10-24), F0.1 monorepo (2026-10-24 sabahı), SEO ve güvenlik dokümanları (2026-10-22).
 
 ## Sıradaki görev
-**Claude'un sıradaki işi:** F14 G9 — Kapanış: bağımsız güvenlik incelemesi (SSRF yolları, dosya yüklemeleri, sahiplik/yetki, KVKK, davetler), bulguların düzeltilmesi, tam doğrulama (birim, modül, HTTP tam takım, panel, e2e), docs/03 F14 KK işaretleri, `migration_item` saklama süresi temizleme işi. G1–G8 bitti (2026-10-31).
+**Claude'un sıradaki işi:** F15 — Sertleştirme (plan: "F15 görev planı"); önce H1 kimlik doğrulama sertleştirmesi (e-posta doğrulama onayını isteyen kimliğe bağlama). H4 gözlemlenebilirlik yeni bağımlılık ister: kullanıcı onayı. F14 bitti (2026-10-31).
+
+### F15 görev planı (2026-10-31, taslak; F14 kapanınca başlar. Dış servis ya da yeni bağımlılık isteyen işler kullanıcı onayını bekler)
+
+| # | F15 | Görev | Bağımlılık | KK |
+|---|---|---|---|---|
+| H1 | F15.1 | Kimlik doğrulama sertleştirmesi: e-posta doğrulama onayını isteyen kimliğe bağlama (F14 kapanışından devreden; Medusa `/auth/verification/confirm`), şifre değişince eski kimliksiz anahtarların yenilenmemesi; önceki fazların ADR'lerindeki "sonraya kalanlar" taraması ve kapatılması | — | KK1 |
+| H2 | F15.2 | Güvenlik tabanı uçtan uca: hız sınırı, güvenlik başlıkları, CORS, CSRF, yükleme, SSRF için tek HTTP takımı; staging için OWASP ZAP yapılandırması (CI açılınca çalışır) | — | KK1 |
+| H3 | F15.3 | k6 senaryoları (ürün gezinme, sepet, sahte sağlayıcıyla checkout, webhook patlaması 1000/dk, sitemap/robots), yerelde ölçüm, `docs/perf-raporlari/` | — | KK2 |
+| H4 | F15.4 | Gözlemlenebilirlik: OpenTelemetry izleri, yavaş sorgu logu, hata izleme (Türkiye'de kendi barındırılan; ADR). **Yeni bağımlılık: kullanıcı onayı** | — | — |
+| H5 | F15.5 | Yedekleme ve geri yükleme: şifreli tenant yedeği betiği, runbook, yerelde prova ve kaydı | — | KK3 |
+| H6 | F15.6 | `fraud-guard`: giriş/kayıt/checkout'ta kendi barındırdığımız iş kanıtı (proof-of-work) captcha'sı (dış servis yok; ADR), kart/IP/e-posta hız kuralları, şüpheli sipariş işareti ve panelde inceleme kuyruğu, kara liste | — | KK4 |
+| H7 | F15.9 | `/.well-known/security.txt`, sorumlu açıklama sayfası ve SLA; `pnpm audit` ve bağımlılık raporu betiği | — | — |
+| H8 | F15.7, F15.8 | Kenar güvenliği (WAF, DDoS, bot) ve dış pentest için kontrol listesi ve hazırlık (kod dışı; F16 altyapısıyla) | — | KK1 (dış pentest) |
+| H9 | — | Kapanış: güvenlik incelemesi, tam doğrulama, KK işaretleri | H1–H8 | — |
 
 ### F14 görev planı (2026-10-30; mevcut altyapı tarandı: katalog tablosu motoru F3.9 (kontrol ve uygulama, tanıtıcıya göre tekrarsız), `seo-redirects` (301 ve 404 kaydı), `safe-fetch`, `lib/security/xml`, arka plan işleri, şifre sıfırlama iletisi; dış kaynakların erişim biçimi her görevin başında resmî belgeden doğrulanır)
 Karar: ADR-0042 (önerildi, otonom kabul). Dal `f14-migration` (`f8-einvoice` üzerinden).
@@ -1193,7 +1207,7 @@ Karar: ADR-0042 (önerildi, otonom kabul). Dal `f14-migration` (`f8-einvoice` ü
 | G6 ✅ | F14.5 | **Bitti (2026-10-31).** Şifre belirleme daveti: taşınan müşterilere partiler halinde işlemsel ileti, kotaya uyar, mevcut şifre sıfırlama bağlantısı. Yapılan (sapma, gözden geçir): sıfırlama yerine kayıt daveti (`account.migration_invite`, `/hesap/kayit?email=`), günlük sınırın yarısı, her sabah devam (`migration-invites`), hesabı olana gitmez, iki kez gitmez; girişte taşınmış kaydın geçmiş siparişleri, yorumları, izinleri ve adresleri hesaba (`adoptMigratedStep`). HTTP 2/2; şablon sayımı 23. | G2 | — |
 | G7 ✅ | F14.3 | **Bitti (2026-10-31): G7a Google Merchant akışı kaynağı (dört platform da yayımlar); G7b müşteri listesi (platformun kendi xlsx/CSV dışa aktarması, esnek başlıklar).** Türk platformları: genel CSV/XML eşleme kaynağı (güvenli XML), doğrulanan dışa aktarma biçimleri için hazır eşlemeler (Ticimax, ikas, IdeaSoft, T-Soft) | G2 | — |
 | G8 ✅ | F14.6, F14.7 | **Bitti (2026-10-31).** Panel: Ayarlar > Taşıma (kaynak, bağlantı, kuru çalıştırma raporu, çalıştırma, ilerleme, adres eşleme tablosu ve kararlar, kesim listesi); `docs/runbooks/gecis.md`. Yapılan: `/settings/migration` (yalnızca sahip, panel yetkisi `migration`): çalıştırma kartı (kaynak seçimi, Shopify bağlantısı, akış adresi ya da dosya, varsayılan paket, kuru çalıştır/uygula, ilerleme, sayım tablosu, rapor; yanında son çalıştırmalar), eski adresler kartı (hazır rozeti, sayaçlar, site haritası, Search Console, kararları uygula, süzgeç sekmeleri, satır başına karar), kesim ve davet kartları; zilde `migration_not_found`; runbook. Doğrulama: panel 2 yeni test, ayarlar ana sayfa testi 21 bölüm; e2e erişilebilirlik (açık/koyu), yerleşim ve telefon geçti (telefonda tablo başlığındaki ekran okuyucu metni sayfayı genişletiyordu: kaydırma kutusu `relative` yapıldı). | G2–G7 | — |
-| G9 ◐ | — | Kapanış: bağımsız güvenlik incelemesi, tam doğrulama, KK işaretleri | G1–G8 | — |
+| G9 ✅ | — | **Bitti (2026-10-31).** Kapanış: bağımsız güvenlik incelemesi, tam doğrulama, KK işaretleri. Üç inceleme: 2 yüksek, 8 orta, 17 düşük; yüksek ve ortaların hepsi, düşüklerin 11'i düzeltildi, kalanlar ADR-0042'de. Doğrulama: birim 2268; modül 39 dosya, 253 test; HTTP tam takım 146 dosya, 692 test (bağlantı havuzu zaman aşımıyla düşen 2 dosya ve 1 modül dosyası tek başına geçti); panel 369; e2e 80 (erişilebilirlik, yerleşim, telefon, temel akışlar). docs/03 F14 KK1–KK4 işaretli. | G1–G8 | KK1–KK4 |
 
 ### F13 görev planı (2026-10-30; Medusa 2.21.2 API'leri Context7 `/medusajs/medusa` ve v2.21.2 kaynağından doğrulandı: `completeCartWorkflow.hooks.validate` (kanca başına tek işleyici; ödemesi alınmış sepet yolunda da çalışır), `deleteCustomersWorkflow` yumuşak siler, `removeCustomerAccountWorkflow`, `updateOrderWorkflow` eski değerleri değişiklik geçmişine yazar, `updateOrderAddresses` yazmaz, sepet `metadata`'sı vitrinden yazılabilir, ziyaretçi kimliği yok; ayrıntı ADR-0041)
 Karar: ADR-0041 (önerildi, otonom kabul). Envanter: `legal` modülü yok; ödemede yalnızca ticari ileti izni var (`messaging` `checkout_consent`, deseni yeniden kullanılır); çerez onayı sepete bağlı (`conversions` `tracking_consent`); cayma süresi `lib/orders/returns.ts`'de 14 güne sabit; künye ve `MerchantReturnPolicy` yok; KVKK dışa aktarma/silme yok, saklama işleri kısmi; ihlal kılavuzu docs/04'te bir paragraf.
@@ -1868,7 +1882,7 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
 | F11 Raporlama, muhasebe ve dış API | ✅ (R1–R9; KK1–KK5; 2026-10-29) |
 | F12 Admin genişletmeleri (ekranlar panel hattı P5'te) | ✅ (Y1–Y13; KK1–KK3; 2026-10-30) |
 | F13 Uyum & yasal özellikler | ✅ KK5 hariç (L1–L11; KK1–KK4; 2026-10-30; tatbikat kullanıcıda) |
-| F14 Veri taşıma ve geçiş araçları | ⬜ |
+| F14 Veri taşıma ve geçiş araçları | ✅ (G1–G9; KK1–KK4; 2026-10-31; gerçek Shopify ve Türk platformu akışıyla ilk geçişte denenecek) |
 | F15 Sertleştirme (güvenlik/dolandırıcılık/yük) | ⬜ |
 | F16 Dağıtım & tenant işletimi | ⬜ |
 | F17 Control plane | ⬜ |
