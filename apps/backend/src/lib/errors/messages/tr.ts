@@ -427,6 +427,12 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "media.not_an_image": "Bu dosya bir görsel değil.",
   "media.unknown": "Görsel bulunamadı.",
   "orders.nothing_to_ship": "Bu siparişte kargoya verilecek ürün kalmadı.",
+  "legal.unknown": "Böyle bir yasal metin türü yok.",
+  "legal.not_published": "Bu metin henüz yayımlanmadı.",
+  "legal.draft_missing": "Bu metnin taslağı yok.",
+  "legal.token_invalid":
+    "Metinde tanınmayan ya da yarım kalmış bir belirteç var; belirteçler {mağaza_unvanı} biçiminde ve listedeki adlarla yazılır.",
+  "legal.title_invalid": "Başlık görünmeyen kontrol karakterleri içeremez.",
   "orders.unknown": "Sipariş bulunamadı.",
   "paytr.merchant_id_invalid":
     "Mağaza no yalnızca rakamlardan oluşur; PayTR panelinde Destek & Kurulum > Entegrasyon Bilgileri sayfasından kopyalayın.",

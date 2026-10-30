@@ -7,6 +7,7 @@ import { CHARGEBACK_RESOURCES } from "./resources/chargebacks"
 import { CONTENT_RESOURCES } from "./resources/content"
 import { GIFT_CARD_RESOURCES } from "./resources/gift-cards"
 import { INTEGRATION_RESOURCES } from "./resources/integrations"
+import { LEGAL_RESOURCES } from "./resources/legal"
 import { ORDER_RESOURCES } from "./resources/orders"
 import { MEDIA_RESOURCES } from "./resources/media"
 import { PRICE_RESOURCES } from "./resources/prices"
@@ -42,6 +43,7 @@ export const AUDITED_RESOURCES: readonly AuditedResource[] = [
   ...ORDER_RESOURCES,
   ...CHARGEBACK_RESOURCES,
   ...STAFF_RESOURCES,
+  ...LEGAL_RESOURCES,
 ]
 
 export interface ResourceMatch {

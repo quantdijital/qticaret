@@ -30,6 +30,7 @@ import { BRAND_ROUTES, STORE_BRAND_FIELDS } from "./http/brand-routes"
 import { CATALOG_SHEET_ROUTES } from "./http/catalog-sheet-routes"
 import { CHARGEBACK_ROUTES } from "./http/chargeback-routes"
 import { COMMUNICATION_ROUTES } from "./http/communication-routes"
+import { LEGAL_ROUTES } from "./http/legal-routes"
 import { CORE_RETURN_ROUTES } from "./http/core-return-routes"
 import { GOOGLE_ROUTES } from "./http/google-routes"
 import { MARKETING_ROUTES } from "./http/marketing-routes"
@@ -231,6 +232,7 @@ export default defineMiddlewares({
     ...BANK_TRANSFER_ROUTES,
     ...CHARGEBACK_ROUTES,
     ...COMMUNICATION_ROUTES,
+    ...LEGAL_ROUTES,
     ...SHIPPING_ROUTES,
     // F11.7: outgoing webhooks
     ...WEBHOOK_ROUTES,

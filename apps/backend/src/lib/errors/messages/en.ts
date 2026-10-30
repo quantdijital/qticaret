@@ -426,6 +426,12 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "media.not_an_image": "This file is not an image.",
   "media.unknown": "Image not found.",
   "orders.nothing_to_ship": "Nothing is left to ship in this order.",
+  "legal.unknown": "There is no such kind of legal text.",
+  "legal.not_published": "This text is not published yet.",
+  "legal.draft_missing": "This text has no draft.",
+  "legal.token_invalid":
+    "The text has an unknown or broken token; tokens are written like {mağaza_unvanı}, with the names in the list.",
+  "legal.title_invalid": "The title cannot contain invisible control characters.",
   "orders.unknown": "Order not found.",
   "paytr.merchant_id_invalid":
     "The merchant number is digits only; copy it from Destek & Kurulum > Entegrasyon Bilgileri in the PayTR panel.",
