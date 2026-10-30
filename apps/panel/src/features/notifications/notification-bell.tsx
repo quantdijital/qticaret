@@ -1,6 +1,14 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
-import { Bell, Calculator, PackageMinus, Scale, ShieldAlert, Webhook } from "lucide-react"
+import {
+  Bell,
+  Calculator,
+  FileWarning,
+  PackageMinus,
+  Scale,
+  ShieldAlert,
+  Webhook,
+} from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
@@ -60,6 +68,16 @@ function useAlertText(data: Record<string, unknown>) {
       Icon: Webhook,
       tone: "bg-destructive-soft text-destructive-text",
       link: { to: "/settings/api" as const, search: {}, params: {} },
+    }
+  }
+  if (data["kind"] === "einvoice_stopped") {
+    const order = text(data["order_id"])
+    return {
+      title: t("notifications.einvoiceStopped.title", { order: text(data["display_id"]) }),
+      description: t("notifications.einvoiceStopped.description"),
+      Icon: FileWarning,
+      tone: "bg-destructive-soft text-destructive-text",
+      link: { to: "/orders/$id" as const, search: {}, params: { id: order } },
     }
   }
   if (data["kind"] === "accounting_sync") {

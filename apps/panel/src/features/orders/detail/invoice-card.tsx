@@ -1,0 +1,163 @@
+import { useQuery } from "@tanstack/react-query"
+import { FileDown, FilePen, Loader2, RotateCcw } from "lucide-react"
+import { useState } from "react"
+import { useTranslation } from "react-i18next"
+import { toast } from "sonner"
+import { SectionCard } from "@/components/patterns/section-card"
+import type { StatusTone } from "@/components/patterns/status-badge"
+import { StatusBadge } from "@/components/patterns/status-badge"
+import { Button } from "@/components/ui/button"
+import { Skeleton } from "@/components/ui/skeleton"
+import { invoicePdfUrl, orderInvoicesQuery, useRetryInvoice } from "@/features/orders/api/invoices"
+import type { InvoiceRecord } from "@/features/orders/api/invoices"
+import { InvoiceEntryDialog } from "@/features/orders/detail/invoice-entry-dialog"
+import { errorText } from "@/lib/errors"
+import { formatDateTime } from "@/lib/format"
+
+const V = "orders.invoice"
+
+const TONES: Readonly<Record<InvoiceRecord["status"], StatusTone>> = {
+  pending: "info",
+  issuing: "info",
+  issued: "success",
+  failed: "danger",
+  cancelled: "neutral",
+}
+
+function Row({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-baseline justify-between gap-3 py-2">
+      <dt className="text-[13px] text-muted-foreground">{label}</dt>
+      <dd className="truncate text-sm font-medium tabular-nums">{value}</dd>
+    </div>
+  )
+}
+
+/**
+ * The order's invoice (F8, adr/0034): where it stands at its program, its
+ * number and PDF; a stopped one tried again, and one issued elsewhere
+ * (the shop's own program, Luca by hand) typed in with its PDF.
+ */
+export function InvoiceCard({ orderId }: { orderId: string }) {
+  const { t } = useTranslation()
+  const query = useQuery(orderInvoicesQuery(orderId))
+  const retry = useRetryInvoice()
+  const [entry, setEntry] = useState<"full" | "pdf" | null>(null)
+  const [opening, setOpening] = useState(false)
+  const invoice = query.data?.invoices.find((row) => row.kind === "sale") ?? null
+  const fail = (failure: unknown) => toast.error(errorText(t, failure))
+  const openPdf = async (id: string) => {
+    setOpening(true)
+    try {
+      window.open(await invoicePdfUrl(id), "_blank", "noopener")
+    } catch (failure) {
+      fail(failure)
+    } finally {
+      setOpening(false)
+    }
+  }
+  const external = invoice?.provider === "external"
+  return (
+    <SectionCard title={t(`${V}.title`)}>
+      {query.isPending ? (
+        <Skeleton className="h-20 rounded-md" />
+      ) : query.isError ? (
+        <p className="text-[13px] text-muted-foreground">{errorText(t, query.error)}</p>
+      ) : !invoice ? (
+        <p className="text-[13px] text-muted-foreground">{t(`${V}.none`)}</p>
+      ) : (
+        <div className="flex flex-col gap-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <StatusBadge tone={TONES[invoice.status]}>
+              {t(`${V}.status.${invoice.status}`)}
+            </StatusBadge>
+            <span className="text-xs text-muted-foreground">
+              {t(`${V}.providers.${invoice.provider}`)}
+            </span>
+          </div>
+          <dl className="divide-y">
+            {invoice.number ? <Row label={t(`${V}.number`)} value={invoice.number} /> : null}
+            {invoice.document_type ? (
+              <Row label={t(`${V}.type`)} value={t(`${V}.types.${invoice.document_type}`)} />
+            ) : null}
+            {invoice.issued_at ? (
+              <Row label={t(`${V}.issuedAt`)} value={formatDateTime(invoice.issued_at)} />
+            ) : null}
+          </dl>
+          {invoice.status === "failed" ? (
+            <p className="text-[13px] text-destructive-text">
+              {t(`${V}.reasons.${(invoice.last_error ?? "").replace(/\./g, "_")}`, {
+                defaultValue: t(`${V}.failed`, {
+                  code: invoice.last_error ?? "—",
+                  attempts: invoice.attempts,
+                }),
+              })}
+            </p>
+          ) : null}
+          {invoice.status === "pending" && external ? (
+            <p className="text-[13px] text-muted-foreground">{t(`${V}.waitingExternal`)}</p>
+          ) : null}
+          {invoice.program_difference ? (
+            <p className="text-[13px] text-muted-foreground">
+              {t(`${V}.difference`, { kurus: invoice.program_difference })}
+            </p>
+          ) : null}
+          <div className="grid gap-2 sm:grid-cols-2">
+            {invoice.has_pdf ? (
+              <Button variant="outline" disabled={opening} onClick={() => void openPdf(invoice.id)}>
+                {opening ? <Loader2 className="animate-spin" /> : <FileDown />}
+                {t(`${V}.pdf`)}
+              </Button>
+            ) : null}
+            {invoice.status === "failed" ? (
+              <Button
+                variant="outline"
+                disabled={retry.isPending}
+                onClick={() => {
+                  retry.mutate(invoice.id, {
+                    onSuccess: () => toast.success(t(`${V}.retried`)),
+                    onError: fail,
+                  })
+                }}
+              >
+                <RotateCcw />
+                {t(`${V}.retry`)}
+              </Button>
+            ) : null}
+            {external && invoice.status === "pending" ? (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setEntry("full")
+                }}
+              >
+                <FilePen />
+                {t(`${V}.enter`)}
+              </Button>
+            ) : null}
+            {external && invoice.status === "issued" && !invoice.has_pdf ? (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setEntry("pdf")
+                }}
+              >
+                <FilePen />
+                {t(`${V}.addPdf`)}
+              </Button>
+            ) : null}
+          </div>
+        </div>
+      )}
+      {entry && invoice ? (
+        <InvoiceEntryDialog
+          invoiceId={invoice.id}
+          numbered={entry === "pdf"}
+          onClose={() => {
+            setEntry(null)
+          }}
+        />
+      ) : null}
+    </SectionCard>
+  )
+}

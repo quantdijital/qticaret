@@ -18,6 +18,7 @@ import { NotesCard } from "@/features/orders/detail/notes-card"
 import { OrderActions } from "@/features/orders/detail/order-actions"
 import { PaymentCard } from "@/features/orders/detail/payment-card"
 import { ContractsCard } from "@/features/orders/detail/contracts-card"
+import { InvoiceCard } from "@/features/orders/detail/invoice-card"
 import { AddressCard, CustomerCard } from "@/features/orders/detail/people-cards"
 import { ProgressCard } from "@/features/orders/detail/progress-card"
 import { RefundsCard } from "@/features/orders/detail/refunds-card"
@@ -123,6 +124,7 @@ export function OrderDetailPage() {
             {...(money.error ? { moneyError: { onRetry: () => void money.refetch() } } : {})}
             hosted={hosted}
           />
+          <InvoiceCard orderId={order.id} />
           <ContractsCard orderId={order.id} />
           {/* Last: the column's last card grows, and the note box sits at its foot */}
           <NotesCard orderId={order.id} />

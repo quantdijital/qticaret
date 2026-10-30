@@ -3,7 +3,14 @@ import { withReauth } from "@/lib/reauth"
 import { sdk } from "@/lib/sdk"
 
 /** What a key may reach (F11.6, adr/0039 §6); every other admin route is closed to it. */
-export const API_SCOPES = ["orders:read", "catalog:read", "stock:write", "webhooks:manage"] as const
+export const API_SCOPES = [
+  "orders:read",
+  "catalog:read",
+  "stock:write",
+  "webhooks:manage",
+  "invoices:read",
+  "invoices:write",
+] as const
 export type ApiScope = (typeof API_SCOPES)[number]
 
 /** A scope's text key: i18next reads `:` as a namespace, so `orders:read` is `orders_read`. */

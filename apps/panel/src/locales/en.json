@@ -1715,6 +1715,14 @@
         "webhooks_manage": {
           "name": "Manage webhooks",
           "hint": "Manage the shop's outgoing event subscriptions"
+        },
+        "invoices_read": {
+          "name": "Read invoices",
+          "hint": "Invoices waiting and their contents (buyer and tax id included)"
+        },
+        "invoices_write": {
+          "name": "Write invoices",
+          "hint": "Write back an issued invoice's number and PDF"
         }
       },
       "connect": {
@@ -1762,7 +1770,8 @@
           "order_fulfilled": "Order fulfilled",
           "return_requested": "Return requested",
           "return_received": "Return received",
-          "stock_changed": "Stock changed"
+          "stock_changed": "Stock changed",
+          "invoice_requested": "Invoice waiting"
         },
         "status": {
           "active": "Active",
@@ -2032,7 +2041,7 @@
           "placed": "The order is placed"
         },
         "hints": {
-          "none": "No invoice is issued; if you issue invoices elsewhere, enter them on the order's invoice card.",
+          "none": "No invoice is issued. If you issue invoices elsewhere (e.g. Luca), pick \"My own program\"; their number and PDF are entered on the order's invoice card.",
           "parasut": "Invoices are issued in your Paraşüt account; Paraşüt decides e-Fatura or e-Arşiv.",
           "external": "Invoices are issued in your own program (e.g. through BirFatura) or by hand; their number and PDF are written back here.",
           "fake": "The fake program works in development only; it issues no real invoice."
@@ -2086,7 +2095,7 @@
         "description": "Pick a program and the orders' invoices are issued on their own, or wait for you.",
         "parasut": "Paraşüt: issued in your Paraşüt account; the PDF comes to the order and the customer.",
         "external": "My own program: issued through BirFatura and the like, or by hand; the number and PDF are written here.",
-        "manual": "Even when off, you can enter an invoice's number and PDF on the order's invoice card."
+        "manual": "If you issue invoices by hand (e.g. Luca), pick \"My own program\": each order's invoice card waits for its number and PDF."
       },
       "carriers": {
         "title": "Carriers' details",
@@ -3050,6 +3059,62 @@
       },
       "age": "Age declared",
       "ageValue": "{{age}} or over · {{date}}"
+    },
+    "invoice": {
+      "title": "Invoice",
+      "none": "No invoice yet. It is opened with the program in Settings > E-invoice when its moment comes.",
+      "status": {
+        "pending": "Waiting",
+        "issuing": "Being issued",
+        "issued": "Issued",
+        "failed": "Not issued",
+        "cancelled": "Cancelled"
+      },
+      "providers": {
+        "parasut": "Paraşüt",
+        "external": "Your own program",
+        "fake": "Fake program"
+      },
+      "types": {
+        "e_archive": "e-Arşiv",
+        "e_invoice": "e-Fatura"
+      },
+      "number": "Invoice no",
+      "type": "Document",
+      "issuedAt": "Issued",
+      "failed": "Not issued ({{code}}, {{attempts}} tries). Check the program and try again.",
+      "waitingExternal": "Waiting for your program to write its number and PDF; you can enter them by hand too.",
+      "difference": "The program's total differs from ours by {{kurus}} kuruş (rounding).",
+      "pdf": "Open the PDF",
+      "retry": "Try again",
+      "retried": "The invoice will be tried again.",
+      "enter": "Enter the invoice",
+      "addPdf": "Add the PDF",
+      "entry": {
+        "title": "Enter the invoice",
+        "pdfTitle": "Invoice PDF",
+        "description": "Enter the invoice you issued in another program. The number is entered once.",
+        "number": "Invoice no",
+        "numberInvalid": "GİB's form: three letters or digits, the year and nine digits (e.g. ABC2026000000123).",
+        "issuedOn": "Issue date",
+        "dateInvalid": "Pick the date.",
+        "type": "Document type",
+        "uuid": "ETTN (optional)",
+        "uuidInvalid": "The ETTN looks wrong.",
+        "pdf": "PDF file",
+        "saved": "Invoice saved."
+      },
+      "reasons": {
+        "einvoice_outcome_unknown": "Paraşüt's answer was lost; the invoice may have been issued. Look at Paraşüt first; if it was not, try again.",
+        "parasut_job_error": "Paraşüt did not issue the invoice. Look at it in Paraşüt and fix it, then try again.",
+        "einvoice_document_missing": "Paraşüt has not made the e-document for hours. Look at Paraşüt.",
+        "einvoice_carrier_identity_missing": "The carrier's registered name and tax id are not entered (Settings > E-invoice).",
+        "einvoice_parasut_not_connected": "No Paraşüt account is connected (Settings > E-invoice).",
+        "einvoice_parasut_disconnected": "The Paraşüt connection is lost; connect again (Settings > E-invoice).",
+        "einvoice_store_url_missing": "The shop's storefront address is not entered (Settings > SEO).",
+        "einvoice_tax_office_missing": "The corporate buyer has no tax office.",
+        "einvoice_address_missing": "The order has no billing address."
+      }
     }
   },
   "customers": {
@@ -4716,6 +4781,10 @@
     "webhookDisabled": {
       "title": "The {{host}} webhook subscription was turned off",
       "description": "Eight deliveries in a row failed; turn it on again in Settings > External API."
+    },
+    "einvoiceStopped": {
+      "title": "Order #{{order}}'s invoice could not be issued",
+      "description": "It will not be tried again on its own; see the invoice card on the order's page."
     }
   },
   "content": {

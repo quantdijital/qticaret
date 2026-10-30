@@ -39,6 +39,7 @@ async function alertStopped(
       data: {
         kind: "einvoice_stopped",
         order_id: orderId,
+        display_id: order,
         code,
         ...notificationText("einvoice.issue_stopped", { order }),
       },

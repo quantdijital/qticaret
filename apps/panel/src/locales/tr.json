@@ -1715,6 +1715,14 @@
         "webhooks_manage": {
           "name": "Webhook yönetimi",
           "hint": "Mağazadan giden olay aboneliklerini yönetme"
+        },
+        "invoices_read": {
+          "name": "Faturaları okuma",
+          "hint": "Bekleyen faturalar ve içerikleri (alıcı ve vergi numarası dahil)"
+        },
+        "invoices_write": {
+          "name": "Fatura yazma",
+          "hint": "Kesilen faturanın numarasını ve PDF'ini geri yazma"
         }
       },
       "connect": {
@@ -1762,7 +1770,8 @@
           "order_fulfilled": "Sipariş hazırlandı",
           "return_requested": "İade istendi",
           "return_received": "İade teslim alındı",
-          "stock_changed": "Stok değişti"
+          "stock_changed": "Stok değişti",
+          "invoice_requested": "Fatura bekliyor"
         },
         "status": {
           "active": "Etkin",
@@ -2032,7 +2041,7 @@
           "placed": "Sipariş onaylanınca"
         },
         "hints": {
-          "none": "Fatura kesilmez; faturalarınızı başka yerden kesiyorsanız siparişin fatura kartından elle işleyebilirsiniz.",
+          "none": "Fatura kesilmez. Faturalarınızı başka yerde (ör. Luca) kesiyorsanız \"Kendi programım\"ı seçin; numarası ve PDF'i siparişin fatura kartından elle girilir.",
           "parasut": "Fatura, Paraşüt hesabınızda kesilir; e-Fatura mı e-Arşiv mi olacağına Paraşüt karar verir.",
           "external": "Fatura kendi programınızda (ör. BirFatura üzerinden) ya da elle kesilir; numarası ve PDF'i buraya geri yazılır.",
           "fake": "Sahte program yalnızca geliştirme ortamında çalışır; gerçek fatura kesmez."
@@ -2086,7 +2095,7 @@
         "description": "Bir program seçince siparişlerin faturası kendiliğinden kesilir ya da sizi bekler.",
         "parasut": "Paraşüt: fatura Paraşüt hesabınızda kesilir, PDF'i siparişe ve müşteriye gelir.",
         "external": "Kendi programım: BirFatura gibi bir aracıyla ya da elle kesilir, numarası ve PDF'i buraya yazılır.",
-        "manual": "Kapalıyken de siparişin fatura kartından numarayı ve PDF'i elle girebilirsiniz."
+        "manual": "Faturalarınızı elle kesiyorsanız (ör. Luca) \"Kendi programım\"ı seçin: her sipariş fatura kartında numarasını ve PDF'ini bekler."
       },
       "carriers": {
         "title": "Kargo firmalarının bilgileri",
@@ -3050,6 +3059,62 @@
       },
       "age": "Yaş beyanı",
       "ageValue": "{{age}} yaş ve üstü · {{date}}"
+    },
+    "invoice": {
+      "title": "Fatura",
+      "none": "Henüz fatura yok. Ayarlar > E-Fatura'daki programla, kesim anı gelince açılır.",
+      "status": {
+        "pending": "Bekliyor",
+        "issuing": "Kesiliyor",
+        "issued": "Kesildi",
+        "failed": "Kesilemedi",
+        "cancelled": "İptal edildi"
+      },
+      "providers": {
+        "parasut": "Paraşüt",
+        "external": "Kendi programınız",
+        "fake": "Sahte program"
+      },
+      "types": {
+        "e_archive": "e-Arşiv",
+        "e_invoice": "e-Fatura"
+      },
+      "number": "Fatura no",
+      "type": "Belge",
+      "issuedAt": "Kesim",
+      "failed": "Kesilemedi ({{code}}, {{attempts}} deneme). Programı kontrol edip yeniden deneyin.",
+      "waitingExternal": "Programınızın numarayı ve PDF'i yazmasını bekliyor; elle de girebilirsiniz.",
+      "difference": "Programın toplamı bizimkinden {{kurus}} kuruş farklı (yuvarlama).",
+      "pdf": "PDF'i aç",
+      "retry": "Yeniden dene",
+      "retried": "Fatura yeniden denenecek.",
+      "enter": "Faturayı elle işle",
+      "addPdf": "PDF ekle",
+      "entry": {
+        "title": "Faturayı elle işle",
+        "pdfTitle": "Fatura PDF'i",
+        "description": "Başka bir programda kestiğiniz faturanın bilgilerini girin. Numara bir kez girilir.",
+        "number": "Fatura no",
+        "numberInvalid": "GİB biçiminde olmalı: 3 harf veya rakam, yıl ve 9 hane (ör. ABC2026000000123).",
+        "issuedOn": "Kesim tarihi",
+        "dateInvalid": "Tarihi seçin.",
+        "type": "Belge türü",
+        "uuid": "ETTN (isteğe bağlı)",
+        "uuidInvalid": "ETTN geçersiz görünüyor.",
+        "pdf": "PDF dosyası",
+        "saved": "Fatura kaydedildi."
+      },
+      "reasons": {
+        "einvoice_outcome_unknown": "Paraşüt'ün yanıtı alınamadı; fatura kesilmiş olabilir. Önce Paraşüt'e bakın, kesilmemişse yeniden deneyin.",
+        "parasut_job_error": "Paraşüt faturayı kesmedi. Paraşüt'teki faturaya bakıp düzeltin, sonra yeniden deneyin.",
+        "einvoice_document_missing": "Paraşüt e-belgeyi saatlerdir oluşturmadı. Paraşüt'e bakın.",
+        "einvoice_carrier_identity_missing": "Kargo firmasının unvanı ve VKN'si girilmemiş (Ayarlar > E-Fatura).",
+        "einvoice_parasut_not_connected": "Paraşüt hesabı bağlı değil (Ayarlar > E-Fatura).",
+        "einvoice_parasut_disconnected": "Paraşüt bağlantısı koptu; yeniden bağlayın (Ayarlar > E-Fatura).",
+        "einvoice_store_url_missing": "Mağazanın vitrin adresi girilmemiş (Ayarlar > SEO).",
+        "einvoice_tax_office_missing": "Kurumsal alıcının vergi dairesi yok.",
+        "einvoice_address_missing": "Siparişte fatura adresi yok."
+      }
     }
   },
   "customers": {
@@ -4716,6 +4781,10 @@
     "webhookDisabled": {
       "title": "{{host}} webhook aboneliği kapatıldı",
       "description": "Arka arkaya 8 teslim başarısız oldu; Ayarlar > Dış API'den açabilirsiniz."
+    },
+    "einvoiceStopped": {
+      "title": "#{{order}} siparişinin faturası kesilemedi",
+      "description": "Kendiliğinden yeniden denenmeyecek; sipariş sayfasındaki fatura kartından bakın."
     }
   },
   "content": {

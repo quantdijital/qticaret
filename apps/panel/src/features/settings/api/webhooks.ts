@@ -10,6 +10,7 @@ export const WEBHOOK_EVENTS = [
   "return.requested",
   "return.received",
   "stock.changed",
+  "invoice.requested",
 ] as const
 export type WebhookEvent = (typeof WEBHOOK_EVENTS)[number]
 
