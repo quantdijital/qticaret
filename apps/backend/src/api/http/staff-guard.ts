@@ -92,8 +92,10 @@ export async function guardStaffRoles(
     return
   }
   const body = req.body as { type?: unknown } | undefined
+  const channel = (req.query as Record<string, unknown> | undefined)?.["channel"]
   const decision = decide(role, req.method, routePath(req), {
     jobType: typeof body?.type === "string" ? body.type : undefined,
+    notificationChannel: typeof channel === "string" ? channel : undefined,
   })
   if (!decision.allowed) {
     rejectRequest(

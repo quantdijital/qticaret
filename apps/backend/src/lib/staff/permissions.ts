@@ -33,6 +33,8 @@ interface Rule {
 export interface RequestFacts {
   /** `type` of a queued job's body, when there is one. */
   jobType?: string | undefined
+  /** The `channel` a notification list asks for, when it asks for one alone. */
+  notificationChannel?: string | undefined
 }
 
 const WRITES: readonly Method[] = ["POST", "PUT", "PATCH", "DELETE"]
@@ -91,6 +93,14 @@ const PRIVATE: readonly Rule[] = [
   { methods: "*", path: "/admin/staff*" },
   // A run's steps keep what they read: customers, addresses, payments
   { methods: "*", path: "/admin/workflows-executions*" },
+  // Medusa's sent messages carry each customer's address: the team's own
+  // feed (the panel's bell) is the one channel the others read
+  {
+    methods: "*",
+    path: "/admin/notifications",
+    when: (facts) => facts.notificationChannel !== "feed",
+  },
+  { methods: "*", path: "/admin/notifications/:id" },
 ]
 
 const readJob: Rule = {

@@ -50,6 +50,21 @@ medusaIntegrationTestRunner({
       expect(self.status).toBe(200)
     })
 
+    it("shows the others the team's feed alone, not the messages customers were sent", async () => {
+      const ops = as((await createAdminUser(http, getContainer(), "operations")).headers)
+      const admin = as((await createAdminUser(http, getContainer(), "admin")).headers)
+
+      const feed = await ops.get("/admin/notifications?channel=feed&fields=id,created_at,data")
+      const all = await ops.get("/admin/notifications")
+      const email = await ops.get("/admin/notifications?channel=email")
+      const both = await ops.get("/admin/notifications?channel=feed&channel=email")
+      const one = await ops.get("/admin/notifications/noti_1")
+
+      expect(feed.status).toBe(200)
+      expect([all.status, email.status, both.status, one.status]).toEqual([403, 403, 403, 403])
+      expect((await admin.get("/admin/notifications?channel=email")).status).toBe(200)
+    })
+
     it("keeps the shop's accounts, keys and people the owner's", async () => {
       const owner = as((await createAdminUser(http, getContainer())).headers)
       const admin = as((await createAdminUser(http, getContainer(), "admin")).headers)

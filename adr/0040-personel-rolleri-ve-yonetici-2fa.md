@@ -35,7 +35,7 @@ Medusa 2.21.2'de doğrulananlar (v2.21.2 kaynağı ve docs.medusajs.com; Context
    - **Yetkiler:**
      - `owner`: her şey. Yalnızca o yapabilir: ödeme/entegrasyon hesapları, personel ve roller, API anahtarları, mağazanın silinmesi gibi geri dönüşsüz işler.
      - `admin`: `owner`'a ayrılanlar dışında her şey. Varsayılan izinli, kara liste.
-     - `operations`: Her şeyi okur (personel listesi, denetim kaydı ve hesap ayrıntıları hariç). Yazma yalnızca beyaz listedeki operasyon uçlarında: sipariş, kargo, iade/değişim, stok, yorum/soru moderasyonu, bildirim okundu. Ayarları değiştiremez (KK1). Varsayılan ret.
+     - `operations`: Her şeyi okur (personel listesi, denetim kaydı, hesap ayrıntıları ve müşterilere giden iletiler hariç; Medusa'nın `/admin/notifications` ucunu yalnızca ekibin `feed` kanalıyla, yani paneldeki zil için okur, F12 Y13). Yazma yalnızca beyaz listedeki operasyon uçlarında: sipariş, kargo, iade/değişim, stok, yorum/soru moderasyonu, bildirim okundu. Ayarları değiştiremez (KK1). Varsayılan ret.
      - `readonly`: yalnızca okur, aynı hariç tutmalarla. Kendi hesabının 2FA uçlarına yazabilir.
    - **Rolü olmayan kullanıcı:** Hiçbir yere erişemez; yalnızca kim olduğunu ve rolünün olmadığını görür (`staff.no_role`). Ekipten çıkarılan kişinin açık oturumu da bir sonraki istekte bu duruma düşer (Y2'de Y1'in "salt-okunur say" kararı daraltıldı).
    - **İlk rol ataması:** Göç betiği en eski kullanıcıya `owner`, diğerlerine `admin` verir.

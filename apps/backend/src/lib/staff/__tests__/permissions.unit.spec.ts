@@ -112,9 +112,25 @@ describe("staff roles", () => {
     ["GET", "/admin/staff"],
     ["GET", "/admin/workflows-executions"],
     ["GET", "/admin/staff/%6d%65mbers"],
+    ["GET", "/admin/notifications"],
+    ["GET", "/admin/notifications/noti_1"],
   ] as const)("keeps %s %s from operations and read-only staff", (method, path) => {
     expect(decide("operations", method, path)).toEqual({ allowed: false, reason: "private" })
     expect(decide("readonly", method, path)).toEqual({ allowed: false, reason: "private" })
+  })
+
+  it("lets every role read the team's feed, and only the owner and admin customers' messages", () => {
+    for (const role of STAFF_ROLES) {
+      expect(allowed(role, "GET", "/admin/notifications", { notificationChannel: "feed" })).toBe(
+        true
+      )
+    }
+    expect(allowed("admin", "GET", "/admin/notifications", { notificationChannel: "email" })).toBe(
+      true
+    )
+    expect(
+      allowed("operations", "GET", "/admin/notifications", { notificationChannel: "email" })
+    ).toBe(false)
   })
 
   it("lets every role read who it is", () => {
