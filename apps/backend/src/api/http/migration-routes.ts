@@ -41,6 +41,16 @@ export const MIGRATION_ROUTES = [
     ],
   },
   {
+    matcher: "/admin/migrations/customers",
+    methods: ["POST" as const],
+    bodyParser: false as const,
+    middlewares: [
+      requireUserActor,
+      validateAndTransformQuery(AdminPostMigrationQuery, {}),
+      requireReauth(applying),
+    ],
+  },
+  {
     matcher: "/admin/migrations/shopify",
     methods: ["POST" as const],
     middlewares: [

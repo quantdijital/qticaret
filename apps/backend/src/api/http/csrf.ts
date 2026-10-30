@@ -36,6 +36,9 @@ const SHEET_TYPES = [
   "application/octet-stream",
 ]
 
+// A migration's customer list (F14.3): a sheet as the product import takes one
+const CUSTOMER_SHEET_PATH = /^\/admin\/migrations\/customers$/
+
 // Search Console's export of the old site's top pages (F14.7): a zip or its pages CSV
 const SEARCH_CONSOLE_PATH = /^\/admin\/migrations\/urls\/search-console$/
 const SEARCH_CONSOLE_TYPES = ["text/csv", "application/zip", "application/octet-stream"]
@@ -93,7 +96,8 @@ function isAllowedAdminBody(req: MedusaRequest): boolean {
     !hasBody(req) ||
     type.startsWith("application/json") ||
     (type.startsWith("multipart/form-data") && MULTIPART_PATH.test(routePath(req))) ||
-    (SHEET_TYPES.some((sheet) => type.startsWith(sheet)) && SHEET_PATH.test(routePath(req))) ||
+    (SHEET_TYPES.some((sheet) => type.startsWith(sheet)) &&
+      (SHEET_PATH.test(routePath(req)) || CUSTOMER_SHEET_PATH.test(routePath(req)))) ||
     (SEARCH_CONSOLE_TYPES.some((file) => type.startsWith(file)) &&
       SEARCH_CONSOLE_PATH.test(routePath(req))) ||
     (type.startsWith("application/pdf") && INVOICE_PDF_PATH.test(routePath(req)))

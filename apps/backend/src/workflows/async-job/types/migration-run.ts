@@ -14,6 +14,8 @@ import type { JobType } from "./types"
 
 /** The name an uploaded migration file is stored under; the job reads no other file. */
 export const MIGRATION_FILE_PREFIX = "migration-bundle-"
+/** The name an uploaded customer sheet is stored under (F14.3). */
+export const CUSTOMER_FILE_PREFIX = "migration-customers-"
 
 const shared = {
   mode: z.enum(["check", "apply"]),
@@ -44,6 +46,18 @@ const input = z.discriminatedUnion("source", [
     .strict(),
   // The store and its account are the connected one's (integration-credentials), never the input's
   z.object({ source: z.literal("shopify"), ...shared }).strict(),
+  // The old platform's customer list (F14.3), a sheet stored as a bundle is
+  z
+    .object({
+      source: z.literal("customers"),
+      source_file_id: z
+        .string()
+        .min(1)
+        .max(512)
+        .refine((id) => id.includes(CUSTOMER_FILE_PREFIX)),
+      ...shared,
+    })
+    .strict(),
   // The old site's product feed (F14.3), fetched under the SSRF rules
   z
     .object({
@@ -133,7 +147,8 @@ export const migrationRun: JobType<z.infer<typeof input>> = {
         .catch(() => undefined)
       throw error
     } finally {
-      if (values.source === "bundle") {
+      // A file holds the shop's customers: gone however the run ended
+      if (values.source === "bundle" || values.source === "customers") {
         await container
           .resolve(Modules.FILE)
           .deleteFiles(values.source_file_id)

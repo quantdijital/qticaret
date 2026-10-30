@@ -7,6 +7,7 @@ import { openShopifySource } from "../../lib/migration/shopify/source"
 import { parseEnv } from "../../lib/env"
 import { fetchOwnersFile } from "../../lib/migration/fetch"
 import { bundleSource } from "../../lib/migration/sources/bundle"
+import { customerSheetSource } from "../../lib/migration/sources/customer-sheet"
 import { MAX_FEED_BYTES, feedSource } from "../../lib/migration/sources/merchant-feed"
 import type { MigrationSource } from "../../lib/migration/types"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-credentials"
@@ -18,6 +19,7 @@ export type SourceInput =
   | { source: "bundle"; source_file_id: string }
   | { source: "shopify" }
   | { source: "feed"; feed_url: string }
+  | { source: "customers"; source_file_id: string }
 
 /**
  * The run's source, opened (adr/0042 §1, §9): an uploaded bundle read
@@ -30,10 +32,10 @@ export async function openSource(
   input: SourceInput,
   beat: () => Promise<void>
 ): Promise<{ source: MigrationSource; digest: string | null }> {
-  if (input.source === "bundle") {
+  if (input.source === "bundle" || input.source === "customers") {
     const buffer = await container.resolve(Modules.FILE).getAsBuffer(input.source_file_id)
     return {
-      source: bundleSource(buffer),
+      source: input.source === "bundle" ? bundleSource(buffer) : await customerSheetSource(buffer),
       digest: createHash("sha256").update(buffer).digest("hex"),
     }
   }

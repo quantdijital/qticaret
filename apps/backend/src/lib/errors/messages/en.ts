@@ -752,4 +752,6 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The item is priced in a currency other than lira; prices are never converted.",
   "migration.feed_item_invalid":
     "The item's title, address or price could not be read; it did not move.",
+  "migration.customers_sheet_invalid":
+    "The customer list could not be read; it must be xlsx or CSV with an e-mail column.",
 }

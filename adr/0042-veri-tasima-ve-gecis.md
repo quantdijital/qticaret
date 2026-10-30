@@ -157,3 +157,10 @@ Elimizde olanlar:
 2. **Okuma.** Sahip akışın adresini verir (`POST /admin/migrations/feed`); `safeFetch` ile, 100 MB sınırla indirilir; güvenli XML okuyucu varlıkları çözmediği için başlık, marka ve kategori yolundaki `&amp;`, `&gt;` metin olarak çözülür.
 3. **Eşleme.** Aynı `item_group_id` kalemleri tek ürünün varyantlarıdır; ürün adı grubun ortak başlığıdır (kelime sınırında kesilir). Grup içinde değişen renk, beden, malzeme, desen seçenek olur. `sale_price` varsa satış fiyatıdır (üstü çizili fiyat taşınmaz). `out_of_stock` stok 0; diğerlerinde stok bilinmez. `product_type` "A > B" kategori yolu; tanıtıcı eski adresin son parçası (uzantısız). TRY dışında fiyatlı ya da fiyatsız kalem taşınmaz, raporun notlarında yazar.
 4. Kaynak kimliği `feed:<akışın alan adı>`; aynı akış yeniden okununca tekrarsızdır.
+
+## Uygulama notları (G7b müşteri listesi, 2026-10-31)
+
+1. Sahip eski platformun müşteri dışa aktarmasını (xlsx ya da CSV) olduğu gibi yükler (`POST /admin/migrations/customers`). Başlıklar esnek okunur: "E-Posta", "E-posta Adresi", "Email"; "Adı", "Soyadı" ya da "Adı Soyadı"; "Cep Telefonu", "GSM"; "İl", "İlçe", "Açık Adres", "Posta Kodu"; izin ve üyelik tarihleri. E-posta sütunu yoksa liste reddedilir.
+2. Müşteri küçük harfli e-postasıyla anahtarlanır: liste yeniden yüklenince kimse iki kez taşınmaz. Aynı e-posta birden çok satırdaysa sonuncusu geçer.
+3. İzin sütunu yalnızca tarih içeriyorsa izindir ("Evet" tek başına değildir; gelecek tarih de değildir). Türkçe tarih (31.12.2024 10:30) Türkiye saatiyle okunur.
+4. Dosya taşıma işi nasıl biterse bitsin silinir (paket gibi); CSRF istisnası yalnızca bu yol ve tablo türleri için.

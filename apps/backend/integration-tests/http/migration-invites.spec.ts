@@ -145,5 +145,43 @@ medusaIntegrationTestRunner({
       const { data } = await me()
       expect(data.customer.addresses.map((address) => address.address_1)).toEqual(["Atatürk Cd. 1"])
     })
+
+    it("moves the old platform's customer list, its own export, nobody twice", async () => {
+      const list =
+        "E-Posta Adresi;Adı Soyadı;Cep Telefonu;İl;İlçe;Açık Adres;E-Posta İzni\n" +
+        "liste.ayse@example.com;Ayşe Kaya;05321112233;İstanbul;Kadıköy;Bağdat Cd. 1;15.03.2024\n" +
+        "liste.can@example.com;Can Demir;;;;;Evet\n"
+      const upload = async (mode: "check" | "apply") => {
+        const queued = await settle(
+          http.post<{ async_job: SheetJob }>(
+            `/admin/migrations/customers?mode=${mode}`,
+            Buffer.from(list),
+            {
+              headers: { ...owner.headers, "content-type": "text/csv" },
+            }
+          )
+        )
+        expect(queued.status).toBe(202)
+        const job = await settled(queued.data.async_job.id)
+        expect(job.status).toBe("succeeded")
+        return (job.result_summary as { counts: Record<string, Record<string, number>> }).counts
+      }
+      expect(await upload("check")).toMatchObject({
+        customer: { read: 2, created: 2 },
+        consent: { created: 1 },
+        product: { read: 0 },
+      })
+      expect(await upload("apply")).toMatchObject({
+        customer: { created: 2 },
+        consent: { created: 1 },
+      })
+      const [ayse] = await customers().listCustomers(
+        { email: "liste.ayse@example.com" },
+        { relations: ["addresses"] }
+      )
+      expect(ayse).toMatchObject({ first_name: "Ayşe", last_name: "Kaya", has_account: false })
+      expect(ayse?.addresses.map((address) => address.city)).toEqual(["Kadıköy"])
+      expect(await upload("apply")).toMatchObject({ customer: { created: 0, found: 2 } })
+    })
   },
 })

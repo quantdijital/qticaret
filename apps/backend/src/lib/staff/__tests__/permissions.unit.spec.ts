@@ -241,6 +241,7 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/migrations": false,
   "POST /admin/migrations/shopify": false,
   "POST /admin/migrations/feed": false,
+  "POST /admin/migrations/customers": false,
   "POST /admin/migrations/urls/:id/decision": false,
   "POST /admin/migrations/urls/apply": false,
   "POST /admin/migrations/cutover": false,

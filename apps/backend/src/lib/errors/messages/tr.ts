@@ -753,4 +753,6 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "migration.feed_currency":
     "Ürün Türk lirası dışında bir para birimiyle; fiyat çevrilmeden taşınmadı.",
   "migration.feed_item_invalid": "Ürünün adı, adresi ya da fiyatı okunamadı; taşınmadı.",
+  "migration.customers_sheet_invalid":
+    'Müşteri listesi okunamadı; xlsx ya da CSV olmalı ve bir e-posta sütunu ("E-posta") içermeli.',
 }
