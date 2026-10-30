@@ -29,6 +29,38 @@ test("opens every settings page without an error", async ({ page, guard }) => {
   }
 })
 
+// A collapsed menu's hidden group label once lay over the item above it and took its click
+test("opens each section from the collapsed menu's icons", async ({ page, guard }) => {
+  await page.goto("/")
+  await expect(pageHeading(page)).toBeVisible()
+  const sidebar = page.locator('[data-slot="sidebar"]')
+  // Whatever the shop's menu behaviour, it starts collapsed here
+  if ((await sidebar.getAttribute("data-state")) === "expanded") {
+    await page.locator('[data-sidebar="trigger"]').first().click()
+  }
+  const items = page.locator('[data-sidebar="sidebar"] a[data-sidebar="menu-button"]')
+  await expect(sidebar).toHaveAttribute("data-state", "collapsed")
+  for (const href of await items.evaluateAll((links) =>
+    links.map((link) => link.getAttribute("href") ?? "")
+  )) {
+    await test.step(href, async () => {
+      const box = await items
+        .and(page.locator(`[href="${href}"]`))
+        .locator("svg")
+        .boundingBox()
+      if (!box) {
+        throw new Error(`no icon for ${href}`)
+      }
+      await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
+      await expect(page).toHaveURL(new RegExp(href === "/" ? "/$" : href))
+      // Off the menu: the automatic behaviour folds it back before the next icon
+      await page.mouse.move(800, 400)
+      await expect(sidebar).toHaveAttribute("data-state", "collapsed")
+    })
+  }
+  await guard.assertHealthy()
+})
+
 test("finds a product by its name and opens it", async ({ page, guard }) => {
   await page.goto("/products")
   const first = page.getByRole("table").getByRole("link").first()

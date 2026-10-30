@@ -13,6 +13,8 @@ export interface AppearanceSettings {
   mode: "light" | "dark" | "system"
   /** The navigation's surface: ink, page-light, or the brand colour. */
   sidebar: "dark" | "light" | "brand"
+  /** The menu on a wide screen: open, icons only, or icons that open while pointed at. */
+  sidebar_mode: "expanded" | "collapsed" | "auto"
   logo_light_url: string | null
   logo_dark_url: string | null
 }
@@ -43,6 +45,7 @@ export const appearanceSection = defineSection<AppearanceSettings>(
     density: z.enum(["comfortable", "compact"]),
     mode: z.enum(["light", "dark", "system"]),
     sidebar: z.enum(["dark", "light", "brand"]),
+    sidebar_mode: z.enum(["expanded", "collapsed", "auto"]),
     logo_light_url: logoUrl,
     logo_dark_url: logoUrl,
   },
@@ -52,6 +55,7 @@ export const appearanceSection = defineSection<AppearanceSettings>(
     density: "comfortable",
     mode: "system",
     sidebar: "dark",
+    sidebar_mode: "expanded",
     logo_light_url: null,
     logo_dark_url: null,
   }

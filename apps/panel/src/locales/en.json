@@ -307,19 +307,26 @@
       "errors": {
         "color": "The colour must be in #rrggbb form, e.g. #2f6feb."
       },
-      "sidebar": "Menu",
+      "sidebar": "Menu ground",
       "sidebarHint": "The left menu's surface.",
       "sidebarOptions": {
         "dark": "Dark",
         "light": "Light",
         "brand": "Brand colour"
       },
+      "sidebar_mode": "Menu behaviour",
+      "sidebar_modeHint": "The left menu on a wide screen: always open, icons only, or icons that open the menu while pointed at. On a phone the menu always opens with its button.",
+      "sidebar_modeOptions": {
+        "expanded": "Open",
+        "collapsed": "Closed",
+        "auto": "Automatic"
+      },
       "previewValue": "Sample product name",
       "previewField": "Sample field",
       "colors": "Colours",
-      "colorsHint": "The brand colour paints buttons, selections and charts; the mode sets the ground.",
+      "colorsHint": "The brand colour paints buttons, selections and charts; the mode sets the page's ground, the menu ground the left menu's.",
       "layout": "Layout",
-      "layoutHint": "The menu's ground, the corners and the row height.",
+      "layoutHint": "How the menu behaves, the corners and the row height.",
       "radiusHint": "The corners of cards, buttons and fields.",
       "densityHint": "The height of table rows and fields.",
       "modeHint": "A light or dark ground; by system follows your device."

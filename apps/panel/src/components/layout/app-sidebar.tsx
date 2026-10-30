@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link, useRouterState } from "@tanstack/react-router"
+import { useEffect, useRef } from "react"
 import { useTranslation } from "react-i18next"
 import {
   Sidebar,
@@ -63,15 +64,59 @@ function NavLink({
   )
 }
 
-export function AppSidebar() {
+// A pointer sweeping across the menu does not open it; one stopping on it does, at once
+const PEEK_OPEN_MS = 50
+const PEEK_CLOSE_MS = 200
+
+/**
+ * The menu. With `onPeek` (the "auto" behaviour) it opens over the page
+ * while the pointer rests on it, and folds back once it leaves.
+ */
+export function AppSidebar({
+  peek = false,
+  onPeek,
+}: {
+  peek?: boolean
+  onPeek?: (open: boolean) => void
+}) {
   const { t } = useTranslation()
   const pathname = useRouterState({ select: (state) => state.location.pathname })
   // Orders waiting for the shop: the one number worth showing in the menu
   const { data: tasks } = useQuery(tasksQuery())
   const badges: Record<string, number | undefined> = { orders: tasks?.to_ship }
+  const timer = useRef<number | undefined>(undefined)
+  useEffect(
+    () => () => {
+      window.clearTimeout(timer.current)
+    },
+    []
+  )
+  const hover = (open: boolean) => {
+    window.clearTimeout(timer.current)
+    timer.current = window.setTimeout(
+      () => {
+        onPeek?.(open)
+      },
+      open ? PEEK_OPEN_MS : PEEK_CLOSE_MS
+    )
+  }
 
   return (
-    <Sidebar collapsible="icon" className="border-r-0">
+    <Sidebar
+      collapsible="icon"
+      peek={peek}
+      className="border-r-0"
+      {...(onPeek
+        ? {
+            onMouseEnter: () => {
+              hover(true)
+            },
+            onMouseLeave: () => {
+              hover(false)
+            },
+          }
+        : {})}
+    >
       <SidebarHeader className="h-[var(--layout-topbar-height)] justify-center px-3">
         <StoreMark />
       </SidebarHeader>
@@ -81,7 +126,8 @@ export function AppSidebar() {
           {NAV_GROUPS.map((group) => (
             <SidebarGroup key={group.key ?? "main"} className="py-1.5">
               {group.key ? (
-                <SidebarGroupLabel className="h-7 text-[11px] font-medium tracking-wide text-sidebar-muted-foreground">
+                // Collapsed, the label fades and slides over the item above it: it must not take its click
+                <SidebarGroupLabel className="h-7 text-[11px] font-medium tracking-wide text-sidebar-muted-foreground group-data-[collapsible=icon]:pointer-events-none">
                   {t(`nav.groups.${group.key}`)}
                 </SidebarGroupLabel>
               ) : null}

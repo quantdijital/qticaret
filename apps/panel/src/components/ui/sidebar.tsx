@@ -147,6 +147,7 @@ function Sidebar({
   side = "left",
   variant = "sidebar",
   collapsible = "offcanvas",
+  peek = false,
   className,
   children,
   ...props
@@ -154,6 +155,8 @@ function Sidebar({
   side?: "left" | "right"
   variant?: "sidebar" | "floating" | "inset"
   collapsible?: "offcanvas" | "icon" | "none"
+  /** Open over the page while pointed at: the page keeps the collapsed width. */
+  peek?: boolean
 }) {
   const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
 
@@ -204,6 +207,7 @@ function Sidebar({
       data-collapsible={state === "collapsed" ? collapsible : ""}
       data-variant={variant}
       data-side={side}
+      data-peek={peek ? "true" : undefined}
       data-slot="sidebar"
     >
       {/* This is what handles the sidebar gap on desktop */}
@@ -215,7 +219,7 @@ function Sidebar({
           "group-data-[side=right]:rotate-180",
           variant === "floating" || variant === "inset"
             ? "group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4)))]"
-            : "group-data-[collapsible=icon]:w-(--sidebar-width-icon)"
+            : "group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[peek=true]:w-(--sidebar-width-icon)"
         )}
       />
       <div
@@ -229,6 +233,8 @@ function Sidebar({
           variant === "floating" || variant === "inset"
             ? "p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)+(--spacing(4))+2px)]"
             : "group-data-[collapsible=icon]:w-(--sidebar-width-icon) group-data-[side=left]:border-r group-data-[side=right]:border-l",
+          // Opening over the page answers the pointer quicker than the toggle's slide
+          "group-data-[peek=true]:z-30 group-data-[peek=true]:shadow-xl group-data-[peek=true]:duration-100 group-data-[peek=true]:ease-out",
           className
         )}
         {...props}

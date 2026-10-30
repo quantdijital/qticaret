@@ -307,19 +307,26 @@
       "errors": {
         "color": "Renk #rrggbb biçiminde olmalı, ör. #2f6feb."
       },
-      "sidebar": "Menü",
+      "sidebar": "Menü zemini",
       "sidebarHint": "Sol menünün zemini.",
       "sidebarOptions": {
         "dark": "Koyu",
         "light": "Açık",
         "brand": "Marka rengi"
       },
+      "sidebar_mode": "Menü davranışı",
+      "sidebar_modeHint": "Geniş ekranda sol menü: hep açık, yalnızca ikonlar ya da ikonlar ve üzerine gelince açılan menü. Telefonda menü her zaman düğmeyle açılır.",
+      "sidebar_modeOptions": {
+        "expanded": "Açık",
+        "collapsed": "Kapalı",
+        "auto": "Otomatik"
+      },
       "previewValue": "Örnek ürün adı",
       "previewField": "Örnek alan",
       "colors": "Renkler",
-      "colorsHint": "Marka rengi düğmeleri, seçili durumları ve grafikleri boyar; mod zemini belirler.",
+      "colorsHint": "Marka rengi düğmeleri, seçili durumları ve grafikleri boyar; mod sayfanın, menü zemini sol menünün zeminini belirler.",
       "layout": "Düzen",
-      "layoutHint": "Menünün zemini, köşeler ve satır yüksekliği.",
+      "layoutHint": "Menünün davranışı, köşeler ve satır yüksekliği.",
       "radiusHint": "Kartların, düğmelerin ve alanların köşeleri.",
       "densityHint": "Tablo satırlarının ve alanların yüksekliği.",
       "modeHint": "Açık ya da koyu zemin; sisteme göre seçilirse cihazınızı izler."

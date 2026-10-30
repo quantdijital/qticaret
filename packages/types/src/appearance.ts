@@ -16,6 +16,10 @@ export type ThemeMode = (typeof THEME_MODES)[number]
 export const THEME_SIDEBARS = ["dark", "light", "brand"] as const
 export type ThemeSidebar = (typeof THEME_SIDEBARS)[number]
 
+/** The menu open with its labels, icons only, or icons that open it while pointed at. */
+export const SIDEBAR_MODES = ["expanded", "collapsed", "auto"] as const
+export type SidebarMode = (typeof SIDEBAR_MODES)[number]
+
 export interface AppearanceSettings {
   /** `#rrggbb`, lower case. */
   brand_color: string
@@ -24,6 +28,8 @@ export interface AppearanceSettings {
   mode: ThemeMode
   /** The navigation's surface: ink, page-light, or the brand colour. */
   sidebar: ThemeSidebar
+  /** How the menu behaves on a wide screen; a phone always opens it as a sheet. */
+  sidebar_mode: SidebarMode
   logo_light_url: string | null
   logo_dark_url: string | null
 }
@@ -36,6 +42,7 @@ export const DEFAULT_APPEARANCE: AppearanceSettings = {
   density: "comfortable",
   mode: "system",
   sidebar: "dark",
+  sidebar_mode: "expanded",
   logo_light_url: null,
   logo_dark_url: null,
 }

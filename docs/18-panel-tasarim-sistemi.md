@@ -106,7 +106,7 @@ Bir bileşenin boyutu, çizgisi ya da köşesi sabit kodlanmaz; token'dan okunur
 
 ## 5. Tema motoru (`src/theme/engine.ts`)
 
-Mağaza sahibi beş şey seçer; gerisi türetilir:
+Mağaza sahibi yedi şey seçer; gerisi türetilir:
 
 | Ayar | Değerler | Etkisi |
 | --- | --- | --- |
@@ -115,6 +115,8 @@ Mağaza sahibi beş şey seçer; gerisi türetilir:
 | Köşe | keskin / yumuşak / yuvarlak | `--radius` 4 / 8 / 12 |
 | Yoğunluk | ferah / kompakt | kontrol ve satır yükseklikleri |
 | Mod | açık / koyu / sistem | anlamsal token seti |
+| Menü zemini | koyu / açık / marka rengi | `--sidebar-*` |
+| Menü davranışı | açık / kapalı / otomatik | geniş ekranda sol menü: hep açık, yalnızca ikonlar ya da ikonlar ve üzerine gelince sayfayı itmeden açılan menü (50 ms gecikme, 100 ms açılış); üst çubuktaki düğme bir sonraki ziyarete kadar açıp kapatır; telefonda menü her zaman düğmeyle açılan çekmece |
 
 - Marka renginden OKLCH'de 11 tonluk ölçek üretilir (`culori`). `--primary` için açıklık `[0,40 – 0,62]` aralığına çekilir ki beyaz metin AA (≥ 4,5:1) sağlasın; düzeltme yapıldıysa ayar ekranı "renginiz koyulaştırıldı" uyarısı gösterir. Kontrast testi birim testidir.
 - Nötr ölçek, marka tonuna `kroma 0,006` ile eğilir; böylece panel "gri" değil, markanın soğuk/sıcak havasında olur ama renk okunaklılığı bozulmaz.

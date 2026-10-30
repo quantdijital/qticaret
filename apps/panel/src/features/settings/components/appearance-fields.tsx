@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import type { AppearanceForm as FormValues } from "@/theme"
 
-type ChoiceName = "radius" | "density" | "mode" | "sidebar"
+type ChoiceName = "radius" | "density" | "mode" | "sidebar" | "sidebar_mode"
 
 /**
  * One of the look's choices: its name and what it changes, then the options

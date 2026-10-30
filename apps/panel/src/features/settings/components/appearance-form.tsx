@@ -1,5 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { THEME_DENSITIES, THEME_MODES, THEME_RADII, THEME_SIDEBARS } from "@qticaret/types"
+import {
+  SIDEBAR_MODES,
+  THEME_DENSITIES,
+  THEME_MODES,
+  THEME_RADII,
+  THEME_SIDEBARS,
+} from "@qticaret/types"
 import type { AppearanceSettings } from "@qticaret/types"
 import { useEffect, useMemo } from "react"
 import { useForm, useWatch } from "react-hook-form"
@@ -26,10 +32,10 @@ import type { AppearanceForm as FormValues } from "@/theme"
 const HEX = /^#[0-9a-f]{6}$/
 
 /**
- * The shop's choices (docs/18 §5): colours (brand, mode) and layout (menu,
- * corners, density) side by side, the panel in miniature under them. Every
- * change repaints this screen at once; leaving without saving paints the
- * stored values back.
+ * The shop's choices (docs/18 §5): colours (brand, mode, the menu's ground)
+ * and layout (how the menu behaves, corners, density) side by side, the
+ * panel in miniature under them. Every change repaints this screen at
+ * once; leaving without saving paints the stored values back.
  */
 export function AppearanceForm({ saved }: { saved: AppearanceSettings }) {
   const { t } = useTranslation()
@@ -42,6 +48,7 @@ export function AppearanceForm({ saved }: { saved: AppearanceSettings }) {
       density: saved.density,
       mode: saved.mode,
       sidebar: saved.sidebar,
+      sidebar_mode: saved.sidebar_mode,
     },
   })
   // `useWatch`, not `form.watch()`: the React Compiler can follow it. It
@@ -54,8 +61,17 @@ export function AppearanceForm({ saved }: { saved: AppearanceSettings }) {
       density: watched.density ?? saved.density,
       mode: watched.mode ?? saved.mode,
       sidebar: watched.sidebar ?? saved.sidebar,
+      sidebar_mode: watched.sidebar_mode ?? saved.sidebar_mode,
     }),
-    [watched.brand_color, watched.radius, watched.density, watched.mode, watched.sidebar, saved]
+    [
+      watched.brand_color,
+      watched.radius,
+      watched.density,
+      watched.mode,
+      watched.sidebar,
+      watched.sidebar_mode,
+      saved,
+    ]
   )
   const { isDirty } = form.formState
   const colorValid = HEX.test(values.brand_color)
@@ -137,6 +153,12 @@ export function AppearanceForm({ saved }: { saved: AppearanceSettings }) {
               options={THEME_MODES}
               optionLabel={(option) => t(`settings.appearance.modeOptions.${option}`)}
             />
+            <ChoiceField
+              name="sidebar"
+              control={form.control}
+              options={THEME_SIDEBARS}
+              optionLabel={(option) => t(`settings.appearance.sidebarOptions.${option}`)}
+            />
           </div>
         </SectionCard>
         <SectionCard
@@ -146,10 +168,10 @@ export function AppearanceForm({ saved }: { saved: AppearanceSettings }) {
         >
           <div className="flex flex-col gap-6">
             <ChoiceField
-              name="sidebar"
+              name="sidebar_mode"
               control={form.control}
-              options={THEME_SIDEBARS}
-              optionLabel={(option) => t(`settings.appearance.sidebarOptions.${option}`)}
+              options={SIDEBAR_MODES}
+              optionLabel={(option) => t(`settings.appearance.sidebar_modeOptions.${option}`)}
             />
             <ChoiceField
               name="radius"

@@ -1,5 +1,6 @@
 import {
   BRAND_COLOR_PATTERN,
+  SIDEBAR_MODES,
   THEME_DENSITIES,
   THEME_MODES,
   THEME_RADII,
@@ -18,6 +19,7 @@ export const appearanceSchema = z.object({
   density: z.enum(THEME_DENSITIES),
   mode: z.enum(THEME_MODES),
   sidebar: z.enum(THEME_SIDEBARS),
+  sidebar_mode: z.enum(SIDEBAR_MODES),
 })
 
 export type AppearanceForm = z.infer<typeof appearanceSchema>
