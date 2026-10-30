@@ -417,6 +417,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "einvoice.issued_at_invalid": "Kesim tarihi ileri bir tarih olamaz.",
   "einvoice.pdf_invalid": "Yalnızca PDF dosyası yüklenebilir.",
   "einvoice.pdf_missing": "Bu faturanın PDF'i yok.",
+  "einvoice.not_failed": "Yalnızca durmuş bir fatura yeniden denenebilir.",
   "accounting.sync_unknown": "Aktarım kaydı bulunamadı.",
   "accounting.source_missing": "Aktarılacak kayıt artık yok.",
   "accounting.month_invalid": "Ay geçersiz: başlamış bir ay olmalı, en fazla iki yıl öncesi.",

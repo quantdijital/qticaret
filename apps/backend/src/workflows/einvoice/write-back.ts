@@ -1,4 +1,5 @@
 import { MedusaError, Modules } from "@medusajs/framework/utils"
+import { ConflictError } from "../../lib/errors"
 import {
   StepResponse,
   WorkflowResponse,
@@ -75,4 +76,26 @@ export const attachInvoicePdfWorkflow = createWorkflow(
     removePreviousPdfStep(attached)
     return new WorkflowResponse(attached)
   }
+)
+
+/**
+ * Staff start a stopped invoice again (KK2): it carries on from where it
+ * stopped at its program, never from the start. Nothing to undo.
+ */
+const retryInvoiceStep = createStep(
+  "einvoice-retry-invoice",
+  async (input: { invoice_id: string }, { container }) => {
+    const retried = await container
+      .resolve<EinvoiceModuleService>(EINVOICE_MODULE)
+      .retry(input.invoice_id)
+    if (!retried) {
+      throw new ConflictError("einvoice.not_failed")
+    }
+    return new StepResponse(null)
+  }
+)
+
+export const retryInvoiceWorkflow = createWorkflow(
+  "einvoice-retry-invoice",
+  (input: { invoice_id: string }) => new WorkflowResponse(retryInvoiceStep(input))
 )

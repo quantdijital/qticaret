@@ -153,6 +153,12 @@ medusaIntegrationTestRunner({
       parasut.queue("POST /sales_invoices", { drop: true })
       await issueInvoices(getContainer())
       const stopped = await invoiceOf(lost)
+      const retried = await http.post(
+        `/admin/invoices/${stopped?.id ?? ""}/retry`,
+        {},
+        { headers: owner.headers }
+      )
+      const afterRetry = await runUntilSettled(lost)
       const bell = await getContainer()
         .resolve(Modules.NOTIFICATION)
         .listNotifications({ channel: "feed" })
@@ -161,6 +167,8 @@ medusaIntegrationTestRunner({
       expect(recovered).toMatchObject({ status: "issued" })
       expect(stopped).toMatchObject({ status: "failed", last_error: "einvoice.outcome_unknown" })
       expect(bell.filter(({ data }) => data?.["kind"] === "einvoice_stopped")).toHaveLength(1)
+      expect(retried.status).toBe(200)
+      expect(afterRetry).toMatchObject({ status: "issued" })
     })
 
     it("on the placed setting, waits for the payment to be taken", async () => {

@@ -413,6 +413,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "einvoice.issued_at_invalid": "The issue date cannot be in the future.",
   "einvoice.pdf_invalid": "Only a PDF file can be uploaded.",
   "einvoice.pdf_missing": "This invoice has no PDF.",
+  "einvoice.not_failed": "Only a stopped invoice can be tried again.",
   "accounting.sync_unknown": "No such transfer record.",
   "accounting.source_missing": "The record to send is no longer there.",
   "accounting.month_invalid": "The month is not valid: one that has begun, two years back at most.",
