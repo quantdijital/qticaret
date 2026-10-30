@@ -268,7 +268,8 @@
       "team": "Ekip",
       "security": "Güvenlik",
       "legal": "Yasal metinler",
-      "einvoice": "E-Fatura"
+      "einvoice": "E-Fatura",
+      "migration": "Taşıma"
     },
     "appearance": {
       "title": "Görünüm",
@@ -1473,7 +1474,8 @@
       "team": "Panele kimlerin hangi rolle girdiği ve davetler",
       "security": "İki adımlı doğrulamanız ve ekip için zorunluluk",
       "legal": "Sözleşmeler, politikalar ve aydınlatma metni",
-      "einvoice": "Fatura programı ve kesim anı"
+      "einvoice": "Fatura programı ve kesim anı",
+      "migration": "Eski platformdan katalog, müşteri ve 301 yönlendirmeleri"
     },
     "marketing": {
       "title": "Pazarlama",
@@ -2113,6 +2115,176 @@
         "taxId": "VKN / TCKN",
         "both": "Unvanı ve VKN'yi birlikte girin ya da ikisini de boş bırakın.",
         "taxIdInvalid": "VKN 10, TCKN 11 haneden oluşur."
+      }
+    },
+    "migration": {
+      "title": "Taşıma",
+      "subtitle": "Mağazanızı eski platformdan bu siteye taşıyın: katalog, müşteriler, geçmiş siparişler ve eski adreslerin 301 yönlendirmeleri.",
+      "run": {
+        "title": "Taşımayı çalıştır",
+        "description": "Önce kuru çalıştırın: hiçbir şey yazılmaz, rapor ne olacağını söyler. Sonra uygulayın; yeniden çalıştırmak hiçbir şeyi iki kez yazmaz.",
+        "source": "Kaynak",
+        "sources": {
+          "shopify": "Shopify",
+          "feed": "Ürün akışı (Ticimax, ikas, IdeaSoft, T-Soft)",
+          "customers": "Müşteri listesi (xlsx/CSV)",
+          "bundle": "Geçiş paketi (JSON)"
+        },
+        "hints": {
+          "shopify": "Mağazanız Shopify'da: bağlı uygulamanızla ürünler, koleksiyonlar, müşteriler, siparişler ve sayfalar okunur.",
+          "feed": "Eski sitenin Google Merchant XML ürün akışının adresi; platform panelinizde \"Google ürün akışı\" olarak bulunur.",
+          "customers": "Eski platformun müşteri dışa aktarması, olduğu gibi; e-posta sütunu yeterli.",
+          "bundle": "Ekibimizin sizin için hazırladığı geçiş dosyası."
+        },
+        "feedUrl": "Akış adresi",
+        "file": "Dosya",
+        "parcel": {
+          "title": "Varsayılan paket",
+          "hint": "Ağırlığı ya da ölçüsü olmayan yayındaki ürünler bu paketle gelir; boş bırakırsanız taslak gelir ve sayfaları kesime kadar açılmaz.",
+          "weight": "Ağırlık (g)",
+          "length": "Uzunluk (cm)",
+          "width": "Genişlik (cm)",
+          "height": "Yükseklik (cm)"
+        },
+        "check": "Kuru çalıştır",
+        "apply": "Uygula",
+        "confirmTitle": "Taşıma uygulansın mı?",
+        "confirmText": "Kaynaktaki kayıtlar bu mağazaya yazılır. Yeniden çalıştırmak hiçbir şeyi iki kez yazmaz.",
+        "running": "Çalışıyor… %{{progress}}",
+        "failed": "Taşıma durdu: {{reason}}",
+        "planned": "Kuru çalıştırma bitti: ne olacağı aşağıda.",
+        "applied": "Taşıma uygulandı.",
+        "report": "Raporu indir",
+        "kinds": {
+          "category": "Kategoriler",
+          "brand": "Markalar",
+          "product": "Ürünler",
+          "image": "Görseller",
+          "customer": "Müşteriler",
+          "consent": "İleti izinleri",
+          "order": "Geçmiş siparişler",
+          "review": "Yorumlar",
+          "page": "Diğer sayfalar"
+        },
+        "columns": {
+          "kind": "Tür",
+          "read": "Kaynakta",
+          "created": "Eklenen",
+          "plannedCreated": "Eklenecek",
+          "found": "Var olan",
+          "skipped": "Atlanan"
+        }
+      },
+      "shopify": {
+        "connected": "{{shop}} bağlı",
+        "notConnected": "Shopify mağazası bağlı değil.",
+        "steps": "Shopify Dev Dashboard'da bir uygulama açın, yalnızca okuma kapsamları verin (ürünler, müşteriler, siparişler, sayfalar), mağazanıza yükleyin ve bilgilerini buraya girin.",
+        "shopDomain": "Mağaza adresi",
+        "clientId": "Client ID",
+        "clientSecret": "Client secret",
+        "connect": "Bağla",
+        "reconnect": "Yeniden bağla",
+        "saved": "Shopify mağazası bağlandı."
+      },
+      "runs": {
+        "title": "Geçmiş çalıştırmalar",
+        "description": "Her kuru çalıştırma ve uygulama, kaynağıyla.",
+        "empty": "Henüz çalıştırma yok.",
+        "modes": {
+          "check": "Kuru",
+          "apply": "Uygulama"
+        },
+        "statuses": {
+          "running": "Sürüyor",
+          "done": "Bitti",
+          "failed": "Durdu"
+        },
+        "summary": "{{products}} ürün, {{customers}} müşteri"
+      },
+      "addresses": {
+        "title": "Eski adresler",
+        "description": "Eski sitenin adresleri yeni sayfalara 301 ile gider; eşleşmeyenler için siz karar verirsiniz. Search Console'daki en çok trafik alan 100 adresin hepsi yanıt verince kesime hazırsınız.",
+        "ready": "Kesime hazır",
+        "notReady": "Kesime hazır değil",
+        "noTraffic": "Search Console verisi yok: en çok trafik alan sayfaları yükleyin.",
+        "unanswered": "En çok trafik alan adreslerden {{count}} tanesi henüz yanıt vermiyor.",
+        "counts": {
+          "total": "Adres",
+          "matched": "Eşleşen",
+          "decided": "Karar verilen",
+          "undecided": "Karar bekleyen",
+          "unsupported": "Sorgu dizeli"
+        },
+        "sitemap": "Site haritası adresi",
+        "readSitemap": "Haritayı oku",
+        "searchConsole": "Search Console dosyası",
+        "searchConsoleHint": "Performans > Dışa aktar > CSV'den gelen zip ya da sayfalar CSV'si.",
+        "uploaded": "{{count}} adres eklendi.",
+        "sitemapStarted": "Site haritası okunuyor; bitince adresler listeye eklenir.",
+        "apply": "Kararları uygula",
+        "applyConfirmTitle": "Adres kararları uygulansın mı?",
+        "applyConfirmText": "Eşleşen eski adresler kayıtlarının yeni adresine, kararlarınız 301 ve 410 kuralı olarak yazılır.",
+        "applyStarted": "Kararlar uygulanıyor; rapor işler sayfasında.",
+        "filters": {
+          "all": "Tümü",
+          "undecided": "Karar bekleyen",
+          "matched": "Eşleşen",
+          "decided": "Karar verilen",
+          "unsupported": "Sorgu dizeli"
+        },
+        "columns": {
+          "address": "Eski adres",
+          "clicks": "Tıklama",
+          "state": "Bugün",
+          "action": "Uygulamada"
+        },
+        "states": {
+          "live": "Sayfa",
+          "redirected": "301",
+          "gone": "410",
+          "not_found": "404"
+        },
+        "actions": {
+          "covered": "Yanıt veriyor",
+          "reserve": "Kaydın adresine 301",
+          "redirect": "301 kuralı",
+          "gone": "410",
+          "undecided": "Karar bekliyor",
+          "unsupported": "Sunucu kuralı gerekir"
+        },
+        "decide": {
+          "redirect": "Yönlendir",
+          "gone": "410 ver",
+          "auto": "Otomatik",
+          "target": "Hedef yol",
+          "save": "Kaydet",
+          "saved": "Karar kaydedildi."
+        },
+        "empty": "Bu görünümde adres yok.",
+        "upload": "Yükle"
+      },
+      "cutover": {
+        "title": "Kesim",
+        "description": "Alan adınızı yeni siteye yönlendirdiğiniz gün işaretleyin: 30 gün boyunca 404'ler izlenir, yeni olanlar eski adreslere eklenir ve zil çalar.",
+        "mark": "Kesim yapıldı",
+        "confirmTitle": "Kesim yapıldı mı?",
+        "confirmText": "Alan adı yeni siteyi gösteriyorsa işaretleyin; 404 izlemesi bugünden başlar.",
+        "watching": "{{date}} tarihinde kesim yapıldı; 404'ler {{until}} tarihine kadar izleniyor.",
+        "none": "Henüz kesim yapılmadı."
+      },
+      "invites": {
+        "title": "Müşteri davetleri",
+        "description": "Şifreler taşınamaz: taşınan müşterilere hesaplarını açmaları için e-posta gider. Günlük e-posta sınırının yarısı kadarı her gün gönderilir; siparişler kalan payı kullanır.",
+        "start": "Davetleri başlat",
+        "confirmTitle": "Davetler başlasın mı?",
+        "confirmText": "Taşınan ve hesabı olmayan her müşteriye bir kez e-posta gider.",
+        "started": "Davetler başladı.",
+        "counts": {
+          "queued": "Sırada",
+          "invited": "Gönderildi",
+          "waiting": "Bekleyen",
+          "today": "Bugün"
+        }
       }
     }
   },
@@ -4803,6 +4975,10 @@
     "einvoiceReturnNeeded": {
       "title": "İptal edilen #{{order}} siparişinin faturası duruyor",
       "description": "Fatura artık iptal edilemiyor; iade belgesi düzenleyin."
+    },
+    "migrationNotFound": {
+      "title": "Kesimden sonra {{count}} adres 404 verdi",
+      "description": "Taşıma > Eski adreslerden 301 ya da 410 kararı verin."
     }
   },
   "content": {

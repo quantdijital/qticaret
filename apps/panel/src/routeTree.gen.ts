@@ -62,6 +62,7 @@ import { Route as AuthSettingsFeaturesRouteImport } from './routes/_auth/setting
 import { Route as AuthSettingsIntegrationsRouteImport } from './routes/_auth/settings/integrations'
 import { Route as AuthSettingsJobsRouteImport } from './routes/_auth/settings/jobs'
 import { Route as AuthSettingsLocationsRouteImport } from './routes/_auth/settings/locations'
+import { Route as AuthSettingsMigrationRouteImport } from './routes/_auth/settings/migration'
 import { Route as AuthSettingsNotificationsRouteImport } from './routes/_auth/settings/notifications'
 import { Route as AuthSettingsSecurityRouteImport } from './routes/_auth/settings/security'
 import { Route as AuthSettingsSeoRouteImport } from './routes/_auth/settings/seo'
@@ -347,6 +348,11 @@ const AuthSettingsLocationsRoute = AuthSettingsLocationsRouteImport.update({
   path: '/locations',
   getParentRoute: () => AuthSettingsRoute,
 } as any)
+const AuthSettingsMigrationRoute = AuthSettingsMigrationRouteImport.update({
+  id: '/migration',
+  path: '/migration',
+  getParentRoute: () => AuthSettingsRoute,
+} as any)
 const AuthSettingsNotificationsRoute =
   AuthSettingsNotificationsRouteImport.update({
     id: '/notifications',
@@ -496,6 +502,7 @@ export interface FileRoutesByFullPath {
   '/settings/integrations': typeof AuthSettingsIntegrationsRoute
   '/settings/jobs': typeof AuthSettingsJobsRoute
   '/settings/locations': typeof AuthSettingsLocationsRoute
+  '/settings/migration': typeof AuthSettingsMigrationRoute
   '/settings/notifications': typeof AuthSettingsNotificationsRoute
   '/settings/security': typeof AuthSettingsSecurityRoute
   '/settings/seo': typeof AuthSettingsSeoRoute
@@ -567,6 +574,7 @@ export interface FileRoutesByTo {
   '/settings/integrations': typeof AuthSettingsIntegrationsRoute
   '/settings/jobs': typeof AuthSettingsJobsRoute
   '/settings/locations': typeof AuthSettingsLocationsRoute
+  '/settings/migration': typeof AuthSettingsMigrationRoute
   '/settings/notifications': typeof AuthSettingsNotificationsRoute
   '/settings/security': typeof AuthSettingsSecurityRoute
   '/settings/seo': typeof AuthSettingsSeoRoute
@@ -642,6 +650,7 @@ export interface FileRoutesById {
   '/_auth/settings/integrations': typeof AuthSettingsIntegrationsRoute
   '/_auth/settings/jobs': typeof AuthSettingsJobsRoute
   '/_auth/settings/locations': typeof AuthSettingsLocationsRoute
+  '/_auth/settings/migration': typeof AuthSettingsMigrationRoute
   '/_auth/settings/notifications': typeof AuthSettingsNotificationsRoute
   '/_auth/settings/security': typeof AuthSettingsSecurityRoute
   '/_auth/settings/seo': typeof AuthSettingsSeoRoute
@@ -717,6 +726,7 @@ export interface FileRouteTypes {
     | '/settings/integrations'
     | '/settings/jobs'
     | '/settings/locations'
+    | '/settings/migration'
     | '/settings/notifications'
     | '/settings/security'
     | '/settings/seo'
@@ -788,6 +798,7 @@ export interface FileRouteTypes {
     | '/settings/integrations'
     | '/settings/jobs'
     | '/settings/locations'
+    | '/settings/migration'
     | '/settings/notifications'
     | '/settings/security'
     | '/settings/seo'
@@ -862,6 +873,7 @@ export interface FileRouteTypes {
     | '/_auth/settings/integrations'
     | '/_auth/settings/jobs'
     | '/_auth/settings/locations'
+    | '/_auth/settings/migration'
     | '/_auth/settings/notifications'
     | '/_auth/settings/security'
     | '/_auth/settings/seo'
@@ -1274,6 +1286,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSettingsLocationsRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
+    '/_auth/settings/migration': {
+      id: '/_auth/settings/migration'
+      path: '/migration'
+      fullPath: '/settings/migration'
+      preLoaderRoute: typeof AuthSettingsMigrationRouteImport
+      parentRoute: typeof AuthSettingsRoute
+    }
     '/_auth/settings/notifications': {
       id: '/_auth/settings/notifications'
       path: '/notifications'
@@ -1449,6 +1468,7 @@ interface AuthSettingsRouteChildren {
   AuthSettingsIntegrationsRoute: typeof AuthSettingsIntegrationsRoute
   AuthSettingsJobsRoute: typeof AuthSettingsJobsRoute
   AuthSettingsLocationsRoute: typeof AuthSettingsLocationsRoute
+  AuthSettingsMigrationRoute: typeof AuthSettingsMigrationRoute
   AuthSettingsNotificationsRoute: typeof AuthSettingsNotificationsRoute
   AuthSettingsSecurityRoute: typeof AuthSettingsSecurityRoute
   AuthSettingsSeoRoute: typeof AuthSettingsSeoRoute
@@ -1478,6 +1498,7 @@ const AuthSettingsRouteChildren: AuthSettingsRouteChildren = {
   AuthSettingsIntegrationsRoute: AuthSettingsIntegrationsRoute,
   AuthSettingsJobsRoute: AuthSettingsJobsRoute,
   AuthSettingsLocationsRoute: AuthSettingsLocationsRoute,
+  AuthSettingsMigrationRoute: AuthSettingsMigrationRoute,
   AuthSettingsNotificationsRoute: AuthSettingsNotificationsRoute,
   AuthSettingsSecurityRoute: AuthSettingsSecurityRoute,
   AuthSettingsSeoRoute: AuthSettingsSeoRoute,

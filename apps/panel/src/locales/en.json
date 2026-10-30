@@ -268,7 +268,8 @@
       "team": "Team",
       "security": "Security",
       "legal": "Legal texts",
-      "einvoice": "E-invoice"
+      "einvoice": "E-invoice",
+      "migration": "Migration"
     },
     "appearance": {
       "title": "Appearance",
@@ -1473,7 +1474,8 @@
       "team": "Who uses the panel, with which role, and invitations",
       "security": "Your two-step verification and the team's requirement",
       "legal": "Contracts, policies and the privacy notice",
-      "einvoice": "Invoicing program and moment"
+      "einvoice": "Invoicing program and moment",
+      "migration": "Catalog, customers and 301s from the old platform"
     },
     "marketing": {
       "title": "Marketing",
@@ -2113,6 +2115,176 @@
         "taxId": "Tax id",
         "both": "Enter the name and the tax id together, or leave both empty.",
         "taxIdInvalid": "A tax id has 10 digits (11 for a T.C. kimlik)."
+      }
+    },
+    "migration": {
+      "title": "Migration",
+      "subtitle": "Move your shop here from its old platform: the catalog, customers, past orders and the old addresses' 301 redirects.",
+      "run": {
+        "title": "Run the migration",
+        "description": "Check first: nothing is written, the report says what would happen. Then apply; running it again writes nothing twice.",
+        "source": "Source",
+        "sources": {
+          "shopify": "Shopify",
+          "feed": "Product feed (Ticimax, ikas, IdeaSoft, T-Soft)",
+          "customers": "Customer list (xlsx/CSV)",
+          "bundle": "Migration bundle (JSON)"
+        },
+        "hints": {
+          "shopify": "Your shop is on Shopify: products, collections, customers, orders and pages are read through your app.",
+          "feed": "The old site's Google Merchant XML product feed address; your platform's panel calls it the \"Google product feed\".",
+          "customers": "The old platform's customer export, as it is; an e-mail column is enough.",
+          "bundle": "The migration file our team prepared for you."
+        },
+        "feedUrl": "Feed address",
+        "file": "File",
+        "parcel": {
+          "title": "Default parcel",
+          "hint": "Live products without a weight or measurements take this parcel; left empty, they come as drafts and their pages stay closed until you fill them.",
+          "weight": "Weight (g)",
+          "length": "Length (cm)",
+          "width": "Width (cm)",
+          "height": "Height (cm)"
+        },
+        "check": "Check",
+        "apply": "Apply",
+        "confirmTitle": "Apply the migration?",
+        "confirmText": "The source's records are written to this shop. Running it again writes nothing twice.",
+        "running": "Running… {{progress}}%",
+        "failed": "The migration stopped: {{reason}}",
+        "planned": "The check is done: what would happen is below.",
+        "applied": "The migration was applied.",
+        "report": "Download the report",
+        "kinds": {
+          "category": "Categories",
+          "brand": "Brands",
+          "product": "Products",
+          "image": "Pictures",
+          "customer": "Customers",
+          "consent": "Message consents",
+          "order": "Past orders",
+          "review": "Reviews",
+          "page": "Other pages"
+        },
+        "columns": {
+          "kind": "Kind",
+          "read": "In the source",
+          "created": "Added",
+          "plannedCreated": "To add",
+          "found": "Already here",
+          "skipped": "Left out"
+        }
+      },
+      "shopify": {
+        "connected": "{{shop}} is connected",
+        "notConnected": "No Shopify store is connected.",
+        "steps": "Create an app in Shopify's Dev Dashboard, give it read scopes only (products, customers, orders, pages), install it on your store and enter its details here.",
+        "shopDomain": "Store address",
+        "clientId": "Client ID",
+        "clientSecret": "Client secret",
+        "connect": "Connect",
+        "reconnect": "Connect again",
+        "saved": "The Shopify store is connected."
+      },
+      "runs": {
+        "title": "Past runs",
+        "description": "Every check and apply, with its source.",
+        "empty": "No runs yet.",
+        "modes": {
+          "check": "Check",
+          "apply": "Apply"
+        },
+        "statuses": {
+          "running": "Running",
+          "done": "Done",
+          "failed": "Stopped"
+        },
+        "summary": "{{products}} products, {{customers}} customers"
+      },
+      "addresses": {
+        "title": "Old addresses",
+        "description": "The old site's addresses 301 to the new pages; you decide the ones that match nothing. Once Search Console's 100 most visited addresses all answer, you are ready to cut over.",
+        "ready": "Ready to cut over",
+        "notReady": "Not ready to cut over",
+        "noTraffic": "No Search Console data: upload the most visited pages.",
+        "unanswered": "{{count}} of the most visited addresses answer nothing yet.",
+        "counts": {
+          "total": "Addresses",
+          "matched": "Matched",
+          "decided": "Decided",
+          "undecided": "To decide",
+          "unsupported": "With a query"
+        },
+        "sitemap": "Sitemap address",
+        "readSitemap": "Read the sitemap",
+        "searchConsole": "Search Console file",
+        "searchConsoleHint": "The zip from Performance > Export > CSV, or its pages CSV.",
+        "uploaded": "{{count}} addresses added.",
+        "sitemapStarted": "The sitemap is being read; its addresses join the list when it ends.",
+        "apply": "Apply the decisions",
+        "applyConfirmTitle": "Apply the address decisions?",
+        "applyConfirmText": "Matched old addresses go to their records' new address; your decisions are written as 301 and 410 rules.",
+        "applyStarted": "The decisions are being applied; the report is on the jobs page.",
+        "filters": {
+          "all": "All",
+          "undecided": "To decide",
+          "matched": "Matched",
+          "decided": "Decided",
+          "unsupported": "With a query"
+        },
+        "columns": {
+          "address": "Old address",
+          "clicks": "Clicks",
+          "state": "Today",
+          "action": "On apply"
+        },
+        "states": {
+          "live": "Page",
+          "redirected": "301",
+          "gone": "410",
+          "not_found": "404"
+        },
+        "actions": {
+          "covered": "Answers",
+          "reserve": "301 to its record",
+          "redirect": "301 rule",
+          "gone": "410",
+          "undecided": "To decide",
+          "unsupported": "Needs a server rule"
+        },
+        "decide": {
+          "redirect": "Redirect",
+          "gone": "Give 410",
+          "auto": "Automatic",
+          "target": "Target path",
+          "save": "Save",
+          "saved": "The decision was saved."
+        },
+        "empty": "No addresses in this view.",
+        "upload": "Upload"
+      },
+      "cutover": {
+        "title": "Cutover",
+        "description": "Mark the day your domain points at the new site: for 30 days 404s are watched, new ones join the old addresses and the bell rings.",
+        "mark": "Cutover is done",
+        "confirmTitle": "Is the cutover done?",
+        "confirmText": "Mark it if the domain shows the new site; the 404 watch starts today.",
+        "watching": "Cut over on {{date}}; 404s are watched until {{until}}.",
+        "none": "No cutover yet."
+      },
+      "invites": {
+        "title": "Customer invitations",
+        "description": "Passwords cannot move: moved customers get an e-mail to open their accounts. Half of the daily e-mail limit goes each day; orders keep the rest.",
+        "start": "Start the invitations",
+        "confirmTitle": "Start the invitations?",
+        "confirmText": "Each moved customer without an account gets one e-mail.",
+        "started": "The invitations started.",
+        "counts": {
+          "queued": "Queued",
+          "invited": "Sent",
+          "waiting": "Waiting",
+          "today": "Today"
+        }
       }
     }
   },
@@ -4803,6 +4975,10 @@
     "einvoiceReturnNeeded": {
       "title": "Canceled order #{{order}}'s invoice stands",
       "description": "It can no longer be cancelled; issue a return document."
+    },
+    "migrationNotFound": {
+      "title": "{{count}} addresses answered 404 since cutover",
+      "description": "Decide a 301 or 410 in Migration > Old addresses."
     }
   },
   "content": {

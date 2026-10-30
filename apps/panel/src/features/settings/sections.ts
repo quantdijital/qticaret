@@ -4,6 +4,7 @@ import {
   CreditCard,
   FileClock,
   FileText,
+  Import,
   KeyRound,
   ListChecks,
   ListTodo,
@@ -80,6 +81,8 @@ export const SETTINGS_GROUPS: readonly SettingsGroup[] = [
       { key: "integrations", to: "/settings/integrations", icon: Plug, needs: "settings" },
       { key: "api", to: "/settings/api", icon: KeyRound, needs: "keys" },
       { key: "features", to: "/settings/features", icon: ToggleRight, needs: "settings" },
+      // F14: moving the shop in from its old platform, the owner's alone
+      { key: "migration", to: "/settings/migration", icon: Import, needs: "migration" },
       { key: "jobs", to: "/settings/jobs", icon: ListTodo },
       { key: "audit", to: "/settings/audit", icon: FileClock, needs: "audit" },
     ],

@@ -62,7 +62,12 @@ describe("Settings home", () => {
       "href",
       "/settings/shipping"
     )
-    expect(screen.getAllByRole("link")).toHaveLength(20)
+    // F14: moving the shop in, the owner's
+    expect(screen.getByRole("link", { name: /Taşıma.*301/ })).toHaveAttribute(
+      "href",
+      "/settings/migration"
+    )
+    expect(screen.getAllByRole("link")).toHaveLength(21)
   })
 
   it("offers operations staff only what they may use: no settings to change", () => {

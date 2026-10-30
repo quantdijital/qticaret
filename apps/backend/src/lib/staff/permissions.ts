@@ -279,6 +279,8 @@ const CAPABILITY_PROBES = {
   privacy: ["POST", "/admin/customers/:id/privacy-requests"],
   // F8: an invoice's PDF, the buyer and their tax id on it
   invoices: ["GET", "/admin/invoices/:id/pdf"],
+  // F14: moving the shop in from its old platform, the owner's alone
+  migration: ["POST", "/admin/migrations"],
 } as const satisfies Record<string, readonly [Method, string]>
 
 export type Capability = keyof typeof CAPABILITY_PROBES

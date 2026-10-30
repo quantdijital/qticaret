@@ -21,6 +21,7 @@ export type Capability =
   | "taxId"
   | "privacy"
   | "invoices"
+  | "migration"
 
 export interface StaffMe {
   user_id: string

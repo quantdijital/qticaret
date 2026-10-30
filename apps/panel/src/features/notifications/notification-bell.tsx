@@ -7,6 +7,7 @@ import {
   PackageMinus,
   Scale,
   ShieldAlert,
+  Unlink,
   Webhook,
 } from "lucide-react"
 import { useState } from "react"
@@ -77,6 +78,15 @@ function useAlertText(data: Record<string, unknown>) {
       Icon: FileWarning,
       tone: "bg-destructive-soft text-destructive-text",
       link: { to: "/orders/$id" as const, search: {}, params: { id: text(data["order_id"]) } },
+    }
+  }
+  if (data["kind"] === "migration_not_found") {
+    return {
+      title: t("notifications.migrationNotFound.title", { count: amount(data["count"]) }),
+      description: t("notifications.migrationNotFound.description"),
+      Icon: Unlink,
+      tone: "bg-warning-soft text-warning-text",
+      link: { to: "/settings/migration" as const, search: {}, params: {} },
     }
   }
   if (data["kind"] === "einvoice_stopped") {
