@@ -14,11 +14,11 @@ class LegalModuleService extends MedusaService({ LegalDocument }) {
     return row ?? null
   }
 
-  /** The number the kind's next version takes. */
+  /** The number the kind's next version takes; a dropped draft's number is taken again. */
   async nextVersion(kind: LegalKind): Promise<number> {
     const [last] = await this.listLegalDocuments(
       { kind },
-      { take: 1, order: { version: "DESC" }, select: ["version"], withDeleted: true }
+      { take: 1, order: { version: "DESC" }, select: ["version"] }
     )
     return (last?.version ?? 0) + 1
   }

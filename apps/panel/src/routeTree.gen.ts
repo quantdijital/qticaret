@@ -69,6 +69,8 @@ import { Route as AuthContentLandingsIdRouteImport } from './routes/_auth/conten
 import { Route as AuthPromotionsPriceListsIndexRouteImport } from './routes/_auth/promotions/price-lists/index'
 import { Route as AuthPromotionsPriceListsIdRouteImport } from './routes/_auth/promotions/price-lists/$id'
 import { Route as AuthPromotionsPriceListsNewRouteImport } from './routes/_auth/promotions/price-lists/new'
+import { Route as AuthSettingsLegalIndexRouteImport } from './routes/_auth/settings/legal/index'
+import { Route as AuthSettingsLegalKindRouteImport } from './routes/_auth/settings/legal/$kind'
 import { Route as AuthSettingsMarketingIndexRouteImport } from './routes/_auth/settings/marketing/index'
 import { Route as AuthSettingsMarketingProviderRouteImport } from './routes/_auth/settings/marketing/$provider'
 import { Route as AuthSettingsPaymentsIndexRouteImport } from './routes/_auth/settings/payments/index'
@@ -382,6 +384,16 @@ const AuthPromotionsPriceListsNewRoute =
     path: '/promotions/price-lists/new',
     getParentRoute: () => AuthRoute,
   } as any)
+const AuthSettingsLegalIndexRoute = AuthSettingsLegalIndexRouteImport.update({
+  id: '/legal/',
+  path: '/legal/',
+  getParentRoute: () => AuthSettingsRoute,
+} as any)
+const AuthSettingsLegalKindRoute = AuthSettingsLegalKindRouteImport.update({
+  id: '/legal/$kind',
+  path: '/legal/$kind',
+  getParentRoute: () => AuthSettingsRoute,
+} as any)
 const AuthSettingsMarketingIndexRoute =
   AuthSettingsMarketingIndexRouteImport.update({
     id: '/marketing/',
@@ -488,11 +500,13 @@ export interface FileRoutesByFullPath {
   '/content/landings/$id': typeof AuthContentLandingsIdRoute
   '/promotions/price-lists/$id': typeof AuthPromotionsPriceListsIdRoute
   '/promotions/price-lists/new': typeof AuthPromotionsPriceListsNewRoute
+  '/settings/legal/$kind': typeof AuthSettingsLegalKindRoute
   '/settings/marketing/$provider': typeof AuthSettingsMarketingProviderRoute
   '/settings/payments/$provider': typeof AuthSettingsPaymentsProviderRoute
   '/settings/shipping/$carrier': typeof AuthSettingsShippingCarrierRoute
   '/settings/sms/$provider': typeof AuthSettingsSmsProviderRoute
   '/promotions/price-lists/': typeof AuthPromotionsPriceListsIndexRoute
+  '/settings/legal/': typeof AuthSettingsLegalIndexRoute
   '/settings/marketing/': typeof AuthSettingsMarketingIndexRoute
   '/settings/payments/': typeof AuthSettingsPaymentsIndexRoute
   '/settings/shipping/': typeof AuthSettingsShippingIndexRoute
@@ -555,11 +569,13 @@ export interface FileRoutesByTo {
   '/content/landings/$id': typeof AuthContentLandingsIdRoute
   '/promotions/price-lists/$id': typeof AuthPromotionsPriceListsIdRoute
   '/promotions/price-lists/new': typeof AuthPromotionsPriceListsNewRoute
+  '/settings/legal/$kind': typeof AuthSettingsLegalKindRoute
   '/settings/marketing/$provider': typeof AuthSettingsMarketingProviderRoute
   '/settings/payments/$provider': typeof AuthSettingsPaymentsProviderRoute
   '/settings/shipping/$carrier': typeof AuthSettingsShippingCarrierRoute
   '/settings/sms/$provider': typeof AuthSettingsSmsProviderRoute
   '/promotions/price-lists': typeof AuthPromotionsPriceListsIndexRoute
+  '/settings/legal': typeof AuthSettingsLegalIndexRoute
   '/settings/marketing': typeof AuthSettingsMarketingIndexRoute
   '/settings/payments': typeof AuthSettingsPaymentsIndexRoute
   '/settings/shipping': typeof AuthSettingsShippingIndexRoute
@@ -626,11 +642,13 @@ export interface FileRoutesById {
   '/_auth/content/landings/$id': typeof AuthContentLandingsIdRoute
   '/_auth/promotions/price-lists/$id': typeof AuthPromotionsPriceListsIdRoute
   '/_auth/promotions/price-lists/new': typeof AuthPromotionsPriceListsNewRoute
+  '/_auth/settings/legal/$kind': typeof AuthSettingsLegalKindRoute
   '/_auth/settings/marketing/$provider': typeof AuthSettingsMarketingProviderRoute
   '/_auth/settings/payments/$provider': typeof AuthSettingsPaymentsProviderRoute
   '/_auth/settings/shipping/$carrier': typeof AuthSettingsShippingCarrierRoute
   '/_auth/settings/sms/$provider': typeof AuthSettingsSmsProviderRoute
   '/_auth/promotions/price-lists/': typeof AuthPromotionsPriceListsIndexRoute
+  '/_auth/settings/legal/': typeof AuthSettingsLegalIndexRoute
   '/_auth/settings/marketing/': typeof AuthSettingsMarketingIndexRoute
   '/_auth/settings/payments/': typeof AuthSettingsPaymentsIndexRoute
   '/_auth/settings/shipping/': typeof AuthSettingsShippingIndexRoute
@@ -697,11 +715,13 @@ export interface FileRouteTypes {
     | '/content/landings/$id'
     | '/promotions/price-lists/$id'
     | '/promotions/price-lists/new'
+    | '/settings/legal/$kind'
     | '/settings/marketing/$provider'
     | '/settings/payments/$provider'
     | '/settings/shipping/$carrier'
     | '/settings/sms/$provider'
     | '/promotions/price-lists/'
+    | '/settings/legal/'
     | '/settings/marketing/'
     | '/settings/payments/'
     | '/settings/shipping/'
@@ -764,11 +784,13 @@ export interface FileRouteTypes {
     | '/content/landings/$id'
     | '/promotions/price-lists/$id'
     | '/promotions/price-lists/new'
+    | '/settings/legal/$kind'
     | '/settings/marketing/$provider'
     | '/settings/payments/$provider'
     | '/settings/shipping/$carrier'
     | '/settings/sms/$provider'
     | '/promotions/price-lists'
+    | '/settings/legal'
     | '/settings/marketing'
     | '/settings/payments'
     | '/settings/shipping'
@@ -834,11 +856,13 @@ export interface FileRouteTypes {
     | '/_auth/content/landings/$id'
     | '/_auth/promotions/price-lists/$id'
     | '/_auth/promotions/price-lists/new'
+    | '/_auth/settings/legal/$kind'
     | '/_auth/settings/marketing/$provider'
     | '/_auth/settings/payments/$provider'
     | '/_auth/settings/shipping/$carrier'
     | '/_auth/settings/sms/$provider'
     | '/_auth/promotions/price-lists/'
+    | '/_auth/settings/legal/'
     | '/_auth/settings/marketing/'
     | '/_auth/settings/payments/'
     | '/_auth/settings/shipping/'
@@ -1275,6 +1299,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthPromotionsPriceListsNewRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_auth/settings/legal/': {
+      id: '/_auth/settings/legal/'
+      path: '/legal'
+      fullPath: '/settings/legal/'
+      preLoaderRoute: typeof AuthSettingsLegalIndexRouteImport
+      parentRoute: typeof AuthSettingsRoute
+    }
+    '/_auth/settings/legal/$kind': {
+      id: '/_auth/settings/legal/$kind'
+      path: '/legal/$kind'
+      fullPath: '/settings/legal/$kind'
+      preLoaderRoute: typeof AuthSettingsLegalKindRouteImport
+      parentRoute: typeof AuthSettingsRoute
+    }
     '/_auth/settings/marketing/': {
       id: '/_auth/settings/marketing/'
       path: '/marketing'
@@ -1378,10 +1416,12 @@ interface AuthSettingsRouteChildren {
   AuthSettingsStoreRoute: typeof AuthSettingsStoreRoute
   AuthSettingsTeamRoute: typeof AuthSettingsTeamRoute
   AuthSettingsIndexRoute: typeof AuthSettingsIndexRoute
+  AuthSettingsLegalKindRoute: typeof AuthSettingsLegalKindRoute
   AuthSettingsMarketingProviderRoute: typeof AuthSettingsMarketingProviderRoute
   AuthSettingsPaymentsProviderRoute: typeof AuthSettingsPaymentsProviderRoute
   AuthSettingsShippingCarrierRoute: typeof AuthSettingsShippingCarrierRoute
   AuthSettingsSmsProviderRoute: typeof AuthSettingsSmsProviderRoute
+  AuthSettingsLegalIndexRoute: typeof AuthSettingsLegalIndexRoute
   AuthSettingsMarketingIndexRoute: typeof AuthSettingsMarketingIndexRoute
   AuthSettingsPaymentsIndexRoute: typeof AuthSettingsPaymentsIndexRoute
   AuthSettingsShippingIndexRoute: typeof AuthSettingsShippingIndexRoute
@@ -1404,10 +1444,12 @@ const AuthSettingsRouteChildren: AuthSettingsRouteChildren = {
   AuthSettingsStoreRoute: AuthSettingsStoreRoute,
   AuthSettingsTeamRoute: AuthSettingsTeamRoute,
   AuthSettingsIndexRoute: AuthSettingsIndexRoute,
+  AuthSettingsLegalKindRoute: AuthSettingsLegalKindRoute,
   AuthSettingsMarketingProviderRoute: AuthSettingsMarketingProviderRoute,
   AuthSettingsPaymentsProviderRoute: AuthSettingsPaymentsProviderRoute,
   AuthSettingsShippingCarrierRoute: AuthSettingsShippingCarrierRoute,
   AuthSettingsSmsProviderRoute: AuthSettingsSmsProviderRoute,
+  AuthSettingsLegalIndexRoute: AuthSettingsLegalIndexRoute,
   AuthSettingsMarketingIndexRoute: AuthSettingsMarketingIndexRoute,
   AuthSettingsPaymentsIndexRoute: AuthSettingsPaymentsIndexRoute,
   AuthSettingsShippingIndexRoute: AuthSettingsShippingIndexRoute,

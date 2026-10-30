@@ -75,6 +75,10 @@ export function layoutIssues(page: Page): Promise<string[]> {
       }
       // Controls: a control, or a tight wrapper around exactly one
       const controls = children.flatMap((child) => {
+        // A form's stand-in a select keeps for the browser (hidden, a pixel high) is no control
+        if (child.closest("[aria-hidden=true]") || child.getBoundingClientRect().height <= 2) {
+          return []
+        }
         if (child.matches(CONTROL)) {
           return [{ el: child, height: child.getBoundingClientRect().height }]
         }

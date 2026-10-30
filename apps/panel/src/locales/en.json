@@ -262,7 +262,8 @@
       "accounting": "Accounting",
       "api": "External API",
       "team": "Team",
-      "security": "Security"
+      "security": "Security",
+      "legal": "Legal texts"
     },
     "appearance": {
       "title": "Appearance",
@@ -1405,7 +1406,8 @@
       "accounting": "The month's package for the accountant",
       "api": "API keys for your own systems",
       "team": "Who uses the panel, with which role, and invitations",
-      "security": "Your two-step verification and the team's requirement"
+      "security": "Your two-step verification and the team's requirement",
+      "legal": "Contracts, policies and the privacy notice"
     },
     "marketing": {
       "title": "Marketing",
@@ -1810,6 +1812,134 @@
         "turnOff": "Lift requirement",
         "turnedOn": "Required for the team.",
         "turnedOff": "Requirement lifted."
+      }
+    },
+    "legal": {
+      "title": "Legal texts",
+      "subtitle": "The contracts and policies your customers read and accept with an order. A published version cannot be changed; editing opens a new version.",
+      "open": "Edit",
+      "groups": {
+        "order": {
+          "title": "Order contracts",
+          "description": "Texts the customer accepts before paying; a copy filled with the order is kept with each order."
+        },
+        "policies": {
+          "title": "Policies",
+          "description": "Rules shown publicly in your shop."
+        },
+        "people": {
+          "title": "Personal data and membership",
+          "description": "The privacy notice and the terms members accept."
+        }
+      },
+      "kinds": {
+        "distance_sales": {
+          "name": "Distance sales contract",
+          "description": "The contract made with the buyer at the order."
+        },
+        "pre_information": {
+          "name": "Pre-information form",
+          "description": "What the buyer is shown before paying."
+        },
+        "return_policy": {
+          "name": "Return and exchange policy",
+          "description": "The withdrawal period and how to return."
+        },
+        "shipping_policy": {
+          "name": "Shipping and delivery policy",
+          "description": "Shipping, times and fees."
+        },
+        "cookie_policy": {
+          "name": "Cookie policy",
+          "description": "Cookies used on the site and preferences."
+        },
+        "privacy_notice": {
+          "name": "Privacy notice (KVKK)",
+          "description": "What personal data is processed for."
+        },
+        "membership": {
+          "name": "Membership terms",
+          "description": "The terms members accept."
+        }
+      },
+      "status": {
+        "published": "Published · v{{version}}",
+        "none": "Not published",
+        "draft": "Draft waiting"
+      },
+      "editor": {
+        "title": "Text",
+        "draftHint": "Draft: what you save is not shown to customers until it is published.",
+        "publishedHint": "The published text. Change it and save to open a new draft version; the text in force stays until you publish.",
+        "titleLabel": "Title",
+        "body": "The text's body",
+        "saved": "Draft saved."
+      },
+      "tokens": {
+        "title": "Tokens",
+        "hint": "Copy them into the text; they are filled with the shop's and the order's details when shown.",
+        "shop": "Shop",
+        "order": "Order (in this contract only)",
+        "copy": "Copy the token {{token}}",
+        "names": {
+          "mağaza_adı": "Shop name",
+          "mağaza_unvanı": "Company title (legal identity)",
+          "mersis": "MERSİS number (legal identity)",
+          "vkn": "Tax number (legal identity)",
+          "vergi_dairesi": "Tax office (legal identity)",
+          "adres": "Full address (legal identity)",
+          "kep": "KEP address (legal identity)",
+          "etbis": "ETBİS registration number (legal identity)",
+          "e_posta": "Shop's contact e-mail",
+          "telefon": "Shop's contact phone",
+          "alan_adı": "Shop's domain",
+          "iade_süresi": "Withdrawal period (days)",
+          "bugün": "Today's date",
+          "alıcı_adı": "Buyer's full name",
+          "alıcı_e_posta": "Buyer's e-mail",
+          "alıcı_telefon": "Buyer's phone",
+          "teslimat_adresi": "Delivery address",
+          "fatura_adresi": "Billing address",
+          "sipariş_no": "Order number",
+          "sipariş_tarihi": "Order date",
+          "sipariş_kalemleri": "Product table (on a line of its own)",
+          "ara_toplam": "Subtotal",
+          "kargo_ücreti": "Shipping",
+          "indirim": "Discount",
+          "toplam": "Total (VAT included)",
+          "ödeme_yöntemi": "Payment method"
+        }
+      },
+      "versions": {
+        "title": "Versions",
+        "empty": "No version published yet.",
+        "published": "In force",
+        "retired": "Retired"
+      },
+      "actions": {
+        "preview": "Preview",
+        "publish": "Publish",
+        "discard": "Discard draft"
+      },
+      "publish": {
+        "title": "Publish version {{version}}?",
+        "text": "Make sure your lawyer has checked the text. A published version cannot be changed; customers see and accept this text from now on.",
+        "done": "Text published."
+      },
+      "discard": {
+        "title": "Discard the draft?",
+        "text": "The saved draft is deleted; the published text stays as it is.",
+        "done": "Draft discarded."
+      },
+      "start": {
+        "title": "This text is not written yet",
+        "text": "The starting draft has the headings such texts usually have and your shop's tokens. It is not legal advice; have your lawyer check it before publishing.",
+        "starter": "Start from the draft",
+        "blank": "Start blank"
+      },
+      "preview": {
+        "hint": "As customers will see it; contracts are filled with a made-up order.",
+        "frame": "Preview of {{title}}"
       }
     }
   },

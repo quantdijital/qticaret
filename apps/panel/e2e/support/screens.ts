@@ -61,4 +61,6 @@ export const SETTINGS = [
   "/settings/marketing/ga4",
   "/settings/security",
   "/settings/team",
+  "/settings/legal",
+  "/settings/legal/distance_sales",
 ]

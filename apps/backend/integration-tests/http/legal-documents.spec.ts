@@ -126,6 +126,14 @@ medusaIntegrationTestRunner({
         http.post(`${base}/draft`, { title: "Sözleşme", body }, { headers: owner.headers })
       )
       const dropped = await settle(http.delete(`${base}/draft`, { headers: owner.headers }))
+      // A dropped draft's number is taken again: the first text published is still v1
+      const again = await settle(
+        http.post<{ draft: { version: number } }>(
+          `${base}/draft`,
+          { title: "Sözleşme", body },
+          { headers: owner.headers }
+        )
+      )
 
       expect(preview.status).toBe(200)
       expect(preview.data.html).toContain("Ayşe Yılmaz")
@@ -136,6 +144,7 @@ medusaIntegrationTestRunner({
       expect(opsRead.status).toBe(200)
       expect(saved.status).toBe(200)
       expect(dropped.status).toBe(200)
+      expect(again.data.draft.version).toBe(1)
     })
   },
 })

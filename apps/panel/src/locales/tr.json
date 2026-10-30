@@ -262,7 +262,8 @@
       "accounting": "Muhasebe",
       "api": "Dış API",
       "team": "Ekip",
-      "security": "Güvenlik"
+      "security": "Güvenlik",
+      "legal": "Yasal metinler"
     },
     "appearance": {
       "title": "Görünüm",
@@ -1405,7 +1406,8 @@
       "accounting": "Mali müşavire aylık paket",
       "api": "Kendi sistemleriniz için API anahtarları",
       "team": "Panele kimlerin hangi rolle girdiği ve davetler",
-      "security": "İki adımlı doğrulamanız ve ekip için zorunluluk"
+      "security": "İki adımlı doğrulamanız ve ekip için zorunluluk",
+      "legal": "Sözleşmeler, politikalar ve aydınlatma metni"
     },
     "marketing": {
       "title": "Pazarlama",
@@ -1810,6 +1812,134 @@
         "turnOff": "Zorunluluğu kaldır",
         "turnedOn": "Ekip için zorunlu.",
         "turnedOff": "Zorunluluk kaldırıldı."
+      }
+    },
+    "legal": {
+      "title": "Yasal metinler",
+      "subtitle": "Müşterilerinizin okuduğu ve siparişte onayladığı sözleşmeler ve politikalar. Yayımlanan sürüm değiştirilemez; düzenleme yeni bir sürüm açar.",
+      "open": "Düzenle",
+      "groups": {
+        "order": {
+          "title": "Sipariş sözleşmeleri",
+          "description": "Müşterinin ödemeden önce onayladığı metinler; her siparişte sipariş bilgileriyle doldurulmuş kopyası saklanır."
+        },
+        "policies": {
+          "title": "Politikalar",
+          "description": "Mağazanızda herkese açık gösterilen kurallar."
+        },
+        "people": {
+          "title": "Kişisel veriler ve üyelik",
+          "description": "Aydınlatma metni ve üye olanların kabul ettiği sözleşme."
+        }
+      },
+      "kinds": {
+        "distance_sales": {
+          "name": "Mesafeli satış sözleşmesi",
+          "description": "Alıcıyla siparişte kurulan sözleşme."
+        },
+        "pre_information": {
+          "name": "Ön bilgilendirme formu",
+          "description": "Ödemeden önce alıcıya gösterilen bilgiler."
+        },
+        "return_policy": {
+          "name": "İade ve değişim politikası",
+          "description": "Cayma süresi ve iade adımları."
+        },
+        "shipping_policy": {
+          "name": "Kargo ve teslimat politikası",
+          "description": "Gönderim, süre ve ücretler."
+        },
+        "cookie_policy": {
+          "name": "Çerez politikası",
+          "description": "Sitede kullanılan çerezler ve tercihler."
+        },
+        "privacy_notice": {
+          "name": "KVKK aydınlatma metni",
+          "description": "Kişisel verilerin hangi amaçla işlendiği."
+        },
+        "membership": {
+          "name": "Üyelik sözleşmesi",
+          "description": "Üye olanların kabul ettiği koşullar."
+        }
+      },
+      "status": {
+        "published": "Yayında · v{{version}}",
+        "none": "Yayında değil",
+        "draft": "Taslak var"
+      },
+      "editor": {
+        "title": "Metin",
+        "draftHint": "Taslak: kaydettikleriniz yayımlanana kadar müşterilere gösterilmez.",
+        "publishedHint": "Yayındaki metin. Değiştirip kaydettiğinizde yeni bir taslak sürüm açılır; yürürlükteki metin yayımlayana kadar aynı kalır.",
+        "titleLabel": "Başlık",
+        "body": "Metnin gövdesi",
+        "saved": "Taslak kaydedildi."
+      },
+      "tokens": {
+        "title": "Belirteçler",
+        "hint": "Metne kopyalayın; gösterilirken mağazanın ve siparişin bilgileriyle dolar.",
+        "shop": "Mağaza",
+        "order": "Sipariş (yalnızca bu sözleşmede)",
+        "copy": "{{token}} belirtecini kopyala",
+        "names": {
+          "mağaza_adı": "Mağazanın adı",
+          "mağaza_unvanı": "Şirket unvanı (künye)",
+          "mersis": "MERSİS numarası (künye)",
+          "vkn": "Vergi kimlik numarası (künye)",
+          "vergi_dairesi": "Vergi dairesi (künye)",
+          "adres": "Açık adres (künye)",
+          "kep": "KEP adresi (künye)",
+          "etbis": "ETBİS kayıt numarası (künye)",
+          "e_posta": "Mağazanın iletişim e-postası",
+          "telefon": "Mağazanın iletişim telefonu",
+          "alan_adı": "Mağazanın alan adı",
+          "iade_süresi": "Cayma süresi (gün)",
+          "bugün": "Bugünün tarihi",
+          "alıcı_adı": "Alıcının adı soyadı",
+          "alıcı_e_posta": "Alıcının e-postası",
+          "alıcı_telefon": "Alıcının telefonu",
+          "teslimat_adresi": "Teslimat adresi",
+          "fatura_adresi": "Fatura adresi",
+          "sipariş_no": "Sipariş numarası",
+          "sipariş_tarihi": "Sipariş tarihi",
+          "sipariş_kalemleri": "Ürün tablosu (tek başına bir satıra yazın)",
+          "ara_toplam": "Ara toplam",
+          "kargo_ücreti": "Kargo ücreti",
+          "indirim": "İndirim",
+          "toplam": "Toplam (KDV dahil)",
+          "ödeme_yöntemi": "Ödeme yöntemi"
+        }
+      },
+      "versions": {
+        "title": "Sürümler",
+        "empty": "Henüz yayımlanmış sürüm yok.",
+        "published": "Yürürlükte",
+        "retired": "Geride kaldı"
+      },
+      "actions": {
+        "preview": "Önizle",
+        "publish": "Yayımla",
+        "discard": "Taslağı at"
+      },
+      "publish": {
+        "title": "Sürüm {{version}} yayımlansın mı?",
+        "text": "Metni avukatınıza kontrol ettirdiğinizden emin olun. Yayımlanan sürüm değiştirilemez; müşteriler bundan sonra bu metni görür ve siparişte onaylar.",
+        "done": "Metin yayımlandı."
+      },
+      "discard": {
+        "title": "Taslak atılsın mı?",
+        "text": "Kaydedilmiş taslak silinir; yayındaki metin olduğu gibi kalır.",
+        "done": "Taslak atıldı."
+      },
+      "start": {
+        "title": "Bu metin henüz yazılmadı",
+        "text": "Başlangıç taslağı, bu tür metinlerde olağan başlıkları ve mağazanızın belirteçlerini içerir. Hukuki görüş değildir; yayımlamadan önce avukatınıza kontrol ettirin.",
+        "starter": "Başlangıç taslağıyla başla",
+        "blank": "Boş başla"
+      },
+      "preview": {
+        "hint": "Müşterilerin göreceği biçimde; sözleşmelerde örnek bir siparişle doldurulmuştur.",
+        "frame": "{{title}} önizlemesi"
       }
     }
   },

@@ -7,6 +7,7 @@ import {
   ListChecks,
   ListTodo,
   Megaphone,
+  Scale,
   MessageSquare,
   Palette,
   Plug,
@@ -47,6 +48,8 @@ export const SETTINGS_GROUPS: readonly SettingsGroup[] = [
       { key: "appearance", to: "/settings/appearance", icon: Palette, needs: "settings" },
       { key: "seo", to: "/settings/seo", icon: Search, needs: "settings" },
       { key: "attributes", to: "/settings/attributes", icon: ListChecks, needs: "settings" },
+      // F13.1: the contracts and policies the shop's customers read
+      { key: "legal", to: "/settings/legal", icon: Scale, needs: "settings" },
     ],
   },
   {
