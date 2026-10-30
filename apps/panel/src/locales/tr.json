@@ -135,7 +135,8 @@
       "subtitle": "Satışa başlamadan önce tamamlanacak adımlar",
       "hide": "Gizle",
       "continue": "Devam et",
-      "byInstall": "Mağaza kurulurken tamamlanır; eksikse destek ekibimize yazın."
+      "byInstall": "Mağaza kurulurken tamamlanır; eksikse destek ekibimize yazın.",
+      "failed": "Kurulum adımları okunamadı."
     },
     "subtitle": "{{date}} · Mağazanızın özeti",
     "addProduct": "Ürün ekle",
@@ -180,6 +181,14 @@
       "orphanPayments": {
         "label": "Siparişe dönüşmeyen ödemeler",
         "hint": "Kendiliğinden iade ediliyor; elle iade gerekenler zilde."
+      },
+      "accountingStopped": {
+        "label": "Aktarılamayan muhasebe kayıtları",
+        "hint": "Muhasebe programının reddettiği kayıtlar; yeniden deneyin."
+      },
+      "webhooksDisabled": {
+        "label": "Durdurulan web kancaları",
+        "hint": "Art arda başarısız olduğu için kapatılan adresler."
       }
     },
     "recent": {
@@ -224,6 +233,9 @@
       "missingDimensions": "Ağırlığı ya da ölçüsü eksik",
       "allGood": "Bütün ürünler eksiksiz.",
       "empty": "Henüz ürün yok."
+    },
+    "seo": {
+      "open": "Ürünlere bak"
     }
   },
   "settings": {
@@ -1027,31 +1039,100 @@
     },
     "integrations": {
       "title": "Entegrasyonlar",
-      "subtitle": "Mağazanın bağlı olduğu dış servislerin şu an çalışıp çalışmadığı.",
+      "subtitle": "Mağazanın kullandığı dış servisler: nerede durdukları, şu an yanıt verip vermedikleri ve son hataları. Hesap bilgileri burada gösterilmez.",
       "health": {
-        "title": "Bağlantı durumu",
         "all_ok": "Bağlı servislerin hepsi yanıt veriyor.",
         "degraded": "Yanıt vermeyen servis var; ayrıntısı satırında.",
         "checked": "Son kontrol: {{when}}",
         "refresh": "Yeniden kontrol et"
       },
-      "checks": {
-        "redis": "Önbellek (Redis)",
+      "groups": {
+        "payments": {
+          "title": "Ödeme",
+          "text": "Kartla ödeme sağlayıcıları ve sağlayıcısız yöntemler."
+        },
+        "shipping": {
+          "title": "Kargo",
+          "text": "Etiket ve takip için kargo hesapları."
+        },
+        "messaging": {
+          "title": "İletişim",
+          "text": "SMS, ticari ileti izinleri ve e-posta."
+        },
+        "marketing": {
+          "title": "Google ve pazarlama",
+          "text": "Arama görünürlüğü, reklam ölçümü ve ürün akışları."
+        },
+        "accounting": {
+          "title": "Muhasebe",
+          "text": "Satışların ve tahsilatların aktarıldığı program."
+        },
+        "infrastructure": {
+          "title": "Altyapı",
+          "text": "Platformun kendi servisleri."
+        }
+      },
+      "names": {
         "paytr": "PayTR",
         "iyzico": "iyzico",
-        "netgsm": "Netgsm (SMS)",
+        "bank_transfer": "Havale / EFT",
+        "cash_on_delivery": "Kapıda ödeme",
+        "geliver": "Geliver",
         "aras": "Aras Kargo",
-        "yurtici": "Yurtiçi Kargo"
+        "yurtici": "Yurtiçi Kargo",
+        "netgsm": "Netgsm",
+        "meta": "Meta (Facebook, Instagram)",
+        "ga4": "Google Analytics 4",
+        "resend": "E-posta (Resend)",
+        "google": "Google (Search Console, Merchant Center)",
+        "feeds": "Ürün akışları",
+        "accounting": "Muhasebe programı",
+        "redis": "Önbellek (Redis)"
       },
-      "kinds": {
-        "cache": "Önbellek ve oturumlar",
-        "payment": "Kartla ödeme"
+      "purposes": {
+        "paytr": "Kartla ödeme",
+        "iyzico": "Kartla ödeme",
+        "bank_transfer": "Mağazanın banka hesabına havale; sağlayıcı yok",
+        "cash_on_delivery": "Kapıda nakit ya da kartla ödeme; sağlayıcı yok",
+        "geliver": "Birden çok kargo firması tek hesapla",
+        "aras": "Mağazanın kendi kargo sözleşmesi",
+        "yurtici": "Mağazanın kendi kargo sözleşmesi",
+        "netgsm": "SMS ve İYS",
+        "meta": "Reklam dönüşümlerinin ölçümü",
+        "ga4": "Satışların ölçümü",
+        "resend": "Sipariş ve hesap e-postaları",
+        "google": "Arama sonuçları ve alışveriş ilanları",
+        "feeds": "Google, Meta, Akakçe ve Cimri için ürün listesi",
+        "accounting": "Satışların muhasebeye aktarımı",
+        "redis": "Önbellek, oturumlar ve sayaçlar"
       },
-      "status": {
-        "ok": "Çalışıyor",
-        "down": "Yanıt yok",
-        "not_configured": "Bağlı değil"
+      "states": {
+        "connected": "Bağlı",
+        "attention": "İlgilenin",
+        "not_set_up": "Kurulmadı",
+        "off": "Kapalı",
+        "down": "Yanıt yok"
       },
+      "notes": {
+        "test_mode": "Test modunda: gerçek para ya da gönderi yok.",
+        "unverified": "Kaydedildi ama sağlayıcıya sorulamadı; bağlantıyı test edin.",
+        "rejected": "Sağlayıcı kayıtlı bilgileri reddetti; hesabı yeniden kaydedin.",
+        "unreadable": "Kayıtlı bilgiler okunamıyor; hesabı yeniden girin.",
+        "platform_not_ready": "Platformun Google bağlantısı henüz açılmadı.",
+        "search_console_not_granted": "Search Console izni verilmemiş; Google'ı yeniden bağlayın.",
+        "search_console_no_site": "Search Console'da site seçilmemiş.",
+        "merchant_not_chosen": "Merchant Center hesabı seçilmemiş.",
+        "merchant_sync_failed": "Son ürün gönderiminde hata var.",
+        "dev_mailbox": "Geliştirme posta kutusuna gidiyor; gerçek gönderim yok.",
+        "not_sending": "E-posta gönderimi kurulmamış.",
+        "platform_sender": "Platformun adresinden gidiyor; kendi alan adınızı ekleyebilirsiniz.",
+        "domain_unverified": "Alan adınız henüz doğrulanmadı; DNS kayıtlarını kontrol edin.",
+        "no_storefront": "Akışlar açık ama mağazanın adresi tanımlı değil.",
+        "records_stopped_one": "{{count}} kayıt aktarılamadı; Muhasebe sayfasından yeniden deneyin.",
+        "records_stopped_other": "{{count}} kayıt aktarılamadı; Muhasebe sayfasından yeniden deneyin.",
+        "memory_only": "Redis tanımlı değil; sayaçlar yalnızca bu sunucuda tutuluyor."
+      },
+      "latency": "{{ms}} ms",
       "reasons": {
         "timeout": "Zamanında yanıt vermedi.",
         "auth_failed": "Hesap bilgileri reddedildi; hesabı yeniden kaydedin.",
@@ -1060,8 +1141,39 @@
         "unexpected_reply": "Beklenmeyen bir yanıt verdi.",
         "error": "Kontrol sırasında hata oluştu."
       },
-      "latency": "{{ms}} ms",
-      "manage": "Hesabı yönet"
+      "test": "Bağlantıyı test et",
+      "setUp": "Ayarla",
+      "tested": {
+        "valid": "{{name}} bağlantısı çalışıyor.",
+        "unreachable": "{{name}} şu an yanıt vermedi; biraz sonra tekrar deneyin.",
+        "merchant_invalid": "{{name}} kayıtlı hesap bilgilerini reddetti; hesabı yeniden kaydedin.",
+        "secret_invalid": "{{name}} kayıtlı hesap bilgilerini reddetti; hesabı yeniden kaydedin.",
+        "failed": "{{name}} beklenmedik bir yanıt verdi.",
+        "not_configured": "Kayıtlı bir {{name}} hesabı yok."
+      },
+      "failures": {
+        "last": "Son hata {{when}}: {{what}}",
+        "more_one": "son {{count}} hata",
+        "more_other": "son {{count}} hata",
+        "request": "istek",
+        "status": "HTTP {{status}} ({{code}})",
+        "codes": {
+          "timeout": "Zaman aşımı",
+          "network_error": "Bağlantı kurulamadı",
+          "outcome_unknown": "Yanıt alınamadı; işlemin sonucu bilinmiyor",
+          "circuit_open": "Art arda hata; çağrılar bir süre durduruldu",
+          "invalid_response": "Beklenmeyen yanıt",
+          "response_too_large": "Yanıt çok büyük",
+          "http_400": "İstek reddedildi (400)",
+          "http_401": "Kimlik reddedildi (401)",
+          "http_403": "Yetki yok (403)",
+          "http_429": "Çok fazla istek (429)",
+          "http_500": "Sağlayıcı hatası (500)",
+          "http_502": "Ağ geçidi hatası (502)",
+          "http_503": "Hizmet dışı (503)",
+          "http_504": "Ağ geçidi zaman aşımı (504)"
+        }
+      }
     },
     "notifications": {
       "title": "Bildirimler",

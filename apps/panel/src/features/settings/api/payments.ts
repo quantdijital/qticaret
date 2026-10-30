@@ -56,7 +56,7 @@ export interface AccountSave {
   secrets?: Record<string, string>
 }
 
-const ACCOUNTS_KEY = ["settings", "provider-accounts"] as const
+export const ACCOUNTS_KEY = ["settings", "provider-accounts"] as const
 const accountUrl = (provider: string) =>
   `/admin/integrations/credentials/${encodeURIComponent(provider)}`
 

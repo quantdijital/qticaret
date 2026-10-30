@@ -7,6 +7,10 @@ import { DEMO_SHIPPING_OPTIONS } from "../../src/scripts/seed/data"
 import { advanceOrder } from "../../src/scripts/seed/orders/advance"
 import type { DemoStage } from "../../src/scripts/seed/orders/advance"
 import { placeOrder } from "../../src/scripts/seed/orders/place"
+import { ACCOUNTING_MODULE } from "../../src/modules/accounting"
+import type AccountingModuleService from "../../src/modules/accounting/service"
+import { TENANT_WEBHOOKS_MODULE } from "../../src/modules/tenant-webhooks"
+import type TenantWebhooksModuleService from "../../src/modules/tenant-webhooks/service"
 import { createAdminUser } from "../helpers/admin"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
@@ -51,8 +55,52 @@ medusaIntegrationTestRunner({
         to_ship: 0,
         awaiting_payment: 0,
         orphan_payments: { refunding: 0, by_hand: 0 },
+        // Neither in use: nothing to count
+        accounting_stopped: null,
+        webhooks_disabled: null,
       })
       expect(recent.data.orders).toEqual([])
+    })
+
+    it("counts records the accounting program refused and hooks turned off after failing (F12.1)", async () => {
+      const container = getContainer()
+      await http.post(
+        "/admin/platform-settings/accounting",
+        { adapter: "fake" },
+        { headers: admin.headers }
+      )
+      await container.resolve<AccountingModuleService>(ACCOUNTING_MODULE).createAccountingSyncs([
+        {
+          adapter: "fake",
+          source_type: "sale",
+          source_id: "order_1",
+          status: "stopped",
+          next_attempt_at: new Date(),
+        },
+        {
+          adapter: "fake",
+          source_type: "sale",
+          source_id: "order_2",
+          status: "synced",
+          next_attempt_at: new Date(),
+        },
+      ])
+      const hooks = container.resolve<TenantWebhooksModuleService>(TENANT_WEBHOOKS_MODULE)
+      await hooks.subscribe({
+        url: "https://erp.example.com/a",
+        events: ["order.placed"],
+        created_by: null,
+      })
+      const { subscription } = await hooks.subscribe({
+        url: "https://erp.example.com/b",
+        events: ["order.placed"],
+        created_by: null,
+      })
+      await hooks.updateWebhookSubscriptions({ id: subscription.id, status: "disabled" })
+
+      const tasks = await get<Record<string, unknown>>("/admin/dashboard/tasks")
+
+      expect(tasks.data).toMatchObject({ accounting_stopped: 1, webhooks_disabled: 1 })
     })
 
     it("refuses an unknown period and requests without a signed-in user", async () => {

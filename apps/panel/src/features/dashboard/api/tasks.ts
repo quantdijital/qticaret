@@ -10,6 +10,10 @@ export interface DashboardTasks {
   draft_products: number
   /** Payments that became no order (F5 V4): being given back, or left to the shop. */
   orphan_payments: { refunding: number; by_hand: number }
+  /** Records the accounting program refused (F12.1); null while no program is chosen. */
+  accounting_stopped: number | null
+  /** Hooks turned off after failing (F12.1); null while the shop has none. */
+  webhooks_disabled: number | null
   capped: boolean
 }
 

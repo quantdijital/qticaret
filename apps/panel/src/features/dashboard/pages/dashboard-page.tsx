@@ -9,6 +9,7 @@ import { KpiRow } from "@/features/dashboard/components/kpi-row"
 import { OrderStatusCard } from "@/features/dashboard/components/order-status-card"
 import { RecentOrdersCard } from "@/features/dashboard/components/recent-orders-card"
 import { SalesChartCard } from "@/features/dashboard/components/sales-chart-card"
+import { SeoScoreCard } from "@/features/dashboard/components/seo-score-card"
 import { SetupBanner } from "@/features/dashboard/components/setup-banner"
 import { TasksCard } from "@/features/dashboard/components/tasks-card"
 import { TopProductsCard } from "@/features/dashboard/components/top-products-card"
@@ -23,7 +24,7 @@ interface DashboardPageProps {
 
 /**
  * The shop at a glance (docs/06 Dashboard): the period's numbers, the
- * sales curve, what waits, recent orders and what sells; full width, a
+ * sales curve, what waits, recent orders, what sells and the SEO score; full width, a
  * 12-column grid from wide screens down to one column on phones.
  */
 export function DashboardPage({ period, onPeriodChange }: DashboardPageProps) {
@@ -38,7 +39,11 @@ export function DashboardPage({ period, onPeriodChange }: DashboardPageProps) {
         <SalesChartCard query={overview} className="xl:col-span-8" />
         <TasksCard className="xl:col-span-4" />
         <RecentOrdersCard className="xl:col-span-8" />
-        <TopProductsCard query={overview} className="xl:col-span-4" />
+        {/* Best sellers and the SEO score share the column beside the recent orders */}
+        <div className="flex flex-col gap-[var(--grid-gap)] xl:col-span-4">
+          <TopProductsCard query={overview} className="flex-1" />
+          <SeoScoreCard />
+        </div>
         <OrderStatusCard query={overview} className="lg:col-span-1 xl:col-span-4" />
         <CategorySalesCard query={overview} className="xl:col-span-4" />
         <CatalogHealthCard className="xl:col-span-4" />

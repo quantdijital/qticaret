@@ -1,16 +1,20 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { render, screen, within } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
 import type { ReactNode } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
-import type { HealthReport } from "@/features/settings/api/integrations"
+import type { HealthReport, IntegrationView } from "@/features/settings/api/integrations"
 import { IntegrationsPage } from "./integrations-page"
 
 const fetchMock = vi.hoisted(() => vi.fn())
+const toast = vi.hoisted(() => ({ success: vi.fn(), warning: vi.fn(), error: vi.fn() }))
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
+vi.mock("sonner", () => ({ toast }))
 // Links as plain anchors with their params filled in: the page is rendered without a router
 vi.mock("@tanstack/react-router", () => ({
+  linkOptions: (options: unknown) => options,
   Link: ({
     to,
     params,
@@ -27,8 +31,70 @@ vi.mock("@tanstack/react-router", () => ({
   ),
 }))
 
-function renderPage(report: HealthReport) {
-  fetchMock.mockResolvedValue(report)
+const view = (id: string, more: Partial<IntegrationView> = {}): IntegrationView => ({
+  id,
+  group: "payments",
+  state: "not_set_up",
+  notes: [],
+  test: null,
+  failures: [],
+  ...more,
+})
+
+const OVERVIEW: IntegrationView[] = [
+  view("paytr", {
+    state: "attention",
+    notes: [{ code: "rejected" }],
+    test: "account",
+    failures: [
+      {
+        at: "2026-10-30T06:12:00Z",
+        code: "http_401",
+        status: 401,
+        method: "POST",
+        path: "/odeme/api/get-token",
+        request_id: "req_abc",
+      },
+      {
+        at: "2026-10-30T05:00:00Z",
+        code: "timeout",
+        status: null,
+        method: "POST",
+        path: "/odeme/api/get-token",
+        request_id: null,
+      },
+    ],
+  }),
+  view("bank_transfer", { state: "off" }),
+  view("aras", { group: "shipping", state: "connected", test: "account" }),
+  view("accounting", {
+    group: "accounting",
+    state: "attention",
+    notes: [{ code: "records_stopped", count: 3 }],
+  }),
+  view("redis", { group: "infrastructure", state: "connected" }),
+]
+
+const HEALTH: HealthReport = {
+  status: "degraded",
+  checked_at: new Date().toISOString(),
+  checks: [
+    { id: "redis", kind: "cache", status: "ok", latency_ms: 3 },
+    { id: "paytr", kind: "payment", status: "down", reason: "auth_failed", latency_ms: 210 },
+    { id: "aras", kind: "shipping", status: "ok", latency_ms: 120 },
+  ],
+}
+
+function renderPage() {
+  fetchMock.mockImplementation((path: string) => {
+    if (path === "/admin/integrations/overview") {
+      return Promise.resolve({ integrations: OVERVIEW })
+    }
+    if (path === "/admin/integrations/health") {
+      return Promise.resolve(HEALTH)
+    }
+    return Promise.resolve({ check: "valid" })
+  })
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
     <QueryClientProvider client={client}>
@@ -46,45 +112,68 @@ const row = async (name: string) => {
 describe("IntegrationsPage", () => {
   beforeEach(() => {
     fetchMock.mockReset()
+    vi.clearAllMocks()
   })
 
-  it("says which services answer, why one does not, and opens a provider's account", async () => {
-    renderPage({
-      status: "degraded",
-      checked_at: new Date().toISOString(),
-      checks: [
-        { id: "redis", kind: "cache", status: "ok", latency_ms: 3 },
-        { id: "paytr", kind: "payment", status: "down", reason: "auth_failed", latency_ms: 210 },
-        { id: "iyzico", kind: "payment", status: "not_configured", latency_ms: 0 },
-      ],
-    })
+  it("groups every service with where it stands, why, whether it answers and where it is set up", async () => {
+    renderPage()
 
-    const redis = await row("Önbellek (Redis)")
     const paytr = await row("PayTR")
-    const iyzico = await row("iyzico")
+    const accounting = await row("Muhasebe programı")
 
-    expect(screen.getByText(/Yanıt vermeyen servis var/)).toBeInTheDocument()
-    expect(within(redis).getByText("Çalışıyor")).toBeInTheDocument()
-    expect(within(redis).queryByRole("link")).toBeNull()
+    expect(screen.getByRole("heading", { name: "Ödeme" })).toBeInTheDocument()
+    expect(screen.getByRole("heading", { name: "Kargo" })).toBeInTheDocument()
+    // Stored as needing attention, and not answering now: the live check decides the badge
     expect(within(paytr).getByText("Yanıt yok")).toBeInTheDocument()
-    expect(within(paytr).getByText(/Hesap bilgileri reddedildi/)).toBeInTheDocument()
-    expect(within(paytr).getByRole("link", { name: "Hesabı yönet" })).toHaveAttribute(
+    expect(within(accounting).getByText("İlgilenin")).toBeInTheDocument()
+    expect(
+      within(paytr).getByText("Sağlayıcı kayıtlı bilgileri reddetti; hesabı yeniden kaydedin.")
+    ).toBeInTheDocument()
+    expect(
+      within(paytr).getByText("Hesap bilgileri reddedildi; hesabı yeniden kaydedin.")
+    ).toBeInTheDocument()
+    expect(within(paytr).getByRole("link", { name: "Ayarla" })).toHaveAttribute(
       "href",
       "/settings/payments/paytr"
     )
-    expect(within(iyzico).getByText("Bağlı değil")).toBeInTheDocument()
-    expect(within(iyzico).queryByText(/ms$/)).toBeNull()
+    expect(within(await row("Aras Kargo")).getByText("120 ms")).toBeInTheDocument()
+    expect(within(await row("Havale / EFT")).getByText("Kapalı")).toBeInTheDocument()
+    expect(
+      within(accounting).getByText("3 kayıt aktarılamadı; Muhasebe sayfasından yeniden deneyin.")
+    ).toBeInTheDocument()
+    // The cache has no settings page
+    expect(within(await row("Önbellek (Redis)")).queryByRole("link")).toBeNull()
   })
 
-  it("names a service it does not know by its id, and an unknown reason plainly", async () => {
-    renderPage({
-      status: "degraded",
-      checked_at: new Date().toISOString(),
-      checks: [{ id: "s3", kind: "file_storage", status: "down", reason: "nope", latency_ms: 9 }],
+  it("shows a provider's last failed call, and the ones before on request", async () => {
+    const user = userEvent.setup()
+    renderPage()
+    const paytr = await row("PayTR")
+
+    const last = within(paytr).getByRole("button", {
+      name: /Son hata .*: Kimlik reddedildi \(401\)/,
     })
+    expect(last).toHaveTextContent("son 2 hata")
+    await user.click(last)
 
-    const s3 = await row("s3")
+    expect(within(paytr).getByText("Zaman aşımı")).toBeInTheDocument()
+    expect(
+      within(paytr).getByText(/POST \/odeme\/api\/get-token · istek req_abc/)
+    ).toBeInTheDocument()
+  })
 
-    expect(within(s3).getByText("Kontrol sırasında hata oluştu.")).toBeInTheDocument()
+  it("tests a connection with the stored account and says how it went", async () => {
+    const user = userEvent.setup()
+    renderPage()
+
+    await user.click(
+      within(await row("Aras Kargo")).getByRole("button", { name: "Bağlantıyı test et" })
+    )
+
+    expect(fetchMock).toHaveBeenCalledWith("/admin/integrations/credentials/aras/check", {
+      method: "POST",
+      body: {},
+    })
+    expect(toast.success).toHaveBeenCalledWith("Aras Kargo bağlantısı çalışıyor.")
   })
 })

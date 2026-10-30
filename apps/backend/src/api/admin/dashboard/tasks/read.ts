@@ -3,8 +3,13 @@ import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { LIFECYCLE_FIELDS, lifecycleOf } from "../../../../lib/dashboard"
 import type { LifecycleOrder } from "../../../../lib/dashboard"
 import { lowStockThresholds } from "../../../../lib/stock"
+import { ACCOUNTING_MODULE } from "../../../../modules/accounting"
+import type AccountingModuleService from "../../../../modules/accounting/service"
 import { PAYMENT_RECOVERY_MODULE } from "../../../../modules/payment-recovery"
 import type PaymentRecoveryModuleService from "../../../../modules/payment-recovery/service"
+import { TENANT_WEBHOOKS_MODULE } from "../../../../modules/tenant-webhooks"
+import type TenantWebhooksModuleService from "../../../../modules/tenant-webhooks/service"
+import { activeAccountingAdapter } from "../../../../workflows/accounting/active-adapter"
 
 // Open orders and stock records read at most (docs/04); past this the
 // counts are floors and the answer says so
@@ -25,33 +30,43 @@ const available = (row: StockRow): number =>
 /**
  * What waits for the shop (docs/17): orders to ship or still unpaid, stock
  * running low, products left as drafts, payments that became no order
- * (F5 V4). Counts only; no personal data.
+ * (F5 V4); records the accounting program refused and hooks turned off
+ * after failing (F12.1), null where the shop uses neither. Counts only;
+ * no personal data.
  */
 export async function readDashboardTasks(scope: MedusaContainer) {
   const query = scope.resolve(ContainerRegistrationKeys.QUERY)
   const recoveries = scope.resolve<PaymentRecoveryModuleService>(PAYMENT_RECOVERY_MODULE)
-  const [open, stock, drafts, [, refunding], [, byHand]] = await Promise.all([
-    query.graph({
-      entity: "order",
-      fields: ["id", ...LIFECYCLE_FIELDS],
-      filters: { status: ["pending", "requires_action"], is_draft_order: false },
-      pagination: { skip: 0, take: MAX_READ },
-    }),
-    query.graph({
-      entity: "inventory_item",
-      fields: ["id", "location_levels.stocked_quantity", "location_levels.reserved_quantity"],
-      pagination: { skip: 0, take: MAX_READ },
-    }),
-    query.graph({
-      entity: "product",
-      fields: ["id"],
-      filters: { status: "draft" },
-      pagination: { skip: 0, take: 1 },
-    }),
-    // F5 V4: payments that became no order, being given back or left to the shop
-    recoveries.listAndCountPaymentRecoveries({ status: "pending" }, { select: ["id"], take: 1 }),
-    recoveries.listAndCountPaymentRecoveries({ status: "failed" }, { select: ["id"], take: 1 }),
-  ])
+  const hooks = scope.resolve<TenantWebhooksModuleService>(TENANT_WEBHOOKS_MODULE)
+  const accounting = await activeAccountingAdapter(scope)
+  const [open, stock, drafts, [, refunding], [, byHand], [, hookCount], [, hooksOff], counts] =
+    await Promise.all([
+      query.graph({
+        entity: "order",
+        fields: ["id", ...LIFECYCLE_FIELDS],
+        filters: { status: ["pending", "requires_action"], is_draft_order: false },
+        pagination: { skip: 0, take: MAX_READ },
+      }),
+      query.graph({
+        entity: "inventory_item",
+        fields: ["id", "location_levels.stocked_quantity", "location_levels.reserved_quantity"],
+        pagination: { skip: 0, take: MAX_READ },
+      }),
+      query.graph({
+        entity: "product",
+        fields: ["id"],
+        filters: { status: "draft" },
+        pagination: { skip: 0, take: 1 },
+      }),
+      // F5 V4: payments that became no order, being given back or left to the shop
+      recoveries.listAndCountPaymentRecoveries({ status: "pending" }, { select: ["id"], take: 1 }),
+      recoveries.listAndCountPaymentRecoveries({ status: "failed" }, { select: ["id"], take: 1 }),
+      hooks.listAndCountWebhookSubscriptions({}, { select: ["id"], take: 1 }),
+      hooks.listAndCountWebhookSubscriptions({ status: "disabled" }, { select: ["id"], take: 1 }),
+      accounting.adapter
+        ? scope.resolve<AccountingModuleService>(ACCOUNTING_MODULE).counts(accounting.id)
+        : Promise.resolve(null),
+    ])
   const orders = open.data as LifecycleOrder[]
   const stages = orders.map(lifecycleOf)
   const items = stock.data as StockRow[]
@@ -66,6 +81,8 @@ export async function readDashboardTasks(scope: MedusaContainer) {
     low_stock_threshold: thresholds.fallback,
     draft_products: drafts.metadata?.count ?? drafts.data.length,
     orphan_payments: { refunding, by_hand: byHand },
+    accounting_stopped: counts ? counts.stopped : null,
+    webhooks_disabled: hookCount > 0 ? hooksOff : null,
     capped:
       (open.metadata?.count ?? 0) > orders.length || (stock.metadata?.count ?? 0) > items.length,
   }

@@ -161,6 +161,12 @@ export default defineMiddlewares({
       methods: ["GET"],
       middlewares: [requireUserActor],
     },
+    // The Integrations page (F12.2): people only
+    {
+      matcher: "/admin/integrations/overview",
+      methods: ["GET"],
+      middlewares: [requireUserActor],
+    },
     // F2.3: settings sections and flags, each body checked by its own schema
     // (adr/0012); people only, by role (adr/0040): robots.txt or a flag is
     // not a change for an integration key

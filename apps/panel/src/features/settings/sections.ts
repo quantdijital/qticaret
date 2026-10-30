@@ -71,7 +71,7 @@ export const SETTINGS_GROUPS: readonly SettingsGroup[] = [
     sections: [
       { key: "security", to: "/settings/security", icon: ShieldCheck },
       { key: "team", to: "/settings/team", icon: Users, needs: "team" },
-      { key: "integrations", to: "/settings/integrations", icon: Plug },
+      { key: "integrations", to: "/settings/integrations", icon: Plug, needs: "settings" },
       { key: "api", to: "/settings/api", icon: KeyRound, needs: "keys" },
       { key: "features", to: "/settings/features", icon: ToggleRight, needs: "settings" },
       { key: "jobs", to: "/settings/jobs", icon: ListTodo },

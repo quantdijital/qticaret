@@ -3,6 +3,8 @@ import { ProviderError } from "../errors"
 import { currentRequestId, logger as platformLogger } from "../logging"
 import type { LogFields, StructuredLogger } from "../logging"
 import { CircuitBreaker, DEFAULT_CIRCUIT_BREAKER } from "./circuit-breaker"
+import { noteGivenUp } from "./failure-log"
+import type { FailureLog } from "./failure-log"
 import type { CircuitBreakerOptions } from "./circuit-breaker"
 import {
   HttpClientMisuse,
@@ -48,6 +50,8 @@ export interface HttpClientOptions {
   hidePaths?: boolean
   /** Reads the provider's own code (`card_declined`) from an error body. */
   errorCode?: (body: unknown, status: number) => string | undefined
+  /** Where a failed call is noted for the Integrations page; the tenant's shared log by default. */
+  failureLog?: () => FailureLog
   logger?: StructuredLogger
   sleep?: (ms: number) => Promise<void>
   random?: () => number
@@ -108,8 +112,9 @@ interface Prepared {
   fields: LogFields
 }
 
-// What to do after one try: return a value, wait and try again, or throw
-type Next<T> = { value: T } | { delay: number } | { error: Error }
+// What to do after one try: return a value, wait and try again, or throw (with
+// the status the provider answered; `quiet` when the call never got to it)
+type Next<T> = { value: T } | { delay: number } | { error: Error; status?: number; quiet?: true }
 
 export function createHttpClient(options: HttpClientOptions): HttpClient {
   const baseUrl = new URL(options.baseUrl)
@@ -218,7 +223,7 @@ export function createHttpClient(options: HttpClientOptions): HttpClient {
       status === 429 || (prepared.repeatable && (status === 503 || GATEWAY_STATUSES.has(status)))
     const retryAfter = parseRetryAfter(response.header("retry-after"), options.now?.())
     if (!retryable || attempt >= policy.attempts || (retryAfter ?? 0) > policy.maxRetryAfterMs) {
-      return { error: errorFrom(response, prepared) }
+      return { error: errorFrom(response, prepared), status }
     }
     const backoff = backoffDelay(attempt - 1, policy, random)
     // Retry-After plus a little jitter, so callers told the same time do not return together
@@ -270,11 +275,11 @@ export function createHttpClient(options: HttpClientOptions): HttpClient {
       // Neither says anything about the provider: the permit goes back unrecorded
       if ("error" in outcome && outcome.error instanceof TransportRefusal) {
         log.warn({ ...fields, outcome: "refused" })
-        return { error: failure("url_not_allowed", false) }
+        return { error: failure("url_not_allowed", false), quiet: true }
       }
       if ("error" in outcome && request.signal?.aborted) {
         log.info({ ...fields, outcome: "aborted" })
-        return { error: failure("aborted", false) }
+        return { error: failure("aborted", false), quiet: true }
       }
       recorded = true
       if ("error" in outcome) {
@@ -294,15 +299,30 @@ export function createHttpClient(options: HttpClientOptions): HttpClient {
     }
   }
 
+  // The call given up on, for the Integrations page: what the log line says, no more
+  const noteFailure = (prepared: Prepared, error: unknown, status: number | null) => {
+    noteGivenUp(provider, { ...prepared, error, status, at: clock() }, options.failureLog)
+  }
+
   async function request<T>(request: HttpRequest<T>): Promise<T> {
     // Misuse is refused here, before the breaker or a retry sees it
     const prepared = prepare(request)
     for (let attempt = 1; ; attempt++) {
-      const next = await attemptOnce(prepared, request, attempt)
+      let next: Next<T>
+      try {
+        next = await attemptOnce(prepared, request, attempt)
+      } catch (error) {
+        // An answer that is not what the provider documents
+        noteFailure(prepared, error, null)
+        throw error
+      }
       if ("value" in next) {
         return next.value
       }
       if ("error" in next) {
+        if (next.quiet !== true) {
+          noteFailure(prepared, next.error, next.status ?? null)
+        }
         throw next.error
       }
       await sleep(next.delay)

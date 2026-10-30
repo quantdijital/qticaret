@@ -84,6 +84,8 @@ const OWNER_ONLY: readonly Rule[] = [
 const PRIVATE: readonly Rule[] = [
   { methods: "*", path: "/admin/audit-log*" },
   { methods: "*", path: "/admin/integrations/credentials*" },
+  // What each provider failed at: the shop's set-up, for those who set it up
+  { methods: "*", path: "/admin/integrations/overview" },
   { methods: "*", path: "/admin/webhooks*" },
   { methods: "*", path: "/admin/users*" },
   { methods: "*", path: "/admin/staff*" },

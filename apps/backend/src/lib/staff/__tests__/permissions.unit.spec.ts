@@ -63,6 +63,7 @@ describe("staff roles", () => {
     ["POST", "/admin/platform-settings/store"],
     ["POST", "/admin/integrations/credentials/paytr/check"],
     ["GET", "/admin/integrations/credentials"],
+    ["GET", "/admin/integrations/overview"],
     ["GET", "/admin/webhooks"],
     ["GET", "/admin/audit-log"],
     ["GET", "/admin/users"],
@@ -104,6 +105,7 @@ describe("staff roles", () => {
   it.each([
     ["GET", "/admin/audit-log"],
     ["GET", "/admin/integrations/credentials"],
+    ["GET", "/admin/integrations/overview"],
     ["GET", "/admin/webhooks"],
     ["GET", "/admin/users"],
     ["GET", "/admin/users/user_1"],

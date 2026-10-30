@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
 import {
+  Calculator,
   ChevronRight,
   CircleCheck,
   Clock,
@@ -8,35 +9,58 @@ import {
   PackageMinus,
   RotateCcw,
   Truck,
+  Webhook,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { AsyncBody } from "@/components/patterns/async-body"
 import { SectionCard } from "@/components/patterns/section-card"
 import { Skeleton } from "@/components/ui/skeleton"
+import { useCan } from "@/features/auth/api/staff"
 import { tasksQuery } from "@/features/dashboard/api/tasks"
 import type { DashboardTasks } from "@/features/dashboard/api/tasks"
 import { formatCount } from "@/lib/format"
 import { cn } from "@/lib/utils"
 
 interface TaskRow {
-  key: "toShip" | "awaitingPayment" | "lowStock" | "drafts" | "orphanPayments"
+  key:
+    | "toShip"
+    | "awaitingPayment"
+    | "lowStock"
+    | "drafts"
+    | "orphanPayments"
+    | "accountingStopped"
+    | "webhooksDisabled"
   icon: LucideIcon
   count: number
   to: string
-  search?: { status: "draft" } | { view: "low" }
+  search?: { status: "draft" } | { view: "low" } | { stage: "to_ship" | "awaiting_payment" }
   /** A count here needs the shop's attention (amber) rather than routine work. */
   urgent: boolean
 }
 
-function rows(tasks: DashboardTasks): TaskRow[] {
+/** What the person may act on: the accounting program and the hooks are the set-up's (adr/0040). */
+interface Reach {
+  settings: boolean
+  keys: boolean
+}
+
+function rows(tasks: DashboardTasks, reach: Reach): TaskRow[] {
   return [
-    { key: "toShip", icon: Truck, count: tasks.to_ship, to: "/orders", urgent: false },
+    {
+      key: "toShip",
+      icon: Truck,
+      count: tasks.to_ship,
+      to: "/orders",
+      search: { stage: "to_ship" },
+      urgent: false,
+    },
     {
       key: "awaitingPayment",
       icon: Clock,
       count: tasks.awaiting_payment,
       to: "/orders",
+      search: { stage: "awaiting_payment" },
       urgent: false,
     },
     {
@@ -67,12 +91,35 @@ function rows(tasks: DashboardTasks): TaskRow[] {
           },
         ]
       : []),
+    // F12.1: only where the shop uses them, for those who can set them right
+    ...(tasks.accounting_stopped !== null && reach.settings
+      ? [
+          {
+            key: "accountingStopped" as const,
+            icon: Calculator,
+            count: tasks.accounting_stopped,
+            to: "/settings/accounting",
+            urgent: true,
+          },
+        ]
+      : []),
+    ...(tasks.webhooks_disabled !== null && reach.keys
+      ? [
+          {
+            key: "webhooksDisabled" as const,
+            icon: Webhook,
+            count: tasks.webhooks_disabled,
+            to: "/settings/api",
+            urgent: true,
+          },
+        ]
+      : []),
   ]
 }
 
 function TaskList({ tasks }: { tasks: DashboardTasks }) {
   const { t } = useTranslation()
-  const list = rows(tasks)
+  const list = rows(tasks, { settings: useCan("settings"), keys: useCan("keys") })
   if (list.every((row) => row.count === 0)) {
     return (
       <p className="flex items-center gap-2 px-5 pb-5 text-sm text-muted-foreground">

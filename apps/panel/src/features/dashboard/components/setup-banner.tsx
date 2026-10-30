@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next"
 import { Stepper } from "@/components/patterns/stepper"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
+import { useCan } from "@/features/auth/api/staff"
 import { setupFactsQuery } from "@/features/dashboard/api/setup"
 import { setupStatus } from "@/features/dashboard/setup-steps"
 import type { SetupStatus, SetupStepKey } from "@/features/dashboard/setup-steps"
@@ -54,15 +55,43 @@ function NextStep({ status, selected }: { status: SetupStatus; selected: SetupSt
 /**
  * Setup as stages (docs/17): a stepper across the page, the next open step
  * spelled out with its action. Gone once every step is done; the owner
- * may hide it sooner in this browser.
+ * may hide it sooner in this browser. When the steps cannot be read, a
+ * line says so with a retry.
  */
 export function SetupBanner() {
   const { t } = useTranslation()
-  const { data } = useQuery(setupFactsQuery())
+  // Setting the shop up is for those who may change its settings (adr/0040);
+  // its accounts are not even readable for the others
+  const allowed = useCan("settings")
+  const facts = useQuery({ ...setupFactsQuery(), enabled: allowed })
   const [hidden, setHidden] = useState(readHidden)
   const [selected, setSelected] = useState<SetupStepKey | null>(null)
-  const status = data ? setupStatus(data) : null
-  if (!status?.nextKey || hidden) {
+  if (hidden || !allowed) {
+    return null
+  }
+  // Not known: say so, rather than let a shop not yet set up miss its steps
+  if (facts.isError) {
+    return (
+      <div
+        role="alert"
+        className="flex flex-col gap-3 rounded-lg border bg-card px-5 py-4 shadow-card sm:flex-row sm:items-center sm:justify-between"
+      >
+        <p className="text-[13px] text-muted-foreground">{t("dashboard.setup.failed")}</p>
+        <Button
+          variant="outline"
+          size="sm"
+          className="shrink-0"
+          onClick={() => void facts.refetch()}
+        >
+          {t("common.retry")}
+        </Button>
+      </div>
+    )
+  }
+  // While it loads nothing is drawn: most shops are set up, and a placeholder
+  // that then vanishes would move the whole page
+  const status = facts.data ? setupStatus(facts.data) : null
+  if (!status?.nextKey) {
     return null
   }
   const total = status.steps.length

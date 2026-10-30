@@ -69,9 +69,9 @@ describe("Settings home", () => {
     staff.allowed = (capability) => ["orders", "stock", "moderation"].includes(capability)
     render(<SettingsHomePage />)
 
+    // Integrations show the shop's set-up and its failures: those who set it up (F12.2)
     expect(screen.getAllByRole("link").map((link) => link.getAttribute("href"))).toEqual([
       "/settings/security",
-      "/settings/integrations",
       "/settings/jobs",
     ])
     expect(screen.queryByRole("heading", { name: "Satış ve teslimat" })).toBeNull()

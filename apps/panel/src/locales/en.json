@@ -135,7 +135,8 @@
       "subtitle": "Steps to complete before you start selling",
       "hide": "Hide",
       "continue": "Continue",
-      "byInstall": "Done when the shop is installed; if missing, write to our support team."
+      "byInstall": "Done when the shop is installed; if missing, write to our support team.",
+      "failed": "The setup steps could not be read."
     },
     "subtitle": "{{date}} · Your shop at a glance",
     "addProduct": "Add product",
@@ -180,6 +181,14 @@
       "orphanPayments": {
         "label": "Payments that became no order",
         "hint": "Refunded on their own; those to refund by hand are in the bell."
+      },
+      "accountingStopped": {
+        "label": "Accounting records not sent",
+        "hint": "Records the accounting program refused; try them again."
+      },
+      "webhooksDisabled": {
+        "label": "Webhooks turned off",
+        "hint": "Addresses turned off after failing again and again."
       }
     },
     "recent": {
@@ -224,6 +233,9 @@
       "missingDimensions": "Missing weight or dimensions",
       "allGood": "Every product is complete.",
       "empty": "No products yet."
+    },
+    "seo": {
+      "open": "See products"
     }
   },
   "settings": {
@@ -1027,41 +1039,141 @@
     },
     "integrations": {
       "title": "Integrations",
-      "subtitle": "Whether the outside services the shop depends on are working right now.",
+      "subtitle": "The outside services the shop uses: where they stand, whether they answer now, and their last errors. Account details are not shown here.",
       "health": {
-        "title": "Connection status",
         "all_ok": "Every connected service answers.",
-        "degraded": "A service is not answering; its row says why.",
-        "checked": "Checked: {{when}}",
+        "degraded": "A service does not answer; see its row.",
+        "checked": "Last checked: {{when}}",
         "refresh": "Check again"
       },
-      "checks": {
-        "redis": "Cache (Redis)",
+      "groups": {
+        "payments": {
+          "title": "Payment",
+          "text": "Card payment providers and methods without one."
+        },
+        "shipping": {
+          "title": "Shipping",
+          "text": "Carrier accounts for labels and tracking."
+        },
+        "messaging": {
+          "title": "Communication",
+          "text": "SMS, marketing consent and e-mail."
+        },
+        "marketing": {
+          "title": "Google and marketing",
+          "text": "Search visibility, ad measurement and product feeds."
+        },
+        "accounting": {
+          "title": "Accounting",
+          "text": "The program sales and payments are sent to."
+        },
+        "infrastructure": {
+          "title": "Infrastructure",
+          "text": "The platform's own services."
+        }
+      },
+      "names": {
         "paytr": "PayTR",
         "iyzico": "iyzico",
-        "netgsm": "Netgsm (SMS)",
+        "bank_transfer": "Bank transfer",
+        "cash_on_delivery": "Cash on delivery",
+        "geliver": "Geliver",
         "aras": "Aras Kargo",
-        "yurtici": "Yurtiçi Kargo"
+        "yurtici": "Yurtiçi Kargo",
+        "netgsm": "Netgsm",
+        "meta": "Meta (Facebook, Instagram)",
+        "ga4": "Google Analytics 4",
+        "resend": "E-mail (Resend)",
+        "google": "Google (Search Console, Merchant Center)",
+        "feeds": "Product feeds",
+        "accounting": "Accounting program",
+        "redis": "Cache (Redis)"
       },
-      "kinds": {
-        "cache": "Cache and sessions",
-        "payment": "Card payments"
+      "purposes": {
+        "paytr": "Card payments",
+        "iyzico": "Card payments",
+        "bank_transfer": "Transfers to the shop's bank account; no provider",
+        "cash_on_delivery": "Cash or card at the door; no provider",
+        "geliver": "Several carriers with one account",
+        "aras": "The shop's own carrier contract",
+        "yurtici": "The shop's own carrier contract",
+        "netgsm": "SMS and the consent registry (İYS)",
+        "meta": "Measuring ad conversions",
+        "ga4": "Measuring sales",
+        "resend": "Order and account e-mails",
+        "google": "Search results and shopping listings",
+        "feeds": "Product lists for Google, Meta, Akakçe and Cimri",
+        "accounting": "Sending sales to accounting",
+        "redis": "Cache, sessions and counters"
       },
-      "status": {
-        "ok": "Working",
-        "down": "Not answering",
-        "not_configured": "Not connected"
+      "states": {
+        "connected": "Connected",
+        "attention": "Needs attention",
+        "not_set_up": "Not set up",
+        "off": "Off",
+        "down": "Not answering"
       },
+      "notes": {
+        "test_mode": "In test mode: no real money or parcels.",
+        "unverified": "Saved, but the provider could not be asked; test the connection.",
+        "rejected": "The provider refused the stored details; save the account again.",
+        "unreadable": "The stored details cannot be read; enter the account again.",
+        "platform_not_ready": "The platform's Google connection is not open yet.",
+        "search_console_not_granted": "Search Console access was not granted; connect Google again.",
+        "search_console_no_site": "No Search Console site is chosen.",
+        "merchant_not_chosen": "No Merchant Center account is chosen.",
+        "merchant_sync_failed": "The last product upload had errors.",
+        "dev_mailbox": "Going to the development mailbox; nothing is really sent.",
+        "not_sending": "E-mail sending is not set up.",
+        "platform_sender": "Sent from the platform's address; you can add your own domain.",
+        "domain_unverified": "Your domain is not verified yet; check its DNS records.",
+        "no_storefront": "Feeds are on, but the shop's address is not set.",
+        "records_stopped_one": "{{count}} record could not be sent; retry it on the Accounting page.",
+        "records_stopped_other": "{{count}} records could not be sent; retry them on the Accounting page.",
+        "memory_only": "No Redis: counters are kept on this server only."
+      },
+      "latency": "{{ms}} ms",
       "reasons": {
         "timeout": "Did not answer in time.",
         "auth_failed": "The account details were refused; save the account again.",
         "connection_failed": "Could not connect.",
         "error_reply": "Answered with an error.",
         "unexpected_reply": "Gave an unexpected answer.",
-        "error": "The check failed."
+        "error": "The check itself failed."
       },
-      "latency": "{{ms}} ms",
-      "manage": "Manage account"
+      "test": "Test the connection",
+      "setUp": "Set up",
+      "tested": {
+        "valid": "{{name}} connection works.",
+        "unreachable": "{{name}} did not answer just now; try again shortly.",
+        "merchant_invalid": "{{name}} refused the stored account details; save the account again.",
+        "secret_invalid": "{{name}} refused the stored account details; save the account again.",
+        "failed": "{{name}} gave an unexpected answer.",
+        "not_configured": "There is no stored {{name}} account."
+      },
+      "failures": {
+        "last": "Last error {{when}}: {{what}}",
+        "more_one": "last {{count}} error",
+        "more_other": "last {{count}} errors",
+        "request": "request",
+        "status": "HTTP {{status}} ({{code}})",
+        "codes": {
+          "timeout": "Timed out",
+          "network_error": "Could not connect",
+          "outcome_unknown": "No answer; the outcome is unknown",
+          "circuit_open": "Repeated errors; calls paused for a while",
+          "invalid_response": "Unexpected answer",
+          "response_too_large": "Answer too large",
+          "http_400": "Request refused (400)",
+          "http_401": "Credentials refused (401)",
+          "http_403": "Not allowed (403)",
+          "http_429": "Too many requests (429)",
+          "http_500": "Provider error (500)",
+          "http_502": "Gateway error (502)",
+          "http_503": "Service unavailable (503)",
+          "http_504": "Gateway timeout (504)"
+        }
+      }
     },
     "notifications": {
       "title": "Notifications",

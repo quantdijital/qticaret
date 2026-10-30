@@ -39,7 +39,7 @@ Dashboard, Siparişler (aşama sekmeleri + detay: kargoya ver, teslim edildi, ta
 | Dashboard | StatCard + grafik + kurulum ilerlemesi (P1) | Bugünkü satış, bekleyen ve kargoya hazır sipariş, düşük stok, haftalık grafik, sıradaki kurulum adımı; hatalı ödeme/fatura sayıları ilgili fazda |
 | Sipariş detay | Sayfa (P4, F7) | Kalemler, ödeme/kargo/fatura durumu tek bakışta, kargo takip zaman çizelgesi, yasal onay kaydı, iç notlar |
 | Ürün sihirbazı ve düzenleme | Wizard + FormSection (P3, F3) | Temel bilgi → görseller → fiyat ve stok → özellikler (şablon) → katalog ve SEO → yayınla; düzenlemede aynı bölümler |
-| Entegrasyonlar | Sayfa | Sağlayıcı kartları: durum, bağlantı testi, son hata |
+| Entegrasyonlar | Sayfa | Gruplu kartlar (ödeme, kargo, iletişim, Google ve pazarlama, muhasebe, altyapı); her satırda durum ve nedeni, canlı yanıt, bağlantı testi, ayar sayfasına bağlantı ve son hatalar (kodlarıyla, açılır liste). Yalnızca sahip ve yönetici (F12.2, adr/0002 ek) |
 | Operasyon | Sayfa | Kargoya hazır listesi, toplu etiket, filtreler |
 | Ayarlar > Görünüm | Sayfa (P1) | Marka rengi, logo, köşe, yoğunluk, mod; canlı önizleme (docs/18 §5) |
 | Kurulum sihirbazı | Wizard (P2) | Mağaza bilgileri → ilk ürün → kargo → ödeme → yayına al; atlanabilir, ilerleme kalıcı |
