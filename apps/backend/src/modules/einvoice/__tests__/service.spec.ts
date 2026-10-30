@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto"
 import { moduleIntegrationTestRunner } from "@medusajs/test-utils"
 import { EINVOICE_MODULE } from ".."
 import type EinvoiceModuleService from "../service"
@@ -19,6 +20,7 @@ const sale = (orderId: string, provider: QueuedInvoice["provider"] = "fake"): Qu
 moduleIntegrationTestRunner<EinvoiceModuleService>({
   moduleName: EINVOICE_MODULE,
   resolve: "./src/modules/einvoice",
+  moduleOptions: { encryptionKey: randomBytes(32).toString("hex") },
   testSuite: ({ service }) => {
     it("queues an order's sale invoice once, however often its event comes (KK3)", async () => {
       const first = await service.enqueue(sale("order_1"))

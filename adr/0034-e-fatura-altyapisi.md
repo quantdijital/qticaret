@@ -78,8 +78,10 @@ Paraşüt API v4, resmî tanımından (`https://apidocs.parasut.com/swagger.json
    - İstemci kimliği ve sırrı platformundur ve ortamdan okunur (`PARASUT_CLIENT_ID`, `PARASUT_CLIENT_SECRET`), Google bağlantısındaki gibi.
    - Mağaza firma numarasını panelden girer ve Paraşüt'e bağlanır. Önerilen yol yetki kodu akışıdır: Paraşüt'ün sayfası açılır, verdiği kod panele yapıştırılır. Böylece mağazanın Paraşüt parolası bizde tutulmaz.
    - Paraşüt bu akışı platform istemcisine açmazsa parola akışına geçilir: ayrı bir API kullanıcısı açılır, parolası `integration-credentials`'ta şifreli tutulur.
-   - Jetonlar şifreli saklanır. Yenileme jetonu her kullanımda değişir ve kilit altında yenilenir.
+   - Jetonlar `einvoice` modülünde (`parasut_connection`) `PII_ENCRYPTION_KEY` ile şifreli saklanır, sağlayıcı hesaplarında (`integration-credentials`) değil: yenileme jetonu her kullanımda değiştiği için iki saatte bir yazılır. Yenileme satır kilidi altında yapılır; iki süreç aynı yenileme jetonunu harcamaz.
+   - Paraşüt bir erişim jetonunu süresinden önce reddederse (401) bir kez zorla yenilenir; başka süreç zaten yenilediyse yeniden yenilenmez.
    - Yenileme reddedilirse bağlantı "koptu" olur ve panel yeniden bağlanmayı ister.
+   - Bağlanma ve kaldırma yalnızca sahibin ve yeniden kimlik doğrulamalıdır; bağlantıyı denemek yöneticiye de açıktır. Yapıştırılan kod iş akışı girdisine girer ama tek kullanımlıktır ve ilk çağrıda harcanır; jetonlar iş akışı kaydına hiç girmez.
 6. **İstemci (`lib/clients` tabanı):**
    - zaman aşımı, yeniden deneme ve günlüklerde redaksiyon (alıcı verisi ve jeton yazılmaz);
    - mağaza başına 10 saniyede 10 istek sınırı (Redis), 429 ve 5xx'te artan aralıkla bekleme;

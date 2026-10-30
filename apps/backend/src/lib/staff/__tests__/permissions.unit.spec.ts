@@ -51,6 +51,8 @@ describe("staff roles", () => {
     ["POST", "/admin/platform-settings/security"],
     ["POST", "/admin/platform-settings/invoicing"],
     ["POST", "/admin/platform-settings/%69nvoicing"],
+    ["POST", "/admin/einvoice/parasut"],
+    ["DELETE", "/admin/einvoice/parasut"],
     ["POST", "/admin/google/connect"],
     ["DELETE", "/admin/google"],
     ["POST", "/admin/users/user_1"],
@@ -65,6 +67,8 @@ describe("staff roles", () => {
   it.each([
     ["POST", "/admin/platform-settings/store"],
     ["POST", "/admin/integrations/credentials/paytr/check"],
+    ["POST", "/admin/einvoice/parasut/check"],
+    ["GET", "/admin/einvoice/parasut"],
     ["GET", "/admin/integrations/credentials"],
     ["GET", "/admin/integrations/overview"],
     ["GET", "/admin/webhooks"],
@@ -108,6 +112,7 @@ describe("staff roles", () => {
   it.each([
     ["GET", "/admin/audit-log"],
     ["GET", "/admin/integrations/credentials"],
+    ["GET", "/admin/einvoice/parasut"],
     ["GET", "/admin/integrations/overview"],
     ["GET", "/admin/webhooks"],
     ["GET", "/admin/users"],
@@ -327,6 +332,9 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/webhooks/:id": false,
   "DELETE /admin/webhooks/:id": false,
   "POST /admin/webhooks": false,
+  "POST /admin/einvoice/parasut": false,
+  "DELETE /admin/einvoice/parasut": false,
+  "POST /admin/einvoice/parasut/check": false,
 }
 
 const ADMIN_DIR = join(__dirname, "../../../api/admin")

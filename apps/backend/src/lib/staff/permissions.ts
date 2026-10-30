@@ -74,6 +74,8 @@ const OWNER_ONLY: readonly Rule[] = [
   { methods: WRITES, path: "/admin/platform-settings/accounting" },
   // Which program issues the invoices: the buyers' details go to it (adr/0034)
   { methods: WRITES, path: "/admin/platform-settings/invoicing" },
+  // Connecting the company; checking it stays the admin's, as with provider accounts
+  { methods: WRITES, path: "/admin/einvoice/parasut" },
   { methods: ["POST"], path: "/admin/google/connect" },
   { methods: ["DELETE"], path: "/admin/google" },
   // Where shoppers' transfers go
@@ -90,6 +92,7 @@ const OWNER_ONLY: readonly Rule[] = [
 const PRIVATE: readonly Rule[] = [
   { methods: "*", path: "/admin/audit-log*" },
   { methods: "*", path: "/admin/integrations/credentials*" },
+  { methods: "*", path: "/admin/einvoice/parasut*" },
   // What each provider failed at: the shop's set-up, for those who set it up
   { methods: "*", path: "/admin/integrations/overview" },
   { methods: "*", path: "/admin/webhooks*" },

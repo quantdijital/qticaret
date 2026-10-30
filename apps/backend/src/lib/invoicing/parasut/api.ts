@@ -122,6 +122,15 @@ export function createParasutApi(
   }
 
   return {
+    /** Whether the token reaches the company: one contact read (403 for another's company). */
+    async checkCompany(token: string): Promise<void> {
+      await call(token, {
+        path: ["contacts"],
+        query: { "page[size]": "1" },
+        schema: Many(z.looseObject({})),
+      })
+    },
+
     /** The company's contact with this tax id, or null. */
     async findContact(token: string, taxId: string): Promise<string | null> {
       const answer = await call(token, {

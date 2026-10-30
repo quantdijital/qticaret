@@ -33,6 +33,7 @@ import { COMMUNICATION_ROUTES } from "./http/communication-routes"
 import { LEGAL_ROUTES } from "./http/legal-routes"
 import { CORE_RETURN_ROUTES } from "./http/core-return-routes"
 import { GOOGLE_ROUTES } from "./http/google-routes"
+import { EINVOICE_ROUTES } from "./http/einvoice-routes"
 import { MARKETING_ROUTES } from "./http/marketing-routes"
 import { ORDER_EDIT_ROUTES } from "./http/order-edit-routes"
 import { RETURN_ROUTES } from "./http/return-routes"
@@ -249,6 +250,7 @@ export default defineMiddlewares({
     ...REVIEW_ROUTES,
     ...MARKETING_ROUTES,
     ...GOOGLE_ROUTES,
+    ...EINVOICE_ROUTES,
     ...RETURN_ROUTES,
     ...CORE_RETURN_ROUTES,
     ...ORDER_EDIT_ROUTES,

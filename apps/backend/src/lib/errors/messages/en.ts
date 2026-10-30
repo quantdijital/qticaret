@@ -391,6 +391,17 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "einvoice.carrier_identity_missing":
     "The carrier's registered name and tax id are not entered (Settings > E-invoice).",
   "einvoice.store_url_missing": "The shop has no storefront address.",
+  "einvoice.parasut_unavailable": "Paraşüt cannot be connected on this server yet.",
+  "einvoice.parasut_not_connected": "No Paraşüt account is connected (Settings > E-invoice).",
+  "einvoice.parasut_disconnected":
+    "Paraşüt refused the connection; connect the account again (Settings > E-invoice).",
+  "einvoice.parasut_code_refused":
+    "Paraşüt did not accept this code. Get a new code from Paraşüt's page and paste it.",
+  "einvoice.parasut_company_refused": "This Paraşüt account cannot reach this company number.",
+  "einvoice.parasut_company_invalid": "A company number has digits only.",
+  "einvoice.parasut_code_invalid":
+    "The code looks wrong; paste the whole code from Paraşüt's page.",
+  "einvoice.rate_limited": "Too many requests went to Paraşüt; it is tried again shortly.",
   "accounting.sync_unknown": "No such transfer record.",
   "accounting.source_missing": "The record to send is no longer there.",
   "accounting.month_invalid": "The month is not valid: one that has begun, two years back at most.",

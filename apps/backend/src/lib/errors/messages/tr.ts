@@ -395,6 +395,17 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "einvoice.carrier_identity_missing":
     "Kargo firmasının unvanı ve VKN'si girilmemiş (Ayarlar > E-Fatura).",
   "einvoice.store_url_missing": "Mağazanın vitrin adresi yok.",
+  "einvoice.parasut_unavailable": "Paraşüt bağlantısı bu sunucuda henüz açılmadı.",
+  "einvoice.parasut_not_connected": "Paraşüt hesabı bağlı değil (Ayarlar > E-Fatura).",
+  "einvoice.parasut_disconnected":
+    "Paraşüt bağlantıyı reddetti; hesabı yeniden bağlayın (Ayarlar > E-Fatura).",
+  "einvoice.parasut_code_refused":
+    "Paraşüt bu kodu kabul etmedi. Paraşüt sayfasından yeni bir kod alıp yapıştırın.",
+  "einvoice.parasut_company_refused": "Bu Paraşüt hesabı bu firma numarasına erişemiyor.",
+  "einvoice.parasut_company_invalid": "Firma numarası yalnızca rakamlardan oluşur.",
+  "einvoice.parasut_code_invalid":
+    "Yetki kodu geçersiz görünüyor; Paraşüt sayfasındaki kodu eksiksiz yapıştırın.",
+  "einvoice.rate_limited": "Paraşüt'e çok sık istek gitti; biraz sonra yeniden denenecek.",
   "accounting.sync_unknown": "Aktarım kaydı bulunamadı.",
   "accounting.source_missing": "Aktarılacak kayıt artık yok.",
   "accounting.month_invalid": "Ay geçersiz: başlamış bir ay olmalı, en fazla iki yıl öncesi.",
