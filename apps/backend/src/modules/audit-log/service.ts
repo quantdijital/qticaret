@@ -19,7 +19,16 @@ export interface AuditEntryInput {
   user_agent?: string | null
 }
 
+interface Executor {
+  execute: (sql: string, params: unknown[]) => Promise<unknown>
+}
+
+/** Who an entry names (Medusa's actor types; `system` for the platform's own actions). */
+export const AUDIT_ACTOR_TYPES = ["user", "api-key", "system"] as const
+
 const KINDS = new Set<AuditKind>(["mutation", "sensitive_read", "system"])
+// The viewer's filter lists them all; more than this is not a list to choose from
+const MAX_RESOURCE_TYPES = 200
 // Bounds so one request cannot write an unbounded row
 const MAX_TEXT = 256
 const MAX_USER_AGENT = 512
@@ -99,6 +108,29 @@ class AuditLogModuleService extends MedusaService({ AuditEntry }) {
       },
       sharedContext
     )
+  }
+
+  /**
+   * The kinds of thing the log has entries for, for the viewer's filter. A
+   * skip scan over the (resource_type, resource_id) index: one probe per
+   * type instead of a pass over every entry.
+   */
+  @InjectManager()
+  async resourceTypes(@MedusaContext() sharedContext: Context = {}): Promise<string[]> {
+    const manager = sharedContext.manager as Executor
+    const rows = (await manager.execute(
+      `WITH RECURSIVE types AS (
+         (SELECT resource_type FROM audit_entry
+           WHERE resource_type IS NOT NULL ORDER BY resource_type LIMIT 1)
+         UNION ALL
+         SELECT (SELECT resource_type FROM audit_entry
+                  WHERE resource_type > types.resource_type ORDER BY resource_type LIMIT 1)
+           FROM types WHERE types.resource_type IS NOT NULL
+       )
+       SELECT resource_type FROM types WHERE resource_type IS NOT NULL LIMIT ?`,
+      [MAX_RESOURCE_TYPES]
+    )) as { resource_type: string }[]
+    return rows.map((row) => row.resource_type)
   }
 
   // The generated writers stay unreachable: an audit entry is never changed

@@ -1,4 +1,5 @@
 import { z } from "@medusajs/framework/zod"
+import { AUDIT_ACTOR_TYPES } from "../../../modules/audit-log/service"
 
 // docs/04: list endpoints page at most 100 records
 export const AUDIT_LOG_MAX_LIMIT = 100
@@ -12,6 +13,8 @@ export const AdminGetAuditLog = z.object({
   resource_type: text.optional(),
   resource_id: text.optional(),
   actor_id: text.optional(),
+  // Who: a person, an integration's key, or the platform itself (Medusa's names)
+  actor_type: z.enum(AUDIT_ACTOR_TYPES).optional(),
   created_after: z.coerce.date().optional(),
   created_before: z.coerce.date().optional(),
   limit: z.coerce.number().int().min(1).max(AUDIT_LOG_MAX_LIMIT).default(50),

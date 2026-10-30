@@ -155,6 +155,12 @@ export default defineMiddlewares({
         auditSensitiveRead("audit_log", { list: true }),
       ],
     },
+    // The viewer's filter (F12.5): names only, people only
+    {
+      matcher: "/admin/audit-log/resource-types",
+      methods: ["GET"],
+      middlewares: [requireUserActor],
+    },
     // F2.3: settings sections and flags, each body checked by its own schema
     // (adr/0012); people only, by role (adr/0040): robots.txt or a flag is
     // not a change for an integration key

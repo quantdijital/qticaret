@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto"
 import { z } from "@medusajs/framework/zod"
 import { CSV_BOM, toCsv } from "../../../lib/security"
 import { AUDIT_LOG_MODULE } from "../../../modules/audit-log"
+import { AUDIT_ACTOR_TYPES } from "../../../modules/audit-log/service"
 import type AuditLogModuleService from "../../../modules/audit-log/service"
 import type { JobType } from "./types"
 
@@ -19,6 +20,7 @@ const input = z
     resource_type: text.optional(),
     resource_id: text.optional(),
     actor_id: text.optional(),
+    actor_type: z.enum(AUDIT_ACTOR_TYPES).optional(),
     created_after: z.iso.datetime().optional(),
     created_before: z.iso.datetime().optional(),
   })

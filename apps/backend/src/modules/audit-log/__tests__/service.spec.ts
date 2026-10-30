@@ -74,6 +74,26 @@ moduleIntegrationTestRunner<AuditLogModuleService>({
       expect(Object.keys(changes.diff).length).toBeLessThan(2000)
     })
 
+    it("lists each kind of resource once, in order, for the viewer's filter", async () => {
+      for (const [type, id] of [
+        ["product", "prod_1"],
+        ["order", "order_1"],
+        ["product", "prod_2"],
+        ["customer", "cus_1"],
+        ["order", "order_2"],
+      ] as const) {
+        await service.record({
+          kind: "mutation",
+          action: "POST /admin/x",
+          resource_type: type,
+          resource_id: id,
+        })
+      }
+      await service.record({ kind: "system", action: "seo.sitemap_built" })
+
+      expect(await service.resourceTypes()).toEqual(["customer", "order", "product"])
+    })
+
     it("refuses an unknown kind", async () => {
       expect(
         await messageOf(() => service.record({ kind: "other" as "system", action: "x" }))

@@ -10,6 +10,8 @@ import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { createStorefront, createTestProduct } from "../helpers/storefront"
 import type { Storefront } from "../helpers/storefront"
+import { AUDIT_LOG_MODULE } from "../../src/modules/audit-log"
+import type AuditLogModuleService from "../../src/modules/audit-log/service"
 
 jest.setTimeout(120 * 1000)
 
@@ -217,6 +219,45 @@ medusaIntegrationTestRunner({
         changes: { fields: "email,*addresses", limit: "20" },
       })
       expect(expansion.status).toBe(400)
+    })
+
+    it("filters by who: a person, an integration's key or the platform; and lists what it has entries for", async () => {
+      const container = getContainer()
+      const log = container.resolve<AuditLogModuleService>(AUDIT_LOG_MODULE)
+      await log.record({ kind: "system", action: "seo.sitemap_built", actor_type: "system" })
+      await log.record({
+        kind: "mutation",
+        action: "POST /admin/webhooks",
+        actor_type: "api-key",
+        actor_id: "apk_1",
+        resource_type: "webhook",
+      })
+      const ops = await createAdminUser(http, container, "operations")
+      const list = (params: Record<string, string>) =>
+        settle(
+          http.get<{ audit_entries: AuditEntry[] }>(
+            `/admin/audit-log?${new URLSearchParams(params).toString()}`,
+            { headers: admin.headers }
+          )
+        )
+
+      const byKey = await list({ actor_type: "api-key" })
+      const bySystem = await list({ actor_type: "system" })
+      const unknown = await list({ actor_type: "robot" })
+      const types = await http.get<{ resource_types: string[] }>(
+        "/admin/audit-log/resource-types",
+        { headers: admin.headers }
+      )
+      const typesByOps = await settle(
+        http.get("/admin/audit-log/resource-types", { headers: ops.headers })
+      )
+
+      expect(byKey.data.audit_entries.map(({ actor_id }) => actor_id)).toEqual(["apk_1"])
+      expect(bySystem.data.audit_entries.map(({ action }) => action)).toContain("seo.sitemap_built")
+      expect(unknown.status).toBe(400)
+      // Reading the log is recorded as an `audit_log` entry: it is in the list too
+      expect(types.data.resource_types).toEqual(expect.arrayContaining(["audit_log", "webhook"]))
+      expect(typesByOps.status).toBe(403)
     })
 
     it("keeps the audit log from secret API keys", async () => {

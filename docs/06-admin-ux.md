@@ -46,7 +46,7 @@ Dashboard, Siparişler (aşama sekmeleri + detay: kargoya ver, teslim edildi, ta
 | Ayarlar > Özellikler | Sayfa | Feature flag'ler |
 | Ayarlar > Yasal metinler | Sayfa | Sürümlü sözleşme editörü |
 | Ayarlar > Mağaza künyesi | Sayfa | Unvan, MERSİS, VKN, KEP, ETBİS; eksik alan uyarısı (F13) |
-| Denetim kaydı | Sayfa | Filtrelenebilir audit log |
+| Denetim kaydı | Sayfa | Tür sekmeleri; kişi, kaynak (gruplu) ve tarih süzgeçleri adreste; satır yan panelde açılır (sonuç, istek kimliği, IP, tarayıcı, alan alan değişiklik); dışa aktarım aynı süzgeçlerle (F12.5) |
 | İçe/dışa aktarma | Sayfa | Şablon indir, dosya yükle, ilerleme, satır bazlı hata raporu (F3) |
 | Toplu düzenleme | Ürün listesi (seçim çubuğu + pencere) | Fiyat, stok, yayın durumu, kategori, SEO şablonu, eksik alt metin; iş olarak koşar, rapor indirilir (F3.10) |
 | Yönlendirmeler | Sayfa | 301/302 listesi, toplu yükleme (F3) |
