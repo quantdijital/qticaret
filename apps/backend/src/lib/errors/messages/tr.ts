@@ -738,4 +738,11 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Yönlendirme kuralları yazılamadı; kararları gözden geçirip yeniden uygulayın.",
   "migration.url_target_not_live":
     "Hedef, sitede yayında olan bir sayfa olmalı (başka bir yönlendirme değil).",
+  "migration.sitemap_invalid":
+    "Site haritası okunamadı; sitemaps.org biçiminde bir XML (ya da .xml.gz) olmalı.",
+  "migration.sitemap_unreachable": "Site haritasına ulaşılamadı; adresi tarayıcıda açıp deneyin.",
+  "migration.sitemap_address_refused":
+    "Bu adres alınamaz: iç ağa ya da izin verilmeyen bir adrese gidiyor.",
+  "migration.search_console_invalid":
+    "Search Console dosyası okunamadı; Performans > Dışa aktar > CSV'den gelen zip'i ya da sayfalar CSV'sini yükleyin.",
 }

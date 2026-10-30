@@ -5,6 +5,7 @@ import {
   AdminGetMigrationUrls,
   AdminGetMigrations,
   AdminPostMigrationQuery,
+  AdminPostMigrationSitemap,
   AdminPostMigrationUrlDecision,
   AdminPostShopifyMigration,
 } from "../admin/migrations/validators"
@@ -67,6 +68,18 @@ export const MIGRATION_ROUTES = [
     matcher: "/admin/migrations/urls/:id/decision",
     methods: ["POST" as const],
     middlewares: [requireUserActor, validateAndTransformBody(AdminPostMigrationUrlDecision)],
+  },
+  {
+    matcher: "/admin/migrations/urls/sitemap",
+    methods: ["POST" as const],
+    middlewares: [requireUserActor, validateAndTransformBody(AdminPostMigrationSitemap)],
+  },
+  // The export's bytes as the body, read by the route itself
+  {
+    matcher: "/admin/migrations/urls/search-console",
+    methods: ["POST" as const],
+    bodyParser: false as const,
+    middlewares: [requireUserActor],
   },
   {
     matcher: "/admin/migrations/urls/apply",

@@ -734,4 +734,12 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "migration.url_rules_refused":
     "The redirect rules could not be written; review the decisions and apply again.",
   "migration.url_target_not_live": "The target must be a live page here (not another redirect).",
+  "migration.sitemap_invalid":
+    "The sitemap could not be read; it must be sitemaps.org XML (or .xml.gz).",
+  "migration.sitemap_unreachable":
+    "The sitemap could not be reached; open its address in a browser and try again.",
+  "migration.sitemap_address_refused":
+    "This address cannot be fetched: it leads inside the network or somewhere not allowed.",
+  "migration.search_console_invalid":
+    "The Search Console file could not be read; upload the zip from Performance > Export > CSV, or its pages CSV.",
 }

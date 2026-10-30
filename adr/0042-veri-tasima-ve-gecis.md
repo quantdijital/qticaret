@@ -130,3 +130,9 @@ Elimizde olanlar:
 4. **Sorgu dizeli adres** (`/urun.php?id=12`) kural olamaz: sorgu atılırsa farklı ürünler tek yola iner. Raporda "sunucu kuralı gerekir"; sahip karar verdiyse (gördüm) hazırlık ölçütünü kilitlemez.
 5. **Hazır (KK3).** Search Console'un en çok tıklanan ilk 100 adresinin hepsi bir şeye yanıt vermeli (sayfa, 301 ya da 410). Tıklama verisi yoksa "hazır" denmez.
 6. **Erişim.** Envanter, karar ve uygulama yalnızca sahibin; uygulama yeniden doğrulama ister ve `migration.urls` işi olarak taşıma ve katalog içe aktarmayla yan yana çalışmaz. Uygulama sonunda vitrinin çözümleme önbelleği boşaltılır, site haritası yenilenir.
+
+## Uygulama notları (G5b site haritası ve Search Console, 2026-10-31)
+
+1. **Site haritası.** Sahip eski sitenin site haritası adresini verir; `migration.sitemap` işi onu `safeFetch` ile indirir (iç ağ reddi, her yönlendirme denetlenir, 50 MB, gzip açılmış boyutla sınırlı), güvenli XML okuyucuyla okur (DTD ve varlık reddi). Dizin (`sitemapindex`) ve alt haritalar en çok 50 dosya, 100.000 adres. Yalnızca eski sitenin kendi alan adındaki (www farkı yok sayılır) haritalar ve adresler alınır.
+2. **Search Console.** Performans > Dışa aktar > CSV'den gelen zip (içindeki `Pages.csv` / `Sayfalar.csv`) ya da sayfalar CSV'si yüklenir; Türkçe ve İngilizce başlıklar okunur. Aynı adresin farklı yazılışları (sondaki eğik çizgi) tek adres olur, tıklamaları toplanır. CSRF istisnası yalnızca bu yol ve `text/csv`, `application/zip`, `application/octet-stream` türleri için.
+3. Envantere eklenen adres eski kaydı ve sahibin kararını değiştirmez; yalnızca kaynağı ve (büyük olan) tıklaması güncellenir.

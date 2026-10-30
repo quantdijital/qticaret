@@ -36,6 +36,10 @@ const SHEET_TYPES = [
   "application/octet-stream",
 ]
 
+// Search Console's export of the old site's top pages (F14.7): a zip or its pages CSV
+const SEARCH_CONSOLE_PATH = /^\/admin\/migrations\/urls\/search-console$/
+const SEARCH_CONSOLE_TYPES = ["text/csv", "application/zip", "application/octet-stream"]
+
 // An invoice issued elsewhere (F8, adr/0034 §9): its PDF as the body, on its own path only
 const INVOICE_PDF_PATH = /^\/admin\/invoices\/[^/]+\/pdf$/
 
@@ -90,6 +94,8 @@ function isAllowedAdminBody(req: MedusaRequest): boolean {
     type.startsWith("application/json") ||
     (type.startsWith("multipart/form-data") && MULTIPART_PATH.test(routePath(req))) ||
     (SHEET_TYPES.some((sheet) => type.startsWith(sheet)) && SHEET_PATH.test(routePath(req))) ||
+    (SEARCH_CONSOLE_TYPES.some((file) => type.startsWith(file)) &&
+      SEARCH_CONSOLE_PATH.test(routePath(req))) ||
     (type.startsWith("application/pdf") && INVOICE_PDF_PATH.test(routePath(req)))
   )
 }

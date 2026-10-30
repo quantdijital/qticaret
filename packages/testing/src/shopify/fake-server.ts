@@ -2,6 +2,7 @@ import { randomBytes } from "node:crypto"
 import { createServer } from "node:http"
 import type { IncomingMessage, ServerResponse } from "node:http"
 import type { AddressInfo, Socket } from "node:net"
+import { sitemapFile } from "./sitemap"
 
 /**
  * A local stand-in for a Shopify store's GraphQL Admin API (docs/07: tests
@@ -211,6 +212,15 @@ export async function startFakeShopify(
         const picture = !image.endsWith(".txt")
         res.writeHead(200, { "content-type": picture ? "image/png" : "text/plain" })
         res.end(picture ? FAKE_SHOPIFY_PNG : "bir görsel değil")
+        return
+      }
+      const sitemap = /^\/(sitemap[a-z0-9_]*\.xml(?:\.gz)?)$/.exec(url.pathname)?.[1]
+      if (sitemap && req.method === "GET") {
+        const body = sitemapFile(sitemap, origin, data)
+        res.writeHead(body ? 200 : 404, {
+          "content-type": sitemap.endsWith(".gz") ? "application/gzip" : "application/xml",
+        })
+        res.end(body ?? "")
         return
       }
       const file = /^\/files\/([0-9]+)\.jsonl$/.exec(url.pathname)?.[1]

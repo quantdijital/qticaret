@@ -16,6 +16,7 @@ describe("job types", () => {
       "catalog.import",
       "customer.data_export",
       "migration.run",
+      "migration.sitemap",
       "migration.urls",
       "promotion.codes",
       "report.export",
@@ -59,6 +60,7 @@ describe("job types", () => {
       "catalog.bulk_edit",
       "catalog.import",
       "migration.run",
+      "migration.sitemap",
       "migration.urls",
     ])
     expect(queueLockKey("catalog.import")).toBe(queueLockKey("catalog.bulk_edit"))

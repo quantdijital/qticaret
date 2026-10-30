@@ -5,6 +5,7 @@ import { catalogExport } from "./catalog-export"
 import { catalogImport } from "./catalog-import"
 import { customerDataExport } from "./customer-data-export"
 import { migrationRun } from "./migration-run"
+import { migrationSitemap } from "./migration-sitemap"
 import { migrationUrls } from "./migration-urls"
 import { promotionCodes } from "./promotion-codes"
 import { reportExport } from "./report-export"
@@ -28,6 +29,7 @@ const JOB_TYPES: Readonly<Record<string, JobType>> = Object.freeze({
   "catalog.import": erase(catalogImport),
   "customer.data_export": erase(customerDataExport),
   "migration.run": erase(migrationRun),
+  "migration.sitemap": erase(migrationSitemap),
   "migration.urls": erase(migrationUrls),
   "promotion.codes": erase(promotionCodes),
   "report.export": erase(reportExport),

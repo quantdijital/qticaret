@@ -58,3 +58,9 @@ export const AdminPostMigrationUrlDecision = z
   })
   .strict()
 export type AdminPostMigrationUrlDecisionType = z.infer<typeof AdminPostMigrationUrlDecision>
+
+/** `POST /admin/migrations/urls/sitemap`: the old site's sitemap (or its index). */
+export const AdminPostMigrationSitemap = z
+  .object({ url: z.url({ protocol: /^https?$/ }).max(2048) })
+  .strict()
+export type AdminPostMigrationSitemapType = z.infer<typeof AdminPostMigrationSitemap>
