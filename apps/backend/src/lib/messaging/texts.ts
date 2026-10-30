@@ -88,6 +88,12 @@ const TR: Readonly<Record<string, string>> = {
   "cart_reminder.button": "Sepetime dön",
   "cart_reminder.note":
     "Bağlantı {{days}} gün geçerlidir ve sepetinizi bir kez açar. Fiyat ve stok, döndüğünüz anki durumuna göre gösterilir.",
+  "order_invoiced.subject": "Faturanız hazır (#{{number}})",
+  "order_invoiced.preheader": "{{shop}} siparişinizin faturası kesildi.",
+  "order_invoiced.heading": "Merhaba {{name}}, faturanız hazır",
+  "order_invoiced.intro":
+    "#{{number}} numaralı siparişinizin {{document}} faturası {{invoice}} numarasıyla kesildi. Faturanızı sipariş sayfanızdan indirebilirsiniz.",
+  "order_invoiced.button": "Faturayı görüntüle",
   "order_link.subject": "Siparişinizin bağlantısı (#{{number}})",
   "order_link.preheader": "{{shop}} siparişinizi görüntüleyin.",
   "order_link.heading": "Merhaba {{name}}, siparişiniz burada",

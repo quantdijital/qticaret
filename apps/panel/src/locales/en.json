@@ -1346,7 +1346,8 @@
             "placed": "Order placed",
             "shipped": "Order shipped",
             "delivered": "Order delivered",
-            "access_link": "Order link"
+            "access_link": "Order link",
+            "invoiced": "Invoice issued"
           },
           "return": {
             "requested": "Return requested",

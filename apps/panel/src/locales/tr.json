@@ -1346,7 +1346,8 @@
             "placed": "Sipariş alındı",
             "shipped": "Sipariş kargoda",
             "delivered": "Sipariş teslim edildi",
-            "access_link": "Sipariş bağlantısı"
+            "access_link": "Sipariş bağlantısı",
+            "invoiced": "Fatura kesildi"
           },
           "return": {
             "requested": "İade talebi alındı",

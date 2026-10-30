@@ -5,15 +5,20 @@ import { fakeVkn, seededRandom, startFakeParasut } from "@qticaret/testing"
 import type { FakeParasut } from "@qticaret/testing"
 import { issueInvoices } from "../../src/jobs/einvoice-issue"
 import { EINVOICE_MODULE } from "../../src/modules/einvoice"
+import { MESSAGING_MODULE } from "../../src/modules/messaging"
+import type MessagingModuleService from "../../src/modules/messaging/service"
 import type EinvoiceModuleService from "../../src/modules/einvoice/service"
 import { advanceOrder } from "../../src/scripts/seed/orders/advance"
 import { placeOrder } from "../../src/scripts/seed/orders/place"
 import { queueSaleInvoice } from "../../src/workflows/einvoice/queue-invoices"
+import { orderAccessKey, orderAccessToken } from "../../src/lib/orders"
 import { createAdminUser } from "../helpers/admin"
 import { eventually } from "../helpers/eventually"
 import type { HttpClient } from "../helpers/http"
+import { settle } from "../helpers/http"
 import { stockShop, stockedProduct } from "../helpers/stock"
 import type { StockShop } from "../helpers/stock"
+import { createStorefront } from "../helpers/storefront"
 import { loadTrAddressFixture } from "../helpers/tr-address"
 
 jest.setTimeout(180 * 1000)
@@ -111,6 +116,33 @@ medusaIntegrationTestRunner({
       const queued = await eventually(() => invoiceOf(orderId), Boolean)
       const issued = await runUntilSettled(orderId)
       const again = await queueSaleInvoice(getContainer(), orderId, "shipped")
+      const storefront = await createStorefront(getContainer())
+      const shopper = {
+        ...storefront.headers,
+        "x-order-token": orderAccessToken(orderAccessKey(), {
+          id: orderId,
+          email: "ayse@example.com",
+        }),
+      }
+      const forShopper = await http.get<{ invoice: { number: string; has_pdf: boolean } }>(
+        `/store/orders/${orderId}/invoice`,
+        { headers: shopper }
+      )
+      const shopperPdf = await fetch(
+        `${(api as { defaults: { baseURL?: string } }).defaults.baseURL ?? ""}/store/orders/${orderId}/invoice/pdf`,
+        { headers: shopper }
+      )
+      const stranger = await settle(
+        http.get(`/store/orders/${orderId}/invoice`, { headers: storefront.headers })
+      )
+      // The test shop sends no e-mail: the message is tried and kept as skipped
+      const told = await eventually(
+        () =>
+          getContainer()
+            .resolve<MessagingModuleService>(MESSAGING_MODULE)
+            .listMessageSkips({ template: "order.invoiced", resource_id: issued?.id ?? "" }),
+        (rows) => rows.length > 0
+      )
       const job = [...parasut.jobs.values()].at(-1)
       const pdf = await getContainer()
         .resolve(Modules.FILE)
@@ -125,6 +157,19 @@ medusaIntegrationTestRunner({
         internet_sale: { url: "https://magaza.example.com", payment_type: "ODEMEARACISI" },
         shipment: { title: "Örnek Kargo A.Ş.", vkn: carrierVkn },
       })
+      expect(forShopper.data.invoice).toEqual({
+        number: issued?.number,
+        has_pdf: true,
+        document_type: "e_archive",
+        issued_at: expect.any(String) as unknown,
+      })
+      expect(
+        Buffer.from(await shopperPdf.arrayBuffer())
+          .subarray(0, 5)
+          .toString()
+      ).toBe("%PDF-")
+      expect(stranger.status).toBeGreaterThanOrEqual(400)
+      expect(told).toHaveLength(1)
       expect(again).toBe("already")
       expect(
         [...parasut.invoices.values()].filter((row) => row.attributes["order_no"])

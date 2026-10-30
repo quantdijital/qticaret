@@ -1,14 +1,17 @@
 import { MedusaError, Modules } from "@medusajs/framework/utils"
 import { ConflictError } from "../../lib/errors"
+import { errorSummary, logger } from "../../lib/logging"
 import {
   StepResponse,
   WorkflowResponse,
   createStep,
   createWorkflow,
+  transform,
 } from "@medusajs/framework/workflows-sdk"
 import { EINVOICE_MODULE } from "../../modules/einvoice"
 import type EinvoiceModuleService from "../../modules/einvoice/service"
 import type { WrittenBack } from "../../modules/einvoice/service"
+import { sendMessageWorkflow } from "../messaging/send-message"
 
 /**
  * An external program's invoice written back (F8, adr/0034 §9): by the
@@ -69,11 +72,41 @@ const removePreviousPdfStep = createStep(
   }
 )
 
+/**
+ * "Faturanız hazır" when an invoice issued elsewhere gets its first PDF:
+ * the buyer can download it now. A message that fails leaves the PDF kept.
+ */
+const tellCustomerStep = createStep(
+  "einvoice-tell-customer",
+  async (input: { invoice_id: string; previous: string | null }, { container }) => {
+    if (!input.previous) {
+      try {
+        await sendMessageWorkflow(container).run({
+          input: { template: "order.invoiced", resource_id: input.invoice_id },
+        })
+      } catch (error) {
+        logger.warn({
+          event: "einvoice.message_failed",
+          invoice_id: input.invoice_id,
+          err: errorSummary(error),
+        })
+      }
+    }
+    return new StepResponse(null)
+  }
+)
+
 export const attachInvoicePdfWorkflow = createWorkflow(
   "einvoice-attach-pdf",
   (input: { invoice_id: string; file_id: string }) => {
     const attached = attachPdfStep(input)
     removePreviousPdfStep(attached)
+    tellCustomerStep(
+      transform({ input, attached }, ({ input, attached }) => ({
+        invoice_id: input.invoice_id,
+        previous: attached.previous,
+      }))
+    )
     return new WorkflowResponse(attached)
   }
 )

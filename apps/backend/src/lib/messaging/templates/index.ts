@@ -1,6 +1,7 @@
 import { passwordReset, verifyEmail } from "./account"
 import { cartReminder } from "./cart-reminder"
 import { consentConfirm } from "./consent"
+import { orderInvoiced } from "./invoice"
 import { announcement } from "./marketing"
 import { orderLink } from "./order-link"
 import { orderPlaced } from "./order-placed"
@@ -28,6 +29,7 @@ export type { OrderVars } from "./order-placed"
 export type { OrderLinkVars } from "./order-link"
 export type { PaymentFailedVars } from "./payment"
 export type { ReturnVars } from "./returns"
+export type { InvoiceVars } from "./invoice"
 export type { ParcelVars } from "./shipping"
 export type { StockAlertVars } from "./stock"
 export type {
@@ -45,6 +47,8 @@ export const MESSAGE_TEMPLATES = {
   "order.access_link": orderLink,
   "order.shipped": orderShipped,
   "order.delivered": orderDelivered,
+  // F8 (adr/0034 §7): the order's invoice, issued
+  "order.invoiced": orderInvoiced,
   "return.requested": returnRequested,
   "return.approved": returnApproved,
   "return.refunded": returnRefunded,

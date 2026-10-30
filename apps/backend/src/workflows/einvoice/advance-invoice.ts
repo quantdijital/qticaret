@@ -22,6 +22,7 @@ import type { AdvanceOutcome, InvoiceProvider } from "../../lib/invoicing/provid
 import { EINVOICE_MODULE } from "../../modules/einvoice"
 import type EinvoiceModuleService from "../../modules/einvoice/service"
 import type { ClaimedInvoice, InvoiceStatus } from "../../modules/einvoice/service"
+import { sendMessageWorkflow } from "../messaging/send-message"
 import { invoiceDraftFor } from "./draft-source"
 import { withParasut } from "./parasut-session"
 
@@ -74,6 +75,21 @@ async function storePdf(container: Container, pdf: Buffer): Promise<string> {
   return upload.fileKey
 }
 
+/** "Faturanız hazır" to the buyer; an invoice issued stays issued whatever the message does. */
+async function tellCustomer(container: Container, invoiceId: string) {
+  try {
+    await sendMessageWorkflow(container as MedusaContainer).run({
+      input: { template: "order.invoiced", resource_id: invoiceId },
+    })
+  } catch (error) {
+    logger.warn({
+      event: "einvoice.message_failed",
+      invoice_id: invoiceId,
+      err: errorSummary(error),
+    })
+  }
+}
+
 async function settle(
   container: Container,
   claim: ClaimedInvoice,
@@ -107,6 +123,9 @@ async function settle(
         },
         now
       )
+      if (done) {
+        await tellCustomer(container, claim.id)
+      }
       return { status: done ? "issued" : "lost", code: null }
     }
     case "failed": {

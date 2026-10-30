@@ -5,6 +5,7 @@ import { loadAnnouncement, loadPasswordReset, loadVerification } from "./account
 import { loadPaymentFailed } from "./cart"
 import { loadCartReminder } from "./cart-reminder"
 import { loadConsentRequest } from "./consent"
+import { loadInvoiceMessage } from "./invoice"
 import { loadOrderLink, loadOrderMessage } from "./order"
 import { loadParcelMessage } from "./parcel"
 import { loadReturnMessage } from "./return-request"
@@ -33,6 +34,7 @@ export const MESSAGE_LOADERS: { readonly [N in MessageTemplateName]: Loader<N> }
   "order.access_link": (container, id) => loadOrderLink(container, id),
   "order.shipped": (container, id) => loadParcelMessage(container, id),
   "order.delivered": (container, id) => loadParcelMessage(container, id),
+  "order.invoiced": (container, id) => loadInvoiceMessage(container, id),
   "return.requested": (container, id) => loadReturnMessage(container, id),
   "return.approved": (container, id) => loadReturnMessage(container, id),
   "return.refunded": (container, id) => loadReturnMessage(container, id),
