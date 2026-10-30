@@ -2,6 +2,7 @@ import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusaj
 import { validateAndTransformBody } from "@medusajs/framework/http"
 import { z } from "@medusajs/framework/zod"
 import { fakeAccountingAllowed } from "../../../lib/accounting/adapters"
+import { fakeInvoicingAllowed } from "../../../lib/invoicing"
 import { SECTIONS, isSectionName } from "../../../modules/platform-settings/sections"
 
 // Each section's body: any subset of its fields; unknown fields are refused
@@ -25,6 +26,11 @@ const SECTION_VALIDATORS = {
   accounting: validateAndTransformBody(
     SECTIONS.accounting.patch.refine((body) => body.adapter !== "fake" || fakeAccountingAllowed(), {
       message: "accounting.adapter_unavailable",
+    })
+  ),
+  invoicing: validateAndTransformBody(
+    SECTIONS.invoicing.patch.refine((body) => body.provider !== "fake" || fakeInvoicingAllowed(), {
+      message: "einvoice.provider_unavailable",
     })
   ),
 } as const

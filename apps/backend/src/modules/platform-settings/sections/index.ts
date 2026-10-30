@@ -4,6 +4,7 @@ import { bankTransferSection } from "./bank-transfer"
 import { cashOnDeliverySection } from "./cash-on-delivery"
 import type { SectionDefinition } from "./define"
 import { inventorySection } from "./inventory"
+import { invoicingSection } from "./invoicing"
 import { legalSection } from "./legal"
 import { marketingSection } from "./marketing"
 import { notificationsSection } from "./notifications"
@@ -22,6 +23,7 @@ export type { AppearanceSettings } from "./appearance"
 export type { BankTransferSettings } from "./bank-transfer"
 export type { CashOnDeliverySettings } from "./cash-on-delivery"
 export type { InventorySettings } from "./inventory"
+export type { CarrierIdentity, InvoiceCarrier, InvoicingSettings } from "./invoicing"
 export type { LegalSettings } from "./legal"
 export type { MarketingSettings } from "./marketing"
 export type { NotificationSettings } from "./notifications"
@@ -49,6 +51,7 @@ export const SECTIONS = {
   notifications: notificationsSection,
   marketing: marketingSection,
   accounting: accountingSection,
+  invoicing: invoicingSection,
   security: securitySection,
   legal: legalSection,
   returns: returnsSection,

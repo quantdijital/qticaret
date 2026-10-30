@@ -72,6 +72,8 @@ const OWNER_ONLY: readonly Rule[] = [
   { methods: "*", path: "/admin/api-keys*" },
   { methods: WRITES, path: "/admin/webhooks*" },
   { methods: WRITES, path: "/admin/platform-settings/accounting" },
+  // Which program issues the invoices: the buyers' details go to it (adr/0034)
+  { methods: WRITES, path: "/admin/platform-settings/invoicing" },
   { methods: ["POST"], path: "/admin/google/connect" },
   { methods: ["DELETE"], path: "/admin/google" },
   // Where shoppers' transfers go

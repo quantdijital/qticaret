@@ -196,6 +196,8 @@ module.exports = defineConfig({
     { resolve: "./src/modules/statement-checks" },
     // F11.5 (adr/0039 §5): records sent to the shop's accounting program, until they go through
     { resolve: "./src/modules/accounting" },
+    // F8 (adr/0034): orders' invoices, issued by the shop's program, until they are
+    { resolve: "./src/modules/einvoice" },
     // F11.6 (adr/0039 §6): what each secret API key may reach; a key without a scope reaches nothing
     { resolve: "./src/modules/api-key-scopes" },
     // F12.6 (adr/0040): each staff member's role, read on every admin request

@@ -49,6 +49,8 @@ describe("staff roles", () => {
     ["POST", "/admin/platform-settings/bank%5ftransfer"],
     ["POST", "/admin/platform-settings/%61ccounting"],
     ["POST", "/admin/platform-settings/security"],
+    ["POST", "/admin/platform-settings/invoicing"],
+    ["POST", "/admin/platform-settings/%69nvoicing"],
     ["POST", "/admin/google/connect"],
     ["DELETE", "/admin/google"],
     ["POST", "/admin/users/user_1"],
