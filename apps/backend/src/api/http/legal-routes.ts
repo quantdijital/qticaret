@@ -9,6 +9,7 @@ import {
   StoreGetCartContract,
   StorePostLegalConsents,
 } from "../store/carts/[id]/legal-consents/validators"
+import { StorePostCookieConsent } from "../store/consents/cookies/validators"
 import { requireUserActor } from "./actor"
 import { optionalCustomer, orderAccess } from "./order-access"
 
@@ -19,7 +20,8 @@ const noQuery = validateAndTransformQuery(AdminGetDashboardNoQuery, {})
  * them (who may is the role table's: not operations, not read-only); the
  * storefront reads the published ones. F13.2 (§2): the checkout shows the
  * contracts filled for the cart and records their acceptance; the order
- * keeps its copies, for its shopper and the shop's staff.
+ * keeps its copies, for its shopper and the shop's staff. F13.8 (§5): the
+ * cookie banner's answers, by the storefront's own visitor cookie.
  */
 export const LEGAL_ROUTES = [
   ...[
@@ -75,6 +77,16 @@ export const LEGAL_ROUTES = [
     matcher: "/store/orders/:id/legal/:kind",
     methods: ["GET" as const],
     middlewares: [optionalCustomer, orderAccess, noQuery],
+  },
+  {
+    matcher: "/store/consents/cookies",
+    methods: ["GET" as const],
+    middlewares: [noQuery],
+  },
+  {
+    matcher: "/store/consents/cookies",
+    methods: ["POST" as const],
+    middlewares: [validateAndTransformBody(StorePostCookieConsent)],
   },
   ...["/admin/orders/:id/legal", "/admin/orders/:id/legal/:kind"].map((matcher) => ({
     matcher,

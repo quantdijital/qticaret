@@ -10,7 +10,10 @@ const body = { type: "doc", content: [] }
 moduleIntegrationTestRunner<LegalModuleService>({
   moduleName: LEGAL_MODULE,
   resolve: "./src/modules/legal",
-  moduleOptions: { encryptionKey: randomBytes(32).toString("hex") },
+  moduleOptions: {
+    encryptionKey: randomBytes(32).toString("hex"),
+    hashKey: randomBytes(32).toString("hex"),
+  },
   testSuite: ({ service }) => {
     it("keeps one draft and one published version per kind, numbered in order", async () => {
       await service.createLegalDocuments({
@@ -85,6 +88,33 @@ moduleIntegrationTestRunner<LegalModuleService>({
         intact: true,
       })
       expect(await service.readOrderCopy("order_1", "pre_information")).toBeNull()
+    })
+
+    it("keeps every cookie banner answer by the visitor's hash, the latest in force", async () => {
+      const first = await service.recordCookieConsent("visitor-a", {
+        analytics: true,
+        marketing: true,
+        policy_version: 1,
+      })
+      await service.recordCookieConsent("visitor-b", {
+        analytics: false,
+        marketing: false,
+        policy_version: 1,
+      })
+      // A withdrawal: a new answer, the first kept as it was
+      await new Promise((resolve) => setTimeout(resolve, 5))
+      await service.recordCookieConsent("visitor-a", {
+        analytics: true,
+        marketing: false,
+        policy_version: 1,
+      })
+      const rows = await service.listCookieConsents({})
+
+      expect(rows).toHaveLength(3)
+      expect(rows.map((row) => row.visitor_hash).join()).not.toContain("visitor-a")
+      expect(await service.latestCookieConsent("visitor-a")).toMatchObject({ marketing: false })
+      expect(await service.currentCookieConsent(first.id)).toMatchObject({ marketing: false })
+      expect(await service.latestCookieConsent("visitor-c")).toBeNull()
     })
   },
 })

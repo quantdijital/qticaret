@@ -17,6 +17,9 @@ import { CONVERSIONS_MODULE } from "../../modules/conversions"
 import type ConversionsModuleService from "../../modules/conversions/service"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-credentials"
 import type IntegrationCredentialsModuleService from "../../modules/integration-credentials/service"
+import { LEGAL_MODULE } from "../../modules/legal"
+import type LegalModuleService from "../../modules/legal/service"
+import { heldToCookieConsent } from "../../lib/legal/visitor"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -132,6 +135,22 @@ const accounts = async (container: Container) => {
 }
 
 /**
+ * The order's consent, held to the visitor's cookie banner answer in force
+ * now (F13.8): one withdrawn after the cart was answered counts.
+ */
+async function heldToCurrentAnswer<
+  T extends { analytics: boolean; marketing: boolean; cookieConsentId: string | null },
+>(container: Container, consent: T | null): Promise<T | null> {
+  if (!consent?.cookieConsentId) {
+    return consent
+  }
+  const answer = await container
+    .resolve<LegalModuleService>(LEGAL_MODULE)
+    .currentCookieConsent(consent.cookieConsentId)
+  return answer ? { ...consent, ...heldToCookieConsent(consent, answer) } : consent
+}
+
+/**
  * An order's purchase, sent to the shop's Meta pixel and GA4 stream as
  * the shopper allowed at checkout (F10.9, adr/0038 §4; KK5): Meta only
  * with marketing consent, GA4 only with analytics consent and the
@@ -150,7 +169,7 @@ const sendPurchaseConversionsStep = createStep(
     if (found.cartId) {
       await conversions.moveToOrder(found.cartId, found.order.id)
     }
-    const consent = await conversions.ofOrder(found.order.id)
+    const consent = await heldToCurrentAnswer(container, await conversions.ofOrder(found.order.id))
     const connected = await accounts(container)
     const api = conversionsApi()
     const base = { order_id: found.order.id, kind: "purchase" }

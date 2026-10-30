@@ -121,7 +121,10 @@ module.exports = defineConfig({
     // F12.8: staff notes on orders
     { resolve: "./src/modules/order-notes" },
     // F13 (adr/0041): legal texts in versions, and the consents given to them
-    { resolve: "./src/modules/legal", options: { encryptionKey: env.PII_ENCRYPTION_KEY } },
+    {
+      resolve: "./src/modules/legal",
+      options: { encryptionKey: env.PII_ENCRYPTION_KEY, hashKey: env.PII_HASH_KEY },
+    },
     // F10.2 (adr/0037 §3): configuring the module drops Medusa's default, so
     // e-mail is named again; Google and Apple only once their clients are set
     {

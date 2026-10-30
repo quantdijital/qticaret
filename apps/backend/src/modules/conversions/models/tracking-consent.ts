@@ -25,6 +25,11 @@ export const TrackingConsent = model
     page_url: model.text().nullable(),
     /** The IP address and browser, encrypted; cleared once no event needs them. */
     client_encrypted: model.text().nullable(),
+    /**
+     * The visitor's cookie banner answer this one is held to (F13.8): read
+     * again when the order is placed, a withdrawal since counts.
+     */
+    cookie_consent_id: model.text().nullable(),
   })
   .indexes([
     { on: ["cart_id"], unique: true, where: "deleted_at IS NULL AND cart_id IS NOT NULL" },

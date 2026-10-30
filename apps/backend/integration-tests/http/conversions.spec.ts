@@ -186,6 +186,40 @@ medusaIntegrationTestRunner({
       })
     })
 
+    it("holds the order to the visitor's cookie answer when placed: a withdrawal since counts (F13.8)", async () => {
+      const answer = (body: Record<string, unknown>, cookie?: string) =>
+        http.post("/store/consents/cookies", body, {
+          headers: { ...storefront.headers, ...(cookie ? { cookie } : {}) },
+        })
+      const given = await answer({ analytics: true, marketing: true, policy_version: null })
+      const cookie = String(given.headers["set-cookie"] ?? "").split(";")[0] ?? ""
+      const cartId = await readyCart(getContainer(), shop, variantId, {
+        ...PAYTR_ADDRESS,
+        phone: "05321234567",
+      })
+      // The cart is answered while marketing is allowed, then the visitor withdraws it
+      await http.post(
+        `/store/carts/${cartId}/tracking`,
+        { ga_client_id: GA_CLIENT, fbp: FBP },
+        { headers: { ...storefront.headers, cookie, "user-agent": "TestBrowser/1.0" } }
+      )
+      await answer({ analytics: true, marketing: false, policy_version: null }, cookie)
+      await http.post(
+        `/store/carts/${cartId}/payment-session`,
+        { provider_id: "pp_bank-transfer_bank-transfer" },
+        { headers: storefront.headers }
+      )
+      const { data } = await http.post<{ order: { id: string } }>(
+        `/store/carts/${cartId}/complete`,
+        {},
+        { headers: storefront.headers }
+      )
+      await settled(data.order.id, 1)
+
+      expect(fake.metaEvents).toEqual([])
+      expect(fake.ga4Requests).toHaveLength(1)
+    })
+
     it("tells GA4 of a refund once, and of a cancelled order's whole amount", async () => {
       const orderId = await order({ analytics: true, marketing: false, ga_client_id: GA_CLIENT })
       await settled(orderId, 1)

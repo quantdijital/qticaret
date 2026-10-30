@@ -25,6 +25,8 @@ export interface TrackingInput {
   page_url?: string | null | undefined
   ip?: string | null | undefined
   user_agent?: string | null | undefined
+  /** The visitor's cookie consent the answer was held to (F13.8). */
+  cookie_consent_id?: string | null | undefined
 }
 
 const CONTEXT = "conversions.client"
@@ -79,6 +81,7 @@ class ConversionsModuleService extends MedusaService({ TrackingConsent, Conversi
       fbc: marketing ? (input.fbc ?? null) : null,
       page_url: input.analytics || marketing ? (input.page_url ?? null) : null,
       client_encrypted: client,
+      cookie_consent_id: input.cookie_consent_id ?? null,
     }
     const [row] = await this.listTrackingConsents({ cart_id: cartId }, { take: 1 }, sharedContext)
     if (row) {
@@ -114,6 +117,7 @@ class ConversionsModuleService extends MedusaService({ TrackingConsent, Conversi
     marketing: boolean
     gaClientId: string | null
     client: ConversionClient
+    cookieConsentId: string | null
   } | null> {
     const [row] = await this.listTrackingConsents({ order_id: orderId }, { take: 1 }, sharedContext)
     if (!row) {
@@ -130,6 +134,7 @@ class ConversionsModuleService extends MedusaService({ TrackingConsent, Conversi
       marketing: row.marketing,
       gaClientId: row.ga_client_id,
       client: { ...opened, fbp: row.fbp, fbc: row.fbc, pageUrl: row.page_url },
+      cookieConsentId: row.cookie_consent_id,
     }
   }
 
