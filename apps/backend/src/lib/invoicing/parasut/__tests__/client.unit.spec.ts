@@ -115,7 +115,7 @@ describe("Paraşüt client against the fake server (adr/0034)", () => {
       await api.pdfLink(token, document.type, document.id),
     ]
 
-    expect(await api.findContact(token, "11111111111")).toBe(contact)
+    expect(await api.findContact(token, { taxNumber: "11111111111" })).toBe(contact)
     expect(created.gross_total).toBe("300.00")
     expect(inbox).toBeNull()
     expect(steps.map((step) => step.status)).toEqual(["running", "done"])

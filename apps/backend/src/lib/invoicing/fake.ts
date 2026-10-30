@@ -1,0 +1,43 @@
+import { PDFDocument, StandardFonts } from "pdf-lib"
+import { differenceOf } from "./provider"
+import type { InvoiceProvider } from "./provider"
+
+/**
+ * A program for a developer's machine and the tests (adr/0034 §1): it
+ * issues at once, an e-Fatura for a company and an e-Arşiv for a person,
+ * numbered from the invoice's own id, its PDF a page that says it is not
+ * an invoice. Never a live shop's (`fakeInvoicingAllowed`).
+ */
+
+async function fakePdf(number: string): Promise<Buffer> {
+  const document = await PDFDocument.create()
+  const page = document.addPage([420, 595])
+  const font = await document.embedFont(StandardFonts.Helvetica)
+  page.drawText("SAHTE FATURA - gecerli bir belge degildir", { x: 30, y: 540, size: 14, font })
+  page.drawText(number, { x: 30, y: 515, size: 11, font })
+  return Buffer.from(await document.save())
+}
+
+export const fakeInvoiceProvider: InvoiceProvider = {
+  id: "fake",
+  async advance(state, context) {
+    const draft = await context.draft()
+    const number = `TST${String(context.now().getUTCFullYear())}${state.id.slice(-9).toUpperCase()}`
+    return {
+      next: "issued",
+      progress: {
+        external_id: `fake-${state.id}`,
+        document_id: `fake-${state.id}`,
+        document_type: draft.buyer.kind === "company" ? "e_invoice" : "e_archive",
+        number,
+        uuid: null,
+        cancellable_until:
+          draft.buyer.kind === "company"
+            ? null
+            : new Date(context.now().getTime() + 7 * 86_400_000),
+        program_difference: differenceOf(draft, draft.totals.gross),
+      },
+      pdf: await fakePdf(number),
+    }
+  },
+}

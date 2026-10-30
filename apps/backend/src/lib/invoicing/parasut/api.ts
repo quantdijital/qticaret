@@ -131,11 +131,16 @@ export function createParasutApi(
       })
     },
 
-    /** The company's contact with this tax id, or null. */
-    async findContact(token: string, taxId: string): Promise<string | null> {
+    /** The company's contact with this tax id (or e-mail), or null. */
+    async findContact(
+      token: string,
+      by: { taxNumber: string } | { email: string }
+    ): Promise<string | null> {
+      const filter =
+        "taxNumber" in by ? { "filter[tax_number]": by.taxNumber } : { "filter[email]": by.email }
       const answer = await call(token, {
         path: ["contacts"],
-        query: { "filter[tax_number]": taxId, "page[size]": "1" },
+        query: { ...filter, "page[size]": "1" },
         schema: Many(z.looseObject({})),
       })
       return answer.data[0]?.id ?? null
