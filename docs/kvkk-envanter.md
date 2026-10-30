@@ -1,0 +1,99 @@
+# KVKK veri envanteri ve saklama süreleri
+
+> F13.5, ADR-0041 §6. Hangi tablo hangi kişisel veriyi, hangi amaçla, ne kadar süre tutar; süre dolunca ya da kişi silinmeyi isteyince ne olur.
+> **Süreler öneridir.** Mağazanın KVKK danışmanı ve mali müşaviri onaylayana kadar böyle kalır (docs/12). Kodda tek yer: `apps/backend/src/lib/compliance/retention.ts`; gecelik iş: `compliance-retention` (04:15).
+> Bir faz kişisel veri tutan yeni bir tablo ya da alan eklerse bu dosyayı da günceller.
+
+**Saklama biçimi kısaltmaları**
+
+| Kısaltma | Anlamı                                                                        |
+| -------- | ----------------------------------------------------------------------------- |
+| D        | düz metin                                                                     |
+| M        | maskeli (`a***@ornek.com`)                                                    |
+| Ö        | anahtarlı özet (`hashPii`, HMAC-SHA256; geri çevrilemez, eşitlik aramak için) |
+| Ş        | şifreli (`encryptPii`, AES-256-GCM, alan bağlamı ek veri olarak bağlı)        |
+
+**"Silmede" sütunu:** Kişinin silme ya da anonimleştirme talebinde ne olacağını yazar. Bu akış L9'da gelir. "Korunur" yazan veri yasal saklama yükümlülüğü nedeniyle tutulur.
+
+---
+
+## 1. Sipariş, ödeme ve sözleşmeler
+
+| Tablo (modül)                       | Kişisel veri                                                                 | Amaç                                                   | Süre                                                                                                          | Silmede                                                               |
+| ----------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `order`, sipariş adresleri (Medusa) | e-posta, ad, soyad, telefon, adres (D)                                       | sipariş, teslimat, fatura                              | 10 yıl (TTK md. 82; VUK md. 253'te 5 yıl), öneri                                                              | Kişisel alanlar yer tutucuya çevrilir. Tutar, kalem ve vergi korunur. |
+| `cart`, sepet adresleri (Medusa)    | e-posta, adres (D)                                                           | ödeme öncesi                                           | Medusa'nın kendi davranışı; süre yok, **açık**                                                                | Siparişe dönüşmeyen sepetin adresi temizlenir (L9).                   |
+| `legal_consent` (legal)             | IP (Ş), sepet ve sipariş kimliği                                             | sözleşme onayının kanıtı                               | Siparişe dönüşmeyen sepette 30 gün (iş). Siparişinkinde sözleşme süresi boyunca.                              | Sipariş kopyasıyla aynı.                                              |
+| `legal_order_copy` (legal)          | alıcının adı, adresi, iletişim bilgisi, kalemler (Ş, SHA-256 özetli)         | mesafeli satış sözleşmesi ve ön bilgilendirme kopyası  | En az 3 yıl (Mesafeli Sözleşmeler Yönetmeliği), avukat doğrulayacak                                           | Süre dolmadıysa kilitli kalır; dolduysa silinir.                      |
+| `age_declaration` (legal)           | sepet kimliği, sınır ve zaman (doğum tarihi tutulmaz)                        | yaş sınırlı satışın kanıtı                             | Siparişe dönüşmeyen sepette 30 gün (iş). Siparişte siparişle birlikte.                                        | Siparişle birlikte.                                                   |
+| `checkout_consent` (messaging)      | IP (Ö), sepet kimliği                                                        | ödemede işaretlenen ileti onayı, sipariş oluşana kadar | Sipariş oluşunca silinir. Terk edilen sepette 30 gün (iş).                                                    | Silinir.                                                              |
+| `tracking_consent` (conversions)    | GA istemci kimliği (D); `_fbp`, `_fbc`, sayfa adresi (D); IP ve tarayıcı (Ş) | ölçüm onayı ve dönüşüm olayı                           | IP, tarayıcı, `_fbp`, `_fbc`, adres: olay gidince ya da en geç 3 gün. Terk edilen sepetin satırı 30 gün (iş). | Silinir.                                                              |
+| `billing_profile` (billing-profile) | ad ya da unvan, vergi dairesi (D); VKN veya TCKN (Ş + Ö, son 4 hane D)       | fatura kimliği                                         | Müşteri hesabı süresince                                                                                      | Bugün yalnız yumuşak siliniyor. Kalıcı silme L9'da (**açık**).        |
+| `order_refund` (order-refunds)      | personel notu (D, serbest metin)                                             | iade kaydı                                             | Siparişle birlikte                                                                                            | Not temizlenir, tutar korunur.                                        |
+| `chargeback` (chargebacks)          | personel notu (D)                                                            | ters ibraz kaydı                                       | Siparişle birlikte                                                                                            | Not temizlenir.                                                       |
+| `return_request` (return-requests)  | müşteri notu, karar notu (D)                                                 | iade ve değişim talebi                                 | Siparişle birlikte                                                                                            | Notlar temizlenir.                                                    |
+| `order_note` (order-notes)          | personel notu (D)                                                            | siparişe iç not                                        | Siparişle birlikte                                                                                            | Notlar temizlenir.                                                    |
+
+## 2. İletişim ve izinler
+
+| Tablo (modül)                       | Kişisel veri                             | Amaç                               | Süre                                                                                                        | Silmede                                                    |
+| ----------------------------------- | ---------------------------------------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| `message_consent` (messaging)       | alıcı (Ş + Ö + M), müşteri kimliği       | ticari ileti izni, İYS'ye bildirim | İzin geçerliyken; bittikten sonra 3 yıl (Ticari İletişim Yönetmeliği), öneri                                | İzin geri çekilir. İYS kanıtı süresince tutulur.           |
+| `message_consent_event` (messaging) | personel notu ya da metin sürümü; IP (Ö) | iznin değişmez kanıt zinciri       | `message_consent` ile aynı                                                                                  | Kanıt süresince tutulur.                                   |
+| `consent_request` (messaging)       | alıcı (Ş + Ö)                            | çift onay bağlantısı               | Bağlantı 7 gün açık; süresi dolunca 30 gün sonra silinir (iş)                                               | Silinir.                                                   |
+| `message_suppression` (messaging)   | alıcı (Ö + M)                            | gönderilmeyecekler listesi         | Kalıcı. Kişinin isteği olduğu için tutulur.                                                                 | Özet ve maske tutulur (yeniden gönderimi engellemek için). |
+| `message_skip` (messaging)          | alıcı (M), müşteri kimliği               | gönderilmeyen iletinin nedeni      | 180 gün (`message-skips-retention`)                                                                         | Silinir.                                                   |
+| `notification` (Medusa)             | alıcı adresi (D)                         | gönderim kaydı                     | Medusa'nın kendi davranışı. İletinin metni saklanıyor mu, doğrulanacak (**açık**).                          | Alıcı temizlenir (L9).                                     |
+| `stock_alert` (back-in-stock)       | e-posta (Ş + Ö + M), müşteri kimliği     | stok bildirimi                     | Gönderildikten ya da iptalden 180 gün sonra; doğrulanmamış misafir talebi süresi dolunca 180 gün sonra (iş) | Silinir.                                                   |
+| `cart_reminder` (cart-reminders)    | sepet kimliği, bağlantı özeti            | terk edilen sepet hatırlatması     | Bağlantı 7 gün; satır silinmiyor (**açık**, kişisel veri yok)                                               | Sepetle birlikte.                                          |
+
+## 3. Vitrin, ziyaretçi ve hesap
+
+| Tablo (modül)                                     | Kişisel veri                                               | Amaç                    | Süre                               | Silmede                                                       |
+| ------------------------------------------------- | ---------------------------------------------------------- | ----------------------- | ---------------------------------- | ------------------------------------------------------------- |
+| `customer`, `customer_address` (Medusa)           | ad, e-posta, telefon, adres (D)                            | müşteri hesabı          | Hesap süresince                    | Kişisel alanlar yer tutucuya çevrilir, adresler silinir (L9). |
+| `auth_identity`, `provider_identity` (Medusa)     | e-posta ya da Apple kimliği; Apple'dan gelen ad ve e-posta | giriş                   | Hesap süresince                    | Giriş kaydı kaldırılır (L9).                                  |
+| `cookie_consent` (legal)                          | ziyaretçi çerezi (Ö)                                       | çerez tercihi ve kanıtı | 2 yıl (iş). Çerezin kendisi 13 ay. | Silinir.                                                      |
+| `wishlist_item` (wishlist)                        | müşteri kimliği                                            | favoriler               | Hesap süresince                    | Silinir.                                                      |
+| `product_review` (product-reviews)                | yazar adı (ad + baş harf), başlık, metin (D)               | ürün yorumu             | Yayında kaldıkça                   | Yazar adı ve metin anonimleşir (L9).                          |
+| `product_question`, `product_answer` (product-qa) | yazar adı, metin (D)                                       | soru ve cevap           | Yayında kaldıkça                   | Yazar adı anonimleşir (L9).                                   |
+| `search_term_day` (search-terms)                  | aranan metin (kişiye bağlı değil)                          | arama istatistiği       | 180 gün (`search-terms-retention`) | —                                                             |
+| `traffic_source` (traffic-sources)                | sepet kimliği, UTM, yönlendiren alan adı                   | trafik kaynağı          | Sepet ve siparişle birlikte        | —                                                             |
+
+## 4. Personel, denetim ve sistem
+
+| Tablo (modül)                                   | Kişisel veri                                                                                                          | Amaç                             | Süre                                                                           | Silmede                                |
+| ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- | -------------------------------- | ------------------------------------------------------------------------------ | -------------------------------------- |
+| `audit_entry` (audit-log)                       | personel kimliği; IP ve tarayıcı (D); değişikliklerde hassas alanlar maskeli                                          | denetim kaydı (ADR-0011)         | IP ve tarayıcı 2 yıl sonra boşaltılır (iş). Kaydın kendisi için süre **açık**. | Kayıt korunur, kimin yaptığı kalır.    |
+| `async_job` ve sonuç dosyaları (async-job)      | isteyen personel. Dışa aktarma dosyaları kişisel veri içerebilir (denetim kaydı dosyasında IP ve tarayıcı).           | dışa aktarma, içe aktarma, rapor | Dosyalar 7 ya da 30 gün (türüne göre); kayıt 90 gün (`async-job-retention`)    | —                                      |
+| `staff_role`, `user` (staff, Medusa)            | personel adı, e-posta                                                                                                 | yetki                            | Personel çalıştıkça                                                            | Personel çıkarılınca giriş kaldırılır. |
+| `platform_settings_section` (platform-settings) | Şahıs işletmesinde unvan (kişi adı), TCKN, adres, KEP; banka hesap sahibi ve IBAN; iletişim e-postası ve telefonu (D) | mağaza künyesi ve ödeme          | Mağaza süresince                                                               | Mağazanın kendi verisi.                |
+| `content_entry` (content)                       | yazar adı (D)                                                                                                         | blog ve sayfa                    | Yayında kaldıkça                                                               | —                                      |
+
+**Kişisel veri tutmayan, kontrol edilmiş tablolar:** katalog, fiyat, SEO, stok, medya, feed, kargo olayları, webhook ve muhasebe tabloları (tam liste L8 taramasında).
+
+**Bellekte tutulanlar:** Sayaçlarda kullanılan ziyaretçi IP özetleri (Ö) veritabanında değil, hız sınırı deposunda durur ve pencere bitince düşer. Bu sayaçlar arama, hız sınırı ve yeniden doğrulama içindir.
+
+---
+
+## Gecelik saklama işi (`compliance-retention`)
+
+| Parça              | Ne yapar                                                                                                                                                            | Süre (`RETENTION_DAYS`) |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| `abandoned_carts`  | Siparişe dönüşmeyen sepetin `legal_consent`, `age_declaration`, `checkout_consent` ve `tracking_consent` satırlarını siler. Siparişe dönüşenler kanıt olarak kalır. | `abandonedCart` 30 gün  |
+| `cookie_consents`  | Eski çerez yanıtlarını siler.                                                                                                                                       | `cookieConsent` 730 gün |
+| `audit_clients`    | Denetim kaydında IP ve tarayıcıyı boşaltır. Kaydın tek değişikliği budur. F16'daki tablo izni bu iki sütunun güncellenmesine izin vermeli.                          | `auditClient` 730 gün   |
+| `stock_alerts`     | Gönderilmiş ya da iptal edilmiş bildirimleri ve doğrulanmamış misafir taleplerini siler.                                                                            | `stockAlert` 180 gün    |
+| `consent_requests` | Süresi dolmuş çift onay taleplerini siler.                                                                                                                          | `consentRequest` 30 gün |
+
+Her parça ayrı çalışır; biri hata verse de diğerleri yapılır. Bir gecede 500'den fazla satır birikmişse kalanı sonraki gecelere kalır.
+
+**Diğer saklama işleri:** `conversions-retry` (3 gün), `message-skips-retention` (180 gün), `search-terms-retention` (180 gün), `async-job-retention` (90 gün), `tenant-webhooks` (teslimat kayıtları 30 gün).
+
+## Açık konular
+
+- **Danışman onayı:** Bu dosyadaki sürelerin tamamı. Sipariş ve fatura için 10 yıl, sözleşme kopyası için 3 yıl, İYS kanıtı için 3 yıl, denetim kaydının kendisi için süre (docs/12).
+- **Silme ve anonimleştirme akışı (L9):** müşteri, adresler, fatura profili (bugün yumuşak siliniyor, şifreli VKN kalıyor), siparişlerin kişisel alanları, notlar, yorumlar ve sorular.
+- **GA istemci kimliği:** `tracking_consent.ga_client_id` hiç temizlenmiyor. İadede GA4'e olay gittiği için iade süresi bitene kadar gerekli. Öneri: siparişten iade süresi + 30 gün sonra boşalt.
+- **Medusa `notification`:** İletinin işlenmiş metni saklanıyor mu, doğrulanacak. Saklanıyorsa süre konacak.
+- **Terk edilmiş sepet:** Medusa sepetinin kendisi (e-posta, adres) silinmiyor. Öneri: 90 gün sonra adres ve e-postayı temizle (L9 ile).

@@ -3,7 +3,9 @@ import { model } from "@medusajs/framework/utils"
 /**
  * One audited event (adr/0011): an admin mutation, a read of personal data
  * or a meaningful automatic action. Append-only: the service exposes no
- * update or delete, and F16 revokes UPDATE/DELETE on the table.
+ * update or delete but forgetting the IP address and browser after their
+ * retention period (F13.5); F16 revokes UPDATE/DELETE on the table, all but
+ * UPDATE of those two columns.
  */
 export const AuditEntry = model
   .define("audit_entry", {
@@ -18,7 +20,7 @@ export const AuditEntry = model
     outcome: model.number().nullable(),
     changes: model.json().nullable(),
     request_id: model.text().nullable(),
-    // Personal data: kept for the retention period docs/12 sets, erased in F13
+    // Personal data: kept for the retention period docs/kvkk-envanter.md sets, then cleared
     ip: model.text().nullable(),
     user_agent: model.text().nullable(),
   })

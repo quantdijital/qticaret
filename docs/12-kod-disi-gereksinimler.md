@@ -21,6 +21,7 @@
 | Ters ibraz (chargeback) süreçleri ve belge gereksinimleri | Ödeme sağlayıcı + avukat | F6.7 |
 | Adres referans verisi (il/ilçe/mahalle/posta kodu) kaynağı ve kullanım lisansı: PTT/TÜİK verisinin ticari kullanımı ve tenant'lara dağıtımı | Avukat | F1.3, F16 (ADR-0008) |
 | Denetim kaydı ve erişim bilgisi (IP, user agent, okuma kayıtları) saklama süresi; öneri 2 yıl | KVKK danışmanı | F2.5, F13 (ADR-0011) |
+| Tüm kişisel veri saklama sürelerinin onayı (sipariş 10 yıl, sözleşme kopyası 3 yıl, İYS kanıtı 3 yıl, terk edilmiş sepet 30 gün, çerez yanıtı 2 yıl...); liste `docs/kvkk-envanter.md` | KVKK danışmanı + mali müşavir | F13.5 |
 
 ## Mali ve vergi
 | Kalem | Sorumlu / danışılacak | Etkilediği faz |

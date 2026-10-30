@@ -133,9 +133,31 @@ class AuditLogModuleService extends MedusaService({ AuditEntry }) {
     return rows.map((row) => row.resource_type)
   }
 
+  /**
+   * Forgets who sent the requests of entries older than `before`: their IP
+   * address and browser (F13.5, adr/0041 §6). The one change an entry ever
+   * takes; what was done, by whom and when stays. Returns how many entries
+   * were cleared.
+   */
+  @InjectManager()
+  async forgetClients(before: Date, @MedusaContext() sharedContext: Context = {}): Promise<number> {
+    const manager = sharedContext.manager as Executor
+    const rows = (await manager.execute(
+      `WITH cleared AS (
+         UPDATE audit_entry SET ip = NULL, user_agent = NULL
+          WHERE created_at < ? AND (ip IS NOT NULL OR user_agent IS NOT NULL)
+         RETURNING 1
+       )
+       SELECT count(*)::int AS count FROM cleared`,
+      [before]
+    )) as { count: number }[]
+    return rows[0]?.count ?? 0
+  }
+
   // The generated writers stay unreachable: an audit entry is never changed
-  // or removed, and is created only through record() with its bounds. Field initialisers run after the base constructor, so these
-  // replace the generated methods on every instance.
+  // (but for forgetClients) or removed, and is created only through record()
+  // with its bounds. Field initialisers run after the base constructor, so
+  // these replace the generated methods on every instance.
   override createAuditEntries = refuseWrite
   override updateAuditEntries = refuseWrite
   override deleteAuditEntries = refuseWrite

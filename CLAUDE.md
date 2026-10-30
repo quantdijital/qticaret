@@ -58,6 +58,7 @@ Güncel faz ve görevler: `PROGRESS.md`
 | Claude Code çalışma düzeni, MCP | docs/09-claude-code-is-akisi.md |
 | Kod standartları | docs/10-kod-standartlari.md |
 | Kod dışı gereksinimler (hukuk, mali, sağlayıcı) | docs/12-kod-disi-gereksinimler.md |
+| KVKK veri envanteri ve saklama süreleri | docs/kvkk-envanter.md |
 | SEO mimarisi (URL, 301, JSON-LD, sitemap, GEO) | docs/13-seo-mimarisi.md |
 | SEO advisor kural seti ve öneri motoru | docs/14-seo-advisor-kural-seti.md |
 | Rakip analizi ve farklılaşma | docs/15-rakip-analizi-ve-farklilasma.md |
