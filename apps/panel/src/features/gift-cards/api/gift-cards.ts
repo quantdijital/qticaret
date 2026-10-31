@@ -44,9 +44,9 @@ export const giftCardsQuery = () =>
     },
   })
 
+/** A card has no last day: cards do not expire (adr/0025, 2026-10-31). */
 export interface NewGiftCard {
   value: number
-  expires_at: string | null
   note: string | null
 }
 

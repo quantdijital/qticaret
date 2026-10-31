@@ -16,7 +16,6 @@ import {
 import { Input } from "@/components/ui/input"
 import { CREATE_GIFT_CARD, useCreateGiftCard } from "@/features/gift-cards/api/gift-cards"
 import type { GiftCard } from "@/features/gift-cards/api/gift-cards"
-import { dayEnd } from "@/lib/days"
 import { errorText } from "@/lib/errors"
 import { formatMoney } from "@/lib/format"
 import { parseMoneyInput } from "@/lib/money-input"
@@ -55,13 +54,12 @@ function MadeCard({ card }: { card: GiftCard }) {
 
 interface Draft {
   value: string
-  ends: string
   note: string
 }
 
-const EMPTY: Draft = { value: "", ends: "", note: "" }
+const EMPTY: Draft = { value: "", note: "" }
 
-/** Value, last day and the shop's note. */
+/** Value and the shop's note; cards do not expire (adr/0025). */
 function GiftCardFields({
   draft,
   onChange,
@@ -91,21 +89,6 @@ function GiftCardFields({
           </span>
         </div>
       </Field>
-      <Field
-        label={t("giftCards.expires")}
-        htmlFor="gift-card-ends"
-        hint={t("giftCards.expiresHint")}
-      >
-        <Input
-          id="gift-card-ends"
-          type="date"
-          className="w-44"
-          value={draft.ends}
-          onChange={(event) => {
-            onChange({ ...draft, ends: event.target.value })
-          }}
-        />
-      </Field>
       <Field label={t("giftCards.note")} htmlFor="gift-card-note" hint={t("giftCards.noteHint")}>
         <Input
           id="gift-card-note"
@@ -120,7 +103,7 @@ function GiftCardFields({
   )
 }
 
-/** The form: a card of a value, with an optional last day and a note for the shop. */
+/** The form: a card of a value, with a note for the shop. */
 function NewCardForm({
   onMade,
   onCancel,
@@ -138,9 +121,8 @@ function NewCardForm({
       setError(t("giftCards.errors.value"))
       return
     }
-    const { ends, note } = draft
     create.mutate(
-      { value: amount, expires_at: dayEnd(ends)?.toISOString() ?? null, note: note.trim() || null },
+      { value: amount, note: draft.note.trim() || null },
       { onSuccess: onMade, onError: (failure) => toast.error(errorText(t, failure)) }
     )
   }

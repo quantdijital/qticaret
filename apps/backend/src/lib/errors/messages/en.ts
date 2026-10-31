@@ -197,6 +197,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "A card code's prefix is up to 20 letters, digits or dashes; the rest of the code is drawn at random.",
   "gift_cards.guest_account":
     "Store credit is for customers with an account; a guest could not spend it.",
+  "gift_cards.no_expiry": "Gift cards do not expire; a card cannot be given a last day.",
   "integration_credentials.check_failed":
     "The provider gave an unexpected answer; nothing was saved. Try again in a while.",
   "integration_credentials.invalid": "The value is not valid.",

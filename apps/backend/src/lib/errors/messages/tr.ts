@@ -203,6 +203,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Kart kodunun öneki en çok 20 harf, rakam ya da tire olabilir; kodun geri kalanı rastgele üretilir.",
   "gift_cards.guest_account":
     "Mağaza kredisi yalnızca üye müşterilere verilebilir; misafir müşteri krediyi kullanamaz.",
+  "gift_cards.no_expiry": "Hediye kartları süresizdir; son kullanma günü verilemez.",
   "integration_credentials.check_failed":
     "Sağlayıcı beklenmedik bir yanıt verdi; bilgiler kaydedilmedi. Biraz sonra tekrar deneyin.",
   "integration_credentials.invalid": "Girilen değer geçerli değil.",

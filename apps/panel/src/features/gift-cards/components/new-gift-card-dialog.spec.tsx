@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { fireEvent, render, screen } from "@testing-library/react"
+import { render, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
@@ -41,22 +41,15 @@ describe("NewGiftCardDialog", () => {
     expect(await screen.findByText("GIFT-ABCD-EFGH")).toBeInTheDocument()
   })
 
-  it("makes a card to the end of its last day, Türkiye time, then shows its code", async () => {
+  it("makes a card with no last day, then shows its code", async () => {
     renderDialog()
+    expect(screen.queryByLabelText(/^Son kullanma/u)).not.toBeInTheDocument()
     await userEvent.type(screen.getByLabelText(/^Tutar/u), "250")
-    fireEvent.change(screen.getByLabelText(/^Son kullanma günü/u), {
-      target: { value: "2026-12-31" },
-    })
     await userEvent.click(screen.getByRole("button", { name: "Kartı oluştur" }))
     expect(await screen.findByText("GIFT-ABCD-EFGH")).toBeInTheDocument()
     expect(fetchMock).toHaveBeenCalledWith("/admin/gift-cards", {
       method: "POST",
-      body: {
-        currency_code: "try",
-        value: 250,
-        expires_at: "2026-12-31T20:59:59.000Z",
-        note: null,
-      },
+      body: { currency_code: "try", value: 250, note: null },
     })
     expect(screen.getByRole("button", { name: "Kodu kopyala" })).toBeInTheDocument()
   })

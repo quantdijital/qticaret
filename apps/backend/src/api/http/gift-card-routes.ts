@@ -2,6 +2,7 @@ import type { MedusaRequest } from "@medusajs/framework/http"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import { GIFT_CARDS } from "../../modules/platform-settings/features"
 import { giftCardCodes } from "../validation/gift-card-codes"
+import { cardsWithoutExpiry } from "../validation/gift-card-expiry"
 import { storeCreditGuards } from "../validation/store-credit"
 import { rateLimit } from "./rate-limit"
 import { decodedSegment, routePath, routePathKeepingCase } from "./request-path"
@@ -37,7 +38,8 @@ const codeTries = rateLimit(codeTry, {
  * codes read in one form, and store credit kept to its owner
  * (`validation/store-credit.ts`). Without `methods`, so all of it runs
  * before the plugin validates the body (a 400 would give the routes away),
- * on every path below each matcher. What a shopper sees of a card:
+ * on every path below each matcher. Cards are made without a last day
+ * (`validation/gift-card-expiry.ts`). What a shopper sees of a card:
  * `shopper-gift-cards.ts`.
  */
 export const GIFT_CARD_ROUTES = [
@@ -54,6 +56,7 @@ export const GIFT_CARD_ROUTES = [
       requireFeature(GIFT_CARDS),
       codeTries,
       giftCardCodes,
+      cardsWithoutExpiry,
       storeCreditGuards,
       ...(matcher.startsWith("/store/") ? [shopperGiftCardAnswers] : []),
     ],

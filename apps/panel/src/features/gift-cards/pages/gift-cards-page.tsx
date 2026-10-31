@@ -17,8 +17,9 @@ import { NewGiftCardDialog } from "@/features/gift-cards/components/new-gift-car
 import { PromotionsNav } from "@/features/promotions/components/promotions-nav"
 import { featuresQuery } from "@/features/settings/api/features"
 import { errorText } from "@/lib/errors"
-import { formatCount, formatDate, formatMoney } from "@/lib/format"
+import { formatCount, formatMoney } from "@/lib/format"
 
+// Cards do not expire now (adr/0025); one made with a last day before still can
 const isExpired = (card: GiftCard) =>
   card.expires_at !== null && new Date(card.expires_at).getTime() < Date.now()
 
@@ -45,16 +46,6 @@ function useColumns(): Column<GiftCard>[] {
       cell: (card) => (
         <span className="font-medium tabular-nums">
           {formatMoney(card.store_credit_account?.balance ?? card.value, card.currency_code)}
-        </span>
-      ),
-    },
-    {
-      key: "expires",
-      header: t("giftCards.columns.expires"),
-      className: "hidden md:table-cell",
-      cell: (card) => (
-        <span className="text-muted-foreground tabular-nums">
-          {card.expires_at ? formatDate(card.expires_at) : t("giftCards.noEnd")}
         </span>
       ),
     },

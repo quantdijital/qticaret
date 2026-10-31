@@ -79,6 +79,27 @@ medusaIntegrationTestRunner({
 
     const account = (cardId: string) => cardAccount(getContainer(), cardId)
 
+    it("makes cards without a last day: one is refused, made or changed (adr/0025)", async () => {
+      expect((await flag(true)).status).toBe(200)
+      const lastDay = { expires_at: "2027-01-01T00:00:00.000Z" }
+      const made = await settle(
+        http.post(
+          "/admin/gift-cards",
+          { currency_code: "try", value: 100, ...lastDay },
+          { headers: admin.headers }
+        )
+      )
+      expect(made.status).toBe(400)
+      expect(made.data).toMatchObject({ message: "gift_cards.no_expiry" })
+
+      const card = await giftCard(100)
+      const changed = await settle(
+        http.post(`/admin/gift-cards/${card.id}`, lastDay, { headers: admin.headers })
+      )
+      expect(changed.status).toBe(400)
+      expect(changed.data).toMatchObject({ message: "gift_cards.no_expiry" })
+    })
+
     it("takes a gift card's value off what the customer pays", async () => {
       expect((await flag(true)).status).toBe(200)
       const card = await giftCard(100)
