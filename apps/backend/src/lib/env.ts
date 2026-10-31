@@ -50,6 +50,10 @@ const envSchema = z.object({
   // `on` looks new passwords up in Have I Been Pwned's breach list
   // (adr/0043): an outside service, off until approved
   PASSWORD_BREACH_CHECK: z.enum(["on", "off"]).optional(),
+  // F15.9 (RFC 9116): where to report a security issue, `mailto:` or
+  // `https:`, comma separated; security.txt answers 404 without it
+  SECURITY_CONTACT: z.string().max(500).optional(),
+  SECURITY_POLICY_URL: z.url({ protocol: /^https$/ }).optional(),
   // The backend's own public address: iyzico sends the shopper back to it
   // (`/hooks/iyzico/callback`). Required once deployed; locally localhost:9000
   BACKEND_URL: z.url({ protocol: /^https?$/ }).optional(),

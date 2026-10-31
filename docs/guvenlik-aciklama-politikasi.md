@@ -1,6 +1,6 @@
 # Güvenlik açığı bildirme politikası (taslak)
 
-> F15.9. Bu metin platformun ve mağazaların sitesinde `/.well-known/security.txt`'deki `Policy` bağlantısının gösterdiği sayfanın kaynağıdır. **Taslak:** iletişim adresi, süreler ve güvenli liman maddesi kullanıcının (ve gerekirse avukatın) onayını bekler.
+> F15.9. Bu metin platformun ve mağazaların sitesinde `/.well-known/security.txt`'deki `Policy` bağlantısının gösterdiği sayfanın kaynağıdır. Dosyayı backend üretir (`GET /store/seo/security`; `SECURITY_CONTACT`, `SECURITY_POLICY_URL`), vitrin sunar. **Taslak:** iletişim adresi, süreler ve güvenli liman maddesi kullanıcının (ve gerekirse avukatın) onayını bekler.
 
 ## Kapsam
 
