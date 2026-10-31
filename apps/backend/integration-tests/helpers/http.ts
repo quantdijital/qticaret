@@ -22,6 +22,10 @@ export interface HttpClient {
   delete<T = unknown>(url: string, config?: RequestConfig): Promise<HttpResponse<T>>
   head<T = unknown>(url: string, config?: RequestConfig): Promise<HttpResponse<T>>
   options<T = unknown>(url: string, config?: RequestConfig): Promise<HttpResponse<T>>
+  /** Any method, chosen at run time (a sweep over routes). */
+  request<T = unknown>(
+    config: RequestConfig & { url: string; method: string }
+  ): Promise<HttpResponse<T>>
 }
 
 /** Resolves with the response for 4xx/5xx too, so tests can assert on it. */
