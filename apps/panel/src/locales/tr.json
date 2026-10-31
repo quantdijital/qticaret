@@ -1402,7 +1402,7 @@
       },
       "emailLimit": {
         "title": "Günlük e-posta sınırı",
-        "description": "Mağazanın bir günde gönderebileceği en çok e-posta. Uydurma adreslerle verilen siparişlerin geri dönen postaları gönderici itibarını düşürür; sınırın %80'inde zilde uyarı görürsünüz, aşılınca o gün başka e-posta gitmez.",
+        "description": "Mağazanın bir günde gönderebileceği en çok e-posta. Pazarlama e-postaları ile sipariş ve hesap e-postaları ayrı sayılır, her biri bu sınıra kadar gider: kampanya sipariş e-postalarını durdurmaz. Uydurma adreslerle verilen siparişlerin geri dönen postaları gönderici itibarını düşürür; sınırın %80'inde zilde uyarı görürsünüz, aşılınca o türden başka e-posta o gün gitmez.",
         "label": "Günde en çok",
         "saved": "E-posta sınırı kaydedildi."
       },

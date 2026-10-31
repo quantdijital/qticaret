@@ -27,6 +27,18 @@ describe("e-mail quota (F10 M9)", () => {
     expect(order).toMatchObject({ allowed: true, shopToday: 3 })
   })
 
+  it("never lets a campaign stop an order's e-mail: each kind has its own day", async () => {
+    const store = createMemoryStore()
+    const campaign = []
+    for (let i = 0; i < 3; i += 1) {
+      campaign.push(await emailAllowance(store, { dailyLimit: 2, budget: "commercial" }))
+    }
+    const order = await emailAllowance(store, { dailyLimit: 2 })
+
+    expect(campaign.map(({ allowed }) => allowed)).toEqual([true, true, false])
+    expect(order).toMatchObject({ allowed: true, shopToday: 1 })
+  })
+
   it("starts each day afresh", async () => {
     const store = createMemoryStore()
     const today = new Date("2026-10-28T10:00:00Z")

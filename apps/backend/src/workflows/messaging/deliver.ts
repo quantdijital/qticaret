@@ -210,7 +210,7 @@ export async function deliver<N extends MessageTemplateName>(
       // to record the result: a failed attempt is cleared and sent as a new one
       await rows.deleteNotifications([previous.id])
     }
-    if (!(await withinQuota(container, channel, recipient.hash, template.name))) {
+    if (!(await withinQuota(container, channel, recipient.hash, template))) {
       await notSent("over_quota", recipient.masked)
       continue
     }

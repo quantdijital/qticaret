@@ -1402,7 +1402,7 @@
       },
       "emailLimit": {
         "title": "Daily e-mail limit",
-        "description": "The most e-mails the shop sends in a day. Bounces from orders with made-up addresses hurt the sender's reputation; you are warned in the bell at 80% of the limit, and past it no more e-mail goes that day.",
+        "description": "The most e-mails the shop sends in a day. Marketing e-mails and order or account e-mails are counted apart, each up to this limit: a campaign never stops an order's e-mail. Orders placed with made-up addresses bounce and hurt the sender's reputation; at 80% of the limit the bell warns you, and past it no more e-mails of that kind go out that day.",
         "label": "At most a day",
         "saved": "E-mail limit saved."
       },

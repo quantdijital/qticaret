@@ -1554,7 +1554,7 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
   - **Apple ile giriş:** kapalı kalır.
   - **Google Cloud (Google ile giriş, Search Console):** projeyi kullanıcı açacak; adımlar Claude tarafından yazılacak.
   - **Resend:** her mağazaya ayrı hesap (ADR-0036 eki onaylandı).
-  - **E-posta kotası:** işlemsel e-postalar ayrı kota (pazarlama kotası işlemselleri durdurmaz; F9 kotası buna göre değiştirilecek).
+  - **E-posta kotası:** işlemsel e-postalar ayrı kota (pazarlama kotası işlemselleri durdurmaz). **Yapıldı 2026-10-31:** iki ayrı günlük sayaç, ikisi de mağazanın sınırına kadar; herkesin tetikleyebildiği e-postaların çeyrek payı işlem bütçesinde (`lib/messaging/email/quota.ts`).
   - **Sözleşmeler:** mesafeli satış ve ön bilgilendirme canlıya çıkışta zorunlu (F16 canlıya çıkış listesine girer).
   - **Silinen müşterinin yorumu:** metin kalır, ad "Anonim" (yapılan buydu).
   - **İYS:** ilk müşteri kaydolacak.
@@ -1576,7 +1576,7 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
 - [ ] **Kararlardan doğan işler (2026-10-30):**
   - ~~Google Cloud kurulum adımları~~ yazıldı: `docs/runbooks/google-cloud-kurulum.md` (platform projesi bir kez, mağaza başına giriş projesi). Doğan iki iş: (1) Merchant API, Cloud projesinin bir kez bir Merchant Center hesabına "geliştirici kaydı" (`registerGcp`) yapılmasını istiyor; proje yalnızca tek hesaba kaydolabildiği için platformun kendi Merchant Center hesabı kullanılacak; kaydı yapan tek seferlik betik yazılacak (bugün kodda yok; kayıtsız projede Merchant API 401 döner). (2) F16 mağaza açılış listesine: panel adresinin `/google/callback` olarak platform istemcisine eklenmesi ve mağazanın giriş projesi.
   - Mali müşavir soru listesi yazıldı: `docs/mali-musavir-sorulari.md` (kullanıcı mağazanın mali müşavirine iletecek).
-  - İşlemsel e-postalara ayrı kota (bugün tek kota; pazarlama dolunca işlemseller durmamalı).
+  - ~~İşlemsel e-postalara ayrı kota~~ yapıldı (2026-10-31).
   - F16 canlıya çıkış listesi: mesafeli satış ve ön bilgilendirme yayında olmadan mağaza açılmaz; her mağazaya ayrı Resend hesabı kurulum notu.
   - İYS kaydı (ilk müşteri) ve platform yasal şablonlarının avukat onayı (kullanıcı).
 - [ ] **F13 kod dışı girdiler (kullanıcı, docs/12):** avukat onaylı yasal metinler (mesafeli satış, ön bilgilendirme, aydınlatma, çerez, iade, kargo, üyelik); sektörel satış kuralları (ör. 6136 sayılı kanun kapsamı ve yaş sınırı); KVKK danışmanının onaylayacağı saklama süreleri (öneriler `docs/kvkk-envanter.md`'de). Gelene kadar taslaklar işaretli, süreler öneri.

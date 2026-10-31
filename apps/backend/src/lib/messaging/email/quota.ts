@@ -4,6 +4,9 @@ import type { RateLimitStore } from "../../security/rate-limit"
  * The shop's e-mails a day (F10 M9): a guard on the sender's reputation.
  * Orders and forms with made-up addresses bounce, and enough bounces get
  * a sender blocked; past the limit nothing goes until the next day.
+ * Commercial e-mails and the rest (orders, resets) are counted apart,
+ * each to the limit: a campaign never stops an order's e-mail (the
+ * owner, 2026-10-30).
  */
 
 /** The share of the day's limit that warns staff. */
@@ -37,27 +40,35 @@ export interface EmailAllowance {
   reason?: "shop" | "open"
   /** This e-mail is the one that reached the warning share of the day's limit. */
   warn: boolean
-  /** E-mails the shop sent today, this one counted. */
+  /** E-mails of its kind the shop sent today, this one counted. */
   shopToday: number
 }
 
+/** An e-mail's budget: a commercial one, or one about an order, an account, a form. */
+export type EmailBudget = "commercial" | "transactional"
+
 /**
- * Counts one e-mail against the shop's day and says whether it may go.
- * An open one is counted against its share first; past it, it does not
- * count against the day.
+ * Counts one e-mail against its budget's day and says whether it may go.
+ * An open one is counted against its share of the transactional day
+ * first; past it, it does not count against the day.
  */
 export async function emailAllowance(
   store: RateLimitStore,
-  input: { dailyLimit: number; open?: boolean; now?: Date }
+  input: { dailyLimit: number; budget?: EmailBudget; open?: boolean; now?: Date }
 ): Promise<EmailAllowance> {
   const day = (input.now ?? new Date()).toISOString().slice(0, 10)
+  const budget = input.budget ?? "transactional"
   if (input.open) {
     const opened = await store.hit(`email:open:${day}`, DAY)
     if (opened.count > Math.ceil(input.dailyLimit * EMAIL_OPEN_SHARE)) {
       return { allowed: false, reason: "open", warn: false, shopToday: 0 }
     }
   }
-  const shop = await store.hit(`email:shop:${day}`, DAY)
+  // The transactional day keeps its old key: a day's count survives the release
+  const shop = await store.hit(
+    budget === "commercial" ? `email:commercial:${day}` : `email:shop:${day}`,
+    DAY
+  )
   return {
     ...(shop.count <= input.dailyLimit ? {} : { reason: "shop" as const }),
     allowed: shop.count <= input.dailyLimit,
