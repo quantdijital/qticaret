@@ -5423,6 +5423,13 @@
       "done": "Kept them, hide"
     }
   },
+  "passwordRule": {
+    "too_short": "The password must be at least 10 characters.",
+    "too_long": "The password can be at most 256 characters.",
+    "common": "This password is too common and easy to guess. A sentence of a few words works well.",
+    "contains_email": "The password must not contain your e-mail's name.",
+    "breached": "This password appears in a known data breach; choose another."
+  },
   "reset": {
     "title": "Forgot password",
     "subtitle": "Enter your panel account's e-mail address; we will send a reset link.",

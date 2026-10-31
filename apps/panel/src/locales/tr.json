@@ -5423,6 +5423,13 @@
       "done": "Kaydettim, gizle"
     }
   },
+  "passwordRule": {
+    "too_short": "Şifre en az 10 karakter olmalı.",
+    "too_long": "Şifre en fazla 256 karakter olabilir.",
+    "common": "Bu şifre çok yaygın, kolayca tahmin edilir. Birkaç kelimeden oluşan bir cümle iyi bir seçimdir.",
+    "contains_email": "Şifre e-posta adresinizin adını içermemeli.",
+    "breached": "Bu şifre bilinen bir veri sızıntısında yer alıyor; başka bir şifre seçin."
+  },
   "reset": {
     "title": "Şifremi unuttum",
     "subtitle": "Panel hesabınızın e-posta adresini girin; şifre yenileme bağlantısı gönderelim.",

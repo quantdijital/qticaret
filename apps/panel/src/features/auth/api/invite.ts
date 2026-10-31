@@ -1,4 +1,5 @@
 import { queryOptions } from "@tanstack/react-query"
+import { passwordRuleText } from "../password-rule"
 
 /** What an invitation is for: the address it was sent to and the role it gives. */
 export interface InviteInfo {
@@ -29,9 +30,18 @@ async function call<T>(
     },
     ...(init.body === undefined ? {} : { body: init.body }),
   })
-  const body = (await response.json().catch(() => null)) as { message?: unknown } | null
+  const body = (await response.json().catch(() => null)) as {
+    code?: unknown
+    message?: unknown
+  } | null
   if (!response.ok) {
-    const key = typeof body?.message === "string" ? body.message : null
+    // A sign-in route answers this panel with its sentence, the key kept in `code`
+    const key =
+      typeof body?.code === "string"
+        ? body.code
+        : typeof body?.message === "string"
+          ? body.message
+          : null
     throw new InviteFailure(response.status, key)
   }
   return body as T
@@ -65,9 +75,13 @@ export async function acceptInvite(input: {
   const login = await call<{ token: string }>("/auth/user/emailpass/register", {
     method: "POST",
     body: credentials,
-  }).catch(() =>
-    call<{ token: string }>("/auth/user/emailpass", { method: "POST", body: credentials })
-  )
+  }).catch((error: unknown) => {
+    // A password the rule refuses is the answer; anything else may be an earlier try's login
+    if (passwordRuleText(error)) {
+      throw error
+    }
+    return call<{ token: string }>("/auth/user/emailpass", { method: "POST", body: credentials })
+  })
   await call("/admin/staff/invites/accept", {
     method: "POST",
     authorization: `Bearer ${login.token}`,

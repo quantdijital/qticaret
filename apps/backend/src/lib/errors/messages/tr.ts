@@ -770,4 +770,11 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Adresinizi doğrulamak için önce hesabınıza giriş yapın; bağlantı ancak oturumunuzda çalışır.",
   "account.token_before_password_change":
     "Şifre değiştiği için bu oturum sona erdi; yeni şifrenizle yeniden giriş yapın.",
+  "auth.password_too_short": "Şifre en az 10 karakter olmalı.",
+  "auth.password_too_long": "Şifre en fazla 256 karakter olabilir.",
+  "auth.password_common":
+    "Bu şifre çok yaygın, kolayca tahmin edilir; başka bir şifre seçin. Birkaç kelimeden oluşan bir cümle iyi bir seçimdir.",
+  "auth.password_contains_email": "Şifre e-posta adresinizin adını içermemeli.",
+  "auth.password_breached":
+    "Bu şifre bilinen bir veri sızıntısında yer alıyor; başka bir şifre seçin.",
 }

@@ -770,4 +770,10 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "Sign in to your account first to confirm your address; the link works only in your session.",
   "account.token_before_password_change":
     "The password changed, so this session ended; sign in again with the new password.",
+  "auth.password_too_short": "The password must be at least 10 characters.",
+  "auth.password_too_long": "The password can be at most 256 characters.",
+  "auth.password_common":
+    "This password is too common and easy to guess; choose another. A sentence of a few words works well.",
+  "auth.password_contains_email": "The password must not contain your e-mail's name.",
+  "auth.password_breached": "This password appears in a known data breach; choose another.",
 }

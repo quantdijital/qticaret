@@ -20,6 +20,7 @@ import { StorePostOrderLookup } from "../store/order-lookup/validators"
 import { StorePostStockAlert } from "../store/stock-alerts/validators"
 import { requireMailDomain } from "./mail-domain"
 import { notePasswordChange, tokenAfterPasswordChange } from "./password-change"
+import { newPasswordPolicy } from "./password-policy"
 import { verificationOfOwnIdentity } from "./verification"
 import { optionalCustomer, orderPageAccess } from "./order-access"
 import { rateLimit } from "./rate-limit"
@@ -220,11 +221,14 @@ export const ACCOUNT_ROUTES = [
   // F10 M9: an address whose domain takes no mail opens no account; no
   // `methods`, so it runs before Medusa's own route
   { matcher: "/auth/customer/emailpass/register", middlewares: [requireMailDomain()] },
-  // F15.1: a changed password ends the tokens given before it
+  // F15.1: a new password keeps the rule (adr/0043), and a changed one ends
+  // the tokens given before it. Registration's without `methods`, like the
+  // mail domain's above: it runs before Medusa's own route
+  { matcher: "/auth/:actor_type/emailpass/register", middlewares: [newPasswordPolicy] },
   {
     matcher: "/auth/:actor_type/emailpass/update",
     methods: ["POST" as const],
-    middlewares: [notePasswordChange],
+    middlewares: [newPasswordPolicy, notePasswordChange],
   },
   ...["/auth/token/refresh", "/auth/session", "/store/customers"].map((matcher) => ({
     matcher,

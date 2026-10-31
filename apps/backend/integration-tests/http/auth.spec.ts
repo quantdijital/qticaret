@@ -109,6 +109,35 @@ medusaIntegrationTestRunner({
       expect(response.data.customer.id).toBe(customer.id)
     })
 
+    it("takes a new password only by the rule, for customers and staff alike (F15.1)", async () => {
+      const register = (
+        actor: "customer" | "user",
+        password: string,
+        email = `kayit-${randomUUID()}@example.com`
+      ) =>
+        settle(
+          http.post<{ token?: string; type?: string; message?: string }>(
+            `/auth/${actor}/emailpass/register`,
+            { email, password }
+          )
+        )
+
+      const short = await register("customer", "kisa-sif")
+      const common = await register("customer", "Galatasaray1905")
+      const named = await register("customer", "Selin.Yildiz-2024", "selin.yildiz@example.com")
+      const staff = await register("user", "1234567890")
+      // Throwaway credential for this test database only
+      const good = await register("customer", `mavi kuş ${randomUUID()}`)
+
+      expect(short.status).toBe(400)
+      expect(short.data).toMatchObject({ type: "invalid_data", message: "auth.password_too_short" })
+      expect(common.data).toMatchObject({ message: "auth.password_common" })
+      expect(named.data).toMatchObject({ message: "auth.password_contains_email" })
+      expect(staff.data).toMatchObject({ message: "auth.password_common" })
+      expect(good.status).toBe(200)
+      expect(good.data.token).toEqual(expect.any(String))
+    })
+
     it("opens an account for the registering address only, and lets it in once confirmed", async () => {
       const email = `kayit-${randomUUID()}@example.com`
       // Throwaway credential for this test database only

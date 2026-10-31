@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { InviteFailure, acceptInvite, inviteInfoQuery } from "@/features/auth/api/invite"
 import { useLogin } from "@/features/auth/api/me"
+import { passwordRuleText } from "@/features/auth/password-rule"
 import { linkParams } from "@/lib/link-params"
 
 // docs/04: length first, ten characters at least
@@ -31,9 +32,10 @@ const FAILURES: Record<string, string> = {
 }
 
 const failureKey = (error: unknown) =>
-  error instanceof InviteFailure && error.key
+  passwordRuleText(error) ??
+  (error instanceof InviteFailure && error.key
     ? (FAILURES[error.key] ?? "errors.generic")
-    : "errors.generic"
+    : "errors.generic")
 
 function Field({
   id,

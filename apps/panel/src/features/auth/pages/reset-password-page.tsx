@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { passwordRuleText } from "@/features/auth/password-rule"
 import { sdk } from "@/lib/sdk"
 import { linkParams } from "@/lib/link-params"
 
@@ -99,7 +100,7 @@ function NewPasswordForm({ token }: { token: string }) {
       </div>
       {change.isError ? (
         <p role="alert" className="text-sm text-destructive">
-          {t("reset.expired")}
+          {t(passwordRuleText(change.error) ?? "reset.expired")}
         </p>
       ) : null}
       <Button type="submit" disabled={password.length < MIN_PASSWORD || change.isPending}>

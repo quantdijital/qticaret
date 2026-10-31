@@ -6,6 +6,7 @@ import type {
 } from "@medusajs/framework/http"
 import { Modules } from "@medusajs/framework/utils"
 import { errorSummary, logger } from "../../lib/logging"
+import { claimsOf } from "./bearer"
 import { rejectRequest } from "./reject"
 
 /**
@@ -20,23 +21,6 @@ import { rejectRequest } from "./reject"
  */
 
 const KEY = "password_changed_at"
-
-/** The bearer token's claims; read only where Medusa checks its signature too. */
-function claimsOf(req: MedusaRequest): Record<string, unknown> | null {
-  const token = /^Bearer\s+(\S+)$/i.exec(req.headers.authorization ?? "")?.[1]
-  const payload = token?.split(".")[1]
-  if (!payload) {
-    return null
-  }
-  try {
-    const claims: unknown = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"))
-    return typeof claims === "object" && claims !== null
-      ? (claims as Record<string, unknown>)
-      : null
-  } catch {
-    return null
-  }
-}
 
 /** The bearer token's identity and when it was given (seconds). */
 function bearerOf(req: MedusaRequest): { identity: string; issued: number } | null {

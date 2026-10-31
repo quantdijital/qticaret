@@ -47,6 +47,9 @@ const envSchema = z.object({
   AUTH_MFA_ENCRYPTION_KEY: key256.optional(),
   // Local only: `off` lets a developer sign in without 2FA; ignored when deployed
   ADMIN_MFA: z.enum(["on", "off"]).optional(),
+  // `on` looks new passwords up in Have I Been Pwned's breach list
+  // (adr/0043): an outside service, off until approved
+  PASSWORD_BREACH_CHECK: z.enum(["on", "off"]).optional(),
   // The backend's own public address: iyzico sends the shopper back to it
   // (`/hooks/iyzico/callback`). Required once deployed; locally localhost:9000
   BACKEND_URL: z.url({ protocol: /^https?$/ }).optional(),
