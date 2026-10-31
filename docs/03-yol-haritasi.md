@@ -466,7 +466,7 @@ Güvenlik tabanı F0–F2'de kuruldu; bu faz doğrular ve derinleştirir.
 **KK:**
 - [ ] Kritik/yüksek güvenlik bulgusu yok (iç review + dış pentest)
 - [ ] Hedef yük altında p95 < 500 ms (Store API okuma), checkout hata oranı < %0,5
-- [ ] Geri yükleme provası dokümante ve başarılı
+- [x] Geri yükleme provası dokümante ve başarılı — 2026-10-31, `infra/backup/`, `docs/runbooks/tatbikatlar/2026-10-31-yedek-geri-yukleme.md` (geliştirmede; canlıda aylık, F16.8)
 - [x] Velocity kuralını aşan checkout engelleniyor veya incelemeye düşüyor (testli) — 2026-10-31, ADR-0044, `integration-tests/http/fraud-guard.spec.ts`
 
 ---

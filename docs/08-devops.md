@@ -53,3 +53,4 @@ Script **idempotent** olmalı (yarıda kalırsa tekrar çalıştırılabilir).
 - Postgres: günlük tam + WAL/PITR, şifreli, farklı bölge
 - Obje depolama: versiyonlama
 - Aylık geri yükleme provası
+- Betikler ve anahtar yönetimi: `infra/backup/` (`age` ile şifreli döküm, manifestle doğrulanan geri yükleme), `docs/runbooks/yedek-ve-geri-yukleme.md`. İlk prova 2026-10-31 (`docs/runbooks/tatbikatlar/2026-10-31-yedek-geri-yukleme.md`).
