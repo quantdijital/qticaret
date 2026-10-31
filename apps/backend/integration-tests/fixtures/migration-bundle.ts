@@ -45,7 +45,16 @@ export const bundle = {
       email: "Ayse.Tasinan@Example.com",
       first_name: "Ayşe",
       last_name: "Kaya",
-      addresses: [{ address_1: "Atatürk Cd. 1", city: "Kadıköy", province: "İstanbul" }],
+      // As the old platform kept it: the platform writes it in E.164
+      phone: "0532 123 45 67",
+      addresses: [
+        {
+          address_1: "Atatürk Cd. 1",
+          city: "Kadıköy",
+          province: "İstanbul",
+          phone: "(0532) 123-45-67",
+        },
+      ],
       marketing: { email: "2025-03-01T10:00:00+03:00" },
     },
     { source_key: "cus-2", email: "zaten@example.com" },

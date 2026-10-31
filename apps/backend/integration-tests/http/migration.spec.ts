@@ -101,8 +101,13 @@ medusaIntegrationTestRunner({
       expect(products.find((product) => product.handle === "tasinan-kapak")?.status).toBe("draft")
       expect(pan).toMatchObject({ status: "published", categories: [{ handle: "tavalar" }] })
 
-      const [ayse] = await customers.listCustomers({ email: "ayse.tasinan@example.com" })
+      const [ayse] = await customers.listCustomers(
+        { email: "ayse.tasinan@example.com" },
+        { relations: ["addresses"] }
+      )
       expect(ayse).toBeDefined()
+      expect(ayse?.phone).toBe("+905321234567")
+      expect(ayse?.addresses[0]?.phone).toBe("+905321234567")
       const messaging = getContainer().resolve<MessagingModuleService>(MESSAGING_MODULE)
       const consent = await messaging.listMessageConsents({ customer_id: ayse?.id ?? "" })
       expect(consent).toMatchObject([{ channel: "email", status: "granted", source: "import" }])

@@ -3,6 +3,7 @@ import { Modules } from "@medusajs/framework/utils"
 import { createCustomersWorkflow } from "@medusajs/medusa/core-flows"
 import { isValidationError } from "../../lib/errors"
 import { erasedKeyOf } from "../../lib/migration/erased"
+import { normalizeTrPhone } from "../../lib/tr/phone"
 import type {
   SourceAddress,
   SourceCustomer,
@@ -23,6 +24,13 @@ const BATCH = 100
 
 const emailKey = (email: string) => email.trim().toLowerCase()
 
+/**
+ * A Turkish number as the platform keeps it (E.164, as the storefront's
+ * forms write it); one it cannot read as Turkish is kept as given.
+ */
+const phoneOf = <T extends string | null | undefined>(phone: T): T | string =>
+  phone ? (normalizeTrPhone(phone) ?? phone) : phone
+
 const addressOf = (address: SourceAddress) => ({
   first_name: address.first_name,
   last_name: address.last_name,
@@ -32,7 +40,7 @@ const addressOf = (address: SourceAddress) => ({
   city: address.city,
   province: address.province,
   postal_code: address.postal_code,
-  phone: address.phone,
+  phone: phoneOf(address.phone),
   country_code: "tr",
 })
 
@@ -65,7 +73,7 @@ async function keepConsents(
   for (const customer of customers) {
     const given = [
       ["email", customer.marketing?.email ?? null, customer.email] as const,
-      ["sms", customer.marketing?.sms ?? null, customer.phone] as const,
+      ["sms", customer.marketing?.sms ?? null, phoneOf(customer.phone)] as const,
     ]
     for (const [channel, at, address] of given) {
       if (!at || !address || at.getTime() > now) {
@@ -160,7 +168,7 @@ export async function migrateCustomers(
             email: emailKey(customer.email),
             first_name: customer.first_name,
             last_name: customer.last_name,
-            phone: customer.phone,
+            phone: phoneOf(customer.phone),
             addresses: customer.addresses.map(addressOf),
           })),
         },
