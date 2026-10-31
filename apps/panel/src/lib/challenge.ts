@@ -12,6 +12,10 @@ export interface Challenge {
 
 // Digests asked of the browser at once: the page is never held up for long
 const BATCH = 512
+// The server never asks more (adr/0044 §1); a harder one, or a run past
+// sixteen times the expected tries, is given up rather than spun on
+const MAX_BITS = 24
+const MAX_TRIES = 2 ** (MAX_BITS + 4)
 
 /** Whether the digest starts with `bits` zero bits. */
 export function startsWithZeros(digest: Uint8Array, bits: number): boolean {
@@ -27,8 +31,12 @@ export function startsWithZeros(digest: Uint8Array, bits: number): boolean {
 
 /** The nonce that answers the challenge, found with the browser's own SHA-256. */
 export async function solveChallenge(challenge: Pick<Challenge, "salt" | "bits">): Promise<string> {
+  if (!Number.isInteger(challenge.bits) || challenge.bits < 1 || challenge.bits > MAX_BITS) {
+    throw new Error("challenge: difficulty out of range")
+  }
+  const limit = Math.min(MAX_TRIES, 2 ** (challenge.bits + 4))
   const encoder = new TextEncoder()
-  for (let start = 0; ; start += BATCH) {
+  for (let start = 0; start < limit; start += BATCH) {
     const digests = await Promise.all(
       Array.from({ length: BATCH }, (_, offset) =>
         crypto.subtle.digest(
@@ -44,6 +52,7 @@ export async function solveChallenge(challenge: Pick<Challenge, "salt" | "bits">
       return String(start + found)
     }
   }
+  throw new Error("challenge: no answer found")
 }
 
 /** The header the answer goes back in: the challenge's token, then the nonce. */

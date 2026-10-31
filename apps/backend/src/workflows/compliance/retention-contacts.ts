@@ -3,7 +3,7 @@ import type {
   ICartModuleService,
   MedusaContainer,
 } from "@medusajs/framework/types"
-import { Modules } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { RETENTION_DAYS, cutoffOf } from "../../lib/compliance/retention"
 import { CART_REMINDERS_MODULE } from "../../modules/cart-reminders"
 import type CartRemindersModuleService from "../../modules/cart-reminders/service"
@@ -26,17 +26,32 @@ const BATCH = 500
 // A night's work at most; a larger backlog is finished the nights after
 const MAX_BATCHES = 40
 
-/** Of these carts, the ones money was taken or a hosted form opened for: their records are the money's trail. */
+/**
+ * Of these carts, the ones with a money trail: a payment made (Medusa's),
+ * money taken for no order, or a hosted form still open. Every row read:
+ * a page cut short would let a cart with money go.
+ */
 async function paymentCarts(container: Container, cartIds: string[]): Promise<Set<string>> {
-  const [recoveries, forms] = await Promise.all([
+  const [recoveries, forms, paid] = await Promise.all([
     container
       .resolve<PaymentRecoveryModuleService>(PAYMENT_RECOVERY_MODULE)
-      .listPaymentRecoveries({ cart_id: cartIds }, { select: ["cart_id"] }),
+      .listPaymentRecoveries({ cart_id: cartIds }, { select: ["cart_id"], take: null }),
     container
       .resolve<PaymentFormsModuleService>(PAYMENT_FORMS_MODULE)
-      .listPaymentForms({ cart_id: cartIds, status: "open" }, { select: ["cart_id"] }),
+      .listPaymentForms({ cart_id: cartIds, status: "open" }, { select: ["cart_id"], take: null }),
+    container.resolve(ContainerRegistrationKeys.QUERY).graph({
+      entity: "cart",
+      fields: ["id", "payment_collection.payments.id"],
+      filters: { id: cartIds },
+    }),
   ])
-  return new Set([...recoveries, ...forms].flatMap((row) => (row.cart_id ? [row.cart_id] : [])))
+  const withPayment = (
+    paid.data as { id: string; payment_collection?: { payments?: unknown[] | null } | null }[]
+  ).flatMap((cart) => ((cart.payment_collection?.payments ?? []).length > 0 ? [cart.id] : []))
+  return new Set([
+    ...withPayment,
+    ...[...recoveries, ...forms].flatMap((row) => (row.cart_id ? [row.cart_id] : [])),
+  ])
 }
 
 /**
@@ -71,8 +86,8 @@ export async function forgetAbandonedCartContacts(container: Container, now: Dat
     const due = ids.filter((id) => !ordered.has(id) && !paid.has(id))
     if (due.length > 0) {
       const [reminded, sourced] = await Promise.all([
-        reminders.listCartReminders({ cart_id: due }, { select: ["id"] }),
-        sources.listTrafficSourceRecords({ cart_id: due }, { select: ["id"] }),
+        reminders.listCartReminders({ cart_id: due }, { select: ["id"], take: null }),
+        sources.listTrafficSourceRecords({ cart_id: due }, { select: ["id"], take: null }),
       ])
       await reminders.deleteCartReminders(reminded.map((row) => row.id))
       await sources.deleteTrafficSourceRecords(sourced.map((row) => row.id))

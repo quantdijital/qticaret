@@ -70,13 +70,18 @@ export function hidePrivateAttributes(
   }
   const send = res.json.bind(res)
   res.json = (body: unknown) => {
-    withoutHidden(req.scope, body).then(send, (error: unknown) => {
-      logger.warn({ event: "store.attributes_unfiltered", err: errorSummary(error) })
-      for (const product of productsOf(body)) {
-        product.attribute_values = []
-      }
-      send(body)
-    })
+    withoutHidden(req.scope, body)
+      .then(send, (error: unknown) => {
+        logger.warn({ event: "store.attributes_unfiltered", err: errorSummary(error) })
+        for (const product of productsOf(body)) {
+          product.attribute_values = []
+        }
+        send(body)
+      })
+      // The answer itself failing (the client gone): logged, never a crash
+      .catch((error: unknown) => {
+        logger.warn({ event: "store.attributes_unsent", err: errorSummary(error) })
+      })
     return res
   }
   next()

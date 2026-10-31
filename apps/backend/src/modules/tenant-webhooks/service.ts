@@ -78,7 +78,12 @@ class TenantWebhooksModuleService extends MedusaService({
     return { subscription, secret }
   }
 
-  /** A new secret for the subscription, returned here only; the old one signs nothing more. */
+  /**
+   * A new secret for the subscription, returned here only; the old one
+   * signs nothing more. A delivery claimed just before (its row read with
+   * the old secret) may still go out signed with it, once, within its
+   * lease (the F15 review): receivers keep the old secret a minute.
+   */
   async rotateSecret(id: string): Promise<string> {
     const secret = newWebhookSecret()
     await this.updateWebhookSubscriptions({

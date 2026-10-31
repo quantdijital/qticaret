@@ -9,6 +9,7 @@ import {
   AdminPostStaffInviteInfo,
   AdminPostStaffAccept,
   AdminPostStaffInvite,
+  AdminPostStaffResetMfa,
   AdminPostStaffRole,
 } from "../admin/staff/validators"
 import { requireUserActor } from "./actor"
@@ -43,7 +44,7 @@ export const STAFF_ROUTES = [
   {
     matcher: "/admin/staff/members/:id/reset-mfa",
     methods: ["POST" as const],
-    middlewares: [requireUserActor],
+    middlewares: [requireUserActor, validateAndTransformBody(AdminPostStaffResetMfa)],
   },
   {
     matcher: "/admin/staff/invites",

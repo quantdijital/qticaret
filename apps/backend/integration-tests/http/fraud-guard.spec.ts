@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto"
 import { completeCartWorkflow } from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { createAdminUser } from "../helpers/admin"
+import { BASE_BITS } from "../../src/lib/security/challenge"
 import { freshChallenge, solved } from "../helpers/challenge"
 import type { GivenChallenge } from "../helpers/challenge"
 import { eventually } from "../helpers/eventually"
@@ -218,7 +219,12 @@ medusaIntegrationTestRunner({
 
       const email = `giris-${randomUUID()}@example.com`
       const password = randomUUID()
-      await post("/auth/customer/emailpass/register", { email, password }, fresh("register"))
+      // Twice past the limit by now: the harder proof
+      await post(
+        "/auth/customer/emailpass/register",
+        { email, password },
+        fresh("register", BASE_BITS + 2)
+      )
       const signIn = (secret: string, headers: Record<string, string> = {}) =>
         post<{ token?: string; message?: string; challenge?: Challenge }>(
           "/auth/customer/emailpass",

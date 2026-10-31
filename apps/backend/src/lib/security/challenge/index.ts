@@ -13,6 +13,8 @@ import { safeEqual } from "../timing-safe"
 export const CHALLENGE_SCOPES = [
   "register",
   "login",
+  // A staff member's sign-in: its challenges are never a shopper's (the F15 review)
+  "staff_login",
   "order_lookup",
   "stock_alert",
   "checkout",
@@ -37,7 +39,7 @@ export interface Challenge {
 
 export type ChallengeCheck =
   | { ok: true; key: string; until: number }
-  | { ok: false; reason: "malformed" | "forged" | "expired" | "scope" | "unsolved" }
+  | { ok: false; reason: "malformed" | "forged" | "expired" | "scope" | "weak" | "unsolved" }
 
 const signed = (body: string, key: Buffer) => hashPii(body, key, PURPOSE)
 
@@ -83,14 +85,17 @@ export function solveChallenge(salt: string, bits: number): string {
 }
 
 /**
- * Checks `X-Challenge: <token>.<nonce>` for the scope. A good one returns
- * the key its single use is kept under, and until when.
+ * Checks `X-Challenge: <token>.<nonce>` for the scope, at least as hard as
+ * `minBits` (what is asked now: a challenge given when less was asked does
+ * not answer a harder ask). A good one returns the key its single use is
+ * kept under, and until when.
  */
 export function checkChallenge(
   header: string,
   scope: ChallengeScope,
   key: Buffer,
-  now: number = Date.now()
+  now: number = Date.now(),
+  minBits: number = MIN_BITS
 ): ChallengeCheck {
   const parts = header.trim().split(".")
   if (parts.length !== 6) {
@@ -113,6 +118,9 @@ export function checkChallenge(
   }
   if (given !== scope) {
     return { ok: false, reason: "scope" }
+  }
+  if (Number(bitsText) < minBits) {
+    return { ok: false, reason: "weak" }
   }
   if (!solves(salt, nonce, Number(bitsText))) {
     return { ok: false, reason: "unsolved" }

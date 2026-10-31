@@ -117,7 +117,7 @@ export const FRAUD_ROUTES = [
   {
     matcher: "/auth/user/emailpass",
     methods: ["POST" as const],
-    middlewares: [challengeAfterAttempts({ max: 5, windowMs: 15 * MINUTE })],
+    middlewares: [challengeAfterAttempts({ max: 5, windowMs: 15 * MINUTE }, "staff_login")],
   },
   // An account made after a sign-in elsewhere (Google) names its address here
   {

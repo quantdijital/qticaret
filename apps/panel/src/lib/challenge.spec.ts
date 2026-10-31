@@ -14,6 +14,10 @@ describe("proof of work (adr/0044 §1)", () => {
     })
   })
 
+  it("refuses a difficulty the server never asks", async () => {
+    await expect(solveChallenge({ salt: "c2FsdA", bits: 40 })).rejects.toThrow(/out of range/u)
+  })
+
   it("counts the zero bits of a digest", () => {
     expect(startsWithZeros(Uint8Array.from([0, 0b0011_1111]), 10)).toBe(true)
     expect(startsWithZeros(Uint8Array.from([0, 0b0100_0000]), 10)).toBe(false)

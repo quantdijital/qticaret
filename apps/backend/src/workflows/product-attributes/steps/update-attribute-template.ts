@@ -241,6 +241,7 @@ async function undoUpdate(service: Service, undo: Undo): Promise<void> {
         is_required: definition.is_required,
         is_filterable: definition.is_filterable,
         is_seo_highlight: definition.is_seo_highlight,
+        is_public: definition.is_public,
         scope: definition.scope,
         option_title: definition.option_title,
         varies_by: definition.varies_by,

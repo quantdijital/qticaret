@@ -151,3 +151,8 @@ Kalanlar (gözden geçir):
 - Panel: Ayarlar > Güvenlik (inceleme eşikleri, kara liste), Siparişler > İnceleme. Sipariş sayfasında inceleme işareti ve "kara listeye ekle" kısayolu sonraya.
 - KVKK envanteri: `fraud_review` nedenleri kişisel veri içermez (kural adları ve sayılar); silme talebinde personel notu temizlenir. `fraud_block` silme talebinde hukuki yarar gereği kalır (ham değer zaten yok); süresi dolunca silinir.
 - Sonraya: sağlayıcının ödeme sonrası kart parmak izi ve BIN ülkesiyle kural; 3D Secure sonucu (`liability shift`) puana katılır.
+
+**F15 kapanış incelemesi (2026-10-31, öğleden sonraki değişiklikler): yüksek ve orta yok, 6 düşük; hepsi kapandı.**
+- Doğrulama artık istenen zorluktan kolay bir çözümü kabul etmez (`weak`): eşiğin iki katında istenen 20 bit, önceden alınmış 18 bitlik bir çözümle atlanamaz. Personel girişinin kapsamı ayrı (`staff_login`): müşteri girişinde toplanan doğrulamalar personel girişinde geçmez.
+- Herkesin tetikleyebildiği e-postaların payı bütçe başına: sepet hatırlatmaları (pazarlama) şifre sıfırlama ve doğrulama kodlarının payını tüketmez.
+- Öbürleri: şablon güncellemesinin geri alınması `is_public`'i de geri yükler, gönderilmeyen alan görünürlüğü değiştirmez; terk edilmiş sepet silmede para izi listeleri sınırsız okunur ve ödemesi olan sepet atlanır; vitrin yanıtı sarmalayıcısında son yakalayıcı; panel çözücüsünde zorluk ve deneme üst sınırı; `reset-mfa` gövde şeması; webhook sırrı yenilenirken hemen önce alınmış bir teslim eski sırla bir kez imzalanabilir (belgelendi).

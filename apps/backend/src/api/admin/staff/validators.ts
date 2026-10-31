@@ -26,3 +26,6 @@ export type AdminPostStaffAcceptType = z.infer<typeof AdminPostStaffAccept>
 
 export const AdminPostStaffInviteInfo = z.object({ token }).strict()
 export type AdminPostStaffInviteInfoType = z.infer<typeof AdminPostStaffInviteInfo>
+
+/** A member's 2FA reset names nothing but the member in its path. */
+export const AdminPostStaffResetMfa = z.object({}).strict()

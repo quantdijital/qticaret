@@ -1,6 +1,6 @@
 import { parseKey } from "../../src/lib/crypto/pii"
 import { parseEnv } from "../../src/lib/env"
-import { issueChallenge, solveChallenge } from "../../src/lib/security/challenge"
+import { BASE_BITS, issueChallenge, solveChallenge } from "../../src/lib/security/challenge"
 import type { ChallengeScope } from "../../src/lib/security/challenge"
 
 export interface GivenChallenge {
@@ -17,6 +17,10 @@ export function solved(challenge: GivenChallenge | undefined): { "x-challenge": 
   return { "x-challenge": `${challenge.token}.${solveChallenge(challenge.salt, challenge.bits)}` }
 }
 
-/** A solved challenge as the server makes them, its key the test environment's; easy (10 bits). */
-export const freshChallenge = (scope: ChallengeScope) =>
-  solved(issueChallenge(scope, parseKey(parseEnv().PII_HASH_KEY, "PII_HASH_KEY"), 10))
+/**
+ * A solved challenge as the server makes them, its key the test
+ * environment's; as hard as the server asks first (it refuses an easier
+ * one than it asks), or `bits`.
+ */
+export const freshChallenge = (scope: ChallengeScope, bits = BASE_BITS) =>
+  solved(issueChallenge(scope, parseKey(parseEnv().PII_HASH_KEY, "PII_HASH_KEY"), bits))

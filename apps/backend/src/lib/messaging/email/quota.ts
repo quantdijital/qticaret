@@ -49,8 +49,8 @@ export type EmailBudget = "commercial" | "transactional"
 
 /**
  * Counts one e-mail against its budget's day and says whether it may go.
- * An open one is counted against its share of the transactional day
- * first; past it, it does not count against the day.
+ * An open one is counted against its share of its budget's day first;
+ * past it, it does not count against the day.
  */
 export async function emailAllowance(
   store: RateLimitStore,
@@ -59,7 +59,11 @@ export async function emailAllowance(
   const day = (input.now ?? new Date()).toISOString().slice(0, 10)
   const budget = input.budget ?? "transactional"
   if (input.open) {
-    const opened = await store.hit(`email:open:${day}`, DAY)
+    // Each budget its own share: a cart's reminders never use up the resets' (F15 review)
+    const opened = await store.hit(
+      budget === "commercial" ? `email:open:commercial:${day}` : `email:open:${day}`,
+      DAY
+    )
     if (opened.count > Math.ceil(input.dailyLimit * EMAIL_OPEN_SHARE)) {
       return { allowed: false, reason: "open", warn: false, shopToday: 0 }
     }

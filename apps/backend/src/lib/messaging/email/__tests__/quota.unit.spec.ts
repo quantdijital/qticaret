@@ -39,6 +39,16 @@ describe("e-mail quota (F10 M9)", () => {
     expect(order).toMatchObject({ allowed: true, shopToday: 1 })
   })
 
+  it("keeps a campaign's open e-mails (cart reminders) off the resets' share", async () => {
+    const store = createMemoryStore()
+    for (let i = 0; i < 3; i += 1) {
+      await emailAllowance(store, { dailyLimit: 8, budget: "commercial", open: true })
+    }
+    const reset = await emailAllowance(store, { dailyLimit: 8, open: true })
+
+    expect(reset.allowed).toBe(true)
+  })
+
   it("starts each day afresh", async () => {
     const store = createMemoryStore()
     const today = new Date("2026-10-28T10:00:00Z")

@@ -14,6 +14,16 @@ const solved = (bits = 10, scope: "register" | "login" = "register") => {
 }
 
 describe("proof-of-work challenge", () => {
+  it("refuses a challenge easier than asked now, and a shopper's for a staff sign-in (F15 review)", () => {
+    const easy = checkChallenge(solved(10).header, "register", KEY, NOW, 12)
+    const hard = checkChallenge(solved(12).header, "register", KEY, NOW, 12)
+    const shopper = checkChallenge(solved(10, "login").header, "staff_login", KEY, NOW)
+
+    expect(easy).toEqual({ ok: false, reason: "weak" })
+    expect(hard).toMatchObject({ ok: true })
+    expect(shopper).toEqual({ ok: false, reason: "scope" })
+  })
+
   it("takes a solved challenge once per salt, for its own scope, until it lapses", () => {
     const { challenge, header } = solved()
     const check = checkChallenge(header, "register", KEY, NOW + 1000)
