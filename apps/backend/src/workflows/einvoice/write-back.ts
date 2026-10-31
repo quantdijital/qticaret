@@ -158,3 +158,46 @@ export const retryInvoiceWorkflow = createWorkflow(
   "einvoice-retry-invoice",
   (input: { invoice_id: string }) => new WorkflowResponse(retryInvoiceStep(input))
 )
+
+/** A return's document written back by staff (the accountant, 2026-10-31): its number, once. */
+const recordReturnDocumentStep = createStep(
+  "einvoice-record-return-document",
+  async (input: { invoice_id: string; number: string; issued_at: Date }, { container }) => {
+    const result = await container
+      .resolve<EinvoiceModuleService>(EINVOICE_MODULE)
+      .recordReturnDocument(input.invoice_id, { number: input.number, issued_at: input.issued_at })
+    if (!result) {
+      throw new MedusaError(MedusaError.Types.NOT_FOUND, "einvoice.unknown")
+    }
+    return new StepResponse(result)
+  }
+)
+
+export const recordReturnDocumentWorkflow = createWorkflow(
+  "einvoice-record-return-document",
+  (input: { invoice_id: string; number: string; issued_at: Date }) =>
+    new WorkflowResponse(recordReturnDocumentStep(input))
+)
+
+/** A return that needs no document of its own, and which exception it is. */
+const waiveReturnDocumentStep = createStep(
+  "einvoice-waive-return-document",
+  async (
+    input: { invoice_id: string; reason: "payment_institution" | "signed_return_section" },
+    { container }
+  ) => {
+    const result = await container
+      .resolve<EinvoiceModuleService>(EINVOICE_MODULE)
+      .waiveReturnDocument(input.invoice_id, input.reason)
+    if (!result) {
+      throw new MedusaError(MedusaError.Types.NOT_FOUND, "einvoice.unknown")
+    }
+    return new StepResponse(result)
+  }
+)
+
+export const waiveReturnDocumentWorkflow = createWorkflow(
+  "einvoice-waive-return-document",
+  (input: { invoice_id: string; reason: "payment_institution" | "signed_return_section" }) =>
+    new WorkflowResponse(waiveReturnDocumentStep(input))
+)

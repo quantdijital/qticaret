@@ -8,6 +8,8 @@ export type {
 } from "./draft"
 export { invoiceLines, invoiceTotals } from "./lines"
 export { pdfFilename } from "./filename"
+export { returnedOrder } from "./returns"
+export type { ReturnedLine } from "./returns"
 export { fakeInvoicingAllowed } from "./providers"
 export type { InvoiceItem, InvoiceShippingMethod } from "./lines"
 export { ANONYMOUS_TCKN, INVOICE_PAYMENTS } from "./types"

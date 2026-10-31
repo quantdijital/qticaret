@@ -26,6 +26,11 @@ export async function loadInvoiceMessage(
     logger.info({ event: "messaging.not_sent", template: "order.invoiced", reason: "not_issued" })
     return null
   }
+  // A return's document (a gider pusulası, a company's return invoice) is the shop's paper, not the buyer's invoice
+  if (invoice.kind !== "sale") {
+    logger.info({ event: "messaging.not_sent", template: "order.invoiced", reason: "not_sale" })
+    return null
+  }
   const order = await loadOrderMessage(container, invoice.order_id)
   if (!order) {
     return null

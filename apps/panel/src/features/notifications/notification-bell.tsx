@@ -80,6 +80,18 @@ function useAlertText(data: Record<string, unknown>) {
       link: { to: "/orders/$id" as const, search: {}, params: { id: text(data["order_id"]) } },
     }
   }
+  if (data["kind"] === "einvoice_return_document") {
+    const document = data["document"] === "return_invoice" ? "returnInvoice" : "expenseVoucher"
+    return {
+      title: t(`notifications.einvoiceReturnDocument.${document}.title`, {
+        order: text(data["display_id"]),
+      }),
+      description: t(`notifications.einvoiceReturnDocument.${document}.description`),
+      Icon: FileWarning,
+      tone: "bg-warning-soft text-warning-text",
+      link: { to: "/orders/$id" as const, search: {}, params: { id: text(data["order_id"]) } },
+    }
+  }
   if (data["kind"] === "fraud_review") {
     return {
       title: t("notifications.fraudReview.title", {

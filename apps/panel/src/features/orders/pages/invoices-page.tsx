@@ -25,6 +25,7 @@ const TONE: Record<InvoiceStatus, StatusTone> = {
   issuing: "info",
   issued: "success",
   cancelled: "neutral",
+  waived: "neutral",
 }
 
 /**

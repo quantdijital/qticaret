@@ -176,3 +176,13 @@ Varsayımların çoğu doğrulandı. Değişenler (kod; her biri testle):
 **Kullanıcı kararı (2026-10-31): e-Arşiv'in taşıyıcı alanı boş gitmez.** Fatura sipariş onayında kesildiğinde paket henüz çıkmamıştır. Taşıyıcı, müşterinin ödemede seçtiği kargo seçeneğinin firmasından alınır; unvan ve VKN mağazanın bir kez girdiği değerdir (Ayarlar > E-Fatura). Gönderim tarihi faturanın kesildiği gündür. Paket çıktıktan sonra kesilen fatura, paketin firmasını ve çıkış gününü yazar. Firma bilgisi girilmemişse fatura `einvoice.carrier_identity_missing` ile bekler (`workflows/einvoice/draft-source.ts` `shipmentOf`).
 
 **Ayrı seri (mali müşavir 6.2, 2026-10-31):** mağaza Ayarlar > E-Fatura'da web satışlarının serisini (GİB numarasının ilk 3 karakteri) girer. Elle işlenen ya da dış programın geri yazdığı numara bu seriyle başlamazsa `einvoice.series_mismatch` (400) ile reddedilir; taslak ekranı hangi seriyle kesileceğini söyler. Paraşüt'te seri Paraşüt'ün kendi e-belge ayarından seçilir, API'den gönderilmez (Paraşüt'e sorulacaklar listesinde).
+
+**İade belgesi (E6, 2026-10-31; mali müşavir 5.2, 5.3):**
+- **Ne zaman açılır:** iade parası ödendiğinde (`return.refunded`), siparişin satış faturası kesilmişse (`workflows/einvoice/queue-return.ts`). Kesilmemişse belge yok.
+- **Hangi belge:** satış e-Arşiv ise (bireysel alıcı) mağazanın düzenleyeceği **gider pusulası** (`expense_voucher`); e-Fatura ise (şirket) şirketin mağazaya keseceği **iade faturası** (`return_invoice`).
+- **İçerik:** yalnızca iade edilen kalemler ve miktarlar. Tutarlar sipariş satırının o paydaki hâli: iskonto ve KDV dahil, bedel ve KDV ayrı. Personel kargoyu da iade ettiyse kargo satırı eklenir. Belge ilk satış faturasının numarası ve tarihiyle bağlanır.
+- **Kim düzenler:** her zaman personel; hiçbir program bunu kesmez. Gider pusulası maliyenin anlaşmalı matbaasında basılmış formla düzenlenir; bu yüzden sistem içeriği gösterir, belgeyi üretmez.
+  - Personel seri numarasını ve imzalı taramayı `POST /admin/invoices/:id/return-document` ve `…/pdf` ile girer. Numara biçimi serbesttir (harf, rakam, boşluk, nokta, eğik çizgi, tire; en çok 40).
+- **Belge gerekmeyen durumlar** (`POST …/waive`, durum `waived`): para banka ya da ödeme kuruluşu üzerinden iade edildiyse kurumun belgesi gider pusulası yerine geçebilir; müşteri faturanın iade bölümünü doldurup imzaladıysa ayrıca gider pusulası gerekmeyebilir. Hangi istisna uygulandıysa saklanır.
+- **Yetki ve görünürlük:** yalnızca yönetici ve sahip (operasyon yazamaz). Taslak, satışınki gibi yeniden doğrulama ister. Müşteriye "faturanız hazır" e-postası gitmez.
+- **Açık (E6b):** değişimin belgeleri. Mali müşavire göre eski ürün için iade, yeni ürün için yeni satış faturası gerekir; değişim bugün aynı siparişte kalıyor.

@@ -75,6 +75,16 @@ export const NOTIFICATION_MESSAGES: Readonly<
       description:
         "Kendiliğinden yeniden denenmeyecek; sipariş sayfasındaki fatura kartından bakın.",
     },
+    "einvoice.expense_voucher_due": {
+      title: "#{{order}} siparişinin iadesi için gider pusulası düzenleyin",
+      description:
+        "Yalnızca iade edilen ürün ve miktarlar için, ilk faturaya bağlı olarak; taslağı sipariş sayfasının fatura kartında.",
+    },
+    "einvoice.return_invoice_due": {
+      title: "#{{order}} siparişinin iadesi için şirketin iade faturasını kaydedin",
+      description:
+        "Alıcı şirket iade faturası keser; gelince numarasını sipariş sayfasının fatura kartından girin.",
+    },
     "einvoice.return_needed": {
       title: "İptal edilen #{{order}} siparişinin faturası duruyor",
       description:
@@ -141,6 +151,16 @@ export const NOTIFICATION_MESSAGES: Readonly<
       title: "Order #{{order}}'s invoice could not be issued",
       description:
         "It will not be tried again on its own; see the invoice card on the order's page.",
+    },
+    "einvoice.expense_voucher_due": {
+      title: "Issue a gider pusulası for order #{{order}}'s return",
+      description:
+        "For the goods and quantities returned only, naming the first invoice; the draft is on the order's invoice card.",
+    },
+    "einvoice.return_invoice_due": {
+      title: "Record the company's return invoice for order #{{order}}",
+      description:
+        "The buying company issues a return invoice; once it comes, enter its number on the order's invoice card.",
     },
     "einvoice.return_needed": {
       title: "Canceled order #{{order}}'s invoice stands",

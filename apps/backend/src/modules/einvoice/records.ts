@@ -34,14 +34,18 @@ export class InvoiceRecordsService extends InvoiceQueueService {
   ): Promise<{ changed: boolean } | null> {
     const manager = sharedContext.transactionManager as Executor
     const [row] = (await manager.execute(
-      `SELECT provider, status, number FROM invoice WHERE id = ? AND deleted_at IS NULL FOR UPDATE`,
+      `SELECT provider, kind, status, number FROM invoice WHERE id = ? AND deleted_at IS NULL FOR UPDATE`,
       [id]
-    )) as { provider: string; status: string; number: string | null }[]
+    )) as { provider: string; kind: string; status: string; number: string | null }[]
     if (!row) {
       return null
     }
     if (row.provider !== "external") {
       throw new ConflictError("einvoice.not_external")
+    }
+    // A return's document is written back as one (`recordReturnDocument`)
+    if (row.kind !== "sale") {
+      throw new ConflictError("einvoice.not_sale")
     }
     if (row.status === "cancelled") {
       throw new ConflictError("einvoice.cancelled")
@@ -66,6 +70,89 @@ export class InvoiceRecordsService extends InvoiceQueueService {
       }
       throw error
     }
+    return { changed: true }
+  }
+
+  /**
+   * A return's document issued by the shop (the accountant, 2026-10-31):
+   * its gider pusulası's serial, or the number of the return invoice a
+   * company sent. Once; the same number again changes nothing, another
+   * is a conflict, as with a sale's.
+   */
+  @InjectTransactionManager()
+  async recordReturnDocument(
+    id: string,
+    input: { number: string; issued_at: Date },
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<{ changed: boolean } | null> {
+    const manager = sharedContext.transactionManager as Executor
+    const [row] = (await manager.execute(
+      `SELECT kind, status, number FROM invoice WHERE id = ? AND deleted_at IS NULL FOR UPDATE`,
+      [id]
+    )) as { kind: string; status: string; number: string | null }[]
+    if (!row) {
+      return null
+    }
+    if (row.kind !== "return") {
+      throw new ConflictError("einvoice.not_return")
+    }
+    if (row.status === "issued") {
+      if (row.number === input.number) {
+        return { changed: false }
+      }
+      throw new ConflictError("einvoice.already_issued")
+    }
+    if (row.status !== "pending") {
+      throw new ConflictError("einvoice.return_not_pending")
+    }
+    try {
+      await manager.execute(
+        `UPDATE invoice SET status = 'issued', number = ?, issued_at = ?, updated_at = now()
+          WHERE id = ?`,
+        [input.number, input.issued_at, id]
+      )
+    } catch (error) {
+      if (uniqueViolationKeys(error)?.includes("number")) {
+        throw new ConflictError("einvoice.number_taken")
+      }
+      throw error
+    }
+    return { changed: true }
+  }
+
+  /**
+   * A return that needs no document of its own (the accountant's
+   * exceptions): the money went back through a bank or payment
+   * institution whose document stands in for a gider pusulası, or the
+   * buyer filled in and signed the invoice's return section.
+   */
+  @InjectTransactionManager()
+  async waiveReturnDocument(
+    id: string,
+    reason: "payment_institution" | "signed_return_section",
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<{ changed: boolean } | null> {
+    const manager = sharedContext.transactionManager as Executor
+    const [row] = (await manager.execute(
+      `SELECT kind, status FROM invoice WHERE id = ? AND deleted_at IS NULL FOR UPDATE`,
+      [id]
+    )) as { kind: string; status: string }[]
+    if (!row) {
+      return null
+    }
+    if (row.kind !== "return") {
+      throw new ConflictError("einvoice.not_return")
+    }
+    if (row.status === "waived") {
+      return { changed: false }
+    }
+    if (row.status !== "pending") {
+      throw new ConflictError("einvoice.return_not_pending")
+    }
+    await manager.execute(
+      `UPDATE invoice SET status = 'waived', waived_reason = ?, updated_at = now() WHERE id = ?`,
+      [reason, id]
+    )
     return { changed: true }
   }
 
@@ -133,6 +220,7 @@ export class InvoiceRecordsService extends InvoiceQueueService {
       issued: 0,
       failed: 0,
       cancelled: 0,
+      waived: 0,
     }
     for (const row of rows) {
       counts[row.status] = row.count

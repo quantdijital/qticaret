@@ -16,6 +16,7 @@ export function invoiceView(row: {
   gross_total: unknown
   program_difference: number | null
   created_at: Date | string
+  waived_reason?: string | null
 }) {
   return {
     id: row.id,
@@ -34,5 +35,7 @@ export function invoiceView(row: {
     total: String(row.gross_total),
     program_difference: row.program_difference,
     created_at: row.created_at,
+    /** A return that needed no document: the accountant's exception that applied. */
+    waived_reason: row.waived_reason ?? null,
   }
 }

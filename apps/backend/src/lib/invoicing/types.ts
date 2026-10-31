@@ -63,6 +63,15 @@ export interface InvoiceDraft {
   }
   /** Null until the parcel leaves. */
   shipment: { carrier: { title: string; tax_id: string }; shipped_on: string } | null
+  /**
+   * A return's document (the accountant, 2026-10-31): the sale invoice it
+   * belongs to, by its number and day, and which document it is.
+   */
+  return_of?: {
+    document: "expense_voucher" | "return_invoice"
+    number: string | null
+    issued_on: string | null
+  }
 }
 
 /** Why an order cannot be invoiced yet; each a code the panel names. */

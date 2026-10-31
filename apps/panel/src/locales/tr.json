@@ -3276,7 +3276,8 @@
         "issuing": "Kesiliyor",
         "issued": "Kesildi",
         "failed": "Kesilemedi",
-        "cancelled": "İptal edildi"
+        "cancelled": "İptal edildi",
+        "waived": "Gerekmedi"
       },
       "providers": {
         "parasut": "Paraşüt",
@@ -3285,7 +3286,9 @@
       },
       "types": {
         "e_archive": "e-Arşiv",
-        "e_invoice": "e-Fatura"
+        "e_invoice": "e-Fatura",
+        "expense_voucher": "Gider pusulası",
+        "return_invoice": "İade faturası"
       },
       "number": "Fatura no",
       "type": "Belge",
@@ -3378,7 +3381,55 @@
         "blocked": "Taslak henüz hazır değil:",
         "problem": "Eksik bilgi ({{code}}).",
         "lineSummary": "{{quantity}} × {{unit}} (KDV hariç) · %{{rate}} KDV {{vat}}",
-        "series": "Faturayı {{series}} serisiyle kesin."
+        "series": "Faturayı {{series}} serisiyle kesin.",
+        "returnOf": "Bağlı olduğu fatura",
+        "document": "Belge",
+        "originalNumber": "İlk fatura no",
+        "originalDate": "İlk fatura tarihi",
+        "refundedBy": "Ödeme yolu",
+        "institutionHint": "Para banka ya da ödeme kuruluşu üzerinden iade edildiyse, gerekli bilgileri taşıyan kurum belgesi gider pusulası yerine geçebilir (\"Belge gerekmiyor\").",
+        "returnTitle": {
+          "expense_voucher": "Gider pusulası taslağı {{number}}",
+          "return_invoice": "İade faturası bilgileri {{number}}"
+        }
+      },
+      "returns": {
+        "title": "İade belgeleri",
+        "kinds": {
+          "expense_voucher": "Gider pusulası",
+          "return_invoice": "Şirketin iade faturası"
+        },
+        "waiting": {
+          "expense_voucher": "Düzenlenmeyi bekliyor · {{total}}",
+          "return_invoice": "Şirketten gelmesi bekleniyor · {{total}}"
+        },
+        "numbered": "{{number}} · {{total}}",
+        "enter": "Belgeyi işle",
+        "waive": "Belge gerekmiyor",
+        "waivedSaved": "Kaydedildi: bu iade için ayrı belge gerekmiyor.",
+        "reasons": {
+          "payment_institution": "Para banka ya da ödeme kuruluşu üzerinden iade edildi (kurum belgesi geçerli)",
+          "signed_return_section": "Müşteri faturanın iade bölümünü doldurup imzaladı"
+        },
+        "waived": {
+          "payment_institution": "Gerekmedi: kurum belgesi",
+          "signed_return_section": "Gerekmedi: imzalı iade bölümü"
+        },
+        "enterTitle": {
+          "expense_voucher": "Gider pusulasını işle",
+          "return_invoice": "Şirketin iade faturasını işle"
+        },
+        "enterHint": {
+          "expense_voucher": "Yalnızca iade edilen ürün ve miktarlar için, ilk faturaya bağlı olarak düzenlediğiniz gider pusulasının seri numarasını ve imzalı taramasını girin.",
+          "return_invoice": "Alıcı şirketin size kestiği iade faturasının numarasını ve PDF'ini girin."
+        },
+        "number": {
+          "expense_voucher": "Seri / sıra no",
+          "return_invoice": "Fatura no"
+        },
+        "numberInvalid": "Harf, rakam, boşluk, nokta, eğik çizgi ya da tire (en çok 40 karakter).",
+        "pdf": "PDF (tarama ya da belge)",
+        "saved": "İade belgesi kaydedildi."
       }
     },
     "fraud": {
@@ -5086,7 +5137,7 @@
     },
     "einvoiceReturnNeeded": {
       "title": "İptal edilen #{{order}} siparişinin faturası duruyor",
-      "description": "Fatura artık iptal edilemiyor; iade belgesi düzenleyin."
+      "description": "Kendi programınızda kestiyseniz orada iptal edin (e-Arşiv: alıcıya iletildiği günden itibaren 8 gün). Süre geçtiyse ya da e-Fatura ise kaydı uygun belgeyle düzeltin."
     },
     "migrationNotFound": {
       "title": "Kesimden sonra {{count}} adres 404 verdi",
@@ -5095,6 +5146,16 @@
     "fraudReview": {
       "title": "#{{number}} incelemede (puan {{score}})",
       "description": "Kargoya vermeden önce Siparişler > İnceleme'den onaylayın ya da reddedin."
+    },
+    "einvoiceReturnDocument": {
+      "expenseVoucher": {
+        "title": "#{{order}} iadesi için gider pusulası düzenleyin",
+        "description": "Yalnızca iade edilen ürün ve miktarlar için; taslak siparişin fatura kartında."
+      },
+      "returnInvoice": {
+        "title": "#{{order}} iadesi: şirketin iade faturasını kaydedin",
+        "description": "Alıcı şirket iade faturası keser; gelince numarasını siparişin fatura kartından girin."
+      }
     }
   },
   "content": {

@@ -97,7 +97,7 @@
           "scale": null,
           "default": "'pending'",
           "comment": null,
-          "enumItems": ["pending", "issuing", "issued", "failed", "cancelled"],
+          "enumItems": ["pending", "issuing", "issued", "failed", "cancelled", "waived"],
           "mappedType": "enum"
         },
         "document_type": {
@@ -113,7 +113,7 @@
           "scale": null,
           "default": null,
           "comment": null,
-          "enumItems": ["e_invoice", "e_archive"],
+          "enumItems": ["e_invoice", "e_archive", "expense_voucher", "return_invoice"],
           "mappedType": "enum"
         },
         "attempts": {
@@ -419,6 +419,22 @@
           "comment": null,
           "enumItems": [],
           "mappedType": "text"
+        },
+        "waived_reason": {
+          "name": "waived_reason",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": ["payment_institution", "signed_return_section"],
+          "mappedType": "enum"
         },
         "raw_net_total": {
           "name": "raw_net_total",

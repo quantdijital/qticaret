@@ -77,7 +77,12 @@ const advanceInvoiceStep = createStep(
     }
     const state = {
       ...claim,
-      document_type: row.document_type,
+      // A program's own documents: a return's (gider pusulası, a company's
+      // return invoice) is always the shop's to write back, never claimed
+      document_type:
+        row.document_type === "e_invoice" || row.document_type === "e_archive"
+          ? row.document_type
+          : null,
       number: row.number,
       cancellable_until: row.cancellable_until ? new Date(row.cancellable_until) : null,
     }

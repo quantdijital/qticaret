@@ -44,9 +44,19 @@ function Rows({ rows }: { rows: [string, ReactNode][] }) {
   )
 }
 
-function Panel({ title, children }: { title: string; children: ReactNode }) {
+function Panel({
+  title,
+  children,
+  className,
+}: {
+  title: string
+  children: ReactNode
+  className?: string | undefined
+}) {
   return (
-    <section className="flex h-full min-w-0 flex-col gap-2 rounded-lg border p-4">
+    <section
+      className={`flex h-full min-w-0 flex-col gap-2 rounded-lg border p-4 ${className ?? ""}`}
+    >
       <h3 className="text-sm font-semibold">{title}</h3>
       {children}
     </section>
@@ -64,6 +74,30 @@ function byRate(lines: DraftLine[]) {
     })
   }
   return [...rates.entries()].sort(([a], [b]) => b - a)
+}
+
+/** A return's document: the sale invoice it belongs to, and how the money went back. */
+function ReturnOfPanel({ draft }: { draft: InvoiceDraft }) {
+  const { t } = useTranslation()
+  const of = draft.return_of
+  if (!of) {
+    return null
+  }
+  return (
+    <Panel title={t(`${V}.returnOf`)}>
+      <Rows
+        rows={[
+          [t(`${V}.document`), t(`orders.invoice.returns.kinds.${of.document}`)],
+          [t(`${V}.originalNumber`), of.number ?? "—"],
+          [t(`${V}.originalDate`), of.issued_on ? formatDate(of.issued_on) : "—"],
+          [t(`${V}.refundedBy`), t(`${V}.payments.${draft.internet_sale.payment}`)],
+        ]}
+      />
+      {draft.internet_sale.payment === "card" && of.document === "expense_voucher" ? (
+        <p className="text-[13px] text-muted-foreground">{t(`${V}.institutionHint`)}</p>
+      ) : null}
+    </Panel>
+  )
 }
 
 function DraftView({ draft }: { draft: InvoiceDraft }) {
@@ -92,7 +126,8 @@ function DraftView({ draft }: { draft: InvoiceDraft }) {
             ]}
           />
         </Panel>
-        <Panel title={t(`${V}.sale`)}>
+        {draft.return_of ? <ReturnOfPanel draft={draft} /> : null}
+        <Panel title={t(`${V}.sale`)} className={draft.return_of ? "hidden" : undefined}>
           <Rows
             rows={[
               [t(`${V}.url`), sale.url],
@@ -228,7 +263,12 @@ export function InvoiceDraftDialog({
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>
-            {t(`${V}.title`, { number: orderNumber === null ? "" : `#${String(orderNumber)}` })}
+            {t(
+              read.data?.draft?.return_of
+                ? `${V}.returnTitle.${read.data.draft.return_of.document}`
+                : `${V}.title`,
+              { number: orderNumber === null ? "" : `#${String(orderNumber)}` }
+            )}
           </DialogTitle>
           <DialogDescription>
             {t(`${V}.description`)}

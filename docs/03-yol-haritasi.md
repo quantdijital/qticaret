@@ -284,7 +284,7 @@ Detay: `docs/entegrasyonlar/geliver.md`
 **KK:**
 - [x] Test ortamında sipariş → etiket → takip ilerlemesi → "teslim edildi" akışı çalışıyor (`geliver-tracking`: sahte Geliver'in test gönderisi her okumada ilerliyor; taşıyıcı alınca Medusa gönderisi, teslimde Medusa teslimi; gerçek hesapla deneme sunucuya çıkışta)
 - [x] Ölçüsü eksik ürünle kargo hesabı açıklayıcı hata veriyor (`geliver-shipping`: `shipping.dimensions_missing`)
-- [ ] İade talebinden para iadesi + stok + iade faturasına kadar akış çalışıyor (para iadesi + stok testli: `return-requests`; iade faturası F8'de `return.refunded` olayına bağlanınca işaretlenir)
+- [x] İade talebinden para iadesi + stok + iade faturasına kadar akış çalışıyor (para iadesi + stok testli: `return-requests`; iade belgesi 2026-10-31: `return.refunded` olayı bireysel alıcıda gider pusulası, şirkette iade faturası kaydı açar, `einvoice-return.spec.ts`. Değişimin "iade + yeni satış" belgeleri açık, F8 E6b)
 - [x] Webhook ve polling aynı güncellemeyi iki kez uygulamıyor (`geliver-tracking`: aynı anda gelen bildirim ve sorgu tek olay, tek Medusa gönderisi)
 - [x] Değişim akışı: fark tutarı doğru hesaplanıyor, stok iki yönde doğru (testli) (`exchanges`: aynı fiyatta 0, pahalıda tahsilat sonrası onay, ucuzda teslimde iade; yeni varyant onayda ayrılıyor, eski teslimde stoğa dönüyor; taşıyıcı reddinde Medusa değişimi geri alınıyor)
 - [x] Kargoya verilmiş sipariş müşteri tarafından iptal edilemiyor; verilmemiş olan iptal edilip iade ediliyor (testli) (`customer-cancel`; misafir siparişi F9/F10'daki sipariş bağlantısıyla)

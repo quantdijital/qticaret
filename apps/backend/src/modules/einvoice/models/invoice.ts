@@ -2,13 +2,32 @@ import { model } from "@medusajs/framework/utils"
 
 export const INVOICE_KINDS = ["sale", "return"] as const
 export const INVOICE_PROVIDERS = ["parasut", "external", "fake"] as const
-export const DOCUMENT_TYPES = ["e_invoice", "e_archive"] as const
+/**
+ * A sale's e-Fatura or e-Arşiv; a return's document (the accountant,
+ * 2026-10-31): the shop's gider pusulası to a person who sent goods back,
+ * or the return invoice a company issues to the shop.
+ */
+export const DOCUMENT_TYPES = [
+  "e_invoice",
+  "e_archive",
+  "expense_voucher",
+  "return_invoice",
+] as const
+/** Why a return needed no document of its own (the accountant's two exceptions). */
+export const WAIVER_REASONS = ["payment_institution", "signed_return_section"] as const
 /**
  * `pending`: to be started, or (external) to be written back; `issuing`:
  * started at the program, its outcome awaited; `failed`: stopped after
- * the last try, staff told.
+ * the last try, staff told; `waived`: a return that needed no document.
  */
-export const INVOICE_STATUSES = ["pending", "issuing", "issued", "failed", "cancelled"] as const
+export const INVOICE_STATUSES = [
+  "pending",
+  "issuing",
+  "issued",
+  "failed",
+  "cancelled",
+  "waived",
+] as const
 
 /**
  * An order's invoice (F8, adr/0034 §2): a sale's, or a return's. Each of
@@ -63,6 +82,8 @@ export const Invoice = model
     cancel_requested_at: model.dateTime().nullable(),
     /** A return's invoice: the sale's it returns. */
     original_invoice_id: model.text().nullable(),
+    /** A return's document waived: which of the accountant's exceptions applied. */
+    waived_reason: model.enum([...WAIVER_REASONS]).nullable(),
   })
   .indexes([
     { on: ["order_id", "kind", "source_id"], unique: true, where: "deleted_at IS NULL" },

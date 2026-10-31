@@ -8,8 +8,9 @@ export interface InvoiceRecord {
   order_id: string
   kind: "sale" | "return"
   provider: "parasut" | "external" | "fake"
-  status: "pending" | "issuing" | "issued" | "failed" | "cancelled"
-  document_type: "e_invoice" | "e_archive" | null
+  status: "pending" | "issuing" | "issued" | "failed" | "cancelled" | "waived"
+  /** A sale's e-document; a return's gider pusulası or a company's return invoice. */
+  document_type: "e_invoice" | "e_archive" | "expense_voucher" | "return_invoice" | null
   number: string | null
   uuid: string | null
   issued_at: string | null
@@ -20,6 +21,8 @@ export interface InvoiceRecord {
   total: string
   program_difference: number | null
   created_at: string
+  /** A return that needed no document: which of the accountant's exceptions. */
+  waived_reason?: WaiverReason | null
   /** In a list: the order's number. */
   order_display_id?: number | null
 }
@@ -31,7 +34,16 @@ export interface InvoicePage {
   offset: number
 }
 
-export const INVOICE_STATUSES = ["failed", "pending", "issuing", "issued", "cancelled"] as const
+export const INVOICE_STATUSES = [
+  "failed",
+  "pending",
+  "issuing",
+  "issued",
+  "cancelled",
+  "waived",
+] as const
+export const WAIVER_REASONS = ["payment_institution", "signed_return_section"] as const
+export type WaiverReason = (typeof WAIVER_REASONS)[number]
 export const INVOICE_PAGE_SIZE = 20
 export type InvoiceStatus = (typeof INVOICE_STATUSES)[number]
 
@@ -96,6 +108,19 @@ async function failed(response: Response): Promise<never> {
   })
 }
 
+/** A return's document entered by staff: a gider pusulası's serial or a company's return invoice number. */
+export const useRecordReturnDocument = () =>
+  useInvoiceMutation(
+    ({ id, number, issued_at }: { id: string; number: string; issued_at: string }) =>
+      sdk.client.fetch(path(id, "return-document"), { method: "POST", body: { number, issued_at } })
+  )
+
+/** A return that needs no document of its own, and why. */
+export const useWaiveReturnDocument = () =>
+  useInvoiceMutation(({ id, reason }: { id: string; reason: WaiverReason }) =>
+    sdk.client.fetch(path(id, "waive"), { method: "POST", body: { reason } })
+  )
+
 /** Its PDF, sent as it is: the SDK would send a body as JSON. */
 export const useUploadInvoicePdf = () =>
   useInvoiceMutation(async ({ id, file }: { id: string; file: File }) => {
@@ -155,6 +180,12 @@ export interface InvoiceDraft {
     paid_on: string
   }
   shipment: { carrier: { title: string; tax_id: string }; shipped_on: string } | null
+  /** A return's document: the sale invoice it belongs to. */
+  return_of?: {
+    document: "expense_voucher" | "return_invoice"
+    number: string | null
+    issued_on: string | null
+  }
 }
 
 /**

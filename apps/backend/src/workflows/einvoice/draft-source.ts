@@ -1,7 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
-import { invoiceDraft, invoiceLines, invoiceTotals } from "../../lib/invoicing"
-import type { DraftResult, InvoiceOrder, InvoiceProfile } from "../../lib/invoicing"
+import { invoiceDraft, invoiceLines, invoiceTotals, returnedOrder } from "../../lib/invoicing"
+import type { DraftResult, InvoiceOrder, InvoiceProfile, ReturnedLine } from "../../lib/invoicing"
 import { carrierOf } from "../../lib/shipping/carriers"
 import { AUDIT_LOG_MODULE } from "../../modules/audit-log"
 import type AuditLogModuleService from "../../modules/audit-log/service"
@@ -10,6 +10,7 @@ import type BillingProfileModuleService from "../../modules/billing-profile/serv
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import type { CarrierIdentity, InvoicingSettings } from "../../modules/platform-settings/sections"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
+import { returnDraft } from "./return-source"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -33,6 +34,7 @@ const LINE_FIELDS = [
   // Medusa totals the lines only when the order's own total is asked for
   "total",
   ...[
+    "id",
     "title",
     "product_title",
     "variant_title",
@@ -66,17 +68,26 @@ type OrderRow = InvoiceOrder & {
 
 const query = (container: Container) => container.resolve(ContainerRegistrationKeys.QUERY)
 
-/** What an order's invoice comes to, for its record when it is queued (no buyer read). */
-export async function invoiceTotalsOf(container: Container, orderId: string) {
+/**
+ * What an order's invoice comes to, for its record when it is queued (no
+ * buyer read); a return's, only the lines that came back.
+ */
+export async function invoiceTotalsOf(
+  container: Container,
+  orderId: string,
+  returned?: { lines: readonly ReturnedLine[]; shipping: boolean }
+) {
   const { data } = await query(container).graph({
     entity: "order",
     fields: LINE_FIELDS,
     filters: { id: orderId },
   })
-  const order = data[0] as InvoiceOrder | undefined
-  return order
-    ? { currency: order.currency_code ?? "", totals: invoiceTotals(invoiceLines(order)) }
-    : null
+  const found = data[0] as InvoiceOrder | undefined
+  if (!found) {
+    return null
+  }
+  const order = returned ? returnedOrder(found, returned.lines, returned.shipping) : found
+  return { currency: order.currency_code ?? "", totals: invoiceTotals(invoiceLines(order)) }
 }
 
 async function settingsOf(container: Container) {
@@ -177,7 +188,14 @@ async function shipmentOf(
  */
 export async function invoiceDraftFor(
   container: Container,
-  invoice: { id: string; order_id: string },
+  invoice: {
+    id: string
+    order_id: string
+    kind?: string
+    source_id?: string
+    original_invoice_id?: string | null
+    document_type?: string | null
+  },
   now: Date = new Date()
 ): Promise<DraftResult> {
   const { data } = await query(container).graph({
@@ -210,7 +228,20 @@ export async function invoiceDraftFor(
     return { problems: ["einvoice.no_lines"] }
   }
   const settings = await settingsOf(container)
-  const shipment = await shipmentOf(container, order, settings.carriers, now)
   const profile = await profileOf(container, order, invoice.id)
+  if (invoice.kind === "return") {
+    const result = await returnDraft(
+      container,
+      order,
+      {
+        source_id: invoice.source_id ?? "",
+        original_invoice_id: invoice.original_invoice_id ?? null,
+        document_type: invoice.document_type ?? null,
+      },
+      { store_url: settings.store_url, profile }
+    )
+    return result ?? { problems: ["einvoice.no_lines"] }
+  }
+  const shipment = await shipmentOf(container, order, settings.carriers, now)
   return invoiceDraft(order, profile, { store_url: settings.store_url, shipment })
 }

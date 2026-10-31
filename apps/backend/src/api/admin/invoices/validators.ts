@@ -57,3 +57,34 @@ export const AdminPostInvoiceIssued = z
   )
 
 export type AdminPostInvoiceIssuedType = z.infer<typeof AdminPostInvoiceIssued>
+
+/**
+ * A return's document (the accountant, 2026-10-31): a gider pusulası's
+ * serial as printed on the form, or the number of a company's return
+ * invoice, and the day it was issued.
+ */
+export const AdminPostReturnDocument = z
+  .object({
+    number: z
+      .string()
+      .trim()
+      .toUpperCase()
+      .regex(/^[A-Z0-9][A-Z0-9 ./-]{0,39}$/, "einvoice.return_number_invalid"),
+    issued_at: z.iso
+      .datetime({ offset: true })
+      .transform((text) => new Date(text))
+      .refine(
+        (at) => at.getTime() >= EARLIEST && at.getTime() <= Date.now() + 86_400_000,
+        "einvoice.issued_at_invalid"
+      ),
+  })
+  .strict()
+
+export type AdminPostReturnDocumentType = z.infer<typeof AdminPostReturnDocument>
+
+/** Why a return needs no document of its own: one of the accountant's two exceptions. */
+export const AdminPostInvoiceWaive = z
+  .object({ reason: z.enum(["payment_institution", "signed_return_section"]) })
+  .strict()
+
+export type AdminPostInvoiceWaiveType = z.infer<typeof AdminPostInvoiceWaive>

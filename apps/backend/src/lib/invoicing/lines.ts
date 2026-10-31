@@ -22,6 +22,8 @@ interface TotalledLine {
 }
 
 export interface InvoiceItem extends TotalledLine {
+  /** The order line's id: a return names the lines that came back by it. */
+  id?: string | null
   title?: string | null
   product_title?: string | null
   variant_title?: string | null

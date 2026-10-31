@@ -22,6 +22,8 @@ export interface QueuedInvoice {
   provider: InvoiceProviderId
   totals: { net: string; vat: string; gross: string }
   original_invoice_id?: string | null
+  /** Known when it is queued: a return's document (a sale's is the program's to choose). */
+  document_type?: DocumentType | null
 }
 
 export interface ClaimedInvoice {
@@ -126,6 +128,7 @@ export class InvoiceQueueService extends MedusaService({ Invoice, ParasutConnect
         vat_total: Number(record.totals.vat),
         gross_total: Number(record.totals.gross),
         original_invoice_id: record.original_invoice_id ?? null,
+        document_type: record.document_type ?? null,
       })
       return { id: created.id, created: true }
     } catch (error) {

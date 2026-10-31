@@ -386,6 +386,13 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "api_key.title_invalid": "The key's name is not valid.",
   "api_key.unknown": "No such API key.",
   "accounting.adapter_unavailable": "This accounting program cannot be picked here.",
+  "einvoice.not_return": "This record is not a return's document.",
+  "einvoice.not_sale":
+    "A return's document is not entered as a sale invoice; enter it as the return's document.",
+  "einvoice.return_not_pending":
+    "The return's document no longer waits: it was entered, or recorded as not needed.",
+  "einvoice.return_number_invalid":
+    "The document number is letters, digits, spaces, dots, slashes or dashes (40 at most).",
   "einvoice.series_mismatch":
     "The invoice number must start with the web sales series set in Settings > E-Fatura.",
   "einvoice.provider_unavailable": "This invoicing program cannot be picked here.",

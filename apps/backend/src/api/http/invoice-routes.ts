@@ -2,7 +2,12 @@ import { validateAndTransformBody, validateAndTransformQuery } from "@medusajs/f
 import type { AuthenticatedMedusaRequest, MedusaRequest } from "@medusajs/framework/http"
 import { z } from "@medusajs/framework/zod"
 import { AdminGetDashboardNoQuery } from "../admin/dashboard/validators"
-import { AdminGetInvoices, AdminPostInvoiceIssued } from "../admin/invoices/validators"
+import {
+  AdminGetInvoices,
+  AdminPostInvoiceIssued,
+  AdminPostInvoiceWaive,
+  AdminPostReturnDocument,
+} from "../admin/invoices/validators"
 import { optionalCustomer, orderAccess } from "./order-access"
 import { requireReauth } from "./reauth"
 
@@ -50,6 +55,16 @@ export const INVOICE_ROUTES = [
     matcher: "/admin/invoices/:id/issued",
     methods: ["POST" as const],
     middlewares: [validateAndTransformBody(AdminPostInvoiceIssued)],
+  },
+  {
+    matcher: "/admin/invoices/:id/return-document",
+    methods: ["POST" as const],
+    middlewares: [validateAndTransformBody(AdminPostReturnDocument)],
+  },
+  {
+    matcher: "/admin/invoices/:id/waive",
+    methods: ["POST" as const],
+    middlewares: [validateAndTransformBody(AdminPostInvoiceWaive)],
   },
   {
     matcher: "/admin/invoices/:id/pdf",

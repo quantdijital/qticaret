@@ -13,6 +13,7 @@ import { invoicePdfUrl, orderInvoicesQuery, useRetryInvoice } from "@/features/o
 import type { InvoiceRecord } from "@/features/orders/api/invoices"
 import { InvoiceDraftDialog } from "@/features/orders/detail/invoice-draft-dialog"
 import { InvoiceEntryDialog } from "@/features/orders/detail/invoice-entry-dialog"
+import { ReturnDocuments } from "@/features/orders/detail/return-documents"
 import { errorText } from "@/lib/errors"
 import { formatDateTime } from "@/lib/format"
 
@@ -24,6 +25,7 @@ const TONES: Readonly<Record<InvoiceRecord["status"], StatusTone>> = {
   issued: "success",
   failed: "danger",
   cancelled: "neutral",
+  waived: "neutral",
 }
 
 function Row({ label, value }: { label: string; value: string }) {
@@ -60,6 +62,7 @@ export function InvoiceCard({
   // The PDF names the buyer and their tax id: not for every role (adr/0034 §9)
   const mayOpen = useCan("invoices")
   const invoice = query.data?.invoices.find((row) => row.kind === "sale") ?? null
+  const returns = query.data?.invoices.filter((row) => row.kind === "return") ?? []
   const fail = (failure: unknown) => toast.error(errorText(t, failure))
   const openPdf = async (id: string) => {
     setOpening(true)
@@ -184,6 +187,7 @@ export function InvoiceCard({
               </Button>
             ) : null}
           </div>
+          <ReturnDocuments records={returns} mayOpen={mayOpen} orderNumber={orderNumber ?? null} />
         </div>
       )}
       {drafting && invoice ? (

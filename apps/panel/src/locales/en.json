@@ -3276,7 +3276,8 @@
         "issuing": "Being issued",
         "issued": "Issued",
         "failed": "Not issued",
-        "cancelled": "Cancelled"
+        "cancelled": "Cancelled",
+        "waived": "Not needed"
       },
       "providers": {
         "parasut": "Paraşüt",
@@ -3285,7 +3286,9 @@
       },
       "types": {
         "e_archive": "e-Arşiv",
-        "e_invoice": "e-Fatura"
+        "e_invoice": "e-Fatura",
+        "expense_voucher": "Gider pusulası",
+        "return_invoice": "Return invoice"
       },
       "number": "Invoice no",
       "type": "Document",
@@ -3378,7 +3381,55 @@
         "blocked": "The draft is not ready yet:",
         "problem": "Missing information ({{code}}).",
         "lineSummary": "{{quantity}} × {{unit}} (excl. KDV) · {{rate}}% KDV {{vat}}",
-        "series": "Issue it in the {{series}} series."
+        "series": "Issue it in the {{series}} series.",
+        "returnOf": "The invoice it belongs to",
+        "document": "Document",
+        "originalNumber": "First invoice no",
+        "originalDate": "First invoice date",
+        "refundedBy": "Paid back by",
+        "institutionHint": "If the money went back through a bank or payment institution, its document carrying the details can stand in for a gider pusulası (\"No document needed\").",
+        "returnTitle": {
+          "expense_voucher": "Gider pusulası draft {{number}}",
+          "return_invoice": "Return invoice details {{number}}"
+        }
+      },
+      "returns": {
+        "title": "Return documents",
+        "kinds": {
+          "expense_voucher": "Gider pusulası",
+          "return_invoice": "The company's return invoice"
+        },
+        "waiting": {
+          "expense_voucher": "Waiting to be issued · {{total}}",
+          "return_invoice": "Waiting for the company's · {{total}}"
+        },
+        "numbered": "{{number}} · {{total}}",
+        "enter": "Enter the document",
+        "waive": "No document needed",
+        "waivedSaved": "Recorded: this return needs no document of its own.",
+        "reasons": {
+          "payment_institution": "The money went back through a bank or payment institution (its document stands)",
+          "signed_return_section": "The customer filled in and signed the invoice's return section"
+        },
+        "waived": {
+          "payment_institution": "Not needed: institution's document",
+          "signed_return_section": "Not needed: signed return section"
+        },
+        "enterTitle": {
+          "expense_voucher": "Enter the gider pusulası",
+          "return_invoice": "Enter the company's return invoice"
+        },
+        "enterHint": {
+          "expense_voucher": "For the goods and quantities returned only, naming the first invoice: enter the form's serial and its signed scan.",
+          "return_invoice": "Enter the number and PDF of the return invoice the buying company issued to you."
+        },
+        "number": {
+          "expense_voucher": "Serial / no",
+          "return_invoice": "Invoice no"
+        },
+        "numberInvalid": "Letters, digits, spaces, dots, slashes or dashes (40 at most).",
+        "pdf": "PDF (a scan or the document)",
+        "saved": "Return document saved."
       }
     },
     "fraud": {
@@ -5086,7 +5137,7 @@
     },
     "einvoiceReturnNeeded": {
       "title": "Canceled order #{{order}}'s invoice stands",
-      "description": "It can no longer be cancelled; issue a return document."
+      "description": "If your own program issued it, cancel it there (an e-Arşiv within 8 days of reaching the buyer). Past that, or for an e-Fatura, correct the books with the proper document."
     },
     "migrationNotFound": {
       "title": "{{count}} addresses answered 404 since cutover",
@@ -5095,6 +5146,16 @@
     "fraudReview": {
       "title": "#{{number}} held for review (score {{score}})",
       "description": "Approve or turn it down in Orders > Review before it ships."
+    },
+    "einvoiceReturnDocument": {
+      "expenseVoucher": {
+        "title": "Issue a gider pusulası for #{{order}}'s return",
+        "description": "For the goods and quantities returned only; the draft is on the order's invoice card."
+      },
+      "returnInvoice": {
+        "title": "#{{order}}'s return: record the company's return invoice",
+        "description": "The buying company issues a return invoice; once it comes, enter its number on the order's invoice card."
+      }
     }
   },
   "content": {
