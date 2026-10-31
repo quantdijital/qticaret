@@ -573,13 +573,22 @@
           "expression": "CREATE INDEX IF NOT EXISTS \"IDX_invoice_order_id\" ON \"invoice\" (\"order_id\") WHERE deleted_at IS NULL"
         },
         {
-          "keyName": "IDX_invoice_number_unique",
+          "keyName": "IDX_invoice_sale_number_unique",
           "columnNames": [],
           "composite": false,
           "constraint": false,
           "primary": false,
           "unique": false,
-          "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_invoice_number_unique\" ON \"invoice\" (\"number\") WHERE number IS NOT NULL AND deleted_at IS NULL"
+          "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_invoice_sale_number_unique\" ON \"invoice\" (\"number\") WHERE kind = 'sale' AND number IS NOT NULL AND deleted_at IS NULL"
+        },
+        {
+          "keyName": "IDX_invoice_voucher_number_unique",
+          "columnNames": [],
+          "composite": false,
+          "constraint": false,
+          "primary": false,
+          "unique": false,
+          "expression": "CREATE UNIQUE INDEX IF NOT EXISTS \"IDX_invoice_voucher_number_unique\" ON \"invoice\" (\"number\") WHERE kind = 'return' AND document_type = 'expense_voucher' AND number IS NOT NULL AND deleted_at IS NULL"
         },
         {
           "keyName": "invoice_pkey",

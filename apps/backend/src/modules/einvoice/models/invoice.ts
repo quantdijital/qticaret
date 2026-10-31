@@ -89,6 +89,20 @@ export const Invoice = model
     { on: ["order_id", "kind", "source_id"], unique: true, where: "deleted_at IS NULL" },
     { on: ["status", "next_attempt_at"] },
     { on: ["order_id"] },
-    // An invoice number names one invoice: a number written back twice is refused
-    { on: ["number"], unique: true, where: "number IS NOT NULL AND deleted_at IS NULL" },
+    // A number the shop issues names one document: a sale's (GİB number), or
+    // its gider pusulası serial. A company's return invoice is numbered in
+    // that company's series, so two may share a number (the F15 security review)
+    {
+      name: "IDX_invoice_sale_number_unique",
+      on: ["number"],
+      unique: true,
+      where: "kind = 'sale' AND number IS NOT NULL AND deleted_at IS NULL",
+    },
+    {
+      name: "IDX_invoice_voucher_number_unique",
+      on: ["number"],
+      unique: true,
+      where:
+        "kind = 'return' AND document_type = 'expense_voucher' AND number IS NOT NULL AND deleted_at IS NULL",
+    },
   ])

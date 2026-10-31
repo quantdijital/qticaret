@@ -58,8 +58,13 @@ medusaIntegrationTestRunner({
       )
     })
 
-    /** An order of two, invoiced as an e-Arşiv by hand; one of the two came back and was refunded. */
-    async function refundedReturn() {
+    /**
+     * An order of two, invoiced by hand (an e-Arşiv unless said); one of the
+     * two came back and was refunded, before the sale was entered if asked.
+     */
+    async function refundedReturn(
+      options: { document?: "e_archive" | "e_invoice"; refundFirst?: boolean } = {}
+    ) {
       const container = getContainer()
       const orderId = await placeOrder(container, {
         regionId: shop.regionId,
@@ -71,14 +76,23 @@ medusaIntegrationTestRunner({
       })
       await advanceOrder(container, orderId, "to_ship")
       const sale = await eventually(() => invoiceOf(orderId, "sale"), Boolean)
-      const issuedAt = new Date().toISOString()
       const year = new Date(Date.now() + 3 * 3_600_000).getUTCFullYear()
-      const written = await http.post(
-        `/admin/invoices/${sale?.id ?? ""}/issued`,
-        { number: `WEB${String(year)}000000077`, document_type: "e_archive", issued_at: issuedAt },
-        { headers: owner.headers }
-      )
-      expect(written.status).toBe(200)
+      const saleNumber = `WEB${String(year)}000000077`
+      const writeBack = async () => {
+        const written = await http.post(
+          `/admin/invoices/${sale?.id ?? ""}/issued`,
+          {
+            number: saleNumber,
+            document_type: options.document ?? "e_archive",
+            issued_at: new Date().toISOString(),
+          },
+          { headers: owner.headers }
+        )
+        expect(written.status).toBe(200)
+      }
+      if (!options.refundFirst) {
+        await writeBack()
+      }
       const { data } = await container
         .resolve(ContainerRegistrationKeys.QUERY)
         .graph({ entity: "order", fields: ["items.id"], filters: { id: orderId } })
@@ -95,7 +109,7 @@ medusaIntegrationTestRunner({
           received_items: lines(lineId),
           refund_shipping: false,
         })
-      return { orderId, requestId: request.id, saleId: sale?.id ?? "", year }
+      return { orderId, requestId: request.id, saleId: sale?.id ?? "", year, saleNumber, writeBack }
     }
 
     it("queues a gider pusulası for what came back, shows its draft and takes its number", async () => {
@@ -213,6 +227,76 @@ medusaIntegrationTestRunner({
       expect(waived.data.changed).toBe(true)
       expect(after).toMatchObject({ status: "waived", waived_reason: "payment_institution" })
       expect(await queueReturnDocument(getContainer(), request.id)).toBe("not_due")
+    })
+
+    it("keeps a program's key to sale invoices: no list, record, draft or PDF of a return's", async () => {
+      const { orderId, requestId } = await refundedReturn()
+      await queueReturnDocument(getContainer(), requestId)
+      const record = await invoiceOf(orderId, "return")
+      const key = (
+        await http.post<{ token: string }>(
+          "/admin/api-access",
+          { title: "Fatura programı", scopes: ["invoices:read", "invoices:write"] },
+          { headers: owner.headers }
+        )
+      ).data.token
+      const program = { authorization: `Basic ${Buffer.from(`${key}:`).toString("base64")}` }
+
+      const listed = await http.get<{ invoices: { kind: string }[] }>("/admin/invoices", {
+        headers: program,
+      })
+      const one = await settle(
+        http.get(`/admin/invoices/${record?.id ?? ""}`, { headers: program })
+      )
+      const draft = await settle(
+        http.get(`/admin/invoices/${record?.id ?? ""}/draft`, { headers: program })
+      )
+      const pdf = await settle(
+        http.post(`/admin/invoices/${record?.id ?? ""}/pdf`, Buffer.from("%PDF-1.4\n%%EOF\n"), {
+          headers: { ...program, "content-type": "application/pdf" },
+        })
+      )
+
+      expect(listed.data.invoices.map((row) => row.kind)).toEqual(["sale"])
+      expect(one.status).toBe(404)
+      expect([draft.status, pdf.status]).toEqual([409, 409])
+      expect(draft.data).toMatchObject({ message: "einvoice.not_sale" })
+    })
+
+    it("asks a company's return invoice, never waived, its number free of the shop's", async () => {
+      const { orderId, requestId, saleNumber } = await refundedReturn({ document: "e_invoice" })
+      await queueReturnDocument(getContainer(), requestId)
+      const record = await invoiceOf(orderId, "return")
+
+      const waived = await settle(
+        http.post(
+          `/admin/invoices/${record?.id ?? ""}/waive`,
+          { reason: "payment_institution" },
+          { headers: owner.headers }
+        )
+      )
+      // The company numbers in its own series: one may match a number of the shop's
+      const entered = await http.post<{ changed: boolean }>(
+        `/admin/invoices/${record?.id ?? ""}/return-document`,
+        { number: saleNumber, issued_at: new Date().toISOString() },
+        { headers: owner.headers }
+      )
+
+      expect(record?.document_type).toBe("return_invoice")
+      expect(waived.status).toBe(409)
+      expect(waived.data).toMatchObject({ message: "einvoice.waive_not_allowed" })
+      expect(entered.data.changed).toBe(true)
+    })
+
+    it("queues a return's document once a sale entered after its refund is issued", async () => {
+      const { orderId, requestId, writeBack } = await refundedReturn({ refundFirst: true })
+
+      const before = await queueReturnDocument(getContainer(), requestId)
+      await writeBack()
+      const after = await eventually(() => invoiceOf(orderId, "return"), Boolean)
+
+      expect(before).toBe("not_due")
+      expect(after).toMatchObject({ kind: "return", document_type: "expense_voucher" })
     })
   },
 })

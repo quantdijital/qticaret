@@ -364,6 +364,8 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/invoices/:id/issued": false,
   "POST /admin/invoices/:id/pdf": false,
   "POST /admin/invoices/:id/retry": false,
+  "POST /admin/invoices/:id/return-document": false,
+  "POST /admin/invoices/:id/waive": false,
 }
 
 const ADMIN_DIR = join(__dirname, "../../../api/admin")

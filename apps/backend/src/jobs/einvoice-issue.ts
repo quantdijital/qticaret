@@ -12,6 +12,9 @@ import {
 } from "../workflows/einvoice/cancel-invoice"
 import { orderOf, queueSaleInvoice } from "../workflows/einvoice/queue-invoices"
 import type { InvoiceMoment } from "../workflows/einvoice/queue-invoices"
+import { queueReturnDocument } from "../workflows/einvoice/queue-return"
+import { RETURN_REQUESTS_MODULE } from "../modules/return-requests"
+import type ReturnRequestsModuleService from "../modules/return-requests/service"
 
 // Invoices moved on per run at most; the next run takes the rest
 const BATCH = 20
@@ -159,6 +162,18 @@ export async function sweepInvoices(container: MedusaContainer, now: Date = new 
   }
   for (const row of payments.data as { id: string }[]) {
     await queue(await orderOf(container, "payment", row.id), "paid")
+  }
+  // A return whose refund event was missed: its document queued all the same (F8 E6)
+  const refunded = await container
+    .resolve<ReturnRequestsModuleService>(RETURN_REQUESTS_MODULE)
+    .listReturnRequests(
+      { kind: "return", status: "refunded", updated_at: window },
+      { select: ["id"], take: SWEEP_LIMIT }
+    )
+  for (const request of refunded) {
+    if ((await queueReturnDocument(container, request.id)) === "queued") {
+      queued += 1
+    }
   }
   // An order canceled whose event was missed: its invoice undone all the same (adr/0034 §10)
   for (const row of canceled.data as { id: string }[]) {

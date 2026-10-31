@@ -2,13 +2,15 @@ import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { EINVOICE_MODULE } from "../../../modules/einvoice"
 import type EinvoiceModuleService from "../../../modules/einvoice/service"
+import { isProgram } from "./reach"
 import { invoiceView } from "./view"
 import type { AdminGetInvoicesType } from "./validators"
 
 /**
  * GET /admin/invoices (F8, adr/0034 §9): the shop's invoices, the failed
  * first, then the newest; for staff, and for a key with `invoices:read`
- * (an external program lists what waits for it). No buyer in them.
+ * (an external program lists what waits for it: sale invoices only,
+ * `reach.ts`). No buyer in them.
  */
 export async function GET(
   req: MedusaRequest<unknown, AdminGetInvoicesType>,
@@ -17,7 +19,7 @@ export async function GET(
   const { limit, offset, ...filters } = req.validatedQuery
   const [rows, count] = await req.scope
     .resolve<EinvoiceModuleService>(EINVOICE_MODULE)
-    .listAndCountInvoices(filters, {
+    .listAndCountInvoices(isProgram(req) ? { ...filters, kind: "sale" } : filters, {
       take: limit,
       skip: offset,
       order: { status: "ASC", created_at: "DESC" },

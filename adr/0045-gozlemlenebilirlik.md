@@ -32,10 +32,11 @@ Kişisel veri Türkiye'de kalacak (ADR-0003). Bu yüzden Sentry'nin bulut hizmet
    - GlitchTip'e ulaşılamazsa dakikada bir uyarı loglanır. Uyarı error seviyesinin altında olduğu için GlitchTip'e gitmeye çalışmaz.
    - Olaylarda `server_name` mağazanın backend alan adı, `release` ise `RELEASE` değişkenidir. Tek bir GlitchTip projesi bütün mağazaları tutabilir.
 3. **Yavaş sorgular: Postgres'in kendisi.**
-   - `log_min_duration_statement=500` ile 500 ms'yi aşan sorgular loglanır.
-   - `log_parameter_max_length=0` ve `log_parameter_max_length_on_error=0` ile **bağ parametreleri loga yazılmaz** (e-posta, adres gibi değerler taşırlar).
+   - **Düzeltme (F15 güvenlik incelemesi, 2026-10-31):** ilk sürüm `log_min_duration_statement` ile sorgu metnini logluyordu ve "bağ parametreleri yazılmaz" diyordu. ORM (MikroORM) değerleri SQL metnine gömüyor: bağ parametresi yok. Bir müşteri girişinde aranan e-posta izde değişmez olarak görüldü.
+   - Bu yüzden yavaş sorgular `pg_stat_statements` ile izlenir: sorgunun biçimi, değerleri `$n` olarak. Sorgu metni loglanmaz; hata anında da (`log_min_error_statement=panic`).
    - Geliştirmede `compose.dev.yml`'de. Canlıda yönetilen Postgres'in parametreleri olarak F16'da.
-   - İzlerdeki veritabanı span'leri, SQL metnini parametresiz taşır ve uygulama tarafındaki görünümü verir.
+   - İzler `ScrubbingExporter`'dan geçer (`lib/observability/scrub.ts`): SQL'deki değişmezler `?` olur; span adları, rotalar, adresler ve hata mesajları log redaksiyonundan geçer; feed adresindeki token çıkar. Aynı deneme sonrasında izde e-posta yok.
+   - Canlıda OTLP adresi https olmalı, toplayıcı aynı makinede değilse (`OTEL_EXPORTER_OTLP_TRACES_ENDPOINT` dahil).
 
 ## Doğrulama (yerelde, 2026-10-31)
 

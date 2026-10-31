@@ -22,6 +22,7 @@ import type EinvoiceModuleService from "../../modules/einvoice/service"
 import type { ClaimedInvoice, InvoiceStatus } from "../../modules/einvoice/service"
 import { MAX_ATTEMPTS } from "../../modules/einvoice/service"
 import { sendMessageWorkflow } from "../messaging/send-message"
+import { queueOrderReturnDocuments } from "./queue-return"
 import { withParasut } from "./parasut-session"
 
 /**
@@ -178,6 +179,14 @@ async function settleIssued(
   // An order canceled meanwhile is not told its invoice is ready: the job undoes it next
   if (!(await cancelRequested(container, claim.id))) {
     await tellCustomer(container, claim.id)
+    // Returns refunded before the sale was issued have their documents due now
+    if (claim.kind === "sale") {
+      await queueOrderReturnDocuments(container as MedusaContainer, claim.order_id).catch(
+        (error: unknown) => {
+          logger.warn({ event: "einvoice.return_queue_failed", err: errorSummary(error) })
+        }
+      )
+    }
   }
   return { status: "issued", code: null }
 }

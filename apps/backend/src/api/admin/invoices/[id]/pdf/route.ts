@@ -7,6 +7,7 @@ import { EINVOICE_MODULE } from "../../../../../modules/einvoice"
 import type EinvoiceModuleService from "../../../../../modules/einvoice/service"
 import { attachInvoicePdfWorkflow } from "../../../../../workflows/einvoice/write-back"
 import { readRawBody } from "../../../../http/raw-body"
+import { programMayReach } from "../../reach"
 
 const MAX_PDF_BYTES = 5 * 1024 * 1024
 
@@ -23,12 +24,16 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
   // Refused before a byte is kept: a PDF naming its buyer never lies about unreferenced
   const [row] = await req.scope
     .resolve<EinvoiceModuleService>(EINVOICE_MODULE)
-    .listInvoices({ id }, { select: ["provider", "status"], take: 1 })
+    .listInvoices({ id }, { select: ["provider", "status", "kind"], take: 1 })
   if (!row) {
     throw new MedusaError(MedusaError.Types.NOT_FOUND, "einvoice.unknown")
   }
   if (row.provider !== "external") {
     throw new ConflictError("einvoice.not_external")
+  }
+  // A return's PDF is staff's signed scan: a program never replaces it
+  if (!programMayReach(req, row.kind)) {
+    throw new ConflictError("einvoice.not_sale")
   }
   if (row.status !== "issued") {
     throw new ConflictError("einvoice.not_issued")

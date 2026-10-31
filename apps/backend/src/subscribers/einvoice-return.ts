@@ -6,7 +6,8 @@ import { RETURN_REFUNDED } from "../workflows/returns/receive-return"
 /**
  * A return's document (gider pusulası, or a company's return invoice)
  * queued once its money is given back (F8 E6, adr/0034 addendum). A
- * failure is logged: staff see the refund on the order and can ask again.
+ * failure is logged: the hourly sweep tries the day's refunds again, and
+ * the sale invoice's issue queues what an unissued sale left waiting.
  */
 export default async function einvoiceReturn({
   event: { data },

@@ -16,6 +16,7 @@ import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import type { InvoicingSettings } from "../../modules/platform-settings/sections"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
 import { sendMessageWorkflow } from "../messaging/send-message"
+import { queueOrderReturnDocuments } from "./queue-return"
 
 /**
  * An external program's invoice written back (F8, adr/0034 §9): by the
@@ -53,10 +54,35 @@ const recordWriteBackStep = createStep(
   }
 )
 
+/**
+ * A sale invoice entered after its order's returns were refunded: their
+ * documents are due now (`queueOrderReturnDocuments`). Never fails the
+ * write-back; the hourly sweep is there too.
+ */
+const queueReturnsStep = createStep(
+  "einvoice-queue-returns-after-sale",
+  async (input: { invoice_id: string }, { container }) => {
+    try {
+      const [row] = await container
+        .resolve<EinvoiceModuleService>(EINVOICE_MODULE)
+        .listInvoices({ id: input.invoice_id }, { select: ["order_id", "kind"], take: 1 })
+      if (row?.kind === "sale") {
+        await queueOrderReturnDocuments(container, row.order_id)
+      }
+    } catch (error) {
+      logger.warn({ event: "einvoice.return_queue_failed", err: errorSummary(error) })
+    }
+    return new StepResponse(null)
+  }
+)
+
 export const recordInvoiceWriteBackWorkflow = createWorkflow(
   "einvoice-record-write-back",
-  (input: { invoice_id: string; issued: WrittenBack }) =>
-    new WorkflowResponse(recordWriteBackStep(input))
+  (input: { invoice_id: string; issued: WrittenBack }) => {
+    const recorded = recordWriteBackStep(input)
+    queueReturnsStep({ invoice_id: input.invoice_id })
+    return new WorkflowResponse(recorded)
+  }
 )
 
 /**

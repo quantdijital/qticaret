@@ -80,8 +80,8 @@
 
 **Gözlemlenebilirlik (ADR-0045, F16'da kurulur):**
 - **GlitchTip hata olayları:** olay adı, hata türü ve mesajı (log redaksiyonundan geçmiş; e-postanın yerel kısmı maskeli), kod kareleri, istek kimliği, metot, yol, durum. Saklama önerisi 30 gün.
-- **İzler:** rota, iş akışı adımı, parametresiz SQL. Kişisel veri yok. Saklama önerisi 7 gün.
-- **Postgres yavaş sorgu logu:** sorgu metni bağ parametreleri olmadan.
+- **İzler:** rota, iş akışı adımı, SQL'in biçimi. ORM değerleri SQL metnine gömüyor; izler dışa aktarılırken değişmezler `?` olur, diğer metinler log redaksiyonundan geçer (F15 güvenlik incelemesi, sahte toplayıcıyla doğrulandı). Saklama önerisi 7 gün.
+- **Postgres yavaş sorgular:** `pg_stat_statements` (değerler olmadan biçim ve süre). Sorgu metni loglanmaz.
 
 **Kişisel veri tutmayan, kontrol edilmiş tablolar:** katalog, fiyat, SEO, stok, medya, feed, kargo olayları, webhook ve muhasebe tabloları (tam liste L8 taramasında).
 

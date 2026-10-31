@@ -25,7 +25,7 @@ Yeni bir şifre, personel ya da müşteri fark etmeden, iki uçta denetlenir: ka
    - `Add-Padding: true` ile yanıt sahte satırlarla (sayısı 0) doldurulur, boyutu bilgi vermez.
    - İstek `safeFetch` ile gider (2,5 saniye zaman aşımı, yönlendirme yok). Anahtar ya da hesap gerekmez.
    - Servise ulaşılamazsa şifre geçer ve uyarı loglanır (`auth.breach_check_unavailable`): dış bir kesinti kayıtları durdurmaz. Çevrimdışı kurallar (1–3) her durumda uygulanır.
-   - **Kullanıcı onayladı (2026-10-31):** canlı ve staging'de (`NODE_ENV=production|staging`) varsayılan açık; geliştirme ve testte kapalı (her koşuda dış servise gitmesin). `PASSWORD_BREACH_CHECK=on|off` ikisini de geçersiz kılar.
+   - **Kullanıcı onayladı (2026-10-31):** canlıda varsayılan açık. Yalnızca açıkça `development` ya da `test` ortamında kapalı (her koşuda dış servise gitmesin); `NODE_ENV` boşsa canlı sayılır, platformun geri kalanında olduğu gibi (F15 güvenlik incelemesi). Geliştirme şablonu `PASSWORD_BREACH_CHECK=off` içerir. `PASSWORD_BREACH_CHECK=on|off` ikisini de geçersiz kılar; değerler boşluklardan arındırılarak okunur.
    → `breached`.
 
 Mevcut şifreler etkilenmez. Kural bir sonraki şifre belirlemede uygulanır. Girişte denetim yok: kural yalnızca şifrenin belirlendiği anda çalışır.

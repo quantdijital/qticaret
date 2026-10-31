@@ -4,6 +4,8 @@ import { errorSummary, logger } from "../../lib/logging"
 import { notificationText } from "../../lib/notifications/messages"
 import { EINVOICE_MODULE } from "../../modules/einvoice"
 import type EinvoiceModuleService from "../../modules/einvoice/service"
+import { RETURN_REQUESTS_MODULE } from "../../modules/return-requests"
+import type ReturnRequestsModuleService from "../../modules/return-requests/service"
 import { invoiceTotalsOf } from "./draft-source"
 import { returnedOf } from "./return-source"
 
@@ -91,4 +93,27 @@ export async function queueReturnDocument(
     await alertDocumentDue(container, id, orderId, document)
   }
   return created ? "queued" : "already"
+}
+
+/**
+ * Every refunded return of an order queued for its document, once its
+ * sale invoice is issued (the F15 security review): a refund that came
+ * before the sale was issued (a sale entered by hand later) queued none.
+ * Queuing twice is one document; a failure is logged, the hourly sweep
+ * tries the day's refunds again.
+ */
+export async function queueOrderReturnDocuments(container: Container, orderId: string) {
+  const requests = await container
+    .resolve<ReturnRequestsModuleService>(RETURN_REQUESTS_MODULE)
+    .listReturnRequests(
+      { order_id: orderId, kind: "return", status: "refunded" },
+      { select: ["id"], take: 50 }
+    )
+  for (const request of requests) {
+    try {
+      await queueReturnDocument(container, request.id)
+    } catch (error) {
+      logger.warn({ event: "einvoice.return_queue_failed", err: errorSummary(error) })
+    }
+  }
 }

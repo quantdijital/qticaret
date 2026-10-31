@@ -390,6 +390,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "api_key.title_invalid": "Anahtar adı geçersiz.",
   "api_key.unknown": "API anahtarı bulunamadı.",
   "accounting.adapter_unavailable": "Bu muhasebe programı bu ortamda seçilemez.",
+  "einvoice.waive_not_allowed":
+    'Yalnızca gider pusulası için "belge gerekmiyor" denebilir; şirketin iade faturası her zaman kaydedilir.',
   "einvoice.not_return": "Bu kayıt bir iade belgesi değil.",
   "einvoice.not_sale": "İade belgesi satış faturası gibi işlenmez; iade belgesi olarak girin.",
   "einvoice.return_not_pending":

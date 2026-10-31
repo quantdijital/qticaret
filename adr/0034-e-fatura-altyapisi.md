@@ -186,3 +186,10 @@ Varsayımların çoğu doğrulandı. Değişenler (kod; her biri testle):
 - **Belge gerekmeyen durumlar** (`POST …/waive`, durum `waived`): para banka ya da ödeme kuruluşu üzerinden iade edildiyse kurumun belgesi gider pusulası yerine geçebilir; müşteri faturanın iade bölümünü doldurup imzaladıysa ayrıca gider pusulası gerekmeyebilir. Hangi istisna uygulandıysa saklanır.
 - **Yetki ve görünürlük:** yalnızca yönetici ve sahip (operasyon yazamaz). Taslak, satışınki gibi yeniden doğrulama ister. Müşteriye "faturanız hazır" e-postası gitmez.
 - **Açık (E6b):** değişimin belgeleri. Mali müşavire göre eski ürün için iade, yeni ürün için yeni satış faturası gerekir; değişim bugün aynı siparişte kalıyor.
+
+**E6 güvenlik incelemesi (2026-10-31): 2 orta, 2 düşük, 1 kayıt boşluğu; hepsi kapandı.**
+- **Anahtarlar yalnızca satış faturasını görür.** Dış programın anahtarı iade belgesini listelemez, kaydını (404), taslağını ve PDF yüklemesini (409 `einvoice.not_sale`) göremez (`api/admin/invoices/reach.ts`). Bir program iade belgesini satış faturası sanıp kesmez, alıcının vergi numarasını okumaz, personelin imzalı taramasını değiştiremez.
+- **Numara tekilliği belge türüne göre.** Satış numaraları ve gider pusulası serileri kendi içlerinde tekil. Şirketlerin iade faturaları kendi serileriyle numaralandığı için aynı numarayı taşıyabilir (migration `Migration20261031090245`).
+- **"Belge gerekmiyor" yalnızca gider pusulasında.** Şirketin iade faturası her zaman kaydedilir (`einvoice.waive_not_allowed`).
+- **Satıştan önce ödenen iade.** Satış faturası iade ödendikten sonra işlenirse (Luca'ya elle sonradan), belge satışın kesilmesiyle açılır: geri yazmada da Paraşüt'te kesilmede de (`queueOrderReturnDocuments`). Saatlik tarama son 26 saatte ödenen iadeleri yeniden dener.
+- Operasyon rolünün yazma yasağı testine iki yeni uç eklendi.

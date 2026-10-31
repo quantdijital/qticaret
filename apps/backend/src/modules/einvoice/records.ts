@@ -134,14 +134,18 @@ export class InvoiceRecordsService extends InvoiceQueueService {
   ): Promise<{ changed: boolean } | null> {
     const manager = sharedContext.transactionManager as Executor
     const [row] = (await manager.execute(
-      `SELECT kind, status FROM invoice WHERE id = ? AND deleted_at IS NULL FOR UPDATE`,
+      `SELECT kind, status, document_type FROM invoice WHERE id = ? AND deleted_at IS NULL FOR UPDATE`,
       [id]
-    )) as { kind: string; status: string }[]
+    )) as { kind: string; status: string; document_type: string | null }[]
     if (!row) {
       return null
     }
     if (row.kind !== "return") {
       throw new ConflictError("einvoice.not_return")
+    }
+    // Both exceptions stand in for a gider pusulası; a company's return invoice is always due
+    if (row.document_type !== "expense_voucher") {
+      throw new ConflictError("einvoice.waive_not_allowed")
     }
     if (row.status === "waived") {
       return { changed: false }

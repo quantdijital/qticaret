@@ -386,6 +386,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "api_key.title_invalid": "The key's name is not valid.",
   "api_key.unknown": "No such API key.",
   "accounting.adapter_unavailable": "This accounting program cannot be picked here.",
+  "einvoice.waive_not_allowed":
+    "Only a gider pusulası can be recorded as not needed; a company's return invoice is always recorded.",
   "einvoice.not_return": "This record is not a return's document.",
   "einvoice.not_sale":
     "A return's document is not entered as a sale invoice; enter it as the return's document.",

@@ -7,6 +7,7 @@ import { PLATFORM_SETTINGS_MODULE } from "../../../../../modules/platform-settin
 import type { InvoicingSettings } from "../../../../../modules/platform-settings/sections"
 import type PlatformSettingsModuleService from "../../../../../modules/platform-settings/service"
 import { invoiceDraftFor } from "../../../../../workflows/einvoice/draft-source"
+import { programMayReach } from "../../reach"
 
 /**
  * GET /admin/invoices/:id/draft (adr/0034 §9): the invoice an external
@@ -23,6 +24,10 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
   }
   if (row.provider !== "external") {
     throw new ConflictError("einvoice.not_external")
+  }
+  // A return's document is staff's: its buyer's tax id is not a program's to read
+  if (!programMayReach(req, row.kind)) {
+    throw new ConflictError("einvoice.not_sale")
   }
   // What waits to be issued only: a key never pages through the shop's buyers of the past
   if (row.status !== "pending" && row.status !== "failed") {
