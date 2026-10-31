@@ -124,7 +124,7 @@ export function OrderDetailPage() {
             {...(money.error ? { moneyError: { onRetry: () => void money.refetch() } } : {})}
             hosted={hosted}
           />
-          <InvoiceCard orderId={order.id} />
+          <InvoiceCard orderId={order.id} orderNumber={order.display_id} />
           <ContractsCard orderId={order.id} />
           {/* Last: the column's last card grows, and the note box sits at its foot */}
           <NotesCard orderId={order.id} />

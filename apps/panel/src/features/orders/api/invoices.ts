@@ -1,4 +1,5 @@
 import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
+import { withReauth } from "@/lib/reauth"
 import { sdk } from "@/lib/sdk"
 
 /** An invoice record (F8, adr/0034): no buyer in it. */
@@ -116,4 +117,59 @@ export async function invoicePdfUrl(id: string): Promise<string> {
     await failed(response)
   }
   return URL.createObjectURL(new Blob([await response.arrayBuffer()], { type: "application/pdf" }))
+}
+
+/** A line as the invoice writes it: amounts in lira as text, the unit price KDV excluded. */
+export interface DraftLine {
+  description: string
+  quantity: number
+  unit_net: string
+  discount_net: string
+  vat_rate: number
+  net: string
+  vat: string
+  gross: string
+}
+
+/** The invoice the shop's program is to issue, as we computed it (adr/0034 §3, §9). */
+export interface InvoiceDraft {
+  order: { id: string; number: string; date: string }
+  buyer: {
+    kind: "person" | "company"
+    name: string
+    tax_id: string
+    tax_office: string | null
+    email: string | null
+    phone: string | null
+    address: string
+    city: string | null
+    district: string | null
+    postal_code: string | null
+  }
+  lines: DraftLine[]
+  totals: { net: string; vat: string; gross: string }
+  internet_sale: {
+    url: string
+    payment: "card" | "bank_transfer" | "cash_on_delivery" | "gift_card" | "other"
+    platform: string | null
+    paid_on: string
+  }
+  shipment: { carrier: { title: string; tax_id: string }; shipped_on: string } | null
+}
+
+/**
+ * The draft of an invoice the shop issues in its own program (Luca by
+ * hand): the buyer with their tax id, so proved again and recorded. Read
+ * when asked, never kept once nothing shows it.
+ */
+export function useInvoiceDraft() {
+  return useMutation({
+    mutationFn: (id: string) =>
+      withReauth((extra) =>
+        sdk.client.fetch<{ draft: InvoiceDraft | null; problems: string[] }>(path(id, "draft"), {
+          ...extra,
+        })
+      ),
+    gcTime: 0,
+  })
 }

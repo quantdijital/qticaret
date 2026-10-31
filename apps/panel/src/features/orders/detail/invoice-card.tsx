@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
-import { FileDown, FilePen, Loader2, RotateCcw } from "lucide-react"
-import { useState } from "react"
+import { FileDown, FilePen, FileSearch, Loader2, RotateCcw } from "lucide-react"
+import { useCallback, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { SectionCard } from "@/components/patterns/section-card"
@@ -11,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { useCan } from "@/features/auth/api/staff"
 import { invoicePdfUrl, orderInvoicesQuery, useRetryInvoice } from "@/features/orders/api/invoices"
 import type { InvoiceRecord } from "@/features/orders/api/invoices"
+import { InvoiceDraftDialog } from "@/features/orders/detail/invoice-draft-dialog"
 import { InvoiceEntryDialog } from "@/features/orders/detail/invoice-entry-dialog"
 import { errorText } from "@/lib/errors"
 import { formatDateTime } from "@/lib/format"
@@ -37,14 +38,25 @@ function Row({ label, value }: { label: string; value: string }) {
 /**
  * The order's invoice (F8, adr/0034): where it stands at its program, its
  * number and PDF; a stopped one tried again, and one issued elsewhere
- * (the shop's own program, Luca by hand) typed in with its PDF.
+ * (the shop's own program, Luca by hand) read as a draft, then typed in
+ * with its PDF.
  */
-export function InvoiceCard({ orderId }: { orderId: string }) {
+export function InvoiceCard({
+  orderId,
+  orderNumber = null,
+}: {
+  orderId: string
+  orderNumber?: number | null | undefined
+}) {
   const { t } = useTranslation()
   const query = useQuery(orderInvoicesQuery(orderId))
   const retry = useRetryInvoice()
   const [entry, setEntry] = useState<"full" | "pdf" | null>(null)
   const [opening, setOpening] = useState(false)
+  const [drafting, setDrafting] = useState(false)
+  const closeDraft = useCallback(() => {
+    setDrafting(false)
+  }, [])
   // The PDF names the buyer and their tax id: not for every role (adr/0034 §9)
   const mayOpen = useCan("invoices")
   const invoice = query.data?.invoices.find((row) => row.kind === "sale") ?? null
@@ -136,6 +148,19 @@ export function InvoiceCard({ orderId }: { orderId: string }) {
                 {t(`${V}.retry`)}
               </Button>
             ) : null}
+            {external &&
+            mayOpen &&
+            (invoice.status === "pending" || invoice.status === "failed") ? (
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setDrafting(true)
+                }}
+              >
+                <FileSearch />
+                {t(`${V}.seeDraft`)}
+              </Button>
+            ) : null}
             {external && invoice.status === "pending" ? (
               <Button
                 variant="outline"
@@ -161,6 +186,13 @@ export function InvoiceCard({ orderId }: { orderId: string }) {
           </div>
         </div>
       )}
+      {drafting && invoice ? (
+        <InvoiceDraftDialog
+          invoiceId={invoice.id}
+          orderNumber={orderNumber ?? null}
+          onClose={closeDraft}
+        />
+      ) : null}
       {entry && invoice ? (
         <InvoiceEntryDialog
           invoiceId={invoice.id}
