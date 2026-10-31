@@ -24,7 +24,8 @@
     "env:init": "bash scripts/init-dev-env.sh",
     "db:up": "docker compose --env-file infra/docker/.env -f infra/docker/compose.dev.yml up -d --wait",
     "db:down": "docker compose --env-file infra/docker/.env -f infra/docker/compose.dev.yml down",
-    "prepare": "husky"
+    "prepare": "husky",
+    "audit:deps": "bash scripts/dependency-report.sh"
   },
   "prettier": "@qticaret/config/prettier",
   "devDependencies": {
