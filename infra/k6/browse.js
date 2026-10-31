@@ -13,17 +13,35 @@ const BASE = __ENV.BASE_URL || "http://localhost:9000"
 const KEY = __ENV.PUBLISHABLE_KEY || ""
 const headers = { "x-publishable-api-key": KEY }
 
+// SCENARIO=spike: a campaign's moment, visits jumping from 5 a second to
+// PEAK (100) within ten seconds and staying there, then falling away
+const spike = {
+  executor: "ramping-arrival-rate",
+  startRate: 5,
+  timeUnit: "1s",
+  preAllocatedVUs: 50,
+  maxVUs: Number(__ENV.MAX_VUS || 400),
+  stages: [
+    { duration: "10s", target: Number(__ENV.PEAK || 100) },
+    { duration: __ENV.HOLD || "1m", target: Number(__ENV.PEAK || 100) },
+    { duration: "10s", target: 5 },
+  ],
+}
+
 export const options = {
   scenarios: {
-    shoppers: {
-      executor: "ramping-vus",
-      startVUs: 1,
-      stages: [
-        { duration: "30s", target: Number(__ENV.VUS || 3) },
-        { duration: __ENV.HOLD || "2m", target: Number(__ENV.VUS || 3) },
-        { duration: "15s", target: 0 },
-      ],
-    },
+    shoppers:
+      __ENV.SCENARIO === "spike"
+        ? spike
+        : {
+            executor: "ramping-vus",
+            startVUs: 1,
+            stages: [
+              { duration: "30s", target: Number(__ENV.VUS || 3) },
+              { duration: __ENV.HOLD || "2m", target: Number(__ENV.VUS || 3) },
+              { duration: "15s", target: 0 },
+            ],
+          },
   },
   thresholds: {
     http_req_failed: ["rate<0.005"],
@@ -77,11 +95,18 @@ export default function (data) {
         "robots 200": (r) => r.status === 200,
       })
       check(
-        http.get(`${BASE}/store/seo/sitemaps/sitemap.xml`, { headers, tags: { kind: "seo" } }),
+        // A shop whose sitemap is not built yet answers 404: not a failure
+        http.get(`${BASE}/store/seo/sitemaps/sitemap.xml`, {
+          headers,
+          tags: { kind: "seo" },
+          responseCallback: http.expectedStatuses(200, 404),
+        }),
         { "sitemap answers": (r) => r.status === 200 || r.status === 404 }
       )
     }
   })
-  // A person reads a page before the next
-  sleep(1 + Math.random() * 2)
+  // A person reads a page before the next; a spike's visits arrive at its own rate
+  if (__ENV.SCENARIO !== "spike") {
+    sleep(1 + Math.random() * 2)
+  }
 }

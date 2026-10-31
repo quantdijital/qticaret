@@ -229,6 +229,16 @@ describe("parseEnv", () => {
     expect(parseEnv({ ...validEnv, ...resend, NODE_ENV: "test" }).EMAIL_TRANSPORT).toBe("resend")
   })
 
+  it("refuses the load test mode where a shop is live", () => {
+    const load = { LOAD_TEST: "on" }
+    expect(parseEnv({ ...validEnv, ...load, NODE_ENV: "development" }).LOAD_TEST).toBe("on")
+    expect(errorOf({ ...validEnv, ...load, NODE_ENV: "production" })).toContain(
+      "LOAD_TEST: is allowed on development, test and staging only"
+    )
+    // An unset NODE_ENV is treated as live
+    expect(errorOf({ ...validEnv, ...load })).toContain("LOAD_TEST")
+  })
+
   it("lets a fake PayTR address on a developer's machine only", () => {
     const fake = { PAYTR_BASE_URL: "http://127.0.0.1:4010" }
 

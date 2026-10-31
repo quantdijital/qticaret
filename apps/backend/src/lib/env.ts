@@ -47,9 +47,12 @@ const envSchema = z.object({
   AUTH_MFA_ENCRYPTION_KEY: key256.optional(),
   // Local only: `off` lets a developer sign in without 2FA; ignored when deployed
   ADMIN_MFA: z.enum(["on", "off"]).optional(),
-  // `on` looks new passwords up in Have I Been Pwned's breach list
-  // (adr/0043): an outside service, off until approved
+  // Have I Been Pwned's breach list for new passwords (adr/0043): on in
+  // production and staging, off locally unless `on`; `off` turns it off anywhere
   PASSWORD_BREACH_CHECK: z.enum(["on", "off"]).optional(),
+  // F15.3: per-IP limits a thousand times larger, for load tests sent from
+  // one machine (`perIpScale`). Development, test and staging only
+  LOAD_TEST: z.enum(["on", "off"]).optional(),
   // F15.9 (RFC 9116): where to report a security issue, `mailto:` or
   // `https:`, comma separated; security.txt answers 404 without it
   SECURITY_CONTACT: z.string().max(500).optional(),
@@ -263,6 +266,18 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
       code: "custom",
       path: ["EMAIL_TRANSPORT"],
       message: "mailpit needs MAILPIT_URL and is not allowed on staging or production",
+    })
+  }
+  if (
+    env.LOAD_TEST === "on" &&
+    env.NODE_ENV !== "staging" &&
+    env.NODE_ENV !== "development" &&
+    env.NODE_ENV !== "test"
+  ) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["LOAD_TEST"],
+      message: "is allowed on development, test and staging only",
     })
   }
   // A deployed shop pays and ships at the provider's own address only. A fake server

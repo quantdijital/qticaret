@@ -24,7 +24,10 @@
     "MAILPIT_*",
     "RESEND_*",
     "NETGSM_*",
-    "TEST_*"
+    "TEST_*",
+    "LOAD_TEST",
+    "PASSWORD_BREACH_CHECK",
+    "SECURITY_*"
   ],
   "tasks": {
     "build": {
