@@ -379,6 +379,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "staff.reset_self": "Kendi iki adımlı doğrulamanızı Ayarlar > Güvenlik'ten kapatın.",
   "staff.reauth_required": "Bu değişiklik için kimliğinizi yeniden doğrulayın.",
   "staff.reauth_failed": "Doğrulama kodu ya da şifre doğru değil.",
+  "staff.mfa_code_used": "Bu kod kullanıldı; uygulamadaki yeni kodu girin.",
   "staff.reauth_locked": "Çok fazla deneme yapıldı; biraz sonra yeniden deneyin.",
   "staff.forbidden": "Rolünüz bu işlem için yetkili değil.",
   "staff.last_owner": "Mağazanın son sahibi rolünü bırakamaz; önce başka birini sahip yapın.",

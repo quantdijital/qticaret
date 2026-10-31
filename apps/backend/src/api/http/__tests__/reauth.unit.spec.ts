@@ -2,7 +2,7 @@ import type { MedusaRequest } from "@medusajs/framework/http"
 import { Modules } from "@medusajs/framework/utils"
 import { logger } from "../../../lib/logging"
 import { createMemoryStore } from "../../../lib/security/rate-limit"
-import { requireReauth } from "../reauth"
+import { requireReauth, signInCodeOnce } from "../reauth"
 import { fakeRequest, fakeResponse } from "./fakes"
 
 let now = 0
@@ -113,5 +113,34 @@ describe("requireReauth", () => {
 
   it("refuses the password of someone with 2FA", async () => {
     expect((await run(request(byPassword(PASSWORD), true))).status).toBe(428)
+  })
+})
+
+describe("signInCodeOnce", () => {
+  async function signIn(body: Record<string, string>) {
+    const req = { ...request({}, true), validatedBody: body } as unknown as MedusaRequest
+    const response = fakeResponse()
+    const next = jest.fn()
+    await signInCodeOnce(req, response.res, next)
+    return next.mock.calls.length > 0 ? 0 : response.status()
+  }
+  const stepUp = () => run(request({ "x-reauth-method": "totp", "x-reauth-secret": CODE }, true))
+
+  it("takes a sign-in's code once: not for a second sign-in, not for a step-up", async () => {
+    expect(await signIn({ method: "totp", code: CODE })).toBe(0)
+    now += 7_000
+    expect(await signIn({ method: "totp", code: CODE })).toBe(401)
+    expect((await stepUp()).status).toBe(428)
+  })
+
+  it("refuses at sign-in a code a step-up took", async () => {
+    expect((await stepUp()).status).toBe(0)
+    expect(await signIn({ method: "totp", code: CODE })).toBe(401)
+  })
+
+  it("takes only the six digits, and leaves recovery codes to Medusa", async () => {
+    expect(await signIn({ method: "totp", code: ` ${CODE}` })).toBe(401)
+    expect(await signIn({ method: "recovery_code", code: "ABCD-EFGH" })).toBe(0)
+    expect(await signIn({ method: "recovery_code", code: "ABCD-EFGH" })).toBe(0)
   })
 })

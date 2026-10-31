@@ -2,7 +2,7 @@ import type { MedusaRequest } from "@medusajs/framework/http"
 import { Modules } from "@medusajs/framework/utils"
 import { STAFF_ROLES_MODULE } from "../../modules/staff-roles"
 import type StaffRolesModuleService from "../../modules/staff-roles/service"
-import { requireReauth } from "./reauth"
+import { requireReauth, signInCodeOnce } from "./reauth"
 
 const param = (req: MedusaRequest, name: string) =>
   (req.params as Record<string, string | undefined>)[name] ?? ""
@@ -107,5 +107,11 @@ export const REAUTH_ROUTES = [
         return factor?.status === "enabled"
       }),
     ],
+  },
+  // A sign-in's app code: once, and never again for a step-up
+  {
+    matcher: "/auth/mfa/challenges/:id/verify",
+    methods: ["POST" as const],
+    middlewares: [signInCodeOnce],
   },
 ]

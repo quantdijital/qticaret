@@ -374,6 +374,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "staff.reset_self": "Turn your own two-step verification off from Settings > Security.",
   "staff.reauth_required": "Prove it is you again for this change.",
   "staff.reauth_failed": "The code or password is not right.",
+  "staff.mfa_code_used": "This code was used; enter the app's next code.",
   "staff.reauth_locked": "Too many tries; try again a little later.",
   "staff.forbidden": "Your role does not allow this.",
   "staff.last_owner":

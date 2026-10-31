@@ -112,6 +112,36 @@ medusaIntegrationTestRunner({
       expect(again.status).toBeGreaterThanOrEqual(400)
     })
 
+    it("takes a sign-in's app code once: no second sign-in, no step-up with it (F15.1)", async () => {
+      const owner = await createAdminUser(http, getContainer())
+      const { secret } = await setUpTotp(http, owner)
+      const code = totp(secret, 1)
+      const verify = (login: { data: Login }) =>
+        settle(
+          http.post<{ token: string }>(
+            `/auth/mfa/challenges/${login.data.mfa_challenge?.id ?? ""}/verify`,
+            { method: "totp", code },
+            { headers: bearer(login.data.token) }
+          )
+        )
+
+      const passed = await verify(await signIn(owner.email, owner.password))
+      const again = await verify(await signIn(owner.email, owner.password))
+      const token = passed.data.token
+      const stepUp = await settle(
+        http.post(
+          "/admin/api-access",
+          { title: "Depo", scopes: ["orders:read"] },
+          { headers: { ...bearer(token), "x-reauth-method": "totp", "x-reauth-secret": code } }
+        )
+      )
+
+      expect(passed.status).toBe(200)
+      expect(again.status).toBe(401)
+      expect(again.data).toMatchObject({ message: "staff.mfa_code_used" })
+      expect(stepUp.status).toBe(428)
+    })
+
     it("starts a setup left half-way again: its pending factor goes first", async () => {
       const member = await createAdminUser(http, getContainer(), "admin")
       const headers = bearer(member.headers["authorization"]?.slice(7) ?? "")

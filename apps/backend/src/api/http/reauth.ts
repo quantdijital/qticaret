@@ -43,6 +43,18 @@ async function hasFactor(req: MedusaRequest, identity: string): Promise<boolean>
   return factors.length > 0
 }
 
+/**
+ * Medusa takes a TOTP code again within its step: a sign-in and a step-up
+ * take it once between them. True the first time the identity gives it.
+ */
+async function firstUse(identity: string, code: string): Promise<boolean> {
+  const used = await sharedRateLimitStore().hit(
+    `reauth:used:${keyed(`${identity}\n${code}`)}`,
+    USED_CODE_MS
+  )
+  return used.count === 1
+}
+
 /** Whether the proof is the person's: their app's code (once), a recovery code, or their password. */
 async function proves(
   req: MedusaRequest,
@@ -78,12 +90,7 @@ async function proves(
     if (!TOTP_CODE.test(secret)) {
       return false
     }
-    // Medusa takes a TOTP code again within its step: a step-up takes it once
-    const used = await sharedRateLimitStore().hit(
-      `reauth:used:${keyed(`${identity}\n${secret}`)}`,
-      USED_CODE_MS
-    )
-    if (used.count > 1) {
+    if (!(await firstUse(identity, secret))) {
       return false
     }
   }
@@ -174,5 +181,41 @@ export function requireReauth(when?: When) {
       return
     }
     next()
+  }
+}
+
+/**
+ * `POST /auth/mfa/challenges/:id/verify`, a sign-in's second step, takes an
+ * app code once, in the same count as a step-up (F15.1; adr/0040 §3's
+ * remaining risk): a code a real-time phishing proxy relays neither signs
+ * in a second time nor proves a sensitive change. Only the app's six
+ * digits; Medusa takes a recovery code once itself. Runs after Medusa's
+ * authentication and body validation.
+ */
+export async function signInCodeOnce(
+  req: MedusaRequest,
+  res: MedusaResponse,
+  next: MedusaNextFunction
+) {
+  try {
+    const identity = authOf(req)?.auth_identity_id
+    const { method, code } = (req.validatedBody ?? {}) as { method?: unknown; code?: unknown }
+    if (!identity || method !== "totp") {
+      next()
+      return
+    }
+    if (typeof code !== "string" || !TOTP_CODE.test(code) || !(await firstUse(identity, code))) {
+      rejectRequest(
+        req,
+        res,
+        401,
+        { type: "unauthorized", message: "staff.mfa_code_used" },
+        "mfa_code_used"
+      )
+      return
+    }
+    next()
+  } catch (error) {
+    next(error)
   }
 }
