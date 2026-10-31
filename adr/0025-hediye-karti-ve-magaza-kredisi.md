@@ -67,3 +67,10 @@ Medusa 2.21.2'de doğrulananlar (F4 planlaması):
   - İadede kart/kredi payının satırlara dağıtılıp mağaza kredisine dönmesi F7 iade akışıyla (`returnRefundOf` kredi payını henüz ayırmıyor). O zamana kadar iade ödemenin `refundable` tavanıyla sınırlı; kredi payı panelden elle "Kredi ekle" ile verilir.
   - Kartın satışı ve e-postası F9'da. Kart düzenleme/iptal ve krediden düşme panelde yok (Medusa Admin'de).
 - **Kanıt:** `integration-tests/http/gift-cards.spec.ts`, `gift-card-codes.spec.ts`, `store-credit.spec.ts`; birim: `lib/promotions/__tests__/gift-card-code`, `api/validation/__tests__/gift-card-codes`, `api/http/__tests__/shopper-gift-cards`, `gift-card-routes`, `audit`, `lib/logging/__tests__/redact`; panel: `gift-cards-page`, `new-gift-card-dialog`, `store-credit-card`, `payment-card` spec'leri.
+
+## Ek: vergi modeli ve satış kararı (kullanıcı, 2026-10-31)
+
+- **Vergi modeli:** genel amaçlı hediye kartı bir ödeme aracıdır (GİB'in ödeme aracı niteliğindeki hediye çeklerine ilişkin açıklaması). Kart satılırken fatura kesilmez, alınan para avans olarak izlenir. KDV kartla alışveriş yapılınca doğar; ürünün faturası tam bedelden kesilir, e-Arşiv ödeme tipi `ODEMEARACISI`. Tek bir ürüne bağlı kart desteklenmez (satışta mal teslimi sayılabilir).
+- **Mağaza kredisi:** iadeden doğan kredi indirim değil ödeme/mahsup aracıdır; krediyle yapılan alışverişin faturası tam tutardan kesilir, kredi ödeme kısmında izlenir. Promosyon amaçlı kupon ise iskontodur.
+- **Kartlar süresiz:** panelden bitiş tarihi kaldırılır, admin ucu bitiş tarihini reddeder. Kullanılmadan süresi dolan bakiye durumu oluşmaz.
+- **Satış açılır, kodu F18 vitrinle birlikte:** vitrinde tutar seçilen kart; ödeme alınınca kart üretilip alıcıya ya da hediye edilen kişiye e-postayla gider; aylık muhasebe paketinde "satılan kart (avans)" ve "kullanılan kart" satırları; kart satın alan siparişte fraud puanı yükselir (çalıntı kartla hediye kartı alıp bozdurma). Kartın cayma hakkı avukata sorulacak (docs/12).

@@ -163,3 +163,12 @@ UBL-TR yazıcısı, GİB XSD doğrulaması, entegratörün toplu listesinden bes
 - **Düşük (düzeltildi):** PDF yalnızca Paraşüt alan adlarından; platform istemcisi reddi mağaza bağlantılarını koparmaz; yanıtı kaybolan jeton yenilemesi adlandırılır; hata kodları HTTP durumundan; panel PDF yüklemesi CSRF'ten geçer (yalnızca o yol, yalnızca PDF); dosya adı süzülür; PDF operasyon ve salt okunur rollere kapalı; kesim tarihi sınırlı ve numaradaki yılla aynı; PDF yüklemesi kilitli; iptali istenen siparişe e-belge başlatılmaz ve "faturanız hazır" gitmez; geç kalınan iptalde numara saklanır; geri alınamayan kesilmiş fatura iade belgesine bırakılır; bir faturanın beklenmeyen hatası işi durdurmaz; dış programa geri çekilen fatura bildirilir (`invoice.withdrawn`).
 - **Sonraya:** numara tekilliği bütün sağlayıcılar için ortak (bir mağaza programını değiştirirse çakışabilir); vergi numarası açılışının müşteri bazındaki denetim kaydı "sistem" diye yazılır (uç düzeyindeki kayıt kişiyi adlandırır); `PARASUT_BASE_URL` yalnızca staging ve production'da reddedilir (diğer sahte sunucu adresleri gibi; dağıtımda `NODE_ENV` zorunlu, F16).
 
+## Ek: mali müşavir cevapları (kullanıcı, 2026-10-31; `docs/mali-musavir-sorulari.md`)
+
+Varsayımların çoğu doğrulandı. Değişenler (kod; her biri testle):
+1. **Kapıda ödeme hizmet bedeli** ayrı satır değil, kargo satırına eklenir (2.3).
+2. **Varsayılan kesim anı** "sipariş onaylanınca" (4.1). "Kargoya verilince" seçenek olarak kalır.
+3. **Kapıda ödemeli sipariş** teslimden sonra faturalanır (4.1); kesim ayarından bağımsız.
+4. **e-Arşiv iptali** alıcıya iletimden itibaren 8 gün içinde (5.1). Süre geçtiyse sistem iptal etmez; fatura personelin önüne düşer (muhasebe kaydı uygun belgeyle düzeltilir).
+5. **Bireysel müşteri iadesi** gider pusulasıyla (5.2): ilk faturayla ilişkili, yalnızca iade edilen ürün ve miktar, bedel ve KDV ayrı; mağaza kredisine aktarma ayrıca kaydedilir. F8 E6 ve F7 KK3 bununla kapanır.
+6. **Ayrı seri** (6.2): sistemin kestiği faturalar mağazanın elle kestiklerinden ayrı bir ön ekle.

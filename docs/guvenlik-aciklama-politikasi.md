@@ -1,6 +1,6 @@
-# Güvenlik açığı bildirme politikası (taslak)
+# Güvenlik açığı bildirme politikası
 
-> F15.9. Bu metin platformun ve mağazaların sitesinde `/.well-known/security.txt`'deki `Policy` bağlantısının gösterdiği sayfanın kaynağıdır. Dosyayı backend üretir (`GET /store/seo/security`; `SECURITY_CONTACT`, `SECURITY_POLICY_URL`), vitrin sunar. **Taslak:** iletişim adresi, süreler ve güvenli liman maddesi kullanıcının (ve gerekirse avukatın) onayını bekler.
+> F15.9. Bu metin platformun ve mağazaların sitesinde `/.well-known/security.txt`'deki `Policy` bağlantısının gösterdiği sayfanın kaynağıdır. Dosyayı backend üretir (`GET /store/seo/security`; `SECURITY_CONTACT`, `SECURITY_POLICY_URL`), vitrin sunar. **Kararlar (kullanıcı, 2026-10-31):** adres `guvenlik@quantdijital.com`, aşağıdaki süreler ve yumuşatılmış güvenli liman maddesi. Yayın F16'da canlıya çıkışla birlikte; o zamana kadar bir avukat bulunursa güvenli liman maddesi ona gösterilir.
 
 ## Kapsam
 
@@ -17,7 +17,7 @@ Kapsam dışı:
 
 ## Nasıl bildirilir
 
-- Adres: `security.txt`'deki `Contact` (ör. `guvenlik@<alan adı>`). **Kullanıcı belirleyecek.**
+- Adres: `guvenlik@quantdijital.com` (`security.txt`'deki `Contact`; bütün mağazalar için aynı).
 - Bildirimde şunlar yer alır: etkilenen adres, adım adım yeniden üretme, beklenen ve gerçekleşen sonuç, varsa kavram kanıtı.
 - Gerçek müşteri verisine erişildiyse yalnızca kanıt için gereken en az veri gösterilir, kopya tutulmaz.
 - Türkçe ya da İngilizce yazılabilir.
@@ -44,11 +44,17 @@ Kapsam dışı:
 
 ## Güvenli liman
 
-Bu politikaya iyi niyetle uyan araştırmacıya karşı hukuki yola başvurulmaz ve bildirim kolluğa iletilmez. **Avukat onayı gerekir** (docs/12): Türk Ceza Kanunu 243–245. maddeler ve KVKK'nın veri ihlali bildirimi yükümlülüğü (72 saat, docs/runbooks/veri-ihlali.md) ile birlikte değerlendirilmelidir.
+Bu politikaya iyi niyetle uyan araştırmayı izinli sayarız; araştırmacı hakkında şikâyette bulunmaz, dava açmayız. Bu taahhüt yalnızca Quant Dijital'i bağlar; kamu makamlarının yetkilerini ve yasal bildirim yükümlülüklerimizi (KVKK) etkilemez.
+
+_Neden bu biçimde (iç not, yayımlanmaz):_
+- Bilişim suçlarının (TCK 243–245) bir kısmı şikâyete bağlı değil; savcılık kendiliğinden soruşturabilir. "Şikâyet etmeyiz" sözü bizi bağlar, devleti bağlamaz. Bu yüzden taslaktaki "kolluğa iletilmez" sözü çıkarıldı.
+- Araştırmacı gerçek kişisel veriye eriştiyse bu bir veri ihlalidir; 72 saatlik Kurul bildirimi (docs/runbooks/veri-ihlali.md) bu maddeden bağımsız sürer.
+- Verinin sorumlusu mağazadır; platform yalnızca kendi adına söz verebilir.
+- Avukat bulunduğunda bu madde ona gösterilir (docs/12).
 
 ## İç süreç
 
-1. Bildirim, güvenlik sorumlusuna gelir (kişi ve yedeği: kullanıcı belirleyecek).
+1. Bildirim `guvenlik@quantdijital.com` adresine, güvenlik sorumlusuna gelir (kişi ve yedeği F16'da veri ihlali rol tablosuyla birlikte yazılır).
 2. Kişisel veriye erişim varsa veri ihlali runbook'u (`docs/runbooks/veri-ihlali.md`) aynı gün başlar.
 3. Düzeltme, testiyle birlikte birleştirilir. Etkilenen her tenant'a dağıtılır (instance-per-tenant: hepsine aynı sürüm).
 4. Kapanışta ADR ya da `docs/04`'e ders notu yazılır.

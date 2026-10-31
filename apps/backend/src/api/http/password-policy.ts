@@ -5,14 +5,16 @@ import { isBreached, passwordProblem } from "../../lib/security/password"
 import { claimsOf } from "./bearer"
 
 /**
- * Whether new passwords are looked up in the breach list: only with
- * `PASSWORD_BREACH_CHECK=on`, read at each request. An outside service,
- * so off until the owner of the platform approves it (adr/0043).
+ * Whether new passwords are looked up in the breach list (adr/0043,
+ * approved 2026-10-31): on in production (live and staging), off in
+ * development and tests, where it would reach an outside service each
+ * run. `PASSWORD_BREACH_CHECK=on|off` overrides either, read at each request.
  */
 export function breachCheckOn(
-  flag: string | undefined = process.env["PASSWORD_BREACH_CHECK"]
+  flag: string | undefined = process.env["PASSWORD_BREACH_CHECK"],
+  nodeEnv: string | undefined = process.env["NODE_ENV"]
 ): boolean {
-  return flag === "on"
+  return flag ? flag === "on" : nodeEnv === "production"
 }
 
 /**

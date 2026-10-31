@@ -1,6 +1,6 @@
 # ADR-0043: Şifre politikası ve sızmış şifre denetimi
 
-- **Durum:** Önerildi (2026-10-31, F15.1; kullanıcının "önerileni uygula" kuralıyla otonom kabul, PROGRESS "Gözden geçir"de)
+- **Durum:** Kabul edildi (2026-10-31, kullanıcı tek tek gözden geçirip onayladı; sızmış şifre denetimi canlıda açık)
 - **Tarih:** 2026-10-31
 - **İlgili:** docs/04 "Kimlik doğrulama" (şifre politikası); ADR-0003 (barındırma ve veri yerleşimi); ADR-0037 (müşteri hesabı); ADR-0040 (personel)
 
@@ -25,7 +25,7 @@ Yeni bir şifre, personel ya da müşteri fark etmeden, iki uçta denetlenir: ka
    - `Add-Padding: true` ile yanıt sahte satırlarla (sayısı 0) doldurulur, boyutu bilgi vermez.
    - İstek `safeFetch` ile gider (2,5 saniye zaman aşımı, yönlendirme yok). Anahtar ya da hesap gerekmez.
    - Servise ulaşılamazsa şifre geçer ve uyarı loglanır (`auth.breach_check_unavailable`): dış bir kesinti kayıtları durdurmaz. Çevrimdışı kurallar (1–3) her durumda uygulanır.
-   - **Açılması kullanıcı onayını bekliyor** (F15 planı: dış servis isteyen işler onay bekler). Kod hazır, her ortamda varsayılan kapalı; `PASSWORD_BREACH_CHECK=on` ile açılır. Onay gelirse canlı ve staging için varsayılan açık yapılır.
+   - **Kullanıcı onayladı (2026-10-31):** canlı ve staging'de (`NODE_ENV=production`) varsayılan açık; geliştirme ve testte kapalı (her koşuda dış servise gitmesin). `PASSWORD_BREACH_CHECK=on|off` ikisini de geçersiz kılar.
    → `breached`.
 
 Mevcut şifreler etkilenmez. Kural bir sonraki şifre belirlemede uygulanır. Girişte denetim yok: kural yalnızca şifrenin belirlendiği anda çalışır.

@@ -41,9 +41,15 @@ describe("newPasswordPolicy", () => {
 })
 
 describe("breachCheckOn", () => {
-  it("is on only when switched on", () => {
-    expect(breachCheckOn("on")).toBe(true)
-    expect(breachCheckOn("off")).toBe(false)
-    expect(breachCheckOn(undefined)).toBe(false)
+  it("is on in production and off elsewhere unless set", () => {
+    expect(breachCheckOn(undefined, "production")).toBe(true)
+    expect(breachCheckOn(undefined, "development")).toBe(false)
+    expect(breachCheckOn(undefined, "test")).toBe(false)
+    expect(breachCheckOn(undefined, undefined)).toBe(false)
+  })
+
+  it("follows the setting over the environment", () => {
+    expect(breachCheckOn("off", "production")).toBe(false)
+    expect(breachCheckOn("on", "test")).toBe(true)
   })
 })

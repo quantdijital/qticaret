@@ -1,6 +1,6 @@
 # ADR-0044: Dolandırıcılık koruması (fraud-guard)
 
-- **Durum:** Önerildi (2026-10-31, F15.6; kullanıcının "önerileni uygula" kuralıyla otonom kabul, PROGRESS "Gözden geçir"de)
+- **Durum:** Kabul edildi (2026-10-31, kullanıcı tek tek gözden geçirip onayladı; "Güvenlik incelemesi"ndeki kalan 5 risk kabul, sonraki fazlarda kapatılır)
 - **Tarih:** 2026-10-31
 - **İlgili:** docs/04 (dolandırıcılık, SMS pumping); ADR-0036 §8 (SMS kotası, `challenge` işareti); ADR-0037 M9 (ödemede IP sayacı); ADR-0026 (barındırılan ödeme formu); ADR-0040 (roller)
 

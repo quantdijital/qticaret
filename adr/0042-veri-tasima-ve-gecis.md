@@ -1,6 +1,6 @@
 # ADR-0042: Veri taşıma ve geçiş
 
-- **Durum:** Önerildi (2026-10-30; kullanıcının "önerileni uygula" kuralıyla otonom kabul, PROGRESS "Gözden geçir"de)
+- **Durum:** Kabul edildi (2026-10-31, kullanıcı kararları tek tek gözden geçirdi; iki madde açık: Judge.me gibi uygulamaların yorumlarının geçiş paketiyle taşınması (G3) ve "kesime hazır" için Search Console tıklama verisi şartı (G5a))
 - **Tarih:** 2026-10-30
 - **İlgili:** F14.1–F14.7; docs/13 §12 (geçişte SEO koruması); ADR-0018 (katalog tablosundan içe aktarma, F3.9); ADR-0013 (yönlendirmeler ve 404 kaydı); ADR-0036 (iletiler); ADR-0041 (KVKK)
 
