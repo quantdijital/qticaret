@@ -1185,13 +1185,13 @@
 | # | F15 | Görev | Bağımlılık | KK |
 |---|---|---|---|---|
 | H1 ◐ | F15.1 | **Doğrulama kodunun oturuma bağlanması bitti (2026-10-31; ADR-0037 ek, HTTP 1/1, kayıt kullanan 24 takım 142/142). Şifre değişince önceki token'ların yenilenmemesi bitti (ADR-0037 ek 2; kayıt, oturum, yenileme ve sıfırlama kullanan 30 takım 169/169). Girişteki 2FA kodunun ikinci kez kullanılamaması bitti (ADR-0040 kalan risk kapandı; HTTP 13/13). F14 kalanları: bağlantılı taşınmış yorum onay bekler, taşıma işleri yalnızca o anki sahibe görünür, izin kanıtı çalıştırma ve kaydı adlandırır (ADR-0042; ilgili 9 HTTP takımı yeşil). Şifre politikası sunucuda (ADR-0043; sızmış şifre denetimi onay bekliyor).** Kimlik doğrulama sertleştirmesi: e-posta doğrulama onayını isteyen kimliğe bağlama (F14 kapanışından devreden; Medusa `/auth/verification/confirm`), şifre değişince eski kimliksiz anahtarların yenilenmemesi; önceki fazların ADR'lerindeki "sonraya kalanlar" taraması ve kapatılması | — | KK1 |
-| H2 | F15.2 | Güvenlik tabanı uçtan uca: hız sınırı, güvenlik başlıkları, CORS, CSRF, yükleme, SSRF için tek HTTP takımı; staging için OWASP ZAP yapılandırması (CI açılınca çalışır) | — | KK1 |
+| H2 ✓ | F15.2 | **Bitti (2026-10-31): `route-inventory.spec.ts` kendi rota dosyalarımızın her işleyicisini kimliksiz dener (188 admin dosyası 401, müşteri uçları 401, Store API anahtarsız 4xx, web kancaları imzasız 4xx); başlık, CORS, CSRF, hız ve yükleme testleri zaten vardı. ZAP kuralları `infra/zap/` (CI işi staging adresi ve imaj özetiyle F16'da).** Güvenlik tabanı uçtan uca: hız sınırı, güvenlik başlıkları, CORS, CSRF, yükleme, SSRF için tek HTTP takımı; staging için OWASP ZAP yapılandırması (CI açılınca çalışır) | — | KK1 |
 | H3 | F15.3 | k6 senaryoları (ürün gezinme, sepet, sahte sağlayıcıyla checkout, webhook patlaması 1000/dk, sitemap/robots), yerelde ölçüm, `docs/perf-raporlari/` | — | KK2 |
 | H4 | F15.4 | Gözlemlenebilirlik: OpenTelemetry izleri, yavaş sorgu logu, hata izleme (Türkiye'de kendi barındırılan; ADR). **Yeni bağımlılık: kullanıcı onayı** | — | — |
 | H5 | F15.5 | Yedekleme ve geri yükleme: şifreli tenant yedeği betiği, runbook, yerelde prova ve kaydı | — | KK3 |
 | H6 | F15.6 | `fraud-guard`: giriş/kayıt/checkout'ta kendi barındırdığımız iş kanıtı (proof-of-work) captcha'sı (dış servis yok; ADR), kart/IP/e-posta hız kuralları, şüpheli sipariş işareti ve panelde inceleme kuyruğu, kara liste | — | KK4 |
-| H7 | F15.9 | `/.well-known/security.txt`, sorumlu açıklama sayfası ve SLA; `pnpm audit` ve bağımlılık raporu betiği | — | — |
-| H8 | F15.7, F15.8 | Kenar güvenliği (WAF, DDoS, bot) ve dış pentest için kontrol listesi ve hazırlık (kod dışı; F16 altyapısıyla) | — | KK1 (dış pentest) |
+| H7 ◐ | F15.9 | **Bağımlılık raporu `pnpm audit:deps` ve açıklama politikası taslağı hazır; `security.txt` ucu sırada.** `/.well-known/security.txt`, sorumlu açıklama sayfası ve SLA; `pnpm audit` ve bağımlılık raporu betiği | — | — |
+| H8 ✓ | F15.7, F15.8 | **Kontrol listesi: `docs/runbooks/kenar-ve-pentest.md` (uygulaması F16).** Kenar güvenliği (WAF, DDoS, bot) ve dış pentest için kontrol listesi ve hazırlık (kod dışı; F16 altyapısıyla) | — | KK1 (dış pentest) |
 | H9 | — | Kapanış: güvenlik incelemesi, tam doğrulama, KK işaretleri | H1–H8 | — |
 
 **F15 gözden geçir (otonom kararlar ve onay bekleyenler):**
@@ -1199,7 +1199,7 @@
 - **Onay bekliyor:** sızmış şifre denetimi (Have I Been Pwned, yalnızca SHA-1 özetinin ilk 5 karakteri gider). Kod hazır, varsayılan kapalı. Onaylarsan canlıda varsayılan açık yapılır.
 - Taşıma işleri artık yalnızca o anki sahibe görünür (`ownerOnly`); bağlantılı taşınmış yorumlar onay bekler.
 - **Onay bekliyor: bağımlılık güncellemeleri.** `pnpm audit:deps` (2026-10-31): kritik 0, yüksek 16, orta 20, düşük 3. Çoğu dolaylı bağımlılık (Medusa, test ve geliştirme araçları). Sunucuya dokunanlar:
-  - `body-parser`: sıkıştırılmış gövdede DoS. Yükseltmeden kapatıldı: `Content-Encoding` taşıyan istek 415 alır (H2).
+  - `body-parser`: sıkıştırılmış gövdede DoS. Uygulamada kapatılamıyor: Medusa'nın gövde ayrıştırıcısı bizim ara katmanlarımızdan önce çalışıyor. Önlem kenarda: ters vekil/WAF `Content-Encoding` taşıyan isteği reddeder (H8 listesine yazıldı, F16). Kalıcı çözüm sürüm yükseltmesi.
   - `multer`: yüklemede DoS.
   - `zod`: büyük koleksiyonda bellek tüketimi.
   - `undici`, `follow-redirects`: istemci tarafı.
