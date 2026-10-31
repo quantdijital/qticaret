@@ -31,7 +31,10 @@ export function PageHeader({ title, description, action, badge, back }: PageHead
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex min-w-0 flex-col gap-1">
           <div className="flex flex-wrap items-center gap-3">
-            <h1 className="text-2xl leading-8 font-semibold tracking-[-0.015em]">{title}</h1>
+            {/* A title with no break in it (a customer known by e-mail only) wraps anywhere */}
+            <h1 className="min-w-0 text-2xl leading-8 font-semibold tracking-[-0.015em] wrap-anywhere">
+              {title}
+            </h1>
             {badge}
           </div>
           {description ? <p className="text-sm text-muted-foreground">{description}</p> : null}
