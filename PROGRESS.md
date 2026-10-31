@@ -1871,15 +1871,15 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
   - **S9'dan devreden:**
     - `canonical_host` alan adı sahiplik doğrulaması (F16/F18).
     - JSON-LD ve meta çıktısında kaçışlama (docs/13, F18).
-    - İyimser kilit (eşzamanlı iki admin kaydı; F12.4).
+    - İyimser kilit (eşzamanlı iki admin kaydı; F12.4). **Arayüz aşamasına bırakıldı (2026-10-31, gözden geçir):** ürün sayfası alanları ayrı kartlarla kaydediyor; kayıt düzeyinde "sürüm değişti mi" denetimi kişinin kendi kartları arasında yanlış çakışma verir. Doğru biçim alan düzeyinde beklenen değerler (kart yalnızca kendi alanlarının eski değerlerini yollar, sunucu karşılaştırır) ya da istemcide sürüm izleme; çakışma penceresiyle birlikte kararlaştırılacak.
     - Store bölümü için admin sayfası (S10 kapsamı features + SEO).
     - Medusa modül kapanış kancası belgelenmediği için Redis istemcisi tembel açılıyor ama kapatılmıyor; bayrak okuyan bir `medusa exec` script'inin çıkışı izlenmeli.
   - **Storefront hata anahtarları (F18):** `errors.*`, `billing_profile.*`, `tr_address.*` gibi i18n anahtarları henüz bir çeviri kataloğunda değil. Storefront'la birlikte `packages/types`'a taşınır.
 - [ ] **F1'den devreden işler:**
-  - Kargo KDV oranı için `shipping_option` vergi kuralı, mali müşavir onayından sonra (docs/12).
-  - Soft-delete edilmiş fatura profillerini kalıcı silme / KVKK imha işi (F13).
+  - ~~Kargo KDV oranı için `shipping_option` vergi kuralı~~ gerekmedi (2026-10-31 denetimi): kargo bölgenin varsayılan %20'sini alıyor, faturalar oranı kargo satırından okuyor (ADR-0007).
+  - ~~Soft-delete edilmiş fatura profillerini kalıcı silme / KVKK imha işi~~ tasarım gereği tamam (2026-10-31 denetimi): KVKK silmesi bireysel profili kalıcı siliyor; yumuşak silinen yalnızca bilerek saklanan kurumsal profiller.
   - Locking modülünün Redis sağlayıcısına geçmesi ve üretim imajında `NODE_ENV=production` (F16).
-  - Telefon E.164 normalizasyonu yalnızca Store API yolunda yapılıyor; workflow ile yazılan sepet adresi ham telefonu saklar (doğrulama iki yolda da var).
+  - Telefon E.164: Store API yolunda ve (2026-10-31) mağaza taşımada yazılırken; başka workflow'la yazılan sepet adresi ham kalabilir, ama telefonu okuyan her yer (ileti, kara liste, dönüşüm) okurken normalleştiriyor.
   - `tr-address` ve fatura profili Store API sözleşme tipleri `packages/types`'a (F18).
   - Tam vergi kimliğini gösterme: yetki (F12) ve okuma audit log'u (F2.5).
 - [ ] Çok dilli içerik: Medusa Translation modülü feature flag arkasında, şimdilik kapalı. Ana içerik Türkçe; çok dil F19.
@@ -1888,8 +1888,8 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
 - [ ] GitHub Actions dakikaları: private repo, ücretsiz kota 2000 dk/ay; ilk ayda izlenecek.
 - [ ] `adr/0003` hosting ve veri yerleşimi kararı (en geç F15 öncesi; KVKK danışmanı görüşü gerekli)
 - [ ] Kod dışı gereksinimler takibi: `docs/12-kod-disi-gereksinimler.md` (avukat, mali müşavir, sağlayıcı anlaşmaları)
-- [ ] `adr/0005` içerik önerileri: kural motoru + opsiyonel LLM (kabul bekliyor; LLM sağlayıcı seçimi F10.13 öncesi)
-- [ ] Admin 2FA yöntemi ADR (F12.6 öncesi; Medusa'da yerleşik mi doğrulanacak)
+- [x] `adr/0005` içerik önerileri: kural motoru + opsiyonel LLM. Kabul (2026-10-31; LLM kapalı başlar).
+- [x] Admin 2FA yöntemi ADR: ADR-0040 (Medusa'nın yerleşik TOTP'si), kabul edildi.
 - [ ] docs/15 açık doğrulamalar: ikas headless/API, Shopify B2B changelog, Google TR ücretsiz listeleme (tenant hesabında)
 
 ## Faz durumu

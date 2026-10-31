@@ -1,5 +1,10 @@
 # 17 — Yönetici Paneli Kullanılabilirliği
 
+> **Durum (2026-10-31): büyük ölçüde geçersiz.** Bu denetim Medusa Admin için yazıldı; Medusa Admin kapatıldı
+> (`/app` 404) ve yerini kendi panelimiz aldı (adr/0022, docs/18). Hâlâ geçerli olanlar panelde yapıldı: duman ve
+> erişilebilirlik testleri (`apps/panel/e2e`), basit ürün formu (ürün sihirbazı), KDV ipucu (`vat-select`),
+> gösterge kartları. Kurulum sihirbazı F17'de. Ekran başına yardım şeritleri arayüz aşamasında değerlendirilecek.
+
 > Amaç: Paneli hiç admin paneli kullanmamış bir mağaza sahibinin de anlayacağı hâle getirmek.
 > Açık bir başlangıç sayfası, sade Türkçe ve her ekranda "sıradaki adım".
 > İlkeler [docs/06](06-admin-ux.md)'dadır; bu doküman 2026-10-25 denetimini, doğrulanan Medusa sınırlarını ve öncelikli işleri içerir.

@@ -1,6 +1,6 @@
 # ADR-0005: İçerik ve SEO önerileri — kural motoru önce, LLM opsiyonel
 
-- **Durum:** Önerildi
+- **Durum:** Kabul edildi (kural motoru F3.13'te uygulandı ve LLM'siz çalışıyor; LLM taslakları isteğe bağlı ve kapalı başlar, kullanıcı 2026-10-31'de "LLM kapalı" seçti)
 - **Tarih:** 2026-10-22
 
 ## Bağlam

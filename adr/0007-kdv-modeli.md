@@ -37,5 +37,5 @@ Medusa 2.21.2'de doğrulananlar (core-flows, tax-module-service @v2.21.2):
 
 ## Uygulama (F1 S1)
 - `src/scripts/bootstrap-tenant.ts` → `src/scripts/bootstrap/` (region, store, tax). Yalnızca eksik kayıtları oluşturur; tenant'ın admin'de düzenlediği oranlara dokunmaz.
-- Kargo KDV'si için `shipping_option` kuralı henüz yok; kargo varsayılan %20'yi alır. Oran mali müşavirle doğrulanınca eklenecek (docs/12).
+- Kargo KDV'si için ayrı `shipping_option` kuralı gerekmedi: kargo bölgenin varsayılan %20'sini alır, faturalar oranı kargo satırının kendi vergi satırından okur (2026-10-31 denetimi). Kapıda ödeme bedeli de mali müşavirin cevabıyla kargo satırına eklenir (ADR-0034 ek).
 - Kanıt: `integration-tests/http/bootstrap-tenant.spec.ts` (iki çalıştırma, KDV dahil tax line).
