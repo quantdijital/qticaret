@@ -2083,8 +2083,8 @@
           "fake": "Sahte program yalnızca geliştirme ortamında çalışır; gerçek fatura kesmez."
         },
         "triggerHints": {
-          "shipped": "Paket kargoya verildiğinde kesilir; o ana kadar sipariş düzenlenebilir ve iptal faturayı etkilemez.",
-          "placed": "Ödeme alınınca kesilir; havalede ödeme onaylanınca, kapıda ödemede sipariş verilince."
+          "shipped": "Paket kargoya verildiğinde kesilir; o ana kadar sipariş düzenlenebilir ve iptal faturayı etkilemez. Kapıda ödemeli sipariş teslimden sonra faturalanır.",
+          "placed": "Ödeme alınınca kesilir (varsayılan); havalede ödeme onaylanınca. Kapıda ödemeli sipariş teslimden sonra faturalanır."
         },
         "listed": "Kesilen ve kesilemeyen faturalar Siparişler > Faturalar'da listelenir; kesilemeyen fatura zil ile bildirilir."
       },

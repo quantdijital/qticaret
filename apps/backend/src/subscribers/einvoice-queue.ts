@@ -9,6 +9,7 @@ const MOMENTS: Readonly<
   "order.placed": { moment: "placed", of: "order" },
   "payment.captured": { moment: "paid", of: "payment" },
   "shipment.created": { moment: "shipped", of: "fulfillment" },
+  "delivery.created": { moment: "delivered", of: "fulfillment" },
 }
 
 /**
@@ -36,5 +37,5 @@ export default async function einvoiceQueue({
 }
 
 export const config: SubscriberConfig = {
-  event: ["order.placed", "payment.captured", "shipment.created"],
+  event: ["order.placed", "payment.captured", "shipment.created", "delivery.created"],
 }

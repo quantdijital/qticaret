@@ -97,26 +97,53 @@ describe("an order's invoice lines (F8, adr/0034 §3)", () => {
     expect(line).toMatchObject({ unit_net: "83.3333", net: "250.00", gross: "300.00" })
   })
 
-  it("names a payment fee by its title, and leaves out free shipping and lines edited out", () => {
+  const codFee = (rate = vat20) => ({
+    title: "Kapıda ödeme hizmet bedeli",
+    metadata: { qt_fee: COD_FEE },
+    variant_id: null,
+    is_custom_price: true,
+    quantity: 1,
+    subtotal: 25,
+    tax_total: 5,
+    total: 30,
+    tax_lines: rate,
+  })
+
+  it("puts the cash on delivery fee on the shipping line (the accountant, 2.3)", () => {
+    const lines = invoiceLines(order({ items: [codFee()] }))
+
+    expect(lines).toEqual([
+      {
+        description: "Kargo bedeli - Aras Kargo - kapıda ödeme dahil",
+        quantity: 1,
+        unit_net: "74.9167",
+        discount_net: "0.00",
+        vat_rate: 20,
+        net: "74.92",
+        vat: "14.98",
+        gross: "89.90",
+      },
+    ])
+  })
+
+  it("leaves the fee a delivery line alone with free shipping, and drops lines edited out", () => {
     const lines = invoiceLines({
-      items: [
-        {
-          title: "Kapıda ödeme hizmet bedeli",
-          metadata: { qt_fee: COD_FEE },
-          variant_id: null,
-          is_custom_price: true,
-          quantity: 1,
-          subtotal: 25,
-          tax_total: 5,
-          total: 30,
-          tax_lines: vat20,
-        },
-        { product_title: "Tava kapağı", quantity: 0, subtotal: 0, total: 0 },
-      ],
+      items: [codFee(), { product_title: "Tava kapağı", quantity: 0, subtotal: 0, total: 0 }],
       shipping_methods: [{ name: "Ücretsiz", subtotal: 50, discount_subtotal: 50, total: 0 }],
     })
 
-    expect(lines.map((line) => line.description)).toEqual(["Kapıda ödeme hizmet bedeli"])
+    expect(lines.map((line) => [line.description, line.gross])).toEqual([
+      ["Kargo bedeli - kapıda ödeme", "30.00"],
+    ])
+  })
+
+  it("keeps a fee at another KDV rate on a line of its own", () => {
+    const lines = invoiceLines(order({ items: [codFee([{ rate: 10 }])] }))
+
+    expect(lines.map((line) => [line.description, line.vat_rate])).toEqual([
+      ["Kargo bedeli - Aras Kargo", 20],
+      ["Kapıda ödeme hizmet bedeli", 10],
+    ])
   })
 })
 

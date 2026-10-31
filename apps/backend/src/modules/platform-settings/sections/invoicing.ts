@@ -6,7 +6,11 @@ import { defineSection, isCleanText } from "./define"
 export const INVOICING_PROVIDERS = ["none", "parasut", "external", "fake"] as const
 export type InvoicingProvider = (typeof INVOICING_PROVIDERS)[number]
 
-/** When an order is invoiced: when its parcel leaves (the default) or once it is placed and paid. */
+/**
+ * When an order is invoiced: once it is placed and paid (the default, the
+ * shop's accountant, 2026-10-31) or when its parcel leaves. Cash on
+ * delivery is invoiced once delivered either way (adr/0034 addendum).
+ */
 export const INVOICING_TRIGGERS = ["shipped", "placed"] as const
 
 /** The carriers an e-Arşiv may name: ours (adr/0031, adr/0035) and the shop's own parcels. */
@@ -53,5 +57,5 @@ export const invoicingSection = defineSection<InvoicingSettings>(
     trigger: z.enum(INVOICING_TRIGGERS),
     carriers: z.partialRecord(z.enum(INVOICE_CARRIERS), carrier),
   },
-  { provider: "none", trigger: "shipped", carriers: {} }
+  { provider: "none", trigger: "placed", carriers: {} }
 )

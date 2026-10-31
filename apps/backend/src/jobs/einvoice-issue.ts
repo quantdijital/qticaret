@@ -11,6 +11,7 @@ import {
   requestInvoiceCancelWorkflow,
 } from "../workflows/einvoice/cancel-invoice"
 import { orderOf, queueSaleInvoice } from "../workflows/einvoice/queue-invoices"
+import type { InvoiceMoment } from "../workflows/einvoice/queue-invoices"
 
 // Invoices moved on per run at most; the next run takes the rest
 const BATCH = 20
@@ -101,19 +102,25 @@ export async function issueInvoices(container: MedusaContainer, now: Date = new 
 
 /**
  * Queues the invoices of the last day that no event queued: parcels that
- * left, orders placed, payments taken (a transfer confirmed). Those
- * already queued, or not due by the shop's setting, are left alone.
+ * left or arrived, orders placed, payments taken (a transfer confirmed).
+ * Those already queued, or not due yet, are left alone.
  */
 export async function sweepInvoices(container: MedusaContainer, now: Date = new Date()) {
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
   const since = new Date(now.getTime() - SWEEP_HOURS * 3_600_000)
   const window = { $gte: since, $lte: now }
   const page = { take: SWEEP_LIMIT }
-  const [parcels, orders, payments, canceled] = await Promise.all([
+  const [parcels, delivered, orders, payments, canceled] = await Promise.all([
     query.graph({
       entity: "fulfillment",
       fields: ["id"],
       filters: { shipped_at: window },
+      pagination: page,
+    }),
+    query.graph({
+      entity: "fulfillment",
+      fields: ["id"],
+      filters: { delivered_at: window },
       pagination: page,
     }),
     query.graph({
@@ -136,13 +143,16 @@ export async function sweepInvoices(container: MedusaContainer, now: Date = new 
     }),
   ])
   let queued = 0
-  const queue = async (orderId: string | null, moment: "placed" | "paid" | "shipped") => {
+  const queue = async (orderId: string | null, moment: InvoiceMoment) => {
     if (orderId && (await queueSaleInvoice(container, orderId, moment)) === "queued") {
       queued += 1
     }
   }
   for (const row of parcels.data as { id: string }[]) {
     await queue(await orderOf(container, "fulfillment", row.id), "shipped")
+  }
+  for (const row of delivered.data as { id: string }[]) {
+    await queue(await orderOf(container, "fulfillment", row.id), "delivered")
   }
   for (const row of orders.data as { id: string }[]) {
     await queue(row.id, "placed")

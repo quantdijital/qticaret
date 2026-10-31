@@ -28,7 +28,7 @@ medusaIntegrationTestRunner({
       })
       const saved = await save(owner.headers, {
         provider: "external",
-        trigger: "placed",
+        trigger: "shipped",
         carriers: { aras: { title: "Örnek Kargo A.Ş.", tax_id: vkn } },
       })
       const notAnId = await save(owner.headers, {
@@ -36,11 +36,12 @@ medusaIntegrationTestRunner({
       })
       const byAdmin = await save(admin.headers, { provider: "none" })
 
-      expect(before.data.values).toEqual({ provider: "none", trigger: "shipped", carriers: {} })
+      // Once placed and paid by default (the shop's accountant, 2026-10-31)
+      expect(before.data.values).toEqual({ provider: "none", trigger: "placed", carriers: {} })
       expect(saved.status).toBe(200)
       expect(saved.data.values).toEqual({
         provider: "external",
-        trigger: "placed",
+        trigger: "shipped",
         carriers: { aras: { title: "Örnek Kargo A.Ş.", tax_id: vkn } },
       })
       expect(notAnId.status).toBe(400)

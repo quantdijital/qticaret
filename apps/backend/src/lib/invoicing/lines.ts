@@ -70,32 +70,73 @@ function invoiceLine(line: TotalledLine, description: string, quantity: number):
   }
 }
 
+/** Two lines' amounts as one, at the first's KDV rate. */
+const joined = (first: TotalledLine, second: TotalledLine): TotalledLine => ({
+  quantity: 1,
+  subtotal: MathBN.add(first.subtotal ?? 0, second.subtotal ?? 0).toString(),
+  discount_subtotal: MathBN.add(
+    first.discount_subtotal ?? 0,
+    second.discount_subtotal ?? 0
+  ).toString(),
+  tax_total: MathBN.add(first.tax_total ?? 0, second.tax_total ?? 0).toString(),
+  total: MathBN.add(first.total ?? 0, second.total ?? 0).toString(),
+  tax_lines: first.tax_lines ?? null,
+})
+
+const quantityOf = (line: TotalledLine): number => MathBN.convert(line.quantity ?? 0).toNumber()
+
 /**
- * The invoice's lines: each item (a payment fee by its own title), then
- * shipping as a line of its own. A line with nothing left (an item edited
- * out, free shipping) is not written.
+ * Shipping as lines of their own, with the cash on delivery fee on the
+ * charged one of its KDV rate: the shop's accountant counts the fee as part
+ * of delivery (docs/mali-musavir-sorulari.md 2.3, 2026-10-31). Shipping that
+ * is free leaves the fee a delivery line alone; a fee at another rate than
+ * every shipping line keeps its own line, as one line has one rate.
+ */
+function deliveryLines(fees: InvoiceItem[], methods: InvoiceShippingMethod[]): InvoiceLine[] {
+  const charged = methods.filter((method) => kurusOf(method.total) > 0)
+  const fee = fees.reduce<TotalledLine | null>(
+    (sum, line) => (sum ? joined(sum, line) : { ...line, quantity: 1 }),
+    null
+  )
+  const target = fee ? charged.find((method) => rateOf(method) === rateOf(fee)) : undefined
+  const lines = charged.map((method) =>
+    method === target && fee
+      ? invoiceLine(
+          joined(method, fee),
+          describe(["Kargo bedeli", method.name, "kapıda ödeme dahil"]),
+          1
+        )
+      : invoiceLine(method, describe(["Kargo bedeli", method.name]), 1)
+  )
+  if (fee && !target) {
+    const alone = charged.length === 0 ? "Kargo bedeli - kapıda ödeme" : fees[0]?.title
+    lines.push(invoiceLine(fee, describe([alone]), 1))
+  }
+  return lines
+}
+
+/**
+ * The invoice's lines: each item, then delivery (shipping, with the cash on
+ * delivery fee). A line with nothing left (an item edited out, free
+ * shipping) is not written.
  */
 export function invoiceLines(order: {
   items?: Rows<InvoiceItem>
   shipping_methods?: Rows<InvoiceShippingMethod>
 }): InvoiceLine[] {
-  const items = present(order.items).flatMap((item) => {
-    const quantity = MathBN.convert(item.quantity ?? 0).toNumber()
-    if (quantity <= 0) {
-      return []
-    }
-    const variant = item.variant_title === item.product_title ? null : item.variant_title
-    const description = isFeeLine(item)
-      ? describe([item.title])
-      : describe([item.product_title ?? item.title, variant])
-    return [invoiceLine(item, description, quantity)]
-  })
-  const shipping = present(order.shipping_methods).flatMap((method) =>
-    kurusOf(method.total) > 0
-      ? [invoiceLine(method, describe(["Kargo bedeli", method.name]), 1)]
-      : []
-  )
-  return [...items, ...shipping]
+  const counted = present(order.items).filter((item) => quantityOf(item) > 0)
+  const items = counted
+    .filter((item) => !isFeeLine(item))
+    .map((item) => {
+      const variant = item.variant_title === item.product_title ? null : item.variant_title
+      return invoiceLine(
+        item,
+        describe([item.product_title ?? item.title, variant]),
+        quantityOf(item)
+      )
+    })
+  const fees = counted.filter((item) => isFeeLine(item))
+  return [...items, ...deliveryLines(fees, present(order.shipping_methods))]
 }
 
 /** The lines' sums, each from the lines' own rounded amounts. */

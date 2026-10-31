@@ -15,12 +15,15 @@ import { invoiceTotalsOf } from "./draft-source"
 
 type Container = Pick<MedusaContainer, "resolve">
 
-/** What made an order due: placed, its payment taken (a transfer confirmed), or its parcel gone. */
-export type InvoiceMoment = "placed" | "paid" | "shipped"
+/**
+ * What made an order due: placed, its payment taken (a transfer confirmed,
+ * cash collected at the door), its parcel gone, or its parcel delivered.
+ */
+export type InvoiceMoment = "placed" | "paid" | "shipped" | "delivered"
 
 export type QueueOutcome = "queued" | "already" | "not_due" | "off"
 
-interface OrderRow {
+export interface OrderRow {
   status?: string | null
   canceled_at?: string | Date | null
   payment_collections?:
@@ -43,25 +46,43 @@ async function invoicingOf(container: Container): Promise<InvoicingSettings> {
   return section.values as unknown as InvoicingSettings
 }
 
+const paymentsOf = (order: OrderRow) =>
+  (order.payment_collections ?? []).flatMap((collection) => collection?.payments ?? [])
+
+/** Its money taken: a card's capture, a transfer confirmed, cash collected at the door. */
+const paid = (order: OrderRow): boolean =>
+  paymentsOf(order).some((payment) => Boolean(payment?.captured_at))
+
+const cashOnDelivery = (order: OrderRow): boolean =>
+  paymentsOf(order).some((payment) => payment?.provider_id === COD_PAYMENT_PROVIDER_ID)
+
 /**
- * Paid as far as invoicing goes: its money taken, or cash at the door
- * (invoiced on its way, the payment collected on delivery). A transfer
- * waits for staff to confirm it.
+ * Whether the moment makes the order due (adr/0034 §8 and its addendum of
+ * 2026-10-31, the shop's accountant):
+ * - cash on delivery once delivered, or once the cash is recorded as
+ *   collected, whatever the shop's setting;
+ * - otherwise by the setting: once placed and paid (the default), or when
+ *   its parcel leaves (a delivery counts, in case the parcel's event was missed).
  */
-function paid(order: OrderRow): boolean {
-  const payments = (order.payment_collections ?? []).flatMap(
-    (collection) => collection?.payments ?? []
-  )
-  return payments.some(
-    (payment) => Boolean(payment?.captured_at) || payment?.provider_id === COD_PAYMENT_PROVIDER_ID
-  )
+export function invoiceDue(
+  order: OrderRow,
+  moment: InvoiceMoment,
+  settings: Pick<InvoicingSettings, "trigger">
+): boolean {
+  if (cashOnDelivery(order)) {
+    return moment === "delivered" || (moment === "paid" && paid(order))
+  }
+  const parcel = moment === "shipped" || moment === "delivered"
+  if (parcel !== (settings.trigger === "shipped")) {
+    return false
+  }
+  return parcel || paid(order)
 }
 
 /**
- * Queues an order's sale invoice once it is due by the shop's setting
- * (adr/0034 §8): when its parcel leaves (the default), or once it is
- * placed and paid. A canceled order, or one in another currency, is
- * never queued. Queuing twice is one invoice (KK3).
+ * Queues an order's sale invoice once it is due (`due`). A canceled order,
+ * one paid in a provider's test mode, or one in another currency, is never
+ * queued. Queuing twice is one invoice (KK3).
  */
 export async function queueSaleInvoice(
   container: Container,
@@ -71,9 +92,6 @@ export async function queueSaleInvoice(
   const settings = await invoicingOf(container)
   if (settings.provider === "none" || (settings.provider === "fake" && !fakeInvoicingAllowed())) {
     return "off"
-  }
-  if ((moment === "shipped") !== (settings.trigger === "shipped")) {
-    return "not_due"
   }
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "order",
@@ -91,7 +109,7 @@ export async function queueSaleInvoice(
   if (!order || order.status === "canceled" || order.canceled_at || paidInTestMode(order)) {
     return "not_due"
   }
-  if (moment !== "shipped" && !paid(order)) {
+  if (!invoiceDue(order, moment, settings)) {
     return "not_due"
   }
   const lines = await invoiceTotalsOf(container, orderId)

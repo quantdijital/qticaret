@@ -2083,8 +2083,8 @@
           "fake": "The fake program works in development only; it issues no real invoice."
         },
         "triggerHints": {
-          "shipped": "Issued when the parcel leaves; until then the order can be edited and a cancellation leaves no invoice.",
-          "placed": "Issued once paid; a transfer once confirmed, cash on delivery when the order is placed."
+          "shipped": "Issued when the parcel leaves; until then the order can be edited and a cancellation leaves no invoice. Cash on delivery is invoiced once delivered.",
+          "placed": "Issued once paid (the default); a transfer once confirmed. Cash on delivery is invoiced once delivered."
         },
         "listed": "Invoices issued and stopped are listed in Orders > Invoices; a stopped invoice rings the bell."
       },
