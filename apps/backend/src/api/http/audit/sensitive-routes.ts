@@ -13,6 +13,8 @@ export const SENSITIVE_READS: readonly [string, string, boolean, (readonly strin
   ["/admin/messaging/suppressions", "message_suppression", true],
   ["/admin/customer-groups/:id", "customer_group", false],
   ["/admin/orders", "order", true],
+  // F15.6: the held orders' queue shows each buyer's e-mail
+  ["/admin/fraud/reviews", "order", true],
   ["/admin/dashboard/recent-orders", "order", true],
   ["/admin/order-board", "order", true],
   // F12.9: the search box finds customers and orders by name

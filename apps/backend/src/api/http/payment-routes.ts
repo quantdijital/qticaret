@@ -11,7 +11,7 @@ import { StoreGetInstallments } from "../store/payment/installments/validators"
 import { StoreGetPaymentMethods } from "../store/payment/methods/validators"
 import { isFeeLine } from "../../lib/payments/cod"
 import type { FeeCart } from "../../lib/payments/cod"
-import { guardCheckout } from "./checkout-guard"
+import { guardCheckout, guardPaymentStart } from "./checkout-guard"
 import { holdFloodingCheckoutSms } from "./checkout-sms"
 import { requireMailDomain } from "./mail-domain"
 import { rateLimit } from "./rate-limit"
@@ -144,7 +144,13 @@ export const PAYMENT_ROUTES = [
   {
     matcher: "/store/carts/:id/payment-session",
     methods: ["POST" as const],
-    middlewares: [checkoutLimit, validateAndTransformBody(StorePostCartPaymentSession)],
+    // F15.6 (adr/0044): every way to pay starts here, a hosted card form too:
+    // the block list and checkout velocity are counted on starting
+    middlewares: [
+      checkoutLimit,
+      validateAndTransformBody(StorePostCartPaymentSession),
+      guardPaymentStart,
+    ],
   },
   // F5 V6: a product page's or a cart's installment table
   {
@@ -187,7 +193,7 @@ export const PAYMENT_ROUTES = [
   },
   {
     matcher: "/store/carts/:id/complete",
-    // F15.6 (adr/0044): the block list and checkout velocity before the order is made
+    // F15.6 (adr/0044): the block list once more before the order is made
     middlewares: [checkoutLimit, requireCheckoutPayment, guardCheckout, holdFloodingCheckoutSms],
   },
   // PayTR's notifications (adr/0026 §5): its retries stay well inside the budget

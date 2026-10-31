@@ -243,5 +243,6 @@ Karar (`api/http/password-change.ts`):
 - Sıfırlama bağlantısıyla şifre değişince (`POST /auth/:actor_type/emailpass/update`, yanıt 200) değişme anı kimliğin `app_metadata.password_changed_at` alanına yazılır. Adres sıfırlama token'ının `entity_id`'sinden okunur.
 - Bu andan önce verilmiş (`iat`) bir token üç yerde 401 alır (`account.token_before_password_change`): `/auth/token/refresh`, `/auth/session` ve `POST /store/customers`. Aynı saniyede verilen token yeni girişindir.
 - Sınır: kimliği olan eski bir token kendi ömrü dolana kadar (Medusa varsayılanı 1 gün), açık bir oturum da 10 saat geçerli kalır; ikisi de yenilenemez. Her istekte kimliği okumak yerine bu bilinçli olarak bırakıldı.
+- Başlık Medusa'nın okuduğu gibi okunur: `Bearer` sonrasındaki ilk kelime, ardından ne gelirse gelsin. Okunamayan bir bearer token bu üç yerde 401 alır (`account.session_invalid`). Güvenlik incelemesi 2026-10-31: katı okuma `Bearer <token> x` başlığını denetimden kaçırıyordu.
 
 Test: `integration-tests/http/account-verification.spec.ts`.

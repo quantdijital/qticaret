@@ -1178,7 +1178,7 @@
 - **Daha önce:** F1 planlaması ve F0.2–F0.8 (2026-10-24), F0.1 monorepo (2026-10-24 sabahı), SEO ve güvenlik dokümanları (2026-10-22).
 
 ## Sıradaki görev
-**Claude'un sıradaki işi:** F15 — Sertleştirme (plan: "F15 görev planı"); önce H1 kimlik doğrulama sertleştirmesi (e-posta doğrulama onayını isteyen kimliğe bağlama). H4 gözlemlenebilirlik yeni bağımlılık ister: kullanıcı onayı. F14 bitti (2026-10-31).
+**Claude'un sıradaki işi:** F15 — Sertleştirme (plan: "F15 görev planı"). 2026-10-31 gecesi: H1, H2, H6, H8 bitti; H3 ve H7 kısmen. Kalanlar senin kararını bekliyor ("F15 gözden geçir"): sızmış şifre denetimini açmak, bağımlılık güncellemeleri, yedek şifreleme aracı (H5), k6 kurulumu ve yük testi kipi (H3), H4 gözlemlenebilirlik için yeni bağımlılık, güvenlik iletişim adresi (H7 `security.txt`). Sonra H9 kapanış.
 
 ### F15 görev planı (2026-10-31, taslak; F14 kapanınca başlar. Dış servis ya da yeni bağımlılık isteyen işler kullanıcı onayını bekler)
 
@@ -1198,6 +1198,7 @@
 - ADR-0043 şifre politikası (otonom kabul): kayıt ve sıfırlamada 10–256 karakter, yaygın şifre listesi, e-posta adını içeren şifre reddi; personel ve müşteri için sunucuda.
 - **Onay bekliyor:** sızmış şifre denetimi (Have I Been Pwned, yalnızca SHA-1 özetinin ilk 5 karakteri gider). Kod hazır, varsayılan kapalı. Onaylarsan canlıda varsayılan açık yapılır.
 - Taşıma işleri artık yalnızca o anki sahibe görünür (`ownerOnly`); bağlantılı taşınmış yorumlar onay bekler.
+- F15 güvenlik incelemesi (2026-10-31): 2 yüksek, 2 orta, 7 düşük bulgu kapandı (kartla ödemenin korumayı atlaması, `Bearer <token> x` başlığı, eşzamanlı giriş denemeleri, başkasının e-postasıyla ödemeyi kilitleme…). Kalan 5 madde ADR-0044 "Güvenlik incelemesi" altında.
 - ADR-0044 fraud-guard (otonom kabul): IP sınırlarında engel uzak tutuldu (CGNAT: bir IP'nin arkasında binlerce müşteri olabilir), doğrulama yakın. "Reddet" siparişi iptal etmez, kargoya kapatır; iptal ve iade olağan iptalle (para akışı tek yerde). Hız eşikleri kodda; mağazaya açılması istenirse ayara taşınır.
 - **Onay bekliyor: bağımlılık güncellemeleri.** `pnpm audit:deps` (2026-10-31): kritik 0, yüksek 16, orta 20, düşük 3. Çoğu dolaylı bağımlılık (Medusa, test ve geliştirme araçları). Sunucuya dokunanlar:
   - `body-parser`: sıkıştırılmış gövdede DoS. Uygulamada kapatılamıyor: Medusa'nın gövde ayrıştırıcısı bizim ara katmanlarımızdan önce çalışıyor. Önlem kenarda: ters vekil/WAF `Content-Encoding` taşıyan isteği reddeder (H8 listesine yazıldı, F16). Kalıcı çözüm sürüm yükseltmesi.

@@ -21,22 +21,40 @@ describe("block entries", () => {
     expect(phone?.match).toBe(blockEntryOf("phone", "+90 532 111 2233", KEY)?.match)
   })
 
-  it("keeps a domain and an address as written, and refuses what is none of its kind", () => {
+  it("keeps a domain as written, an address as the rate limits count it", () => {
     expect(blockEntryOf("email_domain", "x@Mailinator.com", KEY)).toEqual({
       kind: "email_domain",
       match: "mailinator.com",
       display: "mailinator.com",
     })
-    expect(blockEntryOf("ip", "2001:DB8::1", KEY)?.match).toBe("2001:db8::1")
+    // IPv4-mapped IPv6 is the IPv4 address; IPv6 in any spelling is its /64
+    expect(blockEntryOf("ip", "::ffff:203.0.113.7", KEY)?.match).toBe("203.0.113.7")
+    expect(blockEntryOf("ip", "2001:DB8:0:0:0:0:0:1", KEY)?.match).toBe(
+      blockEntryOf("ip", "2001:db8::abcd", KEY)?.match
+    )
     expect(blockEntryOf("ip", "999.1.1.1", KEY)).toBeNull()
     expect(blockEntryOf("email", "yok", KEY)).toBeNull()
     expect(blockEntryOf("email_domain", "localhost", KEY)).toBeNull()
   })
 
-  it("lists every entry a request could match", () => {
-    const kinds = matchesOf({ email: "a@b.com", phone: "05321112233", ip: "10.0.0.1" }, KEY).map(
-      (entry) => entry.kind
+  it("finds a tagged address, a subdomain and a phone from abroad", () => {
+    const tagged = matchesOf({ email: "Ayse.Kaya+kampanya@mail.example.com" }, KEY)
+    expect(tagged.find((entry) => entry.kind === "email")?.match).toBe(
+      blockEntryOf("email", "ayse.kaya@mail.example.com", KEY)?.match
     )
+    expect(tagged.filter((entry) => entry.kind === "email_domain").map((e) => e.match)).toEqual([
+      "mail.example.com",
+      "example.com",
+    ])
+    expect(blockEntryOf("phone", "+49 151 2345 6789", KEY)?.kind).toBe("phone")
+    expect(blockEntryOf("phone", "12", KEY)).toBeNull()
+  })
+
+  it("lists every entry a request could match, both phones included", () => {
+    const kinds = matchesOf(
+      { email: "a@b.com", phones: ["", "05321112233"], ip: "10.0.0.1" },
+      KEY
+    ).map((entry) => entry.kind)
     expect(kinds).toEqual(["email", "email_domain", "phone", "ip"])
     expect(matchesOf({}, KEY)).toEqual([])
   })

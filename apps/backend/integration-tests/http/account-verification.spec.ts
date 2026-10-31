@@ -145,6 +145,15 @@ medusaIntegrationTestRunner({
       )
       expect(refreshed.status).toBe(401)
       expect(refreshed.data.message).toBe("account.token_before_password_change")
+      // The header read as Medusa reads it: a word after the token changes nothing
+      const padded = await settle(
+        http.post<{ message?: string }>(
+          "/auth/token/refresh",
+          {},
+          { headers: { authorization: `Bearer ${intruder} x` } }
+        )
+      )
+      expect(padded.status).toBe(401)
       const opened = await settle(
         http.post(
           "/store/customers",

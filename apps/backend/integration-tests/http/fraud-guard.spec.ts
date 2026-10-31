@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto"
+import { completeCartWorkflow } from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { createAdminUser } from "../helpers/admin"
 import { freshChallenge, solved } from "../helpers/challenge"
@@ -87,29 +88,52 @@ medusaIntegrationTestRunner({
     })
 
     it("stops a blocked buyer's checkout without saying why, and lets it go once removed", async () => {
+      // A cart whose payment began before its buyer was listed
+      const cartId = await codCart("ayse.yilmaz@example.com")
       const added = await post<{ block: { id: string; display: string } }>(
         "/admin/fraud/blocks",
-        { kind: "email", value: "Ayse.Yilmaz@example.com", reason: "ters ibraz" },
+        { kind: "email", value: "Ayse.Yilmaz+indirim@example.com", reason: "ters ibraz" },
         admin.headers
       )
-      const cartId = await codCart("ayse.yilmaz@example.com")
       const refused = await complete(cartId)
+      const restarted = await post<{ message?: string }>(
+        `/store/carts/${cartId}/payment-session`,
+        { provider_id: COD },
+        storefront.headers
+      )
+      // However it is completed (a card's provider notice too), the order is refused
+      const { errors } = await completeCartWorkflow(getContainer()).run({
+        input: { id: cartId },
+        throwOnError: false,
+      })
       const listed = await http.get<{ blocks: { display: string; match?: string }[] }>(
         "/admin/fraud/blocks",
         { headers: admin.headers }
       )
-      // Nor does it register or sign in
+      // Nor does it register; a sign-in answers as a wrong password does
       const registering = await post(
         "/auth/customer/emailpass/register",
         { email: "ayse.yilmaz@example.com", password: randomUUID() },
         {}
       )
+      const signIn = (email: string) =>
+        post<{ message?: string; type?: string }>(
+          "/auth/customer/emailpass",
+          { email, password: `yanlis-${randomUUID()}` },
+          {}
+        )
+      const blockedSignIn = await signIn("ayse.yilmaz@example.com")
+      const wrongPassword = await signIn(`kimse-${randomUUID()}@example.com`)
       await http.delete(`/admin/fraud/blocks/${added.data.block.id}`, { headers: admin.headers })
       const placed = await complete(cartId)
 
       expect(added.status).toBe(201)
       expect(refused.status).toBe(403)
       expect(refused.data.message).toBe("fraud.checkout_refused")
+      expect(restarted.status).toBe(403)
+      expect((errors[0]?.error as { safeMessage?: string } | undefined)?.safeMessage).toBe(
+        "fraud.checkout_refused"
+      )
       // Masked, and the keyed hash it is found by never leaves
       expect(listed.data.blocks).toEqual([
         expect.objectContaining({ display: "ay***@example.com" }),
@@ -117,6 +141,11 @@ medusaIntegrationTestRunner({
       expect(listed.data.blocks[0]).not.toHaveProperty("match")
       expect(registering.status).toBe(403)
       expect(registering.data).toMatchObject({ message: "fraud.refused" })
+      expect(blockedSignIn.status).toBe(wrongPassword.status)
+      expect({ ...blockedSignIn.data, request_id: null }).toEqual({
+        ...wrongPassword.data,
+        request_id: null,
+      })
       expect(placed.data.type).toBe("order")
     })
 
@@ -171,7 +200,7 @@ medusaIntegrationTestRunner({
       ).toBe(orderId)
     })
 
-    it("asks a proof of a visitor registering often, and of a sign-in failed three times", async () => {
+    it("asks a proof of a visitor registering often, and of a sixth sign-in in a quarter hour", async () => {
       // Per-address limits at their real size here (integration tests grow them)
       process.env["RATE_LIMIT_RELAXED"] = "0"
       const register = (headers: Record<string, string> = {}) =>
@@ -196,7 +225,7 @@ medusaIntegrationTestRunner({
           { email, password: secret },
           headers
         )
-      for (let n = 0; n < 3; n++) {
+      for (let n = 0; n < 5; n++) {
         expect((await signIn(`yanlis-${randomUUID()}`)).status).toBe(401)
       }
       const askedLogin = await signIn(password)
@@ -213,36 +242,45 @@ medusaIntegrationTestRunner({
     it("asks a proof past the soft limit and stops past the hard one (KK4)", async () => {
       // The limits at their real size here (integration tests grow them)
       process.env["RATE_LIMIT_RELAXED"] = "0"
-      const cartId = await codCart()
-      // The fee changed after the payment began: Medusa refuses the cart
-      // after our guard, so each try is counted and no order is made
-      await post(
-        "/admin/platform-settings/cash_on_delivery",
-        { fee_type: "fixed", fee_value: 1_000 },
-        admin.headers
-      )
-      const statuses: number[] = []
-      for (let n = 0; n < 3; n++) {
-        statuses.push((await complete(cartId)).status)
+      // One buyer; a cart has its own budget of starts (the rate limiter's), so a new one every ten
+      const email = `hiz-${randomUUID()}@example.com`
+      let cartId = ""
+      let starts = 0
+      const start = async (headers: Record<string, string> = {}) => {
+        if (starts++ % 10 === 0) {
+          cartId = await readyCart(getContainer(), shop, variantId)
+          await post(`/store/carts/${cartId}`, { email }, storefront.headers)
+        }
+        // Every way to pay starts here, a card's hosted form too: each start counts
+        return post<{ message?: string; challenge?: Challenge }>(
+          `/store/carts/${cartId}/payment-session`,
+          { provider_id: COD },
+          { ...storefront.headers, ...headers }
+        )
       }
-      const asked = await complete(cartId)
-      const proven = await complete(cartId, solved(asked.data.challenge))
-      const reused = await complete(cartId, solved(asked.data.challenge))
-      const more: number[] = []
-      for (let n = 0; n < 4; n++) {
-        more.push((await complete(cartId, fresh("checkout"))).status)
+      const first = await start()
+      let asked = await start()
+      for (let n = 0; n < 5 && asked.status !== 428; n++) {
+        asked = await start()
       }
-      const stopped = await complete(cartId, fresh("checkout"))
+      const proven = await start(solved(asked.data.challenge))
+      const reused = await start(solved(asked.data.challenge))
+      const passed: number[] = []
+      let stopped = await start(fresh("checkout"))
+      while (stopped.status === 200 && passed.length < 40) {
+        passed.push(stopped.status)
+        stopped = await start(fresh("checkout"))
+      }
 
-      expect(statuses.every((status) => status !== 428 && status !== 429)).toBe(true)
+      expect(first.status).toBe(200)
       expect(asked.status).toBe(428)
       expect(asked.data.message).toBe("fraud.challenge_required")
       expect(asked.data.challenge).toMatchObject({ bits: 18 })
-      expect([428, 429]).not.toContain(proven.status)
-      expect(proven.data.message).not.toMatch(/^fraud\./)
+      expect(proven.status).toBe(200)
       // A solution counts once; the same one again is a new ask
       expect(reused.status).toBe(428)
-      expect(more.every((status) => status !== 428 && status !== 429)).toBe(true)
+      // The e-mail's limit asks proofs, never stops: the address's hard limit does
+      expect(passed.length).toBeGreaterThan(10)
       expect(stopped.status).toBe(429)
       expect(stopped.data.message).toBe("fraud.velocity")
     })

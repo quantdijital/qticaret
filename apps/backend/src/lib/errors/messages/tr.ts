@@ -768,6 +768,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Bu eski adres sitenin ana sayfası ya da ayrılmış bir yolu; bir kayda bağlanmadı.",
   "account.verification_session_required":
     "Adresinizi doğrulamak için önce hesabınıza giriş yapın; bağlantı ancak oturumunuzda çalışır.",
+  "account.session_invalid": "Oturum geçersiz; yeniden giriş yapın.",
   "account.token_before_password_change":
     "Şifre değiştiği için bu oturum sona erdi; yeni şifrenizle yeniden giriş yapın.",
   "auth.password_too_short": "Şifre en az 10 karakter olmalı.",

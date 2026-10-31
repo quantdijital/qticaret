@@ -12,6 +12,7 @@ import { kurus } from "../../lib/money"
 import { enteredCodes } from "../../lib/promotions"
 import { hasStaleShipping } from "../checkout/stale-shipping"
 import { assertAgeDeclared } from "../legal/age"
+import { assertBuyerNotBlocked } from "../fraud/buyer-blocked"
 import { assertConsented } from "../legal/consent"
 import { expectedCodFee } from "../payments/steps/payment-fee"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
@@ -65,6 +66,8 @@ completeCartWorkflow.hooks.validate(async ({ cart }: { cart: { id: string } }, {
   await assertConsented(container, cart.id)
   // A restricted product's buyer declared their age (adr/0041 §4)
   await assertAgeDeclared(container, cart.id)
+  // A buyer on the shop's block list, a card's provider notice included (adr/0044 §4)
+  await assertBuyerNotBlocked(container, cart.id)
   // The rule is checked as codes are sent too; requests racing each other
   // can each see an empty cart, so it is checked once more here (ADR-0024)
   if (enteredCodes(row.promotions).length > 1) {

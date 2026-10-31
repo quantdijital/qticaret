@@ -42,10 +42,10 @@ Görsel bulmaca yok. Tarayıcı küçük bir hesap yapar; insan fark etmez, topl
 | Kapsam | Uç | Eşik |
 |---|---|---|
 | `register` | `POST /auth/customer/emailpass/register` | IP başına saatte 3 kayıt |
-| `login` | `POST /auth/customer/emailpass` | Aynı e-postaya (her yerden) 15 dakikada 3 başarısız giriş; yalnızca doğrulama ister, kilitlemez |
+| `login` | `POST /auth/customer/emailpass` | Aynı e-postaya (her yerden) 15 dakikada 5'ten fazla deneme; her deneme çalışmadan önce sayılır (aynı anda gönderilenler eşiği atlayamaz); yalnızca doğrulama ister, kilitlemez |
 | `order_lookup` | `POST /store/order-lookup` | IP başına saatte 5 |
 | `stock_alert` | `POST /store/stock-alerts` | IP başına saatte 5 |
-| `checkout` | `POST /store/carts/:id/complete` | §2'deki hız kuralları |
+| `checkout` | `POST /store/carts/:id/payment-session` | §2'deki hız kuralları |
 
 - Zorluk 18 bit: ortalama ~260 bin özet, telefonda 1 saniyenin altında. Sayaç eşiğin iki katını aşınca 20 bit.
 - Sert sınırlar hız sınırlayıcınındır (`RATE_LIMIT_PROFILES`). Doğrulama ondan önce gelir.
@@ -55,19 +55,21 @@ Görsel bulmaca yok. Tarayıcı küçük bir hesap yapar; insan fark etmez, topl
 
 ### 2. Hız kuralları (ödeme)
 
-`POST /store/carts/:id/complete` zincirinde (`api/http/checkout-guard.ts`), sepet tamamlanmadan önce sayılır. Sayaçlar paylaşılan hız sınırı deposundadır; IP kovası, e-postanın ve telefonun anahtarlı özetiyle tutulur.
+Sayım ödemenin başladığı yerde yapılır: `POST /store/carts/:id/payment-session` (`api/http/checkout-guard.ts`). Her ödeme yolu buradan geçer. Kartla ödemede sipariş sağlayıcının bildirimiyle açılır, `/complete` hiç çağrılmaz (güvenlik incelemesi 2026-10-31, yüksek bulgu). Sayaçlar paylaşılan hız sınırı deposundadır; IP kovası, e-postanın ve telefonun anahtarlı özetiyle tutulur.
 
 | Anahtar | Doğrulama ister | Engeller |
 |---|---|---|
-| IP kovası başına ödeme denemesi / saat | 5'ten sonra | 30'dan sonra |
-| E-posta başına ödeme denemesi / saat | 3'ten sonra | 10'dan sonra |
+| IP kovası başına ödeme başlatma / saat | 5'ten sonra | 30'dan sonra |
+| E-posta başına ödeme başlatma / saat | 3'ten sonra | Engellemez |
 | IP kovası başına farklı e-posta / gün | 3'ten sonra | 30'dan sonra |
 
-- **Bir IP binlerce kişinin olabilir.** Mobil operatörler çok sayıda müşteriyi tek adresin arkasına koyar (CGNAT). Bu yüzden IP sınırlarında engel uzak tutulur, doğrulama yakın. E-posta sınırı kişiye özeldir.
+- **Bir IP binlerce kişinin olabilir.** Mobil operatörler çok sayıda müşteriyi tek adresin arkasına koyar (CGNAT). Bu yüzden IP sınırlarında engel uzak tutulur, doğrulama yakın.
+- **E-posta herkesin yazabileceği bir değerdir.** Misafir sepetine başkasının adresini yazan, o kişiyi ödemeden kilitleyemesin diye e-posta sınırı yalnızca doğrulama ister.
 - Engelleme 429 `fraud.velocity`, doğrulama 428 döner. Metinler geneldir.
-- Sayılanlar (adresin ve telefonun kullandığı farklı e-posta sayısı, yalnızca sayı) sepete `fraud_signals` olarak yazılır; siparişin puanı bunları okur.
-- Değerler kodda sabittir. Mağazaya açılması gerekirse ayarlara taşınır.
-- Sayım ya da not başarısız olursa ödeme geçer ve loglanır: sağlayıcının kendi denetimleri sürer.
+- Sayılanlar (adresin ve telefonun kullandığı farklı e-posta sayısı, yalnızca sayı) sepete `qt_fraud_signals` olarak yazılır. `qt_` önekli üst veri alışverişçiye kapalıdır. Siparişin puanı bunları okur.
+- `/complete` yeniden saymaz, yalnızca kara listeye bakar.
+- Değerler kodda sabittir. Mağazaya açılması gerekirse ayarlara taşınır. Entegrasyon testlerinde hız sınırları gibi büyür (`perIpScale`).
+- Sayım ya da not başarısız olursa ödeme geçer ve loglanır: sağlayıcının kendi denetimleri sürer, sipariş kara listeye bir kez daha bakılarak açılır.
 
 ### 3. Şüpheli sipariş işareti ve inceleme kuyruğu
 
@@ -95,10 +97,43 @@ Görsel bulmaca yok. Tarayıcı küçük bir hesap yapar; insan fark etmez, topl
 
 `fraud_block`: tür (`email`, `email_domain`, `phone`, `ip`), eşleşme değeri, görünen değer, neden, ekleyen, isteğe bağlı bitiş tarihi.
 
-- E-posta ve telefon `PII_HASH_KEY` ile anahtarlı özet olarak saklanır, panelde maskeli gösterilir. Ham değer saklanmaz.
-- IP ve alan adı düz tutulur. IP kişisel veridir: kayıt en çok 1 yıl geçerlidir. Süresi geçen her kayıt gece kalıcı silinir (`fraud-retention`).
-- Kayıt, giriş ve ödemede tam eşleşme işlemi durdurur (403). Yanıt geneldir, listede olduğunu söylemez.
-- Panel: Ayarlar > Güvenlik > Kara liste, türüne göre gruplu. Liste yalnızca sahip ve yöneticiye açıktır (`/admin/fraud/blocks*` özel).
+- Değer ve istek aynı yazıma getirilir (`lib/fraud/block.ts`):
+  - e-posta `+etiket`siz, anahtarlı özetle;
+  - alan adı küçük harfle, alt alan adlarını da kapsar;
+  - telefon E.164 (Türkiye biçimleri ve yurt dışı `+` ile), anahtarlı özetle; teslimat ve fatura telefonunun ikisi de bakılır;
+  - IP, hız sınırlarının saydığı gibi: IPv4'e eşlenmiş IPv6 IPv4 olarak, IPv6 /64 olarak (bir bağlantı bütün /64'ü tutar).
+- E-posta ve telefonun ham değeri saklanmaz, panelde maskeli gösterilir.
+- IP kişisel veridir: kayıt en çok 1 yıl geçerlidir. Süresi geçen her kayıt gece kalıcı silinir (`fraud-retention`).
+- Nerede durdurur:
+  - Kayıt, hesap oluşturma (`POST /store/customers`) ve ödeme başlatma: 403, nedeni söylemeyen metin.
+  - Giriş: yanlış şifreyle aynı yanıt. Liste kimin üzerinde olduğunu söylemez.
+  - Sipariş: `completeCartWorkflow` doğrulama kancası e-posta ve telefonlara bir kez daha bakar. Kartla ödenmiş sepet de böylece siparişe dönmez, parası iade akışıyla geri gider (`fraud.*` "tekrar denense de başarısız" sayılır).
+- Panel: Ayarlar > Güvenlik > Kara liste, türüne göre gruplu. Liste yalnızca sahip ve yöneticiye açıktır (`/admin/fraud/blocks*` özel). İnceleme kuyruğunun okunması hassas okuma olarak denetim kaydına girer.
+
+### Güvenlik incelemesi (2026-10-31)
+
+Bağımsız inceleme 2 yüksek, 2 orta ve birkaç düşük bulgu çıkardı. Kapananlar:
+
+- **Yüksek: kartla ödeme korumayı atlıyordu.** Sayım ödeme başlatmaya taşındı, siparişte kancayla yeniden bakılıyor.
+- **Yüksek: `Bearer <token> x` biçimindeki başlık şifre değişikliği denetimini atlıyordu** (ADR-0037 ek 2). Başlık Medusa gibi okunuyor; okunamayan bearer token reddediliyor.
+- **Orta: aynı anda gönderilen girişler doğrulama eşiğini atlıyordu.** Her deneme çalışmadan önce sayılıyor.
+- **Orta: başkasının e-postasıyla ödeme kilitlenebiliyordu.** E-posta sınırı artık engellemiyor.
+- **Düşükler:**
+  - IP, `+etiket`, alt alan adı ve telefon eşleşmesi;
+  - girişte listede olmanın sızması;
+  - hesap oluşturmada denetim;
+  - Medusa'nın `/admin/fulfillments` ucunda inceleme bekleyen sipariş;
+  - `qt_` öneki;
+  - kuyruğun hassas okuma kaydı;
+  - bilinmeyen iş türünün yalnızca sahibe görünmesi.
+
+Kalanlar (gözden geçir):
+
+- Şifre değişmeden önce açılmış bir oturum çerezi `POST /store/customers`'a ulaşabilir (oturumda `iat` yok).
+- Sipariş, puanlanmadan önceki birkaç saniyede kargoya verilebilir.
+- Google ile girişte kara listeye bakılmaz (hesap oluşturmada bakılır).
+- Bir başkası birinin telefonunu üç e-postayla kullanarak o kişinin bir sonraki siparişine 25 puan ekleyebilir. Bu siparişi tek başına incelemeye düşürmez.
+- İş kanıtı bir hız kesicidir; yerel kodla çözen bot için ucuzdur.
 
 ## Alternatifler
 

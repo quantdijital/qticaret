@@ -20,10 +20,11 @@ export interface VelocityLimits {
 }
 
 // An address may be a mobile carrier's, shared by thousands (CGNAT): past
-// its soft limits a person proves themselves, its hard ones are far
+// its soft limits a person proves themselves, its hard ones are far. An
+// e-mail is anyone's to type into a cart: it asks a proof, never stops one
 export const CHECKOUT_VELOCITY: VelocityLimits = {
   ipHour: { challenge: 5, block: 30 },
-  emailHour: { challenge: 3, block: 10 },
+  emailHour: { challenge: 3, block: Number.POSITIVE_INFINITY },
   ipEmailsDay: { challenge: 3, block: 30 },
 }
 
@@ -96,7 +97,7 @@ export async function countCheckout(
 }
 
 /** Where checkout leaves what it counted on the cart, for the order's score: numbers only. */
-export const CART_SIGNALS = "fraud_signals"
+export const CART_SIGNALS = "qt_fraud_signals"
 
 export interface CartSignals {
   ip_emails: number

@@ -92,11 +92,13 @@ export function challengeOver(scope: ChallengeScope, limit: SoftLimit) {
 }
 
 /**
- * Past `limit` failed sign-ins for one address (from anywhere), a challenge
- * first. Only failures count, and only a challenge follows, never a lock:
- * anyone may type someone's address, nobody may lock its owner out.
+ * Past `limit` sign-in attempts for one address (from anywhere), a
+ * challenge first. Each attempt is counted before it runs, so attempts
+ * sent at once cannot all slip under the limit (security review
+ * 2026-10-31). Only a challenge follows, never a lock: anyone may type
+ * someone's address, nobody may lock its owner out.
  */
-export function challengeAfterFailures(limit: SoftLimit) {
+export function challengeAfterAttempts(limit: SoftLimit) {
   return async (req: MedusaRequest, res: MedusaResponse, next: MedusaNextFunction) => {
     const email = (req.body as { email?: unknown } | undefined)?.email
     if (req.method !== "POST" || typeof email !== "string") {
@@ -104,18 +106,12 @@ export function challengeAfterFailures(limit: SoftLimit) {
       return
     }
     try {
-      const store = sharedRateLimitStore()
       const counter = `fraud:challenge:login:${hashPii(email.trim().toLowerCase(), keyOf(), "fraud.login").slice(0, 32)}`
-      const failures = await store.peek(counter)
-      if (failures >= limit.max && !(await challengePassed(req, "login"))) {
-        demandChallenge(req, res, "login", bitsFor(failures, limit))
+      const { count } = await sharedRateLimitStore().hit(counter, limit.windowMs)
+      if (count > limit.max && !(await challengePassed(req, "login"))) {
+        demandChallenge(req, res, "login", bitsFor(count, limit))
         return
       }
-      res.on("finish", () => {
-        if (res.statusCode === 401) {
-          void store.hit(counter, limit.windowMs).catch(() => undefined)
-        }
-      })
       next()
     } catch (error) {
       next(error)

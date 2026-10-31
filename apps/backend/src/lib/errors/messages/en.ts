@@ -768,6 +768,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "This old address is the site's home page or a reserved path; it was not tied to a record.",
   "account.verification_session_required":
     "Sign in to your account first to confirm your address; the link works only in your session.",
+  "account.session_invalid": "The session is not valid; sign in again.",
   "account.token_before_password_change":
     "The password changed, so this session ended; sign in again with the new password.",
   "auth.password_too_short": "The password must be at least 10 characters.",

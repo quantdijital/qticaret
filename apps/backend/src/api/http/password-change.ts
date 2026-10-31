@@ -6,7 +6,7 @@ import type {
 } from "@medusajs/framework/http"
 import { Modules } from "@medusajs/framework/utils"
 import { errorSummary, logger } from "../../lib/logging"
-import { claimsOf } from "./bearer"
+import { bearerTokenOf, claimsOf } from "./bearer"
 import { rejectRequest } from "./reject"
 
 /**
@@ -83,6 +83,17 @@ export async function tokenAfterPasswordChange(
   try {
     const bearer = bearerOf(req)
     if (!bearer) {
+      // A bearer token we cannot read is one Medusa will refuse too: refused here first
+      if (bearerTokenOf(req)) {
+        rejectRequest(
+          req,
+          res,
+          401,
+          { type: "unauthorized", message: "account.session_invalid" },
+          "token_unreadable"
+        )
+        return
+      }
       next()
       return
     }
