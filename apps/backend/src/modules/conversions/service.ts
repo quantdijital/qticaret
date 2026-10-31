@@ -206,6 +206,27 @@ class ConversionsModuleService extends MedusaService({ TrackingConsent, Conversi
   }
 
   /**
+   * Drops the GA client id once no return can send its event any more
+   * (docs/kvkk-envanter.md): the rest of the consent stays, the order's.
+   */
+  @InjectTransactionManager()
+  async forgetGaClients(
+    before: Date,
+    limit: number,
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<number> {
+    const rows = await this.listTrackingConsents(
+      { ga_client_id: { $ne: null }, created_at: { $lt: before } },
+      { select: ["id"], take: limit },
+      sharedContext
+    )
+    for (const row of rows) {
+      await this.updateTrackingConsents({ id: row.id, ga_client_id: null }, sharedContext)
+    }
+    return rows.length
+  }
+
+  /**
    * Claims an event before it is sent: Medusa's bus may deliver one event
    * twice at once, and only the delivery whose row goes in sends it. A
    * failed event, or one left pending by a delivery that died, may be

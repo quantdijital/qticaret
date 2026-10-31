@@ -38,7 +38,7 @@ async function drain(
 }
 
 /** Of these carts, the ones that became an order: their records are the order's evidence. */
-async function orderedCarts(container: Container, cartIds: string[]): Promise<Set<string>> {
+export async function orderedCarts(container: Container, cartIds: string[]): Promise<Set<string>> {
   if (cartIds.length === 0) {
     return new Set()
   }

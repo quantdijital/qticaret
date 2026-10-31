@@ -1,3 +1,4 @@
+import { Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { AUDIT_LOG_MODULE } from "../../src/modules/audit-log"
 import type AuditLogModuleService from "../../src/modules/audit-log/service"
@@ -9,6 +10,8 @@ import { LEGAL_MODULE } from "../../src/modules/legal"
 import type LegalModuleService from "../../src/modules/legal/service"
 import { MESSAGING_MODULE } from "../../src/modules/messaging"
 import type MessagingModuleService from "../../src/modules/messaging/service"
+import { PAYMENT_FORMS_MODULE } from "../../src/modules/payment-forms"
+import type PaymentFormsModuleService from "../../src/modules/payment-forms/service"
 import {
   forgetAbandonedCarts,
   forgetAuditClients,
@@ -16,6 +19,11 @@ import {
   forgetSettledStockAlerts,
   forgetSpentConsentRequests,
 } from "../../src/workflows/compliance/retention"
+import {
+  forgetAbandonedCartContacts,
+  forgetGaClients,
+  forgetSentMessages,
+} from "../../src/workflows/compliance/retention-contacts"
 import { createAdminUser } from "../helpers/admin"
 import type { HttpClient } from "../helpers/http"
 import { readyCart } from "../helpers/paytr"
@@ -182,6 +190,75 @@ medusaIntegrationTestRunner({
       expect((await messaging.listConsentRequests({})).map((row) => row.token_hash)).toEqual([
         "open",
       ])
+    })
+    it("deletes a cart left 90 days, keeps a paying one, and forgets GA ids and old sends", async () => {
+      const container = getContainer()
+      await loadTrAddressFixture(container)
+      const shop = await stockShop(container)
+      const { variantId } = await stockedProduct(
+        container,
+        shop,
+        `bardak-${String(Date.now())}`,
+        10
+      )
+      const conversions = container.resolve<ConversionsModuleService>(CONVERSIONS_MODULE)
+      const carts = container.resolve(Modules.CART)
+      const notifications = container.resolve(Modules.NOTIFICATION)
+      const now = new Date()
+      // Records cannot be dated back: the job is run as if it were later
+      const later = (days: number) => new Date(now.getTime() + days * DAY)
+      const left = await readyCart(container, shop, variantId)
+      const paying = await readyCart(container, shop, variantId)
+      await container.resolve<PaymentFormsModuleService>(PAYMENT_FORMS_MODULE).createPaymentForms({
+        provider: "iyzico",
+        session_id: "payses_test",
+        cart_id: paying,
+        token: "form-token",
+        expires_at: later(1),
+      })
+      await conversions.createTrackingConsents({
+        order_id: "order_old",
+        analytics: true,
+        marketing: false,
+        ga_client_id: "GA1.1.123.456",
+        given_at: now,
+      })
+      // The panel's bell is no message to a person; an e-mail's record is
+      const [bell, mail] = await notifications.createNotifications([
+        { to: "", channel: "feed", template: "admin-ui", data: { title: "Not" } },
+        { to: "", channel: "feed", template: "admin-ui", data: { title: "Not" } },
+      ])
+      await (
+        notifications as unknown as {
+          updateNotifications: (data: {
+            id: string
+            to: string
+            channel: string
+          }) => Promise<unknown>
+        }
+      ).updateNotifications({ id: mail?.id ?? "", to: "ayse@example.com", channel: "email" })
+
+      const notYet = await forgetAbandonedCartContacts(container, later(80))
+      const deleted = await forgetAbandonedCartContacts(container, later(91))
+      const remaining = (await carts.listCarts({ id: [left, paying] })).map((cart) => cart.id)
+      // The return window (14 days unless the shop set more) and a margin of 45
+      const gaKept = await forgetGaClients(container, later(50))
+      const gaCleared = await forgetGaClients(container, later(60))
+      const [tracking] = await conversions.listTrackingConsents({ order_id: "order_old" })
+      const sendsKept = await forgetSentMessages(container, later(1000))
+      const sendsDeleted = await forgetSentMessages(container, later(1096))
+      const sends = (await notifications.listNotifications({})).map((row) => row.id)
+
+      expect(notYet).toBe(0)
+      // Carts the tests before left count too
+      expect(deleted).toBeGreaterThanOrEqual(1)
+      expect(remaining).toEqual([paying])
+      expect(gaKept).toBe(0)
+      expect(gaCleared).toBeGreaterThanOrEqual(1)
+      expect(tracking?.ga_client_id).toBeNull()
+      expect([sendsKept, sendsDeleted]).toEqual([0, 1])
+      expect(sends).toContain(bell?.id)
+      expect(sends).not.toContain(mail?.id)
     })
   },
 })

@@ -8,6 +8,15 @@
 export const RETENTION_DAYS = {
   /** A cart's consents and age declaration when it never became an order. */
   abandonedCart: 30,
+  /** The cart itself, its e-mail and addresses, when it never became an order: since it was last touched. */
+  abandonedCartContact: 90,
+  /**
+   * The GA client id after the shop's return window (added to it, from the
+   * consent's day): the parcel's way back and the refund's GA4 event.
+   */
+  gaClientMargin: 45,
+  /** The record of an e-mail or SMS sent, its recipient with it: as long as a consent's proof. */
+  sentMessage: 1095,
   /** A visitor's cookie banner answers: their cookie lasts 13 months; the proof a while longer. */
   cookieConsent: 730,
   /** The IP address and browser in the audit log (adr/0011). */

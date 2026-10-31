@@ -7,6 +7,11 @@ import {
   forgetSettledStockAlerts,
   forgetSpentConsentRequests,
 } from "../workflows/compliance/retention"
+import {
+  forgetAbandonedCartContacts,
+  forgetGaClients,
+  forgetSentMessages,
+} from "../workflows/compliance/retention-contacts"
 
 /**
  * The nightly retention pass (F13.5, adr/0041 §6): personal data whose
@@ -22,6 +27,9 @@ export default async function complianceRetention(container: MedusaContainer) {
     audit_clients: () => forgetAuditClients(container, now),
     stock_alerts: () => forgetSettledStockAlerts(container, now),
     consent_requests: () => forgetSpentConsentRequests(container, now),
+    abandoned_cart_contacts: () => forgetAbandonedCartContacts(container, now),
+    ga_clients: () => forgetGaClients(container, now),
+    sent_messages: () => forgetSentMessages(container, now),
   }
   for (const [part, run] of Object.entries(parts)) {
     try {
