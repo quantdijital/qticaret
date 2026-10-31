@@ -27,7 +27,7 @@ Paraşüt API v4, resmî tanımından (`https://apidocs.parasut.com/swagger.json
   4. `POST /e_invoices` (ilişki adı `invoice`) ya da `POST /e_archives` (ilişki adı `sales_invoice`). e-Arşiv'de internet satışında `internet_sale` (adres, ödeme tipi `KREDIKARTI/BANKAKARTI | EFT/HAVALE | KAPIDAODEME | ODEMEARACISI`, ödeme aracısı, ödeme tarihi) ve kargolu satışta `shipment` (taşıyıcı unvanı, VKN, tarih) zorunlu;
   5. iki çağrı da bir `trackable_jobs` kaydı döner: `pending | running | done | error`, hatalar metin dizisi. Kayıt numarası 15 dakika kullanılabilir. Sonra fatura `?include=active_e_document` ile okunur;
   6. PDF: `GET /e_archives/{id}/pdf` ya da `/e_invoices/{id}/pdf`. Hazır olana kadar 204 döner. Hazır olunca 1 saat geçerli bir adres döner; bu adres müşteriye verilmez, dosya indirilip saklanır.
-- **İptal:** yalnızca `DELETE /sales_invoices/{id}/cancel`. e-Arşiv `cancellable_until`'e kadar, yani resmîleştikten sonra 7 gün içinde iptal edilebilir (Paraşüt yardım merkezi). Gönderen e-Faturayı iptal edemez.
+- **İptal:** yalnızca `DELETE /sales_invoices/{id}/cancel`. e-Arşiv `cancellable_until`'e kadar iptal edilebilir; süreyi Paraşüt'ün belgede verdiği değer belirler (yardım merkezi 7 gün diyor; mağazanın mali müşaviri alıcıya iletimden itibaren 8 gün dedi, 2026-10-31). Gönderen e-Faturayı iptal edemez.
 - **Doğrulanamayanlar:**
   - deneme ortamı;
   - 429 yanıtı ve web kancaları (tanımda yok; durum sorgulanarak izlenir);

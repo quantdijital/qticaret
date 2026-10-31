@@ -3331,7 +3331,7 @@
         "when": "Tarih",
         "total": "Tutar"
       },
-      "returnNeeded": "Sipariş iptal edildi ama fatura artık iptal edilemiyor (e-Fatura ya da 7 gün geçti). İade belgesi düzenleyin.",
+      "returnNeeded": "Sipariş iptal edildi ama fatura duruyor. Kendi programınızda kestiyseniz orada iptal edin (e-Arşiv: alıcıya iletildiği günden itibaren 8 gün). Süre geçtiyse ya da e-Fatura ise kaydı uygun belgeyle düzeltin.",
       "seeDraft": "Taslağı gör",
       "draft": {
         "title": "Fatura taslağı {{number}}",

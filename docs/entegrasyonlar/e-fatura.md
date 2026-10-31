@@ -67,7 +67,7 @@ Tekillik: (sipariş, tür, kaynak). Kayıtta kişisel veri yok.
   4. `GET /trackable_jobs/{id}` (`pending | running | done | error`; hatalar metin dizisi; 15 dakika);
   5. `GET /sales_invoices/{id}?include=active_e_document`;
   6. `GET /e_archives/{id}/pdf` ya da `/e_invoices/{id}/pdf`: önce 204, sonra 1 saatlik adres.
-- **İptal:** `DELETE /sales_invoices/{id}/cancel`. e-Arşiv için `cancellable_until`, resmîleştikten sonra 7 gün.
+- **İptal:** `DELETE /sales_invoices/{id}/cancel`. e-Arşiv için `cancellable_until` (Paraşüt'ün verdiği değer; mali müşavir: alıcıya iletimden itibaren 8 gün). Süre geçince sistem iptal etmez, personel muhasebe kaydını uygun belgeyle düzeltir.
 - **Ödeme tipleri** (`internet_sale.payment_type`): kart `KREDIKARTI/BANKAKARTI`, havale `EFT/HAVALE`, kapıda ödeme `KAPIDAODEME`.
 - **Doğrulanamayanlar:** deneme ortamı, 429, web kancası, ürünsüz satır, iade faturasının asıl faturaya bağı. Gerçek hesapla ilk denemede doğrulanır.
 

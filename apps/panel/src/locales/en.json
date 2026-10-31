@@ -3331,7 +3331,7 @@
         "when": "Date",
         "total": "Total"
       },
-      "returnNeeded": "The order was canceled but its invoice can no longer be cancelled (an e-Fatura, or past seven days). Issue a return document.",
+      "returnNeeded": "The order was canceled but its invoice stands. If your own program issued it, cancel it there (an e-Arşiv within 8 days of reaching the buyer). Past that, or for an e-Fatura, correct the books with the proper document.",
       "seeDraft": "See the draft",
       "draft": {
         "title": "Invoice draft {{number}}",

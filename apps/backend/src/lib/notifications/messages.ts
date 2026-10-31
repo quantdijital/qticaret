@@ -77,7 +77,8 @@ export const NOTIFICATION_MESSAGES: Readonly<
     },
     "einvoice.return_needed": {
       title: "İptal edilen #{{order}} siparişinin faturası duruyor",
-      description: "Fatura artık iptal edilemiyor; iade belgesi düzenleyin.",
+      description:
+        "Kendi programınızda kestiyseniz orada iptal edin (e-Arşiv: alıcıya iletildiği günden itibaren 8 gün). Süre geçtiyse ya da e-Fatura ise kaydı uygun belgeyle düzeltin.",
     },
     "payments.statement_mismatch": {
       title: "{{provider}} dökümü {{day}} günü tutmuyor",
@@ -143,7 +144,8 @@ export const NOTIFICATION_MESSAGES: Readonly<
     },
     "einvoice.return_needed": {
       title: "Canceled order #{{order}}'s invoice stands",
-      description: "It can no longer be cancelled; issue a return document.",
+      description:
+        "If your own program issued it, cancel it there (an e-Arşiv within 8 days of reaching the buyer). Past that, or for an e-Fatura, correct the books with the proper document.",
     },
     "payments.statement_mismatch": {
       title: "The {{provider}} statement of {{day}} does not agree",

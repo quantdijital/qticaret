@@ -42,7 +42,8 @@ export const fakeInvoiceProvider: InvoiceProvider = {
         cancellable_until:
           draft.buyer.kind === "company"
             ? null
-            : new Date(context.now().getTime() + 7 * 86_400_000),
+            : // Eight days for an e-Arşiv (the shop's accountant, 2026-10-31)
+              new Date(context.now().getTime() + 8 * 86_400_000),
         program_difference: differenceOf(draft, draft.totals.gross),
       },
       pdf: await fakePdf(number),

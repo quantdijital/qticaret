@@ -154,7 +154,7 @@ export function createParasutApi(
       })
     },
 
-    /** Cancels an invoice: an e-Arşiv while it can still be (seven days). */
+    /** Cancels an invoice: an e-Arşiv while Paraşüt still allows it (its `cancellable_until`). */
     async cancelSalesInvoice(token: string, id: string): Promise<void> {
       await call(token, {
         method: "DELETE",
