@@ -172,3 +172,5 @@ Varsayımların çoğu doğrulandı. Değişenler (kod; her biri testle):
 4. **e-Arşiv iptali** alıcıya iletimden itibaren 8 gün içinde (5.1). Süre geçtiyse sistem iptal etmez; fatura personelin önüne düşer (muhasebe kaydı uygun belgeyle düzeltilir).
 5. **Bireysel müşteri iadesi** gider pusulasıyla (5.2): ilk faturayla ilişkili, yalnızca iade edilen ürün ve miktar, bedel ve KDV ayrı; mağaza kredisine aktarma ayrıca kaydedilir. F8 E6 ve F7 KK3 bununla kapanır.
 6. **Ayrı seri** (6.2): sistemin kestiği faturalar mağazanın elle kestiklerinden ayrı bir ön ekle.
+
+**Kullanıcı kararı (2026-10-31): e-Arşiv'in taşıyıcı alanı boş gitmez.** Fatura sipariş onayında kesildiğinde paket henüz çıkmamıştır. Taşıyıcı, müşterinin ödemede seçtiği kargo seçeneğinin firmasından alınır; unvan ve VKN mağazanın bir kez girdiği değerdir (Ayarlar > E-Fatura). Gönderim tarihi faturanın kesildiği gündür. Paket çıktıktan sonra kesilen fatura, paketin firmasını ve çıkış gününü yazar. Firma bilgisi girilmemişse fatura `einvoice.carrier_identity_missing` ile bekler (`workflows/einvoice/draft-source.ts` `shipmentOf`).

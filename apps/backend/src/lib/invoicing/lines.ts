@@ -32,6 +32,8 @@ export interface InvoiceItem extends TotalledLine {
 
 export interface InvoiceShippingMethod extends TotalledLine {
   name?: string | null
+  /** The option the buyer chose: its carrier is the invoice's before the parcel leaves. */
+  shipping_option_id?: string | null
 }
 
 const present = <T>(rows: Rows<T>): T[] => (rows ?? []).filter((row): row is T => row !== null)

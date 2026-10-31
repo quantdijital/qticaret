@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto"
 import { Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
+import { fakeVkn, seededRandom } from "@qticaret/testing"
 import { EINVOICE_MODULE } from "../../src/modules/einvoice"
 import type EinvoiceModuleService from "../../src/modules/einvoice/service"
 import { advanceOrder } from "../../src/scripts/seed/orders/advance"
@@ -25,6 +26,10 @@ interface Invoice {
 }
 
 const PDF = Buffer.from("%PDF-1.4\n% fatura\n%%EOF\n")
+const carrier = { title: "Örnek Kargo A.Ş.", tax_id: fakeVkn(seededRandom(33)) }
+// The day in Türkiye, as the e-Arşiv writes it
+const turkishToday = () =>
+  new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Istanbul" }).format(new Date())
 
 /** F8 E4 (adr/0034 §9): the shop's own program reads what waits and writes the invoice back. */
 medusaIntegrationTestRunner({
@@ -61,7 +66,7 @@ medusaIntegrationTestRunner({
         .variantId
       await http.post(
         "/admin/platform-settings/invoicing",
-        { provider: "external", trigger: "placed" },
+        { provider: "external", trigger: "placed", carriers: { manual: carrier } },
         { headers: owner.headers }
       )
       await http.post(
@@ -98,7 +103,11 @@ medusaIntegrationTestRunner({
         { headers: basic(reader) }
       )
       const draft = await http.get<{
-        draft: { buyer: { name: string }; totals: { gross: string } }
+        draft: {
+          buyer: { name: string }
+          totals: { gross: string }
+          shipment: { carrier: typeof carrier; shipped_on: string } | null
+        }
       }>(`/admin/invoices/${id}/draft`, { headers: basic(reader) })
       const readerWrites = await settle(
         http.post(`/admin/invoices/${id}/issued`, issued, { headers: basic(reader) })
@@ -155,6 +164,8 @@ medusaIntegrationTestRunner({
       ).toEqual(expect.any(Number))
       expect(draft.data.draft.buyer.name).toBe("Ayşe Yılmaz")
       expect(draft.data.draft.totals.gross).toBe(Number(queued?.gross_total).toFixed(2))
+      // Not shipped yet: the carrier the buyer chose, on the day the invoice is made
+      expect(draft.data.draft.shipment).toEqual({ carrier, shipped_on: turkishToday() })
       expect(readerWrites.status).toBe(403)
       expect(byOperations.status).toBe(403)
       expect(pdfFirst.status).toBe(409)
