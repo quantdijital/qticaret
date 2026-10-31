@@ -1528,7 +1528,7 @@ Paralel zincirler:
 
 Devreden işlerin F3 görevlerine dağılımı:
 - **T1:** `claimPath`/`unclaimPath` ve slug `""` durumu (S7), Türkçe handle (F2 planlaması), düz desen sistem yolları (S7). `additional_data`: admin ürün formu göndermiyor (2.21.2 doğrulandı), alanlar widget + kendi route'umuzla yazılır.
-- **T5 ve T14:** özellik görünürlüğü (`is_public`) ve Store yanıt filtresi (S11).
+- **T5 ve T14:** ~~özellik görünürlüğü (`is_public`) ve Store yanıt filtresi (S11)~~ yapıldı 2026-10-31 (ADR-0013 ek).
 - **T7:** Redis kilit sağlayıcısı (F1, F2'den F16'ya bırakılmıştı; ADR-0020 öneriyor).
 - **T15:** `presigned-urls` yerine kontrollü yükleme yolu, iş iptal ucu (S13).
 
@@ -1863,7 +1863,7 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
     - İptal ucu (F3.9).
     - İsteğe bağlı `TEST_S3_*` testi (private nesnenin imzasız 403'ü).
   - **S11'den devreden:**
-    - Özellik görünürlüğü (`is_public`) ve Store yanıt filtresi.
+    - ~~Özellik görünürlüğü (`is_public`) ve Store yanıt filtresi~~ yapıldı (2026-10-31).
     - (ürün, tanım) için DB tekillik indeksi.
     - `additional_data` ile ürün formundan kayıt (F3.9).
     - Şablon güncellemesinde soft-delete edilen değerlerin link satırları kalıyor (zararsız; temizlik işi F13).

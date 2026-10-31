@@ -577,6 +577,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "product_attributes.text_invalid": "Metin, görünmeyen kontrol karakterleri içeremez.",
   "product_attributes.type_locked":
     "Ürünlerde değeri olan bir özelliğin tipi ya da kapsamı değiştirilemez.",
+  "product_attributes.private_shown":
+    "Vitrinde gösterilmeyen bir özellik filtre, arama başlığı ya da ürün seçeneği olamaz.",
   "product_attributes.value_invalid": "Girilen değer bu özellik için geçerli değil.",
   "product_attributes.values_exist": "Kaldırılan özelliklerin ürünlerde değerleri var.",
   "product_attributes.variant_only":

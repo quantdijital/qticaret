@@ -70,7 +70,7 @@ Medusa 2.21.2'de doğrulananlar (F2 planlaması):
 - **Store:**
   - `allowFields` yaprak alanları açar; seçenekler dahil, çünkü vitrin seçimin etiketini gösterir.
   - Kendi guard'ımız `fields` içinde özelliklere değen her parçanın izinli bir yaprak olmasını ister. `*attribute_values`, `attribute_values.*` ve `.definition.template` gibi geçişler 400 alır.
-- **Görünürlük:** Tüm ürün kapsamlı değerler herkese açıktır. `is_public` bayrağı ertelendi; admin şablon ekranı bunu açıkça uyarır.
+- **Görünürlük (ek, 2026-10-31):** tanımda `is_public` (varsayılan açık). Kapalı tanımın değerleri vitrin API'sinin ürün yanıtlarından sunucuda çıkarılır (`api/http/attribute-visibility.ts`; okuma başarısız olursa bütün değerler çıkar). Kapalı tanım filtre, SEO öne çıkan ya da varyant seçeneği olamaz (`product_attributes.private_shown`); içerik taslakları ve başlık sözcüğü onu görmez. Panel, şablon ekranında "Vitrinde göster" anahtarıyla seçtirir. Personel ve dışa aktarma bütün değerleri görür.
 - **Kilitler:** Değeri olan tanımda tip, kapsam, anahtar ve birim değişimi ile kullanılan seçeneğin kaldırılması 409 alır.
 - **Onaylar:** Değeri olan üründe şablon değişimi `confirm_template_change` ister.
 - **Eşzamanlılık:**

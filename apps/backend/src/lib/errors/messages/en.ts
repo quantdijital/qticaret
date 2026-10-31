@@ -578,6 +578,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "product_attributes.text_invalid": "The text cannot contain invisible control characters.",
   "product_attributes.type_locked":
     "An attribute products have values for cannot change type or scope.",
+  "product_attributes.private_shown":
+    "An attribute hidden from shoppers cannot be a filter, a title's word or a product option.",
   "product_attributes.value_invalid": "The value is not valid for this attribute.",
   "product_attributes.values_exist": "Products have values for the attributes being removed.",
   "product_attributes.variant_only":

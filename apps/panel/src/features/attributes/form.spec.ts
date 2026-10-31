@@ -54,6 +54,36 @@ describe("attribute template form", () => {
     ])
   })
 
+  it("keeps a hidden attribute out of filters and titles, and a product option shown (T5)", () => {
+    const [hidden, option] = definitionsApi([
+      {
+        ...emptyDefinition(),
+        label: "Tedarikçi kodu",
+        is_public: false,
+        is_filterable: true,
+        is_seo_highlight: true,
+      },
+      {
+        ...emptyDefinition(),
+        label: "Beden",
+        scope: "variant",
+        option_title: "Beden",
+        is_public: false,
+      },
+    ])
+
+    expect(hidden).toMatchObject({
+      is_public: false,
+      is_filterable: false,
+      is_seo_highlight: false,
+    })
+    expect(option?.is_public).toBe(true)
+    // Saved before visibility existed: shown
+    expect(templateForm(template).definitions.every((definition) => definition.is_public)).toBe(
+      true
+    )
+  })
+
   it("drops options from non-select types and variant fields from product ones", () => {
     const [sent] = definitionsApi([
       {

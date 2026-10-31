@@ -19,6 +19,7 @@ export interface DefinitionForm {
   is_required: boolean
   is_filterable: boolean
   is_seo_highlight: boolean
+  is_public: boolean
   scope: "product" | "variant"
   option_title: string
   /** "" for none */
@@ -41,6 +42,7 @@ export const emptyDefinition = (): DefinitionForm => ({
   is_required: false,
   is_filterable: false,
   is_seo_highlight: false,
+  is_public: true,
   scope: "product",
   option_title: "",
   varies_by: "",
@@ -56,6 +58,7 @@ const definitionForm = (definition: AttributeDefinition): DefinitionForm => ({
   is_required: definition.is_required,
   is_filterable: definition.is_filterable,
   is_seo_highlight: definition.is_seo_highlight,
+  is_public: definition.is_public ?? true,
   scope: definition.scope,
   option_title: definition.option_title ?? "",
   varies_by: definition.varies_by ?? "",
@@ -85,6 +88,8 @@ export const optionValue = (label: string): string => toSlug(label).slice(0, 100
 export const definitionsApi = (definitions: DefinitionForm[]) =>
   definitions.map((definition, index) => {
     const variant = definition.scope === "variant"
+    // A product option is always shown; a hidden attribute is no filter or title word
+    const shown = variant || definition.is_public
     return {
       ...(definition.id ? { id: definition.id } : {}),
       key: definition.key.trim() || keyFromLabel(definition.label),
@@ -94,8 +99,9 @@ export const definitionsApi = (definitions: DefinitionForm[]) =>
       options: isSelectType(definition.type) ? definition.options : null,
       rank: index,
       is_required: definition.is_required,
-      is_filterable: definition.is_filterable,
-      is_seo_highlight: definition.is_seo_highlight,
+      is_filterable: shown && definition.is_filterable,
+      is_seo_highlight: shown && definition.is_seo_highlight,
+      is_public: shown,
       scope: definition.scope,
       option_title: variant ? orNull(definition.option_title) : null,
       varies_by: variant ? orNull(definition.varies_by) : null,

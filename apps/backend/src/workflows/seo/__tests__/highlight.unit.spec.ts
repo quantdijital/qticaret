@@ -21,6 +21,15 @@ describe("highlightText", () => {
     ).toBe("%100 keten")
   })
 
+  it("never takes an attribute the shop keeps to itself (T5)", () => {
+    expect(
+      highlightText([
+        { value_text: "TED-0042", definition: definition({ rank: 0, is_public: false }) },
+        { value_text: "%100 keten", definition: definition({ rank: 1 }) },
+      ])
+    ).toBe("%100 keten")
+  })
+
   it("names chosen options by their labels and skips empty values", () => {
     expect(
       highlightText([

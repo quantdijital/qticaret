@@ -129,6 +129,42 @@ medusaIntegrationTestRunner({
       )
     })
 
+    it("keeps an attribute the shop holds to itself out of the Store API (T5)", async () => {
+      const template = await createTemplate([
+        ...DEFINITIONS,
+        { key: "supplier_code", label: "Tedarikçi kodu", type: "text", is_public: false },
+      ])
+      const productId = await newProduct()
+      const saved = await setAttributes(productId, {
+        template_id: template.id,
+        values: { material: "steel", supplier_code: "TED-0042" },
+      })
+      const fields = "+attribute_values.value_text,+attribute_values.definition.key"
+      interface Row {
+        attribute_values?: { value_text: string | null }[]
+      }
+      const page = await http.get<{ product: Row }>(
+        `/store/products/${productId}?fields=${fields}`,
+        { headers: storefront.headers }
+      )
+      const list = await http.get<{ products: (Row & { id: string })[] }>(
+        `/store/products?id=${productId}&fields=${fields}`,
+        { headers: storefront.headers }
+      )
+      const admin_ = await http.get<{ values: Record<string, unknown> }>(
+        `/admin/products/${productId}/attributes`,
+        { headers: admin.headers }
+      )
+      const texts = (row: Row | undefined) =>
+        (row?.attribute_values ?? []).map((value) => value.value_text).sort()
+
+      expect(saved.status).toBe(200)
+      expect(texts(page.data.product)).toEqual(["steel"])
+      expect(texts(list.data.products.find((row) => row.id === productId))).toEqual(["steel"])
+      // The panel still reads and writes it
+      expect(admin_.data.values["supplier_code"]).toBe("TED-0042")
+    })
+
     it("keeps values left out, clears one with null and checks each against its definition", async () => {
       const template = await createTemplate()
       const productId = await newProduct()

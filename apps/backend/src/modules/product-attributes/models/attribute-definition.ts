@@ -30,6 +30,11 @@ export const AttributeDefinition = model
     is_required: model.boolean().default(false),
     is_filterable: model.boolean().default(false),
     is_seo_highlight: model.boolean().default(false),
+    /**
+     * Shown to shoppers (T5, adr/0013 addendum): off for the shop's own
+     * notes (a supplier code), which the Store API never returns.
+     */
+    is_public: model.boolean().default(true),
     scope: model.enum(["product", "variant"]).default("product"),
     option_title: model.text().nullable(),
     varies_by: model.enum([...VARIES_BY]).nullable(),

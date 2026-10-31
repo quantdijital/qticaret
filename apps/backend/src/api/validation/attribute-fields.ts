@@ -29,10 +29,10 @@ export const STORE_ATTRIBUTE_FIELDS = [
 ]
 
 // Anywhere in a path: `items.product.attribute_values` reaches them too
-const ATTRIBUTE_RELATION = /(^|\.)\*?attribute_(values|template)\b/
+export const ATTRIBUTE_RELATION = /(^|\.)\*?attribute_(values|template)\b/
 
 /** The store `fields` tokens, without their `+`/`-` prefix. */
-function fieldTokens(req: MedusaRequest): string[] {
+export function fieldTokens(req: MedusaRequest): string[] {
   const fields: unknown = req.query["fields"]
   return (Array.isArray(fields) ? fields : [fields])
     .filter((value): value is string => typeof value === "string")

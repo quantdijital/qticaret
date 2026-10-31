@@ -21,6 +21,7 @@ export interface HighlightValue {
     rank?: number | null
     options?: unknown
     is_seo_highlight?: boolean | null
+    is_public?: boolean | null
   } | null
 }
 
@@ -69,7 +70,11 @@ export function textOf(value: HighlightValue): string {
 
 export function highlightText(values: readonly (HighlightValue | null)[]): string | null {
   const highlighted = values
-    .filter((value): value is HighlightValue => value?.definition?.is_seo_highlight === true)
+    // A hidden attribute is never a highlight (T5); kept out should one be marked so
+    .filter(
+      (value): value is HighlightValue =>
+        value?.definition?.is_seo_highlight === true && value.definition.is_public !== false
+    )
     .sort((a, b) => (a.definition?.rank ?? 0) - (b.definition?.rank ?? 0))
   for (const value of highlighted) {
     const text = textOf(value)

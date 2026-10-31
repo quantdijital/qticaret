@@ -5024,6 +5024,7 @@
     "optionsPlaceholder": "Örn. Paslanmaz çelik, Karbon çelik",
     "removeOption": "{{option}} seçeneğini kaldır",
     "flags": {
+      "is_public": "Vitrinde göster",
       "is_required": "Zorunlu",
       "is_filterable": "Mağazada filtre olsun",
       "is_seo_highlight": "Arama başlığında öne çıkar"

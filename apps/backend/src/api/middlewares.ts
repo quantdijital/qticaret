@@ -77,6 +77,7 @@ import { slugHandles } from "./validation/catalog-handles"
 import { rejectStoreSeoFields } from "./validation/seo-fields"
 import { rejectSensitiveFields } from "./validation/sensitive-fields"
 import { guardApiKeys } from "./http/api-key-guard"
+import { hidePrivateAttributes } from "./http/attribute-visibility"
 import { guardStaffRoles } from "./http/staff-guard"
 import { recordSearchTerms } from "./http/search-terms"
 import { closePresignedUploads, hideJobResultFiles } from "./validation/upload-routes"
@@ -187,11 +188,13 @@ export default defineMiddlewares({
       middlewares: [requireUserActor, validateAndTransformBody(AdminPostFeature)],
     },
     // F2.4: attribute templates and product values (adr/0013); global so
-    // allowFields runs before the core route checks `fields`
+    // allowFields runs before the core route checks `fields`; the answer loses
+    // the attributes the shop keeps to itself (T5), here and on a product's page
     {
       matcher: "/store/products",
       middlewares: [
         allowFields(...STORE_ATTRIBUTE_FIELDS, ...STORE_BRAND_FIELDS, ...STORE_MEDIA_FIELDS),
+        hidePrivateAttributes,
       ],
     },
     // F11.8: the product list's searches counted for the report and the advisor

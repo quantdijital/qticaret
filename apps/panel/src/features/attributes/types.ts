@@ -18,6 +18,11 @@ export interface AttributeDefinition {
   is_required: boolean
   is_filterable: boolean
   is_seo_highlight: boolean
+  /**
+   * Shown to shoppers; off for the shop's own notes, which the Store API
+   * never returns. Missing from a backend before it: shown.
+   */
+  is_public?: boolean
   scope: "product" | "variant"
   option_title: string | null
   varies_by: string | null

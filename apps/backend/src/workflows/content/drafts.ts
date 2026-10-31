@@ -63,8 +63,9 @@ async function productFacts(
     subtitle: product.subtitle ?? null,
     brand: product.brand?.name ?? null,
     category: product.categories?.find((each) => each !== null)?.name ?? null,
+    // A draft is written for shoppers: the shop's own attributes stay out (T5)
     attributes: (product.attribute_values ?? []).flatMap((value) => {
-      const text = value ? textOf(value) : ""
+      const text = value && value.definition?.is_public !== false ? textOf(value) : ""
       const label = value?.definition?.label
       return text && label ? [{ label, value: text }] : []
     }),

@@ -61,6 +61,7 @@ export const definitionInput = z
     is_required: z.boolean().optional(),
     is_filterable: z.boolean().optional(),
     is_seo_highlight: z.boolean().optional(),
+    is_public: z.boolean().optional(),
     scope: z.enum(["product", "variant"]).optional(),
     option_title: text(200).nullable().optional(),
     varies_by: z.enum(VARIES_BY).nullable().optional(),
@@ -86,6 +87,13 @@ export const definitionInput = z
       issue("product_attributes.key_reserved", "key")
     }
     const variant = definition.scope === "variant"
+    // A hidden attribute is never a filter, a title's word or a product option, all shown
+    if (
+      definition.is_public === false &&
+      (definition.is_filterable || definition.is_seo_highlight || variant)
+    ) {
+      issue("product_attributes.private_shown", "is_public")
+    }
     if (variant && !definition.option_title) {
       issue("product_attributes.option_title_required", "option_title")
     }

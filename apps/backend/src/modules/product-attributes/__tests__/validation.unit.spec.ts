@@ -57,6 +57,33 @@ describe("definitionInput", () => {
       "product_attributes.option_title_required",
     ],
     [{ key: "a", label: "x", type: "text", varies_by: "color" }, "product_attributes.variant_only"],
+    // Hidden from shoppers (T5): never a filter, a title's word or a product option
+    [
+      { key: "a", label: "x", type: "text", is_public: false, is_seo_highlight: true },
+      "product_attributes.private_shown",
+    ],
+    [
+      {
+        key: "a",
+        label: "x",
+        type: "select",
+        options: [{ value: "v", label: "V" }],
+        is_public: false,
+        is_filterable: true,
+      },
+      "product_attributes.private_shown",
+    ],
+    [
+      {
+        key: "a",
+        label: "x",
+        type: "text",
+        scope: "variant",
+        option_title: "Beden",
+        is_public: false,
+      },
+      "product_attributes.private_shown",
+    ],
   ])("refuses %p", (input, message) => {
     expect(messages(definitionInput.safeParse(input))).toContain(message)
   })

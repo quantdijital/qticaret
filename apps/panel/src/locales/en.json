@@ -5024,6 +5024,7 @@
     "optionsPlaceholder": "e.g. Stainless steel, Carbon steel",
     "removeOption": "Remove {{option}}",
     "flags": {
+      "is_public": "Show in the shop",
       "is_required": "Required",
       "is_filterable": "Filter in the shop",
       "is_seo_highlight": "Highlight in search titles"

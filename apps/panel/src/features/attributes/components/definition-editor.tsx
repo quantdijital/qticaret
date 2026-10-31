@@ -29,14 +29,21 @@ interface DefinitionEditorProps {
 /** One attribute of the template: what it is called, its kind and where it shows. */
 export function DefinitionEditor({ index, count, onMove, onRemove }: DefinitionEditorProps) {
   const { t } = useTranslation()
-  const { control, register } = useFormContext<TemplateForm>()
+  const { control, register, setValue } = useFormContext<TemplateForm>()
   const base = `definitions.${index}` as const
-  const [label, type, scope, id] = useWatch({
+  const [label, type, scope, id, shown] = useWatch({
     control,
-    name: [`${base}.label`, `${base}.type`, `${base}.scope`, `${base}.id`],
+    name: [`${base}.label`, `${base}.type`, `${base}.scope`, `${base}.id`, `${base}.is_public`],
   })
   const [open, setOpen] = useState(!id)
-  const flags = ["is_required", "is_filterable", "is_seo_highlight"] as const
+  // A product option is always shown: no choice offered for it (T5)
+  const flags =
+    scope === "variant"
+      ? (["is_required", "is_filterable", "is_seo_highlight"] as const)
+      : (["is_public", "is_required", "is_filterable", "is_seo_highlight"] as const)
+  // What a hidden attribute cannot be: a filter, a title's word
+  const needsShown = (flag: string) =>
+    scope !== "variant" && !shown && (flag === "is_filterable" || flag === "is_seo_highlight")
 
   return (
     <li className="rounded-lg border bg-background">
@@ -154,11 +161,16 @@ export function DefinitionEditor({ index, count, onMove, onRemove }: DefinitionE
                 control={control}
                 name={`${base}.${flag}`}
                 render={({ field }) => (
-                  <label className="flex cursor-pointer items-center gap-2 text-sm">
+                  <label className="flex cursor-pointer items-center gap-2 text-sm has-disabled:cursor-not-allowed has-disabled:text-muted-foreground">
                     <Checkbox
-                      checked={field.value}
+                      checked={field.value && !needsShown(flag)}
+                      disabled={needsShown(flag)}
                       onCheckedChange={(checked) => {
                         field.onChange(checked === true)
+                        if (flag === "is_public" && checked !== true) {
+                          setValue(`${base}.is_filterable`, false)
+                          setValue(`${base}.is_seo_highlight`, false)
+                        }
                       }}
                     />
                     {t(`attributes.flags.${flag}`)}

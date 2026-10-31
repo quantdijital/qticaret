@@ -23,6 +23,7 @@ export const definitionRow = (definition: DefinitionInput, templateId: string) =
   is_required: definition.is_required ?? false,
   is_filterable: definition.is_filterable ?? false,
   is_seo_highlight: definition.is_seo_highlight ?? false,
+  is_public: definition.is_public ?? true,
   scope: definition.scope ?? "product",
   option_title: definition.option_title ?? null,
   varies_by: definition.varies_by ?? null,
