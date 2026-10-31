@@ -61,6 +61,9 @@ const REPLACED: readonly Rule[] = [
   { methods: ["POST"], path: "/admin/invites" },
   { methods: ["POST"], path: "/admin/invites/:id/resend" },
   { methods: ["DELETE"], path: "/admin/invites/:id" },
+  // A file under a media record (a product's image, the logo, the share image) deleted
+  // round it would leave the record pointing at nothing; the media cleanup removes them
+  { methods: ["DELETE"], path: "/admin/uploads/:id" },
 ]
 
 /** The owner's alone (adr/0027, adr/0040 §1). */

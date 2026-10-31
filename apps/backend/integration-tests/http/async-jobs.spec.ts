@@ -196,7 +196,8 @@ medusaIntegrationTestRunner({
       )
 
       expect(viaUploads.status).toBe(404)
-      expect(deleteViaUploads.status).toBe(404)
+      // Medusa's delete of an upload is no one's: the media cleanup removes files
+      expect(deleteViaUploads.status).toBe(403)
       expect(presigned.status).toBe(404)
       expect(byKey.status).toBe(403)
     })

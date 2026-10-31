@@ -1599,7 +1599,7 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
     - Davet edilen adres için önceden açılmış giriş kaydı daveti engelliyor (erişim vermiyor). Destek, kimseye bağlı olmayan kaydı `medusa exec ./src/scripts/remove-orphan-login.ts <e-posta>` ile siler. Kalıcı çözüm: kabulü sunucu tarafında jetonla birlikte yapmak (sonraya).
     - Sonraya yazıldı (düşük): 2FA kurulduğunda, kapatıldığında ya da sıfırlandığında kişiye e-posta (çalınan şifreyle ilk kurulumu yapanın hesabı ele geçirmesine karşı uyarı); "mağaza zorunlu tutarken kendi 2FA'nı kapatamazsın" kuralının sunucuda uygulanması (şu an koruyucu bir sonraki girişte yakalıyor; telefon değiştirme akışı bu yolu kullanıyor).
     - F16'ya: panelin kendi HTML'i tıklama tuzağına karşı başlık almıyor; vekil sunucu `frame-ancestors 'none'`, `X-Frame-Options: DENY`, `Referrer-Policy: no-referrer` ve panel CSP'si ekleyecek (docs/04).
-    - Mağazanın silinmiş bir paylaşım görseli kırık og:image olur (güvenlik değil); görsel silinirken ayardan da kaldırmak sonraya.
+    - ~~Mağazanın silinmiş bir paylaşım görseli kırık og:image olur~~ kapandı (2026-10-31): medyayı silmenin tek yolu terk edilmiş medya temizliği ve o, paylaşım görselini koruyor; Medusa'nın `DELETE /admin/uploads/:id` ucu herkese kapatıldı (ürün görseli ve logo da aynı yoldan kırılabilirdi).
   - Y12 ekran bütünlüğü (2026-10-30):
     - Uzun içerikli düzenleyici sayfalarında (ürün, içerik, filtre sayfası) sağ sütunun son kartı sol sütuna yetişmek için uzuyor ve altında boşluk kalıyor (son kart uzar kuralı). Düzenleyici metni artık kendi içinde kaydığından boşluk en çok birkaç yüz piksel. Tamamen kaldırmak için yan sütun yapışkan yapılabilir; ama yan sütun ekrandan uzun olduğunda alt kartlar ancak sayfa sonunda görünür, o yüzden yapmadım.
     - "Webhook" Türkçe arayüzde de "webhook" kaldı (API ayarları teknik kullanıcı içindir; "web kancası" kaldırıldı). Ürün feed'i için de "feed" kullanılıyor.
@@ -1821,7 +1821,7 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
   - **F3.17:** Facet landing ad alanı alt kategori yollarıyla aynı biçimde (docs/13 notu).
   - ~~Admin hata metinleri~~: çözüldü (adr/0021, dashboard'a Türkçe cümle).
   - **İçe aktarma (T15'e kadar):** Medusa'nın CSV'sinde handle'ı olmayan Türkçe başlıklı satır tüm chunk'ı `catalog.handle_invalid` ile reddettiriyor; hangi satır olduğu söylenmiyor.
-  - **Yayın kuralı yarışı:** Aynı anda yayınlama ve varyant ölçüsünü silme ölçüsüz bir yayın bırakabilir; F7 kargo hesabı savunmacı kontrol yapar.
+  - **Yayın kuralı yarışı:** Aynı anda yayınlama ve varyant ölçüsünü silme ölçüsüz bir yayın bırakabilir; F7 kargo hesabı savunmacı kontrol yapar. Kabul edilmiş risk (2026-10-31 denetimi): sonucu kargo hesabında yakalanıyor.
   - **Deploy adımı:** `claim-catalog-paths` her veritabanında bir kez çalıştırılır (F16 runbook).
 - [x] **Gözden geçir: F3 T1a muhafazakâr kararları:**
   - Ağırlık ve ölçü mağaza ayarındaki birimlerde (varsayılan g ve cm); seed ve testler bu birimlerle yazıldı. F7.2 dönüştürür.

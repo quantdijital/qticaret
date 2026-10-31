@@ -23,8 +23,9 @@ describe("staff roles", () => {
     ["POST", "/admin/invites/invite_1/resend"],
     ["DELETE", "/admin/invites/invite_1"],
     ["DELETE", "/admin/customers/cus_1"],
+    ["DELETE", "/admin/uploads/media-1.webp"],
   ] as const)(
-    "keeps Medusa's %s %s from everyone: /admin/staff does it with its guards",
+    "keeps Medusa's %s %s from everyone: our own routes do it with their guards",
     (method, path) => {
       for (const role of STAFF_ROLES) {
         expect(decide(role, method, path)).toEqual({ allowed: false, reason: "replaced" })
