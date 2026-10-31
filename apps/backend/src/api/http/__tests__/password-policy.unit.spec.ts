@@ -41,8 +41,9 @@ describe("newPasswordPolicy", () => {
 })
 
 describe("breachCheckOn", () => {
-  it("is on in production and off elsewhere unless set", () => {
+  it("is on where a shop is deployed and off elsewhere unless set", () => {
     expect(breachCheckOn(undefined, "production")).toBe(true)
+    expect(breachCheckOn(undefined, "staging")).toBe(true)
     expect(breachCheckOn(undefined, "development")).toBe(false)
     expect(breachCheckOn(undefined, "test")).toBe(false)
     expect(breachCheckOn(undefined, undefined)).toBe(false)

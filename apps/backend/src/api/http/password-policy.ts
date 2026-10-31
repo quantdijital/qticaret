@@ -6,15 +6,16 @@ import { claimsOf } from "./bearer"
 
 /**
  * Whether new passwords are looked up in the breach list (adr/0043,
- * approved 2026-10-31): on in production (live and staging), off in
- * development and tests, where it would reach an outside service each
- * run. `PASSWORD_BREACH_CHECK=on|off` overrides either, read at each request.
+ * approved 2026-10-31): on where a shop is deployed (production and
+ * staging), off in development and tests, where it would reach an outside
+ * service each run. `PASSWORD_BREACH_CHECK=on|off` overrides either, read
+ * at each request.
  */
 export function breachCheckOn(
   flag: string | undefined = process.env["PASSWORD_BREACH_CHECK"],
   nodeEnv: string | undefined = process.env["NODE_ENV"]
 ): boolean {
-  return flag ? flag === "on" : nodeEnv === "production"
+  return flag ? flag === "on" : nodeEnv === "production" || nodeEnv === "staging"
 }
 
 /**
