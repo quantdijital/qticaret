@@ -187,9 +187,10 @@ Elimizde olanlar:
 
 **Sonraya kalanlar (gözden geçir)**
 
-- Medusa'nın e-posta doğrulama onayı kodu isteyen oturuma bağlamıyor (F10'dan beri, adr/0037). Taşımaya özgü etkisi anahtarla kapandı; genel düzeltme (onayı isteyen kimliğe bağlamak) F15'te.
+- ~~Medusa'nın e-posta doğrulama onayı kodu isteyen oturuma bağlamıyor.~~ F15.1'de kapandı: onay kodu isteyen kimliğin oturumunda yapılır (adr/0037 ek).
 - 512 MB'lık Shopify toplu dosyası ve 100 MB'lık akış bellekte açılıyor; satır satır okuma büyük mağazayla ilk geçişte.
 - Görsel eklendikten sonra kayıt yazılmadan çökme görseli yineleyebilir (düşük olasılık; elle silinir).
-- Taşınan izin kanıtı yalnızca kaynağı içeriyor (kayıt başına anahtar ve çalıştırma yok).
-- Rolü düşürülen sahip 7 gün boyunca kendi raporunu indirebilir; iş ile dosya yüklemesi arasında süreç ölürse yükleme 3 günden sonra temizlenmiyor (genel arka plan işi davranışı).
-- Taşınan ve yayında görünen yorumlar onay kuyruğundan geçmez (eski sitede yayındaydılar); bağlantı içeren yorum da onaylı gelir.
+- ~~Taşınan izin kanıtı yalnızca kaynağı içeriyor.~~ F15.1'de kapandı: kanıt, kaynağın yanında çalıştırmanın kimliğini (`run`) ve kaynaktaki kaydın anahtarını (`record`) taşır.
+- ~~Rolü düşürülen sahip 7 gün boyunca kendi raporunu indirebilir.~~ F15.1'de kapandı: taşıma işleri (`ownerOnly`) yalnızca o anki sahibe görünür, isteyen de ancak sahipken.
+- İş ile dosya yüklemesi arasında süreç ölürse yükleme 3 günden sonra temizlenmiyor (genel arka plan işi davranışı).
+- Taşınan ve yayında görünen yorumlar onay kuyruğundan geçmez (eski sitede yayındaydılar). Bağlantı içeren yorum F15.1'den beri onay bekler, yeni yazılan bir yorum gibi.

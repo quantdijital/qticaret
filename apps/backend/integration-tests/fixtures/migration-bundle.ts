@@ -94,6 +94,15 @@ export const bundle = {
       created_at: "2025-05-11T09:00:00+03:00",
     },
     {
+      source_key: "rev-4",
+      product_source_key: "prod-1",
+      author: "Mehmet Demir",
+      rating: 1,
+      body: "Daha ucuzu www.baska-magaza.com adresinde.",
+      published: true,
+      created_at: "2025-05-11T12:00:00+03:00",
+    },
+    {
       source_key: "rev-3",
       product_source_key: "yok",
       rating: 4,

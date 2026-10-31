@@ -12,6 +12,8 @@ import { MIGRATION_MODULE } from "../../src/modules/migration"
 import type MigrationModuleService from "../../src/modules/migration/service"
 import { PRODUCT_REVIEWS_MODULE } from "../../src/modules/product-reviews"
 import type ProductReviewsModuleService from "../../src/modules/product-reviews/service"
+import { STAFF_ROLES_MODULE } from "../../src/modules/staff-roles"
+import type StaffRolesModuleService from "../../src/modules/staff-roles/service"
 import { eraseCustomer } from "../../src/workflows/legal/erasure/customer"
 import { eraseTraces } from "../../src/workflows/legal/erasure/traces"
 import { createAdminUser } from "../helpers/admin"
@@ -64,7 +66,7 @@ medusaIntegrationTestRunner({
         customer: { read: 3, created: 1, found: 1, skipped: 1 },
         consent: { created: 1 },
         order: { read: 2, created: 2 },
-        review: { read: 3, created: 2, skipped: 1 },
+        review: { read: 4, created: 3, skipped: 1 },
         page: { read: 1 },
       })
       const query = getContainer().resolve(ContainerRegistrationKeys.QUERY)
@@ -91,7 +93,7 @@ medusaIntegrationTestRunner({
         product: { created: 2, failed: 0 },
         customer: { created: 1, found: 1, skipped: 1 },
         order: { created: 2 },
-        review: { created: 2, skipped: 1 },
+        review: { created: 3, skipped: 1 },
       })
       const products = await productsOf()
       const pan = products.find((product) => product.handle === "tasinan-dokum-tava")
@@ -101,11 +103,19 @@ medusaIntegrationTestRunner({
 
       const [ayse] = await customers.listCustomers({ email: "ayse.tasinan@example.com" })
       expect(ayse).toBeDefined()
-      const consent = await getContainer()
-        .resolve<MessagingModuleService>(MESSAGING_MODULE)
-        .listMessageConsents({ customer_id: ayse?.id ?? "" })
+      const messaging = getContainer().resolve<MessagingModuleService>(MESSAGING_MODULE)
+      const consent = await messaging.listMessageConsents({ customer_id: ayse?.id ?? "" })
       expect(consent).toMatchObject([{ channel: "email", status: "granted", source: "import" }])
       expect(new Date(consent[0]?.changed_at ?? 0).toISOString()).toBe("2025-03-01T07:00:00.000Z")
+      // Its proof names the run and the source's record it came from
+      const [applyRun] = await migration().listMigrationRuns({ mode: "apply" })
+      const [event] = await messaging.listMessageConsentEvents({ consent_id: consent[0]?.id ?? "" })
+      expect(event?.evidence).toEqual({
+        origin: "migration",
+        source: "bundle",
+        run: applyRun?.id,
+        record: "cus-1",
+      })
 
       const kept = await migration().listLegacyOrders({}, { order: { number: "ASC" } })
       expect(kept.map((order) => [order.number, order.customer_id])).toEqual([
@@ -121,6 +131,8 @@ medusaIntegrationTestRunner({
       expect(moved).toMatchObject([
         { rating: 2, status: "approved", origin: "migration", author_name: "Ayşe K." },
         { rating: 5, status: "pending", origin: "migration", author_name: "Müşteri" },
+        // Shown there, but with a link: it waits for the shop, as a new one would
+        { rating: 1, status: "pending", origin: "migration", has_link: true },
       ])
       expect(moved[0]?.customer_id).toBe(ayse?.id)
       expect(new Date(moved[0]?.created_at ?? 0).toISOString()).toBe("2025-05-10T06:00:00.000Z")
@@ -141,11 +153,11 @@ medusaIntegrationTestRunner({
         customer: { created: 0, found: 2 },
         consent: { created: 0 },
         order: { created: 0, found: 2 },
-        review: { created: 0, found: 2 },
+        review: { created: 0, found: 3 },
       })
       expect(await productsOf()).toHaveLength(2)
       expect(await migration().listLegacyOrders({})).toHaveLength(2)
-      expect(await reviews.listProductReviews({ product_id: pan?.id ?? "" })).toHaveLength(2)
+      expect(await reviews.listProductReviews({ product_id: pan?.id ?? "" })).toHaveLength(3)
       const { data: pans } = await query.graph({
         entity: "product_category",
         fields: ["id"],
@@ -215,6 +227,18 @@ medusaIntegrationTestRunner({
         { headers: owner.headers }
       )
       expect(listed.data.runs).toMatchObject([{ status: "failed", mode: "check" }])
+
+      // An owner made admin keeps nothing of it: a report holds the customers
+      await createAdminUser(http, getContainer())
+      await getContainer()
+        .resolve<StaffRolesModuleService>(STAFF_ROLES_MODULE)
+        .setRole(owner.userId, "admin", null)
+      const seen = await settle(http.get(`/admin/async-jobs/${job.id}`, { headers: owner.headers }))
+      const jobs = await http.get<{ async_jobs: { id: string }[] }>("/admin/async-jobs", {
+        headers: owner.headers,
+      })
+      expect(seen.status).toBe(404)
+      expect(jobs.data.async_jobs.map((one) => one.id)).not.toContain(job.id)
     })
 
     async function publishableKey(): Promise<string> {

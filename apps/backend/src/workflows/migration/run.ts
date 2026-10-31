@@ -189,6 +189,7 @@ export async function runMigration(
   const customers = await migrateCustomers(
     container,
     source.id,
+    runId,
     await listOf(source.customers(), beat("customer")),
     apply,
     spanOf(hooks, SPAN.customer)

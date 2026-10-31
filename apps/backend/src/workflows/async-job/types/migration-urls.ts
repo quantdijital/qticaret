@@ -36,7 +36,7 @@ export const migrationUrls: JobType<z.infer<typeof input>> = {
   group: "catalog.write",
   resultTtlDays: 7,
   containsPersonalData: false,
-  privateToAsker: true,
+  ownerOnly: true,
   internal: true,
   execute: async ({ container, job, progress, resultFile }) => {
     const counts = await applyUrls(container, (done, total) =>

@@ -32,7 +32,10 @@ export interface MigratedReview {
   body: string
   author_name: string
   has_link: boolean
-  /** Shown on the old site: approved here; one waiting there waits here. */
+  /**
+   * Shown on the old site: approved here, unless it carries a link (that
+   * waits for the shop, as a new one would); one waiting there waits here.
+   */
   published: boolean
   created_at: Date
 }
@@ -163,6 +166,7 @@ class ProductReviewsModuleService extends MedusaService({ ProductReview, Product
       ).map((row) => [row.source_ref ?? "", row.id])
     )
     const fresh = reviews.filter((review) => !written.has(review.source_ref))
+    const approved = (review: MigratedReview) => review.published && !review.has_link
     const created = await this.createProductReviews(
       fresh.map((review) => ({
         source_ref: review.source_ref,
@@ -175,14 +179,12 @@ class ProductReviewsModuleService extends MedusaService({ ProductReview, Product
         author_name: review.author_name,
         has_link: review.has_link,
         origin: "migration" as const,
-        status: review.published ? ("approved" as const) : ("pending" as const),
+        status: approved(review) ? ("approved" as const) : ("pending" as const),
         created_at: review.created_at,
       })),
       sharedContext
     )
-    const touched = new Set(
-      fresh.filter((review) => review.published).map((review) => review.product_id)
-    )
+    const touched = new Set(fresh.filter(approved).map((review) => review.product_id))
     for (const productId of touched) {
       await this.recountRating_(productId, sharedContext)
     }

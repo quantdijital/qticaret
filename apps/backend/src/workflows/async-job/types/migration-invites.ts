@@ -20,7 +20,7 @@ export const migrationInvites: JobType<z.infer<typeof input>> = {
   singleton: true,
   resultTtlDays: 1,
   containsPersonalData: false,
-  privateToAsker: true,
+  ownerOnly: true,
   internal: true,
   execute: async ({ container, job, progress }) => {
     const queued = await container.resolve<MigrationModuleService>(MIGRATION_MODULE).queueInvites()

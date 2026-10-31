@@ -55,6 +55,7 @@ export interface CustomerCounts {
 async function keepConsents(
   container: Container,
   source: string,
+  run: string,
   customers: readonly SourceCustomer[],
   ids: ReadonlyMap<string, string>
 ): Promise<number> {
@@ -79,7 +80,8 @@ async function keepConsents(
           customer_id: ids.get(emailKey(customer.email)) ?? null,
           given_at: at,
           only_new: true,
-          evidence: { origin: "migration", source },
+          // Which run brought it, from which of the source's records
+          evidence: { origin: "migration", source, run, record: customer.source_key },
         })
         kept += changed ? 1 : 0
       } catch (error) {
@@ -102,6 +104,7 @@ async function keepConsents(
 export async function migrateCustomers(
   container: Container,
   source: string,
+  run: string,
   customers: readonly SourceCustomer[],
   apply: boolean,
   progress: StepProgress
@@ -168,7 +171,7 @@ export async function migrateCustomers(
       counts.created += result.length
     }
     if (apply) {
-      counts.consents += await keepConsents(container, source, batch, ids)
+      counts.consents += await keepConsents(container, source, run, batch, ids)
     } else {
       // At most: an address with an answer here keeps its own
       for (const customer of batch) {

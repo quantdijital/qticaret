@@ -6,7 +6,7 @@ import type AsyncJobModuleService from "../../../../../modules/async-job/service
 import { jobType } from "../../../../../workflows/async-job/types"
 import { auditContext, auditService } from "../../../../http/audit/context"
 import { rejectRequest } from "../../../../http/reject"
-import { staffRoleOf } from "../../../../http/staff-guard"
+import { mayReach } from "../../access"
 import { publicInput } from "../../serialize"
 
 /**
@@ -24,11 +24,7 @@ export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse):
   }
   const personal = jobType(job.type)?.containsPersonalData ?? true
   // A file with personal data goes to whoever asked for it, or the owner (adr/0040)
-  if (
-    personal &&
-    job.requested_by !== req.auth_context.actor_id &&
-    (await staffRoleOf(req)) !== "owner"
-  ) {
+  if (!(await mayReach(req, job, true))) {
     throw new MedusaError(MedusaError.Types.NOT_FOUND, "async_job.result_unavailable")
   }
   if (personal) {

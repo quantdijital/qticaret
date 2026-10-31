@@ -15,7 +15,7 @@ export const migrationSitemap: JobType<z.infer<typeof input>> = {
   group: "catalog.write",
   resultTtlDays: 1,
   containsPersonalData: false,
-  privateToAsker: true,
+  ownerOnly: true,
   internal: true,
   execute: async ({ container, progress }, { url }) => {
     const read = await importSitemap(container, url, (done, total) =>

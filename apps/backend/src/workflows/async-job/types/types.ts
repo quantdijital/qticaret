@@ -46,6 +46,12 @@ export interface JobType<Input = unknown> {
    */
   privateToAsker?: boolean
   /**
+   * Seen, and its file read, by an owner alone; its asker too only while
+   * an owner (a migration's report holds the shop's customer list: an owner
+   * made admin keeps nothing of it). Stricter than `privateToAsker`.
+   */
+  ownerOnly?: boolean
+  /**
    * Queued only by its own route (an import queued with the file it was
    * sent), never through `POST /admin/async-jobs`, whose input it would trust.
    */

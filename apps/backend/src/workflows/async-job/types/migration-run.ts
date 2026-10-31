@@ -85,7 +85,7 @@ export const migrationRun: JobType<z.infer<typeof input>> = {
   resultTtlDays: 7,
   // The report names source records by their keys, and a source may key customers by e-mail
   containsPersonalData: true,
-  privateToAsker: true,
+  ownerOnly: true,
   internal: true,
   execute: async ({ container, job, progress, resultFile }, values) => {
     const { mode, defaults } = values
