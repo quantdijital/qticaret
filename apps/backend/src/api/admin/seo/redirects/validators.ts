@@ -27,7 +27,7 @@ export const AdminPostRedirect = z
       .int()
       .refine(isStatus, { message: "seo.redirect_status_invalid" })
       .default(301)
-      .transform((value) => value as RedirectStatus),
+      .transform((value) => value),
     query_policy: z.enum(QUERY_POLICIES).default("keep"),
     query_keep: z.array(z.string().max(64)).max(20).optional(),
   })
