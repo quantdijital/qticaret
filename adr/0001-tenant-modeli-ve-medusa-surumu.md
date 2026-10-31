@@ -37,8 +37,8 @@ CI kritik açıkta kırılır. Yüksek seviyedekiler aşağıda takip edilir; hi
 | Paket | Kaynak | Durum |
 |---|---|---|
 | lodash <4.18.1 (CVE-2026-4800) | @graphql-codegen, build sırasında | `pnpm-workspace.yaml` override ile 4.18.1'e çekildi |
-| zod 4.2.0 (CVE-2023-54404, DoS) | doğrudan bağımlılık + admin-sdk (exact) | 4.6.6, 14 gün kuralı 2026-10-25'te doluyor → bump + override |
-| body-parser 1.20.8 (DoS) | express ~1.20.3 | 1.20.9, 2026-11-05'te uygun → override |
+| zod 4.2.0 (CVE-2023-54404, DoS) | doğrudan bağımlılık + admin-sdk (exact) | **Kapandı (2026-10-31):** doğrudan bağımlılık 4.6.6, `pnpm-workspace.yaml` override `zod@>=4.0.0 <4.6.6` → 4.6.6. Kalan zod 3.25.76 yalnızca shadcn CLI'ında (geliştirme aracı; 3.x için yama yok, kabul edilmiş risk) |
+| body-parser 1.20.8 (DoS) | express ~1.20.3 | 1.20.9, 2026-11-05'te uygun → override (kullanıcı onayı 2026-10-31); o zamana kadar kenar önlemi (Cloudflare, ADR-0003) |
 | multer 2.4.0 (DoS) | @medusajs/medusa ^2.3.0 | 2.5.0, 2026-11-05'te uygun → override |
 | @graphql-tools/utils 10.11.0 (prototype pollution DoS) | @graphql-codegen ^10, build sırasında | v10 için yama yok, düzeltme 12.x (major). İstek yolunda değil, girdisi güvenilir şema; **kabul edilmiş risk**, Medusa yükseltmesinde tekrar bakılacak |
 

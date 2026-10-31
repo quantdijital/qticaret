@@ -16,6 +16,10 @@ overrides:
   # CVE-2026-4800 (code execution via template imports), pulled in by
   # @graphql-codegen/plugin-helpers (~4.17.0) at build time; 4.18 is semver-compatible
   "lodash@<4.18.1": 4.18.1
+  # CVE-2023-54404 (memory exhaustion on large collections), zod 4 below 4.6.6:
+  # ours and @medusajs/framework's (exact 4.2.0). The 3.x copy is only the
+  # shadcn CLI's (development), with no 3.x fix.
+  "zod@>=4.0.0 <4.6.6": 4.6.6
 
 # Dependency build/postinstall scripts are blocked unless listed here.
 # Add an entry only after reviewing the package's install script.
