@@ -464,7 +464,7 @@ Güvenlik tabanı F0–F2'de kuruldu; bu faz doğrular ve derinleştirir.
 - F15.9 Sorumlu açıklama: `security.txt`, iletişim kanalı, SLA; bağımlılık ve imaj taramalarının dönemsel raporu
 
 **KK:**
-- [ ] Kritik/yüksek güvenlik bulgusu yok (iç review + dış pentest)
+- [ ] Kritik/yüksek güvenlik bulgusu yok (iç review + dış pentest) — iç incelemeler tamam (2026-10-31: F15 boyunca üç inceleme, açık yüksek/kritik yok; ADR-0044, ADR-0045); dış pentest F16'da (`docs/runbooks/kenar-ve-pentest.md`)
 - [ ] Hedef yük altında p95 < 500 ms (Store API okuma), checkout hata oranı < %0,5 — yerelde karşılandı (2026-10-31, `docs/perf-raporlari/2026-10-31-yerel.md`); staging ölçümüyle işaretlenir (F16)
 - [x] Geri yükleme provası dokümante ve başarılı — 2026-10-31, `infra/backup/`, `docs/runbooks/tatbikatlar/2026-10-31-yedek-geri-yukleme.md` (geliştirmede; canlıda aylık, F16.8)
 - [x] Velocity kuralını aşan checkout engelleniyor veya incelemeye düşüyor (testli) — 2026-10-31, ADR-0044, `integration-tests/http/fraud-guard.spec.ts`
