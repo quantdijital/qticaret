@@ -6,16 +6,23 @@ import { claimsOf } from "./bearer"
 
 /**
  * Whether new passwords are looked up in the breach list (adr/0043,
- * approved 2026-10-31): on where a shop is deployed (production and
- * staging), off in development and tests, where it would reach an outside
- * service each run. `PASSWORD_BREACH_CHECK=on|off` overrides either, read
- * at each request.
+ * approved 2026-10-31): on wherever a shop may be live, off only on an
+ * explicit development or test environment, where it would reach an
+ * outside service each run. An unset NODE_ENV counts as live, as it does
+ * for the rest of the platform (the F15 security review).
+ * `PASSWORD_BREACH_CHECK=on|off` overrides either; both read trimmed, as
+ * the environment check reads them, at each request.
  */
 export function breachCheckOn(
   flag: string | undefined = process.env["PASSWORD_BREACH_CHECK"],
   nodeEnv: string | undefined = process.env["NODE_ENV"]
 ): boolean {
-  return flag ? flag === "on" : nodeEnv === "production" || nodeEnv === "staging"
+  const setting = flag?.trim()
+  if (setting) {
+    return setting === "on"
+  }
+  const environment = nodeEnv?.trim()
+  return environment !== "development" && environment !== "test"
 }
 
 /**

@@ -1,6 +1,7 @@
 import { registerOtel } from "@medusajs/medusa"
 import { OTLPTraceExporter } from "@opentelemetry/exporter-trace-otlp-http"
 import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-base"
+import { ScrubbingExporter } from "./src/lib/observability/scrub"
 
 /**
  * Traces (F15.4, adr/0045): Medusa's OpenTelemetry hook, on only when an
@@ -14,8 +15,11 @@ import { BatchSpanProcessor } from "@opentelemetry/sdk-trace-base"
  *
  * What a trace holds: request method, route and status (query values
  * redacted by Medusa except paging and field lists), workflow and step
- * names, Query entities, SQL text without its parameters, cache keys. No
- * headers and no bodies.
+ * names, Query entities, cache keys, SQL text. The ORM writes values into
+ * the SQL text (an e-mail looked up was found in a span, the F15 security
+ * review), so every span leaves through `ScrubbingExporter`: SQL without
+ * its literals, every other text through the logs' redaction. No headers
+ * and no bodies.
  */
 export function register() {
   if (!process.env["OTEL_EXPORTER_OTLP_ENDPOINT"]) {
@@ -23,7 +27,7 @@ export function register() {
   }
   registerOtel({
     serviceName: process.env["OTEL_SERVICE_NAME"] ?? "qticaret-backend",
-    spanProcessors: [new BatchSpanProcessor(new OTLPTraceExporter())],
+    spanProcessors: [new BatchSpanProcessor(new ScrubbingExporter(new OTLPTraceExporter()))],
     instrument: { http: true, workflows: true, query: true, db: true, cache: true },
   })
 }

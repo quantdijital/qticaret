@@ -239,6 +239,29 @@ describe("parseEnv", () => {
     expect(errorOf({ ...validEnv, ...load })).toContain("LOAD_TEST")
   })
 
+  it("sends traces over TLS once deployed, but to a collector on this machine", () => {
+    const deployed = {
+      ...validEnv,
+      ...s3Env,
+      CREDENTIALS_ENCRYPTION_KEY: hexKey(),
+      AUTH_MFA_ENCRYPTION_KEY: hexKey(),
+      NODE_ENV: "production",
+    }
+    expect(
+      errorOf({
+        ...deployed,
+        OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: "http://iz.example.com/v1/traces",
+      })
+    ).toContain("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: must be https")
+    expect(
+      errorOf({ ...deployed, OTEL_EXPORTER_OTLP_ENDPOINT: "http://iz.example.com" })
+    ).toContain("OTEL_EXPORTER_OTLP_ENDPOINT: must be https")
+    expect(
+      parseEnv({ ...validEnv, OTEL_EXPORTER_OTLP_ENDPOINT: "http://iz.example.com" })
+        .OTEL_EXPORTER_OTLP_ENDPOINT
+    ).toBe("http://iz.example.com")
+  })
+
   it("reads a GlitchTip DSN and an OTLP collector, and refuses a DSN it cannot use", () => {
     const env = parseEnv({
       ...validEnv,

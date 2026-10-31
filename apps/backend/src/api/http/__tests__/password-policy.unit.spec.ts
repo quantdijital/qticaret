@@ -41,12 +41,19 @@ describe("newPasswordPolicy", () => {
 })
 
 describe("breachCheckOn", () => {
-  it("is on where a shop is deployed and off elsewhere unless set", () => {
+  it("is on wherever a shop may be live, off only in development and tests", () => {
     expect(breachCheckOn(undefined, "production")).toBe(true)
     expect(breachCheckOn(undefined, "staging")).toBe(true)
+    expect(breachCheckOn(undefined, "production ")).toBe(true)
+    // Unset (empty: undefined would take the test run's own NODE_ENV) counts as live
+    expect(breachCheckOn(undefined, "")).toBe(true)
     expect(breachCheckOn(undefined, "development")).toBe(false)
     expect(breachCheckOn(undefined, "test")).toBe(false)
-    expect(breachCheckOn(undefined, undefined)).toBe(false)
+  })
+
+  it("reads the setting trimmed, as the environment check does", () => {
+    expect(breachCheckOn("on ", "test")).toBe(true)
+    expect(breachCheckOn(" off", "production")).toBe(false)
   })
 
   it("follows the setting over the environment", () => {

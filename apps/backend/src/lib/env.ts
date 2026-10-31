@@ -58,6 +58,8 @@ const envSchema = z.object({
     .refine((value) => parseDsn(value) !== null, "must be a DSN: https://<key>@<host>/<project id>")
     .optional(),
   OTEL_EXPORTER_OTLP_ENDPOINT: z.url({ protocol: /^https?$/ }).optional(),
+  // The exporter prefers this one over the general endpoint: checked alike
+  OTEL_EXPORTER_OTLP_TRACES_ENDPOINT: z.url({ protocol: /^https?$/ }).optional(),
   OTEL_SERVICE_NAME: z.string().max(100).optional(),
   // The deployed version, on each error event (CI sets it to the commit)
   RELEASE: z.string().max(100).optional(),
@@ -176,6 +178,9 @@ const S3_REQUIRED = [
   "S3_SECRET_ACCESS_KEY",
 ] as const
 
+const LOOPBACK_HOSTS = new Set(["localhost", "127.0.0.1", "[::1]"])
+const isLoopbackUrl = (value: string) => LOOPBACK_HOSTS.has(new URL(value).hostname)
+
 const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
   // Sessions must survive restarts and be shared across instances (adr/0004)
   if ((env.NODE_ENV === "production" || env.NODE_ENV === "staging") && !env.REDIS_URL) {
@@ -197,6 +202,21 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
         message: deployed
           ? "is required in production and staging"
           : "is required with the other S3 variables",
+      })
+    }
+  }
+  // Traces carry routes and statement shapes: over TLS once deployed, but
+  // for a collector on the same machine (the F15 security review)
+  for (const name of [
+    "OTEL_EXPORTER_OTLP_ENDPOINT",
+    "OTEL_EXPORTER_OTLP_TRACES_ENDPOINT",
+  ] as const) {
+    const value = env[name]
+    if (deployed && value?.startsWith("http:") && !isLoopbackUrl(value)) {
+      ctx.addIssue({
+        code: "custom",
+        path: [name],
+        message: "must be https in production and staging, unless on this machine",
       })
     }
   }
