@@ -358,6 +358,7 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/warehouses/:id": false,
   "POST /admin/warehouses": false,
   "POST /admin/webhooks/:id": false,
+  "POST /admin/webhooks/:id/rotate-secret": false,
   "DELETE /admin/webhooks/:id": false,
   "POST /admin/webhooks": false,
   "POST /admin/einvoice/parasut": false,

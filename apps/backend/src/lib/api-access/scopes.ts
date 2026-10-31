@@ -101,6 +101,12 @@ export const SCOPED_ROUTES: readonly ScopedRoute[] = [
     path: "/admin/webhooks/:id",
     summary: "Webhook aboneliğini sil",
   },
+  {
+    scope: "webhooks:manage",
+    method: "POST",
+    path: "/admin/webhooks/:id/rotate-secret",
+    summary: "Webhook imza sırrını yenile (yeni sır yalnızca bu yanıtta)",
+  },
   { scope: "invoices:read", method: "GET", path: "/admin/invoices", summary: "Faturaları listele" },
   { scope: "invoices:read", method: "GET", path: "/admin/invoices/:id", summary: "Fatura kaydı" },
   {

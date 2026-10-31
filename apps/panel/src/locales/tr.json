@@ -1791,6 +1791,9 @@
         "eventsLabel": "Olaylar",
         "subscribe": "Aboneliği oluştur",
         "secretOnce": "Bu sır bir daha gösterilmeyecek.",
+        "rotate": "Sırrı yenile",
+        "rotateTitle": "İmza sırrını yenile",
+        "rotateHint": "{{url}} adresine giden istekler yeni sırla imzalanacak; alıcı sistem eski sırla doğruladığı istekleri hemen reddetmeye başlar. Yeni sırrı alıcı sisteme girmeye hazır olun.",
         "copy": "Sırrı kopyala",
         "verify": "Her istekte X-Webhook-Signature başlığı t=<zaman>,v1=<imza> biçimindedir; imza, sırla HMAC-SHA256(zaman + \".\" + gövde)'dir. Eski zamanlı istekleri reddedin. X-Webhook-Id aynı teslimin yeniden denemesinde değişmez.",
         "events": {

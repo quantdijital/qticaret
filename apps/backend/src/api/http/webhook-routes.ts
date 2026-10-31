@@ -1,5 +1,6 @@
 import type { MedusaNextFunction, MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { validateAndTransformBody } from "@medusajs/framework/http"
+import { z } from "@medusajs/framework/zod"
 import { EVENT_SCOPES } from "../../lib/webhooks"
 import type { WebhookEvent } from "../../lib/webhooks"
 import { API_KEY_SCOPES_MODULE } from "../../modules/api-key-scopes"
@@ -52,5 +53,10 @@ export const WEBHOOK_ROUTES = [
     matcher: "/admin/webhooks/:id",
     methods: ["POST" as const],
     middlewares: [validateAndTransformBody(AdminPostWebhookUpdate), keyEventsInScope],
+  },
+  {
+    matcher: "/admin/webhooks/:id/rotate-secret",
+    methods: ["POST" as const],
+    middlewares: [validateAndTransformBody(z.object({}).strict())],
   },
 ]

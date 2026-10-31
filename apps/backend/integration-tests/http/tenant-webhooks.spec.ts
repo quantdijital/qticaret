@@ -34,7 +34,7 @@ const realSend = webhookTransport.send
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
     const http = api as HttpClient
-    let admin: { headers: Record<string, string> }
+    let admin: { headers: Record<string, string>; plain: Record<string, string> }
     let shop: StockShop
     let receiver: Server
     let receiverUrl: string
@@ -145,6 +145,40 @@ medusaIntegrationTestRunner({
       expect(sent?.body).not.toMatch(/ayse|Yılmaz|Demo Sokak|example\.com/i)
       expect(stock).toBeGreaterThan(0)
       expect(received.some((each) => each.body.includes('"type":"stock.changed"'))).toBe(true)
+    })
+
+    it("signs with a new secret once rotated, the person asked again (the F15 audit)", async () => {
+      const made = await subscribe({
+        url: "https://hooks.example.com/qt",
+        events: ["order.placed"],
+      })
+      const rotate = (headers: Record<string, string>) =>
+        settle(
+          http.post<{ secret: string }>(
+            `/admin/webhooks/${made.data.subscription.id}/rotate-secret`,
+            {},
+            { headers }
+          )
+        )
+      const unproved = await rotate(admin.plain)
+      const rotated = await rotate(admin.headers)
+      await hooks().enqueue("order.placed", "rotate-1", { display_id: 1 })
+      await deliverWebhooks(getContainer())
+
+      const [sent] = received
+      const [, t = "", v1 = ""] =
+        /^t=(\d+),v1=([0-9a-f]{64})$/.exec(String(sent?.headers["x-webhook-signature"] ?? "")) ?? []
+      const signed = (secret: string) =>
+        createHmac("sha256", secret)
+          .update(`${t}.${sent?.body ?? ""}`)
+          .digest("hex")
+
+      expect(unproved.status).toBe(428)
+      expect(rotated.status).toBe(200)
+      expect(rotated.data.secret).toMatch(/^whsec_/)
+      expect(rotated.data.secret).not.toBe(made.data.secret)
+      expect(v1).toBe(signed(rotated.data.secret))
+      expect(v1).not.toBe(signed(made.data.secret))
     })
 
     it("refuses an address inside, when subscribed and when a name resolves inside (KK3)", async () => {

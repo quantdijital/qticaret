@@ -78,6 +78,16 @@ class TenantWebhooksModuleService extends MedusaService({
     return { subscription, secret }
   }
 
+  /** A new secret for the subscription, returned here only; the old one signs nothing more. */
+  async rotateSecret(id: string): Promise<string> {
+    const secret = newWebhookSecret()
+    await this.updateWebhookSubscriptions({
+      id,
+      secret_encrypted: encryptPii(secret, this.key, contextOf(id)),
+    })
+    return secret
+  }
+
   /** The secret a delivery is signed with. */
   secretOf(id: string, encrypted: string): string {
     return decryptPii(encrypted, this.key, contextOf(id))

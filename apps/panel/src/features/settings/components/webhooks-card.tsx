@@ -25,6 +25,7 @@ import {
 } from "@/features/settings/api/webhooks"
 import type { WebhookDelivery, WebhookSubscription } from "@/features/settings/api/webhooks"
 import { WebhookDialog } from "@/features/settings/components/webhook-dialog"
+import { WebhookSecretDialog } from "@/features/settings/components/webhook-secret-dialog"
 import { errorText } from "@/lib/errors"
 import { formatCount, formatRelative } from "@/lib/format"
 
@@ -98,10 +99,12 @@ function DeliveriesDialog({ id, onClose }: { id: string; onClose: () => void }) 
 function SubscriptionRow({
   row,
   onLog,
+  onRotate,
   onDelete,
 }: {
   row: WebhookSubscription
   onLog: () => void
+  onRotate: () => void
   onDelete: () => void
 }) {
   const { t } = useTranslation()
@@ -139,6 +142,9 @@ function SubscriptionRow({
         <Button variant="outline" size="sm" onClick={onLog}>
           {t(`${W}.log`)}
         </Button>
+        <Button variant="outline" size="sm" onClick={onRotate}>
+          {t(`${W}.rotate`)}
+        </Button>
         <Button variant="outline" size="sm" onClick={onDelete}>
           {t(`${W}.delete`)}
         </Button>
@@ -159,6 +165,7 @@ export function WebhooksCard() {
   const [creating, setCreating] = useState(false)
   const [logOf, setLogOf] = useState<string | null>(null)
   const [deleting, setDeleting] = useState<WebhookSubscription | null>(null)
+  const [rotating, setRotating] = useState<WebhookSubscription | null>(null)
   const rows = list.data?.subscriptions ?? []
   return (
     <SectionCard
@@ -190,6 +197,9 @@ export function WebhooksCard() {
               onLog={() => {
                 setLogOf(row.id)
               }}
+              onRotate={() => {
+                setRotating(row)
+              }}
               onDelete={() => {
                 setDeleting(row)
               }}
@@ -203,6 +213,14 @@ export function WebhooksCard() {
           id={logOf}
           onClose={() => {
             setLogOf(null)
+          }}
+        />
+      ) : null}
+      {rotating ? (
+        <WebhookSecretDialog
+          row={rotating}
+          onClose={() => {
+            setRotating(null)
           }}
         />
       ) : null}

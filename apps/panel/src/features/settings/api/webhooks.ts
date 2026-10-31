@@ -74,6 +74,22 @@ export function useSubscribeWebhook() {
   })
 }
 
+/**
+ * A new signing secret, shown once; the old one signs nothing more. The
+ * person proves themselves again: whoever holds it signs as the shop.
+ */
+export function useRotateWebhookSecret() {
+  return useMutation({
+    mutationFn: (id: string) =>
+      withReauth((extra) =>
+        sdk.client.fetch<{ id: string; secret: string }>(
+          `/admin/webhooks/${encodeURIComponent(id)}/rotate-secret`,
+          { method: "POST", body: {}, ...extra }
+        )
+      ),
+  })
+}
+
 export function useReactivateWebhook() {
   const client = useQueryClient()
   return useMutation({

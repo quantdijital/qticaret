@@ -21,7 +21,7 @@ import { errorText } from "@/lib/errors"
 const W = "settings.api.webhooks"
 
 /** The signing secret as made: shown here once, for the receiving system. */
-function MadeSecret({ secret }: { secret: string }) {
+export function MadeSecret({ secret }: { secret: string }) {
   const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
   return (

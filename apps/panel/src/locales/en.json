@@ -1791,6 +1791,9 @@
         "eventsLabel": "Events",
         "subscribe": "Make the subscription",
         "secretOnce": "This secret will not be shown again.",
+        "rotate": "Renew secret",
+        "rotateTitle": "Renew the signing secret",
+        "rotateHint": "Requests to {{url}} will be signed with a new secret; the receiving system stops accepting what it checks with the old one at once. Be ready to enter the new secret there.",
         "copy": "Copy the secret",
         "verify": "Every request carries X-Webhook-Signature as t=<time>,v1=<signature>, the signature being HMAC-SHA256(time + \".\" + body) with the secret. Refuse requests with an old time. X-Webhook-Id stays the same when a delivery is tried again.",
         "events": {

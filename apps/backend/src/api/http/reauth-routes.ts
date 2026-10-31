@@ -30,6 +30,12 @@ export const REAUTH_ROUTES = [
   // A new key reaches the shop's data from outside; so does a hook's address
   { matcher: "/admin/api-access", methods: ["POST" as const], middlewares: [requireReauth()] },
   { matcher: "/admin/webhooks", methods: ["POST" as const], middlewares: [requireReauth()] },
+  // A new signing secret: whoever holds it can sign as the shop
+  {
+    matcher: "/admin/webhooks/:id/rotate-secret",
+    methods: ["POST" as const],
+    middlewares: [requireReauth()],
+  },
   {
     matcher: "/admin/webhooks/:id",
     methods: ["POST" as const],
