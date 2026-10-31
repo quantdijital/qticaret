@@ -13,6 +13,7 @@ import {
   staffBankTransfer,
   staffInvite,
   staffLowStock,
+  staffMfaChanged,
   staffNewOrder,
   staffPasswordReset,
   staffSeoDigest,
@@ -35,6 +36,7 @@ export type { StockAlertVars } from "./stock"
 export type {
   StaffInviteVars,
   StaffOrderVars,
+  StaffMfaVars,
   StaffResetVars,
   StaffSeoVars,
   StaffStockVars,
@@ -68,6 +70,7 @@ export const MESSAGE_TEMPLATES = {
   "staff.seo_digest": staffSeoDigest,
   "staff.invite": staffInvite,
   "staff.password_reset": staffPasswordReset,
+  "staff.mfa_changed": staffMfaChanged,
 } as const
 
 export type MessageTemplateName = keyof typeof MESSAGE_TEMPLATES

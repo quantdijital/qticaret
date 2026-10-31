@@ -1,9 +1,10 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { panelUrl } from "../../../lib/env"
 import { inviteLink } from "../../../lib/staff"
 import type {
   StaffInviteVars,
+  StaffMfaVars,
   StaffOrderVars,
   StaffResetVars,
   StaffSeoVars,
@@ -151,4 +152,29 @@ export function loadStaffPasswordReset(
     receiverId: null,
     resourceType: "auth_identity",
   })
+}
+
+const MFA_CHANGES = new Set<string>(["enabled", "disabled", "reset"])
+
+/** A staff member told their 2FA changed (Y13): to their own login address, read when it goes. */
+export async function loadStaffMfaChanged(
+  container: Container,
+  userId: string,
+  extra: Readonly<Record<string, string>>
+): Promise<Loaded<StaffMfaVars> | null> {
+  const change = extra["change"] ?? ""
+  if (!MFA_CHANGES.has(change)) {
+    return null
+  }
+  const [user] = await container
+    .resolve(Modules.USER)
+    .listUsers({ id: userId }, { select: ["email"], take: 1 })
+  return user?.email
+    ? {
+        vars: { change: change as StaffMfaVars["change"] },
+        recipients: { email: user.email },
+        receiverId: null,
+        resourceType: "user",
+      }
+    : null
 }

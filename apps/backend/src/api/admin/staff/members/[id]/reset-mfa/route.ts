@@ -2,6 +2,7 @@ import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/frame
 import { MedusaError, Modules } from "@medusajs/framework/utils"
 import { ValidationError } from "../../../../../../lib/errors"
 import { resetStaffMfaWorkflow } from "../../../../../../workflows/staff/mfa"
+import { tellMfaChanged } from "../../../../../http/mfa-notice"
 
 /**
  * POST /admin/staff/members/:id/reset-mfa (owner; F12.6, adr/0040): a
@@ -20,5 +21,8 @@ export async function POST(req: AuthenticatedMedusaRequest, res: MedusaResponse)
     throw new MedusaError(MedusaError.Types.NOT_FOUND, "staff.unknown")
   }
   const { result } = await resetStaffMfaWorkflow(req.scope).run({ input: { email: user.email } })
+  if (result > 0) {
+    tellMfaChanged(req.scope, id, "reset")
+  }
   res.json({ id, factors: result })
 }

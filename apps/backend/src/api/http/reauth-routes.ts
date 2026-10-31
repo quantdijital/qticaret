@@ -3,6 +3,7 @@ import { Modules } from "@medusajs/framework/utils"
 import { STAFF_ROLES_MODULE } from "../../modules/staff-roles"
 import type StaffRolesModuleService from "../../modules/staff-roles/service"
 import { requireReauth, signInCodeOnce } from "./reauth"
+import { noteMfaChange } from "./mfa-notice"
 
 const param = (req: MedusaRequest, name: string) =>
   (req.params as Record<string, string | undefined>)[name] ?? ""
@@ -85,7 +86,7 @@ export const REAUTH_ROUTES = [
   {
     matcher: "/auth/mfa/factors/:id/verify",
     methods: ["POST" as const],
-    middlewares: [requireReauth()],
+    middlewares: [requireReauth(), noteMfaChange("enabled")],
   },
   // New recovery codes: a stolen session would mint its own and prove itself
   // with them. Right after the setup, its own code proves it (the panel sends it)
@@ -106,6 +107,7 @@ export const REAUTH_ROUTES = [
           .catch(() => null)
         return factor?.status === "enabled"
       }),
+      noteMfaChange("disabled"),
     ],
   },
   // A sign-in's app code: once, and never again for a step-up

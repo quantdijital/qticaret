@@ -215,7 +215,7 @@ medusaIntegrationTestRunner({
       expect(self.data.message).toBe("staff.remove_self")
     })
 
-    it("lets the owner turn off a member's 2FA, their phone lost", async () => {
+    it("lets the owner turn off a member's 2FA, their phone lost, and tells the member", async () => {
       const owner = call((await createAdminUser(http, getContainer())).headers)
       const admin = call((await createAdminUser(http, getContainer(), "admin")).headers)
       const member = await createAdminUser(http, getContainer(), "operations")
@@ -244,6 +244,20 @@ medusaIntegrationTestRunner({
       expect(after).toBe(false)
       expect(login.data.mfa_challenge).toBeUndefined()
       expect(self.data.message).toBe("staff.reset_self")
+      // Told at each change, to their own address (Y13)
+      const told = await eventually(
+        () =>
+          Promise.resolve(
+            fake.messages.filter(
+              ({ to, template }) => to.includes(member.email) && template === "staff_mfa_changed"
+            )
+          ),
+        (found) => found.length >= 2
+      )
+      expect(told.map(({ subject }) => subject)).toEqual([
+        expect.stringMatching(/iki adımlı doğrulama açıldı$/),
+        expect.stringMatching(/iki adımlı doğrulamanız sıfırlandı$/),
+      ])
     })
 
     it("sends a staff member a reset link to the panel, and the new password works", async () => {

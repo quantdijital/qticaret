@@ -63,6 +63,8 @@ describe("staff roles", () => {
     ["POST", "/admin/migrations"],
     ["GET", "/admin/migrations"],
     ["POST", "/admin/%6digrations"],
+    ["POST", "/admin/layouts/settings.sidebar"],
+    ["POST", "/admin/views/orders/configurations"],
   ] as const)("keeps %s %s the owner's alone", (method, path) => {
     expect(decide("admin", method, path)).toEqual({ allowed: false, reason: "owner_only" })
   })

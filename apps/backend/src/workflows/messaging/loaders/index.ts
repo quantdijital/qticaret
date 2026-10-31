@@ -13,6 +13,7 @@ import { loadReturnMessage } from "./return-request"
 import {
   loadSeoDigest,
   loadStaffInvite,
+  loadStaffMfaChanged,
   loadStaffOrder,
   loadStaffPasswordReset,
   loadStaffStock,
@@ -54,4 +55,5 @@ export const MESSAGE_LOADERS: { readonly [N in MessageTemplateName]: Loader<N> }
   "staff.seo_digest": (container) => loadSeoDigest(container),
   "staff.invite": loadStaffInvite,
   "staff.password_reset": loadStaffPasswordReset,
+  "staff.mfa_changed": loadStaffMfaChanged,
 }

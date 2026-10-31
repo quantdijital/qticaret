@@ -29,6 +29,11 @@ export interface StaffInviteVars {
   role: "admin" | "operations" | "readonly"
 }
 
+/** A staff member's 2FA turned on, off, or reset by the owner (Y13). */
+export interface StaffMfaVars {
+  change: "enabled" | "disabled" | "reset"
+}
+
 /** A staff member's password reset: the link only the event knew. */
 export interface StaffResetVars {
   resetUrl: string
@@ -221,4 +226,31 @@ export const staffPasswordReset: MessageTemplate<StaffResetVars> = {
       footer: FOOTER(brand.shopName),
     }),
   sample: { resetUrl: "https://magaza.example/reset-password#token=ornek" },
+}
+
+/**
+ * "İki adımlı doğrulama kapatıldı": told to the member themself, so a
+ * change they did not make (a stolen session, a password guessed) is
+ * seen at once.
+ */
+export const staffMfaChanged: MessageTemplate<StaffMfaVars> = {
+  name: "staff.mfa_changed",
+  kind: "transactional",
+  channels: ["email"],
+  retry: true,
+  email: (vars, brand) =>
+    renderEmail(brand, {
+      subject: messageText(`staff_mfa.subject.${vars.change}`, { shop: brand.shopName }),
+      preheader: messageText(`staff_mfa.intro.${vars.change}`, { shop: brand.shopName }),
+      heading: messageText("staff_mfa.heading"),
+      blocks: [
+        {
+          kind: "paragraph",
+          text: messageText(`staff_mfa.intro.${vars.change}`, { shop: brand.shopName }),
+        },
+        { kind: "note", text: messageText("staff_mfa.not_you") },
+      ],
+      footer: FOOTER(brand.shopName),
+    }),
+  sample: { change: "disabled" },
 }

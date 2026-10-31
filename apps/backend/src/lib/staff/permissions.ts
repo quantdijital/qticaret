@@ -84,6 +84,10 @@ const OWNER_ONLY: readonly Rule[] = [
   { methods: "*", path: "/admin/migrations*" },
   // Whether the team must pass 2FA (adr/0040)
   { methods: WRITES, path: "/admin/platform-settings/security" },
+  // Medusa Admin's menus and saved table views for every user (its `is_default`);
+  // the panel has its own, Medusa Admin is off (the F15 audit)
+  { methods: WRITES, path: "/admin/layouts*" },
+  { methods: WRITES, path: "/admin/views*" },
   // The shop's people
   { methods: WRITES, path: "/admin/users*" },
   { methods: "*", path: "/admin/invites*" },

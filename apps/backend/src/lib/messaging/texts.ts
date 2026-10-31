@@ -177,6 +177,18 @@ const TR: Readonly<Record<string, string>> = {
     "{{shop}} yönetim panelindeki hesabınız için şifre yenileme isteği aldık. Aşağıdaki bağlantı 15 dakika geçerlidir.",
   "staff_reset.button": "Şifremi yenile",
   "staff_reset.ignore": "Bu isteği siz yapmadıysanız e-postayı yok sayın; şifreniz değişmez.",
+  "staff_mfa.subject.enabled": "{{shop}} panelinde iki adımlı doğrulama açıldı",
+  "staff_mfa.subject.disabled": "{{shop}} panelinde iki adımlı doğrulama kapatıldı",
+  "staff_mfa.subject.reset": "{{shop}} panelinde iki adımlı doğrulamanız sıfırlandı",
+  "staff_mfa.heading": "Hesabınızın güvenlik ayarı değişti",
+  "staff_mfa.intro.enabled":
+    "{{shop}} yönetim panelindeki hesabınızda iki adımlı doğrulama açıldı. Girişte artık uygulamanızdaki kod da istenecek.",
+  "staff_mfa.intro.disabled":
+    "{{shop}} yönetim panelindeki hesabınızda iki adımlı doğrulama kapatıldı.",
+  "staff_mfa.intro.reset":
+    "{{shop}} mağazasının sahibi, yönetim panelindeki hesabınızın iki adımlı doğrulamasını sıfırladı. Bir sonraki girişte yeniden kurmanız istenebilir.",
+  "staff_mfa.not_you":
+    "Bunu siz yapmadıysanız ya da istemediyseniz hemen şifrenizi yenileyin ve mağaza sahibine haber verin.",
   "staff_invite.subject": "{{shop}} ekibine davet edildiniz",
   "staff_invite.preheader": "{{shop}} yönetim paneli için hesabınızı oluşturun.",
   "staff_invite.heading": "{{shop}} yönetim paneline davet",
