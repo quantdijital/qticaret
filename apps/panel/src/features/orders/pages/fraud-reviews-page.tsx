@@ -106,7 +106,10 @@ export function FraudReviewsPage() {
             >
               #{row.order.display_id}
             </Link>
-            <span className="truncate text-xs text-muted-foreground">{row.order.email ?? "—"}</span>
+            {/* A phone keeps the row to the number, the score and the decision */}
+            <span className="hidden max-w-64 truncate text-xs text-muted-foreground sm:block">
+              {row.order.email ?? "—"}
+            </span>
           </span>
         ) : (
           "—"

@@ -45,6 +45,7 @@ export const SETTINGS = [
   "/settings/sms",
   "/settings/sms/netgsm",
   "/orders/chargebacks",
+  "/orders/review",
   "/orders/returns",
   "/orders/invoices",
   "/settings/integrations",

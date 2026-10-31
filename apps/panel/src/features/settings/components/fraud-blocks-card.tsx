@@ -88,7 +88,7 @@ export function FraudBlocksCard({ className }: { className?: string }) {
           )
         }}
       >
-        <div className="flex flex-col gap-2">
+        <div className="flex w-full flex-col gap-2 sm:w-auto">
           <span id="fraud-block-kind" className="text-sm font-medium">
             {t(`${C}.kind`)}
           </span>
@@ -98,7 +98,7 @@ export function FraudBlocksCard({ className }: { className?: string }) {
               setKind(next as FraudBlockKind)
             }}
           >
-            <SelectTrigger className="w-44" aria-labelledby="fraud-block-kind">
+            <SelectTrigger className="w-full sm:w-44" aria-labelledby="fraud-block-kind">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

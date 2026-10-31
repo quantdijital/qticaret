@@ -1858,7 +1858,7 @@
     },
     "security": {
       "title": "Security",
-      "description": "Your own two-step verification, and whether the team signs in with a code.",
+      "description": "Two-step verification, review of suspicious orders and the block list.",
       "mine": {
         "title": "My two-step verification",
         "onHint": "Signing in asks for the app's code besides your password.",
@@ -1900,7 +1900,7 @@
       },
       "blocks": {
         "title": "Block list",
-        "hint": "An e-mail, domain, phone or IP on the list cannot register, sign in or check out. The visitor is not told why. E-mails and phones are kept only as a keyed hash.",
+        "hint": "An e-mail, domain, phone or IP on the list cannot register, sign in or check out. The visitor is not told why. Only a keyed hash of an e-mail or a phone is kept, never the value.",
         "kind": "Kind",
         "value": "Value",
         "reason": "Reason (optional)",

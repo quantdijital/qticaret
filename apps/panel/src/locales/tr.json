@@ -1858,7 +1858,7 @@
     },
     "security": {
       "title": "Güvenlik",
-      "description": "Kendi hesabınızın iki adımlı doğrulaması ve ekibin girişte kod kullanıp kullanmayacağı.",
+      "description": "İki adımlı doğrulama, şüpheli siparişlerin incelenmesi ve kara liste.",
       "mine": {
         "title": "İki adımlı doğrulamam",
         "onHint": "Girişte şifrenizin yanında uygulamadaki kod istenir.",
@@ -1900,7 +1900,7 @@
       },
       "blocks": {
         "title": "Kara liste",
-        "hint": "Listedeki e-posta, alan adı, telefon ya da IP ile kayıt, giriş ve ödeme yapılamaz. Ziyaretçiye nedeni söylenmez. E-posta ve telefon yalnızca şifreli özetiyle saklanır.",
+        "hint": "Listedeki e-posta, alan adı, telefon ya da IP ile kayıt, giriş ve ödeme yapılamaz. Ziyaretçiye nedeni söylenmez. E-posta ve telefonun kendisi değil, yalnızca anahtarlı özeti saklanır.",
         "kind": "Tür",
         "value": "Değer",
         "reason": "Neden (isteğe bağlı)",
