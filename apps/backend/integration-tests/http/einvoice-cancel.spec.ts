@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
-import { startFakeParasut } from "@qticaret/testing"
+import { fakeVkn, seededRandom, startFakeParasut } from "@qticaret/testing"
 import type { FakeParasut } from "@qticaret/testing"
 import { issueInvoices } from "../../src/jobs/einvoice-issue"
 import { EINVOICE_MODULE } from "../../src/modules/einvoice"
@@ -99,7 +99,12 @@ medusaIntegrationTestRunner({
       )
       await http.post(
         "/admin/platform-settings/invoicing",
-        { provider: "parasut", trigger: "placed" },
+        {
+          provider: "parasut",
+          trigger: "placed",
+          // Cut before the parcel leaves: the e-Arşiv names the chosen carrier
+          carriers: { manual: { title: "Örnek Kargo A.Ş.", tax_id: fakeVkn(seededRandom(44)) } },
+        },
         { headers: owner.headers }
       )
       await http.post(
