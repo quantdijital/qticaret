@@ -7,6 +7,7 @@ import type EinvoiceModuleService from "../../modules/einvoice/service"
 import { RETURN_REQUESTS_MODULE } from "../../modules/return-requests"
 import type ReturnRequestsModuleService from "../../modules/return-requests/service"
 import { invoiceTotalsOf } from "./draft-source"
+import { EXCHANGE_CAME_BACK, saleReturned } from "./queue-exchange"
 import { returnedOf } from "./return-source"
 
 type Container = Pick<MedusaContainer, "resolve">
@@ -53,23 +54,29 @@ async function alertDocumentDue(
  * invoice was issued, the gider pusulası the shop issues to a person who
  * sent goods back (an e-Arşiv's buyer), or the return invoice a company
  * issues to the shop (an e-Fatura's buyer). Only the lines and quantities
- * that came back, the sale invoice named. Always the shop's to issue and
- * write back; an exchange's documents (a return and a new sale) are not
- * made here yet.
+ * that came back, the sale invoice they were sold on named (the first
+ * sale's, or an exchange's). Always the shop's to issue and write back.
+ * An exchange's return is due once its goods came back, whether money
+ * went either way or none (5.4: a return and a new sale).
  */
 export async function queueReturnDocument(
   container: Container,
   returnRequestId: string
 ): Promise<"queued" | "already" | "not_due"> {
   const returned = await returnedOf(container, returnRequestId)
-  if (returned?.request.kind !== "return" || returned.request.status !== "refunded") {
+  const due =
+    returned?.request.kind === "exchange"
+      ? EXCHANGE_CAME_BACK.includes(returned.request.status)
+      : returned?.request.status === "refunded"
+  if (!returned || !due) {
     return "not_due"
   }
   const orderId = returned.request.order_id
   const invoices = container.resolve<EinvoiceModuleService>(EINVOICE_MODULE)
-  const [sale] = await invoices.listInvoices(
-    { order_id: orderId, kind: "sale", status: "issued" },
-    { take: 1 }
+  const sale = await saleReturned(
+    container,
+    orderId,
+    returned.lines.map((line) => line.line_item_id)
   )
   if (sale?.document_type !== "e_archive" && sale?.document_type !== "e_invoice") {
     return "not_due"
@@ -96,20 +103,25 @@ export async function queueReturnDocument(
 }
 
 /**
- * Every refunded return of an order queued for its document, once its
- * sale invoice is issued (the F15 security review): a refund that came
- * before the sale was issued (a sale entered by hand later) queued none.
- * Queuing twice is one document; a failure is logged, the hourly sweep
- * tries the day's refunds again.
+ * Every return of an order that came back (a return refunded, an
+ * exchange received) queued for its document, once the sale it gives
+ * back is issued (the F15 security review): one that came before (a sale
+ * entered by hand later) queued none. Queuing twice is one document; a
+ * failure is logged, the hourly sweep tries the day's again.
  */
 export async function queueOrderReturnDocuments(container: Container, orderId: string) {
-  const requests = await container
-    .resolve<ReturnRequestsModuleService>(RETURN_REQUESTS_MODULE)
-    .listReturnRequests(
+  const service = container.resolve<ReturnRequestsModuleService>(RETURN_REQUESTS_MODULE)
+  const [returns, exchanges] = await Promise.all([
+    service.listReturnRequests(
       { order_id: orderId, kind: "return", status: "refunded" },
       { select: ["id"], take: 50 }
-    )
-  for (const request of requests) {
+    ),
+    service.listReturnRequests(
+      { order_id: orderId, kind: "exchange", status: EXCHANGE_CAME_BACK },
+      { select: ["id"], take: 50 }
+    ),
+  ])
+  for (const request of [...returns, ...exchanges]) {
     try {
       await queueReturnDocument(container, request.id)
     } catch (error) {

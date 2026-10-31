@@ -185,7 +185,7 @@ Varsayımların çoğu doğrulandı. Değişenler (kod; her biri testle):
   - Personel seri numarasını ve imzalı taramayı `POST /admin/invoices/:id/return-document` ve `…/pdf` ile girer. Numara biçimi serbesttir (harf, rakam, boşluk, nokta, eğik çizgi, tire; en çok 40).
 - **Belge gerekmeyen durumlar** (`POST …/waive`, durum `waived`): para banka ya da ödeme kuruluşu üzerinden iade edildiyse kurumun belgesi gider pusulası yerine geçebilir; müşteri faturanın iade bölümünü doldurup imzaladıysa ayrıca gider pusulası gerekmeyebilir. Hangi istisna uygulandıysa saklanır.
 - **Yetki ve görünürlük:** yalnızca yönetici ve sahip (operasyon yazamaz). Taslak, satışınki gibi yeniden doğrulama ister. Müşteriye "faturanız hazır" e-postası gitmez.
-- **Açık (E6b):** değişimin belgeleri. Mali müşavire göre eski ürün için iade, yeni ürün için yeni satış faturası gerekir; değişim bugün aynı siparişte kalıyor.
+- **Değişim (E6b):** ayrı başlıkta, aşağıda.
 
 **E6 güvenlik incelemesi (2026-10-31): 2 orta, 2 düşük, 1 kayıt boşluğu; hepsi kapandı.**
 - **Anahtarlar yalnızca satış faturasını görür.** Dış programın anahtarı iade belgesini listelemez, kaydını (404), taslağını ve PDF yüklemesini (409 `einvoice.not_sale`) göremez (`api/admin/invoices/reach.ts`). Bir program iade belgesini satış faturası sanıp kesmez, alıcının vergi numarasını okumaz, personelin imzalı taramasını değiştiremez.
@@ -193,3 +193,16 @@ Varsayımların çoğu doğrulandı. Değişenler (kod; her biri testle):
 - **"Belge gerekmiyor" yalnızca gider pusulasında.** Şirketin iade faturası her zaman kaydedilir (`einvoice.waive_not_allowed`).
 - **Satıştan önce ödenen iade.** Satış faturası iade ödendikten sonra işlenirse (Luca'ya elle sonradan), belge satışın kesilmesiyle açılır: geri yazmada da Paraşüt'te kesilmede de (`queueOrderReturnDocuments`). Saatlik tarama son 26 saatte ödenen iadeleri yeniden dener.
 - Operasyon rolünün yazma yasağı testine iki yeni uç eklendi.
+
+**Değişimin belgeleri (E6b, 2026-10-31; mali müşavir 5.4: "iki belge, iade + yeni satış"):**
+- **Ne zaman açılır:** değişimde gelen ürün teslim alınınca (`return.received`, yeni olay; mağaza borçluysa `return.refunded` da). Yeni ürün zaten ancak bundan sonra kargoya verilebiliyor (adr/0032 §6). Onaylanıp hiç geri gelmeyen değişim fatura doğurmaz.
+- **İade belgesi:** normal iadedeki gibi (gider pusulası ya da şirketin iade faturası), yalnızca geri gelen kalemler, kargo yok. Para hiç el değiştirmese de açılır.
+- **Yeni satış faturası:** ayrı bir satış kaydı (`kind: sale`, `source_id` = talep). Yalnızca değişimin eklediği kalemler, Medusa'nın ekleme fiyatıyla, kargo satırı yok (giden kargo mağazanın). Mağazanın sağlayıcısıyla kesilir (Paraşüt ya da dış program; dış programa `invoice.requested` gider).
+  - Kesim anı mağaza ayarına göre: "sipariş onaylanınca" ise teslim almada; "kargoya verilince" ise değişimin kalemlerini taşıyan paket çıkınca (`queueOrderExchangeSales`, kargo olaylarında ve saatlik taramada).
+  - e-Arşiv'in internet satışı bilgileri: ödeme şekli siparişinki, ödeme tarihi teslim alma günü (yeni ürün geri gelen ürünle ve onayda alınan farkla ödendi). Taşıyıcı ve gönderim tarihi değişimin paketinden; paket çıkmadan siparişin kargo seçeneğinden.
+  - Siparişin ilk satışı burada kesilmediyse (test modu, faturalama açılmadan önceki satış) değişime de fatura kesilmez.
+- **İlk satış faturası değişmez:** değişimin eklediği kalemler ilk satışın taslağında ve toplamında yoktur; ilk satışın taşıyıcısı da yalnızca kendi kalemlerini taşıyan paketten okunur (`lib/invoicing/exchanges.ts`).
+- **İade belgesi hangi satışa bağlanır:** geri gelen kalem değişimle geldiyse o değişimin satış faturasına, yoksa ilk satışa (`saleReturned`). İki satışın kalemlerini birden getiren iade ilk kalemin satışına bağlanır; personel taslakta görür.
+- **Panel:** sipariş kartında "Değişim faturaları" bölümü; her biri ilk fatura gibi taslak, numara girişi, PDF. Müşteri tarafı: `GET /store/orders/:id/invoice` `exchange_invoices` listesini de döner, PDF `?invoice=` ile (yalnızca o siparişin kesilmiş satışları).
+- **Bulunan hata (düzeltildi):** Medusa, iade teslim alınınca o kalemin `total`, `subtotal` ve `tax_total` değerlerini 0 yapıyor (adet aynı kalıyor). İade belgesi bu değerlerden hesaplandığı için gerçek bir iadede tutar 0 çıkıyor ve belge açılmıyordu. E6 testi iade kaydını doğrudan modülde açtığı için bunu görmedi. Artık faturalar kalemleri satıldıkları hâliyle hesaplar: Medusa'nın kendi formülü, sipariş edilen tüm adet üzerinden, güncel sürümün indirimleriyle (`lib/invoicing/sold.ts` `asSold`; ödeme payları da aynı yolu kullanıyordu, `lib/orders/shares.ts`).
+- **Testler:** HTTP `einvoice-exchange` (2: teslim almada iade + yeni satış, ilk fatura 180 TL kalır; "kargoya verilince" ayarında paketi bekler, müşteri iki faturayı görür, başka faturanın PDF'i 404), birim `exchanges` (4), panel `invoice-card` (değişim bölümü).

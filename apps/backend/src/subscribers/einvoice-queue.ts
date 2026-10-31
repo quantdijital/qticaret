@@ -1,5 +1,6 @@
 import type { SubscriberArgs, SubscriberConfig } from "@medusajs/framework"
 import { errorSummary, logger } from "../lib/logging"
+import { queueOrderExchangeSales } from "../workflows/einvoice/queue-exchange"
 import { orderOf, queueSaleInvoice } from "../workflows/einvoice/queue-invoices"
 import type { InvoiceMoment } from "../workflows/einvoice/queue-invoices"
 
@@ -15,8 +16,10 @@ const MOMENTS: Readonly<
 /**
  * An order's sale invoice, queued when it is due by the shop's setting
  * (F8, adr/0034 §8). Queuing is one insert a repeated event leaves alone;
- * the order flow never waits on the program. A failure here is logged:
- * the hourly sweep (jobs/einvoice-issue.ts) queues what an event missed.
+ * the order flow never waits on the program. A parcel that leaves may be
+ * an exchange's, whose new sale it makes due (E6b). A failure here is
+ * logged: the hourly sweep (jobs/einvoice-issue.ts) queues what an event
+ * missed.
  */
 export default async function einvoiceQueue({
   event: { name, data },
@@ -30,6 +33,9 @@ export default async function einvoiceQueue({
     const orderId = found.of === "order" ? data.id : await orderOf(container, found.of, data.id)
     if (orderId) {
       await queueSaleInvoice(container, orderId, found.moment)
+      if (found.of === "fulfillment") {
+        await queueOrderExchangeSales(container, orderId)
+      }
     }
   } catch (error) {
     logger.warn({ event: "einvoice.queue_failed", source: name, err: errorSummary(error) })

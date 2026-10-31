@@ -9,8 +9,18 @@ export type {
 export { invoiceLines, invoiceTotals } from "./lines"
 export { pdfFilename } from "./filename"
 export { returnedOrder } from "./returns"
+export {
+  EXCHANGE_FIELDS,
+  exchangeLines,
+  exchangeOfLine,
+  exchangeSaleOrder,
+  firstSaleOrder,
+} from "./exchanges"
+export type { ExchangedOrder, InvoiceExchange } from "./exchanges"
 export type { ReturnedLine } from "./returns"
 export { fakeInvoicingAllowed } from "./providers"
+export { SOLD_FIELDS, asSold } from "./sold"
+export type { SoldItem } from "./sold"
 export type { InvoiceItem, InvoiceShippingMethod } from "./lines"
 export { ANONYMOUS_TCKN, INVOICE_PAYMENTS } from "./types"
 export type {

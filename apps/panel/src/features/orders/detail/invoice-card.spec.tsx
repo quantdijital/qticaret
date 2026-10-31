@@ -31,11 +31,12 @@ const invoice = (changes: Partial<InvoiceRecord>): InvoiceRecord => ({
   ...changes,
 })
 
-const renderCard = (row: InvoiceRecord | null, mayOpen = true) => {
+const renderCard = (row: InvoiceRecord | InvoiceRecord[] | null, mayOpen = true) => {
+  const rows = row === null ? [] : Array.isArray(row) ? row : [row]
   fetchMock.mockImplementation((url: string) =>
     Promise.resolve(
       url === "/admin/invoices"
-        ? { invoices: row ? [row] : [], count: row ? 1 : 0 }
+        ? { invoices: rows, count: rows.length }
         : url === "/admin/staff/me"
           ? { role: mayOpen ? "owner" : "operations", can: { invoices: mayOpen } }
           : {}
@@ -76,6 +77,23 @@ describe("InvoiceCard", () => {
         body: {},
       })
     })
+  })
+
+  it("shows an exchange's own sale beside the order's first (E6b)", async () => {
+    renderCard([
+      invoice({ status: "issued", number: "SHT2026000000042", document_type: "e_archive" }),
+      invoice({
+        id: "inv_2",
+        for_exchange: true,
+        status: "issued",
+        number: "SHT2026000000043",
+        document_type: "e_archive",
+      }),
+    ])
+
+    expect(await screen.findByText("SHT2026000000042")).toBeInTheDocument()
+    expect(screen.getByRole("heading", { name: "Değişim faturaları" })).toBeInTheDocument()
+    expect(screen.getByText("SHT2026000000043")).toBeInTheDocument()
   })
 
   it("offers the PDF only to a role that may read it", async () => {

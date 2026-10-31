@@ -8,6 +8,7 @@ import {
   AdminPostInvoiceWaive,
   AdminPostReturnDocument,
 } from "../admin/invoices/validators"
+import { StoreGetOrderInvoicePdf } from "../store/orders/[id]/invoice/validators"
 import { optionalCustomer, orderAccess } from "./order-access"
 import { requireReauth } from "./reauth"
 
@@ -26,11 +27,20 @@ const staffOnly = (req: MedusaRequest) =>
 
 export const INVOICE_ROUTES = [
   // The order's own customer, or the holder of its key (the invoice e-mail links its page)
-  ...["/store/orders/:id/invoice", "/store/orders/:id/invoice/pdf"].map((matcher) => ({
-    matcher,
+  {
+    matcher: "/store/orders/:id/invoice",
     methods: ["GET" as const],
     middlewares: [optionalCustomer, orderAccess, noQuery],
-  })),
+  },
+  {
+    matcher: "/store/orders/:id/invoice/pdf",
+    methods: ["GET" as const],
+    middlewares: [
+      optionalCustomer,
+      orderAccess,
+      validateAndTransformQuery(StoreGetOrderInvoicePdf, {}),
+    ],
+  },
   {
     matcher: "/admin/invoices",
     methods: ["GET" as const],

@@ -11,6 +11,7 @@ import {
   beginReceiveReturnWorkflow,
   confirmReturnReceiveWorkflow,
   dismissItemReturnRequestWorkflow,
+  emitEventStep,
   receiveItemReturnRequestWorkflow,
   releaseLockStep,
 } from "@medusajs/medusa/core-flows"
@@ -30,6 +31,9 @@ import {
 
 /** Fired when a return's money is given back: the return invoice hangs off it (F8). */
 export const RETURN_REFUNDED = "return.refunded"
+
+/** Fired when a parcel sent back is received: an exchange's two documents hang off it (F8 E6b). */
+export const RETURN_RECEIVED = "return.received"
 
 export interface ReceiveInput {
   id: string
@@ -100,6 +104,14 @@ export const receiveReturnWorkflow = createWorkflow("returns-receive", (input: R
       },
     }))
   )
+  emitEventStep({
+    eventName: RETURN_RECEIVED,
+    data: transform({ received }, ({ received }) => ({
+      id: received.id,
+      order_id: received.order_id,
+      kind: received.kind,
+    })),
+  })
   releaseLockStep({ key: lockKey })
   return new WorkflowResponse(received)
 })

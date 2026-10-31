@@ -3465,6 +3465,10 @@
         "numberInvalid": "Harf, rakam, boşluk, nokta, eğik çizgi ya da tire (en çok 40 karakter).",
         "pdf": "PDF (tarama ya da belge)",
         "saved": "İade belgesi kaydedildi."
+      },
+      "exchanges": {
+        "title": "Değişim faturaları",
+        "hint": "Değişimde gönderilen ürün kendi satış faturasıyla kesilir; geri gelen ürünün belgesi aşağıdaki iade belgelerindedir."
       }
     },
     "fraud": {

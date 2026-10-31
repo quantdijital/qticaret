@@ -12,6 +12,11 @@ import {
 } from "../workflows/einvoice/cancel-invoice"
 import { orderOf, queueSaleInvoice } from "../workflows/einvoice/queue-invoices"
 import type { InvoiceMoment } from "../workflows/einvoice/queue-invoices"
+import {
+  EXCHANGE_CAME_BACK,
+  queueExchangeSale,
+  queueOrderExchangeSales,
+} from "../workflows/einvoice/queue-exchange"
 import { queueReturnDocument } from "../workflows/einvoice/queue-return"
 import { RETURN_REQUESTS_MODULE } from "../modules/return-requests"
 import type ReturnRequestsModuleService from "../modules/return-requests/service"
@@ -151,11 +156,17 @@ export async function sweepInvoices(container: MedusaContainer, now: Date = new 
       queued += 1
     }
   }
+  // A parcel may be an exchange's: its new sale due when the shop invoices on shipping (E6b)
+  const parcel = async (fulfillmentId: string, moment: InvoiceMoment) => {
+    const orderId = await orderOf(container, "fulfillment", fulfillmentId)
+    await queue(orderId, moment)
+    queued += orderId ? await queueOrderExchangeSales(container, orderId) : 0
+  }
   for (const row of parcels.data as { id: string }[]) {
-    await queue(await orderOf(container, "fulfillment", row.id), "shipped")
+    await parcel(row.id, "shipped")
   }
   for (const row of delivered.data as { id: string }[]) {
-    await queue(await orderOf(container, "fulfillment", row.id), "delivered")
+    await parcel(row.id, "delivered")
   }
   for (const row of orders.data as { id: string }[]) {
     await queue(row.id, "placed")
@@ -163,15 +174,25 @@ export async function sweepInvoices(container: MedusaContainer, now: Date = new 
   for (const row of payments.data as { id: string }[]) {
     await queue(await orderOf(container, "payment", row.id), "paid")
   }
-  // A return whose refund event was missed: its document queued all the same (F8 E6)
-  const refunded = await container
-    .resolve<ReturnRequestsModuleService>(RETURN_REQUESTS_MODULE)
-    .listReturnRequests(
+  // A return or exchange whose event was missed: its documents queued all the same (F8 E6, E6b)
+  const service = container.resolve<ReturnRequestsModuleService>(RETURN_REQUESTS_MODULE)
+  const [refunded, exchanged] = await Promise.all([
+    service.listReturnRequests(
       { kind: "return", status: "refunded", updated_at: window },
       { select: ["id"], take: SWEEP_LIMIT }
-    )
-  for (const request of refunded) {
+    ),
+    service.listReturnRequests(
+      { kind: "exchange", status: EXCHANGE_CAME_BACK, updated_at: window },
+      { select: ["id"], take: SWEEP_LIMIT }
+    ),
+  ])
+  for (const request of [...refunded, ...exchanged]) {
     if ((await queueReturnDocument(container, request.id)) === "queued") {
+      queued += 1
+    }
+  }
+  for (const request of exchanged) {
+    if ((await queueExchangeSale(container, request.id)) === "queued") {
       queued += 1
     }
   }

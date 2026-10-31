@@ -1,15 +1,21 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
-import { invoiceDraft, invoiceLines, invoiceTotals, returnedOrder } from "../../lib/invoicing"
-import type { DraftResult, InvoiceOrder, InvoiceProfile, ReturnedLine } from "../../lib/invoicing"
-import { carrierOf } from "../../lib/shipping/carriers"
-import { AUDIT_LOG_MODULE } from "../../modules/audit-log"
-import type AuditLogModuleService from "../../modules/audit-log/service"
-import { BILLING_PROFILE_MODULE } from "../../modules/billing-profile"
-import type BillingProfileModuleService from "../../modules/billing-profile/service"
-import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
-import type { CarrierIdentity, InvoicingSettings } from "../../modules/platform-settings/sections"
-import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
+import { turkishDay } from "../../lib/dashboard/period"
+import {
+  SOLD_FIELDS,
+  asSold,
+  exchangeSaleOrder,
+  firstSaleOrder,
+  invoiceDraft,
+  invoiceLines,
+  invoiceTotals,
+  returnedOrder,
+} from "../../lib/invoicing"
+import type { DraftResult, ExchangedOrder, ReturnedLine } from "../../lib/invoicing"
+import { RETURN_REQUESTS_MODULE } from "../../modules/return-requests"
+import type ReturnRequestsModuleService from "../../modules/return-requests/service"
+import { exchangesOf, profileOf, settingsOf, shipmentOf } from "./draft-parts"
+import type { OrderRow } from "./draft-parts"
 import { returnDraft } from "./return-source"
 
 type Container = Pick<MedusaContainer, "resolve">
@@ -45,140 +51,41 @@ const LINE_FIELDS = [
     ...TOTALS,
   ].map((field) => `items.${field}`),
   ...["name", ...TOTALS].map((field) => `shipping_methods.${field}`),
+  // The lines as sold: Medusa's totals shrink as units come back
+  ...SOLD_FIELDS,
 ]
-
-type OrderRow = InvoiceOrder & {
-  customer_id?: string | null
-  customer?: {
-    billing_profile?: {
-      id: string
-      type: InvoiceProfile["type"]
-      legal_name: string
-      tax_office: string | null
-    } | null
-  } | null
-  fulfillments?:
-    | ({
-        provider_id?: string | null
-        shipped_at?: string | Date | null
-        canceled_at?: string | Date | null
-      } | null)[]
-    | null
-}
 
 const query = (container: Container) => container.resolve(ContainerRegistrationKeys.QUERY)
 
 /**
- * What an order's invoice comes to, for its record when it is queued (no
- * buyer read); a return's, only the lines that came back.
+ * Which part of the order an invoice is for: its first sale (none given),
+ * an exchange's new sale, or what a return brought back.
  */
-export async function invoiceTotalsOf(
-  container: Container,
-  orderId: string,
-  returned?: { lines: readonly ReturnedLine[]; shipping: boolean }
-) {
+export type OrderPart =
+  { exchange_id: string } | { lines: readonly ReturnedLine[]; shipping: boolean }
+
+function partOf<T extends ExchangedOrder>(order: T, part?: OrderPart): T {
+  if (!part) {
+    return firstSaleOrder(order)
+  }
+  return "exchange_id" in part
+    ? exchangeSaleOrder(order, part.exchange_id)
+    : returnedOrder(order, part.lines, part.shipping)
+}
+
+/** What an invoice comes to, for its record when it is queued (no buyer read). */
+export async function invoiceTotalsOf(container: Container, orderId: string, part?: OrderPart) {
   const { data } = await query(container).graph({
     entity: "order",
     fields: LINE_FIELDS,
     filters: { id: orderId },
   })
-  const found = data[0] as InvoiceOrder | undefined
+  const found = data[0] as ExchangedOrder | undefined
   if (!found) {
     return null
   }
-  const order = returned ? returnedOrder(found, returned.lines, returned.shipping) : found
+  const order = partOf({ ...asSold(found), exchanges: await exchangesOf(container, orderId) }, part)
   return { currency: order.currency_code ?? "", totals: invoiceTotals(invoiceLines(order)) }
-}
-
-async function settingsOf(container: Container) {
-  const settings = container.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
-  const [invoicing, seo] = await Promise.all([
-    settings.readSection("invoicing"),
-    settings.readSection("seo"),
-  ])
-  const host = (seo.values as { canonical_host?: string | null }).canonical_host
-  return {
-    carriers: (invoicing.values as unknown as InvoicingSettings).carriers,
-    store_url: host ? `https://${host}` : null,
-  }
-}
-
-/**
- * The buyer's invoice identity, its tax id opened for this invoice only;
- * the read recorded against the customer first (docs/04): no record, no read.
- */
-async function profileOf(container: Container, order: OrderRow, invoiceId: string) {
-  const profile = order.customer?.billing_profile
-  if (!profile || !order.customer_id) {
-    return null
-  }
-  await container.resolve<AuditLogModuleService>(AUDIT_LOG_MODULE).record({
-    kind: "sensitive_read",
-    action: "einvoice.tax_id_sent",
-    actor_type: "system",
-    actor_id: null,
-    resource_type: "customer",
-    resource_id: order.customer_id,
-    outcome: 200,
-    changes: { invoice: invoiceId },
-  })
-  const taxId = await container
-    .resolve<BillingProfileModuleService>(BILLING_PROFILE_MODULE)
-    .revealTaxId(profile.id, order.customer_id)
-  return taxId
-    ? {
-        type: profile.type,
-        legal_name: profile.legal_name,
-        tax_office: profile.tax_office,
-        tax_id: taxId,
-      }
-    : null
-}
-
-type CarrierIdentities = InvoicingSettings["carriers"]
-
-/**
- * Who carries the order, for the e-Arşiv's internet sale details, which
- * are never left out (the owner, 2026-10-31):
- * - the parcel that left, on the day it left;
- * - before that, the carrier of the shipping option the buyer chose at
- *   checkout, dated the day the invoice is made (an invoice cut once the
- *   order is placed and paid, the default).
- * The carrier's name and tax id are the shop's, entered once (Settings >
- * E-Fatura); a carrier without them holds the invoice back. Null for an
- * order with nothing to ship.
- */
-async function shipmentOf(
-  container: Container,
-  order: OrderRow,
-  carriers: CarrierIdentities,
-  now: Date
-): Promise<{ carrier: CarrierIdentity | null; shipped_at: Date } | null> {
-  const identity = (providerId: string | null | undefined) =>
-    carriers[carrierOf(providerId) ?? "manual"] ?? null
-  const parcel = (order.fulfillments ?? [])
-    .filter((row) => row?.shipped_at && !row.canceled_at)
-    .sort(
-      (a, b) => new Date(b?.shipped_at ?? 0).getTime() - new Date(a?.shipped_at ?? 0).getTime()
-    )[0]
-  if (parcel?.shipped_at) {
-    return { carrier: identity(parcel.provider_id), shipped_at: new Date(parcel.shipped_at) }
-  }
-  const optionIds = (order.shipping_methods ?? []).flatMap((method) =>
-    method?.shipping_option_id ? [method.shipping_option_id] : []
-  )
-  if (optionIds.length === 0) {
-    return null
-  }
-  const { data } = await query(container).graph({
-    entity: "shipping_option",
-    fields: ["id", "provider_id"],
-    filters: { id: optionIds },
-  })
-  const chosen = (data as { id: string; provider_id?: string | null }[]).find(
-    (option) => option.id === optionIds[0]
-  )
-  return { carrier: identity(chosen?.provider_id), shipped_at: now }
 }
 
 /**
@@ -215,6 +122,7 @@ export async function invoiceDraftFor(
       "fulfillments.provider_id",
       "fulfillments.shipped_at",
       "fulfillments.canceled_at",
+      "fulfillments.items.line_item_id",
       "shipping_methods.shipping_option_id",
       "customer.billing_profile.id",
       "customer.billing_profile.type",
@@ -223,10 +131,11 @@ export async function invoiceDraftFor(
     ],
     filters: { id: invoice.order_id },
   })
-  const order = data[0] as OrderRow | undefined
-  if (!order) {
+  const row = data[0] as OrderRow | undefined
+  if (!row) {
     return { problems: ["einvoice.no_lines"] }
   }
+  const order = { ...asSold(row), exchanges: await exchangesOf(container, invoice.order_id) }
   const settings = await settingsOf(container)
   const profile = await profileOf(container, order, invoice.id)
   if (invoice.kind === "return") {
@@ -242,6 +151,40 @@ export async function invoiceDraftFor(
     )
     return result ?? { problems: ["einvoice.no_lines"] }
   }
-  const shipment = await shipmentOf(container, order, settings.carriers, now)
-  return invoiceDraft(order, profile, { store_url: settings.store_url, shipment })
+  const exchange =
+    invoice.source_id && invoice.source_id !== invoice.order_id
+      ? await exchangeOf(container, invoice.source_id)
+      : null
+  if (invoice.source_id && invoice.source_id !== invoice.order_id && !exchange) {
+    return { problems: ["einvoice.no_lines"] }
+  }
+  const sold = partOf(order, exchange ? { exchange_id: exchange.exchange_id } : undefined)
+  const lines = new Set((sold.items ?? []).flatMap((item) => (item?.id ? [item.id] : [])))
+  const shipment = await shipmentOf(container, order, settings.carriers, now, lines)
+  const result = invoiceDraft(sold, profile, { store_url: settings.store_url, shipment })
+  // An exchange's new items were paid for by what came back (and what staff collected on approval)
+  return exchange?.received_at && "draft" in result
+    ? {
+        draft: {
+          ...result.draft,
+          internet_sale: {
+            ...result.draft.internet_sale,
+            paid_on: turkishDay(new Date(exchange.received_at)),
+          },
+        },
+      }
+    : result
+}
+
+/** The exchange a request opened, once its goods came back; null for any other. */
+async function exchangeOf(container: Container, requestId: string) {
+  const [request] = await container
+    .resolve<ReturnRequestsModuleService>(RETURN_REQUESTS_MODULE)
+    .listReturnRequests(
+      { id: requestId, kind: "exchange" },
+      { select: ["exchange_id", "received_at"], take: 1 }
+    )
+  return request?.exchange_id
+    ? { exchange_id: request.exchange_id, received_at: request.received_at }
+    : null
 }

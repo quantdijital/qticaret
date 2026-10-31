@@ -3465,6 +3465,10 @@
         "numberInvalid": "Letters, digits, spaces, dots, slashes or dashes (40 at most).",
         "pdf": "PDF (a scan or the document)",
         "saved": "Return document saved."
+      },
+      "exchanges": {
+        "title": "Exchange invoices",
+        "hint": "The item sent in an exchange is invoiced as a sale of its own; the document for what came back is under return documents below."
       }
     },
     "fraud": {

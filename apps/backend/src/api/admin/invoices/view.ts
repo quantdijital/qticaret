@@ -3,6 +3,7 @@ export function invoiceView(row: {
   id: string
   order_id: string
   kind: string
+  source_id: string
   provider: string
   status: string
   document_type: string | null
@@ -22,6 +23,8 @@ export function invoiceView(row: {
     id: row.id,
     order_id: row.order_id,
     kind: row.kind,
+    /** A sale of what an exchange sent instead (E6b): its own invoice beside the order's first. */
+    for_exchange: row.kind === "sale" && row.source_id !== row.order_id,
     provider: row.provider,
     status: row.status,
     document_type: row.document_type,

@@ -7,6 +7,8 @@ export interface InvoiceRecord {
   id: string
   order_id: string
   kind: "sale" | "return"
+  /** A sale of what an exchange sent instead (E6b): its own invoice beside the order's first. */
+  for_exchange?: boolean
   provider: "parasut" | "external" | "fake"
   status: "pending" | "issuing" | "issued" | "failed" | "cancelled" | "waived"
   /** A sale's e-document; a return's gider pusulası or a company's return invoice. */

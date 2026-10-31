@@ -1,47 +1,19 @@
 import { useQuery } from "@tanstack/react-query"
-import { FileDown, FilePen, FileSearch, Loader2, RotateCcw } from "lucide-react"
-import { useCallback, useState } from "react"
 import { useTranslation } from "react-i18next"
-import { toast } from "sonner"
 import { SectionCard } from "@/components/patterns/section-card"
-import type { StatusTone } from "@/components/patterns/status-badge"
-import { StatusBadge } from "@/components/patterns/status-badge"
-import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { useCan } from "@/features/auth/api/staff"
-import { invoicePdfUrl, orderInvoicesQuery, useRetryInvoice } from "@/features/orders/api/invoices"
-import type { InvoiceRecord } from "@/features/orders/api/invoices"
-import { InvoiceDraftDialog } from "@/features/orders/detail/invoice-draft-dialog"
-import { InvoiceEntryDialog } from "@/features/orders/detail/invoice-entry-dialog"
+import { orderInvoicesQuery } from "@/features/orders/api/invoices"
 import { ReturnDocuments } from "@/features/orders/detail/return-documents"
+import { SaleInvoice } from "@/features/orders/detail/sale-invoice"
 import { errorText } from "@/lib/errors"
-import { formatDateTime } from "@/lib/format"
 
 const V = "orders.invoice"
 
-const TONES: Readonly<Record<InvoiceRecord["status"], StatusTone>> = {
-  pending: "info",
-  issuing: "info",
-  issued: "success",
-  failed: "danger",
-  cancelled: "neutral",
-  waived: "neutral",
-}
-
-function Row({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-baseline justify-between gap-3 py-2">
-      <dt className="text-[13px] text-muted-foreground">{label}</dt>
-      <dd className="truncate text-sm font-medium tabular-nums">{value}</dd>
-    </div>
-  )
-}
-
 /**
- * The order's invoice (F8, adr/0034): where it stands at its program, its
- * number and PDF; a stopped one tried again, and one issued elsewhere
- * (the shop's own program, Luca by hand) read as a draft, then typed in
- * with its PDF.
+ * The order's invoices (F8, adr/0034): its sale invoice; each exchange's
+ * own sale for what it sent instead (E6b, the accountant 2026-10-31: a
+ * swap is a return and a new sale); and the returns' documents.
  */
 export function InvoiceCard({
   orderId,
@@ -52,160 +24,40 @@ export function InvoiceCard({
 }) {
   const { t } = useTranslation()
   const query = useQuery(orderInvoicesQuery(orderId))
-  const retry = useRetryInvoice()
-  const [entry, setEntry] = useState<"full" | "pdf" | null>(null)
-  const [opening, setOpening] = useState(false)
-  const [drafting, setDrafting] = useState(false)
-  const closeDraft = useCallback(() => {
-    setDrafting(false)
-  }, [])
   // The PDF names the buyer and their tax id: not for every role (adr/0034 §9)
   const mayOpen = useCan("invoices")
-  const invoice = query.data?.invoices.find((row) => row.kind === "sale") ?? null
-  const returns = query.data?.invoices.filter((row) => row.kind === "return") ?? []
-  const fail = (failure: unknown) => toast.error(errorText(t, failure))
-  const openPdf = async (id: string) => {
-    setOpening(true)
-    try {
-      const url = await invoicePdfUrl(id)
-      window.open(url, "_blank", "noopener")
-      // The new tab holds its own copy once it has loaded: the link is let go after a while
-      window.setTimeout(() => {
-        URL.revokeObjectURL(url)
-      }, 60_000)
-    } catch (failure) {
-      fail(failure)
-    } finally {
-      setOpening(false)
-    }
-  }
-  const external = invoice?.provider === "external"
+  const rows = query.data?.invoices ?? []
+  const invoice = rows.find((row) => row.kind === "sale" && !row.for_exchange) ?? null
+  const exchanges = rows.filter((row) => row.kind === "sale" && row.for_exchange)
+  const returns = rows.filter((row) => row.kind === "return")
+  const number = orderNumber ?? null
   return (
     <SectionCard title={t(`${V}.title`)}>
       {query.isPending ? (
         <Skeleton className="h-20 rounded-md" />
       ) : query.isError ? (
         <p className="text-[13px] text-muted-foreground">{errorText(t, query.error)}</p>
-      ) : !invoice ? (
+      ) : !invoice && exchanges.length === 0 ? (
         <p className="text-[13px] text-muted-foreground">{t(`${V}.none`)}</p>
       ) : (
         <div className="flex flex-col gap-3">
-          <div className="flex flex-wrap items-center gap-2">
-            <StatusBadge tone={TONES[invoice.status]}>
-              {t(`${V}.status.${invoice.status}`)}
-            </StatusBadge>
-            <span className="text-xs text-muted-foreground">
-              {t(`${V}.providers.${invoice.provider}`)}
-            </span>
-          </div>
-          <dl className="divide-y">
-            {invoice.number ? <Row label={t(`${V}.number`)} value={invoice.number} /> : null}
-            {invoice.document_type ? (
-              <Row label={t(`${V}.type`)} value={t(`${V}.types.${invoice.document_type}`)} />
-            ) : null}
-            {invoice.issued_at ? (
-              <Row label={t(`${V}.issuedAt`)} value={formatDateTime(invoice.issued_at)} />
-            ) : null}
-          </dl>
-          {invoice.status === "failed" ? (
-            <p className="text-[13px] text-destructive-text">
-              {t(`${V}.reasons.${(invoice.last_error ?? "").replace(/\./g, "_")}`, {
-                defaultValue: t(`${V}.failed`, {
-                  code: invoice.last_error ?? "—",
-                  attempts: invoice.attempts,
-                }),
-              })}
-            </p>
+          {invoice ? (
+            <SaleInvoice invoice={invoice} mayOpen={mayOpen} orderNumber={number} />
           ) : null}
-          {invoice.status === "issued" &&
-          invoice.last_error === "einvoice.return_document_needed" ? (
-            <p className="text-[13px] text-destructive-text">{t(`${V}.returnNeeded`)}</p>
+          {exchanges.length > 0 ? (
+            <div className="flex flex-col gap-3 border-t pt-3">
+              <div className="flex flex-col gap-0.5">
+                <h3 className="text-sm font-semibold">{t(`${V}.exchanges.title`)}</h3>
+                <p className="text-[13px] text-muted-foreground">{t(`${V}.exchanges.hint`)}</p>
+              </div>
+              {exchanges.map((row) => (
+                <SaleInvoice key={row.id} invoice={row} mayOpen={mayOpen} orderNumber={number} />
+              ))}
+            </div>
           ) : null}
-          {invoice.status === "pending" && external ? (
-            <p className="text-[13px] text-muted-foreground">{t(`${V}.waitingExternal`)}</p>
-          ) : null}
-          {invoice.program_difference ? (
-            <p className="text-[13px] text-muted-foreground">
-              {t(`${V}.difference`, { kurus: invoice.program_difference })}
-            </p>
-          ) : null}
-          <div className="grid gap-2 sm:grid-cols-2">
-            {invoice.has_pdf && mayOpen ? (
-              <Button variant="outline" disabled={opening} onClick={() => void openPdf(invoice.id)}>
-                {opening ? <Loader2 className="animate-spin" /> : <FileDown />}
-                {t(`${V}.pdf`)}
-              </Button>
-            ) : null}
-            {invoice.status === "failed" ? (
-              <Button
-                variant="outline"
-                disabled={retry.isPending}
-                onClick={() => {
-                  retry.mutate(invoice.id, {
-                    onSuccess: () => toast.success(t(`${V}.retried`)),
-                    onError: fail,
-                  })
-                }}
-              >
-                <RotateCcw />
-                {t(`${V}.retry`)}
-              </Button>
-            ) : null}
-            {external &&
-            mayOpen &&
-            (invoice.status === "pending" || invoice.status === "failed") ? (
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setDrafting(true)
-                }}
-              >
-                <FileSearch />
-                {t(`${V}.seeDraft`)}
-              </Button>
-            ) : null}
-            {external && invoice.status === "pending" ? (
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setEntry("full")
-                }}
-              >
-                <FilePen />
-                {t(`${V}.enter`)}
-              </Button>
-            ) : null}
-            {external && invoice.status === "issued" && !invoice.has_pdf ? (
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setEntry("pdf")
-                }}
-              >
-                <FilePen />
-                {t(`${V}.addPdf`)}
-              </Button>
-            ) : null}
-          </div>
-          <ReturnDocuments records={returns} mayOpen={mayOpen} orderNumber={orderNumber ?? null} />
+          <ReturnDocuments records={returns} mayOpen={mayOpen} orderNumber={number} />
         </div>
       )}
-      {drafting && invoice ? (
-        <InvoiceDraftDialog
-          invoiceId={invoice.id}
-          orderNumber={orderNumber ?? null}
-          onClose={closeDraft}
-        />
-      ) : null}
-      {entry && invoice ? (
-        <InvoiceEntryDialog
-          invoiceId={invoice.id}
-          numbered={entry === "pdf"}
-          onClose={() => {
-            setEntry(null)
-          }}
-        />
-      ) : null}
     </SectionCard>
   )
 }

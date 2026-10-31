@@ -39,7 +39,7 @@ export interface OrderRow {
     | null
 }
 
-async function invoicingOf(container: Container): Promise<InvoicingSettings> {
+export async function invoicingOf(container: Container): Promise<InvoicingSettings> {
   const section = await container
     .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
     .readSection("invoicing")
@@ -124,7 +124,7 @@ export async function queueSaleInvoice(
     totals: lines.totals,
   })
   if (created && settings.provider === "external") {
-    await announce(container, id, orderId, lines.totals.gross)
+    await announceInvoice(container, id, orderId, lines.totals.gross)
   }
   return created ? "queued" : "already"
 }
@@ -134,7 +134,12 @@ export async function queueSaleInvoice(
  * adr/0034 §9): ids and the total, never the buyer; the program reads the
  * rest with its key. A failure is logged: the program can list what waits.
  */
-async function announce(container: Container, invoiceId: string, orderId: string, total: string) {
+export async function announceInvoice(
+  container: Container,
+  invoiceId: string,
+  orderId: string,
+  total: string
+) {
   try {
     const hooks = container.resolve<TenantWebhooksModuleService>(TENANT_WEBHOOKS_MODULE)
     if (!(await hooks.anyTakes("invoice.requested"))) {

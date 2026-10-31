@@ -158,6 +158,7 @@ medusaIntegrationTestRunner({
         shipment: { title: "Örnek Kargo A.Ş.", vkn: carrierVkn },
       })
       expect(forShopper.data.invoice).toEqual({
+        id: issued?.id,
         number: issued?.number,
         has_pdf: true,
         document_type: "e_archive",
