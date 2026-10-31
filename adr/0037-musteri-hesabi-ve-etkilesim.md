@@ -234,3 +234,14 @@ F14 kapanış incelemesi, Medusa 2.21.2'nin `POST /auth/verification/confirm` uc
 
 Karar: onay, kodu isteyen kimliğin token'ıyla yapılır (`api/http/verification.ts`). Oturum yoksa 401 (`account.verification_session_required`). Kod başka bir kimliğinse yanıt bilinmeyen kodunkiyle aynıdır (400), kod sahibinin kim olduğu sızmaz. Kod kaydı, Medusa'nın kendi sakladığı SHA-256 özetiyle bulunur. Vitrin (F18) doğrulama sayfasında oturum yoksa girişi ister. Test: `integration-tests/http/account-verification.spec.ts`.
 
+
+## Ek (2026-10-31, F15.1): şifre değişince önceki token'lar yenilenmez
+
+Medusa 2.21.2 her token'ı yeniler (`/auth/token/refresh`; kendi notu: "şifre değişince yenilemeyi kapatmak isteyebiliriz"). Birinin adresiyle kayıt açan, kaydın verdiği kimliksiz token'ı saklar. Adres sahibi şifreyi sıfırlayıp adresi doğruladıktan sonra bu token'ı yenileyerek hesaba girebilirdi.
+
+Karar (`api/http/password-change.ts`):
+- Sıfırlama bağlantısıyla şifre değişince (`POST /auth/:actor_type/emailpass/update`, yanıt 200) değişme anı kimliğin `app_metadata.password_changed_at` alanına yazılır. Adres sıfırlama token'ının `entity_id`'sinden okunur.
+- Bu andan önce verilmiş (`iat`) bir token üç yerde 401 alır (`account.token_before_password_change`): `/auth/token/refresh`, `/auth/session` ve `POST /store/customers`. Aynı saniyede verilen token yeni girişindir.
+- Sınır: kimliği olan eski bir token kendi ömrü dolana kadar (Medusa varsayılanı 1 gün), açık bir oturum da 10 saat geçerli kalır; ikisi de yenilenemez. Her istekte kimliği okumak yerine bu bilinçli olarak bırakıldı.
+
+Test: `integration-tests/http/account-verification.spec.ts`.

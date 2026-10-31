@@ -19,6 +19,7 @@ import { StorePostWishlistItem } from "../store/customers/me/wishlist/validators
 import { StorePostOrderLookup } from "../store/order-lookup/validators"
 import { StorePostStockAlert } from "../store/stock-alerts/validators"
 import { requireMailDomain } from "./mail-domain"
+import { notePasswordChange, tokenAfterPasswordChange } from "./password-change"
 import { verificationOfOwnIdentity } from "./verification"
 import { optionalCustomer, orderPageAccess } from "./order-access"
 import { rateLimit } from "./rate-limit"
@@ -219,6 +220,17 @@ export const ACCOUNT_ROUTES = [
   // F10 M9: an address whose domain takes no mail opens no account; no
   // `methods`, so it runs before Medusa's own route
   { matcher: "/auth/customer/emailpass/register", middlewares: [requireMailDomain()] },
+  // F15.1: a changed password ends the tokens given before it
+  {
+    matcher: "/auth/:actor_type/emailpass/update",
+    methods: ["POST" as const],
+    middlewares: [notePasswordChange],
+  },
+  ...["/auth/token/refresh", "/auth/session", "/store/customers"].map((matcher) => ({
+    matcher,
+    methods: ["POST" as const],
+    middlewares: [tokenAfterPasswordChange],
+  })),
   // F15.1: a code confirms an address only in the session of the identity that asked for it
   {
     matcher: "/auth/verification/confirm",

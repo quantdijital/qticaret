@@ -3,6 +3,7 @@ import { Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
+import { createStorefront } from "../helpers/storefront"
 
 jest.setTimeout(120 * 1000)
 
@@ -82,6 +83,90 @@ medusaIntegrationTestRunner({
       const own = await confirm(code, intruder)
       expect(own.status).toBe(200)
       expect(own.data.verified_at).toBeDefined()
+    })
+
+    it("ends a token given before the password changed: no refresh, no account from it", async () => {
+      const victim = `sifirlayan-${String(Date.now())}@example.com`
+      const intruder = await register(victim)
+      // A token's time is in seconds: the change comes in a later one
+      await new Promise((resolve) => setTimeout(resolve, 1_100))
+
+      // The victim, unable to register, resets the password through the mailed link
+      const bus = getContainer().resolve(Modules.EVENT_BUS)
+      const subscriberId = `reset-${randomUUID()}`
+      let deliver: (token: string) => void = () => undefined
+      const mailed = new Promise<string>((resolve) => {
+        deliver = resolve
+      })
+      bus.subscribe(
+        "auth.password_reset",
+        ({ data }: { data: unknown }) => {
+          const event = data as { entity_id?: string; token?: string }
+          if (event.entity_id === victim && event.token) {
+            deliver(event.token)
+          }
+          return Promise.resolve()
+        },
+        { subscriberId }
+      )
+      await http.post("/auth/customer/emailpass/reset-password", { identifier: victim })
+      const resetToken = await mailed
+      const password = randomUUID()
+      const updated = await settle(
+        http.post(
+          "/auth/customer/emailpass/update",
+          { password },
+          { headers: { authorization: `Bearer ${resetToken}` } }
+        )
+      )
+      expect(updated.status).toBe(200)
+      const auth = getContainer().resolve(Modules.AUTH)
+      const [provider] = await auth.listProviderIdentities({
+        entity_id: victim,
+        provider: "emailpass",
+      })
+      for (let tries = 0; tries < 30; tries++) {
+        const identity = await auth.retrieveAuthIdentity(provider?.auth_identity_id ?? "")
+        if (identity.app_metadata?.["password_changed_at"]) {
+          break
+        }
+        await new Promise((resolve) => setTimeout(resolve, 100))
+      }
+
+      const store = await createStorefront(getContainer())
+      const refreshed = await settle(
+        http.post<{ message?: string }>(
+          "/auth/token/refresh",
+          {},
+          {
+            headers: { authorization: `Bearer ${intruder}` },
+          }
+        )
+      )
+      expect(refreshed.status).toBe(401)
+      expect(refreshed.data.message).toBe("account.token_before_password_change")
+      const opened = await settle(
+        http.post(
+          "/store/customers",
+          { email: victim, first_name: "Saldırgan" },
+          { headers: { ...store.headers, authorization: `Bearer ${intruder}` } }
+        )
+      )
+      expect(opened.status).toBe(401)
+
+      // The victim's own sign-in after the change is not refused by it
+      const signedIn = await http.post<{ token: string }>("/auth/customer/emailpass", {
+        email: victim,
+        password,
+      })
+      const own = await settle(
+        http.post(
+          "/store/customers",
+          { email: victim, first_name: "Kurban" },
+          { headers: { ...store.headers, authorization: `Bearer ${signedIn.data.token}` } }
+        )
+      )
+      expect(own.status).toBe(200)
     })
   },
 })
