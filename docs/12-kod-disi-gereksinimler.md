@@ -27,7 +27,7 @@
 | Kalem | Sorumlu / danışılacak | Etkilediği faz |
 |---|---|---|
 | E-fatura/e-arşiv kuralları: bireysel alıcıda TCKN yoksa uygulama, iade faturası | Mali müşavir | F8 |
-| Paraşüt platform API istemcisi (`destek@parasut.com`): istemci kimliği ve sırrı; yetki kodu akışının (kodu panele yapıştırma) platform istemcisine açılması; deneme ortamı olup olmadığı | Quant Dijital | F8 (ADR-0034) |
+| Paraşüt platform API istemcisi (`destek@parasut.com`; e-posta taslağı 2026-10-31'de kullanıcıya verildi): istemci kimliği ve sırrı; yetki kodu akışının (kodu panele yapıştırma, `urn:ietf:wg:oauth:2.0:oob`) platform istemcisine açılması; GİB'e belge göndermeden deneme yapılabilecek test (staging) ortamı ve test firması; istek sınırları; tekrar önleyici anahtar; e-belge serisinin API'den seçilip seçilemeyeceği (web satışları ayrı seriyle) | Quant Dijital | F8 (ADR-0034) |
 | Mali müşavir soru listesinin cevapları (`docs/mali-musavir-sorulari.md`) | Mali müşavir | F8 |
 | KDV oran grupları (%20/%10/%1) ve kargo bedelinin KDV oranı; tenant ürün gruplarının hangi orana düştüğü | Mali müşavir | F1.2 (ADR-0007) |
 | Kuruş yuvarlama kuralı (yarım yukarı) ve sepet indiriminin kalemlere dağıtımının faturadaki karşılığı | Mali müşavir | F2.7, F4.7, F8 (ADR-0010) |
