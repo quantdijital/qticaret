@@ -1,4 +1,5 @@
 import { z } from "@medusajs/framework/zod"
+import { parseDsn } from "./error-tracking/dsn"
 import { LOG_LEVELS } from "./logging/levels"
 
 /**
@@ -50,6 +51,16 @@ const envSchema = z.object({
   // Have I Been Pwned's breach list for new passwords (adr/0043): on in
   // production and staging, off locally unless `on`; `off` turns it off anywhere
   PASSWORD_BREACH_CHECK: z.enum(["on", "off"]).optional(),
+  // F15.4 (adr/0045): GlitchTip's DSN for errors, self-hosted in Türkiye;
+  // the OTLP collector for traces (instrumentation.ts). Both off when unset
+  ERROR_TRACKING_DSN: z
+    .string()
+    .refine((value) => parseDsn(value) !== null, "must be a DSN: https://<key>@<host>/<project id>")
+    .optional(),
+  OTEL_EXPORTER_OTLP_ENDPOINT: z.url({ protocol: /^https?$/ }).optional(),
+  OTEL_SERVICE_NAME: z.string().max(100).optional(),
+  // The deployed version, on each error event (CI sets it to the commit)
+  RELEASE: z.string().max(100).optional(),
   // F15.3: per-IP limits a thousand times larger, for load tests sent from
   // one machine (`perIpScale`). Development, test and staging only
   LOAD_TEST: z.enum(["on", "off"]).optional(),

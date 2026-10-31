@@ -45,8 +45,9 @@ Script **idempotent** olmalı (yarıda kalırsa tekrar çalıştırılabilir).
 
 ## Gözlemlenebilirlik
 - Log: pino JSON, tenant slug + korelasyon ID her satırda, redaksiyon aktif
-- Trace: OpenTelemetry → (Grafana Tempo / Honeycomb vb.)
-- Hata: Sentry (tenant etiketiyle)
+- Trace: OpenTelemetry (`apps/backend/instrumentation.ts`, toplu gönderim) → Türkiye'de OTLP toplayıcı ve Grafana Tempo/Jaeger (ADR-0045). `OTEL_EXPORTER_OTLP_ENDPOINT` verilmezse kapalı; canlıda örnekleme `OTEL_TRACES_SAMPLER=parentbased_traceidratio`, `OTEL_TRACES_SAMPLER_ARG=0.1`
+- Hata: GlitchTip, Türkiye'de kendi sunucumuzda (ADR-0045). Logger'ın error satırları redakte edilmiş hâliyle gider (`ERROR_TRACKING_DSN`); olayda mağazanın alan adı ve `RELEASE`
+- Yavaş sorgu: Postgres `log_min_duration_statement=500`, bağ parametreleri loga yazılmaz (`log_parameter_max_length=0`)
 - Uyarılar: ödeme başarısızlık oranı artışı, webhook hata oranı, kuyruk birikmesi, fatura dead-letter
 
 ## Yedekleme

@@ -78,6 +78,11 @@
 | `platform_settings_section` (platform-settings) | Şahıs işletmesinde unvan (kişi adı), TCKN, adres, KEP; banka hesap sahibi ve IBAN; iletişim e-postası ve telefonu (D) | mağaza künyesi ve ödeme          | Mağaza süresince                                                               | Mağazanın kendi verisi.                |
 | `content_entry` (content)                       | yazar adı (D)                                                                                                         | blog ve sayfa                    | Yayında kaldıkça                                                               | —                                      |
 
+**Gözlemlenebilirlik (ADR-0045, F16'da kurulur):**
+- **GlitchTip hata olayları:** olay adı, hata türü ve mesajı (log redaksiyonundan geçmiş; e-postanın yerel kısmı maskeli), kod kareleri, istek kimliği, metot, yol, durum. Saklama önerisi 30 gün.
+- **İzler:** rota, iş akışı adımı, parametresiz SQL. Kişisel veri yok. Saklama önerisi 7 gün.
+- **Postgres yavaş sorgu logu:** sorgu metni bağ parametreleri olmadan.
+
 **Kişisel veri tutmayan, kontrol edilmiş tablolar:** katalog, fiyat, SEO, stok, medya, feed, kargo olayları, webhook ve muhasebe tabloları (tam liste L8 taramasında).
 
 **Bellekte tutulanlar:** Sayaçlarda kullanılan ziyaretçi IP özetleri (Ö) veritabanında değil, hız sınırı deposunda durur ve pencere bitince düşer. Bu sayaçlar arama, hız sınırı ve yeniden doğrulama içindir.

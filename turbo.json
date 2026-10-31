@@ -27,7 +27,10 @@
     "TEST_*",
     "LOAD_TEST",
     "PASSWORD_BREACH_CHECK",
-    "SECURITY_*"
+    "SECURITY_*",
+    "OTEL_*",
+    "ERROR_TRACKING_*",
+    "RELEASE"
   ],
   "tasks": {
     "build": {

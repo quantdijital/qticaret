@@ -1,5 +1,6 @@
 import pino from "pino"
 import type { DestinationStream, Logger as PinoLogger } from "pino"
+import { errorTrackingFromEnv } from "../error-tracking"
 import { currentRequestId } from "./context"
 import { DEFAULT_LOG_LEVEL } from "./levels"
 import type { LogLevel } from "./levels"
@@ -31,6 +32,32 @@ export interface LoggerOptions {
   destination?: DestinationStream
 }
 
+// GlitchTip out of reach: said once a minute, below error level so the
+// warning never goes to GlitchTip itself (adr/0045)
+let lastTrackingFailure = 0
+function trackingFailed(reason: string): void {
+  const at = Date.now()
+  if (at - lastTrackingFailure >= 60_000) {
+    lastTrackingFailure = at
+    baseLogger.warn({ event: "error_tracking.send_failed", reason }, "error_tracking.send_failed")
+  }
+}
+
+/** Standard output, and with `ERROR_TRACKING_DSN` the error lines to GlitchTip too. */
+function defaultDestination(): DestinationStream {
+  const tracking = errorTrackingFromEnv(process.env, trackingFailed)
+  if (!tracking) {
+    return process.stdout
+  }
+  return pino.multistream(
+    [
+      { level: "trace", stream: process.stdout },
+      { level: "error", stream: tracking },
+    ],
+    { levels: { ...pino.levels.values, ...CUSTOM_LEVELS } }
+  )
+}
+
 export function createPinoLogger(options: LoggerOptions = {}): BaseLogger {
   return pino<CustomLevel>(
     {
@@ -58,7 +85,7 @@ export function createPinoLogger(options: LoggerOptions = {}): BaseLogger {
         },
       },
     },
-    options.destination ?? process.stdout
+    options.destination ?? defaultDestination()
   )
 }
 

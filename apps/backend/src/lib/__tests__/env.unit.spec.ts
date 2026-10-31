@@ -239,6 +239,21 @@ describe("parseEnv", () => {
     expect(errorOf({ ...validEnv, ...load })).toContain("LOAD_TEST")
   })
 
+  it("reads a GlitchTip DSN and an OTLP collector, and refuses a DSN it cannot use", () => {
+    const env = parseEnv({
+      ...validEnv,
+      ERROR_TRACKING_DSN: "https://abc123@hata.example.com/7",
+      OTEL_EXPORTER_OTLP_ENDPOINT: "https://iz.example.com",
+    })
+    expect(env.ERROR_TRACKING_DSN).toBe("https://abc123@hata.example.com/7")
+    expect(errorOf({ ...validEnv, ERROR_TRACKING_DSN: "https://hata.example.com/7" })).toContain(
+      "ERROR_TRACKING_DSN"
+    )
+    expect(errorOf({ ...validEnv, ERROR_TRACKING_DSN: "http://abc@hata.example.com/7" })).toContain(
+      "ERROR_TRACKING_DSN"
+    )
+  })
+
   it("lets a fake PayTR address on a developer's machine only", () => {
     const fake = { PAYTR_BASE_URL: "http://127.0.0.1:4010" }
 
