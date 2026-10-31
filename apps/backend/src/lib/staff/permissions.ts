@@ -127,6 +127,9 @@ const readJob: Rule = {
   when: (facts) => facts.jobType !== undefined && READ_JOBS.has(facts.jobType),
 }
 
+// One's own export stopped: the route lets its asker (or the owner) only
+const cancelJob: Rule = { methods: ["POST"], path: "/admin/async-jobs/:id/cancel" }
+
 /** What `operations` writes: the day's orders, parcels, returns, stock and moderation. */
 const OPERATIONS_WRITES: readonly Rule[] = [
   // An order's email and addresses (Medusa's update), and shipping it
@@ -154,9 +157,10 @@ const OPERATIONS_WRITES: readonly Rule[] = [
   { methods: ["POST"], path: "/admin/product-answers/moderate" },
   { methods: ["POST"], path: "/admin/product-questions/:id/answer" },
   readJob,
+  cancelJob,
 ]
 
-const READONLY_WRITES: readonly Rule[] = [readJob]
+const READONLY_WRITES: readonly Rule[] = [readJob, cancelJob]
 
 const compiled = new Map<string, RegExp>()
 

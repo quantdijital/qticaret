@@ -17,3 +17,6 @@ export const AdminGetAsyncJobs = z.object({
   offset: z.coerce.number().int().min(0).max(100_000).default(0),
 })
 export type AdminGetAsyncJobsType = z.infer<typeof AdminGetAsyncJobs>
+
+/** A cancel names nothing but the job in its path. */
+export const AdminPostAsyncJobCancel = z.object({}).strict()

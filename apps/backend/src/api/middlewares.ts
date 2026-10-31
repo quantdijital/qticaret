@@ -11,7 +11,11 @@ import {
   AdminPostAttributeTemplate,
   AdminUpdateAttributeTemplate,
 } from "./admin/attribute-templates/validators"
-import { AdminGetAsyncJobs, AdminPostAsyncJob } from "./admin/async-jobs/validators"
+import {
+  AdminGetAsyncJobs,
+  AdminPostAsyncJob,
+  AdminPostAsyncJobCancel,
+} from "./admin/async-jobs/validators"
 import { AdminGetAuditLog } from "./admin/audit-log/validators"
 import { AdminGetHomeSummary } from "./admin/home/summary/validators"
 import { PANEL_ROUTES } from "./admin/panel-routes"
@@ -303,6 +307,11 @@ export default defineMiddlewares({
       matcher: "/admin/async-jobs/:id/result",
       methods: ["GET"],
       middlewares: [requireUserActor],
+    },
+    {
+      matcher: "/admin/async-jobs/:id/cancel",
+      methods: ["POST"],
+      middlewares: [requireUserActor, validateAndTransformBody(AdminPostAsyncJobCancel)],
     },
     {
       matcher: "/admin/uploads/:id",

@@ -549,6 +549,10 @@
       "title": "İşler",
       "subtitle": "Dışa aktarma gibi uzun süren işler. Dosyalar bir hafta saklanır.",
       "empty": "Henüz iş yok. Bir dışa aktarma başlattığınızda burada görünür.",
+      "cancel": "İptal et",
+      "cancelTitle": "İş iptal edilsin mi?",
+      "cancelHint": "Sıradaki iş hiç başlamaz; çalışan iş bir sonraki adımında durur. O ana kadar yapılanlar (ör. içe aktarılan satırlar) kalır.",
+      "cancelled": "İş iptal edildi.",
       "download": "İndir",
       "columns": {
         "type": "İş",

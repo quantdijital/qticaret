@@ -239,6 +239,7 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/api-access/:id/revoke": false,
   "POST /admin/api-access": false,
   "POST /admin/async-jobs": false,
+  "POST /admin/async-jobs/:id/cancel": true,
   "POST /admin/attribute-templates/:id": false,
   "DELETE /admin/attribute-templates/:id": false,
   "POST /admin/attribute-templates": false,

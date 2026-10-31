@@ -6,7 +6,10 @@
 export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "async_job.already_running": "Bu işten biri zaten sırada ya da çalışıyor.",
   "async_job.input_invalid": "İş için verilen seçenekler geçerli değil.",
+  "async_job.cancelled": "İş iptal edildi.",
+  "async_job.not_open": "İş zaten bitmiş; iptal edilemez.",
   "async_job.not_queued": "İş zaten başlamış.",
+  "async_job.not_yours": "Bu işi yalnızca başlatan kişi ya da mağaza sahibi iptal edebilir.",
   "async_job.result_unavailable": "Bu işin indirilebilir bir sonucu yok ya da süresi doldu.",
   "async_job.unknown": "İş bulunamadı.",
   "async_job.type_unknown": "Böyle bir iş tipi yok.",

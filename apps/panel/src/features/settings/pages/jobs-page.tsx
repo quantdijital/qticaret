@@ -11,6 +11,7 @@ import { StatusBadge } from "@/components/patterns/status-badge"
 import type { StatusTone } from "@/components/patterns/status-badge"
 import { JOB_PAGE_SIZE, jobsQuery } from "@/features/settings/api/activity"
 import type { AsyncJob } from "@/features/settings/api/activity"
+import { JobCancelButton } from "@/features/settings/components/job-cancel-button"
 import { JobDownloadButton } from "@/features/settings/components/job-download-button"
 import { errorText } from "@/lib/errors"
 import { formatDateTime, formatPercent, formatRelative } from "@/lib/format"
@@ -71,7 +72,17 @@ function useColumns(): Column<AsyncJob>[] {
         </span>
       ),
     },
-    { key: "result", header: "", align: "right", cell: (job) => <JobDownloadButton job={job} /> },
+    {
+      key: "result",
+      header: "",
+      align: "right",
+      cell: (job) => (
+        <div className="flex justify-end gap-2">
+          <JobCancelButton job={job} />
+          <JobDownloadButton job={job} />
+        </div>
+      ),
+    },
   ]
 }
 

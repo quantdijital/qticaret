@@ -39,6 +39,24 @@ export const jobResultUrl = async (id: string) =>
   (await sdk.client.fetch<{ url: string }>(`/admin/async-jobs/${encodeURIComponent(id)}/result`))
     .url
 
+/**
+ * Stops a job (S13): one queued never starts, one running stops at its
+ * next progress report, what it did by then kept. Its asker or the owner.
+ */
+export function useCancelJob() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (id: string) =>
+      sdk.client.fetch<{ async_job: AsyncJob }>(
+        `/admin/async-jobs/${encodeURIComponent(id)}/cancel`,
+        { method: "POST", body: {} }
+      ),
+    onSuccess: async () => {
+      await client.invalidateQueries({ queryKey: ["settings", "jobs"] })
+    },
+  })
+}
+
 export function useStartJob() {
   const client = useQueryClient()
   return useMutation({

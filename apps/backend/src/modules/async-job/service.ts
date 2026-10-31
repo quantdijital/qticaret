@@ -80,19 +80,23 @@ class AsyncJobModuleService extends MedusaService({ AsyncJob }) {
     return this.retrieveAsyncJob(id, {}, sharedContext)
   }
 
-  /** Progress (0–100) and a heartbeat, throttled to one write a second unless `force`. */
+  /**
+   * Progress (0–100) and a heartbeat, throttled to one write a second
+   * unless `force`. Whether the job still runs: one cancelled or swept
+   * meanwhile is told so at its next written report.
+   */
   async reportProgress(
     id: string,
     progress: number,
     progressKey: string | null = null,
     force = false
-  ) {
+  ): Promise<boolean> {
     const now = Date.now()
     if (!force && now - (this.lastProgress.get(id) ?? 0) < PROGRESS_EVERY_MS) {
-      return
+      return true
     }
     this.lastProgress.set(id, now)
-    await this.transition_(
+    return this.transition_(
       { id, status: "running" },
       {
         progress: Math.max(0, Math.min(100, Math.round(progress))),
@@ -124,6 +128,19 @@ class AsyncJobModuleService extends MedusaService({ AsyncJob }) {
       throw new ConflictError("async_job.not_running")
     }
     return this.retrieveAsyncJob(id)
+  }
+
+  /**
+   * queued or running → cancelled (the F15 audit): a running one stops at
+   * its next progress report, what it did by then kept (an import's rows
+   * written stay). Whether it was still open.
+   */
+  async cancel(id: string): Promise<boolean> {
+    this.lastProgress.delete(id)
+    return this.transition_(
+      { id, status: { $in: ["queued", "running"] } },
+      { status: "cancelled", error_code: "cancelled", finished_at: new Date() }
+    )
   }
 
   /** A failure: the error code only, never its message (it may quote data). A finished job stays as it is. */

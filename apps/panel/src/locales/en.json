@@ -549,6 +549,10 @@
       "title": "Jobs",
       "subtitle": "Long tasks such as exports. Files are kept for a week.",
       "empty": "No jobs yet. They show up here when you start an export.",
+      "cancel": "Cancel",
+      "cancelTitle": "Cancel this job?",
+      "cancelHint": "A queued job never starts; a running one stops at its next step. What it did by then (rows imported, say) stays.",
+      "cancelled": "The job was cancelled.",
       "download": "Download",
       "columns": {
         "type": "Job",

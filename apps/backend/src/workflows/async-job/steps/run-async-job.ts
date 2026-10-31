@@ -2,7 +2,7 @@ import { once } from "node:events"
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
-import { ValidationError } from "../../../lib/errors"
+import { ConflictError, ValidationError } from "../../../lib/errors"
 import { ASYNC_JOB_MODULE } from "../../../modules/async-job"
 import type AsyncJobModuleService from "../../../modules/async-job/service"
 import { jobType } from "../types"
@@ -78,7 +78,12 @@ export const executeAsyncJobStep = createStep(
         {
           container,
           job,
-          progress: (percent, key) => service.reportProgress(id, percent, key ?? null),
+          // Cancelled meanwhile: the job stops here, its file dropped below
+          progress: async (percent, key) => {
+            if (!(await service.reportProgress(id, percent, key ?? null))) {
+              throw new ConflictError("async_job.cancelled")
+            }
+          },
           resultFile: async (filename, mimeType) => {
             file = await openResultFile(container, filename, mimeType)
             return file.writer

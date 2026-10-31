@@ -2,7 +2,10 @@
 export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "async_job.already_running": "One of these jobs is already queued or running.",
   "async_job.input_invalid": "The job's options are not valid.",
+  "async_job.cancelled": "The job was cancelled.",
+  "async_job.not_open": "The job has already finished; it cannot be cancelled.",
   "async_job.not_queued": "The job has already started.",
+  "async_job.not_yours": "Only whoever started this job, or the shop's owner, can cancel it.",
   "async_job.result_unavailable": "This job has no result to download, or it expired.",
   "async_job.unknown": "Job not found.",
   "async_job.type_unknown": "There is no such job type.",

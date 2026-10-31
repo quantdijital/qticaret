@@ -886,7 +886,7 @@
   - Panelde bazı bileşen fonksiyonları 50 satırı aşıyor (sihirbaz sayfası, kategori düzenleyici, şablon paneli, yeni landing diyaloğu); docs/10'a göre bölünmeli.
   - Landing ürün sayısı her okumada hesaplanıyor; liste ekranında gösterilmiyor. Büyük mağazada önbellek ya da Index modülü gerekir.
   - Facet kataloğu en çok 500 aktif marka listeliyor; daha büyük mağazada aramalı seçici gerekir.
-  - İçe aktarma: iş iptal ucu (S13'ten devreden) hâlâ yok. Gerçek Excel, LibreOffice ve Google Sheets dosyalarıyla örnek testleri eklenmedi (fixture'lar openpyxl ile üretildi: Excel uyumlu, paylaşılan metinli sürümü de var).
+  - İçe aktarma: ~~iş iptal ucu (S13'ten devreden)~~ yapıldı 2026-10-31 (`POST /admin/async-jobs/:id/cancel`, Ayarlar > İşler'de "İptal et"; çalışan iş bir sonraki ilerleme bildiriminde durur, o ana kadar yapılan kalır). Gerçek Excel, LibreOffice ve Google Sheets dosyalarıyla örnek testleri eklenmedi (fixture'lar openpyxl ile üretildi: Excel uyumlu, paylaşılan metinli sürümü de var).
   - Fiyat listesi satırları (`GET /admin/price-lists/:id/lines`) sayfalanmadan okunuyor; binlerce çeşitli listede sayfalama gerekir.
   - Müşteri grubu yönetimi panelde yok (Medusa Admin'de); fiyat listesi formu var olan grupları seçiyor.
   - Fiyat listesi ekranı en çok 200 liste ve 200 müşteri grubu okuyor; daha fazlası için sayfalama ve aramalı seçici gerekir.

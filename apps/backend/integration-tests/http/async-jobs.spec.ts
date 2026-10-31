@@ -201,6 +201,41 @@ medusaIntegrationTestRunner({
       expect(byKey.status).toBe(403)
     })
 
+    it("cancels a job for its asker: a queued one never starts, a running one stops at its next report", async () => {
+      const asker = await createAdminUser(http, getContainer(), "operations")
+      const other = await createAdminUser(http, getContainer(), "admin")
+      const make = () =>
+        service().createAsyncJobs({ type: "report.export", requested_by: asker.userId, input: {} })
+      const cancel = (id: string, headers: Record<string, string>) =>
+        settle(
+          http.post<{ async_job?: Job; message?: string }>(
+            `/admin/async-jobs/${id}/cancel`,
+            {},
+            { headers }
+          )
+        )
+      const queued = await make()
+      const running = await make()
+      await service().markRunning(running.id)
+
+      const byOther = await cancel(queued.id, other.headers)
+      const byAsker = await cancel(queued.id, asker.headers)
+      const again = await cancel(queued.id, asker.headers)
+      const byOwner = await cancel(running.id, admin.headers)
+      const stillRunning = await service().reportProgress(running.id, 50, null, true)
+      // The run's own failure after it stops leaves it cancelled
+      await service().markFailed(running.id, "async_job.cancelled")
+      const [stopped] = await service().listAsyncJobs({ id: running.id })
+
+      expect(byOther.data.message).toBe("async_job.not_yours")
+      expect(byAsker.status).toBe(200)
+      expect(byAsker.data.async_job?.status).toBe("cancelled")
+      expect(again.status).toBe(409)
+      expect(byOwner.data.async_job?.status).toBe("cancelled")
+      expect(stillRunning).toBe(false)
+      expect(stopped?.status).toBe("cancelled")
+    })
+
     it("does not let a queued job that lost its event block its type", async () => {
       const lost = await service().createAsyncJobs({ type: "audit_log.export" })
       // created_at belongs to the database; the test ages a job on purpose
