@@ -38,7 +38,12 @@ interface TaskRow {
   icon: LucideIcon
   count: number
   to: string
-  search?: { status: "draft" } | { view: "low" } | { stage: "to_ship" | "awaiting_payment" }
+  search?:
+    | { status: "draft" }
+    | { view: "low" }
+    | { stage: "to_ship" | "awaiting_payment" }
+    // A settings page's tab
+    | { part: string }
   /** A count here needs the shop's attention (amber) rather than routine work. */
   urgent: boolean
 }
@@ -102,7 +107,8 @@ function rows(tasks: DashboardTasks, reach: Reach): TaskRow[] {
             key: "accountingStopped" as const,
             icon: Calculator,
             count: tasks.accounting_stopped,
-            to: "/settings/accounting",
+            to: "/settings/einvoice",
+            search: { part: "accounting" },
             urgent: true,
           },
         ]

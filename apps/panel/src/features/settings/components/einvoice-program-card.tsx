@@ -75,10 +75,8 @@ export function EinvoiceProgramCard({
       }}
       {...(className ? { className } : {})}
     >
-      {/* The series matters where invoices are typed in by hand; Paraşüt keeps its own */}
-      <div
-        className={`grid gap-5 ${provider === "external" ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}
-      >
+      {/* The series matters where invoices are typed in by hand (Paraşüt keeps its own): a row of its own */}
+      <div className="grid gap-5 sm:grid-cols-2">
         <Field label={t(`${E}.provider`)} htmlFor="einvoice-provider">
           <Controller
             control={form.control}
@@ -120,11 +118,11 @@ export function EinvoiceProgramCard({
           />
         </Field>
         {provider === "external" ? (
-          <Field label={t(`${E}.series`)} htmlFor="einvoice-series">
+          <Field label={t(`${E}.series`)} htmlFor="einvoice-series" className="sm:col-span-2">
             <Input
               id="einvoice-series"
               maxLength={3}
-              className="uppercase"
+              className="w-28 uppercase"
               placeholder="WEB"
               {...form.register("series")}
             />

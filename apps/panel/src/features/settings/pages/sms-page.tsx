@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
-import { PageHeader } from "@/components/patterns/page-header"
 import { SectionCard } from "@/components/patterns/section-card"
 import { ErrorState, LoadingRows } from "@/components/patterns/states"
 import { Button } from "@/components/ui/button"
@@ -15,15 +14,15 @@ import { errorText } from "@/lib/errors"
 const S = "settings.sms"
 
 /**
- * Settings > SMS (F9.2, adr/0036): the SMS services the shop can send
+ * The SMS tab of Settings > Messages (the owner, 2026-10-31); before, Settings > SMS (F9.2, adr/0036): the SMS services the shop can send
  * with, each on its own page where the shop connects its account.
  */
-export function SmsPage() {
+export function SmsPanel() {
   const { t } = useTranslation()
   const query = useQuery(providerAccountsQuery())
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader title={t(`${S}.title`)} description={t(`${S}.subtitle`)} />
+      <p className="max-w-2xl text-sm text-muted-foreground">{t(`${S}.subtitle`)}</p>
       {query.isError ? (
         <ErrorState text={errorText(t, query.error)} onRetry={() => void query.refetch()} />
       ) : !query.data ? (

@@ -1,6 +1,5 @@
 import {
   Bell,
-  Calculator,
   CreditCard,
   FileClock,
   FileText,
@@ -10,7 +9,6 @@ import {
   ListTodo,
   Megaphone,
   Scale,
-  MessageSquare,
   Palette,
   Plug,
   Search,
@@ -19,7 +17,6 @@ import {
   ToggleRight,
   Truck,
   Users,
-  Warehouse,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import type { Capability } from "@/features/auth/api/staff"
@@ -30,6 +27,8 @@ export interface SettingsSection {
   icon: LucideIcon
   /** Offered only to a role that may (adr/0040); the API refuses the others anyway. */
   needs?: Capability
+  /** Pages of the section that live under another path (an SMS provider's page). */
+  also?: readonly string[]
 }
 
 export interface SettingsGroup {
@@ -40,7 +39,8 @@ export interface SettingsGroup {
 /**
  * Settings by what they are about (the shop, selling and delivery, talking
  * to customers, the system), so the list reads as a few groups, not one
- * long row. Each key names its text: `settings.groups.*`, `settings.sections.*`.
+ * long row. A subject's parts are tabs of one page (the owner, 2026-10-31):
+ * accounting sits with invoices, warehouses with shipping, SMS with e-mail. Each key names its text: `settings.groups.*`, `settings.sections.*`.
  */
 export const SETTINGS_GROUPS: readonly SettingsGroup[] = [
   {
@@ -58,19 +58,24 @@ export const SETTINGS_GROUPS: readonly SettingsGroup[] = [
     key: "selling",
     sections: [
       { key: "payments", to: "/settings/payments", icon: CreditCard, needs: "settings" },
-      { key: "accounting", to: "/settings/accounting", icon: Calculator, needs: "settings" },
-      // F8: who issues the shop's invoices
+      // F8 and F11.5: invoices and the accountant's side, in tabs (the owner, 2026-10-31)
       { key: "einvoice", to: "/settings/einvoice", icon: FileText, needs: "settings" },
+      // Carriers, options, returns and warehouses, in tabs
       { key: "shipping", to: "/settings/shipping", icon: Truck, needs: "settings" },
-      { key: "locations", to: "/settings/locations", icon: Warehouse, needs: "settings" },
-      { key: "marketing", to: "/settings/marketing", icon: Megaphone, needs: "settings" },
     ],
   },
   {
     key: "messages",
     sections: [
-      { key: "notifications", to: "/settings/notifications", icon: Bell, needs: "settings" },
-      { key: "sms", to: "/settings/sms", icon: MessageSquare, needs: "settings" },
+      // E-mail and SMS together, in tabs
+      {
+        key: "notifications",
+        to: "/settings/notifications",
+        icon: Bell,
+        needs: "settings",
+        also: ["/settings/sms"],
+      },
+      { key: "marketing", to: "/settings/marketing", icon: Megaphone, needs: "settings" },
     ],
   },
   {
@@ -99,7 +104,9 @@ export function visibleGroups(can: (capability: Capability) => boolean): readonl
 
 /** Whether the page at `pathname` belongs to the section. */
 export const inSection = (pathname: string, section: SettingsSection): boolean =>
-  pathname === section.to || pathname.startsWith(`${section.to}/`)
+  [section.to, ...(section.also ?? [])].some(
+    (path) => pathname === path || pathname.startsWith(`${path}/`)
+  )
 
 /** The group the page at `pathname` belongs to; none on the settings home. */
 export const groupOf = (pathname: string): SettingsGroup | undefined =>

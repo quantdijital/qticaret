@@ -129,7 +129,11 @@ function useAlertText(data: Record<string, unknown>) {
       description: t("notifications.accountingSync.description"),
       Icon: Calculator,
       tone: "bg-destructive-soft text-destructive-text",
-      link: { to: "/settings/accounting" as const, search: {}, params: {} },
+      link: {
+        to: "/settings/einvoice" as const,
+        search: { part: "accounting" },
+        params: {},
+      },
     }
   }
   if (data["kind"] === "statement_check") {

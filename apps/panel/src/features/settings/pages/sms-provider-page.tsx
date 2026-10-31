@@ -23,7 +23,7 @@ export function SmsProviderPage() {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
-        back={{ to: "/settings/sms", label: t(`${S}.title`) }}
+        back={{ to: "/settings/notifications", search: { part: "sms" }, label: t(`${S}.title`) }}
         title={name}
         description={t(`${S}.providers.${provider}.description`)}
         badge={query.data ? <AccountBadges account={account} name={name} /> : null}

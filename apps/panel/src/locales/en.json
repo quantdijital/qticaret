@@ -252,7 +252,7 @@
       "appearance": "Appearance",
       "store": "Store",
       "payments": "Payment",
-      "shipping": "Shipping",
+      "shipping": "Shipping and delivery",
       "seo": "SEO",
       "features": "Features",
       "jobs": "Jobs",
@@ -260,7 +260,7 @@
       "attributes": "Product attributes",
       "locations": "Locations",
       "integrations": "Integrations",
-      "notifications": "Notifications",
+      "notifications": "E-mail and SMS",
       "sms": "SMS",
       "marketing": "Marketing",
       "accounting": "Accounting",
@@ -268,7 +268,7 @@
       "team": "Team",
       "security": "Security",
       "legal": "Legal texts",
-      "einvoice": "E-invoice",
+      "einvoice": "Invoices and accounting",
       "migration": "Migration"
     },
     "appearance": {
@@ -479,6 +479,11 @@
         "add": "Upload image",
         "replace": "Replace image",
         "remove": "Remove"
+      },
+      "tabs": {
+        "addresses": "Addresses",
+        "pages": "Titles and image",
+        "search": "Search engines"
       }
     },
     "features": {
@@ -923,10 +928,13 @@
       "offered": {
         "on": "On",
         "off": "Off"
+      },
+      "tabs": {
+        "installments": "Installments"
       }
     },
     "shipping": {
-      "title": "Shipping",
+      "title": "Shipping and delivery",
       "subtitle": "How orders are shipped. Each shipping service is connected on its own page.",
       "manage": "Manage",
       "connect": "Connect",
@@ -1114,6 +1122,12 @@
           "customer": "The shopper"
         },
         "excludedHint": "Mark products that cannot be returned once opened for hygiene, or that are made to order, as \"Outside the right of withdrawal\" on their page; they come back only when faulty."
+      },
+      "tabs": {
+        "carriers": "Carriers",
+        "options": "Options and rates",
+        "returns": "Returns",
+        "locations": "Warehouses and stock"
       }
     },
     "integrations": {
@@ -1255,8 +1269,8 @@
       }
     },
     "notifications": {
-      "title": "Notifications",
-      "description": "Settings for the messages your customers and you get. The SMS account is set up under SMS.",
+      "title": "E-mail and SMS",
+      "description": "The e-mails and SMS sent to customers and the team: the sender domain, daily limits, İYS, message templates and staff alerts.",
       "suppressions": {
         "title": "Addresses not sent to",
         "description": "E-mails that bounced for good or were marked as spam land here by themselves; nothing goes to them again. You can add an address a customer asked to leave alone.",
@@ -1391,6 +1405,12 @@
         "description": "The most e-mails the shop sends in a day. Bounces from orders with made-up addresses hurt the sender's reputation; you are warned in the bell at 80% of the limit, and past it no more e-mail goes that day.",
         "label": "At most a day",
         "saved": "E-mail limit saved."
+      },
+      "tabs": {
+        "email": "E-mail",
+        "sms": "SMS",
+        "templates": "Templates",
+        "staff": "Staff alerts"
       }
     },
     "sms": {
@@ -1445,7 +1465,7 @@
     "groups": {
       "shop": "Shop",
       "selling": "Selling and delivery",
-      "messages": "Talking to customers",
+      "messages": "Messages and marketing",
       "system": "System"
     },
     "home": {
@@ -1457,12 +1477,12 @@
     "sectionHints": {
       "store": "Shop name, contact details, time zone and units",
       "appearance": "The panel's brand colour, corners and density",
-      "seo": "Domain, URL style, title and description templates",
+      "seo": "Domain and address style, title templates, search engines",
       "attributes": "Attribute templates for products",
-      "payments": "Card, bank transfer and cash on delivery",
-      "shipping": "Carriers, options and rates",
+      "payments": "Card payments, installments, bank transfer and cash on delivery",
+      "shipping": "Carriers, options and rates, returns, warehouses and stock",
       "locations": "Warehouses that hold stock, and their addresses",
-      "notifications": "E-mail sender, alerts and message templates",
+      "notifications": "E-mail sender and limit, SMS and İYS, templates, staff alerts",
       "sms": "SMS service and daily sending limit",
       "integrations": "Whether the connected services are working",
       "features": "Shop features you can turn on or off",
@@ -1472,9 +1492,9 @@
       "accounting": "The month's package for the accountant",
       "api": "API keys for your own systems",
       "team": "Who uses the panel, with which role, and invitations",
-      "security": "Your two-step verification and the team's requirement",
+      "security": "Two-step verification, the team's requirement, fraud prevention",
       "legal": "Contracts, policies and the privacy notice",
-      "einvoice": "Invoicing program and moment",
+      "einvoice": "Invoicing program, timing and series, carrier details, accounting",
       "migration": "Catalog, customers and 301s from the old platform"
     },
     "marketing": {
@@ -1626,6 +1646,11 @@
           },
           "rejected": "GA4 no longer accepts the stored secret. Enter a new one."
         }
+      },
+      "tabs": {
+        "feeds": "Product feeds",
+        "conversions": "Conversion tracking",
+        "carts": "Abandoned carts"
       }
     },
     "accounting": {
@@ -1921,6 +1946,11 @@
           "phone": "0532 000 00 00",
           "ip": "203.0.113.7"
         }
+      },
+      "tabs": {
+        "account": "My account",
+        "team": "Team",
+        "fraud": "Fraud prevention"
       }
     },
     "legal": {
@@ -2059,8 +2089,8 @@
       }
     },
     "einvoice": {
-      "title": "E-invoice",
-      "subtitle": "Who issues the orders' invoices, and when.",
+      "title": "Invoices and accounting",
+      "subtitle": "Who issues the invoices, when and in which series; the carrier details on an e-Arşiv; and the accountant's monthly package.",
       "program": {
         "title": "Invoicing program",
         "description": "The program that issues the invoices, and when. Only the owner can change it.",
@@ -2148,6 +2178,11 @@
         "taxId": "Tax id",
         "both": "Enter the name and the tax id together, or leave both empty.",
         "taxIdInvalid": "A tax id has 10 digits (11 for a T.C. kimlik)."
+      },
+      "tabs": {
+        "program": "Invoicing program",
+        "carriers": "Carrier details",
+        "accounting": "Accounting"
       }
     },
     "migration": {

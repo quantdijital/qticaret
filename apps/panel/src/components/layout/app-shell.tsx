@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query"
+import { useRouterState } from "@tanstack/react-router"
 import { useState } from "react"
 import type { CSSProperties, ReactNode } from "react"
 import { useTranslation } from "react-i18next"
@@ -18,19 +19,42 @@ const SIDEBAR_STYLE = {
  * Menu, top bar and the page, which uses the whole width (docs/18 §2
  * "Yerleşim"). The menu behaves as the shop chose in Appearance: open,
  * icons only, or icons that open over the page while pointed at. The
- * toggle still opens or closes it until the next visit.
+ * toggle still opens or closes it until the next visit. Settings has a
+ * menu of its own beside the page (the owner, 2026-10-31: on a laptop the
+ * two side by side left the page cramped), so there the menu is icons that
+ * open while pointed at; one open on the way in opens again on the way out.
  */
 export function AppShell({ children }: { children: ReactNode }) {
   const { t } = useTranslation()
   const { data: appearance } = useQuery(appearanceQuery())
-  const mode = appearance?.values.sidebar_mode ?? "expanded"
+  const inSettings = useRouterState({
+    select: (state) =>
+      state.location.pathname === "/settings" || state.location.pathname.startsWith("/settings/"),
+  })
+  const chosen = appearance?.values.sidebar_mode ?? "expanded"
+  // In settings the menu is icons that open while pointed at, whatever the choice
+  const mode = inSettings ? "auto" : chosen
   const [pinned, setPinned] = useState(mode === "expanded")
   const [peek, setPeek] = useState(false)
   // A saved choice applies at once
-  const [appliedMode, setAppliedMode] = useState(mode)
-  if (appliedMode !== mode) {
-    setAppliedMode(mode)
-    setPinned(mode === "expanded")
+  const [appliedChoice, setAppliedChoice] = useState(chosen)
+  if (appliedChoice !== chosen) {
+    setAppliedChoice(chosen)
+    setPinned(chosen === "expanded" && !inSettings)
+    setPeek(false)
+  }
+  // Entering settings folds a menu open by choice or by the toggle; leaving
+  // opens it again as it was
+  const [settingsOpen, setSettingsOpen] = useState(inSettings)
+  const [pinnedBefore, setPinnedBefore] = useState(pinned)
+  if (settingsOpen !== inSettings) {
+    setSettingsOpen(inSettings)
+    if (inSettings) {
+      setPinnedBefore(pinned)
+      setPinned(false)
+    } else {
+      setPinned(pinnedBefore)
+    }
     setPeek(false)
   }
   const peeking = mode === "auto" && peek && !pinned

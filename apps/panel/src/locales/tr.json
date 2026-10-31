@@ -252,7 +252,7 @@
       "appearance": "Görünüm",
       "store": "Mağaza",
       "payments": "Ödeme",
-      "shipping": "Kargo",
+      "shipping": "Kargo ve teslimat",
       "seo": "SEO",
       "features": "Özellikler",
       "jobs": "İşler",
@@ -260,7 +260,7 @@
       "attributes": "Ürün özellikleri",
       "locations": "Depolar",
       "integrations": "Entegrasyonlar",
-      "notifications": "Bildirimler",
+      "notifications": "E-posta ve SMS",
       "sms": "SMS",
       "marketing": "Pazarlama",
       "accounting": "Muhasebe",
@@ -268,7 +268,7 @@
       "team": "Ekip",
       "security": "Güvenlik",
       "legal": "Yasal metinler",
-      "einvoice": "E-Fatura",
+      "einvoice": "Fatura ve muhasebe",
       "migration": "Taşıma"
     },
     "appearance": {
@@ -479,6 +479,11 @@
         "add": "Görsel yükle",
         "replace": "Görseli değiştir",
         "remove": "Kaldır"
+      },
+      "tabs": {
+        "addresses": "Adresler",
+        "pages": "Başlıklar ve görsel",
+        "search": "Arama motorları"
       }
     },
     "features": {
@@ -923,10 +928,13 @@
       "offered": {
         "on": "Açık",
         "off": "Kapalı"
+      },
+      "tabs": {
+        "installments": "Taksit"
       }
     },
     "shipping": {
-      "title": "Kargo",
+      "title": "Kargo ve teslimat",
       "subtitle": "Siparişlerin nasıl gönderileceğini buradan yönetirsiniz. Her kargo hizmeti kendi sayfasında bağlanır.",
       "manage": "Yönet",
       "connect": "Bağla",
@@ -1114,6 +1122,12 @@
           "customer": "Müşteri"
         },
         "excludedHint": "Hijyen gereği açılınca iade edilemeyen ya da kişiye özel hazırlanan ürünleri ürün sayfasında \"Cayma hakkı dışında\" olarak işaretleyin; bunlar yalnızca kusurlu çıkarsa geri alınır."
+      },
+      "tabs": {
+        "carriers": "Kargo firmaları",
+        "options": "Seçenekler ve ücretler",
+        "returns": "İade",
+        "locations": "Depolar ve stok"
       }
     },
     "integrations": {
@@ -1255,8 +1269,8 @@
       }
     },
     "notifications": {
-      "title": "Bildirimler",
-      "description": "Müşterilere ve size giden iletilerin ayarları. SMS hesabı SMS bölümünde kurulur.",
+      "title": "E-posta ve SMS",
+      "description": "Müşterilere ve ekibe giden e-posta ve SMS'ler: gönderici alan adı, günlük sınırlar, İYS, ileti şablonları ve personel uyarıları.",
       "suppressions": {
         "title": "Gönderilmeyen adresler",
         "description": "Kalıcı olarak geri dönen ya da spam olarak işaretlenen e-postalar buraya kendiliğinden girer; bu adreslere bir daha ileti gönderilmez. Müşteri isterse adresini siz de ekleyebilirsiniz.",
@@ -1391,6 +1405,12 @@
         "description": "Mağazanın bir günde gönderebileceği en çok e-posta. Uydurma adreslerle verilen siparişlerin geri dönen postaları gönderici itibarını düşürür; sınırın %80'inde zilde uyarı görürsünüz, aşılınca o gün başka e-posta gitmez.",
         "label": "Günde en çok",
         "saved": "E-posta sınırı kaydedildi."
+      },
+      "tabs": {
+        "email": "E-posta",
+        "sms": "SMS",
+        "templates": "Şablonlar",
+        "staff": "Personel uyarıları"
       }
     },
     "sms": {
@@ -1445,7 +1465,7 @@
     "groups": {
       "shop": "Mağaza",
       "selling": "Satış ve teslimat",
-      "messages": "Müşteri iletişimi",
+      "messages": "İletişim ve pazarlama",
       "system": "Sistem"
     },
     "home": {
@@ -1457,12 +1477,12 @@
     "sectionHints": {
       "store": "Mağaza adı, iletişim bilgileri, saat dilimi ve ölçü birimleri",
       "appearance": "Panelin marka rengi, köşeleri ve yoğunluğu",
-      "seo": "Alan adı, adres yapısı, başlık ve açıklama şablonları",
+      "seo": "Alan adı ve adres yapısı, başlık şablonları, arama motorları",
       "attributes": "Ürünlerde kullanılan özellik şablonları",
-      "payments": "Kart, havale ve kapıda ödeme yöntemleri",
-      "shipping": "Kargo firmaları, seçenekler ve ücretler",
+      "payments": "Kartla ödeme, taksit, havale ve kapıda ödeme",
+      "shipping": "Kargo firmaları, seçenekler ve ücretler, iade, depolar ve stok",
       "locations": "Stoğun tutulduğu depolar ve adresleri",
-      "notifications": "E-posta gönderici, uyarılar ve ileti şablonları",
+      "notifications": "E-posta gönderici ve sınırı, SMS ve İYS, şablonlar, personel uyarıları",
       "sms": "SMS hizmeti ve günlük gönderim sınırı",
       "integrations": "Bağlı dış servislerin çalışıp çalışmadığı",
       "features": "Açılıp kapatılabilen mağaza özellikleri",
@@ -1472,9 +1492,9 @@
       "accounting": "Mali müşavire aylık paket",
       "api": "Kendi sistemleriniz için API anahtarları",
       "team": "Panele kimlerin hangi rolle girdiği ve davetler",
-      "security": "İki adımlı doğrulamanız ve ekip için zorunluluk",
+      "security": "İki adımlı doğrulama, ekip için zorunluluk, sahtekârlık önleme",
       "legal": "Sözleşmeler, politikalar ve aydınlatma metni",
-      "einvoice": "Fatura programı ve kesim anı",
+      "einvoice": "Fatura programı, kesim anı ve seri, taşıyıcı bilgileri, muhasebe",
       "migration": "Eski platformdan katalog, müşteri ve 301 yönlendirmeleri"
     },
     "marketing": {
@@ -1626,6 +1646,11 @@
           },
           "rejected": "GA4 kayıtlı anahtarı artık kabul etmiyor. Yeni bir anahtar girin."
         }
+      },
+      "tabs": {
+        "feeds": "Ürün akışları",
+        "conversions": "Dönüşüm ölçümü",
+        "carts": "Terk edilen sepet"
       }
     },
     "accounting": {
@@ -1921,6 +1946,11 @@
           "phone": "0532 000 00 00",
           "ip": "203.0.113.7"
         }
+      },
+      "tabs": {
+        "account": "Hesabım",
+        "team": "Ekip",
+        "fraud": "Sahtekârlık önleme"
       }
     },
     "legal": {
@@ -2059,8 +2089,8 @@
       }
     },
     "einvoice": {
-      "title": "E-Fatura",
-      "subtitle": "Siparişlerin faturasını kimin, ne zaman keseceği.",
+      "title": "Fatura ve muhasebe",
+      "subtitle": "Faturayı kimin, ne zaman ve hangi seriyle keseceği; e-Arşiv'deki taşıyıcı bilgileri ve mali müşavire aylık paket.",
       "program": {
         "title": "Fatura programı",
         "description": "Faturayı kesen program ve kesim anı. Yalnızca mağaza sahibi değiştirebilir.",
@@ -2148,6 +2178,11 @@
         "taxId": "VKN / TCKN",
         "both": "Unvanı ve VKN'yi birlikte girin ya da ikisini de boş bırakın.",
         "taxIdInvalid": "VKN 10, TCKN 11 haneden oluşur."
+      },
+      "tabs": {
+        "program": "Fatura programı",
+        "carriers": "Taşıyıcı bilgileri",
+        "accounting": "Muhasebe"
       }
     },
     "migration": {

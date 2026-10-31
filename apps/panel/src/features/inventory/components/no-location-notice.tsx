@@ -10,7 +10,11 @@ export function NoLocationNotice() {
       <TriangleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
       <span>
         {t("inventory.noLocation")}{" "}
-        <Link to="/settings/locations" className="font-medium underline underline-offset-2">
+        <Link
+          to="/settings/shipping"
+          search={{ part: "locations" }}
+          className="font-medium underline underline-offset-2"
+        >
           {t("inventory.addLocation")}
         </Link>
       </span>

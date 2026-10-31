@@ -40,7 +40,7 @@ export const SETUP_STEPS: readonly SetupStep[] = [
   { key: "region", isDone: (facts) => facts.regionCount > 0 },
   {
     key: "location",
-    panelPath: "/settings/locations",
+    panelPath: "/settings/shipping?part=locations",
     isDone: (facts) => facts.locationCount > 0,
   },
   {

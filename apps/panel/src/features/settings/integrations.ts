@@ -36,14 +36,14 @@ export function settingsLinkOf(id: string) {
     case "ga4":
       return marketing(id)
     case "netgsm":
-      return linkOptions({ to: "/settings/sms" })
+      return linkOptions({ to: "/settings/notifications", search: { part: "sms" } })
     case "resend":
       return linkOptions({ to: "/settings/notifications" })
     case "google":
     case "feeds":
       return linkOptions({ to: "/settings/marketing" })
     case "accounting":
-      return linkOptions({ to: "/settings/accounting" })
+      return linkOptions({ to: "/settings/einvoice", search: { part: "accounting" } })
     default:
       return null
   }

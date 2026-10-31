@@ -38,10 +38,14 @@ describe("Settings menu", () => {
     render(<SettingsLayout />)
 
     const shop = screen.getByRole("button", { name: "Mağaza" })
-    for (const name of ["Mağaza", "Satış ve teslimat", "Müşteri iletişimi", "Sistem"]) {
+    for (const name of ["Mağaza", "Satış ve teslimat", "İletişim ve pazarlama", "Sistem"]) {
       expect(screen.getByRole("button", { name })).toHaveAttribute("aria-expanded", "true")
     }
-    expect(screen.getByRole("link", { name: "SMS" })).toHaveAttribute("aria-current", "page")
+    // An SMS provider's page belongs to E-mail and SMS, where SMS is a tab
+    expect(screen.getByRole("link", { name: "E-posta ve SMS" })).toHaveAttribute(
+      "aria-current",
+      "page"
+    )
     expect(screen.getByRole("link", { name: "Görünüm" })).toHaveAttribute(
       "href",
       "/settings/appearance"
@@ -58,7 +62,7 @@ describe("Settings home", () => {
     render(<SettingsHomePage />)
 
     expect(screen.getByRole("heading", { name: "Satış ve teslimat" })).toBeInTheDocument()
-    expect(screen.getByRole("link", { name: /Kargo.*Kargo firmaları/ })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /Kargo ve teslimat.*depolar/ })).toHaveAttribute(
       "href",
       "/settings/shipping"
     )
@@ -67,7 +71,8 @@ describe("Settings home", () => {
       "href",
       "/settings/migration"
     )
-    expect(screen.getAllByRole("link")).toHaveLength(21)
+    // Accounting, warehouses and SMS are tabs of invoices, shipping and e-mail now
+    expect(screen.getAllByRole("link")).toHaveLength(18)
   })
 
   it("offers operations staff only what they may use: no settings to change", () => {

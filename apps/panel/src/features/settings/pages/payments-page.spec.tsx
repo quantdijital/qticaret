@@ -7,10 +7,14 @@ import type { PaytrAccount } from "@/features/settings/api/payments"
 import { PaymentsPage } from "./payments-page"
 
 const fetchMock = vi.hoisted(() => vi.fn())
+// The open tab, as the address holds it (`?part=`)
+const search = vi.hoisted(() => ({ current: {} }))
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
 // Links as plain anchors with their params filled in: the page is rendered without a router
 vi.mock("@tanstack/react-router", () => ({
+  useSearch: () => search.current,
+  useNavigate: () => vi.fn(),
   Link: ({
     to,
     params,
@@ -74,15 +78,30 @@ const row = async (name: string) => around(await screen.findByText(name), "li")
 describe("PaymentsPage", () => {
   beforeEach(() => {
     fetchMock.mockReset()
+    search.current = {}
   })
 
-  it("groups the methods: cards first, then the others", async () => {
-    renderPage(paytr({}))
+  it("groups the methods in tabs: cards first, installments, then the others", async () => {
+    const { unmount } = renderPage(paytr({}))
     const card = around(await screen.findByRole("heading", { name: "Kartla ödeme" }), "section")
-    const other = around(screen.getByRole("heading", { name: "Diğer ödeme yöntemleri" }), "section")
 
+    expect(
+      screen.getAllByRole("tab").map((tab) => [tab.textContent, tab.getAttribute("aria-selected")])
+    ).toEqual([
+      ["Kartla ödeme", "true"],
+      ["Taksit", "false"],
+      ["Diğer ödeme yöntemleri", "false"],
+    ])
     expect(within(card).getByText("PayTR")).toBeInTheDocument()
     expect(within(card).getByText("iyzico")).toBeInTheDocument()
+    unmount()
+
+    search.current = { part: "other" }
+    renderPage(paytr({}))
+    const other = around(
+      await screen.findByRole("heading", { name: "Diğer ödeme yöntemleri" }),
+      "section"
+    )
     expect(within(other).getByText("Havale / EFT")).toBeInTheDocument()
     expect(within(other).getByText("Kapıda ödeme")).toBeInTheDocument()
   })
@@ -131,6 +150,7 @@ describe("PaymentsPage", () => {
   })
 
   it("opens bank transfer and cash on delivery on pages of their own", async () => {
+    search.current = { part: "other" }
     renderPage(paytr({}))
 
     for (const [name, id] of [

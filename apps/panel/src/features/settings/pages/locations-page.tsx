@@ -4,7 +4,6 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { ConfirmDialog } from "@/components/patterns/confirm-dialog"
-import { PageHeader } from "@/components/patterns/page-header"
 import { ErrorState, LoadingRows } from "@/components/patterns/states"
 import { StatusBadge } from "@/components/patterns/status-badge"
 import { Button } from "@/components/ui/button"
@@ -109,9 +108,10 @@ function LocationCard({
  * Warehouses (F3.7): where the shop keeps its stock. New products' stock
  * and the stock page use the default one; each sells to the shop's
  * channel, so checkout reserves from it. A warehouse that is the default
- * or still holds stock is kept (the server refuses).
+ * or still holds stock is kept (the server refuses). A tab of Settings >
+ * Shipping and delivery (the owner, 2026-10-31), so no page header of its own.
  */
-export function LocationsPage() {
+export function LocationsPanel() {
   const { t } = useTranslation()
   const list = useQuery(locationsQuery())
   const setDefault = useSetDefaultLocation()
@@ -122,21 +122,20 @@ export function LocationsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <PageHeader
-        title={t("settings.locations.title")}
-        description={t("settings.locations.description")}
-        action={
-          <Button
-            onClick={() => {
-              setEditing("new")
-            }}
-            disabled={!data}
-          >
-            <Plus />
-            {t("settings.locations.add")}
-          </Button>
-        }
-      />
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="max-w-2xl text-sm text-muted-foreground">
+          {t("settings.locations.description")}
+        </p>
+        <Button
+          onClick={() => {
+            setEditing("new")
+          }}
+          disabled={!data}
+        >
+          <Plus />
+          {t("settings.locations.add")}
+        </Button>
+      </div>
       {list.error ? (
         <ErrorState text={errorText(t, list.error)} onRetry={() => void list.refetch()} />
       ) : !data ? (

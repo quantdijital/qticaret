@@ -14,7 +14,9 @@ import type { ProviderAccount } from "@/features/settings/api/payments"
 import { AccountBadges } from "@/features/settings/components/account-badges"
 import { InstallmentsCard } from "@/features/settings/components/installments-card"
 import { PreferredProviderRow } from "@/features/settings/components/preferred-provider"
-import { PAYMENT_GROUPS, PAYMENT_METHODS } from "@/features/settings/payment-methods"
+import { PAYMENT_METHODS } from "@/features/settings/payment-methods"
+import type { PaymentGroup } from "@/features/settings/payment-methods"
+import { SettingsTabs } from "@/features/settings/components/settings-tabs"
 import type { PaymentMethod } from "@/features/settings/payment-methods"
 import { errorText } from "@/lib/errors"
 
@@ -113,36 +115,45 @@ export function PaymentsPage() {
         provider === id && (state === "connected" || state === "unverified" || state === "rejected")
     )
   )
+  const methods = (group: PaymentGroup) =>
+    query.isError ? (
+      <ErrorState text={errorText(t, query.error)} onRetry={() => void query.refetch()} />
+    ) : !query.data ? (
+      <LoadingRows rows={3} />
+    ) : (
+      <SectionCard
+        title={t(`${P}.groups.${group}.title`)}
+        description={t(`${P}.groups.${group}.description`)}
+        flush
+      >
+        <ul className="flex flex-col">
+          {PAYMENT_METHODS.filter((method) => method.group === group).map((method) => (
+            <MethodRow
+              key={method.id}
+              method={method}
+              account={accounts.find(({ provider }) => provider === method.id)}
+            />
+          ))}
+          {group === "card" ? <PreferredProviderRow connected={connectedCards} /> : null}
+        </ul>
+      </SectionCard>
+    )
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title={t(`${P}.title`)} description={t(`${P}.subtitle`)} />
-      {query.isError ? (
-        <ErrorState text={errorText(t, query.error)} onRetry={() => void query.refetch()} />
-      ) : !query.data ? (
-        <LoadingRows rows={5} />
-      ) : (
-        PAYMENT_GROUPS.map((group) => [
-          <SectionCard
-            key={group}
-            title={t(`${P}.groups.${group}.title`)}
-            description={t(`${P}.groups.${group}.description`)}
-            flush
-          >
-            <ul className="flex flex-col">
-              {PAYMENT_METHODS.filter((method) => method.group === group).map((method) => (
-                <MethodRow
-                  key={method.id}
-                  method={method}
-                  account={accounts.find(({ provider }) => provider === method.id)}
-                />
-              ))}
-              {group === "card" ? <PreferredProviderRow connected={connectedCards} /> : null}
-            </ul>
-          </SectionCard>,
+      <SettingsTabs
+        label={t(`${P}.title`)}
+        tabs={[
+          { key: "card", label: t(`${P}.groups.card.title`), content: methods("card") },
           // Installments follow the card providers they apply to
-          group === "card" ? <InstallmentsCard key="installments" /> : null,
-        ])
-      )}
+          {
+            key: "installments",
+            label: t(`${P}.tabs.installments`),
+            content: <InstallmentsCard />,
+          },
+          { key: "other", label: t(`${P}.groups.other.title`), content: methods("other") },
+        ]}
+      />
     </div>
   )
 }

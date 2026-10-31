@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query"
 import { Controller, useForm } from "react-hook-form"
+import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
+import { SettingsTabs } from "@/features/settings/components/settings-tabs"
 import { toast } from "sonner"
 import { CardForm } from "@/components/patterns/card-form"
 import { Field } from "@/components/patterns/form-section"
@@ -197,23 +199,55 @@ export function SeoPage() {
   const { t } = useTranslation()
   const query = useQuery(sectionQuery<SeoSettings>("seo"))
   const storeName = useStoreName() ?? t("app.name")
+  const saved = (render: (values: SeoSettings) => ReactNode) =>
+    query.isError ? (
+      <ErrorState text={errorText(t, query.error)} onRetry={() => void query.refetch()} />
+    ) : !query.data ? (
+      <LoadingRows rows={3} />
+    ) : (
+      render(query.data.values)
+    )
   return (
     <div className="flex flex-col gap-6">
       <PageHeader title={t("settings.seo.title")} description={t("settings.seo.subtitle")} />
-      {query.isError ? (
-        <ErrorState text={errorText(t, query.error)} onRetry={() => void query.refetch()} />
-      ) : !query.data ? (
-        <LoadingRows rows={6} />
-      ) : (
-        <>
-          <AddressCard saved={query.data.values} />
-          <ShareImageCard saved={query.data.values} />
-          <UrlStyleCard saved={query.data.values.url_style} />
-          <TemplatesCard saved={query.data.values} storeName={storeName} />
-          <CrawlersCard saved={query.data.values} />
-          <SearchConsoleCard />
-        </>
-      )}
+      {/* In tabs (the owner, 2026-10-31): the shop's addresses, how pages read, what search sees */}
+      <SettingsTabs
+        label={t("settings.seo.title")}
+        tabs={[
+          {
+            key: "addresses",
+            label: t("settings.seo.tabs.addresses"),
+            content: saved((values) => (
+              <>
+                <AddressCard saved={values} />
+                <UrlStyleCard saved={values.url_style} />
+              </>
+            )),
+          },
+          {
+            key: "pages",
+            label: t("settings.seo.tabs.pages"),
+            content: saved((values) => (
+              <>
+                <TemplatesCard saved={values} storeName={storeName} />
+                <ShareImageCard saved={values} />
+              </>
+            )),
+          },
+          {
+            key: "search",
+            label: t("settings.seo.tabs.search"),
+            content: (
+              <>
+                {saved((values) => (
+                  <CrawlersCard saved={values} />
+                ))}
+                <SearchConsoleCard />
+              </>
+            ),
+          },
+        ]}
+      />
     </div>
   )
 }
