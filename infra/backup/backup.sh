@@ -35,6 +35,9 @@ while [ $# -gt 0 ]; do
   esac
 done
 [ -n "$db" ] && [ -n "$recipients" ] && [ -n "$out" ] || usage
+# A plain name: it goes into file names, the manifest and psql's -d (where
+# anything with "=" would read as a connection string)
+[[ "$db" =~ ^[A-Za-z0-9_-]{1,63}$ ]] || { echo "not a database name: $db" >&2; exit 2; }
 [ -r "$recipients" ] || { echo "recipients file not readable: $recipients" >&2; exit 2; }
 grep -q '^age1' "$recipients" || { echo "no age public key (age1...) in $recipients" >&2; exit 2; }
 if grep -q 'AGE-SECRET-KEY' "$recipients"; then

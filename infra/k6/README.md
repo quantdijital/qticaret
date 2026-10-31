@@ -28,5 +28,6 @@ k6 run infra/k6/webhooks.js
 - `BASE_URL` varsayılanı `http://localhost:9000`. `VUS` ve `HOLD` ile ziyaretçi sayısı ve süre ayarlanır.
 - **`checkout.js` gerçek sipariş açar ve stok düşer.** Yalnızca test mağazasında koşulur. `MIN_STOCK` (50) altındaki varyantları seçmez. `PROVIDER` varsayılanı kapıda ödeme; mağazada kapalıysa havale verilir.
 - **E-posta:** misafir adresinin alan adı MX kaydıyla denetlenir. Yerelde `EMAIL_DOMAIN_CHECK=off` ve `example.com` kullanılır (posta hiçbir yere gitmez). Staging'de `EMAIL_DOMAIN` olarak postası bizde toplanan bir alan adı verilir.
-- **`webhooks.js`:** anahtarsız koşarsa bildirimler reddedilir (400) ve reddetme yolu ölçülür. `PAYTR_MERCHANT_KEY` ve `PAYTR_MERCHANT_SALT` ortamdan verilirse imzalı bildirimler, mağazaya ait olmayan sipariş numaralarıyla gider (404). Anahtarlar dosyaya yazılmaz.
+- **`webhooks.js`:** anahtarsız koşarsa bildirimler reddedilir (400) ve reddetme yolu ölçülür. `PAYTR_MERCHANT_KEY` ve `PAYTR_MERCHANT_SALT` ortamda varsa imzalı bildirimler, mağazaya ait olmayan sipariş numaralarıyla gider (404). Anahtarlar sır deposundan ortama alınır; `-e` ile komut satırına ya da dosyaya yazılmaz (kabuk geçmişi ve `ps` onları tutar).
+- **SMS:** `checkout.js` her siparişte aynı telefonu kullanır. Staging'de gerçek SMS sağlayıcısı bağlıysa koşudan önce kapatılır.
 - Değişkenler turbo üzerinden geçer (`turbo.json` `globalPassThroughEnv`).

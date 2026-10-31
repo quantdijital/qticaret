@@ -37,8 +37,12 @@ done
 [ -n "$manifest" ] && [ -n "$identity" ] && [ -n "$target" ] || usage
 [ -r "$manifest" ] || { echo "manifest not readable: $manifest" >&2; exit 2; }
 [ -r "$identity" ] || { echo "identity not readable: $identity" >&2; exit 2; }
-# Quoted as an identifier below; anything else is a mistake
+# Quoted as an identifier below; anything else is a mistake. Never a system
+# database: one restored into template1 would seed every database made after
 [[ "$target" =~ ^[A-Za-z0-9_-]{1,63}$ ]] || { echo "not a database name: $target" >&2; exit 2; }
+case "$target" in
+  postgres | template0 | template1) echo "not into a system database: $target" >&2; exit 2 ;;
+esac
 command -v age > /dev/null || { echo "age is not installed" >&2; exit 2; }
 
 # PG_EXEC is split into words on purpose: a command and its arguments
@@ -48,12 +52,19 @@ sha() {
   if command -v sha256sum > /dev/null; then sha256sum "$1"; else shasum -a 256 "$1"; fi | cut -d' ' -f1
 }
 
+# What it restores (the shop's files, invoices among them) is for no one else
+umask 077
+
 dir=$(dirname "$manifest")
 # The manifest is backup.sh's: one entry per line, in its own layout
 entry() { sed -n "s/.*\"$1\": {\"file\": \"\\([^\"]*\\)\", \"sha256\": \"\\([0-9a-f]*\\)\".*/\\$2/p" "$manifest"; }
 dump=$(entry dump 1)
 [ -n "$dump" ] || { echo "no dump named in $manifest" >&2; exit 2; }
 files=$(entry files 1)
+# A name the backup made, never a path: the manifest sits in a store others may write to
+[[ "$dump" =~ ^[A-Za-z0-9._-]+\.dump\.age$ ]] || { echo "not a dump file name: $dump" >&2; exit 2; }
+[ -z "$files" ] || [[ "$files" =~ ^[A-Za-z0-9._-]+\.files\.tar\.age$ ]] \
+  || { echo "not a files archive name: $files" >&2; exit 2; }
 
 check() {
   local file="$1" want="$2"
@@ -78,7 +89,7 @@ opens=$(set +o pipefail; age --decrypt --identity "$identity" "$dir/$dump" 2> /d
 started=$(date -u +%s)
 exists=$(pg psql -X -At -d postgres -c "select 1 from pg_database where datname = '$target'")
 if [ -z "$exists" ]; then
-  pg psql -X -q -v ON_ERROR_STOP=1 -d postgres -c "create database \"$target\""
+  pg psql -X -q -v ON_ERROR_STOP=1 -d postgres -c "create database \"$target\" template template0"
 else
   tables=$(pg psql -X -At -d "$target" -c \
     "select count(*) from information_schema.tables where table_schema = 'public'")
@@ -89,10 +100,10 @@ age --decrypt --identity "$identity" "$dir/$dump" \
   | pg pg_restore --no-owner --no-acl --exit-on-error --dbname="$target"
 
 # The manifest's counts against the restored ones, in the database itself
-# (psql reads JSON; no other tool needed)
-report=$( {
-  printf '%s\n' "\\set manifest '$(tr -d '\n' < "$manifest" | sed "s/'/''/g")'"
-  cat <<'SQL'
+# (psql reads JSON; no other tool needed). The manifest goes in as a
+# variable (`-v`), never inside a command: psql parses no part of it, and
+# `:'manifest'` quotes it as a literal
+report=$(pg psql -X -At -F ' ' -v ON_ERROR_STOP=1 -v manifest="$(cat "$manifest")" -d "$target" <<'SQL'
 with wanted as (
   select key as table_name, value::bigint as rows
   from json_each_text((:'manifest')::json -> 'rows')
@@ -112,7 +123,7 @@ select case
 from wanted w left join restored r using (table_name)
 order by 1, 2;
 SQL
-} | pg psql -X -At -F ' ' -v ON_ERROR_STOP=1 -d "$target")
+)
 
 missing=$(grep -c '^missing ' <<< "$report" || true)
 differs=$(grep -c '^differs ' <<< "$report" || true)
@@ -121,7 +132,9 @@ grep -E '^(missing|differs) ' <<< "$report" | sed 's/^/  /' >&2 || true
 
 if [ -n "$files_to" ]; then
   mkdir -p "$files_to"
-  age --decrypt --identity "$identity" "$dir/$files" | tar -C "$files_to" -xf -
+  # Owned by whoever restores, with no permissions the archive brings along
+  age --decrypt --identity "$identity" "$dir/$files" \
+    | tar --no-same-owner --no-same-permissions -C "$files_to" -xf -
 fi
 
 echo "restored into $target in $(( $(date -u +%s) - started ))s: $same tables match, $differs differ, $missing missing"

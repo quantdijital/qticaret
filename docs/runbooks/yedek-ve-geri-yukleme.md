@@ -40,6 +40,12 @@ Betik sırasıyla şunları yapar:
 4. Dökümü çözerek `pg_restore`'a akıtır.
 5. Her tablonun satır sayısını manifestle karşılaştırır. Eksik tablo hatadır. Sayı farkı uyarıdır, çünkü yedek alınırken mağazaya yazılmış olabilir; `--strict` ile hata olur.
 
+**Bütünlüğün sınırı:**
+- Manifestteki sha256 yalnızca bozulmayı yakalar. Manifest yedeğin yanında açık durduğu için depoya yazabilen biri dökümü de manifesti de değiştirebilir. `age` göndereni doğrulamaz, alıcılar da açık anahtardır.
+- Bu yüzden geri yükleme önce yeni ve boş bir veritabanına, süper kullanıcı olmayan bir rolle yapılır; içerik doğrulanmadan mağazaya bağlanmaz.
+- Manifestin depo dışındaki bir anahtarla imzalanması F16.8'de değerlendirilir.
+- Betik manifestteki hiçbir metni komut olarak çalıştırmaz: dosya adları doğrulanır, sayılar psql'e değişken olarak verilir (2026-10-31 güvenlik incelemesi).
+
 Çalışan bir mağazayı geri döndürmek için:
 1. Mağaza bakım moduna alınır (F16).
 2. Yedek yeni bir veritabanına yüklenir ve doğrulanır.

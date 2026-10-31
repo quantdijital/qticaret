@@ -2,13 +2,15 @@
 // a provider sends after an outage. Read-mostly: no order changes.
 //
 //   k6 run -e BASE_URL=http://localhost:9000 infra/k6/webhooks.js
-//   k6 run -e PAYTR_MERCHANT_KEY=... -e PAYTR_MERCHANT_SALT=... infra/k6/webhooks.js
+//
+// Signed: PAYTR_MERCHANT_KEY and PAYTR_MERCHANT_SALT in the environment, put
+// there from the secret store (k6 reads the environment itself); never as
+// `-e` on the command line, where history and `ps` would keep them.
 //
 // Without the shop's PayTR key and salt every notification carries a hash
 // that does not match: the route's refusing path (400). With them they are
 // signed for references that are not the shop's, so the signature check,
-// the order lookup and the workflow all run (404 "unknown order"). The
-// key and salt are secrets: pass them in the environment, never in a file.
+// the order lookup and the workflow all run (404 "unknown order").
 // Many notifications from one address: the backend runs with LOAD_TEST=on.
 // Target (docs/05): an answer within 300 ms at p95, and never a 5xx.
 import http from "k6/http"

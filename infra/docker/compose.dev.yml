@@ -12,16 +12,18 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in infra/docker/.env}
       POSTGRES_DB: qticaret
-    # Slow query log (F15.4, adr/0045): statements over 500 ms, without their
-    # bound values, which can be personal data (an e-mail, an address)
+    # Slow queries (F15.4, adr/0045) through pg_stat_statements, which keeps
+    # each statement's shape with its values replaced: the ORM writes values
+    # into the SQL text, so a statement log would hold e-mails and addresses.
+    # For the same reason a failing statement's text is not logged either.
     command:
       - postgres
       - -c
-      - log_min_duration_statement=500
+      - shared_preload_libraries=pg_stat_statements
       - -c
-      - log_parameter_max_length=0
+      - pg_stat_statements.track=all
       - -c
-      - log_parameter_max_length_on_error=0
+      - log_min_error_statement=panic
     ports:
       - "127.0.0.1:55432:5432"
     volumes:
