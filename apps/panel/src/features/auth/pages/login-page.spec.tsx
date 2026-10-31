@@ -6,11 +6,14 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import { LoginPage } from "./login-page"
 
-const auth = vi.hoisted(() => ({ login: vi.fn(), verifyChallenge: vi.fn() }))
+const auth = vi.hoisted(() => ({ login: vi.fn(), verifyChallenge: vi.fn(), fetch: vi.fn() }))
 const navigate = vi.hoisted(() => vi.fn())
 
 vi.mock("@/lib/sdk", () => ({
-  sdk: { auth: { login: auth.login, mfa: { verifyChallenge: auth.verifyChallenge } } },
+  sdk: {
+    auth: { login: auth.login, mfa: { verifyChallenge: auth.verifyChallenge } },
+    client: { fetch: auth.fetch },
+  },
 }))
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ to, children }: { to: string; children: ReactNode }) => <a href={to}>{children}</a>,
@@ -37,7 +40,50 @@ describe("LoginPage", () => {
   beforeEach(() => {
     auth.login.mockReset()
     auth.verifyChallenge.mockReset()
+    auth.fetch.mockReset()
     navigate.mockReset()
+  })
+
+  it("solves the proof of work asked after five tries, then signs in (adr/0044)", async () => {
+    auth.login.mockRejectedValue(Object.assign(new Error("Doğrulama gerekiyor"), { status: 428 }))
+    auth.fetch.mockResolvedValue({})
+    const answers = [
+      {
+        status: 428,
+        body: {
+          message: "Doğrulama gerekiyor",
+          challenge: { token: "login.c2FsdA.4.1.sig", salt: "c2FsdA", bits: 4, expires_at: "" },
+        },
+      },
+      { status: 200, body: { token: "token" } },
+    ]
+    const sent: RequestInit[] = []
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((_url: URL, init: RequestInit) => {
+        sent.push(init)
+        const answer = answers.shift()
+        return Promise.resolve({
+          status: answer?.status ?? 500,
+          json: () => Promise.resolve(answer?.body ?? {}),
+        })
+      })
+    )
+    renderPage()
+
+    await signIn()
+
+    await waitFor(() => {
+      expect(navigate).toHaveBeenCalledWith({ to: "/" })
+    })
+    expect((sent[1]?.headers as Record<string, string>)["x-challenge"]).toMatch(
+      /^login\.c2FsdA\.4\.1\.sig\.\d+$/
+    )
+    expect(auth.fetch).toHaveBeenCalledWith("/auth/session", {
+      method: "POST",
+      headers: { Authorization: "Bearer token" },
+    })
+    vi.unstubAllGlobals()
   })
 
   it("signs in at once when no code is asked", async () => {

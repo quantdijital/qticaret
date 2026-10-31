@@ -1,5 +1,6 @@
 import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { sdk } from "@/lib/sdk"
+import { signInWithProof } from "./proof-login"
 
 export const CURRENT_USER_KEY = ["auth", "me"] as const
 
@@ -33,14 +34,22 @@ export interface MfaChallenge {
 /**
  * Email and password → session cookie (js-sdk session mode calls
  * /auth/session). With 2FA on, the session waits for the code: the
- * challenge comes back for `useVerifyChallenge`.
+ * challenge comes back for `useVerifyChallenge`. Past five tries on the
+ * address the backend asks a proof of work first (428): solved here.
  */
 export function useLogin() {
   const client = useQueryClient()
   return useMutation({
     mutationFn: async ({ email, password }: Credentials): Promise<MfaChallenge | null> => {
-      const result = await sdk.auth.login("user", "emailpass", { email, password })
-      return typeof result === "object" && "mfa_required" in result ? result.mfa_challenge : null
+      try {
+        const result = await sdk.auth.login("user", "emailpass", { email, password })
+        return typeof result === "object" && "mfa_required" in result ? result.mfa_challenge : null
+      } catch (error) {
+        if ((error as { status?: unknown } | null)?.status !== 428) {
+          throw error
+        }
+        return signInWithProof({ email, password })
+      }
     },
     onSuccess: async () => {
       // Who signed in, and their role

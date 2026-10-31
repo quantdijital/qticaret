@@ -112,6 +112,13 @@ export const FRAUD_ROUTES = [
       challengeAfterAttempts({ max: 5, windowMs: 15 * MINUTE }),
     ],
   },
+  // A staff login the same (the F15 audit): 2FA stands behind it, but a password
+  // tried from many addresses meets the same proof as a shopper's
+  {
+    matcher: "/auth/user/emailpass",
+    methods: ["POST" as const],
+    middlewares: [challengeAfterAttempts({ max: 5, windowMs: 15 * MINUTE })],
+  },
   // An account made after a sign-in elsewhere (Google) names its address here
   {
     matcher: "/store/customers",

@@ -42,7 +42,7 @@ Görsel bulmaca yok. Tarayıcı küçük bir hesap yapar; insan fark etmez, topl
 | Kapsam | Uç | Eşik |
 |---|---|---|
 | `register` | `POST /auth/customer/emailpass/register` | IP başına saatte 3 kayıt |
-| `login` | `POST /auth/customer/emailpass` | Aynı e-postaya (her yerden) 15 dakikada 5'ten fazla deneme; her deneme çalışmadan önce sayılır (aynı anda gönderilenler eşiği atlayamaz); yalnızca doğrulama ister, kilitlemez |
+| `login` | `POST /auth/customer/emailpass`, `POST /auth/user/emailpass` (personel, 2026-10-31) | Aynı e-postaya (her yerden) 15 dakikada 5'ten fazla deneme; her deneme çalışmadan önce sayılır (aynı anda gönderilenler eşiği atlayamaz); yalnızca doğrulama ister, kilitlemez |
 | `order_lookup` | `POST /store/order-lookup` | IP başına saatte 5 |
 | `stock_alert` | `POST /store/stock-alerts` | IP başına saatte 5 |
 | `checkout` | `POST /store/carts/:id/payment-session` | §2'deki hız kuralları |
@@ -50,7 +50,7 @@ Görsel bulmaca yok. Tarayıcı küçük bir hesap yapar; insan fark etmez, topl
 - Zorluk 18 bit: ortalama ~260 bin özet, telefonda 1 saniyenin altında. Sayaç eşiğin iki katını aşınca 20 bit.
 - Sert sınırlar hız sınırlayıcınındır (`RATE_LIMIT_PROFILES`). Doğrulama ondan önce gelir.
 - IP başına eşikler entegrasyon testlerinde hız sınırları gibi büyür (`perIpScale`). `fraud-guard.spec` gerçek değerlerle sınar.
-- Yorum ve soru doğrulanmış hesap ister, hız sınırına tabidir; doğrulama istenmez. Personel girişi 2FA ve kilitle korunur; panelde çözücü olmadığı için doğrulama istenmez. ADR-0036 §8'deki SMS `challenge` işareti, vitrinin ilk SMS ucu (F18) yazılınca bu düzene bağlanır.
+- Yorum ve soru doğrulanmış hesap ister, hız sınırına tabidir; doğrulama istenmez. Personel girişi 2FA ile korunur; F15 denetiminden sonra (2026-10-31) müşteri girişiyle aynı eşikte doğrulama da ister, panel çözücüyü içerir (`apps/panel/src/lib/challenge.ts`). ADR-0036 §8'deki SMS `challenge` işareti, vitrinin ilk SMS ucu (F18) yazılınca bu düzene bağlanır.
 - Erişilebilirlik: kullanıcıdan hiçbir şey istenmez, ekran okuyucuyla sorun yok.
 
 ### 2. Hız kuralları (ödeme)

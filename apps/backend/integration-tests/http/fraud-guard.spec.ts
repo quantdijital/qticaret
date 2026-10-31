@@ -239,6 +239,28 @@ medusaIntegrationTestRunner({
       expect(signedIn.data.token).toEqual(expect.any(String))
     })
 
+    it("asks a proof of a staff member's sixth sign-in in a quarter hour, from any address", async () => {
+      process.env["RATE_LIMIT_RELAXED"] = "0"
+      // Its own sign-in is the first of the six
+      const member = await createAdminUser(http, getContainer(), "operations")
+      const signIn = (secret: string, headers: Record<string, string> = {}) =>
+        post<{ token?: string; message?: string; challenge?: Challenge }>(
+          "/auth/user/emailpass",
+          { email: member.email, password: secret },
+          headers
+        )
+      for (let n = 0; n < 4; n++) {
+        expect((await signIn(`yanlis-${randomUUID()}`)).status).toBe(401)
+      }
+      const asked = await signIn(member.password)
+      const signedIn = await signIn(member.password, solved(asked.data.challenge))
+
+      expect(asked.status).toBe(428)
+      expect(asked.data.message).toBe("fraud.challenge_required")
+      expect(signedIn.status).toBe(200)
+      expect(signedIn.data.token).toEqual(expect.any(String))
+    })
+
     it("asks a proof past the soft limit and stops past the hard one (KK4)", async () => {
       // The limits at their real size here (integration tests grow them)
       process.env["RATE_LIMIT_RELAXED"] = "0"
