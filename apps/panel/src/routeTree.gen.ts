@@ -31,6 +31,7 @@ import { Route as AuthOrdersIdRouteImport } from './routes/_auth/orders/$id'
 import { Route as AuthOrdersChargebacksRouteImport } from './routes/_auth/orders/chargebacks'
 import { Route as AuthOrdersInvoicesRouteImport } from './routes/_auth/orders/invoices'
 import { Route as AuthOrdersReturnsRouteImport } from './routes/_auth/orders/returns'
+import { Route as AuthOrdersReviewRouteImport } from './routes/_auth/orders/review'
 import { Route as AuthProductsIndexRouteImport } from './routes/_auth/products/index'
 import { Route as AuthProductsIdRouteImport } from './routes/_auth/products/$id'
 import { Route as AuthProductsNewRouteImport } from './routes/_auth/products/new'
@@ -190,6 +191,11 @@ const AuthOrdersInvoicesRoute = AuthOrdersInvoicesRouteImport.update({
 const AuthOrdersReturnsRoute = AuthOrdersReturnsRouteImport.update({
   id: '/orders/returns',
   path: '/orders/returns',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthOrdersReviewRoute = AuthOrdersReviewRouteImport.update({
+  id: '/orders/review',
+  path: '/orders/review',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthProductsIndexRoute = AuthProductsIndexRouteImport.update({
@@ -477,6 +483,7 @@ export interface FileRoutesByFullPath {
   '/orders/chargebacks': typeof AuthOrdersChargebacksRoute
   '/orders/invoices': typeof AuthOrdersInvoicesRoute
   '/orders/returns': typeof AuthOrdersReturnsRoute
+  '/orders/review': typeof AuthOrdersReviewRoute
   '/products/$id': typeof AuthProductsIdRoute
   '/products/new': typeof AuthProductsNewRoute
   '/promotions/$id': typeof AuthPromotionsIdRoute
@@ -549,6 +556,7 @@ export interface FileRoutesByTo {
   '/orders/chargebacks': typeof AuthOrdersChargebacksRoute
   '/orders/invoices': typeof AuthOrdersInvoicesRoute
   '/orders/returns': typeof AuthOrdersReturnsRoute
+  '/orders/review': typeof AuthOrdersReviewRoute
   '/products/$id': typeof AuthProductsIdRoute
   '/products/new': typeof AuthProductsNewRoute
   '/promotions/$id': typeof AuthPromotionsIdRoute
@@ -625,6 +633,7 @@ export interface FileRoutesById {
   '/_auth/orders/chargebacks': typeof AuthOrdersChargebacksRoute
   '/_auth/orders/invoices': typeof AuthOrdersInvoicesRoute
   '/_auth/orders/returns': typeof AuthOrdersReturnsRoute
+  '/_auth/orders/review': typeof AuthOrdersReviewRoute
   '/_auth/products/$id': typeof AuthProductsIdRoute
   '/_auth/products/new': typeof AuthProductsNewRoute
   '/_auth/promotions/$id': typeof AuthPromotionsIdRoute
@@ -701,6 +710,7 @@ export interface FileRouteTypes {
     | '/orders/chargebacks'
     | '/orders/invoices'
     | '/orders/returns'
+    | '/orders/review'
     | '/products/$id'
     | '/products/new'
     | '/promotions/$id'
@@ -773,6 +783,7 @@ export interface FileRouteTypes {
     | '/orders/chargebacks'
     | '/orders/invoices'
     | '/orders/returns'
+    | '/orders/review'
     | '/products/$id'
     | '/products/new'
     | '/promotions/$id'
@@ -848,6 +859,7 @@ export interface FileRouteTypes {
     | '/_auth/orders/chargebacks'
     | '/_auth/orders/invoices'
     | '/_auth/orders/returns'
+    | '/_auth/orders/review'
     | '/_auth/products/$id'
     | '/_auth/products/new'
     | '/_auth/promotions/$id'
@@ -1067,6 +1079,13 @@ declare module '@tanstack/react-router' {
       path: '/orders/returns'
       fullPath: '/orders/returns'
       preLoaderRoute: typeof AuthOrdersReturnsRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/orders/review': {
+      id: '/_auth/orders/review'
+      path: '/orders/review'
+      fullPath: '/orders/review'
+      preLoaderRoute: typeof AuthOrdersReviewRouteImport
       parentRoute: typeof AuthRoute
     }
     '/_auth/products/': {
@@ -1535,6 +1554,7 @@ interface AuthRouteChildren {
   AuthOrdersChargebacksRoute: typeof AuthOrdersChargebacksRoute
   AuthOrdersInvoicesRoute: typeof AuthOrdersInvoicesRoute
   AuthOrdersReturnsRoute: typeof AuthOrdersReturnsRoute
+  AuthOrdersReviewRoute: typeof AuthOrdersReviewRoute
   AuthProductsIdRoute: typeof AuthProductsIdRoute
   AuthProductsNewRoute: typeof AuthProductsNewRoute
   AuthPromotionsIdRoute: typeof AuthPromotionsIdRoute
@@ -1570,6 +1590,7 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthOrdersChargebacksRoute: AuthOrdersChargebacksRoute,
   AuthOrdersInvoicesRoute: AuthOrdersInvoicesRoute,
   AuthOrdersReturnsRoute: AuthOrdersReturnsRoute,
+  AuthOrdersReviewRoute: AuthOrdersReviewRoute,
   AuthProductsIdRoute: AuthProductsIdRoute,
   AuthProductsNewRoute: AuthProductsNewRoute,
   AuthPromotionsIdRoute: AuthPromotionsIdRoute,

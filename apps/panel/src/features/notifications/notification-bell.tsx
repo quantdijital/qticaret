@@ -80,6 +80,18 @@ function useAlertText(data: Record<string, unknown>) {
       link: { to: "/orders/$id" as const, search: {}, params: { id: text(data["order_id"]) } },
     }
   }
+  if (data["kind"] === "fraud_review") {
+    return {
+      title: t("notifications.fraudReview.title", {
+        number: text(data["number"]),
+        score: text(data["score"]),
+      }),
+      description: t("notifications.fraudReview.description"),
+      Icon: ShieldAlert,
+      tone: "bg-warning-soft text-warning-text",
+      link: { to: "/orders/review" as const, search: {}, params: {} },
+    }
+  }
   if (data["kind"] === "migration_not_found") {
     return {
       title: t("notifications.migrationNotFound.title", { count: amount(data["count"]) }),

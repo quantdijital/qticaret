@@ -120,6 +120,9 @@ export function OrdersPage() {
         action={
           <span className="flex flex-wrap gap-2">
             <Button asChild variant="outline" size="sm">
+              <Link to="/orders/review">{t("orders.fraud.queue")}</Link>
+            </Button>
+            <Button asChild variant="outline" size="sm">
               <Link to="/orders/returns">{t("orders.returns.queue")}</Link>
             </Button>
             <Button asChild variant="outline" size="sm">

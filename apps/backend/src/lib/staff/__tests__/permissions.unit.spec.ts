@@ -186,6 +186,7 @@ describe("staff roles", () => {
       privacy: true,
       invoices: true,
       migration: true,
+      fraud: true,
     })
     expect(capabilitiesOf("admin")).toMatchObject({
       settings: true,
@@ -199,6 +200,7 @@ describe("staff roles", () => {
       privacy: true,
       invoices: true,
       migration: false,
+      fraud: true,
     })
     expect(capabilitiesOf("operations")).toEqual({
       settings: false,
@@ -218,6 +220,7 @@ describe("staff roles", () => {
       privacy: false,
       invoices: false,
       migration: false,
+      fraud: false,
     })
     expect(Object.values(capabilitiesOf("readonly")).every((can) => !can)).toBe(true)
     expect(Object.values(capabilitiesOf(null)).every((can) => !can)).toBe(true)
@@ -251,6 +254,10 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/migrations/invites": false,
   "POST /admin/migrations/urls/sitemap": false,
   "POST /admin/migrations/urls/search-console": false,
+  // A held order's release, and who the shop turns away: owner and admin (adr/0044)
+  "POST /admin/fraud/reviews/:id/decision": false,
+  "POST /admin/fraud/blocks": false,
+  "DELETE /admin/fraud/blocks/:id": false,
   "POST /admin/chargebacks/:id": false,
   "POST /admin/chargebacks": false,
   "POST /admin/content-drafts/:id/approve": false,

@@ -1890,6 +1890,37 @@
         "turnOff": "Lift requirement",
         "turnedOn": "Required for the team.",
         "turnedOff": "Requirement lifted."
+      },
+      "fraud": {
+        "title": "Order review",
+        "hint": "An order whose suspicion score reaches this line waits for your approval in Orders > Review before it ships. On a first order the high total adds to the score.",
+        "score": "Review score",
+        "amount": "High total (₺)",
+        "saved": "Review rules saved."
+      },
+      "blocks": {
+        "title": "Block list",
+        "hint": "An e-mail, domain, phone or IP on the list cannot register, sign in or check out. The visitor is not told why. E-mails and phones are kept only as a keyed hash.",
+        "kind": "Kind",
+        "value": "Value",
+        "reason": "Reason (optional)",
+        "add": "Add to list",
+        "added": "Added to the block list.",
+        "removed": "Removed from the block list.",
+        "remove": "Remove {{value}} from the list",
+        "empty": "No one is on the block list.",
+        "kinds": {
+          "email": "E-mail",
+          "email_domain": "E-mail domain",
+          "phone": "Phone",
+          "ip": "IP address"
+        },
+        "placeholders": {
+          "email": "name@example.com",
+          "email_domain": "throwaway-mail.com",
+          "phone": "0532 000 00 00",
+          "ip": "203.0.113.7"
+        }
       }
     },
     "legal": {
@@ -3301,6 +3332,39 @@
         "total": "Total"
       },
       "returnNeeded": "The order was canceled but its invoice can no longer be cancelled (an e-Fatura, or past seven days). Issue a return document."
+    },
+    "fraud": {
+      "queue": "Review",
+      "queueDescription": "Orders the fraud rules held. An approved one may ship; a turned-down one waits until it is cancelled from its page.",
+      "approve": "Approve",
+      "reject": "Turn down",
+      "approved": "Order approved; it may ship.",
+      "rejected": "Order turned down. Cancel it and refund it from the order's page.",
+      "columns": {
+        "order": "Order",
+        "reasons": "Reasons",
+        "score": "Score",
+        "total": "Total",
+        "when": "Date"
+      },
+      "status": {
+        "pending": "Waiting",
+        "approved": "Approved",
+        "rejected": "Turned down"
+      },
+      "empty": {
+        "pending": "No order waits for review.",
+        "approved": "No approved order.",
+        "rejected": "No turned-down order."
+      },
+      "rules": {
+        "new_customer_high_amount": "First order, high total",
+        "address_mismatch": "Delivery and billing province differ",
+        "ip_many_emails": "Many e-mails from one connection",
+        "phone_many_emails": "Many e-mails with one phone",
+        "disposable_email": "Throwaway e-mail",
+        "failed_payments": "Failed payment attempts"
+      }
     }
   },
   "customers": {
@@ -4979,6 +5043,10 @@
     "migrationNotFound": {
       "title": "{{count}} addresses answered 404 since cutover",
       "description": "Decide a 301 or 410 in Migration > Old addresses."
+    },
+    "fraudReview": {
+      "title": "#{{number}} held for review (score {{score}})",
+      "description": "Approve or turn it down in Orders > Review before it ships."
     }
   },
   "content": {

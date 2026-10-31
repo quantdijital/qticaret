@@ -200,6 +200,8 @@ module.exports = defineConfig({
     { resolve: "./src/modules/einvoice", options: { encryptionKey: env.PII_ENCRYPTION_KEY } },
     // F14 (adr/0042): a shop's data moved from its old platform, each record once
     { resolve: "./src/modules/migration" },
+    // F15.6 (adr/0044): the shop's block list and the orders waiting for a person
+    { resolve: "./src/modules/fraud-guard" },
     // F11.6 (adr/0039 §6): what each secret API key may reach; a key without a scope reaches nothing
     { resolve: "./src/modules/api-key-scopes" },
     // F12.6 (adr/0040): each staff member's role, read on every admin request

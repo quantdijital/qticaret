@@ -2,6 +2,7 @@ import { request as httpRequest } from "node:http"
 import { randomUUID } from "node:crypto"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { createAdminUser } from "../helpers/admin"
+import { freshChallenge } from "../helpers/challenge"
 import { registerCustomer } from "../helpers/customer"
 import type { HttpClient, HttpResponse } from "../helpers/http"
 import { settle } from "../helpers/http"
@@ -48,8 +49,15 @@ medusaIntegrationTestRunner({
     it("answers 429 with Retry-After after ten failed logins for one account (F2 KK)", async () => {
       // An account that never logged in, so every attempt in the window is ours
       const email = `nobody-${randomUUID()}@example.com`
+      // Past three failures a sign-in also brings a proof of work (adr/0044 §1)
       const attempt = (path = "/auth/customer/emailpass") =>
-        settle(http.post(path, { email, password: `wrong-${randomUUID()}` }))
+        settle(
+          http.post(
+            path,
+            { email, password: `wrong-${randomUUID()}` },
+            { headers: freshChallenge("login") }
+          )
+        )
 
       for (let index = 0; index < 10; index++) {
         expect((await attempt()).status).toBe(401)

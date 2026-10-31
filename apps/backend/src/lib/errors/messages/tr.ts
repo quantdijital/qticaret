@@ -777,4 +777,16 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "auth.password_contains_email": "Şifre e-posta adresinizin adını içermemeli.",
   "auth.password_breached":
     "Bu şifre bilinen bir veri sızıntısında yer alıyor; başka bir şifre seçin.",
+  "fraud.challenge_required":
+    "Güvenlik doğrulaması gerekiyor; sayfa bunu kendisi yapar, yeniden deneyin.",
+  "fraud.refused": "Bu işlem şu anda yapılamıyor; lütfen mağazayla iletişime geçin.",
+  "fraud.checkout_refused": "Bu sipariş şu anda tamamlanamıyor; lütfen mağazayla iletişime geçin.",
+  "fraud.velocity": "Çok fazla deneme yapıldı; biraz sonra yeniden deneyin.",
+  "fraud.review_pending": "Sipariş incelemede; onaylanmadan kargoya verilemez.",
+  "fraud.review_rejected": "Sipariş incelemede reddedildi; kargoya verilemez, iptal edin.",
+  "fraud.review_decided": "Bu inceleme az önce karara bağlandı; sayfayı yenileyin.",
+  "fraud.block_invalid_email": "Geçerli bir e-posta adresi girin.",
+  "fraud.block_invalid_email_domain": "Geçerli bir alan adı girin (ör. ornek.com).",
+  "fraud.block_invalid_phone": "Geçerli bir Türkiye telefon numarası girin.",
+  "fraud.block_invalid_ip": "Geçerli bir IP adresi girin.",
 }

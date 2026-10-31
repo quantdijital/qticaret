@@ -1890,6 +1890,37 @@
         "turnOff": "Zorunluluğu kaldır",
         "turnedOn": "Ekip için zorunlu.",
         "turnedOff": "Zorunluluk kaldırıldı."
+      },
+      "fraud": {
+        "title": "Sipariş incelemesi",
+        "hint": "Şüphe puanı bu eşiğe ulaşan sipariş kargoya verilmeden önce Siparişler > İnceleme'de onayınızı bekler. İlk siparişte tutar sınırı da puana eklenir.",
+        "score": "İnceleme puanı",
+        "amount": "Yüksek tutar (₺)",
+        "saved": "İnceleme kuralları kaydedildi."
+      },
+      "blocks": {
+        "title": "Kara liste",
+        "hint": "Listedeki e-posta, alan adı, telefon ya da IP ile kayıt, giriş ve ödeme yapılamaz. Ziyaretçiye nedeni söylenmez. E-posta ve telefon yalnızca şifreli özetiyle saklanır.",
+        "kind": "Tür",
+        "value": "Değer",
+        "reason": "Neden (isteğe bağlı)",
+        "add": "Listeye ekle",
+        "added": "Kara listeye eklendi.",
+        "removed": "Kara listeden çıkarıldı.",
+        "remove": "{{value}} listeden çıkar",
+        "empty": "Kara listede kimse yok.",
+        "kinds": {
+          "email": "E-posta",
+          "email_domain": "E-posta alan adı",
+          "phone": "Telefon",
+          "ip": "IP adresi"
+        },
+        "placeholders": {
+          "email": "ornek@eposta.com",
+          "email_domain": "gecici-posta.com",
+          "phone": "0532 000 00 00",
+          "ip": "203.0.113.7"
+        }
       }
     },
     "legal": {
@@ -3301,6 +3332,39 @@
         "total": "Tutar"
       },
       "returnNeeded": "Sipariş iptal edildi ama fatura artık iptal edilemiyor (e-Fatura ya da 7 gün geçti). İade belgesi düzenleyin."
+    },
+    "fraud": {
+      "queue": "İnceleme",
+      "queueDescription": "Dolandırıcılık kurallarının durdurduğu siparişler. Onaylanan kargoya verilebilir; reddedilen, sipariş sayfasından iptal edilene kadar bekler.",
+      "approve": "Onayla",
+      "reject": "Reddet",
+      "approved": "Sipariş onaylandı; kargoya verilebilir.",
+      "rejected": "Sipariş reddedildi. Sipariş sayfasından iptal edip parasını iade edin.",
+      "columns": {
+        "order": "Sipariş",
+        "reasons": "Nedenler",
+        "score": "Puan",
+        "total": "Tutar",
+        "when": "Tarih"
+      },
+      "status": {
+        "pending": "Bekleyen",
+        "approved": "Onaylanan",
+        "rejected": "Reddedilen"
+      },
+      "empty": {
+        "pending": "İnceleme bekleyen sipariş yok.",
+        "approved": "Onaylanan sipariş yok.",
+        "rejected": "Reddedilen sipariş yok."
+      },
+      "rules": {
+        "new_customer_high_amount": "İlk sipariş, yüksek tutar",
+        "address_mismatch": "Teslimat ve fatura ili farklı",
+        "ip_many_emails": "Aynı bağlantıdan çok e-posta",
+        "phone_many_emails": "Aynı telefonla çok e-posta",
+        "disposable_email": "Geçici e-posta",
+        "failed_payments": "Başarısız ödeme denemeleri"
+      }
     }
   },
   "customers": {
@@ -4979,6 +5043,10 @@
     "migrationNotFound": {
       "title": "Kesimden sonra {{count}} adres 404 verdi",
       "description": "Taşıma > Eski adreslerden 301 ya da 410 kararı verin."
+    },
+    "fraudReview": {
+      "title": "#{{number}} incelemede (puan {{score}})",
+      "description": "Kargoya vermeden önce Siparişler > İnceleme'den onaylayın ya da reddedin."
     }
   },
   "content": {

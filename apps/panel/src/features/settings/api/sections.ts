@@ -33,6 +33,10 @@ export interface StoreSettings {
 /** Staff security (F12.6, adr/0040): whether every staff member must pass 2FA; the owner's switch. */
 export interface SecuritySettings {
   staff_mfa_required: boolean
+  /** The suspicion score that holds an order for review (adr/0044). */
+  fraud_review_score: number
+  /** A first order at or above this (kuruş) adds to its score. */
+  fraud_high_amount: number
 }
 
 /** Stock rules (F3.8): the shop's default low-stock threshold. */

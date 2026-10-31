@@ -1,0 +1,121 @@
+import { createHash, randomBytes } from "node:crypto"
+import { hashPii } from "../../crypto/pii"
+import { safeEqual } from "../timing-safe"
+
+/**
+ * A proof of work the visitor's browser does instead of a picture puzzle
+ * (F15.6, adr/0044 §1): find a `nonce` that makes SHA-256(salt + nonce)
+ * start with `bits` zero bits. Cheap once, costly a thousand times. The
+ * challenge is stateless, signed with the shop's keyed hash; its single
+ * use is the caller's (a short-lived key in the shared store).
+ */
+
+export const CHALLENGE_SCOPES = [
+  "register",
+  "login",
+  "order_lookup",
+  "stock_alert",
+  "checkout",
+] as const
+export type ChallengeScope = (typeof CHALLENGE_SCOPES)[number]
+
+export const CHALLENGE_TTL_MS = 5 * 60 * 1000
+// About 260,000 tries on average: under a second on a phone
+export const BASE_BITS = 18
+const MIN_BITS = 10
+const MAX_BITS = 24
+const PURPOSE = "fraud.challenge"
+const SALT = /^[A-Za-z0-9_-]{22}$/
+const NONCE = /^\d{1,12}$/
+
+export interface Challenge {
+  token: string
+  salt: string
+  bits: number
+  expires_at: string
+}
+
+export type ChallengeCheck =
+  | { ok: true; key: string; until: number }
+  | { ok: false; reason: "malformed" | "forged" | "expired" | "scope" | "unsolved" }
+
+const signed = (body: string, key: Buffer) => hashPii(body, key, PURPOSE)
+
+/** A new challenge for the scope; `bits` held to the bounds. */
+export function issueChallenge(
+  scope: ChallengeScope,
+  key: Buffer,
+  bits: number = BASE_BITS,
+  now: number = Date.now()
+): Challenge {
+  const salt = randomBytes(16).toString("base64url")
+  const hard = Math.min(MAX_BITS, Math.max(MIN_BITS, Math.round(bits)))
+  const until = now + CHALLENGE_TTL_MS
+  const body = `${scope}.${salt}.${String(hard)}.${String(until)}`
+  return {
+    token: `${body}.${signed(body, key)}`,
+    salt,
+    bits: hard,
+    expires_at: new Date(until).toISOString(),
+  }
+}
+
+/** Whether the digest of salt and nonce starts with `bits` zero bits. */
+export function solves(salt: string, nonce: string, bits: number): boolean {
+  const digest = createHash("sha256").update(`${salt}${nonce}`, "utf8").digest()
+  const whole = Math.floor(bits / 8)
+  for (let index = 0; index < whole; index++) {
+    if (digest[index] !== 0) {
+      return false
+    }
+  }
+  const rest = bits % 8
+  return rest === 0 || (digest[whole] ?? 0xff) >> (8 - rest) === 0
+}
+
+/** The answer a browser finds, here for tests and the development checkout page. */
+export function solveChallenge(salt: string, bits: number): string {
+  for (let nonce = 0; ; nonce++) {
+    if (solves(salt, String(nonce), bits)) {
+      return String(nonce)
+    }
+  }
+}
+
+/**
+ * Checks `X-Challenge: <token>.<nonce>` for the scope. A good one returns
+ * the key its single use is kept under, and until when.
+ */
+export function checkChallenge(
+  header: string,
+  scope: ChallengeScope,
+  key: Buffer,
+  now: number = Date.now()
+): ChallengeCheck {
+  const parts = header.trim().split(".")
+  if (parts.length !== 6) {
+    return { ok: false, reason: "malformed" }
+  }
+  const [given = "", salt = "", bitsText = "", untilText = "", signature = "", nonce = ""] = parts
+  if (!SALT.test(salt) || !/^\d{2}$/.test(bitsText) || !/^\d{13}$/.test(untilText)) {
+    return { ok: false, reason: "malformed" }
+  }
+  if (!NONCE.test(nonce)) {
+    return { ok: false, reason: "malformed" }
+  }
+  const body = `${given}.${salt}.${bitsText}.${untilText}`
+  if (!safeEqual(signature, signed(body, key))) {
+    return { ok: false, reason: "forged" }
+  }
+  const until = Number(untilText)
+  if (until < now) {
+    return { ok: false, reason: "expired" }
+  }
+  if (given !== scope) {
+    return { ok: false, reason: "scope" }
+  }
+  if (!solves(salt, nonce, Number(bitsText))) {
+    return { ok: false, reason: "unsolved" }
+  }
+  return { ok: true, key: signed(`used.${salt}`, key).slice(0, 32), until }
+}

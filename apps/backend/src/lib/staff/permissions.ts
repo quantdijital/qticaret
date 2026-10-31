@@ -113,6 +113,8 @@ const PRIVATE: readonly Rule[] = [
     when: (facts) => facts.notificationChannel !== "feed",
   },
   { methods: "*", path: "/admin/notifications/:id" },
+  // Who the shop turns away, and why (adr/0044 §4)
+  { methods: "*", path: "/admin/fraud/blocks*" },
 ]
 
 const readJob: Rule = {
@@ -281,6 +283,8 @@ const CAPABILITY_PROBES = {
   invoices: ["GET", "/admin/invoices/:id/pdf"],
   // F14: moving the shop in from its old platform, the owner's alone
   migration: ["POST", "/admin/migrations"],
+  // F15.6: releasing held orders and keeping the block list, owner and admin
+  fraud: ["POST", "/admin/fraud/blocks"],
 } as const satisfies Record<string, readonly [Method, string]>
 
 export type Capability = keyof typeof CAPABILITY_PROBES

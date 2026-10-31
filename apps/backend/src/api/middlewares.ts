@@ -58,6 +58,7 @@ import { MEDIA_ROUTES, STORE_MEDIA_FIELDS, restrictStoreMediaFields } from "./ht
 import { GIFT_CARD_ROUTES } from "./http/gift-card-routes"
 import { ORDER_REFUND_ROUTES } from "./http/order-refund-routes"
 import { PAYMENT_ROUTES } from "./http/payment-routes"
+import { FRAUD_ROUTES } from "./http/fraud-routes"
 import { INTEGRATION_ROUTES } from "./http/integration-routes"
 import { restrictStoreGiftCardFields } from "./http/shopper-gift-cards"
 import { PRICING_ROUTES } from "./http/pricing-routes"
@@ -264,6 +265,7 @@ export default defineMiddlewares({
     // F3.9: product sheets
     ...CATALOG_SHEET_ROUTES,
     ...MIGRATION_ROUTES,
+    ...FRAUD_ROUTES,
     // F3.7: warehouses
     ...STOCK_ROUTES,
     // F3.3: product images

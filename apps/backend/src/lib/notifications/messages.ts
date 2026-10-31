@@ -37,6 +37,10 @@ export const NOTIFICATION_MESSAGES: Readonly<
       title: "Havale bekleniyor: #{{number}}",
       description: "{{total}} tutarındaki ödeme gelince siparişi onaylayın.",
     },
+    "orders.fraud_review": {
+      title: "#{{number}} incelemede (puan {{score}})",
+      description: "Şüpheli görünen sipariş kargoya verilmeden önce onayınızı bekliyor.",
+    },
     "integrations.account_changed": {
       title: "{{provider}} hesap bilgileri değişti",
       description: "{{who}}: {{what}}",
@@ -94,6 +98,10 @@ export const NOTIFICATION_MESSAGES: Readonly<
     "orders.bank_transfer_pending": {
       title: "Bank transfer awaited: #{{number}}",
       description: "Confirm the order once the {{total}} payment arrives.",
+    },
+    "orders.fraud_review": {
+      title: "#{{number}} held for review (score {{score}})",
+      description: "The order looks suspicious and waits for your approval before it ships.",
     },
     "stock.low_stock": {
       title: "Low stock: {{name}}",

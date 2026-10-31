@@ -63,6 +63,9 @@
 | `product_review` (product-reviews)                | yazar adı (ad + baş harf), başlık, metin (D)               | ürün yorumu             | Yayında kaldıkça                   | Yazar adı "Anonim" olur, metin kalır (L9). Taşınan yorum, kaynak yazarın e-postasını verdiyse taşınan müşteriye bağlanır; bağlanamayanın yalnızca ad ve baş harfi tutulur. |
 | `product_question`, `product_answer` (product-qa) | yazar adı, metin (D)                                       | soru ve cevap           | Yayında kaldıkça                   | Yazar adı anonimleşir (L9).                                   |
 | `search_term_day` (search-terms)                  | aranan metin (kişiye bağlı değil)                          | arama istatistiği       | 180 gün (`search-terms-retention`) | —                                                             |
+| `fraud_block` (fraud-guard) | e-posta ve telefon yalnızca anahtarlı özetle (Ş), maskeli görünüm; alan adı; IP adresi (Ö); neden (D) | kara liste (F15.6, adr/0044 §4) | Bitiş tarihine kadar; IP en çok 1 yıl. Süresi geçen kayıt kalıcı silinir (`fraud-retention`) | Kalır: dolandırıcılığa karşı hukuki yarar (KVKK m.5/2-f). Ham değer zaten tutulmaz. |
+| `fraud_review` (fraud-guard) | sipariş kimliği, kural adları ve puanlar; personel notu (D) | şüpheli sipariş incelemesi (adr/0044 §3) | Siparişle birlikte | Not temizlenir. |
+| Ödeme hız sayaçları (Redis) | IP kovası, e-posta ve telefonun anahtarlı özeti | hız kuralları (adr/0044 §2) | En çok 7 gün (sayaç penceresi) | Kendiliğinden düşer. |
 | `traffic_source` (traffic-sources)                | sepet kimliği, UTM, yönlendiren alan adı                   | trafik kaynağı          | Sepet ve siparişle birlikte        | —                                                             |
 
 ## 4. Personel, denetim ve sistem
@@ -93,7 +96,7 @@
 
 Her parça ayrı çalışır; biri hata verse de diğerleri yapılır. Bir gecede 500'den fazla satır birikmişse kalanı sonraki gecelere kalır.
 
-**Diğer saklama işleri:** `conversions-retry` (3 gün), `message-skips-retention` (180 gün), `search-terms-retention` (180 gün), `async-job-retention` (90 gün), `tenant-webhooks` (teslimat kayıtları 30 gün).
+**Diğer saklama işleri:** `conversions-retry` (3 gün), `message-skips-retention` (180 gün), `search-terms-retention` (180 gün), `async-job-retention` (90 gün), `tenant-webhooks` (teslimat kayıtları 30 gün), `fraud-retention` (süresi geçen kara liste kayıtları).
 
 ## Açık konular
 

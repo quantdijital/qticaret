@@ -11,6 +11,8 @@ import type ConversionsModuleService from "../../../modules/conversions/service"
 import { LEGAL_MODULE } from "../../../modules/legal"
 import type LegalModuleService from "../../../modules/legal/service"
 import { logger } from "../../../lib/logging"
+import { FRAUD_GUARD_MODULE } from "../../../modules/fraud-guard"
+import type FraudGuardModuleService from "../../../modules/fraud-guard/service"
 import { ORDER_NOTES_MODULE } from "../../../modules/order-notes"
 import type OrderNotesModuleService from "../../../modules/order-notes/service"
 import { ORDER_REFUNDS_MODULE } from "../../../modules/order-refunds"
@@ -190,6 +192,15 @@ export async function eraseOrders(container: Container, customerId: string, now:
       written.map((note) => ({ id: note.id, body: "", removed_by: "kvkk" }))
     )
     await notes.softDeleteOrderNotes(written.map((note) => note.id))
+  }
+  // A fraud review keeps its rules and score; its staff note may name the buyer (adr/0044)
+  const guard = container.resolve<FraudGuardModuleService>(FRAUD_GUARD_MODULE)
+  const reviewed = await guard.listFraudReviews(
+    { order_id: orderIds, note: { $ne: null } },
+    { select: ["id"] }
+  )
+  if (reviewed.length > 0) {
+    await guard.updateFraudReviews(reviewed.map((review) => ({ id: review.id, note: null })))
   }
   await eraseParcels(container, rows)
   const returns = container.resolve<ReturnRequestsModuleService>(RETURN_REQUESTS_MODULE)

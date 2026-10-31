@@ -43,7 +43,7 @@
 - Kapıda ödeme ek ücreti, kupon indirimi, kargo ücreti dahil hiçbir tutar istemciden alınmaz.
 - Ödeme sonrası dönüş URL'leri (başarı/başarısız) tenant'ın storefront origin allowlist'iyle sınırlı; açık yönlendirme yok.
 - Ters ibraz (chargeback): sağlayıcı bildirimi siparişi işaretler, belge paketi (fatura, kargo teslim kanıtı, onay kaydı) tek tıkla üretilir (F6.7).
-- Dolandırıcılık: captcha, velocity kuralları, şüpheli sipariş kuyruğu (`fraud-guard`, F15.6).
+- Dolandırıcılık (`fraud-guard`, F15.6, ADR-0044): dış servissiz iş kanıtı doğrulaması (kayıt, müşteri girişi, siparişimi bul, stok bildirimi ve ödemede eşik aşılınca 428); ödeme hız kuralları (IP, e-posta, farklı e-posta sayısı; IP'de engel uzak, doğrulama yakın: CGNAT); şüpheli sipariş puanı ve Siparişler > İnceleme (bekleyen ya da reddedilen sipariş kargoya verilemez); kara liste (e-posta ve telefon yalnızca anahtarlı özetle; kayıt, giriş ve ödemede 403).
 
 ### Promosyon ve stok
 - Kupon kullanım limiti ve stok rezervasyonu eşzamanlı isteklerde kilit/atomik işlemle korunur (yarış durumu testli).

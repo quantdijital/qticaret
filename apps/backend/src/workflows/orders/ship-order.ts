@@ -16,6 +16,7 @@ import { ensureGeliverSenderStep } from "../shipping/steps/geliver-sender"
 import { planCarrierStep } from "../shipping/steps/plan-carrier"
 import { forgetLabelSourceStep, storeShipmentLabelStep } from "../shipping/steps/store-label"
 import { trackShipmentStep } from "../shipping/steps/track"
+import { assertNotHeldStep } from "../fraud/steps/not-held"
 import { planShipmentStep } from "./steps/plan-shipment"
 
 export interface ShipOrderInput {
@@ -45,6 +46,8 @@ export const shipOrderWorkflow = createWorkflow("orders-ship-order", (input: Shi
   const lockKey = transform({ input }, ({ input }) => shipLockKey(input.order_id))
   // Long enough for a carrier: offers, the label's purchase and its download
   acquireLockStep({ key: lockKey, timeout: 10, ttl: 180 })
+  // F15.6: an order waiting for a person's review is not shipped
+  assertNotHeldStep(transform({ input }, ({ input }) => ({ order_id: input.order_id })))
 
   const plan = planShipmentStep(
     transform({ input }, ({ input }) => ({ order_id: input.order_id, items: input.items }))

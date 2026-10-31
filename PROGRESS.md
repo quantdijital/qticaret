@@ -1189,7 +1189,7 @@
 | H3 | F15.3 | k6 senaryoları (ürün gezinme, sepet, sahte sağlayıcıyla checkout, webhook patlaması 1000/dk, sitemap/robots), yerelde ölçüm, `docs/perf-raporlari/` | — | KK2 |
 | H4 | F15.4 | Gözlemlenebilirlik: OpenTelemetry izleri, yavaş sorgu logu, hata izleme (Türkiye'de kendi barındırılan; ADR). **Yeni bağımlılık: kullanıcı onayı** | — | — |
 | H5 | F15.5 | Yedekleme ve geri yükleme: şifreli tenant yedeği betiği, runbook, yerelde prova ve kaydı | — | KK3 |
-| H6 | F15.6 | `fraud-guard`: giriş/kayıt/checkout'ta kendi barındırdığımız iş kanıtı (proof-of-work) captcha'sı (dış servis yok; ADR), kart/IP/e-posta hız kuralları, şüpheli sipariş işareti ve panelde inceleme kuyruğu, kara liste | — | KK4 |
+| H6 ✓ | F15.6 | **Bitti (2026-10-31; ADR-0044): iş kanıtı doğrulaması, ödeme hız kuralları (KK4 testli), sipariş puanı ve Siparişler > İnceleme, kara liste; panelde kuyruk, zil, Ayarlar > Güvenlik'te eşikler ve kara liste. HTTP 34 takım 181 test, modül 4, panel 372.** `fraud-guard`: giriş/kayıt/checkout'ta kendi barındırdığımız iş kanıtı (proof-of-work) captcha'sı (dış servis yok; ADR), kart/IP/e-posta hız kuralları, şüpheli sipariş işareti ve panelde inceleme kuyruğu, kara liste | — | KK4 |
 | H7 ◐ | F15.9 | **Bağımlılık raporu `pnpm audit:deps` ve açıklama politikası taslağı hazır; `security.txt` ucu sırada.** `/.well-known/security.txt`, sorumlu açıklama sayfası ve SLA; `pnpm audit` ve bağımlılık raporu betiği | — | — |
 | H8 ✓ | F15.7, F15.8 | **Kontrol listesi: `docs/runbooks/kenar-ve-pentest.md` (uygulaması F16).** Kenar güvenliği (WAF, DDoS, bot) ve dış pentest için kontrol listesi ve hazırlık (kod dışı; F16 altyapısıyla) | — | KK1 (dış pentest) |
 | H9 | — | Kapanış: güvenlik incelemesi, tam doğrulama, KK işaretleri | H1–H8 | — |
@@ -1198,6 +1198,7 @@
 - ADR-0043 şifre politikası (otonom kabul): kayıt ve sıfırlamada 10–256 karakter, yaygın şifre listesi, e-posta adını içeren şifre reddi; personel ve müşteri için sunucuda.
 - **Onay bekliyor:** sızmış şifre denetimi (Have I Been Pwned, yalnızca SHA-1 özetinin ilk 5 karakteri gider). Kod hazır, varsayılan kapalı. Onaylarsan canlıda varsayılan açık yapılır.
 - Taşıma işleri artık yalnızca o anki sahibe görünür (`ownerOnly`); bağlantılı taşınmış yorumlar onay bekler.
+- ADR-0044 fraud-guard (otonom kabul): IP sınırlarında engel uzak tutuldu (CGNAT: bir IP'nin arkasında binlerce müşteri olabilir), doğrulama yakın. "Reddet" siparişi iptal etmez, kargoya kapatır; iptal ve iade olağan iptalle (para akışı tek yerde). Hız eşikleri kodda; mağazaya açılması istenirse ayara taşınır.
 - **Onay bekliyor: bağımlılık güncellemeleri.** `pnpm audit:deps` (2026-10-31): kritik 0, yüksek 16, orta 20, düşük 3. Çoğu dolaylı bağımlılık (Medusa, test ve geliştirme araçları). Sunucuya dokunanlar:
   - `body-parser`: sıkıştırılmış gövdede DoS. Uygulamada kapatılamıyor: Medusa'nın gövde ayrıştırıcısı bizim ara katmanlarımızdan önce çalışıyor. Önlem kenarda: ters vekil/WAF `Content-Encoding` taşıyan isteği reddeder (H8 listesine yazıldı, F16). Kalıcı çözüm sürüm yükseltmesi.
   - `multer`: yüklemede DoS.
