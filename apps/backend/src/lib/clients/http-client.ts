@@ -1,11 +1,9 @@
 import type { z } from "@medusajs/framework/zod"
 import { ProviderError } from "../errors"
 import { currentRequestId, logger as platformLogger } from "../logging"
-import type { LogFields, StructuredLogger } from "../logging"
+import type { LogFields } from "../logging"
 import { CircuitBreaker, DEFAULT_CIRCUIT_BREAKER } from "./circuit-breaker"
 import { noteGivenUp } from "./failure-log"
-import type { FailureLog } from "./failure-log"
-import type { CircuitBreakerOptions } from "./circuit-breaker"
 import {
   HttpClientMisuse,
   buildUrl,
@@ -17,11 +15,9 @@ import {
   serializeBody,
   wasNotSent,
 } from "./request"
-import type { FormValues, QueryValues, RequestPath } from "./request"
 import { IDEMPOTENT_METHODS, backoffDelay, parseRetryAfter, resolveRetryPolicy } from "./retry"
-import type { RetryPolicy } from "./retry"
 import { ResponseTooLarge, TransportRefusal, callTransport, fetchTransport } from "./transport"
-import type { Transport, TransportResponse } from "./transport"
+import type { TransportResponse } from "./transport"
 
 /**
  * The HTTP client every provider integration uses (docs/03 F2.1): timeout,
@@ -38,56 +34,8 @@ import type { Transport, TransportResponse } from "./transport"
 
 // What a provider's error code may be: a short token such as `PERMISSION_DENIED` or `10051`
 const PROVIDER_CODE = /^[A-Za-z0-9_.-]{1,60}$/
-export interface HttpClientOptions {
-  provider: string
-  baseUrl: string
-  defaultHeaders?: Readonly<Record<string, string>>
-  timeoutMs?: number
-  maxResponseBytes?: number
-  retry?: Partial<RetryPolicy>
-  circuitBreaker?: Partial<CircuitBreakerOptions>
-  /** `safeTransport` for URLs a user or tenant supplies. */
-  transport?: Transport
-  /** Webhook URLs keep their secret in the path: log no path at all. */
-  hidePaths?: boolean
-  /** Reads the provider's own code (`card_declined`) from an error body. */
-  errorCode?: (body: unknown, status: number) => string | undefined
-  /** Where a failed call is noted for the Integrations page; the tenant's shared log by default. */
-  failureLog?: () => FailureLog
-  logger?: StructuredLogger
-  sleep?: (ms: number) => Promise<void>
-  random?: () => number
-  now?: () => number
-}
-
-export interface HttpRequest<T> {
-  method?: string
-  /** A raw path, or segments that are encoded one by one (input such as an ID). */
-  path: RequestPath
-  query?: QueryValues
-  headers?: Readonly<Record<string, string>>
-  json?: unknown
-  /** Form fields, sent URL-encoded; instead of `json`. */
-  form?: FormValues
-  /**
-   * An XML document (a SOAP envelope), instead of `json`: its answer is
-   * handed to `schema` as text, for the caller to read (adr/0035).
-   */
-  xml?: string
-  /** The answer is handed to `schema` as text whatever was sent (a provider answering plain lines). */
-  textAnswer?: boolean
-  /** Marks a POST or PATCH as safe to repeat (it carries an idempotency key). */
-  idempotent?: boolean
-  /** Logged instead of the path when it holds secrets or identifiers (`/services/:token`). */
-  logPath?: string
-  signal?: AbortSignal
-  schema: z.ZodType<T>
-}
-
-export interface HttpClient {
-  readonly provider: string
-  request<T>(request: HttpRequest<T>): Promise<T>
-}
+export type { HttpClient, HttpClientOptions, HttpRequest } from "./http-types"
+import type { HttpClient, HttpClientOptions, HttpRequest } from "./http-types"
 
 const DEFAULT_TIMEOUT_MS = 10_000
 const DEFAULT_MAX_RESPONSE_BYTES = 5 * 1024 * 1024
