@@ -58,7 +58,7 @@ export function Topbar() {
       </button>
       <div className="ml-auto flex items-center gap-2">
         {host ? (
-          <Button asChild variant="outline" size="sm" className="hidden md:inline-flex">
+          <Button asChild variant="outline" className="hidden h-9 md:inline-flex">
             <a href={`https://${host}`} target="_blank" rel="noreferrer">
               <ExternalLink />
               {t("topbar.viewStore")}

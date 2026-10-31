@@ -1,5 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { providerFailureLog } from "../../lib/clients/failure-log"
+import { errorSummary, logger } from "../../lib/logging"
 import type { ProviderFailure } from "../../lib/clients/failure-log"
 import { parseEnv } from "../../lib/env"
 import { SEARCH_CONSOLE_SCOPE, googleClientOf } from "../../lib/google/oauth"
@@ -114,7 +115,12 @@ export async function integrationOverview(container: MedusaContainer): Promise<I
     redisRow(env.REDIS_URL !== undefined),
   ]
   const log = providerFailureLog()
-  return Promise.all(
-    rows.map(async (each) => ({ ...each, failures: await log.recent(each.id, FAILURES_SHOWN) }))
-  )
+  // The failures are a help, not the page: a slow or missing Redis (its first
+  // command waits on the connection) leaves them out rather than the page
+  const failuresOf = (id: string) =>
+    log.recent(id, FAILURES_SHOWN).catch((error: unknown) => {
+      logger.warn({ event: "integrations.failures_unread", err: errorSummary(error) })
+      return []
+    })
+  return Promise.all(rows.map(async (each) => ({ ...each, failures: await failuresOf(each.id) })))
 }
