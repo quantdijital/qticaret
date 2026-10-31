@@ -1,5 +1,6 @@
+import type { MedusaContainer } from "@medusajs/framework/types"
 import { MedusaError, Modules } from "@medusajs/framework/utils"
-import { ConflictError } from "../../lib/errors"
+import { ConflictError, ValidationError } from "../../lib/errors"
 import { errorSummary, logger } from "../../lib/logging"
 import {
   StepResponse,
@@ -11,6 +12,9 @@ import {
 import { EINVOICE_MODULE } from "../../modules/einvoice"
 import type EinvoiceModuleService from "../../modules/einvoice/service"
 import type { WrittenBack } from "../../modules/einvoice/service"
+import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
+import type { InvoicingSettings } from "../../modules/platform-settings/sections"
+import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
 import { sendMessageWorkflow } from "../messaging/send-message"
 
 /**
@@ -20,9 +24,25 @@ import { sendMessageWorkflow } from "../messaging/send-message"
  * invoice's own, written once.
  */
 
+/**
+ * The number in the shop's web sales series, when it set one (the
+ * accountant, 2026-10-31): an invoice typed in from another series is a
+ * mistake to catch before it is the record's for good.
+ */
+async function assertSeries(container: Pick<MedusaContainer, "resolve">, number: string) {
+  const { values } = await container
+    .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
+    .readSection("invoicing")
+  const series = (values as unknown as InvoicingSettings).series
+  if (series && !number.startsWith(series)) {
+    throw new ValidationError("einvoice.series_mismatch", { field: "number" })
+  }
+}
+
 const recordWriteBackStep = createStep(
   "einvoice-record-write-back",
   async (input: { invoice_id: string; issued: WrittenBack }, { container }) => {
+    await assertSeries(container, input.issued.number)
     const result = await container
       .resolve<EinvoiceModuleService>(EINVOICE_MODULE)
       .recordWriteBack(input.invoice_id, input.issued)

@@ -390,6 +390,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "api_key.title_invalid": "Anahtar adı geçersiz.",
   "api_key.unknown": "API anahtarı bulunamadı.",
   "accounting.adapter_unavailable": "Bu muhasebe programı bu ortamda seçilemez.",
+  "einvoice.series_mismatch":
+    "Fatura numarası, Ayarlar > E-Fatura'daki web satış serisiyle başlamalı.",
   "einvoice.provider_unavailable": "Bu fatura programı bu ortamda seçilemez.",
   "einvoice.currency_unsupported": "Yalnızca Türk lirası siparişler faturalanır.",
   "einvoice.no_lines": "Siparişte faturalanacak satır yok.",
@@ -491,6 +493,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "age.under_limit": "Bu ürünler yalnızca yaş sınırını geçenlere satılabilir.",
   "age.birth_date_invalid": "Geçerli bir doğum tarihi girin.",
   "age.not_required": "Bu sepet için yaş beyanı gerekmiyor.",
+  "platform_settings.invoice_series_invalid": "Seri 3 harf ya da rakam olmalı (ör. WEB).",
   "platform_settings.min_age_invalid": "Yaş sınırı 18 ile 25 arasında bir tam sayı olmalı.",
   "privacy_requests.unknown": "KVKK talebi bulunamadı.",
   "privacy_requests.not_open": "Bu talep zaten yanıtlandı ya da bu işlem bu talep türü için değil.",

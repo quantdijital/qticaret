@@ -31,6 +31,13 @@ export interface InvoicingSettings {
    * invoice); a parcel whose carrier has none waits for it.
    */
   carriers: Partial<Record<InvoiceCarrier, CarrierIdentity>>
+  /**
+   * The series (GİB number's first three characters) the shop's web sales
+   * are invoiced in, apart from those it issues by hand elsewhere (the
+   * accountant, 2026-10-31). An invoice written back in another is
+   * refused; at Paraşüt the series is chosen in its own e-document settings.
+   */
+  series: string | null
 }
 
 const carrier = z
@@ -56,6 +63,12 @@ export const invoicingSection = defineSection<InvoicingSettings>(
     provider: z.enum(INVOICING_PROVIDERS),
     trigger: z.enum(INVOICING_TRIGGERS),
     carriers: z.partialRecord(z.enum(INVOICE_CARRIERS), carrier),
+    series: z
+      .string()
+      .trim()
+      .toUpperCase()
+      .regex(/^[A-Z0-9]{3}$/, { message: "platform_settings.invoice_series_invalid" })
+      .nullable(),
   },
-  { provider: "none", trigger: "placed", carriers: {} }
+  { provider: "none", trigger: "placed", carriers: {}, series: null }
 )

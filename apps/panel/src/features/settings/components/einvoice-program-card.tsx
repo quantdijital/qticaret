@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { CardForm } from "@/components/patterns/card-form"
 import { Field } from "@/components/patterns/form-section"
+import { Input } from "@/components/ui/input"
 import {
   Select,
   SelectContent,
@@ -18,7 +19,7 @@ import { errorText } from "@/lib/errors"
 const E = "settings.einvoice.program"
 const TRIGGERS = ["shipped", "placed"] as const
 
-type Values = Pick<InvoicingSettings, "provider" | "trigger">
+type Values = Pick<InvoicingSettings, "provider" | "trigger"> & { series: string }
 
 /**
  * Who issues the shop's invoices and when (F8, adr/0034 §1, §8): Paraşüt,
@@ -34,18 +35,30 @@ export function EinvoiceProgramCard({
 }) {
   const { t } = useTranslation()
   const save = useSaveSection<InvoicingSettings>("invoicing")
-  const values: Values = { provider: saved.provider, trigger: saved.trigger }
+  const values: Values = {
+    provider: saved.provider,
+    trigger: saved.trigger,
+    series: saved.series ?? "",
+  }
   const form = useForm<Values>({ values, resetOptions: { keepDirtyValues: true } })
   const provider = useWatch({ control: form.control, name: "provider" })
   const trigger = useWatch({ control: form.control, name: "trigger" })
   const submit = form.handleSubmit((next) => {
-    save.mutate(next, {
-      onSuccess: (result) => {
-        form.reset({ provider: result.values.provider, trigger: result.values.trigger })
-        toast.success(t("settings.saved"))
-      },
-      onError: (failure) => toast.error(errorText(t, failure)),
-    })
+    const series = next.series.trim().toUpperCase()
+    save.mutate(
+      { provider: next.provider, trigger: next.trigger, series: series === "" ? null : series },
+      {
+        onSuccess: (result) => {
+          form.reset({
+            provider: result.values.provider,
+            trigger: result.values.trigger,
+            series: result.values.series ?? "",
+          })
+          toast.success(t("settings.saved"))
+        },
+        onError: (failure) => toast.error(errorText(t, failure)),
+      }
+    )
   })
   // A development shop may run on the fake program: shown, never offered
   const providers =
@@ -62,7 +75,10 @@ export function EinvoiceProgramCard({
       }}
       {...(className ? { className } : {})}
     >
-      <div className="grid gap-5 sm:grid-cols-2">
+      {/* The series matters where invoices are typed in by hand; Paraşüt keeps its own */}
+      <div
+        className={`grid gap-5 ${provider === "external" ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}
+      >
         <Field label={t(`${E}.provider`)} htmlFor="einvoice-provider">
           <Controller
             control={form.control}
@@ -103,10 +119,22 @@ export function EinvoiceProgramCard({
             )}
           />
         </Field>
+        {provider === "external" ? (
+          <Field label={t(`${E}.series`)} htmlFor="einvoice-series">
+            <Input
+              id="einvoice-series"
+              maxLength={3}
+              className="uppercase"
+              placeholder="WEB"
+              {...form.register("series")}
+            />
+          </Field>
+        ) : null}
       </div>
       <ul className="flex list-disc flex-col gap-1 pl-5 text-[13px] text-muted-foreground">
         <li>{t(`${E}.hints.${provider}`)}</li>
         <li>{t(`${E}.triggerHints.${trigger}`)}</li>
+        {provider === "external" ? <li>{t(`${E}.seriesHint`)}</li> : null}
         <li>{t(`${E}.listed`)}</li>
       </ul>
     </CardForm>

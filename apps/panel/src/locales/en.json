@@ -2086,7 +2086,9 @@
           "shipped": "Issued when the parcel leaves; until then the order can be edited and a cancellation leaves no invoice. Cash on delivery is invoiced once delivered.",
           "placed": "Issued once paid (the default); a transfer once confirmed. Cash on delivery is invoiced once delivered."
         },
-        "listed": "Invoices issued and stopped are listed in Orders > Invoices; a stopped invoice rings the bell."
+        "listed": "Invoices issued and stopped are listed in Orders > Invoices; a stopped invoice rings the bell.",
+        "series": "Web sales series",
+        "seriesHint": "Web sales are invoiced in this series (such as WEB); a number typed in that does not start with it is refused. Empty: any series is taken."
       },
       "parasut": {
         "title": "Paraşüt connection",
@@ -3375,7 +3377,8 @@
         "grossTotal": "Total",
         "blocked": "The draft is not ready yet:",
         "problem": "Missing information ({{code}}).",
-        "lineSummary": "{{quantity}} × {{unit}} (excl. KDV) · {{rate}}% KDV {{vat}}"
+        "lineSummary": "{{quantity}} × {{unit}} (excl. KDV) · {{rate}}% KDV {{vat}}",
+        "series": "Issue it in the {{series}} series."
       }
     },
     "fraud": {

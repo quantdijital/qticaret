@@ -66,7 +66,8 @@ medusaIntegrationTestRunner({
         .variantId
       await http.post(
         "/admin/platform-settings/invoicing",
-        { provider: "external", trigger: "placed", carriers: { manual: carrier } },
+        // Web sales in their own series (the accountant, 2026-10-31)
+        { provider: "external", trigger: "placed", carriers: { manual: carrier }, series: "ABC" },
         { headers: owner.headers }
       )
       await http.post(
@@ -108,6 +109,7 @@ medusaIntegrationTestRunner({
           totals: { gross: string }
           shipment: { carrier: typeof carrier; shipped_on: string } | null
         }
+        series: string | null
       }>(`/admin/invoices/${id}/draft`, { headers: basic(reader) })
       const readerWrites = await settle(
         http.post(`/admin/invoices/${id}/issued`, issued, { headers: basic(reader) })
@@ -119,6 +121,13 @@ medusaIntegrationTestRunner({
         http.post(`/admin/invoices/${id}/pdf`, PDF, {
           headers: { ...basic(writer), "content-type": "application/pdf" },
         })
+      )
+      const otherSeries = await settle(
+        http.post(
+          `/admin/invoices/${id}/issued`,
+          { ...issued, number: "XYZ2026000000123" },
+          { headers: basic(writer) }
+        )
       )
       const written = await http.post<{ changed: boolean }>(
         `/admin/invoices/${id}/issued`,
@@ -166,6 +175,9 @@ medusaIntegrationTestRunner({
       expect(draft.data.draft.totals.gross).toBe(Number(queued?.gross_total).toFixed(2))
       // Not shipped yet: the carrier the buyer chose, on the day the invoice is made
       expect(draft.data.draft.shipment).toEqual({ carrier, shipped_on: turkishToday() })
+      expect(draft.data.series).toBe("ABC")
+      expect(otherSeries.status).toBe(400)
+      expect(otherSeries.data).toMatchObject({ message: "einvoice.series_mismatch" })
       expect(readerWrites.status).toBe(403)
       expect(byOperations.status).toBe(403)
       expect(pdfFirst.status).toBe(409)

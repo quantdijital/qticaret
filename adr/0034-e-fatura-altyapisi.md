@@ -174,3 +174,5 @@ Varsayımların çoğu doğrulandı. Değişenler (kod; her biri testle):
 6. **Ayrı seri** (6.2): sistemin kestiği faturalar mağazanın elle kestiklerinden ayrı bir ön ekle.
 
 **Kullanıcı kararı (2026-10-31): e-Arşiv'in taşıyıcı alanı boş gitmez.** Fatura sipariş onayında kesildiğinde paket henüz çıkmamıştır. Taşıyıcı, müşterinin ödemede seçtiği kargo seçeneğinin firmasından alınır; unvan ve VKN mağazanın bir kez girdiği değerdir (Ayarlar > E-Fatura). Gönderim tarihi faturanın kesildiği gündür. Paket çıktıktan sonra kesilen fatura, paketin firmasını ve çıkış gününü yazar. Firma bilgisi girilmemişse fatura `einvoice.carrier_identity_missing` ile bekler (`workflows/einvoice/draft-source.ts` `shipmentOf`).
+
+**Ayrı seri (mali müşavir 6.2, 2026-10-31):** mağaza Ayarlar > E-Fatura'da web satışlarının serisini (GİB numarasının ilk 3 karakteri) girer. Elle işlenen ya da dış programın geri yazdığı numara bu seriyle başlamazsa `einvoice.series_mismatch` (400) ile reddedilir; taslak ekranı hangi seriyle kesileceğini söyler. Paraşüt'te seri Paraşüt'ün kendi e-belge ayarından seçilir, API'den gönderilmez (Paraşüt'e sorulacaklar listesinde).

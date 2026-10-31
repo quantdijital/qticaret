@@ -386,6 +386,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "api_key.title_invalid": "The key's name is not valid.",
   "api_key.unknown": "No such API key.",
   "accounting.adapter_unavailable": "This accounting program cannot be picked here.",
+  "einvoice.series_mismatch":
+    "The invoice number must start with the web sales series set in Settings > E-Fatura.",
   "einvoice.provider_unavailable": "This invoicing program cannot be picked here.",
   "einvoice.currency_unsupported": "Only orders in Turkish lira are invoiced.",
   "einvoice.no_lines": "The order has no lines to invoice.",
@@ -490,6 +492,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "age.under_limit": "These products are sold only to buyers over the age limit.",
   "age.birth_date_invalid": "Enter a valid date of birth.",
   "age.not_required": "This cart needs no declaration of age.",
+  "platform_settings.invoice_series_invalid": "The series is 3 letters or digits (such as WEB).",
   "platform_settings.min_age_invalid": "The age limit must be a whole number from 18 to 25.",
   "privacy_requests.unknown": "The KVKK request was not found.",
   "privacy_requests.not_open":

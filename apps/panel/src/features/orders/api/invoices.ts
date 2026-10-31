@@ -166,7 +166,11 @@ export function useInvoiceDraft() {
   return useMutation({
     mutationFn: (id: string) =>
       withReauth((extra) =>
-        sdk.client.fetch<{ draft: InvoiceDraft | null; problems: string[] }>(path(id, "draft"), {
+        sdk.client.fetch<{
+          draft: InvoiceDraft | null
+          problems: string[]
+          series: string | null
+        }>(path(id, "draft"), {
           ...extra,
         })
       ),

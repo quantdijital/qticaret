@@ -8,8 +8,21 @@ describe("invoicing section (F8, adr/0034 §1)", () => {
   const { full, patch, defaults } = SECTIONS.invoicing
   const vkn = fakeVkn(seededRandom(8))
 
-  it("starts with nothing issued, on shipping, no carrier named", () => {
-    expect(full.parse(defaults)).toEqual({ provider: "none", trigger: "shipped", carriers: {} })
+  it("starts with nothing issued, once paid, no carrier named and no series", () => {
+    expect(full.parse(defaults)).toEqual({
+      provider: "none",
+      trigger: "placed",
+      carriers: {},
+      series: null,
+    })
+  })
+
+  it("takes a series of three letters or digits, upper-cased, and refuses others", () => {
+    expect(full.parse(mergePatch(defaults, patch.parse({ series: " web " }))).series).toBe("WEB")
+    expect(messages(patch.safeParse({ series: "WEBX" }))).toContain(
+      "platform_settings.invoice_series_invalid"
+    )
+    expect(full.parse(mergePatch(defaults, patch.parse({ series: null }))).series).toBeNull()
   })
 
   it("takes a carrier's registered name and tax id, one carrier at a time", () => {
@@ -24,7 +37,8 @@ describe("invoicing section (F8, adr/0034 §1)", () => {
 
     expect(full.parse(second)).toEqual({
       provider: "parasut",
-      trigger: "shipped",
+      trigger: "placed",
+      series: null,
       carriers: {
         aras: { title: "Örnek Kargo A.Ş.", tax_id: vkn },
         manual: { title: "Mağaza", tax_id: vkn },

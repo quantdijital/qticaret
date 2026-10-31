@@ -2086,7 +2086,9 @@
           "shipped": "Paket kargoya verildiğinde kesilir; o ana kadar sipariş düzenlenebilir ve iptal faturayı etkilemez. Kapıda ödemeli sipariş teslimden sonra faturalanır.",
           "placed": "Ödeme alınınca kesilir (varsayılan); havalede ödeme onaylanınca. Kapıda ödemeli sipariş teslimden sonra faturalanır."
         },
-        "listed": "Kesilen ve kesilemeyen faturalar Siparişler > Faturalar'da listelenir; kesilemeyen fatura zil ile bildirilir."
+        "listed": "Kesilen ve kesilemeyen faturalar Siparişler > Faturalar'da listelenir; kesilemeyen fatura zil ile bildirilir.",
+        "series": "Web satış serisi",
+        "seriesHint": "Web satışlarının faturaları bu seriyle kesilir (ör. WEB); elle girilen numara bu seriyle başlamazsa kabul edilmez. Boş bırakılırsa her seri kabul edilir."
       },
       "parasut": {
         "title": "Paraşüt bağlantısı",
@@ -3375,7 +3377,8 @@
         "grossTotal": "Genel toplam",
         "blocked": "Taslak henüz hazır değil:",
         "problem": "Eksik bilgi ({{code}}).",
-        "lineSummary": "{{quantity}} × {{unit}} (KDV hariç) · %{{rate}} KDV {{vat}}"
+        "lineSummary": "{{quantity}} × {{unit}} (KDV hariç) · %{{rate}} KDV {{vat}}",
+        "series": "Faturayı {{series}} serisiyle kesin."
       }
     },
     "fraud": {

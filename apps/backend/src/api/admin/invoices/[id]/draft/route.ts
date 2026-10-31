@@ -3,6 +3,9 @@ import { MedusaError } from "@medusajs/framework/utils"
 import { ConflictError } from "../../../../../lib/errors"
 import { EINVOICE_MODULE } from "../../../../../modules/einvoice"
 import type EinvoiceModuleService from "../../../../../modules/einvoice/service"
+import { PLATFORM_SETTINGS_MODULE } from "../../../../../modules/platform-settings"
+import type { InvoicingSettings } from "../../../../../modules/platform-settings/sections"
+import type PlatformSettingsModuleService from "../../../../../modules/platform-settings/service"
 import { invoiceDraftFor } from "../../../../../workflows/einvoice/draft-source"
 
 /**
@@ -26,10 +29,15 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
     throw new ConflictError("einvoice.not_pending")
   }
   const result = await invoiceDraftFor(req.scope, row)
+  const { values } = await req.scope
+    .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
+    .readSection("invoicing")
+  // The series to issue it in, when the shop keeps its web sales apart
+  const series = (values as unknown as InvoicingSettings).series ?? null
   res.setHeader("Cache-Control", "no-store")
   res.json(
     "draft" in result
-      ? { draft: result.draft, problems: [] }
-      : { draft: null, problems: result.problems }
+      ? { draft: result.draft, problems: [], series }
+      : { draft: null, problems: result.problems, series }
   )
 }

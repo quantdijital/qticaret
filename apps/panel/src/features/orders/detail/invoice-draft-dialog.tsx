@@ -230,7 +230,10 @@ export function InvoiceDraftDialog({
           <DialogTitle>
             {t(`${V}.title`, { number: orderNumber === null ? "" : `#${String(orderNumber)}` })}
           </DialogTitle>
-          <DialogDescription>{t(`${V}.description`)}</DialogDescription>
+          <DialogDescription>
+            {t(`${V}.description`)}
+            {read.data?.series ? ` ${t(`${V}.series`, { series: read.data.series })}` : ""}
+          </DialogDescription>
         </DialogHeader>
         {read.isPending || read.isIdle ? (
           <div className="flex h-40 items-center justify-center text-muted-foreground">

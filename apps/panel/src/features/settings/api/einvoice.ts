@@ -14,6 +14,8 @@ export interface InvoicingSettings {
   provider: InvoicingProvider
   trigger: "shipped" | "placed"
   carriers: Partial<Record<InvoiceCarrier, { title: string; tax_id: string }>>
+  /** The web sales' invoice series (three characters), apart from invoices issued by hand. */
+  series: string | null
 }
 
 /** `GET /admin/einvoice/parasut`: whether Paraşüt can be connected, and the shop's company. */
