@@ -4,6 +4,7 @@ import { z } from "@medusajs/framework/zod"
 import { fakeAccountingAllowed } from "../../../lib/accounting/adapters"
 import { fakeInvoicingAllowed } from "../../../lib/invoicing"
 import { SECTIONS, isSectionName } from "../../../modules/platform-settings/sections"
+import type { SectionName } from "../../../modules/platform-settings/sections"
 
 // Each section's body: any subset of its fields; unknown fields are refused
 const SECTION_VALIDATORS = {
@@ -22,6 +23,7 @@ const SECTION_VALIDATORS = {
   legal: validateAndTransformBody(SECTIONS.legal.patch),
   returns: validateAndTransformBody(SECTIONS.returns.patch),
   compliance: validateAndTransformBody(SECTIONS.compliance.patch),
+  storefront: validateAndTransformBody(SECTIONS.storefront.patch),
   // The fake program is for a developer's machine and the tests, never a live shop
   accounting: validateAndTransformBody(
     SECTIONS.accounting.patch.refine((body) => body.adapter !== "fake" || fakeAccountingAllowed(), {
@@ -33,7 +35,8 @@ const SECTION_VALIDATORS = {
       message: "einvoice.provider_unavailable",
     })
   ),
-} as const
+  // A new section without a validator here fails the type check, not a request
+} as const satisfies Record<SectionName, unknown>
 
 /**
  * Validates the body by the section Express decoded from the path, so

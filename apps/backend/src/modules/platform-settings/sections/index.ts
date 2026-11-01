@@ -16,6 +16,7 @@ import { securitySection } from "./security"
 import { seoSection } from "./seo"
 import { shippingSection } from "./shipping"
 import { storeSection } from "./store"
+import { storefrontSection } from "./storefront"
 
 export { DEFAULT_ROBOTS_TXT } from "./seo"
 export type { AccountingSettings } from "./accounting"
@@ -35,6 +36,8 @@ export type { SecuritySettings } from "./security"
 export type { SeoSettings } from "./seo"
 export type { LabelFormat, ShippingRate, ShippingSettings } from "./shipping"
 export type { StoreSettings } from "./store"
+export type { StorefrontLink, StorefrontSettings, TrustIcon } from "./storefront"
+export { TRUST_ICONS } from "./storefront"
 export { mergePatch } from "./define"
 export type { SectionDefinition } from "./define"
 
@@ -56,6 +59,7 @@ export const SECTIONS = {
   legal: legalSection,
   returns: returnsSection,
   compliance: complianceSection,
+  storefront: storefrontSection,
 } as const
 
 export type SectionName = keyof typeof SECTIONS

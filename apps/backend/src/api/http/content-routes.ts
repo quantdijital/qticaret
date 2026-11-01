@@ -1,5 +1,6 @@
 import { validateAndTransformBody, validateAndTransformQuery } from "@medusajs/framework/http"
 import { AdminGetContent, AdminPostContent, AdminUpdateContent } from "../admin/content/validators"
+import { AdminGetDashboardNoQuery } from "../admin/dashboard/validators"
 import {
   AdminGetLandings,
   AdminPostLanding,
@@ -10,7 +11,7 @@ import { StoreGetLandingProducts } from "../store/landings/validators"
 
 /**
  * Content pages, blog posts and facet landing pages (F3.16): the admin's
- * lists and saves, the storefront's lists and pages. Integration keys may write content (an
+ * lists and saves, the storefront's lists and pages, and its frame (F18). Integration keys may write content (an
  * import brings it, F14).
  */
 export const CONTENT_ROUTES = [
@@ -36,6 +37,12 @@ export const CONTENT_ROUTES = [
     matcher: "/store/content",
     methods: ["GET" as const],
     middlewares: [validateAndTransformQuery(StoreGetContent, {})],
+  },
+  // The storefront's frame: announcement bar, header links, footer (F18 D3)
+  {
+    matcher: "/store/storefront",
+    methods: ["GET" as const],
+    middlewares: [validateAndTransformQuery(AdminGetDashboardNoQuery, {})],
   },
   {
     matcher: "/admin/landings",
