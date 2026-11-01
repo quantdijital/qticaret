@@ -41,6 +41,8 @@ export interface StorefrontSettings {
   primary_color: string | null
   /** The home page's opening; none: the shop's name and its first two categories. */
   hero: StorefrontHero | null
+  /** The shop page that carries the contact form below its text (adr/0047); none: no form. */
+  contact_form_path: string | null
 }
 
 export interface StorefrontHero {
@@ -144,6 +146,14 @@ export const storefrontSection = defineSection<StorefrontSettings>(
       })
       .strict()
       .nullable(),
+    contact_form_path: z
+      .string()
+      .trim()
+      .toLowerCase()
+      .refine((value) => isCleanText(value) && isShopPath(value) && value !== "/", {
+        message: "platform_settings.url_invalid",
+      })
+      .nullable(),
   },
   {
     announcements: [],
@@ -154,5 +164,6 @@ export const storefrontSection = defineSection<StorefrontSettings>(
     menu: [],
     primary_color: null,
     hero: null,
+    contact_form_path: "/iletisim",
   }
 )

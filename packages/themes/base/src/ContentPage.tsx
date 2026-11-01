@@ -1,9 +1,48 @@
-import type { ContentPageView, Translate } from "@qticaret/ui"
+import type { ContactActions, ContentPageView, Translate } from "@qticaret/ui"
 import { Breadcrumbs } from "./components/Breadcrumbs"
+import { ContactForm } from "./components/ContactForm"
+import type { ContactWords } from "./components/ContactForm"
 import { PageContainer } from "./components/Container"
 
-/** A content page or a blog post: the backend's sanitised HTML in a readable column. */
-export function ContentPage({ view, t }: { view: ContentPageView; t: Translate }) {
+const CONTACT_ERRORS = [
+  "contact.rate_limited",
+  "contact.email_domain",
+  "contact.phone_invalid",
+  "contact.invalid",
+  "errors.challenge_failed",
+]
+
+const contactWords = (t: Translate): ContactWords => ({
+  title: t("contact.title"),
+  name: t("contact.name"),
+  email: t("contact.email"),
+  phone: t("contact.phone"),
+  optional: t("contact.optional"),
+  subject: t("contact.subject"),
+  orderNumber: t("contact.order_number"),
+  body: t("contact.body"),
+  privacy: t("contact.privacy"),
+  privacyLink: t("contact.privacy_link"),
+  submit: t("contact.submit"),
+  checking: t("contact.checking"),
+  sent: t("contact.sent"),
+  errors: Object.fromEntries(CONTACT_ERRORS.map((key) => [key, t(key)])),
+  fallback: t("contact.failed"),
+})
+
+/**
+ * A content page or a blog post: the backend's sanitised HTML in a
+ * readable column; on the shop's contact page, the contact form below.
+ */
+export function ContentPage({
+  view,
+  t,
+  actions,
+}: {
+  view: ContentPageView
+  t: Translate
+  actions?: ContactActions
+}) {
   return (
     <PageContainer>
       <article className="mx-auto flex w-full max-w-3xl flex-col gap-8">
@@ -16,6 +55,13 @@ export function ContentPage({ view, t }: { view: ContentPageView; t: Translate }
           // adr/0019: built by the backend from an allow-listed document schema
           dangerouslySetInnerHTML={{ __html: view.html }}
         />
+        {view.contactForm && actions && (
+          <ContactForm
+            view={view.contactForm}
+            action={actions.sendContact}
+            words={contactWords(t)}
+          />
+        )}
       </article>
     </PageContainer>
   )

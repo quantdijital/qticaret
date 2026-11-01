@@ -31,6 +31,8 @@ export interface StorefrontFrame {
     text: string | null
     links: StorefrontLink[]
   } | null
+  /** The shop page that carries the contact form (adr/0047); null: no form. */
+  contact_form_path: string | null
 }
 
 /** `GET /store/storefront`: the frame and the free shipping threshold (F4.5). */

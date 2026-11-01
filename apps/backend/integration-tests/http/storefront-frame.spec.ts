@@ -68,6 +68,7 @@ medusaIntegrationTestRunner({
         menu: [],
         primary_color: null,
         hero: null,
+        contact_form_path: "/iletisim",
       })
       expect(before.data.free_shipping_threshold).toBeNull()
       expect(before.headers["cache-control"]).toContain("max-age=300")
@@ -84,6 +85,7 @@ medusaIntegrationTestRunner({
         menu: [],
         primary_color: null,
         hero: null,
+        contact_form_path: "/iletisim",
       })
       expect(after.data.free_shipping_threshold).toBe(1500)
       expect(withQuery.status).toBe(400)

@@ -312,6 +312,17 @@ export interface ContentPageView {
   /** The backend's own HTML from its allow-listed schema (adr/0019): safe to print as it is. */
   html: string
   publishedAt: string | null
+  /** The contact form below the text, on the page the shop chose for it (adr/0047). */
+  contactForm?: ContactFormView | null
+}
+
+/** The storefront's contact form (adr/0047): a signed-in customer's name and address filled in. */
+export interface ContactFormView {
+  subjects: { value: string; label: string }[]
+  name: string | null
+  email: string | null
+  /** The KVKK notice the form points to; null until the shop publishes one. */
+  privacyPath: string | null
 }
 
 export interface CartLineView {

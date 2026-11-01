@@ -3,6 +3,7 @@ export { ResponsiveImage } from "./ResponsiveImage"
 export type {
   ActionResult,
   CheckoutActions,
+  ContactActions,
   FormAction,
   StorefrontTheme,
   ThemeActions,

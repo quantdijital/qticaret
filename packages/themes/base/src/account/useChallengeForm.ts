@@ -6,12 +6,14 @@ import type { ChallengeResult } from "@qticaret/ui"
 import { challengeAnswer, solveChallenge } from "@qticaret/ui/lib/challenge"
 
 const INITIAL: ChallengeResult = { ok: false, error: null, challenge: null }
+const MAX_ROUNDS = 3
 
 /**
  * A form sent to an action that may answer with a proof of work
  * (adr/0044): the browser solves it and sends the form once more, with
  * the answer in `challenge`. The fields stay as typed: the form is not
- * reset by the action.
+ * reset by the action. The sending again counts too, and may cross into
+ * a harder challenge: a few rounds are solved before giving up.
  */
 export function useChallengeForm(
   action: (state: ChallengeResult, form: FormData) => Promise<ChallengeResult>
@@ -24,7 +26,7 @@ export function useChallengeForm(
     setError(null)
     start(async () => {
       let result = await action(INITIAL, form)
-      if (result.challenge) {
+      for (let round = 0; result.challenge && round < MAX_ROUNDS; round++) {
         setChecking(true)
         try {
           const nonce = await solveChallenge(result.challenge)
@@ -35,6 +37,9 @@ export function useChallengeForm(
         } finally {
           setChecking(false)
         }
+      }
+      if (result.challenge) {
+        result = { ok: false, error: "errors.challenge_failed", challenge: null }
       }
       if (result.error) {
         setError(result.error)

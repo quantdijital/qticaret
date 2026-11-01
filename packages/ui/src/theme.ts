@@ -56,6 +56,15 @@ export interface ThemeActions {
   installments: (variantId: string) => Promise<InstallmentFamilyView[] | null>
 }
 
+/** The contact form's action (adr/0047). */
+export interface ContactActions {
+  /**
+   * Fields: `name`, `email`, `phone`, `subject`, `order_number`, `body`,
+   * `challenge` (the solved proof of work, when one was asked).
+   */
+  sendContact: (state: PlaceOrderResult, form: FormData) => Promise<PlaceOrderResult>
+}
+
 /** The checkout's actions (D7): each step a form, the address selects fed by two lookups. */
 export interface CheckoutActions {
   /** Form fields: the address form's (`AddressFormValues`). */
@@ -96,7 +105,7 @@ export interface StorefrontTheme {
   HomePage: ComponentType<Page<HomePageView>>
   ProductPage: ComponentType<Page<ProductPageView> & { actions: ThemeActions }>
   ListingPage: ComponentType<Page<ListingPageView>>
-  ContentPage: ComponentType<Page<ContentPageView>>
+  ContentPage: ComponentType<Page<ContentPageView> & { actions?: ContactActions }>
   BlogIndexPage: ComponentType<Page<BlogIndexPageView>>
   CartPage: ComponentType<Page<CartPageView> & { actions: ThemeActions }>
   CheckoutPage: ComponentType<Page<CheckoutPageView> & { actions: CheckoutActions }>

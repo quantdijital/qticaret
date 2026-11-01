@@ -14,7 +14,18 @@ describe("storefront section", () => {
       menu: [],
       primary_color: null,
       hero: null,
+      contact_form_path: "/iletisim",
     })
+  })
+
+  it("takes a shop path for the contact form, or none, and nothing else", () => {
+    expect(patch.parse({ contact_form_path: " /Bize-Ulasin " }).contact_form_path).toBe(
+      "/bize-ulasin"
+    )
+    expect(patch.parse({ contact_form_path: null }).contact_form_path).toBeNull()
+    for (const bad of ["/", "https://evil.example", "//evil.example", "javascript:alert(1)"]) {
+      expect(patch.safeParse({ contact_form_path: bad }).success).toBe(false)
+    }
   })
 
   it("takes the shop's frame: lines, links, columns, promises and a WhatsApp number", () => {
@@ -32,6 +43,7 @@ describe("storefront section", () => {
       ],
       trust_badges: [{ icon: "truck", title: "Ücretsiz kargo", text: "1500 TL ve üzeri" }],
       whatsapp_phone: "0532 123 45 67",
+      contact_form_path: "/iletisim",
       menu: [
         {
           label: "Çakılar",
