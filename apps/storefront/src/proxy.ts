@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
+import { LANDING_COOKIE, landingOf } from "./lib/cart/landing"
 import { paymentFrameOrigins, paymentRedirectOrigins, storefrontEnv } from "./lib/env"
 import { t } from "./lib/i18n"
 import { contentSecurityPolicy, newNonce } from "./lib/security/csp"
@@ -81,6 +82,23 @@ export async function proxy(request: NextRequest): Promise<Response> {
   headers.set(URL_HEADER, `${pathname}${search}`)
   const response = NextResponse.next({ request: { headers } })
   response.headers.set("content-security-policy", csp)
+  // The visit's first landing (F11.2): kept for its first cart, nothing of the person
+  const landingName = env.NODE_ENV === "production" ? `__Host-${LANDING_COOKIE}` : LANDING_COOKIE
+  if (
+    isPageView &&
+    !request.cookies.has(landingName) &&
+    !request.headers.has("next-router-prefetch")
+  ) {
+    const landing = landingOf(new URL(request.url), request.headers.get("referer"))
+    if (landing) {
+      response.cookies.set(landingName, encodeURIComponent(JSON.stringify(landing)), {
+        httpOnly: true,
+        secure: env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+      })
+    }
+  }
   if (!(await isIndexing(visitor))) {
     response.headers.set("x-robots-tag", "noindex, nofollow")
   }

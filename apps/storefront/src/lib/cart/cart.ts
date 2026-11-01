@@ -2,7 +2,10 @@ import "server-only"
 import { isNotFound, isStoreApiError } from "../store-api/errors"
 import { liraRegion } from "../store-api/requests"
 import { storeDelete, storeGet, storePost } from "../store-api/server"
+import { cookies } from "next/headers"
+import { cookieName } from "../security/cookies"
 import { cartIdFromCookie, forgetCart, rememberCart } from "./cookie"
+import { LANDING_COOKIE, readLanding } from "./landing"
 
 export interface CartLine {
   id: string
@@ -83,6 +86,11 @@ async function newCart(): Promise<string> {
   const { id: region_id } = await liraRegion()
   const { cart } = await storePost<{ cart: { id: string } }>("/store/carts", { region_id })
   await rememberCart(cart.id)
+  // Where the visit came from goes with its first cart (F11.2); a refusal costs the cart nothing
+  const landing = readLanding((await cookies()).get(cookieName(LANDING_COOKIE))?.value)
+  if (landing) {
+    await storePost(`/store/carts/${cart.id}/source`, landing).catch(() => undefined)
+  }
   return cart.id
 }
 
