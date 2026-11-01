@@ -13,6 +13,7 @@ import type {
   BlogIndexPageView,
   CartPageView,
   ConfirmPageView,
+  InstallmentFamilyView,
   ContentPageView,
   HomePageView,
   ListingPageView,
@@ -50,6 +51,8 @@ export interface ThemeActions {
   stockAlert: (state: PlaceOrderResult, form: FormData) => Promise<PlaceOrderResult>
   /** Field: `product_id`; a signed-in customer saves the product. */
   addFavorite: FormAction
+  /** A variant's installment plans, asked only when the shopper opens them (a call to the provider). */
+  installments: (variantId: string) => Promise<InstallmentFamilyView[] | null>
 }
 
 /** The checkout's actions (D7): each step a form, the address selects fed by two lookups. */

@@ -453,5 +453,12 @@
   "footer.etbis": "ETBİS: {value}",
   "listing.all_products": "Tüm ürünler",
   "product.saving": "{amount} tasarruf",
-  "product.free_shipping_from": "{amount} ve üzeri siparişlerde kargo ücretsiz."
+  "product.free_shipping_from": "{amount} ve üzeri siparişlerde kargo ücretsiz.",
+  "product.installments": "Taksit seçenekleri",
+  "product.installments_loading": "Taksitler yükleniyor…",
+  "product.installments_none": "Bu ürün için taksit seçeneği şu an gösterilemiyor; ödeme adımında kartınıza göre listelenir.",
+  "product.installments_count": "Taksit",
+  "product.installments_per": "Aylık",
+  "product.installments_total": "Toplam",
+  "product.installments_single": "Tek çekim"
 }

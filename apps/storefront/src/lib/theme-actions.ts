@@ -16,6 +16,7 @@ import {
 } from "@/app/actions/account"
 import { saveConsents, saveProfile } from "@/app/actions/account-profile"
 import { addFavorite, removeFavorite, saveBilling } from "@/app/actions/favorites"
+import { installmentsFor } from "@/app/actions/installments"
 import { cancelOrder, requestReturn } from "@/app/actions/order"
 import { requestPrivacy } from "@/app/actions/privacy"
 import { askQuestion, stockAlert, writeReview } from "@/app/actions/product"
@@ -38,6 +39,7 @@ export const themeActions: ThemeActions = {
   askQuestion,
   stockAlert,
   addFavorite,
+  installments: installmentsFor,
 }
 
 /** The checkout's actions (D7). */

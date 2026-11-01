@@ -86,6 +86,16 @@ export function ProductPage({
                 saving: t("product.saving"),
               }}
               stockAlert={actions.stockAlert}
+              installments={actions.installments}
+              installmentWords={{
+                title: t("product.installments"),
+                loading: t("product.installments_loading"),
+                none: t("product.installments_none"),
+                count: t("product.installments_count"),
+                per: t("product.installments_per"),
+                total: t("product.installments_total"),
+                single: t("product.installments_single"),
+              }}
               signedIn={view.signedIn}
               alertWords={{
                 title: t("product.alert_title"),

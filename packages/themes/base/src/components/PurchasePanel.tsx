@@ -5,6 +5,7 @@ import { useActionState, useEffect, useMemo, useState } from "react"
 import type {
   ActionResult,
   FormAction,
+  InstallmentFamilyView,
   PlaceOrderResult,
   ProductOptionView,
   VariantView,
@@ -13,6 +14,8 @@ import { Badge } from "@qticaret/ui/components/badge"
 import { Button } from "@qticaret/ui/components/button"
 import { cn } from "@qticaret/ui/lib/utils"
 import { CART_ADDED_EVENT } from "../layout/CartDrawer"
+import { InstallmentTable } from "./InstallmentTable"
+import type { InstallmentWords } from "./InstallmentTable"
 import { QuantityField } from "./QuantityField"
 import { StockAlertForm } from "./StockAlertForm"
 import type { StockAlertWords } from "./StockAlertForm"
@@ -48,6 +51,8 @@ interface PurchasePanelProps {
   stockAlert: (state: PlaceOrderResult, form: FormData) => Promise<PlaceOrderResult>
   signedIn: boolean
   alertWords: StockAlertWords
+  installments: (variantId: string) => Promise<InstallmentFamilyView[] | null>
+  installmentWords: InstallmentWords
 }
 
 const INITIAL: ActionResult = { ok: false, error: null }
@@ -75,6 +80,8 @@ export function PurchasePanel({
   stockAlert,
   signedIn,
   alertWords,
+  installments,
+  installmentWords,
 }: PurchasePanelProps) {
   const initial =
     variants.find((variant) => variant.id === selectedVariantId) ?? variants[0] ?? null
@@ -221,6 +228,9 @@ export function PurchasePanel({
           )}
         </p>
       </form>
+      {variant && available && (
+        <InstallmentTable variantId={variant.id} load={installments} words={installmentWords} />
+      )}
       {/* Outside the purchase form: a form may not hold another */}
       {variant && !available && (
         <StockAlertForm

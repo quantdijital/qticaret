@@ -357,3 +357,9 @@ export interface ConfirmPageView {
   submit: string
   back: LinkView
 }
+
+/** A card family's installment plans (F5): "3 × 428,78 TL", the total, in words. */
+export interface InstallmentFamilyView {
+  family: string
+  options: { count: number; perInstallment: string; total: string }[]
+}
