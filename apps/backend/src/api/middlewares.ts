@@ -27,6 +27,7 @@ import { AdminPostProductAttributes } from "./admin/products/[id]/attributes/val
 import { AdminPostProductCatalog } from "./admin/products/[id]/catalog/validators"
 import { AdminPostFeature, validateSectionBody } from "./admin/platform-settings/validators"
 import { auditMutations, auditSensitiveRead } from "./http/audit"
+import { storeProfileOf } from "./http/client-ip"
 import { ACCOUNT_ROUTES } from "./http/account-routes"
 import { BANK_TRANSFER_ROUTES } from "./http/bank-transfer-routes"
 import { CUSTOMER_SEGMENT_ROUTES } from "./http/customer-segment-routes"
@@ -120,7 +121,7 @@ export default defineMiddlewares({
     {
       matcher: "/store/*",
       middlewares: [
-        rateLimit(() => RATE_LIMIT_PROFILES.store_default),
+        rateLimit(storeProfileOf),
         storeLimitGuard,
         rejectSensitiveFields,
         restrictStoreAttributeFields,

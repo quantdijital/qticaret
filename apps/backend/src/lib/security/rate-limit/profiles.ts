@@ -43,6 +43,11 @@ export const RATE_LIMIT_PROFILES = {
   token_refresh: { name: "token_refresh", perIp: { max: 60, windowMs: 15 * MINUTE } },
   auth_default: { name: "auth_default", perIp: { max: 120, windowMs: 15 * MINUTE } },
   store_default: { name: "store_default", perIp: { max: 600, windowMs: MINUTE } },
+  // The storefront's server (adr/0046 §5) asks a few calls per page it makes,
+  // for the shopper whose address it signed: counted per that address, in a
+  // wider bucket than a client calling the API directly. Logins, checkout,
+  // codes and the rest keep their own, unchanged profiles.
+  storefront_default: { name: "storefront_default", perIp: { max: 3000, windowMs: MINUTE } },
   admin_default: { name: "admin_default", perIp: { max: 1200, windowMs: MINUTE } },
   // Wired by their phases (F4 coupons, F5/F6 checkout and installments,
   // F9 SMS, webhooks per provider)
