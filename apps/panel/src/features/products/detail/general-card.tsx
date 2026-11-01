@@ -11,6 +11,7 @@ import type { ProductDetail } from "@/features/products/api/products"
 import { useProductPathPrefix } from "@/features/products/use-product-path"
 import { SUGGESTED_WORDS, wordCount } from "@/features/products/wizard/readiness"
 import { errorText } from "@/lib/errors"
+import { FULL_RESET } from "@/lib/forms"
 import { isValidSlug } from "@/lib/slug"
 import { CardForm } from "@/components/patterns/card-form"
 
@@ -69,7 +70,7 @@ export function GeneralCard({
       saving={update.isPending}
       onSubmit={() => void submit()}
       onReset={() => {
-        form.reset(saved)
+        form.reset(saved, FULL_RESET)
       }}
     >
       <Field

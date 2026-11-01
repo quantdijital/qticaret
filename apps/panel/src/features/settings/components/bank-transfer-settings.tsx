@@ -13,6 +13,7 @@ import { useSaveSection } from "@/features/settings/api/sections"
 import type { BankTransferSettings } from "@/features/settings/api/sections"
 import { formatIban, isValidTrIban, normalizeIban } from "@/features/settings/iban"
 import { errorText } from "@/lib/errors"
+import { FULL_RESET } from "@/lib/forms"
 
 const B = "settings.payments.bankTransfer"
 
@@ -158,7 +159,7 @@ function AccountCard({ saved }: { saved: BankTransferSettings }) {
       saving={save.isPending}
       onSubmit={() => void submit()}
       onReset={() => {
-        form.reset(values)
+        form.reset(values, FULL_RESET)
       }}
     >
       <AccountFields form={form} />

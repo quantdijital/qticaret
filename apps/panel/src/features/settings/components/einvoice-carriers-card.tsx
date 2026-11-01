@@ -10,6 +10,7 @@ import { useSaveSection } from "@/features/settings/api/sections"
 import { INVOICE_CARRIERS } from "@/features/settings/api/einvoice"
 import type { InvoiceCarrier, InvoicingSettings } from "@/features/settings/api/einvoice"
 import { errorText } from "@/lib/errors"
+import { FULL_RESET } from "@/lib/forms"
 
 const C = "settings.einvoice.carriers"
 
@@ -56,7 +57,7 @@ export function EinvoiceCarriersCard({ saved }: { saved: InvoicingSettings }) {
       { carriers },
       {
         onSuccess: (result) => {
-          form.reset(valuesOf(result.values))
+          form.reset(valuesOf(result.values), FULL_RESET)
           toast.success(t("settings.saved"))
         },
         onError: (failure) => toast.error(errorText(t, failure)),
@@ -71,7 +72,7 @@ export function EinvoiceCarriersCard({ saved }: { saved: InvoicingSettings }) {
       saving={save.isPending}
       onSubmit={() => void submit()}
       onReset={() => {
-        form.reset(values)
+        form.reset(values, FULL_RESET)
       }}
     >
       <div className="grid gap-x-5 gap-y-4 md:grid-cols-2">

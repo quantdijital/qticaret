@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { useUpdateContent } from "@/features/content/api/content"
 import type { ContentDetail } from "@/features/content/api/content"
 import { errorText } from "@/lib/errors"
+import { FULL_RESET } from "@/lib/forms"
 
 interface Values {
   title: string
@@ -51,7 +52,7 @@ export function ContentGeneralCard({ entry }: { entry: ContentDetail }) {
       saving={update.isPending}
       onSubmit={() => void submit()}
       onReset={() => {
-        form.reset(saved)
+        form.reset(saved, FULL_RESET)
       }}
     >
       <Field label={t("content.fields.title")} htmlFor="content-title" required>

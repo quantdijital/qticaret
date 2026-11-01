@@ -7,6 +7,7 @@ import type { ProductDetail } from "@/features/products/api/products"
 import { CategoryTree } from "@/features/products/components/category-tree"
 import { VatSelect } from "@/features/products/components/vat-select"
 import { errorText } from "@/lib/errors"
+import { FULL_RESET } from "@/lib/forms"
 import { CardForm } from "@/components/patterns/card-form"
 import { SearchPicker } from "@/components/patterns/search-picker"
 import type { PickerOption } from "@/components/patterns/search-picker"
@@ -61,7 +62,7 @@ export function OrganizeCard({ product }: { product: ProductDetail }) {
       saving={update.isPending || setBrand.isPending}
       onSubmit={() => void submit()}
       onReset={() => {
-        form.reset(saved)
+        form.reset(saved, FULL_RESET)
       }}
     >
       <Field label={t("products.wizard.categories")} hint={t("products.wizard.categoriesHint")}>

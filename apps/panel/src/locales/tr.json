@@ -3845,7 +3845,8 @@
         "phone": "Telefon",
         "letter": "Dilekçe",
         "in_person": "Yüz yüze",
-        "other": "Diğer"
+        "other": "Diğer",
+        "account": "Müşteri hesabından"
       },
       "receivedOn": "Geldiği gün",
       "received": "{{channel}} · {{date}}",

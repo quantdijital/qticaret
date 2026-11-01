@@ -27,6 +27,7 @@ import type { Restriction } from "@/features/categories/api/restrictions"
 import { RestrictionSelect } from "@/features/categories/components/restriction-select"
 import { useFeature } from "@/features/settings/api/features"
 import { errorText } from "@/lib/errors"
+import { FULL_RESET } from "@/lib/forms"
 import { CardForm } from "@/components/patterns/card-form"
 
 // Radix Select has no empty value; this one stands for "none chosen"
@@ -73,7 +74,7 @@ function CatalogForm({ productId, catalog }: { productId: string; catalog: Produ
       },
       {
         onSuccess: () => {
-          form.reset(values)
+          form.reset(values, FULL_RESET)
           toast.success(t("products.detail.saved"))
         },
         onError: (failure) => toast.error(errorText(t, failure)),
@@ -89,7 +90,7 @@ function CatalogForm({ productId, catalog }: { productId: string; catalog: Produ
       saving={save.isPending}
       onSubmit={() => void submit()}
       onReset={() => {
-        form.reset(saved)
+        form.reset(saved, FULL_RESET)
       }}
     >
       {kinds ? (

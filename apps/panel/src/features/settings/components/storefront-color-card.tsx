@@ -9,12 +9,12 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import type { StorefrontSettings } from "@/features/settings/api/sections"
 import {
-  FULL_RESET,
   colorSchema,
   errorLine,
   isHexColor,
   useSaveStorefront,
 } from "@/features/settings/storefront"
+import { FULL_RESET } from "@/lib/forms"
 import { STOREFRONT_THEME_COLOR, storefrontTextOn } from "@/theme/storefront"
 
 const S = "settings.storefront"

@@ -11,13 +11,13 @@ import { Textarea } from "@/components/ui/textarea"
 import type { StorefrontHero, StorefrontSettings } from "@/features/settings/api/sections"
 import { LinkRows, ListFooter } from "@/features/settings/components/storefront-rows"
 import {
-  FULL_RESET,
   STOREFRONT_LIMITS,
   errorLine,
   linkSchema,
   optionalLineSchema,
   useSaveStorefront,
 } from "@/features/settings/storefront"
+import { FULL_RESET } from "@/lib/forms"
 
 const S = "settings.storefront"
 const H = `${S}.hero`

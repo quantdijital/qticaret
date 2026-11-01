@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { useUpdateLanding } from "@/features/content/api/landings"
 import type { LandingDetail } from "@/features/content/api/landings"
 import { errorText } from "@/lib/errors"
+import { FULL_RESET } from "@/lib/forms"
 
 interface Values {
   title: string
@@ -62,7 +63,7 @@ export function LandingGeneralCard({ landing }: { landing: LandingDetail }) {
       saving={update.isPending}
       onSubmit={() => void submit()}
       onReset={() => {
-        form.reset(saved)
+        form.reset(saved, FULL_RESET)
       }}
     >
       <Orphaned landing={landing} />

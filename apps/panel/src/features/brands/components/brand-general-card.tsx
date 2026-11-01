@@ -10,6 +10,7 @@ import { useUpdateBrand } from "@/features/brands/api/brands"
 import type { Brand } from "@/features/brands/api/brands"
 import { useBrandPathPrefix } from "@/features/brands/use-brand-path"
 import { errorText } from "@/lib/errors"
+import { FULL_RESET } from "@/lib/forms"
 
 interface Values {
   name: string
@@ -52,7 +53,7 @@ export function BrandGeneralCard({ brand }: { brand: Brand }) {
       saving={update.isPending}
       onSubmit={() => void submit()}
       onReset={() => {
-        form.reset(saved)
+        form.reset(saved, FULL_RESET)
       }}
     >
       <Field label={t("brands.name")} htmlFor="brand-name" required>

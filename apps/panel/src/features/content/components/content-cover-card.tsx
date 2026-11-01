@@ -11,6 +11,7 @@ import { useUpdateContent } from "@/features/content/api/content"
 import type { ContentDetail } from "@/features/content/api/content"
 import { IMAGE_ACCEPT, uploadContentImage } from "@/features/content/editor/upload"
 import { errorText } from "@/lib/errors"
+import { FULL_RESET } from "@/lib/forms"
 
 interface Values {
   image_url: string
@@ -56,7 +57,7 @@ export function ContentCoverCard({ entry }: { entry: ContentDetail }) {
       saving={update.isPending}
       onSubmit={() => void submit()}
       onReset={() => {
-        form.reset(saved)
+        form.reset(saved, FULL_RESET)
       }}
     >
       {url ? (

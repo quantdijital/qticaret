@@ -15,6 +15,7 @@ import { useSaveSection } from "@/features/settings/api/sections"
 import { INVOICING_PROVIDERS } from "@/features/settings/api/einvoice"
 import type { InvoicingSettings } from "@/features/settings/api/einvoice"
 import { errorText } from "@/lib/errors"
+import { FULL_RESET } from "@/lib/forms"
 
 const E = "settings.einvoice.program"
 const TRIGGERS = ["shipped", "placed"] as const
@@ -49,11 +50,14 @@ export function EinvoiceProgramCard({
       { provider: next.provider, trigger: next.trigger, series: series === "" ? null : series },
       {
         onSuccess: (result) => {
-          form.reset({
-            provider: result.values.provider,
-            trigger: result.values.trigger,
-            series: result.values.series ?? "",
-          })
+          form.reset(
+            {
+              provider: result.values.provider,
+              trigger: result.values.trigger,
+              series: result.values.series ?? "",
+            },
+            FULL_RESET
+          )
           toast.success(t("settings.saved"))
         },
         onError: (failure) => toast.error(errorText(t, failure)),
@@ -71,7 +75,7 @@ export function EinvoiceProgramCard({
       saving={save.isPending}
       onSubmit={() => void submit()}
       onReset={() => {
-        form.reset(values)
+        form.reset(values, FULL_RESET)
       }}
       {...(className ? { className } : {})}
     >

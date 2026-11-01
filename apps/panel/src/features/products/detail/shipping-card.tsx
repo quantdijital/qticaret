@@ -13,6 +13,7 @@ import { useUpdateProduct } from "@/features/products/api/products"
 import type { ProductDetail } from "@/features/products/api/products"
 import { useStoreUnits } from "@/features/products/use-units"
 import { errorText } from "@/lib/errors"
+import { FULL_RESET } from "@/lib/forms"
 import { formatMeasureInput, parseMeasureInput } from "@/lib/money-input"
 import { CardForm } from "@/components/patterns/card-form"
 
@@ -90,7 +91,7 @@ export function ShippingCard({ product }: { product: ProductDetail }) {
       saving={update.isPending}
       onSubmit={() => void submit()}
       onReset={() => {
-        form.reset(saved)
+        form.reset(saved, FULL_RESET)
       }}
     >
       <div className="grid grid-cols-2 gap-4">

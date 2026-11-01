@@ -20,6 +20,7 @@ import { sectionQuery, useSaveSection } from "@/features/settings/api/sections"
 import type { StoreSettings } from "@/features/settings/api/sections"
 import { storeQuery, useRenameStore } from "@/features/settings/api/store"
 import { errorText } from "@/lib/errors"
+import { FULL_RESET } from "@/lib/forms"
 import { LegalIdentityCard } from "@/features/settings/components/legal-identity-card"
 
 // The zones a Turkish shop meets first; the browser knows the rest
@@ -87,7 +88,7 @@ function IdentityCard({
       saving={rename.isPending || save.isPending}
       onSubmit={() => void submit()}
       onReset={() => {
-        form.reset(values)
+        form.reset(values, FULL_RESET)
       }}
     >
       <Field
@@ -194,7 +195,7 @@ function RegionCard({ saved }: { saved: StoreSettings }) {
       saving={save.isPending}
       onSubmit={() => void submit()}
       onReset={() => {
-        form.reset(values)
+        form.reset(values, FULL_RESET)
       }}
     >
       <Field label={t("settings.store.timezone")} htmlFor="store-timezone">

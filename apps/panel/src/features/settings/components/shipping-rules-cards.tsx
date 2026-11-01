@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input"
 import { useSaveSection } from "@/features/settings/api/sections"
 import type { ShippingSettings } from "@/features/settings/api/sections"
 import { errorText } from "@/lib/errors"
+import { FULL_RESET } from "@/lib/forms"
 import { formatMoneyInput, parseDecimalInput, parseMoneyInput } from "@/lib/money-input"
 
 const S = "settings.shipping.rules"
@@ -103,7 +104,7 @@ export function DeliveryCard({ saved }: { saved: ShippingSettings }) {
       saving={save.isPending}
       onSubmit={() => void submit()}
       onReset={() => {
-        form.reset(values)
+        form.reset(values, FULL_RESET)
       }}
     >
       {pair("handling")}
@@ -176,7 +177,7 @@ export function RatesCard({ saved }: { saved: ShippingSettings }) {
       saving={save.isPending}
       onSubmit={() => void submit()}
       onReset={() => {
-        form.reset(values)
+        form.reset(values, FULL_RESET)
       }}
     >
       {rows.fields.length === 0 ? (

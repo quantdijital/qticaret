@@ -9,6 +9,7 @@ import { IMAGE_ACCEPT, uploadContentImage } from "@/features/content/editor/uplo
 import { useSaveSection } from "@/features/settings/api/sections"
 import type { SeoSettings } from "@/features/settings/api/sections"
 import { errorText } from "@/lib/errors"
+import { FULL_RESET } from "@/lib/forms"
 
 const S = "settings.seo.shareImage"
 
@@ -43,7 +44,7 @@ export function ShareImageCard({ saved }: { saved: SeoSettings }) {
       { default_og_image: values.image || null },
       {
         onSuccess: (result) => {
-          form.reset({ image: result.values.default_og_image ?? "" })
+          form.reset({ image: result.values.default_og_image ?? "" }, FULL_RESET)
           toast.success(t("settings.saved"))
         },
         onError: (failure) => toast.error(errorText(t, failure)),
@@ -58,7 +59,7 @@ export function ShareImageCard({ saved }: { saved: SeoSettings }) {
       saving={save.isPending}
       onSubmit={() => void submit()}
       onReset={() => {
-        form.reset(initial)
+        form.reset(initial, FULL_RESET)
       }}
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start">

@@ -11,6 +11,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { sectionQuery, useSaveSection } from "@/features/settings/api/sections"
 import type { LegalSettings } from "@/features/settings/api/sections"
 import { errorText } from "@/lib/errors"
+import { FULL_RESET } from "@/lib/forms"
 
 const K = "settings.store.legal"
 
@@ -61,7 +62,7 @@ function Form({ saved, hasContact }: { saved: LegalSettings; hasContact: boolean
       },
       {
         onSuccess: (result) => {
-          form.reset(valuesOf(result.values))
+          form.reset(valuesOf(result.values), FULL_RESET)
           toast.success(t("settings.saved"))
         },
         onError: (failure) => toast.error(errorText(t, failure)),
@@ -82,7 +83,7 @@ function Form({ saved, hasContact }: { saved: LegalSettings; hasContact: boolean
       saving={save.isPending}
       onSubmit={() => void submit()}
       onReset={() => {
-        form.reset(initial)
+        form.reset(initial, FULL_RESET)
       }}
     >
       {gaps.length > 0 ? (

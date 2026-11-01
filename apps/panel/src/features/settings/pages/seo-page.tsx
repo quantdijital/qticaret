@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { Controller, useForm } from "react-hook-form"
+import type { UseFormReturn } from "react-hook-form"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { SettingsTabs } from "@/features/settings/components/settings-tabs"
@@ -20,6 +21,7 @@ import { TemplateField } from "@/features/settings/components/template-field"
 import { UrlStyleCard } from "@/features/settings/components/url-style-card"
 import { TEMPLATE_TOKENS } from "@/features/settings/seo-sample"
 import { errorText } from "@/lib/errors"
+import { FULL_RESET } from "@/lib/forms"
 
 // What search results show before cutting (docs/13 §3)
 const TITLE_LIMIT = 60
@@ -27,13 +29,13 @@ const DESCRIPTION_LIMIT = 155
 const ENTITIES = ["product", "category", "brand", "page", "post", "landing"] as const
 const PRESETS = ["ai_search_visible", "block_training", "none"] as const
 
-function useSave(form: { reset: (values: SeoSettings) => void }) {
+function useSave(form: Pick<UseFormReturn<SeoSettings>, "reset">) {
   const { t } = useTranslation()
   const save = useSaveSection<SeoSettings>("seo")
   const run = (values: Partial<SeoSettings>) => {
     save.mutate(values, {
       onSuccess: (saved) => {
-        form.reset(saved.values)
+        form.reset(saved.values, FULL_RESET)
         toast.success(t("settings.saved"))
       },
       onError: (failure) => toast.error(errorText(t, failure)),
@@ -58,7 +60,7 @@ function AddressCard({ saved }: { saved: SeoSettings }) {
       saving={saving}
       onSubmit={() => void submit()}
       onReset={() => {
-        form.reset(saved)
+        form.reset(saved, FULL_RESET)
       }}
     >
       <Field label={t("settings.seo.host")} htmlFor="seo-host" hint={t("settings.seo.hostHint")}>
@@ -91,7 +93,7 @@ function TemplatesCard({ saved, storeName }: { saved: SeoSettings; storeName: st
       saving={saving}
       onSubmit={() => void submit()}
       onReset={() => {
-        form.reset(saved)
+        form.reset(saved, FULL_RESET)
       }}
     >
       {ENTITIES.map((entity) => (
@@ -146,7 +148,7 @@ function CrawlersCard({ saved }: { saved: SeoSettings }) {
       saving={saving}
       onSubmit={() => void submit()}
       onReset={() => {
-        form.reset(saved)
+        form.reset(saved, FULL_RESET)
       }}
     >
       <Field label={t("settings.seo.ai")}>

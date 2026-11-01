@@ -14,13 +14,13 @@ import {
   RowCell,
 } from "@/features/settings/components/storefront-rows"
 import {
-  FULL_RESET,
   STOREFRONT_LIMITS,
   errorLine,
   lineSchema,
   linkSchema,
   useSaveStorefront,
 } from "@/features/settings/storefront"
+import { FULL_RESET } from "@/lib/forms"
 
 const S = "settings.storefront"
 const F = `${S}.footer`

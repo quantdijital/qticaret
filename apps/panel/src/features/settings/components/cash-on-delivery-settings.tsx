@@ -17,6 +17,7 @@ import { useSaveSection } from "@/features/settings/api/sections"
 import type { CashOnDeliverySettings } from "@/features/settings/api/sections"
 import { shippingOptionNamesQuery } from "@/features/settings/api/shipping-options"
 import { errorText } from "@/lib/errors"
+import { FULL_RESET } from "@/lib/forms"
 import { formatMoneyInput, parseDecimalInput, parseMoneyInput } from "@/lib/money-input"
 
 const C = "settings.payments.cashOnDelivery"
@@ -167,7 +168,7 @@ function FeeCard({ saved }: { saved: CashOnDeliverySettings }) {
       saving={save.isPending}
       onSubmit={() => void submit()}
       onReset={() => {
-        form.reset(values)
+        form.reset(values, FULL_RESET)
       }}
     >
       <FeeFields control={form.control} register={form.register} errors={form.formState.errors} />

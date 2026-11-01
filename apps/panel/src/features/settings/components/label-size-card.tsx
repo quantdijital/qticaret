@@ -16,6 +16,7 @@ import {
 import { LABEL_FORMATS, useSaveSection } from "@/features/settings/api/sections"
 import type { LabelFormat, ShippingSettings } from "@/features/settings/api/sections"
 import { errorText } from "@/lib/errors"
+import { FULL_RESET } from "@/lib/forms"
 
 const L = "settings.shipping.labels"
 
@@ -94,7 +95,7 @@ export function LabelSizeCard({ saved }: { saved: ShippingSettings }) {
       saving={save.isPending}
       onSubmit={() => void submit()}
       onReset={() => {
-        form.reset(values)
+        form.reset(values, FULL_RESET)
       }}
     >
       <div className="grid gap-6 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start">

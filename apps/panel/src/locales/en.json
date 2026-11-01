@@ -3845,7 +3845,8 @@
         "phone": "Phone",
         "letter": "Letter",
         "in_person": "In person",
-        "other": "Other"
+        "other": "Other",
+        "account": "From the customer account"
       },
       "receivedOn": "Received on",
       "received": "{{channel}} · {{date}}",

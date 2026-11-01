@@ -51,4 +51,33 @@ describe("ReturnsCard", () => {
       })
     })
   })
+
+  // The form keeps dirty values on a background refetch; undo must not
+  it("puts back what was saved on undo, even in a field typed in", async () => {
+    renderCard()
+    const days = await screen.findByRole("textbox", { name: "Cayma süresi (gün)" })
+
+    await userEvent.clear(days)
+    await userEvent.type(days, "30")
+    await userEvent.click(screen.getByRole("button", { name: "Geri al" }))
+
+    expect(days).toHaveValue("14")
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      "/admin/platform-settings/returns",
+      expect.objectContaining({ method: "POST" })
+    )
+  })
+
+  it("shows what the server stored after a save, not the text typed", async () => {
+    renderCard()
+    const days = await screen.findByRole("textbox", { name: "Cayma süresi (gün)" })
+
+    await userEvent.clear(days)
+    await userEvent.type(days, "030")
+    await userEvent.click(screen.getByRole("button", { name: "Kaydet" }))
+
+    await waitFor(() => {
+      expect(days).toHaveValue("30")
+    })
+  })
 })

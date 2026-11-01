@@ -132,13 +132,6 @@ export const errorLine = (
 ): string | undefined => (error?.message ? t(error.message, { max }) : undefined)
 
 /**
- * A card's own reset (undo, or what the server stored after a save). RHF's
- * `reset` takes the form's `resetOptions` too, and `keepDirtyValues` there
- * would keep every field once edited as it was typed.
- */
-export const FULL_RESET = { keepDirtyValues: false } as const
-
-/**
  * Saves one card's field of the storefront section; `onSaved` gets what the
  * server stored (trimmed, the phone in E.164) so the card shows it as saved.
  */

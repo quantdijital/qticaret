@@ -18,6 +18,7 @@ import {
 import { MIN_WITHDRAWAL_DAYS, sectionQuery, useSaveSection } from "@/features/settings/api/sections"
 import type { ReturnsSettings } from "@/features/settings/api/sections"
 import { errorText } from "@/lib/errors"
+import { FULL_RESET } from "@/lib/forms"
 
 const R = "settings.shipping.returns"
 const PAYERS = ["shop", "customer"] as const
@@ -51,7 +52,7 @@ function Form({ saved }: { saved: ReturnsSettings }) {
       { withdrawal_days: Number(next.withdrawal_days), return_shipping: next.return_shipping },
       {
         onSuccess: (result) => {
-          form.reset(valuesOf(result.values))
+          form.reset(valuesOf(result.values), FULL_RESET)
           toast.success(t("settings.saved"))
         },
         onError: (failure) => toast.error(errorText(t, failure)),
@@ -66,7 +67,7 @@ function Form({ saved }: { saved: ReturnsSettings }) {
       saving={save.isPending}
       onSubmit={() => void submit()}
       onReset={() => {
-        form.reset(values)
+        form.reset(values, FULL_RESET)
       }}
     >
       <div className="grid gap-5 sm:grid-cols-2">

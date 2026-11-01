@@ -23,6 +23,7 @@ import type { SeoSettings } from "@/features/settings/api/sections"
 import { renderSample } from "@/features/settings/seo-sample"
 import { useStoreName } from "@/features/settings/api/store"
 import { errorText } from "@/lib/errors"
+import { FULL_RESET } from "@/lib/forms"
 import { cn } from "@/lib/utils"
 
 // What search results show before cutting (docs/13 §3)
@@ -123,7 +124,7 @@ function SeoForm({
     }
     save.mutate(body, {
       onSuccess: (result) => {
-        form.reset(next)
+        form.reset(next, FULL_RESET)
         setDuplicates(result.duplicates)
         toast.success(t("seo.card.saved"))
       },
@@ -139,7 +140,7 @@ function SeoForm({
       saving={save.isPending}
       onSubmit={() => void submit()}
       onReset={() => {
-        form.reset(values)
+        form.reset(values, FULL_RESET)
       }}
     >
       <div className="flex flex-col gap-1 rounded-lg border bg-background p-4">

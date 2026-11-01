@@ -4,13 +4,14 @@ import { withReauth } from "@/lib/reauth"
 import { sdk } from "@/lib/sdk"
 
 export const PRIVACY_KINDS = ["export", "erasure"] as const
+/** How a request came, as staff record it. */
 export const PRIVACY_CHANNELS = ["email", "phone", "letter", "in_person", "other"] as const
 
-/** A customer's KVKK request (F13.5), as staff recorded and answered it. */
+/** A customer's KVKK request (F13.5), as staff recorded and answered it, or the customer asked from their account. */
 export interface PrivacyRequest {
   id: string
   kind: (typeof PRIVACY_KINDS)[number]
-  channel: (typeof PRIVACY_CHANNELS)[number]
+  channel: (typeof PRIVACY_CHANNELS)[number] | "account"
   status: "open" | "completed" | "rejected"
   received_at: string
   /** The 30 days the law gives for an answer. */

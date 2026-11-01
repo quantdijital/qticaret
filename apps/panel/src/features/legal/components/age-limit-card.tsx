@@ -11,6 +11,7 @@ import { sectionQuery, useSaveSection } from "@/features/settings/api/sections"
 import type { ComplianceSettings } from "@/features/settings/api/sections"
 import { useFeature } from "@/features/settings/api/features"
 import { errorText } from "@/lib/errors"
+import { FULL_RESET } from "@/lib/forms"
 
 const A = "settings.legal.age"
 
@@ -37,7 +38,7 @@ function Form({ saved }: { saved: ComplianceSettings }) {
       { min_age: Number(next.min_age) },
       {
         onSuccess: (result) => {
-          form.reset({ min_age: String(result.values.min_age) })
+          form.reset({ min_age: String(result.values.min_age) }, FULL_RESET)
           toast.success(t("settings.saved"))
         },
         onError: (failure) => toast.error(errorText(t, failure)),
@@ -52,7 +53,7 @@ function Form({ saved }: { saved: ComplianceSettings }) {
       saving={save.isPending}
       onSubmit={() => void submit()}
       onReset={() => {
-        form.reset(values)
+        form.reset(values, FULL_RESET)
       }}
     >
       <Field

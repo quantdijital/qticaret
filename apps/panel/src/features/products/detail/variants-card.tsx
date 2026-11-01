@@ -9,6 +9,7 @@ import { productCatalogQuery, useSaveVariants } from "@/features/products/api/pr
 import type { ProductDetail } from "@/features/products/api/products"
 import { useFeature } from "@/features/settings/api/features"
 import { errorText } from "@/lib/errors"
+import { FULL_RESET } from "@/lib/forms"
 import { cn } from "@/lib/utils"
 import { VariantRow } from "./variant-row"
 import { savedRows, variantEdits, variantsSchema } from "./variant-values"
@@ -50,7 +51,7 @@ export function VariantsCard({
       },
       {
         onSuccess: () => {
-          form.reset(values)
+          form.reset(values, FULL_RESET)
           toast.success(t("products.detail.variantsSaved"))
         },
         onError: (failure) => toast.error(errorText(t, failure)),
@@ -70,7 +71,7 @@ export function VariantsCard({
       saving={save.isPending}
       onSubmit={() => void submit()}
       onReset={() => {
-        form.reset(saved)
+        form.reset(saved, FULL_RESET)
       }}
     >
       <div className="-mx-5 overflow-x-auto border-y">

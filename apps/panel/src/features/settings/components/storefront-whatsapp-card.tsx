@@ -6,12 +6,8 @@ import { CardForm } from "@/components/patterns/card-form"
 import { Field } from "@/components/patterns/form-section"
 import { Input } from "@/components/ui/input"
 import type { StorefrontSettings } from "@/features/settings/api/sections"
-import {
-  FULL_RESET,
-  errorLine,
-  phoneSchema,
-  useSaveStorefront,
-} from "@/features/settings/storefront"
+import { errorLine, phoneSchema, useSaveStorefront } from "@/features/settings/storefront"
+import { FULL_RESET } from "@/lib/forms"
 
 const W = "settings.storefront.whatsapp"
 
