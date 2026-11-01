@@ -695,6 +695,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "cart.shipping_method_required": "Bir kargo seçeneği seçin.",
   "cart.unknown": "Sepet bulunamadı.",
   "payments.cart_changed": "Sepet değişti; ödemeyi yeniden başlatın.",
+  "payments.amount_due": "Bu sepette ödenecek tutar var; bir ödeme yolu seçin.",
   "payments.checkout_invalid": "Ödeme bilgileri eksik ya da geçersiz.",
   "payments.restart_checkout": "Tutar değişti; ödemeyi yeniden başlatın.",
   "payments.return_url_invalid": "Dönüş adresi bu mağazanın adreslerinden biri değil.",

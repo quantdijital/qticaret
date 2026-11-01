@@ -1,8 +1,13 @@
 import type { MedusaResponse, MedusaStoreRequest } from "@medusajs/framework/http"
 import { ValidationError } from "../../../../../lib/errors"
 import { parseEnv } from "../../../../../lib/env"
-import { returnOrigins, returnUrlProblem } from "../../../../../lib/payments/checkout"
+import {
+  CREDIT_CHECKOUT,
+  returnOrigins,
+  returnUrlProblem,
+} from "../../../../../lib/payments/checkout"
 import { startCartPaymentWorkflow } from "../../../../../workflows/payments/start-cart-payment"
+import { startCreditCheckoutWorkflow } from "../../../../../workflows/payments/start-credit-checkout"
 import type { StorePostCartPaymentSessionType } from "./validators"
 import { clientIp } from "../../../../http/client-ip"
 
@@ -16,6 +21,19 @@ export const POST = async (
   res: MedusaResponse
 ) => {
   const { provider_id, return_urls } = req.validatedBody
+  if (provider_id === CREDIT_CHECKOUT) {
+    await startCreditCheckoutWorkflow(req.scope).run({
+      input: {
+        cart_id: req.params["id"] ?? "",
+        sales_channel_ids: req.publishable_key_context.sales_channel_ids,
+      },
+    })
+    // No session: the storefront completes the cart as for an offline way to pay
+    res.json({
+      payment_session: { id: null, provider_id, status: "authorized", data: { method: "credit" } },
+    })
+    return
+  }
   const refused = return_urls ? returnUrlProblem(return_urls, returnOrigins(parseEnv())) : null
   if (refused) {
     throw new ValidationError("payments.return_url_invalid", { field: refused })

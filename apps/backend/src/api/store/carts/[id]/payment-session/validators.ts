@@ -1,5 +1,9 @@
 import { z } from "@medusajs/framework/zod"
-import { CHECKOUT_PROVIDERS, isHostedFormProvider } from "../../../../../lib/payments/checkout"
+import {
+  CHECKOUT_PROVIDERS,
+  CREDIT_CHECKOUT,
+  isHostedFormProvider,
+} from "../../../../../lib/payments/checkout"
 
 // PayTR takes return addresses up to 400 characters
 const returnUrl = z.url({ protocol: /^https?$/ }).max(400)
@@ -11,7 +15,8 @@ const returnUrl = z.url({ protocol: /^https?$/ }).max(400)
  */
 export const StorePostCartPaymentSession = z
   .object({
-    provider_id: z.enum(CHECKOUT_PROVIDERS),
+    // `credit`: nothing left to pay, the cart's gift cards cover it
+    provider_id: z.enum([...CHECKOUT_PROVIDERS, CREDIT_CHECKOUT]),
     return_urls: z.object({ success: returnUrl, failure: returnUrl }).strict().optional(),
   })
   .strict()

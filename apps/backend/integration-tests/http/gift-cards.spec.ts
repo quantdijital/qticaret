@@ -7,6 +7,8 @@ import { settle } from "../helpers/http"
 import { stockShop, stockedProduct } from "../helpers/stock"
 import type { StockShop } from "../helpers/stock"
 import { createStorefront } from "../helpers/storefront"
+import { readyCart } from "../helpers/paytr"
+import { loadTrAddressFixture } from "../helpers/tr-address"
 import type { Storefront } from "../helpers/storefront"
 
 jest.setTimeout(240 * 1000)
@@ -157,6 +159,76 @@ medusaIntegrationTestRunner({
         headers: admin.headers,
       })
       expect(state.data.stage).toBe("to_ship")
+    })
+    it("completes a cart its gift card pays in full with nothing to pay, and refuses that while something is due", async () => {
+      await flag(true)
+      await loadTrAddressFixture(getContainer())
+      const start = (id: string) =>
+        settle(
+          http.post<{
+            payment_session: { provider_id: string; data: { method: string } }
+            message?: string
+          }>(
+            `/store/carts/${id}/payment-session`,
+            { provider_id: "credit" },
+            { headers: store.headers }
+          )
+        )
+      const complete = (id: string) =>
+        settle(
+          http.post<{ type: string; order?: { id: string; total: number }; message?: string }>(
+            `/store/carts/${id}/complete`,
+            {},
+            { headers: store.headers }
+          )
+        )
+
+      // 300 of goods and 90 shipping against a 100 card: 290 still due
+      const partly = await readyCart(getContainer(), shop, variantId)
+      const small = await giftCard(100)
+      await http.post(
+        `/store/carts/${partly}/gift-cards`,
+        { code: small.code },
+        { headers: store.headers }
+      )
+      const refused = await start(partly)
+
+      const whole = await readyCart(getContainer(), shop, variantId)
+      const card = await giftCard(1000)
+      await http.post(
+        `/store/carts/${whole}/gift-cards`,
+        { code: card.code },
+        { headers: store.headers }
+      )
+      const started = await start(whole)
+      const placed = await complete(whole)
+
+      // Started at nothing due, then the card taken off: the order is not made for free
+      const sly = await readyCart(getContainer(), shop, variantId)
+      const third = await giftCard(1000)
+      await http.post(
+        `/store/carts/${sly}/gift-cards`,
+        { code: third.code },
+        { headers: store.headers }
+      )
+      await start(sly)
+      await http.delete(`/store/carts/${sly}/gift-cards`, {
+        headers: store.headers,
+        data: { code: third.code },
+      })
+      const unpaid = await complete(sly)
+
+      expect([refused.status, refused.data.message]).toEqual([400, "payments.amount_due"])
+      expect(unpaid.status).toBeGreaterThanOrEqual(400)
+      expect(unpaid.data.type).not.toBe("order")
+      expect(started.status).toBe(200)
+      expect(started.data.payment_session).toMatchObject({
+        provider_id: "credit",
+        data: { method: "credit" },
+      })
+      expect(placed.status).toBe(200)
+      expect(placed.data.type).toBe("order")
+      expect(await account(card.id)).toMatchObject({ balance: 610, debits: 390 })
     })
   },
 })

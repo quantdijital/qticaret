@@ -43,6 +43,12 @@ export const OFFLINE_PROVIDERS = [
 /** Every provider a storefront starts a payment with, through our route only. */
 export const CHECKOUT_PROVIDERS = [...HOSTED_FORM_PROVIDERS, ...OFFLINE_PROVIDERS] as const
 
+/**
+ * Not a provider: a cart its gift cards or store credit pay in full starts
+ * its "payment" so, with no session (F18, `startCreditCheckoutWorkflow`).
+ */
+export const CREDIT_CHECKOUT = "credit"
+
 export const isHostedFormProvider = (providerId: string): boolean =>
   (HOSTED_FORM_PROVIDERS as readonly string[]).includes(providerId)
 

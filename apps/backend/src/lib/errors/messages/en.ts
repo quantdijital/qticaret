@@ -690,6 +690,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "cart.shipping_method_required": "Choose a shipping option.",
   "cart.unknown": "Cart not found.",
   "payments.cart_changed": "The cart changed; start the payment again.",
+  "payments.amount_due": "There is an amount to pay for this cart; choose a way to pay.",
   "payments.checkout_invalid": "The payment details are missing or invalid.",
   "payments.restart_checkout": "The amount changed; start the payment again.",
   "payments.return_url_invalid": "The return address is not one of this shop's addresses.",
