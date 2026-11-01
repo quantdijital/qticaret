@@ -63,6 +63,7 @@ const SECTIONS: { section: AccountSection; path: string; key: string }[] = [
   { section: "overview", path: "/hesap", key: "account.overview" },
   { section: "orders", path: "/hesap/siparisler", key: "account.orders" },
   { section: "favorites", path: "/hesap/favoriler", key: "account.favorites" },
+  { section: "addresses", path: "/hesap/adresler", key: "account.addresses" },
   { section: "profile", path: "/hesap/bilgiler", key: "account.details" },
 ]
 
@@ -138,7 +139,7 @@ export function accountView(
   rest: Partial<
     Pick<
       AccountPageView,
-      "orders" | "pagination" | "notice" | "favorites" | "billing" | "privacyRequests"
+      "orders" | "pagination" | "notice" | "favorites" | "billing" | "privacyRequests" | "addresses"
     >
   > & {
     marketing?: { email: boolean; sms: boolean }
@@ -157,6 +158,7 @@ export function accountView(
     notice: rest.notice ?? null,
     orders: rest.orders ?? [],
     favorites: rest.favorites ?? [],
+    addresses: rest.addresses ?? [],
     privacyRequests: rest.privacyRequests ?? [],
     billing: rest.billing ?? null,
     pagination: rest.pagination ?? null,

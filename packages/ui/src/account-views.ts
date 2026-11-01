@@ -48,7 +48,7 @@ export interface AuthActions {
   lookup: AuthAction
 }
 
-export type AccountSection = "overview" | "orders" | "profile" | "favorites"
+export type AccountSection = "overview" | "orders" | "profile" | "favorites" | "addresses"
 
 export interface AccountOrderView {
   displayId: string
@@ -69,6 +69,8 @@ export interface AccountPageView {
   orders: AccountOrderView[]
   /** The orders' pages (orders section). */
   pagination: PaginationView | null
+  /** The customer's saved addresses, in lines (addresses section). */
+  addresses: { id: string; name: string; lines: string[] }[]
   /** The customer's saved products (favorites section). */
   favorites: { id: string; title: string; path: string; image: ImageView | null }[]
   /** The customer's KVKK requests, in words (profile section). */
@@ -91,6 +93,8 @@ export interface AccountPageView {
 }
 
 export interface AccountActions {
+  /** A plain form: `id`, the address to drop. */
+  removeAddress: (form: FormData) => Promise<void>
   /** A plain form: `kind` (export, erasure), the customer's KVKK request. */
   requestPrivacy: (form: FormData) => Promise<void>
   /** Fields: `type` (individual, corporate), `legal_name`, `tax_office`, `tax_id`. */

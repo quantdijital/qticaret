@@ -17,6 +17,7 @@ import {
 import { saveConsents, saveProfile } from "@/app/actions/account-profile"
 import { addFavorite, removeFavorite, saveBilling } from "@/app/actions/favorites"
 import { installmentsFor } from "@/app/actions/installments"
+import { removeAddress } from "@/app/actions/addresses"
 import { cancelOrder, requestReturn } from "@/app/actions/order"
 import { requestPrivacy } from "@/app/actions/privacy"
 import { askQuestion, stockAlert, writeReview } from "@/app/actions/product"
@@ -63,6 +64,7 @@ export const authActions: AuthActions = {
 
 /** The signed-in customer's forms (D8). */
 export const accountActions: AccountActions = {
+  removeAddress,
   requestPrivacy,
   saveBilling,
   removeFavorite,
