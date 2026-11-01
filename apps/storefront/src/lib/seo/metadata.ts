@@ -17,7 +17,10 @@ export function metadataOf(seo: SeoPayload): Metadata {
     openGraph: {
       title: seo.openGraph.title,
       description: seo.openGraph.description,
-      type: seo.openGraph.type === "article" ? "article" : "website",
+      // Next has no "product": a product page writes its own og:type (screens/product.tsx)
+      ...(seo.openGraph.type === "product"
+        ? {}
+        : { type: seo.openGraph.type === "article" ? ("article" as const) : ("website" as const) }),
       siteName: seo.openGraph.siteName,
       locale: "tr_TR",
       ...(seo.openGraph.url ? { url: seo.openGraph.url } : {}),

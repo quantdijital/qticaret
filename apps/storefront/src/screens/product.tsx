@@ -36,6 +36,11 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
     currentCustomer(),
   ])
   const here = `${url.pathname}${url.search}`
+  const amounts = (product.variants ?? []).flatMap((variant) => {
+    const amount = variant.calculated_price?.calculated_amount
+    return typeof amount === "number" ? [amount] : []
+  })
+  const lowest = amounts.length > 0 ? Math.min(...amounts) : null
   const base = productPage({
     product,
     seo: page.seo,
@@ -68,6 +73,14 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
   return (
     <>
       <JsonLd blocks={page.seo?.jsonLd ?? []} />
+      {/* Open Graph's product type and price (React puts these in <head>) */}
+      <meta property="og:type" content="product" />
+      {lowest !== null && (
+        <>
+          <meta property="product:price:amount" content={lowest.toFixed(2)} />
+          <meta property="product:price:currency" content="TRY" />
+        </>
+      )}
       <theme.ProductPage view={view} t={t} actions={themeActions} />
     </>
   )
