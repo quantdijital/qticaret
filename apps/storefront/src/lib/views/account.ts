@@ -11,6 +11,7 @@ import type {
 } from "@qticaret/ui"
 import type { StoreCustomer } from "@/lib/account/auth"
 import { isStoreApiError } from "@/lib/store-api/errors"
+import { pathsOf } from "@/lib/store-api/requests"
 import { storeGet } from "@/lib/store-api/server"
 import { displayPhone } from "./frame"
 import { MARKETING_TEXT_VERSION } from "./checkout"
@@ -61,6 +62,7 @@ export async function membershipTerms(): Promise<ContractView | null> {
 const SECTIONS: { section: AccountSection; path: string; key: string }[] = [
   { section: "overview", path: "/hesap", key: "account.overview" },
   { section: "orders", path: "/hesap/siparisler", key: "account.orders" },
+  { section: "favorites", path: "/hesap/favoriler", key: "account.favorites" },
   { section: "profile", path: "/hesap/bilgiler", key: "account.details" },
 ]
 
@@ -133,7 +135,9 @@ export function accountView(
   section: AccountSection,
   customer: StoreCustomer,
   t: Translate,
-  rest: Partial<Pick<AccountPageView, "orders" | "pagination" | "notice">> & {
+  rest: Partial<
+    Pick<AccountPageView, "orders" | "pagination" | "notice" | "favorites" | "billing">
+  > & {
     marketing?: { email: boolean; sms: boolean }
   } = {}
 ): AccountPageView {
@@ -149,6 +153,8 @@ export function accountView(
     })),
     notice: rest.notice ?? null,
     orders: rest.orders ?? [],
+    favorites: rest.favorites ?? [],
+    billing: rest.billing ?? null,
     pagination: rest.pagination ?? null,
     profile: {
       first_name: customer.first_name ?? "",
@@ -158,5 +164,68 @@ export function accountView(
       marketingSms: rest.marketing?.sms ?? false,
       marketingVersion: MARKETING_TEXT_VERSION,
     },
+  }
+}
+
+interface WishlistAnswer {
+  items: { id: string; product: { id: string; title: string; thumbnail: string | null } }[]
+}
+
+/** The customer's saved products with their pages. */
+export async function customerFavorites(): Promise<AccountPageView["favorites"]> {
+  const { items } = await storeGet<WishlistAnswer>("/store/customers/me/wishlist")
+  const paths = await pathsOf(
+    "product",
+    items.map((item) => item.product.id)
+  )
+  return items.flatMap((item) => {
+    const path = paths[item.product.id]
+    return path
+      ? [
+          {
+            id: item.id,
+            title: item.product.title,
+            path,
+            image: item.product.thumbnail
+              ? {
+                  src: item.product.thumbnail,
+                  alt: item.product.title,
+                  width: null,
+                  height: null,
+                  sources: { avif: null, webp: null },
+                }
+              : null,
+          },
+        ]
+      : []
+  })
+}
+
+interface BillingAnswer {
+  billing_profile: {
+    type: "individual" | "corporate"
+    legal_name: string
+    tax_office: string | null
+    tax_id_masked: string | null
+  } | null
+}
+
+/** The customer's invoice details, the tax id masked by the backend. */
+export async function billingOf(): Promise<AccountPageView["billing"]> {
+  try {
+    const { billing_profile } = await storeGet<BillingAnswer>("/store/customers/me/billing-profile")
+    return billing_profile
+      ? {
+          type: billing_profile.type,
+          legalName: billing_profile.legal_name,
+          taxOffice: billing_profile.tax_office ?? "",
+          taxIdMasked: billing_profile.tax_id_masked,
+        }
+      : null
+  } catch (error) {
+    if (isStoreApiError(error)) {
+      return null
+    }
+    throw error
   }
 }

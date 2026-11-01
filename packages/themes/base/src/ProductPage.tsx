@@ -2,6 +2,7 @@ import type { ProductPageView, ThemeActions, Translate } from "@qticaret/ui"
 import { MessageCircle } from "lucide-react"
 import { Breadcrumbs } from "./components/Breadcrumbs"
 import { PageContainer } from "./components/Container"
+import { FavoriteButton } from "./components/FavoriteButton"
 import { ProductGrid } from "./components/ProductCard"
 import { ProductCommunity } from "./components/ProductCommunity"
 import { ProductDetails, SpecHighlights } from "./components/ProductDetails"
@@ -101,6 +102,20 @@ export function ProductPage({
                   ].map((key) => [key, t(key)])
                 ),
                 fallback: t("product.alert_failed"),
+              }}
+            />
+            <FavoriteButton
+              productId={view.id}
+              signedIn={view.signedIn}
+              loginPath={view.loginPath}
+              add={actions.addFavorite}
+              words={{
+                add: t("product.favorite_add"),
+                added: t("product.favorite_added"),
+                errors: Object.fromEntries(
+                  ["product.sign_in_first", "wishlist.full"].map((key) => [key, t(key)])
+                ),
+                fallback: t("product.favorite_failed"),
               }}
             />
             {view.whatsappHref && (

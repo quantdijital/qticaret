@@ -1,6 +1,6 @@
 import type { ContractView, PlaceOrderResult } from "./checkout-views"
 import type { FormAction } from "./theme"
-import type { LinkView, PaginationView } from "./views"
+import type { ImageView, LinkView, PaginationView } from "./views"
 
 /**
  * The customer account's view models (D8). The sign-in forms answer like
@@ -48,7 +48,7 @@ export interface AuthActions {
   lookup: AuthAction
 }
 
-export type AccountSection = "overview" | "orders" | "profile"
+export type AccountSection = "overview" | "orders" | "profile" | "favorites"
 
 export interface AccountOrderView {
   displayId: string
@@ -69,6 +69,15 @@ export interface AccountPageView {
   orders: AccountOrderView[]
   /** The orders' pages (orders section). */
   pagination: PaginationView | null
+  /** The customer's saved products (favorites section). */
+  favorites: { id: string; title: string; path: string; image: ImageView | null }[]
+  /** The invoice details (F8): who the invoice is for; the tax id shown masked. */
+  billing: {
+    type: "individual" | "corporate"
+    legalName: string
+    taxOffice: string
+    taxIdMasked: string | null
+  } | null
   profile: {
     first_name: string
     last_name: string
@@ -80,6 +89,10 @@ export interface AccountPageView {
 }
 
 export interface AccountActions {
+  /** Fields: `type` (individual, corporate), `legal_name`, `tax_office`, `tax_id`. */
+  saveBilling: FormAction
+  /** A plain form: `id`, the favorite to drop. */
+  removeFavorite: (form: FormData) => Promise<void>
   /** Fields: `first_name`, `last_name`, `phone`. */
   saveProfile: FormAction
   /** Fields: `marketing_email`, `marketing_sms`, `marketing_version`. */

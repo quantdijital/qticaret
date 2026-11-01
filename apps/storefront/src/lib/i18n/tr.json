@@ -409,5 +409,22 @@
   "account.order_number": "Sipariş numarası",
   "account.notice_lookup_sent": "Bilgiler bir siparişle eşleşiyorsa bağlantıyı e-postanıza gönderdik.",
   "footer.find_order": "Siparişimi bul",
-  "account.guest_order_link": "Üye olmadan sipariş verdiniz mi? Siparişinizi bulun"
+  "account.guest_order_link": "Üye olmadan sipariş verdiniz mi? Siparişinizi bulun",
+  "account.favorites": "Favorilerim",
+  "account.no_favorites": "Henüz favori ürününüz yok.",
+  "account.billing": "Fatura bilgileri",
+  "account.billing_individual": "Bireysel",
+  "account.billing_corporate": "Kurumsal",
+  "account.billing_name": "Ad soyad",
+  "account.billing_company": "Şirket unvanı",
+  "account.billing_tax_office": "Vergi dairesi",
+  "account.billing_tckn": "T.C. kimlik numarası",
+  "account.billing_vkn": "Vergi kimlik numarası",
+  "account.billing_current": "Kayıtlı",
+  "billing_profile.tax_id_invalid": "Kimlik ya da vergi numarası geçersiz.",
+  "billing_profile.tax_office_required": "Vergi dairesini yazın.",
+  "product.favorite_add": "Favorilere ekle",
+  "product.favorite_added": "Favorilere eklendi",
+  "product.favorite_failed": "Eklenemedi. Lütfen tekrar deneyin.",
+  "wishlist.full": "Favori listeniz dolu; önce birkaç ürünü çıkarın."
 }

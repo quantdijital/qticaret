@@ -1,6 +1,7 @@
 import { ArrowRight, LogOut, Package } from "lucide-react"
 import type { AccountActions, AccountPageView, AccountOrderView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
+import { BillingForm } from "./account/BillingForm"
 import { ConsentForm, ProfileForm } from "./account/ProfileForms"
 import { PageContainer } from "./components/Container"
 import { Pages } from "./components/Pages"
@@ -145,8 +146,75 @@ export function AccountPage({
               {view.pagination && <Pages pagination={view.pagination} t={t} />}
             </section>
           )}
+          {view.section === "favorites" && (
+            <section aria-labelledby="favoriler" className="flex flex-col gap-4">
+              <h2 id="favoriler" className="text-2xl">
+                {t("account.favorites")}
+              </h2>
+              {view.favorites.length === 0 ? (
+                <p className="rounded-2xl border bg-card p-8 text-center text-muted-foreground">
+                  {t("account.no_favorites")}
+                </p>
+              ) : (
+                <ul className="flex flex-col divide-y rounded-2xl border bg-card">
+                  {view.favorites.map((item) => (
+                    <li
+                      key={item.id}
+                      className="flex items-center justify-between gap-4 p-4 text-sm"
+                    >
+                      <a
+                        href={item.path}
+                        className="font-medium underline-offset-4 hover:underline"
+                      >
+                        {item.title}
+                      </a>
+                      <form action={actions.removeFavorite}>
+                        <input type="hidden" name="id" value={item.id} />
+                        <button type="submit" className="text-muted-foreground underline">
+                          {t("cart.remove")}
+                        </button>
+                      </form>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          )}
           {view.section === "profile" && (
             <>
+              <section
+                aria-labelledby="fatura"
+                className="flex flex-col gap-5 rounded-3xl border bg-card p-6 sm:p-7"
+              >
+                <h2 id="fatura" className="text-2xl">
+                  {t("account.billing")}
+                </h2>
+                <BillingForm
+                  billing={view.billing}
+                  save={actions.saveBilling}
+                  words={{
+                    individual: t("account.billing_individual"),
+                    corporate: t("account.billing_corporate"),
+                    name: t("account.billing_name"),
+                    company: t("account.billing_company"),
+                    taxOffice: t("account.billing_tax_office"),
+                    tckn: t("account.billing_tckn"),
+                    vkn: t("account.billing_vkn"),
+                    current: t("account.billing_current"),
+                    save: t("account.save"),
+                    saving: t("checkout.saving"),
+                    saved: t("account.saved"),
+                    errors: Object.fromEntries(
+                      [
+                        "billing_profile.tax_id_invalid",
+                        "billing_profile.tax_office_required",
+                        "account.save_failed",
+                      ].map((key) => [key, t(key)])
+                    ),
+                    fallback: t("account.save_failed"),
+                  }}
+                />
+              </section>
               <section
                 aria-labelledby="bilgilerim"
                 className="flex flex-col gap-5 rounded-3xl border bg-card p-6 sm:p-7"

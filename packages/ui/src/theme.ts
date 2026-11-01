@@ -47,6 +47,8 @@ export interface ThemeActions {
   askQuestion: FormAction
   /** Fields: `variant_id`, `email` (a guest's), `challenge` (a solved proof of work). */
   stockAlert: (state: PlaceOrderResult, form: FormData) => Promise<PlaceOrderResult>
+  /** Field: `product_id`; a signed-in customer saves the product. */
+  addFavorite: FormAction
 }
 
 /** The checkout's actions (D7): each step a form, the address selects fed by two lookups. */
