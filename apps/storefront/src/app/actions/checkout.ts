@@ -12,6 +12,7 @@ import { addressFromForm, addressPayload } from "@/lib/checkout/address-form"
 import { checkoutCart } from "@/lib/checkout/cart"
 import { paymentMethods } from "@/lib/checkout/options"
 import { rememberPaymentFrame } from "@/lib/checkout/payment-cookie"
+import { recordTracking } from "@/lib/checkout/tracking"
 import { paymentRedirectOrigins, storefrontEnv } from "@/lib/env"
 import { acceptTerms, checkoutError, PlaceOrder } from "@/lib/checkout/place-order"
 import { challengeOf, completeCart, orderAccess, orderPath, startPayment } from "@/lib/checkout/pay"
@@ -112,6 +113,8 @@ export async function placeOrder(
     if (refused) {
       return { ok: false, error: refused, challenge: NO_CHALLENGE }
     }
+    // The purchase is measured only within the cookie answer (F10.9); a refusal costs the order nothing
+    await recordTracking(cart.id).catch(() => undefined)
     const session = await startPayment(cart.id, input.provider_id, input.challenge ?? null)
     next = await nextStep(cart.id, session.provider_id, session.data)
   } catch (error) {
