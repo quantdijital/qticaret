@@ -59,7 +59,11 @@ export async function proxy(request: NextRequest): Promise<Response> {
   const csp = contentSecurityPolicy(nonce, env.NODE_ENV === "development", {
     frameOrigins: paymentFrameOrigins(env),
     framedBySelf: isPaymentReturn(pathname),
-    formOrigins: pathname.startsWith("/odeme") ? paymentRedirectOrigins(env) : [],
+    // The card provider's own pages: iyzico's a form may lead to, and PayTR's
+    // framed form, whose "pay" posts to its own origin for the whole window
+    formOrigins: pathname.startsWith("/odeme")
+      ? [...paymentRedirectOrigins(env), ...paymentFrameOrigins(env)]
+      : [],
   })
   const isPageView = request.method === "GET" || request.method === "HEAD"
   if (isPageView && pathname !== "/" && !isSystemPath(pathname) && !isStorefrontIndex(pathname)) {
