@@ -8,6 +8,7 @@ import {
   pathsOf,
   priceDisplays,
   siteSeo,
+  storefrontSettings,
 } from "@/lib/store-api/requests"
 import { childrenOf } from "@/lib/views/categories"
 import { productCards, variantIdsOf } from "@/lib/views/product"
@@ -19,10 +20,11 @@ export async function generateMetadata(): Promise<Metadata> {
 
 /** The home page: the shop's structured data, its top categories and newest products. */
 export default async function HomePage() {
-  const [site, categories, { products }] = await Promise.all([
+  const [site, categories, { products }, { storefront }] = await Promise.all([
     siteSeo(),
     allCategories(),
     listProducts({ limit: 12, order: "-created_at" }),
+    storefrontSettings(),
   ])
   const top = childrenOf(categories, null)
   const [productPaths, categoryPaths, displays] = await Promise.all([
@@ -36,18 +38,25 @@ export default async function HomePage() {
     ),
     priceDisplays(variantIdsOf(products)),
   ])
+  const categoryLinks = top.flatMap((category) => {
+    const path = categoryPaths[category.id]
+    return path ? [{ label: category.name, path }] : []
+  })
+  // The shop's own opening (D3), else its name and first two categories
+  const { hero } = storefront
   return (
     <>
       <JsonLd blocks={site.home.jsonLd} />
       <theme.HomePage
         t={t}
         view={{
-          heading: site.home.title,
-          intro: site.home.description === "" ? null : site.home.description,
-          categories: top.flatMap((category) => {
-            const path = categoryPaths[category.id]
-            return path ? [{ label: category.name, path }] : []
-          }),
+          eyebrow: hero?.eyebrow ?? null,
+          heading: hero?.heading ?? site.shop.name,
+          intro: hero?.text ?? null,
+          actions: hero
+            ? hero.links.map((link) => ({ label: link.label, path: link.href }))
+            : categoryLinks.slice(0, 2),
+          categories: categoryLinks,
           products: productCards(products, productPaths, displays),
         }}
       />

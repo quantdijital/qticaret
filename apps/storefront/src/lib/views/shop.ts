@@ -25,7 +25,15 @@ export async function shopView(): Promise<ShopView> {
     "product_category",
     categories.map((category) => category.id)
   )
-  const menu = navigation(categories, paths)
+  // The shop's own menu when it wrote one, else its top categories
+  const menu =
+    frame.menu.length > 0
+      ? frame.menu.map((item) => ({
+          label: item.label,
+          path: item.href,
+          children: linkViews(item.children),
+        }))
+      : navigation(categories, paths)
   return {
     name: site.shop.name,
     logo: site.shop.logo_url

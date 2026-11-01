@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from "next"
+import { headers } from "next/headers"
 import type { ReactNode } from "react"
 import { t } from "@/lib/i18n"
+import { storefrontSettings } from "@/lib/store-api/requests"
+import { brandStyle } from "@/lib/views/color"
 import { shopView } from "@/lib/views/shop"
 import { theme } from "@/theme"
 import { inter } from "./fonts"
@@ -15,10 +18,19 @@ export const metadata: Metadata = { formatDetection: { telephone: false } }
 export const viewport: Viewport = { width: "device-width", initialScale: 1 }
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
-  const shop = await shopView()
+  const [shop, { storefront }, requestHeaders] = await Promise.all([
+    shopView(),
+    storefrontSettings(),
+    headers(),
+  ])
+  // The shop's colour over the theme's (D3): one style element with this
+  // response's nonce, so the CSP needs no 'unsafe-inline'
+  const brand = brandStyle(storefront.primary_color)
+  const nonce = requestHeaders.get("x-nonce") ?? undefined
   return (
     <html lang="tr" className={inter.variable}>
       <body>
+        {brand && <style nonce={nonce}>{brand}</style>}
         <theme.Layout shop={shop} t={t}>
           {children}
         </theme.Layout>

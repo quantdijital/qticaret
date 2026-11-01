@@ -171,12 +171,36 @@ export interface ListingPageView {
 }
 
 export interface HomePageView {
-  /** The page's heading: the shop's own home title, else its name. */
+  /** A short line above the heading; null: none. */
+  eyebrow: string | null
+  /** The page's heading: the shop's own, else its name. */
   heading: string
-  /** The shop's own words under it (its home description); null: none. */
+  /** The shop's own words under it; null: none. */
   intro: string | null
+  /** The opening's buttons (at most two), the first the main one. */
+  actions: LinkView[]
   categories: LinkView[]
   products: ProductCardView[]
+}
+
+export interface PostCardView {
+  title: string
+  path: string
+  excerpt: string
+  image: ImageView | null
+  /** "1 Kasım 2026", already in words; null for an undated post. */
+  date: string | null
+  /** The machine form for `<time datetime>`. */
+  dateTime: string | null
+  /** "5 dk okuma", already in words. */
+  reading: string
+}
+
+export interface BlogIndexPageView {
+  title: string
+  breadcrumbs: BreadcrumbView[]
+  posts: PostCardView[]
+  pagination: PaginationView
 }
 
 export interface ContentPageView {

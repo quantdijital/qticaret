@@ -3,19 +3,22 @@ import type { HomePageView, Translate } from "@qticaret/ui"
 import { Button } from "@qticaret/ui/components/button"
 import { ProductGrid } from "./components/ProductCard"
 
-const HERO_LINKS = 2
-
 /**
- * The home page: the shop's heading and words with its first categories as
- * the way in, every top category as a tile, and the newest products. The
+ * The home page: the shop's opening (a line, its heading and words, two
+ * buttons), every top category as a tile, and the newest products. The
  * shop's own blocks (banners, rails) come with the home editor (D11).
  */
 export function HomePage({ view, t }: { view: HomePageView; t: Translate }) {
-  const [first, second] = view.categories.slice(0, HERO_LINKS)
+  const [first, second] = view.actions
   return (
     <div className="flex flex-col gap-14 lg:gap-20">
       <section className="rounded-3xl bg-muted px-6 py-12 sm:px-10 lg:px-16 lg:py-20">
         <div className="flex max-w-2xl flex-col gap-5">
+          {view.eyebrow && (
+            <p className="text-xs font-semibold tracking-[0.2em] text-muted-foreground uppercase">
+              {view.eyebrow}
+            </p>
+          )}
           <h1 className="text-4xl font-semibold tracking-tight text-balance lg:text-5xl">
             {view.heading}
           </h1>

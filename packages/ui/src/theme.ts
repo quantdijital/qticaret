@@ -1,5 +1,6 @@
 import type { ComponentType, ReactNode } from "react"
 import type {
+  BlogIndexPageView,
   CartPageView,
   ContentPageView,
   HomePageView,
@@ -45,6 +46,7 @@ export interface StorefrontTheme {
   ProductPage: ComponentType<Page<ProductPageView> & { actions: ThemeActions }>
   ListingPage: ComponentType<Page<ListingPageView>>
   ContentPage: ComponentType<Page<ContentPageView>>
+  BlogIndexPage: ComponentType<Page<BlogIndexPageView>>
   CartPage: ComponentType<Page<CartPageView> & { actions: ThemeActions }>
   NotFoundPage: ComponentType<{ t: Translate }>
 }

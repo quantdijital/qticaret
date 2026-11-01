@@ -3,7 +3,7 @@ import type { NextRequest } from "next/server"
 import { storefrontEnv } from "./lib/env"
 import { t } from "./lib/i18n"
 import { contentSecurityPolicy, newNonce } from "./lib/security/csp"
-import { backendFile, isSystemPath, normalizedPath } from "./lib/seo/paths"
+import { backendFile, isStorefrontIndex, isSystemPath, normalizedPath } from "./lib/seo/paths"
 import {
   backendFileResponse,
   isIndexing,
@@ -53,7 +53,7 @@ export async function proxy(request: NextRequest): Promise<Response> {
   const nonce = newNonce()
   const csp = contentSecurityPolicy(nonce, env.NODE_ENV === "development")
   const isPageView = request.method === "GET" || request.method === "HEAD"
-  if (isPageView && pathname !== "/" && !isSystemPath(pathname)) {
+  if (isPageView && pathname !== "/" && !isSystemPath(pathname) && !isStorefrontIndex(pathname)) {
     const resolution = await resolveForProxy(`${pathname}${search}`, visitor)
     if (resolution?.type === "redirect") {
       return NextResponse.redirect(new URL(resolution.location, request.url), resolution.status)

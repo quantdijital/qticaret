@@ -10,6 +10,7 @@ import type {
   StoreCategory,
   StoreProduct,
   StoreRegion,
+  StoreContentSummary,
   StorefrontAnswer,
 } from "@qticaret/types"
 import { storeGet } from "./server"
@@ -223,4 +224,13 @@ export const collectionById = cache((id: string) =>
     `/store/collections/${encodeURIComponent(id)}`,
     { fields: "id,title,handle" }
   )
+)
+
+/** Live blog posts, newest first, a page at a time (F3.16). */
+export const blogPosts = cache((offset: number, limit: number) =>
+  storeGet<{ entries: StoreContentSummary[]; count: number }>("/store/content", {
+    kind: "post",
+    offset,
+    limit,
+  })
 )

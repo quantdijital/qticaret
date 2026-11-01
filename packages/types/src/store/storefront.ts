@@ -20,6 +20,17 @@ export interface StorefrontFrame {
   trust_badges: { icon: TrustIcon; title: string; text: string | null }[]
   /** E.164 (`+905321234567`). */
   whatsapp_phone: string | null
+  /** The header's menu as the shop names it; empty: the category tree. */
+  menu: (StorefrontLink & { children: StorefrontLink[] })[]
+  /** `#rrggbb`; null: the theme's own colour. */
+  primary_color: string | null
+  /** The home page's opening; null: the shop's name and first two categories. */
+  hero: {
+    eyebrow: string | null
+    heading: string
+    text: string | null
+    links: StorefrontLink[]
+  } | null
 }
 
 /** `GET /store/storefront`: the frame and the free shipping threshold (F4.5). */
@@ -43,4 +54,20 @@ export interface LegalIdentity {
   email: string | null
   /** E.164. */
   phone: string | null
+}
+
+/** `GET /store/content?kind=post`: a live post as a list shows it (F3.16). */
+export interface StoreContentSummary {
+  id: string
+  kind: "page" | "post"
+  title: string
+  handle: string
+  path: string
+  excerpt: string
+  image_url: string | null
+  image_alt: string | null
+  author_name: string | null
+  published_at: string | null
+  revised_at: string | null
+  reading_minutes: number
 }

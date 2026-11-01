@@ -14,6 +14,16 @@ export const SYSTEM_ROOTS = [
   "siparis",
 ] as const
 
+/**
+ * Index pages the storefront makes itself under a reserved root (backend
+ * `RESERVED_ROOT_SEGMENTS`): exactly these paths skip resolve; the records
+ * under them (`/blog/{handle}`) still go through it.
+ */
+export const STOREFRONT_INDEXES = ["/blog"] as const
+
+export const isStorefrontIndex = (pathname: string): boolean =>
+  (STOREFRONT_INDEXES as readonly string[]).includes(pathname)
+
 export function isSystemPath(pathname: string): boolean {
   const first = pathname.split("/")[1]?.toLowerCase() ?? ""
   return (SYSTEM_ROOTS as readonly string[]).includes(first)

@@ -91,5 +91,9 @@
   "product.specs": "Ürün özellikleri",
   "product.highlights": "Öne çıkan özellikler",
   "cart.free_shipping_left": "Ücretsiz kargo için {amount} daha ekleyin",
-  "cart.free_shipping_reached": "Siparişinizde kargo ücretsiz"
+  "cart.free_shipping_reached": "Siparişinizde kargo ücretsiz",
+  "blog.title": "Blog",
+  "blog.empty": "Henüz yazı yok.",
+  "blog.reading": "{minutes} dk okuma",
+  "blog.read_more": "Devamını oku"
 }
