@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
-import { LANDING_COOKIE, landingOf } from "./lib/cart/landing"
+import { LANDING_COOKIE, landingCookieValue, landingOf } from "./lib/cart/landing"
 import { paymentFrameOrigins, paymentRedirectOrigins, storefrontEnv } from "./lib/env"
 import { t } from "./lib/i18n"
 import { contentSecurityPolicy, newNonce } from "./lib/security/csp"
@@ -122,8 +122,9 @@ export async function proxy(request: NextRequest): Promise<Response> {
     !request.headers.has("next-router-prefetch")
   ) {
     const landing = landingOf(new URL(request.url), request.headers.get("referer"))
-    if (landing) {
-      response.cookies.set(landingName, encodeURIComponent(JSON.stringify(landing)), {
+    const value = landing ? landingCookieValue(landing) : null
+    if (value) {
+      response.cookies.set(landingName, value, {
         httpOnly: true,
         secure: env.NODE_ENV === "production",
         sameSite: "lax",

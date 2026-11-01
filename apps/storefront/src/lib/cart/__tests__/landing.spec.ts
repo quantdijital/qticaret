@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { landingOf, readLanding } from "../landing"
+import { LANDING_MAX_LENGTH, landingCookieValue, landingOf, readLanding } from "../landing"
 
 describe("landingOf", () => {
   it("keeps the campaign words, whether an ad click id came, another site's page", () => {
@@ -8,7 +8,7 @@ describe("landingOf", () => {
       utm_source: "google",
       utm_medium: "cpc",
       gclid: true,
-      referrer: "https://news.example/story",
+      referrer: "https://news.example/",
     })
   })
 
@@ -24,5 +24,22 @@ describe("landingOf", () => {
     const value = encodeURIComponent(JSON.stringify({ utm_source: "x" }))
     expect(readLanding(value)).toEqual({ utm_source: "x" })
     expect(readLanding("%%%")).toBeNull()
+  })
+})
+
+describe("landingCookieValue", () => {
+  it("keeps a landing that fits, and none that would be too long for a cookie", () => {
+    expect(readLanding(landingCookieValue({ utm_source: "bülten" }) ?? undefined)).toEqual({
+      utm_source: "bülten",
+    })
+    const long = "ş".repeat(100)
+    const value = landingCookieValue({
+      utm_source: long,
+      utm_medium: long,
+      utm_campaign: long,
+      referrer: `https://${"a".repeat(2000)}.example/`,
+    })
+    expect(value).toBeNull()
+    expect(LANDING_MAX_LENGTH).toBeLessThan(4096)
   })
 })

@@ -12,7 +12,7 @@ import { safeEqual } from "./timing-safe"
  * The storefront adds three headers: the shopper's address, the time in
  * Unix seconds and an HMAC-SHA256 of `<time>.<address>` with a secret only
  * the two servers hold (`STOREFRONT_IP_SECRET`). An address is believed only
- * with a valid signature at most a minute old; anything else is ignored and
+ * with a valid signature at most 30 seconds old; anything else is ignored and
  * the connection's own address counts, as before.
  */
 export const CLIENT_IP_HEADERS = {
@@ -22,7 +22,7 @@ export const CLIENT_IP_HEADERS = {
 } as const
 
 /** How far the signed time may be from ours, either way, in seconds. */
-export const CLIENT_IP_MAX_SKEW_SECONDS = 60
+export const CLIENT_IP_MAX_SKEW_SECONDS = 30
 
 export function signClientIp(secret: string, ip: string, unixSeconds: number): string {
   return createHmac("sha256", secret)

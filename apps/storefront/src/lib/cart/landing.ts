@@ -1,7 +1,8 @@
 /**
  * Where a visit first landed from (F11.2, adr/0039 §2): the campaign's
- * `utm_*` words, the referring page (another site's only) and whether an
- * ad click id was there, never the ids themselves. Nothing of the person:
+ * `utm_*` words, the referring site (another site's origin only: its page
+ * may name a person) and whether an ad click id was there, never the ids
+ * themselves. Nothing of the person:
  * kept in a session cookie by the proxy at the first page, read when the
  * visit's first cart is made and sent to the backend with it.
  */
@@ -35,14 +36,23 @@ export function landingOf(url: URL, referer: string | null): Landing | null {
   }
   const from = referer ? URL.parse(referer) : null
   if (from && /^https?:$/.test(from.protocol) && from.host !== url.host) {
-    // Only where it came from: the page without its query (a search's words stay there)
-    landing.referrer = `${from.origin}${from.pathname}`.slice(0, 2000)
+    // Only the site: the backend keeps the host, and a page's path may name a person
+    landing.referrer = `${from.origin}/`
   }
   return Object.keys(landing).length > 0 ? landing : null
 }
 
+/** A cookie's longest value read or written: well under a browser's 4 KB and a proxy's buffer. */
+export const LANDING_MAX_LENGTH = 2500
+
+/** The cookie's value, or null when it would be too long to keep. */
+export function landingCookieValue(landing: Landing): string | null {
+  const value = encodeURIComponent(JSON.stringify(landing))
+  return value.length > LANDING_MAX_LENGTH ? null : value
+}
+
 export function readLanding(value: string | undefined): Landing | null {
-  if (!value || value.length > 2500) {
+  if (!value || value.length > LANDING_MAX_LENGTH) {
     return null
   }
   try {

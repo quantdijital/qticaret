@@ -12,7 +12,7 @@ const signed = (ip: string, time = NOW, secret = SECRET): Record<string, string>
 describe("verifiedClientIp", () => {
   it("believes a fresh, correctly signed IPv4 or IPv6 address", () => {
     expect(verifiedClientIp(signed("203.0.113.7"), SECRET, NOW)).toBe("203.0.113.7")
-    expect(verifiedClientIp(signed("2001:db8::1"), SECRET, NOW + 59)).toBe("2001:db8::1")
+    expect(verifiedClientIp(signed("2001:db8::1"), SECRET, NOW + 29)).toBe("2001:db8::1")
   })
 
   it("matches the storefront's signature (a fixed vector both sides test)", () => {
@@ -33,8 +33,8 @@ describe("verifiedClientIp", () => {
   })
 
   it("refuses a signature older or newer than a minute", () => {
-    expect(verifiedClientIp(signed("203.0.113.7", NOW - 61), SECRET, NOW)).toBeNull()
-    expect(verifiedClientIp(signed("203.0.113.7", NOW + 61), SECRET, NOW)).toBeNull()
+    expect(verifiedClientIp(signed("203.0.113.7", NOW - 31), SECRET, NOW)).toBeNull()
+    expect(verifiedClientIp(signed("203.0.113.7", NOW + 31), SECRET, NOW)).toBeNull()
   })
 
   it("refuses malformed, missing or repeated headers", () => {
