@@ -16,7 +16,7 @@ export const ConsentRequest = model
     recipient_encrypted: model.text(),
     /** What the confirmation records: consent given, or withdrawn. */
     status: model.enum(["granted", "revoked"]),
-    source: model.enum(["checkout", "account"]),
+    source: model.enum(["checkout", "account", "newsletter"]),
     customer_id: model.text().nullable(),
     /** How it was asked for, as the consent will keep it; never an address. */
     evidence: model.json().nullable(),

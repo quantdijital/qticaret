@@ -20,6 +20,8 @@ export const CHALLENGE_SCOPES = [
   "checkout",
   // F18 D10 (adr/0047): the storefront's contact form
   "contact",
+  // F18: the storefront's newsletter box (each sends a confirmation e-mail)
+  "newsletter",
 ] as const
 export type ChallengeScope = (typeof CHALLENGE_SCOPES)[number]
 

@@ -161,6 +161,52 @@ medusaIntegrationTestRunner({
       expect(await messaging().listCheckoutConsents({})).toHaveLength(0)
     })
 
+    it("asks a newsletter address's owner, records it once confirmed, and mails one already in nothing", async () => {
+      const email = `bulten-${String(Date.now())}@example.com`
+      const subscribe = () =>
+        settle(
+          http.post<{ status: string }>(
+            "/store/newsletter",
+            { email, text_version: "bulten-2026-11" },
+            { headers: storefront.headers }
+          )
+        )
+      const confirmMails = () =>
+        fake.messages.filter(
+          ({ to, template }) => to.includes(email) && template === "consent_confirm"
+        )
+
+      const asked = await subscribe()
+      const mail = await eventually(
+        () => Promise.resolve(confirmMails()[0]),
+        (found) => found !== undefined
+      )
+      const beforeConfirming = await messaging().consentOf("email", email)
+      const token = /consents\/confirm\?t=([\w-]{43})/.exec(mail?.html ?? "")?.[1] ?? ""
+      const confirmed = await settle(
+        http.post<string>(`/consents/confirm?t=${token}`, undefined, { responseType: "text" })
+      )
+      const [event] = await messaging().listMessageConsentEvents({ source: "newsletter" })
+      const again = await subscribe()
+      await new Promise((resolve) => setTimeout(resolve, 300))
+
+      expect([asked.status, asked.data.status]).toEqual([202, "pending"])
+      expect(beforeConfirming).toBeNull()
+      expect(confirmed.status).toBe(200)
+      expect(await messaging().consentOf("email", email)).toBe("granted")
+      expect(event?.evidence).toMatchObject({ text_version: "bulten-2026-11" })
+      // The same answer, and no second mail, for an address already in
+      expect([again.status, again.data.status]).toEqual([202, "pending"])
+      expect(confirmMails()).toHaveLength(1)
+      expect(
+        (
+          await settle(
+            http.post("/store/newsletter", { email: "x" }, { headers: storefront.headers })
+          )
+        ).status
+      ).toBe(400)
+    })
+
     it("asks a typed phone's owner before its consent counts, from the account", async () => {
       const customer = await registerCustomer(http, storefront)
       const phone = `0532${String(Date.now()).slice(-7)}`

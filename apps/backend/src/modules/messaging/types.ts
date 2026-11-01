@@ -10,7 +10,8 @@ export interface MessagingModuleOptions {
 
 export type ConsentChannel = MessageChannel | "call"
 export type ConsentStatus = "granted" | "revoked"
-export type ConsentSource = "checkout" | "account" | "panel" | "import" | "iys" | "unsubscribe"
+export type ConsentSource =
+  "checkout" | "account" | "panel" | "import" | "iys" | "unsubscribe" | "newsletter"
 
 /** How a consent was given or withdrawn; never an address (adr/0038 §2). */
 export type ConsentEvidence = Record<string, string>

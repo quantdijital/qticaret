@@ -15,7 +15,7 @@ export interface ConsentRequestInput {
   channel: MessageChannel
   address: string
   status: ConsentStatus
-  source: "checkout" | "account"
+  source: "checkout" | "account" | "newsletter"
   customer_id?: string | null
   evidence?: ConsentEvidence | null
 }
@@ -86,7 +86,7 @@ export class ConsentRequests extends ConsentRecords {
         channel: MessageChannel
         recipient_encrypted: string
         status: ConsentStatus
-        source: "checkout" | "account"
+        source: "checkout" | "account" | "newsletter"
         customer_id: string | null
         evidence: ConsentEvidence | null
       }[]

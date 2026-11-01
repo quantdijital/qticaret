@@ -55,6 +55,7 @@ const TYPES = { email: "EPOSTA", sms: "MESAJ", call: "ARAMA" } as const
 const SOURCES: Readonly<Record<string, string>> = {
   checkout: "HS_WEB",
   account: "HS_WEB",
+  newsletter: "HS_WEB",
   unsubscribe: "HS_WEB",
   panel: "HS_FIZIKSEL_ORTAM",
   import: "HS_EORTAM",

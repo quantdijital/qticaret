@@ -103,6 +103,12 @@ export const RATE_LIMIT_PROFILES = {
     perIp: { max: 10, windowMs: HOUR },
     perIdentity: { max: 5, windowMs: HOUR },
   },
+  // F18: the newsletter box mails a confirmation; per address and per e-mail
+  newsletter: {
+    name: "newsletter",
+    perIp: { max: 10, windowMs: HOUR },
+    perIdentity: { max: 3, windowMs: HOUR },
+  },
   // F14.5: a moved customer's claim key, guessed at nowhere: a few tries an hour
   migration_claim: {
     name: "migration_claim",

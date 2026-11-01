@@ -294,7 +294,7 @@
           "scale": null,
           "default": null,
           "comment": null,
-          "enumItems": ["checkout", "account"],
+          "enumItems": ["checkout", "account", "newsletter"],
           "mappedType": "enum"
         },
         "customer_id": {
@@ -596,7 +596,15 @@
           "scale": null,
           "default": null,
           "comment": null,
-          "enumItems": ["checkout", "account", "panel", "import", "iys", "unsubscribe"],
+          "enumItems": [
+            "checkout",
+            "account",
+            "panel",
+            "import",
+            "iys",
+            "unsubscribe",
+            "newsletter"
+          ],
           "mappedType": "enum"
         },
         "changed_at": {
@@ -859,7 +867,15 @@
           "scale": null,
           "default": null,
           "comment": null,
-          "enumItems": ["checkout", "account", "panel", "import", "iys", "unsubscribe"],
+          "enumItems": [
+            "checkout",
+            "account",
+            "panel",
+            "import",
+            "iys",
+            "unsubscribe",
+            "newsletter"
+          ],
           "mappedType": "enum"
         },
         "changed_at": {

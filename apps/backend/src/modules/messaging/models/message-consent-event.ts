@@ -7,7 +7,16 @@ export const MessageConsentEvent = model
     consent_id: model.text(),
     channel: model.enum(["email", "sms", "call"]),
     status: model.enum(["granted", "revoked"]),
-    source: model.enum(["checkout", "account", "panel", "import", "iys", "unsubscribe"]),
+    source: model.enum([
+      "checkout",
+      "account",
+      "panel",
+      "import",
+      "iys",
+      "unsubscribe",
+      // The storefront's newsletter box (F18), confirmed from the address
+      "newsletter",
+    ]),
     changed_at: model.dateTime(),
     changed_by: model.text().nullable(),
     /**

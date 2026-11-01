@@ -16,7 +16,16 @@ export const MessageConsent = model
     recipient_encrypted: model.text().nullable(),
     customer_id: model.text().nullable(),
     status: model.enum(["granted", "revoked"]),
-    source: model.enum(["checkout", "account", "panel", "import", "iys", "unsubscribe"]),
+    source: model.enum([
+      "checkout",
+      "account",
+      "panel",
+      "import",
+      "iys",
+      "unsubscribe",
+      // The storefront's newsletter box (F18), confirmed from the address
+      "newsletter",
+    ]),
     changed_at: model.dateTime(),
     /** The staff member who changed it from the panel; null when the recipient did. */
     changed_by: model.text().nullable(),
