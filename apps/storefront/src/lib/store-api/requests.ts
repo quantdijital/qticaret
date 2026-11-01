@@ -10,7 +10,7 @@ import type {
   StoreCategory,
   StoreProduct,
   StoreRegion,
-  StorefrontFrame,
+  StorefrontAnswer,
 } from "@qticaret/types"
 import { storeGet } from "./server"
 
@@ -30,11 +30,8 @@ export const resolvePath = cache((path: string) =>
 
 export const siteSeo = cache(() => storeGet<SiteAnswer>("/store/seo/site"))
 
-/** The frame the shop wrote: announcement bar, header links, footer, trust strip (D3). */
-export const storefrontFrame = cache(async () => {
-  const { storefront } = await storeGet<{ storefront: StorefrontFrame }>("/store/storefront")
-  return storefront
-})
+/** The frame the shop wrote (announcement bar, links, footer, trust strip) and its free shipping threshold (D3). */
+export const storefrontSettings = cache(() => storeGet<StorefrontAnswer>("/store/storefront"))
 
 /** The shop's legal identity and contact details, for the footer (F13.9). */
 export const legalIdentity = cache(async () => {

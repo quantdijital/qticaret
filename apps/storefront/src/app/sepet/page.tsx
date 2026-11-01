@@ -4,6 +4,8 @@ import { addToCart, changeCartLine } from "@/app/actions/cart"
 import { currentCart } from "@/lib/cart/cart"
 import { t } from "@/lib/i18n"
 import { robotsOnly } from "@/lib/seo/metadata"
+import { storefrontSettings } from "@/lib/store-api/requests"
+import { freeShippingOf } from "@/lib/views/cart"
 import { theme } from "@/theme"
 
 // docs/13 §7: the cart is noindex,nofollow (backend `system_pages`)
@@ -23,7 +25,11 @@ export default async function CartPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
-  const [cart, query] = await Promise.all([currentCart(), searchParams])
+  const [cart, query, settings] = await Promise.all([
+    currentCart(),
+    searchParams,
+    storefrontSettings(),
+  ])
   const error =
     typeof query["hata"] === "string" && CART_ERRORS.has(query["hata"]) ? t(query["hata"]) : null
   const lines = (cart?.items ?? []).map((line) => ({
@@ -54,6 +60,7 @@ export default async function CartPage({
         items: formatLira(items),
         discount: differs(items, subtotal) ? formatLira(items - subtotal) : null,
         subtotal: formatLira(subtotal),
+        freeShipping: freeShippingOf(subtotal, settings.free_shipping_threshold, t),
         error,
       }}
     />

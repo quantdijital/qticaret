@@ -7,17 +7,17 @@ import {
   legalIdentity,
   pathsOf,
   siteSeo,
-  storefrontFrame,
+  storefrontSettings,
 } from "@/lib/store-api/requests"
 import { navigation } from "./categories"
 import { displayPhone, footerGroups, linkViews, socialLinks, whatsappHref } from "./frame"
 
 /** The frame around every page (D3, docs/19 §4), from the backend's answers. */
 export async function shopView(): Promise<ShopView> {
-  const [site, categories, frame, identity, quantity] = await Promise.all([
+  const [site, categories, { storefront: frame }, identity, quantity] = await Promise.all([
     siteSeo(),
     allCategories(),
-    storefrontFrame(),
+    storefrontSettings(),
     legalIdentity(),
     cartQuantity(),
   ])

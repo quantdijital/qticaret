@@ -1,10 +1,39 @@
-import { ImageOff, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react"
+import { ImageOff, Minus, Plus, ShoppingBag, Trash2, Truck } from "lucide-react"
 import { ResponsiveImage } from "@qticaret/ui"
 import type { CartLineView, CartPageView, ThemeActions, Translate } from "@qticaret/ui"
 import { Alert, AlertDescription } from "@qticaret/ui/components/alert"
 import { Button } from "@qticaret/ui/components/button"
+import { cn } from "@qticaret/ui/lib/utils"
 
 const MAX_QUANTITY = 99
+
+// The production CSP refuses inline style attributes: the bar's width is a
+// class, in 5% steps, each written out so Tailwind generates it
+const FILLS = [
+  "w-0",
+  "w-[5%]",
+  "w-[10%]",
+  "w-[15%]",
+  "w-[20%]",
+  "w-[25%]",
+  "w-[30%]",
+  "w-[35%]",
+  "w-[40%]",
+  "w-[45%]",
+  "w-[50%]",
+  "w-[55%]",
+  "w-[60%]",
+  "w-[65%]",
+  "w-[70%]",
+  "w-[75%]",
+  "w-[80%]",
+  "w-[85%]",
+  "w-[90%]",
+  "w-[95%]",
+  "w-full",
+] as const
+const fillOf = (percent: number): string =>
+  FILLS[Math.min(20, Math.max(0, Math.floor(percent / 5)))] ?? "w-0"
 
 /**
  * One line. Minus, plus and remove are the form's own submit buttons, each
@@ -137,6 +166,23 @@ export function CartPage({
           className="flex h-fit flex-col gap-4 rounded-2xl bg-muted p-6 text-sm lg:sticky lg:top-36"
         >
           <h2 className="text-base font-semibold">{t("cart.summary")}</h2>
+          {view.freeShipping && (
+            <div className="flex flex-col gap-2 rounded-xl bg-background p-3">
+              <p className="flex items-center gap-2 text-xs font-medium">
+                <Truck className="size-4 shrink-0" aria-hidden="true" />
+                {view.freeShipping.message}
+              </p>
+              <div aria-hidden="true" className="h-1.5 overflow-hidden rounded-full bg-muted">
+                <div
+                  className={cn(
+                    "h-full",
+                    view.freeShipping.reached ? "bg-success" : "bg-primary",
+                    fillOf(view.freeShipping.percent)
+                  )}
+                />
+              </div>
+            </div>
+          )}
           <dl className="tabular flex flex-col gap-3">
             {view.discount && (
               <>

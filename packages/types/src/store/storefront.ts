@@ -22,6 +22,13 @@ export interface StorefrontFrame {
   whatsapp_phone: string | null
 }
 
+/** `GET /store/storefront`: the frame and the free shipping threshold (F4.5). */
+export interface StorefrontAnswer {
+  storefront: StorefrontFrame
+  /** Lira, KDV in, after discounts (`item_total`); null: no free shipping. */
+  free_shipping_threshold: number | null
+}
+
 /** The shop's legal identity, public by law (F13.9); what is missing is null. */
 export interface LegalIdentity {
   company_title: string | null

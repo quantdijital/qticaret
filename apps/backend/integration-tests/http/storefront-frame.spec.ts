@@ -14,6 +14,7 @@ interface Frame {
     trust_badges: { icon: string; title: string; text: string | null }[]
     whatsapp_phone: string | null
   }
+  free_shipping_threshold: number | null
 }
 
 /** F18 D3 (docs/19 §4): the shop writes the storefront's frame; the storefront reads it. */
@@ -42,6 +43,13 @@ medusaIntegrationTestRunner({
         trust_badges: [{ icon: "clock", title: "Aynı gün kargo", text: "16:00'ya kadar" }],
         whatsapp_phone: "0532 123 45 67",
       })
+      await settle(
+        http.post(
+          "/admin/platform-settings/promotions",
+          { free_shipping_threshold: 1500 },
+          { headers: owner.headers }
+        )
+      )
       const after = await frame()
       const withQuery = await settle(
         http.get("/store/storefront?fields=*", { headers: store.headers })
@@ -55,6 +63,7 @@ medusaIntegrationTestRunner({
         trust_badges: [],
         whatsapp_phone: null,
       })
+      expect(before.data.free_shipping_threshold).toBeNull()
       expect(before.headers["cache-control"]).toContain("max-age=300")
       expect(script.status).toBe(400)
       expect(saved.status).toBe(200)
@@ -67,6 +76,7 @@ medusaIntegrationTestRunner({
         trust_badges: [{ icon: "clock", title: "Aynı gün kargo", text: "16:00'ya kadar" }],
         whatsapp_phone: "+905321234567",
       })
+      expect(after.data.free_shipping_threshold).toBe(1500)
       expect(withQuery.status).toBe(400)
     })
   },

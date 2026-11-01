@@ -106,6 +106,7 @@ shadcn bileşeni eklemek: `cd packages/ui && pnpm exec shadcn add <ad>`. CLI'nin
 7. **Görsel:** `ResponsiveImage` (`<picture>`, AVIF/WebP). Yalnızca LCP görseli `priority`; ızgarada ilk satır.
 8. **Biçimlendirme storefront'ta:** fiyat, indirim yüzdesi, telefon görünüm modelinde biçimlenir (`lib/views`); tema sayı biçimlendirmez.
 9. **Dosya ≤ ~300 satır;** büyüyen sayfa `components/` ya da `layout/` altına bölünür.
+10. **Satır içi `style` yok:** üretimdeki CSP (`style-src 'self' 'nonce-…'`) HTML'deki `style` niteliğini reddeder. Değişken genişlik gibi değerler sabit sınıf adlarıyla verilir (ör. sepet kargo çubuğu 5'lik adımlar).
 
 ## 7. Sayfa envanteri
 
@@ -119,7 +120,7 @@ Durum: ✅ var · 🟡 temel hâli var · ⬜ yok. Görev kodları PROGRESS "F18
 | Tüm ürünler | ör. `/magaza` (landing) | ⬜ | landing | D4 |
 | Ürün | `/urun/{slug}` ya da `/{slug}` | 🟡 galeri, fiyat, seçenek, stok, sepete ekle | özellikler, yorum, soru-cevap, stok alarmı, taksit, kargo cümlesi var | D5 |
 | Arama | `/arama?q=` | 🟡 Medusa `q` | Meilisearch | D10 |
-| Sepet | `/sepet` | ✅ adet, kaldır, indirim, ara toplam | kupon, hediye kartı, ücretsiz kargo eşiği | D6 |
+| Sepet | `/sepet` | ✅ adet, kaldır, indirim, ara toplam, ücretsiz kargo çubuğu | kupon, hediye kartı | D6 |
 | Mini sepet (çekmece) | — | ⬜ | | D6 |
 | Ödeme | `/odeme` | ⬜ | adres (`tr-address`), kargo, ödeme oturumu, sözleşmeler, yaş beyanı, taksit | D7 |
 | Sipariş onayı | `/siparis/{id}` | ⬜ | `order-access` | D7 |

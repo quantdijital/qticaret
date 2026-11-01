@@ -202,6 +202,16 @@ export interface CartPageView {
   items: string
   discount: string | null
   subtotal: string
+  /** How near the cart is to free shipping; null when the shop gives none. */
+  freeShipping: FreeShippingView | null
   /** A message for the shopper after a failed change, already in words. */
   error: string | null
+}
+
+export interface FreeShippingView {
+  /** "Ücretsiz kargo için 250,00 TL daha ekleyin" or "Kargo ücretsiz", in words. */
+  message: string
+  /** 0–100, the bar's fill. */
+  percent: number
+  reached: boolean
 }
