@@ -13,6 +13,9 @@ interface Frame {
     footer_groups: { title: string; links: { label: string; href: string }[] }[]
     trust_badges: { icon: string; title: string; text: string | null }[]
     whatsapp_phone: string | null
+    menu: { label: string; href: string; children: { label: string; href: string }[] }[]
+    primary_color: string | null
+    hero: unknown
   }
   free_shipping_threshold: number | null
 }
@@ -62,6 +65,9 @@ medusaIntegrationTestRunner({
         footer_groups: [],
         trust_badges: [],
         whatsapp_phone: null,
+        menu: [],
+        primary_color: null,
+        hero: null,
       })
       expect(before.data.free_shipping_threshold).toBeNull()
       expect(before.headers["cache-control"]).toContain("max-age=300")
@@ -75,6 +81,9 @@ medusaIntegrationTestRunner({
         ],
         trust_badges: [{ icon: "clock", title: "Aynı gün kargo", text: "16:00'ya kadar" }],
         whatsapp_phone: "+905321234567",
+        menu: [],
+        primary_color: null,
+        hero: null,
       })
       expect(after.data.free_shipping_threshold).toBe(1500)
       expect(withQuery.status).toBe(400)

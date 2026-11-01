@@ -337,10 +337,50 @@
     "saved": "Ayarlar kaydedildi.",
     "storefront": {
       "title": "Vitrin",
-      "subtitle": "Mağazanızın her sayfasında görünen çerçeve: duyuru şeridi, üst bağlantılar, güven rozetleri, alt bilgi ve WhatsApp düğmesi. Her kart kendi bölümünü kaydeder.",
+      "subtitle": "Mağazanızın her sayfasında görünen çerçeve: ana renk, ana sayfa girişi, duyuru şeridi, üst bağlantılar, menü, güven rozetleri, alt bilgi ve WhatsApp düğmesi. Her kart kendi bölümünü kaydeder.",
       "moveUp": "{{item}}: yukarı taşı",
       "moveDown": "{{item}}: aşağı taşı",
       "remove": "{{item}}: kaldır",
+      "color": {
+        "title": "Renk",
+        "description": "Vitrinin ana rengi: birincil düğmeler ve duyuru şeridi bu renkle boyanır. Üzerindeki yazı, okunaklı kalacak biçimde beyaz ya da siyah olur.",
+        "label": "Ana renk",
+        "picker": "Ana renk seçici",
+        "placeholder": "Temanın rengi",
+        "hint": "# ile başlayan 6 haneli kodu yazın ya da renk kutusundan seçin. Boş bırakırsanız temanın kendi rengi (siyah) kullanılır.",
+        "reset": "Temanın rengine dön",
+        "preview": "Önizleme",
+        "button": "Sepete ekle",
+        "previewHint": "Vitrindeki duyuru şeridi ve birincil düğme bu renkte görünür."
+      },
+      "hero": {
+        "title": "Ana sayfa girişi",
+        "description": "Ana sayfanın en üstündeki giriş: kısa bir üst satır, başlık, bir iki cümle ve en çok iki düğme.",
+        "default": "Giriş yazılmadı; vitrin ana sayfada mağazanızın adını başlık, ilk iki kategorinizi düğme olarak gösteriyor.",
+        "custom": "Ana sayfa bu girişle açılıyor. Varsayılana dönerseniz mağazanızın adı ve ilk iki kategoriniz görünür.",
+        "reset": "Varsayılana dön",
+        "eyebrow": "Üst satır (isteğe bağlı)",
+        "eyebrowHint": "Başlığın üstündeki kısa satır; en çok {{max}} karakter.",
+        "eyebrowPlaceholder": "Yeni sezon",
+        "heading": "Başlık",
+        "headingHint": "En çok {{max}} karakter. Bir alanı doldurduysanız başlık zorunludur.",
+        "headingPlaceholder": "Her gün kullanacağınız ürünler",
+        "text": "Metin (isteğe bağlı)",
+        "textHint": "En çok {{max}} karakter; tek paragraf olarak gösterilir.",
+        "textPlaceholder": "Siparişleriniz aynı gün kargoda, iade 14 gün içinde ücretsiz.",
+        "buttons": "Düğmeler",
+        "addLink": "Düğme ekle",
+        "linksHint": "En çok {{max}} düğme; ilki ana düğme olur. Düğme eklemezseniz ilk iki kategoriniz gösterilir.",
+        "link": {
+          "label": "Düğme yazısı",
+          "href": "Adres",
+          "item": "{{number}}. düğme",
+          "labelOf": "{{number}}. düğmenin yazısı",
+          "hrefOf": "{{number}}. düğmenin adresi",
+          "labelPlaceholder": "Alışverişe başla",
+          "hrefPlaceholder": "/kampanyalar"
+        }
+      },
       "announcements": {
         "title": "Duyuru şeridi",
         "description": "Sayfanın en üstündeki ince şerit. Birden çok satır yazarsanız sırayla gösterilir.",
@@ -355,6 +395,20 @@
         "description": "Menünün üstündeki küçük bağlantılar: Hakkımızda, İletişim, Toptan satış gibi.",
         "empty": "Üst bağlantı yok; menünün üstünde bağlantı satırı görünmez.",
         "hint": "En çok {{max}} bağlantı."
+      },
+      "menu": {
+        "title": "Menü",
+        "description": "Başlıktaki ana menü. Öğe eklerseniz kategorilerinizden kendiliğinden oluşan menünün yerini alır; her öğenin altına açılan bağlantılar ekleyebilirsiniz.",
+        "empty": "Menü öğesi yok; vitrin üst kategorilerinizi ve alt kategorilerini menüde kendiliğinden gösteriyor.",
+        "item": "{{number}}. menü öğesi",
+        "labelOf": "{{number}}. menü öğesinin adı",
+        "hrefOf": "{{number}}. menü öğesinin adresi",
+        "labelPlaceholder": "Kampanyalar",
+        "hrefPlaceholder": "/kampanyalar",
+        "add": "Menü öğesi ekle",
+        "hint": "En çok {{max}} öğe.",
+        "addChild": "Alt bağlantı ekle",
+        "childrenHint": "En çok {{max}} alt bağlantı. Açılan menüde önce öğenin kendi bağlantısı görünür."
       },
       "links": {
         "label": "Görünen ad",
@@ -416,7 +470,8 @@
         "tooLong": "En çok {{max}} karakter yazın.",
         "textInvalid": "Metin, görünmeyen kontrol karakterleri içeremez.",
         "hrefInvalid": "Adres / ile başlayan bir mağaza sayfası ya da https:// ile başlayan bir site olmalı.",
-        "phoneInvalid": "Geçerli bir Türkiye telefon numarası girin."
+        "phoneInvalid": "Geçerli bir Türkiye telefon numarası girin.",
+        "colorInvalid": "Renk, # ile başlayan 6 haneli bir kod olmalı (#0b5c99 gibi)."
       }
     },
     "store": {

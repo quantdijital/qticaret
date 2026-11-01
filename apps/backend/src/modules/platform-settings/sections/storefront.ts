@@ -35,6 +35,26 @@ export interface StorefrontSettings {
   trust_badges: { icon: TrustIcon; title: string; text: string | null }[]
   /** The number a WhatsApp chat button opens, E.164; none: no button. */
   whatsapp_phone: string | null
+  /** The header's menu as the shop names it; none: the top categories and their children. */
+  menu: StorefrontMenuItem[]
+  /** The storefront's main colour (`#rrggbb`, lower case); none: the theme's own. */
+  primary_color: string | null
+  /** The home page's opening; none: the shop's name and its first two categories. */
+  hero: StorefrontHero | null
+}
+
+export interface StorefrontHero {
+  /** A short line above the heading ("Yatağan el işçiliği"). */
+  eyebrow: string | null
+  heading: string
+  text: string | null
+  /** At most two: the first is the main button. None: the first two categories. */
+  links: StorefrontLink[]
+}
+
+export interface StorefrontMenuItem extends StorefrontLink {
+  /** The panel it opens: the item's own link comes first in it. */
+  children: StorefrontLink[]
 }
 
 const text = (max: number) =>
@@ -75,6 +95,8 @@ const href = z
 
 const link = z.object({ label: text(60), href }).strict()
 
+const HEX_COLOR = /^#[0-9a-f]{6}$/
+
 /** The storefront's frame, as the shop writes it (F18 D3, docs/19 §4). */
 export const storefrontSection = defineSection<StorefrontSettings>(
   "storefront",
@@ -104,6 +126,24 @@ export const storefrontSection = defineSection<StorefrontSettings>(
         }
         return phone
       }),
+    menu: z
+      .array(z.object({ label: text(40), href, children: z.array(link).max(20) }).strict())
+      .max(12),
+    primary_color: z
+      .string()
+      .trim()
+      .toLowerCase()
+      .regex(HEX_COLOR, { message: "platform_settings.color_invalid" })
+      .nullable(),
+    hero: z
+      .object({
+        eyebrow: text(40).nullable(),
+        heading: text(90),
+        text: text(240).nullable(),
+        links: z.array(link).max(2),
+      })
+      .strict()
+      .nullable(),
   },
   {
     announcements: [],
@@ -111,5 +151,8 @@ export const storefrontSection = defineSection<StorefrontSettings>(
     footer_groups: [],
     trust_badges: [],
     whatsapp_phone: null,
+    menu: [],
+    primary_color: null,
+    hero: null,
   }
 )

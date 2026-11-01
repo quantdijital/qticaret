@@ -11,6 +11,9 @@ describe("storefront section", () => {
       footer_groups: [],
       trust_badges: [],
       whatsapp_phone: null,
+      menu: [],
+      primary_color: null,
+      hero: null,
     })
   })
 
@@ -29,9 +32,26 @@ describe("storefront section", () => {
       ],
       trust_badges: [{ icon: "truck", title: "Ücretsiz kargo", text: "1500 TL ve üzeri" }],
       whatsapp_phone: "0532 123 45 67",
+      menu: [
+        {
+          label: "Çakılar",
+          href: "/kategori/el-yapimi-caki",
+          children: [{ label: "N690 Çakılar", href: "/kategori/el-yapimi-caki/n690-cakilar" }],
+        },
+        { label: "Tüm Ürünler", href: "/magaza", children: [] },
+      ],
+      primary_color: " #0B5C99 ",
+      hero: {
+        eyebrow: "Yatağan el işçiliği",
+        heading: "El yapımı çakı ve bıçaklar",
+        text: null,
+        links: [{ label: "Özel koleksiyon", href: "/kategori/ozel-koleksiyon" }],
+      },
     })
 
     expect(parsed.whatsapp_phone).toBe("+905321234567")
+    expect(parsed.primary_color).toBe("#0b5c99")
+    expect(parsed.menu[0]?.children).toHaveLength(1)
     expect(parsed.footer_groups[0]?.links[1]?.href).toBe("https://instagram.com/ornek")
   })
 
@@ -55,5 +75,16 @@ describe("storefront section", () => {
     ).toBe(false)
     expect(patch.safeParse({ announcements: ["Kargo\u0000bedava"] }).success).toBe(false)
     expect(patch.safeParse({ whatsapp_phone: "12" }).success).toBe(false)
+    expect(patch.safeParse({ primary_color: "blue" }).success).toBe(false)
+    const hero = { eyebrow: null, heading: "Başlık", text: null }
+    expect(
+      patch.safeParse({ hero: { ...hero, links: Array(3).fill({ label: "a", href: "/a" }) } })
+        .success
+    ).toBe(false)
+    expect(patch.safeParse({ hero: { ...hero, heading: "", links: [] } }).success).toBe(false)
+    expect(
+      patch.safeParse({ menu: [{ label: "Kötü", href: "javascript:void(0)", children: [] }] })
+        .success
+    ).toBe(false)
   })
 })

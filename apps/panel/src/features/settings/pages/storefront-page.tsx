@@ -5,19 +5,23 @@ import { ErrorState, LoadingRows } from "@/components/patterns/states"
 import { sectionQuery } from "@/features/settings/api/sections"
 import type { StorefrontSettings } from "@/features/settings/api/sections"
 import { TrustBadgesCard } from "@/features/settings/components/storefront-badges-card"
+import { ColorCard } from "@/features/settings/components/storefront-color-card"
 import { FooterGroupsCard } from "@/features/settings/components/storefront-footer-card"
 import {
   AnnouncementsCard,
   TopLinksCard,
 } from "@/features/settings/components/storefront-header-cards"
+import { HeroCard } from "@/features/settings/components/storefront-hero-card"
+import { MenuCard } from "@/features/settings/components/storefront-menu-card"
 import { WhatsappCard } from "@/features/settings/components/storefront-whatsapp-card"
 import { errorText } from "@/lib/errors"
 
 /**
  * Settings > Storefront (F18, docs/19 §4): what the shop writes around every
- * page of its storefront, top to bottom: the announcement bar, the links
- * above the menu, the trust badges, the footer's columns and the WhatsApp
- * button. Each card saves its own part.
+ * page of its storefront: first its main colour and the home page's opening,
+ * then top to bottom the announcement bar, the links above the menu, the
+ * menu, the trust badges, the footer's columns and the WhatsApp button. Each
+ * card saves its own part.
  */
 export function StorefrontPage() {
   const { t } = useTranslation()
@@ -31,11 +35,14 @@ export function StorefrontPage() {
       {query.isError ? (
         <ErrorState text={errorText(t, query.error)} onRetry={() => void query.refetch()} />
       ) : !query.data ? (
-        <LoadingRows rows={5} />
+        <LoadingRows rows={8} />
       ) : (
         <>
+          <ColorCard saved={query.data.values} />
+          <HeroCard saved={query.data.values} />
           <AnnouncementsCard saved={query.data.values} />
           <TopLinksCard saved={query.data.values} />
+          <MenuCard saved={query.data.values} />
           <TrustBadgesCard saved={query.data.values} />
           <FooterGroupsCard saved={query.data.values} />
           <WhatsappCard saved={query.data.values} />

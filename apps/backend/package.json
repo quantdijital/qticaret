@@ -21,6 +21,7 @@
     "tenant:bootstrap": "medusa exec ./src/scripts/bootstrap-tenant.ts",
     "seed:demo": "NODE_ENV=${NODE_ENV:-development} medusa exec ./src/scripts/seed-demo.ts",
     "seed:demo-orders": "NODE_ENV=${NODE_ENV:-development} medusa exec ./src/scripts/seed-demo-orders.ts",
+    "shop:profile": "NODE_ENV=${NODE_ENV:-development} medusa exec ./src/scripts/load-shop-profile.ts",
     "tr-address:import": "medusa exec ./src/scripts/import-tr-address.ts",
     "messaging:samples": "medusa exec ./src/scripts/messaging-samples.ts",
     "lint": "eslint .",

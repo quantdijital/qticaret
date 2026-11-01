@@ -36,7 +36,13 @@ export type { SecuritySettings } from "./security"
 export type { SeoSettings } from "./seo"
 export type { LabelFormat, ShippingRate, ShippingSettings } from "./shipping"
 export type { StoreSettings } from "./store"
-export type { StorefrontLink, StorefrontSettings, TrustIcon } from "./storefront"
+export type {
+  StorefrontLink,
+  StorefrontHero,
+  StorefrontMenuItem,
+  StorefrontSettings,
+  TrustIcon,
+} from "./storefront"
 export { TRUST_ICONS } from "./storefront"
 export { mergePatch } from "./define"
 export type { SectionDefinition } from "./define"

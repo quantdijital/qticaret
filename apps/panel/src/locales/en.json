@@ -337,10 +337,50 @@
     "saved": "Settings saved.",
     "storefront": {
       "title": "Storefront",
-      "subtitle": "The frame shown on every page of your shop: the announcement bar, top links, trust badges, footer and WhatsApp button. Each card saves its own part.",
+      "subtitle": "The frame shown on every page of your shop: the main colour, home page opening, announcement bar, top links, menu, trust badges, footer and WhatsApp button. Each card saves its own part.",
       "moveUp": "{{item}}: move up",
       "moveDown": "{{item}}: move down",
       "remove": "{{item}}: remove",
+      "color": {
+        "title": "Colour",
+        "description": "Your storefront's main colour: primary buttons and the announcement bar are painted with it. The text on it turns white or black, whichever stays readable.",
+        "label": "Main colour",
+        "picker": "Main colour picker",
+        "placeholder": "Theme colour",
+        "hint": "Type a 6-digit code starting with # or pick one from the colour box. Leave it empty and the theme's own colour (black) is used.",
+        "reset": "Back to the theme colour",
+        "preview": "Preview",
+        "button": "Add to cart",
+        "previewHint": "The storefront's announcement bar and primary button show in this colour."
+      },
+      "hero": {
+        "title": "Home page opening",
+        "description": "The opening at the top of the home page: a short line above, the heading, a sentence or two and up to two buttons.",
+        "default": "No opening written; the home page shows your shop's name as the heading and your first two categories as buttons.",
+        "custom": "The home page opens with this. Go back to the default and your shop's name and first two categories show.",
+        "reset": "Back to the default",
+        "eyebrow": "Line above (optional)",
+        "eyebrowHint": "A short line above the heading; up to {{max}} characters.",
+        "eyebrowPlaceholder": "New season",
+        "heading": "Heading",
+        "headingHint": "Up to {{max}} characters. Once any field is filled in, the heading is required.",
+        "headingPlaceholder": "Things you will use every day",
+        "text": "Text (optional)",
+        "textHint": "Up to {{max}} characters; shown as one paragraph.",
+        "textPlaceholder": "Orders ship the same day, returns are free within 14 days.",
+        "buttons": "Buttons",
+        "addLink": "Add button",
+        "linksHint": "Up to {{max}} buttons; the first is the main one. With none, your first two categories show.",
+        "link": {
+          "label": "Button text",
+          "href": "Address",
+          "item": "Button {{number}}",
+          "labelOf": "Text of button {{number}}",
+          "hrefOf": "Address of button {{number}}",
+          "labelPlaceholder": "Start shopping",
+          "hrefPlaceholder": "/offers"
+        }
+      },
       "announcements": {
         "title": "Announcement bar",
         "description": "The thin bar at the very top of the page. Several lines are shown in turn.",
@@ -355,6 +395,20 @@
         "description": "The small links above the menu: About us, Contact, Wholesale and the like.",
         "empty": "No top links; no link row shows above the menu.",
         "hint": "Up to {{max}} links."
+      },
+      "menu": {
+        "title": "Menu",
+        "description": "The main menu in the header. Items you add replace the menu built from your categories by itself; under each item you can add the links its dropdown opens.",
+        "empty": "No menu items; the storefront shows your top categories and their subcategories in the menu by itself.",
+        "item": "Menu item {{number}}",
+        "labelOf": "Label of menu item {{number}}",
+        "hrefOf": "Address of menu item {{number}}",
+        "labelPlaceholder": "Offers",
+        "hrefPlaceholder": "/offers",
+        "add": "Add menu item",
+        "hint": "Up to {{max}} items.",
+        "addChild": "Add sub-link",
+        "childrenHint": "Up to {{max}} sub-links. The dropdown shows the item's own link first."
       },
       "links": {
         "label": "Label",
@@ -416,7 +470,8 @@
         "tooLong": "Write {{max}} characters at most.",
         "textInvalid": "The text cannot contain invisible control characters.",
         "hrefInvalid": "The address must be a shop page starting with / or a site starting with https://.",
-        "phoneInvalid": "Enter a valid Turkish phone number."
+        "phoneInvalid": "Enter a valid Turkish phone number.",
+        "colorInvalid": "The colour must be a 6-digit code starting with # (like #0b5c99)."
       }
     },
     "store": {
