@@ -110,6 +110,7 @@ export function AuthForm({
       )}
       {mode === "reset" && <input type="hidden" name="token" value={view.token ?? ""} />}
       {view.next && <input type="hidden" name="next" value={view.next} />}
+      {view.invite && <input type="hidden" name="davet" value={view.invite} />}
       {children}
       {mode === "register" && view.terms && (
         <>

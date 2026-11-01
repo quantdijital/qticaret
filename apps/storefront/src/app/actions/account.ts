@@ -6,6 +6,7 @@ import { z } from "zod"
 import type { ChallengeResult } from "@qticaret/ui"
 import {
   claimCart,
+  claimMigration,
   confirmVerification,
   createCustomer,
   login,
@@ -21,8 +22,10 @@ import {
   endSession,
   forgetPending,
   pendingToken,
+  rememberInvite,
   rememberPending,
   startSession,
+  takeInvite,
 } from "@/lib/account/session"
 import { cartIdFromCookie, forgetCart } from "@/lib/cart/cookie"
 import { challengeOf } from "@/lib/checkout/pay"
@@ -53,6 +56,11 @@ async function signedIn(token: string, next: string | null): Promise<never> {
   if (cartId) {
     // A cart that cannot move (ordered, another's) stays as it is
     await claimCart(cartId, token).catch(() => undefined)
+  }
+  // An invited customer's old shop's orders, reviews and addresses (F14 G6)
+  const invite = await takeInvite()
+  if (invite) {
+    await claimMigration(invite, token).catch(() => undefined)
   }
   revalidatePath("/", "layout")
   redirect(safeNext(next) ?? "/hesap")
@@ -101,6 +109,7 @@ const Register = z.object({
   password: Password,
   accept: z.literal("on").optional(),
   terms: z.literal("1").optional(),
+  davet: z.string().max(200).optional(),
   challenge: Challenge,
 })
 
@@ -139,6 +148,9 @@ export async function registerAction(
     })
     await requestVerification(token, input.email)
     await rememberPending(token)
+    if (input.davet) {
+      await rememberInvite(input.davet)
+    }
   } catch (error) {
     return answered(error, "account.register_failed")
   }

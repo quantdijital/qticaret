@@ -332,5 +332,7 @@
   "cookies.marketing_text": "Size uygun reklam ve kampanyalar göstermek için kullanılır.",
   "cookies.save_choice": "Seçimimi kaydet",
   "cookies.only_necessary": "Yalnızca zorunlu",
-  "cookies.accept_all": "Tümünü kabul et"
+  "cookies.accept_all": "Tümünü kabul et",
+  "cart.link_invalid": "Bu bağlantı geçersiz ya da kullanılmış. Sepetiniz aşağıda.",
+  "account.notice_invited": "Yeni mağazamıza hoş geldiniz! Hesabınızı oluşturun; eski siparişleriniz ve adresleriniz ilk girişte hesabınıza taşınır."
 }

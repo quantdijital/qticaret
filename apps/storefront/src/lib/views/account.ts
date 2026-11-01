@@ -40,6 +40,7 @@ export function authView(
     needsPassword: options.needsPassword ?? false,
     terms: options.terms ?? null,
     next: options.next ?? null,
+    invite: options.invite ?? null,
     links: AUTH_LINKS,
   }
 }

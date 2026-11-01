@@ -126,3 +126,12 @@ export function claimCart(cartId: string, token: string) {
     headers: bearer(token),
   })
 }
+
+/** An invited customer takes their migrated records (F14 G6); the record's e-mail must be the login's. */
+export function claimMigration(key: string, token: string) {
+  return storeCall("/store/customers/me/migration-claim", {
+    method: "POST",
+    body: { token: key },
+    headers: bearer(token),
+  })
+}

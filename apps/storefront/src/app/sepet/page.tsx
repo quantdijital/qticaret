@@ -12,6 +12,7 @@ import { theme } from "@/theme"
 export const metadata: Metadata = robotsOnly("noindex,nofollow", t("cart.title"))
 
 const CART_ERRORS = new Set([
+  "cart.link_invalid",
   "cart.quantity_invalid",
   "cart.update_failed",
   "errors.too_many_requests",

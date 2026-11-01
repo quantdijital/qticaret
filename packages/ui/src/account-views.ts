@@ -25,6 +25,8 @@ export interface AuthPageView {
   terms: ContractView | null
   /** Where to go after signing in (a path on the shop). */
   next: string | null
+  /** register: a migration invite's key from the link (`?davet=`), sent along. */
+  invite: string | null
   /** The other forms' addresses (login, register, forgot). */
   links: Record<"login" | "register" | "forgot", string>
 }

@@ -60,3 +60,30 @@ export function claimsOf(token: string): { actor_id?: string; exp?: number } {
     return {}
   }
 }
+
+// A migration invite's key (F14 G6): kept from registration until the account signs in
+const INVITE = () => (production() ? "__Host-qt_invite" : "qt_invite")
+const INVITE_KEY = /^[\w.-]{1,200}$/
+
+export async function rememberInvite(key: string): Promise<void> {
+  if (!INVITE_KEY.test(key)) {
+    return
+  }
+  ;(await cookies()).set(INVITE(), key, {
+    httpOnly: true,
+    secure: production(),
+    sameSite: "lax",
+    path: "/",
+    maxAge: DAY,
+  })
+}
+
+/** The invite's key, once: read and forgotten. */
+export async function takeInvite(): Promise<string | null> {
+  const jar = await cookies()
+  const value = jar.get(INVITE())?.value ?? null
+  if (value !== null) {
+    jar.delete(INVITE())
+  }
+  return value !== null && INVITE_KEY.test(value) ? value : null
+}

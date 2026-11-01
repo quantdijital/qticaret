@@ -8,9 +8,31 @@ import { theme } from "@/theme"
 
 export const metadata: Metadata = robotsOnly("noindex,nofollow", t("account.register_title"))
 
-/** `/hesap/kayit` (D8): a new account; the shop's membership text accepted when it has one. */
-export default async function RegisterPage() {
+const INVITE = /^[\w.-]{1,200}$/
+
+/**
+ * `/hesap/kayit` (D8): a new account; the shop's membership text accepted
+ * when it has one. `?davet=` is a migration invite (F14 G6): its key goes
+ * with the form and the old shop's records come over at first sign-in.
+ */
+export default async function RegisterPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>
+}) {
   await awayIfSignedIn()
-  const terms = await membershipTerms()
-  return <theme.AuthPage t={t} actions={authActions} view={authView("register", { terms })} />
+  const [terms, query] = await Promise.all([membershipTerms(), searchParams])
+  const invite =
+    typeof query["davet"] === "string" && INVITE.test(query["davet"]) ? query["davet"] : null
+  return (
+    <theme.AuthPage
+      t={t}
+      actions={authActions}
+      view={authView("register", {
+        terms,
+        invite,
+        notice: invite ? t("account.notice_invited") : null,
+      })}
+    />
+  )
 }
