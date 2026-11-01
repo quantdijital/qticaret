@@ -20,9 +20,10 @@ export const RESERVED_ROOT_SEGMENTS: ReadonlySet<string> = new Set([
   "giris",
   "kayit",
   "cikis",
-  // An order's page and the shop's legal texts (F18 D7, D10)
+  // An order's page, the shop's legal texts, the whole catalogue (F18 D7, D10, D4)
   "siparis",
   "yasal",
+  "magaza",
   // Backend paths, should a proxy put them on the storefront's host (F16)
   "admin",
   "app",

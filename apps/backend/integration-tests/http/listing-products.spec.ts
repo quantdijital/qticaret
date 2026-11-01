@@ -107,5 +107,21 @@ medusaIntegrationTestRunner({
       const refused = await list({ malzeme: values.join(",") })
       expect([refused.status, refused.data.message]).toEqual([404, "listing.out_of_bounds"])
     })
+    it("lists the whole catalogue as `all`", async () => {
+      const all = await settle(
+        http.get<Answer>(
+          `/store/listings/products?${new URLSearchParams({
+            type: "all",
+            id: "all",
+            region_id: kit.shop.regionId,
+            currency_code: "try",
+            query: "malzeme=seramik",
+          }).toString()}`,
+          { headers: kit.store.headers }
+        )
+      )
+      expect(all.status).toBe(200)
+      expect(all.data.count).toBe(3)
+    })
   },
 })

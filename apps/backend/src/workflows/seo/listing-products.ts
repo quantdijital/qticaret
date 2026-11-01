@@ -53,9 +53,13 @@ interface ProductRow {
   variants?: ({ calculated_price?: { calculated_amount?: number | null } | null } | null)[] | null
 }
 
+/** The whole catalogue's listing (`/magaza`): every published product. */
+export const ALL_PRODUCTS = "all"
+
 /** The listing's own products before its filters: published, in the base's scope. */
 async function baseIds(container: MedusaContainer, listed: Listed): Promise<string[]> {
-  const base = await baseOf(container, listed)
+  const base =
+    listed.entity_type === ALL_PRODUCTS ? { where: {}, ids: null } : await baseOf(container, listed)
   if (!base || base.ids?.length === 0) {
     return []
   }
