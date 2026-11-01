@@ -8,6 +8,7 @@ import {
 } from "../admin/landings/validators"
 import { StoreGetContent } from "../store/content/validators"
 import { StoreGetLandingProducts } from "../store/landings/validators"
+import { StoreGetListingProducts } from "../store/listings/validators"
 
 /**
  * Content pages, blog posts and facet landing pages (F3.16): the admin's
@@ -65,5 +66,11 @@ export const CONTENT_ROUTES = [
     matcher: "/store/landings/:id/products",
     methods: ["GET" as const],
     middlewares: [validateAndTransformQuery(StoreGetLandingProducts, {})],
+  },
+  // A listing's filtered, sorted page and its filters (F18 D4)
+  {
+    matcher: "/store/listings/products",
+    methods: ["GET" as const],
+    middlewares: [validateAndTransformQuery(StoreGetListingProducts, {})],
   },
 ]

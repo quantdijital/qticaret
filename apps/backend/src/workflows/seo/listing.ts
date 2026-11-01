@@ -57,7 +57,7 @@ const LISTING_TYPES: ReadonlySet<string> = new Set([
   CATALOG_ENTITY_TYPES.landing,
 ])
 
-interface Listed {
+export interface Listed {
   entity_type: string
   entity_id: string
 }
@@ -133,7 +133,7 @@ const subtreeWhere = async (container: MedusaContainer, categoryId: string) => (
 })
 
 // What the listing lists before its filters; null for a listing gone since
-async function baseOf(container: MedusaContainer, listed: Listed): Promise<Base | null> {
+export async function baseOf(container: MedusaContainer, listed: Listed): Promise<Base | null> {
   if (listed.entity_type === CATALOG_ENTITY_TYPES.category) {
     return { where: await subtreeWhere(container, listed.entity_id), ids: null }
   }
