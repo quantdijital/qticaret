@@ -1,7 +1,7 @@
 import { Lock } from "lucide-react"
 import type { CheckoutActions, CheckoutPageView, CheckoutStep, Translate } from "@qticaret/ui"
 import { AddressForm } from "./checkout/AddressForm"
-import { OrderSummary } from "./checkout/OrderSummary"
+import { FoldedSummary, OrderSummary } from "./checkout/OrderSummary"
 import { PaymentForm } from "./checkout/PaymentForm"
 import { ShippingForm } from "./checkout/ShippingForm"
 import { Step } from "./checkout/Step"
@@ -83,6 +83,7 @@ export function CheckoutPage({
       )}
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_25rem] lg:gap-12">
         <div className="flex flex-col gap-4">
+          <FoldedSummary summary={view.summary} t={t} />
           <Step
             number={1}
             title={t("checkout.step_address")}
@@ -184,7 +185,7 @@ export function CheckoutPage({
             )}
           </Step>
         </div>
-        <OrderSummary summary={view.summary} t={t} />
+        <OrderSummary summary={view.summary} t={t} className="hidden lg:flex" />
       </div>
     </PageContainer>
   )

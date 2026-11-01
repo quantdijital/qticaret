@@ -1,5 +1,6 @@
 import { formatLira } from "@qticaret/ui"
-import type { FreeShippingView, Translate } from "@qticaret/ui"
+import type { CartLineView, FreeShippingView, MiniCartView, Translate } from "@qticaret/ui"
+import type { Cart } from "@/lib/cart/cart"
 
 /** Kuruş, so float noise never says "0,00 TL more". */
 const kurus = (lira: number): number => Math.round(lira * 100)
@@ -25,5 +26,45 @@ export function freeShippingOf(
     message: t("cart.free_shipping_left", { amount: formatLira(left / 100) }),
     percent: Math.floor((kurus(itemTotal) / kurus(threshold)) * 100),
     reached: false,
+  }
+}
+
+/** Discounts in kuruş are compared rounded: no "−0,00 TL" from float noise. */
+export const differs = (a: number, b: number) => kurus(a) !== kurus(b)
+
+/** The cart's lines as the cart page and the drawer show them. */
+export function cartLinesOf(cart: Cart | null): CartLineView[] {
+  return (cart?.items ?? []).map((line) => ({
+    id: line.id,
+    title: line.title,
+    detail: line.variant_title ?? line.subtitle,
+    quantity: line.quantity,
+    total: formatLira(line.total),
+    original: differs(line.original_total, line.total) ? formatLira(line.original_total) : null,
+    image: line.thumbnail
+      ? {
+          src: line.thumbnail,
+          alt: line.title,
+          width: null,
+          height: null,
+          sources: { avif: null, webp: null },
+        }
+      : null,
+  }))
+}
+
+/** The header drawer's cart; null without lines. */
+export function miniCartOf(
+  cart: Cart | null,
+  threshold: number | null,
+  t: Translate
+): MiniCartView | null {
+  if (!cart || cart.items.length === 0) {
+    return null
+  }
+  return {
+    lines: cartLinesOf(cart),
+    subtotal: formatLira(cart.item_total),
+    freeShipping: freeShippingOf(cart.item_total, threshold, t),
   }
 }

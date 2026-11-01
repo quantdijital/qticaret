@@ -1,7 +1,7 @@
 import "server-only"
 import type { ContactView, ShopView } from "@qticaret/ui"
 import type { LegalIdentity, StorefrontFrame } from "@qticaret/types"
-import { cartQuantity } from "@/lib/cart/cart"
+import { headerCart } from "@/lib/cart/cart"
 import { t } from "@/lib/i18n"
 import {
   allCategories,
@@ -10,6 +10,7 @@ import {
   siteSeo,
   storefrontSettings,
 } from "@/lib/store-api/requests"
+import { miniCartOf } from "./cart"
 import { navigation } from "./categories"
 import { displayPhone, footerGroups, linkViews, socialLinks, whatsappHref } from "./frame"
 
@@ -26,13 +27,14 @@ export function contactOf(identity: LegalIdentity, frame: StorefrontFrame): Cont
 
 /** The frame around every page (D3, docs/19 §4), from the backend's answers. */
 export async function shopView(): Promise<ShopView> {
-  const [site, categories, { storefront: frame }, identity, quantity] = await Promise.all([
-    siteSeo(),
-    allCategories(),
-    storefrontSettings(),
-    legalIdentity(),
-    cartQuantity(),
-  ])
+  const [site, categories, { storefront: frame, free_shipping_threshold }, identity, cart] =
+    await Promise.all([
+      siteSeo(),
+      allCategories(),
+      storefrontSettings(),
+      legalIdentity(),
+      headerCart(),
+    ])
   const paths = await pathsOf(
     "product_category",
     categories.map((category) => category.id)
@@ -58,7 +60,8 @@ export async function shopView(): Promise<ShopView> {
         }
       : null,
     categories: menu,
-    cartQuantity: quantity,
+    cartQuantity: (cart?.items ?? []).reduce((sum, line) => sum + line.quantity, 0),
+    cart: miniCartOf(cart, free_shipping_threshold, t),
     announcements: frame.announcements,
     topLinks: linkViews(frame.top_links),
     footerGroups: footerGroups(frame, menu, t),

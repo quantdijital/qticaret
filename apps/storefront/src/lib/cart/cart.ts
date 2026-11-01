@@ -67,14 +67,13 @@ export async function currentCart(): Promise<Cart | null> {
   }
 }
 
-/** How many items the header shows; a backend hiccup shows none rather than failing the page. */
-export async function cartQuantity(): Promise<number> {
+/** The cart for the header (count and drawer); a backend hiccup shows none rather than failing the page. */
+export async function headerCart(): Promise<Cart | null> {
   try {
-    const cart = await currentCart()
-    return (cart?.items ?? []).reduce((sum, line) => sum + line.quantity, 0)
+    return await currentCart()
   } catch (error) {
     if (isStoreApiError(error)) {
-      return 0
+      return null
     }
     throw error
   }

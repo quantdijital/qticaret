@@ -11,16 +11,27 @@ export function ProductGallery({
   images,
   label,
   noImage,
+  initial,
 }: {
   images: ImageView[]
   label: string
   noImage: string
+  /** The product's first letter, shown large while it has no picture. */
+  initial: string
 }) {
   if (images.length === 0) {
     return (
-      <div className="flex aspect-square flex-col items-center justify-center gap-2 rounded-3xl border bg-card text-sm text-muted-foreground">
-        <ImageOff className="size-8" aria-hidden="true" />
-        {noImage}
+      <div className="flex aspect-square flex-col items-center justify-center gap-3 rounded-3xl border bg-gradient-to-br from-card to-muted text-sm text-muted-foreground">
+        <span
+          aria-hidden="true"
+          className="font-heading text-[10rem] leading-none text-foreground/10"
+        >
+          {initial}
+        </span>
+        <span className="flex items-center gap-1.5">
+          <ImageOff className="size-4" aria-hidden="true" />
+          {noImage}
+        </span>
       </div>
     )
   }

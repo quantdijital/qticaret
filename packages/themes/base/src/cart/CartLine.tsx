@@ -1,4 +1,4 @@
-import { ImageOff, Minus, Plus, X } from "lucide-react"
+import { Minus, Plus, X } from "lucide-react"
 import { ResponsiveImage } from "@qticaret/ui"
 import type { CartLineView, ThemeActions, Translate } from "@qticaret/ui"
 
@@ -30,9 +30,12 @@ export function CartLine({
             className="h-full w-full object-cover"
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-muted-foreground">
-            <ImageOff className="size-5" aria-hidden="true" />
-          </div>
+          <span
+            aria-hidden="true"
+            className="font-heading flex h-full items-center justify-center text-4xl text-foreground/10"
+          >
+            {line.title.charAt(0).toLocaleUpperCase("tr")}
+          </span>
         )}
       </div>
       <form action={actions.changeCartLine} className="flex flex-1 flex-col justify-between gap-3">

@@ -1,6 +1,6 @@
 import { ArrowLeft, Lock } from "lucide-react"
 import type { PaymentFramePageView, Translate } from "@qticaret/ui"
-import { OrderSummary } from "./checkout/OrderSummary"
+import { FoldedSummary, OrderSummary } from "./checkout/OrderSummary"
 import { PageContainer } from "./components/Container"
 
 /**
@@ -22,6 +22,7 @@ export function PaymentFramePage({ view, t }: { view: PaymentFramePageView; t: T
         </a>
       </header>
       <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_25rem] lg:gap-12">
+        <FoldedSummary summary={view.summary} t={t} />
         <section className="flex flex-col gap-4 rounded-3xl border bg-card p-3 sm:p-5">
           <p className="flex items-center gap-2 px-2 pt-1 text-sm text-muted-foreground">
             <Lock className="size-4" aria-hidden="true" />
@@ -34,7 +35,7 @@ export function PaymentFramePage({ view, t }: { view: PaymentFramePageView; t: T
             referrerPolicy="origin"
           />
         </section>
-        <OrderSummary summary={view.summary} t={t} />
+        <OrderSummary summary={view.summary} t={t} className="hidden lg:flex" />
       </div>
     </PageContainer>
   )

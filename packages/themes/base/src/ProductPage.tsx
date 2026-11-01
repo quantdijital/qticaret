@@ -41,6 +41,7 @@ export function ProductPage({
             images={view.images}
             label={t("product.images")}
             noImage={t("product.no_image")}
+            initial={view.title.trim().charAt(0).toLocaleUpperCase("tr")}
           />
           <div className="flex flex-col gap-6 lg:sticky lg:top-40 lg:self-start">
             <header className="flex flex-col gap-3">

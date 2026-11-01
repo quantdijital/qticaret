@@ -66,12 +66,21 @@ export interface SocialLinkView {
   href: string
 }
 
+/** The cart as the header's drawer shows it (D6): its lines read-only, the subtotal. */
+export interface MiniCartView {
+  lines: CartLineView[]
+  subtotal: string
+  freeShipping: FreeShippingView | null
+}
+
 /** Everything the frame around every page shows (D3, docs/19 §4). */
 export interface ShopView {
   name: string
   logo: ImageView | null
   categories: NavCategoryView[]
   cartQuantity: number
+  /** The open cart's lines for the drawer; null without one. */
+  cart: MiniCartView | null
   /** The announcement bar's lines; none: no bar. */
   announcements: string[]
   /** The header's small links (about, contact…). */

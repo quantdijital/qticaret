@@ -1,12 +1,25 @@
+import { ChevronDown, ShoppingBag } from "lucide-react"
 import { ResponsiveImage } from "@qticaret/ui"
 import type { CheckoutSummaryView, Translate } from "@qticaret/ui"
+import { cn } from "@qticaret/ui/lib/utils"
 
 /** The basket beside the checkout: lines with their pictures and counts, then the totals. */
-export function OrderSummary({ summary, t }: { summary: CheckoutSummaryView; t: Translate }) {
+export function OrderSummary({
+  summary,
+  t,
+  className,
+}: {
+  summary: CheckoutSummaryView
+  t: Translate
+  className?: string
+}) {
   return (
     <aside
       aria-labelledby="odeme-ozeti"
-      className="flex h-fit flex-col gap-5 rounded-3xl border bg-card p-6 text-sm lg:sticky lg:top-40 lg:p-7"
+      className={cn(
+        "flex h-fit flex-col gap-5 rounded-3xl border bg-card p-6 text-sm lg:sticky lg:top-40 lg:p-7",
+        className
+      )}
     >
       <h2 id="odeme-ozeti" className="text-2xl">
         {t("cart.summary")}
@@ -68,5 +81,23 @@ export function OrderSummary({ summary, t }: { summary: CheckoutSummaryView; t: 
       </dl>
       <p className="text-xs text-muted-foreground">{t("checkout.tax_included")}</p>
     </aside>
+  )
+}
+
+/** On phones the basket folds above the steps: its total in sight, its lines a tap away. */
+export function FoldedSummary({ summary, t }: { summary: CheckoutSummaryView; t: Translate }) {
+  return (
+    <details className="group rounded-3xl border bg-card lg:hidden">
+      <summary className="flex cursor-pointer list-none items-center gap-3 p-5 text-sm marker:hidden">
+        <ShoppingBag className="size-4.5" aria-hidden="true" />
+        <span className="flex-1 font-medium">{t("checkout.show_summary")}</span>
+        <span className="tabular font-semibold">{summary.total}</span>
+        <ChevronDown
+          className="size-4 transition-transform group-open:rotate-180"
+          aria-hidden="true"
+        />
+      </summary>
+      <OrderSummary summary={summary} t={t} className="rounded-t-none border-x-0 border-b-0" />
+    </details>
   )
 }

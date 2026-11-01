@@ -1,11 +1,12 @@
 "use client"
 
 import { Check } from "lucide-react"
-import { useActionState, useMemo, useState } from "react"
+import { useActionState, useEffect, useMemo, useState } from "react"
 import type { ActionResult, FormAction, ProductOptionView, VariantView } from "@qticaret/ui"
 import { Badge } from "@qticaret/ui/components/badge"
 import { Button } from "@qticaret/ui/components/button"
 import { cn } from "@qticaret/ui/lib/utils"
+import { CART_ADDED_EVENT } from "../layout/CartDrawer"
 import { QuantityField } from "./QuantityField"
 
 export interface PurchaseLabels {
@@ -65,6 +66,12 @@ export function PurchasePanel({
   // A new choice makes the last answer stale: it was about the previous variant
   const [stale, setStale] = useState(false)
   const variant = useMemo(() => matching(variants, options, chosen), [variants, options, chosen])
+  // A line that went in opens the header's cart drawer
+  useEffect(() => {
+    if (state.ok) {
+      window.dispatchEvent(new Event(CART_ADDED_EVENT))
+    }
+  }, [state])
 
   function choose(optionId: string, value: string) {
     const next = { ...chosen, [optionId]: value }

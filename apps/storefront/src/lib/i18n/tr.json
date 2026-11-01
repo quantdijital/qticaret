@@ -239,5 +239,8 @@
   "order.payment_refunded": "İade edildi",
   "order.payment_partially_refunded": "Kısmen iade edildi",
   "order.payment_canceled": "Ödeme iptal edildi",
-  "order.payment_requires_action": "Ödeme işlem bekliyor"
+  "order.payment_requires_action": "Ödeme işlem bekliyor",
+  "checkout.show_summary": "Sipariş özeti",
+  "cart.drawer_note": "Kargo ve indirim kodları ödeme adımında hesaplanır.",
+  "cart.view": "Sepete git"
 }

@@ -1,7 +1,8 @@
-import { ShoppingBag, UserRound } from "lucide-react"
+import { UserRound } from "lucide-react"
 import { ResponsiveImage } from "@qticaret/ui"
 import type { ShopView, Translate } from "@qticaret/ui"
 import { Container } from "../components/Container"
+import { CartDrawer } from "./CartDrawer"
 import { CategoryNav } from "./CategoryNav"
 import { MobileMenu } from "./MobileMenu"
 import { SearchForm } from "./SearchForm"
@@ -49,21 +50,22 @@ export function SiteHeader({ shop, t }: { shop: ShopView; t: Translate }) {
           <a href="/hesap" aria-label={t("nav.account")} className={`${ICON_LINK} hidden sm:flex`}>
             <UserRound className="size-5" aria-hidden="true" />
           </a>
-          <a
-            href="/sepet"
-            aria-label={t("nav.cart_label", { count: shop.cartQuantity })}
+          <CartDrawer
+            cart={shop.cart}
+            count={shop.cartQuantity}
             className={ICON_LINK}
-          >
-            <ShoppingBag className="size-5" aria-hidden="true" />
-            {shop.cartQuantity > 0 && (
-              <span
-                aria-hidden="true"
-                className="tabular absolute top-0.5 right-0.5 flex min-w-[1.125rem] items-center justify-center rounded-full bg-primary px-1 text-[10px] leading-[1.125rem] font-semibold text-primary-foreground ring-2 ring-background"
-              >
-                {shop.cartQuantity}
-              </span>
-            )}
-          </a>
+            words={{
+              label: t("nav.cart_label", { count: shop.cartQuantity }),
+              title: t("cart.title"),
+              empty: t("cart.empty"),
+              subtotal: t("cart.subtotal"),
+              note: t("cart.drawer_note"),
+              viewCart: t("cart.view"),
+              checkout: t("cart.checkout"),
+              close: t("nav.close"),
+              quantity: t("order.quantity"),
+            }}
+          />
         </div>
       </Container>
       <Container className="pb-3 lg:hidden">
