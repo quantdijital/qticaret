@@ -56,6 +56,20 @@ const OPTION_FIELDS = [
 const present = <T>(rows: (T | null)[] | null | undefined): T[] =>
   (rows ?? []).filter((row): row is T => row !== null)
 
+const REGION_ATTRIBUTE = "region_id"
+
+/**
+ * A shop's base price: a currency's plain price, or a region's (Medusa
+ * Admin prices an option per region with one `region_id` rule).
+ */
+function isBasePrice(price: PriceRow): boolean {
+  const rules = present(price.price_rules)
+  return (
+    rules.length === 0 ||
+    (rules.length === 1 && rules[0]?.attribute === REGION_ATTRIBUTE && rules[0].operator === "eq")
+  )
+}
+
 /** The platform's free price: 0 from a basket total, nothing else. */
 export function isFreeShippingPrice(price: PriceRow): boolean {
   const rules = present(price.price_rules)
@@ -78,9 +92,13 @@ type PriceUpdate =
 
 /**
  * An option's prices with free shipping from `threshold` (lira) in each
- * currency it has a plain price in, or without it (null); null when the
+ * currency it has a base price in, or without it (null); null when the
  * option is already so, or is not flat-rate. Prices kept go by id alone:
  * Medusa leaves what it is not told about a price as it is.
+ *
+ * Medusa picks the price matching more rules, then the lowest: the free
+ * price (one rule) beats a plain price (none) and ties a region's price
+ * (one), where 0 is the lower. Below the threshold it does not match.
  */
 export function planFreeShipping(
   option: ShippingOptionRow,
@@ -94,7 +112,7 @@ export function planFreeShipping(
   const currencies = [
     ...new Set(
       prices.flatMap((price) =>
-        price.currency_code && present(price.price_rules).length === 0 ? [price.currency_code] : []
+        price.currency_code && isBasePrice(price) ? [price.currency_code] : []
       )
     ),
   ]

@@ -53,4 +53,20 @@ describe("free shipping from a basket total (F4.5)", () => {
     expect(isFreeShippingPrice(shops)).toBe(false)
     expect(isFreeShippingPrice({ ...free(500), price_rules: [] })).toBe(false)
   })
+
+  it("gives a region's price (Medusa Admin prices options per region) the currency's free price", () => {
+    const region = {
+      id: "price_region",
+      amount: 90,
+      currency_code: "try",
+      price_rules: [{ attribute: "region_id", operator: "eq", value: "reg_1" }],
+    }
+    expect(planFreeShipping(option([region]), 1500)).toEqual([
+      { id: "price_region" },
+      { currency_code: "try", amount: 0, rules: rule(1500) },
+    ])
+    expect(planFreeShipping(option([region, free(1500)]), 1500)).toBeNull()
+    // A plain price and a region's in one currency: one free price
+    expect(planFreeShipping(option([base, region]), 500)).toHaveLength(3)
+  })
 })

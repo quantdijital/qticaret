@@ -60,7 +60,11 @@ medusaIntegrationTestRunner({
       )
 
     // What the shop's flat-rate option costs a basket of `quantity` units of 100 TL
-    async function shipping(quantity: number, codes?: string[]): Promise<number> {
+    async function shipping(
+      quantity: number,
+      codes?: string[],
+      optionId: string = shop.shippingOptionId
+    ): Promise<number> {
       const address = {
         first_name: "Ayşe",
         last_name: "Yılmaz",
@@ -82,7 +86,7 @@ medusaIntegrationTestRunner({
         input: { cart_id: cart.id },
       })
       const option = (result as { id: string; amount?: number }[]).find(
-        (each) => each.id === shop.shippingOptionId
+        (each) => each.id === optionId
       )
       return Number(option?.amount)
     }
@@ -228,6 +232,42 @@ medusaIntegrationTestRunner({
         await new Promise((resolve) => setTimeout(resolve, 100))
       }
       expect(prices.map((price) => Number(price.amount)).sort((a, b) => a - b)).toEqual([0, 150])
+    })
+    it("makes a region-priced option free too (Medusa Admin prices options per region)", async () => {
+      const { data } = await getContainer()
+        .resolve(ContainerRegistrationKeys.QUERY)
+        .graph({
+          entity: "shipping_option",
+          fields: [
+            "id",
+            "service_zone_id",
+            "shipping_profile_id",
+            "provider_id",
+            "type.label",
+            "type.description",
+            "type.code",
+          ],
+          filters: { id: shop.shippingOptionId },
+        })
+      const model = data[0] as unknown as ModelRow
+      const { result } = await createShippingOptionsWorkflow(getContainer()).run({
+        input: [
+          {
+            name: "Bölge Kargo",
+            service_zone_id: model.service_zone_id,
+            shipping_profile_id: model.shipping_profile_id,
+            provider_id: model.provider_id,
+            price_type: "flat",
+            type: model.type,
+            prices: [{ region_id: shop.regionId, amount: 120 }],
+            rules: [],
+          },
+        ],
+      })
+      const created = result[0]?.id ?? ""
+      expect((await threshold(250)).status).toBe(200)
+      expect(await shipping(2, undefined, created)).toBe(120)
+      expect(await shipping(3, undefined, created)).toBe(0)
     })
   },
 })
