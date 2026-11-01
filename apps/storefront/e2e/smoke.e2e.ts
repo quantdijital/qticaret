@@ -6,9 +6,13 @@ const PAGES = [
   DEMO_PRODUCT,
   "/sepet",
   "/blog",
+  "/magaza",
+  "/magaza?sirala=fiyat-artan",
+  "/yorumlar",
   "/arama?q=gomlek",
   "/hesap/giris",
   "/hesap/kayit",
+  "/hesap/sifre-sifirla",
   "/siparis",
 ]
 
