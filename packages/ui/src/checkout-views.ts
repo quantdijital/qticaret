@@ -109,6 +109,8 @@ export interface CheckoutPageView {
   error: string | null
   /** Each step's own address, to reopen it. */
   editPaths: Record<CheckoutStep, string>
+  /** Who the invoice is made out to, in words, and where to change it (F8 billing profile). */
+  invoice: { text: string; link: { label: string; path: string } | null }
 }
 
 /** What the place-order form hears back: an error, or a challenge to solve and send again. */

@@ -488,5 +488,12 @@
   "contact.invalid": "Lütfen alanları kontrol edin: mesaj en az 10 karakter olmalı.",
   "contact.phone_invalid": "Telefon numarası geçerli görünmüyor (ör. 0532 123 45 67).",
   "contact.email_domain": "Bu e-posta adresine yanıt gönderemiyoruz; adresi kontrol edin.",
-  "contact.rate_limited": "Kısa sürede çok mesaj gönderildi. Lütfen daha sonra tekrar deneyin."
+  "contact.rate_limited": "Kısa sürede çok mesaj gönderildi. Lütfen daha sonra tekrar deneyin.",
+  "checkout.invoice_guest": "Faturanız teslimat adınıza bireysel olarak kesilir.",
+  "checkout.invoice_sign_in": "Kurumsal fatura için giriş yapın",
+  "checkout.invoice_default": "Faturanız teslimat adınıza bireysel olarak kesilir.",
+  "checkout.invoice_add": "Kurumsal fatura bilgisi ekleyin",
+  "checkout.invoice_change": "Değiştir",
+  "checkout.invoice_corporate": "Fatura: {name} · {office} V.D. · VKN {tax}",
+  "checkout.invoice_individual": "Fatura: {name} (bireysel)"
 }

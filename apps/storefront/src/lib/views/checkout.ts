@@ -1,6 +1,7 @@
 import "server-only"
 import { formatLira } from "@qticaret/ui"
 import type {
+  AccountPageView,
   AddressSummaryView,
   CheckoutPageView,
   CheckoutStep,
@@ -184,12 +185,47 @@ export interface CustomerDefaults {
   address: CheckoutAddress | null
 }
 
+type Billing = AccountPageView["billing"]
+
+/** Who the invoice goes to (F8): the account's billing profile, or the delivery name. */
+export function invoiceNoteOf(
+  t: Translate,
+  signedIn: boolean,
+  billing: Billing
+): CheckoutPageView["invoice"] {
+  if (!signedIn) {
+    return {
+      text: t("checkout.invoice_guest"),
+      link: { label: t("checkout.invoice_sign_in"), path: "/hesap/giris?sonra=%2Fodeme" },
+    }
+  }
+  const change = { label: t("checkout.invoice_change"), path: "/hesap/bilgiler#fatura" }
+  if (!billing) {
+    return {
+      text: t("checkout.invoice_default"),
+      link: { ...change, label: t("checkout.invoice_add") },
+    }
+  }
+  return {
+    text:
+      billing.type === "corporate"
+        ? t("checkout.invoice_corporate", {
+            name: billing.legalName,
+            office: billing.taxOffice,
+            tax: billing.taxIdMasked ?? "",
+          })
+        : t("checkout.invoice_individual", { name: billing.legalName }),
+    link: change,
+  }
+}
+
 export async function checkoutView(
   cart: CheckoutCart,
   step: CheckoutStep,
   error: string | null,
   t: Translate,
-  customer: CustomerDefaults | null = null
+  customer: CustomerDefaults | null = null,
+  billing: Billing = null
 ): Promise<CheckoutPageView> {
   const address = cart.shipping_address
   // An empty form starts from the customer's newest saved address
@@ -246,5 +282,6 @@ export async function checkoutView(
     summary: summaryOf(cart, t),
     error,
     editPaths: STEP_PATHS,
+    invoice: invoiceNoteOf(t, customer !== null, billing),
   }
 }

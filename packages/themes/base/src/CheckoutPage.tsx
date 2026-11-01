@@ -155,6 +155,17 @@ export function CheckoutPage({
             editPath={view.editPaths.payment}
             editLabel={edit}
           >
+            <p className="mb-5 rounded-xl border bg-muted/40 px-4 py-3 text-sm">
+              {view.invoice.text}{" "}
+              {view.invoice.link && (
+                <a
+                  href={view.invoice.link.path}
+                  className="font-medium underline underline-offset-4"
+                >
+                  {view.invoice.link.label}
+                </a>
+              )}
+            </p>
             {view.paymentMethods.length === 0 ? (
               <p className="rounded-2xl bg-muted p-4 text-sm">{t("checkout.no_payment")}</p>
             ) : (

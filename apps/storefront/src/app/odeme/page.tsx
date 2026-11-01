@@ -5,6 +5,7 @@ import { checkoutCart } from "@/lib/checkout/cart"
 import { t } from "@/lib/i18n"
 import { robotsOnly } from "@/lib/seo/metadata"
 import { checkoutActions } from "@/lib/theme-actions"
+import { billingOf } from "@/lib/views/account"
 import { checkoutView, stepOf } from "@/lib/views/checkout"
 import { theme } from "@/theme"
 
@@ -34,13 +35,16 @@ export default async function CheckoutPage({
   const asked = typeof query["adim"] === "string" ? query["adim"] : undefined
   const failed = typeof query["hata"] === "string" ? query["hata"] : null
   const error = failed && RETURN_ERRORS.has(failed) ? t(failed) : null
-  const [saved] = customer ? await customerAddresses() : []
+  const [[saved], billing] = customer
+    ? await Promise.all([customerAddresses(), billingOf()])
+    : [[], null]
   const view = await checkoutView(
     cart,
     stepOf(cart, asked),
     error,
     t,
-    customer ? { ...customer, address: saved ?? null } : null
+    customer ? { ...customer, address: saved ?? null } : null,
+    billing
   )
   return <theme.CheckoutPage view={view} t={t} actions={checkoutActions} />
 }
