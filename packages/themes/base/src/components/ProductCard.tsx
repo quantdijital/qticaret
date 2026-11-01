@@ -82,13 +82,21 @@ export function ProductGrid({
   products,
   t,
   eager = 0,
+  columns = 4,
 }: {
   products: ProductCardView[]
   t: Translate
   eager?: number
+  /** Columns on wide screens: three beside a filter panel. */
+  columns?: 3 | 4
 }) {
   return (
-    <ul className="grid grid-cols-2 gap-x-3 gap-y-10 sm:grid-cols-3 sm:gap-x-5 lg:grid-cols-4 lg:gap-x-6">
+    <ul
+      className={cn(
+        "grid grid-cols-2 gap-x-3 gap-y-10 sm:grid-cols-3 sm:gap-x-5 lg:gap-x-6",
+        columns === 4 ? "lg:grid-cols-4" : "xl:grid-cols-3"
+      )}
+    >
       {products.map((product, index) => (
         <li key={product.id}>
           <ProductCard product={product} t={t} priority={index < eager} />

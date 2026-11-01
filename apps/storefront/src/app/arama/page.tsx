@@ -65,6 +65,10 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
         products: productCards(products, paths, displays),
         total: count,
         sort: [],
+        filters: [],
+        price: null,
+        active: [],
+        clearPath: null,
         pagination: {
           page: current,
           pages,

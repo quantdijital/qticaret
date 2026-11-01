@@ -168,6 +168,32 @@ export interface SortOptionView {
   current: boolean
 }
 
+/** One value of a filter: a link that chooses it or lets it go (nofollow, D4). */
+export interface FilterOptionView {
+  label: string
+  count: number
+  selected: boolean
+  path: string
+}
+
+export interface FilterGroupView {
+  key: string
+  label: string
+  options: FilterOptionView[]
+}
+
+/** The price range form: a plain GET form to the listing, its current filters carried along. */
+export interface PriceFilterView {
+  action: string
+  /** The range the listing's prices span, whole lira. */
+  min: number
+  max: number
+  currentMin: number | null
+  currentMax: number | null
+  /** The listing's other parameters, as hidden fields. */
+  keep: { name: string; value: string }[]
+}
+
 export interface ListingPageView {
   title: string
   description: string[]
@@ -177,6 +203,12 @@ export interface ListingPageView {
   total: number
   pagination: PaginationView
   sort: SortOptionView[]
+  filters: FilterGroupView[]
+  price: PriceFilterView | null
+  /** What narrows the list now, each a link that takes it away. */
+  active: LinkView[]
+  /** Every filter off; null when none is on. */
+  clearPath: string | null
 }
 
 export interface HomePageView {

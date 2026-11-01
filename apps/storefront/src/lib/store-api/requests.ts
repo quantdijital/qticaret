@@ -234,3 +234,38 @@ export const blogPosts = cache((offset: number, limit: number) =>
     limit,
   })
 )
+
+export interface FacetValueAnswer {
+  value: string
+  label: string
+  count: number
+  selected: boolean
+}
+
+export interface ListingAnswer {
+  product_ids: string[]
+  count: number
+  page: number
+  page_size: number
+  facets: {
+    brands: FacetValueAnswer[]
+    attributes: { key: string; label: string; values: FacetValueAnswer[] }[]
+    price: { min: number; max: number } | null
+  }
+}
+
+/** One page of a listing with its filters (D4): ids, the count, the filters it offers. */
+export async function listingPage(
+  type: "product_category" | "product_collection" | "brand" | "landing",
+  id: string,
+  query: string
+): Promise<ListingAnswer> {
+  const region = await liraRegion()
+  return storeGet<ListingAnswer>("/store/listings/products", {
+    type,
+    id,
+    region_id: region.id,
+    currency_code: region.currency_code,
+    query,
+  })
+}
