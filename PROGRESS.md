@@ -86,13 +86,27 @@
   - **Ödeme adımında fatura notu:** giriş yapmış müşteriye fatura profili gösterilir (kurumsal: unvan, vergi dairesi, maskeli VKN; değiştir bağlantısıyla). Misafire "fatura bireysel kesilir, kurumsal fatura için giriş yapın" denir.
   - **İş kanıtı sınır hatası (vitrin ve panel girişi):** çözülmüş cevabın yeniden gönderimi de sayıldığı için sınırda daha zor bir bulmacaya düşüp sessizce takılıyordu. Artık en çok 3 tur çözülüyor (iletişim formunu denerken yakalandı).
   - **Doğrulama:** tip denetimi ve lint tüm çalışma alanında 0 hata. Backend birim 226 takım (2399 test). İlgili HTTP takımları yeşil: contact-messages 5, consents 5, listing-products 4, product-reviews 4, customer-privacy-requests, kvkk-requests, staff-alerts, message-templates, compliance-retention, platform-settings, route-inventory, storefront-frame. Vitrin birim 56, e2e 26/26, panel 125 dosya / 418 test.
+- **Aynı gecenin devamı (commit'ler `1981abc` → `6948502`):**
+  - **Sipariş sayfasında kargo:** `GET /store/orders/:id/shipments` ucu, sipariş erişimiyle. Taşıyıcı, takip no ve bağlantısı, gönderim/teslim zamanı ve kargonun son durumu ("Yolda · 2 Kasım 10:30") gösteriliyor. Aras testiyle doğrulandı.
+  - **Taslak önizleme:** panelde içerik sayfasında "Önizle" düğmesi → 24 saatlik imzalı bağlantı. Bağlantı `/onizleme/<token>` adresinde açılıyor; `noindex,nofollow` ve `no-referrer` var, kayıt tutulmuyor. HMAC, `PII_HASH_KEY`'in kendi bağlamıyla. Sahte token 404 döndürüyor. Şimdilik yalnız içerik sayfaları ve yazılar; ürün önizlemesi yok.
+  - **Renk örnekleri (D5):** Ayarlar > Vitrin'de mağaza genelinde bir renk sözlüğü (ad → #rrggbb, en çok 100).
+    - Ürün seçeneklerinde ve filtrelerde adı eşleşen değer renkli daire olarak görünüyor.
+    - Daire SVG `fill` ile çiziliyor, çünkü canlıdaki CSP bilinmeyen `style` niteliğini engelliyor.
+    - Geliştirme veritabanına örnek renkler yazıldı.
+  - **Site haritası:** ana sayfa, `/magaza`, ve içerik varsa `/blog` ile `/yorumlar` (`sitemap-site-1.xml`). `/magaza`, `/blog` ve `/yorumlar` sayfalarına meta açıklama ve BreadcrumbList eklendi. Toplu kontrolde tüm sayfalarda tek h1, canonical ve doğru robots değerleri var.
+  - **Adres defteri:** `/hesap/adresler`'e "Yeni adres ekle" eklendi; ödemenin il/ilçe/mahalle formu e-postasız kullanılıyor. Yeni hesap açılıp Mailpit'le doğrulanarak tarayıcıda denendi.
+  - **Güvenlik:** vitrin canlıda HSTS gönderiyor (1 yıl, `includeSubDomains` yok). Panel girişindeki iş kanıtı artık 3 tura kadar çözülüyor.
+  - **Doğrulama:**
+    - Vitrin `next build` geçti (31 rota).
+    - E2E 26/26, vitrin birim 61.
+    - Panel 127 dosya / 422 test.
+    - Backend birim 2402 test; ilgili HTTP takımları yeşil (content, seo-sitemap, aras-shipping, storefront-frame, route-inventory).
 - **Açık kalanlar (vitrin):**
   - Hediye kartı: bayrak kapalı. Sepette kod alanı ve tamamen kartla ödenen (0 TL) siparişin ödeme akışı gerekir; ertelendi.
   - Misafire kurumsal fatura: sipariş düzeyinde VKN verisi (yeni model ve ADR) gerekir; **karar senin**.
   - Meilisearch (D10).
-  - Renk örnekleri.
   - Tema ayarları ve ikinci tema (D11).
-  - İmzalı önizleme bağlantıları.
+  - Ürünler için önizleme bağlantısı; içerik sayfaları için yapıldı.
   - Tasarım (sen yapacaksın).
 - **Gözden geçir (otonom kararlar):**
   - Görünüm sektörden bağımsız ama karakterli (serif başlık); renk yine mağazanın `primary_color`'ı (duyuru şeridi, düğmeler).
@@ -1333,7 +1347,7 @@
 | D2 ✓ | SEO çekirdeği: `proxy.ts` (normalizasyon 301, resolve yönlendirmesi kendi koduyla, 410, 404 bildirimi, nonce'lu CSP, `noindex` ortamı, robots/sitemap/security.txt aktarımı), metadata ilk HTML'de, JSON-LD kaçışlı; canlıda kanonik host 301'i ve IndexNow anahtar dosyası (2026-11-02) | Bitti |
 | D3 ◐ | Çerçeve ve ana sayfa: menü, sepet sayacı, ana sayfa (`/store/seo/site` `home`) ✓; yönetilebilir menü, marka rengi, ana sayfa girişi, mağaza profili yükleyicisi (`shop:profile`) ✓; shadcn temeli, `storefront` ayar bölümü + `GET /store/storefront`, duyuru şeridi, üst bağlantılar, açılır kategori menüsü, telefon çekmecesi, arama kutusu, güven şeridi, alt bilgi, WhatsApp ✓ (`3bc6354`…`ff88a3b`); panel "Vitrin" ekranı (bkz. özet). Açık: panelde SEO ayarlarına ana sayfa başlık/açıklama alanı; footer yasal bağlantıları ve ETBİS (D10); mobil alt gezinme | Büyük ölçüde bitti |
 | D4 ✓ | Listeleme: kategori, marka, koleksiyon, landing, `/magaza` (tüm katalog); filtreler (marka, öznitelik, sayılı), fiyat aralığı, en yeni/fiyat sıralama (`GET /store/listings/products`, bellekte ≤3000 ürün); kanonik bağlantılar | Bitti (2026-11-02) |
-| D5 ◐ | Ürün sayfası: galeri, varyant, 30 gün kuralı, stok, sepete ekle, öznitelikler, yorumlar ve soru-cevap (yazma dahil), stok bildirimi, favori, taksit tablosu (açılınca), WhatsApp'tan sor, benzer ürünler, tasarruf ve kargo cümlesi ✓. Açık: renk örnekleri, `og:type` product | Büyük ölçüde bitti |
+| D5 ✓ | Ürün sayfası: galeri, varyant, 30 gün kuralı, stok, sepete ekle, öznitelikler, yorumlar ve soru-cevap (yazma dahil), stok bildirimi, favori, taksit tablosu (açılınca), WhatsApp'tan sor, benzer ürünler, tasarruf ve kargo cümlesi, `og:type` product, renk örnekleri (mağazanın renk sözlüğü) ✓ | Bitti (2026-11-02) |
 | D6 ✓ | Sepet: satırlar, adet, kaldır, kupon, ücretsiz kargo çubuğu, sepet çekmecesi, `/sepet/geri-don` ✓. Açık: hediye kartı (bayrak) | Bitti (hediye kartı hariç) |
 | D7 ✓ | Ödeme: `/odeme` üç adım (TR adres, kargo, yöntem + sözleşme + yaş + pazarlama izni), iş kanıtı, havale/kapıda anında sipariş, PayTR çerçeve, iyzico yönlendirme (sandbox'la denendi), `/odeme/sonuc`, `/siparis/:id` (iptal, iade talebi, belgeler, fatura); CSP `frame-src`/`form-action`. PayTR çerçevesi sahte PayTR ile uçtan uca denendi; adr/0028 deneme sayfası silindi | Bitti |
 | D8 ✓ | Hesap: giriş, kayıt, e-posta doğrulama, şifre sıfırlama, siparişler, favoriler, adres defteri, bilgiler, fatura profili, iletişim izinleri, KVKK talebi, `migration-claim`, `/siparis` (misafir sorgulama) | Bitti |
