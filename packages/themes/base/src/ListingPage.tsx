@@ -1,5 +1,5 @@
 import type { ListingPageView, Translate } from "@qticaret/ui"
-import { cx } from "@qticaret/ui"
+import { cn } from "@qticaret/ui/lib/utils"
 import { Breadcrumbs } from "./components/Breadcrumbs"
 import { ProductGrid } from "./components/ProductCard"
 
@@ -12,7 +12,7 @@ export function ListingPage({ view, t }: { view: ListingPageView; t: Translate }
       <header className="flex flex-col gap-2">
         <h1 className="text-2xl font-semibold sm:text-3xl">{view.title}</h1>
         {view.description.map((paragraph, index) => (
-          <p key={String(index)} className="max-w-3xl text-muted">
+          <p key={String(index)} className="max-w-3xl text-muted-foreground">
             {paragraph}
           </p>
         ))}
@@ -24,7 +24,7 @@ export function ListingPage({ view, t }: { view: ListingPageView; t: Translate }
               <li key={link.path}>
                 <a
                   href={link.path}
-                  className="inline-block rounded-full border border-line px-4 py-2 text-sm hover:bg-subtle"
+                  className="inline-block rounded-full border border-border px-4 py-2 text-sm hover:bg-muted"
                 >
                   {link.label}
                 </a>
@@ -33,8 +33,8 @@ export function ListingPage({ view, t }: { view: ListingPageView; t: Translate }
           </ul>
         </nav>
       )}
-      <div className="flex flex-wrap items-center justify-between gap-3 border-y border-line py-3 text-sm">
-        <p className="text-muted">{t("listing.count", { count: view.total })}</p>
+      <div className="flex flex-wrap items-center justify-between gap-3 border-y border-border py-3 text-sm">
+        <p className="text-muted-foreground">{t("listing.count", { count: view.total })}</p>
         <nav aria-label={t("listing.sort")}>
           <ul className="flex flex-wrap gap-3">
             {view.sort.map((option) => (
@@ -42,7 +42,7 @@ export function ListingPage({ view, t }: { view: ListingPageView; t: Translate }
                 <a
                   href={option.path}
                   aria-current={option.current ? "true" : undefined}
-                  className={cx("hover:underline", option.current && "font-semibold underline")}
+                  className={cn("hover:underline", option.current && "font-semibold underline")}
                   rel="nofollow"
                 >
                   {option.label}
@@ -55,7 +55,7 @@ export function ListingPage({ view, t }: { view: ListingPageView; t: Translate }
       {view.products.length > 0 ? (
         <ProductGrid products={view.products} t={t} eager={pagination.page === 1 ? 2 : 0} />
       ) : (
-        <p className="py-10 text-center text-muted">{t("listing.empty")}</p>
+        <p className="py-10 text-center text-muted-foreground">{t("listing.empty")}</p>
       )}
       {pagination.pages > 1 && (
         <nav
@@ -65,18 +65,18 @@ export function ListingPage({ view, t }: { view: ListingPageView; t: Translate }
           {pagination.previous && (
             <a
               href={pagination.previous}
-              className="rounded-full border border-line px-4 py-2 hover:bg-subtle"
+              className="rounded-full border border-border px-4 py-2 hover:bg-muted"
             >
               {t("listing.previous")}
             </a>
           )}
-          <span className="px-2 text-muted">
+          <span className="px-2 text-muted-foreground">
             {t("listing.page_of", { page: pagination.page, pages: pagination.pages })}
           </span>
           {pagination.next && (
             <a
               href={pagination.next}
-              className="rounded-full border border-line px-4 py-2 hover:bg-subtle"
+              className="rounded-full border border-border px-4 py-2 hover:bg-muted"
             >
               {t("listing.next")}
             </a>

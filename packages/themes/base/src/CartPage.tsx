@@ -12,7 +12,7 @@ function CartLine({
 }) {
   return (
     <li className="flex gap-4 py-4">
-      <div className="h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-subtle">
+      <div className="h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-muted">
         {line.image && (
           <ResponsiveImage image={line.image} sizes="80px" className="h-full w-full object-cover" />
         )}
@@ -20,12 +20,12 @@ function CartLine({
       <div className="flex flex-1 flex-col gap-2 text-sm">
         <div>
           <p className="font-medium">{line.title}</p>
-          {line.detail && <p className="text-muted">{line.detail}</p>}
+          {line.detail && <p className="text-muted-foreground">{line.detail}</p>}
         </div>
         <div className="flex flex-wrap items-end gap-2">
           <form action={actions.changeCartLine} className="flex items-end gap-2">
             <input type="hidden" name="line_id" value={line.id} />
-            <label className="flex flex-col gap-1 text-xs text-muted">
+            <label className="flex flex-col gap-1 text-xs text-muted-foreground">
               {t("cart.quantity")}
               <input
                 type="number"
@@ -34,12 +34,12 @@ function CartLine({
                 max={99}
                 defaultValue={line.quantity}
                 inputMode="numeric"
-                className="w-16 rounded-md border border-line px-2 py-1.5 text-sm text-ink"
+                className="w-16 rounded-md border border-border px-2 py-1.5 text-sm text-foreground"
               />
             </label>
             <button
               type="submit"
-              className="rounded-md border border-line px-3 py-1.5 hover:bg-subtle"
+              className="rounded-md border border-border px-3 py-1.5 hover:bg-muted"
             >
               {t("cart.update")}
             </button>
@@ -50,7 +50,7 @@ function CartLine({
             <button
               type="submit"
               aria-label={t("cart.remove_line", { title: line.title })}
-              className="rounded-md px-3 py-1.5 text-muted underline hover:text-ink"
+              className="rounded-md px-3 py-1.5 text-muted-foreground underline hover:text-foreground"
             >
               {t("cart.remove")}
             </button>
@@ -59,7 +59,7 @@ function CartLine({
       </div>
       <p className="flex flex-col items-end text-sm">
         {line.original && (
-          <s className="text-xs text-muted">
+          <s className="text-xs text-muted-foreground">
             <span className="sr-only">{t("price.before")} </span>
             {line.original}
           </s>
@@ -84,10 +84,10 @@ export function CartPage({
     return (
       <div className="mx-auto flex max-w-lg flex-col items-center gap-4 py-16 text-center">
         <h1 className="text-2xl font-semibold">{t("cart.title")}</h1>
-        <p className="text-muted">{t("cart.empty")}</p>
+        <p className="text-muted-foreground">{t("cart.empty")}</p>
         <a
           href="/"
-          className="rounded-full bg-accent px-5 py-2.5 text-sm font-medium text-accent-ink"
+          className="rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground"
         >
           {t("cart.continue")}
         </a>
@@ -103,12 +103,12 @@ export function CartPage({
         </p>
       )}
       <div className="grid gap-8 md:grid-cols-[1fr_18rem]">
-        <ul className="divide-y divide-line border-y border-line">
+        <ul className="divide-y divide-border border-y border-border">
           {view.lines.map((line) => (
             <CartLine key={line.id} line={line} t={t} actions={actions} />
           ))}
         </ul>
-        <aside className="flex h-fit flex-col gap-3 rounded-xl border border-line p-5 text-sm">
+        <aside className="flex h-fit flex-col gap-3 rounded-xl border border-border p-5 text-sm">
           {view.discount && (
             <>
               <p className="flex justify-between">
@@ -121,11 +121,11 @@ export function CartPage({
               </p>
             </>
           )}
-          <p className="flex justify-between border-t border-line pt-3">
+          <p className="flex justify-between border-t border-border pt-3">
             <span>{t("cart.subtotal")}</span>
             <span className="font-semibold">{view.subtotal}</span>
           </p>
-          <p className="text-muted">{t("cart.checkout_soon")}</p>
+          <p className="text-muted-foreground">{t("cart.checkout_soon")}</p>
         </aside>
       </div>
     </div>

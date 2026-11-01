@@ -79,7 +79,7 @@ export function PurchasePanel({
       {variant?.price && (
         <p className="flex flex-wrap items-baseline gap-2">
           {variant.price.before && (
-            <s className="text-sm text-muted">
+            <s className="text-sm text-muted-foreground">
               <span className="sr-only">{labels.before} </span>
               {variant.price.before}
             </s>
@@ -103,7 +103,7 @@ export function PurchasePanel({
                 <label
                   key={value}
                   htmlFor={id}
-                  className="cursor-pointer rounded-full border border-line px-4 py-2 text-sm has-[:checked]:border-ink has-[:checked]:bg-ink has-[:checked]:text-surface"
+                  className="cursor-pointer rounded-full border border-border px-4 py-2 text-sm has-[:checked]:border-foreground has-[:checked]:bg-foreground has-[:checked]:text-background"
                 >
                   <input
                     id={id}
@@ -134,13 +134,13 @@ export function PurchasePanel({
             max={99}
             defaultValue={1}
             inputMode="numeric"
-            className="w-20 rounded-md border border-line px-3 py-2"
+            className="w-20 rounded-md border border-border px-3 py-2"
           />
         </label>
         <button
           type="submit"
           disabled={!available || pending}
-          className="flex-1 rounded-full bg-accent px-6 py-3 font-medium text-accent-ink disabled:cursor-not-allowed disabled:opacity-50"
+          className="flex-1 rounded-full bg-primary px-6 py-3 font-medium text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
         >
           {pending
             ? labels.adding
@@ -152,7 +152,7 @@ export function PurchasePanel({
         </button>
       </div>
       <p role="status" aria-live="polite" className="min-h-5 text-sm">
-        {!stale && state.ok && <span className="text-ok">{labels.added}</span>}
+        {!stale && state.ok && <span className="text-success">{labels.added}</span>}
         {!stale && state.error && (
           <span className="text-sale">{labels.errors[state.error] ?? labels.fallbackError}</span>
         )}

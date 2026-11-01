@@ -20,11 +20,11 @@ export function Layout({
     <div className="flex min-h-dvh flex-col">
       <a
         href="#icerik"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-10 focus:rounded focus:bg-surface focus:px-3 focus:py-2"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-10 focus:rounded focus:bg-background focus:px-3 focus:py-2"
       >
         {t("nav.skip_to_content")}
       </a>
-      <header className="border-b border-line">
+      <header className="border-b border-border">
         <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3">
           <a href="/" className="flex shrink-0 items-center text-lg font-semibold">
             {shop.logo ? (
@@ -46,13 +46,13 @@ export function Layout({
           </nav>
           <a
             href="/sepet"
-            className="ml-auto rounded-full border border-line px-3 py-1.5 text-sm hover:bg-subtle"
+            className="ml-auto rounded-full border border-border px-3 py-1.5 text-sm hover:bg-muted"
           >
             {t("nav.cart", { count: shop.cartQuantity })}
           </a>
         </div>
         {shop.categories.length > 0 && (
-          <details className="border-t border-line px-4 py-2 md:hidden">
+          <details className="border-t border-border px-4 py-2 md:hidden">
             <summary className="cursor-pointer text-sm font-medium">{t("nav.categories")}</summary>
             <ul className="mt-2 flex flex-col gap-2 text-sm">
               {shop.categories.map((category) => (
@@ -67,15 +67,15 @@ export function Layout({
       <main id="icerik" className="mx-auto w-full max-w-6xl flex-1 px-4 py-6">
         {children}
       </main>
-      <footer className="border-t border-line bg-subtle">
-        <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-8 text-sm text-muted sm:flex-row sm:justify-between">
+      <footer className="border-t border-border bg-muted">
+        <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-8 text-sm text-muted-foreground sm:flex-row sm:justify-between">
           <p>{shop.name}</p>
           {shop.legal.length > 0 && (
             <nav aria-label={t("nav.legal")}>
               <ul className="flex flex-wrap gap-x-4 gap-y-2">
                 {shop.legal.map((link) => (
                   <li key={link.path}>
-                    <a href={link.path} className="hover:text-ink">
+                    <a href={link.path} className="hover:text-foreground">
                       {link.label}
                     </a>
                   </li>

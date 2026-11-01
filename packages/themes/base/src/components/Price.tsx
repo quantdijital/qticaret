@@ -14,7 +14,7 @@ export function Price({
   return (
     <p className="flex flex-wrap items-baseline gap-2">
       {price.before && (
-        <s className="text-sm text-muted">
+        <s className="text-sm text-muted-foreground">
           <span className="sr-only">{t("price.before")} </span>
           {price.before}
         </s>

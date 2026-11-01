@@ -6,17 +6,17 @@ export function Breadcrumbs({ items, t }: { items: BreadcrumbView[]; t: Translat
     return null
   }
   return (
-    <nav aria-label={t("nav.breadcrumbs")} className="text-sm text-muted">
+    <nav aria-label={t("nav.breadcrumbs")} className="text-sm text-muted-foreground">
       <ol className="flex flex-wrap items-center gap-1">
         {items.map((item, index) => (
           <li key={`${item.label}-${String(index)}`} className="flex items-center gap-1">
             {index > 0 && <span aria-hidden="true">/</span>}
             {item.path ? (
-              <a href={item.path} className="hover:text-ink">
+              <a href={item.path} className="hover:text-foreground">
                 {item.label}
               </a>
             ) : (
-              <span aria-current="page" className="text-ink">
+              <span aria-current="page" className="text-foreground">
                 {item.label}
               </span>
             )}

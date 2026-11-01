@@ -6,6 +6,7 @@ import { t } from "@/lib/i18n"
 import { allCategories, pathsOf, siteSeo } from "@/lib/store-api/requests"
 import { navigation } from "@/lib/views/categories"
 import { theme } from "@/theme"
+import { inter } from "./fonts"
 import "./globals.css"
 
 // Every page is made per request: prices, stock and the cart are live (adr/0046 §2)
@@ -47,7 +48,7 @@ async function shopView(): Promise<ShopView> {
 export default async function RootLayout({ children }: { children: ReactNode }) {
   const shop = await shopView()
   return (
-    <html lang="tr">
+    <html lang="tr" className={inter.variable}>
       <body>
         <theme.Layout shop={shop} t={t}>
           {children}

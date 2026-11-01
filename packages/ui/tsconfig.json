@@ -9,7 +9,14 @@
     "jsx": "react-jsx",
     "noEmit": true,
     "declaration": false,
-    "sourceMap": false
+    "sourceMap": false,
+    // shadcn/ui files import the package by its own name (components.json aliases)
+    "baseUrl": ".",
+    "paths": {
+      "@qticaret/ui/components/*": ["./src/components/*"],
+      "@qticaret/ui/lib/*": ["./src/lib/*"],
+      "@qticaret/ui/hooks/*": ["./src/hooks/*"]
+    }
   },
   "include": ["src", "eslint.config.js"]
 }

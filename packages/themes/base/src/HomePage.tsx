@@ -15,7 +15,7 @@ export function HomePage({ view, t }: { view: HomePageView; t: Translate }) {
               <li key={category.path}>
                 <a
                   href={category.path}
-                  className="inline-block rounded-full border border-line px-4 py-2 text-sm hover:bg-subtle"
+                  className="inline-block rounded-full border border-border px-4 py-2 text-sm hover:bg-muted"
                 >
                   {category.label}
                 </a>
@@ -31,7 +31,7 @@ export function HomePage({ view, t }: { view: HomePageView; t: Translate }) {
         {view.products.length > 0 ? (
           <ProductGrid products={view.products} t={t} eager={2} />
         ) : (
-          <p className="text-muted">{t("home.no_products")}</p>
+          <p className="text-muted-foreground">{t("home.no_products")}</p>
         )}
       </section>
     </div>

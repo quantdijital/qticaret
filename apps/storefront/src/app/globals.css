@@ -1,4 +1,6 @@
 @import "tailwindcss";
+/* Primitives and their token wiring, then the theme's values (docs/19 §3) */
+@import "@qticaret/ui/styles.css";
 @import "@qticaret/theme-base/styles.css";
 
 /* Workspace packages sit behind node_modules links, which Tailwind skips */

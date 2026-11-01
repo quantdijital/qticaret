@@ -26,7 +26,7 @@ export function ProductPage({
       <div className="grid gap-8 md:grid-cols-2">
         <section aria-label={t("product.images")} className="flex flex-col gap-3">
           {main ? (
-            <div className="overflow-hidden rounded-xl bg-subtle">
+            <div className="overflow-hidden rounded-xl bg-muted">
               <ResponsiveImage
                 image={main}
                 sizes="(min-width: 768px) 50vw, 100vw"
@@ -35,14 +35,14 @@ export function ProductPage({
               />
             </div>
           ) : (
-            <div className="flex aspect-square items-center justify-center rounded-xl bg-subtle text-muted">
+            <div className="flex aspect-square items-center justify-center rounded-xl bg-muted text-muted-foreground">
               {t("product.no_image")}
             </div>
           )}
           {rest.length > 0 && (
             <ul className="grid grid-cols-4 gap-2">
               {rest.map((image) => (
-                <li key={image.src} className="overflow-hidden rounded-lg bg-subtle">
+                <li key={image.src} className="overflow-hidden rounded-lg bg-muted">
                   <ResponsiveImage
                     image={image}
                     sizes="(min-width: 768px) 12vw, 25vw"
@@ -57,14 +57,14 @@ export function ProductPage({
           {view.brand && (
             <a
               href={view.brand.path}
-              className="text-sm uppercase tracking-wide text-muted hover:text-ink"
+              className="text-sm uppercase tracking-wide text-muted-foreground hover:text-foreground"
             >
               {view.brand.label}
             </a>
           )}
           <div>
             <h1 className="text-2xl font-semibold sm:text-3xl">{view.title}</h1>
-            {view.subtitle && <p className="mt-1 text-muted">{view.subtitle}</p>}
+            {view.subtitle && <p className="mt-1 text-muted-foreground">{view.subtitle}</p>}
           </div>
           <PurchasePanel
             options={view.options}
@@ -84,7 +84,7 @@ export function ProductPage({
             }}
           />
           {view.description.length > 0 && (
-            <div className="flex flex-col gap-3 border-t border-line pt-5 text-sm leading-relaxed">
+            <div className="flex flex-col gap-3 border-t border-border pt-5 text-sm leading-relaxed">
               <h2 className="text-base font-semibold">{t("product.description")}</h2>
               {view.description.map((paragraph, index) => (
                 <p key={String(index)}>{paragraph}</p>

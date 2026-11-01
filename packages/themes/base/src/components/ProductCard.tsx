@@ -15,7 +15,7 @@ export function ProductCard({
   return (
     <article className="flex flex-col gap-2">
       <a href={product.path} className="group flex flex-col gap-2">
-        <div className="aspect-square overflow-hidden rounded-lg bg-subtle">
+        <div className="aspect-square overflow-hidden rounded-lg bg-muted">
           {product.image ? (
             <ResponsiveImage
               image={product.image}
@@ -24,18 +24,20 @@ export function ProductCard({
               className="h-full w-full object-cover transition-transform group-hover:scale-[1.02]"
             />
           ) : (
-            <div className="flex h-full items-center justify-center text-sm text-muted">
+            <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
               {t("product.no_image")}
             </div>
           )}
         </div>
         {product.brand && (
-          <p className="text-xs uppercase tracking-wide text-muted">{product.brand}</p>
+          <p className="text-xs uppercase tracking-wide text-muted-foreground">{product.brand}</p>
         )}
         <h3 className="text-sm font-medium leading-snug group-hover:underline">{product.title}</h3>
       </a>
       {product.price && <Price price={product.price} t={t} />}
-      {!product.available && <p className="text-xs text-muted">{t("product.out_of_stock")}</p>}
+      {!product.available && (
+        <p className="text-xs text-muted-foreground">{t("product.out_of_stock")}</p>
+      )}
     </article>
   )
 }
