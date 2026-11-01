@@ -171,4 +171,26 @@ export interface OrderPageView {
   /** The order's contracts and invoice, as links on the shop. */
   documents: LinkView[]
   breadcrumbs: BreadcrumbView[]
+  /** The order's key from its link, carried by its forms; null for the signed-in customer's own. */
+  token: string | null
+  orderId: string
+  /** Not packed yet: the shopper may cancel (the backend decides again). */
+  cancellable: boolean
+  /** Shipped or delivered: the lines that may be asked back; null when none may. */
+  returnable: { id: string; title: string; quantity: number }[] | null
+  returnReasons: OptionView[]
+  /** Return requests already made, in words. */
+  returns: { kind: string; status: string; date: string; code: string | null }[]
+  /** A message already in words after an action (cancelled, request received, refused). */
+  notice: string | null
+}
+
+export interface OrderActions {
+  /** A plain form: `order_id`, `token`. */
+  cancelOrder: (form: FormData) => Promise<void>
+  /** Fields: `order_id`, `token`, `kind`, `reason`, `note`, `qty_<line id>`. */
+  requestReturn: (
+    state: { ok: boolean; error: string | null },
+    form: FormData
+  ) => Promise<{ ok: boolean; error: string | null }>
 }

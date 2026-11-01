@@ -9,7 +9,7 @@ import type { LinkView, PaginationView } from "./views"
  */
 export type ChallengeResult = PlaceOrderResult
 
-export type AuthMode = "login" | "register" | "forgot" | "reset" | "verify"
+export type AuthMode = "login" | "register" | "forgot" | "reset" | "verify" | "lookup"
 
 export interface AuthPageView {
   mode: AuthMode
@@ -44,6 +44,8 @@ export interface AuthActions {
   reset: AuthAction
   /** Fields: `code`, and `email`, `password` when the browser no longer holds the login. */
   verify: AuthAction
+  /** "Find my order": `display_id`, `email`, `challenge`; the link goes by e-mail. */
+  lookup: AuthAction
 }
 
 export type AccountSection = "overview" | "orders" | "profile"

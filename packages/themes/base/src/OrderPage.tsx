@@ -1,6 +1,7 @@
 import { CircleCheck, FileText, HandCoins, Landmark } from "lucide-react"
 import { ResponsiveImage } from "@qticaret/ui"
-import type { OrderPageView, Translate } from "@qticaret/ui"
+import type { OrderActions, OrderPageView, Translate } from "@qticaret/ui"
+import { ReturnForm } from "./account/ReturnForm"
 import { Breadcrumbs } from "./components/Breadcrumbs"
 import { PageContainer } from "./components/Container"
 
@@ -55,7 +56,15 @@ function BankTransfer({ view, t }: { view: OrderPageView; t: Translate }) {
  * thanks the shopper first; then what to do for a transfer, the lines,
  * the totals, where it goes and its documents.
  */
-export function OrderPage({ view, t }: { view: OrderPageView; t: Translate }) {
+export function OrderPage({
+  view,
+  t,
+  actions,
+}: {
+  view: OrderPageView
+  t: Translate
+  actions: OrderActions
+}) {
   return (
     <PageContainer className="flex flex-col gap-8">
       <Breadcrumbs items={view.breadcrumbs} t={t} />
@@ -122,6 +131,75 @@ export function OrderPage({ view, t }: { view: OrderPageView; t: Translate }) {
               ))}
             </ul>
           </section>
+          {view.notice && (
+            <p role="status" className="rounded-2xl border bg-card p-4 text-sm">
+              {view.notice}
+            </p>
+          )}
+          {view.returns.length > 0 && (
+            <section aria-labelledby="iadeler" className="rounded-3xl border bg-card p-6 sm:p-7">
+              <h2 id="iadeler" className="mb-3 text-2xl">
+                {t("order.returns")}
+              </h2>
+              <ul className="flex flex-col gap-2 text-sm">
+                {view.returns.map((request, index) => (
+                  <li key={String(index)}>
+                    {request.kind} · {request.status} · {request.date}
+                    {request.code && ` · ${t("order.return_code", { code: request.code })}`}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+          {view.returnable && (
+            <details className="rounded-3xl border bg-card p-6 sm:p-7">
+              <summary className="cursor-pointer text-lg font-semibold">
+                {t("order.return_title")}
+              </summary>
+              <div className="mt-4">
+                <ReturnForm
+                  view={view}
+                  action={actions.requestReturn}
+                  words={{
+                    title: t("order.return_title"),
+                    quantity: t("cart.quantity"),
+                    reason: t("order.return_reason"),
+                    note: t("order.return_note"),
+                    kindReturn: t("order.return_kind_return"),
+                    kindExchange: t("order.return_kind_exchange"),
+                    submit: t("order.return_submit"),
+                    sending: t("checkout.saving"),
+                    sent: t("order.return_sent"),
+                    errors: Object.fromEntries(
+                      [
+                        "order.return_reason_required",
+                        "order.return_items_required",
+                        "order.return_failed",
+                        "errors.too_many_requests",
+                      ].map((key) => [key, t(key)])
+                    ),
+                    fallback: t("order.return_failed"),
+                  }}
+                />
+              </div>
+            </details>
+          )}
+          {view.cancellable && (
+            <form
+              action={actions.cancelOrder}
+              className="rounded-3xl border bg-card p-6 text-sm sm:p-7"
+            >
+              <input type="hidden" name="order_id" value={view.orderId} />
+              <input type="hidden" name="token" value={view.token ?? ""} />
+              <p className="mb-3 text-muted-foreground">{t("order.cancel_text")}</p>
+              <button
+                type="submit"
+                className="h-10 rounded-full border border-sale px-5 font-semibold text-sale hover:bg-sale/5"
+              >
+                {t("order.cancel")}
+              </button>
+            </form>
+          )}
           {view.documents.length > 0 && (
             <section aria-labelledby="belgeler" className="rounded-3xl border bg-card p-6 sm:p-7">
               <h2 id="belgeler" className="mb-4 text-2xl">

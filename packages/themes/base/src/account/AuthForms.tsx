@@ -8,6 +8,7 @@ import { TextField } from "../checkout/fields"
 import { useChallengeForm } from "./useChallengeForm"
 
 export interface AuthWords {
+  orderNumber: string
   email: string
   password: string
   passwordHint: string
@@ -60,6 +61,16 @@ export function AuthForm({
             maxLength={60}
           />
         </div>
+      )}
+      {mode === "lookup" && (
+        <TextField
+          id="display_id"
+          name="display_id"
+          label={words.orderNumber}
+          inputMode="numeric"
+          required
+          pattern="#?[0-9]{1,10}"
+        />
       )}
       {mode !== "reset" && !(mode === "verify" && !view.needsPassword) && (
         <TextField

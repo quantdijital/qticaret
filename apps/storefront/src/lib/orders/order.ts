@@ -13,6 +13,7 @@ export interface StoreOrder {
   payment_status: string
   fulfillment_status: string
   items: {
+    id: string
     title: string
     subtitle: string | null
     variant_title: string | null
@@ -39,6 +40,7 @@ const FIELDS = [
   "status",
   "+payment_status",
   "+fulfillment_status",
+  "items.id",
   "items.title",
   "items.subtitle",
   "items.variant_title",
@@ -82,4 +84,73 @@ export function providersOf(order: StoreOrder): string[] {
   return (order.payment_collections ?? []).flatMap((collection) =>
     (collection.payment_sessions ?? []).map((session) => session.provider_id)
   )
+}
+
+export interface ReturnRequestRow {
+  kind: string
+  status: string
+  return_code: string | null
+  created_at: string
+}
+
+/** The shopper's return requests on the order (F7.9); none when the backend will not say. */
+export async function orderReturns(id: string, token: string | null): Promise<ReturnRequestRow[]> {
+  try {
+    const { return_requests } = await storeCall<{ return_requests: ReturnRequestRow[] }>(
+      `/store/orders/${encodeURIComponent(id)}/returns`,
+      token ? { headers: { "x-order-token": token } } : {}
+    )
+    return return_requests
+  } catch (error) {
+    if (isStoreApiError(error)) {
+      return []
+    }
+    throw error
+  }
+}
+
+export interface InvoiceRow {
+  id: string
+  number: string | null
+  has_pdf: boolean
+}
+
+/** The order's invoice (F8), when one is issued. */
+export async function orderInvoice(id: string, token: string | null): Promise<InvoiceRow | null> {
+  try {
+    const { invoice } = await storeCall<{ invoice: InvoiceRow | null }>(
+      `/store/orders/${encodeURIComponent(id)}/invoice`,
+      token ? { headers: { "x-order-token": token } } : {}
+    )
+    return invoice
+  } catch (error) {
+    if (isStoreApiError(error)) {
+      return null
+    }
+    throw error
+  }
+}
+
+/** Which of the order's contracts the backend kept (accepted at checkout). */
+export async function orderContractKinds(
+  id: string,
+  token: string | null
+): Promise<("pre_information" | "distance_sales")[]> {
+  const kinds = ["pre_information", "distance_sales"] as const
+  const found = await Promise.all(
+    kinds.map(async (kind) => {
+      try {
+        await storeCall(`/store/orders/${encodeURIComponent(id)}/legal/${kind}`, {
+          ...(token ? { headers: { "x-order-token": token } } : {}),
+        })
+        return kind
+      } catch (error) {
+        if (isStoreApiError(error)) {
+          return null
+        }
+        throw error
+      }
+    })
+  )
+  return found.filter((kind) => kind !== null)
 }

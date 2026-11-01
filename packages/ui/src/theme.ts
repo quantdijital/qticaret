@@ -4,6 +4,7 @@ import type {
   CheckoutPageView,
   CheckoutResultPageView,
   OptionView,
+  OrderActions,
   OrderPageView,
   PaymentFramePageView,
   PlaceOrderResult,
@@ -96,7 +97,7 @@ export interface StorefrontTheme {
   PaymentFramePage: ComponentType<Page<PaymentFramePageView>>
   /** After the provider sent the shopper back: waiting for the order, or a refused payment. */
   CheckoutResultPage: ComponentType<Page<CheckoutResultPageView>>
-  OrderPage: ComponentType<Page<OrderPageView>>
+  OrderPage: ComponentType<Page<OrderPageView> & { actions: OrderActions }>
   /** Sign in, register, verify the e-mail, forget and reset the password (D8). */
   AuthPage: ComponentType<Page<AuthPageView> & { actions: AuthActions }>
   /** The signed-in customer's pages: overview, orders, details (D8). */

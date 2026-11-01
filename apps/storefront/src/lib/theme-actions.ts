@@ -1,13 +1,21 @@
-import type { AccountActions, AuthActions, CheckoutActions, ThemeActions } from "@qticaret/ui"
+import type {
+  AccountActions,
+  AuthActions,
+  CheckoutActions,
+  OrderActions,
+  ThemeActions,
+} from "@qticaret/ui"
 import {
   forgotAction,
   loginAction,
   logoutAction,
+  lookupAction,
   registerAction,
   resetAction,
   verifyAction,
 } from "@/app/actions/account"
 import { saveConsents, saveProfile } from "@/app/actions/account-profile"
+import { cancelOrder, requestReturn } from "@/app/actions/order"
 import { askQuestion, stockAlert, writeReview } from "@/app/actions/product"
 import { addToCart, applyPromotion, changeCartLine, removeCartPromotion } from "@/app/actions/cart"
 import {
@@ -45,6 +53,7 @@ export const authActions: AuthActions = {
   forgot: forgotAction,
   reset: resetAction,
   verify: verifyAction,
+  lookup: lookupAction,
 }
 
 /** The signed-in customer's forms (D8). */
@@ -53,3 +62,6 @@ export const accountActions: AccountActions = {
   saveConsents,
   logout: logoutAction,
 }
+
+/** An order's own forms: cancel, ask to return (F7). */
+export const orderActions: OrderActions = { cancelOrder, requestReturn }

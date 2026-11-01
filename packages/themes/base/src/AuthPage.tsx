@@ -10,6 +10,7 @@ const ERRORS = [
   "account.terms_required",
   "account.code_invalid",
   "account.reset_failed",
+  "account.lookup_failed",
   "account.reset_link_invalid",
   "account.token_before_password_change",
   "auth.password_too_short",
@@ -33,6 +34,7 @@ const FALLBACK: Record<AuthMode, string> = {
   forgot: "account.reset_failed",
   reset: "account.reset_link_invalid",
   verify: "account.code_invalid",
+  lookup: "account.lookup_failed",
 }
 
 /**
@@ -77,6 +79,7 @@ export function AuthPage({
             view={view}
             action={actions[mode]}
             words={{
+              orderNumber: t("account.order_number"),
               email: t("checkout.email"),
               password: t("account.password"),
               passwordHint: t("account.password_hint"),
@@ -113,6 +116,9 @@ export function AuthPage({
             <>
               <a href={view.links.forgot} className="font-medium underline underline-offset-4">
                 {t("account.forgot_link")}
+              </a>
+              <a href="/siparis" className="text-muted-foreground underline underline-offset-4">
+                {t("account.guest_order_link")}
               </a>
               <p className="text-muted-foreground">
                 {t("account.no_account")}{" "}

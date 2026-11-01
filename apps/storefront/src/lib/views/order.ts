@@ -2,7 +2,7 @@ import "server-only"
 import { formatLira } from "@qticaret/ui"
 import type { BankTransferView, OrderPageView, Translate } from "@qticaret/ui"
 import type { PaymentMethods } from "@/lib/checkout/options"
-import type { StoreOrder } from "@/lib/orders/order"
+import type { InvoiceRow, ReturnRequestRow, StoreOrder } from "@/lib/orders/order"
 import { providersOf } from "@/lib/orders/order"
 import { addressSummaryOf } from "./checkout"
 
@@ -27,11 +27,33 @@ function said(t: Translate, prefix: string, value: string): string {
 /** The IBAN in groups of four, as a bank prints it. */
 const grouped = (iban: string) => iban.replace(/\s+/g, "").replace(/(.{4})(?=.)/g, "$1 ")
 
+export interface OrderExtras {
+  token: string | null
+  /** The contracts kept for the order. */
+  contracts: string[]
+  returns: ReturnRequestRow[]
+  invoice: InvoiceRow | null
+  /** `?durum=` after an action. */
+  note: string | null
+}
+
+const REASONS = ["damaged", "wrong_item", "not_as_described", "changed_mind", "size_issue", "other"]
+const SHIPPED = new Set(["shipped", "partially_shipped", "delivered", "partially_delivered"])
+const NOTES: Record<string, string> = {
+  iptal: "order.notice_canceled",
+  "iptal-olmadi": "order.notice_cancel_refused",
+}
+
+/** An order page's own address, with its key when it was opened with one. */
+export const orderHref = (id: string, token: string | null, rest = "") =>
+  `/siparis/${encodeURIComponent(id)}${rest}${token ? `?token=${encodeURIComponent(token)}` : ""}`
+
 export function orderView(
   order: StoreOrder,
   methods: PaymentMethods | null,
   fresh: boolean,
-  t: Translate
+  t: Translate,
+  extras: OrderExtras = { token: null, contracts: [], returns: [], invoice: null, note: null }
 ): OrderPageView {
   const providers = providersOf(order)
   const transfer = methods?.bank_transfer ?? null
@@ -76,7 +98,47 @@ export function orderView(
     shipping: order.shipping_total > 0 ? formatLira(order.shipping_total) : t("checkout.free"),
     total: formatLira(order.total),
     address: addressSummaryOf(order.email, order.shipping_address),
-    documents: [],
+    documents: [
+      ...(extras.contracts.includes("pre_information")
+        ? [
+            {
+              label: t("order.doc_pre_information"),
+              path: orderHref(order.id, extras.token, "/belge/on-bilgilendirme"),
+            },
+          ]
+        : []),
+      ...(extras.contracts.includes("distance_sales")
+        ? [
+            {
+              label: t("order.doc_distance_sales"),
+              path: orderHref(order.id, extras.token, "/belge/mesafeli-satis"),
+            },
+          ]
+        : []),
+      ...(extras.invoice?.has_pdf
+        ? [
+            {
+              label: t("order.doc_invoice", { number: extras.invoice.number ?? "" }),
+              path: orderHref(order.id, extras.token, "/fatura"),
+            },
+          ]
+        : []),
+    ],
+    token: extras.token,
+    orderId: order.id,
+    cancellable: order.status === "pending" && order.fulfillment_status === "not_fulfilled",
+    returnable:
+      order.status !== "canceled" && SHIPPED.has(order.fulfillment_status)
+        ? order.items.map((line) => ({ id: line.id, title: line.title, quantity: line.quantity }))
+        : null,
+    returnReasons: REASONS.map((reason) => ({ value: reason, label: t(`order.reason_${reason}`) })),
+    returns: extras.returns.map((request) => ({
+      kind: said(t, "order.return_kind_", request.kind),
+      status: said(t, "order.return_status_", request.status),
+      date: WHEN.format(new Date(request.created_at)),
+      code: request.return_code,
+    })),
+    notice: extras.note && NOTES[extras.note] ? t(NOTES[extras.note] ?? "") : null,
     breadcrumbs: [
       { label: t("home.label"), path: "/" },
       { label: t("order.title", { id: order.display_id }), path: null },

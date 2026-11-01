@@ -28,6 +28,7 @@ import {
   takeInvite,
 } from "@/lib/account/session"
 import { cartIdFromCookie, forgetCart } from "@/lib/cart/cookie"
+import { storeCall } from "@/lib/store-api/server"
 import { challengeOf } from "@/lib/checkout/pay"
 
 const NONE = null
@@ -257,4 +258,39 @@ export async function logoutAction(): Promise<void> {
   await forgetCart()
   revalidatePath("/", "layout")
   redirect("/")
+}
+
+const Lookup = z.object({
+  display_id: z
+    .string()
+    .transform((value) => value.replace(/^#/, "").trim())
+    .pipe(z.string().regex(/^\d{1,10}$/)),
+  email: Email,
+  challenge: Challenge,
+})
+
+/**
+ * "Find my order" (adr/0037 §2): the order's number and its e-mail; the
+ * backend mails the order's link when they match and answers the same
+ * either way, so nothing is told here.
+ */
+export async function lookupAction(
+  _state: ChallengeResult,
+  form: FormData
+): Promise<ChallengeResult> {
+  const parsed = Lookup.safeParse(Object.fromEntries(form))
+  if (!parsed.success) {
+    return failed("account.lookup_failed")
+  }
+  const { display_id, email, challenge } = parsed.data
+  try {
+    await storeCall("/store/order-lookup", {
+      method: "POST",
+      body: { display_id: Number(display_id), email },
+      ...(challenge ? { headers: { "x-challenge": challenge } } : {}),
+    })
+  } catch (error) {
+    return answered(error, "account.lookup_failed")
+  }
+  redirect("/siparis?gonderildi=1")
 }

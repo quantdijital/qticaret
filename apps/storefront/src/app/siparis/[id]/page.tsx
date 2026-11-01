@@ -2,10 +2,11 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { paymentMethods } from "@/lib/checkout/options"
 import { t } from "@/lib/i18n"
-import { orderWithToken } from "@/lib/orders/order"
+import { orderContractKinds, orderInvoice, orderReturns, orderWithToken } from "@/lib/orders/order"
 import { robotsOnly } from "@/lib/seo/metadata"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { orderView } from "@/lib/views/order"
+import { orderActions } from "@/lib/theme-actions"
 import { theme } from "@/theme"
 
 // An order is the shopper's own: never indexed, never followed
@@ -37,5 +38,23 @@ export default async function OrderPage({
     }
     throw error
   })
-  return <theme.OrderPage t={t} view={orderView(order, methods, query["yeni"] === "1", t)} />
+  const [returns, invoice, contracts] = await Promise.all([
+    orderReturns(order.id, token),
+    orderInvoice(order.id, token),
+    orderContractKinds(order.id, token),
+  ])
+  const note = typeof query["durum"] === "string" ? query["durum"] : null
+  return (
+    <theme.OrderPage
+      t={t}
+      actions={orderActions}
+      view={orderView(order, methods, query["yeni"] === "1", t, {
+        token,
+        contracts,
+        returns,
+        invoice,
+        note,
+      })}
+    />
+  )
 }
