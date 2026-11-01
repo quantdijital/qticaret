@@ -1,12 +1,19 @@
 import { RESERVED_ROOT_SEGMENTS, isReservedPath } from "../paths"
 
 describe("isReservedPath", () => {
-  it.each(["/arama", "/sepet", "/urun", "/kategori", "/blog", "/admin", "/store"])(
-    "keeps %s for the storefront",
-    (path) => {
-      expect(isReservedPath(path)).toBe(true)
-    }
-  )
+  it.each([
+    "/arama",
+    "/sepet",
+    "/urun",
+    "/kategori",
+    "/blog",
+    "/siparis",
+    "/yasal",
+    "/admin",
+    "/store",
+  ])("keeps %s for the storefront", (path) => {
+    expect(isReservedPath(path)).toBe(true)
+  })
 
   it.each([
     // What the prefixes are for
