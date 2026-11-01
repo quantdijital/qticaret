@@ -134,10 +134,23 @@ medusaIntegrationTestRunner({
             itemListElement: [{ position: 1, url: "https://magaza.example.com/urun/keten-gomlek" }],
           },
         })
-        const site = await http.get<{ jsonLd: { "@type": string }[] }>("/store/seo/site", {
-          headers: store.headers,
+        await post("/admin/platform-settings/seo", {
+          home: { title: "El Yapımı Giyim | Örnek", description: "Atölyeden kapınıza keten." },
         })
+        const site = await http.get<{
+          jsonLd: { "@type": string }[]
+          shop: { name: string; logo_url: string | null }
+          home: { title: string; description: string; canonical: string | null; jsonLd: unknown[] }
+        }>("/store/seo/site", { headers: store.headers })
         expect(site.data.jsonLd.map((block) => block["@type"])).toEqual(["OnlineStore", "WebSite"])
+        // F18 (adr/0046): the storefront's frame and the home page's seo object
+        expect(typeof site.data.shop.name).toBe("string")
+        expect(site.data.home).toMatchObject({
+          title: "El Yapımı Giyim | Örnek",
+          description: "Atölyeden kapınıza keten.",
+          canonical: "https://magaza.example.com/",
+        })
+        expect(site.data.home.jsonLd).toEqual(site.data.jsonLd)
       })
     })
 

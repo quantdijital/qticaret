@@ -3,7 +3,7 @@ import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import { requireUserActor } from "./actor"
 import { seoPublishGate } from "../validation/seo-publish-gate"
 import { rateLimit } from "./rate-limit"
-import { StoreGetSeoResolve, StorePostNotFound } from "../store/seo/validators"
+import { StoreGetSeoPaths, StoreGetSeoResolve, StorePostNotFound } from "../store/seo/validators"
 import { AdminPutSeoMeta } from "../admin/seo/[entity_type]/[entity_id]/validators"
 import { AdminGetAssessments, AdminPostAssessmentFix } from "../admin/seo/assessments/validators"
 import {
@@ -71,6 +71,7 @@ export const SEO_ROUTES = [
     middlewares: [validateAndTransformBody(AdminPostAssessmentFix)],
   },
   get("/store/seo/resolve", StoreGetSeoResolve),
+  get("/store/seo/paths", StoreGetSeoPaths),
   {
     matcher: "/store/seo/not-found",
     methods: ["POST" as const],

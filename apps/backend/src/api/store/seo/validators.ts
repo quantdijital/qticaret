@@ -15,3 +15,32 @@ export const StorePostNotFound = z
   })
   .strict()
 export type StorePostNotFoundType = z.infer<typeof StorePostNotFound>
+
+/**
+ * `?type=product&id=prod_1&id=prod_2`: the storefront paths of up to 100
+ * records of one type (adr/0046 §3), for the links on a page. A single id
+ * comes as a string, several as an array.
+ */
+export const StoreGetSeoPaths = z
+  .object({
+    type: z.enum([
+      "product",
+      "product_category",
+      "product_collection",
+      "brand",
+      "page",
+      "post",
+      "landing",
+    ]),
+    id: z
+      .union([z.string(), z.array(z.string())])
+      .transform((value) => (Array.isArray(value) ? value : [value]))
+      .pipe(
+        z
+          .array(z.string().regex(/^[a-z]+_[0-9A-Za-z]{1,64}$/))
+          .min(1)
+          .max(100)
+      ),
+  })
+  .strict()
+export type StoreGetSeoPathsType = z.infer<typeof StoreGetSeoPaths>

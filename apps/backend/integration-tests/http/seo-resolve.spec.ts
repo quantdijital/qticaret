@@ -72,6 +72,38 @@ medusaIntegrationTestRunner({
       store = await createStorefront(getContainer())
     })
 
+    it("gives the storefront each record's current path for its links (adr/0046 §3)", async () => {
+      const kept = await create("Keten Masa Örtüsü")
+      const renamed = await create("Bambu Tabak")
+      await post(`/admin/products/${renamed}`, { handle: "bambu-servis-tabagi" })
+
+      const answer = await http.get<{ paths: Record<string, string> }>(
+        `/store/seo/paths?type=product&id=${kept}&id=${renamed}&id=prod_unknown`,
+        { headers: store.headers }
+      )
+
+      expect(answer.data.paths).toEqual({
+        [kept]: "/urun/keten-masa-ortusu",
+        [renamed]: "/urun/bambu-servis-tabagi",
+      })
+      expect(answer.headers["cache-control"]).toContain("max-age=60")
+      const single = await http.get<{ paths: Record<string, string> }>(
+        `/store/seo/paths?type=product&id=${kept}`,
+        { headers: store.headers }
+      )
+      expect(single.data.paths).toEqual({ [kept]: "/urun/keten-masa-ortusu" })
+
+      const tooMany = Array.from({ length: 101 }, (_, index) => `id=prod_${String(index)}`).join(
+        "&"
+      )
+      for (const query of ["type=customer&id=cus_1", "type=product", `type=product&${tooMany}`]) {
+        const refused = await settle(
+          http.get(`/store/seo/paths?${query}`, { headers: store.headers })
+        )
+        expect(refused.status).toBe(400)
+      }
+    })
+
     it("sends a renamed product's old path to its new one, cacheable for a minute", async () => {
       const id = await create("Seramik Kupa")
       await post(`/admin/products/${id}`, { handle: "el-yapimi-seramik-kupa" })

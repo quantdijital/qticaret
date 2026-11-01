@@ -65,6 +65,8 @@ export interface SeoSettings {
   ai_crawler_preset: "ai_search_visible" | "block_training" | "none"
   /** The share image of a page without its own (F12.10): one of the shop's media library. */
   default_og_image: string | null
+  /** The home page's title and description (F18, adr/0046); null: the shop's name, no description. */
+  home: { title: string | null; description: string | null }
 }
 
 /**
@@ -110,6 +112,24 @@ export const seoSection = defineSection<SeoSettings>(
       .max(2048)
       .regex(/^https?:\/\/\S+$/i, { message: "platform_settings.url_invalid" })
       .nullable(),
+    home: z
+      .object({
+        title: z
+          .string()
+          .trim()
+          .min(1)
+          .max(150)
+          .refine((text) => isCleanText(text), cleanText)
+          .nullable(),
+        description: z
+          .string()
+          .trim()
+          .min(1)
+          .max(320)
+          .refine((text) => isCleanText(text), cleanText)
+          .nullable(),
+      })
+      .strict(),
   },
   {
     canonical_host: null,
@@ -127,6 +147,7 @@ export const seoSection = defineSection<SeoSettings>(
     robots_txt: DEFAULT_ROBOTS_TXT,
     ai_crawler_preset: "ai_search_visible",
     default_og_image: null,
+    home: { title: null, description: null },
   },
   (values, ctx) => {
     const templates: [string, TemplateEntity, string][] = [

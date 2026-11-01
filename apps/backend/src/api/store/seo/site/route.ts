@@ -1,9 +1,13 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { homeSeo } from "../../../../lib/seo/home"
 import { siteJsonLd } from "../../../../lib/seo/jsonld"
 import { SYSTEM_PAGES } from "../../../../lib/seo/paths"
 import { PLATFORM_SETTINGS_MODULE } from "../../../../modules/platform-settings"
 import { SEO_INDEXNOW } from "../../../../modules/platform-settings/features"
-import type { AppearanceSettings } from "../../../../modules/platform-settings/sections"
+import type {
+  AppearanceSettings,
+  SeoSettings,
+} from "../../../../modules/platform-settings/sections"
 import type PlatformSettingsModuleService from "../../../../modules/platform-settings/service"
 import { SEO_SITEMAPS_MODULE } from "../../../../modules/seo-sitemaps"
 import type SeoSitemapsModuleService from "../../../../modules/seo-sitemaps/service"
@@ -28,17 +32,24 @@ const identityOf = (identity: LegalIdentity) => ({
  * announces its changes, and the home page's structured data, the shop
  * as an `OnlineStore` (with its legal identity, F13.9) and its `WebSite`. No blocks until the canonical
  * host is set: they need absolute URLs. And the robots value of the
- * storefront's own pages (search results, cart, account).
+ * storefront's own pages (search results, cart, account). For the
+ * storefront's frame (F18, adr/0046): the shop's name and logo, and the
+ * home page's `seo` object, shaped as resolve's for every other page.
  */
 export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {
   const [shop, identity] = await Promise.all([shopOf(req.scope), legalIdentity(req.scope)])
-  const appearance = (await req.scope
-    .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
-    .getSection("appearance")) as unknown as AppearanceSettings
+  const settings = req.scope.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
+  const [appearanceSection, seoSection, announcing] = await Promise.all([
+    settings.getSection("appearance"),
+    settings.getSection("seo"),
+    settings.isFeatureEnabled(SEO_INDEXNOW),
+  ])
+  const appearance = appearanceSection as unknown as AppearanceSettings
+  const seo = seoSection as unknown as SeoSettings
   const url = shop.canonicalHost ? `https://${shop.canonicalHost}/` : null
-  const announcing = await req.scope
-    .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
-    .isFeatureEnabled(SEO_INDEXNOW)
+  const jsonLd = url
+    ? siteJsonLd({ name: shop.name, url, logo: appearance.logo_light_url }, identityOf(identity))
+    : []
   res.setHeader("Cache-Control", "public, max-age=300, stale-while-revalidate=3600")
   res.vary("x-publishable-api-key")
   res.json({
@@ -48,9 +59,9 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
     indexnow_key: announcing
       ? await req.scope.resolve<SeoSitemapsModuleService>(SEO_SITEMAPS_MODULE).indexNowKey()
       : null,
-    jsonLd: url
-      ? siteJsonLd({ name: shop.name, url, logo: appearance.logo_light_url }, identityOf(identity))
-      : [],
+    jsonLd,
     system_pages: SYSTEM_PAGES,
+    shop: { name: shop.name, logo_url: appearance.logo_light_url },
+    home: homeSeo({ shop, home: seo.home, ogImage: seo.default_og_image, jsonLd }),
   })
 }
