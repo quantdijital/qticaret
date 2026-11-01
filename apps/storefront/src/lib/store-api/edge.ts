@@ -36,19 +36,34 @@ export function reportNotFound(
   }).catch(() => undefined)
 }
 
-let indexing: { value: boolean; until: number } | undefined
+/** What every request's edge needs from the shop's SEO settings (docs/13 §2.2, §6). */
+export interface EdgeSite {
+  indexing: boolean
+  canonicalHost: string | null
+  indexNowKey: string | null
+}
 
-/** Whether this instance may be indexed; asked at most once a minute. Unknown counts as yes. */
-export async function isIndexing(visitorIp: string | null): Promise<boolean> {
-  if (indexing && indexing.until > Date.now()) {
-    return indexing.value
+let site: { value: EdgeSite; until: number } | undefined
+
+/**
+ * The shop's edge facts, asked at most once a minute. Unknown counts as
+ * "index, no canonical host": an outage never hides the shop nor loops it.
+ */
+export async function edgeSite(visitorIp: string | null): Promise<EdgeSite> {
+  if (site && site.until > Date.now()) {
+    return site.value
   }
   try {
     const { data } = await storeRequest<SiteSeo>("/store/seo/site", { visitorIp })
-    indexing = { value: data.indexing, until: Date.now() + 60_000 }
-    return data.indexing
+    const value = {
+      indexing: data.indexing,
+      canonicalHost: data.canonical_host,
+      indexNowKey: data.indexnow_key,
+    }
+    site = { value, until: Date.now() + 60_000 }
+    return value
   } catch {
-    return true
+    return { indexing: true, canonicalHost: null, indexNowKey: null }
   }
 }
 

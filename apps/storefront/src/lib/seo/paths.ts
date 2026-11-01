@@ -63,3 +63,28 @@ export function normalizedPath(pathname: string): string | null {
   }
   return path === pathname ? null : path
 }
+
+/**
+ * The 301 to the shop's one host (docs/13 §2.2), or null when the request
+ * is already there or no host is set. The request's host comes as sent,
+ * port and case aside; the target is always https.
+ */
+export function canonicalHostRedirect(
+  requestHost: string | null,
+  canonicalHost: string | null,
+  pathAndSearch: string
+): string | null {
+  if (!canonicalHost || !requestHost) {
+    return null
+  }
+  const host = requestHost.trim().toLowerCase().replace(/:\d+$/, "")
+  return host === canonicalHost ? null : `https://${canonicalHost}${pathAndSearch}`
+}
+
+const INDEXNOW_FILE = /^\/([A-Za-z0-9-]{8,128})\.txt$/
+
+/** The IndexNow key file's answer (`/{key}.txt`, docs/13 §6): the key, when the path names it. */
+export function indexNowFile(pathname: string, key: string | null): string | null {
+  const match = INDEXNOW_FILE.exec(pathname)
+  return key && match?.[1] === key ? key : null
+}

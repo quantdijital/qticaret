@@ -4,10 +4,17 @@ import { LANDING_COOKIE, landingOf } from "./lib/cart/landing"
 import { paymentFrameOrigins, paymentRedirectOrigins, storefrontEnv } from "./lib/env"
 import { t } from "./lib/i18n"
 import { contentSecurityPolicy, newNonce } from "./lib/security/csp"
-import { backendFile, isStorefrontIndex, isSystemPath, normalizedPath } from "./lib/seo/paths"
+import {
+  backendFile,
+  canonicalHostRedirect,
+  indexNowFile,
+  isStorefrontIndex,
+  isSystemPath,
+  normalizedPath,
+} from "./lib/seo/paths"
 import {
   backendFileResponse,
-  isIndexing,
+  edgeSite,
   reportNotFound,
   resolveForProxy,
 } from "./lib/store-api/edge"
@@ -33,8 +40,9 @@ const isPaymentReturn = (pathname: string) =>
   pathname === "/odeme/sonuc" || pathname.startsWith("/odeme/sonuc/")
 
 /**
- * Before every page (adr/0046 §4): the backend's files at the root, one
- * 301 to the normalised address, the backend's redirects and 410s with
+ * Before every page (adr/0046 §4): in production one 301 to the shop's
+ * canonical host, the backend's files at the root (and the IndexNow key
+ * file while the shop announces), one 301 to the normalised address, the backend's redirects and 410s with
  * their own codes, 404s reported, a nonce'd CSP, and `noindex` on an
  * instance search engines must not index (staging; docs/13 §6).
  */
@@ -44,6 +52,26 @@ export async function proxy(request: NextRequest): Promise<Response> {
   // which would hide the very form we answer with a 301
   const { pathname, search } = new URL(request.url)
   const visitor = visitorIp(request.headers, env.STOREFRONT_TRUSTED_PROXY_HOPS ?? 0)
+  const site = await edgeSite(visitor)
+
+  // Development runs on localhost whatever the shop's host is
+  if (env.NODE_ENV === "production") {
+    const target = canonicalHostRedirect(
+      request.headers.get("host"),
+      site.canonicalHost,
+      `${pathname}${search}`
+    )
+    if (target) {
+      return NextResponse.redirect(target, 301)
+    }
+  }
+
+  const key = indexNowFile(pathname, site.indexNowKey)
+  if (key) {
+    return new Response(key, {
+      headers: { "content-type": "text/plain; charset=utf-8", "x-content-type-options": "nosniff" },
+    })
+  }
 
   const file = backendFile(pathname)
   if (file) {
@@ -103,7 +131,7 @@ export async function proxy(request: NextRequest): Promise<Response> {
       })
     }
   }
-  if (!(await isIndexing(visitor))) {
+  if (!site.indexing) {
     response.headers.set("x-robots-tag", "noindex, nofollow")
   }
   return response

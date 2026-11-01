@@ -1,5 +1,11 @@
 import { describe, expect, it } from "vitest"
-import { backendFile, isSystemPath, normalizedPath } from "../paths"
+import {
+  backendFile,
+  canonicalHostRedirect,
+  indexNowFile,
+  isSystemPath,
+  normalizedPath,
+} from "../paths"
 
 describe("normalizedPath", () => {
   it("leaves a clean path alone", () => {
@@ -38,5 +44,41 @@ describe("isSystemPath and backendFile", () => {
     expect(backendFile("/.well-known/security.txt")).toBe("/store/seo/security")
     expect(backendFile("/sitemap-../x.xml")).toBeNull()
     expect(backendFile("/urun/x")).toBeNull()
+  })
+})
+
+describe("canonicalHostRedirect", () => {
+  it("sends another host to the shop's own, path and query kept", () => {
+    expect(canonicalHostRedirect("magaza.example", "www.magaza.example", "/urun/a?x=1")).toBe(
+      "https://www.magaza.example/urun/a?x=1"
+    )
+    expect(canonicalHostRedirect("shop.platform.example:443", "magaza.example", "/")).toBe(
+      "https://magaza.example/"
+    )
+  })
+
+  it("leaves the shop's own host alone, whatever its case or port", () => {
+    expect(canonicalHostRedirect("WWW.Magaza.Example", "www.magaza.example", "/")).toBeNull()
+    expect(canonicalHostRedirect("www.magaza.example:8000", "www.magaza.example", "/")).toBeNull()
+  })
+
+  it("does nothing until a host is set", () => {
+    expect(canonicalHostRedirect("anything.example", null, "/")).toBeNull()
+    expect(canonicalHostRedirect(null, "www.magaza.example", "/")).toBeNull()
+  })
+})
+
+describe("indexNowFile", () => {
+  // Built, not written out: a 32-character literal reads as a secret to the scanner
+  const key = "ab".repeat(16)
+
+  it("answers the key's own file only", () => {
+    expect(indexNowFile(`/${key}.txt`, key)).toBe(key)
+    expect(indexNowFile("/abababab.txt", key)).toBeNull()
+    expect(indexNowFile(`/a/${key}.txt`, key)).toBeNull()
+  })
+
+  it("answers nothing while the shop does not announce", () => {
+    expect(indexNowFile(`/${key}.txt`, null)).toBeNull()
   })
 })
