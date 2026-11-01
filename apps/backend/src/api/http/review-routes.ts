@@ -31,6 +31,12 @@ const customerWrites = () => [
  * a budget, moderated by staff.
  */
 export const REVIEW_ROUTES = [
+  // F18 D10: every approved review, the shop's reviews page
+  {
+    matcher: "/store/reviews",
+    methods: ["GET" as const],
+    middlewares: [validateAndTransformQuery(StoreGetReviews, {})],
+  },
   {
     matcher: "/store/products/:id/reviews",
     methods: ["GET" as const],

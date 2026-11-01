@@ -124,6 +124,10 @@ medusaIntegrationTestRunner({
       )
       await moderate([written.data.review?.id ?? ""], "approved")
       const afterApproval = await storeReviews()
+      // The shop's reviews page lists it with its product (F18 D10)
+      const shopWide = await http.get<{
+        reviews: { id: string; product_id: string; product_title: string }[]
+      }>("/store/reviews", { headers: storefront.headers })
       // Structured data needs absolute URLs: the shop's domain
       await getContainer()
         .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
@@ -145,6 +149,11 @@ medusaIntegrationTestRunner({
         author_name: "Ayşe Y.",
       })
       expect(product?.["aggregateRating"]).toMatchObject({ ratingValue: "4.0", reviewCount: 1 })
+      expect(
+        shopWide.data.reviews.find((each) => each.id === written.data.review?.id)
+      ).toMatchObject({
+        product_id: productId,
+      })
     })
 
     it("hides a changed review until it is approved again, and a rejected one for good", async () => {
