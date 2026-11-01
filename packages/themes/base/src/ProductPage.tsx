@@ -3,6 +3,7 @@ import { Breadcrumbs } from "./components/Breadcrumbs"
 import { ProductDetails, SpecHighlights } from "./components/ProductDetails"
 import { ProductGallery } from "./components/ProductGallery"
 import { PurchasePanel } from "./components/PurchasePanel"
+import { TrustStrip } from "./components/TrustStrip"
 
 const ACTION_ERRORS = [
   "cart.add_failed",
@@ -79,6 +80,7 @@ export function ProductPage({
               before: t("price.before"),
             }}
           />
+          <TrustStrip badges={view.trustBadges} label={t("footer.trust")} compact />
         </div>
       </div>
       <ProductDetails description={view.description} specs={view.specs} t={t} />

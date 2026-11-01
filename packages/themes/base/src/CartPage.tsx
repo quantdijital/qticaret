@@ -156,7 +156,7 @@ export function CartPage({
         </Alert>
       )}
       <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_22rem]">
-        <ul className="divide-y border-y">
+        <ul className="divide-y self-start border-y">
           {view.lines.map((line) => (
             <CartLine key={line.id} line={line} t={t} actions={actions} />
           ))}

@@ -27,25 +27,40 @@ const ICONS: Record<TrustBadgeView["icon"], LucideIcon> = {
 export function TrustStrip({
   badges,
   label,
+  compact = false,
   className,
 }: {
   badges: TrustBadgeView[]
   label: string
+  /** Two columns and smaller type, in a box beside the cart form. */
+  compact?: boolean
   className?: string
 }) {
   if (badges.length === 0) {
     return null
   }
   return (
-    <ul aria-label={label} className={cn("grid grid-cols-2 gap-4 lg:grid-cols-4", className)}>
+    <ul
+      aria-label={label}
+      className={cn(
+        "grid grid-cols-2",
+        compact ? "gap-3 rounded-2xl border p-4" : "gap-4 lg:grid-cols-4",
+        className
+      )}
+    >
       {badges.map((badge) => {
         const Icon = ICONS[badge.icon]
         return (
           <li key={badge.title} className="flex items-start gap-3">
-            <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-muted">
-              <Icon className="size-5" aria-hidden="true" />
+            <span
+              className={cn(
+                "flex shrink-0 items-center justify-center rounded-full bg-muted",
+                compact ? "size-8" : "size-10"
+              )}
+            >
+              <Icon className={compact ? "size-4" : "size-5"} aria-hidden="true" />
             </span>
-            <span className="text-sm">
+            <span className={compact ? "text-xs" : "text-sm"}>
               <span className="block font-medium">{badge.title}</span>
               {badge.text && <span className="block text-muted-foreground">{badge.text}</span>}
             </span>

@@ -1,4 +1,10 @@
-import type { BreadcrumbView, ProductCardView, ProductPageView, Translate } from "@qticaret/ui"
+import type {
+  BreadcrumbView,
+  ProductCardView,
+  ProductPageView,
+  Translate,
+  TrustBadgeView,
+} from "@qticaret/ui"
 import type { PriceDisplay, SeoPayload, StoreProduct } from "@qticaret/types"
 import { productImages } from "./image"
 import { cardPrice, isAvailable, variantPrice } from "./price"
@@ -66,6 +72,8 @@ interface ProductPageInput {
   requestedVariant: string | null
   /** The storefront's words: the trail's first step, yes/no in the specs. */
   t: Translate
+  /** The shop's promises, shown beside the cart form. */
+  trustBadges: TrustBadgeView[]
 }
 
 export function productPage({
@@ -75,6 +83,7 @@ export function productPage({
   brandPath,
   requestedVariant,
   t,
+  trustBadges,
 }: ProductPageInput): ProductPageView {
   const variants = product.variants ?? []
   const options = (product.options ?? []).map((option) => ({
@@ -116,6 +125,7 @@ export function productPage({
     variants: views,
     selectedVariantId: selected?.id ?? null,
     specs: specsOf(product.attribute_values, t),
+    trustBadges,
   }
 }
 

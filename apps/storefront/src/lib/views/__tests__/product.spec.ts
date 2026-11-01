@@ -63,6 +63,7 @@ const page = (requestedVariant: string | null) =>
     brandPath: null,
     requestedVariant,
     t,
+    trustBadges: [],
   })
 
 describe("productPage", () => {

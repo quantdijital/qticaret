@@ -37,12 +37,13 @@ export function HomePage({ view, t }: { view: HomePageView; t: Translate }) {
           )}
         </div>
       </section>
+      {/* A short list fills its row: no empty column beside the last tile */}
       {view.categories.length > 0 && (
         <section aria-labelledby="kategoriler" className="flex flex-col gap-6">
           <h2 id="kategoriler" className="text-2xl font-semibold tracking-tight">
             {t("home.shop_categories")}
           </h2>
-          <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          <ul className="grid grid-cols-2 gap-3 sm:grid-cols-[repeat(auto-fit,minmax(12rem,1fr))] [&>li:last-child:nth-child(odd)]:col-span-2 sm:[&>li:last-child:nth-child(odd)]:col-span-1">
             {view.categories.map((category) => (
               <li key={category.path}>
                 <a

@@ -132,6 +132,8 @@ export interface ProductPageView {
   selectedVariantId: string | null
   /** The product's public attributes, in the shop's order, ready to read. */
   specs: SpecView[]
+  /** The shop's promises (shipping, returns…), beside the cart form. */
+  trustBadges: TrustBadgeView[]
 }
 
 /** One attribute as a shopper reads it: "Bıçak uzunluğu" — "21 cm". */
