@@ -180,6 +180,8 @@ export interface CustomerDefaults {
   first_name: string | null
   last_name: string | null
   phone: string | null
+  /** The newest address in the customer's book. */
+  address: CheckoutAddress | null
 }
 
 export async function checkoutView(
@@ -190,9 +192,10 @@ export async function checkoutView(
   customer: CustomerDefaults | null = null
 ): Promise<CheckoutPageView> {
   const address = cart.shipping_address
-  const selects = address
-    ? await selectsOf(address)
-    : { province: "", district: "", neighborhood: "" }
+  // An empty form starts from the customer's newest saved address
+  // (a cart Medusa gave the customer may carry an empty address object)
+  const known = address?.province ? address : (customer?.address ?? address ?? null)
+  const selects = known ? await selectsOf(known) : { province: "", district: "", neighborhood: "" }
   const complete = addressComplete(cart)
   const chosen = cart.shipping_methods[0] ?? null
   const [provinces, districts, neighborhoods, options, payment] = await Promise.all([
@@ -209,11 +212,11 @@ export async function checkoutView(
     address: {
       values: {
         email: cart.email ?? customer?.email ?? "",
-        phone: displayPhone(address?.phone ?? customer?.phone ?? ""),
-        first_name: address?.first_name ?? customer?.first_name ?? "",
-        last_name: address?.last_name ?? customer?.last_name ?? "",
+        phone: displayPhone(known?.phone ?? customer?.phone ?? ""),
+        first_name: known?.first_name ?? customer?.first_name ?? "",
+        last_name: known?.last_name ?? customer?.last_name ?? "",
         ...selects,
-        address_1: address?.address_1 ?? "",
+        address_1: known?.address_1 ?? "",
       },
       provinces,
       districts,

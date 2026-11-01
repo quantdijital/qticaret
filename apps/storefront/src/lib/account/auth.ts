@@ -135,3 +135,56 @@ export function claimMigration(key: string, token: string) {
     headers: bearer(token),
   })
 }
+
+export interface CustomerAddress {
+  id: string
+  first_name: string | null
+  last_name: string | null
+  phone: string | null
+  address_1: string | null
+  address_2: string | null
+  city: string | null
+  province: string | null
+  postal_code: string | null
+  country_code: string | null
+}
+
+const ADDRESS_FIELDS =
+  "id,first_name,last_name,phone,address_1,address_2,city,province,postal_code,country_code"
+
+/** The signed-in customer's saved addresses, newest first (Medusa's address book). */
+export async function customerAddresses(): Promise<CustomerAddress[]> {
+  try {
+    const { addresses } = await storeGet<{ addresses: CustomerAddress[] }>(
+      "/store/customers/me/addresses",
+      { fields: ADDRESS_FIELDS, order: "-created_at", limit: 20 }
+    )
+    return addresses
+  } catch (error) {
+    if (isStoreApiError(error)) {
+      return []
+    }
+    throw error
+  }
+}
+
+const same = (a: string | null | undefined, b: string | null | undefined) =>
+  (a ?? "").trim().toLocaleLowerCase("tr") === (b ?? "").trim().toLocaleLowerCase("tr")
+
+/**
+ * Keeps an address the customer typed at checkout in their book, once:
+ * the same street, neighbourhood, district and province is not added again.
+ */
+export async function rememberAddress(address: Omit<CustomerAddress, "id">): Promise<void> {
+  const known = await customerAddresses()
+  const exists = known.some(
+    (each) =>
+      same(each.address_1, address.address_1) &&
+      same(each.address_2, address.address_2) &&
+      same(each.city, address.city) &&
+      same(each.province, address.province)
+  )
+  if (!exists) {
+    await storePost("/store/customers/me/addresses", address)
+  }
+}

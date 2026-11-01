@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { z } from "zod"
 import type { ActionResult, OptionView, PlaceOrderResult } from "@qticaret/ui"
+import { rememberAddress } from "@/lib/account/auth"
+import { sessionToken } from "@/lib/account/session"
 import { forgetCart } from "@/lib/cart/cookie"
 import { districtOptions, neighborhoodOptions } from "@/lib/checkout/address"
 import { addressFromForm, addressPayload } from "@/lib/checkout/address-form"
@@ -31,6 +33,22 @@ export async function saveAddress(_state: ActionResult, form: FormData): Promise
     await storePost(`/store/carts/${cart.id}`, addressPayload(parsed.value))
   } catch (error) {
     return { ok: false, error: checkoutError(error, "checkout.address_invalid") }
+  }
+  // A signed-in customer's address goes into their book for next time (best effort)
+  if (await sessionToken()) {
+    const { first_name, last_name, phone, address_1, address_2, city, province, postal_code } =
+      parsed.value
+    await rememberAddress({
+      first_name,
+      last_name,
+      phone,
+      address_1,
+      address_2,
+      city,
+      province,
+      postal_code,
+      country_code: "tr",
+    }).catch(() => undefined)
   }
   revalidatePath("/odeme")
   redirect("/odeme?adim=kargo")
