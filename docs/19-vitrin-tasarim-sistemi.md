@@ -22,14 +22,16 @@ Sürümler exact ve ≥14 gün kuralıyla (docs/04).
 
 ## 2. Görsel dil
 
-**Bir cümleyle:** beyaz zemin, siyah birincil eylem, tek indirim kırmızısı, geniş boşluk, büyük ürün görseli, ince çizgi.
+**Bir cümleyle (2026-11-02):** sıcak kemik rengi zemin (`#f6f4ef`), beyaz kartlar, koyu mürekkep bantlar (alt bilgi, "bize ulaşın"), başlıklarda yumuşak serif (Fraunces), metinde Inter; birincil eylem mağazanın rengi.
 
-- **Görsel önce:** ürün kartı kare görsel, `rounded-xl`; ürün sayfasında görsel alanı geniş sütun. Görsel yoksa ikonlu nötr kutu.
-- **Renk:** birincil eylem `--primary` (varsayılan siyah). Kırmızı (`--sale`) yalnızca indirimli fiyatta ve indirim rozetinde. Yeşil (`--success`) yalnızca stok ve başarı mesajında.
-- **Tipografi:** başlıklar `tracking-tight`, 600 ağırlık; tutarlar `.tabular`. Başlıkta büyük harfle bağırmak yok (marka adı hariç).
-- **Köşe:** `--radius` tek kaynak; düğmeler ve seçenek hapları tam yuvarlak (`rounded-full`), kartlar `rounded-xl/2xl`.
-- **Hareket:** yalnızca hover ve açılır katmanlarda; `prefers-reduced-motion` saygı görür. Kendiliğinden kayan içerik yok (WCAG 2.2.2): duyuru şeridi sabit.
-- **Odak:** klavye kullanıcısı her zaman nerede olduğunu görür (`:focus-visible` 2 px çizgi). Panelin "odak çerçevesi yok" kuralı vitrine uygulanmaz: vitrin herkese açık.
+> Kullanıcı 2026-11-02: "tasarıma çok odaklanma, sadece işlevsel yapıların hepsini kurgulamaya devam et; basic şekilde max hız max güvenlik ve max işlevsellik; tasarımı sonradan bizzat yapacağız." Bu bölüm şimdiki taban görünümü anlatır; tasarım kullanıcıyla yeniden ele alınacak. Yeni ekranlar sade ve işlevsel yazılır.
+
+- **Görsel önce:** ürün kartı 4:5 görsel, `rounded-2xl`, beyaz kart; görsel yoksa adın ilk harfi serifle silik.
+- **Renk:** birincil eylem `--primary` (mağazanın rengi; varsayılan mürekkep). Kırmızı (`--sale`) yalnızca indirimde, yeşil (`--success`) yalnızca stok ve başarıda; koyu bantlar `--ink`.
+- **Tipografi:** `h1`, `h2` Fraunces (`opsz`, `SOFT`), ürün adları ve gövde Inter; tutarlar `.tabular`.
+- **Köşe:** düğmeler ve haplar `rounded-full`, kartlar `rounded-2xl/3xl`.
+- **Hareket:** yalnızca hover ve açılır katmanlarda; `prefers-reduced-motion` saygı görür. Kendiliğinden kayan içerik yok (WCAG 2.2.2).
+- **Odak:** klavye kullanıcısı her zaman nerede olduğunu görür (`:focus-visible`). Panelin "odak çerçevesi yok" kuralı vitrine uygulanmaz.
 
 ## 3. Token'lar
 
@@ -116,28 +118,28 @@ Durum: ✅ var · 🟡 temel hâli var · ⬜ yok. Görev kodları PROGRESS "F18
 
 | Sayfa | Yol | Durum | Backend | Görev |
 | --- | --- | --- | --- | --- |
-| Çerçeve: duyuru, başlık, menü, arama, alt bilgi, WhatsApp | her sayfa | ✅ | `storefront`, `legal-identity` | D3 |
-| Ana sayfa | `/` | 🟡 başlık, kategoriler, yeni ürünler | `seo.home`; ana sayfa blokları yok | D11 |
-| Kategori, marka, koleksiyon, landing | URL kaydına göre | 🟡 sayfalama, "en yeni" | Filtre, fiyat aralığı, fiyat sıralaması için listeleme ucu | D4 |
+| Çerçeve: duyuru, başlık, menü, arama, alt bilgi (yasal bağlantılar, MERSİS/KEP/ETBİS satırı), WhatsApp | her sayfa | ✅ | `storefront`, `legal-identity`, `legal/{kind}` | D3, D10 |
+| Ana sayfa | `/` | 🟡 giriş, kategori dizini, yeni ürünler, "bize ulaşın", blogdan | ana sayfa blokları (D11) yok | D11 |
+| Kategori, marka, koleksiyon, landing | URL kaydına göre | ✅ filtreler (marka, öznitelik), fiyat aralığı, fiyat/yeni sıralama, sayfalama | `GET /store/listings/products` | D4 |
 | Tüm ürünler | ör. `/magaza` (landing) | ⬜ | landing | D4 |
-| Ürün | `/urun/{slug}` ya da `/{slug}` | 🟡 galeri, fiyat, seçenek, stok, sepete ekle | özellikler, yorum, soru-cevap, stok alarmı, taksit, kargo cümlesi var | D5 |
+| Ürün | `/urun/{slug}` ya da `/{slug}` | ✅ galeri, fiyat, seçenek, stok, sepete ekle, yorumlar, soru-cevap, stok bildirimi, favori, WhatsApp'tan sor, benzer ürünler | taksit tablosu, kargo cümlesi, renk örnekleri yok | D5 |
 | Arama | `/arama?q=` | 🟡 Medusa `q` | Meilisearch | D10 |
-| Sepet | `/sepet` | ✅ adet, kaldır, indirim, ara toplam, ücretsiz kargo çubuğu | kupon, hediye kartı | D6 |
-| Mini sepet (çekmece) | — | ⬜ | | D6 |
-| Ödeme | `/odeme` | ⬜ | adres (`tr-address`), kargo, ödeme oturumu, sözleşmeler, yaş beyanı, taksit | D7 |
-| Sipariş onayı | `/siparis/{id}` | ⬜ | `order-access` | D7 |
-| Sipariş sorgulama (misafir) | `/siparis-sorgula` | ⬜ | `order-lookup` | D8 |
-| Giriş, kayıt, şifre sıfırlama | `/giris`, `/kayit`, `/sifremi-unuttum` | ⬜ | Medusa auth | D8 |
-| Hesabım: özet, siparişler, sipariş detayı, iade talebi, adresler, bilgiler, fatura profili, favoriler, izinler | `/hesap/*` | ⬜ | var (`wishlist`, `billing-profile`, `consents`, `returns`, `invoice`) | D8 |
-| Taşınan müşterinin şifre belirlemesi | `/hesap/sifre-belirle` | ⬜ | `migration-claim` | D8 |
-| İçerik sayfası (hakkımızda, toptan…) | `/{handle}` | ✅ | `content` | D10 |
+| Sepet | `/sepet` | ✅ adet, kaldır, kupon, indirim, ücretsiz kargo çubuğu | hediye kartı (bayrak) yok | D6 |
+| Mini sepet (çekmece) | başlıkta | ✅ | | D6 |
+| Sepet hatırlatma | `/sepet/geri-don?token=` | ✅ onay sayfası + Server Action, satırlar yeni sepete | `cart-reminders/redeem` | D6 |
+| Ödeme | `/odeme`, `/odeme/kart`, `/odeme/sonuc`, `/odeme/durum` | ✅ adres (`tr-address`), kargo, yöntemler, sözleşmeler, yaş, pazarlama izni, iş kanıtı; havale/kapıda anında, PayTR çerçeve, iyzico yönlendirme | | D7 |
+| Sipariş | `/siparis/{id}?token=` | ✅ özet, havale bilgisi, iptal, iade/değişim talebi, sözleşmeler, fatura PDF | | D7 |
+| Sipariş sorgulama (misafir) | `/siparis` | ✅ | `order-lookup` | D8 |
+| Giriş, kayıt, doğrulama, şifre | `/hesap/giris`, `/hesap/kayit`, `/hesap/dogrula`, `/hesap/sifre-sifirla`, `/hesap/sifre-yenile` | ✅ | Medusa auth + F15 | D8 |
+| Hesabım: özet, siparişler, favoriler, bilgiler, fatura profili, izinler, KVKK talebi | `/hesap/*` | ✅ (adres defteri ödeme adımında; ayrı adres sayfası yok) | | D8 |
+| Taşınan müşteri daveti | `/hesap/kayit?davet=` | ✅ ilk girişte `migration-claim` | | D8 |
+| İçerik sayfası | `/{handle}` | ✅ | `content` | D10 |
 | İletişim | `/iletisim` | 🟡 içerik sayfası | iletişim formu ucu yok | D10 |
-| SSS | `/sik-sorulan-sorular` | 🟡 içerik sayfası | `FAQPage` şeması | D10 |
 | Müşteri yorumları | `/yorumlar` | ⬜ | mağaza geneli yorum listesi yok | D10 |
-| Blog listesi, yazı | `/blog`, `/blog/{handle}` | ✅ liste (12'li sayfa) ve yazı | `content?kind=post` | D10 |
-| Yasal metinler | ör. `/yasal/{tur}` | ⬜ | `legal/{kind}` | D10 |
-| Çerez onayı | bant + tercih penceresi | ⬜ | `consents/cookies` | D9 |
-| 404 / 410 | — | ✅ | `seo/not-found` | — |
+| Blog | `/blog`, `/blog/{handle}` | ✅ | `content?kind=post` | D10 |
+| Yasal metinler | `/yasal/{tur}` | ✅ (yayımlanmışlar) | `legal/{kind}` | D10 |
+| Çerez onayı | bant | ✅ | `consents/cookies` | D9 |
+| 404 / 410 / hata | — | ✅ | `seo/not-found` | — |
 
 ## 8. İlk müşteri eşlemesi
 
