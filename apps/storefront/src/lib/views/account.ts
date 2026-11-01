@@ -136,7 +136,10 @@ export function accountView(
   customer: StoreCustomer,
   t: Translate,
   rest: Partial<
-    Pick<AccountPageView, "orders" | "pagination" | "notice" | "favorites" | "billing">
+    Pick<
+      AccountPageView,
+      "orders" | "pagination" | "notice" | "favorites" | "billing" | "privacyRequests"
+    >
   > & {
     marketing?: { email: boolean; sms: boolean }
   } = {}
@@ -154,6 +157,7 @@ export function accountView(
     notice: rest.notice ?? null,
     orders: rest.orders ?? [],
     favorites: rest.favorites ?? [],
+    privacyRequests: rest.privacyRequests ?? [],
     billing: rest.billing ?? null,
     pagination: rest.pagination ?? null,
     profile: {
@@ -225,6 +229,30 @@ export async function billingOf(): Promise<AccountPageView["billing"]> {
   } catch (error) {
     if (isStoreApiError(error)) {
       return null
+    }
+    throw error
+  }
+}
+
+interface PrivacyAnswer {
+  privacy_requests: { kind: string; status: string; received_at: string; due_at: string }[]
+}
+
+/** The customer's KVKK requests, in words. */
+export async function privacyRequestsOf(t: Translate): Promise<AccountPageView["privacyRequests"]> {
+  try {
+    const { privacy_requests } = await storeGet<PrivacyAnswer>(
+      "/store/customers/me/privacy-requests"
+    )
+    return privacy_requests.map((row) => ({
+      kind: said(t, "account.privacy_kind_", row.kind),
+      status: said(t, "account.privacy_status_", row.status),
+      received: DATE.format(new Date(row.received_at)),
+      due: DATE.format(new Date(row.due_at)),
+    }))
+  } catch (error) {
+    if (isStoreApiError(error)) {
+      return []
     }
     throw error
   }

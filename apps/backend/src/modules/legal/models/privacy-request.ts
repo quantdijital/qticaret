@@ -1,12 +1,20 @@
 import { model } from "@medusajs/framework/utils"
 
 export const PRIVACY_REQUEST_KINDS = ["export", "erasure"] as const
-export const PRIVACY_REQUEST_CHANNELS = ["email", "phone", "letter", "in_person", "other"] as const
+// `account`: the customer asked from their own signed-in account on the storefront (F18 D8)
+export const PRIVACY_REQUEST_CHANNELS = [
+  "email",
+  "phone",
+  "letter",
+  "in_person",
+  "other",
+  "account",
+] as const
 export const PRIVACY_REQUEST_STATUSES = ["open", "completed", "rejected"] as const
 
 /**
  * A customer's KVKK request (F13.5, adr/0041 §6), recorded by staff as it
- * came: a copy of their data, or its erasure; how it came, when, who
+ * came, or asked by the customer from their account (`account`): a copy of their data, or its erasure; how it came, when, who
  * recorded it, and when and by whom it was answered. The law gives 30 days.
  * No free text: what the customer wrote stays where it came.
  */

@@ -71,6 +71,8 @@ export interface AccountPageView {
   pagination: PaginationView | null
   /** The customer's saved products (favorites section). */
   favorites: { id: string; title: string; path: string; image: ImageView | null }[]
+  /** The customer's KVKK requests, in words (profile section). */
+  privacyRequests: { kind: string; status: string; received: string; due: string }[]
   /** The invoice details (F8): who the invoice is for; the tax id shown masked. */
   billing: {
     type: "individual" | "corporate"
@@ -89,6 +91,8 @@ export interface AccountPageView {
 }
 
 export interface AccountActions {
+  /** A plain form: `kind` (export, erasure), the customer's KVKK request. */
+  requestPrivacy: (form: FormData) => Promise<void>
   /** Fields: `type` (individual, corporate), `legal_name`, `tax_office`, `tax_id`. */
   saveBilling: FormAction
   /** A plain form: `id`, the favorite to drop. */

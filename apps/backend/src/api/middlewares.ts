@@ -70,6 +70,7 @@ import { PROMOTION_ROUTES } from "./http/promotion-routes"
 import { SEO_ROUTES } from "./http/seo-routes"
 import { STOCK_ROUTES } from "./http/stock-routes"
 import { uploadValidator } from "./http/upload-validator"
+import { StorePostPrivacyRequest } from "./store/customers/me/privacy-requests/validators"
 import { StorePostBillingProfile } from "./store/customers/me/billing-profile/validators"
 import { GetTrDistricts, GetTrNeighborhoods, GetTrProvinces } from "./tr-address/validators"
 import {
@@ -367,6 +368,20 @@ export default defineMiddlewares({
       matcher: "/store/customers/me/billing-profile",
       methods: ["GET"],
       middlewares: [authenticate("customer", ["session", "bearer"])],
+    },
+    // F18 D8: the customer's own KVKK requests (adr/0041 §6)
+    {
+      matcher: "/store/customers/me/privacy-requests",
+      methods: ["GET"],
+      middlewares: [authenticate("customer", ["session", "bearer"])],
+    },
+    {
+      matcher: "/store/customers/me/privacy-requests",
+      methods: ["POST"],
+      middlewares: [
+        authenticate("customer", ["session", "bearer"]),
+        validateAndTransformBody(StorePostPrivacyRequest),
+      ],
     },
     {
       matcher: "/store/customers/me/billing-profile",

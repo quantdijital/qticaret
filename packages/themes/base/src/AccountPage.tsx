@@ -225,6 +225,42 @@ export function AccountPage({
                 <ProfileForm profile={view.profile} save={actions.saveProfile} words={words} />
               </section>
               <section
+                aria-labelledby="kvkk"
+                className="flex flex-col gap-4 rounded-3xl border bg-card p-6 text-sm sm:p-7"
+              >
+                <h2 id="kvkk" className="text-2xl">
+                  {t("account.privacy")}
+                </h2>
+                <p className="text-muted-foreground">{t("account.privacy_text")}</p>
+                {view.privacyRequests.length > 0 && (
+                  <ul className="flex flex-col gap-1">
+                    {view.privacyRequests.map((request, index) => (
+                      <li key={String(index)}>
+                        {request.kind} · {request.status} · {request.received} ·{" "}
+                        {t("account.privacy_due", { date: request.due })}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <div className="flex flex-wrap gap-2">
+                  <form action={actions.requestPrivacy}>
+                    <input type="hidden" name="kind" value="export" />
+                    <button type="submit" className="h-10 rounded-full border px-4 font-semibold">
+                      {t("account.privacy_export")}
+                    </button>
+                  </form>
+                  <form action={actions.requestPrivacy}>
+                    <input type="hidden" name="kind" value="erasure" />
+                    <button
+                      type="submit"
+                      className="h-10 rounded-full border border-sale px-4 font-semibold text-sale"
+                    >
+                      {t("account.privacy_erasure")}
+                    </button>
+                  </form>
+                </div>
+              </section>
+              <section
                 aria-labelledby="izinler"
                 className="flex flex-col gap-5 rounded-3xl border bg-card p-6 sm:p-7"
               >

@@ -1077,7 +1077,7 @@
           "scale": null,
           "default": null,
           "comment": null,
-          "enumItems": ["email", "phone", "letter", "in_person", "other"],
+          "enumItems": ["email", "phone", "letter", "in_person", "other", "account"],
           "mappedType": "enum"
         },
         "received_at": {

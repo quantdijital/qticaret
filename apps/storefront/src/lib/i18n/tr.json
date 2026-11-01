@@ -433,5 +433,17 @@
   "cart.restore_title": "Sepetinize dönün",
   "cart.restore_text": "Kaydettiğimiz sepetinizi açmak için aşağıdaki düğmeye basın.",
   "cart.restore_warning": "Şu anki sepetinizdeki ürünler bu sepetle değişecek.",
-  "cart.restore_submit": "Sepetimi aç"
+  "cart.restore_submit": "Sepetimi aç",
+  "account.privacy": "Kişisel verilerim (KVKK)",
+  "account.privacy_text": "Kişisel verilerinizin bir kopyasını ya da silinmesini isteyebilirsiniz. Talebiniz en geç 30 gün içinde yanıtlanır; yasal saklama süresi olan kayıtlar (fatura gibi) süre bitene kadar tutulur.",
+  "account.privacy_export": "Verilerimin kopyasını iste",
+  "account.privacy_erasure": "Verilerimin silinmesini iste",
+  "account.privacy_due": "yanıt en geç {date}",
+  "account.privacy_kind_export": "Veri kopyası",
+  "account.privacy_kind_erasure": "Silme",
+  "account.privacy_status_open": "İnceleniyor",
+  "account.privacy_status_completed": "Yanıtlandı",
+  "account.privacy_status_rejected": "Reddedildi",
+  "account.notice_privacy_sent": "Talebiniz alındı; en geç 30 gün içinde e-postayla yanıtlanacak.",
+  "account.notice_privacy_failed": "Talebiniz şu an alınamadı. Lütfen tekrar deneyin ya da bize yazın."
 }
