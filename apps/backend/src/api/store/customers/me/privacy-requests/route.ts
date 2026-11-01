@@ -53,13 +53,6 @@ export async function POST(
 ): Promise<void> {
   const customerId = req.auth_context.actor_id
   const { kind } = req.validatedBody
-  const [open] = await req.scope
-    .resolve<LegalModuleService>(LEGAL_MODULE)
-    .listPrivacyRequests({ customer_id: customerId, kind, status: "open" }, { take: 1 })
-  if (open) {
-    res.json({ privacy_request: view(open) })
-    return
-  }
   const { result } = await recordPrivacyRequestWorkflow(req.scope).run({
     input: {
       customer_id: customerId,
@@ -69,5 +62,6 @@ export async function POST(
       recorded_by: customerId,
     },
   })
-  res.status(201).json({ privacy_request: view(result) })
+  // An open one of the kind answers as it is: asking twice opens nothing new
+  res.status(result.created ? 201 : 200).json({ privacy_request: view(result.request) })
 }

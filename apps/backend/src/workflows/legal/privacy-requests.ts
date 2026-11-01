@@ -36,10 +36,20 @@ const recordPrivacyRequestStep = createStep(
     if (data.length === 0) {
       throw new MedusaError(MedusaError.Types.NOT_FOUND, "customers.unknown")
     }
-    const request = await container
-      .resolve<LegalModuleService>(LEGAL_MODULE)
-      .createPrivacyRequests({ ...input, received_at: new Date(input.received_at) })
-    return new StepResponse(request, request.id)
+    const legal = container.resolve<LegalModuleService>(LEGAL_MODULE)
+    // Asked twice (a double submit, staff and the customer at once): the open one answers
+    const [open] = await legal.listPrivacyRequests(
+      { customer_id: input.customer_id, kind: input.kind, status: "open" },
+      { take: 1 }
+    )
+    if (open) {
+      return new StepResponse({ request: open, created: false }, null)
+    }
+    const request = await legal.createPrivacyRequests({
+      ...input,
+      received_at: new Date(input.received_at),
+    })
+    return new StepResponse({ request, created: true }, request.id)
   },
   async (id, { container }) => {
     if (id) {
@@ -48,10 +58,23 @@ const recordPrivacyRequestStep = createStep(
   }
 )
 
-/** F13.5: a customer's KVKK request, recorded by staff. */
+/**
+ * F13.5: a customer's KVKK request, recorded by staff or asked from the
+ * account; one open request per customer and kind, checked under a lock
+ * (security review 2026-11-02: two at once both went in).
+ */
 export const recordPrivacyRequestWorkflow = createWorkflow(
   "legal-record-privacy-request",
-  (input: RecordPrivacyRequestInput) => new WorkflowResponse(recordPrivacyRequestStep(input))
+  (input: RecordPrivacyRequestInput) => {
+    const key = transform(
+      { input },
+      ({ input }) => `privacy-request-new:${input.customer_id}:${input.kind}`
+    )
+    acquireLockStep({ key, timeout: 5, ttl: 30 })
+    const request = recordPrivacyRequestStep(input)
+    releaseLockStep({ key })
+    return new WorkflowResponse(request)
+  }
 )
 
 /** The open request of a kind, or a refusal: answered ones take nothing more. */

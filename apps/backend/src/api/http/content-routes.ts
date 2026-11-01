@@ -1,4 +1,5 @@
 import { validateAndTransformBody, validateAndTransformQuery } from "@medusajs/framework/http"
+import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import { AdminGetContent, AdminPostContent, AdminUpdateContent } from "../admin/content/validators"
 import { AdminGetDashboardNoQuery } from "../admin/dashboard/validators"
 import {
@@ -9,6 +10,7 @@ import {
 import { StoreGetContent } from "../store/content/validators"
 import { StoreGetLandingProducts } from "../store/landings/validators"
 import { StoreGetListingProducts } from "../store/listings/validators"
+import { rateLimit } from "./rate-limit"
 
 /**
  * Content pages, blog posts and facet landing pages (F3.16): the admin's
@@ -71,6 +73,9 @@ export const CONTENT_ROUTES = [
   {
     matcher: "/store/listings/products",
     methods: ["GET" as const],
-    middlewares: [validateAndTransformQuery(StoreGetListingProducts, {})],
+    middlewares: [
+      rateLimit(() => RATE_LIMIT_PROFILES.listing),
+      validateAndTransformQuery(StoreGetListingProducts, {}),
+    ],
   },
 ]

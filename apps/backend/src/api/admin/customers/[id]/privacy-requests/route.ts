@@ -50,5 +50,6 @@ export async function POST(
       recorded_by: req.auth_context.actor_id,
     },
   })
-  res.json({ privacy_request: view(result) })
+  // An open one of the kind answers as it is: recorded twice, still one request
+  res.json({ privacy_request: view(result.request) })
 }

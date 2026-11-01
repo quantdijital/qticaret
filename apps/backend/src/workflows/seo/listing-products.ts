@@ -1,5 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, Modules, QueryContext } from "@medusajs/framework/utils"
+import { createTtlCache } from "../../lib/cache"
 import { chunksOf } from "../../lib/catalog"
 import { LISTING_PAGE_SIZE, LISTING_PARAMS } from "../../lib/seo/facets"
 import type { ListingQuery } from "../../lib/seo/facets"
@@ -168,15 +169,38 @@ async function filterDefinitions(container: MedusaContainer) {
   return byKey
 }
 
+/**
+ * A listing's rows and the filter definitions, shared for 30 seconds by
+ * every page, filter and sort of it (security review 2026-11-02): a shopper
+ * paging and filtering, or anyone sending a new query each time, costs one
+ * catalogue read per listing and region, not one per request. A price or
+ * product change shows within that time, as resolve's answers do.
+ */
+const listingRows = createTtlCache<ListingRow[]>({ ttlMs: 30_000, maxEntries: 200 })
+const definitionsCache = createTtlCache<Awaited<ReturnType<typeof filterDefinitions>>>({
+  ttlMs: 30_000,
+  maxEntries: 1,
+})
+
+const rowsKey = (input: ListingProductsInput) =>
+  [
+    input.listed.entity_type,
+    input.listed.entity_id,
+    input.region_id ?? "",
+    input.currency_code,
+    [...input.sales_channel_ids].sort().join(","),
+  ].join("|")
+
 export async function listingProducts(
   container: MedusaContainer,
   input: ListingProductsInput
 ): Promise<ListingProductsAnswer> {
-  const [ids, definitions] = await Promise.all([
-    baseIds(container, input.listed),
-    filterDefinitions(container),
+  const [rows, definitions] = await Promise.all([
+    listingRows(rowsKey(input), async () =>
+      rowsOf(container, await baseIds(container, input.listed), input)
+    ),
+    definitionsCache("definitions", () => filterDefinitions(container)),
   ])
-  const rows = await rowsOf(container, ids, input)
   const arranged = arrange(rows, input.query)
   const start = (input.query.page - 1) * LISTING_PAGE_SIZE
   return {

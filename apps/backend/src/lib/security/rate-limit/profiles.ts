@@ -66,6 +66,9 @@ export const RATE_LIMIT_PROFILES = {
     perIdentityAnyIp: { max: 10, windowMs: 10 * MINUTE },
   },
   installment: { name: "installment", perIp: { max: 30, windowMs: MINUTE } },
+  // F18 D4: a listing's filtered page reads its whole listing once a cache
+  // window; per the shopper's address, signed by the storefront or not
+  listing: { name: "listing", perIp: { max: 120, windowMs: MINUTE } },
   // F10.6 (adr/0037 §4): a customer writing reviews; per IP and per customer
   review_write: {
     name: "review_write",

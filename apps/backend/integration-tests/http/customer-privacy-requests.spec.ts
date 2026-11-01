@@ -31,7 +31,10 @@ medusaIntegrationTestRunner({
         200,
         first.data.privacy_request.id,
       ])
-      expect((await ask("erasure")).status).toBe(201)
+      // Two at once (a double submit): still one request
+      const [one, two] = await Promise.all([ask("erasure"), ask("erasure")])
+      expect([one.status, two.status].sort()).toEqual([200, 201])
+      expect(one.data.privacy_request.id).toBe(two.data.privacy_request.id)
       expect((await ask("everything")).status).toBe(400)
 
       const list = await settle(
