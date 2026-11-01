@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { sectionQuery, useSaveSection } from "@/features/settings/api/sections"
 import type { SeoSettings } from "@/features/settings/api/sections"
 import { useStoreName } from "@/features/settings/api/store"
+import { HomeSeoCard } from "@/features/settings/components/home-seo-card"
 import { SearchConsoleCard } from "@/features/settings/components/search-console-card"
 import { ShareImageCard } from "@/features/settings/components/share-image-card"
 import { TemplateField } from "@/features/settings/components/template-field"
@@ -195,7 +196,7 @@ function CrawlersCard({ saved }: { saved: SeoSettings }) {
 
 /**
  * Settings > SEO (docs/13): the shop's address and share image, URL shape,
- * templates and who may crawl it.
+ * the home page's title, templates and who may crawl it.
  */
 export function SeoPage() {
   const { t } = useTranslation()
@@ -231,6 +232,7 @@ export function SeoPage() {
             label: t("settings.seo.tabs.pages"),
             content: saved((values) => (
               <>
+                <HomeSeoCard saved={values} storeName={storeName} />
                 <TemplatesCard saved={values} storeName={storeName} />
                 <ShareImageCard saved={values} />
               </>

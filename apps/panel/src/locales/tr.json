@@ -620,6 +620,14 @@
         "replace": "Görseli değiştir",
         "remove": "Kaldır"
       },
+      "home": {
+        "title": "Ana sayfa",
+        "hint": "Mağazanızın ana sayfası arama sonuçlarında ve paylaşıldığında bu başlık ve açıklamayla görünür.",
+        "pageTitle": "Sayfa başlığı",
+        "pageTitleHint": "Boşsa mağazanızın adı kullanılır. Arama sonucunda yaklaşık 60 karakter görünür.",
+        "description": "Açıklama",
+        "descriptionHint": "Boşsa açıklama yazılmaz; arama motoru sayfadan bir parça seçer. Yaklaşık 155 karakter görünür."
+      },
       "tabs": {
         "addresses": "Adresler",
         "pages": "Başlıklar ve görsel",

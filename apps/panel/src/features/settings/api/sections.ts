@@ -125,6 +125,8 @@ export interface SeoSettings {
   ai_crawler_preset: "ai_search_visible" | "block_training" | "none"
   /** A page without its own image shares this one (F12.10); from the media library. */
   default_og_image: string | null
+  /** The storefront home page's title and description (F18); null: the shop's name, none. */
+  home: { title: string | null; description: string | null }
 }
 
 const sectionUrl = (section: string) => `/admin/platform-settings/${section}`

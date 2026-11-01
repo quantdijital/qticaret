@@ -620,6 +620,14 @@
         "replace": "Replace image",
         "remove": "Remove"
       },
+      "home": {
+        "title": "Home page",
+        "hint": "Your shop's home page shows with this title and description in search results and when shared.",
+        "pageTitle": "Page title",
+        "pageTitleHint": "When empty, your shop's name is used. Search results show about 60 characters.",
+        "description": "Description",
+        "descriptionHint": "When empty, no description is written and search engines pick a passage from the page. About 155 characters show."
+      },
       "tabs": {
         "addresses": "Addresses",
         "pages": "Titles and image",

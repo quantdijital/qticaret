@@ -48,7 +48,8 @@ export interface SeoContext {
   fallbackDescription: string
 }
 
-function Counter({ length, limit }: { length: number; limit: number }) {
+/** A length against what search results show; past it, in the warning colour. */
+export function Counter({ length, limit }: { length: number; limit: number }) {
   return (
     <span
       className={cn(
