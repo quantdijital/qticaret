@@ -3,7 +3,17 @@ import { expect, test } from "@playwright/test"
 import { DEMO_PRODUCT, dismissCookies } from "./support"
 
 // WCAG 2.2 AA: a serious or critical finding fails the page
-const PAGES = ["/", DEMO_PRODUCT, "/sepet", "/hesap/giris", "/hesap/kayit"]
+const PAGES = [
+  "/",
+  DEMO_PRODUCT,
+  "/sepet",
+  "/magaza",
+  "/yorumlar",
+  "/siparis",
+  "/hesap/giris",
+  "/hesap/kayit",
+  "/hesap/sifre-sifirla",
+]
 
 test.describe("accessibility", () => {
   for (const path of PAGES) {
