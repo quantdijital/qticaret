@@ -54,9 +54,8 @@ export async function addressFromForm(form: FormData): Promise<Parsed> {
     return { ok: false, error: FIELD_ERRORS[field] ?? "checkout.address_invalid" }
   }
   const input = parsed.data
-  const province = (await provinces()).find(
-    (each) => each.code === input.province.replace(/^0/, "")
-  )
+  // Plates come as "06" or "6": compared as numbers
+  const province = (await provinces()).find((each) => Number(each.code) === Number(input.province))
   const district = province
     ? (await districtsOf(province.code)).find((each) => each.id === input.district)
     : undefined

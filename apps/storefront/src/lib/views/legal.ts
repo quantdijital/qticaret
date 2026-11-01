@@ -1,7 +1,7 @@
 import "server-only"
 import { cache } from "react"
 import { isStoreApiError } from "@/lib/store-api/errors"
-import { storeGet } from "@/lib/store-api/server"
+import { storePublicGet } from "@/lib/store-api/server"
 
 /**
  * The shop's legal texts as pages of their own (F13.1, D10): one address
@@ -37,7 +37,7 @@ export interface LegalDocument {
 
 export const legalDocument = cache(async (kind: string): Promise<LegalDocument | null> => {
   try {
-    const { document } = await storeGet<{ document: LegalDocument }>(`/store/legal/${kind}`)
+    const { document } = await storePublicGet<{ document: LegalDocument }>(`/store/legal/${kind}`)
     return document
   } catch (error) {
     if (isStoreApiError(error) && error.status === 404) {

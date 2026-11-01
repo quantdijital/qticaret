@@ -5,7 +5,8 @@ import globals from "globals"
 
 export default [
   ...baseConfig(import.meta.dirname),
-  { ignores: [".next/**", "next-env.d.ts"] },
+  // Next's build, and Playwright's own output (results and HTML report)
+  { ignores: [".next/**", "next-env.d.ts", "e2e/.results/**", "e2e/.report/**"] },
   {
     files: ["**/*.{ts,tsx}"],
     languageOptions: { globals: { ...globals.browser, ...globals.node } },

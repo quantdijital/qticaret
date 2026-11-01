@@ -12,7 +12,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:unit": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:e2e": "playwright test -c e2e/playwright.config.ts"
   },
   "dependencies": {
     "@qticaret/theme-base": "workspace:*",
@@ -25,7 +26,9 @@
     "zod": "4.6.6"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
     "@next/eslint-plugin-next": "16.4.2",
+    "@playwright/test": "1.64.0",
     "@qticaret/config": "workspace:*",
     "@tailwindcss/postcss": "4.3.3",
     "@types/node": "24.19.2",

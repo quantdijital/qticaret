@@ -13,7 +13,7 @@ import type {
   StoreContentSummary,
   StorefrontAnswer,
 } from "@qticaret/types"
-import { storeGet } from "./server"
+import { storeGet, storePublicGet } from "./server"
 
 /**
  * The Store API calls pages make (adr/0046), each one deduplicated within
@@ -29,14 +29,14 @@ export const resolvePath = cache((path: string) =>
   storeGet<Resolution>("/store/seo/resolve", { path })
 )
 
-export const siteSeo = cache(() => storeGet<SiteAnswer>("/store/seo/site"))
+export const siteSeo = cache(() => storePublicGet<SiteAnswer>("/store/seo/site"))
 
 /** The frame the shop wrote (announcement bar, links, footer, trust strip) and its free shipping threshold (D3). */
-export const storefrontSettings = cache(() => storeGet<StorefrontAnswer>("/store/storefront"))
+export const storefrontSettings = cache(() => storePublicGet<StorefrontAnswer>("/store/storefront"))
 
 /** The shop's legal identity and contact details, for the footer (F13.9). */
 export const legalIdentity = cache(async () => {
-  const { identity } = await storeGet<{ identity: LegalIdentity }>("/store/legal-identity")
+  const { identity } = await storePublicGet<{ identity: LegalIdentity }>("/store/legal-identity")
   return identity
 })
 
@@ -49,7 +49,7 @@ export async function pathsOf(
   const found: Record<string, string> = {}
   for (let start = 0; start < unique.length; start += 100) {
     const chunk = unique.slice(start, start + 100)
-    const { paths } = await storeGet<{ paths: Record<string, string> }>("/store/seo/paths", {
+    const { paths } = await storePublicGet<{ paths: Record<string, string> }>("/store/seo/paths", {
       type,
       id: chunk,
     })
@@ -177,7 +177,7 @@ export const productById = cache(async (id: string) => {
  * few hundred categories needs a menu of its own (D11).
  */
 export const allCategories = cache(async () => {
-  const { product_categories } = await storeGet<{ product_categories: StoreCategory[] }>(
+  const { product_categories } = await storePublicGet<{ product_categories: StoreCategory[] }>(
     "/store/product-categories",
     { fields: "id,name,handle,description,parent_category_id,rank", limit: 100 }
   )

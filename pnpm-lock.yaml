@@ -351,9 +351,15 @@ importers:
         specifier: 4.6.6
         version: 4.6.6
     devDependencies:
+      '@axe-core/playwright':
+        specifier: 4.13.0
+        version: 4.13.0(playwright-core@1.64.0)
       '@next/eslint-plugin-next':
         specifier: 16.4.2
         version: 16.4.2(eslint@10.12.0(jiti@2.7.0)(supports-color@8.1.1))
+      '@playwright/test':
+        specifier: 1.64.0
+        version: 1.64.0
       '@qticaret/config':
         specifier: workspace:*
         version: link:../../packages/config

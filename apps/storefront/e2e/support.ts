@@ -1,0 +1,27 @@
+import type { Page } from "@playwright/test"
+
+/** The demo seed's product with sizes in stock (scripts/seed/data.ts). */
+export const DEMO_PRODUCT = "/urun/keten-gomlek"
+
+/** Errors the page logs, apart from a browser extension's or a dev server's own noise. */
+export function collectErrors(page: Page): string[] {
+  const errors: string[] = []
+  page.on("console", (message) => {
+    if (message.type() === "error" && !/hydrat|Download the React DevTools/i.test(message.text())) {
+      errors.push(message.text())
+    }
+  })
+  page.on("pageerror", (error) => {
+    errors.push(error.message)
+  })
+  return errors
+}
+
+/** Answers the cookie banner so it does not cover what a test clicks. */
+export async function dismissCookies(page: Page): Promise<void> {
+  const button = page.locator('button[name="choice"][value="necessary"]')
+  if (await button.count()) {
+    await button.click()
+    await page.waitForLoadState("networkidle")
+  }
+}

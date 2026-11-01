@@ -426,5 +426,8 @@
   "product.favorite_add": "Favorilere ekle",
   "product.favorite_added": "Favorilere eklendi",
   "product.favorite_failed": "Eklenemedi. Lütfen tekrar deneyin.",
-  "wishlist.full": "Favori listeniz dolu; önce birkaç ürünü çıkarın."
+  "wishlist.full": "Favori listeniz dolu; önce birkaç ürünü çıkarın.",
+  "error.title": "Sayfa şu an açılamadı",
+  "error.body": "Kısa bir aksaklık oldu. Birkaç saniye sonra yeniden deneyin.",
+  "error.retry": "Yeniden dene"
 }

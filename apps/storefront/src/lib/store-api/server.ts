@@ -4,6 +4,7 @@ import { storefrontEnv } from "../env"
 import type { QueryValue, StoreRequest } from "./core"
 import { storeRequest } from "./core"
 import { claimsOf, sessionToken } from "../account/session"
+import { shared } from "./shared"
 import { visitorIp } from "./visitor"
 
 /**
@@ -69,4 +70,25 @@ export async function storeCallWithHeaders(
     headers: { ...own.headers, ...options.headers },
   })
   return { data: answer.data, headers: answer.headers }
+}
+
+/**
+ * A shop-wide GET (the frame, the category tree, paths): never with the
+ * customer's key, kept a minute in this process (`shared.ts`).
+ */
+export async function storePublicGet<T>(
+  path: string,
+  query?: Record<string, QueryValue>
+): Promise<T> {
+  const key = `${path}?${JSON.stringify(query ?? {})}`
+  return shared(key, async () => {
+    const { visitorIp: ip, requestId } = await visit()
+    return (
+      await storeRequest<T>(path, {
+        visitorIp: ip,
+        ...(requestId ? { requestId } : {}),
+        ...(query ? { query } : {}),
+      })
+    ).data
+  })
 }
