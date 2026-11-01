@@ -20,6 +20,7 @@ export const SAVED: StorefrontSettings = {
   primary_color: null,
   hero: null,
   contact_form_path: "/iletisim",
+  color_swatches: [],
 }
 
 export interface Init {

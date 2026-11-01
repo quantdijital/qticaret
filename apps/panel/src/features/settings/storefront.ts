@@ -31,6 +31,8 @@ export const STOREFRONT_LIMITS = {
   heroHeadingLength: 90,
   heroTextLength: 240,
   heroLinks: 2,
+  colorSwatches: 100,
+  swatchLabelLength: 40,
 } as const
 
 const E = "settings.storefront.errors"
@@ -134,6 +136,30 @@ export const colorSchema = z
   .trim()
   .toLowerCase()
   .refine((value) => value === "" || isHexColor(value), `${E}.colorInvalid`)
+
+/**
+ * The shop's colour names (F18 D5): each a name and a `#rrggbb` code, lower
+ * case as the server keeps it; a name written twice, in any Turkish case,
+ * is refused on its later row as the server refuses the list.
+ */
+export const colorSwatchesSchema = z
+  .array(
+    z.object({
+      label: lineSchema(STOREFRONT_LIMITS.swatchLabelLength),
+      hex: z.string().trim().toLowerCase().refine(isHexColor, `${E}.colorInvalid`),
+    })
+  )
+  .max(STOREFRONT_LIMITS.colorSwatches)
+  .superRefine((swatches, ctx) => {
+    const seen = new Set<string>()
+    swatches.forEach(({ label }, index) => {
+      const name = label.toLocaleLowerCase("tr")
+      if (name !== "" && seen.has(name)) {
+        ctx.addIssue({ code: "custom", path: [index, "label"], message: `${E}.colorDuplicate` })
+      }
+      seen.add(name)
+    })
+  })
 
 /** A field's error as a sentence; `max` fills the length limit's. */
 export const errorLine = (

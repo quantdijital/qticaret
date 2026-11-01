@@ -473,6 +473,18 @@
         "path": "Formun gösterildiği sayfa",
         "pathHint": "Vitrindeki bir içerik sayfasının adresi, örneğin /iletisim."
       },
+      "swatches": {
+        "title": "Renk örnekleri",
+        "description": "Ürün seçeneklerinde ve filtrelerde bu adlardan biri geçen değer, renkli yuvarlak olarak gösterilir (ör. Lacivert).",
+        "item": "{{number}}. renk",
+        "labelOf": "{{number}}. rengin adı",
+        "pickerOf": "{{number}}. rengin seçicisi",
+        "hexOf": "{{number}}. rengin kodu",
+        "labelPlaceholder": "Lacivert",
+        "hexPlaceholder": "#1e3a8a",
+        "add": "Renk ekle",
+        "hint": "En çok {{max}} renk; her ad en çok {{length}} karakter ve bir kez yazılır."
+      },
       "errors": {
         "required": "Bu alanı doldurun.",
         "tooLong": "En çok {{max}} karakter yazın.",
@@ -480,7 +492,8 @@
         "hrefInvalid": "Adres / ile başlayan bir mağaza sayfası ya da https:// ile başlayan bir site olmalı.",
         "pathInvalid": "Sayfa / ile başlayan bir mağaza sayfası olmalı (/iletisim gibi); ana sayfa ve boşluk olamaz.",
         "phoneInvalid": "Geçerli bir Türkiye telefon numarası girin.",
-        "colorInvalid": "Renk, # ile başlayan 6 haneli bir kod olmalı (#0b5c99 gibi)."
+        "colorInvalid": "Renk, # ile başlayan 6 haneli bir kod olmalı (#0b5c99 gibi).",
+        "colorDuplicate": "Her renk adı bir kez yazılabilir."
       }
     },
     "store": {

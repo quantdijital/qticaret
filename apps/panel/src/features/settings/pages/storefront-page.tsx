@@ -14,6 +14,7 @@ import {
 } from "@/features/settings/components/storefront-header-cards"
 import { HeroCard } from "@/features/settings/components/storefront-hero-card"
 import { MenuCard } from "@/features/settings/components/storefront-menu-card"
+import { SwatchesCard } from "@/features/settings/components/storefront-swatches-card"
 import { WhatsappCard } from "@/features/settings/components/storefront-whatsapp-card"
 import { errorText } from "@/lib/errors"
 
@@ -22,7 +23,8 @@ import { errorText } from "@/lib/errors"
  * page of its storefront: first its main colour and the home page's opening,
  * then top to bottom the announcement bar, the links above the menu, the
  * menu, the trust badges, the footer's columns, the WhatsApp button and the
- * page the contact form shows on. Each card saves its own part.
+ * page the contact form shows on; last the colour names its option and
+ * filter values show as swatches by. Each card saves its own part.
  */
 export function StorefrontPage() {
   const { t } = useTranslation()
@@ -48,6 +50,7 @@ export function StorefrontPage() {
           <FooterGroupsCard saved={query.data.values} />
           <WhatsappCard saved={query.data.values} />
           <ContactFormCard saved={query.data.values} />
+          <SwatchesCard saved={query.data.values} />
         </>
       )}
     </div>

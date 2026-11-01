@@ -473,6 +473,18 @@
         "path": "Page the form shows on",
         "pathHint": "The address of a content page on the storefront, for example /iletisim."
       },
+      "swatches": {
+        "title": "Colour swatches",
+        "description": "In product options and filters, a value that reads as one of these names shows as a coloured circle (e.g. Navy).",
+        "item": "Colour {{number}}",
+        "labelOf": "Name of colour {{number}}",
+        "pickerOf": "Picker of colour {{number}}",
+        "hexOf": "Code of colour {{number}}",
+        "labelPlaceholder": "Navy",
+        "hexPlaceholder": "#1e3a8a",
+        "add": "Add colour",
+        "hint": "Up to {{max}} colours; each name up to {{length}} characters, written once."
+      },
       "errors": {
         "required": "Fill in this field.",
         "tooLong": "Write {{max}} characters at most.",
@@ -480,7 +492,8 @@
         "hrefInvalid": "The address must be a shop page starting with / or a site starting with https://.",
         "pathInvalid": "The page must be a shop page starting with / (like /iletisim); not the home page, and no spaces.",
         "phoneInvalid": "Enter a valid Turkish phone number.",
-        "colorInvalid": "The colour must be a 6-digit code starting with # (like #0b5c99)."
+        "colorInvalid": "The colour must be a 6-digit code starting with # (like #0b5c99).",
+        "colorDuplicate": "Each colour name can be written once."
       }
     },
     "store": {

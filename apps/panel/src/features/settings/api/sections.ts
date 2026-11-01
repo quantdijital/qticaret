@@ -197,6 +197,14 @@ export interface StorefrontSettings {
   hero: StorefrontHero | null
   /** The shop page that carries the contact form below its text (adr/0047); none: no form. */
   contact_form_path: string | null
+  /** The shop's colour names: an option or filter value that reads as one shows as a swatch. */
+  color_swatches: StorefrontColorSwatch[]
+}
+
+/** A colour name and its colour (`#rrggbb`, lower case); names are unique in Turkish case. */
+export interface StorefrontColorSwatch {
+  label: string
+  hex: string
 }
 
 export interface StorefrontHero {
