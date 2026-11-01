@@ -33,6 +33,12 @@ const schema = z.object({
 })
 type Values = z.infer<typeof schema>
 
+const valuesOf = (saved: ShippingSettings): Values => ({
+  format: saved.label_format,
+  width: String(saved.label_custom.width_mm),
+  height: String(saved.label_custom.height_mm),
+})
+
 /** The page's size in mm and how many labels go on it, for the preview. */
 function pageOf(format: LabelFormat, width: string, height: string) {
   switch (format) {
@@ -57,11 +63,7 @@ function pageOf(format: LabelFormat, width: string, height: string) {
 export function LabelSizeCard({ saved }: { saved: ShippingSettings }) {
   const { t } = useTranslation()
   const save = useSaveSection<ShippingSettings>("shipping")
-  const values: Values = {
-    format: saved.label_format,
-    width: String(saved.label_custom.width_mm),
-    height: String(saved.label_custom.height_mm),
-  }
+  const values = valuesOf(saved)
   const form = useForm<Values>({
     resolver: zodResolver(schema),
     values,
@@ -82,7 +84,10 @@ export function LabelSizeCard({ saved }: { saved: ShippingSettings }) {
         label_custom: { width_mm: Number(next.width), height_mm: Number(next.height) },
       },
       {
-        onSuccess: () => toast.success(t("settings.saved")),
+        onSuccess: (result) => {
+          form.reset(valuesOf(result.values), FULL_RESET)
+          toast.success(t("settings.saved"))
+        },
         onError: (failure) => toast.error(errorText(t, failure)),
       }
     )

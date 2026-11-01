@@ -32,7 +32,10 @@ const renderCard = () =>
 describe("LabelSizeCard", () => {
   beforeEach(() => {
     fetchMock.mockReset()
-    fetchMock.mockResolvedValue({})
+    // As the server answers: the section with what was sent stored
+    fetchMock.mockImplementation((_url: string, init?: { body?: Partial<ShippingSettings> }) =>
+      Promise.resolve({ values: { ...SAVED, ...init?.body } })
+    )
   })
 
   it("saves a custom roll size, and refuses one too small to print a label on", async () => {

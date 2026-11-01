@@ -30,6 +30,13 @@ const accountSchema = z.object({
 type AccountInput = z.input<typeof accountSchema>
 type AccountValues = z.output<typeof accountSchema>
 
+const accountOf = (saved: BankTransferSettings): AccountInput => ({
+  account_holder: saved.account_holder,
+  bank_name: saved.bank_name,
+  iban: formatIban(saved.iban),
+  deadline_hours: saved.deadline_hours,
+})
+
 /** Whether shoppers are offered it: on only once the account is saved. */
 function StatusCard({ saved }: { saved: BankTransferSettings }) {
   const { t } = useTranslation()
@@ -131,12 +138,7 @@ function AccountFields({ form }: { form: UseFormReturn<AccountInput, unknown, Ac
 function AccountCard({ saved }: { saved: BankTransferSettings }) {
   const { t } = useTranslation()
   const save = useSaveSection<BankTransferSettings>("bank_transfer")
-  const values: AccountInput = {
-    account_holder: saved.account_holder,
-    bank_name: saved.bank_name,
-    iban: formatIban(saved.iban),
-    deadline_hours: saved.deadline_hours,
-  }
+  const values = accountOf(saved)
   const form = useForm<AccountInput, unknown, AccountValues>({
     resolver: zodResolver(accountSchema),
     values,
@@ -146,7 +148,10 @@ function AccountCard({ saved }: { saved: BankTransferSettings }) {
     save.mutate(
       { ...next, iban: normalizeIban(next.iban) },
       {
-        onSuccess: () => toast.success(t("settings.saved")),
+        onSuccess: (result) => {
+          form.reset(accountOf(result.values), FULL_RESET)
+          toast.success(t("settings.saved"))
+        },
         onError: (failure) => toast.error(errorText(t, failure)),
       }
     )

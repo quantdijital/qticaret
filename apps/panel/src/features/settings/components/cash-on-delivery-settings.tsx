@@ -156,7 +156,10 @@ function FeeCard({ saved }: { saved: CashOnDeliverySettings }) {
   })
   const submit = form.handleSubmit((next) => {
     save.mutate(toSettings(next), {
-      onSuccess: () => toast.success(t("settings.saved")),
+      onSuccess: (result) => {
+        form.reset(toValues(result.values), FULL_RESET)
+        toast.success(t("settings.saved"))
+      },
       onError: (failure) => toast.error(errorText(t, failure)),
     })
   })

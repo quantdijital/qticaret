@@ -43,6 +43,12 @@ interface IdentityValues {
   contact_phone: string
 }
 
+const identityOf = (name: string, saved: StoreSettings): IdentityValues => ({
+  name,
+  contact_email: saved.contact_email ?? "",
+  contact_phone: saved.contact_phone ?? "",
+})
+
 function IdentityCard({
   storeId,
   name,
@@ -55,25 +61,24 @@ function IdentityCard({
   const { t } = useTranslation()
   const rename = useRenameStore()
   const save = useSaveSection<StoreSettings>("store")
-  const values: IdentityValues = {
-    name,
-    contact_email: saved.contact_email ?? "",
-    contact_phone: saved.contact_phone ?? "",
-  }
+  const values = identityOf(name, saved)
   const form = useForm<IdentityValues>({ values, resetOptions: { keepDirtyValues: true } })
   const { dirtyFields, errors } = form.formState
 
   const submit = form.handleSubmit(async (next) => {
     try {
-      if (dirtyFields.name) {
-        await rename.mutateAsync({ id: storeId, name: next.name.trim() })
-      }
-      if (dirtyFields.contact_email || dirtyFields.contact_phone) {
-        await save.mutateAsync({
-          contact_email: next.contact_email.trim() || null,
-          contact_phone: next.contact_phone.trim() || null,
-        })
-      }
+      const renamed = dirtyFields.name
+        ? await rename.mutateAsync({ id: storeId, name: next.name.trim() })
+        : null
+      const contact =
+        dirtyFields.contact_email || dirtyFields.contact_phone
+          ? await save.mutateAsync({
+              contact_email: next.contact_email.trim() || null,
+              contact_phone: next.contact_phone.trim() || null,
+            })
+          : null
+      // What the server stored, so the fields show it trimmed as saved
+      form.reset(identityOf(renamed?.store.name ?? name, contact?.values ?? saved), FULL_RESET)
       toast.success(t("settings.saved"))
     } catch (failure) {
       toast.error(errorText(t, failure))
@@ -134,6 +139,12 @@ function IdentityCard({
 
 type UnitValues = Pick<StoreSettings, "timezone" | "weight_unit" | "dimension_unit">
 
+const unitsOf = (saved: StoreSettings): UnitValues => ({
+  timezone: saved.timezone,
+  weight_unit: saved.weight_unit,
+  dimension_unit: saved.dimension_unit,
+})
+
 function UnitChoice<K extends "weight_unit" | "dimension_unit">({
   name,
   options,
@@ -173,16 +184,15 @@ function RegionCard({ saved }: { saved: StoreSettings }) {
   const { t } = useTranslation()
   const save = useSaveSection<StoreSettings>("store")
   const zoneList = useMemo(() => zones(), [])
-  const values: UnitValues = {
-    timezone: saved.timezone,
-    weight_unit: saved.weight_unit,
-    dimension_unit: saved.dimension_unit,
-  }
+  const values = unitsOf(saved)
   const form = useForm<UnitValues>({ values, resetOptions: { keepDirtyValues: true } })
 
   const submit = form.handleSubmit((next) => {
     save.mutate(next, {
-      onSuccess: () => toast.success(t("settings.saved")),
+      onSuccess: (result) => {
+        form.reset(unitsOf(result.values), FULL_RESET)
+        toast.success(t("settings.saved"))
+      },
       onError: (failure) => toast.error(errorText(t, failure)),
     })
   })

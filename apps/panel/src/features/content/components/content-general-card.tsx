@@ -17,18 +17,20 @@ interface Values {
   author_name: string
 }
 
+const valuesOf = (entry: ContentDetail): Values => ({
+  title: entry.title,
+  handle: entry.handle,
+  excerpt: entry.excerpt ?? "",
+  author_name: entry.author_name ?? "",
+})
+
 const pathPrefix = (kind: ContentDetail["kind"]) => (kind === "post" ? "/blog/" : "/")
 
 /** The title, page address, summary and (for a post) its author. */
 export function ContentGeneralCard({ entry }: { entry: ContentDetail }) {
   const { t } = useTranslation()
   const update = useUpdateContent(entry.id)
-  const saved: Values = {
-    title: entry.title,
-    handle: entry.handle,
-    excerpt: entry.excerpt ?? "",
-    author_name: entry.author_name ?? "",
-  }
+  const saved = valuesOf(entry)
   const form = useForm<Values>({ values: saved, resetOptions: { keepDirtyValues: true } })
   const submit = form.handleSubmit((values) => {
     const { dirtyFields } = form.formState
@@ -40,7 +42,10 @@ export function ContentGeneralCard({ entry }: { entry: ContentDetail }) {
         ...(dirtyFields.author_name ? { author_name: values.author_name.trim() || null } : {}),
       },
       {
-        onSuccess: () => toast.success(t("content.saved")),
+        onSuccess: (result) => {
+          form.reset(valuesOf(result.entry), FULL_RESET)
+          toast.success(t("content.saved"))
+        },
         onError: (failure) => toast.error(errorText(t, failure)),
       }
     )

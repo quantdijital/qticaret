@@ -3,6 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
+import type { ShippingSettings } from "@/features/settings/api/sections"
 import { RatesCard } from "./shipping-rules-cards"
 import { ShippingOptionDialog } from "./shipping-option-dialog"
 
@@ -14,6 +15,17 @@ vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 const wrap = (node: React.ReactNode) => {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(<QueryClientProvider client={client}>{node}</QueryClientProvider>)
+}
+
+const SHIPPING: ShippingSettings = {
+  handling_days_min: 1,
+  handling_days_max: 2,
+  transit_days_min: 1,
+  transit_days_max: 3,
+  rate_table: [],
+  over_desi_price: 0,
+  label_format: "100x150",
+  label_custom: { width_mm: 100, height_mm: 150 },
 }
 
 describe("shipping settings (F7.8)", () => {
@@ -61,20 +73,11 @@ describe("shipping settings (F7.8)", () => {
   })
 
   it("saves the price table in kuruş, bands as typed", async () => {
-    wrap(
-      <RatesCard
-        saved={{
-          handling_days_min: 1,
-          handling_days_max: 2,
-          transit_days_min: 1,
-          transit_days_max: 3,
-          rate_table: [],
-          over_desi_price: 0,
-          label_format: "100x150",
-          label_custom: { width_mm: 100, height_mm: 150 },
-        }}
-      />
+    // As the server answers: the section with what was sent stored
+    fetchMock.mockImplementation((_url: string, init?: { body?: Partial<ShippingSettings> }) =>
+      Promise.resolve({ values: { ...SHIPPING, ...init?.body } })
     )
+    wrap(<RatesCard saved={SHIPPING} />)
 
     await userEvent.click(screen.getByRole("button", { name: "Satır ekle" }))
     await userEvent.type(screen.getByLabelText("1. satırın desi sınırı"), "2,5")

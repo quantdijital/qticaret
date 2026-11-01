@@ -22,6 +22,12 @@ const schema = z.object({
 })
 type Values = z.infer<typeof schema>
 
+const valuesOf = (product: Pick<ProductDetail, "title" | "handle" | "description">): Values => ({
+  title: product.title,
+  handle: product.handle,
+  description: product.description ?? "",
+})
+
 /** Name, address and story; the address change keeps the old one reserved (F3.1). */
 export function GeneralCard({
   product,
@@ -33,11 +39,7 @@ export function GeneralCard({
   const { t } = useTranslation()
   const update = useUpdateProduct(product.id)
   const prefix = useProductPathPrefix()
-  const saved: Values = {
-    title: product.title,
-    handle: product.handle,
-    description: product.description ?? "",
-  }
+  const saved = valuesOf(product)
   const form = useForm<Values>({
     resolver: zodResolver(schema),
     values: saved,
@@ -56,7 +58,10 @@ export function GeneralCard({
         description: values.description.trim(),
       },
       {
-        onSuccess: () => toast.success(t("products.detail.saved")),
+        onSuccess: (result) => {
+          form.reset(valuesOf(result.product), FULL_RESET)
+          toast.success(t("products.detail.saved"))
+        },
         onError: (failure) => toast.error(errorText(t, failure)),
       }
     )

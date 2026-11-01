@@ -18,13 +18,18 @@ interface Values {
   image_alt: string
 }
 
+const valuesOf = (entry: ContentDetail): Values => ({
+  image_url: entry.image_url ?? "",
+  image_alt: entry.image_alt ?? "",
+})
+
 /** The cover: the list's and the share card's image, with its alt text (docs/13 §8). */
 export function ContentCoverCard({ entry }: { entry: ContentDetail }) {
   const { t } = useTranslation()
   const update = useUpdateContent(entry.id)
   const picker = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
-  const saved: Values = { image_url: entry.image_url ?? "", image_alt: entry.image_alt ?? "" }
+  const saved = valuesOf(entry)
   const form = useForm<Values>({ values: saved, resetOptions: { keepDirtyValues: true } })
   const url = useWatch({ control: form.control, name: "image_url" })
   const upload = async (file: File | undefined) => {
@@ -44,7 +49,10 @@ export function ContentCoverCard({ entry }: { entry: ContentDetail }) {
     update.mutate(
       { image_url: values.image_url || null, image_alt: values.image_alt.trim() || null },
       {
-        onSuccess: () => toast.success(t("content.saved")),
+        onSuccess: (result) => {
+          form.reset(valuesOf(result.entry), FULL_RESET)
+          toast.success(t("content.saved"))
+        },
         onError: (failure) => toast.error(errorText(t, failure)),
       }
     )

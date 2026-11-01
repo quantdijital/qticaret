@@ -49,6 +49,8 @@ export function OrganizeCard({ product }: { product: ProductDetail }) {
       if (dirtyFields.brand) {
         await setBrand.mutateAsync(values.brand?.id ?? null)
       }
+      // Ids only: what was sent is what is stored
+      form.reset(values, FULL_RESET)
       toast.success(t("products.detail.saved"))
     } catch (failure) {
       toast.error(errorText(t, failure))

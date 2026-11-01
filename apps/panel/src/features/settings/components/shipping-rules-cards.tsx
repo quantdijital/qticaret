@@ -61,7 +61,10 @@ export function DeliveryCard({ saved }: { saved: ShippingSettings }) {
         transit_days_max: Number(next.transit_days_max),
       },
       {
-        onSuccess: () => toast.success(t("settings.saved")),
+        onSuccess: (result) => {
+          form.reset(daysOf(result.values), FULL_RESET)
+          toast.success(t("settings.saved"))
+        },
         onError: (failure) => toast.error(errorText(t, failure)),
       }
     )
@@ -164,7 +167,10 @@ export function RatesCard({ saved }: { saved: ShippingSettings }) {
           next.over.trim() === "" ? 0 : Math.round((parseMoneyInput(next.over) ?? 0) * 100),
       },
       {
-        onSuccess: () => toast.success(t("settings.saved")),
+        onSuccess: (result) => {
+          form.reset(ratesOf(result.values), FULL_RESET)
+          toast.success(t("settings.saved"))
+        },
         onError: (failure) => toast.error(errorText(t, failure)),
       }
     )

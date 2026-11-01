@@ -19,17 +19,19 @@ interface Values {
   is_active: boolean
 }
 
+const valuesOf = (brand: Brand): Values => ({
+  name: brand.name,
+  handle: brand.handle,
+  description: brand.description ?? "",
+  is_active: brand.is_active,
+})
+
 /** The brand's name, page address, text and whether its page is live. */
 export function BrandGeneralCard({ brand }: { brand: Brand }) {
   const { t } = useTranslation()
   const update = useUpdateBrand(brand.id)
   const prefix = useBrandPathPrefix()
-  const saved: Values = {
-    name: brand.name,
-    handle: brand.handle,
-    description: brand.description ?? "",
-    is_active: brand.is_active,
-  }
+  const saved = valuesOf(brand)
   const form = useForm<Values>({ values: saved, resetOptions: { keepDirtyValues: true } })
   const submit = form.handleSubmit((values) => {
     const { dirtyFields } = form.formState
@@ -41,7 +43,10 @@ export function BrandGeneralCard({ brand }: { brand: Brand }) {
         ...(dirtyFields.is_active ? { is_active: values.is_active } : {}),
       },
       {
-        onSuccess: () => toast.success(t("brands.saved")),
+        onSuccess: (result) => {
+          form.reset(valuesOf(result.brand), FULL_RESET)
+          toast.success(t("brands.saved"))
+        },
         onError: (failure) => toast.error(errorText(t, failure)),
       }
     )

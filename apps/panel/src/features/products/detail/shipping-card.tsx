@@ -38,6 +38,13 @@ type Values = z.infer<typeof schema>
 const asText = (value: number | null | undefined) =>
   typeof value === "number" && value > 0 ? formatMeasureInput(value) : ""
 
+const valuesOf = (product: Pick<ProductDetail, Name>): Values => ({
+  weight: asText(product.weight),
+  length: asText(product.length),
+  width: asText(product.width),
+  height: asText(product.height),
+})
+
 /**
  * The parcel's weight and size at product level; variants without their
  * own take these. A published product cannot lose them (F3.1): the
@@ -48,12 +55,7 @@ export function ShippingCard({ product }: { product: ProductDetail }) {
   const update = useUpdateProduct(product.id)
   const units = useStoreUnits()
   const catalog = useQuery(productCatalogQuery(product.id))
-  const saved: Values = {
-    weight: asText(product.weight),
-    length: asText(product.length),
-    width: asText(product.width),
-    height: asText(product.height),
-  }
+  const saved = valuesOf(product)
   const form = useForm<Values>({
     resolver: zodResolver(schema),
     values: saved,
@@ -66,7 +68,10 @@ export function ShippingCard({ product }: { product: ProductDetail }) {
       FIELDS.map(({ name }) => [name, parseMeasureInput(values[name]) ?? null])
     ) as Record<Name, number | null>
     update.mutate(body, {
-      onSuccess: () => toast.success(t("products.detail.saved")),
+      onSuccess: (result) => {
+        form.reset(valuesOf(result.product), FULL_RESET)
+        toast.success(t("products.detail.saved"))
+      },
       onError: (failure) => toast.error(errorText(t, failure)),
     })
   })

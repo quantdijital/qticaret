@@ -15,6 +15,11 @@ interface Values {
   handle: string
 }
 
+const valuesOf = (landing: LandingDetail): Values => ({
+  title: landing.title,
+  handle: landing.handle,
+})
+
 // The category's path the page sits under (`/kategori/bicak/`), from the page's own
 const prefixOf = (landing: LandingDetail) =>
   landing.path ? landing.path.slice(0, landing.path.lastIndexOf("/") + 1) : "…/"
@@ -38,7 +43,7 @@ function Orphaned({ landing }: { landing: LandingDetail }) {
 export function LandingGeneralCard({ landing }: { landing: LandingDetail }) {
   const { t } = useTranslation()
   const update = useUpdateLanding(landing.id)
-  const saved: Values = { title: landing.title, handle: landing.handle }
+  const saved = valuesOf(landing)
   const form = useForm<Values>({ values: saved, resetOptions: { keepDirtyValues: true } })
   const submit = form.handleSubmit((values) => {
     const { dirtyFields } = form.formState
@@ -48,7 +53,10 @@ export function LandingGeneralCard({ landing }: { landing: LandingDetail }) {
         ...(dirtyFields.handle ? { handle: values.handle.trim() } : {}),
       },
       {
-        onSuccess: () => toast.success(t("content.saved")),
+        onSuccess: (result) => {
+          form.reset(valuesOf(result.landing), FULL_RESET)
+          toast.success(t("content.saved"))
+        },
         onError: (failure) => toast.error(errorText(t, failure)),
       }
     )
