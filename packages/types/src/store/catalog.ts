@@ -50,6 +50,25 @@ export interface StoreProductOption {
   values?: { id: string; value: string }[] | null
 }
 
+/** A public product attribute (adr/0013): the value sits in its type's column. */
+export interface StoreAttributeValue {
+  id: string
+  value_text: string | null
+  value_number: number | string | null
+  value_boolean: boolean | null
+  /** The chosen option values, for select types. */
+  value_options: string[] | null
+  definition: {
+    key: string
+    label: string
+    type: "text" | "number" | "boolean" | "select" | "multi_select"
+    unit: string | null
+    rank: number
+    options: { value: string; label: string }[] | null
+    is_seo_highlight: boolean
+  }
+}
+
 export interface StoreProduct {
   id: string
   title: string
@@ -62,6 +81,7 @@ export interface StoreProduct {
   variants?: StoreVariant[] | null
   brand?: StoreBrand | null
   media_assets?: StoreMediaAsset[] | null
+  attribute_values?: StoreAttributeValue[] | null
 }
 
 export interface StoreCategory {

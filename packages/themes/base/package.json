@@ -14,7 +14,8 @@
   },
   "dependencies": {
     "@qticaret/types": "workspace:*",
-    "@qticaret/ui": "workspace:*"
+    "@qticaret/ui": "workspace:*",
+    "lucide-react": "1.55.0"
   },
   "peerDependencies": {
     "react": "^19.0.0"

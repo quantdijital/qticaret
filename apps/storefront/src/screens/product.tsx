@@ -23,7 +23,7 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
     displays,
     brandPath: product.brand ? (brandPaths[product.brand.id] ?? null) : null,
     requestedVariant: url.searchParams.get("variant"),
-    homeLabel: t("home.label"),
+    t,
   })
   return (
     <>

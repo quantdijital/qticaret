@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest"
 import type { StoreProduct } from "@qticaret/types"
+import { t } from "@/lib/i18n"
+import { percentOff } from "../price"
 import { productPage } from "../product"
 
 const product: StoreProduct = {
@@ -60,7 +62,7 @@ const page = (requestedVariant: string | null) =>
     },
     brandPath: null,
     requestedVariant,
-    homeLabel: "Ana sayfa",
+    t,
   })
 
 describe("productPage", () => {
@@ -83,6 +85,7 @@ describe("productPage", () => {
       current: "999,00 TL",
       before: "1.199,00 TL",
       from: false,
+      discount: 16,
     })
     expect(view.variants[0]?.price?.before).toBeNull()
     expect(view.variants[0]?.available).toBe(false)
@@ -91,5 +94,15 @@ describe("productPage", () => {
       { label: "Ana sayfa", path: "/" },
       { label: "Keten Gömlek", path: null },
     ])
+  })
+})
+
+describe("percentOff", () => {
+  it("rounds down, and gives nothing without a real cut", () => {
+    expect(percentOff(1199, 999)).toBe(16)
+    expect(percentOff(100, 75)).toBe(25)
+    expect(percentOff(100, 99.5)).toBeNull()
+    expect(percentOff(100, 100)).toBeNull()
+    expect(percentOff(100, 120)).toBeNull()
   })
 })

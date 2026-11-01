@@ -8,6 +8,16 @@ export const isAvailable = (variant: StoreVariant): boolean =>
   variant.allow_backorder === true ||
   (variant.inventory_quantity ?? 0) > 0
 
+/** Whole percent off, rounded down so the badge never promises more than the price gives. */
+export function percentOff(before: number, amount: number): number | null {
+  // A display's lira string that is no number gives no badge
+  if (!Number.isFinite(before) || !(before > amount) || before <= 0) {
+    return null
+  }
+  const percent = Math.floor(((before - amount) / before) * 100)
+  return percent >= 1 ? percent : null
+}
+
 /** One variant's price: Medusa's calculated price, struck through only per the 30-day rule. */
 export function variantPrice(
   variant: StoreVariant,
@@ -18,7 +28,12 @@ export function variantPrice(
     return null
   }
   const before = displays[variant.id]?.before ?? null
-  return { current: formatLira(amount), before: before ? formatLira(before) : null, from: false }
+  return {
+    current: formatLira(amount),
+    before: before ? formatLira(before) : null,
+    from: false,
+    discount: before ? percentOff(Number(before), amount) : null,
+  }
 }
 
 /**

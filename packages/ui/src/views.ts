@@ -1,3 +1,5 @@
+import type { TrustIcon } from "@qticaret/types"
+
 /**
  * What a theme is given to show (adr/0046 §7): ready-made view models.
  * The storefront fills them from the Store API; a theme formats nothing
@@ -21,10 +23,13 @@ export interface PriceView {
   before: string | null
   /** True when variants differ: the theme says "…'den başlayan". */
   from: boolean
+  /** Whole percent off the struck-through price ("%25"); null without one. */
+  discount: number | null
 }
 
 export interface LinkView {
   label: string
+  /** A path on the shop, or an https address the shop linked to. */
   path: string
 }
 
@@ -32,13 +37,52 @@ export interface NavCategoryView extends LinkView {
   children: LinkView[]
 }
 
+/** A promise in the trust strip (D3): an icon name, a title and a line. */
+export interface TrustBadgeView {
+  icon: TrustIcon
+  title: string
+  text: string | null
+}
+
+export interface FooterGroupView {
+  title: string
+  links: LinkView[]
+}
+
+export interface ContactView {
+  email: string | null
+  /** For reading: "0532 123 45 67". */
+  phone: string | null
+  /** `tel:+905321234567`. */
+  phoneHref: string | null
+  /** `https://wa.me/905321234567`, when the shop gave a WhatsApp number. */
+  whatsappHref: string | null
+  address: string | null
+}
+
+export interface SocialLinkView {
+  /** The network's name ("Instagram"), or the address's host. */
+  label: string
+  href: string
+}
+
+/** Everything the frame around every page shows (D3, docs/19 §4). */
 export interface ShopView {
   name: string
   logo: ImageView | null
   categories: NavCategoryView[]
-  /** The legal pages the shop published (footer). */
-  legal: LinkView[]
   cartQuantity: number
+  /** The announcement bar's lines; none: no bar. */
+  announcements: string[]
+  /** The header's small links (about, contact…). */
+  topLinks: LinkView[]
+  /** The shop's own columns, or the storefront's (categories, help). */
+  footerGroups: FooterGroupView[]
+  trustBadges: TrustBadgeView[]
+  contact: ContactView
+  social: SocialLinkView[]
+  /** The registered title for the footer's small print; null shows the shop's name. */
+  companyTitle: string | null
 }
 
 export interface ProductCardView {
@@ -86,6 +130,16 @@ export interface ProductPageView {
   variants: VariantView[]
   /** From `?variant=` (docs/13 §2.3), else the first available. */
   selectedVariantId: string | null
+  /** The product's public attributes, in the shop's order, ready to read. */
+  specs: SpecView[]
+}
+
+/** One attribute as a shopper reads it: "Bıçak uzunluğu" — "21 cm". */
+export interface SpecView {
+  label: string
+  value: string
+  /** The shop marked it as a headline fact (shown under the title too). */
+  highlight: boolean
 }
 
 export interface PaginationView {
@@ -115,8 +169,10 @@ export interface ListingPageView {
 }
 
 export interface HomePageView {
-  /** The shop's own heading for the page; null shows the shop's name. */
-  heading: string | null
+  /** The page's heading: the shop's own home title, else its name. */
+  heading: string
+  /** The shop's own words under it (its home description); null: none. */
+  intro: string | null
   categories: LinkView[]
   products: ProductCardView[]
 }

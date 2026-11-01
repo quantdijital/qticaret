@@ -2,6 +2,7 @@ import "server-only"
 import { cache } from "react"
 import type {
   EntityType,
+  LegalIdentity,
   PriceDisplay,
   Resolution,
   SeoPayload,
@@ -9,6 +10,7 @@ import type {
   StoreCategory,
   StoreProduct,
   StoreRegion,
+  StorefrontFrame,
 } from "@qticaret/types"
 import { storeGet } from "./server"
 
@@ -27,6 +29,18 @@ export const resolvePath = cache((path: string) =>
 )
 
 export const siteSeo = cache(() => storeGet<SiteAnswer>("/store/seo/site"))
+
+/** The frame the shop wrote: announcement bar, header links, footer, trust strip (D3). */
+export const storefrontFrame = cache(async () => {
+  const { storefront } = await storeGet<{ storefront: StorefrontFrame }>("/store/storefront")
+  return storefront
+})
+
+/** The shop's legal identity and contact details, for the footer (F13.9). */
+export const legalIdentity = cache(async () => {
+  const { identity } = await storeGet<{ identity: LegalIdentity }>("/store/legal-identity")
+  return identity
+})
 
 /** Storefront paths by record id; records without a live path are missing. */
 export async function pathsOf(
@@ -102,10 +116,25 @@ const PAGE_FIELDS = [
   "variants.options.id",
   "variants.options.value",
   "variants.options.option_id",
+  // Public attributes only: the backend never answers the shop's own notes (adr/0013 T5)
+  "attribute_values.id",
+  "attribute_values.value_text",
+  "attribute_values.value_number",
+  "attribute_values.value_boolean",
+  "attribute_values.value_options",
+  "attribute_values.definition.key",
+  "attribute_values.definition.label",
+  "attribute_values.definition.type",
+  "attribute_values.definition.unit",
+  "attribute_values.definition.rank",
+  "attribute_values.definition.options",
+  "attribute_values.definition.is_seo_highlight",
 ]
 
 export interface ProductQuery {
   ids?: readonly string[]
+  /** Medusa's keyword search over titles and descriptions (until Meilisearch, D10). */
+  q?: string
   categoryIds?: readonly string[]
   collectionIds?: readonly string[]
   /** Medusa's order: `-created_at` for the newest first. */
@@ -127,6 +156,7 @@ export async function listProducts(
     id: query.ids,
     category_id: query.categoryIds,
     collection_id: query.collectionIds,
+    q: query.q,
   })
 }
 

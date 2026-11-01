@@ -1,4 +1,13 @@
+import { Fragment } from "react"
 import type { BreadcrumbView, Translate } from "@qticaret/ui"
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@qticaret/ui/components/breadcrumb"
 
 /** The trail above a page; its structured data comes from the backend, not from here. */
 export function Breadcrumbs({ items, t }: { items: BreadcrumbView[]; t: Translate }) {
@@ -6,23 +15,21 @@ export function Breadcrumbs({ items, t }: { items: BreadcrumbView[]; t: Translat
     return null
   }
   return (
-    <nav aria-label={t("nav.breadcrumbs")} className="text-sm text-muted-foreground">
-      <ol className="flex flex-wrap items-center gap-1">
+    <Breadcrumb aria-label={t("nav.breadcrumbs")}>
+      <BreadcrumbList>
         {items.map((item, index) => (
-          <li key={`${item.label}-${String(index)}`} className="flex items-center gap-1">
-            {index > 0 && <span aria-hidden="true">/</span>}
-            {item.path ? (
-              <a href={item.path} className="hover:text-foreground">
-                {item.label}
-              </a>
-            ) : (
-              <span aria-current="page" className="text-foreground">
-                {item.label}
-              </span>
-            )}
-          </li>
+          <Fragment key={`${String(index)}:${item.label}`}>
+            {index > 0 && <BreadcrumbSeparator />}
+            <BreadcrumbItem>
+              {item.path ? (
+                <BreadcrumbLink href={item.path}>{item.label}</BreadcrumbLink>
+              ) : (
+                <BreadcrumbPage>{item.label}</BreadcrumbPage>
+              )}
+            </BreadcrumbItem>
+          </Fragment>
         ))}
-      </ol>
-    </nav>
+      </BreadcrumbList>
+    </Breadcrumb>
   )
 }

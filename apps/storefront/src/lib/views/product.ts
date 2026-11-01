@@ -1,7 +1,8 @@
-import type { BreadcrumbView, ProductCardView, ProductPageView } from "@qticaret/ui"
+import type { BreadcrumbView, ProductCardView, ProductPageView, Translate } from "@qticaret/ui"
 import type { PriceDisplay, SeoPayload, StoreProduct } from "@qticaret/types"
 import { productImages } from "./image"
 import { cardPrice, isAvailable, variantPrice } from "./price"
+import { specsOf } from "./specs"
 import { paragraphsOf, pathOf } from "./text"
 
 /** A product in a grid; one without a live path is left out by the caller. */
@@ -63,7 +64,8 @@ interface ProductPageInput {
   brandPath: string | null
   /** `?variant=` from the address (docs/13 §2.3). */
   requestedVariant: string | null
-  homeLabel: string
+  /** The storefront's words: the trail's first step, yes/no in the specs. */
+  t: Translate
 }
 
 export function productPage({
@@ -72,7 +74,7 @@ export function productPage({
   displays,
   brandPath,
   requestedVariant,
-  homeLabel,
+  t,
 }: ProductPageInput): ProductPageView {
   const variants = product.variants ?? []
   const options = (product.options ?? []).map((option) => ({
@@ -108,11 +110,12 @@ export function productPage({
     subtitle: product.subtitle,
     description: paragraphsOf(product.description),
     brand: product.brand && brandPath ? { label: product.brand.name, path: brandPath } : null,
-    breadcrumbs: breadcrumbsOf(seo, homeLabel, product.title),
+    breadcrumbs: breadcrumbsOf(seo, t("home.label"), product.title),
     images: productImages(product),
     options,
     variants: views,
     selectedVariantId: selected?.id ?? null,
+    specs: specsOf(product.attribute_values, t),
   }
 }
 

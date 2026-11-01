@@ -1,6 +1,15 @@
+import { ImageOff, Minus, Plus, ShoppingBag, Trash2 } from "lucide-react"
 import { ResponsiveImage } from "@qticaret/ui"
 import type { CartLineView, CartPageView, ThemeActions, Translate } from "@qticaret/ui"
+import { Alert, AlertDescription } from "@qticaret/ui/components/alert"
+import { Button } from "@qticaret/ui/components/button"
 
+const MAX_QUANTITY = 99
+
+/**
+ * One line. Minus, plus and remove are the form's own submit buttons, each
+ * sending its quantity: no script needed, no "update" button to forget.
+ */
 function CartLine({
   line,
   t,
@@ -10,67 +19,82 @@ function CartLine({
   t: Translate
   actions: ThemeActions
 }) {
+  const step =
+    "flex size-9 items-center justify-center rounded-full hover:bg-muted disabled:opacity-40"
   return (
-    <li className="flex gap-4 py-4">
-      <div className="h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-muted">
-        {line.image && (
-          <ResponsiveImage image={line.image} sizes="80px" className="h-full w-full object-cover" />
+    <li className="flex gap-4 py-5">
+      <div className="size-24 shrink-0 overflow-hidden rounded-xl bg-muted">
+        {line.image ? (
+          <ResponsiveImage image={line.image} sizes="96px" className="h-full w-full object-cover" />
+        ) : (
+          <div className="flex h-full items-center justify-center text-muted-foreground">
+            <ImageOff className="size-5" aria-hidden="true" />
+          </div>
         )}
       </div>
-      <div className="flex flex-1 flex-col gap-2 text-sm">
-        <div>
-          <p className="font-medium">{line.title}</p>
-          {line.detail && <p className="text-muted-foreground">{line.detail}</p>}
+      <div className="flex flex-1 flex-col justify-between gap-3">
+        <div className="flex justify-between gap-4">
+          <div className="text-sm">
+            <p className="font-medium">{line.title}</p>
+            {line.detail && <p className="text-muted-foreground">{line.detail}</p>}
+          </div>
+          <p className="tabular flex flex-col items-end text-sm">
+            <span className="font-semibold">{line.total}</span>
+            {line.original && (
+              <s className="text-xs text-muted-foreground">
+                <span className="sr-only">{t("price.before")} </span>
+                {line.original}
+              </s>
+            )}
+          </p>
         </div>
-        <div className="flex flex-wrap items-end gap-2">
-          <form action={actions.changeCartLine} className="flex items-end gap-2">
-            <input type="hidden" name="line_id" value={line.id} />
-            <label className="flex flex-col gap-1 text-xs text-muted-foreground">
-              {t("cart.quantity")}
-              <input
-                type="number"
-                name="quantity"
-                min={1}
-                max={99}
-                defaultValue={line.quantity}
-                inputMode="numeric"
-                className="w-16 rounded-md border border-border px-2 py-1.5 text-sm text-foreground"
-              />
-            </label>
+        <form action={actions.changeCartLine} className="flex items-center justify-between">
+          <input type="hidden" name="line_id" value={line.id} />
+          <div
+            role="group"
+            aria-label={t("cart.quantity_of", { title: line.title })}
+            className="flex items-center rounded-full border"
+          >
             <button
               type="submit"
-              className="rounded-md border border-border px-3 py-1.5 hover:bg-muted"
+              name="quantity"
+              value={line.quantity - 1}
+              aria-label={t("product.decrease")}
+              className={step}
             >
-              {t("cart.update")}
+              <Minus className="size-4" aria-hidden="true" />
             </button>
-          </form>
-          <form action={actions.changeCartLine}>
-            <input type="hidden" name="line_id" value={line.id} />
-            <input type="hidden" name="remove" value="1" />
+            <span className="tabular w-8 text-center text-sm font-medium" aria-live="polite">
+              {line.quantity}
+            </span>
             <button
               type="submit"
-              aria-label={t("cart.remove_line", { title: line.title })}
-              className="rounded-md px-3 py-1.5 text-muted-foreground underline hover:text-foreground"
+              name="quantity"
+              value={line.quantity + 1}
+              disabled={line.quantity >= MAX_QUANTITY}
+              aria-label={t("product.increase")}
+              className={step}
             >
-              {t("cart.remove")}
+              <Plus className="size-4" aria-hidden="true" />
             </button>
-          </form>
-        </div>
+          </div>
+          <button
+            type="submit"
+            name="remove"
+            value="1"
+            aria-label={t("cart.remove_line", { title: line.title })}
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+          >
+            <Trash2 className="size-4" aria-hidden="true" />
+            {t("cart.remove")}
+          </button>
+        </form>
       </div>
-      <p className="flex flex-col items-end text-sm">
-        {line.original && (
-          <s className="text-xs text-muted-foreground">
-            <span className="sr-only">{t("price.before")} </span>
-            {line.original}
-          </s>
-        )}
-        <span className="font-semibold">{line.total}</span>
-      </p>
     </li>
   )
 }
 
-/** The cart: lines with their quantity and removal, discounts and the subtotal (checkout: D7). */
+/** The cart: its lines, discounts and subtotal; the checkout comes with D7. */
 export function CartPage({
   view,
   t,
@@ -82,50 +106,62 @@ export function CartPage({
 }) {
   if (view.lines.length === 0) {
     return (
-      <div className="mx-auto flex max-w-lg flex-col items-center gap-4 py-16 text-center">
-        <h1 className="text-2xl font-semibold">{t("cart.title")}</h1>
+      <div className="mx-auto flex max-w-md flex-col items-center gap-4 py-16 text-center">
+        <span className="flex size-16 items-center justify-center rounded-full bg-muted">
+          <ShoppingBag className="size-7 text-muted-foreground" aria-hidden="true" />
+        </span>
+        <h1 className="text-2xl font-semibold tracking-tight">{t("cart.title")}</h1>
         <p className="text-muted-foreground">{t("cart.empty")}</p>
-        <a
-          href="/"
-          className="rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground"
-        >
-          {t("cart.continue")}
-        </a>
+        <Button asChild size="lg" className="rounded-full px-7">
+          <a href="/">{t("cart.continue")}</a>
+        </Button>
       </div>
     )
   }
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold">{t("cart.title")}</h1>
+      <h1 className="text-3xl font-semibold tracking-tight">{t("cart.title")}</h1>
       {view.error && (
-        <p role="alert" className="rounded-md border border-sale px-4 py-3 text-sm text-sale">
-          {view.error}
-        </p>
+        <Alert variant="destructive">
+          <AlertDescription>{view.error}</AlertDescription>
+        </Alert>
       )}
-      <div className="grid gap-8 md:grid-cols-[1fr_18rem]">
-        <ul className="divide-y divide-border border-y border-border">
+      <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_22rem]">
+        <ul className="divide-y border-y">
           {view.lines.map((line) => (
             <CartLine key={line.id} line={line} t={t} actions={actions} />
           ))}
         </ul>
-        <aside className="flex h-fit flex-col gap-3 rounded-xl border border-border p-5 text-sm">
-          {view.discount && (
-            <>
-              <p className="flex justify-between">
-                <span>{t("cart.items")}</span>
-                <span>{view.items}</span>
-              </p>
-              <p className="flex justify-between text-sale">
-                <span>{t("cart.discount")}</span>
-                <span>−{view.discount}</span>
-              </p>
-            </>
-          )}
-          <p className="flex justify-between border-t border-border pt-3">
-            <span>{t("cart.subtotal")}</span>
-            <span className="font-semibold">{view.subtotal}</span>
-          </p>
-          <p className="text-muted-foreground">{t("cart.checkout_soon")}</p>
+        <aside
+          aria-label={t("cart.summary")}
+          className="flex h-fit flex-col gap-4 rounded-2xl bg-muted p-6 text-sm lg:sticky lg:top-36"
+        >
+          <h2 className="text-base font-semibold">{t("cart.summary")}</h2>
+          <dl className="tabular flex flex-col gap-3">
+            {view.discount && (
+              <>
+                <div className="flex justify-between">
+                  <dt>{t("cart.items")}</dt>
+                  <dd>{view.items}</dd>
+                </div>
+                <div className="flex justify-between text-sale">
+                  <dt>{t("cart.discount")}</dt>
+                  <dd>−{view.discount}</dd>
+                </div>
+              </>
+            )}
+            <div className="flex justify-between border-t border-foreground/10 pt-3 text-base">
+              <dt className="font-medium">{t("cart.subtotal")}</dt>
+              <dd className="font-semibold">{view.subtotal}</dd>
+            </div>
+          </dl>
+          <Button size="lg" disabled className="h-12 rounded-full text-base">
+            {t("cart.checkout")}
+          </Button>
+          <p className="text-center text-xs text-muted-foreground">{t("cart.checkout_soon")}</p>
+          <a href="/" className="text-center font-medium underline-offset-4 hover:underline">
+            {t("cart.continue")}
+          </a>
         </aside>
       </div>
     </div>

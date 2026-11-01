@@ -42,7 +42,8 @@ export default async function HomePage() {
       <theme.HomePage
         t={t}
         view={{
-          heading: site.shop.name,
+          heading: site.home.title,
+          intro: site.home.description === "" ? null : site.home.description,
           categories: top.flatMap((category) => {
             const path = categoryPaths[category.id]
             return path ? [{ label: category.name, path }] : []
