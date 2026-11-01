@@ -464,5 +464,6 @@
   "account.addresses": "Adreslerim",
   "account.no_addresses": "Kayıtlı adresiniz yok; ödeme adımında yazdığınız adres buraya kaydedilir.",
   "reviews.title": "Müşteri yorumları",
-  "reviews.summary": "Bu sayfadaki yorumların ortalaması 5 üzerinden {average} · toplam {count} yorum"
+  "reviews.summary": "Bu sayfadaki yorumların ortalaması 5 üzerinden {average} · toplam {count} yorum",
+  "home.all_products": "Tüm ürünler"
 }

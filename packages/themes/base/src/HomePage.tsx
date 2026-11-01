@@ -206,7 +206,11 @@ export function HomePage({ view, t }: { view: HomePageView; t: Translate }) {
       )}
 
       <section aria-labelledby="urunler" className="flex flex-col gap-8">
-        <SectionHead id="urunler" title={t("home.products")} />
+        <SectionHead
+          id="urunler"
+          title={t("home.products")}
+          more={{ label: t("home.all_products"), path: "/magaza" }}
+        />
         {view.products.length > 0 ? (
           <ProductGrid products={view.products} t={t} eager={4} />
         ) : (
