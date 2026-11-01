@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { customerAddresses } from "@/lib/account/auth"
+import { provinceOptions } from "@/lib/checkout/address"
 import { requireCustomer } from "@/lib/account/guard"
 import { t } from "@/lib/i18n"
 import { robotsOnly } from "@/lib/seo/metadata"
@@ -10,10 +11,13 @@ import { theme } from "@/theme"
 
 export const metadata: Metadata = robotsOnly("noindex,nofollow", t("account.addresses"))
 
-/** `/hesap/adresler` (D8): the addresses checkout saved; the newest fills the next checkout. */
+/**
+ * `/hesap/adresler` (D8): the addresses checkout saved, and a form for one
+ * more; the newest fills the next checkout.
+ */
 export default async function AddressesPage() {
   const customer = await requireCustomer("/hesap/adresler")
-  const addresses = await customerAddresses()
+  const [addresses, provinces] = await Promise.all([customerAddresses(), provinceOptions()])
   return (
     <theme.AccountPage
       t={t}
@@ -25,6 +29,21 @@ export default async function AddressesPage() {
             ? [{ id: address.id, name: summary.name, lines: [...summary.lines, summary.phone] }]
             : []
         }),
+        newAddress: {
+          values: {
+            email: customer.email,
+            phone: "",
+            first_name: customer.first_name ?? "",
+            last_name: customer.last_name ?? "",
+            province: "",
+            district: "",
+            neighborhood: "",
+            address_1: "",
+          },
+          provinces,
+          districts: [],
+          neighborhoods: [],
+        },
       })}
     />
   )

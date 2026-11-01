@@ -139,7 +139,14 @@ export function accountView(
   rest: Partial<
     Pick<
       AccountPageView,
-      "orders" | "pagination" | "notice" | "favorites" | "billing" | "privacyRequests" | "addresses"
+      | "orders"
+      | "pagination"
+      | "notice"
+      | "favorites"
+      | "billing"
+      | "privacyRequests"
+      | "addresses"
+      | "newAddress"
     >
   > & {
     marketing?: { email: boolean; sms: boolean }
@@ -159,6 +166,7 @@ export function accountView(
     orders: rest.orders ?? [],
     favorites: rest.favorites ?? [],
     addresses: rest.addresses ?? [],
+    newAddress: rest.newAddress ?? null,
     privacyRequests: rest.privacyRequests ?? [],
     billing: rest.billing ?? null,
     pagination: rest.pagination ?? null,

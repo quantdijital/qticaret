@@ -1,4 +1,4 @@
-import type { ContractView, PlaceOrderResult } from "./checkout-views"
+import type { AddressStepView, ContractView, OptionView, PlaceOrderResult } from "./checkout-views"
 import type { FormAction } from "./theme"
 import type { ImageView, LinkView, PaginationView } from "./views"
 
@@ -71,6 +71,8 @@ export interface AccountPageView {
   pagination: PaginationView | null
   /** The customer's saved addresses, in lines (addresses section). */
   addresses: { id: string; name: string; lines: string[] }[]
+  /** The empty form for one more address, its province list filled (addresses section). */
+  newAddress?: AddressStepView | null
   /** The customer's saved products (favorites section). */
   favorites: { id: string; title: string; path: string; image: ImageView | null }[]
   /** The customer's KVKK requests, in words (profile section). */
@@ -95,6 +97,14 @@ export interface AccountPageView {
 export interface AccountActions {
   /** A plain form: `id`, the address to drop. */
   removeAddress: (form: FormData) => Promise<void>
+  /** The address form's fields but the e-mail: one more address in the book. */
+  addAddress?: (
+    state: { ok: boolean; error: string | null },
+    form: FormData
+  ) => Promise<{ ok: boolean; error: string | null }>
+  /** A province's districts, and a district's neighbourhoods, for the address form. */
+  districts?: (province: string) => Promise<OptionView[]>
+  neighborhoods?: (district: string) => Promise<OptionView[]>
   /** A plain form: `kind` (export, erasure), the customer's KVKK request. */
   requestPrivacy: (form: FormData) => Promise<void>
   /** Fields: `type` (individual, corporate), `legal_name`, `tax_office`, `tax_id`. */

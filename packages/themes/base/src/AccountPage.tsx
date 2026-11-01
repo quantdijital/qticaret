@@ -1,6 +1,7 @@
 import { ArrowRight, LogOut, Package } from "lucide-react"
 import type { AccountActions, AccountPageView, AccountOrderView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
+import { AddressesSection } from "./account/AddressesSection"
 import { BillingForm } from "./account/BillingForm"
 import { ConsentForm, ProfileForm } from "./account/ProfileForms"
 import { PageContainer } from "./components/Container"
@@ -146,42 +147,7 @@ export function AccountPage({
               {view.pagination && <Pages pagination={view.pagination} t={t} />}
             </section>
           )}
-          {view.section === "addresses" && (
-            <section aria-labelledby="adresler" className="flex flex-col gap-4">
-              <h2 id="adresler" className="text-2xl">
-                {t("account.addresses")}
-              </h2>
-              {view.addresses.length === 0 ? (
-                <p className="rounded-2xl border bg-card p-8 text-center text-muted-foreground">
-                  {t("account.no_addresses")}
-                </p>
-              ) : (
-                <ul className="grid gap-3 sm:grid-cols-2">
-                  {view.addresses.map((address) => (
-                    <li
-                      key={address.id}
-                      className="flex flex-col gap-2 rounded-2xl border bg-card p-4 text-sm"
-                    >
-                      <address className="flex flex-col not-italic">
-                        <span className="font-medium">{address.name}</span>
-                        {address.lines.map((line) => (
-                          <span key={line} className="text-muted-foreground">
-                            {line}
-                          </span>
-                        ))}
-                      </address>
-                      <form action={actions.removeAddress}>
-                        <input type="hidden" name="id" value={address.id} />
-                        <button type="submit" className="text-muted-foreground underline">
-                          {t("cart.remove")}
-                        </button>
-                      </form>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </section>
-          )}
+          {view.section === "addresses" && <AddressesSection view={view} actions={actions} t={t} />}
           {view.section === "favorites" && (
             <section aria-labelledby="favoriler" className="flex flex-col gap-4">
               <h2 id="favoriler" className="text-2xl">

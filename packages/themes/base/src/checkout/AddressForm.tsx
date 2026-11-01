@@ -37,10 +37,13 @@ export function AddressForm({
   step,
   actions,
   words,
+  withEmail = true,
 }: {
   step: AddressStepView
   actions: Pick<CheckoutActions, "saveAddress" | "districts" | "neighborhoods">
   words: AddressWords
+  /** The checkout asks for the e-mail; an account's address book knows it. */
+  withEmail?: boolean
 }) {
   const [state, dispatch, pending] = useActionState(actions.saveAddress, INITIAL)
   const [province, setProvince] = useState(step.values.province)
@@ -83,17 +86,19 @@ export function AddressForm({
       className="grid gap-4 sm:grid-cols-2"
       noValidate={false}
     >
-      <TextField
-        id="email"
-        name="email"
-        type="email"
-        label={words.email}
-        hint={words.emailHint}
-        autoComplete="email"
-        required
-        defaultValue={step.values.email}
-        className="sm:col-span-2"
-      />
+      {withEmail && (
+        <TextField
+          id="email"
+          name="email"
+          type="email"
+          label={words.email}
+          hint={words.emailHint}
+          autoComplete="email"
+          required
+          defaultValue={step.values.email}
+          className="sm:col-span-2"
+        />
+      )}
       <TextField
         id="first_name"
         name="first_name"
