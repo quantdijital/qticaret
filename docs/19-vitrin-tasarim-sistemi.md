@@ -121,8 +121,8 @@ Durum: ✅ var · 🟡 temel hâli var · ⬜ yok. Görev kodları PROGRESS "F18
 | Çerçeve: duyuru, başlık, menü, arama, alt bilgi (yasal bağlantılar, MERSİS/KEP/ETBİS satırı), WhatsApp | her sayfa | ✅ | `storefront`, `legal-identity`, `legal/{kind}` | D3, D10 |
 | Ana sayfa | `/` | 🟡 giriş, kategori dizini, yeni ürünler, "bize ulaşın", blogdan | ana sayfa blokları (D11) yok | D11 |
 | Kategori, marka, koleksiyon, landing | URL kaydına göre | ✅ filtreler (marka, öznitelik), fiyat aralığı, fiyat/yeni sıralama, sayfalama | `GET /store/listings/products` | D4 |
-| Tüm ürünler | ör. `/magaza` (landing) | ⬜ | landing | D4 |
-| Ürün | `/urun/{slug}` ya da `/{slug}` | ✅ galeri, fiyat, seçenek, stok, sepete ekle, yorumlar, soru-cevap, stok bildirimi, favori, WhatsApp'tan sor, benzer ürünler | taksit tablosu, kargo cümlesi, renk örnekleri yok | D5 |
+| Tüm ürünler | `/magaza` | ✅ filtreler, sıralama | liste ucu `type=all` | D4 |
+| Ürün | `/urun/{slug}` ya da `/{slug}` | ✅ galeri, fiyat, tasarruf, seçenek, stok, sepete ekle, taksit tablosu (açılınca), kargo cümlesi, yorumlar, soru-cevap, stok bildirimi, favori, WhatsApp'tan sor, benzer ürünler | renk örnekleri yok | D5 |
 | Arama | `/arama?q=` | 🟡 Medusa `q` | Meilisearch | D10 |
 | Sepet | `/sepet` | ✅ adet, kaldır, kupon, indirim, ücretsiz kargo çubuğu | hediye kartı (bayrak) yok | D6 |
 | Mini sepet (çekmece) | başlıkta | ✅ | | D6 |
@@ -131,11 +131,11 @@ Durum: ✅ var · 🟡 temel hâli var · ⬜ yok. Görev kodları PROGRESS "F18
 | Sipariş | `/siparis/{id}?token=` | ✅ özet, havale bilgisi, iptal, iade/değişim talebi, sözleşmeler, fatura PDF | | D7 |
 | Sipariş sorgulama (misafir) | `/siparis` | ✅ | `order-lookup` | D8 |
 | Giriş, kayıt, doğrulama, şifre | `/hesap/giris`, `/hesap/kayit`, `/hesap/dogrula`, `/hesap/sifre-sifirla`, `/hesap/sifre-yenile` | ✅ | Medusa auth + F15 | D8 |
-| Hesabım: özet, siparişler, favoriler, bilgiler, fatura profili, izinler, KVKK talebi | `/hesap/*` | ✅ (adres defteri ödeme adımında; ayrı adres sayfası yok) | | D8 |
+| Hesabım: özet, siparişler, favoriler, adresler, bilgiler, fatura profili, izinler, KVKK talebi | `/hesap/*` | ✅ | `privacy-requests` (kanal `account`) | D8 |
 | Taşınan müşteri daveti | `/hesap/kayit?davet=` | ✅ ilk girişte `migration-claim` | | D8 |
 | İçerik sayfası | `/{handle}` | ✅ | `content` | D10 |
-| İletişim | `/iletisim` | 🟡 içerik sayfası | iletişim formu ucu yok | D10 |
-| Müşteri yorumları | `/yorumlar` | ⬜ | mağaza geneli yorum listesi yok | D10 |
+| İletişim | `/iletisim` | 🟡 içerik sayfası + WhatsApp/telefon | iletişim formu: kişisel veri saklama ve personel bildirimi kararı bekliyor | D10 |
+| Müşteri yorumları | `/yorumlar` | ✅ | `GET /store/reviews` | D10 |
 | Blog | `/blog`, `/blog/{handle}` | ✅ | `content?kind=post` | D10 |
 | Yasal metinler | `/yasal/{tur}` | ✅ (yayımlanmışlar) | `legal/{kind}` | D10 |
 | Çerez onayı | bant | ✅ | `consents/cookies` | D9 |
