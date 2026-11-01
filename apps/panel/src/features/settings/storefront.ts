@@ -24,6 +24,13 @@ export const STOREFRONT_LIMITS = {
   badges: 4,
   badgeTitleLength: 40,
   badgeTextLength: 80,
+  menuItems: 12,
+  menuLabelLength: 40,
+  menuChildren: 20,
+  heroEyebrowLength: 40,
+  heroHeadingLength: 90,
+  heroTextLength: 240,
+  heroLinks: 2,
 } as const
 
 const E = "settings.storefront.errors"
@@ -33,6 +40,8 @@ const MAX_PHONE_LENGTH = 32
 // An optional country prefix, then ten digits (backend lib/tr/phone.ts)
 const TR_PHONE = /^(?:\+90|0090|90|0)?[2-58]\d{9}$/
 const PHONE_SEPARATORS = /[\s().-]/g
+// `#rrggbb`, lower case: the server lower-cases what it is given
+const HEX_COLOR = /^#[0-9a-f]{6}$/
 
 /** No control characters and no lone surrogates (backend lib/security/text.ts). */
 export function isCleanText(text: string): boolean {
@@ -87,9 +96,18 @@ export const lineSchema = (max: number) =>
 export const optionalLineSchema = (max: number) =>
   z.string().trim().max(max, `${E}.tooLong`).refine(isCleanText, `${E}.textInvalid`)
 
+/** `#rrggbb` as the server keeps it. */
+export const isHexColor = (value: string): boolean => HEX_COLOR.test(value)
+
+export const hrefSchema = z
+  .string()
+  .trim()
+  .min(1, `${E}.required`)
+  .refine(isStorefrontHref, `${E}.hrefInvalid`)
+
 export const linkSchema = z.object({
   label: lineSchema(STOREFRONT_LIMITS.linkLabelLength),
-  href: z.string().trim().min(1, `${E}.required`).refine(isStorefrontHref, `${E}.hrefInvalid`),
+  href: hrefSchema,
 })
 export type LinkValues = z.infer<typeof linkSchema>
 
@@ -99,12 +117,26 @@ export const phoneSchema = z
   .max(MAX_PHONE_LENGTH, `${E}.phoneInvalid`)
   .refine((value) => value === "" || isTrPhone(value), `${E}.phoneInvalid`)
 
+/** A colour as `#rrggbb` in any case, or empty (saved as none: the theme's own). */
+export const colorSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .refine((value) => value === "" || isHexColor(value), `${E}.colorInvalid`)
+
 /** A field's error as a sentence; `max` fills the length limit's. */
 export const errorLine = (
   t: TFunction,
   error: FieldError | undefined,
   max?: number
 ): string | undefined => (error?.message ? t(error.message, { max }) : undefined)
+
+/**
+ * A card's own reset (undo, or what the server stored after a save). RHF's
+ * `reset` takes the form's `resetOptions` too, and `keepDirtyValues` there
+ * would keep every field once edited as it was typed.
+ */
+export const FULL_RESET = { keepDirtyValues: false } as const
 
 /**
  * Saves one card's field of the storefront section; `onSaved` gets what the

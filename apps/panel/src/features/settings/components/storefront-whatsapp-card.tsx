@@ -6,7 +6,12 @@ import { CardForm } from "@/components/patterns/card-form"
 import { Field } from "@/components/patterns/form-section"
 import { Input } from "@/components/ui/input"
 import type { StorefrontSettings } from "@/features/settings/api/sections"
-import { errorLine, phoneSchema, useSaveStorefront } from "@/features/settings/storefront"
+import {
+  FULL_RESET,
+  errorLine,
+  phoneSchema,
+  useSaveStorefront,
+} from "@/features/settings/storefront"
 
 const W = "settings.storefront.whatsapp"
 
@@ -28,7 +33,7 @@ export function WhatsappCard({ saved }: { saved: StorefrontSettings }) {
   const submit = form.handleSubmit((next) => {
     // The server writes it as +90…; the field shows what it stored
     save({ whatsapp_phone: next.phone === "" ? null : next.phone }, (stored) => {
-      form.reset(valuesOf(stored))
+      form.reset(valuesOf(stored), FULL_RESET)
     })
   })
   const error = errorLine(t, form.formState.errors.phone)
@@ -40,7 +45,7 @@ export function WhatsappCard({ saved }: { saved: StorefrontSettings }) {
       saving={saving}
       onSubmit={() => void submit()}
       onReset={() => {
-        form.reset(values)
+        form.reset(values, FULL_RESET)
       }}
     >
       <Field

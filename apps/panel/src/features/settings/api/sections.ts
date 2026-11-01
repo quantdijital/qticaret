@@ -185,6 +185,26 @@ export interface StorefrontSettings {
   trust_badges: { icon: TrustIcon; title: string; text: string | null }[]
   /** The number the WhatsApp button opens, E.164; none: no button. */
   whatsapp_phone: string | null
+  /** The header's menu as the shop names it; none: the top categories and their children. */
+  menu: StorefrontMenuItem[]
+  /** The storefront's main colour (`#rrggbb`, lower case); none: the theme's own. */
+  primary_color: string | null
+  /** The home page's opening; none: the shop's name and its first two categories. */
+  hero: StorefrontHero | null
+}
+
+export interface StorefrontHero {
+  /** A short line above the heading. */
+  eyebrow: string | null
+  heading: string
+  text: string | null
+  /** At most two, the first the main button; none: the first two categories. */
+  links: StorefrontLink[]
+}
+
+export interface StorefrontMenuItem extends StorefrontLink {
+  /** The panel it opens; the item's own link comes first in it. */
+  children: StorefrontLink[]
 }
 
 /** The places the shop's catalog is sent, in the order the panel shows them. */

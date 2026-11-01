@@ -1,57 +1,19 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { render, screen, waitFor, within } from "@testing-library/react"
+import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
-import type { StorefrontSettings } from "@/features/settings/api/sections"
-import { StorefrontPage } from "./storefront-page"
+import { URL, answer, card, posts, renderPage } from "./storefront-page.fixtures"
+import type { Init } from "./storefront-page.fixtures"
 
 const fetchMock = vi.hoisted(() => vi.fn<(url: string, init?: Init) => Promise<unknown>>())
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 
-const URL = "/admin/platform-settings/storefront"
-
-const SAVED: StorefrontSettings = {
-  announcements: ["1500 TL ve üzeri kargo bedava"],
-  top_links: [{ label: "Hakkımızda", href: "/hakkimizda" }],
-  footer_groups: [
-    { title: "Kurumsal", links: [{ label: "Mesafeli satış", href: "/mesafeli-satis" }] },
-  ],
-  trust_badges: [{ icon: "truck", title: "Aynı gün kargo", text: null }],
-  whatsapp_phone: "+905321234567",
-}
-
-interface Init {
-  method?: string
-  body?: Partial<StorefrontSettings>
-}
-
-const posts = () => fetchMock.mock.calls.filter(([, init]) => init?.method === "POST")
-
-function renderPage() {
-  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
-  return render(
-    <QueryClientProvider client={client}>
-      <StorefrontPage />
-    </QueryClientProvider>
-  )
-}
-
-/** The card under a title; each has its own save button. */
-function card(title: string): HTMLElement {
-  const section = screen.getByRole("heading", { name: title }).closest<HTMLElement>("section")
-  if (!section) throw new Error(`No card titled ${title}`)
-  return section
-}
-
 describe("StorefrontPage", () => {
   beforeEach(() => {
     fetchMock.mockReset()
-    fetchMock.mockImplementation((_url: string, init?: Init) =>
-      Promise.resolve({ section: "storefront", values: { ...SAVED, ...init?.body }, version: 2 })
-    )
+    answer(fetchMock)
   })
 
   it("shows what the shop saved, each part in its own card", async () => {
@@ -74,6 +36,9 @@ describe("StorefrontPage", () => {
     )
     expect(screen.getByRole("textbox", { name: "1. rozetin açıklaması" })).toHaveValue("")
     expect(screen.getByRole("textbox", { name: "WhatsApp numarası" })).toHaveValue("+905321234567")
+    expect(within(card("Menü")).getByText(/vitrin üst kategorilerinizi/)).toBeInTheDocument()
+    expect(screen.getByRole("textbox", { name: "Ana renk" })).toHaveValue("")
+    expect(screen.getByRole("button", { name: "Temanın rengine dön" })).toBeDisabled()
     expect(fetchMock).toHaveBeenCalledWith(URL)
   })
 
@@ -124,7 +89,7 @@ describe("StorefrontPage", () => {
       "Adres / ile başlayan bir mağaza sayfası ya da https:// ile başlayan bir site olmalı."
     )
     expect(address).toHaveAttribute("aria-invalid", "true")
-    expect(posts()).toEqual([])
+    expect(posts(fetchMock)).toEqual([])
   })
 
   it("saves a badge without a description as none, and a cleared WhatsApp number as none", async () => {
@@ -164,6 +129,90 @@ describe("StorefrontPage", () => {
     expect(await within(whatsapp).findByRole("alert")).toHaveTextContent(
       "Geçerli bir Türkiye telefon numarası girin."
     )
-    expect(posts()).toEqual([])
+    expect(posts(fetchMock)).toEqual([])
+  })
+
+  it("saves a menu item with a sub-link as the server takes it", async () => {
+    renderPage()
+    await screen.findByRole("textbox", { name: "1. duyuru" })
+    const menu = card("Menü")
+
+    await userEvent.click(within(menu).getByRole("button", { name: "Menü öğesi ekle" }))
+    await userEvent.type(
+      within(menu).getByRole("textbox", { name: "1. menü öğesinin adı" }),
+      "Kampanyalar"
+    )
+    await userEvent.type(
+      within(menu).getByRole("textbox", { name: "1. menü öğesinin adresi" }),
+      "/kampanyalar"
+    )
+    await userEvent.click(within(menu).getByRole("button", { name: "Alt bağlantı ekle" }))
+    await userEvent.type(
+      within(menu).getByRole("textbox", { name: "1. menü öğesi, 1. bağlantının adı" }),
+      "Outlet"
+    )
+    await userEvent.type(
+      within(menu).getByRole("textbox", { name: "1. menü öğesi, 1. bağlantının adresi" }),
+      " https://outlet.example.com/ "
+    )
+    await userEvent.click(within(menu).getByRole("button", { name: "Kaydet" }))
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalledWith(URL, {
+        method: "POST",
+        body: {
+          menu: [
+            {
+              label: "Kampanyalar",
+              href: "/kampanyalar",
+              children: [{ label: "Outlet", href: "https://outlet.example.com/" }],
+            },
+          ],
+        },
+      })
+    })
+  })
+
+  it("refuses a script as a sub-link's address before saving", async () => {
+    renderPage()
+    await screen.findByRole("textbox", { name: "1. duyuru" })
+    const menu = card("Menü")
+
+    await userEvent.click(within(menu).getByRole("button", { name: "Menü öğesi ekle" }))
+    await userEvent.type(
+      within(menu).getByRole("textbox", { name: "1. menü öğesinin adı" }),
+      "Kampanyalar"
+    )
+    await userEvent.type(
+      within(menu).getByRole("textbox", { name: "1. menü öğesinin adresi" }),
+      "/kampanyalar"
+    )
+    await userEvent.click(within(menu).getByRole("button", { name: "Alt bağlantı ekle" }))
+    await userEvent.type(
+      within(menu).getByRole("textbox", { name: "1. menü öğesi, 1. bağlantının adı" }),
+      "Kampanya"
+    )
+    const address = within(menu).getByRole("textbox", {
+      name: "1. menü öğesi, 1. bağlantının adresi",
+    })
+    await userEvent.type(address, "javascript:alert(1)")
+    await userEvent.click(within(menu).getByRole("button", { name: "Kaydet" }))
+
+    expect(await within(menu).findByRole("alert")).toHaveTextContent(
+      "Adres / ile başlayan bir mağaza sayfası ya da https:// ile başlayan bir site olmalı."
+    )
+    expect(address).toHaveAttribute("aria-invalid", "true")
+    expect(posts(fetchMock)).toEqual([])
+  })
+
+  it("puts back what was saved on undo, even in a field typed in", async () => {
+    renderPage()
+    const phone = await screen.findByRole("textbox", { name: "WhatsApp numarası" })
+    const whatsapp = card("WhatsApp")
+
+    await userEvent.type(phone, "9")
+    await userEvent.click(within(whatsapp).getByRole("button", { name: "Geri al" }))
+
+    expect(phone).toHaveValue("+905321234567")
   })
 })

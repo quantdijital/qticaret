@@ -14,6 +14,7 @@ import {
   RowCell,
 } from "@/features/settings/components/storefront-rows"
 import {
+  FULL_RESET,
   STOREFRONT_LIMITS,
   errorLine,
   lineSchema,
@@ -128,7 +129,7 @@ export function FooterGroupsCard({ saved }: { saved: StorefrontSettings }) {
   const groups = useFieldArray({ control: form.control, name: "groups" })
   const submit = form.handleSubmit((next) => {
     save({ footer_groups: next.groups }, (stored) => {
-      form.reset(valuesOf(stored))
+      form.reset(valuesOf(stored), FULL_RESET)
     })
   })
   return (
@@ -139,7 +140,7 @@ export function FooterGroupsCard({ saved }: { saved: StorefrontSettings }) {
       saving={saving}
       onSubmit={() => void submit()}
       onReset={() => {
-        form.reset(values)
+        form.reset(values, FULL_RESET)
       }}
     >
       {groups.fields.length === 0 ? (

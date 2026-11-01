@@ -22,6 +22,7 @@ import {
   RowCell,
 } from "@/features/settings/components/storefront-rows"
 import {
+  FULL_RESET,
   STOREFRONT_LIMITS,
   errorLine,
   lineSchema,
@@ -96,7 +97,7 @@ export function TrustBadgesCard({ saved }: { saved: StorefrontSettings }) {
         })),
       },
       (stored) => {
-        form.reset(valuesOf(stored))
+        form.reset(valuesOf(stored), FULL_RESET)
       }
     )
   })
@@ -112,7 +113,7 @@ export function TrustBadgesCard({ saved }: { saved: StorefrontSettings }) {
       saving={saving}
       onSubmit={() => void submit()}
       onReset={() => {
-        form.reset(values)
+        form.reset(values, FULL_RESET)
       }}
     >
       {badges.fields.length === 0 ? (

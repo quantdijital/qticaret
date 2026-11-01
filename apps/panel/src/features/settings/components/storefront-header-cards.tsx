@@ -13,6 +13,7 @@ import {
   RowCell,
 } from "@/features/settings/components/storefront-rows"
 import {
+  FULL_RESET,
   STOREFRONT_LIMITS,
   errorLine,
   lineSchema,
@@ -49,7 +50,7 @@ export function AnnouncementsCard({ saved }: { saved: StorefrontSettings }) {
   const { errors } = form.formState
   const submit = form.handleSubmit((next) => {
     save({ announcements: next.lines.map((line) => line.text) }, (stored) => {
-      form.reset(announcementsOf(stored))
+      form.reset(announcementsOf(stored), FULL_RESET)
     })
   })
   return (
@@ -60,7 +61,7 @@ export function AnnouncementsCard({ saved }: { saved: StorefrontSettings }) {
       saving={saving}
       onSubmit={() => void submit()}
       onReset={() => {
-        form.reset(values)
+        form.reset(values, FULL_RESET)
       }}
     >
       {lines.fields.length === 0 ? (
@@ -134,7 +135,7 @@ export function TopLinksCard({ saved }: { saved: StorefrontSettings }) {
   const { errors } = form.formState
   const submit = form.handleSubmit((next) => {
     save({ top_links: next.links }, (stored) => {
-      form.reset(topLinksOf(stored))
+      form.reset(topLinksOf(stored), FULL_RESET)
     })
   })
   return (
@@ -145,7 +146,7 @@ export function TopLinksCard({ saved }: { saved: StorefrontSettings }) {
       saving={saving}
       onSubmit={() => void submit()}
       onReset={() => {
-        form.reset(values)
+        form.reset(values, FULL_RESET)
       }}
     >
       {links.fields.length === 0 ? (
