@@ -3,6 +3,8 @@
 > Her oturum sonunda `/oturum-kapat` ile güncellenir. Claude oturuma buradan başlar.
 
 ## Aktif faz
+**F18 — Vitrin ve çoklu tema: BAŞLADI (2026-11-01; D1–D2 bitti, D3–D6 başladı).** Kullanıcı: "kodlamaya başla f18i bana bir şey sorma bi yedek al mevcuttan ben dönüğümde kontrol edicem beğenmezsem geri alırız. kalan adımları tamamla ve bir arayüz işine giriş bakalım." F16'dan önce. Dal `f18-storefront` (`f15-hardening` üzerinden), push yok (kullanıcı 2026-11-01: "şimdilik push yok"). **Yedek:** etiket `pre-f18-2026-11-01` ve dal `backup/pre-f18-2026-11-01` (F18'den önceki son commit `6a68475`); tam depo paketi `~/Desktop/qticaret-yedek-pre-f18-2026-11-01.bundle` (doğrulandı). Geri almak için `git switch f15-hardening` yeter; F18 dalı silinmeden durur. Mimari ADR-0046 (otonom kabul, gözden geçir); plan aşağıda "F18 görev planı".
+
 **F15 — Sertleştirme: BİTTİ (2026-10-31 akşam; H1–H9).** Dal `f15-hardening`, push yok (2026-11-01'e kadar). Kalan yalnızca sunucuyla gelenler: dış pentest, staging yük ölçümü, `SECURITY_CONTACT`, canlı yedek takvimi (F16); body-parser/multer override'ı 2026-11-05'ten, Medusa 2.22 2026-11-06'dan sonra. Bu fazla birlikte kodlama tarafında açık backend/panel işi kalmadı; arayüze ve sunucuya bırakılanlar "Son oturum özeti"nde (iyimser kilit, F17). Sıradaki: F16 (barındırma ve canlıya çıkış) kullanıcıyla birlikte.
 
 **F14 — Veri taşıma ve geçiş araçları: BİTTİ (2026-10-31; G1–G9, KK1–KK4 işaretli).** Dal `f14-migration` (`f8-einvoice` üzerinden), push yok. Plan aşağıda "F14 görev planı"; ADR-0042 (otonom öneri, uygulama notları ve kapanış incelemesiyle; gözden geçir). Kaynaklar: geçiş paketi (JSON), Shopify (Dev Dashboard uygulaması, toplu sorgu), Google Merchant akışı (Ticimax, ikas, IdeaSoft, T-Soft), müşteri listesi (xlsx/CSV). Panel: Ayarlar > Taşıma. Runbook: `docs/runbooks/gecis.md`. **Vitrin (F18) için açık iş:** `/hesap/kayit?davet=` sayfası giriş/kayıt sonrası `POST /store/customers/me/migration-claim` çağırmalı. Sıradaki faz: F15 (plan aşağıda).
@@ -42,6 +44,34 @@
 **Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: BİTTİ** (T1a–T16; kabul kriterlerinin hepsi testlerle işaretli, docs/03; son eksik iki kanıt, danışmanın p95 ölçümü ve yedi sayfa türünün SEO sözleşme testi, kapanışta eklendi). Playwright e2e altyapısı kuruldu; CI düzeltildi. **F4 — Fiyatlandırma ve promosyon: BİTTİ** (plan ve ADR-0023/0024/0025 kabul edildi; U1 `price-history`, U4 kuponlar, U7 indirim dağılımı ve iade tutarı, U2 fiyat listeleri, U3 indirim gösterimi, U5 tek kullanımlık kodlar, U6 otomatik kampanyalar ve kargo bedava eşiği, U8 hediye kartı ve mağaza kredisi bitti (KK1–KK4 işaretli); F4 kapanış incelemesi yapıldı, bulgular düzeltildi: F4 BİTTİ). Dal `f4-pricing-promotions`. Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı. F1, F2 ve F3 dalları push edildi (kullanıcı 2026-10-26: "pushları sen önerdiğinde yapabilirsin"); PR açılmadı.
 
 ## Son oturum özeti
+**2026-11-01 (F18 başlangıcı, otonom; kullanıcı dışarıda).** Dal `f18-storefront`, commit'ler yerelde. Oturum başında kullanıcının dört kararı (tek tur): push şimdilik yok; platform alan adı `PLATFORM_DOMAIN` değişkeniyle başlar, ad ilk sunucudan önce seçilir; barındırmada ekonomik başlangıç (tek güçlü sunucu, Coolify, Postgres ve Redis aynı makinede, yedekler başka yerde); çalışma ağacı temizliği (stash `743b65f`'in içeriğiydi, silindi; `eslint.config.mjs` son commit'teki hâline döndü). Ardından kullanıcı F18'e geçti.
+- **Yapılanlar:**
+  - **Backend, imzalı istemci IP'si (`96b95ed`):** vitrin sunucusu ziyaretçinin adresini `STOREFRONT_IP_SECRET` ile imzalar; `clientIp(req)` hız sınırı, iş kanıtı, dolandırıcılık, ödeme, onay, takip ve denetim kaydında `req.ip`'nin yerini aldı. Testler: birim (sabit vektör vitrinle ortak), HTTP `storefront-client-ip.spec.ts`.
+  - **Backend, vitrin için SEO uçları (`bca3942`):** `GET /store/seo/paths` (URL kaydından en çok 100 kaydın yolu); `/store/seo/site`'a `shop` (ad, logo) ve `home` (ana sayfanın `seo` nesnesi, `seo.home` ayarından); `GET /dev/storefront-key` (yalnızca geliştirme). Testler: HTTP `seo-resolve` (yollar), `seo-payload` (site), `dev-checkout` (404), birim `home`.
+  - **Vitrin (`ddc3656`):** `apps/storefront` (Next.js 16.4.2), `packages/ui` (tema sözleşmesi, görünüm modelleri), `packages/themes/base`, `packages/types/src/store`. Çalışan: ana sayfa, kategori menüsü, kategori/marka/koleksiyon/landing listesi (sayfalama, "en yeniler"), ürün sayfası (varyant seçimi `?variant=`, 30 gün kuralı, stok, sepete ekle), sepet sayfası (satırlar, ara toplam), içerik sayfası, 404, robots.txt, sitemap, security.txt aktarımı, URL normalizasyonu (tek 301), resolve yönlendirmeleri ve 410, 404 bildirimi, nonce'lu CSP, `noindex` ortamı. Metadata ve JSON-LD ilk HTML'de (ürün sayfasında JSON-LD ~5. KB'ta). Testler: vitest 13 (yollar, JSON-LD kaçışı, imza, ürün görünümü), ui 2.
+  - **Elle denendi (Playwright, dev):** ana sayfa, `/urun/keten-gomlek` (beden seçimi, sepete ekle → "Sepet (1)"), `/kategori/giyim`, `/sepet` (390 px), 301/404/410 kodları, `?sayfa=1` → 301, `?sayfa=2` → 404, sıralı liste `noindex,follow`. Bulunan ve düzelen iki hata: Store yanıtında `variants.options.option_id` gelmiyordu (eşleme değer kaydının kimliğiyle), `nextUrl` sondaki `/`'yi kendisi atıyordu (normalizasyon ham adresle).
+  - **Doğrulama:** lint 0, tip 0 (backend, vitrin, paketler); birim testleri; HTTP `storefront-client-ip`, `dev-checkout`, `seo-resolve`, `seo-payload` geçti (tam HTTP koşusu yapılmadı: değişiklik başına ilgili dosyalar).
+- **Kullanıcıya:**
+  1. Vitrini görmek için: `pnpm --filter backend dev` ve `pnpm --filter storefront dev`, sonra `http://localhost:8000`. Oturum sonunda ikisi de açık bırakıldı.
+  2. `pnpm env:init` `apps/backend/.env.test`'e neredeyse bütün değişkenleri ekledi (`DATABASE_URL`, `JWT_SECRET`, `PII_*` …): dosyada `NAME=` biçiminde yoktular. Claude dosyayı okumadı. Testler sonrasında da geçti; dosyayı bilerek boşalttıysan kontrol et.
+  3. Geliştirme Postgres'inde yarıda kalan test koşularından 66 artık `medusa-*-integration-*` veritabanı var; silinmedi (izin verirsen temizlenir).
+  4. Push yapılmadı (karar). Dallar f10–f18 yerelde.
+- **Gözden geçir (otonom kararlar, 2026-11-01; ADR-0046):**
+  - Next.js 16.4.2 App Router (16.4.3, 14 gün kuralına takıldı); `htmlLimitedBots: /.*/` ile metadata hiç akıtılmıyor.
+  - Vitrin Store API'yi yalnızca kendi sunucusundan çağırıyor (BFF); tarayıcıdan doğrudan çağrı yok.
+  - Her sayfa istek anında üretiliyor, Next veri önbelleği yok (fiyat ve stok canlı; önbellek backend'de).
+  - Rota ağacı URL deseni bilmiyor: tek `[...path]` sayfası resolve'a soruyor. Proxy ve sayfa resolve'u ayrı ayrı çağırıyor (backend önbellekli); gerekirse süreç içi kısa önbellek.
+  - Bağlantı yolları backend'in URL kaydından (`/store/seo/paths`); vitrin desen üretmiyor.
+  - Tema yalnızca sunum: veri çekmez, SEO yazmaz, durum kodu belirlemez; eylemler prop olarak (Server Action).
+  - Ana sayfa başlığı ve açıklaması yeni `seo.home` ayarı (boşsa mağaza adı, açıklama yok). Panel alanı D3'te.
+  - Çift `/` içeren adresleri Next kendisi 308 ile düzeltiyor (proxy'den önce); Google 308'i kalıcı sayar, bırakıldı.
+  - Ürün sayfasında `og:type` "website" basılıyor: Next'in metadata tipinde "product" yok (backend "product" diyor). D5'te ele alınacak.
+  - Kanonik alan adına yönlendirme yapılmıyor: docs/13 alan adı doğrulaması (F16.7) gelmeden yönlendirme hedefi olmasın diyor.
+  - Filtreli ya da fiyata göre sıralı liste adresinde "henüz gösterilemiyor" notu çıkıyor (sayfa zaten `noindex`); D4'te backend listeleme ucuyla gelir.
+  - Sepet çerezi `__Host-qt_cart` (yerelde `qt_cart`), 30 gün, httpOnly, SameSite=Lax.
+  - Ödeme deneme sayfası (adr/0028) vitrin ödemesi (D7) çalışana kadar kalıyor.
+  - Kategori menüsü ilk 100 kategoriyle sınırlı; logo boyutsuz basılıyor (küçük kayma), boyutlar D11'de.
+
 **2026-10-31 öğleden sonra (kodlama işlerinin kapanışı, otonom; kullanıcı sporda).** Dal `f15-hardening`, commit'ler yerelde (push 2026-11-01'e kadar yok). Kullanıcı: "kodlama tarafındaki tüm işleri bitirene kadar devam et… backend ve panel işi kalmasın"; canlı/sunucu işleri ve arayüz birlikte yapılacak.
 - **Ayarlar düzeni (kullanıcı isteği):** konu başına tek sayfa, bölümleri sekmelerde (`?part=`); ayarlara girince ana menü ikonlara iner, çıkınca eski hâline döner (`638d1b3`).
 - **E6b değişimin belgeleri:** iade + yeni satış; bu işte gerçek iadede iade belgesinin hiç açılmadığı hata bulundu ve düzeldi (`cd8c469`, ADR-0034 ek).
@@ -1199,7 +1229,24 @@
 - **Daha önce:** F1 planlaması ve F0.2–F0.8 (2026-10-24), F0.1 monorepo (2026-10-24 sabahı), SEO ve güvenlik dokümanları (2026-10-22).
 
 ## Sıradaki görev
-**Claude'un sıradaki işi:** F16 — Dağıtım ve tenant işletimi, kullanıcıyla birlikte (kullanıcı 2026-10-31: "canlı ve sunucu işlerini birlikte hallederiz"). Başlamadan: (1) 2026-11-01'den itibaren push serbest ve CI kotası yenilendi: dallar sırayla push edilip CI son commit'te koşturulur (force push yok); (2) F16 planı `/faz-baslat F16` ile, barındırma sağlayıcısı karşılaştırmayla (ADR-0003 soru 2–4 kararlı, soru 5 "drive mantığı" kullanıcıda). Tarihe bağlı: body-parser/multer override'ı 2026-11-05'ten, Medusa 2.22 2026-11-06'dan sonra. Arayüz aşamasında birlikte: iyimser kilit (seçenekler S9 maddesinde), ekran ekran kontrol. F17 kararları (paket/fiyat modeli, ADR) kullanıcıda.
+**Claude'un sıradaki işi:** F18'e devam (kullanıcı 2026-11-01'de F18'i F16'nın önüne aldı). Sıra: D4 listeleme filtreleri ve fiyat sıralaması (backend listeleme ucu: `workflows/seo/listing.ts`'teki `filteredIds`/`baseOf` Store'a açılır) → D6 sepet (adet, silme, indirim satırları, kupon) → D7 ödeme → D8 hesap → D3/D5 kalanları. Kullanıcı dönünce: vitrini beğenip beğenmediği (beğenmezse `git switch f15-hardening`, yedek etiketi `pre-f18-2026-11-01`), ADR-0046'nın gözden geçirilmesi. F16 (barındırma, kullanıcıyla) ve F17 kararları bekliyor; tarihe bağlı: body-parser/multer override'ı 2026-11-05'ten, Medusa 2.22 2026-11-06'dan sonra.
+
+### F18 görev planı (2026-11-01; Next.js 16 API'leri Context7 `/vercel/next.js/v16.2.9`'dan doğrulandı: `proxy.ts`, `generateMetadata` ve akıtılan metadata, `htmlLimitedBots`, nonce'lu CSP, JSON-LD; Store API envanteri alt ajanla çıkarıldı; mimari ADR-0046)
+
+| # | Kapsam | Durum |
+|---|---|---|
+| D1 ✓ | Mimari ve iskelet: ADR-0046, `apps/storefront`, `packages/ui` (tema sözleşmesi, görünüm modelleri), `packages/themes/base`, `packages/types/src/store`; imzalı istemci IP'si (backend + vitrin); `/dev/storefront-key`; `pnpm env:init` vitrin env'i | Bitti (`96b95ed`, `bca3942`, `ddc3656`) |
+| D2 ✓ | SEO çekirdeği: `proxy.ts` (normalizasyon 301, resolve yönlendirmesi kendi koduyla, 410, 404 bildirimi, nonce'lu CSP, `noindex` ortamı, robots/sitemap/security.txt aktarımı), metadata ilk HTML'de, JSON-LD kaçışlı | Bitti |
+| D3 ◐ | Çerçeve ve ana sayfa: menü, sepet sayacı, ana sayfa (`/store/seo/site` `home`) ✓. Açık: panelde SEO ayarlarına ana sayfa başlık/açıklama alanı; footer yasal bağlantıları (D10) | Başladı |
+| D4 ◐ | Listeleme: kategori, marka, koleksiyon, landing; sayfalama ve "en yeniler" ✓. Açık: filtreler (marka, öznitelik), fiyat aralığı ve fiyat sıralaması için Store listeleme ucu; facet paneli; boş fiyat sayfasında 404 (docs/13 §7) | Başladı |
+| D5 ◐ | Ürün sayfası: galeri (srcset, LCP), varyant `?variant=`, 30 gün kuralı, stok, sepete ekle ✓. Açık: öznitelik tablosu, yorumlar ve soru-cevap (F10), stok bildirimi, taksit, kargo cümlesi, `og:type` product, benzer ürünler | Başladı |
+| D6 ◐ | Sepet: satırlar ve ara toplam ✓. Açık: adet değiştirme ve silme, indirim satırları, kupon, hediye kartı, ücretsiz kargo eşiği, `/sepet/geri-don?token=` (sepet hatırlatma) | Başladı |
+| D7 | Ödeme: TR adres verisi, kargo seçenekleri, yasal metin onayı, yaş beyanı, ödeme yöntemleri (PayTR iFrame, iyzico, havale, kapıda), iş kanıtı (428) akışı, `/siparis/[id]` (sipariş erişimi), CSP `frame-src`/`form-action`; adr/0028 deneme sayfasının silinmesi | — |
+| D8 | Hesap: kayıt ve giriş (çerez oturumu aktarımı, adr/0004), e-posta doğrulama, şifre sıfırlama, siparişler, adresler, iade talebi, KVKK talebi, `migration-claim` (F14), istek listesi, ileti izinleri | — |
+| D9 | Çerez onayı (F13.8), dönüşüm olayları (F10.9), `qt_vid` çerezinin aktarımı | — |
+| D10 | İçerik ve yasal sayfaların yolları, blog listesi, footer bağlantıları; arama (Meilisearch + indeksleme subscriber, ADR eki), `/arama` | — |
+| D11 | Tema ayarları (renk, logo, yerleşim; `platform-settings` JSON şema + panel ekranı), tema seçimi, ikinci tema kanıtı | — |
+| D12 | Kalite ve kapanış: Playwright e2e + axe, Lighthouse/CWV bütçeleri, `/seo-audit` `/seo-technical` `/seo-schema` denetimi, güvenlik incelemesi | — |
 
 ### F15 görev planı (2026-10-31, taslak; F14 kapanınca başlar. Dış servis ya da yeni bağımlılık isteyen işler kullanıcı onayını bekler)
 
@@ -1935,7 +1982,7 @@ F2 görev planı (S1–S13, hepsi ✅) ve görev ayrıntıları git geçmişinde
 | F15 Sertleştirme (güvenlik/dolandırıcılık/yük) | ✅ (H1–H9; KK3, KK4 işaretli; KK1 iç incelemelerle, dış pentest ve staging yük ölçümü F16; 2026-10-31) |
 | F16 Dağıtım & tenant işletimi | ⬜ |
 | F17 Control plane | ⬜ |
-| F18 Storefront & temalar (sonraki aşama) | ⬜ |
+| F18 Storefront & temalar | ◐ (D1–D2 bitti, D3–D6 başladı; 2026-11-01, F16'dan önce) |
 | F19 Genişleme: pazaryeri, B2B, yurt dışı, ajan ticareti (sonraki aşama) | ⬜ |
 
 Durum: ⬜ başlamadı · ⏳ devam · ✅ bitti · ⛔ bloklu
