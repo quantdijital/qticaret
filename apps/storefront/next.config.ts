@@ -8,10 +8,17 @@ import type { NextConfig } from "next"
  *   docs/03 F18 "SSR zorunlu").
  * - `output: "standalone"`: the production image (F16) copies one folder.
  * - The workspace packages ship TypeScript source, so Next compiles them.
- * - Security headers that need no per-request value live here; the CSP needs
+ * - Security headers that need no per-request value live here (HSTS in
+ *   production only); the CSP needs
  *   a nonce and is set in `src/proxy.ts`.
  */
 const SECURITY_HEADERS = [
+  // docs/runbooks/kenar-ve-pentest.md: HSTS comes from the application, a
+  // year, in production only. Not `includeSubDomains`: the storefront lives
+  // on the shop's own domain, whose other hosts are the shop's business
+  ...(process.env.NODE_ENV === "production"
+    ? [{ key: "Strict-Transport-Security", value: "max-age=31536000" }]
+    : []),
   { key: "X-Content-Type-Options", value: "nosniff" },
   { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
   { key: "X-Frame-Options", value: "DENY" },
