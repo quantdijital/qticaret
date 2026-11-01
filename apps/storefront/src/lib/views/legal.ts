@@ -1,5 +1,7 @@
 import "server-only"
 import { cache } from "react"
+import type { LegalIdentity } from "@qticaret/types"
+import type { Translate } from "@qticaret/ui"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { storePublicGet } from "@/lib/store-api/server"
 
@@ -46,3 +48,33 @@ export const legalDocument = cache(async (kind: string): Promise<LegalDocument |
     throw error
   }
 })
+
+/** The published legal texts as footer links, in the order a shopper looks for them. */
+export async function publishedLegalLinks(): Promise<{ label: string; path: string }[]> {
+  const order: LegalSlug[] = [
+    "mesafeli-satis-sozlesmesi",
+    "on-bilgilendirme-formu",
+    "iade-politikasi",
+    "kargo-politikasi",
+    "kvkk-aydinlatma-metni",
+    "cerez-politikasi",
+    "uyelik-sozlesmesi",
+  ]
+  const found = await Promise.all(order.map((slug) => legalDocument(LEGAL_PAGES[slug])))
+  return order.flatMap((slug, index) => {
+    const document = found[index]
+    return document ? [{ label: document.title, path: `/yasal/${slug}` }] : []
+  })
+}
+
+/** The shop's identity lines the e-commerce law asks for, those it filled in. */
+export function identityLinesOf(identity: LegalIdentity, t: Translate): string[] {
+  return [
+    identity.mersis ? t("footer.mersis", { value: identity.mersis }) : null,
+    identity.tax_office && identity.tax_number
+      ? t("footer.tax", { office: identity.tax_office, number: identity.tax_number })
+      : null,
+    identity.kep ? t("footer.kep", { value: identity.kep }) : null,
+    identity.etbis ? t("footer.etbis", { value: identity.etbis }) : null,
+  ].filter((line): line is string => line !== null)
+}

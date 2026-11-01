@@ -14,7 +14,7 @@ import {
 } from "@/lib/store-api/requests"
 import { miniCartOf } from "./cart"
 import { navigation } from "./categories"
-import { legalDocument, legalPath } from "./legal"
+import { identityLinesOf, legalDocument, legalPath, publishedLegalLinks } from "./legal"
 import { displayPhone, footerGroups, linkViews, socialLinks, whatsappHref } from "./frame"
 
 /** How to reach the shop: the legal identity's contact details, the frame's WhatsApp number. */
@@ -39,6 +39,7 @@ export async function shopView(): Promise<ShopView> {
     cookies,
     customer,
     cookiePolicy,
+    legalLinks,
   ] = await Promise.all([
     siteSeo(),
     allCategories(),
@@ -48,6 +49,7 @@ export async function shopView(): Promise<ShopView> {
     cookieConsent(),
     currentCustomer(),
     legalDocument("cookie_policy"),
+    publishedLegalLinks(),
   ])
   const paths = await pathsOf(
     "product_category",
@@ -90,5 +92,7 @@ export async function shopView(): Promise<ShopView> {
         }
       : null,
     customerName: customer ? (customer.first_name ?? customer.email) : null,
+    legalLinks,
+    identityLines: identityLinesOf(identity, t),
   }
 }

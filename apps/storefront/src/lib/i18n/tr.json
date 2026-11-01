@@ -445,5 +445,10 @@
   "account.privacy_status_completed": "Yanıtlandı",
   "account.privacy_status_rejected": "Reddedildi",
   "account.notice_privacy_sent": "Talebiniz alındı; en geç 30 gün içinde e-postayla yanıtlanacak.",
-  "account.notice_privacy_failed": "Talebiniz şu an alınamadı. Lütfen tekrar deneyin ya da bize yazın."
+  "account.notice_privacy_failed": "Talebiniz şu an alınamadı. Lütfen tekrar deneyin ya da bize yazın.",
+  "footer.legal": "Yasal metinler",
+  "footer.mersis": "MERSİS: {value}",
+  "footer.tax": "{office} V.D. {number}",
+  "footer.kep": "KEP: {value}",
+  "footer.etbis": "ETBİS: {value}"
 }

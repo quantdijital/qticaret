@@ -96,6 +96,10 @@ export interface ShopView {
   cookieBanner: CookieBannerView | null
   /** The signed-in customer's first name; null for a guest. */
   customerName: string | null
+  /** The shop's published legal texts' pages (D10). */
+  legalLinks: LinkView[]
+  /** What the law asks a web shop to show (6563, ETBİS): title, MERSİS, tax, KEP, ETBİS; in words. */
+  identityLines: string[]
 }
 
 export interface CookieBannerView {

@@ -91,9 +91,25 @@ export function SiteFooter({ shop, t }: { shop: ShopView; t: Translate }) {
           )}
         </Container>
         <div className="border-t border-ink-foreground/10">
-          <Container className="flex flex-col gap-2 py-6 text-xs text-ink-muted sm:flex-row sm:items-center sm:justify-between">
-            <p>{t("footer.rights", { year, name: shop.companyTitle ?? shop.name })}</p>
-            <p>{t("footer.secure_payment")}</p>
+          <Container className="flex flex-col gap-3 py-6 text-xs text-ink-muted">
+            {shop.legalLinks.length > 0 && (
+              <nav aria-label={t("footer.legal")}>
+                <ul className="flex flex-wrap gap-x-4 gap-y-1">
+                  {shop.legalLinks.map((link) => (
+                    <li key={link.path}>
+                      <a href={link.path} className="hover:text-ink-foreground hover:underline">
+                        {link.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            )}
+            {shop.identityLines.length > 0 && <p>{shop.identityLines.join(" · ")}</p>}
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <p>{t("footer.rights", { year, name: shop.companyTitle ?? shop.name })}</p>
+              <p>{t("footer.secure_payment")}</p>
+            </div>
           </Container>
         </div>
       </div>
