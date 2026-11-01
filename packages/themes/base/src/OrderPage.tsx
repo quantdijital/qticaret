@@ -136,6 +136,41 @@ export function OrderPage({
               {view.notice}
             </p>
           )}
+          {view.shipments.length > 0 && (
+            <section aria-labelledby="kargo" className="rounded-3xl border bg-card p-6 sm:p-7">
+              <h2 id="kargo" className="mb-3 text-2xl">
+                {t("order.shipments")}
+              </h2>
+              <ul className="flex flex-col gap-4 text-sm">
+                {view.shipments.map((parcel, index) => (
+                  <li key={String(index)} className="flex flex-col gap-1">
+                    <span className="font-medium">
+                      {[parcel.carrier, parcel.status].filter(Boolean).join(" · ")}
+                    </span>
+                    {parcel.trackingNumber && (
+                      <span>
+                        {t("order.tracking_number", { number: parcel.trackingNumber })}
+                        {parcel.trackingUrl && (
+                          <>
+                            {" · "}
+                            <a
+                              href={parcel.trackingUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="font-medium underline underline-offset-4"
+                            >
+                              {t("order.track")}
+                            </a>
+                          </>
+                        )}
+                      </span>
+                    )}
+                    <span className="text-muted-foreground">{parcel.items}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
           {view.returns.length > 0 && (
             <section aria-labelledby="iadeler" className="rounded-3xl border bg-card p-6 sm:p-7">
               <h2 id="iadeler" className="mb-3 text-2xl">

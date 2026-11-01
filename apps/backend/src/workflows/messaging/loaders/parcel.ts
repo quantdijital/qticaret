@@ -1,7 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import type { ParcelVars } from "../../../lib/messaging/templates"
-import { carrierOf } from "../../../lib/shipping/carriers"
+import { carrierNameOf, trackingUrlOf } from "../../../lib/shipping/carriers"
 import { GREETING, firstText, personName } from "./types"
 import type { Loaded } from "./types"
 
@@ -41,35 +41,6 @@ interface FulfillmentRow {
   } | null
 }
 
-// Geliver names the carrier it bought the label from by code
-const GELIVER_CARRIERS: Readonly<Record<string, string>> = {
-  ARAS: "Aras Kargo",
-  YURTICI: "Yurtiçi Kargo",
-  MNG: "MNG Kargo",
-  PTT: "PTT Kargo",
-  SURAT: "Sürat Kargo",
-  HEPSIJET: "HepsiJet",
-  KOLAYGELSIN: "Kolay Gelsin",
-}
-
-function carrierName(row: FulfillmentRow): string | null {
-  switch (carrierOf(row.provider_id)) {
-    case "aras":
-      return "Aras Kargo"
-    case "yurtici":
-      return "Yurtiçi Kargo"
-    case "geliver": {
-      const code = row.data?.["provider_code"]
-      return typeof code === "string" ? (GELIVER_CARRIERS[code.toUpperCase()] ?? code) : null
-    }
-    case null:
-      return null
-  }
-}
-
-const httpUrl = (value: string | null | undefined): string | null =>
-  value && /^https?:\/\/[^\s"<>]+$/.test(value) ? value : null
-
 /**
  * A parcel as its messages show it (adr/0036), and where they go; null
  * when it is gone or the shop chose not to tell the customer when it
@@ -93,9 +64,9 @@ export async function loadParcelMessage(
     vars: {
       number: String(order.display_id),
       customerName: personName(order.shipping_address?.first_name) ?? GREETING,
-      carrier: carrierName(row),
+      carrier: carrierNameOf(row.provider_id, row.data),
       trackingNumber: label?.tracking_number ?? null,
-      trackingUrl: httpUrl(label?.tracking_url),
+      trackingUrl: trackingUrlOf(label?.tracking_url),
       items: row.items.flatMap((item) => {
         const line = item?.line_item_id ? lines.get(item.line_item_id) : undefined
         return item

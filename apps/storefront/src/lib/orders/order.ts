@@ -109,6 +109,33 @@ export async function orderReturns(id: string, token: string | null): Promise<Re
   }
 }
 
+/** A parcel that left, as `/store/orders/:id/shipments` gives it. */
+export interface ShipmentRow {
+  carrier: string | null
+  tracking_number: string | null
+  tracking_url: string | null
+  shipped_at: string | null
+  delivered_at: string | null
+  status: string | null
+  status_at: string | null
+  items: { title: string; quantity: number }[]
+}
+
+export async function orderShipments(id: string, token: string | null): Promise<ShipmentRow[]> {
+  try {
+    const { shipments } = await storeCall<{ shipments: ShipmentRow[] }>(
+      `/store/orders/${encodeURIComponent(id)}/shipments`,
+      token ? { headers: { "x-order-token": token } } : {}
+    )
+    return shipments
+  } catch (error) {
+    if (isStoreApiError(error)) {
+      return []
+    }
+    throw error
+  }
+}
+
 export interface InvoiceRow {
   id: string
   number: string | null

@@ -2,7 +2,13 @@ import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { paymentMethods } from "@/lib/checkout/options"
 import { t } from "@/lib/i18n"
-import { orderContractKinds, orderInvoice, orderReturns, orderWithToken } from "@/lib/orders/order"
+import {
+  orderContractKinds,
+  orderInvoice,
+  orderReturns,
+  orderShipments,
+  orderWithToken,
+} from "@/lib/orders/order"
 import { robotsOnly } from "@/lib/seo/metadata"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { orderView } from "@/lib/views/order"
@@ -38,8 +44,9 @@ export default async function OrderPage({
     }
     throw error
   })
-  const [returns, invoice, contracts] = await Promise.all([
+  const [returns, shipments, invoice, contracts] = await Promise.all([
     orderReturns(order.id, token),
+    orderShipments(order.id, token),
     orderInvoice(order.id, token),
     orderContractKinds(order.id, token),
   ])
@@ -52,6 +59,7 @@ export default async function OrderPage({
         token,
         contracts,
         returns,
+        shipments,
         invoice,
         note,
       })}

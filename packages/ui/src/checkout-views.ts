@@ -183,6 +183,15 @@ export interface OrderPageView {
   returnReasons: OptionView[]
   /** Return requests already made, in words. */
   returns: { kind: string; status: string; date: string; code: string | null }[]
+  /** The parcels that left, in words: carrier, tracking and where they are. */
+  shipments: {
+    carrier: string | null
+    trackingNumber: string | null
+    trackingUrl: string | null
+    /** "Yolda · 2 Kasım 14:05", the carrier's last word or when it left. */
+    status: string
+    items: string
+  }[]
   /** A message already in words after an action (cancelled, request received, refused). */
   notice: string | null
 }

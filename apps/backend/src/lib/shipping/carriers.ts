@@ -29,6 +29,40 @@ export const isCarrierProvider = (providerId: string | null | undefined): boolea
 export const carrierOf = (providerId: string | null | undefined): CarrierName | null =>
   CARRIERS[providerId ?? ""] ?? null
 
+// Geliver names the carrier it bought the label from by code
+const GELIVER_CARRIERS: Readonly<Record<string, string>> = {
+  ARAS: "Aras Kargo",
+  YURTICI: "Yurtiçi Kargo",
+  MNG: "MNG Kargo",
+  PTT: "PTT Kargo",
+  SURAT: "Sürat Kargo",
+  HEPSIJET: "HepsiJet",
+  KOLAYGELSIN: "Kolay Gelsin",
+}
+
+/** The carrier a parcel went with, as a shopper reads it; null for the shop's own parcels. */
+export function carrierNameOf(
+  providerId: string | null | undefined,
+  data: Record<string, unknown> | null | undefined
+): string | null {
+  switch (carrierOf(providerId)) {
+    case "aras":
+      return "Aras Kargo"
+    case "yurtici":
+      return "Yurtiçi Kargo"
+    case "geliver": {
+      const code = data?.["provider_code"]
+      return typeof code === "string" ? (GELIVER_CARRIERS[code.toUpperCase()] ?? code) : null
+    }
+    case null:
+      return null
+  }
+}
+
+/** A tracking link fit to show: http(s), nothing that breaks out of an attribute. */
+export const trackingUrlOf = (value: string | null | undefined): string | null =>
+  value && /^https?:\/\/[^\s"<>]+$/.test(value) ? value : null
+
 /**
  * What our "ship" workflow hands a carrier provider through Medusa's
  * `additional_data` (adr/0031): set by our route only, so Medusa's own

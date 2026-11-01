@@ -18,6 +18,12 @@ import { rateLimit } from "./rate-limit"
  * (adr/0037 §2); staff decide, receive and refund.
  */
 export const RETURN_ROUTES = [
+  // F18: the order page's parcels and their tracking, the same access as its returns
+  {
+    matcher: "/store/orders/:id/shipments",
+    methods: ["GET" as const],
+    middlewares: [optionalCustomer, orderAccess],
+  },
   {
     matcher: "/store/orders/:id/returns",
     methods: ["GET" as const],

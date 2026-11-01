@@ -504,5 +504,15 @@
   "newsletter.sent": "Onay bağlantısını e-postanıza gönderdik. Aboneliğiniz bağlantıyı açınca başlar.",
   "newsletter.email_invalid": "Geçerli bir e-posta adresi yazın.",
   "newsletter.rate_limited": "Kısa sürede çok deneme yapıldı. Lütfen daha sonra tekrar deneyin.",
-  "newsletter.failed": "Abonelik şu an alınamadı. Lütfen biraz sonra tekrar deneyin."
+  "newsletter.failed": "Abonelik şu an alınamadı. Lütfen biraz sonra tekrar deneyin.",
+  "order.shipments": "Kargo",
+  "order.tracking_number": "Takip no: {number}",
+  "order.track": "Kargoyu takip et",
+  "order.parcel_created": "Kargoya teslim edilmeyi bekliyor",
+  "order.parcel_picked_up": "Kargoya verildi",
+  "order.parcel_in_transit": "Yolda",
+  "order.parcel_out_for_delivery": "Dağıtımda",
+  "order.parcel_delivered": "Teslim edildi",
+  "order.parcel_returned": "Gönderene döndü",
+  "order.parcel_failed": "Teslim edilemedi"
 }

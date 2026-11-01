@@ -5,6 +5,7 @@ import type { FakeAras } from "@qticaret/testing"
 import { pollShipments } from "../../src/jobs/shipment-tracking"
 import { ensureLocationCarriers } from "../../src/scripts/bootstrap/location-carriers"
 import { placeOrder } from "../../src/scripts/seed/orders/place"
+import { orderShipments } from "../../src/workflows/shipping/order-shipments"
 import { createAdminUser } from "../helpers/admin"
 import { geliverProduct } from "../helpers/geliver"
 import type { HttpClient } from "../helpers/http"
@@ -131,6 +132,8 @@ medusaIntegrationTestRunner({
         await pollShipments(getContainer(), new Date(clock))
       }
       const [arrived] = await fulfillmentsOf(orderId)
+      // As the shopper's order page reads it
+      const [parcel] = await orderShipments(getContainer(), orderId)
 
       expect(shipped.data).toMatchObject({ carrier: "aras" })
       expect(sent).toMatchObject({ receiverName: "Ayşe Yılmaz", isCod: false })
@@ -145,6 +148,9 @@ medusaIntegrationTestRunner({
       // Handed over when Aras took it, delivered when Aras said so
       expect(arrived?.shipped_at).toBeTruthy()
       expect(arrived?.delivered_at).toBeTruthy()
+      expect(parcel).toMatchObject({ carrier: "Aras Kargo", status: "delivered" })
+      expect(parcel?.shipped_at && parcel.delivered_at).toBeTruthy()
+      expect(JSON.stringify(parcel)).not.toContain("label_file_id")
     })
 
     it("withdraws the order at Aras when its label cannot be had, and packs nothing", async () => {

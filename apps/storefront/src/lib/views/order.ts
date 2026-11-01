@@ -2,7 +2,7 @@ import "server-only"
 import { formatLira } from "@qticaret/ui"
 import type { BankTransferView, OrderPageView, Translate } from "@qticaret/ui"
 import type { PaymentMethods } from "@/lib/checkout/options"
-import type { InvoiceRow, ReturnRequestRow, StoreOrder } from "@/lib/orders/order"
+import type { InvoiceRow, ReturnRequestRow, ShipmentRow, StoreOrder } from "@/lib/orders/order"
 import { providersOf } from "@/lib/orders/order"
 import { addressSummaryOf } from "./checkout"
 
@@ -32,6 +32,7 @@ export interface OrderExtras {
   /** The contracts kept for the order. */
   contracts: string[]
   returns: ReturnRequestRow[]
+  shipments: ShipmentRow[]
   invoice: InvoiceRow | null
   /** `?durum=` after an action. */
   note: string | null
@@ -44,6 +45,36 @@ const NOTES: Record<string, string> = {
   "iptal-olmadi": "order.notice_cancel_refused",
 }
 
+// The carrier's words for where a parcel is; anything else reads as on its way
+const PARCEL_STATES = new Set([
+  "created",
+  "picked_up",
+  "in_transit",
+  "out_for_delivery",
+  "delivered",
+  "returned",
+  "failed",
+])
+
+/** A parcel in words: its carrier's last status and when, or when it left. */
+export function shipmentOf(parcel: ShipmentRow, t: Translate): OrderPageView["shipments"][number] {
+  const state = parcel.delivered_at
+    ? "delivered"
+    : parcel.status && PARCEL_STATES.has(parcel.status)
+      ? parcel.status
+      : "in_transit"
+  const at = parcel.delivered_at ?? parcel.status_at ?? parcel.shipped_at
+  return {
+    carrier: parcel.carrier,
+    trackingNumber: parcel.tracking_number,
+    trackingUrl: parcel.tracking_url,
+    status: [t(`order.parcel_${state}`), at ? WHEN.format(new Date(at)) : null]
+      .filter(Boolean)
+      .join(" · "),
+    items: parcel.items.map((item) => `${item.title} × ${String(item.quantity)}`).join(", "),
+  }
+}
+
 /** An order page's own address, with its key when it was opened with one. */
 export const orderHref = (id: string, token: string | null, rest = "") =>
   `/siparis/${encodeURIComponent(id)}${rest}${token ? `?token=${encodeURIComponent(token)}` : ""}`
@@ -53,7 +84,14 @@ export function orderView(
   methods: PaymentMethods | null,
   fresh: boolean,
   t: Translate,
-  extras: OrderExtras = { token: null, contracts: [], returns: [], invoice: null, note: null }
+  extras: OrderExtras = {
+    token: null,
+    contracts: [],
+    returns: [],
+    shipments: [],
+    invoice: null,
+    note: null,
+  }
 ): OrderPageView {
   const providers = providersOf(order)
   const transfer = methods?.bank_transfer ?? null
@@ -138,6 +176,7 @@ export function orderView(
       date: WHEN.format(new Date(request.created_at)),
       code: request.return_code,
     })),
+    shipments: extras.shipments.map((parcel) => shipmentOf(parcel, t)),
     notice: extras.note && NOTES[extras.note] ? t(NOTES[extras.note] ?? "") : null,
     breadcrumbs: [
       { label: t("home.label"), path: "/" },
