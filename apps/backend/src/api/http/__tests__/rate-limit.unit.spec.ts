@@ -11,6 +11,8 @@ const request = (fields: { path?: string; ip?: string; body?: unknown } = {}) =>
     originalUrl: fields.path ?? "/auth/customer/emailpass",
     method: "POST",
     ip: fields.ip ?? "203.0.113.7",
+    // Every real request has headers: the signed-address check reads them
+    headers: {},
     socket: {},
     body: fields.body ?? {},
     requestId: "req-12345678",
