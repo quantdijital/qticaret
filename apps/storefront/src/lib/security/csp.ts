@@ -7,11 +7,23 @@
  * its websocket); a nonce makes browsers ignore 'unsafe-inline', so dev
  * styles go without one.
  */
+/**
+ * Inline style attributes the server's HTML may carry, by hash
+ * (`'unsafe-hashes'`): Radix's navigation menu wraps its list in
+ * `style="position:relative"`. Any other attribute stays refused; our own
+ * code writes none (docs/19 §6).
+ */
+const RADIX_STYLE_HASHES = [
+  // position:relative
+  "'sha256-KpSV7LuPYEu58+3u9LJr9v5Drm0uIKEv0h3u/+NVNm8='",
+]
+
 export function contentSecurityPolicy(nonce: string, development: boolean): string {
   const directives = [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${development ? " 'unsafe-eval'" : ""}`,
     development ? "style-src 'self' 'unsafe-inline'" : `style-src 'self' 'nonce-${nonce}'`,
+    ...(development ? [] : [`style-src-attr 'unsafe-hashes' ${RADIX_STYLE_HASHES.join(" ")}`]),
     `img-src 'self' data: blob: https:${development ? " http:" : ""}`,
     "font-src 'self'",
     `connect-src 'self'${development ? " ws: http://localhost:*" : ""}`,
