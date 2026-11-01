@@ -25,7 +25,8 @@ export function filterViews(
   state: ListingState,
   facets: ListingAnswer["facets"],
   isBrandPage: boolean,
-  t: Translate
+  t: Translate,
+  swatchOf: (value: string) => string | null = () => null
 ): FilterViews {
   const groups = [
     ...(isBrandPage ? [] : [{ key: BRAND, label: t("listing.brand"), values: facets.brands }]),
@@ -41,6 +42,7 @@ export function filterViews(
         count: value.count,
         selected: value.selected,
         path: hrefOf(pathname, toggled(state, group.key, value.value)),
+        swatch: group.key === BRAND ? null : swatchOf(value.label),
       })),
     }))
 

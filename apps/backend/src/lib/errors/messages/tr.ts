@@ -534,6 +534,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "price_lists.no_currency": "Mağazanın para birimi tanımlı değil.",
   "price_lists.rate": "Oran yüzde 0 ile 100 arasında olmalı.",
   "platform_settings.color_invalid": "Renk #rrggbb biçiminde olmalı, ör. #2f6feb.",
+  "platform_settings.color_duplicate": "Her renk adı bir kez yazılabilir.",
   "platform_settings.email_duplicate": "Aynı e-posta adresi iki kez yazılmış.",
   "platform_settings.email_invalid": "Geçerli bir e-posta adresi girin.",
   "platform_settings.feature_unknown": "Böyle bir özellik yok.",

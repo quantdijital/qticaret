@@ -13,6 +13,7 @@ const empty: StorefrontFrame = {
   primary_color: null,
   hero: null,
   contact_form_path: null,
+  color_swatches: [],
 }
 
 describe("contact details", () => {

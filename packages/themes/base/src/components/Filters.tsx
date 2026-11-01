@@ -1,6 +1,7 @@
 import { Check } from "lucide-react"
 import type { FilterGroupView, PriceFilterView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
+import { Swatch } from "./Swatch"
 
 /** Lists longer than this fold their rest behind "more", without a script. */
 const SHOWN = 6
@@ -28,6 +29,7 @@ function FilterOption({ option }: { option: FilterGroupView["options"][number] }
       >
         {option.selected && <Check className="size-3" strokeWidth={3} />}
       </span>
+      {option.swatch && <Swatch hex={option.swatch} className="size-4" />}
       <span className="flex-1">{option.label}</span>
       <span className="tabular text-xs text-muted-foreground">{option.count}</span>
     </a>

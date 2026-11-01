@@ -41,3 +41,13 @@ export function brandStyle(hex: string | null): string | null {
     `--announcement:${hex};--announcement-foreground:${ink}}`
   )
 }
+
+/** The shop's colour names (F18 D5) as a lookup: a value reads as one, whatever its case. */
+export function swatchLookup(
+  swatches: readonly { label: string; hex: string }[]
+): (value: string) => string | null {
+  const byName = new Map(
+    swatches.map((swatch) => [swatch.label.trim().toLocaleLowerCase("tr"), swatch.hex])
+  )
+  return (value) => byName.get(value.trim().toLocaleLowerCase("tr")) ?? null
+}

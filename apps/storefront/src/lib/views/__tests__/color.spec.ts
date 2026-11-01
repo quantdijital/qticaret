@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest"
-import { brandStyle, readableOn } from "../color"
+import { brandStyle, readableOn, swatchLookup } from "../color"
 
 describe("brand colour", () => {
   it("puts white on a dark colour and ink on a light one", () => {
@@ -14,5 +14,20 @@ describe("brand colour", () => {
     expect(brandStyle(null)).toBeNull()
     expect(brandStyle("red;}body{display:none")).toBeNull()
     expect(brandStyle("#0B5C99")).toBeNull()
+  })
+})
+
+describe("swatchLookup", () => {
+  it("finds a value's colour by its name, whatever its case (Turkish)", () => {
+    const swatchOf = swatchLookup([
+      { label: "Lacivert", hex: "#1e3a8a" },
+      { label: "Işık Gri", hex: "#d1d5db" },
+    ])
+    expect(swatchOf(" LACİVERT ")).toBe("#1e3a8a")
+    expect(swatchOf("lacivert")).toBe("#1e3a8a")
+    expect(swatchOf("IŞIK GRİ")).toBe("#d1d5db")
+    // Turkish casing: a dotless capital I is ı, not i
+    expect(swatchOf("LACIVERT")).toBeNull()
+    expect(swatchOf("Kırmızı")).toBeNull()
   })
 })

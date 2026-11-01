@@ -9,6 +9,7 @@ import { storefrontEnv } from "@/lib/env"
 import { whatsappHref } from "@/lib/views/frame"
 import { productPage, variantIdsOf } from "@/lib/views/product"
 import { questionsView, relatedOf, reviewsView } from "@/lib/views/product-extras"
+import { swatchLookup } from "@/lib/views/color"
 import { theme } from "@/theme"
 
 type Entity = Extract<Resolution, { type: "entity" }>
@@ -49,6 +50,7 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
     requestedVariant: url.searchParams.get("variant"),
     t,
     trustBadges: storefront.trust_badges,
+    swatchOf: swatchLookup(storefront.color_swatches),
   })
   const view = {
     ...base,

@@ -74,6 +74,8 @@ interface ProductPageInput {
   t: Translate
   /** The shop's promises, shown beside the cart form. */
   trustBadges: TrustBadgeView[]
+  /** The shop's colour names: matching option values show as swatches. */
+  swatchOf?: (value: string) => string | null
 }
 
 /** What the product itself says; the page adds its reviews, questions and neighbours. */
@@ -90,13 +92,24 @@ export function productPage({
   requestedVariant,
   t,
   trustBadges,
+  swatchOf,
 }: ProductPageInput): ProductPageBase {
   const variants = product.variants ?? []
-  const options = (product.options ?? []).map((option) => ({
-    id: option.id,
-    title: option.title,
-    values: (option.values ?? []).map((value) => value.value),
-  }))
+  const options = (product.options ?? []).map((option) => {
+    const values = (option.values ?? []).map((value) => value.value)
+    const swatches = Object.fromEntries(
+      values.flatMap((value) => {
+        const hex = swatchOf?.(value)
+        return hex ? [[value, hex]] : []
+      })
+    )
+    return {
+      id: option.id,
+      title: option.title,
+      values,
+      ...(Object.keys(swatches).length > 0 ? { swatches } : {}),
+    }
+  })
   // A variant's option values are the product option's own value records:
   // matched by their id (the Store answer may leave `option_id` out)
   const optionOfValue = new Map(

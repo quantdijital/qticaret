@@ -33,6 +33,8 @@ export interface StorefrontFrame {
   } | null
   /** The shop page that carries the contact form (adr/0047); null: no form. */
   contact_form_path: string | null
+  /** Colour names and their `#rrggbb`: option and filter values that match show as swatches. */
+  color_swatches: { label: string; hex: string }[]
 }
 
 /** `GET /store/storefront`: the frame and the free shipping threshold (F4.5). */

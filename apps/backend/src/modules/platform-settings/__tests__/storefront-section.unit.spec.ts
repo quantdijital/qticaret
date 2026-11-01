@@ -15,7 +15,25 @@ describe("storefront section", () => {
       primary_color: null,
       hero: null,
       contact_form_path: "/iletisim",
+      color_swatches: [],
     })
+  })
+
+  it("takes colour names with their colours, each name once", () => {
+    expect(
+      patch.parse({ color_swatches: [{ label: "Lacivert", hex: "#1E3A8A" }] }).color_swatches
+    ).toEqual([{ label: "Lacivert", hex: "#1e3a8a" }])
+    expect(
+      patch.safeParse({
+        color_swatches: [
+          { label: "Mavi", hex: "#0000ff" },
+          { label: "MAVİ", hex: "#0000fe" },
+        ],
+      }).success
+    ).toBe(false)
+    expect(patch.safeParse({ color_swatches: [{ label: "Kırmızı", hex: "red" }] }).success).toBe(
+      false
+    )
   })
 
   it("takes a shop path for the contact form, or none, and nothing else", () => {
@@ -44,6 +62,7 @@ describe("storefront section", () => {
       trust_badges: [{ icon: "truck", title: "Ücretsiz kargo", text: "1500 TL ve üzeri" }],
       whatsapp_phone: "0532 123 45 67",
       contact_form_path: "/iletisim",
+      color_swatches: [],
       menu: [
         {
           label: "Çakılar",

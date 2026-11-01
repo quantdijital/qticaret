@@ -142,6 +142,8 @@ export interface ProductOptionView {
   id: string
   title: string
   values: string[]
+  /** Value → `#rrggbb`, for the values the shop named a colour for (a swatch). */
+  swatches?: Record<string, string>
 }
 
 export interface ProductPageView {
@@ -234,6 +236,8 @@ export interface FilterOptionView {
   count: number
   selected: boolean
   path: string
+  /** `#rrggbb` when the shop named a colour for this value (a swatch). */
+  swatch?: string | null
 }
 
 export interface FilterGroupView {

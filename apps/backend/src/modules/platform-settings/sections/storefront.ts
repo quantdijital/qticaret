@@ -43,6 +43,11 @@ export interface StorefrontSettings {
   hero: StorefrontHero | null
   /** The shop page that carries the contact form below its text (adr/0047); none: no form. */
   contact_form_path: string | null
+  /**
+   * The shop's colour names and their colours (F18 D5): an option value or
+   * a filter value that reads as one of these names shows as a swatch.
+   */
+  color_swatches: { label: string; hex: string }[]
 }
 
 export interface StorefrontHero {
@@ -146,6 +151,26 @@ export const storefrontSection = defineSection<StorefrontSettings>(
       })
       .strict()
       .nullable(),
+    color_swatches: z
+      .array(
+        z
+          .object({
+            label: text(40),
+            hex: z
+              .string()
+              .trim()
+              .toLowerCase()
+              .regex(HEX_COLOR, { message: "platform_settings.color_invalid" }),
+          })
+          .strict()
+      )
+      .max(100)
+      .refine(
+        (swatches) =>
+          new Set(swatches.map((swatch) => swatch.label.toLocaleLowerCase("tr"))).size ===
+          swatches.length,
+        { message: "platform_settings.color_duplicate" }
+      ),
     contact_form_path: z
       .string()
       .trim()
@@ -165,5 +190,6 @@ export const storefrontSection = defineSection<StorefrontSettings>(
     primary_color: null,
     hero: null,
     contact_form_path: "/iletisim",
+    color_swatches: [],
   }
 )

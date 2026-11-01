@@ -19,6 +19,7 @@ import type { InstallmentWords } from "./InstallmentTable"
 import { QuantityField } from "./QuantityField"
 import { StockAlertForm } from "./StockAlertForm"
 import type { StockAlertWords } from "./StockAlertForm"
+import { Swatch } from "./Swatch"
 
 export interface PurchaseLabels {
   quantity: string
@@ -166,11 +167,17 @@ export function PurchasePanel({
             <div className="flex flex-wrap gap-2">
               {option.values.map((value) => {
                 const id = `option-${option.id}-${value}`
+                const swatch = option.swatches?.[value]
                 return (
                   <label
                     key={value}
                     htmlFor={id}
-                    className="inline-flex h-11 min-w-12 cursor-pointer items-center justify-center rounded-full border bg-card px-5 text-sm font-medium transition-colors hover:border-foreground has-[:checked]:border-foreground has-[:checked]:bg-foreground has-[:checked]:text-background has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ring"
+                    title={swatch ? value : undefined}
+                    className={
+                      swatch
+                        ? "inline-flex size-11 cursor-pointer items-center justify-center rounded-full border-2 border-transparent p-0.5 transition-colors hover:border-foreground/40 has-[:checked]:border-foreground has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ring"
+                        : "inline-flex h-11 min-w-12 cursor-pointer items-center justify-center rounded-full border bg-card px-5 text-sm font-medium transition-colors hover:border-foreground has-[:checked]:border-foreground has-[:checked]:bg-foreground has-[:checked]:text-background has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ring"
+                    }
                   >
                     <input
                       id={id}
@@ -183,7 +190,14 @@ export function PurchasePanel({
                       }}
                       className="sr-only"
                     />
-                    {value}
+                    {swatch ? (
+                      <>
+                        <Swatch hex={swatch} className="size-full" />
+                        <span className="sr-only">{value}</span>
+                      </>
+                    ) : (
+                      value
+                    )}
                   </label>
                 )
               })}

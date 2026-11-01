@@ -12,8 +12,10 @@ import {
   listingPage,
   pathsOf,
   priceDisplays,
+  storefrontSettings,
 } from "@/lib/store-api/requests"
 import { childrenOf } from "@/lib/views/categories"
+import { swatchLookup } from "@/lib/views/color"
 import { filterViews } from "@/lib/views/facets"
 import {
   hrefOf,
@@ -166,7 +168,15 @@ export async function ListingContent({
       current: state.sort === "fiyat-azalan",
     },
   ]
-  const facets = filterViews(url.pathname, state, answer.facets, type === "brand", t)
+  const { storefront } = await storefrontSettings()
+  const facets = filterViews(
+    url.pathname,
+    state,
+    answer.facets,
+    type === "brand",
+    t,
+    swatchLookup(storefront.color_swatches)
+  )
   return (
     <>
       <JsonLd blocks={jsonLd} />

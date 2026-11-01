@@ -534,6 +534,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "price_lists.no_currency": "The shop has no currency set.",
   "price_lists.rate": "The rate must be between 0 and 100 percent.",
   "platform_settings.color_invalid": "The colour must be in #rrggbb form, e.g. #2f6feb.",
+  "platform_settings.color_duplicate": "Each colour name can be listed once.",
   "platform_settings.email_duplicate": "The same e-mail address is listed twice.",
   "platform_settings.email_invalid": "Enter a valid email address.",
   "platform_settings.feature_unknown": "There is no such feature.",
