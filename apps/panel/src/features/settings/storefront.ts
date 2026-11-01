@@ -96,6 +96,17 @@ export const lineSchema = (max: number) =>
 export const optionalLineSchema = (max: number) =>
   z.string().trim().max(max, `${E}.tooLong`).refine(isCleanText, `${E}.textInvalid`)
 
+/**
+ * Where the contact form shows (adr/0047): a shop page other than the home
+ * page, lower-cased as the server stores it; turned off, the path is not read.
+ */
+export const contactFormSchema = z
+  .object({ enabled: z.boolean(), path: z.string().trim().toLowerCase() })
+  .refine(
+    ({ enabled, path }) => !enabled || (isCleanText(path) && isShopPath(path) && path !== "/"),
+    { path: ["path"], message: `${E}.pathInvalid` }
+  )
+
 /** `#rrggbb` as the server keeps it. */
 export const isHexColor = (value: string): boolean => HEX_COLOR.test(value)
 

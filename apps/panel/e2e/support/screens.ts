@@ -10,6 +10,7 @@ export const SECTIONS = [
   "/reviews",
   "/reviews/questions",
   "/customers/groups",
+  "/customers/contact-messages",
   "/promotions",
   "/promotions/price-lists",
   "/promotions/gift-cards",

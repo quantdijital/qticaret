@@ -107,7 +107,7 @@ export interface ConsentState {
   address: boolean
   consent: {
     status: "granted" | "revoked"
-    source: "checkout" | "account" | "panel" | "import" | "iys" | "unsubscribe"
+    source: "checkout" | "account" | "panel" | "import" | "iys" | "unsubscribe" | "newsletter"
     changed_at: string
   } | null
 }

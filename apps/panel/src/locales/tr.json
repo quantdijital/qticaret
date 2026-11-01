@@ -465,11 +465,20 @@
         "phone": "WhatsApp numarası",
         "hint": "Türkiye cep numarası; +90 eklemeniz gerekmez. Boş bırakırsanız WhatsApp düğmesi görünmez."
       },
+      "contactForm": {
+        "title": "İletişim formu",
+        "description": "Formdan gelen mesajlar Müşteriler > İletişim mesajları'nda okunur ve yanıtlanır.",
+        "enabled": "Vitrinde iletişim formu göster",
+        "hint": "İletişim formu bu sayfanın metninin altında görünür. Kapatırsanız vitrinde form çıkmaz.",
+        "path": "Formun gösterildiği sayfa",
+        "pathHint": "Vitrindeki bir içerik sayfasının adresi, örneğin /iletisim."
+      },
       "errors": {
         "required": "Bu alanı doldurun.",
         "tooLong": "En çok {{max}} karakter yazın.",
         "textInvalid": "Metin, görünmeyen kontrol karakterleri içeremez.",
         "hrefInvalid": "Adres / ile başlayan bir mağaza sayfası ya da https:// ile başlayan bir site olmalı.",
+        "pathInvalid": "Sayfa / ile başlayan bir mağaza sayfası olmalı (/iletisim gibi); ana sayfa ve boşluk olamaz.",
         "phoneInvalid": "Geçerli bir Türkiye telefon numarası girin.",
         "colorInvalid": "Renk, # ile başlayan 6 haneli bir kod olmalı (#0b5c99 gibi)."
       }
@@ -1487,6 +1496,10 @@
           "alert_seo_digest": {
             "title": "Haftalık SEO özeti",
             "hint": "Her pazartesi sabahı ürünlerin SEO puanı ve önce bakılacaklar."
+          },
+          "alert_contact_message": {
+            "title": "İletişim mesajı",
+            "hint": "Vitrindeki iletişim formundan bir mesaj geldiğinde. E-postada yalnızca gönderenin adı ve konu yer alır; mesaj panelde okunur."
           }
         }
       },
@@ -1537,6 +1550,7 @@
             "bank_transfer": "Ekip: havale bekleyen sipariş",
             "low_stock": "Ekip: stok azaldı",
             "seo_digest": "Ekip: haftalık SEO özeti",
+            "contact_message": "Ekip: iletişim mesajı",
             "invite": "Ekip: panel daveti",
             "password_reset": "Ekip: şifre yenileme"
           },
@@ -3718,7 +3732,8 @@
         "panel": "panelden",
         "import": "aktarımla",
         "iys": "İYS'den",
-        "unsubscribe": "abonelikten çıkışla"
+        "unsubscribe": "abonelikten çıkışla",
+        "newsletter": "e-bülten kutusundan"
       },
       "saved": "İleti izni kaydedildi.",
       "evidenceTitle": "{{channel}} izni nasıl verildi?",
@@ -3732,6 +3747,60 @@
     "sections": "Müşteri ekranları",
     "sectionCustomers": "Müşteriler",
     "sectionGroups": "Gruplar ve segmentler",
+    "sectionContact": "İletişim mesajları",
+    "contactMessages": {
+      "title": "İletişim mesajları",
+      "description": "Vitrindeki iletişim formundan yazılanlar. Yanıtı kendi e-posta programınızdan verin, sonra mesajı yanıtlandı olarak işaretleyin.",
+      "views": "Mesaj görünümleri",
+      "tabs": {
+        "new": "Bekleyen",
+        "handled": "Yanıtlanan"
+      },
+      "status": {
+        "new": "Bekliyor",
+        "handled": "Yanıtlandı"
+      },
+      "columns": {
+        "date": "Tarih",
+        "sender": "Gönderen",
+        "subject": "Konu",
+        "order": "Sipariş",
+        "message": "Mesaj"
+      },
+      "subjects": {
+        "order": "Sipariş",
+        "product": "Ürün",
+        "return": "İade ve değişim",
+        "payment": "Ödeme",
+        "other": "Diğer"
+      },
+      "empty": {
+        "new": "Bekleyen mesaj yok. Vitrindeki iletişim formundan yazılanlar burada görünür.",
+        "handled": "Yanıtlanan mesaj yok."
+      },
+      "detail": {
+        "title": "İletişim mesajı",
+        "name": "Ad soyad",
+        "email": "E-posta",
+        "phone": "Telefon",
+        "order": "Sipariş",
+        "customer": "Müşteri",
+        "openCustomer": "Müşteri kaydını aç",
+        "status": "Durum",
+        "message": "Mesaj"
+      },
+      "reply": "Mesajınız hakkında: {{subject}}",
+      "replyOrder": "Mesajınız hakkında: {{subject}} (sipariş #{{order}})",
+      "markHandled": "Yanıtlandı olarak işaretle",
+      "markNew": "Bekleyene geri al",
+      "markedHandled": "Mesaj yanıtlandı olarak işaretlendi.",
+      "markedNew": "Mesaj bekleyenlere geri alındı.",
+      "delete": "Sil",
+      "deleteTitle": "Mesaj silinsin mi?",
+      "deleteDescription": "{{name}} adlı kişinin mesajı kalıcı olarak silinir. Bu işlem geri alınamaz.",
+      "deleteConfirm": "Mesajı kalıcı olarak sil",
+      "deleted": "Mesaj silindi."
+    },
     "groupsPage": {
       "title": "Gruplar ve segmentler",
       "description": "Kampanyaları ve fiyat listelerini belirli müşterilere açmak için grupları kullanın. Segmentler kurallarla her gece kendiliğinden dolar."
@@ -5339,6 +5408,10 @@
     "migrationNotFound": {
       "title": "Kesimden sonra {{count}} adres 404 verdi",
       "description": "Taşıma > Eski adreslerden 301 ya da 410 kararı verin."
+    },
+    "contactMessage": {
+      "title": "Yeni iletişim mesajı: {{subject}}",
+      "description": "Vitrindeki iletişim formundan geldi; Müşteriler > İletişim mesajları'nda okuyun."
     },
     "fraudReview": {
       "title": "#{{number}} incelemede (puan {{score}})",

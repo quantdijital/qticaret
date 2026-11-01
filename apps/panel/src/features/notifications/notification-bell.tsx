@@ -4,6 +4,7 @@ import {
   Bell,
   Calculator,
   FileWarning,
+  Mail,
   PackageMinus,
   Scale,
   ShieldAlert,
@@ -14,6 +15,7 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { isContactSubject } from "@/features/customers/api/contact-messages"
 import { markSeen, notificationsQuery, seenAt } from "@/features/notifications/api"
 import type { AdminNotification } from "@/features/notifications/api"
 import { isConnectable } from "@/features/settings/payment-methods"
@@ -111,6 +113,19 @@ function useAlertText(data: Record<string, unknown>) {
       Icon: Unlink,
       tone: "bg-warning-soft text-warning-text",
       link: { to: "/settings/migration" as const, search: {}, params: {} },
+    }
+  }
+  if (data["kind"] === "contact_message") {
+    // The server's own wording carries the sender's name in Turkish; the panel words it from the subject
+    const subject = isContactSubject(data["subject"]) ? data["subject"] : "other"
+    return {
+      title: t("notifications.contactMessage.title", {
+        subject: t(`customers.contactMessages.subjects.${subject}`),
+      }),
+      description: t("notifications.contactMessage.description"),
+      Icon: Mail,
+      tone: "bg-info-soft text-info-text",
+      link: { to: "/customers/contact-messages" as const, search: {}, params: {} },
     }
   }
   if (data["kind"] === "einvoice_stopped") {

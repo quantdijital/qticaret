@@ -16,6 +16,7 @@ const values = {
   alert_bank_transfer: true,
   alert_low_stock: true,
   alert_seo_digest: true,
+  alert_contact_message: true,
 }
 
 function renderCard() {
@@ -38,6 +39,7 @@ describe("StaffAlertsCard", () => {
     const box = await screen.findByLabelText("Uyarı alacak e-postalar")
     await userEvent.type(box, "\ndepo@magaza.example, ")
     await userEvent.click(screen.getByRole("switch", { name: "Haftalık SEO özeti" }))
+    await userEvent.click(screen.getByRole("switch", { name: "İletişim mesajı" }))
     await userEvent.click(screen.getByRole("button", { name: "Kaydet" }))
 
     await waitFor(() => {
@@ -48,6 +50,7 @@ describe("StaffAlertsCard", () => {
           body: {
             staff_emails: ["sahip@magaza.example", "depo@magaza.example"],
             alert_seo_digest: false,
+            alert_contact_message: false,
           },
         })
       )

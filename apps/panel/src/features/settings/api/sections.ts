@@ -138,6 +138,8 @@ export interface NotificationSettings {
   alert_bank_transfer: boolean
   alert_low_stock: boolean
   alert_seo_digest: boolean
+  /** A message from the storefront's contact form (adr/0047); on by default. */
+  alert_contact_message: boolean
   /** Texts the shop sends a day at most (F9.8). */
   sms_daily_limit: number
   /** E-mails the shop sends a day at most (F10 M9): a guard on bounces from made-up addresses. */
@@ -193,6 +195,8 @@ export interface StorefrontSettings {
   primary_color: string | null
   /** The home page's opening; none: the shop's name and its first two categories. */
   hero: StorefrontHero | null
+  /** The shop page that carries the contact form below its text (adr/0047); none: no form. */
+  contact_form_path: string | null
 }
 
 export interface StorefrontHero {

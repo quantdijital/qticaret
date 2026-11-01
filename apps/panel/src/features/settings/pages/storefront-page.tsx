@@ -6,6 +6,7 @@ import { sectionQuery } from "@/features/settings/api/sections"
 import type { StorefrontSettings } from "@/features/settings/api/sections"
 import { TrustBadgesCard } from "@/features/settings/components/storefront-badges-card"
 import { ColorCard } from "@/features/settings/components/storefront-color-card"
+import { ContactFormCard } from "@/features/settings/components/storefront-contact-card"
 import { FooterGroupsCard } from "@/features/settings/components/storefront-footer-card"
 import {
   AnnouncementsCard,
@@ -20,8 +21,8 @@ import { errorText } from "@/lib/errors"
  * Settings > Storefront (F18, docs/19 §4): what the shop writes around every
  * page of its storefront: first its main colour and the home page's opening,
  * then top to bottom the announcement bar, the links above the menu, the
- * menu, the trust badges, the footer's columns and the WhatsApp button. Each
- * card saves its own part.
+ * menu, the trust badges, the footer's columns, the WhatsApp button and the
+ * page the contact form shows on. Each card saves its own part.
  */
 export function StorefrontPage() {
   const { t } = useTranslation()
@@ -46,6 +47,7 @@ export function StorefrontPage() {
           <TrustBadgesCard saved={query.data.values} />
           <FooterGroupsCard saved={query.data.values} />
           <WhatsappCard saved={query.data.values} />
+          <ContactFormCard saved={query.data.values} />
         </>
       )}
     </div>

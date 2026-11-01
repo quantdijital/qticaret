@@ -465,11 +465,20 @@
         "phone": "WhatsApp number",
         "hint": "A Turkish mobile number; no need to add +90. Leave it empty and no WhatsApp button shows."
       },
+      "contactForm": {
+        "title": "Contact form",
+        "description": "Messages from the form are read and answered under Customers > Contact messages.",
+        "enabled": "Show the contact form on the storefront",
+        "hint": "The contact form shows below this page's text. Turn it off and the storefront shows no form.",
+        "path": "Page the form shows on",
+        "pathHint": "The address of a content page on the storefront, for example /iletisim."
+      },
       "errors": {
         "required": "Fill in this field.",
         "tooLong": "Write {{max}} characters at most.",
         "textInvalid": "The text cannot contain invisible control characters.",
         "hrefInvalid": "The address must be a shop page starting with / or a site starting with https://.",
+        "pathInvalid": "The page must be a shop page starting with / (like /iletisim); not the home page, and no spaces.",
         "phoneInvalid": "Enter a valid Turkish phone number.",
         "colorInvalid": "The colour must be a 6-digit code starting with # (like #0b5c99)."
       }
@@ -1487,6 +1496,10 @@
           "alert_seo_digest": {
             "title": "Weekly SEO digest",
             "hint": "Every Monday morning: products' SEO scores and what needs work first."
+          },
+          "alert_contact_message": {
+            "title": "Contact message",
+            "hint": "When a message comes from the storefront's contact form. The e-mail holds only the sender's name and the subject; the message is read in the panel."
           }
         }
       },
@@ -1537,6 +1550,7 @@
             "bank_transfer": "Staff: bank transfer awaited",
             "low_stock": "Staff: low stock",
             "seo_digest": "Staff: weekly SEO digest",
+            "contact_message": "Staff: contact message",
             "invite": "Team: panel invitation",
             "password_reset": "Team: password reset"
           },
@@ -3718,7 +3732,8 @@
         "panel": "in the panel",
         "import": "by import",
         "iys": "from İYS",
-        "unsubscribe": "by unsubscribing"
+        "unsubscribe": "by unsubscribing",
+        "newsletter": "from the newsletter box"
       },
       "saved": "Consent saved.",
       "evidenceTitle": "How was the {{channel}} consent given?",
@@ -3732,6 +3747,60 @@
     "sections": "Customer screens",
     "sectionCustomers": "Customers",
     "sectionGroups": "Groups and segments",
+    "sectionContact": "Contact messages",
+    "contactMessages": {
+      "title": "Contact messages",
+      "description": "What shoppers wrote from the storefront's contact form. Reply from your own mail program, then mark the message as answered.",
+      "views": "Message views",
+      "tabs": {
+        "new": "Waiting",
+        "handled": "Answered"
+      },
+      "status": {
+        "new": "Waiting",
+        "handled": "Answered"
+      },
+      "columns": {
+        "date": "Date",
+        "sender": "From",
+        "subject": "Subject",
+        "order": "Order",
+        "message": "Message"
+      },
+      "subjects": {
+        "order": "Order",
+        "product": "Product",
+        "return": "Returns and exchanges",
+        "payment": "Payment",
+        "other": "Other"
+      },
+      "empty": {
+        "new": "No messages waiting. What shoppers write from the storefront's contact form shows here.",
+        "handled": "No answered messages."
+      },
+      "detail": {
+        "title": "Contact message",
+        "name": "Name",
+        "email": "E-mail",
+        "phone": "Phone",
+        "order": "Order",
+        "customer": "Customer",
+        "openCustomer": "Open the customer's record",
+        "status": "Status",
+        "message": "Message"
+      },
+      "reply": "About your message: {{subject}}",
+      "replyOrder": "About your message: {{subject}} (order #{{order}})",
+      "markHandled": "Mark as answered",
+      "markNew": "Move back to waiting",
+      "markedHandled": "Message marked as answered.",
+      "markedNew": "Message moved back to waiting.",
+      "delete": "Delete",
+      "deleteTitle": "Delete this message?",
+      "deleteDescription": "The message from {{name}} is deleted for good. This cannot be undone.",
+      "deleteConfirm": "Delete the message for good",
+      "deleted": "Message deleted."
+    },
     "groupsPage": {
       "title": "Groups and segments",
       "description": "Use groups to open promotions and price lists to some customers. Segments fill themselves by rules every night."
@@ -5339,6 +5408,10 @@
     "migrationNotFound": {
       "title": "{{count}} addresses answered 404 since cutover",
       "description": "Decide a 301 or 410 in Migration > Old addresses."
+    },
+    "contactMessage": {
+      "title": "New contact message: {{subject}}",
+      "description": "From the storefront's contact form; read it under Customers > Contact messages."
     },
     "fraudReview": {
       "title": "#{{number}} held for review (score {{score}})",

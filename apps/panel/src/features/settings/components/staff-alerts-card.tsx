@@ -18,6 +18,7 @@ const ALERTS = [
   "alert_bank_transfer",
   "alert_low_stock",
   "alert_seo_digest",
+  "alert_contact_message",
 ] as const
 type Alert = (typeof ALERTS)[number]
 
