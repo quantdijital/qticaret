@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
-import { paymentFrameOrigins, storefrontEnv } from "./lib/env"
+import { paymentFrameOrigins, paymentRedirectOrigins, storefrontEnv } from "./lib/env"
 import { t } from "./lib/i18n"
 import { contentSecurityPolicy, newNonce } from "./lib/security/csp"
 import { backendFile, isStorefrontIndex, isSystemPath, normalizedPath } from "./lib/seo/paths"
@@ -58,6 +58,7 @@ export async function proxy(request: NextRequest): Promise<Response> {
   const csp = contentSecurityPolicy(nonce, env.NODE_ENV === "development", {
     frameOrigins: paymentFrameOrigins(env),
     framedBySelf: isPaymentReturn(pathname),
+    formOrigins: pathname.startsWith("/odeme") ? paymentRedirectOrigins(env) : [],
   })
   const isPageView = request.method === "GET" || request.method === "HEAD"
   if (isPageView && pathname !== "/" && !isSystemPath(pathname) && !isStorefrontIndex(pathname)) {

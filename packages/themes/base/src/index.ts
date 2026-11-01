@@ -4,6 +4,7 @@ import { AuthPage } from "./AuthPage"
 import { BlogIndexPage } from "./BlogIndexPage"
 import { CartPage } from "./CartPage"
 import { CheckoutPage } from "./CheckoutPage"
+import { ConfirmPage } from "./ConfirmPage"
 import { CheckoutResultPage } from "./CheckoutResultPage"
 import { ContentPage } from "./ContentPage"
 import { HomePage } from "./HomePage"
@@ -31,4 +32,5 @@ export const baseTheme: StorefrontTheme = {
   AuthPage,
   AccountPage,
   NotFoundPage,
+  ConfirmPage,
 }

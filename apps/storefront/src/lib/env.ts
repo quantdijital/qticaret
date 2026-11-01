@@ -7,6 +7,16 @@ import { z } from "zod"
  */
 const origin = z.url({ protocol: /^https?$/ }).transform((value) => new URL(value).origin)
 
+const origins = z.string().transform((value, ctx) => {
+  const listed = value.split(/[\s,]+/).filter((each) => each !== "")
+  const parsed = listed.map((each) => URL.parse(each))
+  if (parsed.some((url) => url === null || !/^https?:$/.test(url.protocol))) {
+    ctx.addIssue({ code: "custom", message: "must be http(s) origins" })
+    return z.NEVER
+  }
+  return parsed.flatMap((url) => (url ? [url.origin] : []))
+})
+
 const schema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).optional(),
   MEDUSA_BACKEND_URL: origin,
@@ -21,18 +31,10 @@ const schema = z.object({
   STOREFRONT_TRUSTED_PROXY_HOPS: z.coerce.number().int().min(0).max(5).optional(),
   // D7: where a card provider's hosted form may be framed from (CSP frame-src),
   // space- or comma-separated origins; PayTR's when unset
-  PAYMENT_FRAME_ORIGINS: z
-    .string()
-    .transform((value, ctx) => {
-      const origins = value.split(/[\s,]+/).filter((each) => each !== "")
-      const parsed = origins.map((each) => URL.parse(each))
-      if (parsed.some((url) => url === null || !/^https?:$/.test(url.protocol))) {
-        ctx.addIssue({ code: "custom", message: "must be http(s) origins" })
-        return z.NEVER
-      }
-      return parsed.flatMap((url) => (url ? [url.origin] : []))
-    })
-    .optional(),
+  PAYMENT_FRAME_ORIGINS: origins.optional(),
+  // D7: a card provider's own payment page the shopper is sent to (iyzico);
+  // iyzico's live and sandbox pages when unset
+  PAYMENT_REDIRECT_ORIGINS: origins.optional(),
 })
 
 export type StorefrontEnv = z.infer<typeof schema>
@@ -59,9 +61,14 @@ export function parseStorefrontEnv(
   const env = result.data
   // Deployed, the key and the signing secret are not optional
   if (env.NODE_ENV === "production") {
-    const missing = (["STOREFRONT_PUBLISHABLE_KEY", "STOREFRONT_IP_SECRET"] as const).filter(
-      (key) => env[key] === undefined
-    )
+    // The proxies in front must be stated: a wrong count signs an address the shopper chose
+    const missing = (
+      [
+        "STOREFRONT_PUBLISHABLE_KEY",
+        "STOREFRONT_IP_SECRET",
+        "STOREFRONT_TRUSTED_PROXY_HOPS",
+      ] as const
+    ).filter((key) => env[key] === undefined)
     if (missing.length > 0) {
       throw new StorefrontEnvError(
         `Invalid storefront configuration:\n${missing.map((key) => `  - ${key}: is missing`).join("\n")}`
@@ -81,6 +88,15 @@ export function paymentFrameOrigins(env: StorefrontEnv): string[] {
     return env.PAYMENT_FRAME_ORIGINS
   }
   return env.NODE_ENV === "development" ? [PAYTR, FAKE_PAYTR] : [PAYTR]
+}
+
+const IYZICO = ["https://cpp.iyzipay.com", "https://sandbox-cpp.iyzipay.com"]
+
+/** The card providers' own pages a shopper may be sent to: the setting, else iyzico's. */
+export function paymentRedirectOrigins(env: StorefrontEnv): string[] {
+  return env.PAYMENT_REDIRECT_ORIGINS && env.PAYMENT_REDIRECT_ORIGINS.length > 0
+    ? env.PAYMENT_REDIRECT_ORIGINS
+    : IYZICO
 }
 
 let cached: StorefrontEnv | undefined

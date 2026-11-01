@@ -22,7 +22,10 @@ describe("visitorIp", () => {
     expect(visitorIp(headers({ "x-forwarded-for": "::ffff:203.0.113.9" }))).toBe("203.0.113.9")
     expect(visitorIp(headers({ "x-forwarded-for": "unknown" }))).toBeNull()
     expect(visitorIp(headers({}))).toBeNull()
-    expect(visitorIp(headers({ "x-real-ip": "2001:db8::7" }))).toBe("2001:db8::7")
+    // A header the client writes itself is never the address
+    expect(visitorIp(headers({ "x-real-ip": "2001:db8::7" }))).toBeNull()
+    // A chain shorter than the proxies stated: no address rather than the client's word
+    expect(visitorIp(headers({ "x-forwarded-for": "6.6.6.6" }), 1)).toBeNull()
   })
 })
 

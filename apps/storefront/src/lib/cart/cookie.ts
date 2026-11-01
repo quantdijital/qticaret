@@ -1,6 +1,7 @@
 import "server-only"
 import { cookies } from "next/headers"
 import { storefrontEnv } from "../env"
+import { clearOwnCookie } from "../security/cookies"
 
 const MAX_AGE = 30 * 24 * 60 * 60
 
@@ -30,5 +31,5 @@ export async function rememberCart(cartId: string): Promise<void> {
 }
 
 export async function forgetCart(): Promise<void> {
-  ;(await cookies()).delete(cookieName())
+  await clearOwnCookie(cookieName())
 }

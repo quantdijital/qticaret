@@ -338,3 +338,14 @@ export interface FreeShippingView {
   percent: number
   reached: boolean
 }
+
+/** A page that asks before it acts (a link from an e-mail): the words, the form's hidden fields. */
+export interface ConfirmPageView {
+  title: string
+  text: string
+  /** A warning above the button, when acting replaces something. */
+  warning: string | null
+  fields: { name: string; value: string }[]
+  submit: string
+  back: LinkView
+}

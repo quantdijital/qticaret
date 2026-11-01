@@ -12,6 +12,7 @@ import type {
 import type {
   BlogIndexPageView,
   CartPageView,
+  ConfirmPageView,
   ContentPageView,
   HomePageView,
   ListingPageView,
@@ -105,4 +106,6 @@ export interface StorefrontTheme {
   /** The signed-in customer's pages: overview, orders, details (D8). */
   AccountPage: ComponentType<Page<AccountPageView> & { actions: AccountActions }>
   NotFoundPage: ComponentType<{ t: Translate }>
+  /** Asks before acting on a link (D6 cart reminder); the action is a plain form. */
+  ConfirmPage: ComponentType<Page<ConfirmPageView> & { action: (form: FormData) => Promise<void> }>
 }

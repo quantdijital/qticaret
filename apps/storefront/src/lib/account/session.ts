@@ -1,6 +1,7 @@
 import "server-only"
 import { cookies } from "next/headers"
 import { storefrontEnv } from "../env"
+import { clearOwnCookie } from "../security/cookies"
 
 /**
  * The signed-in customer's key (D8, adr/0004): the backend's bearer token,
@@ -39,13 +40,13 @@ async function write(name: string, token: string, maxAge: number): Promise<void>
 export const sessionToken = () => read(SESSION())
 export const startSession = (token: string) => write(SESSION(), token, DAY)
 export async function endSession(): Promise<void> {
-  ;(await cookies()).delete(SESSION())
+  await clearOwnCookie(SESSION())
 }
 
 export const pendingToken = () => read(PENDING())
 export const rememberPending = (token: string) => write(PENDING(), token, QUARTER)
 export async function forgetPending(): Promise<void> {
-  ;(await cookies()).delete(PENDING())
+  await clearOwnCookie(PENDING())
 }
 
 /** The token's claims, unverified: only to tell an account-less token (actor not yet set). */
@@ -80,10 +81,9 @@ export async function rememberInvite(key: string): Promise<void> {
 
 /** The invite's key, once: read and forgotten. */
 export async function takeInvite(): Promise<string | null> {
-  const jar = await cookies()
-  const value = jar.get(INVITE())?.value ?? null
+  const value = (await cookies()).get(INVITE())?.value ?? null
   if (value !== null) {
-    jar.delete(INVITE())
+    await clearOwnCookie(INVITE())
   }
   return value !== null && INVITE_KEY.test(value) ? value : null
 }

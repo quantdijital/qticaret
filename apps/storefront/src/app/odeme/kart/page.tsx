@@ -15,7 +15,8 @@ export const metadata: Metadata = robotsOnly("noindex,nofollow", t("checkout.car
  * without one, or once the cart is ordered, back to checkout.
  */
 export default async function CardPage() {
-  const [frameUrl, cart] = await Promise.all([paymentFrame(), checkoutCart()])
+  const cart = await checkoutCart()
+  const frameUrl = cart ? await paymentFrame(cart.id) : null
   if (!frameUrl || !cart) {
     redirect("/odeme")
   }

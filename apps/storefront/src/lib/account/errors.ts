@@ -35,10 +35,33 @@ export function accountError(error: unknown, fallback: string): string {
   return fallback
 }
 
-/** A path on this shop to go to after signing in; anything else (another host, `//x`) is dropped. */
+const BASE = "https://shop.invalid"
+
+// Control characters, space, DEL and the backslash: a browser strips or turns them on the way
+function hasUnsafeCharacter(value: string): boolean {
+  for (let index = 0; index < value.length; index++) {
+    const code = value.charCodeAt(index)
+    if (code <= 0x20 || code === 0x7f || code === 0x5c) {
+      return true
+    }
+  }
+  return false
+}
+
+/**
+ * A path on this shop to go to after signing in; anything else is
+ * dropped: another host, `//x`, a backslash, or any control or space
+ * character a browser would strip on the way (`/\t/evil` is `//evil`).
+ * What comes back is the path the URL parser itself made of it.
+ */
 export function safeNext(next: string | null | undefined): string | null {
-  if (!next || !next.startsWith("/") || next.startsWith("//") || next.includes("\\")) {
+  if (!next || next.length > 300 || !next.startsWith("/") || hasUnsafeCharacter(next)) {
     return null
   }
-  return next.length <= 300 ? next : null
+  const url = URL.parse(next, BASE)
+  if (url?.origin !== BASE) {
+    return null
+  }
+  const path = `${url.pathname}${url.search}`
+  return path.startsWith("//") ? null : path
 }

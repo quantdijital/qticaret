@@ -28,7 +28,9 @@ export function visitorIp(headers: Headers, trustedHops = 0): string | null {
     .split(",")
     .map((entry) => entry.trim())
     .filter((entry) => entry !== "")
-  const candidate = forwarded[forwarded.length - 1 - trustedHops] ?? headers.get("x-real-ip")
+  // Only X-Forwarded-For, read from the right: a header the client wrote
+  // (X-Real-IP, a short chain) is no address of theirs we can trust
+  const candidate = forwarded[forwarded.length - 1 - trustedHops]
   const ip = candidate?.replace(/^::ffff:(?=\d+\.\d+\.\d+\.\d+$)/, "") ?? null
   return ip !== null && isIP(ip) !== 0 ? ip : null
 }

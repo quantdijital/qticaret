@@ -10,6 +10,7 @@ import { addressFromForm, addressPayload } from "@/lib/checkout/address-form"
 import { checkoutCart } from "@/lib/checkout/cart"
 import { paymentMethods } from "@/lib/checkout/options"
 import { rememberPaymentFrame } from "@/lib/checkout/payment-cookie"
+import { paymentRedirectOrigins, storefrontEnv } from "@/lib/env"
 import { acceptTerms, checkoutError, PlaceOrder } from "@/lib/checkout/place-order"
 import { challengeOf, completeCart, orderAccess, orderPath, startPayment } from "@/lib/checkout/pay"
 import { isStoreApiError } from "@/lib/store-api/errors"
@@ -126,14 +127,15 @@ async function nextStep(
     throw new Error("checkout: the provider gave no form")
   }
   if (providerId === "pp_paytr_paytr") {
-    if (!(await rememberPaymentFrame(formUrl))) {
+    if (!(await rememberPaymentFrame(cartId, formUrl))) {
       throw new Error("checkout: the card form's origin is not allowed")
     }
     return "/odeme/kart"
   }
+  // Only a provider's own page (iyzico's): the allow-list, never any https address
   const url = URL.parse(formUrl)
-  if (url?.protocol !== "https:") {
-    throw new Error("checkout: the provider's page is not https")
+  if (!url || !paymentRedirectOrigins(storefrontEnv()).includes(url.origin)) {
+    throw new Error("checkout: the provider's page is not allowed")
   }
   return url.href
 }

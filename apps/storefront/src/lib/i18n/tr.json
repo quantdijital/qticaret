@@ -429,5 +429,9 @@
   "wishlist.full": "Favori listeniz dolu; önce birkaç ürünü çıkarın.",
   "error.title": "Sayfa şu an açılamadı",
   "error.body": "Kısa bir aksaklık oldu. Birkaç saniye sonra yeniden deneyin.",
-  "error.retry": "Yeniden dene"
+  "error.retry": "Yeniden dene",
+  "cart.restore_title": "Sepetinize dönün",
+  "cart.restore_text": "Kaydettiğimiz sepetinizi açmak için aşağıdaki düğmeye basın.",
+  "cart.restore_warning": "Şu anki sepetinizdeki ürünler bu sepetle değişecek.",
+  "cart.restore_submit": "Sepetimi aç"
 }

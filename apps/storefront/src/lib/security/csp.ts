@@ -19,6 +19,8 @@ const RADIX_STYLE_HASHES = [
 ]
 
 export interface FrameRules {
+  /** Card providers' own pages a form may lead to (a checkout without script follows a 303 there). */
+  formOrigins?: readonly string[]
   /** Card providers' hosted forms the checkout frames (D7); nothing else is framed. */
   frameOrigins?: readonly string[]
   /**
@@ -31,7 +33,7 @@ export interface FrameRules {
 export function contentSecurityPolicy(
   nonce: string,
   development: boolean,
-  { frameOrigins = [], framedBySelf = false }: FrameRules = {}
+  { frameOrigins = [], framedBySelf = false, formOrigins = [] }: FrameRules = {}
 ): string {
   const directives = [
     "default-src 'self'",
@@ -44,7 +46,7 @@ export function contentSecurityPolicy(
     `frame-src ${frameOrigins.length > 0 ? frameOrigins.join(" ") : "'none'"}`,
     "object-src 'none'",
     "base-uri 'self'",
-    "form-action 'self'",
+    `form-action 'self'${formOrigins.length > 0 ? ` ${formOrigins.join(" ")}` : ""}`,
     `frame-ancestors ${framedBySelf ? "'self'" : "'none'"}`,
     ...(development ? [] : ["upgrade-insecure-requests"]),
   ]
