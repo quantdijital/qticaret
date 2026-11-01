@@ -103,6 +103,7 @@ const CARD_FIELDS = [
 
 const PAGE_FIELDS = [
   ...CARD_FIELDS,
+  "categories.id",
   "subtitle",
   "description",
   "options.id",
@@ -269,3 +270,32 @@ export async function listingPage(
     query,
   })
 }
+
+export interface ReviewsAnswer {
+  rating: { average: number; count: number } | null
+  reviews: {
+    rating: number
+    title: string | null
+    body: string
+    author_name: string | null
+    created_at: string
+    verified_purchase: boolean
+  }[]
+  count: number
+}
+
+export const productReviews = (id: string) =>
+  storeGet<ReviewsAnswer>(`/store/products/${encodeURIComponent(id)}/reviews`, { limit: 10 })
+
+export interface QuestionsAnswer {
+  questions: {
+    body: string
+    author_name: string | null
+    created_at: string
+    answers: { body: string; author_name: string | null; by_shop: boolean }[]
+  }[]
+  count: number
+}
+
+export const productQuestions = (id: string) =>
+  storeGet<QuestionsAnswer>(`/store/products/${encodeURIComponent(id)}/questions`, { limit: 10 })

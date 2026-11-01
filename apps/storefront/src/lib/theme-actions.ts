@@ -8,6 +8,7 @@ import {
   verifyAction,
 } from "@/app/actions/account"
 import { saveConsents, saveProfile } from "@/app/actions/account-profile"
+import { askQuestion, stockAlert, writeReview } from "@/app/actions/product"
 import { addToCart, applyPromotion, changeCartLine, removeCartPromotion } from "@/app/actions/cart"
 import {
   chooseShipping,
@@ -23,6 +24,9 @@ export const themeActions: ThemeActions = {
   changeCartLine,
   applyPromotion,
   removePromotion: removeCartPromotion,
+  writeReview,
+  askQuestion,
+  stockAlert,
 }
 
 /** The checkout's actions (D7). */

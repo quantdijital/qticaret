@@ -153,6 +153,46 @@ export interface ProductPageView {
   specs: SpecView[]
   /** The shop's promises (shipping, returns…), beside the cart form. */
   trustBadges: TrustBadgeView[]
+  /** Approved reviews and the average (F10.6). */
+  reviews: ReviewsView
+  /** Approved questions with their answers (F10.10). */
+  questions: QuestionsView
+  /** Other products of its category. */
+  related: ProductCardView[]
+  /** A WhatsApp chat about this product, its name written in; null without a number. */
+  whatsappHref: string | null
+  /** The signed-in customer may write; a guest gets the sign-in link instead. */
+  signedIn: boolean
+  /** Sign in and come back here. */
+  loginPath: string
+}
+
+export interface ReviewView {
+  rating: number
+  title: string | null
+  body: string
+  author: string
+  /** "1 Kasım 2026". */
+  date: string
+  verified: boolean
+}
+
+export interface ReviewsView {
+  average: number | null
+  count: number
+  items: ReviewView[]
+}
+
+export interface QuestionView {
+  body: string
+  author: string
+  date: string
+  answers: { body: string; author: string; byShop: boolean }[]
+}
+
+export interface QuestionsView {
+  count: number
+  items: QuestionView[]
 }
 
 /** One attribute as a shopper reads it: "Bıçak uzunluğu" — "21 cm". */

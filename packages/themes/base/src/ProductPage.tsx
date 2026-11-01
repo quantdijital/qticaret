@@ -1,6 +1,9 @@
 import type { ProductPageView, ThemeActions, Translate } from "@qticaret/ui"
+import { MessageCircle } from "lucide-react"
 import { Breadcrumbs } from "./components/Breadcrumbs"
 import { PageContainer } from "./components/Container"
+import { ProductGrid } from "./components/ProductCard"
+import { ProductCommunity } from "./components/ProductCommunity"
 import { ProductDetails, SpecHighlights } from "./components/ProductDetails"
 import { ProductGallery } from "./components/ProductGallery"
 import { PurchasePanel } from "./components/PurchasePanel"
@@ -80,11 +83,90 @@ export function ProductPage({
                 fallbackError: t("cart.add_failed"),
                 before: t("price.before"),
               }}
+              stockAlert={actions.stockAlert}
+              signedIn={view.signedIn}
+              alertWords={{
+                title: t("product.alert_title"),
+                email: t("checkout.email"),
+                submit: t("product.alert_submit"),
+                sent: t("product.alert_sent"),
+                sentGuest: t("product.alert_sent_guest"),
+                errors: Object.fromEntries(
+                  [
+                    "stock_alerts.in_stock",
+                    "stock_alerts.not_tracked",
+                    "checkout.email_invalid",
+                    "errors.too_many_requests",
+                    "errors.challenge_failed",
+                  ].map((key) => [key, t(key)])
+                ),
+                fallback: t("product.alert_failed"),
+              }}
             />
+            {view.whatsappHref && (
+              <a
+                href={view.whatsappHref}
+                target="_blank"
+                rel="noopener"
+                className="flex h-11 items-center justify-center gap-2 rounded-full border text-sm font-semibold hover:bg-foreground/5"
+              >
+                <MessageCircle className="size-4" aria-hidden="true" />
+                {t("product.ask_whatsapp")}
+              </a>
+            )}
             <TrustStrip badges={view.trustBadges} label={t("footer.trust")} compact />
           </div>
         </div>
         <ProductDetails description={view.description} specs={view.specs} t={t} />
+        <ProductCommunity
+          productId={view.id}
+          reviews={view.reviews}
+          questions={view.questions}
+          signedIn={view.signedIn}
+          loginPath={view.loginPath}
+          writeReview={actions.writeReview}
+          askQuestion={actions.askQuestion}
+          words={{
+            reviews: t("product.reviews"),
+            noReviews: t("product.no_reviews"),
+            writeReview: t("product.write_review"),
+            rating: t("product.rating"),
+            reviewTitle: t("product.review_title"),
+            reviewBody: t("product.review_body"),
+            send: t("product.send"),
+            sending: t("checkout.saving"),
+            reviewSent: t("product.review_sent"),
+            verified: t("product.verified"),
+            questions: t("product.questions"),
+            noQuestions: t("product.no_questions"),
+            ask: t("product.ask"),
+            questionBody: t("product.question_body"),
+            questionSent: t("product.question_sent"),
+            signIn: t("account.login_link"),
+            signInToWrite: t("product.sign_in_to_write"),
+            average: t("product.average"),
+            errors: Object.fromEntries(
+              [
+                "product.sign_in_first",
+                "product.rating_required",
+                "product.review_too_short",
+                "product.question_too_short",
+                "reviews.not_purchased",
+                "reviews.already_reviewed",
+                "errors.too_many_requests",
+              ].map((key) => [key, t(key)])
+            ),
+            fallback: t("product.review_failed"),
+          }}
+        />
+        {view.related.length > 0 && (
+          <section aria-labelledby="benzer" className="flex flex-col gap-6 border-t pt-10">
+            <h2 id="benzer" className="text-2xl">
+              {t("product.related")}
+            </h2>
+            <ProductGrid products={view.related} t={t} />
+          </section>
+        )}
       </article>
     </PageContainer>
   )

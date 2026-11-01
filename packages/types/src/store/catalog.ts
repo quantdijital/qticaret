@@ -73,6 +73,8 @@ export interface StoreProduct {
   id: string
   title: string
   handle: string
+  /** Asked on the product page: its neighbours come from its first category. */
+  categories?: { id: string }[] | null
   subtitle: string | null
   description: string | null
   thumbnail: string | null

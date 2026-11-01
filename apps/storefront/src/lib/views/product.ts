@@ -76,6 +76,12 @@ interface ProductPageInput {
   trustBadges: TrustBadgeView[]
 }
 
+/** What the product itself says; the page adds its reviews, questions and neighbours. */
+export type ProductPageBase = Omit<
+  ProductPageView,
+  "reviews" | "questions" | "related" | "whatsappHref" | "signedIn" | "loginPath"
+>
+
 export function productPage({
   product,
   seo,
@@ -84,7 +90,7 @@ export function productPage({
   requestedVariant,
   t,
   trustBadges,
-}: ProductPageInput): ProductPageView {
+}: ProductPageInput): ProductPageBase {
   const variants = product.variants ?? []
   const options = (product.options ?? []).map((option) => ({
     id: option.id,

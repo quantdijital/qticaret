@@ -2,12 +2,20 @@
 
 import { Check } from "lucide-react"
 import { useActionState, useEffect, useMemo, useState } from "react"
-import type { ActionResult, FormAction, ProductOptionView, VariantView } from "@qticaret/ui"
+import type {
+  ActionResult,
+  FormAction,
+  PlaceOrderResult,
+  ProductOptionView,
+  VariantView,
+} from "@qticaret/ui"
 import { Badge } from "@qticaret/ui/components/badge"
 import { Button } from "@qticaret/ui/components/button"
 import { cn } from "@qticaret/ui/lib/utils"
 import { CART_ADDED_EVENT } from "../layout/CartDrawer"
 import { QuantityField } from "./QuantityField"
+import { StockAlertForm } from "./StockAlertForm"
+import type { StockAlertWords } from "./StockAlertForm"
 
 export interface PurchaseLabels {
   quantity: string
@@ -34,6 +42,10 @@ interface PurchasePanelProps {
   selectedVariantId: string | null
   addToCart: FormAction
   labels: PurchaseLabels
+  /** "Tell me when it is back", shown for a variant out of stock. */
+  stockAlert: (state: PlaceOrderResult, form: FormData) => Promise<PlaceOrderResult>
+  signedIn: boolean
+  alertWords: StockAlertWords
 }
 
 const INITIAL: ActionResult = { ok: false, error: null }
@@ -58,6 +70,9 @@ export function PurchasePanel({
   selectedVariantId,
   addToCart,
   labels,
+  stockAlert,
+  signedIn,
+  alertWords,
 }: PurchasePanelProps) {
   const initial =
     variants.find((variant) => variant.id === selectedVariantId) ?? variants[0] ?? null
@@ -88,117 +103,132 @@ export function PurchasePanel({
   const available = variant?.available ?? false
   const price = variant?.price ?? null
   return (
-    <form
-      action={(form) => {
-        setStale(false)
-        submit(form)
-      }}
-      className="flex flex-col gap-6"
-    >
-      {price && (
-        <div className="flex flex-wrap items-center gap-3">
-          <p className="tabular flex flex-wrap items-baseline gap-x-3">
-            <span
-              className={cn("text-[2rem] leading-none font-semibold", price.before && "text-sale")}
-            >
-              {price.current}
-            </span>
-            {price.before && (
-              <s className="text-lg text-muted-foreground">
-                <span className="sr-only">{labels.before} </span>
-                {price.before}
-              </s>
+    <>
+      <form
+        action={(form) => {
+          setStale(false)
+          submit(form)
+        }}
+        className="flex flex-col gap-6"
+      >
+        {price && (
+          <div className="flex flex-wrap items-center gap-3">
+            <p className="tabular flex flex-wrap items-baseline gap-x-3">
+              <span
+                className={cn(
+                  "text-[2rem] leading-none font-semibold",
+                  price.before && "text-sale"
+                )}
+              >
+                {price.current}
+              </span>
+              {price.before && (
+                <s className="text-lg text-muted-foreground">
+                  <span className="sr-only">{labels.before} </span>
+                  {price.before}
+                </s>
+              )}
+            </p>
+            {price.discount !== null && (
+              <Badge className="rounded-full bg-sale px-2.5 py-1 text-sale-foreground">
+                {labels.discount[price.discount]}
+              </Badge>
             )}
-          </p>
-          {price.discount !== null && (
-            <Badge className="rounded-full bg-sale px-2.5 py-1 text-sale-foreground">
-              {labels.discount[price.discount]}
-            </Badge>
-          )}
-        </div>
-      )}
-      <p className="flex items-center gap-2 text-sm font-medium">
-        <span
-          aria-hidden="true"
-          className={cn(
-            "size-2 rounded-full ring-4",
-            available ? "bg-success ring-success/15" : "bg-muted-foreground ring-muted"
-          )}
-        />
-        {variant ? (available ? labels.inStock : labels.outOfStock) : labels.chooseOptions}
-      </p>
-      {options.map((option) => (
-        <fieldset key={option.id} className="flex flex-col gap-2.5">
-          <legend className="mb-1 text-sm font-medium">
-            {option.title}
-            {chosen[option.id] && (
-              <span className="font-normal text-muted-foreground">: {chosen[option.id]}</span>
-            )}
-          </legend>
-          <div className="flex flex-wrap gap-2">
-            {option.values.map((value) => {
-              const id = `option-${option.id}-${value}`
-              return (
-                <label
-                  key={value}
-                  htmlFor={id}
-                  className="inline-flex h-11 min-w-12 cursor-pointer items-center justify-center rounded-full border bg-card px-5 text-sm font-medium transition-colors hover:border-foreground has-[:checked]:border-foreground has-[:checked]:bg-foreground has-[:checked]:text-background has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ring"
-                >
-                  <input
-                    id={id}
-                    type="radio"
-                    name={`option_${option.id}`}
-                    value={value}
-                    checked={chosen[option.id] === value}
-                    onChange={() => {
-                      choose(option.id, value)
-                    }}
-                    className="sr-only"
-                  />
-                  {value}
-                </label>
-              )
-            })}
           </div>
-        </fieldset>
-      ))}
-      <input type="hidden" name="variant_id" value={variant?.id ?? ""} />
-      <div className="flex gap-3">
-        <QuantityField
-          name="quantity"
-          label={labels.quantity}
-          decrease={labels.decrease}
-          increase={labels.increase}
+        )}
+        <p className="flex items-center gap-2 text-sm font-medium">
+          <span
+            aria-hidden="true"
+            className={cn(
+              "size-2 rounded-full ring-4",
+              available ? "bg-success ring-success/15" : "bg-muted-foreground ring-muted"
+            )}
+          />
+          {variant ? (available ? labels.inStock : labels.outOfStock) : labels.chooseOptions}
+        </p>
+        {options.map((option) => (
+          <fieldset key={option.id} className="flex flex-col gap-2.5">
+            <legend className="mb-1 text-sm font-medium">
+              {option.title}
+              {chosen[option.id] && (
+                <span className="font-normal text-muted-foreground">: {chosen[option.id]}</span>
+              )}
+            </legend>
+            <div className="flex flex-wrap gap-2">
+              {option.values.map((value) => {
+                const id = `option-${option.id}-${value}`
+                return (
+                  <label
+                    key={value}
+                    htmlFor={id}
+                    className="inline-flex h-11 min-w-12 cursor-pointer items-center justify-center rounded-full border bg-card px-5 text-sm font-medium transition-colors hover:border-foreground has-[:checked]:border-foreground has-[:checked]:bg-foreground has-[:checked]:text-background has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ring"
+                  >
+                    <input
+                      id={id}
+                      type="radio"
+                      name={`option_${option.id}`}
+                      value={value}
+                      checked={chosen[option.id] === value}
+                      onChange={() => {
+                        choose(option.id, value)
+                      }}
+                      className="sr-only"
+                    />
+                    {value}
+                  </label>
+                )
+              })}
+            </div>
+          </fieldset>
+        ))}
+        <input type="hidden" name="variant_id" value={variant?.id ?? ""} />
+        <div className="flex gap-3">
+          <QuantityField
+            name="quantity"
+            label={labels.quantity}
+            decrease={labels.decrease}
+            increase={labels.increase}
+          />
+          <Button
+            type="submit"
+            size="lg"
+            disabled={!available || pending}
+            className="h-12 flex-1 rounded-full text-base"
+          >
+            {pending
+              ? labels.adding
+              : available
+                ? labels.add
+                : variant
+                  ? labels.outOfStock
+                  : labels.chooseOptions}
+          </Button>
+        </div>
+        <p role="status" aria-live="polite" className="min-h-6 text-sm">
+          {!stale && state.ok && (
+            <span className="flex items-center gap-2 text-success">
+              <Check className="size-4" aria-hidden="true" />
+              {labels.added}
+              <a href="/sepet" className="font-medium text-foreground underline">
+                {labels.goToCart}
+              </a>
+            </span>
+          )}
+          {!stale && state.error && (
+            <span className="text-sale">{labels.errors[state.error] ?? labels.fallbackError}</span>
+          )}
+        </p>
+      </form>
+      {/* Outside the purchase form: a form may not hold another */}
+      {variant && !available && (
+        <StockAlertForm
+          key={variant.id}
+          variantId={variant.id}
+          signedIn={signedIn}
+          action={stockAlert}
+          words={alertWords}
         />
-        <Button
-          type="submit"
-          size="lg"
-          disabled={!available || pending}
-          className="h-12 flex-1 rounded-full text-base"
-        >
-          {pending
-            ? labels.adding
-            : available
-              ? labels.add
-              : variant
-                ? labels.outOfStock
-                : labels.chooseOptions}
-        </Button>
-      </div>
-      <p role="status" aria-live="polite" className="min-h-6 text-sm">
-        {!stale && state.ok && (
-          <span className="flex items-center gap-2 text-success">
-            <Check className="size-4" aria-hidden="true" />
-            {labels.added}
-            <a href="/sepet" className="font-medium text-foreground underline">
-              {labels.goToCart}
-            </a>
-          </span>
-        )}
-        {!stale && state.error && (
-          <span className="text-sale">{labels.errors[state.error] ?? labels.fallbackError}</span>
-        )}
-      </p>
-    </form>
+      )}
+    </>
   )
 }

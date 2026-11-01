@@ -40,6 +40,12 @@ export interface ThemeActions {
   applyPromotion: FormAction
   /** A plain form: `code`, taken off the cart. */
   removePromotion: (form: FormData) => Promise<void>
+  /** Fields: `product_id`, `rating` (1–5), `title`, `body`. */
+  writeReview: FormAction
+  /** Fields: `product_id`, `body`. */
+  askQuestion: FormAction
+  /** Fields: `variant_id`, `email` (a guest's), `challenge` (a solved proof of work). */
+  stockAlert: (state: PlaceOrderResult, form: FormData) => Promise<PlaceOrderResult>
 }
 
 /** The checkout's actions (D7): each step a form, the address selects fed by two lookups. */
