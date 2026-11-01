@@ -1,0 +1,54 @@
+/**
+ * The storefront's own pages (backend `lib/seo/paths.ts`): they never go
+ * through resolve, and their addresses carry ids and tokens whose case
+ * matters, so URL normalisation leaves their case alone.
+ */
+export const SYSTEM_ROOTS = [
+  "sepet",
+  "odeme",
+  "hesap",
+  "giris",
+  "kayit",
+  "cikis",
+  "arama",
+  "siparis",
+] as const
+
+export function isSystemPath(pathname: string): boolean {
+  const first = pathname.split("/")[1]?.toLowerCase() ?? ""
+  return (SYSTEM_ROOTS as readonly string[]).includes(first)
+}
+
+/** Files the backend makes and the storefront serves at its root (docs/13 §6, F15.9). */
+export function backendFile(pathname: string): string | null {
+  if (pathname === "/robots.txt") {
+    return "/store/seo/robots"
+  }
+  if (/^\/sitemap(?:-[a-z]+-\d{1,4})?\.xml$/.test(pathname)) {
+    return `/store/seo/sitemaps${pathname}`
+  }
+  if (pathname === "/.well-known/security.txt") {
+    return "/store/seo/security"
+  }
+  return null
+}
+
+/**
+ * The one address a path should have (docs/13 §2.2): no repeated slashes,
+ * no trailing slash, no `index.html`, lower case outside the storefront's
+ * own pages. Null when the path is already so; a 301 goes there otherwise.
+ */
+export function normalizedPath(pathname: string): string | null {
+  let path = pathname.replace(/\/{2,}/g, "/")
+  path = path.replace(/\/index\.html?$/i, "/")
+  if (path.length > 1) {
+    path = path.replace(/\/+$/, "")
+  }
+  if (!isSystemPath(path)) {
+    path = path.toLowerCase()
+  }
+  if (path === "") {
+    path = "/"
+  }
+  return path === pathname ? null : path
+}

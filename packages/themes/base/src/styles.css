@@ -1,0 +1,37 @@
+/*
+ * The base theme's tokens (adr/0046 §7). Tailwind v4 reads them from
+ * `@theme`; a shop's own colours (D11) override the CSS variables at :root.
+ */
+@theme {
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --color-ink: #1b1b1f;
+  --color-muted: #5d5f66;
+  --color-line: #e3e4e8;
+  --color-surface: #ffffff;
+  --color-subtle: #f6f6f8;
+  --color-accent: #1f4fd6;
+  --color-accent-ink: #ffffff;
+  --color-sale: #b42318;
+  --color-ok: #067647;
+}
+
+@layer base {
+  html {
+    color: var(--color-ink);
+    background: var(--color-surface);
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    font-family: var(--font-sans);
+    line-height: 1.5;
+  }
+  a {
+    text-decoration-thickness: from-font;
+    text-underline-offset: 0.15em;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+}

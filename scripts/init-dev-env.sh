@@ -11,6 +11,8 @@ docker_template="$root/infra/docker/env.example"
 docker_env="$root/infra/docker/.env"
 backend_template="$root/apps/backend/env.example"
 backend_envs=("$root/apps/backend/.env" "$root/apps/backend/.env.test")
+storefront_template="$root/apps/storefront/env.example"
+storefront_env="$root/apps/storefront/.env.local"
 # The development servers' addresses (Mailpit, the fake carriers and payment
 # and SMS servers): the dev file's only. The tests start their own fakes, or
 # check what is sent with no transport set; these would point them elsewhere.
@@ -73,13 +75,13 @@ sync_env() {
   fi
 }
 
-# A new shared secret must not be generated while a backend file already
-# holds a value derived from the old one; the two sides would disagree.
-for f in "${backend_envs[@]}"; do
+# A new shared secret must not be generated while a backend or storefront
+# file already holds a value derived from the old one; the sides would disagree.
+for f in "${backend_envs[@]}" "$storefront_env"; do
   [[ -e "$f" ]] || continue
   for name in $shared_names; do
     has_var "$name" "$docker_env" && continue
-    for dependent in $(grep "__${name}__" "$backend_template" | sed 's/=.*//'); do
+    for dependent in $(grep -h "__${name}__" "$backend_template" "$storefront_template" | sed 's/=.*//'); do
       has_var "$dependent" "$f" &&
         fail "$(rel "$f") has $dependent but infra/docker/.env lacks $name; remove both sides and rerun"
     done
@@ -95,3 +97,4 @@ done
 
 sync_env "$backend_template" "${backend_envs[0]}"
 sync_env "$backend_template" "${backend_envs[1]}" "$test_skipped"
+sync_env "$storefront_template" "$storefront_env"

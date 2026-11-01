@@ -106,9 +106,11 @@ repo/
 │   │   └── integration-tests/
 │   │       ├── http/  modules/  fixtures/
 │   ├── panel/                       # yönetici paneli, bizim SPA'mız (adr/0022; yapı docs/18 §6)
-│   └── storefront/                  # F18 — ŞİMDİ BOŞ
+│   └── storefront/                  # F18 vitrin, Next.js App Router (adr/0046): app/ rotalar, screens/ varlık türüne göre sayfalar, lib/ Store API istemcisi, SEO, sepet, i18n
 ├── packages/
-│   ├── types/                       # paylaşılan tipler (Store API sözleşmeleri)
+│   ├── types/                       # paylaşılan tipler (Store API sözleşmeleri; vitrin için `src/store/`)
+│   ├── ui/                          # tema sözleşmesi, görünüm modelleri, ortak vitrin parçaları (adr/0046 §7)
+│   ├── themes/base/                 # ilk vitrin teması: yalnızca sunum
 │   ├── config/                      # eslint, tsconfig, prettier
 │   └── testing/                     # sahte sağlayıcı sunucuları (PayTR; iyzico V8, Geliver F7), TR fixture'ları (geçerli sahte TCKN/VKN), her çalıştırmada üretilen test sırları
 ├── infra/

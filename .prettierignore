@@ -4,6 +4,9 @@ dist
 coverage
 .turbo
 .medusa
+# Next.js build and dev output (apps/storefront)
+.next
+next-env.d.ts
 pnpm-lock.yaml
 
 # Documentation is hand-formatted (Turkish tables); prettier would reflow it

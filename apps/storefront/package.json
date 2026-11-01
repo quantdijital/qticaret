@@ -1,0 +1,41 @@
+{
+  "name": "@qticaret/storefront",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Quant Ticaret storefront: server-rendered, theme-agnostic shell over the Store API (F18, adr/0046)",
+  "type": "module",
+  "scripts": {
+    "dev": "next dev --port 8000",
+    "build": "next build",
+    "start": "next start --port 8000",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:unit": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@qticaret/theme-base": "workspace:*",
+    "@qticaret/types": "workspace:*",
+    "@qticaret/ui": "workspace:*",
+    "next": "16.4.2",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "server-only": "0.0.1",
+    "zod": "4.6.6"
+  },
+  "devDependencies": {
+    "@next/eslint-plugin-next": "16.4.2",
+    "@qticaret/config": "workspace:*",
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/node": "24.19.2",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "eslint": "10.12.0",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "globals": "17.13.0",
+    "tailwindcss": "4.3.3",
+    "typescript": "5.9.3",
+    "vitest": "5.0.3"
+  }
+}

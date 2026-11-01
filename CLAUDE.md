@@ -9,7 +9,7 @@ sektörel ihtiyaçlar feature flag ve attribute şablonlarıyla çözülür.
 Model: **instance-per-tenant** (her müşteriye ayrı Medusa instance + ayrı DB).
 
 ## Şu anki odak
-Backend + kendi yönetici panelimiz (`apps/panel`, adr/0022). Medusa Admin'e yeni ekran yazılmaz. Storefront/temalar SONRAKİ aşama — şimdi storefront kodu yazma (tek istisna: yalnızca geliştirmede açılan ödeme deneme sayfası, adr/0028).
+F18 vitrin (`apps/storefront`, Next.js; tema sözleşmesi `packages/ui`, ilk tema `packages/themes/base`; adr/0046), kullanıcının 2026-11-01 isteğiyle F16'dan önce. Backend + kendi yönetici panelimiz (`apps/panel`, adr/0022) sürüyor; Medusa Admin'e yeni ekran yazılmaz. Ödeme deneme sayfası (adr/0028) vitrin ödemesi çalışınca silinir.
 Güncel faz ve görevler: `PROGRESS.md`
 
 ## Stack
@@ -22,6 +22,7 @@ Güncel faz ve görevler: `PROGRESS.md`
 - `pnpm dev` — tüm uygulamalar
 - `pnpm --filter backend dev` — sadece backend
 - `pnpm --filter panel dev` — panel (backend'e proxy)
+- `pnpm --filter storefront dev` — vitrin `localhost:8000` (backend açık ve `seed:demo` yapılmış olmalı)
 - `pnpm dev:paytr` — sahte PayTR; ödeme deneme sayfası `localhost:9000/dev/checkout` (adr/0028)
 - `pnpm --filter backend test:unit` / `test:integration:http` / `test:integration:modules`
 - `pnpm lint` / `pnpm typecheck` / `pnpm format`

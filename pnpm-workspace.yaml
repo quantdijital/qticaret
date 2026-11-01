@@ -1,6 +1,8 @@
 packages:
   - "apps/*"
   - "packages/*"
+  # Storefront themes (F18, adr/0046)
+  - "packages/themes/*"
   # Medusa build output contains its own package.json
   - "!apps/backend/.medusa/**"
 
