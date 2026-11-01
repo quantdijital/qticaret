@@ -514,5 +514,8 @@
   "order.parcel_out_for_delivery": "Dağıtımda",
   "order.parcel_delivered": "Teslim edildi",
   "order.parcel_returned": "Gönderene döndü",
-  "order.parcel_failed": "Teslim edilemedi"
+  "order.parcel_failed": "Teslim edilemedi",
+  "preview.title": "Önizleme: {title}",
+  "preview.gone": "Önizleme bağlantısı geçersiz",
+  "preview.notice": "Önizleme: bu sayfa yayımlanmadan önceki hâlidir ve yalnız bağlantıyı bilenler görebilir. Bağlantı 24 saat geçerlidir."
 }

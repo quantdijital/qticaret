@@ -316,6 +316,8 @@ export interface ContentPageView {
   publishedAt: string | null
   /** The contact form below the text, on the page the shop chose for it (adr/0047). */
   contactForm?: ContactFormView | null
+  /** A line above the page, in words: a draft's preview says it is one. */
+  notice?: string | null
 }
 
 /** The storefront's contact form (adr/0047): a signed-in customer's name and address filled in. */

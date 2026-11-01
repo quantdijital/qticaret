@@ -109,6 +109,8 @@ export const RATE_LIMIT_PROFILES = {
     perIp: { max: 10, windowMs: HOUR },
     perIdentity: { max: 3, windowMs: HOUR },
   },
+  // F18: a draft's signed preview link; a guess finds nothing
+  content_preview: { name: "content_preview", perIp: { max: 60, windowMs: 15 * MINUTE } },
   // F14.5: a moved customer's claim key, guessed at nowhere: a few tries an hour
   migration_claim: {
     name: "migration_claim",

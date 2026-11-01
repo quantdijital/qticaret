@@ -69,6 +69,12 @@ export const CONTENT_ROUTES = [
     methods: ["GET" as const],
     middlewares: [validateAndTransformQuery(StoreGetLandingProducts, {})],
   },
+  // A draft's signed preview (F18)
+  {
+    matcher: "/store/content/preview/:token",
+    methods: ["GET" as const],
+    middlewares: [rateLimit(() => RATE_LIMIT_PROFILES.content_preview)],
+  },
   // A listing's filtered, sorted page and its filters (F18 D4)
   {
     matcher: "/store/listings/products",

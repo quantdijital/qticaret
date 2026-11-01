@@ -69,9 +69,14 @@ export async function storeContentList(container: MedusaContainer, query: StoreG
  * document, its cards drawn from live products and categories at their
  * current paths. A draft answers 404 as if it did not exist.
  */
-export async function storeContentEntry(container: MedusaContainer, id: string) {
+export async function storeContentEntry(
+  container: MedusaContainer,
+  id: string,
+  // A draft's signed preview (`previewEntryOf`) opens it whatever its status
+  { draft = false }: { draft?: boolean } = {}
+) {
   const [entry] = await service(container).listContentEntries(
-    { id, status: "published" },
+    draft ? { id } : { id, status: "published" },
     { take: 1 }
   )
   if (!entry) {

@@ -46,6 +46,11 @@ export function ContentPage({
   return (
     <PageContainer>
       <article className="mx-auto flex w-full max-w-3xl flex-col gap-8">
+        {view.notice && (
+          <p role="status" className="rounded-xl border border-primary/40 bg-primary/5 p-4 text-sm">
+            {view.notice}
+          </p>
+        )}
         <header className="flex flex-col gap-5 border-b pb-8">
           <Breadcrumbs items={view.breadcrumbs} t={t} />
           <h1 className="text-4xl leading-[1.08] text-balance lg:text-5xl">{view.title}</h1>

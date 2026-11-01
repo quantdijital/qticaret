@@ -25,6 +25,8 @@ export const RESERVED_ROOT_SEGMENTS: ReadonlySet<string> = new Set([
   "yasal",
   "magaza",
   "yorumlar",
+  // A draft's signed preview (F18)
+  "onizleme",
   // Backend paths, should a proxy put them on the storefront's host (F16)
   "admin",
   "app",
@@ -52,7 +54,7 @@ export const SYSTEM_PAGES: readonly {
   robots: "noindex,follow" | "noindex,nofollow"
 }[] = [
   { path: "/arama", robots: "noindex,follow" },
-  ...["sepet", "odeme", "hesap", "giris", "kayit", "cikis"].map((segment) => ({
+  ...["sepet", "odeme", "hesap", "giris", "kayit", "cikis", "onizleme"].map((segment) => ({
     path: `/${segment}`,
     robots: "noindex,nofollow" as const,
   })),

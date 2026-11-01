@@ -13,6 +13,7 @@ export const SYSTEM_ROOTS = [
   "arama",
   "siparis",
   "yasal",
+  "onizleme",
 ] as const
 
 /**

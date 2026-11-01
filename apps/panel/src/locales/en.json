@@ -5582,7 +5582,9 @@
       "reviewed": "Reviewed by a person",
       "reviewedHint": "A person read the page through and approved it. At least 5% of newly published pages should be reviewed.",
       "blocked": "At the last save less than 30% of the text was original; publishing may be refused. Make it specific to this page."
-    }
+    },
+    "preview": "Preview",
+    "previewReady": "The preview opened in a new tab; its link is copied and works for 24 hours."
   },
   "priceLists": {
     "sections": "Kinds of offer",

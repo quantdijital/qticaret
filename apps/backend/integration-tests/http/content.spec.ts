@@ -103,6 +103,34 @@ medusaIntegrationTestRunner({
       expect(answer.seo?.jsonLd[0]).toMatchObject({ "@type": "WebPage", name: "Hakkımızda" })
     })
 
+    it("shows a draft through its signed preview link only, for a day", async () => {
+      const made = await save({ kind: "page", title: "Taslak", body: doc(p(text("Henüz değil."))) })
+      const id = made.data.entry.id
+      const link = await post<{ url: string; path: string; expires_at: string }>(
+        `/admin/content/${id}/preview`,
+        {}
+      )
+      const token = link.data.path.split("/").pop() ?? ""
+      const opened = await storeGet<{ entry: { id: string; html: string } }>(
+        `/store/content/preview/${token}`
+      )
+      const forged = await storeGet(`/store/content/preview/${token.slice(0, -2)}xx`)
+      const unknown = await post(`/admin/content/cnt_0000000000/preview`, {})
+
+      expect(link.status).toBe(200)
+      expect(link.data.url).toBe(`https://magaza.example.com${link.data.path}`)
+      expect(link.data.path.startsWith("/onizleme/")).toBe(true)
+      expect(new Date(link.data.expires_at).getTime()).toBeGreaterThan(Date.now())
+      expect(opened.status).toBe(200)
+      expect(opened.data.entry).toMatchObject({ id })
+      expect(opened.data.entry.html).toContain("Henüz değil.")
+      expect(opened.headers["cache-control"]).toBe("no-store")
+      expect(forged.status).toBe(404)
+      expect(unknown.status).toBe(404)
+      // The draft itself stays out of sight
+      expect((await storeGet(`/store/content/${id}`)).status).toBe(404)
+    })
+
     it("renders a post with its cards and cover, and makes it an article", async () => {
       const shop = await stockShop(getContainer())
       const { productId } = await stockedProduct(getContainer(), shop, "kupa-karti", 3)

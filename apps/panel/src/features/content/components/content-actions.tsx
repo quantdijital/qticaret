@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router"
-import { Eye, EyeOff, MoreHorizontal, Trash2 } from "lucide-react"
+import { ExternalLink, Eye, EyeOff, MoreHorizontal, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
@@ -11,7 +11,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useDeleteContent, useUpdateContent } from "@/features/content/api/content"
+import {
+  useContentPreview,
+  useDeleteContent,
+  useUpdateContent,
+} from "@/features/content/api/content"
 import type { ContentDetail } from "@/features/content/api/content"
 import { errorText } from "@/lib/errors"
 
@@ -21,7 +25,27 @@ export function ContentActions({ entry }: { entry: ContentDetail }) {
   const navigate = useNavigate()
   const update = useUpdateContent(entry.id)
   const remove = useDeleteContent()
+  const preview = useContentPreview(entry.id)
   const [deleting, setDeleting] = useState(false)
+  // The tab opens on the click, before the link exists: a tab opened after
+  // the request would be taken for a pop-up
+  const openPreview = () => {
+    const tab = window.open("about:blank", "_blank")
+    preview.mutate(undefined, {
+      onSuccess: ({ url }) => {
+        if (tab) {
+          tab.opener = null
+          tab.location.href = url
+        }
+        void navigator.clipboard.writeText(url).catch(() => undefined)
+        toast.success(t("content.previewReady"))
+      },
+      onError: (failure) => {
+        tab?.close()
+        toast.error(errorText(t, failure))
+      },
+    })
+  }
   const live = entry.status === "published"
   const toggle = () => {
     update.mutate(
@@ -34,6 +58,10 @@ export function ContentActions({ entry }: { entry: ContentDetail }) {
   }
   return (
     <div className="flex items-center gap-2">
+      <Button variant="outline" disabled={preview.isPending} onClick={openPreview}>
+        <ExternalLink />
+        {t("content.preview")}
+      </Button>
       <Button variant={live ? "outline" : "default"} disabled={update.isPending} onClick={toggle}>
         {live ? <EyeOff /> : <Eye />}
         {t(live ? "content.unpublish" : "content.publish")}

@@ -113,3 +113,14 @@ export function useDeleteContent() {
     onSettled: changed,
   })
 }
+
+/** A link that shows the entry, draft or not, on the storefront for a day (F18). */
+export function useContentPreview(id: string) {
+  return useMutation({
+    mutationFn: () =>
+      sdk.client.fetch<{ url: string; path: string; expires_at: string }>(
+        `/admin/content/${encodeURIComponent(id)}/preview`,
+        { method: "POST" }
+      ),
+  })
+}

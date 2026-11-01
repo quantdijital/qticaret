@@ -5582,7 +5582,9 @@
       "reviewed": "İnsan inceledi",
       "reviewedHint": "Sayfa bir kişi tarafından okunup onaylandı. Yeni yayınlanan sayfaların en az %5'i incelenmeli.",
       "blocked": "Son kayıtta metnin %30'dan azı özgündü; yayına alma reddedilebilir. Metni bu sayfaya özgü hâle getirin."
-    }
+    },
+    "preview": "Önizle",
+    "previewReady": "Önizleme yeni sekmede açıldı; bağlantı panoya kopyalandı ve 24 saat geçerli."
   },
   "priceLists": {
     "sections": "Kampanya türleri",
