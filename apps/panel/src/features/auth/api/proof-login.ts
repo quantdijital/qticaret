@@ -3,6 +3,8 @@ import type { Challenge } from "@/lib/challenge"
 import { sdk } from "@/lib/sdk"
 import type { Credentials, MfaChallenge } from "./me"
 
+const MAX_ROUNDS = 3
+
 interface LoginAnswer {
   token?: string
   mfa_challenge?: MfaChallenge
@@ -30,12 +32,16 @@ async function postLogin(credentials: Credentials, headers: Record<string, strin
  * one address (adr/0044 §1, the F15 audit): the challenge solved in the
  * browser, the request made again with its answer, then the session
  * opened as the SDK's session mode does. Wrong credentials fail as they
- * would without it.
+ * would without it. The answered request counts too and may cross into a
+ * harder challenge: a few rounds are solved before giving up.
  */
 export async function signInWithProof(credentials: Credentials): Promise<MfaChallenge | null> {
   let answer = await postLogin(credentials)
-  const challenge = answer.status === 428 ? answer.body.challenge : undefined
-  if (challenge) {
+  for (let round = 0; round < MAX_ROUNDS; round++) {
+    const challenge = answer.status === 428 ? answer.body.challenge : undefined
+    if (!challenge) {
+      break
+    }
     const nonce = await solveChallenge(challenge)
     answer = await postLogin(credentials, challengeHeader(challenge.token, nonce))
   }
