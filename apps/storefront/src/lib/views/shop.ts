@@ -93,6 +93,9 @@ export async function shopView(): Promise<ShopView> {
       : null,
     customerName: customer ? (customer.first_name ?? customer.email) : null,
     legalLinks,
+    privacyPath: legalLinks.some((link) => link.path === legalPath("privacy_notice"))
+      ? legalPath("privacy_notice")
+      : null,
     identityLines: identityLinesOf(identity, t),
   }
 }

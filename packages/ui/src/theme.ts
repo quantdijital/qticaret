@@ -101,6 +101,8 @@ export interface StorefrontTheme {
     children: ReactNode
     /** A plain form: `choice` (all, necessary, custom), `analytics`, `marketing`, `policy_version`. */
     saveCookies: (form: FormData) => Promise<void>
+    /** Fields: `email`, `challenge`; the footer's newsletter box (double opt-in). */
+    subscribe?: (state: PlaceOrderResult, form: FormData) => Promise<PlaceOrderResult>
   }>
   HomePage: ComponentType<Page<HomePageView>>
   ProductPage: ComponentType<Page<ProductPageView> & { actions: ThemeActions }>

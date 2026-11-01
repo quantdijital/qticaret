@@ -495,5 +495,14 @@
   "checkout.invoice_add": "Kurumsal fatura bilgisi ekleyin",
   "checkout.invoice_change": "Değiştir",
   "checkout.invoice_corporate": "Fatura: {name} · {office} V.D. · VKN {tax}",
-  "checkout.invoice_individual": "Fatura: {name} (bireysel)"
+  "checkout.invoice_individual": "Fatura: {name} (bireysel)",
+  "newsletter.title": "E-bültene abone olun",
+  "newsletter.text": "Kampanya ve yeniliklerden e-posta ile haberdar olun. Abone olarak {shop} tarafından size ticari elektronik ileti gönderilmesine onay verirsiniz; onay için e-postanıza bir bağlantı göndeririz. İstediğiniz zaman tek tıkla ayrılabilirsiniz.",
+  "newsletter.privacy_link": "KVKK aydınlatma metni",
+  "newsletter.email": "E-posta adresiniz",
+  "newsletter.submit": "Abone ol",
+  "newsletter.sent": "Onay bağlantısını e-postanıza gönderdik. Aboneliğiniz bağlantıyı açınca başlar.",
+  "newsletter.email_invalid": "Geçerli bir e-posta adresi yazın.",
+  "newsletter.rate_limited": "Kısa sürede çok deneme yapıldı. Lütfen daha sonra tekrar deneyin.",
+  "newsletter.failed": "Abonelik şu an alınamadı. Lütfen biraz sonra tekrar deneyin."
 }

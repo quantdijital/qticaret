@@ -100,6 +100,8 @@ export interface ShopView {
   customerName: string | null
   /** The shop's published legal texts' pages (D10). */
   legalLinks: LinkView[]
+  /** The KVKK notice's page, for the forms that collect an address; null until published. */
+  privacyPath: string | null
   /** What the law asks a web shop to show (6563, ETBİS): title, MERSİS, tax, KEP, ETBİS; in words. */
   identityLines: string[]
 }

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next"
 import { headers } from "next/headers"
 import type { ReactNode } from "react"
 import { saveCookieChoice } from "@/app/actions/cookies"
+import { subscribeNewsletter } from "@/app/actions/newsletter"
 import { t } from "@/lib/i18n"
 import { storefrontSettings } from "@/lib/store-api/requests"
 import { brandStyle } from "@/lib/views/color"
@@ -33,7 +34,12 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       {/* Browser extensions write attributes on <body> before React loads */}
       <body suppressHydrationWarning>
         {brand && <style nonce={nonce}>{brand}</style>}
-        <theme.Layout shop={shop} t={t} saveCookies={saveCookieChoice}>
+        <theme.Layout
+          shop={shop}
+          t={t}
+          saveCookies={saveCookieChoice}
+          subscribe={subscribeNewsletter}
+        >
           {children}
         </theme.Layout>
       </body>

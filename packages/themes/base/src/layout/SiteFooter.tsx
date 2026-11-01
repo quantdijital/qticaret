@@ -1,14 +1,29 @@
 import { Mail, MapPin, Phone } from "lucide-react"
-import type { ShopView, Translate } from "@qticaret/ui"
+import type { PlaceOrderResult, ShopView, Translate } from "@qticaret/ui"
 import { Container } from "../components/Container"
 import { TrustStrip } from "../components/TrustStrip"
+import { NewsletterForm } from "./NewsletterForm"
+
+const NEWSLETTER_ERRORS = [
+  "newsletter.email_invalid",
+  "newsletter.rate_limited",
+  "errors.challenge_failed",
+]
 
 /**
  * The footer: the shop's promises on the page's own ground, then a dark
  * band with its name and contact details, its link columns and profiles,
  * and the small print with its registered name.
  */
-export function SiteFooter({ shop, t }: { shop: ShopView; t: Translate }) {
+export function SiteFooter({
+  shop,
+  t,
+  subscribe,
+}: {
+  shop: ShopView
+  t: Translate
+  subscribe?: ((state: PlaceOrderResult, form: FormData) => Promise<PlaceOrderResult>) | undefined
+}) {
   const { contact } = shop
   const year = new Date().getFullYear()
   return (
@@ -19,6 +34,24 @@ export function SiteFooter({ shop, t }: { shop: ShopView; t: Translate }) {
         </Container>
       )}
       <div className="bg-ink text-ink-foreground">
+        {subscribe && (
+          <Container className="border-b border-ink-foreground/10 py-10 lg:py-12">
+            <NewsletterForm
+              action={subscribe}
+              privacyPath={shop.privacyPath}
+              words={{
+                title: t("newsletter.title"),
+                text: t("newsletter.text", { shop: shop.companyTitle ?? shop.name }),
+                privacyLink: t("newsletter.privacy_link"),
+                email: t("newsletter.email"),
+                submit: t("newsletter.submit"),
+                sent: t("newsletter.sent"),
+                errors: Object.fromEntries(NEWSLETTER_ERRORS.map((key) => [key, t(key)])),
+                fallback: t("newsletter.failed"),
+              }}
+            />
+          </Container>
+        )}
         <Container className="grid gap-12 py-14 lg:grid-cols-[1.3fr_2fr] lg:gap-16 lg:py-20">
           <section aria-labelledby="footer-contact" className="flex flex-col gap-6">
             <p className="font-heading text-3xl leading-tight lg:text-4xl">{shop.name}</p>
