@@ -72,7 +72,13 @@ interface Page<View> {
  */
 export interface StorefrontTheme {
   name: string
-  Layout: ComponentType<{ shop: ShopView; t: Translate; children: ReactNode }>
+  Layout: ComponentType<{
+    shop: ShopView
+    t: Translate
+    children: ReactNode
+    /** A plain form: `choice` (all, necessary, custom), `analytics`, `marketing`, `policy_version`. */
+    saveCookies: (form: FormData) => Promise<void>
+  }>
   HomePage: ComponentType<Page<HomePageView>>
   ProductPage: ComponentType<Page<ProductPageView> & { actions: ThemeActions }>
   ListingPage: ComponentType<Page<ListingPageView>>

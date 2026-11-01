@@ -1,6 +1,7 @@
 import type { ReactNode } from "react"
 import type { ShopView, Translate } from "@qticaret/ui"
 import { AnnouncementBar } from "./layout/AnnouncementBar"
+import { CookieBanner } from "./layout/CookieBanner"
 import { SiteFooter } from "./layout/SiteFooter"
 import { SiteHeader } from "./layout/SiteHeader"
 import { WhatsAppButton } from "./layout/WhatsAppButton"
@@ -15,10 +16,12 @@ export function Layout({
   shop,
   t,
   children,
+  saveCookies,
 }: {
   shop: ShopView
   t: Translate
   children: ReactNode
+  saveCookies: (form: FormData) => Promise<void>
 }) {
   return (
     <div className="flex min-h-dvh flex-col">
@@ -39,9 +42,10 @@ export function Layout({
         {children}
       </main>
       <SiteFooter shop={shop} t={t} />
-      {shop.contact.whatsappHref && (
+      {shop.contact.whatsappHref && !shop.cookieBanner && (
         <WhatsAppButton href={shop.contact.whatsappHref} label={t("whatsapp.label")} />
       )}
+      {shop.cookieBanner && <CookieBanner banner={shop.cookieBanner} save={saveCookies} t={t} />}
     </div>
   )
 }

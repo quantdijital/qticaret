@@ -318,5 +318,19 @@
   "account.notice_password_changed": "Şifreniz değiştirildi. Yeni şifrenizle giriş yapın.",
   "account.notice_code_sent": "Doğrulama bağlantısını e-postanıza gönderdik. Gelmediyse istenmeyen klasörüne bakın.",
   "account.notice_reset_sent": "Bu adrese kayıtlı bir hesap varsa şifre yenileme bağlantısı gönderildi.",
-  "account.notice_welcome": "Hesabınız hazır. Hoş geldiniz!"
+  "account.notice_welcome": "Hesabınız hazır. Hoş geldiniz!",
+  "nav.account_of": "Hesabım ({name})",
+  "cookies.title": "Çerezleri nasıl kullanalım?",
+  "cookies.text": "Sitenin çalışması için gerekli çerezler her zaman açıktır. Ziyaretleri ölçmek ve size uygun kampanyalar göstermek için ek çerezleri yalnızca izninizle kullanırız.",
+  "cookies.policy": "Çerez Politikası",
+  "cookies.choose": "Tercihleri seç",
+  "cookies.necessary": "Zorunlu çerezler",
+  "cookies.necessary_text": "Sepet, oturum ve güvenlik için gereklidir; kapatılamaz.",
+  "cookies.analytics": "Analitik çerezler",
+  "cookies.analytics_text": "Sitenin nasıl kullanıldığını anonim olarak ölçmemize yardım eder.",
+  "cookies.marketing": "Pazarlama çerezleri",
+  "cookies.marketing_text": "Size uygun reklam ve kampanyalar göstermek için kullanılır.",
+  "cookies.save_choice": "Seçimimi kaydet",
+  "cookies.only_necessary": "Yalnızca zorunlu",
+  "cookies.accept_all": "Tümünü kabul et"
 }

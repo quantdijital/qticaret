@@ -92,6 +92,16 @@ export interface ShopView {
   social: SocialLinkView[]
   /** The registered title for the footer's small print; null shows the shop's name. */
   companyTitle: string | null
+  /** The cookie question, while the visitor has not answered under the policy now (D9). */
+  cookieBanner: CookieBannerView | null
+  /** The signed-in customer's first name; null for a guest. */
+  customerName: string | null
+}
+
+export interface CookieBannerView {
+  policyVersion: number | null
+  /** The cookie policy's page, when the shop published one. */
+  policyPath: string | null
 }
 
 export interface ProductCardView {

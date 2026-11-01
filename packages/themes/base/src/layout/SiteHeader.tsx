@@ -47,8 +47,22 @@ export function SiteHeader({ shop, t }: { shop: ShopView; t: Translate }) {
           )}
         </a>
         <div className="flex items-center justify-end gap-1">
-          <a href="/hesap" aria-label={t("nav.account")} className={`${ICON_LINK} hidden sm:flex`}>
+          <a
+            href="/hesap"
+            aria-label={
+              shop.customerName
+                ? t("nav.account_of", { name: shop.customerName })
+                : t("nav.account")
+            }
+            className={`${ICON_LINK} hidden sm:flex`}
+          >
             <UserRound className="size-5" aria-hidden="true" />
+            {shop.customerName && (
+              <span
+                aria-hidden="true"
+                className="absolute right-1 bottom-1 size-2.5 rounded-full bg-success ring-2 ring-background"
+              />
+            )}
           </a>
           <CartDrawer
             cart={shop.cart}

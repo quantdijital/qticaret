@@ -1,7 +1,9 @@
 import "server-only"
 import type { ContactView, ShopView } from "@qticaret/ui"
 import type { LegalIdentity, StorefrontFrame } from "@qticaret/types"
+import { currentCustomer } from "@/lib/account/auth"
 import { headerCart } from "@/lib/cart/cart"
+import { bannerDue, cookieConsent } from "@/lib/legal/cookies"
 import { t } from "@/lib/i18n"
 import {
   allCategories,
@@ -12,6 +14,7 @@ import {
 } from "@/lib/store-api/requests"
 import { miniCartOf } from "./cart"
 import { navigation } from "./categories"
+import { legalDocument, legalPath } from "./legal"
 import { displayPhone, footerGroups, linkViews, socialLinks, whatsappHref } from "./frame"
 
 /** How to reach the shop: the legal identity's contact details, the frame's WhatsApp number. */
@@ -27,14 +30,25 @@ export function contactOf(identity: LegalIdentity, frame: StorefrontFrame): Cont
 
 /** The frame around every page (D3, docs/19 §4), from the backend's answers. */
 export async function shopView(): Promise<ShopView> {
-  const [site, categories, { storefront: frame, free_shipping_threshold }, identity, cart] =
-    await Promise.all([
-      siteSeo(),
-      allCategories(),
-      storefrontSettings(),
-      legalIdentity(),
-      headerCart(),
-    ])
+  const [
+    site,
+    categories,
+    { storefront: frame, free_shipping_threshold },
+    identity,
+    cart,
+    cookies,
+    customer,
+    cookiePolicy,
+  ] = await Promise.all([
+    siteSeo(),
+    allCategories(),
+    storefrontSettings(),
+    legalIdentity(),
+    headerCart(),
+    cookieConsent(),
+    currentCustomer(),
+    legalDocument("cookie_policy"),
+  ])
   const paths = await pathsOf(
     "product_category",
     categories.map((category) => category.id)
@@ -69,5 +83,12 @@ export async function shopView(): Promise<ShopView> {
     contact: contactOf(identity, frame),
     social: socialLinks(identity.same_as),
     companyTitle: identity.company_title,
+    cookieBanner: bannerDue(cookies)
+      ? {
+          policyVersion: cookies?.policy_version ?? null,
+          policyPath: cookiePolicy ? legalPath("cookie_policy") : null,
+        }
+      : null,
+    customerName: customer ? (customer.first_name ?? customer.email) : null,
   }
 }

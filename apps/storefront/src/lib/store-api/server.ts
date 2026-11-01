@@ -56,3 +56,17 @@ export async function storeCall<T>(
     })
   ).data
 }
+
+/** A call whose answer's headers matter too (a cookie the backend hands the visitor). */
+export async function storeCallWithHeaders(
+  path: string,
+  options: Pick<StoreRequest, "method" | "query" | "body" | "headers">
+): Promise<{ data: unknown; headers: Headers }> {
+  const own = await visit()
+  const answer = await storeRequest<unknown>(path, {
+    ...own,
+    ...options,
+    headers: { ...own.headers, ...options.headers },
+  })
+  return { data: answer.data, headers: answer.headers }
+}
