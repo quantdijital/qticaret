@@ -1,41 +1,68 @@
 /*
  * The base theme's values for the storefront tokens (docs/19 §3; names from
  * shadcn/ui, wired to Tailwind in `@qticaret/ui/styles.css`). A shop's own
- * colours (D11) override these variables at :root.
+ * colour (D3) overrides `--primary`, `--ring` and the announcement bar at
+ * :root; everything else is the theme's.
  *
- * Contrast (WCAG AA, 4.5:1 for text): muted-foreground on background 6.4:1,
- * on muted 5.8:1; sale on background 5.6:1.
+ * The look: a warm bone page, white cards, ink text and dark ink bands,
+ * a soft serif for headings (Fraunces) over Inter.
+ *
+ * Contrast (WCAG AA, 4.5:1 for text): muted-foreground on background 6.3:1,
+ * on muted 5.6:1, on card 7.0:1; sale on background 6.0:1; ink-muted on
+ * ink 7.4:1.
  */
 :root {
   --font-sans:
     var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial,
     sans-serif;
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-fraunces), ui-serif, Georgia, "Times New Roman", serif;
 
-  --radius: 0.5rem;
+  --radius: 0.625rem;
 
-  --background: #ffffff;
-  --foreground: #111113;
+  --background: #f6f4ef;
+  --foreground: #1a1814;
   --card: #ffffff;
-  --card-foreground: #111113;
+  --card-foreground: #1a1814;
   --popover: #ffffff;
-  --popover-foreground: #111113;
-  --primary: #111113;
+  --popover-foreground: #1a1814;
+  --primary: #1a1814;
   --primary-foreground: #ffffff;
-  --secondary: #f4f4f5;
-  --secondary-foreground: #111113;
-  --muted: #f4f4f5;
-  --muted-foreground: #5f5f66;
-  --accent: #f4f4f5;
-  --accent-foreground: #111113;
-  --destructive: #c4321f;
-  --border: #e4e4e7;
-  --input: #d4d4d8;
-  --ring: #111113;
+  --secondary: #ece8e0;
+  --secondary-foreground: #1a1814;
+  --muted: #ece8e0;
+  --muted-foreground: #5c574d;
+  --accent: #ece8e0;
+  --accent-foreground: #1a1814;
+  --destructive: #b42318;
+  --border: #e2ddd2;
+  --input: #d3cdbf;
+  --ring: #1a1814;
 
-  --sale: #c4321f;
+  --sale: #b42318;
   --sale-foreground: #ffffff;
-  --success: #15803d;
-  --announcement: #111113;
-  --announcement-foreground: #ffffff;
+  --success: #166534;
+  --announcement: #1a1814;
+  --announcement-foreground: #f6f4ef;
+
+  --ink: #1a1814;
+  --ink-foreground: #f6f4ef;
+  --ink-muted: #b9b2a4;
+}
+
+/* Page and section headings in the display face, with its optical size and
+   a softer cut; smaller headings (product names) stay in the text face.
+   In the base layer, so a utility on an element still wins. */
+@layer base {
+  h1,
+  h2,
+  .font-heading {
+    font-family: var(--font-heading);
+    font-optical-sizing: auto;
+    font-variation-settings: "SOFT" 50;
+    letter-spacing: -0.015em;
+  }
+
+  h3 {
+    font-family: var(--font-sans);
+  }
 }

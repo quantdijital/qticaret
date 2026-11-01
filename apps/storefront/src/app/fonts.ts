@@ -1,4 +1,4 @@
-import { Inter } from "next/font/google"
+import { Fraunces, Inter } from "next/font/google"
 
 /**
  * The storefront's typefaces (docs/19 §3). next/font downloads them at build
@@ -10,4 +10,12 @@ export const inter = Inter({
   subsets: ["latin", "latin-ext"],
   display: "swap",
   variable: "--font-inter",
+})
+
+/** The display face for headings: a soft serif with an optical size axis. */
+export const fraunces = Fraunces({
+  subsets: ["latin", "latin-ext"],
+  display: "swap",
+  axes: ["opsz", "SOFT"],
+  variable: "--font-fraunces",
 })

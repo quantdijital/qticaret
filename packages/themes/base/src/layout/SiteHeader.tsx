@@ -1,4 +1,4 @@
-import { ShoppingBag } from "lucide-react"
+import { ShoppingBag, UserRound } from "lucide-react"
 import { ResponsiveImage } from "@qticaret/ui"
 import type { ShopView, Translate } from "@qticaret/ui"
 import { Container } from "../components/Container"
@@ -6,10 +6,14 @@ import { CategoryNav } from "./CategoryNav"
 import { MobileMenu } from "./MobileMenu"
 import { SearchForm } from "./SearchForm"
 
+const ICON_LINK =
+  "relative flex size-10 items-center justify-center rounded-full transition-colors hover:bg-foreground/5"
+
 /**
- * The header: the shop's small links (wide screens), the logo, search and
- * cart, and the category menu (a drawer on phones). Sticky, so search and
- * cart stay at hand on a long page.
+ * The header: the logo in the middle, search on its left and the account
+ * and the cart on its right (wide screens), the categories in a row under
+ * them; on phones the menu drawer, the logo, the cart and a search field.
+ * Sticky, so search and cart stay at hand on a long page.
  */
 export function SiteHeader({ shop, t }: { shop: ShopView; t: Translate }) {
   const allIn = Object.fromEntries(
@@ -21,67 +25,53 @@ export function SiteHeader({ shop, t }: { shop: ShopView; t: Translate }) {
     submit: t("search.submit"),
   }
   return (
-    <header className="sticky top-0 z-30 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
-      {(shop.topLinks.length > 0 || shop.contact.phone) && (
-        <div className="hidden border-b lg:block">
-          <Container className="flex h-9 items-center justify-end gap-6 text-xs text-muted-foreground">
-            {shop.topLinks.length > 0 && (
-              <nav aria-label={t("nav.top_links")}>
-                <ul className="flex gap-5">
-                  {shop.topLinks.map((link) => (
-                    <li key={link.path}>
-                      <a href={link.path} className="hover:text-foreground">
-                        {link.label}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
-            )}
-            {shop.contact.phone && shop.contact.phoneHref && (
-              <a href={shop.contact.phoneHref} className="font-medium hover:text-foreground">
-                {shop.contact.phone}
-              </a>
-            )}
-          </Container>
+    <header className="sticky top-0 z-30 border-b border-border/70 bg-background/90 backdrop-blur-md supports-[backdrop-filter]:bg-background/75">
+      <Container className="grid h-16 grid-cols-[1fr_auto_1fr] items-center gap-4 lg:h-20">
+        <div className="flex items-center gap-2">
+          <MobileMenu
+            categories={shop.categories}
+            topLinks={shop.topLinks}
+            words={{ open: t("nav.open_menu"), title: t("nav.menu"), close: t("nav.close"), allIn }}
+          />
+          <SearchForm {...search} id="arama-genis" className="hidden w-full max-w-xs lg:block" />
         </div>
-      )}
-      <Container className="flex h-16 items-center gap-3 lg:gap-8">
-        <MobileMenu
-          categories={shop.categories}
-          topLinks={shop.topLinks}
-          words={{ open: t("nav.open_menu"), title: t("nav.menu"), close: t("nav.close"), allIn }}
-        />
-        <a href="/" className="flex shrink-0 items-center text-xl font-semibold tracking-tight">
+        <a
+          href="/"
+          className="font-heading flex items-center justify-center text-2xl font-medium tracking-tight lg:text-[1.75rem]"
+        >
           {shop.logo ? (
-            <ResponsiveImage image={shop.logo} sizes="160px" priority className="h-9 w-auto" />
+            <ResponsiveImage image={shop.logo} sizes="180px" priority className="h-10 w-auto" />
           ) : (
             shop.name
           )}
         </a>
-        <SearchForm {...search} id="arama-genis" className="hidden flex-1 md:block lg:max-w-xl" />
-        <a
-          href="/sepet"
-          aria-label={t("nav.cart_label", { count: shop.cartQuantity })}
-          className="relative ml-auto flex size-10 items-center justify-center rounded-full hover:bg-muted"
-        >
-          <ShoppingBag className="size-5" aria-hidden="true" />
-          {shop.cartQuantity > 0 && (
-            <span
-              aria-hidden="true"
-              className="tabular absolute -top-0.5 -right-0.5 flex min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[11px] font-semibold leading-5 text-primary-foreground"
-            >
-              {shop.cartQuantity}
-            </span>
-          )}
-        </a>
+        <div className="flex items-center justify-end gap-1">
+          <a href="/hesap" aria-label={t("nav.account")} className={`${ICON_LINK} hidden sm:flex`}>
+            <UserRound className="size-5" aria-hidden="true" />
+          </a>
+          <a
+            href="/sepet"
+            aria-label={t("nav.cart_label", { count: shop.cartQuantity })}
+            className={ICON_LINK}
+          >
+            <ShoppingBag className="size-5" aria-hidden="true" />
+            {shop.cartQuantity > 0 && (
+              <span
+                aria-hidden="true"
+                className="tabular absolute top-0.5 right-0.5 flex min-w-[1.125rem] items-center justify-center rounded-full bg-primary px-1 text-[10px] leading-[1.125rem] font-semibold text-primary-foreground ring-2 ring-background"
+              >
+                {shop.cartQuantity}
+              </span>
+            )}
+          </a>
+        </div>
       </Container>
-      <Container className="pb-3 md:hidden">
+      <Container className="pb-3 lg:hidden">
         <SearchForm {...search} id="arama-dar" />
       </Container>
       {shop.categories.length > 0 && (
-        <div className="hidden border-t lg:block">
-          <Container className="py-1">
+        <div className="hidden lg:block">
+          <Container className="flex justify-center pb-2">
             <CategoryNav categories={shop.categories} label={t("nav.categories")} allIn={allIn} />
           </Container>
         </div>

@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { z } from "zod"
 import type { ActionResult } from "@qticaret/ui"
-import { addLine, changeLine } from "@/lib/cart/cart"
+import { addLine, addPromotion, changeLine, removePromotion } from "@/lib/cart/cart"
 import { isStoreApiError } from "@/lib/store-api/errors"
 
 const AddToCart = z.object({
@@ -76,6 +76,55 @@ export async function changeCartLine(form: FormData): Promise<void> {
     redirect(
       `/sepet?hata=${messageFor(error) === "errors.too_many_requests" ? "errors.too_many_requests" : "cart.update_failed"}`
     )
+  }
+  revalidatePath("/", "layout")
+}
+
+const PromotionCode = z
+  .string()
+  .trim()
+  .min(1)
+  .max(64)
+  .regex(/^[\p{L}\p{N}_-]+$/u)
+
+/**
+ * Puts a coupon code on the cart (D6): the code only; whether it takes
+ * and what it takes off is the backend's (CLAUDE.md rule 5).
+ */
+export async function applyPromotion(_state: ActionResult, form: FormData): Promise<ActionResult> {
+  const parsed = PromotionCode.safeParse(form.get("code"))
+  if (!parsed.success) {
+    return { ok: false, error: "cart.promotion_invalid" }
+  }
+  try {
+    if (!(await addPromotion(parsed.data))) {
+      return { ok: false, error: "cart.promotion_invalid" }
+    }
+  } catch (error) {
+    return {
+      ok: false,
+      error:
+        isStoreApiError(error) && error.status === 429
+          ? "errors.too_many_requests"
+          : "cart.promotion_invalid",
+    }
+  }
+  revalidatePath("/", "layout")
+  return { ok: true, error: null }
+}
+
+/** Takes a code off the cart; a plain form. */
+export async function removeCartPromotion(form: FormData): Promise<void> {
+  const parsed = PromotionCode.safeParse(form.get("code"))
+  if (parsed.success) {
+    try {
+      await removePromotion(parsed.data)
+    } catch (error) {
+      if (!isStoreApiError(error)) {
+        throw error
+      }
+      redirect("/sepet?hata=cart.update_failed")
+    }
   }
   revalidatePath("/", "layout")
 }

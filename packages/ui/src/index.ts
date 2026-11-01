@@ -1,4 +1,12 @@
 export { formatLira } from "./money"
 export { ResponsiveImage } from "./ResponsiveImage"
-export type { ActionResult, FormAction, StorefrontTheme, ThemeActions, Translate } from "./theme"
+export type {
+  ActionResult,
+  CheckoutActions,
+  FormAction,
+  StorefrontTheme,
+  ThemeActions,
+  Translate,
+} from "./theme"
+export type * from "./checkout-views"
 export type * from "./views"

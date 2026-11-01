@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { formatLira } from "@qticaret/ui"
-import { addToCart, changeCartLine } from "@/app/actions/cart"
-import { currentCart } from "@/lib/cart/cart"
+import { themeActions } from "@/lib/theme-actions"
+import { codesOf, currentCart } from "@/lib/cart/cart"
 import { t } from "@/lib/i18n"
 import { robotsOnly } from "@/lib/seo/metadata"
 import { storefrontSettings } from "@/lib/store-api/requests"
@@ -54,12 +54,13 @@ export default async function CartPage({
   return (
     <theme.CartPage
       t={t}
-      actions={{ addToCart, changeCartLine }}
+      actions={themeActions}
       view={{
         lines,
         items: formatLira(items),
         discount: differs(items, subtotal) ? formatLira(items - subtotal) : null,
         subtotal: formatLira(subtotal),
+        promotions: codesOf(cart),
         freeShipping: freeShippingOf(subtotal, settings.free_shipping_threshold, t),
         error,
       }}

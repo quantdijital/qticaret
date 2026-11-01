@@ -22,6 +22,20 @@ export async function storePost<T>(path: string, body: unknown): Promise<T> {
   return (await storeRequest<T>(path, { ...(await visit()), method: "POST", body })).data
 }
 
-export async function storeDelete<T>(path: string): Promise<T> {
-  return (await storeRequest<T>(path, { ...(await visit()), method: "DELETE" })).data
+export async function storeDelete<T>(path: string, body?: unknown): Promise<T> {
+  return (
+    await storeRequest<T>(path, {
+      ...(await visit()),
+      method: "DELETE",
+      ...(body === undefined ? {} : { body }),
+    })
+  ).data
+}
+
+/** A call with its own method, query, body or headers (a challenge's answer, an order's key). */
+export async function storeCall<T>(
+  path: string,
+  options: Pick<StoreRequest, "method" | "query" | "body" | "headers">
+): Promise<T> {
+  return (await storeRequest<T>(path, { ...(await visit()), ...options })).data
 }

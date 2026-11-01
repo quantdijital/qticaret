@@ -1,5 +1,6 @@
 "use client"
 
+import { ArrowRight } from "lucide-react"
 import type { NavCategoryView } from "@qticaret/ui"
 import {
   NavigationMenu,
@@ -8,8 +9,11 @@ import {
   NavigationMenuLink,
   NavigationMenuList,
   NavigationMenuTrigger,
-  navigationMenuTriggerStyle,
 } from "@qticaret/ui/components/navigation-menu"
+import { cn } from "@qticaret/ui/lib/utils"
+
+const ITEM =
+  "inline-flex h-10 flex-row items-center justify-center gap-1 rounded-full bg-transparent px-4 py-0 text-[13px] font-medium tracking-wide text-foreground/80 transition-colors hover:bg-foreground/5 hover:text-foreground data-[state=open]:bg-foreground/5 data-[state=open]:text-foreground"
 
 /**
  * The category menu on wide screens. A category with children opens a
@@ -28,35 +32,54 @@ export function CategoryNav({
   allIn: Record<string, string>
 }) {
   return (
-    <NavigationMenu viewport={false} aria-label={label} className="max-w-none justify-start">
-      <NavigationMenuList className="flex-wrap justify-start gap-0">
-        {categories.map((category) =>
+    <NavigationMenu viewport={false} aria-label={label} className="max-w-none">
+      <NavigationMenuList className="flex-wrap justify-center gap-0.5">
+        {categories.map((category, index) =>
           category.children.length === 0 ? (
             <NavigationMenuItem key={category.path}>
-              <NavigationMenuLink asChild className={navigationMenuTriggerStyle()}>
+              <NavigationMenuLink asChild className={ITEM}>
                 <a href={category.path}>{category.label}</a>
               </NavigationMenuLink>
             </NavigationMenuItem>
           ) : (
             <NavigationMenuItem key={category.path}>
-              <NavigationMenuTrigger>{category.label}</NavigationMenuTrigger>
-              <NavigationMenuContent forceMount className="z-40 data-[state=closed]:hidden">
-                <ul className="grid w-[28rem] grid-cols-2 gap-1 p-1">
-                  <li className="col-span-2">
-                    <NavigationMenuLink asChild>
-                      <a href={category.path} className="font-medium">
+              <NavigationMenuTrigger className={ITEM}>{category.label}</NavigationMenuTrigger>
+              <NavigationMenuContent
+                forceMount
+                className={cn(
+                  "z-40 rounded-2xl! border-border! bg-card! p-0! shadow-xl! shadow-foreground/5! data-[state=closed]:hidden",
+                  // The right half's panels open leftwards, inside the page
+                  index >= categories.length / 2 && "right-0 left-auto!"
+                )}
+              >
+                <div className="grid w-[30rem] grid-cols-[1fr_10rem]">
+                  <ul className="grid grid-cols-2 content-start gap-x-2 gap-y-0.5 p-3">
+                    {category.children.map((child) => (
+                      <li key={child.path}>
+                        <NavigationMenuLink asChild>
+                          <a href={child.path} className="rounded-lg px-3 py-2 text-sm">
+                            {child.label}
+                          </a>
+                        </NavigationMenuLink>
+                      </li>
+                    ))}
+                  </ul>
+                  <NavigationMenuLink asChild>
+                    <a
+                      href={category.path}
+                      className="group m-2 flex flex-col justify-between rounded-xl bg-muted p-4"
+                    >
+                      <span className="font-heading text-lg leading-snug">{category.label}</span>
+                      <span className="flex items-center gap-1.5 text-xs font-semibold">
                         {allIn[category.path]}
-                      </a>
-                    </NavigationMenuLink>
-                  </li>
-                  {category.children.map((child) => (
-                    <li key={child.path}>
-                      <NavigationMenuLink asChild>
-                        <a href={child.path}>{child.label}</a>
-                      </NavigationMenuLink>
-                    </li>
-                  ))}
-                </ul>
+                        <ArrowRight
+                          className="size-3.5 transition-transform group-hover:translate-x-0.5"
+                          aria-hidden="true"
+                        />
+                      </span>
+                    </a>
+                  </NavigationMenuLink>
+                </div>
               </NavigationMenuContent>
             </NavigationMenuItem>
           )

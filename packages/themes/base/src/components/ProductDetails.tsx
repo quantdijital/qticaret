@@ -17,13 +17,13 @@ export function ProductDetails({
     return null
   }
   return (
-    <div className="grid gap-10 border-t pt-10 lg:grid-cols-2 lg:gap-14">
+    <div className="grid gap-10 border-t pt-12 lg:grid-cols-2 lg:gap-16">
       {description.length > 0 && (
         <section aria-labelledby="urun-aciklamasi" className="flex flex-col gap-4">
-          <h2 id="urun-aciklamasi" className="text-xl font-semibold tracking-tight">
+          <h2 id="urun-aciklamasi" className="text-3xl leading-tight">
             {t("product.description")}
           </h2>
-          <div className="flex flex-col gap-3 leading-relaxed text-muted-foreground">
+          <div className="flex flex-col gap-3 text-[17px] leading-[1.75] text-foreground/85">
             {description.map((paragraph, index) => (
               <p key={String(index)}>{paragraph}</p>
             ))}
@@ -32,14 +32,14 @@ export function ProductDetails({
       )}
       {specs.length > 0 && (
         <section aria-labelledby="urun-ozellikleri" className="flex flex-col gap-4">
-          <h2 id="urun-ozellikleri" className="text-xl font-semibold tracking-tight">
+          <h2 id="urun-ozellikleri" className="text-3xl leading-tight">
             {t("product.specs")}
           </h2>
-          <dl className="overflow-hidden rounded-xl border text-sm">
+          <dl className="overflow-hidden rounded-2xl border bg-card text-sm">
             {specs.map((spec) => (
               <div
                 key={spec.label}
-                className="grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-4 border-b px-4 py-3 last:border-b-0 odd:bg-muted/50"
+                className="grid grid-cols-[minmax(0,2fr)_minmax(0,3fr)] gap-4 border-b px-4 py-3 last:border-b-0"
               >
                 <dt className="text-muted-foreground">{spec.label}</dt>
                 <dd className="font-medium">{spec.value}</dd>
@@ -61,7 +61,11 @@ export function SpecHighlights({ specs, label }: { specs: SpecView[]; label: str
   return (
     <ul aria-label={label} className="flex flex-wrap gap-2">
       {highlights.map((spec) => (
-        <li key={spec.label} className="rounded-full bg-muted px-3 py-1 text-xs" title={spec.label}>
+        <li
+          key={spec.label}
+          className="rounded-full border bg-card px-3 py-1.5 text-xs"
+          title={spec.label}
+        >
           <span className="text-muted-foreground">{spec.label}: </span>
           <span className="font-medium">{spec.value}</span>
         </li>

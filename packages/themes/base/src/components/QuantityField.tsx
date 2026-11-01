@@ -37,7 +37,7 @@ export function QuantityField({
     <div
       role="group"
       aria-label={label}
-      className={cn("flex h-11 items-center rounded-full border bg-background", className)}
+      className={cn("flex h-12 items-center rounded-full border bg-card", className)}
     >
       <button
         type="button"
@@ -46,7 +46,7 @@ export function QuantityField({
         onClick={() => {
           step(-1)
         }}
-        className="flex size-11 items-center justify-center rounded-full text-muted-foreground hover:text-foreground disabled:opacity-40"
+        className="flex size-12 items-center justify-center rounded-full text-muted-foreground hover:text-foreground disabled:opacity-40"
       >
         <Minus className="size-4" aria-hidden="true" />
       </button>
@@ -71,7 +71,7 @@ export function QuantityField({
         onClick={() => {
           step(1)
         }}
-        className="flex size-11 items-center justify-center rounded-full text-muted-foreground hover:text-foreground disabled:opacity-40"
+        className="flex size-12 items-center justify-center rounded-full text-muted-foreground hover:text-foreground disabled:opacity-40"
       >
         <Plus className="size-4" aria-hidden="true" />
       </button>

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
-import { storefrontEnv } from "./lib/env"
+import { paymentFrameOrigins, storefrontEnv } from "./lib/env"
 import { t } from "./lib/i18n"
 import { contentSecurityPolicy, newNonce } from "./lib/security/csp"
 import { backendFile, isStorefrontIndex, isSystemPath, normalizedPath } from "./lib/seo/paths"
@@ -27,6 +27,10 @@ function gonePage(nonce: string, csp: string): NextResponse {
   })
 }
 
+/** Where a card provider sends the shopper back (D7): possibly inside its own frame on our page. */
+const isPaymentReturn = (pathname: string) =>
+  pathname === "/odeme/sonuc" || pathname.startsWith("/odeme/sonuc/")
+
 /**
  * Before every page (adr/0046 §4): the backend's files at the root, one
  * 301 to the normalised address, the backend's redirects and 410s with
@@ -51,7 +55,10 @@ export async function proxy(request: NextRequest): Promise<Response> {
   }
 
   const nonce = newNonce()
-  const csp = contentSecurityPolicy(nonce, env.NODE_ENV === "development")
+  const csp = contentSecurityPolicy(nonce, env.NODE_ENV === "development", {
+    frameOrigins: paymentFrameOrigins(env),
+    framedBySelf: isPaymentReturn(pathname),
+  })
   const isPageView = request.method === "GET" || request.method === "HEAD"
   if (isPageView && pathname !== "/" && !isSystemPath(pathname) && !isStorefrontIndex(pathname)) {
     const resolution = await resolveForProxy(`${pathname}${search}`, visitor)

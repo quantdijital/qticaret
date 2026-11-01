@@ -1,7 +1,7 @@
 /**
  * The storefront's Content Security Policy (docs/04, adr/0046 §4): scripts
  * only with this request's nonce (and what they load, `strict-dynamic`),
- * nothing framed, no plugins, forms only to ourselves. Pictures may come
+ * nothing framed but a card provider's form, no plugins, forms only to ourselves. Pictures may come
  * from any HTTPS host: product images live on the file storage or a CDN.
  * Development relaxes what Next's dev server needs (eval, inline styles,
  * its websocket); a nonce makes browsers ignore 'unsafe-inline', so dev
@@ -18,7 +18,21 @@ const RADIX_STYLE_HASHES = [
   "'sha256-KpSV7LuPYEu58+3u9LJr9v5Drm0uIKEv0h3u/+NVNm8='",
 ]
 
-export function contentSecurityPolicy(nonce: string, development: boolean): string {
+export interface FrameRules {
+  /** Card providers' hosted forms the checkout frames (D7); nothing else is framed. */
+  frameOrigins?: readonly string[]
+  /**
+   * The page may sit in a frame of our own: a card provider may load its
+   * return address inside its own form, which is framed on the checkout.
+   */
+  framedBySelf?: boolean
+}
+
+export function contentSecurityPolicy(
+  nonce: string,
+  development: boolean,
+  { frameOrigins = [], framedBySelf = false }: FrameRules = {}
+): string {
   const directives = [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${development ? " 'unsafe-eval'" : ""}`,
@@ -27,10 +41,11 @@ export function contentSecurityPolicy(nonce: string, development: boolean): stri
     `img-src 'self' data: blob: https:${development ? " http:" : ""}`,
     "font-src 'self'",
     `connect-src 'self'${development ? " ws: http://localhost:*" : ""}`,
+    `frame-src ${frameOrigins.length > 0 ? frameOrigins.join(" ") : "'none'"}`,
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
-    "frame-ancestors 'none'",
+    `frame-ancestors ${framedBySelf ? "'self'" : "'none'"}`,
     ...(development ? [] : ["upgrade-insecure-requests"]),
   ]
   return directives.join("; ")

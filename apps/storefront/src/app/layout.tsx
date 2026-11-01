@@ -6,7 +6,7 @@ import { storefrontSettings } from "@/lib/store-api/requests"
 import { brandStyle } from "@/lib/views/color"
 import { shopView } from "@/lib/views/shop"
 import { theme } from "@/theme"
-import { inter } from "./fonts"
+import { fraunces, inter } from "./fonts"
 import "./globals.css"
 
 // Every page is made per request: prices, stock and the cart are live (adr/0046 §2)
@@ -28,8 +28,9 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const brand = brandStyle(storefront.primary_color)
   const nonce = requestHeaders.get("x-nonce") ?? undefined
   return (
-    <html lang="tr" className={inter.variable}>
-      <body>
+    <html lang="tr" className={`${inter.variable} ${fraunces.variable}`}>
+      {/* Browser extensions write attributes on <body> before React loads */}
+      <body suppressHydrationWarning>
         {brand && <style nonce={nonce}>{brand}</style>}
         <theme.Layout shop={shop} t={t}>
           {children}

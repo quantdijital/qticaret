@@ -1,5 +1,5 @@
 import type { Resolution } from "@qticaret/types"
-import { addToCart, changeCartLine } from "@/app/actions/cart"
+import { themeActions } from "@/lib/theme-actions"
 import { t } from "@/lib/i18n"
 import { JsonLd } from "@/lib/seo/JsonLd"
 import { pathsOf, priceDisplays, productById, storefrontSettings } from "@/lib/store-api/requests"
@@ -30,7 +30,7 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
   return (
     <>
       <JsonLd blocks={page.seo?.jsonLd ?? []} />
-      <theme.ProductPage view={view} t={t} actions={{ addToCart, changeCartLine }} />
+      <theme.ProductPage view={view} t={t} actions={themeActions} />
     </>
   )
 }

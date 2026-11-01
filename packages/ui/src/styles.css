@@ -36,11 +36,17 @@
   --color-success: var(--success);
   --color-announcement: var(--announcement);
   --color-announcement-foreground: var(--announcement-foreground);
+  /* A dark band (footer, call to action) and the words on it */
+  --color-ink: var(--ink);
+  --color-ink-foreground: var(--ink-foreground);
+  --color-ink-muted: var(--ink-muted);
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 16px);
 }
 
 @layer base {

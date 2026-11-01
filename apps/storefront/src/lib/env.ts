@@ -19,6 +19,20 @@ const schema = z.object({
   // adr/0046 §5: proxies in front of the storefront that append to
   // X-Forwarded-For; the shopper's address is the entry before theirs
   STOREFRONT_TRUSTED_PROXY_HOPS: z.coerce.number().int().min(0).max(5).optional(),
+  // D7: where a card provider's hosted form may be framed from (CSP frame-src),
+  // space- or comma-separated origins; PayTR's when unset
+  PAYMENT_FRAME_ORIGINS: z
+    .string()
+    .transform((value, ctx) => {
+      const origins = value.split(/[\s,]+/).filter((each) => each !== "")
+      const parsed = origins.map((each) => URL.parse(each))
+      if (parsed.some((url) => url === null || !/^https?:$/.test(url.protocol))) {
+        ctx.addIssue({ code: "custom", message: "must be http(s) origins" })
+        return z.NEVER
+      }
+      return parsed.flatMap((url) => (url ? [url.origin] : []))
+    })
+    .optional(),
 })
 
 export type StorefrontEnv = z.infer<typeof schema>
@@ -55,6 +69,18 @@ export function parseStorefrontEnv(
     }
   }
   return env
+}
+
+const PAYTR = "https://www.paytr.com"
+// `pnpm dev:paytr`'s fake PayTR (packages/testing)
+const FAKE_PAYTR = "http://127.0.0.1:9102"
+
+/** The origins a card form may be framed from: the setting, else PayTR's (and the fake one's in development). */
+export function paymentFrameOrigins(env: StorefrontEnv): string[] {
+  if (env.PAYMENT_FRAME_ORIGINS && env.PAYMENT_FRAME_ORIGINS.length > 0) {
+    return env.PAYMENT_FRAME_ORIGINS
+  }
+  return env.NODE_ENV === "development" ? [PAYTR, FAKE_PAYTR] : [PAYTR]
 }
 
 let cached: StorefrontEnv | undefined

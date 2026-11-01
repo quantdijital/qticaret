@@ -26,6 +26,8 @@ export interface Cart {
   total: number
   completed_at: string | null
   items: CartLine[]
+  /** The codes on the cart (automatic campaigns have none to show). */
+  promotions: { code: string | null; is_automatic?: boolean | null }[]
 }
 
 const CART_FIELDS = [
@@ -44,6 +46,8 @@ const CART_FIELDS = [
   "items.unit_price",
   "items.total",
   "items.original_total",
+  "promotions.code",
+  "promotions.is_automatic",
 ].join(",")
 
 /** The shopper's open cart, or null (none yet, gone, or already ordered). */
@@ -124,5 +128,31 @@ export async function changeLine(lineId: string, quantity: number): Promise<void
     await storeDelete(line)
   } else {
     await storePost(line, { quantity })
+  }
+}
+
+/** The codes a shopper typed, as the cart holds them (automatic campaigns left out). */
+export const codesOf = (cart: Cart | null): string[] =>
+  (cart?.promotions ?? []).flatMap((promotion) =>
+    promotion.code && !promotion.is_automatic ? [promotion.code] : []
+  )
+
+/**
+ * Puts a coupon code on the shopper's cart. Medusa answers the cart; a
+ * code it did not take (unknown, expired, not for this cart) is not on it.
+ */
+export async function addPromotion(code: string): Promise<boolean> {
+  const cartId = await cartIdFromCookie()
+  if (!cartId) {
+    return false
+  }
+  await storePost(`/store/carts/${cartId}/promotions`, { promo_codes: [code] })
+  return codesOf(await currentCart()).some((each) => each.toLowerCase() === code.toLowerCase())
+}
+
+export async function removePromotion(code: string): Promise<void> {
+  const cartId = await cartIdFromCookie()
+  if (cartId) {
+    await storeDelete(`/store/carts/${cartId}/promotions`, { promo_codes: [code] })
   }
 }

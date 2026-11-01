@@ -5,7 +5,9 @@ export class StoreApiError extends Error {
   constructor(
     readonly status: number,
     readonly messageKey: string | null,
-    readonly requestId: string | null
+    readonly requestId: string | null,
+    /** The answer's whole body: a 428's challenge, a 400's address issues. */
+    readonly body: unknown = null
   ) {
     super(`Store API answered ${String(status)}${messageKey ? ` (${messageKey})` : ""}`)
   }

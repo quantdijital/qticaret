@@ -1,5 +1,13 @@
 import type { ComponentType, ReactNode } from "react"
 import type {
+  CheckoutPageView,
+  CheckoutResultPageView,
+  OptionView,
+  OrderPageView,
+  PaymentFramePageView,
+  PlaceOrderResult,
+} from "./checkout-views"
+import type {
   BlogIndexPageView,
   CartPageView,
   ContentPageView,
@@ -27,6 +35,28 @@ export interface ThemeActions {
   addToCart: FormAction
   /** A plain form: `line_id` and `quantity`, or `remove=1`. */
   changeCartLine: (form: FormData) => Promise<void>
+  /** Form field: `code`; the answer says whether the code took. */
+  applyPromotion: FormAction
+  /** A plain form: `code`, taken off the cart. */
+  removePromotion: (form: FormData) => Promise<void>
+}
+
+/** The checkout's actions (D7): each step a form, the address selects fed by two lookups. */
+export interface CheckoutActions {
+  /** Form fields: the address form's (`AddressFormValues`). */
+  saveAddress: FormAction
+  /** Form field: `option_id`. */
+  chooseShipping: FormAction
+  /**
+   * Form fields: `provider_id`, `contracts` (`kind:version`, repeated),
+   * `accept`, `birth_date` and `age_confirm` when asked, `marketing_email`,
+   * `marketing_sms`, `challenge` (the solved proof of work, when one was asked).
+   */
+  placeOrder: (state: PlaceOrderResult, form: FormData) => Promise<PlaceOrderResult>
+  /** A province's districts, by its plate. */
+  districts: (province: string) => Promise<OptionView[]>
+  /** A district's neighbourhoods, by its id. */
+  neighborhoods: (district: string) => Promise<OptionView[]>
 }
 
 interface Page<View> {
@@ -48,5 +78,11 @@ export interface StorefrontTheme {
   ContentPage: ComponentType<Page<ContentPageView>>
   BlogIndexPage: ComponentType<Page<BlogIndexPageView>>
   CartPage: ComponentType<Page<CartPageView> & { actions: ThemeActions }>
+  CheckoutPage: ComponentType<Page<CheckoutPageView> & { actions: CheckoutActions }>
+  /** The card provider's hosted form, framed on the shop (PayTR). */
+  PaymentFramePage: ComponentType<Page<PaymentFramePageView>>
+  /** After the provider sent the shopper back: waiting for the order, or a refused payment. */
+  CheckoutResultPage: ComponentType<Page<CheckoutResultPageView>>
+  OrderPage: ComponentType<Page<OrderPageView>>
   NotFoundPage: ComponentType<{ t: Translate }>
 }

@@ -33,7 +33,16 @@ const config: NextConfig = {
   images: { unoptimized: true },
   // docs/13 §2.2: no trailing slash; the proxy answers with a single 301
   skipTrailingSlashRedirect: true,
-  headers: () => Promise.resolve([{ source: "/:path*", headers: SECURITY_HEADERS }]),
+  headers: () =>
+    Promise.resolve([
+      { source: "/:path*", headers: SECURITY_HEADERS },
+      // A card provider may load its return address inside its form, framed
+      // on our checkout (D7): those pages may be framed by our own pages
+      {
+        source: "/odeme/sonuc/:path*",
+        headers: [{ key: "X-Frame-Options", value: "SAMEORIGIN" }],
+      },
+    ]),
 }
 
 export default config

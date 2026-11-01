@@ -27,4 +27,17 @@ describe("contentSecurityPolicy", () => {
     expect(directive(policy, "style-src-attr")).toBeUndefined()
     expect(directive(policy, "script-src")).toContain("'unsafe-eval'")
   })
+
+  it("frames only the card providers' forms, and lets the payment return sit in our own frame", () => {
+    const closed = contentSecurityPolicy("abc123", false)
+    expect(directive(closed, "frame-src")).toBe("frame-src 'none'")
+    expect(directive(closed, "frame-ancestors")).toBe("frame-ancestors 'none'")
+
+    const checkout = contentSecurityPolicy("abc123", false, {
+      frameOrigins: ["https://www.paytr.com"],
+      framedBySelf: true,
+    })
+    expect(directive(checkout, "frame-src")).toBe("frame-src https://www.paytr.com")
+    expect(directive(checkout, "frame-ancestors")).toBe("frame-ancestors 'self'")
+  })
 })

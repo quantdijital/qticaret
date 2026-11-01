@@ -1,5 +1,4 @@
 import { Search } from "lucide-react"
-import { Input } from "@qticaret/ui/components/input"
 import { cn } from "@qticaret/ui/lib/utils"
 
 /**
@@ -12,6 +11,7 @@ export function SearchForm({
   placeholder,
   submit,
   className,
+  defaultValue,
 }: {
   /** The field's id; the header has two forms (wide screens, phones). */
   id: string
@@ -19,13 +19,21 @@ export function SearchForm({
   placeholder: string
   submit: string
   className?: string
+  defaultValue?: string
 }) {
   return (
     <form action="/arama" method="get" role="search" className={cn("relative", className)}>
       <label htmlFor={id} className="sr-only">
         {label}
       </label>
-      <Input
+      <button
+        type="submit"
+        aria-label={submit}
+        className="absolute top-1/2 left-1.5 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground hover:text-foreground"
+      >
+        <Search className="size-4" aria-hidden="true" />
+      </button>
+      <input
         id={id}
         name="q"
         type="search"
@@ -33,15 +41,9 @@ export function SearchForm({
         autoComplete="off"
         enterKeyHint="search"
         maxLength={100}
-        className="h-10 rounded-full bg-muted pr-11 pl-4 border-transparent focus-visible:bg-background"
+        defaultValue={defaultValue}
+        className="h-10 w-full rounded-full border border-border bg-card pr-4 pl-10 text-sm transition-colors outline-none placeholder:text-muted-foreground hover:border-input focus-visible:border-foreground/40"
       />
-      <button
-        type="submit"
-        aria-label={submit}
-        className="absolute top-1/2 right-1 flex size-8 -translate-y-1/2 items-center justify-center rounded-full text-muted-foreground hover:text-foreground"
-      >
-        <Search className="size-4" aria-hidden="true" />
-      </button>
     </form>
   )
 }

@@ -1,14 +1,12 @@
 import type { Metadata } from "next"
 import { notFound, permanentRedirect } from "next/navigation"
-import type { PostCardView } from "@qticaret/ui"
 import { t } from "@/lib/i18n"
 import { blogPosts, siteSeo } from "@/lib/store-api/requests"
-
+import { postCards } from "@/lib/views/posts"
 import { theme } from "@/theme"
 
 const PAGE_SIZE = 12
 const PAGE = /^[1-9]\d{0,3}$/
-const DATE = new Intl.DateTimeFormat("tr-TR", { day: "numeric", month: "long", year: "numeric" })
 
 type Query = Record<string, string | string[] | undefined>
 
@@ -59,23 +57,7 @@ export default async function BlogIndex({ searchParams }: { searchParams: Promis
   if (page > pages) {
     notFound()
   }
-  const posts: PostCardView[] = entries.map((entry) => ({
-    title: entry.title,
-    path: entry.path,
-    excerpt: entry.excerpt,
-    image: entry.image_url
-      ? {
-          src: entry.image_url,
-          alt: entry.image_alt ?? "",
-          width: null,
-          height: null,
-          sources: { avif: null, webp: null },
-        }
-      : null,
-    date: entry.published_at ? DATE.format(new Date(entry.published_at)) : null,
-    dateTime: entry.published_at,
-    reading: t("blog.reading", { minutes: entry.reading_minutes }),
-  }))
+  const posts = postCards(entries, t)
   return (
     <theme.BlogIndexPage
       t={t}

@@ -1,5 +1,6 @@
 import "server-only"
-import type { ShopView } from "@qticaret/ui"
+import type { ContactView, ShopView } from "@qticaret/ui"
+import type { LegalIdentity, StorefrontFrame } from "@qticaret/types"
 import { cartQuantity } from "@/lib/cart/cart"
 import { t } from "@/lib/i18n"
 import {
@@ -11,6 +12,17 @@ import {
 } from "@/lib/store-api/requests"
 import { navigation } from "./categories"
 import { displayPhone, footerGroups, linkViews, socialLinks, whatsappHref } from "./frame"
+
+/** How to reach the shop: the legal identity's contact details, the frame's WhatsApp number. */
+export function contactOf(identity: LegalIdentity, frame: StorefrontFrame): ContactView {
+  return {
+    email: identity.email,
+    phone: identity.phone ? displayPhone(identity.phone) : null,
+    phoneHref: identity.phone ? `tel:${identity.phone}` : null,
+    whatsappHref: frame.whatsapp_phone ? whatsappHref(frame.whatsapp_phone) : null,
+    address: identity.address,
+  }
+}
 
 /** The frame around every page (D3, docs/19 §4), from the backend's answers. */
 export async function shopView(): Promise<ShopView> {
@@ -51,13 +63,7 @@ export async function shopView(): Promise<ShopView> {
     topLinks: linkViews(frame.top_links),
     footerGroups: footerGroups(frame, menu, t),
     trustBadges: frame.trust_badges,
-    contact: {
-      email: identity.email,
-      phone: identity.phone ? displayPhone(identity.phone) : null,
-      phoneHref: identity.phone ? `tel:${identity.phone}` : null,
-      whatsappHref: frame.whatsapp_phone ? whatsappHref(frame.whatsapp_phone) : null,
-      address: identity.address,
-    },
+    contact: contactOf(identity, frame),
     social: socialLinks(identity.same_as),
     companyTitle: identity.company_title,
   }

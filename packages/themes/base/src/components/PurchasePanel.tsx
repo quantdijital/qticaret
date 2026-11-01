@@ -91,7 +91,9 @@ export function PurchasePanel({
       {price && (
         <div className="flex flex-wrap items-center gap-3">
           <p className="tabular flex flex-wrap items-baseline gap-x-3">
-            <span className={cn("text-3xl font-semibold", price.before && "text-sale")}>
+            <span
+              className={cn("text-[2rem] leading-none font-semibold", price.before && "text-sale")}
+            >
               {price.current}
             </span>
             {price.before && (
@@ -102,16 +104,19 @@ export function PurchasePanel({
             )}
           </p>
           {price.discount !== null && (
-            <Badge className="bg-sale text-sale-foreground">
+            <Badge className="rounded-full bg-sale px-2.5 py-1 text-sale-foreground">
               {labels.discount[price.discount]}
             </Badge>
           )}
         </div>
       )}
-      <p className="flex items-center gap-2 text-sm">
+      <p className="flex items-center gap-2 text-sm font-medium">
         <span
           aria-hidden="true"
-          className={cn("size-2 rounded-full", available ? "bg-success" : "bg-muted-foreground")}
+          className={cn(
+            "size-2 rounded-full ring-4",
+            available ? "bg-success ring-success/15" : "bg-muted-foreground ring-muted"
+          )}
         />
         {variant ? (available ? labels.inStock : labels.outOfStock) : labels.chooseOptions}
       </p>
@@ -130,7 +135,7 @@ export function PurchasePanel({
                 <label
                   key={value}
                   htmlFor={id}
-                  className="inline-flex h-10 min-w-12 cursor-pointer items-center justify-center rounded-full border px-4 text-sm transition-colors hover:border-foreground has-[:checked]:border-foreground has-[:checked]:bg-foreground has-[:checked]:text-background has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ring"
+                  className="inline-flex h-11 min-w-12 cursor-pointer items-center justify-center rounded-full border bg-card px-5 text-sm font-medium transition-colors hover:border-foreground has-[:checked]:border-foreground has-[:checked]:bg-foreground has-[:checked]:text-background has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ring"
                 >
                   <input
                     id={id}
@@ -162,7 +167,7 @@ export function PurchasePanel({
           type="submit"
           size="lg"
           disabled={!available || pending}
-          className="h-11 flex-1 rounded-full text-base"
+          className="h-12 flex-1 rounded-full text-base"
         >
           {pending
             ? labels.adding

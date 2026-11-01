@@ -4,87 +4,98 @@ import { Container } from "../components/Container"
 import { TrustStrip } from "../components/TrustStrip"
 
 /**
- * The footer: the shop's promises, its contact details and profiles, its
- * link columns, and the small print with its registered name.
+ * The footer: the shop's promises on the page's own ground, then a dark
+ * band with its name and contact details, its link columns and profiles,
+ * and the small print with its registered name.
  */
 export function SiteFooter({ shop, t }: { shop: ShopView; t: Translate }) {
   const { contact } = shop
   const year = new Date().getFullYear()
   return (
-    <footer className="mt-16 border-t bg-muted/60">
+    <footer className="mt-20 lg:mt-28">
       {shop.trustBadges.length > 0 && (
-        <div className="border-b">
-          <Container className="py-8">
-            <TrustStrip badges={shop.trustBadges} label={t("footer.trust")} />
+        <Container className="pb-12 lg:pb-16">
+          <TrustStrip badges={shop.trustBadges} label={t("footer.trust")} />
+        </Container>
+      )}
+      <div className="bg-ink text-ink-foreground">
+        <Container className="grid gap-12 py-14 lg:grid-cols-[1.3fr_2fr] lg:gap-16 lg:py-20">
+          <section aria-labelledby="footer-contact" className="flex flex-col gap-6">
+            <p className="font-heading text-3xl leading-tight lg:text-4xl">{shop.name}</p>
+            <h2 id="footer-contact" className="sr-only">
+              {t("footer.contact")}
+            </h2>
+            <ul className="flex flex-col gap-3 text-sm text-ink-muted">
+              {contact.phone && contact.phoneHref && (
+                <li className="flex items-center gap-2.5">
+                  <Phone className="size-4 shrink-0" aria-hidden="true" />
+                  <a href={contact.phoneHref} className="tabular hover:text-ink-foreground">
+                    {contact.phone}
+                  </a>
+                </li>
+              )}
+              {contact.email && (
+                <li className="flex items-center gap-2.5">
+                  <Mail className="size-4 shrink-0" aria-hidden="true" />
+                  <a href={`mailto:${contact.email}`} className="hover:text-ink-foreground">
+                    {contact.email}
+                  </a>
+                </li>
+              )}
+              {contact.address && (
+                <li className="flex items-start gap-2.5">
+                  <MapPin className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+                  <span className="max-w-xs">{contact.address}</span>
+                </li>
+              )}
+            </ul>
+            {shop.social.length > 0 && (
+              <ul aria-label={t("footer.social")} className="flex flex-wrap gap-2">
+                {shop.social.map((profile) => (
+                  <li key={profile.href}>
+                    <a
+                      href={profile.href}
+                      rel="noopener me"
+                      target="_blank"
+                      className="inline-flex rounded-full border border-ink-foreground/20 px-3.5 py-1.5 text-xs font-medium transition-colors hover:bg-ink-foreground hover:text-ink"
+                    >
+                      {profile.label}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+          {shop.footerGroups.length > 0 && (
+            <div className="grid grid-cols-2 gap-10 sm:grid-cols-[repeat(auto-fit,minmax(10rem,1fr))]">
+              {shop.footerGroups.map((group) => (
+                <nav key={group.title} aria-label={group.title} className="text-sm">
+                  <h2 className="mb-5 font-sans text-xs font-semibold tracking-[0.14em] text-ink-muted uppercase">
+                    {group.title}
+                  </h2>
+                  <ul className="flex flex-col gap-3">
+                    {group.links.map((link) => (
+                      <li key={link.path}>
+                        <a
+                          href={link.path}
+                          className="text-ink-foreground/90 underline-offset-4 hover:text-ink-foreground hover:underline"
+                        >
+                          {link.label}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </nav>
+              ))}
+            </div>
+          )}
+        </Container>
+        <div className="border-t border-ink-foreground/10">
+          <Container className="flex flex-col gap-2 py-6 text-xs text-ink-muted sm:flex-row sm:items-center sm:justify-between">
+            <p>{t("footer.rights", { year, name: shop.companyTitle ?? shop.name })}</p>
+            <p>{t("footer.secure_payment")}</p>
           </Container>
         </div>
-      )}
-      <Container className="grid gap-10 py-12 md:grid-cols-[1.4fr_repeat(3,1fr)]">
-        <section aria-labelledby="footer-contact" className="flex flex-col gap-4 text-sm">
-          <p className="text-lg font-semibold tracking-tight">{shop.name}</p>
-          <h2 id="footer-contact" className="sr-only">
-            {t("footer.contact")}
-          </h2>
-          <ul className="flex flex-col gap-2.5 text-muted-foreground">
-            {contact.phone && contact.phoneHref && (
-              <li className="flex items-center gap-2">
-                <Phone className="size-4 shrink-0" aria-hidden="true" />
-                <a href={contact.phoneHref} className="hover:text-foreground">
-                  {contact.phone}
-                </a>
-              </li>
-            )}
-            {contact.email && (
-              <li className="flex items-center gap-2">
-                <Mail className="size-4 shrink-0" aria-hidden="true" />
-                <a href={`mailto:${contact.email}`} className="hover:text-foreground">
-                  {contact.email}
-                </a>
-              </li>
-            )}
-            {contact.address && (
-              <li className="flex items-start gap-2">
-                <MapPin className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-                <span>{contact.address}</span>
-              </li>
-            )}
-          </ul>
-          {shop.social.length > 0 && (
-            <ul aria-label={t("footer.social")} className="flex flex-wrap gap-2">
-              {shop.social.map((profile) => (
-                <li key={profile.href}>
-                  <a
-                    href={profile.href}
-                    rel="noopener me"
-                    target="_blank"
-                    className="inline-flex rounded-full border bg-background px-3 py-1 text-xs font-medium hover:bg-accent"
-                  >
-                    {profile.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-        {shop.footerGroups.map((group) => (
-          <nav key={group.title} aria-label={group.title} className="text-sm">
-            <h2 className="mb-4 font-semibold">{group.title}</h2>
-            <ul className="flex flex-col gap-2.5 text-muted-foreground">
-              {group.links.map((link) => (
-                <li key={link.path}>
-                  <a href={link.path} className="hover:text-foreground">
-                    {link.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </nav>
-        ))}
-      </Container>
-      <div className="border-t">
-        <Container className="py-6 text-xs text-muted-foreground">
-          {t("footer.rights", { year, name: shop.companyTitle ?? shop.name })}
-        </Container>
       </div>
     </footer>
   )

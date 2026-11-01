@@ -4,6 +4,8 @@ import { JsonLd } from "@/lib/seo/JsonLd"
 import { metadataOf } from "@/lib/seo/metadata"
 import {
   allCategories,
+  blogPosts,
+  legalIdentity,
   listProducts,
   pathsOf,
   priceDisplays,
@@ -11,7 +13,9 @@ import {
   storefrontSettings,
 } from "@/lib/store-api/requests"
 import { childrenOf } from "@/lib/views/categories"
+import { postCards } from "@/lib/views/posts"
 import { productCards, variantIdsOf } from "@/lib/views/product"
+import { contactOf } from "@/lib/views/shop"
 import { theme } from "@/theme"
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -20,12 +24,15 @@ export async function generateMetadata(): Promise<Metadata> {
 
 /** The home page: the shop's structured data, its top categories and newest products. */
 export default async function HomePage() {
-  const [site, categories, { products }, { storefront }] = await Promise.all([
+  const [site, categories, { products }, { storefront }, identity, posts] = await Promise.all([
     siteSeo(),
     allCategories(),
     listProducts({ limit: 12, order: "-created_at" }),
     storefrontSettings(),
+    legalIdentity(),
+    blogPosts(0, 3),
   ])
+  const contact = contactOf(identity, storefront)
   const top = childrenOf(categories, null)
   const [productPaths, categoryPaths, displays] = await Promise.all([
     pathsOf(
@@ -58,6 +65,8 @@ export default async function HomePage() {
             : categoryLinks.slice(0, 2),
           categories: categoryLinks,
           products: productCards(products, productPaths, displays),
+          posts: postCards(posts.entries, t),
+          help: contact.whatsappHref || contact.phone || contact.email ? contact : null,
         }}
       />
     </>

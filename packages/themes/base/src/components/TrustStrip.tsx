@@ -23,7 +23,10 @@ const ICONS: Record<TrustBadgeView["icon"], LucideIcon> = {
   phone: Phone,
 }
 
-/** The shop's promises (free shipping, same-day dispatch…), in a row on wide screens. */
+/**
+ * The shop's promises (free shipping, same-day dispatch…): a card with
+ * one cell per promise on wide screens, two per row on phones.
+ */
 export function TrustStrip({
   badges,
   label,
@@ -43,26 +46,34 @@ export function TrustStrip({
     <ul
       aria-label={label}
       className={cn(
-        "grid grid-cols-2",
-        compact ? "gap-3 rounded-2xl border p-4" : "gap-4 lg:grid-cols-4",
+        "grid grid-cols-2 overflow-hidden rounded-2xl border bg-card",
+        !compact && "lg:grid-cols-4",
         className
       )}
     >
       {badges.map((badge) => {
         const Icon = ICONS[badge.icon]
         return (
-          <li key={badge.title} className="flex items-start gap-3">
+          <li
+            key={badge.title}
+            className={cn(
+              "-mt-px -ml-px flex items-start gap-3 border-t border-l",
+              compact ? "p-4" : "p-5 lg:p-6"
+            )}
+          >
             <span
               className={cn(
-                "flex shrink-0 items-center justify-center rounded-full bg-muted",
+                "flex shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary",
                 compact ? "size-8" : "size-10"
               )}
             >
               <Icon className={compact ? "size-4" : "size-5"} aria-hidden="true" />
             </span>
             <span className={compact ? "text-xs" : "text-sm"}>
-              <span className="block font-medium">{badge.title}</span>
-              {badge.text && <span className="block text-muted-foreground">{badge.text}</span>}
+              <span className="block font-semibold">{badge.title}</span>
+              {badge.text && (
+                <span className="mt-0.5 block text-muted-foreground">{badge.text}</span>
+              )}
             </span>
           </li>
         )

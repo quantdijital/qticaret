@@ -181,6 +181,10 @@ export interface HomePageView {
   actions: LinkView[]
   categories: LinkView[]
   products: ProductCardView[]
+  /** The newest blog posts (at most three); none: no blog block. */
+  posts: PostCardView[]
+  /** How to reach the shop, for the "ask us" band; null without a phone, WhatsApp or e-mail. */
+  help: ContactView | null
 }
 
 export interface PostCardView {
@@ -228,6 +232,8 @@ export interface CartPageView {
   items: string
   discount: string | null
   subtotal: string
+  /** The coupon codes on the cart, each removable. */
+  promotions: string[]
   /** How near the cart is to free shipping; null when the shop gives none. */
   freeShipping: FreeShippingView | null
   /** A message for the shopper after a failed change, already in words. */

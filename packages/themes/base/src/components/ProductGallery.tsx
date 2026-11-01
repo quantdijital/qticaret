@@ -18,7 +18,7 @@ export function ProductGallery({
 }) {
   if (images.length === 0) {
     return (
-      <div className="flex aspect-square flex-col items-center justify-center gap-2 rounded-2xl bg-muted text-sm text-muted-foreground">
+      <div className="flex aspect-square flex-col items-center justify-center gap-2 rounded-3xl border bg-card text-sm text-muted-foreground">
         <ImageOff className="size-8" aria-hidden="true" />
         {noImage}
       </div>
@@ -36,7 +36,7 @@ export function ProductGallery({
                 : "w-[88%] shrink-0 snap-center sm:w-full"
             }
           >
-            <div className="aspect-square overflow-hidden rounded-2xl bg-muted">
+            <div className="aspect-square overflow-hidden rounded-3xl border bg-card">
               <ResponsiveImage
                 image={image}
                 sizes={

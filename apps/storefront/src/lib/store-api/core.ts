@@ -14,6 +14,8 @@ export interface StoreRequest {
   /** The request id to carry on, so one id follows the visit through both servers. */
   requestId?: string | null
   timeoutMs?: number
+  /** Extra headers a call needs: a solved challenge (`x-challenge`), an order's key (`x-order-token`). */
+  headers?: Record<string, string>
 }
 
 export interface StoreAnswer<T> {
@@ -52,6 +54,7 @@ export async function storeRequest<T>(
   const env = storefrontEnv()
   const method = request.method ?? "GET"
   const headers: Record<string, string> = {
+    ...request.headers,
     accept: "application/json",
     "x-publishable-api-key": await publishableKey(env),
     ...signedVisitorHeaders(env.STOREFRONT_IP_SECRET, request.visitorIp),
@@ -80,7 +83,8 @@ export async function storeRequest<T>(
     throw new StoreApiError(
       response.status,
       typeof body.message === "string" ? body.message : null,
-      typeof body.request_id === "string" ? body.request_id : null
+      typeof body.request_id === "string" ? body.request_id : null,
+      body
     )
   }
   return { status: response.status, data: data as T, headers: response.headers }
