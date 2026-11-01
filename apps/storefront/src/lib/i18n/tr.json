@@ -517,5 +517,8 @@
   "order.parcel_failed": "Teslim edilemedi",
   "preview.title": "Önizleme: {title}",
   "preview.gone": "Önizleme bağlantısı geçersiz",
-  "preview.notice": "Önizleme: bu sayfa yayımlanmadan önceki hâlidir ve yalnız bağlantıyı bilenler görebilir. Bağlantı 24 saat geçerlidir."
+  "preview.notice": "Önizleme: bu sayfa yayımlanmadan önceki hâlidir ve yalnız bağlantıyı bilenler görebilir. Bağlantı 24 saat geçerlidir.",
+  "listing.all_products_description": "{shop} mağazasındaki tüm ürünler: fiyatları ve stok durumlarıyla, filtreleyip sıralayarak inceleyin.",
+  "blog.description": "{shop} blogu: ürünler, kullanım ve bakım üzerine rehberler ve haberler.",
+  "reviews.description": "{shop} müşterilerinin satın aldıkları ürünler hakkındaki onaylı yorumları ve puanları."
 }

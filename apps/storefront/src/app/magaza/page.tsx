@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { headers } from "next/headers"
 import { t } from "@/lib/i18n"
+import { breadcrumbJsonLd } from "@/lib/seo/breadcrumbs"
 import { siteSeo } from "@/lib/store-api/requests"
 import { searchOf, stateFromSearch } from "@/lib/views/listing"
 import { ListingContent } from "@/screens/listing"
@@ -28,6 +29,7 @@ export async function generateMetadata({
   const path = state.page > 1 ? `/magaza?sayfa=${String(state.page)}` : "/magaza"
   return {
     title: { absolute: `${t("listing.all_products")} | ${site.shop.name}` },
+    description: t("listing.all_products_description", { shop: site.shop.name }),
     alternates: site.canonical_host ? { canonical: `https://${site.canonical_host}${path}` } : null,
     // docs/13 §7: a narrowed or reordered list is not indexed; its pages are
     robots: !site.indexing ? "noindex,nofollow" : narrowed ? "noindex,follow" : "index,follow",
@@ -36,7 +38,7 @@ export async function generateMetadata({
 
 /** `/magaza` (D4): the whole catalogue, with the filters and sorts every listing has. */
 export default async function Shop({ searchParams }: { searchParams: Promise<Query> }) {
-  const query = await searchParams
+  const [query, site] = await Promise.all([searchParams, siteSeo()])
   const state = stateFromSearch(toSearch(query))
   const incoming = await headers()
   const origin = incoming.get("host") ? `http://${incoming.get("host") ?? ""}` : "http://localhost"
@@ -62,7 +64,10 @@ export default async function Shop({ searchParams }: { searchParams: Promise<Que
         { label: t("home.label"), path: "/" },
         { label: title, path: null },
       ]}
-      jsonLd={[]}
+      jsonLd={breadcrumbJsonLd(site.canonical_host, [
+        { name: t("home.label"), path: "/" },
+        { name: t("listing.all_products"), path: "/magaza" },
+      ])}
     />
   )
 }

@@ -1,6 +1,8 @@
 import type { Metadata } from "next"
 import { notFound, permanentRedirect } from "next/navigation"
 import { t } from "@/lib/i18n"
+import { breadcrumbJsonLd } from "@/lib/seo/breadcrumbs"
+import { JsonLd } from "@/lib/seo/JsonLd"
 import { blogPosts, siteSeo } from "@/lib/store-api/requests"
 import { postCards } from "@/lib/views/posts"
 import { theme } from "@/theme"
@@ -32,6 +34,7 @@ export async function generateMetadata({
   const title = `${t("blog.title")} | ${site.shop.name}`
   return {
     title: { absolute: page > 1 ? `${title} – ${t("listing.page_n", { page })}` : title },
+    description: t("blog.description", { shop: site.shop.name }),
     // docs/13 §7: each page of a list is its own page, its own canonical
     alternates: site.canonical_host ? { canonical: `https://${site.canonical_host}${path}` } : null,
     robots: site.indexing ? "index,follow" : "noindex,nofollow",
@@ -44,7 +47,7 @@ export async function generateMetadata({
  * (docs/13 §7), as every list does.
  */
 export default async function BlogIndex({ searchParams }: { searchParams: Promise<Query> }) {
-  const query = await searchParams
+  const [query, site] = await Promise.all([searchParams, siteSeo()])
   const page = pageOf(query)
   if (page === null) {
     notFound()
@@ -59,28 +62,36 @@ export default async function BlogIndex({ searchParams }: { searchParams: Promis
   }
   const posts = postCards(entries, t)
   return (
-    <theme.BlogIndexPage
-      t={t}
-      view={{
-        title: t("blog.title"),
-        breadcrumbs: [
-          { label: t("home.label"), path: "/" },
-          { label: t("blog.title"), path: null },
-        ],
-        posts,
-        pagination: {
-          page,
-          pages,
-          previous: page > 1 ? pagePath(page - 1) : null,
-          next: page < pages ? pagePath(page + 1) : null,
-          pagePath: Object.fromEntries(
-            Array.from({ length: Math.min(pages, 50) }, (_, index) => [
-              index + 1,
-              pagePath(index + 1),
-            ])
-          ),
-        },
-      }}
-    />
+    <>
+      <JsonLd
+        blocks={breadcrumbJsonLd(site.canonical_host, [
+          { name: t("home.label"), path: "/" },
+          { name: t("blog.title"), path: "/blog" },
+        ])}
+      />
+      <theme.BlogIndexPage
+        t={t}
+        view={{
+          title: t("blog.title"),
+          breadcrumbs: [
+            { label: t("home.label"), path: "/" },
+            { label: t("blog.title"), path: null },
+          ],
+          posts,
+          pagination: {
+            page,
+            pages,
+            previous: page > 1 ? pagePath(page - 1) : null,
+            next: page < pages ? pagePath(page + 1) : null,
+            pagePath: Object.fromEntries(
+              Array.from({ length: Math.min(pages, 50) }, (_, index) => [
+                index + 1,
+                pagePath(index + 1),
+              ])
+            ),
+          },
+        }}
+      />
+    </>
   )
 }

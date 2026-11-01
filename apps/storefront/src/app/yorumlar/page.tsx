@@ -1,6 +1,8 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { t } from "@/lib/i18n"
+import { breadcrumbJsonLd } from "@/lib/seo/breadcrumbs"
+import { JsonLd } from "@/lib/seo/JsonLd"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { pathsOf, siteSeo } from "@/lib/store-api/requests"
 import { storeGet } from "@/lib/store-api/server"
@@ -48,6 +50,7 @@ export async function generateMetadata({
   const page = pageOf(query) ?? 1
   return {
     title: { absolute: `${t("reviews.title")} | ${site.shop.name}` },
+    description: t("reviews.description", { shop: site.shop.name }),
     alternates: site.canonical_host
       ? { canonical: `https://${site.canonical_host}${pagePath(page)}` }
       : null,
@@ -57,7 +60,8 @@ export async function generateMetadata({
 
 /** `/yorumlar` (D10): every approved review, twenty a page, each with its product's link. */
 export default async function ReviewsIndex({ searchParams }: { searchParams: Promise<Query> }) {
-  const page = pageOf(await searchParams)
+  const [query, site] = await Promise.all([searchParams, siteSeo()])
+  const page = pageOf(query)
   if (page === null) {
     notFound()
   }
@@ -89,41 +93,49 @@ export default async function ReviewsIndex({ searchParams }: { searchParams: Pro
         ) / 10
       : null
   return (
-    <theme.ReviewsPage
-      t={t}
-      view={{
-        title: t("reviews.title"),
-        breadcrumbs: [
-          { label: t("home.label"), path: "/" },
-          { label: t("reviews.title"), path: null },
-        ],
-        average,
-        count: answer.count,
-        reviews: answer.reviews.map((review) => {
-          const path = paths[review.product_id]
-          return {
-            rating: review.rating,
-            title: review.title,
-            body: review.body,
-            author: review.author_name ?? t("product.anonymous"),
-            date: DATE.format(new Date(review.created_at)),
-            verified: review.verified_purchase,
-            product: path ? { label: review.product_title, path } : null,
-          }
-        }),
-        pagination: {
-          page,
-          pages,
-          previous: page > 1 ? pagePath(page - 1) : null,
-          next: page < pages ? pagePath(page + 1) : null,
-          pagePath: Object.fromEntries(
-            Array.from({ length: Math.min(pages, 50) }, (_, index) => [
-              index + 1,
-              pagePath(index + 1),
-            ])
-          ),
-        },
-      }}
-    />
+    <>
+      <JsonLd
+        blocks={breadcrumbJsonLd(site.canonical_host, [
+          { name: t("home.label"), path: "/" },
+          { name: t("reviews.title"), path: "/yorumlar" },
+        ])}
+      />
+      <theme.ReviewsPage
+        t={t}
+        view={{
+          title: t("reviews.title"),
+          breadcrumbs: [
+            { label: t("home.label"), path: "/" },
+            { label: t("reviews.title"), path: null },
+          ],
+          average,
+          count: answer.count,
+          reviews: answer.reviews.map((review) => {
+            const path = paths[review.product_id]
+            return {
+              rating: review.rating,
+              title: review.title,
+              body: review.body,
+              author: review.author_name ?? t("product.anonymous"),
+              date: DATE.format(new Date(review.created_at)),
+              verified: review.verified_purchase,
+              product: path ? { label: review.product_title, path } : null,
+            }
+          }),
+          pagination: {
+            page,
+            pages,
+            previous: page > 1 ? pagePath(page - 1) : null,
+            next: page < pages ? pagePath(page + 1) : null,
+            pagePath: Object.fromEntries(
+              Array.from({ length: Math.min(pages, 50) }, (_, index) => [
+                index + 1,
+                pagePath(index + 1),
+              ])
+            ),
+          },
+        }}
+      />
+    </>
   )
 }
