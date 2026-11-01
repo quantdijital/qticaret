@@ -67,7 +67,33 @@
   - **E2E (`apps/storefront/e2e`, Playwright + axe):** 22 test (sayfalar, güvenlik başlıkları, CSP, axe WCAG 2.2 AA, misafir havale siparişi uçtan uca); üç kez üst üste yeşil. E2E iki gerçek hata yakaladı: plakası 0 ile başlayan illerde adres reddi; sayfa başına çok backend çağrısı yüzünden IP sınırı (paylaşılan önbellek + ayrı sınır ile çözüldü).
   - **Doğrulama:** `pnpm typecheck` ve `pnpm lint` tüm çalışma alanında 0 hata; vitrin birim 47; ilgili backend birim ve HTTP takımları (free-shipping, listing-products, customer-privacy-requests, product-reviews, route-inventory, seo-resolve, storefront-frame, storefront-client-ip) yeşil; tam HTTP koşusu yapılmadı.
 - **PayTR çerçevesi uçtan uca denendi (sahte PayTR, geçici bağlanıp sonra kaldırıldı):** çerçeve → onay → bildirim → `/odeme/sonuc` → sipariş. Ardından kural gereği adr/0028 ödeme deneme sayfası silindi (`796ecbf`); demo ürünler e2e kullandığı için duruyor.
-- **Açık kalanlar (vitrin):** Hediye kartı (bayrak kapalı), Meilisearch (D10), iletişim formu (backend ucu yok), renk örnekleri, tema ayarları/ikinci tema (D11), tasarım (kullanıcı yapacak).
+- **Gecenin üçüncü bölümü (2026-11-02 01:00 sonrası; commit'ler `b3bde35` → `47d3d10`):**
+  - **Test düzeltmesi:** backend birim takımındaki 4 hata (`rate-limit.unit.spec.ts`) gerçek bir sorun değildi; sahte istekte `headers` yoktu, imzalı adres denetimi bu yüzden atlanıyordu. Birim 226/226.
+  - **Kenar (D2 kalanı):** canlıda başka host'a gelen istek mağazanın `canonical_host`'una tek 301 alır; mağaza duyuruyu açtıysa `/{anahtar}.txt` IndexNow anahtarını döndürür (tek önbellekli `/store/seo/site` okuması).
+  - **İkinci bağımsız güvenlik incelemesi:** yüksek bulgu yok, hepsi düzeltildi (ayrıntı ADR-0046 eki).
+    - Orta: `/magaza` ve diğer listeler her istekte 3000 ürünü önbelleksiz tarayıp fiyatlıyordu (CPU DoS). Artık liste başına 30 sn süreç önbelleği var, uca ayrı sınır (`listing`, 120/dk).
+    - Düşük: eşzamanlı iki KVKK talebi, `/store/reviews`'un satış kanalına bakmaması, giriş çerezinin yönlendiren sayfa yolunu tutması ve boyutunun sınırsız olması, imzalı IP başlıklarının 2 dakika yeniden kullanılabilmesi (pencere 30 sn'ye indi).
+  - **İletişim formu (D10, ADR-0047):**
+    - Yeni `contact-messages` modülü; ad, e-posta, telefon ve mesaj mühürlü (şifreli) saklanıyor.
+    - `POST /store/contact-messages`: hız sınırı, saatteki ilk mesajdan sonra iş kanıtı, posta almayan alan adının reddi.
+    - Panel zili ve personel e-postası. E-postada yalnız ad ve konu var; Ayarlar > Bildirimler'den kapatılabilir.
+    - Panelde Müşteriler > İletişim mesajları: bekleyen/yanıtlanan, `mailto`/`tel` bağlantıları, yanıtlandı işareti (`operations` dahil), silme (yönetici).
+    - KVKK dökümüne ve silmeye girer; 365 gün sonra gece işiyle silinir.
+    - Vitrinde form, Ayarlar > Vitrin'de seçilen sayfanın (varsayılan `/iletisim`) metninin altında. Tarayıcıda denendi: iş kanıtı ~1,8 sn'de çözüldü, mesaj kaydedildi.
+  - **E-bülten:** vitrin alt bilgisinde abonelik kutusu → `POST /store/newsletter`.
+    - Çift onaylı: adrese onay bağlantısı gider; İYS'ye ve izin kaydına ancak bağlantı açılınca girer.
+    - Yeni izin kaynağı `newsletter` (İYS'de HS_WEB). Zaten izni olan adrese ikinci e-posta gitmez; yanıt her adres için aynıdır.
+  - **Ödeme adımında fatura notu:** giriş yapmış müşteriye fatura profili gösterilir (kurumsal: unvan, vergi dairesi, maskeli VKN; değiştir bağlantısıyla). Misafire "fatura bireysel kesilir, kurumsal fatura için giriş yapın" denir.
+  - **İş kanıtı sınır hatası (vitrin ve panel girişi):** çözülmüş cevabın yeniden gönderimi de sayıldığı için sınırda daha zor bir bulmacaya düşüp sessizce takılıyordu. Artık en çok 3 tur çözülüyor (iletişim formunu denerken yakalandı).
+  - **Doğrulama:** tip denetimi ve lint tüm çalışma alanında 0 hata. Backend birim 226 takım (2399 test). İlgili HTTP takımları yeşil: contact-messages 5, consents 5, listing-products 4, product-reviews 4, customer-privacy-requests, kvkk-requests, staff-alerts, message-templates, compliance-retention, platform-settings, route-inventory, storefront-frame. Vitrin birim 56, e2e 26/26, panel 125 dosya / 418 test.
+- **Açık kalanlar (vitrin):**
+  - Hediye kartı: bayrak kapalı. Sepette kod alanı ve tamamen kartla ödenen (0 TL) siparişin ödeme akışı gerekir; ertelendi.
+  - Misafire kurumsal fatura: sipariş düzeyinde VKN verisi (yeni model ve ADR) gerekir; **karar senin**.
+  - Meilisearch (D10).
+  - Renk örnekleri.
+  - Tema ayarları ve ikinci tema (D11).
+  - İmzalı önizleme bağlantıları.
+  - Tasarım (sen yapacaksın).
 - **Gözden geçir (otonom kararlar):**
   - Görünüm sektörden bağımsız ama karakterli (serif başlık); renk yine mağazanın `primary_color`'ı (duyuru şeridi, düğmeler).
   - Misafir ödemede fatura adresi = teslimat adresi; kurumsal fatura (VKN) yalnız giriş yapmış müşterinin `billing-profile`'ında (vitrinde ekranı henüz yok).
@@ -1304,7 +1330,7 @@
 | # | Kapsam | Durum |
 |---|---|---|
 | D1 ✓ | Mimari ve iskelet: ADR-0046, `apps/storefront`, `packages/ui` (tema sözleşmesi, görünüm modelleri), `packages/themes/base`, `packages/types/src/store`; imzalı istemci IP'si (backend + vitrin); `/dev/storefront-key`; `pnpm env:init` vitrin env'i | Bitti (`96b95ed`, `bca3942`, `ddc3656`) |
-| D2 ✓ | SEO çekirdeği: `proxy.ts` (normalizasyon 301, resolve yönlendirmesi kendi koduyla, 410, 404 bildirimi, nonce'lu CSP, `noindex` ortamı, robots/sitemap/security.txt aktarımı), metadata ilk HTML'de, JSON-LD kaçışlı | Bitti |
+| D2 ✓ | SEO çekirdeği: `proxy.ts` (normalizasyon 301, resolve yönlendirmesi kendi koduyla, 410, 404 bildirimi, nonce'lu CSP, `noindex` ortamı, robots/sitemap/security.txt aktarımı), metadata ilk HTML'de, JSON-LD kaçışlı; canlıda kanonik host 301'i ve IndexNow anahtar dosyası (2026-11-02) | Bitti |
 | D3 ◐ | Çerçeve ve ana sayfa: menü, sepet sayacı, ana sayfa (`/store/seo/site` `home`) ✓; yönetilebilir menü, marka rengi, ana sayfa girişi, mağaza profili yükleyicisi (`shop:profile`) ✓; shadcn temeli, `storefront` ayar bölümü + `GET /store/storefront`, duyuru şeridi, üst bağlantılar, açılır kategori menüsü, telefon çekmecesi, arama kutusu, güven şeridi, alt bilgi, WhatsApp ✓ (`3bc6354`…`ff88a3b`); panel "Vitrin" ekranı (bkz. özet). Açık: panelde SEO ayarlarına ana sayfa başlık/açıklama alanı; footer yasal bağlantıları ve ETBİS (D10); mobil alt gezinme | Büyük ölçüde bitti |
 | D4 ✓ | Listeleme: kategori, marka, koleksiyon, landing, `/magaza` (tüm katalog); filtreler (marka, öznitelik, sayılı), fiyat aralığı, en yeni/fiyat sıralama (`GET /store/listings/products`, bellekte ≤3000 ürün); kanonik bağlantılar | Bitti (2026-11-02) |
 | D5 ◐ | Ürün sayfası: galeri, varyant, 30 gün kuralı, stok, sepete ekle, öznitelikler, yorumlar ve soru-cevap (yazma dahil), stok bildirimi, favori, taksit tablosu (açılınca), WhatsApp'tan sor, benzer ürünler, tasarruf ve kargo cümlesi ✓. Açık: renk örnekleri, `og:type` product | Büyük ölçüde bitti |
@@ -1312,11 +1338,11 @@
 | D7 ✓ | Ödeme: `/odeme` üç adım (TR adres, kargo, yöntem + sözleşme + yaş + pazarlama izni), iş kanıtı, havale/kapıda anında sipariş, PayTR çerçeve, iyzico yönlendirme (sandbox'la denendi), `/odeme/sonuc`, `/siparis/:id` (iptal, iade talebi, belgeler, fatura); CSP `frame-src`/`form-action`. PayTR çerçevesi sahte PayTR ile uçtan uca denendi; adr/0028 deneme sayfası silindi | Bitti |
 | D8 ✓ | Hesap: giriş, kayıt, e-posta doğrulama, şifre sıfırlama, siparişler, favoriler, adres defteri, bilgiler, fatura profili, iletişim izinleri, KVKK talebi, `migration-claim`, `/siparis` (misafir sorgulama) | Bitti |
 | D9 ◐ | Çerez onayı ✓, ilk giriş kaynağı (F11.2) ✓; dönüşüm olayları (F10.9) açık | Başladı |
-| D10 ◐ | Yasal sayfalar `/yasal/*`, alt bilgide yasal bağlantılar ve kimlik satırı, `/yorumlar` ✓. Açık: Meilisearch, iletişim formu | Başladı |
+| D10 ◐ | Yasal sayfalar `/yasal/*`, alt bilgide yasal bağlantılar ve kimlik satırı, `/yorumlar` ✓; iletişim formu (ADR-0047) ve e-bülten (çift onay) ✓ (2026-11-02). Açık: Meilisearch | Büyük ölçüde bitti |
 | D13 | **Ürün ek seçenekleri** (ilk müşteri: yazı işleme, kılıf): ürüne bağlı ücretli metin/seçim, fiyat sunucuda, satıra işlenir, "iade dışı" iade kuralına bağlanır; ADR + backend + panel + vitrin (kullanıcı kararı bekliyor) | — |
 | D14 | Teklif isteme (toptan, fiyatsız RFQ) ve WooCommerce taşıma kaynağı (F14 eki): kullanıcı kararı bekliyor | — |
 | D11 | Tema ayarları (renk, logo, yerleşim; `platform-settings` JSON şema + panel ekranı), tema seçimi, ikinci tema kanıtı | — |
-| D12 ◐ | E2E (Playwright + axe) 22 test ✓; bağımsız güvenlik incelemesi ✓ (bulgular kapandı). Açık: Lighthouse/CWV, `/seo-audit` | Başladı |
+| D12 ◐ | E2E (Playwright + axe) 26 test ✓; iki bağımsız güvenlik incelemesi ✓ (bulgular kapandı). Açık: Lighthouse/CWV, `/seo-audit` | Başladı |
 
 ### F15 görev planı (2026-10-31, taslak; F14 kapanınca başlar. Dış servis ya da yeni bağımlılık isteyen işler kullanıcı onayını bekler)
 
