@@ -54,15 +54,19 @@ const FIELDS = [
   "*payment_collections.payment_sessions",
 ].join(",")
 
-/** The order, or null for a wrong id, a wrong or old key (the backend answers 404 alike). */
-export async function orderWithToken(id: string, token: string): Promise<StoreOrder | null> {
-  if (!ORDER_ID.test(id) || !TOKEN.test(token)) {
+/**
+ * The order with its key, or without one as the signed-in customer's own;
+ * null for a wrong id, a wrong or old key, another's order (the backend
+ * answers 404 alike).
+ */
+export async function orderWithToken(id: string, token: string | null): Promise<StoreOrder | null> {
+  if (!ORDER_ID.test(id) || (token !== null && !TOKEN.test(token))) {
     return null
   }
   try {
     const { order } = await storeCall<{ order: StoreOrder }>(
       `/store/orders/${encodeURIComponent(id)}`,
-      { query: { fields: FIELDS }, headers: { "x-order-token": token } }
+      { query: { fields: FIELDS }, ...(token ? { headers: { "x-order-token": token } } : {}) }
     )
     return order
   } catch (error) {

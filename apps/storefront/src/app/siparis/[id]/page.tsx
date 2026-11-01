@@ -24,7 +24,8 @@ export default async function OrderPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
   const [{ id }, query] = await Promise.all([params, searchParams])
-  const token = typeof query["token"] === "string" ? query["token"] : ""
+  // Without a key, the signed-in customer's own order (D8)
+  const token = typeof query["token"] === "string" ? query["token"] : null
   const order = await orderWithToken(id, token)
   if (!order) {
     notFound()

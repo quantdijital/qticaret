@@ -174,11 +174,20 @@ async function paymentStep(cart: CheckoutCart, t: Translate) {
   }
 }
 
+/** What a signed-in customer's account already knows, for an empty address form. */
+export interface CustomerDefaults {
+  email: string
+  first_name: string | null
+  last_name: string | null
+  phone: string | null
+}
+
 export async function checkoutView(
   cart: CheckoutCart,
   step: CheckoutStep,
   error: string | null,
-  t: Translate
+  t: Translate,
+  customer: CustomerDefaults | null = null
 ): Promise<CheckoutPageView> {
   const address = cart.shipping_address
   const selects = address
@@ -199,10 +208,10 @@ export async function checkoutView(
     step,
     address: {
       values: {
-        email: cart.email ?? "",
-        phone: address?.phone ? displayPhone(address.phone) : "",
-        first_name: address?.first_name ?? "",
-        last_name: address?.last_name ?? "",
+        email: cart.email ?? customer?.email ?? "",
+        phone: displayPhone(address?.phone ?? customer?.phone ?? ""),
+        first_name: address?.first_name ?? customer?.first_name ?? "",
+        last_name: address?.last_name ?? customer?.last_name ?? "",
         ...selects,
         address_1: address?.address_1 ?? "",
       },

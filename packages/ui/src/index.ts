@@ -8,5 +8,6 @@ export type {
   ThemeActions,
   Translate,
 } from "./theme"
+export type * from "./account-views"
 export type * from "./checkout-views"
 export type * from "./views"

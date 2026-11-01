@@ -1,4 +1,13 @@
-import type { CheckoutActions, ThemeActions } from "@qticaret/ui"
+import type { AccountActions, AuthActions, CheckoutActions, ThemeActions } from "@qticaret/ui"
+import {
+  forgotAction,
+  loginAction,
+  logoutAction,
+  registerAction,
+  resetAction,
+  verifyAction,
+} from "@/app/actions/account"
+import { saveConsents, saveProfile } from "@/app/actions/account-profile"
 import { addToCart, applyPromotion, changeCartLine, removeCartPromotion } from "@/app/actions/cart"
 import {
   chooseShipping,
@@ -23,4 +32,20 @@ export const checkoutActions: CheckoutActions = {
   placeOrder,
   districts: loadDistricts,
   neighborhoods: loadNeighborhoods,
+}
+
+/** Signing in and its kin (D8). */
+export const authActions: AuthActions = {
+  login: loginAction,
+  register: registerAction,
+  forgot: forgotAction,
+  reset: resetAction,
+  verify: verifyAction,
+}
+
+/** The signed-in customer's forms (D8). */
+export const accountActions: AccountActions = {
+  saveProfile,
+  saveConsents,
+  logout: logoutAction,
 }

@@ -1,0 +1,128 @@
+import "server-only"
+import { isStoreApiError } from "../store-api/errors"
+import { storeCall, storeGet, storePost } from "../store-api/server"
+
+/**
+ * The customer's sign-in calls (D8, adr/0004, adr/0037): Medusa's
+ * email-and-password provider with the backend's own rules (password
+ * policy, e-mail verification bound to the asking identity, proof of
+ * work). Each answer's key goes back to the caller; nothing is kept here.
+ */
+
+const challenged = (challenge: string | null) =>
+  challenge ? { headers: { "x-challenge": challenge } } : {}
+
+const bearer = (token: string) => ({ authorization: `Bearer ${token}` })
+
+export type LoginAnswer = { kind: "signed_in"; token: string } | { kind: "verify"; token: string }
+
+export async function login(
+  email: string,
+  password: string,
+  challenge: string | null
+): Promise<LoginAnswer> {
+  const answer = await storeCall<{ token: string; verification_required?: boolean }>(
+    "/auth/customer/emailpass",
+    { method: "POST", body: { email, password }, ...challenged(challenge) }
+  )
+  return answer.verification_required
+    ? { kind: "verify", token: answer.token }
+    : { kind: "signed_in", token: answer.token }
+}
+
+/** A new login: the registration key, with no account behind it yet. */
+export async function registerIdentity(
+  email: string,
+  password: string,
+  challenge: string | null
+): Promise<string> {
+  const { token } = await storeCall<{ token: string }>("/auth/customer/emailpass/register", {
+    method: "POST",
+    body: { email, password },
+    ...challenged(challenge),
+  })
+  return token
+}
+
+/** The account behind a registration key; its e-mail is the login's, whatever is sent. */
+export function createCustomer(
+  token: string,
+  details: { first_name: string; last_name: string; phone?: string }
+) {
+  return storeCall<{ customer: { id: string } }>("/store/customers", {
+    method: "POST",
+    body: details,
+    headers: bearer(token),
+  })
+}
+
+/** Mails a verification code (and the link to `/hesap/dogrula`) to the login's own address. */
+export function requestVerification(token: string, email: string) {
+  return storeCall("/auth/verification/request", {
+    method: "POST",
+    body: { entity_id: email, entity_type: "email" },
+    headers: bearer(token),
+  })
+}
+
+export function confirmVerification(token: string, code: string) {
+  return storeCall<{ verified_at: string }>("/auth/verification/confirm", {
+    method: "POST",
+    body: { code },
+    headers: bearer(token),
+  })
+}
+
+/** A fresh key for the same login; after verification it names the account. */
+export async function refreshToken(token: string): Promise<string> {
+  const answer = await storeCall<{ token: string }>("/auth/token/refresh", {
+    method: "POST",
+    headers: bearer(token),
+  })
+  return answer.token
+}
+
+export function requestPasswordReset(email: string) {
+  return storePost("/auth/customer/emailpass/reset-password", { identifier: email })
+}
+
+/** The new password with the reset link's key (a quarter of an hour long). */
+export function resetPassword(token: string, password: string) {
+  return storeCall("/auth/customer/emailpass/update", {
+    method: "POST",
+    body: { password },
+    headers: bearer(token),
+  })
+}
+
+export interface StoreCustomer {
+  id: string
+  email: string
+  first_name: string | null
+  last_name: string | null
+  phone: string | null
+}
+
+/** The signed-in customer; null without a session (or with one the backend no longer takes). */
+export async function currentCustomer(): Promise<StoreCustomer | null> {
+  try {
+    const { customer } = await storeGet<{ customer: StoreCustomer }>("/store/customers/me", {
+      fields: "id,email,first_name,last_name,phone",
+    })
+    return customer
+  } catch (error) {
+    if (isStoreApiError(error)) {
+      return null
+    }
+    throw error
+  }
+}
+
+/** The shopper's open cart becomes the customer's (Medusa's cart transfer). */
+export function claimCart(cartId: string, token: string) {
+  return storeCall(`/store/carts/${cartId}/customer`, {
+    method: "POST",
+    body: {},
+    headers: bearer(token),
+  })
+}

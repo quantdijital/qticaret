@@ -1,16 +1,10 @@
 "use client"
 
 import { CreditCard, HandCoins, Landmark, LoaderCircle, Lock, type LucideIcon } from "lucide-react"
-import { useState, useTransition } from "react"
-import type {
-  CheckoutActions,
-  ContractView,
-  PaymentKind,
-  PaymentMethodView,
-  PlaceOrderResult,
-} from "@qticaret/ui"
+import { useState } from "react"
+import type { CheckoutActions, ContractView, PaymentKind, PaymentMethodView } from "@qticaret/ui"
 import { Button } from "@qticaret/ui/components/button"
-import { challengeAnswer, solveChallenge } from "@qticaret/ui/lib/challenge"
+import { useChallengeForm } from "../account/useChallengeForm"
 import { TextField } from "./fields"
 
 const ICONS: Record<PaymentKind, LucideIcon> = {
@@ -18,8 +12,6 @@ const ICONS: Record<PaymentKind, LucideIcon> = {
   bank_transfer: Landmark,
   cash_on_delivery: HandCoins,
 }
-
-const INITIAL: PlaceOrderResult = { ok: false, error: null, challenge: null }
 
 export interface PaymentWords {
   methods: string
@@ -64,42 +56,12 @@ export function PaymentForm({
   words: PaymentWords
 }) {
   const [method, setMethod] = useState(methods[0]?.id ?? "")
-  const [error, setError] = useState<string | null>(null)
-  const [checking, setChecking] = useState(false)
-  const [pending, startPending] = useTransition()
+  const { error, checking, pending, onSubmit } = useChallengeForm(placeOrder)
   const kind = methods.find((each) => each.id === method)?.kind ?? "card"
   const shown = contracts[kind] ?? []
 
-  function submit(form: FormData) {
-    setError(null)
-    startPending(async () => {
-      let result = await placeOrder(INITIAL, form)
-      if (result.challenge) {
-        setChecking(true)
-        try {
-          const nonce = await solveChallenge(result.challenge)
-          form.set("challenge", challengeAnswer(result.challenge.token, nonce))
-          result = await placeOrder(INITIAL, form)
-        } catch {
-          result = { ok: false, error: "checkout.failed", challenge: null }
-        } finally {
-          setChecking(false)
-        }
-      }
-      if (result.error) {
-        setError(result.error)
-      }
-    })
-  }
-
   return (
-    <form
-      onSubmit={(event) => {
-        event.preventDefault()
-        submit(new FormData(event.currentTarget))
-      }}
-      className="flex flex-col gap-7"
-    >
+    <form onSubmit={onSubmit} className="flex flex-col gap-7">
       <fieldset className="flex flex-col gap-3">
         <legend className="mb-3 text-sm font-semibold">{words.methods}</legend>
         {methods.map((each) => {

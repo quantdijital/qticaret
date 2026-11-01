@@ -12,7 +12,7 @@ export function TextField({
   className,
   id,
   ...props
-}: ComponentProps<"input"> & { id: string; label: string; hint?: string }) {
+}: ComponentProps<"input"> & { id: string; label: string; hint?: string | undefined }) {
   return (
     <div className={cn("flex flex-col gap-1.5", className)}>
       <label htmlFor={id} className="text-sm font-medium">

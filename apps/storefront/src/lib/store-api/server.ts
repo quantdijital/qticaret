@@ -3,14 +3,23 @@ import { headers } from "next/headers"
 import { storefrontEnv } from "../env"
 import type { QueryValue, StoreRequest } from "./core"
 import { storeRequest } from "./core"
+import { claimsOf, sessionToken } from "../account/session"
 import { visitorIp } from "./visitor"
 
-/** The current request's shopper address and id (server components and actions). */
-async function visit(): Promise<Pick<StoreRequest, "visitorIp" | "requestId">> {
-  const incoming = await headers()
+/**
+ * The current request's shopper address and id (server components and
+ * actions), and the signed-in customer's key when there is one: every
+ * Store API call is then the customer's (their carts, orders, prices).
+ */
+async function visit(): Promise<Pick<StoreRequest, "visitorIp" | "requestId" | "headers">> {
+  const [incoming, stored] = await Promise.all([headers(), sessionToken()])
+  // A token past its end is not sent: the page goes on as a guest's
+  const exp = stored ? claimsOf(stored).exp : undefined
+  const token = stored && (exp === undefined || exp * 1000 > Date.now()) ? stored : null
   return {
     visitorIp: visitorIp(incoming, storefrontEnv().STOREFRONT_TRUSTED_PROXY_HOPS ?? 0),
     requestId: incoming.get("x-request-id"),
+    ...(token ? { headers: { authorization: `Bearer ${token}` } } : {}),
   }
 }
 
@@ -37,5 +46,13 @@ export async function storeCall<T>(
   path: string,
   options: Pick<StoreRequest, "method" | "query" | "body" | "headers">
 ): Promise<T> {
-  return (await storeRequest<T>(path, { ...(await visit()), ...options })).data
+  const own = await visit()
+  return (
+    await storeRequest<T>(path, {
+      ...own,
+      ...options,
+      // A call's own key (a reset link's, a registration's) goes before the session's
+      headers: { ...own.headers, ...options.headers },
+    })
+  ).data
 }

@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { redirect } from "next/navigation"
+import { currentCustomer } from "@/lib/account/auth"
 import { checkoutCart } from "@/lib/checkout/cart"
 import { t } from "@/lib/i18n"
 import { robotsOnly } from "@/lib/seo/metadata"
@@ -22,13 +23,17 @@ export default async function CheckoutPage({
 }: {
   searchParams: Promise<Record<string, string | string[] | undefined>>
 }) {
-  const [cart, query] = await Promise.all([checkoutCart(), searchParams])
+  const [cart, query, customer] = await Promise.all([
+    checkoutCart(),
+    searchParams,
+    currentCustomer(),
+  ])
   if (!cart || cart.items.length === 0) {
     redirect("/sepet")
   }
   const asked = typeof query["adim"] === "string" ? query["adim"] : undefined
   const failed = typeof query["hata"] === "string" ? query["hata"] : null
   const error = failed && RETURN_ERRORS.has(failed) ? t(failed) : null
-  const view = await checkoutView(cart, stepOf(cart, asked), error, t)
+  const view = await checkoutView(cart, stepOf(cart, asked), error, t, customer)
   return <theme.CheckoutPage view={view} t={t} actions={checkoutActions} />
 }

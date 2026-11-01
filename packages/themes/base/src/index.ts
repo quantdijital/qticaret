@@ -1,4 +1,6 @@
 import type { StorefrontTheme } from "@qticaret/ui"
+import { AccountPage } from "./AccountPage"
+import { AuthPage } from "./AuthPage"
 import { BlogIndexPage } from "./BlogIndexPage"
 import { CartPage } from "./CartPage"
 import { CheckoutPage } from "./CheckoutPage"
@@ -26,5 +28,7 @@ export const baseTheme: StorefrontTheme = {
   PaymentFramePage,
   CheckoutResultPage,
   OrderPage,
+  AuthPage,
+  AccountPage,
   NotFoundPage,
 }

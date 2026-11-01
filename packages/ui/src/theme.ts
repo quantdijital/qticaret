@@ -1,4 +1,5 @@
 import type { ComponentType, ReactNode } from "react"
+import type { AccountActions, AccountPageView, AuthActions, AuthPageView } from "./account-views"
 import type {
   CheckoutPageView,
   CheckoutResultPageView,
@@ -84,5 +85,9 @@ export interface StorefrontTheme {
   /** After the provider sent the shopper back: waiting for the order, or a refused payment. */
   CheckoutResultPage: ComponentType<Page<CheckoutResultPageView>>
   OrderPage: ComponentType<Page<OrderPageView>>
+  /** Sign in, register, verify the e-mail, forget and reset the password (D8). */
+  AuthPage: ComponentType<Page<AuthPageView> & { actions: AuthActions }>
+  /** The signed-in customer's pages: overview, orders, details (D8). */
+  AccountPage: ComponentType<Page<AccountPageView> & { actions: AccountActions }>
   NotFoundPage: ComponentType<{ t: Translate }>
 }
