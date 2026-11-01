@@ -119,3 +119,44 @@ export function priceAsked(search: URLSearchParams): ListingState["price"] | und
     ? { min: range.max, max: range.min }
     : range
 }
+
+const SORTS = new Set(["yeni", "fiyat-artan", "fiyat-azalan"])
+const VALUE = /^[a-z0-9]+(?:[-_][a-z0-9]+)*$/
+const KEY = /^[a-z][a-z0-9_]{0,63}$/
+const OWN = new Set(["fiyat", "sirala", "sayfa", "fiyat_en_az", "fiyat_en_cok", "q", "variant"])
+
+/**
+ * A listing's state read from its own address, for a page resolve does
+ * not answer (`/magaza`): the backend's listing route checks the filters
+ * again and refuses what it would not answer.
+ */
+export function stateFromSearch(search: URLSearchParams): ListingState {
+  const filters: [string, string[]][] = []
+  for (const [key, raw] of search.entries()) {
+    if (OWN.has(key) || key.startsWith("utm_") || !KEY.test(key)) {
+      continue
+    }
+    const values = raw
+      .split(",")
+      .map((value) => value.trim().toLowerCase())
+      .filter((value) => VALUE.test(value))
+    if (values.length > 0) {
+      filters.push([key, values])
+    }
+  }
+  const price = /^(\d{1,9})?-(\d{1,9})?$/.exec(search.get("fiyat") ?? "")
+  const sort = search.get("sirala")
+  const page = Number(search.get("sayfa") ?? "1")
+  return normalized({
+    filters,
+    price:
+      price && (price[1] !== undefined || price[2] !== undefined)
+        ? {
+            min: price[1] === undefined ? null : Number(price[1]),
+            max: price[2] === undefined ? null : Number(price[2]),
+          }
+        : null,
+    sort: sort && SORTS.has(sort) ? (sort as ListingSort) : null,
+    page: Number.isInteger(page) && page >= 1 && page <= 10_000 ? page : 1,
+  })
+}

@@ -20,7 +20,7 @@ export const SYSTEM_ROOTS = [
  * `RESERVED_ROOT_SEGMENTS`): exactly these paths skip resolve; the records
  * under them (`/blog/{handle}`) still go through it.
  */
-export const STOREFRONT_INDEXES = ["/blog"] as const
+export const STOREFRONT_INDEXES = ["/blog", "/magaza"] as const
 
 export const isStorefrontIndex = (pathname: string): boolean =>
   (STOREFRONT_INDEXES as readonly string[]).includes(pathname)

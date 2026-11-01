@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation"
 import type { Resolution, StoreProduct } from "@qticaret/types"
-import type { LinkView, SortOptionView } from "@qticaret/ui"
+import type { BreadcrumbView, LinkView, SortOptionView } from "@qticaret/ui"
 import { t } from "@/lib/i18n"
 import { JsonLd } from "@/lib/seo/JsonLd"
 import {
@@ -29,7 +29,7 @@ import { paragraphsOf } from "@/lib/views/text"
 import { theme } from "@/theme"
 
 type Entity = Extract<Resolution, { type: "entity" }>
-type ListingType = "product_category" | "product_collection" | "brand" | "landing"
+export type ListingType = "product_category" | "product_collection" | "brand" | "landing" | "all"
 
 interface Heading {
   title: string
@@ -93,15 +93,45 @@ async function headingOf(page: Entity): Promise<Heading> {
  * link is written in the backend's canonical form. The price form's two
  * fields come back as one `fiyat`, by a redirect.
  */
-export async function ListingScreen({ page, url }: { page: Entity; url: URL }) {
-  const state = stateOf(page.listing)
+export function ListingScreen({ page, url }: { page: Entity; url: URL }) {
+  return (
+    <ListingContent
+      type={page.entity_type as ListingType}
+      id={page.entity_id}
+      state={stateOf(page.listing)}
+      url={url}
+      heading={() => headingOf(page)}
+      breadcrumbs={(title) => breadcrumbsOf(page.seo, t("home.label"), title)}
+      jsonLd={page.seo?.jsonLd ?? []}
+    />
+  )
+}
+
+/** One listing's page, whatever lists it: a record resolve found, or the whole catalogue. */
+export async function ListingContent({
+  type,
+  id,
+  state,
+  url,
+  heading: loadHeading,
+  breadcrumbs,
+  jsonLd,
+}: {
+  type: ListingType
+  id: string
+  state: ReturnType<typeof stateOf>
+  url: URL
+  heading: () => Promise<Heading>
+  breadcrumbs: (title: string) => BreadcrumbView[]
+  jsonLd: Parameters<typeof JsonLd>[0]["blocks"]
+}) {
   const asked = priceAsked(url.searchParams)
   if (asked !== undefined) {
     redirect(hrefOf(url.pathname, withPrice(state, asked)))
   }
   const [heading, answer] = await Promise.all([
-    headingOf(page),
-    listingPage(page.entity_type as ListingType, page.entity_id, searchOf(state)),
+    loadHeading(),
+    listingPage(type, id, searchOf(state)),
   ])
   const products = await productsByIds(answer.product_ids)
   const [paths, displays] = await Promise.all([
@@ -136,16 +166,16 @@ export async function ListingScreen({ page, url }: { page: Entity; url: URL }) {
       current: state.sort === "fiyat-azalan",
     },
   ]
-  const facets = filterViews(url.pathname, state, answer.facets, page.entity_type === "brand", t)
+  const facets = filterViews(url.pathname, state, answer.facets, type === "brand", t)
   return (
     <>
-      <JsonLd blocks={page.seo?.jsonLd ?? []} />
+      <JsonLd blocks={jsonLd} />
       <theme.ListingPage
         t={t}
         view={{
           title: heading.title,
           description: current === 1 && facets.active.length === 0 ? heading.description : [],
-          breadcrumbs: breadcrumbsOf(page.seo, t("home.label"), heading.title),
+          breadcrumbs: breadcrumbs(heading.title),
           subcategories: heading.subcategories,
           products: productCards(products, paths, displays),
           total: answer.count,

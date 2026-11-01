@@ -257,7 +257,7 @@ export interface ListingAnswer {
 
 /** One page of a listing with its filters (D4): ids, the count, the filters it offers. */
 export async function listingPage(
-  type: "product_category" | "product_collection" | "brand" | "landing",
+  type: "product_category" | "product_collection" | "brand" | "landing" | "all",
   id: string,
   query: string
 ): Promise<ListingAnswer> {

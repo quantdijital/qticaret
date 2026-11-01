@@ -450,5 +450,6 @@
   "footer.mersis": "MERSİS: {value}",
   "footer.tax": "{office} V.D. {number}",
   "footer.kep": "KEP: {value}",
-  "footer.etbis": "ETBİS: {value}"
+  "footer.etbis": "ETBİS: {value}",
+  "listing.all_products": "Tüm ürünler"
 }
