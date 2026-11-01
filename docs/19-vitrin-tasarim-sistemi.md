@@ -63,7 +63,9 @@ Mağaza panelden yazar: `platform-settings` `storefront` bölümü, `GET /store/
 | Logo / ad | `appearance.logo_light_url` / mağaza adı | |
 | Arama | `GET /arama?q=` | Betiksiz form; sonuçlar `noindex,follow` |
 | Sepet | çerez + `GET /store/carts/:id` | Sayaç; `/sepet` |
-| Kategori menüsü | kategori ağacı (iki seviye) | Geniş ekranda açılır menü (Radix, içerik `forceMount` ile HTML'de), telefonda çekmece |
+| Kategori menüsü | `storefront.menu` (≤12 öğe × 20 alt bağlantı); yazılmamışsa kategori ağacı (iki seviye) | Geniş ekranda açılır menü (Radix, içerik `forceMount` ile HTML'de), telefonda çekmece |
+| Marka rengi | `storefront.primary_color` | `--primary`, `--ring`, `--announcement` ve üzerindeki yazı rengi (beyaz ya da mürekkep, kontrasta göre); yanıtın nonce'uyla tek `<style>` |
+| Ana sayfa girişi | `storefront.hero` (üst yazı, başlık, metin, ≤2 düğme) | Yazılmamışsa mağaza adı ve ilk iki kategori |
 | Güven şeridi | `storefront.trust_badges` (≤4, ikon listesi sabit) | Alt bilginin üstünde |
 | Alt bilgi sütunları | `storefront.footer_groups` (≤4×10) | Yazılmamışsa: ilk 8 kategori + Yardım (Sepetim) |
 | İletişim, sosyal | `legal-identity` (`email`, `phone`, `address`, `same_as`) | Sosyal profiller ağ adıyla |
@@ -132,12 +134,14 @@ Durum: ✅ var · 🟡 temel hâli var · ⬜ yok. Görev kodları PROGRESS "F18
 | İletişim | `/iletisim` | 🟡 içerik sayfası | iletişim formu ucu yok | D10 |
 | SSS | `/sik-sorulan-sorular` | 🟡 içerik sayfası | `FAQPage` şeması | D10 |
 | Müşteri yorumları | `/yorumlar` | ⬜ | mağaza geneli yorum listesi yok | D10 |
-| Blog listesi, yazı | `/blog`, `/blog/{handle}` | 🟡 yazı var, liste yok | `content?kind=post` | D10 |
+| Blog listesi, yazı | `/blog`, `/blog/{handle}` | ✅ liste (12'li sayfa) ve yazı | `content?kind=post` | D10 |
 | Yasal metinler | ör. `/yasal/{tur}` | ⬜ | `legal/{kind}` | D10 |
 | Çerez onayı | bant + tercih penceresi | ⬜ | `consents/cookies` | D9 |
 | 404 / 410 | — | ✅ | `seo/not-found` | — |
 
 ## 8. İlk müşteri eşlemesi
+
+Bir mağazanın kurulumu **mağaza profiliyle** yapılır (`pnpm --filter @qticaret/backend shop:profile <klasör>`): ad, ayar bölümleri, Markdown içerik sayfaları ve taşıma paketi, platformun kendi iş akışlarından geçer. İlk müşterinin profili `docs/gecis/mylarte/profil/`.
 
 Mevcut sitenin (WooCommerce) sayfa sayfa envanteri `docs/gecis/mylarte/envanter.md`, platformla eşlemesi ve eksikler `docs/gecis/mylarte/esleme.md`, sayfa metinleri `docs/gecis/mylarte/sayfalar/`. Kural: ilk müşterinin ihtiyacı sektöre özel koda dönüşmez; içerik, ayar, özellik şablonu ya da özellik bayrağıyla karşılanır.
 
