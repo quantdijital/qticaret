@@ -1,0 +1,417 @@
+{
+  "format": "quant-shop-profile",
+  "version": 1,
+  "store_name": "My L'arte",
+  "site_host": "mylarte.com",
+  "sections": {
+    "store": {
+      "contact_email": "info@mylarte.com",
+      "contact_phone": "+905342551145"
+    },
+    "legal": {
+      "company_title": "My L'arte",
+      "address": "Bağbaşı, Yunus Emre Cd. No:16/A, Pamukkale / Denizli",
+      "same_as": ["https://www.instagram.com/mylarteshop", "https://www.facebook.com/mylarteshop"]
+    },
+    "promotions": {
+      "free_shipping_threshold": 1500
+    },
+    "seo": {
+      "home": {
+        "title": "El Yapımı Bıçak ve Çakı Modelleri | Denizli Yatağan Üretimi - My L'arte",
+        "description": "Günlük taşıma, koleksiyon ve hediye için elde işlenen çakı, bıçak ve kılıçlar. Her modelde çelik, ölçü ve sap detayı yazılı."
+      }
+    },
+    "storefront": {
+      "announcements": [
+        "1500 TL ve üzeri kargo bedava",
+        "El yapımı işçilik garantisi",
+        "Hafta içi 16:00'a kadar aynı gün kargo"
+      ],
+      "top_links": [
+        {
+          "label": "Hakkımızda",
+          "href": "/hakkimizda"
+        },
+        {
+          "label": "Toptan",
+          "href": "/toptan"
+        },
+        {
+          "label": "Blog",
+          "href": "/blog"
+        },
+        {
+          "label": "İletişim",
+          "href": "/iletisim"
+        }
+      ],
+      "menu": [
+        {
+          "label": "Çakılar",
+          "href": "/kategori/el-yapimi-caki",
+          "children": [
+            {
+              "label": "Elmax Çakılar",
+              "href": "/kategori/el-yapimi-caki/elmax-cakilar"
+            },
+            {
+              "label": "Epoksi Çakılar",
+              "href": "/kategori/el-yapimi-caki/epoksi-cakilar"
+            },
+            {
+              "label": "Geyik Boynuzu Saplı Çakılar",
+              "href": "/kategori/el-yapimi-caki/geyik-boynuzu-sapli-cakilar"
+            },
+            {
+              "label": "Kemik Saplı Çakılar",
+              "href": "/kategori/el-yapimi-caki/kemik-sapli-cakilar"
+            },
+            {
+              "label": "N690 Çakılar",
+              "href": "/kategori/el-yapimi-caki/n690-cakilar"
+            },
+            {
+              "label": "4116 Çakılar",
+              "href": "/kategori/el-yapimi-caki/4116-cakilar"
+            },
+            {
+              "label": "Damascus Çakılar",
+              "href": "/kategori/el-yapimi-caki/damascus-cakilar"
+            },
+            {
+              "label": "M390 Çakılar",
+              "href": "/kategori/el-yapimi-caki/m390-cakilar"
+            }
+          ]
+        },
+        {
+          "label": "Av Bıçağı",
+          "href": "/kategori/av-bicagi",
+          "children": []
+        },
+        {
+          "label": "Outdoor & Kamp",
+          "href": "/kategori/outdoor-kamp",
+          "children": [
+            {
+              "label": "Kolye Bıçak",
+              "href": "/kategori/outdoor-kamp/kolye-bicak"
+            },
+            {
+              "label": "4116 Çelik Kamp Bıçakları",
+              "href": "/kategori/outdoor-kamp/4116-celik-kamp-bicaklari"
+            },
+            {
+              "label": "Damascus Çelik Bıçaklar",
+              "href": "/kategori/outdoor-kamp/damascus-celik-bicaklar"
+            },
+            {
+              "label": "N690 Çelik Kamp Bıçakları",
+              "href": "/kategori/outdoor-kamp/n690-celik-kamp-bicaklari"
+            },
+            {
+              "label": "Kamp Baltaları",
+              "href": "/kategori/outdoor-kamp/kamp-baltalari"
+            },
+            {
+              "label": "CK Çelik Bıçaklar",
+              "href": "/kategori/outdoor-kamp/ck-celik-bicaklar"
+            },
+            {
+              "label": "Elmax Çelik Bıçaklar",
+              "href": "/kategori/outdoor-kamp/elmax-celik-bicaklar"
+            },
+            {
+              "label": "Sleipner Çelik Bıçaklar",
+              "href": "/kategori/outdoor-kamp/sleipner-celik-bicaklar"
+            }
+          ]
+        },
+        {
+          "label": "Mutfak & Şef",
+          "href": "/kategori/mutfak-sef-serisi",
+          "children": [
+            {
+              "label": "Mutfak Setleri",
+              "href": "/kategori/mutfak-sef-serisi/mutfak-setleri"
+            },
+            {
+              "label": "4116 Alman Çeliği Mutfak Bıçakları",
+              "href": "/kategori/mutfak-sef-serisi/4116-alman-celigi-mutfak-bicaklari"
+            },
+            {
+              "label": "Şef Bıçakları",
+              "href": "/kategori/mutfak-sef-serisi/sef-bicaklari"
+            },
+            {
+              "label": "N690 Çelik Şef Bıçakları",
+              "href": "/kategori/mutfak-sef-serisi/n690-celik-sef-bicaklari"
+            }
+          ]
+        },
+        {
+          "label": "Kasap Bıçakları",
+          "href": "/kategori/kasap-bicaklari",
+          "children": [
+            {
+              "label": "Deri Yüzme Bıçakları",
+              "href": "/kategori/kasap-bicaklari/deri-yuzme-bicaklari"
+            },
+            {
+              "label": "Kasap Bıçak Setleri",
+              "href": "/kategori/kasap-bicaklari/kasap-bicak-setleri"
+            },
+            {
+              "label": "Kemik Sıyırma Bıçakları",
+              "href": "/kategori/kasap-bicaklari/kemik-siyirma-bicaklari"
+            },
+            {
+              "label": "Kesim ve Kesme Bıçakları",
+              "href": "/kategori/kasap-bicaklari/kesim-ve-kesme-bicaklari"
+            },
+            {
+              "label": "Masat Çeşitleri",
+              "href": "/kategori/kasap-bicaklari/masat-cesitleri"
+            }
+          ]
+        },
+        {
+          "label": "Kılıçlar",
+          "href": "/kategori/kilic-modelleri",
+          "children": [
+            {
+              "label": "Fatih Kılıcı",
+              "href": "/kategori/kilic-modelleri/fatih-kilici"
+            },
+            {
+              "label": "Katana Çeşitleri",
+              "href": "/kategori/kilic-modelleri/katana-cesitleri"
+            },
+            {
+              "label": "Minyatür Kılıçlar",
+              "href": "/kategori/kilic-modelleri/minyatur-kiliclar"
+            },
+            {
+              "label": "Türk Kılıcı",
+              "href": "/kategori/kilic-modelleri/turk-kilici"
+            },
+            {
+              "label": "Yatağan Kılıcı",
+              "href": "/kategori/kilic-modelleri/yatagan-kilici"
+            },
+            {
+              "label": "Zülfikar Kılıcı",
+              "href": "/kategori/kilic-modelleri/zulfikar-kilici"
+            }
+          ]
+        },
+        {
+          "label": "Hediyelik",
+          "href": "/kategori/hediyelik-esyalar",
+          "children": [
+            {
+              "label": "Ahşap Çakı Kutuları",
+              "href": "/kategori/hediyelik-esyalar/ahsap-caki-kutulari"
+            },
+            {
+              "label": "Ahşap Takı Kutuları",
+              "href": "/kategori/hediyelik-esyalar/ahsap-taki-kutulari"
+            },
+            {
+              "label": "Kadife Kutular",
+              "href": "/kategori/hediyelik-esyalar/kadife-kutular"
+            },
+            {
+              "label": "Mıknatıslı Asma Tablolar",
+              "href": "/kategori/hediyelik-esyalar/miknatisli-asma-tablolar"
+            }
+          ]
+        }
+      ],
+      "footer_groups": [
+        {
+          "title": "Kategoriler",
+          "links": [
+            {
+              "label": "El Yapımı Çakılar",
+              "href": "/kategori/el-yapimi-caki"
+            },
+            {
+              "label": "Av Bıçakları",
+              "href": "/kategori/av-bicagi"
+            },
+            {
+              "label": "Kasap Bıçakları",
+              "href": "/kategori/kasap-bicaklari"
+            },
+            {
+              "label": "Mutfak ve Şef Serisi",
+              "href": "/kategori/mutfak-sef-serisi"
+            },
+            {
+              "label": "Kılıç Modelleri",
+              "href": "/kategori/kilic-modelleri"
+            },
+            {
+              "label": "Outdoor ve Kamp",
+              "href": "/kategori/outdoor-kamp"
+            },
+            {
+              "label": "Hediyelik Eşyalar",
+              "href": "/kategori/hediyelik-esyalar"
+            }
+          ]
+        },
+        {
+          "title": "Müşteri Hizmetleri",
+          "links": [
+            {
+              "label": "İade ve Değişim",
+              "href": "/iade-ve-degisim-politikasi"
+            },
+            {
+              "label": "Sık Sorulan Sorular",
+              "href": "/sik-sorulan-sorular"
+            },
+            {
+              "label": "İletişim",
+              "href": "/iletisim"
+            },
+            {
+              "label": "Toptan Sipariş",
+              "href": "/toptan"
+            }
+          ]
+        },
+        {
+          "title": "Kurumsal",
+          "links": [
+            {
+              "label": "Hakkımızda",
+              "href": "/hakkimizda"
+            },
+            {
+              "label": "Blog ve Rehberler",
+              "href": "/blog"
+            },
+            {
+              "label": "Satış Sözleşmesi",
+              "href": "/satis-sozlesmesi"
+            },
+            {
+              "label": "KVKK Aydınlatma Metni",
+              "href": "/kisisel-verilere-iliskin-aydinlatma-metni"
+            },
+            {
+              "label": "Çerez Politikası",
+              "href": "/cerez-politikasi"
+            }
+          ]
+        }
+      ],
+      "trust_badges": [
+        {
+          "icon": "truck",
+          "title": "Ücretsiz kargo",
+          "text": "1.500 TL ve üzeri"
+        },
+        {
+          "icon": "clock",
+          "title": "Aynı gün kargo",
+          "text": "Hafta içi 16:00'a kadar"
+        },
+        {
+          "icon": "award",
+          "title": "2 yıl garanti",
+          "text": "Marka garantili ürünler"
+        },
+        {
+          "icon": "shield",
+          "title": "Güvenli ödeme",
+          "text": "Kart veya havale/EFT"
+        }
+      ],
+      "whatsapp_phone": "+905342551145",
+      "primary_color": "#076599",
+      "hero": {
+        "eyebrow": "Yatağan el işçiliği",
+        "heading": "El yapımı çakı ve bıçaklar",
+        "text": "Günlük taşıma, koleksiyon ve hediye için elde işlenen çakı, bıçak ve kılıçlar. Her modelde çelik, ölçü ve sap detayı yazılı.",
+        "links": [
+          {
+            "label": "Çakıları incele",
+            "href": "/kategori/el-yapimi-caki"
+          },
+          {
+            "label": "Özel koleksiyon",
+            "href": "/kategori/ozel-koleksiyon"
+          }
+        ]
+      }
+    }
+  },
+  "pages": [
+    {
+      "handle": "hakkimizda",
+      "title": "Hakkımızda",
+      "file": "../sayfalar/hakkimizda.md"
+    },
+    {
+      "handle": "iletisim",
+      "title": "İletişim",
+      "file": "../sayfalar/iletisim.md"
+    },
+    {
+      "handle": "sik-sorulan-sorular",
+      "title": "Sık Sorulan Sorular",
+      "file": "../sayfalar/sik-sorulan-sorular.md"
+    },
+    {
+      "handle": "toptan",
+      "title": "Toptan Satış",
+      "file": "../sayfalar/toptan.md"
+    },
+    {
+      "handle": "iade-ve-degisim-politikasi",
+      "title": "İade ve Değişim Politikası",
+      "file": "../sayfalar/iade-ve-degisim-politikasi.md"
+    },
+    {
+      "handle": "satis-sozlesmesi",
+      "title": "Mesafeli Satış Sözleşmesi",
+      "file": "../sayfalar/satis-sozlesmesi.md"
+    },
+    {
+      "handle": "kisisel-verilere-iliskin-aydinlatma-metni",
+      "title": "Kişisel Verilere İlişkin Aydınlatma Metni",
+      "file": "../sayfalar/kisisel-verilere-iliskin-aydinlatma-metni.md"
+    },
+    {
+      "handle": "cerez-politikasi",
+      "title": "Çerez Politikası",
+      "file": "../sayfalar/cerez-politikasi.md"
+    },
+    {
+      "handle": "toptan-satis-sozlesmesi",
+      "title": "Toptan Satış Sözleşmesi",
+      "file": "../sayfalar/toptan-satis-sozlesmesi.md"
+    },
+    {
+      "handle": "toptan-on-bilgilendirme",
+      "title": "Toptan Satış Ön Bilgilendirme Formu",
+      "file": "../sayfalar/toptan-on-bilgilendirme.md"
+    },
+    {
+      "handle": "toptan-kvkk-aydinlatma",
+      "title": "Toptan Müşteri KVKK Aydınlatma Metni",
+      "file": "../sayfalar/toptan-kvkk-aydinlatma.md"
+    },
+    {
+      "handle": "toptan-gizlilik-taahhutnamesi",
+      "title": "Toptan Gizlilik Taahhütnamesi",
+      "file": "../sayfalar/toptan-gizlilik-taahhutnamesi.md"
+    }
+  ],
+  "bundle": "paket.json"
+}

@@ -1,0 +1,362 @@
+{
+  "format": "quant-migration",
+  "version": 1,
+  "source_id": "mylarte",
+  "categories": [
+    {
+      "source_key": "cat-el-yapimi-caki",
+      "path": ["El Yapımı Çakı"],
+      "description": null,
+      "old_url": "/el-yapimi-caki/"
+    },
+    {
+      "source_key": "cat-el-yapimi-caki-elmax-cakilar",
+      "path": ["El Yapımı Çakı", "Elmax Çakılar"],
+      "description": null,
+      "old_url": "/el-yapimi-caki/elmax-cakilar/"
+    },
+    {
+      "source_key": "cat-el-yapimi-caki-epoksi-cakilar",
+      "path": ["El Yapımı Çakı", "Epoksi Çakılar"],
+      "description": null,
+      "old_url": "/el-yapimi-caki/epoksi-cakilar/"
+    },
+    {
+      "source_key": "cat-el-yapimi-caki-geyik-boynuzu-sapli-cakilar",
+      "path": ["El Yapımı Çakı", "Geyik Boynuzu Saplı Çakılar"],
+      "description": null,
+      "old_url": "/el-yapimi-caki/geyik-boynuzu-sapli-cakilar/"
+    },
+    {
+      "source_key": "cat-el-yapimi-caki-kemik-sapli-cakilar",
+      "path": ["El Yapımı Çakı", "Kemik Saplı Çakılar"],
+      "description": null,
+      "old_url": "/el-yapimi-caki/kemik-sapli-cakilar/"
+    },
+    {
+      "source_key": "cat-el-yapimi-caki-n690-cakilar",
+      "path": ["El Yapımı Çakı", "N690 Çakılar"],
+      "description": null,
+      "old_url": "/el-yapimi-caki/n690-cakilar/"
+    },
+    {
+      "source_key": "cat-el-yapimi-caki-4116-cakilar",
+      "path": ["El Yapımı Çakı", "4116 Çakılar"],
+      "description": null,
+      "old_url": "/el-yapimi-caki/4116-cakilar/"
+    },
+    {
+      "source_key": "cat-el-yapimi-caki-damascus-cakilar",
+      "path": ["El Yapımı Çakı", "Damascus Çakılar"],
+      "description": null,
+      "old_url": "/el-yapimi-caki/damascus-cakilar/"
+    },
+    {
+      "source_key": "cat-el-yapimi-caki-m390-cakilar",
+      "path": ["El Yapımı Çakı", "M390 Çakılar"],
+      "description": null,
+      "old_url": "/el-yapimi-caki/m390-cakilar/"
+    },
+    {
+      "source_key": "cat-av-bicagi",
+      "path": ["Av Bıçağı"],
+      "description": null,
+      "old_url": "/av-bicagi/"
+    },
+    {
+      "source_key": "cat-outdoor-kamp",
+      "path": ["Outdoor & Kamp"],
+      "description": null,
+      "old_url": "/outdoor-kamp/"
+    },
+    {
+      "source_key": "cat-outdoor-kamp-kolye-bicak",
+      "path": ["Outdoor & Kamp", "Kolye Bıçak"],
+      "description": null,
+      "old_url": "/outdoor-kamp/kolye-bicak/"
+    },
+    {
+      "source_key": "cat-outdoor-kamp-4116-celik-kamp-bicaklari",
+      "path": ["Outdoor & Kamp", "4116 Çelik Kamp Bıçakları"],
+      "description": null,
+      "old_url": "/outdoor-kamp/4116-celik-kamp-bicaklari/"
+    },
+    {
+      "source_key": "cat-outdoor-kamp-damascus-celik-bicaklar",
+      "path": ["Outdoor & Kamp", "Damascus Çelik Bıçaklar"],
+      "description": null,
+      "old_url": "/outdoor-kamp/damascus-celik-bicaklar/"
+    },
+    {
+      "source_key": "cat-outdoor-kamp-n690-celik-kamp-bicaklari",
+      "path": ["Outdoor & Kamp", "N690 Çelik Kamp Bıçakları"],
+      "description": null,
+      "old_url": "/outdoor-kamp/n690-celik-kamp-bicaklari/"
+    },
+    {
+      "source_key": "cat-outdoor-kamp-kamp-baltalari",
+      "path": ["Outdoor & Kamp", "Kamp Baltaları"],
+      "description": null,
+      "old_url": "/outdoor-kamp/kamp-baltalari/"
+    },
+    {
+      "source_key": "cat-outdoor-kamp-ck-celik-bicaklar",
+      "path": ["Outdoor & Kamp", "CK Çelik Bıçaklar"],
+      "description": null,
+      "old_url": "/outdoor-kamp/ck-celik-bicaklar/"
+    },
+    {
+      "source_key": "cat-outdoor-kamp-elmax-celik-bicaklar",
+      "path": ["Outdoor & Kamp", "Elmax Çelik Bıçaklar"],
+      "description": null,
+      "old_url": "/outdoor-kamp/elmax-celik-bicaklar/"
+    },
+    {
+      "source_key": "cat-outdoor-kamp-sleipner-celik-bicaklar",
+      "path": ["Outdoor & Kamp", "Sleipner Çelik Bıçaklar"],
+      "description": null,
+      "old_url": "/outdoor-kamp/sleipner-celik-bicaklar/"
+    },
+    {
+      "source_key": "cat-mutfak-sef-serisi",
+      "path": ["Mutfak & Şef Serisi"],
+      "description": null,
+      "old_url": "/mutfak-sef-serisi/"
+    },
+    {
+      "source_key": "cat-mutfak-sef-serisi-mutfak-setleri",
+      "path": ["Mutfak & Şef Serisi", "Mutfak Setleri"],
+      "description": null,
+      "old_url": "/mutfak-sef-serisi/mutfak-setleri/"
+    },
+    {
+      "source_key": "cat-mutfak-sef-serisi-4116-celik-mutfak-bicaklari",
+      "path": ["Mutfak & Şef Serisi", "4116 Alman Çeliği Mutfak Bıçakları"],
+      "description": null,
+      "old_url": "/mutfak-sef-serisi/4116-celik-mutfak-bicaklari/"
+    },
+    {
+      "source_key": "cat-mutfak-sef-serisi-sef-bicaklari",
+      "path": ["Mutfak & Şef Serisi", "Şef Bıçakları"],
+      "description": null,
+      "old_url": "/mutfak-sef-serisi/sef-bicaklari/"
+    },
+    {
+      "source_key": "cat-mutfak-sef-serisi-n690-celik-sef-bicaklari",
+      "path": ["Mutfak & Şef Serisi", "N690 Çelik Şef Bıçakları"],
+      "description": null,
+      "old_url": "/mutfak-sef-serisi/n690-celik-sef-bicaklari/"
+    },
+    {
+      "source_key": "cat-kasap-bicaklari",
+      "path": ["Kasap Bıçakları"],
+      "description": null,
+      "old_url": "/kasap-bicaklari/"
+    },
+    {
+      "source_key": "cat-kasap-bicaklari-yuzme-bicaklari",
+      "path": ["Kasap Bıçakları", "Deri Yüzme Bıçakları"],
+      "description": null,
+      "old_url": "/kasap-bicaklari/yuzme-bicaklari/"
+    },
+    {
+      "source_key": "cat-kasap-bicaklari-kasap-bicak-setleri",
+      "path": ["Kasap Bıçakları", "Kasap Bıçak Setleri"],
+      "description": null,
+      "old_url": "/kasap-bicaklari/kasap-bicak-setleri/"
+    },
+    {
+      "source_key": "cat-kasap-bicaklari-siyirma-bicaklari",
+      "path": ["Kasap Bıçakları", "Kemik Sıyırma Bıçakları"],
+      "description": null,
+      "old_url": "/kasap-bicaklari/siyirma-bicaklari/"
+    },
+    {
+      "source_key": "cat-kasap-bicaklari-kesim-bicaklari",
+      "path": ["Kasap Bıçakları", "Kesim ve Kesme Bıçakları"],
+      "description": null,
+      "old_url": "/kasap-bicaklari/kesim-bicaklari/"
+    },
+    {
+      "source_key": "cat-kasap-bicaklari-masat-cesitleri",
+      "path": ["Kasap Bıçakları", "Masat Çeşitleri"],
+      "description": null,
+      "old_url": "/kasap-bicaklari/masat-cesitleri/"
+    },
+    {
+      "source_key": "cat-kilic-modelleri",
+      "path": ["Kılıç Modelleri"],
+      "description": null,
+      "old_url": "/kilic-modelleri/"
+    },
+    {
+      "source_key": "cat-kilic-modelleri-fatih-kilici",
+      "path": ["Kılıç Modelleri", "Fatih Kılıcı"],
+      "description": null,
+      "old_url": "/kilic-modelleri/fatih-kilici/"
+    },
+    {
+      "source_key": "cat-kilic-modelleri-katana-cesitleri",
+      "path": ["Kılıç Modelleri", "Katana Çeşitleri"],
+      "description": null,
+      "old_url": "/kilic-modelleri/katana-cesitleri/"
+    },
+    {
+      "source_key": "cat-kilic-modelleri-minyatur-kiliclar",
+      "path": ["Kılıç Modelleri", "Minyatür Kılıçlar"],
+      "description": null,
+      "old_url": "/kilic-modelleri/minyatur-kiliclar/"
+    },
+    {
+      "source_key": "cat-kilic-modelleri-turk-kilici",
+      "path": ["Kılıç Modelleri", "Türk Kılıcı"],
+      "description": null,
+      "old_url": "/kilic-modelleri/turk-kilici/"
+    },
+    {
+      "source_key": "cat-kilic-modelleri-yatagan-kilici",
+      "path": ["Kılıç Modelleri", "Yatağan Kılıcı"],
+      "description": null,
+      "old_url": "/kilic-modelleri/yatagan-kilici/"
+    },
+    {
+      "source_key": "cat-kilic-modelleri-zulfikar-kilici",
+      "path": ["Kılıç Modelleri", "Zülfikar Kılıcı"],
+      "description": null,
+      "old_url": "/kilic-modelleri/zulfikar-kilici/"
+    },
+    {
+      "source_key": "cat-hediyelik-esyalar",
+      "path": ["Hediyelik Eşyalar"],
+      "description": null,
+      "old_url": "/hediyelik-esyalar/"
+    },
+    {
+      "source_key": "cat-hediyelik-esyalar-ahsap-caki-kutulari",
+      "path": ["Hediyelik Eşyalar", "Ahşap Çakı Kutuları"],
+      "description": null,
+      "old_url": "/hediyelik-esyalar/ahsap-caki-kutulari/"
+    },
+    {
+      "source_key": "cat-hediyelik-esyalar-ahsap-taki-kutulari",
+      "path": ["Hediyelik Eşyalar", "Ahşap Takı Kutuları"],
+      "description": null,
+      "old_url": "/hediyelik-esyalar/ahsap-taki-kutulari/"
+    },
+    {
+      "source_key": "cat-hediyelik-esyalar-kadife-kutular",
+      "path": ["Hediyelik Eşyalar", "Kadife Kutular"],
+      "description": null,
+      "old_url": "/hediyelik-esyalar/kadife-kutular/"
+    },
+    {
+      "source_key": "cat-hediyelik-esyalar-miknatisli-asma-tablolar",
+      "path": ["Hediyelik Eşyalar", "Mıknatıslı Asma Tablolar"],
+      "description": null,
+      "old_url": "/hediyelik-esyalar/miknatisli-asma-tablolar/"
+    },
+    {
+      "source_key": "cat-ozel-koleksiyon",
+      "path": ["Özel Koleksiyon"],
+      "description": null,
+      "old_url": "/ozel-koleksiyon/"
+    },
+    {
+      "source_key": "cat-el-yapimi-bicak",
+      "path": ["El Yapımı Bıçak"],
+      "description": null,
+      "old_url": "/el-yapimi-bicak/"
+    },
+    {
+      "source_key": "cat-surmene-bicagi",
+      "path": ["Sürmene Bıçağı"],
+      "description": null,
+      "old_url": "/surmene-bicagi/"
+    },
+    {
+      "source_key": "cat-kamp-malzemeleri",
+      "path": ["Kamp Malzemeleri"],
+      "description": null,
+      "old_url": "/kamp-malzemeleri/"
+    },
+    {
+      "source_key": "cat-bahce-el-aletleri",
+      "path": ["Bahçe El Aletleri"],
+      "description": null,
+      "old_url": "/bahce-el-aletleri/"
+    },
+    {
+      "source_key": "cat-my-larte-ozel-uretim-cakilar",
+      "path": ["My L'arte Özel Üretim Çakılar"],
+      "description": null,
+      "old_url": "/my-larte-ozel-uretim-cakilar/"
+    }
+  ],
+  "brands": [
+    {
+      "source_key": "brand-my-l-arte",
+      "name": "My L'arte",
+      "old_url": "/marka/my-larte/"
+    },
+    {
+      "source_key": "brand-yatagan",
+      "name": "Yatağan",
+      "old_url": null
+    },
+    {
+      "source_key": "brand-palta-outdoor",
+      "name": "Palta Outdoor",
+      "old_url": null
+    },
+    {
+      "source_key": "brand-orcamp",
+      "name": "Orcamp",
+      "old_url": null
+    },
+    {
+      "source_key": "brand-huseyin-mertturk",
+      "name": "Hüseyin Merttürk",
+      "old_url": null
+    },
+    {
+      "source_key": "brand-pirge",
+      "name": "Pirge",
+      "old_url": null
+    },
+    {
+      "source_key": "brand-hayta",
+      "name": "Hayta",
+      "old_url": null
+    },
+    {
+      "source_key": "brand-clever",
+      "name": "Clever",
+      "old_url": null
+    },
+    {
+      "source_key": "brand-solingen",
+      "name": "Solingen",
+      "old_url": null
+    },
+    {
+      "source_key": "brand-kral-mamut-surmene",
+      "name": "Kral Mamut Sürmene",
+      "old_url": null
+    },
+    {
+      "source_key": "brand-oz-is",
+      "name": "Öz-İş",
+      "old_url": null
+    },
+    {
+      "source_key": "brand-surmene",
+      "name": "Sürmene",
+      "old_url": null
+    },
+    {
+      "source_key": "brand-gama-steel",
+      "name": "Gama Steel",
+      "old_url": null
+    }
+  ]
+}
