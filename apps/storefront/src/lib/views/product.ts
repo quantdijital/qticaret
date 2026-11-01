@@ -79,7 +79,7 @@ interface ProductPageInput {
 /** What the product itself says; the page adds its reviews, questions and neighbours. */
 export type ProductPageBase = Omit<
   ProductPageView,
-  "reviews" | "questions" | "related" | "whatsappHref" | "signedIn" | "loginPath"
+  "reviews" | "questions" | "related" | "whatsappHref" | "signedIn" | "loginPath" | "shippingNote"
 >
 
 export function productPage({

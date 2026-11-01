@@ -1,4 +1,5 @@
 import type { Resolution } from "@qticaret/types"
+import { formatLira } from "@qticaret/ui"
 import { themeActions } from "@/lib/theme-actions"
 import { t } from "@/lib/i18n"
 import { JsonLd } from "@/lib/seo/JsonLd"
@@ -15,18 +16,25 @@ type Entity = Extract<Resolution, { type: "entity" }>
 /** A product page: the product with live prices, its brand's link and `?variant=` chosen. */
 export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
   const product = await productById(page.entity_id)
-  const [displays, brandPaths, { storefront }, reviews, questions, related, customer] =
-    await Promise.all([
-      priceDisplays(variantIdsOf([product])),
-      product.brand
-        ? pathsOf("brand", [product.brand.id])
-        : Promise.resolve({} as Record<string, string>),
-      storefrontSettings(),
-      reviewsView(product.id, t),
-      questionsView(product.id, t),
-      relatedOf(product),
-      currentCustomer(),
-    ])
+  const [
+    displays,
+    brandPaths,
+    { storefront, free_shipping_threshold },
+    reviews,
+    questions,
+    related,
+    customer,
+  ] = await Promise.all([
+    priceDisplays(variantIdsOf([product])),
+    product.brand
+      ? pathsOf("brand", [product.brand.id])
+      : Promise.resolve({} as Record<string, string>),
+    storefrontSettings(),
+    reviewsView(product.id, t),
+    questionsView(product.id, t),
+    relatedOf(product),
+    currentCustomer(),
+  ])
   const here = `${url.pathname}${url.search}`
   const base = productPage({
     product,
@@ -43,6 +51,10 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
     questions,
     related,
     signedIn: customer !== null,
+    shippingNote:
+      free_shipping_threshold && free_shipping_threshold > 0
+        ? t("product.free_shipping_from", { amount: formatLira(free_shipping_threshold) })
+        : null,
     loginPath: `/hesap/giris?sonra=${encodeURIComponent(here)}`,
     whatsappHref: storefront.whatsapp_phone
       ? `${whatsappHref(storefront.whatsapp_phone)}?text=${encodeURIComponent(

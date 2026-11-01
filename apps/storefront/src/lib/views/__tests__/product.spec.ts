@@ -87,6 +87,7 @@ describe("productPage", () => {
       before: "1.199,00 TL",
       from: false,
       discount: 16,
+      saving: "200,00 TL",
     })
     expect(view.variants[0]?.price?.before).toBeNull()
     expect(view.variants[0]?.available).toBe(false)

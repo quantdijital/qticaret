@@ -34,6 +34,8 @@ export interface PurchaseLabels {
   errors: Record<string, string>
   fallbackError: string
   before: string
+  /** With `{amount}` where the saving goes. */
+  saving: string
 }
 
 interface PurchasePanelProps {

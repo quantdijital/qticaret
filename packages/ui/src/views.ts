@@ -25,6 +25,8 @@ export interface PriceView {
   from: boolean
   /** Whole percent off the struck-through price ("%25"); null without one. */
   discount: number | null
+  /** What the struck-through price saves, formatted ("150,00 TL"); null without one. */
+  saving?: string | null
 }
 
 export interface LinkView {
@@ -169,6 +171,8 @@ export interface ProductPageView {
   signedIn: boolean
   /** Sign in and come back here. */
   loginPath: string
+  /** The shop's free shipping line ("1.500,00 TL ve üzeri kargo ücretsiz"), in words; null without one. */
+  shippingNote: string | null
 }
 
 export interface ReviewView {

@@ -83,6 +83,7 @@ export function ProductPage({
                 errors: Object.fromEntries(ACTION_ERRORS.map((key) => [key, t(key)])),
                 fallbackError: t("cart.add_failed"),
                 before: t("price.before"),
+                saving: t("product.saving"),
               }}
               stockAlert={actions.stockAlert}
               signedIn={view.signedIn}
@@ -128,6 +129,9 @@ export function ProductPage({
                 <MessageCircle className="size-4" aria-hidden="true" />
                 {t("product.ask_whatsapp")}
               </a>
+            )}
+            {view.shippingNote && (
+              <p className="text-sm text-muted-foreground">{view.shippingNote}</p>
             )}
             <TrustStrip badges={view.trustBadges} label={t("footer.trust")} compact />
           </div>

@@ -28,11 +28,13 @@ export function variantPrice(
     return null
   }
   const before = displays[variant.id]?.before ?? null
+  const discount = before ? percentOff(Number(before), amount) : null
   return {
     current: formatLira(amount),
     before: before ? formatLira(before) : null,
     from: false,
-    discount: before ? percentOff(Number(before), amount) : null,
+    discount,
+    saving: before && discount !== null ? formatLira(Number(before) - amount) : null,
   }
 }
 
