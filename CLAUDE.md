@@ -9,7 +9,7 @@ sektörel ihtiyaçlar feature flag ve attribute şablonlarıyla çözülür.
 Model: **instance-per-tenant** (her müşteriye ayrı Medusa instance + ayrı DB).
 
 ## Şu anki odak
-F18 vitrin (`apps/storefront`, Next.js; tema sözleşmesi `packages/ui`, ilk tema `packages/themes/base`; adr/0046), kullanıcının 2026-11-01 isteğiyle F16'dan önce. Backend + kendi yönetici panelimiz (`apps/panel`, adr/0022) sürüyor; Medusa Admin'e yeni ekran yazılmaz. Ödeme deneme sayfası (adr/0028) vitrin ödemesi çalışınca silinir.
+F18 vitrin (`apps/storefront`, Next.js; tema sözleşmesi `packages/ui`, ilk tema `packages/themes/base`; adr/0046), kullanıcının 2026-11-01 isteğiyle F16'dan önce. Backend + kendi yönetici panelimiz (`apps/panel`, adr/0022) sürüyor; Medusa Admin'e yeni ekran yazılmaz. Ödeme deneme sayfası (adr/0028) vitrin ödemesi çalışınca silindi (2026-11-02); ödeme `localhost:8000/odeme`.
 Güncel faz ve görevler: `PROGRESS.md`
 
 ## Stack
@@ -23,7 +23,7 @@ Güncel faz ve görevler: `PROGRESS.md`
 - `pnpm --filter backend dev` — sadece backend
 - `pnpm --filter panel dev` — panel (backend'e proxy)
 - `pnpm --filter storefront dev` — vitrin `localhost:8000` (backend açık ve `seed:demo` yapılmış olmalı)
-- `pnpm dev:paytr` — sahte PayTR; ödeme deneme sayfası `localhost:9000/dev/checkout` (adr/0028)
+- `pnpm dev:paytr` — sahte PayTR (panelden test hesabıyla bağlanır); vitrin ödemesi `localhost:8000/odeme`
 - `pnpm --filter backend test:unit` / `test:integration:http` / `test:integration:modules`
 - `pnpm lint` / `pnpm typecheck` / `pnpm format`
 - `pnpm --filter backend medusa db:migrate` — migration

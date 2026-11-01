@@ -107,7 +107,7 @@ iyzico → callbackUrl (POST /hooks/iyzico/callback, gövde: token)
 - Verilen her form `payment-forms` tablosuna yazılır (oturum, sepet, token, son geçerlilik): Medusa yeniden başlatılan ödemenin eski oturumunu siler ama form iyzico'da ödenebilir kalır. `iyzico-reconcile` işi (10 dakikada bir) 5 dakikadan eski açık formların hepsini sayfa sayfa callback'in akışıyla sorar (tarayıcısı dönmeyen alıcı, incelemedeki ödeme, silinmiş oturumun ödenmiş formu). Form ödenince, iade kaydına girince ya da ödenmeden süresi dolunca kapanır; bir günü geçen açık form uyarıyla kapanır.
 - Oturum verisi Store yanıtlarında görünür: Medusa'nın sakladığı ödeme verisinde kart bilgisi yok (yalnızca `payment_id`, taksit, fraud durumu ve satır işlemleri); panel kart bilgisini iyzico'ya sorarak gösterir (V10).
 - Webhook (V3 imzası) kullanıcının kararıyla gerçek firmaya kadar ertelendi (2026-10-27); akış callback + uzlaştırmayla eksiksiz.
-- Geliştirmede: deneme sayfası (`/dev/checkout`, ADR-0028) iyzico'yu paneldeki sandbox hesabıyla açar (tüm sayfa yönlendirmesi). Testler sahte iyzico'nun Checkout Form'unu ve tıklanabilir sayfasını (`/fake-cpp/<token>`: onayla, reddet, incelemede) kullanır.
+- Geliştirmede: vitrinin ödeme adımı (`localhost:8000/odeme`) iyzico'yu paneldeki sandbox hesabıyla açar (tüm sayfa yönlendirmesi); sandbox test kartıyla denendi (2026-11-02). Testler sahte iyzico'nun Checkout Form'unu ve tıklanabilir sayfasını (`/fake-cpp/<token>`: onayla, reddet, incelemede) kullanır.
 
 - **Sandbox'ta ölçüldü (2026-10-27, F5 V10, deneme siparişi #212'nin ödemesinde 1 TL iade):**
   - Aynı gün iade sandbox'ta yapılabildi (`10223` görülmedi; canlıda görülürse tam tutar iptale düşülür).

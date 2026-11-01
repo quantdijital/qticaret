@@ -170,7 +170,7 @@ Gerçek PayTR `localhost`'a bildirim gönderemez; ilk müşterinin canlı hesab�
 1. `pnpm dev:paytr`: sahte PayTR `127.0.0.1:9102`'de açılır, bildirimleri `http://localhost:9000/hooks/paytr`'ye yollar. Açılırken panelde girilecek hesabı yazar (mağaza no `100001`; parola ve gizli anahtar okunur, uydurma değerler: gerçek PayTR reddeder, gizli bilgi tarayıcıları (gitleaks) gerçek sanmaz).
 2. Backend `PAYTR_BASE_URL=http://127.0.0.1:9102` ile çalışır (`env.example`'da var; eski `.env`'lere bir satır eklenir).
 3. Panel > Ayarlar > Ödeme > PayTR'de bu hesap test moduyla kaydedilir (bir kez; dev veritabanında kalır).
-4. `http://localhost:9000/dev/checkout`: ürün → sepet → adres → kargo → taksit tablosu → "Öde" → sahte PayTR formu (iFrame) → dönüş sayfası siparişi bekler ve panel bağlantısını verir.
+4. Vitrin (`http://localhost:8000`): ürün → sepet → `/odeme` (adres → kargo → kart) → `/odeme/kart` sahte PayTR formu (iFrame) → "Ödemeyi onayla" → `/odeme/sonuc` siparişi bekler → `/siparis/:id`. (adr/0028'in deneme sayfası 2026-11-02'de kaldırıldı.)
 
 Sahte formun üç düğmesi, mağazanın karşılaşacağı üç sonuçtur: **Ödemeyi onayla** (taksit seçilebilir, vade farkı `total_amount`'a eklenir; imzalı bildirim gider, sipariş açılır), **Kart reddedildi** (başarısız bildirim, hata adresine dönüş, sepet açık kalır, yeniden ödenebilir), **Ödendi, bildirim kayboldu** (bildirim gitmez; sipariş, `paytr-reconcile` işi PayTR'ye sorunca açılır: oturum 10 dakika sessiz kaldıktan sonraki ilk turda, yani 10–20 dakika içinde). HTTP testi `paytr-payment-form.spec.ts` aynı formu gerçek backend'e karşı sürer.
 

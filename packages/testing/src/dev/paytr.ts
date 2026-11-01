@@ -29,7 +29,7 @@ void startFakePaytr(DEV_PAYTR_ACCOUNT, { port, notifyUrl }).then((fake) => {
       `  Mağaza no: ${DEV_PAYTR_ACCOUNT.merchantId}`,
       `  Mağaza parolası: ${DEV_PAYTR_ACCOUNT.merchantKey}`,
       `  Mağaza gizli anahtarı: ${DEV_PAYTR_ACCOUNT.merchantSalt}`,
-      "Deneme sayfası: http://localhost:9000/dev/checkout",
+      "Vitrin ödemesi: http://localhost:8000/odeme (kartla ödeme PayTR çerçevesinde)",
       "",
     ].join("\n")
   )

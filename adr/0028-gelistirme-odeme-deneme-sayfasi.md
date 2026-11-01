@@ -52,3 +52,7 @@ Kullanıcı 2026-10-27'de müşteri tarafını hiç göremediğini söyledi. Öd
 - **Sahte PayTR:** `startFakePaytr(account, { port, notifyUrl })`. Form `GET/POST /odeme/guvenli/:token`, hedefi üst pencere (PayTR'nin iFrame'i de mağazanın sayfasına döner). Geliştirme hesabı sabit ve okunur (`packages/testing/src/dev/paytr.ts`): panelde bir kez girilir; docs/04'ün "gizli bilgi tarayıcısının gerçeğinden ayıramayacağı sahte sır yok" kuralına uyar.
 - **iyzico:** V9'da eklenir (sayfada seçenek pasif).
 
+
+## Ek (2026-11-02): kaldırıldı
+
+Vitrinin kendi ödemesi (F18 D7, `apps/storefront` `/odeme`) havale, iyzico sandbox ve sahte PayTR çerçevesiyle uçtan uca çalıştı; karar gereği deneme sayfası (`/dev/checkout`, `lib/dev-checkout`) silindi. `/dev/storefront-key` (vitrinin geliştirmedeki demo anahtarı) kalır. HTTP testi sayfanın artık olmadığını denetler.
