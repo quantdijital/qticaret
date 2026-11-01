@@ -251,6 +251,7 @@
     "sections": {
       "appearance": "Görünüm",
       "store": "Mağaza",
+      "storefront": "Vitrin",
       "payments": "Ödeme",
       "shipping": "Kargo ve teslimat",
       "seo": "SEO",
@@ -334,6 +335,90 @@
       "modeHint": "Açık ya da koyu zemin; sisteme göre seçilirse cihazınızı izler."
     },
     "saved": "Ayarlar kaydedildi.",
+    "storefront": {
+      "title": "Vitrin",
+      "subtitle": "Mağazanızın her sayfasında görünen çerçeve: duyuru şeridi, üst bağlantılar, güven rozetleri, alt bilgi ve WhatsApp düğmesi. Her kart kendi bölümünü kaydeder.",
+      "moveUp": "{{item}}: yukarı taşı",
+      "moveDown": "{{item}}: aşağı taşı",
+      "remove": "{{item}}: kaldır",
+      "announcements": {
+        "title": "Duyuru şeridi",
+        "description": "Sayfanın en üstündeki ince şerit. Birden çok satır yazarsanız sırayla gösterilir.",
+        "line": "{{number}}. duyuru",
+        "placeholder": "1500 TL ve üzeri kargo bedava",
+        "empty": "Duyuru yok; vitrinde duyuru şeridi görünmez.",
+        "add": "Duyuru ekle",
+        "hint": "En çok {{max}} satır, her biri en çok {{length}} karakter."
+      },
+      "topLinks": {
+        "title": "Üst bağlantılar",
+        "description": "Menünün üstündeki küçük bağlantılar: Hakkımızda, İletişim, Toptan satış gibi.",
+        "empty": "Üst bağlantı yok; menünün üstünde bağlantı satırı görünmez.",
+        "hint": "En çok {{max}} bağlantı."
+      },
+      "links": {
+        "label": "Görünen ad",
+        "href": "Adres",
+        "item": "{{number}}. bağlantı",
+        "labelOf": "{{number}}. bağlantının adı",
+        "hrefOf": "{{number}}. bağlantının adresi",
+        "within": "{{within}}, {{name}}",
+        "labelPlaceholder": "Hakkımızda",
+        "hrefPlaceholder": "/hakkimizda",
+        "add": "Bağlantı ekle",
+        "hrefHint": "Mağazanızdaki bir sayfanın adresi / ile başlar (/hakkimizda); başka bir site https:// ile yazılır."
+      },
+      "footer": {
+        "title": "Alt bilgi sütunları",
+        "description": "Sayfanın altındaki bağlantı sütunları. Hiç sütun eklemezseniz vitrin kategorilerinizi ve bir yardım sütununu kendiliğinden gösterir.",
+        "empty": "Sütun yok; vitrin alt bilgide kategorilerinizi ve yardım sütununu gösteriyor.",
+        "group": "{{number}}. sütun",
+        "groupTitle": "{{number}}. sütunun başlığı",
+        "groupPlaceholder": "Kurumsal",
+        "addGroup": "Sütun ekle",
+        "hint": "En çok {{max}} sütun.",
+        "linksHint": "Her sütunda en az 1, en çok {{max}} bağlantı."
+      },
+      "badges": {
+        "title": "Güven rozetleri",
+        "description": "Mağazanızın sözleri; başlığın altında ve sepete ekle düğmesinin yanında görünür.",
+        "empty": "Rozet yok; vitrinde güven şeridi görünmez.",
+        "add": "Rozet ekle",
+        "item": "{{number}}. rozet",
+        "icon": "Simge",
+        "iconOf": "{{number}}. rozetin simgesi",
+        "badgeTitle": "Başlık",
+        "titleOf": "{{number}}. rozetin başlığı",
+        "titlePlaceholder": "Aynı gün kargo",
+        "text": "Açıklama (isteğe bağlı)",
+        "textOf": "{{number}}. rozetin açıklaması",
+        "textPlaceholder": "Saat 14.00'e kadar verilen siparişlerde",
+        "hint": "En çok {{max}} rozet.",
+        "icons": {
+          "truck": "Kargo",
+          "clock": "Saat",
+          "shield": "Güvenlik",
+          "card": "Kart",
+          "refresh": "İade ve değişim",
+          "award": "Ödül",
+          "gift": "Hediye",
+          "phone": "Telefon"
+        }
+      },
+      "whatsapp": {
+        "title": "WhatsApp",
+        "description": "Müşterilerin size WhatsApp'tan yazabileceği düğme, vitrinin köşesinde görünür.",
+        "phone": "WhatsApp numarası",
+        "hint": "Türkiye cep numarası; +90 eklemeniz gerekmez. Boş bırakırsanız WhatsApp düğmesi görünmez."
+      },
+      "errors": {
+        "required": "Bu alanı doldurun.",
+        "tooLong": "En çok {{max}} karakter yazın.",
+        "textInvalid": "Metin, görünmeyen kontrol karakterleri içeremez.",
+        "hrefInvalid": "Adres / ile başlayan bir mağaza sayfası ya da https:// ile başlayan bir site olmalı.",
+        "phoneInvalid": "Geçerli bir Türkiye telefon numarası girin."
+      }
+    },
     "store": {
       "title": "Mağaza",
       "subtitle": "Mağazanızın adı, iletişim bilgileri, saat dilimi ve ölçü birimleri.",
@@ -1480,6 +1565,7 @@
     },
     "sectionHints": {
       "store": "Mağaza adı, iletişim bilgileri, saat dilimi ve ölçü birimleri",
+      "storefront": "Duyuru şeridi, üst ve alt bağlantılar, güven rozetleri, WhatsApp düğmesi",
       "appearance": "Panelin marka rengi, köşeleri ve yoğunluğu",
       "seo": "Alan adı ve adres yapısı, başlık şablonları, arama motorları",
       "attributes": "Ürünlerde kullanılan özellik şablonları",

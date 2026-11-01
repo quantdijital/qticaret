@@ -251,6 +251,7 @@
     "sections": {
       "appearance": "Appearance",
       "store": "Store",
+      "storefront": "Storefront",
       "payments": "Payment",
       "shipping": "Shipping and delivery",
       "seo": "SEO",
@@ -334,6 +335,90 @@
       "modeHint": "A light or dark ground; by system follows your device."
     },
     "saved": "Settings saved.",
+    "storefront": {
+      "title": "Storefront",
+      "subtitle": "The frame shown on every page of your shop: the announcement bar, top links, trust badges, footer and WhatsApp button. Each card saves its own part.",
+      "moveUp": "{{item}}: move up",
+      "moveDown": "{{item}}: move down",
+      "remove": "{{item}}: remove",
+      "announcements": {
+        "title": "Announcement bar",
+        "description": "The thin bar at the very top of the page. Several lines are shown in turn.",
+        "line": "Announcement {{number}}",
+        "placeholder": "Free shipping from 1500 TL",
+        "empty": "No announcements; the storefront shows no announcement bar.",
+        "add": "Add announcement",
+        "hint": "Up to {{max}} lines, each up to {{length}} characters."
+      },
+      "topLinks": {
+        "title": "Top links",
+        "description": "The small links above the menu: About us, Contact, Wholesale and the like.",
+        "empty": "No top links; no link row shows above the menu.",
+        "hint": "Up to {{max}} links."
+      },
+      "links": {
+        "label": "Label",
+        "href": "Address",
+        "item": "Link {{number}}",
+        "labelOf": "Label of link {{number}}",
+        "hrefOf": "Address of link {{number}}",
+        "within": "{{within}}, {{name}}",
+        "labelPlaceholder": "About us",
+        "hrefPlaceholder": "/about",
+        "add": "Add link",
+        "hrefHint": "A page of your shop starts with / (/about); another site is written with https://."
+      },
+      "footer": {
+        "title": "Footer columns",
+        "description": "The link columns at the bottom of the page. With no columns, the storefront shows your categories and a help column by itself.",
+        "empty": "No columns; the footer shows your categories and the help column.",
+        "group": "Column {{number}}",
+        "groupTitle": "Title of column {{number}}",
+        "groupPlaceholder": "Company",
+        "addGroup": "Add column",
+        "hint": "Up to {{max}} columns.",
+        "linksHint": "At least 1 and up to {{max}} links in each column."
+      },
+      "badges": {
+        "title": "Trust badges",
+        "description": "Your shop's promises; shown under the header and beside the add to cart button.",
+        "empty": "No badges; the storefront shows no trust strip.",
+        "add": "Add badge",
+        "item": "Badge {{number}}",
+        "icon": "Icon",
+        "iconOf": "Icon of badge {{number}}",
+        "badgeTitle": "Title",
+        "titleOf": "Title of badge {{number}}",
+        "titlePlaceholder": "Same-day shipping",
+        "text": "Description (optional)",
+        "textOf": "Description of badge {{number}}",
+        "textPlaceholder": "For orders placed before 2 pm",
+        "hint": "Up to {{max}} badges.",
+        "icons": {
+          "truck": "Shipping",
+          "clock": "Clock",
+          "shield": "Security",
+          "card": "Card",
+          "refresh": "Returns and exchanges",
+          "award": "Award",
+          "gift": "Gift",
+          "phone": "Phone"
+        }
+      },
+      "whatsapp": {
+        "title": "WhatsApp",
+        "description": "A button customers use to write to you on WhatsApp, shown in the storefront's corner.",
+        "phone": "WhatsApp number",
+        "hint": "A Turkish mobile number; no need to add +90. Leave it empty and no WhatsApp button shows."
+      },
+      "errors": {
+        "required": "Fill in this field.",
+        "tooLong": "Write {{max}} characters at most.",
+        "textInvalid": "The text cannot contain invisible control characters.",
+        "hrefInvalid": "The address must be a shop page starting with / or a site starting with https://.",
+        "phoneInvalid": "Enter a valid Turkish phone number."
+      }
+    },
     "store": {
       "title": "Store",
       "subtitle": "Your shop's name, contact details, time zone and units.",
@@ -1480,6 +1565,7 @@
     },
     "sectionHints": {
       "store": "Shop name, contact details, time zone and units",
+      "storefront": "Announcement bar, top and footer links, trust badges, WhatsApp button",
       "appearance": "The panel's brand colour, corners and density",
       "seo": "Domain and address style, title templates, search engines",
       "attributes": "Attribute templates for products",

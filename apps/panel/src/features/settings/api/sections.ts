@@ -154,6 +154,39 @@ export interface MarketingSettings {
   feed_same_day_cutoff_hour: number | null
 }
 
+/** The icons a promise in the storefront's trust strip may carry (docs/19 §4). */
+export const TRUST_ICONS = [
+  "truck",
+  "clock",
+  "shield",
+  "card",
+  "refresh",
+  "award",
+  "gift",
+  "phone",
+] as const
+export type TrustIcon = (typeof TRUST_ICONS)[number]
+
+export interface StorefrontLink {
+  label: string
+  /** A page of the shop (`/hakkimizda`) or an https address. */
+  href: string
+}
+
+/** The storefront's frame as the shop writes it (F18, docs/19 §4); arrays are saved whole. */
+export interface StorefrontSettings {
+  /** The lines the announcement bar shows in turn. */
+  announcements: string[]
+  /** The small links above the header's menu. */
+  top_links: StorefrontLink[]
+  /** The footer's link columns; none: the storefront lists categories and a help column. */
+  footer_groups: { title: string; links: StorefrontLink[] }[]
+  /** The shop's promises under the header and beside "add to cart". */
+  trust_badges: { icon: TrustIcon; title: string; text: string | null }[]
+  /** The number the WhatsApp button opens, E.164; none: no button. */
+  whatsapp_phone: string | null
+}
+
 /** The places the shop's catalog is sent, in the order the panel shows them. */
 export const FEED_TARGET_NAMES = ["google", "meta", "cimri", "akakce"] as const
 export type FeedTargetName = (typeof FEED_TARGET_NAMES)[number]

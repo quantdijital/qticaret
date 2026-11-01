@@ -72,7 +72,7 @@ describe("Settings home", () => {
       "/settings/migration"
     )
     // Accounting, warehouses and SMS are tabs of invoices, shipping and e-mail now
-    expect(screen.getAllByRole("link")).toHaveLength(18)
+    expect(screen.getAllByRole("link")).toHaveLength(19)
   })
 
   it("offers operations staff only what they may use: no settings to change", () => {

@@ -32,6 +32,7 @@ export const SECTIONS = [
 export const SETTINGS = [
   "/settings",
   "/settings/store",
+  "/settings/storefront",
   "/settings/payments",
   "/settings/payments/paytr",
   "/settings/payments/iyzico",
