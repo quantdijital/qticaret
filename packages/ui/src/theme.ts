@@ -18,6 +18,7 @@ import type {
   HomePageView,
   ListingPageView,
   ProductPageView,
+  ReviewsPageView,
   ShopView,
 } from "./views"
 
@@ -109,6 +110,8 @@ export interface StorefrontTheme {
   /** The signed-in customer's pages: overview, orders, details (D8). */
   AccountPage: ComponentType<Page<AccountPageView> & { actions: AccountActions }>
   NotFoundPage: ComponentType<{ t: Translate }>
+  /** The shop's approved reviews across its products (D10). */
+  ReviewsPage: ComponentType<Page<ReviewsPageView>>
   /** Asks before acting on a link (D6 cart reminder); the action is a plain form. */
   ConfirmPage: ComponentType<Page<ConfirmPageView> & { action: (form: FormData) => Promise<void> }>
 }

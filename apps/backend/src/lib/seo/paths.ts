@@ -24,6 +24,7 @@ export const RESERVED_ROOT_SEGMENTS: ReadonlySet<string> = new Set([
   "siparis",
   "yasal",
   "magaza",
+  "yorumlar",
   // Backend paths, should a proxy put them on the storefront's host (F16)
   "admin",
   "app",

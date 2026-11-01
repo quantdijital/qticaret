@@ -10,6 +10,7 @@ describe("isReservedPath", () => {
     "/siparis",
     "/yasal",
     "/magaza",
+    "/yorumlar",
     "/admin",
     "/store",
   ])("keeps %s for the storefront", (path) => {

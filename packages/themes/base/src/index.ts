@@ -14,6 +14,7 @@ import { NotFoundPage } from "./NotFoundPage"
 import { OrderPage } from "./OrderPage"
 import { PaymentFramePage } from "./PaymentFramePage"
 import { ProductPage } from "./ProductPage"
+import { ReviewsPage } from "./ReviewsPage"
 
 /** The first theme (adr/0046 §7): sector-neutral, mobile first, no script but the menus and the purchase form. */
 export const baseTheme: StorefrontTheme = {
@@ -33,4 +34,5 @@ export const baseTheme: StorefrontTheme = {
   AccountPage,
   NotFoundPage,
   ConfirmPage,
+  ReviewsPage,
 }

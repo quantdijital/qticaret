@@ -462,5 +462,7 @@
   "product.installments_total": "Toplam",
   "product.installments_single": "Tek çekim",
   "account.addresses": "Adreslerim",
-  "account.no_addresses": "Kayıtlı adresiniz yok; ödeme adımında yazdığınız adres buraya kaydedilir."
+  "account.no_addresses": "Kayıtlı adresiniz yok; ödeme adımında yazdığınız adres buraya kaydedilir.",
+  "reviews.title": "Müşteri yorumları",
+  "reviews.summary": "Bu sayfadaki yorumların ortalaması 5 üzerinden {average} · toplam {count} yorum"
 }

@@ -363,3 +363,12 @@ export interface InstallmentFamilyView {
   family: string
   options: { count: number; perInstallment: string; total: string }[]
 }
+
+export interface ReviewsPageView {
+  title: string
+  breadcrumbs: BreadcrumbView[]
+  average: number | null
+  count: number
+  reviews: (ReviewView & { product: LinkView | null })[]
+  pagination: PaginationView
+}
