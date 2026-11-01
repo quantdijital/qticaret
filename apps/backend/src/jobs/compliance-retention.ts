@@ -3,6 +3,7 @@ import { errorSummary, logger } from "../lib/logging"
 import {
   forgetAbandonedCarts,
   forgetAuditClients,
+  forgetOldContactMessages,
   forgetOldCookieConsents,
   forgetSettledStockAlerts,
   forgetSpentConsentRequests,
@@ -27,6 +28,7 @@ export default async function complianceRetention(container: MedusaContainer) {
     audit_clients: () => forgetAuditClients(container, now),
     stock_alerts: () => forgetSettledStockAlerts(container, now),
     consent_requests: () => forgetSpentConsentRequests(container, now),
+    contact_messages: () => forgetOldContactMessages(container, now),
     abandoned_cart_contacts: () => forgetAbandonedCartContacts(container, now),
     ga_clients: () => forgetGaClients(container, now),
     sent_messages: () => forgetSentMessages(container, now),

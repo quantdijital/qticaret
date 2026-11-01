@@ -14,6 +14,7 @@ const SWITCHES = {
   "staff.bank_transfer": "alert_bank_transfer",
   "staff.low_stock": "alert_low_stock",
   "staff.seo_digest": "alert_seo_digest",
+  "staff.contact_message": "alert_contact_message",
 } as const satisfies Partial<Record<MessageTemplateName, keyof NotificationSettings>>
 
 export type StaffTemplate = keyof typeof SWITCHES

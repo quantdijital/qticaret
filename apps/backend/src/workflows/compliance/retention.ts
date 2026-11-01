@@ -4,6 +4,8 @@ import { RETENTION_DAYS, cutoffOf } from "../../lib/compliance/retention"
 import { AUDIT_LOG_MODULE } from "../../modules/audit-log"
 import type AuditLogModuleService from "../../modules/audit-log/service"
 import { BACK_IN_STOCK_MODULE } from "../../modules/back-in-stock"
+import { CONTACT_MESSAGES_MODULE } from "../../modules/contact-messages"
+import type ContactMessagesModuleService from "../../modules/contact-messages/service"
 import type BackInStockModuleService from "../../modules/back-in-stock/service"
 import { CONVERSIONS_MODULE } from "../../modules/conversions"
 import type ConversionsModuleService from "../../modules/conversions/service"
@@ -174,6 +176,20 @@ export async function forgetSettledStockAlerts(container: Container, now: Date):
     (ids) => alerts.deleteStockAlerts(ids)
   )
   return settled + unconfirmed
+}
+
+/** Deletes contact form messages a year after they came, answered or not (adr/0047). */
+export async function forgetOldContactMessages(container: Container, now: Date): Promise<number> {
+  const messages = container.resolve<ContactMessagesModuleService>(CONTACT_MESSAGES_MODULE)
+  const cutoff = cutoffOf(RETENTION_DAYS.contactMessage, now)
+  return drain(
+    () =>
+      messages.listContactMessages(
+        { created_at: { $lt: cutoff } },
+        { select: ["id"], take: BATCH }
+      ),
+    (ids) => messages.deleteContactMessages(ids)
+  )
 }
 
 /** Deletes double opt-in requests a while after their link expired, confirmed or not. */

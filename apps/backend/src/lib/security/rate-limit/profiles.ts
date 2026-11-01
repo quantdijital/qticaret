@@ -97,6 +97,12 @@ export const RATE_LIMIT_PROFILES = {
     perIp: { max: 10, windowMs: 15 * MINUTE },
     perIdentity: { max: 3, windowMs: HOUR },
   },
+  // F18 D10 (adr/0047): the contact form; per address and per sender's e-mail
+  contact_message: {
+    name: "contact_message",
+    perIp: { max: 10, windowMs: HOUR },
+    perIdentity: { max: 5, windowMs: HOUR },
+  },
   // F14.5: a moved customer's claim key, guessed at nowhere: a few tries an hour
   migration_claim: {
     name: "migration_claim",

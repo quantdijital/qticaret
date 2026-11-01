@@ -12,6 +12,7 @@ import { loadParcelMessage } from "./parcel"
 import { loadReturnMessage } from "./return-request"
 import {
   loadSeoDigest,
+  loadStaffContact,
   loadStaffInvite,
   loadStaffMfaChanged,
   loadStaffOrder,
@@ -53,6 +54,7 @@ export const MESSAGE_LOADERS: { readonly [N in MessageTemplateName]: Loader<N> }
   "staff.bank_transfer": (container, id) => loadStaffOrder(container, id),
   "staff.low_stock": loadStaffStock,
   "staff.seo_digest": (container) => loadSeoDigest(container),
+  "staff.contact_message": (container, id) => loadStaffContact(container, id),
   "staff.invite": loadStaffInvite,
   "staff.password_reset": loadStaffPasswordReset,
   "staff.mfa_changed": loadStaffMfaChanged,

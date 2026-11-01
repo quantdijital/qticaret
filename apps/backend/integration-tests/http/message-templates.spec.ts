@@ -39,7 +39,7 @@ medusaIntegrationTestRunner({
       const preview = await get<Preview>(`${PATH}/order.placed/preview`)
 
       expect(list.status).toBe(200)
-      expect(list.data.templates).toHaveLength(24)
+      expect(list.data.templates).toHaveLength(25)
       // A staff member told their 2FA changed (the F15 audit)
       expect(list.data.templates).toContainEqual({
         name: "staff.mfa_changed",

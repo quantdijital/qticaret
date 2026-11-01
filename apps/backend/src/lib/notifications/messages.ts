@@ -19,6 +19,10 @@ export const NOTIFICATION_MESSAGES: Readonly<
   Record<MessageLocale, Readonly<Record<string, AlertText>>>
 > = {
   tr: {
+    "contact.message_received": {
+      title: "Yeni iletişim mesajı: {{subject}}",
+      description: "{{name}} vitrinden yazdı.",
+    },
     "stock.low_stock": {
       title: "Düşük stok: {{name}}",
       description: "{{available}} adet kaldı (eşik {{threshold}}).",
@@ -96,6 +100,10 @@ export const NOTIFICATION_MESSAGES: Readonly<
     },
   },
   en: {
+    "contact.message_received": {
+      title: "New contact message: {{subject}}",
+      description: "{{name}} wrote from the storefront.",
+    },
     "messaging.sms_daily_limit": {
       title: "80% of today's SMS limit used",
       description:

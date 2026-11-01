@@ -23,6 +23,8 @@ export const RETENTION_DAYS = {
   auditClient: 730,
   /** A stock alert once its notice went or it was cancelled; a guest's never confirmed. */
   stockAlert: 180,
+  /** A contact form message, answered or not, since it came (adr/0047). */
+  contactMessage: 365,
   /** A double opt-in request after its link expired: the consent keeps its own proof. */
   consentRequest: 30,
   /**

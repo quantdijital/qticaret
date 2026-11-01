@@ -1,6 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
 import { BACK_IN_STOCK_MODULE } from "../../modules/back-in-stock"
+import { contactMessagesFor } from "../contact/customer-data"
 import type BackInStockModuleService from "../../modules/back-in-stock/service"
 import { LEGAL_MODULE } from "../../modules/legal"
 import type LegalModuleService from "../../modules/legal/service"
@@ -142,6 +143,8 @@ export async function customerData(container: Container, customerId: string) {
           { select: ["number", "placed_at", "currency_code", "total", "status", "email", "lines"] }
         ),
     ])
+  const email = typeof customer["email"] === "string" ? customer["email"] : ""
+  const contact = await contactMessagesFor(container, customerId, email ? [email] : [])
   const { addresses, billing_profile: billing, ...profile } = customer
   return {
     hazırlanma: new Date().toISOString(),
@@ -162,6 +165,7 @@ export async function customerData(container: Container, customerId: string) {
     sorular: questions,
     stok_bildirimleri: alerts,
     favoriler: saved,
+    iletişim_mesajları: contact,
     gönderilen_iletiler: sent,
   }
 }

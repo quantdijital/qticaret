@@ -14,6 +14,7 @@ import type LegalModuleService from "../../../modules/legal/service"
 import { MESSAGING_MODULE } from "../../../modules/messaging"
 import type MessagingModuleService from "../../../modules/messaging/service"
 import { erasedKeyOf } from "../../../lib/migration/erased"
+import { eraseContactMessages } from "../../contact/customer-data"
 import { MIGRATION_MODULE } from "../../../modules/migration"
 import type MigrationModuleService from "../../../modules/migration/service"
 import { PRODUCT_QA_MODULE } from "../../../modules/product-qa"
@@ -217,6 +218,8 @@ export async function eraseTraces(container: Container, customerId: string, addr
   const messages = await eraseMessages(container, customerId, addresses)
   await eraseContributions(container, customerId)
   await eraseLegacyOrders(container, customerId, addresses)
+  // What they wrote from the contact form, by account or address (adr/0047)
+  await eraseContactMessages(container, customerId, addresses)
   await eraseExports(container, customerId)
   return { carts, messages }
 }

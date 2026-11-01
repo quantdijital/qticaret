@@ -18,6 +18,8 @@ export const CHALLENGE_SCOPES = [
   "order_lookup",
   "stock_alert",
   "checkout",
+  // F18 D10 (adr/0047): the storefront's contact form
+  "contact",
 ] as const
 export type ChallengeScope = (typeof CHALLENGE_SCOPES)[number]
 

@@ -246,6 +246,11 @@ module.exports = defineConfig({
       resolve: "./src/modules/back-in-stock",
       options: { hashKey: env.PII_HASH_KEY, encryptionKey: env.PII_ENCRYPTION_KEY },
     },
+    // F18 D10 (adr/0047): the storefront's contact form, what was written sealed
+    {
+      resolve: "./src/modules/contact-messages",
+      options: { hashKey: env.PII_HASH_KEY, encryptionKey: env.PII_ENCRYPTION_KEY },
+    },
     // F10.4 (adr/0037 §4): customers' saved products
     { resolve: "./src/modules/wishlist" },
     // F10.3 (adr/0037 §6): customer segments by rules, members in Medusa groups

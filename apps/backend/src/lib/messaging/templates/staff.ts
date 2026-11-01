@@ -34,6 +34,12 @@ export interface StaffMfaVars {
   change: "enabled" | "disabled" | "reset"
 }
 
+/** A contact message came: who and about what; the message itself stays in the panel. */
+export interface StaffContactVars {
+  name: string
+  subject: "order" | "product" | "return" | "payment" | "other"
+}
+
 /** A staff member's password reset: the link only the event knew. */
 export interface StaffResetVars {
   resetUrl: string
@@ -130,6 +136,30 @@ export const staffLowStock: MessageTemplate<StaffStockVars> = {
       footer: FOOTER(brand.shopName),
     }),
   sample: { name: "Örnek ürün / Mavi M", available: 2, threshold: 5 },
+}
+
+/** "Yeni iletişim mesajı" (F18 D10, adr/0047): the bell's alert; the words stay in the panel. */
+export const staffContactMessage: MessageTemplate<StaffContactVars> = {
+  name: "staff.contact_message",
+  kind: "transactional",
+  channels: ["email"],
+  retry: true,
+  email: (vars, brand) => {
+    const subject = messageText(`staff_contact.subjects.${vars.subject}`)
+    return renderEmail(brand, {
+      subject: messageText("staff_contact.subject", { subject }),
+      preheader: messageText("staff_contact.preheader", { name: vars.name }),
+      heading: messageText("staff_contact.heading"),
+      blocks: [
+        {
+          kind: "paragraph",
+          text: messageText("staff_contact.intro", { name: vars.name, subject }),
+        },
+      ],
+      footer: FOOTER(brand.shopName),
+    })
+  },
+  sample: { name: "Ayşe Yılmaz", subject: "order" },
 }
 
 /** Monday's SEO summary: the shop's average score and what needs work first. */

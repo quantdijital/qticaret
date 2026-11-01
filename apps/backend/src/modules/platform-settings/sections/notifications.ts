@@ -10,6 +10,8 @@ export interface NotificationSettings {
   alert_low_stock: boolean
   /** Monday morning's summary of the shop's SEO (docs/14). */
   alert_seo_digest: boolean
+  /** A message from the storefront's contact form (adr/0047). */
+  alert_contact_message: boolean
   /** Texts the shop sends a day at most (F9.8): a guard on cost and abuse; staff hear at 80%. */
   sms_daily_limit: number
   /** E-mails the shop sends a day at most (F10 M9): a guard on the sender's reputation; staff hear at 80%. */
@@ -33,6 +35,7 @@ export const notificationsSection = defineSection<NotificationSettings>(
     alert_bank_transfer: z.boolean(),
     alert_low_stock: z.boolean(),
     alert_seo_digest: z.boolean(),
+    alert_contact_message: z.boolean(),
     sms_daily_limit: z.number().int().min(1).max(100_000),
     email_daily_limit: z.number().int().min(100).max(200_000),
   },
@@ -42,6 +45,7 @@ export const notificationsSection = defineSection<NotificationSettings>(
     alert_bank_transfer: true,
     alert_low_stock: true,
     alert_seo_digest: true,
+    alert_contact_message: true,
     sms_daily_limit: 500,
     email_daily_limit: 5000,
   }

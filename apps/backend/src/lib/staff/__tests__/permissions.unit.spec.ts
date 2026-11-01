@@ -317,6 +317,9 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/price-lists/:id/discount": false,
   "POST /admin/product-answers/moderate": true,
   "POST /admin/product-questions/:id/answer": true,
+  // adr/0047: answering the contact form is the day's work; deleting a message is not
+  "POST /admin/contact-messages/:id": true,
+  "DELETE /admin/contact-messages/:id": false,
   "POST /admin/product-questions/moderate": true,
   "POST /admin/product-reviews/moderate": true,
   "POST /admin/products/:id/attributes": false,

@@ -1,0 +1,47 @@
+import type { MedusaContainer } from "@medusajs/framework/types"
+import { CONTACT_MESSAGES_MODULE } from "../../modules/contact-messages"
+import type ContactMessagesModuleService from "../../modules/contact-messages/service"
+
+type Container = Pick<MedusaContainer, "resolve">
+
+/** A person's contact messages: by their account, or by an address of theirs (a guest's). */
+async function messagesOf(container: Container, customerId: string, addresses: string[]) {
+  const messages = container.resolve<ContactMessagesModuleService>(CONTACT_MESSAGES_MODULE)
+  const hashes = addresses.flatMap((address) => messages.emailHashOf(address) ?? [])
+  const rows = await messages.listContactMessages(
+    hashes.length
+      ? { $or: [{ customer_id: customerId }, { email_hash: hashes }] }
+      : { customer_id: customerId },
+    { select: ["id", "subject", "order_number", "status", "sealed", "created_at"], take: null }
+  )
+  return { messages, rows }
+}
+
+/** For a KVKK copy (adr/0041 §6): what they wrote, opened. */
+export async function contactMessagesFor(
+  container: Container,
+  customerId: string,
+  addresses: string[]
+) {
+  const { messages, rows } = await messagesOf(container, customerId, addresses)
+  return rows.map((row) => ({
+    konu: row.subject,
+    sipariş_no: row.order_number,
+    durum: row.status,
+    gönderilme: row.created_at,
+    ...messages.open(row.sealed),
+  }))
+}
+
+/** For a KVKK erasure: their messages go, nothing of them kept (adr/0047). */
+export async function eraseContactMessages(
+  container: Container,
+  customerId: string,
+  addresses: string[]
+): Promise<number> {
+  const { messages, rows } = await messagesOf(container, customerId, addresses)
+  if (rows.length > 0) {
+    await messages.deleteContactMessages(rows.map((row) => row.id))
+  }
+  return rows.length
+}

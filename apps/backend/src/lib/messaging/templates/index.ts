@@ -11,6 +11,7 @@ import { orderDelivered, orderShipped } from "./shipping"
 import { backInStock, stockAlertConfirm } from "./stock"
 import {
   staffBankTransfer,
+  staffContactMessage,
   staffInvite,
   staffLowStock,
   staffMfaChanged,
@@ -34,6 +35,7 @@ export type { InvoiceVars } from "./invoice"
 export type { ParcelVars } from "./shipping"
 export type { StockAlertVars } from "./stock"
 export type {
+  StaffContactVars,
   StaffInviteVars,
   StaffOrderVars,
   StaffMfaVars,
@@ -68,6 +70,8 @@ export const MESSAGE_TEMPLATES = {
   "staff.bank_transfer": staffBankTransfer,
   "staff.low_stock": staffLowStock,
   "staff.seo_digest": staffSeoDigest,
+  // F18 D10 (adr/0047): a contact form message came
+  "staff.contact_message": staffContactMessage,
   "staff.invite": staffInvite,
   "staff.password_reset": staffPasswordReset,
   "staff.mfa_changed": staffMfaChanged,

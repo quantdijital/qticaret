@@ -34,6 +34,16 @@ const TR: Readonly<Record<string, string>> = {
   "staff_stock.heading": "{{name}} azalıyor",
   "staff_stock.intro":
     "{{available}} adet kaldı (eşik {{threshold}}). Stok eklemek için Stok sayfasına gidin.",
+  "staff_contact.subject": "Yeni iletişim mesajı: {{subject}}",
+  "staff_contact.preheader": "{{name}} vitrinden yazdı.",
+  "staff_contact.heading": "Yeni iletişim mesajı",
+  "staff_contact.intro":
+    '{{name}} iletişim formundan "{{subject}}" konusunda yazdı. Mesajı ve iletişim bilgilerini panelde Müşteriler > İletişim mesajları\'nda okuyup yanıtlayın; içerik güvenlik için e-postaya konmaz.',
+  "staff_contact.subjects.order": "Sipariş",
+  "staff_contact.subjects.product": "Ürün",
+  "staff_contact.subjects.return": "İade ve değişim",
+  "staff_contact.subjects.payment": "Ödeme",
+  "staff_contact.subjects.other": "Diğer",
   "staff_seo.subject": "Haftalık SEO özeti: ortalama {{average}}/100",
   "staff_seo.preheader": "{{critical}} üründe kritik bulgu var.",
   "staff_seo.heading": "Bu haftanın SEO özeti",

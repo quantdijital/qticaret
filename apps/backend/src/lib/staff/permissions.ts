@@ -159,6 +159,8 @@ const OPERATIONS_WRITES: readonly Rule[] = [
   { methods: ["POST"], path: "/admin/product-questions/moderate" },
   { methods: ["POST"], path: "/admin/product-answers/moderate" },
   { methods: ["POST"], path: "/admin/product-questions/:id/answer" },
+  // Contact form messages marked answered (adr/0047); deleting one is the admin's
+  { methods: ["POST"], path: "/admin/contact-messages/:id" },
   readJob,
   cancelJob,
 ]

@@ -50,6 +50,7 @@
 | `message_skip` (messaging)          | alıcı (M), müşteri kimliği               | gönderilmeyen iletinin nedeni      | 180 gün (`message-skips-retention`)                                                                         | Silinir.                                                   |
 | `notification` (Medusa)             | alıcı adresi (D)                         | gönderim kaydı                     | İletinin metni saklanmaz (2026-10-31 doğrulandı: tabloda metin sütunu yok, `data`'da yalnızca kimlikler). E-posta ve SMS kaydı 3 yıl sonra silinir (`sent_messages`, öneri) | Alıcı temizlenir (L9).                                     |
 | `stock_alert` (back-in-stock)       | e-posta (Ş + Ö + M), müşteri kimliği     | stok bildirimi                     | Gönderildikten ya da iptalden 180 gün sonra; doğrulanmamış misafir talebi süresi dolunca 180 gün sonra (iş) | Silinir.                                                   |
+| `contact_message` (contact-messages) | ad, e-posta, telefon, mesaj (Ş), e-posta (Ö), müşteri kimliği | vitrinin iletişim formu; mağazanın yanıtı | Geldiğinden 365 gün sonra silinir, yanıtlanmış olsun olmasın (`contact_messages`, öneri; adr/0047). Personel silerse hemen kalıcı silinir | Silinir (hesapla ve e-posta özetiyle bulunanlar). |
 | `cart_reminder` (cart-reminders)    | sepet kimliği, bağlantı özeti            | terk edilen sepet hatırlatması     | Bağlantı 7 gün; satır silinmiyor (**açık**, kişisel veri yok)                                               | Sepetle birlikte.                                          |
 
 ## 3. Vitrin, ziyaretçi ve hesap
@@ -98,6 +99,7 @@
 | `audit_clients`    | Denetim kaydında IP ve tarayıcıyı boşaltır. Kaydın tek değişikliği budur. F16'daki tablo izni bu iki sütunun güncellenmesine izin vermeli.                          | `auditClient` 730 gün   |
 | `stock_alerts`     | Gönderilmiş ya da iptal edilmiş bildirimleri ve doğrulanmamış misafir taleplerini siler.                                                                            | `stockAlert` 180 gün    |
 | `consent_requests` | Süresi dolmuş çift onay taleplerini siler.                                                                                                                          | `consentRequest` 30 gün |
+| `contact_messages` | İletişim formu mesajlarını geldikten bir yıl sonra siler (adr/0047). | `contactMessage` 365 gün |
 | `abandoned_cart_contacts` | Siparişe dönüşmeyen sepeti e-posta ve adresleriyle, hatırlatma ve trafik kaynağı kaydıyla birlikte siler. Parası alınmış (`payment_recovery`) ya da ödeme formu açık sepet kalır. | `abandonedCartContact` 90 gün |
 | `ga_clients` | Ölçüm onayındaki GA istemci kimliğini boşaltır: iade olayı artık gidemez. | iade süresi + `gaClientMargin` 45 gün |
 | `sent_messages` | Gönderilen e-posta ve SMS kayıtlarını (alıcı adresiyle) siler. Panelin zil bildirimleri kişiye ileti değildir, kalır. | `sentMessage` 1095 gün |

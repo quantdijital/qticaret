@@ -2,7 +2,10 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { panelUrl } from "../../../lib/env"
 import { inviteLink } from "../../../lib/staff"
+import { CONTACT_MESSAGES_MODULE } from "../../../modules/contact-messages"
+import type ContactMessagesModuleService from "../../../modules/contact-messages/service"
 import type {
+  StaffContactVars,
   StaffInviteVars,
   StaffMfaVars,
   StaffOrderVars,
@@ -60,6 +63,26 @@ export function loadStaffStock(
         }
       : null
   )
+}
+
+/** A contact message as its staff alert names it: who wrote, about what. */
+export async function loadStaffContact(
+  container: Container,
+  messageId: string
+): Promise<Loaded<StaffContactVars> | null> {
+  const messages = container.resolve<ContactMessagesModuleService>(CONTACT_MESSAGES_MODULE)
+  const [message] = await messages.listContactMessages(
+    { id: messageId },
+    { select: ["subject", "sealed"], take: 1 }
+  )
+  if (!message) {
+    return null
+  }
+  return {
+    vars: { name: messages.open(message.sealed).name, subject: message.subject },
+    ...STAFF,
+    resourceType: "contact_message",
+  }
 }
 
 const LOWEST = 5
