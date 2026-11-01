@@ -95,7 +95,8 @@ medusaIntegrationTestRunner({
       await post("/admin/product-categories", { name: "Giyim", is_active: true })
 
       const job = await runSitemap()
-      expect(job).toMatchObject({ status: "succeeded", result_summary: { urls: 2 } })
+      // The product and the category, and the home page and the whole catalogue
+      expect(job).toMatchObject({ status: "succeeded", result_summary: { urls: 4 } })
 
       const index = await storeText("/store/seo/sitemaps/sitemap.xml")
       expect(index.headers["content-type"]).toContain("application/xml")
@@ -105,6 +106,12 @@ medusaIntegrationTestRunner({
       expect(products.data).toContain("<loc>https://magaza.example.com/urun/keten-gomlek</loc>")
       expect(products.data).not.toContain("gizli-urun")
       expect(products.data).not.toContain("taslak")
+      const site = await storeText("/store/seo/sitemaps/sitemap-site-1.xml")
+      expect(site.data).toContain("<loc>https://magaza.example.com/</loc>")
+      expect(site.data).toContain("<loc>https://magaza.example.com/magaza</loc>")
+      // Nothing to show there yet
+      expect(site.data).not.toContain("/blog")
+      expect(site.data).not.toContain("/yorumlar")
 
       expect((await storeText("/store/seo/sitemaps/sitemap-x.xml")).status).toBe(404)
       expect((await storeText("/store/seo/sitemaps/..%2F.env")).status).toBe(404)
@@ -116,6 +123,7 @@ medusaIntegrationTestRunner({
       expect(state.files.map(({ name }) => name)).toEqual([
         "sitemap-categories-1.xml",
         "sitemap-products-1.xml",
+        "sitemap-site-1.xml",
         "sitemap.xml",
       ])
     })

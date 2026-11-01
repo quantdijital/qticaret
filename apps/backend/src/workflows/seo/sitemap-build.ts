@@ -4,6 +4,10 @@ import { sitemapIndex, urlsetFiles } from "../../lib/seo/sitemap"
 import type { SitemapEntry, SitemapFile } from "../../lib/seo/sitemap"
 import { URL_REGISTRY_MODULE } from "../../modules/url-registry"
 import type UrlRegistryModuleService from "../../modules/url-registry/service"
+import { CONTENT_MODULE } from "../../modules/content"
+import type ContentModuleService from "../../modules/content/service"
+import { PRODUCT_REVIEWS_MODULE } from "../../modules/product-reviews"
+import type ProductReviewsModuleService from "../../modules/product-reviews/service"
 import { CATALOG_ENTITY_TYPES, CATALOG_LOCALE } from "../catalog/entity-paths"
 import { liveLandingFilters } from "../content/landing-facet"
 import { shopOf } from "./payload-sources"
@@ -208,6 +212,28 @@ export async function sitemapCounts(
   return counts
 }
 
+/**
+ * The storefront's own index pages (F18): the home page and the whole
+ * catalogue, and the blog and the reviews page once they have something to
+ * show. No date: they change with everything under them.
+ */
+async function siteEntries(container: MedusaContainer, origin: string): Promise<SitemapEntry[]> {
+  const [posts, reviews] = await Promise.all([
+    container
+      .resolve<ContentModuleService>(CONTENT_MODULE)
+      .listContentEntries({ kind: "post", status: "published" }, { select: ["id"], take: 1 }),
+    container
+      .resolve<ProductReviewsModuleService>(PRODUCT_REVIEWS_MODULE)
+      .listProductReviews({ status: "approved" }, { select: ["id"], take: 1 }),
+  ])
+  return [
+    { loc: `${origin}/`, lastmod: null },
+    { loc: `${origin}/magaza`, lastmod: null },
+    ...(posts.length > 0 ? [{ loc: `${origin}/blog`, lastmod: null }] : []),
+    ...(reviews.length > 0 ? [{ loc: `${origin}/yorumlar`, lastmod: null }] : []),
+  ]
+}
+
 export interface BuiltSitemap {
   /** The index first (`sitemap.xml`), then a file per kind and page of URLs. */
   files: SitemapFile[]
@@ -221,7 +247,7 @@ export async function buildSitemap(container: MedusaContainer): Promise<BuiltSit
     return null
   }
   const origin = `https://${shop.canonicalHost}`
-  const files: SitemapFile[] = []
+  const files: SitemapFile[] = [...urlsetFiles("site", await siteEntries(container, origin))]
   for (const spec of KINDS) {
     files.push(...urlsetFiles(spec.kind, await entriesOf(container, spec, origin)))
   }
