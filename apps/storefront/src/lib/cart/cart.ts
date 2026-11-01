@@ -1,7 +1,7 @@
 import "server-only"
 import { isNotFound, isStoreApiError } from "../store-api/errors"
 import { liraRegion } from "../store-api/requests"
-import { storeGet, storePost } from "../store-api/server"
+import { storeDelete, storeGet, storePost } from "../store-api/server"
 import { cartIdFromCookie, forgetCart, rememberCart } from "./cookie"
 
 export interface CartLine {
@@ -13,11 +13,15 @@ export interface CartLine {
   quantity: number
   unit_price: number
   total: number
+  /** Before discounts, KDV included. */
+  original_total: number
 }
 
 export interface Cart {
   id: string
   currency_code: string
+  /** Items before discounts and after, KDV included (Medusa's cart totals). */
+  original_item_total: number
   item_total: number
   total: number
   completed_at: string | null
@@ -27,6 +31,7 @@ export interface Cart {
 const CART_FIELDS = [
   "id",
   "currency_code",
+  "original_item_total",
   "item_total",
   "total",
   "completed_at",
@@ -38,6 +43,7 @@ const CART_FIELDS = [
   "items.quantity",
   "items.unit_price",
   "items.total",
+  "items.original_total",
 ].join(",")
 
 /** The shopper's open cart, or null (none yet, gone, or already ordered). */
@@ -101,5 +107,22 @@ export async function addLine(variantId: string, quantity: number): Promise<void
       variant_id: variantId,
       quantity,
     })
+  }
+}
+
+/**
+ * Sets a line's quantity in the shopper's own cart; zero removes it. The
+ * line must be in the cart the cookie names (Medusa refuses another's).
+ */
+export async function changeLine(lineId: string, quantity: number): Promise<void> {
+  const cartId = await cartIdFromCookie()
+  if (!cartId) {
+    return
+  }
+  const line = `/store/carts/${cartId}/line-items/${encodeURIComponent(lineId)}`
+  if (quantity === 0) {
+    await storeDelete(line)
+  } else {
+    await storePost(line, { quantity })
   }
 }

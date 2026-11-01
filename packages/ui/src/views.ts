@@ -135,10 +135,17 @@ export interface CartLineView {
   detail: string | null
   quantity: number
   total: string
+  /** The line before its discount, only when one applies. */
+  original: string | null
   image: ImageView | null
 }
 
 export interface CartPageView {
   lines: CartLineView[]
+  /** Items before discounts; the discount only when there is one. */
+  items: string
+  discount: string | null
   subtotal: string
+  /** A message for the shopper after a failed change, already in words. */
+  error: string | null
 }

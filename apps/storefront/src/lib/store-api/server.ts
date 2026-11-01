@@ -21,3 +21,7 @@ export async function storeGet<T>(path: string, query?: Record<string, QueryValu
 export async function storePost<T>(path: string, body: unknown): Promise<T> {
   return (await storeRequest<T>(path, { ...(await visit()), method: "POST", body })).data
 }
+
+export async function storeDelete<T>(path: string): Promise<T> {
+  return (await storeRequest<T>(path, { ...(await visit()), method: "DELETE" })).data
+}

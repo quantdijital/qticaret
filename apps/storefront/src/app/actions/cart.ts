@@ -1,9 +1,10 @@
 "use server"
 
 import { revalidatePath } from "next/cache"
+import { redirect } from "next/navigation"
 import { z } from "zod"
 import type { ActionResult } from "@qticaret/ui"
-import { addLine } from "@/lib/cart/cart"
+import { addLine, changeLine } from "@/lib/cart/cart"
 import { isStoreApiError } from "@/lib/store-api/errors"
 
 const AddToCart = z.object({
@@ -49,4 +50,32 @@ export async function addToCart(_state: ActionResult, form: FormData): Promise<A
   // The header's cart count is part of every page
   revalidatePath("/", "layout")
   return { ok: true, error: null }
+}
+
+const ChangeLine = z.object({
+  line_id: z.string().regex(/^cali_[0-9A-Za-z]{10,64}$/),
+  quantity: z.coerce.number().int().min(0).max(99),
+})
+
+/**
+ * Changes a cart line's quantity, or removes it with zero: a plain form,
+ * so it works before the page's script loads. A failure comes back to the
+ * cart with its message key in the address.
+ */
+export async function changeCartLine(form: FormData): Promise<void> {
+  const parsed = ChangeLine.safeParse({
+    line_id: form.get("line_id"),
+    quantity: form.get("remove") === "1" ? 0 : form.get("quantity"),
+  })
+  if (!parsed.success) {
+    redirect("/sepet?hata=cart.quantity_invalid")
+  }
+  try {
+    await changeLine(parsed.data.line_id, parsed.data.quantity)
+  } catch (error) {
+    redirect(
+      `/sepet?hata=${messageFor(error) === "errors.too_many_requests" ? "errors.too_many_requests" : "cart.update_failed"}`
+    )
+  }
+  revalidatePath("/", "layout")
 }

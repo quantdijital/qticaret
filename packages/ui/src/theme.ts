@@ -24,6 +24,8 @@ export type FormAction = (state: ActionResult, form: FormData) => Promise<Action
 export interface ThemeActions {
   /** Form fields: `variant_id`, `quantity`. */
   addToCart: FormAction
+  /** A plain form: `line_id` and `quantity`, or `remove=1`. */
+  changeCartLine: (form: FormData) => Promise<void>
 }
 
 interface Page<View> {
@@ -43,6 +45,6 @@ export interface StorefrontTheme {
   ProductPage: ComponentType<Page<ProductPageView> & { actions: ThemeActions }>
   ListingPage: ComponentType<Page<ListingPageView>>
   ContentPage: ComponentType<Page<ContentPageView>>
-  CartPage: ComponentType<Page<CartPageView>>
+  CartPage: ComponentType<Page<CartPageView> & { actions: ThemeActions }>
   NotFoundPage: ComponentType<{ t: Translate }>
 }
