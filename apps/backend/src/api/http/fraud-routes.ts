@@ -16,6 +16,7 @@ import {
 } from "../admin/fraud/validators"
 import { challengeAfterAttempts, challengeOver } from "./challenge"
 import { rejectRequest } from "./reject"
+import { clientIp } from "./client-ip"
 
 const MINUTE = 60 * 1000
 const HOUR = 60 * MINUTE
@@ -65,7 +66,7 @@ function refuseBlocked(answer: "refused" | "sign_in") {
           matchesOf(
             {
               email: typeof email === "string" ? email : null,
-              ip: req.ip ?? req.socket.remoteAddress ?? null,
+              ip: clientIp(req),
             },
             keyOf()
           )

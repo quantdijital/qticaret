@@ -28,6 +28,7 @@
     "LOAD_TEST",
     "PASSWORD_BREACH_CHECK",
     "SECURITY_*",
+    "STOREFRONT_*",
     "OTEL_*",
     "ERROR_TRACKING_*",
     "RELEASE"

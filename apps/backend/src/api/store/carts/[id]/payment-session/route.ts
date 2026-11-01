@@ -4,6 +4,7 @@ import { parseEnv } from "../../../../../lib/env"
 import { returnOrigins, returnUrlProblem } from "../../../../../lib/payments/checkout"
 import { startCartPaymentWorkflow } from "../../../../../workflows/payments/start-cart-payment"
 import type { StorePostCartPaymentSessionType } from "./validators"
+import { clientIp } from "../../../../http/client-ip"
 
 /**
  * Starts a payment for the cart (adr/0026 §1, adr/0029): a hosted form's
@@ -24,7 +25,7 @@ export const POST = async (
       cart_id: req.params["id"] ?? "",
       provider_id,
       sales_channel_ids: req.publishable_key_context.sales_channel_ids,
-      ip: req.ip ?? req.socket.remoteAddress ?? "",
+      ip: clientIp(req) ?? "",
       // The address as the URL parser reads it: what was checked is what is sent
       return_urls: return_urls
         ? { success: new URL(return_urls.success).href, failure: new URL(return_urls.failure).href }

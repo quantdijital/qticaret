@@ -9,6 +9,7 @@ import {
   storefrontEvidence,
 } from "../../../../../workflows/messaging/consents"
 import type { StorePostConsentType } from "./validators"
+import { clientIp } from "../../../../http/client-ip"
 
 /** GET /store/customers/me/consents (adr/0038 §2): the customer's own answers, without addresses. */
 export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse): Promise<void> {
@@ -36,7 +37,7 @@ export async function POST(
     throw new ValidationError("messaging.no_address", { field: "channel" })
   }
   const messaging = req.scope.resolve<MessagingModuleService>(MESSAGING_MODULE)
-  const evidence = storefrontEvidence(req.ip ?? req.socket.remoteAddress ?? "", textVersion)
+  const evidence = storefrontEvidence(clientIp(req) ?? "", textVersion)
   if (
     channel === "email" ||
     (status === "revoked" && (await ownConsent(req, customerId, address)))

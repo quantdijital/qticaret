@@ -12,6 +12,7 @@ import { noteCheckoutWorkflow } from "../../workflows/fraud/note-checkout"
 import { challengePassed, demandChallenge } from "./challenge"
 import { clientBucket, sharedRateLimitStore } from "./rate-limit"
 import { rejectRequest } from "./reject"
+import { clientIp } from "./client-ip"
 
 interface CartRow {
   email?: string | null
@@ -39,7 +40,7 @@ async function refusedAsBlocked(
   res: MedusaResponse,
   cart: CartRow
 ): Promise<boolean> {
-  const ip = req.ip ?? req.socket.remoteAddress ?? null
+  const ip = clientIp(req)
   const blocked = await req.scope
     .resolve<FraudGuardModuleService>(FRAUD_GUARD_MODULE)
     .blockedBy(matchesOf({ email: cart.email, phones: phonesOf(cart), ip }, keyOf()))

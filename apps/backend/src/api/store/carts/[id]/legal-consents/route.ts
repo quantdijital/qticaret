@@ -3,6 +3,7 @@ import { LEGAL_MODULE } from "../../../../../modules/legal"
 import type LegalModuleService from "../../../../../modules/legal/service"
 import { recordLegalConsentWorkflow } from "../../../../../workflows/legal/consent"
 import type { StorePostLegalConsentsType } from "./validators"
+import { clientIp } from "../../../../http/client-ip"
 
 /**
  * POST /store/carts/:id/legal-consents (F13.2, adr/0041 §2): the shopper
@@ -22,7 +23,7 @@ export async function POST(
       documents: req.validatedBody.documents,
       ip_encrypted: req.scope
         .resolve<LegalModuleService>(LEGAL_MODULE)
-        .sealIp(cartId, req.ip ?? req.socket.remoteAddress ?? null),
+        .sealIp(cartId, clientIp(req)),
     },
   })
   res.json({ consent: result })

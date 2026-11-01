@@ -14,6 +14,7 @@ import {
 import type { Limit, RateLimitProfile, RateLimitStore } from "../../lib/security/rate-limit"
 import { rejectRequest } from "./reject"
 import { routePath } from "./request-path"
+import { clientIp } from "./client-ip"
 
 /**
  * Rate limiting for API routes (docs/04, F2.10). It runs after Medusa's
@@ -83,7 +84,7 @@ function identityKey(identity: string): string {
 
 /** The visitor's address as limits count it (IPv6 by its /64). */
 export const clientBucket = (req: MedusaRequest): string =>
-  ipBucket(req.ip) ?? ipBucket(req.socket.remoteAddress) ?? "unknown"
+  ipBucket(clientIp(req) ?? undefined) ?? "unknown"
 
 /** Seconds until the request may be tried again, or null when it is within every limit. */
 async function retryAfterSeconds(

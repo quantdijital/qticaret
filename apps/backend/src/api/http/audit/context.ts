@@ -2,6 +2,7 @@ import type { AuthenticatedMedusaRequest, MedusaRequest } from "@medusajs/framew
 import { AUDIT_LOG_MODULE } from "../../../modules/audit-log"
 import type AuditLogModuleService from "../../../modules/audit-log/service"
 import type { AuditEntryInput } from "../../../modules/audit-log/service"
+import { clientIp } from "../client-ip"
 
 const present = (value: string | undefined): string | null =>
   value === undefined || value === "" ? null : value
@@ -16,7 +17,7 @@ export function auditContext(
     // Empty while an invite is being accepted: the user does not exist yet
     actor_id: present(auth?.actor_id),
     request_id: req.requestId ?? null,
-    ip: req.ip ?? null,
+    ip: clientIp(req),
     user_agent: req.headers["user-agent"] ?? null,
   }
 }

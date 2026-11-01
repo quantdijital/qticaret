@@ -8,6 +8,7 @@ import type ConversionsModuleService from "../../../../../modules/conversions/se
 import { LEGAL_MODULE } from "../../../../../modules/legal"
 import type LegalModuleService from "../../../../../modules/legal/service"
 import type { StorePostCartTrackingType } from "./validators"
+import { clientIp } from "../../../../http/client-ip"
 
 /**
  * POST /store/carts/:id/tracking (F10.9, adr/0038 §4): what the shopper
@@ -50,7 +51,7 @@ export async function POST(
   await req.scope.resolve<ConversionsModuleService>(CONVERSIONS_MODULE).recordCart(cartId, {
     ...body,
     ...flags,
-    ip: req.ip ?? req.socket.remoteAddress ?? null,
+    ip: clientIp(req),
     user_agent: agent ? agent.slice(0, 500) : null,
     cookie_consent_id: answer?.id ?? null,
   })

@@ -70,6 +70,10 @@ const envSchema = z.object({
   // `https:`, comma separated; security.txt answers 404 without it
   SECURITY_CONTACT: z.string().max(500).optional(),
   SECURITY_POLICY_URL: z.url({ protocol: /^https$/ }).optional(),
+  // F18 (adr/0046 §5): shared with the storefront's server, which signs the
+  // shopper's address with it on each Store API request; unset, only the
+  // connection's own address counts
+  STOREFRONT_IP_SECRET: secret.optional(),
   // The backend's own public address: iyzico sends the shopper back to it
   // (`/hooks/iyzico/callback`). Required once deployed; locally localhost:9000
   BACKEND_URL: z.url({ protocol: /^https?$/ }).optional(),

@@ -4,6 +4,7 @@ import { MESSAGING_MODULE } from "../../../../../modules/messaging"
 import type MessagingModuleService from "../../../../../modules/messaging/service"
 import { storefrontEvidence } from "../../../../../workflows/messaging/consents"
 import type { StorePostCheckoutConsentType } from "../../../customers/me/consents/validators"
+import { clientIp } from "../../../../http/client-ip"
 
 /**
  * POST /store/carts/:id/consents (adr/0038 §2): the consent boxes the
@@ -26,7 +27,7 @@ export async function POST(
     throw new MedusaError(MedusaError.Types.NOT_FOUND, "carts.unknown")
   }
   const { email, sms, text_version: textVersion } = req.validatedBody
-  const evidence = storefrontEvidence(req.ip ?? req.socket.remoteAddress ?? "", textVersion)
+  const evidence = storefrontEvidence(clientIp(req) ?? "", textVersion)
   const messaging = req.scope.resolve<MessagingModuleService>(MESSAGING_MODULE)
   const [existing] = await messaging.listCheckoutConsents({ cart_id: cartId }, { take: 1 })
   const values = {
