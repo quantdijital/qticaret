@@ -8,6 +8,7 @@ import { bootstrapTenant } from "../bootstrap"
 import { ensureDemoCatalog } from "./catalog"
 import { DEMO_PUBLISHABLE_KEY_TITLE } from "./data"
 import { ensureDemoFulfillment } from "./fulfillment"
+import { ensureDemoStorefront } from "./storefront"
 
 export interface DemoSeedResult {
   regionId: string
@@ -30,6 +31,7 @@ export async function seedDemo(container: MedusaContainer): Promise<DemoSeedResu
     locationId,
   })
   await ensureDemoCatalog(container, { salesChannelId, ...fulfillment })
+  await ensureDemoStorefront(container)
 
   return { regionId, salesChannelId, publishableKeyId }
 }
