@@ -139,7 +139,7 @@ Durum: ✅ var · 🟡 temel hâli var · ⬜ yok. Görev kodları PROGRESS "F18
 
 ## 8. İlk müşteri eşlemesi
 
-Mevcut sitenin (WooCommerce) sayfa sayfa envanteri ve eşleme tablosu: `docs/gecis/mylarte-envanter.md`. Kural: ilk müşterinin ihtiyacı sektöre özel koda dönüşmez; içerik, ayar, özellik şablonu ya da özellik bayrağıyla karşılanır.
+Mevcut sitenin (WooCommerce) sayfa sayfa envanteri `docs/gecis/mylarte/envanter.md`, platformla eşlemesi ve eksikler `docs/gecis/mylarte/esleme.md`, sayfa metinleri `docs/gecis/mylarte/sayfalar/`. Kural: ilk müşterinin ihtiyacı sektöre özel koda dönüşmez; içerik, ayar, özellik şablonu ya da özellik bayrağıyla karşılanır.
 
 ## 9. Kontrol listesi (her vitrin ekranı)
 
