@@ -6426,16 +6426,77 @@
       },
       "theme": {
         "title": "Tema ayarları",
-        "color": "Ana renk",
-        "colorHint": "Ana düğmeler ve duyuru şeridi bu renkle boyanır; yazı rengi okunaklı olana göre beyaz ya da siyah seçilir. Boş bırakırsanız temanın rengi kullanılır.",
-        "code": "Renk kodu",
-        "picker": "Renk seç",
+        "live": "Tema ayarları taslağa bağlı değildir: kaydettiğinizde hemen yayına girer ve vitrinde en geç bir dakikada görünür.",
+        "colors": "Renkler",
+        "primary": "Ana renk",
+        "primaryHint": "Düğmeler, bağlantılar ve duyuru şeridi; beyaz yazıyla ve sayfa zemininde okunur olmalı. Boşsa temanın rengi kullanılır.",
+        "primaryMoved": "Bu renk Vitrin tercihlerindeki eski ayardan geliyor; kaydettiğinizde tema ayarlarına taşınır.",
+        "accent": "Vurgu rengi",
+        "accentHint": "Rozetler ve küçük vurgular; boşsa temanın rengi kullanılır.",
+        "pick": "{{name}} seçici",
+        "themeOwn": "Temanın rengi",
+        "clear": "Varsayılan",
+        "background": "Sayfa zemini",
+        "backgrounds": {
+          "warm": "Sıcak",
+          "neutral": "Nötr",
+          "cool": "Soğuk"
+        },
         "sample": "Örnek",
         "sampleLine": "Duyuru şeridiniz böyle görünür",
         "button": "Sepete ekle",
-        "live": "Renk, taslaktan bağımsızdır: kaydedince hemen vitrine yansır.",
-        "save": "Rengi kaydet",
-        "reset": "Temanın rengine dön"
+        "badge": "Yeni",
+        "fontsTitle": "Yazı tipleri",
+        "fontsHint": "Vitrin yazı tiplerini kendi sunucusundan yükler; ziyaretçi bilgisi üçüncü taraflara gitmez.",
+        "heading": "Başlıklar",
+        "body": "Metin",
+        "serif": "tırnaklı",
+        "sans": "tırnaksız",
+        "fonts": {
+          "fraunces": "Fraunces",
+          "inter": "Inter",
+          "playfair": "Playfair Display",
+          "dm-serif": "DM Serif Display",
+          "manrope": "Manrope",
+          "source-sans": "Source Sans 3",
+          "nunito": "Nunito"
+        },
+        "shapes": "Köşeler ve düğmeler",
+        "radius": "Köşeler",
+        "radii": {
+          "sharp": "Keskin",
+          "soft": "Yumuşak",
+          "round": "Yuvarlak"
+        },
+        "buttons": "Düğmeler",
+        "buttonShapes": {
+          "pill": "Hap",
+          "rounded": "Yuvarlatılmış",
+          "square": "Köşeli"
+        },
+        "card": "Ürün kartı ve üst bilgi",
+        "ratio": "Görsel oranı",
+        "ratios": {
+          "4x5": "4:5 (dikey)",
+          "1x1": "1:1 (kare)",
+          "3x4": "3:4 (uzun)"
+        },
+        "headerLayout": "Logo yerleşimi",
+        "headerLayouts": {
+          "centered": "Ortada",
+          "left": "Solda"
+        },
+        "show_brand": "Markayı göster",
+        "show_brandHint": "Kartta ürün adının üstünde marka adı.",
+        "show_rating": "Puanı göster",
+        "show_ratingHint": "Değerlendirmesi olan ürünlerde yıldız ve sayı.",
+        "sticky": "Üst bilgi sabit kalsın",
+        "stickyHint": "Sayfa kaydırılırken üst bilgi ekranın üstünde durur.",
+        "save": "Kaydet ve yayınla",
+        "saved": "Tema ayarları kaydedildi; vitrinde en geç bir dakikada görünür.",
+        "errors": {
+          "contrast": "Bu renk beyaz yazıyla ya da sayfa zemininde yeterince okunmuyor (en az 3:1 gerekir). Daha koyu bir ton seçin."
+        }
       },
       "faq": {
         "items": "Sorular",
@@ -6476,12 +6537,76 @@
       }
     },
     "preferences": {
-      "description": "Tema düzenleyicide çizilmeyen tercihler: güven rozetlerinin sözleri, iletişim formunun sayfası ve renk örnekleri. Her sekme kendi kartını kaydeder.",
+      "description": "Tema düzenleyicide çizilmeyen tercihler: güven rozetlerinin sözleri, iletişim formunun sayfası, renk örnekleri ve bakım modu. Her sekme kendi kartını kaydeder.",
       "editor": "Tema düzenleyiciyi aç",
       "tabs": {
         "badges": "Güven rozetleri",
         "contact": "İletişim formu",
-        "swatches": "Renk örnekleri"
+        "swatches": "Renk örnekleri",
+        "maintenance": "Bakım modu"
+      },
+      "dark": "Mağaza bakımda"
+    },
+    "maintenance": {
+      "status": {
+        "title": "Bakım modu",
+        "description": "Açıkken vitrin, alıcılara mağaza yerine kısa bir bakım sayfası gösterir.",
+        "on": "Açık",
+        "off": "Kapalı",
+        "enabled": "Vitrini bakıma al",
+        "offHint": "Vitrin herkese açık. Açtığınızda alıcılar bakım sayfasını görür; açık bıraktığınız sayfalar ve ödeme dönüşleri çalışmaya devam eder.",
+        "onHint": "Alıcılar şu an bakım sayfasını görüyor. Kapattığınızda vitrin en geç bir dakikada yeniden açılır.",
+        "seo": "Arama motorlarına geçici bir kapanış bildirilir (503). Birkaç günü aşan bakım sayfaların dizinden düşmesine yol açabilir.",
+        "ownerOnly": "Bakım modunu yalnız mağaza sahibi açıp kapatabilir.",
+        "turnedOn": "Bakım modu açıldı; vitrinde en geç bir dakikada görünür.",
+        "turnedOff": "Bakım modu kapatıldı; vitrin en geç bir dakikada açılır.",
+        "confirmTitle": "Vitrin bakıma alınsın mı?",
+        "confirmText": "Alıcılar mağaza yerine bakım sayfasını görür (503) ve sipariş veremez. Açık bıraktığınız sayfalar, ödeme dönüşleri ve atlatma bağlantısı olanlar vitrini görmeye devam eder. Bu bölümü kaydetmek önceki atlatma bağlantılarını geçersiz kılar.",
+        "confirm": "Bakım modunu aç"
+      },
+      "page": {
+        "title": "Bakım sayfası",
+        "description": "Bakım sırasında alıcıların gördüğü sayfa ve açık kalan sayfalar.",
+        "readOnly": "Bu ayarları yalnız mağaza sahibi değiştirebilir; siz görüntülüyorsunuz.",
+        "heading": "Başlık",
+        "headingHint": "Boş bırakırsanız vitrinin kendi başlığı gösterilir.",
+        "headingPlaceholder": "Kısa bir aradayız",
+        "message": "Metin",
+        "messageHint": "Başlığın altındaki satır; telefon gibi mağaza bilgilerini ekleyebilirsiniz.",
+        "expectedAt": "Beklenen dönüş",
+        "expectedAtHint": "Bakım sayfasında gösterilir ve arama motorlarına ne zaman yeniden denemeleri gerektiğini söyler.",
+        "long": "Bakım birkaç günden uzun sürerse Google sayfalarınızı dizinden düşürebilir. Mümkünse kısa tutun ya da mağazayı açık bırakıp ürünleri satışa kapatın.",
+        "paths": "Açık kalan sayfalar",
+        "pathsHint": "Bakımda da açılacak mağaza yolları: tam yol (/iletisim) ya da altındakilerle birlikte (/sozlesmeler/*). Ödeme dönüşleri, robots.txt ve site haritası her zaman açıktır.",
+        "pathPlaceholder": "/iletisim",
+        "pathOf": "{{number}}. yol",
+        "removePath": "{{number}}. yolu kaldır",
+        "addPath": "Yol ekle",
+        "pathsEmpty": "Bakımda yalnız sistem sayfaları açık kalır.",
+        "pathsFull": "En çok {{max}} yol."
+      },
+      "bypass": {
+        "title": "Bakım modunu atlatma bağlantısı",
+        "description": "Bakım sürerken vitrini görmesi gerekenlere (fotoğrafçı, deneyen) gönderin. Bağlantı bir hafta geçerlidir.",
+        "create": "Bağlantı oluştur",
+        "again": "Yeni bağlantı oluştur",
+        "notEnabled": "Bağlantı yalnız bakım modu açıkken oluşturulabilir.",
+        "noRight": "Bağlantıyı mağaza sahibi ve yöneticiler oluşturabilir.",
+        "link": "Bağlantı",
+        "copy": "Bağlantıyı kopyala",
+        "copied": "Bağlantı kopyalandı.",
+        "copyFailed": "Bağlantı kopyalanamadı; alandan seçip kopyalayın.",
+        "expires": "{{date}} tarihine kadar geçerli.",
+        "ends": "Bu bölümün her kaydı (bakımı kapatıp açmak, sayfa metnini düzenlemek) önceki bağlantıları geçersiz kılar."
+      },
+      "errors": {
+        "pathRequired": "Yolu yazın ya da satırı kaldırın.",
+        "pathInvalid": "Yol / ile başlamalı; ?, # ve .. içeremez. Yıldız yalnız sonda /* olarak yazılır.",
+        "dateInvalid": "Tarih ve saat geçerli değil."
+      },
+      "banner": {
+        "text": "Vitrin bakım modunda: alıcılar mağaza yerine bakım sayfasını görüyor.",
+        "link": "Bakım modu ayarları"
       }
     }
   }

@@ -1,7 +1,9 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { render, screen } from "@testing-library/react"
 import type { Mock } from "vitest"
+import type { StorefrontSettings } from "@/features/settings/api/sections"
 import type { AdminLayout, LayoutDocument } from "@/features/storefront/api/layout"
+import type { ThemeSettings } from "@/features/storefront/api/theme"
 import { ThemeEditorPage } from "./theme-editor-page"
 
 /** What the theme editor's specs share: the shop's design, the server and the editor. */
@@ -80,13 +82,47 @@ export interface AdminMock {
 
 const PATH = "/admin/storefront-layout"
 export const SETTINGS = "/admin/platform-settings/storefront"
-const STOREFRONT = {
+export const THEME_SETTINGS = "/admin/platform-settings/theme"
+const STOREFRONT: StorefrontSettings = {
   announcements: [],
   trust_badges: [],
   primary_color: null,
   hero: null,
   contact_form_path: null,
   color_swatches: [],
+}
+/** The theme section's defaults, as the server gives them before anything is saved. */
+export const THEME: ThemeSettings = {
+  theme: "base",
+  colors: { primary: null, accent: null, background: "warm" },
+  typography: { heading: "fraunces", body: "inter" },
+  radius: "soft",
+  product_card: { ratio: "4:5", show_brand: true, show_rating: false },
+  header: { layout: "centered", sticky: true },
+  buttons: "pill",
+}
+
+export interface ServeOptions {
+  /** The next draft saves fail with this message. */
+  refuse?: () => string | null
+  /** The storefront section as stored (its old main colour). */
+  storefront?: Partial<StorefrontSettings>
+  /** The theme section as stored. */
+  theme?: Partial<ThemeSettings>
+  /** A theme save fails with this (an API error). */
+  refuseTheme?: () => Error | null
+}
+
+/** A theme save over the stored one: the groups sent replace theirs, field by field. */
+function mergeTheme(stored: ThemeSettings, body: Partial<ThemeSettings>): ThemeSettings {
+  return {
+    ...stored,
+    ...body,
+    colors: { ...stored.colors, ...body.colors },
+    typography: { ...stored.typography, ...body.typography },
+    product_card: { ...stored.product_card, ...body.product_card },
+    header: { ...stored.header, ...body.header },
+  }
 }
 export const CATEGORIES = [
   {
@@ -111,16 +147,17 @@ export const PRODUCTS = [
 /**
  * The server: the layout, a save answered with the draft it was sent, a
  * preview link per call (`sfl_1`, `sfl_2`…), publish, discard and restore;
- * `refuse` makes the next saves fail with that message.
+ * the storefront and theme sections, saved at once.
  */
 export function serve(
   fetchMock: FetchMock,
   admin: AdminMock,
   layout: AdminLayout = layoutOf(),
-  options: { refuse?: () => string | null } = {}
+  options: ServeOptions = {}
 ) {
   let current = layout
   let previews = 0
+  let theme = mergeTheme(THEME, options.theme ?? {})
   fetchMock.mockImplementation((url: string, init?: Init) => {
     const answer = (next: AdminLayout) => {
       current = next
@@ -148,10 +185,20 @@ export function serve(
     if (url === `${PATH}/discard`) {
       return answer({ ...current, draft: DOC, has_changes: false })
     }
-    // The theme's own settings (the main colour) are the storefront section's, saved at once
     if (url === SETTINGS) {
-      const values = { ...STOREFRONT, ...(init?.body as object | undefined) }
+      const values = { ...STOREFRONT, ...options.storefront, ...(init?.body as object | undefined) }
       return Promise.resolve({ section: "storefront", values, version: 1 })
+    }
+    // The theme's own settings, saved at once (adr/0053)
+    if (url === THEME_SETTINGS) {
+      if (init?.method === "POST") {
+        const refused = options.refuseTheme?.()
+        if (refused) {
+          return Promise.reject(refused)
+        }
+        theme = mergeTheme(theme, init.body as Partial<ThemeSettings>)
+      }
+      return Promise.resolve({ section: "theme", values: theme, version: 1 })
     }
     if (url.startsWith(`${PATH}/revisions/`)) {
       return answer({ ...current, draft: { ...DOC, header: [] }, has_changes: true })

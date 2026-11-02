@@ -14,7 +14,23 @@ const WHITE = "#ffffff"
 /** The colour the storefront uses when the shop has chosen none. */
 export const STOREFRONT_THEME_COLOR = INK
 
-/** WCAG relative luminance of `#rrggbb`. */
+/**
+ * The page colours the storefront's theme settings offer (adr/0053,
+ * backend `THEME_BACKGROUNDS`): the contrast check reads them, so they are
+ * the storefront's own values.
+ */
+export const STOREFRONT_BACKGROUNDS = {
+  warm: "#f6f4ef",
+  neutral: "#f5f5f5",
+  cool: "#f3f5f8",
+} as const
+
+export type StorefrontBackground = keyof typeof STOREFRONT_BACKGROUNDS
+
+/** WCAG AA for large text and controls (§1.4.3, §1.4.11): what the server asks of the main colour. */
+const AA_LARGE_TEXT = 3
+
+/** WCAG relative luminance of `#rrggbb` (8-bit channels: 0.03928 and 0.04045 split them alike). */
 function luminance(hex: string): number {
   const parts = HEX.exec(hex)
   if (!parts) {
@@ -34,3 +50,15 @@ export function storefrontTextOn(hex: string): string {
   const background = luminance(hex)
   return ratio(background, luminance(WHITE)) >= ratio(background, luminance(INK)) ? WHITE : INK
 }
+
+/** The contrast ratio of two `#rrggbb` colours, 1 to 21. */
+export const contrastRatio = (a: string, b: string): number => ratio(luminance(a), luminance(b))
+
+/**
+ * Whether the storefront can put white text on the main colour and show it
+ * on the chosen page colour, 3:1 both (adr/0053 §B.3): the server refuses
+ * anything less with `platform_settings.color_contrast`.
+ */
+export const primaryReadable = (primary: string, background: StorefrontBackground): boolean =>
+  contrastRatio(primary, WHITE) >= AA_LARGE_TEXT &&
+  contrastRatio(primary, STOREFRONT_BACKGROUNDS[background]) >= AA_LARGE_TEXT

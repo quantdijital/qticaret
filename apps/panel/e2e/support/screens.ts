@@ -20,6 +20,8 @@ export const SECTIONS = [
   "/storefront/preferences",
   "/storefront/preferences?part=contact",
   "/storefront/preferences?part=swatches",
+  // Maintenance mode and its bypass link (adr/0053)
+  "/storefront/preferences?part=maintenance",
   "/content",
   // The blog's categories and tags (adr/0019 ek 2026-11-03)
   "/content?kind=category",

@@ -15,6 +15,8 @@ export type Capability =
   | "accounts"
   | "keys"
   | "security"
+  /** Turning the storefront dark (adr/0053): the owner's alone. */
+  | "maintenance"
   | "team"
   | "staff"
   | "audit"

@@ -43,6 +43,7 @@ describe("PreferencesPage", () => {
       "Güven rozetleri",
       "İletişim formu",
       "Renk örnekleri",
+      "Bakım modu",
     ])
     // One card per tab: the others are not drawn below it
     expect(screen.queryByRole("heading", { name: "Renk örnekleri" })).toBeNull()

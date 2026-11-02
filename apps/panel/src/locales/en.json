@@ -6426,16 +6426,77 @@
       },
       "theme": {
         "title": "Theme settings",
-        "color": "Main colour",
-        "colorHint": "Main buttons and the announcement bar are painted in it; the text is white or black, whichever reads better. Empty, the theme's colour is used.",
-        "code": "Colour code",
-        "picker": "Pick a colour",
+        "live": "Theme settings are not part of the draft: once saved they are live at once and show on the storefront within a minute.",
+        "colors": "Colours",
+        "primary": "Main colour",
+        "primaryHint": "Buttons, links and the announcement bar; it must read with white text and on the page colour. Empty, the theme's colour is used.",
+        "primaryMoved": "This colour comes from the old setting in Storefront preferences; saving moves it to the theme settings.",
+        "accent": "Accent colour",
+        "accentHint": "Badges and small highlights; empty, the theme's colour is used.",
+        "pick": "{{name}} picker",
+        "themeOwn": "Theme's colour",
+        "clear": "Default",
+        "background": "Page colour",
+        "backgrounds": {
+          "warm": "Warm",
+          "neutral": "Neutral",
+          "cool": "Cool"
+        },
         "sample": "Sample",
         "sampleLine": "Your announcement bar looks like this",
         "button": "Add to cart",
-        "live": "The colour is not part of the draft: once saved, it shows on the storefront at once.",
-        "save": "Save colour",
-        "reset": "Use the theme's colour"
+        "badge": "New",
+        "fontsTitle": "Fonts",
+        "fontsHint": "The storefront loads its fonts from its own server; nothing about visitors goes to third parties.",
+        "heading": "Headings",
+        "body": "Body text",
+        "serif": "serif",
+        "sans": "sans-serif",
+        "fonts": {
+          "fraunces": "Fraunces",
+          "inter": "Inter",
+          "playfair": "Playfair Display",
+          "dm-serif": "DM Serif Display",
+          "manrope": "Manrope",
+          "source-sans": "Source Sans 3",
+          "nunito": "Nunito"
+        },
+        "shapes": "Corners and buttons",
+        "radius": "Corners",
+        "radii": {
+          "sharp": "Sharp",
+          "soft": "Soft",
+          "round": "Round"
+        },
+        "buttons": "Buttons",
+        "buttonShapes": {
+          "pill": "Pill",
+          "rounded": "Rounded",
+          "square": "Square"
+        },
+        "card": "Product card and header",
+        "ratio": "Image ratio",
+        "ratios": {
+          "4x5": "4:5 (portrait)",
+          "1x1": "1:1 (square)",
+          "3x4": "3:4 (tall)"
+        },
+        "headerLayout": "Logo placement",
+        "headerLayouts": {
+          "centered": "Centred",
+          "left": "Left"
+        },
+        "show_brand": "Show the brand",
+        "show_brandHint": "The brand's name above the product's on the card.",
+        "show_rating": "Show the rating",
+        "show_ratingHint": "Stars and the count on products with reviews.",
+        "sticky": "Keep the header in view",
+        "stickyHint": "The header stays at the top while the page scrolls.",
+        "save": "Save and publish",
+        "saved": "Theme settings saved; they show on the storefront within a minute.",
+        "errors": {
+          "contrast": "This colour does not read well enough with white text or on the page colour (3:1 at least). Pick a darker shade."
+        }
       },
       "faq": {
         "items": "Questions",
@@ -6476,12 +6537,76 @@
       }
     },
     "preferences": {
-      "description": "What the theme editor does not draw: the trust badges' words, the contact form's page and the colour swatches. Each tab saves its own card.",
+      "description": "What the theme editor does not draw: the trust badges' words, the contact form's page, the colour swatches and maintenance mode. Each tab saves its own card.",
       "editor": "Open the theme editor",
       "tabs": {
         "badges": "Trust badges",
         "contact": "Contact form",
-        "swatches": "Colour swatches"
+        "swatches": "Colour swatches",
+        "maintenance": "Maintenance mode"
+      },
+      "dark": "Shop in maintenance"
+    },
+    "maintenance": {
+      "status": {
+        "title": "Maintenance mode",
+        "description": "While on, the storefront shows shoppers a short maintenance page instead of the shop.",
+        "on": "On",
+        "off": "Off",
+        "enabled": "Put the storefront in maintenance",
+        "offHint": "The storefront is open to everyone. Turned on, shoppers see the maintenance page; the pages you leave open and payment returns keep working.",
+        "onHint": "Shoppers see the maintenance page now. Turned off, the storefront opens again within a minute.",
+        "seo": "Search engines are told the shop is closed for a while (503). Maintenance longer than a few days can drop its pages from search.",
+        "ownerOnly": "Only the shop's owner can turn maintenance mode on or off.",
+        "turnedOn": "Maintenance mode is on; the storefront shows it within a minute.",
+        "turnedOff": "Maintenance mode is off; the storefront opens within a minute.",
+        "confirmTitle": "Put the storefront in maintenance?",
+        "confirmText": "Shoppers see the maintenance page (503) instead of the shop and cannot order. The pages you leave open, payment returns and people with a bypass link still reach the storefront. Saving this section ends earlier bypass links.",
+        "confirm": "Turn maintenance mode on"
+      },
+      "page": {
+        "title": "Maintenance page",
+        "description": "The page shoppers see during maintenance, and the pages left open.",
+        "readOnly": "Only the shop's owner can change these settings; you are viewing them.",
+        "heading": "Heading",
+        "headingHint": "Left empty, the storefront's own heading shows.",
+        "headingPlaceholder": "We are taking a short break",
+        "message": "Message",
+        "messageHint": "The line under the heading; you may add shop details such as the phone number.",
+        "expectedAt": "Expected return",
+        "expectedAtHint": "Shown on the maintenance page; tells search engines when to try again.",
+        "long": "If maintenance lasts more than a few days, Google may drop your pages from search. Keep it short, or leave the shop open and take products off sale.",
+        "paths": "Pages left open",
+        "pathsHint": "Shop paths that open during maintenance too: an exact path (/iletisim) or with everything below it (/sozlesmeler/*). Payment returns, robots.txt and the sitemap are always open.",
+        "pathPlaceholder": "/contact",
+        "pathOf": "Path {{number}}",
+        "removePath": "Remove path {{number}}",
+        "addPath": "Add a path",
+        "pathsEmpty": "During maintenance only the system pages stay open.",
+        "pathsFull": "{{max}} paths at most."
+      },
+      "bypass": {
+        "title": "Maintenance bypass link",
+        "description": "Send it to those who need to see the storefront during maintenance (a photographer, a tester). The link works for a week.",
+        "create": "Create a link",
+        "again": "Create a new link",
+        "notEnabled": "A link can be created only while maintenance mode is on.",
+        "noRight": "The owner and admins can create the link.",
+        "link": "Link",
+        "copy": "Copy the link",
+        "copied": "Link copied.",
+        "copyFailed": "The link could not be copied; select it in the field and copy it.",
+        "expires": "Works until {{date}}.",
+        "ends": "Every save of this section (turning maintenance off and on, editing the page's text) ends earlier links."
+      },
+      "errors": {
+        "pathRequired": "Write the path or remove the row.",
+        "pathInvalid": "A path starts with /; it holds no ?, # or .. A star only closes it, as /*.",
+        "dateInvalid": "The date and time are not valid."
+      },
+      "banner": {
+        "text": "The storefront is in maintenance mode: shoppers see the maintenance page instead of the shop.",
+        "link": "Maintenance settings"
       }
     }
   }
