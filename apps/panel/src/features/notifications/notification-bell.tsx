@@ -19,7 +19,7 @@ import { isContactSubject } from "@/features/customers/api/contact-messages"
 import { markSeen, notificationsQuery, seenAt } from "@/features/notifications/api"
 import type { AdminNotification } from "@/features/notifications/api"
 import { isConnectable } from "@/features/settings/payment-methods"
-import { formatRelative } from "@/lib/format"
+import { formatDate, formatRelative } from "@/lib/format"
 import { cn } from "@/lib/utils"
 
 const text = (value: unknown): string => (typeof value === "string" ? value : "")
@@ -118,11 +118,19 @@ function useAlertText(data: Record<string, unknown>) {
   if (data["kind"] === "contact_message") {
     // The server's own wording carries the sender's name in Turkish; the panel words it from the subject
     const subject = isContactSubject(data["subject"]) ? data["subject"] : "other"
+    // A KVKK request carries the law's last day for the answer (adr/0047)
+    const due = text(data["due_at"])
+    const dueDay = due && !Number.isNaN(Date.parse(due)) ? formatDate(due) : null
     return {
       title: t("notifications.contactMessage.title", {
         subject: t(`customers.contactMessages.subjects.${subject}`),
       }),
-      description: t("notifications.contactMessage.description"),
+      description: [
+        t("notifications.contactMessage.description"),
+        dueDay ? t("notifications.contactMessage.due", { date: dueDay }) : "",
+      ]
+        .filter(Boolean)
+        .join(" "),
       Icon: Mail,
       tone: "bg-info-soft text-info-text",
       link: { to: "/customers/contact-messages" as const, search: {}, params: {} },

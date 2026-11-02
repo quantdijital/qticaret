@@ -2,6 +2,8 @@ import type { TFunction } from "i18next"
 import {
   BadgeCheck,
   BookOpen,
+  Boxes,
+  CircleHelp,
   GalleryHorizontal,
   LayoutGrid,
   LifeBuoy,
@@ -14,10 +16,10 @@ import {
   Text,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
-import type { AnySection, HomeSectionType } from "@/features/storefront/api/layout"
+import type { AnySection, BodySectionType } from "@/features/storefront/api/layout"
 
 /** What a section is called: `storefront.editor.types.<type>` (the footer's box is its own). */
-export type SectionKind = HomeSectionType | "announcement_bar" | "footer_newsletter"
+export type SectionKind = BodySectionType | "announcement_bar" | "footer_newsletter"
 
 export const SECTION_ICONS: Readonly<Record<SectionKind, LucideIcon>> = {
   announcement_bar: Megaphone,
@@ -29,6 +31,8 @@ export const SECTION_ICONS: Readonly<Record<SectionKind, LucideIcon>> = {
   posts: BookOpen,
   reviews: MessageSquareQuote,
   rich_text: Text,
+  faq: CircleHelp,
+  related_products: Boxes,
   trust_badges: BadgeCheck,
   newsletter: Mail,
   help: LifeBuoy,
@@ -52,6 +56,8 @@ function ownTitle(section: AnySection): string | null {
     case "posts":
     case "reviews":
     case "rich_text":
+    case "faq":
+    case "related_products":
     case "newsletter":
     case "help":
       return section.title

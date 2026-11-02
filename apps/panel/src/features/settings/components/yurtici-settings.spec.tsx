@@ -43,6 +43,16 @@ describe("YurticiSettings", () => {
     fetchMock.mockResolvedValue({ account: connected, check: "valid" })
   })
 
+  it("names which of Yurtiçi's users each login is, and the tracking pace", () => {
+    renderSettings(undefined)
+
+    expect(screen.getByText(/“Gönderici Ödemeli” kullanıcısını girin/)).toBeInTheDocument()
+    expect(screen.getByText(/dakikada bir izin verir/)).toBeInTheDocument()
+    expect(
+      screen.getByText(/“Gönderici Ödemeli Tahsilatlı Teslimat” kullanıcısını girin/)
+    ).toBeInTheDocument()
+  })
+
   it("asks for the login on a first connection, not for the door account", async () => {
     renderSettings(undefined)
     await userEvent.click(saveButton())

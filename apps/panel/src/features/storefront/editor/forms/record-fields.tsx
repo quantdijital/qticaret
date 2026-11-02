@@ -19,6 +19,8 @@ interface RecordListFieldProps {
   /** What the storefront shows with none chosen (or why one is needed). */
   empty: string
   error?: string | undefined
+  /** How many the section takes; most take 24. */
+  max?: number
 }
 
 /** Records the shop picks and orders: categories, brands, products. */
@@ -29,11 +31,12 @@ export function RecordListField({
   onChange,
   empty,
   error,
+  max = LAYOUT_LIMITS.items,
 }: RecordListFieldProps) {
   const { t } = useTranslation()
   const [picking, setPicking] = useState(false)
   const names = useRecordNames(kind, ids)
-  const full = ids.length >= LAYOUT_LIMITS.items
+  const full = ids.length >= max
   const nameOf = (id: string) =>
     names.data?.[id] ?? (names.isPending ? t("common.loading") : t(`${R}.missing`))
   return (
@@ -74,9 +77,7 @@ export function RecordListField({
           <Plus />
           {t(`${R}.add.${kind}`)}
         </Button>
-        <span className="text-xs text-muted-foreground">
-          {t(`${R}.limit`, { max: LAYOUT_LIMITS.items })}
-        </span>
+        <span className="text-xs text-muted-foreground">{t(`${R}.limit`, { max })}</span>
       </div>
       {picking ? (
         <RecordPickerDialog

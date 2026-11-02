@@ -1,14 +1,18 @@
 import { keepPreviousData, queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
 import type { JSONContent } from "@tiptap/react"
 import { sdk } from "@/lib/sdk"
+import type { TermView } from "./terms"
 
 /** Content pages and blog posts (F3.16, `/admin/content`). */
 
 export const CONTENT_KINDS = ["page", "post"] as const
 export type ContentKind = (typeof CONTENT_KINDS)[number]
 
-/** The Content screen's tabs: pages, posts and the facet landing pages (F3.16). */
-export const CONTENT_TABS = [...CONTENT_KINDS, "landing"] as const
+/**
+ * The Content screen's tabs: pages, posts, the blog's categories and tags
+ * (adr/0019 ek 2026-11-03) and the facet landing pages (F3.16).
+ */
+export const CONTENT_TABS = ["page", "post", "category", "tag", "landing"] as const
 export type ContentTab = (typeof CONTENT_TABS)[number]
 export type ContentStatus = "draft" | "published"
 
@@ -29,6 +33,11 @@ export interface ContentEntry {
   revised_at: string | null
   created_at: string
   updated_at: string
+  /** A post's category and tags; a page has none. */
+  category_id: string | null
+  tag_ids: string[]
+  category: TermView | null
+  tags: TermView[]
 }
 
 export interface ContentDetail extends ContentEntry {
@@ -46,19 +55,26 @@ export interface ContentInput {
   author_name?: string | null
   image_url?: string | null
   image_alt?: string | null
+  /** A post's category; null clears it. */
+  category_id?: string | null
+  /** A post's tags, all of them; [] clears them. */
+  tag_ids?: string[]
 }
 
 export const contentListQuery = ({
   kind,
   q,
   page,
+  termId,
 }: {
   kind: ContentKind
   q: string
   page: number
+  /** Only the posts filed under this category or tag. */
+  termId?: string
 }) =>
   queryOptions({
-    queryKey: ["content", "list", { kind, q, page }],
+    queryKey: ["content", "list", { kind, q, page, termId }],
     queryFn: () =>
       sdk.client.fetch<{ entries: ContentEntry[]; count: number }>("/admin/content", {
         query: {
@@ -66,6 +82,7 @@ export const contentListQuery = ({
           offset: page * CONTENT_PAGE_SIZE,
           limit: CONTENT_PAGE_SIZE,
           ...(q ? { q } : {}),
+          ...(termId ? { term_id: termId } : {}),
         },
       }),
     placeholderData: keepPreviousData,

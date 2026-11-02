@@ -1242,7 +1242,8 @@
         "door": {
           "title": "Cash on delivery account",
           "description": "Yurtiçi gives a separate user name and password for parcels paid at the door. Orders paid at the door go out on this account; without it they cannot ship with Yurtiçi.",
-          "hint": "Optional; enter the user name and password together."
+          "hint": "Optional; enter the user name and password together.",
+          "loginHint": "Enter Yurtiçi's “Gönderici Ödemeli Tahsilatlı Teslimat” (sender pays, cash on delivery) user."
         },
         "live": {
           "title": "Going live",
@@ -1254,7 +1255,8 @@
           "merchant_invalid": "Yurtiçi Kargo did not accept the cash on delivery account's user name and password. Copy them again from the document Yurtiçi gave for that account.",
           "secret_invalid": "Yurtiçi Kargo did not accept this user name and password. Copy them again from Yurtiçi's web service document."
         },
-        "rejected": "Yurtiçi Kargo no longer accepts the stored details; no parcel can be opened. Enter the current details Yurtiçi gave."
+        "rejected": "Yurtiçi Kargo no longer accepts the stored details; no parcel can be opened. Enter the current details Yurtiçi gave.",
+        "keysHint": "Enter Yurtiçi's “Gönderici Ödemeli” (sender pays) user. Yurtiçi allows one tracking query per minute; shipment statuses update at that pace."
       },
       "returns": {
         "title": "Return terms",
@@ -3697,7 +3699,8 @@
         "product": "Product",
         "return": "Returns and exchanges",
         "payment": "Payment",
-        "other": "Other"
+        "other": "Other",
+        "kvkk": "KVKK data request"
       },
       "empty": {
         "new": "No messages waiting. What shoppers write from the storefront's contact form shows here.",
@@ -5336,7 +5339,8 @@
     },
     "contactMessage": {
       "title": "New contact message: {{subject}}",
-      "description": "From the storefront's contact form; read it under Customers > Contact messages."
+      "description": "From the storefront's contact form; read it under Customers > Contact messages.",
+      "due": "Last day: {{date}}."
     },
     "fraudReview": {
       "title": "#{{number}} held for review (score {{score}})",
@@ -5354,12 +5358,14 @@
     }
   },
   "content": {
-    "description": "The shop's own pages (about us, frequently asked questions), blog posts and filter pages.",
+    "description": "The shop's own pages (about us, FAQ), blog posts, the blog's categories and tags, and filter pages.",
     "kinds": "Content kinds",
     "tabs": {
       "page": "Pages",
       "post": "Blog posts",
-      "landing": "Filter pages"
+      "landing": "Filter pages",
+      "category": "Blog categories",
+      "tag": "Tags"
     },
     "search": "Search by title",
     "noMatch": "No content matches your search.",
@@ -5515,7 +5521,86 @@
       "blocked": "At the last save less than 30% of the text was original; publishing may be refused. Make it specific to this page."
     },
     "preview": "Preview",
-    "previewReady": "The preview opened in a new tab; its link is copied and works for 24 hours."
+    "previewReady": "The preview opened in a new tab; its link is copied and works for 24 hours.",
+    "terms": {
+      "filedUnder": "Category and tags",
+      "moreTags": "+{{n}}",
+      "columns": {
+        "name": "Name",
+        "posts": "Posts",
+        "rank": "Order"
+      },
+      "live_one": "{{count}} live",
+      "live_other": "{{count}} live",
+      "search": "Search by name",
+      "noMatch": "Nothing matches your search.",
+      "empty": {
+        "category": "No blog categories yet. Add one above to group your posts by topic.",
+        "tag": "No tags yet. Add them above or from a post's page."
+      },
+      "newName": {
+        "category": "New category name",
+        "tag": "New tag name"
+      },
+      "add": "Add",
+      "addressPreview": "Address: {{path}}",
+      "addressHint": "The address is made from the name you type.",
+      "created": {
+        "category": "Category “{{name}}” added.",
+        "tag": "Tag “{{name}}” added."
+      },
+      "tabs": {
+        "general": "General",
+        "seo": "Search appearance"
+      },
+      "fields": {
+        "name": "Name",
+        "handle": "Address",
+        "description": "Description",
+        "rank": "Order"
+      },
+      "nameRequired": "Enter a name.",
+      "handleHint": "If an archive with live posts gets a new address, the old one redirects to it.",
+      "descriptionHint": "Shown at the top of the archive page and in search results; when empty, the latest posts' titles are used.",
+      "rankHint": "Lower numbers come first; equal ones are sorted by name.",
+      "fallbackDescription": "{{name}} posts: {{titles}}",
+      "delete": {
+        "category": "Delete category",
+        "tag": "Delete tag"
+      },
+      "deleteTitle": "Delete “{{name}}”?",
+      "deleteText": {
+        "category_one": "The category's {{count}} post is not deleted; it becomes uncategorised. If the archive page showed live posts, its address answers “gone” (410). Its search appearance settings are deleted too.",
+        "category_other": "The category's {{count}} posts are not deleted; they become uncategorised. If the archive page showed live posts, its address answers “gone” (410). Its search appearance settings are deleted too.",
+        "tag_one": "The tag is taken off {{count}} post; the post is not deleted. If the archive page showed live posts, its address answers “gone” (410). Its search appearance settings are deleted too.",
+        "tag_other": "The tag is taken off {{count}} posts; the posts are not deleted. If the archive page showed live posts, its address answers “gone” (410). Its search appearance settings are deleted too."
+      },
+      "deleted": {
+        "category": "Category deleted.",
+        "tag": "Tag deleted."
+      },
+      "unlinked": {
+        "category_one": "{{count}} post is now uncategorised.",
+        "category_other": "{{count}} posts are now uncategorised.",
+        "tag_one": "Taken off {{count}} post.",
+        "tag_other": "Taken off {{count}} posts."
+      },
+      "cardTitle": "Category and tags",
+      "cardHint": "The post is also listed on its category's and tags' pages on the blog.",
+      "category": "Category",
+      "tags": "Tags",
+      "uncategorised": "— Uncategorised —",
+      "searchCategory": "Search categories",
+      "noCategory": "No category by that name.",
+      "noTags": "No tags added.",
+      "addTag": "Add tag",
+      "searchTag": "Search tags or type a new name",
+      "noTag": "No tag by that name.",
+      "createTag": "Create tag “{{name}}”",
+      "removeTag": "Remove tag {{name}}",
+      "tagsFull": "A post can have at most {{max}} tags.",
+      "manage": "Manage categories and tags"
+    }
   },
   "priceLists": {
     "sections": "Kinds of offer",
@@ -6016,9 +6101,7 @@
         "label": "Page being edited",
         "home": "Home page",
         "product": "Product page",
-        "category": "Category page",
-        "post": "Blog post",
-        "soon": "{{page}} (coming soon)"
+        "category": "Category page"
       },
       "device": {
         "label": "Preview width",
@@ -6067,7 +6150,7 @@
       "publish": {
         "open": "Publish",
         "title": "Publish the design?",
-        "text": "The draft's header, home page and footer go live together. They show on the storefront within a minute.",
+        "text": "The draft's header, home page, product and category pages and footer go live together. They show on the storefront within a minute.",
         "confirm": "Publish",
         "done": "Published; it shows on the storefront within a minute."
       },
@@ -6081,12 +6164,25 @@
         "add": "Add section",
         "addAnnouncement": "Add announcement bar",
         "addNewsletter": "Add newsletter box",
-        "empty": "The home page has no sections; the storefront shows only the header and footer.",
+        "empty": {
+          "home": "The home page has no sections; the storefront shows only the header and footer.",
+          "product": "No sections added to the product pages; the product's own details show."
+        },
         "logo": "Logo and menu",
         "columns": "Link columns",
         "contact": "Contact and legal details",
         "storeProfile": "Store profile",
-        "menus": "Menus"
+        "menus": "Menus",
+        "productBlock": "The product's own details",
+        "grid": "Product grid",
+        "placements": {
+          "top": "Above the grid",
+          "bottom": "Below the grid"
+        },
+        "addTo": {
+          "top": "Add section above",
+          "bottom": "Add section below"
+        }
       },
       "row": {
         "drag": "Drag to move",
@@ -6102,11 +6198,20 @@
         "moveDown": "Move down",
         "duplicate": "Duplicate",
         "remove": "Remove",
-        "removed": "{{name}} removed."
+        "removed": "{{name}} removed.",
+        "place": {
+          "top": "Move above the grid",
+          "bottom": "Move below the grid"
+        }
       },
       "add": {
         "title": "Add section",
-        "description": "It is added at the end of the home page; drag it or use its arrows to move it."
+        "description": {
+          "home": "It is added at the end of the home page; drag it or use its arrows to move it.",
+          "product": "It is added on every product page, under the product's own details.",
+          "top": "It is added on every category page, above the product grid.",
+          "bottom": "It is added on every category page, below the product grid."
+        }
       },
       "types": {
         "announcement_bar": {
@@ -6160,6 +6265,14 @@
         "footer_newsletter": {
           "name": "Newsletter",
           "description": "The e-mail sign-up box in the footer; removed, it does not show."
+        },
+        "faq": {
+          "name": "Frequently asked questions",
+          "description": "Questions and answers; search engines are told about them as a FAQ too."
+        },
+        "related_products": {
+          "name": "Related products",
+          "description": "Products from the product's category, a collection or ones you pick."
         }
       },
       "panel": {
@@ -6171,7 +6284,8 @@
         "startsAt": "Starts",
         "endsAt": "Ends",
         "duplicate": "Duplicate",
-        "remove": "Remove section"
+        "remove": "Remove section",
+        "placement": "Position"
       },
       "defaults": {
         "heading": "Your shop's name",
@@ -6183,7 +6297,9 @@
         "newsletter": "Subscribe to the newsletter",
         "help": "Something on your mind?",
         "helpText": "Write to us about a product, an order or shipping; we will get back soon.",
-        "newsletterText": "The storefront's text: hear about campaigns and news by e-mail…"
+        "newsletterText": "The storefront's text: hear about campaigns and news by e-mail…",
+        "faq": "Frequently asked questions",
+        "related_products": "Related products"
       },
       "fields": {
         "eyebrow": "Eyebrow",
@@ -6282,7 +6398,7 @@
         "done": "Done"
       },
       "trustBadges": {
-        "text": "The badges are written in Storefront preferences; this section sets where they show on the home page.",
+        "text": "The badges are written in Storefront preferences; this section sets where they show on the page.",
         "link": "Edit the badges"
       },
       "help": {
@@ -6304,7 +6420,9 @@
         "productsRequired": "Pick at least one product.",
         "categoryRequired": "Choose a category.",
         "collectionRequired": "Choose a collection.",
-        "scheduleOrder": "The end must come after the start."
+        "scheduleOrder": "The end must come after the start.",
+        "questionRequired": "Write the question.",
+        "answerRequired": "Write the answer."
       },
       "theme": {
         "title": "Theme settings",
@@ -6318,6 +6436,43 @@
         "live": "The colour is not part of the draft: once saved, it shows on the storefront at once.",
         "save": "Save colour",
         "reset": "Use the theme's colour"
+      },
+      "faq": {
+        "items": "Questions",
+        "item": "Question {{number}}",
+        "question": "Question {{number}}'s text",
+        "answer": "Question {{number}}'s answer",
+        "add": "Add question",
+        "hint": "Up to {{max}} questions; answers may hold the shop's details."
+      },
+      "related": {
+        "source": "Which products",
+        "sources": {
+          "same_category": "From the product's own category",
+          "collection": "A collection's products",
+          "manual": "Products I pick"
+        },
+        "sameCategoryHint": "Each product page shows other products from that product's category."
+      },
+      "sample": {
+        "label": {
+          "product": "Sample product in the preview",
+          "category": "Sample category in the preview"
+        },
+        "shown": "Sample: {{name}}",
+        "none": "none",
+        "search": {
+          "product": "Search live products",
+          "category": "Search storefront categories"
+        },
+        "empty": {
+          "product": "No live product by that name.",
+          "category": "No storefront category by that name."
+        },
+        "missing": {
+          "product": "The preview needs a live product; publish one and the product page shows here.",
+          "category": "The preview needs a category shown on the storefront; activate one and its page shows here."
+        }
       }
     },
     "preferences": {

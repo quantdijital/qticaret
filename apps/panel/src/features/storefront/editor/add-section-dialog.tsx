@@ -6,30 +6,42 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import type { HomeSectionType } from "@/features/storefront/api/layout"
-import { HOME_TYPES } from "@/features/storefront/layout/sections"
+import type { BodyGroup, BodySectionType, Placement } from "@/features/storefront/api/layout"
+import { GROUP_TYPES } from "@/features/storefront/layout/sections"
 import { SECTION_ICONS } from "./section-meta"
 
 const A = "storefront.editor.add"
 
 interface AddSectionDialogProps {
   open: boolean
+  /** The page the section is for. */
+  page: BodyGroup
+  /** A category page's side of its products. */
+  placement: Placement
   onOpenChange: (open: boolean) => void
-  onPick: (type: HomeSectionType) => void
+  onPick: (type: BodySectionType) => void
 }
 
-/** The home page's section types, each with what it shows in one line. */
-export function AddSectionDialog({ open, onOpenChange, onPick }: AddSectionDialogProps) {
+/** The section types the page takes, each with what it shows in one line. */
+export function AddSectionDialog({
+  open,
+  page,
+  placement,
+  onOpenChange,
+  onPick,
+}: AddSectionDialogProps) {
   const { t } = useTranslation()
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>{t(`${A}.title`)}</DialogTitle>
-          <DialogDescription>{t(`${A}.description`)}</DialogDescription>
+          <DialogDescription>
+            {t(`${A}.description.${page === "category" ? placement : page}`)}
+          </DialogDescription>
         </DialogHeader>
         <ul className="grid gap-2 sm:grid-cols-2">
-          {HOME_TYPES.map((type) => {
+          {GROUP_TYPES[page].map((type) => {
             const Icon = SECTION_ICONS[type]
             return (
               <li key={type} className="flex">

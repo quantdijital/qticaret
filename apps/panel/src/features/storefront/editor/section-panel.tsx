@@ -1,12 +1,17 @@
 import { ArrowLeft, Copy, Trash2 } from "lucide-react"
 import { useTranslation } from "react-i18next"
+import { Field } from "@/components/patterns/form-section"
 import { Button } from "@/components/ui/button"
-import type { AnySection, LayoutGroup } from "@/features/storefront/api/layout"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import type { AnySection, LayoutGroup, Placement } from "@/features/storefront/api/layout"
 import type { SectionProblems } from "@/features/storefront/layout/problems"
+import { isBodyGroup } from "@/features/storefront/layout/sections"
 import { AnnouncementForm } from "./forms/announcement-form"
 import { BannerForm } from "./forms/banner-form"
+import { FaqForm } from "./forms/faq-form"
 import { HeroForm } from "./forms/hero-form"
 import { ProductsForm } from "./forms/products-form"
+import { RelatedForm } from "./forms/related-form"
 import { RichTextForm } from "./forms/rich-text-form"
 import { ScheduleFields } from "./forms/schedule-fields"
 import {
@@ -24,9 +29,11 @@ interface SectionPanelProps {
   section: AnySection
   group: LayoutGroup
   problems: SectionProblems
-  /** May another of it be added (a home section under the limit). */
+  /** May another of it be added (a page's section under its page's limit). */
   canDuplicate: boolean
   onChange: (section: AnySection, field?: string) => void
+  /** A category page's section to the other side of its products. */
+  onPlace: (placement: Placement) => void
   onBack: () => void
   onDuplicate: () => void
   onRemove: () => void
@@ -57,6 +64,10 @@ function FormOf({
       return <CountedForm section={section} {...props} />
     case "rich_text":
       return <RichTextForm section={section} {...props} />
+    case "faq":
+      return <FaqForm section={section} {...props} />
+    case "related_products":
+      return <RelatedForm section={section} {...props} />
     case "trust_badges":
       return <TrustBadgesForm />
     case "newsletter":
@@ -76,6 +87,7 @@ export function SectionPanel({
   problems,
   canDuplicate,
   onChange,
+  onPlace,
   onBack,
   onDuplicate,
   onRemove,
@@ -103,12 +115,31 @@ export function SectionPanel({
         <p className="text-xs text-muted-foreground">
           {t(`storefront.editor.types.${kind}.description`)}
         </p>
+        {"placement" in section ? (
+          <Field label={t(`${P}.placement`)}>
+            <RadioGroup
+              aria-label={t(`${P}.placement`)}
+              value={section.placement}
+              className="gap-2"
+              onValueChange={(next) => {
+                onPlace(next as Placement)
+              }}
+            >
+              {(["top", "bottom"] as const).map((placement) => (
+                <label key={placement} className="flex items-center gap-2 text-sm">
+                  <RadioGroupItem value={placement} />
+                  {t(`storefront.editor.tree.placements.${placement}`)}
+                </label>
+              ))}
+            </RadioGroup>
+          </Field>
+        ) : null}
         <FormOf section={section} problems={problems} onChange={onChange} />
         <div className="border-t pt-5">
           <ScheduleFields section={section} problem={problems["schedule"]} onChange={onChange} />
         </div>
         <div className="flex flex-wrap gap-2 border-t pt-5">
-          {group === "home" ? (
+          {isBodyGroup(group) ? (
             <Button
               type="button"
               variant="outline"

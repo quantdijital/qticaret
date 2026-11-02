@@ -10,6 +10,7 @@ import { ContentActions } from "@/features/content/components/content-actions"
 import { ContentBodyCard } from "@/features/content/components/content-body-card"
 import { ContentCoverCard } from "@/features/content/components/content-cover-card"
 import { ContentGeneralCard } from "@/features/content/components/content-general-card"
+import { PostTermsCard } from "@/features/content/components/post-terms-card"
 import { ContentStatusBadge } from "@/features/content/components/content-status"
 import { docText } from "@/features/content/doc-text"
 import { AdvisorCard } from "@/features/seo/advisor/advisor-card"
@@ -100,6 +101,7 @@ export function ContentEntryPage() {
         <PageColumn span={4}>
           <AdvisorCard kind={data.kind} id={data.id} version={data.updated_at} targets={TARGETS} />
           <Dates entry={data} />
+          {data.kind === "post" ? <PostTermsCard entry={data} /> : null}
           <div id="content-cover" className="scroll-mt-20">
             <ContentCoverCard entry={data} />
           </div>

@@ -1,15 +1,31 @@
 import type {
   AnnouncementBar,
   AnySection,
+  BodyGroup,
+  BodySection,
+  BodySectionType,
+  CategorySection,
   FooterNewsletter,
   HomeSection,
   HomeSectionType,
   LayoutDocument,
   LayoutGroup,
+  Placement,
+  ProductSection,
 } from "@/features/storefront/api/layout"
+import { LAYOUT_LIMITS } from "@/features/storefront/api/layout"
 
-/** The groups in the order the storefront draws them. */
-export const LAYOUT_GROUPS: readonly LayoutGroup[] = ["header", "home", "footer"]
+/** The groups in the order the storefront draws them (a page's body between header and footer). */
+export const LAYOUT_GROUPS: readonly LayoutGroup[] = [
+  "header",
+  "home",
+  "product",
+  "category",
+  "footer",
+]
+
+export const isBodyGroup = (group: LayoutGroup): group is BodyGroup =>
+  group === "home" || group === "product" || group === "category"
 
 /** The home page's section types, in the order the chooser offers them. */
 export const HOME_TYPES: readonly HomeSectionType[] = [
@@ -21,10 +37,45 @@ export const HOME_TYPES: readonly HomeSectionType[] = [
   "posts",
   "reviews",
   "rich_text",
+  "faq",
   "trust_badges",
   "newsletter",
   "help",
 ]
+
+type ProductSectionType = ProductSection["type"]
+type CategorySectionType = CategorySection["type"]
+
+/** What a product page takes under its own block (adr/0049 ek 2026-11-03). */
+export const PRODUCT_TYPES: readonly ProductSectionType[] = [
+  "related_products",
+  "rich_text",
+  "banner",
+  "faq",
+  "trust_badges",
+  "help",
+  "newsletter",
+]
+
+/** What a category page takes, above or below its products. */
+export const CATEGORY_TYPES: readonly CategorySectionType[] = [
+  "rich_text",
+  "banner",
+  "faq",
+  "trust_badges",
+  "help",
+  "newsletter",
+]
+
+/** Each body group's section types, as its chooser offers them. */
+export const GROUP_TYPES: Readonly<Record<BodyGroup, readonly BodySectionType[]>> = {
+  home: HOME_TYPES,
+  product: PRODUCT_TYPES,
+  category: CATEGORY_TYPES,
+}
+
+/** The sections a group holds at most. */
+export const groupLimit = (group: BodyGroup): number => LAYOUT_LIMITS[group]
 
 const ID_LENGTH = 12
 const ALPHABET = "abcdefghijklmnopqrstuvwxyz0123456789"
@@ -40,12 +91,13 @@ export function newSectionId(taken: ReadonlySet<string> = new Set()): string {
   }
 }
 
-/** Every section of the document, top to bottom. */
-export const allSections = (doc: LayoutDocument): AnySection[] => [
-  ...doc.header,
-  ...doc.home,
-  ...doc.footer,
-]
+/** Every section of the document, group by group. */
+export const allSections = (doc: LayoutDocument): AnySection[] =>
+  LAYOUT_GROUPS.flatMap((group): readonly AnySection[] => doc[group])
+
+/** A category page's sections in one place: above the grid or below it, in order. */
+export const placed = (sections: readonly CategorySection[], placement: Placement) =>
+  sections.filter((section) => section.placement === placement)
 
 export const idsOf = (doc: LayoutDocument): Set<string> =>
   new Set(allSections(doc).map((section) => section.id))
@@ -72,6 +124,8 @@ const ALWAYS = { visible: true, starts_at: null, ends_at: null } as const
 export function newHomeSection(type: HomeSectionType, id: string): HomeSection {
   const base = { id, ...ALWAYS }
   switch (type) {
+    case "faq":
+      return { ...base, type, title: null, items: [{ question: "", answer: "" }] }
     case "hero":
       return { ...base, type, eyebrow: null, heading: null, text: null, links: [], image: null }
     case "banner":
@@ -101,6 +155,24 @@ export function newHomeSection(type: HomeSectionType, id: string): HomeSection {
     case "help":
       return { ...base, type, title: null, text: null }
   }
+}
+
+/**
+ * A section of a body group as its chooser adds it; a category page's
+ * goes where it was added (below the products unless said otherwise).
+ */
+export function newBodySection(
+  group: BodyGroup,
+  type: BodySectionType,
+  id: string,
+  placement: Placement = "bottom"
+): BodySection {
+  if (type === "related_products") {
+    const base = { id, ...ALWAYS }
+    return { ...base, type, title: null, source: { kind: "same_category" }, limit: 8 }
+  }
+  const section = newHomeSection(type, id)
+  return group === "category" ? ({ ...section, placement } as CategorySection) : section
 }
 
 /** The announcement bar, with one line to write. */

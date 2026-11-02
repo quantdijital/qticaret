@@ -47,7 +47,10 @@ const isYurticiOption = (id: unknown): boolean => YURTICI_OPTIONS.some((option) 
 const storedYurticiAccount = (): Promise<YurticiCredentials> =>
   storedCarrierAccount("yurtici", yurticiCredentialsOf)
 
-/** Yurtiçi answered and said no: nothing was opened, nothing to withdraw. */
+/**
+ * Yurtiçi answered and said no (an answer's code, or a fault, also one sent
+ * as HTTP 500): nothing was opened, nothing to withdraw.
+ */
 const refusedOutright = (error: unknown): boolean =>
   isProviderError(error) &&
   (error.providerCode === "rejected" || error.providerCode.startsWith("error_"))

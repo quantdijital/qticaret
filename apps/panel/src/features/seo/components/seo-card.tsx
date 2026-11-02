@@ -92,8 +92,13 @@ function SeoForm({
     name: ["seo_title", "seo_description"],
   })
 
-  // The template fills what is left empty, as the storefront will (F3.4b)
-  const templateKey = type === "collection" ? "category" : type
+  // The template fills what is left empty, as the storefront will (F3.4b); a blog archive is titled as a post
+  const templateKey =
+    type === "collection"
+      ? "category"
+      : type === "post_category" || type === "post_tag"
+        ? "post"
+        : type
   const titleTemplate = settings?.values.title_templates[templateKey] ?? ""
   const shownTitle = title.trim() || renderSample(titleTemplate, storeName, context.tokens)
   const shownDescription =

@@ -66,7 +66,8 @@ export interface FakeYurtici {
   hold: (cargoKey: string) => void
   /**
    * The next answer to an operation instead of the usual one: a refusal
-   * with this code, or `lost` for a parcel opened whose answer never comes.
+   * with this code, `lost` for a parcel opened whose answer never comes, or
+   * `fault:<code>` for a service exception (HTTP 500) with that code.
    */
   queue: (operation: string, errCode: string) => void
   close: () => Promise<void>
@@ -91,9 +92,12 @@ const envelope = (inner: string) =>
 const answer = (operation: string, inner: string) =>
   envelope(`<ns2:${operation}Response xmlns:ns2="${NS}">${inner}</ns2:${operation}Response>`)
 
-const FAULT = envelope(
-  `<S:Fault><faultcode>S:Server</faultcode><faultstring>Kullanıcı adı veya şifre hatalı</faultstring><detail><ns2:YurticikargoWSException xmlns:ns2="http://yurticikargo.com.tr/WSExceptions/"><errorCode>936</errorCode><errText>Kullanıcı adı veya şifre hatalı</errText></ns2:YurticikargoWSException></detail></S:Fault>`
-)
+const fault = (code: string, text: string) =>
+  envelope(
+    `<S:Fault><faultcode>S:Server</faultcode><faultstring>${text}</faultstring><detail><ns2:YurticikargoWSException xmlns:ns2="http://yurticikargo.com.tr/WSExceptions/"><errorCode>${code}</errorCode><errText>${text}</errText></ns2:YurticikargoWSException></detail></S:Fault>`
+  )
+
+const FAULT = fault("936", "Kullanıcı adı veya şifre hatalı")
 
 /** The document's error line for a key the login does not have: no cargo key on it. */
 const notFound = (user: string, cargoKey: string) =>
@@ -239,6 +243,9 @@ export async function startFakeYurtici(
       return { status: 500, text: FAULT }
     }
     const forced = queued.get(name)?.shift()
+    if (forced?.startsWith("fault:")) {
+      return { status: 500, text: fault(forced.slice("fault:".length), "Hata") }
+    }
     switch (name) {
       case "createShipment":
         return create(body, account, forced)

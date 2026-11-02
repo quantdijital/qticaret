@@ -33,6 +33,27 @@ export const DOC: LayoutDocument = {
     { id: "blogyazilari", type: "posts", ...ALWAYS, title: null, limit: 3 },
   ],
   footer: [{ id: "ebultenkutusu", type: "newsletter", ...ALWAYS, title: null, text: null }],
+  product: [
+    {
+      id: "benzerurunler",
+      type: "related_products",
+      ...ALWAYS,
+      title: null,
+      source: { kind: "same_category" },
+      limit: 8,
+    },
+  ],
+  category: [
+    {
+      id: "kategorisss",
+      type: "faq",
+      ...ALWAYS,
+      placement: "top",
+      title: null,
+      items: [{ question: "Kargo ne zaman çıkar?", answer: "Aynı gün kargoya veririz." }],
+    },
+    { id: "kategoriyardim", type: "help", ...ALWAYS, placement: "bottom", title: null, text: null },
+  ],
 }
 
 /** The design as `GET /admin/storefront-layout` gives it: saved before, published once. */
@@ -68,9 +89,24 @@ const STOREFRONT = {
   color_swatches: [],
 }
 export const CATEGORIES = [
-  { id: "pcat_kitchen", name: "Mutfak bıçakları", parent_category_id: null },
-  { id: "pcat_chefs", name: "Şef bıçakları", parent_category_id: "pcat_kitchen" },
+  {
+    id: "pcat_kitchen",
+    name: "Mutfak bıçakları",
+    handle: "mutfak-bicaklari",
+    parent_category_id: null,
+  },
+  {
+    id: "pcat_chefs",
+    name: "Şef bıçakları",
+    handle: "sef-bicaklari",
+    parent_category_id: "pcat_kitchen",
+  },
 ].map((category) => ({ is_active: true, is_internal: false, ...category }))
+/** The shop's live products, newest change first. */
+export const PRODUCTS = [
+  { id: "prod_chef", title: "Şef bıçağı 20 cm", handle: "sef-bicagi-20-cm", status: "published" },
+  { id: "prod_bread", title: "Ekmek bıçağı", handle: "ekmek-bicagi", status: "published" },
+]
 
 /**
  * The server: the layout, a save answered with the draft it was sent, a

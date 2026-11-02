@@ -4,8 +4,12 @@ import type { Dispatch, ReactNode } from "react"
 import type { LucideIcon } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
-import type { AnySection, HomeSection, LayoutDocument } from "@/features/storefront/api/layout"
-import { LAYOUT_LIMITS } from "@/features/storefront/api/layout"
+import type {
+  AnySection,
+  BodyGroup,
+  LayoutDocument,
+  Placement,
+} from "@/features/storefront/api/layout"
 import type { EditorAction } from "@/features/storefront/layout/editor-state"
 import {
   idsOf,
@@ -14,7 +18,7 @@ import {
   newFooterNewsletter,
   newSectionId,
 } from "@/features/storefront/layout/sections"
-import { HomeList } from "./home-list"
+import { PageSections } from "./page-sections"
 import { SECTION_ICONS, kindOf, sectionLabel } from "./section-meta"
 import { SectionRow } from "./section-row"
 
@@ -81,22 +85,25 @@ function AddRow({ label, onClick }: { label: string; onClick: () => void }) {
 }
 
 interface SectionTreeProps {
+  /** The page being edited: its own sections between the header and the footer. */
+  page: BodyGroup
   doc: LayoutDocument
   problems: ReadonlySet<string>
   dispatch: Dispatch<EditorAction>
   onOpen: (id: string) => void
   onRemove: (section: AnySection) => void
-  onAddSection: () => void
+  onAddSection: (placement?: Placement) => void
   onTheme: () => void
 }
 
 /**
  * The page's parts as the storefront draws them, top to bottom: the
- * header, the home page's sections, the footer; then the theme's own
- * settings. The menus, the logo and the contact details are edited on
- * their own screens, linked from where they show.
+ * header, the chosen page's own sections, the footer; then the theme's
+ * own settings. The menus, the logo and the contact details are edited
+ * on their own screens, linked from where they show.
  */
 export function SectionTree({
+  page,
   doc,
   problems,
   dispatch,
@@ -164,33 +171,16 @@ export function SectionTree({
           />
         </ul>
       </TreeGroup>
-      <TreeGroup title={t(`${T}.home`)}>
-        {doc.home.length === 0 ? (
-          <p className="px-2 py-1 text-xs text-muted-foreground">{t(`${T}.empty`)}</p>
-        ) : (
-          <HomeList
-            sections={doc.home}
-            problems={problems}
-            dispatch={dispatch}
-            onOpen={onOpen}
-            onRemove={(section: HomeSection) => {
-              onRemove(section)
-            }}
-          />
-        )}
-        <div className="pl-5">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="w-full justify-start text-primary-text"
-            disabled={doc.home.length >= LAYOUT_LIMITS.home}
-            onClick={onAddSection}
-          >
-            <Plus />
-            {t(`${T}.add`)}
-          </Button>
-        </div>
+      <TreeGroup title={t(`storefront.editor.page.${page}`)}>
+        <PageSections
+          page={page}
+          doc={doc}
+          problems={problems}
+          dispatch={dispatch}
+          onOpen={onOpen}
+          onRemove={onRemove}
+          onAdd={onAddSection}
+        />
       </TreeGroup>
       <TreeGroup title={t(`${T}.footer`)}>
         <ul className="flex flex-col gap-0.5">

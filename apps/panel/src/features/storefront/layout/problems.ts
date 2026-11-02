@@ -11,6 +11,8 @@ import { allSections } from "./sections"
  */
 export type Problem =
   | "required"
+  | "questionRequired"
+  | "answerRequired"
   | "tooLong"
   | "textInvalid"
   | "tokenUnknown"
@@ -105,6 +107,41 @@ function fieldsOf(section: AnySection): Found[] {
         ["more", linkProblem(section.more)],
       ]
     }
+    case "related_products": {
+      const { source } = section
+      return [
+        ["title", textProblem(section.title, L.title)],
+        [
+          "source",
+          source.kind === "manual" && source.product_ids.length === 0
+            ? "productsRequired"
+            : source.kind === "collection" && source.collection_id === ""
+              ? "collectionRequired"
+              : null,
+        ],
+      ]
+    }
+    case "faq":
+      return [
+        ["title", textProblem(section.title, L.title)],
+        ...section.items.flatMap((item, index): Found[] => {
+          const at = `items.${String(index)}`
+          return [
+            [
+              `${at}.question`,
+              item.question.trim() === ""
+                ? "questionRequired"
+                : textProblem(item.question, L.question),
+            ],
+            [
+              `${at}.answer`,
+              item.answer.trim() === ""
+                ? "answerRequired"
+                : textProblem(item.answer, L.answer, true),
+            ],
+          ]
+        }),
+      ]
     case "newsletter":
     case "help":
       return [

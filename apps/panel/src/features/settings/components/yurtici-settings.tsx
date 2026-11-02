@@ -81,6 +81,8 @@ export function YurticiSettings({
             error={message(errors.password?.message)}
             registration={form.register("password")}
           />
+          {/* Which of Yurtiçi's users this is, and how often it may be asked (V3 document) */}
+          <p className="text-[13px] text-muted-foreground sm:col-span-2">{t(`${Y}.keysHint`)}</p>
         </fieldset>
       </FormSection>
       <FormSection title={t(`${Y}.door.title`)} description={t(`${Y}.door.description`)}>
@@ -105,6 +107,9 @@ export function YurticiSettings({
             error={message(errors.cod_password?.message)}
             registration={form.register("cod_password")}
           />
+          <p className="text-[13px] text-muted-foreground sm:col-span-2">
+            {t(`${Y}.door.loginHint`)}
+          </p>
         </fieldset>
       </FormSection>
       <FormSection title={t(`${Y}.live.title`)} description={t(`${Y}.live.description`)}>

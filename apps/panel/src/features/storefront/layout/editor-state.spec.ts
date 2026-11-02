@@ -1,18 +1,46 @@
 import { describe, expect, it } from "vitest"
-import type { LayoutDocument, ProductsSection } from "@/features/storefront/api/layout"
+import type {
+  CategorySection,
+  LayoutDocument,
+  ProductSection,
+  ProductsSection,
+} from "@/features/storefront/api/layout"
 import { HISTORY_LIMIT, editorReducer, initialEditorState } from "./editor-state"
 import type { EditorAction, EditorState } from "./editor-state"
-import { newAnnouncementBar, newFooterNewsletter, newHomeSection, newSectionId } from "./sections"
+import {
+  newAnnouncementBar,
+  newBodySection,
+  newFooterNewsletter,
+  newHomeSection,
+  newSectionId,
+} from "./sections"
 
 const hero = newHomeSection("hero", "girisbolumu")
 const products = newHomeSection("products", "yeniurunler") as ProductsSection
 const posts = newHomeSection("posts", "blogyazilari")
+const related = newBodySection("product", "related_products", "benzerurunler") as ProductSection
+const productFaq = newBodySection("product", "faq", "urunsss") as ProductSection
+const category = (type: CategorySection["type"], id: string, placement: "top" | "bottom") =>
+  newBodySection("category", type, id, placement) as CategorySection
 
 const DOC: LayoutDocument = {
   header: [{ ...newAnnouncementBar("duyurular"), lines: ["Kargo bedava"] }],
   home: [hero, products, posts],
   footer: [newFooterNewsletter("ebultenkutusu")],
+  product: [related, productFaq],
+  category: [
+    category("banner", "ustbanner", "top"),
+    category("rich_text", "ustmetin", "top"),
+    category("faq", "altsss", "bottom"),
+    category("help", "altyardim", "bottom"),
+  ],
 }
+
+const ids = (sections: readonly { id: string }[]) => sections.map((section) => section.id)
+const sides = (state: EditorState) => ({
+  top: ids(state.doc.category.filter((section) => section.placement === "top")),
+  bottom: ids(state.doc.category.filter((section) => section.placement === "bottom")),
+})
 
 const run = (actions: EditorAction[], from: EditorState = initialEditorState(DOC)) =>
   actions.reduce(editorReducer, from)
@@ -129,6 +157,105 @@ describe("editorReducer", () => {
     expect(state.past).toHaveLength(HISTORY_LIMIT)
     const loaded = editorReducer(state, { type: "load", doc: DOC })
     expect(loaded).toEqual(initialEditorState(DOC))
+  })
+
+  it("adds a product page's section up to its limit of 12, a related list with the storefront's defaults", () => {
+    const added = run([
+      {
+        type: "add",
+        group: "product",
+        section: newBodySection("product", "related_products", "dahabenzer"),
+      },
+    ])
+    expect(ids(added.doc.product)).toEqual(["benzerurunler", "urunsss", "dahabenzer"])
+    expect(added.doc.product[2]).toEqual({
+      id: "dahabenzer",
+      type: "related_products",
+      visible: true,
+      starts_at: null,
+      ends_at: null,
+      title: null,
+      source: { kind: "same_category" },
+      limit: 8,
+    })
+    let full = initialEditorState({ ...DOC, product: [] })
+    for (let at = 0; at < 13; at++) {
+      full = editorReducer(full, {
+        type: "add",
+        group: "product",
+        section: newBodySection("product", "help", `yardim${String(at).padStart(2, "0")}`),
+      })
+    }
+    expect(full.doc.product).toHaveLength(12)
+    // A full page copies nothing either
+    expect(editorReducer(full, { type: "duplicate", id: "yardim00" }).doc).toBe(full.doc)
+  })
+
+  it("moves and copies a product page's sections within that page", () => {
+    const moved = run([{ type: "move", id: "urunsss", to: 0 }])
+    expect(ids(moved.doc.product)).toEqual(["urunsss", "benzerurunler"])
+    expect(moved.doc.home).toBe(DOC.home)
+    const copied = run([{ type: "duplicate", id: "benzerurunler" }])
+    expect(copied.doc.product).toHaveLength(3)
+    expect(copied.doc.product[1]).toEqual({ ...related, id: copied.doc.product[1]?.id })
+  })
+
+  it("adds a category page's section on the side it was added to", () => {
+    const state = run([
+      {
+        type: "add",
+        group: "category",
+        section: newBodySection("category", "newsletter", "ustbulten", "top"),
+      },
+      { type: "add", group: "category", section: newBodySection("category", "faq", "yenisss") },
+    ])
+    expect(sides(state)).toEqual({
+      top: ["ustbanner", "ustmetin", "ustbulten"],
+      bottom: ["altsss", "altyardim", "yenisss"],
+    })
+  })
+
+  it("moves a category page's section among those on its side of the products", () => {
+    const state = run([{ type: "move", id: "ustmetin", to: 0 }])
+    expect(sides(state)).toEqual({
+      top: ["ustmetin", "ustbanner"],
+      bottom: ["altsss", "altyardim"],
+    })
+    // Past the end of its side it stays on its side
+    expect(sides(run([{ type: "move", id: "altsss", to: 9 }]))).toEqual({
+      top: ["ustbanner", "ustmetin"],
+      bottom: ["altyardim", "altsss"],
+    })
+    expect(run([{ type: "move", id: "ustbanner", to: 0 }]).doc).toBe(DOC)
+  })
+
+  it("puts a category page's section on the other side, at the end nearest where it was", () => {
+    const down = run([{ type: "place", id: "ustbanner", placement: "bottom" }])
+    expect(sides(down)).toEqual({
+      top: ["ustmetin"],
+      bottom: ["ustbanner", "altsss", "altyardim"],
+    })
+    const up = run([{ type: "place", id: "altyardim", placement: "top" }])
+    expect(sides(up)).toEqual({
+      top: ["ustbanner", "ustmetin", "altyardim"],
+      bottom: ["altsss"],
+    })
+    expect(up.doc.category.find((section) => section.id === "altyardim")?.placement).toBe("top")
+    // Already there: nothing to undo
+    const still = run([{ type: "place", id: "altsss", placement: "bottom" }])
+    expect(still.doc).toBe(DOC)
+    expect(still.past).toEqual([])
+    // And back with one undo
+    expect(run([{ type: "undo" }], up).doc).toBe(DOC)
+  })
+
+  it("copies a category page's section on its own side, right after it", () => {
+    const state = run([{ type: "duplicate", id: "ustbanner" }])
+    const { top, bottom } = sides(state)
+    expect(top).toHaveLength(3)
+    expect(top[0]).toBe("ustbanner")
+    expect(top[2]).toBe("ustmetin")
+    expect(bottom).toEqual(["altsss", "altyardim"])
   })
 
   it("makes ids of 12 lowercase letters and digits, never one already taken", () => {

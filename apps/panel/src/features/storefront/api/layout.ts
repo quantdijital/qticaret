@@ -6,13 +6,19 @@ import { sdk } from "@/lib/sdk"
 
 /**
  * The theme editor's document (adr/0049, backend lib/storefront/layout.ts):
- * the header's, the home page's and the footer's sections, saved whole as
- * a draft and published together.
+ * the header's, the home page's, every product and category page's and
+ * the footer's sections, saved whole as a draft and published together.
  */
 
 /** The server's limits, so a mistake shows before the save. */
 export const LAYOUT_LIMITS = {
   home: 30,
+  product: 12,
+  category: 12,
+  faq: 12,
+  related: 12,
+  question: 160,
+  answer: 600,
   items: 24,
   slides: 6,
   lines: 5,
@@ -115,6 +121,33 @@ export interface WordedSection extends SectionBase {
   text: string | null
 }
 
+export interface FaqItem {
+  /** Plain text. */
+  question: string
+  /** Plain text; may hold the shop's details (`{telefon}`). */
+  answer: string
+}
+
+/** Questions and answers; the storefront also gives them as `FAQPage` structured data. */
+export interface FaqSection extends SectionBase {
+  type: "faq"
+  title: string | null
+  items: FaqItem[]
+}
+
+/** Products under a product's own: its category's (the storefront finds it), a collection's or chosen ones. */
+export type RelatedSource =
+  | { kind: "same_category" }
+  | { kind: "collection"; collection_id: string }
+  | { kind: "manual"; product_ids: string[] }
+
+export interface RelatedProductsSection extends SectionBase {
+  type: "related_products"
+  title: string | null
+  source: RelatedSource
+  limit: number
+}
+
 export type HomeSection =
   | HeroSection
   | BannerSection
@@ -125,8 +158,26 @@ export type HomeSection =
   | RichTextSection
   | TrustBadgesSection
   | WordedSection
+  | FaqSection
 
 export type HomeSectionType = HomeSection["type"]
+
+/** Under the product's own block, on every product page. */
+export type ProductSection =
+  | RelatedProductsSection
+  | RichTextSection
+  | BannerSection
+  | FaqSection
+  | TrustBadgesSection
+  | WordedSection
+
+/** Where a category page shows a section: above its product grid or below it. */
+export type Placement = "top" | "bottom"
+
+/** On every category page, above or below the products. */
+export type CategorySection = (
+  RichTextSection | BannerSection | FaqSection | TrustBadgesSection | WordedSection
+) & { placement: Placement }
 
 export interface AnnouncementBar extends SectionBase {
   type: "announcement_bar"
@@ -143,10 +194,16 @@ export interface LayoutDocument {
   header: AnnouncementBar[]
   home: HomeSection[]
   footer: FooterNewsletter[]
+  product: ProductSection[]
+  category: CategorySection[]
 }
 
 export type LayoutGroup = keyof LayoutDocument
-export type AnySection = AnnouncementBar | HomeSection | FooterNewsletter
+/** The groups that make a page's body: sections are added, moved and copied in them. */
+export type BodyGroup = "home" | "product" | "category"
+export type BodySection = HomeSection | ProductSection | CategorySection
+export type BodySectionType = BodySection["type"]
+export type AnySection = AnnouncementBar | BodySection | FooterNewsletter
 
 export interface LayoutRevision {
   revision: number
@@ -178,14 +235,28 @@ export const LAYOUT_KEY = ["storefront-layout"] as const
 /** Publish, discard and restore: the autosave waits while one runs. */
 export const LAYOUT_ACTION_KEY = [...LAYOUT_KEY, "action"] as const
 
+/** The layout as the server answers; an older backend may leave the page groups out. */
 interface Answer {
-  layout: AdminLayout
+  layout: Omit<AdminLayout, "draft"> & {
+    draft: Omit<LayoutDocument, "product" | "category"> &
+      Partial<Pick<LayoutDocument, "product" | "category">>
+  }
 }
+
+/** A draft from before the product and category pages had sections reads with both empty. */
+const withAllGroups = (layout: Answer["layout"]): AdminLayout => ({
+  ...layout,
+  draft: {
+    ...layout.draft,
+    product: layout.draft.product ?? [],
+    category: layout.draft.category ?? [],
+  },
+})
 
 export const layoutQuery = () =>
   queryOptions({
     queryKey: LAYOUT_KEY,
-    queryFn: async () => (await sdk.client.fetch<Answer>(PATH)).layout,
+    queryFn: async () => withAllGroups((await sdk.client.fetch<Answer>(PATH)).layout),
     // The editor holds its own copy once open; a refetch would not change it
     staleTime: Infinity,
   })
@@ -195,7 +266,7 @@ function useLayoutAction<T>(call: (input: T) => Promise<Answer>, action = true) 
   const client = useQueryClient()
   return useMutation({
     mutationKey: action ? LAYOUT_ACTION_KEY : [...LAYOUT_KEY, "save"],
-    mutationFn: async (input: T) => (await call(input)).layout,
+    mutationFn: async (input: T) => withAllGroups((await call(input)).layout),
     onSuccess: (layout) => {
       client.setQueryData(LAYOUT_KEY, layout)
     },

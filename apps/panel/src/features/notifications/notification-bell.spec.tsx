@@ -57,4 +57,23 @@ describe("NotificationBell: contact messages (adr/0047)", () => {
     expect(screen.getByText("Yeni iletişim mesajı: Diğer")).toBeInTheDocument()
     expect(screen.getAllByText(/Vitrindeki iletişim formundan geldi/)).toHaveLength(2)
   })
+
+  it("names a KVKK request's last day to answer", async () => {
+    fetchMock.mockResolvedValue({
+      notifications: [
+        alert("noti_3", {
+          kind: "contact_message",
+          message_id: "cm_3",
+          subject: "kvkk",
+          due_at: "2026-12-01T20:59:59.000Z",
+        }),
+      ],
+    })
+    renderBell()
+
+    await userEvent.click(await screen.findByRole("button", { name: "Bildirimler, 1 yeni" }))
+
+    expect(await screen.findByText("Yeni iletişim mesajı: KVKK başvurusu")).toBeInTheDocument()
+    expect(screen.getByText(/Son gün: 1 Ara 2026/)).toBeInTheDocument()
+  })
 })

@@ -1,9 +1,17 @@
 import { describe, expect, it } from "vitest"
-import type { HeroSection, LayoutDocument, ProductsSection } from "@/features/storefront/api/layout"
+import type {
+  AnySection,
+  CategorySection,
+  FaqSection,
+  HeroSection,
+  LayoutDocument,
+  ProductSection,
+  ProductsSection,
+} from "@/features/storefront/api/layout"
 import { previewAddress } from "./preview-url"
 import { documentProblems, sectionProblems } from "./problems"
 import { fromLocalInput, toLocalInput } from "./schedule"
-import { newAnnouncementBar, newHomeSection } from "./sections"
+import { newAnnouncementBar, newBodySection, newHomeSection } from "./sections"
 
 describe("sectionProblems", () => {
   it("finds what the server would refuse, field by field", () => {
@@ -49,8 +57,41 @@ describe("sectionProblems", () => {
       header: [newAnnouncementBar("duyurular")],
       home: [newHomeSection("hero", "girisbolumu")],
       footer: [],
+      product: [newBodySection("product", "faq", "urunsss") as ProductSection],
+      category: [newBodySection("category", "rich_text", "kategorimetni") as CategorySection],
     }
-    expect([...documentProblems(doc).keys()]).toEqual(["duyurular"])
+    expect([...documentProblems(doc).keys()]).toEqual(["duyurular", "urunsss"])
+  })
+
+  it("asks for each question and answer of a FAQ, its answer may hold the shop's details", () => {
+    const faq = newHomeSection("faq", "sss") as FaqSection
+    expect(sectionProblems(faq)).toEqual({
+      "items.0.question": "questionRequired",
+      "items.0.answer": "answerRequired",
+    })
+    expect(
+      sectionProblems({
+        ...faq,
+        items: [
+          { question: "Kargo ne kadar sürer?", answer: "{telefon} numarasından sorun." },
+          { question: "x".repeat(161), answer: "{bilinmeyen}" },
+        ],
+      })
+    ).toEqual({ "items.1.question": "tooLong", "items.1.answer": "tokenUnknown" })
+  })
+
+  it("asks a related products section for its collection or products", () => {
+    const related = newBodySection("product", "related_products", "benzerler")
+    expect(sectionProblems(related)).toEqual({})
+    expect(
+      sectionProblems({ ...related, source: { kind: "manual", product_ids: [] } } as AnySection)
+    ).toEqual({ source: "productsRequired" })
+    expect(
+      sectionProblems({
+        ...related,
+        source: { kind: "collection", collection_id: "" },
+      } as AnySection)
+    ).toEqual({ source: "collectionRequired" })
   })
 })
 
@@ -78,5 +119,15 @@ describe("previewAddress", () => {
     const absolute = { ...preview, url: "https://ornek.com/onizleme/sfl_abc" }
     expect(previewAddress(absolute, null)).toBe("https://ornek.com/onizleme/sfl_abc")
     expect(previewAddress(preview, null)).toBeNull()
+  })
+
+  it("asks for a product's or category's page with the draft by its path", () => {
+    expect(previewAddress(preview, "http://localhost:8000", "/urun/sef-bicagi")).toBe(
+      "http://localhost:8000/onizleme/sfl_abc?sayfa=%2Furun%2Fsef-bicagi"
+    )
+    const absolute = { ...preview, url: "https://ornek.com/onizleme/sfl_abc" }
+    expect(previewAddress(absolute, null, "/kategori/mutfak")).toBe(
+      "https://ornek.com/onizleme/sfl_abc?sayfa=%2Fkategori%2Fmutfak"
+    )
   })
 })

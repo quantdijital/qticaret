@@ -11,16 +11,21 @@ import {
 } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
+import type { BodyGroup } from "@/features/storefront/api/layout"
 import { BarButton } from "./bar-button"
 import type { Device } from "./preview-frame"
 
 const E = "storefront.editor"
 
-// The page templates the editor will cover (adr/0049 §6.3); only the home page today
-const PAGES = ["home", "product", "category", "post"] as const
+// The page templates the editor covers (adr/0049 §6.3); one not ready yet is not offered
+const EDITOR_PAGES: readonly BodyGroup[] = ["home", "product", "category"]
 
 interface EditorTopBarProps {
   onExit: () => void
+  /** The page being edited, and its sample's picker (a product's or category's page). */
+  page: BodyGroup
+  onPage: (page: BodyGroup) => void
+  sample: ReactNode
   device: Device
   onDevice: (device: Device) => void
   canUndo: boolean
@@ -41,6 +46,9 @@ interface EditorTopBarProps {
  */
 export function EditorTopBar({
   onExit,
+  page,
+  onPage,
+  sample,
   device,
   onDevice,
   canUndo,
@@ -63,20 +71,24 @@ export function EditorTopBar({
         />
         <Separator orientation="vertical" className="h-5" />
         <h1 className="truncate text-sm font-semibold">{t(`${E}.title`)}</h1>
-        <Select value="home">
+        <Select
+          value={page}
+          onValueChange={(next) => {
+            onPage(next as BodyGroup)
+          }}
+        >
           <SelectTrigger size="sm" aria-label={t(`${E}.page.label`)} className="w-40">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {PAGES.map((page) => (
-              <SelectItem key={page} value={page} disabled={page !== "home"}>
-                {page === "home"
-                  ? t(`${E}.page.home`)
-                  : t(`${E}.page.soon`, { page: t(`${E}.page.${page}`) })}
+            {EDITOR_PAGES.map((each) => (
+              <SelectItem key={each} value={each}>
+                {t(`${E}.page.${each}`)}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
+        {sample}
       </div>
       <div className="flex min-w-0 flex-1 items-center gap-2 lg:justify-center">
         <ToggleGroup

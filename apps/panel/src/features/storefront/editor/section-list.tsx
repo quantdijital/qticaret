@@ -1,21 +1,26 @@
 import { useState } from "react"
 import type { Dispatch } from "react"
 import { useTranslation } from "react-i18next"
-import type { HomeSection } from "@/features/storefront/api/layout"
-import { LAYOUT_LIMITS } from "@/features/storefront/api/layout"
+import type { BodySection, Placement } from "@/features/storefront/api/layout"
 import type { EditorAction } from "@/features/storefront/layout/editor-state"
 import { isScheduled } from "@/features/storefront/layout/sections"
 import { SECTION_ICONS, sectionLabel } from "./section-meta"
 import { SectionRow } from "./section-row"
 import type { DropPlace, RowDrag } from "./section-row"
 
-interface HomeListProps {
-  sections: readonly HomeSection[]
+interface SectionListProps {
+  /** The list's name for screen readers: the page, or its side of a category's products. */
+  label: string
+  sections: readonly BodySection[]
+  /** The page holds as many as it may: nothing is copied. */
+  full: boolean
+  /** A category page's side: each row may move to the other one. */
+  placement?: Placement
   /** The ids of sections with a mistake to fix. */
   problems: ReadonlySet<string>
   dispatch: Dispatch<EditorAction>
   onOpen: (id: string) => void
-  onRemove: (section: HomeSection) => void
+  onRemove: (section: BodySection) => void
 }
 
 /** Where a section dropped before or after `target` lands, as an index among the others. */
@@ -35,12 +40,21 @@ function dropIndex(
   return to === from ? null : to
 }
 
-/** The home page's sections in order: dragged by their handles or moved by their buttons. */
-export function HomeList({ sections, problems, dispatch, onOpen, onRemove }: HomeListProps) {
+/** A page's sections in order: dragged by their handles or moved by their buttons. */
+export function SectionList({
+  label,
+  sections,
+  full,
+  placement,
+  problems,
+  dispatch,
+  onOpen,
+  onRemove,
+}: SectionListProps) {
   const { t } = useTranslation()
   const [dragged, setDragged] = useState<string | null>(null)
   const [over, setOver] = useState<{ id: string; place: DropPlace } | null>(null)
-  const full = sections.length >= LAYOUT_LIMITS.home
+  const other: Placement | null = placement ? (placement === "top" ? "bottom" : "top") : null
   const stop = () => {
     setDragged(null)
     setOver(null)
@@ -71,7 +85,7 @@ export function HomeList({ sections, problems, dispatch, onOpen, onRemove }: Hom
     },
   })
   return (
-    <ol aria-label={t("storefront.editor.tree.home")} className="flex flex-col gap-0.5">
+    <ol aria-label={label} className="flex flex-col gap-0.5">
       {sections.map((section, index) => {
         const { name, detail } = sectionLabel(t, section)
         const move = (to: number) => () => {
@@ -108,6 +122,16 @@ export function HomeList({ sections, problems, dispatch, onOpen, onRemove }: Hom
                   }
             }
             drag={dragOf(section.id)}
+            onPlace={
+              other
+                ? {
+                    to: other,
+                    run: () => {
+                      dispatch({ type: "place", id: section.id, placement: other })
+                    },
+                  }
+                : undefined
+            }
           />
         )
       })}

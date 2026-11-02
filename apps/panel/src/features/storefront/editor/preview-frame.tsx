@@ -20,6 +20,12 @@ interface PreviewFrameProps {
   /** The draft has been saved at least once: there is something to show. */
   ready: boolean
   device: Device
+  /** The page shown with the draft: a product's or category's path; null: the home page. */
+  page: string | null
+  /** Why the chosen page cannot be shown (no live product yet); shown in place of the frame. */
+  missing: string | null
+  /** The page to show is still being found (the first live product): the frame waits. */
+  finding: boolean
 }
 
 /** A message in place of the storefront: why it does not show, and what to do. */
@@ -38,7 +44,7 @@ function PreviewMessage({ text, action }: { text: string; action?: ReactNode }) 
  * for after each save, in a frame the storefront allows only the panel to
  * open. The last page stays on show while the next one loads.
  */
-export function PreviewFrame({ round, ready, device }: PreviewFrameProps) {
+export function PreviewFrame({ round, ready, device, page, missing, finding }: PreviewFrameProps) {
   const { t } = useTranslation()
   const preview = useQuery({
     queryKey: [...LAYOUT_KEY, "preview", round],
@@ -47,13 +53,18 @@ export function PreviewFrame({ round, ready, device }: PreviewFrameProps) {
     staleTime: Infinity,
     placeholderData: keepPreviousData,
   })
-  const address = preview.data ? previewAddress(preview.data) : null
+  const address =
+    preview.data && !missing && !finding ? previewAddress(preview.data, undefined, page) : null
   const [loaded, setLoaded] = useState<string | null>(null)
   // The spinner while a link is asked for, and while the page it opens loads
   const waiting =
-    !preview.isError && (address ? loaded !== address || preview.isPlaceholderData : !preview.data)
+    !missing &&
+    !preview.isError &&
+    (finding || (address ? loaded !== address || preview.isPlaceholderData : !preview.data))
   let content: ReactNode
-  if (preview.isError) {
+  if (missing) {
+    content = <PreviewMessage text={missing} />
+  } else if (preview.isError) {
     content = (
       <PreviewMessage
         text={`${t(`${V}.failed`)} ${errorText(t, preview.error)}`}
@@ -64,7 +75,7 @@ export function PreviewFrame({ round, ready, device }: PreviewFrameProps) {
         }
       />
     )
-  } else if (preview.data && !address) {
+  } else if (preview.data && !address && !finding) {
     content = (
       <PreviewMessage
         text={t(`${V}.noHost`)}

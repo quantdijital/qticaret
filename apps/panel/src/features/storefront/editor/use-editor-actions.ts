@@ -16,6 +16,8 @@ const E = "storefront.editor"
 interface EditorActionsOptions {
   /** Stores what waits to be saved; false when it could not (a mistake, a refusal). */
   flush: () => Promise<boolean>
+  /** The page the preview opens on: a product's or category's path; null: the home page. */
+  page: string | null
   /** The draft as the server now holds it, after a discard or a restore. */
   onLoaded: (doc: LayoutDocument) => void
 }
@@ -24,7 +26,7 @@ interface EditorActionsOptions {
  * Publish, discard, restore and preview in a new tab. Each first stores
  * what is waiting, so what goes live (or opens) is what the editor shows.
  */
-export function useEditorActions({ flush, onLoaded }: EditorActionsOptions) {
+export function useEditorActions({ flush, page, onLoaded }: EditorActionsOptions) {
   const { t } = useTranslation()
   const publish = usePublishLayout()
   const discard = useDiscardLayout()
@@ -77,7 +79,7 @@ export function useEditorActions({ flush, onLoaded }: EditorActionsOptions) {
         return
       }
       try {
-        const address = previewAddress(await preview.mutateAsync())
+        const address = previewAddress(await preview.mutateAsync(), undefined, page)
         if (!address) {
           close()
           toast.error(t(`${E}.preview.noHost`))

@@ -21,6 +21,9 @@ export const SECTIONS = [
   "/storefront/preferences?part=contact",
   "/storefront/preferences?part=swatches",
   "/content",
+  // The blog's categories and tags (adr/0019 ek 2026-11-03)
+  "/content?kind=category",
+  "/content?kind=tag",
   "/seo",
   "/reports",
   "/reports/products",

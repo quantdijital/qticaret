@@ -210,8 +210,12 @@ export function createArasApi(options: Partial<Omit<HttpClientOptions, "provider
       }
       return findFirst(answer, "Fault") ? "secret_invalid" : "valid"
     } catch (error) {
-      // A .NET service answers a refused login with a fault (HTTP 500)
-      if (isProviderError(error) && error.providerCode === "http_500") {
+      // A .NET service answers a refused login with a fault (HTTP 500), which
+      // the HTTP client reads as `error_<fault code>`
+      if (
+        isProviderError(error) &&
+        (error.providerCode === "http_500" || error.providerCode.startsWith("error_"))
+      ) {
         return "secret_invalid"
       }
       throw error

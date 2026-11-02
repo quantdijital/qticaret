@@ -1,6 +1,8 @@
 import {
   ArrowDown,
+  ArrowDownToLine,
   ArrowUp,
+  ArrowUpToLine,
   CircleAlert,
   Clock,
   Copy,
@@ -55,6 +57,8 @@ interface SectionRowProps {
   moves?: { up: (() => void) | null; down: (() => void) | null }
   onDuplicate?: (() => void) | null
   drag?: RowDrag
+  /** A category page's section: to the other side of the products. */
+  onPlace?: { to: "top" | "bottom"; run: () => void } | undefined
 }
 
 // The upper half of a row drops before it, the lower half after
@@ -83,6 +87,7 @@ export function SectionRow({
   moves,
   onDuplicate,
   drag,
+  onPlace,
 }: SectionRowProps) {
   const { t } = useTranslation()
   return (
@@ -225,6 +230,12 @@ export function SectionRow({
                 {t(`${R}.moveDown`)}
               </DropdownMenuItem>
             </>
+          ) : null}
+          {onPlace ? (
+            <DropdownMenuItem onSelect={onPlace.run}>
+              {onPlace.to === "bottom" ? <ArrowDownToLine /> : <ArrowUpToLine />}
+              {t(`${R}.place.${onPlace.to}`)}
+            </DropdownMenuItem>
           ) : null}
           {onDuplicate !== undefined ? (
             <DropdownMenuItem disabled={!onDuplicate} onSelect={() => onDuplicate?.()}>

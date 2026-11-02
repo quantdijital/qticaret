@@ -19,14 +19,18 @@ const ABSOLUTE = /^https?:\/\//
 /**
  * The address the frame and the new tab open: the storefront's origin with
  * the signed path, else the server's absolute link; null when neither is
- * known (no canonical host set and no origin configured).
+ * known (no canonical host set and no origin configured). With `page`, the
+ * storefront shows that page (a product's, a category's) with the draft
+ * instead of the home page (`?sayfa=`).
  */
 export function previewAddress(
   preview: Pick<LayoutPreview, "url" | "path">,
-  origin: string | null = STOREFRONT_ORIGIN
+  origin: string | null = STOREFRONT_ORIGIN,
+  page: string | null = null
 ): string | null {
+  const query = page ? `?sayfa=${encodeURIComponent(page)}` : ""
   if (origin) {
-    return `${origin}${preview.path}`
+    return `${origin}${preview.path}${query}`
   }
-  return ABSOLUTE.test(preview.url) ? preview.url : null
+  return ABSOLUTE.test(preview.url) ? `${preview.url}${query}` : null
 }

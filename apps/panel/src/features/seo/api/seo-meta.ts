@@ -2,7 +2,16 @@ import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query
 import { sdk } from "@/lib/sdk"
 
 export type SeoEntityType =
-  "product" | "category" | "collection" | "brand" | "page" | "post" | "landing"
+  | "product"
+  | "category"
+  | "collection"
+  | "brand"
+  | "page"
+  | "post"
+  | "landing"
+  // A blog category's and tag's archive (adr/0019 ek 2026-11-03)
+  | "post_category"
+  | "post_tag"
 export const ROBOTS_OVERRIDES = ["index_follow", "noindex_follow", "noindex_nofollow"] as const
 export type RobotsOverride = (typeof ROBOTS_OVERRIDES)[number]
 

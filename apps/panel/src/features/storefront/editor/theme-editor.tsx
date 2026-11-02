@@ -4,14 +4,22 @@ import { useEffect, useMemo, useReducer, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { LeaveGuard } from "@/components/patterns/leave-guard"
-import { LAYOUT_ACTION_KEY, LAYOUT_LIMITS, layoutQuery } from "@/features/storefront/api/layout"
-import type { AdminLayout, AnySection, LayoutDocument } from "@/features/storefront/api/layout"
+import { LAYOUT_ACTION_KEY, layoutQuery } from "@/features/storefront/api/layout"
+import type {
+  AdminLayout,
+  AnySection,
+  BodyGroup,
+  LayoutDocument,
+  Placement,
+} from "@/features/storefront/api/layout"
 import { editorReducer, initialEditorState } from "@/features/storefront/layout/editor-state"
 import { documentProblems } from "@/features/storefront/layout/problems"
 import {
   findSection,
+  groupLimit,
   idsOf,
-  newHomeSection,
+  isBodyGroup,
+  newBodySection,
   newSectionId,
 } from "@/features/storefront/layout/sections"
 import { useAutosave } from "@/features/storefront/layout/use-autosave"
@@ -21,12 +29,14 @@ import { PreviewFrame } from "./preview-frame"
 import type { Device } from "./preview-frame"
 import { PublishControls } from "./publish-controls"
 import { RevisionsSheet } from "./revisions-sheet"
+import { SamplePicker } from "./sample-picker"
 import { SaveStatus } from "./save-status"
 import { sectionLabel } from "./section-meta"
 import { SectionPanel } from "./section-panel"
 import { SectionTree } from "./section-tree"
 import { ThemePanel } from "./theme-panel"
 import { useEditorActions } from "./use-editor-actions"
+import { usePreviewTarget } from "./use-preview-target"
 import { useUndoKeys } from "./use-undo-keys"
 
 const E = "storefront.editor"
@@ -57,12 +67,16 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
   })
   const live = useQuery(layoutQuery()).data ?? layout
   const [opened, setOpened] = useState<Opened>(null)
-  const [adding, setAdding] = useState(false)
+  const [page, setPage] = useState<BodyGroup>("home")
+  // The chooser is open for this side of a category page's products (the others have one)
+  const [adding, setAdding] = useState<Placement | null>(null)
   const [device, setDevice] = useState<Device>("desktop")
+  const target = usePreviewTarget(page)
   // A theme setting saved elsewhere than the draft reloads the preview too
   const [refreshed, setRefreshed] = useState(0)
   const actions = useEditorActions({
     flush: autosave.flush,
+    page: target.path,
     onLoaded: (next: LayoutDocument) => {
       dispatch({ type: "load", doc: next })
       autosave.reset(next)
@@ -112,9 +126,12 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
         section={found.section}
         group={found.group}
         problems={problems.get(found.section.id) ?? {}}
-        canDuplicate={doc.home.length < LAYOUT_LIMITS.home}
+        canDuplicate={isBodyGroup(found.group) && doc[found.group].length < groupLimit(found.group)}
         onChange={(section, field) => {
           dispatch({ type: "update", section, merge: field ? `${section.id}:${field}` : undefined })
+        }}
+        onPlace={(placement) => {
+          dispatch({ type: "place", id: found.section.id, placement })
         }}
         onBack={() => {
           setOpened(null)
@@ -142,6 +159,7 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
   } else {
     panel = (
       <SectionTree
+        page={page}
         doc={doc}
         problems={new Set(problems.keys())}
         dispatch={dispatch}
@@ -149,8 +167,8 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
           setOpened({ kind: "section", id })
         }}
         onRemove={remove}
-        onAddSection={() => {
-          setAdding(true)
+        onAddSection={(placement) => {
+          setAdding(placement ?? "bottom")
         }}
         onTheme={() => {
           setOpened({ kind: "theme" })
@@ -163,6 +181,16 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
     <div className="flex min-h-dvh flex-col bg-background lg:h-dvh">
       <EditorTopBar
         onExit={() => void exit()}
+        page={page}
+        onPage={(next) => {
+          setPage(next)
+          setOpened(null)
+        }}
+        sample={
+          page === "home" ? null : (
+            <SamplePicker page={page} sample={target.sample} onChange={target.choose} />
+          )
+        }
         device={device}
         onDevice={setDevice}
         canUndo={state.past.length > 0}
@@ -201,15 +229,25 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
           round={autosave.round + refreshed}
           ready={!layout.is_default || autosave.round > 0}
           device={device}
+          page={target.path}
+          missing={target.missing}
+          finding={target.finding}
         />
       </main>
       <AddSectionDialog
-        open={adding}
-        onOpenChange={setAdding}
+        open={adding !== null}
+        page={page}
+        placement={adding ?? "bottom"}
+        onOpenChange={(open) => {
+          if (!open) {
+            setAdding(null)
+          }
+        }}
         onPick={(type) => {
           const id = newSectionId(idsOf(doc))
-          dispatch({ type: "add", group: "home", section: newHomeSection(type, id) })
-          setAdding(false)
+          const section = newBodySection(page, type, id, adding ?? "bottom")
+          dispatch({ type: "add", group: page, section })
+          setAdding(null)
           setOpened({ kind: "section", id })
         }}
       />

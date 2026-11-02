@@ -1242,7 +1242,8 @@
         "door": {
           "title": "Kapıda ödeme hesabı",
           "description": "Yurtiçi, tahsilatlı teslimat (kapıda ödeme) gönderileri için ayrı bir kullanıcı adı ve şifre verir. Kapıda ödemeli siparişler bu hesapla gönderilir; hesap girilmezse bu siparişler Yurtiçi ile gönderilemez.",
-          "hint": "İsteğe bağlı; kullanıcı adı ve şifreyi birlikte girin."
+          "hint": "İsteğe bağlı; kullanıcı adı ve şifreyi birlikte girin.",
+          "loginHint": "Yurtiçi'nin “Gönderici Ödemeli Tahsilatlı Teslimat” kullanıcısını girin."
         },
         "live": {
           "title": "Canlıya geçiş",
@@ -1254,7 +1255,8 @@
           "merchant_invalid": "Yurtiçi Kargo kapıda ödeme hesabının kullanıcı adı ve şifresini kabul etmedi. Bilgileri Yurtiçi'nin bu hesap için verdiği belgeden yeniden kopyalayın.",
           "secret_invalid": "Yurtiçi Kargo bu kullanıcı adı ve şifreyi kabul etmedi. Bilgileri Yurtiçi'nin verdiği web servis belgesinden yeniden kopyalayın."
         },
-        "rejected": "Yurtiçi Kargo kayıtlı bilgileri artık kabul etmiyor; gönderi açılamaz. Yurtiçi'nin verdiği güncel bilgileri girin."
+        "rejected": "Yurtiçi Kargo kayıtlı bilgileri artık kabul etmiyor; gönderi açılamaz. Yurtiçi'nin verdiği güncel bilgileri girin.",
+        "keysHint": "Yurtiçi'nin “Gönderici Ödemeli” kullanıcısını girin. Yurtiçi takip sorgusuna dakikada bir izin verir; gönderi durumları bu aralıkla güncellenir."
       },
       "returns": {
         "title": "İade koşulları",
@@ -3697,7 +3699,8 @@
         "product": "Ürün",
         "return": "İade ve değişim",
         "payment": "Ödeme",
-        "other": "Diğer"
+        "other": "Diğer",
+        "kvkk": "KVKK başvurusu"
       },
       "empty": {
         "new": "Bekleyen mesaj yok. Vitrindeki iletişim formundan yazılanlar burada görünür.",
@@ -5336,7 +5339,8 @@
     },
     "contactMessage": {
       "title": "Yeni iletişim mesajı: {{subject}}",
-      "description": "Vitrindeki iletişim formundan geldi; Müşteriler > İletişim mesajları'nda okuyun."
+      "description": "Vitrindeki iletişim formundan geldi; Müşteriler > İletişim mesajları'nda okuyun.",
+      "due": "Son gün: {{date}}."
     },
     "fraudReview": {
       "title": "#{{number}} incelemede (puan {{score}})",
@@ -5354,12 +5358,14 @@
     }
   },
   "content": {
-    "description": "Mağazanın kendi sayfaları (hakkımızda, sık sorulan sorular), blog yazıları ve filtre sayfaları.",
+    "description": "Mağazanın kendi sayfaları (hakkımızda, sık sorulan sorular), blog yazıları, blogun kategorileri ve etiketleri, filtre sayfaları.",
     "kinds": "İçerik türleri",
     "tabs": {
       "page": "Sayfalar",
       "post": "Blog yazıları",
-      "landing": "Filtre sayfaları"
+      "landing": "Filtre sayfaları",
+      "category": "Blog kategorileri",
+      "tag": "Etiketler"
     },
     "search": "Başlığa göre ara",
     "noMatch": "Aramanızla eşleşen içerik yok.",
@@ -5515,7 +5521,86 @@
       "blocked": "Son kayıtta metnin %30'dan azı özgündü; yayına alma reddedilebilir. Metni bu sayfaya özgü hâle getirin."
     },
     "preview": "Önizle",
-    "previewReady": "Önizleme yeni sekmede açıldı; bağlantı panoya kopyalandı ve 24 saat geçerli."
+    "previewReady": "Önizleme yeni sekmede açıldı; bağlantı panoya kopyalandı ve 24 saat geçerli.",
+    "terms": {
+      "filedUnder": "Kategori ve etiketler",
+      "moreTags": "+{{n}}",
+      "columns": {
+        "name": "Ad",
+        "posts": "Yazılar",
+        "rank": "Sıra"
+      },
+      "live_one": "{{count}} yayında",
+      "live_other": "{{count}} yayında",
+      "search": "Ada göre ara",
+      "noMatch": "Aramanızla eşleşen kayıt yok.",
+      "empty": {
+        "category": "Henüz blog kategorisi yok. Yazılarınızı konularına göre gruplamak için yukarıdan bir kategori ekleyin.",
+        "tag": "Henüz etiket yok. Yukarıdan ya da yazının sayfasından etiket ekleyebilirsiniz."
+      },
+      "newName": {
+        "category": "Yeni kategori adı",
+        "tag": "Yeni etiket adı"
+      },
+      "add": "Ekle",
+      "addressPreview": "Adresi: {{path}}",
+      "addressHint": "Adres, yazdığınız addan kendiliğinden oluşur.",
+      "created": {
+        "category": "“{{name}}” kategorisi eklendi.",
+        "tag": "“{{name}}” etiketi eklendi."
+      },
+      "tabs": {
+        "general": "Genel bilgiler",
+        "seo": "Arama görünümü"
+      },
+      "fields": {
+        "name": "Ad",
+        "handle": "Adres",
+        "description": "Açıklama",
+        "rank": "Sıra"
+      },
+      "nameRequired": "Bir ad yazın.",
+      "handleHint": "Yayında yazısı olan bir arşivin adresini değiştirirseniz eski adres yeni adrese yönlendirilir.",
+      "descriptionHint": "Arşiv sayfasının başında ve arama sonucunda görünür; boşsa son yazıların başlıkları kullanılır.",
+      "rankHint": "Küçük sayı önce gelir; sırası eşit olanlar ada göre dizilir.",
+      "fallbackDescription": "{{name}} yazıları: {{titles}}",
+      "delete": {
+        "category": "Kategoriyi sil",
+        "tag": "Etiketi sil"
+      },
+      "deleteTitle": "“{{name}}” silinsin mi?",
+      "deleteText": {
+        "category_one": "Kategorideki {{count}} yazı silinmez, kategorisiz kalır. Arşiv sayfası yayındaki yazıları gösterdiyse adresi “kaldırıldı” (410) yanıtı verir. Arama görünümü ayarları da silinir.",
+        "category_other": "Kategorideki {{count}} yazı silinmez, kategorisiz kalır. Arşiv sayfası yayındaki yazıları gösterdiyse adresi “kaldırıldı” (410) yanıtı verir. Arama görünümü ayarları da silinir.",
+        "tag_one": "Etiket {{count}} yazıdan çıkarılır; yazılar silinmez. Arşiv sayfası yayındaki yazıları gösterdiyse adresi “kaldırıldı” (410) yanıtı verir. Arama görünümü ayarları da silinir.",
+        "tag_other": "Etiket {{count}} yazıdan çıkarılır; yazılar silinmez. Arşiv sayfası yayındaki yazıları gösterdiyse adresi “kaldırıldı” (410) yanıtı verir. Arama görünümü ayarları da silinir."
+      },
+      "deleted": {
+        "category": "Kategori silindi.",
+        "tag": "Etiket silindi."
+      },
+      "unlinked": {
+        "category_one": "{{count}} yazı kategorisiz kaldı.",
+        "category_other": "{{count}} yazı kategorisiz kaldı.",
+        "tag_one": "{{count}} yazıdan çıkarıldı.",
+        "tag_other": "{{count}} yazıdan çıkarıldı."
+      },
+      "cardTitle": "Kategori ve etiketler",
+      "cardHint": "Yazı, blogda kategorisinin ve etiketlerinin sayfalarında da listelenir.",
+      "category": "Kategori",
+      "tags": "Etiketler",
+      "uncategorised": "— Kategorisiz —",
+      "searchCategory": "Kategori ara",
+      "noCategory": "Bu adla bir kategori yok.",
+      "noTags": "Etiket eklenmedi.",
+      "addTag": "Etiket ekle",
+      "searchTag": "Etiket ara ya da yeni ad yazın",
+      "noTag": "Bu adla bir etiket yok.",
+      "createTag": "“{{name}}” etiketini oluştur",
+      "removeTag": "{{name}} etiketini çıkar",
+      "tagsFull": "Bir yazıya en çok {{max}} etiket eklenebilir.",
+      "manage": "Kategorileri ve etiketleri yönet"
+    }
   },
   "priceLists": {
     "sections": "Kampanya türleri",
@@ -6016,9 +6101,7 @@
         "label": "Düzenlenen sayfa",
         "home": "Ana sayfa",
         "product": "Ürün sayfası",
-        "category": "Kategori sayfası",
-        "post": "Blog yazısı",
-        "soon": "{{page}} (yakında)"
+        "category": "Kategori sayfası"
       },
       "device": {
         "label": "Önizleme genişliği",
@@ -6067,7 +6150,7 @@
       "publish": {
         "open": "Yayınla",
         "title": "Tasarım yayınlansın mı?",
-        "text": "Taslaktaki üst bilgi, ana sayfa ve alt bilgi birlikte yayına girer. Vitrinde en geç bir dakikada görünür.",
+        "text": "Taslaktaki üst bilgi, ana sayfa, ürün ve kategori sayfaları ile alt bilgi birlikte yayına girer. Vitrinde en geç bir dakikada görünür.",
         "confirm": "Yayınla",
         "done": "Yayınlandı; vitrinde en geç bir dakikada görünür."
       },
@@ -6081,12 +6164,25 @@
         "add": "Bölüm ekle",
         "addAnnouncement": "Duyuru şeridi ekle",
         "addNewsletter": "E-bülten kutusu ekle",
-        "empty": "Ana sayfada bölüm yok; vitrin yalnız üst ve alt bilgiyi gösterir.",
+        "empty": {
+          "home": "Ana sayfada bölüm yok; vitrin yalnız üst ve alt bilgiyi gösterir.",
+          "product": "Ürün sayfalarına eklenmiş bölüm yok; ürünün kendi bilgileri görünür."
+        },
         "logo": "Logo ve menü",
         "columns": "Bağlantı sütunları",
         "contact": "İletişim ve yasal bilgiler",
         "storeProfile": "Mağaza profili",
-        "menus": "Menüler"
+        "menus": "Menüler",
+        "productBlock": "Ürünün kendi bilgileri",
+        "grid": "Ürün ızgarası",
+        "placements": {
+          "top": "Izgaranın üstü",
+          "bottom": "Izgaranın altı"
+        },
+        "addTo": {
+          "top": "Üste bölüm ekle",
+          "bottom": "Alta bölüm ekle"
+        }
       },
       "row": {
         "drag": "Sürükleyerek taşıyın",
@@ -6102,11 +6198,20 @@
         "moveDown": "Aşağı taşı",
         "duplicate": "Çoğalt",
         "remove": "Kaldır",
-        "removed": "{{name}} kaldırıldı."
+        "removed": "{{name}} kaldırıldı.",
+        "place": {
+          "top": "Izgaranın üstüne taşı",
+          "bottom": "Izgaranın altına taşı"
+        }
       },
       "add": {
         "title": "Bölüm ekle",
-        "description": "Ana sayfanın sonuna eklenir; sonra sürükleyerek ya da oklarla yerini değiştirebilirsiniz."
+        "description": {
+          "home": "Ana sayfanın sonuna eklenir; sonra sürükleyerek ya da oklarla yerini değiştirebilirsiniz.",
+          "product": "Bütün ürün sayfalarında, ürünün kendi bilgilerinin altına eklenir.",
+          "top": "Bütün kategori sayfalarında, ürün ızgarasının üstüne eklenir.",
+          "bottom": "Bütün kategori sayfalarında, ürün ızgarasının altına eklenir."
+        }
       },
       "types": {
         "announcement_bar": {
@@ -6160,6 +6265,14 @@
         "footer_newsletter": {
           "name": "E-bülten",
           "description": "Alt bilgide e-posta aboneliği kutusu; kaldırırsanız görünmez."
+        },
+        "faq": {
+          "name": "Sık sorulan sorular",
+          "description": "Soru ve cevaplar; arama motorlarına da soru-cevap olarak bildirilir."
+        },
+        "related_products": {
+          "name": "Benzer ürünler",
+          "description": "Ürünün kategorisinden, bir koleksiyondan ya da elle seçtiğiniz ürünler."
         }
       },
       "panel": {
@@ -6171,7 +6284,8 @@
         "startsAt": "Başlangıç",
         "endsAt": "Bitiş",
         "duplicate": "Çoğalt",
-        "remove": "Bölümü kaldır"
+        "remove": "Bölümü kaldır",
+        "placement": "Yeri"
       },
       "defaults": {
         "heading": "Mağazanızın adı",
@@ -6183,7 +6297,9 @@
         "newsletter": "E-bültene abone olun",
         "help": "Aklınıza takılan bir şey mi var?",
         "helpText": "Ürün, sipariş ya da kargo için bize yazın; en kısa sürede dönelim.",
-        "newsletterText": "Vitrinin metni: kampanya ve yeniliklerden e-postayla haberdar olun…"
+        "newsletterText": "Vitrinin metni: kampanya ve yeniliklerden e-postayla haberdar olun…",
+        "faq": "Sık sorulan sorular",
+        "related_products": "Benzer ürünler"
       },
       "fields": {
         "eyebrow": "Üst satır",
@@ -6282,7 +6398,7 @@
         "done": "Tamam"
       },
       "trustBadges": {
-        "text": "Rozetlerin kendisi Vitrin tercihlerinde yazılır; bu bölüm ana sayfada nerede görüneceklerini belirler.",
+        "text": "Rozetlerin kendisi Vitrin tercihlerinde yazılır; bu bölüm sayfada nerede görüneceklerini belirler.",
         "link": "Rozetleri düzenle"
       },
       "help": {
@@ -6304,7 +6420,9 @@
         "productsRequired": "En az bir ürün seçin.",
         "categoryRequired": "Bir kategori seçin.",
         "collectionRequired": "Bir koleksiyon seçin.",
-        "scheduleOrder": "Bitiş, başlangıçtan sonra olmalı."
+        "scheduleOrder": "Bitiş, başlangıçtan sonra olmalı.",
+        "questionRequired": "Soruyu yazın.",
+        "answerRequired": "Cevabı yazın."
       },
       "theme": {
         "title": "Tema ayarları",
@@ -6318,6 +6436,43 @@
         "live": "Renk, taslaktan bağımsızdır: kaydedince hemen vitrine yansır.",
         "save": "Rengi kaydet",
         "reset": "Temanın rengine dön"
+      },
+      "faq": {
+        "items": "Sorular",
+        "item": "{{number}}. soru",
+        "question": "{{number}}. sorunun metni",
+        "answer": "{{number}}. sorunun cevabı",
+        "add": "Soru ekle",
+        "hint": "En çok {{max}} soru; cevaplarda mağaza bilgisi kullanılabilir."
+      },
+      "related": {
+        "source": "Hangi ürünler",
+        "sources": {
+          "same_category": "Ürünün kendi kategorisinden",
+          "collection": "Bir koleksiyonun ürünleri",
+          "manual": "Elle seçtiğim ürünler"
+        },
+        "sameCategoryHint": "Her ürün sayfasında, o ürünün kategorisindeki diğer ürünler gösterilir."
+      },
+      "sample": {
+        "label": {
+          "product": "Önizlemedeki örnek ürün",
+          "category": "Önizlemedeki örnek kategori"
+        },
+        "shown": "Örnek: {{name}}",
+        "none": "yok",
+        "search": {
+          "product": "Yayındaki ürünlerde ara",
+          "category": "Vitrindeki kategorilerde ara"
+        },
+        "empty": {
+          "product": "Bu adla yayında bir ürün yok.",
+          "category": "Bu adla vitrinde bir kategori yok."
+        },
+        "missing": {
+          "product": "Önizleme için yayında bir ürün gerekli; bir ürünü yayınlayınca ürün sayfası burada görünür.",
+          "category": "Önizleme için vitrinde görünen bir kategori gerekli; bir kategoriyi etkinleştirince sayfası burada görünür."
+        }
       }
     },
     "preferences": {

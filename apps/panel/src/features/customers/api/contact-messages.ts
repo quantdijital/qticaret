@@ -1,8 +1,8 @@
 import { queryOptions } from "@tanstack/react-query"
 import { sdk } from "@/lib/sdk"
 
-/** What a shopper writes about, from the form's fixed list (adr/0047 §3). */
-export const CONTACT_SUBJECTS = ["order", "product", "return", "payment", "other"] as const
+/** What a shopper writes about, from the form's fixed list (adr/0047 §3); `kvkk` is a data request. */
+export const CONTACT_SUBJECTS = ["order", "product", "return", "payment", "kvkk", "other"] as const
 export type ContactSubject = (typeof CONTACT_SUBJECTS)[number]
 
 /** Waiting for an answer, or answered. */
