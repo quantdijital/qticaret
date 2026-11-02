@@ -114,6 +114,22 @@
   - **Doğrulama:**
     - Backend birim 227 takım (2403 test). HTTP: gift-cards 5, order-ship-parts 4, storefront-frame ve ödeme takımları yeşil (iyzico tek başına 8/8).
     - Vitrin e2e 26/26, birim 61; panel sipariş testleri 49.
+- **Üçüncü bağımsız güvenlik incelemesi ve tam HTTP koşusu (`9ad19b3`):**
+  - Yüksek bulgu yok. 3 orta ve 5 düşük bulgunun hepsi düzeltildi; ayrıntı ADR-0046 ekinde.
+  - Orta:
+    - İletişim formunun personel e-postası artık 10 dakikada bir gidiyor, gönderen adı olmadan. Bu yapılmazsa mesaj seli günlük e-posta bütçesini bitirebiliyordu.
+    - Ödenecek tutarı olmayan sepet artık yalnız korumalı `credit` başlatmasından geçince tamamlanıyor. Medusa'nın açık tahsilat ucu da kapatıldı.
+    - Zil kaydında artık gönderen adı tutulmuyor.
+  - Düşük:
+    - Bülten bir adrese art arda onay e-postası gönderemiyor.
+    - Bültenin yanıt süresi artık abonelik durumunu belli etmiyor.
+    - Bülten izni yalnız hesabın kendi adresiyse hesaba bağlanıyor.
+    - Önizleme bağlantısı içeriğin son kaydına bağlandı.
+  - **Tam backend HTTP koşusu** (tüm gecenin değişiklikleriyle) ilk kez yapıldı: 157 takım, 737 test. Düşen 4 takımın hepsi düzeldi ya da tek başına geçti:
+    - `stock-ledger`: tam koşuda bağlantı havuzu zaman aşımı, ortam kaynaklı. Tek başına 6/6.
+    - `free-shipping` ve `non-physical-products`: yeni kapatılan tahsilat ucunu kullanıyorlardı; test iş akışını kullanacak şekilde güncellendi.
+    - `einvoice-issue`: bu makinenin test ortamında e-posta taşıyıcısı tanımlı olduğu için ileti "gönderildi" sayılıyordu. Test, ortamdan bağımsız hâle getirildi (3/3).
+  - Backend birim 2405 test yeşil.
 - **Açık kalanlar (vitrin):**
   - Hediye kartı satışı (hediye kartı ürünü) ve hesapta kart bakiyesi yok; kodla kullanım bitti.
   - Misafire kurumsal fatura: sipariş düzeyinde VKN verisi (yeni model ve ADR) gerekir; **karar senin**.
@@ -1369,7 +1385,7 @@
 | D13 | **Ürün ek seçenekleri** (ilk müşteri: yazı işleme, kılıf): ürüne bağlı ücretli metin/seçim, fiyat sunucuda, satıra işlenir, "iade dışı" iade kuralına bağlanır; ADR + backend + panel + vitrin (kullanıcı kararı bekliyor) | — |
 | D14 | Teklif isteme (toptan, fiyatsız RFQ) ve WooCommerce taşıma kaynağı (F14 eki): kullanıcı kararı bekliyor | — |
 | D11 | Tema ayarları (renk, logo, yerleşim; `platform-settings` JSON şema + panel ekranı), tema seçimi, ikinci tema kanıtı | — |
-| D12 ◐ | E2E (Playwright + axe) 26 test ✓; iki bağımsız güvenlik incelemesi ✓ (bulgular kapandı). Açık: Lighthouse/CWV, `/seo-audit` | Başladı |
+| D12 ◐ | E2E (Playwright + axe) 28 test ✓; üç bağımsız güvenlik incelemesi ✓ (bulgular kapandı); tam backend HTTP koşusu ✓. Açık: Lighthouse/CWV, `/seo-audit` | Başladı |
 
 ### F15 görev planı (2026-10-31, taslak; F14 kapanınca başlar. Dış servis ya da yeni bağımlılık isteyen işler kullanıcı onayını bekler)
 
