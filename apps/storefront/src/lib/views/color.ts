@@ -26,20 +26,27 @@ export function readableOn(hex: string): string {
     : INK
 }
 
+/** Whether `value` is a lower-case `#rrggbb`: the only colour form that goes into CSS. */
+export const isHexColor = (value: unknown): value is string =>
+  typeof value === "string" && HEX.test(value)
+
 /**
  * The shop's main colour as theme tokens (D3, docs/19 §3): the primary
  * button, the focus ring and the announcement bar, each with readable
- * text. Null for anything but `#rrggbb`: the value goes into CSS.
+ * text. None for anything but `#rrggbb`: the value goes into CSS.
  */
-export function brandStyle(hex: string | null): string | null {
-  if (hex === null || !HEX.test(hex)) {
-    return null
+export function brandDeclarations(hex: string | null): string[] {
+  if (!isHexColor(hex)) {
+    return []
   }
   const ink = readableOn(hex)
-  return (
-    `:root{--primary:${hex};--primary-foreground:${ink};--ring:${hex};` +
-    `--announcement:${hex};--announcement-foreground:${ink}}`
-  )
+  return [
+    `--primary:${hex}`,
+    `--primary-foreground:${ink}`,
+    `--ring:${hex}`,
+    `--announcement:${hex}`,
+    `--announcement-foreground:${ink}`,
+  ]
 }
 
 /** The shop's colour names (F18 D5) as a lookup: a value reads as one, whatever its case. */

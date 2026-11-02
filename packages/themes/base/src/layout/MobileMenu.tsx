@@ -1,6 +1,7 @@
 "use client"
 
 import { Menu } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
 import type { LinkView, NavCategoryView } from "@qticaret/ui"
 import {
   Accordion,
@@ -16,6 +17,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@qticaret/ui/components/sheet"
+import { OPEN_MENU_EVENT } from "./menu-events"
 
 export interface MobileMenuWords {
   open: string
@@ -29,6 +31,7 @@ export interface MobileMenuWords {
  * The menu on phones: a drawer with the categories (children folded) and
  * the shop's small links. The same links are in the page's HTML through
  * the wide-screen menu, so the drawer adds nothing a crawler would miss.
+ * The bottom bar's "Kategoriler" opens it too, and gets the focus back.
  */
 export function MobileMenu({
   categories,
@@ -39,14 +42,49 @@ export function MobileMenu({
   topLinks: LinkView[]
   words: MobileMenuWords
 }) {
+  const [open, setOpen] = useState(false)
+  // Who asked, when not the header's own button: the focus goes back there
+  const opener = useRef<HTMLElement | null>(null)
+
+  useEffect(() => {
+    const show = (event: Event) => {
+      event.preventDefault()
+      opener.current = document.activeElement instanceof HTMLElement ? document.activeElement : null
+      setOpen(true)
+    }
+    window.addEventListener(OPEN_MENU_EVENT, show)
+    return () => {
+      window.removeEventListener(OPEN_MENU_EVENT, show)
+    }
+  }, [])
+
   return (
-    <Sheet>
+    <Sheet
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next)
+        if (next) {
+          opener.current = null
+        }
+      }}
+    >
       <SheetTrigger asChild>
         <Button variant="ghost" size="icon" className="lg:hidden" aria-label={words.open}>
           <Menu className="size-5" aria-hidden="true" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="left" closeLabel={words.close} className="w-[85vw] max-w-sm gap-0">
+      <SheetContent
+        side="left"
+        closeLabel={words.close}
+        className="w-[85vw] max-w-sm gap-0"
+        onCloseAutoFocus={(event) => {
+          if (opener.current) {
+            event.preventDefault()
+            opener.current.focus()
+            opener.current = null
+          }
+        }}
+      >
         <SheetHeader className="border-b">
           <SheetTitle>{words.title}</SheetTitle>
         </SheetHeader>

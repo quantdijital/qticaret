@@ -10,6 +10,8 @@ const requests = vi.hoisted(() => ({
     Promise.resolve(Object.fromEntries(ids.map((id) => [id, `/urun/${id}`])))
   ),
   priceDisplays: vi.fn(() => Promise.resolve({})),
+  // No theme settings: the cards show what they always did (adr/0053 §B)
+  storefrontSettings: vi.fn(() => Promise.resolve({ storefront: { primary_color: null } })),
 }))
 vi.mock("@/lib/store-api/requests", () => requests)
 

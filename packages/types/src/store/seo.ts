@@ -77,6 +77,22 @@ export type Resolution =
   | { type: "gone"; path: string }
   | { type: "not_found"; path: string | null }
 
+/**
+ * Whether the shop is dark (adr/0053), in `GET /store/seo/site`. While it
+ * is off every field but `enabled` is empty: a prepared text never shows.
+ */
+export interface SiteMaintenance {
+  enabled: boolean
+  /** null: the storefront's own heading. */
+  title: string | null
+  /** The shop's `{belirteç}`s already filled; null: the storefront's own words. */
+  message: string | null
+  /** ISO 8601 with its offset: the storefront's `Retry-After` while it is ahead. */
+  expected_at: string | null
+  /** Open besides the storefront's own: exact (`/iletisim`) or with what is below (`/sozlesmeler/*`). */
+  allow_paths: string[]
+}
+
 /** `GET /store/seo/site`: what every page of the storefront needs. */
 export interface SiteSeo {
   canonical_host: string | null
@@ -85,4 +101,6 @@ export interface SiteSeo {
   /** The home page's `OnlineStore` and `WebSite`; empty until a canonical host is set. */
   jsonLd: JsonLd[]
   system_pages: { path: string; robots: RobotsValue }[]
+  /** Absent from a backend before adr/0053: the shop is open. */
+  maintenance?: SiteMaintenance
 }

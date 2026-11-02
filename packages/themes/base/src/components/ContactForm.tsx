@@ -145,7 +145,7 @@ export function ContactForm({
           <button
             type="submit"
             disabled={pending}
-            className="h-12 rounded-full bg-primary px-7 text-sm font-semibold text-primary-foreground disabled:opacity-50"
+            className="h-12 rounded-button bg-primary px-7 text-sm font-semibold text-primary-foreground disabled:opacity-50"
           >
             {checking ? words.checking : words.submit}
           </button>

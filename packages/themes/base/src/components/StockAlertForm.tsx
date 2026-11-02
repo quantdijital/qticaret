@@ -63,7 +63,7 @@ export function StockAlertForm({
         <button
           type="submit"
           disabled={pending}
-          className="h-10 shrink-0 rounded-full border border-foreground px-4 text-sm font-semibold disabled:opacity-50"
+          className="h-10 shrink-0 rounded-button border border-foreground px-4 text-sm font-semibold disabled:opacity-50"
         >
           {words.submit}
         </button>

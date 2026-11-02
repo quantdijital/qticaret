@@ -11,18 +11,26 @@ import { cardPrice, isAvailable, variantPrice } from "./price"
 import { specsOf } from "./specs"
 import { paragraphsOf, pathOf } from "./text"
 
+/** What the shop shows on its cards (adr/0053 §B, `product_card`). */
+export interface CardOptions {
+  showBrand: boolean
+}
+
+const ALL_SHOWN: CardOptions = { showBrand: true }
+
 /** A product in a grid; one without a live path is left out by the caller. */
 export function productCard(
   product: StoreProduct,
   path: string,
-  displays: Record<string, PriceDisplay>
+  displays: Record<string, PriceDisplay>,
+  options: CardOptions = ALL_SHOWN
 ): ProductCardView {
   const variants = product.variants ?? []
   return {
     id: product.id,
     title: product.title,
     path,
-    brand: product.brand?.name ?? null,
+    brand: options.showBrand ? (product.brand?.name ?? null) : null,
     image: productImages(product)[0] ?? null,
     price: cardPrice(variants, displays),
     available: variants.some(isAvailable),
@@ -33,11 +41,12 @@ export function productCard(
 export function productCards(
   products: readonly StoreProduct[],
   paths: Record<string, string>,
-  displays: Record<string, PriceDisplay>
+  displays: Record<string, PriceDisplay>,
+  options: CardOptions = ALL_SHOWN
 ): ProductCardView[] {
   return products.flatMap((product) => {
     const path = paths[product.id]
-    return path ? [productCard(product, path, displays)] : []
+    return path ? [productCard(product, path, displays, options)] : []
   })
 }
 

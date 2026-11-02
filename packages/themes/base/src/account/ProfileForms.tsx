@@ -76,7 +76,7 @@ export function ProfileForm({
         className="sm:col-span-2"
       />
       <div className="flex flex-wrap items-center gap-4 sm:col-span-2">
-        <Button type="submit" disabled={pending} className="h-11 rounded-full px-6">
+        <Button type="submit" disabled={pending} className="h-11 rounded-button px-6">
           {pending && <LoaderCircle className="animate-spin" aria-hidden="true" />}
           {pending ? words.saving : words.save}
         </Button>
@@ -123,7 +123,7 @@ export function ConsentForm({
           type="submit"
           variant="outline"
           disabled={pending}
-          className="h-11 rounded-full bg-transparent px-6 shadow-none"
+          className="h-11 rounded-button bg-transparent px-6 shadow-none"
         >
           {pending ? words.saving : words.save}
         </Button>

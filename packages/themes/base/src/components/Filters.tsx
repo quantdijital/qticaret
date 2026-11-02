@@ -123,7 +123,7 @@ function PriceForm({ price, t }: { price: PriceFilterView; t: Translate }) {
         </div>
         <button
           type="submit"
-          className="h-10 rounded-full border border-foreground text-sm font-semibold transition-colors hover:bg-foreground hover:text-background"
+          className="h-10 rounded-button border border-foreground text-sm font-semibold transition-colors hover:bg-foreground hover:text-background"
         >
           {t("listing.price_apply")}
         </button>

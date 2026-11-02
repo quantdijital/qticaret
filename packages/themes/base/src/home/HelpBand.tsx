@@ -26,7 +26,7 @@ export function HelpBand({ section, t }: { section: Help; t: Translate }) {
               href={contact.whatsappHref}
               target="_blank"
               rel="noopener"
-              className="inline-flex h-12 items-center gap-2 rounded-full bg-ink-foreground px-6 text-sm font-semibold text-ink transition-opacity hover:opacity-90"
+              className="inline-flex h-12 items-center gap-2 rounded-button bg-ink-foreground px-6 text-sm font-semibold text-ink transition-opacity hover:opacity-90"
             >
               <MessageCircle className="size-4" aria-hidden="true" />
               {t("home.help_whatsapp")}
@@ -37,7 +37,7 @@ export function HelpBand({ section, t }: { section: Help; t: Translate }) {
           <li>
             <a
               href={contact.phoneHref}
-              className="tabular inline-flex h-12 items-center gap-2 rounded-full border border-ink-foreground/25 px-6 text-sm font-semibold transition-colors hover:bg-ink-foreground/10"
+              className="tabular inline-flex h-12 items-center gap-2 rounded-button border border-ink-foreground/25 px-6 text-sm font-semibold transition-colors hover:bg-ink-foreground/10"
             >
               <Phone className="size-4" aria-hidden="true" />
               {contact.phone}
@@ -48,7 +48,7 @@ export function HelpBand({ section, t }: { section: Help; t: Translate }) {
           <li>
             <a
               href={`mailto:${contact.email}`}
-              className="inline-flex h-12 items-center gap-2 rounded-full border border-ink-foreground/25 px-6 text-sm font-semibold transition-colors hover:bg-ink-foreground/10"
+              className="inline-flex h-12 items-center gap-2 rounded-button border border-ink-foreground/25 px-6 text-sm font-semibold transition-colors hover:bg-ink-foreground/10"
             >
               <Mail className="size-4" aria-hidden="true" />
               {contact.email}

@@ -13,7 +13,7 @@ import {
 import { cn } from "@qticaret/ui/lib/utils"
 
 const ITEM =
-  "inline-flex h-10 flex-row items-center justify-center gap-1 rounded-full bg-transparent px-4 py-0 text-[13px] font-medium tracking-wide text-foreground/80 transition-colors hover:bg-foreground/5 hover:text-foreground data-[state=open]:bg-foreground/5 data-[state=open]:text-foreground"
+  "inline-flex h-10 flex-row items-center justify-center gap-1 rounded-button bg-transparent px-4 py-0 text-[13px] font-medium tracking-wide text-foreground/80 transition-colors hover:bg-foreground/5 hover:text-foreground data-[state=open]:bg-foreground/5 data-[state=open]:text-foreground"
 
 /**
  * The category menu on wide screens. A category with children opens a

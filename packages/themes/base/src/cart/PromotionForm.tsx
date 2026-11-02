@@ -49,12 +49,12 @@ export function PromotionForm({
           autoComplete="off"
           autoCapitalize="characters"
           placeholder={words.placeholder}
-          className="h-11 min-w-0 flex-1 rounded-full border bg-background px-4 text-sm uppercase outline-none placeholder:normal-case placeholder:text-muted-foreground focus-visible:border-foreground/40"
+          className="h-11 min-w-0 flex-1 rounded-button border bg-background px-4 text-sm uppercase outline-none placeholder:normal-case placeholder:text-muted-foreground focus-visible:border-foreground/40"
         />
         <button
           type="submit"
           disabled={pending}
-          className="h-11 shrink-0 rounded-full border border-foreground px-5 text-sm font-semibold transition-colors hover:bg-foreground hover:text-background disabled:opacity-50"
+          className="h-11 shrink-0 rounded-button border border-foreground px-5 text-sm font-semibold transition-colors hover:bg-foreground hover:text-background disabled:opacity-50"
         >
           {pending ? words.applying : words.apply}
         </button>
@@ -75,7 +75,7 @@ export function PromotionForm({
                 <button
                   type="submit"
                   aria-label={`${words.remove}: ${code}`}
-                  className="inline-flex h-8 items-center gap-1.5 rounded-full bg-success/10 pr-2 pl-3 text-xs font-semibold text-success hover:bg-success/15"
+                  className="inline-flex h-8 items-center gap-1.5 rounded-button bg-success/10 pr-2 pl-3 text-xs font-semibold text-success hover:bg-success/15"
                 >
                   <Tag className="size-3.5" aria-hidden="true" />
                   {code}

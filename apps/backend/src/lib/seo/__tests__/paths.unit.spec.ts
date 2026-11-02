@@ -20,6 +20,10 @@ describe("isReservedPath", () => {
     "/kampanyalar",
     "/blog/kategori",
     "/blog/etiket",
+    // The category and brand indexes (docs/20) and the maintenance bypass page (adr/0053)
+    "/kategoriler",
+    "/markalar",
+    "/bakim",
   ])("keeps %s for the storefront", (path) => {
     expect(isReservedPath(path)).toBe(true)
   })
@@ -40,6 +44,9 @@ describe("isReservedPath", () => {
     "/blog/etiket/celik",
     "/blog/kategoriler",
     "/kampanyalar-hakkinda",
+    "/kategoriler/bicaklar",
+    "/markalarimiz",
+    "/bakim-seti",
   ])("leaves %s to records", (path) => {
     expect(isReservedPath(path)).toBe(false)
   })
@@ -56,6 +63,7 @@ describe("isReservedPath", () => {
         { path: "/abonelik", robots: "noindex,nofollow" },
         { path: "/stok-bildirimi", robots: "noindex,nofollow" },
         { path: "/cerez-tercihleri", robots: "noindex,follow" },
+        { path: "/bakim", robots: "noindex,nofollow" },
       ])
     )
     for (const { path } of SYSTEM_PAGES) {

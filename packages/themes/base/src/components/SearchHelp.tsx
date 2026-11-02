@@ -20,7 +20,7 @@ function ChipRow({
             <a
               href={link.path}
               rel={nofollow ? "nofollow" : undefined}
-              className="inline-flex h-10 items-center rounded-full border bg-card px-4 text-sm font-medium transition-colors hover:border-foreground"
+              className="inline-flex h-10 items-center rounded-button border bg-card px-4 text-sm font-medium transition-colors hover:border-foreground"
             >
               {link.label}
             </a>

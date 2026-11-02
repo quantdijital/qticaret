@@ -18,6 +18,8 @@ export const SYSTEM_ROOTS = [
   "abonelik",
   "stok-bildirimi",
   "cerez-tercihleri",
+  // The maintenance bypass link's page (adr/0053)
+  "bakim",
 ] as const
 
 /**

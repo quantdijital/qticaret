@@ -139,7 +139,7 @@ export function ProductPage({
                 href={view.whatsappHref}
                 target="_blank"
                 rel="noopener"
-                className="flex h-11 items-center justify-center gap-2 rounded-full border text-sm font-semibold hover:bg-foreground/5"
+                className="flex h-11 items-center justify-center gap-2 rounded-button border text-sm font-semibold hover:bg-foreground/5"
               >
                 <MessageCircle className="size-4" aria-hidden="true" />
                 {t("product.ask_whatsapp")}

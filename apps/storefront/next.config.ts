@@ -55,9 +55,10 @@ const config: NextConfig = {
           { key: "Referrer-Policy", value: "no-referrer" },
         ],
       },
-      // A message's token link (adr/0038 Ek 2026-11-02): no page it loads
-      // learns the token from the Referer (this rule comes after the first)
-      ...["/abonelik/:path*", "/stok-bildirimi/:path*"].map((source) => ({
+      // A message's token link (adr/0038 Ek 2026-11-02) and the maintenance
+      // bypass link (adr/0053): no page it loads learns the token from the
+      // Referer (this rule comes after the first)
+      ...["/abonelik/:path*", "/stok-bildirimi/:path*", "/bakim/:path*"].map((source) => ({
         source,
         headers: [{ key: "Referrer-Policy", value: "no-referrer" }],
       })),

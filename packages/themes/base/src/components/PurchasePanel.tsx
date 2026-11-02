@@ -176,7 +176,7 @@ export function PurchasePanel({
                     className={
                       swatch
                         ? "inline-flex size-11 cursor-pointer items-center justify-center rounded-full border-2 border-transparent p-0.5 transition-colors hover:border-foreground/40 has-[:checked]:border-foreground has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ring"
-                        : "inline-flex h-11 min-w-12 cursor-pointer items-center justify-center rounded-full border bg-card px-5 text-sm font-medium transition-colors hover:border-foreground has-[:checked]:border-foreground has-[:checked]:bg-foreground has-[:checked]:text-background has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ring"
+                        : "inline-flex h-11 min-w-12 cursor-pointer items-center justify-center rounded-button border bg-card px-5 text-sm font-medium transition-colors hover:border-foreground has-[:checked]:border-foreground has-[:checked]:bg-foreground has-[:checked]:text-background has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ring"
                     }
                   >
                     <input
@@ -216,7 +216,7 @@ export function PurchasePanel({
             type="submit"
             size="lg"
             disabled={!available || pending}
-            className="h-12 flex-1 rounded-full text-base"
+            className="h-12 flex-1 rounded-button text-base"
           >
             {pending
               ? labels.adding

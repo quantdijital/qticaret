@@ -27,12 +27,17 @@ export const RESERVED_ROOT_SEGMENTS: ReadonlySet<string> = new Set([
   "yorumlar",
   // The products on sale now (adr/0019 ek 2026-11-03)
   "kampanyalar",
+  // Every category and every brand, as indexes (docs/20 "sayfalar")
+  "kategoriler",
+  "markalar",
   // A draft's signed preview (F18)
   "onizleme",
   // A message's token links (adr/0038 Ek 2026-11-02) and the cookie choices (F18 D9)
   "abonelik",
   "stok-bildirimi",
   "cerez-tercihleri",
+  // The maintenance bypass link's page (adr/0053)
+  "bakim",
   // Backend paths, should a proxy put them on the storefront's host (F16)
   "admin",
   "app",
@@ -82,6 +87,8 @@ export const SYSTEM_PAGES: readonly {
     // A message's token links (adr/0038 Ek 2026-11-02)
     "abonelik",
     "stok-bildirimi",
+    // The maintenance bypass link (adr/0053)
+    "bakim",
   ].map((segment) => ({
     path: `/${segment}`,
     robots: "noindex,nofollow" as const,

@@ -3,6 +3,7 @@ import type { NextRequest } from "next/server"
 import { LANDING_COOKIE, landingCookieValue, landingOf } from "./lib/cart/landing"
 import { panelOrigins, paymentFrameOrigins, paymentRedirectOrigins, storefrontEnv } from "./lib/env"
 import { t } from "./lib/i18n"
+import { maintenanceGate } from "./lib/maintenance/gate"
 import { contentSecurityPolicy, newNonce } from "./lib/security/csp"
 import {
   backendFile,
@@ -47,9 +48,12 @@ const isPaymentReturn = (pathname: string) =>
 /**
  * Before every page (adr/0046 §4): in production one 301 to the shop's
  * canonical host, the backend's files at the root (and the IndexNow key
- * file while the shop announces), one 301 to the normalised address, the backend's redirects and 410s with
- * their own codes, 404s reported, a nonce'd CSP, and `noindex` on an
- * instance search engines must not index (staging; docs/13 §6).
+ * file while the shop announces), one 301 to the normalised address, a
+ * nonce'd CSP, the dark shop's 503 (adr/0053: but for its open paths and
+ * a bypass cookie), the backend's redirects and 410s with
+ * their own codes, 404s reported, and `noindex` on an
+ * instance search engines must not index (staging; docs/13 §6) or a page
+ * seen through a bypass link.
  */
 export async function proxy(request: NextRequest): Promise<Response> {
   const env = storefrontEnv()
@@ -100,6 +104,16 @@ export async function proxy(request: NextRequest): Promise<Response> {
       ? [...paymentRedirectOrigins(env), ...paymentFrameOrigins(env)]
       : [],
   })
+  // The dark shop (adr/0053): pages, Server Actions and route handlers alike
+  const gate = await maintenanceGate(request, pathname, site, {
+    nonce,
+    csp,
+    production: env.NODE_ENV === "production",
+    visitorIp: visitor,
+  })
+  if (gate.blocked) {
+    return gate.blocked
+  }
   const isPageView = request.method === "GET" || request.method === "HEAD"
   if (isPageView && pathname !== "/" && !isSystemPath(pathname) && !isStorefrontIndex(pathname)) {
     const resolution = await resolveForProxy(`${pathname}${search}`, visitor)
@@ -147,6 +161,12 @@ export async function proxy(request: NextRequest): Promise<Response> {
   }
   if (!site.indexing) {
     response.headers.set("x-robots-tag", "noindex, nofollow")
+  } else if (gate.bypassed) {
+    // The dark shop seen through a bypass link: nobody's search result, never stored
+    response.headers.set("x-robots-tag", "noindex")
+  }
+  if (gate.bypassed) {
+    response.headers.set("cache-control", "private, no-store")
   }
   return response
 }

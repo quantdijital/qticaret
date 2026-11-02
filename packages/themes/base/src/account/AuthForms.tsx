@@ -140,7 +140,12 @@ export function AuthForm({
       <p role="alert" className="text-sm font-medium text-sale empty:hidden">
         {error ? (words.errors[error] ?? words.fallback) : null}
       </p>
-      <Button type="submit" size="lg" disabled={pending} className="h-12 rounded-full text-[15px]">
+      <Button
+        type="submit"
+        size="lg"
+        disabled={pending}
+        className="h-12 rounded-button text-[15px]"
+      >
         {pending && <LoaderCircle className="animate-spin" aria-hidden="true" />}
         {pending ? (checking ? words.checking : words.working) : words.submit}
       </Button>

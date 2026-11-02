@@ -21,7 +21,7 @@ export function HeroSection({ section, first }: { section: Hero; first: boolean 
       <div className="flex flex-col justify-center gap-7 rounded-3xl border bg-card px-6 py-12 sm:px-10 lg:col-span-7 lg:px-14 lg:py-20">
         {section.eyebrow && (
           <p className="flex items-center gap-2 text-xs font-semibold tracking-[0.16em] text-primary uppercase">
-            <span aria-hidden="true" className="size-1.5 rounded-full bg-primary" />
+            <span aria-hidden="true" className="size-1.5 rounded-full bg-highlight" />
             {section.eyebrow}
           </p>
         )}
@@ -33,7 +33,7 @@ export function HeroSection({ section, first }: { section: Hero; first: boolean 
         )}
         {main && (
           <div className="flex flex-wrap gap-3 pt-1">
-            <Button asChild size="lg" className="h-12 rounded-full px-7 text-[15px]">
+            <Button asChild size="lg" className="h-12 rounded-button px-7 text-[15px]">
               <a href={main.path}>
                 {main.label}
                 <ArrowRight aria-hidden="true" />
@@ -44,7 +44,7 @@ export function HeroSection({ section, first }: { section: Hero; first: boolean 
                 asChild
                 size="lg"
                 variant="outline"
-                className="h-12 rounded-full bg-transparent px-7 text-[15px] shadow-none"
+                className="h-12 rounded-button bg-transparent px-7 text-[15px] shadow-none"
               >
                 <a href={second.path}>{second.label}</a>
               </Button>

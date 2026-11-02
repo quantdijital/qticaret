@@ -1,4 +1,4 @@
-import { ArrowUpRight } from "lucide-react"
+import { ArrowUpRight, Star } from "lucide-react"
 import { ResponsiveImage } from "@qticaret/ui"
 import type { ProductCardView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
@@ -7,7 +7,9 @@ import { Price } from "./Price"
 /**
  * One product in a grid or a rail: one link around the picture and the
  * name; the discount and "sold out" as labels on the picture, a quiet
- * "view" cue that rises on hover.
+ * "view" cue that rises on hover. The picture's shape is the shop's
+ * (`--card-ratio`, adr/0053 §B); the brand and the stars show when the
+ * storefront put them in the view.
  */
 export function ProductCard({
   product,
@@ -21,7 +23,7 @@ export function ProductCard({
   const discount = product.price?.discount ?? null
   return (
     <article className="group relative flex h-full flex-col gap-3.5">
-      <div className="relative aspect-[4/5] overflow-hidden rounded-2xl border bg-card">
+      <div className="relative aspect-card overflow-hidden rounded-2xl border bg-card">
         {product.image ? (
           <ResponsiveImage
             image={product.image}
@@ -72,6 +74,18 @@ export function ProductCard({
             {product.title}
           </a>
         </h3>
+        {product.rating && (
+          <p className="flex items-center gap-1 text-xs text-muted-foreground">
+            <Star className="size-3.5 fill-current text-foreground" aria-hidden="true" />
+            <span aria-hidden="true" className="tabular font-medium text-foreground">
+              {product.rating.average}
+            </span>
+            <span aria-hidden="true" className="tabular">
+              ({product.rating.count})
+            </span>
+            <span className="sr-only">{product.rating.label}</span>
+          </p>
+        )}
         {product.price && <Price price={product.price} t={t} className="mt-auto pt-1.5" />}
       </div>
     </article>

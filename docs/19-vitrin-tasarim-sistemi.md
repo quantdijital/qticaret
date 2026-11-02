@@ -14,7 +14,7 @@
 | Stil | Tailwind v4 (CSS-first) | Token'lar CSS değişkeni; tema değerleri değiştirir |
 | Bileşen | shadcn/ui (new-york, Radix), `@qticaret/ui/components/*` | Panelle aynı sürümler; kod bizde; her tema paylaşır |
 | İkon | lucide-react | Tek set; marka ikonları yok (sosyal bağlantılar yazıyla) |
-| Yazı tipi | Inter (`next/font`), kendi sunucumuzdan | Türkçe karakterler tam; tarayıcıdan Google'a istek gitmez (KVKK), CSP `font-src 'self'` |
+| Yazı tipi | Varsayılan Fraunces + Inter; mağaza seçebilir: Playfair Display, DM Serif Display, Manrope, Source Sans 3, Nunito (`next/font/google`, derlemede indirilir, kendi sunucumuzdan; yalnız varsayılan ikisi önyüklenir) | Türkçe karakterler tam (latin-ext); tarayıcıdan Google'a istek gitmez (KVKK), CSP `font-src 'self'` |
 | Formlar | Sunucu eylemleri (Server Actions) + yerel form öğeleri | Sayfanın betiği yüklenmeden de çalışır |
 | Test | Vitest (görünüm modelleri), Playwright (e2e, ekran karşılaştırma), axe | §9 |
 
@@ -29,7 +29,7 @@ Sürümler exact ve ≥14 gün kuralıyla (docs/04).
 - **Görsel önce:** ürün kartı 4:5 görsel, `rounded-2xl`, beyaz kart; görsel yoksa adın ilk harfi serifle silik.
 - **Renk:** birincil eylem `--primary` (mağazanın rengi; varsayılan mürekkep). Kırmızı (`--sale`) yalnızca indirimde, yeşil (`--success`) yalnızca stok ve başarıda; koyu bantlar `--ink`.
 - **Tipografi:** `h1`, `h2` Fraunces (`opsz`, `SOFT`), ürün adları ve gövde Inter; tutarlar `.tabular`.
-- **Köşe:** düğmeler ve haplar `rounded-full`, kartlar `rounded-2xl/3xl`.
+- **Köşe:** düğmeler, haplar ve form alanları `rounded-button` (varsayılan tam yuvarlak; mağaza `rounded` ya da `square` seçebilir), kartlar `rounded-2xl/3xl` (mağazanın köşe ölçeğiyle); rozet, sayaç ve simge daireleri `rounded-full` kalır.
 - **Hareket:** yalnızca hover ve açılır katmanlarda; `prefers-reduced-motion` saygı görür. Kendiliğinden kayan içerik yok (WCAG 2.2.2).
 - **Odak:** klavye kullanıcısı her zaman nerede olduğunu görür (`:focus-visible`). Panelin "odak çerçevesi yok" kuralı vitrine uygulanmaz.
 
@@ -48,10 +48,14 @@ Adlar shadcn/ui'ninkidir; bağlantı `packages/ui/src/styles.css`'te, değerler 
 | `--sale`, `--sale-foreground` | İndirimli fiyat, indirim rozeti |
 | `--success` | Stokta, sepete eklendi |
 | `--announcement`, `--announcement-foreground` | Duyuru şeridi |
+| `--highlight`, `--highlight-foreground` | Rozet ve vurgu (sepet sayacı, giriş noktası); mağazanın `accent`'i, yoksa `--primary` |
 | `--radius` | Köşe ölçeği (`sm`/`md`/`lg`/`xl` ondan türer) |
+| `--radius-scale` | Bütün köşe ölçeğinin çarpanı: `soft` 1, `sharp` 0,2, `round` 1,5 |
+| `--button-radius` | Düğme ve düğme gibi bağlantıların köşesi (`rounded-button`): `pill` tam, `rounded` 0,75rem, `square` 0 |
+| `--card-ratio` | Ürün kartı görselinin oranı (`aspect-card`): 4 / 5, 1 / 1, 3 / 4 |
 | `--font-sans`, `--font-heading` | Gövde ve başlık yazı tipi |
 
-Kontrast (WCAG AA 4.5:1) temanın `styles.css` başında hesaplı yazılır. Mağazanın kendi renkleri (D11) bu değişkenleri `:root`'ta ezer.
+Kontrast (WCAG AA 4.5:1) temanın `styles.css` başında hesaplı yazılır. Mağazanın tema ayarları (adr/0053 §B) bu değişkenleri `:root`'ta ezer: `lib/views/theme.ts` ayarı denetler (bilinmeyen değer varsayılana düşer, renk yalnız `#rrggbb`) ve yalnız varsayılandan farklı olanları yanıtın nonce'lu tek `<style>`'ına yazar; varsayılanlarda hiçbir şey basılmaz, görünüm bugünküdür. Zemin `warm` `#f6f4ef`, `neutral` `#f5f5f5`, `cool` `#f3f5f8` (backend `THEME_BACKGROUNDS` ile aynı; karşıtlık denetimi bunları okur); `neutral` ve `cool` kendi nötr yüzeylerini, çizgilerini ve ikincil metin rengini de getirir (ikincil metin zeminde ≥ 6,4:1).
 
 ## 4. Çerçeve (her sayfada)
 
@@ -66,13 +70,14 @@ Mağaza panelden yazar: `platform-settings` `storefront` bölümü, `GET /store/
 | Arama | `GET /arama?q=` | Betiksiz form; sonuçlar `noindex,follow` |
 | Sepet | çerez + `GET /store/carts/:id` | Sayaç; `/sepet` |
 | Kategori menüsü | Vitrin > Menüler, `main` menüsü (≤30 bağlantı × 20 alt bağlantı; bağlantılar kayda bağlı, adı ve adresi kayıttan, yayında olmayan gizli; adr/0049); menü yoksa kategori ağacı (iki seviye) | Geniş ekranda açılır menü (Radix, içerik `forceMount` ile HTML'de), telefonda çekmece |
-| Marka rengi | `storefront.primary_color` | `--primary`, `--ring`, `--announcement` ve üzerindeki yazı rengi (beyaz ya da mürekkep, kontrasta göre); yanıtın nonce'uyla tek `<style>` |
+| Tema ayarları | `GET /store/storefront` `theme` (adr/0053 §B; yoksa `storefront.primary_color`) | Ana renk `--primary`, `--ring`, `--announcement` ve üzerindeki yazı rengi (beyaz ya da mürekkep, kontrasta göre); `accent` `--highlight`; zemin, yazı tipleri (`<html>`'de seçilen iki yüzün sınıfı), köşe, düğme ve kart oranı §3'teki değişkenlerle; yanıtın nonce'uyla tek `<style>`. Biçimi değiştirenler `ShopView.theme`'de: üst bilgi `centered` (logo ortada) ya da `left` (logo başta, arama ortada, kategoriler soldan), `sticky`; kartta marka (`show_brand: false` ise vitrin kartın görünüm modeline markayı koymaz) ve yıldız (`show_rating`; kartın görünüm modelinde `rating` varsa; liste satırları puan taşımadığı için bugün boş) |
 | Ana sayfa girişi | `storefront.hero` (üst yazı, başlık, metin, ≤2 düğme) | Yazılmamışsa mağaza adı ve ilk iki kategori |
 | Güven şeridi | `storefront.trust_badges` (≤4, ikon listesi sabit) | Alt bilginin üstünde |
 | Alt bilgi sütunları | Vitrin > Menüler, `footer` menüleri (sırasıyla; adr/0049) | Yazılmamışsa: ilk 8 kategori + Yardım (Sepetim) |
 | İletişim, sosyal | `legal-identity` (`email`, `phone`, `address`, `same_as`) | Sosyal profiller ağ adıyla |
 | Küçük yazı | `legal.company_title` | "© yıl unvan" |
-| WhatsApp | `storefront.whatsapp_phone` | Sağ altta düz bağlantı (`wa.me`) |
+| WhatsApp | `storefront.whatsapp_phone` | Sağ altta düz bağlantı (`wa.me`); telefonda alt gezinmenin üstünde |
+| Mobil alt gezinme | `ShopView.bottomNav` (proxy'nin `x-qt-url`'inden) | 1024 px altında sabit alt çubuk: Ana sayfa, Kategoriler (menü çekmecesini açar; betiksiz `/kategoriler`), Ara (`/arama`), Sepet (sayaçlı; ad "Sepet, N ürün"), Hesabım. Bulunulan öğe `aria-current="page"` ve üst çizgiyle. Yüksekliği sayfanın sonunda ilk HTML'den ayrılır (kayma yok, alt bilgi altında kalmaz), telefonun alt güvenli alanı kadar boşluk. `/odeme*`, `/onizleme/*` ve `/bakim/*`'da yok |
 
 Bağlantılar yalnızca mağaza yolu (`/…`) ya da `https://` adres olabilir; `javascript:`, `//host`, kimlik bilgili adres reddedilir (backend şeması ve testi).
 
@@ -87,13 +92,14 @@ packages/ui/
 ├── src/theme.ts, views.ts     # tema sözleşmesi ve görünüm modelleri
 packages/themes/base/src/
 ├── Layout.tsx, *Page.tsx      # sözleşmenin sayfaları
-├── layout/                    # çerçeve: AnnouncementBar, SiteHeader, CategoryNav, MobileMenu, SearchForm, SiteFooter, WhatsAppButton
+├── layout/                    # çerçeve: AnnouncementBar, SiteHeader, CategoryNav, MobileMenu, SearchForm, SiteFooter, WhatsAppButton, BottomNav
 ├── components/                # ProductCard, Price, Breadcrumbs, Pages, ProductGallery, PurchasePanel, QuantityField, TrustStrip, Container
 └── styles.css                 # temanın token değerleri
 apps/storefront/src/
 ├── app/                       # rotalar (sistem sayfaları sabit, gerisi [...path])
 ├── screens/                   # varlık türüne göre sayfa verisi
-├── lib/views/                 # Store yanıtı → görünüm modeli (saf, testli)
+├── lib/views/                 # Store yanıtı → görünüm modeli (saf, testli); theme.ts tema ayarı → CSS
+├── lib/maintenance/           # bakım: açık yollar, Retry-After, jeton biçimi, 503 sayfası, proxy kapısı
 └── lib/store-api/             # BFF istemcisi
 ```
 
@@ -139,6 +145,8 @@ Durum: ✅ var · 🟡 temel hâli var · ⬜ yok. Görev kodları PROGRESS "F18
 | İçerik sayfası | `/{handle}` | ✅ | `content` | D10 |
 | İletişim | `/iletisim` (Ayarlar > Vitrin'de seçilen sayfa) | ✅ içerik + iletişim formu (konular arasında misafirin "KVKK başvurusu") | `contact-messages` (ADR-0047) | D10 |
 | Taslak önizleme | `/onizleme/{token}` | ✅ 24 saatlik imzalı bağlantı, `noindex` | `content/preview/{token}` | D10 |
+| Bakım sayfası | her yol (açık kalanlar hariç) | ✅ proxy'de, tema olmadan sade sayfa: mağaza adı, başlık, metin (belirteçler dolu), Türkçe beklenen açılış; `503`, `Retry-After` (beklenen zamana kalan saniye, 300–86400; yoksa ya da geçmişse 3600), `Cache-Control: no-store`, CSP; `noindex` yok. Açık kalanlar: `/onizleme/*`, `/odeme/sonuc*`, `/odeme/durum*`, `/bakim/gir`, `/robots.txt`, `/sitemap*`, IndexNow anahtar dosyası, `/_next/*`, simge dosyaları, mağazanın `allow_paths`'i (tam ya da `/x/*`; küçük harf, sondaki `/` yok). Server Action ve rota işleyicileri de 503. Bakım açılıp kapanınca en geç 60 sn'de yansır | `seo/site` `maintenance` (adr/0053) | docs/20 |
+| Bakım atlama bağlantısı | `/bakim/gir?t=` | ✅ rota işleyicisi: jeton biçimi (`mnb_…`) → `maintenance/bypass/:token`; `204` → httpOnly `__Host-qt_bypass` (yerelde `qt_bypass`), SameSite=Lax, 7 gün, 303 `/`; `404` ya da bozuk → bakım sayfası "Bağlantı geçersiz" (503, `noindex`); mağaza açıkken 303 `/` (çerezsiz); `Referrer-Policy: no-referrer`. Proxy çerezi jeton başına dakikada en çok bir kez doğrular; `404` gelince çerezi siler. Atlamayla görülen sayfalar `X-Robots-Tag: noindex`, `Cache-Control: private, no-store` | `maintenance/bypass/:token` | docs/20 |
 | Müşteri yorumları | `/yorumlar` | ✅ | `GET /store/reviews` | D10 |
 | Blog | `/blog`, `/blog/{handle}` | ✅ kategori çubuğu (Tüm yazılar + canlı yazısı olan kategoriler), kartta kategori; yazıda kategori ve etiket bağlantıları | `content?kind=post`, `content/terms` | D10 |
 | Blog arşivleri | `/blog/kategori/{handle}`, `/blog/etiket/{handle}` | ✅ terimin canlı yazıları, `?sayfa=` (sonraki sayfanın kendi canonical'ı ve başlığı), ilk sayfada terimin açıklaması; robots ve JSON-LD resolve'dan; bilinmeyen handle 404 | resolve `post_category` / `post_tag`, `content?kind=post&category=` / `&tag=` (adr/0019 Ek 2026-11-03) | docs/20 |

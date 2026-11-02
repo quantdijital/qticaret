@@ -174,7 +174,7 @@ export function PaymentForm({
           type="submit"
           size="lg"
           disabled={pending || methods.length === 0}
-          className="h-13 rounded-full text-base"
+          className="h-13 rounded-button text-base"
         >
           {pending ? (
             <LoaderCircle className="animate-spin" aria-hidden="true" />

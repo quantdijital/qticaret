@@ -19,7 +19,7 @@ function EmptyCart({ t }: { t: Translate }) {
         </span>
         <h1 className="text-4xl leading-tight">{t("cart.title")}</h1>
         <p className="text-muted-foreground">{t("cart.empty")}</p>
-        <Button asChild size="lg" className="h-12 rounded-full px-7">
+        <Button asChild size="lg" className="h-12 rounded-button px-7">
           <a href="/">
             {t("cart.continue")}
             <ArrowRight aria-hidden="true" />
@@ -127,7 +127,7 @@ export function CartPage({
               <dd className="text-xl font-semibold">{view.subtotal}</dd>
             </div>
           </dl>
-          <Button asChild size="lg" className="h-13 rounded-full text-base">
+          <Button asChild size="lg" className="h-13 rounded-button text-base">
             <a href="/odeme">
               {t("cart.checkout")}
               <ArrowRight aria-hidden="true" />

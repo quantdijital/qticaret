@@ -229,7 +229,7 @@ export function OrderPage({
               <p className="mb-3 text-muted-foreground">{t("order.cancel_text")}</p>
               <button
                 type="submit"
-                className="h-10 rounded-full border border-sale px-5 font-semibold text-sale hover:bg-sale/5"
+                className="h-10 rounded-button border border-sale px-5 font-semibold text-sale hover:bg-sale/5"
               >
                 {t("order.cancel")}
               </button>

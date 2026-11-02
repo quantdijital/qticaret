@@ -86,7 +86,7 @@ export function ReturnForm({
       <button
         type="submit"
         disabled={pending}
-        className="h-10 self-start rounded-full bg-foreground px-5 font-semibold text-background disabled:opacity-50"
+        className="h-10 self-start rounded-button bg-foreground px-5 font-semibold text-background disabled:opacity-50"
       >
         {pending ? words.sending : words.submit}
       </button>

@@ -1,4 +1,5 @@
 import type { TrustIcon } from "@qticaret/types"
+import type { BottomNavView, ThemeView } from "./frame-views"
 
 /**
  * What a theme is given to show (adr/0046 §7): ready-made view models.
@@ -120,6 +121,10 @@ export interface ShopView {
   privacyPath: string | null
   /** What the law asks a web shop to show (6563, ETBİS): title, MERSİS, tax, KEP, ETBİS; in words. */
   identityLines: string[]
+  /** The shop's theme choices that change markup (adr/0053 §B). */
+  theme: ThemeView
+  /** The phone's bottom bar; null where it stays away (checkout, a preview). */
+  bottomNav: BottomNavView | null
 }
 
 export interface CookieBannerView {
@@ -149,6 +154,17 @@ export interface ProductCardView {
   image: ImageView | null
   price: PriceView | null
   available: boolean
+  /** The product's reviews in short, when the storefront has them for a card; shown when the shop asks. */
+  rating?: CardRatingView | null
+}
+
+/** A card's stars: the average and how many reviews, formatted, and in words for a screen reader. */
+export interface CardRatingView {
+  /** "4,5". */
+  average: string
+  count: number
+  /** "5 üzerinden 4,5 (12 değerlendirme)". */
+  label: string
 }
 
 export interface BreadcrumbView {

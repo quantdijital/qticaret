@@ -16,7 +16,7 @@ function TermBar({ terms, t }: { terms: BlogTermLinkView[]; t: Translate }) {
               href={term.path}
               aria-current={term.current ? "page" : undefined}
               className={cn(
-                "inline-flex h-10 items-center rounded-full border bg-card px-5 text-sm font-medium whitespace-nowrap transition-colors hover:border-foreground",
+                "inline-flex h-10 items-center rounded-button border bg-card px-5 text-sm font-medium whitespace-nowrap transition-colors hover:border-foreground",
                 term.current && "border-foreground bg-foreground text-background"
               )}
             >

@@ -1,4 +1,5 @@
 import "server-only"
+import { headers } from "next/headers"
 import type { ContactView, ShopView, Translate } from "@qticaret/ui"
 import type { LegalIdentity, StoreLayout } from "@qticaret/types"
 import { currentCustomer } from "@/lib/account/auth"
@@ -13,6 +14,7 @@ import {
   storefrontMenus,
   storefrontSettings,
 } from "@/lib/store-api/requests"
+import { bottomNavOf } from "./bottom-nav"
 import { miniCartOf } from "./cart"
 import { navigation } from "./categories"
 import { cookieBannerOf } from "./cookies"
@@ -21,6 +23,8 @@ import { displayPhone, footerGroups, socialLinks, whatsappHref } from "./frame"
 import { currentLayout } from "./layout"
 import { footerMenus, mainMenu, topLinks } from "./menus"
 import { hoursOf } from "./hours"
+import { themeView } from "./theme"
+import { currentTheme } from "./theme-settings"
 
 /** How to reach the shop, from its store details and legal identity (adr/0048): one source. */
 export function contactOf(identity: LegalIdentity, t: Translate): ContactView {
@@ -61,6 +65,8 @@ export async function shopView(): Promise<ShopView> {
     menus,
     layout,
     preferencesPage,
+    theme,
+    requestHeaders,
   ] = await Promise.all([
     siteSeo(),
     allCategories(),
@@ -74,6 +80,8 @@ export async function shopView(): Promise<ShopView> {
     storefrontMenus(),
     currentLayout(),
     onCookiePreferencesPage(),
+    currentTheme(),
+    headers(),
   ])
   const paths = await pathsOf(
     "product_category",
@@ -115,5 +123,8 @@ export async function shopView(): Promise<ShopView> {
       ? legalPath("privacy_notice")
       : null,
     identityLines: identityLinesOf(identity, t),
+    theme: themeView(theme),
+    // The page's address as the proxy set it (never the visitor's)
+    bottomNav: bottomNavOf(requestHeaders.get("x-qt-url") ?? ""),
   }
 }

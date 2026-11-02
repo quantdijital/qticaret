@@ -10,6 +10,7 @@ import {
   productReviews,
 } from "@/lib/store-api/requests"
 import { productCards, variantIdsOf } from "./product"
+import { cardOptions } from "./theme-settings"
 
 const DATE = new Intl.DateTimeFormat("tr-TR", {
   day: "numeric",
@@ -83,12 +84,13 @@ export async function relatedOf(product: StoreProduct): Promise<ProductCardView[
   if (others.length === 0) {
     return []
   }
-  const [paths, displays] = await Promise.all([
+  const [paths, displays, options] = await Promise.all([
     pathsOf(
       "product",
       others.map((each) => each.id)
     ),
     priceDisplays(variantIdsOf(others)),
+    cardOptions(),
   ])
-  return productCards(others, paths, displays)
+  return productCards(others, paths, displays, options)
 }

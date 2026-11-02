@@ -38,7 +38,7 @@ export function ConfirmPage({
             ))}
             <button
               type="submit"
-              className="h-11 rounded-full bg-foreground px-6 text-sm font-semibold text-background"
+              className="h-11 rounded-button bg-foreground px-6 text-sm font-semibold text-background"
             >
               {view.submit}
             </button>

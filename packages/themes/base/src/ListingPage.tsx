@@ -13,7 +13,7 @@ import { Sections, type Subscribe } from "./home/Sections"
 function SortLinks({ view, t }: { view: ListingPageView; t: Translate }) {
   return (
     <nav aria-label={t("listing.sort")} className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
-      <ul className="flex w-max gap-1 rounded-full border bg-card p-1">
+      <ul className="flex w-max gap-1 rounded-button border bg-card p-1">
         {view.sort.map((option) => (
           <li key={option.path}>
             <a
@@ -21,7 +21,7 @@ function SortLinks({ view, t }: { view: ListingPageView; t: Translate }) {
               aria-current={option.current ? "true" : undefined}
               rel="nofollow"
               className={cn(
-                "inline-flex h-8 items-center rounded-full px-3.5 text-sm whitespace-nowrap text-muted-foreground hover:text-foreground",
+                "inline-flex h-8 items-center rounded-button px-3.5 text-sm whitespace-nowrap text-muted-foreground hover:text-foreground",
                 option.current && "bg-foreground font-medium text-background hover:text-background"
               )}
             >
@@ -75,7 +75,7 @@ export function ListingPage({
                   <li key={link.path}>
                     <a
                       href={link.path}
-                      className="inline-flex h-10 items-center rounded-full border bg-card px-5 text-sm font-medium whitespace-nowrap transition-colors hover:border-foreground hover:bg-foreground hover:text-background"
+                      className="inline-flex h-10 items-center rounded-button border bg-card px-5 text-sm font-medium whitespace-nowrap transition-colors hover:border-foreground hover:bg-foreground hover:text-background"
                     >
                       {link.label}
                     </a>
@@ -137,7 +137,7 @@ export function ListingPage({
                   href={chip.path}
                   rel="nofollow"
                   aria-label={t("listing.remove_filter", { label: chip.label })}
-                  className="inline-flex h-8 items-center gap-1.5 rounded-full bg-foreground pr-2.5 pl-3.5 text-xs font-medium text-background hover:opacity-90"
+                  className="inline-flex h-8 items-center gap-1.5 rounded-button bg-foreground pr-2.5 pl-3.5 text-xs font-medium text-background hover:opacity-90"
                 >
                   {chip.label}
                   <X className="size-3.5" aria-hidden="true" />

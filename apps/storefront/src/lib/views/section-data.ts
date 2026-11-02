@@ -6,6 +6,7 @@ import { isStoreApiError } from "@/lib/store-api/errors"
 import { storeGet } from "@/lib/store-api/server"
 import { childrenOf } from "./categories"
 import { productCards, variantIdsOf } from "./product"
+import { cardOptions } from "./theme-settings"
 
 /**
  * What the design's sections show (adr/0049), fetched live: the products
@@ -108,14 +109,15 @@ export async function railCards(products: readonly StoreProduct[]): Promise<Prod
   if (products.length === 0) {
     return []
   }
-  const [paths, displays] = await Promise.all([
+  const [paths, displays, options] = await Promise.all([
     pathsOf(
       "product",
       products.map((product) => product.id)
     ),
     priceDisplays(variantIdsOf(products)),
+    cardOptions(),
   ])
-  return productCards(products, paths, displays)
+  return productCards(products, paths, displays, options)
 }
 
 export async function categoryLinks(ids: readonly string[]): Promise<LinkView[]> {

@@ -4,11 +4,11 @@ import type { ReactNode } from "react"
 import { saveCookieChoice } from "@/app/actions/cookies"
 import { subscribeNewsletter } from "@/app/actions/newsletter"
 import { t } from "@/lib/i18n"
-import { storefrontSettings } from "@/lib/store-api/requests"
-import { brandStyle } from "@/lib/views/color"
 import { shopView } from "@/lib/views/shop"
+import { themeFonts, themeStyle } from "@/lib/views/theme"
+import { currentTheme } from "@/lib/views/theme-settings"
 import { theme } from "@/theme"
-import { fraunces, inter } from "./fonts"
+import { FONT_CLASSES } from "./fonts"
 import "./globals.css"
 
 // Every page is made per request: prices, stock and the cart are live (adr/0046 §2)
@@ -20,20 +20,22 @@ export const metadata: Metadata = { formatDetection: { telephone: false } }
 export const viewport: Viewport = { width: "device-width", initialScale: 1 }
 
 export default async function RootLayout({ children }: { children: ReactNode }) {
-  const [shop, { storefront }, requestHeaders] = await Promise.all([
+  const [shop, settings, requestHeaders] = await Promise.all([
     shopView(),
-    storefrontSettings(),
+    currentTheme(),
     headers(),
   ])
-  // The shop's colour over the theme's (D3): one style element with this
-  // response's nonce, so the CSP needs no 'unsafe-inline'
-  const brand = brandStyle(storefront.primary_color)
+  // The shop's theme settings over the theme's own (adr/0053 §B): one style
+  // element with this response's nonce, so the CSP needs no 'unsafe-inline';
+  // <html> carries the chosen faces' classes, which define their variables
+  const style = themeStyle(settings)
+  const fonts = themeFonts(settings).map((font) => FONT_CLASSES[font])
   const nonce = requestHeaders.get("x-nonce") ?? undefined
   return (
-    <html lang="tr" className={`${inter.variable} ${fraunces.variable}`}>
+    <html lang="tr" className={fonts.join(" ")}>
       {/* Browser extensions write attributes on <body> before React loads */}
       <body suppressHydrationWarning>
-        {brand && <style nonce={nonce}>{brand}</style>}
+        {style && <style nonce={nonce}>{style}</style>}
         <theme.Layout
           shop={shop}
           t={t}

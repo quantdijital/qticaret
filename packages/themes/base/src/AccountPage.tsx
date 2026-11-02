@@ -98,7 +98,7 @@ export function AccountPage({
                   href={link.path}
                   aria-current={link.current ? "page" : undefined}
                   className={cn(
-                    "flex h-10 items-center rounded-full px-4 text-sm font-medium whitespace-nowrap transition-colors lg:rounded-xl",
+                    "flex h-10 items-center rounded-button px-4 text-sm font-medium whitespace-nowrap transition-colors lg:rounded-xl",
                     link.current ? "bg-foreground text-background" : "hover:bg-foreground/5"
                   )}
                 >
@@ -249,7 +249,7 @@ export function AccountPage({
                 <div className="flex flex-wrap gap-2">
                   <form action={actions.requestPrivacy}>
                     <input type="hidden" name="kind" value="export" />
-                    <button type="submit" className="h-10 rounded-full border px-4 font-semibold">
+                    <button type="submit" className="h-10 rounded-button border px-4 font-semibold">
                       {t("account.privacy_export")}
                     </button>
                   </form>
@@ -257,7 +257,7 @@ export function AccountPage({
                     <input type="hidden" name="kind" value="erasure" />
                     <button
                       type="submit"
-                      className="h-10 rounded-full border border-sale px-4 font-semibold text-sale"
+                      className="h-10 rounded-button border border-sale px-4 font-semibold text-sale"
                     >
                       {t("account.privacy_erasure")}
                     </button>

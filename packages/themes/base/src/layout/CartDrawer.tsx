@@ -74,7 +74,7 @@ export function CartDrawer({
         {count > 0 && (
           <span
             aria-hidden="true"
-            className="tabular absolute top-0.5 right-0.5 flex min-w-[1.125rem] items-center justify-center rounded-full bg-primary px-1 text-[10px] leading-[1.125rem] font-semibold text-primary-foreground ring-2 ring-background"
+            className="tabular absolute top-0.5 right-0.5 flex min-w-[1.125rem] items-center justify-center rounded-full bg-highlight px-1 text-[10px] leading-[1.125rem] font-semibold text-highlight-foreground ring-2 ring-background"
           >
             {count}
           </span>
@@ -126,7 +126,7 @@ export function CartDrawer({
                   <span className="tabular text-xl font-semibold">{cart.subtotal}</span>
                 </p>
                 <p className="-mt-2 text-xs text-muted-foreground">{words.note}</p>
-                <Button asChild size="lg" className="h-12 rounded-full text-[15px]">
+                <Button asChild size="lg" className="h-12 rounded-button text-[15px]">
                   <a href="/odeme">
                     {words.checkout}
                     <ArrowRight aria-hidden="true" />
@@ -136,7 +136,7 @@ export function CartDrawer({
                   asChild
                   size="lg"
                   variant="outline"
-                  className="h-12 rounded-full bg-transparent text-[15px] shadow-none"
+                  className="h-12 rounded-button bg-transparent text-[15px] shadow-none"
                 >
                   <a href="/sepet">{words.viewCart}</a>
                 </Button>

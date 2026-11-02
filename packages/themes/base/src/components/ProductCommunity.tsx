@@ -157,7 +157,7 @@ export function ProductCommunity({
               <button
                 type="submit"
                 disabled={reviewPending}
-                className="h-10 rounded-full bg-foreground text-sm font-semibold text-background disabled:opacity-50"
+                className="h-10 rounded-button bg-foreground text-sm font-semibold text-background disabled:opacity-50"
               >
                 {reviewPending ? words.sending : words.send}
               </button>
@@ -208,7 +208,7 @@ export function ProductCommunity({
             <button
               type="submit"
               disabled={questionPending}
-              className="h-10 rounded-full border border-foreground text-sm font-semibold disabled:opacity-50"
+              className="h-10 rounded-button border border-foreground text-sm font-semibold disabled:opacity-50"
             >
               {questionPending ? words.sending : words.ask}
             </button>

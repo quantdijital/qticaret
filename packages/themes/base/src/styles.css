@@ -1,8 +1,11 @@
 /*
  * The base theme's values for the storefront tokens (docs/19 §3; names from
- * shadcn/ui, wired to Tailwind in `@qticaret/ui/styles.css`). A shop's own
- * colour (D3) overrides `--primary`, `--ring` and the announcement bar at
- * :root; everything else is the theme's.
+ * shadcn/ui, wired to Tailwind in `@qticaret/ui/styles.css`). The shop's
+ * theme settings (adr/0053 §B) override at :root, in the storefront's one
+ * nonce'd style element: `--primary`, `--ring` and the announcement bar,
+ * `--highlight`, the page colour and its neutrals, the faces, the corner
+ * scale, the buttons' corners and the cards' picture shape. Left at their
+ * defaults, nothing is printed and these values stand.
  *
  * The look: a warm bone page, white cards, ink text and dark ink bands,
  * a soft serif for headings (Fraunces) over Inter.
@@ -18,6 +21,12 @@
   --font-heading: var(--font-fraunces), ui-serif, Georgia, "Times New Roman", serif;
 
   --radius: 0.625rem;
+  /* Soft corners; sharp and round scale the whole set */
+  --radius-scale: 1;
+  /* Pill buttons */
+  --button-radius: calc(infinity * 1px);
+  /* Product cards' pictures */
+  --card-ratio: 4 / 5;
 
   --background: #f6f4ef;
   --foreground: #1a1814;
@@ -43,6 +52,9 @@
   --success: #166534;
   --announcement: #1a1814;
   --announcement-foreground: #f6f4ef;
+  /* Badges and highlights: the shop's accent, else its primary */
+  --highlight: var(--primary);
+  --highlight-foreground: var(--primary-foreground);
 
   --ink: #1a1814;
   --ink-foreground: #f6f4ef;

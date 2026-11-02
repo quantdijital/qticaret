@@ -45,7 +45,7 @@ export function BrandsPage({ view, t }: { view: BrandsPageView; t: Translate }) 
                 <li key={group.anchor}>
                   <a
                     href={`#${group.anchor}`}
-                    className="inline-flex h-10 min-w-10 items-center justify-center rounded-full border bg-card px-3 text-sm font-semibold transition-colors hover:bg-foreground hover:text-background"
+                    className="inline-flex h-10 min-w-10 items-center justify-center rounded-button border bg-card px-3 text-sm font-semibold transition-colors hover:bg-foreground hover:text-background"
                   >
                     {group.letter}
                   </a>

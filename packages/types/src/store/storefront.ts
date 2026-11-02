@@ -63,9 +63,40 @@ export interface StoreMenu {
   items: StoreMenuLink[]
 }
 
+/** The heading faces a shop may choose (adr/0053 §B): names, each self-hosted by the storefront. */
+export type ThemeHeadingFont = "fraunces" | "inter" | "playfair" | "dm-serif" | "manrope"
+
+/** The body faces a shop may choose. */
+export type ThemeBodyFont = "inter" | "manrope" | "source-sans" | "nunito"
+
+/** The page colour's name; the storefront paints each with the backend's `THEME_BACKGROUNDS`. */
+export type ThemeBackground = "warm" | "neutral" | "cool"
+
+/**
+ * How the storefront looks (F18 D11, adr/0053 §B): choices from fixed
+ * lists, never CSS. The defaults are today's look.
+ */
+export interface StoreThemeSettings {
+  theme: "base"
+  colors: {
+    /** `#rrggbb`; null: the theme's own ink. Falls back to `storefront.primary_color`. */
+    primary: string | null
+    /** `#rrggbb` for badges and highlights; null: the primary colour. Not contrast-checked. */
+    accent: string | null
+    background: ThemeBackground
+  }
+  typography: { heading: ThemeHeadingFont; body: ThemeBodyFont }
+  radius: "sharp" | "soft" | "round"
+  product_card: { ratio: "4:5" | "1:1" | "3:4"; show_brand: boolean; show_rating: boolean }
+  header: { layout: "centered" | "left"; sticky: boolean }
+  buttons: "pill" | "rounded" | "square"
+}
+
 /** `GET /store/storefront`: the frame and the free shipping threshold (F4.5). */
 export interface StorefrontAnswer {
   storefront: StorefrontFrame
+  /** The theme's choices (adr/0053 §B); absent from a backend before it: the defaults. */
+  theme?: StoreThemeSettings
   /** Lira, KDV in, after discounts (`item_total`); null: no free shipping. */
   free_shipping_threshold: number | null
   /** What the storefront offers only while the shop has it on. */

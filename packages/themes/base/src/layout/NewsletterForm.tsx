@@ -59,12 +59,12 @@ export function NewsletterForm({
               autoComplete="email"
               placeholder={words.email}
               aria-label={words.email}
-              className="h-11 min-w-0 flex-1 rounded-full border border-ink-foreground/25 bg-transparent px-4 text-sm text-ink-foreground placeholder:text-ink-muted"
+              className="h-11 min-w-0 flex-1 rounded-button border border-ink-foreground/25 bg-transparent px-4 text-sm text-ink-foreground placeholder:text-ink-muted"
             />
             <button
               type="submit"
               disabled={pending}
-              className="h-11 shrink-0 rounded-full bg-ink-foreground px-5 text-sm font-semibold text-ink disabled:opacity-50"
+              className="h-11 shrink-0 rounded-button bg-ink-foreground px-5 text-sm font-semibold text-ink disabled:opacity-50"
             >
               {words.submit}
             </button>

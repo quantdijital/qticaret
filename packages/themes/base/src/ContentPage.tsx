@@ -41,7 +41,7 @@ function Tags({ tags, t }: { tags: LinkView[]; t: Translate }) {
           <li key={tag.path}>
             <a
               href={tag.path}
-              className="inline-flex h-10 items-center rounded-full border bg-card px-4 text-sm font-medium transition-colors hover:border-foreground"
+              className="inline-flex h-10 items-center rounded-button border bg-card px-4 text-sm font-medium transition-colors hover:border-foreground"
             >
               {tag.label}
             </a>

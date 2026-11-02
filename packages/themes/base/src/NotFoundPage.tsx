@@ -12,7 +12,7 @@ export function NotFoundPage({ t }: { t: Translate }) {
         <h1 className="text-3xl leading-tight lg:text-4xl">{t("not_found.title")}</h1>
         <p className="text-muted-foreground">{t("not_found.body")}</p>
         <div className="flex flex-wrap justify-center gap-3 pt-2">
-          <Button asChild size="lg" className="h-12 rounded-full px-7">
+          <Button asChild size="lg" className="h-12 rounded-button px-7">
             <a href="/">
               {t("not_found.home")}
               <ArrowRight aria-hidden="true" />
@@ -22,7 +22,7 @@ export function NotFoundPage({ t }: { t: Translate }) {
             asChild
             size="lg"
             variant="outline"
-            className="h-12 rounded-full bg-transparent px-7 shadow-none"
+            className="h-12 rounded-button bg-transparent px-7 shadow-none"
           >
             <a href="/arama">{t("not_found.search")}</a>
           </Button>

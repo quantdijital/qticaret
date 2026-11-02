@@ -95,8 +95,9 @@ medusaIntegrationTestRunner({
       await post("/admin/product-categories", { name: "Giyim", is_active: true })
 
       const job = await runSitemap()
-      // The product and the category, and the home page and the whole catalogue
-      expect(job).toMatchObject({ status: "succeeded", result_summary: { urls: 4 } })
+      // The product and the category, and the home page, the whole catalogue
+      // and the category and brand indexes
+      expect(job).toMatchObject({ status: "succeeded", result_summary: { urls: 6 } })
 
       const index = await storeText("/store/seo/sitemaps/sitemap.xml")
       expect(index.headers["content-type"]).toContain("application/xml")
@@ -109,6 +110,8 @@ medusaIntegrationTestRunner({
       const site = await storeText("/store/seo/sitemaps/sitemap-site-1.xml")
       expect(site.data).toContain("<loc>https://magaza.example.com/</loc>")
       expect(site.data).toContain("<loc>https://magaza.example.com/magaza</loc>")
+      expect(site.data).toContain("<loc>https://magaza.example.com/kategoriler</loc>")
+      expect(site.data).toContain("<loc>https://magaza.example.com/markalar</loc>")
       // Nothing to show there yet
       expect(site.data).not.toContain("/blog")
       expect(site.data).not.toContain("/yorumlar")

@@ -66,7 +66,7 @@ export function ShippingForm({
         type="submit"
         size="lg"
         disabled={pending}
-        className="h-12 rounded-full px-7 text-[15px] sm:self-start"
+        className="h-12 rounded-button px-7 text-[15px] sm:self-start"
       >
         {pending && <LoaderCircle className="animate-spin" aria-hidden="true" />}
         {pending ? words.saving : words.submit}

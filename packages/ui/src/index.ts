@@ -11,4 +11,5 @@ export type {
 } from "./theme"
 export type * from "./account-views"
 export type * from "./checkout-views"
+export type * from "./frame-views"
 export type * from "./views"

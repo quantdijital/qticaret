@@ -1,7 +1,7 @@
 import { Cookie } from "lucide-react"
 import type { CookieBannerView, Translate } from "@qticaret/ui"
 
-const BUTTON = "h-10 rounded-full px-5 text-sm font-semibold transition-colors whitespace-nowrap"
+const BUTTON = "h-10 rounded-button px-5 text-sm font-semibold transition-colors whitespace-nowrap"
 
 function Choice({
   name,

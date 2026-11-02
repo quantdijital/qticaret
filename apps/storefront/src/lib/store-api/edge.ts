@@ -1,6 +1,7 @@
-import type { Resolution, SiteSeo } from "@qticaret/types"
+import type { Resolution, SiteMaintenance, SiteSeo } from "@qticaret/types"
 import { storefrontEnv } from "../env"
 import { storeRequest, storeUrl } from "./core"
+import { isNotFound } from "./errors"
 import { publishableKey } from "./publishable-key"
 import { signedVisitorHeaders } from "./visitor"
 
@@ -36,34 +37,138 @@ export function reportNotFound(
   }).catch(() => undefined)
 }
 
+/** Whether the shop is dark (adr/0053) and what its page says. */
+export interface EdgeMaintenance {
+  enabled: boolean
+  title: string | null
+  message: string | null
+  expectedAt: string | null
+  allowPaths: string[]
+}
+
 /** What every request's edge needs from the shop's SEO settings (docs/13 §2.2, §6). */
 export interface EdgeSite {
   indexing: boolean
   canonicalHost: string | null
   indexNowKey: string | null
+  /** For the pages the edge answers itself (maintenance). */
+  shopName: string
+  maintenance: EdgeMaintenance
 }
+
+const OPEN: EdgeMaintenance = {
+  enabled: false,
+  title: null,
+  message: null,
+  expectedAt: null,
+  allowPaths: [],
+}
+
+const textOrNull = (value: unknown): string | null =>
+  typeof value === "string" && value.trim() !== "" ? value : null
+
+/** The answer's maintenance block, every field checked; anything but `enabled: true` is open. */
+function maintenanceOf(raw: unknown): EdgeMaintenance {
+  const maintenance = (raw ?? {}) as Partial<Record<keyof SiteMaintenance, unknown>>
+  if (maintenance.enabled !== true) {
+    return OPEN
+  }
+  const paths: unknown[] = Array.isArray(maintenance.allow_paths) ? maintenance.allow_paths : []
+  return {
+    enabled: true,
+    title: textOrNull(maintenance.title),
+    message: textOrNull(maintenance.message),
+    expectedAt: textOrNull(maintenance.expected_at),
+    allowPaths: paths.filter((path): path is string => typeof path === "string"),
+  }
+}
+
+const SITE_TTL_MS = 60_000
 
 let site: { value: EdgeSite; until: number } | undefined
 
 /**
- * The shop's edge facts, asked at most once a minute. Unknown counts as
- * "index, no canonical host": an outage never hides the shop nor loops it.
+ * The shop's edge facts, asked at most once a minute (turning maintenance
+ * on or off shows within that minute, adr/0053). When the backend does not
+ * answer, the last answer stands; with none yet, "index, no canonical host,
+ * open": an outage never hides the shop nor loops it.
  */
 export async function edgeSite(visitorIp: string | null): Promise<EdgeSite> {
   if (site && site.until > Date.now()) {
     return site.value
   }
   try {
-    const { data } = await storeRequest<SiteSeo>("/store/seo/site", { visitorIp })
+    const { data } = await storeRequest<
+      Omit<SiteSeo, "maintenance"> & { maintenance?: unknown; shop?: { name?: unknown } }
+    >("/store/seo/site", { visitorIp })
     const value = {
       indexing: data.indexing,
       canonicalHost: data.canonical_host,
       indexNowKey: data.indexnow_key,
+      shopName: textOrNull(data.shop?.name) ?? "",
+      maintenance: maintenanceOf(data.maintenance),
     }
-    site = { value, until: Date.now() + 60_000 }
+    site = { value, until: Date.now() + SITE_TTL_MS }
     return value
   } catch {
-    return { indexing: true, canonicalHost: null, indexNowKey: null }
+    return (
+      site?.value ?? {
+        indexing: true,
+        canonicalHost: null,
+        indexNowKey: null,
+        shopName: "",
+        maintenance: OPEN,
+      }
+    )
+  }
+}
+
+/** A bypass token's answer: it opens the dark shop, it does not, or the backend did not say. */
+export type BypassAnswer = "open" | "closed" | "unknown"
+
+const BYPASS_TTL_MS = 60_000
+const BYPASS_MAX_ENTRIES = 500
+
+const bypasses = new Map<string, { answer: BypassAnswer; until: number }>()
+
+function rememberBypass(token: string, answer: BypassAnswer, now: number): void {
+  bypasses.set(token, { answer, until: now + BYPASS_TTL_MS })
+  if (bypasses.size <= BYPASS_MAX_ENTRIES) {
+    return
+  }
+  for (const [key, entry] of bypasses) {
+    if (entry.until <= now || bypasses.size > BYPASS_MAX_ENTRIES) {
+      bypasses.delete(key)
+    }
+  }
+}
+
+/**
+ * Whether a bypass link's token opens the dark shop (`GET
+ * /store/maintenance/bypass/:token`, adr/0053): asked at most once a
+ * minute per token in this process. A 204 opens, a 404 closes (the link
+ * ended, or the section was saved since); anything else is no answer and
+ * not kept, so the page stays dark this once and the cookie stays.
+ */
+export async function checkBypass(token: string, visitorIp: string | null): Promise<BypassAnswer> {
+  const now = Date.now()
+  const hit = bypasses.get(token)
+  if (hit && hit.until > now) {
+    return hit.answer
+  }
+  try {
+    await storeRequest(`/store/maintenance/bypass/${encodeURIComponent(token)}`, {
+      visitorIp,
+      timeoutMs: 3000,
+    })
+    rememberBypass(token, "open", now)
+    return "open"
+  } catch (error) {
+    if (isNotFound(error)) {
+      rememberBypass(token, "closed", now)
+      return "closed"
+    }
+    return "unknown"
   }
 }
 

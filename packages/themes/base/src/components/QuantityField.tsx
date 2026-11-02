@@ -37,7 +37,7 @@ export function QuantityField({
     <div
       role="group"
       aria-label={label}
-      className={cn("flex h-12 items-center rounded-full border bg-card", className)}
+      className={cn("flex h-12 items-center rounded-button border bg-card", className)}
     >
       <button
         type="button"

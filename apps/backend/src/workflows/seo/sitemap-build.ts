@@ -218,9 +218,10 @@ export async function sitemapCounts(
 }
 
 /**
- * The storefront's own index pages (F18): the home page and the whole
- * catalogue, and the blog, the reviews page and the sale page once they
- * have something to show. No date: they change with everything under them.
+ * The storefront's own index pages (F18): the home page, the whole
+ * catalogue and the category and brand indexes (always there, docs/20),
+ * and the blog, the reviews page and the sale page once they have
+ * something to show. No date: they change with everything under them.
  */
 async function siteEntries(container: MedusaContainer, origin: string): Promise<SitemapEntry[]> {
   const [posts, reviews, sale] = await Promise.all([
@@ -235,6 +236,8 @@ async function siteEntries(container: MedusaContainer, origin: string): Promise<
   return [
     { loc: `${origin}/`, lastmod: null },
     { loc: `${origin}/magaza`, lastmod: null },
+    { loc: `${origin}/kategoriler`, lastmod: null },
+    { loc: `${origin}/markalar`, lastmod: null },
     ...(posts.length > 0 ? [{ loc: `${origin}/blog`, lastmod: null }] : []),
     ...(reviews.length > 0 ? [{ loc: `${origin}/yorumlar`, lastmod: null }] : []),
     // Noindex while nothing is on sale (adr/0019 ek 2026-11-03)

@@ -96,7 +96,7 @@ export function BillingForm({
       <button
         type="submit"
         disabled={pending}
-        className="h-10 self-start rounded-full border border-foreground px-5 font-semibold disabled:opacity-50"
+        className="h-10 self-start rounded-button border border-foreground px-5 font-semibold disabled:opacity-50"
       >
         {pending ? words.saving : words.save}
       </button>

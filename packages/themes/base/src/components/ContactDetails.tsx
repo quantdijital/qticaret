@@ -90,7 +90,7 @@ export function ContactDetails({ contact, t }: { contact: ContactView; t: Transl
           href={contact.whatsappHref}
           target="_blank"
           rel="noopener"
-          className="mt-6 inline-flex h-11 items-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground hover:opacity-90"
+          className="mt-6 inline-flex h-11 items-center gap-2 rounded-button bg-primary px-5 text-sm font-semibold text-primary-foreground hover:opacity-90"
         >
           <MessageCircle className="size-4" aria-hidden="true" />
           {t("contact.info_whatsapp")}

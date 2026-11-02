@@ -619,5 +619,19 @@
   "blog.category": "Kategori",
   "blog.tag": "Etiket",
   "blog.tags": "Etiketler",
-  "blog.archive_empty": "Bu başlıkta henüz yazı yok."
+  "blog.archive_empty": "Bu başlıkta henüz yazı yok.",
+  "nav.bottom.label": "Hızlı gezinme",
+  "nav.bottom.home": "Ana sayfa",
+  "nav.bottom.categories": "Kategoriler",
+  "nav.bottom.search": "Ara",
+  "nav.bottom.cart": "Sepet",
+  "nav.bottom.cart_label": "Sepet, {count} ürün",
+  "nav.bottom.account": "Hesabım",
+  "product.card_rating": "5 üzerinden {average} ({count} değerlendirme)",
+  "maintenance.title": "Kısa bir aradayız",
+  "maintenance.body": "Mağazamızda bakım çalışması yapıyoruz. Kısa süre sonra yeniden buradayız.",
+  "maintenance.expected": "Tahmini açılış: {when}",
+  "maintenance.link_invalid_title": "Bağlantı geçersiz",
+  "maintenance.link_invalid": "Bu bağlantı geçersiz ya da süresi dolmuş. Mağazadan yeni bir bağlantı isteyin.",
+  "maintenance.home": "Ana sayfaya git"
 }

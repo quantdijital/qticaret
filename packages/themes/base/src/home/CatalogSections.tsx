@@ -70,7 +70,7 @@ export function BrandsSection({ section }: { section: Of<"brands"> }) {
           <li key={brand.path}>
             <a
               href={brand.path}
-              className="inline-flex h-11 items-center rounded-full border bg-card px-5 text-sm font-medium transition-colors hover:bg-muted"
+              className="inline-flex h-11 items-center rounded-button border bg-card px-5 text-sm font-medium transition-colors hover:bg-muted"
             >
               {brand.label}
             </a>

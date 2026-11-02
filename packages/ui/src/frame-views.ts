@@ -1,0 +1,33 @@
+/**
+ * The shop's theme choices a theme draws by itself (F18 D11, adr/0053 §B).
+ * Colours, faces and corner sizes reach it as CSS variables the storefront
+ * prints (`--primary`, `--font-heading`, `--radius-scale`…); these are the
+ * choices that change markup.
+ */
+export interface ThemeView {
+  card: {
+    /** The picture's shape; also `--card-ratio`. */
+    ratio: "4:5" | "1:1" | "3:4"
+    /** The storefront leaves `brand` out of the cards when the shop hides it. */
+    showBrand: boolean
+    /** Stars on a card, when its view carries a rating. */
+    showRating: boolean
+  }
+  header: {
+    /** The logo in the middle with search on its left, or the logo first. */
+    layout: "centered" | "left"
+    /** The header stays at the top of a long page. */
+    sticky: boolean
+  }
+  /** The buttons' corners; also `--button-radius`. */
+  buttons: "pill" | "rounded" | "square"
+}
+
+/** The phone's bottom bar's items (docs/20 "mobil alt gezinme"). */
+export type BottomNavItem = "home" | "categories" | "search" | "cart" | "account"
+
+/** The phone's bottom bar (under 1024 px): which item the page is under. */
+export interface BottomNavView {
+  /** The item the page belongs to; null: none of them. */
+  current: BottomNavItem | null
+}

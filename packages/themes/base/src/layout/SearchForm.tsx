@@ -42,7 +42,7 @@ export function SearchForm({
         enterKeyHint="search"
         maxLength={100}
         defaultValue={defaultValue}
-        className="h-10 w-full rounded-full border border-border bg-card pr-4 pl-10 text-sm transition-colors outline-none placeholder:text-muted-foreground hover:border-input focus-visible:border-foreground/40"
+        className="h-10 w-full rounded-button border border-border bg-card pr-4 pl-10 text-sm transition-colors outline-none placeholder:text-muted-foreground hover:border-input focus-visible:border-foreground/40"
       />
     </form>
   )

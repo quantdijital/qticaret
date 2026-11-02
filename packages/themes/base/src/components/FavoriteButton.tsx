@@ -20,7 +20,7 @@ export function FavoriteButton({
 }) {
   const [state, submit, pending] = useActionState(add, { ok: false, error: null } as ActionResult)
   const button =
-    "flex h-11 w-full items-center justify-center gap-2 rounded-full border text-sm font-semibold hover:bg-foreground/5"
+    "flex h-11 w-full items-center justify-center gap-2 rounded-button border text-sm font-semibold hover:bg-foreground/5"
   if (!signedIn) {
     return (
       <a href={loginPath} className={button}>

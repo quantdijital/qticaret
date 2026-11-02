@@ -40,7 +40,7 @@ export function CheckoutResultPage({ view, t }: { view: CheckoutResultPageView; 
           </a>
         )}
         {view.state !== "pending" && (
-          <Button asChild size="lg" className="h-12 rounded-full px-7">
+          <Button asChild size="lg" className="h-12 rounded-button px-7">
             <a href={view.backPath}>
               {view.state === "failed" ? t("checkout.result_try_again") : t("not_found.home")}
             </a>

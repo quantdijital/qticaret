@@ -59,7 +59,7 @@ export function CartLine({
           <div
             role="group"
             aria-label={t("cart.quantity_of", { title: line.title })}
-            className="flex items-center rounded-full border bg-card"
+            className="flex items-center rounded-button border bg-card"
           >
             <button
               type="submit"

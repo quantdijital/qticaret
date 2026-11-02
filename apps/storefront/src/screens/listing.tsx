@@ -32,6 +32,7 @@ import {
 } from "@/lib/views/listing"
 import { breadcrumbsOf, productCards, variantIdsOf } from "@/lib/views/product"
 import { byPlacement, sectionViews } from "@/lib/views/sections"
+import { cardOptions } from "@/lib/views/theme-settings"
 import { paragraphsOf } from "@/lib/views/text"
 import { theme } from "@/theme"
 
@@ -207,7 +208,7 @@ export async function ListingContent({
       current: state.sort === "fiyat-azalan",
     },
   ]
-  const { storefront } = await storefrontSettings()
+  const [{ storefront }, options] = await Promise.all([storefrontSettings(), cardOptions()])
   const facets = filterViews(
     url.pathname,
     state,
@@ -232,7 +233,7 @@ export async function ListingContent({
           sectionsBottom: sections.bottom,
           breadcrumbs: breadcrumbs(heading.title),
           subcategories: heading.subcategories,
-          products: productCards(products, paths, displays),
+          products: productCards(products, paths, displays, options),
           total: answer.count,
           sort,
           ...facets,

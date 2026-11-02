@@ -46,6 +46,12 @@ describe("isSystemPath and backendFile", () => {
     expect(isSystemPath("/abonelikler-hakkinda")).toBe(false)
   })
 
+  it("keeps the maintenance bypass page as its own (adr/0053), never resolved", () => {
+    expect(isSystemPath("/bakim/gir")).toBe(true)
+    expect(normalizedPath("/bakim/gir")).toBeNull()
+    expect(isSystemPath("/bakim-seti")).toBe(false)
+  })
+
   it("makes the category and brand indexes itself; resolve answers the sale page and archives", () => {
     expect(isStorefrontIndex("/kategoriler")).toBe(true)
     expect(isStorefrontIndex("/markalar")).toBe(true)
