@@ -34,7 +34,15 @@ export const RECORD_LINK_KINDS = [
 ] as const
 export type RecordLinkKind = (typeof RECORD_LINK_KINDS)[number]
 
-export const MENU_LIMITS = { links: 30, children: 20, total: 200, title: 60, label: 60 } as const
+export const MENU_LIMITS = {
+  links: 30,
+  children: 20,
+  total: 200,
+  title: 60,
+  label: 60,
+  /** Footer columns: every page reads every menu (security review 2026-11-02, L1). */
+  footers: 10,
+} as const
 
 const MAX_PATH_LENGTH = 512
 
@@ -84,10 +92,12 @@ export type MenuLinkInput = z.infer<typeof link>
 /** A link to a record, a legal text, a storefront page or an address: menus, buttons and banners (adr/0049). */
 export const storefrontLink = link
 
-const withChildren = z.object({
-  link,
-  children: z.array(link).max(MENU_LIMITS.children).default([]),
-})
+const withChildren = z
+  .object({
+    link,
+    children: z.array(link).max(MENU_LIMITS.children).default([]),
+  })
+  .strict()
 
 /** A menu's links as the panel sends them: each link with its children beside it. */
 export const menuInput = z

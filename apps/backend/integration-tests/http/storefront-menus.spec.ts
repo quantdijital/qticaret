@@ -134,6 +134,30 @@ medusaIntegrationTestRunner({
         },
       ])
 
+      // Every page reads every menu: ten footer columns at most
+      const columns = await Promise.all(
+        Array.from({ length: 10 }, (_, rank) =>
+          post("/admin/storefront-menus", {
+            title: `Sütun ${String(rank)}`,
+            location: "footer",
+            rank,
+            items: rank === 0 ? [{ link: { kind: "page", target: draft, label: "Taslak" } }] : [],
+          })
+        )
+      )
+      const eleventh = await post("/admin/storefront-menus", {
+        title: "Fazla",
+        location: "footer",
+        items: [],
+      })
+      const withColumns = await settle(
+        http.get<Menus<StoreLink>>("/store/storefront-menus", { headers: store.headers })
+      )
+      expect(columns.map((each) => each.status)).toEqual(Array(10).fill(201))
+      expect(eleventh.data.message).toBe("storefront_menus.too_many_footers")
+      // A column with no live link (here: a draft page only, or none) is not there
+      expect(withColumns.data.menus.map((menu) => menu.location)).toEqual(["main"])
+
       const removed = await settle(
         http.delete(`/admin/storefront-menus/${main.data.menu.id}`, { headers: owner.headers })
       )

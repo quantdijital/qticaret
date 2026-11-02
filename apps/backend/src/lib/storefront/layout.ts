@@ -3,7 +3,7 @@ import { contentDoc } from "../content"
 import { isHttpsUrl } from "../security/https-url"
 import { isCleanText } from "../security/text"
 import { unknownShopTokens } from "../shop/tokens"
-import { storefrontLink } from "./menus"
+import { isShopPath, storefrontLink } from "./menus"
 
 /**
  * The storefront's design as the theme editor writes it (adr/0049): the
@@ -41,7 +41,7 @@ const image = z
     url: z
       .string()
       .trim()
-      .refine((value) => isHttpsUrl(value) || value.startsWith("/"), {
+      .refine((value) => isCleanText(value) && (isHttpsUrl(value) || isShopPath(value)), {
         message: "storefront_layout.image_invalid",
       }),
     alt: optional(text(300)),

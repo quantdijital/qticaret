@@ -8,6 +8,7 @@ import {
 } from "@medusajs/framework/workflows-sdk"
 import { acquireLockStep, releaseLockStep } from "@medusajs/medusa/core-flows"
 import { ValidationError } from "../../lib/errors"
+import { MENU_LIMITS } from "../../lib/storefront/menus"
 import type { MenuInput, MenuLinkInput } from "../../lib/storefront/menus"
 import { STOREFRONT_MENUS_MODULE } from "../../modules/storefront-menus"
 import type StorefrontMenusModuleService from "../../modules/storefront-menus/service"
@@ -46,14 +47,15 @@ const checkMenuStep = createStep(
         throw new MedusaError(MedusaError.Types.NOT_FOUND, "storefront_menus.unknown")
       }
     }
-    if (input.location !== "footer") {
-      const taken = await service.listStorefrontMenus(
-        { location: input.location },
-        { select: ["id"] }
-      )
-      if (taken.some((menu) => menu.id !== input.id)) {
-        throw new ValidationError("storefront_menus.location_taken", { field: "location" })
-      }
+    const others = (
+      await service.listStorefrontMenus({ location: input.location }, { select: ["id"] })
+    ).filter((menu) => menu.id !== input.id)
+    if (input.location !== "footer" && others.length > 0) {
+      throw new ValidationError("storefront_menus.location_taken", { field: "location" })
+    }
+    // Every storefront page reads every menu: the footer's columns are few
+    if (input.location === "footer" && others.length >= MENU_LIMITS.footers) {
+      throw new ValidationError("storefront_menus.too_many_footers", { field: "location" })
     }
     const links = linksOf(input).map(stored)
     const found = await existingRecords(container, links)
@@ -110,51 +112,66 @@ async function restore(service: StorefrontMenusModuleService, snapshot: Snapshot
   }
 }
 
-/** Writes the menu and replaces its links; undone, the menu is as it was (or gone, if new). */
+/** The menu as it was before a save: its links removed, the old ones back; a new menu gone. */
+async function putBack(
+  service: StorefrontMenusModuleService,
+  menuId: string,
+  previous: Snapshot | null
+): Promise<void> {
+  const current = await service.listStorefrontMenuItems({ menu_id: menuId }, { select: ["id"] })
+  await service.deleteStorefrontMenuItems(current.map((item) => item.id))
+  if (previous) {
+    await restore(service, previous)
+  } else {
+    await service.deleteStorefrontMenus(menuId)
+  }
+}
+
+/**
+ * Writes the menu and replaces its links; undone, the menu is as it was
+ * (or gone, if new). The writes are several: one failing part-way puts the
+ * menu back here, as the workflow undoes only a step that finished.
+ */
 const saveMenuStep = createStep(
   "storefront-menu-save",
   async (input: SaveMenuInput, { container }) => {
     const service = menus(container)
     const previous = input.id ? await snapshotOf(service, input.id) : null
     const fields = { title: input.title, location: input.location, rank: input.rank }
-    let menuId: string
-    if (previous) {
-      menuId = previous.menu.id
-      await service.updateStorefrontMenus({ id: menuId, ...fields })
-      await service.deleteStorefrontMenuItems(previous.items.map((item) => item.id))
-    } else {
-      menuId = (await service.createStorefrontMenus(fields)).id
+    let menuId = previous?.menu.id ?? null
+    try {
+      if (previous) {
+        await service.updateStorefrontMenus({ id: previous.menu.id, ...fields })
+        await service.deleteStorefrontMenuItems(previous.items.map((item) => item.id))
+      } else {
+        menuId = (await service.createStorefrontMenus(fields)).id
+      }
+      const owner = menuId ?? ""
+      const parents = await service.createStorefrontMenuItems(
+        input.items.map((each, rank) => ({ menu_id: owner, rank, ...stored(each.link) }))
+      )
+      const children = input.items.flatMap((each, index) =>
+        each.children.map((child, rank) => ({
+          menu_id: owner,
+          parent_id: parents[index]?.id ?? null,
+          rank,
+          ...stored(child),
+        }))
+      )
+      if (children.length > 0) {
+        await service.createStorefrontMenuItems(children)
+      }
+      return new StepResponse({ id: owner }, { menuId: owner, previous })
+    } catch (error) {
+      if (menuId) {
+        await putBack(service, menuId, previous)
+      }
+      throw error
     }
-    const parents = await service.createStorefrontMenuItems(
-      input.items.map((each, rank) => ({ menu_id: menuId, rank, ...stored(each.link) }))
-    )
-    const children = input.items.flatMap((each, index) =>
-      each.children.map((child, rank) => ({
-        menu_id: menuId,
-        parent_id: parents[index]?.id ?? null,
-        rank,
-        ...stored(child),
-      }))
-    )
-    if (children.length > 0) {
-      await service.createStorefrontMenuItems(children)
-    }
-    return new StepResponse({ id: menuId }, { menuId, previous })
   },
   async (undo, { container }) => {
-    if (!undo) {
-      return
-    }
-    const service = menus(container)
-    const current = await service.listStorefrontMenuItems(
-      { menu_id: undo.menuId },
-      { select: ["id"] }
-    )
-    await service.deleteStorefrontMenuItems(current.map((item) => item.id))
-    if (undo.previous) {
-      await restore(service, undo.previous)
-    } else {
-      await service.deleteStorefrontMenus(undo.menuId)
+    if (undo) {
+      await putBack(menus(container), undo.menuId, undo.previous)
     }
   }
 )

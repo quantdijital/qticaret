@@ -45,6 +45,8 @@ test.describe("storefront pages", () => {
     const headers = preview?.headers() ?? {}
     expect(headers["content-security-policy"]).toMatch(/frame-ancestors http:\/\/localhost:5173/)
     expect(headers["x-frame-options"]).toBeUndefined()
+    // The link is a key: no page it loads learns it from the Referer
+    expect(headers["referrer-policy"]).toBe("no-referrer")
     const home = (await page.goto("/"))?.headers() ?? {}
     expect(home["x-frame-options"]).toBe("DENY")
     expect(home["content-security-policy"]).toContain("frame-ancestors 'none'")

@@ -153,5 +153,7 @@ export async function proxy(request: NextRequest): Promise<Response> {
 
 export const config = {
   // Everything but Next's own build files and the favicon
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  // Exact exclusions: a page whose path only starts like one still passes
+  // through here (its CSP, and the preview header set only here)
+  matcher: ["/((?!_next/static/|_next/image(?:$|/)|favicon\\.ico$).*)"],
 }

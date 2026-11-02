@@ -177,9 +177,26 @@ medusaIntegrationTestRunner({
         },
       ])
       expect(forged.status).toBe(404)
+      // A link of one kind opens nothing of another (security review 2026-11-02)
+      const asContent = await settle(
+        http.get(`/store/content/preview/${token.replace(/^sfl_/, "cnt_")}`, {
+          headers: store.headers,
+        })
+      )
+      const contentToken = await settle(
+        http.get(`/store/storefront-layout/preview/${token.replace(/^sfl_/, "cnt_")}`, {
+          headers: store.headers,
+        })
+      )
+      expect([asContent.status, contentToken.status]).toEqual([404, 404])
 
       const published = await action("publish")
       expect(published.data.layout).toMatchObject({ revision: 1, has_changes: false })
+      // Publishing saves the record: the draft's link made before is spent
+      const afterPublish = await settle(
+        http.get(`/store/storefront-layout/preview/${token}`, { headers: store.headers })
+      )
+      expect(afterPublish.status).toBe(404)
       expect((await live()).home.map((section) => section.id)).toEqual(["girisbolumu"])
       // Saved again, the earlier preview link no longer opens
       await save([hero])

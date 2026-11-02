@@ -9,6 +9,7 @@ import {
 } from "@medusajs/framework/workflows-sdk"
 import { acquireLockStep, emitEventStep, releaseLockStep } from "@medusajs/medusa/core-flows"
 import { ValidationError } from "../../lib/errors"
+import { layoutDocument } from "../../lib/storefront/layout"
 import type { LayoutDocument } from "../../lib/storefront/layout"
 import { STOREFRONT_LAYOUT_MODULE } from "../../modules/storefront-layout"
 import type StorefrontLayoutModuleService from "../../modules/storefront-layout/service"
@@ -98,10 +99,50 @@ export const saveLayoutDraftWorkflow = createWorkflow(
   }
 )
 
-/** Publishes the draft as the next revision; undone, the live design and revisions are as they were. */
+/** The draft to publish, read through today's schema; none saved yet: nothing to publish. */
+const loadDraftStep = createStep(
+  "storefront-layout-load-draft",
+  async (_: undefined, { container }) => {
+    const row = await layoutRow(container)
+    if (!row) {
+      throw new ValidationError("storefront_layout.nothing_to_publish", { field: "document" })
+    }
+    return new StepResponse(layoutDocument.parse(row.draft))
+  }
+)
+
+interface PublishUndo {
+  row: LayoutRow
+  made: string | null
+  pruned: Record<string, unknown>[]
+}
+
+/** The live design and revisions as they were before a publication. */
+async function unpublish(service: StorefrontLayoutModuleService, undo: PublishUndo) {
+  const { row } = undo
+  await service.updateStorefrontLayouts({
+    id: row.id,
+    published: row.published as Record<string, unknown> | null,
+    published_at: row.published_at,
+    published_by: row.published_by,
+    revision: row.revision,
+  })
+  if (undo.made) {
+    await service.deleteStorefrontLayoutRevisions(undo.made)
+  }
+  if (undo.pruned.length > 0) {
+    await service.createStorefrontLayoutRevisions(undo.pruned)
+  }
+}
+
+/**
+ * Publishes the checked draft as the next revision; undone, the live
+ * design and revisions are as they were. Its writes failing part-way are
+ * put back here (the workflow undoes only a step that finished).
+ */
 const publishStep = createStep(
   "storefront-layout-publish",
-  async (actor: string | null, { container }) => {
+  async ({ draft, actor }: { draft: LayoutDocument; actor: string | null }, { container }) => {
     const row = await layoutRow(container)
     if (!row) {
       throw new ValidationError("storefront_layout.nothing_to_publish", { field: "document" })
@@ -109,54 +150,55 @@ const publishStep = createStep(
     const service = layouts(container)
     const revision = row.revision + 1
     const now = new Date()
-    await service.updateStorefrontLayouts({
-      id: row.id,
-      published: row.draft as Record<string, unknown>,
-      published_at: now,
-      published_by: actor,
-      revision,
-    })
-    const made = await service.createStorefrontLayoutRevisions({
-      revision,
-      document: row.draft as Record<string, unknown>,
-      published_at: now,
-      published_by: actor,
-    })
-    const old = await service.listStorefrontLayoutRevisions(
-      { revision: { $lte: revision - KEPT_REVISIONS } },
-      { select: ["id", "revision", "document", "published_at", "published_by"] }
-    )
-    if (old.length > 0) {
-      await service.deleteStorefrontLayoutRevisions(old.map((each) => each.id))
+    const undo: PublishUndo = { row, made: null, pruned: [] }
+    try {
+      await service.updateStorefrontLayouts({
+        id: row.id,
+        published: json(draft),
+        published_at: now,
+        published_by: actor,
+        revision,
+      })
+      const made = await service.createStorefrontLayoutRevisions({
+        revision,
+        document: json(draft),
+        published_at: now,
+        published_by: actor,
+      })
+      undo.made = made.id
+      const old = await service.listStorefrontLayoutRevisions(
+        { revision: { $lte: revision - KEPT_REVISIONS } },
+        { select: ["id", "revision", "document", "published_at", "published_by"] }
+      )
+      if (old.length > 0) {
+        await service.deleteStorefrontLayoutRevisions(old.map((each) => each.id))
+        undo.pruned = old
+      }
+    } catch (error) {
+      await unpublish(service, undo)
+      throw error
     }
-    return new StepResponse({ revision, published_at: now }, { row, made: made.id, pruned: old })
+    return new StepResponse({ revision, published_at: now }, undo)
   },
   async (undo, { container }) => {
-    if (!undo) {
-      return
-    }
-    const service = layouts(container)
-    const { row } = undo
-    await service.updateStorefrontLayouts({
-      id: row.id,
-      published: row.published as Record<string, unknown> | null,
-      published_at: row.published_at,
-      published_by: row.published_by,
-      revision: row.revision,
-    })
-    await service.deleteStorefrontLayoutRevisions(undo.made)
-    if (undo.pruned.length > 0) {
-      await service.createStorefrontLayoutRevisions(undo.pruned)
+    if (undo) {
+      await unpublish(layouts(container), undo)
     }
   }
 )
 
-/** Takes the draft live (adr/0049); the storefront shows it within its cache's minute. */
+/**
+ * Takes the draft live (adr/0049), checked again first: a record or an
+ * image it names may have gone since it was saved. The storefront shows it
+ * within its cache's minute.
+ */
 export const publishLayoutWorkflow = createWorkflow(
   "storefront-layout-publish",
   (actor: string | null) => {
     acquireLockStep(LAYOUT_LOCK)
-    const published = publishStep(actor)
+    const draft = loadDraftStep()
+    checkLayoutStep(draft)
+    const published = publishStep(transform({ draft, actor }, (data) => data))
     emitEventStep({ eventName: LAYOUT_PUBLISHED, data: published })
     releaseLockStep({ key: LAYOUT_LOCK.key })
     return new WorkflowResponse(published)
@@ -176,8 +218,9 @@ export async function draftSource(
     if (!kept) {
       throw new MedusaError(MedusaError.Types.NOT_FOUND, "storefront_layout.revision_unknown")
     }
-    return kept.document as unknown as LayoutDocument
+    // Through today's schema: a document kept under an older one is checked again
+    return layoutDocument.parse(kept.document)
   }
   const row = await layoutRow(container)
-  return (row?.published as LayoutDocument | null) ?? defaultLayout(container)
+  return row?.published ? layoutDocument.parse(row.published) : defaultLayout(container)
 }

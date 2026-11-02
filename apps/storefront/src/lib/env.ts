@@ -77,6 +77,12 @@ export function parseStorefrontEnv(
         `Invalid storefront configuration:\n${missing.map((key) => `  - ${key}: is missing`).join("\n")}`
       )
     }
+    // The theme editor's panel frames drafts: only over TLS when deployed
+    if (env.PANEL_ORIGIN?.startsWith("http:")) {
+      throw new StorefrontEnvError(
+        "Invalid storefront configuration:\n  - PANEL_ORIGIN: must be https in production"
+      )
+    }
   }
   return env
 }

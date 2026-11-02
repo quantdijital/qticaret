@@ -49,27 +49,34 @@ async function rowsOf(container: Container) {
   )) as (StoredLink & { menu_id: string })[]
   menus.sort((a, b) => LOCATION_ORDER[a.location] - LOCATION_ORDER[b.location] || a.rank - b.rank)
   items.sort((a, b) => a.rank - b.rank)
-  return { menus, items, resolved: await resolveLinks(container, items) }
+  // Each menu's links under their parent, in one pass (security review 2026-11-02, L1)
+  const under = new Map<string, StoredLink[]>()
+  for (const item of items) {
+    const key = `${item.menu_id}|${item.parent_id ?? ""}`
+    under.set(key, [...(under.get(key) ?? []), item])
+  }
+  const childrenOf = (menuId: string, parentId: string | null): StoredLink[] =>
+    under.get(`${menuId}|${parentId ?? ""}`) ?? []
+  return { menus, childrenOf, resolved: await resolveLinks(container, items) }
 }
 
 const BROKEN: ResolvedLink = { name: null, path: null, broken: true }
 
 /** Every menu with every link, each marked with what it shows now (adr/0049): the panel's view. */
 export async function adminMenus(container: Container) {
-  const { menus, items, resolved } = await rowsOf(container)
-  const linkOf = (item: StoredLink): AdminMenuLink => ({
-    id: item.id,
-    kind: item.kind,
-    target: item.target,
-    url: item.url,
-    label: item.label,
-    ...(resolved.get(item.id) ?? BROKEN),
-    children: items.filter((child) => child.parent_id === item.id).map(linkOf),
-  })
-  return menus.map((menu) => ({
-    ...menu,
-    items: items.filter((item) => item.menu_id === menu.id && item.parent_id === null).map(linkOf),
-  }))
+  const { menus, childrenOf, resolved } = await rowsOf(container)
+  const linkOf =
+    (menuId: string) =>
+    (item: StoredLink): AdminMenuLink => ({
+      id: item.id,
+      kind: item.kind,
+      target: item.target,
+      url: item.url,
+      label: item.label,
+      ...(resolved.get(item.id) ?? BROKEN),
+      children: childrenOf(menuId, item.id).map(linkOf(menuId)),
+    })
+  return menus.map((menu) => ({ ...menu, items: childrenOf(menu.id, null).map(linkOf(menu.id)) }))
 }
 
 /**
@@ -78,28 +85,27 @@ export async function adminMenus(container: Container) {
  * and so are its children.
  */
 export async function storeMenus(container: Container) {
-  const { menus, items, resolved } = await rowsOf(container)
+  const { menus, childrenOf, resolved } = await rowsOf(container)
   const linksOf = (menuId: string, parentId: string | null): StoreMenuLink[] =>
-    items
-      .filter((item) => item.menu_id === menuId && item.parent_id === parentId)
-      .flatMap((item) => {
-        const shown = resolved.get(item.id) ?? BROKEN
-        return shown.broken
-          ? []
-          : [
-              {
-                label: item.label ?? shown.name,
-                kind: item.kind,
-                target: item.target,
-                path: shown.path,
-                children: linksOf(menuId, item.id),
-              },
-            ]
-      })
-  return menus.map((menu) => ({
-    title: menu.title,
-    location: menu.location,
-    rank: menu.rank,
-    items: linksOf(menu.id, null),
-  }))
+    childrenOf(menuId, parentId).flatMap((item) => {
+      const shown = resolved.get(item.id) ?? BROKEN
+      return shown.broken
+        ? []
+        : [
+            {
+              label: item.label ?? shown.name,
+              kind: item.kind,
+              target: item.target,
+              path: shown.path,
+              children: linksOf(menuId, item.id),
+            },
+          ]
+    })
+  // A menu left without a link is not there at all
+  return menus.flatMap((menu) => {
+    const items = linksOf(menu.id, null)
+    return items.length > 0
+      ? [{ title: menu.title, location: menu.location, rank: menu.rank, items }]
+      : []
+  })
 }

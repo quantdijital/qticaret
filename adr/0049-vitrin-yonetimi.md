@@ -105,3 +105,30 @@ Bugün vitrinin çerçevesi Ayarlar > Vitrin'de alt alta on kartla yönetiliyor.
   - Bu sayfalarda CSP `frame-ancestors` panelin kökenini (`PANEL_ORIGIN`; geliştirmede `http://localhost:5173`) adlandırır ve `X-Frame-Options` gönderilmez. Diğer bütün sayfalar `DENY` ve `frame-ancestors 'none'` ile kalır (e2e testli).
 - **Yansıma.** Yayın `storefront.layout_published` olayını yayar. Vitrin yayındaki belgeyi paylaşılan önbellekle en geç 60 sn'de gösterir; hemen yansıma adr/0048 planındaki ayrı adımdır.
 - **Bilinen sınır.** İki kişi aynı anda düzenlerse son kayıt kazanır; düzenleyici "başka biri kaydetti" uyarısını sonra alabilir.
+
+## Ek (2026-11-02): bağımsız güvenlik incelemesi
+
+Menüler, tema düzenleyicinin backend'i ve önizleme çerçevesi incelendi. Yüksek ya da orta bulgu çıkmadı. 8 düşük bulgunun hepsi düzeltildi:
+
+- **L1:** alt bilgi sütunu en çok 10 (`storefront_menus.too_many_footers`). Menü bağlantıları tek geçişte gruplanıyor; bağlantısı kalmamış menü herkese açık yanıtta yok.
+- **L2:** yayındaki düzen süreçte bir dakika tutuluyor (anahtarı sürüm numarası; yeni yayın hemen görünür). Herkese açık ucun maliyetini ziyaretçi seçemez.
+- **L3:** menü kaydı ve yayın adımı yarıda hata verirse önceki durumu adımın içinde geri koyuyor. İş akışı yalnız biten adımı geri alır.
+- **L4:** yayın, taslağı bugünkü şemadan ve kayıt/görsel denetiminden yeniden geçirir. Geri yüklenen sürüm ve yayındaki belge de şemadan geçer.
+- **L5:** vekilin eşleştiricisi kesin: `_next/static/`, `_next/image`, `favicon.ico$`. Vitrin önizleme belirtecini biçimi tutmadan backend'e sormaz.
+- **L6:** önizleme sayfalarında `Referrer-Policy: no-referrer`.
+- **L7:** göç betiği uymayan bağlantıyı atlayıp yalnız sayısını kaydeder. Kayıt bağlantısı reddedilirse menüyü adresleriyle kurar. Yer yer çalışır; yarıda kalan çalıştırma kalanını sonra tamamlar.
+- **L8:** herkese açık düzende yalnız yayındaki kayıtların kimlikleri var. Seçimi tümüyle boşalan bölüm çıkar.
+
+Notlardan uygulananlar:
+
+- Görsel adresi mağaza yolu ya da https olmalı.
+- `withChildren` şeması katı.
+- `PANEL_ORIGIN` canlıda https olmak zorunda.
+- Önizleme ucu `no-store`'u en başta yazar.
+- Eklenen testler: bir türün belirteci öbür türün ucunu açmaz; yayından sonra eski bağlantı kapanır.
+
+Bilinçli kalanlar:
+
+- Ürünün satış kanalı menüde denetlenmiyor; vitrin ürün sayfası zaten 404 verir.
+- İçerik önizlemeleri de artık panel tarafından çerçevelenebilir (panel güvenilir köken).
+- Belirteç anahtarları için HKDF ile ayrı anahtar türetme sonraya kaldı (bağlamlar ayrı, karışma yok).

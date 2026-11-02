@@ -47,7 +47,13 @@ const config: NextConfig = {
       // frame-ancestors names the panel, which X-Frame-Options cannot
       {
         source: "/onizleme/:path*",
-        headers: SECURITY_HEADERS.filter((header) => header.key !== "X-Frame-Options"),
+        // The link is a key: no page it loads learns it from the Referer
+        headers: [
+          ...SECURITY_HEADERS.filter(
+            (header) => header.key !== "X-Frame-Options" && header.key !== "Referrer-Policy"
+          ),
+          { key: "Referrer-Policy", value: "no-referrer" },
+        ],
       },
       // A card provider may load its return address inside its form, framed
       // on our checkout (D7): those pages may be framed by our own pages

@@ -1,16 +1,20 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { renderDoc } from "../../lib/content"
 import type { LayoutDocument, PageSection } from "../../lib/storefront/layout"
-import { isShowing } from "../../lib/storefront/layout"
-import type { MenuLinkInput } from "../../lib/storefront/menus"
+import { isShowing, layoutDocument } from "../../lib/storefront/layout"
+import type { MenuLinkInput, RecordLinkKind } from "../../lib/storefront/menus"
 import { fillShopDoc, fillShopText } from "../../lib/shop/tokens"
 import type { ShopInfoValues } from "../../lib/shop/tokens"
 import { MEDIA_MODULE } from "../../modules/media"
 import type MediaModuleService from "../../modules/media/service"
 import { cardTargets } from "../../api/store/content/cards"
+import { createTtlCache } from "../../lib/cache/ttl-cache"
 import { shopInfoValues } from "../shop/info-values"
+import { layoutRow } from "./layout"
+import { defaultLayout } from "./layout-default"
 import { linksOf } from "./layout-check"
 import { resolveLinks } from "./menu-links"
+import type { StoredLink } from "./menu-links"
 
 /** A button or slide link as the storefront prints it; a broken one is not there. */
 export interface StoreLayoutLink {
@@ -109,6 +113,72 @@ async function hydrateSection(section: PageSection, at: Context): Promise<Hydrat
 }
 
 /**
+ * The sections with only the records live now (security review 2026-11-02,
+ * L8): a draft product's or an inactive category's id never leaves the
+ * backend. A section whose every chosen record is gone, or whose rail's
+ * category or collection is, is left out (an emptied choice would read as
+ * "the top categories" or "every brand").
+ */
+async function liveSections(
+  container: MedusaContainer,
+  sections: PageSection[]
+): Promise<PageSection[]> {
+  const wanted = new Map<string, StoredLink>()
+  const want = (kind: RecordLinkKind, target: string) =>
+    wanted.set(`${kind}:${target}`, {
+      id: `${kind}:${target}`,
+      parent_id: null,
+      rank: 0,
+      label: null,
+      kind,
+      target,
+      url: null,
+    })
+  for (const section of sections) {
+    if (section.type === "categories") {
+      section.category_ids.forEach((id) => want("category", id))
+    } else if (section.type === "brands") {
+      section.brand_ids.forEach((id) => want("brand", id))
+    } else if (section.type === "products") {
+      const { source } = section
+      if (source.kind === "category") want("category", source.category_id)
+      if (source.kind === "collection") want("collection", source.collection_id)
+      if (source.kind === "manual") source.product_ids.forEach((id) => want("product", id))
+    }
+  }
+  if (wanted.size === 0) {
+    return sections
+  }
+  const resolved = await resolveLinks(container, [...wanted.values()])
+  const live = (kind: RecordLinkKind) => (id: string) =>
+    resolved.get(`${kind}:${id}`)?.broken === false
+  return sections.flatMap((section): PageSection[] => {
+    if (section.type === "categories" && section.category_ids.length > 0) {
+      const ids = section.category_ids.filter(live("category"))
+      return ids.length > 0 ? [{ ...section, category_ids: ids }] : []
+    }
+    if (section.type === "brands" && section.brand_ids.length > 0) {
+      const ids = section.brand_ids.filter(live("brand"))
+      return ids.length > 0 ? [{ ...section, brand_ids: ids }] : []
+    }
+    if (section.type === "products") {
+      const { source } = section
+      if (source.kind === "category") {
+        return live("category")(source.category_id) ? [section] : []
+      }
+      if (source.kind === "collection") {
+        return live("collection")(source.collection_id) ? [section] : []
+      }
+      if (source.kind === "manual") {
+        const ids = source.product_ids.filter(live("product"))
+        return ids.length > 0 ? [{ ...section, source: { ...source, product_ids: ids } }] : []
+      }
+    }
+    return [section]
+  })
+}
+
+/**
  * The design as the storefront shows it at a moment (adr/0049): only the
  * sections showing then, the shop's details in place, links named and
  * placed as their records are now (a broken one left out), images with
@@ -122,7 +192,10 @@ export async function storeLayout(
   now = new Date()
 ) {
   const header = doc.header.filter((section) => isShowing(section, now))
-  const home = doc.home.filter((section) => isShowing(section, now))
+  const home = await liveSections(
+    container,
+    doc.home.filter((section) => isShowing(section, now))
+  )
   const footer = doc.footer.filter((section) => isShowing(section, now))
   const links = home.flatMap(linksOf)
   const urls = home.flatMap((section) =>
@@ -201,4 +274,22 @@ export async function storeLayout(
       text: fill(section.text, values),
     })),
   }
+}
+
+type Shown = Awaited<ReturnType<typeof storeLayout>>
+
+// The live design, hydrated once a minute per process at most (security review
+// 2026-11-02, L2): the public endpoint's cost is not the visitor's to choose
+const shownCache = createTtlCache<Shown>({ ttlMs: 60_000, maxEntries: 4 })
+
+/** The published design (else the default) as shown now; a new publication is seen at once. */
+export async function publishedLayout(container: MedusaContainer): Promise<Shown> {
+  const row = await layoutRow(container)
+  const key = row?.published ? `revision:${String(row.revision)}` : "default"
+  return shownCache(key, async () => {
+    const doc = row?.published
+      ? layoutDocument.parse(row.published)
+      : await defaultLayout(container)
+    return storeLayout(container, doc)
+  })
 }

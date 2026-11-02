@@ -695,6 +695,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "storefront_menus.no_children": "Only the main menu can have child links.",
   "storefront_menus.location_taken":
     "There is already a menu in this place; there is one main menu and one row of top links.",
+  "storefront_menus.too_many_footers": "The footer can have at most 10 columns.",
   "storefront_menus.unknown": "Menu not found.",
   "tr_address.phone_invalid": "The phone number is not valid.",
   "tr_address.postal_code_invalid": "The postal code is not valid.",

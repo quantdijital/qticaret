@@ -698,6 +698,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "storefront_menus.no_children": "Yalnızca ana menüde alt bağlantı olabilir.",
   "storefront_menus.location_taken":
     "Bu yerde zaten bir menü var; ana menü ve üst bağlantılar birer tanedir.",
+  "storefront_menus.too_many_footers": "Alt bilgide en çok 10 sütun olabilir.",
   "storefront_menus.unknown": "Menü bulunamadı.",
   "tr_address.phone_invalid": "Telefon numarası geçerli değil.",
   "tr_address.postal_code_invalid": "Posta kodu geçerli değil.",

@@ -9,6 +9,8 @@ import { menuLink } from "./menus"
 /** Set by the proxy on a design preview's address (adr/0049), never by a visitor. */
 const LAYOUT_PREVIEW_HEADER = "x-qt-layout-preview"
 
+const LAYOUT_TOKEN = /^sfl_[0-9A-Za-z]{1,40}\.[0-9a-z]{1,12}\.[\w-]{43}$/
+
 /**
  * The design this request shows: the draft on a signed preview address
  * (its header and footer too), else the published one. A preview link
@@ -16,7 +18,8 @@ const LAYOUT_PREVIEW_HEADER = "x-qt-layout-preview"
  */
 export async function currentLayout(): Promise<StoreLayout> {
   const token = (await headers()).get(LAYOUT_PREVIEW_HEADER)
-  return (token ? await layoutPreview(token) : null) ?? (await storefrontLayout())
+  const preview = token && LAYOUT_TOKEN.test(token) ? await layoutPreview(token) : null
+  return preview ?? (await storefrontLayout())
 }
 
 /** A button's or slide's link as the theme prints it; null when it has no name or address. */

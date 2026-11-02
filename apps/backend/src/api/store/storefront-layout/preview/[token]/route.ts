@@ -12,6 +12,8 @@ import { storeLayout } from "../../../../../workflows/storefront/layout-read"
  * saved now. Anything else is a 404, as if there were no such page.
  */
 export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {
+  // A draft is no one's to keep, whatever the answer
+  res.setHeader("Cache-Control", "private, no-store")
   const parts = layoutPreview.parts(req.params["token"] ?? "")
   const row = parts ? await layoutRow(req.scope) : null
   const updated = (row as unknown as { updated_at?: Date } | null)?.updated_at
@@ -21,6 +23,5 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
   if (!layoutPreview.opens(orderAccessKey(), parts, updated)) {
     throw new MedusaError(MedusaError.Types.NOT_FOUND, "storefront_layout.preview_unknown")
   }
-  res.setHeader("Cache-Control", "private, no-store")
   res.json({ layout: await storeLayout(req.scope, row.draft as LayoutDocument) })
 }
