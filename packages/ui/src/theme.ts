@@ -108,7 +108,12 @@ export interface StorefrontTheme {
     /** Fields: `email`, `challenge`; the footer's newsletter box (double opt-in). */
     subscribe?: (state: PlaceOrderResult, form: FormData) => Promise<PlaceOrderResult>
   }>
-  HomePage: ComponentType<Page<HomePageView>>
+  HomePage: ComponentType<
+    Page<HomePageView> & {
+      /** Fields: `email`, `challenge`: a newsletter section's box (double opt-in). */
+      subscribe?: (state: PlaceOrderResult, form: FormData) => Promise<PlaceOrderResult>
+    }
+  >
   ProductPage: ComponentType<Page<ProductPageView> & { actions: ThemeActions }>
   ListingPage: ComponentType<Page<ListingPageView>>
   ContentPage: ComponentType<Page<ContentPageView> & { actions?: ContactActions }>

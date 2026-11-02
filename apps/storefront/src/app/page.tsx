@@ -1,74 +1,25 @@
 import type { Metadata } from "next"
+import { subscribeNewsletter } from "@/app/actions/newsletter"
 import { t } from "@/lib/i18n"
 import { JsonLd } from "@/lib/seo/JsonLd"
 import { metadataOf } from "@/lib/seo/metadata"
-import {
-  allCategories,
-  blogPosts,
-  legalIdentity,
-  listProducts,
-  pathsOf,
-  priceDisplays,
-  siteSeo,
-  storefrontSettings,
-} from "@/lib/store-api/requests"
-import { childrenOf } from "@/lib/views/categories"
-import { postCards } from "@/lib/views/posts"
-import { productCards, variantIdsOf } from "@/lib/views/product"
-import { contactOf } from "@/lib/views/shop"
+import { siteSeo } from "@/lib/store-api/requests"
+import { homeSections } from "@/lib/views/home"
+import { currentLayout } from "@/lib/views/layout"
 import { theme } from "@/theme"
 
 export async function generateMetadata(): Promise<Metadata> {
   return metadataOf((await siteSeo()).home)
 }
 
-/** The home page: the shop's structured data, its top categories and newest products. */
+/** The home page as the shop laid it out in the theme editor (adr/0049), with its structured data. */
 export default async function HomePage() {
-  const [site, categories, { products }, { storefront }, identity, posts] = await Promise.all([
-    siteSeo(),
-    allCategories(),
-    listProducts({ limit: 12, order: "-created_at" }),
-    storefrontSettings(),
-    legalIdentity(),
-    blogPosts(0, 3),
-  ])
-  const contact = contactOf(identity, t)
-  const top = childrenOf(categories, null)
-  const [productPaths, categoryPaths, displays] = await Promise.all([
-    pathsOf(
-      "product",
-      products.map((product) => product.id)
-    ),
-    pathsOf(
-      "product_category",
-      top.map((category) => category.id)
-    ),
-    priceDisplays(variantIdsOf(products)),
-  ])
-  const categoryLinks = top.flatMap((category) => {
-    const path = categoryPaths[category.id]
-    return path ? [{ label: category.name, path }] : []
-  })
-  // The shop's own opening (D3), else its name and first two categories
-  const { hero } = storefront
+  const [site, layout] = await Promise.all([siteSeo(), currentLayout()])
+  const sections = await homeSections(layout.home, t)
   return (
     <>
       <JsonLd blocks={site.home.jsonLd} />
-      <theme.HomePage
-        t={t}
-        view={{
-          eyebrow: hero?.eyebrow ?? null,
-          heading: hero?.heading ?? site.shop.name,
-          intro: hero?.text ?? null,
-          actions: hero
-            ? hero.links.map((link) => ({ label: link.label, path: link.href }))
-            : categoryLinks.slice(0, 2),
-          categories: categoryLinks,
-          products: productCards(products, productPaths, displays),
-          posts: postCards(posts.entries, t),
-          help: contact.whatsappHref || contact.phone || contact.email ? contact : null,
-        }}
-      />
+      <theme.HomePage t={t} view={{ sections }} subscribe={subscribeNewsletter} />
     </>
   )
 }

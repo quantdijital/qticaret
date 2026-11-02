@@ -28,13 +28,16 @@ export interface FrameRules {
    * return address inside its own form, which is framed on the checkout.
    */
   framedBySelf?: boolean
+  /** Other origins that may frame the page: the panel's theme editor, on preview pages only (adr/0049). */
+  framedBy?: readonly string[]
 }
 
 export function contentSecurityPolicy(
   nonce: string,
   development: boolean,
-  { frameOrigins = [], framedBySelf = false, formOrigins = [] }: FrameRules = {}
+  { frameOrigins = [], framedBySelf = false, formOrigins = [], framedBy = [] }: FrameRules = {}
 ): string {
+  const ancestors = [...(framedBySelf ? ["'self'"] : []), ...framedBy]
   const directives = [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${development ? " 'unsafe-eval'" : ""}`,
@@ -47,7 +50,7 @@ export function contentSecurityPolicy(
     "object-src 'none'",
     "base-uri 'self'",
     `form-action 'self'${formOrigins.length > 0 ? ` ${formOrigins.join(" ")}` : ""}`,
-    `frame-ancestors ${framedBySelf ? "'self'" : "'none'"}`,
+    `frame-ancestors ${ancestors.length > 0 ? ancestors.join(" ") : "'none'"}`,
     ...(development ? [] : ["upgrade-insecure-requests"]),
   ]
   return directives.join("; ")

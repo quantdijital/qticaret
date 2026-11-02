@@ -3,12 +3,7 @@ import type { PlaceOrderResult, ShopView, Translate } from "@qticaret/ui"
 import { Container } from "../components/Container"
 import { TrustStrip } from "../components/TrustStrip"
 import { NewsletterForm } from "./NewsletterForm"
-
-const NEWSLETTER_ERRORS = [
-  "newsletter.email_invalid",
-  "newsletter.rate_limited",
-  "errors.challenge_failed",
-]
+import { newsletterWords } from "./newsletter-words"
 
 /**
  * The footer: the shop's promises on the page's own ground, then a dark
@@ -34,21 +29,12 @@ export function SiteFooter({
         </Container>
       )}
       <div className="bg-ink text-ink-foreground">
-        {subscribe && (
+        {subscribe && shop.newsletter && (
           <Container className="border-b border-ink-foreground/10 py-10 lg:py-12">
             <NewsletterForm
               action={subscribe}
               privacyPath={shop.privacyPath}
-              words={{
-                title: t("newsletter.title"),
-                text: t("newsletter.text", { shop: shop.companyTitle ?? shop.name }),
-                privacyLink: t("newsletter.privacy_link"),
-                email: t("newsletter.email"),
-                submit: t("newsletter.submit"),
-                sent: t("newsletter.sent"),
-                errors: Object.fromEntries(NEWSLETTER_ERRORS.map((key) => [key, t(key)])),
-                fallback: t("newsletter.failed"),
-              }}
+              words={newsletterWords(t, shop.newsletter.title, shop.newsletter.text)}
             />
           </Container>
         )}

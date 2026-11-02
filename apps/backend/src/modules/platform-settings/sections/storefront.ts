@@ -24,17 +24,15 @@ export interface StorefrontLink {
   href: string
 }
 
+/**
+ * The storefront's frame as the shop writes it (F18 D3). Its menus, top
+ * links and footer columns are menus of their own since adr/0049.
+ */
 export interface StorefrontSettings {
   /** The lines the announcement bar shows in turn (free shipping, same-day dispatch…). */
   announcements: string[]
-  /** The header's small links above the menu (about, contact, wholesale…). */
-  top_links: StorefrontLink[]
-  /** The footer's link columns; none: the storefront lists categories and legal texts. */
-  footer_groups: { title: string; links: StorefrontLink[] }[]
   /** The shop's promises under the header and beside "add to cart". */
   trust_badges: { icon: TrustIcon; title: string; text: string | null }[]
-  /** The header's menu as the shop names it; none: the top categories and their children. */
-  menu: StorefrontMenuItem[]
   /** The storefront's main colour (`#rrggbb`, lower case); none: the theme's own. */
   primary_color: string | null
   /** The home page's opening; none: the shop's name and its first two categories. */
@@ -55,11 +53,6 @@ export interface StorefrontHero {
   text: string | null
   /** At most two: the first is the main button. None: the first two categories. */
   links: StorefrontLink[]
-}
-
-export interface StorefrontMenuItem extends StorefrontLink {
-  /** The panel it opens: the item's own link comes first in it. */
-  children: StorefrontLink[]
 }
 
 const text = (max: number) =>
@@ -101,10 +94,6 @@ export const storefrontSection = defineSection<StorefrontSettings>(
   "storefront",
   {
     announcements: z.array(shopText(120)).max(5),
-    top_links: z.array(link).max(8),
-    footer_groups: z
-      .array(z.object({ title: text(40), links: z.array(link).min(1).max(10) }).strict())
-      .max(4),
     trust_badges: z
       .array(
         z
@@ -112,9 +101,6 @@ export const storefrontSection = defineSection<StorefrontSettings>(
           .strict()
       )
       .max(4),
-    menu: z
-      .array(z.object({ label: text(40), href, children: z.array(link).max(20) }).strict())
-      .max(12),
     primary_color: z
       .string()
       .trim()
@@ -161,10 +147,7 @@ export const storefrontSection = defineSection<StorefrontSettings>(
   },
   {
     announcements: [],
-    top_links: [],
-    footer_groups: [],
     trust_badges: [],
-    menu: [],
     primary_color: null,
     hero: null,
     contact_form_path: "/iletisim",

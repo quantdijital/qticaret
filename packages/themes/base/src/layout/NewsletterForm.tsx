@@ -15,15 +15,21 @@ export interface NewsletterWords {
   fallback: string
 }
 
-/** The footer's newsletter box: the address confirms by e-mail (double opt-in). */
+/**
+ * A newsletter box, in the footer or as a home page section: the address
+ * confirms by e-mail (double opt-in). `id` names its heading; two boxes on
+ * a page need two.
+ */
 export function NewsletterForm({
   action,
   privacyPath,
   words,
+  id = "bulten",
 }: {
   action: (state: PlaceOrderResult, form: FormData) => Promise<PlaceOrderResult>
   privacyPath: string | null
   words: NewsletterWords
+  id?: string
 }) {
   const [sent, setSent] = useState(false)
   const { error, pending, onSubmit } = useChallengeForm(async (state, form) => {
@@ -34,8 +40,8 @@ export function NewsletterForm({
     return result
   })
   return (
-    <section aria-labelledby="bulten" className="flex flex-col gap-3">
-      <h2 id="bulten" className="font-heading text-2xl">
+    <section aria-labelledby={id} className="flex flex-col gap-3">
+      <h2 id={id} className="font-heading text-2xl">
         {words.title}
       </h2>
       {sent ? (

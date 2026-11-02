@@ -673,6 +673,32 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Adres Türkiye adres kayıtlarıyla uyuşmuyor; il, ilçe, mahalle ve posta kodunu kontrol edin.",
   "tr_address.neighborhood_not_in_district": "Mahalle bu ilçede bulunamadı.",
   "tr_address.neighborhood_requires_district": "Mahalle için önce ilçe seçin.",
+  "storefront_layout.text_invalid": "Metin çok uzun ya da kullanılamayan karakter içeriyor.",
+  "storefront_layout.token_unknown":
+    "Metinde tanınmayan bir {…} bilgisi var. Kullanılabilenler: {mağaza_adı}, {telefon}, {e_posta}, {adres}, {whatsapp}, {ücretsiz_kargo_eşiği}.",
+  "storefront_layout.target_invalid": "Seçilen kayıt geçerli değil.",
+  "storefront_layout.target_unknown":
+    "Bölümlerden birinin gösterdiği kayıt artık yok; onu yeniden seçin.",
+  "storefront_layout.image_invalid": "Görsel mağazanın medya kütüphanesinden seçilmeli.",
+  "storefront_layout.section_invalid": "Bölüm tanınmadı; sayfayı yenileyip yeniden deneyin.",
+  "storefront_layout.section_duplicate":
+    "Aynı bölüm iki kez eklenmiş; duyuru şeridi ve bülten birer kez olabilir.",
+  "storefront_layout.schedule_invalid": "Bölümün bitiş zamanı başlangıçtan sonra olmalı.",
+  "storefront_layout.nothing_to_publish": "Yayınlanacak bir taslak yok; önce bir değişiklik yapın.",
+  "storefront_layout.nothing_to_preview": "Önizlemek için önce taslağı kaydedin.",
+  "storefront_layout.revision_unknown": "Bu sürüm artık tutulmuyor.",
+  "storefront_layout.preview_unknown": "Önizleme bağlantısı geçersiz ya da süresi dolmuş.",
+  "storefront_menus.text_invalid":
+    "Menü adı ve bağlantı adı en fazla 60 karakter olmalı ve kullanılamayan karakter içermemeli.",
+  "storefront_menus.target_invalid": "Bağlantının hedefi geçerli değil.",
+  "storefront_menus.target_unknown":
+    "Bağlantılardan birinin gösterdiği kayıt artık yok; bağlantıyı yeniden seçin.",
+  "storefront_menus.url_invalid": "Adres https:// ile ya da / ile başlamalı.",
+  "storefront_menus.too_many": "Bir menüde en çok 200 bağlantı olabilir.",
+  "storefront_menus.no_children": "Yalnızca ana menüde alt bağlantı olabilir.",
+  "storefront_menus.location_taken":
+    "Bu yerde zaten bir menü var; ana menü ve üst bağlantılar birer tanedir.",
+  "storefront_menus.unknown": "Menü bulunamadı.",
   "tr_address.phone_invalid": "Telefon numarası geçerli değil.",
   "tr_address.postal_code_invalid": "Posta kodu geçerli değil.",
   "tr_address.postal_code_neighborhood_mismatch": "Posta kodu seçilen mahalleye ait değil.",

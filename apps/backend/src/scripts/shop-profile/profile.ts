@@ -55,6 +55,36 @@ const profileSchema = z.strictObject({
    * texts (F13, published under `/yasal`), never to a content page.
    */
   retired_pages: z.array(handle).max(200).default([]),
+  /**
+   * The storefront's menus (adr/0049), links written as addresses: a
+   * record's path becomes a link to the record when the profile is loaded.
+   */
+  menus: z
+    .array(
+      z.strictObject({
+        title: z.string().trim().min(1).max(60),
+        location: z.enum(["main", "top", "footer"]),
+        items: z
+          .array(
+            z.strictObject({
+              label: z.string().trim().min(1).max(60),
+              href: z.string().trim().min(1).max(2048),
+              children: z
+                .array(
+                  z.strictObject({
+                    label: z.string().trim().min(1).max(60),
+                    href: z.string().trim().min(1).max(2048),
+                  })
+                )
+                .max(20)
+                .default([]),
+            })
+          )
+          .max(30),
+      })
+    )
+    .max(10)
+    .default([]),
   /** A migration bundle (`quant-migration`) queued as a run that applies. */
   bundle: relativeFile.optional(),
 })

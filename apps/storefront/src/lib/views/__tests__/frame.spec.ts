@@ -1,19 +1,6 @@
 import { describe, expect, it } from "vitest"
-import type { StorefrontFrame } from "@qticaret/types"
 import { t } from "@/lib/i18n"
 import { displayPhone, footerGroups, socialLinks, whatsappHref } from "../frame"
-
-const empty: StorefrontFrame = {
-  announcements: [],
-  top_links: [],
-  footer_groups: [],
-  trust_badges: [],
-  menu: [],
-  primary_color: null,
-  hero: null,
-  contact_form_path: null,
-  color_swatches: [],
-}
 
 describe("contact details", () => {
   it("shows a Turkish number as it is read, and links WhatsApp without the plus", () => {
@@ -49,10 +36,7 @@ describe("footerGroups", () => {
 
   it("uses the shop's own columns when it wrote some", () => {
     const groups = footerGroups(
-      {
-        ...empty,
-        footer_groups: [{ title: "Kurumsal", links: [{ label: "Blog", href: "/blog" }] }],
-      },
+      [{ title: "Kurumsal", links: [{ label: "Blog", path: "/blog" }] }],
       categories,
       t
     )
@@ -61,7 +45,7 @@ describe("footerGroups", () => {
   })
 
   it("else lists the first eight categories and the cart", () => {
-    const groups = footerGroups(empty, categories, t)
+    const groups = footerGroups([], categories, t)
 
     expect(groups.map((group) => group.title)).toEqual(["Kategoriler", "Yardım"])
     expect(groups[0]?.links).toHaveLength(8)
@@ -69,6 +53,6 @@ describe("footerGroups", () => {
   })
 
   it("shows only the help column for a shop without categories", () => {
-    expect(footerGroups(empty, [], t).map((group) => group.title)).toEqual(["Yardım"])
+    expect(footerGroups([], [], t).map((group) => group.title)).toEqual(["Yardım"])
   })
 })

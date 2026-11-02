@@ -24,6 +24,11 @@ export type LegalSlug = keyof typeof LEGAL_PAGES
 
 export const isLegalSlug = (value: string): value is LegalSlug => value in LEGAL_PAGES
 
+export type LegalKind = (typeof LEGAL_PAGES)[LegalSlug]
+
+export const isLegalKind = (value: string): value is LegalKind =>
+  (Object.values(LEGAL_PAGES) as string[]).includes(value)
+
 export const legalPath = (kind: (typeof LEGAL_PAGES)[LegalSlug]): string => {
   const slug = Object.entries(LEGAL_PAGES).find(([, each]) => each === kind)?.[0] ?? ""
   return `/yasal/${slug}`

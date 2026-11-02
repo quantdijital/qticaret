@@ -63,6 +63,26 @@
     - Logo kartı yeni: önceden panelde vitrin logosunu girecek bir yer yoktu. **Not:** backend logo adresini yalnız https ya da `/` ile kabul ediyor; geliştirmedeki yerel depo `http://localhost` adresi veriyorsa logo kaydı geliştirmede reddedilebilir (denenmedi).
     - Ekranlar tarayıcıda görülmedi (panel girişi gerekiyor).
 - **Doğrulama:** backend birim (231 dosya, 2430 test; eskiyen bir varsayılan testi düzeltildi), ayar modülü 57, HTTP 17 takım (54 test), vitrin birim 64, lint ve tip temiz. Vitrinde elle: iletişim bilgileri bloğu, alt bilgide saatler, duyuru ve rozette `₺1.500`.
+- **Vitrin sekmesi, adım 1 Menüler (ADR-0049):**
+  - Backend: `storefront-menus` modülü (menü: başlık, yer `main`/`top`/`footer`, sıra; bağlantı: kayıt, yasal metin, mağaza sayfası ya da adres; ana menüde bir alt düzey).
+  - Uçlar ve çözümleme: `GET/POST /admin/storefront-menus`, `POST/DELETE /admin/storefront-menus/:id`, `GET /store/storefront-menus`. Bağlantının adı ve adresi kayıttan ve adres kaydından geliyor; yayında olmayan ya da silinmiş hedef vitrinde gizli, panelde "kırık" işaretli.
+  - Göç betiği `storefront-menus-from-settings` eski `menu`, `top_links` ve `footer_groups`'u bir kez menülere çevirdi (geliştirmede 5 menü). Bu alanlar ayar bölümünden kalktı.
+  - Mağaza profili biçimine `menus` eklendi. Vitrin çerçevesi menüleri yeni uçtan okuyor.
+  - Testler: HTTP 2 (çözümleme, kırık gizleme, yer ve hedef denetimleri, göç), vitrin birim 67.
+  - **Panel (alt ajan; doğrulandı: 138 dosya, 471 test; e2e 84):**
+    - Kenar menüsünde "Vitrin" grubu: Menüler, Sayfalar ve blog (İçerik buraya taşındı), Vitrin ayarları.
+    - Menüler ekranı iki bölmeli. Solda yere göre gruplu menüler, sağda bağlantı düzenleyici: tutamakla sürükle-bırak, klavyeyle taşıma, içe/dışa alma, kırık rozetleri, kayıt seçici (katalog, içerik, mağaza sayfaları, dış adres).
+    - 12'den uzun menülerde alt bağlantılar katlı açılıyor (geliştirmedeki ana menü 42 bağlantı).
+    - Vitrin ayarlarından menü, üst bağlantı ve alt bilgi kartları kalktı.
+  - **Tema düzenleyicinin backend ve vitrin tarafı (ADR-0049 eki):**
+    - `storefront-layout` modülü tek belge: `header`, `home` ve `footer`; taslak, yayın ve son 20 sürüm.
+    - Bölüm türleri, kayıtta denetim, imzalı önizleme (`/onizleme/sfl_…`; yalnız panel çerçeveleyebilir), herkese açık uç (süzülmüş ve çözülmüş). Varsayılan belge bugünkü vitrin.
+    - Vitrinin ana sayfası, duyuru şeridi ve bülten kutusu düzenden geliyor. Temanın `HomePageView`'ı bölüm listesi oldu.
+    - Testler: HTTP `storefront-layout` (varsayılan, denetimler, önizleme, yayın, geri alma, geri yükleme, zamanlama), vitrin e2e 29.
+  - **F16 şartları (yeni):**
+    - Vitrine `PANEL_ORIGIN` girilmeli; girilmezse panel önizlemeyi çerçeveleyemez.
+    - Panelin önündeki ters vekil `/store/` önekini yönlendirmeli, çıplak `/store` önekini değil; aksi halde panelin `/storefront/*` sayfaları backend'e gider (alt ajan geliştirmedeki Vite vekilinde düzeltti).
+  - **Karar (otonom, gözden geçir):** sürükle-bırak yeni bağımlılık eklemeden, tarayıcının kendi sürükle-bırakı ve klavye düğmeleriyle (WCAG 2.5.7). Menü kaydı hemen yayına gidiyor (Shopify'daki gibi), tema düzenleyicinin taslak/yayın akışına girmiyor.
 - **Kenara alınan:** ana sayfa düzeni (bölümler, taslak/yayın) için başlanan kod `git stash` içinde ("wip: storefront layout module (adr-0048)"). Kullanıcı Vitrin sekmesini ayrıca planlamak istedi; stash'teki ADR bu yüzden **0049** olarak yeniden numaralanmalı ve `storefront.ts`'teki bugünkü değişikliklerle birleştirilmeli. Geliştirme veritabanındaki göçü geri alındı.
 - **Bekleyen (kullanıcı kararı, planlama):** Vitrin sekmesinin UX planı (tema düzenleyici, menüler; taslak çizimlerle ayrı plan). WordPress/WooCommerce taşıma kaynağı plan aşamasında bekletildi (kullanıcı: "şimdilik dursun").
 
@@ -1388,7 +1408,7 @@
 - **Daha önce:** F1 planlaması ve F0.2–F0.8 (2026-10-24), F0.1 monorepo (2026-10-24 sabahı), SEO ve güvenlik dokümanları (2026-10-22).
 
 ## Sıradaki görev
-**Claude'un sıradaki işi (2026-11-02 akşam):** Vitrin sekmesinin UX planını (tema düzenleyici, menüler, sayfa bölümleri; taslak çizimlerle) kullanıcıya sun, **onay gelmeden kod yazma** (kullanıcı: "önce plan kuralım"). Kenardaki ana sayfa düzeni çalışması `git stash` "wip: storefront layout module (adr-0048)"; plan onaylanırsa ADR-0049 olarak oradan başlanır. WordPress taşıma kaynağı bekletiliyor.
+**Claude'un sıradaki işi (2026-11-02 gece):** Vitrin sekmesi (ADR-0049; kullanıcı planı ve dört kararı onayladı: "önerilerine uyuyorum"). Sıra: (1) Menüler — backend, vitrin ve göç bitti, panel ekranı yapılıyor; (2) tema düzenleyici iskeleti (tam ekran, canlı önizleme, otomatik taslak + Yayınla; ana sayfa bölümleri, üst/alt bilgi): `git stash` "wip: storefront layout module (adr-0048)" oradan devam (ADR numarası 0049'un eki olur, `storefront.ts` ile birleştir); (3) diğer sayfa bölümleri; (4) tema ayarları ve metinler. WordPress taşıma kaynağı bekletiliyor.
 
 Önceki durum (2026-11-02 sabahı):
 - Bitenler: ödeme (hediye kartı ve tamamı kartla ödeme dahil), hesap (adres ekleme dahil), filtreler, renk örnekleri, iletişim formu, e-bülten, kargo takibi, taslak önizleme, yasal sayfalar, çerez onayı, SEO dizinleri. Üç güvenlik incelemesi ve tam HTTP koşusu yapıldı.

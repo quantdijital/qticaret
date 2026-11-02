@@ -11,8 +11,11 @@ import type {
   StoreProduct,
   StoreRegion,
   StoreContentSummary,
+  StoreLayout,
+  StoreMenu,
   StorefrontAnswer,
 } from "@qticaret/types"
+import { isStoreApiError } from "./errors"
 import { storeGet, storePublicGet } from "./server"
 
 /**
@@ -33,6 +36,33 @@ export const siteSeo = cache(() => storePublicGet<SiteAnswer>("/store/seo/site")
 
 /** The frame the shop wrote (announcement bar, links, footer, trust strip) and its free shipping threshold (D3). */
 export const storefrontSettings = cache(() => storePublicGet<StorefrontAnswer>("/store/storefront"))
+
+/** The shop's published design (adr/0049): the sections showing now, resolved. */
+export const storefrontLayout = cache(async () => {
+  const { layout } = await storePublicGet<{ layout: StoreLayout }>("/store/storefront-layout")
+  return layout
+})
+
+/** The design's draft for a signed preview link; null when the link does not open (a 404). */
+export const layoutPreview = cache(async (token: string): Promise<StoreLayout | null> => {
+  try {
+    const { layout } = await storeGet<{ layout: StoreLayout }>(
+      `/store/storefront-layout/preview/${encodeURIComponent(token)}`
+    )
+    return layout
+  } catch (error) {
+    if (isStoreApiError(error) && error.status === 404) {
+      return null
+    }
+    throw error
+  }
+})
+
+/** The shop's menus (adr/0049): links named and placed as their records are now. */
+export const storefrontMenus = cache(async () => {
+  const { menus } = await storePublicGet<{ menus: StoreMenu[] }>("/store/storefront-menus")
+  return menus
+})
 
 /** The shop's legal identity and contact details, for the footer (F13.9). */
 export const legalIdentity = cache(async () => {

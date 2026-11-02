@@ -10,10 +10,7 @@ interface Frame {
   features?: { gift_cards: boolean }
   storefront: {
     announcements: string[]
-    top_links: { label: string; href: string }[]
-    footer_groups: { title: string; links: { label: string; href: string }[] }[]
     trust_badges: { icon: string; title: string; text: string | null }[]
-    menu: { label: string; href: string; children: { label: string; href: string }[] }[]
     primary_color: string | null
     hero: unknown
   }
@@ -35,15 +32,16 @@ medusaIntegrationTestRunner({
 
       const before = await frame()
       const script = await save({
-        top_links: [{ label: "Tıkla", href: "javascript:alert(document.cookie)" }],
+        hero: {
+          eyebrow: null,
+          heading: "Giriş",
+          text: null,
+          links: [{ label: "Tıkla", href: "javascript:alert(document.cookie)" }],
+        },
       })
       const misspelt = await save({ announcements: ["{ucretsiz_kargo} ve üzeri kargo bedava"] })
       const saved = await save({
         announcements: ["{ücretsiz_kargo_eşiği} ve üzeri kargo bedava"],
-        top_links: [{ label: "Hakkımızda", href: "/hakkimizda" }],
-        footer_groups: [
-          { title: "Müşteri Hizmetleri", links: [{ label: "İletişim", href: "/iletisim" }] },
-        ],
         trust_badges: [{ icon: "clock", title: "Aynı gün kargo", text: "16:00'ya kadar" }],
       })
       await settle(
@@ -61,10 +59,7 @@ medusaIntegrationTestRunner({
       expect(before.status).toBe(200)
       expect(before.data.storefront).toEqual({
         announcements: [],
-        top_links: [],
-        footer_groups: [],
         trust_badges: [],
-        menu: [],
         primary_color: null,
         hero: null,
         contact_form_path: "/iletisim",
@@ -82,12 +77,7 @@ medusaIntegrationTestRunner({
       expect(after.data.storefront).toEqual({
         // The threshold as the promotions section says it now
         announcements: ["₺1.500 ve üzeri kargo bedava"],
-        top_links: [{ label: "Hakkımızda", href: "/hakkimizda" }],
-        footer_groups: [
-          { title: "Müşteri Hizmetleri", links: [{ label: "İletişim", href: "/iletisim" }] },
-        ],
         trust_badges: [{ icon: "clock", title: "Aynı gün kargo", text: "16:00'ya kadar" }],
-        menu: [],
         primary_color: null,
         hero: null,
         contact_form_path: "/iletisim",

@@ -62,33 +62,83 @@
         "El yapımı işçilik garantisi",
         "Hafta içi 16:00'a kadar aynı gün kargo"
       ],
-      "top_links": [
+      "trust_badges": [
         {
-          "label": "Tüm Ürünler",
-          "href": "/magaza"
+          "icon": "truck",
+          "title": "Ücretsiz kargo",
+          "text": "{ücretsiz_kargo_eşiği} ve üzeri"
         },
         {
-          "label": "Hakkımızda",
-          "href": "/hakkimizda"
+          "icon": "clock",
+          "title": "Aynı gün kargo",
+          "text": "Hafta içi 16:00'a kadar"
         },
         {
-          "label": "Toptan",
-          "href": "/toptan"
+          "icon": "award",
+          "title": "2 yıl garanti",
+          "text": "Marka garantili ürünler"
         },
         {
-          "label": "Blog",
-          "href": "/blog"
-        },
-        {
-          "label": "İletişim",
-          "href": "/iletisim"
-        },
-        {
-          "label": "Yorumlar",
-          "href": "/yorumlar"
+          "icon": "shield",
+          "title": "Güvenli ödeme",
+          "text": "Kart veya havale/EFT"
         }
       ],
-      "menu": [
+      "primary_color": "#076599",
+      "hero": {
+        "eyebrow": "Yatağan el işçiliği",
+        "heading": "El yapımı çakı ve bıçaklar",
+        "text": "Günlük taşıma, koleksiyon ve hediye için elde işlenen çakı, bıçak ve kılıçlar. Her modelde çelik, ölçü ve sap detayı yazılı.",
+        "links": [
+          {
+            "label": "Çakıları incele",
+            "href": "/kategori/el-yapimi-caki"
+          },
+          {
+            "label": "Özel koleksiyon",
+            "href": "/kategori/ozel-koleksiyon"
+          }
+        ]
+      }
+    }
+  },
+  "pages": [
+    {
+      "handle": "hakkimizda",
+      "title": "Hakkımızda",
+      "file": "../sayfalar/hakkimizda.md"
+    },
+    {
+      "handle": "iletisim",
+      "title": "İletişim",
+      "file": "../sayfalar/iletisim.md"
+    },
+    {
+      "handle": "sik-sorulan-sorular",
+      "title": "Sık Sorulan Sorular",
+      "file": "../sayfalar/sik-sorulan-sorular.md"
+    },
+    {
+      "handle": "toptan",
+      "title": "Toptan Satış",
+      "file": "../sayfalar/toptan.md"
+    }
+  ],
+  "retired_pages": [
+    "iade-ve-degisim-politikasi",
+    "satis-sozlesmesi",
+    "kisisel-verilere-iliskin-aydinlatma-metni",
+    "cerez-politikasi",
+    "toptan-satis-sozlesmesi",
+    "toptan-on-bilgilendirme",
+    "toptan-kvkk-aydinlatma",
+    "toptan-gizlilik-taahhutnamesi"
+  ],
+  "menus": [
+    {
+      "title": "Ana menü",
+      "location": "main",
+      "items": [
         {
           "label": "Çakılar",
           "href": "/kategori/el-yapimi-caki",
@@ -270,159 +320,120 @@
             }
           ]
         }
-      ],
-      "footer_groups": [
+      ]
+    },
+    {
+      "title": "Üst bağlantılar",
+      "location": "top",
+      "items": [
         {
-          "title": "Kategoriler",
-          "links": [
-            {
-              "label": "El Yapımı Çakılar",
-              "href": "/kategori/el-yapimi-caki"
-            },
-            {
-              "label": "Av Bıçakları",
-              "href": "/kategori/av-bicagi"
-            },
-            {
-              "label": "Kasap Bıçakları",
-              "href": "/kategori/kasap-bicaklari"
-            },
-            {
-              "label": "Mutfak ve Şef Serisi",
-              "href": "/kategori/mutfak-sef-serisi"
-            },
-            {
-              "label": "Kılıç Modelleri",
-              "href": "/kategori/kilic-modelleri"
-            },
-            {
-              "label": "Outdoor ve Kamp",
-              "href": "/kategori/outdoor-kamp"
-            },
-            {
-              "label": "Hediyelik Eşyalar",
-              "href": "/kategori/hediyelik-esyalar"
-            },
-            {
-              "label": "Tüm Ürünler",
-              "href": "/magaza"
-            }
-          ]
+          "label": "Tüm Ürünler",
+          "href": "/magaza"
         },
         {
-          "title": "Müşteri Hizmetleri",
-          "links": [
-            {
-              "label": "Hesabım",
-              "href": "/hesap"
-            },
-            {
-              "label": "Siparişimi Bul",
-              "href": "/siparis"
-            },
-            {
-              "label": "Sık Sorulan Sorular",
-              "href": "/sik-sorulan-sorular"
-            },
-            {
-              "label": "İletişim",
-              "href": "/iletisim"
-            },
-            {
-              "label": "Toptan Sipariş",
-              "href": "/toptan"
-            },
-            {
-              "label": "Müşteri Yorumları",
-              "href": "/yorumlar"
-            }
-          ]
+          "label": "Hakkımızda",
+          "href": "/hakkimizda"
         },
         {
-          "title": "Kurumsal",
-          "links": [
-            {
-              "label": "Hakkımızda",
-              "href": "/hakkimizda"
-            },
-            {
-              "label": "Blog ve Rehberler",
-              "href": "/blog"
-            }
-          ]
+          "label": "Toptan",
+          "href": "/toptan"
+        },
+        {
+          "label": "Blog",
+          "href": "/blog"
+        },
+        {
+          "label": "İletişim",
+          "href": "/iletisim"
+        },
+        {
+          "label": "Yorumlar",
+          "href": "/yorumlar"
         }
-      ],
-      "trust_badges": [
+      ]
+    },
+    {
+      "title": "Kategoriler",
+      "location": "footer",
+      "items": [
         {
-          "icon": "truck",
-          "title": "Ücretsiz kargo",
-          "text": "{ücretsiz_kargo_eşiği} ve üzeri"
+          "label": "El Yapımı Çakılar",
+          "href": "/kategori/el-yapimi-caki"
         },
         {
-          "icon": "clock",
-          "title": "Aynı gün kargo",
-          "text": "Hafta içi 16:00'a kadar"
+          "label": "Av Bıçakları",
+          "href": "/kategori/av-bicagi"
         },
         {
-          "icon": "award",
-          "title": "2 yıl garanti",
-          "text": "Marka garantili ürünler"
+          "label": "Kasap Bıçakları",
+          "href": "/kategori/kasap-bicaklari"
         },
         {
-          "icon": "shield",
-          "title": "Güvenli ödeme",
-          "text": "Kart veya havale/EFT"
+          "label": "Mutfak ve Şef Serisi",
+          "href": "/kategori/mutfak-sef-serisi"
+        },
+        {
+          "label": "Kılıç Modelleri",
+          "href": "/kategori/kilic-modelleri"
+        },
+        {
+          "label": "Outdoor ve Kamp",
+          "href": "/kategori/outdoor-kamp"
+        },
+        {
+          "label": "Hediyelik Eşyalar",
+          "href": "/kategori/hediyelik-esyalar"
+        },
+        {
+          "label": "Tüm Ürünler",
+          "href": "/magaza"
         }
-      ],
-      "primary_color": "#076599",
-      "hero": {
-        "eyebrow": "Yatağan el işçiliği",
-        "heading": "El yapımı çakı ve bıçaklar",
-        "text": "Günlük taşıma, koleksiyon ve hediye için elde işlenen çakı, bıçak ve kılıçlar. Her modelde çelik, ölçü ve sap detayı yazılı.",
-        "links": [
-          {
-            "label": "Çakıları incele",
-            "href": "/kategori/el-yapimi-caki"
-          },
-          {
-            "label": "Özel koleksiyon",
-            "href": "/kategori/ozel-koleksiyon"
-          }
-        ]
-      }
+      ]
+    },
+    {
+      "title": "Müşteri Hizmetleri",
+      "location": "footer",
+      "items": [
+        {
+          "label": "Hesabım",
+          "href": "/hesap"
+        },
+        {
+          "label": "Siparişimi Bul",
+          "href": "/siparis"
+        },
+        {
+          "label": "Sık Sorulan Sorular",
+          "href": "/sik-sorulan-sorular"
+        },
+        {
+          "label": "İletişim",
+          "href": "/iletisim"
+        },
+        {
+          "label": "Toptan Sipariş",
+          "href": "/toptan"
+        },
+        {
+          "label": "Müşteri Yorumları",
+          "href": "/yorumlar"
+        }
+      ]
+    },
+    {
+      "title": "Kurumsal",
+      "location": "footer",
+      "items": [
+        {
+          "label": "Hakkımızda",
+          "href": "/hakkimizda"
+        },
+        {
+          "label": "Blog ve Rehberler",
+          "href": "/blog"
+        }
+      ]
     }
-  },
-  "pages": [
-    {
-      "handle": "hakkimizda",
-      "title": "Hakkımızda",
-      "file": "../sayfalar/hakkimizda.md"
-    },
-    {
-      "handle": "iletisim",
-      "title": "İletişim",
-      "file": "../sayfalar/iletisim.md"
-    },
-    {
-      "handle": "sik-sorulan-sorular",
-      "title": "Sık Sorulan Sorular",
-      "file": "../sayfalar/sik-sorulan-sorular.md"
-    },
-    {
-      "handle": "toptan",
-      "title": "Toptan Satış",
-      "file": "../sayfalar/toptan.md"
-    }
-  ],
-  "retired_pages": [
-    "iade-ve-degisim-politikasi",
-    "satis-sozlesmesi",
-    "kisisel-verilere-iliskin-aydinlatma-metni",
-    "cerez-politikasi",
-    "toptan-satis-sozlesmesi",
-    "toptan-on-bilgilendirme",
-    "toptan-kvkk-aydinlatma",
-    "toptan-gizlilik-taahhutnamesi"
   ],
   "bundle": "paket.json"
 }

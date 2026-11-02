@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 import { LANDING_COOKIE, landingCookieValue, landingOf } from "./lib/cart/landing"
-import { paymentFrameOrigins, paymentRedirectOrigins, storefrontEnv } from "./lib/env"
+import { panelOrigins, paymentFrameOrigins, paymentRedirectOrigins, storefrontEnv } from "./lib/env"
 import { t } from "./lib/i18n"
 import { contentSecurityPolicy, newNonce } from "./lib/security/csp"
 import {
@@ -22,6 +22,11 @@ import { visitorIp } from "./lib/store-api/visitor"
 
 /** The address the page renders, query included; set here, never taken from the browser. */
 export const URL_HEADER = "x-qt-url"
+
+/** A design preview's token (adr/0049): set here only, so the frame shows the draft's header and footer. */
+export const LAYOUT_PREVIEW_HEADER = "x-qt-layout-preview"
+
+const LAYOUT_PREVIEW = /^\/onizleme\/(sfl_[0-9A-Za-z]{1,40}\.[0-9a-z]{1,12}\.[\w-]{43})$/
 
 function gonePage(nonce: string, csp: string): NextResponse {
   const html = `<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="robots" content="noindex"><title>${t("gone.title")}</title></head><body><main><h1>${t("gone.title")}</h1><p>${t("gone.body")}</p><p><a href="/">${t("not_found.home")}</a></p></main></body></html>`
@@ -87,6 +92,8 @@ export async function proxy(request: NextRequest): Promise<Response> {
   const csp = contentSecurityPolicy(nonce, env.NODE_ENV === "development", {
     frameOrigins: paymentFrameOrigins(env),
     framedBySelf: isPaymentReturn(pathname),
+    // The theme editor frames its draft (adr/0049); no other page may be framed by the panel
+    framedBy: pathname.startsWith("/onizleme/") ? panelOrigins(env) : [],
     // The card provider's own pages: iyzico's a form may lead to, and PayTR's
     // framed form, whose "pay" posts to its own origin for the whole window
     formOrigins: pathname.startsWith("/odeme")
@@ -109,6 +116,12 @@ export async function proxy(request: NextRequest): Promise<Response> {
   }
 
   const headers = new Headers(request.headers)
+  // Never the visitor's own: only a preview address sets it
+  headers.delete(LAYOUT_PREVIEW_HEADER)
+  const preview = LAYOUT_PREVIEW.exec(pathname)?.[1]
+  if (preview) {
+    headers.set(LAYOUT_PREVIEW_HEADER, preview)
+  }
   headers.set("x-nonce", nonce)
   headers.set("content-security-policy", csp)
   headers.set(URL_HEADER, `${pathname}${search}`)

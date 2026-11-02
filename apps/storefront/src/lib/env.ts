@@ -35,6 +35,9 @@ const schema = z.object({
   // D7: a card provider's own payment page the shopper is sent to (iyzico);
   // iyzico's live and sandbox pages when unset
   PAYMENT_REDIRECT_ORIGINS: origins.optional(),
+  // adr/0049: the panel whose theme editor frames the storefront's preview
+  // pages (CSP frame-ancestors on /onizleme only); the dev panel when unset
+  PANEL_ORIGIN: origin.optional(),
 })
 
 export type StorefrontEnv = z.infer<typeof schema>
@@ -88,6 +91,14 @@ export function paymentFrameOrigins(env: StorefrontEnv): string[] {
     return env.PAYMENT_FRAME_ORIGINS
   }
   return env.NODE_ENV === "development" ? [PAYTR, FAKE_PAYTR] : [PAYTR]
+}
+
+/** The panel that may frame a preview page (adr/0049): the setting, else the dev panel in development. */
+export function panelOrigins(env: StorefrontEnv): string[] {
+  if (env.PANEL_ORIGIN) {
+    return [env.PANEL_ORIGIN]
+  }
+  return env.NODE_ENV === "development" ? ["http://localhost:5173"] : []
 }
 
 const IYZICO = ["https://cpp.iyzipay.com", "https://sandbox-cpp.iyzipay.com"]

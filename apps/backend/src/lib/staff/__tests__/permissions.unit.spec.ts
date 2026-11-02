@@ -376,6 +376,15 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/invoices/:id/retry": false,
   "POST /admin/invoices/:id/return-document": false,
   "POST /admin/invoices/:id/waive": false,
+  // The storefront's design and menus (adr/0049): the admin's and the owner's
+  "POST /admin/storefront-layout": false,
+  "POST /admin/storefront-layout/discard": false,
+  "POST /admin/storefront-layout/preview": false,
+  "POST /admin/storefront-layout/publish": false,
+  "POST /admin/storefront-layout/revisions/:revision/restore": false,
+  "POST /admin/storefront-menus": false,
+  "POST /admin/storefront-menus/:id": false,
+  "DELETE /admin/storefront-menus/:id": false,
 }
 
 const ADMIN_DIR = join(__dirname, "../../../api/admin")

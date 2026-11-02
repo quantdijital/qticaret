@@ -1,9 +1,12 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { cache } from "react"
+import { subscribeNewsletter } from "@/app/actions/newsletter"
 import { t } from "@/lib/i18n"
 import { isStoreApiError } from "@/lib/store-api/errors"
+import { layoutPreview } from "@/lib/store-api/requests"
 import { storeGet } from "@/lib/store-api/server"
+import { homeSections } from "@/lib/views/home"
 import { theme } from "@/theme"
 
 type Params = Promise<{ token: string }>
@@ -15,6 +18,8 @@ interface PreviewEntry {
 }
 
 const TOKEN = /^cnt_[0-9A-Za-z]{1,40}\.[0-9a-z]{1,12}\.[\w-]{43}$/
+// The theme editor's draft (adr/0049)
+const LAYOUT_TOKEN = /^sfl_[0-9A-Za-z]{1,40}\.[0-9a-z]{1,12}\.[\w-]{43}$/
 
 /** The entry a signed link opens; null for one malformed, changed or past its day. */
 const previewOf = cache(async (token: string): Promise<PreviewEntry | null> => {
@@ -35,9 +40,12 @@ const previewOf = cache(async (token: string): Promise<PreviewEntry | null> => {
 })
 
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
-  const entry = await previewOf((await params).token)
+  const { token } = await params
+  const found = LAYOUT_TOKEN.test(token)
+    ? (await layoutPreview(token)) && t("preview.design")
+    : (await previewOf(token))?.title
   return {
-    title: { absolute: entry ? t("preview.title", { title: entry.title }) : t("preview.gone") },
+    title: { absolute: found ? t("preview.title", { title: found }) : t("preview.gone") },
     // A preview is nobody's search result, nor a page to follow links from
     robots: "noindex,nofollow",
     referrer: "no-referrer",
@@ -46,10 +54,26 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 
 /**
  * `/onizleme/:token` (F18): a content page or post as it will read, draft
- * or not, from the link staff made in the panel (a day). Never indexed.
+ * or not, or the theme editor's draft home page with its header and footer
+ * (adr/0049), from a link staff made in the panel (a day). Never indexed.
  */
 export default async function PreviewPage({ params }: { params: Params }) {
-  const entry = await previewOf((await params).token)
+  const { token } = await params
+  if (LAYOUT_TOKEN.test(token)) {
+    const layout = await layoutPreview(token)
+    if (!layout) {
+      notFound()
+    }
+    const sections = await homeSections(layout.home, t)
+    return (
+      <theme.HomePage
+        t={t}
+        view={{ sections, notice: t("preview.design_notice") }}
+        subscribe={subscribeNewsletter}
+      />
+    )
+  }
+  const entry = await previewOf(token)
   if (!entry) {
     notFound()
   }

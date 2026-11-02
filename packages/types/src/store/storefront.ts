@@ -15,11 +15,7 @@ export interface StorefrontLink {
 
 export interface StorefrontFrame {
   announcements: string[]
-  top_links: StorefrontLink[]
-  footer_groups: { title: string; links: StorefrontLink[] }[]
   trust_badges: { icon: TrustIcon; title: string; text: string | null }[]
-  /** The header's menu as the shop names it; empty: the category tree. */
-  menu: (StorefrontLink & { children: StorefrontLink[] })[]
   /** `#rrggbb`; null: the theme's own colour. */
   primary_color: string | null
   /** The home page's opening; null: the shop's name and first two categories. */
@@ -33,6 +29,38 @@ export interface StorefrontFrame {
   contact_form_path: string | null
   /** Colour names and their `#rrggbb`: option and filter values that match show as swatches. */
   color_swatches: { label: string; hex: string }[]
+}
+
+export type MenuLinkKind =
+  | "category"
+  | "product"
+  | "collection"
+  | "brand"
+  | "page"
+  | "post"
+  | "landing"
+  | "legal"
+  | "system"
+  | "url"
+
+/** A menu link as `GET /store/storefront-menus` gives it (adr/0049); a broken one is not there. */
+export interface StoreMenuLink {
+  /** The shop's wording, else the record's or legal text's name; null: the storefront's own name. */
+  label: string | null
+  kind: MenuLinkKind
+  /** A record's id, a legal kind or a storefront page's key. */
+  target: string | null
+  /** The record's live path or the address; null: a storefront page or a legal text. */
+  path: string | null
+  children: StoreMenuLink[]
+}
+
+/** A storefront menu (adr/0049): the header's, the top links, or a footer column. */
+export interface StoreMenu {
+  title: string
+  location: "main" | "top" | "footer"
+  rank: number
+  items: StoreMenuLink[]
 }
 
 /** `GET /store/storefront`: the frame and the free shipping threshold (F4.5). */

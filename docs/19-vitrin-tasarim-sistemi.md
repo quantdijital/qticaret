@@ -60,16 +60,16 @@ Mağaza panelden yazar: `platform-settings` `storefront` bölümü, `GET /store/
 | Parça | Kaynak | Not |
 | --- | --- | --- |
 | Duyuru şeridi | `storefront.announcements` (≤5) | Telefonda ilk satır, geniş ekranda hepsi |
-| Üst bağlantılar | `storefront.top_links` (≤8) | Geniş ekranda başlığın üstünde; telefonda menü çekmecesinde |
+| Üst bağlantılar | Vitrin > Menüler, `top` menüsü (adr/0049) | Geniş ekranda başlığın üstünde; telefonda menü çekmecesinde |
 | Telefon | `store.contact_phone` | Üst satırda ve alt bilgide `tel:` bağlantısı |
 | Logo / ad | `appearance.logo_light_url` / mağaza adı | |
 | Arama | `GET /arama?q=` | Betiksiz form; sonuçlar `noindex,follow` |
 | Sepet | çerez + `GET /store/carts/:id` | Sayaç; `/sepet` |
-| Kategori menüsü | `storefront.menu` (≤12 öğe × 20 alt bağlantı); yazılmamışsa kategori ağacı (iki seviye) | Geniş ekranda açılır menü (Radix, içerik `forceMount` ile HTML'de), telefonda çekmece |
+| Kategori menüsü | Vitrin > Menüler, `main` menüsü (≤30 bağlantı × 20 alt bağlantı; bağlantılar kayda bağlı, adı ve adresi kayıttan, yayında olmayan gizli; adr/0049); menü yoksa kategori ağacı (iki seviye) | Geniş ekranda açılır menü (Radix, içerik `forceMount` ile HTML'de), telefonda çekmece |
 | Marka rengi | `storefront.primary_color` | `--primary`, `--ring`, `--announcement` ve üzerindeki yazı rengi (beyaz ya da mürekkep, kontrasta göre); yanıtın nonce'uyla tek `<style>` |
 | Ana sayfa girişi | `storefront.hero` (üst yazı, başlık, metin, ≤2 düğme) | Yazılmamışsa mağaza adı ve ilk iki kategori |
 | Güven şeridi | `storefront.trust_badges` (≤4, ikon listesi sabit) | Alt bilginin üstünde |
-| Alt bilgi sütunları | `storefront.footer_groups` (≤4×10) | Yazılmamışsa: ilk 8 kategori + Yardım (Sepetim) |
+| Alt bilgi sütunları | Vitrin > Menüler, `footer` menüleri (sırasıyla; adr/0049) | Yazılmamışsa: ilk 8 kategori + Yardım (Sepetim) |
 | İletişim, sosyal | `legal-identity` (`email`, `phone`, `address`, `same_as`) | Sosyal profiller ağ adıyla |
 | Küçük yazı | `legal.company_title` | "© yıl unvan" |
 | WhatsApp | `storefront.whatsapp_phone` | Sağ altta düz bağlantı (`wa.me`) |
@@ -118,7 +118,7 @@ Durum: ✅ var · 🟡 temel hâli var · ⬜ yok. Görev kodları PROGRESS "F18
 
 | Sayfa | Yol | Durum | Backend | Görev |
 | --- | --- | --- | --- | --- |
-| Çerçeve: duyuru, başlık, menü, arama, alt bilgi (yasal bağlantılar, MERSİS/KEP/ETBİS satırı, e-bülten kutusu), WhatsApp | her sayfa | ✅ | `storefront`, `legal-identity`, `legal/{kind}`, `newsletter` (çift onay) | D3, D10 |
+| Çerçeve: duyuru, başlık, menü, arama, alt bilgi (yasal bağlantılar, MERSİS/KEP/ETBİS satırı, e-bülten kutusu), WhatsApp | her sayfa | ✅ | `storefront`, `storefront-menus`, `legal-identity`, `legal/{kind}`, `newsletter` (çift onay) | D3, D10 |
 | Ana sayfa | `/` | 🟡 giriş, kategori dizini, yeni ürünler, "bize ulaşın", blogdan | ana sayfa blokları (D11) yok | D11 |
 | Kategori, marka, koleksiyon, landing | URL kaydına göre | ✅ filtreler (marka, öznitelik), fiyat aralığı, fiyat/yeni sıralama, sayfalama | `GET /store/listings/products` | D4 |
 | Tüm ürünler | `/magaza` | ✅ filtreler, sıralama | liste ucu `type=all` | D4 |

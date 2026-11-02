@@ -669,6 +669,33 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The address does not match Turkish address records; check the province, district, neighbourhood and postal code.",
   "tr_address.neighborhood_not_in_district": "The neighbourhood is not in this district.",
   "tr_address.neighborhood_requires_district": "Choose a district before the neighbourhood.",
+  "storefront_layout.text_invalid": "The text is too long or holds disallowed characters.",
+  "storefront_layout.token_unknown":
+    "The text has a {…} detail that is not known. Available: {mağaza_adı}, {telefon}, {e_posta}, {adres}, {whatsapp}, {ücretsiz_kargo_eşiği}.",
+  "storefront_layout.target_invalid": "The chosen record is not valid.",
+  "storefront_layout.target_unknown":
+    "A record one of the sections shows no longer exists; choose it again.",
+  "storefront_layout.image_invalid": "The image must come from the shop's media library.",
+  "storefront_layout.section_invalid":
+    "The section was not recognised; reload the page and try again.",
+  "storefront_layout.section_duplicate":
+    "A section was added twice; the announcement bar and the newsletter can appear once each.",
+  "storefront_layout.schedule_invalid": "The section must end after it starts.",
+  "storefront_layout.nothing_to_publish": "There is no draft to publish; make a change first.",
+  "storefront_layout.nothing_to_preview": "Save the draft once before previewing it.",
+  "storefront_layout.revision_unknown": "This revision is no longer kept.",
+  "storefront_layout.preview_unknown": "The preview link is not valid or has expired.",
+  "storefront_menus.text_invalid":
+    "Menu and link names must be at most 60 characters, without disallowed characters.",
+  "storefront_menus.target_invalid": "The link's target is not valid.",
+  "storefront_menus.target_unknown":
+    "A record one of the links points at no longer exists; choose the link again.",
+  "storefront_menus.url_invalid": "The address must start with https:// or /.",
+  "storefront_menus.too_many": "A menu can have at most 200 links.",
+  "storefront_menus.no_children": "Only the main menu can have child links.",
+  "storefront_menus.location_taken":
+    "There is already a menu in this place; there is one main menu and one row of top links.",
+  "storefront_menus.unknown": "Menu not found.",
   "tr_address.phone_invalid": "The phone number is not valid.",
   "tr_address.postal_code_invalid": "The postal code is not valid.",
   "tr_address.postal_code_neighborhood_mismatch": "The postal code is not the neighbourhood's.",

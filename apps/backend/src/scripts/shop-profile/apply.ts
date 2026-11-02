@@ -12,6 +12,11 @@ import { isConflictError } from "../../lib/errors"
 import { ASYNC_JOB_MODULE } from "../../modules/async-job"
 import type AsyncJobModuleService from "../../modules/async-job/service"
 import { deleteContentWorkflow, saveContentWorkflow } from "../../workflows/content/workflows"
+import { menuInput } from "../../lib/storefront/menus"
+import { STOREFRONT_MENUS_MODULE } from "../../modules/storefront-menus"
+import type StorefrontMenusModuleService from "../../modules/storefront-menus/service"
+import { linkFromHref } from "../../workflows/storefront/menu-hrefs"
+import { saveStorefrontMenuWorkflow } from "../../workflows/storefront/menus"
 import { startMigrationWorkflow } from "../../workflows/migration/start"
 import { updatePlatformSettingsWorkflow } from "../../workflows/platform-settings/update-platform-settings"
 import { ensureStoreName } from "../bootstrap/store-name"
@@ -68,6 +73,37 @@ async function retirePages(container: MedusaContainer, loaded: LoadedProfile): P
   for (const page of found) {
     await deleteContentWorkflow(container).run({ input: page.id })
     logger.info({ event: "shop_profile.page_retired", handle: page.handle }, "content page removed")
+  }
+}
+
+/**
+ * Each menu by its place (the header's, the top links) or, for a footer
+ * column, its title: made the first time, replaced after. Links written as
+ * addresses become links to records where the address is one (adr/0049).
+ */
+async function applyMenus(container: MedusaContainer, loaded: LoadedProfile): Promise<void> {
+  const service = container.resolve<StorefrontMenusModuleService>(STOREFRONT_MENUS_MODULE)
+  for (const [rank, menu] of loaded.profile.menus.entries()) {
+    const items = await Promise.all(
+      menu.items.map(async (item) => ({
+        link: await linkFromHref(container, item),
+        children: await Promise.all(item.children.map((child) => linkFromHref(container, child))),
+      }))
+    )
+    const input = menuInput.parse({ title: menu.title, location: menu.location, rank, items })
+    const [existing] = await service.listStorefrontMenus(
+      menu.location === "footer"
+        ? { location: "footer", title: menu.title }
+        : { location: menu.location },
+      { select: ["id"], take: 1 }
+    )
+    await saveStorefrontMenuWorkflow(container).run({
+      input: existing ? { ...input, id: existing.id } : input,
+    })
+    logger.info(
+      { event: "shop_profile.menu_saved", location: menu.location, made: !existing },
+      "menu saved"
+    )
   }
 }
 
@@ -147,7 +183,7 @@ async function queueBundle(container: MedusaContainer, loaded: LoadedProfile): P
   logger.info({ event: "shop_profile.bundle_applied", job: result.id }, "migration run done")
 }
 
-/** The whole profile: name, settings, retired then current pages, the migration run. Safe to run again. */
+/** The whole profile: name, settings, retired then current pages, the migration run, menus. Safe to run again. */
 export async function applyProfile(
   container: MedusaContainer,
   loaded: LoadedProfile
@@ -159,4 +195,6 @@ export async function applyProfile(
   await retirePages(container, loaded)
   await applyPages(container, loaded)
   await queueBundle(container, loaded)
+  // After the bundle: its categories are what the menus link to
+  await applyMenus(container, loaded)
 }

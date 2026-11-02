@@ -42,7 +42,13 @@ const config: NextConfig = {
   skipTrailingSlashRedirect: true,
   headers: () =>
     Promise.resolve([
-      { source: "/:path*", headers: SECURITY_HEADERS },
+      { source: "/:path((?!onizleme/).*)", headers: SECURITY_HEADERS },
+      // The theme editor frames a preview page (adr/0049): its CSP's
+      // frame-ancestors names the panel, which X-Frame-Options cannot
+      {
+        source: "/onizleme/:path*",
+        headers: SECURITY_HEADERS.filter((header) => header.key !== "X-Frame-Options"),
+      },
       // A card provider may load its return address inside its form, framed
       // on our checkout (D7): those pages may be framed by our own pages
       {

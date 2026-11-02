@@ -95,6 +95,8 @@ export interface ShopView {
   cart: MiniCartView | null
   /** The announcement bar's lines; none: no bar. */
   announcements: string[]
+  /** The footer's newsletter box in the shop's words; null: the shop took it out (adr/0049). */
+  newsletter: { title: string; text: string } | null
   /** The header's small links (about, contact…). */
   topLinks: LinkView[]
   /** The shop's own columns, or the storefront's (categories, help). */
@@ -285,21 +287,62 @@ export interface ListingPageView {
   clearPath: string | null
 }
 
+/**
+ * A home page section as the theme draws it (adr/0049): the shop lays the
+ * page out in the theme editor; every title already in words (the shop's
+ * own or the storefront's default), every link already a path.
+ */
+export type HomeSectionView =
+  | {
+      id: string
+      type: "hero"
+      /** A short line above the heading; null: none. */
+      eyebrow: string | null
+      /** The shop's heading, else its name. */
+      heading: string
+      intro: string | null
+      /** At most two buttons, the first the main one. */
+      actions: LinkView[]
+      image: ImageView | null
+    }
+  | {
+      id: string
+      type: "banner"
+      slides: {
+        image: ImageView
+        heading: string | null
+        text: string | null
+        link: LinkView | null
+      }[]
+    }
+  | { id: string; type: "categories"; title: string; categories: LinkView[] }
+  | {
+      id: string
+      type: "products"
+      title: string
+      products: ProductCardView[]
+      more: LinkView | null
+      /** Words when the rail has nothing to show. */
+      empty: string
+    }
+  | { id: string; type: "brands"; title: string; brands: LinkView[] }
+  | { id: string; type: "posts"; title: string; posts: PostCardView[]; more: LinkView }
+  | {
+      id: string
+      type: "reviews"
+      title: string
+      reviews: (ReviewView & { product: LinkView | null })[]
+      more: LinkView
+    }
+  | { id: string; type: "rich_text"; title: string | null; html: string }
+  | { id: string; type: "trust_badges"; badges: TrustBadgeView[] }
+  | { id: string; type: "newsletter"; title: string; text: string; privacyPath: string | null }
+  | { id: string; type: "help"; title: string; text: string; contact: ContactView }
+
 export interface HomePageView {
-  /** A short line above the heading; null: none. */
-  eyebrow: string | null
-  /** The page's heading: the shop's own, else its name. */
-  heading: string
-  /** The shop's own words under it; null: none. */
-  intro: string | null
-  /** The opening's buttons (at most two), the first the main one. */
-  actions: LinkView[]
-  categories: LinkView[]
-  products: ProductCardView[]
-  /** The newest blog posts (at most three); none: no blog block. */
-  posts: PostCardView[]
-  /** How to reach the shop, for the "ask us" band; null without a phone, WhatsApp or e-mail. */
-  help: ContactView | null
+  sections: HomeSectionView[]
+  /** A line above the page: a draft's preview says it is one. */
+  notice?: string | null
 }
 
 export interface PostCardView {

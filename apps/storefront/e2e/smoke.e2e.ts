@@ -33,6 +33,21 @@ test.describe("storefront pages", () => {
     )
     expect(forged?.status()).toBe(404)
     expect((await page.goto("/onizleme/bir-sey"))?.status()).toBe(404)
+    // The theme editor's draft (adr/0049): a forged link opens nothing either
+    const design = await page.goto(
+      "/onizleme/sfl_01ABCDEFGHJK.zzzzzz.AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    )
+    expect(design?.status()).toBe(404)
+  })
+
+  test("only a preview page may be framed, and only by the panel", async ({ page }) => {
+    const preview = await page.goto("/onizleme/bir-sey")
+    const headers = preview?.headers() ?? {}
+    expect(headers["content-security-policy"]).toMatch(/frame-ancestors http:\/\/localhost:5173/)
+    expect(headers["x-frame-options"]).toBeUndefined()
+    const home = (await page.goto("/"))?.headers() ?? {}
+    expect(home["x-frame-options"]).toBe("DENY")
+    expect(home["content-security-policy"]).toContain("frame-ancestors 'none'")
   })
 
   test("the footer offers the newsletter, with what subscribing consents to", async ({ page }) => {

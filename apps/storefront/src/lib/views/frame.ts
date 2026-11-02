@@ -1,5 +1,4 @@
-import type { StorefrontFrame, StorefrontLink } from "@qticaret/types"
-import type { FooterGroupView, LinkView, NavCategoryView, SocialLinkView } from "@qticaret/ui"
+import type { FooterGroupView, NavCategoryView, SocialLinkView } from "@qticaret/ui"
 import type { Translate } from "@qticaret/ui"
 
 const TURKISH_MOBILE = /^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/
@@ -37,25 +36,20 @@ export function socialLinks(sameAs: readonly string[]): SocialLinkView[] {
   })
 }
 
-export const linkViews = (links: readonly StorefrontLink[]): LinkView[] =>
-  links.map((link) => ({ label: link.label, path: link.href }))
-
 const DEFAULT_FOOTER_CATEGORIES = 8
 
 /**
- * The footer's columns: the shop's own, else the storefront's, so a new
- * shop's footer still leads somewhere: its top categories and its cart.
+ * The footer's columns: the shop's own footer menus (adr/0049), else the
+ * storefront's, so a new shop's footer still leads somewhere: its top
+ * categories and its cart.
  */
 export function footerGroups(
-  frame: StorefrontFrame,
+  own: readonly FooterGroupView[],
   categories: readonly NavCategoryView[],
   t: Translate
 ): FooterGroupView[] {
-  if (frame.footer_groups.length > 0) {
-    return frame.footer_groups.map((group) => ({
-      title: group.title,
-      links: linkViews(group.links),
-    }))
+  if (own.length > 0) {
+    return [...own]
   }
   const groups: FooterGroupView[] = []
   if (categories.length > 0) {

@@ -1,6 +1,6 @@
 import "server-only"
 import type { ContactView, ShopView, Translate } from "@qticaret/ui"
-import type { LegalIdentity } from "@qticaret/types"
+import type { LegalIdentity, StoreLayout } from "@qticaret/types"
 import { currentCustomer } from "@/lib/account/auth"
 import { headerCart } from "@/lib/cart/cart"
 import { bannerDue, cookieConsent } from "@/lib/legal/cookies"
@@ -10,12 +10,15 @@ import {
   legalIdentity,
   pathsOf,
   siteSeo,
+  storefrontMenus,
   storefrontSettings,
 } from "@/lib/store-api/requests"
 import { miniCartOf } from "./cart"
 import { navigation } from "./categories"
 import { identityLinesOf, legalDocument, legalPath, publishedLegalLinks } from "./legal"
-import { displayPhone, footerGroups, linkViews, socialLinks, whatsappHref } from "./frame"
+import { displayPhone, footerGroups, socialLinks, whatsappHref } from "./frame"
+import { currentLayout } from "./layout"
+import { footerMenus, mainMenu, topLinks } from "./menus"
 import { hoursOf } from "./hours"
 
 /** How to reach the shop, from its store details and legal identity (adr/0048): one source. */
@@ -31,6 +34,17 @@ export function contactOf(identity: LegalIdentity, t: Translate): ContactView {
   }
 }
 
+/** The footer's newsletter box in the design's words; null when the shop took it out. */
+function newsletterOf(layout: StoreLayout, shop: string): ShopView["newsletter"] {
+  const [section] = layout.footer
+  return section
+    ? {
+        title: section.title ?? t("newsletter.title"),
+        text: section.text ?? t("newsletter.text", { shop }),
+      }
+    : null
+}
+
 /** The frame around every page (D3, docs/19 §4), from the backend's answers. */
 export async function shopView(): Promise<ShopView> {
   const [
@@ -43,6 +57,8 @@ export async function shopView(): Promise<ShopView> {
     customer,
     cookiePolicy,
     legalLinks,
+    menus,
+    layout,
   ] = await Promise.all([
     siteSeo(),
     allCategories(),
@@ -53,20 +69,15 @@ export async function shopView(): Promise<ShopView> {
     currentCustomer(),
     legalDocument("cookie_policy"),
     publishedLegalLinks(),
+    storefrontMenus(),
+    currentLayout(),
   ])
   const paths = await pathsOf(
     "product_category",
     categories.map((category) => category.id)
   )
-  // The shop's own menu when it wrote one, else its top categories
-  const menu =
-    frame.menu.length > 0
-      ? frame.menu.map((item) => ({
-          label: item.label,
-          path: item.href,
-          children: linkViews(item.children),
-        }))
-      : navigation(categories, paths)
+  // The shop's own menu when it made one (adr/0049), else its top categories
+  const menu = mainMenu(menus, t) ?? navigation(categories, paths)
   return {
     name: site.shop.name,
     logo: site.shop.logo_url
@@ -81,9 +92,11 @@ export async function shopView(): Promise<ShopView> {
     categories: menu,
     cartQuantity: (cart?.items ?? []).reduce((sum, line) => sum + line.quantity, 0),
     cart: miniCartOf(cart, free_shipping_threshold, t),
-    announcements: frame.announcements,
-    topLinks: linkViews(frame.top_links),
-    footerGroups: footerGroups(frame, menu, t),
+    // The header's and footer's sections from the design (adr/0049)
+    announcements: layout.header.flatMap((section) => section.lines),
+    newsletter: newsletterOf(layout, identity.company_title ?? site.shop.name),
+    topLinks: topLinks(menus, t),
+    footerGroups: footerGroups(footerMenus(menus, t), menu, t),
     trustBadges: frame.trust_badges,
     contact: contactOf(identity, t),
     social: socialLinks(identity.same_as),

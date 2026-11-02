@@ -251,6 +251,10 @@ module.exports = defineConfig({
       resolve: "./src/modules/contact-messages",
       options: { hashKey: env.PII_HASH_KEY, encryptionKey: env.PII_ENCRYPTION_KEY },
     },
+    // F18 (adr/0049): the storefront's design from the theme editor: draft, live, revisions
+    { resolve: "./src/modules/storefront-layout" },
+    // F18 (adr/0049): the storefront's menus, their links pointing at records
+    { resolve: "./src/modules/storefront-menus" },
     // F10.4 (adr/0037 §4): customers' saved products
     { resolve: "./src/modules/wishlist" },
     // F10.3 (adr/0037 §6): customer segments by rules, members in Medusa groups
