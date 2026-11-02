@@ -3,6 +3,8 @@ import { formatLira } from "@qticaret/ui"
 import { subscribeNewsletter } from "@/app/actions/newsletter"
 import { themeActions } from "@/lib/theme-actions"
 import { t } from "@/lib/i18n"
+import { productEvents } from "@/lib/analytics/payloads"
+import { TrackEvents } from "@/lib/analytics/TrackEvents"
 import { faqJsonLd } from "@/lib/seo/faq"
 import { JsonLd } from "@/lib/seo/JsonLd"
 import {
@@ -36,7 +38,7 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
   const [
     displays,
     brandPaths,
-    { storefront, free_shipping_threshold },
+    { storefront, free_shipping_threshold, features },
     reviews,
     questions,
     related,
@@ -83,6 +85,8 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
     questions,
     related,
     sections,
+    // The amount is the variant; the cart form asks who the card is for (adr/0025 Ek 2026-11-03)
+    giftCard: features?.gift_cards === true && product.product_extension?.is_gift_card === true,
     signedIn: customer !== null,
     shippingNote:
       free_shipping_threshold && free_shipping_threshold > 0
@@ -98,8 +102,10 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
         )}`
       : null,
   }
+  const measured = productEvents(product, base.selectedVariantId)
   return (
     <>
+      <TrackEvents events={measured.events} context={measured.context} />
       <JsonLd blocks={[...(page.seo?.jsonLd ?? []), ...faqJsonLd(sections)]} />
       {/* Open Graph's product type and price (React puts these in <head>) */}
       <meta property="og:type" content="product" />

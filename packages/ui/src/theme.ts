@@ -3,6 +3,7 @@ import type { AccountActions, AccountPageView, AuthActions, AuthPageView } from 
 import type {
   CheckoutPageView,
   CheckoutResultPageView,
+  GiftBalanceResult,
   OptionView,
   OrderActions,
   OrderPageView,
@@ -16,6 +17,7 @@ import type {
   CategoriesPageView,
   ConfirmPageView,
   CookiePreferencesPageView,
+  GiftCardBalancePageView,
   InstallmentFamilyView,
   ContentPageView,
   HomePageView,
@@ -61,6 +63,24 @@ export interface ThemeActions {
   addFavorite: FormAction
   /** A variant's installment plans, asked only when the shopper opens them (a call to the provider). */
   installments: (variantId: string) => Promise<InstallmentFamilyView[] | null>
+  /**
+   * A gift card into the cart with its recipient (adr/0025 Ek 2026-11-03).
+   * Fields: `variant_id`, `quantity`, `recipient_email`, `recipient_name`,
+   * `message`, `sender_name`.
+   */
+  addGiftToCart?: FormAction
+  /**
+   * A plain form: a gift line's recipient, written again from the cart.
+   * Fields: `line_id` and the recipient's, as above; a refusal comes back
+   * to the cart with its message key.
+   */
+  saveGiftRecipient?: (form: FormData) => Promise<void>
+}
+
+/** `/hediye-karti/bakiye`'s form. */
+export interface GiftCardActions {
+  /** Fields: `code`, `challenge` (the solved proof of work, when one was asked). */
+  checkBalance: (state: GiftBalanceResult, form: FormData) => Promise<GiftBalanceResult>
 }
 
 /** The contact form's action (adr/0047). */
@@ -166,4 +186,6 @@ export interface StorefrontTheme {
   CookiePreferencesPage: ComponentType<
     Page<CookiePreferencesPageView> & { save: (form: FormData) => Promise<void> }
   >
+  /** A gift card's balance by its code (adr/0025 Ek 2026-11-03). */
+  GiftCardBalancePage: ComponentType<Page<GiftCardBalancePageView> & { actions: GiftCardActions }>
 }

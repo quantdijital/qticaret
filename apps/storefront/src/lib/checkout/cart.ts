@@ -17,6 +17,10 @@ export interface CheckoutAddress {
 
 export interface CheckoutCartLine {
   id: string
+  /** For the conversion events (docs/20): the item's id and name as the server events give them. */
+  variant_id?: string | null
+  product_title?: string | null
+  unit_price?: number | null
   title: string
   subtitle: string | null
   variant_title: string | null
@@ -62,6 +66,9 @@ const FIELDS = [
   "shipping_methods.name",
   "shipping_methods.total",
   "items.id",
+  "items.variant_id",
+  "items.product_title",
+  "items.unit_price",
   "items.title",
   "items.subtitle",
   "items.variant_title",

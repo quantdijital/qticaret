@@ -103,4 +103,18 @@ export interface SiteSeo {
   system_pages: { path: string; robots: RobotsValue }[]
   /** Absent from a backend before adr/0053: the shop is open. */
   maintenance?: SiteMaintenance
+  /**
+   * The measurement tags the shop connected (F10.9, docs/20 "vitrin dönüşüm
+   * olayları"): their public ids only, never a secret; null: not connected.
+   * Absent from a backend that does not say yet: none.
+   */
+  tracking?: SiteTracking
+}
+
+/** The public ids of the shop's measurement tags; the storefront loads each only with the visitor's consent. */
+export interface SiteTracking {
+  /** GA4's web stream (`G-XXXX`). */
+  ga4_measurement_id: string | null
+  /** Meta's pixel (digits). */
+  meta_pixel_id: string | null
 }

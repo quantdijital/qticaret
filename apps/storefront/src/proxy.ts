@@ -20,6 +20,7 @@ import {
   resolveForProxy,
 } from "./lib/store-api/edge"
 import { visitorIp } from "./lib/store-api/visitor"
+import { REFRESH_PATH } from "./lib/refresh/contract"
 
 /** The address the page renders, query included; set here, never taken from the browser. */
 export const URL_HEADER = "x-qt-url"
@@ -60,6 +61,11 @@ export async function proxy(request: NextRequest): Promise<Response> {
   // The address as sent: Next's `nextUrl` drops a trailing slash on its own,
   // which would hide the very form we answer with a 301
   const { pathname, search } = new URL(request.url)
+  // The backend's refresh signal (adr/0048 Ek 2026-11-03) goes straight to its route: no host
+  // 301, no normalising, no maintenance page (the backend follows no redirect), nothing resolved
+  if (pathname === REFRESH_PATH) {
+    return NextResponse.next()
+  }
   const visitor = visitorIp(request.headers, env.STOREFRONT_TRUSTED_PROXY_HOPS ?? 0)
   const site = await edgeSite(visitor)
 
@@ -103,6 +109,8 @@ export async function proxy(request: NextRequest): Promise<Response> {
     formOrigins: pathname.startsWith("/odeme")
       ? [...paymentRedirectOrigins(env), ...paymentFrameOrigins(env)]
       : [],
+    // The shop's measurement tags (docs/20): their hosts only while connected
+    tags: { google: site.tracking.ga4 !== null, meta: site.tracking.meta !== null },
   })
   // The dark shop (adr/0053): pages, Server Actions and route handlers alike
   const gate = await maintenanceGate(request, pathname, site, {

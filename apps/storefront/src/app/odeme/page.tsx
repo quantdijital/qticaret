@@ -1,6 +1,9 @@
 import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { currentCustomer, customerAddresses } from "@/lib/account/auth"
+import { checkoutEvents } from "@/lib/analytics/payloads"
+import { TrackEvents } from "@/lib/analytics/TrackEvents"
+import { shopperGiftLines } from "@/lib/cart/gift"
 import { checkoutCart } from "@/lib/checkout/cart"
 import { t } from "@/lib/i18n"
 import { robotsOnly } from "@/lib/seo/metadata"
@@ -35,16 +38,37 @@ export default async function CheckoutPage({
   const asked = typeof query["adim"] === "string" ? query["adim"] : undefined
   const failed = typeof query["hata"] === "string" ? query["hata"] : null
   const error = failed && RETURN_ERRORS.has(failed) ? t(failed) : null
-  const [[saved], billing] = customer
-    ? await Promise.all([customerAddresses(), billingOf()])
-    : [[], null]
+  const [[saved], billing, gifts] = await Promise.all([
+    customer ? customerAddresses() : Promise.resolve([]),
+    customer ? billingOf() : Promise.resolve(null),
+    shopperGiftLines(cart.id),
+  ])
+  // A gift card waits for its recipient, and is never paid with a card or credit (adr/0025 Ek 2026-11-03)
+  const unnamed = gifts.some((gift) => gift.recipient === null)
   const view = await checkoutView(
     cart,
     stepOf(cart, asked),
-    error,
+    error ?? (unnamed ? t("gift_card.recipient_required") : null),
     t,
     customer ? { ...customer, address: saved ?? null } : null,
     billing
   )
-  return <theme.CheckoutPage view={view} t={t} actions={checkoutActions} />
+  const shown =
+    gifts.length > 0
+      ? {
+          ...view,
+          paymentMethods: view.paymentMethods.filter((method) => method.kind !== "credit"),
+        }
+      : view
+  const measured = checkoutEvents(cart)
+  return (
+    <>
+      <TrackEvents
+        events={measured.events}
+        context={measured.context}
+        once={`begin_checkout:${cart.id}`}
+      />
+      <theme.CheckoutPage view={shown} t={t} actions={checkoutActions} />
+    </>
+  )
 }

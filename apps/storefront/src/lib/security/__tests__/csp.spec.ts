@@ -40,4 +40,28 @@ describe("contentSecurityPolicy", () => {
     expect(directive(checkout, "frame-src")).toBe("frame-src https://www.paytr.com")
     expect(directive(checkout, "frame-ancestors")).toBe("frame-ancestors 'self'")
   })
+
+  it("opens the measurement tags' hosts only for the tags the shop connected (docs/20)", () => {
+    const none = contentSecurityPolicy("abc123", false)
+    expect(directive(none, "connect-src")).toBe("connect-src 'self'")
+    expect(none).not.toMatch(/google|facebook/)
+
+    const google = contentSecurityPolicy("abc123", false, { tags: { google: true, meta: false } })
+    expect(directive(google, "script-src")).toBe(
+      "script-src 'self' 'nonce-abc123' 'strict-dynamic' https://www.googletagmanager.com"
+    )
+    expect(directive(google, "connect-src")).toBe(
+      "connect-src 'self' https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com"
+    )
+    expect(google).not.toContain("facebook")
+
+    const meta = contentSecurityPolicy("abc123", false, { tags: { google: false, meta: true } })
+    expect(directive(meta, "script-src")).toContain("https://connect.facebook.net")
+    expect(directive(meta, "connect-src")).toBe(
+      "connect-src 'self' https://connect.facebook.net https://www.facebook.com"
+    )
+    expect(meta).not.toContain("google")
+    // Nothing else opens: no frames, no other scripts
+    expect(directive(meta, "frame-src")).toBe("frame-src 'none'")
+  })
 })

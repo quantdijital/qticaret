@@ -1,6 +1,7 @@
 import type { ProductPageView, ThemeActions, Translate } from "@qticaret/ui"
 import { MessageCircle } from "lucide-react"
 import { Breadcrumbs } from "./components/Breadcrumbs"
+import { GIFT_ERRORS, giftWords } from "./components/gift-words"
 import { PageContainer } from "./components/Container"
 import { FavoriteButton } from "./components/FavoriteButton"
 import { ProductGrid } from "./components/ProductCard"
@@ -16,6 +17,8 @@ const ACTION_ERRORS = [
   "cart.variant_unavailable",
   "cart.quantity_invalid",
   "errors.too_many_requests",
+  // A gift card's recipient (adr/0025 Ek 2026-11-03)
+  ...GIFT_ERRORS,
 ]
 
 /**
@@ -102,6 +105,11 @@ export function ProductPage({
                 single: t("product.installments_single"),
               }}
               signedIn={view.signedIn}
+              gift={
+                view.giftCard && actions.addGiftToCart
+                  ? { action: actions.addGiftToCart, words: giftWords(t) }
+                  : null
+              }
               alertWords={{
                 title: t("product.alert_title"),
                 email: t("checkout.email"),

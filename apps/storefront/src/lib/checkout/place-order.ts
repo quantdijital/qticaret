@@ -93,6 +93,10 @@ const KNOWN = new Set([
   "payments.cart_changed",
   "promotions.one_code",
   "errors.too_many_requests",
+  // A gift card line not ready to pay (adr/0025 Ek 2026-11-03)
+  "gift_card.recipient_required",
+  "gift_card.sale_disabled",
+  "gift_card.not_payable_with_credit",
 ])
 
 export function checkoutError(error: unknown, fallback: string): string {

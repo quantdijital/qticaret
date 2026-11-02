@@ -1,6 +1,7 @@
 import { formatLira } from "@qticaret/ui"
 import type { CartLineView, FreeShippingView, MiniCartView, Translate } from "@qticaret/ui"
 import type { Cart } from "@/lib/cart/cart"
+import type { GiftLine } from "@/lib/cart/gift"
 
 /** Kuruş, so float noise never says "0,00 TL more". */
 const kurus = (lira: number): number => Math.round(lira * 100)
@@ -67,4 +68,28 @@ export function miniCartOf(
     subtotal: formatLira(cart.item_total),
     freeShipping: freeShippingOf(cart.item_total, threshold, t),
   }
+}
+
+/** The cart's gift card lines with their recipients (adr/0025 Ek 2026-11-03), as typed. */
+export function withGiftLines(lines: CartLineView[], gifts: readonly GiftLine[]): CartLineView[] {
+  const byLine = new Map(gifts.map((gift) => [gift.line_id, gift.recipient]))
+  return lines.map((line) => {
+    if (!byLine.has(line.id)) {
+      return line
+    }
+    const recipient = byLine.get(line.id) ?? null
+    return {
+      ...line,
+      gift: {
+        recipient: recipient
+          ? {
+              email: recipient.recipient_email,
+              name: recipient.recipient_name,
+              message: recipient.message,
+              sender: recipient.sender_name,
+            }
+          : null,
+      },
+    }
+  })
 }

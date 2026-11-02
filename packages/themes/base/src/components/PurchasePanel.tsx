@@ -1,7 +1,7 @@
 "use client"
 
 import { Check } from "lucide-react"
-import { useActionState, useEffect, useMemo, useState } from "react"
+import { useActionState, useEffect, useMemo, useRef, useState } from "react"
 import type {
   ActionResult,
   FormAction,
@@ -12,8 +12,11 @@ import type {
 } from "@qticaret/ui"
 import { Badge } from "@qticaret/ui/components/badge"
 import { Button } from "@qticaret/ui/components/button"
+import { emitShopEvent } from "@qticaret/ui/lib/shop-events"
 import { cn } from "@qticaret/ui/lib/utils"
 import { CART_ADDED_EVENT } from "../layout/CartDrawer"
+import { GiftFields } from "./GiftFields"
+import type { GiftWords } from "./GiftFields"
 import { InstallmentTable } from "./InstallmentTable"
 import type { InstallmentWords } from "./InstallmentTable"
 import { QuantityField } from "./QuantityField"
@@ -54,6 +57,8 @@ interface PurchasePanelProps {
   alertWords: StockAlertWords
   installments: (variantId: string) => Promise<InstallmentFamilyView[] | null>
   installmentWords: InstallmentWords
+  /** A gift card (adr/0025 Ek 2026-11-03): the form asks its recipient and sends it to this action instead. */
+  gift?: { action: FormAction; words: GiftWords } | null
 }
 
 const INITIAL: ActionResult = { ok: false, error: null }
@@ -83,11 +88,14 @@ export function PurchasePanel({
   alertWords,
   installments,
   installmentWords,
+  gift = null,
 }: PurchasePanelProps) {
   const initial =
     variants.find((variant) => variant.id === selectedVariantId) ?? variants[0] ?? null
   const [chosen, setChosen] = useState<Record<string, string>>(initial?.options ?? {})
-  const [state, submit, pending] = useActionState(addToCart, INITIAL)
+  const [state, submit, pending] = useActionState(gift?.action ?? addToCart, INITIAL)
+  // What was sent, for the storefront's "added to cart" (it decides whether anything is measured)
+  const sent = useRef<{ variantId: string; quantity: number } | null>(null)
   // A new choice makes the last answer stale: it was about the previous variant
   const [stale, setStale] = useState(false)
   const variant = useMemo(() => matching(variants, options, chosen), [variants, options, chosen])
@@ -95,6 +103,10 @@ export function PurchasePanel({
   useEffect(() => {
     if (state.ok) {
       window.dispatchEvent(new Event(CART_ADDED_EVENT))
+      if (sent.current) {
+        emitShopEvent({ type: "add_to_cart", ...sent.current })
+        sent.current = null
+      }
     }
   }, [state])
 
@@ -117,6 +129,11 @@ export function PurchasePanel({
       <form
         action={(form) => {
           setStale(false)
+          const variantId = form.get("variant_id")
+          sent.current = {
+            variantId: typeof variantId === "string" ? variantId : "",
+            quantity: Number(form.get("quantity") ?? 1) || 1,
+          }
           submit(form)
         }}
         className="flex flex-col gap-6"
@@ -205,6 +222,7 @@ export function PurchasePanel({
           </fieldset>
         ))}
         <input type="hidden" name="variant_id" value={variant?.id ?? ""} />
+        {gift && <GiftFields id="hediye" words={gift.words} />}
         <div className="flex gap-3">
           <QuantityField
             name="quantity"

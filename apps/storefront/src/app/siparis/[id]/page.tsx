@@ -1,5 +1,7 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
+import { purchaseEvent } from "@/lib/analytics/payloads"
+import { TrackEvents } from "@/lib/analytics/TrackEvents"
 import { paymentMethods } from "@/lib/checkout/options"
 import { t } from "@/lib/i18n"
 import {
@@ -51,18 +53,23 @@ export default async function OrderPage({
     orderContractKinds(order.id, token),
   ])
   const note = typeof query["durum"] === "string" ? query["durum"] : null
+  const fresh = query["yeni"] === "1"
   return (
-    <theme.OrderPage
-      t={t}
-      actions={orderActions}
-      view={orderView(order, methods, query["yeni"] === "1", t, {
-        token,
-        contracts,
-        returns,
-        shipments,
-        invoice,
-        note,
-      })}
-    />
+    <>
+      {/* Fresh from checkout, once per order in this tab; the backend sends the same order server to server */}
+      {fresh && <TrackEvents events={[purchaseEvent(order)]} once={`purchase:${order.id}`} />}
+      <theme.OrderPage
+        t={t}
+        actions={orderActions}
+        view={orderView(order, methods, fresh, t, {
+          token,
+          contracts,
+          returns,
+          shipments,
+          invoice,
+          note,
+        })}
+      />
+    </>
   )
 }

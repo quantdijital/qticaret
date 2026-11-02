@@ -1,7 +1,10 @@
 import type { Resolution, SiteMaintenance, SiteSeo } from "@qticaret/types"
+import { NO_TRACKING, trackingIdsOf } from "../analytics/ids"
+import type { TrackingIds } from "../analytics/ids"
 import { storefrontEnv } from "../env"
 import { storeRequest, storeUrl } from "./core"
 import { isNotFound } from "./errors"
+import { storeCaches } from "./registry"
 import { publishableKey } from "./publishable-key"
 import { signedVisitorHeaders } from "./visitor"
 
@@ -54,6 +57,8 @@ export interface EdgeSite {
   /** For the pages the edge answers itself (maintenance). */
   shopName: string
   maintenance: EdgeMaintenance
+  /** The measurement tags the shop connected: the CSP opens their hosts (docs/20). */
+  tracking: TrackingIds
 }
 
 const OPEN: EdgeMaintenance = {
@@ -85,7 +90,16 @@ function maintenanceOf(raw: unknown): EdgeMaintenance {
 
 const SITE_TTL_MS = 60_000
 
-let site: { value: EdgeSite; until: number } | undefined
+// In the process-wide registry: the refresh route (another bundle) clears it (adr/0048 Ek 2026-11-03)
+const edgeCache = storeCaches().edge
+const SITE = "site"
+
+const cachedSite = () => edgeCache.get(SITE) as { value: EdgeSite; until: number } | undefined
+
+/** Forgets the site's edge facts: the next request asks the backend again (the refresh signal). */
+export function forget(): void {
+  edgeCache.delete(SITE)
+}
 
 /**
  * The shop's edge facts, asked at most once a minute (turning maintenance
@@ -94,6 +108,7 @@ let site: { value: EdgeSite; until: number } | undefined
  * open": an outage never hides the shop nor loops it.
  */
 export async function edgeSite(visitorIp: string | null): Promise<EdgeSite> {
+  const site = cachedSite()
   if (site && site.until > Date.now()) {
     return site.value
   }
@@ -101,23 +116,25 @@ export async function edgeSite(visitorIp: string | null): Promise<EdgeSite> {
     const { data } = await storeRequest<
       Omit<SiteSeo, "maintenance"> & { maintenance?: unknown; shop?: { name?: unknown } }
     >("/store/seo/site", { visitorIp })
-    const value = {
+    const value: EdgeSite = {
       indexing: data.indexing,
       canonicalHost: data.canonical_host,
       indexNowKey: data.indexnow_key,
       shopName: textOrNull(data.shop?.name) ?? "",
       maintenance: maintenanceOf(data.maintenance),
+      tracking: trackingIdsOf(data.tracking),
     }
-    site = { value, until: Date.now() + SITE_TTL_MS }
+    edgeCache.set(SITE, { value, until: Date.now() + SITE_TTL_MS })
     return value
   } catch {
     return (
-      site?.value ?? {
+      cachedSite()?.value ?? {
         indexing: true,
         canonicalHost: null,
         indexNowKey: null,
         shopName: "",
         maintenance: OPEN,
+        tracking: NO_TRACKING,
       }
     )
   }

@@ -12,6 +12,7 @@ import {
 import { useState } from "react"
 import type { CheckoutActions, ContractView, PaymentKind, PaymentMethodView } from "@qticaret/ui"
 import { Button } from "@qticaret/ui/components/button"
+import { emitShopEvent } from "@qticaret/ui/lib/shop-events"
 import { useChallengeForm } from "../account/useChallengeForm"
 import { TextField } from "./fields"
 
@@ -70,7 +71,14 @@ export function PaymentForm({
   const shown = contracts[kind] ?? []
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-7">
+    <form
+      onSubmit={(event) => {
+        // The storefront hears the way chosen; whether it is measured is the cookie answer's
+        emitShopEvent({ type: "add_payment_info", payment: kind })
+        onSubmit(event)
+      }}
+      className="flex flex-col gap-7"
+    >
       <fieldset className="flex flex-col gap-3">
         <legend className="mb-3 text-sm font-semibold">{words.methods}</legend>
         {methods.map((each) => {

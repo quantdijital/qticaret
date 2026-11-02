@@ -20,6 +20,8 @@ export const SYSTEM_ROOTS = [
   "cerez-tercihleri",
   // The maintenance bypass link's page (adr/0053)
   "bakim",
+  // A gift card's balance (adr/0025 Ek 2026-11-03): the backend must reserve it too
+  "hediye-karti",
 ] as const
 
 /**

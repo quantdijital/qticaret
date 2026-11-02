@@ -224,6 +224,11 @@ export interface ProductPageView {
   shippingNote: string | null
   /** The shop's sections below the product's own block (adr/0049), drawn as on the home page. */
   sections?: HomeSectionView[]
+  /**
+   * A gift card the shop sells (adr/0025 Ek 2026-11-03): the amount is the
+   * variant, and the cart form asks who the card is for.
+   */
+  giftCard?: boolean
 }
 
 export interface ReviewView {
@@ -499,6 +504,21 @@ export interface CartLineView {
   /** The line before its discount, only when one applies. */
   original: string | null
   image: ImageView | null
+  /** A gift card line's recipient (adr/0025 Ek 2026-11-03); absent on any other line. */
+  gift?: GiftLineView | null
+}
+
+/** A gift card line: who it goes to, as typed (the edit form shows it again). */
+export interface GiftLineView {
+  /** Null: not named yet; the payment waits for it. */
+  recipient: GiftRecipientView | null
+}
+
+export interface GiftRecipientView {
+  email: string
+  name: string | null
+  message: string | null
+  sender: string | null
 }
 
 export interface CartPageView {
@@ -513,6 +533,8 @@ export interface CartPageView {
   giftCards?: string[] | null
   /** What the gift cards take off, in words; null when none. */
   credit?: string | null
+  /** Said while a gift card line meets a gift card or credit on the cart, in words (a card buys no card). */
+  giftNotice?: string | null
   /** How near the cart is to free shipping; null when the shop gives none. */
   freeShipping: FreeShippingView | null
   /** A message for the shopper after a failed change, already in words. */
@@ -552,4 +574,11 @@ export interface ReviewsPageView {
   count: number
   reviews: (ReviewView & { product: LinkView | null })[]
   pagination: PaginationView
+}
+
+/** `/hediye-karti/bakiye`: a gift card's balance, asked by its code (adr/0025 Ek 2026-11-03). */
+export interface GiftCardBalancePageView {
+  title: string
+  text: string
+  breadcrumbs: BreadcrumbView[]
 }

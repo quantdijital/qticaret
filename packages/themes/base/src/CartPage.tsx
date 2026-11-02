@@ -55,6 +55,11 @@ export function CartPage({
           <AlertDescription>{view.error}</AlertDescription>
         </Alert>
       )}
+      {view.giftNotice && (
+        <Alert>
+          <AlertDescription>{view.giftNotice}</AlertDescription>
+        </Alert>
+      )}
       <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_24rem] lg:gap-14">
         <ul className="divide-y self-start">
           {view.lines.map((line) => (

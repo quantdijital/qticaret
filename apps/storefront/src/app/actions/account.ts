@@ -155,7 +155,8 @@ export async function registerAction(
   } catch (error) {
     return answered(error, "account.register_failed")
   }
-  redirect("/hesap/dogrula?gonderildi=1")
+  // `yeni`: the account was just made (the sign-up event, docs/20)
+  redirect("/hesap/dogrula?gonderildi=1&yeni=1")
 }
 
 const Verify = z.object({

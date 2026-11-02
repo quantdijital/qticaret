@@ -2,6 +2,7 @@ import { CircleCheck, FileText, HandCoins, Landmark } from "lucide-react"
 import { ResponsiveImage } from "@qticaret/ui"
 import type { OrderActions, OrderPageView, Translate } from "@qticaret/ui"
 import { ReturnForm } from "./account/ReturnForm"
+import { OrderGift } from "./checkout/OrderGift"
 import { Breadcrumbs } from "./components/Breadcrumbs"
 import { PageContainer } from "./components/Container"
 
@@ -125,6 +126,7 @@ export function OrderPage({
                         .filter(Boolean)
                         .join(" · ")}
                     </span>
+                    {line.gift && <OrderGift gift={line.gift} t={t} />}
                   </div>
                   <span className="tabular text-sm font-semibold">{line.total}</span>
                 </li>

@@ -5,6 +5,7 @@ export type {
   CheckoutActions,
   ContactActions,
   FormAction,
+  GiftCardActions,
   StorefrontTheme,
   ThemeActions,
   Translate,

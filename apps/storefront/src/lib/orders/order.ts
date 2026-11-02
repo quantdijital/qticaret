@@ -20,6 +20,12 @@ export interface StoreOrder {
     thumbnail: string | null
     quantity: number
     total: number
+    /** For the purchase event (docs/20): the item as the backend's server events name it. */
+    variant_id?: string | null
+    product_title?: string | null
+    unit_price?: number | null
+    /** A gift card line's recipient (`qt_gift`) and issued cards' last four (`qt_gift_cards`). */
+    metadata?: Record<string, unknown> | null
   }[]
   original_item_total: number
   item_total: number
@@ -47,6 +53,10 @@ const FIELDS = [
   "items.thumbnail",
   "items.quantity",
   "items.total",
+  "items.variant_id",
+  "items.product_title",
+  "items.unit_price",
+  "items.metadata",
   "original_item_total",
   "item_total",
   "shipping_total",

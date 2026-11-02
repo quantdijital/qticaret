@@ -124,6 +124,12 @@ export interface PlaceOrderResult {
   challenge: { token: string; salt: string; bits: number } | null
 }
 
+/** A gift card's balance asked by its code, or why not. */
+export interface GiftBalanceResult extends PlaceOrderResult {
+  /** "Kalan bakiye: 250,00 TL", in words; null without an answer. */
+  balance: string | null
+}
+
 export interface PaymentFramePageView {
   /** The provider's hosted form (an allowed origin only). */
   frameUrl: string
@@ -145,6 +151,15 @@ export interface OrderLineView {
   quantity: number
   total: string
   image: ImageView | null
+  /** A gift card line (adr/0025 Ek 2026-11-03): its cards' last four and the recipient's address. */
+  gift?: OrderGiftView | null
+}
+
+export interface OrderGiftView {
+  /** The issued cards' last four characters; none until the payment is in. */
+  cards: string[]
+  /** Where the cards go; null when the line names no one (they go to the order's address). */
+  recipient: string | null
 }
 
 export interface BankTransferView {

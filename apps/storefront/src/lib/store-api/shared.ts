@@ -1,4 +1,5 @@
 import "server-only"
+import { storeCaches } from "./registry"
 
 /**
  * Shop-wide answers kept a short while in the storefront's own process
@@ -13,7 +14,8 @@ import "server-only"
 const SHARED_TTL_MS = 60_000
 const MAX_ENTRIES = 1000
 
-const entries = new Map<string, { until: number; value: Promise<unknown> }>()
+// In the process-wide registry: the refresh route clears what every bundle reads
+const entries = storeCaches().shared
 
 function prune(now: number): void {
   for (const [key, entry] of entries) {
@@ -47,4 +49,27 @@ export function shared<T>(key: string, load: () => Promise<T>, ttlMs = SHARED_TT
     prune(now)
   }
   return value
+}
+
+/** The path of a key (`<path>?<query JSON>`). */
+const pathOf = (key: string): string => {
+  const at = key.indexOf("?")
+  return at === -1 ? key : key.slice(0, at)
+}
+
+/**
+ * Drops the answers of these paths (adr/0048 Ek 2026-11-03): a path
+ * ending in `/` drops everything under it (`/store/legal/` every legal
+ * text), any other only itself, whatever its query. Returns how many went.
+ */
+export function forgetShared(paths: readonly string[]): number {
+  let dropped = 0
+  for (const key of [...entries.keys()]) {
+    const path = pathOf(key)
+    if (paths.some((each) => (each.endsWith("/") ? path.startsWith(each) : path === each))) {
+      entries.delete(key)
+      dropped++
+    }
+  }
+  return dropped
 }

@@ -2,6 +2,7 @@ import type {
   AccountActions,
   AuthActions,
   CheckoutActions,
+  GiftCardActions,
   OrderActions,
   ThemeActions,
 } from "@qticaret/ui"
@@ -18,6 +19,7 @@ import { saveConsents, saveProfile } from "@/app/actions/account-profile"
 import { addFavorite, removeFavorite, saveBilling } from "@/app/actions/favorites"
 import { installmentsFor } from "@/app/actions/installments"
 import { addAddress, removeAddress } from "@/app/actions/addresses"
+import { addGiftToCart, checkGiftCardBalance, saveGiftRecipient } from "@/app/actions/gift-cards"
 import { cancelOrder, requestReturn } from "@/app/actions/order"
 import { requestPrivacy } from "@/app/actions/privacy"
 import { askQuestion, stockAlert, writeReview } from "@/app/actions/product"
@@ -50,7 +52,12 @@ export const themeActions: ThemeActions = {
   stockAlert,
   addFavorite,
   installments: installmentsFor,
+  addGiftToCart,
+  saveGiftRecipient,
 }
+
+/** `/hediye-karti/bakiye`'s form (adr/0025 Ek 2026-11-03). */
+export const giftCardActions: GiftCardActions = { checkBalance: checkGiftCardBalance }
 
 /** The checkout's actions (D7). */
 export const checkoutActions: CheckoutActions = {

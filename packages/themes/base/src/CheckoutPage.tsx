@@ -41,6 +41,10 @@ const ERRORS = [
   "payments.cart_changed",
   "promotions.one_code",
   "errors.too_many_requests",
+  "errors.challenge_failed",
+  "gift_card.recipient_required",
+  "gift_card.sale_disabled",
+  "gift_card.not_payable_with_credit",
 ]
 
 /**

@@ -2,6 +2,9 @@ import { notFound, redirect } from "next/navigation"
 import type { Resolution, StoreProduct } from "@qticaret/types"
 import type { BreadcrumbView, LinkView, ListingPageView, SortOptionView } from "@qticaret/ui"
 import { subscribeNewsletter } from "@/app/actions/newsletter"
+import type { AnalyticsEvent } from "@/lib/analytics/events"
+import { listEvent } from "@/lib/analytics/payloads"
+import { TrackEvents } from "@/lib/analytics/TrackEvents"
 import { t } from "@/lib/i18n"
 import { faqJsonLd } from "@/lib/seo/faq"
 import { JsonLd } from "@/lib/seo/JsonLd"
@@ -218,8 +221,16 @@ export async function ListingContent({
     swatchLookup(storefront.color_swatches)
   )
   const first = current === 1 && facets.active.length === 0
+  // A search is one when asked, not again for each page or filter (as the backend counts it)
+  const measured: AnalyticsEvent[] = [
+    ...(isSearch && state.q && first ? [{ name: "search" as const, term: state.q }] : []),
+    ...(products.length > 0
+      ? [listEvent(type, isSearch ? t("search.title") : heading.title, products)]
+      : []),
+  ]
   return (
     <>
+      <TrackEvents events={measured} />
       <JsonLd
         blocks={[...jsonLd, ...(first ? faqJsonLd([...sections.top, ...sections.bottom]) : [])]}
       />

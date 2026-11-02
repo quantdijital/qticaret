@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { pendingToken } from "@/lib/account/session"
+import { TrackEvents } from "@/lib/analytics/TrackEvents"
 import { t } from "@/lib/i18n"
 import { robotsOnly } from "@/lib/seo/metadata"
 import { authActions } from "@/lib/theme-actions"
@@ -21,14 +22,20 @@ export default async function VerifyPage({ searchParams }: { searchParams: Promi
   const [query, pending] = await Promise.all([searchParams, pendingToken()])
   const code = typeof query["code"] === "string" && CODE.test(query["code"]) ? query["code"] : null
   return (
-    <theme.AuthPage
-      t={t}
-      actions={authActions}
-      view={authView("verify", {
-        token: code,
-        needsPassword: pending === null,
-        notice: query["gonderildi"] === "1" ? t("account.notice_code_sent") : null,
-      })}
-    />
+    <>
+      {/* Just registered: the sign-up, once in this tab (docs/20) */}
+      {query["yeni"] === "1" && (
+        <TrackEvents events={[{ name: "sign_up", method: "email" }]} once="sign_up" />
+      )}
+      <theme.AuthPage
+        t={t}
+        actions={authActions}
+        view={authView("verify", {
+          token: code,
+          needsPassword: pending === null,
+          notice: query["gonderildi"] === "1" ? t("account.notice_code_sent") : null,
+        })}
+      />
+    </>
   )
 }

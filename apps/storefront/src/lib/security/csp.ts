@@ -30,22 +30,64 @@ export interface FrameRules {
   framedBySelf?: boolean
   /** Other origins that may frame the page: the panel's theme editor, on preview pages only (adr/0049). */
   framedBy?: readonly string[]
+  /**
+   * The measurement tags the shop connected (docs/20 "vitrin dönüşüm
+   * olayları"): their hosts are opened only then. Whether a visitor gets
+   * the tag is their cookie answer's; the policy only allows it.
+   */
+  tags?: { google: boolean; meta: boolean }
+}
+
+/**
+ * The tags' hosts (Google's and Meta's CSP guidance): their loaders in
+ * `script-src` for browsers without `strict-dynamic` (the others trust
+ * what our nonce'd code loads), and where they send what they measure.
+ * Pictures are already allowed from any HTTPS host.
+ */
+const TAG_HOSTS = {
+  google: {
+    script: ["https://www.googletagmanager.com"],
+    connect: [
+      "https://www.googletagmanager.com",
+      "https://*.google-analytics.com",
+      "https://*.analytics.google.com",
+    ],
+  },
+  meta: {
+    script: ["https://connect.facebook.net"],
+    connect: ["https://connect.facebook.net", "https://www.facebook.com"],
+  },
 }
 
 export function contentSecurityPolicy(
   nonce: string,
   development: boolean,
-  { frameOrigins = [], framedBySelf = false, formOrigins = [], framedBy = [] }: FrameRules = {}
+  {
+    frameOrigins = [],
+    framedBySelf = false,
+    formOrigins = [],
+    framedBy = [],
+    tags = { google: false, meta: false },
+  }: FrameRules = {}
 ): string {
   const ancestors = [...(framedBySelf ? ["'self'"] : []), ...framedBy]
+  const hosts = [...(tags.google ? [TAG_HOSTS.google] : []), ...(tags.meta ? [TAG_HOSTS.meta] : [])]
+  const tagScripts = hosts
+    .flatMap((each) => each.script)
+    .map((host) => ` ${host}`)
+    .join("")
+  const tagConnects = hosts
+    .flatMap((each) => each.connect)
+    .map((host) => ` ${host}`)
+    .join("")
   const directives = [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${development ? " 'unsafe-eval'" : ""}`,
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${tagScripts}${development ? " 'unsafe-eval'" : ""}`,
     development ? "style-src 'self' 'unsafe-inline'" : `style-src 'self' 'nonce-${nonce}'`,
     ...(development ? [] : [`style-src-attr 'unsafe-hashes' ${RADIX_STYLE_HASHES.join(" ")}`]),
     `img-src 'self' data: blob: https:${development ? " http:" : ""}`,
     "font-src 'self'",
-    `connect-src 'self'${development ? " ws: http://localhost:*" : ""}`,
+    `connect-src 'self'${tagConnects}${development ? " ws: http://localhost:*" : ""}`,
     `frame-src ${frameOrigins.length > 0 ? frameOrigins.join(" ") : "'none'"}`,
     "object-src 'none'",
     "base-uri 'self'",

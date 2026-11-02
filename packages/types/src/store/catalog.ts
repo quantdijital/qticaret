@@ -89,6 +89,8 @@ export interface StoreProduct {
   brand?: StoreBrand | null
   media_assets?: StoreMediaAsset[] | null
   attribute_values?: StoreAttributeValue[] | null
+  /** The catalog's own row; only its gift card mark may be asked (adr/0025 Ek 2026-11-03). */
+  product_extension?: { is_gift_card?: boolean | null } | null
 }
 
 export interface StoreCategory {

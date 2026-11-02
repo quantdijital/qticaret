@@ -1,6 +1,6 @@
 import "server-only"
 import { formatLira } from "@qticaret/ui"
-import type { BankTransferView, OrderPageView, Translate } from "@qticaret/ui"
+import type { BankTransferView, OrderGiftView, OrderPageView, Translate } from "@qticaret/ui"
 import type { PaymentMethods } from "@/lib/checkout/options"
 import type { InvoiceRow, ReturnRequestRow, ShipmentRow, StoreOrder } from "@/lib/orders/order"
 import { providersOf } from "@/lib/orders/order"
@@ -75,6 +75,31 @@ export function shipmentOf(parcel: ShipmentRow, t: Translate): OrderPageView["sh
   }
 }
 
+const LAST4 = /^[0-9A-Za-z]{4}$/
+
+/**
+ * A gift card line's cards and recipient (adr/0025 Ek 2026-11-03): the
+ * last four of each card issued (`qt_gift_cards`; never the code) and the
+ * address in `qt_gift` (gone once erased). Null on any other line.
+ */
+export function orderGiftOf(metadata: unknown): OrderGiftView | null {
+  if (typeof metadata !== "object" || metadata === null) {
+    return null
+  }
+  const { qt_gift: gift, qt_gift_cards: cards } = metadata as Record<string, unknown>
+  if (gift === undefined && cards === undefined) {
+    return null
+  }
+  const email = (gift as { recipient_email?: unknown } | null)?.recipient_email
+  return {
+    cards: (Array.isArray(cards) ? cards : []).flatMap((card: unknown) => {
+      const last4 = (card as { last4?: unknown } | null)?.last4
+      return typeof last4 === "string" && LAST4.test(last4) ? [last4] : []
+    }),
+    recipient: typeof email === "string" && email.includes("@") ? email : null,
+  }
+}
+
 /** An order page's own address, with its key when it was opened with one. */
 export const orderHref = (id: string, token: string | null, rest = "") =>
   `/siparis/${encodeURIComponent(id)}${rest}${token ? `?token=${encodeURIComponent(token)}` : ""}`
@@ -130,6 +155,7 @@ export function orderView(
             sources: { avif: null, webp: null },
           }
         : null,
+      gift: orderGiftOf(line.metadata),
     })),
     items: formatLira(order.original_item_total),
     discount: discount > 0 ? formatLira(discount / 100) : null,

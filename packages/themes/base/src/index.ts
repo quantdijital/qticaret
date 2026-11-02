@@ -10,6 +10,7 @@ import { ConfirmPage } from "./ConfirmPage"
 import { CheckoutResultPage } from "./CheckoutResultPage"
 import { ContentPage } from "./ContentPage"
 import { CookiePreferencesPage } from "./CookiePreferencesPage"
+import { GiftCardBalancePage } from "./GiftCardBalancePage"
 import { HomePage } from "./HomePage"
 import { Layout } from "./Layout"
 import { ListingPage } from "./ListingPage"
@@ -41,4 +42,5 @@ export const baseTheme: StorefrontTheme = {
   ConfirmPage,
   CookiePreferencesPage,
   ReviewsPage,
+  GiftCardBalancePage,
 }

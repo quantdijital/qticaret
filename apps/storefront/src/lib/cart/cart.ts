@@ -129,9 +129,10 @@ async function newCart(): Promise<string> {
 /**
  * Puts a variant in the shopper's cart, opening a cart when there is none
  * or the remembered one is gone or ordered. Prices come from the backend
- * (CLAUDE.md rule 5): only the variant and the quantity are sent.
+ * (CLAUDE.md rule 5): only the variant and the quantity are sent. Answers
+ * the cart's id.
  */
-export async function addLine(variantId: string, quantity: number): Promise<void> {
+export async function addLine(variantId: string, quantity: number): Promise<string> {
   const existing = await currentCart().catch((error: unknown) => {
     if (isStoreApiError(error)) {
       return null
@@ -141,15 +142,15 @@ export async function addLine(variantId: string, quantity: number): Promise<void
   const cartId = existing?.id ?? (await newCart())
   try {
     await storePost(`/store/carts/${cartId}/line-items`, { variant_id: variantId, quantity })
+    return cartId
   } catch (error) {
     if (!existing || !isNotFound(error)) {
       throw error
     }
     await forgetCart()
-    await storePost(`/store/carts/${await newCart()}/line-items`, {
-      variant_id: variantId,
-      quantity,
-    })
+    const fresh = await newCart()
+    await storePost(`/store/carts/${fresh}/line-items`, { variant_id: variantId, quantity })
+    return fresh
   }
 }
 

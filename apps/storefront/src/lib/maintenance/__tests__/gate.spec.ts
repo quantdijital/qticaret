@@ -15,6 +15,7 @@ const site = (enabled: boolean): EdgeSite => ({
   canonicalHost: null,
   indexNowKey: null,
   shopName: "Mağaza",
+  tracking: { ga4: null, meta: null },
   maintenance: {
     enabled,
     title: null,
