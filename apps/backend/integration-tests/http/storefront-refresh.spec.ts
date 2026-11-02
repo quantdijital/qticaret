@@ -147,6 +147,33 @@ medusaIntegrationTestRunner({
       expect(new Set(received.map((call) => call.body.nonce)).size).toBe(3)
     })
 
+    it("signals the site answer when GA4's account is connected or removed, and not for others", async () => {
+      const credentials = `/admin/integrations/credentials`
+      const connected = await settle(
+        http.post(
+          `${credentials}/ga4`,
+          { settings: { measurement_id: "G-REFRESH1" }, secrets: { api_secret: randomUUID() } },
+          { headers: admin.headers }
+        )
+      )
+      expect(connected.status).toBe(200)
+      await arrived(1)
+      expectSigned(received[0], ["site"])
+
+      const removed = await settle(http.delete(`${credentials}/ga4`, { headers: admin.headers }))
+      expect(removed.status).toBe(200)
+      await arrived(2)
+      expectSigned(received[1], ["site"])
+
+      // An account the storefront never shows: no signal (a later one would arrive first)
+      const other = await settle(http.delete(`${credentials}/paytr`, { headers: admin.headers }))
+      expect(other.status).toBe(200)
+      expect((await saveDraft()).status).toBe(200)
+      expect((await publish()).status).toBe(200)
+      await arrived(3)
+      expectSigned(received[2], ["layout"])
+    })
+
     it("keeps the publication when the storefront answers 500 or never answers", async () => {
       expect((await saveDraft()).status).toBe(200)
 

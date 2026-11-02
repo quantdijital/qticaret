@@ -38,6 +38,8 @@ export const RESERVED_ROOT_SEGMENTS: ReadonlySet<string> = new Set([
   "cerez-tercihleri",
   // The maintenance bypass link's page (adr/0053)
   "bakim",
+  // A gift card's balance, `/hediye-karti/bakiye` (adr/0025 Ek 2026-11-03)
+  "hediye-karti",
   // Backend paths, should a proxy put them on the storefront's host (F16)
   "admin",
   "app",

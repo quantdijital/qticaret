@@ -125,6 +125,42 @@ describe("resolveSeoPayload", () => {
     })
   })
 
+  it("describes a listing without text of its own from its name and the shop's (docs/21 §8)", () => {
+    const listing = (kind: "category" | "brand" | "collection", name: string) => ({
+      ...product(),
+      kind,
+      path: "/liste",
+      name,
+      description: " <p> </p> ",
+      tokens: {},
+      trail: [],
+    })
+    const browse = "fiyatları ve stok durumlarıyla, filtreleyip sıralayarak inceleyin."
+
+    const category = resolveSeoPayload(listing("category", "El Yapımı Çakı"), shop)
+    const brand = resolveSeoPayload(listing("brand", "Örnek"), shop)
+    const collection = resolveSeoPayload(listing("collection", "Yaz"), shop)
+    const nameless = resolveSeoPayload(listing("category", "Giyim"), { ...shop, name: "" })
+    const long = resolveSeoPayload(listing("category", "Çok ".repeat(60).trim()), shop)
+
+    expect(category.description).toBe(
+      `Demo Mağaza mağazasında El Yapımı Çakı kategorisindeki ürünler: ${browse}`
+    )
+    expect(category.openGraph.description).toBe(category.description)
+    expect(brand.description).toBe(`Demo Mağaza mağazasında Örnek markasının ürünleri: ${browse}`)
+    expect(collection.description).toBe(
+      `Demo Mağaza mağazasında Yaz koleksiyonundaki ürünler: ${browse}`
+    )
+    expect(nameless.description).toBe(`Giyim kategorisindeki ürünler: ${browse}`)
+    expect(Array.from(long.description).length).toBeLessThanOrEqual(155)
+    // A product keeps its own text or template: no listing sentence
+    const bare = resolveSeoPayload(product({ description: "", tokens: {} }), {
+      ...shop,
+      descriptionTemplates: { product: "{fiyat_cümlesi}" },
+    })
+    expect(bare.description).toBe("")
+  })
+
   it("titles a brand from its own template", () => {
     const payload = resolveSeoPayload(
       { ...product(), kind: "brand", path: "/marka/ornek", name: "Örnek", tokens: {}, trail: [] },

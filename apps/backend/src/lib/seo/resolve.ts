@@ -1,5 +1,6 @@
 import { articleJsonLd, breadcrumbJsonLd, listingJsonLd, productJsonLd } from "./jsonld"
 import type { ArticleFacts, JsonLd, ProductFacts } from "./jsonld"
+import { listingDescription } from "./listing-description"
 import { renderTemplate } from "./template"
 
 /**
@@ -221,7 +222,11 @@ function descriptionOf(subject: SeoSubject, shop: SeoShop): string {
       return filled
     }
   }
-  return excerpt(subject.description, DESCRIPTION_EXCERPT)
+  // A listing without text of its own still describes itself (docs/21 §8)
+  const text = excerpt(subject.description, DESCRIPTION_EXCERPT)
+  return (
+    text || excerpt(listingDescription(subject.kind, subject.name, shop.name), DESCRIPTION_EXCERPT)
+  )
 }
 
 /** Builds the page's `seo` object from its record, overrides and the shop's settings. */

@@ -12,6 +12,7 @@ import { livePostsUnder, termIdOf, termsOfEntries } from "../../../workflows/con
 import type { EntryTerms } from "../../../workflows/content/term-reads"
 import { shopInfoValues } from "../../../workflows/shop/info-values"
 import { cardTargets } from "./cards"
+import { coverOf, coversOf } from "./covers"
 import type { StoreGetContentType } from "./validators"
 
 // A reader's pace, for the "n min" a theme may show
@@ -118,11 +119,15 @@ export async function storeContentList(container: MedusaContainer, query: StoreG
           order: { published_at: "DESC" },
         }
       )
-  const [values, terms] = await Promise.all([
+  const [values, terms, covers] = await Promise.all([
     shopInfoValues(container),
     termsOfEntries(
       container,
       entries.map((entry) => entry.id)
+    ),
+    coversOf(
+      container,
+      entries.map((entry) => entry.image_url)
     ),
   ])
   return {
@@ -130,6 +135,7 @@ export async function storeContentList(container: MedusaContainer, query: StoreG
       const listed = summary(entry)
       return {
         ...listed,
+        ...coverOf(covers, entry.image_url),
         excerpt: fillShopText(listed.excerpt, values),
         ...(terms.get(entry.id) ?? NOT_FILED),
       }
@@ -161,9 +167,13 @@ export async function storeContentEntry(
   const values = await shopInfoValues(container)
   const body = fillShopDoc(entry.body as unknown as ContentDoc, values)
   const listed = summary(entry)
-  const terms = await termsOfEntries(container, [entry.id])
+  const [terms, covers] = await Promise.all([
+    termsOfEntries(container, [entry.id]),
+    coversOf(container, [entry.image_url]),
+  ])
   return {
     ...listed,
+    ...coverOf(covers, entry.image_url),
     excerpt: fillShopText(listed.excerpt, values),
     // A post's category and tags, at their archives' paths (adr/0019 ek 2026-11-03)
     ...(terms.get(entry.id) ?? NOT_FILED),

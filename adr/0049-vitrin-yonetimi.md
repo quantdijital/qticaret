@@ -103,7 +103,7 @@ Bugün vitrinin çerçevesi Ayarlar > Vitrin'de alt alta on kartla yönetiliyor.
   - İçerik önizlemesinin imzası genelleşti (`previewSigner`); düzenin bağlamı ayrı (`layout-preview:v1`, `sfl_`). Bağlantı taslağın kaydedilme anına bağlıdır: düzenleyici her kayıttan sonra yenisini alır.
   - Vitrin `/onizleme/<sfl_…>` adresinde taslağın ana sayfasını, üst bilgisini ve alt bilgisini basar. Vekil, belirteci kendi koyduğu bir istek başlığıyla iletir; ziyaretçinin gönderdiği aynı adlı başlık silinir.
   - Bu sayfalarda CSP `frame-ancestors` panelin kökenini (`PANEL_ORIGIN`; geliştirmede `http://localhost:5173`) adlandırır ve `X-Frame-Options` gönderilmez. Diğer bütün sayfalar `DENY` ve `frame-ancestors 'none'` ile kalır (e2e testli).
-- **Yansıma.** Yayın `storefront.layout_published` olayını yayar. Vitrin yayındaki belgeyi paylaşılan önbellekle en geç 60 sn'de gösterir; hemen yansıma adr/0048 planındaki ayrı adımdır.
+- **Yansıma.** Yayın `storefront.layout_published` olayını yayar. Vitrin yayındaki belgeyi hemen gösterir: backend yayından sonra imzalı "yenile" sinyali gönderir (`layout` kapsamı), sinyal ulaşmazsa paylaşılan önbellekle en geç 60 sn'de. Ayrıntı adr/0048 Ek (2026-11-03).
 - **Bilinen sınır.** İki kişi aynı anda düzenlerse son kayıt kazanır; düzenleyici "başka biri kaydetti" uyarısını sonra alabilir.
 
 ## Ek (2026-11-02): bağımsız güvenlik incelemesi

@@ -40,24 +40,47 @@ test("opens each section from the collapsed menu's icons", async ({ page, guard 
   }
   const items = page.locator('[data-sidebar="sidebar"] a[data-sidebar="menu-button"]')
   await expect(sidebar).toHaveAttribute("data-state", "collapsed")
-  const hrefs = await items.evaluateAll((links) =>
-    links.map((link) => link.getAttribute("href") ?? "")
+  const links = await items.evaluateAll((each) =>
+    each.map((link) => ({
+      href: link.getAttribute("href") ?? "",
+      name: link.textContent.trim(),
+    }))
   )
+  /**
+   * Off the menu, folded and still: the automatic behaviour opens it while
+   * the pointer rests on it and folds it back after, and its width, labels
+   * and group titles slide for a moment. An icon measured mid-slide is
+   * another item's by the time the click lands.
+   */
+  const settle = async () => {
+    await page.mouse.move(800, 400)
+    await expect
+      .poll(() =>
+        sidebar.evaluate(
+          (element) =>
+            element.getAttribute("data-state") === "collapsed" &&
+            !element.hasAttribute("data-peek") &&
+            element
+              .getAnimations({ subtree: true })
+              .every((animation) => !("transitionProperty" in animation))
+        )
+      )
+      .toBe(true)
+  }
   // The theme editor opens full screen, without this menu: its own test opens it
-  for (const href of hrefs.filter((each) => each !== "/storefront/editor")) {
+  for (const { href, name } of links.filter((each) => each.href !== "/storefront/editor")) {
     await test.step(href, async () => {
-      const box = await items
-        .and(page.locator(`[href="${href}"]`))
-        .locator("svg")
-        .boundingBox()
-      if (!box) {
-        throw new Error(`no icon for ${href}`)
-      }
-      await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2)
+      await settle()
+      const link = sidebar.getByRole("link", { name, exact: true })
+      // Folded, the icon's own point is the link's: no hidden label lies over it
+      const ownsItsIcon = await link.evaluate((element) => {
+        const box = (element.querySelector("svg") ?? element).getBoundingClientRect()
+        const hit = document.elementFromPoint(box.x + box.width / 2, box.y + box.height / 2)
+        return hit !== null && element.contains(hit)
+      })
+      expect(ownsItsIcon, `${name}'s icon takes its own click`).toBe(true)
+      await link.click()
       await expect(page).toHaveURL(new RegExp(href === "/" ? "/$" : href))
-      // Off the menu: the automatic behaviour folds it back before the next icon
-      await page.mouse.move(800, 400)
-      await expect(sidebar).toHaveAttribute("data-state", "collapsed")
     })
   }
   await guard.assertHealthy()

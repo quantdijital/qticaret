@@ -12,6 +12,7 @@ import type {
 import type PlatformSettingsModuleService from "../../../../modules/platform-settings/service"
 import { SEO_SITEMAPS_MODULE } from "../../../../modules/seo-sitemaps"
 import type SeoSitemapsModuleService from "../../../../modules/seo-sitemaps/service"
+import { storefrontTracking } from "../../../../workflows/conversions/tracking"
 import { legalIdentity } from "../../../../workflows/legal/identity"
 import type { LegalIdentity } from "../../../../workflows/legal/identity"
 import { shopOf } from "../../../../workflows/seo/payload-sources"
@@ -44,13 +45,15 @@ const identityOf = (identity: LegalIdentity) => ({
  * home page's `seo` object, shaped as resolve's for every other page. And
  * whether the shop is dark (adr/0053): the storefront answers 503 with
  * `Retry-After` and this page but for its system paths, the paths left
- * open and visitors holding a bypass link.
+ * open and visitors holding a bypass link. And the browser tags' public
+ * ids from the connected GA4 and Meta accounts, nothing else of them.
  */
 export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {
-  const [shop, identity, maintenance] = await Promise.all([
+  const [shop, identity, maintenance, tracking] = await Promise.all([
     shopOf(req.scope),
     legalIdentity(req.scope),
     siteMaintenance(req.scope),
+    storefrontTracking(req.scope),
   ])
   const settings = req.scope.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
   const [appearanceSection, seoSection, announcing] = await Promise.all([
@@ -78,5 +81,6 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
     shop: { name: shop.name, logo_url: appearance.logo_light_url },
     home: homeSeo({ shop, home: seo.home, ogImage: seo.default_og_image, jsonLd }),
     maintenance,
+    tracking,
   })
 }

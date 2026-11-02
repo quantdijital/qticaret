@@ -39,7 +39,13 @@ medusaIntegrationTestRunner({
       const preview = await get<Preview>(`${PATH}/order.placed/preview`)
 
       expect(list.status).toBe(200)
-      expect(list.data.templates).toHaveLength(25)
+      expect(list.data.templates).toHaveLength(26)
+      // A sold gift card's codes to its recipient (adr/0025 Ek 2026-11-03)
+      expect(list.data.templates).toContainEqual({
+        name: "gift_card.issued",
+        kind: "transactional",
+        channels: ["email"],
+      })
       // A staff member told their 2FA changed (the F15 audit)
       expect(list.data.templates).toContainEqual({
         name: "staff.mfa_changed",

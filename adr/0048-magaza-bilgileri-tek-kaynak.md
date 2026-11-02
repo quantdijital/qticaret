@@ -110,6 +110,7 @@ adr/0049'daki "hemen yansıma" adımı. Vitrin mağaza geneli yanıtları süre�
   | Menü kaydı ya da silme | `menus` |
   | Yasal metin yayını (geri çekme yok) | `legal` |
   | İçerik sayfası, yazı ya da filtre sayfası kaydı (yalnız yayında olan ya da daha önce yayına çıkmış olan; taslak kaydı değil); bunların silinmesi; blog kategorisi ve etiketi kaydı ya da silme | `content` |
+  | GA4 ya da Meta hesabının kaydı ya da kaldırılması (vitrinin etiket kimlikleri `/store/seo/site` `tracking`'de) | `site` |
 
   `appearance` ve filtre sayfası görev listesinde yoktu. Logo vitrinin çerçevesinde (`/store/seo/site`) görünüyor, filtre sayfasına da menüden bağlantı verilebiliyor; bu yüzden eklendi.
 
@@ -125,7 +126,7 @@ adr/0049'daki "hemen yansıma" adımı. Vitrin mağaza geneli yanıtları süre�
   - Her kapsam bir kez geçer. Sıra bu listedeki sıradır.
 - İmzalanan metin `<time>.<nonce>.<scopes.join(",")>`. Anahtar `STOREFRONT_IP_SECRET`, iki sunucunun zaten paylaştığı sır (adr/0046 §5).
 
-**Vitrin (sıradaki iş, vitrin ajanı):**
+**Vitrin (yapıldı, 2026-11-03):**
 
 1. **Rota:** `app/api/yenile/route.ts`, yalnız POST, Node çalışma ortamı, gövde en çok 1 KB.
    - Vekil (`proxy.ts`) bu yolu kanonik alan adı 301'ine, normalizasyona, bakım kapısına ve resolve çağrısına sokmamalı. Backend yönlendirme izlemez; sinyal 301 alırsa başarısız sayılır.
@@ -160,4 +161,4 @@ adr/0049'daki "hemen yansıma" adımı. Vitrin mağaza geneli yanıtları süre�
 - **Testler:**
   - birim `lib/storefront/__tests__/refresh.unit.spec.ts`: imza, hedef seçimi, loopback'in yalnız yerelde açık olması, hatasız dönüş;
   - `lib/__tests__/env.unit.spec.ts`;
-  - HTTP `storefront-refresh.spec.ts`: küçük bir alıcı. Yayın, vitrin ve SEO ayarı kaydı doğru kapsam ve geçerli imzayla geliyor. Alıcı 500 dönse de 3 sn'yi aşsa da yayın 200 ve kalıcı.
+  - HTTP `storefront-refresh.spec.ts`: küçük bir alıcı. Yayın, vitrin ve SEO ayarı kaydı, GA4 hesabının bağlanması ve kaldırılması doğru kapsam ve geçerli imzayla geliyor; başka sağlayıcı hesabı sinyal göndermiyor. Alıcı 500 dönse de 3 sn'yi aşsa da yayın 200 ve kalıcı.

@@ -24,6 +24,9 @@ describe("isReservedPath", () => {
     "/kategoriler",
     "/markalar",
     "/bakim",
+    // The gift card balance's root (adr/0025 Ek 2026-11-03) and the storefront's own routes
+    "/hediye-karti",
+    "/api",
   ])("keeps %s for the storefront", (path) => {
     expect(isReservedPath(path)).toBe(true)
   })
@@ -47,6 +50,9 @@ describe("isReservedPath", () => {
     "/kategoriler/bicaklar",
     "/markalarimiz",
     "/bakim-seti",
+    "/hediye-karti-seti",
+    "/hediye-kartlari",
+    "/api-anahtarligi",
   ])("leaves %s to records", (path) => {
     expect(isReservedPath(path)).toBe(false)
   })

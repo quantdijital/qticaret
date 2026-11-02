@@ -45,6 +45,14 @@ const text = (value: string, marks?: unknown[]) => ({
 const p = (...content: unknown[]) => ({ type: "paragraph", content })
 const doc = (...content: unknown[]) => ({ type: "doc", content })
 const COVER = "https://cdn.example.com/content/kapak.webp"
+// The versions the media pipeline made of the cover, as a product image's
+const COVER_DERIVATIVES = {
+  srcset: {
+    webp: [{ width: 640, url: "https://cdn.example.com/content/kapak-640.webp" }],
+    avif: [{ width: 640, url: "https://cdn.example.com/content/kapak-640.avif" }],
+  },
+  og: { url: "https://cdn.example.com/content/kapak-og.jpg", width: 1200, height: 630 },
+}
 
 /** F3.16 (adr/0019): content pages and blog posts, their paths, SEO and Store API. */
 medusaIntegrationTestRunner({
@@ -72,7 +80,15 @@ medusaIntegrationTestRunner({
       await container
         .resolve<MediaModuleService>(MEDIA_MODULE)
         // As an upload leaves it: a file behind the address
-        .createMediaAssets([{ url: COVER, file_id: "content-test-cover" }])
+        .createMediaAssets([
+          {
+            url: COVER,
+            file_id: "content-test-cover",
+            width: 1600,
+            height: 900,
+            derivatives: COVER_DERIVATIVES,
+          },
+        ])
       await container
         .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
         .saveSection("seo", { canonical_host: "magaza.example.com" }, null)
@@ -101,6 +117,14 @@ medusaIntegrationTestRunner({
       expect(answer.seo?.title.startsWith("Hakkımızda |")).toBe(true)
       expect(answer.seo?.description).toBe("Biz kimiz.")
       expect(answer.seo?.jsonLd[0]).toMatchObject({ "@type": "WebPage", name: "Hakkımızda" })
+      // No cover: nothing to size
+      const read = await storeGet<{ entry: Record<string, unknown> }>(`/store/content/${id}`)
+      expect(read.data.entry).toMatchObject({
+        image_url: null,
+        image_width: null,
+        image_height: null,
+        image_derivatives: null,
+      })
     })
 
     it("shows a draft through its signed preview link only, for a day", async () => {
@@ -163,6 +187,15 @@ medusaIntegrationTestRunner({
       expect(data.entry.html).toContain('<a href="/urun/kupa-karti">kupa-karti</a>')
       const list = await storeGet<{ entries: { id: string }[] }>("/store/content?kind=post")
       expect(list.data.entries.map((entry) => entry.id)).toEqual([id])
+      // The cover's size and versions from the media library: `width`/`height` and a `srcset`
+      const cover = {
+        image_url: COVER,
+        image_width: 1600,
+        image_height: 900,
+        image_derivatives: COVER_DERIVATIVES,
+      }
+      expect(data.entry).toMatchObject(cover)
+      expect(list.data.entries[0]).toMatchObject(cover)
 
       const answer = await resolve(path)
       expect(answer.seo?.openGraph.type).toBe("article")

@@ -185,6 +185,10 @@ medusaIntegrationTestRunner({
       const answer = await resolve("/kategori/giyim/gomlek")
       expect(answer.seo?.title.startsWith("Gömlek Modelleri ve Fiyatları")).toBe(true)
       expect(answer.seo?.breadcrumbs.map(({ name }) => name)).toEqual(["Giyim", "Gömlek"])
+      // No text of its own: described from its name and the shop's (docs/21 §8)
+      expect(answer.seo?.description).toMatch(
+        /^.+ mağazasında Gömlek kategorisindeki ürünler: fiyatları ve stok durumlarıyla, filtreleyip sıralayarak inceleyin\.$/
+      )
     })
   },
 })
