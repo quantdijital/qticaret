@@ -101,8 +101,21 @@
     - E2E 26/26, vitrin birim 61.
     - Panel 127 dosya / 422 test.
     - Backend birim 2402 test; ilgili HTTP takımları yeşil (content, seo-sitemap, aras-shipping, storefront-frame, route-inventory).
+- **Gecenin son bölümü (commit'ler `dae5306` → `d6dd5f9`):**
+  - **Hediye kartı (F4.8'in vitrin tarafı):**
+    - Vitrin bayrağın açık olduğunu `/store/storefront` cevabındaki `features.gift_cards` alanından okuyor.
+    - Sepette indirim kodunun yanında "Hediye kartı" alanı var; her kart çıkarılabiliyor ve özette "Hediye kartı −X" satırı görünüyor.
+    - Kart tutarın tamamını karşılayınca ödeme adımında tek seçenek "Hediye kartıyla tamamla" (`credit`). Backend sepet toplamı 0 değilse bunu reddediyor (`payments.amount_due`). Bu yol diğer ödemelerle aynı korumalardan geçiyor: kara liste, hız sınırı, iş kanıtı, sözleşme ve yaş denetimi.
+    - Ödeme başladıktan sonra kart çıkarılırsa sipariş oluşmuyor (testli).
+    - Bayrak kapatıldıktan sonraki 60 saniyelik önbellek döneminde sepet okuması 400 alırsa kart alanları olmadan yeniden deneniyor; bunu e2e yakaladı.
+    - Tarayıcıda sepet alanı ve geçersiz kod mesajı denendi. Tamamı kartla ödenen sipariş yalnız backend HTTP testiyle denendi: geliştirme ortamında kart oluşturamadım.
+  - **Elle kargoya verilen paket:** panelin "Kargoya ver" penceresine isteğe bağlı firma, takip no ve takip bağlantısı (https) eklendi. Bu bilgiler sipariş sayfasında ve kargo e-postasında görünüyor. Aras/Yurtiçi bağlantısı beklerken mağaza bununla gönderebilir.
+  - **Hesap:** Bilgilerim sayfasına "Şifre" kartı eklendi; şifre değiştirme e-postayla gelen bağlantıyla yapılıyor.
+  - **Doğrulama:**
+    - Backend birim 227 takım (2403 test). HTTP: gift-cards 5, order-ship-parts 4, storefront-frame ve ödeme takımları yeşil (iyzico tek başına 8/8).
+    - Vitrin e2e 26/26, birim 61; panel sipariş testleri 49.
 - **Açık kalanlar (vitrin):**
-  - Hediye kartı: bayrak kapalı. Sepette kod alanı ve tamamen kartla ödenen (0 TL) siparişin ödeme akışı gerekir; ertelendi.
+  - Hediye kartı satışı (hediye kartı ürünü) ve hesapta kart bakiyesi yok; kodla kullanım bitti.
   - Misafire kurumsal fatura: sipariş düzeyinde VKN verisi (yeni model ve ADR) gerekir; **karar senin**.
   - Meilisearch (D10).
   - Tema ayarları ve ikinci tema (D11).
@@ -1348,7 +1361,7 @@
 | D3 ◐ | Çerçeve ve ana sayfa: menü, sepet sayacı, ana sayfa (`/store/seo/site` `home`) ✓; yönetilebilir menü, marka rengi, ana sayfa girişi, mağaza profili yükleyicisi (`shop:profile`) ✓; shadcn temeli, `storefront` ayar bölümü + `GET /store/storefront`, duyuru şeridi, üst bağlantılar, açılır kategori menüsü, telefon çekmecesi, arama kutusu, güven şeridi, alt bilgi, WhatsApp ✓ (`3bc6354`…`ff88a3b`); panel "Vitrin" ekranı (bkz. özet). Açık: panelde SEO ayarlarına ana sayfa başlık/açıklama alanı; footer yasal bağlantıları ve ETBİS (D10); mobil alt gezinme | Büyük ölçüde bitti |
 | D4 ✓ | Listeleme: kategori, marka, koleksiyon, landing, `/magaza` (tüm katalog); filtreler (marka, öznitelik, sayılı), fiyat aralığı, en yeni/fiyat sıralama (`GET /store/listings/products`, bellekte ≤3000 ürün); kanonik bağlantılar | Bitti (2026-11-02) |
 | D5 ✓ | Ürün sayfası: galeri, varyant, 30 gün kuralı, stok, sepete ekle, öznitelikler, yorumlar ve soru-cevap (yazma dahil), stok bildirimi, favori, taksit tablosu (açılınca), WhatsApp'tan sor, benzer ürünler, tasarruf ve kargo cümlesi, `og:type` product, renk örnekleri (mağazanın renk sözlüğü) ✓ | Bitti (2026-11-02) |
-| D6 ✓ | Sepet: satırlar, adet, kaldır, kupon, ücretsiz kargo çubuğu, sepet çekmecesi, `/sepet/geri-don` ✓. Açık: hediye kartı (bayrak) | Bitti (hediye kartı hariç) |
+| D6 ✓ | Sepet: satırlar, adet, kaldır, kupon, ücretsiz kargo çubuğu, sepet çekmecesi, `/sepet/geri-don`, hediye kartı kodu (bayrakla) ve tamamı kartla ödenen sepet ✓ | Bitti (2026-11-02) |
 | D7 ✓ | Ödeme: `/odeme` üç adım (TR adres, kargo, yöntem + sözleşme + yaş + pazarlama izni), iş kanıtı, havale/kapıda anında sipariş, PayTR çerçeve, iyzico yönlendirme (sandbox'la denendi), `/odeme/sonuc`, `/siparis/:id` (iptal, iade talebi, belgeler, fatura); CSP `frame-src`/`form-action`. PayTR çerçevesi sahte PayTR ile uçtan uca denendi; adr/0028 deneme sayfası silindi | Bitti |
 | D8 ✓ | Hesap: giriş, kayıt, e-posta doğrulama, şifre sıfırlama, siparişler, favoriler, adres defteri, bilgiler, fatura profili, iletişim izinleri, KVKK talebi, `migration-claim`, `/siparis` (misafir sorgulama) | Bitti |
 | D9 ◐ | Çerez onayı ✓, ilk giriş kaynağı (F11.2) ✓; dönüşüm olayları (F10.9) açık | Başladı |
