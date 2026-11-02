@@ -144,8 +144,57 @@ describe("the theme settings", () => {
         radius: "sharp",
       })
     })
-    expect(postsTo(fetchMock, SETTINGS)).toEqual([])
+    // The old one gives way once the theme holds the colour, after the theme's save
+    await waitFor(() => {
+      expect(postsTo(fetchMock, SETTINGS).map(([, init]) => init?.body)).toEqual([
+        { primary_color: null },
+      ])
+    })
+    const sections = fetchMock.mock.calls
+      .filter(
+        ([url, init]) => init?.method === "POST" && url.startsWith("/admin/platform-settings")
+      )
+      .map(([url]) => url)
+    expect(sections).toEqual([THEME_SETTINGS, SETTINGS])
+    expect(primary).toHaveValue("#0b5c99")
+    expect(screen.queryByText(/eski ayardan geliyor/)).toBeNull()
   })
+
+  it(
+    "puts the main colour back to the theme's own over an old one, clearing that once",
+    HEAVY,
+    async () => {
+      const primary = await openTheme({ storefront: { primary_color: "#0b5c99" } })
+      expect(primary).toHaveValue("#0b5c99")
+
+      await userEvent.click(screen.getByRole("button", { name: "Varsayılan" }))
+      await userEvent.click(save())
+
+      await waitFor(() => {
+        expect(postsTo(fetchMock, SETTINGS)).toHaveLength(1)
+      })
+      expect(themeBody()).toMatchObject({ colors: { primary: null } })
+      expect(postsTo(fetchMock, SETTINGS)[0]?.[1]?.body).toEqual({ primary_color: null })
+      // The theme's own colour shows, not the old one
+      await waitFor(() => {
+        expect(primary).toHaveValue("")
+      })
+      await waitFor(() => {
+        expect(screen.getByTitle("Vitrin önizlemesi")).toHaveAttribute(
+          "src",
+          expect.stringContaining("/onizleme/sfl_2")
+        )
+      })
+
+      // A later save leaves the storefront section alone
+      await userEvent.click(screen.getByRole("radio", { name: "Nötr" }))
+      await userEvent.click(save())
+      await waitFor(() => {
+        expect(postsTo(fetchMock, THEME_SETTINGS)).toHaveLength(2)
+      })
+      expect(postsTo(fetchMock, SETTINGS)).toHaveLength(1)
+    }
+  )
 
   it("puts a colour back to the theme's own as none", HEAVY, async () => {
     const primary = await openTheme({ theme: { colors: { ...THEME.colors, accent: "#c2410c" } } })

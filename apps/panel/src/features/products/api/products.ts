@@ -21,6 +21,8 @@ const LIST_FIELDS = [
   "variants.prices.amount",
   "variants.prices.currency_code",
   "variants.inventory_items.inventory.location_levels.available_quantity",
+  // A gift card product's badge (adr/0025 Ek 2026-11-03): the catalog extension's mark
+  "product_extension.is_gift_card",
 ].join(",")
 
 export interface ProductListParams {
@@ -45,6 +47,11 @@ export const productsQuery = ({ q, status, page }: ProductListParams) =>
   })
 
 export type ProductListItem = Awaited<ReturnType<typeof sdk.admin.product.list>>["products"][number]
+
+/** Whether a listed product sells gift cards; the SDK's type does not know the extension. */
+export const isGiftCardProduct = (product: ProductListItem): boolean =>
+  (product as { product_extension?: { is_gift_card?: boolean | null } | null }).product_extension
+    ?.is_gift_card === true
 
 /** How many products each quick view holds. */
 export const productCountsQuery = () =>

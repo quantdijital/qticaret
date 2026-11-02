@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { useSaveSection } from "@/features/settings/api/sections"
+import type { StorefrontSettings } from "@/features/settings/api/sections"
 import { isHexColor } from "@/features/settings/storefront"
 import { THEME_SECTION } from "@/features/storefront/api/theme"
 import type { ThemeSettings } from "@/features/storefront/api/theme"
@@ -43,6 +44,9 @@ interface ThemeFormProps {
 export function ThemeForm({ saved, legacyPrimary, announcement, onSaved }: ThemeFormProps) {
   const { t } = useTranslation()
   const save = useSaveSection<ThemeSettings>(THEME_SECTION)
+  const storefront = useSaveSection<StorefrontSettings>("storefront")
+  // The old main colour is cleared once, by the first save that writes the theme's (again if that failed)
+  const clearLegacy = legacyPrimary !== null && (storefront.isIdle || storefront.isError)
   const values = themeValuesOf(saved, legacyPrimary)
   const form = useForm<ThemeValues, unknown, ThemeParsed>({
     resolver: zodResolver(themeSchema),
@@ -56,9 +60,18 @@ export function ThemeForm({ saved, legacyPrimary, announcement, onSaved }: Theme
   const submit = form.handleSubmit((next) => {
     save.mutate(themeBodyOf(next), {
       onSuccess: (stored) => {
-        form.reset(themeValuesOf(stored.values, legacyPrimary), FULL_RESET)
+        // The server falls back to the storefront section's old colour while it is set
+        // (adr/0053 §B.5): the theme's colour, or none ("Varsayılan"), holds only once it is gone
+        form.reset(themeValuesOf(stored.values, clearLegacy ? null : legacyPrimary), FULL_RESET)
         toast.success(t(`${C}.saved`))
-        onSaved()
+        if (!clearLegacy) {
+          onSaved()
+          return
+        }
+        storefront.mutate(
+          { primary_color: null },
+          { onError: (failure) => toast.error(errorText(t, failure)), onSettled: onSaved }
+        )
       },
       onError: (failure) => {
         if (isContrastRefusal(failure)) {

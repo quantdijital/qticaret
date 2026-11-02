@@ -20,6 +20,8 @@ export interface ProductCatalog {
   withdrawal_excluded: boolean
   /** Sold to adults only, and why (F13.4); a category's mark is not shown here. */
   restriction: Restriction | null
+  /** Its variants are gift card amounts (adr/0025 Ek 2026-11-03); marked, it is digital. */
+  is_gift_card: boolean
   successor: { id: string; title: string; handle: string } | null
   categories: { id: string; name: string }[]
   variants: {
@@ -50,6 +52,7 @@ export function useSaveCatalog(id: string) {
       primary_category_id?: string | null
       withdrawal_excluded?: boolean
       restriction?: Restriction | null
+      is_gift_card?: boolean
     }) => sdk.client.fetch<ProductCatalog>(catalogUrl(id), { method: "POST", body }),
     onSuccess: async (catalog) => {
       client.setQueryData(["products", "catalog", id], catalog)

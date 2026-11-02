@@ -1,6 +1,8 @@
 import { Link } from "@tanstack/react-router"
 import { useTranslation } from "react-i18next"
 import type { Column } from "@/components/patterns/data-table"
+import { Badge } from "@/components/ui/badge"
+import { isGiftCardProduct } from "@/features/products/api/products"
 import type { ProductListItem } from "@/features/products/api/products"
 import { ProductStatusBadge } from "@/features/products/components/product-status-badge"
 import { ProductThumb } from "@/features/products/components/product-thumb"
@@ -50,7 +52,16 @@ export function useProductColumns(
     {
       key: "status",
       header: t("products.columns.status"),
-      cell: (product) => <ProductStatusBadge status={product.status} />,
+      cell: (product) => (
+        <div className="flex flex-wrap items-center gap-1.5">
+          <ProductStatusBadge status={product.status} />
+          {isGiftCardProduct(product) ? (
+            <Badge variant="outline" className="h-6 font-normal">
+              {t("products.giftCardBadge")}
+            </Badge>
+          ) : null}
+        </div>
+      ),
     },
     {
       key: "stock",

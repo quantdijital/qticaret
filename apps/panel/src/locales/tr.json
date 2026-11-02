@@ -1532,6 +1532,9 @@
           },
           "consent": {
             "confirm": "Kampanya izni onayı"
+          },
+          "gift_card": {
+            "issued": "Hediye kartı gönderildi"
           }
         }
       },
@@ -2768,7 +2771,11 @@
         "service": "Hizmet"
       },
       "withdrawalExcluded": "Cayma hakkı dışında",
-      "withdrawalExcludedHint": "Hijyen ürünü ya da kişiye özel hazırlanıyor; yalnızca kusurlu çıkarsa geri alınır."
+      "withdrawalExcludedHint": "Hijyen ürünü ya da kişiye özel hazırlanıyor; yalnızca kusurlu çıkarsa geri alınır.",
+      "giftCard": "Hediye kartı",
+      "giftCardHint": "Varyantlar kartın tutarlarıdır. Ödeme alınınca her adet için bir kart üretilir ve alıcıya e-postayla gider. Ürün dijital olur, kargo gerekmez; varyantlarda stok takibini kapatmanız önerilir.",
+      "giftCardFeatures": "Özelliklere git",
+      "kindGiftCard": "Hediye kartı dijital üründür; türü değiştirilemez."
     },
     "variantImages": {
       "title": "Varyant görselleri",
@@ -2987,7 +2994,8 @@
         "approve": "Taslak onaylandı ve sayfaya uygulandı.",
         "reject": "Taslak reddedildi."
       }
-    }
+    },
+    "giftCardBadge": "Hediye kartı"
   },
   "orders": {
     "description": "Gelen siparişler; önce hazırlanacak olanlar",
@@ -3123,6 +3131,13 @@
         "waiting_other": "{{count}} kolinin etiketi hazır. Etiketleri yazdırıp kolilere yapıştırın; kargo firması teslim aldığında sipariş kendiliğinden \"kargoda\" olur.",
         "label": "Etiketi indir",
         "labelOf": "Etiket {{number}}"
+      },
+      "gift": {
+        "cards": "Hediye kartları:",
+        "open": "•••• {{last4}} kartını aç",
+        "recipient": "Alıcı: {{email}}",
+        "recipientNamed": "Alıcı: {{name}} ({{email}})",
+        "pending": "Kart, ödeme alınınca üretilip alıcıya e-postayla gönderilir."
       }
     },
     "providers": {
@@ -5737,7 +5752,8 @@
       "value": "Tutar",
       "balance": "Kalan",
       "note": "Not",
-      "status": "Durum"
+      "status": "Durum",
+      "actions": "İşlemler"
     },
     "states": {
       "usable": "Kullanılabilir",
@@ -5746,6 +5762,21 @@
     },
     "errors": {
       "value": "En az 1 ₺ olan bir tutar girin."
+    },
+    "actions": "{{code}} kartının işlemleri",
+    "oneCard": "Yalnızca bir kart gösteriliyor.",
+    "allCards": "Tüm kartlar",
+    "close": {
+      "action": "Kartı kapat",
+      "title": "Kartı kapat",
+      "description": "{{code}} kodlu kartta kalan {{amount}} sıfırlanır ve kart bir daha kullanılamaz. Hareket kartın bakiye geçmişinde kalır; bu işlem geri alınamaz.",
+      "reason": "Neden",
+      "reasonHint": "Ör. sipariş iade edildi. Hareketin notuna yazılır.",
+      "confirm": "Kartı kapat",
+      "note": "Kart panelden kapatıldı",
+      "noteWith": "Kart panelden kapatıldı: {{reason}}",
+      "done": "Kart kapatıldı; kalan {{amount}} sıfırlandı.",
+      "empty": "Kartta bakiye kalmamıştı; bir şey değişmedi."
     }
   },
   "storeCredit": {
@@ -6060,7 +6091,10 @@
         "reviews": "Müşteri yorumları",
         "cart": "Sepetim",
         "account": "Hesabım",
-        "order_lookup": "Siparişimi bul"
+        "order_lookup": "Siparişimi bul",
+        "categories": "Tüm kategoriler",
+        "brands": "Markalar",
+        "sale": "Kampanyalar"
       },
       "picker": {
         "add": "Bağlantı ekle",

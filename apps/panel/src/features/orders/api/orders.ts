@@ -132,6 +132,8 @@ const DETAIL_FIELDS = [
   "items.detail.fulfilled_quantity",
   "items.detail.shipped_quantity",
   "items.detail.delivered_quantity",
+  // A gift card line's recipient and issued cards (adr/0025 Ek 2026-11-03)
+  "items.metadata",
   "customer.id",
   "customer.first_name",
   "customer.last_name",

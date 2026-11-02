@@ -1532,6 +1532,9 @@
           },
           "consent": {
             "confirm": "Campaign consent confirmation"
+          },
+          "gift_card": {
+            "issued": "Gift card sent"
           }
         }
       },
@@ -2768,7 +2771,11 @@
         "service": "Service"
       },
       "withdrawalExcluded": "Outside the right of withdrawal",
-      "withdrawalExcludedHint": "A hygiene product or made to order; it comes back only when faulty."
+      "withdrawalExcludedHint": "A hygiene product or made to order; it comes back only when faulty.",
+      "giftCard": "Gift card",
+      "giftCardHint": "Its variants are the card's amounts. Once paid, a card is issued for each unit and e-mailed to the recipient. The product becomes digital, with no shipping; turning off stock tracking on its variants is recommended.",
+      "giftCardFeatures": "Go to features",
+      "kindGiftCard": "A gift card is a digital product; its kind cannot change."
     },
     "variantImages": {
       "title": "Variant images",
@@ -2987,7 +2994,8 @@
         "approve": "Draft approved and applied to the page.",
         "reject": "Draft rejected."
       }
-    }
+    },
+    "giftCardBadge": "Gift card"
   },
   "orders": {
     "description": "Incoming orders; the ones to pack first",
@@ -3123,6 +3131,13 @@
         "waiting_other": "Labels for {{count}} parcels are ready. Print them and stick them on the parcels; the order moves to shipped by itself when the carrier picks them up.",
         "label": "Download label",
         "labelOf": "Label {{number}}"
+      },
+      "gift": {
+        "cards": "Gift cards:",
+        "open": "Open card •••• {{last4}}",
+        "recipient": "Recipient: {{email}}",
+        "recipientNamed": "Recipient: {{name}} ({{email}})",
+        "pending": "The card is issued and e-mailed to the recipient once payment is taken."
       }
     },
     "providers": {
@@ -5737,7 +5752,8 @@
       "value": "Value",
       "balance": "Left",
       "note": "Note",
-      "status": "Status"
+      "status": "Status",
+      "actions": "Actions"
     },
     "states": {
       "usable": "Usable",
@@ -5746,6 +5762,21 @@
     },
     "errors": {
       "value": "Enter an amount of at least 1."
+    },
+    "actions": "Actions for card {{code}}",
+    "oneCard": "Showing one card only.",
+    "allCards": "All cards",
+    "close": {
+      "action": "Close card",
+      "title": "Close card",
+      "description": "The {{amount}} left on card {{code}} goes to zero and the card can no longer be used. The movement stays in the card's balance history; this cannot be undone.",
+      "reason": "Reason",
+      "reasonHint": "E.g. the order was refunded. Written in the movement's note.",
+      "confirm": "Close card",
+      "note": "Card closed in the panel",
+      "noteWith": "Card closed in the panel: {{reason}}",
+      "done": "Card closed; the {{amount}} left went to zero.",
+      "empty": "Nothing was left on the card; nothing changed."
     }
   },
   "storeCredit": {
@@ -6060,7 +6091,10 @@
         "reviews": "Customer reviews",
         "cart": "My cart",
         "account": "My account",
-        "order_lookup": "Find my order"
+        "order_lookup": "Find my order",
+        "categories": "All categories",
+        "brands": "Brands",
+        "sale": "Sale"
       },
       "picker": {
         "add": "Add link",

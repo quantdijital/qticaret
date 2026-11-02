@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next"
 import { SectionCard } from "@/components/patterns/section-card"
 import type { OrderDetail, OrderMoney, OrderMoneyLine } from "@/features/orders/api/orders"
 import { ProductThumb } from "@/features/products/components/product-thumb"
+import { GiftLineDetails } from "./gift-line"
 import { formatCount, formatMoney } from "@/lib/format"
 import { cn } from "@/lib/utils"
 
@@ -60,6 +61,7 @@ function ItemRow({
         <span className="truncate text-xs text-muted-foreground">
           {[item.subtitle, item.variant_sku].filter(Boolean).join(" · ")}
         </span>
+        <GiftLineDetails metadata={item.metadata} />
       </div>
       <span className="hidden text-sm text-muted-foreground tabular-nums sm:inline">
         {formatCount(item.quantity)} × {money(item.unit_price)}

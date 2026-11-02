@@ -67,4 +67,24 @@ describe("MessageHistoryCard", () => {
     expect(await screen.findByText("Henüz ileti yok.")).toBeInTheDocument()
     expect(fetchMock).toHaveBeenCalledWith("/admin/customers/cus_1/messages")
   })
+
+  it("names the gift card e-mail sent to a card's recipient", async () => {
+    fetchMock.mockResolvedValue({
+      messages: [
+        {
+          id: "noti_2",
+          template: "gift_card.issued",
+          channel: "email",
+          state: "sent",
+          reason: null,
+          to: "fa***@example.com",
+          at: "2026-11-03T08:00:00Z",
+        },
+      ],
+      limited: false,
+    })
+    renderCard({ orderId: "order_1" })
+
+    expect(await screen.findByText("Hediye kartı gönderildi")).toBeInTheDocument()
+  })
 })

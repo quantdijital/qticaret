@@ -29,6 +29,10 @@ export const SYSTEM_PAGES = [
   "cart",
   "account",
   "order_lookup",
+  // Every category, every brand, the products on sale now (docs/20 "sayfalar")
+  "categories",
+  "brands",
+  "sale",
 ] as const
 export type SystemPage = (typeof SYSTEM_PAGES)[number]
 
