@@ -27,6 +27,21 @@ test.describe("storefront pages", () => {
     })
   }
 
+  test("a forged or malformed preview link is a 404, never indexed", async ({ page }) => {
+    const forged = await page.goto(
+      "/onizleme/cnt_01ABCDEFGHJK.zzzzzz.AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+    )
+    expect(forged?.status()).toBe(404)
+    expect((await page.goto("/onizleme/bir-sey"))?.status()).toBe(404)
+  })
+
+  test("the footer offers the newsletter, with what subscribing consents to", async ({ page }) => {
+    await page.goto("/")
+    const box = page.locator("#bulten").locator("..")
+    await expect(box.getByRole("textbox", { name: "E-posta adresiniz" })).toBeVisible()
+    await expect(box.getByText(/ticari elektronik ileti/)).toBeVisible()
+  })
+
   test("an unknown address is a 404 page", async ({ page }) => {
     const response = await page.goto("/bu-sayfa-yok-12345")
     expect(response?.status()).toBe(404)
