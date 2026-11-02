@@ -10,6 +10,8 @@ import { baseOf } from "./listing"
 import type { Listed } from "./listing"
 import { arrange, facetsOf } from "./listing-facets"
 import type { ListingFacets, ListingRow } from "./listing-facets"
+import { SEARCH_FIELDS, SEARCH_LISTING, searchDocOf, searchListingRows } from "./listing-search"
+import type { ListingSearch, SearchedProduct } from "./listing-search"
 
 /**
  * A listing page's products for the storefront (F18 D4, docs/13 §7): the
@@ -17,7 +19,9 @@ import type { ListingFacets, ListingRow } from "./listing-facets"
  * by its filters and price range, in its sort, one page of ids; and the
  * filters it can offer with how many products each would show. Worked
  * out in memory over the listing's products: a few thousand at most per
- * listing until search (D10) takes the large ones.
+ * listing until search (D10) takes the large ones. A site search
+ * (`search`, its id the query as compared) is the whole catalogue's rows
+ * the query finds, most relevant first (listing-search.ts).
  */
 
 /** A listing past this many products answers its first ones only (a search index's job, D10). */
@@ -37,18 +41,19 @@ export interface ListingProductsAnswer {
   page: number
   page_size: number
   facets: ListingFacets
+  /** A site search's suggestions and related chips. */
+  search?: ListingSearch
 }
 
-interface ProductRow {
-  id: string
+interface ProductRow extends SearchedProduct {
   created_at: string | Date
   sales_channels?: ({ id: string } | null)[] | null
-  brand?: { handle: string; name: string } | null
+  brand?: { id?: string; handle: string; name: string } | null
   attribute_values?:
     | ({
         value_text?: string | null
         value_options?: string[] | null
-        definition?: { key: string; type: string } | null
+        definition?: { key: string; type: string; is_public?: boolean | null } | null
       } | null)[]
     | null
   variants?: ({ calculated_price?: { calculated_amount?: number | null } | null } | null)[] | null
@@ -77,11 +82,15 @@ async function baseIds(container: MedusaContainer, listed: Listed): Promise<stri
   return found.slice(0, LISTING_SCAN_LIMIT)
 }
 
-/** What filtering and sorting read of each product: brand, options, lowest price, age. */
+/**
+ * What filtering and sorting read of each product: brand, options, lowest
+ * price, age; with `withText`, what search reads too (the whole catalogue's).
+ */
 async function rowsOf(
   container: MedusaContainer,
   ids: string[],
-  input: ListingProductsInput
+  input: ListingProductsInput,
+  withText: boolean
 ): Promise<ListingRow[]> {
   const query = container.resolve(ContainerRegistrationKeys.QUERY)
   const channels = new Set(input.sales_channel_ids)
@@ -104,6 +113,7 @@ async function rowsOf(
         "attribute_values.definition.key",
         "attribute_values.definition.type",
         "variants.calculated_price.calculated_amount",
+        ...(withText ? SEARCH_FIELDS : []),
       ],
       filters: { id: chunk },
       context: { variants: { calculated_price: pricing } },
@@ -139,6 +149,7 @@ async function rowsOf(
         brand: product.brand ? { handle: product.brand.handle, name: product.brand.name } : null,
         options,
         price: amounts.length ? Math.min(...amounts) : null,
+        ...(withText ? { doc: searchDocOf(product) } : {}),
       })
     }
   }
@@ -195,19 +206,39 @@ export async function listingProducts(
   container: MedusaContainer,
   input: ListingProductsInput
 ): Promise<ListingProductsAnswer> {
+  const started = performance.now()
+  const isSearch = input.listed.entity_type === SEARCH_LISTING
+  // A search reads the whole catalogue's rows, shared with `/magaza`
+  const listed = isSearch ? { entity_type: ALL_PRODUCTS, entity_id: ALL_PRODUCTS } : input.listed
   const [rows, definitions] = await Promise.all([
-    listingRows(rowsKey(input), async () =>
-      rowsOf(container, await baseIds(container, input.listed), input)
+    listingRows(rowsKey({ ...input, listed }), async () =>
+      rowsOf(
+        container,
+        await baseIds(container, listed),
+        input,
+        listed.entity_type === ALL_PRODUCTS
+      )
     ),
     definitionsCache("definitions", () => filterDefinitions(container)),
   ])
-  const arranged = arrange(rows, input.query)
+  const searched = isSearch ? await searchListingRows(rows, input.listed.entity_id) : null
+  const shown = searched?.rows ?? rows
+  // No sort chosen: a search's own order is relevance
+  const arranged = arrange(shown, input.query)
   const start = (input.query.page - 1) * LISTING_PAGE_SIZE
-  return {
+  const answer: ListingProductsAnswer = {
     product_ids: arranged.slice(start, start + LISTING_PAGE_SIZE).map((row) => row.id),
     count: arranged.length,
     page: input.query.page,
     page_size: LISTING_PAGE_SIZE,
-    facets: facetsOf(rows, input.query, definitions),
+    facets: facetsOf(shown, input.query, definitions),
   }
+  if (searched) {
+    answer.search = {
+      suggestions: searched.suggestions,
+      related: searched.related,
+      took_ms: Math.round(performance.now() - started),
+    }
+  }
+  return answer
 }

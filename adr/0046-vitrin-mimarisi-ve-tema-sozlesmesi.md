@@ -118,3 +118,30 @@ Next.js 16.4.2'de doğrulananlar (Context7, `/vercel/next.js/v16.2.9`; 16.4.2, 1
     - Toplam okunamazsa "ödenecek tutar yok" sayılmıyor.
     - `credit` başlatması, önceki kapıda ödeme ücret satırını temizliyor.
     - Önizleme rotası boş gövde şemasıyla korunuyor.
+
+## Ek (2026-11-03): yazım toleranslı arama (otonom, gözden geçir)
+
+docs/20 "arama kalitesi": Meilisearch kararına (§11, D10) kadar ara çözüm. Yeni servis ve veritabanı eklentisi (pg_trgm) yok. Arama, liste motorunun zaten tuttuğu satırlar üzerinde bellekte yapılır.
+
+- **Uç:** `GET /store/listings/products?type=search&q=…` (`id` gönderilmez). Liste motorunun filtreleri, sıralamaları (varsayılan "önerilen" = alaka; `yeni`, `fiyat-artan`, `fiyat-azalan`), sayfalaması ve facet sayıları aynen geçerli. Yanıta `search: { suggestions, related: { categories, brands }, took_ms }` eklenir. `q` 1–100 karakter, kontrol karakteri yok, en az bir kelime; aksi 400. Uca mevcut `listing` sınırı uygulanır (adres başına 120/dk).
+- **Veri:** tüm katalog listesinin (`all`, `/magaza`) satırları; en çok `LISTING_SCAN_LIMIT` (3000, en yeniler), bölge, para birimi ve kanal başına 30 sn tutulur. Bu satırlar yalnız bu listede başlık, alt başlık, açıklamanın ilk 240 karakteri, etkin ve iç olmayan kategoriler, markanın kimliği ve **yalnız herkese açık** özellik değerleriyle okunur. Mağazanın kendine sakladığı özellik aramada bulunmaz.
+- **İndeks:** satırlar her yüklendiğinde bir kez kurulur: kelime sözlüğü, kelimelerin trigramları, alan başına kelime kimlikleri. 3000 ürün ≈ 45–55 ms. Sorgu sonucu (kimlikler, öneriler, çipler) aynı yüklemeye bağlı, karşılaştırma biçimindeki sorguyla 30 sn tutulur (en çok 300 sorgu). Satırlar yenilenince indeks ve sonuçlar onlarla birlikte bırakılır. Bir arama 3000 üründe ≈ 2–20 ms.
+- **Normalleştirme:** NFKC, Türkçe küçük harf (`İ`→`i`, `I`→`ı`), işaretler atılır (`ç ğ ı ö ş ü â` → `c g i o s u a`); "cakı" "çakı"yı, "bicak" "bıçak"ı bulur. Harf, rakam ve işaret dışındaki her şey ayraçtır. Bağlaç kelimeleri (`ve`, `ile`, `için`, `veya`, `ya`, `bir`) yalnız başka kelime varsa atılır. En çok 8 kelime okunur.
+- **Eşleşme (sorgu kelimesi × katalog kelimesi):**
+  - tam: 1;
+  - önek (`bıç` → `bıçak`, en az 2 harf): 0,75;
+  - kök (`bıçaklar` → `bıçak`; katalog kelimesi en az 4 harf ve sorgunun en az yarısı): 0,6;
+  - bulanık: trigram Dice benzerliği × 0,5. pg_trgm gibi önce iki, sonra bir boşlukla doldurulur. Eşik 5+ harfte 0,4, 3–4 harfte 0,5; 3 harften kısa kelimede bulanık eşleşme yok.
+  - Rakam içeren kelime (kod, ölçü) yalnız tam ya da önek eşleşir: `model124` `model123`ün yazım hatası değildir.
+- **Puan:** her sorgu kelimesi için her alanın en iyi kelimesi × alan ağırlığı, alanlar toplanır. Ağırlıklar: başlık 3, marka 2, kategori 2, özellik 1, alt başlık ve açıklama 0,5. Bir–iki kelimelik sorguda her kelime, daha uzununda biri hariç hepsi bulunmalı. Eksik kelime puanı oranla düşürür. Sorgunun tamamı başlıkta geçiyorsa +2. Eşit puanlarda katalog sırası (en yeni önce) korunur.
+- **Öneri ("bunu mu demek istediniz"):** sorgunun bir kelimesi katalogda tam, önek ya da kök olarak yoksa (yalnız yazım hatası olarak eşleşiyorsa) sorgu zayıf sayılır. O kelimenin yerine en benzer başlık kelimeleri konur (benzerlik, sonra kaç başlıkta geçtiği; kelime başına 3). Bilinen kelimeler katalogdaki yazılışıyla kalır. Tüm kelimelerini bir arada taşıyan ürün yoksa öneri gösterilmez. En çok 5 öneri.
+- **İlgili çipler:** ilk 48 sonucun en sık 5 kategorisi (`{id, name}`) ve markası (`{id, name, handle}`).
+- **Arama raporu (F11.8):** yalnız ilk ve daraltılmamış sayfa (filtre ve fiyat yok) yeni arama sayılır. `count` ile, ürün listesindeki aramayla aynı yoldan (`countSearchTerm`) sayılır: kişisel veri süzgeci, ziyaretçi başına günde bir kez, günde en çok 30 terim.
+- **SEO:** `/arama` sistem yolu ve `noindex,follow` kalır; değişiklik yok.
+- **Sınırlar:**
+  - Katalog 3000 ürünü aşarsa yalnız en yeni 3000'i aranır.
+  - Eş anlamlı kelime ve çok dilli arama yok.
+  - Seçim özelliklerinde etiket değil değer (slug) aranır; işaretler atıldığı için sonuç aynı.
+  - Her süreç kendi indeksini kurar.
+  - Fiyat ya da ürün değişikliği 30 sn içinde yansır.
+- **Tam çözüm:** Meilisearch (D10) kalır: büyük katalog, eş anlamlılar, vurgulama, indeksleme subscriber'ı. Geçişte uç ve `search` bloğu aynı kalır; yalnız satır kaynağı değişir.

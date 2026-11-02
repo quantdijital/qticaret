@@ -1,3 +1,4 @@
+import type { SearchDoc } from "../../lib/search"
 import { LISTING_PARAMS } from "../../lib/seo/facets"
 import type { ListingQuery } from "../../lib/seo/facets"
 
@@ -18,6 +19,8 @@ export interface ListingRow {
   options: Map<string, string[]>
   /** The lowest variant price now, whole currency units with decimals; null when unpriced. */
   price: number | null
+  /** What site search reads of it; only the whole catalogue's rows (`all`) carry it. */
+  doc?: SearchDoc
 }
 
 export interface FacetValue {

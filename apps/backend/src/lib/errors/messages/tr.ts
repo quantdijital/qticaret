@@ -221,6 +221,24 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "gift_cards.guest_account":
     "Mağaza kredisi yalnızca üye müşterilere verilebilir; misafir müşteri krediyi kullanamaz.",
   "gift_cards.no_expiry": "Hediye kartları süresizdir; son kullanma günü verilemez.",
+  "gift_card.sale_disabled":
+    "Mağaza şu anda hediye kartı satmıyor; hediye kartını sepetten çıkarın.",
+  "gift_card.recipient_required":
+    "Sepetteki her hediye kartı için alıcının e-posta adresini girin.",
+  "gift_card.not_payable_with_credit":
+    "Hediye kartı, hediye kartı ya da mağaza kredisiyle alınamaz; kartı veya krediyi sepetten çıkarın.",
+  "gift_card.not_gift_line": "Bu satır bir hediye kartı değil.",
+  "gift_card.recipient_email_invalid": "Alıcının e-posta adresi geçerli değil.",
+  "gift_card.text_too_long": "Ad en çok 60, mesaj en çok 300 karakter olabilir.",
+  "gift_card.text_invalid": "Metinde kullanılamayan bir karakter var.",
+  "gift_card.text_link": "Ad ve mesajda bağlantı, web adresi ya da e-posta adresi olamaz.",
+  "gift_card.unknown": "Bu koda ait hediye kartı bulunamadı.",
+  "catalog.gift_card_disabled":
+    "Hediye kartı satmak için önce Ayarlar > Özellikler'den hediye kartlarını açın.",
+  "catalog.gift_card_kind": "Hediye kartı dijital üründür; türü değiştirilemez.",
+  "catalog.core_gift_card":
+    "Ürünü hediye kartı yapmak için ürün sayfasındaki 'Hediye kartı' seçeneğini kullanın.",
+  "cart.line_unknown": "Bu satır sepette yok.",
   "integration_credentials.check_failed":
     "Sağlayıcı beklenmedik bir yanıt verdi; bilgiler kaydedilmedi. Biraz sonra tekrar deneyin.",
   "integration_credentials.invalid": "Girilen değer geçerli değil.",
@@ -335,6 +353,9 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "cart_reminders.link_invalid":
     "Bu bağlantı geçersiz, süresi dolmuş ya da kullanılmış. Sepetinize mağazadan ulaşabilirsiniz.",
   "marketing_feeds.unknown": "Feed bulunamadı.",
+  "maintenance.not_enabled":
+    "Bakım modu kapalı. Bu bağlantı yalnızca mağaza bakımdayken oluşturulabilir.",
+  "maintenance.bypass_unknown": "Bakım bağlantısı geçersiz ya da süresi dolmuş.",
   "consents.link_invalid":
     "Bu bağlantı geçersiz, süresi dolmuş ya da kullanılmış. İzninizi hesabınızdan ya da yeniden abone olarak verebilirsiniz.",
   "stock_alerts.link_invalid":
@@ -501,6 +522,9 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "media.file_unknown": "Dosya bulunamadı.",
   "media.not_an_image": "Bu dosya bir görsel değil.",
   "media.unknown": "Görsel bulunamadı.",
+  "listing.id_required": "Hangi listenin istendiği belirtilmeli.",
+  "listing.search_query_invalid": "Aramak için bir kelime yazın (en çok 100 karakter).",
+  "listing.search_query_unexpected": "Arama metni yalnızca aramada gönderilir.",
   "orders.nothing_to_ship": "Bu siparişte kargoya verilecek ürün kalmadı.",
   "legal.unknown": "Böyle bir yasal metin türü yok.",
   "legal.not_published": "Bu metin henüz yayımlanmadı.",
@@ -553,6 +577,9 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "price_lists.rate": "Oran yüzde 0 ile 100 arasında olmalı.",
   "platform_settings.color_invalid": "Renk #rrggbb biçiminde olmalı, ör. #2f6feb.",
   "platform_settings.color_duplicate": "Her renk adı bir kez yazılabilir.",
+  "platform_settings.color_contrast":
+    "Bu renk beyaz yazıyla ya da sayfa zemininde yeterince okunmuyor (en az 3:1 karşıtlık gerekir). Daha koyu bir ton seçin.",
+  "platform_settings.date_invalid": "Tarih ve saat geçerli değil.",
   "platform_settings.email_duplicate": "Aynı e-posta adresi iki kez yazılmış.",
   "platform_settings.email_invalid": "Geçerli bir e-posta adresi girin.",
   "platform_settings.feature_unknown": "Böyle bir özellik yok.",

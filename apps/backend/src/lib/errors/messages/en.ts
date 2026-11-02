@@ -215,6 +215,22 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "gift_cards.guest_account":
     "Store credit is for customers with an account; a guest could not spend it.",
   "gift_cards.no_expiry": "Gift cards do not expire; a card cannot be given a last day.",
+  "gift_card.sale_disabled":
+    "The shop does not sell gift cards right now; remove the gift card from the cart.",
+  "gift_card.recipient_required": "Enter the recipient's e-mail for every gift card in the cart.",
+  "gift_card.not_payable_with_credit":
+    "A gift card cannot be bought with a gift card or store credit; remove the card or the credit from the cart.",
+  "gift_card.not_gift_line": "This line is not a gift card.",
+  "gift_card.recipient_email_invalid": "The recipient's e-mail address is not valid.",
+  "gift_card.text_too_long": "A name may be 60 characters at most, a message 300.",
+  "gift_card.text_invalid": "The text contains a character that cannot be used.",
+  "gift_card.text_link": "Names and the message cannot contain a link, a web address or an e-mail.",
+  "gift_card.unknown": "No gift card was found for this code.",
+  "catalog.gift_card_disabled": "Turn on gift cards in Settings > Features first to sell them.",
+  "catalog.gift_card_kind": "A gift card is a digital product; its kind cannot change.",
+  "catalog.core_gift_card":
+    "To make a product a gift card, use the 'Gift card' option on the product page.",
+  "cart.line_unknown": "This line is not in the cart.",
   "integration_credentials.check_failed":
     "The provider gave an unexpected answer; nothing was saved. Try again in a while.",
   "integration_credentials.invalid": "The value is not valid.",
@@ -329,6 +345,9 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "cart_reminders.link_invalid":
     "This link is invalid, expired or already used. You can reach your cart from the shop.",
   "marketing_feeds.unknown": "Feed not found.",
+  "maintenance.not_enabled":
+    "Maintenance mode is off. This link can only be made while the shop is in maintenance.",
+  "maintenance.bypass_unknown": "The maintenance link is not valid or has expired.",
   "consents.link_invalid":
     "This link is invalid, expired or already used. You can give your consent from your account or by subscribing again.",
   "stock_alerts.link_invalid":
@@ -501,6 +520,9 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "media.file_unknown": "File not found.",
   "media.not_an_image": "This file is not an image.",
   "media.unknown": "Image not found.",
+  "listing.id_required": "Say which listing is asked for.",
+  "listing.search_query_invalid": "Type a word to search for (100 characters at most).",
+  "listing.search_query_unexpected": "A search text is sent with a search only.",
   "orders.nothing_to_ship": "Nothing is left to ship in this order.",
   "legal.unknown": "There is no such kind of legal text.",
   "legal.not_published": "This text is not published yet.",
@@ -553,6 +575,9 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "price_lists.rate": "The rate must be between 0 and 100 percent.",
   "platform_settings.color_invalid": "The colour must be in #rrggbb form, e.g. #2f6feb.",
   "platform_settings.color_duplicate": "Each colour name can be listed once.",
+  "platform_settings.color_contrast":
+    "This colour does not read well with white text or on the page background (at least 3:1 contrast is needed). Choose a darker shade.",
+  "platform_settings.date_invalid": "The date and time are not valid.",
   "platform_settings.email_duplicate": "The same e-mail address is listed twice.",
   "platform_settings.email_invalid": "Enter a valid email address.",
   "platform_settings.feature_unknown": "There is no such feature.",

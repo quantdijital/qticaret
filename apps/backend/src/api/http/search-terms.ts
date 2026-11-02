@@ -45,6 +45,22 @@ async function record(req: MedusaRequest, term: string, found: number): Promise<
 }
 
 /**
+ * A search counted once it is answered, as the product list's are: its
+ * words if they may not hold a person, and whether it found anything.
+ * Never slows or fails the answer. For site search (`/store/listings/products`,
+ * `type=search`), whose route knows which request is a new search.
+ */
+export function countSearchTerm(req: MedusaRequest, raw: unknown, found: number): void {
+  const term = normalizeSearchTerm(raw)
+  if (!term) {
+    return
+  }
+  record(req, term, found).catch((error: unknown) => {
+    logger.warn({ event: "search_terms.record_failed", err: errorSummary(error) })
+  })
+}
+
+/**
  * A storefront product search counted (F11.8, adr/0039 §8): its words and
  * whether it found anything, read from the answer Medusa sends. Only the
  * first page is a search (a next page is the same one); a term that may
