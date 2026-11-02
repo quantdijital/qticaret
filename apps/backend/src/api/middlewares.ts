@@ -39,6 +39,7 @@ import { CONTACT_ROUTES } from "./http/contact-routes"
 import { EMAIL_LINK_ROUTES } from "./http/email-link-routes"
 import { STOREFRONT_MENU_ROUTES } from "./http/storefront-menu-routes"
 import { LEGAL_ROUTES } from "./http/legal-routes"
+import { MAINTENANCE_ROUTES } from "./http/maintenance-routes"
 import { CORE_RETURN_ROUTES } from "./http/core-return-routes"
 import { GOOGLE_ROUTES } from "./http/google-routes"
 import { EINVOICE_ROUTES } from "./http/einvoice-routes"
@@ -64,6 +65,7 @@ import { adminLimitGuard, storeLimitGuard, uploadSizeGate } from "./http/request
 import { securityHeaders } from "./http/security-headers"
 import { MEDIA_ROUTES, STORE_MEDIA_FIELDS, restrictStoreMediaFields } from "./http/media-routes"
 import { GIFT_CARD_ROUTES } from "./http/gift-card-routes"
+import { GIFT_CARD_SALE_ROUTES, STORE_GIFT_PRODUCT_FIELDS } from "./http/gift-card-sale-routes"
 import { ORDER_REFUND_ROUTES } from "./http/order-refund-routes"
 import { PAYMENT_ROUTES } from "./http/payment-routes"
 import { FRAUD_ROUTES } from "./http/fraud-routes"
@@ -202,7 +204,12 @@ export default defineMiddlewares({
     {
       matcher: "/store/products",
       middlewares: [
-        allowFields(...STORE_ATTRIBUTE_FIELDS, ...STORE_BRAND_FIELDS, ...STORE_MEDIA_FIELDS),
+        allowFields(
+          ...STORE_ATTRIBUTE_FIELDS,
+          ...STORE_BRAND_FIELDS,
+          ...STORE_MEDIA_FIELDS,
+          ...STORE_GIFT_PRODUCT_FIELDS
+        ),
         hidePrivateAttributes,
       ],
     },
@@ -266,6 +273,8 @@ export default defineMiddlewares({
     ...CONTACT_ROUTES,
     ...EMAIL_LINK_ROUTES,
     ...STOREFRONT_MENU_ROUTES,
+    // adr/0053: maintenance mode's bypass link
+    ...MAINTENANCE_ROUTES,
     ...MARKETING_ROUTES,
     ...GOOGLE_ROUTES,
     ...EINVOICE_ROUTES,
@@ -291,6 +300,8 @@ export default defineMiddlewares({
     ...PRICING_ROUTES,
     // F4.8: gift cards and store credit, behind their flag
     ...GIFT_CARD_ROUTES,
+    // adr/0025 Ek 2026-11-03: selling gift cards (a line's recipient, a balance by code)
+    ...GIFT_CARD_SALE_ROUTES,
     // docs/17: the home page's order numbers are for people (shop revenue)
     {
       matcher: "/admin/home/summary",

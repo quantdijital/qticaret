@@ -1,5 +1,6 @@
 import { migrationInvite, passwordReset, verifyEmail } from "./account"
 import { cartReminder } from "./cart-reminder"
+import { giftCardIssued } from "./gift-card"
 import { consentConfirm } from "./consent"
 import { orderInvoiced } from "./invoice"
 import { announcement } from "./marketing"
@@ -24,6 +25,7 @@ export type { MigrationInviteVars, ResetVars, VerifyVars } from "./account"
 export type { AnnouncementVars } from "./marketing"
 export type { CartReminderVars } from "./cart-reminder"
 export type { ConsentConfirmVars } from "./consent"
+export type { GiftCardVars } from "./gift-card"
 export { renderEmail } from "./layout"
 export type { EmailBlock, EmailBody } from "./layout"
 export { orderSummary } from "./order-placed"
@@ -61,6 +63,8 @@ export const MESSAGE_TEMPLATES = {
   // F14.5 (adr/0042 §6): a moved customer asked to open their account here
   "account.migration_invite": migrationInvite,
   "payment.failed": paymentFailed,
+  // adr/0025 Ek 2026-11-03: a sold gift card, to its recipient
+  "gift_card.issued": giftCardIssued,
   "marketing.announcement": announcement,
   "cart.reminder": cartReminder,
   "consent.confirm": consentConfirm,

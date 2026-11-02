@@ -56,6 +56,7 @@ export const startCartPaymentWorkflow = createWorkflow(
     const cart = readCheckoutCartStep({
       cart_id: input.cart_id,
       sales_channel_ids: input.sales_channel_ids,
+      provider_id: input.provider_id,
     })
     const offline = offlineSessionDataStep({ provider_id: input.provider_id, fee: fee.fee })
     when("payments-create-collection", { cart }, ({ cart }) => !cart.payment_collection_id).then(

@@ -18,7 +18,11 @@ export const PRODUCT_KINDS = ["physical", "digital", "service"] as const
  * - `withdrawal_excluded`: outside the right of withdrawal (hygiene, made to
  *   order; F13.6, adr/0041 §3). A faulty or wrong item still comes back;
  * - `restriction`: sold to adults only, and why (F13.4, adr/0041 §4); a
- *   category's mark reaches the product too.
+ *   category's mark reaches the product too;
+ * - `is_gift_card`: its variants are gift card amounts; a paid unit issues
+ *   a card to the recipient the line names (adr/0025 Ek 2026-11-03). Not
+ *   Medusa's `is_giftcard`: the loyalty plugin issues weak codes for that
+ *   one as the order is placed, before it is paid.
  */
 export const ProductExtension = model.define("product_extension", {
   id: model.id({ prefix: "pext" }).primaryKey(),
@@ -28,4 +32,5 @@ export const ProductExtension = model.define("product_extension", {
   successor_product_id: model.text().nullable(),
   withdrawal_excluded: model.boolean().default(false),
   restriction: model.enum([...RESTRICTIONS]).nullable(),
+  is_gift_card: model.boolean().default(false),
 })

@@ -137,9 +137,10 @@ const TEXT_PATTERNS: readonly (readonly [
     (_match, at = "@", domain = "") => `${REDACTED}${at}${domain}`,
   ],
   // A gift card's code in the path of its lookup (ADR-0025): whoever holds
-  // it spends the card, so only its last four characters are kept
+  // it spends the card, so only its last four characters are kept. The
+  // balance route takes its code in the body: its name stays readable
   [
-    /(\/store\/gift-cards\/)([^/?#\s"]+)/gi,
+    /(\/store\/gift-cards\/)(?!balance(?![^/?#\s"]))([^/?#\s"]+)/gi,
     (_match, path = "", code = "") => `${path}${REDACTED}${code.slice(-4)}`,
   ],
   // A Medusa secret API key (F11.6, KK4): never in a log, whole or in part

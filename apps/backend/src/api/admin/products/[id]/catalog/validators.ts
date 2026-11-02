@@ -49,6 +49,8 @@ export const AdminPostProductCatalog = z
     withdrawal_excluded: z.boolean().optional(),
     // F13.4: adults only, and why; needs the catalog.restricted flag (checked in the workflow)
     restriction: z.enum(RESTRICTIONS).nullable().optional(),
+    // adr/0025 Ek 2026-11-03: its variants are gift card amounts; needs promotions.gift_cards
+    is_gift_card: z.boolean().optional(),
     variants: z
       .record(
         id,

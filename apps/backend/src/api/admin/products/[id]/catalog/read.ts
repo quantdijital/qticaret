@@ -23,6 +23,7 @@ interface ProductRow {
     successor_product_id: string | null
     withdrawal_excluded?: boolean | null
     restriction?: string | null
+    is_gift_card?: boolean | null
   } | null
 }
 
@@ -84,6 +85,7 @@ export async function readProductCatalog(scope: MedusaContainer, productId: stri
     kind: extension?.kind ?? "physical",
     withdrawal_excluded: extension?.withdrawal_excluded ?? false,
     restriction: extension?.restriction ?? null,
+    is_gift_card: extension?.is_gift_card ?? false,
     primary_category_id: categories.some((category) => category.id === primary) ? primary : null,
     successor: await productTitle(scope, extension?.successor_product_id ?? null),
     categories,

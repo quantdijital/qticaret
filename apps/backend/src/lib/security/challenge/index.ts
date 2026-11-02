@@ -22,6 +22,8 @@ export const CHALLENGE_SCOPES = [
   "contact",
   // F18: the storefront's newsletter box (each sends a confirmation e-mail)
   "newsletter",
+  // adr/0025 Ek 2026-11-03: a gift card's balance asked by its code (a guess at a code)
+  "gift_card",
 ] as const
 export type ChallengeScope = (typeof CHALLENGE_SCOPES)[number]
 

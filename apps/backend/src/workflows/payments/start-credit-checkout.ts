@@ -92,9 +92,11 @@ export const startCreditCheckoutWorkflow = createWorkflow(
       sales_channel_ids: input.sales_channel_ids,
     })
     acquireLockStep({ key: input.cart_id, timeout: 5, ttl: 30 })
+    // A gift card is never paid with gift cards or store credit (adr/0025 Ek 2026-11-03)
     const cart = readCheckoutCartStep({
       cart_id: input.cart_id,
       sales_channel_ids: input.sales_channel_ids,
+      provider_id: "credit",
     })
     checkNothingDueStep({ cart_id: input.cart_id })
     when(

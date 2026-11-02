@@ -13,6 +13,22 @@ const TR: Readonly<Record<string, string>> = {
   "footer.stock": "Bu e-postayı, {{shop}} mağazasında stok bildirimi istediğiniz için aldınız.",
   "footer.order": "Bu e-posta, {{shop}} mağazasındaki siparişiniz için gönderildi.",
   "footer.account": "Bu e-posta, {{shop}} hesabınız için gönderildi.",
+  "footer.gift_card":
+    "Bu e-posta, {{shop}} mağazasında sizin için alınan bir hediye kartı için gönderildi.",
+  "gift_card.subject": "{{shop}} hediye kartınız",
+  "gift_card.subject_from": "{{sender}} size bir {{shop}} hediye kartı gönderdi",
+  "gift_card.preheader": "Kodunuz bu e-postada; {{shop}} alışverişlerinizde kullanabilirsiniz.",
+  "gift_card.heading": "{{name}}, size bir hediye kartı var",
+  "gift_card.greeting": "Merhaba",
+  "gift_card.intro": "{{shop}} mağazasında kullanabileceğiniz hediye kartınız aşağıda.",
+  "gift_card.intro_from":
+    "{{sender}}, {{shop}} mağazasında kullanabileceğiniz bir hediye kartı gönderdi.",
+  "gift_card.message": "Mesaj",
+  "gift_card.card": "{{value}} değerinde hediye kartı",
+  "gift_card.how_to":
+    "Ödeme adımında hediye kartı alanına kodu yazın; tutar siparişinizden düşülür. Kartın son kullanma tarihi yoktur, kalan bakiyeyi sonraki alışverişlerinizde kullanabilirsiniz.",
+  "gift_card.shop": "Alışverişe başla",
+  "gift_card.keep_safe": "Kodu kimseyle paylaşmayın: kodu bilen herkes kartı kullanabilir.",
   "footer.staff":
     "Bu e-posta, {{shop}} yöneticisi olarak bildirim aldığınız için gönderildi. Ayarlar > Bildirimler'den değiştirebilirsiniz.",
   "staff.customer": "Müşteri",

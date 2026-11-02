@@ -5,6 +5,7 @@ import { loadAnnouncement, loadPasswordReset, loadVerification } from "./account
 import { loadPaymentFailed } from "./cart"
 import { loadCartReminder } from "./cart-reminder"
 import { loadConsentRequest } from "./consent"
+import { loadGiftCardMessage } from "./gift-card"
 import { loadInvoiceMessage } from "./invoice"
 import { loadMigrationInvite } from "./migration"
 import { loadOrderLink, loadOrderMessage } from "./order"
@@ -45,6 +46,7 @@ export const MESSAGE_LOADERS: { readonly [N in MessageTemplateName]: Loader<N> }
   "account.verify_email": loadVerification,
   "account.migration_invite": (container, id) => loadMigrationInvite(container, id),
   "payment.failed": (container, id) => loadPaymentFailed(container, id),
+  "gift_card.issued": loadGiftCardMessage,
   "marketing.announcement": loadAnnouncement,
   "cart.reminder": loadCartReminder,
   "consent.confirm": loadConsentRequest,

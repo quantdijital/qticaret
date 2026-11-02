@@ -18,6 +18,7 @@ interface ProductRow {
     successor_product_id: string | null
     withdrawal_excluded?: boolean | null
     restriction?: string | null
+    is_gift_card?: boolean | null
   } | null
 }
 
@@ -51,6 +52,7 @@ async function catalogSnapshot(scope: Resolver, productId: string): Promise<Snap
     successor_product_id: extension?.successor_product_id ?? null,
     withdrawal_excluded: extension?.withdrawal_excluded ?? false,
     restriction: extension?.restriction ?? null,
+    is_gift_card: extension?.is_gift_card ?? false,
     ...Object.fromEntries(
       (product.variants ?? []).flatMap((variant): [string, string | number | null][] =>
         variant

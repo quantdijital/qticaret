@@ -7,6 +7,7 @@ import { fromMedusaAmount } from "../../../lib/money"
 import type { PRODUCT_CONDITIONS } from "../../../modules/catalog-extension/models/product-extension"
 import { PLATFORM_SETTINGS_MODULE } from "../../../modules/platform-settings"
 import {
+  GIFT_CARDS,
   NON_PHYSICAL_PRODUCTS,
   RESTRICTED_PRODUCTS,
 } from "../../../modules/platform-settings/features"
@@ -27,6 +28,8 @@ export interface SetProductCatalogInput {
   withdrawal_excluded?: boolean | undefined
   /** Sold to adults only, and why (F13.4); null clears it. */
   restriction?: Restriction | null | undefined
+  /** Its variants are gift card amounts (adr/0025 Ek 2026-11-03). */
+  is_gift_card?: boolean | undefined
   /** Per variant: the MPN, and the unit cost in lira (VAT excluded, F11.4). */
   variants?:
     | Record<string, { mpn?: string | null | undefined; cost?: number | null | undefined }>
@@ -46,6 +49,7 @@ export interface ExtensionFields {
   successor_product_id: string | null
   withdrawal_excluded: boolean
   restriction: Restriction | null
+  is_gift_card: boolean
 }
 
 export interface ProductCatalogPlan {
@@ -127,6 +131,7 @@ const EXTENSION_KEYS = [
   "successor_product_id",
   "withdrawal_excluded",
   "restriction",
+  "is_gift_card",
 ] as const
 
 /** The fields the save sends (absent ones keep their values) and what they hold now. */
@@ -153,9 +158,11 @@ async function kindShipping(
   container: MedusaContainer,
   product: ProductRow,
   kind: ProductKind,
-  current: ProductKind
+  current: ProductKind,
+  giftCard: boolean
 ): Promise<ShippingChanges> {
-  if (kind !== "physical" && kind !== current) {
+  // A gift card is digital under its own flag (checked when it is marked)
+  if (kind !== "physical" && kind !== current && !giftCard) {
     const settings = container.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
     if (!(await settings.isFeatureEnabled(NON_PHYSICAL_PRODUCTS))) {
       throw new ValidationError("catalog.kind_disabled", { field: "kind" })
@@ -174,6 +181,32 @@ async function kindShipping(
       (profiles.find((profile) => profile.type === "default") ?? profiles[0])?.id ?? null
   }
   return shippingChanges(product, kind, defaultProfile)
+}
+
+/**
+ * A gift card product (adr/0025 Ek 2026-11-03): marking one needs the shop's
+ * gift cards on (unmarking never does); it is digital, another kind refused
+ * while it is one. The kind the save writes, or undefined to keep it.
+ */
+async function giftCardKind(
+  container: MedusaContainer,
+  input: SetProductCatalogInput,
+  current: ExtensionFields | null
+): Promise<ProductKind | undefined> {
+  const marking = input.is_gift_card === true && current?.is_gift_card !== true
+  if (marking) {
+    const settings = container.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
+    if (!(await settings.isFeatureEnabled(GIFT_CARDS))) {
+      throw new ValidationError("catalog.gift_card_disabled", { field: "is_gift_card" })
+    }
+  }
+  if (!(input.is_gift_card ?? current?.is_gift_card ?? false)) {
+    return input.kind
+  }
+  if (input.kind !== undefined && input.kind !== "digital") {
+    throw new ValidationError("catalog.gift_card_kind", { field: "kind" })
+  }
+  return input.is_gift_card === true ? "digital" : input.kind
 }
 
 /** What a variant's save changes and what it was: only fields asked for and different. */
@@ -246,13 +279,20 @@ export const planProductCatalogStep = createStep(
       }
     }
     const extension = product.product_extension ?? null
-    const { set, previous } = changesOf(input, extension)
+    const kind = await giftCardKind(container, input, extension)
+    const { set, previous } = changesOf({ ...input, kind }, extension)
     const plan: ProductCatalogPlan = {
       product_id: product.id,
       product: { id: extension?.id ?? null, set, previous },
       variants: variantChanges,
-      shipping: input.kind
-        ? await kindShipping(container, product, input.kind, extension?.kind ?? "physical")
+      shipping: kind
+        ? await kindShipping(
+            container,
+            product,
+            kind,
+            extension?.kind ?? "physical",
+            input.is_gift_card === true
+          )
         : NO_SHIPPING_CHANGES,
     }
     return new StepResponse(plan)

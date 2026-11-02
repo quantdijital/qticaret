@@ -249,6 +249,22 @@
           "enumItems": ["weapon", "alcohol", "tobacco", "adult_content", "other"],
           "mappedType": "enum"
         },
+        "is_gift_card": {
+          "name": "is_gift_card",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "false",
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "boolean"
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamptz",

@@ -4,6 +4,7 @@ import { checkoutProblem } from "../../../lib/checkout"
 import { ConflictError, ValidationError } from "../../../lib/errors"
 import { assertAgeDeclared } from "../../legal/age"
 import { assertConsented } from "../../legal/consent"
+import { assertGiftLinesReady } from "../../gift-cards/cart-gifts"
 import { itemAmounts, lineShares, shippingAmounts } from "../../../lib/orders"
 import type { LineShare } from "../../../lib/orders"
 import type { HostedCheckout } from "../../../lib/payments/checkout"
@@ -21,6 +22,8 @@ export interface CheckoutCartInput {
   cart_id: string
   /** The publishable key's channels: a cart of another channel is not this storefront's. */
   sales_channel_ids: string[]
+  /** The way to pay being started (`credit`: nothing left to pay); gift lines refuse some. */
+  provider_id: string
 }
 
 export interface CheckoutCart {
@@ -111,6 +114,8 @@ export const readCheckoutCartStep = createStep(
     // No payment is taken for a cart whose contracts were not accepted (adr/0041 §2)
     await assertConsented(container, cart.id)
     await assertAgeDeclared(container, cart.id)
+    // A gift line names its recipient and is not paid with credit (adr/0025 Ek 2026-11-03)
+    await assertGiftLinesReady(container, cart.id, input.provider_id)
 
     const names = new Map([
       ...items.map((item) => [item.id, itemName(item)] as const),

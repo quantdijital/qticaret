@@ -66,6 +66,8 @@ export const RATE_LIMIT_PROFILES = {
     perIdentityAnyIp: { max: 10, windowMs: 10 * MINUTE },
   },
   installment: { name: "installment", perIp: { max: 30, windowMs: MINUTE } },
+  // adr/0025 Ek 2026-11-03: a gift card's balance by its code; each ask is a guess at a code
+  gift_card_balance: { name: "gift_card_balance", perIp: { max: 10, windowMs: MINUTE } },
   // F18 D4: a listing's filtered page reads its whole listing once a cache
   // window; per the shopper's address, signed by the storefront or not
   listing: { name: "listing", perIp: { max: 120, windowMs: MINUTE } },
@@ -111,6 +113,9 @@ export const RATE_LIMIT_PROFILES = {
   },
   // F18: a draft's signed preview link; a guess finds nothing
   content_preview: { name: "content_preview", perIp: { max: 60, windowMs: 15 * MINUTE } },
+  // adr/0053: the storefront checking a visitor's maintenance bypass (it keeps
+  // the answer a minute); per the visitor's address, a guess finds nothing
+  maintenance_bypass: { name: "maintenance_bypass", perIp: { max: 60, windowMs: MINUTE } },
   // F14.5: a moved customer's claim key, guessed at nowhere: a few tries an hour
   migration_claim: {
     name: "migration_claim",

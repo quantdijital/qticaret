@@ -2,6 +2,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
 import { BACK_IN_STOCK_MODULE } from "../../modules/back-in-stock"
 import { contactMessagesFor } from "../contact/customer-data"
+import { exportedItems } from "../gift-cards/kvkk"
 import type BackInStockModuleService from "../../modules/back-in-stock/service"
 import { LEGAL_MODULE } from "../../modules/legal"
 import type LegalModuleService from "../../modules/legal/service"
@@ -89,6 +90,8 @@ export async function customerData(container: Container, customerId: string) {
       "items.variant_title",
       "items.quantity",
       "items.total",
+      // A gift line's recipient and the buyer's words (adr/0025 Ek 2026-11-03)
+      "items.metadata",
       ...ADDRESS.map((field) => `shipping_address.${field}`),
       ...ADDRESS.map((field) => `billing_address.${field}`),
     ],
@@ -151,7 +154,10 @@ export async function customerData(container: Container, customerId: string) {
     müşteri: profile,
     adresler: addresses ?? [],
     fatura_bilgisi: billing ?? null,
-    siparişler: orders,
+    siparişler: (orders as Record<string, unknown>[]).map((order) => ({
+      ...order,
+      items: exportedItems(order["items"]),
+    })),
     önceki_platform_siparişleri: legacy.map((order) => ({ ...order, lines: order.lines["lines"] })),
     ileti_izinleri: consents,
     sözleşme_onayları: legalConsents.map((consent) => ({
