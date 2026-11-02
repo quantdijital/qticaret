@@ -1366,7 +1366,22 @@
 - **Daha önce:** F1 planlaması ve F0.2–F0.8 (2026-10-24), F0.1 monorepo (2026-10-24 sabahı), SEO ve güvenlik dokümanları (2026-10-22).
 
 ## Sıradaki görev
-**Claude'un sıradaki işi:** F18'e devam (2026-11-02 sabahı durum: ödeme, hesap, filtreler, ürün sayfası eklentileri, çerez onayı, yasal sayfalar, e2e bitti; açıklar "Son oturum özeti"nde). Kullanıcı tasarımı kendisi yapacak; işlevsel yapılar sürer. Kullanıcının mylarte kararları (PROGRESS özet "Kullanıcıya" 1–6) gelene kadar sıra: D4 listeleme filtreleri ve fiyat sıralaması (backend listeleme ucu: `workflows/seo/listing.ts`'teki `filteredIds`/`baseOf` Store'a açılır; mylarte'nin çelik/ürün türü/fiyat filtreleri) → D5 kalanları (yorumlar, soru-cevap, stok bildirimi, taksit, renk örnekleri, WhatsApp'tan sor, benzer ürünler) → D10 içerik/yasal yolları ve blog listesi → D7 ödeme → D8 hesap. D13 (ürün ek seçenekleri) kullanıcı onayıyla ADR'den başlar. Kullanıcı dönünce: vitrini beğenip beğenmediği (geri alma: `git switch f15-hardening`, yedek etiketi `pre-f18-2026-11-01`), ADR-0046 ve docs/19'un gözden geçirilmesi. F16 (barındırma) ve F17 kararları bekliyor; tarihe bağlı: body-parser/multer override'ı 2026-11-05'ten, Medusa 2.22 2026-11-06'dan sonra.
+**Claude'un sıradaki işi:** F18'e devam (2026-11-02 sabahı durum):
+- Bitenler: ödeme (hediye kartı ve tamamı kartla ödeme dahil), hesap (adres ekleme dahil), filtreler, renk örnekleri, iletişim formu, e-bülten, kargo takibi, taslak önizleme, yasal sayfalar, çerez onayı, SEO dizinleri. Üç güvenlik incelemesi ve tam HTTP koşusu yapıldı.
+- Kalanlar:
+  - D10 Meilisearch: yeni servis ve bağımlılık, **kullanıcı kararı**.
+  - D11 tema ayarları ve tasarım: kullanıcı yapacak.
+  - D12 Lighthouse/CWV ve `/seo-audit`.
+  - Ürün önizleme bağlantısı.
+  - Hediye kartı satışı.
+- Kullanıcı kararları:
+  - Misafire kurumsal fatura (sipariş düzeyinde VKN, ADR).
+  - Meilisearch.
+  - mylarte'nin altı açık kararı.
+  - ADR-0046 ve ADR-0047'nin gözden geçirilmesi.
+- Kullanıcı dönünce: vitrini beğenip beğenmediği. Geri almak için `git switch f15-hardening`; yedek etiketi `pre-f18-2026-11-01`.
+- F16 (barındırma) ve F17 kararları bekliyor.
+- Tarihe bağlı işler: body-parser/multer override'ı 2026-11-05'ten sonra, Medusa 2.22 2026-11-06'dan sonra.
 
 ### F18 görev planı (2026-11-01; Next.js 16 API'leri Context7 `/vercel/next.js/v16.2.9`'dan doğrulandı: `proxy.ts`, `generateMetadata` ve akıtılan metadata, `htmlLimitedBots`, nonce'lu CSP, JSON-LD; Store API envanteri alt ajanla çıkarıldı; mimari ADR-0046)
 
