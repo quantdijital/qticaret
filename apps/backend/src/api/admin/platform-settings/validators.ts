@@ -24,7 +24,7 @@ const SECTION_VALIDATORS = {
   returns: validateAndTransformBody(SECTIONS.returns.patch),
   compliance: validateAndTransformBody(SECTIONS.compliance.patch),
   storefront: validateAndTransformBody(SECTIONS.storefront.patch),
-  // The fake program is for a developer's machine and the tests, never a live shop
+  // The fake programs are for the tests only: never a live shop, nor an owner trying it locally
   accounting: validateAndTransformBody(
     SECTIONS.accounting.patch.refine((body) => body.adapter !== "fake" || fakeAccountingAllowed(), {
       message: "accounting.adapter_unavailable",

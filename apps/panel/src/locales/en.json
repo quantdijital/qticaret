@@ -1302,14 +1302,6 @@
         "marketing": {
           "title": "Google and marketing",
           "text": "Search visibility, ad measurement and product feeds."
-        },
-        "accounting": {
-          "title": "Accounting",
-          "text": "The program sales and payments are sent to."
-        },
-        "infrastructure": {
-          "title": "Infrastructure",
-          "text": "The platform's own services."
         }
       },
       "names": {
@@ -1325,9 +1317,7 @@
         "ga4": "Google Analytics 4",
         "resend": "E-mail (Resend)",
         "google": "Google (Search Console, Merchant Center)",
-        "feeds": "Product feeds",
-        "accounting": "Accounting program",
-        "redis": "Cache (Redis)"
+        "feeds": "Product feeds"
       },
       "purposes": {
         "paytr": "Card payments",
@@ -1342,9 +1332,7 @@
         "ga4": "Measuring sales",
         "resend": "Order and account e-mails",
         "google": "Search results and shopping listings",
-        "feeds": "Product lists for Google, Meta, Akakçe and Cimri",
-        "accounting": "Sending sales to accounting",
-        "redis": "Cache, sessions and counters"
+        "feeds": "Product lists for Google, Meta, Akakçe and Cimri"
       },
       "states": {
         "connected": "Connected",
@@ -1363,22 +1351,15 @@
         "search_console_no_site": "No Search Console site is chosen.",
         "merchant_not_chosen": "No Merchant Center account is chosen.",
         "merchant_sync_failed": "The last product upload had errors.",
-        "dev_mailbox": "Going to the development mailbox; nothing is really sent.",
-        "not_sending": "E-mail sending is not set up.",
+        "not_sending": "E-mail sending is not set up yet; it is switched on when the shop goes live.",
         "platform_sender": "Sent from the platform's address; you can add your own domain.",
         "domain_unverified": "Your domain is not verified yet; check its DNS records.",
-        "no_storefront": "Feeds are on, but the shop's address is not set.",
-        "records_stopped_one": "{{count}} record could not be sent; retry it on the Accounting page.",
-        "records_stopped_other": "{{count}} records could not be sent; retry them on the Accounting page.",
-        "memory_only": "No Redis: counters are kept on this server only."
+        "no_storefront": "Feeds are on, but the shop's address is not set."
       },
       "latency": "{{ms}} ms",
       "reasons": {
         "timeout": "Did not answer in time.",
         "auth_failed": "The account details were refused; save the account again.",
-        "connection_failed": "Could not connect.",
-        "error_reply": "Answered with an error.",
-        "unexpected_reply": "Gave an unexpected answer.",
         "error": "The check itself failed."
       },
       "test": "Test the connection",
@@ -1439,7 +1420,7 @@
         "description": "Have e-mail go from your shop's own domain. Until it is verified, e-mail goes from the platform's address under your shop's name; customers' replies reach your contact e-mail.",
         "sender": "Sending from:",
         "none": "none",
-        "unavailable": "Here e-mail goes to the development mailbox (Mailpit); the domain is verified on the live shop.",
+        "unavailable": "E-mail sending is not set up yet; once the shop goes live you verify your domain here.",
         "localPart": "Part before @",
         "name": "Domain",
         "add": "Add the domain",
@@ -1806,8 +1787,6 @@
       }
     },
     "accounting": {
-      "title": "Accounting",
-      "subtitle": "Sales, refunds, collections and VAT for the accountant's monthly records.",
       "package": {
         "title": "Monthly accounting package",
         "hint": "The chosen month's records in one zip: an Excel file and the same tables as CSV.",
@@ -1822,48 +1801,6 @@
         "download": "Download the package",
         "later": "The package is being made; download it from Settings > Jobs when it is done.",
         "failed": "The package could not be made."
-      },
-      "program": {
-        "title": "Accounting program",
-        "hint": "Sales, collections and refunds go to the chosen program every five minutes. A record it refuses is tried again later and later; the order flow never waits.",
-        "label": "Accounting program",
-        "adapters": {
-          "none": "None: the monthly package only",
-          "fake": "Test program (development)"
-        },
-        "upcoming": {
-          "parasut": "Paraşüt (coming)",
-          "logo": "Logo (coming)",
-          "mikro": "Mikro (coming)"
-        },
-        "none": "Records go to no program; send the accountant the monthly package. Paraşüt, Logo or Mikro will be added as the shop chooses.",
-        "counts": {
-          "pending_one": "{{count}} waiting",
-          "pending_other": "{{count}} waiting",
-          "synced_one": "{{count}} sent",
-          "synced_other": "{{count}} sent",
-          "stopped_one": "{{count}} stopped",
-          "stopped_other": "{{count}} stopped",
-          "skipped_one": "{{count}} skipped",
-          "skipped_other": "{{count}} skipped"
-        },
-        "sources": {
-          "sale": "Sale",
-          "payment": "Collection",
-          "refund": "Refund",
-          "cancel": "Sale cancellation"
-        },
-        "lastError": "{{attempts}} tries · last error {{code}} · {{when}}",
-        "retry": "Try again",
-        "retried": "The record will be tried again on the next run.",
-        "saved": "Accounting program saved.",
-        "sends": {
-          "sale": "Sale: when an order is placed, with its VAT rates; a corporate customer's card too",
-          "payment": "Collection: when a payment is taken, with its method",
-          "refund": "Refund: when money is given back",
-          "cancel": "Cancellation: when a sent sale's order is canceled; an order canceled before it went, or not in lira, is never sent",
-          "once": "Each record goes to the program once; a retry never makes it again."
-        }
       }
     },
     "api": {
@@ -2254,8 +2191,7 @@
         "providers": {
           "none": "Off",
           "parasut": "Paraşüt",
-          "external": "My own program (write-back)",
-          "fake": "Fake program (development)"
+          "external": "My own program (write-back)"
         },
         "triggers": {
           "shipped": "The parcel leaves",
@@ -2264,8 +2200,7 @@
         "hints": {
           "none": "No invoice is issued. If you issue invoices elsewhere (e.g. Luca), pick \"My own program\"; their number and PDF are entered on the order's invoice card.",
           "parasut": "Invoices are issued in your Paraşüt account; Paraşüt decides e-Fatura or e-Arşiv.",
-          "external": "Invoices are issued in your own program (e.g. through BirFatura) or by hand; their number and PDF are written back here.",
-          "fake": "The fake program works in development only; it issues no real invoice."
+          "external": "Invoices are issued in your own program (e.g. through BirFatura) or by hand; their number and PDF are written back here."
         },
         "triggerHints": {
           "shipped": "Issued when the parcel leaves; until then the order can be edited and a cancellation leaves no invoice. Cash on delivery is invoiced once delivered.",
@@ -3019,7 +2954,6 @@
     "drafts": {
       "title": "Content drafts",
       "description": "Drafts written by a model; nothing reaches the page until approved. {{used}}/{{limit}} drafts this month.",
-      "noProvider": "No draft provider is set up yet.",
       "ask": {
         "product_description": "Draft a description",
         "seo_title": "Draft a search title",
@@ -3478,8 +3412,7 @@
       },
       "providers": {
         "parasut": "Paraşüt",
-        "external": "Your own program",
-        "fake": "Fake program"
+        "external": "Your own program"
       },
       "types": {
         "e_archive": "e-Arşiv",
@@ -4356,7 +4289,7 @@
         "bank-transfer": "Bank transfer",
         "cod": "Cash on delivery",
         "gift-card": "Gift card",
-        "system": "System (test)"
+        "system": "Manual payment"
       },
       "chargebacks": {
         "title": "Disputes",
@@ -5070,8 +5003,8 @@
       "reasons": {
         "S-HOST-01": {
           "no_host": "No primary domain: no canonical addresses and no sitemap.",
-          "indexing_off": "This environment is closed to search engines (SEO_INDEXING); robots.txt blocks every crawler.",
-          "staging_indexed": "This is a staging environment but it is open to search engines (SEO_INDEXING); its copy competes with the live store."
+          "indexing_off": "The shop is closed to search engines; robots.txt blocks every crawler.",
+          "staging_indexed": "This is a staging environment but it is open to search engines; its copy competes with the live store."
         },
         "S-ROBOTS-01": {
           "blocked": "{{target}} cannot crawl this page.",

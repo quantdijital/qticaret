@@ -43,7 +43,7 @@ Paraşüt API v4, resmî tanımından (`https://apidocs.parasut.com/swagger.json
    - `parasut`: faturayı sistem Paraşüt'te keser.
    - `external`: mağazanın kendi programı keser ve sonucu sisteme geri yazar. Elle işlemek de bu seçenektir (Luca).
    - `none`: kapalı.
-   - `fake`: yalnızca geliştirme ve testte seçilebilir.
+   - `fake`: yalnızca geliştirme ve testte seçilebilir (ek, 2026-11-02: yalnızca testte; kayıtlı eski değer "program yok" sayılır).
 
    Kendi UBL'imiz ve doğrudan entegratör sonraki aşamadır (F17'de bir entegratörle bayilik gündeme gelirse); aynı arayüze yeni bir sağlayıcı olarak eklenir.
 2. **`einvoice` modülü ve fatura kaydı.**

@@ -190,7 +190,7 @@ Kısıtlar:
   - Hiç gitmemişse "atlandı" olur.
   - İptal edilmiş ya da TL dışındaki siparişin satışı gönderilmez; durumu `skipped`, nedeni `last_error`'da.
 - **VKN:** Gönderim adımında açılır; okuma adımının çıktısında (iş akışı motorunun sakladığı veride) bulunmaz. Her açılış müşteri kimliğiyle `sensitive_read` kaydı yazar; kayıt yazılamazsa açılmaz. Aylık paketin denetim kaydı VKN'si okunan müşterilerin kimliklerini listeler.
-- **Sahte program:** Yalnızca `development` ve `test` ortamlarında seçilebilir. Tanımsız NODE_ENV canlı sayılır.
+- **Sahte program:** Yalnızca `development` ve `test` ortamlarında seçilebilir. Tanımsız NODE_ENV canlı sayılır. **Ek (2026-11-02):** yalnızca `test`; mağaza sahibi yerel paneli denerken sahte programı görmesin diye panelde muhasebe programı kartı ve Entegrasyonlar'daki "Muhasebe" satırı gerçek bir adaptör yazılana kadar kaldırıldı.
 
 **Mutabakat**
 - **Mod ayrımı:** Sonuçlar sağlayıcı, gün ve mod (`test_mode`) başına tutulur. Deneme hesabıyla yapılan denetim canlı günün sonucunun yerine geçemez. Liste her sağlayıcının o anki modundaki sonuçları gösterir.

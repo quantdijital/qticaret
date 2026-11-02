@@ -31,13 +31,12 @@ medusaIntegrationTestRunner({
 
       expect(response.status).toBe(200)
       expect(["ok", "degraded"]).toContain(response.data.status)
+      // The shop's providers; no account stored is not a failure
       expect(response.data.checks).toContainEqual(
-        expect.objectContaining({
-          id: "redis",
-          kind: "cache",
-          status: expect.stringMatching(/^(ok|down|not_configured)$/) as string,
-        })
+        expect.objectContaining({ id: "paytr", kind: "payment", status: "not_configured" })
       )
+      // The platform's own services are operations' to watch, not the shop's
+      expect(response.data.checks.map((check) => check.id)).not.toContain("redis")
       expect(JSON.stringify(response.data)).not.toMatch(/redis:\/\/|password|@/)
     })
   },

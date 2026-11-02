@@ -2,7 +2,11 @@ import { z } from "@medusajs/framework/zod"
 import { isValidTckn, isValidVkn } from "../../../lib/tr/tax-id"
 import { defineSection, isCleanText } from "./define"
 
-/** Who issues the shop's invoices (adr/0034 §1); `fake` only in development and tests. */
+/**
+ * Who issues the shop's invoices (adr/0034 §1). `fake` can be picked in
+ * tests only (`fakeInvoicingAllowed`); it stays here so a value stored
+ * earlier still reads, and then issues nothing.
+ */
 export const INVOICING_PROVIDERS = ["none", "parasut", "external", "fake"] as const
 export type InvoicingProvider = (typeof INVOICING_PROVIDERS)[number]
 

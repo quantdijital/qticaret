@@ -89,7 +89,7 @@ export function InvoicesPage() {
       className: "hidden lg:table-cell",
       cell: (row) => (
         <span className="text-muted-foreground">
-          {t(`${V}.providers.${row.provider}`)}
+          {t(`${V}.providers.${row.provider}`, { defaultValue: "—" })}
           {row.document_type ? ` · ${t(`${V}.types.${row.document_type}`)}` : ""}
         </span>
       ),

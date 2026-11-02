@@ -6,6 +6,14 @@
 
 export const DEMO_PUBLISHABLE_KEY_TITLE = "Demo storefront"
 
+/**
+ * What marks a demo order (seed:demo-orders), so `demo:remove` finds them:
+ * the metadata from 2026-11-02 on, and before that the made-up street
+ * every demo order went to, with no e-mail.
+ */
+export const DEMO_ORDER_METADATA = { demo: true } as const
+export const DEMO_ORDER_ADDRESS_1 = "Demo Sokak No: 1"
+
 /** Given to the bootstrap's warehouse when it has no address yet. */
 export const DEMO_LOCATION_ADDRESS = {
   address_1: "Caferağa Mahallesi, Moda Caddesi No: 1",

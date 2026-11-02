@@ -10,7 +10,7 @@
   - `parasut`: faturayı sistem Paraşüt'te keser.
   - `external`: mağazanın kendi programı keser ve sonucu geri yazar, ya da personel elle işler (ör. Luca).
   - `none`: kapalı.
-  - `fake`: yalnızca geliştirme ve testte.
+  - `fake`: yalnızca testte (2026-11-02'den beri geliştirmede de kapalı: mağaza sahibi yerel panelde sahte program görmesin; kayıtlı eski değer "program yok" sayılır).
 - Kendi UBL'imiz ve doğrudan entegratör sonraki aşamadır; aynı arayüze yeni sağlayıcı olarak eklenir.
 
 ```ts

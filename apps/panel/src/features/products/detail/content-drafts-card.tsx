@@ -84,7 +84,8 @@ export function ContentDraftsCard({ productId }: { productId: string }) {
     onError: failed,
   })
   const data = query.data
-  if (!data?.enabled) {
+  // Off, or nothing to write them (the flag is not even listed then): no card
+  if (!data?.enabled || !data.provider_ready) {
     return null
   }
   const full = data.quota.used >= data.quota.limit
@@ -94,30 +95,26 @@ export function ContentDraftsCard({ productId }: { productId: string }) {
       description={t(`${D}.description`, { used: data.quota.used, limit: data.quota.limit })}
     >
       <div className="flex flex-col gap-4">
-        {!data.provider_ready ? (
-          <p className="text-[13px] text-muted-foreground">{t(`${D}.noProvider`)}</p>
-        ) : (
-          <div className="flex flex-wrap gap-2">
-            {KINDS.map((kind) => (
-              <Button
-                key={kind}
-                size="sm"
-                variant="outline"
-                disabled={ask.isPending || full}
-                onClick={() => {
-                  ask.mutate(kind)
-                }}
-              >
-                {ask.isPending && ask.variables === kind ? (
-                  <Loader2 className="animate-spin" />
-                ) : (
-                  <Sparkles />
-                )}
-                {t(`${D}.ask.${kind}`)}
-              </Button>
-            ))}
-          </div>
-        )}
+        <div className="flex flex-wrap gap-2">
+          {KINDS.map((kind) => (
+            <Button
+              key={kind}
+              size="sm"
+              variant="outline"
+              disabled={ask.isPending || full}
+              onClick={() => {
+                ask.mutate(kind)
+              }}
+            >
+              {ask.isPending && ask.variables === kind ? (
+                <Loader2 className="animate-spin" />
+              ) : (
+                <Sparkles />
+              )}
+              {t(`${D}.ask.${kind}`)}
+            </Button>
+          ))}
+        </div>
         {data.drafts.length === 0 ? null : (
           <ul className="flex flex-col divide-y">
             {data.drafts.map((draft) => (

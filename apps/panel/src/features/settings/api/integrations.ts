@@ -12,7 +12,7 @@ export type HealthStatus = "ok" | "down" | "not_configured"
 
 export interface HealthCheck {
   id: string
-  /** `cache`, `payment`; shipping and invoicing join in their phases. */
+  /** `payment`, `shipping`, `messaging`. */
   kind: string
   status: HealthStatus
   reason?: string
@@ -31,8 +31,7 @@ export const integrationHealthQuery = () =>
     queryFn: () => sdk.client.fetch<HealthReport>("/admin/integrations/health"),
   })
 
-export type IntegrationGroup =
-  "payments" | "shipping" | "messaging" | "marketing" | "accounting" | "infrastructure"
+export type IntegrationGroup = "payments" | "shipping" | "messaging" | "marketing"
 
 export type IntegrationState = "connected" | "attention" | "not_set_up" | "off"
 

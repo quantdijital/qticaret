@@ -8,7 +8,7 @@ pnpm --filter @qticaret/backend shop:profile ../../docs/gecis/mylarte/profil hid
 
 - Tekrar çalıştırılabilir: ayarlar ve sayfalar güncellenir, taşıma kaynak anahtarıyla aynı kayıtları bulur, çoğaltmaz.
 - **Yasal metinler içerik sayfası değildir:** sözleşmeler, KVKK, çerez, iade ve kargo politikaları Ayarlar > Yasal'da firma bilgilerinden üretilir ve `/yasal/...` adreslerinde yayınlanır; alt bilgideki yasal bağlantılar oradan gelir. Profilin eskiden açtığı 8 yasal sayfa `retired_pages` ile (varsa) silinir; eski site metinleri yalnız başvuru için `../eski-yasal-metinler/`.
-- `hide-demo`: demo tohumunun kategorileri vitrinden kalkar (kayıtlar durur; demo ürünler ve ödeme deneme sayfası onları kullanır).
+- `hide-demo`: demo tohumunun kategorileri vitrinden kalkar (kayıtlar durur; demo ürünler onları kullanır). Demo ürün, sipariş ve kategorileri tümden kaldırmak için `pnpm --filter @qticaret/backend demo:remove` (docs/09).
 - Eski mylarte adreslerinden 301'ler taşımanın kesim adımında uygulanır (`docs/runbooks/gecis.md`), şimdi değil.
 - Ürünleri mağaza sahibi ekler. Menüdeki ve alt bilgideki kategori adresleri taşımanın ürettiği adreslerdir (`/kategori/{üst}/{alt}`); adres stili kararı `../esleme.md` §3.
 - Henüz vitrinde olmayan sayfalara bağlantı verilmedi: Yorumlar, Hesabım, Tüm Ürünler (`/magaza`).

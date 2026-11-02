@@ -67,11 +67,12 @@ medusaIntegrationTestRunner({
         "resend",
         "google",
         "feeds",
-        "accounting",
-        "redis",
       ])
       expect(row("paytr")).toMatchObject({ state: "not_set_up", test: null, failures: [] })
       expect(row("bank_transfer")).toMatchObject({ group: "payments", state: "off" })
+      // Nothing the shop does not use: no accounting program yet, nothing of the platform's own
+      expect(rows.map(({ group }) => group)).not.toContain("accounting")
+      expect(rows.map(({ group }) => group)).not.toContain("infrastructure")
       expect(row("resend")).toMatchObject({
         state: "connected",
         notes: [{ code: "platform_sender" }],

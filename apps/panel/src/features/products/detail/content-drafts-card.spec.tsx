@@ -56,6 +56,16 @@ describe("ContentDraftsCard", () => {
     expect(container).toBeEmptyDOMElement()
   })
 
+  it("shows nothing while no provider can write drafts, even with the flag left on", async () => {
+    fetchMock.mockResolvedValue({ ...answer(true), provider_ready: false })
+    const { container } = renderCard()
+
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenCalled()
+    })
+    expect(container).toBeEmptyDOMElement()
+  })
+
   it("offers only an open draft to approve, and approves it", async () => {
     fetchMock.mockResolvedValue(answer(true))
     renderCard()

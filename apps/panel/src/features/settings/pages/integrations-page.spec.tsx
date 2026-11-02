@@ -67,19 +67,13 @@ const OVERVIEW: IntegrationView[] = [
   }),
   view("bank_transfer", { state: "off" }),
   view("aras", { group: "shipping", state: "connected", test: "account" }),
-  view("accounting", {
-    group: "accounting",
-    state: "attention",
-    notes: [{ code: "records_stopped", count: 3 }],
-  }),
-  view("redis", { group: "infrastructure", state: "connected" }),
+  view("resend", { group: "messaging", state: "off", notes: [{ code: "not_sending" }] }),
 ]
 
 const HEALTH: HealthReport = {
   status: "degraded",
   checked_at: new Date().toISOString(),
   checks: [
-    { id: "redis", kind: "cache", status: "ok", latency_ms: 3 },
     { id: "paytr", kind: "payment", status: "down", reason: "auth_failed", latency_ms: 210 },
     { id: "aras", kind: "shipping", status: "ok", latency_ms: 120 },
   ],
@@ -119,13 +113,11 @@ describe("IntegrationsPage", () => {
     renderPage()
 
     const paytr = await row("PayTR")
-    const accounting = await row("Muhasebe programı")
 
     expect(screen.getByRole("heading", { name: "Ödeme" })).toBeInTheDocument()
     expect(screen.getByRole("heading", { name: "Kargo" })).toBeInTheDocument()
     // Stored as needing attention, and not answering now: the live check decides the badge
     expect(within(paytr).getByText("Yanıt yok")).toBeInTheDocument()
-    expect(within(accounting).getByText("İlgilenin")).toBeInTheDocument()
     expect(
       within(paytr).getByText("Sağlayıcı kayıtlı bilgileri reddetti; hesabı yeniden kaydedin.")
     ).toBeInTheDocument()
@@ -138,11 +130,19 @@ describe("IntegrationsPage", () => {
     )
     expect(within(await row("Aras Kargo")).getByText("120 ms")).toBeInTheDocument()
     expect(within(await row("Havale / EFT")).getByText("Kapalı")).toBeInTheDocument()
+    // E-mail not set up yet is said in the shop's words, with where it is set up
+    const email = await row("E-posta (Resend)")
     expect(
-      within(accounting).getByText("3 kayıt aktarılamadı; Muhasebe sayfasından yeniden deneyin.")
+      within(email).getByText("E-posta gönderimi henüz kurulmadı; mağaza yayına alınırken açılır.")
     ).toBeInTheDocument()
-    // The cache has no settings page
-    expect(within(await row("Önbellek (Redis)")).queryByRole("link")).toBeNull()
+    expect(within(email).getByRole("link", { name: "Ayarla" })).toHaveAttribute(
+      "href",
+      "/settings/notifications"
+    )
+    // Only the groups of services the shop uses
+    expect(screen.getAllByRole("heading").map((heading) => heading.textContent)).toEqual(
+      expect.not.arrayContaining(["Muhasebe", "Altyapı"])
+    )
   })
 
   it("shows a provider's last failed call, and the ones before on request", async () => {

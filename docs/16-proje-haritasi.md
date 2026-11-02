@@ -125,6 +125,7 @@ Medusa'nın kendi yönetim ekranına yazılan eklentiler (Başlangıç sayfası,
 |---|---|---|
 | `pnpm --filter backend tenant:bootstrap` | `bootstrap-tenant.ts` + `bootstrap/` | Yeni mağazanın temel kurulumu: mağaza, Türkiye bölgesi, TRY, KDV |
 | `pnpm --filter backend seed:demo` | `seed-demo.ts` + `seed/` | Demo ürün ve kargo verisi |
+| `pnpm --filter backend demo:remove` | `remove-demo.ts` + `demo-removal/` | Demo veriyi ve e2e artıklarını geliştirme veritabanından kaldırır (docs/09) |
 | `pnpm --filter backend tr-address:import` | `import-tr-address.ts` | İl/ilçe/mahalle CSV'sini içe aktarır |
 
 ---

@@ -1,12 +1,5 @@
 import type { CredentialStatus } from "../../../modules/integration-credentials/types"
-import {
-  accountRow,
-  accountingRow,
-  bankTransferRow,
-  emailRow,
-  feedsRow,
-  googleRow,
-} from "../overview-rules"
+import { accountRow, bankTransferRow, emailRow, feedsRow, googleRow } from "../overview-rules"
 
 const status = (
   provider: CredentialStatus["provider"],
@@ -74,12 +67,17 @@ describe("integration overview rules", () => {
     expect(google({ account: status("google", "not_configured") }).state).toBe("not_set_up")
   })
 
-  it("reads the shop's own services: transfers, e-mail, feeds, the accounting program", () => {
+  it("reads the shop's own services: transfers, e-mail, feeds", () => {
     expect([bankTransferRow(true).state, bankTransferRow(false).state]).toEqual([
       "connected",
       "off",
     ])
     expect(emailRow({ transport: null, domain: null })).toMatchObject({
+      state: "off",
+      notes: [{ code: "not_sending" }],
+    })
+    // A developer's local mailbox sends the shop nothing either
+    expect(emailRow({ transport: "mailpit", domain: null })).toMatchObject({
       state: "off",
       notes: [{ code: "not_sending" }],
     })
@@ -95,10 +93,5 @@ describe("integration overview rules", () => {
       state: "attention",
       notes: [{ code: "no_storefront" }],
     })
-    expect(accountingRow(true, 3)).toMatchObject({
-      state: "attention",
-      notes: [{ code: "records_stopped", count: 3 }],
-    })
-    expect(accountingRow(false, 0).state).toBe("not_set_up")
   })
 })

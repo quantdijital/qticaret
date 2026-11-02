@@ -28,7 +28,7 @@ export default async function run({ container }: ExecArgs): Promise<void> {
   for (const template of Object.values(MESSAGE_TEMPLATES) as MessageTemplate<unknown>[]) {
     const mail = template.email?.(template.sample, brand, {
       unsubscribeUrl:
-        template.kind === "commercial" ? "https://magaza.example/unsubscribe?t=ornek" : null,
+        template.kind === "commercial" ? "https://magaza.example/abonelik/cik?t=ornek" : null,
     })
     if (!mail) {
       continue

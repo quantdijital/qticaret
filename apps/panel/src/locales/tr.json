@@ -1302,14 +1302,6 @@
         "marketing": {
           "title": "Google ve pazarlama",
           "text": "Arama görünürlüğü, reklam ölçümü ve ürün akışları."
-        },
-        "accounting": {
-          "title": "Muhasebe",
-          "text": "Satışların ve tahsilatların aktarıldığı program."
-        },
-        "infrastructure": {
-          "title": "Altyapı",
-          "text": "Platformun kendi servisleri."
         }
       },
       "names": {
@@ -1325,9 +1317,7 @@
         "ga4": "Google Analytics 4",
         "resend": "E-posta (Resend)",
         "google": "Google (Search Console, Merchant Center)",
-        "feeds": "Ürün akışları",
-        "accounting": "Muhasebe programı",
-        "redis": "Önbellek (Redis)"
+        "feeds": "Ürün akışları"
       },
       "purposes": {
         "paytr": "Kartla ödeme",
@@ -1342,9 +1332,7 @@
         "ga4": "Satışların ölçümü",
         "resend": "Sipariş ve hesap e-postaları",
         "google": "Arama sonuçları ve alışveriş ilanları",
-        "feeds": "Google, Meta, Akakçe ve Cimri için ürün listesi",
-        "accounting": "Satışların muhasebeye aktarımı",
-        "redis": "Önbellek, oturumlar ve sayaçlar"
+        "feeds": "Google, Meta, Akakçe ve Cimri için ürün listesi"
       },
       "states": {
         "connected": "Bağlı",
@@ -1363,22 +1351,15 @@
         "search_console_no_site": "Search Console'da site seçilmemiş.",
         "merchant_not_chosen": "Merchant Center hesabı seçilmemiş.",
         "merchant_sync_failed": "Son ürün gönderiminde hata var.",
-        "dev_mailbox": "Geliştirme posta kutusuna gidiyor; gerçek gönderim yok.",
-        "not_sending": "E-posta gönderimi kurulmamış.",
+        "not_sending": "E-posta gönderimi henüz kurulmadı; mağaza yayına alınırken açılır.",
         "platform_sender": "Platformun adresinden gidiyor; kendi alan adınızı ekleyebilirsiniz.",
         "domain_unverified": "Alan adınız henüz doğrulanmadı; DNS kayıtlarını kontrol edin.",
-        "no_storefront": "Akışlar açık ama mağazanın adresi tanımlı değil.",
-        "records_stopped_one": "{{count}} kayıt aktarılamadı; Muhasebe sayfasından yeniden deneyin.",
-        "records_stopped_other": "{{count}} kayıt aktarılamadı; Muhasebe sayfasından yeniden deneyin.",
-        "memory_only": "Redis tanımlı değil; sayaçlar yalnızca bu sunucuda tutuluyor."
+        "no_storefront": "Akışlar açık ama mağazanın adresi tanımlı değil."
       },
       "latency": "{{ms}} ms",
       "reasons": {
         "timeout": "Zamanında yanıt vermedi.",
         "auth_failed": "Hesap bilgileri reddedildi; hesabı yeniden kaydedin.",
-        "connection_failed": "Bağlantı kurulamadı.",
-        "error_reply": "Hata ile yanıt verdi.",
-        "unexpected_reply": "Beklenmeyen bir yanıt verdi.",
         "error": "Kontrol sırasında hata oluştu."
       },
       "test": "Bağlantıyı test et",
@@ -1439,7 +1420,7 @@
         "description": "E-postalar mağazanızın kendi alan adından gitsin. Alan adı doğrulanana kadar e-postalar platformun adresinden, mağazanızın adıyla gider; müşteri yanıtları iletişim e-postanıza ulaşır.",
         "sender": "Şu an gönderen adres:",
         "none": "yok",
-        "unavailable": "Bu ortamda e-postalar geliştirme posta kutusuna (Mailpit) gider; alan adı canlı ortamda doğrulanır.",
+        "unavailable": "E-posta gönderimi henüz kurulmadı; alan adınızı mağaza yayına alındığında buradan doğrularsınız.",
         "localPart": "Adresin @ öncesi",
         "name": "Alan adı",
         "add": "Alan adını ekle",
@@ -1820,48 +1801,6 @@
         "download": "Paketi indir",
         "later": "Paket hazırlanıyor; bitince Ayarlar > İşler'den indirebilirsiniz.",
         "failed": "Paket hazırlanamadı."
-      },
-      "program": {
-        "title": "Muhasebe programı",
-        "hint": "Satışlar, tahsilatlar ve iadeler seçilen programa beş dakikada bir aktarılır. Aktarılamayan kayıt artan aralıklarla yeniden denenir; sipariş akışı hiç beklemez.",
-        "label": "Muhasebe programı",
-        "adapters": {
-          "none": "Yok: yalnızca aylık paket",
-          "fake": "Deneme programı (geliştirme)"
-        },
-        "upcoming": {
-          "parasut": "Paraşüt (yakında)",
-          "logo": "Logo (yakında)",
-          "mikro": "Mikro (yakında)"
-        },
-        "none": "Kayıtlar bir programa aktarılmıyor; mali müşavire aylık paketi gönderin. Paraşüt, Logo ya da Mikro mağazanın seçimine göre eklenecek.",
-        "counts": {
-          "pending_one": "{{count}} bekliyor",
-          "pending_other": "{{count}} bekliyor",
-          "synced_one": "{{count}} aktarıldı",
-          "synced_other": "{{count}} aktarıldı",
-          "stopped_one": "{{count}} durdu",
-          "stopped_other": "{{count}} durdu",
-          "skipped_one": "{{count}} atlandı",
-          "skipped_other": "{{count}} atlandı"
-        },
-        "sources": {
-          "sale": "Satış",
-          "payment": "Tahsilat",
-          "refund": "İade",
-          "cancel": "Satış iptali"
-        },
-        "lastError": "{{attempts}} deneme · son hata {{code}} · {{when}}",
-        "retry": "Yeniden dene",
-        "retried": "Kayıt bir sonraki aktarımda yeniden denenecek.",
-        "saved": "Muhasebe programı kaydedildi.",
-        "sends": {
-          "sale": "Satış: sipariş verildiğinde, KDV oranlarıyla; kurumsal müşterinin cari kartı da",
-          "payment": "Tahsilat: ödeme alındığında, ödeme yöntemiyle",
-          "refund": "İade: para geri verildiğinde",
-          "cancel": "İptal: aktarılmış satışın siparişi iptal edilince; aktarılmadan iptal edilen ya da TL dışındaki sipariş hiç gönderilmez",
-          "once": "Her kayıt programa bir kez gider; yeniden denemede aynı kayıt yeniden oluşmaz."
-        }
       }
     },
     "api": {
@@ -2252,8 +2191,7 @@
         "providers": {
           "none": "Kapalı",
           "parasut": "Paraşüt",
-          "external": "Kendi programım (geri yazma)",
-          "fake": "Sahte program (geliştirme)"
+          "external": "Kendi programım (geri yazma)"
         },
         "triggers": {
           "shipped": "Kargoya verilince",
@@ -2262,8 +2200,7 @@
         "hints": {
           "none": "Fatura kesilmez. Faturalarınızı başka yerde (ör. Luca) kesiyorsanız \"Kendi programım\"ı seçin; numarası ve PDF'i siparişin fatura kartından elle girilir.",
           "parasut": "Fatura, Paraşüt hesabınızda kesilir; e-Fatura mı e-Arşiv mi olacağına Paraşüt karar verir.",
-          "external": "Fatura kendi programınızda (ör. BirFatura üzerinden) ya da elle kesilir; numarası ve PDF'i buraya geri yazılır.",
-          "fake": "Sahte program yalnızca geliştirme ortamında çalışır; gerçek fatura kesmez."
+          "external": "Fatura kendi programınızda (ör. BirFatura üzerinden) ya da elle kesilir; numarası ve PDF'i buraya geri yazılır."
         },
         "triggerHints": {
           "shipped": "Paket kargoya verildiğinde kesilir; o ana kadar sipariş düzenlenebilir ve iptal faturayı etkilemez. Kapıda ödemeli sipariş teslimden sonra faturalanır.",
@@ -3017,7 +2954,6 @@
     "drafts": {
       "title": "İçerik taslakları",
       "description": "Modelle yazılan taslaklar; onaylamadan sayfaya çıkmaz. Bu ay {{used}}/{{limit}} taslak.",
-      "noProvider": "Taslak sağlayıcısı henüz tanımlı değil.",
       "ask": {
         "product_description": "Açıklama taslağı",
         "seo_title": "Arama başlığı taslağı",
@@ -3476,8 +3412,7 @@
       },
       "providers": {
         "parasut": "Paraşüt",
-        "external": "Kendi programınız",
-        "fake": "Sahte program"
+        "external": "Kendi programınız"
       },
       "types": {
         "e_archive": "e-Arşiv",
@@ -4354,7 +4289,7 @@
         "bank-transfer": "Havale/EFT",
         "cod": "Kapıda ödeme",
         "gift-card": "Hediye kartı",
-        "system": "Sistem (deneme)"
+        "system": "Manuel ödeme"
       },
       "chargebacks": {
         "title": "Ters ibrazlar",
@@ -4371,7 +4306,7 @@
         "hint": "Her sabah 08.30'da PayTR ve iyzico'nun dünkü dökümü siparişlerin ödemeleriyle karşılaştırılır.",
         "states": {
           "live": "Canlı",
-          "testMode": "Deneme modu",
+          "testMode": "Test modu",
           "notConnected": "Bağlı değil"
         },
         "waiting": "Bu dönemde henüz denetlenmiş gün yok.",
@@ -5068,8 +5003,8 @@
       "reasons": {
         "S-HOST-01": {
           "no_host": "Ana alan adı girilmemiş: kanonik adresler ve site haritası oluşmuyor.",
-          "indexing_off": "Bu ortam arama motorlarına kapalı (SEO_INDEXING); robots.txt tüm tarayıcıları engelliyor.",
-          "staging_indexed": "Bu bir test ortamı ama arama motorlarına açık (SEO_INDEXING); kopya içerik asıl mağazayla yarışır."
+          "indexing_off": "Mağaza arama motorlarına kapalı; robots.txt tüm tarayıcıları engelliyor.",
+          "staging_indexed": "Bu bir test ortamı ama arama motorlarına açık; kopya içerik asıl mağazayla yarışır."
         },
         "S-ROBOTS-01": {
           "blocked": "{{target}} bu sayfaya giremiyor.",

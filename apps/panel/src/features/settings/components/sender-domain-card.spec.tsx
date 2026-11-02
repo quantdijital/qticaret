@@ -27,7 +27,7 @@ describe("SenderDomainCard", () => {
     fetchMock.mockReset()
   })
 
-  it("says the domain is verified only on the live shop where e-mail is not Resend's", async () => {
+  it("says e-mail is not set up yet, in the shop's words, while Resend is not configured", async () => {
     fetchMock.mockResolvedValue({
       available: false,
       sender: "bildirim@platform.example",
@@ -36,7 +36,8 @@ describe("SenderDomainCard", () => {
     } satisfies SenderDomainView)
     renderCard()
 
-    expect(await screen.findByText(/canlı ortamda doğrulanır/)).toBeInTheDocument()
+    expect(await screen.findByText(/E-posta gönderimi henüz kurulmadı/)).toBeInTheDocument()
+    expect(screen.queryByText(/Mailpit/)).toBeNull()
     expect(screen.queryByRole("button", { name: "Alan adını ekle" })).toBeNull()
   })
 

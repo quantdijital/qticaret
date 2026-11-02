@@ -12,7 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useSaveSection } from "@/features/settings/api/sections"
-import { INVOICING_PROVIDERS } from "@/features/settings/api/einvoice"
+import { INVOICING_PROVIDERS, invoicingProviderOf } from "@/features/settings/api/einvoice"
 import type { InvoicingSettings } from "@/features/settings/api/einvoice"
 import { errorText } from "@/lib/errors"
 import { FULL_RESET } from "@/lib/forms"
@@ -37,7 +37,7 @@ export function EinvoiceProgramCard({
   const { t } = useTranslation()
   const save = useSaveSection<InvoicingSettings>("invoicing")
   const values: Values = {
-    provider: saved.provider,
+    provider: invoicingProviderOf(saved.provider),
     trigger: saved.trigger,
     series: saved.series ?? "",
   }
@@ -52,7 +52,7 @@ export function EinvoiceProgramCard({
         onSuccess: (result) => {
           form.reset(
             {
-              provider: result.values.provider,
+              provider: invoicingProviderOf(result.values.provider),
               trigger: result.values.trigger,
               series: result.values.series ?? "",
             },
@@ -64,9 +64,6 @@ export function EinvoiceProgramCard({
       }
     )
   })
-  // A development shop may run on the fake program: shown, never offered
-  const providers =
-    saved.provider === "fake" ? [...INVOICING_PROVIDERS, "fake" as const] : INVOICING_PROVIDERS
   return (
     <CardForm
       title={t(`${E}.title`)}
@@ -91,7 +88,7 @@ export function EinvoiceProgramCard({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {providers.map((provider) => (
+                  {INVOICING_PROVIDERS.map((provider) => (
                     <SelectItem key={provider} value={provider}>
                       {t(`${E}.providers.${provider}`)}
                     </SelectItem>

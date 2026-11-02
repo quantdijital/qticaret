@@ -78,7 +78,7 @@ describe("StatementChecksCard", () => {
     expect(
       await screen.findByText("1 gün tuttu · 1 gün fark · 0 gün okunamadı")
     ).toBeInTheDocument()
-    expect(screen.getByText("Deneme modu")).toBeInTheDocument()
+    expect(screen.getByText("Test modu")).toBeInTheDocument()
     expect(screen.getByText(/28\.10\.2026/)).toBeInTheDocument()
     expect(screen.getByText("Sağlayıcıda yok")).toBeInTheDocument()
     // Under the difference on a phone, in its own column on a wider screen

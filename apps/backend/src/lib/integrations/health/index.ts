@@ -1,4 +1,3 @@
-import { parseEnv } from "../../env"
 import type { AccountDetails } from "../account-check"
 import type { CredentialProviderName } from "../../../modules/integration-credentials/providers"
 import { createHealthMonitor } from "./health"
@@ -8,7 +7,6 @@ import { geliverHealthCheck } from "./geliver-check"
 import { iyzicoHealthCheck } from "./iyzico-check"
 import { paytrHealthCheck } from "./paytr-check"
 import { netgsmHealthCheck } from "./netgsm-check"
-import { redisHealthCheck } from "./redis-check"
 import { yurticiHealthCheck } from "./yurtici-check"
 
 export { createHealthMonitor, runHealthChecks } from "./health"
@@ -25,7 +23,6 @@ export { geliverHealthCheck } from "./geliver-check"
 export { iyzicoHealthCheck } from "./iyzico-check"
 export { paytrHealthCheck } from "./paytr-check"
 export { netgsmHealthCheck } from "./netgsm-check"
-export { redisHealthCheck } from "./redis-check"
 export { yurticiHealthCheck } from "./yurtici-check"
 
 /** The shop's stored provider accounts (adr/0027), as the checks read them. */
@@ -34,13 +31,12 @@ export interface AccountSource {
 }
 
 /**
- * The checks the endpoint runs. New integrations add theirs here: the file
- * store in S13, payment, shipping and invoicing providers in their phases.
+ * The checks the endpoint runs: the shop's providers, as the Integrations
+ * page shows them. New integrations add theirs here. The platform's own
+ * services (Redis, the database) are operations' to watch, not the shop's.
  */
 export function defaultHealthChecks(accounts: AccountSource): IntegrationHealthCheck[] {
-  const env = parseEnv()
   return [
-    redisHealthCheck(env.REDIS_URL),
     paytrHealthCheck(() => accounts.read("paytr")),
     iyzicoHealthCheck(() => accounts.read("iyzico")),
     geliverHealthCheck(() => accounts.read("geliver")),

@@ -3,9 +3,9 @@ import { useTranslation } from "react-i18next"
 import { PageHeader } from "@/components/patterns/page-header"
 import { Skeleton } from "@/components/ui/skeleton"
 import { sectionQuery } from "@/features/settings/api/sections"
+import { invoicingProviderOf } from "@/features/settings/api/einvoice"
 import type { InvoicingSettings } from "@/features/settings/api/einvoice"
 import { AccountingPackageCard } from "@/features/settings/components/accounting-package-card"
-import { AccountingProgramCard } from "@/features/settings/components/accounting-program-card"
 import { EinvoiceCarriersCard } from "@/features/settings/components/einvoice-carriers-card"
 import { EinvoiceProgramCard } from "@/features/settings/components/einvoice-program-card"
 import { EinvoiceConnectionCard } from "@/features/settings/components/parasut-card"
@@ -17,8 +17,8 @@ const E = "settings.einvoice"
  * Settings > Invoices and accounting (F8, F11.5; the owner, 2026-10-31:
  * one page for everything about invoices): who issues the invoices, when
  * and in which series, with the program's connection beside it; the
- * carriers an e-Arşiv names; and the accountant's monthly package and
- * program.
+ * carriers an e-Arşiv names; and the accountant's monthly package (no
+ * accounting program is offered until one is written, adr/0039 §5).
  */
 export function EinvoicePage() {
   const { t } = useTranslation()
@@ -37,7 +37,10 @@ export function EinvoicePage() {
             content: saved ? (
               <div className="grid gap-[var(--grid-gap)] lg:grid-cols-2 lg:items-stretch">
                 <EinvoiceProgramCard saved={saved} className="h-full" />
-                <EinvoiceConnectionCard provider={saved.provider} className="h-full" />
+                <EinvoiceConnectionCard
+                  provider={invoicingProviderOf(saved.provider)}
+                  className="h-full"
+                />
               </div>
             ) : (
               loading
@@ -51,12 +54,7 @@ export function EinvoicePage() {
           {
             key: "accounting",
             label: t(`${E}.tabs.accounting`),
-            content: (
-              <div className="grid gap-[var(--grid-gap)] lg:grid-cols-2 lg:items-stretch">
-                <AccountingPackageCard className="h-full" />
-                <AccountingProgramCard className="h-full" />
-              </div>
-            ),
+            content: <AccountingPackageCard />,
           },
         ]}
       />

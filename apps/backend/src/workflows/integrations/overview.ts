@@ -5,8 +5,6 @@ import type { ProviderFailure } from "../../lib/clients/failure-log"
 import { parseEnv } from "../../lib/env"
 import { SEARCH_CONSOLE_SCOPE, googleClientOf } from "../../lib/google/oauth"
 import { bankTransferSettings } from "../../lib/payments/settings"
-import { ACCOUNTING_MODULE } from "../../modules/accounting"
-import type AccountingModuleService from "../../modules/accounting/service"
 import { GOOGLE_MERCHANT_MODULE } from "../../modules/google-merchant"
 import type GoogleMerchantModuleService from "../../modules/google-merchant/service"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-credentials"
@@ -17,18 +15,15 @@ import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import { CASH_ON_DELIVERY } from "../../modules/platform-settings/features"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
 import type MarketingFeedsModuleService from "../../modules/marketing-feeds/service"
-import { activeAccountingAdapter } from "../accounting/active-adapter"
 import { brandOf } from "../messaging/brand"
 import { currentSenderDomain } from "../messaging/sender-domain"
 import {
   accountRow,
-  accountingRow,
   bankTransferRow,
   cashOnDeliveryRow,
   emailRow,
   feedsRow,
   googleRow,
-  redisRow,
 } from "./overview-rules"
 import type { IntegrationGroup, IntegrationRow } from "./overview-rules"
 
@@ -60,8 +55,7 @@ const text = (value: unknown): string | null =>
  */
 export async function integrationOverview(container: MedusaContainer): Promise<IntegrationView[]> {
   const env = parseEnv()
-  const accounting = await activeAccountingAdapter(container)
-  const [accounts, bank, cod, domain, token, brand, [sync], counts] = await Promise.all([
+  const [accounts, bank, cod, domain, token, brand, [sync]] = await Promise.all([
     container
       .resolve<IntegrationCredentialsModuleService>(INTEGRATION_CREDENTIALS_MODULE)
       .describeAll(),
@@ -75,9 +69,6 @@ export async function integrationOverview(container: MedusaContainer): Promise<I
     container
       .resolve<GoogleMerchantModuleService>(GOOGLE_MERCHANT_MODULE)
       .listMerchantSyncs({}, { take: 1 }),
-    accounting.adapter
-      ? container.resolve<AccountingModuleService>(ACCOUNTING_MODULE).counts(accounting.id)
-      : Promise.resolve(null),
   ])
   const account = (provider: CredentialStatus["provider"]) => {
     const found = accounts.find((each) => each.provider === provider)
@@ -111,8 +102,6 @@ export async function integrationOverview(container: MedusaContainer): Promise<I
       lastSyncFailed: sync !== undefined && (sync.failed > 0 || sync.error !== null),
     }),
     feedsRow(token !== null, brand.storefrontUrl !== null),
-    accountingRow(accounting.adapter !== null, counts?.stopped ?? 0),
-    redisRow(env.REDIS_URL !== undefined),
   ]
   const log = providerFailureLog()
   // The failures are a help, not the page: a slow or missing Redis (its first

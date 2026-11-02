@@ -4,7 +4,12 @@ import type { Knex } from "@medusajs/framework/mikro-orm/knex"
 import { logger } from "../../../lib/logging"
 import { TR_ADDRESS_MODULE } from "../../../modules/tr-address"
 import type TrAddressModuleService from "../../../modules/tr-address/service"
-import { DEMO_PRODUCTS, DEMO_SHIPPING_OPTIONS } from "../data"
+import {
+  DEMO_ORDER_ADDRESS_1,
+  DEMO_ORDER_METADATA,
+  DEMO_PRODUCTS,
+  DEMO_SHIPPING_OPTIONS,
+} from "../data"
 import { advanceOrder } from "./advance"
 import { placeOrder } from "./place"
 import { planDemoOrders } from "./plan"
@@ -88,7 +93,8 @@ async function context(container: MedusaContainer) {
  * Demo orders for the dashboard (dev only): about 90 days of orders placed
  * through checkout, then captured, shipped, delivered or canceled. Runs
  * only on a database without orders, unless `append` says otherwise. The dates are moved into the past
- * with an UPDATE, which no workflow offers; demo data only.
+ * with an UPDATE, which no workflow offers, and the order marked as demo
+ * (`DEMO_ORDER_METADATA`); demo data only. `demo:remove` takes them out.
  */
 export async function seedDemoOrders(
   container: MedusaContainer,
@@ -122,16 +128,18 @@ export async function seedDemoOrders(
       })),
       address: {
         ...order.customer,
-        address_1: "Demo Sokak No: 1",
+        address_1: DEMO_ORDER_ADDRESS_1,
         ...(place ? { province: place.province, city: place.city } : {}),
       },
     })
     await advanceOrder(container, orderId, order.stage)
+    // Marked as demo in the same write, so `demo:remove` finds it
     await knex("order")
       .where({ id: orderId })
       .update({
         created_at: order.at,
         updated_at: order.at,
+        metadata: JSON.stringify(DEMO_ORDER_METADATA),
         ...(order.stage === "canceled" ? { canceled_at: order.at } : {}),
       })
     if ((index + 1) % 25 === 0) {

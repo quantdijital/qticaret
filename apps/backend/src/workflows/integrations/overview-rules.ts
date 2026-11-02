@@ -5,8 +5,12 @@ import type { CredentialStatus } from "../../modules/integration-credentials/typ
  * and why, in codes the panel words. Pure, from what `overview.ts` reads.
  */
 
-export type IntegrationGroup =
-  "payments" | "shipping" | "messaging" | "marketing" | "accounting" | "infrastructure"
+/**
+ * Only services the shop uses: no accounting program until one is written
+ * (adr/0039 §5), nothing of the platform's own (its cache answers to
+ * operations, not to the shop).
+ */
+export type IntegrationGroup = "payments" | "shipping" | "messaging" | "marketing"
 
 /**
  * - `connected`: set up and, as far as is known, working
@@ -108,12 +112,14 @@ export interface EmailFacts {
   domain: { status: string } | null
 }
 
-/** E-mail: Resend in production; the shop's own domain once verified, else the platform's. */
+/**
+ * E-mail: Resend in production; the shop's own domain once verified, else
+ * the platform's. Anything else (none, or a developer's local mailbox)
+ * sends the shop nothing, and says so in the shop's words.
+ */
 export function emailRow({ transport, domain }: EmailFacts): IntegrationRow {
   if (transport !== "resend") {
-    return row("resend", "messaging", "off", [
-      { code: transport === "mailpit" ? "dev_mailbox" : "not_sending" },
-    ])
+    return row("resend", "messaging", "off", [{ code: "not_sending" }])
   }
   if (!domain) {
     return row("resend", "messaging", "connected", [{ code: "platform_sender" }])
@@ -130,19 +136,4 @@ export function feedsRow(enabled: boolean, storefrontSet: boolean): IntegrationR
   return storefrontSet
     ? row("feeds", "marketing", "connected")
     : row("feeds", "marketing", "attention", [{ code: "no_storefront" }])
-}
-
-export function accountingRow(active: boolean, stopped: number): IntegrationRow {
-  if (!active) {
-    return row("accounting", "accounting", "not_set_up")
-  }
-  return stopped > 0
-    ? row("accounting", "accounting", "attention", [{ code: "records_stopped", count: stopped }])
-    : row("accounting", "accounting", "connected")
-}
-
-export function redisRow(configured: boolean): IntegrationRow {
-  return row("redis", "infrastructure", configured ? "connected" : "off", [
-    ...(configured ? [] : [{ code: "memory_only" }]),
-  ])
 }

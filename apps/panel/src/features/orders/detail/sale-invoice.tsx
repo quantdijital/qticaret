@@ -77,7 +77,7 @@ export function SaleInvoice({
       <div className="flex flex-wrap items-center gap-2">
         <StatusBadge tone={TONES[invoice.status]}>{t(`${V}.status.${invoice.status}`)}</StatusBadge>
         <span className="text-xs text-muted-foreground">
-          {t(`${V}.providers.${invoice.provider}`)}
+          {t(`${V}.providers.${invoice.provider}`, { defaultValue: "—" })}
         </span>
       </div>
       <dl className="divide-y">

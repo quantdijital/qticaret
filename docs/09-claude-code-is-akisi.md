@@ -68,6 +68,11 @@ Ağır işler (tam test, build) hook'a konmaz; token ve süre israfı.
 → /oturum-kapat → /clear
 ```
 
+## Yerel demo verisi
+- Panelin ve vitrinin yerel e2e testleri demo veriye dayanır: önce `pnpm --filter @qticaret/backend seed:demo` (katalog, kargo seçenekleri, "Demo storefront" anahtarı), panoyu dolduran siparişler için `seed:demo-orders`. Testler kendi yönetici hesaplarını açıp kapatır (`remove-e2e-admin.ts`).
+- Mağaza sahibi yerel paneli kendi verisiyle deniyorsa demo kayıtları kafa karıştırır: `pnpm --filter @qticaret/backend demo:remove` demo siparişleri (faturalarıyla), demo ürünleri, boş kalan demo kategorileri, mağazanın başka kargo seçeneği varsa demo kargo seçeneklerini, depodaki uydurma adresi, yarıda kalmış e2e yönetici hesaplarını ve onların ürün tablosu kontrol işlerini kaldırır; tekrar çalıştırılabilir, özeti loga yazar. Vitrin için "Demo storefront" anahtarı kalır. Geliştirme/test dışında `allow-non-local` olmadan çalışmaz.
+- `demo:remove` sonrası e2e çalıştırmak için `seed:demo` (ve gerekiyorsa `seed:demo-orders`) yeniden çalıştırılır.
+
 ## Claude'a verilmeyecek yetkiler
 - `git push --force`, `rm -rf`, prod deploy komutları
 - `.env*` okuma, secret dosyaları

@@ -1,7 +1,9 @@
 import { redirect } from "next/navigation"
 import type { Resolution, StoreProduct } from "@qticaret/types"
 import type { BreadcrumbView, LinkView, SortOptionView } from "@qticaret/ui"
+import { subscribeNewsletter } from "@/app/actions/newsletter"
 import { t } from "@/lib/i18n"
+import { faqJsonLd } from "@/lib/seo/faq"
 import { JsonLd } from "@/lib/seo/JsonLd"
 import {
   allCategories,
@@ -17,6 +19,7 @@ import {
 import { childrenOf } from "@/lib/views/categories"
 import { swatchLookup } from "@/lib/views/color"
 import { filterViews } from "@/lib/views/facets"
+import { currentLayout } from "@/lib/views/layout"
 import {
   hrefOf,
   priceAsked,
@@ -27,6 +30,7 @@ import {
   withSort,
 } from "@/lib/views/listing"
 import { breadcrumbsOf, productCards, variantIdsOf } from "@/lib/views/product"
+import { byPlacement, sectionViews } from "@/lib/views/sections"
 import { paragraphsOf } from "@/lib/views/text"
 import { theme } from "@/theme"
 
@@ -109,7 +113,19 @@ export function ListingScreen({ page, url }: { page: Entity; url: URL }) {
   )
 }
 
-/** One listing's page, whatever lists it: a record resolve found, or the whole catalogue. */
+/** The design's category page sections (adr/0049), above the grid and below it. */
+async function listingSections() {
+  const { top, bottom } = byPlacement((await currentLayout()).category)
+  const [above, below] = await Promise.all([sectionViews(top, t), sectionViews(bottom, t)])
+  return { top: above, bottom: below }
+}
+
+/**
+ * One listing's page, whatever lists it: a record resolve found, or the
+ * whole catalogue. The design's category page sections go on every kind
+ * (category, brand, collection, landing, `/magaza`); their FAQ data only
+ * on the list's first, unfiltered page, where its description shows too.
+ */
 export async function ListingContent({
   type,
   id,
@@ -131,9 +147,10 @@ export async function ListingContent({
   if (asked !== undefined) {
     redirect(hrefOf(url.pathname, withPrice(state, asked)))
   }
-  const [heading, answer] = await Promise.all([
+  const [heading, answer, sections] = await Promise.all([
     loadHeading(),
     listingPage(type, id, searchOf(state)),
+    listingSections(),
   ])
   const products = await productsByIds(answer.product_ids)
   const [paths, displays] = await Promise.all([
@@ -177,14 +194,20 @@ export async function ListingContent({
     t,
     swatchLookup(storefront.color_swatches)
   )
+  const first = current === 1 && facets.active.length === 0
   return (
     <>
-      <JsonLd blocks={jsonLd} />
+      <JsonLd
+        blocks={[...jsonLd, ...(first ? faqJsonLd([...sections.top, ...sections.bottom]) : [])]}
+      />
       <theme.ListingPage
         t={t}
+        subscribe={subscribeNewsletter}
         view={{
           title: heading.title,
-          description: current === 1 && facets.active.length === 0 ? heading.description : [],
+          description: first ? heading.description : [],
+          sectionsTop: sections.top,
+          sectionsBottom: sections.bottom,
           breadcrumbs: breadcrumbs(heading.title),
           subcategories: heading.subcategories,
           products: productCards(products, paths, displays),

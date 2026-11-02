@@ -2,15 +2,27 @@ import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query
 import { withReauth } from "@/lib/reauth"
 import { sdk } from "@/lib/sdk"
 
-/** Who issues the shop's invoices (F8, adr/0034 §1); `fake` only in development. */
+/** Who issues the shop's invoices (F8, adr/0034 §1). */
 export const INVOICING_PROVIDERS = ["none", "parasut", "external"] as const
-export type InvoicingProvider = (typeof INVOICING_PROVIDERS)[number] | "fake"
+export type InvoicingProvider = (typeof INVOICING_PROVIDERS)[number]
+
+/**
+ * The program as the panel shows it: a stored value it does not offer (a
+ * test program picked on a development database) reads as none, which is
+ * what the server does with it.
+ */
+export function invoicingProviderOf(value: string): InvoicingProvider {
+  return (INVOICING_PROVIDERS as readonly string[]).includes(value)
+    ? (value as InvoicingProvider)
+    : "none"
+}
 
 export const INVOICE_CARRIERS = ["aras", "yurtici", "geliver", "manual"] as const
 export type InvoiceCarrier = (typeof INVOICE_CARRIERS)[number]
 
 /** The shop's `invoicing` settings section. */
 export interface InvoicingSettings {
+  /** Read it with `invoicingProviderOf`: an old development value may still come back. */
   provider: InvoicingProvider
   trigger: "shipped" | "placed"
   carriers: Partial<Record<InvoiceCarrier, { title: string; tax_id: string }>>

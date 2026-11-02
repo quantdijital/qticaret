@@ -3,15 +3,14 @@ import type { IntegrationGroup } from "@/features/settings/api/integrations"
 
 /**
  * The Integrations page's groups in order, and where each service is set
- * up (F12.2). A service with no page (the cache) has no link.
+ * up (F12.2). Only services the shop uses: no accounting program until
+ * one is written (adr/0039 §5), nothing of the platform's own.
  */
 export const INTEGRATION_GROUPS: readonly IntegrationGroup[] = [
   "payments",
   "shipping",
   "messaging",
   "marketing",
-  "accounting",
-  "infrastructure",
 ]
 
 const payment = (provider: string) =>
@@ -42,8 +41,6 @@ export function settingsLinkOf(id: string) {
     case "google":
     case "feeds":
       return linkOptions({ to: "/settings/marketing" })
-    case "accounting":
-      return linkOptions({ to: "/settings/einvoice", search: { part: "accounting" } })
     default:
       return null
   }

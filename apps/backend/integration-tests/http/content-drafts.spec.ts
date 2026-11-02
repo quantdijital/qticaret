@@ -84,6 +84,25 @@ medusaIntegrationTestRunner({
       admin = await createAdminUser(http, container)
     })
 
+    it("lists the drafts' switch to the panel only while a provider is set", async () => {
+      const listed = async () =>
+        (
+          await http.get<{ features: { key: string }[] }>("/admin/features", {
+            headers: admin.headers,
+          })
+        ).data.features.map(({ key }) => key)
+
+      const withProvider = await listed()
+      Reflect.deleteProperty(process.env, "CONTENT_DRAFT_PROVIDER")
+      const without = await listed().finally(() => {
+        process.env["CONTENT_DRAFT_PROVIDER"] = "fake"
+      })
+
+      expect(withProvider).toContain(CONTENT_AI_DRAFTS)
+      expect(without).not.toContain(CONTENT_AI_DRAFTS)
+      expect(without.length).toBe(withProvider.length - 1)
+    })
+
     it("asks for nothing while the platform keeps drafts off", async () => {
       const refused = await ask(await product(), "seo_title")
 
