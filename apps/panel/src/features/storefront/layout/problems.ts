@@ -1,0 +1,141 @@
+import type { AnySection, LayoutDocument, LayoutLink } from "@/features/storefront/api/layout"
+import { LAYOUT_LIMITS as L } from "@/features/storefront/api/layout"
+import { isCleanText } from "@/features/settings/storefront"
+import { unknownShopTokens } from "@/features/settings/shop-tokens"
+import { allSections } from "./sections"
+
+/**
+ * What the server would refuse in a section, found before the save: the
+ * editor marks the field and waits instead of sending a draft it knows
+ * will fail. Each problem is a key under `storefront.editor.problems`.
+ */
+export type Problem =
+  | "required"
+  | "tooLong"
+  | "textInvalid"
+  | "tokenUnknown"
+  | "linkLabel"
+  | "slidesRequired"
+  | "productsRequired"
+  | "categoryRequired"
+  | "collectionRequired"
+  | "scheduleOrder"
+
+/** A section's problems by field (`heading`, `lines.0`, `slides.1.text`, `schedule`). */
+export type SectionProblems = Record<string, Problem>
+
+/** A written text: within `max`, no control characters, and (`tokens`) only the shop's details. */
+export function textProblem(value: string | null, max: number, tokens = false): Problem | null {
+  if (value === null) {
+    return null
+  }
+  const text = value.trim()
+  if (text.length > max) {
+    return "tooLong"
+  }
+  if (!isCleanText(text)) {
+    return "textInvalid"
+  }
+  return tokens && unknownShopTokens(text).length > 0 ? "tokenUnknown" : null
+}
+
+/** A link's own wording: an address must have one. */
+export function linkProblem(link: LayoutLink | null): Problem | null {
+  if (!link) {
+    return null
+  }
+  if (link.kind === "url" && link.label.trim() === "") {
+    return "linkLabel"
+  }
+  return textProblem(link.label, L.label)
+}
+
+/** The end must come after the start. */
+export function scheduleProblem(section: Pick<AnySection, "starts_at" | "ends_at">) {
+  const { starts_at: starts, ends_at: ends } = section
+  return starts && ends && new Date(ends).getTime() <= new Date(starts).getTime()
+    ? "scheduleOrder"
+    : null
+}
+
+type Found = [string, Problem | null]
+
+function fieldsOf(section: AnySection): Found[] {
+  switch (section.type) {
+    case "announcement_bar":
+      return section.lines.map((line, index): Found => [
+        `lines.${String(index)}`,
+        line.trim() === "" ? "required" : textProblem(line, L.line, true),
+      ])
+    case "hero":
+      return [
+        ["eyebrow", textProblem(section.eyebrow, L.eyebrow, true)],
+        ["heading", textProblem(section.heading, L.heading, true)],
+        ["text", textProblem(section.text, L.text, true)],
+        ["image", textProblem(section.image?.alt ?? null, L.alt)],
+        ...section.links.map((link, index): Found => [`links.${String(index)}`, linkProblem(link)]),
+      ]
+    case "banner":
+      return [
+        ["slides", section.slides.length === 0 ? "slidesRequired" : null],
+        ...section.slides.flatMap((slide, index): Found[] => {
+          const at = `slides.${String(index)}`
+          return [
+            [`${at}.image`, textProblem(slide.image.alt, L.alt)],
+            [`${at}.heading`, textProblem(slide.heading, L.heading, true)],
+            [`${at}.text`, textProblem(slide.text, L.slideText, true)],
+            [`${at}.link`, linkProblem(slide.link)],
+          ]
+        }),
+      ]
+    case "products": {
+      const { source } = section
+      return [
+        ["title", textProblem(section.title, L.title)],
+        [
+          "source",
+          source.kind === "manual" && source.product_ids.length === 0
+            ? "productsRequired"
+            : source.kind === "category" && source.category_id === ""
+              ? "categoryRequired"
+              : source.kind === "collection" && source.collection_id === ""
+                ? "collectionRequired"
+                : null,
+        ],
+        ["more", linkProblem(section.more)],
+      ]
+    }
+    case "newsletter":
+    case "help":
+      return [
+        ["title", textProblem(section.title, L.title)],
+        ["text", textProblem(section.text, L.text, true)],
+      ]
+    case "categories":
+    case "brands":
+    case "posts":
+    case "reviews":
+    case "rich_text":
+      return [["title", textProblem(section.title, L.title)]]
+    case "trust_badges":
+      return []
+  }
+}
+
+/** The section's problems; none: it may be saved as it is. */
+export function sectionProblems(section: AnySection): SectionProblems {
+  const found: Found[] = [...fieldsOf(section), ["schedule", scheduleProblem(section)]]
+  return Object.fromEntries(found.filter((entry): entry is [string, Problem] => entry[1] !== null))
+}
+
+/** The sections with a problem, by id; an empty map: the draft may be saved. */
+export function documentProblems(doc: LayoutDocument): Map<string, SectionProblems> {
+  const problems = new Map<string, SectionProblems>()
+  for (const section of allSections(doc)) {
+    const found = sectionProblems(section)
+    if (Object.keys(found).length > 0) {
+      problems.set(section.id, found)
+    }
+  }
+  return problems
+}

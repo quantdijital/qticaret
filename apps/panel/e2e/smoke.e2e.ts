@@ -40,9 +40,11 @@ test("opens each section from the collapsed menu's icons", async ({ page, guard 
   }
   const items = page.locator('[data-sidebar="sidebar"] a[data-sidebar="menu-button"]')
   await expect(sidebar).toHaveAttribute("data-state", "collapsed")
-  for (const href of await items.evaluateAll((links) =>
+  const hrefs = await items.evaluateAll((links) =>
     links.map((link) => link.getAttribute("href") ?? "")
-  )) {
+  )
+  // The theme editor opens full screen, without this menu: its own test opens it
+  for (const href of hrefs.filter((each) => each !== "/storefront/editor")) {
     await test.step(href, async () => {
       const box = await items
         .and(page.locator(`[href="${href}"]`))
@@ -137,5 +139,19 @@ test("opens an order with what each line was paid", async ({ page, guard }) => {
   expect((await money).status()).toBe(200)
   await expect(pageHeading(page)).toBeVisible()
   await page.waitForLoadState("networkidle")
+  await guard.assertHealthy()
+})
+
+test("sends the old storefront settings address to the storefront preferences", async ({
+  page,
+  guard,
+}) => {
+  await page.goto("/settings/storefront?part=swatches")
+  await expect(page).toHaveURL(/\/storefront\/preferences\?part=swatches$/)
+  await expect(pageHeading(page)).toHaveText("Vitrin tercihleri")
+  await expect(page.getByRole("tab", { name: "Renk örnekleri" })).toHaveAttribute(
+    "aria-selected",
+    "true"
+  )
   await guard.assertHealthy()
 })

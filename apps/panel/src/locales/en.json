@@ -53,7 +53,8 @@
     "content": "Pages and blog",
     "reviews": "Reviews and questions",
     "menus": "Menus",
-    "storefrontSettings": "Storefront settings"
+    "themeEditor": "Theme editor",
+    "storefrontPreferences": "Storefront preferences"
   },
   "login": {
     "title": "Sign in",
@@ -254,7 +255,6 @@
     "sections": {
       "appearance": "Appearance",
       "store": "Store profile",
-      "storefront": "Storefront",
       "payments": "Payment",
       "shipping": "Shipping and delivery",
       "seo": "SEO",
@@ -339,76 +339,9 @@
     },
     "saved": "Settings saved.",
     "storefront": {
-      "title": "Storefront",
-      "subtitle": "The frame on every page of your storefront: the main colour, the home page's opening, the announcement bar, trust badges, the contact form and colour swatches. Each card saves its own part.",
       "moveUp": "{{item}}: move up",
       "moveDown": "{{item}}: move down",
       "remove": "{{item}}: remove",
-      "color": {
-        "title": "Colour",
-        "description": "Your storefront's main colour: primary buttons and the announcement bar are painted with it. The text on it turns white or black, whichever stays readable.",
-        "label": "Main colour",
-        "picker": "Main colour picker",
-        "placeholder": "Theme colour",
-        "hint": "Type a 6-digit code starting with # or pick one from the colour box. Leave it empty and the theme's own colour (black) is used.",
-        "reset": "Back to the theme colour",
-        "preview": "Preview",
-        "button": "Add to cart",
-        "previewHint": "The storefront's announcement bar and primary button show in this colour."
-      },
-      "hero": {
-        "title": "Home page opening",
-        "description": "The opening at the top of the home page: a short line above, the heading, a sentence or two and up to two buttons. With the Insert detail button ({}) you can add shop details such as the phone or the free shipping threshold; the text changes when the detail does.",
-        "default": "No opening written; the home page shows your shop's name as the heading and your first two categories as buttons.",
-        "custom": "The home page opens with this. Go back to the default and your shop's name and first two categories show.",
-        "reset": "Back to the default",
-        "eyebrow": "Line above (optional)",
-        "eyebrowHint": "A short line above the heading; up to {{max}} characters.",
-        "eyebrowPlaceholder": "New season",
-        "heading": "Heading",
-        "headingHint": "Up to {{max}} characters. Once any field is filled in, the heading is required.",
-        "headingPlaceholder": "Things you will use every day",
-        "text": "Text (optional)",
-        "textHint": "Up to {{max}} characters; shown as one paragraph.",
-        "textPlaceholder": "Orders ship the same day, returns are free within 14 days.",
-        "buttons": "Buttons",
-        "addLink": "Add button",
-        "linksHint": "Up to {{max}} buttons; the first is the main one. With none, your first two categories show.",
-        "link": {
-          "label": "Button text",
-          "href": "Address",
-          "item": "Button {{number}}",
-          "labelOf": "Text of button {{number}}",
-          "hrefOf": "Address of button {{number}}",
-          "labelPlaceholder": "Start shopping",
-          "hrefPlaceholder": "/offers"
-        }
-      },
-      "announcements": {
-        "title": "Announcement bar",
-        "description": "The thin bar at the very top of the page. Several lines are shown in turn. With the Insert detail button ({}) you can add shop details such as the phone or the free shipping threshold; the text changes when the detail does.",
-        "line": "Announcement {{number}}",
-        "placeholder": "Free shipping from {ücretsiz_kargo_eşiği}",
-        "empty": "No announcements; the storefront shows no announcement bar.",
-        "add": "Add announcement",
-        "hint": "Up to {{max}} lines, each up to {{length}} characters."
-      },
-      "menusMoved": {
-        "title": "Menus",
-        "text": "The main menu, top links and footer columns now live under Storefront > Menus. Links point at your categories, products and pages, so they never break when an address changes.",
-        "link": "Go to menus"
-      },
-      "links": {
-        "label": "Label",
-        "href": "Address",
-        "item": "Link {{number}}",
-        "labelOf": "Label of link {{number}}",
-        "hrefOf": "Address of link {{number}}",
-        "within": "{{within}}, {{name}}",
-        "labelPlaceholder": "About us",
-        "hrefPlaceholder": "/about",
-        "hrefHint": "A page of your shop starts with / (/about); another site is written with https://."
-      },
       "badges": {
         "title": "Trust badges",
         "description": "Your shop's promises; shown under the header and beside the add to cart button. With the Insert detail button ({}) you can add shop details such as the phone or the free shipping threshold; the text changes when the detail does.",
@@ -459,7 +392,6 @@
         "required": "Fill in this field.",
         "tooLong": "Write {{max}} characters at most.",
         "textInvalid": "The text cannot contain invisible control characters.",
-        "hrefInvalid": "The address must be a shop page starting with / or a site starting with https://.",
         "pathInvalid": "The page must be a shop page starting with / (like /iletisim); not the home page, and no spaces.",
         "phoneInvalid": "Enter a valid Turkish phone number.",
         "colorInvalid": "The colour must be a 6-digit code starting with # (like #0b5c99).",
@@ -1696,7 +1628,6 @@
     },
     "sectionHints": {
       "store": "Shop name and logo, contact details and opening hours, legal identity, social accounts",
-      "storefront": "Home page opening, announcement bar, menu, trust badges and footer links",
       "appearance": "The panel's brand colour, corners and density",
       "seo": "Domain and address style, title templates, search engines",
       "attributes": "Attribute templates for products",
@@ -6140,6 +6071,329 @@
         "required": "This field cannot be empty.",
         "tooLong": "At most {{max}} characters.",
         "textInvalid": "Contains a character that cannot be used."
+      }
+    },
+    "editor": {
+      "title": "Theme editor",
+      "exit": "Exit",
+      "undo": "Undo",
+      "redo": "Redo",
+      "unsaved": "The draft could not be saved; fix the marked fields or retry the save first.",
+      "page": {
+        "label": "Page being edited",
+        "home": "Home page",
+        "product": "Product page",
+        "category": "Category page",
+        "post": "Blog post",
+        "soon": "{{page}} (coming soon)"
+      },
+      "device": {
+        "label": "Preview width",
+        "desktop": "Desktop",
+        "mobile": "Mobile"
+      },
+      "status": {
+        "label": "Draft status",
+        "saving": "Saving…",
+        "saved": "Draft saved {{time}}",
+        "idle": "Draft saved",
+        "invalid": "A field needs fixing",
+        "error": "Not saved: {{message}}",
+        "retry": "Retry"
+      },
+      "revisions": {
+        "open": "Versions",
+        "title": "Published versions",
+        "description": "Each publish is kept as a version; the last 20 are kept. Load one into the draft, edit it, then publish it again.",
+        "empty": "Nothing published yet; versions show here after the first publish.",
+        "item": "Version {{revision}}",
+        "live": "Live",
+        "restore": "Load into draft",
+        "restoreOf": "Load version {{revision}} into the draft",
+        "confirmTitle": "Load version {{revision}} into the draft?",
+        "confirmText": "The draft's changes are replaced by this version. The storefront does not change until you publish.",
+        "confirm": "Load into draft",
+        "restored": "Version {{revision}} is in the draft."
+      },
+      "discard": {
+        "open": "Discard changes",
+        "title": "Discard the draft's changes?",
+        "text": "The draft goes back to the design that is live (the default one if nothing was published). This cannot be undone.",
+        "confirm": "Discard changes",
+        "done": "The draft is back to the live design."
+      },
+      "preview": {
+        "open": "Preview",
+        "frameTitle": "Storefront preview",
+        "loading": "Loading the preview",
+        "refreshing": "Refreshing the preview",
+        "failed": "The preview could not open.",
+        "noHost": "The preview needs your shop's address; enter your domain in the SEO settings.",
+        "noHostLink": "Go to SEO settings"
+      },
+      "publish": {
+        "open": "Publish",
+        "title": "Publish the design?",
+        "text": "The draft's header, home page and footer go live together. They show on the storefront within a minute.",
+        "confirm": "Publish",
+        "done": "Published; it shows on the storefront within a minute."
+      },
+      "tree": {
+        "label": "The page's sections",
+        "header": "Header",
+        "home": "Home page",
+        "footer": "Footer",
+        "theme": "Theme",
+        "themeSettings": "Theme settings",
+        "add": "Add section",
+        "addAnnouncement": "Add announcement bar",
+        "addNewsletter": "Add newsletter box",
+        "empty": "The home page has no sections; the storefront shows only the header and footer.",
+        "logo": "Logo and menu",
+        "columns": "Link columns",
+        "contact": "Contact and legal details",
+        "storeProfile": "Store profile",
+        "menus": "Menus"
+      },
+      "row": {
+        "drag": "Drag to move",
+        "problem": "A field needs fixing",
+        "scheduled": "Scheduled",
+        "moveUpOf": "Move {{name}} up",
+        "moveDownOf": "Move {{name}} down",
+        "hide": "Hide {{name}}",
+        "show": "Show {{name}}",
+        "actions": "Actions for {{name}}",
+        "open": "Open its settings",
+        "moveUp": "Move up",
+        "moveDown": "Move down",
+        "duplicate": "Duplicate",
+        "remove": "Remove",
+        "removed": "{{name}} removed."
+      },
+      "add": {
+        "title": "Add section",
+        "description": "It is added at the end of the home page; drag it or use its arrows to move it."
+      },
+      "types": {
+        "announcement_bar": {
+          "name": "Announcement bar",
+          "description": "Short notices at the very top of the page, shown in turn."
+        },
+        "hero": {
+          "name": "Hero",
+          "description": "The page's opening: a heading, a short text, up to two buttons and an optional image."
+        },
+        "banner": {
+          "name": "Image slider",
+          "description": "1–6 images shown in turn, each with its own heading, line and link."
+        },
+        "categories": {
+          "name": "Categories",
+          "description": "The categories you pick; with none, your top categories."
+        },
+        "products": {
+          "name": "Product list",
+          "description": "The newest products, or a category's, a collection's or ones you pick."
+        },
+        "brands": {
+          "name": "Brands",
+          "description": "The brands you pick; with none, all your brands."
+        },
+        "posts": {
+          "name": "Blog posts",
+          "description": "Your latest blog posts."
+        },
+        "reviews": {
+          "name": "Customer reviews",
+          "description": "Your customers' latest reviews."
+        },
+        "rich_text": {
+          "name": "Text",
+          "description": "A title and formatted text; product and category cards may be added."
+        },
+        "trust_badges": {
+          "name": "Trust badges",
+          "description": "Your promises such as fast shipping or easy returns; written in Storefront preferences."
+        },
+        "newsletter": {
+          "name": "Newsletter",
+          "description": "An e-mail sign-up box."
+        },
+        "help": {
+          "name": "Help box",
+          "description": "A short call for help with the ways to reach you."
+        },
+        "footer_newsletter": {
+          "name": "Newsletter",
+          "description": "The e-mail sign-up box in the footer; removed, it does not show."
+        }
+      },
+      "panel": {
+        "back": "Back to sections",
+        "visibility": "Visibility",
+        "visible": "Show on the storefront",
+        "visibleHint": "A hidden section does not show; its settings are kept.",
+        "scheduleHint": "Give dates for a section shown for a while, such as a campaign; empty, it always shows.",
+        "startsAt": "Starts",
+        "endsAt": "Ends",
+        "duplicate": "Duplicate",
+        "remove": "Remove section"
+      },
+      "defaults": {
+        "heading": "Your shop's name",
+        "products": "New products",
+        "categories": "Browse the categories",
+        "brands": "Brands",
+        "posts": "From the blog",
+        "reviews": "What our customers say",
+        "newsletter": "Subscribe to the newsletter",
+        "help": "Something on your mind?",
+        "helpText": "Write to us about a product, an order or shipping; we will get back soon.",
+        "newsletterText": "The storefront's text: hear about campaigns and news by e-mail…"
+      },
+      "fields": {
+        "eyebrow": "Eyebrow",
+        "heading": "Heading",
+        "text": "Text",
+        "title": "Title",
+        "titleHint": "Left empty, the storefront uses its own title.",
+        "titleOptional": "Optional; left empty, no title shows.",
+        "textHint": "Left empty, the storefront uses its own text.",
+        "image": "Image",
+        "alt": "Image description",
+        "altHint": "For visitors who cannot see it and for search engines: say briefly what it shows.",
+        "noImage": "No image",
+        "upload": "Upload image",
+        "uploadOf": "Upload an image for {{label}}",
+        "replace": "Replace",
+        "replaceOf": "Replace the image for {{label}}",
+        "removeImage": "Remove image",
+        "chooseImage": "Choose an image file",
+        "limit": "How many to show",
+        "limitHint": "Between 1 and {{max}}."
+      },
+      "hero": {
+        "eyebrowPlaceholder": "New season",
+        "headingHint": "Left empty, your shop's name shows.",
+        "textPlaceholder": "Orders ship the same day; returns are free within 14 days.",
+        "buttons": "Buttons",
+        "buttonsHint": "Up to {{max}} buttons; the first is the main one. With none, your first two categories show.",
+        "button": "Button {{number}}",
+        "addButton": "Add button",
+        "imageHint": "A wide, landscape image works best."
+      },
+      "banner": {
+        "empty": "No images yet. The section is saved once it has one.",
+        "slide": "Image {{number}}",
+        "link": "Link",
+        "linkHint": "Where a visitor clicking the image goes; optional.",
+        "add": "Add image",
+        "hint": "Up to {{max}} images, shown in turn."
+      },
+      "products": {
+        "source": "Which products",
+        "sources": {
+          "newest": "The newest products",
+          "category": "A category's products",
+          "collection": "A collection's products",
+          "manual": "Products I pick"
+        },
+        "category": "Category",
+        "collection": "Collection",
+        "products": "Products",
+        "manualEmpty": "Pick at least one product.",
+        "more": "See all link",
+        "moreHint": "The link under the list; removed, it does not show."
+      },
+      "records": {
+        "pick": {
+          "category": "Choose a category",
+          "product": "Choose products",
+          "collection": "Choose a collection",
+          "brand": "Choose brands"
+        },
+        "pickMany": "Click to add or take out; you can reorder them afterwards.",
+        "pickOne": "Search by name and pick one.",
+        "done": "Done",
+        "missing": "Deleted record",
+        "add": {
+          "category": "Add category",
+          "product": "Add product",
+          "brand": "Add brand"
+        },
+        "limit": "Up to {{max}} records.",
+        "none": "None chosen",
+        "change": "Change",
+        "choose": "Choose",
+        "changeOf": "Change the {{label}}",
+        "chooseOf": "Choose the {{label}}",
+        "categories": "Categories",
+        "brands": "Brands",
+        "categoriesEmpty": "With none chosen, the storefront shows your top categories.",
+        "brandsEmpty": "With none chosen, the storefront shows all your brands."
+      },
+      "link": {
+        "missing": "Deleted record",
+        "labelRequired": "Shown text (required)",
+        "label": "Shown text of the {{name}} link",
+        "change": "Change target",
+        "remove": "Remove link",
+        "choose": "Choose link"
+      },
+      "richText": {
+        "edit": "Edit text",
+        "body": "Text",
+        "empty": "No text written yet.",
+        "description": "What you write is saved to the draft by itself; you can add product and category cards and shop details.",
+        "done": "Done"
+      },
+      "trustBadges": {
+        "text": "The badges are written in Storefront preferences; this section sets where they show on the home page.",
+        "link": "Edit the badges"
+      },
+      "help": {
+        "contact": "The ways to reach you (phone, e-mail, WhatsApp) come from the store profile; with none, the box does not show."
+      },
+      "announcement": {
+        "line": "Announcement {{number}}",
+        "placeholder": "Free shipping from {ücretsiz_kargo_eşiği}",
+        "add": "Add announcement",
+        "hint": "Up to {{max}} lines of up to {{length}} characters each, shown in turn."
+      },
+      "problems": {
+        "required": "Write this line or remove it.",
+        "tooLong": "Write at most {{max}} characters.",
+        "textInvalid": "The text cannot hold invisible control characters.",
+        "tokenUnknown": "There is an unknown detail in braces; add details from the Insert detail menu.",
+        "linkLabel": "Enter the shown text of the address.",
+        "slidesRequired": "Add at least one image.",
+        "productsRequired": "Pick at least one product.",
+        "categoryRequired": "Choose a category.",
+        "collectionRequired": "Choose a collection.",
+        "scheduleOrder": "The end must come after the start."
+      },
+      "theme": {
+        "title": "Theme settings",
+        "color": "Main colour",
+        "colorHint": "Main buttons and the announcement bar are painted in it; the text is white or black, whichever reads better. Empty, the theme's colour is used.",
+        "code": "Colour code",
+        "picker": "Pick a colour",
+        "sample": "Sample",
+        "sampleLine": "Your announcement bar looks like this",
+        "button": "Add to cart",
+        "live": "The colour is not part of the draft: once saved, it shows on the storefront at once.",
+        "save": "Save colour",
+        "reset": "Use the theme's colour"
+      }
+    },
+    "preferences": {
+      "description": "What the theme editor does not draw: the trust badges' words, the contact form's page and the colour swatches. Each tab saves its own card.",
+      "editor": "Open the theme editor",
+      "tabs": {
+        "badges": "Trust badges",
+        "contact": "Contact form",
+        "swatches": "Colour swatches"
       }
     }
   }

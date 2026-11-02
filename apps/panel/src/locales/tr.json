@@ -53,7 +53,8 @@
     "content": "Sayfalar ve blog",
     "reviews": "Yorumlar ve sorular",
     "menus": "Menüler",
-    "storefrontSettings": "Vitrin ayarları"
+    "themeEditor": "Tema düzenleyici",
+    "storefrontPreferences": "Vitrin tercihleri"
   },
   "login": {
     "title": "Giriş yap",
@@ -254,7 +255,6 @@
     "sections": {
       "appearance": "Görünüm",
       "store": "Mağaza profili",
-      "storefront": "Vitrin",
       "payments": "Ödeme",
       "shipping": "Kargo ve teslimat",
       "seo": "SEO",
@@ -339,76 +339,9 @@
     },
     "saved": "Ayarlar kaydedildi.",
     "storefront": {
-      "title": "Vitrin",
-      "subtitle": "Mağazanızın her sayfasında görünen çerçeve: ana renk, ana sayfa girişi, duyuru şeridi, güven rozetleri, iletişim formu ve renk örnekleri. Her kart kendi bölümünü kaydeder.",
       "moveUp": "{{item}}: yukarı taşı",
       "moveDown": "{{item}}: aşağı taşı",
       "remove": "{{item}}: kaldır",
-      "color": {
-        "title": "Renk",
-        "description": "Vitrinin ana rengi: birincil düğmeler ve duyuru şeridi bu renkle boyanır. Üzerindeki yazı, okunaklı kalacak biçimde beyaz ya da siyah olur.",
-        "label": "Ana renk",
-        "picker": "Ana renk seçici",
-        "placeholder": "Temanın rengi",
-        "hint": "# ile başlayan 6 haneli kodu yazın ya da renk kutusundan seçin. Boş bırakırsanız temanın kendi rengi (siyah) kullanılır.",
-        "reset": "Temanın rengine dön",
-        "preview": "Önizleme",
-        "button": "Sepete ekle",
-        "previewHint": "Vitrindeki duyuru şeridi ve birincil düğme bu renkte görünür."
-      },
-      "hero": {
-        "title": "Ana sayfa girişi",
-        "description": "Ana sayfanın en üstündeki giriş: kısa bir üst satır, başlık, bir iki cümle ve en çok iki düğme. Bilgi ekle düğmesiyle ({}) telefon, ücretsiz kargo eşiği gibi mağaza bilgilerini ekleyebilirsiniz; bilgi değişince metin de kendiliğinden değişir.",
-        "default": "Giriş yazılmadı; vitrin ana sayfada mağazanızın adını başlık, ilk iki kategorinizi düğme olarak gösteriyor.",
-        "custom": "Ana sayfa bu girişle açılıyor. Varsayılana dönerseniz mağazanızın adı ve ilk iki kategoriniz görünür.",
-        "reset": "Varsayılana dön",
-        "eyebrow": "Üst satır (isteğe bağlı)",
-        "eyebrowHint": "Başlığın üstündeki kısa satır; en çok {{max}} karakter.",
-        "eyebrowPlaceholder": "Yeni sezon",
-        "heading": "Başlık",
-        "headingHint": "En çok {{max}} karakter. Bir alanı doldurduysanız başlık zorunludur.",
-        "headingPlaceholder": "Her gün kullanacağınız ürünler",
-        "text": "Metin (isteğe bağlı)",
-        "textHint": "En çok {{max}} karakter; tek paragraf olarak gösterilir.",
-        "textPlaceholder": "Siparişleriniz aynı gün kargoda, iade 14 gün içinde ücretsiz.",
-        "buttons": "Düğmeler",
-        "addLink": "Düğme ekle",
-        "linksHint": "En çok {{max}} düğme; ilki ana düğme olur. Düğme eklemezseniz ilk iki kategoriniz gösterilir.",
-        "link": {
-          "label": "Düğme yazısı",
-          "href": "Adres",
-          "item": "{{number}}. düğme",
-          "labelOf": "{{number}}. düğmenin yazısı",
-          "hrefOf": "{{number}}. düğmenin adresi",
-          "labelPlaceholder": "Alışverişe başla",
-          "hrefPlaceholder": "/kampanyalar"
-        }
-      },
-      "announcements": {
-        "title": "Duyuru şeridi",
-        "description": "Sayfanın en üstündeki ince şerit. Birden çok satır yazarsanız sırayla gösterilir. Bilgi ekle düğmesiyle ({}) telefon, ücretsiz kargo eşiği gibi mağaza bilgilerini ekleyebilirsiniz; bilgi değişince metin de kendiliğinden değişir.",
-        "line": "{{number}}. duyuru",
-        "placeholder": "{ücretsiz_kargo_eşiği} ve üzeri kargo bedava",
-        "empty": "Duyuru yok; vitrinde duyuru şeridi görünmez.",
-        "add": "Duyuru ekle",
-        "hint": "En çok {{max}} satır, her biri en çok {{length}} karakter."
-      },
-      "menusMoved": {
-        "title": "Menüler",
-        "text": "Ana menü, üst bağlantılar ve alt bilgi sütunları artık Vitrin > Menüler ekranında. Bağlantılar kategori, ürün ve sayfalarınıza bağlanır; adresleri değişse de kırılmaz.",
-        "link": "Menülere git"
-      },
-      "links": {
-        "label": "Görünen ad",
-        "href": "Adres",
-        "item": "{{number}}. bağlantı",
-        "labelOf": "{{number}}. bağlantının adı",
-        "hrefOf": "{{number}}. bağlantının adresi",
-        "within": "{{within}}, {{name}}",
-        "labelPlaceholder": "Hakkımızda",
-        "hrefPlaceholder": "/hakkimizda",
-        "hrefHint": "Mağazanızdaki bir sayfanın adresi / ile başlar (/hakkimizda); başka bir site https:// ile yazılır."
-      },
       "badges": {
         "title": "Güven rozetleri",
         "description": "Mağazanızın sözleri; başlığın altında ve sepete ekle düğmesinin yanında görünür. Bilgi ekle düğmesiyle ({}) telefon, ücretsiz kargo eşiği gibi mağaza bilgilerini ekleyebilirsiniz; bilgi değişince metin de kendiliğinden değişir.",
@@ -459,7 +392,6 @@
         "required": "Bu alanı doldurun.",
         "tooLong": "En çok {{max}} karakter yazın.",
         "textInvalid": "Metin, görünmeyen kontrol karakterleri içeremez.",
-        "hrefInvalid": "Adres / ile başlayan bir mağaza sayfası ya da https:// ile başlayan bir site olmalı.",
         "pathInvalid": "Sayfa / ile başlayan bir mağaza sayfası olmalı (/iletisim gibi); ana sayfa ve boşluk olamaz.",
         "phoneInvalid": "Geçerli bir Türkiye telefon numarası girin.",
         "colorInvalid": "Renk, # ile başlayan 6 haneli bir kod olmalı (#0b5c99 gibi).",
@@ -1696,7 +1628,6 @@
     },
     "sectionHints": {
       "store": "Mağaza adı ve logosu, iletişim bilgileri ve çalışma saatleri, yasal kimlik, sosyal hesaplar",
-      "storefront": "Ana sayfa girişi, duyuru şeridi, menü, güven rozetleri ve altbilgi bağlantıları",
       "appearance": "Panelin marka rengi, köşeleri ve yoğunluğu",
       "seo": "Alan adı ve adres yapısı, başlık şablonları, arama motorları",
       "attributes": "Ürünlerde kullanılan özellik şablonları",
@@ -6140,6 +6071,329 @@
         "required": "Bu alan boş bırakılamaz.",
         "tooLong": "En çok {{max}} karakter olabilir.",
         "textInvalid": "Kullanılamayan bir karakter içeriyor."
+      }
+    },
+    "editor": {
+      "title": "Tema düzenleyici",
+      "exit": "Çık",
+      "undo": "Geri al",
+      "redo": "Yinele",
+      "unsaved": "Taslak kaydedilemedi; önce işaretli alanları düzeltin ya da kaydı yeniden deneyin.",
+      "page": {
+        "label": "Düzenlenen sayfa",
+        "home": "Ana sayfa",
+        "product": "Ürün sayfası",
+        "category": "Kategori sayfası",
+        "post": "Blog yazısı",
+        "soon": "{{page}} (yakında)"
+      },
+      "device": {
+        "label": "Önizleme genişliği",
+        "desktop": "Masaüstü",
+        "mobile": "Mobil"
+      },
+      "status": {
+        "label": "Taslağın durumu",
+        "saving": "Kaydediliyor…",
+        "saved": "Taslak kaydedildi {{time}}",
+        "idle": "Taslak kayıtlı",
+        "invalid": "Düzeltilecek alan var",
+        "error": "Kaydedilemedi: {{message}}",
+        "retry": "Tekrar dene"
+      },
+      "revisions": {
+        "open": "Sürümler",
+        "title": "Yayınlanan sürümler",
+        "description": "Her yayın bir sürüm olarak saklanır; son 20 sürüm tutulur. Bir sürümü taslağa yükleyip düzenleyebilir, sonra yeniden yayınlayabilirsiniz.",
+        "empty": "Henüz yayın yok; ilk yayından sonra sürümler burada görünür.",
+        "item": "{{revision}}. sürüm",
+        "live": "Yayında",
+        "restore": "Taslağa geri yükle",
+        "restoreOf": "{{revision}}. sürümü taslağa geri yükle",
+        "confirmTitle": "{{revision}}. sürüm taslağa yüklensin mi?",
+        "confirmText": "Taslaktaki değişiklikler bu sürümle değiştirilir. Vitrin, siz yayınlayana kadar değişmez.",
+        "confirm": "Taslağa yükle",
+        "restored": "{{revision}}. sürüm taslağa yüklendi."
+      },
+      "discard": {
+        "open": "Değişiklikleri at",
+        "title": "Taslaktaki değişiklikler atılsın mı?",
+        "text": "Taslak, vitrinde yayında olan tasarıma döner (hiç yayın yoksa varsayılan tasarıma). Bu işlem geri alınamaz.",
+        "confirm": "Değişiklikleri at",
+        "done": "Taslak, yayındaki tasarıma döndü."
+      },
+      "preview": {
+        "open": "Önizle",
+        "frameTitle": "Vitrin önizlemesi",
+        "loading": "Önizleme yükleniyor",
+        "refreshing": "Önizleme yenileniyor",
+        "failed": "Önizleme açılamadı.",
+        "noHost": "Önizleme için mağazanızın adresi gerekli; SEO ayarlarında alan adınızı girin.",
+        "noHostLink": "SEO ayarlarına git"
+      },
+      "publish": {
+        "open": "Yayınla",
+        "title": "Tasarım yayınlansın mı?",
+        "text": "Taslaktaki üst bilgi, ana sayfa ve alt bilgi birlikte yayına girer. Vitrinde en geç bir dakikada görünür.",
+        "confirm": "Yayınla",
+        "done": "Yayınlandı; vitrinde en geç bir dakikada görünür."
+      },
+      "tree": {
+        "label": "Sayfanın bölümleri",
+        "header": "Üst bilgi",
+        "home": "Ana sayfa",
+        "footer": "Alt bilgi",
+        "theme": "Tema",
+        "themeSettings": "Tema ayarları",
+        "add": "Bölüm ekle",
+        "addAnnouncement": "Duyuru şeridi ekle",
+        "addNewsletter": "E-bülten kutusu ekle",
+        "empty": "Ana sayfada bölüm yok; vitrin yalnız üst ve alt bilgiyi gösterir.",
+        "logo": "Logo ve menü",
+        "columns": "Bağlantı sütunları",
+        "contact": "İletişim ve yasal bilgiler",
+        "storeProfile": "Mağaza profili",
+        "menus": "Menüler"
+      },
+      "row": {
+        "drag": "Sürükleyerek taşıyın",
+        "problem": "Düzeltilecek alan var",
+        "scheduled": "Zamanlanmış",
+        "moveUpOf": "{{name}} bölümünü yukarı taşı",
+        "moveDownOf": "{{name}} bölümünü aşağı taşı",
+        "hide": "{{name}} bölümünü gizle",
+        "show": "{{name}} bölümünü göster",
+        "actions": "{{name}} için işlemler",
+        "open": "Ayarlarını aç",
+        "moveUp": "Yukarı taşı",
+        "moveDown": "Aşağı taşı",
+        "duplicate": "Çoğalt",
+        "remove": "Kaldır",
+        "removed": "{{name}} kaldırıldı."
+      },
+      "add": {
+        "title": "Bölüm ekle",
+        "description": "Ana sayfanın sonuna eklenir; sonra sürükleyerek ya da oklarla yerini değiştirebilirsiniz."
+      },
+      "types": {
+        "announcement_bar": {
+          "name": "Duyuru şeridi",
+          "description": "Sayfanın en üstünde sırayla dönen kısa duyurular."
+        },
+        "hero": {
+          "name": "Giriş",
+          "description": "Sayfanın başında başlık, kısa bir metin, en çok iki düğme ve isteğe bağlı bir görsel."
+        },
+        "banner": {
+          "name": "Görsel slayt",
+          "description": "Sırayla kayan 1–6 görsel; her birinin başlığı, satırı ve bağlantısı olabilir."
+        },
+        "categories": {
+          "name": "Kategoriler",
+          "description": "Seçtiğiniz kategoriler; seçmezseniz ana kategorileriniz."
+        },
+        "products": {
+          "name": "Ürün listesi",
+          "description": "En yeni ürünler ya da bir kategorinin, bir koleksiyonun veya elle seçtiğiniz ürünler."
+        },
+        "brands": {
+          "name": "Markalar",
+          "description": "Seçtiğiniz markalar; seçmezseniz tüm markalarınız."
+        },
+        "posts": {
+          "name": "Blog yazıları",
+          "description": "Son blog yazılarınız."
+        },
+        "reviews": {
+          "name": "Müşteri yorumları",
+          "description": "Müşterilerinizin son yorumları."
+        },
+        "rich_text": {
+          "name": "Metin",
+          "description": "Başlık ve biçimli metin; ürün ve kategori kartı da eklenebilir."
+        },
+        "trust_badges": {
+          "name": "Güven rozetleri",
+          "description": "Hızlı kargo, kolay iade gibi sözleriniz; Vitrin tercihlerinde yazılır."
+        },
+        "newsletter": {
+          "name": "E-bülten",
+          "description": "E-posta aboneliği kutusu."
+        },
+        "help": {
+          "name": "Yardım kutusu",
+          "description": "Size ulaşma yollarıyla kısa bir yardım çağrısı."
+        },
+        "footer_newsletter": {
+          "name": "E-bülten",
+          "description": "Alt bilgide e-posta aboneliği kutusu; kaldırırsanız görünmez."
+        }
+      },
+      "panel": {
+        "back": "Bölümlere dön",
+        "visibility": "Görünürlük",
+        "visible": "Vitrinde göster",
+        "visibleHint": "Gizli bölüm vitrinde görünmez; ayarları saklanır.",
+        "scheduleHint": "Kampanya gibi belli bir süre gösterilecek bölümler için tarih verin; boş bırakırsanız her zaman görünür.",
+        "startsAt": "Başlangıç",
+        "endsAt": "Bitiş",
+        "duplicate": "Çoğalt",
+        "remove": "Bölümü kaldır"
+      },
+      "defaults": {
+        "heading": "Mağazanızın adı",
+        "products": "Yeni ürünler",
+        "categories": "Kategorilere göz atın",
+        "brands": "Markalar",
+        "posts": "Blogdan",
+        "reviews": "Müşterilerimiz ne diyor?",
+        "newsletter": "E-bültene abone olun",
+        "help": "Aklınıza takılan bir şey mi var?",
+        "helpText": "Ürün, sipariş ya da kargo için bize yazın; en kısa sürede dönelim.",
+        "newsletterText": "Vitrinin metni: kampanya ve yeniliklerden e-postayla haberdar olun…"
+      },
+      "fields": {
+        "eyebrow": "Üst satır",
+        "heading": "Başlık",
+        "text": "Metin",
+        "title": "Başlık",
+        "titleHint": "Boş bırakırsanız vitrin kendi başlığını kullanır.",
+        "titleOptional": "İsteğe bağlı; boş bırakırsanız başlık görünmez.",
+        "textHint": "Boş bırakırsanız vitrin kendi metnini kullanır.",
+        "image": "Görsel",
+        "alt": "Görselin açıklaması",
+        "altHint": "Görmeyen ziyaretçiler ve arama motorları için görselde ne olduğunu kısaca yazın.",
+        "noImage": "Görsel yok",
+        "upload": "Görsel yükle",
+        "uploadOf": "{{label}} için görsel yükle",
+        "replace": "Değiştir",
+        "replaceOf": "{{label}} görselini değiştir",
+        "removeImage": "Görseli kaldır",
+        "chooseImage": "Görsel dosyası seç",
+        "limit": "Gösterilecek sayı",
+        "limitHint": "1 ile {{max}} arası."
+      },
+      "hero": {
+        "eyebrowPlaceholder": "Yeni sezon",
+        "headingHint": "Boş bırakırsanız mağazanızın adı görünür.",
+        "textPlaceholder": "Siparişleriniz aynı gün kargoda, iade 14 gün içinde ücretsiz.",
+        "buttons": "Düğmeler",
+        "buttonsHint": "En çok {{max}} düğme; ilki ana düğme olur. Düğme eklemezseniz ilk iki kategoriniz gösterilir.",
+        "button": "{{number}}. düğme",
+        "addButton": "Düğme ekle",
+        "imageHint": "Geniş, yatay bir görsel en iyi sonucu verir."
+      },
+      "banner": {
+        "empty": "Henüz görsel yok. Bölüm en az bir görselle kaydedilir.",
+        "slide": "{{number}}. görsel",
+        "link": "Bağlantı",
+        "linkHint": "Görsele tıklayan ziyaretçinin gideceği yer; isteğe bağlı.",
+        "add": "Görsel ekle",
+        "hint": "En çok {{max}} görsel; sırayla kayar."
+      },
+      "products": {
+        "source": "Hangi ürünler",
+        "sources": {
+          "newest": "En yeni ürünler",
+          "category": "Bir kategorinin ürünleri",
+          "collection": "Bir koleksiyonun ürünleri",
+          "manual": "Elle seçtiğim ürünler"
+        },
+        "category": "Kategori",
+        "collection": "Koleksiyon",
+        "products": "Ürünler",
+        "manualEmpty": "En az bir ürün seçin.",
+        "more": "Tümünü gör bağlantısı",
+        "moreHint": "Listenin altındaki bağlantı; kaldırırsanız görünmez."
+      },
+      "records": {
+        "pick": {
+          "category": "Kategori seç",
+          "product": "Ürün seç",
+          "collection": "Koleksiyon seç",
+          "brand": "Marka seç"
+        },
+        "pickMany": "Eklemek ya da çıkarmak için tıklayın; sıralarını sonra değiştirebilirsiniz.",
+        "pickOne": "Adına göre arayıp birini seçin.",
+        "done": "Tamam",
+        "missing": "Silinmiş kayıt",
+        "add": {
+          "category": "Kategori ekle",
+          "product": "Ürün ekle",
+          "brand": "Marka ekle"
+        },
+        "limit": "En çok {{max}} kayıt.",
+        "none": "Seçilmedi",
+        "change": "Değiştir",
+        "choose": "Seç",
+        "changeOf": "{{label}} seçimini değiştir",
+        "chooseOf": "{{label}} seç",
+        "categories": "Kategoriler",
+        "brands": "Markalar",
+        "categoriesEmpty": "Kategori seçmezseniz vitrin ana kategorilerinizi gösterir.",
+        "brandsEmpty": "Marka seçmezseniz vitrin tüm markalarınızı gösterir."
+      },
+      "link": {
+        "missing": "Silinmiş kayıt",
+        "labelRequired": "Görünen yazı (zorunlu)",
+        "label": "{{name}} bağlantısının görünen yazısı",
+        "change": "Hedefi değiştir",
+        "remove": "Bağlantıyı kaldır",
+        "choose": "Bağlantı seç"
+      },
+      "richText": {
+        "edit": "Metni düzenle",
+        "body": "Metin",
+        "empty": "Henüz metin yazılmadı.",
+        "description": "Yazdıklarınız taslağa kendiliğinden kaydedilir; ürün ve kategori kartı, mağaza bilgisi ekleyebilirsiniz.",
+        "done": "Tamam"
+      },
+      "trustBadges": {
+        "text": "Rozetlerin kendisi Vitrin tercihlerinde yazılır; bu bölüm ana sayfada nerede görüneceklerini belirler.",
+        "link": "Rozetleri düzenle"
+      },
+      "help": {
+        "contact": "İletişim yolları (telefon, e-posta, WhatsApp) Mağaza profilinden gelir; hiçbiri yoksa kutu görünmez."
+      },
+      "announcement": {
+        "line": "{{number}}. duyuru",
+        "placeholder": "{ücretsiz_kargo_eşiği} ve üzeri kargo bedava",
+        "add": "Duyuru ekle",
+        "hint": "En çok {{max}} satır, her biri en çok {{length}} karakter; sırayla gösterilir."
+      },
+      "problems": {
+        "required": "Bu satırı yazın ya da kaldırın.",
+        "tooLong": "En çok {{max}} karakter yazın.",
+        "textInvalid": "Metin, görünmeyen kontrol karakterleri içeremez.",
+        "tokenUnknown": "Süslü parantez içinde tanınmayan bir bilgi var; bilgileri Bilgi ekle menüsünden ekleyin.",
+        "linkLabel": "Dış adresin görünen yazısını girin.",
+        "slidesRequired": "En az bir görsel ekleyin.",
+        "productsRequired": "En az bir ürün seçin.",
+        "categoryRequired": "Bir kategori seçin.",
+        "collectionRequired": "Bir koleksiyon seçin.",
+        "scheduleOrder": "Bitiş, başlangıçtan sonra olmalı."
+      },
+      "theme": {
+        "title": "Tema ayarları",
+        "color": "Ana renk",
+        "colorHint": "Ana düğmeler ve duyuru şeridi bu renkle boyanır; yazı rengi okunaklı olana göre beyaz ya da siyah seçilir. Boş bırakırsanız temanın rengi kullanılır.",
+        "code": "Renk kodu",
+        "picker": "Renk seç",
+        "sample": "Örnek",
+        "sampleLine": "Duyuru şeridiniz böyle görünür",
+        "button": "Sepete ekle",
+        "live": "Renk, taslaktan bağımsızdır: kaydedince hemen vitrine yansır.",
+        "save": "Rengi kaydet",
+        "reset": "Temanın rengine dön"
+      }
+    },
+    "preferences": {
+      "description": "Tema düzenleyicide çizilmeyen tercihler: güven rozetlerinin sözleri, iletişim formunun sayfası ve renk örnekleri. Her sekme kendi kartını kaydeder.",
+      "editor": "Tema düzenleyiciyi aç",
+      "tabs": {
+        "badges": "Güven rozetleri",
+        "contact": "İletişim formu",
+        "swatches": "Renk örnekleri"
       }
     }
   }

@@ -1,0 +1,150 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { render, screen } from "@testing-library/react"
+import type { Mock } from "vitest"
+import type { AdminLayout, LayoutDocument } from "@/features/storefront/api/layout"
+import { ThemeEditorPage } from "./theme-editor-page"
+
+/** What the theme editor's specs share: the shop's design, the server and the editor. */
+
+const ALWAYS = { visible: true, starts_at: null, ends_at: null }
+
+export const DOC: LayoutDocument = {
+  header: [{ id: "duyurular", type: "announcement_bar", ...ALWAYS, lines: ["Kargo bedava"] }],
+  home: [
+    {
+      id: "girisbolumu",
+      type: "hero",
+      ...ALWAYS,
+      eyebrow: null,
+      heading: null,
+      text: null,
+      links: [],
+      image: null,
+    },
+    {
+      id: "yeniurunler",
+      type: "products",
+      ...ALWAYS,
+      title: null,
+      source: { kind: "newest" },
+      limit: 12,
+      more: { kind: "system", target: "shop", label: null },
+    },
+    { id: "blogyazilari", type: "posts", ...ALWAYS, title: null, limit: 3 },
+  ],
+  footer: [{ id: "ebultenkutusu", type: "newsletter", ...ALWAYS, title: null, text: null }],
+}
+
+/** The design as `GET /admin/storefront-layout` gives it: saved before, published once. */
+export const layoutOf = (more: Partial<AdminLayout> = {}): AdminLayout => ({
+  draft: DOC,
+  is_default: false,
+  has_changes: false,
+  revision: 1,
+  published_at: "2026-11-01T09:00:00.000Z",
+  revisions: [{ revision: 1, published_at: "2026-11-01T09:00:00.000Z", published_by: null }],
+  ...more,
+})
+
+export interface Init {
+  method?: string
+  body?: unknown
+}
+export type FetchMock = Mock<(url: string, init?: Init) => Promise<unknown>>
+export interface AdminMock {
+  productCategory: { list: Mock }
+  product: { list: Mock }
+  productCollection: { list: Mock }
+}
+
+const PATH = "/admin/storefront-layout"
+export const SETTINGS = "/admin/platform-settings/storefront"
+const STOREFRONT = {
+  announcements: [],
+  trust_badges: [],
+  primary_color: null,
+  hero: null,
+  contact_form_path: null,
+  color_swatches: [],
+}
+export const CATEGORIES = [
+  { id: "pcat_kitchen", name: "Mutfak bıçakları", parent_category_id: null },
+  { id: "pcat_chefs", name: "Şef bıçakları", parent_category_id: "pcat_kitchen" },
+].map((category) => ({ is_active: true, is_internal: false, ...category }))
+
+/**
+ * The server: the layout, a save answered with the draft it was sent, a
+ * preview link per call (`sfl_1`, `sfl_2`…), publish, discard and restore;
+ * `refuse` makes the next saves fail with that message.
+ */
+export function serve(
+  fetchMock: FetchMock,
+  admin: AdminMock,
+  layout: AdminLayout = layoutOf(),
+  options: { refuse?: () => string | null } = {}
+) {
+  let current = layout
+  let previews = 0
+  fetchMock.mockImplementation((url: string, init?: Init) => {
+    const answer = (next: AdminLayout) => {
+      current = next
+      return Promise.resolve({ layout: next })
+    }
+    if (url === PATH && init?.method === "POST") {
+      const refused = options.refuse?.()
+      if (refused) {
+        return Promise.reject(Object.assign(new Error(refused), { status: 400 }))
+      }
+      const { document } = init.body as { document: LayoutDocument }
+      return answer({ ...current, draft: document, is_default: false, has_changes: true })
+    }
+    if (url === PATH) {
+      return Promise.resolve({ layout: current })
+    }
+    if (url === `${PATH}/preview`) {
+      previews++
+      const path = `/onizleme/sfl_${String(previews)}`
+      return Promise.resolve({ url: path, path, expires_at: "2026-11-03T09:00:00.000Z" })
+    }
+    if (url === `${PATH}/publish`) {
+      return answer({ ...current, has_changes: false, revision: current.revision + 1 })
+    }
+    if (url === `${PATH}/discard`) {
+      return answer({ ...current, draft: DOC, has_changes: false })
+    }
+    // The theme's own settings (the main colour) are the storefront section's, saved at once
+    if (url === SETTINGS) {
+      const values = { ...STOREFRONT, ...(init?.body as object | undefined) }
+      return Promise.resolve({ section: "storefront", values, version: 1 })
+    }
+    if (url.startsWith(`${PATH}/revisions/`)) {
+      return answer({ ...current, draft: { ...DOC, header: [] }, has_changes: true })
+    }
+    return Promise.reject(new Error(`unexpected ${url}`))
+  })
+  admin.productCategory.list.mockResolvedValue({ product_categories: CATEGORIES })
+  admin.product.list.mockResolvedValue({ products: [] })
+  admin.productCollection.list.mockResolvedValue({ collections: [] })
+}
+
+/** The calls made to one address with a body. */
+export const postsTo = (fetchMock: FetchMock, url = PATH) =>
+  fetchMock.mock.calls.filter(([to, init]) => to === url && init?.method === "POST")
+
+/** The document the last draft save sent. */
+export function lastSaved(fetchMock: FetchMock): LayoutDocument | undefined {
+  const body = postsTo(fetchMock).at(-1)?.[1]?.body as { document: LayoutDocument } | undefined
+  return body?.document
+}
+
+export function renderEditor() {
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  return render(
+    <QueryClientProvider client={client}>
+      <ThemeEditorPage />
+    </QueryClientProvider>
+  )
+}
+
+/** The editor once the design is in. */
+export const opened = () => screen.findByRole("navigation", { name: "Sayfanın bölümleri" })

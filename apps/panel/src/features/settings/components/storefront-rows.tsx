@@ -1,10 +1,7 @@
 import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react"
 import type { ReactNode } from "react"
-import type { FieldError, UseFormRegisterReturn } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { STOREFRONT_LIMITS, errorLine } from "@/features/settings/storefront"
 import { cn } from "@/lib/utils"
 
 const S = "settings.storefront"
@@ -126,111 +123,5 @@ export function EmptyLine({ text }: { text: string }) {
     <p className="rounded-md border border-dashed px-4 py-3 text-[13px] text-muted-foreground">
       {text}
     </p>
-  )
-}
-
-// Name, address, actions side by side once the card is wide enough; on a
-// narrow one the name shares its line with the actions and the address
-// takes the next (inside an `@container`)
-export const LINK_GRID =
-  "grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2 @lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)_auto]"
-
-type LinkErrors = { label?: FieldError | undefined; href?: FieldError | undefined } | undefined
-
-interface LinkRowsProps {
-  rows: readonly { id: string }[]
-  /** Ids and names start with it: one card may hold several lists. */
-  idPrefix: string
-  register: (index: number, key: "label" | "href") => UseFormRegisterReturn
-  errors: (index: number) => LinkErrors
-  onMove: (from: number, to: number) => void
-  onRemove: (index: number) => void
-  /** The fewest links the list keeps (a footer column: one). */
-  minimum?: number
-  /** The list's owner in each field's name ("2. sütun"), when a card holds several. */
-  within?: string
-  /** Where the rows' names come from: links by default, a hero's buttons by their own. */
-  names?: string
-}
-
-/** Links as rows of a name and an address, each movable and removable. */
-export function LinkRows({
-  rows,
-  idPrefix,
-  register,
-  errors,
-  onMove,
-  onRemove,
-  minimum = 0,
-  within,
-  names = `${S}.links`,
-}: LinkRowsProps) {
-  const { t } = useTranslation()
-  const named = (name: string) => (within ? t(`${S}.links.within`, { within, name }) : name)
-  if (rows.length === 0) {
-    return null
-  }
-  return (
-    <div className="@container flex flex-col gap-2">
-      {/* Column names over the rows; each field also carries its own */}
-      <div
-        aria-hidden
-        className={cn(LINK_GRID, "hidden text-xs font-medium text-muted-foreground @lg:grid")}
-      >
-        <span>{t(`${names}.label`)}</span>
-        <span>{t(`${names}.href`)}</span>
-        <span className="w-29" />
-      </div>
-      <ol className="flex flex-col gap-3 @lg:gap-2">
-        {rows.map((row, index) => {
-          const error = errors(index)
-          const number = index + 1
-          const labelError = errorLine(t, error?.label, STOREFRONT_LIMITS.linkLabelLength)
-          const hrefError = errorLine(t, error?.href)
-          const id = `${idPrefix}-${index}`
-          return (
-            <li key={row.id} className={LINK_GRID}>
-              <RowCell error={labelError} errorId={`${id}-label-error`} className="col-start-1">
-                <Input
-                  aria-label={named(t(`${names}.labelOf`, { number }))}
-                  aria-invalid={Boolean(labelError)}
-                  aria-describedby={labelError ? `${id}-label-error` : undefined}
-                  placeholder={t(`${names}.labelPlaceholder`)}
-                  {...register(index, "label")}
-                />
-              </RowCell>
-              <RowCell
-                error={hrefError}
-                errorId={`${id}-href-error`}
-                className="col-span-2 @lg:col-span-1 @lg:col-start-2 @lg:row-start-1"
-              >
-                <Input
-                  aria-label={named(t(`${names}.hrefOf`, { number }))}
-                  aria-invalid={Boolean(hrefError)}
-                  aria-describedby={hrefError ? `${id}-href-error` : undefined}
-                  placeholder={t(`${names}.hrefPlaceholder`)}
-                  autoComplete="off"
-                  spellCheck={false}
-                  {...register(index, "href")}
-                />
-              </RowCell>
-              <RowActions
-                index={index}
-                count={rows.length}
-                item={named(t(`${names}.item`, { number }))}
-                removable={rows.length > minimum}
-                className="col-start-2 row-start-1 @lg:col-start-3"
-                onMove={(to) => {
-                  onMove(index, to)
-                }}
-                onRemove={() => {
-                  onRemove(index)
-                }}
-              />
-            </li>
-          )
-        })}
-      </ol>
-    </div>
   )
 }

@@ -3,16 +3,18 @@ import userEvent from "@testing-library/user-event"
 import type { ReactNode } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
-import { URL, answer, card, posts, renderPage } from "./storefront-page.fixtures"
-import type { Init } from "./storefront-page.fixtures"
+import { URL, answer, card, posts, renderPage } from "./preferences-page.fixtures"
+import type { Init } from "./preferences-page.fixtures"
 
 const fetchMock = vi.hoisted(() => vi.fn<(url: string, init?: Init) => Promise<unknown>>())
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
-// The menus' card points at their own screen (adr/0049)
+// The open tab comes from the address (`?part=swatches`)
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ to, children }: { to: string; children: ReactNode }) => <a href={to}>{children}</a>,
+  useSearch: () => ({ part: "swatches" }),
+  useNavigate: () => vi.fn(),
 }))
 
 const TITLE = "Renk örnekleri"
@@ -25,7 +27,7 @@ async function swatchesCard(): Promise<HTMLElement> {
   return card(TITLE)
 }
 
-describe("StorefrontPage: colour swatches (F18 D5)", () => {
+describe("PreferencesPage: colour swatches (F18 D5)", () => {
   beforeEach(() => {
     fetchMock.mockReset()
     answer(fetchMock)

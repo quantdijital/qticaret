@@ -7,6 +7,7 @@ import {
   ListTree,
   MessageSquareText,
   Package,
+  Paintbrush,
   Search,
   Settings,
   ShoppingBag,
@@ -59,12 +60,13 @@ export const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
-    // What the shop's customers see around its catalog (adr/0049); the theme editor joins later
+    // What the shop's customers see around its catalog (adr/0049); the editor opens full screen
     key: "storefront",
     items: [
+      { key: "themeEditor", to: "/storefront/editor", icon: Paintbrush },
       { key: "menus", to: "/storefront/menus", icon: ListTree },
       { key: "content", to: "/content", icon: FileText },
-      { key: "storefrontSettings", to: "/settings/storefront", icon: SlidersHorizontal },
+      { key: "storefrontPreferences", to: "/storefront/preferences", icon: SlidersHorizontal },
     ],
   },
   {
@@ -92,7 +94,7 @@ export function isActive(item: NavItem, pathname: string): boolean {
 
 /**
  * The item a path belongs to, for titles and the command menu: the most
- * specific one, so Storefront settings (`/settings/storefront`) wins over
+ * specific one, so a settings page under its own item would win over
  * Settings.
  */
 export function itemFor(pathname: string): NavItem | undefined {

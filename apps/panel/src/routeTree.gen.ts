@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/_auth'
+import { Route as FullscreenRouteImport } from './routes/_fullscreen'
 import { Route as InviteRouteImport } from './routes/invite'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
@@ -72,6 +73,8 @@ import { Route as AuthSettingsStoreRouteImport } from './routes/_auth/settings/s
 import { Route as AuthSettingsStorefrontRouteImport } from './routes/_auth/settings/storefront'
 import { Route as AuthSettingsTeamRouteImport } from './routes/_auth/settings/team'
 import { Route as AuthStorefrontMenusRouteImport } from './routes/_auth/storefront/menus'
+import { Route as AuthStorefrontPreferencesRouteImport } from './routes/_auth/storefront/preferences'
+import { Route as FullscreenStorefrontEditorRouteImport } from './routes/_fullscreen/storefront/editor'
 import { Route as AuthContentLandingsIdRouteImport } from './routes/_auth/content/landings/$id'
 import { Route as AuthPromotionsPriceListsIndexRouteImport } from './routes/_auth/promotions/price-lists/index'
 import { Route as AuthPromotionsPriceListsIdRouteImport } from './routes/_auth/promotions/price-lists/$id'
@@ -89,6 +92,10 @@ import { Route as AuthSettingsSmsProviderRouteImport } from './routes/_auth/sett
 
 const AuthRoute = AuthRouteImport.update({
   id: '/_auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FullscreenRoute = FullscreenRouteImport.update({
+  id: '/_fullscreen',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InviteRoute = InviteRouteImport.update({
@@ -404,6 +411,18 @@ const AuthStorefrontMenusRoute = AuthStorefrontMenusRouteImport.update({
   path: '/storefront/menus',
   getParentRoute: () => AuthRoute,
 } as any)
+const AuthStorefrontPreferencesRoute =
+  AuthStorefrontPreferencesRouteImport.update({
+    id: '/storefront/preferences',
+    path: '/storefront/preferences',
+    getParentRoute: () => AuthRoute,
+  } as any)
+const FullscreenStorefrontEditorRoute =
+  FullscreenStorefrontEditorRouteImport.update({
+    id: '/storefront/editor',
+    path: '/storefront/editor',
+    getParentRoute: () => FullscreenRoute,
+  } as any)
 const AuthContentLandingsIdRoute = AuthContentLandingsIdRouteImport.update({
   id: '/content/landings/$id',
   path: '/content/landings/$id',
@@ -537,6 +556,8 @@ export interface FileRoutesByFullPath {
   '/settings/storefront': typeof AuthSettingsStorefrontRoute
   '/settings/team': typeof AuthSettingsTeamRoute
   '/storefront/menus': typeof AuthStorefrontMenusRoute
+  '/storefront/preferences': typeof AuthStorefrontPreferencesRoute
+  '/storefront/editor': typeof FullscreenStorefrontEditorRoute
   '/brands/': typeof AuthBrandsIndexRoute
   '/content/': typeof AuthContentIndexRoute
   '/customers/': typeof AuthCustomersIndexRoute
@@ -563,13 +584,13 @@ export interface FileRoutesByFullPath {
   '/settings/sms/': typeof AuthSettingsSmsIndexRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof AuthIndexRoute
   '/invite': typeof InviteRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
   '/categories': typeof AuthCategoriesRoute
   '/inventory': typeof AuthInventoryRoute
   '/security/setup': typeof SecuritySetupRoute
-  '/': typeof AuthIndexRoute
   '/brands/$id': typeof AuthBrandsIdRoute
   '/content/$id': typeof AuthContentIdRoute
   '/customers/$id': typeof AuthCustomersIdRoute
@@ -613,6 +634,8 @@ export interface FileRoutesByTo {
   '/settings/storefront': typeof AuthSettingsStorefrontRoute
   '/settings/team': typeof AuthSettingsTeamRoute
   '/storefront/menus': typeof AuthStorefrontMenusRoute
+  '/storefront/preferences': typeof AuthStorefrontPreferencesRoute
+  '/storefront/editor': typeof FullscreenStorefrontEditorRoute
   '/brands': typeof AuthBrandsIndexRoute
   '/content': typeof AuthContentIndexRoute
   '/customers': typeof AuthCustomersIndexRoute
@@ -641,6 +664,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_auth': typeof AuthRouteWithChildren
+  '/_fullscreen': typeof FullscreenRouteWithChildren
   '/invite': typeof InviteRoute
   '/login': typeof LoginRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -693,6 +717,8 @@ export interface FileRoutesById {
   '/_auth/settings/storefront': typeof AuthSettingsStorefrontRoute
   '/_auth/settings/team': typeof AuthSettingsTeamRoute
   '/_auth/storefront/menus': typeof AuthStorefrontMenusRoute
+  '/_auth/storefront/preferences': typeof AuthStorefrontPreferencesRoute
+  '/_fullscreen/storefront/editor': typeof FullscreenStorefrontEditorRoute
   '/_auth/brands/': typeof AuthBrandsIndexRoute
   '/_auth/content/': typeof AuthContentIndexRoute
   '/_auth/customers/': typeof AuthCustomersIndexRoute
@@ -773,6 +799,8 @@ export interface FileRouteTypes {
     | '/settings/storefront'
     | '/settings/team'
     | '/storefront/menus'
+    | '/storefront/preferences'
+    | '/storefront/editor'
     | '/brands/'
     | '/content/'
     | '/customers/'
@@ -799,13 +827,13 @@ export interface FileRouteTypes {
     | '/settings/sms/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
     | '/invite'
     | '/login'
     | '/reset-password'
     | '/categories'
     | '/inventory'
     | '/security/setup'
-    | '/'
     | '/brands/$id'
     | '/content/$id'
     | '/customers/$id'
@@ -849,6 +877,8 @@ export interface FileRouteTypes {
     | '/settings/storefront'
     | '/settings/team'
     | '/storefront/menus'
+    | '/storefront/preferences'
+    | '/storefront/editor'
     | '/brands'
     | '/content'
     | '/customers'
@@ -876,6 +906,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_auth'
+    | '/_fullscreen'
     | '/invite'
     | '/login'
     | '/reset-password'
@@ -928,6 +959,8 @@ export interface FileRouteTypes {
     | '/_auth/settings/storefront'
     | '/_auth/settings/team'
     | '/_auth/storefront/menus'
+    | '/_auth/storefront/preferences'
+    | '/_fullscreen/storefront/editor'
     | '/_auth/brands/'
     | '/_auth/content/'
     | '/_auth/customers/'
@@ -956,6 +989,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   AuthRoute: typeof AuthRouteWithChildren
+  FullscreenRoute: typeof FullscreenRouteWithChildren
   InviteRoute: typeof InviteRoute
   LoginRoute: typeof LoginRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -969,6 +1003,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_fullscreen': {
+      id: '/_fullscreen'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof FullscreenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/invite': {
@@ -1405,6 +1446,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthStorefrontMenusRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_auth/storefront/preferences': {
+      id: '/_auth/storefront/preferences'
+      path: '/storefront/preferences'
+      fullPath: '/storefront/preferences'
+      preLoaderRoute: typeof AuthStorefrontPreferencesRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_fullscreen/storefront/editor': {
+      id: '/_fullscreen/storefront/editor'
+      path: '/storefront/editor'
+      fullPath: '/storefront/editor'
+      preLoaderRoute: typeof FullscreenStorefrontEditorRouteImport
+      parentRoute: typeof FullscreenRoute
+    }
     '/_auth/content/landings/$id': {
       id: '/_auth/content/landings/$id'
       path: '/content/landings/$id'
@@ -1624,6 +1679,7 @@ interface AuthRouteChildren {
   AuthReviewsQuestionsRoute: typeof AuthReviewsQuestionsRoute
   AuthSeoRedirectsRoute: typeof AuthSeoRedirectsRoute
   AuthStorefrontMenusRoute: typeof AuthStorefrontMenusRoute
+  AuthStorefrontPreferencesRoute: typeof AuthStorefrontPreferencesRoute
   AuthBrandsIndexRoute: typeof AuthBrandsIndexRoute
   AuthContentIndexRoute: typeof AuthContentIndexRoute
   AuthCustomersIndexRoute: typeof AuthCustomersIndexRoute
@@ -1662,6 +1718,7 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthReviewsQuestionsRoute: AuthReviewsQuestionsRoute,
   AuthSeoRedirectsRoute: AuthSeoRedirectsRoute,
   AuthStorefrontMenusRoute: AuthStorefrontMenusRoute,
+  AuthStorefrontPreferencesRoute: AuthStorefrontPreferencesRoute,
   AuthBrandsIndexRoute: AuthBrandsIndexRoute,
   AuthContentIndexRoute: AuthContentIndexRoute,
   AuthCustomersIndexRoute: AuthCustomersIndexRoute,
@@ -1678,8 +1735,21 @@ const AuthRouteChildren: AuthRouteChildren = {
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
+interface FullscreenRouteChildren {
+  FullscreenStorefrontEditorRoute: typeof FullscreenStorefrontEditorRoute
+}
+
+const FullscreenRouteChildren: FullscreenRouteChildren = {
+  FullscreenStorefrontEditorRoute: FullscreenStorefrontEditorRoute,
+}
+
+const FullscreenRouteWithChildren = FullscreenRoute._addFileChildren(
+  FullscreenRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRouteWithChildren,
+  FullscreenRoute: FullscreenRouteWithChildren,
   InviteRoute: InviteRoute,
   LoginRoute: LoginRoute,
   ResetPasswordRoute: ResetPasswordRoute,

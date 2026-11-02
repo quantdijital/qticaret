@@ -71,8 +71,10 @@ describe("Settings home", () => {
       "href",
       "/settings/migration"
     )
-    // Accounting, warehouses and SMS are tabs of invoices, shipping and e-mail now
-    expect(screen.getAllByRole("link")).toHaveLength(19)
+    // Accounting, warehouses and SMS are tabs of invoices, shipping and e-mail now; the
+    // storefront's parts are under Storefront in the main menu (adr/0049)
+    expect(screen.getAllByRole("link")).toHaveLength(18)
+    expect(screen.queryByRole("link", { name: /^Vitrin/ })).toBeNull()
   })
 
   it("offers operations staff only what they may use: no settings to change", () => {

@@ -15,16 +15,9 @@ import { errorText } from "@/lib/errors"
  * saves instead of after.
  */
 export const STOREFRONT_LIMITS = {
-  announcements: 5,
-  announcementLength: 120,
-  linkLabelLength: 60,
   badges: 4,
   badgeTitleLength: 40,
   badgeTextLength: 80,
-  heroEyebrowLength: 40,
-  heroHeadingLength: 90,
-  heroTextLength: 240,
-  heroLinks: 2,
   colorSwatches: 100,
   swatchLabelLength: 40,
 } as const
@@ -99,7 +92,7 @@ export const lineSchema = (max: number) =>
 
 /**
  * A text the storefront fills with the shop's details (adr/0048): the
- * announcements, the trust badges, the home page's opening. A `{name}`
+ * trust badges (the theme editor checks its own texts the same way). A `{name}`
  * that is no detail is refused, as the server refuses it.
  */
 export const knownTokens = [
@@ -125,30 +118,11 @@ export const contactFormSchema = z
 /** `#rrggbb` as the server keeps it. */
 export const isHexColor = (value: string): boolean => HEX_COLOR.test(value)
 
-export const hrefSchema = z
-  .string()
-  .trim()
-  .min(1, `${E}.required`)
-  .refine(isStorefrontHref, `${E}.hrefInvalid`)
-
-export const linkSchema = z.object({
-  label: lineSchema(STOREFRONT_LIMITS.linkLabelLength),
-  href: hrefSchema,
-})
-export type LinkValues = z.infer<typeof linkSchema>
-
 export const phoneSchema = z
   .string()
   .trim()
   .max(MAX_PHONE_LENGTH, `${E}.phoneInvalid`)
   .refine((value) => value === "" || isTrPhone(value), `${E}.phoneInvalid`)
-
-/** A colour as `#rrggbb` in any case, or empty (saved as none: the theme's own). */
-export const colorSchema = z
-  .string()
-  .trim()
-  .toLowerCase()
-  .refine((value) => value === "" || isHexColor(value), `${E}.colorInvalid`)
 
 /**
  * The shop's colour names (F18 D5): each a name and a `#rrggbb` code, lower

@@ -14,7 +14,12 @@ export const SECTIONS = [
   "/promotions",
   "/promotions/price-lists",
   "/promotions/gift-cards",
+  // The theme editor opens full screen, without the panel's menu (adr/0049)
+  "/storefront/editor",
   "/storefront/menus",
+  "/storefront/preferences",
+  "/storefront/preferences?part=contact",
+  "/storefront/preferences?part=swatches",
   "/content",
   "/seo",
   "/reports",
@@ -34,7 +39,6 @@ export const SECTIONS = [
 export const SETTINGS = [
   "/settings",
   "/settings/store",
-  "/settings/storefront",
   "/settings/payments",
   "/settings/payments/paytr",
   "/settings/payments/iyzico",

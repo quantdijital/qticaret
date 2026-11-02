@@ -1,6 +1,14 @@
-import { createFileRoute } from "@tanstack/react-router"
-import { StorefrontPage } from "@/features/settings/pages/storefront-page"
+import { createFileRoute, redirect } from "@tanstack/react-router"
+import { preferencesTabSearch } from "@/features/storefront/preferences-tabs"
 
+/**
+ * The old Settings > Storefront (adr/0049): its parts went to the theme
+ * editor and Storefront > Preferences; a link to it opens the latter, on
+ * the tab it names when it names one.
+ */
 export const Route = createFileRoute("/_auth/settings/storefront")({
-  component: StorefrontPage,
+  validateSearch: preferencesTabSearch,
+  beforeLoad: ({ search }) => {
+    throw redirect({ to: "/storefront/preferences", search, replace: true })
+  },
 })

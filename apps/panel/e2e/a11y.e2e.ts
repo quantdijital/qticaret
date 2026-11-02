@@ -17,6 +17,8 @@ async function seriousIssues(page: Page): Promise<string[]> {
     // A message preview runs no script, axe's included (it would wait there forever);
     // what it shows is the shop's e-mail, not the panel
     .exclude('iframe[sandbox=""]')
+    // The theme editor's preview is the storefront itself, checked by the storefront's own tests
+    .exclude("iframe[data-storefront-preview]")
     .analyze()
   return results.violations
     .filter((violation) => violation.impact === "serious" || violation.impact === "critical")

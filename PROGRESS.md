@@ -79,6 +79,25 @@
     - Bölüm türleri, kayıtta denetim, imzalı önizleme (`/onizleme/sfl_…`; yalnız panel çerçeveleyebilir), herkese açık uç (süzülmüş ve çözülmüş). Varsayılan belge bugünkü vitrin.
     - Vitrinin ana sayfası, duyuru şeridi ve bülten kutusu düzenden geliyor. Temanın `HomePageView`'ı bölüm listesi oldu.
     - Testler: HTTP `storefront-layout` (varsayılan, denetimler, önizleme, yayın, geri alma, geri yükleme, zamanlama), vitrin e2e 29.
+  - **Bağımsız güvenlik incelemesi (ADR-0049 eki):** yüksek ve orta bulgu yok. 8 düşük bulgunun hepsi düzeltildi (`1fb4e9e`):
+    - alt bilgi sütunu sınırı;
+    - herkese açık düzen ucunda süreç içi önbellek ve yalnız yayındaki kayıtların kimlikleri;
+    - yarıda kalan yazmanın geri konması;
+    - yayında yeniden denetim;
+    - vekil eşleştiricisinin kesinleşmesi;
+    - önizlemede Referer yok;
+    - göç betiğinin hatada durmaması.
+    Doğrulama: backend birim 2444, HTTP (menü, düzen, içerik) 23, vitrin birim 70 ve e2e 29.
+  - **Panel tema düzenleyicisi (alt ajan; doğrulandı: 140 dosya, 493 test, tip ve lint temiz; e2e 89, bir yerleşim testi yük altında bir kez düştü, tek başına geçti):**
+    - `/storefront/editor` tam ekran (`_fullscreen` düzeni, aynı giriş ve 2FA koruması).
+    - Üst çubuk: sayfa seçici (şimdilik Ana sayfa), masaüstü/mobil, geri al/ileri al, kayıt durumu, Sürümler, Değişiklikleri at, Önizle, Yayınla.
+    - Sol panel: üst bilgi (duyuru şeridi), ana sayfa bölümleri (sürükle-bırak, oklar, göz, saat rozeti, çoğalt/sil, "Bölüm ekle"), alt bilgi (bülten), Tema ayarları (ana renk, anında yayına gider).
+    - Ortada vitrinin taslağı korumalı çerçevede (`sandbox`), her kayıttan sonra yeni imzalı bağlantıyla yenileniyor. Taslak 1,5 sn sonra kendiliğinden kaydediliyor.
+  - **Ayarlar > Vitrin kalktı** (kullanıcı: "ayarlardaki vitrine girince o eski kart kart yapıyı görüyorum ben"):
+    - Giriş metni, duyurular ve ana renk tema düzenleyicide.
+    - Güven rozetleri, iletişim formu ve renk örnekleri yeni **Vitrin tercihleri** ekranında (`/storefront/preferences`, sekmeli).
+    - `/settings/storefront` oraya yönleniyor.
+    - Kenar menüsünde Vitrin grubu: Tema düzenleyici, Menüler, Sayfalar ve blog, Vitrin tercihleri.
   - **F16 şartları (yeni):**
     - Vitrine `PANEL_ORIGIN` girilmeli; girilmezse panel önizlemeyi çerçeveleyemez.
     - Panelin önündeki ters vekil `/store/` önekini yönlendirmeli, çıplak `/store` önekini değil; aksi halde panelin `/storefront/*` sayfaları backend'e gider (alt ajan geliştirmedeki Vite vekilinde düzeltti).
@@ -1408,7 +1427,7 @@
 - **Daha önce:** F1 planlaması ve F0.2–F0.8 (2026-10-24), F0.1 monorepo (2026-10-24 sabahı), SEO ve güvenlik dokümanları (2026-10-22).
 
 ## Sıradaki görev
-**Claude'un sıradaki işi (2026-11-02 gece):** Vitrin sekmesi (ADR-0049; kullanıcı planı ve dört kararı onayladı: "önerilerine uyuyorum"). Sıra: (1) Menüler — backend, vitrin ve göç bitti, panel ekranı yapılıyor; (2) tema düzenleyici iskeleti (tam ekran, canlı önizleme, otomatik taslak + Yayınla; ana sayfa bölümleri, üst/alt bilgi): `git stash` "wip: storefront layout module (adr-0048)" oradan devam (ADR numarası 0049'un eki olur, `storefront.ts` ile birleştir); (3) diğer sayfa bölümleri; (4) tema ayarları ve metinler. WordPress taşıma kaynağı bekletiliyor.
+**Claude'un sıradaki işi (2026-11-02 gece):** Vitrin sekmesi (ADR-0049; kullanıcı planı ve dört kararı onayladı: "önerilerine uyuyorum"). (1) Menüler bitti (`5eeb972`, `1d584f6`). (2) Tema düzenleyici: backend ve vitrin bitti (`5eeb972`, güvenlik `1fb4e9e`); panelin tam ekran düzenleyicisi ve Vitrin tercihleri de bitti. Sonra: (3) diğer sayfaların bölümleri (ürün, kategori, sepet), (4) tema ayarları (D11) ve metin geçersiz kılma, (5) yayında hemen yansıma (imzalı önbellek boşaltma). Kenardaki stash'ler: `stash@{1}` ana sayfa düzeninin ilk hali (modülü alındı, gerisi aşıldı), `stash@{0}` lint-staged'in otomatik yedeği (içeriği commit'lerde); ikisi de silinebilir, kullanıcıya sorulmadan silinmedi. WordPress taşıma kaynağı bekletiliyor.
 
 Önceki durum (2026-11-02 sabahı):
 - Bitenler: ödeme (hediye kartı ve tamamı kartla ödeme dahil), hesap (adres ekleme dahil), filtreler, renk örnekleri, iletişim formu, e-bülten, kargo takibi, taslak önizleme, yasal sayfalar, çerez onayı, SEO dizinleri. Üç güvenlik incelemesi ve tam HTTP koşusu yapıldı.

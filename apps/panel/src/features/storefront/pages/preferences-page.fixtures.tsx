@@ -2,9 +2,9 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { render, screen } from "@testing-library/react"
 import type { Mock } from "vitest"
 import type { StorefrontSettings } from "@/features/settings/api/sections"
-import { StorefrontPage } from "./storefront-page"
+import { PreferencesPage } from "./preferences-page"
 
-/** What the storefront page's specs share: the saved section, the server and the cards. */
+/** What the storefront preferences' specs share: the saved section, the server and the cards. */
 
 export const URL = "/admin/platform-settings/storefront"
 
@@ -56,7 +56,7 @@ export function renderPage() {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   return render(
     <QueryClientProvider client={client}>
-      <StorefrontPage />
+      <PreferencesPage />
     </QueryClientProvider>
   )
 }
