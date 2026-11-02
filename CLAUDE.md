@@ -63,6 +63,7 @@ Güncel faz ve görevler: `PROGRESS.md`
 | SEO mimarisi (URL, 301, JSON-LD, sitemap, GEO) | docs/13-seo-mimarisi.md |
 | SEO advisor kural seti ve öneri motoru | docs/14-seo-advisor-kural-seti.md |
 | Rakip analizi ve farklılaşma | docs/15-rakip-analizi-ve-farklilasma.md |
+| Platform eksik analizi (Shopify, ikas, TR; gerekli/faydalı/gereksiz) | docs/20-platform-eksik-analizi.md |
 | Entegrasyonlar | docs/entegrasyonlar/*.md |
 
 ## Oturum düzeni

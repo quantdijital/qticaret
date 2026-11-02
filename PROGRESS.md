@@ -44,6 +44,18 @@
 **Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: BİTTİ** (T1a–T16; kabul kriterlerinin hepsi testlerle işaretli, docs/03; son eksik iki kanıt, danışmanın p95 ölçümü ve yedi sayfa türünün SEO sözleşme testi, kapanışta eklendi). Playwright e2e altyapısı kuruldu; CI düzeltildi. **F4 — Fiyatlandırma ve promosyon: BİTTİ** (plan ve ADR-0023/0024/0025 kabul edildi; U1 `price-history`, U4 kuponlar, U7 indirim dağılımı ve iade tutarı, U2 fiyat listeleri, U3 indirim gösterimi, U5 tek kullanımlık kodlar, U6 otomatik kampanyalar ve kargo bedava eşiği, U8 hediye kartı ve mağaza kredisi bitti (KK1–KK4 işaretli); F4 kapanış incelemesi yapıldı, bulgular düzeltildi: F4 BİTTİ). Dal `f4-pricing-promotions`. Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı. F1, F2 ve F3 dalları push edildi (kullanıcı 2026-10-26: "pushları sen önerdiğinde yapabilirsin"); PR açılmadı.
 
 ## Son oturum özeti
+**2026-11-02 gece → 2026-11-03 (otonom gece; ana oturum yönetici, kodlama Opus 5.5 alt ajanlarında).** Kullanıcı: "shopify ikas gibi bir altyapıyı inceliyorsun bizim projedeki eksiklikleri … tespit ediyorsun … dengeli olmalı … sen bu işin beynisin sadece plan yaparsın ve yönetirsin … ben yatıyorum baştan sonra geliştirmeyi yapabilirsin. durmaksızın … demo programlar test uygulamaları gibi şeyleri panelimizden kaldır … Yurtiçi kargo entegrasyon güncel belgesi … eksiklik veya yanlış varsa güncellersin."
+- **Gece planı (dalga dalga; aynı pakete aynı anda tek ajan):**
+  1. Araştırma: panelde demo/test envanteri; Shopify, ikas ve TR platformlarına karşı eksik analizi (sonuç `docs/20-platform-eksik-analizi.md`'ye).
+  2. Yurtiçi Kargo entegrasyonunun V3 belgesiyle karşılaştırılıp düzeltilmesi (`docs/entegrasyonlar/yurtici.md`).
+  3. Vitrin yasal eksikleri: çerez tercihleri bağlantısı ve `/cerez-tercihleri`; e-posta bağlantı sayfaları (abonelikten çık, izin onayı, stok bildirimi onayı) vitrine; iletişim formuna KVKK başvurusu konusu.
+  4. Tema düzenleyicide ürün ve kategori sayfası bölümleri (backend önce, sonra vitrin ve panel).
+  5. Panelden demo/test kalıntılarının kaldırılması (envantere göre).
+  6. `/kategoriler`, `/markalar`, `/kampanyalar`; blog kategorileri ve etiketleri.
+  7. Bakım modu. 8. Hediye kartı satışı ve bakiye (analize göre). 9. Kapanış: güvenlik incelemesi, tam doğrulama, sabah özeti.
+- **Eksik analizi bitti → `docs/20-platform-eksik-analizi.md`** (matris, gerekli/faydalı/gereksiz, sıra). Gece planına eklenenler: vitrin dönüşüm olayları (GA4/Meta, çerez iznine bağlı), mobil alt gezinme, Postgres trigram arama (Meilisearch kararına kadar ara çözüm), tema ayarları altyapısı (D11), CWV ölçümü. Sabah planına (ADR ister): toplu kampanya gönderimi, panelden sipariş + ödeme bağlantısı, ürün ek seçenekleri (D13).
+- Sabah için: yapılanlar aşağıda madde madde; kararlar "Gözden geçir" etiketiyle.
+
 **2026-11-02 akşam (F18: yasal metinler ve mağaza bilgileri tek kaynak; kullanıcı onaylı plan).** Kullanıcı: "yasal metinlerin hepsini ekstra sayfa olarak açmışsın … firma bilgilerinden otomatik üretilecek … seo içeriklerinin hepsini iletişim bilgierini vs oluşturduğumuz yapılardan çekelim. sonrada Vitrin sekmesine gel ux/ui açısından yönetilebilir bir yapı kuracağız … önce plan kuralım." Plan onayı: "önerilerini beğendim uygulamaya başla".
 - **Adım 1, yasal metinler tek kaynak (`e27b63f`):**
   - mylarte profilinin açtığı 8 yasal içerik sayfası kaldırıldı (profil `retired_pages`), alt bilgideki kopya bağlantılar silindi.
