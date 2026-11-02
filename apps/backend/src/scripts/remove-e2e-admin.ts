@@ -5,8 +5,8 @@ import { removeStaffMemberWorkflow } from "../workflows/staff/remove-member"
 import { E2E_STAFF_EMAIL } from "./demo-removal/select"
 
 /**
- * Removes the admin an e2e run made, with its role and login (`medusa exec
- * ./src/scripts/remove-e2e-admin.ts <email>`). A user cannot delete
+ * Removes the admin an e2e run made, with its role and login (`NODE_ENV=development
+ * medusa exec ./src/scripts/remove-e2e-admin.ts <email>`). A user cannot delete
  * itself through the API; anything but an address the panel's e2e setup
  * makes (apps/panel/e2e/support/admin.ts) is refused.
  */

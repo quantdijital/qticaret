@@ -7,10 +7,13 @@ export interface TemporaryAdmin {
   password: string
 }
 
-// Medusa's CLI in the backend, against its database (its `.env`)
+// Medusa's CLI in the backend, against its database (its `.env`). The local
+// `.env` points providers at the fake servers, which the backend refuses
+// unless NODE_ENV is development or test (an unset one counts as live).
 const backend = (args: string[]) =>
   execFileSync("pnpm", ["--filter", "@qticaret/backend", "medusa", ...args], {
     cwd: REPO_ROOT,
+    env: { ...process.env, NODE_ENV: "development" },
     stdio: "pipe",
   })
 
