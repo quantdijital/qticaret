@@ -118,23 +118,24 @@ Durum: ✅ var · 🟡 temel hâli var · ⬜ yok. Görev kodları PROGRESS "F18
 
 | Sayfa | Yol | Durum | Backend | Görev |
 | --- | --- | --- | --- | --- |
-| Çerçeve: duyuru, başlık, menü, arama, alt bilgi (yasal bağlantılar, MERSİS/KEP/ETBİS satırı), WhatsApp | her sayfa | ✅ | `storefront`, `legal-identity`, `legal/{kind}` | D3, D10 |
+| Çerçeve: duyuru, başlık, menü, arama, alt bilgi (yasal bağlantılar, MERSİS/KEP/ETBİS satırı, e-bülten kutusu), WhatsApp | her sayfa | ✅ | `storefront`, `legal-identity`, `legal/{kind}`, `newsletter` (çift onay) | D3, D10 |
 | Ana sayfa | `/` | 🟡 giriş, kategori dizini, yeni ürünler, "bize ulaşın", blogdan | ana sayfa blokları (D11) yok | D11 |
 | Kategori, marka, koleksiyon, landing | URL kaydına göre | ✅ filtreler (marka, öznitelik), fiyat aralığı, fiyat/yeni sıralama, sayfalama | `GET /store/listings/products` | D4 |
 | Tüm ürünler | `/magaza` | ✅ filtreler, sıralama | liste ucu `type=all` | D4 |
-| Ürün | `/urun/{slug}` ya da `/{slug}` | ✅ galeri, fiyat, tasarruf, seçenek, stok, sepete ekle, taksit tablosu (açılınca), kargo cümlesi, yorumlar, soru-cevap, stok bildirimi, favori, WhatsApp'tan sor, benzer ürünler | renk örnekleri yok | D5 |
+| Ürün | `/urun/{slug}` ya da `/{slug}` | ✅ galeri, fiyat, tasarruf, seçenek (renk sözlüğündeki değerler renkli daire), stok, sepete ekle, taksit tablosu (açılınca), kargo cümlesi, yorumlar, soru-cevap, stok bildirimi, favori, WhatsApp'tan sor, benzer ürünler | `storefront.color_swatches` | D5 |
 | Arama | `/arama?q=` | 🟡 Medusa `q` | Meilisearch | D10 |
-| Sepet | `/sepet` | ✅ adet, kaldır, kupon, indirim, ücretsiz kargo çubuğu | hediye kartı (bayrak) yok | D6 |
+| Sepet | `/sepet` | ✅ adet, kaldır, kupon, indirim, ücretsiz kargo çubuğu, hediye kartı (bayrak açıkken) | `carts/{id}/gift-cards` | D6 |
 | Mini sepet (çekmece) | başlıkta | ✅ | | D6 |
 | Sepet hatırlatma | `/sepet/geri-don?token=` | ✅ onay sayfası + Server Action, satırlar yeni sepete | `cart-reminders/redeem` | D6 |
-| Ödeme | `/odeme`, `/odeme/kart`, `/odeme/sonuc`, `/odeme/durum` | ✅ adres (`tr-address`), kargo, yöntemler, sözleşmeler, yaş, pazarlama izni, iş kanıtı; havale/kapıda anında, PayTR çerçeve, iyzico yönlendirme | | D7 |
-| Sipariş | `/siparis/{id}?token=` | ✅ özet, havale bilgisi, iptal, iade/değişim talebi, sözleşmeler, fatura PDF | | D7 |
+| Ödeme | `/odeme`, `/odeme/kart`, `/odeme/sonuc`, `/odeme/durum` | ✅ adres (`tr-address`), kargo, yöntemler, sözleşmeler, yaş, pazarlama izni, iş kanıtı, fatura notu; havale/kapıda anında, PayTR çerçeve, iyzico yönlendirme, tamamı hediye kartıyla (`credit`) | | D7 |
+| Sipariş | `/siparis/{id}?token=` | ✅ özet, havale bilgisi, kargo ve takip, iptal, iade/değişim talebi, sözleşmeler, fatura PDF | `orders/{id}/shipments` | D7 |
 | Sipariş sorgulama (misafir) | `/siparis` | ✅ | `order-lookup` | D8 |
 | Giriş, kayıt, doğrulama, şifre | `/hesap/giris`, `/hesap/kayit`, `/hesap/dogrula`, `/hesap/sifre-sifirla`, `/hesap/sifre-yenile` | ✅ | Medusa auth + F15 | D8 |
-| Hesabım: özet, siparişler, favoriler, adresler, bilgiler, fatura profili, izinler, KVKK talebi | `/hesap/*` | ✅ | `privacy-requests` (kanal `account`) | D8 |
+| Hesabım: özet, siparişler, favoriler, adresler (ekleme dahil), bilgiler, şifre, fatura profili, izinler, KVKK talebi | `/hesap/*` | ✅ | `privacy-requests` (kanal `account`) | D8 |
 | Taşınan müşteri daveti | `/hesap/kayit?davet=` | ✅ ilk girişte `migration-claim` | | D8 |
 | İçerik sayfası | `/{handle}` | ✅ | `content` | D10 |
-| İletişim | `/iletisim` | 🟡 içerik sayfası + WhatsApp/telefon | iletişim formu: kişisel veri saklama ve personel bildirimi kararı bekliyor | D10 |
+| İletişim | `/iletisim` (Ayarlar > Vitrin'de seçilen sayfa) | ✅ içerik + iletişim formu | `contact-messages` (ADR-0047) | D10 |
+| Taslak önizleme | `/onizleme/{token}` | ✅ 24 saatlik imzalı bağlantı, `noindex` | `content/preview/{token}` | D10 |
 | Müşteri yorumları | `/yorumlar` | ✅ | `GET /store/reviews` | D10 |
 | Blog | `/blog`, `/blog/{handle}` | ✅ | `content?kind=post` | D10 |
 | Yasal metinler | `/yasal/{tur}` | ✅ (yayımlanmışlar) | `legal/{kind}` | D10 |
