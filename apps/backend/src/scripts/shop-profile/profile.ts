@@ -49,6 +49,12 @@ const profileSchema = z.strictObject({
     )
     .max(200)
     .default([]),
+  /**
+   * Pages an earlier version of the profile made that it no longer wants,
+   * removed by their handle if present: a legal text belongs to the legal
+   * texts (F13, published under `/yasal`), never to a content page.
+   */
+  retired_pages: z.array(handle).max(200).default([]),
   /** A migration bundle (`quant-migration`) queued as a run that applies. */
   bundle: relativeFile.optional(),
 })
@@ -63,16 +69,27 @@ export interface LoadedProfile {
   dir: string
 }
 
-export async function readProfile(dir: string): Promise<LoadedProfile> {
-  const file = path.join(dir, "profil.json")
-  const parsed = profileSchema.safeParse(JSON.parse(await readFile(file, "utf8")))
+/** A profile's `profil.json` as read; a wrong one throws, naming the field. */
+export function parseProfile(value: unknown, file = "profil.json"): ShopProfile {
+  const parsed = profileSchema.safeParse(value)
   if (!parsed.success) {
     const issue = parsed.error.issues[0]
     throw new Error(
       `shop profile: ${file} ${issue?.path.map(String).join(".") ?? ""}: ${issue?.message ?? ""}`
     )
   }
-  return { profile: parsed.data, dir }
+  const { data } = parsed
+  const kept = new Set(data.pages.map((page) => page.handle))
+  const both = data.retired_pages.find((handle) => kept.has(handle))
+  if (both) {
+    throw new Error(`shop profile: ${file} retired_pages: ${both} is also a page`)
+  }
+  return data
+}
+
+export async function readProfile(dir: string): Promise<LoadedProfile> {
+  const file = path.join(dir, "profil.json")
+  return { profile: parseProfile(JSON.parse(await readFile(file, "utf8")), file), dir }
 }
 
 /** A profile's file, which must stay inside the profile's folder tree's parent. */

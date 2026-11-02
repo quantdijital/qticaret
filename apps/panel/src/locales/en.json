@@ -5449,7 +5449,7 @@
     }
   },
   "content": {
-    "description": "The shop's own pages (about us, shipping and returns), blog posts and filter pages.",
+    "description": "The shop's own pages (about us, frequently asked questions), blog posts and filter pages.",
     "kinds": "Content kinds",
     "tabs": {
       "page": "Pages",
@@ -5459,7 +5459,7 @@
     "search": "Search by title",
     "noMatch": "No content matches your search.",
     "empty": {
-      "page": "No pages yet. Write pages such as about us or shipping and returns here.",
+      "page": "No pages yet. Write pages such as about us or frequently asked questions here.",
       "post": "No blog posts yet. Add a first post about your products.",
       "landing": "No filter pages yet. Give a category with a brand or attribute option a page of its own, with its own address and text."
     },
@@ -5469,6 +5469,12 @@
       "landing": "Add filter page"
     },
     "addHint": "Enter the title; you edit the text, cover and search appearance on its page next. It stays a draft until you publish it.",
+    "legal": {
+      "title": "Legal texts are not written here",
+      "text": "Contracts, the KVKK and cookie notices, the return and shipping policies are made from your shop's details under Settings > Legal and published at their own addresses. Written here as well, two versions of the same text would be live.",
+      "hint": "Contracts, KVKK, cookie, return and shipping texts are not here:",
+      "link": "Settings > Legal"
+    },
     "create": "Create",
     "created": {
       "page": "Page created.",

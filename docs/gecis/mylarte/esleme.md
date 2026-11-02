@@ -26,8 +26,8 @@
 | 16 | Hakkımızda, SSS | içerik sayfası | ✅ | Metinler `sayfalar/`. SSS için `FAQPage` şeması D10 |
 | 17 | Müşteri yorumları `/yorumlar/` | — | ⬜ | Mağaza geneli onaylı yorum listesi ucu yok (backend'de ürün başına var). Google İşletme yorumları dış servis: sonraki aşama |
 | 18 | Toptan teklif `/toptan/` | — | ⬜ | **Teklif isteme** (fiyatsız RFQ: ürün seç + adet + firma + onaylar) platform özelliği olarak önerilir |
-| 19 | Toptan hukuk metinleri (4) | içerik sayfası (noindex) | 🟡 | Metinler `sayfalar/toptan-*.md`; "taslak" notu canlıda, düzeltilmeli |
-| 20 | İade, satış sözleşmesi, KVKK, çerez politikası | yasal metinler (`legal` modülü) | ⬜ | Metinler `sayfalar/`. Yasal modülde sürümlü yayın + vitrin yolu D10 (sözleşmeler ödemede sürümüyle onaylanır) |
+| 19 | Toptan hukuk metinleri (4) | — | ⬜ | Yasal modülde türleri yok; toptan satış özelliği (D14) kararını bekler. İçerik sayfası olarak açılmaz (2026-11-02). Eski metinler yalnız başvuru: `eski-yasal-metinler/toptan-*.md` (canlıda "taslak" notlu) |
+| 20 | İade, satış sözleşmesi, KVKK, çerez politikası | yasal metinler (`legal` modülü), `/yasal/...` | ✅ | Ayarlar > Yasal'da firma bilgilerinden üretilir, sürümüyle yayınlanır; ödemede o sürüm onaylanır; alt bilginin "Yasal metinler" sütunu kendiliğinden. **İçerik sayfası olarak açılmaz** (2026-11-02: profilin açtığı kopyalar kaldırıldı). Eski site metinleri yalnız başvuru: `eski-yasal-metinler/`. Eski adresler §3 |
 | 21 | 404 | 404 | ✅ | |
 
 ## 2. Özellikler
@@ -69,6 +69,7 @@
 | Sayfalama | `…/page/N/` | `?sayfa=N` | Desen yönlendirmesi ya da kök sayfaya 301 |
 | Filtre | `?filter_celik=…` | D4'ün filtre adresleri | Hepsi noindex; 301 gerekmez |
 | Sepet, ödeme, hesap | `/sepet/`, `/odeme/`, `/hesabim/` | `/sepet`, `/odeme`, `/hesap` | `/hesabim` → `/hesap` 301 |
+| Yasal metinler | `/satis-sozlesmesi/`, `/kisisel-verilere-iliskin-aydinlatma-metni/`, `/cerez-politikasi/`, `/iade-ve-degisim-politikasi/` | `/yasal/mesafeli-satis-sozlesmesi`, `/yasal/kvkk-aydinlatma-metni`, `/yasal/cerez-politikasi`, `/yasal/iade-politikasi` | Geçiş günü 301 (Taşıma > eski adresler kararı). Toptan hukuk metinleri (4, noindex): toptan satış kararına kadar `/toptan`'a 301 |
 
 Ürün adresleri listesi: `urun-urlleri.txt` (197). Geçiş protokolü: `docs/runbooks/gecis.md`.
 

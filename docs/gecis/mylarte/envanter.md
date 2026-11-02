@@ -3,7 +3,7 @@
 > Kaynak: canlı site, salt okunur inceleme (WebFetch yerine tarayıcı içi `fetch` + Playwright). Hiçbir form gönderilmedi, giriş yapılmadı.
 > Sepete yalnızca bir ürün (ID 3046, ₺190) arayüzden eklendi, sepet/ödeme alanları okundu, sepet yeniden boşaltıldı. Ödeme alanlarına hiçbir şey yazılmadı.
 > Ekran görüntüleri: `/Users/deniz/Desktop/qticaret/.playwright-mcp/mylarte/` (liste en sonda).
-> Statik sayfa metinleri: `sayfalar/<slug>.md` (bu dosyanın yanında). Ürün URL listesi: `urun-urlleri.txt`. Ekran görüntüleri depoda değil (`.playwright-mcp` git dışı).
+> Statik sayfa metinleri: `sayfalar/<slug>.md` (bu dosyanın yanında); eski sitenin hukuki metinleri yalnız başvuru için `eski-yasal-metinler/<slug>.md` (yeni sitede yasal metinler Ayarlar > Yasal'dan, firma bilgilerinden üretilir). Ürün URL listesi: `urun-urlleri.txt`. Ekran görüntüleri depoda değil (`.playwright-mcp` git dışı).
 
 ---
 
@@ -320,7 +320,7 @@ Alt bölümler (sırasıyla):
 - "Doğrudan görüşmek isterseniz": telefon, e-posta, adres, "Pazartesi – Cuma 08:00-17:00".
 - 4 toptan hukuk metni ayrı sayfalar (noindex,nofollow), "Sürüm 2.1 — Yürürlük tarihi: 26.08.2026" ve **"Bu metin taslaktır. Yayına almadan önce hukuk danışmanınıza kontrol ettiriniz."** notuyla yayında.
 
-### 4.18 Hukuki sayfalar (metinler `sayfalar/` altında)
+### 4.18 Hukuki sayfalar (metinler `eski-yasal-metinler/` altında; yalnız başvuru)
 | Sayfa | URL | Not |
 |---|---|---|
 | İade ve Değişim Politikası | `/iade-ve-degisim-politikasi/` | 14 gün cayma, 10 günde iade, iade kargosu müşteride, kişiselleştirilmiş ürün iade edilmez; mobil menüde "Kargo & İade" bu sayfaya gider |
@@ -396,7 +396,7 @@ Alt bölümler (sırasıyla):
 | 26 | SSS | `/sik-sorulan-sorular/` | H1 yok, 9 soru, şema yok |
 | 27 | Toptan teklif | `/toptan/` | noindex; ürün seçici + firma bilgisi + 4 onay, fiyatsız RFQ |
 | 28 | Toptan hukuk metinleri (4) | `/toptan-…/` | taslak notlu, noindex |
-| 29 | İade ve değişim | `/iade-ve-degisim-politikasi/` | metin `sayfalar/` |
+| 29 | İade ve değişim | `/iade-ve-degisim-politikasi/` | metin `eski-yasal-metinler/` |
 | 30 | Satış sözleşmesi | `/satis-sozlesmesi/` | ödemede inline açılıyor |
 | 31 | KVKK aydınlatma | `/kisisel-verilere-iliskin-aydinlatma-metni/` | metin `sayfalar/` |
 | 32 | Çerez politikası | `/cerez-politikasi/` | metin `sayfalar/` |

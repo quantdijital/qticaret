@@ -1,9 +1,10 @@
-import { useNavigate } from "@tanstack/react-router"
-import { Loader2 } from "lucide-react"
+import { Link, useNavigate } from "@tanstack/react-router"
+import { Loader2, Scale } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { Field } from "@/components/patterns/form-section"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -16,9 +17,14 @@ import {
 import { Input } from "@/components/ui/input"
 import { useCreateContent } from "@/features/content/api/content"
 import type { ContentKind } from "@/features/content/api/content"
+import { looksLikeLegalText } from "@/features/content/legal-title"
 import { errorText } from "@/lib/errors"
 
-/** A new page or post by its title, as a draft; it is written on its own page next. */
+/**
+ * A new page or post by its title, as a draft; it is written on its own page
+ * next. A page titled like a legal text points to Settings > Legal, where
+ * those are made from the shop's details (it does not stop the page).
+ */
 export function NewContentDialog({
   kind,
   open,
@@ -91,6 +97,18 @@ export function NewContentDialog({
               }}
             />
           </Field>
+          {kind === "page" && looksLikeLegalText(title) ? (
+            <Alert>
+              <Scale aria-hidden="true" />
+              <AlertTitle>{t("content.legal.title")}</AlertTitle>
+              <AlertDescription>
+                <p>{t("content.legal.text")}</p>
+                <Link to="/settings/legal" className="font-medium underline underline-offset-4">
+                  {t("content.legal.link")}
+                </Link>
+              </AlertDescription>
+            </Alert>
+          ) : null}
           <DialogFooter>
             <Button type="button" variant="outline" disabled={create.isPending} onClick={close}>
               {t("common.cancel")}

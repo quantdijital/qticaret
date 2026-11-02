@@ -5449,7 +5449,7 @@
     }
   },
   "content": {
-    "description": "Mağazanın kendi sayfaları (hakkımızda, kargo ve iade), blog yazıları ve filtre sayfaları.",
+    "description": "Mağazanın kendi sayfaları (hakkımızda, sık sorulan sorular), blog yazıları ve filtre sayfaları.",
     "kinds": "İçerik türleri",
     "tabs": {
       "page": "Sayfalar",
@@ -5459,7 +5459,7 @@
     "search": "Başlığa göre ara",
     "noMatch": "Aramanızla eşleşen içerik yok.",
     "empty": {
-      "page": "Henüz sayfa yok. Hakkımızda, kargo ve iade gibi sayfaları buradan yazın.",
+      "page": "Henüz sayfa yok. Hakkımızda, sık sorulan sorular gibi sayfaları buradan yazın.",
       "post": "Henüz blog yazısı yok. Ürünlerinizi anlatan ilk yazıyı ekleyin.",
       "landing": "Henüz filtre sayfası yok. Bir kategori ile marka ya da özellik seçeneğine kendi adresi ve metni olan bir sayfa verin."
     },
@@ -5469,6 +5469,12 @@
       "landing": "Filtre sayfası ekle"
     },
     "addHint": "Başlığı yazın; metni, kapağı ve arama görünümünü açılan sayfada düzenlersiniz. Yayınlayana kadar taslak kalır.",
+    "legal": {
+      "title": "Yasal metinler burada yazılmaz",
+      "text": "Sözleşmeler, KVKK ve çerez metinleri, iade ve kargo politikaları Ayarlar > Yasal'da mağaza bilgilerinizden üretilir ve kendi adresleriyle yayınlanır. Burada ayrıca yazılırsa aynı metnin iki farklı hali yayında olur.",
+      "hint": "Sözleşmeler, KVKK, çerez, iade ve kargo metinleri burada değil:",
+      "link": "Ayarlar > Yasal"
+    },
     "create": "Oluştur",
     "created": {
       "page": "Sayfa oluşturuldu.",

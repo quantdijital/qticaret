@@ -11,7 +11,7 @@ import { runAsyncJobWorkflow } from "../../workflows/async-job/run-async-job"
 import { isConflictError } from "../../lib/errors"
 import { ASYNC_JOB_MODULE } from "../../modules/async-job"
 import type AsyncJobModuleService from "../../modules/async-job/service"
-import { saveContentWorkflow } from "../../workflows/content/workflows"
+import { deleteContentWorkflow, saveContentWorkflow } from "../../workflows/content/workflows"
 import { startMigrationWorkflow } from "../../workflows/migration/start"
 import { updatePlatformSettingsWorkflow } from "../../workflows/platform-settings/update-platform-settings"
 import { ensureStoreName } from "../bootstrap/store-name"
@@ -51,6 +51,23 @@ async function applyPages(container: MedusaContainer, loaded: LoadedProfile): Pr
       { event: "shop_profile.page_saved", handle: page.handle, made: !existing },
       "content page saved"
     )
+  }
+}
+
+/** Pages the profile no longer makes, deleted by their handle if present (their paths answer 410). */
+async function retirePages(container: MedusaContainer, loaded: LoadedProfile): Promise<void> {
+  const handles = loaded.profile.retired_pages
+  if (handles.length === 0) {
+    return
+  }
+  const content = container.resolve<ContentModuleService>(CONTENT_MODULE)
+  const found = await content.listContentEntries(
+    { kind: "page", handle: handles },
+    { select: ["id", "handle"] }
+  )
+  for (const page of found) {
+    await deleteContentWorkflow(container).run({ input: page.id })
+    logger.info({ event: "shop_profile.page_retired", handle: page.handle }, "content page removed")
   }
 }
 
@@ -130,7 +147,7 @@ async function queueBundle(container: MedusaContainer, loaded: LoadedProfile): P
   logger.info({ event: "shop_profile.bundle_applied", job: result.id }, "migration run done")
 }
 
-/** The whole profile: name, settings, pages, then the migration run. Safe to run again. */
+/** The whole profile: name, settings, retired then current pages, the migration run. Safe to run again. */
 export async function applyProfile(
   container: MedusaContainer,
   loaded: LoadedProfile
@@ -139,6 +156,7 @@ export async function applyProfile(
     await ensureStoreName(container, loaded.profile.store_name)
   }
   await applySections(container, loaded)
+  await retirePages(container, loaded)
   await applyPages(container, loaded)
   await queueBundle(container, loaded)
 }

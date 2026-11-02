@@ -146,7 +146,7 @@ Durum: ✅ var · 🟡 temel hâli var · ⬜ yok. Görev kodları PROGRESS "F18
 
 Bir mağazanın kurulumu **mağaza profiliyle** yapılır (`pnpm --filter @qticaret/backend shop:profile <klasör>`): ad, ayar bölümleri, Markdown içerik sayfaları ve taşıma paketi, platformun kendi iş akışlarından geçer. İlk müşterinin profili `docs/gecis/mylarte/profil/`.
 
-Mevcut sitenin (WooCommerce) sayfa sayfa envanteri `docs/gecis/mylarte/envanter.md`, platformla eşlemesi ve eksikler `docs/gecis/mylarte/esleme.md`, sayfa metinleri `docs/gecis/mylarte/sayfalar/`. Kural: ilk müşterinin ihtiyacı sektöre özel koda dönüşmez; içerik, ayar, özellik şablonu ya da özellik bayrağıyla karşılanır.
+Mevcut sitenin (WooCommerce) sayfa sayfa envanteri `docs/gecis/mylarte/envanter.md`, platformla eşlemesi ve eksikler `docs/gecis/mylarte/esleme.md`, sayfa metinleri `docs/gecis/mylarte/sayfalar/`. Yasal metinler içerik sayfası değildir: Ayarlar > Yasal'da firma bilgilerinden üretilir, `/yasal/...` adreslerinde yayınlanır (eski sitenin metinleri yalnız başvuru: `docs/gecis/mylarte/eski-yasal-metinler/`). Kural: ilk müşterinin ihtiyacı sektöre özel koda dönüşmez; içerik, ayar, özellik şablonu ya da özellik bayrağıyla karşılanır.
 
 ## 9. Kontrol listesi (her vitrin ekranı)
 

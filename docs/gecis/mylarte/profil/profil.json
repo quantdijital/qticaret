@@ -287,10 +287,6 @@
               "href": "/siparis"
             },
             {
-              "label": "İade ve Değişim",
-              "href": "/iade-ve-degisim-politikasi"
-            },
-            {
               "label": "Sık Sorulan Sorular",
               "href": "/sik-sorulan-sorular"
             },
@@ -318,18 +314,6 @@
             {
               "label": "Blog ve Rehberler",
               "href": "/blog"
-            },
-            {
-              "label": "Satış Sözleşmesi",
-              "href": "/satis-sozlesmesi"
-            },
-            {
-              "label": "KVKK Aydınlatma Metni",
-              "href": "/kisisel-verilere-iliskin-aydinlatma-metni"
-            },
-            {
-              "label": "Çerez Politikası",
-              "href": "/cerez-politikasi"
             }
           ]
         }
@@ -395,47 +379,17 @@
       "handle": "toptan",
       "title": "Toptan Satış",
       "file": "../sayfalar/toptan.md"
-    },
-    {
-      "handle": "iade-ve-degisim-politikasi",
-      "title": "İade ve Değişim Politikası",
-      "file": "../sayfalar/iade-ve-degisim-politikasi.md"
-    },
-    {
-      "handle": "satis-sozlesmesi",
-      "title": "Mesafeli Satış Sözleşmesi",
-      "file": "../sayfalar/satis-sozlesmesi.md"
-    },
-    {
-      "handle": "kisisel-verilere-iliskin-aydinlatma-metni",
-      "title": "Kişisel Verilere İlişkin Aydınlatma Metni",
-      "file": "../sayfalar/kisisel-verilere-iliskin-aydinlatma-metni.md"
-    },
-    {
-      "handle": "cerez-politikasi",
-      "title": "Çerez Politikası",
-      "file": "../sayfalar/cerez-politikasi.md"
-    },
-    {
-      "handle": "toptan-satis-sozlesmesi",
-      "title": "Toptan Satış Sözleşmesi",
-      "file": "../sayfalar/toptan-satis-sozlesmesi.md"
-    },
-    {
-      "handle": "toptan-on-bilgilendirme",
-      "title": "Toptan Satış Ön Bilgilendirme Formu",
-      "file": "../sayfalar/toptan-on-bilgilendirme.md"
-    },
-    {
-      "handle": "toptan-kvkk-aydinlatma",
-      "title": "Toptan Müşteri KVKK Aydınlatma Metni",
-      "file": "../sayfalar/toptan-kvkk-aydinlatma.md"
-    },
-    {
-      "handle": "toptan-gizlilik-taahhutnamesi",
-      "title": "Toptan Gizlilik Taahhütnamesi",
-      "file": "../sayfalar/toptan-gizlilik-taahhutnamesi.md"
     }
+  ],
+  "retired_pages": [
+    "iade-ve-degisim-politikasi",
+    "satis-sozlesmesi",
+    "kisisel-verilere-iliskin-aydinlatma-metni",
+    "cerez-politikasi",
+    "toptan-satis-sozlesmesi",
+    "toptan-on-bilgilendirme",
+    "toptan-kvkk-aydinlatma",
+    "toptan-gizlilik-taahhutnamesi"
   ],
   "bundle": "paket.json"
 }

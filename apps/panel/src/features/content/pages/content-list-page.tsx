@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
 import { Link, getRouteApi, useNavigate } from "@tanstack/react-router"
-import { FileText, Plus } from "lucide-react"
+import { FileText, Plus, Scale } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { DataTable } from "@/components/patterns/data-table"
@@ -117,6 +117,20 @@ export function ContentListPage() {
               setSearch({ q: text, page: 1 })
             }}
           />
+          {tab === "page" ? (
+            <p className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Scale className="size-4 shrink-0" aria-hidden="true" />
+              <span>
+                {t("content.legal.hint")}{" "}
+                <Link
+                  to="/settings/legal"
+                  className="font-medium text-foreground underline underline-offset-4"
+                >
+                  {t("content.legal.link")}
+                </Link>
+              </span>
+            </p>
+          ) : null}
         </div>
         {tab === "landing" ? (
           <LandingList
