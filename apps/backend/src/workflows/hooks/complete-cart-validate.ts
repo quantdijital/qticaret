@@ -14,6 +14,7 @@ import { hasStaleShipping } from "../checkout/stale-shipping"
 import { assertAgeDeclared } from "../legal/age"
 import { assertBuyerNotBlocked } from "../fraud/buyer-blocked"
 import { assertConsented } from "../legal/consent"
+import { assertGiftLinesReady } from "../gift-cards/cart-gifts"
 import { expectedCodFee } from "../payments/steps/payment-fee"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import type { PromotionSettings } from "../../modules/platform-settings/sections"
@@ -68,6 +69,8 @@ completeCartWorkflow.hooks.validate(async ({ cart }: { cart: { id: string } }, {
   await assertAgeDeclared(container, cart.id)
   // A buyer on the shop's block list, a card's provider notice included (adr/0044 §4)
   await assertBuyerNotBlocked(container, cart.id)
+  // Gift lines name their recipients and are not paid with credit (adr/0025 Ek 2026-11-03)
+  await assertGiftLinesReady(container, cart.id, null)
   // The rule is checked as codes are sent too; requests racing each other
   // can each see an empty cart, so it is checked once more here (ADR-0024)
   if (enteredCodes(row.promotions).length > 1) {

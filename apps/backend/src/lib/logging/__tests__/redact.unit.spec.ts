@@ -261,6 +261,11 @@ describe("redactText", () => {
       `GET /store/gift-cards/${REDACTED}NPQR?fields=id 429`,
     ],
     [
+      "the balance route, whose code is in the body",
+      "POST /store/gift-cards/balance 404",
+      "POST /store/gift-cards/balance 404",
+    ],
+    [
       "e-mail",
       "Customer with email: ayse@example.com",
       `Customer with email: ${REDACTED}@example.com`,
