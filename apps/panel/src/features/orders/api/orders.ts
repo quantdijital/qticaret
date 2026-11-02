@@ -261,10 +261,19 @@ export function useOrderMutation<T, R = unknown>(run: (input: T) => Promise<R>) 
  */
 export const useShipOrder = (id: string) =>
   useOrderMutation(
-    ({ notify, items }: { notify: boolean; items?: { id: string; quantity: number }[] }) =>
+    ({
+      notify,
+      items,
+      tracking,
+    }: {
+      notify: boolean
+      items?: { id: string; quantity: number }[]
+      /** The shop's own parcel's carrier and tracking (F18). */
+      tracking?: { carrier: string; number: string; url: string | null }
+    }) =>
       sdk.client.fetch(`/admin/orders/${encodeURIComponent(id)}/ship`, {
         method: "POST",
-        body: { notify, ...(items ? { items } : {}) },
+        body: { notify, ...(items ? { items } : {}), ...(tracking ? { tracking } : {}) },
       })
   )
 

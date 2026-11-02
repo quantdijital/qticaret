@@ -3137,7 +3137,14 @@
       "description": "These items go into the parcel and the order becomes \"Shipped\".",
       "notify": "Send the customer a shipping notice",
       "done": "Order shipped.",
-      "quantityOf": "Quantity of {{name}} to ship"
+      "quantityOf": "Quantity of {{name}} to ship",
+      "trackingTitle": "Tracking (optional)",
+      "trackingHint": "If you send the parcel yourself, type the carrier and the tracking number; the customer sees them on the order page and in the e-mail. A parcel sent with a carrier integration ignores these fields.",
+      "carrier": "Carrier",
+      "trackingNumber": "Tracking number",
+      "trackingUrl": "Tracking link (https://…)",
+      "trackingInvalid": "Type the carrier and a 4–40 character tracking number.",
+      "trackingUrlInvalid": "The tracking link must start with https://."
     },
     "deliver": {
       "title": "Was the order delivered?",

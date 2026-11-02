@@ -3137,7 +3137,14 @@
       "description": "Aşağıdaki ürünler pakete girer ve sipariş \"Kargoda\" olur.",
       "notify": "Müşteriye kargo bildirimi gönder",
       "done": "Sipariş kargoya verildi.",
-      "quantityOf": "{{name}} için gönderilecek adet"
+      "quantityOf": "{{name}} için gönderilecek adet",
+      "trackingTitle": "Takip bilgisi (isteğe bağlı)",
+      "trackingHint": "Paketi kendiniz gönderiyorsanız kargo firmasını ve takip numarasını yazın; müşteri sipariş sayfasında ve e-postada görür. Anlaşmalı kargo entegrasyonuyla giden pakette bu alanlar yok sayılır.",
+      "carrier": "Kargo firması",
+      "trackingNumber": "Takip numarası",
+      "trackingUrl": "Takip bağlantısı (https://…)",
+      "trackingInvalid": "Firma adını ve 4–40 harf/rakamlık takip numarasını yazın.",
+      "trackingUrlInvalid": "Takip bağlantısı https:// ile başlamalı."
     },
     "deliver": {
       "title": "Sipariş teslim edildi mi?",

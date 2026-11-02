@@ -4,6 +4,7 @@ import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { startFakeGeliver } from "@qticaret/testing"
 import type { FakeGeliver } from "@qticaret/testing"
 import { placeOrder } from "../../src/scripts/seed/orders/place"
+import { orderShipments } from "../../src/workflows/shipping/order-shipments"
 import { geliverOrder, geliverShop } from "../helpers/geliver"
 import type { GeliverShop } from "../helpers/geliver"
 import type { HttpClient } from "../helpers/http"
@@ -94,6 +95,41 @@ medusaIntegrationTestRunner({
       expect(tooMany.data.message).toBe("orders.ship_items_invalid")
       expect(rest.status).toBe(200)
       expect(state).toMatchObject({ ship: null, stage: "shipped" })
+    })
+
+    it("keeps the carrier and tracking staff typed for a parcel the shop sends itself", async () => {
+      const orderId = await placeOrder(getContainer(), {
+        regionId: setup.shop.regionId,
+        salesChannelId: setup.shop.salesChannelId,
+        shippingOptionId: setup.shop.shippingOptionId,
+        items: [{ variant_id: setup.variantId, quantity: 1 }],
+        address: PAYTR_ADDRESS,
+      })
+      const tracking = {
+        carrier: "MNG Kargo",
+        number: "MNG-123456789",
+        url: "https://kargotakip.example.com/?no=MNG-123456789",
+      }
+      const unsafe = await post(`/admin/orders/${orderId}/ship`, {
+        notify: false,
+        tracking: { ...tracking, url: "http://kargotakip.example.com/" },
+      })
+      const odd = await post(`/admin/orders/${orderId}/ship`, {
+        notify: false,
+        tracking: { ...tracking, number: "<b>" },
+      })
+      const shipped = await post(`/admin/orders/${orderId}/ship`, { notify: false, tracking })
+      const [parcel] = await orderShipments(getContainer(), orderId)
+
+      expect(unsafe.status).toBe(400)
+      expect(odd.status).toBe(400)
+      expect(shipped.status).toBe(200)
+      expect(parcel).toMatchObject({
+        carrier: "MNG Kargo",
+        tracking_number: "MNG-123456789",
+        tracking_url: "https://kargotakip.example.com/?no=MNG-123456789",
+      })
+      expect(parcel?.shipped_at).toBeTruthy()
     })
 
     it("ships a test payment only with a carrier in test mode, where nothing leaves the shop", async () => {

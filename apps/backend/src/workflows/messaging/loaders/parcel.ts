@@ -64,7 +64,7 @@ export async function loadParcelMessage(
     vars: {
       number: String(order.display_id),
       customerName: personName(order.shipping_address?.first_name) ?? GREETING,
-      carrier: carrierNameOf(row.provider_id, row.data),
+      carrier: carrierNameOf(row.provider_id, row.data, row.metadata),
       trackingNumber: label?.tracking_number ?? null,
       trackingUrl: trackingUrlOf(label?.tracking_url),
       items: row.items.flatMap((item) => {

@@ -45,6 +45,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "orders.use_order_edit": "Orders are edited from the edit dialog on the order page only.",
   "orders.ship_items_invalid":
     "The chosen lines do not match what is left to ship: at most what is left of each line can go.",
+  "orders.tracking_invalid":
+    "Invalid tracking: a carrier name, a 4–40 character tracking number and an https link.",
   "orders.ship_packed_first":
     "The packed parcel must go first; then the remaining lines can be chosen.",
   "orders.nothing_to_deliver": "No parcel of the shop's own delivery waits to be delivered.",

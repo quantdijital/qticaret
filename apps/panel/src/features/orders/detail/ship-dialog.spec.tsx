@@ -40,7 +40,7 @@ describe("ShipDialog (F7.10)", () => {
 
     await userEvent.click(ship())
 
-    expect(onConfirm).toHaveBeenCalledWith(true, undefined)
+    expect(onConfirm).toHaveBeenCalledWith(true, undefined, undefined)
   })
 
   it("ships fewer of a line, leaving out a line set to none", async () => {
@@ -50,7 +50,7 @@ describe("ShipDialog (F7.10)", () => {
     fireEvent.change(quantity("Bileme taşı"), { target: { value: "0" } })
     await userEvent.click(ship())
 
-    expect(onConfirm).toHaveBeenCalledWith(true, [{ id: "line_1", quantity: 1 }])
+    expect(onConfirm).toHaveBeenCalledWith(true, [{ id: "line_1", quantity: 1 }], undefined)
   })
 
   it("ships nothing when every line is set to none, and never more than is left", () => {
@@ -68,5 +68,25 @@ describe("ShipDialog (F7.10)", () => {
     renderDialog(vi.fn(), true)
 
     expect(screen.queryByLabelText(/gönderilecek adet/)).not.toBeInTheDocument()
+  })
+
+  it("sends the shop's own parcel's tracking, and holds a half-typed one back", async () => {
+    const onConfirm = renderDialog()
+
+    await userEvent.click(screen.getByText("Takip bilgisi (isteğe bağlı)"))
+    await userEvent.type(screen.getByLabelText("Kargo firması"), "MNG Kargo")
+    expect(ship()).toBeDisabled()
+    expect(screen.getByText(/4–40 harf\/rakamlık/)).toBeInTheDocument()
+    await userEvent.type(screen.getByLabelText("Takip numarası"), "MNG-123456")
+    await userEvent.type(screen.getByLabelText("Takip bağlantısı (https://…)"), "http://x.example")
+    expect(ship()).toBeDisabled()
+    await userEvent.clear(screen.getByLabelText("Takip bağlantısı (https://…)"))
+    await userEvent.click(ship())
+
+    expect(onConfirm).toHaveBeenCalledWith(true, undefined, {
+      carrier: "MNG Kargo",
+      number: "MNG-123456",
+      url: null,
+    })
   })
 })

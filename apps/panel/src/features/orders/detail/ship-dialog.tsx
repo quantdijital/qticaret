@@ -24,8 +24,40 @@ interface ShipDialogProps {
   open: boolean
   busy: boolean
   onOpenChange: (open: boolean) => void
-  /** `items` only when a part of what is left goes (F7.10). */
-  onConfirm: (notify: boolean, items?: { id: string; quantity: number }[]) => void
+  /** `items` only when a part of what is left goes (F7.10); `tracking` for the shop's own parcel. */
+  onConfirm: (
+    notify: boolean,
+    items?: { id: string; quantity: number }[],
+    tracking?: ShipTracking
+  ) => void
+}
+
+/** The shop's own parcel's tracking (F18): a carrier integration has its own and ignores it. */
+export interface ShipTracking {
+  carrier: string
+  number: string
+  url: string | null
+}
+
+const TRACKING_NUMBER = /^[A-Za-z0-9-]{4,40}$/
+
+/** The typed tracking, or why it cannot go; nothing typed is no tracking. */
+function trackingOf(
+  carrier: string,
+  number: string,
+  url: string
+): { tracking: ShipTracking | undefined; problem: string | null } {
+  const [name, no, link] = [carrier.trim(), number.trim(), url.trim()]
+  if (!name && !no && !link) {
+    return { tracking: undefined, problem: null }
+  }
+  if (!name || name.length > 60 || !TRACKING_NUMBER.test(no)) {
+    return { tracking: undefined, problem: "orders.ship.trackingInvalid" }
+  }
+  if (link && (!link.startsWith("https://") || link.length > 500 || !URL.canParse(link))) {
+    return { tracking: undefined, problem: "orders.ship.trackingUrlInvalid" }
+  }
+  return { tracking: { carrier: name, number: no, url: link || null }, problem: null }
 }
 
 /**
@@ -45,6 +77,10 @@ export function ShipDialog({
   const { t } = useTranslation()
   const [notify, setNotify] = useState(true)
   const [counts, setCounts] = useState<Record<string, number>>({})
+  const [carrier, setCarrier] = useState("")
+  const [trackingNumber, setTrackingNumber] = useState("")
+  const [trackingUrl, setTrackingUrl] = useState("")
+  const { tracking, problem } = trackingOf(carrier, trackingNumber, trackingUrl)
   const byId = new Map(order.items.map((item) => [item.id, item]))
   const countOf = (id: string, left: number) => Math.min(Math.max(counts[id] ?? left, 0), left)
   const chosen = items
@@ -95,6 +131,42 @@ export function ShipDialog({
             )
           })}
         </ul>
+        <details className="rounded-md border px-3 py-2 text-sm">
+          <summary className="cursor-pointer font-medium">{t("orders.ship.trackingTitle")}</summary>
+          <p className="mt-2 text-xs text-muted-foreground">{t("orders.ship.trackingHint")}</p>
+          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+            <Input
+              aria-label={t("orders.ship.carrier")}
+              placeholder={t("orders.ship.carrier")}
+              maxLength={60}
+              value={carrier}
+              onChange={(event) => {
+                setCarrier(event.target.value)
+              }}
+            />
+            <Input
+              aria-label={t("orders.ship.trackingNumber")}
+              placeholder={t("orders.ship.trackingNumber")}
+              maxLength={40}
+              value={trackingNumber}
+              onChange={(event) => {
+                setTrackingNumber(event.target.value)
+              }}
+            />
+            <Input
+              type="url"
+              aria-label={t("orders.ship.trackingUrl")}
+              placeholder={t("orders.ship.trackingUrl")}
+              maxLength={500}
+              className="sm:col-span-2"
+              value={trackingUrl}
+              onChange={(event) => {
+                setTrackingUrl(event.target.value)
+              }}
+            />
+          </div>
+          {problem ? <p className="mt-2 text-xs text-destructive">{t(problem)}</p> : null}
+        </details>
         <label className="flex cursor-pointer items-center gap-2.5 text-sm">
           <Checkbox
             checked={notify}
@@ -115,9 +187,9 @@ export function ShipDialog({
             {t("common.cancel")}
           </Button>
           <Button
-            disabled={busy || chosen.length === 0}
+            disabled={busy || chosen.length === 0 || problem !== null}
             onClick={() => {
-              onConfirm(notify, whole ? undefined : chosen)
+              onConfirm(notify, whole ? undefined : chosen, tracking)
             }}
           >
             {busy ? <Loader2 className="animate-spin" /> : <Truck />}

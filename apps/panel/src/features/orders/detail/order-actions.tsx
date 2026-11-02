@@ -209,9 +209,9 @@ export function OrderActions({
         open={dialog === "ship"}
         busy={ship.isPending}
         onOpenChange={close}
-        onConfirm={(notify, items) => {
+        onConfirm={(notify, items, tracking) => {
           ship.mutate(
-            { notify, ...(items ? { items } : {}) },
+            { notify, ...(items ? { items } : {}), ...(tracking ? { tracking } : {}) },
             { onSuccess: done("orders.ship.done"), onError: failed }
           )
         }}

@@ -18,6 +18,7 @@ export async function POST(
       notify: req.validatedBody.notify,
       created_by: req.auth_context.actor_id || undefined,
       items: req.validatedBody.items,
+      tracking: req.validatedBody.tracking ?? null,
     },
   })
   res.json(result)

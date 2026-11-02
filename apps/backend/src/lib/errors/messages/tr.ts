@@ -51,6 +51,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Sipariş düzenleme yalnızca sipariş sayfasındaki düzenleme penceresinden yapılır.",
   "orders.ship_items_invalid":
     "Seçilen kalemler gönderilecek olanlarla uyuşmuyor: her kalemden en çok kalan adet kadar gönderilebilir.",
+  "orders.tracking_invalid":
+    "Takip bilgisi geçersiz: firma adı, 4–40 harf/rakamlık takip numarası ve https ile başlayan bağlantı olmalı.",
   "orders.ship_packed_first":
     "Önce paketlenmiş koli kargoya verilmeli; ardından kalan kalemler seçilebilir.",
   "orders.nothing_to_deliver": "Teslim edilecek, mağazanın kendi teslimatında bir koli yok.",

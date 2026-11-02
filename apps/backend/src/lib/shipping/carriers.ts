@@ -40,11 +40,17 @@ const GELIVER_CARRIERS: Readonly<Record<string, string>> = {
   KOLAYGELSIN: "Kolay Gelsin",
 }
 
-/** The carrier a parcel went with, as a shopper reads it; null for the shop's own parcels. */
+/**
+ * The carrier a parcel went with, as a shopper reads it: an integration's,
+ * or the name staff gave the shop's own parcel (`qt_carrier_name`, F18);
+ * null when none is known.
+ */
 export function carrierNameOf(
   providerId: string | null | undefined,
-  data: Record<string, unknown> | null | undefined
+  data: Record<string, unknown> | null | undefined,
+  metadata?: Record<string, unknown> | null
 ): string | null {
+  const named = metadata?.["qt_carrier_name"]
   switch (carrierOf(providerId)) {
     case "aras":
       return "Aras Kargo"
@@ -55,7 +61,7 @@ export function carrierNameOf(
       return typeof code === "string" ? (GELIVER_CARRIERS[code.toUpperCase()] ?? code) : null
     }
     case null:
-      return null
+      return typeof named === "string" && named !== "" ? named : null
   }
 }
 

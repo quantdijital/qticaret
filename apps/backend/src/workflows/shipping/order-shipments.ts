@@ -8,6 +8,7 @@ interface FulfillmentRow {
   id: string
   provider_id: string | null
   data: Record<string, unknown> | null
+  metadata: Record<string, unknown> | null
   shipped_at: string | Date | null
   delivered_at: string | Date | null
   canceled_at: string | Date | null
@@ -48,6 +49,7 @@ export async function orderShipments(
       "fulfillments.id",
       "fulfillments.provider_id",
       "fulfillments.data",
+      "fulfillments.metadata",
       "fulfillments.shipped_at",
       "fulfillments.delivered_at",
       "fulfillments.canceled_at",
@@ -77,7 +79,7 @@ export async function orderShipments(
       const follow = byFulfillment.get(row.id)
       return {
         id: row.id,
-        carrier: carrierNameOf(row.provider_id, row.data),
+        carrier: carrierNameOf(row.provider_id, row.data, row.metadata),
         tracking_number: label?.tracking_number ?? follow?.tracking_number ?? null,
         tracking_url: trackingUrlOf(label?.tracking_url ?? follow?.tracking_url),
         shipped_at: iso(row.shipped_at),
