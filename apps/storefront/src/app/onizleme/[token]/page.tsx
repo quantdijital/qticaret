@@ -1,10 +1,12 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { cache } from "react"
+import type { StoreContentTerm } from "@qticaret/types"
 import { t } from "@/lib/i18n"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { layoutPreview } from "@/lib/store-api/requests"
 import { storeGet } from "@/lib/store-api/server"
+import { postTerms } from "@/lib/views/posts"
 import { previewPage } from "@/lib/views/preview"
 import { DesignPreviewScreen } from "@/screens/design-preview"
 import { theme } from "@/theme"
@@ -16,6 +18,8 @@ interface PreviewEntry {
   title: string
   html: string
   published_at: string | null
+  category?: StoreContentTerm | null
+  tags?: StoreContentTerm[]
 }
 
 const TOKEN = /^cnt_[0-9A-Za-z]{1,40}\.[0-9a-z]{1,12}\.[\w-]{43}$/
@@ -90,6 +94,7 @@ export default async function PreviewPage({
         publishedAt: entry.published_at,
         breadcrumbs: [],
         notice: t("preview.notice"),
+        ...postTerms(entry),
       }}
     />
   )

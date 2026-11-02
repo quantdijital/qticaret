@@ -7,10 +7,10 @@ import type {
   Resolution,
   SeoPayload,
   SiteSeo,
+  StoreBrandSummary,
   StoreCategory,
   StoreProduct,
   StoreRegion,
-  StoreContentSummary,
   StoreLayout,
   StoreMenu,
   StorefrontAnswer,
@@ -230,6 +230,26 @@ export async function priceDisplays(
   return found
 }
 
+// A brands page reads them all; past this many, a shop needs a search of its own (D10)
+const MAX_BRANDS = 1000
+const BRANDS_PAGE = 100
+
+/** Every active brand, by name (F3.11), a hundred at a time: `/markalar`. */
+export const allBrands = cache(async (): Promise<StoreBrandSummary[]> => {
+  const brands: StoreBrandSummary[] = []
+  for (let offset = 0; offset < MAX_BRANDS; offset += BRANDS_PAGE) {
+    const page = await storePublicGet<{ brands: StoreBrandSummary[]; count: number }>(
+      "/store/brands",
+      { limit: BRANDS_PAGE, offset }
+    )
+    brands.push(...page.brands)
+    if (page.brands.length < BRANDS_PAGE || offset + BRANDS_PAGE >= page.count) {
+      break
+    }
+  }
+  return brands
+})
+
 export const brandById = cache((id: string) =>
   storeGet<{ brand: { id: string; name: string; handle: string; description: string | null } }>(
     `/store/brands/${encodeURIComponent(id)}`
@@ -256,50 +276,6 @@ export const collectionById = cache((id: string) =>
     { fields: "id,title,handle" }
   )
 )
-
-/** Live blog posts, newest first, a page at a time (F3.16). */
-export const blogPosts = cache((offset: number, limit: number) =>
-  storeGet<{ entries: StoreContentSummary[]; count: number }>("/store/content", {
-    kind: "post",
-    offset,
-    limit,
-  })
-)
-
-export interface FacetValueAnswer {
-  value: string
-  label: string
-  count: number
-  selected: boolean
-}
-
-export interface ListingAnswer {
-  product_ids: string[]
-  count: number
-  page: number
-  page_size: number
-  facets: {
-    brands: FacetValueAnswer[]
-    attributes: { key: string; label: string; values: FacetValueAnswer[] }[]
-    price: { min: number; max: number } | null
-  }
-}
-
-/** One page of a listing with its filters (D4): ids, the count, the filters it offers. */
-export async function listingPage(
-  type: "product_category" | "product_collection" | "brand" | "landing" | "all",
-  id: string,
-  query: string
-): Promise<ListingAnswer> {
-  const region = await liraRegion()
-  return storeGet<ListingAnswer>("/store/listings/products", {
-    type,
-    id,
-    region_id: region.id,
-    currency_code: region.currency_code,
-    query,
-  })
-}
 
 export interface ReviewsAnswer {
   rating: { average: number; count: number } | null

@@ -19,6 +19,10 @@ export const SYSTEM_LINKS = [
   "cart",
   "account",
   "order_lookup",
+  // Every category, every brand, the products on sale now (docs/20 "sayfalar")
+  "categories",
+  "brands",
+  "sale",
 ] as const
 export type SystemLink = (typeof SYSTEM_LINKS)[number]
 

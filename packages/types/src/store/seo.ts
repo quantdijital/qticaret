@@ -51,7 +51,18 @@ export interface ListingView {
 }
 
 export type EntityType =
-  "product" | "product_category" | "product_collection" | "brand" | "page" | "post" | "landing"
+  | "product"
+  | "product_category"
+  | "product_collection"
+  | "brand"
+  | "page"
+  | "post"
+  | "landing"
+  // A blog archive (adr/0019 ek 2026-11-03): `/blog/kategori/{handle}`, `/blog/etiket/{handle}`
+  | "post_category"
+  | "post_tag"
+  // The products on sale now (`/kampanyalar`), its id `sale`
+  | "sale"
 
 export type Resolution =
   | {

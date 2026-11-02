@@ -26,6 +26,11 @@ export interface StoreBrand {
   logo_url: string | null
 }
 
+/** `GET /store/brands`: an active brand as a brands page lists it (F3.11). */
+export interface StoreBrandSummary extends StoreBrand {
+  description: string | null
+}
+
 /** Medusa's calculated price: amounts in lira as numbers, KDV included. */
 export interface StoreCalculatedPrice {
   calculated_amount: number | null

@@ -11,7 +11,9 @@ import type {
 } from "./checkout-views"
 import type {
   BlogIndexPageView,
+  BrandsPageView,
   CartPageView,
+  CategoriesPageView,
   ConfirmPageView,
   CookiePreferencesPageView,
   InstallmentFamilyView,
@@ -133,6 +135,10 @@ export interface StorefrontTheme {
   >
   ContentPage: ComponentType<Page<ContentPageView> & { actions?: ContactActions }>
   BlogIndexPage: ComponentType<Page<BlogIndexPageView>>
+  /** `/kategoriler`: every category as a tree. */
+  CategoriesPage: ComponentType<Page<CategoriesPageView>>
+  /** `/markalar`: every brand by first letter. */
+  BrandsPage: ComponentType<Page<BrandsPageView>>
   CartPage: ComponentType<Page<CartPageView> & { actions: ThemeActions }>
   CheckoutPage: ComponentType<Page<CheckoutPageView> & { actions: CheckoutActions }>
   /** The card provider's hosted form, framed on the shop (PayTR). */

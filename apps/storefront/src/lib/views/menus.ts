@@ -11,6 +11,9 @@ const SYSTEM_PATHS: Readonly<Record<string, string>> = {
   cart: "/sepet",
   account: "/hesap",
   order_lookup: "/siparis",
+  categories: "/kategoriler",
+  brands: "/markalar",
+  sale: "/kampanyalar",
 }
 
 /**

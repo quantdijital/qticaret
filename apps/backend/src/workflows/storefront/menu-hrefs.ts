@@ -17,6 +17,9 @@ const SYSTEM_PATHS: Readonly<Record<string, SystemLink>> = {
   "/sepet": "cart",
   "/hesap": "account",
   "/siparis": "order_lookup",
+  "/kategoriler": "categories",
+  "/markalar": "brands",
+  "/kampanyalar": "sale",
 }
 
 const KIND_OF_TYPE: Readonly<Record<string, RecordLinkKind>> = {

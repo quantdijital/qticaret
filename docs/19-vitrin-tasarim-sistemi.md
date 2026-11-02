@@ -122,8 +122,11 @@ Durum: ✅ var · 🟡 temel hâli var · ⬜ yok. Görev kodları PROGRESS "F18
 | Ana sayfa | `/` | 🟡 giriş, kategori dizini, yeni ürünler, "bize ulaşın", blogdan | ana sayfa blokları (D11) yok | D11 |
 | Kategori, marka, koleksiyon, landing | URL kaydına göre | ✅ filtreler (marka, öznitelik), fiyat aralığı, fiyat/yeni sıralama, sayfalama | `GET /store/listings/products` | D4 |
 | Tüm ürünler | `/magaza` | ✅ filtreler, sıralama | liste ucu `type=all` | D4 |
+| Kampanyalı ürünler | `/kampanyalar` | ✅ liste ekranı (filtre, sıralama, sayfalama), kartlarda üstü çizili fiyat ve indirim rozeti; başlık ve robots resolve'dan (indirimde ürün yokken `noindex,follow`, "Şu an indirimde ürün yok") | resolve `entity_type: "sale"`, liste ucu `type=sale&id=sale` (adr/0019 Ek 2026-11-03) | docs/20 |
+| Tüm kategoriler | `/kategoriler` | ✅ ağaç: üst kategoriler kart, altları iç içe bağlantı (4 seviyeye kadar); indekslenir, BreadcrumbList; ürün sayısı yok (kategori başına ayrı çağrı gerekir) | `product-categories`, `seo/paths` | docs/20 |
+| Tüm markalar | `/markalar` | ✅ ilk harfe göre gruplar (Türkçe alfabe; harfle başlamayanlar sonda "Diğer"), harf atlama bağlantıları, logo varsa; indekslenir, BreadcrumbList | `brands` (100'erli, en çok 1000), `seo/paths` | docs/20 |
 | Ürün | `/urun/{slug}` ya da `/{slug}` | ✅ galeri, fiyat, tasarruf, seçenek (renk sözlüğündeki değerler renkli daire), stok, sepete ekle, taksit tablosu (açılınca), kargo cümlesi, yorumlar, soru-cevap, stok bildirimi, favori, WhatsApp'tan sor, benzer ürünler | `storefront.color_swatches` | D5 |
-| Arama | `/arama?q=` | 🟡 Medusa `q` | Meilisearch | D10 |
+| Arama | `/arama?q=` | ✅ liste ekranı: yazım toleranslı arama, filtreler, sıralama (varsayılan "En alakalı"), sayfalama; "Bunu mu demek istediniz" bağlantıları, ilgili kategori ve marka (`marka=` süzgeci) çipleri; okunamayan sorgu (400) boş sayfa + ipucu; `noindex,follow`; terim ilk ve daraltılmamış sayfada backend'de sayılır | liste ucu `type=search&q=` (adr/0046 Ek 2026-11-03); Meilisearch sonra | D10 |
 | Sepet | `/sepet` | ✅ adet, kaldır, kupon, indirim, ücretsiz kargo çubuğu, hediye kartı (bayrak açıkken) | `carts/{id}/gift-cards` | D6 |
 | Mini sepet (çekmece) | başlıkta | ✅ | | D6 |
 | Sepet hatırlatma | `/sepet/geri-don?token=` | ✅ onay sayfası + Server Action, satırlar yeni sepete | `cart-reminders/redeem` | D6 |
@@ -137,7 +140,8 @@ Durum: ✅ var · 🟡 temel hâli var · ⬜ yok. Görev kodları PROGRESS "F18
 | İletişim | `/iletisim` (Ayarlar > Vitrin'de seçilen sayfa) | ✅ içerik + iletişim formu (konular arasında misafirin "KVKK başvurusu") | `contact-messages` (ADR-0047) | D10 |
 | Taslak önizleme | `/onizleme/{token}` | ✅ 24 saatlik imzalı bağlantı, `noindex` | `content/preview/{token}` | D10 |
 | Müşteri yorumları | `/yorumlar` | ✅ | `GET /store/reviews` | D10 |
-| Blog | `/blog`, `/blog/{handle}` | ✅ | `content?kind=post` | D10 |
+| Blog | `/blog`, `/blog/{handle}` | ✅ kategori çubuğu (Tüm yazılar + canlı yazısı olan kategoriler), kartta kategori; yazıda kategori ve etiket bağlantıları | `content?kind=post`, `content/terms` | D10 |
+| Blog arşivleri | `/blog/kategori/{handle}`, `/blog/etiket/{handle}` | ✅ terimin canlı yazıları, `?sayfa=` (sonraki sayfanın kendi canonical'ı ve başlığı), ilk sayfada terimin açıklaması; robots ve JSON-LD resolve'dan; bilinmeyen handle 404 | resolve `post_category` / `post_tag`, `content?kind=post&category=` / `&tag=` (adr/0019 Ek 2026-11-03) | docs/20 |
 | Yasal metinler | `/yasal/{tur}` | ✅ (yayımlanmışlar) | `legal/{kind}` | D10 |
 | Çerez onayı | bant; alt bilgideki "Çerez tercihleri" bağlantısı bandı geçerli seçimle yeniden açar | ✅ | `consents/cookies` | D9 |
 | Çerez tercihleri (betiksiz) | `/cerez-tercihleri` | ✅ bandın formu, kaydedince "kaydedildi", `noindex,follow` | `consents/cookies` | D9 |

@@ -35,6 +35,18 @@ describe("menu links", () => {
     ).toEqual({ label: "İade politikası", path: "/yasal/iade-politikasi" })
   })
 
+  it("links the category index, the brand index and the sale page by name (docs/20)", () => {
+    expect(
+      ["categories", "brands", "sale"].map((target) =>
+        menuLink(link({ kind: "system", target }), t)
+      )
+    ).toEqual([
+      { label: "Kategoriler", path: "/kategoriler" },
+      { label: "Markalar", path: "/markalar" },
+      { label: "Kampanyalar", path: "/kampanyalar" },
+    ])
+  })
+
   it("drops a link without a name or an address", () => {
     expect(menuLink(link({ kind: "system", target: "nowhere" }), t)).toBeNull()
     expect(menuLink(link({ kind: "legal", target: "unknown", label: "X" }), t)).toBeNull()

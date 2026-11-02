@@ -58,7 +58,13 @@ medusaIntegrationTestRunner({
         items: [
           {
             link: { kind: "category", target: category, label: null },
-            children: [{ kind: "system", target: "shop", label: "Tüm ürünler" }],
+            children: [
+              { kind: "system", target: "shop", label: "Tüm ürünler" },
+              // The storefront's index pages (docs/20 "sayfalar"): named by the storefront
+              { kind: "system", target: "categories", label: null },
+              { kind: "system", target: "brands", label: null },
+              { kind: "system", target: "sale", label: "Kampanyalar" },
+            ],
           },
           { link: { kind: "page", target: draft, label: "Yakında" } },
           { link: { kind: "legal", target: "privacy_notice", label: null } },
@@ -123,6 +129,9 @@ medusaIntegrationTestRunner({
           path: links[0]?.path,
           children: [
             { label: "Tüm ürünler", kind: "system", target: "shop", path: null, children: [] },
+            { label: null, kind: "system", target: "categories", path: null, children: [] },
+            { label: null, kind: "system", target: "brands", path: null, children: [] },
+            { label: "Kampanyalar", kind: "system", target: "sale", path: null, children: [] },
           ],
         },
         {
@@ -200,7 +209,10 @@ medusaIntegrationTestRunner({
           section: "storefront",
           values: {
             menu: [{ label: "Bıçaklar", href: `${categoryPath ?? ""}/`, children: [] }],
-            top_links: [{ label: "Hakkımızda", href: "/hakkimizda" }],
+            top_links: [
+              { label: "Hakkımızda", href: "/hakkimizda" },
+              { label: "Kampanyalar", href: "/kampanyalar" },
+            ],
             footer_groups: [
               { title: "Yardım", links: [{ label: "Sepetim", href: "/sepet" }] },
               { title: "Sosyal", links: [{ label: "X", href: "https://x.com/ornek" }] },
@@ -224,7 +236,15 @@ medusaIntegrationTestRunner({
       ).toEqual([
         ["main", "Ana menü", [["category", category.id, "Bıçaklar"]]],
         // No such page: kept as the address it was
-        ["top", "Üst bağlantılar", [["url", null, "Hakkımızda"]]],
+        [
+          "top",
+          "Üst bağlantılar",
+          [
+            ["url", null, "Hakkımızda"],
+            // The sale page is the storefront's own: a system link
+            ["system", "sale", "Kampanyalar"],
+          ],
+        ],
         ["footer", "Yardım", [["system", "cart", "Sepetim"]]],
         ["footer", "Sosyal", [["url", null, "X"]]],
       ])

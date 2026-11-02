@@ -6,6 +6,7 @@ import { PageContainer } from "./components/Container"
 import { Filters } from "./components/Filters"
 import { Pages } from "./components/Pages"
 import { ProductGrid } from "./components/ProductCard"
+import { SearchHelp } from "./components/SearchHelp"
 import { Sections, type Subscribe } from "./home/Sections"
 
 /** The sort orders as links; a page's sort is never indexed (nofollow). */
@@ -34,8 +35,8 @@ function SortLinks({ view, t }: { view: ListingPageView; t: Translate }) {
 }
 
 /**
- * A category, brand, collection or landing page: the heading and its
- * subcategories, the filters beside the grid (folded above it on phones,
+ * A category, brand, collection or landing page, the sale page or a
+ * search's results: the heading and its subcategories (a search's help), the filters beside the grid (folded above it on phones,
  * without a script), what is chosen as removable chips, the sort, the
  * grid and the pages. The shop's sections (adr/0049) sit between the
  * heading and the grid, and below the pages.
@@ -84,6 +85,7 @@ export function ListingPage({
             </nav>
           )}
         </header>
+        {view.search && <SearchHelp help={view.search} t={t} />}
       </div>
 
       {top.length > 0 && (
@@ -163,7 +165,9 @@ export function ListingPage({
           ) : (
             view.description.length === 0 && (
               <p className="rounded-2xl border bg-card py-16 text-center text-muted-foreground">
-                {view.active.length > 0 ? t("listing.no_match") : t("listing.empty")}
+                {view.active.length > 0
+                  ? t("listing.no_match")
+                  : (view.empty ?? t("listing.empty"))}
               </p>
             )
           )}

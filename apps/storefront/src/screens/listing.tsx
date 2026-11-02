@@ -1,6 +1,6 @@
-import { redirect } from "next/navigation"
+import { notFound, redirect } from "next/navigation"
 import type { Resolution, StoreProduct } from "@qticaret/types"
-import type { BreadcrumbView, LinkView, SortOptionView } from "@qticaret/ui"
+import type { BreadcrumbView, LinkView, ListingPageView, SortOptionView } from "@qticaret/ui"
 import { subscribeNewsletter } from "@/app/actions/newsletter"
 import { t } from "@/lib/i18n"
 import { faqJsonLd } from "@/lib/seo/faq"
@@ -11,19 +11,20 @@ import {
   collectionById,
   landingById,
   listProducts,
-  listingPage,
   pathsOf,
   priceDisplays,
   storefrontSettings,
 } from "@/lib/store-api/requests"
+import { listingPage } from "@/lib/store-api/listings"
+import type { ListingAnswer, ListingType } from "@/lib/store-api/listings"
 import { childrenOf } from "@/lib/views/categories"
 import { swatchLookup } from "@/lib/views/color"
 import { filterViews } from "@/lib/views/facets"
 import { currentLayout } from "@/lib/views/layout"
 import {
   hrefOf,
+  listingQueryOf,
   priceAsked,
-  searchOf,
   stateOf,
   withPage,
   withPrice,
@@ -35,7 +36,6 @@ import { paragraphsOf } from "@/lib/views/text"
 import { theme } from "@/theme"
 
 type Entity = Extract<Resolution, { type: "entity" }>
-export type ListingType = "product_category" | "product_collection" | "brand" | "landing" | "all"
 
 interface Heading {
   title: string
@@ -85,30 +85,41 @@ async function headingOf(page: Entity): Promise<Heading> {
       const { collection } = await collectionById(page.entity_id)
       return { title: collection.title, description: [], subcategories: [] }
     }
+    case "sale":
+      // Its name is the backend's (the page's last crumb), as its title is
+      return {
+        title: page.seo?.breadcrumbs.at(-1)?.name ?? t("sale.title"),
+        description: [],
+        subcategories: [],
+      }
     case "product":
     case "page":
     case "post":
+    case "post_category":
+    case "post_tag":
       throw new Error(`${page.entity_type} is not a listing`)
   }
 }
 
 /**
- * A category, brand, collection or landing page (docs/13 §7, D4): its
- * products a page at a time, narrowed by the filters and the price range
- * in its address and sorted as asked, beside the filters it offers. Every
- * link is written in the backend's canonical form. The price form's two
- * fields come back as one `fiyat`, by a redirect.
+ * A category, brand, collection or landing page, or the products on sale
+ * (docs/13 §7, D4): its products a page at a time, narrowed by the filters
+ * and the price range in its address and sorted as asked, beside the
+ * filters it offers. Every link is written in the backend's canonical
+ * form. The price form's two fields come back as one `fiyat`, by a redirect.
  */
 export function ListingScreen({ page, url }: { page: Entity; url: URL }) {
+  const type = page.entity_type as ListingType
   return (
     <ListingContent
-      type={page.entity_type as ListingType}
-      id={page.entity_id}
+      type={type}
+      load={(query) => listingPage(type, page.entity_id, query)}
       state={stateOf(page.listing)}
       url={url}
       heading={() => headingOf(page)}
       breadcrumbs={(title) => breadcrumbsOf(page.seo, t("home.label"), title)}
       jsonLd={page.seo?.jsonLd ?? []}
+      extra={type === "sale" ? { empty: t("sale.empty") } : {}}
     />
   )
 }
@@ -121,37 +132,49 @@ async function listingSections() {
 }
 
 /**
- * One listing's page, whatever lists it: a record resolve found, or the
- * whole catalogue. The design's category page sections go on every kind
- * (category, brand, collection, landing, `/magaza`); their FAQ data only
- * on the list's first, unfiltered page, where its description shows too.
+ * One listing's page, whatever lists it: a record resolve found, the
+ * whole catalogue, or a site search. The design's category page sections
+ * go on every listing (category, brand, collection, landing, sale,
+ * `/magaza`), not on a search; their FAQ data only on the list's first,
+ * unfiltered page, where its description shows too. A page past the last
+ * is a 404 (docs/13 §7).
  */
 export async function ListingContent({
   type,
-  id,
+  load,
   state,
   url,
   heading: loadHeading,
   breadcrumbs,
   jsonLd,
+  extra = {},
 }: {
-  type: ListingType
-  id: string
+  type: ListingType | "search"
+  /** The page's answer, by the listing's own query (`query=`). */
+  load: (query: string) => Promise<ListingAnswer>
   state: ReturnType<typeof stateOf>
   url: URL
   heading: () => Promise<Heading>
   breadcrumbs: (title: string) => BreadcrumbView[]
   jsonLd: Parameters<typeof JsonLd>[0]["blocks"]
+  /** A search's help, a page's own words for an empty list. */
+  extra?: Pick<ListingPageView, "search" | "empty">
 }) {
   const asked = priceAsked(url.searchParams)
   if (asked !== undefined) {
     redirect(hrefOf(url.pathname, withPrice(state, asked)))
   }
+  const isSearch = type === "search"
   const [heading, answer, sections] = await Promise.all([
     loadHeading(),
-    listingPage(type, id, searchOf(state)),
-    listingSections(),
+    load(listingQueryOf(state)),
+    isSearch ? { top: [], bottom: [] } : listingSections(),
   ])
+  const pages = Math.max(1, Math.ceil(answer.count / answer.page_size))
+  const current = state.page
+  if (current > pages) {
+    notFound()
+  }
   const products = await productsByIds(answer.product_ids)
   const [paths, displays] = await Promise.all([
     pathsOf(
@@ -160,12 +183,11 @@ export async function ListingContent({
     ),
     priceDisplays(variantIdsOf(products)),
   ])
-  const pages = Math.max(1, Math.ceil(answer.count / answer.page_size))
-  const current = state.page
   const href = (each: typeof state) => hrefOf(url.pathname, each)
   const sort: SortOptionView[] = [
     {
-      label: t("listing.sort_recommended"),
+      // A search's own order is relevance
+      label: t(isSearch ? "search.sort_relevance" : "listing.sort_recommended"),
       path: href(withSort(state, null)),
       current: !state.sort,
     },
@@ -214,6 +236,7 @@ export async function ListingContent({
           total: answer.count,
           sort,
           ...facets,
+          ...extra,
           pagination: {
             page: current,
             pages,

@@ -5,12 +5,15 @@ import type { ListingSort, ListingView } from "@qticaret/types"
  * the backend's canonical form, so a link never costs a 301. `marka`
  * first, then the attribute keys in code-point order, each key's values
  * sorted; then `fiyat`, `sirala`, `sayfa` (no `sayfa=1`, no default sort).
+ * A site search's words (`q`) lead, kept by every link of its page.
  */
 export interface ListingState {
   filters: [string, string[]][]
   price: { min: number | null; max: number | null } | null
   sort: ListingSort | null
   page: number
+  /** The search's words on `/arama`; none on a listing. */
+  q?: string | null
 }
 
 const BRAND = "marka"
@@ -44,6 +47,9 @@ export function stateOf(listing: ListingView | undefined): ListingState {
 /** The query string, canonical; empty for the plain listing. */
 export function searchOf(state: ListingState): string {
   const params = new URLSearchParams()
+  if (state.q) {
+    params.append("q", state.q)
+  }
   for (const [key, values] of state.filters) {
     params.append(key, values.join(","))
   }
@@ -59,6 +65,9 @@ export function searchOf(state: ListingState): string {
   }
   return params.toString().replace(/%2C/g, ",")
 }
+
+/** The listing's own query as the listing route reads it (`query=`): the search's words aside. */
+export const listingQueryOf = (state: ListingState): string => searchOf({ ...state, q: null })
 
 export const hrefOf = (pathname: string, state: ListingState): string => {
   const search = searchOf(state)

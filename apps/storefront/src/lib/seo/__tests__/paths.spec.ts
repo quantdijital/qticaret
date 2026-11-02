@@ -1,8 +1,10 @@
 import { describe, expect, it } from "vitest"
 import {
   backendFile,
+  BLOG_ARCHIVE_PREFIXES,
   canonicalHostRedirect,
   indexNowFile,
+  isStorefrontIndex,
   isSystemPath,
   normalizedPath,
 } from "../paths"
@@ -42,6 +44,18 @@ describe("isSystemPath and backendFile", () => {
     expect(isSystemPath("/cerez-tercihleri")).toBe(true)
     expect(normalizedPath("/abonelik/cik")).toBeNull()
     expect(isSystemPath("/abonelikler-hakkinda")).toBe(false)
+  })
+
+  it("makes the category and brand indexes itself; resolve answers the sale page and archives", () => {
+    expect(isStorefrontIndex("/kategoriler")).toBe(true)
+    expect(isStorefrontIndex("/markalar")).toBe(true)
+    expect(isStorefrontIndex("/kampanyalar")).toBe(false)
+    expect(isStorefrontIndex("/kategoriler/bicak")).toBe(false)
+    for (const prefix of Object.values(BLOG_ARCHIVE_PREFIXES)) {
+      expect(isSystemPath(`${prefix}/bakim`)).toBe(false)
+      expect(isStorefrontIndex(`${prefix}/bakim`)).toBe(false)
+      expect(normalizedPath(`${prefix}/bakim`)).toBeNull()
+    }
   })
 
   it("maps the root files to the backend", () => {

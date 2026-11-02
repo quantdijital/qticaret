@@ -1,4 +1,4 @@
-import type { LinkView, NavCategoryView } from "@qticaret/ui"
+import type { CategoryTreeView, LinkView, NavCategoryView } from "@qticaret/ui"
 import type { StoreCategory } from "@qticaret/types"
 
 const byRank = (a: StoreCategory, b: StoreCategory) =>
@@ -39,4 +39,28 @@ export function navigation(
     })
     return [{ label: top.name, path, children }]
   })
+}
+
+// The index shows the tree this deep; deeper categories are on their parents' pages
+const TREE_DEPTH = 4
+
+/**
+ * Every category as a tree (`/kategoriler`): the top ones with the ones
+ * below them, in the shop's order. A category without a live path is left
+ * out with what is below it, as the menu does.
+ */
+export function categoryTree(
+  categories: readonly StoreCategory[],
+  paths: Record<string, string>
+): CategoryTreeView[] {
+  const below = (parentId: string | null, depth: number): CategoryTreeView[] =>
+    depth > TREE_DEPTH
+      ? []
+      : childrenOf(categories, parentId).flatMap((category) => {
+          const path = paths[category.id]
+          return path
+            ? [{ label: category.name, path, children: below(category.id, depth + 1) }]
+            : []
+        })
+  return below(null, 1)
 }

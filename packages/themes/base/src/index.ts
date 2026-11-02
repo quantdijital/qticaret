@@ -2,7 +2,9 @@ import type { StorefrontTheme } from "@qticaret/ui"
 import { AccountPage } from "./AccountPage"
 import { AuthPage } from "./AuthPage"
 import { BlogIndexPage } from "./BlogIndexPage"
+import { BrandsPage } from "./BrandsPage"
 import { CartPage } from "./CartPage"
+import { CategoriesPage } from "./CategoriesPage"
 import { CheckoutPage } from "./CheckoutPage"
 import { ConfirmPage } from "./ConfirmPage"
 import { CheckoutResultPage } from "./CheckoutResultPage"
@@ -26,6 +28,8 @@ export const baseTheme: StorefrontTheme = {
   ListingPage,
   ContentPage,
   BlogIndexPage,
+  CategoriesPage,
+  BrandsPage,
   CartPage,
   CheckoutPage,
   PaymentFramePage,

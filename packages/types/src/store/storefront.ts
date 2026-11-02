@@ -94,6 +94,22 @@ export interface LegalIdentity {
   map_url: string | null
 }
 
+/** A blog category or tag a post is filed under, at its archive's path (adr/0019 ek 2026-11-03). */
+export interface StoreContentTerm {
+  id: string
+  name: string
+  handle: string
+  /** `/blog/kategori/{handle}` or `/blog/etiket/{handle}`. */
+  path: string
+}
+
+/** `GET /store/content/terms?kind=`: a category or tag with live posts, in the shop's order. */
+export interface StoreContentTermSummary extends StoreContentTerm {
+  kind: "category" | "tag"
+  description: string | null
+  post_count: number
+}
+
 /** `GET /store/content?kind=post`: a live post as a list shows it (F3.16). */
 export interface StoreContentSummary {
   id: string
@@ -108,4 +124,7 @@ export interface StoreContentSummary {
   published_at: string | null
   revised_at: string | null
   reading_minutes: number
+  /** A post's category and tags; a page has neither. */
+  category?: StoreContentTerm | null
+  tags?: StoreContentTerm[]
 }

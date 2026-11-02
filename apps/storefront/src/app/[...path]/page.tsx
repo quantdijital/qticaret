@@ -3,6 +3,7 @@ import { notFound, permanentRedirect, redirect } from "next/navigation"
 import { t } from "@/lib/i18n"
 import { metadataOf } from "@/lib/seo/metadata"
 import { resolvePath } from "@/lib/store-api/requests"
+import { blogPageOf, pagedSeo } from "@/lib/views/blog"
 import { EntityScreen } from "@/screens/entity"
 import { requestedUrl } from "@/screens/url"
 
@@ -12,9 +13,12 @@ async function resolution() {
 }
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { page } = await resolution()
+  const { url, page } = await resolution()
   if (page.type === "entity" && page.seo) {
-    return metadataOf(page.seo)
+    // A blog archive's later page is its own page (docs/13 §7); listings come paged from resolve
+    const isArchive = page.entity_type === "post_category" || page.entity_type === "post_tag"
+    const number = isArchive ? (blogPageOf(url.searchParams.get("sayfa") ?? undefined) ?? 1) : 1
+    return metadataOf(pagedSeo(page.seo, url.pathname, number, t))
   }
   return { title: { absolute: t("not_found.title") }, robots: "noindex,follow" }
 }

@@ -1,7 +1,8 @@
 import type { Metadata } from "next"
 import { t } from "@/lib/i18n"
 import { siteSeo } from "@/lib/store-api/requests"
-import { BlogIndexScreen, blogPageOf, blogPagePath } from "@/screens/blog"
+import { blogPageOf, blogPagePath } from "@/lib/views/blog"
+import { BlogIndexScreen } from "@/screens/blog"
 import type { Query } from "@/screens/shop"
 
 export async function generateMetadata({
@@ -10,8 +11,8 @@ export async function generateMetadata({
   searchParams: Promise<Query>
 }): Promise<Metadata> {
   const [site, query] = await Promise.all([siteSeo(), searchParams])
-  const page = blogPageOf(query) ?? 1
-  const path = blogPagePath(page)
+  const page = blogPageOf(query["sayfa"]) ?? 1
+  const path = blogPagePath("/blog", page)
   const title = `${t("blog.title")} | ${site.shop.name}`
   return {
     title: { absolute: page > 1 ? `${title} – ${t("listing.page_n", { page })}` : title },

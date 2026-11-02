@@ -308,6 +308,45 @@ export interface ListingPageView {
   sectionsTop?: HomeSectionView[]
   /** …and below the pages. */
   sectionsBottom?: HomeSectionView[]
+  /** A site search's help (`/arama`); none on other lists. */
+  search?: SearchHelpView | null
+  /** The empty list's words, when the page has its own (a search, the sale page). */
+  empty?: string | null
+}
+
+/** A site search's help (`/arama`, adr/0046 ek 2026-11-03): every item already a link. */
+export interface SearchHelpView {
+  /** "Bunu mu demek istediniz": phrases the catalogue spells, each its own search. */
+  suggestions: LinkView[]
+  /** The categories most results are in, at their pages. */
+  categories: LinkView[]
+  /** The brands most results are in, each narrowing this search to it (a filter, nofollow). */
+  brands: LinkView[]
+}
+
+/** A category in the index (`/kategoriler`): its page and the categories below it. */
+export interface CategoryTreeView extends LinkView {
+  children: CategoryTreeView[]
+}
+
+/** `/kategoriler`: every live category as a tree, in the shop's order. */
+export interface CategoriesPageView {
+  title: string
+  breadcrumbs: BreadcrumbView[]
+  categories: CategoryTreeView[]
+}
+
+/** A brand in the index (`/markalar`): its page, and its logo when it has one. */
+export interface BrandLinkView extends LinkView {
+  logo: ImageView | null
+}
+
+/** `/markalar`: the shop's brands by first letter, in Turkish alphabetical order. */
+export interface BrandsPageView {
+  title: string
+  breadcrumbs: BreadcrumbView[]
+  /** "A", "Ç", "İ"…; names that start with no letter last, under "#". */
+  groups: { letter: string; anchor: string; brands: BrandLinkView[] }[]
 }
 
 /**
@@ -388,6 +427,14 @@ export interface PostCardView {
   dateTime: string | null
   /** "5 dk okuma", already in words. */
   reading: string
+  /** The post's category, at its archive (adr/0019 ek 2026-11-03); null when it has none. */
+  category?: LinkView | null
+}
+
+/** A link in the blog's bar of categories: "all posts" first, then each category. */
+export interface BlogTermLinkView extends LinkView {
+  /** The page this is (the index, or this category's archive). */
+  current: boolean
 }
 
 export interface BlogIndexPageView {
@@ -395,6 +442,10 @@ export interface BlogIndexPageView {
   breadcrumbs: BreadcrumbView[]
   posts: PostCardView[]
   pagination: PaginationView
+  /** The blog's categories with live posts; none: no bar. */
+  terms?: BlogTermLinkView[]
+  /** On a category's or tag's archive: which, and its own words; null on the index. */
+  activeTerm?: { kind: "category" | "tag"; name: string; description: string[] } | null
 }
 
 export interface ContentPageView {
@@ -409,6 +460,9 @@ export interface ContentPageView {
   contact?: ContactView | null
   /** A line above the page, in words: a draft's preview says it is one. */
   notice?: string | null
+  /** A post's category and tags, at their archives (adr/0019 ek 2026-11-03). */
+  category?: LinkView | null
+  tags?: LinkView[]
 }
 
 /** The storefront's contact form (adr/0047): a signed-in customer's name and address filled in. */

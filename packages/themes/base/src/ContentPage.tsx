@@ -1,4 +1,4 @@
-import type { ContactActions, ContentPageView, Translate } from "@qticaret/ui"
+import type { ContactActions, ContentPageView, LinkView, Translate } from "@qticaret/ui"
 import { Breadcrumbs } from "./components/Breadcrumbs"
 import { ContactDetails } from "./components/ContactDetails"
 import { ContactForm } from "./components/ContactForm"
@@ -31,6 +31,27 @@ const contactWords = (t: Translate): ContactWords => ({
   fallback: t("contact.failed"),
 })
 
+/** A post's tags under its text, each a link to its archive. */
+function Tags({ tags, t }: { tags: LinkView[]; t: Translate }) {
+  return (
+    <section className="flex flex-col gap-3 border-t pt-6">
+      <h2 className="text-sm font-semibold text-muted-foreground">{t("blog.tags")}</h2>
+      <ul className="flex flex-wrap gap-2">
+        {tags.map((tag) => (
+          <li key={tag.path}>
+            <a
+              href={tag.path}
+              className="inline-flex h-10 items-center rounded-full border bg-card px-4 text-sm font-medium transition-colors hover:border-foreground"
+            >
+              {tag.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
 /**
  * A content page or a blog post: the backend's sanitised HTML in a
  * readable column; on the shop's contact page, how to reach the shop (its
@@ -55,6 +76,17 @@ export function ContentPage({
         )}
         <header className="flex flex-col gap-5 border-b pb-8">
           <Breadcrumbs items={view.breadcrumbs} t={t} />
+          {view.category && (
+            <p className="text-sm">
+              <span className="text-muted-foreground">{t("blog.category")}: </span>
+              <a
+                href={view.category.path}
+                className="font-semibold underline underline-offset-4 hover:no-underline"
+              >
+                {view.category.label}
+              </a>
+            </p>
+          )}
           <h1 className="text-4xl leading-[1.08] text-balance lg:text-5xl">{view.title}</h1>
         </header>
         <div
@@ -62,6 +94,7 @@ export function ContentPage({
           // adr/0019: built by the backend from an allow-listed document schema
           dangerouslySetInnerHTML={{ __html: view.html }}
         />
+        {view.tags && view.tags.length > 0 && <Tags tags={view.tags} t={t} />}
         {view.contact && <ContactDetails contact={view.contact} t={t} />}
         {view.contactForm && actions && (
           <ContactForm

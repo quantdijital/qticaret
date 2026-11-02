@@ -1,4 +1,4 @@
-import type { Resolution } from "@qticaret/types"
+import type { Resolution, StoreContentTerm } from "@qticaret/types"
 import type { ContactFormView, ContactView } from "@qticaret/ui"
 import { sendContact } from "@/app/actions/contact"
 import { currentCustomer } from "@/lib/account/auth"
@@ -7,6 +7,7 @@ import { legalDocument, legalPath } from "@/lib/views/legal"
 import { JsonLd } from "@/lib/seo/JsonLd"
 import { legalIdentity, storefrontSettings } from "@/lib/store-api/requests"
 import { storeGet } from "@/lib/store-api/server"
+import { postTerms } from "@/lib/views/posts"
 import { breadcrumbsOf } from "@/lib/views/product"
 import { contactOf } from "@/lib/views/shop"
 import { theme } from "@/theme"
@@ -18,6 +19,9 @@ interface ContentEntry {
   title: string
   html: string
   published_at: string | null
+  /** A post's, at their archives (adr/0019 ek 2026-11-03); a page has none. */
+  category?: StoreContentTerm | null
+  tags?: StoreContentTerm[]
 }
 
 // `kvkk`: a guest's data request (adr/0047 Ek 2026-11-02); a customer asks from the account too
@@ -51,7 +55,7 @@ async function contactOfPage(
   }
 }
 
-/** A content page or blog post (F3.16): the backend's sanitised HTML (adr/0019). */
+/** A content page or blog post (F3.16): the backend's sanitised HTML (adr/0019), a post's category and tags. */
 export async function ContentScreen({ page }: { page: Entity }) {
   const [{ entry }, contact] = await Promise.all([
     storeGet<{ entry: ContentEntry }>(`/store/content/${encodeURIComponent(page.entity_id)}`),
@@ -70,6 +74,7 @@ export async function ContentScreen({ page }: { page: Entity }) {
           breadcrumbs: breadcrumbsOf(page.seo, t("home.label"), entry.title),
           contactForm: contact?.form ?? null,
           contact: contact?.contact ?? null,
+          ...postTerms(entry),
         }}
       />
     </>

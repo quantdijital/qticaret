@@ -23,9 +23,26 @@ export const SYSTEM_ROOTS = [
 /**
  * Index pages the storefront makes itself under a reserved root (backend
  * `RESERVED_ROOT_SEGMENTS`): exactly these paths skip resolve; the records
- * under them (`/blog/{handle}`) still go through it.
+ * under them (`/blog/{handle}`) still go through it. `/kampanyalar` is
+ * reserved too, but resolve answers it (`sale`: its listing query, its
+ * seo object), so it is no index of ours.
  */
-export const STOREFRONT_INDEXES = ["/blog", "/magaza", "/yorumlar"] as const
+export const STOREFRONT_INDEXES = [
+  "/blog",
+  "/magaza",
+  "/yorumlar",
+  // Every category, every brand (docs/20 "sayfalar")
+  "/kategoriler",
+  "/markalar",
+] as const
+
+/**
+ * Deeper paths the storefront keeps (backend `RESERVED_PATHS`): the blog's
+ * archive prefixes (adr/0019 ek 2026-11-03). No post takes `kategori` or
+ * `etiket` as its handle; the archives under them
+ * (`/blog/kategori/{handle}`) go through resolve.
+ */
+export const BLOG_ARCHIVE_PREFIXES = { category: "/blog/kategori", tag: "/blog/etiket" } as const
 
 export const isStorefrontIndex = (pathname: string): boolean =>
   (STOREFRONT_INDEXES as readonly string[]).includes(pathname)

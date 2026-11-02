@@ -1,6 +1,7 @@
 import { headers } from "next/headers"
 import { t } from "@/lib/i18n"
 import { breadcrumbJsonLd } from "@/lib/seo/breadcrumbs"
+import { listingPage } from "@/lib/store-api/listings"
 import { siteSeo } from "@/lib/store-api/requests"
 import { searchOf, stateFromSearch } from "@/lib/views/listing"
 import { ListingContent } from "./listing"
@@ -46,7 +47,7 @@ export async function ShopScreen({ query }: { query: Query }) {
   return (
     <ListingContent
       type="all"
-      id="all"
+      load={(listing) => listingPage("all", "all", listing)}
       state={state}
       url={url}
       heading={() =>

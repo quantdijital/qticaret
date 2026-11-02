@@ -1,6 +1,6 @@
 import { formatLira } from "@qticaret/ui"
 import type { FilterGroupView, LinkView, PriceFilterView, Translate } from "@qticaret/ui"
-import type { ListingAnswer } from "@/lib/store-api/requests"
+import type { ListingAnswer } from "@/lib/store-api/listings"
 import { cleared, hrefOf, searchOf, toggled, withPrice } from "./listing"
 import type { ListingState } from "./listing"
 

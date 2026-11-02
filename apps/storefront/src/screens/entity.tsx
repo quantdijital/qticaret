@@ -1,4 +1,5 @@
 import type { Resolution } from "@qticaret/types"
+import { BlogArchiveScreen } from "./blog"
 import { ContentScreen } from "./content"
 import { ListingScreen } from "./listing"
 import { ProductScreen } from "./product"
@@ -16,10 +17,14 @@ export function EntityScreen({ page, url }: { page: Entity; url: URL }) {
     case "page":
     case "post":
       return <ContentScreen page={page} />
+    case "post_category":
+    case "post_tag":
+      return <BlogArchiveScreen page={page} url={url} />
     case "product_category":
     case "product_collection":
     case "brand":
     case "landing":
+    case "sale":
       return <ListingScreen page={page} url={url} />
   }
 }

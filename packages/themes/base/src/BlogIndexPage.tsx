@@ -1,18 +1,61 @@
-import type { BlogIndexPageView, Translate } from "@qticaret/ui"
+import type { BlogIndexPageView, BlogTermLinkView, Translate } from "@qticaret/ui"
+import { cn } from "@qticaret/ui/lib/utils"
 import { Breadcrumbs } from "./components/Breadcrumbs"
 import { PageContainer } from "./components/Container"
 import { Pages } from "./components/Pages"
 import { PostCard } from "./components/PostCard"
 
-/** The blog's posts, newest first: a card per post, one link to it. */
+/** The blog's categories as a row of links, the page shown marked; scrolls sideways on phones. */
+function TermBar({ terms, t }: { terms: BlogTermLinkView[]; t: Translate }) {
+  return (
+    <nav aria-label={t("blog.categories")} className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+      <ul className="flex w-max gap-2 pb-1">
+        {terms.map((term) => (
+          <li key={term.path}>
+            <a
+              href={term.path}
+              aria-current={term.current ? "page" : undefined}
+              className={cn(
+                "inline-flex h-10 items-center rounded-full border bg-card px-5 text-sm font-medium whitespace-nowrap transition-colors hover:border-foreground",
+                term.current && "border-foreground bg-foreground text-background"
+              )}
+            >
+              {term.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )
+}
+
+/**
+ * The blog's posts, newest first, or one category's or tag's (an
+ * archive): the categories as a bar above, a card per post, one link to it.
+ */
 export function BlogIndexPage({ view, t }: { view: BlogIndexPageView; t: Translate }) {
+  const terms = view.terms ?? []
+  const archive = view.activeTerm ?? null
   return (
     <PageContainer className="flex flex-col gap-8">
       <Breadcrumbs items={view.breadcrumbs} t={t} />
-      <h1 className="text-4xl leading-tight lg:text-5xl">{view.title}</h1>
+      <header className="flex flex-col gap-3">
+        {archive && (
+          <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+            {t(archive.kind === "tag" ? "blog.tag" : "blog.category")}
+          </p>
+        )}
+        <h1 className="text-4xl leading-tight break-words lg:text-5xl">{view.title}</h1>
+        {archive?.description.map((paragraph, index) => (
+          <p key={String(index)} className="max-w-3xl text-lg text-muted-foreground">
+            {paragraph}
+          </p>
+        ))}
+      </header>
+      {terms.length > 0 && <TermBar terms={terms} t={t} />}
       {view.posts.length === 0 ? (
         <p className="rounded-2xl border bg-card py-16 text-center text-muted-foreground">
-          {t("blog.empty")}
+          {t(archive ? "blog.archive_empty" : "blog.empty")}
         </p>
       ) : (
         <ul className="grid gap-x-8 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">

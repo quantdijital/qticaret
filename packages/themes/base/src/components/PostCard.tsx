@@ -2,7 +2,11 @@ import { ResponsiveImage } from "@qticaret/ui"
 import type { PostCardView } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 
-/** A blog post in a list: its picture (or a quiet panel), date, title and summary; one link. */
+/**
+ * A blog post in a list: its picture (or a quiet panel), category, date,
+ * title and summary; the card one link to the post, its category a link
+ * of its own above it.
+ */
 export function PostCard({
   post,
   priority = false,
@@ -38,7 +42,18 @@ export function PostCard({
         )}
       </div>
       <div className="flex flex-col gap-2">
-        <p className="flex gap-2 text-xs font-medium text-muted-foreground">
+        <p className="flex flex-wrap items-center gap-x-2 text-xs font-medium text-muted-foreground">
+          {post.category && (
+            <>
+              <a
+                href={post.category.path}
+                className="relative z-10 -my-3 inline-flex min-h-10 items-center font-semibold text-foreground hover:underline hover:underline-offset-4"
+              >
+                {post.category.label}
+              </a>
+              <span aria-hidden="true">·</span>
+            </>
+          )}
           {post.date && post.dateTime && <time dateTime={post.dateTime}>{post.date}</time>}
           {post.date && <span aria-hidden="true">·</span>}
           <span>{post.reading}</span>
