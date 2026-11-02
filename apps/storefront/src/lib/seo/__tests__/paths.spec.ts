@@ -4,6 +4,7 @@ import {
   BLOG_ARCHIVE_PREFIXES,
   canonicalHostRedirect,
   indexNowFile,
+  isStaticFile,
   isStorefrontIndex,
   isSystemPath,
   normalizedPath,
@@ -109,5 +110,36 @@ describe("indexNowFile", () => {
 
   it("answers nothing while the shop does not announce", () => {
     expect(indexNowFile(`/${key}.txt`, null)).toBeNull()
+  })
+})
+
+describe("isStaticFile", () => {
+  it("knows the app's metadata files and the self-hosted faces, exactly", () => {
+    for (const path of [
+      "/icon.svg",
+      "/apple-icon.png",
+      "/manifest.webmanifest",
+      "/favicon.ico",
+      "/fonts/inter-latin.c940764593.woff2",
+      "/fonts/source-sans-tr.2739d40613.woff2",
+    ]) {
+      expect(isStaticFile(path)).toBe(true)
+    }
+  })
+
+  it("is never a page whose path only starts or ends like one", () => {
+    for (const path of [
+      "/icon.svg/x",
+      "/icon.svgx",
+      "/urun/icon.svg",
+      "/fonts",
+      "/fonts/inter.woff2",
+      "/fonts/../sepet",
+      "/fonts/inter-latin.c940764593.woff2/x",
+      "/kategori/fonts/inter-latin.c940764593.woff2",
+      "/manifest.json",
+    ]) {
+      expect(isStaticFile(path)).toBe(false)
+    }
   })
 })

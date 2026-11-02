@@ -25,4 +25,11 @@ describe("forgetting by scope", () => {
     expect(caches.edge.has("site")).toBe(false)
     expect([...caches.shared.keys()]).toEqual(["/store/product-categories?{}"])
   })
+
+  it("drops every kept resolve answer whatever the scope", () => {
+    const caches = storeCaches()
+    caches.resolve.set("/urun/keten-gomlek", { until: Date.now() + 10_000, value: {} })
+    forgetScopes(["menus"])
+    expect(caches.resolve.size).toBe(0)
+  })
 })

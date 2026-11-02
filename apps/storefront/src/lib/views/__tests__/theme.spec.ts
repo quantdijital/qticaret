@@ -1,13 +1,6 @@
 import { describe, expect, it } from "vitest"
 import type { StoreThemeSettings } from "@qticaret/types"
-import {
-  DEFAULT_THEME,
-  THEME_BACKGROUNDS,
-  themeFonts,
-  themeSettings,
-  themeStyle,
-  themeView,
-} from "../theme"
+import { DEFAULT_THEME, THEME_BACKGROUNDS, themeSettings, themeStyle, themeView } from "../theme"
 
 const theme = (patch: Partial<StoreThemeSettings>): StoreThemeSettings => ({
   ...DEFAULT_THEME,
@@ -117,7 +110,7 @@ describe("themeStyle", () => {
   })
 })
 
-describe("themeView and themeFonts", () => {
+describe("themeView", () => {
   it("hands the theme the choices that change markup", () => {
     expect(themeView(DEFAULT_THEME)).toEqual({
       card: { ratio: "4:5", showBrand: true, showRating: false },
@@ -135,12 +128,5 @@ describe("themeView and themeFonts", () => {
       card: { ratio: "1:1", showBrand: false, showRating: true },
       header: { layout: "left", sticky: false },
     })
-  })
-
-  it("names the faces whose classes go on <html>, once each", () => {
-    expect(themeFonts(DEFAULT_THEME)).toEqual(["fraunces", "inter"])
-    expect(themeFonts(theme({ typography: { heading: "manrope", body: "manrope" } }))).toEqual([
-      "manrope",
-    ])
   })
 })

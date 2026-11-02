@@ -14,7 +14,7 @@
 | Stil | Tailwind v4 (CSS-first) | Token'lar CSS değişkeni; tema değerleri değiştirir |
 | Bileşen | shadcn/ui (new-york, Radix), `@qticaret/ui/components/*` | Panelle aynı sürümler; kod bizde; her tema paylaşır |
 | İkon | lucide-react | Tek set; marka ikonları yok (sosyal bağlantılar yazıyla) |
-| Yazı tipi | Varsayılan Fraunces + Inter; mağaza seçebilir: Playfair Display, DM Serif Display, Manrope, Source Sans 3, Nunito (`next/font/google`, derlemede indirilir, kendi sunucumuzdan; yalnız varsayılan ikisi önyüklenir) | Türkçe karakterler tam (latin-ext); tarayıcıdan Google'a istek gitmez (KVKK), CSP `font-src 'self'` |
+| Yazı tipi | Varsayılan Fraunces + Inter; mağaza seçebilir: Playfair Display, DM Serif Display, Manrope, Source Sans 3, Nunito (kendi sunucumuzdan `public/fonts`, `app/fonts.css`; yüz başına `latin` + Türkçe harfler dosyası; yalnız mağazanın seçtiği iki yüz önyüklenir, docs/21) | Türkçe karakterler tam (Ğ ğ İ ı Ş ş ₺); tarayıcıdan Google'a istek gitmez (KVKK), CSP `font-src 'self'` |
 | Formlar | Sunucu eylemleri (Server Actions) + yerel form öğeleri | Sayfanın betiği yüklenmeden de çalışır |
 | Test | Vitest (görünüm modelleri), Playwright (e2e, ekran karşılaştırma), axe | §9 |
 

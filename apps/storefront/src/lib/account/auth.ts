@@ -1,6 +1,8 @@
 import "server-only"
+import { cache } from "react"
 import { isStoreApiError } from "../store-api/errors"
 import { storeCall, storeGet, storePost } from "../store-api/server"
+import { claimsOf, sessionToken } from "./session"
 
 /**
  * The customer's sign-in calls (D8, adr/0004, adr/0037): Medusa's
@@ -103,8 +105,19 @@ export interface StoreCustomer {
   phone: string | null
 }
 
-/** The signed-in customer; null without a session (or with one the backend no longer takes). */
-export async function currentCustomer(): Promise<StoreCustomer | null> {
+/**
+ * The signed-in customer; null without a session (or with one the backend
+ * no longer takes). Without a session cookie, or with a token past its end
+ * (never sent, `store-api/server.ts`), nothing is asked: the answer is a
+ * 401 every time (docs/21). Asked once per request (the layout and the
+ * page both want it).
+ */
+export const currentCustomer = cache(async (): Promise<StoreCustomer | null> => {
+  const token = await sessionToken()
+  const exp = token ? claimsOf(token).exp : undefined
+  if (!token || (exp !== undefined && exp * 1000 <= Date.now())) {
+    return null
+  }
   try {
     const { customer } = await storeGet<{ customer: StoreCustomer }>("/store/customers/me", {
       fields: "id,email,first_name,last_name,phone",
@@ -116,7 +129,7 @@ export async function currentCustomer(): Promise<StoreCustomer | null> {
     }
     throw error
   }
-}
+})
 
 /** The shopper's open cart becomes the customer's (Medusa's cart transfer). */
 export function claimCart(cartId: string, token: string) {

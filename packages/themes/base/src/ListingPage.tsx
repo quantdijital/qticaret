@@ -123,9 +123,10 @@ export function ListingPage({
 
         <div className="flex min-w-0 flex-col gap-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <p className="text-sm font-medium text-muted-foreground">
+            {/* The grid's heading: the cards' names (h3) sit under it, never straight under the h1 */}
+            <h2 className="font-sans text-sm font-medium tracking-normal text-muted-foreground">
               {t("listing.count", { count: view.total })}
-            </p>
+            </h2>
             <SortLinks view={view} t={t} />
           </div>
 

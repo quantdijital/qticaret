@@ -16,6 +16,7 @@ import type {
   StorefrontAnswer,
 } from "@qticaret/types"
 import { isStoreApiError } from "./errors"
+import { keepResolution, keptResolution } from "./resolutions"
 import { storeGet, storePublicGet } from "./server"
 
 /**
@@ -28,9 +29,16 @@ export interface SiteAnswer extends SiteSeo {
   home: SeoPayload
 }
 
-export const resolvePath = cache((path: string) =>
-  storeGet<Resolution>("/store/seo/resolve", { path })
-)
+/** A path's answer; the proxy's, when it resolved the same path seconds ago (`resolutions.ts`). */
+export const resolvePath = cache(async (path: string): Promise<Resolution> => {
+  const kept = keptResolution(path)
+  if (kept) {
+    return kept
+  }
+  const answer = await storeGet<Resolution>("/store/seo/resolve", { path })
+  keepResolution(path, answer)
+  return answer
+})
 
 export const siteSeo = cache(() => storePublicGet<SiteAnswer>("/store/seo/site"))
 

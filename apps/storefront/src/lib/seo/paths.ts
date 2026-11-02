@@ -48,6 +48,25 @@ export const STOREFRONT_INDEXES = [
  */
 export const BLOG_ARCHIVE_PREFIXES = { category: "/blog/kategori", tag: "/blog/etiket" } as const
 
+/**
+ * Files Next or `public/` serve as they are: the app's metadata files
+ * (`app/icon.svg`; the others if ever added) and the self-hosted faces
+ * (`app/fonts.css`, a content hash in each name). Never a page: no
+ * resolve, no 404 report, no maintenance page. `proxy.ts`'s matcher
+ * leaves the same addresses out, exactly these and nothing that only
+ * starts like them.
+ */
+const METADATA_FILES: readonly string[] = [
+  "/favicon.ico",
+  "/icon.svg",
+  "/apple-icon.png",
+  "/manifest.webmanifest",
+]
+const FONT_FILE = /^\/fonts\/[a-z-]+\.[0-9a-f]{10}\.woff2$/
+
+export const isStaticFile = (pathname: string): boolean =>
+  METADATA_FILES.includes(pathname) || FONT_FILE.test(pathname)
+
 export const isStorefrontIndex = (pathname: string): boolean =>
   (STOREFRONT_INDEXES as readonly string[]).includes(pathname)
 

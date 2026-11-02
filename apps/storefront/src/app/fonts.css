@@ -1,0 +1,225 @@
+/*
+ * The faces a shop may choose (docs/19 §3, adr/0053 §B), served from this
+ * origin (`public/fonts`): no request reaches a font host from a shopper's
+ * browser (KVKK) and the CSP stays `font-src 'self'`. A face costs nothing
+ * until a page draws text in it; the layout preloads the shop's two
+ * (`app/fonts.ts`, docs/21 "Yapılanlar 2026-11-03").
+ *
+ * Each face is two files: Google Fonts' `latin` file and a file of the
+ * Turkish letters outside it (Ğ ğ İ Ş ş ₺; ı is in `latin`), cut from its
+ * `latin-ext` file. `latin-ext` whole cost 6-80 KB a face for six glyphs.
+ * Fraunces is pinned at `SOFT` 50, the only value the theme uses.
+ * The file name carries its content hash: a changed file is a new
+ * address, so the files are kept a year (`next.config.ts`).
+ *
+ * Each face has a fallback with Arial's or Times New Roman's metrics
+ * stretched to its own (next/font's figures): text drawn before the file
+ * arrives takes the same room, so the swap moves nothing (CLS).
+ *
+ * OFL 1.1: each file keeps its copyright and licence address. The two
+ * files cut from a face with a reserved name (Playfair Display, Source
+ * Sans 3) carry another name inside; the family names here are our own.
+ */
+
+@font-face {
+  font-family: "qt-inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/inter-latin.c940764593.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "qt-inter";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/inter-tr.51341ab647.woff2") format("woff2");
+  unicode-range: U+011E-011F, U+0130, U+015E-015F, U+20BA;
+}
+@font-face {
+  font-family: "qt-inter-fallback";
+  src: local("Arial");
+  ascent-override: 90.44%;
+  descent-override: 22.52%;
+  line-gap-override: 0%;
+  size-adjust: 107.12%;
+}
+
+@font-face {
+  font-family: "qt-fraunces";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/fraunces-latin.22258e288b.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "qt-fraunces";
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/fonts/fraunces-tr.001f80ce8b.woff2") format("woff2");
+  unicode-range: U+011E-011F, U+0130, U+015E-015F, U+20BA;
+}
+@font-face {
+  font-family: "qt-fraunces-fallback";
+  src: local("Times New Roman");
+  ascent-override: 84.71%;
+  descent-override: 22.09%;
+  line-gap-override: 0%;
+  size-adjust: 115.45%;
+}
+
+@font-face {
+  font-family: "qt-playfair";
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url("/fonts/playfair-latin.5d91eb5d52.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* No ₺ in this face: the fallback draws it */
+@font-face {
+  font-family: "qt-playfair";
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url("/fonts/playfair-tr.a7772d5272.woff2") format("woff2");
+  unicode-range: U+011E-011F, U+0130, U+015E-015F;
+}
+@font-face {
+  font-family: "qt-playfair-fallback";
+  src: local("Times New Roman");
+  ascent-override: 97.25%;
+  descent-override: 22.56%;
+  line-gap-override: 0%;
+  size-adjust: 111.26%;
+}
+
+/* One weight only: the face has no others */
+@font-face {
+  font-family: "qt-dm-serif";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/dm-serif-latin.f273cf2c9c.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* No ₺ in this face: the fallback draws it */
+@font-face {
+  font-family: "qt-dm-serif";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/dm-serif-tr.556a09927e.woff2") format("woff2");
+  unicode-range: U+011E-011F, U+0130, U+015E-015F;
+}
+@font-face {
+  font-family: "qt-dm-serif-fallback";
+  src: local("Times New Roman");
+  ascent-override: 94.37%;
+  descent-override: 30.51%;
+  line-gap-override: 0%;
+  size-adjust: 109.78%;
+}
+
+@font-face {
+  font-family: "qt-manrope";
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url("/fonts/manrope-latin.8bd97e6bbb.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "qt-manrope";
+  font-style: normal;
+  font-weight: 200 800;
+  font-display: swap;
+  src: url("/fonts/manrope-tr.d4c13b9d87.woff2") format("woff2");
+  unicode-range: U+011E-011F, U+0130, U+015E-015F, U+20BA;
+}
+@font-face {
+  font-family: "qt-manrope-fallback";
+  src: local("Arial");
+  ascent-override: 103.31%;
+  descent-override: 29.07%;
+  line-gap-override: 0%;
+  size-adjust: 103.19%;
+}
+
+@font-face {
+  font-family: "qt-source-sans";
+  font-style: normal;
+  font-weight: 200 900;
+  font-display: swap;
+  src: url("/fonts/source-sans-latin.587435ca9d.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "qt-source-sans";
+  font-style: normal;
+  font-weight: 200 900;
+  font-display: swap;
+  src: url("/fonts/source-sans-tr.2739d40613.woff2") format("woff2");
+  unicode-range: U+011E-011F, U+0130, U+015E-015F, U+20BA;
+}
+@font-face {
+  font-family: "qt-source-sans-fallback";
+  src: local("Arial");
+  ascent-override: 109.21%;
+  descent-override: 42.66%;
+  line-gap-override: 0%;
+  size-adjust: 93.76%;
+}
+
+@font-face {
+  font-family: "qt-nunito";
+  font-style: normal;
+  font-weight: 200 1000;
+  font-display: swap;
+  src: url("/fonts/nunito-latin.20fc9b6fc6.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: "qt-nunito";
+  font-style: normal;
+  font-weight: 200 1000;
+  font-display: swap;
+  src: url("/fonts/nunito-tr.e5385d46f7.woff2") format("woff2");
+  unicode-range: U+011E-011F, U+0130, U+015E-015F, U+20BA;
+}
+@font-face {
+  font-family: "qt-nunito-fallback";
+  src: local("Arial");
+  ascent-override: 99.71%;
+  descent-override: 34.82%;
+  line-gap-override: 0%;
+  size-adjust: 101.39%;
+}
+
+/* Each face's variable (`THEME_FONTS` in `lib/views/theme.ts`); the theme reads them */
+:root {
+  --font-inter: "qt-inter", "qt-inter-fallback";
+  --font-fraunces: "qt-fraunces", "qt-fraunces-fallback";
+  --font-playfair: "qt-playfair", "qt-playfair-fallback";
+  --font-dm-serif: "qt-dm-serif", "qt-dm-serif-fallback";
+  --font-manrope: "qt-manrope", "qt-manrope-fallback";
+  --font-source-sans: "qt-source-sans", "qt-source-sans-fallback";
+  --font-nunito: "qt-nunito", "qt-nunito-fallback";
+}

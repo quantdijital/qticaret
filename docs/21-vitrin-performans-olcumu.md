@@ -103,3 +103,79 @@ Etiketler: **[vitrin]** yalnız `apps/storefront` · **[tema]** yalnız `package
 ## Tekrar üretme
 
 `pnpm --filter storefront build`, ardından env'le `next start --port 8000` (anahtar: dev backend `GET /dev/storefront-key`). `npx lighthouse@13.6.0 <url> --chrome-flags="--headless=new" [--preset=desktop]`, `CHROME_PATH` Playwright'ın Chromium'u. Bu ölçümün ham JSON raporları oturumun geçici klasöründeydi; kalıcı arşiv istenirse `docs/perf-raporlari/` altına özet eklenir.
+
+## Yapılanlar (2026-11-03)
+
+Düzeltme listesinin 1, 2, 3 ve 6. maddeleri yapıldı; 4. madde ertelendi (aşağıda). Bu oturumda Lighthouse ölçümü yapılmadı; puanlar yeni üretim derlemesinde yeniden ölçülecek. Doğrulama: birim testleri, e2e ve `next build`.
+
+### 1. Yazı tipleri: varsayılan mağazada 350 KB → 122 KB
+
+- **`next/font` kaldırıldı.** Yedi yüz `apps/storefront/public/fonts/` altında, `@font-face` kuralları `src/app/fonts.css`'te. Her yüzün değişkeni (`--font-inter` …) `:root`'ta. `<html>` artık yazı tipi sınıfı taşımıyor.
+  - Neden `next/font/local` değil: next/font'un önyüklemesi derleme anında sabittir ve her sayfaya aynı gider. Mağazanın yüzü ise çalışma anında `theme.typography`'den gelir (adr/0053 §B).
+  - Dosyalar bilinen adreslerde olunca layout yalnız seçilen yüzleri `<link rel="preload" as="font" crossorigin>` ile önyükler (`app/fonts.ts` `fontPreloads`). React bu bağlantıları `<head>`'e taşır.
+- **Önyükleme kararı:** önce gövde yüzü, sonra başlık yüzü.
+  - Gövde yüzü telefonda ilk metni çizer (hero satırı, çerez bildirimi).
+  - Başlık yüzü de önyüklenir: üst bilgideki mağaza adı (logo yoksa) ve her sayfanın `h1`'i bu yüzle, her sayfada ilk ekranda.
+  - Seçilmeyen beş yüz için hiçbir şey inmez: tarayıcı `@font-face` dosyasını yalnız o yüzle metin çizilince ister.
+- **Alt küme.** Her yüz iki dosya, aynı aile adı altında `unicode-range` ile:
+  - Google Fonts'un `latin` dosyası, olduğu gibi. Kaynak: next/font/google'ın son derlemede indirdiği dosyalar.
+  - `latin-ext` dosyasından yalnız Türkçenin istediği harfler: Ğ ğ İ Ş ş ₺. `ı` zaten `latin`'de. Playfair Display ve DM Serif Display'de ₺ yok; onu yedek yazı tipi çizer (önceden de böyleydi).
+  - Tek dosyaya birleştirilmedi: tam kaynak dosyası bu ortamda indirilemedi ve fontTools değişken yazı tiplerini birleştirmiyor. Bedeli: `latin` ile Türkçe harf arasında kerning yok (Google'ın kendi bölmesinde de yok).
+  - Fraunces `SOFT` 50'ye sabitlendi (tema yalnız bu değeri kullanıyor); `opsz` ve `wght` eksenleri duruyor. Inter yalnız `wght` taşıyor (önceki gibi).
+
+  | Yüz | Önce (`latin` + `latin-ext`) | Sonra (`latin` + Türkçe) |
+  |---|---|---|
+  | Inter | 47 + 83 KB | 47,3 + 3,2 KB |
+  | Fraunces | 117 + 103 KB | 65,3 + 6,3 KB |
+  | Playfair Display | 37 + 20 KB | 37,6 + 2,8 KB |
+  | DM Serif Display | 17 + 6 KB | 17,4 + 1,6 KB |
+  | Manrope | 23 + 14 KB | 23,9 + 2,4 KB |
+  | Source Sans 3 | 28 + 58 KB | 28,1 + 2,6 KB |
+  | Nunito | 38 + 34 KB | 38,2 + 3,6 KB |
+
+  Varsayılan mağazanın önyüklediği dört dosya 350 KB'tan 122 KB'a indi.
+- **CLS:** her yüzün yedek yazı tipi (Arial ya da Times New Roman) next/font'un ölçüleriyle aynı (`size-adjust`, `ascent-override` …), `font-display: swap`.
+- **Önbellek:** dosya adında içeriğin sha256 özetinin ilk 10 hanesi var; dosya değişirse adresi de değişir.
+  - `next.config.ts`: `/fonts/:file` → `public, max-age=31536000, immutable`. `public/` dosyalarının varsayılanı `max-age=0`.
+  - Geliştirme sunucusunda e2e doğruladı. Üretimde yeniden ölçümde başlığa bakılmalı.
+- **Proxy:** dosyalar matcher'ın dışında (`fonts/[a-z-]+\.[0-9a-f]{10}\.woff2$`) ve `isStaticFile`'da. Resolve gitmez; bakım sayfası yazı tipini kesmez.
+- **Lisans (OFL 1.1):** dosyalar telif satırını ve lisans adresini (name 0 ve 14) taşıyor.
+  - Ayrılmış adlı iki yüzden (Playfair Display; Source Sans 3, RFN "Source") kesilen Türkçe dosyalarının iç adı değiştirildi: "Qticaret Ext Serif" ve "Qticaret Ext Sans". `latin` dosyaları Google'ın dağıttığı haliyle duruyor.
+  - CSS aile adları bizim (`qt-inter` …).
+- **F16:** standalone imajına `.next/static` gibi `public/` de kopyalanmalı.
+- **Yeni yüz ya da yeni sürüm eklerken:**
+  1. Google Fonts CSS API'den `latin` ve `latin-ext` woff2'lerini al.
+  2. Türkçe dosyayı fontTools'la kes: `pyftsubset <latin-ext>.woff2 --unicodes=U+011E,U+011F,U+0130,U+015E,U+015F,U+20BA --layout-features='*' --flavor=woff2`. Ayrılmış adlı yüzde iç adı değiştir. Fraunces'te önce `fontTools.varLib.instancer` ile `SOFT=50`.
+  3. Dosyayı içerik özetiyle adlandır, `fonts.css` ve `FONT_FILES`'a ekle. `app/__tests__/fonts.spec.ts` ad, özet ve liste uyumunu denetler.
+
+### 2. CSP: `pointer-events:none` özeti
+
+`RADIX_STYLE_HASHES`'e `'sha256-1OjyRYLAOH1vhXLUN4bBHal0rWxuwBDBP220NNc0CNU='` eklendi. Özet, değerin tam metninden (`pointer-events:none`) yeniden hesaplanarak doğrulandı. Birim testi her özeti değerinden hesaplar. `unsafe-inline` yok.
+
+### 3. Sayfa başına backend çağrıları
+
+- **Yasal metin 404'leri:** `storePublicFind` (`lib/store-api/server.ts`) 404'ü "yayında değil" (null) sayar ve bulunan yanıt gibi 60 sn tutar. 5xx ve zaman aşımı tutulmaz. Yenileme sinyalinin `legal` kapsamı bunları da siler. `legalDocument` bunu kullanıyor: her sayfadaki 6 `GET /store/legal/*` artık dakikada bir.
+- **`/store/customers/me`:** oturum çerezi yoksa ya da jetonun süresi geçmişse istek atılmaz. React `cache` ile istek başına bir kez sorulur (ürün sayfasında 2 → 1, ziyaretçide 0).
+- **`seo/resolve`:** backend rotası ziyaretçiden bağımsız: yalnız `path`'i okur ve `public, max-age=60` döner. Bu yüzden süreç içi 10 sn önbellek eklendi (adr/0046 Ek 2026-11-03).
+  - Yalnız `entity` ve `not_found` yanıtları tutulur; `redirect` kural vuruşlarını saydığı için tutulmaz.
+  - Ürün ve kategori sayfasında proxy'nin yanıtını sayfa kullanır: 2 → 1.
+- **`/icon.svg` hatası:** proxy matcher'ı `icon\.svg$`, `apple-icon\.png$`, `manifest\.webmanifest$` (ve yazı tipleri) için tam eşleşmeyle dışarıda bırakıyor. Aynı liste `isStaticFile`'da; proxy'ye ulaşırsa da sayfa sayılmaz.
+  - Birim testi Next'in derlediği biçimle (`functions-config-manifest.json`) matcher'ı ve `isStaticFile`'ı karşılaştırır.
+  - e2e: `/icon.svg` ikonu döner ve proxy'nin her yanıta koyduğu CSP başlığını taşımaz.
+- Çağrı sayıları ölçülmedi; yeniden ölçümde backend günlüğüyle sayılmalı.
+
+### 6. Başlık sırası
+
+- Liste sayfalarında (`/magaza`, `/arama`, kategori, marka, `/kampanyalar`) "N ürün" satırı artık ızgaranın `h2`'si. Ürün kartları (`h3`) `h1`'in hemen altına düşmüyor.
+- Görünüm aynı: `font-sans text-sm font-medium tracking-normal`; tema `h2`'ye başlık yüzü verdiği için yazı tipi sınıfı açıkça yazıldı. Yeni i18n anahtarı yok.
+- `/blog` zaten doğruydu: `h1`, ardından `PostCard` `h2`.
+- e2e: axe `heading-order` kuralı 11 sayfada (ana sayfa, ürün, liste, arama, blog, kategoriler, markalar, yorumlar, sepet). Eski işaretlemeyle `/magaza` ve `/arama`'da kırmızı verdiği denendi.
+
+### Ertelenen: 4. madde (düzen JS'ini tembel yükleme)
+
+Yapılmadı. Nedenler:
+
+- `next/dynamic` temayı Next'e bağlar. `@qticaret/theme-base` yalnız React'e bağlı ve tema yalnız sunumdur (adr/0046 §7).
+- `CategoryNav`'ın bağlantıları ilk HTML'de kalmalı (docs/13). "Mobilde hydrate etme" ancak hiç çözülmeyen bir Suspense sınırıyla ya da medya sorgusuna bağlı istemci yüklemesiyle olur; ikisi de hydration uyuşmazlığı ve script'siz yedek riski taşıyor.
+- Çekmece ve menünün tetikleyicileri hydration'da Radix Dialog'u zaten istiyor. Yalnız içeriği tembel yüklemek Radix'i paylaşılan parçadan çıkarmaz; kazanç tahminden küçük kalır.
+- Doğru yol ayrı bir görev: tema sözleşmesine "tembel ada" yuvası (vitrin `next/dynamic` sağlar, tema yalnız bileşeni verir) ve paylaşılan parçanın önce/sonra ölçümü.

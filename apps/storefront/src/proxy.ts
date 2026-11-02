@@ -9,6 +9,7 @@ import {
   backendFile,
   canonicalHostRedirect,
   indexNowFile,
+  isStaticFile,
   isStorefrontIndex,
   isSystemPath,
   normalizedPath,
@@ -64,6 +65,10 @@ export async function proxy(request: NextRequest): Promise<Response> {
   // The backend's refresh signal (adr/0048 Ek 2026-11-03) goes straight to its route: no host
   // 301, no normalising, no maintenance page (the backend follows no redirect), nothing resolved
   if (pathname === REFRESH_PATH) {
+    return NextResponse.next()
+  }
+  // The matcher already leaves these out; should one reach here, it is a file, never a page
+  if (isStaticFile(pathname)) {
     return NextResponse.next()
   }
   const visitor = visitorIp(request.headers, env.STOREFRONT_TRUSTED_PROXY_HOPS ?? 0)
@@ -180,8 +185,11 @@ export async function proxy(request: NextRequest): Promise<Response> {
 }
 
 export const config = {
-  // Everything but Next's own build files and the favicon
+  // Everything but Next's own build files, the app's metadata files and the
+  // self-hosted faces (`isStaticFile`): a file is no page to resolve or report
   // Exact exclusions: a page whose path only starts like one still passes
   // through here (its CSP, and the preview header set only here)
-  matcher: ["/((?!_next/static/|_next/image(?:$|/)|favicon\\.ico$).*)"],
+  matcher: [
+    "/((?!_next/static/|_next/image(?:$|/)|favicon\\.ico$|icon\\.svg$|apple-icon\\.png$|manifest\\.webmanifest$|fonts/[a-z-]+\\.[0-9a-f]{10}\\.woff2$).*)",
+  ],
 }

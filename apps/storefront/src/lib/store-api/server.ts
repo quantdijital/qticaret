@@ -3,6 +3,7 @@ import { headers } from "next/headers"
 import { storefrontEnv } from "../env"
 import type { QueryValue, StoreRequest } from "./core"
 import { storeRequest } from "./core"
+import { isNotFound } from "./errors"
 import { claimsOf, sessionToken } from "../account/session"
 import { shared } from "./shared"
 import { visitorIp } from "./visitor"
@@ -72,6 +73,18 @@ export async function storeCallWithHeaders(
   return { data: answer.data, headers: answer.headers }
 }
 
+/** A shop-wide call: the visitor's address and request id, never the customer's key. */
+async function publicRequest<T>(path: string, query?: Record<string, QueryValue>): Promise<T> {
+  const { visitorIp: ip, requestId } = await visit()
+  return (
+    await storeRequest<T>(path, {
+      visitorIp: ip,
+      ...(requestId ? { requestId } : {}),
+      ...(query ? { query } : {}),
+    })
+  ).data
+}
+
 /**
  * A shop-wide GET (the frame, the category tree, paths): never with the
  * customer's key, kept a minute in this process (`shared.ts`).
@@ -80,15 +93,28 @@ export async function storePublicGet<T>(
   path: string,
   query?: Record<string, QueryValue>
 ): Promise<T> {
-  const key = `${path}?${JSON.stringify(query ?? {})}`
-  return shared(key, async () => {
-    const { visitorIp: ip, requestId } = await visit()
-    return (
-      await storeRequest<T>(path, {
-        visitorIp: ip,
-        ...(requestId ? { requestId } : {}),
-        ...(query ? { query } : {}),
-      })
-    ).data
+  return shared(`${path}?${JSON.stringify(query ?? {})}`, () => publicRequest<T>(path, query))
+}
+
+/**
+ * A shop-wide GET whose 404 is an answer: "not published" (a legal text
+ * the shop has none of), null, kept the same minute as a found answer, so
+ * every page does not ask again (docs/21). Any other failure (a 5xx, a
+ * timeout) is not kept. The refresh signal drops it as any other answer
+ * of its path: the key starts with the path.
+ */
+export async function storePublicFind<T>(
+  path: string,
+  query?: Record<string, QueryValue>
+): Promise<T | null> {
+  return shared(`${path}?${JSON.stringify(query ?? {})}#find`, async () => {
+    try {
+      return await publicRequest<T>(path, query)
+    } catch (error) {
+      if (isNotFound(error)) {
+        return null
+      }
+      throw error
+    }
   })
 }

@@ -10,7 +10,7 @@ import { brandDeclarations, isHexColor, readableOn } from "./color"
 /**
  * The shop's theme settings (adr/0053 §B) as the storefront applies them:
  * CSS variables in the page's one nonce'd style element, the faces'
- * classes on `<html>`, and the choices that change markup (`ThemeView`).
+ * preloads (`app/fonts.ts`), and the choices that change markup (`ThemeView`).
  * The settings are choices from fixed lists; anything else falls back to
  * the default, so nothing the backend sends reaches CSS unchecked. At the
  * defaults nothing is printed: the theme's own look stands.
@@ -66,7 +66,7 @@ export type ThemeFont = ThemeHeadingFont | ThemeBodyFont
 const SERIF = 'ui-serif, Georgia, "Times New Roman", serif'
 const SANS = 'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif'
 
-/** Each face's CSS variable (`app/fonts.ts` sets it) and the fallback its kind wants. */
+/** Each face's CSS variable (`app/fonts.css` sets it) and the fallback its kind wants. */
 export const THEME_FONTS: Readonly<Record<ThemeFont, { variable: string; fallback: string }>> = {
   fraunces: { variable: "--font-fraunces", fallback: SERIF },
   playfair: { variable: "--font-playfair", fallback: SERIF },
@@ -204,8 +204,3 @@ export function themeStyle(settings: StoreThemeSettings): string | null {
   }
   return declarations.length > 0 ? `:root{${declarations.join(";")}}` : null
 }
-
-/** The faces the page uses, heading then body; `<html>` carries their classes. */
-export const themeFonts = (settings: StoreThemeSettings): ThemeFont[] => [
-  ...new Set<ThemeFont>([settings.typography.heading, settings.typography.body]),
-]

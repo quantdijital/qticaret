@@ -1,23 +1,33 @@
 import { createHash } from "node:crypto"
 import { describe, expect, it } from "vitest"
-import { contentSecurityPolicy } from "../csp"
+import { contentSecurityPolicy, RADIX_STYLE_HASHES } from "../csp"
 
 const directive = (policy: string, name: string) =>
   policy.split("; ").find((each) => each.startsWith(`${name} `))
 
 describe("contentSecurityPolicy", () => {
-  it("in production allows styles by nonce and only Radix's known style attribute", () => {
+  it("in production allows styles by nonce and only Radix's known style attributes", () => {
     const policy = contentSecurityPolicy("abc123", false)
-    const hash = createHash("sha256").update("position:relative").digest("base64")
+    const hash = (value: string) =>
+      `'sha256-${createHash("sha256").update(value).digest("base64")}'`
 
     expect(directive(policy, "style-src")).toBe("style-src 'self' 'nonce-abc123'")
     expect(directive(policy, "style-src-attr")).toBe(
-      `style-src-attr 'unsafe-hashes' 'sha256-${hash}'`
+      `style-src-attr 'unsafe-hashes' ${hash("position:relative")} ${hash("pointer-events:none")}`
     )
     expect(policy).not.toContain("'unsafe-inline'")
     expect(directive(policy, "script-src")).toBe(
       "script-src 'self' 'nonce-abc123' 'strict-dynamic'"
     )
+  })
+
+  it("hashes exactly the attribute values Radix writes, nothing more", () => {
+    // The browser hashes the attribute's value as written: no spaces, no `;`
+    const values = ["position:relative", "pointer-events:none"]
+    expect(RADIX_STYLE_HASHES).toEqual(
+      values.map((value) => `'sha256-${createHash("sha256").update(value).digest("base64")}'`)
+    )
+    expect(RADIX_STYLE_HASHES).toContain("'sha256-1OjyRYLAOH1vhXLUN4bBHal0rWxuwBDBP220NNc0CNU='")
   })
 
   it("relaxes what Next's dev server needs in development only", () => {

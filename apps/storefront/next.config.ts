@@ -11,6 +11,8 @@ import type { NextConfig } from "next"
  * - Security headers that need no per-request value live here (HSTS in
  *   production only); the CSP needs
  *   a nonce and is set in `src/proxy.ts`.
+ * - `public/` (the faces) must be copied next to the standalone server in
+ *   the image (F16), as `.next/static` is.
  */
 const SECURITY_HEADERS = [
   // docs/runbooks/kenar-ve-pentest.md: HSTS comes from the application, a
@@ -67,6 +69,13 @@ const config: NextConfig = {
       {
         source: "/odeme/sonuc/:path*",
         headers: [{ key: "X-Frame-Options", value: "SAMEORIGIN" }],
+      },
+      // The self-hosted faces (`app/fonts.css`): a content hash in each name,
+      // so a file never changes under its address and is kept a year
+      // (`public/` files are otherwise served with `max-age=0`)
+      {
+        source: "/fonts/:file",
+        headers: [{ key: "Cache-Control", value: "public, max-age=31536000, immutable" }],
       },
     ]),
 }

@@ -9,13 +9,16 @@
  */
 /**
  * Inline style attributes the server's HTML may carry, by hash
- * (`'unsafe-hashes'`): Radix's navigation menu wraps its list in
- * `style="position:relative"`. Any other attribute stays refused; our own
- * code writes none (docs/19 §6).
+ * (`'unsafe-hashes'`, sha256 of the attribute's exact value, base64):
+ * Radix's navigation menu wraps its list in `style="position:relative"`
+ * and marks each closed dropdown `style="pointer-events:none"`. Any other
+ * attribute stays refused; our own code writes none (docs/19 §6).
  */
-const RADIX_STYLE_HASHES = [
+export const RADIX_STYLE_HASHES = [
   // position:relative
   "'sha256-KpSV7LuPYEu58+3u9LJr9v5Drm0uIKEv0h3u/+NVNm8='",
+  // pointer-events:none (docs/21: six refusals a page, Best Practices 92)
+  "'sha256-1OjyRYLAOH1vhXLUN4bBHal0rWxuwBDBP220NNc0CNU='",
 ]
 
 export interface FrameRules {

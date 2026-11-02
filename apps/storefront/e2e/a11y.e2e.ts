@@ -36,3 +36,30 @@ test.describe("accessibility", () => {
     })
   }
 })
+
+// Lighthouse's heading-order (axe best practice, moderate): a level is never skipped (docs/21)
+const HEADED = [
+  "/",
+  DEMO_PRODUCT,
+  "/magaza",
+  "/kampanyalar",
+  "/arama?q=gomlek",
+  "/arama?q=bicak",
+  "/blog",
+  "/kategoriler",
+  "/markalar",
+  "/yorumlar",
+  "/sepet",
+]
+
+test.describe("heading order", () => {
+  for (const path of HEADED) {
+    test(`${path} skips no heading level`, async ({ page }) => {
+      await page.goto(path)
+      const result = await new AxeBuilder({ page }).withRules(["heading-order"]).analyze()
+      expect(
+        result.violations.flatMap((violation) => violation.nodes.map((node) => node.html))
+      ).toEqual([])
+    })
+  }
+})

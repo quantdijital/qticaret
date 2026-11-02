@@ -147,3 +147,12 @@ docs/20 "arama kalitesi": Meilisearch kararına (§11, D10) kadar ara çözüm. 
 - **Tam çözüm:** Meilisearch (D10) kalır: büyük katalog, eş anlamlılar, vurgulama, indeksleme subscriber'ı. Geçişte uç ve `search` bloğu aynı kalır; yalnız satır kaynağı değişir.
 
 - **Güvenlik incelemesi 2026-11-03 (L3):** sorgu kelimesi artık bütün sözlükle değil, yalnızca en az bir trigram paylaştığı ve eşleşebilecek uzunluktaki kelimelerle karşılaştırılır (trigram → kelime indeksi, kısa kelime önce; sonuçların aynı kaldığı birim testte bütün sözlükle karşılaştırılarak kanıtlı); açıklamanın ilk 400 karakteri etiketlerden arındırılıp 240 karaktere kesilir.
+
+## Ek (2026-11-03): süreç içi resolve önbelleği (otonom, gözden geçir)
+
+§4'ün "ölçüm gerekirse" dediği önbellek (docs/21 3. düzeltme): ürün ve kategori sayfasında resolve iki kez gidiyordu (proxy, sonra sayfa).
+
+- `GET /store/seo/resolve` yanıtı vitrin sürecinde yol + sorgu anahtarıyla **10 sn** tutulur (`lib/store-api/resolutions.ts`); proxy ve sayfa paketleri aynı haritayı görür (`registry.ts`).
+- Ziyaretçiden bağımsızlık denetlendi: backend rotası yalnız `path`'i okur; oturum, çerez ya da ziyaretçi adresi yanıtı değiştirmez ve rota `Cache-Control: public, max-age=60` döner.
+- Yalnız `entity` ve `not_found` tutulur. `redirect` her sorguda kuralın vuruş sayısını artırdığı için tutulmaz; `gone` ve `redirect`'i zaten proxy yanıtlar.
+- Yenileme sinyali (adr/0048 Ek) kapsamı ne olursa olsun hepsini siler. En çok 500 yol.

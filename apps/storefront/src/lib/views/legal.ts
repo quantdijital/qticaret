@@ -2,8 +2,7 @@ import "server-only"
 import { cache } from "react"
 import type { LegalIdentity } from "@qticaret/types"
 import type { Translate } from "@qticaret/ui"
-import { isStoreApiError } from "@/lib/store-api/errors"
-import { storePublicGet } from "@/lib/store-api/server"
+import { storePublicFind } from "@/lib/store-api/server"
 
 /**
  * The shop's legal texts as pages of their own (F13.1, D10): one address
@@ -42,16 +41,10 @@ export interface LegalDocument {
   published_at: string | null
 }
 
+/** A kind the shop has not published answers 404: kept a minute as null like a text (`storePublicFind`). */
 export const legalDocument = cache(async (kind: string): Promise<LegalDocument | null> => {
-  try {
-    const { document } = await storePublicGet<{ document: LegalDocument }>(`/store/legal/${kind}`)
-    return document
-  } catch (error) {
-    if (isStoreApiError(error) && error.status === 404) {
-      return null
-    }
-    throw error
-  }
+  const answer = await storePublicFind<{ document: LegalDocument }>(`/store/legal/${kind}`)
+  return answer?.document ?? null
 })
 
 /** The published legal texts as footer links, in the order a shopper looks for them. */

@@ -6,6 +6,7 @@ import { storeRequest, storeUrl } from "./core"
 import { isNotFound } from "./errors"
 import { storeCaches } from "./registry"
 import { publishableKey } from "./publishable-key"
+import { keepResolution, keptResolution } from "./resolutions"
 import { signedVisitorHeaders } from "./visitor"
 
 /**
@@ -17,9 +18,18 @@ export async function resolveForProxy(
   path: string,
   visitorIp: string | null
 ): Promise<Resolution | null> {
+  const kept = keptResolution(path)
+  if (kept) {
+    return kept
+  }
   try {
-    return (await storeRequest<Resolution>("/store/seo/resolve", { query: { path }, visitorIp }))
-      .data
+    const { data } = await storeRequest<Resolution>("/store/seo/resolve", {
+      query: { path },
+      visitorIp,
+    })
+    // The page asks for the same path next (`resolvePath`): it gets this answer
+    keepResolution(path, data)
+    return data
   } catch {
     // The page asks again and shows the error there; the proxy only routes
     return null

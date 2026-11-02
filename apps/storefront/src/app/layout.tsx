@@ -7,10 +7,10 @@ import { analyticsTags } from "@/lib/analytics/tags"
 import { subscribeNewsletter } from "@/app/actions/newsletter"
 import { t } from "@/lib/i18n"
 import { shopView } from "@/lib/views/shop"
-import { themeFonts, themeStyle } from "@/lib/views/theme"
+import { themeStyle } from "@/lib/views/theme"
 import { currentTheme } from "@/lib/views/theme-settings"
 import { theme } from "@/theme"
-import { FONT_CLASSES } from "./fonts"
+import { fontPreloads } from "./fonts"
 import "./globals.css"
 
 // Every page is made per request: prices, stock and the cart are live (adr/0046 §2)
@@ -29,17 +29,26 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     analyticsTags(),
   ])
   // The shop's theme settings over the theme's own (adr/0053 §B): one style
-  // element with this response's nonce, so the CSP needs no 'unsafe-inline';
-  // <html> carries the chosen faces' classes, which define their variables
+  // element with this response's nonce, so the CSP needs no 'unsafe-inline'
   const style = themeStyle(settings)
-  const fonts = themeFonts(settings).map((font) => FONT_CLASSES[font])
   const nonce = requestHeaders.get("x-nonce") ?? undefined
   // A design preview in the panel's frame is the shop's own look, not a visit
   const preview = (requestHeaders.get("x-qt-url") ?? "").startsWith("/onizleme/")
   return (
-    <html lang="tr" className={fonts.join(" ")}>
+    <html lang="tr">
       {/* Browser extensions write attributes on <body> before React loads */}
       <body suppressHydrationWarning>
+        {/* The shop's two faces only (`app/fonts.ts`); React puts these in <head> */}
+        {fontPreloads(settings).map((href) => (
+          <link
+            key={href}
+            rel="preload"
+            href={href}
+            as="font"
+            type="font/woff2"
+            crossOrigin="anonymous"
+          />
+        ))}
         {style && <style nonce={nonce}>{style}</style>}
         {/* Before the page: its page view goes first, the page's own events after */}
         <AnalyticsScripts
