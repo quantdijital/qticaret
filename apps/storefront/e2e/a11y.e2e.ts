@@ -13,6 +13,8 @@ const PAGES = [
   "/hesap/giris",
   "/hesap/kayit",
   "/hesap/sifre-sifirla",
+  "/cerez-tercihleri",
+  "/abonelik/cik?t=bozuk",
 ]
 
 test.describe("accessibility", () => {

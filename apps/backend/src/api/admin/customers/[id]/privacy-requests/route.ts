@@ -1,11 +1,9 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { privacyAnswerDue } from "../../../../../lib/legal/answer-due"
 import { LEGAL_MODULE } from "../../../../../modules/legal"
 import type LegalModuleService from "../../../../../modules/legal/service"
 import { recordPrivacyRequestWorkflow } from "../../../../../workflows/legal/privacy-requests"
 import type { AdminPostPrivacyRequestType } from "../../../privacy-requests/validators"
-
-/** The 30 days the law gives for an answer (KVKK md. 13). */
-const ANSWER_DAYS = 30
 
 const view = (row: {
   id: string
@@ -22,7 +20,7 @@ const view = (row: {
   return {
     ...row,
     received_at: received.toISOString(),
-    due_at: new Date(received.getTime() + ANSWER_DAYS * 86_400_000).toISOString(),
+    due_at: privacyAnswerDue(received).toISOString(),
     completed_at: row.completed_at ? new Date(row.completed_at).toISOString() : null,
   }
 }

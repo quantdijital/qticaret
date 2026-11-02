@@ -44,7 +44,7 @@ export function Layout({
         {children}
       </main>
       <SiteFooter shop={shop} t={t} subscribe={subscribe} />
-      {shop.contact.whatsappHref && !shop.cookieBanner && (
+      {shop.contact.whatsappHref && !shop.cookieBanner?.due && (
         <WhatsAppButton href={shop.contact.whatsappHref} label={t("whatsapp.label")} />
       )}
       {shop.cookieBanner && <CookieBanner banner={shop.cookieBanner} save={saveCookies} t={t} />}

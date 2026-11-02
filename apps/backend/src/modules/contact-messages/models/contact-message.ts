@@ -1,6 +1,10 @@
 import { model } from "@medusajs/framework/utils"
 
-export const CONTACT_SUBJECTS = ["order", "product", "return", "payment", "other"] as const
+/**
+ * What a message is about; `kvkk` is a guest's data request (KVKK md. 11,
+ * adr/0047 Ek 2026-11-02), answered within the law's 30 days.
+ */
+export const CONTACT_SUBJECTS = ["order", "product", "return", "payment", "kvkk", "other"] as const
 export const CONTACT_STATUSES = ["new", "handled"] as const
 
 /**

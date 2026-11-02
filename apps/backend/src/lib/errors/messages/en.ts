@@ -177,6 +177,16 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "content.landing_not_original":
     "The text is not original enough (under 30%); it is too close to other filter pages. Make it specific to this page before publishing.",
   "content.landing_unknown": "Filter page not found.",
+  "content.tags_too_many": "A post can have at most 50 tags.",
+  "content.term_description_invalid":
+    "The description must be at most 1000 characters, without disallowed characters.",
+  "content.term_handle_taken":
+    "Another category or tag uses this address; write a different name or address.",
+  "content.term_name_invalid":
+    "A name is required, at most 120 characters, without disallowed characters.",
+  "content.term_unknown":
+    "The chosen category or tag was not found; reload the list and choose again.",
+  "content.terms_post_only": "Categories and tags can be added to blog posts only.",
   "content.title_invalid":
     "A title is required, at most 200 characters, without disallowed characters.",
   "content.too_large":
@@ -319,6 +329,10 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "cart_reminders.link_invalid":
     "This link is invalid, expired or already used. You can reach your cart from the shop.",
   "marketing_feeds.unknown": "Feed not found.",
+  "consents.link_invalid":
+    "This link is invalid, expired or already used. You can give your consent from your account or by subscribing again.",
+  "stock_alerts.link_invalid":
+    "This link is invalid, expired or already used. You can ask again from the product page.",
   "stock_alerts.not_tracked": "Stock alerts are not available for this product.",
   "stock_alerts.in_stock": "This product is in stock now; you can order it.",
   "stock_alerts.email_required": "Write your e-mail address so we can tell you.",

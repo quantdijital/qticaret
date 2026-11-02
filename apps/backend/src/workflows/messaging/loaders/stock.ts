@@ -1,6 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
-import { parseEnv } from "../../../lib/env"
+import { emailLinkUrl } from "../../../lib/messaging/links"
 import type { StockAlertVars } from "../../../lib/messaging/templates"
 import { BACK_IN_STOCK_MODULE } from "../../../modules/back-in-stock"
 import type BackInStockModuleService from "../../../modules/back-in-stock/service"
@@ -11,9 +11,6 @@ import { brandOf } from "../brand"
 import type { Loaded } from "./types"
 
 type Container = Pick<MedusaContainer, "resolve">
-
-/** The backend's page that confirms a guest's alert (`/stock-alerts/confirm`). */
-export const STOCK_CONFIRM_PATH = "/stock-alerts/confirm"
 
 interface VariantRow {
   title: string | null
@@ -57,16 +54,14 @@ export async function loadStockAlert(
       { take: 1, select: ["path"] }
     )
   const { storefrontUrl } = await brandOf(container)
-  const backend = parseEnv().BACKEND_URL?.replace(/\/+$/, "")
+  const token = extra["token"]
   return {
     vars: {
       product: variant.product.title,
       variant: (variant.product.variants?.length ?? 0) > 1 ? variant.title : null,
       productUrl: storefrontUrl && entry ? `${storefrontUrl}${entry.path}` : null,
-      confirmUrl:
-        extra["token"] && backend
-          ? `${backend}${STOCK_CONFIRM_PATH}?${new URLSearchParams({ t: extra["token"] }).toString()}`
-          : null,
+      // The storefront's page once the shop has a host (adr/0038 Ek 2026-11-02)
+      confirmUrl: token ? emailLinkUrl("stock_alert", token, storefrontUrl) : null,
     },
     recipients: { email },
     receiverId: alert.customer_id,

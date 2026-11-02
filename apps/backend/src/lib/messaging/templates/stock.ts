@@ -17,7 +17,7 @@ const SAMPLE: StockAlertVars = {
   product: "Örnek ürün",
   variant: "Mavi / M",
   productUrl: "https://magaza.example/urun/ornek",
-  confirmUrl: "https://api.magaza.example/stock-alerts/confirm?t=ornek",
+  confirmUrl: "https://magaza.example/stok-bildirimi/onay?t=ornek",
 }
 
 const named = (vars: StockAlertVars): string =>

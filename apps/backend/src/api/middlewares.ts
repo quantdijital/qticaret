@@ -36,6 +36,7 @@ import { CATALOG_SHEET_ROUTES } from "./http/catalog-sheet-routes"
 import { CHARGEBACK_ROUTES } from "./http/chargeback-routes"
 import { COMMUNICATION_ROUTES } from "./http/communication-routes"
 import { CONTACT_ROUTES } from "./http/contact-routes"
+import { EMAIL_LINK_ROUTES } from "./http/email-link-routes"
 import { STOREFRONT_MENU_ROUTES } from "./http/storefront-menu-routes"
 import { LEGAL_ROUTES } from "./http/legal-routes"
 import { CORE_RETURN_ROUTES } from "./http/core-return-routes"
@@ -263,6 +264,7 @@ export default defineMiddlewares({
     ...CUSTOMER_SEGMENT_ROUTES,
     ...REVIEW_ROUTES,
     ...CONTACT_ROUTES,
+    ...EMAIL_LINK_ROUTES,
     ...STOREFRONT_MENU_ROUTES,
     ...MARKETING_ROUTES,
     ...GOOGLE_ROUTES,

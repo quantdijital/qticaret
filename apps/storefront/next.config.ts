@@ -55,6 +55,12 @@ const config: NextConfig = {
           { key: "Referrer-Policy", value: "no-referrer" },
         ],
       },
+      // A message's token link (adr/0038 Ek 2026-11-02): no page it loads
+      // learns the token from the Referer (this rule comes after the first)
+      ...["/abonelik/:path*", "/stok-bildirimi/:path*"].map((source) => ({
+        source,
+        headers: [{ key: "Referrer-Policy", value: "no-referrer" }],
+      })),
       // A card provider may load its return address inside its form, framed
       // on our checkout (D7): those pages may be framed by our own pages
       {

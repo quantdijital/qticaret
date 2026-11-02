@@ -2,6 +2,7 @@ import { createHmac } from "node:crypto"
 import { parseKey } from "../crypto/pii"
 import { parseEnv } from "../env"
 import { safeEqual } from "../security/timing-safe"
+import { emailLinkUrl } from "./links"
 
 /**
  * One-click unsubscribe (adr/0038 §1, RFC 8058): a link names the
@@ -34,10 +35,24 @@ export function recipientOfToken(token: string, key = keyOf()): string | null {
   return safeEqual(match[2], macOf(key, match[1])) ? match[1] : null
 }
 
-/** The recipient's link, or null where the backend has no public address yet. */
+/**
+ * The one-click address (RFC 8058, `List-Unsubscribe`): the backend's,
+ * which a mail client POSTs to; null where it has no public address yet.
+ */
 export function unsubscribeUrl(recipientHash: string): string | null {
   const backend = parseEnv().BACKEND_URL
   return backend
     ? `${backend.replace(/\/+$/, "")}${UNSUBSCRIBE_PATH}?${new URLSearchParams({ t: unsubscribeToken(recipientHash) }).toString()}`
     : null
+}
+
+/**
+ * The way out in the message's body (adr/0038 Ek 2026-11-02): the
+ * storefront's page once the shop has a host, else the backend's own.
+ */
+export function unsubscribePageUrl(
+  recipientHash: string,
+  storefrontUrl: string | null
+): string | null {
+  return emailLinkUrl("unsubscribe", unsubscribeToken(recipientHash), storefrontUrl)
 }

@@ -43,7 +43,11 @@ const TR: Readonly<Record<string, string>> = {
   "staff_contact.subjects.product": "Ürün",
   "staff_contact.subjects.return": "İade ve değişim",
   "staff_contact.subjects.payment": "Ödeme",
+  "staff_contact.subjects.kvkk": "KVKK başvurusu",
   "staff_contact.subjects.other": "Diğer",
+  "staff_contact.kvkk_preheader": "KVKK başvurusu: yanıt için son gün {{due}}.",
+  "staff_contact.kvkk_due":
+    "Bu bir KVKK başvurusu. Kanun en geç 30 gün içinde yanıt vermenizi ister (KVKK md. 13); son gün {{due}}. Başvuranın kimliğini doğrulayın. Başvuru bir müşteri hesabına aitse talebi o müşterinin KVKK talepleri bölümüne de kaydedin.",
   "staff_seo.subject": "Haftalık SEO özeti: ortalama {{average}}/100",
   "staff_seo.preheader": "{{critical}} üründe kritik bulgu var.",
   "staff_seo.heading": "Bu haftanın SEO özeti",

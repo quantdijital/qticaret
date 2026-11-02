@@ -17,10 +17,13 @@ export function collectErrors(page: Page): string[] {
   return errors
 }
 
+/** The cookie banner at the foot of every page (it stays in the page, closed, once answered). */
+export const cookieBanner = (page: Page) => page.locator('section[aria-labelledby="cerez-baslik"]')
+
 /** Answers the cookie banner so it does not cover what a test clicks. */
 export async function dismissCookies(page: Page): Promise<void> {
-  const button = page.locator('button[name="choice"][value="necessary"]')
-  if (await button.count()) {
+  const button = cookieBanner(page).locator('button[name="choice"][value="necessary"]')
+  if (await button.isVisible()) {
     await button.click()
     await page.waitForLoadState("networkidle")
   }

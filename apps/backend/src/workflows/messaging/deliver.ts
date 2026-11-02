@@ -11,7 +11,7 @@ import type {
   MessageTemplate,
   MessageTemplateName,
 } from "../../lib/messaging/templates"
-import { unsubscribeUrl } from "../../lib/messaging/unsubscribe"
+import { unsubscribePageUrl, unsubscribeUrl } from "../../lib/messaging/unsubscribe"
 import { netgsmAccountOf } from "../../lib/messaging/sms/netgsm"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-credentials"
 import type IntegrationCredentialsModuleService from "../../modules/integration-credentials/service"
@@ -215,10 +215,17 @@ export async function deliver<N extends MessageTemplateName>(
       continue
     }
     brand ??= await brandOf(container)
-    // A commercial e-mail carries its recipient's way out, in the body and the headers
-    const leave =
-      template.kind === "commercial" && channel === "email" ? unsubscribeUrl(recipient.hash) : null
-    const content = render(input.template, channel, input.vars, brand, { unsubscribeUrl: leave })
+    // A commercial e-mail carries its recipient's way out: in the body the
+    // storefront's page when the shop has a host (adr/0038 Ek 2026-11-02), in
+    // the headers the backend's one-click address a mail client POSTs to
+    const commercialMail = template.kind === "commercial" && channel === "email"
+    const leave = commercialMail ? unsubscribeUrl(recipient.hash) : null
+    const leavePage = commercialMail
+      ? unsubscribePageUrl(recipient.hash, brand.storefrontUrl)
+      : null
+    const content = render(input.template, channel, input.vars, brand, {
+      unsubscribeUrl: leavePage,
+    })
     try {
       const created = await notifications.createNotifications([
         {

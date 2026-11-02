@@ -25,8 +25,14 @@ export const RESERVED_ROOT_SEGMENTS: ReadonlySet<string> = new Set([
   "yasal",
   "magaza",
   "yorumlar",
+  // The products on sale now (adr/0019 ek 2026-11-03)
+  "kampanyalar",
   // A draft's signed preview (F18)
   "onizleme",
+  // A message's token links (adr/0038 Ek 2026-11-02) and the cookie choices (F18 D9)
+  "abonelik",
+  "stok-bildirimi",
+  "cerez-tercihleri",
   // Backend paths, should a proxy put them on the storefront's host (F16)
   "admin",
   "app",
@@ -38,8 +44,17 @@ export const RESERVED_ROOT_SEGMENTS: ReadonlySet<string> = new Set([
   "store",
 ])
 
-/** Whether `path` (`/arama`) is a root path the storefront keeps for itself. */
+/**
+ * Deeper paths the storefront keeps: the blog's archive prefixes (adr/0019
+ * ek 2026-11-03), so no post takes `kategori` or `etiket` as its handle.
+ */
+export const RESERVED_PATHS: ReadonlySet<string> = new Set(["/blog/kategori", "/blog/etiket"])
+
+/** Whether `path` (`/arama`) is a path the storefront keeps for itself. */
 export function isReservedPath(path: string): boolean {
+  if (RESERVED_PATHS.has(path)) {
+    return true
+  }
   const segments = path.split("/").slice(1)
   return segments.length === 1 && RESERVED_ROOT_SEGMENTS.has(segments[0] ?? "")
 }
@@ -54,7 +69,20 @@ export const SYSTEM_PAGES: readonly {
   robots: "noindex,follow" | "noindex,nofollow"
 }[] = [
   { path: "/arama", robots: "noindex,follow" },
-  ...["sepet", "odeme", "hesap", "giris", "kayit", "cikis", "onizleme"].map((segment) => ({
+  // The cookie choices: no one's search result, its links (the policy) may be followed
+  { path: "/cerez-tercihleri", robots: "noindex,follow" },
+  ...[
+    "sepet",
+    "odeme",
+    "hesap",
+    "giris",
+    "kayit",
+    "cikis",
+    "onizleme",
+    // A message's token links (adr/0038 Ek 2026-11-02)
+    "abonelik",
+    "stok-bildirimi",
+  ].map((segment) => ({
     path: `/${segment}`,
     robots: "noindex,nofollow" as const,
   })),

@@ -2,6 +2,7 @@ import { Clock, Mail, MapPin, Phone } from "lucide-react"
 import type { PlaceOrderResult, ShopView, Translate } from "@qticaret/ui"
 import { Container } from "../components/Container"
 import { TrustStrip } from "../components/TrustStrip"
+import { CookiePreferencesLink } from "./CookiePreferencesLink"
 import { NewsletterForm } from "./NewsletterForm"
 import { newsletterWords } from "./newsletter-words"
 
@@ -123,19 +124,24 @@ export function SiteFooter({
         </Container>
         <div className="border-t border-ink-foreground/10">
           <Container className="flex flex-col gap-3 py-6 text-xs text-ink-muted">
-            {shop.legalLinks.length > 0 && (
-              <nav aria-label={t("footer.legal")}>
-                <ul className="flex flex-wrap gap-x-4 gap-y-1">
-                  {shop.legalLinks.map((link) => (
-                    <li key={link.path}>
-                      <a href={link.path} className="hover:text-ink-foreground hover:underline">
-                        {link.label}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
-            )}
+            <nav aria-label={t("footer.legal")}>
+              <ul className="flex flex-wrap gap-x-4 gap-y-1">
+                {shop.legalLinks.map((link) => (
+                  <li key={link.path}>
+                    <a href={link.path} className="hover:text-ink-foreground hover:underline">
+                      {link.label}
+                    </a>
+                  </li>
+                ))}
+                {/* The cookie answer can always be changed (D9, KVKK) */}
+                <li>
+                  <CookiePreferencesLink
+                    label={t("cookies.preferences")}
+                    className="hover:text-ink-foreground hover:underline"
+                  />
+                </li>
+              </ul>
+            </nav>
             {shop.identityLines.length > 0 && <p>{shop.identityLines.join(" · ")}</p>}
             <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
               <p>{t("footer.rights", { year, name: shop.companyTitle ?? shop.name })}</p>

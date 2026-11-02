@@ -23,6 +23,11 @@ export const NOTIFICATION_MESSAGES: Readonly<
       title: "Yeni iletişim mesajı: {{subject}}",
       description: "Müşteriler > İletişim mesajları'nda okuyun.",
     },
+    "contact.kvkk_received": {
+      title: "Yeni KVKK başvurusu",
+      description:
+        "Kanun 30 gün içinde yanıt ister; son gün {{due}}. Müşteriler > İletişim mesajları'nda okuyun.",
+    },
     "stock.low_stock": {
       title: "Düşük stok: {{name}}",
       description: "{{available}} adet kaldı (eşik {{threshold}}).",
@@ -103,6 +108,11 @@ export const NOTIFICATION_MESSAGES: Readonly<
     "contact.message_received": {
       title: "New contact message: {{subject}}",
       description: "Read it under Customers > Contact messages.",
+    },
+    "contact.kvkk_received": {
+      title: "New KVKK data request",
+      description:
+        "The law asks for an answer within 30 days; the last day is {{due}}. Read it under Customers > Contact messages.",
     },
     "messaging.sms_daily_limit": {
       title: "80% of today's SMS limit used",

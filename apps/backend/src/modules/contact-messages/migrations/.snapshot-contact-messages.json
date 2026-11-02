@@ -49,7 +49,7 @@
           "scale": null,
           "default": null,
           "comment": null,
-          "enumItems": ["order", "product", "return", "payment", "other"],
+          "enumItems": ["order", "product", "return", "payment", "kvkk", "other"],
           "mappedType": "enum"
         },
         "order_number": {

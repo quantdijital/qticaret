@@ -1,8 +1,7 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { BACK_IN_STOCK_MODULE } from "../../../modules/back-in-stock"
-import type BackInStockModuleService from "../../../modules/back-in-stock/service"
 import { brandOf } from "../../../workflows/messaging/brand"
-import { confirmForm, simplePage } from "../../http/simple-page"
+import { confirmStockAlertByLinkWorkflow } from "../../../workflows/messaging/email-links"
+import { confirmForm, sendToStorefront, simplePage } from "../../http/simple-page"
 
 const tokenOf = (req: MedusaRequest): string => {
   const value = req.query["t"]
@@ -11,11 +10,16 @@ const tokenOf = (req: MedusaRequest): string => {
 
 /**
  * GET /stock-alerts/confirm?t=… (F10.5): the page a guest's confirmation
- * link opens; it asks first, so a mail scanner opening the link turns
- * nothing on.
+ * link opens. Once the shop has a host, the storefront's own page answers
+ * it (`/stok-bildirimi/onay`, adr/0038 Ek 2026-11-02); until then this
+ * one. Either asks first, so a mail scanner turns nothing on.
  */
 export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {
-  const { shopName: shop } = await brandOf(req.scope)
+  const { shopName: shop, storefrontUrl } = await brandOf(req.scope)
+  if (storefrontUrl) {
+    sendToStorefront(res, "stock_alert", req.query["t"], storefrontUrl)
+    return
+  }
   const token = tokenOf(req)
   simplePage(res, token ? 200 : 400, {
     shop,
@@ -32,7 +36,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
   const { shopName: shop } = await brandOf(req.scope)
   const token = tokenOf(req)
   const confirmed = token
-    ? await req.scope.resolve<BackInStockModuleService>(BACK_IN_STOCK_MODULE).confirm(token)
+    ? (await confirmStockAlertByLinkWorkflow(req.scope).run({ input: { token } })).result
     : null
   simplePage(res, confirmed ? 200 : 400, {
     shop,

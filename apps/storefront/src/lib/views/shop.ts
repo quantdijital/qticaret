@@ -3,7 +3,7 @@ import type { ContactView, ShopView, Translate } from "@qticaret/ui"
 import type { LegalIdentity, StoreLayout } from "@qticaret/types"
 import { currentCustomer } from "@/lib/account/auth"
 import { headerCart } from "@/lib/cart/cart"
-import { bannerDue, cookieConsent } from "@/lib/legal/cookies"
+import { cookieConsent, onCookiePreferencesPage } from "@/lib/legal/cookies"
 import { t } from "@/lib/i18n"
 import {
   allCategories,
@@ -15,6 +15,7 @@ import {
 } from "@/lib/store-api/requests"
 import { miniCartOf } from "./cart"
 import { navigation } from "./categories"
+import { cookieBannerOf } from "./cookies"
 import { identityLinesOf, legalDocument, legalPath, publishedLegalLinks } from "./legal"
 import { displayPhone, footerGroups, socialLinks, whatsappHref } from "./frame"
 import { currentLayout } from "./layout"
@@ -59,6 +60,7 @@ export async function shopView(): Promise<ShopView> {
     legalLinks,
     menus,
     layout,
+    preferencesPage,
   ] = await Promise.all([
     siteSeo(),
     allCategories(),
@@ -71,6 +73,7 @@ export async function shopView(): Promise<ShopView> {
     publishedLegalLinks(),
     storefrontMenus(),
     currentLayout(),
+    onCookiePreferencesPage(),
   ])
   const paths = await pathsOf(
     "product_category",
@@ -101,12 +104,11 @@ export async function shopView(): Promise<ShopView> {
     contact: contactOf(identity, t),
     social: socialLinks(identity.same_as),
     companyTitle: identity.company_title,
-    cookieBanner: bannerDue(cookies)
-      ? {
-          policyVersion: cookies?.policy_version ?? null,
-          policyPath: cookiePolicy ? legalPath("cookie_policy") : null,
-        }
-      : null,
+    cookieBanner: cookieBannerOf(
+      cookies,
+      cookiePolicy ? legalPath("cookie_policy") : null,
+      preferencesPage
+    ),
     customerName: customer ? (customer.first_name ?? customer.email) : null,
     legalLinks,
     privacyPath: legalLinks.some((link) => link.path === legalPath("privacy_notice"))

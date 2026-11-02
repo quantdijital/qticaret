@@ -134,12 +134,14 @@ Durum: ✅ var · 🟡 temel hâli var · ⬜ yok. Görev kodları PROGRESS "F18
 | Hesabım: özet, siparişler, favoriler, adresler (ekleme dahil), bilgiler, şifre, fatura profili, izinler, KVKK talebi | `/hesap/*` | ✅ | `privacy-requests` (kanal `account`) | D8 |
 | Taşınan müşteri daveti | `/hesap/kayit?davet=` | ✅ ilk girişte `migration-claim` | | D8 |
 | İçerik sayfası | `/{handle}` | ✅ | `content` | D10 |
-| İletişim | `/iletisim` (Ayarlar > Vitrin'de seçilen sayfa) | ✅ içerik + iletişim formu | `contact-messages` (ADR-0047) | D10 |
+| İletişim | `/iletisim` (Ayarlar > Vitrin'de seçilen sayfa) | ✅ içerik + iletişim formu (konular arasında misafirin "KVKK başvurusu") | `contact-messages` (ADR-0047) | D10 |
 | Taslak önizleme | `/onizleme/{token}` | ✅ 24 saatlik imzalı bağlantı, `noindex` | `content/preview/{token}` | D10 |
 | Müşteri yorumları | `/yorumlar` | ✅ | `GET /store/reviews` | D10 |
 | Blog | `/blog`, `/blog/{handle}` | ✅ | `content?kind=post` | D10 |
 | Yasal metinler | `/yasal/{tur}` | ✅ (yayımlanmışlar) | `legal/{kind}` | D10 |
-| Çerez onayı | bant | ✅ | `consents/cookies` | D9 |
+| Çerez onayı | bant; alt bilgideki "Çerez tercihleri" bağlantısı bandı geçerli seçimle yeniden açar | ✅ | `consents/cookies` | D9 |
+| Çerez tercihleri (betiksiz) | `/cerez-tercihleri` | ✅ bandın formu, kaydedince "kaydedildi", `noindex,follow` | `consents/cookies` | D9 |
+| İleti bağlantıları: kampanya çıkışı, izin onayı, stok bildirimi onayı | `/abonelik/cik?t=`, `/abonelik/onay?t=`, `/stok-bildirimi/onay?t=` | ✅ önce sorar, Server Action, sonuç `?sonuc=`; bozuk bağlantı 200 + `noindex,nofollow`, `no-referrer` | `consents/unsubscribe`, `consents/confirm`, `stock-alerts/confirm` (adr/0038 Ek) | D9 |
 | 404 / 410 / hata | — | ✅ | `seo/not-found` | — |
 
 ## 8. İlk müşteri eşlemesi

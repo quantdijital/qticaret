@@ -1,9 +1,8 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { recipientOfToken } from "../../lib/messaging/unsubscribe"
-import { MESSAGING_MODULE } from "../../modules/messaging"
-import type MessagingModuleService from "../../modules/messaging/service"
 import { brandOf } from "../../workflows/messaging/brand"
-import { confirmForm, simplePage } from "../http/simple-page"
+import { unsubscribeByLinkWorkflow } from "../../workflows/messaging/email-links"
+import { confirmForm, sendToStorefront, simplePage } from "../http/simple-page"
 
 const tokenOf = (req: MedusaRequest): string => {
   const value = req.query["t"]
@@ -14,11 +13,16 @@ const INVALID = { title: "Bağlantı geçersiz", body: "<p>Bu çıkış bağlant
 
 /**
  * GET /unsubscribe?t=… (adr/0038 §1): the page a commercial e-mail's link
- * opens. It asks to confirm, so a mail scanner opening the link does not
- * withdraw anyone's consent.
+ * opens. Once the shop has a host, the storefront's own page answers it
+ * (`/abonelik/cik`, Ek 2026-11-02); until then this one. Either asks to
+ * confirm, so a mail scanner opening the link withdraws no one's consent.
  */
 export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {
-  const { shopName: shop } = await brandOf(req.scope)
+  const { shopName: shop, storefrontUrl } = await brandOf(req.scope)
+  if (storefrontUrl) {
+    sendToStorefront(res, "unsubscribe", req.query["t"], storefrontUrl)
+    return
+  }
   const token = tokenOf(req)
   if (!recipientOfToken(token)) {
     simplePage(res, 400, { shop, ...INVALID })
@@ -36,18 +40,18 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
 /**
  * POST /unsubscribe?t=…: withdraws the recipient's e-mail consent, from
  * the page's button or a mail client's one-click (RFC 8058,
- * `List-Unsubscribe=One-Click`). Done once; again changes nothing.
+ * `List-Unsubscribe=One-Click`, which names this address whatever the
+ * shop's host). Done once; again changes nothing.
  */
 export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<void> {
   const { shopName: shop } = await brandOf(req.scope)
-  const hash = recipientOfToken(tokenOf(req))
-  if (!hash) {
+  const { result } = await unsubscribeByLinkWorkflow(req.scope).run({
+    input: { token: tokenOf(req) },
+  })
+  if (!result) {
     simplePage(res, 400, { shop, ...INVALID })
     return
   }
-  await req.scope
-    .resolve<MessagingModuleService>(MESSAGING_MODULE)
-    .revokeByHash("email", hash, "unsubscribe", { via: "link" })
   simplePage(res, 200, {
     shop,
     title: "Çıkışınız alındı",

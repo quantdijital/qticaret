@@ -48,3 +48,15 @@ Vitrinin `/iletisim` sayfası yalnızca WhatsApp, telefon ve e-posta bağlantıs
 - **Testler:** HTTP `contact-messages.spec.ts` (5 senaryo). İlgili takımlar yeşil: yetki, şablon sayısı, saklama, KVKK.
 - **Vitrin:** `/iletisim` sayfası içerik sayfasıysa formu da gösterir.
 - **Açık:** Personelin yanıtı panelden e-postayla gönderilmiyor; personel kendi posta programından yanıtlıyor. Panelden yanıt ileride eklenebilir (şablon, gönderim kaydı, KVKK etkisi).
+
+## Ek (2026-11-02): misafirin KVKK başvurusu
+
+- **Sorun:** Giriş yapmış müşteri veri kopyası ve silme talebini hesabından açıyor (adr/0041 §6, kanal `account`). Hesabı olmayan kişinin (misafir alıcı, yalnızca bülten ya da stok bildirimi bırakan) vitrinde bir yolu yoktu.
+- **Karar:** İletişim formuna `kvkk` konusu ("KVKK başvurusu") eklendi (`CONTACT_SUBJECTS`, vitrin `contact.subjects.kvkk`). Yeni uç ya da tablo yok; mesaj öteki mesajlar gibi mühürlü saklanır, aynı hız sınırı, iş kanıtı ve alan adı denetiminden geçer. Migration: `Migration20261102201858` (konu kısıtına `kvkk`).
+- **Yasal süre:** Başvuru geldiği andan 30 gün içinde yanıtlanır (KVKK md. 13). Süre personelin kaydettiği taleplerle aynı hesaplanır: `lib/legal/answer-due.ts` (`privacyAnswerDue`, iki `privacy-requests` ucu da bunu kullanır). Son gün mağazanın saat dilimiyle yazılır.
+  - Zil kaydı başlığı "Yeni KVKK başvurusu", açıklaması son günü söyler (`contact.kvkk_received`); verisinde `due_at` (ISO) durur, panel kendi dilinde bundan yazar.
+  - Personel e-postası (`staff.contact_message`) konu `kvkk` ise son günü ve kimlik doğrulama hatırlatmasını ekler (`staff_contact.kvkk_due`, ön metin `staff_contact.kvkk_preheader`).
+  - Personel e-postasının 10 dakikalık sınırı KVKK başvurusu için ayrı sayılır (`contact:staff-mail:kvkk`): öteki mesajların seli yasal süreli bir başvurunun e-postasını geciktirmez. Sınır yine 10 dakikada birdir.
+- **Panel (ayrı iş):** Konu etiketi `kvkk` panelin çevirilerine eklenmeli; zildeki `due_at` gösterilebilir. Personel başvuruyu bir müşteri hesabına bağlayabiliyorsa talebi Müşteriler > KVKK talepleri'ne (kanal `email`/`other`) de kaydeder; misafirse yanıt e-postayla verilir.
+- **Testler:** HTTP `contact-messages.spec.ts` (KVKK başvurusu: zil `due_at`, e-postada son gün, öteki mesajın e-posta sınırından bağımsız), birim `answer-due`, şablon testi.
+- **Açık:** Misafir başvurusunun kimlik doğrulaması (e-posta sahipliği) elle yapılır; otomatik doğrulama ve misafir verisinin dışa aktarımı ileride (kvkk-envanter).

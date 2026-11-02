@@ -1,12 +1,10 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { parseEnv } from "../../../lib/env"
+import { emailLinkUrl } from "../../../lib/messaging/links"
 import type { ConsentConfirmVars } from "../../../lib/messaging/templates"
 import { MESSAGING_MODULE } from "../../../modules/messaging"
 import type MessagingModuleService from "../../../modules/messaging/service"
+import { brandOf } from "../brand"
 import type { Loaded } from "./types"
-
-/** The backend's page that confirms a consent request (`/consents/confirm`). */
-export const CONSENT_CONFIRM_PATH = "/consents/confirm"
 
 /**
  * A consent request's confirmation (security review 2026-10-29): to the
@@ -24,14 +22,13 @@ export async function loadConsentRequest(
   if (!request) {
     return null
   }
-  const backend = parseEnv().BACKEND_URL?.replace(/\/+$/, "")
+  const token = extra["token"]
+  const { storefrontUrl } = await brandOf(container)
   return {
     vars: {
       granting: request.status === "granted",
-      confirmUrl:
-        extra["token"] && backend
-          ? `${backend}${CONSENT_CONFIRM_PATH}?${new URLSearchParams({ t: extra["token"] }).toString()}`
-          : null,
+      // The storefront's page once the shop has a host (adr/0038 Ek 2026-11-02)
+      confirmUrl: token ? emailLinkUrl("consent", token, storefrontUrl) : null,
     },
     recipients: { [request.channel]: request.address },
     receiverId: null,

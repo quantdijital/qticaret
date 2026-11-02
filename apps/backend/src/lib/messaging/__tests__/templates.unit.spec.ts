@@ -82,3 +82,20 @@ describe("a commercial e-mail's way out", () => {
     expect(render("javascript:alert(1)")?.html).not.toContain("javascript:")
   })
 })
+
+describe("staff.contact_message", () => {
+  const mail = (vars: { subject: "order" | "kvkk"; due?: string | null }) =>
+    MESSAGE_TEMPLATES["staff.contact_message"].email?.(vars, brand)
+
+  it("names a KVKK request's legal last day (adr/0047 Ek 2026-11-02)", () => {
+    const kvkk = mail({ subject: "kvkk", due: "2 Aralık 2026" })
+    expect(kvkk?.subject).toBe("Yeni iletişim mesajı: KVKK başvurusu")
+    expect(kvkk?.text).toContain("30 gün")
+    expect(kvkk?.text).toContain("son gün 2 Aralık 2026")
+    expect(kvkk?.html).toContain("2 Aralık 2026")
+  })
+
+  it("says nothing of a deadline for any other message", () => {
+    expect(mail({ subject: "order" })?.text).not.toContain("30 gün")
+  })
+})

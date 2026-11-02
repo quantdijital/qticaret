@@ -26,7 +26,7 @@ export async function GET(req: AuthenticatedMedusaRequest, res: MedusaResponse):
       ? template.email(template.sample, brand, {
           // A made-up way out, so a commercial message shows its footer link
           unsubscribeUrl:
-            template.kind === "commercial" ? "https://magaza.example/unsubscribe?t=ornek" : null,
+            template.kind === "commercial" ? "https://magaza.example/abonelik/cik?t=ornek" : null,
         })
       : null,
     sms: template.sms ? template.sms(template.sample, brand) : null,

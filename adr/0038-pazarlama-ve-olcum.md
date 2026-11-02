@@ -387,3 +387,16 @@ F10'un pazarlama tarafı mağazanın verisini dış servislere taşır: Google, 
   - Ayarlar > Pazarlama: feed'ler ve token, Meta, GA4, terk edilmiş sepet;
   - Ayarlar > Entegrasyonlar: Google bağlantısı;
   - SEO paneli: GSC ve CWV kartları.
+
+## Ek (2026-11-02): ileti bağlantılarının sayfaları vitrinde
+- **Sorun:** Ticari ve işlem iletilerindeki token bağlantıları (çıkış, çift onaylı izin, stok bildirimi onayı) backend'in düz HTML sayfalarını açıyordu: mağazanın görünümü yok, başka host.
+- **Karar:** Mağazanın host'u varken (`seo.canonical_host`, `brandOf().storefrontUrl`) bağlantılar vitrinin sayfalarına gider:
+  - `/abonelik/cik?t=` → `POST /store/consents/unsubscribe` (imzalı alıcı özeti; geri çekme bir kez yazılır, ikinci basış aynı yanıtı verir).
+  - `/abonelik/onay?t=` → `POST /store/consents/confirm` (`granted` ya da `revoked` döner; kullanılmış, süresi dolmuş ya da bilinmeyen token 400 `consents.link_invalid`).
+  - `/stok-bildirimi/onay?t=` → `POST /store/stock-alerts/confirm` (400 `stock_alerts.link_invalid`).
+  - Sayfa bağlantıyı açınca hiçbir şey yapmaz, önce sorar (e-posta tarayıcıları token harcamaz). Düğme Server Action'dır; sonuç sayfası `?sonuc=` ile döner, token adres çubuğundan çıkar. Bozuk bağlantı hata değil, "Bağlantı geçersiz" sayfasıdır (200).
+  - Sayfalar `noindex,nofollow`, `Referrer-Policy: no-referrer`; kökler iki tarafta sistem yolu (`abonelik`, `stok-bildirimi`; docs/13 §6).
+  - Store uçları token'ı gövdede alır, eski sayfalarla aynı kontrolleri yapar (iş mantığı `workflows/messaging/email-links.ts`; tek adımlı, modülün kendi işlemi; telafi gerektiren sonraki adım yok) ve aynı hız sınırı profilindedir (`webhook`, IP başına dakikada 600; vitrin imzalı müşteri IP'sini iletir). Rotalar `api/http/email-link-routes.ts`.
+- **Gönderim:** `lib/messaging/links.ts` (`emailLinkUrl`) host varsa vitrin adresini, yoksa `BACKEND_URL`'deki eski sayfayı, ikisi de yoksa bağlantısız gönderir. Ticari e-postanın gövdesindeki çıkış bağlantısı vitrine gider; `List-Unsubscribe` başlığı (RFC 8058 tek tık POST) backend'in `/unsubscribe` adresinde kalır, çünkü posta istemcisi oraya POST eder.
+- **Eski bağlantılar:** Gönderilmiş iletilerde oldukları için `/unsubscribe`, `/consents/confirm`, `/stock-alerts/confirm` kalır. Host varken GET 302 ile vitrin sayfasına gönderir (token biçimi uyuyorsa taşınır; `no-store`, `no-referrer`); yoksa eski sayfayı gösterir. POST'lar (sayfanın düğmesi, tek tık çıkış) çalışmaya devam eder.
+- **Testler:** HTTP `consent-links.spec.ts` (6: geçerli/sahte/biçimsiz/tekrar token, süresi dolmuş onay ve stok bildirimi, eski adreslerin yönlendirmesi, host varken iletilerin vitrin bağlantısı ve backend tek tık başlığı, hız sınırı), birim `links`, `unsubscribe`, vitrin birim `email-links`, e2e `legal-links.e2e.ts`.

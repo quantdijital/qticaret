@@ -1,8 +1,7 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
-import { MESSAGING_MODULE } from "../../../modules/messaging"
-import type MessagingModuleService from "../../../modules/messaging/service"
 import { brandOf } from "../../../workflows/messaging/brand"
-import { confirmForm, simplePage } from "../../http/simple-page"
+import { confirmConsentByLinkWorkflow } from "../../../workflows/messaging/email-links"
+import { confirmForm, sendToStorefront, simplePage } from "../../http/simple-page"
 
 const tokenOf = (req: MedusaRequest): string => {
   const value = req.query["t"]
@@ -11,11 +10,16 @@ const tokenOf = (req: MedusaRequest): string => {
 
 /**
  * GET /consents/confirm?t=… (security review 2026-10-29): the page a
- * consent request's link opens. It asks first, so a mail scanner opening
- * the link records nothing.
+ * consent request's link opens. Once the shop has a host, the storefront's
+ * own page answers it (`/abonelik/onay`, adr/0038 Ek 2026-11-02); until
+ * then this one. Either asks first, so a mail scanner records nothing.
  */
 export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {
-  const { shopName: shop } = await brandOf(req.scope)
+  const { shopName: shop, storefrontUrl } = await brandOf(req.scope)
+  if (storefrontUrl) {
+    sendToStorefront(res, "consent", req.query["t"], storefrontUrl)
+    return
+  }
   const token = tokenOf(req)
   simplePage(res, token ? 200 : 400, {
     shop,
@@ -32,7 +36,7 @@ export async function POST(req: MedusaRequest, res: MedusaResponse): Promise<voi
   const { shopName: shop } = await brandOf(req.scope)
   const token = tokenOf(req)
   const confirmed = token
-    ? await req.scope.resolve<MessagingModuleService>(MESSAGING_MODULE).confirmConsentRequest(token)
+    ? (await confirmConsentByLinkWorkflow(req.scope).run({ input: { token } })).result
     : null
   simplePage(res, confirmed ? 200 : 400, {
     shop,

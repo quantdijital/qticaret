@@ -7,6 +7,7 @@ import { CheckoutPage } from "./CheckoutPage"
 import { ConfirmPage } from "./ConfirmPage"
 import { CheckoutResultPage } from "./CheckoutResultPage"
 import { ContentPage } from "./ContentPage"
+import { CookiePreferencesPage } from "./CookiePreferencesPage"
 import { HomePage } from "./HomePage"
 import { Layout } from "./Layout"
 import { ListingPage } from "./ListingPage"
@@ -34,5 +35,6 @@ export const baseTheme: StorefrontTheme = {
   AccountPage,
   NotFoundPage,
   ConfirmPage,
+  CookiePreferencesPage,
   ReviewsPage,
 }

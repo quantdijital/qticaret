@@ -241,14 +241,7 @@ export const ACCOUNT_ROUTES = [
     methods: ["POST" as const],
     middlewares: [verificationOfOwnIdentity],
   },
-  { matcher: "/stock-alerts/confirm", middlewares: [rateLimit(() => RATE_LIMIT_PROFILES.webhook)] },
-  // A consent request's link (double opt-in): opened from a message, by address alone
-  { matcher: "/consents/confirm", middlewares: [rateLimit(() => RATE_LIMIT_PROFILES.webhook)] },
-  // adr/0038 §1: an unsubscribe link, opened or one-clicked from anywhere
-  {
-    matcher: "/unsubscribe",
-    middlewares: [rateLimit(() => RATE_LIMIT_PROFILES.webhook)],
-  },
+  // The links in messages (unsubscribe, consent, stock alert): http/email-link-routes.ts
   // Counted per address too: it mails one
   {
     matcher: "/store/order-lookup",

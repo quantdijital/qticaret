@@ -14,6 +14,10 @@ export const SYSTEM_ROOTS = [
   "siparis",
   "yasal",
   "onizleme",
+  // A message's token links (adr/0038 Ek 2026-11-02) and the cookie choices (D9)
+  "abonelik",
+  "stok-bildirimi",
+  "cerez-tercihleri",
 ] as const
 
 /**

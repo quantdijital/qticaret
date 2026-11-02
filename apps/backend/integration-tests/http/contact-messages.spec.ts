@@ -2,6 +2,7 @@ import { Modules } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { startFakeMail } from "@qticaret/testing"
 import type { FakeMail } from "@qticaret/testing"
+import { privacyAnswerDue, privacyAnswerDueText } from "../../src/lib/legal/answer-due"
 import { CONTACT_MESSAGES_MODULE } from "../../src/modules/contact-messages"
 import type ContactMessagesModuleService from "../../src/modules/contact-messages/service"
 import { contactMessagesFor, eraseContactMessages } from "../../src/workflows/contact/customer-data"
@@ -133,6 +134,49 @@ medusaIntegrationTestRunner({
       expect(mailsToStaff().map(({ template }) => template)).toEqual(["staff.contact_message"])
       // The message itself stays in the panel
       expect(JSON.stringify(mailsToStaff()[0])).not.toContain("Siparişim")
+    })
+
+    it("names a KVKK request's legal last day in the bell and the staff e-mail, past other messages' mail budget", async () => {
+      // Another message has the shop's staff e-mail for these ten minutes
+      await send(message(`once-${String(Date.now())}@example.com`))
+      const email = `kvkk-${String(Date.now())}@example.com`
+      const sent = await send({
+        ...message(email),
+        subject: "kvkk",
+        body: "Hakkımda tuttuğunuz kişisel verilerin bir kopyasını istiyorum.",
+      })
+      const { data } = await list("new")
+      const mine = data.contact_messages.find((row) => row.email === email)
+      const [row] = await getContainer()
+        .resolve<ContactMessagesModuleService>(CONTACT_MESSAGES_MODULE)
+        .listContactMessages({ id: mine?.id ?? "" }, { take: 1 })
+      const came = new Date(row?.created_at ?? 0)
+      const lastDay = privacyAnswerDueText(came, "Europe/Istanbul")
+      const [mail] = await eventually(
+        () =>
+          Promise.resolve(
+            fake.messages.filter(
+              ({ to, subject }) =>
+                to.includes("sahip@magaza.example") && subject.includes("KVKK başvurusu")
+            )
+          ),
+        (mails) => mails.length > 0
+      )
+      const bell = await getContainer()
+        .resolve(Modules.NOTIFICATION)
+        .listNotifications({ channel: "feed", resource_id: mine?.id ?? "" })
+
+      expect([sent.status, mine?.subject]).toEqual([202, "kvkk"])
+      expect(bell[0]?.data).toMatchObject({
+        kind: "contact_message",
+        subject: "kvkk",
+        due_at: privacyAnswerDue(came).toISOString(),
+        title: "Yeni KVKK başvurusu",
+      })
+      expect(mail?.text).toContain("30 gün")
+      expect(mail?.text).toContain(`son gün ${lastDay}`)
+      // The person's words stay in the panel
+      expect(JSON.stringify(mail)).not.toContain("kopyasını")
     })
 
     it("refuses what it cannot take", async () => {

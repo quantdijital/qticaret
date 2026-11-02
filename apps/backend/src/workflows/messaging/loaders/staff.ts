@@ -3,6 +3,7 @@ import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import { panelUrl } from "../../../lib/env"
 import { inviteLink } from "../../../lib/staff"
 import { CONTACT_MESSAGES_MODULE } from "../../../modules/contact-messages"
+import { contactAnswerDue } from "../../contact/answer-due"
 import type ContactMessagesModuleService from "../../../modules/contact-messages/service"
 import type {
   StaffContactVars,
@@ -73,13 +74,16 @@ export async function loadStaffContact(
   const messages = container.resolve<ContactMessagesModuleService>(CONTACT_MESSAGES_MODULE)
   const [message] = await messages.listContactMessages(
     { id: messageId },
-    { select: ["subject"], take: 1 }
+    { select: ["subject", "created_at"], take: 1 }
   )
   if (!message) {
     return null
   }
+  // A KVKK request runs on the law's clock: its last day goes with the alert
+  const due =
+    message.subject === "kvkk" ? (await contactAnswerDue(container, message.created_at)).text : null
   return {
-    vars: { subject: message.subject },
+    vars: { subject: message.subject, due },
     ...STAFF,
     resourceType: "contact_message",
   }

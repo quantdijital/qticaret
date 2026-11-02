@@ -13,6 +13,7 @@ import type {
   BlogIndexPageView,
   CartPageView,
   ConfirmPageView,
+  CookiePreferencesPageView,
   InstallmentFamilyView,
   ContentPageView,
   HomePageView,
@@ -103,7 +104,10 @@ export interface StorefrontTheme {
     shop: ShopView
     t: Translate
     children: ReactNode
-    /** A plain form: `choice` (all, necessary, custom), `analytics`, `marketing`, `policy_version`. */
+    /**
+     * A plain form: `choice` (all, necessary, custom), `analytics`,
+     * `marketing`, `policy_version`, and `return=preferences` from the page.
+     */
     saveCookies: (form: FormData) => Promise<void>
     /** Fields: `email`, `challenge`; the footer's newsletter box (double opt-in). */
     subscribe?: (state: PlaceOrderResult, form: FormData) => Promise<PlaceOrderResult>
@@ -132,6 +136,17 @@ export interface StorefrontTheme {
   NotFoundPage: ComponentType<{ t: Translate }>
   /** The shop's approved reviews across its products (D10). */
   ReviewsPage: ComponentType<Page<ReviewsPageView>>
-  /** Asks before acting on a link (D6 cart reminder); the action is a plain form. */
+  /**
+   * Asks before acting on a link (D6 cart reminder; a message's unsubscribe,
+   * consent and stock alert links), then says what happened; the action is
+   * a plain form.
+   */
   ConfirmPage: ComponentType<Page<ConfirmPageView> & { action: (form: FormData) => Promise<void> }>
+  /**
+   * The cookie choices on a page of their own (D9), where the footer's link
+   * leads without script. The form is the banner's, with `return=preferences`.
+   */
+  CookiePreferencesPage: ComponentType<
+    Page<CookiePreferencesPageView> & { save: (form: FormData) => Promise<void> }
+  >
 }

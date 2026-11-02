@@ -6,7 +6,8 @@ import { challengeOf } from "@/lib/checkout/pay"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { storeCall } from "@/lib/store-api/server"
 
-const SUBJECTS = ["order", "product", "return", "payment", "other"] as const
+// `kvkk`: a guest's data request (adr/0047 Ek 2026-11-02); a customer asks from the account too
+const SUBJECTS = ["order", "product", "return", "payment", "kvkk", "other"] as const
 
 const optional = (schema: z.ZodString) =>
   schema.optional().or(z.literal("").transform(() => undefined))

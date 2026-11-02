@@ -6,6 +6,7 @@ import { messageText } from "../lib/messaging/texts"
 import { notificationText } from "../lib/notifications/messages"
 import { CONTACT_MESSAGES_MODULE } from "../modules/contact-messages"
 import type ContactMessagesModuleService from "../modules/contact-messages/service"
+import { contactAnswerDue } from "../workflows/contact/answer-due"
 import { CONTACT_MESSAGE_RECEIVED } from "../workflows/contact/messages"
 import { alertStaff } from "../workflows/messaging/staff"
 
@@ -31,12 +32,15 @@ export default async function contactMessageAlerts({
   const messages = container.resolve<ContactMessagesModuleService>(CONTACT_MESSAGES_MODULE)
   const [message] = await messages.listContactMessages(
     { id: data.id },
-    { select: ["id", "subject"], take: 1 }
+    { select: ["id", "subject", "created_at"], take: 1 }
   )
   if (!message) {
     return
   }
   const subject = messageText(`staff_contact.subjects.${message.subject}`)
+  // A KVKK request (adr/0047 Ek 2026-11-02): the bell names the law's last day
+  const due =
+    message.subject === "kvkk" ? await contactAnswerDue(container, message.created_at) : null
   await container
     .resolve(Modules.NOTIFICATION)
     .createNotifications({
@@ -51,13 +55,20 @@ export default async function contactMessageAlerts({
         kind: "contact_message",
         message_id: message.id,
         subject: message.subject,
-        ...notificationText("contact.message_received", { subject }),
+        ...(due
+          ? { due_at: due.at, ...notificationText("contact.kvkk_received", { due: due.text }) }
+          : notificationText("contact.message_received", { subject })),
       },
     })
     .catch((error: unknown) => {
       logger.warn({ event: "contact.alert_failed", err: errorSummary(error) })
     })
-  const { count } = await sharedRateLimitStore().hit("contact:staff-mail", MAIL_EVERY_MS)
+  // A KVKK request has a budget of its own: a flood of other messages never
+  // keeps its e-mail back
+  const { count } = await sharedRateLimitStore().hit(
+    message.subject === "kvkk" ? "contact:staff-mail:kvkk" : "contact:staff-mail",
+    MAIL_EVERY_MS
+  )
   if (count === 1) {
     await alertStaff(container, { template: "staff.contact_message", resource_id: message.id })
   }

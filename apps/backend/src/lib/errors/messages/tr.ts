@@ -182,6 +182,16 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "content.landing_not_original":
     "Metin yeterince özgün değil (%30'un altında); başka filtre sayfalarına çok benziyor. Yayına almadan önce metni bu sayfaya özgü hâle getirin.",
   "content.landing_unknown": "Filtre sayfası bulunamadı.",
+  "content.tags_too_many": "Bir yazıya en fazla 50 etiket eklenebilir.",
+  "content.term_description_invalid":
+    "Açıklama en fazla 1000 karakter olmalı ve kullanılamayan karakter içermemeli.",
+  "content.term_handle_taken":
+    "Bu adres başka bir kategoride ya da etikette kullanılıyor; farklı bir ad ya da adres yazın.",
+  "content.term_name_invalid":
+    "Ad gerekli; en fazla 120 karakter olmalı ve kullanılamayan karakter içermemeli.",
+  "content.term_unknown":
+    "Seçilen kategori ya da etiket bulunamadı; listeyi yenileyip yeniden seçin.",
+  "content.terms_post_only": "Kategori ve etiket yalnızca blog yazılarına eklenebilir.",
   "content.title_invalid":
     "Başlık gerekli; en fazla 200 karakter olmalı ve kullanılamayan karakter içermemeli.",
   "content.too_large":
@@ -325,6 +335,10 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "cart_reminders.link_invalid":
     "Bu bağlantı geçersiz, süresi dolmuş ya da kullanılmış. Sepetinize mağazadan ulaşabilirsiniz.",
   "marketing_feeds.unknown": "Feed bulunamadı.",
+  "consents.link_invalid":
+    "Bu bağlantı geçersiz, süresi dolmuş ya da kullanılmış. İzninizi hesabınızdan ya da yeniden abone olarak verebilirsiniz.",
+  "stock_alerts.link_invalid":
+    "Bu bağlantı geçersiz, süresi dolmuş ya da kullanılmış. Ürün sayfasından yeniden isteyebilirsiniz.",
   "stock_alerts.not_tracked": "Bu ürün için stok bildirimi verilemiyor.",
   "stock_alerts.in_stock": "Bu ürün şu an stokta; hemen sipariş verebilirsiniz.",
   "stock_alerts.email_required": "Haber verebilmemiz için e-posta adresinizi yazın.",

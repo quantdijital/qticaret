@@ -12,7 +12,7 @@ export interface ConsentConfirmVars {
 
 const SAMPLE: ConsentConfirmVars = {
   granting: true,
-  confirmUrl: "https://api.magaza.example/consents/confirm?t=ornek",
+  confirmUrl: "https://magaza.example/abonelik/onay?t=ornek",
 }
 
 /**

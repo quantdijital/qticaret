@@ -36,7 +36,9 @@ export interface StaffMfaVars {
 
 /** A contact message came, about what; who and what they wrote stay in the panel. */
 export interface StaffContactVars {
-  subject: "order" | "product" | "return" | "payment" | "other"
+  subject: "order" | "product" | "return" | "payment" | "kvkk" | "other"
+  /** A KVKK request's last day to answer (30 days from its coming, adr/0041), in words. */
+  due?: string | null
 }
 
 /** A staff member's password reset: the link only the event knew. */
@@ -147,13 +149,25 @@ export const staffContactMessage: MessageTemplate<StaffContactVars> = {
     const subject = messageText(`staff_contact.subjects.${vars.subject}`)
     return renderEmail(brand, {
       subject: messageText("staff_contact.subject", { subject }),
-      preheader: messageText("staff_contact.preheader"),
+      preheader:
+        vars.subject === "kvkk"
+          ? messageText("staff_contact.kvkk_preheader", { due: vars.due ?? "" })
+          : messageText("staff_contact.preheader"),
       heading: messageText("staff_contact.heading"),
       blocks: [
         {
           kind: "paragraph",
           text: messageText("staff_contact.intro", { subject }),
         },
+        // A data request runs on the law's clock (KVKK md. 13, adr/0041)
+        ...(vars.subject === "kvkk"
+          ? [
+              {
+                kind: "paragraph" as const,
+                text: messageText("staff_contact.kvkk_due", { due: vars.due ?? "" }),
+              },
+            ]
+          : []),
       ],
       footer: FOOTER(brand.shopName),
     })

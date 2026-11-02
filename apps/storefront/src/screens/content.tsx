@@ -20,7 +20,8 @@ interface ContentEntry {
   published_at: string | null
 }
 
-const SUBJECTS = ["order", "product", "return", "payment", "other"] as const
+// `kvkk`: a guest's data request (adr/0047 Ek 2026-11-02); a customer asks from the account too
+const SUBJECTS = ["order", "product", "return", "payment", "kvkk", "other"] as const
 
 /**
  * On the page the shop chose for it (adr/0047): how to reach the shop, from

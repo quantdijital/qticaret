@@ -106,7 +106,11 @@ export interface ShopView {
   social: SocialLinkView[]
   /** The registered title for the footer's small print; null shows the shop's name. */
   companyTitle: string | null
-  /** The cookie question, while the visitor has not answered under the policy now (D9). */
+  /**
+   * The cookie question (D9): open by itself while the visitor has not
+   * answered under the policy now, else kept for the footer's "cookie
+   * preferences" link to open again. Null when the answer could not be read.
+   */
   cookieBanner: CookieBannerView | null
   /** The signed-in customer's first name; null for a guest. */
   customerName: string | null
@@ -122,6 +126,19 @@ export interface CookieBannerView {
   policyVersion: number | null
   /** The cookie policy's page, when the shop published one. */
   policyPath: string | null
+  /** No answer yet under the policy now: the banner shows by itself. */
+  due: boolean
+  /** The answer in force, for the boxes; both false while one is due. */
+  analytics: boolean
+  marketing: boolean
+}
+
+/** `/cerez-tercihleri`: the banner's form on a page of its own, for a browser without script. */
+export interface CookiePreferencesPageView {
+  title: string
+  banner: CookieBannerView
+  /** Said once the choice is saved. */
+  notice: string | null
 }
 
 export interface ProductCardView {
@@ -432,7 +449,8 @@ export interface ConfirmPageView {
   /** A warning above the button, when acting replaces something. */
   warning: string | null
   fields: { name: string; value: string }[]
-  submit: string
+  /** The button's words; null when there is nothing left to do (done, or a broken link). */
+  submit: string | null
   back: LinkView
 }
 

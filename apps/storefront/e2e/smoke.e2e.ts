@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test"
-import { collectErrors, DEMO_PRODUCT, dismissCookies } from "./support"
+import { collectErrors, cookieBanner, DEMO_PRODUCT, dismissCookies } from "./support"
 
 const PAGES = [
   "/",
@@ -85,6 +85,6 @@ test.describe("storefront pages", () => {
     await page.goto("/")
     await dismissCookies(page)
     await page.reload()
-    await expect(page.locator("#cerez-baslik")).toHaveCount(0)
+    await expect(cookieBanner(page)).toBeHidden()
   })
 })

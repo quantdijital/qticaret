@@ -1,8 +1,13 @@
 import "server-only"
-import { cookies } from "next/headers"
+import { cookies, headers } from "next/headers"
+import { cache } from "react"
 import { storefrontEnv } from "../env"
 import { isStoreApiError } from "../store-api/errors"
 import { storeCall, storeCallWithHeaders } from "../store-api/server"
+import { COOKIE_PREFERENCES_PATH } from "../views/cookies"
+import type { CookieConsent } from "../views/cookies"
+
+export type { CookieConsent }
 
 /**
  * The cookie banner's answers (F13.8, adr/0041 §5, D9). The backend keys
@@ -20,13 +25,12 @@ async function visitorHeader(): Promise<Record<string, string>> {
   return id && ID.test(id) ? { cookie: `${NAME()}=${id}` } : {}
 }
 
-export interface CookieConsent {
-  consent: { analytics: boolean; marketing: boolean; policy_version: number | null } | null
-  policy_version: number | null
-}
-
-/** The answer in force and the policy now; the banner asks when there is none, or one under an older policy. */
-export async function cookieConsent(): Promise<CookieConsent | null> {
+/**
+ * The answer in force and the policy now; the banner asks when there is
+ * none, or one under an older policy. Once per request: the frame and the
+ * preferences page read the same.
+ */
+export const cookieConsent = cache(async (): Promise<CookieConsent | null> => {
   try {
     return await storeCall<CookieConsent>("/store/consents/cookies", {
       headers: await visitorHeader(),
@@ -38,10 +42,13 @@ export async function cookieConsent(): Promise<CookieConsent | null> {
     }
     throw error
   }
-}
+})
 
-export const bannerDue = (state: CookieConsent | null): boolean =>
-  state !== null && state.consent?.policy_version !== state.policy_version
+/** Whether this request is the preferences page, which asks itself (the banner waits there). */
+export async function onCookiePreferencesPage(): Promise<boolean> {
+  const url = (await headers()).get("x-qt-url") ?? ""
+  return url === COOKIE_PREFERENCES_PATH || url.startsWith(`${COOKIE_PREFERENCES_PATH}?`)
+}
 
 /** Records the answer; the visitor's id cookie, new or renewed, is the backend's. */
 export async function recordCookieConsent(answer: {

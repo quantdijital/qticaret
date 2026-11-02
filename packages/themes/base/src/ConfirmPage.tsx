@@ -1,7 +1,11 @@
 import type { ConfirmPageView, Translate } from "@qticaret/ui"
 import { PageContainer } from "./components/Container"
 
-/** Asks before acting on a link: the words, a warning, one button, the way back. */
+/**
+ * Asks before acting on a link: the words, a warning, one button, the way
+ * back. With nothing left to do (done, or a broken link) only the words
+ * and the way back.
+ */
 export function ConfirmPage({
   view,
   action,
@@ -10,6 +14,11 @@ export function ConfirmPage({
   t: Translate
   action: (form: FormData) => Promise<void>
 }) {
+  const back = (
+    <a href={view.back.path} className="text-sm underline">
+      {view.back.label}
+    </a>
+  )
   return (
     <PageContainer>
       <div className="mx-auto flex max-w-md flex-col gap-5 py-12 text-center">
@@ -20,20 +29,22 @@ export function ConfirmPage({
             {view.warning}
           </p>
         )}
-        <form action={action} className="flex flex-col items-center gap-3">
-          {view.fields.map((field) => (
-            <input key={field.name} type="hidden" name={field.name} value={field.value} />
-          ))}
-          <button
-            type="submit"
-            className="h-11 rounded-full bg-foreground px-6 text-sm font-semibold text-background"
-          >
-            {view.submit}
-          </button>
-          <a href={view.back.path} className="text-sm underline">
-            {view.back.label}
-          </a>
-        </form>
+        {view.submit === null ? (
+          <p>{back}</p>
+        ) : (
+          <form action={action} className="flex flex-col items-center gap-3">
+            {view.fields.map((field) => (
+              <input key={field.name} type="hidden" name={field.name} value={field.value} />
+            ))}
+            <button
+              type="submit"
+              className="h-11 rounded-full bg-foreground px-6 text-sm font-semibold text-background"
+            >
+              {view.submit}
+            </button>
+            {back}
+          </form>
+        )}
       </div>
     </PageContainer>
   )

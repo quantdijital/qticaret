@@ -35,6 +35,15 @@ describe("isSystemPath and backendFile", () => {
     expect(isSystemPath("/")).toBe(false)
   })
 
+  it("keeps a message's token links and the cookie choices as its own, token case and all", () => {
+    expect(isSystemPath("/abonelik/cik")).toBe(true)
+    expect(isSystemPath("/abonelik/onay")).toBe(true)
+    expect(isSystemPath("/stok-bildirimi/onay")).toBe(true)
+    expect(isSystemPath("/cerez-tercihleri")).toBe(true)
+    expect(normalizedPath("/abonelik/cik")).toBeNull()
+    expect(isSystemPath("/abonelikler-hakkinda")).toBe(false)
+  })
+
   it("maps the root files to the backend", () => {
     expect(backendFile("/robots.txt")).toBe("/store/seo/robots")
     expect(backendFile("/sitemap.xml")).toBe("/store/seo/sitemaps/sitemap.xml")

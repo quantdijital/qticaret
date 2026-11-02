@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto"
-import { recipientOfToken, unsubscribeToken } from "../unsubscribe"
+import { recipientOfToken, unsubscribePageUrl, unsubscribeToken } from "../unsubscribe"
 
 /** adr/0038 §1: a way out names its recipient by hash, signed, and opens nothing else. */
 describe("unsubscribe token", () => {
@@ -18,5 +18,14 @@ describe("unsubscribe token", () => {
     for (const bad of ["", hash, `${token}x`, token.toUpperCase()]) {
       expect(recipientOfToken(bad, key)).toBeNull()
     }
+  })
+})
+
+describe("unsubscribePageUrl (adr/0038 Ek 2026-11-02)", () => {
+  it("opens the storefront's page, the signed token carried", () => {
+    const hash = "c".repeat(64)
+    const url = new URL(unsubscribePageUrl(hash, "https://magaza.example") ?? "")
+    expect(`${url.origin}${url.pathname}`).toBe("https://magaza.example/abonelik/cik")
+    expect(url.searchParams.get("t")?.startsWith(`${hash}.`)).toBe(true)
   })
 })
