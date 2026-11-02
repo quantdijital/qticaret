@@ -1,4 +1,5 @@
 import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
+import { SHOP_TOKENS_KEY } from "@/features/settings/api/shop-tokens"
 import { withReauth } from "@/lib/reauth"
 import { sdk } from "@/lib/sdk"
 
@@ -21,10 +22,24 @@ export interface LegalSettings {
   same_as: string[]
 }
 
+/** One range the shop answers in (adr/0048): ISO weekday 1 (Monday) … 7, `HH:MM`, `closes` up to `24:00`. */
+export interface OpeningRange {
+  day: number
+  opens: string
+  closes: string
+}
+
+/** The shop's own details (adr/0048): with the legal section, the one source every page reads. */
 export interface StoreSettings {
   contact_email: string | null
   /** E.164; the server accepts Turkish forms and normalises them. */
   contact_phone: string | null
+  /** The number the storefront's WhatsApp buttons open, E.164; none: no button. */
+  whatsapp_phone: string | null
+  /** Sorted by day and opening; a day without a range is closed, none at all: not given. */
+  opening_hours: OpeningRange[]
+  /** The shop on a map (Google Maps and the like), https; none: no link. */
+  map_url: string | null
   timezone: string
   weight_unit: "g" | "kg"
   dimension_unit: "cm" | "mm"
@@ -187,8 +202,6 @@ export interface StorefrontSettings {
   footer_groups: { title: string; links: StorefrontLink[] }[]
   /** The shop's promises under the header and beside "add to cart". */
   trust_badges: { icon: TrustIcon; title: string; text: string | null }[]
-  /** The number the WhatsApp button opens, E.164; none: no button. */
-  whatsapp_phone: string | null
   /** The header's menu as the shop names it; none: the top categories and their children. */
   menu: StorefrontMenuItem[]
   /** The storefront's main colour (`#rrggbb`, lower case); none: the theme's own. */
@@ -247,6 +260,8 @@ export function useSaveSection<T>(section: string) {
       ),
     onSuccess: (saved) => {
       client.setQueryData(["settings", section], saved)
+      // A shop detail a text stands in for may have changed (adr/0048)
+      void client.invalidateQueries({ queryKey: SHOP_TOKENS_KEY })
     },
   })
 }

@@ -11,7 +11,7 @@ import type { SeoSetupEntry, SeoSetupItem } from "@/features/seo/api/setup"
 
 const C = "seo.setup"
 
-// Where each item is done
+// Where each item is done; the legal identity on the store profile's own tab
 const WHERE: Record<
   SeoSetupItem,
   | "/settings/store"
@@ -45,7 +45,10 @@ function Item({ entry, mayAct }: { entry: SeoSetupEntry; mayAct: boolean }) {
       {/* Google's items open where its account is connected, even while that is the step */}
       {mayAct && entry.blocked !== "google_platform" ? (
         <Button asChild variant="outline" size="sm" className="ml-8 shrink-0 sm:ml-0">
-          <Link to={where}>
+          <Link
+            to={where}
+            {...(entry.key === "legal_identity" ? { search: { part: "legal" } } : {})}
+          >
             {t(`${C}.go`)}
             <ArrowRight />
           </Link>

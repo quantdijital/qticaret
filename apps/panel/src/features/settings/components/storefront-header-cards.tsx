@@ -1,10 +1,11 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useFieldArray, useForm } from "react-hook-form"
+import { useFieldArray, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { z } from "zod"
 import { CardForm } from "@/components/patterns/card-form"
 import { Input } from "@/components/ui/input"
 import type { StorefrontSettings } from "@/features/settings/api/sections"
+import { ShopTokenPreview, TokenSlot } from "@/features/settings/components/shop-token-menu"
 import {
   EmptyLine,
   LinkRows,
@@ -15,6 +16,7 @@ import {
 import {
   STOREFRONT_LIMITS,
   errorLine,
+  knownTokens,
   lineSchema,
   linkSchema,
   useSaveStorefront,
@@ -27,7 +29,7 @@ const LIMITS = STOREFRONT_LIMITS
 const announcementsSchema = z.object({
   // Rows of their own, so each line keeps its place while the list moves
   lines: z
-    .array(z.object({ text: lineSchema(LIMITS.announcementLength) }))
+    .array(z.object({ text: lineSchema(LIMITS.announcementLength).refine(...knownTokens) }))
     .max(LIMITS.announcements),
 })
 type AnnouncementValues = z.infer<typeof announcementsSchema>
@@ -36,7 +38,7 @@ const announcementsOf = (saved: StorefrontSettings): AnnouncementValues => ({
   lines: saved.announcements.map((text) => ({ text })),
 })
 
-/** The thin bar on top of every page: its lines, shown in turn. */
+/** The thin bar on top of every page: its lines, shown in turn; each may hold the shop's details. */
 export function AnnouncementsCard({ saved }: { saved: StorefrontSettings }) {
   const { t } = useTranslation()
   const { save, saving } = useSaveStorefront()
@@ -47,7 +49,8 @@ export function AnnouncementsCard({ saved }: { saved: StorefrontSettings }) {
     resetOptions: { keepDirtyValues: true },
   })
   const lines = useFieldArray({ control: form.control, name: "lines" })
-  const { errors } = form.formState
+  const written = useWatch({ control: form.control, name: "lines" })
+  const { errors, isSubmitted } = form.formState
   const submit = form.handleSubmit((next) => {
     save({ announcements: next.lines.map((line) => line.text) }, (stored) => {
       form.reset(announcementsOf(stored), FULL_RESET)
@@ -71,17 +74,31 @@ export function AnnouncementsCard({ saved }: { saved: StorefrontSettings }) {
           {lines.fields.map((line, index) => {
             const number = index + 1
             const error = errorLine(t, errors.lines?.[index]?.text, LIMITS.announcementLength)
-            const errorId = `storefront-announcement-${index}-error`
+            const id = `storefront-announcement-${index}`
+            const errorId = `${id}-error`
             return (
               <li key={line.id} className="flex items-start gap-2">
                 <RowCell error={error} errorId={errorId} className="flex-1">
-                  <Input
-                    aria-label={t(`${S}.announcements.line`, { number })}
-                    aria-invalid={Boolean(error)}
-                    aria-describedby={error ? errorId : undefined}
-                    placeholder={t(`${S}.announcements.placeholder`)}
-                    {...form.register(`lines.${index}.text`)}
-                  />
+                  <TokenSlot
+                    fieldId={id}
+                    onInsert={(text) => {
+                      form.setValue(`lines.${index}.text`, text, {
+                        shouldDirty: true,
+                        shouldValidate: isSubmitted,
+                      })
+                    }}
+                  >
+                    <Input
+                      id={id}
+                      aria-label={t(`${S}.announcements.line`, { number })}
+                      aria-invalid={Boolean(error)}
+                      aria-describedby={error ? errorId : undefined}
+                      placeholder={t(`${S}.announcements.placeholder`)}
+                      className="pr-9"
+                      {...form.register(`lines.${index}.text`)}
+                    />
+                  </TokenSlot>
+                  <ShopTokenPreview text={written[index]?.text ?? ""} />
                 </RowCell>
                 <RowActions
                   index={index}

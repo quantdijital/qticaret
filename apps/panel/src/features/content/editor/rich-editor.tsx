@@ -31,10 +31,13 @@ export function RichEditor({
   value,
   onChange,
   label,
+  shopTokens = false,
 }: {
   value: JSONContent
   onChange: (doc: JSONContent) => void
   label: string
+  /** Offer the shop's details (`{telefon}`), for a text the server fills them in (adr/0048). */
+  shopTokens?: boolean
 }) {
   const { t } = useTranslation()
   const [linking, setLinking] = useState(false)
@@ -81,6 +84,7 @@ export function RichEditor({
           setImaging(true)
         }}
         onCard={setCarding}
+        tokens={shopTokens}
       />
       {/* A long text scrolls inside, under a toolbar that stays in reach; the page beside keeps its height */}
       <EditorContent editor={editor} className="max-h-[min(70vh,48rem)] overflow-y-auto" />

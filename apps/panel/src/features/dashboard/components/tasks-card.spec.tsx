@@ -83,7 +83,7 @@ describe("TasksCard", () => {
     expect(await hrefOf("Aktarılamayan muhasebe kayıtları")).toBe(
       "/settings/einvoice?part=accounting"
     )
-    expect(await hrefOf("Mağaza künyesi eksik")).toBe("/settings/store")
+    expect(await hrefOf("Mağaza künyesi eksik")).toBe("/settings/store?part=legal")
     expect(await hrefOf("Durdurulan webhook'lar")).toBe("/settings/api")
     expect(await hrefOf("SEO kurulumunda eksik")).toBe("/seo")
   })

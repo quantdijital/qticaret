@@ -15,7 +15,6 @@ export const SAVED: StorefrontSettings = {
     { title: "Kurumsal", links: [{ label: "Mesafeli satış", href: "/mesafeli-satis" }] },
   ],
   trust_badges: [{ icon: "truck", title: "Aynı gün kargo", text: null }],
-  whatsapp_phone: "+905321234567",
   menu: [],
   primary_color: null,
   hero: null,
@@ -30,14 +29,28 @@ export interface Init {
 
 export type FetchMock = Mock<(url: string, init?: Init) => Promise<unknown>>
 
-/** The server answers every call with `stored` over the saved section, and a save over both. */
+/** The shop's details as `GET /admin/shop-tokens` gives them (adr/0048); the address not given. */
+export const SHOP_TOKENS = [
+  { name: "mağaza_adı", value: "Örnek Bıçak" },
+  { name: "telefon", value: "0212 123 45 67" },
+  { name: "e_posta", value: "destek@ornek.com" },
+  { name: "adres", value: null },
+  { name: "whatsapp", value: "0532 123 45 67" },
+  { name: "ücretsiz_kargo_eşiği", value: "₺1.500" },
+]
+
+/** The server answers every call with `stored` over the saved section, and a save over both; the details menu its list. */
 export function answer(fetchMock: FetchMock, stored: Partial<StorefrontSettings> = {}) {
-  fetchMock.mockImplementation((_url: string, init?: Init) =>
-    Promise.resolve({
-      section: "storefront",
-      values: { ...SAVED, ...stored, ...init?.body },
-      version: 2,
-    })
+  fetchMock.mockImplementation((url: string, init?: Init) =>
+    Promise.resolve(
+      url === "/admin/shop-tokens"
+        ? { tokens: SHOP_TOKENS }
+        : {
+            section: "storefront",
+            values: { ...SAVED, ...stored, ...init?.body },
+            version: 2,
+          }
+    )
   )
 }
 

@@ -132,6 +132,7 @@ function rows(tasks: DashboardTasks, reach: Reach): TaskRow[] {
             icon: Landmark,
             count: tasks.legal_identity_missing,
             to: "/settings/store",
+            search: { part: "legal" },
             urgent: true,
           },
         ]

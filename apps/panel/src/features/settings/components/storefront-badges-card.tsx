@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Award, Clock, CreditCard, Gift, Phone, RefreshCw, ShieldCheck, Truck } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
-import { Controller, useFieldArray, useForm } from "react-hook-form"
+import { Controller, useFieldArray, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { z } from "zod"
 import { CardForm } from "@/components/patterns/card-form"
@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/select"
 import { TRUST_ICONS } from "@/features/settings/api/sections"
 import type { StorefrontSettings, TrustIcon } from "@/features/settings/api/sections"
+import { ShopTokenPreview, TokenSlot } from "@/features/settings/components/shop-token-menu"
 import {
   EmptyLine,
   ListFooter,
@@ -24,6 +25,7 @@ import {
 import {
   STOREFRONT_LIMITS,
   errorLine,
+  knownTokens,
   lineSchema,
   optionalLineSchema,
   useSaveStorefront,
@@ -52,9 +54,9 @@ const schema = z.object({
     .array(
       z.object({
         icon: z.enum(TRUST_ICONS),
-        title: lineSchema(LIMITS.badgeTitleLength),
+        title: lineSchema(LIMITS.badgeTitleLength).refine(...knownTokens),
         // Empty is saved as none: the badge shows its title alone
-        text: optionalLineSchema(LIMITS.badgeTextLength),
+        text: optionalLineSchema(LIMITS.badgeTextLength).refine(...knownTokens),
       })
     )
     .max(LIMITS.badges),
@@ -86,7 +88,11 @@ export function TrustBadgesCard({ saved }: { saved: StorefrontSettings }) {
     resetOptions: { keepDirtyValues: true },
   })
   const badges = useFieldArray({ control: form.control, name: "badges" })
-  const { errors } = form.formState
+  const written = useWatch({ control: form.control, name: "badges" })
+  const { errors, isSubmitted } = form.formState
+  const insert = (name: `badges.${number}.title` | `badges.${number}.text`, text: string) => {
+    form.setValue(name, text, { shouldDirty: true, shouldValidate: isSubmitted })
+  }
   const submit = form.handleSubmit((next) => {
     save(
       {
@@ -171,26 +177,46 @@ export function TrustBadgesCard({ saved }: { saved: StorefrontSettings }) {
                     errorId={`${id}-title-error`}
                     className={cn(WIDE_CELL, "@2xl:col-start-2")}
                   >
-                    <Input
-                      aria-label={t(`${B}.titleOf`, { number })}
-                      aria-invalid={Boolean(titleError)}
-                      aria-describedby={titleError ? `${id}-title-error` : undefined}
-                      placeholder={t(`${B}.titlePlaceholder`)}
-                      {...form.register(`badges.${index}.title`)}
-                    />
+                    <TokenSlot
+                      fieldId={`${id}-title`}
+                      onInsert={(text) => {
+                        insert(`badges.${index}.title`, text)
+                      }}
+                    >
+                      <Input
+                        id={`${id}-title`}
+                        aria-label={t(`${B}.titleOf`, { number })}
+                        aria-invalid={Boolean(titleError)}
+                        aria-describedby={titleError ? `${id}-title-error` : undefined}
+                        placeholder={t(`${B}.titlePlaceholder`)}
+                        className="pr-9"
+                        {...form.register(`badges.${index}.title`)}
+                      />
+                    </TokenSlot>
+                    <ShopTokenPreview text={written[index]?.title ?? ""} />
                   </RowCell>
                   <RowCell
                     error={textError}
                     errorId={`${id}-text-error`}
                     className={cn(WIDE_CELL, "@2xl:col-start-3")}
                   >
-                    <Input
-                      aria-label={t(`${B}.textOf`, { number })}
-                      aria-invalid={Boolean(textError)}
-                      aria-describedby={textError ? `${id}-text-error` : undefined}
-                      placeholder={t(`${B}.textPlaceholder`)}
-                      {...form.register(`badges.${index}.text`)}
-                    />
+                    <TokenSlot
+                      fieldId={`${id}-text`}
+                      onInsert={(text) => {
+                        insert(`badges.${index}.text`, text)
+                      }}
+                    >
+                      <Input
+                        id={`${id}-text`}
+                        aria-label={t(`${B}.textOf`, { number })}
+                        aria-invalid={Boolean(textError)}
+                        aria-describedby={textError ? `${id}-text-error` : undefined}
+                        placeholder={t(`${B}.textPlaceholder`)}
+                        className="pr-9"
+                        {...form.register(`badges.${index}.text`)}
+                      />
+                    </TokenSlot>
+                    <ShopTokenPreview text={written[index]?.text ?? ""} />
                   </RowCell>
                   <RowActions
                     index={index}

@@ -11,8 +11,17 @@ const reach = vi.hoisted(() => ({ settings: true }))
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
 vi.mock("@/features/auth/api/staff", () => ({ useCan: () => reach.settings }))
+// A link as an anchor with its search in the address: rendered without a router
 vi.mock("@tanstack/react-router", () => ({
-  Link: ({ to, children }: { to: string; children: ReactNode }) => <a href={to}>{children}</a>,
+  Link: ({
+    to,
+    search,
+    children,
+  }: {
+    to: string
+    search?: Record<string, string>
+    children: ReactNode
+  }) => <a href={search ? `${to}?${new URLSearchParams(search).toString()}` : to}>{children}</a>,
 }))
 
 const entry = (
@@ -56,7 +65,7 @@ describe("SetupChecklistCard", () => {
     // The identity, the share image and Search Console have a way in; the platform's Google does not
     expect(
       screen.getAllByRole("link", { name: /Tamamla/ }).map((link) => link.getAttribute("href"))
-    ).toEqual(["/settings/store", "/settings/seo", "/settings/marketing"])
+    ).toEqual(["/settings/store?part=legal", "/settings/seo", "/settings/marketing"])
   })
 
   it("shows staff who cannot change settings what is missing, not the way in", async () => {

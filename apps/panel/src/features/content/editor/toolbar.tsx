@@ -25,6 +25,7 @@ import {
 import { Separator } from "@/components/ui/separator"
 import type { CardKind } from "./card-nodes"
 import { TableTools } from "./table-tools"
+import { EditorTokenMenu } from "./token-menu"
 import { ToolButton } from "./tool-button"
 
 const BLOCKS = ["paragraph", "h2", "h3", "h4"] as const
@@ -53,10 +54,12 @@ interface ToolbarProps {
   onLink: () => void
   onImage: () => void
   onCard: (kind: CardKind) => void
+  /** The shop's details menu (adr/0048): only texts the server fills them in. */
+  tokens?: boolean
 }
 
 /** The editor's actions, each one the server allows (adr/0019). */
-export function Toolbar({ editor, onLink, onImage, onCard }: ToolbarProps) {
+export function Toolbar({ editor, onLink, onImage, onCard, tokens = false }: ToolbarProps) {
   const { t } = useTranslation()
   const state = useEditorState({
     editor,
@@ -159,6 +162,12 @@ export function Toolbar({ editor, onLink, onImage, onCard }: ToolbarProps) {
           onCard("category")
         }}
       />
+      {tokens ? (
+        <>
+          <Separator orientation="vertical" className="mx-1 h-5" />
+          <EditorTokenMenu editor={editor} />
+        </>
+      ) : null}
       {state.table ? <TableTools editor={editor} /> : null}
       <div className="ml-auto flex items-center gap-0.5">
         <ToolButton

@@ -54,7 +54,8 @@ export function DocumentCard({ title, description, stored, saving, save }: Docum
       }}
     >
       <div className="-mx-5 -my-1">
-        <RichEditor value={draft ?? stored} onChange={setDraft} label={title} />
+        {/* Pages, posts and filter pages show the shop's details in place of their tokens */}
+        <RichEditor value={draft ?? stored} onChange={setDraft} label={title} shopTokens />
       </div>
     </CardForm>
   )

@@ -1,4 +1,5 @@
 import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { SHOP_TOKENS_KEY } from "@/features/settings/api/shop-tokens"
 import { sdk } from "@/lib/sdk"
 
 // Medusa's own store record (name, currencies); our extra fields are the "store" settings section
@@ -26,6 +27,8 @@ export function useRenameStore() {
     onSuccess: async () => {
       await client.invalidateQueries({ queryKey: STORE_KEY })
       await client.invalidateQueries({ queryKey: ["dashboard"] })
+      // `{mağaza_adı}` shows the name (adr/0048)
+      await client.invalidateQueries({ queryKey: SHOP_TOKENS_KEY })
     },
   })
 }

@@ -250,7 +250,7 @@
     "title": "Settings",
     "sections": {
       "appearance": "Appearance",
-      "store": "Store",
+      "store": "Store profile",
       "storefront": "Storefront",
       "payments": "Payment",
       "shipping": "Shipping and delivery",
@@ -355,7 +355,7 @@
       },
       "hero": {
         "title": "Home page opening",
-        "description": "The opening at the top of the home page: a short line above, the heading, a sentence or two and up to two buttons.",
+        "description": "The opening at the top of the home page: a short line above, the heading, a sentence or two and up to two buttons. With the Insert detail button ({}) you can add shop details such as the phone or the free shipping threshold; the text changes when the detail does.",
         "default": "No opening written; the home page shows your shop's name as the heading and your first two categories as buttons.",
         "custom": "The home page opens with this. Go back to the default and your shop's name and first two categories show.",
         "reset": "Back to the default",
@@ -383,9 +383,9 @@
       },
       "announcements": {
         "title": "Announcement bar",
-        "description": "The thin bar at the very top of the page. Several lines are shown in turn.",
+        "description": "The thin bar at the very top of the page. Several lines are shown in turn. With the Insert detail button ({}) you can add shop details such as the phone or the free shipping threshold; the text changes when the detail does.",
         "line": "Announcement {{number}}",
-        "placeholder": "Free shipping from 1500 TL",
+        "placeholder": "Free shipping from {ücretsiz_kargo_eşiği}",
         "empty": "No announcements; the storefront shows no announcement bar.",
         "add": "Add announcement",
         "hint": "Up to {{max}} lines, each up to {{length}} characters."
@@ -435,7 +435,7 @@
       },
       "badges": {
         "title": "Trust badges",
-        "description": "Your shop's promises; shown under the header and beside the add to cart button.",
+        "description": "Your shop's promises; shown under the header and beside the add to cart button. With the Insert detail button ({}) you can add shop details such as the phone or the free shipping threshold; the text changes when the detail does.",
         "empty": "No badges; the storefront shows no trust strip.",
         "add": "Add badge",
         "item": "Badge {{number}}",
@@ -458,12 +458,6 @@
           "gift": "Gift",
           "phone": "Phone"
         }
-      },
-      "whatsapp": {
-        "title": "WhatsApp",
-        "description": "A button customers use to write to you on WhatsApp, shown in the storefront's corner.",
-        "phone": "WhatsApp number",
-        "hint": "A Turkish mobile number; no need to add +90. Leave it empty and no WhatsApp button shows."
       },
       "contactForm": {
         "title": "Contact form",
@@ -493,20 +487,35 @@
         "pathInvalid": "The page must be a shop page starting with / (like /iletisim); not the home page, and no spaces.",
         "phoneInvalid": "Enter a valid Turkish phone number.",
         "colorInvalid": "The colour must be a 6-digit code starting with # (like #0b5c99).",
-        "colorDuplicate": "Each colour name can be written once."
+        "colorDuplicate": "Each colour name can be written once.",
+        "tokenUnknown": "There is an unknown detail in braces; add details from the Insert detail menu."
       }
     },
     "store": {
-      "title": "Store",
-      "subtitle": "Your shop's name, contact details, time zone and units.",
-      "identity": "Store details",
-      "identityHint": "Shown in the panel, e-mails and invoices.",
-      "name": "Store name",
-      "nameRequired": "Give your store a name.",
-      "email": "Contact e-mail",
-      "emailHint": "Where customers write to you.",
-      "phone": "Contact phone",
-      "phoneHint": "A Turkish number; no need to add +90.",
+      "title": "Store profile",
+      "subtitle": "Every detail of your shop in one place. The storefront, legal texts, e-mails and Google read them from here.",
+      "tabs": {
+        "general": "General",
+        "contact": "Contact",
+        "legal": "Legal identity",
+        "social": "Social accounts"
+      },
+      "brand": {
+        "title": "Shop name and logo",
+        "description": "Shown on the storefront, in e-mails and on Google. The {mağaza_adı} detail in texts shows this name.",
+        "name": "Shop name",
+        "nameRequired": "Give your shop a name.",
+        "light": "Logo (light background)",
+        "lightHint": "Used on white or light backgrounds: the top of the storefront, e-mails and Google.",
+        "dark": "Logo (dark background)",
+        "darkHint": "A version that reads on dark backgrounds; optional.",
+        "none": "No logo",
+        "upload": "Upload logo",
+        "replace": "Replace",
+        "remove": "Remove",
+        "removeOf": "{{logo}}: remove",
+        "choose": "Choose {{logo}}"
+      },
       "region": "Region and units",
       "regionHint": "How dates and product measurements are kept.",
       "timezone": "Time zone",
@@ -519,31 +528,87 @@
         "cm": "Centimetre (cm)",
         "mm": "Millimetre (mm)"
       },
+      "contact": {
+        "title": "Contact details",
+        "description": "How customers reach you; each is written here only. The {telefon}, {e_posta}, {adres} and {whatsapp} details in texts show them too.",
+        "contact_email": "E-mail",
+        "contact_emailHint": "Shown in the storefront's footer, on the contact page, in the legal texts and in e-mails.",
+        "contact_phone": "Phone",
+        "contact_phoneHint": "Shown in the footer, on the contact page, in the legal texts and in the structured data given to Google. No need to add +90.",
+        "whatsapp_phone": "WhatsApp number",
+        "whatsapp_phoneHint": "The storefront's WhatsApp buttons open this number. Leave it empty and no button shows.",
+        "map_url": "Map link",
+        "map_urlHint": "A link on the contact page that opens the map. In Google Maps, find your shop and use Share > Copy link.",
+        "address": "Full address",
+        "addressHint": "Shown in the footer, on the contact page, in the legal texts and in the structured data given to Google; the law asks for it in full."
+      },
+      "hours": {
+        "title": "Opening hours",
+        "description": "When you answer customers. Shown on the contact page, in the footer and in the structured data given to Google.",
+        "empty": "No opening hours yet; the storefront shows none. Switch on the days you are open.",
+        "midnightHint": "Open until midnight? Enter 00:00 as the closing time.",
+        "copyWeekdays": "Apply Monday's hours to weekdays",
+        "closed": "Closed",
+        "openOf": "{{day}} open",
+        "rangeOf": "{{day}}, range {{number}}",
+        "opensOf": "{{range}}: opens",
+        "closesOf": "{{range}}: closes",
+        "removeRange": "{{range}}: remove",
+        "addBreak": "Add break",
+        "addBreakOf": "{{day}}: add break",
+        "errors": {
+          "required": "Enter the opening and closing time.",
+          "backwards": "The closing time must be after the opening time.",
+          "overlap": "This range overlaps another one on the same day."
+        },
+        "days": {
+          "1": "Monday",
+          "2": "Tuesday",
+          "3": "Wednesday",
+          "4": "Thursday",
+          "5": "Friday",
+          "6": "Saturday",
+          "7": "Sunday"
+        }
+      },
+      "errors": {
+        "required": "Fill in this field.",
+        "tooLong": "Write {{max}} characters at most.",
+        "emailInvalid": "Enter a valid e-mail address.",
+        "urlInvalid": "The address must start with https://."
+      },
       "legal": {
         "title": "Legal identity",
         "hint": "What the law asks a web shop to show. Used in the shop's footer, the structured data given to search engines and the legal texts.",
         "missing": "Missing: {{fields}}.",
         "gaps": {
           "company_title": "company title",
-          "address": "address",
+          "address": "full address (on the Contact tab)",
           "tax_office": "tax office",
           "tax_number": "tax number",
-          "contact": "contact e-mail or phone (the card above)"
+          "contact": "contact e-mail or phone (on the Contact tab)"
         },
         "fields": {
           "company_title": "Company title",
           "tax_office": "Tax office",
           "tax_number": "Tax number or Turkish ID number",
-          "address": "Full address",
           "mersis": "MERSİS number",
           "kep": "KEP address",
-          "etbis": "ETBİS registration number",
-          "same_as": "Social media accounts"
+          "etbis": "ETBİS registration number"
         },
         "taxNumberHint": "A company's 10-digit tax number; a sole trader's 11-digit Turkish ID number.",
         "mersisHint": "16 digits. Leave empty if a sole trader has none.",
-        "etbisHint": "The number given after registering with the Electronic Commerce Information System.",
-        "sameAsHint": "One https address per line; up to 10."
+        "etbisHint": "The number given after registering with the Electronic Commerce Information System."
+      },
+      "social": {
+        "title": "Social accounts",
+        "description": "Your accounts such as Instagram and Facebook. Shown as links in the storefront's footer, and as your shop's accounts in the structured data given to Google.",
+        "empty": "No social accounts yet.",
+        "urlOf": "Address of account {{number}}",
+        "item": "account {{number}}",
+        "placeholder": "https://instagram.com/yourshop",
+        "add": "Add account",
+        "hint": "Each an address starting with https://; up to {{max}} accounts."
       }
     },
     "seo": {
@@ -1654,8 +1719,8 @@
       "menu": "Settings section"
     },
     "sectionHints": {
-      "store": "Shop name, contact details, time zone and units",
-      "storefront": "Announcement bar, top and footer links, trust badges, WhatsApp button",
+      "store": "Shop name and logo, contact details and opening hours, legal identity, social accounts",
+      "storefront": "Home page opening, announcement bar, menu, trust badges and footer links",
       "appearance": "The panel's brand colour, corners and density",
       "seo": "Domain and address style, title templates, search engines",
       "attributes": "Attribute templates for products",
@@ -5937,5 +6002,20 @@
     },
     "productHint": "Sold to adults only; search engines are told, and it stays out of the feeds.",
     "categoryHint": "This category, its children and every product in them are sold to adults only."
+  },
+  "shopTokens": {
+    "insert": "Insert detail",
+    "title": "Insert a shop detail",
+    "hint": "When it changes on the store profile, the detail in the text changes too.",
+    "notGiven": "not given yet",
+    "preview": "On the storefront:",
+    "names": {
+      "shopName": "Shop name",
+      "phone": "Phone",
+      "email": "E-mail",
+      "address": "Address",
+      "whatsapp": "WhatsApp number",
+      "freeShippingThreshold": "Free shipping threshold"
+    }
   }
 }

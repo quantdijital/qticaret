@@ -44,6 +44,28 @@
 **Panel P1–P4 (kendi yönetici panelimiz, adr/0022): ekranlar yazıldı, kullanıcı kontrolü bekliyor** ve **F3 — Katalog, SEO motoru ve stok: BİTTİ** (T1a–T16; kabul kriterlerinin hepsi testlerle işaretli, docs/03; son eksik iki kanıt, danışmanın p95 ölçümü ve yedi sayfa türünün SEO sözleşme testi, kapanışta eklendi). Playwright e2e altyapısı kuruldu; CI düzeltildi. **F4 — Fiyatlandırma ve promosyon: BİTTİ** (plan ve ADR-0023/0024/0025 kabul edildi; U1 `price-history`, U4 kuponlar, U7 indirim dağılımı ve iade tutarı, U2 fiyat listeleri, U3 indirim gösterimi, U5 tek kullanımlık kodlar, U6 otomatik kampanyalar ve kargo bedava eşiği, U8 hediye kartı ve mağaza kredisi bitti (KK1–KK4 işaretli); F4 kapanış incelemesi yapıldı, bulgular düzeltildi: F4 BİTTİ). Dal `f4-pricing-promotions`. Panel hattı F3 backend'iyle paralel yürür; F3'ün admin parçaları panele yazılır. Dal `f3-catalog-seo-stock`, `f2-platform-core` üzerinden açıldı. F2 bitti (S1–S13; KK'ların hepsi işaretli). Dal `f2-platform-core`, F1 merge edilmediği için `f1-tr-localization` üzerinden açıldı. F1, F2 ve F3 dalları push edildi (kullanıcı 2026-10-26: "pushları sen önerdiğinde yapabilirsin"); PR açılmadı.
 
 ## Son oturum özeti
+**2026-11-02 akşam (F18: yasal metinler ve mağaza bilgileri tek kaynak; kullanıcı onaylı plan).** Kullanıcı: "yasal metinlerin hepsini ekstra sayfa olarak açmışsın … firma bilgilerinden otomatik üretilecek … seo içeriklerinin hepsini iletişim bilgierini vs oluşturduğumuz yapılardan çekelim. sonrada Vitrin sekmesine gel ux/ui açısından yönetilebilir bir yapı kuracağız … önce plan kuralım." Plan onayı: "önerilerini beğendim uygulamaya başla".
+- **Adım 1, yasal metinler tek kaynak (`e27b63f`):**
+  - mylarte profilinin açtığı 8 yasal içerik sayfası kaldırıldı (profil `retired_pages`), alt bilgideki kopya bağlantılar silindi.
+  - Eski metinler yalnız başvuru: `docs/gecis/mylarte/eski-yasal-metinler/`.
+  - Panelin İçerik ekranı Ayarlar > Yasal'a yönlendiriyor; başlığı yasal metne benzeyen yeni sayfada uyarı çıkıyor.
+  - Geliştirme ortamında `/yasal/...` metinleri yayında değil; Ayarlar > Yasal'dan yayınlanınca alt bilgide kendiliğinden çıkar.
+- **Adım 2, mağaza bilgileri tek kaynak (ADR-0048):**
+  - `store` bölümüne WhatsApp (Vitrin'den taşındı; göç betiği `store-whatsapp-phone`), çalışma saatleri ve harita bağlantısı eklendi.
+  - `/store/legal-identity` bunları da döndürüyor. Vitrinde iletişim sayfasında otomatik "İletişim bilgileri" bloğu, alt bilgide saatler, WhatsApp düğmeleri; yapısal veride `contactPoint` + `hoursAvailable`.
+  - Bilgi değişkenleri: yasal metinlerin `{telefon}` dili duyurularda, güven rozetlerinde, ana sayfa girişinde ve içerik metinlerinde kullanılıyor. Yeni değişken `{ücretsiz_kargo_eşiği}`. Tanınmayan değişken kayıtta reddediliyor. `GET /admin/shop-tokens`.
+  - SEO danışmanı kuralı `A-DETAIL-01`: metinde elle yazılmış telefon/e-posta.
+  - mylarte profili güncellendi (iletişim ve toptan metinlerinde elle bilgi yok; duyuru ve rozet eşiği değişkenle).
+  - **Panel (alt ajan; doğrulandı: 135 dosya, 451 test, tip ve lint temiz):**
+    - Ayarlar > Mağaza artık sekmeli "Mağaza profili" (`?part=`): Genel (ad, açık/koyu logo, saat dilimi ve birimler), İletişim (e-posta, telefon, WhatsApp, adres, harita, gün gün çalışma saatleri, öğle arası ve "hafta içine uygula"), Yasal kimlik, Sosyal hesaplar.
+    - Vitrin'deki WhatsApp kartı kalktı.
+    - Duyuru, rozet ve giriş alanlarında `{}` "Bilgi ekle" menüsü ve "Vitrinde: …" önizlemesi; içerik düzenleyicisinin araç çubuğunda "Bilgi ekle".
+    - Logo kartı yeni: önceden panelde vitrin logosunu girecek bir yer yoktu. **Not:** backend logo adresini yalnız https ya da `/` ile kabul ediyor; geliştirmedeki yerel depo `http://localhost` adresi veriyorsa logo kaydı geliştirmede reddedilebilir (denenmedi).
+    - Ekranlar tarayıcıda görülmedi (panel girişi gerekiyor).
+- **Doğrulama:** backend birim (231 dosya, 2430 test; eskiyen bir varsayılan testi düzeltildi), ayar modülü 57, HTTP 17 takım (54 test), vitrin birim 64, lint ve tip temiz. Vitrinde elle: iletişim bilgileri bloğu, alt bilgide saatler, duyuru ve rozette `₺1.500`.
+- **Kenara alınan:** ana sayfa düzeni (bölümler, taslak/yayın) için başlanan kod `git stash` içinde ("wip: storefront layout module (adr-0048)"). Kullanıcı Vitrin sekmesini ayrıca planlamak istedi; stash'teki ADR bu yüzden **0049** olarak yeniden numaralanmalı ve `storefront.ts`'teki bugünkü değişikliklerle birleştirilmeli. Geliştirme veritabanındaki göçü geri alındı.
+- **Bekleyen (kullanıcı kararı, planlama):** Vitrin sekmesinin UX planı (tema düzenleyici, menüler; taslak çizimlerle ayrı plan). WordPress/WooCommerce taşıma kaynağı plan aşamasında bekletildi (kullanıcı: "şimdilik dursun").
+
 **2026-11-01 gece → 2026-11-02 (F18 sürüyor: yeni görünüm, ödeme, filtreler, hesap; otonom).** Kullanıcı: "ödeme adımını da yap tam full işleyen bir yapı kurana kadar durma bana soru sorma. my lartenin aynısını yapmana gerek yok daha özgün çalış mevcut temayı beğenmedim. geliştirmelerini yapmaya devam et. sabaha kadar çalış!" (+ tarayıcı eklentisinin `<body>` niteliğinden doğan hidrasyon uyarısı).
 - **Yapılanlar (commit'ler `9546709` → `0c93df7`):**
   - **Yeni görünüm (`1791cae`):** sıcak kemik rengi zemin, beyaz kartlar, koyu mürekkep bantlar; başlıklarda Fraunces (next/font, kendi sunucumuzdan), metinde Inter; logo ortada, solda arama, sağda hesap ve sepet; kategoriler alt satırda yuvarlak hap menü; ana sayfada giriş metni + numaralı "öne çıkan kategoriler" dizini, tüm kategoriler sütunlu dizin, yeni ürünler, "bize ulaşın" bandı (WhatsApp/telefon/e-posta), blogdan son 3 yazı; koyu alt bilgi. Görselsiz ürünlerde adın ilk harfi. `<body suppressHydrationWarning>`.
@@ -1366,7 +1388,9 @@
 - **Daha önce:** F1 planlaması ve F0.2–F0.8 (2026-10-24), F0.1 monorepo (2026-10-24 sabahı), SEO ve güvenlik dokümanları (2026-10-22).
 
 ## Sıradaki görev
-**Claude'un sıradaki işi:** F18'e devam (2026-11-02 sabahı durum):
+**Claude'un sıradaki işi (2026-11-02 akşam):** Vitrin sekmesinin UX planını (tema düzenleyici, menüler, sayfa bölümleri; taslak çizimlerle) kullanıcıya sun, **onay gelmeden kod yazma** (kullanıcı: "önce plan kuralım"). Kenardaki ana sayfa düzeni çalışması `git stash` "wip: storefront layout module (adr-0048)"; plan onaylanırsa ADR-0049 olarak oradan başlanır. WordPress taşıma kaynağı bekletiliyor.
+
+Önceki durum (2026-11-02 sabahı):
 - Bitenler: ödeme (hediye kartı ve tamamı kartla ödeme dahil), hesap (adres ekleme dahil), filtreler, renk örnekleri, iletişim formu, e-bülten, kargo takibi, taslak önizleme, yasal sayfalar, çerez onayı, SEO dizinleri. Üç güvenlik incelemesi ve tam HTTP koşusu yapıldı.
 - Kalanlar:
   - D10 Meilisearch: yeni servis ve bağımlılık, **kullanıcı kararı**.

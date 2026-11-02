@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { RotateCcw } from "lucide-react"
-import { useFieldArray, useForm } from "react-hook-form"
+import { useFieldArray, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { z } from "zod"
 import { CardForm } from "@/components/patterns/card-form"
@@ -9,10 +9,12 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import type { StorefrontHero, StorefrontSettings } from "@/features/settings/api/sections"
+import { ShopTokenPreview, TokenSlot } from "@/features/settings/components/shop-token-menu"
 import { LinkRows, ListFooter } from "@/features/settings/components/storefront-rows"
 import {
   STOREFRONT_LIMITS,
   errorLine,
+  knownTokens,
   linkSchema,
   optionalLineSchema,
   useSaveStorefront,
@@ -28,9 +30,12 @@ const oneLine = (value: string) => value.replace(/\s*[\r\n\t]+\s*/g, " ")
 
 const schema = z
   .object({
-    eyebrow: optionalLineSchema(LIMITS.heroEyebrowLength),
-    heading: optionalLineSchema(LIMITS.heroHeadingLength),
-    text: z.string().transform(oneLine).pipe(optionalLineSchema(LIMITS.heroTextLength)),
+    eyebrow: optionalLineSchema(LIMITS.heroEyebrowLength).refine(...knownTokens),
+    heading: optionalLineSchema(LIMITS.heroHeadingLength).refine(...knownTokens),
+    text: z
+      .string()
+      .transform(oneLine)
+      .pipe(optionalLineSchema(LIMITS.heroTextLength).refine(...knownTokens)),
     links: z.array(linkSchema).max(LIMITS.heroLinks),
   })
   // Every field empty is the default opening; anything written needs a heading
@@ -84,7 +89,14 @@ export function HeroCard({ saved }: { saved: StorefrontSettings }) {
     resetOptions: { keepDirtyValues: true },
   })
   const links = useFieldArray({ control: form.control, name: "links" })
-  const { errors } = form.formState
+  const [eyebrow, heading, text] = useWatch({
+    control: form.control,
+    name: ["eyebrow", "heading", "text"],
+  })
+  const { errors, isSubmitted } = form.formState
+  const insert = (name: "eyebrow" | "heading" | "text", next: string) => {
+    form.setValue(name, next, { shouldDirty: true, shouldValidate: isSubmitted })
+  }
   const saveHero = (hero: StorefrontHero | null) => {
     save({ hero }, (stored) => {
       form.reset(valuesOf(stored), FULL_RESET)
@@ -132,12 +144,21 @@ export function HeroCard({ saved }: { saved: StorefrontSettings }) {
             hint={t(`${H}.eyebrowHint`, { max: LIMITS.heroEyebrowLength })}
             error={eyebrowError}
           >
-            <Input
-              id="storefront-hero-eyebrow"
-              aria-invalid={Boolean(eyebrowError)}
-              placeholder={t(`${H}.eyebrowPlaceholder`)}
-              {...form.register("eyebrow")}
-            />
+            <TokenSlot
+              fieldId="storefront-hero-eyebrow"
+              onInsert={(next) => {
+                insert("eyebrow", next)
+              }}
+            >
+              <Input
+                id="storefront-hero-eyebrow"
+                aria-invalid={Boolean(eyebrowError)}
+                placeholder={t(`${H}.eyebrowPlaceholder`)}
+                className="pr-9"
+                {...form.register("eyebrow")}
+              />
+            </TokenSlot>
+            <ShopTokenPreview text={eyebrow} />
           </Field>
           <Field
             label={t(`${H}.heading`)}
@@ -145,12 +166,21 @@ export function HeroCard({ saved }: { saved: StorefrontSettings }) {
             hint={t(`${H}.headingHint`, { max: LIMITS.heroHeadingLength })}
             error={headingError}
           >
-            <Input
-              id="storefront-hero-heading"
-              aria-invalid={Boolean(headingError)}
-              placeholder={t(`${H}.headingPlaceholder`)}
-              {...form.register("heading")}
-            />
+            <TokenSlot
+              fieldId="storefront-hero-heading"
+              onInsert={(next) => {
+                insert("heading", next)
+              }}
+            >
+              <Input
+                id="storefront-hero-heading"
+                aria-invalid={Boolean(headingError)}
+                placeholder={t(`${H}.headingPlaceholder`)}
+                className="pr-9"
+                {...form.register("heading")}
+              />
+            </TokenSlot>
+            <ShopTokenPreview text={heading} />
           </Field>
         </div>
       </div>
@@ -160,13 +190,23 @@ export function HeroCard({ saved }: { saved: StorefrontSettings }) {
         hint={t(`${H}.textHint`, { max: LIMITS.heroTextLength })}
         error={textError}
       >
-        <Textarea
-          id="storefront-hero-text"
-          rows={2}
-          aria-invalid={Boolean(textError)}
-          placeholder={t(`${H}.textPlaceholder`)}
-          {...form.register("text")}
-        />
+        <TokenSlot
+          fieldId="storefront-hero-text"
+          multiline
+          onInsert={(next) => {
+            insert("text", next)
+          }}
+        >
+          <Textarea
+            id="storefront-hero-text"
+            rows={2}
+            aria-invalid={Boolean(textError)}
+            placeholder={t(`${H}.textPlaceholder`)}
+            className="pr-9"
+            {...form.register("text")}
+          />
+        </TokenSlot>
+        <ShopTokenPreview text={text} />
       </Field>
       <div className="flex flex-col gap-3">
         <span className="text-sm font-medium">{t(`${H}.buttons`)}</span>

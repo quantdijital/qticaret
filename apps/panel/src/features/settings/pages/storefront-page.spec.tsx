@@ -35,7 +35,9 @@ describe("StorefrontPage", () => {
       "Aynı gün kargo"
     )
     expect(screen.getByRole("textbox", { name: "1. rozetin açıklaması" })).toHaveValue("")
-    expect(screen.getByRole("textbox", { name: "WhatsApp numarası" })).toHaveValue("+905321234567")
+    // The WhatsApp number is a store detail now (adr/0048): no card for it here
+    expect(screen.queryByRole("heading", { name: "WhatsApp" })).toBeNull()
+    expect(screen.queryByRole("textbox", { name: "WhatsApp numarası" })).toBeNull()
     expect(within(card("Menü")).getByText(/vitrin üst kategorilerinizi/)).toBeInTheDocument()
     expect(screen.getByRole("textbox", { name: "Ana renk" })).toHaveValue("")
     expect(screen.getByRole("button", { name: "Temanın rengine dön" })).toBeDisabled()
@@ -92,7 +94,7 @@ describe("StorefrontPage", () => {
     expect(posts(fetchMock)).toEqual([])
   })
 
-  it("saves a badge without a description as none, and a cleared WhatsApp number as none", async () => {
+  it("saves a badge without a description as none", async () => {
     renderPage()
     const title = await screen.findByRole("textbox", { name: "1. rozetin başlığı" })
     const badges = card("Güven rozetleri")
@@ -105,31 +107,6 @@ describe("StorefrontPage", () => {
         body: { trust_badges: [{ icon: "truck", title: "Aynı gün kargo bugün", text: null }] },
       })
     })
-
-    const whatsapp = card("WhatsApp")
-    await userEvent.clear(within(whatsapp).getByRole("textbox", { name: "WhatsApp numarası" }))
-    await userEvent.click(within(whatsapp).getByRole("button", { name: "Kaydet" }))
-    await waitFor(() => {
-      expect(fetchMock).toHaveBeenCalledWith(URL, {
-        method: "POST",
-        body: { whatsapp_phone: null },
-      })
-    })
-  })
-
-  it("refuses a number that is not Turkish", async () => {
-    renderPage()
-    const phone = await screen.findByRole("textbox", { name: "WhatsApp numarası" })
-    const whatsapp = card("WhatsApp")
-
-    await userEvent.clear(phone)
-    await userEvent.type(phone, "12345")
-    await userEvent.click(within(whatsapp).getByRole("button", { name: "Kaydet" }))
-
-    expect(await within(whatsapp).findByRole("alert")).toHaveTextContent(
-      "Geçerli bir Türkiye telefon numarası girin."
-    )
-    expect(posts(fetchMock)).toEqual([])
   })
 
   it("saves a menu item with a sub-link as the server takes it", async () => {
@@ -207,12 +184,15 @@ describe("StorefrontPage", () => {
 
   it("puts back what was saved on undo, even in a field typed in", async () => {
     renderPage()
-    const phone = await screen.findByRole("textbox", { name: "WhatsApp numarası" })
-    const whatsapp = card("WhatsApp")
+    const line = await screen.findByRole("textbox", { name: "1. duyuru" })
+    const announcements = card("Duyuru şeridi")
 
-    await userEvent.type(phone, "9")
-    await userEvent.click(within(whatsapp).getByRole("button", { name: "Geri al" }))
+    await userEvent.type(line, " bugün")
+    await userEvent.click(within(announcements).getByRole("button", { name: "Geri al" }))
 
-    expect(phone).toHaveValue("+905321234567")
+    // The list's rows are drawn again from what was saved
+    expect(screen.getByRole("textbox", { name: "1. duyuru" })).toHaveValue(
+      "1500 TL ve üzeri kargo bedava"
+    )
   })
 })

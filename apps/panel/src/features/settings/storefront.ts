@@ -5,6 +5,7 @@ import { toast } from "sonner"
 import { z } from "zod"
 import { useSaveSection } from "@/features/settings/api/sections"
 import type { StorefrontSettings } from "@/features/settings/api/sections"
+import { unknownShopTokens } from "@/features/settings/shop-tokens"
 import { errorText } from "@/lib/errors"
 
 /**
@@ -65,7 +66,8 @@ const isShopPath = (value: string): boolean =>
   !value.includes("\\") &&
   !/\s/.test(value)
 
-const isHttpsUrl = (value: string): boolean => {
+/** An absolute https address without credentials (backend lib/security/https-url.ts). */
+export const isHttpsUrl = (value: string): boolean => {
   if (value.length > MAX_URL_LENGTH || !value.startsWith("https://")) {
     return false
   }
@@ -85,6 +87,14 @@ export const isStorefrontHref = (value: string): boolean =>
 export const isTrPhone = (value: string): boolean =>
   TR_PHONE.test(value.replace(PHONE_SEPARATORS, ""))
 
+const E164_TR = /^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/
+
+/** `+905321234567` as a Turkish reader writes it (`0532 123 45 67`); another value as it is. */
+export function displayTrPhone(e164: string): string {
+  const parts = E164_TR.exec(e164)
+  return parts ? `0${parts.slice(1).join(" ")}` : e164
+}
+
 /** A line that must be written, `max` characters at most; `tooLong` reads `max` when shown. */
 export const lineSchema = (max: number) =>
   z
@@ -93,6 +103,16 @@ export const lineSchema = (max: number) =>
     .min(1, `${E}.required`)
     .max(max, `${E}.tooLong`)
     .refine(isCleanText, `${E}.textInvalid`)
+
+/**
+ * A text the storefront fills with the shop's details (adr/0048): the
+ * announcements, the trust badges, the home page's opening. A `{name}`
+ * that is no detail is refused, as the server refuses it.
+ */
+export const knownTokens = [
+  (value: string) => unknownShopTokens(value).length === 0,
+  `${E}.tokenUnknown`,
+] as const
 
 /** A line that may stay empty (saved as none). */
 export const optionalLineSchema = (max: number) =>

@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils"
 interface CardFormProps {
   title: string
   description?: string
-  className?: string
+  className?: string | undefined
   dirty: boolean
   saving: boolean
   onSubmit: () => void
