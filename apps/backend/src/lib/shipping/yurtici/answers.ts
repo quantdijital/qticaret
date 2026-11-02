@@ -19,6 +19,15 @@ export const KEY_NOT_FOUND = "82519"
 /** ERR_INTG_CARGO_KEY_OPERATION_CANCELLED: the key was withdrawn before. */
 const CANCELED_BEFORE = "82520"
 
+/**
+ * A refused login: a fault (HTTP 500, or 200) whose `errorCode` is this.
+ * Yurtiçi's document does not say how it refuses one (docs/entegrasyonlar/
+ * yurtici.md, open questions); the fake service answers it so, and the
+ * document's table gives 936 as "unexpected error". Any other fault is
+ * the service's refusal of the call, not of the login.
+ */
+export const LOGIN_REFUSED_CODES: ReadonlySet<string> = new Set(["error_936"])
+
 export const refused = (code: string | null) =>
   new ProviderError({
     provider: YURTICI_PROVIDER,

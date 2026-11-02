@@ -7,11 +7,18 @@
 export const DEMO_PUBLISHABLE_KEY_TITLE = "Demo storefront"
 
 /**
+ * What marks a record the demo seed made (products, categories, shipping
+ * options from 2026-11-03 on), so `demo:remove` takes that record and
+ * never a shop's own one that only shares its handle or name.
+ */
+export const DEMO_METADATA = { demo: true } as const
+
+/**
  * What marks a demo order (seed:demo-orders), so `demo:remove` finds them:
  * the metadata from 2026-11-02 on, and before that the made-up street
  * every demo order went to, with no e-mail.
  */
-export const DEMO_ORDER_METADATA = { demo: true } as const
+export const DEMO_ORDER_METADATA = DEMO_METADATA
 export const DEMO_ORDER_ADDRESS_1 = "Demo Sokak No: 1"
 
 /** Given to the bootstrap's warehouse when it has no address yet. */

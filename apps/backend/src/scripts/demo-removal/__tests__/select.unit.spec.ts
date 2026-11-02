@@ -2,7 +2,10 @@ import { DEMO_LOCATION_ADDRESS, MANUAL_FULFILLMENT_PROVIDER_ID } from "../../see
 import {
   E2E_STAFF_EMAIL,
   demoShippingOptionsToRemove,
+  isDemoCategory,
   isDemoOrder,
+  isDemoProduct,
+  isDemoShippingOption,
   isDemoWarehouseAddress,
   isEmptyCategory,
   isLeftoverImportCheck,
@@ -43,6 +46,64 @@ describe("what demo:remove takes out", () => {
     ).toBe(false)
     expect(isDemoOrder({ id: "o4", metadata: { demo: "yes" } })).toBe(false)
     expect(isDemoOrder({ id: "o5", shipping_address: null })).toBe(false)
+  })
+
+  it("takes a product by a demo handle only with the seed's mark, or unchanged from before it", () => {
+    const kupa = { id: "prod_1", handle: "seramik-kupa", title: "Seramik Kupa" }
+
+    expect(isDemoProduct({ ...kupa, metadata: { demo: true } })).toBe(true)
+    // Seeded before the mark (2026-11-03): no metadata, the seed's title as written
+    expect(isDemoProduct({ ...kupa, metadata: null })).toBe(true)
+    expect(isDemoProduct({ ...kupa })).toBe(true)
+    // The handle alone is not enough: the shop's own record, or the seed's it renamed
+    expect(isDemoProduct({ ...kupa, title: "Seramik Kupa 350 ml", metadata: null })).toBe(false)
+    expect(isDemoProduct({ ...kupa, title: "seramik kupa", metadata: null })).toBe(false)
+    expect(isDemoProduct({ ...kupa, metadata: {} })).toBe(false)
+    expect(isDemoProduct({ ...kupa, metadata: { demo: "true" } })).toBe(false)
+    expect(isDemoProduct({ ...kupa, metadata: { source: "import" } })).toBe(false)
+    // A mark on a handle the seed never made is not the seed's
+    expect(
+      isDemoProduct({
+        id: "prod_2",
+        handle: "el-yapimi-bicak",
+        title: "Bıçak",
+        metadata: { demo: true },
+      })
+    ).toBe(false)
+  })
+
+  it("takes a category by a demo handle only with the seed's mark, or unchanged from before it", () => {
+    const giyim = { id: "pcat_1", handle: "giyim", name: "Giyim" }
+
+    expect(isDemoCategory({ ...giyim, metadata: { demo: true } })).toBe(true)
+    expect(isDemoCategory({ ...giyim, metadata: null })).toBe(true)
+    expect(isDemoCategory({ ...giyim, name: "Giyim ve Aksesuar", metadata: null })).toBe(false)
+    expect(isDemoCategory({ ...giyim, metadata: { menu: "top" } })).toBe(false)
+    expect(
+      isDemoCategory({
+        id: "pcat_2",
+        handle: "bicaklar",
+        name: "Bıçaklar",
+        metadata: { demo: true },
+      })
+    ).toBe(false)
+  })
+
+  it("takes a shipping option like the seed's only with its mark, or with no metadata at all", () => {
+    expect(isDemoShippingOption(option("so_1", { metadata: { demo: true } }))).toBe(true)
+    expect(isDemoShippingOption(option("so_2", { metadata: null }))).toBe(true)
+    expect(isDemoShippingOption(option("so_3", { metadata: { note: "bizim" } }))).toBe(false)
+    expect(
+      isDemoShippingOption(
+        option("so_4", { name: "Standart Kargo (İstanbul)", metadata: { demo: true } })
+      )
+    ).toBe(false)
+    expect(
+      demoShippingOptionsToRemove([
+        option("so_1", { metadata: { demo: true } }),
+        option("so_3", { metadata: { note: "bizim" } }),
+      ])
+    ).toEqual({ remove: ["so_1"], keptForCheckout: [] })
   })
 
   it("removes the seed's shipping options only when the shop ships some other way", () => {
@@ -88,6 +149,17 @@ describe("what demo:remove takes out", () => {
     expect(isEmptyCategory({ id: "c3", handle: "ev", category_children: [{ id: "c4" }] })).toBe(
       false
     )
+    // Empty once the demo products in it go; the shop's own product keeps it
+    const going = new Set(["prod_demo"])
+    expect(
+      isEmptyCategory({ id: "c5", handle: "gida", products: [{ id: "prod_demo" }] }, going)
+    ).toBe(true)
+    expect(
+      isEmptyCategory(
+        { id: "c6", handle: "gida", products: [{ id: "prod_demo" }, { id: "prod_own" }] },
+        going
+      )
+    ).toBe(false)
   })
 
   it("knows e2e staff by the address the e2e setup makes", () => {

@@ -8,8 +8,9 @@ import { termPath } from "./term-rules"
 /**
  * Blog categories and tags as the Admin and Store APIs show them (adr/0019
  * ek 2026-11-03): a post's terms, a term's posts and how many of them are
- * live. A blog holds hundreds of posts and terms, not millions: the links
- * are read whole and the posts by id.
+ * live. A term's posts are read a page at a time in one statement (an
+ * archive is public); counting reads the links whole, a blog holding
+ * hundreds of posts and terms, not millions.
  */
 
 export interface TermView {
@@ -113,25 +114,26 @@ export async function postCounts(
   return counts
 }
 
-/** The entries filed under a term named by kind and handle; null when there is no such term. */
-export async function entryIdsOfTerm(
+/** A term's id by its kind and handle; null when there is no such term. */
+export async function termIdOf(
   container: MedusaContainer,
   kind: ContentTermKind,
   handle: string
-): Promise<string[] | null> {
+): Promise<string | null> {
   const [term] = await service(container).listContentTerms(
     { kind, handle },
     { select: ["id"], take: 1 }
   )
-  if (!term) {
-    return null
-  }
-  const links = await service(container).listContentEntryTerms(
-    { term_id: term.id },
-    { select: ["entry_id"], take: null }
-  )
-  return links.map((link) => link.entry_id)
+  return term?.id ?? null
 }
+
+/** A page of the live posts filed under every one of the terms, the newest first, and how many. */
+export const livePostsUnder = (
+  container: MedusaContainer,
+  termIds: readonly string[],
+  page: { skip: number; take: number }
+): Promise<{ ids: string[]; count: number }> =>
+  service(container).pageLivePostsUnderTerms(termIds, page)
 
 /** A term's live posts, counted, and the newest ones' titles (an archive's description). */
 export async function livePostsOfTerm(
@@ -139,16 +141,14 @@ export async function livePostsOfTerm(
   termId: string,
   take: number
 ): Promise<{ count: number; titles: string[] }> {
-  const links = await service(container).listContentEntryTerms(
-    { term_id: termId },
-    { select: ["entry_id"], take: null }
-  )
-  if (links.length === 0) {
-    return { count: 0, titles: [] }
+  const { ids, count } = await livePostsUnder(container, [termId], { skip: 0, take })
+  if (ids.length === 0) {
+    return { count, titles: [] }
   }
-  const [posts, count] = await service(container).listAndCountContentEntries(
-    { id: links.map((link) => link.entry_id), kind: "post", status: "published" },
-    { select: ["title"], take, order: { published_at: "DESC" } }
+  const posts = await service(container).listContentEntries(
+    { id: ids },
+    { select: ["id", "title"], take: null }
   )
-  return { count, titles: posts.map((post) => post.title) }
+  const titles = new Map(posts.map((post) => [post.id, post.title]))
+  return { count, titles: ids.flatMap((id) => titles.get(id) ?? []) }
 }

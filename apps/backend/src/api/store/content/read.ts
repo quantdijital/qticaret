@@ -8,7 +8,7 @@ import { CONTENT_MODULE } from "../../../modules/content"
 import type ContentModuleService from "../../../modules/content/service"
 import type { ContentEntryRecord } from "../../../modules/content/service"
 import { contentPath } from "../../../workflows/content/paths"
-import { entryIdsOfTerm, termsOfEntries } from "../../../workflows/content/term-reads"
+import { livePostsUnder, termIdOf, termsOfEntries } from "../../../workflows/content/term-reads"
 import type { EntryTerms } from "../../../workflows/content/term-reads"
 import { shopInfoValues } from "../../../workflows/shop/info-values"
 import { cardTargets } from "./cards"
@@ -57,47 +57,67 @@ const summary = (entry: Listed) => ({
 const NOT_FILED: EntryTerms = { category: null, tags: [] }
 
 /**
- * The entries filed under the category and tag the query names (both, when
- * both); null when it names neither, none for a term there is not.
+ * The terms the query names (a category and a tag: posts under both); null
+ * when it names neither, none when one of them does not exist.
  */
-async function filedUnder(
+async function termsNamed(
   container: MedusaContainer,
   query: StoreGetContentType
 ): Promise<string[] | null> {
-  const wanted = [
-    ...(query.category ? [entryIdsOfTerm(container, "category", query.category)] : []),
-    ...(query.tag ? [entryIdsOfTerm(container, "tag", query.tag)] : []),
+  const named = [
+    ...(query.category ? [termIdOf(container, "category", query.category)] : []),
+    ...(query.tag ? [termIdOf(container, "tag", query.tag)] : []),
   ]
-  if (wanted.length === 0) {
+  if (named.length === 0) {
     return null
   }
-  const [first = [], ...rest] = (await Promise.all(wanted)).map((ids) => ids ?? [])
-  return rest.reduce((kept, ids) => kept.filter((id) => ids.includes(id)), first)
+  const ids = await Promise.all(named)
+  return ids.every((id): id is string => id !== null) ? ids : []
+}
+
+/** A category's or tag's page of live posts, in the order the paging read them. */
+async function filedPage(
+  container: MedusaContainer,
+  termIds: string[],
+  query: StoreGetContentType
+): Promise<[Listed[], number]> {
+  const { ids, count } = await livePostsUnder(container, termIds, {
+    skip: query.offset,
+    take: query.limit,
+  })
+  const rows = ids.length
+    ? await service(container).listContentEntries(
+        { id: ids, status: "published" },
+        { select: [...LIST_FIELDS], take: null }
+      )
+    : []
+  const byId = new Map(rows.map((row) => [row.id, row]))
+  return [ids.flatMap((id) => byId.get(id) ?? []), count]
 }
 
 /**
  * Live entries, the newest first, a post with its category and tags; a
- * category or tag narrows them to its posts. Page SEO comes from
+ * category or tag narrows them to its posts, read a page at a time (one
+ * statement, however many posts a term holds). Page SEO comes from
  * `/store/seo/resolve`.
  */
 export async function storeContentList(container: MedusaContainer, query: StoreGetContentType) {
   const page = { offset: query.offset, limit: query.limit }
-  const filed = await filedUnder(container, query)
-  if (filed?.length === 0) {
+  const termIds = await termsNamed(container, query)
+  if (termIds?.length === 0) {
     return { entries: [], count: 0, ...page }
   }
-  const [entries, count] = await service(container).listAndCountContentEntries(
-    {
-      status: "published",
-      ...(filed ? { kind: "post" as const, id: filed } : query.kind ? { kind: query.kind } : {}),
-    },
-    {
-      select: [...LIST_FIELDS],
-      skip: query.offset,
-      take: query.limit,
-      order: { published_at: "DESC" },
-    }
-  )
+  const [entries, count] = termIds
+    ? await filedPage(container, termIds, query)
+    : await service(container).listAndCountContentEntries(
+        { status: "published", ...(query.kind ? { kind: query.kind } : {}) },
+        {
+          select: [...LIST_FIELDS],
+          skip: query.offset,
+          take: query.limit,
+          order: { published_at: "DESC" },
+        }
+      )
   const [values, terms] = await Promise.all([
     shopInfoValues(container),
     termsOfEntries(

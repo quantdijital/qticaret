@@ -258,6 +258,18 @@ medusaIntegrationTestRunner({
       expect(await fulfillmentsOf(orderId)).toHaveLength(0)
     })
 
+    it("withdraws nothing when Yurtiçi refuses the parcel with a fault (HTTP 500)", async () => {
+      const orderId = await order()
+      fake.requests.length = 0
+      fake.queue("createShipment", "fault:82516")
+
+      const failed = await post(`/admin/orders/${orderId}/ship`, { notify: false })
+
+      expect(failed.status).toBeGreaterThanOrEqual(400)
+      expect(fake.requests.map((request) => request.operation)).toEqual(["createShipment"])
+      expect(await fulfillmentsOf(orderId)).toHaveLength(0)
+    })
+
     it("sends a parcel paid at the door on the door account, and asks for it when missing", async () => {
       const placed = await codOrder()
 

@@ -12,6 +12,7 @@ import { updateWarehouseWorkflow } from "../../workflows/stock/warehouses"
 import { TRY_CURRENCY_CODE, TR_COUNTRY_CODE } from "../bootstrap/constants"
 import {
   DEMO_FULFILLMENT_SET_NAME,
+  DEMO_METADATA,
   DEMO_SERVICE_ZONE_NAME,
   DEMO_SHIPPING_OPTIONS,
   DEMO_LOCATION_ADDRESS,
@@ -181,6 +182,9 @@ async function ensureShippingOptions(
       service_zone_id: input.serviceZoneId,
       shipping_profile_id: input.shippingProfileId,
       type: { label: option.name, description: option.description, code: option.code },
+      // `demo:remove` takes only what carries it. The workflow's input type
+      // leaves `metadata` out; the module stores it (seed-demo.spec.ts)
+      metadata: { ...DEMO_METADATA },
       prices: [
         { currency_code: TRY_CURRENCY_CODE, amount: option.price },
         { region_id: input.regionId, amount: option.price },

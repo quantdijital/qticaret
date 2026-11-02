@@ -135,7 +135,7 @@ Yurtiçi etiket ucu vermez: taşıma belgesini ve barkod etiketini şube, bizim 
 | createFulfillment | `createShipment` | Alıcı kuralı önce denetlenir (`shipping.address_incomplete`); yanıt gelmezse aynı anahtarla `cancelShipment` |
 | cancelFulfillment | `cancelShipment` | Yalnızca CNL/ISC/82520 başarı |
 | takip işi | `queryShipment` | Ana hesap, bulunmazsa (82519) kapıda ödeme hesabı |
-| hesap kontrolü | `queryShipment` (rastgele anahtar) | Fault ya da satırsız yanıt → `secret_invalid` |
+| hesap kontrolü | `queryShipment` (rastgele anahtar) | Giriş fault'u (`errorCode` 936) ya da satırsız yanıt → `secret_invalid`; fault'suz 500 ulaşılamadı, başka fault doğrulanamadı |
 
 ## Belgedeki tutarsızlıklar ve seçimimiz
 
@@ -147,7 +147,7 @@ Yurtiçi etiket ucu vermez: taşıma belgesini ve barkod etiketini şube, bizim 
 
 ## Açık sorular
 
-- Hatalı kullanıcı adı/şifrenin dönüş biçimi belgede yok (şimdi: SOAP fault ya da 82519'suz satırsız yanıt → reddedildi).
+- Hatalı kullanıcı adı/şifrenin dönüş biçimi belgede yok (şimdi: `errorCode` 936'lı SOAP fault ya da 82519'suz satırsız yanıt → reddedildi; 936 belgede "beklenmeyen hata"). Gerçek hesapla denenip `LOGIN_REFUSED_CODES` (`lib/shipping/yurtici/answers.ts`) güncellenecek.
 - 1 dakikalık sorgu sınırı anahtar başına mı, kullanıcı başına mı? Kullanıcı başınaysa aynı dakikada hesap kontrolü ile sağlık kontrolü çakışabilir ve fault "reddedildi" sayılır.
 - `desi`/`kg` alanları mağazanın kullanıcısında yetkili mi; desi böleni (3000) sözleşmede aynı mı?
 - `waybillNo` "ticari gönderilerde zorunlu": mağazanın e-ticaret gönderileri bu kapsamda mı? E-irsaliye/e-fatura (F8) gelince doldurulabilir.

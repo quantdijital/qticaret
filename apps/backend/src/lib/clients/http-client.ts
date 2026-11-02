@@ -16,6 +16,7 @@ import {
   wasNotSent,
 } from "./request"
 import { IDEMPOTENT_METHODS, backoffDelay, parseRetryAfter, resolveRetryPolicy } from "./retry"
+import { soapFaultOf } from "./soap-fault"
 import { ResponseTooLarge, TransportRefusal, callTransport, fetchTransport } from "./transport"
 import type { TransportResponse } from "./transport"
 
@@ -29,7 +30,8 @@ import type { TransportResponse } from "./transport"
  * idempotent is repeated only when it certainly did not reach the provider,
  * and a failure whose outcome is unknown (a timeout after sending, a gateway
  * error) is `outcome_unknown`, not retryable. Payment integrations check
- * the provider's status for it before trying again.
+ * the provider's status for it before trying again. A SOAP fault under a
+ * 5xx is the service's refusal: `error_<its code>` (`soap-fault.ts`).
  */
 
 // What a provider's error code may be: a short token such as `PERMISSION_DENIED` or `10051`
@@ -138,6 +140,15 @@ export function createHttpClient(options: HttpClientOptions): HttpClient {
 
   function errorFrom(response: TransportResponse, prepared: Prepared): Error {
     const { status } = response
+    // A SOAP fault is the service's own refusal, not a lost answer (not a gateway's)
+    const fault =
+      status >= 500 && !REJECTED_STATUSES.has(status) && !GATEWAY_STATUSES.has(status)
+        ? soapFaultOf(response)
+        : undefined
+    if (fault !== undefined) {
+      const code = `error_${fault}`
+      return failure(fault !== "" && PROVIDER_CODE.test(code) ? code : "error_fault", false)
+    }
     if (status >= 500 && status !== 503 && !prepared.repeatable) {
       return failure("outcome_unknown", false)
     }

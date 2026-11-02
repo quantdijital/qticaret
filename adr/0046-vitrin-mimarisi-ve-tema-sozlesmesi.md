@@ -145,3 +145,5 @@ docs/20 "arama kalitesi": Meilisearch kararına (§11, D10) kadar ara çözüm. 
   - Her süreç kendi indeksini kurar.
   - Fiyat ya da ürün değişikliği 30 sn içinde yansır.
 - **Tam çözüm:** Meilisearch (D10) kalır: büyük katalog, eş anlamlılar, vurgulama, indeksleme subscriber'ı. Geçişte uç ve `search` bloğu aynı kalır; yalnız satır kaynağı değişir.
+
+- **Güvenlik incelemesi 2026-11-03 (L3):** sorgu kelimesi artık bütün sözlükle değil, yalnızca en az bir trigram paylaştığı ve eşleşebilecek uzunluktaki kelimelerle karşılaştırılır (trigram → kelime indeksi, kısa kelime önce; sonuçların aynı kaldığı birim testte bütün sözlükle karşılaştırılarak kanıtlı); açıklamanın ilk 400 karakteri etiketlerden arındırılıp 240 karaktere kesilir.

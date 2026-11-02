@@ -9,7 +9,7 @@ import {
 import { logger } from "../../lib/logging"
 import { TRY_CURRENCY_CODE } from "../bootstrap/constants"
 import type { DemoProduct } from "./data"
-import { DEMO_CATEGORIES, DEMO_PRODUCTS, DEMO_STOCKED_QUANTITY } from "./data"
+import { DEMO_CATEGORIES, DEMO_METADATA, DEMO_PRODUCTS, DEMO_STOCKED_QUANTITY } from "./data"
 
 export interface CatalogContext {
   salesChannelId: string
@@ -99,6 +99,8 @@ function toProductInput(
     handle: product.handle,
     description: product.description,
     status: ProductStatus.PUBLISHED,
+    // `demo:remove` takes only what carries it
+    metadata: { ...DEMO_METADATA },
     ...product.dimensions,
     shipping_profile_id: context.shippingProfileId,
     category_ids: [categoryId],
@@ -132,6 +134,7 @@ async function ensureCategories(container: MedusaContainer): Promise<Map<string,
           name: category.name,
           handle: category.handle,
           is_active: true,
+          metadata: { ...DEMO_METADATA },
         })),
       },
     })

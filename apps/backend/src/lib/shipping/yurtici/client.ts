@@ -8,6 +8,7 @@ import { parseEnv } from "../../env"
 import { isProviderError } from "../../errors"
 import {
   KEY_NOT_FOUND,
+  LOGIN_REFUSED_CODES,
   YURTICI_PROVIDER,
   deliveryOf,
   invalid,
@@ -167,9 +168,10 @@ export function createYurticiApi(options: Partial<Omit<HttpClientOptions, "provi
 
   /**
    * Whether Yurtiçi takes the login: a query for a key nobody has, which
-   * any account may make. A refused login is a fault or an answer with no
-   * line for the key; an unknown key gets a line of its own code (82519,
-   * "this user has no such key"), which names the user it found.
+   * any account may make. A refused login is a login fault
+   * (`LOGIN_REFUSED_CODES`) or an answer with no line for the key; an
+   * unknown key gets a line of its own code (82519, "this user has no
+   * such key"), which names the user it found.
    */
   async function checkLogin(
     login: YurticiLogin,
@@ -199,11 +201,9 @@ export function createYurticiApi(options: Partial<Omit<HttpClientOptions, "provi
         ? "valid"
         : "secret_invalid"
     } catch (error) {
-      // A JAX-WS service answers a refused login with a fault (HTTP 500)
-      if (
-        isProviderError(error) &&
-        (error.providerCode === "http_500" || error.providerCode.startsWith("error_"))
-      ) {
+      // A JAX-WS service answers a refused login with a fault (HTTP 500); a
+      // 500 without one, or another fault, is no verdict on the login
+      if (isProviderError(error) && LOGIN_REFUSED_CODES.has(error.providerCode)) {
         return "secret_invalid"
       }
       throw error

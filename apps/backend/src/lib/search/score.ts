@@ -74,11 +74,72 @@ export function matchQuality(
   return similarity >= least ? MATCH.fuzzy * similarity : 0
 }
 
-/** A query word's match with every word of the index, by word id. */
+/**
+ * The fewest letters a word needs for `matchQuality` to find it at all:
+ * the query's own length (same word, or one it starts), half of it (a
+ * stem), or the trigram count a typo's similarity needs (a word of n
+ * letters has at most n + 1). Rounded down, so it never leaves one out.
+ */
+function shortestMatch(query: string, gramCount: number): number {
+  let shortest = query.length
+  if (!DIGIT.test(query)) {
+    shortest = Math.min(shortest, Math.max(4, Math.ceil(query.length / 2)))
+    if (query.length >= 3) {
+      const least = query.length >= 5 ? MIN_SIMILARITY : SHORT_WORD_SIMILARITY
+      shortest = Math.min(shortest, Math.floor((gramCount * least) / (2 - least)) - 1)
+    }
+  }
+  return Math.max(1, shortest)
+}
+
+// The first word in a posting (shortest first) of at least that many letters
+function firstOfLength(index: SearchIndex, posting: readonly number[], length: number): number {
+  let low = 0
+  let high = posting.length
+  while (low < high) {
+    const middle = (low + high) >> 1
+    if ((index.words[posting[middle] ?? 0]?.length ?? 0) < length) {
+      low = middle + 1
+    } else {
+      high = middle
+    }
+  }
+  return low
+}
+
+/**
+ * The words a query word may match, by id: those sharing a trigram with
+ * it and long enough. The word's opening trigram (`  b`) is skipped: the
+ * same word, a prefix or a stem shares its second (` bi`), and a typo
+ * shares two or more (similarity at least 0.4 of six trigrams or more).
+ * A long query word (a pasted string) so meets only the rare long words.
+ */
+export function candidateWords(index: SearchIndex, query: string): number[] {
+  if (query.length < 2) {
+    const id = index.ids.get(query)
+    return id === undefined ? [] : [id]
+  }
+  const grams = trigrams(query)
+  const shortest = shortestMatch(query, grams.length)
+  const opening = `  ${query.slice(0, 1)}`
+  const found = new Set<number>()
+  for (const gram of grams) {
+    const posting = gram === opening ? undefined : index.postings.get(gram)
+    if (!posting) {
+      continue
+    }
+    for (let at = firstOfLength(index, posting, shortest); at < posting.length; at += 1) {
+      found.add(posting[at] ?? 0)
+    }
+  }
+  return [...found]
+}
+
+/** A query word's match with every word of the index, by word id (0 for the words it cannot match). */
 export function wordQualities(index: SearchIndex, query: string): Float64Array {
   const grams = new Set(trigrams(query))
   const qualities = new Float64Array(index.words.length)
-  for (let id = 0; id < index.words.length; id += 1) {
+  for (const id of candidateWords(index, query)) {
     qualities[id] = matchQuality(query, grams, index.words[id] ?? "", index.grams[id] ?? [])
   }
   return qualities

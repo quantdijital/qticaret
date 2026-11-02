@@ -161,8 +161,10 @@ describe("parseEnv", () => {
     expect(parseEnv({ ...validEnv, ...fake, NODE_ENV: "test" }).IYZICO_BASE_URL).toBe(
       fake.IYZICO_BASE_URL
     )
-    // Medusa's CLI (`medusa user`, `db:migrate`) runs with NODE_ENV unset
-    expect(parseEnv({ ...validEnv, ...fake }).IYZICO_BASE_URL).toBe(fake.IYZICO_BASE_URL)
+    // An unset NODE_ENV counts as live (docs/04): the CLI needs NODE_ENV=development
+    expect(errorOf({ ...validEnv, ...fake })).toContain(
+      "IYZICO_BASE_URL: is allowed on development and test only"
+    )
     expect(
       errorOf({
         ...validEnv,
@@ -172,7 +174,7 @@ describe("parseEnv", () => {
         AUTH_MFA_ENCRYPTION_KEY: hexKey(),
         NODE_ENV: "staging",
       })
-    ).toContain("IYZICO_BASE_URL: is not allowed on staging or production")
+    ).toContain("IYZICO_BASE_URL: is allowed on development and test only")
   })
 
   it("lets a fake Geliver address on a developer's machine only", () => {
@@ -190,7 +192,7 @@ describe("parseEnv", () => {
         AUTH_MFA_ENCRYPTION_KEY: hexKey(),
         NODE_ENV: "production",
       })
-    ).toContain("GELIVER_BASE_URL: is not allowed on staging or production")
+    ).toContain("GELIVER_BASE_URL: is allowed on development and test only")
   })
 
   it("sends e-mail through Mailpit on a developer's machine only, and through Resend with its key", () => {
@@ -208,7 +210,7 @@ describe("parseEnv", () => {
 
     expect(parseEnv({ ...validEnv, ...mailpit, NODE_ENV: "test" }).EMAIL_TRANSPORT).toBe("mailpit")
     expect(errorOf({ ...deployed, ...mailpit, NODE_ENV: "production" })).toContain(
-      "MAILPIT_URL: is not allowed on staging or production"
+      "MAILPIT_URL: is allowed on development and test only"
     )
     expect(
       errorOf({ ...validEnv, EMAIL_TRANSPORT: "resend", EMAIL_FROM: "a@b.example" })
@@ -283,7 +285,9 @@ describe("parseEnv", () => {
     expect(parseEnv({ ...validEnv, ...fake, NODE_ENV: "test" }).PAYTR_BASE_URL).toBe(
       fake.PAYTR_BASE_URL
     )
-    expect(parseEnv({ ...validEnv, ...fake }).PAYTR_BASE_URL).toBe(fake.PAYTR_BASE_URL)
+    expect(errorOf({ ...validEnv, ...fake })).toContain(
+      "PAYTR_BASE_URL: is allowed on development and test only"
+    )
     expect(
       errorOf({
         ...validEnv,
@@ -293,7 +297,33 @@ describe("parseEnv", () => {
         AUTH_MFA_ENCRYPTION_KEY: hexKey(),
         NODE_ENV: "production",
       })
-    ).toContain("PAYTR_BASE_URL: is not allowed on staging or production")
+    ).toContain("PAYTR_BASE_URL: is allowed on development and test only")
+  })
+
+  it.each([
+    "PAYTR_BASE_URL",
+    "IYZICO_BASE_URL",
+    "GELIVER_BASE_URL",
+    "ARAS_BASE_URL",
+    "YURTICI_BASE_URL",
+    "RESEND_BASE_URL",
+    "NETGSM_BASE_URL",
+    "APPLE_AUTH_BASE_URL",
+    "GOOGLE_BASE_URL",
+    "PARASUT_BASE_URL",
+    "SHOPIFY_BASE_URL",
+    "META_GRAPH_BASE_URL",
+    "GA4_BASE_URL",
+  ])("refuses a fake %s with NODE_ENV unset, which counts as live", (name) => {
+    const fake = { [name]: "http://127.0.0.1:9100" }
+
+    expect(errorOf({ ...validEnv, ...fake })).toContain(
+      `${name}: is allowed on development and test only`
+    )
+    expect(errorOf({ ...validEnv, ...fake, NODE_ENV: "staging" })).toContain(name)
+    expect(
+      parseEnv({ ...validEnv, ...fake, NODE_ENV: "development" })[name as "GA4_BASE_URL"]
+    ).toBe(fake[name])
   })
 
   it("rejects identical PII encryption and hash keys", () => {

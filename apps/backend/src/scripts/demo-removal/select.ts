@@ -1,7 +1,9 @@
 import {
+  DEMO_CATEGORIES,
   DEMO_LOCATION_ADDRESS,
+  DEMO_METADATA,
   DEMO_ORDER_ADDRESS_1,
-  DEMO_ORDER_METADATA,
+  DEMO_PRODUCTS,
   DEMO_SHIPPING_OPTIONS,
   MANUAL_FULFILLMENT_PROVIDER_ID,
 } from "../seed/data"
@@ -22,24 +24,53 @@ export interface OrderRow {
   shipping_address?: { address_1?: string | null } | null
 }
 
+type Metadata = Record<string, unknown> | null | undefined
+
+/** The seed's mark (`DEMO_METADATA`). */
+export const hasDemoMark = (metadata: Metadata): boolean =>
+  Object.entries(DEMO_METADATA).every(([key, value]) => metadata?.[key] === value)
+
+/**
+ * A record the seed made: its mark, or, made before the mark (2026-11-03),
+ * no metadata at all and the seed's own name as written. A handle or a
+ * name alone is never enough: a shop's own record may share it.
+ */
+export const isSeeded = (metadata: Metadata, name: string, seedName: string | undefined): boolean =>
+  seedName !== undefined &&
+  (hasDemoMark(metadata) || ((metadata === null || metadata === undefined) && name === seedName))
+
 /**
  * A demo order: marked so (seed:demo-orders from 2026-11-02), or older,
  * sent to the seed's made-up street with no e-mail (a shopper's order
  * always has one).
  */
 export function isDemoOrder(order: OrderRow): boolean {
-  const marked = Object.entries(DEMO_ORDER_METADATA).every(
-    ([key, value]) => order.metadata?.[key] === value
-  )
   return (
-    marked || (order.shipping_address?.address_1 === DEMO_ORDER_ADDRESS_1 && !order.email?.trim())
+    hasDemoMark(order.metadata) ||
+    (order.shipping_address?.address_1 === DEMO_ORDER_ADDRESS_1 && !order.email?.trim())
   )
 }
+
+export interface ProductRow {
+  id: string
+  handle: string
+  title: string
+  metadata?: Metadata
+}
+
+/** One of the seed's products: its handle, and its mark or its unchanged title with no metadata. */
+export const isDemoProduct = (product: ProductRow): boolean =>
+  isSeeded(
+    product.metadata,
+    product.title,
+    DEMO_PRODUCTS.find((demo) => demo.handle === product.handle)?.title
+  )
 
 export interface ShippingOptionRow {
   id: string
   name: string
   provider_id?: string | null
+  metadata?: Metadata
   type?: { code?: string | null } | null
   rules?: ({ attribute: string; value: unknown } | null)[] | null
 }
@@ -49,15 +80,22 @@ const isReturnOption = (option: ShippingOptionRow) =>
     (rule) => rule?.attribute === "is_return" && String(rule.value) === "true"
   )
 
-/** One of the seed's two flat-rate options, by name, code and the manual provider. */
-export function isDemoShippingOption(option: ShippingOptionRow): boolean {
-  return DEMO_SHIPPING_OPTIONS.some(
+/** Named, coded and sent like one of the seed's two flat-rate options: maybe the shop's own. */
+export const looksLikeDemoShippingOption = (option: ShippingOptionRow): boolean =>
+  DEMO_SHIPPING_OPTIONS.some(
     (demo) =>
       demo.name === option.name &&
       demo.code === option.type?.code &&
       option.provider_id === MANUAL_FULFILLMENT_PROVIDER_ID
   )
-}
+
+/**
+ * One of the seed's two flat-rate options: it looks like one, and is
+ * marked or (made before the mark) has no metadata.
+ */
+export const isDemoShippingOption = (option: ShippingOptionRow): boolean =>
+  looksLikeDemoShippingOption(option) &&
+  (hasDemoMark(option.metadata) || option.metadata === null || option.metadata === undefined)
 
 /**
  * The demo options to remove: only when the shop ships some other way,
@@ -96,13 +134,32 @@ export function isDemoWarehouseAddress(address: LocationAddressRow | null | unde
 export interface CategoryRow {
   id: string
   handle: string
-  products?: unknown[] | null
+  name?: string
+  metadata?: Metadata
+  products?: ({ id: string } | null)[] | null
   category_children?: unknown[] | null
 }
 
-/** A demo category goes once nothing of the shop's is in or under it. */
-export function isEmptyCategory(category: CategoryRow): boolean {
-  return (category.products ?? []).length === 0 && (category.category_children ?? []).length === 0
+/** One of the seed's categories: its handle, and its mark or its unchanged name with no metadata. */
+export const isDemoCategory = (category: CategoryRow): boolean =>
+  isSeeded(
+    category.metadata,
+    category.name ?? "",
+    DEMO_CATEGORIES.find((demo) => demo.handle === category.handle)?.name
+  )
+
+/**
+ * A demo category goes once nothing of the shop's is in or under it:
+ * after the demo products that are going (`going`), if given.
+ */
+export function isEmptyCategory(
+  category: CategoryRow,
+  going: ReadonlySet<string> = new Set()
+): boolean {
+  return (
+    (category.products ?? []).every((product) => !product || going.has(product.id)) &&
+    (category.category_children ?? []).length === 0
+  )
 }
 
 export interface ImportJobRow {

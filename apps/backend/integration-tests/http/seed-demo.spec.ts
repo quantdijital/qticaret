@@ -138,6 +138,19 @@ medusaIntegrationTestRunner({
         )
       })
 
+      it("marks what it creates as demo, so demo:remove takes nothing else", async () => {
+        const container = getContainer()
+        const query = container.resolve(ContainerRegistrationKeys.QUERY)
+        await seedDemo(container)
+
+        for (const entity of ["product", "product_category", "shipping_option"] as const) {
+          const { data } = await query.graph({ entity, fields: ["id", "metadata"] })
+          const rows = data as unknown as { metadata?: Record<string, unknown> | null }[]
+          expect(rows.length).toBeGreaterThan(0)
+          expect(rows.every((row) => row.metadata?.["demo"] === true)).toBe(true)
+        }
+      })
+
       it("uses docs/13 compliant handles", () => {
         for (const product of DEMO_PRODUCTS) {
           expect(product.handle).toMatch(SLUG)

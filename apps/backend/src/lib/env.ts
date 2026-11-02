@@ -316,7 +316,8 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
     })
   }
   // A deployed shop pays and ships at the provider's own address only. A fake server
-  // is for a developer's machine, where Medusa's CLI runs with NODE_ENV unset
+  // is for an explicit development or test run: an unset NODE_ENV counts as live
+  // (docs/04), so Medusa's CLI with a fake address needs NODE_ENV=development
   for (const name of [
     "PAYTR_BASE_URL",
     "IYZICO_BASE_URL",
@@ -334,11 +335,11 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
     "GA4_BASE_URL",
     "CONTENT_DRAFT_PROVIDER",
   ] as const) {
-    if (env[name] !== undefined && (env.NODE_ENV === "production" || env.NODE_ENV === "staging")) {
+    if (env[name] !== undefined && !isLocalEnv(env)) {
       ctx.addIssue({
         code: "custom",
         path: [name],
-        message: "is not allowed on staging or production",
+        message: "is allowed on development and test only (an unset NODE_ENV counts as live)",
       })
     }
   }

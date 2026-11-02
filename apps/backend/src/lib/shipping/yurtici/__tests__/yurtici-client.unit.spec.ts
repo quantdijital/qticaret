@@ -207,4 +207,34 @@ describe("Yurtiçi client against the fake service (adr/0035)", () => {
       "secret_invalid"
     )
   })
+
+  it("takes a fault sent as HTTP 500 for Yurtiçi's refusal, not for a lost answer", async () => {
+    fake.queue("createShipment", "fault:82516")
+
+    const refused = await api()
+      .createShipment(fake.accounts.main, true, shipment("QTUNITKEY000005"))
+      .catch((error: unknown) => error)
+
+    expect(refused).toMatchObject({ providerCode: "error_82516", retryable: false })
+    expect(fake.shipments.has("QTUNITKEY000005")).toBe(false)
+  })
+
+  it("says nothing of the login on a 500 without a fault or on another fault", async () => {
+    const answering = (status: number, text: string) =>
+      createYurticiApi({
+        baseUrl: fake.url,
+        transport: () => Promise.resolve({ status, text, header: () => "text/xml; charset=utf-8" }),
+      })
+    fake.queue("queryShipment", "fault:82526")
+
+    const otherFault = await api()
+      .checkLogin(fake.accounts.main, true)
+      .catch((error: unknown) => error)
+    const plain = await answering(500, "")
+      .checkLogin(fake.accounts.main, true)
+      .catch((error: unknown) => error)
+
+    expect(otherFault).toMatchObject({ providerCode: "error_82526" })
+    expect(plain).toMatchObject({ providerCode: "http_500" })
+  })
 })

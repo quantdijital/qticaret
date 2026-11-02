@@ -4,8 +4,9 @@ import { normalizeText, trigrams, wordsOf } from "./normalize"
  * A catalogue's words, indexed once per load for site search (adr/0046 ek
  * 2026-11-03): every product's fields as word ids with their weights, and
  * each distinct word once with its trigrams, how it reads and how many
- * titles hold it. Searching then weighs a query word against the
- * vocabulary once and each product by lookups: ~O(products × words).
+ * titles hold it. Each trigram lists the words that hold it, the shortest
+ * first, so a query word is weighed only against the words it could match
+ * (`score.ts`); each product then by lookups: ~O(products × words).
  */
 
 /** What search reads of a product. */
@@ -55,22 +56,35 @@ export interface SearchIndex {
   grams: string[][]
   display: string[]
   titleCount: number[]
+  /** By trigram: the ids of the words holding it, the shortest word first. */
+  postings: ReadonlyMap<string, readonly number[]>
   ids: ReadonlyMap<string, number>
   byId: ReadonlyMap<string, IndexedDoc>
 }
 
 const TAGS = /<[^>]*>|&[a-z]+;|&#\d+;/gi
+// A tag or entity the cut left open at its end
+const CUT_OPEN = /<[^>]*$|&#?[a-z\d]*$/i
+// Read before the tags go: a long description is never scanned whole
+const DESCRIPTION_READ = 400
 
-const excerptOf = (text: string | null | undefined): string =>
-  (text ?? "").replace(TAGS, " ").slice(0, DESCRIPTION_EXCERPT)
+function excerptOf(text: string | null | undefined): string {
+  const whole = text ?? ""
+  const read = whole.slice(0, DESCRIPTION_READ)
+  return (read.length < whole.length ? read.replace(CUT_OPEN, "") : read)
+    .replace(TAGS, " ")
+    .slice(0, DESCRIPTION_EXCERPT)
+}
 
 export function buildSearchIndex(docs: readonly SearchDoc[]): SearchIndex {
+  const postings = new Map<string, number[]>()
   const index: SearchIndex & { ids: Map<string, number>; byId: Map<string, IndexedDoc> } = {
     docs: [],
     words: [],
     grams: [],
     display: [],
     titleCount: [],
+    postings,
     ids: new Map(),
     byId: new Map(),
   }
@@ -85,7 +99,16 @@ export function buildSearchIndex(docs: readonly SearchDoc[]): SearchIndex {
         id = index.words.length
         index.ids.set(word.norm, id)
         index.words.push(word.norm)
-        index.grams.push(trigrams(word.norm))
+        const grams = trigrams(word.norm)
+        index.grams.push(grams)
+        for (const gram of grams) {
+          const posting = postings.get(gram)
+          if (posting) {
+            posting.push(id)
+          } else {
+            postings.set(gram, [id])
+          }
+        }
         index.display.push(word.display)
         index.titleCount.push(0)
         fromTitle.push(isTitle)
@@ -124,6 +147,11 @@ export function buildSearchIndex(docs: readonly SearchDoc[]): SearchIndex {
     }
     index.docs.push(entry)
     index.byId.set(doc.id, entry)
+  }
+  // The shortest first: a long query word skips the words too short to match it
+  const length = (id: number) => index.words[id]?.length ?? 0
+  for (const posting of postings.values()) {
+    posting.sort((a, b) => length(a) - length(b) || a - b)
   }
   return index
 }
