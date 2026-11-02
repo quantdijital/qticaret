@@ -87,6 +87,9 @@ const OWNER_ONLY: readonly Rule[] = [
   { methods: "*", path: "/admin/migrations*" },
   // Whether the team must pass 2FA (adr/0040)
   { methods: WRITES, path: "/admin/platform-settings/security" },
+  // Where the shop goes dark: maintenance or "coming soon" (adr/0053); its
+  // bypass link stays the admin's, as a draft's preview link does
+  { methods: WRITES, path: "/admin/platform-settings/maintenance" },
   // Medusa Admin's menus and saved table views for every user (its `is_default`);
   // the panel has its own, Medusa Admin is off (the F15 audit)
   { methods: WRITES, path: "/admin/layouts*" },
@@ -286,6 +289,8 @@ const CAPABILITY_PROBES = {
   accounts: ["POST", "/admin/integrations/credentials/:provider"],
   keys: ["POST", "/admin/api-access"],
   security: ["POST", "/admin/platform-settings/security"],
+  // adr/0053: turning the storefront dark, the owner's alone
+  maintenance: ["POST", "/admin/platform-settings/maintenance"],
   team: ["GET", "/admin/staff"],
   staff: ["POST", "/admin/staff/members/:id"],
   audit: ["GET", "/admin/audit-log"],

@@ -4,6 +4,7 @@ import { GIFT_CARDS } from "../../../modules/platform-settings/features"
 import type {
   PromotionSettings,
   StorefrontSettings,
+  ThemeSettings,
 } from "../../../modules/platform-settings/sections"
 import type PlatformSettingsModuleService from "../../../modules/platform-settings/service"
 import { fillShopText } from "../../../lib/shop/tokens"
@@ -44,18 +45,30 @@ function filled(storefront: StorefrontSettings, values: ShopInfoValues): Storefr
   }
 }
 
+/**
+ * The theme's choices (F18 D11, adr/0053). Its main colour falls back to the
+ * storefront section's `primary_color` until the panel writes it here; that
+ * field stays in `storefront` meanwhile.
+ */
+const themeOf = (theme: ThemeSettings, storefront: StorefrontSettings): ThemeSettings => ({
+  ...theme,
+  colors: { ...theme.colors, primary: theme.colors.primary ?? storefront.primary_color },
+})
+
 export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {
   const settings = req.scope.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
-  const [storefront, promotions, giftCards, values] = (await Promise.all([
+  const [storefront, promotions, theme, giftCards, values] = (await Promise.all([
     settings.getSection("storefront"),
     settings.getSection("promotions"),
+    settings.getSection("theme"),
     settings.isFeatureEnabled(GIFT_CARDS),
     shopInfoValues(req.scope),
-  ])) as unknown as [StorefrontSettings, PromotionSettings, boolean, ShopInfoValues]
+  ])) as unknown as [StorefrontSettings, PromotionSettings, ThemeSettings, boolean, ShopInfoValues]
   res.setHeader("Cache-Control", "public, max-age=300, stale-while-revalidate=3600")
   res.vary("x-publishable-api-key")
   res.json({
     storefront: filled(storefront, values),
+    theme: themeOf(theme, storefront),
     free_shipping_threshold: promotions.free_shipping_threshold,
     // What the storefront offers only while the shop has it on (its routes answer 404 otherwise)
     features: { gift_cards: giftCards },

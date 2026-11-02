@@ -24,6 +24,8 @@ const SECTION_VALIDATORS = {
   returns: validateAndTransformBody(SECTIONS.returns.patch),
   compliance: validateAndTransformBody(SECTIONS.compliance.patch),
   storefront: validateAndTransformBody(SECTIONS.storefront.patch),
+  maintenance: validateAndTransformBody(SECTIONS.maintenance.patch),
+  theme: validateAndTransformBody(SECTIONS.theme.patch),
   // The fake programs are for the tests only: never a live shop, nor an owner trying it locally
   accounting: validateAndTransformBody(
     SECTIONS.accounting.patch.refine((body) => body.adapter !== "fake" || fakeAccountingAllowed(), {

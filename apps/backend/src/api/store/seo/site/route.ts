@@ -15,6 +15,7 @@ import type SeoSitemapsModuleService from "../../../../modules/seo-sitemaps/serv
 import { legalIdentity } from "../../../../workflows/legal/identity"
 import type { LegalIdentity } from "../../../../workflows/legal/identity"
 import { shopOf } from "../../../../workflows/seo/payload-sources"
+import { siteMaintenance } from "../../../../workflows/storefront/maintenance"
 
 const identityOf = (identity: LegalIdentity) => ({
   legalName: identity.company_title,
@@ -40,10 +41,17 @@ const identityOf = (identity: LegalIdentity) => ({
  * host is set: they need absolute URLs. And the robots value of the
  * storefront's own pages (search results, cart, account). For the
  * storefront's frame (F18, adr/0046): the shop's name and logo, and the
- * home page's `seo` object, shaped as resolve's for every other page.
+ * home page's `seo` object, shaped as resolve's for every other page. And
+ * whether the shop is dark (adr/0053): the storefront answers 503 with
+ * `Retry-After` and this page but for its system paths, the paths left
+ * open and visitors holding a bypass link.
  */
 export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {
-  const [shop, identity] = await Promise.all([shopOf(req.scope), legalIdentity(req.scope)])
+  const [shop, identity, maintenance] = await Promise.all([
+    shopOf(req.scope),
+    legalIdentity(req.scope),
+    siteMaintenance(req.scope),
+  ])
   const settings = req.scope.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
   const [appearanceSection, seoSection, announcing] = await Promise.all([
     settings.getSection("appearance"),
@@ -69,5 +77,6 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
     system_pages: SYSTEM_PAGES,
     shop: { name: shop.name, logo_url: appearance.logo_light_url },
     home: homeSeo({ shop, home: seo.home, ogImage: seo.default_og_image, jsonLd }),
+    maintenance,
   })
 }

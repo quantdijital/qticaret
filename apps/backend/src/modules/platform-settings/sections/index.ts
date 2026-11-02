@@ -6,6 +6,7 @@ import type { SectionDefinition } from "./define"
 import { inventorySection } from "./inventory"
 import { invoicingSection } from "./invoicing"
 import { legalSection } from "./legal"
+import { maintenanceSection } from "./maintenance"
 import { marketingSection } from "./marketing"
 import { notificationsSection } from "./notifications"
 import { paymentsSection } from "./payments"
@@ -17,6 +18,7 @@ import { seoSection } from "./seo"
 import { shippingSection } from "./shipping"
 import { storeSection } from "./store"
 import { storefrontSection } from "./storefront"
+import { themeSection } from "./theme"
 
 export { DEFAULT_ROBOTS_TXT } from "./seo"
 export type { AccountingSettings } from "./accounting"
@@ -26,6 +28,7 @@ export type { CashOnDeliverySettings } from "./cash-on-delivery"
 export type { InventorySettings } from "./inventory"
 export type { CarrierIdentity, InvoiceCarrier, InvoicingSettings } from "./invoicing"
 export type { LegalSettings } from "./legal"
+export type { MaintenanceSettings } from "./maintenance"
 export type { MarketingSettings } from "./marketing"
 export type { NotificationSettings } from "./notifications"
 export type { PaymentSettings } from "./payments"
@@ -38,6 +41,8 @@ export type { LabelFormat, ShippingRate, ShippingSettings } from "./shipping"
 export type { StoreSettings } from "./store"
 export type { StorefrontLink, StorefrontHero, StorefrontSettings, TrustIcon } from "./storefront"
 export { TRUST_ICONS } from "./storefront"
+export type { ThemeBackground, ThemeSettings } from "./theme"
+export { BODY_FONTS, HEADING_FONTS, INSTALLED_THEMES, THEME_BACKGROUNDS } from "./theme"
 export { mergePatch } from "./define"
 export type { SectionDefinition } from "./define"
 
@@ -60,6 +65,8 @@ export const SECTIONS = {
   returns: returnsSection,
   compliance: complianceSection,
   storefront: storefrontSection,
+  maintenance: maintenanceSection,
+  theme: themeSection,
 } as const
 
 export type SectionName = keyof typeof SECTIONS

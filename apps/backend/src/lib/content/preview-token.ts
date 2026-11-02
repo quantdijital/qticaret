@@ -27,9 +27,11 @@ export interface PreviewTokenParts {
  * Signed preview links for one kind of record: `<id>.<end, base 36
  * seconds>.<mac>`, the MAC under the kind's own context, so a link made for
  * one kind never opens another. Shared by content entries and the
- * storefront's design (adr/0049).
+ * storefront's design (adr/0049), and the maintenance bypass (adr/0053),
+ * whose links last `hours` and are bound to a version number rather than a
+ * time: a record's "saved" mark is either.
  */
-export function previewSigner(context: string, idPattern: string) {
+export function previewSigner(context: string, idPattern: string, hours = PREVIEW_HOURS) {
   const macOf = (key: Buffer, entryId: string, expires: string, savedAt: Date): string =>
     createHmac("sha256", key)
       .update(`${context}:${entryId}:${expires}:${String(savedAt.getTime())}`, "utf8")
@@ -38,10 +40,10 @@ export function previewSigner(context: string, idPattern: string) {
   return {
     token: (
       key: Buffer,
-      entry: { id: string; updated_at: Date | string },
+      entry: { id: string; updated_at: Date | string | number },
       now = new Date()
     ): { token: string; expires_at: Date } => {
-      const end = Math.floor((now.getTime() + PREVIEW_HOURS * HOUR_MS) / 1000)
+      const end = Math.floor((now.getTime() + hours * HOUR_MS) / 1000)
       const expires = end.toString(36)
       return {
         token: `${entry.id}.${expires}.${macOf(key, entry.id, expires, new Date(entry.updated_at))}`,
@@ -60,7 +62,7 @@ export function previewSigner(context: string, idPattern: string) {
       return { entryId: match[1], expires: match[2], mac: match[3] }
     },
     /** Whether the token was made for the record as it is saved now. */
-    opens: (key: Buffer, parts: PreviewTokenParts, savedAt: Date | string): boolean => {
+    opens: (key: Buffer, parts: PreviewTokenParts, savedAt: Date | string | number): boolean => {
       return safeEqual(parts.mac, macOf(key, parts.entryId, parts.expires, new Date(savedAt)))
     },
   }
