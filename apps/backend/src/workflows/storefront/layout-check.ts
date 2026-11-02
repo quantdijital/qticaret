@@ -1,7 +1,8 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { docStats } from "../../lib/content"
 import { ValidationError } from "../../lib/errors"
-import type { LayoutDocument, PageSection } from "../../lib/storefront/layout"
+import { bodySections } from "../../lib/storefront/layout"
+import type { BodySection, LayoutDocument } from "../../lib/storefront/layout"
 import type { MenuLinkInput } from "../../lib/storefront/menus"
 import { unknownDocTokens } from "../../lib/shop/tokens"
 import type { MenuLinkKind } from "../../modules/storefront-menus/service"
@@ -9,7 +10,7 @@ import { assertCards, mediaOf } from "../content/rules"
 import { existingRecords, isRecordKind } from "./menu-links"
 
 /** Every link a section holds: buttons, slides, "see all". */
-export function linksOf(section: PageSection): MenuLinkInput[] {
+export function linksOf(section: BodySection): MenuLinkInput[] {
   if (section.type === "hero") {
     return section.links
   }
@@ -23,7 +24,7 @@ export function linksOf(section: PageSection): MenuLinkInput[] {
 }
 
 /** Every record a section names by id, as a link would point at it. */
-function recordsOf(section: PageSection): { kind: MenuLinkKind; target: string }[] {
+function recordsOf(section: BodySection): { kind: MenuLinkKind; target: string }[] {
   const as = (kind: MenuLinkKind) => (target: string) => ({ kind, target })
   if (section.type === "categories") {
     return section.category_ids.map(as("category"))
@@ -31,7 +32,8 @@ function recordsOf(section: PageSection): { kind: MenuLinkKind; target: string }
   if (section.type === "brands") {
     return section.brand_ids.map(as("brand"))
   }
-  if (section.type === "products") {
+  // A rail's or a product page's related products: their category, collection or choice
+  if (section.type === "products" || section.type === "related_products") {
     const { source } = section
     return source.kind === "category"
       ? [as("category")(source.category_id)]
@@ -45,7 +47,7 @@ function recordsOf(section: PageSection): { kind: MenuLinkKind; target: string }
 }
 
 /** The addresses of every image the design shows: openings, slides, rich text. */
-function imagesOf(section: PageSection): string[] {
+function imagesOf(section: BodySection): string[] {
   if (section.type === "hero") {
     return section.image ? [section.image.url] : []
   }
@@ -61,14 +63,16 @@ function imagesOf(section: PageSection): string[] {
 /**
  * What a saved design must hold (adr/0049): records that exist (a draft
  * one counts: it shows once live), images the shop uploaded, rich text
- * whose cards exist and whose `{belirteç}`s are the shop's details.
- * Returns the media records it uses, to keep their files.
+ * whose cards exist and whose `{belirteç}`s are the shop's details. The
+ * home, product and category pages' sections go through the same checks
+ * (the plain lines' `{belirteç}`s, a FAQ's answers among them, are the
+ * schema's). Returns the media records it uses, to keep their files.
  */
 export async function checkLayout(
   container: MedusaContainer,
   doc: LayoutDocument
 ): Promise<string[]> {
-  const sections = doc.home
+  const sections = bodySections(doc)
   const targets = sections.flatMap((section) => [
     ...recordsOf(section),
     ...linksOf(section).flatMap((link) =>

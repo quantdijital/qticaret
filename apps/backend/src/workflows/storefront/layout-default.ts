@@ -56,5 +56,8 @@ export async function defaultLayout(container: Container): Promise<LayoutDocumen
     footer: [
       { id: "ebultenkutusu", type: "newsletter", ...NOT_SCHEDULED, title: null, text: null },
     ],
+    // The product and category pages show only their own blocks until the shop adds sections
+    product: [],
+    category: [],
   })
 }

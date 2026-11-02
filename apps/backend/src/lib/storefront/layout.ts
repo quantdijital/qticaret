@@ -7,13 +7,23 @@ import { isShopPath, storefrontLink } from "./menus"
 
 /**
  * The storefront's design as the theme editor writes it (adr/0049): the
- * header's, the home page's and the footer's sections, each a type of its
- * own with its settings. Sector-free; text is plain (shop details as
+ * header's, the home page's, the product and category pages' and the
+ * footer's sections, each a type of its own with its settings. Sector-free; text is plain (shop details as
  * `{belirteç}`s, adr/0048); images only from the shop's media library;
  * links point at records, never typed paths. No HTML, CSS or scripts.
  */
 
-export const LAYOUT_LIMITS = { home: 30, header: 3, footer: 3, items: 24, slides: 6 } as const
+export const LAYOUT_LIMITS = {
+  home: 30,
+  product: 12,
+  category: 12,
+  header: 3,
+  footer: 3,
+  items: 24,
+  slides: 6,
+  faq: 12,
+  related: 12,
+} as const
 
 const text = (max: number) =>
   z
@@ -110,16 +120,17 @@ const categories = z
   })
   .strict()
 
+const collectionSource = z
+  .object({ kind: z.literal("collection"), collection_id: recordId })
+  .strict()
+const manualSource = (max: number) =>
+  z.object({ kind: z.literal("manual"), product_ids: z.array(recordId).min(1).max(max) }).strict()
+
 const productSource = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("newest") }).strict(),
   z.object({ kind: z.literal("category"), category_id: recordId }).strict(),
-  z.object({ kind: z.literal("collection"), collection_id: recordId }).strict(),
-  z
-    .object({
-      kind: z.literal("manual"),
-      product_ids: z.array(recordId).min(1).max(LAYOUT_LIMITS.items),
-    })
-    .strict(),
+  collectionSource,
+  manualSource(LAYOUT_LIMITS.items),
 ])
 
 const products = z
@@ -163,24 +174,87 @@ const trustBadges = z.object({ ...base, type: z.literal("trust_badges") }).stric
 const worded = (type: "newsletter" | "help") =>
   z.object({ ...base, type: z.literal(type), title, text: optional(shopText(240)) }).strict()
 
-const pageSection = z.discriminatedUnion("type", [
-  hero,
-  banner,
-  categories,
-  products,
-  brands,
-  counted("posts", 6, 3),
-  counted("reviews", 12, 6),
-  richText,
-  trustBadges,
-  worded("newsletter"),
-  worded("help"),
-])
+/** Questions and answers; the storefront also gives them as `FAQPage` structured data. */
+const faq = z
+  .object({
+    ...base,
+    type: z.literal("faq"),
+    title,
+    items: z
+      .array(z.object({ question: text(160), answer: shopText(600) }).strict())
+      .min(1)
+      .max(LAYOUT_LIMITS.faq),
+  })
+  .strict()
+
+/** Products shown under a product's own: its category's, a collection's, or chosen ones. */
+const relatedProducts = z
+  .object({
+    ...base,
+    type: z.literal("related_products"),
+    title,
+    source: z.discriminatedUnion("kind", [
+      z.object({ kind: z.literal("same_category") }).strict(),
+      collectionSource,
+      manualSource(LAYOUT_LIMITS.related),
+    ]),
+    limit: z.number().int().min(1).max(LAYOUT_LIMITS.related).default(8),
+  })
+  .strict()
+
+// A type a group does not take (another page's, or none) reads as an unknown section
+const SECTION_TYPE = { error: "storefront_layout.section_invalid" }
+
+const pageSection = z.discriminatedUnion(
+  "type",
+  [
+    hero,
+    banner,
+    categories,
+    products,
+    brands,
+    counted("posts", 6, 3),
+    counted("reviews", 12, 6),
+    richText,
+    trustBadges,
+    worded("newsletter"),
+    worded("help"),
+    faq,
+  ],
+  SECTION_TYPE
+)
+
+/** Below the product's own block on every product page. */
+const productSection = z.discriminatedUnion(
+  "type",
+  [relatedProducts, richText, banner, faq, trustBadges, worded("help"), worded("newsletter")],
+  SECTION_TYPE
+)
+
+/** Where a category page shows a section: above its product grid or below it. */
+const placement = z.enum(["top", "bottom"]).default("bottom")
+
+const categorySection = z.discriminatedUnion(
+  "type",
+  [
+    richText.extend({ placement }),
+    banner.extend({ placement }),
+    faq.extend({ placement }),
+    trustBadges.extend({ placement }),
+    worded("help").extend({ placement }),
+    worded("newsletter").extend({ placement }),
+  ],
+  SECTION_TYPE
+)
 
 export type PageSection = z.infer<typeof pageSection>
+export type ProductSection = z.infer<typeof productSection>
+export type CategorySection = z.infer<typeof categorySection>
+/** A section of a page's body: the home, product or category page's. */
+export type BodySection = PageSection | ProductSection | CategorySection
 export type HeaderSection = z.infer<typeof announcementBar>
 export type FooterSection = z.infer<ReturnType<typeof worded>>
-export type LayoutSection = PageSection | HeaderSection
+export type LayoutSection = BodySection | HeaderSection
 
 const onlyOnce = (sections: readonly { type: string }[]) =>
   new Set(sections.map((section) => section.type)).size === sections.length
@@ -191,6 +265,8 @@ export const layoutDocument = z
     header: z.array(announcementBar).max(LAYOUT_LIMITS.header).default([]),
     home: z.array(pageSection).max(LAYOUT_LIMITS.home).default([]),
     footer: z.array(worded("newsletter")).max(LAYOUT_LIMITS.footer).default([]),
+    product: z.array(productSection).max(LAYOUT_LIMITS.product).default([]),
+    category: z.array(categorySection).max(LAYOUT_LIMITS.category).default([]),
   })
   .strict()
   .superRefine((doc, ctx) => {
@@ -198,6 +274,8 @@ export const layoutDocument = z
       ...doc.header,
       ...doc.home,
       ...doc.footer,
+      ...doc.product,
+      ...doc.category,
     ]
     if (new Set(all.map((section) => section.id)).size !== all.length) {
       ctx.addIssue({ code: "custom", message: "storefront_layout.section_duplicate" })
@@ -217,6 +295,13 @@ export const layoutDocument = z
   })
 
 export type LayoutDocument = z.infer<typeof layoutDocument>
+
+/** Every page's body sections (home, product, category): checked and shown alike. */
+export const bodySections = (doc: LayoutDocument): BodySection[] => [
+  ...doc.home,
+  ...doc.product,
+  ...doc.category,
+]
 
 /** Whether a section shows at this moment: visible, and within its dates if it has any. */
 export function isShowing(

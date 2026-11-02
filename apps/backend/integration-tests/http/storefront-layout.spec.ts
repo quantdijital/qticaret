@@ -8,9 +8,17 @@ jest.setTimeout(120 * 1000)
 
 type Section = Record<string, unknown> & { id: string; type: string }
 
+interface Groups {
+  header: Section[]
+  home: Section[]
+  footer: Section[]
+  product: Section[]
+  category: Section[]
+}
+
 interface AdminLayout {
   layout: {
-    draft: { header: Section[]; home: Section[]; footer: Section[] }
+    draft: Groups
     is_default: boolean
     has_changes: boolean
     revision: number
@@ -20,10 +28,26 @@ interface AdminLayout {
 }
 
 interface StoreLayout {
-  layout: { header: Section[]; home: Section[]; footer: Section[] }
+  layout: Groups
 }
 
 const ALWAYS = { visible: true, starts_at: null, ends_at: null }
+
+// A draft needs no weight or dimensions; a published product does (F3.1)
+const productBody = (title: string, status: "draft" | "published") => ({
+  title,
+  status,
+  ...(status === "published" ? { weight: 250, length: 30, width: 5, height: 2 } : {}),
+  options: [{ title: "Boyut", values: ["Standart"] }],
+  variants: [
+    {
+      title: "Standart",
+      options: { Boyut: "Standart" },
+      manage_inventory: false,
+      prices: [{ currency_code: "try", amount: 1000 }],
+    },
+  ],
+})
 
 /** adr/0049: the theme editor's draft, its preview and its publications. */
 medusaIntegrationTestRunner({
@@ -87,7 +111,9 @@ medusaIntegrationTestRunner({
         "help",
         "posts",
       ])
+      expect([first.draft.product, first.draft.category]).toEqual([[], []])
       const defaultLive = await live()
+      expect([defaultLive.product, defaultLive.category]).toEqual([[], []])
       expect(defaultLive.header).toEqual([
         { id: "duyurular", type: "announcement_bar", lines: ["Bize 0532 123 45 67 ile ulaşın"] },
       ])
@@ -220,6 +246,134 @@ medusaIntegrationTestRunner({
       expect(restored.data.layout.draft.home[0]?.["heading"]).toBe("Yeni sezon")
       expect(restored.data.layout.revisions.map((each) => each.revision)).toEqual([2, 1])
       expect(gone.status).toBe(404)
+    })
+
+    it("keeps the product and category pages' sections: live records only, details filled, in place", async () => {
+      const container = getContainer()
+      const owner = await createAdminUser(http, container)
+      const store = await createStorefront(container)
+      const asOwner = { headers: owner.headers }
+      await settle(
+        http.post("/admin/platform-settings/store", { contact_phone: "0532 123 45 67" }, asOwner)
+      )
+      const product = async (title: string, status: "draft" | "published") =>
+        (
+          await settle(
+            http.post<{ product: { id: string } }>(
+              "/admin/products",
+              productBody(title, status),
+              asOwner
+            )
+          )
+        ).data.product.id
+      const liveProduct = await product("Kamp Bıçağı", "published")
+      const draftProduct = await product("Taslak Bıçak", "draft")
+      const save = (groups: Partial<Groups>) =>
+        settle(
+          http.post<AdminLayout>(
+            "/admin/storefront-layout",
+            { document: { header: [], home: [], footer: [], ...groups } },
+            asOwner
+          )
+        )
+      const related = (source: Record<string, unknown>): Section => ({
+        id: "benzerurunler",
+        type: "related_products",
+        ...ALWAYS,
+        title: "Bunlara da bakın",
+        source,
+        limit: 4,
+      })
+      const faq: Section = {
+        id: "sikcasorulan",
+        type: "faq",
+        ...ALWAYS,
+        title: null,
+        items: [{ question: "Size nasıl ulaşırım?", answer: "{telefon} numarasından arayın." }],
+      }
+      const intro: Section = {
+        id: "kategorigiris",
+        type: "rich_text",
+        ...ALWAYS,
+        title: null,
+        body: {
+          type: "doc",
+          content: [{ type: "paragraph", content: [{ type: "text", text: "Danışın: {telefon}" }] }],
+        },
+        placement: "top",
+      }
+      const trust: Section = { id: "guvencealt", type: "trust_badges", ...ALWAYS }
+
+      const noCollection = await save({
+        product: [related({ kind: "collection", collection_id: "pcol_yok" })],
+      })
+      const wrongPage = await save({ category: [related({ kind: "same_category" })] })
+      const saved = await save({
+        product: [related({ kind: "manual", product_ids: [liveProduct, draftProduct] }), faq],
+        category: [intro, trust],
+      })
+
+      expect(noCollection.status).toBe(400)
+      expect(noCollection.data.message).toBe("storefront_layout.target_unknown")
+      expect(wrongPage.status).toBe(400)
+      expect(wrongPage.data.message).toContain("storefront_layout.section_invalid")
+      expect(saved.status).toBe(200)
+      expect(saved.data.layout).toMatchObject({ is_default: false, has_changes: true })
+      // A category page's section without a place goes below the grid
+      expect(saved.data.layout.draft.category.map((each) => each["placement"])).toEqual([
+        "top",
+        "bottom",
+      ])
+
+      const preview = await settle(
+        http.post<{ path: string }>("/admin/storefront-layout/preview", {}, asOwner)
+      )
+      const token = preview.data.path.split("/").pop() ?? ""
+      const previewed = await settle(
+        http.get<StoreLayout>(`/store/storefront-layout/preview/${token}`, {
+          headers: store.headers,
+        })
+      )
+      expect(previewed.status).toBe(200)
+      const { layout } = previewed.data
+      expect(layout.home).toEqual([])
+      // The draft product's id never leaves the backend
+      expect(layout.product).toEqual([
+        {
+          id: "benzerurunler",
+          type: "related_products",
+          title: "Bunlara da bakın",
+          source: { kind: "manual", product_ids: [liveProduct] },
+          limit: 4,
+        },
+        {
+          id: "sikcasorulan",
+          type: "faq",
+          title: null,
+          items: [
+            { question: "Size nasıl ulaşırım?", answer: "0532 123 45 67 numarasından arayın." },
+          ],
+        },
+      ])
+      expect(layout.category).toEqual([
+        {
+          id: "kategorigiris",
+          type: "rich_text",
+          title: null,
+          html: expect.stringContaining("Danışın: 0532 123 45 67") as unknown,
+          placement: "top",
+        },
+        { id: "guvencealt", type: "trust_badges", placement: "bottom" },
+      ])
+
+      const published = await settle(
+        http.post<AdminLayout>("/admin/storefront-layout/publish", {}, asOwner)
+      )
+      expect(published.data.layout).toMatchObject({ revision: 1, has_changes: false })
+      expect(published.data.layout.draft.product.map((each) => each.id)).toEqual([
+        "benzerurunler",
+        "sikcasorulan",
+      ])
     })
   },
 })

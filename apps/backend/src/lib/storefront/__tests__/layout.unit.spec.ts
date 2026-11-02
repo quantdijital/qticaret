@@ -1,6 +1,19 @@
 import { isShowing, layoutDocument } from "../layout"
 
 const ALWAYS = { visible: true, starts_at: null, ends_at: null }
+const QA = { question: "İade süresi ne kadar?", answer: "14 gün içinde iade edebilirsiniz." }
+const faq = (id: string, more: Record<string, unknown> = {}) => ({
+  id,
+  type: "faq",
+  items: [QA],
+  ...more,
+})
+const related = (id: string, productIds: string[], more: Record<string, unknown> = {}) => ({
+  id,
+  type: "related_products",
+  source: { kind: "manual", product_ids: productIds },
+  ...more,
+})
 const help = (id: string, more: Record<string, unknown> = {}) => ({
   id,
   type: "help",
@@ -17,7 +30,53 @@ describe("storefront layout document (adr/0049)", () => {
       header: [],
       home: [{ id: "yazilar1", type: "posts", ...ALWAYS, title: null, limit: 3 }],
       footer: [],
+      product: [],
+      category: [],
     })
+  })
+
+  it("reads the product and category pages' sections with their defaults", () => {
+    const doc = layoutDocument.parse({
+      product: [
+        { id: "benzerler1", type: "related_products", source: { kind: "same_category" } },
+        faq("sss001"),
+      ],
+      category: [
+        { id: "guvence1", type: "trust_badges" },
+        { id: "ustmetin1", type: "help", placement: "top" },
+      ],
+    })
+    expect(doc.product).toEqual([
+      {
+        id: "benzerler1",
+        type: "related_products",
+        ...ALWAYS,
+        title: null,
+        source: { kind: "same_category" },
+        limit: 8,
+      },
+      { ...faq("sss001"), ...ALWAYS, title: null },
+    ])
+    expect(doc.category).toEqual([
+      { id: "guvence1", type: "trust_badges", ...ALWAYS, placement: "bottom" },
+      { id: "ustmetin1", type: "help", ...ALWAYS, title: null, text: null, placement: "top" },
+    ])
+    expect(doc.home).toEqual([])
+  })
+
+  it("takes a FAQ of up to twelve questions with the shop's details in its answers", () => {
+    const doc = layoutDocument.parse({
+      home: [faq("sss001", { items: Array.from({ length: 12 }, () => QA) })],
+      category: [faq("sss002", { items: [{ question: "Kargo?", answer: "{telefon} arayın" }] })],
+    })
+    expect(doc.home[0]).toMatchObject({ type: "faq" })
+    expect(doc.category[0]).toMatchObject({ type: "faq", placement: "bottom" })
+  })
+
+  it("takes up to twelve chosen related products", () => {
+    const ids = Array.from({ length: 12 }, (_, index) => `prod_${String(index)}`)
+    const doc = layoutDocument.parse({ product: [related("benzer01", ids)] })
+    expect(doc.product[0]).toMatchObject({ source: { kind: "manual", product_ids: ids } })
   })
 
   it.each([
@@ -59,6 +118,67 @@ describe("storefront layout document (adr/0049)", () => {
     ],
     ["an unknown shop detail", { home: [help("yardim1", { text: "{telfon}" })] }],
     ["a section type it does not know", { home: [{ id: "garip01", type: "html", html: "<b>" }] }],
+    ["an id used on two pages", { home: [help("ayniid1")], product: [faq("ayniid1")] }],
+    [
+      "an id used on the product and the category page",
+      { product: [faq("ayniid2")], category: [faq("ayniid2")] },
+    ],
+    ["a home section on a product page", { product: [{ id: "giris01", type: "hero" }] }],
+    [
+      "a type the product page does not know",
+      { product: [{ id: "garip01", type: "html", html: "<b>" }] },
+    ],
+    [
+      "related products on a category page",
+      { category: [{ ...related("benzer01", ["prod_1"]), placement: "top" }] },
+    ],
+    ["a place on a product page", { product: [{ ...faq("sss001"), placement: "top" }] }],
+    ["a place a category page has not", { category: [{ ...faq("sss001"), placement: "side" }] }],
+    ["a FAQ without questions", { home: [faq("sss001", { items: [] })] }],
+    [
+      "a FAQ of thirteen questions",
+      { home: [faq("sss001", { items: Array.from({ length: 13 }, () => QA) })] },
+    ],
+    [
+      "a question over 160 characters",
+      { home: [faq("sss001", { items: [{ ...QA, question: "a".repeat(161) }] })] },
+    ],
+    [
+      "an answer over 600 characters",
+      { product: [faq("sss001", { items: [{ ...QA, answer: "a".repeat(601) }] })] },
+    ],
+    [
+      "an unknown shop detail in an answer",
+      { category: [faq("sss001", { items: [{ ...QA, answer: "{telfon}" }] })] },
+    ],
+    [
+      "thirteen chosen related products",
+      {
+        product: [
+          related(
+            "benzer01",
+            Array.from({ length: 13 }, (_, index) => `prod_${String(index)}`)
+          ),
+        ],
+      },
+    ],
+    ["no chosen related product", { product: [related("benzer01", [])] }],
+    [
+      "thirteen related products shown",
+      { product: [related("benzer01", ["prod_1"], { limit: 13 })] },
+    ],
+    [
+      "a related source it does not know",
+      { product: [{ id: "benzer01", type: "related_products", source: { kind: "newest" } }] },
+    ],
+    [
+      "thirteen product page sections",
+      {
+        product: Array.from({ length: 13 }, (_, index) =>
+          faq(`sss${String(index).padStart(3, "0")}`)
+        ),
+      },
+    ],
   ])("refuses %s", (_, doc) => {
     expect(layoutDocument.safeParse(doc).success).toBe(false)
   })

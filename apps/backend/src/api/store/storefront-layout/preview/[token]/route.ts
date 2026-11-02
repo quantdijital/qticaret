@@ -1,7 +1,7 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { MedusaError } from "@medusajs/framework/utils"
 import { layoutPreview } from "../../../../../lib/content/preview-token"
-import type { LayoutDocument } from "../../../../../lib/storefront/layout"
+import { layoutDocument } from "../../../../../lib/storefront/layout"
 import { orderAccessKey } from "../../../../../lib/orders/access-token"
 import { layoutRow } from "../../../../../workflows/storefront/layout"
 import { storeLayout } from "../../../../../workflows/storefront/layout-read"
@@ -23,5 +23,6 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
   if (!layoutPreview.opens(orderAccessKey(), parts, updated)) {
     throw new MedusaError(MedusaError.Types.NOT_FOUND, "storefront_layout.preview_unknown")
   }
-  res.json({ layout: await storeLayout(req.scope, row.draft as LayoutDocument) })
+  // Through today's schema: a draft saved before a group existed shows it empty
+  res.json({ layout: await storeLayout(req.scope, layoutDocument.parse(row.draft)) })
 }

@@ -1,5 +1,7 @@
 import type { MedusaResponse } from "@medusajs/framework/http"
 import { escapeXml } from "../../lib/clients/xml"
+import { storefrontLinkTarget } from "../../lib/messaging/links"
+import type { EmailLinkKind } from "../../lib/messaging/links"
 
 // The page runs nothing and loads nothing; its one form posts back here
 const PAGE_POLICY =
@@ -30,4 +32,20 @@ export function simplePage(
         `<body style="font-family:Arial,Helvetica,sans-serif;max-width:480px;margin:48px auto;padding:0 16px;color:#111827">` +
         `<p style="color:#6b7280;margin:0 0 8px">${escapeXml(page.shop)}</p><h1 style="font-size:20px">${escapeXml(page.title)}</h1>${page.body}</body></html>`
     )
+}
+
+/**
+ * An old link sent on to the storefront's page for it (adr/0038 Ek
+ * 2026-11-02): a 302, uncached, telling no one where it came from. The
+ * host is the shop's own, never the request's.
+ */
+export function sendToStorefront(
+  res: MedusaResponse,
+  kind: EmailLinkKind,
+  token: unknown,
+  storefrontUrl: string
+) {
+  res.setHeader("Cache-Control", "no-store")
+  res.setHeader("Referrer-Policy", "no-referrer")
+  res.redirect(302, storefrontLinkTarget(kind, token, storefrontUrl))
 }

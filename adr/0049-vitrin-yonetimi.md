@@ -132,3 +132,35 @@ Bilinçli kalanlar:
 - Ürünün satış kanalı menüde denetlenmiyor; vitrin ürün sayfası zaten 404 verir.
 - İçerik önizlemeleri de artık panel tarafından çerçevelenebilir (panel güvenilir köken).
 - Belirteç anahtarları için HKDF ile ayrı anahtar türetme sonraya kaldı (bağlamlar ayrı, karışma yok).
+
+## Ek (2026-11-03): ürün ve kategori sayfası bölümleri
+
+Kararın 6.3 adımı ("diğer sayfa şablonlarının bölümleri"), backend tarafı.
+
+- **İki yeni grup.** Belgeye `product` ve `category` eklendi; ikisi de en çok 12 bölüm, varsayılanı boş. Bunlar bütün ürün ve kategori sayfalarında ortaktır; sayfaya özel bölüm yoktur.
+  - Eski taslak ve yayınlar bugünkü şemadan geçerken iki grup boş gelir. Panelin okuması, önizleme ve "değişiklik var" karşılaştırması da bu okumayla yapılır.
+  - Bölüm kimlikleri beş grubun hepsinde tekildir.
+  - Grubun almadığı tür `storefront_layout.section_invalid` ile reddedilir. Ana sayfada da aynısı geçerli.
+- **Ürün sayfası.** Bölümler ürünün kendi bloğunun altında çıkar. Türler:
+  - `related_products` (yeni): başlık, kaynak ve adet (1–12, varsayılan 8). Kaynak üç türlü olabilir:
+    - `same_category`: ürünün kendi kategorisi; kayıt adlandırmaz, vitrin çözer;
+    - `collection`: bir koleksiyon;
+    - `manual`: 1–12 ürün.
+  - `rich_text`, `banner`, `faq`, `trust_badges`, `help`, `newsletter`.
+- **Kategori sayfası.** `rich_text`, `banner`, `faq`, `trust_badges`, `help` ve `newsletter` alır. Her bölümde bir de yer var (`placement`):
+  - `top`: ürün ızgarasının üstü;
+  - `bottom`: altı (varsayılan).
+- **SSS (`faq`).** Ana sayfa, ürün ve kategori sayfasında kullanılabilir. Başlık en çok 60 karakter, boş olabilir. 1–12 soru-cevap içerir:
+  - soru düz metin, en çok 160 karakter;
+  - cevap düz metin, en çok 600 karakter, `{belirteç}` alabilir.
+
+  Vitrin bu bölümden `FAQPage` yapılandırılmış verisi üretir.
+- **Denetim ve okuma.** Üç grup (`home`, `product`, `category`) aynı yoldan geçer.
+  - `checkLayout`: kayıtlar (ilgili ürünlerin koleksiyonu ve seçilen ürünleri dahil), görseller, zengin metnin kartları ve değişkenleri. SSS cevaplarının belirteçlerini şema denetler.
+  - `storeLayout`: o anda gösterilenler süzülür ve yalnız yayındaki kayıtlar kalır:
+    - elle seçimde yalnız yayındaki ürünler kalır, hiçbiri kalmazsa bölüm çıkar;
+    - koleksiyonu gitmiş bölüm çıkar;
+    - `same_category` olduğu gibi geçer.
+
+    Belirteçler doldurulur. Zengin metin HTML olarak, görseller boyutlarıyla gelir. Kategori bölümleri yerlerini korur.
+- **Uçların biçimi.** `GET /store/storefront-layout` ve önizleme `product` ile `category` dizilerini de verir. Yayındaki düzenin süreç önbelleği eskisi gibi sürüm numarasıyla anahtarlanır. Varsayılan belgede iki grup boş.
