@@ -3,6 +3,7 @@ import type { AccountActions, AccountPageView, AccountOrderView, Translate } fro
 import { cn } from "@qticaret/ui/lib/utils"
 import { AddressesSection } from "./account/AddressesSection"
 import { BillingForm } from "./account/BillingForm"
+import { PasswordCard } from "./account/PasswordCard"
 import { ConsentForm, ProfileForm } from "./account/ProfileForms"
 import { PageContainer } from "./components/Container"
 import { Pages } from "./components/Pages"
@@ -184,6 +185,7 @@ export function AccountPage({
           )}
           {view.section === "profile" && (
             <>
+              <PasswordCard t={t} />
               <section
                 aria-labelledby="fatura"
                 className="flex flex-col gap-5 rounded-3xl border bg-card p-6 sm:p-7"
