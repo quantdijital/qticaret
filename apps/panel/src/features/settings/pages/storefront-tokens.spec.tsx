@@ -1,5 +1,6 @@
 import { screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
+import type { ReactNode } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import { URL, answer, card, posts, renderPage } from "./storefront-page.fixtures"
@@ -9,6 +10,10 @@ const fetchMock = vi.hoisted(() => vi.fn<(url: string, init?: Init) => Promise<u
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
+// The menus' card points at their own screen (adr/0049)
+vi.mock("@tanstack/react-router", () => ({
+  Link: ({ to, children }: { to: string; children: ReactNode }) => <a href={to}>{children}</a>,
+}))
 
 const THRESHOLD = "{ücretsiz_kargo_eşiği}"
 

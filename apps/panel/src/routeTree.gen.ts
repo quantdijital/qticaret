@@ -8,926 +8,950 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-import { Route as rootRouteImport } from "./routes/__root"
-import { Route as AuthRouteImport } from "./routes/_auth"
-import { Route as InviteRouteImport } from "./routes/invite"
-import { Route as LoginRouteImport } from "./routes/login"
-import { Route as ResetPasswordRouteImport } from "./routes/reset-password"
-import { Route as AuthIndexRouteImport } from "./routes/_auth/index"
-import { Route as AuthCategoriesRouteImport } from "./routes/_auth/categories"
-import { Route as AuthInventoryRouteImport } from "./routes/_auth/inventory"
-import { Route as AuthReportsRouteImport } from "./routes/_auth/reports"
-import { Route as AuthSettingsRouteImport } from "./routes/_auth/settings"
-import { Route as SecuritySetupRouteImport } from "./routes/security/setup"
-import { Route as AuthBrandsIndexRouteImport } from "./routes/_auth/brands/index"
-import { Route as AuthBrandsIdRouteImport } from "./routes/_auth/brands/$id"
-import { Route as AuthContentIndexRouteImport } from "./routes/_auth/content/index"
-import { Route as AuthContentIdRouteImport } from "./routes/_auth/content/$id"
-import { Route as AuthCustomersIndexRouteImport } from "./routes/_auth/customers/index"
-import { Route as AuthCustomersIdRouteImport } from "./routes/_auth/customers/$id"
-import { Route as AuthCustomersContactMessagesRouteImport } from "./routes/_auth/customers/contact-messages"
-import { Route as AuthCustomersGroupsRouteImport } from "./routes/_auth/customers/groups"
-import { Route as AuthOrdersIndexRouteImport } from "./routes/_auth/orders/index"
-import { Route as AuthOrdersIdRouteImport } from "./routes/_auth/orders/$id"
-import { Route as AuthOrdersChargebacksRouteImport } from "./routes/_auth/orders/chargebacks"
-import { Route as AuthOrdersInvoicesRouteImport } from "./routes/_auth/orders/invoices"
-import { Route as AuthOrdersReturnsRouteImport } from "./routes/_auth/orders/returns"
-import { Route as AuthOrdersReviewRouteImport } from "./routes/_auth/orders/review"
-import { Route as AuthProductsIndexRouteImport } from "./routes/_auth/products/index"
-import { Route as AuthProductsIdRouteImport } from "./routes/_auth/products/$id"
-import { Route as AuthProductsNewRouteImport } from "./routes/_auth/products/new"
-import { Route as AuthPromotionsIndexRouteImport } from "./routes/_auth/promotions/index"
-import { Route as AuthPromotionsIdRouteImport } from "./routes/_auth/promotions/$id"
-import { Route as AuthPromotionsGiftCardsRouteImport } from "./routes/_auth/promotions/gift-cards"
-import { Route as AuthPromotionsNewRouteImport } from "./routes/_auth/promotions/new"
-import { Route as AuthReportsIndexRouteImport } from "./routes/_auth/reports/index"
-import { Route as AuthReportsBrandsRouteImport } from "./routes/_auth/reports/brands"
-import { Route as AuthReportsCategoriesRouteImport } from "./routes/_auth/reports/categories"
-import { Route as AuthReportsDailyRouteImport } from "./routes/_auth/reports/daily"
-import { Route as AuthReportsFinanceRouteImport } from "./routes/_auth/reports/finance"
-import { Route as AuthReportsMarketingRouteImport } from "./routes/_auth/reports/marketing"
-import { Route as AuthReportsProductsRouteImport } from "./routes/_auth/reports/products"
-import { Route as AuthReportsSearchRouteImport } from "./routes/_auth/reports/search"
-import { Route as AuthReportsStockRouteImport } from "./routes/_auth/reports/stock"
-import { Route as AuthReviewsIndexRouteImport } from "./routes/_auth/reviews/index"
-import { Route as AuthReviewsQuestionsRouteImport } from "./routes/_auth/reviews/questions"
-import { Route as AuthSeoIndexRouteImport } from "./routes/_auth/seo/index"
-import { Route as AuthSeoRedirectsRouteImport } from "./routes/_auth/seo/redirects"
-import { Route as AuthSettingsIndexRouteImport } from "./routes/_auth/settings/index"
-import { Route as AuthSettingsAccountingRouteImport } from "./routes/_auth/settings/accounting"
-import { Route as AuthSettingsApiRouteImport } from "./routes/_auth/settings/api"
-import { Route as AuthSettingsAppearanceRouteImport } from "./routes/_auth/settings/appearance"
-import { Route as AuthSettingsAttributesRouteImport } from "./routes/_auth/settings/attributes"
-import { Route as AuthSettingsAuditRouteImport } from "./routes/_auth/settings/audit"
-import { Route as AuthSettingsEinvoiceRouteImport } from "./routes/_auth/settings/einvoice"
-import { Route as AuthSettingsFeaturesRouteImport } from "./routes/_auth/settings/features"
-import { Route as AuthSettingsIntegrationsRouteImport } from "./routes/_auth/settings/integrations"
-import { Route as AuthSettingsJobsRouteImport } from "./routes/_auth/settings/jobs"
-import { Route as AuthSettingsLocationsRouteImport } from "./routes/_auth/settings/locations"
-import { Route as AuthSettingsMigrationRouteImport } from "./routes/_auth/settings/migration"
-import { Route as AuthSettingsNotificationsRouteImport } from "./routes/_auth/settings/notifications"
-import { Route as AuthSettingsSecurityRouteImport } from "./routes/_auth/settings/security"
-import { Route as AuthSettingsSeoRouteImport } from "./routes/_auth/settings/seo"
-import { Route as AuthSettingsStoreRouteImport } from "./routes/_auth/settings/store"
-import { Route as AuthSettingsStorefrontRouteImport } from "./routes/_auth/settings/storefront"
-import { Route as AuthSettingsTeamRouteImport } from "./routes/_auth/settings/team"
-import { Route as AuthContentLandingsIdRouteImport } from "./routes/_auth/content/landings/$id"
-import { Route as AuthPromotionsPriceListsIndexRouteImport } from "./routes/_auth/promotions/price-lists/index"
-import { Route as AuthPromotionsPriceListsIdRouteImport } from "./routes/_auth/promotions/price-lists/$id"
-import { Route as AuthPromotionsPriceListsNewRouteImport } from "./routes/_auth/promotions/price-lists/new"
-import { Route as AuthSettingsLegalIndexRouteImport } from "./routes/_auth/settings/legal/index"
-import { Route as AuthSettingsLegalKindRouteImport } from "./routes/_auth/settings/legal/$kind"
-import { Route as AuthSettingsMarketingIndexRouteImport } from "./routes/_auth/settings/marketing/index"
-import { Route as AuthSettingsMarketingProviderRouteImport } from "./routes/_auth/settings/marketing/$provider"
-import { Route as AuthSettingsPaymentsIndexRouteImport } from "./routes/_auth/settings/payments/index"
-import { Route as AuthSettingsPaymentsProviderRouteImport } from "./routes/_auth/settings/payments/$provider"
-import { Route as AuthSettingsShippingIndexRouteImport } from "./routes/_auth/settings/shipping/index"
-import { Route as AuthSettingsShippingCarrierRouteImport } from "./routes/_auth/settings/shipping/$carrier"
-import { Route as AuthSettingsSmsIndexRouteImport } from "./routes/_auth/settings/sms/index"
-import { Route as AuthSettingsSmsProviderRouteImport } from "./routes/_auth/settings/sms/$provider"
+import { Route as rootRouteImport } from './routes/__root'
+import { Route as AuthRouteImport } from './routes/_auth'
+import { Route as InviteRouteImport } from './routes/invite'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as AuthIndexRouteImport } from './routes/_auth/index'
+import { Route as AuthCategoriesRouteImport } from './routes/_auth/categories'
+import { Route as AuthInventoryRouteImport } from './routes/_auth/inventory'
+import { Route as AuthReportsRouteImport } from './routes/_auth/reports'
+import { Route as AuthSettingsRouteImport } from './routes/_auth/settings'
+import { Route as SecuritySetupRouteImport } from './routes/security/setup'
+import { Route as AuthBrandsIndexRouteImport } from './routes/_auth/brands/index'
+import { Route as AuthBrandsIdRouteImport } from './routes/_auth/brands/$id'
+import { Route as AuthContentIndexRouteImport } from './routes/_auth/content/index'
+import { Route as AuthContentIdRouteImport } from './routes/_auth/content/$id'
+import { Route as AuthCustomersIndexRouteImport } from './routes/_auth/customers/index'
+import { Route as AuthCustomersIdRouteImport } from './routes/_auth/customers/$id'
+import { Route as AuthCustomersContactMessagesRouteImport } from './routes/_auth/customers/contact-messages'
+import { Route as AuthCustomersGroupsRouteImport } from './routes/_auth/customers/groups'
+import { Route as AuthOrdersIndexRouteImport } from './routes/_auth/orders/index'
+import { Route as AuthOrdersIdRouteImport } from './routes/_auth/orders/$id'
+import { Route as AuthOrdersChargebacksRouteImport } from './routes/_auth/orders/chargebacks'
+import { Route as AuthOrdersInvoicesRouteImport } from './routes/_auth/orders/invoices'
+import { Route as AuthOrdersReturnsRouteImport } from './routes/_auth/orders/returns'
+import { Route as AuthOrdersReviewRouteImport } from './routes/_auth/orders/review'
+import { Route as AuthProductsIndexRouteImport } from './routes/_auth/products/index'
+import { Route as AuthProductsIdRouteImport } from './routes/_auth/products/$id'
+import { Route as AuthProductsNewRouteImport } from './routes/_auth/products/new'
+import { Route as AuthPromotionsIndexRouteImport } from './routes/_auth/promotions/index'
+import { Route as AuthPromotionsIdRouteImport } from './routes/_auth/promotions/$id'
+import { Route as AuthPromotionsGiftCardsRouteImport } from './routes/_auth/promotions/gift-cards'
+import { Route as AuthPromotionsNewRouteImport } from './routes/_auth/promotions/new'
+import { Route as AuthReportsIndexRouteImport } from './routes/_auth/reports/index'
+import { Route as AuthReportsBrandsRouteImport } from './routes/_auth/reports/brands'
+import { Route as AuthReportsCategoriesRouteImport } from './routes/_auth/reports/categories'
+import { Route as AuthReportsDailyRouteImport } from './routes/_auth/reports/daily'
+import { Route as AuthReportsFinanceRouteImport } from './routes/_auth/reports/finance'
+import { Route as AuthReportsMarketingRouteImport } from './routes/_auth/reports/marketing'
+import { Route as AuthReportsProductsRouteImport } from './routes/_auth/reports/products'
+import { Route as AuthReportsSearchRouteImport } from './routes/_auth/reports/search'
+import { Route as AuthReportsStockRouteImport } from './routes/_auth/reports/stock'
+import { Route as AuthReviewsIndexRouteImport } from './routes/_auth/reviews/index'
+import { Route as AuthReviewsQuestionsRouteImport } from './routes/_auth/reviews/questions'
+import { Route as AuthSeoIndexRouteImport } from './routes/_auth/seo/index'
+import { Route as AuthSeoRedirectsRouteImport } from './routes/_auth/seo/redirects'
+import { Route as AuthSettingsIndexRouteImport } from './routes/_auth/settings/index'
+import { Route as AuthSettingsAccountingRouteImport } from './routes/_auth/settings/accounting'
+import { Route as AuthSettingsApiRouteImport } from './routes/_auth/settings/api'
+import { Route as AuthSettingsAppearanceRouteImport } from './routes/_auth/settings/appearance'
+import { Route as AuthSettingsAttributesRouteImport } from './routes/_auth/settings/attributes'
+import { Route as AuthSettingsAuditRouteImport } from './routes/_auth/settings/audit'
+import { Route as AuthSettingsEinvoiceRouteImport } from './routes/_auth/settings/einvoice'
+import { Route as AuthSettingsFeaturesRouteImport } from './routes/_auth/settings/features'
+import { Route as AuthSettingsIntegrationsRouteImport } from './routes/_auth/settings/integrations'
+import { Route as AuthSettingsJobsRouteImport } from './routes/_auth/settings/jobs'
+import { Route as AuthSettingsLocationsRouteImport } from './routes/_auth/settings/locations'
+import { Route as AuthSettingsMigrationRouteImport } from './routes/_auth/settings/migration'
+import { Route as AuthSettingsNotificationsRouteImport } from './routes/_auth/settings/notifications'
+import { Route as AuthSettingsSecurityRouteImport } from './routes/_auth/settings/security'
+import { Route as AuthSettingsSeoRouteImport } from './routes/_auth/settings/seo'
+import { Route as AuthSettingsStoreRouteImport } from './routes/_auth/settings/store'
+import { Route as AuthSettingsStorefrontRouteImport } from './routes/_auth/settings/storefront'
+import { Route as AuthSettingsTeamRouteImport } from './routes/_auth/settings/team'
+import { Route as AuthStorefrontMenusRouteImport } from './routes/_auth/storefront/menus'
+import { Route as AuthContentLandingsIdRouteImport } from './routes/_auth/content/landings/$id'
+import { Route as AuthPromotionsPriceListsIndexRouteImport } from './routes/_auth/promotions/price-lists/index'
+import { Route as AuthPromotionsPriceListsIdRouteImport } from './routes/_auth/promotions/price-lists/$id'
+import { Route as AuthPromotionsPriceListsNewRouteImport } from './routes/_auth/promotions/price-lists/new'
+import { Route as AuthSettingsLegalIndexRouteImport } from './routes/_auth/settings/legal/index'
+import { Route as AuthSettingsLegalKindRouteImport } from './routes/_auth/settings/legal/$kind'
+import { Route as AuthSettingsMarketingIndexRouteImport } from './routes/_auth/settings/marketing/index'
+import { Route as AuthSettingsMarketingProviderRouteImport } from './routes/_auth/settings/marketing/$provider'
+import { Route as AuthSettingsPaymentsIndexRouteImport } from './routes/_auth/settings/payments/index'
+import { Route as AuthSettingsPaymentsProviderRouteImport } from './routes/_auth/settings/payments/$provider'
+import { Route as AuthSettingsShippingIndexRouteImport } from './routes/_auth/settings/shipping/index'
+import { Route as AuthSettingsShippingCarrierRouteImport } from './routes/_auth/settings/shipping/$carrier'
+import { Route as AuthSettingsSmsIndexRouteImport } from './routes/_auth/settings/sms/index'
+import { Route as AuthSettingsSmsProviderRouteImport } from './routes/_auth/settings/sms/$provider'
 
 const AuthRoute = AuthRouteImport.update({
-  id: "/_auth",
+  id: '/_auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InviteRoute = InviteRouteImport.update({
-  id: "/invite",
-  path: "/invite",
+  id: '/invite',
+  path: '/invite',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
-  id: "/login",
-  path: "/login",
+  id: '/login',
+  path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: "/reset-password",
-  path: "/reset-password",
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthIndexRoute = AuthIndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthCategoriesRoute = AuthCategoriesRouteImport.update({
-  id: "/categories",
-  path: "/categories",
+  id: '/categories',
+  path: '/categories',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthInventoryRoute = AuthInventoryRouteImport.update({
-  id: "/inventory",
-  path: "/inventory",
+  id: '/inventory',
+  path: '/inventory',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthReportsRoute = AuthReportsRouteImport.update({
-  id: "/reports",
-  path: "/reports",
+  id: '/reports',
+  path: '/reports',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthSettingsRoute = AuthSettingsRouteImport.update({
-  id: "/settings",
-  path: "/settings",
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => AuthRoute,
 } as any)
 const SecuritySetupRoute = SecuritySetupRouteImport.update({
-  id: "/security/setup",
-  path: "/security/setup",
+  id: '/security/setup',
+  path: '/security/setup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthBrandsIndexRoute = AuthBrandsIndexRouteImport.update({
-  id: "/brands/",
-  path: "/brands/",
+  id: '/brands/',
+  path: '/brands/',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthBrandsIdRoute = AuthBrandsIdRouteImport.update({
-  id: "/brands/$id",
-  path: "/brands/$id",
+  id: '/brands/$id',
+  path: '/brands/$id',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthContentIndexRoute = AuthContentIndexRouteImport.update({
-  id: "/content/",
-  path: "/content/",
+  id: '/content/',
+  path: '/content/',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthContentIdRoute = AuthContentIdRouteImport.update({
-  id: "/content/$id",
-  path: "/content/$id",
+  id: '/content/$id',
+  path: '/content/$id',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthCustomersIndexRoute = AuthCustomersIndexRouteImport.update({
-  id: "/customers/",
-  path: "/customers/",
+  id: '/customers/',
+  path: '/customers/',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthCustomersIdRoute = AuthCustomersIdRouteImport.update({
-  id: "/customers/$id",
-  path: "/customers/$id",
+  id: '/customers/$id',
+  path: '/customers/$id',
   getParentRoute: () => AuthRoute,
 } as any)
-const AuthCustomersContactMessagesRoute = AuthCustomersContactMessagesRouteImport.update({
-  id: "/customers/contact-messages",
-  path: "/customers/contact-messages",
-  getParentRoute: () => AuthRoute,
-} as any)
+const AuthCustomersContactMessagesRoute =
+  AuthCustomersContactMessagesRouteImport.update({
+    id: '/customers/contact-messages',
+    path: '/customers/contact-messages',
+    getParentRoute: () => AuthRoute,
+  } as any)
 const AuthCustomersGroupsRoute = AuthCustomersGroupsRouteImport.update({
-  id: "/customers/groups",
-  path: "/customers/groups",
+  id: '/customers/groups',
+  path: '/customers/groups',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthOrdersIndexRoute = AuthOrdersIndexRouteImport.update({
-  id: "/orders/",
-  path: "/orders/",
+  id: '/orders/',
+  path: '/orders/',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthOrdersIdRoute = AuthOrdersIdRouteImport.update({
-  id: "/orders/$id",
-  path: "/orders/$id",
+  id: '/orders/$id',
+  path: '/orders/$id',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthOrdersChargebacksRoute = AuthOrdersChargebacksRouteImport.update({
-  id: "/orders/chargebacks",
-  path: "/orders/chargebacks",
+  id: '/orders/chargebacks',
+  path: '/orders/chargebacks',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthOrdersInvoicesRoute = AuthOrdersInvoicesRouteImport.update({
-  id: "/orders/invoices",
-  path: "/orders/invoices",
+  id: '/orders/invoices',
+  path: '/orders/invoices',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthOrdersReturnsRoute = AuthOrdersReturnsRouteImport.update({
-  id: "/orders/returns",
-  path: "/orders/returns",
+  id: '/orders/returns',
+  path: '/orders/returns',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthOrdersReviewRoute = AuthOrdersReviewRouteImport.update({
-  id: "/orders/review",
-  path: "/orders/review",
+  id: '/orders/review',
+  path: '/orders/review',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthProductsIndexRoute = AuthProductsIndexRouteImport.update({
-  id: "/products/",
-  path: "/products/",
+  id: '/products/',
+  path: '/products/',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthProductsIdRoute = AuthProductsIdRouteImport.update({
-  id: "/products/$id",
-  path: "/products/$id",
+  id: '/products/$id',
+  path: '/products/$id',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthProductsNewRoute = AuthProductsNewRouteImport.update({
-  id: "/products/new",
-  path: "/products/new",
+  id: '/products/new',
+  path: '/products/new',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthPromotionsIndexRoute = AuthPromotionsIndexRouteImport.update({
-  id: "/promotions/",
-  path: "/promotions/",
+  id: '/promotions/',
+  path: '/promotions/',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthPromotionsIdRoute = AuthPromotionsIdRouteImport.update({
-  id: "/promotions/$id",
-  path: "/promotions/$id",
+  id: '/promotions/$id',
+  path: '/promotions/$id',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthPromotionsGiftCardsRoute = AuthPromotionsGiftCardsRouteImport.update({
-  id: "/promotions/gift-cards",
-  path: "/promotions/gift-cards",
+  id: '/promotions/gift-cards',
+  path: '/promotions/gift-cards',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthPromotionsNewRoute = AuthPromotionsNewRouteImport.update({
-  id: "/promotions/new",
-  path: "/promotions/new",
+  id: '/promotions/new',
+  path: '/promotions/new',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthReportsIndexRoute = AuthReportsIndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => AuthReportsRoute,
 } as any)
 const AuthReportsBrandsRoute = AuthReportsBrandsRouteImport.update({
-  id: "/brands",
-  path: "/brands",
+  id: '/brands',
+  path: '/brands',
   getParentRoute: () => AuthReportsRoute,
 } as any)
 const AuthReportsCategoriesRoute = AuthReportsCategoriesRouteImport.update({
-  id: "/categories",
-  path: "/categories",
+  id: '/categories',
+  path: '/categories',
   getParentRoute: () => AuthReportsRoute,
 } as any)
 const AuthReportsDailyRoute = AuthReportsDailyRouteImport.update({
-  id: "/daily",
-  path: "/daily",
+  id: '/daily',
+  path: '/daily',
   getParentRoute: () => AuthReportsRoute,
 } as any)
 const AuthReportsFinanceRoute = AuthReportsFinanceRouteImport.update({
-  id: "/finance",
-  path: "/finance",
+  id: '/finance',
+  path: '/finance',
   getParentRoute: () => AuthReportsRoute,
 } as any)
 const AuthReportsMarketingRoute = AuthReportsMarketingRouteImport.update({
-  id: "/marketing",
-  path: "/marketing",
+  id: '/marketing',
+  path: '/marketing',
   getParentRoute: () => AuthReportsRoute,
 } as any)
 const AuthReportsProductsRoute = AuthReportsProductsRouteImport.update({
-  id: "/products",
-  path: "/products",
+  id: '/products',
+  path: '/products',
   getParentRoute: () => AuthReportsRoute,
 } as any)
 const AuthReportsSearchRoute = AuthReportsSearchRouteImport.update({
-  id: "/search",
-  path: "/search",
+  id: '/search',
+  path: '/search',
   getParentRoute: () => AuthReportsRoute,
 } as any)
 const AuthReportsStockRoute = AuthReportsStockRouteImport.update({
-  id: "/stock",
-  path: "/stock",
+  id: '/stock',
+  path: '/stock',
   getParentRoute: () => AuthReportsRoute,
 } as any)
 const AuthReviewsIndexRoute = AuthReviewsIndexRouteImport.update({
-  id: "/reviews/",
-  path: "/reviews/",
+  id: '/reviews/',
+  path: '/reviews/',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthReviewsQuestionsRoute = AuthReviewsQuestionsRouteImport.update({
-  id: "/reviews/questions",
-  path: "/reviews/questions",
+  id: '/reviews/questions',
+  path: '/reviews/questions',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthSeoIndexRoute = AuthSeoIndexRouteImport.update({
-  id: "/seo/",
-  path: "/seo/",
+  id: '/seo/',
+  path: '/seo/',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthSeoRedirectsRoute = AuthSeoRedirectsRouteImport.update({
-  id: "/seo/redirects",
-  path: "/seo/redirects",
+  id: '/seo/redirects',
+  path: '/seo/redirects',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthSettingsIndexRoute = AuthSettingsIndexRouteImport.update({
-  id: "/",
-  path: "/",
+  id: '/',
+  path: '/',
   getParentRoute: () => AuthSettingsRoute,
 } as any)
 const AuthSettingsAccountingRoute = AuthSettingsAccountingRouteImport.update({
-  id: "/accounting",
-  path: "/accounting",
+  id: '/accounting',
+  path: '/accounting',
   getParentRoute: () => AuthSettingsRoute,
 } as any)
 const AuthSettingsApiRoute = AuthSettingsApiRouteImport.update({
-  id: "/api",
-  path: "/api",
+  id: '/api',
+  path: '/api',
   getParentRoute: () => AuthSettingsRoute,
 } as any)
 const AuthSettingsAppearanceRoute = AuthSettingsAppearanceRouteImport.update({
-  id: "/appearance",
-  path: "/appearance",
+  id: '/appearance',
+  path: '/appearance',
   getParentRoute: () => AuthSettingsRoute,
 } as any)
 const AuthSettingsAttributesRoute = AuthSettingsAttributesRouteImport.update({
-  id: "/attributes",
-  path: "/attributes",
+  id: '/attributes',
+  path: '/attributes',
   getParentRoute: () => AuthSettingsRoute,
 } as any)
 const AuthSettingsAuditRoute = AuthSettingsAuditRouteImport.update({
-  id: "/audit",
-  path: "/audit",
+  id: '/audit',
+  path: '/audit',
   getParentRoute: () => AuthSettingsRoute,
 } as any)
 const AuthSettingsEinvoiceRoute = AuthSettingsEinvoiceRouteImport.update({
-  id: "/einvoice",
-  path: "/einvoice",
+  id: '/einvoice',
+  path: '/einvoice',
   getParentRoute: () => AuthSettingsRoute,
 } as any)
 const AuthSettingsFeaturesRoute = AuthSettingsFeaturesRouteImport.update({
-  id: "/features",
-  path: "/features",
+  id: '/features',
+  path: '/features',
   getParentRoute: () => AuthSettingsRoute,
 } as any)
-const AuthSettingsIntegrationsRoute = AuthSettingsIntegrationsRouteImport.update({
-  id: "/integrations",
-  path: "/integrations",
-  getParentRoute: () => AuthSettingsRoute,
-} as any)
+const AuthSettingsIntegrationsRoute =
+  AuthSettingsIntegrationsRouteImport.update({
+    id: '/integrations',
+    path: '/integrations',
+    getParentRoute: () => AuthSettingsRoute,
+  } as any)
 const AuthSettingsJobsRoute = AuthSettingsJobsRouteImport.update({
-  id: "/jobs",
-  path: "/jobs",
+  id: '/jobs',
+  path: '/jobs',
   getParentRoute: () => AuthSettingsRoute,
 } as any)
 const AuthSettingsLocationsRoute = AuthSettingsLocationsRouteImport.update({
-  id: "/locations",
-  path: "/locations",
+  id: '/locations',
+  path: '/locations',
   getParentRoute: () => AuthSettingsRoute,
 } as any)
 const AuthSettingsMigrationRoute = AuthSettingsMigrationRouteImport.update({
-  id: "/migration",
-  path: "/migration",
+  id: '/migration',
+  path: '/migration',
   getParentRoute: () => AuthSettingsRoute,
 } as any)
-const AuthSettingsNotificationsRoute = AuthSettingsNotificationsRouteImport.update({
-  id: "/notifications",
-  path: "/notifications",
-  getParentRoute: () => AuthSettingsRoute,
-} as any)
+const AuthSettingsNotificationsRoute =
+  AuthSettingsNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthSettingsRoute,
+  } as any)
 const AuthSettingsSecurityRoute = AuthSettingsSecurityRouteImport.update({
-  id: "/security",
-  path: "/security",
+  id: '/security',
+  path: '/security',
   getParentRoute: () => AuthSettingsRoute,
 } as any)
 const AuthSettingsSeoRoute = AuthSettingsSeoRouteImport.update({
-  id: "/seo",
-  path: "/seo",
+  id: '/seo',
+  path: '/seo',
   getParentRoute: () => AuthSettingsRoute,
 } as any)
 const AuthSettingsStoreRoute = AuthSettingsStoreRouteImport.update({
-  id: "/store",
-  path: "/store",
+  id: '/store',
+  path: '/store',
   getParentRoute: () => AuthSettingsRoute,
 } as any)
 const AuthSettingsStorefrontRoute = AuthSettingsStorefrontRouteImport.update({
-  id: "/storefront",
-  path: "/storefront",
+  id: '/storefront',
+  path: '/storefront',
   getParentRoute: () => AuthSettingsRoute,
 } as any)
 const AuthSettingsTeamRoute = AuthSettingsTeamRouteImport.update({
-  id: "/team",
-  path: "/team",
+  id: '/team',
+  path: '/team',
   getParentRoute: () => AuthSettingsRoute,
 } as any)
+const AuthStorefrontMenusRoute = AuthStorefrontMenusRouteImport.update({
+  id: '/storefront/menus',
+  path: '/storefront/menus',
+  getParentRoute: () => AuthRoute,
+} as any)
 const AuthContentLandingsIdRoute = AuthContentLandingsIdRouteImport.update({
-  id: "/content/landings/$id",
-  path: "/content/landings/$id",
+  id: '/content/landings/$id',
+  path: '/content/landings/$id',
   getParentRoute: () => AuthRoute,
 } as any)
-const AuthPromotionsPriceListsIndexRoute = AuthPromotionsPriceListsIndexRouteImport.update({
-  id: "/promotions/price-lists/",
-  path: "/promotions/price-lists/",
-  getParentRoute: () => AuthRoute,
-} as any)
-const AuthPromotionsPriceListsIdRoute = AuthPromotionsPriceListsIdRouteImport.update({
-  id: "/promotions/price-lists/$id",
-  path: "/promotions/price-lists/$id",
-  getParentRoute: () => AuthRoute,
-} as any)
-const AuthPromotionsPriceListsNewRoute = AuthPromotionsPriceListsNewRouteImport.update({
-  id: "/promotions/price-lists/new",
-  path: "/promotions/price-lists/new",
-  getParentRoute: () => AuthRoute,
-} as any)
+const AuthPromotionsPriceListsIndexRoute =
+  AuthPromotionsPriceListsIndexRouteImport.update({
+    id: '/promotions/price-lists/',
+    path: '/promotions/price-lists/',
+    getParentRoute: () => AuthRoute,
+  } as any)
+const AuthPromotionsPriceListsIdRoute =
+  AuthPromotionsPriceListsIdRouteImport.update({
+    id: '/promotions/price-lists/$id',
+    path: '/promotions/price-lists/$id',
+    getParentRoute: () => AuthRoute,
+  } as any)
+const AuthPromotionsPriceListsNewRoute =
+  AuthPromotionsPriceListsNewRouteImport.update({
+    id: '/promotions/price-lists/new',
+    path: '/promotions/price-lists/new',
+    getParentRoute: () => AuthRoute,
+  } as any)
 const AuthSettingsLegalIndexRoute = AuthSettingsLegalIndexRouteImport.update({
-  id: "/legal/",
-  path: "/legal/",
+  id: '/legal/',
+  path: '/legal/',
   getParentRoute: () => AuthSettingsRoute,
 } as any)
 const AuthSettingsLegalKindRoute = AuthSettingsLegalKindRouteImport.update({
-  id: "/legal/$kind",
-  path: "/legal/$kind",
+  id: '/legal/$kind',
+  path: '/legal/$kind',
   getParentRoute: () => AuthSettingsRoute,
 } as any)
-const AuthSettingsMarketingIndexRoute = AuthSettingsMarketingIndexRouteImport.update({
-  id: "/marketing/",
-  path: "/marketing/",
-  getParentRoute: () => AuthSettingsRoute,
-} as any)
-const AuthSettingsMarketingProviderRoute = AuthSettingsMarketingProviderRouteImport.update({
-  id: "/marketing/$provider",
-  path: "/marketing/$provider",
-  getParentRoute: () => AuthSettingsRoute,
-} as any)
-const AuthSettingsPaymentsIndexRoute = AuthSettingsPaymentsIndexRouteImport.update({
-  id: "/payments/",
-  path: "/payments/",
-  getParentRoute: () => AuthSettingsRoute,
-} as any)
-const AuthSettingsPaymentsProviderRoute = AuthSettingsPaymentsProviderRouteImport.update({
-  id: "/payments/$provider",
-  path: "/payments/$provider",
-  getParentRoute: () => AuthSettingsRoute,
-} as any)
-const AuthSettingsShippingIndexRoute = AuthSettingsShippingIndexRouteImport.update({
-  id: "/shipping/",
-  path: "/shipping/",
-  getParentRoute: () => AuthSettingsRoute,
-} as any)
-const AuthSettingsShippingCarrierRoute = AuthSettingsShippingCarrierRouteImport.update({
-  id: "/shipping/$carrier",
-  path: "/shipping/$carrier",
-  getParentRoute: () => AuthSettingsRoute,
-} as any)
+const AuthSettingsMarketingIndexRoute =
+  AuthSettingsMarketingIndexRouteImport.update({
+    id: '/marketing/',
+    path: '/marketing/',
+    getParentRoute: () => AuthSettingsRoute,
+  } as any)
+const AuthSettingsMarketingProviderRoute =
+  AuthSettingsMarketingProviderRouteImport.update({
+    id: '/marketing/$provider',
+    path: '/marketing/$provider',
+    getParentRoute: () => AuthSettingsRoute,
+  } as any)
+const AuthSettingsPaymentsIndexRoute =
+  AuthSettingsPaymentsIndexRouteImport.update({
+    id: '/payments/',
+    path: '/payments/',
+    getParentRoute: () => AuthSettingsRoute,
+  } as any)
+const AuthSettingsPaymentsProviderRoute =
+  AuthSettingsPaymentsProviderRouteImport.update({
+    id: '/payments/$provider',
+    path: '/payments/$provider',
+    getParentRoute: () => AuthSettingsRoute,
+  } as any)
+const AuthSettingsShippingIndexRoute =
+  AuthSettingsShippingIndexRouteImport.update({
+    id: '/shipping/',
+    path: '/shipping/',
+    getParentRoute: () => AuthSettingsRoute,
+  } as any)
+const AuthSettingsShippingCarrierRoute =
+  AuthSettingsShippingCarrierRouteImport.update({
+    id: '/shipping/$carrier',
+    path: '/shipping/$carrier',
+    getParentRoute: () => AuthSettingsRoute,
+  } as any)
 const AuthSettingsSmsIndexRoute = AuthSettingsSmsIndexRouteImport.update({
-  id: "/sms/",
-  path: "/sms/",
+  id: '/sms/',
+  path: '/sms/',
   getParentRoute: () => AuthSettingsRoute,
 } as any)
 const AuthSettingsSmsProviderRoute = AuthSettingsSmsProviderRouteImport.update({
-  id: "/sms/$provider",
-  path: "/sms/$provider",
+  id: '/sms/$provider',
+  path: '/sms/$provider',
   getParentRoute: () => AuthSettingsRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
-  "/": typeof AuthIndexRoute
-  "/invite": typeof InviteRoute
-  "/login": typeof LoginRoute
-  "/reset-password": typeof ResetPasswordRoute
-  "/categories": typeof AuthCategoriesRoute
-  "/inventory": typeof AuthInventoryRoute
-  "/reports": typeof AuthReportsRouteWithChildren
-  "/settings": typeof AuthSettingsRouteWithChildren
-  "/security/setup": typeof SecuritySetupRoute
-  "/brands/$id": typeof AuthBrandsIdRoute
-  "/content/$id": typeof AuthContentIdRoute
-  "/customers/$id": typeof AuthCustomersIdRoute
-  "/customers/contact-messages": typeof AuthCustomersContactMessagesRoute
-  "/customers/groups": typeof AuthCustomersGroupsRoute
-  "/orders/$id": typeof AuthOrdersIdRoute
-  "/orders/chargebacks": typeof AuthOrdersChargebacksRoute
-  "/orders/invoices": typeof AuthOrdersInvoicesRoute
-  "/orders/returns": typeof AuthOrdersReturnsRoute
-  "/orders/review": typeof AuthOrdersReviewRoute
-  "/products/$id": typeof AuthProductsIdRoute
-  "/products/new": typeof AuthProductsNewRoute
-  "/promotions/$id": typeof AuthPromotionsIdRoute
-  "/promotions/gift-cards": typeof AuthPromotionsGiftCardsRoute
-  "/promotions/new": typeof AuthPromotionsNewRoute
-  "/reports/brands": typeof AuthReportsBrandsRoute
-  "/reports/categories": typeof AuthReportsCategoriesRoute
-  "/reports/daily": typeof AuthReportsDailyRoute
-  "/reports/finance": typeof AuthReportsFinanceRoute
-  "/reports/marketing": typeof AuthReportsMarketingRoute
-  "/reports/products": typeof AuthReportsProductsRoute
-  "/reports/search": typeof AuthReportsSearchRoute
-  "/reports/stock": typeof AuthReportsStockRoute
-  "/reviews/questions": typeof AuthReviewsQuestionsRoute
-  "/seo/redirects": typeof AuthSeoRedirectsRoute
-  "/settings/accounting": typeof AuthSettingsAccountingRoute
-  "/settings/api": typeof AuthSettingsApiRoute
-  "/settings/appearance": typeof AuthSettingsAppearanceRoute
-  "/settings/attributes": typeof AuthSettingsAttributesRoute
-  "/settings/audit": typeof AuthSettingsAuditRoute
-  "/settings/einvoice": typeof AuthSettingsEinvoiceRoute
-  "/settings/features": typeof AuthSettingsFeaturesRoute
-  "/settings/integrations": typeof AuthSettingsIntegrationsRoute
-  "/settings/jobs": typeof AuthSettingsJobsRoute
-  "/settings/locations": typeof AuthSettingsLocationsRoute
-  "/settings/migration": typeof AuthSettingsMigrationRoute
-  "/settings/notifications": typeof AuthSettingsNotificationsRoute
-  "/settings/security": typeof AuthSettingsSecurityRoute
-  "/settings/seo": typeof AuthSettingsSeoRoute
-  "/settings/store": typeof AuthSettingsStoreRoute
-  "/settings/storefront": typeof AuthSettingsStorefrontRoute
-  "/settings/team": typeof AuthSettingsTeamRoute
-  "/brands/": typeof AuthBrandsIndexRoute
-  "/content/": typeof AuthContentIndexRoute
-  "/customers/": typeof AuthCustomersIndexRoute
-  "/orders/": typeof AuthOrdersIndexRoute
-  "/products/": typeof AuthProductsIndexRoute
-  "/promotions/": typeof AuthPromotionsIndexRoute
-  "/reports/": typeof AuthReportsIndexRoute
-  "/reviews/": typeof AuthReviewsIndexRoute
-  "/seo/": typeof AuthSeoIndexRoute
-  "/settings/": typeof AuthSettingsIndexRoute
-  "/content/landings/$id": typeof AuthContentLandingsIdRoute
-  "/promotions/price-lists/$id": typeof AuthPromotionsPriceListsIdRoute
-  "/promotions/price-lists/new": typeof AuthPromotionsPriceListsNewRoute
-  "/settings/legal/$kind": typeof AuthSettingsLegalKindRoute
-  "/settings/marketing/$provider": typeof AuthSettingsMarketingProviderRoute
-  "/settings/payments/$provider": typeof AuthSettingsPaymentsProviderRoute
-  "/settings/shipping/$carrier": typeof AuthSettingsShippingCarrierRoute
-  "/settings/sms/$provider": typeof AuthSettingsSmsProviderRoute
-  "/promotions/price-lists/": typeof AuthPromotionsPriceListsIndexRoute
-  "/settings/legal/": typeof AuthSettingsLegalIndexRoute
-  "/settings/marketing/": typeof AuthSettingsMarketingIndexRoute
-  "/settings/payments/": typeof AuthSettingsPaymentsIndexRoute
-  "/settings/shipping/": typeof AuthSettingsShippingIndexRoute
-  "/settings/sms/": typeof AuthSettingsSmsIndexRoute
+  '/': typeof AuthIndexRoute
+  '/invite': typeof InviteRoute
+  '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/categories': typeof AuthCategoriesRoute
+  '/inventory': typeof AuthInventoryRoute
+  '/reports': typeof AuthReportsRouteWithChildren
+  '/settings': typeof AuthSettingsRouteWithChildren
+  '/security/setup': typeof SecuritySetupRoute
+  '/brands/$id': typeof AuthBrandsIdRoute
+  '/content/$id': typeof AuthContentIdRoute
+  '/customers/$id': typeof AuthCustomersIdRoute
+  '/customers/contact-messages': typeof AuthCustomersContactMessagesRoute
+  '/customers/groups': typeof AuthCustomersGroupsRoute
+  '/orders/$id': typeof AuthOrdersIdRoute
+  '/orders/chargebacks': typeof AuthOrdersChargebacksRoute
+  '/orders/invoices': typeof AuthOrdersInvoicesRoute
+  '/orders/returns': typeof AuthOrdersReturnsRoute
+  '/orders/review': typeof AuthOrdersReviewRoute
+  '/products/$id': typeof AuthProductsIdRoute
+  '/products/new': typeof AuthProductsNewRoute
+  '/promotions/$id': typeof AuthPromotionsIdRoute
+  '/promotions/gift-cards': typeof AuthPromotionsGiftCardsRoute
+  '/promotions/new': typeof AuthPromotionsNewRoute
+  '/reports/brands': typeof AuthReportsBrandsRoute
+  '/reports/categories': typeof AuthReportsCategoriesRoute
+  '/reports/daily': typeof AuthReportsDailyRoute
+  '/reports/finance': typeof AuthReportsFinanceRoute
+  '/reports/marketing': typeof AuthReportsMarketingRoute
+  '/reports/products': typeof AuthReportsProductsRoute
+  '/reports/search': typeof AuthReportsSearchRoute
+  '/reports/stock': typeof AuthReportsStockRoute
+  '/reviews/questions': typeof AuthReviewsQuestionsRoute
+  '/seo/redirects': typeof AuthSeoRedirectsRoute
+  '/settings/accounting': typeof AuthSettingsAccountingRoute
+  '/settings/api': typeof AuthSettingsApiRoute
+  '/settings/appearance': typeof AuthSettingsAppearanceRoute
+  '/settings/attributes': typeof AuthSettingsAttributesRoute
+  '/settings/audit': typeof AuthSettingsAuditRoute
+  '/settings/einvoice': typeof AuthSettingsEinvoiceRoute
+  '/settings/features': typeof AuthSettingsFeaturesRoute
+  '/settings/integrations': typeof AuthSettingsIntegrationsRoute
+  '/settings/jobs': typeof AuthSettingsJobsRoute
+  '/settings/locations': typeof AuthSettingsLocationsRoute
+  '/settings/migration': typeof AuthSettingsMigrationRoute
+  '/settings/notifications': typeof AuthSettingsNotificationsRoute
+  '/settings/security': typeof AuthSettingsSecurityRoute
+  '/settings/seo': typeof AuthSettingsSeoRoute
+  '/settings/store': typeof AuthSettingsStoreRoute
+  '/settings/storefront': typeof AuthSettingsStorefrontRoute
+  '/settings/team': typeof AuthSettingsTeamRoute
+  '/storefront/menus': typeof AuthStorefrontMenusRoute
+  '/brands/': typeof AuthBrandsIndexRoute
+  '/content/': typeof AuthContentIndexRoute
+  '/customers/': typeof AuthCustomersIndexRoute
+  '/orders/': typeof AuthOrdersIndexRoute
+  '/products/': typeof AuthProductsIndexRoute
+  '/promotions/': typeof AuthPromotionsIndexRoute
+  '/reports/': typeof AuthReportsIndexRoute
+  '/reviews/': typeof AuthReviewsIndexRoute
+  '/seo/': typeof AuthSeoIndexRoute
+  '/settings/': typeof AuthSettingsIndexRoute
+  '/content/landings/$id': typeof AuthContentLandingsIdRoute
+  '/promotions/price-lists/$id': typeof AuthPromotionsPriceListsIdRoute
+  '/promotions/price-lists/new': typeof AuthPromotionsPriceListsNewRoute
+  '/settings/legal/$kind': typeof AuthSettingsLegalKindRoute
+  '/settings/marketing/$provider': typeof AuthSettingsMarketingProviderRoute
+  '/settings/payments/$provider': typeof AuthSettingsPaymentsProviderRoute
+  '/settings/shipping/$carrier': typeof AuthSettingsShippingCarrierRoute
+  '/settings/sms/$provider': typeof AuthSettingsSmsProviderRoute
+  '/promotions/price-lists/': typeof AuthPromotionsPriceListsIndexRoute
+  '/settings/legal/': typeof AuthSettingsLegalIndexRoute
+  '/settings/marketing/': typeof AuthSettingsMarketingIndexRoute
+  '/settings/payments/': typeof AuthSettingsPaymentsIndexRoute
+  '/settings/shipping/': typeof AuthSettingsShippingIndexRoute
+  '/settings/sms/': typeof AuthSettingsSmsIndexRoute
 }
 export interface FileRoutesByTo {
-  "/invite": typeof InviteRoute
-  "/login": typeof LoginRoute
-  "/reset-password": typeof ResetPasswordRoute
-  "/categories": typeof AuthCategoriesRoute
-  "/inventory": typeof AuthInventoryRoute
-  "/security/setup": typeof SecuritySetupRoute
-  "/": typeof AuthIndexRoute
-  "/brands/$id": typeof AuthBrandsIdRoute
-  "/content/$id": typeof AuthContentIdRoute
-  "/customers/$id": typeof AuthCustomersIdRoute
-  "/customers/contact-messages": typeof AuthCustomersContactMessagesRoute
-  "/customers/groups": typeof AuthCustomersGroupsRoute
-  "/orders/$id": typeof AuthOrdersIdRoute
-  "/orders/chargebacks": typeof AuthOrdersChargebacksRoute
-  "/orders/invoices": typeof AuthOrdersInvoicesRoute
-  "/orders/returns": typeof AuthOrdersReturnsRoute
-  "/orders/review": typeof AuthOrdersReviewRoute
-  "/products/$id": typeof AuthProductsIdRoute
-  "/products/new": typeof AuthProductsNewRoute
-  "/promotions/$id": typeof AuthPromotionsIdRoute
-  "/promotions/gift-cards": typeof AuthPromotionsGiftCardsRoute
-  "/promotions/new": typeof AuthPromotionsNewRoute
-  "/reports/brands": typeof AuthReportsBrandsRoute
-  "/reports/categories": typeof AuthReportsCategoriesRoute
-  "/reports/daily": typeof AuthReportsDailyRoute
-  "/reports/finance": typeof AuthReportsFinanceRoute
-  "/reports/marketing": typeof AuthReportsMarketingRoute
-  "/reports/products": typeof AuthReportsProductsRoute
-  "/reports/search": typeof AuthReportsSearchRoute
-  "/reports/stock": typeof AuthReportsStockRoute
-  "/reviews/questions": typeof AuthReviewsQuestionsRoute
-  "/seo/redirects": typeof AuthSeoRedirectsRoute
-  "/settings/accounting": typeof AuthSettingsAccountingRoute
-  "/settings/api": typeof AuthSettingsApiRoute
-  "/settings/appearance": typeof AuthSettingsAppearanceRoute
-  "/settings/attributes": typeof AuthSettingsAttributesRoute
-  "/settings/audit": typeof AuthSettingsAuditRoute
-  "/settings/einvoice": typeof AuthSettingsEinvoiceRoute
-  "/settings/features": typeof AuthSettingsFeaturesRoute
-  "/settings/integrations": typeof AuthSettingsIntegrationsRoute
-  "/settings/jobs": typeof AuthSettingsJobsRoute
-  "/settings/locations": typeof AuthSettingsLocationsRoute
-  "/settings/migration": typeof AuthSettingsMigrationRoute
-  "/settings/notifications": typeof AuthSettingsNotificationsRoute
-  "/settings/security": typeof AuthSettingsSecurityRoute
-  "/settings/seo": typeof AuthSettingsSeoRoute
-  "/settings/store": typeof AuthSettingsStoreRoute
-  "/settings/storefront": typeof AuthSettingsStorefrontRoute
-  "/settings/team": typeof AuthSettingsTeamRoute
-  "/brands": typeof AuthBrandsIndexRoute
-  "/content": typeof AuthContentIndexRoute
-  "/customers": typeof AuthCustomersIndexRoute
-  "/orders": typeof AuthOrdersIndexRoute
-  "/products": typeof AuthProductsIndexRoute
-  "/promotions": typeof AuthPromotionsIndexRoute
-  "/reports": typeof AuthReportsIndexRoute
-  "/reviews": typeof AuthReviewsIndexRoute
-  "/seo": typeof AuthSeoIndexRoute
-  "/settings": typeof AuthSettingsIndexRoute
-  "/content/landings/$id": typeof AuthContentLandingsIdRoute
-  "/promotions/price-lists/$id": typeof AuthPromotionsPriceListsIdRoute
-  "/promotions/price-lists/new": typeof AuthPromotionsPriceListsNewRoute
-  "/settings/legal/$kind": typeof AuthSettingsLegalKindRoute
-  "/settings/marketing/$provider": typeof AuthSettingsMarketingProviderRoute
-  "/settings/payments/$provider": typeof AuthSettingsPaymentsProviderRoute
-  "/settings/shipping/$carrier": typeof AuthSettingsShippingCarrierRoute
-  "/settings/sms/$provider": typeof AuthSettingsSmsProviderRoute
-  "/promotions/price-lists": typeof AuthPromotionsPriceListsIndexRoute
-  "/settings/legal": typeof AuthSettingsLegalIndexRoute
-  "/settings/marketing": typeof AuthSettingsMarketingIndexRoute
-  "/settings/payments": typeof AuthSettingsPaymentsIndexRoute
-  "/settings/shipping": typeof AuthSettingsShippingIndexRoute
-  "/settings/sms": typeof AuthSettingsSmsIndexRoute
+  '/invite': typeof InviteRoute
+  '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/categories': typeof AuthCategoriesRoute
+  '/inventory': typeof AuthInventoryRoute
+  '/security/setup': typeof SecuritySetupRoute
+  '/': typeof AuthIndexRoute
+  '/brands/$id': typeof AuthBrandsIdRoute
+  '/content/$id': typeof AuthContentIdRoute
+  '/customers/$id': typeof AuthCustomersIdRoute
+  '/customers/contact-messages': typeof AuthCustomersContactMessagesRoute
+  '/customers/groups': typeof AuthCustomersGroupsRoute
+  '/orders/$id': typeof AuthOrdersIdRoute
+  '/orders/chargebacks': typeof AuthOrdersChargebacksRoute
+  '/orders/invoices': typeof AuthOrdersInvoicesRoute
+  '/orders/returns': typeof AuthOrdersReturnsRoute
+  '/orders/review': typeof AuthOrdersReviewRoute
+  '/products/$id': typeof AuthProductsIdRoute
+  '/products/new': typeof AuthProductsNewRoute
+  '/promotions/$id': typeof AuthPromotionsIdRoute
+  '/promotions/gift-cards': typeof AuthPromotionsGiftCardsRoute
+  '/promotions/new': typeof AuthPromotionsNewRoute
+  '/reports/brands': typeof AuthReportsBrandsRoute
+  '/reports/categories': typeof AuthReportsCategoriesRoute
+  '/reports/daily': typeof AuthReportsDailyRoute
+  '/reports/finance': typeof AuthReportsFinanceRoute
+  '/reports/marketing': typeof AuthReportsMarketingRoute
+  '/reports/products': typeof AuthReportsProductsRoute
+  '/reports/search': typeof AuthReportsSearchRoute
+  '/reports/stock': typeof AuthReportsStockRoute
+  '/reviews/questions': typeof AuthReviewsQuestionsRoute
+  '/seo/redirects': typeof AuthSeoRedirectsRoute
+  '/settings/accounting': typeof AuthSettingsAccountingRoute
+  '/settings/api': typeof AuthSettingsApiRoute
+  '/settings/appearance': typeof AuthSettingsAppearanceRoute
+  '/settings/attributes': typeof AuthSettingsAttributesRoute
+  '/settings/audit': typeof AuthSettingsAuditRoute
+  '/settings/einvoice': typeof AuthSettingsEinvoiceRoute
+  '/settings/features': typeof AuthSettingsFeaturesRoute
+  '/settings/integrations': typeof AuthSettingsIntegrationsRoute
+  '/settings/jobs': typeof AuthSettingsJobsRoute
+  '/settings/locations': typeof AuthSettingsLocationsRoute
+  '/settings/migration': typeof AuthSettingsMigrationRoute
+  '/settings/notifications': typeof AuthSettingsNotificationsRoute
+  '/settings/security': typeof AuthSettingsSecurityRoute
+  '/settings/seo': typeof AuthSettingsSeoRoute
+  '/settings/store': typeof AuthSettingsStoreRoute
+  '/settings/storefront': typeof AuthSettingsStorefrontRoute
+  '/settings/team': typeof AuthSettingsTeamRoute
+  '/storefront/menus': typeof AuthStorefrontMenusRoute
+  '/brands': typeof AuthBrandsIndexRoute
+  '/content': typeof AuthContentIndexRoute
+  '/customers': typeof AuthCustomersIndexRoute
+  '/orders': typeof AuthOrdersIndexRoute
+  '/products': typeof AuthProductsIndexRoute
+  '/promotions': typeof AuthPromotionsIndexRoute
+  '/reports': typeof AuthReportsIndexRoute
+  '/reviews': typeof AuthReviewsIndexRoute
+  '/seo': typeof AuthSeoIndexRoute
+  '/settings': typeof AuthSettingsIndexRoute
+  '/content/landings/$id': typeof AuthContentLandingsIdRoute
+  '/promotions/price-lists/$id': typeof AuthPromotionsPriceListsIdRoute
+  '/promotions/price-lists/new': typeof AuthPromotionsPriceListsNewRoute
+  '/settings/legal/$kind': typeof AuthSettingsLegalKindRoute
+  '/settings/marketing/$provider': typeof AuthSettingsMarketingProviderRoute
+  '/settings/payments/$provider': typeof AuthSettingsPaymentsProviderRoute
+  '/settings/shipping/$carrier': typeof AuthSettingsShippingCarrierRoute
+  '/settings/sms/$provider': typeof AuthSettingsSmsProviderRoute
+  '/promotions/price-lists': typeof AuthPromotionsPriceListsIndexRoute
+  '/settings/legal': typeof AuthSettingsLegalIndexRoute
+  '/settings/marketing': typeof AuthSettingsMarketingIndexRoute
+  '/settings/payments': typeof AuthSettingsPaymentsIndexRoute
+  '/settings/shipping': typeof AuthSettingsShippingIndexRoute
+  '/settings/sms': typeof AuthSettingsSmsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  "/_auth": typeof AuthRouteWithChildren
-  "/invite": typeof InviteRoute
-  "/login": typeof LoginRoute
-  "/reset-password": typeof ResetPasswordRoute
-  "/_auth/categories": typeof AuthCategoriesRoute
-  "/_auth/inventory": typeof AuthInventoryRoute
-  "/_auth/reports": typeof AuthReportsRouteWithChildren
-  "/_auth/settings": typeof AuthSettingsRouteWithChildren
-  "/security/setup": typeof SecuritySetupRoute
-  "/_auth/": typeof AuthIndexRoute
-  "/_auth/brands/$id": typeof AuthBrandsIdRoute
-  "/_auth/content/$id": typeof AuthContentIdRoute
-  "/_auth/customers/$id": typeof AuthCustomersIdRoute
-  "/_auth/customers/contact-messages": typeof AuthCustomersContactMessagesRoute
-  "/_auth/customers/groups": typeof AuthCustomersGroupsRoute
-  "/_auth/orders/$id": typeof AuthOrdersIdRoute
-  "/_auth/orders/chargebacks": typeof AuthOrdersChargebacksRoute
-  "/_auth/orders/invoices": typeof AuthOrdersInvoicesRoute
-  "/_auth/orders/returns": typeof AuthOrdersReturnsRoute
-  "/_auth/orders/review": typeof AuthOrdersReviewRoute
-  "/_auth/products/$id": typeof AuthProductsIdRoute
-  "/_auth/products/new": typeof AuthProductsNewRoute
-  "/_auth/promotions/$id": typeof AuthPromotionsIdRoute
-  "/_auth/promotions/gift-cards": typeof AuthPromotionsGiftCardsRoute
-  "/_auth/promotions/new": typeof AuthPromotionsNewRoute
-  "/_auth/reports/brands": typeof AuthReportsBrandsRoute
-  "/_auth/reports/categories": typeof AuthReportsCategoriesRoute
-  "/_auth/reports/daily": typeof AuthReportsDailyRoute
-  "/_auth/reports/finance": typeof AuthReportsFinanceRoute
-  "/_auth/reports/marketing": typeof AuthReportsMarketingRoute
-  "/_auth/reports/products": typeof AuthReportsProductsRoute
-  "/_auth/reports/search": typeof AuthReportsSearchRoute
-  "/_auth/reports/stock": typeof AuthReportsStockRoute
-  "/_auth/reviews/questions": typeof AuthReviewsQuestionsRoute
-  "/_auth/seo/redirects": typeof AuthSeoRedirectsRoute
-  "/_auth/settings/accounting": typeof AuthSettingsAccountingRoute
-  "/_auth/settings/api": typeof AuthSettingsApiRoute
-  "/_auth/settings/appearance": typeof AuthSettingsAppearanceRoute
-  "/_auth/settings/attributes": typeof AuthSettingsAttributesRoute
-  "/_auth/settings/audit": typeof AuthSettingsAuditRoute
-  "/_auth/settings/einvoice": typeof AuthSettingsEinvoiceRoute
-  "/_auth/settings/features": typeof AuthSettingsFeaturesRoute
-  "/_auth/settings/integrations": typeof AuthSettingsIntegrationsRoute
-  "/_auth/settings/jobs": typeof AuthSettingsJobsRoute
-  "/_auth/settings/locations": typeof AuthSettingsLocationsRoute
-  "/_auth/settings/migration": typeof AuthSettingsMigrationRoute
-  "/_auth/settings/notifications": typeof AuthSettingsNotificationsRoute
-  "/_auth/settings/security": typeof AuthSettingsSecurityRoute
-  "/_auth/settings/seo": typeof AuthSettingsSeoRoute
-  "/_auth/settings/store": typeof AuthSettingsStoreRoute
-  "/_auth/settings/storefront": typeof AuthSettingsStorefrontRoute
-  "/_auth/settings/team": typeof AuthSettingsTeamRoute
-  "/_auth/brands/": typeof AuthBrandsIndexRoute
-  "/_auth/content/": typeof AuthContentIndexRoute
-  "/_auth/customers/": typeof AuthCustomersIndexRoute
-  "/_auth/orders/": typeof AuthOrdersIndexRoute
-  "/_auth/products/": typeof AuthProductsIndexRoute
-  "/_auth/promotions/": typeof AuthPromotionsIndexRoute
-  "/_auth/reports/": typeof AuthReportsIndexRoute
-  "/_auth/reviews/": typeof AuthReviewsIndexRoute
-  "/_auth/seo/": typeof AuthSeoIndexRoute
-  "/_auth/settings/": typeof AuthSettingsIndexRoute
-  "/_auth/content/landings/$id": typeof AuthContentLandingsIdRoute
-  "/_auth/promotions/price-lists/$id": typeof AuthPromotionsPriceListsIdRoute
-  "/_auth/promotions/price-lists/new": typeof AuthPromotionsPriceListsNewRoute
-  "/_auth/settings/legal/$kind": typeof AuthSettingsLegalKindRoute
-  "/_auth/settings/marketing/$provider": typeof AuthSettingsMarketingProviderRoute
-  "/_auth/settings/payments/$provider": typeof AuthSettingsPaymentsProviderRoute
-  "/_auth/settings/shipping/$carrier": typeof AuthSettingsShippingCarrierRoute
-  "/_auth/settings/sms/$provider": typeof AuthSettingsSmsProviderRoute
-  "/_auth/promotions/price-lists/": typeof AuthPromotionsPriceListsIndexRoute
-  "/_auth/settings/legal/": typeof AuthSettingsLegalIndexRoute
-  "/_auth/settings/marketing/": typeof AuthSettingsMarketingIndexRoute
-  "/_auth/settings/payments/": typeof AuthSettingsPaymentsIndexRoute
-  "/_auth/settings/shipping/": typeof AuthSettingsShippingIndexRoute
-  "/_auth/settings/sms/": typeof AuthSettingsSmsIndexRoute
+  '/_auth': typeof AuthRouteWithChildren
+  '/invite': typeof InviteRoute
+  '/login': typeof LoginRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/_auth/categories': typeof AuthCategoriesRoute
+  '/_auth/inventory': typeof AuthInventoryRoute
+  '/_auth/reports': typeof AuthReportsRouteWithChildren
+  '/_auth/settings': typeof AuthSettingsRouteWithChildren
+  '/security/setup': typeof SecuritySetupRoute
+  '/_auth/': typeof AuthIndexRoute
+  '/_auth/brands/$id': typeof AuthBrandsIdRoute
+  '/_auth/content/$id': typeof AuthContentIdRoute
+  '/_auth/customers/$id': typeof AuthCustomersIdRoute
+  '/_auth/customers/contact-messages': typeof AuthCustomersContactMessagesRoute
+  '/_auth/customers/groups': typeof AuthCustomersGroupsRoute
+  '/_auth/orders/$id': typeof AuthOrdersIdRoute
+  '/_auth/orders/chargebacks': typeof AuthOrdersChargebacksRoute
+  '/_auth/orders/invoices': typeof AuthOrdersInvoicesRoute
+  '/_auth/orders/returns': typeof AuthOrdersReturnsRoute
+  '/_auth/orders/review': typeof AuthOrdersReviewRoute
+  '/_auth/products/$id': typeof AuthProductsIdRoute
+  '/_auth/products/new': typeof AuthProductsNewRoute
+  '/_auth/promotions/$id': typeof AuthPromotionsIdRoute
+  '/_auth/promotions/gift-cards': typeof AuthPromotionsGiftCardsRoute
+  '/_auth/promotions/new': typeof AuthPromotionsNewRoute
+  '/_auth/reports/brands': typeof AuthReportsBrandsRoute
+  '/_auth/reports/categories': typeof AuthReportsCategoriesRoute
+  '/_auth/reports/daily': typeof AuthReportsDailyRoute
+  '/_auth/reports/finance': typeof AuthReportsFinanceRoute
+  '/_auth/reports/marketing': typeof AuthReportsMarketingRoute
+  '/_auth/reports/products': typeof AuthReportsProductsRoute
+  '/_auth/reports/search': typeof AuthReportsSearchRoute
+  '/_auth/reports/stock': typeof AuthReportsStockRoute
+  '/_auth/reviews/questions': typeof AuthReviewsQuestionsRoute
+  '/_auth/seo/redirects': typeof AuthSeoRedirectsRoute
+  '/_auth/settings/accounting': typeof AuthSettingsAccountingRoute
+  '/_auth/settings/api': typeof AuthSettingsApiRoute
+  '/_auth/settings/appearance': typeof AuthSettingsAppearanceRoute
+  '/_auth/settings/attributes': typeof AuthSettingsAttributesRoute
+  '/_auth/settings/audit': typeof AuthSettingsAuditRoute
+  '/_auth/settings/einvoice': typeof AuthSettingsEinvoiceRoute
+  '/_auth/settings/features': typeof AuthSettingsFeaturesRoute
+  '/_auth/settings/integrations': typeof AuthSettingsIntegrationsRoute
+  '/_auth/settings/jobs': typeof AuthSettingsJobsRoute
+  '/_auth/settings/locations': typeof AuthSettingsLocationsRoute
+  '/_auth/settings/migration': typeof AuthSettingsMigrationRoute
+  '/_auth/settings/notifications': typeof AuthSettingsNotificationsRoute
+  '/_auth/settings/security': typeof AuthSettingsSecurityRoute
+  '/_auth/settings/seo': typeof AuthSettingsSeoRoute
+  '/_auth/settings/store': typeof AuthSettingsStoreRoute
+  '/_auth/settings/storefront': typeof AuthSettingsStorefrontRoute
+  '/_auth/settings/team': typeof AuthSettingsTeamRoute
+  '/_auth/storefront/menus': typeof AuthStorefrontMenusRoute
+  '/_auth/brands/': typeof AuthBrandsIndexRoute
+  '/_auth/content/': typeof AuthContentIndexRoute
+  '/_auth/customers/': typeof AuthCustomersIndexRoute
+  '/_auth/orders/': typeof AuthOrdersIndexRoute
+  '/_auth/products/': typeof AuthProductsIndexRoute
+  '/_auth/promotions/': typeof AuthPromotionsIndexRoute
+  '/_auth/reports/': typeof AuthReportsIndexRoute
+  '/_auth/reviews/': typeof AuthReviewsIndexRoute
+  '/_auth/seo/': typeof AuthSeoIndexRoute
+  '/_auth/settings/': typeof AuthSettingsIndexRoute
+  '/_auth/content/landings/$id': typeof AuthContentLandingsIdRoute
+  '/_auth/promotions/price-lists/$id': typeof AuthPromotionsPriceListsIdRoute
+  '/_auth/promotions/price-lists/new': typeof AuthPromotionsPriceListsNewRoute
+  '/_auth/settings/legal/$kind': typeof AuthSettingsLegalKindRoute
+  '/_auth/settings/marketing/$provider': typeof AuthSettingsMarketingProviderRoute
+  '/_auth/settings/payments/$provider': typeof AuthSettingsPaymentsProviderRoute
+  '/_auth/settings/shipping/$carrier': typeof AuthSettingsShippingCarrierRoute
+  '/_auth/settings/sms/$provider': typeof AuthSettingsSmsProviderRoute
+  '/_auth/promotions/price-lists/': typeof AuthPromotionsPriceListsIndexRoute
+  '/_auth/settings/legal/': typeof AuthSettingsLegalIndexRoute
+  '/_auth/settings/marketing/': typeof AuthSettingsMarketingIndexRoute
+  '/_auth/settings/payments/': typeof AuthSettingsPaymentsIndexRoute
+  '/_auth/settings/shipping/': typeof AuthSettingsShippingIndexRoute
+  '/_auth/settings/sms/': typeof AuthSettingsSmsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | "/"
-    | "/invite"
-    | "/login"
-    | "/reset-password"
-    | "/categories"
-    | "/inventory"
-    | "/reports"
-    | "/settings"
-    | "/security/setup"
-    | "/brands/$id"
-    | "/content/$id"
-    | "/customers/$id"
-    | "/customers/contact-messages"
-    | "/customers/groups"
-    | "/orders/$id"
-    | "/orders/chargebacks"
-    | "/orders/invoices"
-    | "/orders/returns"
-    | "/orders/review"
-    | "/products/$id"
-    | "/products/new"
-    | "/promotions/$id"
-    | "/promotions/gift-cards"
-    | "/promotions/new"
-    | "/reports/brands"
-    | "/reports/categories"
-    | "/reports/daily"
-    | "/reports/finance"
-    | "/reports/marketing"
-    | "/reports/products"
-    | "/reports/search"
-    | "/reports/stock"
-    | "/reviews/questions"
-    | "/seo/redirects"
-    | "/settings/accounting"
-    | "/settings/api"
-    | "/settings/appearance"
-    | "/settings/attributes"
-    | "/settings/audit"
-    | "/settings/einvoice"
-    | "/settings/features"
-    | "/settings/integrations"
-    | "/settings/jobs"
-    | "/settings/locations"
-    | "/settings/migration"
-    | "/settings/notifications"
-    | "/settings/security"
-    | "/settings/seo"
-    | "/settings/store"
-    | "/settings/storefront"
-    | "/settings/team"
-    | "/brands/"
-    | "/content/"
-    | "/customers/"
-    | "/orders/"
-    | "/products/"
-    | "/promotions/"
-    | "/reports/"
-    | "/reviews/"
-    | "/seo/"
-    | "/settings/"
-    | "/content/landings/$id"
-    | "/promotions/price-lists/$id"
-    | "/promotions/price-lists/new"
-    | "/settings/legal/$kind"
-    | "/settings/marketing/$provider"
-    | "/settings/payments/$provider"
-    | "/settings/shipping/$carrier"
-    | "/settings/sms/$provider"
-    | "/promotions/price-lists/"
-    | "/settings/legal/"
-    | "/settings/marketing/"
-    | "/settings/payments/"
-    | "/settings/shipping/"
-    | "/settings/sms/"
+    | '/'
+    | '/invite'
+    | '/login'
+    | '/reset-password'
+    | '/categories'
+    | '/inventory'
+    | '/reports'
+    | '/settings'
+    | '/security/setup'
+    | '/brands/$id'
+    | '/content/$id'
+    | '/customers/$id'
+    | '/customers/contact-messages'
+    | '/customers/groups'
+    | '/orders/$id'
+    | '/orders/chargebacks'
+    | '/orders/invoices'
+    | '/orders/returns'
+    | '/orders/review'
+    | '/products/$id'
+    | '/products/new'
+    | '/promotions/$id'
+    | '/promotions/gift-cards'
+    | '/promotions/new'
+    | '/reports/brands'
+    | '/reports/categories'
+    | '/reports/daily'
+    | '/reports/finance'
+    | '/reports/marketing'
+    | '/reports/products'
+    | '/reports/search'
+    | '/reports/stock'
+    | '/reviews/questions'
+    | '/seo/redirects'
+    | '/settings/accounting'
+    | '/settings/api'
+    | '/settings/appearance'
+    | '/settings/attributes'
+    | '/settings/audit'
+    | '/settings/einvoice'
+    | '/settings/features'
+    | '/settings/integrations'
+    | '/settings/jobs'
+    | '/settings/locations'
+    | '/settings/migration'
+    | '/settings/notifications'
+    | '/settings/security'
+    | '/settings/seo'
+    | '/settings/store'
+    | '/settings/storefront'
+    | '/settings/team'
+    | '/storefront/menus'
+    | '/brands/'
+    | '/content/'
+    | '/customers/'
+    | '/orders/'
+    | '/products/'
+    | '/promotions/'
+    | '/reports/'
+    | '/reviews/'
+    | '/seo/'
+    | '/settings/'
+    | '/content/landings/$id'
+    | '/promotions/price-lists/$id'
+    | '/promotions/price-lists/new'
+    | '/settings/legal/$kind'
+    | '/settings/marketing/$provider'
+    | '/settings/payments/$provider'
+    | '/settings/shipping/$carrier'
+    | '/settings/sms/$provider'
+    | '/promotions/price-lists/'
+    | '/settings/legal/'
+    | '/settings/marketing/'
+    | '/settings/payments/'
+    | '/settings/shipping/'
+    | '/settings/sms/'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | "/invite"
-    | "/login"
-    | "/reset-password"
-    | "/categories"
-    | "/inventory"
-    | "/security/setup"
-    | "/"
-    | "/brands/$id"
-    | "/content/$id"
-    | "/customers/$id"
-    | "/customers/contact-messages"
-    | "/customers/groups"
-    | "/orders/$id"
-    | "/orders/chargebacks"
-    | "/orders/invoices"
-    | "/orders/returns"
-    | "/orders/review"
-    | "/products/$id"
-    | "/products/new"
-    | "/promotions/$id"
-    | "/promotions/gift-cards"
-    | "/promotions/new"
-    | "/reports/brands"
-    | "/reports/categories"
-    | "/reports/daily"
-    | "/reports/finance"
-    | "/reports/marketing"
-    | "/reports/products"
-    | "/reports/search"
-    | "/reports/stock"
-    | "/reviews/questions"
-    | "/seo/redirects"
-    | "/settings/accounting"
-    | "/settings/api"
-    | "/settings/appearance"
-    | "/settings/attributes"
-    | "/settings/audit"
-    | "/settings/einvoice"
-    | "/settings/features"
-    | "/settings/integrations"
-    | "/settings/jobs"
-    | "/settings/locations"
-    | "/settings/migration"
-    | "/settings/notifications"
-    | "/settings/security"
-    | "/settings/seo"
-    | "/settings/store"
-    | "/settings/storefront"
-    | "/settings/team"
-    | "/brands"
-    | "/content"
-    | "/customers"
-    | "/orders"
-    | "/products"
-    | "/promotions"
-    | "/reports"
-    | "/reviews"
-    | "/seo"
-    | "/settings"
-    | "/content/landings/$id"
-    | "/promotions/price-lists/$id"
-    | "/promotions/price-lists/new"
-    | "/settings/legal/$kind"
-    | "/settings/marketing/$provider"
-    | "/settings/payments/$provider"
-    | "/settings/shipping/$carrier"
-    | "/settings/sms/$provider"
-    | "/promotions/price-lists"
-    | "/settings/legal"
-    | "/settings/marketing"
-    | "/settings/payments"
-    | "/settings/shipping"
-    | "/settings/sms"
+    | '/invite'
+    | '/login'
+    | '/reset-password'
+    | '/categories'
+    | '/inventory'
+    | '/security/setup'
+    | '/'
+    | '/brands/$id'
+    | '/content/$id'
+    | '/customers/$id'
+    | '/customers/contact-messages'
+    | '/customers/groups'
+    | '/orders/$id'
+    | '/orders/chargebacks'
+    | '/orders/invoices'
+    | '/orders/returns'
+    | '/orders/review'
+    | '/products/$id'
+    | '/products/new'
+    | '/promotions/$id'
+    | '/promotions/gift-cards'
+    | '/promotions/new'
+    | '/reports/brands'
+    | '/reports/categories'
+    | '/reports/daily'
+    | '/reports/finance'
+    | '/reports/marketing'
+    | '/reports/products'
+    | '/reports/search'
+    | '/reports/stock'
+    | '/reviews/questions'
+    | '/seo/redirects'
+    | '/settings/accounting'
+    | '/settings/api'
+    | '/settings/appearance'
+    | '/settings/attributes'
+    | '/settings/audit'
+    | '/settings/einvoice'
+    | '/settings/features'
+    | '/settings/integrations'
+    | '/settings/jobs'
+    | '/settings/locations'
+    | '/settings/migration'
+    | '/settings/notifications'
+    | '/settings/security'
+    | '/settings/seo'
+    | '/settings/store'
+    | '/settings/storefront'
+    | '/settings/team'
+    | '/storefront/menus'
+    | '/brands'
+    | '/content'
+    | '/customers'
+    | '/orders'
+    | '/products'
+    | '/promotions'
+    | '/reports'
+    | '/reviews'
+    | '/seo'
+    | '/settings'
+    | '/content/landings/$id'
+    | '/promotions/price-lists/$id'
+    | '/promotions/price-lists/new'
+    | '/settings/legal/$kind'
+    | '/settings/marketing/$provider'
+    | '/settings/payments/$provider'
+    | '/settings/shipping/$carrier'
+    | '/settings/sms/$provider'
+    | '/promotions/price-lists'
+    | '/settings/legal'
+    | '/settings/marketing'
+    | '/settings/payments'
+    | '/settings/shipping'
+    | '/settings/sms'
   id:
-    | "__root__"
-    | "/_auth"
-    | "/invite"
-    | "/login"
-    | "/reset-password"
-    | "/_auth/categories"
-    | "/_auth/inventory"
-    | "/_auth/reports"
-    | "/_auth/settings"
-    | "/security/setup"
-    | "/_auth/"
-    | "/_auth/brands/$id"
-    | "/_auth/content/$id"
-    | "/_auth/customers/$id"
-    | "/_auth/customers/contact-messages"
-    | "/_auth/customers/groups"
-    | "/_auth/orders/$id"
-    | "/_auth/orders/chargebacks"
-    | "/_auth/orders/invoices"
-    | "/_auth/orders/returns"
-    | "/_auth/orders/review"
-    | "/_auth/products/$id"
-    | "/_auth/products/new"
-    | "/_auth/promotions/$id"
-    | "/_auth/promotions/gift-cards"
-    | "/_auth/promotions/new"
-    | "/_auth/reports/brands"
-    | "/_auth/reports/categories"
-    | "/_auth/reports/daily"
-    | "/_auth/reports/finance"
-    | "/_auth/reports/marketing"
-    | "/_auth/reports/products"
-    | "/_auth/reports/search"
-    | "/_auth/reports/stock"
-    | "/_auth/reviews/questions"
-    | "/_auth/seo/redirects"
-    | "/_auth/settings/accounting"
-    | "/_auth/settings/api"
-    | "/_auth/settings/appearance"
-    | "/_auth/settings/attributes"
-    | "/_auth/settings/audit"
-    | "/_auth/settings/einvoice"
-    | "/_auth/settings/features"
-    | "/_auth/settings/integrations"
-    | "/_auth/settings/jobs"
-    | "/_auth/settings/locations"
-    | "/_auth/settings/migration"
-    | "/_auth/settings/notifications"
-    | "/_auth/settings/security"
-    | "/_auth/settings/seo"
-    | "/_auth/settings/store"
-    | "/_auth/settings/storefront"
-    | "/_auth/settings/team"
-    | "/_auth/brands/"
-    | "/_auth/content/"
-    | "/_auth/customers/"
-    | "/_auth/orders/"
-    | "/_auth/products/"
-    | "/_auth/promotions/"
-    | "/_auth/reports/"
-    | "/_auth/reviews/"
-    | "/_auth/seo/"
-    | "/_auth/settings/"
-    | "/_auth/content/landings/$id"
-    | "/_auth/promotions/price-lists/$id"
-    | "/_auth/promotions/price-lists/new"
-    | "/_auth/settings/legal/$kind"
-    | "/_auth/settings/marketing/$provider"
-    | "/_auth/settings/payments/$provider"
-    | "/_auth/settings/shipping/$carrier"
-    | "/_auth/settings/sms/$provider"
-    | "/_auth/promotions/price-lists/"
-    | "/_auth/settings/legal/"
-    | "/_auth/settings/marketing/"
-    | "/_auth/settings/payments/"
-    | "/_auth/settings/shipping/"
-    | "/_auth/settings/sms/"
+    | '__root__'
+    | '/_auth'
+    | '/invite'
+    | '/login'
+    | '/reset-password'
+    | '/_auth/categories'
+    | '/_auth/inventory'
+    | '/_auth/reports'
+    | '/_auth/settings'
+    | '/security/setup'
+    | '/_auth/'
+    | '/_auth/brands/$id'
+    | '/_auth/content/$id'
+    | '/_auth/customers/$id'
+    | '/_auth/customers/contact-messages'
+    | '/_auth/customers/groups'
+    | '/_auth/orders/$id'
+    | '/_auth/orders/chargebacks'
+    | '/_auth/orders/invoices'
+    | '/_auth/orders/returns'
+    | '/_auth/orders/review'
+    | '/_auth/products/$id'
+    | '/_auth/products/new'
+    | '/_auth/promotions/$id'
+    | '/_auth/promotions/gift-cards'
+    | '/_auth/promotions/new'
+    | '/_auth/reports/brands'
+    | '/_auth/reports/categories'
+    | '/_auth/reports/daily'
+    | '/_auth/reports/finance'
+    | '/_auth/reports/marketing'
+    | '/_auth/reports/products'
+    | '/_auth/reports/search'
+    | '/_auth/reports/stock'
+    | '/_auth/reviews/questions'
+    | '/_auth/seo/redirects'
+    | '/_auth/settings/accounting'
+    | '/_auth/settings/api'
+    | '/_auth/settings/appearance'
+    | '/_auth/settings/attributes'
+    | '/_auth/settings/audit'
+    | '/_auth/settings/einvoice'
+    | '/_auth/settings/features'
+    | '/_auth/settings/integrations'
+    | '/_auth/settings/jobs'
+    | '/_auth/settings/locations'
+    | '/_auth/settings/migration'
+    | '/_auth/settings/notifications'
+    | '/_auth/settings/security'
+    | '/_auth/settings/seo'
+    | '/_auth/settings/store'
+    | '/_auth/settings/storefront'
+    | '/_auth/settings/team'
+    | '/_auth/storefront/menus'
+    | '/_auth/brands/'
+    | '/_auth/content/'
+    | '/_auth/customers/'
+    | '/_auth/orders/'
+    | '/_auth/products/'
+    | '/_auth/promotions/'
+    | '/_auth/reports/'
+    | '/_auth/reviews/'
+    | '/_auth/seo/'
+    | '/_auth/settings/'
+    | '/_auth/content/landings/$id'
+    | '/_auth/promotions/price-lists/$id'
+    | '/_auth/promotions/price-lists/new'
+    | '/_auth/settings/legal/$kind'
+    | '/_auth/settings/marketing/$provider'
+    | '/_auth/settings/payments/$provider'
+    | '/_auth/settings/shipping/$carrier'
+    | '/_auth/settings/sms/$provider'
+    | '/_auth/promotions/price-lists/'
+    | '/_auth/settings/legal/'
+    | '/_auth/settings/marketing/'
+    | '/_auth/settings/payments/'
+    | '/_auth/settings/shipping/'
+    | '/_auth/settings/sms/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -938,537 +962,544 @@ export interface RootRouteChildren {
   SecuritySetupRoute: typeof SecuritySetupRoute
 }
 
-declare module "@tanstack/react-router" {
+declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    "/_auth": {
-      id: "/_auth"
-      path: ""
-      fullPath: "/"
+    '/_auth': {
+      id: '/_auth'
+      path: ''
+      fullPath: '/'
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    "/invite": {
-      id: "/invite"
-      path: "/invite"
-      fullPath: "/invite"
+    '/invite': {
+      id: '/invite'
+      path: '/invite'
+      fullPath: '/invite'
       preLoaderRoute: typeof InviteRouteImport
       parentRoute: typeof rootRouteImport
     }
-    "/login": {
-      id: "/login"
-      path: "/login"
-      fullPath: "/login"
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    "/reset-password": {
-      id: "/reset-password"
-      path: "/reset-password"
-      fullPath: "/reset-password"
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
-    "/_auth/": {
-      id: "/_auth/"
-      path: "/"
-      fullPath: "/"
+    '/_auth/': {
+      id: '/_auth/'
+      path: '/'
+      fullPath: '/'
       preLoaderRoute: typeof AuthIndexRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/categories": {
-      id: "/_auth/categories"
-      path: "/categories"
-      fullPath: "/categories"
+    '/_auth/categories': {
+      id: '/_auth/categories'
+      path: '/categories'
+      fullPath: '/categories'
       preLoaderRoute: typeof AuthCategoriesRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/inventory": {
-      id: "/_auth/inventory"
-      path: "/inventory"
-      fullPath: "/inventory"
+    '/_auth/inventory': {
+      id: '/_auth/inventory'
+      path: '/inventory'
+      fullPath: '/inventory'
       preLoaderRoute: typeof AuthInventoryRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/reports": {
-      id: "/_auth/reports"
-      path: "/reports"
-      fullPath: "/reports"
+    '/_auth/reports': {
+      id: '/_auth/reports'
+      path: '/reports'
+      fullPath: '/reports'
       preLoaderRoute: typeof AuthReportsRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/settings": {
-      id: "/_auth/settings"
-      path: "/settings"
-      fullPath: "/settings"
+    '/_auth/settings': {
+      id: '/_auth/settings'
+      path: '/settings'
+      fullPath: '/settings'
       preLoaderRoute: typeof AuthSettingsRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/security/setup": {
-      id: "/security/setup"
-      path: "/security/setup"
-      fullPath: "/security/setup"
+    '/security/setup': {
+      id: '/security/setup'
+      path: '/security/setup'
+      fullPath: '/security/setup'
       preLoaderRoute: typeof SecuritySetupRouteImport
       parentRoute: typeof rootRouteImport
     }
-    "/_auth/brands/": {
-      id: "/_auth/brands/"
-      path: "/brands"
-      fullPath: "/brands/"
+    '/_auth/brands/': {
+      id: '/_auth/brands/'
+      path: '/brands'
+      fullPath: '/brands/'
       preLoaderRoute: typeof AuthBrandsIndexRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/brands/$id": {
-      id: "/_auth/brands/$id"
-      path: "/brands/$id"
-      fullPath: "/brands/$id"
+    '/_auth/brands/$id': {
+      id: '/_auth/brands/$id'
+      path: '/brands/$id'
+      fullPath: '/brands/$id'
       preLoaderRoute: typeof AuthBrandsIdRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/content/": {
-      id: "/_auth/content/"
-      path: "/content"
-      fullPath: "/content/"
+    '/_auth/content/': {
+      id: '/_auth/content/'
+      path: '/content'
+      fullPath: '/content/'
       preLoaderRoute: typeof AuthContentIndexRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/content/$id": {
-      id: "/_auth/content/$id"
-      path: "/content/$id"
-      fullPath: "/content/$id"
+    '/_auth/content/$id': {
+      id: '/_auth/content/$id'
+      path: '/content/$id'
+      fullPath: '/content/$id'
       preLoaderRoute: typeof AuthContentIdRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/customers/": {
-      id: "/_auth/customers/"
-      path: "/customers"
-      fullPath: "/customers/"
+    '/_auth/customers/': {
+      id: '/_auth/customers/'
+      path: '/customers'
+      fullPath: '/customers/'
       preLoaderRoute: typeof AuthCustomersIndexRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/customers/$id": {
-      id: "/_auth/customers/$id"
-      path: "/customers/$id"
-      fullPath: "/customers/$id"
+    '/_auth/customers/$id': {
+      id: '/_auth/customers/$id'
+      path: '/customers/$id'
+      fullPath: '/customers/$id'
       preLoaderRoute: typeof AuthCustomersIdRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/customers/contact-messages": {
-      id: "/_auth/customers/contact-messages"
-      path: "/customers/contact-messages"
-      fullPath: "/customers/contact-messages"
+    '/_auth/customers/contact-messages': {
+      id: '/_auth/customers/contact-messages'
+      path: '/customers/contact-messages'
+      fullPath: '/customers/contact-messages'
       preLoaderRoute: typeof AuthCustomersContactMessagesRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/customers/groups": {
-      id: "/_auth/customers/groups"
-      path: "/customers/groups"
-      fullPath: "/customers/groups"
+    '/_auth/customers/groups': {
+      id: '/_auth/customers/groups'
+      path: '/customers/groups'
+      fullPath: '/customers/groups'
       preLoaderRoute: typeof AuthCustomersGroupsRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/orders/": {
-      id: "/_auth/orders/"
-      path: "/orders"
-      fullPath: "/orders/"
+    '/_auth/orders/': {
+      id: '/_auth/orders/'
+      path: '/orders'
+      fullPath: '/orders/'
       preLoaderRoute: typeof AuthOrdersIndexRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/orders/$id": {
-      id: "/_auth/orders/$id"
-      path: "/orders/$id"
-      fullPath: "/orders/$id"
+    '/_auth/orders/$id': {
+      id: '/_auth/orders/$id'
+      path: '/orders/$id'
+      fullPath: '/orders/$id'
       preLoaderRoute: typeof AuthOrdersIdRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/orders/chargebacks": {
-      id: "/_auth/orders/chargebacks"
-      path: "/orders/chargebacks"
-      fullPath: "/orders/chargebacks"
+    '/_auth/orders/chargebacks': {
+      id: '/_auth/orders/chargebacks'
+      path: '/orders/chargebacks'
+      fullPath: '/orders/chargebacks'
       preLoaderRoute: typeof AuthOrdersChargebacksRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/orders/invoices": {
-      id: "/_auth/orders/invoices"
-      path: "/orders/invoices"
-      fullPath: "/orders/invoices"
+    '/_auth/orders/invoices': {
+      id: '/_auth/orders/invoices'
+      path: '/orders/invoices'
+      fullPath: '/orders/invoices'
       preLoaderRoute: typeof AuthOrdersInvoicesRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/orders/returns": {
-      id: "/_auth/orders/returns"
-      path: "/orders/returns"
-      fullPath: "/orders/returns"
+    '/_auth/orders/returns': {
+      id: '/_auth/orders/returns'
+      path: '/orders/returns'
+      fullPath: '/orders/returns'
       preLoaderRoute: typeof AuthOrdersReturnsRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/orders/review": {
-      id: "/_auth/orders/review"
-      path: "/orders/review"
-      fullPath: "/orders/review"
+    '/_auth/orders/review': {
+      id: '/_auth/orders/review'
+      path: '/orders/review'
+      fullPath: '/orders/review'
       preLoaderRoute: typeof AuthOrdersReviewRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/products/": {
-      id: "/_auth/products/"
-      path: "/products"
-      fullPath: "/products/"
+    '/_auth/products/': {
+      id: '/_auth/products/'
+      path: '/products'
+      fullPath: '/products/'
       preLoaderRoute: typeof AuthProductsIndexRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/products/$id": {
-      id: "/_auth/products/$id"
-      path: "/products/$id"
-      fullPath: "/products/$id"
+    '/_auth/products/$id': {
+      id: '/_auth/products/$id'
+      path: '/products/$id'
+      fullPath: '/products/$id'
       preLoaderRoute: typeof AuthProductsIdRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/products/new": {
-      id: "/_auth/products/new"
-      path: "/products/new"
-      fullPath: "/products/new"
+    '/_auth/products/new': {
+      id: '/_auth/products/new'
+      path: '/products/new'
+      fullPath: '/products/new'
       preLoaderRoute: typeof AuthProductsNewRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/promotions/": {
-      id: "/_auth/promotions/"
-      path: "/promotions"
-      fullPath: "/promotions/"
+    '/_auth/promotions/': {
+      id: '/_auth/promotions/'
+      path: '/promotions'
+      fullPath: '/promotions/'
       preLoaderRoute: typeof AuthPromotionsIndexRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/promotions/$id": {
-      id: "/_auth/promotions/$id"
-      path: "/promotions/$id"
-      fullPath: "/promotions/$id"
+    '/_auth/promotions/$id': {
+      id: '/_auth/promotions/$id'
+      path: '/promotions/$id'
+      fullPath: '/promotions/$id'
       preLoaderRoute: typeof AuthPromotionsIdRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/promotions/gift-cards": {
-      id: "/_auth/promotions/gift-cards"
-      path: "/promotions/gift-cards"
-      fullPath: "/promotions/gift-cards"
+    '/_auth/promotions/gift-cards': {
+      id: '/_auth/promotions/gift-cards'
+      path: '/promotions/gift-cards'
+      fullPath: '/promotions/gift-cards'
       preLoaderRoute: typeof AuthPromotionsGiftCardsRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/promotions/new": {
-      id: "/_auth/promotions/new"
-      path: "/promotions/new"
-      fullPath: "/promotions/new"
+    '/_auth/promotions/new': {
+      id: '/_auth/promotions/new'
+      path: '/promotions/new'
+      fullPath: '/promotions/new'
       preLoaderRoute: typeof AuthPromotionsNewRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/reports/": {
-      id: "/_auth/reports/"
-      path: "/"
-      fullPath: "/reports/"
+    '/_auth/reports/': {
+      id: '/_auth/reports/'
+      path: '/'
+      fullPath: '/reports/'
       preLoaderRoute: typeof AuthReportsIndexRouteImport
       parentRoute: typeof AuthReportsRoute
     }
-    "/_auth/reports/brands": {
-      id: "/_auth/reports/brands"
-      path: "/brands"
-      fullPath: "/reports/brands"
+    '/_auth/reports/brands': {
+      id: '/_auth/reports/brands'
+      path: '/brands'
+      fullPath: '/reports/brands'
       preLoaderRoute: typeof AuthReportsBrandsRouteImport
       parentRoute: typeof AuthReportsRoute
     }
-    "/_auth/reports/categories": {
-      id: "/_auth/reports/categories"
-      path: "/categories"
-      fullPath: "/reports/categories"
+    '/_auth/reports/categories': {
+      id: '/_auth/reports/categories'
+      path: '/categories'
+      fullPath: '/reports/categories'
       preLoaderRoute: typeof AuthReportsCategoriesRouteImport
       parentRoute: typeof AuthReportsRoute
     }
-    "/_auth/reports/daily": {
-      id: "/_auth/reports/daily"
-      path: "/daily"
-      fullPath: "/reports/daily"
+    '/_auth/reports/daily': {
+      id: '/_auth/reports/daily'
+      path: '/daily'
+      fullPath: '/reports/daily'
       preLoaderRoute: typeof AuthReportsDailyRouteImport
       parentRoute: typeof AuthReportsRoute
     }
-    "/_auth/reports/finance": {
-      id: "/_auth/reports/finance"
-      path: "/finance"
-      fullPath: "/reports/finance"
+    '/_auth/reports/finance': {
+      id: '/_auth/reports/finance'
+      path: '/finance'
+      fullPath: '/reports/finance'
       preLoaderRoute: typeof AuthReportsFinanceRouteImport
       parentRoute: typeof AuthReportsRoute
     }
-    "/_auth/reports/marketing": {
-      id: "/_auth/reports/marketing"
-      path: "/marketing"
-      fullPath: "/reports/marketing"
+    '/_auth/reports/marketing': {
+      id: '/_auth/reports/marketing'
+      path: '/marketing'
+      fullPath: '/reports/marketing'
       preLoaderRoute: typeof AuthReportsMarketingRouteImport
       parentRoute: typeof AuthReportsRoute
     }
-    "/_auth/reports/products": {
-      id: "/_auth/reports/products"
-      path: "/products"
-      fullPath: "/reports/products"
+    '/_auth/reports/products': {
+      id: '/_auth/reports/products'
+      path: '/products'
+      fullPath: '/reports/products'
       preLoaderRoute: typeof AuthReportsProductsRouteImport
       parentRoute: typeof AuthReportsRoute
     }
-    "/_auth/reports/search": {
-      id: "/_auth/reports/search"
-      path: "/search"
-      fullPath: "/reports/search"
+    '/_auth/reports/search': {
+      id: '/_auth/reports/search'
+      path: '/search'
+      fullPath: '/reports/search'
       preLoaderRoute: typeof AuthReportsSearchRouteImport
       parentRoute: typeof AuthReportsRoute
     }
-    "/_auth/reports/stock": {
-      id: "/_auth/reports/stock"
-      path: "/stock"
-      fullPath: "/reports/stock"
+    '/_auth/reports/stock': {
+      id: '/_auth/reports/stock'
+      path: '/stock'
+      fullPath: '/reports/stock'
       preLoaderRoute: typeof AuthReportsStockRouteImport
       parentRoute: typeof AuthReportsRoute
     }
-    "/_auth/reviews/": {
-      id: "/_auth/reviews/"
-      path: "/reviews"
-      fullPath: "/reviews/"
+    '/_auth/reviews/': {
+      id: '/_auth/reviews/'
+      path: '/reviews'
+      fullPath: '/reviews/'
       preLoaderRoute: typeof AuthReviewsIndexRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/reviews/questions": {
-      id: "/_auth/reviews/questions"
-      path: "/reviews/questions"
-      fullPath: "/reviews/questions"
+    '/_auth/reviews/questions': {
+      id: '/_auth/reviews/questions'
+      path: '/reviews/questions'
+      fullPath: '/reviews/questions'
       preLoaderRoute: typeof AuthReviewsQuestionsRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/seo/": {
-      id: "/_auth/seo/"
-      path: "/seo"
-      fullPath: "/seo/"
+    '/_auth/seo/': {
+      id: '/_auth/seo/'
+      path: '/seo'
+      fullPath: '/seo/'
       preLoaderRoute: typeof AuthSeoIndexRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/seo/redirects": {
-      id: "/_auth/seo/redirects"
-      path: "/seo/redirects"
-      fullPath: "/seo/redirects"
+    '/_auth/seo/redirects': {
+      id: '/_auth/seo/redirects'
+      path: '/seo/redirects'
+      fullPath: '/seo/redirects'
       preLoaderRoute: typeof AuthSeoRedirectsRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/settings/": {
-      id: "/_auth/settings/"
-      path: "/"
-      fullPath: "/settings/"
+    '/_auth/settings/': {
+      id: '/_auth/settings/'
+      path: '/'
+      fullPath: '/settings/'
       preLoaderRoute: typeof AuthSettingsIndexRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
-    "/_auth/settings/accounting": {
-      id: "/_auth/settings/accounting"
-      path: "/accounting"
-      fullPath: "/settings/accounting"
+    '/_auth/settings/accounting': {
+      id: '/_auth/settings/accounting'
+      path: '/accounting'
+      fullPath: '/settings/accounting'
       preLoaderRoute: typeof AuthSettingsAccountingRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
-    "/_auth/settings/api": {
-      id: "/_auth/settings/api"
-      path: "/api"
-      fullPath: "/settings/api"
+    '/_auth/settings/api': {
+      id: '/_auth/settings/api'
+      path: '/api'
+      fullPath: '/settings/api'
       preLoaderRoute: typeof AuthSettingsApiRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
-    "/_auth/settings/appearance": {
-      id: "/_auth/settings/appearance"
-      path: "/appearance"
-      fullPath: "/settings/appearance"
+    '/_auth/settings/appearance': {
+      id: '/_auth/settings/appearance'
+      path: '/appearance'
+      fullPath: '/settings/appearance'
       preLoaderRoute: typeof AuthSettingsAppearanceRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
-    "/_auth/settings/attributes": {
-      id: "/_auth/settings/attributes"
-      path: "/attributes"
-      fullPath: "/settings/attributes"
+    '/_auth/settings/attributes': {
+      id: '/_auth/settings/attributes'
+      path: '/attributes'
+      fullPath: '/settings/attributes'
       preLoaderRoute: typeof AuthSettingsAttributesRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
-    "/_auth/settings/audit": {
-      id: "/_auth/settings/audit"
-      path: "/audit"
-      fullPath: "/settings/audit"
+    '/_auth/settings/audit': {
+      id: '/_auth/settings/audit'
+      path: '/audit'
+      fullPath: '/settings/audit'
       preLoaderRoute: typeof AuthSettingsAuditRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
-    "/_auth/settings/einvoice": {
-      id: "/_auth/settings/einvoice"
-      path: "/einvoice"
-      fullPath: "/settings/einvoice"
+    '/_auth/settings/einvoice': {
+      id: '/_auth/settings/einvoice'
+      path: '/einvoice'
+      fullPath: '/settings/einvoice'
       preLoaderRoute: typeof AuthSettingsEinvoiceRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
-    "/_auth/settings/features": {
-      id: "/_auth/settings/features"
-      path: "/features"
-      fullPath: "/settings/features"
+    '/_auth/settings/features': {
+      id: '/_auth/settings/features'
+      path: '/features'
+      fullPath: '/settings/features'
       preLoaderRoute: typeof AuthSettingsFeaturesRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
-    "/_auth/settings/integrations": {
-      id: "/_auth/settings/integrations"
-      path: "/integrations"
-      fullPath: "/settings/integrations"
+    '/_auth/settings/integrations': {
+      id: '/_auth/settings/integrations'
+      path: '/integrations'
+      fullPath: '/settings/integrations'
       preLoaderRoute: typeof AuthSettingsIntegrationsRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
-    "/_auth/settings/jobs": {
-      id: "/_auth/settings/jobs"
-      path: "/jobs"
-      fullPath: "/settings/jobs"
+    '/_auth/settings/jobs': {
+      id: '/_auth/settings/jobs'
+      path: '/jobs'
+      fullPath: '/settings/jobs'
       preLoaderRoute: typeof AuthSettingsJobsRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
-    "/_auth/settings/locations": {
-      id: "/_auth/settings/locations"
-      path: "/locations"
-      fullPath: "/settings/locations"
+    '/_auth/settings/locations': {
+      id: '/_auth/settings/locations'
+      path: '/locations'
+      fullPath: '/settings/locations'
       preLoaderRoute: typeof AuthSettingsLocationsRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
-    "/_auth/settings/migration": {
-      id: "/_auth/settings/migration"
-      path: "/migration"
-      fullPath: "/settings/migration"
+    '/_auth/settings/migration': {
+      id: '/_auth/settings/migration'
+      path: '/migration'
+      fullPath: '/settings/migration'
       preLoaderRoute: typeof AuthSettingsMigrationRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
-    "/_auth/settings/notifications": {
-      id: "/_auth/settings/notifications"
-      path: "/notifications"
-      fullPath: "/settings/notifications"
+    '/_auth/settings/notifications': {
+      id: '/_auth/settings/notifications'
+      path: '/notifications'
+      fullPath: '/settings/notifications'
       preLoaderRoute: typeof AuthSettingsNotificationsRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
-    "/_auth/settings/security": {
-      id: "/_auth/settings/security"
-      path: "/security"
-      fullPath: "/settings/security"
+    '/_auth/settings/security': {
+      id: '/_auth/settings/security'
+      path: '/security'
+      fullPath: '/settings/security'
       preLoaderRoute: typeof AuthSettingsSecurityRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
-    "/_auth/settings/seo": {
-      id: "/_auth/settings/seo"
-      path: "/seo"
-      fullPath: "/settings/seo"
+    '/_auth/settings/seo': {
+      id: '/_auth/settings/seo'
+      path: '/seo'
+      fullPath: '/settings/seo'
       preLoaderRoute: typeof AuthSettingsSeoRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
-    "/_auth/settings/store": {
-      id: "/_auth/settings/store"
-      path: "/store"
-      fullPath: "/settings/store"
+    '/_auth/settings/store': {
+      id: '/_auth/settings/store'
+      path: '/store'
+      fullPath: '/settings/store'
       preLoaderRoute: typeof AuthSettingsStoreRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
-    "/_auth/settings/storefront": {
-      id: "/_auth/settings/storefront"
-      path: "/storefront"
-      fullPath: "/settings/storefront"
+    '/_auth/settings/storefront': {
+      id: '/_auth/settings/storefront'
+      path: '/storefront'
+      fullPath: '/settings/storefront'
       preLoaderRoute: typeof AuthSettingsStorefrontRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
-    "/_auth/settings/team": {
-      id: "/_auth/settings/team"
-      path: "/team"
-      fullPath: "/settings/team"
+    '/_auth/settings/team': {
+      id: '/_auth/settings/team'
+      path: '/team'
+      fullPath: '/settings/team'
       preLoaderRoute: typeof AuthSettingsTeamRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
-    "/_auth/content/landings/$id": {
-      id: "/_auth/content/landings/$id"
-      path: "/content/landings/$id"
-      fullPath: "/content/landings/$id"
+    '/_auth/storefront/menus': {
+      id: '/_auth/storefront/menus'
+      path: '/storefront/menus'
+      fullPath: '/storefront/menus'
+      preLoaderRoute: typeof AuthStorefrontMenusRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/content/landings/$id': {
+      id: '/_auth/content/landings/$id'
+      path: '/content/landings/$id'
+      fullPath: '/content/landings/$id'
       preLoaderRoute: typeof AuthContentLandingsIdRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/promotions/price-lists/": {
-      id: "/_auth/promotions/price-lists/"
-      path: "/promotions/price-lists"
-      fullPath: "/promotions/price-lists/"
+    '/_auth/promotions/price-lists/': {
+      id: '/_auth/promotions/price-lists/'
+      path: '/promotions/price-lists'
+      fullPath: '/promotions/price-lists/'
       preLoaderRoute: typeof AuthPromotionsPriceListsIndexRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/promotions/price-lists/$id": {
-      id: "/_auth/promotions/price-lists/$id"
-      path: "/promotions/price-lists/$id"
-      fullPath: "/promotions/price-lists/$id"
+    '/_auth/promotions/price-lists/$id': {
+      id: '/_auth/promotions/price-lists/$id'
+      path: '/promotions/price-lists/$id'
+      fullPath: '/promotions/price-lists/$id'
       preLoaderRoute: typeof AuthPromotionsPriceListsIdRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/promotions/price-lists/new": {
-      id: "/_auth/promotions/price-lists/new"
-      path: "/promotions/price-lists/new"
-      fullPath: "/promotions/price-lists/new"
+    '/_auth/promotions/price-lists/new': {
+      id: '/_auth/promotions/price-lists/new'
+      path: '/promotions/price-lists/new'
+      fullPath: '/promotions/price-lists/new'
       preLoaderRoute: typeof AuthPromotionsPriceListsNewRouteImport
       parentRoute: typeof AuthRoute
     }
-    "/_auth/settings/legal/": {
-      id: "/_auth/settings/legal/"
-      path: "/legal"
-      fullPath: "/settings/legal/"
+    '/_auth/settings/legal/': {
+      id: '/_auth/settings/legal/'
+      path: '/legal'
+      fullPath: '/settings/legal/'
       preLoaderRoute: typeof AuthSettingsLegalIndexRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
-    "/_auth/settings/legal/$kind": {
-      id: "/_auth/settings/legal/$kind"
-      path: "/legal/$kind"
-      fullPath: "/settings/legal/$kind"
+    '/_auth/settings/legal/$kind': {
+      id: '/_auth/settings/legal/$kind'
+      path: '/legal/$kind'
+      fullPath: '/settings/legal/$kind'
       preLoaderRoute: typeof AuthSettingsLegalKindRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
-    "/_auth/settings/marketing/": {
-      id: "/_auth/settings/marketing/"
-      path: "/marketing"
-      fullPath: "/settings/marketing/"
+    '/_auth/settings/marketing/': {
+      id: '/_auth/settings/marketing/'
+      path: '/marketing'
+      fullPath: '/settings/marketing/'
       preLoaderRoute: typeof AuthSettingsMarketingIndexRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
-    "/_auth/settings/marketing/$provider": {
-      id: "/_auth/settings/marketing/$provider"
-      path: "/marketing/$provider"
-      fullPath: "/settings/marketing/$provider"
+    '/_auth/settings/marketing/$provider': {
+      id: '/_auth/settings/marketing/$provider'
+      path: '/marketing/$provider'
+      fullPath: '/settings/marketing/$provider'
       preLoaderRoute: typeof AuthSettingsMarketingProviderRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
-    "/_auth/settings/payments/": {
-      id: "/_auth/settings/payments/"
-      path: "/payments"
-      fullPath: "/settings/payments/"
+    '/_auth/settings/payments/': {
+      id: '/_auth/settings/payments/'
+      path: '/payments'
+      fullPath: '/settings/payments/'
       preLoaderRoute: typeof AuthSettingsPaymentsIndexRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
-    "/_auth/settings/payments/$provider": {
-      id: "/_auth/settings/payments/$provider"
-      path: "/payments/$provider"
-      fullPath: "/settings/payments/$provider"
+    '/_auth/settings/payments/$provider': {
+      id: '/_auth/settings/payments/$provider'
+      path: '/payments/$provider'
+      fullPath: '/settings/payments/$provider'
       preLoaderRoute: typeof AuthSettingsPaymentsProviderRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
-    "/_auth/settings/shipping/": {
-      id: "/_auth/settings/shipping/"
-      path: "/shipping"
-      fullPath: "/settings/shipping/"
+    '/_auth/settings/shipping/': {
+      id: '/_auth/settings/shipping/'
+      path: '/shipping'
+      fullPath: '/settings/shipping/'
       preLoaderRoute: typeof AuthSettingsShippingIndexRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
-    "/_auth/settings/shipping/$carrier": {
-      id: "/_auth/settings/shipping/$carrier"
-      path: "/shipping/$carrier"
-      fullPath: "/settings/shipping/$carrier"
+    '/_auth/settings/shipping/$carrier': {
+      id: '/_auth/settings/shipping/$carrier'
+      path: '/shipping/$carrier'
+      fullPath: '/settings/shipping/$carrier'
       preLoaderRoute: typeof AuthSettingsShippingCarrierRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
-    "/_auth/settings/sms/": {
-      id: "/_auth/settings/sms/"
-      path: "/sms"
-      fullPath: "/settings/sms/"
+    '/_auth/settings/sms/': {
+      id: '/_auth/settings/sms/'
+      path: '/sms'
+      fullPath: '/settings/sms/'
       preLoaderRoute: typeof AuthSettingsSmsIndexRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
-    "/_auth/settings/sms/$provider": {
-      id: "/_auth/settings/sms/$provider"
-      path: "/sms/$provider"
-      fullPath: "/settings/sms/$provider"
+    '/_auth/settings/sms/$provider': {
+      id: '/_auth/settings/sms/$provider'
+      path: '/sms/$provider'
+      fullPath: '/settings/sms/$provider'
       preLoaderRoute: typeof AuthSettingsSmsProviderRouteImport
       parentRoute: typeof AuthSettingsRoute
     }
@@ -1499,7 +1530,9 @@ const AuthReportsRouteChildren: AuthReportsRouteChildren = {
   AuthReportsIndexRoute: AuthReportsIndexRoute,
 }
 
-const AuthReportsRouteWithChildren = AuthReportsRoute._addFileChildren(AuthReportsRouteChildren)
+const AuthReportsRouteWithChildren = AuthReportsRoute._addFileChildren(
+  AuthReportsRouteChildren,
+)
 
 interface AuthSettingsRouteChildren {
   AuthSettingsAccountingRoute: typeof AuthSettingsAccountingRoute
@@ -1563,7 +1596,9 @@ const AuthSettingsRouteChildren: AuthSettingsRouteChildren = {
   AuthSettingsSmsIndexRoute: AuthSettingsSmsIndexRoute,
 }
 
-const AuthSettingsRouteWithChildren = AuthSettingsRoute._addFileChildren(AuthSettingsRouteChildren)
+const AuthSettingsRouteWithChildren = AuthSettingsRoute._addFileChildren(
+  AuthSettingsRouteChildren,
+)
 
 interface AuthRouteChildren {
   AuthCategoriesRoute: typeof AuthCategoriesRoute
@@ -1588,6 +1623,7 @@ interface AuthRouteChildren {
   AuthPromotionsNewRoute: typeof AuthPromotionsNewRoute
   AuthReviewsQuestionsRoute: typeof AuthReviewsQuestionsRoute
   AuthSeoRedirectsRoute: typeof AuthSeoRedirectsRoute
+  AuthStorefrontMenusRoute: typeof AuthStorefrontMenusRoute
   AuthBrandsIndexRoute: typeof AuthBrandsIndexRoute
   AuthContentIndexRoute: typeof AuthContentIndexRoute
   AuthCustomersIndexRoute: typeof AuthCustomersIndexRoute
@@ -1625,6 +1661,7 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthPromotionsNewRoute: AuthPromotionsNewRoute,
   AuthReviewsQuestionsRoute: AuthReviewsQuestionsRoute,
   AuthSeoRedirectsRoute: AuthSeoRedirectsRoute,
+  AuthStorefrontMenusRoute: AuthStorefrontMenusRoute,
   AuthBrandsIndexRoute: AuthBrandsIndexRoute,
   AuthContentIndexRoute: AuthContentIndexRoute,
   AuthCustomersIndexRoute: AuthCustomersIndexRoute,

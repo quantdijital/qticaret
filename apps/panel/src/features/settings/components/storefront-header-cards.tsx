@@ -1,14 +1,17 @@
 import { zodResolver } from "@hookform/resolvers/zod"
+import { Link } from "@tanstack/react-router"
+import { ListTree } from "lucide-react"
 import { useFieldArray, useForm, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { z } from "zod"
 import { CardForm } from "@/components/patterns/card-form"
+import { SectionCard } from "@/components/patterns/section-card"
+import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import type { StorefrontSettings } from "@/features/settings/api/sections"
 import { ShopTokenPreview, TokenSlot } from "@/features/settings/components/shop-token-menu"
 import {
   EmptyLine,
-  LinkRows,
   ListFooter,
   RowActions,
   RowCell,
@@ -18,7 +21,6 @@ import {
   errorLine,
   knownTokens,
   lineSchema,
-  linkSchema,
   useSaveStorefront,
 } from "@/features/settings/storefront"
 import { FULL_RESET } from "@/lib/forms"
@@ -131,68 +133,25 @@ export function AnnouncementsCard({ saved }: { saved: StorefrontSettings }) {
   )
 }
 
-const topLinksSchema = z.object({ links: z.array(linkSchema).max(LIMITS.topLinks) })
-type TopLinkValues = z.infer<typeof topLinksSchema>
-
-const topLinksOf = (saved: StorefrontSettings): TopLinkValues => ({
-  links: saved.top_links.map(({ label, href }) => ({ label, href })),
-})
-
-/** The header's small links above the menu: about, contact, wholesale. */
-export function TopLinksCard({ saved }: { saved: StorefrontSettings }) {
+/**
+ * Where the menus went (adr/0049): the header's menu, the links above it
+ * and the footer's columns are records under Storefront > Menus now.
+ */
+export function MenusMovedCard() {
   const { t } = useTranslation()
-  const { save, saving } = useSaveStorefront()
-  const values = topLinksOf(saved)
-  const form = useForm<TopLinkValues>({
-    resolver: zodResolver(topLinksSchema),
-    values,
-    resetOptions: { keepDirtyValues: true },
-  })
-  const links = useFieldArray({ control: form.control, name: "links" })
-  const { errors } = form.formState
-  const submit = form.handleSubmit((next) => {
-    save({ top_links: next.links }, (stored) => {
-      form.reset(topLinksOf(stored), FULL_RESET)
-    })
-  })
   return (
-    <CardForm
-      title={t(`${S}.topLinks.title`)}
-      description={t(`${S}.topLinks.description`)}
-      dirty={form.formState.isDirty}
-      saving={saving}
-      onSubmit={() => void submit()}
-      onReset={() => {
-        form.reset(values, FULL_RESET)
-      }}
-    >
-      {links.fields.length === 0 ? (
-        <EmptyLine text={t(`${S}.topLinks.empty`)} />
-      ) : (
-        <LinkRows
-          rows={links.fields}
-          idPrefix="storefront-top-link"
-          register={(index, key) => form.register(`links.${index}.${key}`)}
-          errors={(index) => errors.links?.[index]}
-          onMove={(from, to) => {
-            links.move(from, to)
-          }}
-          onRemove={(index) => {
-            links.remove(index)
-          }}
-        />
-      )}
-      <ListFooter
-        label={t(`${S}.links.add`)}
-        hint={t(`${S}.topLinks.hint`, { max: LIMITS.topLinks })}
-        full={links.fields.length >= LIMITS.topLinks}
-        onAdd={() => {
-          links.append({ label: "", href: "" })
-        }}
-      />
-      {links.fields.length > 0 ? (
-        <p className="text-[13px] text-muted-foreground">{t(`${S}.links.hrefHint`)}</p>
-      ) : null}
-    </CardForm>
+    <SectionCard title={t(`${S}.menusMoved.title`)}>
+      <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
+        <p className="max-w-2xl flex-[1_1_20rem] text-[13px] text-muted-foreground">
+          {t(`${S}.menusMoved.text`)}
+        </p>
+        <Button asChild variant="outline">
+          <Link to="/storefront/menus">
+            <ListTree />
+            {t(`${S}.menusMoved.link`)}
+          </Link>
+        </Button>
+      </div>
+    </SectionCard>
   )
 }

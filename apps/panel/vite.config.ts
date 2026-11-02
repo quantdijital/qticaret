@@ -13,13 +13,19 @@ import { defineConfig } from "vitest/config"
  */
 const BACKEND_URL = process.env["PANEL_BACKEND_URL"] ?? "http://localhost:9000"
 const BACKEND_PATHS = ["/admin", "/auth", "/store", "/static", "/health"]
+// Whole path segments only: the panel's own `/storefront/menus` is no `/store` call
+// (a key starting with `^` is a pattern to Vite; a plain one matches any prefix)
+const segment = (path: string) => `^${path}(?:[/?]|$)`
 
 export default defineConfig({
   plugins: [tanstackRouter({ target: "react", autoCodeSplitting: true }), react(), tailwindcss()],
   resolve: { alias: { "@": fileURLToPath(new URL("./src", import.meta.url)) } },
   server: {
     proxy: Object.fromEntries(
-      BACKEND_PATHS.map((path) => [path, { target: BACKEND_URL, headers: { origin: BACKEND_URL } }])
+      BACKEND_PATHS.map((path) => [
+        segment(path),
+        { target: BACKEND_URL, headers: { origin: BACKEND_URL } },
+      ])
     ),
   },
   test: {

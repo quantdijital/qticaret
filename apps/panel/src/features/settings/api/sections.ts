@@ -192,18 +192,16 @@ export interface StorefrontLink {
   href: string
 }
 
-/** The storefront's frame as the shop writes it (F18, docs/19 §4); arrays are saved whole. */
+/**
+ * The storefront's frame as the shop writes it (F18, docs/19 §4); arrays
+ * are saved whole. Its menus are records of their own (adr/0049,
+ * features/storefront/api/menus.ts).
+ */
 export interface StorefrontSettings {
   /** The lines the announcement bar shows in turn. */
   announcements: string[]
-  /** The small links above the header's menu. */
-  top_links: StorefrontLink[]
-  /** The footer's link columns; none: the storefront lists categories and a help column. */
-  footer_groups: { title: string; links: StorefrontLink[] }[]
   /** The shop's promises under the header and beside "add to cart". */
   trust_badges: { icon: TrustIcon; title: string; text: string | null }[]
-  /** The header's menu as the shop names it; none: the top categories and their children. */
-  menu: StorefrontMenuItem[]
   /** The storefront's main colour (`#rrggbb`, lower case); none: the theme's own. */
   primary_color: string | null
   /** The home page's opening; none: the shop's name and its first two categories. */
@@ -227,11 +225,6 @@ export interface StorefrontHero {
   text: string | null
   /** At most two, the first the main button; none: the first two categories. */
   links: StorefrontLink[]
-}
-
-export interface StorefrontMenuItem extends StorefrontLink {
-  /** The panel it opens; the item's own link comes first in it. */
-  children: StorefrontLink[]
 }
 
 /** The places the shop's catalog is sent, in the order the panel shows them. */

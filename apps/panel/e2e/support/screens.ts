@@ -14,6 +14,7 @@ export const SECTIONS = [
   "/promotions",
   "/promotions/price-lists",
   "/promotions/gift-cards",
+  "/storefront/menus",
   "/content",
   "/seo",
   "/reports",

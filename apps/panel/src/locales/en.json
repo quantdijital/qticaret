@@ -41,7 +41,8 @@
     "groups": {
       "sales": "Sales",
       "catalog": "Catalog",
-      "growth": "Growth"
+      "growth": "Growth",
+      "storefront": "Storefront"
     },
     "categories": "Categories",
     "inventory": "Inventory",
@@ -49,8 +50,10 @@
     "seo": "SEO",
     "reports": "Reports",
     "brands": "Brands",
-    "content": "Content",
-    "reviews": "Reviews and questions"
+    "content": "Pages and blog",
+    "reviews": "Reviews and questions",
+    "menus": "Menus",
+    "storefrontSettings": "Storefront settings"
   },
   "login": {
     "title": "Sign in",
@@ -337,7 +340,7 @@
     "saved": "Settings saved.",
     "storefront": {
       "title": "Storefront",
-      "subtitle": "The frame shown on every page of your shop: the main colour, home page opening, announcement bar, top links, menu, trust badges, footer and WhatsApp button. Each card saves its own part.",
+      "subtitle": "The frame on every page of your storefront: the main colour, the home page's opening, the announcement bar, trust badges, the contact form and colour swatches. Each card saves its own part.",
       "moveUp": "{{item}}: move up",
       "moveDown": "{{item}}: move down",
       "remove": "{{item}}: remove",
@@ -390,25 +393,10 @@
         "add": "Add announcement",
         "hint": "Up to {{max}} lines, each up to {{length}} characters."
       },
-      "topLinks": {
-        "title": "Top links",
-        "description": "The small links above the menu: About us, Contact, Wholesale and the like.",
-        "empty": "No top links; no link row shows above the menu.",
-        "hint": "Up to {{max}} links."
-      },
-      "menu": {
-        "title": "Menu",
-        "description": "The main menu in the header. Items you add replace the menu built from your categories by itself; under each item you can add the links its dropdown opens.",
-        "empty": "No menu items; the storefront shows your top categories and their subcategories in the menu by itself.",
-        "item": "Menu item {{number}}",
-        "labelOf": "Label of menu item {{number}}",
-        "hrefOf": "Address of menu item {{number}}",
-        "labelPlaceholder": "Offers",
-        "hrefPlaceholder": "/offers",
-        "add": "Add menu item",
-        "hint": "Up to {{max}} items.",
-        "addChild": "Add sub-link",
-        "childrenHint": "Up to {{max}} sub-links. The dropdown shows the item's own link first."
+      "menusMoved": {
+        "title": "Menus",
+        "text": "The main menu, top links and footer columns now live under Storefront > Menus. Links point at your categories, products and pages, so they never break when an address changes.",
+        "link": "Go to menus"
       },
       "links": {
         "label": "Label",
@@ -419,19 +407,7 @@
         "within": "{{within}}, {{name}}",
         "labelPlaceholder": "About us",
         "hrefPlaceholder": "/about",
-        "add": "Add link",
         "hrefHint": "A page of your shop starts with / (/about); another site is written with https://."
-      },
-      "footer": {
-        "title": "Footer columns",
-        "description": "The link columns at the bottom of the page. With no columns, the storefront shows your categories and a help column by itself.",
-        "empty": "No columns; the footer shows your categories and the help column.",
-        "group": "Column {{number}}",
-        "groupTitle": "Title of column {{number}}",
-        "groupPlaceholder": "Company",
-        "addGroup": "Add column",
-        "hint": "Up to {{max}} columns.",
-        "linksHint": "At least 1 and up to {{max}} links in each column."
       },
       "badges": {
         "title": "Trust badges",
@@ -6016,6 +5992,155 @@
       "address": "Address",
       "whatsapp": "WhatsApp number",
       "freeShippingThreshold": "Free shipping threshold"
+    }
+  },
+  "storefront": {
+    "menus": {
+      "title": "Menus",
+      "description": "The storefront's header menu, top links and footer columns. Links point at your categories, products and pages, so they never break when an address changes.",
+      "add": "Add menu",
+      "list": "Menus",
+      "listHint": "By where they show on the storefront.",
+      "places": {
+        "main": "Main menu",
+        "top": "Top links",
+        "footer": "Footer columns"
+      },
+      "place": {
+        "main": "Main menu",
+        "top": "Top links",
+        "footer": "Footer column"
+      },
+      "fallback": {
+        "main": "No main menu; the storefront shows your category tree in the header.",
+        "top": "No top links; no link row shows above the menu.",
+        "footer": "No columns; the storefront shows your categories and a help column in the footer."
+      },
+      "linkCount_one": "{{count}} link",
+      "linkCount_other": "{{count}} links",
+      "brokenCount_one": "{{count}} link not shown on the storefront",
+      "brokenCount_other": "{{count}} links not shown on the storefront",
+      "columnUp": "Move column {{title}} up",
+      "columnDown": "Move column {{title}} down",
+      "emptyTitle": "No menus yet",
+      "empty": "For now the storefront shows your category tree in the header, and your categories and a help column in the footer. Add a menu to build your own.",
+      "new": {
+        "title": "Add menu",
+        "description": "Choose where the menu shows on the storefront and give it a name; you add its links next.",
+        "place": "Place",
+        "taken": "Already exists",
+        "hints": {
+          "main": "The header's menu; links can open a panel of links under them.",
+          "top": "The small links above the menu: About us, Contact and the like.",
+          "footer": "A column of links at the bottom of the page; there can be several."
+        },
+        "defaults": {
+          "main": "Main menu",
+          "top": "Top links",
+          "footer": ""
+        },
+        "placeholder": "Company",
+        "create": "Create menu",
+        "created": "Menu created."
+      },
+      "editor": {
+        "title": "Menu name",
+        "titleHint": {
+          "main": "Shown in the panel only.",
+          "top": "Shown in the panel only.",
+          "footer": "Shown on the storefront as the column's heading."
+        },
+        "links": "Links",
+        "linksHint": {
+          "nested": "Drag or use the arrows to order them. A link moved under the one above shows in that one's panel in the header.",
+          "flat": "Drag or use the arrows to order them."
+        },
+        "empty": {
+          "main": "No links; the storefront shows your category tree in the header.",
+          "top": "No links; no link row shows above the menu.",
+          "footer": "No links; this column does not show on the storefront."
+        },
+        "addLink": "Add link",
+        "limit": "At most {{links}} links.",
+        "limitNested": "At most {{links}} links, each with at most {{children}} under it.",
+        "discard": "Discard changes",
+        "saved": "Menu saved.",
+        "invalid": "Fix the marked fields before saving.",
+        "delay": "A saved menu shows on the storefront within a minute.",
+        "delete": "Delete menu",
+        "deleteTitle": "Delete this menu?",
+        "deleteText": "“{{title}}” and its links are deleted; the storefront acts as if you had no menu there. This cannot be undone.",
+        "deleted": "Menu deleted."
+      },
+      "row": {
+        "label": "Shown name for {{name}}",
+        "drag": "Drag to move",
+        "moveUp": "{{name}}: move up",
+        "moveDown": "{{name}}: move down",
+        "indent": "{{name}}: move under the one above",
+        "outdent": "{{name}}: move to the top level",
+        "change": "{{name}}: change target",
+        "remove": "{{name}}: remove",
+        "notLive": "Not live",
+        "notLiveHint": "The record is not live, so the link is hidden on the storefront.",
+        "notFound": "Not found",
+        "notFoundHint": "The record was deleted; the link is hidden on the storefront. Change its target or remove it.",
+        "missing": "Deleted record",
+        "urlPlaceholder": "The link's name",
+        "fold": "{{name}}: hide the links under it",
+        "unfold": "{{name}}: show the links under it",
+        "children_one": "{{count}} link under it",
+        "children_other": "{{count}} links under it"
+      },
+      "kinds": {
+        "category": "Category",
+        "product": "Product",
+        "collection": "Collection",
+        "brand": "Brand",
+        "page": "Page",
+        "post": "Blog post",
+        "landing": "Filter page",
+        "legal": "Legal text",
+        "system": "Store page",
+        "url": "External address"
+      },
+      "system": {
+        "home": "Home",
+        "shop": "All products",
+        "blog": "Blog",
+        "reviews": "Customer reviews",
+        "cart": "My cart",
+        "account": "My account",
+        "order_lookup": "Find my order"
+      },
+      "picker": {
+        "add": "Add link",
+        "change": "Change the link's target",
+        "description": "Choose where the link goes; its name and address come from the record and follow it when it changes.",
+        "groups": {
+          "catalog": "Catalog",
+          "content": "Content",
+          "shop": "Store"
+        },
+        "search": "Search by name",
+        "noMatch": "Nothing matches your search.",
+        "none": "Nothing of this kind yet.",
+        "notLive": "Not live",
+        "url": {
+          "address": "Address",
+          "addressHint": "A page of your shop starts with / (/campaigns), another site with https://.",
+          "invalid": "The address must be a shop page starting with / or a site starting with https://.",
+          "name": "Shown name",
+          "namePlaceholder": "Campaigns",
+          "add": "Add link",
+          "change": "Change target"
+        }
+      },
+      "errors": {
+        "required": "This field cannot be empty.",
+        "tooLong": "At most {{max}} characters.",
+        "textInvalid": "Contains a character that cannot be used."
+      }
     }
   }
 }

@@ -19,7 +19,7 @@ import {
 import { tasksQuery } from "@/features/dashboard/api/tasks"
 import { formatCount } from "@/lib/format"
 import { cn } from "@/lib/utils"
-import { NAV_GROUPS, SETTINGS_ITEM, isActive } from "./navigation"
+import { NAV_GROUPS, SETTINGS_ITEM, itemFor } from "./navigation"
 import type { NavItem } from "./navigation"
 import { StoreMark } from "./store-mark"
 
@@ -33,23 +33,18 @@ const ITEM_CLASS = cn(
 
 function NavLink({
   item,
-  pathname,
+  active,
   badge,
 }: {
   item: NavItem
-  pathname: string
+  active: boolean
   badge?: number | undefined
 }) {
   const { t } = useTranslation()
   const label = t(`nav.${item.key}`)
   return (
     <SidebarMenuItem>
-      <SidebarMenuButton
-        asChild
-        isActive={isActive(item, pathname)}
-        tooltip={label}
-        className={ITEM_CLASS}
-      >
+      <SidebarMenuButton asChild isActive={active} tooltip={label} className={ITEM_CLASS}>
         <Link to={item.to}>
           <item.icon />
           <span>{label}</span>
@@ -81,6 +76,8 @@ export function AppSidebar({
 }) {
   const { t } = useTranslation()
   const pathname = useRouterState({ select: (state) => state.location.pathname })
+  // One item lit: Storefront settings, not Settings too, on its page
+  const active = itemFor(pathname)?.key
   // Orders waiting for the shop: the one number worth showing in the menu
   const { data: tasks } = useQuery(tasksQuery())
   const badges: Record<string, number | undefined> = { orders: tasks?.to_ship }
@@ -137,7 +134,7 @@ export function AppSidebar({
                     <NavLink
                       key={item.key}
                       item={item}
-                      pathname={pathname}
+                      active={item.key === active}
                       badge={badges[item.key]}
                     />
                   ))}
@@ -149,7 +146,7 @@ export function AppSidebar({
       </SidebarContent>
       <SidebarFooter className="gap-0.5 border-t border-sidebar-border px-3 py-3">
         <SidebarMenu className="gap-0.5">
-          <NavLink item={SETTINGS_ITEM} pathname={pathname} />
+          <NavLink item={SETTINGS_ITEM} active={active === SETTINGS_ITEM.key} />
         </SidebarMenu>
       </SidebarFooter>
       <SidebarRail />

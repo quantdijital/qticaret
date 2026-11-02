@@ -7,24 +7,22 @@ import type { StorefrontSettings } from "@/features/settings/api/sections"
 import { TrustBadgesCard } from "@/features/settings/components/storefront-badges-card"
 import { ColorCard } from "@/features/settings/components/storefront-color-card"
 import { ContactFormCard } from "@/features/settings/components/storefront-contact-card"
-import { FooterGroupsCard } from "@/features/settings/components/storefront-footer-card"
 import {
   AnnouncementsCard,
-  TopLinksCard,
+  MenusMovedCard,
 } from "@/features/settings/components/storefront-header-cards"
 import { HeroCard } from "@/features/settings/components/storefront-hero-card"
-import { MenuCard } from "@/features/settings/components/storefront-menu-card"
 import { SwatchesCard } from "@/features/settings/components/storefront-swatches-card"
 import { errorText } from "@/lib/errors"
 
 /**
  * Settings > Storefront (F18, docs/19 §4): what the shop writes around every
  * page of its storefront: first its main colour and the home page's opening,
- * then top to bottom the announcement bar, the links above the menu, the
- * menu, the trust badges, the footer's columns and the page the contact
- * form shows on; last the colour names its option and filter values show
- * as swatches by. Each card saves its own part. The WhatsApp number is a
- * store detail (Settings > Store profile, adr/0048).
+ * then top to bottom the announcement bar, the trust badges and the page the
+ * contact form shows on; last the colour names its option and filter values
+ * show as swatches by. Each card saves its own part. The menus are under
+ * Storefront > Menus (adr/0049), pointed at where they used to be; the
+ * WhatsApp number is a store detail (Settings > Store profile, adr/0048).
  */
 export function StorefrontPage() {
   const { t } = useTranslation()
@@ -44,10 +42,8 @@ export function StorefrontPage() {
           <ColorCard saved={query.data.values} />
           <HeroCard saved={query.data.values} />
           <AnnouncementsCard saved={query.data.values} />
-          <TopLinksCard saved={query.data.values} />
-          <MenuCard saved={query.data.values} />
+          <MenusMovedCard />
           <TrustBadgesCard saved={query.data.values} />
-          <FooterGroupsCard saved={query.data.values} />
           <ContactFormCard saved={query.data.values} />
           <SwatchesCard saved={query.data.values} />
         </>

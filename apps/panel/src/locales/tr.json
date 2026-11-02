@@ -41,7 +41,8 @@
     "groups": {
       "sales": "Satış",
       "catalog": "Katalog",
-      "growth": "Büyüme"
+      "growth": "Büyüme",
+      "storefront": "Vitrin"
     },
     "categories": "Kategoriler",
     "inventory": "Stok",
@@ -49,8 +50,10 @@
     "seo": "SEO",
     "reports": "Raporlar",
     "brands": "Markalar",
-    "content": "İçerik",
-    "reviews": "Yorumlar ve sorular"
+    "content": "Sayfalar ve blog",
+    "reviews": "Yorumlar ve sorular",
+    "menus": "Menüler",
+    "storefrontSettings": "Vitrin ayarları"
   },
   "login": {
     "title": "Giriş yap",
@@ -337,7 +340,7 @@
     "saved": "Ayarlar kaydedildi.",
     "storefront": {
       "title": "Vitrin",
-      "subtitle": "Mağazanızın her sayfasında görünen çerçeve: ana renk, ana sayfa girişi, duyuru şeridi, üst bağlantılar, menü, güven rozetleri, alt bilgi ve WhatsApp düğmesi. Her kart kendi bölümünü kaydeder.",
+      "subtitle": "Mağazanızın her sayfasında görünen çerçeve: ana renk, ana sayfa girişi, duyuru şeridi, güven rozetleri, iletişim formu ve renk örnekleri. Her kart kendi bölümünü kaydeder.",
       "moveUp": "{{item}}: yukarı taşı",
       "moveDown": "{{item}}: aşağı taşı",
       "remove": "{{item}}: kaldır",
@@ -390,25 +393,10 @@
         "add": "Duyuru ekle",
         "hint": "En çok {{max}} satır, her biri en çok {{length}} karakter."
       },
-      "topLinks": {
-        "title": "Üst bağlantılar",
-        "description": "Menünün üstündeki küçük bağlantılar: Hakkımızda, İletişim, Toptan satış gibi.",
-        "empty": "Üst bağlantı yok; menünün üstünde bağlantı satırı görünmez.",
-        "hint": "En çok {{max}} bağlantı."
-      },
-      "menu": {
-        "title": "Menü",
-        "description": "Başlıktaki ana menü. Öğe eklerseniz kategorilerinizden kendiliğinden oluşan menünün yerini alır; her öğenin altına açılan bağlantılar ekleyebilirsiniz.",
-        "empty": "Menü öğesi yok; vitrin üst kategorilerinizi ve alt kategorilerini menüde kendiliğinden gösteriyor.",
-        "item": "{{number}}. menü öğesi",
-        "labelOf": "{{number}}. menü öğesinin adı",
-        "hrefOf": "{{number}}. menü öğesinin adresi",
-        "labelPlaceholder": "Kampanyalar",
-        "hrefPlaceholder": "/kampanyalar",
-        "add": "Menü öğesi ekle",
-        "hint": "En çok {{max}} öğe.",
-        "addChild": "Alt bağlantı ekle",
-        "childrenHint": "En çok {{max}} alt bağlantı. Açılan menüde önce öğenin kendi bağlantısı görünür."
+      "menusMoved": {
+        "title": "Menüler",
+        "text": "Ana menü, üst bağlantılar ve alt bilgi sütunları artık Vitrin > Menüler ekranında. Bağlantılar kategori, ürün ve sayfalarınıza bağlanır; adresleri değişse de kırılmaz.",
+        "link": "Menülere git"
       },
       "links": {
         "label": "Görünen ad",
@@ -419,19 +407,7 @@
         "within": "{{within}}, {{name}}",
         "labelPlaceholder": "Hakkımızda",
         "hrefPlaceholder": "/hakkimizda",
-        "add": "Bağlantı ekle",
         "hrefHint": "Mağazanızdaki bir sayfanın adresi / ile başlar (/hakkimizda); başka bir site https:// ile yazılır."
-      },
-      "footer": {
-        "title": "Alt bilgi sütunları",
-        "description": "Sayfanın altındaki bağlantı sütunları. Hiç sütun eklemezseniz vitrin kategorilerinizi ve bir yardım sütununu kendiliğinden gösterir.",
-        "empty": "Sütun yok; vitrin alt bilgide kategorilerinizi ve yardım sütununu gösteriyor.",
-        "group": "{{number}}. sütun",
-        "groupTitle": "{{number}}. sütunun başlığı",
-        "groupPlaceholder": "Kurumsal",
-        "addGroup": "Sütun ekle",
-        "hint": "En çok {{max}} sütun.",
-        "linksHint": "Her sütunda en az 1, en çok {{max}} bağlantı."
       },
       "badges": {
         "title": "Güven rozetleri",
@@ -6016,6 +5992,155 @@
       "address": "Adres",
       "whatsapp": "WhatsApp numarası",
       "freeShippingThreshold": "Ücretsiz kargo eşiği"
+    }
+  },
+  "storefront": {
+    "menus": {
+      "title": "Menüler",
+      "description": "Vitrinin başlık menüsü, üst bağlantıları ve alt bilgi sütunları. Bağlantılar kategori, ürün ve sayfalarınıza bağlanır; adresleri değişse de kırılmaz.",
+      "add": "Menü ekle",
+      "list": "Menüler",
+      "listHint": "Vitrinde göründükleri yere göre.",
+      "places": {
+        "main": "Ana menü",
+        "top": "Üst bağlantılar",
+        "footer": "Alt bilgi sütunları"
+      },
+      "place": {
+        "main": "Ana menü",
+        "top": "Üst bağlantılar",
+        "footer": "Alt bilgi sütunu"
+      },
+      "fallback": {
+        "main": "Ana menü yok; vitrin başlıkta kategori ağacınızı gösteriyor.",
+        "top": "Üst bağlantı yok; menünün üstünde bağlantı satırı görünmüyor.",
+        "footer": "Sütun yok; vitrin alt bilgide kategorilerinizi ve yardım sütununu gösteriyor."
+      },
+      "linkCount_one": "{{count}} bağlantı",
+      "linkCount_other": "{{count}} bağlantı",
+      "brokenCount_one": "{{count}} bağlantı vitrinde görünmüyor",
+      "brokenCount_other": "{{count}} bağlantı vitrinde görünmüyor",
+      "columnUp": "{{title}} sütununu yukarı taşı",
+      "columnDown": "{{title}} sütununu aşağı taşı",
+      "emptyTitle": "Henüz menü yok",
+      "empty": "Vitrin şimdilik başlıkta kategori ağacınızı, alt bilgide kategorilerinizi ve yardım sütununu gösteriyor. Kendi menünüzü kurmak için bir menü ekleyin.",
+      "new": {
+        "title": "Menü ekle",
+        "description": "Menünün vitrinde nerede görüneceğini seçin ve ona bir ad verin; bağlantıları sonra eklersiniz.",
+        "place": "Yeri",
+        "taken": "Zaten var",
+        "hints": {
+          "main": "Başlıktaki menü; bağlantıların altına açılan bağlantılar eklenebilir.",
+          "top": "Menünün üstündeki küçük bağlantılar: Hakkımızda, İletişim gibi.",
+          "footer": "Sayfanın altındaki bir bağlantı sütunu; birden çok sütun olabilir."
+        },
+        "defaults": {
+          "main": "Ana menü",
+          "top": "Üst bağlantılar",
+          "footer": ""
+        },
+        "placeholder": "Kurumsal",
+        "create": "Menüyü oluştur",
+        "created": "Menü oluşturuldu."
+      },
+      "editor": {
+        "title": "Menü adı",
+        "titleHint": {
+          "main": "Yalnızca panelde görünür.",
+          "top": "Yalnızca panelde görünür.",
+          "footer": "Vitrinde sütunun başlığı olarak görünür."
+        },
+        "links": "Bağlantılar",
+        "linksHint": {
+          "nested": "Sürükleyerek ya da oklarla sıralayın. Bir bağlantıyı üsttekinin altına alırsanız başlıkta onun açılır menüsünde görünür.",
+          "flat": "Sürükleyerek ya da oklarla sıralayın."
+        },
+        "empty": {
+          "main": "Bağlantı yok; vitrin başlıkta kategori ağacınızı gösteriyor.",
+          "top": "Bağlantı yok; menünün üstünde bağlantı satırı görünmüyor.",
+          "footer": "Bağlantı yok; bu sütun vitrinde görünmüyor."
+        },
+        "addLink": "Bağlantı ekle",
+        "limit": "En çok {{links}} bağlantı.",
+        "limitNested": "En çok {{links}} bağlantı; her birinin altında en çok {{children}}.",
+        "discard": "Değişiklikleri at",
+        "saved": "Menü kaydedildi.",
+        "invalid": "Kaydetmeden önce işaretli alanları düzeltin.",
+        "delay": "Kaydedilen menü bir dakika içinde vitrinde görünür.",
+        "delete": "Menüyü sil",
+        "deleteTitle": "Menü silinsin mi?",
+        "deleteText": "“{{title}}” ve içindeki bağlantılar silinir; vitrin o yerde menünüz yokmuş gibi davranır. Bu işlem geri alınamaz.",
+        "deleted": "Menü silindi."
+      },
+      "row": {
+        "label": "{{name}} için görünen ad",
+        "drag": "Sürükleyerek taşıyın",
+        "moveUp": "{{name}}: yukarı taşı",
+        "moveDown": "{{name}}: aşağı taşı",
+        "indent": "{{name}}: üsttekinin altına al",
+        "outdent": "{{name}}: üst düzeye çıkar",
+        "change": "{{name}}: hedefi değiştir",
+        "remove": "{{name}}: kaldır",
+        "notLive": "Yayında değil",
+        "notLiveHint": "Kayıt yayında olmadığı için bağlantı vitrinde gizli.",
+        "notFound": "Bulunamadı",
+        "notFoundHint": "Kayıt silinmiş; bağlantı vitrinde gizli. Hedefini değiştirin ya da kaldırın.",
+        "missing": "Silinmiş kayıt",
+        "urlPlaceholder": "Bağlantının adı",
+        "fold": "{{name}}: alt bağlantıları gizle",
+        "unfold": "{{name}}: alt bağlantıları göster",
+        "children_one": "{{count}} alt bağlantı",
+        "children_other": "{{count}} alt bağlantı"
+      },
+      "kinds": {
+        "category": "Kategori",
+        "product": "Ürün",
+        "collection": "Koleksiyon",
+        "brand": "Marka",
+        "page": "Sayfa",
+        "post": "Blog yazısı",
+        "landing": "Filtre sayfası",
+        "legal": "Yasal metin",
+        "system": "Mağaza sayfası",
+        "url": "Dış adres"
+      },
+      "system": {
+        "home": "Ana sayfa",
+        "shop": "Tüm ürünler",
+        "blog": "Blog",
+        "reviews": "Müşteri yorumları",
+        "cart": "Sepetim",
+        "account": "Hesabım",
+        "order_lookup": "Siparişimi bul"
+      },
+      "picker": {
+        "add": "Bağlantı ekle",
+        "change": "Bağlantının hedefini değiştir",
+        "description": "Bağlantının açacağı yeri seçin; adı ve adresi kayıttan gelir, kayıt değişince bağlantı da güncellenir.",
+        "groups": {
+          "catalog": "Katalog",
+          "content": "İçerik",
+          "shop": "Mağaza"
+        },
+        "search": "Ada göre ara",
+        "noMatch": "Aramanızla eşleşen kayıt yok.",
+        "none": "Bu türde henüz kayıt yok.",
+        "notLive": "Yayında değil",
+        "url": {
+          "address": "Adres",
+          "addressHint": "Mağazanızdaki bir sayfa / ile (/kampanyalar), başka bir site https:// ile başlar.",
+          "invalid": "Adres / ile başlayan bir mağaza sayfası ya da https:// ile başlayan bir site olmalı.",
+          "name": "Görünen ad",
+          "namePlaceholder": "Kampanyalar",
+          "add": "Bağlantıyı ekle",
+          "change": "Hedefi değiştir"
+        }
+      },
+      "errors": {
+        "required": "Bu alan boş bırakılamaz.",
+        "tooLong": "En çok {{max}} karakter olabilir.",
+        "textInvalid": "Kullanılamayan bir karakter içeriyor."
+      }
     }
   }
 }

@@ -10,12 +10,7 @@ export const URL = "/admin/platform-settings/storefront"
 
 export const SAVED: StorefrontSettings = {
   announcements: ["1500 TL ve üzeri kargo bedava"],
-  top_links: [{ label: "Hakkımızda", href: "/hakkimizda" }],
-  footer_groups: [
-    { title: "Kurumsal", links: [{ label: "Mesafeli satış", href: "/mesafeli-satis" }] },
-  ],
   trust_badges: [{ icon: "truck", title: "Aynı gün kargo", text: null }],
-  menu: [],
   primary_color: null,
   hero: null,
   contact_form_path: "/iletisim",
