@@ -23,6 +23,7 @@ type Amount = MedusaAmount | null | undefined
 export interface PaymentFacts {
   raw_total?: Amount
   total?: Amount
+  metadata?: Record<string, unknown> | null
   payment_collection?: {
     raw_amount?: Amount
     amount?: Amount
@@ -71,7 +72,9 @@ export function paymentMismatch(cart: PaymentFacts): boolean {
 export function paidOutsideCheckout(cart: PaymentFacts): boolean {
   const collection = cart.payment_collection
   if (!collection || (kurusOf(collection.raw_amount, collection.amount) ?? 0) === 0) {
-    return false
+    // Nothing to pay only through our `credit` start, which marks the cart (security review
+    // 2026-11-02): it runs the guards every way to pay runs
+    return !cart.metadata?.["qt_credit_checkout"]
   }
   const live = (collection.payment_sessions ?? []).filter(
     (session) => session && LIVE.has(session.status ?? "")
@@ -80,6 +83,7 @@ export function paidOutsideCheckout(cart: PaymentFacts): boolean {
 }
 
 export const PAYMENT_FACT_FIELDS = [
+  "metadata",
   "total",
   "raw_total",
   "payment_collection.amount",

@@ -65,7 +65,7 @@ export function loadStaffStock(
   )
 }
 
-/** A contact message as its staff alert names it: who wrote, about what. */
+/** A contact message as its staff alert names it: about what, never who. */
 export async function loadStaffContact(
   container: Container,
   messageId: string
@@ -73,13 +73,13 @@ export async function loadStaffContact(
   const messages = container.resolve<ContactMessagesModuleService>(CONTACT_MESSAGES_MODULE)
   const [message] = await messages.listContactMessages(
     { id: messageId },
-    { select: ["subject", "sealed"], take: 1 }
+    { select: ["subject"], take: 1 }
   )
   if (!message) {
     return null
   }
   return {
-    vars: { name: messages.open(message.sealed).name, subject: message.subject },
+    vars: { subject: message.subject },
     ...STAFF,
     resourceType: "contact_message",
   }

@@ -103,3 +103,18 @@ Next.js 16.4.2'de doğrulananlar (Context7, `/vercel/next.js/v16.2.9`; 16.4.2, 1
   - Düşük: aynı anda iki KVKK talebi açılabiliyordu → açık talep denetimi iş akışında kilit altında (hesap ve panel). `/store/reviews` satış kanalına bakmıyor, yayında olmayan ürünlerin yorumlarını sayıyordu → yalnız yayındaki ve anahtarın kanalındaki ürünler. Giriş çerezi yönlendiren sayfanın yolunu tutuyor, boyutu sınırsızdı → yalnız köken, 2500 karakter sınırı. İmzalı adres başlıkları iki dakika boyunca yeniden kullanılabiliyordu → izin verilen saat farkı 30 sn.
   - **Karar (otonom, gözden geçir):** giriş çerezi kişisel veri ve tanımlayıcı taşımadığı (kampanya kelimeleri, kaynak site, oturum süresi) için çerez onayına bağlanmadı; avukat bulunursa sorulacak (adr/0039 §2).
   - **F16 şartı:** vitrin → backend hattı özel ağda ya da TLS'li olmalı: imzalı başlıklar ve müşteri jetonu bu hatta düz gider.
+- **Üçüncü bağımsız güvenlik incelemesi (2026-11-02 gece; iletişim formu, bülten, önizleme, hediye kartıyla ödeme, kargo takibi):** yüksek bulgu yok; hepsi düzeltildi.
+  - Orta:
+    - İletişim formunun personel e-postası, günlük e-posta bütçesini (sipariş e-postaları dahil) tüketebiliyordu. Artık mağaza genelinde 10 dakikada bir gidiyor ve gönderenin adını taşımıyor.
+    - Ödenecek tutarı olmayan sepet, `credit` başlatmasının korumalarını (hız, iş kanıtı, kara liste, hazırlık denetimi) atlayıp doğrudan tamamlanabiliyordu. Bunun için Medusa'nın açık `POST /store/payment-collections` ucu kullanılabiliyordu. Artık bu uç kapalı; tamamlama da yalnız `credit` başlatmasının sepete yazdığı `qt_credit_checkout` işaretiyle mümkün (testli).
+    - Zil kaydı gönderenin adını süresiz tutuyordu. Artık yalnız konu tutuluyor.
+  - Düşük:
+    - Bülten bir adrese art arda onay e-postası yağdırabiliyordu. Artık bekleyen istek varsa 24 saat yeni e-posta gitmiyor.
+    - Bülten, yanıt süresinden adresin abone olup olmadığını belli ediyordu. Artık gönderim istek yolunun dışında yapılıyor.
+    - Girişli müşteri başkasının adresini yazınca izin o müşterinin hesabına bağlanıyordu. Artık yalnız hesabın kendi adresiyse bağlanıyor.
+    - Gönderen metni personel e-postasında görünüyordu. Artık hiç gitmiyor.
+    - Önizleme bağlantısı sonraki düzenlemeleri de gösteriyordu. Artık bağlantı içeriğin kaydedilme anına bağlı; yeniden kaydedince eski bağlantı açılmıyor.
+  - Ek sağlamlaştırmalar:
+    - Toplam okunamazsa "ödenecek tutar yok" sayılmıyor.
+    - `credit` başlatması, önceki kapıda ödeme ücret satırını temizliyor.
+    - Önizleme rotası boş gövde şemasıyla korunuyor.

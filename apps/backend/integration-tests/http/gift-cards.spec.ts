@@ -218,6 +218,23 @@ medusaIntegrationTestRunner({
       })
       const unpaid = await complete(sly)
 
+      // Nothing to pay, but never through the guarded start: Medusa's own collection route is
+      // closed, and the cart is not completed
+      const skipped = await readyCart(getContainer(), shop, variantId)
+      const fourth = await giftCard(1000)
+      await http.post(
+        `/store/carts/${skipped}/gift-cards`,
+        { code: fourth.code },
+        { headers: store.headers }
+      )
+      const collection = await settle(
+        http.post("/store/payment-collections", { cart_id: skipped }, { headers: store.headers })
+      )
+      const unguarded = await complete(skipped)
+
+      expect(collection.status).toBe(400)
+      expect(unguarded.status).toBeGreaterThanOrEqual(400)
+      expect(unguarded.data.type).not.toBe("order")
       expect([refused.status, refused.data.message]).toEqual([400, "payments.amount_due"])
       expect(unpaid.status).toBeGreaterThanOrEqual(400)
       expect(unpaid.data.type).not.toBe("order")

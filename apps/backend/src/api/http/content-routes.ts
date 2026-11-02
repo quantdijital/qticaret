@@ -1,4 +1,5 @@
 import { validateAndTransformBody, validateAndTransformQuery } from "@medusajs/framework/http"
+import { z } from "@medusajs/framework/zod"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
 import { AdminGetContent, AdminPostContent, AdminUpdateContent } from "../admin/content/validators"
 import { AdminGetDashboardNoQuery } from "../admin/dashboard/validators"
@@ -68,6 +69,12 @@ export const CONTENT_ROUTES = [
     matcher: "/store/landings/:id/products",
     methods: ["GET" as const],
     middlewares: [validateAndTransformQuery(StoreGetLandingProducts, {})],
+  },
+  // A draft's preview link: no body at all (CLAUDE.md: every route has its schema)
+  {
+    matcher: "/admin/content/:id/preview",
+    methods: ["POST" as const],
+    middlewares: [validateAndTransformBody(z.object({}).strict())],
   },
   // A draft's signed preview (F18)
   {

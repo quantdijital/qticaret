@@ -191,6 +191,12 @@ export const PAYMENT_ROUTES = [
     matcher: "/store/payment-collections/:id/payment-sessions",
     middlewares: [refuseCoreSessions],
   },
+  // A collection is made by our checkout's workflows only: one made here at 0 would
+  // let a cart with nothing to pay skip the payment start's guards (security review 2026-11-02)
+  {
+    matcher: "/store/payment-collections",
+    middlewares: [refuseCoreSessions],
+  },
   {
     matcher: "/store/carts/:id/complete",
     // F15.6 (adr/0044): the block list once more before the order is made

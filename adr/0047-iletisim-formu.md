@@ -20,7 +20,12 @@ Vitrinin `/iletisim` sayfası yalnızca WhatsApp, telefon ve e-posta bağlantıs
    - Aynı adresten saatteki ilk mesajdan sonrası için iş kanıtı istenir (`contact` kapsamı).
    - E-posta alan adının posta kabul etmesi gerekir.
    - Yanıt yalnızca "alındı" der.
-5. **Personel bildirimi:** panel ziline düşer (`contact_message`). Personel listesi varsa e-posta da gider (`staff.contact_message`). Bu e-posta Ayarlar > Bildirimler'den kapatılabilir ve varsayılanı açıktır. E-postada yalnızca gönderenin adı ve konu bulunur; mesajın kendisi panelde okunur.
+5. **Personel bildirimi:** panel ziline düşer (`contact_message`). Personel listesi varsa e-posta da gider (`staff.contact_message`). Bu e-posta Ayarlar > Bildirimler'den kapatılabilir ve varsayılanı açıktır.
+   - Zilde ve e-postada **yalnızca konu** bulunur. Gönderenin adı ve mesaj panelde okunur.
+     - Ad zil kaydında kalsaydı mesajın silinmesinden, saklama süresinden ve KVKK silmesinden sonra da yaşardı.
+     - Gönderenin yazdığı metin mağazanın kendi adresinden giden e-postada oltalamaya alet olabilirdi.
+   - E-posta mağaza genelinde en çok **10 dakikada bir** gider. Bu sınır olmasaydı birçok adresten gelen mesaj seli siparişlerin de kullandığı günlük e-posta bütçesini bitirebilirdi.
+   - Bu iki karar üçüncü güvenlik incelemesinden (2026-11-02) geldi.
 6. **Panel:** Müşteriler > İletişim mesajları.
    - Bekleyenler eskiden yeniye, yanıtlananlar yeniden eskiye sıralanır.
    - "Yanıtlandı" işaretini `operations` rolü de koyabilir. Silme yetkisi yöneticidedir.

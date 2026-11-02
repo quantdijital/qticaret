@@ -4,7 +4,7 @@ import {
   refreshPaymentCollectionForCartWorkflow,
   releaseLockStep,
 } from "@medusajs/medusa/core-flows"
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
 import {
   StepResponse,
   WorkflowResponse,
@@ -15,7 +15,16 @@ import {
 import { ValidationError } from "../../lib/errors"
 import { fromMedusaAmount } from "../../lib/money"
 import type { MedusaAmount } from "../../lib/money"
+import { applyPaymentFeeStep } from "./steps/payment-fee"
 import { readCheckoutCartStep } from "./steps/read-checkout-cart"
+
+/**
+ * Set on the cart by this workflow alone (storefronts cannot write `qt_`
+ * metadata): a cart with nothing to pay is completed only once it went
+ * through here, with the same guards as every way to pay
+ * (`requireCheckoutPayment`, security review 2026-11-02).
+ */
+export const CREDIT_CHECKOUT_MARK = "qt_credit_checkout"
 
 export interface StartCreditCheckoutInput {
   cart_id: string
@@ -32,11 +41,37 @@ const checkNothingDueStep = createStep(
       filters: { id: input.cart_id },
     })
     const cart = data[0] as { total?: MedusaAmount; raw_total?: MedusaAmount } | undefined
-    const due = fromMedusaAmount(cart?.raw_total ?? cart?.total ?? 0, { allowRounding: true })
+    const total = cart?.raw_total ?? cart?.total
+    // A total that cannot be read is never taken for nothing due
+    if (total === undefined) {
+      throw new ValidationError("payments.amount_due", { field: "provider_id" })
+    }
+    const due = fromMedusaAmount(total, { allowRounding: true })
     if (due !== 0) {
       throw new ValidationError("payments.amount_due", { field: "provider_id" })
     }
     return new StepResponse({ due })
+  }
+)
+
+/** Marks the cart as started with nothing to pay; undone, the mark goes. */
+const markCreditCheckoutStep = createStep(
+  "payments-mark-credit-checkout",
+  async (input: { cart_id: string }, { container }) => {
+    const carts = container.resolve(Modules.CART)
+    const cart = await carts.retrieveCart(input.cart_id, { select: ["id", "metadata"] })
+    const before = cart.metadata ?? null
+    await carts.updateCarts(input.cart_id, {
+      metadata: { ...(before ?? {}), [CREDIT_CHECKOUT_MARK]: new Date().toISOString() },
+    })
+    return new StepResponse(null, { id: input.cart_id, metadata: before })
+  },
+  async (previous, { container }) => {
+    if (previous) {
+      await container
+        .resolve(Modules.CART)
+        .updateCarts(previous.id, { metadata: previous.metadata ?? {} })
+    }
   }
 )
 
@@ -50,6 +85,12 @@ const checkNothingDueStep = createStep(
 export const startCreditCheckoutWorkflow = createWorkflow(
   "payments-start-credit-checkout",
   (input: StartCreditCheckoutInput) => {
+    // A cash on delivery fee line left from an earlier choice goes (no fee without a way to pay)
+    applyPaymentFeeStep({
+      cart_id: input.cart_id,
+      provider_id: "credit",
+      sales_channel_ids: input.sales_channel_ids,
+    })
     acquireLockStep({ key: input.cart_id, timeout: 5, ttl: 30 })
     const cart = readCheckoutCartStep({
       cart_id: input.cart_id,
@@ -68,6 +109,7 @@ export const startCreditCheckoutWorkflow = createWorkflow(
     ).then(() => {
       refreshPaymentCollectionForCartWorkflow.runAsStep({ input: { cart_id: input.cart_id } })
     })
+    markCreditCheckoutStep({ cart_id: input.cart_id })
     releaseLockStep({ key: input.cart_id })
     return new WorkflowResponse({ cart_id: input.cart_id })
   }

@@ -34,9 +34,8 @@ export interface StaffMfaVars {
   change: "enabled" | "disabled" | "reset"
 }
 
-/** A contact message came: who and about what; the message itself stays in the panel. */
+/** A contact message came, about what; who and what they wrote stay in the panel. */
 export interface StaffContactVars {
-  name: string
   subject: "order" | "product" | "return" | "payment" | "other"
 }
 
@@ -148,18 +147,18 @@ export const staffContactMessage: MessageTemplate<StaffContactVars> = {
     const subject = messageText(`staff_contact.subjects.${vars.subject}`)
     return renderEmail(brand, {
       subject: messageText("staff_contact.subject", { subject }),
-      preheader: messageText("staff_contact.preheader", { name: vars.name }),
+      preheader: messageText("staff_contact.preheader"),
       heading: messageText("staff_contact.heading"),
       blocks: [
         {
           kind: "paragraph",
-          text: messageText("staff_contact.intro", { name: vars.name, subject }),
+          text: messageText("staff_contact.intro", { subject }),
         },
       ],
       footer: FOOTER(brand.shopName),
     })
   },
-  sample: { name: "Ayşe Yılmaz", subject: "order" },
+  sample: { subject: "order" },
 }
 
 /** Monday's SEO summary: the shop's average score and what needs work first. */

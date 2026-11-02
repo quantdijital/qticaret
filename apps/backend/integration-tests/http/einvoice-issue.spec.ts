@@ -83,7 +83,12 @@ medusaIntegrationTestRunner({
       return invoiceOf(orderId)
     }
 
+    // The test shop sends no e-mail (the "told" check reads the message kept as skipped),
+    // whatever transport the machine's environment names
+    const transport = process.env["EMAIL_TRANSPORT"]
+
     beforeAll(async () => {
+      Reflect.deleteProperty(process.env, "EMAIL_TRANSPORT")
       parasut = await startFakeParasut(client, user)
       Object.assign(process.env, {
         PARASUT_CLIENT_ID: client.clientId,
@@ -95,6 +100,9 @@ medusaIntegrationTestRunner({
     afterAll(async () => {
       for (const name of ENV) {
         Reflect.deleteProperty(process.env, name)
+      }
+      if (transport !== undefined) {
+        process.env["EMAIL_TRANSPORT"] = transport
       }
       await parasut.close()
     })

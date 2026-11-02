@@ -21,7 +21,7 @@ export const NOTIFICATION_MESSAGES: Readonly<
   tr: {
     "contact.message_received": {
       title: "Yeni iletişim mesajı: {{subject}}",
-      description: "{{name}} vitrinden yazdı.",
+      description: "Müşteriler > İletişim mesajları'nda okuyun.",
     },
     "stock.low_stock": {
       title: "Düşük stok: {{name}}",
@@ -102,7 +102,7 @@ export const NOTIFICATION_MESSAGES: Readonly<
   en: {
     "contact.message_received": {
       title: "New contact message: {{subject}}",
-      description: "{{name}} wrote from the storefront.",
+      description: "Read it under Customers > Contact messages.",
     },
     "messaging.sms_daily_limit": {
       title: "80% of today's SMS limit used",

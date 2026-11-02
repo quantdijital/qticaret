@@ -129,6 +129,9 @@ medusaIntegrationTestRunner({
       expect(unknown.status).toBe(404)
       // The draft itself stays out of sight
       expect((await storeGet(`/store/content/${id}`)).status).toBe(404)
+      // Saved again: the link made before shows nothing written since
+      await save({ title: "Taslak, ikinci hâli" }, id)
+      expect((await storeGet(`/store/content/preview/${token}`)).status).toBe(404)
     })
 
     it("renders a post with its cards and cover, and makes it an article", async () => {

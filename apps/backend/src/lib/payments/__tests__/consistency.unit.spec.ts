@@ -36,8 +36,15 @@ describe("paidOutsideCheckout", () => {
   })
 
   it("lets a hosted form's session, and a cart credit pays in full, through", () => {
+    const marked = { metadata: { qt_credit_checkout: "2026-11-02T03:00:00.000Z" } }
     expect(paidOutsideCheckout(cart([session()]))).toBe(false)
-    expect(paidOutsideCheckout(cart([], "0", "0"))).toBe(false)
-    expect(paidOutsideCheckout({ raw_total: "0" })).toBe(false)
+    expect(paidOutsideCheckout({ ...cart([], "0", "0"), ...marked })).toBe(false)
+    expect(paidOutsideCheckout({ raw_total: "0", ...marked })).toBe(false)
+  })
+
+  it("refuses a cart with nothing to pay that did not start through the credit route", () => {
+    expect(paidOutsideCheckout(cart([], "0", "0"))).toBe(true)
+    expect(paidOutsideCheckout({ raw_total: "0" })).toBe(true)
+    expect(paidOutsideCheckout({ raw_total: "0", metadata: { qt_credit: "x" } })).toBe(true)
   })
 })

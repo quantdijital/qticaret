@@ -1,3 +1,4 @@
+import { createPaymentCollectionForCartWorkflow } from "@medusajs/medusa/core-flows"
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
@@ -172,17 +173,13 @@ medusaIntegrationTestRunner({
       await send(`/store/carts/${cartId}/shipping-methods`, {
         option_id: (options[0] as { id: string }).id,
       })
-      const collection = await send<{ payment_collection: { id: string } }>(
-        "/store/payment-collections",
-        {
-          cart_id: cartId,
-        }
-      )
-      const completed = await completeWithSystemPayment(
-        getContainer(),
-        cartId,
-        collection.data.payment_collection.id
-      )
+      // Medusa's own collection route is closed to shoppers (security review 2026-11-02)
+      const { result: collection } = await createPaymentCollectionForCartWorkflow(
+        getContainer()
+      ).run({
+        input: { cart_id: cartId },
+      })
+      const completed = await completeWithSystemPayment(getContainer(), cartId, collection.id)
 
       expect(completed).toEqual({ order_id: null, message: "cart.shipping_not_needed" })
     })

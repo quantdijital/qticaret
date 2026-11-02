@@ -181,6 +181,10 @@ medusaIntegrationTestRunner({
         () => Promise.resolve(confirmMails()[0]),
         (found) => found !== undefined
       )
+      // Asked again before the owner answered: no second e-mail for a day
+      await subscribe()
+      await new Promise((resolve) => setTimeout(resolve, 300))
+      const whileWaiting = confirmMails().length
       const beforeConfirming = await messaging().consentOf("email", email)
       const token = /consents\/confirm\?t=([\w-]{43})/.exec(mail?.html ?? "")?.[1] ?? ""
       const confirmed = await settle(
@@ -190,6 +194,7 @@ medusaIntegrationTestRunner({
       const again = await subscribe()
       await new Promise((resolve) => setTimeout(resolve, 300))
 
+      expect(whileWaiting).toBe(1)
       expect([asked.status, asked.data.status]).toEqual([202, "pending"])
       expect(beforeConfirming).toBeNull()
       expect(confirmed.status).toBe(200)
