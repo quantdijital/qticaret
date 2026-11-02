@@ -13,6 +13,7 @@ import type { MenuInput, MenuLinkInput } from "../../lib/storefront/menus"
 import { STOREFRONT_MENUS_MODULE } from "../../modules/storefront-menus"
 import type StorefrontMenusModuleService from "../../modules/storefront-menus/service"
 import { existingRecords, isRecordKind } from "./menu-links"
+import { refreshStorefrontStep } from "./steps/refresh-storefront"
 
 const MENUS_LOCK = { key: "storefront-menus", timeout: 10, ttl: 60 }
 
@@ -176,7 +177,11 @@ const saveMenuStep = createStep(
   }
 )
 
-/** Creates or changes a storefront menu (adr/0049): checked, written whole, undone on failure. */
+/**
+ * Creates or changes a storefront menu (adr/0049): checked, written whole,
+ * undone on failure; live at once, so the storefront is told (adr/0048 ek
+ * 2026-11-03).
+ */
 export const saveStorefrontMenuWorkflow = createWorkflow(
   "storefront-menu-save",
   (input: SaveMenuInput) => {
@@ -184,6 +189,7 @@ export const saveStorefrontMenuWorkflow = createWorkflow(
     checkMenuStep(input)
     const saved = saveMenuStep(input)
     releaseLockStep({ key: MENUS_LOCK.key })
+    refreshStorefrontStep(["menus"])
     return new WorkflowResponse(saved)
   }
 )
@@ -218,6 +224,7 @@ export const deleteStorefrontMenuWorkflow = createWorkflow(
     acquireLockStep(MENUS_LOCK)
     const deleted = deleteMenuStep(id)
     releaseLockStep({ key: MENUS_LOCK.key })
+    refreshStorefrontStep(["menus"])
     return new WorkflowResponse(deleted)
   }
 )

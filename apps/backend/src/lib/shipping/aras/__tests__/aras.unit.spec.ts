@@ -205,4 +205,30 @@ describe("Aras client (adr/0035)", () => {
     expect(pdf).toBe("JVBERi0x")
     expect(rows).toEqual([{ KARGO_TAKIP_NO: "1234567890", DURUMU: "YOLDA" }])
   })
+
+  it("takes a fault for a refused login, but a 500 without one for no verdict", async () => {
+    const answering = (status: number, text: string) =>
+      createArasApi({
+        baseUrl: `http://127.0.0.1:${String((server.address() as AddressInfo).port)}`,
+        transport: () => Promise.resolve({ status, text, header: () => "text/xml; charset=utf-8" }),
+      })
+    const fault = envelope(
+      "<soap:Fault><faultcode>soap:Server</faultcode><faultstring>Hatalı</faultstring></soap:Fault>"
+    )
+    answer = envelope(
+      xmlElement("GetOrderWithIntegrationCodeResponse", { GetOrderWithIntegrationCodeResult: "" })
+    )
+
+    const valid = await api().checkCredentials(credentials)
+    const faultAs500 = await answering(500, fault).checkCredentials(credentials)
+    const faultAs200 = await answering(200, fault).checkCredentials(credentials)
+    const plain = await answering(500, "")
+      .checkCredentials(credentials)
+      .catch((error: unknown) => error)
+
+    expect(valid).toBe("valid")
+    expect(faultAs500).toBe("secret_invalid")
+    expect(faultAs200).toBe("secret_invalid")
+    expect(plain).toMatchObject({ providerCode: "http_500" })
+  })
 })

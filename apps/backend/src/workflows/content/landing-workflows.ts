@@ -10,11 +10,13 @@ import { CATALOG_ENTITY_TYPES } from "../catalog/entity-paths"
 import { releaseEntityPathsStep } from "../catalog/steps/release-entity-paths"
 import { attachMediaStep } from "../media/steps/attach-media"
 import { forgetResolutionsStep } from "../seo/steps/forget-resolutions"
+import { refreshStorefrontStep } from "../storefront/steps/refresh-storefront"
 import { LANDINGS_LOCK } from "./landing-originality"
 import { claimLandingPathStep } from "./steps/claim-landing-path"
 import { deleteLandingStep } from "./steps/delete-landing"
 import { saveLandingStep } from "./steps/save-landing"
 import type { SaveLandingInput } from "./steps/save-landing"
+import { liveScopes } from "./workflows"
 
 /** Emitted after a landing page is saved or deleted: `{ id }`. */
 export const LANDING_SAVED = "landing.saved"
@@ -45,6 +47,8 @@ export const saveLandingWorkflow = createWorkflow(
       data: transform({ saved }, ({ saved }) => ({ id: saved.id })),
     })
     releaseLockStep({ key: LANDINGS_LOCK.key })
+    // A menu may link it (adr/0048 ek 2026-11-03)
+    refreshStorefrontStep(transform({ saved }, ({ saved }) => liveScopes(saved)))
     return new WorkflowResponse(saved)
   }
 )
@@ -58,5 +62,6 @@ export const deleteLandingWorkflow = createWorkflow("content-delete-landing", (i
   forgetResolutionsStep()
   emitEventStep({ eventName: LANDING_DELETED, data: deleted })
   releaseLockStep({ key: LANDINGS_LOCK.key })
+  refreshStorefrontStep(["content"])
   return new WorkflowResponse(deleted)
 })

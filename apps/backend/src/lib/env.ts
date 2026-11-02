@@ -14,6 +14,21 @@ const SECRET_MIN_LENGTH = 32
 const isHttpOrigin = (value: string): boolean =>
   z.url({ protocol: /^https?$/ }).safeParse(value).success
 
+// Nothing but the origin: no path, query, fragment or credentials
+const isBareOrigin = (value: string): boolean => {
+  if (!URL.canParse(value)) {
+    return false
+  }
+  const url = new URL(value)
+  return (
+    url.username === "" &&
+    url.password === "" &&
+    url.pathname === "/" &&
+    url.search === "" &&
+    url.hash === ""
+  )
+}
+
 const originList = z
   .string()
   .refine(
@@ -74,6 +89,14 @@ const envSchema = z.object({
   // shopper's address with it on each Store API request; unset, only the
   // connection's own address counts
   STOREFRONT_IP_SECRET: secret.optional(),
+  // adr/0048 ek 2026-11-03: where a publication or a settings save tells the
+  // storefront's server to forget its shop-wide answers (`POST /api/yenile`,
+  // signed with the secret above). Unset: the shop's canonical host once
+  // deployed, http://localhost:8000 on a developer's machine
+  STOREFRONT_ORIGIN: z
+    .url({ protocol: /^https?$/ })
+    .refine(isBareOrigin, "must be an origin: scheme, host and port only")
+    .optional(),
   // The backend's own public address: iyzico sends the shopper back to it
   // (`/hooks/iyzico/callback`). Required once deployed; locally localhost:9000
   BACKEND_URL: z.url({ protocol: /^https?$/ }).optional(),
@@ -270,6 +293,14 @@ const deployedEnvSchema = envSchema.superRefine((env, ctx) => {
       message: "must differ from the PII keys",
     })
   }
+  // The refresh signal crosses the network to the storefront: over TLS once deployed
+  if (deployed && env.STOREFRONT_ORIGIN?.startsWith("http:")) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["STOREFRONT_ORIGIN"],
+      message: "must be https in production and staging",
+    })
+  }
   if (deployed && !env.BACKEND_URL?.startsWith("https://")) {
     ctx.addIssue({
       code: "custom",
@@ -419,6 +450,23 @@ export function backendUrl(env: Pick<Env, "BACKEND_URL"> = parseEnv()): string {
 
 // The panel's dev server (`vite --strictPort`); deployed, it shares the backend's host (adr/0022)
 const LOCAL_PANEL_URL = "http://localhost:5173"
+
+// The storefront's dev server (`pnpm --filter storefront dev`)
+const LOCAL_STOREFRONT_URL = "http://localhost:8000"
+
+/**
+ * The storefront server's origin as set (`STOREFRONT_ORIGIN`); on a
+ * developer's machine localhost:8000 when unset, elsewhere null (the
+ * caller decides: the refresh then takes the shop's canonical host).
+ */
+export function storefrontOrigin(
+  env: Pick<Env, "STOREFRONT_ORIGIN" | "NODE_ENV"> = parseEnv()
+): string | null {
+  if (env.STOREFRONT_ORIGIN) {
+    return new URL(env.STOREFRONT_ORIGIN).origin
+  }
+  return isLocalEnv(env) ? LOCAL_STOREFRONT_URL : null
+}
 
 /** The panel's origin, for links staff open (an invitation). */
 export function panelUrl(env: Pick<Env, "BACKEND_URL" | "NODE_ENV"> = parseEnv()): string {

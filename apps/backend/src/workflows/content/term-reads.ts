@@ -1,5 +1,5 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { chunksOf } from "../../lib/catalog"
+import { logger } from "../../lib/logging"
 import { CONTENT_MODULE } from "../../modules/content"
 import type ContentModuleService from "../../modules/content/service"
 import type { ContentTermKind, ContentTermRecord } from "../../modules/content/service"
@@ -9,8 +9,7 @@ import { termPath } from "./term-rules"
  * Blog categories and tags as the Admin and Store APIs show them (adr/0019
  * ek 2026-11-03): a post's terms, a term's posts and how many of them are
  * live. A term's posts are read a page at a time in one statement (an
- * archive is public); counting reads the links whole, a blog holding
- * hundreds of posts and terms, not millions.
+ * archive is public); the counts are one grouped statement, capped.
  */
 
 export interface TermView {
@@ -86,32 +85,26 @@ export async function termsOfEntries(
   return answer
 }
 
+/**
+ * Most terms counted at once: past it the fullest are kept and a warning
+ * logged (a blog's tags, not a catalog; adr/0019 ek 2026-11-03).
+ */
+export const MAX_COUNTED_TERMS = 5000
+
 /** The posts behind each term, counted: live ones only, or every post not deleted. */
 export async function postCounts(
   container: MedusaContainer,
   termIds: readonly string[] | null,
   { live }: { live: boolean }
 ): Promise<Map<string, number>> {
-  const links = await service(container).listContentEntryTerms(
-    termIds ? { term_id: [...termIds] } : {},
-    { select: ["entry_id", "term_id"], take: null }
-  )
-  const entryIds = [...new Set(links.map((link) => link.entry_id))]
-  const posts = new Set<string>()
-  for (const chunk of chunksOf(entryIds)) {
-    const rows = await service(container).listContentEntries(
-      { id: chunk, kind: "post", ...(live ? { status: "published" as const } : {}) },
-      { select: ["id"], take: null }
-    )
-    rows.forEach((row) => posts.add(row.id))
+  const rows = await service(container).countPostsByTerm(termIds, {
+    live,
+    cap: MAX_COUNTED_TERMS,
+  })
+  if (rows.length >= MAX_COUNTED_TERMS) {
+    logger.warn({ event: "content.term_counts_capped", max: MAX_COUNTED_TERMS })
   }
-  const counts = new Map<string, number>()
-  for (const link of links) {
-    if (posts.has(link.entry_id)) {
-      counts.set(link.term_id, (counts.get(link.term_id) ?? 0) + 1)
-    }
-  }
-  return counts
+  return new Map(rows.map((row) => [row.term_id, row.count]))
 }
 
 /** A term's id by its kind and handle; null when there is no such term. */

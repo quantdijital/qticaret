@@ -1,5 +1,12 @@
 import { randomBytes } from "node:crypto"
-import { EnvValidationError, backendUrl, isLocalEnv, parseEnv, s3Settings } from "../env"
+import {
+  EnvValidationError,
+  backendUrl,
+  isLocalEnv,
+  parseEnv,
+  s3Settings,
+  storefrontOrigin,
+} from "../env"
 
 // Test-only values, generated per run so no fixed secret lives in the repo (docs/04)
 const jwtSecret = "j".repeat(16) + Math.random().toString(36).padEnd(16, "x")
@@ -103,6 +110,30 @@ describe("parseEnv", () => {
     expect(backendUrl({ BACKEND_URL: undefined })).toBe("http://localhost:9000")
     expect(backendUrl({ BACKEND_URL: "https://api.example.com/x/" })).toBe(
       "https://api.example.com"
+    )
+  })
+
+  it("takes the storefront's origin bare, over TLS once deployed, localhost:8000 by default locally", () => {
+    const deployed = {
+      ...validEnv,
+      ...s3Env,
+      CREDENTIALS_ENCRYPTION_KEY: hexKey(),
+      AUTH_MFA_ENCRYPTION_KEY: hexKey(),
+      BACKEND_URL: "https://api.example.com",
+      NODE_ENV: "production",
+    }
+    expect(errorOf({ ...validEnv, STOREFRONT_ORIGIN: "https://vitrin.example.com/api" })).toContain(
+      "STOREFRONT_ORIGIN: must be an origin"
+    )
+    expect(errorOf({ ...deployed, STOREFRONT_ORIGIN: "http://vitrin.example.com" })).toContain(
+      "STOREFRONT_ORIGIN: must be https in production and staging"
+    )
+    expect(
+      storefrontOrigin(parseEnv({ ...deployed, STOREFRONT_ORIGIN: "https://vitrin.example.com/" }))
+    ).toBe("https://vitrin.example.com")
+    expect(storefrontOrigin({ STOREFRONT_ORIGIN: undefined, NODE_ENV: "production" })).toBeNull()
+    expect(storefrontOrigin({ STOREFRONT_ORIGIN: undefined, NODE_ENV: "development" })).toBe(
+      "http://localhost:8000"
     )
   })
 

@@ -85,3 +85,79 @@ Kullanıcı: "yasal metinler kısmını zaten firma bilgilerinden otomatik üret
   - WhatsApp, saatler ve harita `store` bölümünde;
   - duyuru ve rozet `{ücretsiz_kargo_eşiği}` kullanıyor;
   - iletişim ve toptan metinlerinde elle yazılı bilgi yok (toptanın 08:00–17:00 saatleri mağaza saatlerinden farklı, kullanıcı kararı: esleme §5).
+
+## Ek (2026-11-03): yayında hemen yansıma
+
+adr/0049'daki "hemen yansıma" adımı. Vitrin mağaza geneli yanıtları süreç içinde 60 sn tutuyor (`lib/store-api/shared.ts`, `edge.ts`'teki site yanıtı; adr/0046 ek 2026-11-02). Yayın ya da ayar kaydı vitrine bu yüzden bir dakikaya kadar geç yansıyordu. Artık backend değişiklikten hemen sonra vitrine imzalı bir "yenile" sinyali gönderiyor. Sinyal ulaşmazsa eski davranış sürer: 60 sn.
+
+**Backend (yapıldı):**
+
+- **Gönderen:** `lib/storefront/refresh.ts` (`refreshStorefront(container, scopes)`). Tek deneme, 3 sn, `safe-fetch` ile, yönlendirme izlenmez. Hata çağırana hiç atılmaz.
+  - Başarılı yanıt `storefront.refresh_sent` olarak loglanır. Başarısız yanıt `storefront.refresh_failed` olarak loglanır. Logda yalnız durum kodu (ya da `timeout` gibi neden) ve kapsamlar var; adres, başlık ve gövde yok.
+- **Hedef:**
+  1. `STOREFRONT_ORIGIN` (yeni, isteğe bağlı; yalnız köken; canlıda https). Geliştirmede ve testte boşsa `http://localhost:8000`. Geliştirici makinesi canlı mağazanın alan adına hiç gitmez.
+  2. Canlıda o da boşsa mağazanın kanonik alan adı (`https://<canonical_host>`, `brandOf().storefrontUrl` ile aynı değer).
+  3. İkisi de yoksa ya da `STOREFRONT_IP_SECRET` yoksa gönderilmez (debug log).
+- **SSRF:** `safe-fetch` iç adresleri reddeder. Yalnız bu çağrı için, yalnız geliştirmede ve testte loopback (`127.0.0.0/8`, `::1`, `localhost`) ve hedefin kendi portu açıktır. Başka hiçbir yerde değişiklik yok.
+- **Tetikleyiciler.** Hepsi iş akışı bittikten sonra ve ateşle-unut: kayıt vitrini beklemez. Ortak adım `refreshStorefrontStep(scopes)` (`workflows/storefront/steps/refresh-storefront.ts`); hata adımın içinde yakalanır, iş akışını düşürmez ya da geri almaz. Testlerde kapalıdır; bir test açabilir (`QT_TEST_STOREFRONT_REFRESH=1`, `RATE_LIMIT_RELAXED` gibi).
+
+  | Olay | Kapsam |
+  |---|---|
+  | `storefront.layout_published` (abone `subscribers/storefront-refresh.ts`) | `layout` |
+  | Ayar kaydı `storefront`, `theme`, `promotions`, `appearance` | `settings` |
+  | Ayar kaydı `store`, `legal` | `settings`, `legal` |
+  | Ayar kaydı `seo`, `maintenance` | `settings`, `site` |
+  | Menü kaydı ya da silme | `menus` |
+  | Yasal metin yayını (geri çekme yok) | `legal` |
+  | İçerik sayfası, yazı ya da filtre sayfası kaydı (yalnız yayında olan ya da daha önce yayına çıkmış olan; taslak kaydı değil); bunların silinmesi; blog kategorisi ve etiketi kaydı ya da silme | `content` |
+
+  `appearance` ve filtre sayfası görev listesinde yoktu. Logo vitrinin çerçevesinde (`/store/seo/site`) görünüyor, filtre sayfasına da menüden bağlantı verilebiliyor; bu yüzden eklendi.
+
+**Sözleşme (backend → vitrin):**
+
+- `POST <köken>/api/yenile`.
+- Başlıklar:
+  - `content-type: application/json`;
+  - `x-qt-refresh-time`: Unix saniyesi;
+  - `x-qt-refresh-signature`: HMAC-SHA256'nın onaltılık yazımı (64 karakter).
+- Gövde: `{ "scopes": [...], "at": <aynı saniye>, "nonce": "<32 onaltılık karakter>" }`.
+  - Kapsamlar şunlardan biri ya da birkaçıdır: `layout`, `settings`, `menus`, `legal`, `content`, `site`.
+  - Her kapsam bir kez geçer. Sıra bu listedeki sıradır.
+- İmzalanan metin `<time>.<nonce>.<scopes.join(",")>`. Anahtar `STOREFRONT_IP_SECRET`, iki sunucunun zaten paylaştığı sır (adr/0046 §5).
+
+**Vitrin (sıradaki iş, vitrin ajanı):**
+
+1. **Rota:** `app/api/yenile/route.ts`, yalnız POST, Node çalışma ortamı, gövde en çok 1 KB.
+   - Vekil (`proxy.ts`) bu yolu kanonik alan adı 301'ine, normalizasyona, bakım kapısına ve resolve çağrısına sokmamalı. Backend yönlendirme izlemez; sinyal 301 alırsa başarısız sayılır.
+2. **Denetim sırası.** Herhangi bir adım tutmazsa 401, gövdesiz ve `cache-control: no-store`:
+   - IP başına hız sınırı (ör. dakikada 30), imza denetiminden önce;
+   - `STOREFRONT_IP_SECRET` yoksa 404;
+   - zaman başlığı `^\d{1,12}$` biçiminde ve en çok ±60 sn sapmalı; gövdedeki `at` başlıktakiyle aynı;
+   - `nonce` `^[0-9a-f]{32}$` biçiminde;
+   - `scopes` 1–6 bilinen değer içeriyor, tekrar yok;
+   - imza `^[0-9a-f]{64}$` biçiminde ve `timingSafeEqual` ile tutuyor;
+   - `nonce` son 2 dakikada görülmemiş. Süreç içi bir kümede tutulur, süresi geçenler budanır, üst sınırı vardır (ör. 1000). Küme yalnız imzası geçen istekle büyür.
+   - Hepsi tutarsa önbellekler boşaltılır ve 204 döner.
+3. **Kapsamın boşalttığı önbellekler.** `shared.ts` anahtarı `<yol>?<sorgu JSON>` biçiminde, yol önekiyle silinir. Hepsini boşaltmak da doğrudur; kapsamlar yalnız gereksiz yeniden okumayı azaltır.
+
+   | Kapsam | Boşaltılan önbellek |
+   |---|---|
+   | `layout` | `/store/storefront-layout` (düzenin okunuşu) |
+   | `settings` | `/store/storefront`, `/store/seo/site`, `/store/legal-identity` |
+   | `menus` | `/store/storefront-menus` |
+   | `legal` | `/store/legal/*`, `/store/legal-identity`, `/store/storefront-menus` (yasal metin bağlantısı yalnız yayındaysa görünür) |
+   | `content` | `/store/content/terms*`, `/store/seo/paths*`, `/store/storefront-menus` |
+   | `site` | `edge.ts`'teki `site` ve `/store/seo/site` |
+
+4. **Dikkat: vekil ayrı paketlenir.** `proxy.ts` ile rota işleyicisi aynı modül örneğini görmeyebilir. Bu durumda `edge.ts`'teki `site` değişkeni rotadan silinemez. Önbellekleri `globalThis[Symbol.for("qticaret.store-cache")]` gibi süreç geneli bir kayıtta tutmak ya da her iki tarafın baktığı bir kuşak sayacı kullanmak gerekir. e2e'de doğrulanmalı: panelde kaydet, vitrin aynı saniyede göstersin.
+
+**Bilinen sınırlar ve açık maddeler:**
+
+- **Birden çok vitrin örneği (F16):** sinyal yük dengeleyicinin ardındaki tek bir örneğe düşer, öbürleri 60 sn'lik eski davranışta kalır. F16'da ya tek örnek çalışır ya da sinyal örneklere dağıtılır (ör. Redis yayın/abone).
+- **İç ağdaki vitrin:** canlıda `safe-fetch` iç adresleri reddeder. `STOREFRONT_ORIGIN` iç ağdaki bir adres olursa sinyal `address_not_allowed` ile düşer. F16 vitrini iç ağdan çağıracaksa işletmecinin ayarladığı bu köken için ayrı ve dar bir izin gerekir.
+- **Backend'in kendi önbellekleri:** yayındaki düzen backend'de sürüm numarasıyla bir dakika tutulur. İçerik değişince bu önbellek boşalmaz; düzendeki ürün ve kategori seçimleri bir dakikaya kadar eski kalabilir. Menü ve ayar yanıtları önbelleksizdir ya da ayar önbelleği kayıtta boşalır.
+- **Aynı sır, iki iş:** IP imzası (`<zaman>.<adres>`) vitrinde üretilir, backend'de doğrulanır. Yenile imzası (`<zaman>.<nonce>.<kapsamlar>`) backend'de üretilir, vitrinde doğrulanır. Biçimler karışmaz: adres geçerli bir IP olmak zorunda, kapsam adları IP'de geçemez. İmzalar tarayıcıya hiç çıkmaz.
+- **Testler:**
+  - birim `lib/storefront/__tests__/refresh.unit.spec.ts`: imza, hedef seçimi, loopback'in yalnız yerelde açık olması, hatasız dönüş;
+  - `lib/__tests__/env.unit.spec.ts`;
+  - HTTP `storefront-refresh.spec.ts`: küçük bir alıcı. Yayın, vitrin ve SEO ayarı kaydı doğru kapsam ve geçerli imzayla geliyor. Alıcı 500 dönse de 3 sn'yi aşsa da yayın 200 ve kalıcı.

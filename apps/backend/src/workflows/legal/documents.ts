@@ -15,6 +15,7 @@ import { checkLegalDoc } from "../../lib/legal"
 import type { LegalKind } from "../../lib/legal"
 import { LEGAL_MODULE } from "../../modules/legal"
 import type LegalModuleService from "../../modules/legal/service"
+import { refreshStorefrontStep } from "../storefront/steps/refresh-storefront"
 
 const legal = (container: Pick<MedusaContainer, "resolve">) =>
   container.resolve<LegalModuleService>(LEGAL_MODULE)
@@ -160,7 +161,10 @@ export const saveLegalDraftWorkflow = createWorkflow(
   }
 )
 
-/** A legal text's draft published, the version before it retired (F13.1). */
+/**
+ * A legal text's draft published, the version before it retired (F13.1);
+ * the storefront shows it at once (adr/0048 ek 2026-11-03).
+ */
 export const publishLegalDraftWorkflow = createWorkflow(
   "legal-publish-draft",
   (input: { kind: LegalKind; actor_id: string | null }) => {
@@ -168,6 +172,7 @@ export const publishLegalDraftWorkflow = createWorkflow(
     acquireLockStep({ key, timeout: 10, ttl: 30 })
     const published = publishDraftStep(input)
     releaseLockStep({ key })
+    refreshStorefrontStep(["legal"])
     return new WorkflowResponse(published)
   }
 )

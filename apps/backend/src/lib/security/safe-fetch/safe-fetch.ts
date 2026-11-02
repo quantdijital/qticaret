@@ -206,7 +206,8 @@ async function run(
 /**
  * Tests only: DNS and the address rule injected. Not exported from the
  * library, since an `isAddressAllowed` that allows everything turns the SSRF
- * protection off.
+ * protection off. One other user: the storefront refresh, which allows
+ * loopback on a developer's machine and in tests only (lib/storefront/refresh.ts).
  */
 export function createSafeFetch(deps: SafeFetchDependencies) {
   return (input: string | URL, options: SafeFetchOptions = {}): Promise<SafeFetchResponse> =>

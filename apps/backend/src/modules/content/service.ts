@@ -85,6 +85,36 @@ class ContentModuleService extends MedusaService({
     )) as { ids: string[]; count: number }[]
     return { ids: row?.ids ?? [], count: row?.count ?? 0 }
   }
+
+  /**
+   * How many posts each term files, counted in one grouped statement:
+   * live ones only, or every post not deleted. A term with none is not in
+   * the answer. At most `cap` terms, the fullest first. `termIds` null:
+   * every term.
+   */
+  @InjectManager()
+  async countPostsByTerm(
+    termIds: readonly string[] | null,
+    options: { live: boolean; cap: number },
+    @MedusaContext() sharedContext: Context = {}
+  ): Promise<{ term_id: string; count: number }[]> {
+    if (termIds?.length === 0) {
+      return []
+    }
+    const manager = sharedContext.manager as Executor
+    return (await manager.execute(
+      `SELECT t.term_id, count(*)::int AS count
+         FROM content_entry_term t
+         JOIN content_entry e ON e.id = t.entry_id
+        WHERE t.deleted_at IS NULL AND e.deleted_at IS NULL AND e.kind = 'post'
+          ${options.live ? "AND e.status = 'published'" : ""}
+          ${termIds ? "AND t.term_id IN (SELECT jsonb_array_elements_text(?::jsonb))" : ""}
+        GROUP BY t.term_id
+        ORDER BY count DESC, t.term_id
+        LIMIT ?`,
+      [...(termIds ? [JSON.stringify(termIds)] : []), options.cap]
+    )) as { term_id: string; count: number }[]
+  }
 }
 
 export default ContentModuleService

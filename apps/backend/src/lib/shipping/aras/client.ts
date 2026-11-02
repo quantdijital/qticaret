@@ -210,12 +210,12 @@ export function createArasApi(options: Partial<Omit<HttpClientOptions, "provider
       }
       return findFirst(answer, "Fault") ? "secret_invalid" : "valid"
     } catch (error) {
-      // A .NET service answers a refused login with a fault (HTTP 500), which
-      // the HTTP client reads as `error_<fault code>`
-      if (
-        isProviderError(error) &&
-        (error.providerCode === "http_500" || error.providerCode.startsWith("error_"))
-      ) {
+      // A .NET service answers a refused login with a SOAP fault (HTTP 500),
+      // which the HTTP client reads as `error_<fault code>`. Aras's
+      // description names no login fault code, so any fault counts as a
+      // refused login. A 500 without a fault is no verdict on the login
+      // (an outage, a gateway): it stays an error, as with Yurtiçi
+      if (isProviderError(error) && error.providerCode.startsWith("error_")) {
         return "secret_invalid"
       }
       throw error

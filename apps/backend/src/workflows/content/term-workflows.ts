@@ -2,6 +2,7 @@ import { WorkflowResponse, createWorkflow, transform } from "@medusajs/framework
 import { acquireLockStep, releaseLockStep, removeRemoteLinkStep } from "@medusajs/medusa/core-flows"
 import { CONTENT_MODULE } from "../../modules/content"
 import { forgetResolutionsStep } from "../seo/steps/forget-resolutions"
+import { refreshStorefrontStep } from "../storefront/steps/refresh-storefront"
 import { termEntityType } from "./paths"
 import { claimTermPathStep } from "./steps/claim-term-path"
 import { deleteTermStep } from "./steps/delete-term"
@@ -22,6 +23,8 @@ export const saveTermWorkflow = createWorkflow("content-save-term", (input: Save
   claimTermPathStep(saved)
   forgetResolutionsStep()
   releaseLockStep({ key: CONTENT_LOCK.key })
+  // The blog's category and tag lists (adr/0048 ek 2026-11-03)
+  refreshStorefrontStep(["content"])
   return new WorkflowResponse(saved)
 })
 
@@ -42,5 +45,6 @@ export const deleteTermWorkflow = createWorkflow("content-delete-term", (id: str
   releaseTermPathStep(release)
   forgetResolutionsStep()
   releaseLockStep({ key: CONTENT_LOCK.key })
+  refreshStorefrontStep(["content"])
   return new WorkflowResponse(deleted)
 })
