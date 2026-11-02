@@ -8,6 +8,8 @@ import { CONTENT_MODULE } from "../../../modules/content"
 import type ContentModuleService from "../../../modules/content/service"
 import type { ContentEntryRecord } from "../../../modules/content/service"
 import { contentPath } from "../../../workflows/content/paths"
+import { entryIdsOfTerm, termsOfEntries } from "../../../workflows/content/term-reads"
+import type { EntryTerms } from "../../../workflows/content/term-reads"
 import { shopInfoValues } from "../../../workflows/shop/info-values"
 import { cardTargets } from "./cards"
 import type { StoreGetContentType } from "./validators"
@@ -52,10 +54,43 @@ const summary = (entry: Listed) => ({
   reading_minutes: Math.max(1, Math.round(entry.word_count / WORDS_PER_MINUTE)),
 })
 
-/** Live entries, the newest first. Page SEO comes from `/store/seo/resolve`. */
+const NOT_FILED: EntryTerms = { category: null, tags: [] }
+
+/**
+ * The entries filed under the category and tag the query names (both, when
+ * both); null when it names neither, none for a term there is not.
+ */
+async function filedUnder(
+  container: MedusaContainer,
+  query: StoreGetContentType
+): Promise<string[] | null> {
+  const wanted = [
+    ...(query.category ? [entryIdsOfTerm(container, "category", query.category)] : []),
+    ...(query.tag ? [entryIdsOfTerm(container, "tag", query.tag)] : []),
+  ]
+  if (wanted.length === 0) {
+    return null
+  }
+  const [first = [], ...rest] = (await Promise.all(wanted)).map((ids) => ids ?? [])
+  return rest.reduce((kept, ids) => kept.filter((id) => ids.includes(id)), first)
+}
+
+/**
+ * Live entries, the newest first, a post with its category and tags; a
+ * category or tag narrows them to its posts. Page SEO comes from
+ * `/store/seo/resolve`.
+ */
 export async function storeContentList(container: MedusaContainer, query: StoreGetContentType) {
+  const page = { offset: query.offset, limit: query.limit }
+  const filed = await filedUnder(container, query)
+  if (filed?.length === 0) {
+    return { entries: [], count: 0, ...page }
+  }
   const [entries, count] = await service(container).listAndCountContentEntries(
-    { status: "published", ...(query.kind ? { kind: query.kind } : {}) },
+    {
+      status: "published",
+      ...(filed ? { kind: "post" as const, id: filed } : query.kind ? { kind: query.kind } : {}),
+    },
     {
       select: [...LIST_FIELDS],
       skip: query.offset,
@@ -63,15 +98,24 @@ export async function storeContentList(container: MedusaContainer, query: StoreG
       order: { published_at: "DESC" },
     }
   )
-  const values = await shopInfoValues(container)
+  const [values, terms] = await Promise.all([
+    shopInfoValues(container),
+    termsOfEntries(
+      container,
+      entries.map((entry) => entry.id)
+    ),
+  ])
   return {
     entries: entries.map((entry) => {
       const listed = summary(entry)
-      return { ...listed, excerpt: fillShopText(listed.excerpt, values) }
+      return {
+        ...listed,
+        excerpt: fillShopText(listed.excerpt, values),
+        ...(terms.get(entry.id) ?? NOT_FILED),
+      }
     }),
     count,
-    offset: query.offset,
-    limit: query.limit,
+    ...page,
   }
 }
 
@@ -97,9 +141,12 @@ export async function storeContentEntry(
   const values = await shopInfoValues(container)
   const body = fillShopDoc(entry.body as unknown as ContentDoc, values)
   const listed = summary(entry)
+  const terms = await termsOfEntries(container, [entry.id])
   return {
     ...listed,
     excerpt: fillShopText(listed.excerpt, values),
+    // A post's category and tags, at their archives' paths (adr/0019 ek 2026-11-03)
+    ...(terms.get(entry.id) ?? NOT_FILED),
     html: renderDoc(body, await cardTargets(container, body)),
     // For a table of contents
     headings: docStats(body).headings,

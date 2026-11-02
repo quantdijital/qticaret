@@ -209,3 +209,46 @@ describe("text helpers", () => {
     expect(priceSentence([])).toBe("")
   })
 })
+
+describe("blog archives and the sale page (adr/0019 ek 2026-11-03)", () => {
+  const listing = (overrides: Partial<SeoSubject>): SeoSubject => ({
+    kind: "post_category",
+    path: "/blog/kategori/bakim",
+    name: "Bakım",
+    description: "Bakım üzerine yazılar.",
+    tokens: {},
+    overrides: null,
+    image: null,
+    trail: [{ name: "Blog", path: "/blog" }],
+    ...overrides,
+  })
+
+  it("titles a category's or tag's archive with the post template, under the blog", () => {
+    const shopWithPostTemplate = {
+      ...shop,
+      titleTemplates: { ...shop.titleTemplates, post: "{başlık} – Blog | {mağaza}" },
+    }
+    for (const kind of ["post_category", "post_tag"] as const) {
+      const seo = resolveSeoPayload(listing({ kind }), shopWithPostTemplate)
+      expect(seo.title).toBe("Bakım – Blog | Demo Mağaza")
+      expect(seo.openGraph.type).toBe("website")
+      expect(seo.breadcrumbs.map((crumb) => crumb.name)).toEqual(["Blog", "Bakım"])
+    }
+  })
+
+  it("titles the sale page by its name and the shop's, whatever the templates", () => {
+    const seo = resolveSeoPayload(
+      listing({
+        kind: "sale",
+        path: "/kampanyalar",
+        name: "Kampanyalı ürünler",
+        trail: [],
+        listing: [{ name: "Keten Gömlek", path: "/urun/keten-gomlek" }],
+      }),
+      shop
+    )
+    expect(seo.title).toBe("Kampanyalı ürünler | Demo Mağaza")
+    expect(seo.canonical).toBe("https://magaza.example.com/kampanyalar")
+    expect(seo.jsonLd.map((block) => block["@type"])).toEqual(["CollectionPage"])
+  })
+})

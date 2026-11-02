@@ -1,8 +1,9 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { pagePath, postPath } from "../../lib/seo"
-import type { ContentKind } from "../../modules/content/service"
+import type { ContentKind, ContentTermKind } from "../../modules/content/service"
 import type { PathClaim } from "../../modules/url-registry/service"
 import { CATALOG_ENTITY_TYPES, claimMissing } from "../catalog/entity-paths"
+import { termPath } from "./term-rules"
 
 export interface PathedEntry {
   id: string
@@ -39,3 +40,40 @@ export async function claimContentPaths(
     })
   )
 }
+
+export interface PathedTerm {
+  id: string
+  kind: ContentTermKind
+  handle: string
+  /** It had live posts before this save: its archive was public, so a path it leaves answers with a 301. */
+  was_live: boolean
+}
+
+/**
+ * Claims a blog category's or tag's archive path (adr/0019 ek 2026-11-03):
+ * `/blog/kategori/{handle}` or `/blog/etiket/{handle}`, whatever the URL
+ * style. An archive that had live posts keeps a changed handle's old path
+ * for its 301; an empty one frees it.
+ */
+export async function claimTermPaths(
+  container: MedusaContainer,
+  terms: PathedTerm[]
+): Promise<PathClaim[]> {
+  return claimMissing(
+    container,
+    terms.map((term) => {
+      const path = termPath(term)
+      return {
+        entity_type: termEntityType(term.kind),
+        entity_id: term.id,
+        path,
+        accepted: [path],
+        replaced: term.was_live ? "reserve" : "free",
+      }
+    })
+  )
+}
+
+/** A term's type in the URL registry and the SEO payload. */
+export const termEntityType = (kind: ContentTermKind): string =>
+  kind === "category" ? CATALOG_ENTITY_TYPES.post_category : CATALOG_ENTITY_TYPES.post_tag

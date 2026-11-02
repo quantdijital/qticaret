@@ -33,7 +33,17 @@
           "scale": null,
           "default": null,
           "comment": null,
-          "enumItems": ["product", "category", "collection", "brand", "page", "post", "landing"],
+          "enumItems": [
+            "product",
+            "category",
+            "collection",
+            "brand",
+            "page",
+            "post",
+            "landing",
+            "post_category",
+            "post_tag"
+          ],
           "mappedType": "enum"
         },
         "seo_title": {

@@ -1,18 +1,27 @@
 import type { Context, InferTypeOf } from "@medusajs/framework/types"
 import { InjectManager, MedusaContext, MedusaService } from "@medusajs/framework/utils"
 import { ContentEntry } from "./models/content-entry"
+import { ContentEntryTerm, ContentTerm } from "./models/content-term"
 import { LandingPage } from "./models/landing-page"
 
 export type ContentEntryRecord = InferTypeOf<typeof ContentEntry>
 export type ContentKind = ContentEntryRecord["kind"]
 export type LandingPageRecord = InferTypeOf<typeof LandingPage>
+export type ContentTermRecord = InferTypeOf<typeof ContentTerm>
+export type ContentTermKind = ContentTermRecord["kind"]
 
 /**
- * Content pages, blog posts and facet landing pages (F3.16). The rules (a
- * checked document, a slug handle, the shop's own images, the page's path,
- * a landing's originality) live in the workflows that write here.
+ * Content pages, blog posts with their categories and tags, and facet
+ * landing pages (F3.16). The rules (a checked document, a slug handle, the
+ * shop's own images, the page's path, a landing's originality, one
+ * category a post) live in the workflows that write here.
  */
-class ContentModuleService extends MedusaService({ ContentEntry, LandingPage }) {
+class ContentModuleService extends MedusaService({
+  ContentEntry,
+  LandingPage,
+  ContentTerm,
+  ContentEntryTerm,
+}) {
   /**
    * Stores landing pages' measured shares without touching `updated_at`: a
    * share measured again is no change of the page (IndexNow, list order).

@@ -1,6 +1,11 @@
 import { validateAndTransformBody, validateAndTransformQuery } from "@medusajs/framework/http"
 import { z } from "@medusajs/framework/zod"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
+import {
+  AdminGetContentTerms,
+  AdminPostContentTerm,
+  AdminUpdateContentTerm,
+} from "../admin/content/terms/validators"
 import { AdminGetContent, AdminPostContent, AdminUpdateContent } from "../admin/content/validators"
 import { AdminGetDashboardNoQuery } from "../admin/dashboard/validators"
 import {
@@ -8,10 +13,13 @@ import {
   AdminPostLanding,
   AdminUpdateLanding,
 } from "../admin/landings/validators"
-import { StoreGetContent } from "../store/content/validators"
+import { StoreGetContent, StoreGetContentTerms } from "../store/content/validators"
 import { StoreGetLandingProducts } from "../store/landings/validators"
 import { StoreGetListingProducts } from "../store/listings/validators"
 import { rateLimit } from "./rate-limit"
+
+// An entry's own route: `/admin/content/terms` is the blog terms', not an entry called "terms"
+const CONTENT_ENTRY = /^\/admin\/content\/(?!terms$)[^/]+$/
 
 /**
  * Content pages, blog posts and facet landing pages (F3.16): the admin's
@@ -32,15 +40,36 @@ export const CONTENT_ROUTES = [
     middlewares: [validateAndTransformBody(AdminPostContent)],
   },
   {
-    matcher: "/admin/content/:id",
+    matcher: CONTENT_ENTRY,
     methods: ["POST" as const],
     bodyParser: { sizeLimit: "1mb" },
     middlewares: [validateAndTransformBody(AdminUpdateContent)],
+  },
+  // A blog's categories and tags (adr/0019 ek 2026-11-03)
+  {
+    matcher: "/admin/content/terms",
+    methods: ["GET" as const],
+    middlewares: [validateAndTransformQuery(AdminGetContentTerms, {})],
+  },
+  {
+    matcher: "/admin/content/terms",
+    methods: ["POST" as const],
+    middlewares: [validateAndTransformBody(AdminPostContentTerm)],
+  },
+  {
+    matcher: "/admin/content/terms/:id",
+    methods: ["POST" as const],
+    middlewares: [validateAndTransformBody(AdminUpdateContentTerm)],
   },
   {
     matcher: "/store/content",
     methods: ["GET" as const],
     middlewares: [validateAndTransformQuery(StoreGetContent, {})],
+  },
+  {
+    matcher: "/store/content/terms",
+    methods: ["GET" as const],
+    middlewares: [validateAndTransformQuery(StoreGetContentTerms, {})],
   },
   // The storefront's frame: announcement bar, header links, footer (F18 D3)
   {

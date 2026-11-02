@@ -11,6 +11,9 @@ import type ProductReviewsModuleService from "../../modules/product-reviews/serv
 import { CATALOG_ENTITY_TYPES, CATALOG_LOCALE } from "../catalog/entity-paths"
 import { liveLandingFilters } from "../content/landing-facet"
 import { shopOf } from "./payload-sources"
+import { SALE_PATH } from "../../lib/seo/url-patterns"
+import { saleProductIds } from "../pricing/sale-products"
+import { termSitemapPaths } from "./sitemap-terms"
 
 /**
  * The sitemap's pages (docs/13 §6): live products, categories, brands and
@@ -209,28 +212,33 @@ export async function sitemapCounts(
       }
     }
   }
+  // The blog's archives with live posts (adr/0019 ek 2026-11-03)
+  counts.expected += (await termSitemapPaths(container)).length
   return counts
 }
 
 /**
  * The storefront's own index pages (F18): the home page and the whole
- * catalogue, and the blog and the reviews page once they have something to
- * show. No date: they change with everything under them.
+ * catalogue, and the blog, the reviews page and the sale page once they
+ * have something to show. No date: they change with everything under them.
  */
 async function siteEntries(container: MedusaContainer, origin: string): Promise<SitemapEntry[]> {
-  const [posts, reviews] = await Promise.all([
+  const [posts, reviews, sale] = await Promise.all([
     container
       .resolve<ContentModuleService>(CONTENT_MODULE)
       .listContentEntries({ kind: "post", status: "published" }, { select: ["id"], take: 1 }),
     container
       .resolve<ProductReviewsModuleService>(PRODUCT_REVIEWS_MODULE)
       .listProductReviews({ status: "approved" }, { select: ["id"], take: 1 }),
+    saleProductIds(container),
   ])
   return [
     { loc: `${origin}/`, lastmod: null },
     { loc: `${origin}/magaza`, lastmod: null },
     ...(posts.length > 0 ? [{ loc: `${origin}/blog`, lastmod: null }] : []),
     ...(reviews.length > 0 ? [{ loc: `${origin}/yorumlar`, lastmod: null }] : []),
+    // Noindex while nothing is on sale (adr/0019 ek 2026-11-03)
+    ...(sale.length > 0 ? [{ loc: `${origin}${SALE_PATH}`, lastmod: null }] : []),
   ]
 }
 
@@ -251,6 +259,14 @@ export async function buildSitemap(container: MedusaContainer): Promise<BuiltSit
   for (const spec of KINDS) {
     files.push(...urlsetFiles(spec.kind, await entriesOf(container, spec, origin)))
   }
+  // The blog's archives (adr/0019 ek 2026-11-03); no date: their posts change them
+  const archives = await termSitemapPaths(container)
+  files.push(
+    ...urlsetFiles(
+      "blog",
+      archives.map((path) => ({ loc: new URL(path, origin).href, lastmod: null }))
+    )
+  )
   const now = new Date()
   const index: SitemapFile = {
     name: "sitemap.xml",

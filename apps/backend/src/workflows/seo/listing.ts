@@ -30,11 +30,12 @@ import {
   optionProductIds,
   subtreeIn,
 } from "../content/landing-facet"
+import { SALE_LISTING, saleProductIds } from "../pricing/sale-products"
 import { activePathOf } from "./redirects/owners"
 
 /**
  * A listing page's query answered (docs/13 §3, §7, F3.17): a category,
- * brand, collection or landing page with filters, a price range, a sort
+ * brand, collection, landing page or the sale page with filters, a price range, a sort
  * or a page number. Its own query in canonical order, or a 301 there; a
  * category filtered by one facet that has a live landing page, a 301 to
  * it; filters no product has, or a page past the last, not found. What
@@ -55,6 +56,7 @@ const LISTING_TYPES: ReadonlySet<string> = new Set([
   CATALOG_ENTITY_TYPES.brand,
   CATALOG_ENTITY_TYPES.collection,
   CATALOG_ENTITY_TYPES.landing,
+  SALE_LISTING,
 ])
 
 export interface Listed {
@@ -142,6 +144,9 @@ export async function baseOf(container: MedusaContainer, listed: Listed): Promis
   }
   if (listed.entity_type === CATALOG_ENTITY_TYPES.brand) {
     return { where: {}, ids: await brandProductIds(container, [listed.entity_id]) }
+  }
+  if (listed.entity_type === SALE_LISTING) {
+    return { where: {}, ids: await saleProductIds(container) }
   }
   const [landing] = await container
     .resolve<ContentModuleService>(CONTENT_MODULE)

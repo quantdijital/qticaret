@@ -7,13 +7,16 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
   res.json({ entry: await readContentEntry(req.scope, req.params["id"] ?? "") })
 }
 
-/** Fields left out keep their values; a new handle leaves the old path to redirect. */
+/** Fields left out keep their values (a post's terms too); a new handle leaves the old path to redirect. */
 export async function POST(
   req: MedusaRequest<AdminUpdateContentType>,
   res: MedusaResponse
 ): Promise<void> {
   const id = req.params["id"] ?? ""
-  await saveContentWorkflow(req.scope).run({ input: { id, values: req.validatedBody } })
+  const { category_id, tag_ids, ...values } = req.validatedBody
+  await saveContentWorkflow(req.scope).run({
+    input: { id, values, terms: { category_id, tag_ids } },
+  })
   res.json({ entry: await readContentEntry(req.scope, id) })
 }
 

@@ -10,9 +10,14 @@ export async function GET(
   res.json(await readContentList(req.scope, req.validatedQuery))
 }
 
-/** A new content page or blog post (F3.16): its handle from its title unless given, its path claimed. */
+/**
+ * A new content page or blog post (F3.16): its handle from its title unless
+ * given, its path claimed, a post filed under its category and tags.
+ */
 export async function POST(req: MedusaRequest<AdminPostContentType>, res: MedusaResponse) {
-  const { kind, ...values } = req.validatedBody
-  const { result } = await saveContentWorkflow(req.scope).run({ input: { kind, values } })
+  const { kind, category_id, tag_ids, ...values } = req.validatedBody
+  const { result } = await saveContentWorkflow(req.scope).run({
+    input: { kind, values, terms: { category_id, tag_ids } },
+  })
   res.status(201).json({ entry: await readContentEntry(req.scope, result.id) })
 }

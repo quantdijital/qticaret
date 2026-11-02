@@ -14,6 +14,8 @@ import { URL_REGISTRY_MODULE } from "../../../modules/url-registry"
 import type UrlRegistryModuleService from "../../../modules/url-registry/service"
 import type { ResolvedPath } from "../../../modules/url-registry/service"
 import type { SeoPayload } from "../../../lib/seo/resolve"
+import { SALE_PATH } from "../../../lib/seo/url-patterns"
+import { SALE_LISTING } from "../../pricing/sale-products"
 import { CATALOG_LOCALE } from "../../catalog/entity-paths"
 import { pageWithQuery, redirectThroughListing } from "../listing-resolution"
 import type { ListingView } from "../listing-resolution"
@@ -73,11 +75,15 @@ async function ownerAnswer(
 }
 
 /**
- * One hop (adr/0017): a live record's own path, then the rules (exact,
- * longest prefix, patterns), then the URL registry's old paths. A live
- * page always wins, so no rule can hide it.
+ * One hop (adr/0017): the sale page (`/kampanyalar`), a live record's own
+ * path, then the rules (exact, longest prefix, patterns), then the URL
+ * registry's old paths. A live page always wins, so no rule can hide it.
  */
 async function answer(container: MedusaContainer, request: RequestPath): Promise<Answer> {
+  // The sale page is the storefront's own (a reserved path), always there
+  if (request.path === SALE_PATH) {
+    return { type: "entity", entity_type: SALE_LISTING, entity_id: SALE_LISTING }
+  }
   const registry = container.resolve<UrlRegistryModuleService>(URL_REGISTRY_MODULE)
   const redirects = container.resolve<SeoRedirectsModuleService>(SEO_REDIRECTS_MODULE)
   const entry = await registry.resolvePath({ locale: CATALOG_LOCALE, path: request.path })

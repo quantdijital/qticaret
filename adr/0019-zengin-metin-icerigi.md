@@ -49,3 +49,56 @@
 - **Görsel:** yalnızca medya kütüphanesine yüklenmiş (dosyası olan) kayıtlar. Kayıt görseli "bağlı" işaretliyor, gece süpürmesi silmiyor.
 - **Kartlar:** belgede yalnızca id. HTML'e çevrilirken canlı kaydın güncel adı ve url-registry'deki yolu basılıyor; yayında olmayan kart çıkmıyor.
 - **Ürün açıklaması:** Kararın "ürün açıklaması content'e bağlanır" kısmı uygulanmadı (PROGRESS karar 73).
+
+## Ek (2026-11-03): blog kategorileri ve etiketleri; kampanya listesi
+
+### Blog kategorileri ve etiketleri
+
+- **Bağlam:** `content_entry` (page|post) sınıflandırmasızdı. İlk müşterinin blogunda 12 kategori ve ~290 etiket var.
+- **Model (`content` modülü):**
+  - `content_term`: `kind` (category|tag), `name`, `handle` (tür başına tekil), `description` (düz metin, boş olabilir), `rank` (mağazanın sırası; sonra ada göre, Türkçe sıralama).
+  - `content_entry_term`: yazı ↔ terim, çift başına bir satır. Kısmi tekil indeks (`term_kind = 'category'`) bir yazıya ikinci kategoriyi veritabanında da engeller.
+  - SEO alanları adr/0015 deseniyle: `content_term ↔ seo_meta` bağlantısı, `seo_meta.entity_type` değerlerine `post_category` ve `post_tag` eklendi. Ayrı panel yok; `PUT /admin/seo/post_category/:id` çalışır.
+  - Migration'lar: `content` `Migration20261102203606`, `seoMeta` `Migration20261102203620`.
+- **Kurallar (workflow, `workflows/content/term-rules.ts`):**
+  - Yalnızca yazı (post) terim alır; sayfa için `content.terms_post_only`.
+  - En fazla bir kategori; yeni kategori eskisinin yerine geçer. En fazla 50 etiket (`content.tags_too_many`).
+  - Yanlış türdeki ya da olmayan terim `content.term_unknown`. Gönderilmeyen alan değerini korur; `null` ve `[]` temizler.
+  - Handle addan `toSlug` ile; tür içinde alınmışsa `content.term_handle_taken`.
+- **Adresler (docs/13 §2.2):** kategori arşivi `/blog/kategori/<handle>`, etiket arşivi `/blog/etiket/<handle>`. URL stilinden bağımsızdır.
+  - `url-registry` türleri `post_category` ve `post_tag`.
+  - `/blog/kategori` ve `/blog/etiket` ayrılmış yollar (`RESERVED_PATHS`): bu handle'la yazı açılamaz.
+  - Handle değişince eski yol, arşivde canlı yazı varsa 301 için ayrılır; yoksa serbest kalır.
+- **Silme hiç engellenmez:** kategorinin yazıları kategorisiz kalır, etiket yazılardan çıkar. SEO alanları da silinir. Arşiv canlı yazı göstermişse yolu 410 verir; göstermemişse serbest kalır ve terim yeniden açılabilir.
+- **SEO (`/store/seo/resolve`):**
+  - `entity_type` değeri `post_category` ya da `post_tag`.
+  - Başlık `post` şablonuyla, `{başlık}` = terim adı.
+  - Açıklama terimin kendi metni; yoksa "<ad> yazıları: …" (en yeni 5 canlı yazının başlıkları).
+  - Breadcrumb: Blog → terim. `listing` yok (yazıları vitrin listeler).
+  - Canlı yazısı olmayan arşiv `noindex,follow`.
+- **Sitemap:** `sitemap-blog-N.xml`, yalnızca en az bir canlı yazısı olan, noindex ya da başka canonical işaretli olmayan arşivler. SEO denetiminin beklenen sayısına da eklendi.
+- **Store API:** `GET /store/content?kind=post&category=<handle>&tag=<handle>` süzer; ikisi birlikte verilirse kesişim döner. `GET /store/content/terms?kind=` canlı yazısı olan terimleri sayılarıyla döner. Yazı listesi ve okuma `category` ve `tags` taşır.
+- **KVKK / dışa aktarma:** kişisel veri yok; envanter ve dışa aktarma değişmez.
+- **WordPress kaynağı (F14, kapsam dışı, eşleme notu):**
+  - `category` taksonomisi → `kind: category`. WP'de yazı birden çok, iç içe kategori alabilir: Yoast birincil kategorisi (yoksa ilki) kategori olur, diğerleri rapora düşer.
+  - `post_tag` → `kind: tag`.
+  - Terim slug'ı → `handle` (`toSlug` ile). Eski `/category/<slug>/` ve `/tag/<slug>/` adresleri yeni arşivlere 301 ile eşlenir.
+  - Terim açıklaması → `description`. Yoast terim metası (`wpseo_title`, `wpseo_desc`, `wpseo_noindex`) → `seo_meta`.
+
+### Kampanya listesi (`/kampanyalar`)
+
+- **Listeleme motoru:** `GET /store/listings/products` yeni `type=sale&id=sale` alır. Filtreleri, sıralaması ve 30 saniyelik önbelleği öbür listelerle aynı.
+- **Ürün tabanı (`workflows/pricing/sale-products.ts`):**
+  - Yalnızca aktif fiyat listelerinin fiyatladığı varyantlar taranır; katalog taranmaz.
+  - Varyant indirimli sayılırsa: müşteri grubu olmayan herkese açık bağlamda TRY `calculated_amount < original_amount` olmalı. Override listesi ikisini eşitler, bu yüzden sayılmaz.
+  - Ayrıca 30 gün kuralı (ADR-0023) varyantı `on_sale` göstermeli. Vitrinin üstü çizili fiyatıyla aynı kural uygulanır: fiyatı artırıp geri indirmek kampanya sayılmaz.
+  - Sepette uygulanan promosyonlar (adr/0024) fiyat hesabına girmez, listede de yok.
+- **Fiyatlar:** taban herkese açık bağlamda hesaplanır. Satırların fiyatları (sıralama ve fiyat aralığı) alışverişçinin bölgesinden gelir.
+- **SEO:**
+  - `/store/seo/resolve?path=/kampanyalar` kayıt defterinden önce `entity` döner: `entity_type: "sale"`, `entity_id: "sale"`.
+  - Başlık sabit "Kampanyalı ürünler | {mağaza}". JSON-LD `CollectionPage` + `ItemList`. Liste sorgusu (filtre, sıra, sayfa) öbür listelerdeki gibi işlenir.
+  - İndirimde ürün yoksa `noindex,follow` olur ve sitemap'e girmez. En az bir ürün varsa `sitemap-site` dosyasına girer.
+  - `kampanyalar` kök segmenti ayrılmış.
+- **Açık:**
+  - Fiyat listesinin başlaması ya da bitmesi resolve önbelleğini düşürmez (en çok 30 sn bayat kalır). Sitemap'i de kirli işaretlemez; değişiklik günlük tam yenilemede girer.
+  - Vitrin menü eşlemesi (`workflows/storefront/menu-hrefs.ts`) `/kampanyalar`'ı henüz tanımıyor.

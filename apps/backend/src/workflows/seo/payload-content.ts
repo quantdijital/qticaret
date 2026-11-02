@@ -1,7 +1,8 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import type { SeoSubject } from "../../lib/seo/resolve"
+import type { SeoOverrides, SeoSubject } from "../../lib/seo/resolve"
 import { fillShopText } from "../../lib/shop/tokens"
 import { CATALOG_ENTITY_TYPES } from "../catalog/entity-paths"
+import { livePostsOfTerm } from "../content/term-reads"
 import { shopInfoValues } from "../shop/info-values"
 import { SEO_FIELDS, imageOf, listingItems, rowOf, trailOf } from "./payload-sources"
 import type { CategoryRow, SeoMetaRow } from "./payload-sources"
@@ -130,5 +131,63 @@ export async function landingSubject(
       entity_type: CATALOG_ENTITY_TYPES.landing,
       entity_id: id,
     }),
+  }
+}
+
+interface TermRow {
+  id: string
+  kind: "category" | "tag"
+  name: string
+  description?: string | null
+  seo_meta?: SeoMetaRow | null
+}
+
+// An archive with no text of its own is described by its newest posts' titles
+const DESCRIBING_POSTS = 5
+
+const NO_OVERRIDES: SeoOverrides = {
+  seo_title: null,
+  seo_description: null,
+  canonical_override: null,
+  robots_override: null,
+  og_image_alt: null,
+}
+
+/**
+ * A blog category's or tag's archive (adr/0019 ek 2026-11-03): titled as a
+ * post is, described by its own text or its newest posts, under the blog.
+ * The storefront lists the posts itself; an archive with no live post is
+ * nobody's search result (noindex, its links followed).
+ */
+export async function termSubject(
+  container: MedusaContainer,
+  id: string,
+  path: string
+): Promise<SeoSubject | null> {
+  const term = await rowOf<TermRow>(
+    container,
+    "content_term",
+    ["id", "kind", "name", "description", ...SEO_FIELDS],
+    id
+  )
+  if (!term) {
+    return null
+  }
+  const posts = await livePostsOfTerm(container, id, DESCRIBING_POSTS)
+  const own = term.seo_meta ?? null
+  // A term's description is stored trimmed, or null
+  const description =
+    term.description ??
+    (posts.titles.length > 0 ? `${term.name} yazıları: ${posts.titles.join(", ")}.` : "")
+  return {
+    kind: term.kind === "category" ? "post_category" : "post_tag",
+    path,
+    name: term.name,
+    description,
+    tokens: {},
+    overrides:
+      posts.count === 0 ? { ...(own ?? NO_OVERRIDES), robots_override: "noindex_follow" } : own,
+    image: await imageOf(container, own, null),
+    trail: BLOG_TRAIL,
   }
 }

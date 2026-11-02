@@ -12,6 +12,7 @@ import { URL_REGISTRY_MODULE } from "../../modules/url-registry"
 import type UrlRegistryModuleService from "../../modules/url-registry/service"
 import { CATALOG_ENTITY_TYPES, CATALOG_LOCALE } from "../catalog/entity-paths"
 import { publicUploadUrl } from "../files/public-upload"
+import { SALE_LISTING, saleProductIds } from "../pricing/sale-products"
 
 /** What every page's `seo` object reads (adr/0015): its own fields, the shop, its trail and image. */
 
@@ -189,6 +190,11 @@ async function listingFilters(
   if (owner.entity_type === CATALOG_ENTITY_TYPES.landing) {
     const ids = await landingListing(container, owner.entity_id)
     return ids ? { id: ids } : null
+  }
+  // The products on sale now (`/kampanyalar`)
+  if (owner.entity_type === SALE_LISTING) {
+    const ids = await saleProductIds(container)
+    return ids.length > 0 ? { id: ids } : null
   }
   return null
 }

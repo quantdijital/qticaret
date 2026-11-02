@@ -110,6 +110,37 @@ async function landingByFacet(scope: Resolver, body: unknown): Promise<Snapshot>
   return landingSnapshot(landing)
 }
 
+// A blog category or tag (adr/0019 ek 2026-11-03): no body, its fields as they are
+async function termSnapshot(scope: Resolver, filters: Record<string, string>): Promise<Snapshot> {
+  const [term] = await content(scope).listContentTerms(filters, { take: 1 })
+  return term
+    ? {
+        kind: term.kind,
+        name: term.name,
+        handle: term.handle,
+        description: term.description,
+        rank: term.rank,
+      }
+    : {}
+}
+
+async function termByHandle(scope: Resolver, body: unknown): Promise<Snapshot> {
+  const { kind, handle, name } = (body ?? {}) as {
+    kind?: unknown
+    handle?: unknown
+    name?: unknown
+  }
+  const wanted =
+    typeof handle === "string" && handle.trim() !== ""
+      ? handle.trim()
+      : typeof name === "string"
+        ? toSlug(name)
+        : ""
+  return (kind === "category" || kind === "tag") && wanted !== ""
+    ? termSnapshot(scope, { kind, handle: wanted })
+    : {}
+}
+
 export const CONTENT_RESOURCES: readonly AuditedResource[] = [
   {
     method: "POST",
@@ -127,6 +158,23 @@ export const CONTENT_RESOURCES: readonly AuditedResource[] = [
     resourceId: (params: Record<string, string>) => params["id"] ?? null,
     snapshot: ({ scope, params }: { scope: Resolver; params: Record<string, string> }) =>
       byId(scope, params["id"] ?? ""),
+  })),
+  {
+    method: "POST",
+    route: "POST /admin/content/terms",
+    pattern: /^\/admin\/content\/terms$/i,
+    resourceType: "content_term",
+    resourceId: () => null,
+    snapshot: ({ scope, body }) => termByHandle(scope, body),
+  },
+  ...(["POST", "DELETE"] as const).map((method) => ({
+    method,
+    route: `${method} /admin/content/terms/:id`,
+    pattern: new RegExp(`^/admin/content/terms/(?<id>${ID})$`, "i"),
+    resourceType: "content_term",
+    resourceId: (params: Record<string, string>) => params["id"] ?? null,
+    snapshot: ({ scope, params }: { scope: Resolver; params: Record<string, string> }) =>
+      termSnapshot(scope, { id: params["id"] ?? "" }),
   })),
   {
     method: "POST",

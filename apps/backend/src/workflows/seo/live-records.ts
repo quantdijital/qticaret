@@ -40,6 +40,13 @@ export const LIVE_RECORDS: readonly LiveSpec[] = [
     filters: fixed({ kind: "post", status: "published" }),
   },
   { entity: "landing_page", type: CATALOG_ENTITY_TYPES.landing, filters: liveLandingFilters },
+  // Blog archives (adr/0019 ek 2026-11-03)
+  {
+    entity: "content_term",
+    type: CATALOG_ENTITY_TYPES.post_category,
+    filters: fixed({ kind: "category" }),
+  },
+  { entity: "content_term", type: CATALOG_ENTITY_TYPES.post_tag, filters: fixed({ kind: "tag" }) },
 ]
 
 /** Which of the owners are live, as `type:id`; one query per kind of record. */

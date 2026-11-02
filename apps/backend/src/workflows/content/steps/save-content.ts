@@ -5,12 +5,15 @@ import type ContentModuleService from "../../../modules/content/service"
 import type { ContentEntryRecord, ContentKind } from "../../../modules/content/service"
 import { contentPlan } from "../rules"
 import type { ContentFields, ContentInput } from "../rules"
+import type { PostTermsInput } from "../term-rules"
 
 export interface SaveContentInput {
   /** The entry to change; none makes a new one of `kind`. */
   id?: string | undefined
   kind?: ContentKind | undefined
   values: ContentInput
+  /** A post's category and tags (adr/0019 ek 2026-11-03); left out, they stay. */
+  terms?: PostTermsInput | undefined
 }
 
 /** The entry as written; `was_live` says whether it had been live before (its old path's fate). */

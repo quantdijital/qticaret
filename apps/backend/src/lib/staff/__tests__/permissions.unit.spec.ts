@@ -270,6 +270,10 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/content/:id": false,
   "DELETE /admin/content/:id": false,
   "POST /admin/content": false,
+  // A blog's categories and tags (adr/0019 ek 2026-11-03): the catalogue's people
+  "POST /admin/content/terms": false,
+  "POST /admin/content/terms/:id": false,
+  "DELETE /admin/content/terms/:id": false,
   "POST /admin/customer-segments/:id/refresh": false,
   "POST /admin/customer-segments/:id": false,
   "DELETE /admin/customer-segments/:id": false,

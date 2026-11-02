@@ -22,7 +22,9 @@ import type { ShippingSettings, StoreSettings } from "../../modules/platform-set
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
 import type { Condition } from "../../lib/seo/jsonld"
 import { highlightText } from "./highlight"
-import { contentSubject, landingSubject } from "./payload-content"
+import { contentSubject, landingSubject, termSubject } from "./payload-content"
+import { SALE_LISTING } from "../pricing/sale-products"
+import { saleSubject } from "./sale-page"
 import type { HighlightValue } from "./highlight"
 import {
   MEDIA_FIELDS,
@@ -267,6 +269,9 @@ const SUBJECTS: Readonly<
   [CATALOG_ENTITY_TYPES.page]: contentSubject,
   [CATALOG_ENTITY_TYPES.post]: contentSubject,
   [CATALOG_ENTITY_TYPES.landing]: landingSubject,
+  [CATALOG_ENTITY_TYPES.post_category]: termSubject,
+  [CATALOG_ENTITY_TYPES.post_tag]: termSubject,
+  [SALE_LISTING]: saleSubject,
 }
 
 /** The `seo` object of a live page at `path`, or null for a kind without one. */

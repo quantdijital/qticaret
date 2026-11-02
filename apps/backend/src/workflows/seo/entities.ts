@@ -31,6 +31,19 @@ export const SEO_ENTITIES = {
     kind: "post",
   },
   landing: { entity: "landing_page", module: CONTENT_MODULE, linkKey: "landing_page_id" },
+  // Blog categories and tags: one record, told apart by its kind
+  post_category: {
+    entity: "content_term",
+    module: CONTENT_MODULE,
+    linkKey: "content_term_id",
+    kind: "category",
+  },
+  post_tag: {
+    entity: "content_term",
+    module: CONTENT_MODULE,
+    linkKey: "content_term_id",
+    kind: "tag",
+  },
 } as const
 
 export type SeoEntityType = keyof typeof SEO_ENTITIES

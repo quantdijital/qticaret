@@ -1,4 +1,4 @@
-import { RESERVED_ROOT_SEGMENTS, isReservedPath } from "../paths"
+import { RESERVED_ROOT_SEGMENTS, SYSTEM_PAGES, isReservedPath } from "../paths"
 
 describe("isReservedPath", () => {
   it.each([
@@ -11,8 +11,15 @@ describe("isReservedPath", () => {
     "/yasal",
     "/magaza",
     "/yorumlar",
+    "/abonelik",
+    "/stok-bildirimi",
+    "/cerez-tercihleri",
     "/admin",
     "/store",
+    // The sale page and the blog's archive prefixes (adr/0019 ek 2026-11-03)
+    "/kampanyalar",
+    "/blog/kategori",
+    "/blog/etiket",
   ])("keeps %s for the storefront", (path) => {
     expect(isReservedPath(path)).toBe(true)
   })
@@ -26,13 +33,33 @@ describe("isReservedPath", () => {
     "/sepet-cantasi",
     "/bicak-blog",
     "/sef-bicagi",
+    "/abonelik/cik",
+    "/stok-bildirimi-formu",
+    // A blog archive's own path, and posts named like a word of it
+    "/blog/kategori/bicak-bakimi",
+    "/blog/etiket/celik",
+    "/blog/kategoriler",
+    "/kampanyalar-hakkinda",
   ])("leaves %s to records", (path) => {
     expect(isReservedPath(path)).toBe(false)
   })
 
-  it("holds plain lowercase words, the form a stored path segment takes", () => {
+  it("holds lowercase words, hyphen-joined: the form a stored path segment takes", () => {
     for (const segment of RESERVED_ROOT_SEGMENTS) {
-      expect(segment).toMatch(/^[a-z]+$/)
+      expect(segment).toMatch(/^[a-z]+(?:-[a-z]+)*$/)
+    }
+  })
+
+  it("names the storefront's own pages, the token links among them, as nobody's search result", () => {
+    expect(SYSTEM_PAGES).toEqual(
+      expect.arrayContaining([
+        { path: "/abonelik", robots: "noindex,nofollow" },
+        { path: "/stok-bildirimi", robots: "noindex,nofollow" },
+        { path: "/cerez-tercihleri", robots: "noindex,follow" },
+      ])
+    )
+    for (const { path } of SYSTEM_PAGES) {
+      expect(isReservedPath(path)).toBe(true)
     }
   })
 })

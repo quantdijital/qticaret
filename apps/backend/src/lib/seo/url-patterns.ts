@@ -28,3 +28,14 @@ export const brandPath = (handle: string, style: UrlStyle): string =>
 export const pagePath = (handle: string): string => `/${handle}`
 
 export const postPath = (handle: string): string => `/blog/${handle}`
+
+/** The blog's archives (adr/0019 ek 2026-11-03): `/blog/kategori` and `/blog/etiket` hold no post. */
+export const POST_ARCHIVE_PREFIXES = { category: "/blog/kategori", tag: "/blog/etiket" } as const
+
+export const postCategoryPath = (handle: string): string =>
+  `${POST_ARCHIVE_PREFIXES.category}/${handle}`
+
+export const postTagPath = (handle: string): string => `${POST_ARCHIVE_PREFIXES.tag}/${handle}`
+
+/** The products on sale now (`/kampanyalar`): a storefront page of its own, no record's. */
+export const SALE_PATH = "/kampanyalar"

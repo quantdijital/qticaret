@@ -8,8 +8,9 @@ import { z } from "@medusajs/framework/zod"
  */
 export const StoreGetListingProducts = z
   .object({
-    // `all`: the whole catalogue (`/magaza`), its id `all`
-    type: z.enum(["product_category", "product_collection", "brand", "landing", "all"]),
+    // `all`: the whole catalogue (`/magaza`), its id `all`; `sale`: what is on sale now
+    // (`/kampanyalar`), its id `sale`
+    type: z.enum(["product_category", "product_collection", "brand", "landing", "all", "sale"]),
     id: z.string().regex(/^[\w-]{1,80}$/),
     region_id: z.string().regex(/^reg_[0-9A-Za-z]{1,40}$/),
     currency_code: z.string().regex(/^[a-z]{3}$/),

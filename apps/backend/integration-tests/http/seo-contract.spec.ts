@@ -1,3 +1,5 @@
+import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { createPriceListsWorkflow } from "@medusajs/medusa/core-flows"
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { PLATFORM_SETTINGS_MODULE } from "../../src/modules/platform-settings"
 import { CATALOG_ENTITY_TYPES } from "../../src/workflows/catalog/entity-paths"
@@ -129,11 +131,22 @@ medusaIntegrationTestRunner({
         status: "published",
         body: doc("Biz kimiz, ne yaparız ve neden yaparız."),
       })
+      // A blog category and a tag (adr/0019 ek 2026-11-03): one with its own text, one without
+      const category = await kit.post<{ term: { id: string; path: string } }>(
+        "/admin/content/terms",
+        { kind: "category", name: "Bakım", description: "Ürünlerinizi uzun ömürlü kılın." }
+      )
+      const tag = await kit.post<{ term: { id: string; path: string } }>("/admin/content/terms", {
+        kind: "tag",
+        name: "Seramik",
+      })
       const article = await kit.post<{ entry: { path: string } }>("/admin/content", {
         kind: "post",
         title: "Kupa bakımı",
         status: "published",
         body: doc("Seramik kupalar elde yıkanır, bulaşık makinesinde de yıkanabilir."),
+        category_id: category.data.term.id,
+        tag_ids: [tag.data.term.id],
       })
       const landing = await kit.landing("seramik", {
         title: "Seramik kupalar",
@@ -149,6 +162,8 @@ medusaIntegrationTestRunner({
         page: page.data.entry.path,
         post: article.data.entry.path,
         landing: landing.data.landing.path ?? "",
+        post_category: category.data.term.path,
+        post_tag: tag.data.term.path,
       }
       for (const [kind, path] of Object.entries(paths)) {
         const answer = await kit.resolve(path)
@@ -163,6 +178,32 @@ medusaIntegrationTestRunner({
           throw new Error(`${kind} (${path}): ${(error as Error).message}`, { cause: error })
         }
       }
+
+      // The sale page: no record's, the storefront's own (adr/0019 ek 2026-11-03)
+      const { data: variants } = await getContainer()
+        .resolve(ContainerRegistrationKeys.QUERY)
+        .graph({ entity: "product_variant", fields: ["id"], filters: { product_id: productId } })
+      await createPriceListsWorkflow(getContainer()).run({
+        input: {
+          price_lists_data: [
+            {
+              title: "Sözleşme kampanyası",
+              description: "",
+              status: "active",
+              prices: [
+                {
+                  variant_id: (variants[0] as { id: string }).id,
+                  amount: 50,
+                  currency_code: "try",
+                },
+              ],
+            },
+          ],
+        },
+      })
+      const sale = await kit.resolve("/kampanyalar")
+      expect(sale).toMatchObject({ type: "entity", entity_type: "sale" })
+      expectContract(sale.seo as Seo | null | undefined, "/kampanyalar")
     })
   },
 })

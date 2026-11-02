@@ -10,7 +10,16 @@ import { renderTemplate } from "./template"
 
 export type RobotsValue = "index,follow" | "noindex,follow" | "noindex,nofollow"
 export type SeoPageKind =
-  "product" | "category" | "collection" | "brand" | "page" | "post" | "landing"
+  | "product"
+  | "category"
+  | "collection"
+  | "brand"
+  | "page"
+  | "post"
+  | "landing"
+  | "post_category"
+  | "post_tag"
+  | "sale"
 
 export interface SeoPayload {
   title: string
@@ -166,6 +175,26 @@ const NAME_TOKEN: Record<SeoPageKind, string> = {
   page: "başlık",
   post: "başlık",
   landing: "başlık",
+  post_category: "başlık",
+  post_tag: "başlık",
+  sale: "başlık",
+}
+
+// The sale page (`/kampanyalar`) has no template of the shop's: its name and the shop's
+const SALE_TITLE = "{başlık} | {mağaza}"
+
+// A blog archive (adr/0019 ek 2026-11-03) is titled as a post is, its name in the post's place
+function templateOf(kind: SeoPageKind, shop: SeoShop): string {
+  if (kind === "sale") {
+    return SALE_TITLE
+  }
+  const own =
+    kind === "collection"
+      ? "category"
+      : kind === "post_category" || kind === "post_tag"
+        ? "post"
+        : kind
+  return shop.titleTemplates[own]
 }
 
 function titleOf(subject: SeoSubject, shop: SeoShop): string {
@@ -174,11 +203,7 @@ function titleOf(subject: SeoSubject, shop: SeoShop): string {
     return own
   }
   const values = { ...subject.tokens, [NAME_TOKEN[subject.kind]]: subject.name, mağaza: shop.name }
-  const template =
-    subject.kind === "category" || subject.kind === "collection"
-      ? shop.titleTemplates.category
-      : shop.titleTemplates[subject.kind]
-  return renderTemplate(template, values) || subject.name
+  return renderTemplate(templateOf(subject.kind, shop), values) || subject.name
 }
 
 function descriptionOf(subject: SeoSubject, shop: SeoShop): string {

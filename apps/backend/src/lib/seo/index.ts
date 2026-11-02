@@ -6,11 +6,15 @@ export { SLUG_MAX_LENGTH, SLUG_SEGMENT, isValidSlug, toSlug } from "./slug"
 export { SEO_TEMPLATE_TOKENS, assertValidTemplate, checkTemplate, renderTemplate } from "./template"
 export type { TemplateCheck } from "./template"
 export {
+  POST_ARCHIVE_PREFIXES,
+  SALE_PATH,
   brandPath,
   categoryPath,
   collectionPath,
   pagePath,
+  postCategoryPath,
   postPath,
+  postTagPath,
   productPath,
 } from "./url-patterns"
 export type { UrlStyle } from "./url-patterns"
