@@ -1,9 +1,9 @@
-import { startFakeYurtici } from "@qticaret/testing"
-import type { FakeYurtici } from "@qticaret/testing"
 import {
-  createYurticiApi,
   yurticiCredentialsOf,
+  yurticiDesi,
   yurticiLabelPdf,
+  yurticiOperationStatus,
+  yurticiReceiverGap,
   yurticiShipmentFields,
   yurticiStatusOf,
 } from ".."
@@ -39,9 +39,11 @@ const shipment = (
 const delivery = (overrides: Partial<YurticiDelivery>): YurticiDelivery => ({
   found: true,
   operationCode: 1,
+  operationStatus: null,
   operationMessage: null,
   docId: null,
   trackingUrl: null,
+  rejectStatus: null,
   words: [],
   ...overrides,
 })
@@ -73,8 +75,8 @@ describe("Yurtiçi (adr/0035)", () => {
       receiverAddress: "Moda Mah., Atatürk Cad. No: 5",
       cityName: "İstanbul",
       townName: "Kadıköy",
-      receiverPhone1: "05321234567",
       desi: "1.500",
+      kg: "0.450",
       cargoCount: 1,
       ttInvoiceAmount: "249.90",
       ttDocumentId: "1042",
@@ -83,25 +85,87 @@ describe("Yurtiçi (adr/0035)", () => {
     })
     expect(yurticiShipmentFields(shipment("QT01ABCDEF"))).toMatchObject({
       ttInvoiceAmount: null,
-      ttDocumentId: 0,
       ttCollectionType: null,
+      ttDocumentSaveType: null,
     })
   })
 
-  it("reads the stage from the operation code and the last mile from Yurtiçi's words", () => {
+  it("sends the phone as ten digits and the unused numbers empty, as the document does", () => {
+    const fields = yurticiShipmentFields(shipment("QT01ABCDEF"))
+
+    // Document: "Alan kodu ile birlikte 10 adet rakam"; its requests send 2123652426
+    expect(fields["receiverPhone1"]).toBe("5321234567")
+    // Its requests carry <taxOfficeId/>, <ttDocumentId/>, <dcSelectedCredit/>, <dcCreditRule/>
+    expect(fields).toMatchObject({
+      taxOfficeId: "",
+      ttDocumentId: "",
+      dcSelectedCredit: "",
+      dcCreditRule: "",
+    })
+    // The il and the ilçe go in their own fields, not in the address
+    expect(fields["receiverAddress"]).toBe("Moda Mah., Atatürk Cad. No: 5")
+  })
+
+  it("finds the receiver Yurtiçi refuses before asking it: a short name, a short address", () => {
+    const receiver = receiverOf(address)
+
+    expect(yurticiReceiverGap(receiver)).toBeNull()
+    expect(yurticiReceiverGap({ ...receiver, name: "Al Ay" })).toBeNull()
+    expect(yurticiReceiverGap({ ...receiver, name: "Ab C" })).toBe("first_name")
+    // Five characters, two of them letters
+    expect(yurticiReceiverGap({ ...receiver, name: "A1 B2" })).toBe("first_name")
+    expect(yurticiReceiverGap({ ...receiver, address: "No: 5, 34" })).toBe("address_1")
+    // Eight letters and digits, then eleven
+    expect(yurticiReceiverGap({ ...receiver, address: "Ev 12, Sk. 34" })).toBe("address_1")
+    expect(yurticiReceiverGap({ ...receiver, address: "Ev 12, Sokak 34" })).toBeNull()
+  })
+
+  it("sends the volume's desi apart from the weight: volume / 3000, one decimal up", () => {
+    expect(yurticiDesi({ length_cm: 30, width_cm: 20, height_cm: 10 })).toBe(2)
+    expect(yurticiDesi({ length_cm: 10.1, width_cm: 10.1, height_cm: 10.1 })).toBe(0.4)
+    expect(yurticiDesi({ length_cm: 15, width_cm: 15, height_cm: 15 })).toBe(1.2)
+  })
+
+  it("reads the stage from the operation's letters, its code only standing in", () => {
+    expect(yurticiOperationStatus("cnl", 2)).toBe("CNL")
+    expect(yurticiOperationStatus(null, 3)).toBe("CNL")
+    expect(yurticiOperationStatus("XYZ", null)).toBeNull()
+    expect(yurticiOperationStatus("__proto__", 9)).toBeNull()
     expect(yurticiStatusOf(delivery({ found: false })).status).toBe("created")
     expect(yurticiStatusOf(delivery({ operationCode: 0 })).status).toBe("created")
     expect(yurticiStatusOf(delivery({ operationCode: 2 })).status).toBe("picked_up")
     expect(yurticiStatusOf(delivery({ operationCode: 1 })).status).toBe("in_transit")
+    // The document's sample answers number CNL as 2: the letters win
+    expect(yurticiStatusOf(delivery({ operationCode: 2, operationStatus: "CNL" })).status).toBe(
+      "canceled"
+    )
+    expect(yurticiStatusOf(delivery({ operationStatus: "BI", operationCode: 6 })).status).toBe(
+      "canceled"
+    )
     expect(yurticiStatusOf(delivery({ words: ["Dağıtıma çıkarıldı"] })).status).toBe(
       "out_for_delivery"
     )
     expect(yurticiStatusOf(delivery({ words: ["Teslim edilemedi"] })).status).toBe("failed")
     expect(yurticiStatusOf(delivery({ operationCode: 5 })).status).toBe("delivered")
-    expect(
-      yurticiStatusOf(delivery({ operationCode: 5, words: ["Göndericiye iade"] })).status
-    ).toBe("returned")
     expect(yurticiStatusOf(delivery({ operationCode: 4 })).status).toBe("canceled")
+  })
+
+  it("reads a return from its own code: 0–3, 9 and 10 return, 4, 7, 8 and 11 call it off", () => {
+    const of = (rejectStatus: string, operationStatus = "IND") =>
+      yurticiStatusOf(delivery({ operationStatus, rejectStatus })).status
+
+    expect(["0", "1", "2", "3", "9", "10"].map((code) => of(code))).toEqual(
+      Array(6).fill("returned")
+    )
+    expect(of("10", "DLV")).toBe("returned")
+    // "İade Bekletiliyor", "İade Onaylanmadı": the parcel goes on, whatever the words say
+    expect(["4", "7", "8", "11"].map((code) => of(code))).toEqual(Array(4).fill("in_transit"))
+    // Withdrawn after its document was issued: Yurtiçi's own words for a return request
+    expect(
+      yurticiStatusOf(
+        delivery({ operationStatus: "IND", operationMessage: "İade isteği Alınmıştır" })
+      ).status
+    ).toBe("returned")
   })
 
   it("takes Yurtiçi's tracking link only on its own https hosts, else its page for the number", () => {
@@ -121,6 +185,8 @@ describe("Yurtiçi (adr/0035)", () => {
     ]) {
       expect(linkOf(foreign)).toContain("code=100000000001")
     }
+    // No document yet: Yurtiçi answers docId 0
+    expect(yurticiStatusOf(delivery({ docId: "0" })).tracking_number).toBeNull()
   })
 
   it("draws a 100×150 mm PDF label, whatever the shopper typed", async () => {
@@ -164,77 +230,5 @@ describe("Yurtiçi (adr/0035)", () => {
       [80, 80],
       [70, 70],
     ])
-  })
-})
-
-describe("Yurtiçi client against the fake service (adr/0035)", () => {
-  let fake: FakeYurtici
-  const api = () => createYurticiApi({ baseUrl: fake.url })
-
-  beforeAll(async () => {
-    fake = await startFakeYurtici()
-  })
-
-  afterAll(async () => {
-    await fake.close()
-  })
-
-  it("opens a parcel under our key in a JAX-WS body, and refuses the same key twice", async () => {
-    await api().createShipment(fake.accounts.main, true, shipment("QTUNITKEY000001"))
-    const twice = await api()
-      .createShipment(fake.accounts.main, true, shipment("QTUNITKEY000001"))
-      .catch((error: unknown) => error)
-    const [sent] = fake.requests
-
-    expect(sent?.body).toContain(
-      '<op:createShipment xmlns:op="http://yurticikargo.com.tr/ShippingOrderDispatcherServices">'
-    )
-    expect(sent?.body).toContain(`<wsUserName>${fake.accounts.main.username}</wsUserName>`)
-    expect(fake.shipments.get("QTUNITKEY000001")).toMatchObject({
-      account: "main",
-      receiverName: "Ayşe Yılmaz",
-    })
-    expect(twice).toMatchObject({ providerCode: "error_60020" })
-  })
-
-  it("follows the parcel on the login that opened it only", async () => {
-    await api().createShipment(fake.accounts.cod, true, shipment("QTUNITKEY000002", 10_000))
-
-    const elsewhere = await api().query(fake.accounts.main, true, "QTUNITKEY000002")
-    const first = await api().query(fake.accounts.cod, true, "QTUNITKEY000002")
-
-    expect(elsewhere.found).toBe(false)
-    expect(first).toMatchObject({ found: true, operationCode: 2 })
-    expect(yurticiStatusOf(first)).toMatchObject({
-      status: "picked_up",
-      tracking_number: expect.stringMatching(/^\d{12}$/) as string,
-    })
-    expect(fake.shipments.get("QTUNITKEY000002")).toMatchObject({
-      account: "cod",
-      codAmount: "100.00",
-      codDocumentId: "1042",
-    })
-  })
-
-  it("withdraws a parcel the branch has not taken, again without harm, and not after", async () => {
-    await api().createShipment(fake.accounts.main, true, shipment("QTUNITKEY000003"))
-    await api().cancel(fake.accounts.main, true, "QTUNITKEY000003")
-    await api().cancel(fake.accounts.main, true, "QTUNITKEY000003")
-    await api().createShipment(fake.accounts.main, true, shipment("QTUNITKEY000004"))
-    await api().query(fake.accounts.main, true, "QTUNITKEY000004")
-
-    const late = await api()
-      .cancel(fake.accounts.main, true, "QTUNITKEY000004")
-      .catch((error: unknown) => error)
-
-    expect(fake.shipments.get("QTUNITKEY000003")?.canceled).toBe(true)
-    expect(late).toMatchObject({ providerCode: "error_82512" })
-  })
-
-  it("tells a login Yurtiçi takes from one it refuses", async () => {
-    expect(await api().checkLogin(fake.accounts.main, true)).toBe("valid")
-    expect(await api().checkLogin({ username: "yanlis", password: "yanlis-sifre" }, true)).toBe(
-      "secret_invalid"
-    )
   })
 })

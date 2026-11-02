@@ -1,13 +1,15 @@
 import type { XmlFields } from "../../clients/xml"
 import { kurus, toMedusaAmount } from "../../money"
+import type { Parcel } from "../parcel"
 import type { Receiver } from "../receiver"
 
 /**
  * A parcel as Yurtiçi takes it (`ShippingOrderVO`, adr/0035): our code as
  * its cargo key, the receiver (`../receiver`), its desi and weight, and
  * what the courier collects at the door. Who pays the shipping is not a
- * field: the account the parcel goes out on says it. Lengths as the
- * service's description gives them; amounts with a dot.
+ * field: the account the parcel goes out on says it. Lengths, required
+ * fields and formats as Yurtiçi's "Web Servis Giden Kargo Teknik Döküman
+ * V3" gives them (docs/entegrasyonlar/yurtici.md); amounts with a dot.
  */
 
 export interface YurticiShipmentInput {
@@ -16,6 +18,7 @@ export interface YurticiShipmentInput {
   /** The order's number: digits, the door collection's document. */
   orderNumber: string
   receiver: Receiver
+  /** The parcel's volume in desi (`yurticiDesi`): Yurtiçi keeps desi and kg apart. */
   desi: number
   kg: number
   /** Kuruş the courier collects at the door; null when paid already. */
@@ -26,7 +29,31 @@ const cut = (value: string, length: number): string => value.slice(0, length)
 
 const decimal = (value: number): string => value.toFixed(3)
 
-/** The `ShippingOrderVO` element of `createShipment`, as the service describes it. */
+const count = (value: string, pattern: RegExp): number => value.match(pattern)?.length ?? 0
+
+/**
+ * The part of the receiver Yurtiçi refuses, found before asking it: a name
+ * of at least 5 characters with 4 letters, an address of at least 10
+ * letters or digits. Null when Yurtiçi takes both.
+ */
+export function yurticiReceiverGap(receiver: Receiver): "first_name" | "address_1" | null {
+  const name = receiver.name.trim()
+  if (name.length < 5 || count(name, /\p{L}/gu) < 4) {
+    return "first_name"
+  }
+  if (count(receiver.address, /[\p{L}\p{N}]/gu) < 10) {
+    return "address_1"
+  }
+  return null
+}
+
+/** The parcel's desi as Yurtiçi records it: its volume / 3000, to one decimal up; the kg goes apart. */
+export function yurticiDesi(parcel: Pick<Parcel, "length_cm" | "width_cm" | "height_cm">): number {
+  const desi = (parcel.length_cm * parcel.width_cm * parcel.height_cm) / 3000
+  return Math.max(0, Math.ceil(desi * 10 - 1e-9) / 10)
+}
+
+/** The `ShippingOrderVO` element of `createShipment`, as the document describes it. */
 export function yurticiShipmentFields(input: YurticiShipmentInput): XmlFields {
   const cod = input.cashOnDelivery !== null && input.cashOnDelivery > 0
   const document = /^\d{1,12}$/.test(input.orderNumber) ? input.orderNumber : "0"
@@ -35,22 +62,25 @@ export function yurticiShipmentFields(input: YurticiShipmentInput): XmlFields {
     // One key per parcel for both: ours is unique already
     invoiceKey: input.cargoKey,
     receiverCustName: cut(input.receiver.name, 200),
+    // Without the il and the ilçe: they go in their own fields
     receiverAddress: cut(input.receiver.address, 500),
     cityName: cut(input.receiver.city, 40),
     townName: cut(input.receiver.town, 40),
-    receiverPhone1: input.receiver.phone,
-    // Numbers the service's description requires; zero when the parcel has none
-    taxOfficeId: 0,
+    // Ten digits with the area code, no leading 0 (the document's 2123652426)
+    receiverPhone1: input.receiver.phone.replace(/^0/, ""),
+    // Numbers the service's description requires: empty when unused, as the document sends them
+    taxOfficeId: "",
     desi: decimal(input.desi),
     kg: decimal(input.kg),
     cargoCount: 1,
-    ttInvoiceAmount: cod ? toMedusaAmount(kurus(input.cashOnDelivery ?? 0)) : null,
-    ttDocumentId: cod ? document : 0,
-    // Cash at the door, on the parcel's own collection document
+    // Cash at the door (0); the collection service fee on the same invoice (0)
     ttCollectionType: cod ? "0" : null,
+    ttInvoiceAmount: cod ? toMedusaAmount(kurus(input.cashOnDelivery ?? 0)) : null,
+    ttDocumentId: cod ? document : "",
     ttDocumentSaveType: cod ? "0" : null,
-    dcSelectedCredit: 0,
-    dcCreditRule: 0,
+    // Instalments: only when the courier takes a card (ttCollectionType 1), which we do not ask
+    dcSelectedCredit: "",
+    dcCreditRule: "",
     description: cut(`Sipariş ${input.orderNumber}`, 255),
   }
 }

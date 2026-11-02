@@ -24,7 +24,13 @@ import {
   storedCarrierAccount,
   tablePriceOf,
 } from "../../lib/shipping/shop"
-import { yurticiApi, yurticiCredentialsOf, yurticiLabelPdf } from "../../lib/shipping/yurtici"
+import {
+  yurticiApi,
+  yurticiCredentialsOf,
+  yurticiDesi,
+  yurticiLabelPdf,
+  yurticiReceiverGap,
+} from "../../lib/shipping/yurtici"
 import type { YurticiCredentials, YurticiLogin } from "../../lib/shipping/yurtici"
 
 /**
@@ -118,13 +124,19 @@ class YurticiFulfillmentService extends AbstractFulfillmentProviderService {
     const login = loginFor(credentials, ship.cash_on_delivery)
     const parcel = await packedParcelOf(items, order?.items)
     const receiver = shipmentReceiverOf(order?.shipping_address)
+    // What Yurtiçi's document refuses (a name under 5 characters, an address under 10), told here
+    const gap = yurticiReceiverGap(receiver)
+    if (gap) {
+      throw new ValidationError("shipping.address_incomplete", { field: `shipping_address.${gap}` })
+    }
     const cargoKey = shipmentCode()
     const number = String(order?.display_id ?? order?.id ?? "")
     const shipment = {
       cargoKey,
       orderNumber: number,
       receiver,
-      desi: parcel.desi,
+      // Yurtiçi keeps the volume's desi and the weight apart, and charges the larger
+      desi: yurticiDesi(parcel),
       kg: parcel.weight_kg,
       cashOnDelivery: ship.cash_on_delivery,
     }
@@ -162,7 +174,12 @@ class YurticiFulfillmentService extends AbstractFulfillmentProviderService {
     }
   }
 
-  /** Withdraws the parcel at Yurtiçi, on the login it went out on. */
+  /**
+   * Withdraws the parcel at Yurtiçi, on the login it went out on. Refused
+   * once its document is issued: Yurtiçi then takes the call as a return
+   * request (`return_requested`), so the fulfillment stays and tracking
+   * follows the parcel back.
+   */
   override async cancelFulfillment(
     data: Record<string, unknown>
   ): Promise<Record<string, unknown>> {

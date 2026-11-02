@@ -130,3 +130,21 @@ Mağaza kendi kurumsal kargo sözleşmesiyle (müşteri kodu, kendi fiyatları, 
   - etiketin şubede okutulması;
   - desi/kg alanlarının sözleşmede açık olması.
 
+
+## Ek (2026-11-02): Yurtiçi resmî belgesiyle karşılaştırma
+
+Mağaza sahibi Yurtiçi'nin "Web Servis Giden Kargo Teknik Döküman V3" belgesini verdi. Entegrasyon satır satır karşılaştırıldı; doğrulanan bilgiler `docs/entegrasyonlar/yurtici.md`'de. Belge "Hizmete Özel", repoya konmadı.
+
+- **Doğrulananlar (değişiklik yok):** test ve canlı adresler (`testws` / `ws.yurticikargo.com`, Bağlam'daki `testwebservices…:9090` adresi geçersiz), ad alanı, kimlik alanları (`queryShipment`'ta `wsLanguage`), ödeme tipinin ayrı kullanıcıyla seçilmesi (ana hesap = gönderici ödemeli, kapıda ödeme hesabı = gönderici ödemeli tahsilatlı teslimat), `cargoKey`/`invoiceKey` 20 karakter, il/ilçenin adreste değil `cityName`/`townName`'de gitmesi, nokta ayraçlı tutar, `keyType=0`, Yurtiçi'nin etiket vermemesi (anahtarın koli üzerinde metin/barkod olması yeterli).
+- **Düzeltilenler:**
+  - **Hesap kontrolü:** bilinmeyen anahtar için Yurtiçi `outFlag` 0 ve `cargoKey`'siz bir 82519 satırı döndürüyor. Kontrol satırı anahtarla aradığı için geçerli bir canlı hesap "reddedildi" görünecekti. Artık 82519 satırı geçerli giriş sayılıyor. Takip de bu satırı "bulunamadı" okuyor; başka bir hata kodu artık sessizce "bulunamadı" sayılmıyor, hata olarak dönüyor.
+  - **İptal:** belgeye göre düzenlenmiş (`IND`) gönderiye iptal bir iade isteğidir; teslim edilmiş gönderi (`DLV`) de `outFlag` 0 ile döner. Eskiden ikisi de başarılı geri çekme sayılıyordu: Medusa gönderimi iptal ederken koli yoldaydı ya da teslim edilmişti. Artık yalnızca `CNL`, `ISC` ve 82520 (önceden iptal; belgenin hatalı örneği `outFlag` 1 ile döner ve eskiden hata sayılıyordu) geri çekmedir. `IND` → `return_requested`, `DLV` → `status_dlv` hatası; gönderim kalır, takip iadeyi izler.
+  - **Durum eşleme:** belgenin örnek yanıtları kodları tablodan farklı numaralıyor (CNL=2, DLV=1). Durum artık `operationStatus` harflerinden okunuyor, kod yalnızca yedek. İade, `rejectStatus` koduyla okunuyor (0–3, 9, 10 iade; 4, 7, 8, 11 iade iptal). Eskiden "İade Bekletiliyor"/"İade Onaylanmadı" metni yanlışlıkla iade sayılıyordu. `returnStatus` geri dönüşlü hizmetin durumu olduğu için iade sayılmıyor ("Gönderici müşteriye iade edildi" teslim edilmiş gönderiyi iade gösterebiliyordu). `docId` satırdan da okunuyor.
+  - **Telefon:** belge alan koduyla 10 rakam istiyor; baştaki 0 atılıyor.
+  - **Boş öğeler:** `taxOfficeId`, `ttDocumentId`, `dcSelectedCredit`, `dcCreditRule` kullanılmadığında belgenin örneklerindeki gibi boş gidiyor. Eskiden `0` gidiyordu ve `dcCreditRule=0` "müşteri seçimi zorunlu" demekti.
+  - **Desi:** belge desi ve kg'ı ayrı alanlarda tutuyor, yanıtta `totalDesi`, `totalKg`, `totalDesiKg` ayrı. Eskiden `desi` alanına max(kg, hacim/3000) gidiyordu; artık hacim/3000, kg ayrı. Mağazanın fiyat tablosu yine max(kg, hacim/3000) ile fiyatlar.
+  - **Alıcı kuralları:** ad en az 5 karakter ve 4 harf, adres en az 10 harf/rakam. Gönderimden önce denetleniyor, Yurtiçi'ye gitmeden `shipping.address_incomplete` (alan adıyla) dönüyor.
+  - **Sahte Yurtiçi** belgenin hata kodlarına ve yanıt biçimlerine göre yeniden yazıldı (`packages/testing/src/yurtici/rules.ts`): bilinmeyen anahtar 82519, tekrar iptal 82520, düzenlenmiş gönderiye iptal iade isteği, alan kuralları belgedeki kodlarla. Eski sahte, belgede başka anlama gelen kodlar kullanıyordu (60017, 82500, 82512, 82513).
+- **Belgedeki tutarsızlıklar:** adres en çok 200 mü 500 mü (500 seçildi: alan tipi ve servis mesajı), telefon örneği 11 hane mi 10 hane mi (10), tutar ayracı nokta mı virgül mü (alan tanımındaki nokta), örneklerde `dispatch` işlem adı (`createShipment` kullanılıyor).
+- **Açık sorular** (`docs/entegrasyonlar/yurtici.md`): hatalı girişin dönüş biçimi; dakikalık sorgu sınırının kapsamı; desi/kg yetkisi ve desi böleni; ticari gönderide `waybillNo`; `ttDocumentId` ve `ttDocumentSaveType`; kapıda ödeme sözleşmesinin nakit/kart oluşu (82512); takip bağlantısı; son durum olan `returned`/`failed`'ın geri alınamaması; barkod simgelemesi.
+- **Kapsam dışı kalan, başka dosya isteyen:** `return_requested` için ayrı bir Türkçe hata mesajı (`lib/errors/messages`), panelde ana hesabın "gönderici ödemeli" kullanıcısı olması gerektiğini söyleyen yardım metni.

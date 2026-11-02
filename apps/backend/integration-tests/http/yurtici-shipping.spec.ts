@@ -47,13 +47,13 @@ medusaIntegrationTestRunner({
       )
     const connect = (secrets: Partial<Record<string, string>>) =>
       post("/admin/integrations/credentials/yurtici", { settings: { test_mode: true }, secrets })
-    const order = () =>
+    const order = (address: typeof PAYTR_ADDRESS = PAYTR_ADDRESS) =>
       placeOrder(getContainer(), {
         regionId: shop.regionId,
         salesChannelId: shop.salesChannelId,
         shippingOptionId: optionId,
         items: [{ variant_id: variantId, quantity: 1 }],
-        address: PAYTR_ADDRESS,
+        address,
       })
     const codOrder = async () => {
       await post("/admin/features/payments.cash_on_delivery", { enabled: true })
@@ -180,7 +180,16 @@ medusaIntegrationTestRunner({
       const [arrived] = await fulfillmentsOf(orderId)
 
       expect(shipped.data).toMatchObject({ carrier: "yurtici" })
-      expect(sent).toMatchObject({ account: "main", receiverName: "Ayşe Yılmaz", codAmount: "" })
+      // As Yurtiçi's document asks: ten digits, il and ilçe apart, desi and kg apart
+      expect(sent).toMatchObject({
+        account: "main",
+        receiverName: "Ayşe Yılmaz",
+        phone: "5320000000",
+        city: "İstanbul",
+        town: "Kadıköy",
+        codAmount: "",
+      })
+      expect(sent?.desi).toMatch(/^\d+\.\d{3}$/)
       expect(String(packed?.data["shipment_id"])).toMatch(/^QT[A-Z2-9]{14}$/)
       expect(packed?.data).toMatchObject({
         shipment_id: sent?.cargoKey,
@@ -202,6 +211,39 @@ medusaIntegrationTestRunner({
       expect(refused.status).toBeGreaterThanOrEqual(400)
       expect(fake.shipments.size).toBe(0)
       expect(await fulfillmentsOf(orderId)).toHaveLength(0)
+    })
+
+    it("tells the shop which part of the receiver Yurtiçi would refuse, before asking it", async () => {
+      const orderId = await order({ ...PAYTR_ADDRESS, first_name: "Ab", last_name: "C" })
+
+      const refused = await post(`/admin/orders/${orderId}/ship`, { notify: false })
+
+      expect(refused.status).toBe(400)
+      expect(refused.data).toMatchObject({ message: "shipping.address_incomplete" })
+      expect(fake.requests.filter(({ operation }) => operation === "createShipment")).toHaveLength(
+        0
+      )
+      expect(await fulfillmentsOf(orderId)).toHaveLength(0)
+    })
+
+    it("keeps the parcel once its document is issued: Yurtiçi takes a cancel as a return", async () => {
+      const orderId = await order()
+      await post(`/admin/orders/${orderId}/ship`, { notify: false })
+      const [packed] = await fulfillmentsOf(orderId)
+      const sent = fake.shipments.get(String(packed?.data["shipment_id"]))
+      // On its way (IND), before our next read has seen it
+      if (sent) {
+        sent.step = 1
+      }
+
+      const canceled = await post(
+        `/admin/orders/${orderId}/fulfillments/${packed?.id ?? ""}/cancel`,
+        {}
+      )
+
+      expect(canceled.status).toBeGreaterThanOrEqual(400)
+      expect(sent).toMatchObject({ canceled: false, returnRequested: true })
+      expect(await fulfillmentsOf(orderId)).toHaveLength(1)
     })
 
     it("withdraws a parcel whose answer never came, and packs nothing", async () => {

@@ -1,10 +1,12 @@
 import type { ShipmentStatus } from "../../../modules/shipment-tracking/states"
 
 /**
- * Where a Yurtiçi parcel stands (adr/0035), from `queryShipment`: the
- * operation code says the stage, the words Yurtiçi shows for the last
- * event tell a return, a failed delivery and the last mile apart while
- * the parcel is on its way. To confirm with a real account (PROGRESS).
+ * Where a Yurtiçi parcel stands (adr/0035), from `queryShipment`, as
+ * Yurtiçi's "Web Servis Giden Kargo Teknik Döküman V3" gives it
+ * (docs/entegrasyonlar/yurtici.md): the operation status says the stage,
+ * the return's own code (`rejectStatus`) says a return, the words Yurtiçi
+ * shows for the last event tell a failed delivery and the last mile apart
+ * while the parcel is on its way. To confirm with a real account (PROGRESS).
  */
 
 /** One parcel of a `queryShipment` answer. */
@@ -12,25 +14,54 @@ export interface YurticiDelivery {
   /** Yurtiçi knows the cargo key on this account. */
   found: boolean
   operationCode: number | null
+  /** NOP, IND, ISR, CNL, ISC, DLV or BI. */
+  operationStatus: string | null
   operationMessage: string | null
   /** Yurtiçi's own shipment number, once the branch has the parcel. */
   docId: string | null
   trackingUrl: string | null
-  /** What Yurtiçi shows for the last event and its reason, return and refusal included. */
+  /** The return's stage (`rejectStatus`, 0–11); null when no return was asked for. */
+  rejectStatus: string | null
+  /** What Yurtiçi shows for the last event and its reason. */
   words: string[]
 }
 
-// 0 NOP not processed, 1 IND on its way, 2 ISR taken (no document yet), 3 CNL kept from
-// leaving, 4 ISC canceled before, 5 DLV delivered, 6 BI document canceled by the branch
-const CODES: Readonly<Record<number, ShipmentStatus>> = {
-  0: "created",
-  1: "in_transit",
-  2: "picked_up",
-  3: "canceled",
-  4: "canceled",
-  5: "delivered",
-  6: "canceled",
+// NOP not processed, IND on its way (or a return asked for), ISR taken (no document yet),
+// CNL kept from leaving, ISC canceled before, DLV delivered, BI document canceled by the branch
+const STAGES: Readonly<Record<string, ShipmentStatus>> = {
+  NOP: "created",
+  IND: "in_transit",
+  ISR: "picked_up",
+  CNL: "canceled",
+  ISC: "canceled",
+  DLV: "delivered",
+  BI: "canceled",
 }
+
+// The document's code table; its own sample answers number them otherwise (CNL as 2),
+// so the letters decide and the number only stands in when they are missing
+const CODES: Readonly<Record<number, string>> = {
+  0: "NOP",
+  1: "IND",
+  2: "ISR",
+  3: "CNL",
+  4: "ISC",
+  5: "DLV",
+  6: "BI",
+}
+
+/** The operation status an answer gives: its letters, else its code by the document's table. */
+export function yurticiOperationStatus(status: string | null, code: number | null): string | null {
+  const named = (status ?? "").trim().toUpperCase()
+  if (Object.hasOwn(STAGES, named)) {
+    return named
+  }
+  return code !== null && Object.hasOwn(CODES, code) ? (CODES[code] ?? null) : null
+}
+
+// rejectStatus 0, 1, 2, 3, 9 and 10: the parcel is being returned; 4, 7, 8 and 11: the
+// return was called off and the parcel goes on as before
+const RETURNING = new Set(["0", "1", "2", "3", "9", "10"])
 
 const RETURNED = /İADE|IADE/
 const FAILED = /TESLİM EDİLEMEDİ|TESLIM EDILEMEDI|ADRESTE BULUNAMADI/
@@ -64,11 +95,15 @@ export function yurticiStatusOf(delivery: YurticiDelivery): {
   tracking_number: string | null
   tracking_url: string | null
 } {
-  const words = delivery.words.map((word) => word.toLocaleUpperCase("tr"))
+  const words = [...delivery.words, delivery.operationMessage ?? ""].map((word) =>
+    word.toLocaleUpperCase("tr")
+  )
   const says = (pattern: RegExp) => words.some((word) => pattern.test(word))
-  const stage = delivery.found ? (CODES[delivery.operationCode ?? 0] ?? "created") : "created"
+  const operation = yurticiOperationStatus(delivery.operationStatus, delivery.operationCode)
+  const stage = delivery.found && operation ? (STAGES[operation] ?? "created") : "created"
+  const returning = RETURNING.has((delivery.rejectStatus ?? "").trim()) || says(RETURNED)
   const status: ShipmentStatus =
-    (stage === "in_transit" || stage === "delivered") && says(RETURNED)
+    (stage === "in_transit" || stage === "delivered") && returning
       ? "returned"
       : stage === "in_transit" && says(FAILED)
         ? "failed"

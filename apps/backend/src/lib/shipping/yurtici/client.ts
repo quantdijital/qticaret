@@ -2,10 +2,21 @@ import { randomBytes } from "node:crypto"
 import { z } from "@medusajs/framework/zod"
 import { createHttpClient } from "../../clients"
 import type { HttpClient, HttpClientOptions } from "../../clients"
-import { findAll, findFirst, parseXml, soapEnvelope } from "../../clients/xml"
+import { findFirst, parseXml, soapEnvelope } from "../../clients/xml"
 import type { XmlFields, XmlNode } from "../../clients/xml"
 import { parseEnv } from "../../env"
-import { ProviderError, isProviderError } from "../../errors"
+import { isProviderError } from "../../errors"
+import {
+  KEY_NOT_FOUND,
+  YURTICI_PROVIDER,
+  deliveryOf,
+  invalid,
+  lineOf,
+  own,
+  refused,
+  succeeded,
+  withdrawalRefusal,
+} from "./answers"
 import type { YurticiLogin } from "./credentials"
 import { yurticiShipmentFields } from "./mappers"
 import type { YurticiShipmentInput } from "./mappers"
@@ -13,44 +24,19 @@ import type { YurticiDelivery } from "./status"
 
 /**
  * Yurtiçi Kargo's shipping order service (adr/0035): a JAX-WS SOAP
- * service whose answers carry `outFlag` 0 for success and an `errCode` per
- * parcel. Shapes from the service's own description (WSDL). Which login a
- * call uses is the caller's: the shop's account, or its separate account
- * for parcels paid at the door. Logins never reach a log (the HTTP client
- * logs fixed fields only).
+ * service, its answers read in `./answers`. Shapes from the service's own
+ * description (WSDL) and Yurtiçi's "Web Servis Giden Kargo Teknik Döküman
+ * V3" (docs/entegrasyonlar/yurtici.md). Which login a call uses is the
+ * caller's: the shop's account, or its separate account for parcels paid
+ * at the door. Logins never reach a log (the HTTP client logs fixed fields
+ * only).
  */
 
-export const YURTICI_PROVIDER = "yurtici"
+export { YURTICI_PROVIDER }
 export const YURTICI_TEST_URL = "https://testws.yurticikargo.com"
 export const YURTICI_LIVE_URL = "https://ws.yurticikargo.com"
 const PATH = "/KOPSWebServices/ShippingOrderDispatcherServices"
 const NAMESPACE = "http://yurticikargo.com.tr/ShippingOrderDispatcherServices"
-
-const refused = (code: string | null) =>
-  new ProviderError({
-    provider: YURTICI_PROVIDER,
-    providerCode: code && /^-?\d{1,8}$/.test(code) ? `error_${code}` : "rejected",
-    retryable: false,
-  })
-
-const invalid = () =>
-  new ProviderError({
-    provider: YURTICI_PROVIDER,
-    providerCode: "invalid_response",
-    retryable: false,
-  })
-
-/** A child's own text (not a descendant's): the answers repeat names at each level. */
-const own = (node: XmlNode, name: string): string | null => {
-  const text = node.children.find((child) => child.name === name)?.text.trim() ?? ""
-  return text === "" ? null : text
-}
-
-const succeeded = (code: string | null): boolean => code === null || code === "0"
-
-/** The parcel's line in an answer, by our cargo key. */
-const lineOf = (result: XmlNode, name: string, cargoKey: string): XmlNode | null =>
-  findAll(result, name).find((line) => own(line, "cargoKey") === cargoKey) ?? null
 
 export function createYurticiApi(options: Partial<Omit<HttpClientOptions, "provider">> = {}) {
   const clients = new Map<string, HttpClient>()
@@ -148,39 +134,15 @@ export function createYurticiApi(options: Partial<Omit<HttpClientOptions, "provi
     if (!result) {
       throw invalid()
     }
-    const line = lineOf(result, "shippingDeliveryDetailVO", cargoKey)
-    if (!line || !succeeded(own(line, "errCode"))) {
-      if (own(result, "outFlag") === "2") {
-        throw refused(own(result, "errCode"))
-      }
-      return {
-        found: false,
-        operationCode: null,
-        operationMessage: null,
-        docId: null,
-        trackingUrl: null,
-        words: [],
-      }
-    }
-    const item = findFirst(line, "shippingDeliveryItemDetailVO")
-    const code = Number(own(line, "operationCode"))
-    const read = (name: string) => (item ? own(item, name) : null)
-    return {
-      found: true,
-      operationCode: Number.isInteger(code) ? code : null,
-      operationMessage: own(line, "operationMessage"),
-      docId: read("docId"),
-      trackingUrl: read("trackingUrl"),
-      words: [
-        "cargoEventExplanation",
-        "cargoReasonExplanation",
-        "returnStatusExplanation",
-        "rejectStatusExplanation",
-      ].flatMap((name) => read(name) ?? []),
-    }
+    return deliveryOf(result, cargoKey)
   }
 
-  /** Withdraws the parcel before its document is issued; already withdrawn counts as done. */
+  /**
+   * Withdraws the parcel before its document is issued; already withdrawn
+   * counts as done. Only CNL and ISC are a withdrawal: once the document is
+   * issued Yurtiçi takes the call as a return request (IND) and the parcel
+   * comes back, and a delivered one (DLV) stays delivered.
+   */
   async function cancel(login: YurticiLogin, testMode: boolean, cargoKey: string): Promise<void> {
     const tree = await call(
       testMode,
@@ -197,21 +159,17 @@ export function createYurticiApi(options: Partial<Omit<HttpClientOptions, "provi
     if (!result) {
       throw invalid()
     }
-    const line = lineOf(result, "shippingCancelDetailVO", cargoKey)
-    // 4 (ISC): canceled before, as a repeated withdrawal finds it
-    if (line && own(line, "operationCode") === "4") {
-      return
-    }
-    const code = line ? own(line, "errCode") : own(result, "errCode")
-    if (own(result, "outFlag") !== "0" || !succeeded(code)) {
-      throw refused(code)
+    const refusal = withdrawalRefusal(result, cargoKey)
+    if (refusal) {
+      throw refusal
     }
   }
 
   /**
    * Whether Yurtiçi takes the login: a query for a key nobody has, which
    * any account may make. A refused login is a fault or an answer with no
-   * line for the key; an unknown key still gets its line.
+   * line for the key; an unknown key gets a line of its own code (82519,
+   * "this user has no such key"), which names the user it found.
    */
   async function checkLogin(
     login: YurticiLogin,
@@ -236,7 +194,10 @@ export function createYurticiApi(options: Partial<Omit<HttpClientOptions, "provi
         { idempotent: true, signal: options.signal }
       )
       const result = findFirst(tree, "ShippingDeliveryVO")
-      return result && lineOf(result, "shippingDeliveryDetailVO", key) ? "valid" : "secret_invalid"
+      const line = result ? lineOf(result, "shippingDeliveryDetailVO", key) : null
+      return line && (own(line, "cargoKey") === key || own(line, "errCode") === KEY_NOT_FOUND)
+        ? "valid"
+        : "secret_invalid"
     } catch (error) {
       // A JAX-WS service answers a refused login with a fault (HTTP 500)
       if (

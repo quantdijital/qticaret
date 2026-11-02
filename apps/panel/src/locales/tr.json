@@ -1806,8 +1806,6 @@
       }
     },
     "accounting": {
-      "title": "Muhasebe",
-      "subtitle": "Mali müşavirin aylık kayıtları için satış, iade, tahsilat ve KDV dökümü.",
       "package": {
         "title": "Aylık muhasebe paketi",
         "hint": "Seçilen ayın kayıtları tek zip dosyasında: bir Excel dosyası ve aynı tablolar CSV olarak.",
