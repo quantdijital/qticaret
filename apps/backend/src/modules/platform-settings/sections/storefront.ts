@@ -1,9 +1,9 @@
 import { z } from "@medusajs/framework/zod"
-import { normalizeTrPhone } from "../../../lib/tr/phone"
+import { isHttpsUrl } from "../../../lib/security/https-url"
+import { unknownShopTokens } from "../../../lib/shop/tokens"
 import { defineSection, isCleanText } from "./define"
 
 const MAX_PATH_LENGTH = 512
-const MAX_URL_LENGTH = 2048
 
 /** The icons a promise in the storefront's trust strip may carry (docs/19 §4). */
 export const TRUST_ICONS = [
@@ -33,8 +33,6 @@ export interface StorefrontSettings {
   footer_groups: { title: string; links: StorefrontLink[] }[]
   /** The shop's promises under the header and beside "add to cart". */
   trust_badges: { icon: TrustIcon; title: string; text: string | null }[]
-  /** The number a WhatsApp chat button opens, E.164; none: no button. */
-  whatsapp_phone: string | null
   /** The header's menu as the shop names it; none: the top categories and their children. */
   menu: StorefrontMenuItem[]
   /** The storefront's main colour (`#rrggbb`, lower case); none: the theme's own. */
@@ -79,18 +77,6 @@ const isShopPath = (value: string): boolean =>
   !value.includes("\\") &&
   !/\s/.test(value)
 
-const isHttpsUrl = (value: string): boolean => {
-  if (value.length > MAX_URL_LENGTH || !value.startsWith("https://")) {
-    return false
-  }
-  try {
-    const url = new URL(value)
-    return url.protocol === "https:" && url.username === "" && url.password === ""
-  } catch {
-    return false
-  }
-}
-
 // A link opens a page of the shop or an https address, never a script
 // (`javascript:`), another scheme or a protocol-relative host
 const href = z
@@ -102,37 +88,30 @@ const href = z
 
 const link = z.object({ label: text(60), href }).strict()
 
+// A line that may stand in for the shop's details (`{ücretsiz_kargo_eşiği}`, adr/0048)
+const shopText = (max: number) =>
+  text(max).refine((value) => unknownShopTokens(value).length === 0, {
+    message: "platform_settings.token_unknown",
+  })
+
 const HEX_COLOR = /^#[0-9a-f]{6}$/
 
 /** The storefront's frame, as the shop writes it (F18 D3, docs/19 §4). */
 export const storefrontSection = defineSection<StorefrontSettings>(
   "storefront",
   {
-    announcements: z.array(text(120)).max(5),
+    announcements: z.array(shopText(120)).max(5),
     top_links: z.array(link).max(8),
     footer_groups: z
       .array(z.object({ title: text(40), links: z.array(link).min(1).max(10) }).strict())
       .max(4),
     trust_badges: z
       .array(
-        z.object({ icon: z.enum(TRUST_ICONS), title: text(40), text: text(80).nullable() }).strict()
+        z
+          .object({ icon: z.enum(TRUST_ICONS), title: shopText(40), text: shopText(80).nullable() })
+          .strict()
       )
       .max(4),
-    whatsapp_phone: z
-      .string()
-      .max(32)
-      .nullable()
-      .transform((value, ctx) => {
-        if (value === null) {
-          return null
-        }
-        const phone = normalizeTrPhone(value)
-        if (!phone) {
-          ctx.addIssue({ code: "custom", message: "platform_settings.phone_invalid" })
-          return z.NEVER
-        }
-        return phone
-      }),
     menu: z
       .array(z.object({ label: text(40), href, children: z.array(link).max(20) }).strict())
       .max(12),
@@ -144,9 +123,9 @@ export const storefrontSection = defineSection<StorefrontSettings>(
       .nullable(),
     hero: z
       .object({
-        eyebrow: text(40).nullable(),
-        heading: text(90),
-        text: text(240).nullable(),
+        eyebrow: shopText(40).nullable(),
+        heading: shopText(90),
+        text: shopText(240).nullable(),
         links: z.array(link).max(2),
       })
       .strict()
@@ -185,7 +164,6 @@ export const storefrontSection = defineSection<StorefrontSettings>(
     top_links: [],
     footer_groups: [],
     trust_badges: [],
-    whatsapp_phone: null,
     menu: [],
     primary_color: null,
     hero: null,

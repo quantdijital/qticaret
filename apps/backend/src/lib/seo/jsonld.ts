@@ -319,6 +319,26 @@ export interface SiteIdentity {
   email: string | null
   telephone: string | null
   sameAs: readonly string[]
+  /** When customer service answers (adr/0048): schema.org day addresses and `HH:MM`. */
+  hours?: readonly { dayOfWeek: string; opens: string; closes: string }[]
+}
+
+// How to reach customer service: its phone, e-mail and hours (Google reads `contactPoint`)
+function contactPointOf(identity: SiteIdentity | undefined) {
+  if (!identity || (!identity.telephone && !identity.email)) {
+    return undefined
+  }
+  return compact({
+    "@type": "ContactPoint",
+    contactType: "customer service",
+    telephone: identity.telephone ?? undefined,
+    email: identity.email ?? undefined,
+    areaServed: "TR",
+    availableLanguage: "tr",
+    hoursAvailable: identity.hours?.length
+      ? identity.hours.map((range) => ({ "@type": "OpeningHoursSpecification", ...range }))
+      : undefined,
+  })
 }
 
 /**
@@ -346,6 +366,7 @@ export function siteJsonLd(
       email: identity?.email ?? undefined,
       telephone: identity?.telephone ?? undefined,
       sameAs: identity?.sameAs.length ? [...identity.sameAs] : undefined,
+      contactPoint: contactPointOf(identity),
     }),
     { "@context": SCHEMA, "@type": "WebSite", name: shop.name, url: shop.url },
   ]

@@ -51,7 +51,15 @@ medusaIntegrationTestRunner({
         same_as: ["https://instagram.com/ornek"],
       })
       const stillMissing = await missing()
-      await admin("post", "/admin/platform-settings/store", { contact_email: "destek@ornek.com" })
+      await admin("post", "/admin/platform-settings/store", {
+        contact_email: "destek@ornek.com",
+        whatsapp_phone: "0532 123 45 67",
+        map_url: "https://maps.app.goo.gl/ornek",
+        opening_hours: [
+          { day: 1, opens: "09:00", closes: "18:00" },
+          { day: 6, opens: "10:00", closes: "14:00" },
+        ],
+      })
       await admin("post", "/admin/platform-settings/seo", { canonical_host: "ornek.com" })
       const after = await missing()
       const footer = await settle(
@@ -92,6 +100,13 @@ medusaIntegrationTestRunner({
         tax_number: vkn,
         kep: "ornek@hs01.kep.tr",
         email: "destek@ornek.com",
+        // How the shop is reached, from its store details (adr/0048)
+        whatsapp: "+905321234567",
+        map_url: "https://maps.app.goo.gl/ornek",
+        opening_hours: [
+          { day: 1, opens: "09:00", closes: "18:00" },
+          { day: 6, opens: "10:00", closes: "14:00" },
+        ],
       })
       expect(site.data.jsonLd[0]).toMatchObject({
         "@type": "OnlineStore",
@@ -99,6 +114,25 @@ medusaIntegrationTestRunner({
         taxID: vkn,
         address: { "@type": "PostalAddress", addressCountry: "TR" },
         sameAs: ["https://instagram.com/ornek"],
+        contactPoint: {
+          "@type": "ContactPoint",
+          contactType: "customer service",
+          email: "destek@ornek.com",
+          hoursAvailable: [
+            {
+              "@type": "OpeningHoursSpecification",
+              dayOfWeek: "https://schema.org/Monday",
+              opens: "09:00",
+              closes: "18:00",
+            },
+            {
+              "@type": "OpeningHoursSpecification",
+              dayOfWeek: "https://schema.org/Saturday",
+              opens: "10:00",
+              closes: "14:00",
+            },
+          ],
+        },
       })
       expect(preview.data.html).toContain(`Örnek Ticaret Ltd. Şti., ${vkn}`)
     })

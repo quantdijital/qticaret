@@ -13,7 +13,6 @@ interface Frame {
     top_links: { label: string; href: string }[]
     footer_groups: { title: string; links: { label: string; href: string }[] }[]
     trust_badges: { icon: string; title: string; text: string | null }[]
-    whatsapp_phone: string | null
     menu: { label: string; href: string; children: { label: string; href: string }[] }[]
     primary_color: string | null
     hero: unknown
@@ -26,7 +25,7 @@ medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
     const http = api as HttpClient
 
-    it("serves the frame the shop saved, empty until then, and refuses a script link", async () => {
+    it("serves the frame the shop saved with its details filled, and refuses a script link", async () => {
       const container = getContainer()
       const owner = await createAdminUser(http, container)
       const store = await createStorefront(container)
@@ -38,14 +37,14 @@ medusaIntegrationTestRunner({
       const script = await save({
         top_links: [{ label: "Tıkla", href: "javascript:alert(document.cookie)" }],
       })
+      const misspelt = await save({ announcements: ["{ucretsiz_kargo} ve üzeri kargo bedava"] })
       const saved = await save({
-        announcements: ["1500 TL ve üzeri kargo bedava"],
+        announcements: ["{ücretsiz_kargo_eşiği} ve üzeri kargo bedava"],
         top_links: [{ label: "Hakkımızda", href: "/hakkimizda" }],
         footer_groups: [
           { title: "Müşteri Hizmetleri", links: [{ label: "İletişim", href: "/iletisim" }] },
         ],
         trust_badges: [{ icon: "clock", title: "Aynı gün kargo", text: "16:00'ya kadar" }],
-        whatsapp_phone: "0532 123 45 67",
       })
       await settle(
         http.post(
@@ -65,7 +64,6 @@ medusaIntegrationTestRunner({
         top_links: [],
         footer_groups: [],
         trust_badges: [],
-        whatsapp_phone: null,
         menu: [],
         primary_color: null,
         hero: null,
@@ -77,15 +75,18 @@ medusaIntegrationTestRunner({
       expect(before.data.features).toEqual({ gift_cards: false })
       expect(before.headers["cache-control"]).toContain("max-age=300")
       expect(script.status).toBe(400)
+      // A misspelt detail would show as typed: refused, naming the ones there are (adr/0048)
+      expect(misspelt.status).toBe(400)
+      expect(JSON.stringify(misspelt.data)).toContain("platform_settings.token_unknown")
       expect(saved.status).toBe(200)
       expect(after.data.storefront).toEqual({
-        announcements: ["1500 TL ve üzeri kargo bedava"],
+        // The threshold as the promotions section says it now
+        announcements: ["₺1.500 ve üzeri kargo bedava"],
         top_links: [{ label: "Hakkımızda", href: "/hakkimizda" }],
         footer_groups: [
           { title: "Müşteri Hizmetleri", links: [{ label: "İletişim", href: "/iletisim" }] },
         ],
         trust_badges: [{ icon: "clock", title: "Aynı gün kargo", text: "16:00'ya kadar" }],
-        whatsapp_phone: "+905321234567",
         menu: [],
         primary_color: null,
         hero: null,

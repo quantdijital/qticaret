@@ -2,9 +2,10 @@ import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { legalIdentity } from "../../../workflows/legal/identity"
 
 /**
- * GET /store/legal-identity (F13.9, adr/0041 §3): the shop's legal identity
- * for the storefront's footer and its "about" page. Public by law; what
- * the shop has not entered comes back as null.
+ * GET /store/legal-identity (F13.9, adr/0041 §3, adr/0048): the shop's
+ * legal identity and how it is reached, for the storefront's footer, its
+ * contact page and its WhatsApp buttons. Public by law or by the shop's
+ * choice; what the shop has not entered comes back as null (hours: none).
  */
 export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {
   const identity = await legalIdentity(req.scope)
@@ -22,6 +23,9 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
       same_as: identity.same_as,
       email: identity.contact_email,
       phone: identity.contact_phone,
+      whatsapp: identity.whatsapp_phone,
+      opening_hours: identity.opening_hours,
+      map_url: identity.map_url,
     },
   })
 }

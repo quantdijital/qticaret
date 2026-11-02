@@ -124,6 +124,19 @@ const stale = forArticle((_facts, article) =>
     : null
 )
 
+// A phone or e-mail typed into the text goes stale when the store details change (adr/0048)
+const writtenDetail = forArticle((_facts, article) =>
+  article.writtenDetails?.length
+    ? {
+        ruleId: "A-DETAIL-01",
+        severity: "low",
+        category: "content",
+        params: { details: article.writtenDetails.join(", ") },
+        fix: { kind: "manual", action: "edit_body" },
+      }
+    : null
+)
+
 export const CONTENT_RULES: readonly Rule[] = [
   length,
   structure,
@@ -132,4 +145,5 @@ export const CONTENT_RULES: readonly Rule[] = [
   byline,
   cover,
   stale,
+  writtenDetail,
 ]

@@ -73,6 +73,15 @@ describe("content rules (docs/14 §3.8)", () => {
     })
   })
 
+  it("asks for {telefon} and the like where the shop's details are typed in (adr/0048)", () => {
+    expect(findIssues(post({ writtenDetails: ["telefon", "e_posta"] }))[0]).toMatchObject({
+      ruleId: "A-DETAIL-01",
+      severity: "low",
+      params: { details: "telefon, e_posta" },
+    })
+    expect(ids(post({ writtenDetails: [] }))).toEqual([])
+  })
+
   it("asks a post, not a page, for its author and its opening answer", () => {
     expect(ids(post({ author: null, openingWords: 40 }))).toEqual(["A-BYLINE-01", "A-ANSWER-01"])
     expect(ids(post({ author: null, openingWords: 40 }, { kind: "page" }))).toEqual([])

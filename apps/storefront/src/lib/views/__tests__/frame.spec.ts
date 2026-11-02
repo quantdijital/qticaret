@@ -8,7 +8,6 @@ const empty: StorefrontFrame = {
   top_links: [],
   footer_groups: [],
   trust_badges: [],
-  whatsapp_phone: null,
   menu: [],
   primary_color: null,
   hero: null,

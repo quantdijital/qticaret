@@ -1,4 +1,4 @@
-import { Mail, MapPin, Phone } from "lucide-react"
+import { Clock, Mail, MapPin, Phone } from "lucide-react"
 import type { PlaceOrderResult, ShopView, Translate } from "@qticaret/ui"
 import { Container } from "../components/Container"
 import { TrustStrip } from "../components/TrustStrip"
@@ -79,6 +79,18 @@ export function SiteFooter({
                 <li className="flex items-start gap-2.5">
                   <MapPin className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
                   <span className="max-w-xs">{contact.address}</span>
+                </li>
+              )}
+              {contact.hours.length > 0 && (
+                <li className="flex items-start gap-2.5">
+                  <Clock className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+                  <span className="flex flex-col">
+                    {contact.hours.map((line) => (
+                      <span key={line.days}>
+                        {line.days}: <span className="tabular">{line.hours}</span>
+                      </span>
+                    ))}
+                  </span>
                 </li>
               )}
             </ul>

@@ -13,6 +13,9 @@ describe("store section", () => {
     expect(full.parse(defaults)).toEqual({
       contact_email: null,
       contact_phone: null,
+      whatsapp_phone: null,
+      opening_hours: [],
+      map_url: null,
       timezone: "Europe/Istanbul",
       weight_unit: "g",
       dimension_unit: "cm",

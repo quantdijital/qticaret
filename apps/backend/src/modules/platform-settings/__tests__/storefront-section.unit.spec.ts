@@ -10,7 +10,6 @@ describe("storefront section", () => {
       top_links: [],
       footer_groups: [],
       trust_badges: [],
-      whatsapp_phone: null,
       menu: [],
       primary_color: null,
       hero: null,
@@ -46,7 +45,7 @@ describe("storefront section", () => {
     }
   })
 
-  it("takes the shop's frame: lines, links, columns, promises and a WhatsApp number", () => {
+  it("takes the shop's frame: lines, links, columns and promises", () => {
     const parsed = full.parse({
       announcements: ["1500 TL ve üzeri kargo bedava", "16:00'ya kadar aynı gün kargo"],
       top_links: [{ label: "Hakkımızda", href: "/hakkimizda" }],
@@ -60,7 +59,6 @@ describe("storefront section", () => {
         },
       ],
       trust_badges: [{ icon: "truck", title: "Ücretsiz kargo", text: "1500 TL ve üzeri" }],
-      whatsapp_phone: "0532 123 45 67",
       contact_form_path: "/iletisim",
       color_swatches: [],
       menu: [
@@ -80,7 +78,6 @@ describe("storefront section", () => {
       },
     })
 
-    expect(parsed.whatsapp_phone).toBe("+905321234567")
     expect(parsed.primary_color).toBe("#0b5c99")
     expect(parsed.menu[0]?.children).toHaveLength(1)
     expect(parsed.footer_groups[0]?.links[1]?.href).toBe("https://instagram.com/ornek")
@@ -105,7 +102,8 @@ describe("storefront section", () => {
       patch.safeParse({ trust_badges: [{ icon: "rocket", title: "Hızlı", text: null }] }).success
     ).toBe(false)
     expect(patch.safeParse({ announcements: ["Kargo\u0000bedava"] }).success).toBe(false)
-    expect(patch.safeParse({ whatsapp_phone: "12" }).success).toBe(false)
+    // The WhatsApp number moved to the store details (adr/0048)
+    expect(patch.safeParse({ whatsapp_phone: "+905321234567" }).success).toBe(false)
     expect(patch.safeParse({ primary_color: "blue" }).success).toBe(false)
     const hero = { eyebrow: null, heading: "Başlık", text: null }
     expect(

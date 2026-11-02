@@ -1,5 +1,6 @@
 import type { ContactActions, ContentPageView, Translate } from "@qticaret/ui"
 import { Breadcrumbs } from "./components/Breadcrumbs"
+import { ContactDetails } from "./components/ContactDetails"
 import { ContactForm } from "./components/ContactForm"
 import type { ContactWords } from "./components/ContactForm"
 import { PageContainer } from "./components/Container"
@@ -32,7 +33,8 @@ const contactWords = (t: Translate): ContactWords => ({
 
 /**
  * A content page or a blog post: the backend's sanitised HTML in a
- * readable column; on the shop's contact page, the contact form below.
+ * readable column; on the shop's contact page, how to reach the shop (its
+ * store details) and the contact form below.
  */
 export function ContentPage({
   view,
@@ -60,6 +62,7 @@ export function ContentPage({
           // adr/0019: built by the backend from an allow-listed document schema
           dangerouslySetInnerHTML={{ __html: view.html }}
         />
+        {view.contact && <ContactDetails contact={view.contact} t={t} />}
         {view.contactForm && actions && (
           <ContactForm
             view={view.contactForm}

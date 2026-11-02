@@ -139,6 +139,7 @@ Kural adları ortak ve ürün kurallarıyla çakışmasın diye farklıdır (MET
 | A-STALE-01 | Yayındaki metin 180 günden uzun süredir güncellenmemişse "gözden geçir" hatırlatması | D |
 | A-COVER-01 | En az bir görsel (kapak ya da metinde); her görselin alt metni | D |
 | A-LEN-01 | ≥ 300 kelime | O |
+| A-DETAIL-01 | Metinde mağazanın telefonu, WhatsApp numarası ya da e-postası elle yazılmışsa `{telefon}`, `{whatsapp}`, `{e_posta}` bilgi değişkeni önerisi: mağaza bilgisi değişince metin eskimez (adr/0048) | D |
 
 ### 3.9 Mağaza geneli (gece denetimi)
 | ID | Kural | Önem |

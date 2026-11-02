@@ -1,4 +1,8 @@
 import { z } from "@medusajs/framework/zod"
+import { isHttpsUrl } from "../../../lib/security/https-url"
+import { isCleanText } from "../../../lib/security/text"
+import { openingHours } from "../../../lib/shop/hours"
+import type { OpeningRange } from "../../../lib/shop/hours"
 import { normalizeTrPhone } from "../../../lib/tr/phone"
 import { defineSection } from "./define"
 
@@ -11,16 +15,26 @@ const isTimeZone = (value: string): boolean => {
   }
 }
 
+/**
+ * The shop's own details beside Medusa's store record (F2.3): how it is
+ * reached and its units. With the legal section (address, legal identity)
+ * the one source every page, text and e-mail reads them from (adr/0048).
+ */
 export interface StoreSettings {
   contact_email: string | null
   /** E.164 (`+905321234567`). */
   contact_phone: string | null
+  /** The number the WhatsApp buttons open, E.164; none: no button. */
+  whatsapp_phone: string | null
+  /** When the shop answers; none: not said. */
+  opening_hours: OpeningRange[]
+  /** The shop's place on a map (Google Maps and the like), https; none: no link. */
+  map_url: string | null
   timezone: string
   weight_unit: "g" | "kg"
   dimension_unit: "cm" | "mm"
 }
 
-/** Store details Medusa's store record lacks (F2.3); legal details come with F13 (`legal_info`). */
 export const storeSection = defineSection<StoreSettings>(
   "store",
   {
@@ -40,6 +54,29 @@ export const storeSection = defineSection<StoreSettings>(
         }
         return phone
       }),
+    whatsapp_phone: z
+      .string()
+      .max(32)
+      .nullable()
+      .transform((value, ctx) => {
+        if (value === null) {
+          return null
+        }
+        const phone = normalizeTrPhone(value)
+        if (!phone) {
+          ctx.addIssue({ code: "custom", message: "platform_settings.phone_invalid" })
+          return z.NEVER
+        }
+        return phone
+      }),
+    opening_hours: openingHours,
+    map_url: z
+      .string()
+      .trim()
+      .refine((value) => isCleanText(value) && isHttpsUrl(value), {
+        message: "platform_settings.url_invalid",
+      })
+      .nullable(),
     timezone: z
       .string()
       .max(64)
@@ -50,6 +87,9 @@ export const storeSection = defineSection<StoreSettings>(
   {
     contact_email: null,
     contact_phone: null,
+    whatsapp_phone: null,
+    opening_hours: [],
+    map_url: null,
     timezone: "Europe/Istanbul",
     weight_unit: "g",
     dimension_unit: "cm",

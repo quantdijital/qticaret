@@ -1,6 +1,6 @@
 import "server-only"
-import type { ContactView, ShopView } from "@qticaret/ui"
-import type { LegalIdentity, StorefrontFrame } from "@qticaret/types"
+import type { ContactView, ShopView, Translate } from "@qticaret/ui"
+import type { LegalIdentity } from "@qticaret/types"
 import { currentCustomer } from "@/lib/account/auth"
 import { headerCart } from "@/lib/cart/cart"
 import { bannerDue, cookieConsent } from "@/lib/legal/cookies"
@@ -16,15 +16,18 @@ import { miniCartOf } from "./cart"
 import { navigation } from "./categories"
 import { identityLinesOf, legalDocument, legalPath, publishedLegalLinks } from "./legal"
 import { displayPhone, footerGroups, linkViews, socialLinks, whatsappHref } from "./frame"
+import { hoursOf } from "./hours"
 
-/** How to reach the shop: the legal identity's contact details, the frame's WhatsApp number. */
-export function contactOf(identity: LegalIdentity, frame: StorefrontFrame): ContactView {
+/** How to reach the shop, from its store details and legal identity (adr/0048): one source. */
+export function contactOf(identity: LegalIdentity, t: Translate): ContactView {
   return {
     email: identity.email,
     phone: identity.phone ? displayPhone(identity.phone) : null,
     phoneHref: identity.phone ? `tel:${identity.phone}` : null,
-    whatsappHref: frame.whatsapp_phone ? whatsappHref(frame.whatsapp_phone) : null,
+    whatsappHref: identity.whatsapp ? whatsappHref(identity.whatsapp) : null,
     address: identity.address,
+    hours: hoursOf(identity.opening_hours, t),
+    mapHref: identity.map_url,
   }
 }
 
@@ -82,7 +85,7 @@ export async function shopView(): Promise<ShopView> {
     topLinks: linkViews(frame.top_links),
     footerGroups: footerGroups(frame, menu, t),
     trustBadges: frame.trust_badges,
-    contact: contactOf(identity, frame),
+    contact: contactOf(identity, t),
     social: socialLinks(identity.same_as),
     companyTitle: identity.company_title,
     cookieBanner: bannerDue(cookies)

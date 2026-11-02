@@ -5,6 +5,7 @@ import type { ContentDoc } from "../../lib/content"
 import { ValidationError } from "../../lib/errors"
 import { isCleanText } from "../../lib/security"
 import { isValidSlug, toSlug } from "../../lib/seo"
+import { unknownDocTokens } from "../../lib/shop/tokens"
 import { CONTENT_MODULE } from "../../modules/content"
 import type ContentModuleService from "../../modules/content/service"
 import type { ContentEntryRecord, ContentKind } from "../../modules/content/service"
@@ -90,6 +91,10 @@ export function bodyOf(raw: unknown): ContentDoc {
       message === "content.too_large" ? "content.too_large" : "content.body_invalid",
       { field: "body" }
     )
+  }
+  // A `{belirteç}` stands for one of the shop's details (adr/0048); a misspelt one would show as typed
+  if (unknownDocTokens(parsed.data).length > 0) {
+    throw new ValidationError("content.token_unknown", { field: "body" })
   }
   return parsed.data
 }

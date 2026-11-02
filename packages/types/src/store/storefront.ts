@@ -18,8 +18,6 @@ export interface StorefrontFrame {
   top_links: StorefrontLink[]
   footer_groups: { title: string; links: StorefrontLink[] }[]
   trust_badges: { icon: TrustIcon; title: string; text: string | null }[]
-  /** E.164 (`+905321234567`). */
-  whatsapp_phone: string | null
   /** The header's menu as the shop names it; empty: the category tree. */
   menu: (StorefrontLink & { children: StorefrontLink[] })[]
   /** `#rrggbb`; null: the theme's own colour. */
@@ -46,7 +44,7 @@ export interface StorefrontAnswer {
   features?: { gift_cards: boolean }
 }
 
-/** The shop's legal identity, public by law (F13.9); what is missing is null. */
+/** The shop's legal identity and how it is reached (F13.9, adr/0048); what is missing is null. */
 export interface LegalIdentity {
   company_title: string | null
   mersis: string | null
@@ -60,6 +58,12 @@ export interface LegalIdentity {
   email: string | null
   /** E.164. */
   phone: string | null
+  /** The number the WhatsApp buttons open, E.164 (adr/0048). */
+  whatsapp: string | null
+  /** When the shop answers: ISO weekday (1 Monday) and `HH:MM`; none: not said. */
+  opening_hours: { day: number; opens: string; closes: string }[]
+  /** The shop's place on a map, https. */
+  map_url: string | null
 }
 
 /** `GET /store/content?kind=post`: a live post as a list shows it (F3.16). */

@@ -162,6 +162,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The content holds an element or format that is not allowed; reload the page and try again.",
   "content.card_unknown":
     "One of the product or category cards in the content no longer exists; remove it.",
+  "content.token_unknown":
+    "The text has a {…} detail that is not known. Available: {mağaza_adı}, {telefon}, {e_posta}, {adres}, {whatsapp}, {ücretsiz_kargo_eşiği}.",
   "content.excerpt_invalid":
     "The summary must be at most 500 characters, without disallowed characters.",
   "content.image_alt_invalid": "The cover image's alt text must be at most 300 characters.",
@@ -549,10 +551,14 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "platform_settings.etbis_invalid": "An ETBİS registration number is letters, digits and dashes.",
   "platform_settings.withdrawal_days_invalid":
     "The withdrawal period must be a whole number of days between 14 and 365; the law asks for at least 14.",
+  "platform_settings.hours_invalid":
+    "The opening hours are not valid: each range must close after it opens and not overlap another on the same day.",
   "platform_settings.phone_invalid": "Enter a valid Turkish phone number.",
   "platform_settings.robots_invalid":
     "robots.txt may only hold User-agent, Allow, Disallow, Sitemap, Crawl-delay lines and comments.",
   "platform_settings.section_invalid": "The settings section's values are not valid.",
+  "platform_settings.token_unknown":
+    "The text has a {…} detail that is not known. Available: {mağaza_adı}, {telefon}, {e_posta}, {adres}, {whatsapp}, {ücretsiz_kargo_eşiği}.",
   "platform_settings.text_invalid": "The text cannot contain invisible control characters.",
   "platform_settings.timezone_invalid": "Choose a valid time zone.",
   "platform_settings.unknown_section": "There is no such settings section.",

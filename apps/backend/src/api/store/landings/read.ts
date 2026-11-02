@@ -2,12 +2,14 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { MedusaError } from "@medusajs/framework/utils"
 import { docStats, renderDoc } from "../../../lib/content"
 import type { ContentDoc } from "../../../lib/content"
+import { fillShopDoc } from "../../../lib/shop/tokens"
 import { CONTENT_MODULE } from "../../../modules/content"
 import type ContentModuleService from "../../../modules/content/service"
 import type { LandingPageRecord } from "../../../modules/content/service"
 import { CATALOG_ENTITY_TYPES } from "../../../workflows/catalog/entity-paths"
 import { findFacet, landingProducts } from "../../../workflows/content/landing-facet"
 import { activePathOf, ownerState } from "../../../workflows/seo/redirects/owners"
+import { shopInfoValues } from "../../../workflows/shop/info-values"
 import { cardTargets } from "../content/cards"
 
 const facetOf = (row: LandingPageRecord) => ({
@@ -38,7 +40,8 @@ export async function liveLanding(
  */
 export async function storeLanding(container: MedusaContainer, id: string) {
   const row = await liveLanding(container, id)
-  const body = row.body as unknown as ContentDoc
+  // The shop's details stand where the text names them (adr/0048)
+  const body = fillShopDoc(row.body as unknown as ContentDoc, await shopInfoValues(container))
   const facet = facetOf(row)
   const [path, described, products, cards] = await Promise.all([
     activePathOf(container, { entity_type: CATALOG_ENTITY_TYPES.landing, entity_id: id }),

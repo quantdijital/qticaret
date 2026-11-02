@@ -1,6 +1,8 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import type { SeoSubject } from "../../lib/seo/resolve"
+import { fillShopText } from "../../lib/shop/tokens"
 import { CATALOG_ENTITY_TYPES } from "../catalog/entity-paths"
+import { shopInfoValues } from "../shop/info-values"
 import { SEO_FIELDS, imageOf, listingItems, rowOf, trailOf } from "./payload-sources"
 import type { CategoryRow, SeoMetaRow } from "./payload-sources"
 
@@ -65,7 +67,8 @@ export async function contentSubject(
     kind: entry.kind,
     path,
     name: entry.title,
-    description: entry.excerpt ?? entry.body_summary,
+    // The shop's details stand where the text names them (adr/0048)
+    description: fillShopText(entry.excerpt ?? entry.body_summary, await shopInfoValues(container)),
     tokens: {},
     overrides: entry.seo_meta ?? null,
     image,
@@ -118,7 +121,7 @@ export async function landingSubject(
     kind: "landing",
     path,
     name: landing.title,
-    description: landing.body_summary,
+    description: fillShopText(landing.body_summary, await shopInfoValues(container)),
     tokens: { kategori: category?.name ?? null },
     overrides: landing.seo_meta ?? null,
     image: await imageOf(container, landing.seo_meta, null),

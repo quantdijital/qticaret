@@ -3,10 +3,12 @@ import { MedusaError } from "@medusajs/framework/utils"
 import { docStats, renderDoc, summaryOf } from "../../../lib/content"
 import type { ContentDoc } from "../../../lib/content"
 import { DESCRIPTION_EXCERPT } from "../../../lib/seo/resolve"
+import { fillShopDoc, fillShopText } from "../../../lib/shop/tokens"
 import { CONTENT_MODULE } from "../../../modules/content"
 import type ContentModuleService from "../../../modules/content/service"
 import type { ContentEntryRecord } from "../../../modules/content/service"
 import { contentPath } from "../../../workflows/content/paths"
+import { shopInfoValues } from "../../../workflows/shop/info-values"
 import { cardTargets } from "./cards"
 import type { StoreGetContentType } from "./validators"
 
@@ -61,7 +63,16 @@ export async function storeContentList(container: MedusaContainer, query: StoreG
       order: { published_at: "DESC" },
     }
   )
-  return { entries: entries.map(summary), count, offset: query.offset, limit: query.limit }
+  const values = await shopInfoValues(container)
+  return {
+    entries: entries.map((entry) => {
+      const listed = summary(entry)
+      return { ...listed, excerpt: fillShopText(listed.excerpt, values) }
+    }),
+    count,
+    offset: query.offset,
+    limit: query.limit,
+  }
 }
 
 /**
@@ -82,9 +93,13 @@ export async function storeContentEntry(
   if (!entry) {
     throw new MedusaError(MedusaError.Types.NOT_FOUND, "content.unknown")
   }
-  const body = entry.body as unknown as ContentDoc
+  // The shop's details stand where the text names them (adr/0048)
+  const values = await shopInfoValues(container)
+  const body = fillShopDoc(entry.body as unknown as ContentDoc, values)
+  const listed = summary(entry)
   return {
-    ...summary(entry),
+    ...listed,
+    excerpt: fillShopText(listed.excerpt, values),
     html: renderDoc(body, await cardTargets(container, body)),
     // For a table of contents
     headings: docStats(body).headings,

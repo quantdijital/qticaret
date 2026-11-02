@@ -111,5 +111,45 @@ medusaIntegrationTestRunner({
       expect(data.entries[0]?.excerpt.startsWith("kelime0 kelime1")).toBe(true)
       expect(data.entries[0]?.reading_minutes).toBe(2)
     })
+
+    it("shows the shop's details where a text names them, and refuses a misspelt one", async () => {
+      const misspelt = await save({
+        kind: "page",
+        title: "Yanlış",
+        body: doc(p("Bize {telfon} numarasından ulaşın.")),
+      })
+      const made = await save({
+        kind: "page",
+        title: "Bize ulaşın",
+        status: "published",
+        body: doc(p("Bize {telefon} numarasından ulaşın.")),
+      })
+      const read = async () =>
+        (
+          await settle(
+            http.get<{ entry: { html: string; excerpt: string } }>(
+              `/store/content/${made.data.entry.id}`,
+              { headers: store.headers }
+            )
+          )
+        ).data.entry
+      const before = await read()
+      await settle(
+        http.post(
+          "/admin/platform-settings/store",
+          { contact_phone: "0532 123 45 67" },
+          { headers: admin.headers }
+        )
+      )
+      const after = await read()
+
+      expect(misspelt.status).toBe(400)
+      expect(misspelt.data.message).toBe("content.token_unknown")
+      expect(made.status).toBe(201)
+      // Not given yet: nothing; given: as the store details say it now (adr/0048)
+      expect(before.html).toContain("Bize  numarasından ulaşın.")
+      expect(after.html).toContain("Bize 0532 123 45 67 numarasından ulaşın.")
+      expect(after.excerpt).toBe("Bize 0532 123 45 67 numarasından ulaşın.")
+    })
   },
 })

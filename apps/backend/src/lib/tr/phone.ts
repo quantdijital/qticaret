@@ -12,3 +12,11 @@ export function normalizeTrPhone(raw: string): string | null {
   const match = TR_PHONE.exec(raw.replace(SEPARATORS, ""))
   return match?.[1] ? `+90${match[1]}` : null
 }
+
+const MOBILE = /^\+90(\d{3})(\d{3})(\d{2})(\d{2})$/
+
+/** `+905321234567` as a Turkish reader writes it: `0532 123 45 67`; another number as it is. */
+export function displayTrPhone(e164: string): string {
+  const parts = MOBILE.exec(e164)
+  return parts ? `0${parts.slice(1).join(" ")}` : e164
+}

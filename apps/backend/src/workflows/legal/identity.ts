@@ -7,9 +7,18 @@ import type PlatformSettingsModuleService from "../../modules/platform-settings/
 
 type Container = Pick<MedusaContainer, "resolve">
 
+/**
+ * The shop's public identity (F13.9, adr/0048): its legal details and how
+ * it is reached, from the legal section and the store details. The one
+ * source the footer, the contact page, the legal texts, the structured
+ * data and the e-mails read.
+ */
 export interface LegalIdentity extends LegalSettings {
   contact_email: string | null
   contact_phone: string | null
+  whatsapp_phone: string | null
+  opening_hours: StoreSettings["opening_hours"]
+  map_url: string | null
   /** The required details still missing; empty once the identity is complete. */
   gaps: IdentityField[]
 }
@@ -25,6 +34,9 @@ export async function legalIdentity(container: Container): Promise<LegalIdentity
     ...legal,
     contact_email: store.contact_email,
     contact_phone: store.contact_phone,
+    whatsapp_phone: store.whatsapp_phone,
+    opening_hours: store.opening_hours,
+    map_url: store.map_url,
   }
   return { ...facts, gaps: identityGaps(facts) }
 }

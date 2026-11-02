@@ -32,7 +32,7 @@ export default async function HomePage() {
     legalIdentity(),
     blogPosts(0, 3),
   ])
-  const contact = contactOf(identity, storefront)
+  const contact = contactOf(identity, t)
   const top = childrenOf(categories, null)
   const [productPaths, categoryPaths, displays] = await Promise.all([
     pathsOf(

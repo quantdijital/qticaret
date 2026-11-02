@@ -1,6 +1,7 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { homeSeo } from "../../../../lib/seo/home"
 import { siteJsonLd } from "../../../../lib/seo/jsonld"
+import { SCHEMA_DAYS } from "../../../../lib/shop/hours"
 import { SYSTEM_PAGES } from "../../../../lib/seo/paths"
 import { PLATFORM_SETTINGS_MODULE } from "../../../../modules/platform-settings"
 import { SEO_INDEXNOW } from "../../../../modules/platform-settings/features"
@@ -22,6 +23,11 @@ const identityOf = (identity: LegalIdentity) => ({
   email: identity.contact_email,
   telephone: identity.contact_phone,
   sameAs: identity.same_as,
+  hours: identity.opening_hours.map((range) => ({
+    dayOfWeek: SCHEMA_DAYS[range.day] ?? "",
+    opens: range.opens,
+    closes: range.closes,
+  })),
 })
 
 /**

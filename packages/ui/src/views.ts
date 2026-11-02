@@ -60,6 +60,16 @@ export interface ContactView {
   /** `https://wa.me/905321234567`, when the shop gave a WhatsApp number. */
   whatsappHref: string | null
   address: string | null
+  /** When the shop answers, days with the same hours together; none: not said. */
+  hours: OpeningHoursView[]
+  /** The shop's place on a map (https), when it gave one. */
+  mapHref: string | null
+}
+
+/** A line of the shop's hours, in words: "Pazartesi – Cuma", "08:00 – 19:00" (or "Kapalı"). */
+export interface OpeningHoursView {
+  days: string
+  hours: string
 }
 
 export interface SocialLinkView {
@@ -320,6 +330,8 @@ export interface ContentPageView {
   publishedAt: string | null
   /** The contact form below the text, on the page the shop chose for it (adr/0047). */
   contactForm?: ContactFormView | null
+  /** How to reach the shop, from its store details, on that same page (adr/0048). */
+  contact?: ContactView | null
   /** A line above the page, in words: a draft's preview says it is one. */
   notice?: string | null
 }

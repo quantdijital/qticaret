@@ -6,7 +6,41 @@
   "sections": {
     "store": {
       "contact_email": "info@mylarte.com",
-      "contact_phone": "+905342551145"
+      "contact_phone": "+905342551145",
+      "whatsapp_phone": "+905342551145",
+      "opening_hours": [
+        {
+          "day": 1,
+          "opens": "08:00",
+          "closes": "19:00"
+        },
+        {
+          "day": 2,
+          "opens": "08:00",
+          "closes": "19:00"
+        },
+        {
+          "day": 3,
+          "opens": "08:00",
+          "closes": "19:00"
+        },
+        {
+          "day": 4,
+          "opens": "08:00",
+          "closes": "19:00"
+        },
+        {
+          "day": 5,
+          "opens": "08:00",
+          "closes": "19:00"
+        },
+        {
+          "day": 6,
+          "opens": "08:00",
+          "closes": "16:00"
+        }
+      ],
+      "map_url": "https://www.google.com/maps/place//data=!4m2!3m1!1s0x14c7095c495e5e29:0xd95828b1108b5759"
     },
     "legal": {
       "company_title": "My L'arte",
@@ -24,7 +58,7 @@
     },
     "storefront": {
       "announcements": [
-        "1500 TL ve üzeri kargo bedava",
+        "{ücretsiz_kargo_eşiği} ve üzeri kargo bedava",
         "El yapımı işçilik garantisi",
         "Hafta içi 16:00'a kadar aynı gün kargo"
       ],
@@ -322,7 +356,7 @@
         {
           "icon": "truck",
           "title": "Ücretsiz kargo",
-          "text": "1.500 TL ve üzeri"
+          "text": "{ücretsiz_kargo_eşiği} ve üzeri"
         },
         {
           "icon": "clock",
@@ -340,7 +374,6 @@
           "text": "Kart veya havale/EFT"
         }
       ],
-      "whatsapp_phone": "+905342551145",
       "primary_color": "#076599",
       "hero": {
         "eyebrow": "Yatağan el işçiliği",

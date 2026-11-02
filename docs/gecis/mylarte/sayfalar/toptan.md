@@ -21,6 +21,6 @@ Yıldızlı alanlar zorunludur. Talebiniz kayıt altına alınır ve size bir ko
 
 ### Doğrudan görüşmek isterseniz
 
-**0534 255 11 45** | [info@mylarte.com](mailto:info@mylarte.com)
-Bağbaşı, Yunus Emre Cd. No:16/A, 20200 Pamukkale/Denizli
+**{telefon}** | {e_posta}
+{adres}
 Pazartesi – Cuma 08:00-17:00 |

@@ -3,7 +3,13 @@ import { formatLira } from "@qticaret/ui"
 import { themeActions } from "@/lib/theme-actions"
 import { t } from "@/lib/i18n"
 import { JsonLd } from "@/lib/seo/JsonLd"
-import { pathsOf, priceDisplays, productById, storefrontSettings } from "@/lib/store-api/requests"
+import {
+  legalIdentity,
+  pathsOf,
+  priceDisplays,
+  productById,
+  storefrontSettings,
+} from "@/lib/store-api/requests"
 import { currentCustomer } from "@/lib/account/auth"
 import { storefrontEnv } from "@/lib/env"
 import { whatsappHref } from "@/lib/views/frame"
@@ -36,6 +42,8 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
     relatedOf(product),
     currentCustomer(),
   ])
+  // The shop's WhatsApp number comes with its contact details (adr/0048)
+  const { whatsapp } = await legalIdentity()
   const here = `${url.pathname}${url.search}`
   const amounts = (product.variants ?? []).flatMap((variant) => {
     const amount = variant.calculated_price?.calculated_amount
@@ -63,8 +71,8 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
         ? t("product.free_shipping_from", { amount: formatLira(free_shipping_threshold) })
         : null,
     loginPath: `/hesap/giris?sonra=${encodeURIComponent(here)}`,
-    whatsappHref: storefront.whatsapp_phone
-      ? `${whatsappHref(storefront.whatsapp_phone)}?text=${encodeURIComponent(
+    whatsappHref: whatsapp
+      ? `${whatsappHref(whatsapp)}?text=${encodeURIComponent(
           t("product.whatsapp_text", {
             title: product.title,
             url: `${storefrontEnv().STOREFRONT_ORIGIN}${url.pathname}`,

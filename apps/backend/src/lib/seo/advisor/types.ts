@@ -104,6 +104,8 @@ export interface AdvisorFacts {
         published: boolean
         /** Days since it last changed in text (or went live); null while a draft. */
         ageDays: number | null
+        /** The shop's details the text spells out instead of `{telefon}` and the like (adr/0048). */
+        writtenDetails?: string[]
       }
     | undefined
   /** A facet landing page's standing among the others (docs/14 §3.7, F3.16). */

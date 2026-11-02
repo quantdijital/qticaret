@@ -2,7 +2,10 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { docStats, renderDoc } from "../../../lib/content"
 import type { ContentDoc } from "../../../lib/content"
 import type { AdvisorFacts } from "../../../lib/seo/advisor"
+import { writtenDetails } from "../../../lib/shop/written-details"
+import type { ShopContact } from "../../../lib/shop/written-details"
 import { contentPath } from "../../content/paths"
+import { legalIdentity } from "../../legal/identity"
 import { seoPayloadFor } from "../payload"
 import { activePathOf } from "../redirects/owners"
 import { OWN_FIELDS, duplicates, rowOf } from "./facts-common"
@@ -26,7 +29,11 @@ interface ContentRow {
 const DAY_MS = 24 * 60 * 60 * 1000
 
 /** The document as the content rules read it, with the cover counted among its images. */
-function articleFacts(row: ContentRow, now: Date): NonNullable<AdvisorFacts["article"]> {
+function articleFacts(
+  row: ContentRow,
+  now: Date,
+  contact: ShopContact
+): NonNullable<AdvisorFacts["article"]> {
   const stats = docStats(row.body)
   const cover = row.image_url ? 1 : 0
   const changed = row.revised_at ?? row.published_at
@@ -44,6 +51,7 @@ function articleFacts(row: ContentRow, now: Date): NonNullable<AdvisorFacts["art
     author: row.author_name ?? null,
     published: row.status === "published",
     ageDays: changed ? Math.floor((now.getTime() - new Date(changed).getTime()) / DAY_MS) : null,
+    writtenDetails: writtenDetails(stats.text, contact),
   }
 }
 
@@ -84,6 +92,7 @@ export async function contentFacts(
   const path = (await activePathOf(container, owner)) ?? contentPath(row)
   const seo = await seoPayloadFor(container, owner, path)
   const own = row.seo_meta ?? null
+  const identity = await legalIdentity(container)
   const stats = docStats(row.body)
   const noindex = own?.robots_override?.startsWith("noindex") ?? false
   const title = seo?.title ?? row.title
@@ -102,6 +111,10 @@ export async function contentFacts(
     focusKeyword: own?.focus_keyword ?? null,
     duplicates: await duplicates(container, kind, id, { title, description }),
     noindex,
-    article: articleFacts(row, now),
+    article: articleFacts(row, now, {
+      phone: identity.contact_phone,
+      whatsapp: identity.whatsapp_phone,
+      email: identity.contact_email,
+    }),
   }
 }

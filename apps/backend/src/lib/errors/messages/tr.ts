@@ -166,6 +166,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "İçerikte izin verilmeyen bir öğe ya da biçim var; sayfayı yenileyip yeniden deneyin.",
   "content.card_unknown":
     "İçerikteki ürün ya da kategori kartlarından biri artık yok; kartı kaldırın.",
+  "content.token_unknown":
+    "Metinde tanınmayan bir {…} bilgisi var. Kullanılabilenler: {mağaza_adı}, {telefon}, {e_posta}, {adres}, {whatsapp}, {ücretsiz_kargo_eşiği}.",
   "content.excerpt_invalid":
     "Özet en fazla 500 karakter olmalı ve kullanılamayan karakter içermemeli.",
   "content.image_alt_invalid": "Kapak görselinin alt metni en fazla 300 karakter olmalı.",
@@ -549,10 +551,14 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "platform_settings.etbis_invalid": "ETBİS kayıt numarası harf, rakam ve tireden oluşur.",
   "platform_settings.withdrawal_days_invalid":
     "Cayma süresi 14 ile 365 gün arasında bir tam sayı olmalı; yasa en az 14 gün istiyor.",
+  "platform_settings.hours_invalid":
+    "Çalışma saatleri geçerli değil: her aralık açılıştan sonra kapanmalı ve aynı gün içinde çakışmamalı.",
   "platform_settings.phone_invalid": "Geçerli bir Türkiye telefon numarası girin.",
   "platform_settings.robots_invalid":
     "robots.txt yalnızca User-agent, Allow, Disallow, Sitemap, Crawl-delay satırları ve yorum içerebilir.",
   "platform_settings.section_invalid": "Ayar bölümündeki değerler geçerli değil.",
+  "platform_settings.token_unknown":
+    "Metinde tanınmayan bir {…} bilgisi var. Kullanılabilenler: {mağaza_adı}, {telefon}, {e_posta}, {adres}, {whatsapp}, {ücretsiz_kargo_eşiği}.",
   "platform_settings.text_invalid": "Metin, görünmeyen kontrol karakterleri içeremez.",
   "platform_settings.timezone_invalid": "Geçerli bir saat dilimi seçin.",
   "platform_settings.unknown_section": "Böyle bir ayar bölümü yok.",
