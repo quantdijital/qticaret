@@ -1,22 +1,8 @@
 import type { Metadata } from "next"
-import { headers } from "next/headers"
 import { t } from "@/lib/i18n"
-import { breadcrumbJsonLd } from "@/lib/seo/breadcrumbs"
 import { siteSeo } from "@/lib/store-api/requests"
-import { searchOf, stateFromSearch } from "@/lib/views/listing"
-import { ListingContent } from "@/screens/listing"
-
-type Query = Record<string, string | string[] | undefined>
-
-const toSearch = (query: Query) => {
-  const search = new URLSearchParams()
-  for (const [key, value] of Object.entries(query)) {
-    for (const each of typeof value === "string" ? [value] : (value ?? [])) {
-      search.append(key, each)
-    }
-  }
-  return search
-}
+import { stateFromSearch } from "@/lib/views/listing"
+import { type Query, ShopScreen, toSearch } from "@/screens/shop"
 
 export async function generateMetadata({
   searchParams,
@@ -38,36 +24,5 @@ export async function generateMetadata({
 
 /** `/magaza` (D4): the whole catalogue, with the filters and sorts every listing has. */
 export default async function Shop({ searchParams }: { searchParams: Promise<Query> }) {
-  const [query, site] = await Promise.all([searchParams, siteSeo()])
-  const state = stateFromSearch(toSearch(query))
-  const incoming = await headers()
-  const origin = incoming.get("host") ? `http://${incoming.get("host") ?? ""}` : "http://localhost"
-  const search = searchOf(state)
-  const url = new URL(`/magaza${search ? `?${search}` : ""}`, origin)
-  // The price form's fields ride along as the address had them
-  for (const key of ["fiyat_en_az", "fiyat_en_cok"]) {
-    const value = query[key]
-    if (typeof value === "string") {
-      url.searchParams.set(key, value)
-    }
-  }
-  return (
-    <ListingContent
-      type="all"
-      id="all"
-      state={state}
-      url={url}
-      heading={() =>
-        Promise.resolve({ title: t("listing.all_products"), description: [], subcategories: [] })
-      }
-      breadcrumbs={(title) => [
-        { label: t("home.label"), path: "/" },
-        { label: title, path: null },
-      ]}
-      jsonLd={breadcrumbJsonLd(site.canonical_host, [
-        { name: t("home.label"), path: "/" },
-        { name: t("listing.all_products"), path: "/magaza" },
-      ])}
-    />
-  )
+  return <ShopScreen query={await searchParams} />
 }

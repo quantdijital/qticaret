@@ -118,8 +118,19 @@ export interface StorefrontTheme {
       subscribe?: (state: PlaceOrderResult, form: FormData) => Promise<PlaceOrderResult>
     }
   >
-  ProductPage: ComponentType<Page<ProductPageView> & { actions: ThemeActions }>
-  ListingPage: ComponentType<Page<ListingPageView>>
+  ProductPage: ComponentType<
+    Page<ProductPageView> & {
+      actions: ThemeActions
+      /** A newsletter section's box among the page's sections. */
+      subscribe?: (state: PlaceOrderResult, form: FormData) => Promise<PlaceOrderResult>
+    }
+  >
+  ListingPage: ComponentType<
+    Page<ListingPageView> & {
+      /** A newsletter section's box among the page's sections. */
+      subscribe?: (state: PlaceOrderResult, form: FormData) => Promise<PlaceOrderResult>
+    }
+  >
   ContentPage: ComponentType<Page<ContentPageView> & { actions?: ContactActions }>
   BlogIndexPage: ComponentType<Page<BlogIndexPageView>>
   CartPage: ComponentType<Page<CartPageView> & { actions: ThemeActions }>

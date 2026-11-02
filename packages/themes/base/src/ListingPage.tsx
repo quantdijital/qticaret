@@ -6,6 +6,7 @@ import { PageContainer } from "./components/Container"
 import { Filters } from "./components/Filters"
 import { Pages } from "./components/Pages"
 import { ProductGrid } from "./components/ProductCard"
+import { Sections, type Subscribe } from "./home/Sections"
 
 /** The sort orders as links; a page's sort is never indexed (nofollow). */
 function SortLinks({ view, t }: { view: ListingPageView; t: Translate }) {
@@ -36,11 +37,22 @@ function SortLinks({ view, t }: { view: ListingPageView; t: Translate }) {
  * A category, brand, collection or landing page: the heading and its
  * subcategories, the filters beside the grid (folded above it on phones,
  * without a script), what is chosen as removable chips, the sort, the
- * grid and the pages.
+ * grid and the pages. The shop's sections (adr/0049) sit between the
+ * heading and the grid, and below the pages.
  */
-export function ListingPage({ view, t }: { view: ListingPageView; t: Translate }) {
+export function ListingPage({
+  view,
+  t,
+  subscribe,
+}: {
+  view: ListingPageView
+  t: Translate
+  subscribe?: Subscribe | undefined
+}) {
   const { pagination } = view
   const hasFilters = view.filters.length > 0 || view.price !== null
+  const top = view.sectionsTop ?? []
+  const bottom = view.sectionsBottom ?? []
   return (
     <PageContainer className="flex flex-col gap-8">
       <div className="flex flex-col gap-5">
@@ -73,6 +85,12 @@ export function ListingPage({ view, t }: { view: ListingPageView; t: Translate }
           )}
         </header>
       </div>
+
+      {top.length > 0 && (
+        <div className="flex flex-col gap-12 pb-4 lg:gap-16">
+          <Sections sections={top} t={t} subscribe={subscribe} />
+        </div>
+      )}
 
       <div
         className={cn("grid gap-8", hasFilters && "lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-12")}
@@ -152,6 +170,12 @@ export function ListingPage({ view, t }: { view: ListingPageView; t: Translate }
           <Pages pagination={pagination} t={t} />
         </div>
       </div>
+
+      {bottom.length > 0 && (
+        <div className="mt-12 flex flex-col gap-20 lg:mt-20 lg:gap-28">
+          <Sections sections={bottom} t={t} subscribe={subscribe} />
+        </div>
+      )}
     </PageContainer>
   )
 }

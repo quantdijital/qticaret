@@ -64,9 +64,50 @@ export type StoreLayoutSection =
   | { id: string; type: "rich_text"; title: string | null; html: string }
   | { id: string; type: "trust_badges" }
   | { id: string; type: "newsletter" | "help"; title: string | null; text: string | null }
+  | StoreFaqSection
+
+/** Questions and answers in plain text, the answers' `{tokens}` already filled (adr/0049 Ek 2026-11-03). */
+export interface StoreFaqSection {
+  id: string
+  type: "faq"
+  title: string | null
+  items: { question: string; answer: string }[]
+}
+
+/**
+ * Where a product page's related rail takes its products from: the
+ * product's own category (the storefront works it out), a collection, or
+ * the shop's choice (only live products left in it).
+ */
+export type RelatedSource =
+  | { kind: "same_category" }
+  | { kind: "collection"; collection_id: string }
+  | { kind: "manual"; product_ids: string[] }
+
+/** The kinds every product and category page may hold (adr/0049 Ek 2026-11-03). */
+export type StorePageSection = Extract<
+  StoreLayoutSection,
+  { type: "rich_text" | "banner" | "faq" | "trust_badges" | "help" | "newsletter" }
+>
+
+/** A section below every product's own block. */
+export type StoreProductSection =
+  | StorePageSection
+  | {
+      id: string
+      type: "related_products"
+      title: string | null
+      source: RelatedSource
+      limit: number
+    }
+
+/** A section of every category page: above the product grid (`top`) or below it. */
+export type StoreCategorySection = StorePageSection & { placement: "top" | "bottom" }
 
 export interface StoreLayout {
   header: { id: string; type: "announcement_bar"; lines: string[] }[]
   home: StoreLayoutSection[]
   footer: { id: string; type: "newsletter"; title: string | null; text: string | null }[]
+  product: StoreProductSection[]
+  category: StoreCategorySection[]
 }

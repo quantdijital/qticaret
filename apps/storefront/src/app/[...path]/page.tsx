@@ -3,9 +3,7 @@ import { notFound, permanentRedirect, redirect } from "next/navigation"
 import { t } from "@/lib/i18n"
 import { metadataOf } from "@/lib/seo/metadata"
 import { resolvePath } from "@/lib/store-api/requests"
-import { ContentScreen } from "@/screens/content"
-import { ListingScreen } from "@/screens/listing"
-import { ProductScreen } from "@/screens/product"
+import { EntityScreen } from "@/screens/entity"
 import { requestedUrl } from "@/screens/url"
 
 async function resolution() {
@@ -36,17 +34,6 @@ export default async function CatchAllPage() {
     case "not_found":
       return notFound()
     case "entity":
-      switch (page.entity_type) {
-        case "product":
-          return <ProductScreen page={page} url={url} />
-        case "page":
-        case "post":
-          return <ContentScreen page={page} />
-        case "product_category":
-        case "product_collection":
-        case "brand":
-        case "landing":
-          return <ListingScreen page={page} url={url} />
-      }
+      return <EntityScreen page={page} url={url} />
   }
 }

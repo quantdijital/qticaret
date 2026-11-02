@@ -1,15 +1,16 @@
 import type { Metadata } from "next"
 import { notFound } from "next/navigation"
 import { cache } from "react"
-import { subscribeNewsletter } from "@/app/actions/newsletter"
 import { t } from "@/lib/i18n"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { layoutPreview } from "@/lib/store-api/requests"
 import { storeGet } from "@/lib/store-api/server"
-import { homeSections } from "@/lib/views/home"
+import { previewPage } from "@/lib/views/preview"
+import { DesignPreviewScreen } from "@/screens/design-preview"
 import { theme } from "@/theme"
 
 type Params = Promise<{ token: string }>
+type SearchParams = Promise<Record<string, string | string[] | undefined>>
 
 interface PreviewEntry {
   title: string
@@ -54,24 +55,27 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
 
 /**
  * `/onizleme/:token` (F18): a content page or post as it will read, draft
- * or not, or the theme editor's draft home page with its header and footer
- * (adr/0049), from a link staff made in the panel (a day). Never indexed.
+ * or not, from a link staff made in the panel (a day). Or the theme
+ * editor's draft (adr/0049) with its header and footer: the home page, or
+ * with `?sayfa=<path>` that storefront page (a product, a category, brand,
+ * collection or landing, `/magaza`, `/blog`) with the draft's sections.
+ * Never indexed.
  */
-export default async function PreviewPage({ params }: { params: Params }) {
+export default async function PreviewPage({
+  params,
+  searchParams,
+}: {
+  params: Params
+  searchParams: SearchParams
+}) {
   const { token } = await params
   if (LAYOUT_TOKEN.test(token)) {
     const layout = await layoutPreview(token)
     if (!layout) {
       notFound()
     }
-    const sections = await homeSections(layout.home, t)
-    return (
-      <theme.HomePage
-        t={t}
-        view={{ sections, notice: t("preview.design_notice") }}
-        subscribe={subscribeNewsletter}
-      />
-    )
+    const { sayfa } = await searchParams
+    return <DesignPreviewScreen layout={layout} target={previewPage(sayfa)} />
   }
   const entry = await previewOf(token)
   if (!entry) {

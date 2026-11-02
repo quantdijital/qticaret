@@ -206,6 +206,8 @@ export interface ProductPageView {
   loginPath: string
   /** The shop's free shipping line ("1.500,00 TL ve üzeri kargo ücretsiz"), in words; null without one. */
   shippingNote: string | null
+  /** The shop's sections below the product's own block (adr/0049), drawn as on the home page. */
+  sections?: HomeSectionView[]
 }
 
 export interface ReviewView {
@@ -302,12 +304,17 @@ export interface ListingPageView {
   active: LinkView[]
   /** Every filter off; null when none is on. */
   clearPath: string | null
+  /** The shop's category page sections above the grid (adr/0049), drawn as on the home page. */
+  sectionsTop?: HomeSectionView[]
+  /** …and below the pages. */
+  sectionsBottom?: HomeSectionView[]
 }
 
 /**
- * A home page section as the theme draws it (adr/0049): the shop lays the
- * page out in the theme editor; every title already in words (the shop's
- * own or the storefront's default), every link already a path.
+ * A section as the theme draws it (adr/0049): the shop lays the home,
+ * product and category pages out in the theme editor; every title already
+ * in words (the shop's own or the storefront's default, a FAQ's aside),
+ * every link already a path.
  */
 export type HomeSectionView =
   | {
@@ -355,6 +362,14 @@ export type HomeSectionView =
   | { id: string; type: "trust_badges"; badges: TrustBadgeView[] }
   | { id: string; type: "newsletter"; title: string; text: string; privacyPath: string | null }
   | { id: string; type: "help"; title: string; text: string; contact: ContactView }
+  | {
+      id: string
+      type: "faq"
+      /** None: the theme's own words ("Sık sorulan sorular"). */
+      title: string | null
+      /** Plain text; the theme keeps the answers in the HTML (open or closed). */
+      items: { question: string; answer: string }[]
+    }
 
 export interface HomePageView {
   sections: HomeSectionView[]

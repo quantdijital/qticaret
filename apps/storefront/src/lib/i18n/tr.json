@@ -500,6 +500,7 @@
   "home.all_reviews": "Tüm yorumlar",
   "reviews.summary": "Bu sayfadaki yorumların ortalaması 5 üzerinden {average} · toplam {count} yorum",
   "home.all_products": "Tüm ürünler",
+  "faq.title": "Sık sorulan sorular",
   "menu.system.home": "Ana sayfa",
   "menu.system.shop": "Tüm ürünler",
   "menu.system.blog": "Blog",

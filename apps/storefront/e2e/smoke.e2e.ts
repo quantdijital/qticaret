@@ -38,6 +38,25 @@ test.describe("storefront pages", () => {
       "/onizleme/sfl_01ABCDEFGHJK.zzzzzz.AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
     )
     expect(design?.status()).toBe(404)
+    // …nor any storefront page with the draft design (`?sayfa=`)
+    const designed = await page.goto(
+      "/onizleme/sfl_01ABCDEFGHJK.zzzzzz.AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA?sayfa=%2Fmagaza"
+    )
+    expect(designed?.status()).toBe(404)
+    expect(designed?.headers()["referrer-policy"]).toBe("no-referrer")
+  })
+
+  test("a product page with no sections of the shop's still shows its own block", async ({
+    page,
+  }) => {
+    await page.goto(DEMO_PRODUCT)
+    await expect(page.locator("h1").first()).toBeVisible()
+    await expect(
+      page.locator("main form button[type=submit]").filter({ hasText: "Sepete ekle" })
+    ).toBeVisible()
+    // However many FAQ sections the shop places, the page has one FAQPage at most
+    const data = await page.locator('script[type="application/ld+json"]').allTextContents()
+    expect(data.filter((block) => block.includes('"FAQPage"')).length).toBeLessThanOrEqual(1)
   })
 
   test("only a preview page may be framed, and only by the panel", async ({ page }) => {

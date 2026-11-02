@@ -9,6 +9,7 @@ import { ProductDetails, SpecHighlights } from "./components/ProductDetails"
 import { ProductGallery } from "./components/ProductGallery"
 import { PurchasePanel } from "./components/PurchasePanel"
 import { TrustStrip } from "./components/TrustStrip"
+import { Sections, type Subscribe } from "./home/Sections"
 
 const ACTION_ERRORS = [
   "cart.add_failed",
@@ -21,16 +22,20 @@ const ACTION_ERRORS = [
  * A product: its pictures, then its name, price, options and the cart
  * form (sticky beside the pictures on wide screens), then its description
  * and attributes, open in the HTML for shoppers, crawlers and agents alike.
+ * The shop's own sections (adr/0049) follow the product's block.
  */
 export function ProductPage({
   view,
   t,
   actions,
+  subscribe,
 }: {
   view: ProductPageView
   t: Translate
   actions: ThemeActions
+  subscribe?: Subscribe | undefined
 }) {
+  const sections = view.sections ?? []
   const discounts = new Set(
     view.variants.flatMap((variant) =>
       typeof variant.price?.discount === "number" ? [variant.price.discount] : []
@@ -197,6 +202,11 @@ export function ProductPage({
           </section>
         )}
       </article>
+      {sections.length > 0 && (
+        <div className="mt-20 flex flex-col gap-20 lg:mt-28 lg:gap-28">
+          <Sections sections={sections} t={t} subscribe={subscribe} />
+        </div>
+      )}
     </PageContainer>
   )
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next"
 import { subscribeNewsletter } from "@/app/actions/newsletter"
 import { t } from "@/lib/i18n"
+import { faqJsonLd } from "@/lib/seo/faq"
 import { JsonLd } from "@/lib/seo/JsonLd"
 import { metadataOf } from "@/lib/seo/metadata"
 import { siteSeo } from "@/lib/store-api/requests"
@@ -18,7 +19,7 @@ export default async function HomePage() {
   const sections = await homeSections(layout.home, t)
   return (
     <>
-      <JsonLd blocks={site.home.jsonLd} />
+      <JsonLd blocks={[...site.home.jsonLd, ...faqJsonLd(sections)]} />
       <theme.HomePage t={t} view={{ sections }} subscribe={subscribeNewsletter} />
     </>
   )
