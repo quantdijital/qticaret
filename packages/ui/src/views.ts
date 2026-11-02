@@ -352,6 +352,10 @@ export interface CartPageView {
   subtotal: string
   /** The coupon codes on the cart, each removable. */
   promotions: string[]
+  /** The gift card codes on the cart, each removable; null while the shop sells none (F4.8). */
+  giftCards?: string[] | null
+  /** What the gift cards take off, in words; null when none. */
+  credit?: string | null
   /** How near the cart is to free shipping; null when the shop gives none. */
   freeShipping: FreeShippingView | null
   /** A message for the shopper after a failed change, already in words. */

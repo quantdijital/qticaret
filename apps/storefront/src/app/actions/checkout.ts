@@ -15,7 +15,14 @@ import { rememberPaymentFrame } from "@/lib/checkout/payment-cookie"
 import { recordTracking } from "@/lib/checkout/tracking"
 import { paymentRedirectOrigins, storefrontEnv } from "@/lib/env"
 import { acceptTerms, checkoutError, PlaceOrder } from "@/lib/checkout/place-order"
-import { challengeOf, completeCart, orderAccess, orderPath, startPayment } from "@/lib/checkout/pay"
+import {
+  challengeOf,
+  completeCart,
+  CREDIT_CHECKOUT,
+  orderAccess,
+  orderPath,
+  startPayment,
+} from "@/lib/checkout/pay"
 import { isStoreApiError } from "@/lib/store-api/errors"
 import { storePost } from "@/lib/store-api/server"
 import { cardProviderOf } from "@/lib/views/checkout"
@@ -101,11 +108,15 @@ export async function placeOrder(
   let next: string
   try {
     const methods = await paymentMethods(cart.id)
-    const offered = [
-      cardProviderOf(methods),
-      methods.bank_transfer?.provider_id,
-      methods.cash_on_delivery?.provider_id,
-    ]
+    // Nothing left to pay: only the gift cards' way, and no other
+    const offered =
+      cart.total === 0
+        ? [CREDIT_CHECKOUT]
+        : [
+            cardProviderOf(methods),
+            methods.bank_transfer?.provider_id,
+            methods.cash_on_delivery?.provider_id,
+          ]
     if (!offered.includes(input.provider_id)) {
       return { ok: false, error: "checkout.payment_required", challenge: NO_CHALLENGE }
     }
@@ -134,7 +145,11 @@ async function nextStep(
   providerId: string,
   data: Record<string, unknown>
 ): Promise<string> {
-  if (data["method"] === "bank_transfer" || data["method"] === "cash_on_delivery") {
+  if (
+    data["method"] === "bank_transfer" ||
+    data["method"] === "cash_on_delivery" ||
+    data["method"] === "credit"
+  ) {
     const orderId = await completeCart(cartId)
     const access = orderId ? await orderAccess(cartId) : null
     if (!access) {

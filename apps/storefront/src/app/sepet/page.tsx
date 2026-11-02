@@ -43,6 +43,10 @@ export default async function CartPage({
         discount: differs(items, subtotal) ? formatLira(items - subtotal) : null,
         subtotal: formatLira(subtotal),
         promotions: codesOf(cart),
+        giftCards: settings.features?.gift_cards
+          ? (cart?.gift_cards ?? []).map((card) => card.code)
+          : null,
+        credit: cart?.credit_line_total ? formatLira(cart.credit_line_total) : null,
         freeShipping: freeShippingOf(subtotal, settings.free_shipping_threshold, t),
         error,
       }}

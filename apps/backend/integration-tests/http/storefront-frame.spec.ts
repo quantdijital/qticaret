@@ -7,6 +7,7 @@ import { createStorefront } from "../helpers/storefront"
 jest.setTimeout(120 * 1000)
 
 interface Frame {
+  features?: { gift_cards: boolean }
   storefront: {
     announcements: string[]
     top_links: { label: string; href: string }[]
@@ -72,6 +73,8 @@ medusaIntegrationTestRunner({
         color_swatches: [],
       })
       expect(before.data.free_shipping_threshold).toBeNull()
+      // Gift cards are off until the shop turns them on (F4.8)
+      expect(before.data.features).toEqual({ gift_cards: false })
       expect(before.headers["cache-control"]).toContain("max-age=300")
       expect(script.status).toBe(400)
       expect(saved.status).toBe(200)

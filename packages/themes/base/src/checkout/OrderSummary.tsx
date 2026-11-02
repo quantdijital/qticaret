@@ -68,6 +68,12 @@ export function OrderSummary({
             <dd>−{summary.discount}</dd>
           </div>
         )}
+        {summary.credit && (
+          <div className="flex justify-between text-sale">
+            <dt>{t("cart.gift_card_credit")}</dt>
+            <dd>−{summary.credit}</dd>
+          </div>
+        )}
         <div className="flex justify-between">
           <dt className="text-muted-foreground">{t("cart.shipping")}</dt>
           <dd className={summary.shipping ? undefined : "text-muted-foreground"}>

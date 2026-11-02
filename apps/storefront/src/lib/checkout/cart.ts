@@ -35,6 +35,8 @@ export interface CheckoutCart {
   original_item_total: number
   item_total: number
   shipping_total: number
+  /** What gift cards and store credit take off (F4.8); `total` is after it. */
+  credit_line_total?: number | null
   total: number
 }
 
@@ -69,6 +71,7 @@ const FIELDS = [
   "original_item_total",
   "item_total",
   "shipping_total",
+  "credit_line_total",
   "total",
 ].join(",")
 

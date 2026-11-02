@@ -1,6 +1,6 @@
 import "server-only"
 import { isNotFound, isStoreApiError } from "../store-api/errors"
-import { liraRegion } from "../store-api/requests"
+import { liraRegion, storefrontSettings } from "../store-api/requests"
 import { storeDelete, storeGet, storePost } from "../store-api/server"
 import { cookies } from "next/headers"
 import { cookieName } from "../security/cookies"
@@ -31,6 +31,10 @@ export interface Cart {
   items: CartLine[]
   /** The codes on the cart (automatic campaigns have none to show). */
   promotions: { code: string | null; is_automatic?: boolean | null }[]
+  /** What gift cards and store credit take off (F4.8), KDV included. */
+  credit_line_total?: number | null
+  /** The gift cards on the cart; asked only while the shop has them on. */
+  gift_cards?: { code: string }[] | null
 }
 
 const CART_FIELDS = [
@@ -51,7 +55,34 @@ const CART_FIELDS = [
   "items.original_total",
   "promotions.code",
   "promotions.is_automatic",
+  "credit_line_total",
 ].join(",")
+
+// Asked only while gift cards are on: the backend refuses the relation otherwise (adr/0025)
+const GIFT_CARD_FIELDS = ",gift_cards.code"
+
+/**
+ * The cart with its gift cards while the shop has them on. The flag is read
+ * from a cache up to a minute old: a cart asked with the gift card fields
+ * just after the shop turned them off is refused (400), and asked again
+ * without them.
+ */
+async function readCart(id: string, giftCards: boolean): Promise<Cart> {
+  if (giftCards) {
+    try {
+      return (
+        await storeGet<{ cart: Cart }>(`/store/carts/${id}`, {
+          fields: CART_FIELDS + GIFT_CARD_FIELDS,
+        })
+      ).cart
+    } catch (error) {
+      if (!isStoreApiError(error) || error.status !== 400) {
+        throw error
+      }
+    }
+  }
+  return (await storeGet<{ cart: Cart }>(`/store/carts/${id}`, { fields: CART_FIELDS })).cart
+}
 
 /** The shopper's open cart, or null (none yet, gone, or already ordered). */
 export async function currentCart(): Promise<Cart | null> {
@@ -60,7 +91,8 @@ export async function currentCart(): Promise<Cart | null> {
     return null
   }
   try {
-    const { cart } = await storeGet<{ cart: Cart }>(`/store/carts/${id}`, { fields: CART_FIELDS })
+    const { features } = await storefrontSettings()
+    const cart = await readCart(id, features?.gift_cards === true)
     return cart.completed_at ? null : cart
   } catch (error) {
     if (isNotFound(error)) {
@@ -155,6 +187,24 @@ export async function addPromotion(code: string): Promise<boolean> {
   }
   await storePost(`/store/carts/${cartId}/promotions`, { promo_codes: [code] })
   return codesOf(await currentCart()).some((each) => each.toLowerCase() === code.toLowerCase())
+}
+
+/** Puts a gift card on the cart (F4.8); whether it took is read back from the cart. */
+export async function addGiftCard(code: string): Promise<boolean> {
+  const cartId = await cartIdFromCookie()
+  if (!cartId) {
+    return false
+  }
+  await storePost(`/store/carts/${cartId}/gift-cards`, { code })
+  const cart = await currentCart()
+  return (cart?.gift_cards ?? []).some((card) => card.code.toUpperCase() === code.toUpperCase())
+}
+
+export async function removeGiftCard(code: string): Promise<void> {
+  const cartId = await cartIdFromCookie()
+  if (cartId) {
+    await storeDelete(`/store/carts/${cartId}/gift-cards`, { code })
+  }
 }
 
 export async function removePromotion(code: string): Promise<void> {

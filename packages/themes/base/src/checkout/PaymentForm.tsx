@@ -1,6 +1,14 @@
 "use client"
 
-import { CreditCard, HandCoins, Landmark, LoaderCircle, Lock, type LucideIcon } from "lucide-react"
+import {
+  CreditCard,
+  Gift,
+  HandCoins,
+  Landmark,
+  LoaderCircle,
+  Lock,
+  type LucideIcon,
+} from "lucide-react"
 import { useState } from "react"
 import type { CheckoutActions, ContractView, PaymentKind, PaymentMethodView } from "@qticaret/ui"
 import { Button } from "@qticaret/ui/components/button"
@@ -11,6 +19,7 @@ const ICONS: Record<PaymentKind, LucideIcon> = {
   card: CreditCard,
   bank_transfer: Landmark,
   cash_on_delivery: HandCoins,
+  credit: Gift,
 }
 
 export interface PaymentWords {

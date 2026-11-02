@@ -41,7 +41,15 @@ export function returnUrls(): { success: string; failure: string } {
   return { success: `${origin}/odeme/sonuc`, failure: `${origin}/odeme/sonuc/hata` }
 }
 
-export const OFFLINE_PROVIDERS = new Set(["pp_bank-transfer_bank-transfer", "pp_cod_cod"])
+/** Nothing left to pay: the cart's gift cards cover it (F4.8); the backend's `credit`. */
+export const CREDIT_CHECKOUT = "credit"
+
+// Ways that send nobody anywhere; `credit` starts no session at all
+export const OFFLINE_PROVIDERS = new Set([
+  "pp_bank-transfer_bank-transfer",
+  "pp_cod_cod",
+  CREDIT_CHECKOUT,
+])
 
 /** POST payment-session; the solved challenge, when there is one, rides in `X-Challenge`. */
 export async function startPayment(

@@ -44,6 +44,10 @@ export interface ThemeActions {
   applyPromotion: FormAction
   /** A plain form: `code`, taken off the cart. */
   removePromotion: (form: FormData) => Promise<void>
+  /** Form field: `code`, a gift card's (F4.8); the answer says whether it took. */
+  applyGiftCard?: FormAction
+  /** A plain form: `code`, the gift card taken off the cart. */
+  removeGiftCard?: (form: FormData) => Promise<void>
   /** Fields: `product_id`, `rating` (1–5), `title`, `body`. */
   writeReview: FormAction
   /** Fields: `product_id`, `body`. */

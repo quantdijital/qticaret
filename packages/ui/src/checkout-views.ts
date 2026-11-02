@@ -48,7 +48,8 @@ export interface ShippingOptionView {
   detail: string | null
 }
 
-export type PaymentKind = "card" | "bank_transfer" | "cash_on_delivery"
+/** `credit`: nothing left to pay, the cart's gift cards cover it (F4.8). */
+export type PaymentKind = "card" | "bank_transfer" | "cash_on_delivery" | "credit"
 
 export interface PaymentMethodView {
   /** The provider the session starts with (`pp_paytr_paytr`…). */
@@ -80,6 +81,8 @@ export interface CheckoutSummaryView {
   lines: CheckoutLineView[]
   items: string
   discount: string | null
+  /** What gift cards take off, in words; null when none. */
+  credit?: string | null
   /** Null until a shipping method is chosen. */
   shipping: string | null
   total: string

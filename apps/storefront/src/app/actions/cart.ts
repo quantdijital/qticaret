@@ -4,7 +4,14 @@ import { revalidatePath } from "next/cache"
 import { redirect } from "next/navigation"
 import { z } from "zod"
 import type { ActionResult } from "@qticaret/ui"
-import { addLine, addPromotion, changeLine, removePromotion } from "@/lib/cart/cart"
+import {
+  addGiftCard,
+  addLine,
+  addPromotion,
+  changeLine,
+  removeGiftCard,
+  removePromotion,
+} from "@/lib/cart/cart"
 import { isStoreApiError } from "@/lib/store-api/errors"
 
 const AddToCart = z.object({
@@ -119,6 +126,52 @@ export async function removeCartPromotion(form: FormData): Promise<void> {
   if (parsed.success) {
     try {
       await removePromotion(parsed.data)
+    } catch (error) {
+      if (!isStoreApiError(error)) {
+        throw error
+      }
+      redirect("/sepet?hata=cart.update_failed")
+    }
+  }
+  revalidatePath("/", "layout")
+}
+
+// Our codes: a prefix and four groups of four (adr/0025); typed in any case, with or without dashes
+const GiftCardCode = z
+  .string()
+  .trim()
+  .toUpperCase()
+  .regex(/^[A-Z0-9-]{8,48}$/)
+
+/** Puts a gift card on the cart (F4.8): the code only; its balance is the backend's. */
+export async function applyGiftCard(_state: ActionResult, form: FormData): Promise<ActionResult> {
+  const parsed = GiftCardCode.safeParse(form.get("code"))
+  if (!parsed.success) {
+    return { ok: false, error: "cart.gift_card_invalid" }
+  }
+  try {
+    if (!(await addGiftCard(parsed.data))) {
+      return { ok: false, error: "cart.gift_card_invalid" }
+    }
+  } catch (error) {
+    if (!isStoreApiError(error)) {
+      throw error
+    }
+    return {
+      ok: false,
+      error: error.status === 429 ? "errors.too_many_requests" : "cart.gift_card_invalid",
+    }
+  }
+  revalidatePath("/", "layout")
+  return { ok: true, error: null }
+}
+
+/** Takes a gift card off the cart; a plain form. */
+export async function removeCartGiftCard(form: FormData): Promise<void> {
+  const parsed = GiftCardCode.safeParse(form.get("code"))
+  if (parsed.success) {
+    try {
+      await removeGiftCard(parsed.data)
     } catch (error) {
       if (!isStoreApiError(error)) {
         throw error

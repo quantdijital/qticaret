@@ -522,5 +522,12 @@
   "blog.description": "{shop} blogu: ürünler, kullanım ve bakım üzerine rehberler ve haberler.",
   "reviews.description": "{shop} müşterilerinin satın aldıkları ürünler hakkındaki onaylı yorumları ve puanları.",
   "account.add_address": "Yeni adres ekle",
-  "account.save_address": "Adresi kaydet"
+  "account.save_address": "Adresi kaydet",
+  "cart.gift_card_label": "Hediye kartı",
+  "cart.gift_card_placeholder": "Kart kodu",
+  "cart.gift_card_applied": "Hediye kartı uygulandı",
+  "cart.gift_card_invalid": "Bu kod geçerli bir hediye kartı değil ya da bakiyesi yok.",
+  "cart.gift_card_credit": "Hediye kartı",
+  "checkout.pay_credit": "Hediye kartıyla tamamla",
+  "checkout.pay_credit_detail": "Ödenecek tutar kalmadı; sipariş hediye kartı bakiyenizden karşılanır."
 }

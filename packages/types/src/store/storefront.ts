@@ -42,6 +42,8 @@ export interface StorefrontAnswer {
   storefront: StorefrontFrame
   /** Lira, KDV in, after discounts (`item_total`); null: no free shipping. */
   free_shipping_threshold: number | null
+  /** What the storefront offers only while the shop has it on. */
+  features?: { gift_cards: boolean }
 }
 
 /** The shop's legal identity, public by law (F13.9); what is missing is null. */

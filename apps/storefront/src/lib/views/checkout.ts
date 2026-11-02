@@ -18,6 +18,7 @@ import {
   selectsOf,
 } from "@/lib/checkout/address"
 import { addressComplete } from "@/lib/checkout/cart"
+import { CREDIT_CHECKOUT } from "@/lib/checkout/pay"
 import type { CheckoutAddress, CheckoutCart } from "@/lib/checkout/cart"
 import {
   ageCheck,
@@ -81,6 +82,7 @@ export function summaryOf(cart: CheckoutCart, t: Translate): CheckoutSummaryView
     })),
     items: formatLira(cart.original_item_total),
     discount: discount > 0 ? formatLira(discount / 100) : null,
+    credit: cart.credit_line_total ? formatLira(cart.credit_line_total) : null,
     shipping:
       cart.shipping_methods.length === 0
         ? null
@@ -156,13 +158,22 @@ function methodViews(
 }
 
 /** The payment step's offer: ways to pay, their contracts, an age to declare. */
+/** Nothing left to pay (F4.8): the gift cards' way, alone. */
+const creditView = (t: Translate): PaymentMethodView => ({
+  id: CREDIT_CHECKOUT,
+  kind: "credit",
+  label: t("checkout.pay_credit"),
+  detail: t("checkout.pay_credit_detail"),
+})
+
 async function paymentStep(cart: CheckoutCart, t: Translate) {
+  const nothingDue = cart.total === 0
   const [methods, installments, age] = await Promise.all([
-    paymentMethods(cart.id),
-    maxInstallments(cart.id),
+    nothingDue ? null : paymentMethods(cart.id),
+    nothingDue ? 0 : maxInstallments(cart.id),
     ageCheck(cart.id),
   ])
-  const views = methodViews(methods, installments, t)
+  const views = methods ? methodViews(methods, installments, t) : [creditView(t)]
   const kinds = [...new Set(views.map((view) => view.kind))]
   const texts = await Promise.all(kinds.map((kind) => contracts(cart.id, kind)))
   const byKind: Partial<Record<PaymentKind, ContractView[]>> = Object.fromEntries(

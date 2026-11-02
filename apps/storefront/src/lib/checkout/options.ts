@@ -85,14 +85,15 @@ export interface Contract {
  */
 export async function contracts(
   cartId: string,
-  payment: "card" | "bank_transfer" | "cash_on_delivery"
+  // `credit`: nothing to pay, the contract names no way of paying
+  payment: "card" | "bank_transfer" | "cash_on_delivery" | "credit"
 ): Promise<Contract[]> {
   const found = await Promise.all(
     CONTRACT_KINDS.map(async (kind) => {
       try {
         const { document } = await storeGet<{ document: Contract }>(
           `/store/carts/${cartId}/legal/${kind}`,
-          { payment }
+          payment === "credit" ? {} : { payment }
         )
         return document
       } catch (error) {

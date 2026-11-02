@@ -21,7 +21,14 @@ import { addAddress, removeAddress } from "@/app/actions/addresses"
 import { cancelOrder, requestReturn } from "@/app/actions/order"
 import { requestPrivacy } from "@/app/actions/privacy"
 import { askQuestion, stockAlert, writeReview } from "@/app/actions/product"
-import { addToCart, applyPromotion, changeCartLine, removeCartPromotion } from "@/app/actions/cart"
+import {
+  addToCart,
+  applyGiftCard,
+  applyPromotion,
+  changeCartLine,
+  removeCartGiftCard,
+  removeCartPromotion,
+} from "@/app/actions/cart"
 import {
   chooseShipping,
   loadDistricts,
@@ -36,6 +43,8 @@ export const themeActions: ThemeActions = {
   changeCartLine,
   applyPromotion,
   removePromotion: removeCartPromotion,
+  applyGiftCard,
+  removeGiftCard: removeCartGiftCard,
   writeReview,
   askQuestion,
   stockAlert,

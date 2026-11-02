@@ -8,6 +8,7 @@ import { PromotionForm } from "./cart/PromotionForm"
 import { PageContainer } from "./components/Container"
 
 const PROMOTION_ERRORS = ["cart.promotion_invalid", "errors.too_many_requests"]
+const GIFT_CARD_ERRORS = ["cart.gift_card_invalid", "errors.too_many_requests"]
 
 function EmptyCart({ t }: { t: Translate }) {
   return (
@@ -83,6 +84,23 @@ export function CartPage({
               fallback: t("cart.promotion_invalid"),
             }}
           />
+          {view.giftCards && actions.applyGiftCard && actions.removeGiftCard && (
+            <PromotionForm
+              codes={view.giftCards}
+              apply={actions.applyGiftCard}
+              remove={actions.removeGiftCard}
+              words={{
+                label: t("cart.gift_card_label"),
+                placeholder: t("cart.gift_card_placeholder"),
+                apply: t("cart.promotion_apply"),
+                applying: t("cart.promotion_applying"),
+                remove: t("cart.promotion_remove"),
+                applied: t("cart.gift_card_applied"),
+                errors: Object.fromEntries(GIFT_CARD_ERRORS.map((key) => [key, t(key)])),
+                fallback: t("cart.gift_card_invalid"),
+              }}
+            />
+          )}
           <dl className="tabular flex flex-col gap-3 border-t pt-5">
             <div className="flex justify-between">
               <dt className="text-muted-foreground">{t("cart.items")}</dt>
@@ -92,6 +110,12 @@ export function CartPage({
               <div className="flex justify-between text-sale">
                 <dt>{t("cart.discount")}</dt>
                 <dd>−{view.discount}</dd>
+              </div>
+            )}
+            {view.credit && (
+              <div className="flex justify-between text-sale">
+                <dt>{t("cart.gift_card_credit")}</dt>
+                <dd>−{view.credit}</dd>
               </div>
             )}
             <div className="flex justify-between">

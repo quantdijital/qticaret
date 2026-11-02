@@ -6,7 +6,8 @@ import { ageCheck, CONTRACT_KINDS } from "./options"
 
 /** The payment step's form, as the theme sends it (`CheckoutActions.placeOrder`). */
 export const PlaceOrder = z.object({
-  provider_id: z.string().regex(/^pp_[\w-]{1,80}$/),
+  // A provider, or `credit` when the cart's gift cards leave nothing to pay
+  provider_id: z.string().regex(/^(?:pp_[\w-]{1,80}|credit)$/),
   accept: z.literal("on").optional(),
   birth_date: z
     .string()
