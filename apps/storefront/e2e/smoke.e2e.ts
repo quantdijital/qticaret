@@ -1,15 +1,16 @@
 import { expect, test } from "@playwright/test"
-import { collectErrors, cookieBanner, DEMO_PRODUCT, dismissCookies } from "./support"
+import { pathOf, PRODUCT_PAGE, SEARCH_PAGE, stockedProduct } from "./catalog"
+import { collectErrors, cookieBanner, dismissCookies } from "./support"
 
 const PAGES = [
   "/",
-  DEMO_PRODUCT,
+  PRODUCT_PAGE,
   "/sepet",
   "/blog",
   "/magaza",
   "/magaza?sirala=fiyat-artan",
   "/yorumlar",
-  "/arama?q=gomlek",
+  SEARCH_PAGE,
   "/hesap/giris",
   "/hesap/kayit",
   "/hesap/sifre-sifirla",
@@ -20,7 +21,7 @@ test.describe("storefront pages", () => {
   for (const path of PAGES) {
     test(`${path} opens without errors`, async ({ page }) => {
       const errors = collectErrors(page)
-      const response = await page.goto(path)
+      const response = await page.goto(await pathOf(path))
       expect(response?.status()).toBe(200)
       await expect(page.locator("h1").first()).toBeVisible()
       expect(errors).toEqual([])
@@ -49,7 +50,7 @@ test.describe("storefront pages", () => {
   test("a product page with no sections of the shop's still shows its own block", async ({
     page,
   }) => {
-    await page.goto(DEMO_PRODUCT)
+    await page.goto((await stockedProduct()).path)
     await expect(page.locator("h1").first()).toBeVisible()
     await expect(
       page.locator("main form button[type=submit]").filter({ hasText: "Sepete ekle" })

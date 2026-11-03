@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test"
-import { DEMO_PRODUCT } from "./support"
+import { stockedProduct } from "./catalog"
 
 /**
  * Files, not pages (docs/21): the app's icon and the self-hosted faces
@@ -38,7 +38,7 @@ test.describe("files past the proxy", () => {
   })
 
   test("the shop's faces load from their files, Turkish letters included", async ({ page }) => {
-    await page.goto(DEMO_PRODUCT)
+    await page.goto((await stockedProduct()).path)
     const faces = await page
       .locator('head link[rel="preload"][as="font"]')
       .evaluateAll((links) => [

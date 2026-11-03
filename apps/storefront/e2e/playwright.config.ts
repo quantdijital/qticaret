@@ -8,8 +8,11 @@ const isCI = Boolean(process.env["CI"])
  * errors and with their security headers, axe finds no serious issue, and
  * a guest buys by bank transfer from the product page to the order page.
  * They run against the storefront's dev server (started here if it is not
- * running) and a backend that is, with the demo seed (`seed:demo`). The
- * order test writes an order to that database.
+ * running) and a backend that is, with the storefront's publishable key
+ * (`/dev/storefront-key`, or `E2E_PUBLISHABLE_KEY`) and at least one
+ * published product in stock with a lira price: the tests find what they
+ * open and buy through the Store API (`catalog.ts`), never by its name.
+ * The order tests write orders to that database, each holding a unit.
  */
 export default defineConfig({
   testDir: ".",

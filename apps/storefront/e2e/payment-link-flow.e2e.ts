@@ -2,6 +2,7 @@ import { expect, test } from "@playwright/test"
 import type { Page } from "@playwright/test"
 import { createTemporaryAdmin, removeTemporaryAdmin, signInAdmin } from "./admin"
 import type { AdminApi } from "./admin"
+import { stockedProduct } from "./catalog"
 import { dismissCookies } from "./support"
 
 /**
@@ -9,7 +10,9 @@ import { dismissCookies } from "./support"
  * admin API (the panel's own calls, a temporary owner proving themselves
  * again); the guest opens `/ode/<token>`, goes on to a checkout whose cart
  * is locked to the link, and pays by card in the fake PayTR's frame
- * (`pnpm dev:paytr`). The link is then paid and the order names it.
+ * (`pnpm dev:paytr`). The link is then paid and the order names it. Its
+ * line is a variant in stock the shop sells (`catalog.ts`), priced by the
+ * link as the Store API prices it.
  *
  * The dev shop is set up for it and put back after: the flag on, then off
  * again; a storefront host for the share address while the shop has none,
@@ -88,16 +91,6 @@ async function readyShop(api: AdminApi, undo: Undo[]): Promise<void> {
   }
 }
 
-/** The demo seed's shirt (scripts/seed/data.ts), its first size: stocked a hundred deep. */
-async function demoVariant(api: AdminApi): Promise<string> {
-  const { products } = await api.get<{ products: { variants: { id: string }[] }[] }>(
-    "/admin/products?handle=keten-gomlek&fields=id,variants.id"
-  )
-  const id = products[0]?.variants[0]?.id
-  expect(id, "the demo seed's product (seed:demo)").toBeDefined()
-  return id ?? ""
-}
-
 /** Checkout's address and shipping steps, as the bank transfer test fills them. */
 async function addressAndShipping(page: Page): Promise<void> {
   await page.fill("#email", GUEST.email)
@@ -136,15 +129,23 @@ test("a guest pays a link the shop made: its page, a locked cart, the card in Pa
     api = await signInAdmin(admin)
     const shop = api
     await readyShop(shop, undo)
-    const variantId = await demoVariant(shop)
+    const product = await stockedProduct()
 
     // 1. Staff make the link (a step-up: 428 without the proof) and copy its address
     const made = await shop.postProved<{ payment_link: Link }>("/admin/payment-links", {
       guest: GUEST,
-      lines: [{ variant_id: variantId, quantity: 1 }],
+      lines: [{ variant_id: product.variant.id, quantity: 1 }],
     })
     link = made.payment_link
     expect(link.status).toBe("open")
+    // The server prices the line (adr/0051 §2): the catalog's price now, as the Store API gives it
+    expect(link.lines).toEqual([
+      expect.objectContaining({
+        title: product.title,
+        quantity: 1,
+        unit_price: product.variant.kurus,
+      }),
+    ])
     const { share } = await shop.get<{ share: { url: string | null } }>(
       `/admin/payment-links/${link.id}/share`
     )

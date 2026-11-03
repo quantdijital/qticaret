@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test"
 import type { Page } from "@playwright/test"
-import { cookieBanner, DEMO_PRODUCT } from "./support"
+import { searchPath, stockedProduct } from "./catalog"
+import { cookieBanner } from "./support"
 
 /**
  * The conversion tags (docs/20 "vitrin dönüşüm olayları", D9): nothing of
@@ -40,8 +41,9 @@ async function noTags(page: Page): Promise<void> {
 test("no tag before the cookie answer, and none at all while the shop connects none", async ({
   page,
 }) => {
+  const product = await stockedProduct()
   const requests = tagRequests(page)
-  const response = await page.goto(DEMO_PRODUCT)
+  const response = await page.goto(product.path)
   await page.waitForLoadState("networkidle")
   await expect(cookieBanner(page)).toBeVisible()
   await noTags(page)
@@ -52,7 +54,7 @@ test("no tag before the cookie answer, and none at all while the shop connects n
   // Everything allowed: still nothing, the shop has no ids
   await cookieBanner(page).locator('button[name="choice"][value="all"]').click()
   await page.waitForLoadState("networkidle")
-  await page.goto("/arama?q=gomlek")
+  await page.goto(searchPath(product))
   await page.waitForLoadState("networkidle")
   await noTags(page)
   expect(requests).toEqual([])

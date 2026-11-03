@@ -1,7 +1,8 @@
 import AxeBuilder from "@axe-core/playwright"
 import { expect, test } from "@playwright/test"
 import type { Page } from "@playwright/test"
-import { DEMO_PRODUCT, dismissCookies } from "./support"
+import { pathOf, PRODUCT_PAGE, purchasePath, searchPath, stockedProduct } from "./catalog"
+import { dismissCookies } from "./support"
 
 /**
  * The frame's newer parts (docs/19 §4, §7): the phone's bottom bar and
@@ -43,7 +44,7 @@ test.describe("the phone's bottom bar", () => {
     const height = await page.evaluate(() => document.documentElement.scrollHeight)
     expect((footer?.y ?? 0) + (footer?.height ?? 0)).toBeLessThanOrEqual(height - 60)
 
-    await page.goto("/arama?q=gomlek")
+    await page.goto(searchPath(await stockedProduct()))
     await expect(bottomBar(page).getByRole("link", { name: "Ara" })).toHaveAttribute(
       "aria-current",
       "page"
@@ -74,9 +75,8 @@ test.describe("the phone's bottom bar", () => {
 
     // A cart, made at desktop width where the purchase form stands free
     await page.setViewportSize({ width: 1280, height: 800 })
-    await page.goto(DEMO_PRODUCT)
+    await page.goto(purchasePath(await stockedProduct()))
     await dismissCookies(page)
-    await page.locator('main input[type=radio][name^="option_"]').first().check({ force: true })
     await page.locator("main form button[type=submit]").filter({ hasText: "Sepete ekle" }).click()
     await expect(page.getByRole("dialog")).toBeVisible()
     await page.setViewportSize(PHONE)
@@ -91,8 +91,8 @@ test.describe("the phone's bottom bar", () => {
   })
 
   test("has no serious axe finding at phone width", async ({ page }) => {
-    for (const path of ["/", DEMO_PRODUCT, "/kategoriler"]) {
-      await page.goto(path)
+    for (const path of ["/", PRODUCT_PAGE, "/kategoriler"]) {
+      await page.goto(await pathOf(path))
       await dismissCookies(page)
       const result = await new AxeBuilder({ page })
         .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
@@ -140,8 +140,8 @@ test.describe("the maintenance bypass link", () => {
 test("a normal page keeps its security headers and status while the shop is open", async ({
   page,
 }) => {
-  for (const path of ["/", DEMO_PRODUCT, "/kategoriler"]) {
-    const response = await page.goto(path)
+  for (const path of ["/", PRODUCT_PAGE, "/kategoriler"]) {
+    const response = await page.goto(await pathOf(path))
     expect(response?.status()).toBe(200)
     const headers = response?.headers() ?? {}
     expect(headers["x-content-type-options"]).toBe("nosniff")

@@ -1,11 +1,12 @@
 import AxeBuilder from "@axe-core/playwright"
 import { expect, test } from "@playwright/test"
-import { DEMO_PRODUCT, dismissCookies } from "./support"
+import { pathOf, PRODUCT_PAGE, SEARCH_PAGE } from "./catalog"
+import { dismissCookies } from "./support"
 
 // WCAG 2.2 AA: a serious or critical finding fails the page
 const PAGES = [
   "/",
-  DEMO_PRODUCT,
+  PRODUCT_PAGE,
   "/sepet",
   "/magaza",
   "/kategoriler",
@@ -24,7 +25,7 @@ const PAGES = [
 test.describe("accessibility", () => {
   for (const path of PAGES) {
     test(`${path} has no serious axe finding`, async ({ page }) => {
-      await page.goto(path)
+      await page.goto(await pathOf(path))
       await dismissCookies(page)
       const result = await new AxeBuilder({ page })
         .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
@@ -40,10 +41,10 @@ test.describe("accessibility", () => {
 // Lighthouse's heading-order (axe best practice, moderate): a level is never skipped (docs/21)
 const HEADED = [
   "/",
-  DEMO_PRODUCT,
+  PRODUCT_PAGE,
   "/magaza",
   "/kampanyalar",
-  "/arama?q=gomlek",
+  SEARCH_PAGE,
   "/arama?q=bicak",
   "/blog",
   "/kategoriler",
@@ -55,7 +56,7 @@ const HEADED = [
 test.describe("heading order", () => {
   for (const path of HEADED) {
     test(`${path} skips no heading level`, async ({ page }) => {
-      await page.goto(path)
+      await page.goto(await pathOf(path))
       const result = await new AxeBuilder({ page }).withRules(["heading-order"]).analyze()
       expect(
         result.violations.flatMap((violation) => violation.nodes.map((node) => node.html))

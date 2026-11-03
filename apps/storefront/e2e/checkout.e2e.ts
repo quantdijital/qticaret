@@ -1,17 +1,17 @@
 import { expect, test } from "@playwright/test"
-import { DEMO_PRODUCT, dismissCookies } from "./support"
+import { purchasePath, stockedProduct } from "./catalog"
+import { dismissCookies } from "./support"
 
 /**
  * A guest buys by bank transfer (D7): product → cart drawer → checkout's
- * three steps → the order page with the account to pay to. The address
- * is the first one the shop's address data offers.
+ * three steps → the order page with the account to pay to. The product is
+ * one in stock the shop sells (`catalog.ts`), its variant chosen; the
+ * address is the first one the shop's address data offers.
  */
 test("a guest orders by bank transfer", async ({ page }) => {
   test.setTimeout(90_000)
-  await page.goto(DEMO_PRODUCT)
+  await page.goto(purchasePath(await stockedProduct()))
   await dismissCookies(page)
-  const size = page.locator('main input[type=radio][name^="option_"]').first()
-  await size.check({ force: true })
   await page.locator("main form button[type=submit]").filter({ hasText: "Sepete ekle" }).click()
   await expect(page.getByRole("dialog")).toBeVisible()
   await page.getByRole("dialog").getByRole("link", { name: "Ödemeye geç" }).click()

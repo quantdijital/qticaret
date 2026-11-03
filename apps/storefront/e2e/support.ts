@@ -1,8 +1,5 @@
 import type { Page } from "@playwright/test"
 
-/** The demo seed's product with sizes in stock (scripts/seed/data.ts). */
-export const DEMO_PRODUCT = "/urun/keten-gomlek"
-
 /** Errors the page logs, apart from a browser extension's or a dev server's own noise. */
 export function collectErrors(page: Page): string[] {
   const errors: string[] = []
