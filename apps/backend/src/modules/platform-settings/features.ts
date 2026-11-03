@@ -49,6 +49,15 @@ export const RESTRICTED_PRODUCTS = "catalog.restricted"
 /** Asking a cart with a restricted product for the buyer's age (F13.3, adr/0041 §4). */
 export const AGE_VERIFICATION = "compliance.age_verification"
 
+/** Bulk e-mail and SMS to consented customers from the panel (adr/0050). */
+export const MARKETING_CAMPAIGNS = "marketing.campaigns"
+
+/** Product add-ons priced on the server, a typed text or a choice (adr/0052). */
+export const PRODUCT_ADDONS = "catalog.addons"
+
+/** Orders staff make and the customer pays through a link (adr/0051). */
+export const PAYMENT_LINKS = "orders.payment_links"
+
 export const FEATURES: Readonly<Record<string, FeatureDefinition>> = Object.freeze({
   // F3.2: products that need no shipping (e-books, gift codes, courses, services)
   [NON_PHYSICAL_PRODUCTS]: {
@@ -113,6 +122,27 @@ export const FEATURES: Readonly<Record<string, FeatureDefinition>> = Object.free
     owner: "tenant",
     labelKey: "qticaret.features.compliance_age_verification.label",
     descriptionKey: "qticaret.features.compliance_age_verification.description",
+  },
+  // adr/0052: off until the shop sells add-ons; off, carts carrying them do not check out
+  [PRODUCT_ADDONS]: {
+    default: false,
+    owner: "tenant",
+    labelKey: "qticaret.features.catalog_addons.label",
+    descriptionKey: "qticaret.features.catalog_addons.description",
+  },
+  // adr/0050: off until the shop takes on bulk messages; the panel shows the screen only when on
+  [MARKETING_CAMPAIGNS]: {
+    default: false,
+    owner: "tenant",
+    labelKey: "qticaret.features.marketing_campaigns.label",
+    descriptionKey: "qticaret.features.marketing_campaigns.description",
+  },
+  // adr/0051: off until the shop sells through DMs; off, no link opens and none is made
+  [PAYMENT_LINKS]: {
+    default: false,
+    owner: "tenant",
+    labelKey: "qticaret.features.orders_payment_links.label",
+    descriptionKey: "qticaret.features.orders_payment_links.description",
   },
 })
 

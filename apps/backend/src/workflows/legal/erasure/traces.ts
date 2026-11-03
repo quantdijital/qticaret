@@ -16,6 +16,7 @@ import type MessagingModuleService from "../../../modules/messaging/service"
 import { erasedKeyOf } from "../../../lib/migration/erased"
 import { eraseCampaignRecipients } from "../../campaigns/customer-data"
 import { eraseContactMessages } from "../../contact/customer-data"
+import { erasePaymentLinks } from "../../payment-links/retention"
 import { MIGRATION_MODULE } from "../../../modules/migration"
 import type MigrationModuleService from "../../../modules/migration/service"
 import { PRODUCT_QA_MODULE } from "../../../modules/product-qa"
@@ -223,6 +224,8 @@ export async function eraseTraces(container: Container, customerId: string, addr
   await eraseContactMessages(container, customerId, addresses)
   // The bulk messages' rows naming them (adr/0050 §8); the campaigns' counts stay
   await eraseCampaignRecipients(container, customerId, addresses)
+  // Payment links made for them (adr/0051): an open one canceled, every one's contact gone
+  await erasePaymentLinks(container, customerId, addresses)
   await eraseExports(container, customerId)
   return { carts, messages }
 }

@@ -990,4 +990,45 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "campaigns.test_address_missing":
     "Deneme gönderimi için adres yok: e-postada giriş adresiniz, SMS'te mağazanın telefonu kullanılır.",
   "campaigns.quota_spent": "Bugünkü gönderim sınırı doldu; deneme yarın gönderilebilir.",
+  // adr/0051: payment links
+  "payment_link.unavailable":
+    "Bu ödeme bağlantısı geçerli değil ya da süresi doldu. Mağazayla iletişime geçin.",
+  "payment_link.unknown": "Ödeme bağlantısı bulunamadı.",
+  "payment_link.prices_changed":
+    "Bu siparişteki fiyatlar değişti. Mağazaya bildirildi; size yeni bir bağlantı gönderilecek.",
+  "payment_link.out_of_stock":
+    "Siparişteki bir ürün şu anda stokta yok. Mağazaya bildirildi; sizinle iletişime geçilecek.",
+  "payment_link.no_storefront":
+    "Ödeme bağlantısı için önce mağazanın alan adını girin (Ayarlar > SEO).",
+  "payment_link.no_region": "Türk lirası satış bölgesi yok; ödeme bağlantısı oluşturulamaz.",
+  "payment_link.variant_unknown": "Seçilen ürünlerden biri bulunamadı ya da yayında değil.",
+  "payment_link.variant_unpriced": "Seçilen ürünlerden birinin Türk lirası fiyatı yok.",
+  "payment_link.customer_unknown": "Seçilen müşteri bulunamadı.",
+  "payment_link.customer_required": "Bir müşteri seçin ya da yeni müşterinin bilgilerini girin.",
+  "payment_link.customer_no_email": "Seçilen müşterinin e-posta adresi yok.",
+  "payment_link.address_required": "Kargo seçeneği seçildiyse teslimat adresini de girin.",
+  "payment_link.shipping_option_unknown": "Seçilen kargo seçeneği bulunamadı.",
+  "payment_link.discount_not_allowed": "Rolünüz ödeme bağlantısında indirim veremez.",
+  "payment_link.discount_over_limit":
+    "Bu indirim sınırınızı aşıyor (en çok %20). Daha fazlasını mağaza sahibi verebilir.",
+  "payment_link.discount_invalid": "İndirim tutarı geçersiz; siparişin tamamını karşılayamaz.",
+  "payment_link.not_open": "Bu bağlantı artık açık değil.",
+  "payment_link.extend_limit":
+    "Bağlantı oluşturulduğundan en çok 7 gün geçerli olabilir; daha fazla uzatılamaz.",
+  "payment_link.sent_recently": "Bu bağlantı az önce gönderildi; 10 dakika sonra yeniden deneyin.",
+  "cart.payment_link_closed":
+    "Bu sepetin ödeme bağlantısı kapandı. Ödeme alındıysa kendiliğinden iade edilir.",
+  "cart.payment_link_superseded":
+    "Bu bağlantıdan daha yeni bir sepet açıldı; ödemeye son açılan sepetten devam edin.",
+  "cart.payment_link_changed":
+    "Ödeme bağlantısıyla gelen siparişin ürünleri değiştirilemez. Bağlantıyı yeniden açın.",
+  "cart.payment_link_prices_changed":
+    "Bu siparişteki fiyatlar değişti. Mağazaya bildirildi; size yeni bir bağlantı gönderilecek.",
+  "cart.payment_link_code_misused":
+    "Bu indirim kodu yalnızca kendi ödeme bağlantısının sepetinde geçerlidir.",
+  "cart.payment_link_locked":
+    "Ödeme bağlantısıyla gelen siparişin ürünleri ve indirimi değiştirilemez.",
+  "cart.payment_link_no_cod": "Ödeme bağlantısıyla gelen siparişte kapıda ödeme kullanılamaz.",
+  "orders.use_payment_link":
+    "Panelden sipariş, Siparişler > Ödeme bağlantıları ekranından oluşturulur.",
 }

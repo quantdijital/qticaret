@@ -29,8 +29,10 @@ import { AdminPostFeature, validateSectionBody } from "./admin/platform-settings
 import { auditMutations, auditSensitiveRead } from "./http/audit"
 import { storeProfileOf } from "./http/client-ip"
 import { ACCOUNT_ROUTES } from "./http/account-routes"
+import { ADDON_ROUTES } from "./http/addon-routes"
 import { BANK_TRANSFER_ROUTES } from "./http/bank-transfer-routes"
 import { CUSTOMER_SEGMENT_ROUTES } from "./http/customer-segment-routes"
+import { CAMPAIGN_ROUTES } from "./http/campaign-routes"
 import { BRAND_ROUTES, STORE_BRAND_FIELDS } from "./http/brand-routes"
 import { CATALOG_SHEET_ROUTES } from "./http/catalog-sheet-routes"
 import { CHARGEBACK_ROUTES } from "./http/chargeback-routes"
@@ -47,6 +49,7 @@ import { INVOICE_ROUTES } from "./http/invoice-routes"
 import { MIGRATION_ROUTES } from "./http/migration-routes"
 import { MARKETING_ROUTES } from "./http/marketing-routes"
 import { ORDER_EDIT_ROUTES } from "./http/order-edit-routes"
+import { PAYMENT_LINK_ROUTES } from "./http/payment-link-routes"
 import { RETURN_ROUTES } from "./http/return-routes"
 import { REVIEW_ROUTES } from "./http/review-routes"
 import { MESSAGING_ROUTES } from "./http/messaging-routes"
@@ -269,6 +272,8 @@ export default defineMiddlewares({
     ...MESSAGING_ROUTES,
     ...ACCOUNT_ROUTES,
     ...CUSTOMER_SEGMENT_ROUTES,
+    // adr/0050: bulk e-mail and SMS, behind their flag
+    ...CAMPAIGN_ROUTES,
     ...REVIEW_ROUTES,
     ...CONTACT_ROUTES,
     ...EMAIL_LINK_ROUTES,
@@ -282,6 +287,8 @@ export default defineMiddlewares({
     ...RETURN_ROUTES,
     ...CORE_RETURN_ROUTES,
     ...ORDER_EDIT_ROUTES,
+    // adr/0051: payment links behind their flag; a link's cart locked; Medusa's draft orders closed
+    ...PAYMENT_LINK_ROUTES,
     // F3.11: brands
     ...BRAND_ROUTES,
     ...CONTENT_ROUTES,
@@ -302,6 +309,8 @@ export default defineMiddlewares({
     ...GIFT_CARD_ROUTES,
     // adr/0025 Ek 2026-11-03: selling gift cards (a line's recipient, a balance by code)
     ...GIFT_CARD_SALE_ROUTES,
+    // adr/0052: product add-ons (a line's picks priced on the server)
+    ...ADDON_ROUTES,
     // docs/17: the home page's order numbers are for people (shop revenue)
     {
       matcher: "/admin/home/summary",

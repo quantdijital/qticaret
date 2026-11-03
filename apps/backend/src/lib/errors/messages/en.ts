@@ -996,4 +996,43 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "campaigns.test_address_missing":
     "No address for the test: e-mail goes to your sign-in address, SMS to the shop's phone.",
   "campaigns.quota_spent": "Today's sending limit is used up; the test can go tomorrow.",
+  // adr/0051: payment links
+  "payment_link.unavailable":
+    "This payment link is not valid or has expired. Please contact the shop.",
+  "payment_link.unknown": "Payment link not found.",
+  "payment_link.prices_changed":
+    "Prices in this order have changed. The shop has been told and will send you a new link.",
+  "payment_link.out_of_stock":
+    "An item in this order is out of stock. The shop has been told and will contact you.",
+  "payment_link.no_storefront":
+    "Set the shop's domain first (Settings > SEO) to make payment links.",
+  "payment_link.no_region": "There is no Turkish lira region; a payment link cannot be made.",
+  "payment_link.variant_unknown": "One of the chosen products was not found or is not published.",
+  "payment_link.variant_unpriced": "One of the chosen products has no Turkish lira price.",
+  "payment_link.customer_unknown": "The chosen customer was not found.",
+  "payment_link.customer_required": "Choose a customer or enter the new customer's details.",
+  "payment_link.customer_no_email": "The chosen customer has no e-mail address.",
+  "payment_link.address_required": "With a shipping option, enter the delivery address too.",
+  "payment_link.shipping_option_unknown": "The chosen shipping option was not found.",
+  "payment_link.discount_not_allowed": "Your role cannot give a discount on a payment link.",
+  "payment_link.discount_over_limit":
+    "This discount is over your limit (20% at most). The shop owner can give more.",
+  "payment_link.discount_invalid": "The discount is not valid; it cannot cover the whole order.",
+  "payment_link.not_open": "This link is no longer open.",
+  "payment_link.extend_limit":
+    "A link can stay valid for at most 7 days from its making; it cannot be extended further.",
+  "payment_link.sent_recently": "This link was just sent; try again in 10 minutes.",
+  "cart.payment_link_closed":
+    "This cart's payment link has closed. A payment already taken is refunded automatically.",
+  "cart.payment_link_superseded":
+    "A newer cart was opened from this link; continue to pay from the latest one.",
+  "cart.payment_link_changed":
+    "The items of an order from a payment link cannot be changed. Open the link again.",
+  "cart.payment_link_prices_changed":
+    "Prices in this order have changed. The shop has been told and will send you a new link.",
+  "cart.payment_link_code_misused": "This discount code works only in its own payment link's cart.",
+  "cart.payment_link_locked":
+    "The items and discount of an order from a payment link cannot be changed.",
+  "cart.payment_link_no_cod": "Cash on delivery is not available for an order from a payment link.",
+  "orders.use_payment_link": "Staff orders are made under Orders > Payment links.",
 }

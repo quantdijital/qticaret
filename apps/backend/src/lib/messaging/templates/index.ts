@@ -1,4 +1,5 @@
 import { migrationInvite, passwordReset, verifyEmail } from "./account"
+import { campaignMessage } from "./campaign"
 import { cartReminder } from "./cart-reminder"
 import { giftCardIssued } from "./gift-card"
 import { consentConfirm } from "./consent"
@@ -7,6 +8,7 @@ import { announcement } from "./marketing"
 import { orderLink } from "./order-link"
 import { orderPlaced } from "./order-placed"
 import { paymentFailed } from "./payment"
+import { paymentLinkSent } from "./payment-link"
 import { returnApproved, returnRefunded, returnRequested } from "./returns"
 import { orderDelivered, orderShipped } from "./shipping"
 import { backInStock, stockAlertConfirm } from "./stock"
@@ -23,6 +25,7 @@ import {
 
 export type { MigrationInviteVars, ResetVars, VerifyVars } from "./account"
 export type { AnnouncementVars } from "./marketing"
+export type { CampaignVars } from "./campaign"
 export type { CartReminderVars } from "./cart-reminder"
 export type { ConsentConfirmVars } from "./consent"
 export type { GiftCardVars } from "./gift-card"
@@ -32,6 +35,7 @@ export { orderSummary } from "./order-placed"
 export type { OrderVars } from "./order-placed"
 export type { OrderLinkVars } from "./order-link"
 export type { PaymentFailedVars } from "./payment"
+export type { PaymentLinkVars } from "./payment-link"
 export type { ReturnVars } from "./returns"
 export type { InvoiceVars } from "./invoice"
 export type { ParcelVars } from "./shipping"
@@ -79,6 +83,10 @@ export const MESSAGE_TEMPLATES = {
   "staff.invite": staffInvite,
   "staff.password_reset": staffPasswordReset,
   "staff.mfa_changed": staffMfaChanged,
+  // adr/0050: a bulk e-mail or SMS, to one consented recipient
+  "marketing.campaign": campaignMessage,
+  // adr/0051 §7: a payment link staff made, to the customer who asked for the order
+  "payment_link.sent": paymentLinkSent,
 } as const
 
 export type MessageTemplateName = keyof typeof MESSAGE_TEMPLATES

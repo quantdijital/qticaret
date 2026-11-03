@@ -39,7 +39,13 @@ medusaIntegrationTestRunner({
       const preview = await get<Preview>(`${PATH}/order.placed/preview`)
 
       expect(list.status).toBe(200)
-      expect(list.data.templates).toHaveLength(26)
+      expect(list.data.templates).toHaveLength(28)
+      // A bulk e-mail or SMS to one consented recipient (adr/0050)
+      expect(list.data.templates).toContainEqual({
+        name: "marketing.campaign",
+        kind: "commercial",
+        channels: ["email", "sms"],
+      })
       // A sold gift card's codes to its recipient (adr/0025 Ek 2026-11-03)
       expect(list.data.templates).toContainEqual({
         name: "gift_card.issued",

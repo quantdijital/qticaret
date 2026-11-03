@@ -4,6 +4,7 @@ import { BACK_IN_STOCK_MODULE } from "../../modules/back-in-stock"
 import { campaignMessagesFor } from "../campaigns/customer-data"
 import { contactMessagesFor } from "../contact/customer-data"
 import { exportedItems } from "../gift-cards/kvkk"
+import { paymentLinksFor } from "../payment-links/retention"
 import type BackInStockModuleService from "../../modules/back-in-stock/service"
 import { LEGAL_MODULE } from "../../modules/legal"
 import type LegalModuleService from "../../modules/legal/service"
@@ -150,6 +151,7 @@ export async function customerData(container: Container, customerId: string) {
   const email = typeof customer["email"] === "string" ? customer["email"] : ""
   const contact = await contactMessagesFor(container, customerId, email ? [email] : [])
   const campaigns = await campaignMessagesFor(container, customerId, email ? [email] : [])
+  const paymentLinks = await paymentLinksFor(container, customerId, email ? [email] : [])
   const { addresses, billing_profile: billing, ...profile } = customer
   return {
     hazırlanma: new Date().toISOString(),
@@ -177,5 +179,7 @@ export async function customerData(container: Container, customerId: string) {
     gönderilen_iletiler: sent,
     // adr/0050 §8: the bulk messages that went to them
     toplu_iletiler: campaigns,
+    // adr/0051: the payment links staff made for them
+    ödeme_bağlantıları: paymentLinks,
   }
 }

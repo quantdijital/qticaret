@@ -1,5 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, MedusaError, Modules } from "@medusajs/framework/utils"
+import { linkCampaignIds } from "../payment-links/promotion"
 import { BATCH_PREFIX, templateOfBatch } from "./code-batches"
 
 interface CampaignRow {
@@ -36,7 +37,11 @@ async function batchCampaigns(container: MedusaContainer, templateId?: string) {
  */
 export async function promotionBoard(container: MedusaContainer, fields: string[], take: number) {
   const batches = await batchCampaigns(container)
-  const batchIds = batches.map((campaign) => campaign.id)
+  // Payment links' own codes stay out too (adr/0051 §2): each link's page shows its discount
+  const batchIds = [
+    ...batches.map((campaign) => campaign.id),
+    ...(await linkCampaignIds(container)),
+  ]
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "promotion",
     fields,

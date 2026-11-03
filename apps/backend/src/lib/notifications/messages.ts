@@ -37,6 +37,11 @@ export const NOTIFICATION_MESSAGES: Readonly<
       description:
         "Bugün {{count}}/{{limit}} SMS gönderildi. Sınıra ulaşınca SMS gitmez; Ayarlar > SMS'ten değiştirebilirsiniz.",
     },
+    "campaigns.paused_complaints": {
+      title: "Toplu ileti durduruldu: {{name}}",
+      description:
+        "Şikâyet ya da geri dönen e-posta oranı sınırı aştı. Kitleyi ve içeriği inceleyip Büyüme > Toplu ileti'den sürdürebilirsiniz.",
+    },
     "messaging.email_daily_limit": {
       title: "Günlük e-posta sınırının %80'i doldu",
       description:
@@ -103,6 +108,21 @@ export const NOTIFICATION_MESSAGES: Readonly<
       title: "{{provider}} dökümü {{day}} günü tutmuyor",
       description: "{{count}} fark var; Raporlar > Finans'ta listelendi.",
     },
+    // adr/0051: payment links
+    "payment_links.paid": {
+      title: "Ödeme bağlantısı {{number}} ödendi ({{total}})",
+      description: "Sipariş oluştu; Siparişler'de görebilirsiniz.",
+    },
+    "payment_links.prices_changed": {
+      title: "Ödeme bağlantısı {{number}}: fiyatlar değişti",
+      description:
+        "Müşteri ödeyemedi. Siparişler > Ödeme bağlantıları'ndan bugünkü fiyatlarla yeni bağlantı oluşturun.",
+    },
+    "payment_links.out_of_stock": {
+      title: "Ödeme bağlantısı {{number}}: stokta olmayan ürün",
+      description:
+        "Müşteri ödeyemedi. Stoğu güncelleyin ya da bağlantıyı iptal edip yenisini oluşturun.",
+    },
   },
   en: {
     "contact.message_received": {
@@ -118,6 +138,11 @@ export const NOTIFICATION_MESSAGES: Readonly<
       title: "80% of today's SMS limit used",
       description:
         "{{count}}/{{limit}} texts sent today. At the limit no text goes; change it under Settings > SMS.",
+    },
+    "campaigns.paused_complaints": {
+      title: "Bulk message stopped: {{name}}",
+      description:
+        "Its complaint or bounce rate passed the limit. Review the audience and content, then resume it under Growth > Bulk messages.",
     },
     "messaging.email_daily_limit": {
       title: "80% of today's e-mail limit used",
@@ -188,6 +213,21 @@ export const NOTIFICATION_MESSAGES: Readonly<
     "payments.statement_mismatch": {
       title: "The {{provider}} statement of {{day}} does not agree",
       description: "{{count}} differences, listed in Reports > Finance.",
+    },
+    // adr/0051: payment links
+    "payment_links.paid": {
+      title: "Payment link {{number}} was paid ({{total}})",
+      description: "The order is in Orders.",
+    },
+    "payment_links.prices_changed": {
+      title: "Payment link {{number}}: prices changed",
+      description:
+        "The customer could not pay. Make a new link at today's prices under Orders > Payment links.",
+    },
+    "payment_links.out_of_stock": {
+      title: "Payment link {{number}}: an item is out of stock",
+      description:
+        "The customer could not pay. Update the stock, or cancel the link and make a new one.",
     },
   },
 }

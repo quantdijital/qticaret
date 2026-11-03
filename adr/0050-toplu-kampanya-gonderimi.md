@@ -1,6 +1,6 @@
 # ADR-0050: Panelden toplu e-posta ve SMS gönderimi
 
-- **Durum:** Öneri (kullanıcı kararı bekliyor; 2026-11-03 gece taslağı)
+- **Durum:** Kabul (2026-11-03, kullanıcı: "önerilerine uyuyorum")
 - **Tarih:** 2026-11-03
 - **İlgili:** docs/20 (gerekli liste); adr/0036 (bildirim altyapısı, `deliver()`), adr/0038 (İYS, tek tıkla çıkış, bülten onayı), adr/0037 §6 (segmentler), adr/0019 (içerik belgesi), adr/0048 (belirteçler), adr/0040 (roller, yeniden doğrulama), adr/0014 (iş altyapısı), F11.2 (`traffic-sources`), docs/kvkk-envanter
 
@@ -171,3 +171,65 @@ Rakiplerin hepsinde var, bizde yok: mağaza bir segmente kampanya e-postası ya 
 2. **İYS'ye iletilmemiş izin:** İYS'ye henüz iletilmemiş (`pending`) izinlere gönderim yapılmasın mı? Öneri: yapılmasın. Bunun sonucu: İYS marka kodu girilmemiş mağaza toplu ileti gönderemez.
 3. **Varsayılanlar:** aynı kişiye 24 saatte en çok bir toplu ileti, SMS yalnız 09:00–20:00 arası. Uygun mu?
 4. **İlk dilim:** e-posta ve SMS birlikte mi gelsin, yoksa önce yalnız e-posta mı (SMS ikinci dilimde, yaklaşık 1 gün)?
+
+## Uygulama notları (backend, 2026-11-03)
+
+Kararlar önerildiği gibi uygulandı: bülten abonelerine gönderilir (şifreli adres yalnız gönderim anında çözülür; KVKK envanteri güncellendi), İYS'ye iletilmemiş izne gönderilmez, 24 saat sınırı ve SMS saatleri ayardır (varsayılan açık, 09:00–20:00). Soru 4'te öneri yoktu: e-posta ve SMS birlikte geldi.
+
+**Ad farkları.** Medusa'nın promosyon modülü `campaign` varlığını ve `/admin/campaigns` uçlarını kullanıyor (promosyon kampanyaları, bütçeler). Bu yüzden:
+
+- tablolar `bulk_message` ve `bulk_message_recipient`;
+- uçlar `/admin/bulk-messages*`;
+- modül, workflow ve lib klasörleri `campaigns` adını korur.
+
+**Uçlar** (`marketing.campaigns` bayrağı kapalıyken yok sayılır, yalnız personel):
+
+- `GET /admin/bulk-messages?status&limit&offset`, `POST /admin/bulk-messages`;
+- `GET`, `POST` (yalnız taslak) ve `DELETE` (yalnız taslak) `/admin/bulk-messages/:id`;
+- `POST /:id/audience-preview`, gövde `{ channel?, audience? }`: `{ audience, eligible, excluded: { no_consent, suppressed, iys_pending, recent, invalid_recipient, over_quota }, quota: { limit, left, today, later }, sms: { parts, max_parts } | null }`;
+- `POST /:id/test-send` `{}`, `POST /:id/schedule` `{ scheduled_at }`, `POST /:id/send` `{}`; son ikisi yeniden doğrulama ister (428);
+- `POST /:id/{pause,resume,cancel}` `{}`, `POST /:id/copy` `{ name? }`;
+- `GET /:id/report`: `counts` (`audience`, `targeted`, `pending`, `sent`, `failed`, `skipped` nedenleriyle, `bounces`, `complaints`, `unsubscribed`) ve `traffic` (`carts`, `orders`, `revenue`).
+
+Kitle bir kaynak dizisidir: `[{ kind: "segment" | "group", id }, { kind: "all_consented" }, { kind: "newsletter" }]`. Durumlar §2'deki gibidir. Bekleme nedenlerine `channel_off` eklendi: gönderen alan adı ya da SMS hesabı gönderim sırasında giderse kampanya bekler, kanal dönünce sürer. Yetenek: `capabilities.bulkMessages` (sahip ve yönetici).
+
+**Ayarlar** (`marketing` bölümü): `campaign_frequency_cap`, `campaign_sms_start_hour`, `campaign_sms_end_hour`, `sms_opt_out_text` (Ayarlar > SMS'te gösterilecek; boşken SMS kampanyası başlamaz).
+
+**Kararın içinde netleşenler:**
+
+- Liste "Gönder" isteğinde değil, işin ilk turunda (en geç bir dakika sonra) dondurulur.
+- Tur 55 saniyeyi geçmez.
+- SMS denemesi mağazanın telefonuna gider, çünkü personelin kayıtlı telefonu yok.
+- Tek bağlantıdan oluşan kısa paragraf düğme olarak çizilir.
+- Kategori kartı bağlantı düğmesi olur.
+- Tablo ve alıntı düz paragraf olur.
+- Şikâyet ve geri dönüş, Resend kancasının bastırma listesine yazdıklarından kampanyanın alıcılarıyla özet üzerinden eşleştirilir. Personel sürdürünce oranlar o andan sonraki gönderimlerle yeniden ölçülür.
+- Başarısız gönderim `failed` kalır; kendiliğinden yeniden denenmez.
+
+**Panelin yapacakları** (Büyüme > "Toplu ileti", bayrak açıkken):
+
+- **Liste:** ad, kanal, kitle, durum, gönderilen/hedef, tarih; durum süzgeci.
+- **Düzenleyici** iki sütun:
+  - Kitle: segment, grup, "izinli müşteriler", bülten; canlı sayı ve dışarıda kalanlar nedenleriyle (`audience-preview`).
+  - İçerik:
+    - e-posta: konu (120), önizleme satırı, Sayfalar editörü; ürün kartı en çok 4;
+    - SMS: düz metin, parça sayacı;
+    - belirteç menüsü: `{ad}` ve mağaza belirteçleri.
+  - Deneme: "Bana gönder" düğmesi.
+  - Zamanlama: şimdi ya da tarih, kota tahmini (`quota.today` / `later`).
+  - Sağda canlı önizleme: masaüstü, telefon, SMS balonu.
+- **Gönder ve Zamanla:** kod/şifre penceresi (428'de açılır, `X-Reauth-*` başlıkları).
+- **Taslak dışı:** içerik kilitli, "Kopyala".
+- **Gönderimde:** durdur, sürdür, iptal.
+- **Rapor:** hedef, gönderilen, nedenleriyle atlananlar, başarısız; geri dönüş ve şikâyet; 7 günde çıkış; sepet, sipariş, ciro.
+- **Ayarlar > SMS:** ret metni alanı. **Ayarlar > Pazarlama:** sıklık sınırı ve SMS saatleri.
+- **Mesaj şablonları:** `marketing.campaign` için etiket ("Toplu ileti").
+
+**Açık kalanlar:**
+
+- `marketing.announcement` kaldırılmadı: şablon kaydına bu görevde yalnız ekleme yapılabildi, panelde etiketi duruyor.
+- Netgsm'in Türkçe kodlama kuralı (155/149 karakter, ş ğ ı İ Ş Ğ ç iki karakter) resmî belgeden doğrulanmadı: belge sayfası çevrim dışıydı.
+- Resend'in saniyede 2 isteklik sınırı canlı hesapta doğrulanacak.
+- adr/0038 M11'e amaç genişlemesi notu eklenecek. KVKK envanterine eklendi.
+- Alt bilgi ve ret metni danışman onayı bekliyor.
+

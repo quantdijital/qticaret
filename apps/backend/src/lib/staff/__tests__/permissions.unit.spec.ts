@@ -193,6 +193,9 @@ describe("staff roles", () => {
       invoices: true,
       migration: true,
       fraud: true,
+      bulkMessages: true,
+      paymentLinks: true,
+      paymentLinksManage: true,
     })
     expect(capabilitiesOf("admin")).toMatchObject({
       settings: true,
@@ -208,6 +211,9 @@ describe("staff roles", () => {
       invoices: true,
       migration: false,
       fraud: true,
+      bulkMessages: true,
+      paymentLinks: true,
+      paymentLinksManage: true,
     })
     expect(capabilitiesOf("operations")).toEqual({
       settings: false,
@@ -229,6 +235,9 @@ describe("staff roles", () => {
       invoices: false,
       migration: false,
       fraud: false,
+      bulkMessages: false,
+      paymentLinks: true,
+      paymentLinksManage: false,
     })
     expect(Object.values(capabilitiesOf("readonly")).every((can) => !can)).toBe(true)
     expect(Object.values(capabilitiesOf(null)).every((can) => !can)).toBe(true)
@@ -283,6 +292,18 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/customer-segments/:id": false,
   "DELETE /admin/customer-segments/:id": false,
   "POST /admin/customer-segments": false,
+  // adr/0050: bulk messages are written and sent by the owner and admin only
+  "POST /admin/bulk-messages": false,
+  "POST /admin/bulk-messages/:id": false,
+  "DELETE /admin/bulk-messages/:id": false,
+  "POST /admin/bulk-messages/:id/audience-preview": false,
+  "POST /admin/bulk-messages/:id/test-send": false,
+  "POST /admin/bulk-messages/:id/schedule": false,
+  "POST /admin/bulk-messages/:id/send": false,
+  "POST /admin/bulk-messages/:id/pause": false,
+  "POST /admin/bulk-messages/:id/resume": false,
+  "POST /admin/bulk-messages/:id/cancel": false,
+  "POST /admin/bulk-messages/:id/copy": false,
   "POST /admin/customers/:id/consents": false,
   "POST /admin/customers/:id/billing-profile/reveal": false,
   "POST /admin/features/:key": false,
@@ -382,6 +403,12 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/einvoice/parasut": false,
   "DELETE /admin/einvoice/parasut": false,
   "POST /admin/einvoice/parasut/check": false,
+  // adr/0051 §8: operations make a link without a discount and send it; the rest is the admin's
+  "POST /admin/payment-links": true,
+  "POST /admin/payment-links/preview": true,
+  "POST /admin/payment-links/:id/resend": true,
+  "POST /admin/payment-links/:id/cancel": false,
+  "POST /admin/payment-links/:id/extend": false,
   "POST /admin/invoices/:id/issued": false,
   "POST /admin/invoices/:id/pdf": false,
   "POST /admin/invoices/:id/retry": false,

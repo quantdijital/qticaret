@@ -164,6 +164,11 @@ const OPERATIONS_WRITES: readonly Rule[] = [
   { methods: ["POST"], path: "/admin/product-questions/:id/answer" },
   // Contact form messages marked answered (adr/0047); deleting one is the admin's
   { methods: ["POST"], path: "/admin/contact-messages/:id" },
+  // A payment link for a customer in the DMs, without a discount (the workflow refuses
+  // one), and sending it; cancelling or extending one is the admin's (adr/0051 §8)
+  { methods: ["POST"], path: "/admin/payment-links" },
+  { methods: ["POST"], path: "/admin/payment-links/preview" },
+  { methods: ["POST"], path: "/admin/payment-links/:id/resend" },
   readJob,
   cancelJob,
 ]
@@ -303,6 +308,12 @@ const CAPABILITY_PROBES = {
   migration: ["POST", "/admin/migrations"],
   // F15.6: releasing held orders and keeping the block list, owner and admin
   fraud: ["POST", "/admin/fraud/blocks"],
+  // adr/0050: writing and sending bulk messages, owner and admin; everyone reads them
+  bulkMessages: ["POST", "/admin/bulk-messages/:id/send"],
+  // adr/0051: making a payment link (operations too, without a discount)
+  paymentLinks: ["POST", "/admin/payment-links"],
+  // adr/0051 §8: a link's discount, cancel and extension: owner and admin
+  paymentLinksManage: ["POST", "/admin/payment-links/:id/cancel"],
 } as const satisfies Record<string, readonly [Method, string]>
 
 export type Capability = keyof typeof CAPABILITY_PROBES

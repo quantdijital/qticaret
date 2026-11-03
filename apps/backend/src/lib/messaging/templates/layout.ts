@@ -18,11 +18,36 @@ export type EmailBlock =
   | { kind: "summary"; rows: { label: string; value: string; strong?: boolean }[] }
   | { kind: "details"; title: string; lines: string[] }
   | { kind: "note"; text: string }
+  // A campaign's body (adr/0050 §4), from its content document
+  | { kind: "heading"; text: string }
+  | { kind: "rich"; runs: EmailRun[] }
+  | { kind: "list"; ordered: boolean; items: EmailRun[][] }
+  | { kind: "image"; src: string; alt: string }
+  | { kind: "products"; cards: EmailProductCard[] }
+
+/** A stretch of text with its emphasis, and the link it is part of. */
+export interface EmailRun {
+  text: string
+  bold?: boolean
+  italic?: boolean
+  href?: string | null
+}
+
+/** A product as a campaign shows it: its price read at send time (adr/0050 §4). */
+export interface EmailProductCard {
+  title: string
+  url: string | null
+  image: string | null
+  price: string | null
+  /** The price struck through, where the 30-day rule allows it. */
+  before: string | null
+}
 
 export interface EmailBody {
   subject: string
   /** The line mail clients show after the subject. */
   preheader: string
+  /** The message's title; empty for none (a campaign's body has its own). */
   heading: string
   blocks: EmailBlock[]
   /** Why the recipient gets it (transactional) or how to stop it (commercial). */
@@ -38,9 +63,121 @@ const linkable = (url: string | null): url is string =>
 
 const FONT = "font-family:Arial,Helvetica,sans-serif;"
 const MUTED = "#6b7280"
+const BODY_TEXT = `${FONT}font-size:15px;line-height:22px;color:#111827`
+
+function runsHtml(runs: readonly EmailRun[], color: string): string {
+  return runs
+    .map((run) => {
+      let html = e(run.text).replace(/\n/g, "<br>")
+      if (run.italic) {
+        html = `<em>${html}</em>`
+      }
+      if (run.bold) {
+        html = `<strong>${html}</strong>`
+      }
+      return linkable(run.href ?? null)
+        ? `<a href="${e(run.href ?? "")}" style="color:${color};text-decoration:underline">${html}</a>`
+        : html
+    })
+    .join("")
+}
+
+const runsText = (runs: readonly EmailRun[]): string =>
+  runs
+    .map((run) => {
+      const href = run.href ?? null
+      return linkable(href) && href !== run.text ? `${run.text} (${href})` : run.text
+    })
+    .join("")
+
+function productCell(card: EmailProductCard, color: string): string {
+  const link = (inner: string) =>
+    linkable(card.url)
+      ? `<a href="${e(card.url)}" style="color:#111827;text-decoration:none">${inner}</a>`
+      : inner
+  const image = linkable(card.image)
+    ? link(
+        `<img src="${e(card.image)}" alt="${e(card.title)}" width="260" style="display:block;width:100%;max-width:260px;height:auto;border:0;border-radius:6px;margin:0 0 8px">`
+      )
+    : ""
+  const before = card.before
+    ? ` <s style="color:${MUTED};font-weight:normal">${e(card.before)}</s>`
+    : ""
+  const price = card.price
+    ? `<br><span style="font-weight:bold;color:${color}">${e(card.price)}</span>${before}`
+    : ""
+  return `<td width="50%" valign="top" style="${FONT}font-size:14px;line-height:20px;padding:0 8px 16px;color:#111827">${image}${link(e(card.title))}${price}</td>`
+}
+
+function productsHtml(cards: readonly EmailProductCard[], color: string): string {
+  const rows: string[] = []
+  for (let index = 0; index < cards.length; index += 2) {
+    const pair = cards.slice(index, index + 2)
+    rows.push(
+      `<tr>${pair.map((card) => productCell(card, color)).join("")}${pair.length === 1 ? "<td></td>" : ""}</tr>`
+    )
+  }
+  return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0 -8px">${rows.join("")}</table>`
+}
+
+/** The blocks only a campaign's body has (adr/0050 §4). */
+type CampaignBlock = Extract<
+  EmailBlock,
+  { kind: "heading" | "rich" | "list" | "image" | "products" }
+>
+
+function campaignBlockHtml(block: CampaignBlock, color: string): string {
+  switch (block.kind) {
+    case "heading":
+      return `<h2 style="${FONT}font-size:18px;line-height:26px;margin:0 0 12px;color:#111827">${e(block.text)}</h2>`
+    case "rich":
+      return `<p style="${BODY_TEXT};margin:0 0 16px">${runsHtml(block.runs, color)}</p>`
+    case "list": {
+      const tag = block.ordered ? "ol" : "ul"
+      return `<${tag} style="${BODY_TEXT};margin:0 0 16px;padding-left:24px">${block.items
+        .map((item) => `<li style="margin:0 0 4px">${runsHtml(item, color)}</li>`)
+        .join("")}</${tag}>`
+    }
+    case "image":
+      return linkable(block.src)
+        ? `<p style="margin:0 0 16px"><img src="${e(block.src)}" alt="${e(block.alt)}" width="552" style="display:block;width:100%;max-width:552px;height:auto;border:0;border-radius:6px"></p>`
+        : ""
+    case "products":
+      return productsHtml(block.cards, color)
+  }
+}
+
+function campaignBlockText(block: CampaignBlock): string {
+  switch (block.kind) {
+    case "heading":
+      return block.text
+    case "rich":
+      return runsText(block.runs)
+    case "list":
+      return block.items
+        .map((item, index) => `${block.ordered ? `${String(index + 1)}.` : "•"} ${runsText(item)}`)
+        .join("\n")
+    case "image":
+      return ""
+    case "products":
+      return block.cards
+        .map((card) =>
+          [`${card.title}${card.price ? `: ${card.price}` : ""}`, card.url ?? ""]
+            .filter(Boolean)
+            .join("\n")
+        )
+        .join("\n\n")
+  }
+}
 
 function blockHtml(block: EmailBlock, color: string): string {
   switch (block.kind) {
+    case "heading":
+    case "rich":
+    case "list":
+    case "image":
+    case "products":
+      return campaignBlockHtml(block, color)
     case "paragraph":
       return `<p style="${FONT}font-size:15px;line-height:22px;margin:0 0 16px;color:#111827">${e(block.text)}</p>`
     case "note":
@@ -70,6 +207,12 @@ function blockHtml(block: EmailBlock, color: string): string {
 
 function blockText(block: EmailBlock): string {
   switch (block.kind) {
+    case "heading":
+    case "rich":
+    case "list":
+    case "image":
+    case "products":
+      return campaignBlockText(block)
     case "paragraph":
     case "note":
       return block.text
@@ -106,14 +249,14 @@ export function renderEmail(brand: Brand, body: EmailBody): EmailContent {
     `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f3f4f6"><tr><td align="center" style="padding:24px 12px">`,
     `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#ffffff;border-radius:8px;overflow:hidden">`,
     `<tr><td style="background:${color};padding:16px 24px">${mark}</td></tr>`,
-    `<tr><td style="padding:24px"><h1 style="${FONT}font-size:20px;line-height:28px;margin:0 0 16px;color:#111827">${e(body.heading)}</h1>`,
+    `<tr><td style="padding:24px">${body.heading ? `<h1 style="${FONT}font-size:20px;line-height:28px;margin:0 0 16px;color:#111827">${e(body.heading)}</h1>` : ""}`,
     body.blocks.map((block) => blockHtml(block, color)).join(""),
     `</td></tr>`,
     `<tr><td style="padding:16px 24px;border-top:1px solid #e5e7eb"><p style="${FONT}font-size:12px;line-height:18px;margin:0;color:${MUTED}">${e(body.footer)}${contact ? `<br>${e(brand.shopName)} · ${e(contact)}` : ""}${leave ? `<br><a href="${e(leave.url)}" style="color:${MUTED};text-decoration:underline">${e(leave.label)}</a>` : ""}</p></td></tr>`,
     `</table></td></tr></table></body></html>`,
   ].join("")
   const text = [
-    body.heading,
+    ...(body.heading ? [body.heading] : []),
     ...body.blocks.map(blockText).filter((part) => part !== ""),
     "—",
     body.footer,

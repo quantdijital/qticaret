@@ -74,6 +74,9 @@ const TR: Readonly<Record<string, string>> = {
   "staff_seo.lowest": "Önce bakılacaklar",
   "footer.commercial":
     "Bu e-postayı {{shop}} ticari ileti izniniz olduğu için aldınız. İzninizi hesabınızdan ya da {{contact}} adresine yazarak dilediğiniz an geri alabilirsiniz.",
+  "campaign.test_subject": "[Deneme] {{subject}}",
+  "campaign.test_sms": "[Deneme] {{text}}",
+  "campaign.mersis": "MERSİS {{mersis}}",
   "announcement.button": "Mağazaya git",
   "announcement.sms": "{{shop}}: {{title}} {{body}} Ret için mağazayla iletişime geçin.",
   "order.subtotal": "Ara toplam",
@@ -265,6 +268,21 @@ const TR: Readonly<Record<string, string>> = {
     "Sorun devam ederse farklı bir kart ya da ödeme yöntemi deneyin veya bankanızla görüşün.",
   "order_placed.sms":
     "{{shop}}: #{{number}} numaralı siparişiniz alındı. Toplam {{total}}. Teşekkür ederiz.",
+  // adr/0051 §7: a payment link staff made for the customer
+  "payment_link.subject": "{{shop}}: siparişiniz hazır ({{number}})",
+  "payment_link.preheader": "Toplam {{total}}; ödeme bağlantınız bu e-postada.",
+  "payment_link.heading": "Merhaba {{name}}, siparişiniz hazır",
+  "payment_link.intro":
+    "{{shop}} mağazasında sizin için hazırlanan {{number}} numaralı siparişin kalemleri aşağıda. Ödemeyi bağlantıdan güvenle tamamlayabilirsiniz.",
+  "payment_link.discount": "İndirim",
+  "payment_link.total": "Toplam",
+  "payment_link.button": "Ödemeye geç",
+  "payment_link.note":
+    "Bağlantı {{validity}} geçerli. Bu siparişi siz istemediyseniz e-postayı yok sayın.",
+  "payment_link.sms":
+    "{{shop}}: Siparişiniz hazır, toplam {{total}}. Ödeme bağlantısı ({{validity}} geçerli): {{url}}",
+  "payment_link.hours": "{{count}} saat",
+  "payment_link.days": "{{count}} gün",
 }
 
 const CATALOG: Readonly<Record<MessageLocale, Readonly<Record<string, string>>>> = {

@@ -237,6 +237,8 @@ module.exports = defineConfig({
     },
     // F10.7 (adr/0038 §1): one reminder per cart left behind, its link opening the cart once
     { resolve: "./src/modules/cart-reminders" },
+    // adr/0050: bulk e-mail and SMS, recipients by keyed hash only
+    { resolve: "./src/modules/campaigns" },
     // F10.10 (adr/0037 §4): product questions and answers, moderated
     { resolve: "./src/modules/product-qa" },
     // F10.6 (adr/0037 §4): purchasers' reviews, moderated, and their ratings
@@ -249,6 +251,11 @@ module.exports = defineConfig({
     // F18 D10 (adr/0047): the storefront's contact form, what was written sealed
     {
       resolve: "./src/modules/contact-messages",
+      options: { hashKey: env.PII_HASH_KEY, encryptionKey: env.PII_ENCRYPTION_KEY },
+    },
+    // adr/0051: payment links staff make, the customer's contact sealed, the token hashed
+    {
+      resolve: "./src/modules/payment-links",
       options: { hashKey: env.PII_HASH_KEY, encryptionKey: env.PII_ENCRYPTION_KEY },
     },
     // F18 (adr/0049): the storefront's design from the theme editor: draft, live, revisions

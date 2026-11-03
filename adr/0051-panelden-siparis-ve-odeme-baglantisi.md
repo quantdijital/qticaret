@@ -1,6 +1,6 @@
 # ADR-0051: Panelden sipariş ve ödeme bağlantısı
 
-- **Durum:** Öneri (kullanıcı kararı bekliyor; 2026-11-03 gece taslağı)
+- **Durum:** Kabul (2026-11-03, kullanıcı: "önerilerine uyuyorum")
 - **Tarih:** 2026-11-03
 - **İlgili:** docs/20 (gerekli liste); adr/0026 (barındırılan ödeme formu), adr/0029 (havale, kapıda ödeme), adr/0044 (fraud guard), adr/0040 (roller), adr/0038 M10 (sepet bağlantısı deseni), adr/0041 (sözleşme onayı), adr/0034 (e-fatura), adr/0033 §7 (Medusa uçlarını kapatma), adr/0052 (ek seçenekler)
 
@@ -144,3 +144,62 @@ Türkiye'de Instagram ve WhatsApp satışı yaygın bir kanal. Müşteri DM'den 
 2. **Stok ayırma:** v1'de stok ayrılmıyor; stok ödeme anında denetleniyor. Shopify'daki gibi isteğe bağlı "ürünleri ayır" şimdi gerekli mi?
 3. **Dışarıda alınmış ödeme:** Ödemesi elden ya da IBAN'la önceden alınmış siparişi bağlantısız, panelden "ödendi" diye kapatmak istiyor musunuz? Bu durumda mesafeli satış onayı müşteriden alınmamış olur; öneri: v1'de yok.
 4. **Kapıda ödeme:** Bağlantıyla gelen siparişte kapıda ödeme açık olsun mu? Öneri: kapalı başlasın, ayardan açılsın.
+
+Cevaplar (2026-11-03): dört soruda da öneri kabul edildi. `operations` yalnız indirimsiz bağlantı oluşturur ve gönderir; v1'de stok ayrılmaz; dışarıda alınmış ödeme v1'de yok; kapıda ödeme bağlantı siparişinde kapalı.
+
+## Uygulama notları (backend, 2026-11-03)
+
+**Karardan sapmalar:**
+
+- **Fiyat kilidi özel fiyat değil.** Satırlar oluşturma anında katalog fiyatıyla (TRY bölgesi, müşteri ve grupları, adet) anlık görüntüye yazılır. Sepet her açıldığında Medusa satırları kendi fiyatlar; fiyat anlık görüntüden farklıysa 409 `payment_link.prices_changed`, bağlantı `draft` olur ve personelin ziline düşer. Aynı denetim ödeme başlatmada ve tamamlamada yeniden yapılır (`cart.payment_link_prices_changed`). `draft` bağlantı müşteriye bir şey açmaz; personel "Kopyala" ile bugünkü fiyatlarla yeni bağlantı oluşturur.
+- **Durumlar:** `draft`, `open`, `paid`, `expired`, `canceled` (`draft` = fiyat değişti).
+- **Vitrin ucu:** `/redeem` yerine `POST /store/payment-links/:token/cart`.
+- **Jeton:** `pl_<22 rastgele>.<bitiş>.<mac>`; `previewSigner("payment-link:v1")` ile `PII_HASH_KEY` altında imzalı. İmzası tutmayan jeton tabloya hiç sorulmaz. Kayıtta SHA-256 özeti (arama) ve şifreli kopyası (yeniden paylaşım) durur. Jeton iş akışı girdisine ya da çıktısına girmez: route jetonu çözer, iş akışına bağlantı kimliğini verir.
+- **Uzatma var:** `POST /admin/payment-links/:id/extend`, ama bağlantının oluşturulmasından en çok 7 gün (jetonun kendi bitişi). Bağlantı ve paylaşım metni aynı kalır.
+- **Şablon adı:** `order.pay_link` yerine `payment_link.sent` (işlemsel; e-posta ve SMS; `retry: true`, jeton kayıttaki şifreli kopyadan okunur). Yeniden gönderim bağlantı başına 10 dakikada bir.
+- **Ayarlar bölümü yok (açık):** `pay_links.max_discount_percent` ve `pay_links.allow_cod` henüz yok. Sınırlar kodda: `admin` en çok %20, `owner` en çok %99; kapıda ödeme her zaman kapalı (`cart.payment_link_no_cod`).
+- **İndirim:** yüzde ya da tutar; kargo bedava v1'de yok. Promosyon `PL-XXXXXXXXXXXX` kodlu, `limit: 1`, KDV dahil, `qt-payment-links` kampanyasında. Promosyon listesi (`/admin/promotion-board`) bu kampanyayı göstermez. Kod başka bir sepette kullanılırsa ödeme başlatma ve tamamlama reddeder (`cart.payment_link_code_misused`).
+- **Kurumsal fatura bilgisi (VKN, unvan) v1'de yok.** Yalnız teslimat adresi önceden girilebilir; fatura adresi de aynı adres olur.
+- **Süre sonu işi saatlik** (`payment-links-expiry`, :17). Ödeme başlatma bağlantının bitişine kadar açıktır; başlamış bir ödeme bitişten sonra 1 saat daha siparişe dönebilir. İş bağlantıyı bu saatten sonra `expired` yapar ve kodunu kapatır.
+- **Sipariş işareti:** `qt_source` yerine `order.metadata.qt_payment_link` (bağlantı kimliği) ve `qt_payment_link_by` (oluşturan personel).
+- **Ek seçenekli satırlar (adr/0052)** v1'de yok. Bağlantı sepetinde `/line-items/:id/addons` kilitli.
+- **Hız sınırları:** vitrin `pay_link` (IP başına 15 dakikada 30); personel başına oluşturma ve gönderim birlikte saatte 60; önizleme saatte 600.
+- **Taslak siparişler:** `/admin/draft-orders*` yazmaları bayraktan bağımsız olarak herkese `orders.use_payment_link` (400) ile kapalı.
+- **Bayrak:** `orders.payment_links` (mağaza, varsayılan kapalı). Kapalıyken admin ve vitrin uçları yokmuş gibi 404 verir. Sepet kilidi ve tamamlama denetimi bayraktan bağımsız çalışır.
+
+**Sözleşme (vitrin, `/ode/[token]`):**
+
+- Sayfa `noindex`, `Referrer-Policy: no-referrer`. Jeton sayfa açılınca kullanılmaz.
+- `GET /store/payment-links/:token` (yayımlanabilir anahtar) → `{ payment_link: { number, state: "open" | "prices_changed", first_name, currency_code, lines: [{ variant_id, title, variant_title, thumbnail, quantity, unit_price, total, in_stock }], items_total, discount_total, total, shipping: { preset }, expires_at } }`. Tutarlar kuruş.
+  - Bilinmeyen, imzası tutmayan, süresi dolmuş, ödenmiş ya da iptal edilmiş bağlantı aynı 404'ü alır (`payment_link.unavailable`). Bayrak kapalıysa Express'in 404 sayfası döner.
+  - Kişisel veri olarak yalnız ad gelir.
+- "Ödemeye geç" → `POST /store/payment-links/:token/cart` gövde `{}` → `{ cart_id }`. Vitrin sepet çerezini bu kimlikle yazar ve `/odeme`'ye geçer.
+  - 409 `payment_link.prices_changed` ya da `payment_link.out_of_stock`: "mağazaya bildirildi" iletisi gösterilir.
+  - Her basış yeni sepet açar; eski sepet artık tamamlanmaz (`cart.payment_link_superseded`). Kartla ödenmişse sahipsiz ödeme olarak kendiliğinden iade edilir (adr/0026 §6, mevcut yol).
+- Ödeme adımında sepet `metadata.qt_payment_link` taşır. Satır ekleme, silme, adet ve kod değişikliği 400 `cart.payment_link_locked` alır; hediye kartı alıcısı (`/gift`) serbesttir. Kapıda ödeme gösterilmez.
+  - Ödeme başlatma ve tamamlama hataları: `cart.payment_link_closed`, `cart.payment_link_superseded`, `cart.payment_link_changed`, `cart.payment_link_prices_changed`, `cart.payment_link_no_cod`.
+
+**Sözleşme (panel, Siparişler > "Ödeme bağlantıları" ve "Yeni sipariş"):**
+
+- `capabilities.paymentLinks`: oluşturma ve gönderme (owner, admin, operations). `capabilities.paymentLinksManage`: indirim, iptal ve uzatma (owner, admin).
+- `POST /admin/payment-links/preview` gövde `{ customer_id?, lines: [{ variant_id, quantity }], discount?, shipping_option_id? }` → `{ preview: { lines, items_total, discount, total, short_variant_ids, currency_code } }`. Formun özeti budur; fiyat gönderilirse 400 döner.
+- `POST /admin/payment-links` yeniden doğrulamayla (`X-Reauth-*`; 428 → kod penceresi).
+  - Gövde: `{ customer_id | guest: { first_name, last_name, email, phone? }, lines, discount?: { type: "percentage" (1–99) | "fixed" (kuruş), value, reason }, address?: { first_name, last_name, phone?, address_1, address_2?, city (ilçe), province (il), postal_code? }, shipping_option_id? (adresle), note?, expires_in_hours? (1–168, varsayılan 72) }`.
+  - Yanıt 201 `{ payment_link, share }`.
+  - Hatalar: 403 `payment_link.discount_not_allowed` / `discount_over_limit`; 400 `payment_link.discount_invalid`, `no_storefront`, `variant_unpriced`, `customer_required`, `customer_no_email`, `address_required`; 404 `variant_unknown`, `customer_unknown`, `shipping_option_unknown`.
+- `GET /admin/payment-links?status&discounted=true|false&created_by&limit&offset` → `{ payment_links, count, limit, offset }`. Satır: `id, number ("PL-1042"), status, customer { id, name ("Ayşe Y."), email (maskeli) }, items_total, discount_total, total, discount, created_by, created_at, expires_at, opened_count, sent_count, order_id`. Denetim kaydına düşen okuma.
+- `GET /admin/payment-links/:id` → `{ payment_link }`: listedeki alanlar ve `contact, address, lines, shipping_option_id, note, token_ends_at, cart_id, last_opened_at, last_sent_at, paid_at, canceled_by, closed_at`. Denetlenen okuma.
+- `GET /admin/payment-links/:id/share` → `{ share: { url, sms_text, whatsapp_url, email_sent, sms_sent } }`. Bağlantı açık değilse metinler `null` olur. SMS metni kişi adı taşımaz. WhatsApp adresi müşterinin cep telefonuyla açılır, telefon yoksa numarasız.
+- `POST /:id/resend { channels: ["email","sms"] }` → `{ outcomes }` (`sent`, `channel_off`, `invalid_recipient`, `over_quota`…). 10 dakika dolmadan 409 `payment_link.sent_recently`.
+- `POST /:id/cancel {}`, `POST /:id/extend { hours }`: 409 `payment_link.not_open`; 400 `payment_link.extend_limit`.
+- **Zil:** `payment_link_paid` (`order_id` ile), `payment_link_prices_changed`, `payment_link_out_of_stock`; `data.payment_link_id` ve `number` taşır.
+- **Sipariş sayfası:** `order.metadata.qt_payment_link` varsa "Ödeme bağlantısından (PL-…, oluşturan …)" yazar; numara `GET /admin/payment-links/:id`'den okunur.
+
+**KVKK:** `payment_link.sealed` alanında iletişim ve adres tutulur (Ş, `PII_ENCRYPTION_KEY`), e-posta ayrıca özetlenir (Ö). Kapanıştan 30 gün sonra kişisel alanlar silinir. Silme talebinde açık bağlantı iptal edilir; veri dökümüne `ödeme_bağlantıları` olarak girer (docs/kvkk-envanter.md).
+
+**Açık konular:**
+
+- **Grup fiyatı:** Misafir bağlantısı grup fiyatı olmadan fiyatlanır. Medusa sepeti aynı e-postalı kayıtlı müşteriye bağlarsa ve onun grup fiyatı farklıysa bağlantı `draft` olur (güvenli yön).
+- **Ayarlar bölümü:** indirim sınırı ve kapıda ödeme ayarı.
+- **Kapsam dışı:** kurumsal fatura bilgisi, kargo bedava indirimi, ek seçenekli satır, "ürünleri ayır".
+- **e2e testi** (panel → vitrin → sahte PayTR → sipariş) panel ve vitrin hazır olunca yazılır.

@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Separator } from "@/components/ui/separator"
+import type { ExtraToken } from "@/features/settings/components/shop-token-menu"
 import type { CardKind } from "./card-nodes"
 import { TableTools } from "./table-tools"
 import { EditorTokenMenu } from "./token-menu"
@@ -56,10 +57,19 @@ interface ToolbarProps {
   onCard: (kind: CardKind) => void
   /** The shop's details menu (adr/0048): only texts the server fills them in. */
   tokens?: boolean
+  /** Tokens the menu offers besides the shop's details. */
+  extraTokens?: readonly ExtraToken[] | undefined
 }
 
 /** The editor's actions, each one the server allows (adr/0019). */
-export function Toolbar({ editor, onLink, onImage, onCard, tokens = false }: ToolbarProps) {
+export function Toolbar({
+  editor,
+  onLink,
+  onImage,
+  onCard,
+  tokens = false,
+  extraTokens,
+}: ToolbarProps) {
   const { t } = useTranslation()
   const state = useEditorState({
     editor,
@@ -165,7 +175,7 @@ export function Toolbar({ editor, onLink, onImage, onCard, tokens = false }: Too
       {tokens ? (
         <>
           <Separator orientation="vertical" className="mx-1 h-5" />
-          <EditorTokenMenu editor={editor} />
+          <EditorTokenMenu editor={editor} extra={extraTokens} />
         </>
       ) : null}
       {state.table ? <TableTools editor={editor} /> : null}

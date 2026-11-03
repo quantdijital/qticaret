@@ -130,10 +130,26 @@ export interface SetGiftRecipientInput {
 }
 
 /**
- * Writes the recipient on a gift line of an open cart of this storefront;
- * another line is refused. Undone, the line's metadata before comes back.
+ * What undoing the recipient writes: Medusa merges a line's metadata
+ * (2.21.2), so the earlier metadata alone would leave the new recipient in
+ * place. The key goes back to its exact earlier value; one the line did not
+ * have is written as an empty string, which takes it out.
  */
-const setGiftRecipientStep = createStep(
+export function restoredGiftMetadata(
+  before: Record<string, unknown> | null
+): Record<string, unknown> {
+  return {
+    [GIFT_RECIPIENT_KEY]:
+      before && Object.hasOwn(before, GIFT_RECIPIENT_KEY) ? before[GIFT_RECIPIENT_KEY] : "",
+  }
+}
+
+/**
+ * Writes the recipient on a gift line of an open cart of this storefront;
+ * another line is refused. Undone, the line's recipient before comes back
+ * (none, if it had none); its other metadata is left as it is.
+ */
+export const setGiftRecipientStep = createStep(
   "gift-cards-set-recipient",
   async (input: SetGiftRecipientInput, { container }) => {
     const cart = await cartRow(container, input.cart_id)
@@ -165,7 +181,7 @@ const setGiftRecipientStep = createStep(
     if (undo) {
       await container
         .resolve<ICartModuleService>(Modules.CART)
-        .updateLineItems(undo.id, { metadata: undo.metadata ?? {} })
+        .updateLineItems(undo.id, { metadata: restoredGiftMetadata(undo.metadata) })
     }
   }
 )

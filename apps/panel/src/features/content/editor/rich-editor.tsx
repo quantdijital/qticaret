@@ -2,6 +2,7 @@ import { EditorContent, useEditor, useEditorState } from "@tiptap/react"
 import type { JSONContent } from "@tiptap/react"
 import { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
+import type { ExtraToken } from "@/features/settings/components/shop-token-menu"
 import { formatCount } from "@/lib/format"
 import { CardDialog } from "./card-dialog"
 import type { CardKind } from "./card-nodes"
@@ -32,12 +33,15 @@ export function RichEditor({
   onChange,
   label,
   shopTokens = false,
+  extraTokens,
 }: {
   value: JSONContent
   onChange: (doc: JSONContent) => void
   label: string
   /** Offer the shop's details (`{telefon}`), for a text the server fills them in (adr/0048). */
   shopTokens?: boolean
+  /** Tokens besides the shop's details, with `shopTokens` (a campaign's `{ad}`). */
+  extraTokens?: readonly ExtraToken[] | undefined
 }) {
   const { t } = useTranslation()
   const [linking, setLinking] = useState(false)
@@ -85,6 +89,7 @@ export function RichEditor({
         }}
         onCard={setCarding}
         tokens={shopTokens}
+        extraTokens={extraTokens}
       />
       {/* A long text scrolls inside, under a toolbar that stays in reach; the page beside keeps its height */}
       <EditorContent editor={editor} className="max-h-[min(70vh,48rem)] overflow-y-auto" />
