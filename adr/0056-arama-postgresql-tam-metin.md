@@ -87,11 +87,16 @@ sıra: stokta olan önce, sonra skor, sonra yeni, sonra id
 
 - `search_synonym`: grup başına 2–10 terim, terim 1–3 kelime, her terim karşılaştırma biçimine göre bir kez. Mağaza başına en çok 1000 grup.
 - Grup iki yönlüdür. PostgreSQL thesaurus dosyası kullanılmaz (sunucu dosyası ister).
-- Admin uçları (katalog ayarı: sahip ve yönetici yazar, diğerleri okur; denetim kaydı terimleri önce/sonra yazar):
+- Admin uçları (sahip ve yönetici yazar, diğerleri okur; denetim kaydı terimleri önce/sonra yazar):
   - `GET /admin/search/synonyms?q=&offset=&limit=`
   - `POST /admin/search/synonyms` `{ terms: string[] }`
   - `POST /admin/search/synonyms/:id`
   - `DELETE /admin/search/synonyms/:id`
+- **Yetki (ek, 2026-11-04):** yazma kendi yeteneğidir: `searchSynonyms` (`lib/staff/permissions.ts`, sahip ve yönetici). `/admin/staff/me` `can` içinde döner. Uçlar bu yeteneğin örnek ucu gibi karar verir; birim testi üç yazma ucunu her rol için yetenekle eşit tutar. Okuma her rolündür.
+- **Terim denetimi (ek, 2026-11-04):** şema yalnız biçim ve boy denetler (dizi 2–10, terim en çok 60 karakter). Terimin içeriği `synonymTerms`'tedir (`lib/search/synonyms.ts`, workflow adımı çağırır). Her ret istemciye kendi anahtarıyla gider, `field` terimin yeridir (`terms.2`):
+  - Harf ya da rakam içermeyen terim (`!!!`, boş) ve kontrol karakteri ya da tek vekil (lone surrogate) içeren terim: `search.synonym_term_invalid`. Böyle terim sessizce atılmaz; atılsaydı geçerli görünen grup `synonym_terms_too_few` olurdu.
+  - 3 kelimeden uzun terim: `search.synonym_term_too_long`.
+  - Karşılaştırma biçimine göre 2'den az farklı terim: `search.synonym_terms_too_few`; 10'dan çok: `search.synonym_terms_too_many`.
 - Yazma workflow'dadır (`saveSynonymWorkflow`, kilitli). Adımlar geri alınabilir.
 - Vitrin tarafı süreç içi önbellek (`createVersionedCache`). Yazınca Redis işaretiyle her süreç yeniden okur, en geç 60 sn.
 
@@ -120,6 +125,12 @@ sıra: stokta olan önce, sonra skor, sonra yeni, sonra id
   - Tüm ürünler yeniden indekslenir (kaçan olay, şablon değişikliği, satış kanalı bağı).
   - Sözlük sayıları kesinleşir, eski kelimeler düşer.
 - `pnpm --filter @qticaret/backend search:rebuild`: aynısı, elle.
+- **Durum ucu (ek, 2026-11-04):** `GET /admin/search/index` → `{ documents, pending, last_rebuilt_at, dictionary_words, synonyms }`. Her rol okur (yalnız sayılar, ürün bilgisi yok). Modülün kendi tablolarından tek SQL (`sql/status.ts`), kesin sayımlar:
+  - `documents`: `search_document` satırları (yayında olsun olmasın).
+  - `pending`: `search_pending` satırları.
+  - `last_rebuilt_at`: en eski satırın `indexed_at`'i. Yeniden kurulum her satırı yeniden yazar, yani her satır en az bu kadar tazedir. İndekslenemeyen ürün bu tarihi geride tutar (görünür olması istenen durum). İndeks boşsa `null`. Ayrı bir "son kurulum" kaydı tutulmaz.
+  - `dictionary_words`: `search_word` satırları.
+  - `synonyms`: silinmemiş `search_synonym` grupları.
 - **Popülerlik:** `order.placed` siparişin ürünlerine anında +1 yazar (geri alınabilir adım). Ürün görüntülenmesi platformda izlenmiyor.
 - **Yorum değişikliği tetiklemez:** yorum metni aranmaz, puan sıralamaya girmez (eski ürünü kayırır).
 
@@ -170,7 +181,7 @@ Execution Time: 2.077 ms
 - **Vitrin değişikliği gerekmez:** `GET /store/listings/products` sözleşmesi aynı.
 - **Eklenen alan:** `facets.stock` `{ count, selected }`.
 - **Eklenen sorgu değeri:** `query` içinde `stok=var`.
-- Panel için yeni ekran: eş anlamlı grupları (yukarıdaki uçlar).
+- Panel için yeni ekran: eş anlamlı grupları ve indeks durumu (yukarıdaki uçlar). Panel yazma düğmelerini `can.searchSynonyms` ile açar.
 - **Riskler:**
   - Olay ile indeks arasında milisaniyeler var.
   - Sözlük sayıları gece kesinleşir. Yeni kelime yazımda hemen eklenir; silinen ürünün kelimesi gece düşer. Öneri yine de ürün denetiminden geçer.

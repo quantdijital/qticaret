@@ -1061,4 +1061,14 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The items and discount of an order from a payment link cannot be changed.",
   "cart.payment_link_no_cod": "Cash on delivery is not available for an order from a payment link.",
   "orders.use_payment_link": "Staff orders are made under Orders > Payment links.",
+  // adr/0056: site search's synonym groups
+  "search.synonym_terms_too_few":
+    "A group needs at least two different terms. Letter case and Turkish letters do not make a term different.",
+  "search.synonym_term_too_long": "A term can be at most 3 words.",
+  "search.synonym_terms_too_many": "A group can have at most 10 terms.",
+  "search.synonyms_too_many":
+    "The shop can keep at most 1,000 synonym groups; delete one to add another.",
+  "search.synonym_unknown": "Synonym group not found.",
+  "search.synonym_term_invalid":
+    "Each term must contain a letter or a digit, with no hidden characters.",
 }

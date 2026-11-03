@@ -198,6 +198,7 @@ describe("staff roles", () => {
       bulkMessages: true,
       paymentLinks: true,
       paymentLinksManage: true,
+      searchSynonyms: true,
     })
     expect(capabilitiesOf("admin")).toMatchObject({
       settings: true,
@@ -216,6 +217,7 @@ describe("staff roles", () => {
       bulkMessages: true,
       paymentLinks: true,
       paymentLinksManage: true,
+      searchSynonyms: true,
     })
     expect(capabilitiesOf("operations")).toEqual({
       settings: false,
@@ -240,9 +242,26 @@ describe("staff roles", () => {
       bulkMessages: false,
       paymentLinks: true,
       paymentLinksManage: false,
+      searchSynonyms: false,
     })
     expect(Object.values(capabilitiesOf("readonly")).every((can) => !can)).toBe(true)
     expect(Object.values(capabilitiesOf(null)).every((can) => !can)).toBe(true)
+  })
+
+  it("decides site search's synonym writes as the searchSynonyms capability says; every role reads", () => {
+    for (const role of STAFF_ROLES) {
+      const can = capabilitiesOf(role).searchSynonyms
+      expect(can).toBe(role === "owner" || role === "admin")
+      for (const [method, path] of [
+        ["POST", "/admin/search/synonyms"],
+        ["POST", "/admin/search/synonyms/ssyn_1"],
+        ["DELETE", "/admin/search/synonyms/ssyn_1"],
+      ] as const) {
+        expect(allowed(role, method, path)).toBe(can)
+      }
+      expect(allowed(role, "GET", "/admin/search/synonyms")).toBe(true)
+      expect(allowed(role, "GET", "/admin/search/index")).toBe(true)
+    }
   })
 })
 
@@ -263,7 +282,7 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/brands/:id": false,
   "DELETE /admin/brands/:id": false,
   "POST /admin/brands": false,
-  // adr/0056: search synonyms are a catalogue setting, the owner's and admins'
+  // adr/0056: search synonyms are the owner's and admins' (the searchSynonyms capability)
   "POST /admin/search/synonyms/:id": false,
   "DELETE /admin/search/synonyms/:id": false,
   "POST /admin/search/synonyms": false,

@@ -26,6 +26,8 @@ import {
 } from "./sql/documents"
 import { listingResult, listingStatement } from "./sql/listing"
 import { claimPending, finishPending, markPending, pendingCount } from "./sql/pending"
+import { indexStatus } from "./sql/status"
+import type { IndexStatus } from "./sql/status"
 import type {
   AnalysedWord,
   DocumentInput,
@@ -163,6 +165,12 @@ class SearchIndexModuleService extends MedusaService({ SearchSynonym }) {
   @InjectManager()
   async pendingCount(@MedusaContext() context: Context = {}): Promise<number> {
     return pendingCount(run(context))
+  }
+
+  /** What the index holds now: rows, the queue, the dictionary, the synonyms (the panel). */
+  @InjectManager()
+  async indexStatus(@MedusaContext() context: Context = {}): Promise<IndexStatus> {
+    return indexStatus(run(context))
   }
 
   /** A query's words: stems, the catalogue's spelling, roots, typo neighbours. */

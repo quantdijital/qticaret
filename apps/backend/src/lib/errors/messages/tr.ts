@@ -1057,4 +1057,14 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "cart.payment_link_no_cod": "Ödeme bağlantısıyla gelen siparişte kapıda ödeme kullanılamaz.",
   "orders.use_payment_link":
     "Panelden sipariş, Siparişler > Ödeme bağlantıları ekranından oluşturulur.",
+  // adr/0056: site search's synonym groups
+  "search.synonym_terms_too_few":
+    "Grupta en az iki farklı terim olmalı. Büyük-küçük harf ve Türkçe karakter farkı terimi değiştirmez.",
+  "search.synonym_term_too_long": "Bir terim en çok 3 kelime olabilir.",
+  "search.synonym_terms_too_many": "Bir grupta en çok 10 terim olabilir.",
+  "search.synonyms_too_many":
+    "Mağaza en çok 1000 eş anlamlı grubu tutabilir; yenisini eklemek için birini silin.",
+  "search.synonym_unknown": "Eş anlamlı grubu bulunamadı.",
+  "search.synonym_term_invalid":
+    "Her terim en az bir harf ya da rakam içermeli; görünmeyen karakterler kullanılamaz.",
 }

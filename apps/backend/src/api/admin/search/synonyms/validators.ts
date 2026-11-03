@@ -1,5 +1,4 @@
 import { z } from "@medusajs/framework/zod"
-import { isCleanText } from "../../../../lib/security/text"
 
 /** `?q=&offset=&limit=`: the shop's synonym groups, those holding `q` when given. */
 export const AdminGetSearchSynonyms = z
@@ -11,13 +10,11 @@ export const AdminGetSearchSynonyms = z
   .strict()
 export type AdminGetSearchSynonymsType = z.infer<typeof AdminGetSearchSynonyms>
 
-// Shape and size only; words per term and the group's distinct terms are checked in the workflow
-const term = z
-  .string()
-  .trim()
-  .min(1)
-  .max(60)
-  .refine((text) => isCleanText(text), { message: "search.synonym_term_invalid" })
+// Shape and size only. What a term holds (a letter or digit, no control
+// characters, at most three words) and the group's distinct terms are the
+// workflow's (lib/search/synonyms.ts): its refusals reach the client as their
+// keys, which Medusa's own wording of a schema rule would hide
+const term = z.string().trim().max(60)
 
 /** A synonym group: `{ terms: ["tişört", "t shirt"] }`. */
 export const AdminPostSearchSynonym = z.object({ terms: z.array(term).min(2).max(10) }).strict()

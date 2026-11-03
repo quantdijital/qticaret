@@ -11,6 +11,7 @@ export {
 export type { Word } from "./normalize"
 export { MAX_SYNONYM_WORDS, hasDigit, readQuery, synonymMap } from "./query"
 export type { QueryUnit, ReadQuery, SynonymMap } from "./query"
+export { MAX_GROUP_TERMS, synonymTerms } from "./synonyms"
 export {
   LEVEL,
   MAX_TYPOS,
