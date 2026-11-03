@@ -49,6 +49,22 @@ describe("listing query", () => {
     expect(listingSearch(read.query)).toBe(canonical)
   })
 
+  it("reads `stok=var` as a filter among the others, any other value as none (adr/0056)", () => {
+    const { query, isCanonical } = listing("marka=atolye&renk=mavi&stok=var")
+    expect(isCanonical).toBe(true)
+    expect(query.filters).toEqual([
+      ["marka", ["atolye"]],
+      ["renk", ["mavi"]],
+      ["stok", ["var"]],
+    ])
+    expect(isNarrowed(query)).toBe(true)
+    const other = listing("stok=yok&renk=mavi")
+    expect([other.isCanonical, listingSearch(other.query)]).toEqual([false, "renk=mavi"])
+    expect(facetDisallowLines(KEYS)).toContain("Disallow: /*?stok=")
+    // An attribute keyed `stok` is no URL filter: the parameter is the listing's
+    expect(filterKeysOf(["stok"]).size).toBe(0)
+  })
+
   it("leaves other parameters where they came, after the listing's", () => {
     const { query, isCanonical } = listing("utm_source=x&renk=mavi&gclid=1")
     expect(isCanonical).toBe(true)

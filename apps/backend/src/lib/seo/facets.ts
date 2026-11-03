@@ -1,20 +1,25 @@
 /**
  * A listing page's query (docs/13 §3, §7, F3.17): its filters, price
  * range, sort and page, in one canonical form. Filters are parameters
- * named after what they narrow by: `marka` (brand handles) and the keys
- * of filterable attributes (option values), several values comma
- * separated (`renk=kirmizi,mavi`). The canonical form lists `marka`
- * first, then the attribute keys in order, each with its values sorted,
+ * named after what they narrow by: `marka` (brand handles), the keys of
+ * filterable attributes (option values), several values comma separated
+ * (`renk=kirmizi,mavi`), and `stok=var` (in stock only, adr/0056). The
+ * canonical form lists `marka` first, then the other filters' keys in
+ * order (`stok` among them), each with its values sorted,
  * then `fiyat`, `sirala` and `sayfa`; any other parameter (`utm_source`)
  * stays as it came, after them. Pure: the caller knows the keys.
  */
 
 export const LISTING_PARAMS = {
   brand: "marka",
+  stock: "stok",
   price: "fiyat",
   sort: "sirala",
   page: "sayfa",
 } as const
+
+/** `stok`'s one value: only products a shopper can have now (adr/0056). */
+export const IN_STOCK_VALUE = "var"
 
 /** Sort orders a listing offers; the first is the default and is never written. */
 export const SORT_ORDERS = ["onerilen", "yeni", "fiyat-artan", "fiyat-azalan"] as const
@@ -74,6 +79,7 @@ export const filterKeysOf = (keys: Iterable<string>): Set<string> =>
   new Set([...keys].filter((key) => FILTER_KEY.test(key) && !isReservedParam(key)))
 
 const isListingKey = (key: string, filterKeys: ReadonlySet<string>) =>
+  key === LISTING_PARAMS.stock ||
   key === LISTING_PARAMS.price ||
   key === LISTING_PARAMS.sort ||
   key === LISTING_PARAMS.page ||
@@ -108,14 +114,17 @@ const keyOrder = (a: string, b: string) =>
 function filtersOf(pairs: [string, string][], filterKeys: ReadonlySet<string>) {
   const byKey = new Map<string, Set<string>>()
   for (const [key, raw] of pairs) {
-    if (key !== LISTING_PARAMS.brand && (isReservedParam(key) || !filterKeys.has(key))) {
+    const isOwn = key === LISTING_PARAMS.brand || key === LISTING_PARAMS.stock
+    if (!isOwn && (isReservedParam(key) || !filterKeys.has(key))) {
       continue
     }
     const values = byKey.get(key) ?? new Set<string>()
     raw
       .split(",")
       .map((value) => value.trim().toLowerCase())
-      .filter((value) => VALUE.test(value))
+      .filter((value) =>
+        key === LISTING_PARAMS.stock ? value === IN_STOCK_VALUE : VALUE.test(value)
+      )
       .forEach((value) => values.add(value))
     byKey.set(key, values)
   }
@@ -207,6 +216,7 @@ export function facetDisallowLines(filterKeys: Iterable<string>): string[] {
   const keys = [
     LISTING_PARAMS.brand,
     ...[...filterKeysOf(filterKeys)].sort(),
+    LISTING_PARAMS.stock,
     LISTING_PARAMS.price,
     LISTING_PARAMS.sort,
   ]

@@ -26,6 +26,7 @@
     "shop:profile": "NODE_ENV=${NODE_ENV:-development} medusa exec ./src/scripts/load-shop-profile.ts",
     "tr-address:import": "medusa exec ./src/scripts/import-tr-address.ts",
     "messaging:samples": "medusa exec ./src/scripts/messaging-samples.ts",
+    "search:rebuild": "medusa exec ./src/scripts/search-rebuild.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "pnpm test:unit",

@@ -8,6 +8,7 @@ import {
   removeRemoteLinkStep,
 } from "@medusajs/medusa/core-flows"
 import { BRANDS_MODULE } from "../../modules/brands"
+import { CATALOG_PRODUCT_SAVED } from "../catalog/events"
 import { releaseEntityPathsStep } from "../catalog/steps/release-entity-paths"
 import { CATALOG_ENTITY_TYPES } from "../catalog/entity-paths"
 import { forgetResolutionsStep } from "../seo/steps/forget-resolutions"
@@ -70,6 +71,9 @@ export const setProductBrandWorkflow = createWorkflow(
     dismissRemoteLinkStep(dismiss)
     createRemoteLinkStep(create)
     forgetResolutionsStep()
+    // Search and listings read the brand (adr/0056)
+    const saved = transform({ input }, ({ input }) => ({ id: input.product_id }))
+    emitEventStep({ eventName: CATALOG_PRODUCT_SAVED, data: saved })
     releaseLockStep({ key })
     return new WorkflowResponse(undefined)
   }

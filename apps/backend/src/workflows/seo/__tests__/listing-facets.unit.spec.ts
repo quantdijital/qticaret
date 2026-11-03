@@ -1,20 +1,8 @@
 import type { ListingQuery } from "../../../lib/seo/facets"
-import { arrange, facetsOf } from "../listing-facets"
-import type { FilterDefinition, ListingRow } from "../listing-facets"
-
-const row = (
-  id: string,
-  price: number | null,
-  brand: string | null,
-  options: Record<string, string[]>,
-  created_at = 0
-): ListingRow => ({
-  id,
-  price,
-  created_at,
-  brand: brand ? { handle: brand, name: brand.toUpperCase() } : null,
-  options: new Map(Object.entries(options)),
-})
+import type { ListingResult } from "../../../modules/search-index/types"
+import { facetsOf } from "../listing-facets"
+import type { FilterDefinition } from "../listing-facets"
+import { planFilters, planSort, priceKey } from "../listing-plan"
 
 const query = (over: Partial<ListingQuery> = {}): ListingQuery => ({
   filters: [],
@@ -25,12 +13,17 @@ const query = (over: Partial<ListingQuery> = {}): ListingQuery => ({
   ...over,
 })
 
-const rows = [
-  row("a", 500, "x", { celik: ["n690"] }, 1),
-  row("b", 1500, "x", { celik: ["damascus"] }, 3),
-  row("c", 900, "y", { celik: ["n690", "damascus"] }, 2),
-  row("d", null, null, {}, 4),
-]
+const result = (over: Partial<ListingResult> = {}): ListingResult => ({
+  count: 0,
+  ids: [],
+  brands: [],
+  options: [],
+  ownOptions: {},
+  inStock: 0,
+  price: null,
+  related: null,
+  ...over,
+})
 
 const definitions = new Map<string, FilterDefinition>([
   [
@@ -43,32 +36,39 @@ const definitions = new Map<string, FilterDefinition>([
       ]),
     },
   ],
+  ["renk", { label: "Renk", options: new Map([["mavi", "Mavi"]]) }],
 ])
 
-describe("a listing's products in memory (F18 D4)", () => {
-  it("keeps the products every filter allows, in the price range, in the sort asked", () => {
-    const ids = (q: ListingQuery) => arrange(rows, q).map((each) => each.id)
-    expect(ids(query())).toEqual(["a", "b", "c", "d"])
-    expect(ids(query({ filters: [["celik", ["damascus"]]] }))).toEqual(["b", "c"])
-    expect(
-      ids(
-        query({
-          filters: [
-            ["marka", ["x"]],
-            ["celik", ["n690"]],
+describe("a listing's facets from the index's counts (F18 D4, adr/0056)", () => {
+  it("names each count, a filtered key's from its own counts, the most first", () => {
+    const facets = facetsOf(
+      result({
+        brands: [
+          { handle: "y", name: "Y", count: 1 },
+          { handle: "x", name: "X", count: 3 },
+        ],
+        // Under every filter: the steel filter leaves one blue product
+        options: [
+          { value: "celik=n690", count: 2 },
+          { value: "renk=mavi", count: 1 },
+        ],
+        // Steel counted without the steel filter
+        ownOptions: {
+          celik: [
+            { value: "celik=n690", count: 2 },
+            { value: "celik=damascus", count: 2 },
           ],
-        })
-      )
-    ).toEqual(["a"])
-    expect(ids(query({ price: { min: 600, max: null } }))).toEqual(["b", "c"])
-    expect(ids(query({ sort: "fiyat-artan" }))).toEqual(["a", "c", "b", "d"])
-    expect(ids(query({ sort: "fiyat-azalan" }))).toEqual(["b", "c", "a", "d"])
-    expect(ids(query({ sort: "yeni" }))).toEqual(["d", "b", "c", "a"])
-  })
-
-  it("counts a filter's values without itself, and the price range under all filters", () => {
-    const facets = facetsOf(rows, query({ filters: [["celik", ["n690"]]] }), definitions)
-    // Steel counted without the steel filter: two of each
+        },
+        inStock: 2,
+        price: { min: 499.5, max: 900.2 },
+      }),
+      query({ filters: [["celik", ["n690"]]] }),
+      definitions
+    )
+    expect(facets.brands).toEqual([
+      { value: "x", label: "X", count: 3, selected: false },
+      { value: "y", label: "Y", count: 1, selected: false },
+    ])
     expect(facets.attributes).toEqual([
       {
         key: "celik",
@@ -79,20 +79,61 @@ describe("a listing's products in memory (F18 D4)", () => {
           { value: "damascus", label: "Şam çeliği", count: 2, selected: false },
         ],
       },
+      {
+        key: "renk",
+        label: "Renk",
+        values: [{ value: "mavi", label: "Mavi", count: 1, selected: false }],
+      },
     ])
-    // Brands under the steel filter: a (x) and c (y)
-    expect(facets.brands).toEqual([
-      { value: "x", label: "X", count: 1, selected: false },
-      { value: "y", label: "Y", count: 1, selected: false },
-    ])
-    expect(facets.price).toEqual({ min: 500, max: 900 })
+    expect(facets.price).toEqual({ min: 499, max: 901 })
+    expect(facets.stock).toEqual({ count: 2, selected: false })
   })
 
   it("has no price range when nothing is priced, and keeps a chosen value nothing has", () => {
-    const facets = facetsOf(rows.slice(3), query({ filters: [["celik", ["n690"]]] }), definitions)
+    const facets = facetsOf(
+      result({ ownOptions: { celik: [] } }),
+      query({
+        filters: [
+          ["celik", ["n690"]],
+          ["stok", ["var"]],
+        ],
+      }),
+      definitions
+    )
     expect(facets.price).toBeNull()
-    expect(facets.attributes[0]?.values).toEqual([
-      { value: "n690", label: "N690", count: 0, selected: true },
+    expect(facets.attributes).toEqual([
+      {
+        key: "celik",
+        label: "Çelik",
+        values: [{ value: "n690", label: "N690", count: 0, selected: true }],
+      },
     ])
+    expect(facets.stock.selected).toBe(true)
+  })
+})
+
+describe("a listing's plan (adr/0056)", () => {
+  it("reads brands, attribute options and `stok` apart", () => {
+    expect(
+      planFilters([
+        ["marka", ["atolye"]],
+        ["renk", ["kirmizi", "mavi"]],
+        ["stok", ["var"]],
+      ])
+    ).toEqual({
+      brands: ["atolye"],
+      options: [{ key: "renk", values: ["kirmizi", "mavi"] }],
+      in_stock: true,
+    })
+    expect(planFilters([])).toEqual({ brands: null, options: [], in_stock: false })
+  })
+
+  it("sorts a search by relevance and a listing by age unless a sort is chosen", () => {
+    expect(planSort(null, true)).toBe("relevance")
+    expect(planSort(null, false)).toBe("newest")
+    expect(planSort("fiyat-artan", true)).toBe("price_asc")
+    expect(planSort("fiyat-azalan", false)).toBe("price_desc")
+    expect(planSort("yeni", true)).toBe("newest")
+    expect(priceKey("reg_1", "try")).toBe("reg_1:try")
   })
 })

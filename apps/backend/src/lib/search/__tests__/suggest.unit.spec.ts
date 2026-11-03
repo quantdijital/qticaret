@@ -1,62 +1,67 @@
-import { buildSearchIndex } from "../search-index"
-import type { SearchDoc } from "../search-index"
-import { searchIndex } from "../score"
-import { MAX_SUGGESTIONS, relatedTerms, suggest } from "../suggest"
+import type { WordFacts } from "../levels"
+import { queryTerms } from "../normalize"
+import { suggestionCandidates } from "../suggest"
 
-const kitchen = { id: "pcat_mutfak", name: "Mutfak" }
-const outdoor = { id: "pcat_kamp", name: "Kamp" }
-const usta = { id: "brand_usta", name: "Usta", handle: "usta" }
+const facts = (entries: Record<string, Partial<WordFacts>>) =>
+  new Map(
+    Object.entries(entries).map(([word, own]) => [
+      word,
+      { stem: null, roots: [], alike: [], display: null, ...own },
+    ])
+  )
 
-const docs: SearchDoc[] = [
-  { id: "p1", title: "Ekmek Bıçak Seti", categories: [kitchen], brand: usta },
-  { id: "p2", title: "Şef Bıçağı", categories: [kitchen], brand: usta },
-  { id: "p3", title: "Katlanır Çakı", categories: [outdoor] },
-  { id: "p4", title: "Kamp Bıçak Kılıfı", categories: [outdoor, kitchen] },
-  { id: "p5", title: "Seramik Kupa" },
-]
-const index = buildSearchIndex(docs)
+const alike = (word: string, display: string, similarity: number, titles = 1) => ({
+  word,
+  display,
+  similarity,
+  titles,
+})
 
-describe("search suggestions", () => {
-  it("offers the title word a one-letter typo meant", () => {
-    expect(suggest("bıçal", index)[0]).toBe("bıçak")
-    expect(suggest("katlnır", index)).toEqual(["katlanır"])
+const words = (query: string, known: string[]) =>
+  queryTerms(query).map((word) => ({ ...word, known: known.includes(word.norm) }))
+
+describe("did you mean (adr/0056)", () => {
+  it("offers the title words a weak word may have meant, the most alike first", () => {
+    const candidates = suggestionCandidates(
+      words("bıçal", []),
+      facts({
+        bical: { alike: [alike("bicak", "bıçak", 0.5), alike("bicagi", "bıçağı", 0.44)] },
+      })
+    )
+    expect(candidates).toEqual([
+      { phrase: "bıçak", query: "'bicak'" },
+      { phrase: "bıçağı", query: "'bicagi'" },
+    ])
   })
 
-  it("keeps a known word, as the catalogue writes it, and mends the other", () => {
-    expect(suggest("ekmek bıçal", index)[0]).toBe("ekmek bıçak")
-    // The query as compared (no marks) still reads as the titles do; no
-    // product holds `şef` and `bıçak`, one holds `şef` and `bıçağı`
-    expect(suggest("sef bical", index)).toEqual(["şef bıçağı"])
+  it("keeps a known word as the catalogue writes it and mends the other", () => {
+    const candidates = suggestionCandidates(
+      words("sef bical", ["sef"]),
+      facts({
+        sef: { display: "şef" },
+        bical: { alike: [alike("bicak", "bıçak", 0.5), alike("bicagi", "bıçağı", 0.44)] },
+      })
+    )
+    // The caller keeps those some product holds: `şef bıçağı`
+    expect(candidates.map((each) => each.phrase)).toEqual(["şef bıçak", "şef bıçağı"])
+    expect(candidates[1]?.query).toBe("('sef' & 'bicagi')")
   })
 
   it("offers nothing when every word is the catalogue's own, nor for nothing alike", () => {
-    expect(suggest("bıçak", index)).toEqual([])
-    expect(suggest("bıc", index)).toEqual([])
-    expect(suggest("bıçaklar", index)).toEqual([])
-    expect(suggest("zzzz", index)).toEqual([])
-    expect(suggest("", index)).toEqual([])
+    expect(suggestionCandidates(words("bıçak", ["bicak"]), facts({}))).toEqual([])
+    expect(suggestionCandidates(words("zzzz", []), facts({ zzzz: {} }))).toEqual([])
+    expect(suggestionCandidates([], facts({}))).toEqual([])
   })
 
-  it("offers only phrases some product holds, five at most", () => {
-    // `seramik` and `bıçak` share no product: no phrase of both
-    expect(suggest("seramik bıçal", index)).toEqual([])
-    const many = buildSearchIndex(
-      Array.from({ length: 12 }, (_, n) => ({
-        id: `m${String(n)}`,
-        title: `kalem${"x".repeat(n)}`,
-      }))
+  it("leaves out a word only typos match in no title, and one known only by its stem", () => {
+    const candidates = suggestionCandidates(
+      words("bıçaklar bical", ["bicaklar"]),
+      facts({
+        // `bıçaklar` is known by its stem: not asked for as itself
+        bicaklar: { stem: "bicak" },
+        bical: { alike: [alike("bicak", "bıçak", 0.5), alike("bicaz", "bicaz", 0.4, 0)] },
+      })
     )
-    expect(suggest("kalam", many).length).toBeLessThanOrEqual(MAX_SUGGESTIONS)
-  })
-})
-
-describe("related terms", () => {
-  it("names the categories and brands most hits are in, the most common first", () => {
-    const hits = searchIndex(index, "bıçak")
-    expect(relatedTerms(hits, index)).toEqual({
-      categories: [kitchen, outdoor],
-      brands: [usta],
-    })
-    expect(relatedTerms([], index)).toEqual({ categories: [], brands: [] })
+    expect(candidates).toEqual([{ phrase: "bıçaklar bıçak", query: "'bicak'" }])
   })
 })

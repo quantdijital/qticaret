@@ -2,6 +2,7 @@ import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { landingKit } from "../helpers/landings"
+import { indexCatalogue } from "../helpers/search-index"
 import type { LandingKit } from "../helpers/landings"
 
 jest.setTimeout(180 * 1000)
@@ -35,8 +36,9 @@ medusaIntegrationTestRunner({
       kit = await landingKit(http, getContainer())
     })
 
-    const list = (params: Record<string, string>) =>
-      settle(
+    const list = async (params: Record<string, string>) => {
+      await indexCatalogue(getContainer())
+      return settle(
         http.get<Answer>(
           `/store/listings/products?${new URLSearchParams({
             type: "product_category",
@@ -48,6 +50,7 @@ medusaIntegrationTestRunner({
           { headers: kit.store.headers }
         )
       )
+    }
 
     const counts = (answer: Answer, key: string) =>
       Object.fromEntries(
@@ -108,6 +111,7 @@ medusaIntegrationTestRunner({
       expect([refused.status, refused.data.message]).toEqual([404, "listing.out_of_bounds"])
     })
     it("lists the whole catalogue as `all`", async () => {
+      await indexCatalogue(getContainer())
       const all = await settle(
         http.get<Answer>(
           `/store/listings/products?${new URLSearchParams({

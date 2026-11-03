@@ -8,6 +8,7 @@ import type SeoRedirectsModuleService from "../../src/modules/seo-redirects/serv
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { landingKit } from "../helpers/landings"
+import { indexCatalogue } from "../helpers/search-index"
 import type { LandingKit } from "../helpers/landings"
 
 jest.setTimeout(240 * 1000)
@@ -48,8 +49,9 @@ medusaIntegrationTestRunner({
       await settings().saveSection("seo", { canonical_host: null }, null)
     })
 
-    const list = (query = "") =>
-      settle(
+    const list = async (query = "") => {
+      await indexCatalogue(getContainer())
+      return settle(
         http.get<Listing & { message?: string }>(
           `/store/listings/products?${new URLSearchParams({
             type: "sale",
@@ -61,6 +63,7 @@ medusaIntegrationTestRunner({
           { headers: kit.store.headers }
         )
       )
+    }
 
     const resolve = async (path: string) => {
       // A price list is no catalogue event: answers kept from before it are forgotten here,

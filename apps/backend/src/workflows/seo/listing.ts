@@ -1,6 +1,4 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { Modules } from "@medusajs/framework/utils"
-import { chunksOf } from "../../lib/catalog"
 import {
   LISTING_PAGE_SIZE,
   LISTING_PARAMS,
@@ -22,16 +20,13 @@ import type ProductAttributesModuleService from "../../modules/product-attribute
 import { SEO_REDIRECTS_MODULE } from "../../modules/seo-redirects"
 import type SeoRedirectsModuleService from "../../modules/seo-redirects/service"
 import { CATALOG_ENTITY_TYPES } from "../catalog/entity-paths"
-import {
-  BRAND_FACET_KEY,
-  brandProductIds,
-  categoryRows,
-  facetProductIds,
-  optionProductIds,
-  subtreeIn,
-} from "../content/landing-facet"
-import { SALE_LISTING, saleProductIds } from "../pricing/sale-products"
+import { BRAND_FACET_KEY } from "../content/landing-facet"
+import { SALE_LISTING } from "../pricing/sale-products"
+import { countListing } from "./listing-plan"
+import type { Listed } from "./listing-plan"
 import { activePathOf } from "./redirects/owners"
+
+export type { Listed } from "./listing-plan"
 
 /**
  * A listing page's query answered (docs/13 §3, §7, F3.17): a category,
@@ -58,11 +53,6 @@ const LISTING_TYPES: ReadonlySet<string> = new Set([
   CATALOG_ENTITY_TYPES.landing,
   SALE_LISTING,
 ])
-
-export interface Listed {
-  entity_type: string
-  entity_id: string
-}
 
 /** Kept with the resolve answers until anything changes (at most 30 seconds). */
 async function remembered<T>(
@@ -99,101 +89,6 @@ async function brandIdsOf(container: MedusaContainer, handles: string[]): Promis
     .resolve<BrandsModuleService>(BRANDS_MODULE)
     .listBrands({ handle: handles, is_active: true }, { select: ["id"] })
   return brands.map((brand) => brand.id)
-}
-
-// The products with any of a filter's values; a brand filter names brands by handle
-const filterProducts = async (container: MedusaContainer, [key, values]: [string, string[]]) =>
-  key === LISTING_PARAMS.brand
-    ? brandProductIds(container, await brandIdsOf(container, values))
-    : optionProductIds(container, key, values)
-
-/** The products every filter allows, one filter after another; null when nothing filters. */
-async function filteredIds(
-  container: MedusaContainer,
-  filters: ListingQuery["filters"]
-): Promise<string[] | null> {
-  let kept: string[] | null = null
-  for (const filter of filters) {
-    const ids = new Set(await filterProducts(container, filter))
-    kept = (kept ?? [...ids]).filter((id) => ids.has(id))
-    if (kept.length === 0) {
-      return kept
-    }
-  }
-  return kept
-}
-
-interface Base {
-  /** Product filters: a category's shown subtree, a collection. */
-  where: Record<string, unknown>
-  /** The listing's own products when they are a set of ids (a brand's, a landing page's facet). */
-  ids: string[] | null
-}
-
-const subtreeWhere = async (container: MedusaContainer, categoryId: string) => ({
-  categories: { id: subtreeIn(await categoryRows(container), categoryId, true) },
-})
-
-// What the listing lists before its filters; null for a listing gone since
-export async function baseOf(container: MedusaContainer, listed: Listed): Promise<Base | null> {
-  if (listed.entity_type === CATALOG_ENTITY_TYPES.category) {
-    return { where: await subtreeWhere(container, listed.entity_id), ids: null }
-  }
-  if (listed.entity_type === CATALOG_ENTITY_TYPES.collection) {
-    return { where: { collection_id: listed.entity_id }, ids: null }
-  }
-  if (listed.entity_type === CATALOG_ENTITY_TYPES.brand) {
-    return { where: {}, ids: await brandProductIds(container, [listed.entity_id]) }
-  }
-  if (listed.entity_type === SALE_LISTING) {
-    return { where: {}, ids: await saleProductIds(container) }
-  }
-  const [landing] = await container
-    .resolve<ContentModuleService>(CONTENT_MODULE)
-    .listLandingPages(
-      { id: listed.entity_id },
-      { select: ["category_id", "facet_kind", "facet_key", "facet_value"], take: 1 }
-    )
-  if (!landing) {
-    return null
-  }
-  const facet = { kind: landing.facet_kind, key: landing.facet_key, value: landing.facet_value }
-  return {
-    where: await subtreeWhere(container, landing.category_id),
-    ids: await facetProductIds(container, facet),
-  }
-}
-
-const intersect = (a: string[] | null, b: string[] | null): string[] | null => {
-  if (a === null || b === null) {
-    return a ?? b
-  }
-  const kept = new Set(b)
-  return a.filter((id) => kept.has(id))
-}
-
-/** How many published products the listing shows with its filters (price aside). */
-async function countListing(
-  container: MedusaContainer,
-  listed: Listed,
-  filters: ListingQuery["filters"]
-): Promise<number> {
-  const filtered = await filteredIds(container, filters)
-  const base = filtered?.length === 0 ? null : await baseOf(container, listed)
-  const ids = base ? intersect(base.ids, filtered) : []
-  if (!base || ids?.length === 0) {
-    return 0
-  }
-  const products = container.resolve(Modules.PRODUCT)
-  const where = { ...base.where, status: "published" as const }
-  if (ids === null) {
-    return (await products.listAndCountProducts(where, { select: ["id"], take: 1 }))[1]
-  }
-  let count = 0
-  for (const chunk of chunksOf(ids)) {
-    count += (await products.listAndCountProducts({ ...where, id: chunk }, { take: 1 }))[1]
-  }
-  return count
 }
 
 /** A category's live landing page for this one filter, its path; null when it has none. */

@@ -218,6 +218,14 @@ module.exports = defineConfig({
     },
     // F11.8 (adr/0039 §8): storefront search terms by day, counts only, 180 days
     { resolve: "./src/modules/search-terms" },
+    // adr/0056: site search and listings in PostgreSQL full text, synonyms shared by processes
+    {
+      resolve: "./src/modules/search-index",
+      options: {
+        redisUrl: env.REDIS_URL,
+        versionKey: `qt:search-synonyms:${namespace}:version`,
+      },
+    },
     // F11.7 (adr/0039 §7): events sent to the shop's own systems, signed, tried until answered
     {
       resolve: "./src/modules/tenant-webhooks",

@@ -1,11 +1,9 @@
 import {
   MAX_QUERY_WORDS,
-  dice,
   foldWord,
-  jaccard,
   normalizeText,
+  queryTerms,
   queryWords,
-  trigrams,
   wordsOf,
 } from "../normalize"
 
@@ -59,15 +57,10 @@ describe("search normalisation", () => {
     expect(queryWords("a".repeat(5000))).toEqual(["a".repeat(100)])
   })
 
-  it("pads trigrams as pg_trgm does and compares them", () => {
-    expect(trigrams("cat")).toEqual(["  c", " ca", "cat", "at "])
-    const a = trigrams("bicak")
-    const b = trigrams("bicap")
-    // 4 of 6 shared each side
-    expect(dice(a, b)).toBeCloseTo(8 / 12)
-    expect(jaccard(a, b)).toBeCloseTo(4 / 8)
-    expect(dice(a, a)).toBe(1)
-    expect(dice([], [])).toBe(0)
-    expect(jaccard([], [])).toBe(0)
+  it("keeps each query word as typed beside its compared form", () => {
+    expect(queryTerms("ŞEF ve Bıçağı şef")).toEqual([
+      { display: "şef", norm: "sef" },
+      { display: "bıçağı", norm: "bicagi" },
+    ])
   })
 })

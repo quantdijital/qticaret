@@ -9,11 +9,13 @@ import {
   acquireLockStep,
   createRemoteLinkStep,
   dismissRemoteLinkStep,
+  emitEventStep,
   releaseLockStep,
   updateInventoryItemsStep,
   updateProductsWorkflow,
 } from "@medusajs/medusa/core-flows"
 import { CATALOG_EXTENSION_MODULE } from "../../modules/catalog-extension"
+import { CATALOG_PRODUCT_SAVED } from "./events"
 import { planProductCatalogStep } from "./steps/plan-product-catalog"
 import type { SetProductCatalogInput } from "./steps/plan-product-catalog"
 import { writeProductCatalogStep } from "./steps/write-product-catalog"
@@ -78,6 +80,9 @@ export const setProductCatalogWorkflow = createWorkflow(
       }
     )
 
+    // Search reads MPNs and the description (adr/0056)
+    const saved = transform({ input }, ({ input }) => ({ id: input.product_id }))
+    emitEventStep({ eventName: CATALOG_PRODUCT_SAVED, data: saved })
     releaseLockStep({ key: lockKey })
     return new WorkflowResponse({ product_id: input.product_id })
   }

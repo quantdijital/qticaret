@@ -5,6 +5,7 @@ import { eventually } from "../helpers/eventually"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import { landingKit } from "../helpers/landings"
+import { indexCatalogue } from "../helpers/search-index"
 import type { LandingKit } from "../helpers/landings"
 
 jest.setTimeout(180 * 1000)
@@ -30,9 +31,9 @@ interface Answer {
 }
 
 /**
- * Site search as a listing (docs/20, adr/0046 ek 2026-11-03): typo
- * tolerant over the whole catalogue's rows, the listing's filters and
- * sorts, suggestions for a near miss, and the search report's count.
+ * Site search as a listing (adr/0056): typo tolerant over the search
+ * index, the listing's filters and sorts, suggestions for a near miss,
+ * and the search report's count.
  */
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
@@ -56,7 +57,6 @@ medusaIntegrationTestRunner({
 
     beforeEach(async () => {
       kit = await landingKit(http, getContainer())
-      // Made before the first search: the catalogue's rows are kept 30 seconds
       knives = {
         caki: await knife("katlanir-caki", "Katlanır Çakı", "paslanmaz_celik", 450),
         ekmek: await knife("ekmek-bicak-seti", "Ekmek Bıçak Seti", "seramik", 300),
@@ -64,8 +64,9 @@ medusaIntegrationTestRunner({
       }
     })
 
-    const search = (params: Record<string, string>, query: Record<string, string> = {}) =>
-      settle(
+    const search = async (params: Record<string, string>, query: Record<string, string> = {}) => {
+      await indexCatalogue(getContainer())
+      return settle(
         http.get<Answer>(
           `/store/listings/products?${new URLSearchParams({
             type: "search",
@@ -77,6 +78,7 @@ medusaIntegrationTestRunner({
           { headers: kit.store.headers }
         )
       )
+    }
 
     it("finds a product through a typo or missing marks, the most relevant first", async () => {
       const typo = await search({ q: "katlnır" })

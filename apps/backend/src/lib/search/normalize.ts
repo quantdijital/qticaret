@@ -1,9 +1,11 @@
 /**
- * Words as site search compares them (docs/20, adr/0046 ek 2026-11-03):
- * lower-cased the Turkish way (`İ` → `i`, `I` → `ı`), then without their
- * marks, so a shopper typing `cakı` or `bicak` on a keyboard without
- * Turkish letters finds `çakı` and `bıçak`. Anything that is not a letter
- * or a digit separates words. Pure, no locale data beyond `tr` casing.
+ * Words as site search compares them (adr/0056): lower-cased the Turkish
+ * way (`İ` → `i`, `I` → `ı`), then without their marks, so a shopper
+ * typing `cakı` or `bicak` on a keyboard without Turkish letters finds
+ * `çakı` and `bıçak`. Anything that is not a letter or a digit separates
+ * words. The index stores words both ways: as typed for PostgreSQL's
+ * Turkish stemmer, as compared for exact, prefix and trigram matching.
+ * Pure, no locale data beyond `tr` casing.
  */
 
 /** A word as typed (Turkish lower case, marks kept) and as compared. */
@@ -97,51 +99,23 @@ export const MAX_QUERY_LENGTH = 100
 export const MAX_QUERY_WORDS = 8
 
 /**
- * A query's words to look for, as compared, each once, in order: joining
- * words (`ve`, `ile`, `için`) left out unless nothing else is left.
+ * A query's words to look for, as typed and as compared, each once, in
+ * order: joining words (`ve`, `ile`, `için`) left out unless nothing else
+ * is left.
  */
-export function queryWords(query: string): string[] {
-  const all = [
-    ...new Set(wordsOf(query.slice(0, MAX_QUERY_LENGTH)).map((word) => word.norm)),
-  ].slice(0, MAX_QUERY_WORDS)
-  const kept = all.filter((word) => !STOP_WORDS.has(word))
-  return kept.length > 0 ? kept : all
-}
-
-/**
- * A word's distinct trigrams, padded as Postgres' pg_trgm pads them (two
- * spaces before, one after), so a word's start weighs more than its end.
- */
-export function trigrams(word: string): string[] {
-  const padded = `  ${word} `
-  const grams = new Set<string>()
-  for (let index = 0; index + 3 <= padded.length; index += 1) {
-    grams.add(padded.slice(index, index + 3))
-  }
-  return [...grams]
-}
-
-const shared = (a: readonly string[], b: readonly string[]): number => {
-  const [small, large] = a.length <= b.length ? [a, b] : [b, a]
-  const set = new Set(large)
-  let count = 0
-  for (const gram of small) {
-    if (set.has(gram)) {
-      count += 1
+export function queryTerms(query: string): Word[] {
+  const seen = new Set<string>()
+  const all: Word[] = []
+  for (const word of wordsOf(query.slice(0, MAX_QUERY_LENGTH))) {
+    if (!seen.has(word.norm)) {
+      seen.add(word.norm)
+      all.push(word)
     }
   }
-  return count
+  const read = all.slice(0, MAX_QUERY_WORDS)
+  const kept = read.filter((word) => !STOP_WORDS.has(word.norm))
+  return kept.length > 0 ? kept : read
 }
 
-/** Dice's coefficient of two distinct trigram lists: 2|A∩B| / (|A|+|B|), 0 to 1. */
-export function dice(a: readonly string[], b: readonly string[]): number {
-  const total = a.length + b.length
-  return total === 0 ? 0 : (2 * shared(a, b)) / total
-}
-
-/** Jaccard's index of two distinct trigram lists: |A∩B| / |A∪B|, 0 to 1. */
-export function jaccard(a: readonly string[], b: readonly string[]): number {
-  const common = shared(a, b)
-  const union = a.length + b.length - common
-  return union === 0 ? 0 : common / union
-}
+/** A query's words to look for, as compared (`queryTerms`). */
+export const queryWords = (query: string): string[] => queryTerms(query).map((word) => word.norm)

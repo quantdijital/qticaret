@@ -1,149 +1,88 @@
-import { queryWords, wordsOf } from "./normalize"
-import { MATCH, wordQualities } from "./score"
-import type { SearchHit } from "./score"
-import type { SearchIndex } from "./search-index"
+import type { Word } from "./normalize"
+import { leastSimilarity, typosOf } from "./levels"
+import type { WordFacts } from "./levels"
+import { allOf, lexeme } from "./tsquery"
 
 /**
- * "Did you mean" and the chips beside the results (adr/0046 ek
- * 2026-11-03). A query is weak when one of its words is no catalogue word
- * nor the start or stem of one: only typos of it match. Each such word is
- * then offered as the title words most alike, the most common first, and
- * the phrases made of them are kept only if some product holds all their
- * words.
+ * "Did you mean" (adr/0056, as adr/0046 ek 2026-11-03 had it). A query is
+ * weak when one of its words is found in no product, neither as itself,
+ * its stem, the start of a word nor a word it starts with: only typos of
+ * it could match. Each such word is offered as the title words most alike,
+ * the most common first; the phrases made of them are kept only when some
+ * product holds all their words (the caller asks the index). Pure.
  */
 
 export const MAX_SUGGESTIONS = 5
 const CANDIDATES_PER_WORD = 3
 
-/** Hits read for the related chips: about the first two pages. */
-export const RELATED_FROM_HITS = 48
-export const MAX_RELATED = 5
-
-interface QueryWord {
-  norm: string
-  display: string
-  /** The title words it may have meant, best first; null when it is a known word. */
-  candidates: number[] | null
+export interface SuggestionWord extends Word {
+  /** Some product holds it (as itself, its stem, a word it starts or one it starts with). */
+  known: boolean
 }
 
-function readWord(index: SearchIndex, norm: string, display: string): QueryWord {
-  const qualities = wordQualities(index, norm)
-  const alike: number[] = []
-  for (let id = 0; id < qualities.length; id += 1) {
-    const quality = qualities[id] ?? 0
-    if (quality >= MATCH.stem) {
-      return { norm, display, candidates: null }
-    }
-    if (quality > 0 && (index.titleCount[id] ?? 0) > 0) {
-      alike.push(id)
-    }
+export interface Suggestion {
+  /** As shown: the catalogue's own spelling (`şef bıçağı`). */
+  phrase: string
+  /** What some product must hold for it to be offered. */
+  query: string
+}
+
+// The title words a weak word may have meant, best first
+function candidatesOf(word: SuggestionWord, facts: WordFacts | undefined) {
+  if (!facts) {
+    return []
   }
-  alike.sort(
-    (a, b) =>
-      (qualities[b] ?? 0) - (qualities[a] ?? 0) ||
-      (index.titleCount[b] ?? 0) - (index.titleCount[a] ?? 0)
-  )
-  return { norm, display, candidates: alike.slice(0, CANDIDATES_PER_WORD) }
-}
-
-/** Whether some product holds every word of the phrase that is a catalogue word. */
-function findsSomething(index: SearchIndex, ids: number[]): boolean {
-  return index.docs.some((entry) => ids.every((id) => entry.all.has(id)))
+  return typosOf(word.norm, facts, leastSimilarity(word.norm))
+    .filter((alike) => alike.titles > 0)
+    .slice(0, CANDIDATES_PER_WORD)
 }
 
 /**
- * Up to five phrases the query may have meant, best first; none when every
- * word of it is the catalogue's own (the query is not weak).
+ * The phrases to check, best first; none when every word is the
+ * catalogue's own. A known word stays as the catalogue writes it; a weak
+ * one with nothing alike is left out.
  */
-export function suggest(query: string, index: SearchIndex): string[] {
-  const typed = new Map<string, string>()
-  for (const word of wordsOf(query)) {
-    if (!typed.has(word.norm)) {
-      typed.set(word.norm, word.display)
-    }
-  }
-  const words = queryWords(query).map((norm) => readWord(index, norm, typed.get(norm) ?? norm))
-  if (words.every((word) => word.candidates === null)) {
+export function suggestionCandidates(
+  words: readonly SuggestionWord[],
+  facts: ReadonlyMap<string, WordFacts>
+): Suggestion[] {
+  if (words.every((word) => word.known)) {
     return []
   }
-  // A known word stays; one with nothing alike is left out
-  const kept = words.filter((word) => word.candidates === null || word.candidates.length > 0)
-  const choice = kept.map(() => 0)
-  const variants: number[][] = [choice]
-  kept.forEach((word, position) => {
-    for (let rank = 1; rank < (word.candidates?.length ?? 0); rank += 1) {
-      variants.push(choice.map((each, at) => (at === position ? rank : each)))
+  const kept = words
+    .map((word) => ({
+      word,
+      candidates: word.known ? null : candidatesOf(word, facts.get(word.norm)),
+    }))
+    .filter((entry) => entry.candidates === null || entry.candidates.length > 0)
+  const base = kept.map(() => 0)
+  const variants: number[][] = [base]
+  kept.forEach((entry, position) => {
+    for (let rank = 1; rank < (entry.candidates?.length ?? 0); rank += 1) {
+      variants.push(base.map((each, at) => (at === position ? rank : each)))
     }
   })
-  const own = queryWords(query).join(" ")
-  const phrases: string[] = []
+  const own = words.map((word) => word.norm).join(" ")
+  const seen = new Set<string>()
+  const suggestions: Suggestion[] = []
   for (const variant of variants) {
-    const ids: number[] = []
-    const shown = kept.map((word, position) => {
-      const id = word.candidates?.[variant[position] ?? 0]
-      if (id === undefined) {
-        // A catalogue word reads as the catalogue writes it: `sef` → `şef`
-        const exact = index.ids.get(word.norm)
-        if (exact === undefined) {
-          return word.display
-        }
-        ids.push(exact)
-        return index.display[exact] ?? word.display
+    const chosen = kept.map((entry, position) => {
+      const candidate = entry.candidates?.[variant[position] ?? 0]
+      if (candidate) {
+        return { norm: candidate.word, shown: candidate.display, held: true }
       }
-      ids.push(id)
-      return index.display[id] ?? ""
+      // A known word reads as the catalogue writes it (`sef` → `şef`); one known
+      // only by its stem or start is not asked for as itself
+      const display = facts.get(entry.word.norm)?.display ?? null
+      return { norm: entry.word.norm, shown: display ?? entry.word.display, held: display !== null }
     })
-    const phrase = shown.join(" ")
-    const compared = wordsOf(phrase)
-      .map((word) => word.norm)
-      .join(" ")
-    if (compared && compared !== own && !phrases.includes(phrase) && findsSomething(index, ids)) {
-      phrases.push(phrase)
-    }
-    if (phrases.length === MAX_SUGGESTIONS) {
-      break
+    const compared = chosen.map((each) => each.norm).join(" ")
+    const phrase = chosen.map((each) => each.shown).join(" ")
+    const held = chosen.filter((each) => each.held).map((each) => lexeme(each.norm))
+    if (compared && compared !== own && held.length > 0 && !seen.has(phrase)) {
+      seen.add(phrase)
+      suggestions.push({ phrase, query: allOf(held) })
     }
   }
-  return phrases
-}
-
-export interface RelatedTerms {
-  categories: { id: string; name: string }[]
-  brands: { id: string; name: string; handle: string }[]
-}
-
-/** The categories and brands most of the first hits are in, the most common first. */
-export function relatedTerms(
-  hits: readonly SearchHit[],
-  index: SearchIndex,
-  limit = MAX_RELATED
-): RelatedTerms {
-  const categories = new Map<string, { value: { id: string; name: string }; count: number }>()
-  const brands = new Map<
-    string,
-    { value: { id: string; name: string; handle: string }; count: number }
-  >()
-  for (const hit of hits.slice(0, RELATED_FROM_HITS)) {
-    const doc = index.byId.get(hit.id)?.doc
-    for (const category of doc?.categories ?? []) {
-      const entry = categories.get(category.id) ?? { value: category, count: 0 }
-      entry.count += 1
-      categories.set(category.id, entry)
-    }
-    if (doc?.brand) {
-      const entry = brands.get(doc.brand.id) ?? { value: doc.brand, count: 0 }
-      entry.count += 1
-      brands.set(doc.brand.id, entry)
-    }
-  }
-  // Map order is first seen: among equals the better hit's comes first
-  const top = <T>(entries: Map<string, { value: T; count: number }>) =>
-    [...entries.values()]
-      .sort((a, b) => b.count - a.count)
-      .slice(0, limit)
-      .map((entry) => entry.value)
-  return {
-    categories: top(categories).map(({ id, name }) => ({ id, name })),
-    brands: top(brands).map(({ id, name, handle }) => ({ id, name, handle })),
-  }
+  return suggestions
 }

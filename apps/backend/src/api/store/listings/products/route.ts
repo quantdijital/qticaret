@@ -30,6 +30,7 @@ export async function GET(
   const isSearch = type === SEARCH_LISTING
   const answer = await listingProducts(req.scope, {
     listed: { entity_type: type, entity_id: isSearch ? normalizeText(q ?? "") : (id ?? "") },
+    ...(isSearch ? { search: q ?? "" } : {}),
     query: read.query,
     region_id,
     currency_code,

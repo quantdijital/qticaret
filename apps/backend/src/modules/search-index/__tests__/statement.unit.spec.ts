@@ -1,0 +1,100 @@
+import { listingResult, listingStatement } from "../sql/listing"
+import { Statement } from "../sql/statement"
+import type { ListingPlan } from "../types"
+
+const plan = (over: Partial<ListingPlan> = {}): ListingPlan => ({
+  channels: ["sc_1"],
+  scope: {},
+  text: null,
+  filters: { brands: null, options: [], in_stock: false },
+  price: { key: "reg_1:try", min: null, max: null },
+  sort: "newest",
+  page: { offset: 0, limit: 24 },
+  ...over,
+})
+
+const placeholders = (sql: string) => sql.split("?").length - 1
+
+describe("the listing statement (adr/0056)", () => {
+  it("binds values in the order they stand, whatever order they were made in", () => {
+    const sql = new Statement()
+    const later = sql.param("b")
+    const first = sql.param("a")
+    expect(sql.finish(`SELECT ${first}, ${later}, ${first}`)).toEqual({
+      sql: "SELECT ?, ?, ?",
+      params: ["a", "b", "a"],
+    })
+  })
+
+  it("writes no value into the text: what a shopper typed only binds", () => {
+    const { sql, params } = listingStatement(
+      plan({
+        scope: { category_ids: ["pcat_1"], option: "renk=mavi" },
+        text: {
+          match: "'x''; DROP TABLE search_document; --'",
+          units: [[{ query: "'x''; DROP TABLE search_document; --'", weight: 1 }]],
+          phrase: "x'; drop",
+        },
+        filters: {
+          brands: ["atolye"],
+          options: [{ key: "malzeme", values: ["seramik"] }],
+          in_stock: true,
+        },
+        price: { key: "reg_1:try", min: 10, max: 500 },
+        sort: "relevance",
+        related: 48,
+      })
+    )
+    expect(sql).not.toContain("DROP")
+    expect(sql).not.toContain("atolye")
+    expect(sql).not.toContain("reg_1")
+    expect(placeholders(sql)).toBe(params.length)
+    expect(params).toContain("x'; drop")
+    expect(params).toContain(JSON.stringify(["malzeme=seramik"]))
+    // A filtered key's values are counted without its own filter
+    expect(sql).toContain("AS own0")
+    expect(sql).toContain("ts_rank(")
+  })
+
+  it("answers nothing for a scope with no categories or products, and only a count when asked", () => {
+    const { sql } = listingStatement(plan({ scope: { category_ids: [], product_ids: [] } }))
+    expect(sql).toContain("AND false")
+    const count = listingStatement(plan({ countOnly: true, channels: null }))
+    expect(count.sql).not.toContain("AS ids")
+    expect(count.sql).not.toContain("sales_channel_ids")
+  })
+
+  it("reads the statement's row into the answer", () => {
+    const filtered = plan({
+      filters: { brands: null, options: [{ key: "renk", values: ["mavi"] }], in_stock: false },
+    })
+    expect(
+      listingResult(filtered, {
+        count: 2,
+        ids: ["p1", "p2"],
+        brands: [["atolye", "Atölye", 2]],
+        options: { "renk=mavi": 2 },
+        own0: { "renk=mavi": 2, "renk=kirmizi": 1 },
+        in_stock: 1,
+        price: [10.5, 99],
+        related: null,
+      })
+    ).toEqual({
+      count: 2,
+      ids: ["p1", "p2"],
+      brands: [{ handle: "atolye", name: "Atölye", count: 2 }],
+      options: [{ value: "renk=mavi", count: 2 }],
+      ownOptions: {
+        renk: [
+          { value: "renk=mavi", count: 2 },
+          { value: "renk=kirmizi", count: 1 },
+        ],
+      },
+      inStock: 1,
+      price: { min: 10.5, max: 99 },
+      related: null,
+    })
+    expect(listingResult(filtered, undefined).count).toBe(0)
+    expect(listingResult(plan(), { count: 0, price: [null, null] }).price).toBeNull()
+  })
+})

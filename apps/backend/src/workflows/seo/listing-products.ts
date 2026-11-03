@@ -1,35 +1,37 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys, Modules, QueryContext } from "@medusajs/framework/utils"
 import { createTtlCache } from "../../lib/cache"
-import { chunksOf } from "../../lib/catalog"
-import { LISTING_PAGE_SIZE, LISTING_PARAMS } from "../../lib/seo/facets"
+import { LISTING_PAGE_SIZE, LISTING_PARAMS, isReservedParam } from "../../lib/seo/facets"
 import type { ListingQuery } from "../../lib/seo/facets"
 import { PRODUCT_ATTRIBUTES_MODULE } from "../../modules/product-attributes"
 import type ProductAttributesModuleService from "../../modules/product-attributes/service"
-import { baseOf } from "./listing"
-import type { Listed } from "./listing"
-import { arrange, facetsOf } from "./listing-facets"
-import type { ListingFacets, ListingRow } from "./listing-facets"
-import { SEARCH_FIELDS, SEARCH_LISTING, searchDocOf, searchListingRows } from "./listing-search"
-import type { ListingSearch, SearchedProduct } from "./listing-search"
+import { SEARCH_INDEX_MODULE } from "../../modules/search-index"
+import type SearchIndexModuleService from "../../modules/search-index/service"
+import type { ListingPlan, ListingResult } from "../../modules/search-index/types"
+import { facetsOf } from "./listing-facets"
+import type { FilterDefinition, ListingFacets } from "./listing-facets"
+import { listingScope, planFilters, planSort, priceKey } from "./listing-plan"
+import type { Listed } from "./listing-plan"
+import { SEARCH_LISTING, searchListing } from "./listing-search"
+import type { ListingSearch } from "./listing-search"
 
 /**
- * A listing page's products for the storefront (F18 D4, docs/13 §7): the
- * listing's published products in the shopper's sales channels, narrowed
- * by its filters and price range, in its sort, one page of ids; and the
- * filters it can offer with how many products each would show. Worked
- * out in memory over the listing's products: a few thousand at most per
- * listing until search (D10) takes the large ones. A site search
- * (`search`, its id the query as compared) is the whole catalogue's rows
- * the query finds, most relevant first (listing-search.ts).
+ * A listing page's products for the storefront (F18 D4, docs/13 §7,
+ * adr/0056): the listing's published products in the shopper's sales
+ * channels, narrowed by its filters and price range, in its sort, one
+ * page of ids; and the filters it can offer with how many products each
+ * would show. Answered by the search index in one statement, paged in
+ * the database: a listing of any size answers whole. A site search
+ * (`search`) is the whole catalogue matched against the query, most
+ * relevant first (listing-search.ts).
  */
 
-/** A listing past this many products answers its first ones only (a search index's job, D10). */
-export const LISTING_SCAN_LIMIT = 3000
+export { ALL_PRODUCTS } from "./listing-plan"
 
 export interface ListingProductsInput {
   listed: Listed
   query: ListingQuery
+  /** A site search's words as the shopper typed them. */
+  search?: string
   currency_code: string
   region_id: string | null
   sales_channel_ids: readonly string[]
@@ -45,119 +47,6 @@ export interface ListingProductsAnswer {
   search?: ListingSearch
 }
 
-interface ProductRow extends SearchedProduct {
-  created_at: string | Date
-  sales_channels?: ({ id: string } | null)[] | null
-  brand?: { id?: string; handle: string; name: string } | null
-  attribute_values?:
-    | ({
-        value_text?: string | null
-        value_options?: string[] | null
-        definition?: { key: string; type: string; is_public?: boolean | null } | null
-      } | null)[]
-    | null
-  variants?: ({ calculated_price?: { calculated_amount?: number | null } | null } | null)[] | null
-}
-
-/** The whole catalogue's listing (`/magaza`): every published product. */
-export const ALL_PRODUCTS = "all"
-
-/** The listing's own products before its filters: published, in the base's scope. */
-async function baseIds(container: MedusaContainer, listed: Listed): Promise<string[]> {
-  const base =
-    listed.entity_type === ALL_PRODUCTS ? { where: {}, ids: null } : await baseOf(container, listed)
-  if (!base || base.ids?.length === 0) {
-    return []
-  }
-  const products = container.resolve(Modules.PRODUCT)
-  const where = { ...base.where, status: "published" as const }
-  const config = { select: ["id"], take: LISTING_SCAN_LIMIT, order: { created_at: "DESC" } }
-  if (base.ids === null) {
-    return (await products.listProducts(where, config)).map((product) => product.id)
-  }
-  const found: string[] = []
-  for (const chunk of chunksOf(base.ids)) {
-    found.push(...(await products.listProducts({ ...where, id: chunk }, config)).map((p) => p.id))
-  }
-  return found.slice(0, LISTING_SCAN_LIMIT)
-}
-
-/**
- * What filtering and sorting read of each product: brand, options, lowest
- * price, age; with `withText`, what search reads too (the whole catalogue's).
- */
-async function rowsOf(
-  container: MedusaContainer,
-  ids: string[],
-  input: ListingProductsInput,
-  withText: boolean
-): Promise<ListingRow[]> {
-  const query = container.resolve(ContainerRegistrationKeys.QUERY)
-  const channels = new Set(input.sales_channel_ids)
-  const pricing = QueryContext({
-    currency_code: input.currency_code,
-    ...(input.region_id ? { region_id: input.region_id } : {}),
-  })
-  const rows: ListingRow[] = []
-  for (const chunk of chunksOf(ids)) {
-    const { data } = await query.graph({
-      entity: "product",
-      fields: [
-        "id",
-        "created_at",
-        "sales_channels.id",
-        "brand.handle",
-        "brand.name",
-        "attribute_values.value_text",
-        "attribute_values.value_options",
-        "attribute_values.definition.key",
-        "attribute_values.definition.type",
-        "variants.calculated_price.calculated_amount",
-        ...(withText ? SEARCH_FIELDS : []),
-      ],
-      filters: { id: chunk },
-      context: { variants: { calculated_price: pricing } },
-    })
-    for (const product of data as ProductRow[]) {
-      const shelved = (product.sales_channels ?? []).some(
-        (channel) => channel && channels.has(channel.id)
-      )
-      if (!shelved) {
-        continue
-      }
-      const options = new Map<string, string[]>()
-      for (const value of product.attribute_values ?? []) {
-        const definition = value?.definition
-        // A single choice keeps its option in `value_text`, a multiple one in `value_options`
-        const chosen =
-          definition?.type === "select"
-            ? value?.value_text
-              ? [value.value_text]
-              : []
-            : (value?.value_options ?? [])
-        if (definition?.key && chosen.length > 0) {
-          options.set(definition.key, chosen)
-        }
-      }
-      const amounts = (product.variants ?? []).flatMap((variant) => {
-        const amount = variant?.calculated_price?.calculated_amount
-        return typeof amount === "number" ? [amount] : []
-      })
-      rows.push({
-        id: product.id,
-        created_at: new Date(product.created_at).getTime(),
-        brand: product.brand ? { handle: product.brand.handle, name: product.brand.name } : null,
-        options,
-        price: amounts.length ? Math.min(...amounts) : null,
-        ...(withText ? { doc: searchDocOf(product) } : {}),
-      })
-    }
-  }
-  // The listing's order (newest first) survives the chunks
-  const order = new Map(ids.map((id, index) => [id, index]))
-  return rows.sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0))
-}
-
 /** The filterable choice attributes, by key: their labels and option labels, in rank order. */
 async function filterDefinitions(container: MedusaContainer) {
   const definitions = await container
@@ -166,9 +55,10 @@ async function filterDefinitions(container: MedusaContainer) {
       { is_filterable: true, is_public: true, type: ["select", "multi_select"] },
       { select: ["key", "label", "options", "rank"], order: { rank: "ASC" } }
     )
-  const byKey = new Map<string, { label: string; options: Map<string, string> }>()
+  const byKey = new Map<string, FilterDefinition>()
   for (const definition of definitions) {
-    if (definition.key === LISTING_PARAMS.brand) {
+    // A key the URL keeps for itself (`marka`, `stok`) is no attribute filter
+    if (definition.key === LISTING_PARAMS.brand || isReservedParam(definition.key)) {
       continue
     }
     const entry = byKey.get(definition.key) ?? { label: definition.label, options: new Map() }
@@ -180,27 +70,22 @@ async function filterDefinitions(container: MedusaContainer) {
   return byKey
 }
 
-/**
- * A listing's rows and the filter definitions, shared for 30 seconds by
- * every page, filter and sort of it (security review 2026-11-02): a shopper
- * paging and filtering, or anyone sending a new query each time, costs one
- * catalogue read per listing and region, not one per request. A price or
- * product change shows within that time, as resolve's answers do.
- */
-const listingRows = createTtlCache<ListingRow[]>({ ttlMs: 30_000, maxEntries: 200 })
-const definitionsCache = createTtlCache<Awaited<ReturnType<typeof filterDefinitions>>>({
+// Labels change rarely; every page and filter of every listing shares them for 30 seconds
+const definitionsCache = createTtlCache<Map<string, FilterDefinition>>({
   ttlMs: 30_000,
   maxEntries: 1,
 })
 
-const rowsKey = (input: ListingProductsInput) =>
-  [
-    input.listed.entity_type,
-    input.listed.entity_id,
-    input.region_id ?? "",
-    input.currency_code,
-    [...input.sales_channel_ids].sort().join(","),
-  ].join("|")
+const NOTHING: ListingResult = {
+  count: 0,
+  ids: [],
+  brands: [],
+  options: [],
+  ownOptions: {},
+  inStock: 0,
+  price: null,
+  related: null,
+}
 
 export async function listingProducts(
   container: MedusaContainer,
@@ -208,30 +93,37 @@ export async function listingProducts(
 ): Promise<ListingProductsAnswer> {
   const started = performance.now()
   const isSearch = input.listed.entity_type === SEARCH_LISTING
-  // A search reads the whole catalogue's rows, shared with `/magaza`
-  const listed = isSearch ? { entity_type: ALL_PRODUCTS, entity_id: ALL_PRODUCTS } : input.listed
-  const [rows, definitions] = await Promise.all([
-    listingRows(rowsKey({ ...input, listed }), async () =>
-      rowsOf(
-        container,
-        await baseIds(container, listed),
-        input,
-        listed.entity_type === ALL_PRODUCTS
-      )
-    ),
+  const [scope, definitions] = await Promise.all([
+    isSearch ? Promise.resolve({}) : listingScope(container, input.listed, input.region_id),
     definitionsCache("definitions", () => filterDefinitions(container)),
   ])
-  const searched = isSearch ? await searchListingRows(rows, input.listed.entity_id) : null
-  const shown = searched?.rows ?? rows
-  // No sort chosen: a search's own order is relevance
-  const arranged = arrange(shown, input.query)
-  const start = (input.query.page - 1) * LISTING_PAGE_SIZE
+  const { query } = input
+  const base: ListingPlan = {
+    channels: [...input.sales_channel_ids],
+    scope: scope ?? {},
+    text: null,
+    filters: planFilters(query.filters),
+    price: {
+      key: priceKey(input.region_id, input.currency_code),
+      min: query.price?.min ?? null,
+      max: query.price?.max ?? null,
+    },
+    sort: planSort(query.sort, isSearch),
+    page: { offset: (query.page - 1) * LISTING_PAGE_SIZE, limit: LISTING_PAGE_SIZE },
+  }
+  const index = container.resolve<SearchIndexModuleService>(SEARCH_INDEX_MODULE)
+  const searched = isSearch ? await searchListing(container, base, input.search ?? "") : null
+  const result = !scope
+    ? NOTHING
+    : searched
+      ? (searched.result ?? NOTHING)
+      : await index.listing(base)
   const answer: ListingProductsAnswer = {
-    product_ids: arranged.slice(start, start + LISTING_PAGE_SIZE).map((row) => row.id),
-    count: arranged.length,
-    page: input.query.page,
+    product_ids: result.ids,
+    count: result.count,
+    page: query.page,
     page_size: LISTING_PAGE_SIZE,
-    facets: facetsOf(shown, input.query, definitions),
+    facets: facetsOf(result, query, definitions),
   }
   if (searched) {
     answer.search = {

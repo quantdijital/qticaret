@@ -3,6 +3,7 @@ import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { createAdminUser } from "./admin"
 import type { HttpClient, HttpResponse } from "./http"
 import { settle } from "./http"
+import { indexCatalogue } from "./search-index"
 import { stockShop, stockedProduct } from "./stock"
 import type { StockShop } from "./stock"
 import { createStorefront } from "./storefront"
@@ -136,12 +137,15 @@ export async function landingKit(
     templateId,
     post,
     product,
-    resolve: async (path) =>
-      (
+    // A listing's counts come from the search index (adr/0056): built first
+    resolve: async (path) => {
+      await indexCatalogue(container)
+      return (
         await http.get<Answer>(`/store/seo/resolve?path=${encodeURIComponent(path)}`, {
           headers: store.headers,
         })
-      ).data,
+      ).data
+    },
     landing: (value, body, key = "malzeme") =>
       post<{ landing: Landing }>("/admin/landings", {
         category_id: categoryId,
