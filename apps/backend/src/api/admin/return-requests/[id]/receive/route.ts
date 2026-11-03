@@ -13,7 +13,7 @@ import {
   refundReturn,
 } from "../../../../../workflows/returns/receive-return"
 import type { AdminPostReturnReceiveType } from "../../validators"
-import { returnRequestView } from "../../view"
+import { returnRequestDetail } from "../../view"
 
 /**
  * POST /admin/return-requests/:id/receive (adr/0032): what reached the
@@ -57,17 +57,17 @@ export async function POST(
     },
   })
   if (exchange && (request.difference ?? 0) >= 0) {
-    res.json({ return_request: returnRequestView(received), refund_error: null })
+    res.json({ return_request: await returnRequestDetail(req.scope, received), refund_error: null })
     return
   }
   try {
     const refunded = await refundReturn(req.scope, { id, staff_id: req.auth_context.actor_id })
-    res.json({ return_request: returnRequestView(refunded), refund_error: null })
+    res.json({ return_request: await returnRequestDetail(req.scope, refunded), refund_error: null })
   } catch (error) {
     logger.warn({ event: "returns.refund_failed", returnRequestId: id, err: errorSummary(error) })
     const key = (error as { safeMessage?: unknown }).safeMessage
     res.json({
-      return_request: returnRequestView({ ...request, status: "received" }),
+      return_request: await returnRequestDetail(req.scope, { ...request, status: "received" }),
       refund_error:
         typeof key === "string" && I18N_KEY.test(key)
           ? serverErrorMessage(key, "tr")

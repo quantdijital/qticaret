@@ -1,6 +1,6 @@
 import type { MedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { PLATFORM_SETTINGS_MODULE } from "../../../modules/platform-settings"
-import { GIFT_CARDS } from "../../../modules/platform-settings/features"
+import { GIFT_CARDS, PRODUCT_ADDONS } from "../../../modules/platform-settings/features"
 import type {
   PromotionSettings,
   StorefrontSettings,
@@ -17,7 +17,7 @@ import { shopInfoValues } from "../../../workflows/shop/info-values"
  * footer's columns, the trust strip and the WhatsApp number; and the free
  * shipping threshold (F4.5: `item_total`, KDV in, after discounts) for the
  * cart's "this much more" line; and the flags of what the storefront offers
- * only while on (gift card codes, F4.8). The shop's contact and legal details come
+ * only while on (gift card codes, F4.8; product add-ons, adr/0052). The shop's contact and legal details come
  * from `/store/legal-identity`. A `{belirteç}` in the shop's lines stands for
  * its details as they are now (adr/0048).
  */
@@ -57,13 +57,21 @@ const themeOf = (theme: ThemeSettings, storefront: StorefrontSettings): ThemeSet
 
 export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {
   const settings = req.scope.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
-  const [storefront, promotions, theme, giftCards, values] = (await Promise.all([
+  const [storefront, promotions, theme, giftCards, addons, values] = (await Promise.all([
     settings.getSection("storefront"),
     settings.getSection("promotions"),
     settings.getSection("theme"),
     settings.isFeatureEnabled(GIFT_CARDS),
+    settings.isFeatureEnabled(PRODUCT_ADDONS),
     shopInfoValues(req.scope),
-  ])) as unknown as [StorefrontSettings, PromotionSettings, ThemeSettings, boolean, ShopInfoValues]
+  ])) as unknown as [
+    StorefrontSettings,
+    PromotionSettings,
+    ThemeSettings,
+    boolean,
+    boolean,
+    ShopInfoValues,
+  ]
   res.setHeader("Cache-Control", "public, max-age=300, stale-while-revalidate=3600")
   res.vary("x-publishable-api-key")
   res.json({
@@ -71,6 +79,6 @@ export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void
     theme: themeOf(theme, storefront),
     free_shipping_threshold: promotions.free_shipping_threshold,
     // What the storefront offers only while the shop has it on (its routes answer 404 otherwise)
-    features: { gift_cards: giftCards },
+    features: { gift_cards: giftCards, product_addons: addons },
   })
 }

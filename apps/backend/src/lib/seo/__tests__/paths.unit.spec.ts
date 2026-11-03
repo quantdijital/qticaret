@@ -27,6 +27,8 @@ describe("isReservedPath", () => {
     // The gift card balance's root (adr/0025 Ek 2026-11-03) and the storefront's own routes
     "/hediye-karti",
     "/api",
+    // A payment link's page, `/ode/<token>` (adr/0051)
+    "/ode",
   ])("keeps %s for the storefront", (path) => {
     expect(isReservedPath(path)).toBe(true)
   })
@@ -53,6 +55,8 @@ describe("isReservedPath", () => {
     "/hediye-karti-seti",
     "/hediye-kartlari",
     "/api-anahtarligi",
+    "/ode-sepeti",
+    "/odeme-kolayligi",
   ])("leaves %s to records", (path) => {
     expect(isReservedPath(path)).toBe(false)
   })
@@ -70,6 +74,7 @@ describe("isReservedPath", () => {
         { path: "/stok-bildirimi", robots: "noindex,nofollow" },
         { path: "/cerez-tercihleri", robots: "noindex,follow" },
         { path: "/bakim", robots: "noindex,nofollow" },
+        { path: "/ode", robots: "noindex,nofollow" },
       ])
     )
     for (const { path } of SYSTEM_PAGES) {

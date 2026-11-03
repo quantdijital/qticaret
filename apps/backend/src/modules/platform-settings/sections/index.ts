@@ -9,6 +9,7 @@ import { legalSection } from "./legal"
 import { maintenanceSection } from "./maintenance"
 import { marketingSection } from "./marketing"
 import { notificationsSection } from "./notifications"
+import { paymentLinksSection } from "./payment-links"
 import { paymentsSection } from "./payments"
 import { promotionsSection } from "./promotions"
 import { returnsSection } from "./returns"
@@ -31,6 +32,7 @@ export type { LegalSettings } from "./legal"
 export type { MaintenanceSettings } from "./maintenance"
 export type { MarketingSettings } from "./marketing"
 export type { NotificationSettings } from "./notifications"
+export type { PaymentLinkSettings } from "./payment-links"
 export type { PaymentSettings } from "./payments"
 export type { PromotionSettings } from "./promotions"
 export type { ReturnsSettings } from "./returns"
@@ -67,6 +69,7 @@ export const SECTIONS = {
   storefront: storefrontSection,
   maintenance: maintenanceSection,
   theme: themeSection,
+  payment_links: paymentLinksSection,
 } as const
 
 export type SectionName = keyof typeof SECTIONS

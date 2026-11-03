@@ -78,25 +78,33 @@ describe("payment link snapshot (adr/0051 §2)", () => {
     expect(discountAmount("fixed", 50_000, kurus(39_990))).toBe(39_990)
   })
 
-  it("lets operations give none, admin a fifth, the owner just below the whole", () => {
+  it("lets operations give none, admin up to the shop's limit, the owner just below the whole", () => {
     const total = kurus(10_000)
-    expect(discountProblem("operations", { type: "percentage", value: 5 }, total)).toBe(
+    const check = (role: string, discount: { type: "percentage" | "fixed"; value: number }) =>
+      discountProblem(role, discount, total, 20)
+    expect(check("operations", { type: "percentage", value: 5 })).toBe(
       "payment_link.discount_not_allowed"
     )
-    expect(discountProblem("readonly", { type: "fixed", value: 100 }, total)).toBe(
+    expect(check("readonly", { type: "fixed", value: 100 })).toBe(
       "payment_link.discount_not_allowed"
     )
-    expect(discountProblem("admin", { type: "percentage", value: 20 }, total)).toBeNull()
-    expect(discountProblem("admin", { type: "percentage", value: 21 }, total)).toBe(
+    expect(check("admin", { type: "percentage", value: 20 })).toBeNull()
+    expect(check("admin", { type: "percentage", value: 21 })).toBe(
       "payment_link.discount_over_limit"
     )
-    expect(discountProblem("admin", { type: "fixed", value: 2_001 }, total)).toBe(
-      "payment_link.discount_over_limit"
-    )
-    expect(discountProblem("owner", { type: "percentage", value: 60 }, total)).toBeNull()
-    expect(discountProblem("owner", { type: "fixed", value: 10_000 }, total)).toBe(
-      "payment_link.discount_invalid"
-    )
+    expect(check("admin", { type: "fixed", value: 2_001 })).toBe("payment_link.discount_over_limit")
+    expect(check("owner", { type: "percentage", value: 60 })).toBeNull()
+    expect(check("owner", { type: "fixed", value: 10_000 })).toBe("payment_link.discount_invalid")
+  })
+
+  it("holds an admin to the limit the owner set, and the owner to 99 whatever it is", () => {
+    const total = kurus(10_000)
+    const percent = (role: string, value: number, limit: number) =>
+      discountProblem(role, { type: "percentage", value }, total, limit)
+    expect(percent("admin", 35, 40)).toBeNull()
+    expect(percent("admin", 5, 0)).toBe("payment_link.discount_over_limit")
+    expect(percent("admin", 99, 99)).toBeNull()
+    expect(percent("owner", 99, 0)).toBeNull()
   })
 
   it("finds the lines whose price moved, a variant gone among them", () => {

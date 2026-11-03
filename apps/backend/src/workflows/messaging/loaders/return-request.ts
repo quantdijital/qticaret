@@ -3,6 +3,7 @@ import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import type { ReturnVars } from "../../../lib/messaging/templates"
 import { RETURN_REQUESTS_MODULE } from "../../../modules/return-requests"
 import type ReturnRequestsModuleService from "../../../modules/return-requests/service"
+import { messageAddonsOf } from "./line-addons"
 import { GREETING, firstText, personName } from "./types"
 import type { Loaded } from "./types"
 
@@ -16,6 +17,7 @@ interface OrderRow {
     product_title?: string | null
     title?: string | null
     variant_title?: string | null
+    metadata?: Record<string, unknown> | null
   } | null)[]
 }
 
@@ -45,6 +47,7 @@ export async function loadReturnMessage(
       "items.product_title",
       "items.title",
       "items.variant_title",
+      "items.metadata",
     ],
     filters: { id: request.order_id },
   })
@@ -65,6 +68,7 @@ export async function loadReturnMessage(
           title: firstText(line?.product_title, line?.title) ?? "",
           detail: firstText(line?.variant_title),
           quantity: each.quantity,
+          ...messageAddonsOf(line?.metadata),
         }
       }),
       returnCode: request.return_code,

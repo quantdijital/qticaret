@@ -32,7 +32,7 @@ export interface SetLineAddonsInput {
 type Metadata = Record<string, unknown>
 
 /** What the line becomes: priced with its add-ons, or back to the variant's own price. */
-interface LinePlan {
+export interface LinePlan {
   mode: "set" | "reset" | "none"
   line_id: string
   quantity: number
@@ -47,11 +47,23 @@ const withoutAddons = (metadata: Metadata | null | undefined): Metadata =>
   Object.fromEntries(Object.entries(metadata ?? {}).filter(([key]) => key !== ADDONS_KEY))
 
 /**
+ * What an undo writes on the line: the add-ons it had before, or an empty
+ * string that takes the key out (none before). Medusa merges a line's
+ * metadata (2.21.2), so the undo names its own key only; the whole earlier
+ * metadata would write over keys others wrote meanwhile.
+ */
+export function restoredAddonsMetadata(before: Metadata | null): Metadata {
+  return {
+    [ADDONS_KEY]: before && Object.hasOwn(before, ADDONS_KEY) ? before[ADDONS_KEY] : "",
+  }
+}
+
+/**
  * Checks the picks against the line's product and prices them from the
  * cart's own pricing context; writes nothing. Only an open cart of this
  * storefront, a line of a product that has add-ons.
  */
-const planLineAddonsStep = createStep(
+export const planLineAddonsStep = createStep(
   "addons-plan-line",
   async (input: SetLineAddonsInput, { container }) => {
     const cart = await readAddonCart(container, input.cart_id)
@@ -113,9 +125,10 @@ const planLineAddonsStep = createStep(
 /**
  * A line back to an ordinary one: no add-ons, no custom price, so the
  * cart's refresh prices it from the variant as Medusa prices any line.
- * Undone, the line before comes back.
+ * Undone, the line's price and add-ons before come back; its other
+ * metadata is left as it is.
  */
-const resetLineStep = createStep(
+export const resetLineStep = createStep(
   "addons-reset-line",
   async (plan: LinePlan, { container }) => {
     const carts = container.resolve<ICartModuleService>(Modules.CART)
@@ -127,7 +140,7 @@ const resetLineStep = createStep(
       await container.resolve<ICartModuleService>(Modules.CART).updateLineItems(plan.line_id, {
         is_custom_price: plan.before.is_custom_price,
         unit_price: plan.before.unit_price as number,
-        metadata: plan.before.metadata ?? {},
+        metadata: restoredAddonsMetadata(plan.before.metadata),
       })
     }
   }

@@ -2,13 +2,15 @@ import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/frame
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { RETURN_REQUESTS_MODULE } from "../../../modules/return-requests"
 import type ReturnRequestsModuleService from "../../../modules/return-requests/service"
+import { withWithdrawalMarks } from "../../../workflows/returns/request-items"
 import type { AdminGetReturnRequestsType } from "./validators"
 import { returnRequestView } from "./view"
 
 /**
  * GET /admin/return-requests (F7.9, adr/0032): shoppers' requests, the
  * oldest waiting first, each with its order's number; refunds as lira;
- * an exchange's wanted variants by name (§6).
+ * an exchange's wanted variants by name (§6); each line marked when it is
+ * outside the right of withdrawal, as `/admin/orders/:id/returnable` marks it.
  */
 export async function GET(
   req: AuthenticatedMedusaRequest<unknown, AdminGetReturnRequestsType>,
@@ -25,7 +27,7 @@ export async function GET(
   const swaps = (request: { exchange_items: unknown }) =>
     (request.exchange_items ?? []) as { line_item_id: string; variant_id: string }[]
   const variantIds = [...new Set(requests.flatMap(swaps).map((line) => line.variant_id))]
-  const [{ data: orders }, { data: variants }] = await Promise.all([
+  const [{ data: orders }, { data: variants }, marked] = await Promise.all([
     query.graph({
       entity: "order",
       fields: ["id", "display_id"],
@@ -38,6 +40,7 @@ export async function GET(
           filters: { id: variantIds },
         })
       : Promise.resolve({ data: [] as unknown[] }),
+    withWithdrawalMarks(req.scope, requests),
   ])
   const titles = new Map(
     (variants as { id: string; title?: string | null }[]).map((variant) => [
@@ -52,7 +55,7 @@ export async function GET(
     ])
   )
   res.json({
-    return_requests: requests.map((request) => ({
+    return_requests: marked.map((request) => ({
       ...returnRequestView(request),
       exchange_items:
         request.kind === "exchange"

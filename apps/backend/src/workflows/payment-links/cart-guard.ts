@@ -4,10 +4,12 @@ import { ValidationError } from "../../lib/errors"
 import { fromMedusaAmount } from "../../lib/money"
 import type { MedusaAmount } from "../../lib/money"
 import { cartDifference, completesNow, isOpen } from "../../lib/payment-links/snapshot"
+import { isFeeLine } from "../../lib/payments/cod"
 import { enteredCodes } from "../../lib/promotions"
 import { PAYMENT_LINKS_MODULE } from "../../modules/payment-links"
 import type PaymentLinksModuleService from "../../modules/payment-links/service"
 import { alertLink } from "./alerts"
+import { paymentLinkSettings } from "./settings"
 import { linesOf } from "./views"
 
 type Container = Pick<MedusaContainer, "resolve">
@@ -20,7 +22,13 @@ interface CartRow {
   metadata?: Record<string, unknown> | null
   currency_code?: string | null
   items?:
-    | ({ variant_id?: string | null; quantity: MedusaAmount; unit_price: MedusaAmount } | null)[]
+    | ({
+        variant_id?: string | null
+        quantity: MedusaAmount
+        unit_price: MedusaAmount
+        is_custom_price?: boolean | null
+        metadata?: Record<string, unknown> | null
+      } | null)[]
     | null
   promotions?: ({ code?: string | null; is_automatic?: boolean | null } | null)[] | null
 }
@@ -48,6 +56,8 @@ async function cartRow(container: Container, cartId: string): Promise<CartRow | 
       "items.variant_id",
       "items.quantity",
       "items.unit_price",
+      "items.is_custom_price",
+      "items.metadata",
       "promotions.code",
       "promotions.is_automatic",
     ],
@@ -119,8 +129,9 @@ export async function linkCartProblem(
   }
   const difference = cartDifference(
     linesOf(link),
+    // The fee of paying at the door is the server's line, when the owner allows it
     (cart.items ?? []).flatMap((item) =>
-      item
+      item && !isFeeLine(item)
         ? [
             {
               variant_id: item.variant_id ?? null,
@@ -136,6 +147,23 @@ export async function linkCartProblem(
     return "cart.payment_link_prices_changed"
   }
   return difference === "changed" ? "cart.payment_link_changed" : null
+}
+
+/**
+ * Whether a cart may be paid at the door as far as payment links go, by
+ * its metadata: a link's cart only when the owner allows it
+ * (`payment_links.allow_cod`, adr/0051 soru 4). Null for an ordinary cart,
+ * and for a link's cart then; cash on delivery's own rules (flag, limit,
+ * courier) still apply.
+ */
+export async function linkCodProblem(
+  container: Container,
+  cartMetadata: unknown
+): Promise<"cart.payment_link_no_cod" | null> {
+  if (linkIdOfCart(cartMetadata) === null || (await paymentLinkSettings(container)).allow_cod) {
+    return null
+  }
+  return "cart.payment_link_no_cod"
 }
 
 /** Stops the order of a cart a link's rules refuse (the completion hook, adr/0051 §5). */

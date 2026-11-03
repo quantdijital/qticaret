@@ -2,6 +2,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import type { ParcelVars } from "../../../lib/messaging/templates"
 import { carrierNameOf, trackingUrlOf } from "../../../lib/shipping/carriers"
+import { messageAddonsOf } from "./line-addons"
 import { GREETING, firstText, personName } from "./types"
 import type { Loaded } from "./types"
 
@@ -24,6 +25,7 @@ const FIELDS = [
   "order.items.id",
   "order.items.product_title",
   "order.items.variant_title",
+  "order.items.metadata",
 ]
 
 interface FulfillmentRow {
@@ -37,7 +39,12 @@ interface FulfillmentRow {
     email: string | null
     customer_id: string | null
     shipping_address: { first_name?: string | null; phone?: string | null } | null
-    items: ({ id: string; product_title?: string | null; variant_title?: string | null } | null)[]
+    items: ({
+      id: string
+      product_title?: string | null
+      variant_title?: string | null
+      metadata?: Record<string, unknown> | null
+    } | null)[]
   } | null
 }
 
@@ -75,6 +82,7 @@ export async function loadParcelMessage(
                 title: firstText(line?.product_title, item.title) ?? "",
                 detail: firstText(line?.variant_title),
                 quantity: Number(item.quantity),
+                ...messageAddonsOf(line?.metadata),
               },
             ]
           : []

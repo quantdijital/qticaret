@@ -1,6 +1,6 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { refundReturn } from "../../../../../workflows/returns/receive-return"
-import { returnRequestView } from "../../view"
+import { returnRequestDetail } from "../../view"
 
 /** POST /admin/return-requests/:id/refund: gives a received return's money back (again, once). */
 export async function POST(req: AuthenticatedMedusaRequest, res: MedusaResponse): Promise<void> {
@@ -8,5 +8,5 @@ export async function POST(req: AuthenticatedMedusaRequest, res: MedusaResponse)
     id: req.params["id"] ?? "",
     staff_id: req.auth_context.actor_id,
   })
-  res.json({ return_request: returnRequestView(refunded) })
+  res.json({ return_request: await returnRequestDetail(req.scope, refunded) })
 }

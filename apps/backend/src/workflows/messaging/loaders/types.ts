@@ -1,5 +1,7 @@
 import { readsAsLink } from "../../../lib/text/link-like"
 import type { MessageChannel } from "../../../lib/messaging/recipients"
+import { fromMedusaAmount } from "../../../lib/money"
+import type { MedusaAmount } from "../../../lib/money"
 
 /** Where a message may go: the order's e-mail and phone, a customer's. */
 export type MessageRecipients = Partial<Record<MessageChannel, string | null>>
@@ -42,3 +44,9 @@ export function addressLine(value: string): string | null {
 
 /** How a message greets a shopper whose first name it does not have. */
 export const GREETING = "Değerli müşterimiz"
+
+/** Lira as a Turkish shopper reads it: `₺1.234,50`. */
+export const lira = (amount: MedusaAmount): string =>
+  new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY" }).format(
+    fromMedusaAmount(amount, { allowRounding: true }) / 100
+  )

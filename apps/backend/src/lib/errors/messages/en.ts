@@ -892,7 +892,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "migration.wordpress_invalid":
     "The file is not a WordPress export or could not be read. Upload the .xml file from Tools > Export > All content in WordPress.",
   "migration.wordpress_too_large":
-    "The WordPress export is larger than 50 MB. Zip it, or export the content in parts.",
+    "The WordPress export is larger than 50 MB (the limit applies to the XML inside a zip too); it cannot be moved this way yet. Get in touch with us to move it.",
   "migration.wordpress_trashed": "The record is in WordPress's trash; it was not moved.",
   "migration.wordpress_product_type":
     "A grouped or external product has no price of its own; it was not moved.",

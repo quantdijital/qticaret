@@ -892,7 +892,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "migration.wordpress_invalid":
     "Dosya bir WordPress dışa aktarması değil ya da okunamadı. WordPress'te Araçlar > Dışa aktar > Tüm içerik ile indirilen .xml dosyasını yükleyin.",
   "migration.wordpress_too_large":
-    "WordPress dışa aktarması 50 MB'tan büyük. Dosyayı zip'leyerek ya da içeriği parça parça dışa aktararak yükleyin.",
+    "WordPress dışa aktarması 50 MB'tan büyük (sınır zip içindeki XML için de geçerli); bu yolla henüz taşınamıyor. Taşıma için bizimle iletişime geçin.",
   "migration.wordpress_trashed": "Kayıt WordPress'te çöp kutusunda; taşınmadı.",
   "migration.wordpress_product_type":
     "Gruplanmış ya da dış bağlantılı ürün; kendi fiyatı olmadığı için taşınmadı.",

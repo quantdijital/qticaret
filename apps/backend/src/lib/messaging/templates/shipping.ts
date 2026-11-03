@@ -1,5 +1,7 @@
 import { messageText } from "../texts"
 import { renderEmail } from "./layout"
+import { contentLines } from "./line-addons"
+import type { MessageLineAddons } from "./line-addons"
 import type { MessageTemplate } from "./types"
 
 /** A parcel as its messages show it. */
@@ -10,8 +12,8 @@ export interface ParcelVars {
   carrier: string | null
   trackingNumber: string | null
   trackingUrl: string | null
-  /** What the parcel holds: its lines, without prices. */
-  items: { title: string; detail: string | null; quantity: number }[]
+  /** What the parcel holds: its lines, without prices, each with its add-on picks. */
+  items: ({ title: string; detail: string | null; quantity: number } & MessageLineAddons)[]
 }
 
 const SAMPLE: ParcelVars = {
@@ -26,9 +28,7 @@ const SAMPLE: ParcelVars = {
 const contents = (vars: ParcelVars) => ({
   kind: "details" as const,
   title: messageText("parcel.contents"),
-  lines: vars.items.map(
-    (item) => `${String(item.quantity)} × ${item.title}${item.detail ? ` (${item.detail})` : ""}`
-  ),
+  lines: vars.items.flatMap(contentLines),
 })
 
 function trackingLines(vars: ParcelVars): string[] {

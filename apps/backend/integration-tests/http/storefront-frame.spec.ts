@@ -7,7 +7,7 @@ import { createStorefront } from "../helpers/storefront"
 jest.setTimeout(120 * 1000)
 
 interface Frame {
-  features?: { gift_cards: boolean }
+  features?: { gift_cards: boolean; product_addons: boolean }
   storefront: {
     announcements: string[]
     trust_badges: { icon: string; title: string; text: string | null }[]
@@ -66,8 +66,8 @@ medusaIntegrationTestRunner({
         color_swatches: [],
       })
       expect(before.data.free_shipping_threshold).toBeNull()
-      // Gift cards are off until the shop turns them on (F4.8)
-      expect(before.data.features).toEqual({ gift_cards: false })
+      // Gift cards and add-ons are off until the shop turns them on (F4.8, adr/0052)
+      expect(before.data.features).toEqual({ gift_cards: false, product_addons: false })
       expect(before.headers["cache-control"]).toContain("max-age=300")
       expect(script.status).toBe(400)
       // A misspelt detail would show as typed: refused, naming the ones there are (adr/0048)
@@ -85,6 +85,24 @@ medusaIntegrationTestRunner({
       })
       expect(after.data.free_shipping_threshold).toBe(1500)
       expect(withQuery.status).toBe(400)
+    })
+
+    it("says whether the shop sells product add-ons, so the storefront skips their calls when off", async () => {
+      const container = getContainer()
+      const owner = await createAdminUser(http, container)
+      const store = await createStorefront(container)
+      const frame = () => settle(http.get<Frame>("/store/storefront", { headers: store.headers }))
+      const flag = (enabled: boolean) =>
+        settle(http.post("/admin/features/catalog.addons", { enabled }, { headers: owner.headers }))
+
+      const off = await frame()
+      await flag(true)
+      const on = await frame()
+      // Flags live in settings, whose cache outlives the database reset between tests
+      await flag(false)
+
+      expect(off.data.features?.product_addons).toBe(false)
+      expect(on.data.features).toEqual({ gift_cards: false, product_addons: true })
     })
   },
 })

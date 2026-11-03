@@ -23,7 +23,8 @@ import { PLATFORM_SETTINGS_MODULE } from "../../../modules/platform-settings"
 import type PlatformSettingsModuleService from "../../../modules/platform-settings/service"
 import type { StoreSettings } from "../../../modules/platform-settings/sections"
 import { brandOf } from "../brand"
-import { GREETING, addressLine, personName } from "./types"
+import { messageAddonsOf } from "./line-addons"
+import { GREETING, addressLine, lira, personName } from "./types"
 import type { Loaded } from "./types"
 
 const ORDER_FIELDS = [
@@ -41,6 +42,8 @@ const ORDER_FIELDS = [
   "items.variant_title",
   "items.quantity",
   "items.total",
+  // A line's add-on picks (adr/0052 §9)
+  "items.metadata",
   "shipping_address.first_name",
   "shipping_address.last_name",
   "shipping_address.address_1",
@@ -70,6 +73,7 @@ interface OrderRow {
     variant_title?: string | null
     quantity: MedusaAmount
     total: MedusaAmount
+    metadata?: Record<string, unknown> | null
   } | null)[]
   shipping_address: Record<string, string | null | undefined> | null
   payment_collections:
@@ -81,11 +85,7 @@ interface OrderRow {
   cart?: { id?: string; metadata?: Record<string, unknown> | null } | null
 }
 
-/** Lira as a Turkish shopper reads it: `₺1.234,50`. */
-export const lira = (amount: MedusaAmount): string =>
-  new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY" }).format(
-    fromMedusaAmount(amount, { allowRounding: true }) / 100
-  )
+export { lira }
 
 const filled = (value: string | null | undefined): string => (value ?? "").trim()
 
@@ -164,6 +164,7 @@ export async function loadOrderMessage(
                 detail: filled(item.variant_title) || null,
                 quantity: Number(item.quantity),
                 total: lira(item.total),
+                ...messageAddonsOf(item.metadata),
               },
             ]
           : []

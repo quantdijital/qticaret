@@ -6,7 +6,7 @@ import { approveExchangeWorkflow } from "../../../../../workflows/returns/approv
 import { approveReturnWorkflow } from "../../../../../workflows/returns/approve-return"
 import { requoteExchange } from "../../../../../workflows/returns/exchange-quote"
 import type { AdminPostReturnApproveType } from "../../validators"
-import { returnRequestView } from "../../view"
+import { returnRequestDetail } from "../../view"
 
 /**
  * POST /admin/return-requests/:id/approve: Medusa's return and the
@@ -35,9 +35,9 @@ export async function POST(
     const { result } = await approveExchangeWorkflow(req.scope).run({
       input: { ...input, collected: req.validatedBody.difference_collected },
     })
-    res.json({ return_request: returnRequestView(result) })
+    res.json({ return_request: await returnRequestDetail(req.scope, result) })
     return
   }
   const { result } = await approveReturnWorkflow(req.scope).run({ input })
-  res.json({ return_request: returnRequestView(result) })
+  res.json({ return_request: await returnRequestDetail(req.scope, result) })
 }

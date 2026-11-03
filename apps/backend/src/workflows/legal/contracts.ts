@@ -1,7 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import type { ContentDoc } from "../../lib/content"
-import { orderLegalValues } from "../../lib/legal"
+import { orderLegalValues, withPersonalLines } from "../../lib/legal"
 import type { ContractPayment, OrderContractFacts } from "../../lib/legal"
 import {
   BANK_TRANSFER_PAYMENT_PROVIDER_ID,
@@ -35,6 +35,8 @@ const CONTRACT_FIELDS = [
   "items.variant_title",
   "items.quantity",
   "items.total",
+  // A line's add-on record: a pick made to the buyer's wish (adr/0052 §8)
+  "items.metadata",
   ...ADDRESS.map((field) => `shipping_address.${field}`),
   ...ADDRESS.map((field) => `billing_address.${field}`),
 ]
@@ -125,11 +127,15 @@ export async function cartContract(
   }
 }
 
-/** A contract's text filled with the shop's details and the order's (or the cart's). */
+/**
+ * A contract's text filled with the shop's details and the order's (or the
+ * cart's); its withdrawal clause names the lines made to the buyer's wish.
+ */
 export async function renderContract(
   container: Container,
   body: unknown,
   facts: OrderContractFacts
 ): Promise<string> {
-  return renderLegal(container, body as ContentDoc, orderLegalValues(facts))
+  const values = orderLegalValues(facts)
+  return renderLegal(container, withPersonalLines(body as ContentDoc, values.blocks), values)
 }

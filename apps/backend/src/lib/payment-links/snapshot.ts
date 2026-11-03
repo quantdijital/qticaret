@@ -36,9 +36,7 @@ export interface PaymentLinkDiscount {
 
 export const MAX_LINES = 50
 export const MAX_QUANTITY = 999
-/** What an `admin` may give off a link; more is the owner's (adr/0051 §2). */
-export const ADMIN_MAX_DISCOUNT_PERCENT = 20
-/** A link's order still costs something: a discount stops short of the whole. */
+/** A link's order still costs something: a discount stops short of the whole (the owner's limit). */
 export const MAX_DISCOUNT_PERCENT = 99
 /** After its end, a payment already under way may still complete for this long. */
 export const COMPLETION_GRACE_MS = 60 * 60 * 1000
@@ -61,12 +59,14 @@ export type DiscountProblem =
 
 /**
  * Whether the role may give this discount: `operations` none (adr/0051
- * soru 1), `admin` up to a fifth, the owner up to just below the whole.
+ * soru 1), `admin` up to the shop's limit for them (`payment_links`
+ * settings, percent), the owner up to just below the whole.
  */
 export function discountProblem(
   role: string | null,
   discount: { type: DiscountType; value: number },
-  itemsTotal: Kurus
+  itemsTotal: Kurus,
+  adminMaxPercent: number
 ): DiscountProblem | null {
   if (role !== "owner" && role !== "admin") {
     return "payment_link.discount_not_allowed"
@@ -81,7 +81,7 @@ export function discountProblem(
   ) {
     return "payment_link.discount_invalid"
   }
-  return role === "admin" && percentOff > ADMIN_MAX_DISCOUNT_PERCENT
+  return role === "admin" && percentOff > adminMaxPercent
     ? "payment_link.discount_over_limit"
     : null
 }

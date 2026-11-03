@@ -1,6 +1,8 @@
 import { messageText } from "../texts"
 import { renderEmail } from "./layout"
 import type { EmailBlock } from "./layout"
+import { contentLines } from "./line-addons"
+import type { MessageLineAddons } from "./line-addons"
 import type { MessageTemplate } from "./types"
 
 /** A return or exchange request as its messages show it. */
@@ -8,7 +10,7 @@ export interface ReturnVars {
   number: string
   customerName: string
   kind: "return" | "exchange"
-  items: { title: string; detail: string | null; quantity: number }[]
+  items: ({ title: string; detail: string | null; quantity: number } & MessageLineAddons)[]
   /** The carrier's code the shopper hands the parcel over with, once approved. */
   returnCode: string | null
   /** What was paid back, once refunded. */
@@ -27,9 +29,7 @@ const SAMPLE: ReturnVars = {
 const lines = (vars: ReturnVars): EmailBlock => ({
   kind: "details",
   title: messageText("returns.lines"),
-  lines: vars.items.map(
-    (item) => `${String(item.quantity)} × ${item.title}${item.detail ? ` (${item.detail})` : ""}`
-  ),
+  lines: vars.items.flatMap(contentLines),
 })
 
 /** A text by the request's kind: "İade" and "Değişim" read differently all through. */

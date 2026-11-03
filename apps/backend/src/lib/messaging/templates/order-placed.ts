@@ -1,13 +1,20 @@
 import { messageText } from "../texts"
 import { renderEmail } from "./layout"
 import type { EmailBlock } from "./layout"
+import { addonLines } from "./line-addons"
+import type { MessageLineAddons } from "./line-addons"
 import type { MessageTemplate } from "./types"
 
 /** An order as its messages show it: amounts already written out in lira. */
 export interface OrderVars {
   number: string
   customerName: string
-  items: { title: string; detail: string | null; quantity: number; total: string }[]
+  items: ({
+    title: string
+    detail: string | null
+    quantity: number
+    total: string
+  } & MessageLineAddons)[]
   subtotal: string
   shipping: string
   discount: string | null
@@ -23,7 +30,10 @@ export interface OrderVars {
 
 export function orderSummary(vars: OrderVars): EmailBlock[] {
   return [
-    { kind: "items", rows: vars.items },
+    {
+      kind: "items",
+      rows: vars.items.map((item) => ({ ...item, lines: addonLines(item) })),
+    },
     {
       kind: "summary",
       rows: [

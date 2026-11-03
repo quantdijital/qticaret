@@ -9,9 +9,13 @@ import {
 } from "../../lib/payments/checkout"
 import { bankTransferSettings } from "../../lib/payments/settings"
 import { formatIban } from "../../lib/tr/iban"
+import { linkCodProblem } from "../payment-links/cart-guard"
 import { expectedCodFee, readFeeCart } from "./steps/payment-fee"
 
-/** Cash on delivery for a cart the storefront can see, with its fee; null when not offered. */
+/**
+ * Cash on delivery for a cart the storefront can see, with its fee; null
+ * when not offered (a payment link's cart included, unless allowed).
+ */
 async function cashOnDeliveryFor(
   container: MedusaContainer,
   cartId: string,
@@ -20,6 +24,10 @@ async function cashOnDeliveryFor(
   const cart = await readFeeCart(container, cartId)
   if (!cart || !salesChannelIds.includes(cart.sales_channel_id ?? "")) {
     throw new MedusaError(MedusaError.Types.NOT_FOUND, "cart.unknown")
+  }
+  // A payment link's cart, unless the owner lets its order be paid at the door (adr/0051)
+  if (await linkCodProblem(container, cart.metadata)) {
+    return null
   }
   try {
     const fee = await expectedCodFee(container, cart)

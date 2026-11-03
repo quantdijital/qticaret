@@ -10,7 +10,11 @@ import { ValidationError } from "../../lib/errors"
 import { COD_PAYMENT_PROVIDER_ID } from "../../lib/payments/checkout"
 import type { RateLimitProfile } from "../../lib/security/rate-limit"
 import { PAYMENT_LINKS } from "../../modules/platform-settings/features"
-import { linkCartProblem, linkIdOfCart } from "../../workflows/payment-links/cart-guard"
+import {
+  linkCartProblem,
+  linkCodProblem,
+  linkIdOfCart,
+} from "../../workflows/payment-links/cart-guard"
 import {
   AdminExtendPaymentLink,
   AdminGetPaymentLinks,
@@ -100,7 +104,7 @@ async function lockLinkCart(req: MedusaRequest, _res: MedusaResponse, next: Medu
 /**
  * Starting a payment for a cart (adr/0051 §4, §5): a link's cart while the
  * link is open, its latest, as made; a link's code on no other cart. Cash
- * on delivery is not taken for a link's order in v1 (soru 4).
+ * on delivery for a link's order only when the owner allows it (soru 4).
  */
 async function guardLinkPaymentStart(
   req: MedusaRequest,
@@ -120,10 +124,10 @@ async function guardLinkPaymentStart(
     }
     const provider = (req.body as { provider_id?: unknown } | undefined)?.provider_id
     const cod =
-      provider === COD_PAYMENT_PROVIDER_ID && linkIdOfCart(await cartMetadata(req)) !== null
-    next(
-      cod ? new ValidationError("cart.payment_link_no_cod", { field: "provider_id" }) : undefined
-    )
+      provider === COD_PAYMENT_PROVIDER_ID
+        ? await linkCodProblem(req.scope, await cartMetadata(req))
+        : null
+    next(cod ? new ValidationError(cod, { field: "provider_id" }) : undefined)
   } catch (error) {
     next(error)
   }

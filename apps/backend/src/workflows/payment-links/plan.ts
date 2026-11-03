@@ -12,6 +12,7 @@ import { STAFF_ROLES_MODULE } from "../../modules/staff-roles"
 import type StaffRolesModuleService from "../../modules/staff-roles/service"
 import { brandOf } from "../messaging/brand"
 import { defaultChannel, liraRegion, priceLines, shortLines } from "./pricing"
+import { paymentLinkSettings } from "./settings"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -59,7 +60,8 @@ async function assertShippingOption(container: Container, optionId: string): Pro
 /**
  * What a link would offer (adr/0051 §2): the shop has a storefront to open
  * it on, every line has a catalog price in lira, and the discount is one
- * the staff member's role may give. Shared by the preview and the making.
+ * the staff member's role may give (an admin's limit is the owner's
+ * setting). Shared by the preview and the making.
  */
 export async function planPaymentLink(container: Container, input: PlanInput): Promise<LinkPlan> {
   if (!(await brandOf(container)).storefrontUrl) {
@@ -79,10 +81,16 @@ export async function planPaymentLink(container: Container, input: PlanInput): P
   const itemsTotal = linesTotal(lines)
   let discount: PaymentLinkDiscount | null = null
   if (input.discount) {
-    const role = await container
-      .resolve<StaffRolesModuleService>(STAFF_ROLES_MODULE)
-      .roleOf(input.actor_id)
-    const problem = discountProblem(role, input.discount, itemsTotal)
+    const [role, settings] = await Promise.all([
+      container.resolve<StaffRolesModuleService>(STAFF_ROLES_MODULE).roleOf(input.actor_id),
+      paymentLinkSettings(container),
+    ])
+    const problem = discountProblem(
+      role,
+      input.discount,
+      itemsTotal,
+      settings.admin_max_discount_percent
+    )
     if (problem === "payment_link.discount_invalid") {
       throw new ValidationError(problem, { field: "discount" })
     }

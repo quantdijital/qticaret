@@ -1,7 +1,9 @@
 import type { Block } from "../content"
 import { fromMedusaAmount } from "../money"
 import type { MedusaAmount } from "../money"
+import { PERSONAL_LINES_TOKEN } from "./tokens"
 import type { OrderToken } from "./tokens"
+import { personalLinesBlocks } from "./withdrawal"
 
 /**
  * An order as its contracts read it (F13.2): what was bought, by whom, for
@@ -22,6 +24,8 @@ export interface OrderContractFacts {
     variant_title?: string | null
     quantity: MedusaAmount
     total: MedusaAmount
+    /** Its add-on record (adr/0052): a pick can make it the buyer's own. */
+    metadata?: unknown
   } | null)[]
   shipping_address: AddressFacts | null
   billing_address: AddressFacts | null
@@ -119,7 +123,7 @@ export function linesTable(
  * The order's values for its contracts' tokens (adr/0041 §2), as the
  * order holds them when placed: the buyer, the addresses (the billing
  * one is the delivery one when none was given), the lines and totals,
- * and the way it is paid.
+ * the way it is paid, and the lines made to the buyer's wish (adr/0052 §8).
  */
 export function orderLegalValues(order: OrderContractFacts): OrderLegalValues {
   const delivery = addressText(order.shipping_address)
@@ -132,6 +136,7 @@ export function orderLegalValues(order: OrderContractFacts): OrderLegalValues {
             title: joined([item.product_title ?? item.title, item.variant_title], " · "),
             quantity: Number(item.quantity),
             total: lira(item.total),
+            metadata: item.metadata,
           },
         ]
       : []
@@ -152,6 +157,9 @@ export function orderLegalValues(order: OrderContractFacts): OrderLegalValues {
       toplam: lira(order.total),
       ödeme_yöntemi: order.payment ? PAYMENTS[order.payment] : "",
     },
-    blocks: { sipariş_kalemleri: [linesTable(lines)] },
+    blocks: {
+      sipariş_kalemleri: [linesTable(lines)],
+      [PERSONAL_LINES_TOKEN]: personalLinesBlocks(lines),
+    },
   }
 }

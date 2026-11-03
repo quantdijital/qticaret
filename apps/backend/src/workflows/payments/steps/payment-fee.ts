@@ -47,11 +47,13 @@ export async function expectedCodFee(container: MedusaContainer, cart: FeeCart):
 export async function readFeeCart(container: MedusaContainer, cartId: string) {
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "cart",
-    fields: ["sales_channel_id", "completed_at", ...FEE_CART_FIELDS],
+    // Its metadata: a payment link's cart is paid at the door only when allowed (adr/0051)
+    fields: ["sales_channel_id", "completed_at", "metadata", ...FEE_CART_FIELDS],
     filters: { id: cartId },
   })
   return data[0] as
-    (FeeCart & { sales_channel_id?: string | null; completed_at?: unknown }) | undefined
+    | (FeeCart & { sales_channel_id?: string | null; completed_at?: unknown; metadata?: unknown })
+    | undefined
 }
 
 /** The fee a cart carried before a start changed it: put back if the start fails. */

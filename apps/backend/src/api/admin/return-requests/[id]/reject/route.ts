@@ -1,7 +1,7 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { rejectReturn } from "../../../../../workflows/returns/receive-return"
 import type { AdminPostReturnRejectType } from "../../validators"
-import { returnRequestView } from "../../view"
+import { returnRequestDetail } from "../../view"
 
 /** POST /admin/return-requests/:id/reject: turned down, with a note for the shopper. */
 export async function POST(
@@ -13,5 +13,5 @@ export async function POST(
     staff_id: req.auth_context.actor_id,
     note: req.validatedBody.note,
   })
-  res.json({ return_request: returnRequestView(rejected) })
+  res.json({ return_request: await returnRequestDetail(req.scope, rejected) })
 }

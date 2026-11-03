@@ -13,7 +13,14 @@ export type EmailBlock =
   | { kind: "button"; label: string; url: string | null }
   | {
       kind: "items"
-      rows: { title: string; detail: string | null; quantity: number; total: string }[]
+      rows: {
+        title: string
+        detail: string | null
+        quantity: number
+        total: string
+        /** Said under the line, smaller: its add-on picks (adr/0052 §9). */
+        lines?: string[]
+      }[]
     }
   | { kind: "summary"; rows: { label: string; value: string; strong?: boolean }[] }
   | { kind: "details"; title: string; lines: string[] }
@@ -190,7 +197,7 @@ function blockHtml(block: EmailBlock, color: string): string {
       return `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse;margin:0 0 16px">${block.rows
         .map(
           (row) =>
-            `<tr><td style="${FONT}font-size:14px;padding:8px 0;border-bottom:1px solid #e5e7eb;color:#111827">${e(row.title)}${row.detail ? `<br><span style="color:${MUTED};font-size:13px">${e(row.detail)}</span>` : ""}</td><td style="${FONT}font-size:14px;padding:8px;border-bottom:1px solid #e5e7eb;color:${MUTED};text-align:center;white-space:nowrap">× ${String(row.quantity)}</td><td style="${FONT}font-size:14px;padding:8px 0;border-bottom:1px solid #e5e7eb;color:#111827;text-align:right;white-space:nowrap">${e(row.total)}</td></tr>`
+            `<tr><td style="${FONT}font-size:14px;padding:8px 0;border-bottom:1px solid #e5e7eb;color:#111827">${e(row.title)}${[row.detail, ...(row.lines ?? [])].map((line) => (line ? `<br><span style="color:${MUTED};font-size:13px">${e(line)}</span>` : "")).join("")}</td><td style="${FONT}font-size:14px;padding:8px;border-bottom:1px solid #e5e7eb;color:${MUTED};text-align:center;white-space:nowrap">× ${String(row.quantity)}</td><td style="${FONT}font-size:14px;padding:8px 0;border-bottom:1px solid #e5e7eb;color:#111827;text-align:right;white-space:nowrap">${e(row.total)}</td></tr>`
         )
         .join("")}</table>`
     case "summary":
@@ -222,7 +229,7 @@ function blockText(block: EmailBlock): string {
       return block.rows
         .map(
           (row) =>
-            `${String(row.quantity)} × ${row.title}${row.detail ? ` (${row.detail})` : ""}: ${row.total}`
+            `${String(row.quantity)} × ${row.title}${row.detail ? ` (${row.detail})` : ""}: ${row.total}${(row.lines ?? []).map((line) => `\n  ${line}`).join("")}`
         )
         .join("\n")
     case "summary":

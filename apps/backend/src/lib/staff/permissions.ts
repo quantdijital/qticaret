@@ -90,6 +90,9 @@ const OWNER_ONLY: readonly Rule[] = [
   // Where the shop goes dark: maintenance or "coming soon" (adr/0053); its
   // bypass link stays the admin's, as a draft's preview link does
   { methods: WRITES, path: "/admin/platform-settings/maintenance" },
+  // How far an admin may discount a link, and whether a link's order is paid
+  // at the door (adr/0051): an admin would otherwise raise their own limit
+  { methods: WRITES, path: "/admin/platform-settings/payment_links" },
   // Medusa Admin's menus and saved table views for every user (its `is_default`);
   // the panel has its own, Medusa Admin is off (the F15 audit)
   { methods: WRITES, path: "/admin/layouts*" },

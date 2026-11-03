@@ -9,9 +9,11 @@ import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
 import {
   GUEST,
+  LINK_DEFAULTS,
   linkBody,
   linkFlag,
   linkRow,
+  linkSettings,
   linkShop,
   linksOf,
   makeLink,
@@ -57,6 +59,7 @@ medusaIntegrationTestRunner({
     // The flag lives in settings, whose cache outlives the database reset between tests
     afterEach(async () => {
       await linkFlag(http, owner.headers, false)
+      await linkSettings(http, owner.headers, LINK_DEFAULTS)
     })
 
     it("makes a link with re-auth, at the catalog's price, never the request's, and shares it naming no one", async () => {
@@ -138,6 +141,34 @@ medusaIntegrationTestRunner({
       expect(over.status).toBe(403)
       expect(over.data.message).toBe("payment_link.discount_over_limit")
       expect(within.status).toBe(201)
+    })
+
+    it("holds an admin to the discount limit the owner sets, which the admin cannot raise", async () => {
+      const admin = await createAdminUser(http, getContainer(), "admin")
+      const discount = (value: number) =>
+        linkBody(shop, variantId, { discount: { type: "percentage", value, reason: "DM" } })
+      const defaults = await settle(
+        http.get<{ values: Record<string, unknown> }>("/admin/platform-settings/payment_links", {
+          headers: owner.headers,
+        })
+      )
+      const raised = await linkSettings(http, admin.headers, { admin_max_discount_percent: 99 })
+      const outOfRange = await linkSettings(http, owner.headers, {
+        admin_max_discount_percent: 100,
+      })
+      const lowered = await linkSettings(http, owner.headers, { admin_max_discount_percent: 10 })
+      const over = await makeLink(http, admin.headers, discount(15))
+      const within = await makeLink(http, admin.headers, discount(10))
+      const owners = await makeLink(http, owner.headers, discount(50))
+
+      expect(defaults.data.values).toEqual(LINK_DEFAULTS)
+      expect(raised.status).toBe(403)
+      expect(outOfRange.status).toBe(400)
+      expect(lowered.status).toBe(200)
+      expect([over.status, over.data.message]).toEqual([403, "payment_link.discount_over_limit"])
+      expect(within.status).toBe(201)
+      // The owner's own limit stays 99, whatever the admin's
+      expect(owners.status).toBe(201)
     })
 
     it("shows the link to its token alone, the first name only; forged, ended and canceled links are one 404", async () => {

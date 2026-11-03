@@ -70,8 +70,18 @@ export const ORDER_TOKENS = [
   "ödeme_yöntemi",
 ] as const
 
+/**
+ * The block the server places in an order's contracts, in their withdrawal
+ * clause, for lines made to the buyer's wish (adr/0052 §8). No order token:
+ * the shop never writes it, the checker refuses it in a text.
+ */
+export const PERSONAL_LINES_TOKEN = "kişiye_özel_ürünler"
+
 /** A token that stands for blocks (a table of lines), written alone in its paragraph. */
-export const BLOCK_TOKENS: ReadonlySet<string> = new Set(["sipariş_kalemleri"])
+export const BLOCK_TOKENS: ReadonlySet<string> = new Set([
+  "sipariş_kalemleri",
+  PERSONAL_LINES_TOKEN,
+])
 
 export type ShopToken = (typeof SHOP_TOKENS)[number]
 export type OrderToken = (typeof ORDER_TOKENS)[number]

@@ -40,6 +40,8 @@ export const RESERVED_ROOT_SEGMENTS: ReadonlySet<string> = new Set([
   "bakim",
   // A gift card's balance, `/hediye-karti/bakiye` (adr/0025 Ek 2026-11-03)
   "hediye-karti",
+  // A payment link's page, `/ode/<token>` (adr/0051)
+  "ode",
   // Backend paths, should a proxy put them on the storefront's host (F16)
   "admin",
   "app",
@@ -91,6 +93,8 @@ export const SYSTEM_PAGES: readonly {
     "stok-bildirimi",
     // The maintenance bypass link (adr/0053)
     "bakim",
+    // A payment link's token page (adr/0051)
+    "ode",
   ].map((segment) => ({
     path: `/${segment}`,
     robots: "noindex,nofollow" as const,

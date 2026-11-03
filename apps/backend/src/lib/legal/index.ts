@@ -5,11 +5,13 @@ export type { LegalValues } from "./fill"
 export { CONTRACT_PAYMENTS, linesTable, orderLegalValues } from "./order-values"
 export type { ContractPayment, OrderContractFacts, OrderLegalValues } from "./order-values"
 export { starterOf } from "./starters"
+export { personalLinesBlocks, withPersonalLines } from "./withdrawal"
 export {
   BLOCK_TOKENS,
   LEGAL_KINDS,
   ORDER_KINDS,
   ORDER_TOKENS,
+  PERSONAL_LINES_TOKEN,
   REQUIRED_KINDS,
   SHOP_TOKENS,
   checkLegalDoc,

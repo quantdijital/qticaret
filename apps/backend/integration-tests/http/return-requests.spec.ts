@@ -75,6 +75,13 @@ medusaIntegrationTestRunner({
       )
     const staff = <T>(path: string, body: unknown = {}) =>
       settle(http.post<T & { message?: string }>(path, body, { headers: setup.admin.headers }))
+    const requestsOf = (orderId: string) =>
+      settle(
+        http.get<{ return_requests: { items: unknown[] }[] }>(
+          `/admin/return-requests?order_id=${orderId}`,
+          { headers: setup.admin.headers }
+        )
+      )
     const stocked = async () => {
       const { data } = await query().graph({
         entity: "product_variant",
@@ -200,13 +207,35 @@ medusaIntegrationTestRunner({
         items: [{ line_item_id: lineId, quantity: 1 }],
         reason: "damaged",
       })
+      // Staff see the line marked as `/admin/orders/:id/returnable` marks it
+      const listed = await requestsOf(orderId)
+      const returnable = await settle(
+        http.get<{ lines: { line_item_id: string; withdrawal_excluded: boolean }[] }>(
+          `/admin/orders/${orderId}/returnable`,
+          { headers: setup.admin.headers }
+        )
+      )
+      const rejected = await staff<{ return_request: { items: unknown[] } }>(
+        `/admin/return-requests/${faulty.data.return_request.id}/reject`,
+        { note: "Kusur bulunamadı." }
+      )
       await staff(`/admin/products/${productId}/catalog`, { withdrawal_excluded: false })
+      const unmarked = await requestsOf(orderId)
 
       expect(changedMind.status).toBe(400)
       expect(changedMind.data.message).toBe("returns.withdrawal_excluded")
       // Never fewer than the law's 14 days
       expect(shortPeriod.status).toBe(400)
       expect(faulty.status).toBe(200)
+      const marked = [{ line_item_id: lineId, quantity: 1, withdrawal_excluded: true }]
+      expect(listed.data.return_requests[0]?.items).toEqual(marked)
+      expect(returnable.data.lines).toEqual([
+        expect.objectContaining({ line_item_id: lineId, withdrawal_excluded: true }),
+      ])
+      expect(rejected.data.return_request.items).toEqual(marked)
+      expect(unmarked.data.return_requests[0]?.items).toEqual([
+        { line_item_id: lineId, quantity: 1, withdrawal_excluded: false },
+      ])
     })
 
     it("refunds a damaged unit without restocking it, and the shipping only when staff say so", async () => {

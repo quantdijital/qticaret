@@ -157,7 +157,12 @@ Cevaplar (2026-11-03): dört soruda da öneri kabul edildi. `operations` yalnız
 - **Jeton:** `pl_<22 rastgele>.<bitiş>.<mac>`; `previewSigner("payment-link:v1")` ile `PII_HASH_KEY` altında imzalı. İmzası tutmayan jeton tabloya hiç sorulmaz. Kayıtta SHA-256 özeti (arama) ve şifreli kopyası (yeniden paylaşım) durur. Jeton iş akışı girdisine ya da çıktısına girmez: route jetonu çözer, iş akışına bağlantı kimliğini verir.
 - **Uzatma var:** `POST /admin/payment-links/:id/extend`, ama bağlantının oluşturulmasından en çok 7 gün (jetonun kendi bitişi). Bağlantı ve paylaşım metni aynı kalır.
 - **Şablon adı:** `order.pay_link` yerine `payment_link.sent` (işlemsel; e-posta ve SMS; `retry: true`, jeton kayıttaki şifreli kopyadan okunur). Yeniden gönderim bağlantı başına 10 dakikada bir.
-- **Ayarlar bölümü yok (açık):** `pay_links.max_discount_percent` ve `pay_links.allow_cod` henüz yok. Sınırlar kodda: `admin` en çok %20, `owner` en çok %99; kapıda ödeme her zaman kapalı (`cart.payment_link_no_cod`).
+- **Ayarlar bölümü `payment_links` (2026-11-03):** `pay_links.*` yerine `platform-settings` bölümü `payment_links`.
+  - `admin_max_discount_percent`: tam sayı 0–99, varsayılan 20. `admin`'in bağlantıda verebileceği en büyük indirim (satırların yüzdesi). `owner`'ın sınırı kodda %99 kalır. 0, `admin`'in indirim veremeyeceği anlamına gelir.
+  - `allow_cod`: varsayılan `false`. Açıkken bağlantı sepeti kapıda ödemeyi alır; kapıda ödemenin kendi bayrağı, tutar sınırı ve kurye seçimi yine geçerlidir. Kapalıyken ödeme başlatma 400 `cart.payment_link_no_cod` verir ve `GET /store/payment/methods?cart_id=` bağlantı sepetine `cash_on_delivery: null` döner.
+  - Bölümü yalnız `owner` yazar (`OWNER_ONLY`): `admin` kendi sınırını yükseltemez.
+  - Okuyan yerler: oluşturma ve önizlemedeki indirim denetimi (`plan.ts`, `discountProblem`'in dördüncü girdisi) ve sepet koruması (`cart-guard.ts` `linkCodProblem`; ödeme başlatma ara katmanı ve ödeme yolları listesi).
+  - Kapıda ödeme ücreti satırı (`qt_fee`) bağlantı sepetinin "değişti" denetimine girmez; sunucunun satırıdır.
 - **İndirim:** yüzde ya da tutar; kargo bedava v1'de yok. Promosyon `PL-XXXXXXXXXXXX` kodlu, `limit: 1`, KDV dahil, `qt-payment-links` kampanyasında. Promosyon listesi (`/admin/promotion-board`) bu kampanyayı göstermez. Kod başka bir sepette kullanılırsa ödeme başlatma ve tamamlama reddeder (`cart.payment_link_code_misused`).
 - **Kurumsal fatura bilgisi (VKN, unvan) v1'de yok.** Yalnız teslimat adresi önceden girilebilir; fatura adresi de aynı adres olur.
 - **Süre sonu işi saatlik** (`payment-links-expiry`, :17). Ödeme başlatma bağlantının bitişine kadar açıktır; başlamış bir ödeme bitişten sonra 1 saat daha siparişe dönebilir. İş bağlantıyı bu saatten sonra `expired` yapar ve kodunu kapatır.
@@ -176,7 +181,7 @@ Cevaplar (2026-11-03): dört soruda da öneri kabul edildi. `operations` yalnız
 - "Ödemeye geç" → `POST /store/payment-links/:token/cart` gövde `{}` → `{ cart_id }`. Vitrin sepet çerezini bu kimlikle yazar ve `/odeme`'ye geçer.
   - 409 `payment_link.prices_changed` ya da `payment_link.out_of_stock`: "mağazaya bildirildi" iletisi gösterilir.
   - Her basış yeni sepet açar; eski sepet artık tamamlanmaz (`cart.payment_link_superseded`). Kartla ödenmişse sahipsiz ödeme olarak kendiliğinden iade edilir (adr/0026 §6, mevcut yol).
-- Ödeme adımında sepet `metadata.qt_payment_link` taşır. Satır ekleme, silme, adet ve kod değişikliği 400 `cart.payment_link_locked` alır; hediye kartı alıcısı (`/gift`) serbesttir. Kapıda ödeme gösterilmez.
+- Ödeme adımında sepet `metadata.qt_payment_link` taşır. Satır ekleme, silme, adet ve kod değişikliği 400 `cart.payment_link_locked` alır; hediye kartı alıcısı (`/gift`) serbesttir. Kapıda ödeme yalnız `GET /store/payment/methods?cart_id=` onu döndürürse gösterilir (`payment_links.allow_cod`).
   - Ödeme başlatma ve tamamlama hataları: `cart.payment_link_closed`, `cart.payment_link_superseded`, `cart.payment_link_changed`, `cart.payment_link_prices_changed`, `cart.payment_link_no_cod`.
 
 **Sözleşme (panel, Siparişler > "Ödeme bağlantıları" ve "Yeni sipariş"):**
@@ -200,6 +205,5 @@ Cevaplar (2026-11-03): dört soruda da öneri kabul edildi. `operations` yalnız
 **Açık konular:**
 
 - **Grup fiyatı:** Misafir bağlantısı grup fiyatı olmadan fiyatlanır. Medusa sepeti aynı e-postalı kayıtlı müşteriye bağlarsa ve onun grup fiyatı farklıysa bağlantı `draft` olur (güvenli yön).
-- **Ayarlar bölümü:** indirim sınırı ve kapıda ödeme ayarı.
 - **Kapsam dışı:** kurumsal fatura bilgisi, kargo bedava indirimi, ek seçenekli satır, "ürünleri ayır".
 - **e2e testi** (panel → vitrin → sahte PayTR → sipariş) panel ve vitrin hazır olunca yazılır.

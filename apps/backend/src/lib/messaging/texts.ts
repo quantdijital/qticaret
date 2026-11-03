@@ -85,6 +85,10 @@ const TR: Readonly<Record<string, string>> = {
   "order.total": "Toplam",
   "order.address": "Teslimat adresi",
   "order.view": "Siparişi görüntüle",
+  // A line's add-on picks (adr/0052 §9), under the line
+  "order.addon": "{{label}}: {{value}}",
+  "order.addon_paid": "{{label}}: {{value}} (+{{amount}})",
+  "order.non_withdrawable": "Kişiye özel ürün: cayma hakkı yok",
   "consent_confirm.subject": "Kampanya iletilerine izninizi onaylayın",
   "consent_confirm.preheader": "{{shop}} size kampanya iletisi göndermeden önce soruyor.",
   "consent_confirm.intro":

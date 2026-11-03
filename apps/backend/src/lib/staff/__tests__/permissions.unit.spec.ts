@@ -52,6 +52,8 @@ describe("staff roles", () => {
     ["POST", "/admin/platform-settings/security"],
     ["POST", "/admin/platform-settings/maintenance"],
     ["POST", "/admin/platform-settings/%6daintenance"],
+    ["POST", "/admin/platform-settings/payment_links"],
+    ["POST", "/admin/platform-settings/payment%5flinks"],
     ["POST", "/admin/platform-settings/invoicing"],
     ["POST", "/admin/platform-settings/%69nvoicing"],
     ["POST", "/admin/einvoice/parasut"],

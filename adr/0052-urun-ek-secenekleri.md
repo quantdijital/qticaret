@@ -171,7 +171,12 @@ Cevaplar (2026-11-03): dört soruda da öneri kabul edildi. Yazı satırın her 
 - **Fiyatlar:** JSON'da lira (Medusa'nın tutar biçimi) tutulur. Hesap kuruşla yapılır.
 - **Tamamlamada eskime:** `completeCartWorkflow` sepet kilidini tutar; Medusa'nın satır iş akışları orada çalışamaz. Bu yüzden tamamlama satırı düzeltmez, yalnız 409 `cart.prices_changed` döner. Satırı yeni fiyata ödeme başlatma çeker (409 ile durur); müşteri yeni toplamı görüp ödemeyi yeniden başlatır.
 - **Silme işareti:** KVKK silmesi yazıyı "—" yapar; ek adı, seçim ve tutar kalır.
-- **Kapsam dışı (açık):** personelin yeni sipariş e-postası ve müşterinin sipariş e-postasında ek satırı (`lib/messaging`); panelden ekli satır düzenleme (adr/0033).
+- **Kapsam dışı (açık):** panelden ekli satır düzenleme (adr/0033). Personelin yeni sipariş e-postası satır listelemez (yalnız adet); ek adı orada da yok.
+- **Sonradan eklenenler (2026-11-03):**
+  - **İletiler:** `order.placed`, `order.shipped`, `order.delivered` ve `return.*` e-postaları her seçimi satırın altında yazar: "Kılıf: Desenli Siyah (+₺300,00)", ücretsiz seçimde tutar yok. Fiyatsız listelerde (koli içeriği, iade talebi) seçimler tutarsız yazılır. Cayma dışı satırın altında "Kişiye özel ürün: cayma hakkı yok" notu çıkar. SMS metinleri değişmedi.
+  - **Sözleşmeler:** ön bilgilendirme formu ve mesafeli satış sözleşmesinin sipariş kopyası (ve ödeme adımındaki sepet metni) cayma dışı her satırı ürün ve seçimiyle adlandırır, MSY md. 15/1-ç cümlesiyle. Blok, metnin "cayma" geçen ilk başlığının bölümünün sonuna sunucu tarafından konur; böyle başlık yoksa metnin sonuna. Mağaza bu belirteci yazamaz (`kişiye_özel_ürünler`, sipariş belirteci değil). Cümle taslaktır, avukat onayı bekler (docs/12). Ürün düzeyindeki `withdrawal_excluded` işareti (F13.6) bu cümleye girmez: istisnanın dayanağı ürüne göre değişir.
+  - **Vitrin:** `GET /store/storefront` → `features.product_addons` (bayrak `catalog.addons`). Kapalıyken vitrin ek uçlarını çağırmaz.
+  - **Geri alma:** ek kaldırmanın telafisi satırın yalnız `qt_addons` anahtarını eski hâline getirir (önceden yoksa `""`); başka adımların yazdığı anahtarlara dokunmaz.
 
 **Medusa 2.21.2 (Context7, 2026-11-03, testle doğrulandı):**
 

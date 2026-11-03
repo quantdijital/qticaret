@@ -46,6 +46,18 @@ export async function linkShop(
 export const linkFlag = (http: HttpClient, headers: Record<string, string>, enabled: boolean) =>
   settle(http.post("/admin/features/orders.payment_links", { enabled }, { headers }))
 
+/** The `payment_links` section as it starts; a test that changes it puts this back. */
+export const LINK_DEFAULTS = { admin_max_discount_percent: 20, allow_cod: false }
+
+export const linkSettings = (
+  http: HttpClient,
+  headers: Record<string, string>,
+  values: Record<string, unknown>
+) =>
+  settle(
+    http.post<{ message?: string }>("/admin/platform-settings/payment_links", values, { headers })
+  )
+
 /** A link body: two units of the variant for the guest, preset to the seed's shipping. */
 export const linkBody = (
   shop: StockShop,
