@@ -11,8 +11,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const [site, query] = await Promise.all([siteSeo(), searchParams])
   const state = stateFromSearch(toSearch(query))
+  // Filters (`stok=var` among them), a price range or a sort narrow the list
   const narrowed = state.filters.length > 0 || state.price !== null || state.sort !== null
-  const path = state.page > 1 ? `/magaza?sayfa=${String(state.page)}` : "/magaza"
+  // docs/13 §7: a narrowed list's canonical is the clean page; a plain numbered page names itself
+  const path = state.page > 1 && !narrowed ? `/magaza?sayfa=${String(state.page)}` : "/magaza"
   return {
     title: { absolute: `${t("listing.all_products")} | ${site.shop.name}` },
     description: t("listing.all_products_description", { shop: site.shop.name }),

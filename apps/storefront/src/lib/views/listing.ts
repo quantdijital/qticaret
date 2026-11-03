@@ -3,8 +3,9 @@ import type { ListingSort, ListingView } from "@qticaret/types"
 /**
  * A listing's query (docs/13 §7) as the storefront writes its links: in
  * the backend's canonical form, so a link never costs a 301. `marka`
- * first, then the attribute keys in code-point order, each key's values
- * sorted; then `fiyat`, `sirala`, `sayfa` (no `sayfa=1`, no default sort).
+ * first, then the attribute keys and `stok` in code-point order, each
+ * key's values sorted; then `fiyat`, `sirala`, `sayfa` (no `sayfa=1`, no
+ * default sort).
  * A site search's words (`q`) lead, kept by every link of its page.
  */
 export interface ListingState {
@@ -17,6 +18,14 @@ export interface ListingState {
 }
 
 const BRAND = "marka"
+
+/** "Only what is in stock" (adr/0056): a filter like the others, its one value `var`. */
+export const STOCK = "stok"
+export const IN_STOCK = "var"
+
+/** Whether the list shows only what is in stock. */
+export const isInStockOnly = (state: ListingState): boolean =>
+  state.filters.some(([key, values]) => key === STOCK && values.includes(IN_STOCK))
 
 const keyOrder = ([a]: [string, string[]], [b]: [string, string[]]) =>
   a === BRAND ? -1 : b === BRAND ? 1 : a < b ? -1 : a > b ? 1 : 0
@@ -148,7 +157,8 @@ export function stateFromSearch(search: URLSearchParams): ListingState {
     const values = raw
       .split(",")
       .map((value) => value.trim().toLowerCase())
-      .filter((value) => VALUE.test(value))
+      // `stok` has one value (`var`); any other is no filter, as the backend reads it
+      .filter((value) => (key === STOCK ? value === IN_STOCK : VALUE.test(value)))
     if (values.length > 0) {
       filters.push([key, values])
     }

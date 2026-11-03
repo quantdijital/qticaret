@@ -42,6 +42,7 @@ export type ListingSort = "yeni" | "fiyat-artan" | "fiyat-azalan"
 
 /** A listing page's query as the backend read it (docs/13 §7). */
 export interface ListingView {
+  /** By key: `marka`, the attribute keys, `stok` (its one value `var`, adr/0056). */
   filters: Record<string, string[]>
   price: { min: number | null; max: number | null } | null
   sort: ListingSort | null

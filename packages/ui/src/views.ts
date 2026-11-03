@@ -325,6 +325,17 @@ export interface FilterGroupView {
   options: FilterOptionView[]
 }
 
+/**
+ * "Yalnızca stokta olanlar" (adr/0056): one link that turns `stok=var` on
+ * or off (nofollow, D4); its count is what the list holds in stock.
+ */
+export interface StockFilterView {
+  label: string
+  count: number
+  selected: boolean
+  path: string
+}
+
 /** The price range form: a plain GET form to the listing, its current filters carried along. */
 export interface PriceFilterView {
   action: string
@@ -348,6 +359,8 @@ export interface ListingPageView {
   sort: SortOptionView[]
   filters: FilterGroupView[]
   price: PriceFilterView | null
+  /** The in-stock toggle; none when the listing does not offer it. */
+  stock?: StockFilterView | null
   /** What narrows the list now, each a link that takes it away. */
   active: LinkView[]
   /** Every filter off; null when none is on. */

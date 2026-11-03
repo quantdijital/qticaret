@@ -257,6 +257,7 @@
   "listing.remove_filter": "Filtreyi kaldır: {label}",
   "listing.no_match": "Bu seçimle eşleşen ürün yok. Bir filtreyi kaldırmayı deneyin.",
   "listing.more_values": "+{count} daha göster",
+  "listing.in_stock_only": "Yalnızca stokta olanlar",
   "account.title": "Hesabım",
   "account.menu": "Hesap menüsü",
   "account.overview": "Genel bakış",

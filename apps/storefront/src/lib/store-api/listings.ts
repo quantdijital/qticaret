@@ -21,6 +21,12 @@ export interface ListingAnswer {
     brands: FacetValueAnswer[]
     attributes: { key: string; label: string; values: FacetValueAnswer[] }[]
     price: { min: number; max: number } | null
+    /**
+     * `stok=var` (adr/0056): how many the list holds in stock, counted
+     * without that filter, and whether it is on. Optional: an older
+     * backend leaves it out and the toggle is not offered.
+     */
+    stock?: { count: number; selected: boolean }
   }
   /** A site search's (adr/0046 ek 2026-11-03): "did you mean" phrases, related chips. */
   search?: {

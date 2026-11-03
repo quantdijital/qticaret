@@ -97,6 +97,30 @@ test.describe("site search (/arama)", () => {
   })
 })
 
+test.describe("in stock only (stok=var, adr/0056)", () => {
+  test("turns on by a plain link, kept by the sorts, out of the index, off by its chip", async ({
+    page,
+  }) => {
+    const errors = collectErrors(page)
+    await page.goto("/magaza")
+    const filters = page.getByRole("complementary", { name: "Filtreler" })
+    const toggle = filters.getByRole("link", { name: /Yalnızca stokta olanlar/ })
+    await expect(toggle).toHaveAttribute("href", "/magaza?stok=var")
+    await expect(toggle).toHaveAttribute("rel", "nofollow")
+    await toggle.click()
+    await expect(page).toHaveURL(/\/magaza\?stok=var$/)
+    expect(await robotsOf(page)).toMatch(/^noindex/)
+    await expect(toggle).toHaveAttribute("aria-current", "true")
+    await expect(toggle).toHaveAttribute("href", "/magaza")
+    const sorts = page.getByRole("navigation", { name: "Sıralama" }).getByRole("link")
+    await expect(sorts.nth(1)).toHaveAttribute("href", "/magaza?stok=var&sirala=yeni")
+    await page.getByRole("link", { name: "Filtreyi kaldır: Yalnızca stokta olanlar" }).click()
+    await expect(page).toHaveURL(/\/magaza$/)
+    await fitsThePhone(page)
+    expect(errors).toEqual([])
+  })
+})
+
 test.describe("blog archives (adr/0019 ek 2026-11-03)", () => {
   test("an archive no category or tag has is a 404", async ({ page }) => {
     for (const path of ["/blog/kategori/boyle-bir-kategori-yok", "/blog/etiket/boyle-etiket-yok"]) {

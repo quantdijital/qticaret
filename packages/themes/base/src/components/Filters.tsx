@@ -1,5 +1,5 @@
 import { Check } from "lucide-react"
-import type { FilterGroupView, PriceFilterView, Translate } from "@qticaret/ui"
+import type { FilterGroupView, PriceFilterView, StockFilterView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
 import { Swatch } from "./Swatch"
 
@@ -75,6 +75,48 @@ function FilterGroup({ group, more }: { group: FilterGroupView; more: string }) 
   )
 }
 
+/**
+ * "Yalnızca stokta olanlar": a link drawn as a switch (no script), its
+ * count beside it; on, the same link turns it off.
+ */
+function StockToggle({ stock }: { stock: StockFilterView }) {
+  return (
+    <div className="border-b pb-4">
+      <a
+        href={stock.path}
+        rel="nofollow"
+        aria-current={stock.selected ? "true" : undefined}
+        className={cn(
+          "group flex min-h-10 items-center gap-3 rounded-lg text-sm transition-colors hover:text-foreground",
+          stock.selected ? "font-medium text-foreground" : "text-foreground/80",
+          stock.count === 0 && !stock.selected && "pointer-events-none opacity-45"
+        )}
+      >
+        <span
+          aria-hidden="true"
+          className={cn(
+            "flex h-5 w-9 shrink-0 items-center rounded-full border transition-colors",
+            stock.selected
+              ? "border-foreground bg-foreground"
+              : "border-input bg-card group-hover:border-foreground/50"
+          )}
+        >
+          <span
+            className={cn(
+              "size-3.5 rounded-full transition-transform motion-reduce:transition-none",
+              stock.selected
+                ? "translate-x-4.5 bg-background"
+                : "translate-x-0.5 bg-muted-foreground/60"
+            )}
+          />
+        </span>
+        <span className="flex-1">{stock.label}</span>
+        <span className="tabular text-xs text-muted-foreground">{stock.count}</span>
+      </a>
+    </div>
+  )
+}
+
 /** The price range: a plain GET form; the listing's other choices ride along hidden. */
 function PriceForm({ price, t }: { price: PriceFilterView; t: Translate }) {
   return (
@@ -132,18 +174,21 @@ function PriceForm({ price, t }: { price: PriceFilterView; t: Translate }) {
   )
 }
 
-/** Every filter the listing offers, then the price range. */
+/** The in-stock toggle, every filter the listing offers, then the price range. */
 export function Filters({
   filters,
   price,
+  stock,
   t,
 }: {
   filters: FilterGroupView[]
   price: PriceFilterView | null
+  stock: StockFilterView | null
   t: Translate
 }) {
   return (
     <div className="flex flex-col">
+      {stock && <StockToggle stock={stock} />}
       {filters.map((group) => (
         <FilterGroup key={group.key} group={group} more={t("listing.more_values")} />
       ))}

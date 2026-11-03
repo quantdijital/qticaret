@@ -51,7 +51,8 @@ export function ListingPage({
   subscribe?: Subscribe | undefined
 }) {
   const { pagination } = view
-  const hasFilters = view.filters.length > 0 || view.price !== null
+  const stock = view.stock ?? null
+  const hasFilters = view.filters.length > 0 || view.price !== null || stock !== null
   const top = view.sectionsTop ?? []
   const bottom = view.sectionsBottom ?? []
   return (
@@ -101,7 +102,7 @@ export function ListingPage({
           <>
             <aside aria-label={t("listing.filters")} className="hidden lg:block">
               <div className="sticky top-40">
-                <Filters filters={view.filters} price={view.price} t={t} />
+                <Filters filters={view.filters} price={view.price} stock={stock} t={t} />
               </div>
             </aside>
             <details className="rounded-2xl border bg-card lg:hidden">
@@ -115,7 +116,7 @@ export function ListingPage({
                 )}
               </summary>
               <div className="border-t px-5 pt-4">
-                <Filters filters={view.filters} price={view.price} t={t} />
+                <Filters filters={view.filters} price={view.price} stock={stock} t={t} />
               </div>
             </details>
           </>

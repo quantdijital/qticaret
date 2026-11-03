@@ -1,7 +1,22 @@
 import { formatLira } from "@qticaret/ui"
-import type { FilterGroupView, LinkView, PriceFilterView, Translate } from "@qticaret/ui"
+import type {
+  FilterGroupView,
+  LinkView,
+  PriceFilterView,
+  StockFilterView,
+  Translate,
+} from "@qticaret/ui"
 import type { ListingAnswer } from "@/lib/store-api/listings"
-import { cleared, hrefOf, searchOf, toggled, withPrice } from "./listing"
+import {
+  IN_STOCK,
+  STOCK,
+  cleared,
+  hrefOf,
+  isInStockOnly,
+  searchOf,
+  toggled,
+  withPrice,
+} from "./listing"
 import type { ListingState } from "./listing"
 
 const BRAND = "marka"
@@ -9,16 +24,40 @@ const BRAND = "marka"
 export interface FilterViews {
   filters: FilterGroupView[]
   price: PriceFilterView | null
+  stock: StockFilterView | null
   active: LinkView[]
   clearPath: string | null
+}
+
+/**
+ * "Yalnızca stokta olanlar" (adr/0056): offered when the listing route
+ * counts it, unless nothing is in stock and it is off (it would narrow
+ * the list to nothing). On, it stays to be turned off again.
+ */
+function stockView(
+  pathname: string,
+  state: ListingState,
+  facet: ListingAnswer["facets"]["stock"],
+  t: Translate
+): StockFilterView | null {
+  const selected = isInStockOnly(state)
+  if (!facet || (facet.count === 0 && !selected)) {
+    return null
+  }
+  return {
+    label: t("listing.in_stock_only"),
+    count: facet.count,
+    selected,
+    path: hrefOf(pathname, toggled(state, STOCK, IN_STOCK)),
+  }
 }
 
 /**
  * The listing's filters as links (D4): each value toggles itself in the
  * address, its count what the list would hold; a filter with one value and
  * nothing chosen narrows nothing and is left out, as is the brand filter
- * on a brand's own page. What is chosen shows again as links that take it
- * away.
+ * on a brand's own page. The in-stock toggle is one more such link. What
+ * is chosen shows again as links that take it away.
  */
 export function filterViews(
   pathname: string,
@@ -46,11 +85,12 @@ export function filterViews(
       })),
     }))
 
-  const labels = new Map(
-    groups.flatMap((group) =>
+  const labels = new Map([
+    ...groups.flatMap((group) =>
       group.values.map((value) => [`${group.key}:${value.value}`, value.label] as const)
-    )
-  )
+    ),
+    [`${STOCK}:${IN_STOCK}`, t("listing.in_stock_only")] as const,
+  ])
   const active: LinkView[] = state.filters.flatMap(([key, values]) =>
     values.map((value) => ({
       label: labels.get(`${key}:${value}`) ?? value,
@@ -85,6 +125,7 @@ export function filterViews(
   return {
     filters,
     price,
+    stock: stockView(pathname, state, facets.stock, t),
     active,
     clearPath: active.length > 0 ? hrefOf(pathname, cleared(state)) : null,
   }
