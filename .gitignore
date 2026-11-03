@@ -31,3 +31,6 @@ apps/panel/e2e/.results/
 apps/panel/e2e/.report/
 apps/storefront/e2e/.results/
 apps/storefront/e2e/.report/
+
+# Müşteri kaynak dosyaları (dışa aktarmalar, tedarikçi belgeleri): depoya girmez
+docs/gecis/*/kaynak/
