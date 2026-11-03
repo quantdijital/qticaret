@@ -1,4 +1,4 @@
-import { demoRemovalMode, describeDemoPlan } from "../plan"
+import { demoRemovalMode, describeDemoPlan, orderedProductsMode } from "../plan"
 import type { DemoRemovalPlan } from "../plan"
 
 const plan: DemoRemovalPlan = {
@@ -25,6 +25,18 @@ describe("demo:remove's plan", () => {
     expect(demoRemovalMode(false, ["allow-non-local"])).toBe("list_only")
     expect(demoRemovalMode(false, ["allow-non-local", "confirm"])).toBe("remove")
     expect(demoRemovalMode(false, ["allow-non-local", "--confirm"])).toBe("list_only")
+  })
+
+  it("takes the seed products orders hold only when asked, and on a developer's machine only", () => {
+    expect(orderedProductsMode(true, [])).toBe("skip")
+    expect(orderedProductsMode(true, ["products-with-orders"])).toBe("remove")
+    expect(orderedProductsMode(false, ["products-with-orders"])).toBe("refuse")
+    expect(orderedProductsMode(false, ["products-with-orders", "allow-non-local", "confirm"])).toBe(
+      "refuse"
+    )
+    expect(orderedProductsMode(false, ["allow-non-local", "confirm"])).toBe("skip")
+    // `medusa exec` passes plain words only: the dashed form is not the option
+    expect(orderedProductsMode(true, ["--products-with-orders"])).toBe("skip")
   })
 
   it("lists every record it would remove, one line each, and nothing it keeps", () => {

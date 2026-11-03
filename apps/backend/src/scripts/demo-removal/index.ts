@@ -21,8 +21,17 @@ import {
   removeLeftoverImportChecks,
 } from "./shop"
 
-export { ALLOW_FLAG, CONFIRM_FLAG, demoRemovalMode, describeDemoPlan } from "./plan"
+export {
+  ALLOW_FLAG,
+  CONFIRM_FLAG,
+  ORDERED_PRODUCTS_FLAG,
+  demoRemovalMode,
+  describeDemoPlan,
+  orderedProductsMode,
+} from "./plan"
 export type { DemoRemovalPlan } from "./plan"
+export { removeOrderedDemoProducts } from "./ordered"
+export type { OrderedRemovalSummary } from "./ordered"
 
 export interface DemoRemovalSummary {
   orders: number

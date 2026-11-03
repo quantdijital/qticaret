@@ -64,6 +64,23 @@ export function describeDemoPlan(
 
 export const ALLOW_FLAG = "allow-non-local"
 export const CONFIRM_FLAG = "confirm"
+/** Also the seed products an order still holds stock for (a developer's machine only). */
+export const ORDERED_PRODUCTS_FLAG = "products-with-orders"
+
+/**
+ * What a run does with the seed products a shopper's order holds: nothing
+ * unless asked; asked, only on a developer's machine (their reservations
+ * are released, which a shop's live orders must never have done to them).
+ */
+export function orderedProductsMode(
+  local: boolean,
+  args: readonly string[]
+): "skip" | "remove" | "refuse" {
+  if (!args.includes(ORDERED_PRODUCTS_FLAG)) {
+    return "skip"
+  }
+  return local ? "remove" : "refuse"
+}
 
 /**
  * What a run does. On a developer's machine it removes. Elsewhere (a demo

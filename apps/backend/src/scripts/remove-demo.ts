@@ -3,15 +3,18 @@ import { isLocalEnv, parseEnv } from "../lib/env"
 import {
   ALLOW_FLAG,
   CONFIRM_FLAG,
+  ORDERED_PRODUCTS_FLAG,
   applyDemoRemoval,
   demoRemovalMode,
   describeDemoPlan,
   logDemoPlan,
+  orderedProductsMode,
   planDemoRemoval,
+  removeOrderedDemoProducts,
 } from "./demo-removal"
 
 /**
- * Usage: pnpm --filter @qticaret/backend demo:remove [allow-non-local [confirm]]
+ * Usage: pnpm --filter @qticaret/backend demo:remove [products-with-orders] [allow-non-local [confirm]]
  *
  * Takes the demo catalog and orders (seed:demo, seed:demo-orders) and what
  * e2e runs left out of the database, so the shop owner sees only their
@@ -20,9 +23,21 @@ import {
  * and then stops after the list; run again with `confirm` as well to
  * remove. `medusa exec` refuses `--options` it does not know: plain
  * arguments pass.
+ *
+ * `products-with-orders` (development/test only) also takes the seed
+ * products a shopper's order kept (their stock reserved): their
+ * reservations are released, the products soft-deleted with the demo
+ * categories left empty. Orders keep their lines; no customer is touched.
  */
 export default async function run({ container, args }: ExecArgs): Promise<void> {
-  const mode = demoRemovalMode(isLocalEnv(parseEnv()), args)
+  const local = isLocalEnv(parseEnv())
+  const ordered = orderedProductsMode(local, args)
+  if (ordered === "refuse") {
+    throw new Error(
+      `demo:remove: ${ORDERED_PRODUCTS_FLAG} releases orders' stock and runs on development/test only`
+    )
+  }
+  const mode = demoRemovalMode(local, args)
   if (mode === "refuse") {
     throw new Error(
       `demo:remove: refusing to remove records outside development/test; pass ${ALLOW_FLAG} for a demo tenant`
@@ -36,4 +51,7 @@ export default async function run({ container, args }: ExecArgs): Promise<void> 
     )
   }
   await applyDemoRemoval(container, plan)
+  if (ordered === "remove") {
+    await removeOrderedDemoProducts(container)
+  }
 }

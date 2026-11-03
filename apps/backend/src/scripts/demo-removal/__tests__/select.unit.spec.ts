@@ -9,6 +9,7 @@ import {
   isDemoWarehouseAddress,
   isEmptyCategory,
   isLeftoverImportCheck,
+  orderedDemoProducts,
 } from "../select"
 import type { ImportJobRow, ShippingOptionRow } from "../select"
 
@@ -182,5 +183,48 @@ describe("what demo:remove takes out", () => {
     expect(isLeftoverImportCheck(job({ status: "running" }), live, removed)).toBe(false)
     expect(isLeftoverImportCheck(job({ requested_by: null }), live, removed)).toBe(false)
     expect(isLeftoverImportCheck(job({ type: "catalog.export" }), live, removed)).toBe(false)
+  })
+})
+
+describe("demo:remove products-with-orders", () => {
+  const stocked = (id: string, handle: string, metadata: unknown, items: string[]) => ({
+    id,
+    handle,
+    title: "Pamuklu Tişört",
+    metadata: metadata as Record<string, unknown> | null,
+    variants: items.map((item) => ({ inventory_items: [{ inventory_item_id: item }] })),
+  })
+
+  it("takes the seed's marked products with the reservations on their stock", () => {
+    const found = orderedDemoProducts(
+      [
+        stocked("prod_1", "pamuklu-tisort", { demo: true }, ["iitem_s", "iitem_m"]),
+        stocked("prod_2", "keten-gomlek", { demo: true }, ["iitem_g"]),
+      ],
+      [
+        { id: "res_1", inventory_item_id: "iitem_s" },
+        { id: "res_2", inventory_item_id: "iitem_m" },
+        { id: "res_3", inventory_item_id: "iitem_other" },
+      ]
+    )
+
+    expect(found).toEqual([
+      { id: "prod_1", label: "pamuklu-tisort", reservation_ids: ["res_1", "res_2"] },
+      { id: "prod_2", label: "keten-gomlek", reservation_ids: [] },
+    ])
+  })
+
+  it("never takes one by its handle or title alone, nor a shop's own product", () => {
+    const found = orderedDemoProducts(
+      [
+        // Made before the mark: the plain run may take it, this option does not
+        stocked("prod_1", "pamuklu-tisort", null, ["iitem_1"]),
+        stocked("prod_2", "yun-bere", { demo: "yes" }, ["iitem_2"]),
+        stocked("prod_3", "kendi-urunum", { demo: true }, ["iitem_3"]),
+      ],
+      [{ id: "res_1", inventory_item_id: "iitem_1" }]
+    )
+
+    expect(found).toEqual([])
   })
 })

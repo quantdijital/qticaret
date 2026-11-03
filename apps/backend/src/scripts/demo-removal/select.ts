@@ -66,6 +66,53 @@ export const isDemoProduct = (product: ProductRow): boolean =>
     DEMO_PRODUCTS.find((demo) => demo.handle === product.handle)?.title
   )
 
+/** A product with the stock its variants draw on (Query's variant to inventory item link). */
+export interface ProductStockRow extends ProductRow {
+  variants?:
+    ({ inventory_items?: ({ inventory_item_id?: string | null } | null)[] | null } | null)[] | null
+}
+
+export interface ReservationRow {
+  id: string
+  inventory_item_id: string
+}
+
+/** A seed product a shopper's order still holds, with the reservations to release. */
+export interface OrderedDemoProduct {
+  id: string
+  label: string
+  reservation_ids: string[]
+}
+
+/**
+ * The seed products `products-with-orders` takes (local only): those the
+ * seed marked (`metadata.demo`) under a demo handle, the mark required:
+ * no handle or unchanged title alone is enough here, as the orders that
+ * hold them may be the owner's own. Each with the reservations on its stock.
+ */
+export function orderedDemoProducts(
+  products: readonly ProductStockRow[],
+  reservations: readonly ReservationRow[]
+): OrderedDemoProduct[] {
+  const handles = new Set(DEMO_PRODUCTS.map((demo) => demo.handle))
+  return products
+    .filter((product) => handles.has(product.handle) && hasDemoMark(product.metadata))
+    .map((product) => {
+      const items = new Set(
+        (product.variants ?? []).flatMap((variant) =>
+          (variant?.inventory_items ?? []).flatMap((link) => link?.inventory_item_id ?? [])
+        )
+      )
+      return {
+        id: product.id,
+        label: product.handle,
+        reservation_ids: reservations
+          .filter((reservation) => items.has(reservation.inventory_item_id))
+          .map((reservation) => reservation.id),
+      }
+    })
+}
+
 export interface ShippingOptionRow {
   id: string
   name: string
