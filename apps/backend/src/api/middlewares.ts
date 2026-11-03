@@ -34,6 +34,7 @@ import { BANK_TRANSFER_ROUTES } from "./http/bank-transfer-routes"
 import { CUSTOMER_SEGMENT_ROUTES } from "./http/customer-segment-routes"
 import { CAMPAIGN_ROUTES } from "./http/campaign-routes"
 import { BRAND_ROUTES, STORE_BRAND_FIELDS } from "./http/brand-routes"
+import { SEARCH_ROUTES } from "./http/search-routes"
 import { CATALOG_SHEET_ROUTES } from "./http/catalog-sheet-routes"
 import { CHARGEBACK_ROUTES } from "./http/chargeback-routes"
 import { COMMUNICATION_ROUTES } from "./http/communication-routes"
@@ -293,6 +294,8 @@ export default defineMiddlewares({
     ...PAYMENT_LINK_ROUTES,
     // F3.11: brands
     ...BRAND_ROUTES,
+    // adr/0056: site search's synonym groups
+    ...SEARCH_ROUTES,
     ...CONTENT_ROUTES,
     ...CONTENT_DRAFT_ROUTES,
     // F3.9: product sheets

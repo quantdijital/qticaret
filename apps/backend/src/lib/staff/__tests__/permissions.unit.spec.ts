@@ -263,6 +263,10 @@ const OPERATIONS_WRITE_ROUTES: Record<string, boolean> = {
   "POST /admin/brands/:id": false,
   "DELETE /admin/brands/:id": false,
   "POST /admin/brands": false,
+  // adr/0056: search synonyms are a catalogue setting, the owner's and admins'
+  "POST /admin/search/synonyms/:id": false,
+  "DELETE /admin/search/synonyms/:id": false,
+  "POST /admin/search/synonyms": false,
   "POST /admin/catalog/imports": false,
   "POST /admin/migrations": false,
   "POST /admin/migrations/shopify": false,

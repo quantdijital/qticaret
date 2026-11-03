@@ -13,6 +13,7 @@ import { MEDIA_RESOURCES } from "./resources/media"
 import { PRICE_RESOURCES } from "./resources/prices"
 import { PROMOTION_RESOURCES } from "./resources/promotions"
 import { REDIRECT_RESOURCES } from "./resources/redirects"
+import { SEARCH_RESOURCES } from "./resources/search"
 import { SEO_RESOURCES } from "./resources/seo"
 import { SETTINGS_RESOURCES } from "./resources/settings"
 import { STAFF_RESOURCES } from "./resources/staff"
@@ -35,6 +36,7 @@ export const AUDITED_RESOURCES: readonly AuditedResource[] = [
   ...SEO_RESOURCES,
   ...REDIRECT_RESOURCES,
   ...BRAND_RESOURCES,
+  ...SEARCH_RESOURCES,
   ...STOCK_RESOURCES,
   ...MEDIA_RESOURCES,
   ...CONTENT_RESOURCES,
