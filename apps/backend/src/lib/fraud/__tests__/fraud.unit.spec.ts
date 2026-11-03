@@ -4,7 +4,7 @@ import { blockEntryOf, matchesOf } from "../block"
 import { isDisposableEmail } from "../disposable"
 import { scoreOrder } from "../score"
 import type { OrderFacts } from "../score"
-import { countCheckout } from "../velocity"
+import { UNCOUNTED, countCheckout, isVelocityExempt } from "../velocity"
 
 // A throwaway key for these checks only
 const KEY = randomBytes(32)
@@ -98,6 +98,34 @@ describe("checkout velocity", () => {
     expect(third).toMatchObject({ ipEmails: 3, phoneEmails: 3, verdict: "ok" })
     expect(again).toMatchObject({ ipEmails: 3, phoneEmails: 3 })
     expect((await run("e4")).verdict).toBe("challenge")
+  })
+
+  it("leaves this machine's own checkouts uncounted on a developer's machine only", () => {
+    const development = { NODE_ENV: "development" }
+    const loopback = ["127.0.0.1", "127.0.1.1", "::1", "::ffff:127.0.0.1", " 127.0.0.1 "]
+
+    for (const ip of loopback) {
+      expect(isVelocityExempt(ip, development)).toBe(true)
+    }
+    // Any other address is counted, a private one on the same network too
+    for (const ip of [
+      "203.0.113.7",
+      "192.168.1.20",
+      "10.0.0.1",
+      "::ffff:203.0.113.7",
+      "2001:db8::1",
+    ]) {
+      expect(isVelocityExempt(ip, development)).toBe(false)
+    }
+    expect(isVelocityExempt(null, development)).toBe(false)
+    expect(isVelocityExempt("1270.0.0.1", development)).toBe(false)
+    // Tests and every deployed instance count loopback as any address
+    for (const NODE_ENV of ["test", "staging", "production", undefined]) {
+      for (const ip of loopback) {
+        expect(isVelocityExempt(ip, { NODE_ENV })).toBe(false)
+      }
+    }
+    expect(UNCOUNTED).toEqual({ verdict: "ok", ipEmails: 0, phoneEmails: 0 })
   })
 })
 

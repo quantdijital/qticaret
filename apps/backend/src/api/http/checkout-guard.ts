@@ -3,7 +3,12 @@ import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { parseKey } from "../../lib/crypto/pii"
 import { parseEnv } from "../../lib/env"
 import { blockEntryOf, matchesOf } from "../../lib/fraud/block"
-import { CHECKOUT_VELOCITY, countCheckout } from "../../lib/fraud/velocity"
+import {
+  CHECKOUT_VELOCITY,
+  UNCOUNTED,
+  countCheckout,
+  isVelocityExempt,
+} from "../../lib/fraud/velocity"
 import { errorSummary, logger } from "../../lib/logging"
 import { perIpScale } from "../../lib/security/rate-limit"
 import { FRAUD_GUARD_MODULE } from "../../modules/fraud-guard"
@@ -91,16 +96,21 @@ export async function guardPaymentStart(
     }
     const phone = phonesOf(cart).find(Boolean) ?? null
     const scale = perIpScale()
-    const counts = await countCheckout(
-      sharedRateLimitStore(),
-      {
-        ipBucket: clientBucket(req),
-        emailKey: cart.email ? (blockEntryOf("email", cart.email, keyOf())?.match ?? null) : null,
-        phoneKey: phone ? (blockEntryOf("phone", phone, keyOf())?.match ?? null) : null,
-      },
-      CHECKOUT_VELOCITY,
-      scale
-    )
+    // This machine's own checkouts on a developer's machine are not counted
+    const counts = isVelocityExempt(clientIp(req), parseEnv())
+      ? UNCOUNTED
+      : await countCheckout(
+          sharedRateLimitStore(),
+          {
+            ipBucket: clientBucket(req),
+            emailKey: cart.email
+              ? (blockEntryOf("email", cart.email, keyOf())?.match ?? null)
+              : null,
+            phoneKey: phone ? (blockEntryOf("phone", phone, keyOf())?.match ?? null) : null,
+          },
+          CHECKOUT_VELOCITY,
+          scale
+        )
     if (counts.verdict === "block") {
       logger.warn({ event: "fraud.checkout_velocity" })
       rejectRequest(

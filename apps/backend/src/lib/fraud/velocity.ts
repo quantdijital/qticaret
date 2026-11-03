@@ -96,6 +96,27 @@ export async function countCheckout(
   }
 }
 
+/** What a checkout not counted leaves: nothing seen. */
+export const UNCOUNTED: CheckoutCounts = { verdict: "ok", ipEmails: 0, phoneEmails: 0 }
+
+// This machine itself: IPv4's loopback block, IPv6's, and IPv4's as IPv6 writes it
+const isLoopback = (ip: string): boolean =>
+  ip === "::1" || /^(?:::ffff:)?127(?:\.\d{1,3}){3}$/i.test(ip)
+
+/**
+ * Whether a checkout start goes uncounted: one from this machine itself on
+ * a developer's machine (NODE_ENV=development), where the storefront's e2e
+ * runs and the owner's own tries all start from loopback with a new e-mail
+ * each and would meet the hard limits within a day. Tests and every
+ * deployed instance count every address, loopback included.
+ */
+export function isVelocityExempt(
+  ip: string | null | undefined,
+  env: { NODE_ENV?: string | undefined }
+): boolean {
+  return env.NODE_ENV === "development" && typeof ip === "string" && isLoopback(ip.trim())
+}
+
 /** Where checkout leaves what it counted on the cart, for the order's score: numbers only. */
 export const CART_SIGNALS = "qt_fraud_signals"
 
