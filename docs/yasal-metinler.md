@@ -61,8 +61,8 @@ Metinler yalnız kayıttaki belirteçleri kullanır (`lib/legal/tokens.ts`; test
 
 Her metnin not kutusunda kendi listesi var. Özetle:
 
-1. İade için öngörülen taşıyıcının adının yazılması (MSY md. 5/1-g).
-2. Kısmi iadede gidiş kargo ücretinin iadesi; değer kaybı kesintisi (md. 12/1, 13/2).
+1. İade için öngörülen taşıyıcının adının yazılması (MSY md. 5/1-g; ayrıntı aşağıda 17).
+2. Kısmi iadede gidiş kargo ücretinin iadesi, kapıda ödeme bedeli, reddedilen ürünün geri gönderim ücreti ve değer kaybı kesintisi (md. 12/1, 13/2; ayrıntı aşağıda 13–16).
 3. Hediye kartında cayma kuralının (kartlardan harcama yapılmadıkça cayma var) md. 15/1-ğ karşısında yeterliliği.
 4. Kapıda ödeme ve havale iadelerinde IBAN istenmesi ve hesabın alıcı adına olması şartı.
 5. Teslim edilemeyen ya da teslim alınmayan gönderinin yeniden gönderim ücreti; kapıda ödemeli gönderinin reddinin cayma sayılması.
@@ -76,15 +76,27 @@ Her metnin not kutusunda kendi listesi var. Özetle:
 
 Platformun kullandığı yurt dışı sağlayıcılar (aydınlatma metni kategoriyle yazar): CDN/WAF Cloudflare (adr/0003), e-posta gönderimi Resend (adr/0036), izinle ölçüm Google Analytics 4 ve Meta (adr/0038), sosyal giriş Google ve Apple (adr/0037). Veritabanı, dosya deposu, yedekler ve hata izleme Türkiye'de (adr/0003, adr/0045).
 
-## Metinlerle çelişen platform davranışları (kod işi, bu görevin kapsamı dışında)
+## Metinlerle çelişen platform davranışları
 
-Taslaklar yasaya göre yazıldı; aşağıdakiler metinle uyumlu olsun diye ayrıca düzeltilmeli:
+Taslaklar yasaya göre yazıldı; aşağıdakiler metinle uyumlu olsun diye ayrıca düzeltildi ya da düzeltilmeli. Durum 2026-11-03 itibarıyla (MSY 2026 uyumu: adr/0032 Ek, adr/0052 Ek, docs/12):
 
-1. **Kargo ücretinin iadesi:** iade akışı kargo ücretini varsayılan olarak iade etmiyor (adr/0032 §5). Cayma iadesinde teslim masrafları dahil iade edilir (MSY md. 12/1).
-2. **"İade kargosunu ödeyen: Müşteri" ayarı** (Ayarlar > Kargo ve teslimat > İade): satıcının belirttiği taşıyıcıyla yapılan cayma iadesinde alıcıdan masraf istenemez (md. 12). Seçenek ya kaldırılmalı ya da yalnız yasal zorunluluk dışındaki iadeler için yeniden adlandırılmalı; `hasMerchantReturnPolicy` buna göre gözden geçirilmeli.
-3. **Ürün düzeyindeki "Cayma hakkı dışında" işareti** vitrinde ürün sayfasında gösterilmiyor (yalnız kişiye özel ek seçenekte uyarı var); md. 5/1-h ve md. 6/2 bunu siparişten önce ister. İşaret ürünü ambalajı açılmamış olsa da iade dışı tutuyor; hijyen istisnası (15/1-ç) yalnız koruyucu ambalajı açılmış üründe geçerli. Paneldeki ipucu ("…yalnızca kusurlu çıkarsa geri alınır") da buna göre düzeltilmeli.
-4. **"MSY md. 15/1-ç" atfı yanlış:** kişiye özel ürün 15/1-b'dir. `lib/legal/withdrawal.ts` düzeltildi; hâlâ "15/1-ç" diyenler: panel `locales/tr.json` ve `en.json` (`nonWithdrawableHint`), `features/orders/components/non-withdrawable-badge.tsx` yorumu, backend `lib/catalog/addons/schema.ts` yorumu, adr/0052, PROGRESS.
-5. **Para iadesinin zamanı:** yasal süre malın iade taşıyıcısına teslimiyle başlar; platform parayı depoya varışta iade ediyor. Taşıma ve kontrol 14 günü aşmamalı.
+1. **Kapandı (02928844).** Kargo ücretinin iadesi: iade akışı kargo ücretini varsayılan olarak iade etmiyordu (adr/0032 §5). Artık cayma hakkı içindeki bir satırı kapsayan her iade, siparişin gidiş kargo ücretini kendiliğinden iade ediyor; kısmi iadede de ilk iadeyle, bir kez (MSY md. 12/1; `shippingRefundDue`). Yalnız cayma dışı satırların ayıplı iadesinde karar personelin. Kısmi iadede ücretin tamamının iadesi aşağıda avukata soru olarak duruyor.
+2. **Kapandı (02928844).** "İade kargosunu ödeyen: Müşteri" seçeneği kaldırıldı: `returns.return_shipping` yalnız `"shop"` alır, kayıtlı `"customer"` değeri migration script'iyle `"shop"` oldu (md. 12/5; md. 13/3 mülga). JSON-LD `returnFees` hep `FreeReturn`. Panelin denetimi kaldırması panel işi.
+3. **Backend kapandı (02928844; Store API alanları 2026-11-03); vitrin ürün sayfasında gösterim bekliyor.** Ürün düzeyindeki işaret ürünün türüne göre okunuyor (`productMarkOf`): fiziksel üründe hijyen uyarısıdır (`withdrawal_warning: "sealed_goods"`), talep kabul edilir, ambalajı açılmış gelen birim teslim almada reddedilir (md. 15/1-ç); dijital ürün ve hizmette kesin istisnadır (md. 15/1-ğ, h). Store API ürün okuması işareti ve türü veriyor: `fields=+product_extension.withdrawal_excluded,+product_extension.kind` (`/store/products/:id` ve `/store/products`). **Açık:** vitrinin ürün sayfasında bunu siparişten önce göstermesi (md. 5/1-h, md. 6/2) ve paneldeki ipucunun ("…yalnızca kusurlu çıkarsa geri alınır") hijyen ürününe göre düzeltilmesi.
+4. **Kapandı (02928844; backend ve ADR).** "MSY md. 15/1-ç" atfı: kişiye özel ürün 15/1-b'dir. `lib/legal/withdrawal.ts`, `lib/catalog/addons/schema.ts` yorumu ve adr/0052 (Ek 2026-11-03) düzeltildi; `returns.withdrawal_excluded` hata metni artık "hijyen" demiyor. Panelde hâlâ "15/1-ç" diyenler panel işi: `locales/tr.json` ve `en.json` (`nonWithdrawableHint`), `features/orders/components/non-withdrawable-badge.tsx` yorumu.
+5. **Kapandı (02928844).** Para iadesinin zamanı: iade gönderisinin taşıyıcıya teslimi takipten okunup `handed_over_at` olarak yazılıyor; yönetici yanıtında `refund_due_at` (teslim ya da varış + 14 gün) var; 10. günde para iade edilmemişse personelin ziline bir kez `returns.refund_deadline_near` düşüyor (md. 12/1). İade gönderisini yalnız Geliver açtığı için teslim yalnız Geliver'den okunuyor; mağazanın kendi gönderdiği iadelerde süre depoya varıştan sayılıyor.
 6. **İade talebi formu** cayma süresi dolunca kapanıyor; ayıplı ürün başvuruları sonrasında e-posta ve telefonla alınıyor (metinler böyle yazıldı). Vitrinde ayrı bir "ayıplı ürün başvurusu" yolu düşünülebilir.
 7. **IBAN:** kapıda ödeme ve havale iadesinde müşterinin banka hesabı platformda tutulmuyor; personel e-postayla alıyor (docs/kvkk-envanter.md "Açık konular").
-8. **Gövde sınırı:** yasal metin taslak ve önizleme uçları Medusa'nın varsayılan 100 kB JSON sınırıyla çalışıyor (içerik uçları 1 MB). Taslaklar 10–29 kB; mağazanın uzun eklemeleri için `legal-routes.ts`'e `bodyParser.sizeLimit` eklenmesi önerilir.
+8. **Kapandı (c8874d5c).** Gövde sınırı: yasal metin taslak, önizleme ve yayım uçları 1 MB gövde alıyor (`legal-routes.ts`), içerik uçları gibi.
+9. **Kapıda ödeme bedeli:** metinler cayıldığında bu bedelin de iade edileceğini söylüyor (iade politikası 6. madde; sözleşmelerde "tahsil ettiği tüm ödemeler"); platform bu bedeli iade tutarına kendiliğinden katmıyor, personelin ayrıca iade etmesi gerekiyor. Avukatın cevabına göre ya iade akışı bedeli katar ya da metin değişir (aşağıdaki soru 14).
+10. **Kapandı (2026-11-03).** Reddedilen birim için müşteriye ileti: Teslim almada reddedilen birimler müşteriye `return.refused` e-postasıyla bildiriliyor: birimler, neden ("koruyucu ambalajı açılmış"), bedelin iade edilmeyeceği ve ürünün ücreti mağazaya ait olmak üzere geri gönderilebileceği ya da teslim alınabileceği. Her şey reddedildiyse giden tek ileti budur; kısmi retten sonra `return.refunded` reddedilenlerin tutara dahil olmadığını yazar. İade iletileri yalnız e-postayla gider (SMS yok).
+
+## Avukata sorulacaklar: MSY 2026 iade akışından açık kalanlar
+
+İade akışı 1.1.2026'da yürürlüğe giren değişikliklere uyarlandı (02928844; adr/0032 Ek 2026-11-03). Platformun bugünkü davranışı yasal varsayılan olarak seçildi; aşağıdakiler avukata sorulacak (docs/12'deki satırla aynı). Not kutularında da var.
+
+13. **Kısmi iadede gidiş kargo ücreti (md. 12/1):** siparişin bir kısmı iade edildiğinde platform kargo ücretinin tamamını ilk iadeyle bir kez iade ediyor ve metinler bunu söylüyor. Yönetmeliğin bunu gerektirip gerektirmediği; gerektirmiyorsa mağaza ayarı olur.
+14. **Kapıda ödeme bedeli (md. 12/1):** bedelin "tahsil ettiği tüm ödemeler"e girip girmediği. Bugün iade edilmiyor (yukarıda 9).
+15. **Reddedilen ürünün geri gönderimi:** ambalajı açılmış olarak gelip reddedilen ürünün müşteriye geri gönderim ücretinin kime ait olduğu. Platformun e-postası ve iade politikası (5. madde) ücretin mağazaya ait olduğunu ya da ürünün teslim alınabileceğini söylüyor; sözleşmeler (5.11, 7.11) ücreti belirtmiyor. Ücretin müşteriden istenip istenemeyeceği.
+16. **Değer kaybı kesintisi (md. 13/2):** olağan kullanım dışında kullanılmış ürün için iade tutarından kesinti yapılıp yapılamayacağı ve nasıl belgeleneceği. Platformda kesinti yok.
+17. **İade taşıyıcısının adı (md. 5/1-g):** ön bilgilendirmede iade için öngörülen taşıyıcının adının yazılması. Mağaza ayarlarında bu alan yok; metinler "anlaşmalı kargo firması" der, not kutusu adın elle yazılmasını ister.

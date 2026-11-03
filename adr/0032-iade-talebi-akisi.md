@@ -117,7 +117,9 @@ Medusa v2'nin iade modeli (Kaynak: core-flows v2.21.2) şöyle çalışıyor:
    - Teslim almada personel ambalajı açılmış birimleri `refused` listesine yazar. Yalnız `sealed_goods` satırı reddedilebilir; başka satır `returns.refusal_not_sealed` alır.
    - Reddedilen birim Medusa'nın teslim alma akışına girmez, stoğa dönmez, para iadesine girmez ve yeniden istenemez. Talepte `refused_items` (`reason: "unsealed"`) olarak kalır; müşteri kendi talebinde görür. Ürün müşteriye geri gönderilir.
    - Yalnız reddedilen birim geldiyse talep "received" kalır, para iadesi yapılmaz, zil çalmaz.
+   - Müşteri reddedilen birimleri `return.refused` e-postasıyla öğrenir (`return_request.refused` olayı, teslim almada birim reddedildiyse). E-posta birimleri ve nedenini ("koruyucu ambalajı açılmış") yazar, bedelin iade edilmeyeceğini ve ürünün ücreti mağazaya ait olmak üzere geri gönderilebileceğini ya da teslim alınabileceğini söyler. Her şey reddedildiyse giden tek ileti budur. Kısmi retten sonra `return.refunded` reddedilenlerin tutara dahil olmadığını yazar. İade iletileri yalnız e-postadır; geri gönderim ücretinin kime ait olduğu avukata açık sorudur.
    - Dijital ve hizmet ürünündeki işaret kesin istisnadır (md. 15/1-ğ, h): `withdrawal_excluded_reason: "product"`.
+   - Vitrin, ürün sayfasında işareti siparişten önce göstermek için (md. 5/1-h, md. 6/2) Store API ürün okumasında `fields=+product_extension.withdrawal_excluded,+product_extension.kind` ister; ikisi yalnız ürünün kendi yanıtında açıktır, bir ilişki üzerinden (`items.product.…`) istenemez.
 
 **Açık (avukata, docs/12):**
 
