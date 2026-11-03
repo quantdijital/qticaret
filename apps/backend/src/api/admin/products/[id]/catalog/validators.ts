@@ -1,5 +1,6 @@
 import { z } from "@medusajs/framework/zod"
 import { RESTRICTIONS } from "../../../../../lib/catalog"
+import { AddonsInput } from "../../../../../lib/catalog/addons"
 import { isCleanText } from "../../../../../lib/security"
 import {
   PRODUCT_CONDITIONS,
@@ -51,6 +52,8 @@ export const AdminPostProductCatalog = z
     restriction: z.enum(RESTRICTIONS).nullable().optional(),
     // adr/0025 Ek 2026-11-03: its variants are gift card amounts; needs promotions.gift_cards
     is_gift_card: z.boolean().optional(),
+    // adr/0052: up to five add-ons, priced in lira; needs catalog.addons (checked in the workflow)
+    addons: AddonsInput.nullable().optional(),
     variants: z
       .record(
         id,

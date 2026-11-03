@@ -19,6 +19,7 @@ interface ProductRow {
     withdrawal_excluded?: boolean | null
     restriction?: string | null
     is_gift_card?: boolean | null
+    addons?: unknown
   } | null
 }
 
@@ -53,6 +54,8 @@ async function catalogSnapshot(scope: Resolver, productId: string): Promise<Snap
     withdrawal_excluded: extension?.withdrawal_excluded ?? false,
     restriction: extension?.restriction ?? null,
     is_gift_card: extension?.is_gift_card ?? false,
+    // adr/0052: one value, so a change shows as before and after
+    addons: JSON.stringify(extension?.addons ?? null),
     ...Object.fromEntries(
       (product.variants ?? []).flatMap((variant): [string, string | number | null][] =>
         variant

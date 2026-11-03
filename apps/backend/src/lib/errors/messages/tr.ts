@@ -239,6 +239,33 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "catalog.core_gift_card":
     "Ürünü hediye kartı yapmak için ürün sayfasındaki 'Hediye kartı' seçeneğini kullanın.",
   "cart.line_unknown": "Bu satır sepette yok.",
+  "cart.prices_changed":
+    "Sepetteki bazı ürünlerin fiyatı değişti. Yeni tutarı kontrol edip ödemeyi yeniden başlatın.",
+  "catalog.addons_disabled":
+    "Ek seçenekler kapalı. Açmak için Ayarlar > Özellikler'e gidin; sepette ek seçenekli ürün varsa çıkarın.",
+  "addons.id_invalid": "Ek seçeneğin kimliği geçerli değil.",
+  "addons.id_duplicate": "Aynı kimlik iki kez kullanılmış.",
+  "addons.label_invalid": "Ad 1-60 karakter olmalı ve görünmez karakter içermemeli.",
+  "addons.help_invalid": "Açıklama en çok 160 karakter olabilir.",
+  "addons.price_invalid": "Fiyat 0 ile 10.000 TL arasında, en çok iki ondalıkla girilmeli.",
+  "addons.max_quantity_invalid": "Satır başına adet sınırı 1 ile 99 arasında olmalı.",
+  "addons.text_rules_invalid": "Yazı uzunluğu 1 ile 200 karakter arasında olmalı.",
+  "addons.choices_invalid": "Seçim türündeki ek seçenekte 2-10 seçenek olmalı.",
+  "addons.too_many": "Bir üründe en çok 5 ek seçenek olabilir.",
+  "addons.required_must_be_free": "Ücretli ek seçenek zorunlu yapılamaz.",
+  "addons.not_addon_line": "Bu ürünün ek seçeneği yok.",
+  "addons.unknown": "Bu ek seçenek ya da seçim üründe yok.",
+  "addons.duplicate": "Aynı ek seçenek iki kez seçilmiş.",
+  "addons.text_required": "Bu ek seçenek için yazı girin.",
+  "addons.text_too_long": "Yazı bu ek seçenek için izin verilenden uzun.",
+  "addons.charset": "Yazıda yalnızca harf, rakam ve boşluk kullanılabilir.",
+  "addons.text_link": "Yazıda bağlantı, web adresi ya da e-posta adresi olamaz.",
+  "addons.required": "Bu ürün için zorunlu ek seçeneği seçin.",
+  "addons.max_quantity": "Bu ek seçenekle bir satırda bu kadar adet alınamaz.",
+  "addons.line_locked":
+    "Ek seçenekli satırın bilgisi değiştirilemez; seçimleri ürünün ek seçenek alanından değiştirin.",
+  "addons.unavailable":
+    "Sepetteki bir ürünün ek seçeneği artık satılmıyor. Seçimi değiştirin ya da kaldırın.",
   "integration_credentials.check_failed":
     "Sağlayıcı beklenmedik bir yanıt verdi; bilgiler kaydedilmedi. Biraz sonra tekrar deneyin.",
   "integration_credentials.invalid": "Girilen değer geçerli değil.",
@@ -862,6 +889,62 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Bu tanıtıcı sitede başka bir ürüne ait; ürün taşınmadı (üzerine yazılmaz). Tanıtıcıyı kaynakta değiştirin ya da buradaki ürünü kaldırın.",
   "migration.url_path_reserved":
     "Bu eski adres sitenin ana sayfası ya da ayrılmış bir yolu; bir kayda bağlanmadı.",
+  "migration.wordpress_invalid":
+    "Dosya bir WordPress dışa aktarması değil ya da okunamadı. WordPress'te Araçlar > Dışa aktar > Tüm içerik ile indirilen .xml dosyasını yükleyin.",
+  "migration.wordpress_too_large":
+    "WordPress dışa aktarması 50 MB'tan büyük. Dosyayı zip'leyerek ya da içeriği parça parça dışa aktararak yükleyin.",
+  "migration.wordpress_trashed": "Kayıt WordPress'te çöp kutusunda; taşınmadı.",
+  "migration.wordpress_product_type":
+    "Gruplanmış ya da dış bağlantılı ürün; kendi fiyatı olmadığı için taşınmadı.",
+  "migration.wordpress_product_unread": "Ürünün adı ya da kısa adı okunamadı; taşınmadı.",
+  "migration.wordpress_attributes_unread":
+    "Ürünün özellikleri okunamadı; seçenekler varyasyonlardan çıkarıldı.",
+  "migration.wordpress_product_no_price":
+    "Ürünün (ya da hiçbir varyasyonunun) fiyatı yok; taşınmadı.",
+  "migration.wordpress_options_too_many":
+    "Ürünün üçten fazla varyasyon özelliği var; ilk üçü seçenek oldu.",
+  "migration.wordpress_variation_disabled": "Varyasyon WordPress'te kapalı; taşınmadı.",
+  "migration.wordpress_variation_no_price": "Varyasyonun fiyatı yok; taşınmadı.",
+  "migration.wordpress_variation_unread": "Varyasyonun seçenek değerleri okunamadı; taşınmadı.",
+  "migration.wordpress_variation_orphan": "Varyasyonun ana ürünü dosyada yok; taşınmadı.",
+  "migration.wordpress_image_missing":
+    "Görsel dosyanın ortam kütüphanesinde yok; taşınmadı. Ürüne elle ekleyebilirsiniz.",
+  "migration.wordpress_description_cut":
+    "Ürün açıklaması 20.000 karakterden uzun; bir paragraf sınırında kesildi.",
+  "migration.wordpress_body_cut": "Metin çok uzun; bir bölüm sınırında kesildi.",
+  "migration.wordpress_body_media":
+    "Metindeki görseller ya da ürün vitrini, galeri gibi bileşenler taşınmadı; yazı taşındı. Görselleri içerik düzenleyicide ekleyebilirsiniz.",
+  "migration.wordpress_post_unread": "Yazının başlığı ya da kısa adı okunamadı; taşınmadı.",
+  "migration.wordpress_path_reserved":
+    "Bu adres vitrinin kendi sayfası (/blog, /sepet, /magaza gibi); içerik sayfası yapılmadı, eski adresi Eski adresler'de kararınızı bekliyor.",
+  "migration.wordpress_post_categories":
+    "Yazının birden çok kategorisi var; birincil olanı kategori oldu, diğerleri taşınmadı.",
+  "migration.wordpress_post_tags_cut": "Yazının 50'den fazla etiketi var; ilk 50'si taşındı.",
+  "migration.wordpress_term_unread":
+    "Kategori ya da etiket adı okunamadı (kısa kod artığı ya da 120 karakterden uzun); taşınmadı.",
+  "migration.wordpress_page_front":
+    "Ana sayfa; içerik sayfası yapılmadı. Vitrinin ana sayfası Vitrin ayarlarından düzenlenir.",
+  "migration.wordpress_page_legal":
+    "Yasal metin; içerik sayfası yapılmadı (yasal metinler Ayarlar > Yasal'dan yayınlanır). Eski adresini Eski adresler'de /yasal/... sayfasına yönlendirin.",
+  "migration.wordpress_page_system":
+    "Mağaza sistem sayfası (sepet, ödeme, hesap, istek listesi); içerik sayfası yapılmadı.",
+  "migration.wordpress_page_empty":
+    "Sayfanın kendi metni yok (yalnızca tema bileşenleri); içerik sayfası yapılmadı.",
+  "migration.wordpress_noindex_draft":
+    "Eski sitede arama motorlarından gizliydi (noindex); taslak olarak taşındı, gözden geçirip yayınlayın ya da silin.",
+  "migration.wordpress_comment_not_review": "Yorumun puanı yok; ürün yorumu olarak taşınmadı.",
+  "migration.wordpress_review_photos": "Yorumun fotoğrafları taşınmadı; metni ve puanı taşındı.",
+  "migration.wordpress_handle_duplicate":
+    "Aynı kısa adla başka bir kayıt daha var; yalnızca ilki taşındı.",
+  "migration.wordpress_menus":
+    "Menüler taşınmadı; Vitrin > Menüler'den kurulur (kimlik sütununda öğe sayısı).",
+  "migration.wordpress_coupons":
+    "Kuponlar taşınmadı; Kampanyalar'dan indirim kodu olarak yeniden açılır (kullanım geçmişleri dışa aktarmada yok).",
+  "migration.wordpress_blog_comments": "Blog yorumları taşınmadı (vitrinde blog yorumu yok).",
+  "migration.wordpress_product_tags":
+    "Ürün etiketleri taşınmadı (vitrinde ürün etiketi sayfası yok; eski etiket adresleri noindex'ti).",
+  "migration.wordpress_attribute_not_moved":
+    "Ürün özelliği taşınmadı: özellik şablonunda bu anahtarla bir alan açılınca ürünlere yazılabilir (kimlik sütununda ürün ve değer sayısı).",
   "account.verification_session_required":
     "Adresinizi doğrulamak için önce hesabınıza giriş yapın; bağlantı ancak oturumunuzda çalışır.",
   "account.session_invalid": "Oturum geçersiz; yeniden giriş yapın.",
@@ -886,4 +969,25 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "fraud.block_invalid_email_domain": "Geçerli bir alan adı girin (ör. ornek.com).",
   "fraud.block_invalid_phone": "Geçerli bir Türkiye telefon numarası girin.",
   "fraud.block_invalid_ip": "Geçerli bir IP adresi girin.",
+  "campaigns.unknown": "Toplu ileti bulunamadı.",
+  "campaigns.locked":
+    "Bu ileti zamanlandı ya da gönderilmeye başladı; içeriği değişmez. Değiştirmek için kopyalayın.",
+  "campaigns.status_conflict": "İletinin durumu az önce değişti; sayfayı yenileyin.",
+  "campaigns.token_unknown":
+    "Metinde tanınmayan bir belirteç var. Yalnızca {ad} ve mağaza bilgisi belirteçleri kullanılabilir.",
+  "campaigns.too_many_products": "Bir e-postada en çok 4 ürün kartı olabilir.",
+  "campaigns.sms_too_long":
+    "SMS metni, mağaza adı ve ret metniyle birlikte en çok 3 SMS boyunu geçmemeli; metni kısaltın.",
+  "campaigns.content_missing": "Göndermeden önce iletinin konusunu ve metnini yazın.",
+  "campaigns.schedule_invalid": "Gönderim zamanı ileri bir tarih olmalı ve 90 günü geçmemeli.",
+  "campaigns.channel_off": "E-posta gönderimi bu mağazada açık değil.",
+  "campaigns.sender_unverified":
+    "Toplu e-posta için mağazanın gönderen alan adı doğrulanmış olmalı (Ayarlar > E-posta).",
+  "campaigns.sms_account_missing": "Toplu SMS için önce SMS hesabını bağlayın (Entegrasyonlar).",
+  "campaigns.sms_opt_out_missing":
+    "Toplu SMS için önce ret metnini girin (Ayarlar > SMS); her ticari SMS'te bulunması gerekir.",
+  "campaigns.segment_unknown": "Seçilen segment artık yok; kitleyi yeniden seçin.",
+  "campaigns.test_address_missing":
+    "Deneme gönderimi için adres yok: e-postada giriş adresiniz, SMS'te mağazanın telefonu kullanılır.",
+  "campaigns.quota_spent": "Bugünkü gönderim sınırı doldu; deneme yarın gönderilebilir.",
 }

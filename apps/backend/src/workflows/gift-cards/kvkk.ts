@@ -4,6 +4,7 @@ import type {
   MedusaContainer,
 } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
+import { lineAddonsOf } from "../../lib/catalog/addons"
 import { giftRecipientOf, issuedCardsOf, withoutRecipient } from "../../lib/promotions/gift-sale"
 
 type Container = Pick<MedusaContainer, "resolve">
@@ -17,7 +18,10 @@ type Container = Pick<MedusaContainer, "resolve">
 
 type ItemRow = { id: string; metadata?: Record<string, unknown> | null } | null
 
-/** An order's lines in the buyer's copy: what they gave for a gift, not the line's other notes. */
+/**
+ * An order's lines in the buyer's copy: what they gave for a gift and
+ * their add-on picks, not the line's other notes.
+ */
 export function exportedItems(items: unknown): unknown {
   if (!Array.isArray(items)) {
     return items
@@ -29,18 +33,30 @@ export function exportedItems(items: unknown): unknown {
     const { metadata, ...rest } = item
     const recipient = giftRecipientOf(metadata)
     const cards = issuedCardsOf(metadata)
-    return recipient || cards.length > 0
-      ? {
-          ...rest,
-          hediye: {
-            alıcı_e_posta: recipient?.recipient_email ?? null,
-            alıcı_adı: recipient?.recipient_name ?? null,
-            mesaj: recipient?.message ?? null,
-            gönderen_adı: recipient?.sender_name ?? null,
-            kartlar: cards.map((card) => `…${card.last4}`),
-          },
-        }
-      : rest
+    // The add-ons they picked, the text they typed with them (adr/0052 §10)
+    const addons = lineAddonsOf(metadata)?.items ?? []
+    return {
+      ...rest,
+      ...(recipient || cards.length > 0
+        ? {
+            hediye: {
+              alıcı_e_posta: recipient?.recipient_email ?? null,
+              alıcı_adı: recipient?.recipient_name ?? null,
+              mesaj: recipient?.message ?? null,
+              gönderen_adı: recipient?.sender_name ?? null,
+              kartlar: cards.map((card) => `…${card.last4}`),
+            },
+          }
+        : {}),
+      ...(addons.length > 0
+        ? {
+            ek_seçenekler: addons.map((addon) => ({
+              ad: addon.label,
+              değer: addon.value ?? addon.choice_label ?? null,
+            })),
+          }
+        : {}),
+    }
   })
 }
 

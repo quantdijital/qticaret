@@ -1,5 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { isNonWithdrawableLine } from "../../lib/catalog/addons"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import type { ReturnsSettings } from "../../modules/platform-settings/sections"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
@@ -13,16 +14,23 @@ export async function returnPolicy(container: Container): Promise<ReturnsSetting
     .getSection("returns")) as unknown as ReturnsSettings
 }
 
-/** The order's lines whose product is outside the right of withdrawal, by line id. */
+/**
+ * The order's lines outside the right of withdrawal, by line id: their
+ * product's mark (F13.6), or an add-on made to the buyer's wish that the
+ * line records (adr/0052 §8; the record as sold, not the product now).
+ */
 export async function excludedLines(
   container: Container,
-  items: readonly ({ id: string; product_id?: string | null } | null)[]
+  items: readonly ({ id: string; product_id?: string | null; metadata?: unknown } | null)[]
 ): Promise<Set<string>> {
+  const byAddon = items.flatMap((item) =>
+    item && isNonWithdrawableLine(item.metadata) ? [item.id] : []
+  )
   const productIds = [
     ...new Set(items.flatMap((item) => (item?.product_id ? [item.product_id] : []))),
   ]
   if (productIds.length === 0) {
-    return new Set()
+    return new Set(byAddon)
   }
   const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
     entity: "product",
@@ -34,7 +42,10 @@ export async function excludedLines(
       .filter((product) => product.product_extension?.withdrawal_excluded)
       .map((product) => product.id)
   )
-  return new Set(
-    items.flatMap((item) => (item?.product_id && excluded.has(item.product_id) ? [item.id] : []))
-  )
+  return new Set([
+    ...byAddon,
+    ...items.flatMap((item) =>
+      item?.product_id && excluded.has(item.product_id) ? [item.id] : []
+    ),
+  ])
 }

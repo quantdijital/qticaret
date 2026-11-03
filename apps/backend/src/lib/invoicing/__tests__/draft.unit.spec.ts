@@ -97,6 +97,44 @@ describe("an order's invoice lines (F8, adr/0034 §3)", () => {
     expect(line).toMatchObject({ unit_net: "83.3333", net: "250.00", gross: "300.00" })
   })
 
+  it("names a line's add-ons, never the text the buyer typed (adr/0052 §9)", () => {
+    const [line] = invoiceLines({
+      items: [
+        {
+          product_title: "Çakı",
+          variant_title: "Standart",
+          variant_id: "variant_1",
+          is_custom_price: true,
+          metadata: {
+            qt_addons: {
+              base: 1000,
+              non_withdrawable: true,
+              max_quantity: null,
+              items: [
+                { addon_id: "ad_1", kind: "text", label: "Ürün üzerine yazı", value: "Ahmet" },
+                {
+                  addon_id: "ad_2",
+                  kind: "choice",
+                  label: "Kılıf",
+                  choice_id: "ch_1",
+                  choice_label: "Desenli Siyah",
+                },
+              ],
+            },
+          },
+          quantity: 1,
+          subtotal: 1112.5,
+          tax_total: 222.5,
+          total: 1335,
+          tax_lines: vat20,
+        },
+      ],
+    })
+
+    expect(line?.description).toBe("Çakı - Standart - Ürün üzerine yazı - Kılıf: Desenli Siyah")
+    expect(line?.description).not.toContain("Ahmet")
+  })
+
   const codFee = (rate = vat20) => ({
     title: "Kapıda ödeme hizmet bedeli",
     metadata: { qt_fee: COD_FEE },

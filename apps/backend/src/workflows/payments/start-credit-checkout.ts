@@ -15,6 +15,7 @@ import {
 import { ValidationError } from "../../lib/errors"
 import { fromMedusaAmount } from "../../lib/money"
 import type { MedusaAmount } from "../../lib/money"
+import { repriceAddonLinesStep } from "../addons/checkout"
 import { applyPaymentFeeStep } from "./steps/payment-fee"
 import { readCheckoutCartStep } from "./steps/read-checkout-cart"
 
@@ -85,6 +86,11 @@ const markCreditCheckoutStep = createStep(
 export const startCreditCheckoutWorkflow = createWorkflow(
   "payments-start-credit-checkout",
   (input: StartCreditCheckoutInput) => {
+    // Add-on lines at their price now (adr/0052 §5)
+    repriceAddonLinesStep({
+      cart_id: input.cart_id,
+      sales_channel_ids: input.sales_channel_ids,
+    })
     // A cash on delivery fee line left from an earlier choice goes (no fee without a way to pay)
     applyPaymentFeeStep({
       cart_id: input.cart_id,

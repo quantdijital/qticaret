@@ -15,6 +15,7 @@ import { assertAgeDeclared } from "../legal/age"
 import { assertBuyerNotBlocked } from "../fraud/buyer-blocked"
 import { assertConsented } from "../legal/consent"
 import { assertGiftLinesReady } from "../gift-cards/cart-gifts"
+import { assertAddonLinesCurrent } from "../addons/checkout"
 import { expectedCodFee } from "../payments/steps/payment-fee"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import type { PromotionSettings } from "../../modules/platform-settings/sections"
@@ -71,6 +72,8 @@ completeCartWorkflow.hooks.validate(async ({ cart }: { cart: { id: string } }, {
   await assertBuyerNotBlocked(container, cart.id)
   // Gift lines name their recipients and are not paid with credit (adr/0025 Ek 2026-11-03)
   await assertGiftLinesReady(container, cart.id, null)
+  // Add-on lines still cost what they did when the payment started (adr/0052 §5)
+  await assertAddonLinesCurrent(container, cart.id)
   // The rule is checked as codes are sent too; requests racing each other
   // can each see an empty cart, so it is checked once more here (ADR-0024)
   if (enteredCodes(row.promotions).length > 1) {

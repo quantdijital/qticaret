@@ -1,4 +1,5 @@
 import { MathBN } from "@medusajs/framework/utils"
+import { addonInvoiceParts } from "../catalog/addons/line"
 import { ZERO_KURUS, addKurus, fromMedusaAmount, toMedusaAmount } from "../money"
 import type { Kurus, MedusaAmount } from "../money"
 import { isFeeLine } from "../payments/cod"
@@ -133,9 +134,10 @@ export function invoiceLines(order: {
     .filter((item) => !isFeeLine(item))
     .map((item) => {
       const variant = item.variant_title === item.product_title ? null : item.variant_title
+      // An add-on's name, never the text the buyer typed (adr/0052 §9)
       return invoiceLine(
         item,
-        describe([item.product_title ?? item.title, variant]),
+        describe([item.product_title ?? item.title, variant, ...addonInvoiceParts(item.metadata)]),
         quantityOf(item)
       )
     })

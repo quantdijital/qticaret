@@ -23,6 +23,9 @@ export const PRODUCT_KINDS = ["physical", "digital", "service"] as const
  *   a card to the recipient the line names (adr/0025 Ek 2026-11-03). Not
  *   Medusa's `is_giftcard`: the loyalty plugin issues weak codes for that
  *   one as the order is placed, before it is paid.
+ * - `addons`: up to five add-ons a shopper picks on the product page (a
+ *   typed text, one of a few choices), each with its price in lira
+ *   (adr/0052). The shape is `lib/catalog/addons`' schema; null: none.
  */
 export const ProductExtension = model.define("product_extension", {
   id: model.id({ prefix: "pext" }).primaryKey(),
@@ -33,4 +36,5 @@ export const ProductExtension = model.define("product_extension", {
   withdrawal_excluded: model.boolean().default(false),
   restriction: model.enum([...RESTRICTIONS]).nullable(),
   is_gift_card: model.boolean().default(false),
+  addons: model.json().nullable(),
 })

@@ -1,6 +1,6 @@
 # ADR-0052: Ürün ek seçenekleri (D13)
 
-- **Durum:** Öneri (kullanıcı kararı bekliyor; 2026-11-03 gece taslağı)
+- **Durum:** Kabul (2026-11-03, kullanıcı: "önerilerine uyuyorum")
 - **Tarih:** 2026-11-03
 - **İlgili:** D13; docs/gecis/mylarte/envanter.md §4.6; adr/0007 (KDV), adr/0010 (kuruş), adr/0026 §8 (iade tutarı), adr/0029 (ücret satırı deseni), adr/0032 (iade ve değişim), adr/0033 (sipariş düzenleme), adr/0034 (e-fatura), adr/0036 Ek (müşteri metni e-postada), adr/0041 (cayma istisnası, F13.6), docs/13 (feed ve JSON-LD fiyatı)
 
@@ -153,3 +153,63 @@ Bizde hazır olanlar: vitrin `qt_` ile başlayan metadata'yı yazamaz (`refuseRe
 2. **Kılıf:** Kılıf ek seçenek olsun (stok tutmaz), yoksa stoğu izlenen ayrı ürün mü?
 3. **İndirim:** Kampanya indirimleri ek ücretine de uygulanır. Bu kabul mü?
 4. **Faturada yazı:** Faturada yalnız ek adı ("Ürün üzerine yazı") görünsün, yazılan metin görünmesin. Uygun mu?
+
+Cevaplar (2026-11-03): dört soruda da öneri kabul edildi. Yazı satırın her adedine uygulanır; kılıf ek seçenektir; indirim eke de uygulanır; faturada yalnız ek adı görünür.
+
+## Uygulama notları (backend, 2026-11-03)
+
+**Karardan sapmalar** (ADR'nin yolu korunur: aynı satır, sunucuda hesaplanan özel birim fiyat):
+
+- **Depolama:** Ayrı `product-addons` modülü yerine `product_extension.addons` JSON sütunu kullanıldı (`{ items: [...] }`; migration `Migration20261103055421`). Ürün başına en çok 5 ek var ve ürünle birlikte okunur. Ürün bağlantısı zaten vardı; ayrı tablo ve link gerekmedi.
+- **Yazma:** Ekler ürünün katalog ucundan kaydedilir: `POST /admin/products/:id/catalog { addons }`. Ayrı `/admin/products/:id/addons*` ucu yok. Denetim kaydı katalog kaydıyla düşer.
+- **Etkin alanı yok:** Ek silinince onu taşıyan sepet satırı ödemede `addons.unavailable` ile durur.
+- **Seçim sayısı:** Seçim türünde 2–10 seçenek var (taslakta 2–20).
+- **Vitrin ucu satır düzeyinde:** Taslaktaki `addon-lines` yerine `POST /store/carts/:id/line-items/:line_id/addons`. Satır önce çekirdek uçla eklenir, sonra ekleri seçilir.
+  - Zorunlu ek, çekirdek ekleme ucunda değil; ödeme başlatmada ve tamamlamada denetlenir (`addons.required`).
+  - Yalnız ücretsiz ek zorunlu olabilir.
+- **Ürün sayfasının okuması:** Ürün yüküne alan eklenmedi. `GET /store/products/:id/addons` bayrak kapalıyken 404 verir; ürün yükünden okunsaydı bayrak süzülemezdi.
+- **Fiyatlar:** JSON'da lira (Medusa'nın tutar biçimi) tutulur. Hesap kuruşla yapılır.
+- **Tamamlamada eskime:** `completeCartWorkflow` sepet kilidini tutar; Medusa'nın satır iş akışları orada çalışamaz. Bu yüzden tamamlama satırı düzeltmez, yalnız 409 `cart.prices_changed` döner. Satırı yeni fiyata ödeme başlatma çeker (409 ile durur); müşteri yeni toplamı görüp ödemeyi yeniden başlatır.
+- **Silme işareti:** KVKK silmesi yazıyı "—" yapar; ek adı, seçim ve tutar kalır.
+- **Kapsam dışı (açık):** personelin yeni sipariş e-postası ve müşterinin sipariş e-postasında ek satırı (`lib/messaging`); panelden ekli satır düzenleme (adr/0033).
+
+**Medusa 2.21.2 (Context7, 2026-11-03, testle doğrulandı):**
+
+- `updateLineItemInCartWorkflow`'a `update.unit_price` verilince satır özel fiyatlı olur (`is_custom_price: true`). Verilmezse eski fiyat ve işaret korunur; özel fiyat bu akışla kaldırılamaz.
+  - Ek kaldırma bu yüzden satırı cart modülüyle `is_custom_price: false` yapar. Ardından `refreshCartItemsWorkflow`'u `force_refresh` ile çalıştırır; satırı Medusa kendi fiyatlamasıyla yeniden fiyatlar.
+- İç içe çalışan iş akışında `acquireLockStep` kilit almaz. Ekleri yazan akış sepet kilidini kendisi alır, Medusa'nın satır güncelleme ve yenileme akışlarını iç içe çalıştırır.
+- Promosyon ayarlamaları her sepet güncellemesinde yeniden hesaplanır. Özel fiyatlı satır da indirime girer: kod önce, ekler sonra seçilse de indirim yeni birim fiyattan çıkar (test: %10, 1.335 TL satırda 133,50 TL).
+- `compare_at_unit_price` güncellemede taşınır. Satış listesindeyken üstü çizili fiyat "liste öncesi fiyat + ekler" olarak yazılır.
+- Fiyat bağlamı: para birimi, bölge, müşteri ve grupları (`customer.groups.id`), satır adedi. Grup fiyat listesi testle doğrulandı.
+- Satır metadata'sı sipariş satırına geçer; `qt_addons` siparişte kalır.
+- Satır ve JSON sütunu güncellemeleri birleştirir: üst düzey anahtarlar eklenir, iç içe nesne bütün olarak değişir, boş dize anahtarı siler. Ek kaldırma `qt_addons: ""` yazar. Ürünün ekleri bu yüzden `{ items }` içinde tutulur; her kayıt listeyi bütün olarak değiştirir.
+- Satır adedi çekirdek uçla değişince özel fiyat korunur (test).
+- Medusa'nın doğrulayıcısı boyut hatalarını kendi cümlesiyle yazar. Panel i18n anahtarını alsın diye sınırlar `refine` ile denetlenir.
+
+**Sözleşme (vitrin):**
+
+- `GET /store/products/:id/addons` → `{ addons: [{ id, kind: "text"|"choice", label, help, required, max_quantity, non_withdrawable, price?, text?: { max_length, charset }, choices?: [{ id, label, price }] }] }`. Bayrak kapalıysa ya da ürün bu vitrinin yayımlanmış ürünü değilse 404.
+- `POST /store/carts/:id/line-items/:line_id/addons` → gövde `{ selections: [{ addon_id, value? , choice_id? }] }` (en çok 5; boş liste ekleri kaldırır). Fiyat, birim fiyat ya da `qt_` gönderilirse 400 döner. Yanıt `{ line: { id, quantity, unit_price, compare_at_unit_price, is_custom_price, addons } }`.
+- Hata anahtarları: `addons.unknown`, `addons.duplicate`, `addons.text_required`, `addons.text_too_long`, `addons.charset`, `addons.text_link`, `addons.max_quantity`, `addons.not_addon_line`, `cart.line_unknown`.
+- Satırın ekleri: `item.metadata.qt_addons` = `{ items: [{ addon_id, kind, label, value?, choice_id?, choice_label?, amount, non_withdrawable }], base, non_withdrawable, max_quantity }`. Tutarlar birim başına lira.
+- Çekirdek satır ucu: ekli satırın `metadata`'sı değiştirilemez (`addons.line_locked`). Adet, ekin sınırını aşamaz (`addons.max_quantity`).
+- Ödeme başlatma ve tamamlama: 409 `cart.prices_changed` gelirse sepet yeniden okunur ve gösterilir, ödeme yeniden başlatılır. 400 `addons.unavailable`, `addons.required` ya da `catalog.addons_disabled` gelirse satır düzeltilir.
+
+**Vitrinin yapacakları:**
+
+- **Ürün sayfası:** ek formu (yazı alanı uzunluk ve karakter kümesiyle; seçim için radyo, "istemiyorum" seçilmemiş hâldir) ve canlı toplam (yalnız gösterim).
+  - `non_withdrawable` ekte uyarı: "Bu seçenekle alınan ürün kişiye özeldir, cayma hakkı kapsamı dışındadır."
+  - Sepete ekleme iki adımdır: önce çekirdek ekleme, sonra `.../addons`. Fiyat etiketi "Fiyat + ekler".
+- **Sepet, ödeme özeti, müşterinin sipariş sayfası:** satır altında "Ürün üzerine yazı: Ahmet (+35,00 TL)" ya da "Kılıf: Desenli Siyah (+300,00 TL)". Değer kaçışlanır. Birim fiyat ekler dahil gösterilir.
+- **Ön bilgilendirme formu:** cayma dışı satırlar adlandırılır (yasal metin danışman onayına işaretli kalır).
+
+**Panelin yapacakları:**
+
+- **Ürün sayfası:** fiyat kartının altında "Ek seçenekler" kartı.
+  - Liste: ad, tür, fiyat, "cayma dışı" rozeti, sıra.
+  - "Ek ekle" yan paneli: tür, ad, açıklama, fiyat, yazı sınırları ve karakter kümesi, seçenek satırları, adet sınırı, "Kişiye özel: cayma hakkı dışında" kutusu.
+  - Kayıt `POST /admin/products/:id/catalog { addons }` ile yapılır. Mevcut eklerin `id`'si geri gönderilir, yoksa sepetteki satırlar `addons.unavailable` olur.
+  - Bayrak kapalıyken kart gizlenir (`catalog.addons_disabled`). İndirimin eke de uygulandığı not olarak yazılır.
+- **Sipariş sayfası ve kargoya hazır listesi:** satırın ekleri `metadata.qt_addons`'tan okunur; değer üretim için tam gösterilir.
+- **İade talepleri:** cayma dışı satırda "cayma dışı" rozeti. Kural sunucuda: `returnable-lines` yanıtında `withdrawal_excluded: true` olur; yalnız kusurlu ya da yanlış gelen ürün kabul edilir.
+- **Ayarlar > Özellikler:** `catalog.addons` bayrağının metni (`qticaret.features.catalog_addons.label`/`.description`).

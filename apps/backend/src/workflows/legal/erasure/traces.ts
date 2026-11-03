@@ -14,6 +14,7 @@ import type LegalModuleService from "../../../modules/legal/service"
 import { MESSAGING_MODULE } from "../../../modules/messaging"
 import type MessagingModuleService from "../../../modules/messaging/service"
 import { erasedKeyOf } from "../../../lib/migration/erased"
+import { eraseCampaignRecipients } from "../../campaigns/customer-data"
 import { eraseContactMessages } from "../../contact/customer-data"
 import { MIGRATION_MODULE } from "../../../modules/migration"
 import type MigrationModuleService from "../../../modules/migration/service"
@@ -220,6 +221,8 @@ export async function eraseTraces(container: Container, customerId: string, addr
   await eraseLegacyOrders(container, customerId, addresses)
   // What they wrote from the contact form, by account or address (adr/0047)
   await eraseContactMessages(container, customerId, addresses)
+  // The bulk messages' rows naming them (adr/0050 §8); the campaigns' counts stay
+  await eraseCampaignRecipients(container, customerId, addresses)
   await eraseExports(container, customerId)
   return { carts, messages }
 }

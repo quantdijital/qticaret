@@ -1,6 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
 import { variantGtin } from "../../../../../lib/catalog"
+import { storedAddonsOf } from "../../../../../lib/catalog/addons"
 
 interface ProductRow {
   id: string
@@ -24,6 +25,7 @@ interface ProductRow {
     withdrawal_excluded?: boolean | null
     restriction?: string | null
     is_gift_card?: boolean | null
+    addons?: unknown
   } | null
 }
 
@@ -86,6 +88,8 @@ export async function readProductCatalog(scope: MedusaContainer, productId: stri
     withdrawal_excluded: extension?.withdrawal_excluded ?? false,
     restriction: extension?.restriction ?? null,
     is_gift_card: extension?.is_gift_card ?? false,
+    // adr/0052: prices in lira, as saved
+    addons: storedAddonsOf(extension?.addons ?? null),
     primary_category_id: categories.some((category) => category.id === primary) ? primary : null,
     successor: await productTitle(scope, extension?.successor_product_id ?? null),
     categories,

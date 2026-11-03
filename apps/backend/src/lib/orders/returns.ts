@@ -32,6 +32,7 @@ export interface ReturnOrderFacts {
     | ({
         id: string
         product_id?: string | null
+        metadata?: Record<string, unknown> | null
         detail?: {
           shipped_quantity?: number | null
           return_requested_quantity?: number | null
@@ -58,6 +59,8 @@ export interface ReturnLine {
 export const RETURN_ORDER_FIELDS = [
   "items.id",
   "items.product_id",
+  // A line's add-on record can put it outside the right of withdrawal (adr/0052 §8)
+  "items.metadata",
   "items.detail.shipped_quantity",
   "items.detail.return_requested_quantity",
   "items.detail.return_received_quantity",

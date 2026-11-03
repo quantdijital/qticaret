@@ -8,6 +8,7 @@ import {
 } from "../../../lib/compliance/retention"
 import { CONVERSIONS_MODULE } from "../../../modules/conversions"
 import { eraseGiftRecipients } from "../../gift-cards/kvkk"
+import { eraseAddonTexts } from "../../addons/kvkk"
 import type ConversionsModuleService from "../../../modules/conversions/service"
 import { LEGAL_MODULE } from "../../../modules/legal"
 import type LegalModuleService from "../../../modules/legal/service"
@@ -144,8 +145,8 @@ async function eraseHistory(orders: IOrderModuleService, orderIds: string[]): Pr
 /**
  * The customer's orders, erased (adr/0041 §6; KK3): their e-mail and
  * addresses, the change history that kept them, the parcels' addresses
- * and labels, gift lines' recipients, the staff's notes, the return
- * requests' notes and labels,
+ * and labels, gift lines' recipients, add-on lines' typed texts, the
+ * staff's notes, the return requests' notes and labels,
  * the refunds' notes and the measurement consent. Amounts, lines, tax
  * and the place (city, province, country) stay for the books. A contract's
  * copy and its consent stay while the law keeps them. Medusa's own order
@@ -207,6 +208,8 @@ export async function eraseOrders(container: Container, customerId: string, now:
   await eraseParcels(container, rows)
   // A gift line's recipient, a third person the buyer named (adr/0025 Ek 2026-11-03)
   await eraseGiftRecipients(container, orderIds)
+  // A text typed on an add-on line, which can be a person's name (adr/0052 §10)
+  await eraseAddonTexts(container, orderIds)
   const returns = container.resolve<ReturnRequestsModuleService>(RETURN_REQUESTS_MODULE)
   const asked = await returns.listReturnRequests(
     { order_id: orderIds },

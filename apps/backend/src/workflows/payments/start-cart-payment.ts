@@ -11,6 +11,7 @@ import {
   transform,
   when,
 } from "@medusajs/framework/workflows-sdk"
+import { repriceAddonLinesStep } from "../addons/checkout"
 import { paymentBasket } from "../../lib/payments/basket"
 import { HOSTED_CHECKOUT, isHostedFormProvider } from "../../lib/payments/checkout"
 import type { HostedCheckout } from "../../lib/payments/checkout"
@@ -42,6 +43,11 @@ export interface StartCartPaymentInput {
 export const startCartPaymentWorkflow = createWorkflow(
   "payments-start-cart-payment",
   (input: StartCartPaymentInput) => {
+    // Add-on lines at their price now, or the start stops for the shopper to see it (adr/0052 §5)
+    repriceAddonLinesStep({
+      cart_id: input.cart_id,
+      sales_channel_ids: input.sales_channel_ids,
+    })
     // Cash on delivery's fee line put right first: Medusa's cart workflows that
     // change lines take the cart's lock themselves (adr/0029)
     const fee = applyPaymentFeeStep({

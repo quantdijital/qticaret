@@ -231,6 +231,33 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "catalog.core_gift_card":
     "To make a product a gift card, use the 'Gift card' option on the product page.",
   "cart.line_unknown": "This line is not in the cart.",
+  "cart.prices_changed":
+    "The price of some items in the cart changed. Check the new total and start the payment again.",
+  "catalog.addons_disabled":
+    "Add-ons are off. Turn them on in Settings > Features; remove items with add-ons from the cart.",
+  "addons.id_invalid": "The add-on's id is not valid.",
+  "addons.id_duplicate": "The same id is used twice.",
+  "addons.label_invalid": "A name is 1-60 characters, without invisible characters.",
+  "addons.help_invalid": "A description is at most 160 characters.",
+  "addons.price_invalid": "A price is between 0 and 10,000 TL, with at most two decimals.",
+  "addons.max_quantity_invalid": "The limit per line is between 1 and 99.",
+  "addons.text_rules_invalid": "A text's length is between 1 and 200 characters.",
+  "addons.choices_invalid": "A choice add-on has 2-10 options.",
+  "addons.too_many": "A product has at most 5 add-ons.",
+  "addons.required_must_be_free": "A paid add-on cannot be required.",
+  "addons.not_addon_line": "This product has no add-ons.",
+  "addons.unknown": "The product has no such add-on or option.",
+  "addons.duplicate": "The same add-on is picked twice.",
+  "addons.text_required": "Enter the text for this add-on.",
+  "addons.text_too_long": "The text is longer than this add-on allows.",
+  "addons.charset": "The text may hold only letters, digits and spaces.",
+  "addons.text_link": "The text may not hold a link, a web address or an e-mail address.",
+  "addons.required": "Pick the add-on this product requires.",
+  "addons.max_quantity": "A line with this add-on cannot hold that many units.",
+  "addons.line_locked":
+    "A line with add-ons keeps its details; change the picks in the product's add-on fields.",
+  "addons.unavailable":
+    "An add-on of an item in the cart is no longer sold. Change the pick or remove it.",
   "integration_credentials.check_failed":
     "The provider gave an unexpected answer; nothing was saved. Try again in a while.",
   "integration_credentials.invalid": "The value is not valid.",
@@ -862,6 +889,70 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "Another product here holds this handle; the product did not move (nothing is written over). Change the handle at the source or remove the product here.",
   "migration.url_path_reserved":
     "This old address is the site's home page or a reserved path; it was not tied to a record.",
+  "migration.wordpress_invalid":
+    "The file is not a WordPress export or could not be read. Upload the .xml file from Tools > Export > All content in WordPress.",
+  "migration.wordpress_too_large":
+    "The WordPress export is larger than 50 MB. Zip it, or export the content in parts.",
+  "migration.wordpress_trashed": "The record is in WordPress's trash; it was not moved.",
+  "migration.wordpress_product_type":
+    "A grouped or external product has no price of its own; it was not moved.",
+  "migration.wordpress_product_unread":
+    "The product's name or slug could not be read; it was not moved.",
+  "migration.wordpress_attributes_unread":
+    "The product's attributes could not be read; its options were taken from its variations.",
+  "migration.wordpress_product_no_price":
+    "The product (or every variation of it) has no price; it was not moved.",
+  "migration.wordpress_options_too_many":
+    "The product has more than three variation attributes; the first three became options.",
+  "migration.wordpress_variation_disabled":
+    "The variation is disabled in WordPress; it was not moved.",
+  "migration.wordpress_variation_no_price": "The variation has no price; it was not moved.",
+  "migration.wordpress_variation_unread":
+    "The variation's option values could not be read; it was not moved.",
+  "migration.wordpress_variation_orphan":
+    "The variation's product is not in the file; it was not moved.",
+  "migration.wordpress_image_missing":
+    "The picture is not in the file's media library; it was not moved. You can add it to the product.",
+  "migration.wordpress_description_cut":
+    "The product description is longer than 20,000 characters; it was cut at a paragraph.",
+  "migration.wordpress_body_cut": "The text is too long; it was cut at a section.",
+  "migration.wordpress_body_media":
+    "Pictures or widgets in the text (a product grid, a gallery) were not moved; the text was. Add pictures in the content editor.",
+  "migration.wordpress_post_unread":
+    "The post's title or slug could not be read; it was not moved.",
+  "migration.wordpress_path_reserved":
+    "This address is one of the storefront's own pages (/blog, /sepet, /magaza…); no content page was made, its old address awaits your decision under Old addresses.",
+  "migration.wordpress_post_categories":
+    "The post has several categories; its primary one became its category, the others did not move.",
+  "migration.wordpress_post_tags_cut": "The post has more than 50 tags; the first 50 moved.",
+  "migration.wordpress_term_unread":
+    "The category or tag name could not be read (shortcode debris, or longer than 120 characters); it was not moved.",
+  "migration.wordpress_page_front":
+    "The front page; no content page was made. The storefront's home page is set in the Storefront settings.",
+  "migration.wordpress_page_legal":
+    "A legal text; no content page was made (legal texts are published from Settings > Legal). Redirect its old address to its /yasal/... page under Old addresses.",
+  "migration.wordpress_page_system":
+    "A shop system page (cart, checkout, account, wishlist); no content page was made.",
+  "migration.wordpress_page_empty":
+    "The page has no text of its own (theme widgets only); no content page was made.",
+  "migration.wordpress_noindex_draft":
+    "The old site kept it out of search engines (noindex); it moved as a draft: review it, then publish or delete it.",
+  "migration.wordpress_comment_not_review":
+    "The comment has no rating; it was not moved as a product review.",
+  "migration.wordpress_review_photos":
+    "The review's photos were not moved; its text and rating were.",
+  "migration.wordpress_handle_duplicate":
+    "Another record has the same slug; only the first one moved.",
+  "migration.wordpress_menus":
+    "Menus were not moved; set them up under Storefront > Menus (the ID column gives the item count).",
+  "migration.wordpress_coupons":
+    "Coupons were not moved; create them again as discount codes under Campaigns (their usage history is not in the export).",
+  "migration.wordpress_blog_comments":
+    "Blog comments were not moved (the storefront has no blog comments).",
+  "migration.wordpress_product_tags":
+    "Product tags were not moved (the storefront has no product tag pages; the old tag pages were noindex).",
+  "migration.wordpress_attribute_not_moved":
+    "A product attribute was not moved: once the attribute template has a field with this key it can be written to the products (the ID column gives the product and value counts).",
   "account.verification_session_required":
     "Sign in to your account first to confirm your address; the link works only in your session.",
   "account.session_invalid": "The session is not valid; sign in again.",
@@ -884,4 +975,25 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "fraud.block_invalid_email_domain": "Enter a valid domain (e.g. example.com).",
   "fraud.block_invalid_phone": "Enter a valid Turkish phone number.",
   "fraud.block_invalid_ip": "Enter a valid IP address.",
+  "campaigns.unknown": "Bulk message not found.",
+  "campaigns.locked":
+    "This message is scheduled or sending; its content cannot change. Copy it to make changes.",
+  "campaigns.status_conflict": "The message's status just changed; refresh the page.",
+  "campaigns.token_unknown":
+    "The text has an unknown token. Only {ad} and the shop detail tokens can be used.",
+  "campaigns.too_many_products": "An e-mail can have at most 4 product cards.",
+  "campaigns.sms_too_long":
+    "With the shop's name and the opt-out line, the text must fit in 3 SMS parts; shorten it.",
+  "campaigns.content_missing": "Write the message's subject and text before sending it.",
+  "campaigns.schedule_invalid": "The send time must be ahead and within 90 days.",
+  "campaigns.channel_off": "E-mail sending is not on for this shop.",
+  "campaigns.sender_unverified":
+    "Bulk e-mail needs the shop's sender domain verified (Settings > E-mail).",
+  "campaigns.sms_account_missing": "Connect the SMS account first (Integrations).",
+  "campaigns.sms_opt_out_missing":
+    "Enter the opt-out line first (Settings > SMS); every commercial text must carry it.",
+  "campaigns.segment_unknown": "The chosen segment no longer exists; choose the audience again.",
+  "campaigns.test_address_missing":
+    "No address for the test: e-mail goes to your sign-in address, SMS to the shop's phone.",
+  "campaigns.quota_spent": "Today's sending limit is used up; the test can go tomorrow.",
 }

@@ -2,6 +2,8 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
 import { StepResponse, createStep } from "@medusajs/framework/workflows-sdk"
 import type { Restriction } from "../../../lib/catalog"
+import type { AddonInput, StoredAddons } from "../../../lib/catalog/addons"
+import { addonsToWrite } from "../addons"
 import { ValidationError } from "../../../lib/errors"
 import { fromMedusaAmount } from "../../../lib/money"
 import type { PRODUCT_CONDITIONS } from "../../../modules/catalog-extension/models/product-extension"
@@ -30,6 +32,8 @@ export interface SetProductCatalogInput {
   restriction?: Restriction | null | undefined
   /** Its variants are gift card amounts (adr/0025 Ek 2026-11-03). */
   is_gift_card?: boolean | undefined
+  /** Its add-ons (adr/0052); null or none clears them. */
+  addons?: AddonInput[] | null | undefined
   /** Per variant: the MPN, and the unit cost in lira (VAT excluded, F11.4). */
   variants?:
     | Record<string, { mpn?: string | null | undefined; cost?: number | null | undefined }>
@@ -50,6 +54,7 @@ export interface ExtensionFields {
   withdrawal_excluded: boolean
   restriction: Restriction | null
   is_gift_card: boolean
+  addons: StoredAddons | null
 }
 
 export interface ProductCatalogPlan {
@@ -132,10 +137,15 @@ const EXTENSION_KEYS = [
   "withdrawal_excluded",
   "restriction",
   "is_gift_card",
+  "addons",
 ] as const
 
+type ExtensionChanges = Omit<SetProductCatalogInput, "addons"> & {
+  addons?: StoredAddons | null | undefined
+}
+
 /** The fields the save sends (absent ones keep their values) and what they hold now. */
-function changesOf(input: SetProductCatalogInput, current: ExtensionFields | null) {
+function changesOf(input: ExtensionChanges, current: ExtensionFields | null) {
   const set: Partial<ExtensionFields> = {}
   const previous: Partial<ExtensionFields> = {}
   for (const key of EXTENSION_KEYS) {
@@ -280,7 +290,8 @@ export const planProductCatalogStep = createStep(
     }
     const extension = product.product_extension ?? null
     const kind = await giftCardKind(container, input, extension)
-    const { set, previous } = changesOf({ ...input, kind }, extension)
+    const addons = await addonsToWrite(container, input.addons)
+    const { set, previous } = changesOf({ ...input, kind, addons }, extension)
     const plan: ProductCatalogPlan = {
       product_id: product.id,
       product: { id: extension?.id ?? null, set, previous },
