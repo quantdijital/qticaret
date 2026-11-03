@@ -91,6 +91,26 @@ describe("accounting package", () => {
     ])
   })
 
+  it("names a payment staff marked paid by hand as such, never as a trial", () => {
+    const { collections } = packageTables({
+      orders: [],
+      parties: new Map(),
+      captures: [
+        {
+          order_display_id: 105,
+          day: "2026-10-04",
+          provider_id: "pp_system_default",
+          amount: 80,
+        },
+      ],
+      refunds: [],
+      dayOf: (at) => new Date(at).toISOString().slice(0, 10),
+    })
+
+    expect(collections.slice(1)).toEqual([["#105", "2026-10-04", "Manuel ödeme", 80, null]])
+    expect(JSON.stringify(collections)).not.toMatch(/deneme/i)
+  })
+
   it("takes gift cards out of the sales and VAT, as an advance sold and a card spent (adr/0025, 2026-11-03)", () => {
     const dayOf = (at: string | Date) => new Date(at).toISOString().slice(0, 10)
     // #103 sells a 500 TL card beside a mug; #104 is paid 150 TL by a card, the rest by PayTR

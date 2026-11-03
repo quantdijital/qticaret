@@ -97,13 +97,11 @@ const origins = (list: string) =>
     .filter((origin) => origin !== "")
 
 /**
- * The storefront's origins; in development also the admin's, which is the
- * backend's own: its payment test page (adr/0028) is served there.
+ * The storefront's origins, and only those: on a developer's machine as
+ * where the shop runs (the backend's payment test page is gone, adr/0028).
  */
-export function returnOrigins(env: Pick<Env, "NODE_ENV" | "STORE_CORS" | "ADMIN_CORS">): string[] {
-  return env.NODE_ENV === "development"
-    ? [...origins(env.STORE_CORS), ...origins(env.ADMIN_CORS)]
-    : origins(env.STORE_CORS)
+export function returnOrigins(env: Pick<Env, "STORE_CORS">): string[] {
+  return origins(env.STORE_CORS)
 }
 
 const text = (max: number) => z.string().trim().min(1).max(max)

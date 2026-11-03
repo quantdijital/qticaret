@@ -42,12 +42,10 @@ describe("returnOrigins", () => {
     ADMIN_CORS: "http://localhost:9000",
   }
 
-  it("is the storefront's origins, plus the backend's own in development (adr/0028)", () => {
-    expect(returnOrigins({ ...env, NODE_ENV: "production" })).toEqual([
-      "http://localhost:8000",
-      "https://magaza.example.com",
-    ])
-    expect(returnOrigins({ ...env, NODE_ENV: undefined })).not.toContain("http://localhost:9000")
-    expect(returnOrigins({ ...env, NODE_ENV: "development" })).toContain("http://localhost:9000")
+  it("is the storefront's origins only, in development as where the shop runs (adr/0028)", () => {
+    for (const NODE_ENV of ["production", "development", "test", undefined] as const) {
+      const where = { ...env, NODE_ENV }
+      expect(returnOrigins(where)).toEqual(["http://localhost:8000", "https://magaza.example.com"])
+    }
   })
 })

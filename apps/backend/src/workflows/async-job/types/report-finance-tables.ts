@@ -14,7 +14,7 @@ const METHODS: Record<string, string> = {
   "bank-transfer": "Havale/EFT",
   cod: "Kapıda ödeme",
   "gift-card": "Hediye kartı",
-  system: "Sistem (deneme)",
+  system: "Manuel ödeme",
 }
 
 const REASONS: Record<string, string> = {

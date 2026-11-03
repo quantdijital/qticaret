@@ -42,7 +42,7 @@ const METHODS: Readonly<Record<string, string>> = {
   "bank-transfer": "Havale/EFT",
   cod: "Kapıda ödeme",
   "gift-card": "Hediye kartı",
-  system: "Sistem (deneme)",
+  system: "Manuel ödeme",
 }
 
 /** Lira as a sheet number, from a Medusa amount (exact to the kuruş). */
