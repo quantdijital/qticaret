@@ -14,6 +14,8 @@ export const SECTIONS = [
   "/promotions",
   "/promotions/price-lists",
   "/promotions/gift-cards",
+  // Bulk e-mail and SMS (adr/0050): the list, or why it is closed while the flag is off
+  "/bulk-messages",
   // The theme editor opens full screen, without the panel's menu (adr/0049)
   "/storefront/editor",
   "/storefront/menus",
@@ -73,6 +75,7 @@ export const SETTINGS = [
   "/settings/migration",
   "/settings/api",
   "/settings/marketing",
+  "/settings/marketing?part=bulk",
   "/settings/marketing/meta",
   "/settings/marketing/ga4",
   "/settings/security",

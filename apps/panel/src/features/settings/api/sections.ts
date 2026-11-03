@@ -171,6 +171,14 @@ export interface MarketingSettings {
   feed_exclusions: Record<FeedTargetName, string[]>
   /** An order placed before this hour leaves the same day (Akakçe); null: not promised. */
   feed_same_day_cutoff_hour: number | null
+  /** One bulk message (adr/0050) a recipient in 24 hours at most. */
+  campaign_frequency_cap: boolean
+  /** Bulk texts go from this hour (Türkiye) ... */
+  campaign_sms_start_hour: number
+  /** ... until before this one (1–24); outside, a sending SMS campaign waits. */
+  campaign_sms_end_hour: number
+  /** The way to refuse added to every bulk SMS (80 at most); none: no SMS campaign starts. */
+  sms_opt_out_text: string | null
 }
 
 /** The icons a promise in the storefront's trust strip may carry (docs/19 §4). */

@@ -22,6 +22,7 @@ import { cn } from "@/lib/utils"
 import { NAV_GROUPS, SETTINGS_ITEM, itemFor } from "./navigation"
 import type { NavItem } from "./navigation"
 import { StoreMark } from "./store-mark"
+import { useNavAccess } from "./use-nav-access"
 
 // The active item: a raised surface, a brand-coloured icon and a marker bar
 const ITEM_CLASS = cn(
@@ -81,6 +82,12 @@ export function AppSidebar({
   // Orders waiting for the shop: the one number worth showing in the menu
   const { data: tasks } = useQuery(tasksQuery())
   const badges: Record<string, number | undefined> = { orders: tasks?.to_ship }
+  // An item behind a flag or a capability shows once both are known and allow it
+  const allowed = useNavAccess()
+  const groups = NAV_GROUPS.map((group) => ({
+    ...group,
+    items: group.items.filter(allowed),
+  })).filter((group) => group.items.length > 0)
   const timer = useRef<number | undefined>(undefined)
   useEffect(
     () => () => {
@@ -120,7 +127,7 @@ export function AppSidebar({
       <SidebarContent className="gap-0 px-1 pt-2">
         {/* A landmark screen readers list as the menu; `contents` keeps the sidebar's layout */}
         <nav aria-label={t("nav.label")} className="contents">
-          {NAV_GROUPS.map((group) => (
+          {groups.map((group) => (
             <SidebarGroup key={group.key ?? "main"} className="py-1.5">
               {group.key ? (
                 // Collapsed, the label fades and slides over the item above it: it must not take its click

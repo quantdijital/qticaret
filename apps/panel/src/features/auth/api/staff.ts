@@ -25,6 +25,8 @@ export type Capability =
   | "invoices"
   | "migration"
   | "fraud"
+  /** Writing and sending bulk e-mail and SMS (adr/0050): owner and admin. */
+  | "bulkMessages"
 
 export interface StaffMe {
   user_id: string

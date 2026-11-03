@@ -8,6 +8,7 @@ import { providerAccountsQuery } from "@/features/settings/api/payments"
 import { AccountBadges } from "@/features/settings/components/account-badges"
 import { IysCard } from "@/features/settings/components/iys-card"
 import { SmsLimitCard } from "@/features/settings/components/sms-limit-card"
+import { SmsOptOutCard } from "@/features/settings/components/sms-opt-out-card"
 import { SMS_PROVIDERS } from "@/features/settings/sms-providers"
 import { errorText } from "@/lib/errors"
 
@@ -71,6 +72,7 @@ export function SmsPanel() {
         </SectionCard>
       )}
       <SmsLimitCard />
+      <SmsOptOutCard />
       <IysCard />
     </div>
   )

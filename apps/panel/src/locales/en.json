@@ -54,7 +54,8 @@
     "reviews": "Reviews and questions",
     "menus": "Menus",
     "themeEditor": "Theme editor",
-    "storefrontPreferences": "Storefront preferences"
+    "storefrontPreferences": "Storefront preferences",
+    "bulkMessages": "Bulk messages"
   },
   "login": {
     "title": "Sign in",
@@ -1522,7 +1523,8 @@
             "failed": "Payment failed"
           },
           "marketing": {
-            "announcement": "Campaign announcement"
+            "announcement": "Campaign announcement",
+            "campaign": "Bulk message"
           },
           "staff": {
             "new_order": "Staff: new order",
@@ -1608,6 +1610,14 @@
         "pending": "Waiting",
         "sent": "Sent",
         "failed": "Refused"
+      },
+      "optOut": {
+        "title": "Opt-out line",
+        "description": "Added after the shop's name to the end of every bulk SMS; it tells the recipient how to refuse commercial texts. No bulk SMS goes without it.",
+        "label": "Opt-out line",
+        "placeholder": "The opt-out line your SMS service gave you",
+        "hint": "At most {{max}} characters. Type the opt-out line your SMS service (Netgsm, İYS) gave you exactly. Left empty, no bulk SMS can be sent.",
+        "saved": "Opt-out line saved."
       }
     },
     "groups": {
@@ -1798,7 +1808,20 @@
       "tabs": {
         "feeds": "Product feeds",
         "conversions": "Conversion tracking",
-        "carts": "Abandoned carts"
+        "carts": "Abandoned carts",
+        "bulk": "Bulk messages"
+      },
+      "bulk": {
+        "title": "Bulk message rules",
+        "description": "Limits for the e-mail and SMS campaigns sent from Growth > Bulk messages.",
+        "cap": "At most one bulk message per person in 24 hours",
+        "capHint": "Anyone who got another bulk message in the last 24 hours is left out of a new one; fewer complaints and unsubscribes.",
+        "hours": "Bulk SMS hours",
+        "hoursHint": "Bulk texts go only within these hours (Türkiye time). A send outside them waits and goes on by itself when they open.",
+        "start": "From",
+        "end": "Until",
+        "hoursInvalid": "The end hour must come after the start hour.",
+        "saved": "Bulk message rules saved."
       }
     },
     "accounting": {
@@ -6783,6 +6806,294 @@
         "text": "The storefront is in maintenance mode: shoppers see the maintenance page instead of the shop.",
         "link": "Maintenance settings"
       }
+    }
+  },
+  "bulkMessages": {
+    "title": "Bulk messages",
+    "description": "Send bulk e-mail or SMS to customers who consented and to newsletter subscribers.",
+    "new": "New message",
+    "empty": "No bulk messages yet. Prepare your first one.",
+    "emptyFiltered": "No message matches this filter.",
+    "views": "Message states",
+    "allStatuses": "All",
+    "channelFilter": "Channel",
+    "allChannels": "All channels",
+    "off": "Bulk e-mail and SMS are off for this shop. Turned on, you can send campaign messages to consenting customers from the panel.",
+    "turnOn": "Turn on in Features",
+    "noAccess": "Only the shop owner and admins can prepare and send bulk messages.",
+    "columns": {
+      "name": "Name",
+      "channel": "Channel",
+      "status": "Status",
+      "audience": "Audience",
+      "sent": "Sent / target",
+      "when": "Date"
+    },
+    "channels": {
+      "email": "E-mail",
+      "sms": "SMS"
+    },
+    "status": {
+      "draft": "Draft",
+      "scheduled": "Scheduled",
+      "sending": "Sending",
+      "paused": "Paused",
+      "sent": "Sent",
+      "cancelled": "Cancelled",
+      "failed": "Failed"
+    },
+    "pauseShort": {
+      "staff": "Paused by hand",
+      "quota": "Daily limit reached",
+      "quiet_hours": "Outside SMS hours",
+      "complaints": "Complaint rate high",
+      "channel_off": "Channel unavailable"
+    },
+    "pause": {
+      "staff": "Someone on the team paused it. Resumed, it goes to the remaining recipients.",
+      "quota": "The daily sending limit was reached. It goes on by itself when the limit resets at 03:00.",
+      "quiet_hours": "Outside the bulk SMS hours. It goes on by itself when they open (Settings > Marketing).",
+      "complaints": "The complaint or bounce rate passed its limit; sending stopped. Review it and resume.",
+      "channel_off": "The sender domain or the SMS account cannot be used right now. It goes on by itself once the channel works again."
+    },
+    "failure": {
+      "generic": "Sending could not start. Copy the message and try again.",
+      "segment_unknown": "The chosen segment no longer exists; sending could not start. Copy the message and choose the audience again."
+    },
+    "scheduledFor": "Scheduled for {{when}}.",
+    "sourceCount_one": "{{count}} source",
+    "sourceCount_other": "{{count}} sources",
+    "failedCount_one": "{{count}} failed",
+    "failedCount_other": "{{count}} failed",
+    "when": {
+      "created": "Created",
+      "scheduled": "Goes out",
+      "started": "Started",
+      "finished": "Finished"
+    },
+    "create": {
+      "title": "New bulk message",
+      "hint": "Choose a name and a channel; you set the audience and content on the next page. The audience starts as every consenting customer.",
+      "submit": "Create draft",
+      "created": "Draft created."
+    },
+    "fields": {
+      "name": "Message name",
+      "nameHint": "Shown in the panel only.",
+      "channel": "Channel",
+      "channelHint": "Each message goes on one channel.",
+      "utm": "Campaign code",
+      "utmHint": "Added to the shop's links as utm_campaign; the report finds sales with it.",
+      "subject": "Subject",
+      "subjectHint": "Use {ad} for the recipient's name.",
+      "preheader": "Preview line",
+      "preheaderHint": "Shown next to the subject in the inbox.",
+      "chars": "{{used}}/{{max}} characters.",
+      "body": "E-mail text",
+      "bodyHint_one": "Headings, paragraphs, lists, links, images and at most {{max}} product cards ({{count}} used). Tables and quotes go as plain paragraphs.",
+      "bodyHint_other": "Headings, paragraphs, lists, links, images and at most {{max}} product cards ({{count}} used). Tables and quotes go as plain paragraphs."
+    },
+    "tokens": {
+      "name": "Recipient's name",
+      "nameHint": "The name on the customer record; without one, “Değerli müşterimiz”."
+    },
+    "editor": {
+      "general": "General",
+      "parts": "Message parts",
+      "tabs": {
+        "audience": "Audience",
+        "content": "Content",
+        "send": "Test and send"
+      },
+      "saved": "Message saved.",
+      "invalid": "Some fields are missing or wrong; fix the marked ones.",
+      "unsaved": "There are unsaved changes; save before testing or sending.",
+      "incomplete": "Write these first: {{fields}}.",
+      "missing": {
+        "subject": "subject",
+        "body": "e-mail text",
+        "sms_text": "SMS text"
+      },
+      "emptyAudience": "Nobody in the audience can get the message now; check the sources and consents."
+    },
+    "audience": {
+      "title": "Who it goes to",
+      "description": "Choose one or more sources. Someone in several of them gets one message; only those with consent on this channel get it.",
+      "all_consented": "All consenting customers",
+      "all_consentedHint": "Every customer account that consented to commercial messages on this channel.",
+      "newsletter": "Newsletter subscribers",
+      "newsletterHint": "Subscribers without an account who consented in the storefront's newsletter box.",
+      "segments": "Segments",
+      "segmentsEmpty": "No segments yet.",
+      "groups": "Customer groups",
+      "groupsEmpty": "No customer groups yet.",
+      "manage": "Groups and segments",
+      "members_one": "{{members}} member",
+      "members_other": "{{members}} members",
+      "full": "At most {{limit}} sources can be chosen.",
+      "kinds": {
+        "segment": "Segment",
+        "group": "Group"
+      },
+      "count": {
+        "title": "Live audience",
+        "pick": "Choose at least one source to count.",
+        "eligible_one": "{{people}} person",
+        "eligible_other": "{{people}} people",
+        "of": "The sources hold {{audience}} people; {{excluded}} are left out.",
+        "excluded": "Left out",
+        "noneExcluded": "Nobody is left out.",
+        "quotaLater": "Because of the daily limit it reaches {{today}} people today; the other {{later}} follow after 03:00 the next day.",
+        "estimate": "An estimate from today's consents; the recipient list is fixed when sending starts."
+      }
+    },
+    "skip": {
+      "no_consent": "No consent on this channel",
+      "suppressed": "On the suppression list",
+      "iys_pending": "Consent not yet reported to İYS",
+      "recent": "Got another bulk message in the last 24 hours",
+      "invalid_recipient": "Invalid address or number",
+      "over_quota": "Held by the daily limit"
+    },
+    "content": {
+      "emailTitle": "E-mail",
+      "emailHint": "Subject, preview line and text. The shop's legal name, contact details and a one-click unsubscribe link are added below by themselves."
+    },
+    "sms": {
+      "title": "SMS",
+      "description": "Plain text; at most 3 SMS long with the shop's name and the opt-out line.",
+      "text": "SMS text",
+      "count": "{{chars}} characters · {{parts}}/{{max}} SMS ({{perPart}} characters per SMS)",
+      "ucs2": "There is a character outside the Turkish alphabet (an emoji, say); only 70 characters fit in an SMS.",
+      "footer": "Added to the end of every SMS",
+      "optOutMissing": "No opt-out line yet; no bulk SMS can be sent.",
+      "optOutLink": "Enter the opt-out line",
+      "shopFallback": "Mağaza"
+    },
+    "preview": {
+      "title": "Preview",
+      "emailHint": "How it shows in the inbox; see the whole e-mail with a test send.",
+      "smsHint": "How it shows on a phone; the longest greeting stands in for the recipient's name.",
+      "inbox": "Inbox preview",
+      "sms": "SMS preview",
+      "noSubject": "(no subject)",
+      "noPreheader": "(no preview line)"
+    },
+    "test": {
+      "title": "Test send",
+      "description": {
+        "email": "The test goes to the e-mail address you signed in with; its subject starts with [Deneme] and it counts towards the daily limit. At most 10 tests an hour.",
+        "sms": "The test goes to the phone in the shop's details and counts towards the daily limit. At most 10 tests an hour."
+      },
+      "send": "Send to me",
+      "sent": "Test sent to {{to}}."
+    },
+    "send": {
+      "title": "Sending",
+      "description": "Send now or set a later time. Once sending starts the content no longer changes.",
+      "now": "Send now",
+      "schedule": "Schedule",
+      "at": "Send at",
+      "atHint": "In this computer's time; at most 90 days ahead.",
+      "quota": "Because of the daily limit it reaches {{today}} people today; the other {{later}} wait for the next day.",
+      "quiet": "Bulk texts go between {{start}} and {{end}}; sent now, it starts at {{start}}.",
+      "reauthNote": "You confirm who you are again before sending or scheduling.",
+      "problems": {
+        "required": "Choose a date and time.",
+        "past": "The time must be in the future.",
+        "tooFar": "A send can be set at most 90 days ahead."
+      },
+      "confirmNow": {
+        "title_one": "Send to {{people}} person now?",
+        "title_other": "Send to {{people}} people now?",
+        "titleUnknown": "Send the message now?",
+        "description": "Sending starts within a minute and the content locks. You can pause or cancel it if needed."
+      },
+      "confirmSchedule": {
+        "title": "Schedule the message for {{when}}?",
+        "description": "It goes by itself when the time comes; the content locks now. You can cancel it until then."
+      },
+      "started": "Sending started; the first messages go within a minute.",
+      "scheduled": "Message scheduled for {{when}}."
+    },
+    "actions": {
+      "pause": "Pause",
+      "resume": "Resume",
+      "cancel": "Cancel sending",
+      "copy": "Copy",
+      "delete": "Delete",
+      "done": {
+        "pause": "Sending paused.",
+        "resume": "Sending resumed.",
+        "cancel": "Sending cancelled.",
+        "copy": "The copy opened as a draft.",
+        "delete": "Draft deleted."
+      },
+      "confirm": {
+        "resume": {
+          "title": "Resume “{{name}}”?",
+          "description": "Sending goes on to the remaining recipients from where it stopped. If complaints stopped it, the rates are measured again from now on."
+        },
+        "cancel": {
+          "title": "Cancel “{{name}}”?",
+          "description": "Recipients not yet reached get nothing; messages already sent cannot be taken back. Cancelling cannot be undone."
+        },
+        "delete": {
+          "title": "Delete “{{name}}”?",
+          "description": "The draft is deleted for good."
+        }
+      }
+    },
+    "locked": {
+      "tab": "Content",
+      "title": "Content sent",
+      "description": "A scheduled or sent message's content does not change; copy it to change it.",
+      "fields": {
+        "subject": "Subject",
+        "preheader": "Preview line",
+        "body": "E-mail text",
+        "smsText": "SMS text",
+        "scheduledAt": "Scheduled for"
+      }
+    },
+    "report": {
+      "tab": "Report",
+      "title": "Sending",
+      "description": {
+        "email": "The numbers refresh every half minute while it sends. Bounces and complaints are reported by the e-mail service.",
+        "sms": "The numbers refresh every half minute while it sends."
+      },
+      "counts": {
+        "audience": "Audience",
+        "targeted": "Target",
+        "sent": "Sent",
+        "pending": "Queued",
+        "failed": "Failed",
+        "skipped": "Skipped",
+        "bounces": "Bounced",
+        "complaints": "Complaints",
+        "unsubscribed": "Unsubscribed in 7 days"
+      },
+      "share": "Rate: {{share}}",
+      "skippedTitle": "Skipped and why",
+      "skippedHint": "Those left out when sending started or at the moment of sending.",
+      "trafficTitle": "Effect on the shop",
+      "trafficHint": "Visits with the code {{code}} in the 7 days after sending; measured in total, never per person.",
+      "carts": "Carts",
+      "orders": "Orders",
+      "revenue": "Revenue",
+      "trafficNone": "Measured once sending starts.",
+      "notStarted": "The numbers show here once sending starts.",
+      "notStartedAt": "Scheduled for {{when}}; the numbers show here once sending starts."
+    },
+    "errors": {
+      "nameRequired": "Give the message a name.",
+      "tooLong": "At most {{limit}} characters.",
+      "tokenUnknown": "There is an unknown token. Only {ad} and the shop detail tokens can be used.",
+      "audienceRequired": "Choose at least one source.",
+      "audienceTooMany": "At most {{limit}} sources can be chosen.",
+      "tooManyProducts": "An e-mail can hold at most {{max}} product cards.",
+      "smsTooLong": "With the shop's name and the opt-out line the text is longer than {{parts}} SMS; shorten it."
     }
   }
 }

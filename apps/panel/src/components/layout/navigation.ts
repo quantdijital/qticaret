@@ -5,6 +5,7 @@ import {
   FolderTree,
   LayoutDashboard,
   ListTree,
+  Mails,
   MessageSquareText,
   Package,
   Paintbrush,
@@ -17,6 +18,7 @@ import {
   Warehouse,
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
+import type { Capability } from "@/features/auth/api/staff"
 
 /**
  * The panel's map (docs/06 ekran planı): one place for the sidebar, the
@@ -29,6 +31,10 @@ export interface NavItem {
   icon: LucideIcon
   /** Only this path, not its children. */
   exact?: boolean
+  /** Shown only while this tenant flag is on (adr/0012). */
+  feature?: string
+  /** Shown only to a role that may (adr/0040); the API refuses the others anyway. */
+  needs?: Capability
 }
 
 export interface NavGroup {
@@ -73,6 +79,14 @@ export const NAV_GROUPS: NavGroup[] = [
     key: "growth",
     items: [
       { key: "promotions", to: "/promotions", icon: BadgePercent },
+      // adr/0050: bulk e-mail and SMS, the owner's and admin's, while the shop has it on
+      {
+        key: "bulkMessages",
+        to: "/bulk-messages",
+        icon: Mails,
+        feature: "marketing.campaigns",
+        needs: "bulkMessages",
+      },
       { key: "seo", to: "/seo", icon: Search },
       { key: "reports", to: "/reports", icon: ChartColumnBig },
     ],

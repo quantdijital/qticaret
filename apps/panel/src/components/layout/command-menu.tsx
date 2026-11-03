@@ -23,6 +23,7 @@ import {
 import { useLogout } from "@/features/auth/api/me"
 import { SearchResults } from "@/features/search/search-results"
 import { ALL_NAV_ITEMS } from "./navigation"
+import { useNavAccess } from "./use-nav-access"
 
 // The jobs people start most, a keystroke away (docs/06 §5)
 const SHORTCUTS: { key: string; icon: LucideIcon; to: string; search?: Record<string, string> }[] =
@@ -48,6 +49,8 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
   const navigate = useNavigate()
   const logout = useLogout(() => void navigate({ to: "/login" }))
   const [search, setSearch] = useState("")
+  // What the menu beside it offers: the shell has asked already
+  const allowed = useNavAccess({ fetch: false })
   // Closed, it forgets what was typed: a new opening starts empty
   const change = (next: boolean) => {
     if (!next) {
@@ -97,7 +100,7 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
           }}
         />
         <CommandGroup heading={t("command.pages")}>
-          {ALL_NAV_ITEMS.map((item) => (
+          {ALL_NAV_ITEMS.filter(allowed).map((item) => (
             <CommandItem
               key={item.key}
               value={t(`nav.${item.key}`)}

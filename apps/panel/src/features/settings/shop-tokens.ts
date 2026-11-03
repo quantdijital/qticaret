@@ -57,7 +57,7 @@ export function fillShopText(text: string, values: ShopTokenValues): string {
 /** `{name}` in place of the selection (`start`…`end`), and where the caret goes after it. */
 export function insertToken(
   text: string,
-  name: ShopToken,
+  name: string,
   start: number,
   end: number = start
 ): { text: string; caret: number } {

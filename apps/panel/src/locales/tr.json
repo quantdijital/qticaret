@@ -54,7 +54,8 @@
     "reviews": "Yorumlar ve sorular",
     "menus": "Menüler",
     "themeEditor": "Tema düzenleyici",
-    "storefrontPreferences": "Vitrin tercihleri"
+    "storefrontPreferences": "Vitrin tercihleri",
+    "bulkMessages": "Toplu ileti"
   },
   "login": {
     "title": "Giriş yap",
@@ -1522,7 +1523,8 @@
             "failed": "Ödeme alınamadı"
           },
           "marketing": {
-            "announcement": "Kampanya duyurusu"
+            "announcement": "Kampanya duyurusu",
+            "campaign": "Toplu ileti"
           },
           "staff": {
             "new_order": "Ekip: yeni sipariş",
@@ -1608,6 +1610,14 @@
         "pending": "Bekleyen",
         "sent": "İletilen",
         "failed": "Reddedilen"
+      },
+      "optOut": {
+        "title": "Ret metni",
+        "description": "Her toplu SMS'in sonuna mağaza adından sonra eklenir; alıcı bu yolla ticari SMS almayı reddeder. Girilmeden toplu SMS gönderilemez.",
+        "label": "Ret metni",
+        "placeholder": "SMS hizmetinizin verdiği ret satırı",
+        "hint": "En çok {{max}} karakter. SMS hizmetinizin (Netgsm, İYS) verdiği ret satırını aynen yazın. Boş bırakırsanız toplu SMS gönderilemez.",
+        "saved": "Ret metni kaydedildi."
       }
     },
     "groups": {
@@ -1798,7 +1808,20 @@
       "tabs": {
         "feeds": "Ürün akışları",
         "conversions": "Dönüşüm ölçümü",
-        "carts": "Terk edilen sepet"
+        "carts": "Terk edilen sepet",
+        "bulk": "Toplu ileti"
+      },
+      "bulk": {
+        "title": "Toplu ileti kuralları",
+        "description": "Büyüme > Toplu ileti'den gönderilen e-posta ve SMS kampanyalarının sınırları.",
+        "cap": "Bir kişiye 24 saatte en çok bir toplu ileti",
+        "capHint": "Son 24 saatte başka bir toplu ileti almış kişi yeni iletinin kitlesinden çıkarılır; şikâyetleri ve abonelikten çıkışları azaltır.",
+        "hours": "Toplu SMS saatleri",
+        "hoursHint": "Toplu SMS'ler yalnız bu saatler arasında gider (Türkiye saati). Saat dışında kalan gönderim bekler, saat gelince kendiliğinden sürer.",
+        "start": "Başlangıç",
+        "end": "Bitiş",
+        "hoursInvalid": "Bitiş saati başlangıç saatinden sonra olmalı.",
+        "saved": "Toplu ileti kuralları kaydedildi."
       }
     },
     "accounting": {
@@ -6783,6 +6806,294 @@
         "text": "Vitrin bakım modunda: alıcılar mağaza yerine bakım sayfasını görüyor.",
         "link": "Bakım modu ayarları"
       }
+    }
+  },
+  "bulkMessages": {
+    "title": "Toplu ileti",
+    "description": "İzinli müşterilerinize ve bülten abonelerinize toplu e-posta ya da SMS gönderin.",
+    "new": "Yeni ileti",
+    "empty": "Henüz toplu ileti yok. İlk iletinizi hazırlayın.",
+    "emptyFiltered": "Bu süzgece uyan ileti yok.",
+    "views": "İleti durumları",
+    "allStatuses": "Tümü",
+    "channelFilter": "Kanal",
+    "allChannels": "Tüm kanallar",
+    "off": "Toplu e-posta ve SMS bu mağazada kapalı. Açınca izinli müşterilerinize panelden kampanya iletisi gönderebilirsiniz.",
+    "turnOn": "Özelliklerden aç",
+    "noAccess": "Toplu iletileri yalnız mağaza sahibi ve yöneticiler hazırlayıp gönderebilir.",
+    "columns": {
+      "name": "Ad",
+      "channel": "Kanal",
+      "status": "Durum",
+      "audience": "Kitle",
+      "sent": "Gönderilen / hedef",
+      "when": "Tarih"
+    },
+    "channels": {
+      "email": "E-posta",
+      "sms": "SMS"
+    },
+    "status": {
+      "draft": "Taslak",
+      "scheduled": "Zamanlandı",
+      "sending": "Gönderiliyor",
+      "paused": "Duraklatıldı",
+      "sent": "Gönderildi",
+      "cancelled": "İptal edildi",
+      "failed": "Başarısız"
+    },
+    "pauseShort": {
+      "staff": "Elle duraklatıldı",
+      "quota": "Günlük sınır doldu",
+      "quiet_hours": "SMS saatleri dışında",
+      "complaints": "Şikâyet oranı yüksek",
+      "channel_off": "Kanal kullanılamıyor"
+    },
+    "pause": {
+      "staff": "Ekipten biri gönderimi duraklattı. Sürdürünce kalan alıcılara gider.",
+      "quota": "Günlük gönderim sınırı doldu. Sınır 03:00'te yenilenince kendiliğinden sürer.",
+      "quiet_hours": "Toplu SMS saatlerinin dışında. Saat gelince kendiliğinden sürer (Ayarlar > Pazarlama).",
+      "complaints": "Şikâyet ya da geri dönen ileti oranı sınırı geçti; gönderim durduruldu. İnceleyip sürdürebilirsiniz.",
+      "channel_off": "Gönderen alan adı ya da SMS hesabı şu an kullanılamıyor. Kanal yeniden çalışınca kendiliğinden sürer."
+    },
+    "failure": {
+      "generic": "Gönderim başlatılamadı. İletiyi kopyalayıp yeniden deneyin.",
+      "segment_unknown": "Seçilen segment artık yok; gönderim başlatılamadı. İletiyi kopyalayıp kitleyi yeniden seçin."
+    },
+    "scheduledFor": "{{when}} için zamanlandı.",
+    "sourceCount_one": "{{count}} kaynak",
+    "sourceCount_other": "{{count}} kaynak",
+    "failedCount_one": "{{count}} başarısız",
+    "failedCount_other": "{{count}} başarısız",
+    "when": {
+      "created": "Oluşturuldu",
+      "scheduled": "Gönderilecek",
+      "started": "Başladı",
+      "finished": "Bitti"
+    },
+    "create": {
+      "title": "Yeni toplu ileti",
+      "hint": "Ad ve kanalı seçin; kitleyi ve içeriği sonraki sayfada hazırlarsınız. Kitle önce bütün izinli müşteriler olarak gelir.",
+      "submit": "Taslağı oluştur",
+      "created": "Taslak oluşturuldu."
+    },
+    "fields": {
+      "name": "İletinin adı",
+      "nameHint": "Yalnız panelde görünür.",
+      "channel": "Kanal",
+      "channelHint": "Her ileti tek kanaldan gider.",
+      "utm": "Kampanya kodu",
+      "utmHint": "Mağaza bağlantılarına utm_campaign olarak eklenir; rapor satışları bununla bulur.",
+      "subject": "Konu",
+      "subjectHint": "Alıcının adı için {ad} yazabilirsiniz.",
+      "preheader": "Önizleme satırı",
+      "preheaderHint": "Gelen kutusunda konunun yanında görünür.",
+      "chars": "{{used}}/{{max}} karakter.",
+      "body": "E-posta metni",
+      "bodyHint_one": "Başlık, paragraf, liste, bağlantı, görsel ve en çok {{max}} ürün kartı ({{count}} kullanıldı). Tablo ve alıntı düz paragraf olarak gider.",
+      "bodyHint_other": "Başlık, paragraf, liste, bağlantı, görsel ve en çok {{max}} ürün kartı ({{count}} kullanıldı). Tablo ve alıntı düz paragraf olarak gider."
+    },
+    "tokens": {
+      "name": "Alıcının adı",
+      "nameHint": "Müşteri kaydındaki ad; yoksa “Değerli müşterimiz” yazılır."
+    },
+    "editor": {
+      "general": "Genel",
+      "parts": "İletinin bölümleri",
+      "tabs": {
+        "audience": "Kitle",
+        "content": "İçerik",
+        "send": "Deneme ve gönderim"
+      },
+      "saved": "İleti kaydedildi.",
+      "invalid": "Bazı alanlar eksik ya da hatalı; işaretli yerleri düzeltin.",
+      "unsaved": "Kaydedilmemiş değişiklikler var; denemeden ve göndermeden önce kaydedin.",
+      "incomplete": "Önce şunları yazın: {{fields}}.",
+      "missing": {
+        "subject": "konu",
+        "body": "e-posta metni",
+        "sms_text": "SMS metni"
+      },
+      "emptyAudience": "Kitlede şu an iletiyi alabilecek kimse yok; kaynakları ve izinleri kontrol edin."
+    },
+    "audience": {
+      "title": "Kimlere gidecek",
+      "description": "Bir ya da birkaç kaynak seçin. Aynı kişi birden çok kaynakta olsa da tek ileti alır; yalnız bu kanalda izni olanlara gider.",
+      "all_consented": "Bütün izinli müşteriler",
+      "all_consentedHint": "Bu kanalda ticari ileti izni veren bütün müşteri hesapları.",
+      "newsletter": "Bülten aboneleri",
+      "newsletterHint": "Vitrindeki bülten kutusundan izin veren, hesabı olmayan aboneler.",
+      "segments": "Segmentler",
+      "segmentsEmpty": "Henüz segment yok.",
+      "groups": "Müşteri grupları",
+      "groupsEmpty": "Henüz müşteri grubu yok.",
+      "manage": "Gruplar ve segmentler",
+      "members_one": "{{members}} üye",
+      "members_other": "{{members}} üye",
+      "full": "En çok {{limit}} kaynak seçilebilir.",
+      "kinds": {
+        "segment": "Segment",
+        "group": "Grup"
+      },
+      "count": {
+        "title": "Canlı kitle",
+        "pick": "Saymak için en az bir kaynak seçin.",
+        "eligible_one": "{{people}} kişi",
+        "eligible_other": "{{people}} kişi",
+        "of": "Kaynaklarda {{audience}} kişi var; {{excluded}} kişi dışarıda kalıyor.",
+        "excluded": "Dışarıda kalanlar",
+        "noneExcluded": "Dışarıda kalan yok.",
+        "quotaLater": "Günlük sınır nedeniyle bugün {{today}} kişiye gider; kalan {{later}} kişiye ertesi gün 03:00'ten sonra devam eder.",
+        "estimate": "Sayı şu anki izinlere göre bir tahmindir; alıcı listesi gönderim başlarken kesinleşir."
+      }
+    },
+    "skip": {
+      "no_consent": "Bu kanalda izni yok",
+      "suppressed": "Gönderim engeli listesinde",
+      "iys_pending": "İzni İYS'ye henüz bildirilmedi",
+      "recent": "Son 24 saatte başka bir toplu ileti aldı",
+      "invalid_recipient": "Adresi ya da numarası geçersiz",
+      "over_quota": "Günlük sınıra takıldı"
+    },
+    "content": {
+      "emailTitle": "E-posta",
+      "emailHint": "Konu, önizleme satırı ve metin. Altına mağazanın unvanı, iletişim bilgisi ve tek tıkla çıkış bağlantısı kendiliğinden eklenir."
+    },
+    "sms": {
+      "title": "SMS",
+      "description": "Düz metin; mağaza adı ve ret metniyle birlikte en çok 3 SMS boyunda.",
+      "text": "SMS metni",
+      "count": "{{chars}} karakter · {{parts}}/{{max}} SMS (SMS başına {{perPart}} karakter)",
+      "ucs2": "Türkçe alfabe dışında bir karakter (ör. emoji) var; SMS başına yalnız 70 karakter sığar.",
+      "footer": "Her SMS'in sonuna kendiliğinden eklenir",
+      "optOutMissing": "Ret metni girilmemiş; toplu SMS gönderilemez.",
+      "optOutLink": "Ret metnini gir",
+      "shopFallback": "Mağaza"
+    },
+    "preview": {
+      "title": "Önizleme",
+      "emailHint": "Gelen kutusunda böyle görünür; e-postanın tamamını deneme gönderimiyle görün.",
+      "smsHint": "Telefonda böyle görünür; alıcının adı yerine en uzun selamlama gösterilir.",
+      "inbox": "Gelen kutusu önizlemesi",
+      "sms": "SMS önizlemesi",
+      "noSubject": "(konu yok)",
+      "noPreheader": "(önizleme satırı yok)"
+    },
+    "test": {
+      "title": "Deneme gönderimi",
+      "description": {
+        "email": "Deneme, panele giriş yaptığınız e-posta adresine gider; konusu [Deneme] ile başlar ve günlük sınırdan düşer. Saatte en çok 10 deneme.",
+        "sms": "Deneme, mağaza bilgilerindeki telefona gider ve günlük sınırdan düşer. Saatte en çok 10 deneme."
+      },
+      "send": "Bana gönder",
+      "sent": "Deneme {{to}} adresine gönderildi."
+    },
+    "send": {
+      "title": "Gönderim",
+      "description": "Şimdi gönderin ya da ileri bir zamana kurun. Gönderim başlayınca içerik değişmez.",
+      "now": "Şimdi gönder",
+      "schedule": "Zamanla",
+      "at": "Gönderim zamanı",
+      "atHint": "Bu bilgisayarın saatiyle; en geç 90 gün sonrası.",
+      "quota": "Günlük sınır nedeniyle bugün {{today}} kişiye gider; kalan {{later}} kişi ertesi güne kalır.",
+      "quiet": "Toplu SMS'ler {{start}}–{{end}} arasında gider; şimdi gönderirseniz saat {{start}} olunca başlar.",
+      "reauthNote": "Göndermeden ya da zamanlamadan önce kimliğinizi yeniden doğrularsınız.",
+      "problems": {
+        "required": "Bir tarih ve saat seçin.",
+        "past": "Gönderim zamanı ileri bir an olmalı.",
+        "tooFar": "Gönderim en geç 90 gün sonrasına kurulabilir."
+      },
+      "confirmNow": {
+        "title_one": "{{people}} kişiye şimdi gönderilsin mi?",
+        "title_other": "{{people}} kişiye şimdi gönderilsin mi?",
+        "titleUnknown": "İleti şimdi gönderilsin mi?",
+        "description": "Gönderim bir dakika içinde başlar ve içerik kilitlenir. Gerekirse duraklatabilir ya da iptal edebilirsiniz."
+      },
+      "confirmSchedule": {
+        "title": "İleti {{when}} için zamanlansın mı?",
+        "description": "Zamanı gelince kendiliğinden gönderilir; içerik şimdiden kilitlenir. O zamana kadar iptal edebilirsiniz."
+      },
+      "started": "Gönderim başladı; ilk iletiler bir dakika içinde gider.",
+      "scheduled": "İleti {{when}} için zamanlandı."
+    },
+    "actions": {
+      "pause": "Duraklat",
+      "resume": "Sürdür",
+      "cancel": "İptal et",
+      "copy": "Kopyala",
+      "delete": "Sil",
+      "done": {
+        "pause": "Gönderim duraklatıldı.",
+        "resume": "Gönderim sürüyor.",
+        "cancel": "Gönderim iptal edildi.",
+        "copy": "Kopyası taslak olarak açıldı.",
+        "delete": "Taslak silindi."
+      },
+      "confirm": {
+        "resume": {
+          "title": "“{{name}}” sürdürülsün mü?",
+          "description": "Kalan alıcılara gönderim kaldığı yerden devam eder. Şikâyet nedeniyle durduysa oranlar bundan sonra yeniden ölçülür."
+        },
+        "cancel": {
+          "title": "“{{name}}” iptal edilsin mi?",
+          "description": "Henüz ulaşılmamış alıcılara gönderilmez; giden iletiler geri alınamaz. İptal geri alınmaz."
+        },
+        "delete": {
+          "title": "“{{name}}” silinsin mi?",
+          "description": "Taslak kalıcı olarak silinir."
+        }
+      }
+    },
+    "locked": {
+      "tab": "İçerik",
+      "title": "Gönderilen içerik",
+      "description": "Zamanlanmış ya da gönderilmiş iletinin içeriği değişmez; değiştirmek için kopyalayın.",
+      "fields": {
+        "subject": "Konu",
+        "preheader": "Önizleme satırı",
+        "body": "E-posta metni",
+        "smsText": "SMS metni",
+        "scheduledAt": "Zamanlanan an"
+      }
+    },
+    "report": {
+      "tab": "Rapor",
+      "title": "Gönderim",
+      "description": {
+        "email": "Sayılar gönderim sürerken yarım dakikada bir yenilenir. Geri dönen ve şikâyetleri e-posta hizmeti bildirir.",
+        "sms": "Sayılar gönderim sürerken yarım dakikada bir yenilenir."
+      },
+      "counts": {
+        "audience": "Kitle",
+        "targeted": "Hedef",
+        "sent": "Gönderilen",
+        "pending": "Sırada",
+        "failed": "Başarısız",
+        "skipped": "Atlanan",
+        "bounces": "Geri dönen",
+        "complaints": "Şikâyet",
+        "unsubscribed": "7 günde çıkış"
+      },
+      "share": "Oran: {{share}}",
+      "skippedTitle": "Atlananlar ve nedenleri",
+      "skippedHint": "Gönderim başlarken ya da gönderim anında dışarıda kalanlar.",
+      "trafficTitle": "Mağazaya etkisi",
+      "trafficHint": "Gönderimden sonraki 7 günde {{code}} koduyla gelen ziyaretler; kişi bazında değil, toplu ölçülür.",
+      "carts": "Sepet",
+      "orders": "Sipariş",
+      "revenue": "Ciro",
+      "trafficNone": "Gönderim başlayınca ölçülür.",
+      "notStarted": "Gönderim başlayınca sayılar burada görünür.",
+      "notStartedAt": "İleti {{when}} için zamanlandı; gönderim başlayınca sayılar burada görünür."
+    },
+    "errors": {
+      "nameRequired": "İletiye bir ad verin.",
+      "tooLong": "En çok {{limit}} karakter olabilir.",
+      "tokenUnknown": "Tanınmayan bir belirteç var. Yalnızca {ad} ve mağaza bilgisi belirteçleri kullanılabilir.",
+      "audienceRequired": "En az bir kaynak seçin.",
+      "audienceTooMany": "En çok {{limit}} kaynak seçilebilir.",
+      "tooManyProducts": "Bir e-postada en çok {{max}} ürün kartı olabilir.",
+      "smsTooLong": "Metin, mağaza adı ve ret metniyle birlikte {{parts}} SMS boyunu geçiyor; kısaltın."
     }
   }
 }
