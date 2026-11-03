@@ -200,6 +200,23 @@ describe("Yurtiçi (adr/0035)", () => {
     expect(yurticiStatusOf(delivery({ docId: "0" })).tracking_number).toBeNull()
   })
 
+  it("links a parcel to the fake's own page when a fake Yurtiçi is set, whatever it answers", () => {
+    const fake = "http://127.0.0.1:9105"
+    const page = "https://selfservis.yurticikargo.com/reports/SSWDocumentDetail.aspx?DocId=1"
+
+    expect(yurticiStatusOf(delivery({ docId: "100000000001" }), fake).tracking_url).toBe(
+      "http://127.0.0.1:9105/takip/100000000001"
+    )
+    expect(
+      yurticiStatusOf(delivery({ docId: "100000000001", trackingUrl: page }), fake).tracking_url
+    ).toBe("http://127.0.0.1:9105/takip/100000000001")
+    expect(yurticiStatusOf(delivery({ docId: "0" }), fake).tracking_url).toBeNull()
+    // No fake set: Yurtiçi's own pages, as a live shop's
+    expect(yurticiStatusOf(delivery({ docId: "100000000001" }), null).tracking_url).toBe(
+      "https://www.yurticikargo.com/tr/online-servisler/gonderi-sorgula?code=100000000001"
+    )
+  })
+
   it("draws a 100×150 mm PDF label, whatever the shopper typed", async () => {
     const pdf = await yurticiLabelPdf({
       ...shipment("QT01ABCDEF", 24_990),

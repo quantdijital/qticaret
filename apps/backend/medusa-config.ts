@@ -6,6 +6,7 @@ import {
 } from "@medusajs/framework/utils"
 import { customerAuthProviders } from "./src/lib/auth/providers"
 import { isLocalEnv, parseEnv, s3Settings } from "./src/lib/env"
+import { warnFakeProviders } from "./src/lib/fake-providers"
 import { DEFAULT_LOG_LEVEL, MedusaPinoLogger, baseLogger, logger } from "./src/lib/logging"
 import { lockingModules, tenantNamespace } from "./src/lib/redis"
 
@@ -22,6 +23,12 @@ if (!s3 && !isLocalEnv(env)) {
   // NODE_ENV unset counts as deployed: files on local disk are lost on
   // restart and served unauthenticated under /static (F16 sets NODE_ENV)
   logger.warn({ event: "files.local_disk", nodeEnv: env.NODE_ENV ?? null })
+}
+// A fake provider server set (development only; refused when deployed): one
+// warning per provider, as the panel's test mode words do not hold then.
+// Tests set them on purpose and stay quiet
+if (env.NODE_ENV !== "test") {
+  warnFakeProviders(env)
 }
 
 module.exports = defineConfig({

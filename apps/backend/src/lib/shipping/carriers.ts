@@ -65,6 +65,15 @@ export function carrierNameOf(
   }
 }
 
+/**
+ * A fake carrier's own tracking page (`<base>/takip/<no>`), which the
+ * fakes on a developer's machine serve: with a fake address set
+ * (`ARAS_BASE_URL`, `YURTICI_BASE_URL`; refused when deployed), a parcel's
+ * link opens the fake's page, as a live shop's opens the carrier's.
+ */
+export const fakeTrackingUrl = (fakeBase: string, number: string): string =>
+  `${fakeBase.replace(/\/+$/, "")}/takip/${encodeURIComponent(number)}`
+
 /** A tracking link fit to show: http(s), nothing that breaks out of an attribute. */
 export const trackingUrlOf = (value: string | null | undefined): string | null =>
   value && /^https?:\/\/[^\s"<>]+$/.test(value) ? value : null

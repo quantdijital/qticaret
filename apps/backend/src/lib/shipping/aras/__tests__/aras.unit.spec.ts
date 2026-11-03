@@ -4,6 +4,7 @@ import {
   arasCredentialsOf,
   arasOrderFields,
   arasStatusOf,
+  arasTrackingUrl,
   createArasApi,
   isArasServiceUrl,
 } from ".."
@@ -118,6 +119,19 @@ describe("Aras (adr/0035)", () => {
     expect(
       arasStatusOf([{ ALICI: "Teslim Edildi", ADRES: "Dağıtım Sok.", DURUMU: "Yolda" }]).status
     ).toBe("in_transit")
+  })
+
+  it("links a parcel to Aras's own page, and to the fake's page when a fake Aras is set", () => {
+    const row = { KARGO_TAKIP_NO: "1234567890", DURUMU: "Yolda" }
+
+    expect(arasStatusOf([row]).tracking_url).toBe(
+      "https://kargotakip.araskargo.com.tr/mainpage.aspx?code=1234567890"
+    )
+    expect(arasStatusOf([row], null).tracking_url).toBe(arasTrackingUrl("1234567890"))
+    expect(arasStatusOf([row], "http://127.0.0.1:9104/").tracking_url).toBe(
+      "http://127.0.0.1:9104/takip/1234567890"
+    )
+    expect(arasStatusOf([], "http://127.0.0.1:9104").tracking_url).toBeNull()
   })
 })
 

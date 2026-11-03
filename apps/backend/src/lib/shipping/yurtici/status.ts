@@ -1,4 +1,5 @@
 import type { ShipmentStatus } from "../../../modules/shipment-tracking/states"
+import { fakeTrackingUrl } from "../carriers"
 
 /**
  * Where a Yurtiçi parcel stands (adr/0035), from `queryShipment`, as
@@ -67,9 +68,15 @@ const RETURNED = /İADE|IADE/
 const FAILED = /TESLİM EDİLEMEDİ|TESLIM EDILEMEDI|ADRESTE BULUNAMADI/
 const LAST_MILE = /DAĞITIM|DAGITIM/
 
-/** Yurtiçi's public tracking page for a parcel, when the answer gives none. */
-export const yurticiTrackingUrl = (docId: string): string =>
-  `https://www.yurticikargo.com/tr/online-servisler/gonderi-sorgula?code=${encodeURIComponent(docId)}`
+/**
+ * Yurtiçi's public tracking page for a parcel, when the answer gives none;
+ * the fake Yurtiçi's own page when one is set (`YURTICI_BASE_URL`, a
+ * developer's machine only).
+ */
+export const yurticiTrackingUrl = (docId: string, fakeBase?: string | null): string =>
+  fakeBase
+    ? fakeTrackingUrl(fakeBase, docId)
+    : `https://www.yurticikargo.com/tr/online-servisler/gonderi-sorgula?code=${encodeURIComponent(docId)}`
 
 /** Yurtiçi's own page from an answer: https on its hosts only, shown to shoppers and staff. */
 const yurticiPage = (value: string | null): string | null => {
@@ -89,7 +96,10 @@ const yurticiPage = (value: string | null): string | null => {
   }
 }
 
-export function yurticiStatusOf(delivery: YurticiDelivery): {
+export function yurticiStatusOf(
+  delivery: YurticiDelivery,
+  fakeBase?: string | null
+): {
   status: ShipmentStatus
   provider_status: string | null
   tracking_number: string | null
@@ -115,6 +125,9 @@ export function yurticiStatusOf(delivery: YurticiDelivery): {
     status,
     provider_status: delivery.operationMessage,
     tracking_number: docId,
-    tracking_url: yurticiPage(delivery.trackingUrl) ?? (docId ? yurticiTrackingUrl(docId) : null),
+    // A fake's answer names no page of Yurtiçi's: its own page stands in
+    tracking_url:
+      (fakeBase ? null : yurticiPage(delivery.trackingUrl)) ??
+      (docId ? yurticiTrackingUrl(docId, fakeBase) : null),
   }
 }

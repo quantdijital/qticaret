@@ -1,4 +1,5 @@
 import type { ShipmentStatus } from "../../../modules/shipment-tracking/states"
+import { fakeTrackingUrl } from "../carriers"
 import type { ArasRow } from "./client"
 
 /**
@@ -24,11 +25,19 @@ const TRACKING_COLUMN = /TAKIP|BARKOD|KARGO_?NO|CARGO_?KEY/i
 // Aras's own words about the parcel; never a name, an address or a note
 const STATUS_COLUMN = /DURUM|STATU/i
 
-/** Aras's public tracking page for a parcel. */
-export const arasTrackingUrl = (number: string): string =>
-  `https://kargotakip.araskargo.com.tr/mainpage.aspx?code=${encodeURIComponent(number)}`
+/**
+ * Aras's public tracking page for a parcel; the fake Aras's own page when
+ * one is set (`ARAS_BASE_URL`, a developer's machine only).
+ */
+export const arasTrackingUrl = (number: string, fakeBase?: string | null): string =>
+  fakeBase
+    ? fakeTrackingUrl(fakeBase, number)
+    : `https://kargotakip.araskargo.com.tr/mainpage.aspx?code=${encodeURIComponent(number)}`
 
-export function arasStatusOf(rows: readonly Record<string, string>[]): {
+export function arasStatusOf(
+  rows: readonly Record<string, string>[],
+  fakeBase?: string | null
+): {
   status: ShipmentStatus
   provider_status: string | null
   tracking_number: string | null
@@ -51,6 +60,6 @@ export function arasStatusOf(rows: readonly Record<string, string>[]): {
     status: rows.length === 0 ? "created" : (rule?.[1] ?? "created"),
     provider_status: rule ? (values.find((value) => rule[0].test(value)) ?? null) : null,
     tracking_number: number,
-    tracking_url: number ? arasTrackingUrl(number) : null,
+    tracking_url: number ? arasTrackingUrl(number, fakeBase) : null,
   }
 }

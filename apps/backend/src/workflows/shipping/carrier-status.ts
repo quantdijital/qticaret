@@ -1,4 +1,5 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
+import { parseEnv } from "../../lib/env"
 import { ValidationError } from "../../lib/errors"
 import type { CarrierName } from "../../lib/shipping/carriers"
 import { arasApi, arasCredentialsOf, arasStatusOf } from "../../lib/shipping/aras"
@@ -48,7 +49,10 @@ const readAras: Reader = async (container, providerShipmentId) => {
   if (!account) {
     throw new ValidationError("shipping.carrier_not_connected")
   }
-  return arasStatusOf(await arasApi().cargoInfo(account, providerShipmentId))
+  return arasStatusOf(
+    await arasApi().cargoInfo(account, providerShipmentId),
+    parseEnv().ARAS_BASE_URL
+  )
 }
 
 const readYurtici: Reader = async (container, providerShipmentId) => {
@@ -62,13 +66,16 @@ const readYurtici: Reader = async (container, providerShipmentId) => {
   return yurticiStatusOf(
     !delivery.found && account.cod
       ? await api.query(account.cod, account.testMode, providerShipmentId)
-      : delivery
+      : delivery,
+    parseEnv().YURTICI_BASE_URL
   )
 }
 
 /**
  * How each carrier is asked about a parcel (adr/0035): the shop's account
- * read at the call, the answer mapped to our statuses.
+ * read at the call, the answer mapped to our statuses. With a fake Aras or
+ * Yurtiçi set, the parcel's link opens the fake's own page; Geliver's link
+ * is the one its answer gives.
  */
 const READERS: Record<CarrierName, Reader> = {
   geliver: readGeliver,
