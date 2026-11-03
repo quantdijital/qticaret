@@ -33,7 +33,7 @@ Geliver'in resmi SDK'sından okunanlar (`GeliverApp/geliver-js`):
 2. **Fiyat (F7.2):**
    - Desi = en × boy × yükseklik / 3000 ile ağırlığın büyüğü; ürün ölçüleri varyanttan okunur (Medusa fiyat bağlamındaki ve siparişteki kalemlere varyantın ağırlık ve ölçülerini veriyor; testle doğrulandı).
    - Ölçüler mağazanın biriminde saklanır (Ayarlar > Mağaza: g/kg, cm/mm). Sağlayıcı birimleri çağrı anında paylaşılan kapsayıcıdan okur (`platform-settings`'in `store` bölümü, salt okunur). Bu, PayTR sağlayıcısının taksit ayarını okuması gibi dar bir istisnadır: `calculatePrice`'a gelen `data` istemciden gelir, birimleri taşıyacak başka güvenli kanal yoktur.
-   - Ölçüsü ya da ağırlığı eksik ürün açıklayıcı hatayla durur (`shipping.dimensions_missing`, ürün adlarıyla).
+   - ~~Ölçüsü ya da ağırlığı eksik ürün açıklayıcı hatayla durur (`shipping.dimensions_missing`, ürün adlarıyla).~~ Değişti (ADR-0054, 2026-11-03): ölçüler isteğe bağlı; eksik değer mağazanın varsayılan paketinden (Ayarlar > Kargo; yoksa 1 kg, 30 × 20 × 10 cm) birim başına alınır. Yalnız geçersiz değer (sıfırdan küçük) `shipping.measures_invalid` ile durur.
    - Hesaplanan seçenek Geliver'in fiyat listesinden seçilen servisin fiyatını kullanır. Desi ve servise göre önbelleğe alınır (10 dk).
    - Sabit ücretli seçenek de Geliver'le gönderilebilir: fiyat mağazanın, gönderi Geliver'in.
 3. **Gönderi ve etiket (F7.3):**

@@ -90,7 +90,7 @@ Kategori ağırlıkları (claude-seo e-ticaret puanlamasıyla hizalı):
 | P-DATA-02 | GTIN (EAN/UPC) veya MPN + marka (Merchant Center uygunluğu, `gtin13` kontrol basamağı doğrulanır) | Y | |
 | P-DATA-03 | Marka atanmış | O | |
 | P-DATA-04 | Kategori atanmış ve birincil kategori seçili | Y | En derin kategoriyi seç |
-| P-DATA-05 | Fiziksel üründe ağırlık/ölçü (kargo hesabı + `shippingDetails`) | Y | |
+| P-DATA-05 | Fiziksel üründe ağırlık/ölçü önerisi: "ölçü girilmezse kargo ücreti varsayılan pakete göre hesaplanır". Engel değil, yalnız öneri (ADR-0054, 2026-11-03; önceden Y). Kural sürümü 5 | D | |
 | P-DATA-06 | Ürün durumu (`itemCondition`) | D | Varsayılan "yeni" |
 | P-SCHEMA-01 | Üretilen JSON-LD şema doğrulamasından geçiyor | K | |
 | P-SCHEMA-02 | `aggregateRating` yalnızca onaylı yorum varken | O | |

@@ -20,10 +20,10 @@ Shopify için ayrıntı: `docs/entegrasyonlar/shopify.md`; WordPress için `docs
 
 - **Fiyatlar çevrilmez.** Kaynak Türk lirası dışında satıyorsa taşıma reddedilir.
 - **Üstü çizili fiyat taşınmaz.** İndirim öncesi fiyat son 30 günün en düşük fiyatı olmalı; fiyat geçmişi taşımayla başlar.
-- **Ölçüsü olmayan ürün.** Yayındaki yeni ürün ağırlık ve ölçü ister. Varsayılan paket verilmezse ürün taslak gelir ve sayfası açılmaz. Kesimden önce ya varsayılan paket verilir ya ölçüler girilir.
+- **Ölçüsü olmayan ürün.** Ölçüler isteğe bağlıdır (ADR-0054): ürün kaynaktaki durumuyla gelir, kargo ücreti mağazanın varsayılan paketine göre (Ayarlar > Kargo; girilmemişse 1 kg, 30 × 20 × 10 cm) hesaplanır, kargo firması gerçek paketi kendisi ölçer. Taşımada verilen paket isteğe bağlıdır ve ürünün kendi ölçüsü olarak yazılır. Raporun Notlar sayfası her ölçüsüz ürünü "kargo varsayılan paketle hesaplanır" diye adlandırır.
 - **Şifreler taşınmaz.** Müşterilere hesap açma daveti gider (aşağıda).
 - **İleti izinleri.** Yalnızca kaynak tarihiyle veriyorsa taşınır; İYS'ye bildirilir.
-- **Tekrarsızlık.** Her çalıştırma kaynak kayıtlarını kimlikleriyle hatırlar; yeniden çalıştırmak hiçbir şeyi iki kez yazmaz. Yarıda kalan bir çalıştırma aynen yeniden başlatılır.
+- **Tekrarsızlık.** Her çalıştırma kaynak kayıtlarını kimlikleriyle hatırlar; yeniden çalıştırmak hiçbir şeyi iki kez yazmaz. Yarıda kalan bir çalıştırma (sunucu durdu, yeniden başladı) en geç 15 dakika içinde "Yarıda kaldı" görünür (iş 10 dakika ses vermezse, bakım her 5 dakikada bir); Geçmiş çalıştırmalar listesindeki **Yeniden başlat** aynı kaynağı, kipi ve paketi saklanan dosyadan yeniden başlatır. Dosya artık saklanmıyorsa (başarısız işlerin dosyaları birkaç gün içinde silinir) panel dosyayı yeniden yüklemenizi söyler.
 - **Taşınmış ürün yeniden yazılmaz.** Yeniden çalıştırma yalnızca yeni ürünleri ekler; bir kez taşınmış ürünün fiyatı, stoku ve durumu buradaki hâliyle kalır. Bu yüzden ana uygulamadan sonra ürün değişiklikleri eski platformda değil, burada yapılır.
 - **Tanıtıcı çakışması.** Sitede aynı tanıtıcılı başka bir ürün varsa (elle eklenmiş) kaynaktaki ürün taşınmaz, raporun Notlar sayfasında yazar; üzerine asla yazılmaz.
 
@@ -31,7 +31,7 @@ Shopify için ayrıntı: `docs/entegrasyonlar/shopify.md`; WordPress için `docs
 
 1. Sahip WordPress'te **Araçlar > Dışa aktar > Tüm içerik** dosyasını indirir ve Taşıma'da **WordPress** kaynağına yükler (50 MB'a kadar; büyükse zip). Dosya sohbete, e-postaya ya da depoya konmaz: yazarların ve yorumcuların e-postası içindedir. Taşıma işi dosyayı bitince siler.
 2. Müşteriler ve geçmiş siparişler dosyada yoktur: WooCommerce > Müşteriler'in CSV dışa aktarması **Müşteri listesi** kaynağıyla ayrıca yüklenir.
-3. WooCommerce ürünlerinde ağırlık ve ölçü çoğu zaman girilmemiştir: kuru çalıştırmada "ölçüsüz, taslak gelecek" notları çoksa varsayılan paket verilir.
+3. WooCommerce ürünlerinde ağırlık ve ölçü çoğu zaman girilmemiştir. Ürünler yine de kaynaktaki durumlarıyla gelir; kuru çalıştırmada "ölçüsüz; kargo varsayılan paketle hesaplanır" notları çoksa Ayarlar > Kargo'daki varsayılan paketin mağazanın tipik kolisine uyduğu kontrol edilir (isteğe bağlı olarak taşımada bir paket de verilebilir).
 4. Kuru çalıştırmanın Notlar sayfasında beklenenler: yasal metinler ve sepet/ödeme/hesap sayfaları "yalnızca eski adres" (Eski adresler'de `/yasal/...`'a ya da ilgili sayfaya 301), menüler ve kuponlar "taşınmadı" (Vitrin > Menüler, Kampanyalar'dan elle), ürün etiketleri ve açıklayıcı özellikler "taşınmadı" (özellik şablonu kurulunca), yazı içindeki görseller (içerik düzenleyicide eklenir).
 5. Kategori eski adresleri raporda yanlış tabanla görünürse (ör. `/product-category/...` ama site `/urun-kategori/...` kullanıyorsa) kategori adres tabanı elle verilip kuru çalıştırma tekrarlanır.
 6. Geliştirme ortamında bir dosyanın kuru çalıştırması: `NODE_ENV=development pnpm --filter @qticaret/backend medusa exec ./src/scripts/wordpress-check.ts <dosya.xml>` (yalnızca kuru çalıştırma; özet kişi verisi içermez).
@@ -43,7 +43,7 @@ Shopify için ayrıntı: `docs/entegrasyonlar/shopify.md`; WordPress için `docs
    - **Özet:** tür başına kaynakta, eklenecek, var olan, atlanacak.
    - **Ürünler:** katalog içe aktarmanın satır satır sonucu (tanıtıcıya göre).
    - **Notlar:** atlanan kayıtlar ve nedenleri (geçersiz e-posta, para birimi, ölçüsüz ürün, görsel indirilemedi…).
-3. Notlardaki sorunları kaynakta düzeltin ya da varsayılan paketi belirleyin; kuru çalıştırmayı sorun kalmayana kadar tekrarlayın.
+3. Notlardaki sorunları kaynakta düzeltin; ölçüsüz ürün notu engel değildir (varsayılan paketi Ayarlar > Kargo'dan kontrol edin). Kuru çalıştırmayı sorun kalmayana kadar tekrarlayın.
 4. **Uygulayın** (yeniden doğrulama ister). Sonra katalogu ve birkaç müşteriyi panelde gözle kontrol edin.
 
 ## Eski adresler (kesimden 1 hafta önce)
@@ -79,7 +79,7 @@ Shopify için ayrıntı: `docs/entegrasyonlar/shopify.md`; WordPress için `docs
 ## Doğrulama listesi
 
 - [ ] Kuru çalıştırma raporunda Notlar sayfası boş ya da her satırın nedeni biliniyor.
-- [ ] Ürün sayısı kaynaktakiyle (taslaklar dahil) eşleşiyor; ölçüsüz taslak kalmadı.
+- [ ] Ürün sayısı kaynaktakiyle (taslaklar dahil) eşleşiyor; yayın durumları kaynaktakiyle aynı. Ölçüsüz ürünler için Ayarlar > Kargo'daki varsayılan paket kontrol edildi.
 - [ ] Rastgele 10 ürünün fiyatı, varyantları ve görselleri kaynakla aynı.
 - [ ] Müşteri sayısı (geçersiz e-postalar hariç) ve izinli müşteri sayısı makul.
 - [ ] Kesime hazır rozeti yeşil; sorgu dizeli adresler için sunucu kuralı yazıldı ya da kabul edildi.

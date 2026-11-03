@@ -38,7 +38,7 @@ Belgedeki sınırlar ve bizim gönderdiğimiz (`mappers.ts`). E: zorunlu, H: ist
 | `cityName` / `townName` | String(40) | H | | İl `province`, ilçe `city` (ADR-0008) |
 | `receiverPhone1` | String(20) | E | Alan koduyla **10 rakam** | Baştaki 0 atılarak 10 rakam |
 | `receiverPhone2/3` | String(20) | H | 10 rakam | Gönderilmiyor |
-| `desi` / `kg` | Double(9,3) | H | Yalnızca kullanıcının yetkisi varsa kaydedilir; yoksa şube ölçer | Desi = hacim / 3000 (bir ondalık yukarı), kg ayrı; nokta ile, 3 ondalık |
+| `desi` / `kg` | Double(9,3) | H | Yalnızca kullanıcının yetkisi varsa kaydedilir; yoksa şube ölçer | Desi = hacim / 3000 (bir ondalık yukarı), kg ayrı; nokta ile, 3 ondalık. Kolideki bir ürünün kendi ölçüsü yoksa ikisi de gönderilmez (öğe yok), şube ölçer; etikette de yazmaz (ADR-0054) |
 | `cargoCount` | Integer(4) | H | | 1 |
 | `waybillNo` | String(20) | H | **Ticari gönderilerde zorunlu** | Gönderilmiyor (açık soru) |
 | `specialField1` | String(200) | H | `alan$değer#` biçimi, alan adı Yurtiçi'de tanımlı olmalı | Gönderilmiyor |

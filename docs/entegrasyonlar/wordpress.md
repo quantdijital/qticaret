@@ -11,7 +11,7 @@ WordPress sitesinin kendi dışa aktarma dosyası (WXR) bir kez okunur: ürün k
    - Sınır **XML'in kendisi için 50 MB**: düz yüklenirse dosya, zip'lenip yüklenirse zip'in içindeki `.xml` (zip okuyucusunun girdi sınırı da 50 MB). Zip yalnızca yüklemeyi küçültür, sınırı büyütmez.
    - XML'i 50 MB'ı aşan site şimdilik bu yoldan taşınamaz. Aynı siteden ikinci bir dosya tekrarsızlığı bozmaz (kaynak kimliği ve WordPress kimlikleri aynı, bir kez yazılan yeniden yazılmaz), ama parçalara bölmek yukarıdaki bağları kopardığı için önerilmez. Açık iş: büyük dosya için akışlı okuma ya da WooCommerce REST "Bağlan" yolu.
 2. Panelde **Ayarlar > Taşıma**, kaynak **WordPress**, dosyayı seçer.
-   - Ürünlerin çoğunda ağırlık ve ölçü yoksa (WooCommerce'te çoğu mağaza girmez) varsayılan paketi verir; vermezse ürünler taslak gelir.
+   - Ürünlerde ağırlık ve ölçü çoğu zaman yoktur (WooCommerce'te çoğu mağaza girmez). Ürünler yine de kaynaktaki durumlarıyla (yayında ya da taslak) gelir; kargo ücreti mağazanın varsayılan paketine göre hesaplanır (Ayarlar > Kargo, ADR-0054). Taşımada verilen paket isteğe bağlıdır: ölçüsüz ürünlere kendi ölçüsü olarak yazılır.
    - Kategori adresleri sitenin kendi bağlantılarından okunur. Raporda yanlış görünürse kategori adres tabanını (ör. `/urun-kategori/`) elle verir.
 3. **Kuru çalıştırır**, raporun Notlar sayfasını okur, sonra **uygular** (yeniden doğrulama ister).
 4. Eski adresler kartında yasal metinlerin ve sistem sayfalarının eski adreslerine karar verir (ör. `/satis-sozlesmesi/` → `/yasal/mesafeli-satis-sozlesmesi`).

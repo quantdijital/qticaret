@@ -130,7 +130,7 @@ F17 öncesinde tenant'lar F16 script'leriyle elle açılır.
 **Hedef:** Mağazanın yüzlerce ürünü hızlıca yükleyip, SEO'su hazır ve doğru stokla satabilmesi. Detay: `docs/13`, `docs/14`.
 
 ### Katalog
-- F3.1 Ürün yapısı: varyant/seçenek, kategori ağacı, koleksiyon, etiket (Medusa çekirdeği) + fiziksel ürünlerde ölçü/ağırlık zorunluluğu
+- F3.1 Ürün yapısı: varyant/seçenek, kategori ağacı, koleksiyon, etiket (Medusa çekirdeği) + fiziksel ürünlerde ölçü/ağırlık alanları (isteğe bağlı; yayın onları beklemez, kargo eksikte mağazanın varsayılan paketini kullanır — ADR-0054, 2026-11-03)
   + GTIN/MPN/durum alanları + **birincil kategori** (`primary_category_id`) + **halef ürün** alanı (satıştan kalkınca 301 hedefi)
 - F3.2 Fiziksel olmayan ürün tipi (dijital/hizmet; kargo gerektirmez) — flag ile
 - F3.3 Görseller: S3 file provider (dev'de SeaweedFS, adr/0006), tür/boyut sınırı (`lib/security` upload validator; SVG kapalı; EXIF temizleme; yeniden kodlama),
@@ -266,7 +266,7 @@ Detay: `docs/entegrasyonlar/alternatif-odeme.md`
 Detay: `docs/entegrasyonlar/geliver.md`
 
 - F7.1 `fulfillment-geliver` provider: `getFulfillmentOptions`, `validateFulfillmentData`, `validateOption`
-- F7.2 `canCalculate` / `calculatePrice`: desi hesaplama (ürün ölçü/ağırlık) + teklif, cache'li
+- F7.2 `canCalculate` / `calculatePrice`: desi hesaplama (ürün ölçü/ağırlık; ölçüsü girilmemiş ürün mağazanın varsayılan paketiyle, ADR-0054) + teklif, cache'li
 - F7.3 `createFulfillment`: gönderi oluşturma, etiket PDF → obje depolama (private, presigned erişim), takip no kaydı
 - F7.4 `cancelFulfillment`, `createReturnFulfillment` (iade kodu)
 - F7.5 Takip webhook'u: `POST /hooks/geliver` → imza/doğrulama → fulfillment durum güncelleme → event
@@ -283,7 +283,7 @@ Detay: `docs/entegrasyonlar/geliver.md`
 
 **KK:**
 - [x] Test ortamında sipariş → etiket → takip ilerlemesi → "teslim edildi" akışı çalışıyor (`geliver-tracking`: sahte Geliver'in test gönderisi her okumada ilerliyor; taşıyıcı alınca Medusa gönderisi, teslimde Medusa teslimi; gerçek hesapla deneme sunucuya çıkışta)
-- [x] Ölçüsü eksik ürünle kargo hesabı açıklayıcı hata veriyor (`geliver-shipping`: `shipping.dimensions_missing`)
+- [x] Ölçüsü eksik ürünle kargo hesabı varsayılan paketle yapılıyor, geçersiz (sıfırdan küçük) ölçü açıklayıcı hata veriyor (ADR-0054, 2026-11-03; `geliver-shipping`, `aras-shipping`, `yurtici-shipping`, `parcel.unit.spec`: `shipping.measures_invalid`). Önceki hâli: eksik ölçü `shipping.dimensions_missing` ile reddediliyordu
 - [x] İade talebinden para iadesi + stok + iade faturasına kadar akış çalışıyor (para iadesi + stok testli: `return-requests`; iade belgesi 2026-10-31: `return.refunded` olayı bireysel alıcıda gider pusulası, şirkette iade faturası kaydı açar, `einvoice-return.spec.ts`. değişimin "iade + yeni satış" belgeleri 2026-10-31, `einvoice-exchange.spec.ts`)
 - [x] Webhook ve polling aynı güncellemeyi iki kez uygulamıyor (`geliver-tracking`: aynı anda gelen bildirim ve sorgu tek olay, tek Medusa gönderisi)
 - [x] Değişim akışı: fark tutarı doğru hesaplanıyor, stok iki yönde doğru (testli) (`exchanges`: aynı fiyatta 0, pahalıda tahsilat sonrası onay, ucuzda teslimde iade; yeni varyant onayda ayrılıyor, eski teslimde stoğa dönüyor; taşıyıcı reddinde Medusa değişimi geri alınıyor)
