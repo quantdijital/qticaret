@@ -112,6 +112,27 @@ describe("RefundDialog", () => {
     expect(units).toHaveValue(2)
   })
 
+  it("keeps a long product name inside the box at any width (2026-11-03)", () => {
+    const long = "El Yapımı Yatağan Çakısı 22,5 cm | 4116 Alman Çeliği, Ceviz veya Kompakt Sap"
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(
+      <QueryClientProvider client={client}>
+        <RefundDialog
+          order={{ ...order, items: [{ ...order.items[0], title: long }] } as OrderDetail}
+          money={money}
+          open
+          onOpenChange={vi.fn()}
+        />
+      </QueryClientProvider>
+    )
+    // The box's one column never grows to the name's width: the name truncates instead
+    expect(screen.getByRole("dialog")).toHaveClass("grid-cols-[minmax(0,1fr)]", "overflow-y-auto")
+    const name = screen.getByText(long)
+    expect(name).toHaveClass("truncate")
+    expect(name.parentElement).toHaveClass("min-w-0", "flex-1")
+    expect(screen.getByLabelText(`${long} için iade adedi`)).toBeInTheDocument()
+  })
+
   it("previews a free amount", async () => {
     renderDialog()
     await userEvent.click(screen.getByRole("radio", { name: "Tutar girerek" }))

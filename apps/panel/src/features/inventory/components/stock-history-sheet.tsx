@@ -132,7 +132,7 @@ function ThresholdForm({ itemId }: { itemId: string }) {
         <Input
           id="own-threshold"
           inputMode="numeric"
-          className="w-28 tabular-nums"
+          className="min-w-0 flex-1 tabular-nums"
           placeholder={watch.data ? String(watch.data.fallback) : ""}
           value={text}
           aria-invalid={!valid || undefined}
@@ -140,7 +140,8 @@ function ThresholdForm({ itemId }: { itemId: string }) {
             setDraft(event.target.value.trim())
           }}
         />
-        <Button type="submit" size="sm" disabled={!valid || draft === null || save.isPending}>
+        {/* The field's height beside it, the row filled (docs/18 §2) */}
+        <Button type="submit" disabled={!valid || draft === null || save.isPending}>
           {save.isPending ? <Loader2 className="animate-spin" /> : null}
           {t("common.save")}
         </Button>

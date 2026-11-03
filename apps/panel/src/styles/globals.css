@@ -101,6 +101,24 @@
     font-variant-numeric: tabular-nums;
   }
 
+  /*
+   * Radix's checkbox, radio, switch and select put a hidden native input
+   * beside their button, absolutely positioned against the nearest
+   * positioned box. The control's own row is that box: in a list that
+   * scrolls inside itself the input stays clipped with its row instead of
+   * stretching the page under it (2026-11-03: /settings/marketing scrolled
+   * 1000 px past its end, one 32 px input per category of the feed list).
+   * Zero specificity, under the utilities: a row placed on purpose wins.
+   */
+  :where(
+    :has(
+      > button:is([role="checkbox"], [role="radio"], [role="switch"]) + input[aria-hidden="true"]
+    ),
+    :has(> button[role="combobox"] ~ select[aria-hidden="true"])
+  ) {
+    position: relative;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,

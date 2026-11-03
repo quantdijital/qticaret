@@ -96,7 +96,7 @@ export function ShipDialog({
           <DialogTitle>{t("orders.ship.title", { number: order.display_id })}</DialogTitle>
           <DialogDescription>{t("orders.ship.description")}</DialogDescription>
         </DialogHeader>
-        <ul className="flex max-h-72 flex-col divide-y overflow-y-auto rounded-md border">
+        <ul className="relative flex max-h-72 flex-col divide-y overflow-y-auto rounded-md border">
           {items.map(({ id, quantity }) => {
             const item = byId.get(id)
             return (

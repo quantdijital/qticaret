@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useIsMobile } from "@/hooks/use-mobile"
 import { isStorefrontHref } from "@/features/settings/storefront"
 import { MENU_LIMITS, RECORD_KINDS } from "@/features/storefront/api/menus"
 import type { RecordKind } from "@/features/storefront/api/menus"
@@ -126,6 +127,8 @@ interface LinkPickerDialogProps {
 export function LinkPickerDialog({ row, onClose, onPick }: LinkPickerDialogProps) {
   const { t } = useTranslation()
   const [kind, setKind] = useState<PickerKind>(row?.to.kind ?? "category")
+  // The kinds beside the results on a wide screen; above them, side by side, on a narrow one
+  const narrow = useIsMobile()
   const to = row?.to
   const current = to?.kind === kind && to.kind !== "url" ? to.target : null
   return (
@@ -137,18 +140,18 @@ export function LinkPickerDialog({ row, onClose, onPick }: LinkPickerDialogProps
         }
       }}
     >
-      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto sm:max-w-3xl">
+      <DialogContent className="sm:max-w-3xl">
         <DialogHeader>
           <DialogTitle>{t(row ? `${P}.change` : `${P}.add`)}</DialogTitle>
           <DialogDescription>{t(`${P}.description`)}</DialogDescription>
         </DialogHeader>
         <Tabs
-          orientation="vertical"
+          orientation={narrow ? "horizontal" : "vertical"}
           value={kind}
           onValueChange={(value) => {
             setKind(value as PickerKind)
           }}
-          className="grid gap-4 sm:grid-cols-[11rem_minmax(0,1fr)]"
+          className="grid gap-4 md:grid-cols-[11rem_minmax(0,1fr)]"
         >
           <div className="flex flex-col gap-3">
             {GROUPS.map((group) => (
@@ -161,7 +164,7 @@ export function LinkPickerDialog({ row, onClose, onPick }: LinkPickerDialogProps
                 </p>
                 <TabsList
                   aria-labelledby={`menu-picker-${group.key}`}
-                  className="flex h-auto w-full flex-wrap justify-start gap-1 bg-transparent p-0 sm:flex-col sm:items-stretch"
+                  className="flex h-auto w-full flex-wrap justify-start gap-1 bg-transparent p-0 group-data-[orientation=horizontal]/tabs:h-auto md:items-stretch"
                 >
                   {group.kinds.map((each) => (
                     <TabsTrigger

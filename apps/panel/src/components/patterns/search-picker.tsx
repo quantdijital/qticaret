@@ -32,6 +32,8 @@ interface SearchPickerProps {
   empty: string
   inactiveNote?: string
   disabled?: boolean
+  /** The button's own size where the default (at most 320 px) leaves a gap in its row. */
+  className?: string
 }
 
 const DELAY_MS = 250
@@ -50,6 +52,7 @@ export function SearchPicker({
   empty,
   inactiveNote,
   disabled = false,
+  className,
 }: SearchPickerProps) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
@@ -80,7 +83,7 @@ export function SearchPicker({
             role="combobox"
             aria-expanded={open}
             disabled={disabled}
-            className="min-w-0 flex-1 justify-between font-normal sm:max-w-80"
+            className={cn("min-w-0 flex-1 justify-between font-normal sm:max-w-80", className)}
           >
             <span className={cn("truncate", !value && "text-muted-foreground")}>
               {value?.label ?? placeholder}

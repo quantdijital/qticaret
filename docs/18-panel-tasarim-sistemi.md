@@ -50,6 +50,7 @@ Sürümler `apps/panel/package.json`'da exact ve ≥14 gün kuralıyla (docs/04)
   - Hiçbir kartın yanında ya da altında anlamsız boşluk kalmaz; uzun içerik kendi sekmesine taşınır (Raporlar).
   - `e2e/layout.e2e.ts` her sayfayı masaüstü genişlikte ölçer; ihlal testi kırar.
 - `e2e/shell.e2e.ts` (2026-11-03): her sayfa üç ekran boyunda sonuna kaydırılır; içeriğin bittiği yerle ekranın altı arasında sayfa arka planı dışında bir alan, yüzey–kanvas farkı ya da yatay kaydırma olamaz; listelerin ilk kaydı da açılır, kayıt yoksa atlanır. Ayarlar menüsü lg+'da yapışkan ve kendi içinde kayar (sayfa yalnız kendi içeriği kadar uzundur).
+- Diyalog ve sheet'ler (2026-11-03): paylaşılan `DialogContent` tek sütun `grid-cols-[minmax(0,1fr)]` (içerik kutuyu genişletemez), ekrandan uzunsa içinde kayar, alt bilgi yapışkan; <640 px'te alt kenardan tam genişlik sheet (içeriği kadar, en çok ekran). Radix onay kutusu/radyo/anahtar/seçim satırı `relative` (gizli mutlak input kaydırılan listeden kaçmasın — `globals.css`). `e2e/dialogs.e2e.ts` 11 diyaloğu 1440 ve 390'da açıp taşma/kırpılma ölçer.
 
 ---
 

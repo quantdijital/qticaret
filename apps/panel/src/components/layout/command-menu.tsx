@@ -81,8 +81,9 @@ export function CommandMenu({ open, onOpenChange }: CommandMenuProps) {
     <CommandDialog
       open={open}
       onOpenChange={change}
-      // Held near the top: results arriving grow it downwards instead of moving it
-      className="top-[12vh] translate-y-0 sm:max-w-xl"
+      // Held near the top: results arriving grow it downwards instead of moving it.
+      // On a phone it hangs from the top edge, clear of the keyboard coming up below.
+      className="top-0 bottom-auto rounded-t-none rounded-b-lg border-t-0 border-b sm:top-[12vh] sm:max-w-xl sm:translate-y-0"
       title={t("command.title")}
       description={t("command.description")}
     >

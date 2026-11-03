@@ -34,7 +34,7 @@ function CollectionList({
     return <p className="text-sm text-muted-foreground">{t("promotions.form.noCollections")}</p>
   }
   return (
-    <ul className="flex max-h-72 flex-col gap-0.5 overflow-y-auto rounded-md border p-1.5">
+    <ul className="relative flex max-h-72 flex-col gap-0.5 overflow-y-auto rounded-md border p-1.5">
       {rows.map((collection) => (
         <li key={collection.id}>
           <label className="flex cursor-pointer items-center gap-2.5 rounded px-2 py-1.5 text-sm hover:bg-muted">

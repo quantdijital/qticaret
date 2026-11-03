@@ -20,8 +20,12 @@ import type { OrderEditChange } from "@/features/orders/api/edit"
 import type { OrderDetail } from "@/features/orders/api/orders"
 import { differenceText } from "@/features/orders/exchange-text"
 import { errorText } from "@/lib/errors"
+import { cn } from "@/lib/utils"
 
 const E = "orders.edit"
+// A line's name over its fields on a phone (no column under 160 px), beside them from `sm` up
+const LINE = "flex flex-wrap items-center gap-x-3 gap-y-2 px-3 py-2 sm:flex-nowrap"
+const NAME = "min-w-0 basis-full truncate text-sm sm:basis-auto sm:flex-1"
 
 interface LineDraft {
   quantity: number
@@ -105,13 +109,12 @@ export function EditOrderDialog({ order, onClose }: { order: OrderDetail; onClos
             {items.map((item) => {
               const draft = lines[item.id] ?? { quantity: 0, price: "" }
               return (
-                <li key={item.id} className="flex items-center gap-3 px-3 py-2">
+                <li key={item.id} className={LINE}>
                   <span
-                    className={
-                      draft.quantity === 0
-                        ? "flex-1 truncate text-sm text-muted-foreground line-through"
-                        : "flex-1 truncate text-sm font-medium"
-                    }
+                    className={cn(
+                      NAME,
+                      draft.quantity === 0 ? "text-muted-foreground line-through" : "font-medium"
+                    )}
                   >
                     {item.title}
                   </span>
@@ -120,7 +123,7 @@ export function EditOrderDialog({ order, onClose }: { order: OrderDetail; onClos
                     inputMode="numeric"
                     min={0}
                     aria-label={t(`${E}.quantityOf`, { name: item.title })}
-                    className="h-8 w-16 text-right tabular-nums"
+                    className="ml-auto h-8 w-16 text-right tabular-nums sm:ml-0"
                     value={draft.quantity}
                     onChange={(event) => {
                       set(item.id, { quantity: count(event.target.value) })
@@ -153,9 +156,11 @@ export function EditOrderDialog({ order, onClose }: { order: OrderDetail; onClos
               )
             })}
             {added.map((line, index) => (
-              <li key={line.variant.id} className="flex items-center gap-3 px-3 py-2">
-                <span className="flex-1 truncate text-sm font-medium">{line.variant.label}</span>
-                <span className="w-16 text-right text-sm tabular-nums">{line.quantity}</span>
+              <li key={line.variant.id} className={LINE}>
+                <span className={cn(NAME, "font-medium")}>{line.variant.label}</span>
+                <span className="ml-auto w-16 text-right text-sm tabular-nums sm:ml-0">
+                  {line.quantity}
+                </span>
                 <span className="w-28 text-right text-xs text-muted-foreground">
                   {t(`${E}.shopPrice`)}
                 </span>
@@ -188,6 +193,7 @@ export function EditOrderDialog({ order, onClose }: { order: OrderDetail; onClos
               queryKey={["orders", "edit", "variants"]}
               placeholder={t(`${E}.addPlaceholder`)}
               empty={t(`${E}.addEmpty`)}
+              className="sm:max-w-none"
             />
           </div>
           <Input

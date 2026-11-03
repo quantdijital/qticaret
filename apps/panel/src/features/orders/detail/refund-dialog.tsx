@@ -96,7 +96,7 @@ export function RefundDialog({ order, money, open, onOpenChange }: RefundDialogP
         </ToggleGroup>
         {mode === "items" ? (
           <div className="flex flex-col gap-3">
-            <ul className="flex max-h-72 flex-col divide-y overflow-y-auto rounded-md border">
+            <ul className="relative flex max-h-72 flex-col divide-y overflow-y-auto rounded-md border">
               {lines.map((line) => {
                 const item = byId.get(line.id)
                 const max = refundableUnits(line)

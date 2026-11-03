@@ -101,8 +101,12 @@ export function ReceiveReturnDialog({
               const count = counts[item.line_item_id] ?? EMPTY_COUNT
               const name = line?.title ?? ""
               return (
-                <li key={item.line_item_id} className="flex items-center gap-3 px-3 py-2.5">
-                  <span className="flex min-w-0 flex-1 flex-col gap-1">
+                // A phone puts the counts under the name: no name column squeezed under 160 px
+                <li
+                  key={item.line_item_id}
+                  className="flex flex-wrap items-center gap-x-3 gap-y-2 px-3 py-2.5 sm:flex-nowrap"
+                >
+                  <span className="flex min-w-0 basis-full flex-col gap-1 sm:flex-1 sm:basis-auto">
                     <span className="truncate text-sm font-medium">{line?.title ?? "—"}</span>
                     {line?.variant_title ? (
                       <span className="truncate text-xs text-muted-foreground">
@@ -118,42 +122,44 @@ export function ReceiveReturnDialog({
                       </span>
                     ) : null}
                   </span>
-                  {keys.map((key) =>
-                    // Only a sealed good is refused for being opened (`returns.refusal_not_sealed`)
-                    key === "refused" && !sealed.has(item.line_item_id) ? (
-                      <span
-                        key={key}
-                        aria-hidden="true"
-                        className="w-16 text-right text-muted-foreground"
-                      >
-                        —
-                      </span>
-                    ) : (
-                      <Input
-                        key={key}
-                        type="number"
-                        inputMode="numeric"
-                        min={0}
-                        max={item.quantity}
-                        aria-label={t(`${R}.${key}Of`, { name })}
-                        className="h-8 w-16 text-right tabular-nums"
-                        value={count[key]}
-                        onChange={(event) => {
-                          setCounts({
-                            ...counts,
-                            [item.line_item_id]: setCount(
-                              count,
-                              key,
-                              Number(event.target.value),
-                              item.quantity
-                            ),
-                          })
-                        }}
-                      />
-                    )
-                  )}
-                  <span className="w-10 text-sm text-muted-foreground tabular-nums">
-                    / {item.quantity}
+                  <span className="ml-auto flex shrink-0 items-center gap-3">
+                    {keys.map((key) =>
+                      // Only a sealed good is refused for being opened (`returns.refusal_not_sealed`)
+                      key === "refused" && !sealed.has(item.line_item_id) ? (
+                        <span
+                          key={key}
+                          aria-hidden="true"
+                          className="w-16 text-right text-muted-foreground"
+                        >
+                          —
+                        </span>
+                      ) : (
+                        <Input
+                          key={key}
+                          type="number"
+                          inputMode="numeric"
+                          min={0}
+                          max={item.quantity}
+                          aria-label={t(`${R}.${key}Of`, { name })}
+                          className="h-8 w-16 text-right tabular-nums"
+                          value={count[key]}
+                          onChange={(event) => {
+                            setCounts({
+                              ...counts,
+                              [item.line_item_id]: setCount(
+                                count,
+                                key,
+                                Number(event.target.value),
+                                item.quantity
+                              ),
+                            })
+                          }}
+                        />
+                      )
+                    )}
+                    <span className="w-10 text-sm text-muted-foreground tabular-nums">
+                      / {item.quantity}
+                    </span>
                   </span>
                 </li>
               )

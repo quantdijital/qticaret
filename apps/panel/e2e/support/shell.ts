@@ -7,7 +7,10 @@ import type { Page } from "@playwright/test"
  *
  * - an empty band: a page that scrolls ends with its own content, not with
  *   a stretch of bare background something beside it (a long menu) made
- *   room for;
+ *   room for. Only what shows counts: a row cut off by a list that scrolls
+ *   inside itself is not content, so an invisible input escaping that list
+ *   and stretching the page is caught (2026-11-03, /settings/marketing
+ *   scrolled 1000 px past its end);
  * - colour: between the content's end and the bottom of the screen the
  *   page's own background shows, not a darker or lighter band (a wrapper
  *   ending short, the canvas showing through, a surface of another colour);
@@ -88,19 +91,54 @@ export async function shellIssues(page: Page): Promise<string[]> {
     const left = Math.max(box.left, 0)
     const right = Math.min(box.right, width)
     const from = left + (right - left) / 4
+    const styles = new Map<Element, CSSStyleDeclaration>()
+    const styleOf = (element: Element) => {
+      let style = styles.get(element)
+      if (!style) {
+        style = getComputedStyle(element)
+        styles.set(element, style)
+      }
+      return style
+    }
+    // The part of a box on screen: cut by every box that clips it. An absolutely
+    // placed box is clipped only from its containing block (a positioned box) up.
+    const shown = (element: Element) => {
+      let { top, bottom, left: start, right: stop } = element.getBoundingClientRect()
+      let absolute = styleOf(element).position === "absolute"
+      for (let at = element.parentElement; at && at !== root; at = at.parentElement) {
+        const style = styleOf(at)
+        if (style.position === "fixed") {
+          break
+        }
+        if (absolute && style.position === "static" && style.transform === "none") {
+          continue
+        }
+        if (style.overflowX !== "visible" || style.overflowY !== "visible") {
+          const clip = at.getBoundingClientRect()
+          top = Math.max(top, clip.top + at.clientTop)
+          bottom = Math.min(bottom, clip.top + at.clientTop + at.clientHeight)
+          start = Math.max(start, clip.left + at.clientLeft)
+          stop = Math.min(stop, clip.left + at.clientLeft + at.clientWidth)
+        }
+        absolute = style.position === "absolute"
+      }
+      return { top, bottom, left: start, right: stop }
+    }
     let end = box.top
     for (const element of Array.from(column.querySelectorAll("*"))) {
-      const style = getComputedStyle(element)
+      const style = styleOf(element)
       if (style.position === "fixed" || style.visibility === "hidden" || style.opacity === "0") {
         continue
       }
-      const rect = element.getBoundingClientRect()
+      if (!drawn(element, style)) {
+        continue
+      }
+      const rect = shown(element)
       if (
-        rect.width > 0 &&
-        rect.height > 0 &&
+        rect.bottom - rect.top > 0 &&
+        rect.right - rect.left > 0 &&
         rect.right > from &&
-        rect.left < right &&
-        drawn(element, style)
+        rect.left < right
       ) {
         end = Math.max(end, rect.bottom)
       }
@@ -108,10 +146,12 @@ export async function shellIssues(page: Page): Promise<string[]> {
     // Under the content, the column's own padding: what the shell leaves at the bottom
     const content = document.querySelector("#content")
     const padding = content ? parseFloat(getComputedStyle(content).paddingBottom) : 0
-    const scrolls = root.scrollHeight > height + 1
-    if (scrolls && height - end > padding + 24) {
+    // How far the page scrolls past what it shows (scrolled to its end, the content ends `end` down)
+    const scroller = document.scrollingElement ?? root
+    const past = scroller.scrollHeight - (window.scrollY + end) - padding
+    if (scroller.scrollHeight > height + 1 && past > 16) {
       issues.push(
-        `scrolls into an empty band: the content ends ${String(Math.round(height - end))}px above the bottom`
+        `scrolls ${String(Math.round(past))}px past its visible content (page ${String(scroller.scrollHeight)}px, content ends at ${String(Math.round(window.scrollY + end))}px)`
       )
     }
     const top = Math.ceil(end) + 1
