@@ -3,14 +3,16 @@ import type { Page } from "@playwright/test"
 import { createTemporaryAdmin, removeTemporaryAdmin, signInAdmin } from "./admin"
 import type { AdminApi } from "./admin"
 import { stockedProduct } from "./catalog"
-import { dismissCookies } from "./support"
+import { connectFakePaytr, payWithTestCard, startCardPayment } from "./paytr"
+import { addressAndShipping, dismissCookies } from "./support"
 
 /**
  * A payment link paid end to end (adr/0051). Staff make it through the
  * admin API (the panel's own calls, a temporary owner proving themselves
  * again); the guest opens `/ode/<token>`, goes on to a checkout whose cart
  * is locked to the link, and pays by card in the fake PayTR's frame
- * (`pnpm dev:paytr`). The link is then paid and the order names it. Its
+ * (`pnpm dev:paytr`): PayTR's test card on its form, then the bank's
+ * 3-D Secure page (`paytr.ts`). The link is then paid and the order names it. Its
  * line is a variant in stock the shop sells (`catalog.ts`), priced by the
  * link as the Store API prices it.
  *
@@ -25,11 +27,6 @@ const FLAG = "orders.payment_links"
 // The share address is `https://<host>/ode/<token>`: its path opens on this storefront.
 // A reserved name (RFC 2606) for a shop without a host, so it can lead nowhere else
 const SHARE_HOST = "vitrin.test"
-// `pnpm dev:paytr`'s account, fake and readable on purpose (packages/testing/src/dev/paytr.ts)
-const DEV_PAYTR = {
-  settings: { merchant_id: "100001", test_mode: true },
-  secrets: { merchant_key: "gelistirme-sahte-anahtar", merchant_salt: "gelistirme-sahte-tuz" },
-}
 const GUEST = {
   first_name: "Uçtan",
   last_name: "Uca",
@@ -79,34 +76,7 @@ async function readyShop(api: AdminApi, undo: Undo[]): Promise<void> {
       api.post("/admin/platform-settings/seo", { canonical_host: seo.values.canonical_host })
     )
   }
-  const { accounts } = await api.get<{ accounts: { provider: string; state: string }[] }>(
-    "/admin/integrations/credentials"
-  )
-  if (accounts.find((each) => each.provider === "paytr")?.state !== "connected") {
-    const saved = await api.postProved<{ account: { state: string } }>(
-      "/admin/integrations/credentials/paytr",
-      DEV_PAYTR
-    )
-    expect(saved.account.state, "the fake PayTR answers the backend's check").toBe("connected")
-  }
-}
-
-/** Checkout's address and shipping steps, as the bank transfer test fills them. */
-async function addressAndShipping(page: Page): Promise<void> {
-  await page.fill("#email", GUEST.email)
-  await page.fill("#first_name", GUEST.first_name)
-  await page.fill("#last_name", GUEST.last_name)
-  await page.fill("#phone", GUEST.phone)
-  await page.selectOption("#province", { index: 1 })
-  await expect(page.locator("#district option")).not.toHaveCount(1)
-  await page.selectOption("#district", { index: 1 })
-  await expect(page.locator("#neighborhood option")).not.toHaveCount(1)
-  await page.selectOption("#neighborhood", { index: 1 })
-  await page.fill("#address_1", "Deneme Sokak No: 1")
-  await page.locator("main form button[type=submit]").click()
-  await expect(page).toHaveURL(/adim=kargo/)
-  await page.locator("main form button[type=submit]").click()
-  await expect(page).toHaveURL(/\/odeme$/)
+  await connectFakePaytr(api)
 }
 
 /** No way to change a line: no minus, plus or remove. */
@@ -189,23 +159,11 @@ test("a guest pays a link the shop made: its page, a locked cart, the card in Pa
     await expectNoLineControls(page)
     await expect(page.getByLabel("İndirim kodu")).toHaveCount(0)
     await page.goto("/odeme")
-    await addressAndShipping(page)
+    await addressAndShipping(page, GUEST)
 
-    // 4. Card: PayTR's form in its frame (the fake's three outcomes), back to the order
-    await page.locator('input[value="pp_paytr_paytr"]').check()
-    const accept = page.locator('input[name="accept"]')
-    if (await accept.count()) {
-      await accept.check()
-    }
-    await page
-      .locator("main form button[type=submit]")
-      .filter({ hasText: "Kart bilgilerine geç" })
-      .click()
-    await expect(page).toHaveURL(/\/odeme\/kart$/)
-    await page
-      .frameLocator('iframe[title="Güvenli kart ödeme formu"]')
-      .getByRole("button", { name: /^Ödemeyi onayla/ })
-      .click()
+    // 4. Card: PayTR's form in its frame, the bank's 3-D Secure page, back to the order
+    await startCardPayment(page)
+    await payWithTestCard(page)
     await expect(page).toHaveURL(/\/siparis\/order_[0-9A-Z]+\?token=.+&yeni=1/, {
       timeout: 60_000,
     })

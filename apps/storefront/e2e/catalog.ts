@@ -63,7 +63,11 @@ async function publishableKey(): Promise<string> {
   return body.publishable_key
 }
 
-async function storeGet<T>(path: string, query: Record<string, string | string[]>): Promise<T> {
+/** A Store API read with the storefront's key, as the storefront makes it. */
+export async function storeGet<T>(
+  path: string,
+  query: Record<string, string | string[]>
+): Promise<T> {
   const url = new URL(path, BACKEND_URL)
   for (const [name, value] of Object.entries(query)) {
     for (const each of typeof value === "string" ? [value] : value) {
