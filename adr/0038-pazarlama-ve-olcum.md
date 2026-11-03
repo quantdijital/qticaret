@@ -143,7 +143,7 @@ F10'un pazarlama tarafı mağazanın verisini dış servislere taşır: Google, 
   - Netgsm hesap ayarlarına `iys_brand_code` (yalnızca rakam) eklendi. Panelde Ayarlar > SMS > Netgsm > İYS bölümünden girilir.
   - Marka kodu yoksa izinler `pending` kalır ve iletilmez.
 - **Adres:**
-  - İzin kaydı adresi özetin yanında `PII_ENCRYPTION_KEY` ile şifreli olarak da tutar (`recipient_encrypted`). Bu kopya yalnızca İYS'ye iletmek için çözülür.
+  - İzin kaydı adresi özetin yanında `PII_ENCRYPTION_KEY` ile şifreli olarak da tutar (`recipient_encrypted`). Bu kopya yalnızca İYS'ye iletmek için çözülür. **Ek (2026-11-03, adr/0050):** amaç "İYS'ye iletmek ve izin verilen toplu iletiyi göndermek" olarak genişledi; müşteri kaydı olmayan bülten abonesine kampanya giderken adres yalnız gönderim anında, bellekte çözülür, alıcı tablosuna yazılmaz (KVKK envanteri `bulk_message_recipient`).
   - Hiçbir uç bu alanı döndürmez.
   - Bu değişiklikten önceki satırların şifreli adresi yok. Bunlar `failed` ve `no_address` olarak işaretlenir.
 - **Eşleme:**
