@@ -233,7 +233,7 @@ medusaIntegrationTestRunner({
       expect(bad.status).toBe(400)
     })
 
-    it("takes drafts live through the SEO gate and the measurement rule", async () => {
+    it("takes drafts live through the SEO gate, measured or not (adr/0054)", async () => {
       const ready = await stockedProduct(getContainer(), shop, "toplu-hazir", 1)
       const { result } = await createProductsWorkflow(getContainer()).run({
         input: {
@@ -271,9 +271,10 @@ medusaIntegrationTestRunner({
         action: "status",
         status: "published",
       })
-      expect(job.result_summary).toMatchObject({ changed: 1, failed: 1 })
+      // Weight and dimensions are optional (adr/0054): a product without them goes live too
+      expect(job.result_summary).toMatchObject({ changed: 2, failed: 0 })
       expect(await productOf(ready.productId, ["status"])).toMatchObject({ status: "published" })
-      expect(await productOf(unmeasured, ["status"])).toMatchObject({ status: "draft" })
+      expect(await productOf(unmeasured, ["status"])).toMatchObject({ status: "published" })
     })
 
     it("files products under a category, makes it primary, and takes it away again", async () => {
