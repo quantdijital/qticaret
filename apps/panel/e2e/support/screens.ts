@@ -2,6 +2,9 @@
 export const SECTIONS = [
   "/",
   "/orders",
+  // Payment links (adr/0051): the list and the new-order form, or why they are closed
+  "/payment-links",
+  "/payment-links/new",
   "/customers",
   "/products",
   "/categories",

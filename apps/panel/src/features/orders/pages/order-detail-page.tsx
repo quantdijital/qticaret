@@ -23,6 +23,8 @@ import { AddressCard, CustomerCard } from "@/features/orders/detail/people-cards
 import { ProgressCard } from "@/features/orders/detail/progress-card"
 import { RefundsCard } from "@/features/orders/detail/refunds-card"
 import { ReturnsCard } from "@/features/orders/detail/returns-card"
+import { orderPaymentLinkId } from "@/features/payment-links/components/order-link"
+import { PaymentLinkChip } from "@/features/payment-links/components/payment-link-chip"
 import { errorText } from "@/lib/errors"
 import { formatLongDate } from "@/lib/format"
 
@@ -46,6 +48,7 @@ export function OrderDetailPage() {
   const refunds = details.data?.refunds ?? []
   const order = query.data
   const back = { to: "/orders", label: t("nav.orders") }
+  const linkId = orderPaymentLinkId(order?.metadata)
 
   const failed = query.error ?? state.error
   if (failed) {
@@ -79,7 +82,12 @@ export function OrderDetailPage() {
       <PageHeader
         title={t("orders.detail.number", { number: order.display_id })}
         description={t("orders.detail.placed", { date: formatLongDate(order.created_at) })}
-        badge={<StageBadge stage={state.data.stage} />}
+        badge={
+          <>
+            <StageBadge stage={state.data.stage} />
+            {linkId ? <PaymentLinkChip linkId={linkId} /> : null}
+          </>
+        }
         back={back}
         action={
           <OrderActions

@@ -13,6 +13,7 @@ import type { BankTransferSettings } from "@/features/settings/api/sections"
 import type { ProviderAccount } from "@/features/settings/api/payments"
 import { AccountBadges } from "@/features/settings/components/account-badges"
 import { InstallmentsCard } from "@/features/settings/components/installments-card"
+import { PaymentLinkSettingsCard } from "@/features/settings/components/payment-link-settings-card"
 import { PreferredProviderRow } from "@/features/settings/components/preferred-provider"
 import { PAYMENT_METHODS } from "@/features/settings/payment-methods"
 import type { PaymentGroup } from "@/features/settings/payment-methods"
@@ -152,6 +153,12 @@ export function PaymentsPage() {
             content: <InstallmentsCard />,
           },
           { key: "other", label: t(`${P}.groups.other.title`), content: methods("other") },
+          // adr/0051: an admin's discount limit and cash on delivery for a link's order
+          {
+            key: "payment-links",
+            label: t(`${P}.tabs.paymentLinks`),
+            content: <PaymentLinkSettingsCard />,
+          },
         ]}
       />
     </div>

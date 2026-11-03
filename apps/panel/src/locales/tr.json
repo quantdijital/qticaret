@@ -55,7 +55,8 @@
     "menus": "Menüler",
     "themeEditor": "Tema düzenleyici",
     "storefrontPreferences": "Vitrin tercihleri",
-    "bulkMessages": "Toplu ileti"
+    "bulkMessages": "Toplu ileti",
+    "paymentLinks": "Ödeme bağlantıları"
   },
   "login": {
     "title": "Giriş yap",
@@ -696,6 +697,12 @@
             "label": "Yaş doğrulama",
             "description": "Sepette yaş sınırlı ürün varsa müşteri ödemeden önce doğum tarihini girerek yaşını beyan eder; sınırın altındaysa ödeme alınmaz. Doğum tarihi saklanmaz. Sınır Ayarlar > Yasal metinler'de."
           }
+        },
+        "orders": {
+          "payment_links": {
+            "label": "Ödeme bağlantısıyla sipariş",
+            "description": "Ekip panelden sipariş hazırlar; müşteri vitrindeki ödeme bağlantısıyla öder."
+          }
         }
       }
     },
@@ -1088,7 +1095,19 @@
         "off": "Kapalı"
       },
       "tabs": {
-        "installments": "Taksit"
+        "installments": "Taksit",
+        "paymentLinks": "Ödeme bağlantıları"
+      },
+      "paymentLinks": {
+        "title": "Ödeme bağlantıları",
+        "description": "Panelden hazırlanan siparişlerde yöneticinin indirim sınırı ve kapıda ödeme.",
+        "limit": "Yöneticinin verebileceği en büyük indirim",
+        "limitHint": "Ürün toplamının yüzdesi, 0 ile 99 arası. 0: yöneticiler indirim veremez. Mağaza sahibi %99'a kadar verebilir.",
+        "limitInvalid": "0 ile 99 arasında bir tam sayı girin.",
+        "cod": "Ödeme bağlantısıyla gelen siparişte kapıda ödeme",
+        "codHint": "Açıkken müşteri bağlantı siparişini kapıda ödeyebilir; kapıda ödemenin kendi ayarları ve sınırları yine geçerlidir.",
+        "ownerOnly": "Bu ayarları yalnız mağaza sahibi değiştirebilir.",
+        "saved": "Ödeme bağlantısı ayarları kaydedildi."
       }
     },
     "shipping": {
@@ -5534,6 +5553,18 @@
         "title": "#{{order}} iadesi: şirketin iade faturasını kaydedin",
         "description": "Alıcı şirket iade faturası keser; gelince numarasını siparişin fatura kartından girin."
       }
+    },
+    "paymentLinkPaid": {
+      "title": "Ödeme bağlantısı {{number}} ödendi",
+      "description": "Sipariş oluştu; açmak için tıklayın."
+    },
+    "paymentLinkPrices": {
+      "title": "Ödeme bağlantısı {{number}}: fiyatlar değişti",
+      "description": "Müşteri ödeyemedi. Bugünkü fiyatlarla yeni bir bağlantı oluşturun."
+    },
+    "paymentLinkStock": {
+      "title": "Ödeme bağlantısı {{number}}: stokta olmayan ürün",
+      "description": "Müşteri ödeyemedi. Stoğu güncelleyin ya da bağlantıyı iptal edip yenisini oluşturun."
     }
   },
   "content": {
@@ -7094,6 +7125,259 @@
       "audienceTooMany": "En çok {{limit}} kaynak seçilebilir.",
       "tooManyProducts": "Bir e-postada en çok {{max}} ürün kartı olabilir.",
       "smsTooLong": "Metin, mağaza adı ve ret metniyle birlikte {{parts}} SMS boyunu geçiyor; kısaltın."
+    }
+  },
+  "paymentLinks": {
+    "title": "Ödeme bağlantıları",
+    "description": "Telefonda, mesajla ya da mağazada alınan siparişler: fiyatı sistem hesaplar, müşteri bağlantıdan öder.",
+    "new": "Yeni sipariş",
+    "newTitle": "Yeni sipariş",
+    "newDescription": "Müşteriyi ve ürünleri seçin; fiyatları sistem hesaplar, müşteri ödeme bağlantısıyla öder.",
+    "newFromDescription": "Önceki bağlantının müşterisi, ürünleri ve notu dolduruldu; fiyatlar bugünkü haliyle yeniden hesaplanır.",
+    "off": "Ödeme bağlantıları bu mağazada kapalı. Açıldığında panelden sipariş hazırlayıp müşteriye ödeme bağlantısı gönderebilirsiniz.",
+    "noAccess": "Ödeme bağlantılarını yalnız mağaza sahibi, yöneticiler ve operasyon ekibi hazırlayabilir.",
+    "turnOn": "Özelliklerden aç",
+    "views": "Bağlantı durumları",
+    "allStatuses": "Tümü",
+    "status": {
+      "open": "Açık",
+      "draft": "Fiyat değişti",
+      "paid": "Ödendi",
+      "expired": "Süresi doldu",
+      "canceled": "İptal edildi"
+    },
+    "empty": "Henüz ödeme bağlantısı yok. Müşterinin telefonda ya da mesajla verdiği siparişi buradan hazırlayın.",
+    "emptyFiltered": "Bu süzgeçlere uyan bağlantı yok.",
+    "columns": {
+      "number": "Numara",
+      "customer": "Müşteri",
+      "total": "Tutar",
+      "status": "Durum",
+      "createdBy": "Oluşturan",
+      "expires": "Bitiş",
+      "created": "Oluşturma"
+    },
+    "discountMark": "{{amount}} indirim",
+    "you": "Siz",
+    "teamMember": "Ekip üyesi",
+    "filters": {
+      "discount": "İndirim",
+      "anyDiscount": "İndirimli ya da değil",
+      "discounted": "İndirimli",
+      "notDiscounted": "İndirimsiz",
+      "createdBy": "Oluşturan",
+      "anyone": "Herkes",
+      "mine": "Benim oluşturduklarım",
+      "team": "Ekip"
+    },
+    "chip": "Ödeme bağlantısı {{number}}",
+    "chipUnknown": "Ödeme bağlantısından",
+    "lines": {
+      "each": "{{quantity}} × {{price}}",
+      "short": "Stok yetersiz",
+      "itemsTotal": "Ürünler",
+      "discount": "İndirim",
+      "discountPercent": "İndirim (%{{percent}})",
+      "reason": "Neden: {{reason}}",
+      "total": "Toplam",
+      "shippingLater": "Kargo ücreti, müşterinin ödeme adımında seçtiği kargoya göre eklenir."
+    },
+    "summary": {
+      "title": "Özet",
+      "empty": "Ürün ekledikçe fiyatlar ve toplam burada görünür.",
+      "short_one": "{{count}} üründe stok yetersiz. Bağlantı yine oluşturulur; müşteri öderken stok yeniden denetlenir.",
+      "short_other": "{{count}} üründe stok yetersiz. Bağlantı yine oluşturulur; müşteri öderken stok yeniden denetlenir.",
+      "discountPending": "İndirim, değeri ve nedeni girilince özete eklenir.",
+      "create": "Bağlantı oluştur",
+      "reauth": "Oluştururken kimliğinizi yeniden doğrulamanız istenebilir."
+    },
+    "form": {
+      "parts": "Siparişin diğer bölümleri",
+      "invalid": "Eksik ya da hatalı alanlar var; işaretli alanları düzeltin.",
+      "tabs": {
+        "delivery": "Teslimat",
+        "discount": "İndirim",
+        "note": "Süre ve not"
+      },
+      "errors": {
+        "customer": "Bir müşteri seçin.",
+        "name": "Ad ve soyadı girin (en çok 60 karakter).",
+        "email": "Geçerli bir e-posta adresi girin.",
+        "phone": "Geçerli bir Türkiye telefon numarası girin.",
+        "lines": "En az bir ürün ekleyin.",
+        "quantity": "Adet 1 ile 999 arasında olmalı.",
+        "percent": "Yüzde, 1 ile 99 arasında bir tam sayı olmalı.",
+        "amount": "Geçerli bir tutar girin.",
+        "reason": "İndirimin nedenini yazın (en çok 200 karakter).",
+        "note": "Not en çok 1000 karakter olabilir.",
+        "hours": "Süre 1 ile 168 saat arasında olmalı."
+      },
+      "customer": {
+        "title": "Müşteri",
+        "description": "Bağlantı müşterinin e-posta adresine gider; telefon SMS ve WhatsApp için kullanılır.",
+        "mode": "Müşteri türü",
+        "existing": "Kayıtlı müşteri",
+        "guest": "Yeni müşteri",
+        "search": "Müşteri",
+        "searchHint": "Kayıtlı müşteride müşteri grubunun fiyatları geçerlidir.",
+        "searchPlaceholder": "Ad ya da e-posta ile arayın",
+        "searchEmpty": "Müşteri bulunamadı.",
+        "noEmail": "e-posta yok",
+        "firstName": "Ad",
+        "lastName": "Soyad",
+        "email": "E-posta",
+        "phone": "Cep telefonu",
+        "phoneHint": "İsteğe bağlı; SMS ve WhatsApp için."
+      },
+      "lines": {
+        "title": "Ürünler",
+        "description": "Ürünü ve adedi seçin; fiyatı katalogdan sistem hesaplar.",
+        "add": "Ürün ekle",
+        "searchPlaceholder": "Ürün adı ya da stok kodu",
+        "searchEmpty": "Ürün bulunamadı.",
+        "empty": "Henüz ürün eklenmedi.",
+        "full": "Bir bağlantıda en çok {{count}} ürün olabilir.",
+        "quantityOf": "{{name}} adedi",
+        "remove": "{{name}} ürününü çıkar"
+      },
+      "delivery": {
+        "title": "Teslimat adresi",
+        "descriptionOff": "İsteğe bağlı. Girilmezse müşteri adresini ödeme adımında yazar.",
+        "descriptionOn": "Adres müşterinin ödeme sayfasına dolu gelir; müşteri değiştirebilir.",
+        "toggle": "Teslimat adresini şimdi gir",
+        "firstName": "Alıcının adı",
+        "lastName": "Alıcının soyadı",
+        "shipping": "Kargo seçeneği",
+        "shippingHint": "Seçilirse ödeme sayfasında hazır gelir; ücreti müşteri öderken eklenir.",
+        "customerPicks": "Müşteri ödeme adımında seçsin",
+        "off": "Adres ve kargo seçeneği müşteriye bırakıldı."
+      },
+      "discount": {
+        "title": "İndirim",
+        "description": "Yalnız bu bağlantıda geçerli; faturada iskonto olarak görünür.",
+        "toggle": "İndirim uygula",
+        "off": "Bu bağlantıda indirim yok.",
+        "type": "İndirim türü",
+        "types": {
+          "percentage": "Yüzde",
+          "fixed": "Tutar"
+        },
+        "percent": "İndirim yüzdesi",
+        "percentHint": "1 ile {{max}} arasında bir tam sayı.",
+        "adminLimit": "Yöneticiler en çok %{{limit}} indirim verebilir; üstünü mağaza sahibi verir.",
+        "amount": "İndirim tutarı (₺)",
+        "amountHint": "Ürünlerin toplamından düşülür.",
+        "reason": "Neden",
+        "reasonHint": "Örneğin: sadık müşteri, hasarlı kutu. Mağaza sahibi listede görür."
+      },
+      "note": {
+        "title": "Süre ve not",
+        "description": "Bağlantının ne kadar açık kalacağı ve ekibin notu.",
+        "hours": "Geçerlilik (saat)",
+        "hoursHint": "{{min}} ile {{max}} saat (7 gün) arası; önerilen {{default}} saat.",
+        "note": "Not",
+        "noteHint": "Yalnız ekip görür; müşteriye gitmez."
+      }
+    },
+    "detail": {
+      "made": "{{date}} tarihinde oluşturuldu",
+      "lines_one": "Ürünler ({{count}})",
+      "lines_other": "Ürünler ({{count}})",
+      "contact": "Müşteri",
+      "openCustomer": "Müşteriyi aç",
+      "guest": "Yeni müşteri",
+      "erased": "Kişisel bilgiler silindi.",
+      "address": "Teslimat adresi",
+      "noAddress": "Adres müşteriye bırakıldı; ödeme adımında girer.",
+      "shippingSet": "Kargo seçeneği hazır seçildi.",
+      "shippingOpen": "Kargo seçeneğini müşteri seçer."
+    },
+    "draft": {
+      "title": "Fiyatlar değişti",
+      "description": "Bu bağlantıdaki ürünlerden birinin fiyatı bağlantı oluşturulduktan sonra değişti; müşteri bu bağlantıyla ödeme yapamaz. Bugünkü fiyatlarla yeni bir bağlantı oluşturup müşteriye gönderin."
+    },
+    "share": {
+      "title": "Paylaş",
+      "description": "Bağlantıyı kopyalayıp gönderin ya da mağaza adına e-posta veya SMS ile yollayın.",
+      "created": "Bağlantı hazır. Kopyalayıp gönderin ya da mağaza adına e-posta veya SMS ile yollayın.",
+      "url": "Ödeme bağlantısı",
+      "text": "Mesaj metni",
+      "copy": "{{what}}: kopyala",
+      "copied": "Kopyalandı.",
+      "copyFailed": "Kopyalanamadı; metni seçip kopyalayın.",
+      "whatsapp": "WhatsApp'ta aç",
+      "closed": "Bağlantı artık açık değil; paylaşılacak bir şey yok.",
+      "emailSent": "E-posta gönderildi",
+      "emailNotSent": "E-posta gönderilmedi",
+      "smsSent": "SMS gönderildi",
+      "smsNotSent": "SMS gönderilmedi",
+      "send": {
+        "email": "E-postayla gönder",
+        "sms": "SMS ile gönder"
+      },
+      "resend": {
+        "email": "E-postayı yeniden gönder",
+        "sms": "SMS'i yeniden gönder"
+      },
+      "gap": "Aynı bağlantı 10 dakikada en çok bir kez gönderilir; SMS günlük kotaya sayılır.",
+      "sent": "Bağlantı gönderildi.",
+      "outcome": "{{channel}}: {{result}}",
+      "channels": {
+        "email": "E-posta",
+        "sms": "SMS"
+      },
+      "outcomes": {
+        "sent": "gönderildi.",
+        "duplicate": "zaten gönderilmişti.",
+        "channel_off": "kanal kapalı ya da hesap bağlı değil.",
+        "invalid_recipient": "alıcının adresi ya da telefonu yok veya geçersiz.",
+        "suppressed": "alıcı bu kanaldan ileti almıyor.",
+        "no_consent": "alıcının izni yok.",
+        "over_quota": "günlük gönderim sınırı doldu.",
+        "failed": "gönderilemedi; biraz sonra yeniden deneyin."
+      }
+    },
+    "actions": {
+      "again": "Yeniden oluştur",
+      "extend": "Uzat",
+      "cancel": "İptal et",
+      "canceled": "{{number}} iptal edildi.",
+      "confirmCancel": {
+        "title": "{{number}} iptal edilsin mi?",
+        "description": "Müşteri bu bağlantıyla artık ödeme yapamaz ve bağlantının indirimi kapanır. Bu işlem geri alınamaz."
+      }
+    },
+    "extend": {
+      "title": "{{number}} süresini uzat",
+      "description": "Şu anki bitiş: {{now}}. Yeni bitiş, şimdiden girilen saat kadar sonrasıdır; bağlantı oluşturulduğundan en çok 7 gün, yani en geç {{cap}} tarihine kadar açık kalabilir.",
+      "hours": "Şimdiden itibaren (saat)",
+      "hoursHint": "Bağlantı ve paylaşım metni değişmez.",
+      "invalid": "Süre {{min}} ile {{max}} saat arasında olmalı.",
+      "confirm": "Uzat",
+      "done": "Bağlantı {{date}} tarihine kadar açık."
+    },
+    "facts": {
+      "title": "Ayrıntılar",
+      "created": "Oluşturan",
+      "createdBy": "{{who}}, {{date}}",
+      "expires": "Bitiş",
+      "expired": "Bitiş",
+      "cap": "En geç {{date}} tarihine kadar uzatılabilir.",
+      "opened": "Müşterinin açması",
+      "openedCount_one": "{{total}} kez, son {{date}}",
+      "openedCount_other": "{{total}} kez, son {{date}}",
+      "never": "Henüz açılmadı.",
+      "sent": "Mağazadan gönderim",
+      "sentCount_one": "{{total}} kez, son {{date}}",
+      "sentCount_other": "{{total}} kez, son {{date}}",
+      "notSent": "Mağazadan gönderilmedi.",
+      "order": "Sipariş",
+      "paidAt": "{{date}} tarihinde ödendi; siparişi aç",
+      "openOrder": "Siparişi aç",
+      "canceled": "İptal",
+      "canceledBy": "{{who}}, {{date}}",
+      "note": "Not",
+      "noNote": "Not yok."
     }
   }
 }

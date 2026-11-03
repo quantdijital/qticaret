@@ -43,6 +43,27 @@ describe("the menu's items behind a flag and a capability", () => {
     expect(accessFor({})(bulk)).toBe(false)
   })
 
+  it("offers Ödeme bağlantıları while its flag is on, to the roles that make links", () => {
+    const links = navItem("paymentLinks")
+    const client = (role: "owner" | "operations", flag: boolean) => {
+      const query = new QueryClient({
+        defaultOptions: { queries: { retry: false, staleTime: Infinity } },
+      })
+      query.setQueryData(STAFF_KEY, staff(role))
+      query.setQueryData(featuresQuery().queryKey, [
+        { key: "orders.payment_links", default: false, owner: "tenant", enabled: flag },
+      ])
+      const wrapper = ({ children }: { children: ReactNode }) => (
+        <QueryClientProvider client={query}>{children}</QueryClientProvider>
+      )
+      return renderHook(() => useNavAccess(), { wrapper }).result.current
+    }
+    expect(client("owner", true)(links)).toBe(true)
+    // Operations make links too, without a discount (adr/0051 soru 1)
+    expect(client("operations", true)(links)).toBe(true)
+    expect(client("owner", false)(links)).toBe(false)
+  })
+
   it("leaves items with neither alone", () => {
     expect(accessFor({})(navItem("promotions"))).toBe(true)
   })

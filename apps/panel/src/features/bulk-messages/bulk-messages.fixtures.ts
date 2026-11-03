@@ -122,6 +122,8 @@ const CAN_ALL = {
   migration: true,
   fraud: true,
   bulkMessages: true,
+  paymentLinks: true,
+  paymentLinksManage: true,
 }
 
 export const staff = (role: "owner" | "operations"): StaffMe => ({
@@ -130,7 +132,14 @@ export const staff = (role: "owner" | "operations"): StaffMe => ({
   can:
     role === "owner"
       ? CAN_ALL
-      : { ...CAN_ALL, settings: false, bulkMessages: false, migration: false, team: false },
+      : {
+          ...CAN_ALL,
+          settings: false,
+          bulkMessages: false,
+          paymentLinksManage: false,
+          migration: false,
+          team: false,
+        },
   mfa: { available: true, required: false, enabled: true, passed: true },
 })
 

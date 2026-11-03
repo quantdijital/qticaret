@@ -30,6 +30,7 @@ import { BulkBar } from "@/features/orders/components/bulk-bar"
 import { useColumns } from "@/features/orders/components/order-columns"
 import { ShipResultsDialog } from "@/features/orders/components/ship-results-dialog"
 import type { OrderListSearch } from "@/features/orders/search"
+import { PaymentLinkButtons } from "@/features/payment-links/components/order-buttons"
 import { errorText } from "@/lib/errors"
 
 const route = getRouteApi("/_auth/orders/")
@@ -131,6 +132,8 @@ export function OrdersPage() {
             <Button asChild variant="outline" size="sm">
               <Link to="/orders/invoices">{t("orders.invoice.queue")}</Link>
             </Button>
+            {/* adr/0051: staff-made orders paid through a link, while the shop has them on */}
+            <PaymentLinkButtons />
           </span>
         }
       />

@@ -81,7 +81,7 @@ describe("PaymentsPage", () => {
     search.current = {}
   })
 
-  it("groups the methods in tabs: cards first, installments, then the others", async () => {
+  it("groups the methods in tabs: cards first, installments, the others, then payment links", async () => {
     const { unmount } = renderPage(paytr({}))
     const card = around(await screen.findByRole("heading", { name: "Kartla ödeme" }), "section")
 
@@ -91,6 +91,8 @@ describe("PaymentsPage", () => {
       ["Kartla ödeme", "true"],
       ["Taksit", "false"],
       ["Diğer ödeme yöntemleri", "false"],
+      // adr/0051: an admin's discount limit and cash on delivery for a link's order
+      ["Ödeme bağlantıları", "false"],
     ])
     expect(within(card).getByText("PayTR")).toBeInTheDocument()
     expect(within(card).getByText("iyzico")).toBeInTheDocument()

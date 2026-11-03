@@ -27,6 +27,10 @@ export type Capability =
   | "fraud"
   /** Writing and sending bulk e-mail and SMS (adr/0050): owner and admin. */
   | "bulkMessages"
+  /** Making and sending a payment link, without a discount (adr/0051): owner, admin, operations. */
+  | "paymentLinks"
+  /** A payment link's discount, cancelling and extending it (adr/0051 §8): owner and admin. */
+  | "paymentLinksManage"
 
 export interface StaffMe {
   user_id: string

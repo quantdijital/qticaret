@@ -36,6 +36,9 @@ import { Route as AuthOrdersChargebacksRouteImport } from './routes/_auth/orders
 import { Route as AuthOrdersInvoicesRouteImport } from './routes/_auth/orders/invoices'
 import { Route as AuthOrdersReturnsRouteImport } from './routes/_auth/orders/returns'
 import { Route as AuthOrdersReviewRouteImport } from './routes/_auth/orders/review'
+import { Route as AuthPaymentLinksIndexRouteImport } from './routes/_auth/payment-links/index'
+import { Route as AuthPaymentLinksIdRouteImport } from './routes/_auth/payment-links/$id'
+import { Route as AuthPaymentLinksNewRouteImport } from './routes/_auth/payment-links/new'
 import { Route as AuthProductsIndexRouteImport } from './routes/_auth/products/index'
 import { Route as AuthProductsIdRouteImport } from './routes/_auth/products/$id'
 import { Route as AuthProductsNewRouteImport } from './routes/_auth/products/new'
@@ -224,6 +227,21 @@ const AuthOrdersReturnsRoute = AuthOrdersReturnsRouteImport.update({
 const AuthOrdersReviewRoute = AuthOrdersReviewRouteImport.update({
   id: '/orders/review',
   path: '/orders/review',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthPaymentLinksIndexRoute = AuthPaymentLinksIndexRouteImport.update({
+  id: '/payment-links/',
+  path: '/payment-links/',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthPaymentLinksIdRoute = AuthPaymentLinksIdRouteImport.update({
+  id: '/payment-links/$id',
+  path: '/payment-links/$id',
+  getParentRoute: () => AuthRoute,
+} as any)
+const AuthPaymentLinksNewRoute = AuthPaymentLinksNewRouteImport.update({
+  id: '/payment-links/new',
+  path: '/payment-links/new',
   getParentRoute: () => AuthRoute,
 } as any)
 const AuthProductsIndexRoute = AuthProductsIndexRouteImport.update({
@@ -536,6 +554,8 @@ export interface FileRoutesByFullPath {
   '/orders/invoices': typeof AuthOrdersInvoicesRoute
   '/orders/returns': typeof AuthOrdersReturnsRoute
   '/orders/review': typeof AuthOrdersReviewRoute
+  '/payment-links/$id': typeof AuthPaymentLinksIdRoute
+  '/payment-links/new': typeof AuthPaymentLinksNewRoute
   '/products/$id': typeof AuthProductsIdRoute
   '/products/new': typeof AuthProductsNewRoute
   '/promotions/$id': typeof AuthPromotionsIdRoute
@@ -576,6 +596,7 @@ export interface FileRoutesByFullPath {
   '/content/': typeof AuthContentIndexRoute
   '/customers/': typeof AuthCustomersIndexRoute
   '/orders/': typeof AuthOrdersIndexRoute
+  '/payment-links/': typeof AuthPaymentLinksIndexRoute
   '/products/': typeof AuthProductsIndexRoute
   '/promotions/': typeof AuthPromotionsIndexRoute
   '/reports/': typeof AuthReportsIndexRoute
@@ -616,6 +637,8 @@ export interface FileRoutesByTo {
   '/orders/invoices': typeof AuthOrdersInvoicesRoute
   '/orders/returns': typeof AuthOrdersReturnsRoute
   '/orders/review': typeof AuthOrdersReviewRoute
+  '/payment-links/$id': typeof AuthPaymentLinksIdRoute
+  '/payment-links/new': typeof AuthPaymentLinksNewRoute
   '/products/$id': typeof AuthProductsIdRoute
   '/products/new': typeof AuthProductsNewRoute
   '/promotions/$id': typeof AuthPromotionsIdRoute
@@ -656,6 +679,7 @@ export interface FileRoutesByTo {
   '/content': typeof AuthContentIndexRoute
   '/customers': typeof AuthCustomersIndexRoute
   '/orders': typeof AuthOrdersIndexRoute
+  '/payment-links': typeof AuthPaymentLinksIndexRoute
   '/products': typeof AuthProductsIndexRoute
   '/promotions': typeof AuthPromotionsIndexRoute
   '/reports': typeof AuthReportsIndexRoute
@@ -701,6 +725,8 @@ export interface FileRoutesById {
   '/_auth/orders/invoices': typeof AuthOrdersInvoicesRoute
   '/_auth/orders/returns': typeof AuthOrdersReturnsRoute
   '/_auth/orders/review': typeof AuthOrdersReviewRoute
+  '/_auth/payment-links/$id': typeof AuthPaymentLinksIdRoute
+  '/_auth/payment-links/new': typeof AuthPaymentLinksNewRoute
   '/_auth/products/$id': typeof AuthProductsIdRoute
   '/_auth/products/new': typeof AuthProductsNewRoute
   '/_auth/promotions/$id': typeof AuthPromotionsIdRoute
@@ -741,6 +767,7 @@ export interface FileRoutesById {
   '/_auth/content/': typeof AuthContentIndexRoute
   '/_auth/customers/': typeof AuthCustomersIndexRoute
   '/_auth/orders/': typeof AuthOrdersIndexRoute
+  '/_auth/payment-links/': typeof AuthPaymentLinksIndexRoute
   '/_auth/products/': typeof AuthProductsIndexRoute
   '/_auth/promotions/': typeof AuthPromotionsIndexRoute
   '/_auth/reports/': typeof AuthReportsIndexRoute
@@ -785,6 +812,8 @@ export interface FileRouteTypes {
     | '/orders/invoices'
     | '/orders/returns'
     | '/orders/review'
+    | '/payment-links/$id'
+    | '/payment-links/new'
     | '/products/$id'
     | '/products/new'
     | '/promotions/$id'
@@ -825,6 +854,7 @@ export interface FileRouteTypes {
     | '/content/'
     | '/customers/'
     | '/orders/'
+    | '/payment-links/'
     | '/products/'
     | '/promotions/'
     | '/reports/'
@@ -865,6 +895,8 @@ export interface FileRouteTypes {
     | '/orders/invoices'
     | '/orders/returns'
     | '/orders/review'
+    | '/payment-links/$id'
+    | '/payment-links/new'
     | '/products/$id'
     | '/products/new'
     | '/promotions/$id'
@@ -905,6 +937,7 @@ export interface FileRouteTypes {
     | '/content'
     | '/customers'
     | '/orders'
+    | '/payment-links'
     | '/products'
     | '/promotions'
     | '/reports'
@@ -949,6 +982,8 @@ export interface FileRouteTypes {
     | '/_auth/orders/invoices'
     | '/_auth/orders/returns'
     | '/_auth/orders/review'
+    | '/_auth/payment-links/$id'
+    | '/_auth/payment-links/new'
     | '/_auth/products/$id'
     | '/_auth/products/new'
     | '/_auth/promotions/$id'
@@ -989,6 +1024,7 @@ export interface FileRouteTypes {
     | '/_auth/content/'
     | '/_auth/customers/'
     | '/_auth/orders/'
+    | '/_auth/payment-links/'
     | '/_auth/products/'
     | '/_auth/promotions/'
     | '/_auth/reports/'
@@ -1209,6 +1245,27 @@ declare module '@tanstack/react-router' {
       path: '/orders/review'
       fullPath: '/orders/review'
       preLoaderRoute: typeof AuthOrdersReviewRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/payment-links/': {
+      id: '/_auth/payment-links/'
+      path: '/payment-links'
+      fullPath: '/payment-links/'
+      preLoaderRoute: typeof AuthPaymentLinksIndexRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/payment-links/$id': {
+      id: '/_auth/payment-links/$id'
+      path: '/payment-links/$id'
+      fullPath: '/payment-links/$id'
+      preLoaderRoute: typeof AuthPaymentLinksIdRouteImport
+      parentRoute: typeof AuthRoute
+    }
+    '/_auth/payment-links/new': {
+      id: '/_auth/payment-links/new'
+      path: '/payment-links/new'
+      fullPath: '/payment-links/new'
+      preLoaderRoute: typeof AuthPaymentLinksNewRouteImport
       parentRoute: typeof AuthRoute
     }
     '/_auth/products/': {
@@ -1710,6 +1767,8 @@ interface AuthRouteChildren {
   AuthOrdersInvoicesRoute: typeof AuthOrdersInvoicesRoute
   AuthOrdersReturnsRoute: typeof AuthOrdersReturnsRoute
   AuthOrdersReviewRoute: typeof AuthOrdersReviewRoute
+  AuthPaymentLinksIdRoute: typeof AuthPaymentLinksIdRoute
+  AuthPaymentLinksNewRoute: typeof AuthPaymentLinksNewRoute
   AuthProductsIdRoute: typeof AuthProductsIdRoute
   AuthProductsNewRoute: typeof AuthProductsNewRoute
   AuthPromotionsIdRoute: typeof AuthPromotionsIdRoute
@@ -1724,6 +1783,7 @@ interface AuthRouteChildren {
   AuthContentIndexRoute: typeof AuthContentIndexRoute
   AuthCustomersIndexRoute: typeof AuthCustomersIndexRoute
   AuthOrdersIndexRoute: typeof AuthOrdersIndexRoute
+  AuthPaymentLinksIndexRoute: typeof AuthPaymentLinksIndexRoute
   AuthProductsIndexRoute: typeof AuthProductsIndexRoute
   AuthPromotionsIndexRoute: typeof AuthPromotionsIndexRoute
   AuthReviewsIndexRoute: typeof AuthReviewsIndexRoute
@@ -1751,6 +1811,8 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthOrdersInvoicesRoute: AuthOrdersInvoicesRoute,
   AuthOrdersReturnsRoute: AuthOrdersReturnsRoute,
   AuthOrdersReviewRoute: AuthOrdersReviewRoute,
+  AuthPaymentLinksIdRoute: AuthPaymentLinksIdRoute,
+  AuthPaymentLinksNewRoute: AuthPaymentLinksNewRoute,
   AuthProductsIdRoute: AuthProductsIdRoute,
   AuthProductsNewRoute: AuthProductsNewRoute,
   AuthPromotionsIdRoute: AuthPromotionsIdRoute,
@@ -1765,6 +1827,7 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthContentIndexRoute: AuthContentIndexRoute,
   AuthCustomersIndexRoute: AuthCustomersIndexRoute,
   AuthOrdersIndexRoute: AuthOrdersIndexRoute,
+  AuthPaymentLinksIndexRoute: AuthPaymentLinksIndexRoute,
   AuthProductsIndexRoute: AuthProductsIndexRoute,
   AuthPromotionsIndexRoute: AuthPromotionsIndexRoute,
   AuthReviewsIndexRoute: AuthReviewsIndexRoute,

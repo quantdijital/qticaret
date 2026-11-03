@@ -55,7 +55,8 @@
     "menus": "Menus",
     "themeEditor": "Theme editor",
     "storefrontPreferences": "Storefront preferences",
-    "bulkMessages": "Bulk messages"
+    "bulkMessages": "Bulk messages",
+    "paymentLinks": "Payment links"
   },
   "login": {
     "title": "Sign in",
@@ -696,6 +697,12 @@
             "label": "Age verification",
             "description": "When a cart holds an adults-only product, the shopper declares their age with their date of birth before paying; under the limit, no payment is taken. The date of birth is not kept. The limit is in Settings > Legal texts."
           }
+        },
+        "orders": {
+          "payment_links": {
+            "label": "Orders by payment link",
+            "description": "The team prepares an order in the panel; the customer pays through a payment link on the storefront."
+          }
         }
       }
     },
@@ -1088,7 +1095,19 @@
         "off": "Off"
       },
       "tabs": {
-        "installments": "Installments"
+        "installments": "Installments",
+        "paymentLinks": "Payment links"
+      },
+      "paymentLinks": {
+        "title": "Payment links",
+        "description": "For orders prepared in the panel: the admins' discount limit and cash on delivery.",
+        "limit": "The largest discount an admin may give",
+        "limitHint": "A percentage of the products' total, 0 to 99. 0: admins cannot give discounts. The owner can give up to 99%.",
+        "limitInvalid": "Enter a whole number between 0 and 99.",
+        "cod": "Cash on delivery for an order from a payment link",
+        "codHint": "When on, the customer can pay a link's order at the door; cash on delivery's own settings and limits still apply.",
+        "ownerOnly": "Only the owner can change these settings.",
+        "saved": "Payment link settings saved."
       }
     },
     "shipping": {
@@ -5534,6 +5553,18 @@
         "title": "#{{order}}'s return: record the company's return invoice",
         "description": "The buying company issues a return invoice; once it comes, enter its number on the order's invoice card."
       }
+    },
+    "paymentLinkPaid": {
+      "title": "Payment link {{number}} was paid",
+      "description": "The order was placed; click to open it."
+    },
+    "paymentLinkPrices": {
+      "title": "Payment link {{number}}: prices changed",
+      "description": "The customer could not pay. Create a new link at today's prices."
+    },
+    "paymentLinkStock": {
+      "title": "Payment link {{number}}: a product is out of stock",
+      "description": "The customer could not pay. Update the stock, or cancel the link and create a new one."
     }
   },
   "content": {
@@ -7094,6 +7125,259 @@
       "audienceTooMany": "At most {{limit}} sources can be chosen.",
       "tooManyProducts": "An e-mail can hold at most {{max}} product cards.",
       "smsTooLong": "With the shop's name and the opt-out line the text is longer than {{parts}} SMS; shorten it."
+    }
+  },
+  "paymentLinks": {
+    "title": "Payment links",
+    "description": "Orders taken on the phone, in messages or at the counter: the system prices them, the customer pays through a link.",
+    "new": "New order",
+    "newTitle": "New order",
+    "newDescription": "Choose the customer and the products; the system prices them and the customer pays through a payment link.",
+    "newFromDescription": "The earlier link's customer, products and note are filled in; prices are worked out again as they are today.",
+    "off": "Payment links are off in this shop. Turned on, staff can prepare an order in the panel and send the customer a payment link.",
+    "noAccess": "Only the owner, admins and the operations team can prepare payment links.",
+    "turnOn": "Turn on in Features",
+    "views": "Link states",
+    "allStatuses": "All",
+    "status": {
+      "open": "Open",
+      "draft": "Prices changed",
+      "paid": "Paid",
+      "expired": "Expired",
+      "canceled": "Canceled"
+    },
+    "empty": "No payment links yet. Prepare an order a customer gave on the phone or in a message here.",
+    "emptyFiltered": "No links match these filters.",
+    "columns": {
+      "number": "Number",
+      "customer": "Customer",
+      "total": "Total",
+      "status": "Status",
+      "createdBy": "Created by",
+      "expires": "Ends",
+      "created": "Created"
+    },
+    "discountMark": "{{amount}} off",
+    "you": "You",
+    "teamMember": "Team member",
+    "filters": {
+      "discount": "Discount",
+      "anyDiscount": "With or without discount",
+      "discounted": "Discounted",
+      "notDiscounted": "Not discounted",
+      "createdBy": "Created by",
+      "anyone": "Anyone",
+      "mine": "Made by me",
+      "team": "Team"
+    },
+    "chip": "Payment link {{number}}",
+    "chipUnknown": "From a payment link",
+    "lines": {
+      "each": "{{quantity}} × {{price}}",
+      "short": "Low stock",
+      "itemsTotal": "Products",
+      "discount": "Discount",
+      "discountPercent": "Discount ({{percent}}%)",
+      "reason": "Reason: {{reason}}",
+      "total": "Total",
+      "shippingLater": "Shipping is added at checkout, by the shipping the customer chooses."
+    },
+    "summary": {
+      "title": "Summary",
+      "empty": "Prices and the total show here as you add products.",
+      "short_one": "{{count}} product is short on stock. The link is still made; stock is checked again when the customer pays.",
+      "short_other": "{{count}} products are short on stock. The link is still made; stock is checked again when the customer pays.",
+      "discountPending": "The discount is added to the summary once its value and reason are entered.",
+      "create": "Create link",
+      "reauth": "You may be asked to confirm it is you when creating."
+    },
+    "form": {
+      "parts": "The order's other parts",
+      "invalid": "Some fields are missing or wrong; fix the marked ones.",
+      "tabs": {
+        "delivery": "Delivery",
+        "discount": "Discount",
+        "note": "Duration and note"
+      },
+      "errors": {
+        "customer": "Choose a customer.",
+        "name": "Enter the first and last name (60 characters at most).",
+        "email": "Enter a valid e-mail address.",
+        "phone": "Enter a valid Turkish phone number.",
+        "lines": "Add at least one product.",
+        "quantity": "The quantity must be between 1 and 999.",
+        "percent": "The percentage must be a whole number between 1 and 99.",
+        "amount": "Enter a valid amount.",
+        "reason": "Write the discount's reason (200 characters at most).",
+        "note": "The note can be 1000 characters at most.",
+        "hours": "The duration must be between 1 and 168 hours."
+      },
+      "customer": {
+        "title": "Customer",
+        "description": "The link goes to the customer's e-mail address; the phone is used for SMS and WhatsApp.",
+        "mode": "Customer type",
+        "existing": "Existing customer",
+        "guest": "New customer",
+        "search": "Customer",
+        "searchHint": "For an existing customer, their group's prices apply.",
+        "searchPlaceholder": "Search by name or e-mail",
+        "searchEmpty": "No customer found.",
+        "noEmail": "no e-mail",
+        "firstName": "First name",
+        "lastName": "Last name",
+        "email": "E-mail",
+        "phone": "Mobile phone",
+        "phoneHint": "Optional; for SMS and WhatsApp."
+      },
+      "lines": {
+        "title": "Products",
+        "description": "Choose the product and the quantity; the system prices it from the catalog.",
+        "add": "Add a product",
+        "searchPlaceholder": "Product name or SKU",
+        "searchEmpty": "No product found.",
+        "empty": "No products added yet.",
+        "full": "A link can hold {{count}} products at most.",
+        "quantityOf": "Quantity of {{name}}",
+        "remove": "Remove {{name}}"
+      },
+      "delivery": {
+        "title": "Delivery address",
+        "descriptionOff": "Optional. Without it, the customer enters the address at checkout.",
+        "descriptionOn": "The address comes filled in on the customer's checkout; they can change it.",
+        "toggle": "Enter the delivery address now",
+        "firstName": "Recipient's first name",
+        "lastName": "Recipient's last name",
+        "shipping": "Shipping option",
+        "shippingHint": "Chosen here, it comes ready at checkout; its cost is added when the customer pays.",
+        "customerPicks": "The customer chooses at checkout",
+        "off": "The address and the shipping option are left to the customer."
+      },
+      "discount": {
+        "title": "Discount",
+        "description": "Valid on this link only; shown as a discount on the invoice.",
+        "toggle": "Apply a discount",
+        "off": "No discount on this link.",
+        "type": "Discount type",
+        "types": {
+          "percentage": "Percentage",
+          "fixed": "Amount"
+        },
+        "percent": "Discount percentage",
+        "percentHint": "A whole number between 1 and {{max}}.",
+        "adminLimit": "Admins can give at most {{limit}}%; more is the owner's to give.",
+        "amount": "Discount amount (₺)",
+        "amountHint": "Taken off the products' total.",
+        "reason": "Reason",
+        "reasonHint": "For example: loyal customer, damaged box. The owner sees it in the list."
+      },
+      "note": {
+        "title": "Duration and note",
+        "description": "How long the link stays open, and the team's note.",
+        "hours": "Valid for (hours)",
+        "hoursHint": "Between {{min}} and {{max}} hours (7 days); {{default}} hours suggested.",
+        "note": "Note",
+        "noteHint": "Only the team sees it; it never goes to the customer."
+      }
+    },
+    "detail": {
+      "made": "Created on {{date}}",
+      "lines_one": "Products ({{count}})",
+      "lines_other": "Products ({{count}})",
+      "contact": "Customer",
+      "openCustomer": "Open customer",
+      "guest": "New customer",
+      "erased": "The personal details were erased.",
+      "address": "Delivery address",
+      "noAddress": "The address is left to the customer; they enter it at checkout.",
+      "shippingSet": "A shipping option is preset.",
+      "shippingOpen": "The customer chooses the shipping option."
+    },
+    "draft": {
+      "title": "Prices changed",
+      "description": "A product's price on this link changed after the link was made; the customer cannot pay with it. Create a new link at today's prices and send it to the customer."
+    },
+    "share": {
+      "title": "Share",
+      "description": "Copy the link and send it, or have the shop send it by e-mail or SMS.",
+      "created": "The link is ready. Copy and send it, or have the shop send it by e-mail or SMS.",
+      "url": "Payment link",
+      "text": "Message text",
+      "copy": "{{what}}: copy",
+      "copied": "Copied.",
+      "copyFailed": "Could not copy; select the text and copy it.",
+      "whatsapp": "Open in WhatsApp",
+      "closed": "The link is no longer open; there is nothing to share.",
+      "emailSent": "E-mail sent",
+      "emailNotSent": "E-mail not sent",
+      "smsSent": "SMS sent",
+      "smsNotSent": "SMS not sent",
+      "send": {
+        "email": "Send by e-mail",
+        "sms": "Send by SMS"
+      },
+      "resend": {
+        "email": "Send the e-mail again",
+        "sms": "Send the SMS again"
+      },
+      "gap": "A link is sent once in 10 minutes at most; an SMS counts toward the daily quota.",
+      "sent": "The link was sent.",
+      "outcome": "{{channel}}: {{result}}",
+      "channels": {
+        "email": "E-mail",
+        "sms": "SMS"
+      },
+      "outcomes": {
+        "sent": "sent.",
+        "duplicate": "already sent.",
+        "channel_off": "the channel is off or no account is connected.",
+        "invalid_recipient": "no address or phone for the recipient, or it is not valid.",
+        "suppressed": "the recipient does not take messages on this channel.",
+        "no_consent": "the recipient has not consented.",
+        "over_quota": "the daily sending limit is reached.",
+        "failed": "could not be sent; try again shortly."
+      }
+    },
+    "actions": {
+      "again": "Create again",
+      "extend": "Extend",
+      "cancel": "Cancel link",
+      "canceled": "{{number}} was canceled.",
+      "confirmCancel": {
+        "title": "Cancel {{number}}?",
+        "description": "The customer can no longer pay with this link and its discount closes. This cannot be undone."
+      }
+    },
+    "extend": {
+      "title": "Extend {{number}}",
+      "description": "It ends now at {{now}}. The new end is the hours entered from now; a link stays open at most 7 days from its making, that is until {{cap}}.",
+      "hours": "From now (hours)",
+      "hoursHint": "The link and its share text stay the same.",
+      "invalid": "The duration must be between {{min}} and {{max}} hours.",
+      "confirm": "Extend",
+      "done": "The link is open until {{date}}."
+    },
+    "facts": {
+      "title": "Details",
+      "created": "Created by",
+      "createdBy": "{{who}}, {{date}}",
+      "expires": "Ends",
+      "expired": "Ended",
+      "cap": "It can be extended until {{date}} at most.",
+      "opened": "Opened by the customer",
+      "openedCount_one": "{{total}} time, last {{date}}",
+      "openedCount_other": "{{total}} times, last {{date}}",
+      "never": "Not opened yet.",
+      "sent": "Sent by the shop",
+      "sentCount_one": "{{total}} time, last {{date}}",
+      "sentCount_other": "{{total}} times, last {{date}}",
+      "notSent": "Not sent by the shop.",
+      "order": "Order",
+      "paidAt": "Paid on {{date}}; open the order",
+      "openOrder": "Open the order",
+      "canceled": "Canceled",
+      "canceledBy": "{{who}}, {{date}}",
+      "note": "Note",
+      "noNote": "No note."
     }
   }
 }

@@ -4,6 +4,7 @@ import {
   FileText,
   FolderTree,
   LayoutDashboard,
+  Link2,
   ListTree,
   Mails,
   MessageSquareText,
@@ -52,6 +53,14 @@ export const NAV_GROUPS: NavGroup[] = [
     key: "sales",
     items: [
       { key: "orders", to: "/orders", icon: ShoppingBag },
+      // adr/0051: orders staff make for a customer, paid through a link, while the shop has them on
+      {
+        key: "paymentLinks",
+        to: "/payment-links",
+        icon: Link2,
+        feature: "orders.payment_links",
+        needs: "paymentLinks",
+      },
       { key: "customers", to: "/customers", icon: Users },
     ],
   },

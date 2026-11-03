@@ -111,6 +111,8 @@ const DETAIL_FIELDS = [
   "created_at",
   "email",
   "currency_code",
+  // Where it came from: a payment link's id (adr/0051) in `qt_payment_link`
+  "metadata",
   // Tax included and before discounts, as the shop priced them; the discount is its own row
   "original_item_total",
   "original_shipping_total",
