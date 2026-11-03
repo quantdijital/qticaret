@@ -138,9 +138,11 @@ class YurticiFulfillmentService extends AbstractFulfillmentProviderService {
       cargoKey,
       orderNumber: number,
       receiver,
-      // Yurtiçi keeps the volume's desi and the weight apart, and charges the larger
-      desi: yurticiDesi(parcel),
-      kg: parcel.weight_kg,
+      // Yurtiçi keeps the volume's desi and the weight apart, and charges the larger.
+      // Both optional there: a parcel the default filled in goes without them,
+      // the branch measures it (adr/0054)
+      desi: parcel.measured ? yurticiDesi(parcel) : null,
+      kg: parcel.measured ? parcel.weight_kg : null,
       cashOnDelivery: ship.cash_on_delivery,
     }
     const api = yurticiApi()

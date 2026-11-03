@@ -69,8 +69,9 @@ export interface SourceProduct {
 
 /**
  * The parcel a product without its own measurements is sent in, as the
- * owner gives it for a run: grams and cm. A product going live needs them
- * (F3.1, the carriers' desi).
+ * owner gives it for a run: grams and cm, written into the product's own
+ * fields. Optional: without it such a product ships as the shop's default
+ * parcel (Settings > Shipping, adr/0054).
  */
 export interface PackageDefaults {
   weight: number

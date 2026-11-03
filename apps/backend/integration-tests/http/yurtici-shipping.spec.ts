@@ -202,6 +202,30 @@ medusaIntegrationTestRunner({
       expect(arrived?.delivered_at).toBeTruthy()
     })
 
+    it("sends desi and kg only for a product measured, leaving the rest to the branch (adr/0054)", async () => {
+      const ship = async () => {
+        const orderId = await order()
+        const shipped = await post(`/admin/orders/${orderId}/ship`, { notify: false })
+        const [packed] = await fulfillmentsOf(orderId)
+        return {
+          status: shipped.status,
+          sent: fake.shipments.get(String(packed?.data["shipment_id"])),
+        }
+      }
+      const createBody = (index: number) =>
+        fake.requests.filter((request) => request.operation === "createShipment")[index]?.body ?? ""
+
+      const measured = await ship()
+      variantId = await geliverProduct(getContainer(), shop, false)
+      const unmeasured = await ship()
+
+      // 35 × 8 × 4 cm: 0.4 desi by volume, 0.45 kg apart
+      expect(measured).toMatchObject({ status: 200, sent: { desi: "0.400", kg: "0.450" } })
+      // Optional in Yurtiçi's document: no made-up value, the elements left out
+      expect(unmeasured).toMatchObject({ status: 200, sent: { desi: "", kg: "" } })
+      expect(createBody(1)).not.toMatch(/<(desi|kg)[\s/>]/)
+    })
+
     it("packs nothing when Yurtiçi refuses the parcel", async () => {
       const orderId = await order()
       fake.queue("createShipment", "60017")

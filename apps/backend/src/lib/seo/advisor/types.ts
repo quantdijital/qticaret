@@ -4,7 +4,7 @@
  * of the facts, so the same page always gets the same score.
  */
 
-export const RULES_VERSION = 4
+export const RULES_VERSION = 5
 
 export const SEVERITIES = ["critical", "high", "medium", "low", "info"] as const
 export type Severity = (typeof SEVERITIES)[number]

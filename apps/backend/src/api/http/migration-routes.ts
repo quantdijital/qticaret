@@ -15,6 +15,8 @@ import type {
   AdminPostMigrationQueryType,
   AdminPostShopifyMigrationType,
 } from "../admin/migrations/validators"
+import { MIGRATION_MODULE } from "../../modules/migration"
+import type MigrationModuleService from "../../modules/migration/service"
 import { requireUserActor } from "./actor"
 import { requireReauth } from "./reauth"
 
@@ -23,6 +25,13 @@ const applying = (req: MedusaRequest) =>
   (req.validatedQuery as Partial<AdminPostMigrationQueryType>).mode === "apply"
 const applyingStore = (req: MedusaRequest) =>
   (req.validatedBody as Partial<AdminPostShopifyMigrationType>).mode === "apply"
+// A run started again is applied again when it was an apply: the stored run says
+const restartingApply = async (req: MedusaRequest) => {
+  const [run] = await req.scope
+    .resolve<MigrationModuleService>(MIGRATION_MODULE)
+    .listMigrationRuns({ id: req.params["id"] ?? "" }, { select: ["mode"], take: 1 })
+  return run?.mode !== "check"
+}
 
 /**
  * F14 (adr/0042 §9): a shop's data moved in, by a person: the owner, who
@@ -73,6 +82,16 @@ export const MIGRATION_ROUTES = [
     matcher: "/admin/migrations",
     methods: ["GET" as const],
     middlewares: [validateAndTransformQuery(AdminGetMigrations, {})],
+  },
+  // A run that stopped half-way, started again from its stored file
+  {
+    matcher: "/admin/migrations/:id/restart",
+    methods: ["POST" as const],
+    middlewares: [
+      requireUserActor,
+      validateAndTransformBody(z.object({}).strict()),
+      requireReauth(restartingApply),
+    ],
   },
   // F14.7: the old site's addresses; applying them writes the shop's redirects
   {

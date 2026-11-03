@@ -17,7 +17,11 @@ export interface SheetRefs {
   categoryHandle: (path: string[]) => string | null
   /** A brand's name to its handle. */
   brandHandle: (name: string) => string | null
-  /** The owner's parcel for a product without measurements; none: such a product comes as a draft. */
+  /**
+   * The owner's parcel for a product without measurements, written into
+   * its own fields; none: it goes without, and shipping prices it by the
+   * shop's default parcel (adr/0054).
+   */
   defaults: PackageDefaults | null
 }
 
@@ -29,7 +33,7 @@ export interface ProductPackage {
   height: number | null
   /** Some of it from the owner's defaults. */
   defaulted: boolean
-  /** Whether the product may go live with it (F3.1). */
+  /** All four known; else shipping takes the rest from the shop's default parcel (adr/0054). */
   complete: boolean
 }
 
@@ -65,10 +69,6 @@ export function packageOf(
   }
 }
 
-/** A product the source shows live, here a draft: nothing to send it in yet. */
-export const goesLiveAsDraft = (product: SourceProduct, pack: ProductPackage) =>
-  product.status === "published" && !pack.complete
-
 export const categoryKey = (path: readonly string[]) => path.join(" > ")
 
 /** The sheet's header in the shop's units, as the import reads it. */
@@ -99,8 +99,8 @@ function productCells(
     cm === null ? null : refs.units.dimension === "mm" ? cm * 10 : cm
   return {
     title: product.title,
-    status:
-      product.status === "published" && !goesLiveAsDraft(product, pack) ? "Yayında" : "Taslak",
+    // As the source shows it: measures are optional (adr/0054)
+    status: product.status === "published" ? "Yayında" : "Taslak",
     description: product.description,
     categories: categories.length > 0 ? categories.join("|") : null,
     brand: product.brand ? refs.brandHandle(product.brand) : null,

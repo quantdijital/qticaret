@@ -7,7 +7,6 @@ import {
   claimCollectionPaths,
   claimProductPaths,
 } from "../workflows/catalog/entity-paths"
-import { assertPublishable } from "../workflows/catalog/publish-rules"
 
 type Check = (container: MedusaContainer, id: string) => Promise<unknown>
 
@@ -20,19 +19,15 @@ const CHECKS: readonly [string, string, Check][] = [
   ],
   ["product", "path", (container, id) => claimProductPaths(container, [id])],
   ["product_collection", "path", (container, id) => claimCollectionPaths(container, [id])],
-  // Published before the rule: any edit is refused until the values are filled in
-  ["product", "dimensions", (container, id) => assertPublishable(container, [id])],
 ]
 
 /**
  * Usage: pnpm --filter @qticaret/backend medusa exec ./src/scripts/claim-catalog-paths.ts
  *
  * Brings records made before F3.1 in line, once per database (a deploy step):
- * - claims their storefront paths in the URL registry; the workflow hooks do
- *   it for every save since;
- * - lists published physical products without weight or dimensions, whose
- *   edits the publish rule refuses until those are filled in.
- * Safe to run again: a record that holds its path is left alone. Records
+ * claims their storefront paths in the URL registry; the workflow hooks do
+ * it for every save since. (Weight and measures are optional, adr/0054:
+ * nothing to check there.) Safe to run again: a record that holds its path is left alone. Records
  * that fail a check are listed by ID with the reason and skipped.
  */
 export default async function run({ container }: ExecArgs): Promise<void> {

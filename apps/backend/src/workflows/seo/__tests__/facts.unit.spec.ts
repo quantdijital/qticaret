@@ -134,6 +134,7 @@ describe("productFacts", () => {
       over_desi_price: 0,
       label_format: "100x150" as const,
       label_custom: { width_mm: 100, height_mm: 150 },
+      default_parcel: null,
     }
     const units = { weight_unit: "g", dimension_unit: "cm" } as const
     const measured = row({
@@ -158,11 +159,48 @@ describe("productFacts", () => {
     })
 
     expect(facts.delivery).toEqual({ handling: [1, 2], transit: [1, 3] })
+    // Without measures, as checkout prices it: the default parcel, 2 desi (adr/0054)
     expect(facts.variants.map((variant) => [variant.id, variant.shippingRate])).toEqual([
-      ["variant_a", null],
+      ["variant_a", 49.9],
       ["variant_b", 49.9],
+    ])
+    // A feed's volume is the product's own, never the default's
+    expect(facts.variants.map((variant) => [variant.id, variant.desi])).toEqual([
+      ["variant_a", null],
+      ["variant_b", 1],
     ])
     expect(unoffered.variants.map((variant) => variant.shippingRate)).toEqual([null, null])
     expect(productFacts(measured, null, "").delivery).toBeNull()
+  })
+
+  it("prices a product without measures by the shop's own default parcel, a digital one not at all", () => {
+    const settings = {
+      handling_days_min: 1,
+      handling_days_max: 2,
+      transit_days_min: 1,
+      transit_days_max: 3,
+      rate_table: [
+        { max_desi: 2, price: 4_990 },
+        { max_desi: 10, price: 9_990 },
+      ],
+      over_desi_price: 0,
+      label_format: "100x150" as const,
+      label_custom: { width_mm: 100, height_mm: 150 },
+      // 5 kg: past the first band
+      default_parcel: { weight: 5_000, length: 30, width: 20, height: 10 },
+    }
+    const shipping = {
+      settings,
+      units: { weight_unit: "g", dimension_unit: "cm" } as const,
+      table_offered: true,
+    }
+    const digital = row({ product_extension: { kind: "digital" } })
+
+    expect(productFacts(row(), null, "", undefined, shipping).variants[0]?.shippingRate).toBe(99.9)
+    expect(
+      productFacts(digital, null, "", undefined, shipping).variants.map(
+        (variant) => variant.shippingRate
+      )
+    ).toEqual([null, null])
   })
 })

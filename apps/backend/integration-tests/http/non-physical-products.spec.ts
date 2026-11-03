@@ -84,7 +84,7 @@ medusaIntegrationTestRunner({
       expect(requiresShipping(physical).every((value) => value === true)).toBe(true)
     })
 
-    it("exempts a digital product from the measurement rule and keeps new variants off shipping", async () => {
+    it("publishes without measurements whatever the kind, and keeps a digital one's new variants off shipping", async () => {
       await setFlag(true)
       const { data } = await http.post<{ product: { id: string } }>(
         "/admin/products",
@@ -108,14 +108,12 @@ medusaIntegrationTestRunner({
           http.post(`/admin/products/${id}`, { status: "published" }, { headers: admin.headers })
         )
 
-      expect((await publish()).status).toBe(400)
-      expect((await setKind("digital", id)).status).toBe(200)
+      // Measurements are optional for any kind (adr/0054): published as it is
       expect((await publish()).status).toBe(200)
-
-      // Turned physical while published, it needs its measurements: refused, still digital
-      const back = await setKind("physical", id)
-      expect(back.status).toBe(400)
-      expect(back.data).toMatchObject({ message: "catalog.dimensions_required" })
+      expect((await setKind("digital", id)).status).toBe(200)
+      // Turned physical while published, then back: nothing to fill in either way
+      expect((await setKind("physical", id)).status).toBe(200)
+      expect((await setKind("digital", id)).status).toBe(200)
       const { data: catalog } = await http.get<{ kind: string }>(`/admin/products/${id}/catalog`, {
         headers: admin.headers,
       })

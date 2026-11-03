@@ -45,6 +45,8 @@ export interface CurrentFields {
   brandId: string | null
   primaryCategoryId: string | null
   seo: { seo_title: string | null; seo_description: string | null; focus_keyword: string | null }
+  /** F3.2: a digital or service product has no parcel to measure. */
+  physical: boolean
 }
 
 export interface ExistingProduct {
@@ -60,13 +62,13 @@ export interface ExistingProduct {
 
 interface ProductRow extends Omit<
   CurrentFields,
-  "categoryIds" | "brandId" | "primaryCategoryId" | "seo"
+  "categoryIds" | "brandId" | "primaryCategoryId" | "seo" | "physical"
 > {
   id: string
   handle: string
   categories?: ({ id: string } | null)[] | null
   brand?: { id: string } | null
-  product_extension?: { primary_category_id?: string | null } | null
+  product_extension?: { primary_category_id?: string | null; kind?: string | null } | null
   seo_meta?: Partial<CurrentFields["seo"]> | null
   options?: { id: string; title: string; values?: { value: string }[] | null }[] | null
   variants?:
@@ -114,6 +116,7 @@ const FIELDS = [
   "categories.id",
   "brand.id",
   "product_extension.primary_category_id",
+  "product_extension.kind",
   "seo_meta.seo_title",
   "seo_meta.seo_description",
   "seo_meta.focus_keyword",
@@ -171,6 +174,7 @@ function currentOf(row: ProductRow): CurrentFields {
       seo_description: row.seo_meta?.seo_description ?? null,
       focus_keyword: row.seo_meta?.focus_keyword ?? null,
     },
+    physical: (row.product_extension?.kind ?? "physical") === "physical",
   }
 }
 

@@ -120,6 +120,7 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "Two rows without a handle have the same product name; give them handles.",
   "catalog_import.no_location":
     "The shop has no default warehouse, so stock cannot be written. Add one under Settings > Warehouses.",
+  "catalog_import.no_measures": "No measures; shipping is priced by the default parcel.",
   "catalog_import.option_incomplete": "An option's name and value go together.",
   "catalog_import.option_unknown": "The product has no option of this name.",
   "catalog_import.option_value_unknown":
@@ -144,8 +145,6 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "catalog_import.variant_unmatched":
     "The row matches none of the product's variants; give its SKU or all of the product's options.",
   "catalog_import.write_failed": "The product could not be saved.",
-  "catalog.dimensions_required":
-    "A physical product needs weight and dimensions for every variant before it is published.",
   "catalog.handle_invalid": "The handle may contain only lowercase letters, digits and hyphens.",
   "catalog.handle_required": "No handle could be made from the title; enter one yourself.",
   "catalog.kind_disabled": "Turn on digital and service products in Settings > Features first.",
@@ -342,8 +341,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "shipping.carrier_unknown": "This parcel's carrier is not known; it cannot be tracked.",
   "shipping.carrier_not_connected":
     "The shipping service is not connected. Connect the account under Settings > Shipping.",
-  "shipping.dimensions_missing":
-    "Some products in the cart have no weight or measures; shipping cannot be priced. Enter weight, length, width and height on their variants.",
+  "shipping.measures_invalid":
+    "A product in the cart has an invalid weight or measure (below zero); shipping cannot be priced. Correct it or leave it empty.",
   "shipping.no_offer":
     "No carrier offer came for this shipment. The chosen service may not carry this parcel.",
   "shipping.option_invalid": "The shipping option does not belong to this service.",
@@ -845,8 +844,12 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "The default parcel takes its weight, length, width and height together.",
   "migration.product_parcel_defaulted":
     "The source had no measurements; the default parcel was used.",
-  "migration.product_drafted_no_parcel":
-    "No weight or measurements; brought in as a draft. Add them and publish.",
+  "migration.product_no_parcel":
+    "No weight or measurements; shipping is priced by the default parcel.",
+  "migration.run_not_interrupted": "Only a run that stopped half-way can be started again.",
+  "migration.run_unknown": "No such migration run.",
+  "migration.source_file_gone":
+    "This run's file is no longer kept; upload the file again and start.",
   "migration.shopify_not_connected":
     "No Shopify store is connected; connect it under Settings > Integrations first.",
   "migration.shopify_currency":

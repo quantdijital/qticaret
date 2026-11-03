@@ -1,5 +1,5 @@
 import { missingDimensions } from "../../../lib/catalog"
-import type { SheetProblem, SheetProduct } from "../../../lib/catalog-sheet"
+import type { SheetProduct } from "../../../lib/catalog-sheet"
 import type { CurrentFields } from "./existing-products"
 
 /**
@@ -77,14 +77,22 @@ export function linksOf(found: Found, current: CurrentFields | undefined) {
 }
 
 /**
- * A new product going live needs its weight and measurements (F3.1): the
- * product hook would refuse it on apply, so the check says so first.
+ * Whether the product goes on without its own weight and measures, as the
+ * row leaves them: optional, published or not (adr/0054). Shipping prices
+ * it by the shop's default parcel, and the report says so. A digital or
+ * service product has no parcel to measure.
  */
-export function publishProblems(sheet: SheetProduct, isNew: boolean): SheetProblem[] {
-  if (!isNew || sheet.fields.status !== "published") {
-    return []
+export function lacksMeasures(sheet: SheetProduct, current: CurrentFields | undefined): boolean {
+  if (current && !current.physical) {
+    return false
   }
-  return missingDimensions(sheet.fields).length > 0
-    ? [{ line: sheet.line, key: "catalog.dimensions_required" }]
-    : []
+  const { fields } = sheet
+  return (
+    missingDimensions({
+      weight: fields.weight ?? current?.weight ?? null,
+      length: fields.length ?? current?.length ?? null,
+      width: fields.width ?? current?.width ?? null,
+      height: fields.height ?? current?.height ?? null,
+    }).length > 0
+  )
 }

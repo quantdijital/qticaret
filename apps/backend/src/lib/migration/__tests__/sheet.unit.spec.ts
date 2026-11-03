@@ -102,7 +102,7 @@ describe("source products as the catalog sheet reads them (F14, adr/0042 §2)", 
     expect(first?.[header.indexOf("Marka")]).toBeNull()
   })
 
-  it("fills a parcel from the owner's defaults, else brings a live product in as a draft (F3.1)", () => {
+  it("fills a parcel from the owner's defaults, else keeps a live product live without one (adr/0054)", () => {
     const bare = {
       ...product,
       dimensions: null,
@@ -119,7 +119,7 @@ describe("source products as the catalog sheet reads them (F14, adr/0042 §2)", 
     }
 
     const [filled] = migrationRows(bare, { ...refs, defaults })
-    const [drafted] = migrationRows(bare, { ...refs, defaults: null })
+    const [bareRow] = migrationRows(bare, { ...refs, defaults: null })
 
     expect(packageOf(bare, defaults)).toMatchObject({ defaulted: true, complete: true })
     expect(packageOf(product, defaults)).toMatchObject({ weight: 1500, defaulted: false })
@@ -129,6 +129,6 @@ describe("source products as the catalog sheet reads them (F14, adr/0042 §2)", 
       300,
     ])
     expect(packageOf(bare, null).complete).toBe(false)
-    expect([cell(drafted, "Durum"), cell(drafted, "Ağırlık")]).toEqual(["Taslak", null])
+    expect([cell(bareRow, "Durum"), cell(bareRow, "Ağırlık")]).toEqual(["Yayında", null])
   })
 })

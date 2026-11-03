@@ -18,8 +18,9 @@ export interface YurticiLabelInput {
   cargoKey: string
   orderNumber: string
   receiver: Receiver
-  desi: number
-  kg: number
+  /** Null when not sent to Yurtiçi (a product without measures, adr/0054). */
+  desi: number | null
+  kg: number | null
   /** Kuruş the courier collects at the door; null when paid already. */
   cashOnDelivery: number | null
   test: boolean
@@ -161,7 +162,14 @@ export async function yurticiLabelPdf(
   pen.line(0.85)
   pen.gap(2 * MM * k)
   pen.text(`Sipariş ${input.orderNumber}`, regular, foot)
-  const meta = `${measure(input.desi)} desi · ${measure(input.kg)} kg · 1/1`
+  // Unmeasured, the branch weighs it: only what was sent is printed
+  const meta = [
+    input.desi === null ? null : `${measure(input.desi)} desi`,
+    input.kg === null ? null : `${measure(input.kg)} kg`,
+    "1/1",
+  ]
+    .filter(Boolean)
+    .join(" · ")
   pen.text(meta, regular, foot, { x: WIDTH - MARGIN - regular.widthOfTextAtSize(meta, foot) })
 
   return doc.save()

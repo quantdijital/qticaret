@@ -23,6 +23,19 @@ export interface ShippingSettings {
   label_format: LabelFormat
   /** The roll's own size when `label_format` is `custom`, in millimetres. */
   label_custom: { width_mm: number; height_mm: number }
+  /**
+   * The parcel a product without its own weight or measures ships as, in
+   * the shop's units (Settings > Store); null: the platform's, 1 kg in
+   * 30 × 20 × 10 cm (adr/0054). The carrier measures the real parcel.
+   */
+  default_parcel: DefaultParcel | null
+}
+
+export interface DefaultParcel {
+  weight: number
+  length: number
+  width: number
+  height: number
 }
 
 export const LABEL_FORMATS = ["100x150", "100x100", "80x80", "a4", "custom"] as const
@@ -30,10 +43,14 @@ export type LabelFormat = (typeof LABEL_FORMATS)[number]
 
 const days = (max: number) => z.number().int().min(0).max(max)
 
+// A measure in the shop's units: above zero, as a product's (a tonne in grams at most)
+const measure = z.number().positive().max(1_000_000)
+
 /**
  * Shipping rules (F7.8, adr/0031): how long an order takes to leave and to
  * arrive (the storefront's promise and the products' `shippingDetails`),
- * and the shop's price table by desi for shipping options priced by it.
+ * the shop's price table by desi for shipping options priced by it, and
+ * the parcel a product without measures ships as (adr/0054).
  */
 export const shippingSection = defineSection<ShippingSettings>(
   "shipping",
@@ -61,6 +78,10 @@ export const shippingSection = defineSection<ShippingSettings>(
         height_mm: z.number().int().min(70).max(297),
       })
       .strict(),
+    default_parcel: z
+      .object({ weight: measure, length: measure, width: measure, height: measure })
+      .strict()
+      .nullable(),
   },
   {
     handling_days_min: 1,
@@ -71,6 +92,7 @@ export const shippingSection = defineSection<ShippingSettings>(
     over_desi_price: 0,
     label_format: "100x150",
     label_custom: { width_mm: 100, height_mm: 150 },
+    default_parcel: null,
   },
   (values, ctx) => {
     if (values.handling_days_min > values.handling_days_max) {

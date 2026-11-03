@@ -44,6 +44,10 @@ export function problemRow(problem: SheetProblem, handle: string | undefined): S
   ]
 }
 
+/** A product's note in its row: going on without weight or measures (adr/0054). */
+export const measuresNote = (plan: { noMeasures?: boolean }): { message?: string } =>
+  plan.noMeasures ? { message: serverErrorMessage("catalog_import.no_measures", "tr") } : {}
+
 export function productRow(
   line: number,
   handle: string,

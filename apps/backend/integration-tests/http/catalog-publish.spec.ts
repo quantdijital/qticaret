@@ -32,7 +32,11 @@ const product = (title: string, extra: Record<string, unknown> = {}) => ({
   ...extra,
 })
 
-/** F3.1: a physical product is published only with weight and dimensions. */
+/**
+ * F3.1 as the owner changed it (adr/0054, 2026-11-03): weight and
+ * dimensions are optional; a physical product publishes without them and
+ * ships as the shop's default parcel.
+ */
 medusaIntegrationTestRunner({
   testSuite: ({ api, getContainer }) => {
     const http = api as HttpClient
@@ -42,90 +46,46 @@ medusaIntegrationTestRunner({
       settle(http.post<T & { message?: string }>(url, body, { headers: admin.headers }))
     const createProduct = async (body: unknown) =>
       (await post<{ product: Product }>("/admin/products", body)).data.product
-    const countByHandle = async (handle: string) =>
-      (
-        await http.get<{ count: number }>(`/admin/products?handle=${handle}`, {
-          headers: admin.headers,
-        })
-      ).data.count
 
     beforeEach(async () => {
       admin = await createAdminUser(http, getContainer())
     })
 
     describe("publishing a physical product", () => {
-      it("needs weight and dimensions, and a refused create leaves nothing behind", async () => {
-        const refused = await post("/admin/products", product("Ölçüsüz", { status: "published" }))
-        const draft = await post("/admin/products", product("Taslak Ürün"))
-        const published = await post(
+      it("needs no weight or dimensions, created live or published later", async () => {
+        const bare = await post<{ product: Product }>(
           "/admin/products",
-          product("Ölçülü", { status: "published", ...DIMENSIONS })
+          product("Ölçüsüz", { status: "published" })
         )
-
-        expect(refused.status).toBe(400)
-        expect(refused.data.message).toBe("catalog.dimensions_required")
-        expect(await countByHandle("olcusuz")).toBe(0)
-        expect(draft.status).toBe(200)
-        expect(published.status).toBe(200)
-      })
-
-      it("checks a draft when it is published, and every variant", async () => {
-        const created = await createProduct(product("Ekmek Bıçağı"))
-        const [first, second] = created.variants
-
-        const bare = await post(`/admin/products/${created.id}`, { status: "published" })
-        // The product's variant list is the whole list: both stay
-        const oneVariant = await post(`/admin/products/${created.id}`, {
+        const measured = await post("/admin/products", product("Ölçülü", DIMENSIONS))
+        const draft = await createProduct(product("Ekmek Bıçağı"))
+        const later = await post<{ product: Product }>(`/admin/products/${draft.id}`, {
           status: "published",
-          variants: [{ id: first?.id, ...DIMENSIONS }, { id: second?.id }],
         })
-        const withProductValues = await post(`/admin/products/${created.id}`, {
-          status: "published",
-          ...DIMENSIONS,
-        })
-
-        expect(bare.status).toBe(400)
-        expect(oneVariant.status).toBe(400)
-        expect(withProductValues.status).toBe(200)
-      })
-
-      it("refuses a variant change that leaves no weight, and keeps the old value", async () => {
-        const created = await createProduct(
-          product("Satır", { status: "published", ...DIMENSIONS })
-        )
-        const variantId = created.variants[0]?.id ?? ""
-
-        const cleared = await post(`/admin/products/${created.id}/variants/${variantId}`, {
-          weight: 0,
-        })
-        const after = await http.get<{ variant: { weight: number | null } }>(
-          `/admin/products/${created.id}/variants/${variantId}`,
-          { headers: admin.headers }
-        )
-
-        expect(cleared.status).toBe(400)
-        expect(cleared.data.message).toBe("catalog.dimensions_required")
-        expect(after.data.variant.weight).toBeNull()
-      })
-
-      it("applies on the batch route too", async () => {
-        const batch = await post("/admin/products/batch", {
+        const batch = await post<{ created: Product[] }>("/admin/products/batch", {
           create: [product("Toplu Ürün", { status: "published" })],
         })
 
-        expect(batch.status).toBe(400)
-        expect(await countByHandle("toplu-urun")).toBe(0)
+        expect([bare.status, bare.data.product.status]).toEqual([200, "published"])
+        expect(measured.status).toBe(200)
+        expect([later.status, later.data.product.status]).toEqual([200, "published"])
+        expect(batch.status).toBe(200)
+        expect(batch.data.created.map((each) => each.status)).toEqual(["published"])
       })
 
-      it("refuses a new variant without weight on a published product", async () => {
+      it("lets a published product's variant lose its weight, or gain one without", async () => {
         const created = await createProduct(
-          product("Kasap Bıçağı", {
+          product("Satır", {
             status: "published",
             options: [{ title: "Boyut", values: ["20 cm", "25 cm", "30 cm"] }],
             variants: sizes().map((variant) => ({ ...variant, ...DIMENSIONS })),
           })
         )
+        const variantId = created.variants[0]?.id ?? ""
 
+        const cleared = await post(`/admin/products/${created.id}/variants/${variantId}`, {
+          weight: null,
+        })
         const added = await post(`/admin/products/${created.id}/variants`, {
           title: "30 cm",
           options: { Boyut: "30 cm" },
@@ -136,21 +96,11 @@ medusaIntegrationTestRunner({
           headers: admin.headers,
         })
 
-        expect(added.status).toBe(400)
-        expect(added.data.message).toBe("catalog.dimensions_required")
-        expect(after.data.product.variants).toHaveLength(2)
-      })
-
-      it("applies on the dashboard's variant batch route", async () => {
-        const created = await createProduct(
-          product("Fileto Bıçağı", { status: "published", ...DIMENSIONS })
-        )
-
-        const batch = await post(`/admin/products/${created.id}/variants/batch`, {
-          update: [{ id: created.variants[0]?.id, weight: 0 }],
-        })
-
-        expect(batch.status).toBe(400)
+        expect(cleared.status).toBe(200)
+        expect(added.status).toBe(200)
+        expect(after.data.product.status).toBe("published")
+        expect(after.data.product.variants).toHaveLength(3)
+        expect(after.data.product.variants.find((each) => each.id === variantId)?.weight).toBeNull()
       })
     })
   },

@@ -5,7 +5,8 @@ import { URL_FILTERS } from "../../../workflows/migration/urls-read"
 /**
  * `?mode=check` (the default) reports what the migration would do; `apply`
  * does it. `weight` (g), `length`, `width`, `height` (cm), all four or none:
- * the parcel of a product without its own measurements.
+ * an optional parcel written into the products without their own
+ * measurements; without it they ship as the shop's default parcel (adr/0054).
  */
 export const AdminPostMigrationQuery = z
   .object({

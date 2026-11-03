@@ -120,6 +120,17 @@ describe("Yurtiçi (adr/0035)", () => {
     expect(yurticiReceiverGap({ ...receiver, address: "Ev 12, Sokak 34" })).toBeNull()
   })
 
+  it("leaves desi and kg out for a parcel without measures: optional there, the branch measures (adr/0054)", async () => {
+    const unmeasured = { ...shipment("QT01ABCDEF"), desi: null, kg: null }
+    const fields = yurticiShipmentFields(unmeasured)
+    const pdf = await yurticiLabelPdf({ ...unmeasured, test: true })
+
+    expect(fields["desi"]).toBeNull()
+    expect(fields["kg"]).toBeNull()
+    expect(fields).toMatchObject({ cargoKey: "QT01ABCDEF", cargoCount: 1 })
+    expect(Buffer.from(pdf.subarray(0, 5)).toString()).toBe("%PDF-")
+  })
+
   it("sends the volume's desi apart from the weight: volume / 3000, one decimal up", () => {
     expect(yurticiDesi({ length_cm: 30, width_cm: 20, height_cm: 10 })).toBe(2)
     expect(yurticiDesi({ length_cm: 10.1, width_cm: 10.1, height_cm: 10.1 })).toBe(0.4)

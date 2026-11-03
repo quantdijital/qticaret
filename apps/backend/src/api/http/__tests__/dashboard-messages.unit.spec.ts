@@ -1,7 +1,7 @@
 import type { MedusaRequest } from "@medusajs/framework/http"
 import { forDashboard, isDashboardRequest } from "../dashboard-messages"
 
-const BODY = { type: "invalid_data", message: "catalog.dimensions_required" }
+const BODY = { type: "invalid_data", message: "catalog.handle_required" }
 
 function request(path: string, fields: { session?: boolean; headers?: Record<string, string> }) {
   return {
@@ -42,8 +42,8 @@ describe("forDashboard", () => {
   it("turns our key into the Turkish sentence and keeps the key in code", () => {
     expect(forDashboard(request("/admin/products", { session: true }), BODY)).toEqual({
       type: "invalid_data",
-      code: "catalog.dimensions_required",
-      message: "Fiziksel bir ürünü yayınlamak için her varyantın ağırlığı ve ölçüleri girilmeli.",
+      code: "catalog.handle_required",
+      message: "Başlıktan bir adres üretilemedi; adresi (handle) kendiniz girin.",
     })
   })
 

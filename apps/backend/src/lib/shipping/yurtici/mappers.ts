@@ -18,9 +18,14 @@ export interface YurticiShipmentInput {
   /** The order's number: digits, the door collection's document. */
   orderNumber: string
   receiver: Receiver
-  /** The parcel's volume in desi (`yurticiDesi`): Yurtiçi keeps desi and kg apart. */
-  desi: number
-  kg: number
+  /**
+   * The parcel's volume in desi (`yurticiDesi`) and its weight: Yurtiçi
+   * keeps them apart. Both optional there (the branch measures); null when
+   * a product had no measures of its own, so no made-up value is sent
+   * (adr/0054).
+   */
+  desi: number | null
+  kg: number | null
   /** Kuruş the courier collects at the door; null when paid already. */
   cashOnDelivery: number | null
 }
@@ -70,8 +75,9 @@ export function yurticiShipmentFields(input: YurticiShipmentInput): XmlFields {
     receiverPhone1: input.receiver.phone.replace(/^0/, ""),
     // Numbers the service's description requires: empty when unused, as the document sends them
     taxOfficeId: "",
-    desi: decimal(input.desi),
-    kg: decimal(input.kg),
+    // Optional (H): left out when unmeasured, the branch measures the parcel
+    desi: input.desi === null ? null : decimal(input.desi),
+    kg: input.kg === null ? null : decimal(input.kg),
     cargoCount: 1,
     // Cash at the door (0); the collection service fee on the same invoice (0)
     ttCollectionType: cod ? "0" : null,

@@ -62,6 +62,7 @@ const existing: ExistingProduct = {
     brandId: null,
     primaryCategoryId: null,
     seo: { seo_title: null, seo_description: null, focus_keyword: null },
+    physical: true,
   },
   options: [{ id: "opt_1", title: "Beden", values: ["S", "M"] }],
   variants: [
@@ -200,7 +201,7 @@ describe("import plan", () => {
     expect(problems.map((problem) => problem.key)).toContain(key)
   })
 
-  it("refuses stock for a variant that keeps none, and a new product going live without measurements", () => {
+  it("refuses stock for a variant that keeps none", () => {
     const untracked = planImport(
       product({ variants: [{ line: 2, options: [["Beden", "M"]], stock: 4 }] }),
       withExisting()
@@ -208,8 +209,56 @@ describe("import plan", () => {
     expect(untracked.problems.map((problem) => problem.key)).toEqual([
       "catalog_import.stock_untracked",
     ])
+  })
+
+  it("takes a product live without measurements, noting it (adr/0054)", () => {
     const live = planImport(product({ fields: { title: "Kupa", status: "published" } }), refs())
-    expect(live.problems.map((problem) => problem.key)).toEqual(["catalog.dimensions_required"])
+    const measured = planImport(
+      product({
+        fields: {
+          title: "Kupa",
+          status: "published",
+          weight: 300,
+          length: 12,
+          width: 9,
+          height: 9,
+        },
+      }),
+      refs()
+    )
+    // An existing product keeps the measures the row leaves out
+    const variants: SheetProduct["variants"] = [{ line: 2, options: [["Beden", "s"]], sku: "K-S" }]
+    const kept = planImport(
+      product({ fields: { weight: 300 }, variants }),
+      refs({
+        products: new Map([
+          [
+            "kupa",
+            {
+              ...existing,
+              current: { ...existing.current, length: 12, width: 9, height: 9 },
+            },
+          ],
+        ]),
+      })
+    )
+    const digital = planImport(
+      product({ variants }),
+      refs({
+        products: new Map([
+          ["kupa", { ...existing, current: { ...existing.current, physical: false } }],
+        ]),
+      })
+    )
+
+    expect(live.problems).toEqual([])
+    expect(live.plan).toMatchObject({ product: { status: "published" }, noMeasures: true })
+    expect(measured.plan?.noMeasures).toBe(false)
+    expect(kept.problems).toEqual([])
+    expect(kept.plan?.noMeasures).toBe(false)
+    expect(digital.plan?.noMeasures).toBe(false)
+    // Without the measures it lacks, the existing product is noted too
+    expect(planImport(product({ variants }), withExisting()).plan?.noMeasures).toBe(true)
   })
 
   it.each([

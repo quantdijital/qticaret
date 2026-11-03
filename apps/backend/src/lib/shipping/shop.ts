@@ -10,7 +10,7 @@ import type PlatformSettingsModuleService from "../../modules/platform-settings/
 import type { ShippingSettings, StoreSettings } from "../../modules/platform-settings/sections"
 import { parcelLinesOf } from "./geliver/mappers"
 import type { OrderItemRow } from "./geliver/mappers"
-import { MissingMeasures, parcelOf } from "./parcel"
+import { InvalidMeasures, defaultParcelOf, parcelOf } from "./parcel"
 import type { ParcelLine, ParcelUnits } from "./parcel"
 import type { Kurus } from "../money"
 import { tablePrice } from "./rates"
@@ -18,8 +18,8 @@ import { tablePrice } from "./rates"
 /**
  * What a carrier provider reads of the shop at the time of the call, from
  * the app's shared container (adr/0027, adr/0031, adr/0035; the narrow
- * exception in apps/backend/CLAUDE.md): its account, its units and its
- * price table by desi.
+ * exception in apps/backend/CLAUDE.md): its account, its units, its
+ * price table by desi and its default parcel (adr/0054).
  */
 
 /** The shop's account with a carrier; refused when none is stored. */
@@ -49,13 +49,18 @@ export async function storeUnits(): Promise<ParcelUnits> {
 export const shippingRates = async (): Promise<ShippingSettings> =>
   (await settings().getSection("shipping")) as unknown as ShippingSettings
 
-/** A parcel the lines make, or why it cannot be priced or shipped. */
+/**
+ * The parcel the lines make; a line without measures takes the shop's
+ * default parcel (adr/0054). Refused only for a value that cannot be a
+ * measure (below zero).
+ */
 export async function parcelFor(lines: ParcelLine[]) {
+  const [units, shipping] = await Promise.all([storeUnits(), shippingRates()])
   try {
-    return parcelOf(lines, await storeUnits())
+    return parcelOf(lines, units, defaultParcelOf(shipping.default_parcel, units))
   } catch (error) {
-    if (error instanceof MissingMeasures) {
-      throw new ValidationError("shipping.dimensions_missing", { field: "items" })
+    if (error instanceof InvalidMeasures) {
+      throw new ValidationError("shipping.measures_invalid", { field: "items" })
     }
     throw error
   }

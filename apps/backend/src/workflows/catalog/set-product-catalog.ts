@@ -8,7 +8,6 @@ import {
   updateInventoryItemsStep,
 } from "@medusajs/medusa/core-flows"
 import { CATALOG_EXTENSION_MODULE } from "../../modules/catalog-extension"
-import { assertPublishableStep } from "./steps/assert-publishable"
 import { planProductCatalogStep } from "./steps/plan-product-catalog"
 import type { SetProductCatalogInput } from "./steps/plan-product-catalog"
 import { writeProductCatalogStep } from "./steps/write-product-catalog"
@@ -59,10 +58,6 @@ export const setProductCatalogWorkflow = createWorkflow(
     dismissRemoteLinkStep(dismiss)
     const inventory = transform({ plan }, ({ plan }) => plan.shipping.inventory)
     updateInventoryItemsStep(inventory)
-
-    // A published product turned physical needs its measurements: checked
-    // after the writes, so a refusal undoes them all (F3.1 rule, F3.2)
-    assertPublishableStep({ product_id: input.product_id })
 
     releaseLockStep({ key: lockKey })
     return new WorkflowResponse({ product_id: input.product_id })

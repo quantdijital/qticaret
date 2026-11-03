@@ -764,6 +764,22 @@
           "enumItems": ["running", "done", "failed"],
           "mappedType": "enum"
         },
+        "error_code": {
+          "name": "error_code",
+          "type": "text",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "enumItems": [],
+          "mappedType": "text"
+        },
         "job_id": {
           "name": "job_id",
           "type": "text",

@@ -2,7 +2,7 @@ import { attributeHeader, attributeValueOf } from "../../../lib/catalog-sheet"
 import type { SheetProblem, SheetProduct, SheetVariant } from "../../../lib/catalog-sheet"
 import type { AttributeInputValue } from "../../../modules/product-attributes/validation"
 import type { ExistingProduct, ExistingVariant, ImportReferences } from "./references"
-import { linksOf, productFields, publishProblems, seoFields } from "./plan-fields"
+import { lacksMeasures, linksOf, productFields, seoFields } from "./plan-fields"
 import { variantsPlan } from "./plan-variants"
 import type { VariantsPlan } from "./plan-variants"
 
@@ -26,6 +26,8 @@ export interface ImportPlan extends VariantsPlan {
   primaryCategoryId?: string
   seo: { seo_title?: string; seo_description?: string; focus_keyword?: string } | null
   attributes: { template_id: string; values: Record<string, AttributeInputValue> } | null
+  /** Left without weight or measures (adr/0054): a note in the report, never a refusal. */
+  noMeasures?: boolean
 }
 
 const COLUMNS = {
@@ -155,7 +157,6 @@ export function planImport(
   const attributes = attributesPlan(sheet, existing, refs, problems)
   skuProblems(sheet.variants, sheet.handle, refs, problems)
   const variants = variantsPlan(sheet, existing, refs, problems)
-  problems.push(...publishProblems(sheet, !existing))
   if (problems.length > 0) {
     return { plan: null, problems }
   }
@@ -172,6 +173,7 @@ export function planImport(
       seo: seoFields(sheet, existing?.current),
       attributes,
       ...variants,
+      noMeasures: lacksMeasures(sheet, existing?.current),
     },
     problems,
   }

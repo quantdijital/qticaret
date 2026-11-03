@@ -90,7 +90,11 @@ export async function POST(req: AuthenticatedMedusaRequest, res: MedusaResponse)
   res.status(202).json({ async_job: serializeJob(await service.retrieveAsyncJob(result.id)) })
 }
 
-/** `GET /admin/migrations`: the runs, newest first, with what each came to. */
+/**
+ * `GET /admin/migrations`: the runs, newest first, with what each came to;
+ * a failed one with its code (`interrupted`: stopped half-way, it can be
+ * started again).
+ */
 export async function GET(
   req: AuthenticatedMedusaRequest<unknown, AdminGetMigrationsType>,
   res: MedusaResponse
@@ -109,6 +113,7 @@ export async function GET(
           "source",
           "mode",
           "status",
+          "error_code",
           "job_id",
           "started_by",
           "counts",

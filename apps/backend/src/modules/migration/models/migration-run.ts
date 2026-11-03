@@ -6,13 +6,16 @@ export const RUN_STATUSES = ["running", "done", "failed"] as const
 /**
  * One pass of a migration (F14, adr/0042 §9): a dry run (check) or the
  * real one (apply), from one source, its counts by kind as it went. The
- * job behind it keeps its report file.
+ * job behind it keeps its report file. A run whose job stopped (a crash,
+ * a restart) is failed with the job's code, `interrupted`, and can be
+ * started again from the same stored file.
  */
 export const MigrationRun = model.define("migration_run", {
   id: model.id({ prefix: "mrun" }).primaryKey(),
   source: model.text(),
   mode: model.enum([...RUN_MODES]),
   status: model.enum([...RUN_STATUSES]).default("running"),
+  error_code: model.text().nullable(),
   job_id: model.text().nullable(),
   started_by: model.text().nullable(),
   /** By kind: read, created, updated, unchanged, skipped, failed. */

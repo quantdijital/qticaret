@@ -164,5 +164,31 @@ medusaIntegrationTestRunner({
       expect(sent?.canceled).toBe(true)
       expect(await fulfillmentsOf(orderId)).toHaveLength(0)
     })
+
+    it("sends the product's own desi and weight, else the shop's default parcel (adr/0054)", async () => {
+      const setOrderOf = (index: number) =>
+        fake.requests.filter((request) => request.operation === "SetOrder")[index]?.body ?? ""
+      const sizes = (body: string) =>
+        ["VolumetricWeight", "Weight"].map(
+          (name) => new RegExp(`<${name}>([^<]*)</${name}>`).exec(body)?.[1]
+        )
+      const ship = async () =>
+        (await post(`/admin/orders/${await order()}/ship`, { notify: false })).status
+
+      // 450 g in a 35 × 8 × 4 cm box: the weight's 0.5 desi
+      expect(await ship()).toBe(200)
+      variantId = await geliverProduct(getContainer(), shop, false)
+      // None of its own: the platform's 1 kg in 30 × 20 × 10 cm, 2 desi
+      expect(await ship()).toBe(200)
+      await post("/admin/platform-settings/shipping", {
+        default_parcel: { weight: 3000, length: 40, width: 30, height: 20 },
+      })
+      // The shop's own: 3 kg in 40 × 30 × 20 cm, 8 desi
+      expect(await ship()).toBe(200)
+
+      expect(sizes(setOrderOf(0))).toEqual(["0.50", "0.45"])
+      expect(sizes(setOrderOf(1))).toEqual(["2.00", "1.00"])
+      expect(sizes(setOrderOf(2))).toEqual(["8.00", "3.00"])
+    })
   },
 })

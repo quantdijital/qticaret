@@ -124,6 +124,7 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Tanıtıcısız iki satır aynı ürün adını taşıyor; ayırmak için tanıtıcı girin.",
   "catalog_import.no_location":
     "Mağazanın varsayılan deposu yok; stok yazılamaz. Ayarlar > Depolar'dan bir depo ekleyin.",
+  "catalog_import.no_measures": "Ölçü yok; kargo varsayılan paketle hesaplanır.",
   "catalog_import.option_incomplete": "Seçeneğin adı ve değeri birlikte girilmeli.",
   "catalog_import.option_unknown": "Ürünün bu adla bir seçeneği yok.",
   "catalog_import.option_value_unknown": "Yeni seçenek değeri; önce panelden ürüne ekleyin.",
@@ -146,8 +147,6 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "catalog_import.variant_unmatched":
     "Satır ürünün bir varyantıyla eşleşmedi; SKU ya da ürünün tüm seçeneklerini girin.",
   "catalog_import.write_failed": "Ürün kaydedilemedi.",
-  "catalog.dimensions_required":
-    "Fiziksel bir ürünü yayınlamak için her varyantın ağırlığı ve ölçüleri girilmeli.",
   "catalog.handle_invalid":
     "Adres (handle) yalnızca küçük harf, rakam ve tire içerebilir; Türkçe karakter kullanmayın.",
   "catalog.handle_required": "Başlıktan bir adres üretilemedi; adresi (handle) kendiniz girin.",
@@ -352,8 +351,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "shipping.carrier_unknown": "Bu gönderinin kargo firması tanınmıyor; takip edilemiyor.",
   "shipping.carrier_not_connected":
     "Kargo hizmeti bağlı değil. Ayarlar > Kargo'dan hesabı bağlayın.",
-  "shipping.dimensions_missing":
-    "Sepetteki bazı ürünlerin ağırlığı ya da ölçüleri girilmemiş; kargo ücreti hesaplanamıyor. Ürünlerin varyantlarına ağırlık, en, boy ve yükseklik girin.",
+  "shipping.measures_invalid":
+    "Sepetteki bir ürünün ağırlığı ya da ölçüsü geçersiz (sıfırdan küçük); kargo ücreti hesaplanamıyor. Ürünün değerlerini düzeltin ya da boş bırakın.",
   "shipping.no_offer":
     "Bu gönderi için kargo teklifi alınamadı. Seçilen kargo hizmeti bu koliyi taşımıyor olabilir.",
   "shipping.option_invalid": "Kargo seçeneği bu hizmete ait değil.",
@@ -849,8 +848,12 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Varsayılan paket için ağırlık, uzunluk, genişlik ve yüksekliğin dördü birlikte verilmeli.",
   "migration.product_parcel_defaulted":
     "Ürünün ölçüsü kaynakta yoktu; varsayılan paket ölçüsü kullanıldı.",
-  "migration.product_drafted_no_parcel":
-    "Ürünün ağırlığı ya da ölçüleri yok; taslak olarak alındı. Ölçüleri girip yayınlayın.",
+  "migration.product_no_parcel":
+    "Ürünün ağırlığı ya da ölçüleri yok; kargo varsayılan paketle hesaplanır.",
+  "migration.run_not_interrupted": "Yalnızca yarıda kalan bir aktarım yeniden başlatılabilir.",
+  "migration.run_unknown": "Aktarım bulunamadı.",
+  "migration.source_file_gone":
+    "Bu aktarımın dosyası artık saklanmıyor; dosyayı yeniden yükleyip başlatın.",
   "migration.shopify_not_connected":
     "Shopify mağazası bağlı değil; önce Ayarlar > Entegrasyonlar'dan bağlayın.",
   "migration.shopify_currency":

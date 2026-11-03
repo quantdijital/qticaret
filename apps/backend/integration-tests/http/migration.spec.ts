@@ -97,8 +97,11 @@ medusaIntegrationTestRunner({
       })
       const products = await productsOf()
       const pan = products.find((product) => product.handle === "tasinan-dokum-tava")
-      // A live product without measurements comes as a draft, never refused
-      expect(products.find((product) => product.handle === "tasinan-kapak")?.status).toBe("draft")
+      // A live product without measurements stays live: shipping uses the default parcel (adr/0054)
+      expect(products.find((product) => product.handle === "tasinan-kapak")).toMatchObject({
+        status: "published",
+        weight: null,
+      })
       expect(pan).toMatchObject({ status: "published", categories: [{ handle: "tavalar" }] })
 
       const [ayse] = await customers.listCustomers(

@@ -75,7 +75,7 @@ medusaIntegrationTestRunner({
       fake.addresses.clear()
     })
 
-    it("prices the cart's parcel from Geliver's list, and says when a product has no measures", async () => {
+    it("prices the cart's parcel from Geliver's list, a product without measures as the default parcel", async () => {
       const cartOf = async (variant: string) =>
         (
           await createCartWorkflow(getContainer()).run({
@@ -98,12 +98,22 @@ medusaIntegrationTestRunner({
         )
 
       const priced = await calculate(await cartOf(variantId))
-      const unmeasured = await calculate(await cartOf(await product(false)))
+      const bare = await product(false)
+      const unmeasured = await calculate(await cartOf(bare))
+      await http.post(
+        "/admin/platform-settings/shipping",
+        { default_parcel: { weight: 5000, length: 30, width: 20, height: 10 } },
+        { headers: admin.headers }
+      )
+      const heavier = await calculate(await cartOf(bare))
 
       // 1 desi: MNG 50 + 10 against Yurtiçi 60 + 8; the cheapest
       expect(priced.data.shipping_option.amount).toBe(60)
-      expect(unmeasured.status).toBe(400)
-      expect(unmeasured.data.message).toBe("shipping.dimensions_missing")
+      // Without measures (adr/0054): 1 kg in 30 × 20 × 10 cm, 2 desi: MNG 50 + 20
+      expect(unmeasured.status).toBe(200)
+      expect(unmeasured.data.shipping_option.amount).toBe(70)
+      // The shop's own default: 5 kg, 5 desi: MNG 50 + 50
+      expect(heavier.data.shipping_option.amount).toBe(100)
     })
 
     it("ships with the cheapest offer, keeps the label privately and waits for the pickup", async () => {
@@ -249,6 +259,23 @@ medusaIntegrationTestRunner({
       expect(forged.status).toBe(400)
       expect(JSON.stringify(forged.data)).toMatch(/shipping\.additional_data_reserved/)
       expect(fake.shipments.size).toBe(0)
+    })
+
+    it("ships a product without measures as the default parcel, one with them as its own box (adr/0054)", async () => {
+      const measured = await order()
+      const bare = await order(await product(false))
+
+      expect((await ship(measured)).status).toBe(200)
+      expect((await ship(bare)).status).toBe(200)
+      const sizes = [...fake.shipments.values()].map(({ request }) =>
+        ["length", "width", "height", "weight"].map((name) => request[name])
+      )
+
+      // One unit keeps its own shape: 35 × 8 × 4 cm, 450 g; none: 30 × 20 × 10 cm, 1 kg
+      expect(sizes).toEqual([
+        ["35.0", "8.0", "4.0", "0.45"],
+        ["30.0", "20.0", "10.0", "1.00"],
+      ])
     })
 
     it("withdraws the shipment when the label cannot be bought, and leaves the order unpacked", async () => {

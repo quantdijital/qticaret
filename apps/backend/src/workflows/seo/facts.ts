@@ -5,10 +5,11 @@ import type { Kurus } from "../../lib/money"
 import type { PriceDisplay } from "../../lib/pricing"
 import { VARIES_BY_PROPERTIES } from "../../lib/seo/jsonld"
 import type { Availability, Condition, ProductFacts, VariesBy } from "../../lib/seo/jsonld"
-import { MissingMeasures, parcelOf } from "../../lib/shipping/parcel"
-import type { ParcelUnits } from "../../lib/shipping/parcel"
-import { tablePrice } from "../../lib/shipping/rates"
-import type { ReturnsSettings, ShippingSettings } from "../../modules/platform-settings/sections"
+import type { ReturnsSettings } from "../../modules/platform-settings/sections"
+import { shippingRateOf, unitParcelOf } from "./shipping-facts"
+import type { ShippingFacts } from "./shipping-facts"
+
+export type { ShippingFacts } from "./shipping-facts"
 
 /**
  * The facts a product's structured data is built from (F3.12): its
@@ -22,6 +23,7 @@ export const PRODUCT_FACT_FIELDS = [
   "images.url",
   "images.rank",
   "product_extension.condition",
+  "product_extension.kind",
   "product_extension.withdrawal_excluded",
   "product_extension.restriction",
   "categories.id",
@@ -62,6 +64,8 @@ export interface FactRow {
   images?: ({ url: string; rank?: number | null } | null)[] | null
   product_extension?: {
     condition?: Condition | null
+    /** F3.2: only a physical product ships; none read as physical. */
+    kind?: string | null
     withdrawal_excluded?: boolean | null
     restriction?: string | null
   } | null
@@ -177,54 +181,6 @@ function propertiesByOption(row: FactRow): Map<string, VariesBy> {
 
 const lira = (amount: Kurus): number => Number(toMedusaAmount(amount))
 
-/** The shop's shipping rules and units, for each offer's `shippingDetails` (F7.8). */
-export interface ShippingFacts {
-  settings: ShippingSettings
-  units: ParcelUnits
-  /**
-   * Shoppers can pick an option priced by the table: only then is its rate
-   * one checkout charges (security review 2026-10-28).
-   */
-  table_offered: boolean
-}
-
-/**
- * What the shop's table charges to ship one of the variant; null when no
- * option shoppers see is priced by it, or without measures or a band.
- */
-function shippingRateOf(variant: Variant, shipping: ShippingFacts): number | null {
-  const desi = shipping.table_offered ? desiOf(variant, shipping.units) : null
-  if (desi === null) {
-    return null
-  }
-  const rate = tablePrice(shipping.settings.rate_table, shipping.settings.over_desi_price, desi)
-  return rate === null ? null : Number(toMedusaAmount(rate))
-}
-
-/** One unit's parcel in desi; null without its measures. */
-function desiOf(variant: Variant, units: ParcelUnits): number | null {
-  try {
-    return parcelOf(
-      [
-        {
-          title: variant.id,
-          quantity: 1,
-          weight: variant.weight ?? null,
-          length: variant.length ?? null,
-          width: variant.width ?? null,
-          height: variant.height ?? null,
-        },
-      ],
-      units
-    ).desi
-  } catch (error) {
-    if (error instanceof MissingMeasures) {
-      return null
-    }
-    throw error
-  }
-}
-
 /**
  * A product's facts for its structured data. With `displays` (F4.3) an
  * offer carries the price the shopper pays now and, where the 30-day rule
@@ -243,6 +199,7 @@ export function productFacts(
   restricted?: ReadonlyMap<string, Restriction> | null
 ): ProductFacts {
   const byOption = propertiesByOption(row)
+  const physical = (row.product_extension?.kind ?? "physical") === "physical"
   const images = [...(row.images ?? [])]
     .filter((image): image is { url: string; rank?: number | null } => image !== null)
     .sort((a, b) => (a.rank ?? 0) - (b.rank ?? 0))
@@ -264,6 +221,8 @@ export function productFacts(
           properties[property] = option.value
         }
       }
+      // F3.2: a digital or service product has no parcel, measured or not
+      const parcel = shipping && physical ? unitParcelOf(variant, shipping) : null
       return {
         id: variant.id,
         name: variant.title ? `${row.title} – ${variant.title}` : row.title,
@@ -274,9 +233,10 @@ export function productFacts(
         ...priceOf(variant, displays),
         availability: availabilityOf(variant),
         properties,
-        shippingRate: shipping ? shippingRateOf(variant, shipping) : null,
+        shippingRate: shipping ? shippingRateOf(parcel, shipping) : null,
         stock: stockOf(variant),
-        desi: shipping ? desiOf(variant, shipping.units) : null,
+        // A feed's volume is the product's own: not one the default parcel made up
+        desi: parcel?.measured ? parcel.desi : null,
       }
     })
   const used = new Set(variants.flatMap((variant) => Object.keys(variant.properties)))

@@ -230,10 +230,11 @@ medusaIntegrationTestRunner({
         .resolve<MediaModuleService>(MEDIA_MODULE)
         .listMediaAssets({ url: pan?.thumbnail ?? "" })
       expect(main?.alt).toBe("Döküm tava önden")
-      // No parcel in the source and none given: live there, a draft here; hidden and drafts stay drafts
+      // No parcel in the source and none given: live there, live here (adr/0054, the
+      // default parcel ships it); hidden and drafts stay drafts
       expect(
         ["ahsap-kasik", "gizli-urun", "taslak-urun"].map((h) => byHandle.get(h)?.status)
-      ).toEqual(["draft", "draft", "draft"])
+      ).toEqual(["published", "draft", "draft"])
       // The descriptive attribute the template has a field for, through the catalog import
       const spoon = byHandle.get("ahsap-kasik")
       expect(spoon?.attribute_template?.handle).toBe("ev-esyasi")

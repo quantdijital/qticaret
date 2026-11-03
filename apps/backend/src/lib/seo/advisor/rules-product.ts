@@ -171,11 +171,13 @@ const categories = forProduct((_facts, product) => {
       }
 })
 
+// Measures are optional (adr/0054): without them shipping is priced by the
+// shop's default parcel, so this is a suggestion, never a blocker
 const dimensions = forProduct((_facts, product) =>
   product.physical && product.missingDimensions
     ? {
         ruleId: "P-DATA-05",
-        severity: "high",
+        severity: "low",
         category: "technical",
         params: {},
         fix: { kind: "manual", action: "edit_dimensions" },

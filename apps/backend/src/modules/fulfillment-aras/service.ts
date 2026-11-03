@@ -107,6 +107,7 @@ class ArasFulfillmentService extends AbstractFulfillmentProviderService {
         integrationCode: code,
         waybill: number,
         receiver,
+        // A product without measures counts as the shop's default parcel (adr/0054)
         desi: parcel.desi,
         kg: parcel.weight_kg,
         cashOnDelivery: ship.cash_on_delivery,

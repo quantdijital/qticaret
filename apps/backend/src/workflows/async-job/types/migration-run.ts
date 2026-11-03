@@ -85,6 +85,9 @@ const input = z.discriminatedUnion("source", [
     .strict(),
 ])
 
+/** What a `migration.run` job is asked: kept with it, so a run stopped half-way can start again. */
+export type MigrationRunInput = z.infer<typeof input>
+
 /**
  * A shop's old platform moved here, or a dry run of it (F14, adr/0042 §9):
  * queued by `POST /admin/migrations` (a bundle or a WordPress export it stored) or

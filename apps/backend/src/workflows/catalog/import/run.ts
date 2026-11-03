@@ -14,7 +14,7 @@ import { importProductWorkflow } from "./import-product"
 import { planImport } from "./plan"
 import type { ImportPlan } from "./plan"
 import { importReferences } from "./references"
-import { problemRow, productRow, seoSummary } from "./report"
+import { measuresNote, problemRow, productRow, seoSummary } from "./report"
 import type { SeoSummary } from "./report"
 import type { ImportReferences } from "./references"
 
@@ -98,7 +98,14 @@ async function applyPlans(
         })
         counts[plan.productId ? "update" : "create"] += 1
         written.push(plan.handle)
-        rows.push(productRow(plan.line, plan.handle, plan.productId ? "updated" : "created", {}))
+        rows.push(
+          productRow(
+            plan.line,
+            plan.handle,
+            plan.productId ? "updated" : "created",
+            measuresNote(plan)
+          )
+        )
       } catch (error) {
         counts.failed += 1
         logger.warn({
@@ -131,7 +138,10 @@ async function checkPlans(
       assessments.push(assessment)
     }
     const outcome = plan.productId ? "update" : "create"
-    return productRow(plan.line, plan.handle, outcome, assessment ? { assessment } : {})
+    return productRow(plan.line, plan.handle, outcome, {
+      ...measuresNote(plan),
+      ...(assessment ? { assessment } : {}),
+    })
   })
   return { rows, seo: seoSummary(assessments) }
 }
@@ -184,7 +194,7 @@ export async function runImport(
       : null
   const unchangedRows = all
     .filter(({ plan }) => isUnchanged(plan))
-    .map(({ plan }) => productRow(plan.line, plan.handle, "unchanged", {}))
+    .map(({ plan }) => productRow(plan.line, plan.handle, "unchanged", measuresNote(plan)))
   const summary: ImportSummary = {
     mode,
     rows,

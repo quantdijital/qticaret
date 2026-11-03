@@ -1,5 +1,5 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { goesLiveAsDraft, packageOf } from "../../lib/migration/sheet"
+import { packageOf } from "../../lib/migration/sheet"
 import type { PackageDefaults, SourceProduct, StepProgress } from "../../lib/migration/types"
 import type { MigrationSource } from "../../lib/migration/types"
 import type { SheetCell } from "../../lib/sheets"
@@ -91,8 +91,9 @@ const counted = (values: Partial<KindCounts>): KindCounts => ({ ...emptyCounts()
  * in groups, with the descriptive attributes the shop's templates take
  * (attributes.ts), and their pictures, then customers, their old orders and the reviews, then
  * blog posts and content pages (those without their own text kept for
- * their addresses, F14.7). A live product without its
- * measurements takes the owner's `defaults`, else comes as a draft; each
+ * their addresses, F14.7). A product keeps the source's status; one
+ * without its measurements takes the owner's `defaults` when given, else
+ * goes without (shipping uses the shop's default parcel, adr/0054); each
  * is named in the report. A dry run writes nothing and
  * counts what a run would do. Every record is kept against its source key,
  * so a run again (one that stopped half-way) makes nothing twice. Each
@@ -149,12 +150,13 @@ export async function runMigration(
     brandHandle: brands.handleOf,
     defaults,
   }
+  // Measures are optional (adr/0054): each product without them is named, live or not
   for (const product of products) {
     const pack = packageOf(product, defaults)
-    const key = goesLiveAsDraft(product, pack)
-      ? "migration.product_drafted_no_parcel"
-      : pack.defaulted
-        ? "migration.product_parcel_defaulted"
+    const key = pack.defaulted
+      ? "migration.product_parcel_defaulted"
+      : !pack.complete
+        ? "migration.product_no_parcel"
         : null
     if (key) {
       problems.push({ kind: "product", source_key: product.source_key, key })
