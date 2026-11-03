@@ -63,11 +63,16 @@ export const AdminCampaignAction = z.object({}).strict()
 export const AdminGetCampaigns = z
   .object({
     status: z.enum(CAMPAIGN_STATUSES).optional(),
+    channel: fields.channel.optional(),
     limit: z.coerce.number().int().min(1).max(100).default(50),
     offset: z.coerce.number().int().min(0).max(100_000).default(0),
   })
   .strict()
 export type AdminGetCampaignsType = z.infer<typeof AdminGetCampaigns>
+
+/** The rendered preview (adr/0050 §10): the campaign's own channel unless another is asked. */
+export const AdminGetCampaignPreview = z.object({ channel: fields.channel.optional() }).strict()
+export type AdminGetCampaignPreviewType = z.infer<typeof AdminGetCampaignPreview>
 
 /** The live count (adr/0050 §3): the campaign's own audience, or the one being edited. */
 export const AdminPreviewCampaignAudience = z

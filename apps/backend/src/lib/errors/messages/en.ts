@@ -996,6 +996,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "campaigns.test_address_missing":
     "No address for the test: e-mail goes to your sign-in address, SMS to the shop's phone.",
   "campaigns.quota_spent": "Today's sending limit is used up; the test can go tomorrow.",
+  "campaigns.audience_empty":
+    "No one in this audience can receive the message (consent, suppression list or the 24-hour cap). Change the audience.",
   // adr/0051: payment links
   "payment_link.unavailable":
     "This payment link is not valid or has expired. Please contact the shop.",

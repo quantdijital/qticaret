@@ -5,15 +5,16 @@ import { createCampaignWorkflow } from "../../../workflows/campaigns/save"
 import type { AdminGetCampaignsType, AdminPostCampaignType } from "./validators"
 import { campaignSummary, campaignView } from "./view"
 
-/** GET /admin/bulk-messages (adr/0050 §10): the bulk messages, newest first. */
+/** GET /admin/bulk-messages (adr/0050 §10): the bulk messages, newest first; by status, by channel. */
 export async function GET(
   req: AuthenticatedMedusaRequest<unknown, AdminGetCampaignsType>,
   res: MedusaResponse
 ): Promise<void> {
-  const { status, limit, offset } = req.validatedQuery as unknown as AdminGetCampaignsType
+  const { status, channel, limit, offset } = req.validatedQuery as unknown as AdminGetCampaignsType
+  const filters = { ...(status ? { status } : {}), ...(channel ? { channel } : {}) }
   const [campaigns, count] = await req.scope
     .resolve<CampaignsModuleService>(CAMPAIGNS_MODULE)
-    .listAndCountBulkMessages(status ? { status } : {}, {
+    .listAndCountBulkMessages(filters, {
       take: limit,
       skip: offset,
       order: { created_at: "DESC" },

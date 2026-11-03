@@ -990,6 +990,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "campaigns.test_address_missing":
     "Deneme gönderimi için adres yok: e-postada giriş adresiniz, SMS'te mağazanın telefonu kullanılır.",
   "campaigns.quota_spent": "Bugünkü gönderim sınırı doldu; deneme yarın gönderilebilir.",
+  "campaigns.audience_empty":
+    "Bu kitlede iletiyi alabilecek kimse yok (izin, bastırma listesi ya da 24 saat sınırı). Kitleyi değiştirin.",
   // adr/0051: payment links
   "payment_link.unavailable":
     "Bu ödeme bağlantısı geçerli değil ya da süresi doldu. Mağazayla iletişime geçin.",

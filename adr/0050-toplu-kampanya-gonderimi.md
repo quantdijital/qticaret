@@ -184,10 +184,11 @@ Kararlar önerildiği gibi uygulandı: bülten abonelerine gönderilir (şifreli
 
 **Uçlar** (`marketing.campaigns` bayrağı kapalıyken yok sayılır, yalnız personel):
 
-- `GET /admin/bulk-messages?status&limit&offset`, `POST /admin/bulk-messages`;
+- `GET /admin/bulk-messages?status&channel&limit&offset`, `POST /admin/bulk-messages`;
 - `GET`, `POST` (yalnız taslak) ve `DELETE` (yalnız taslak) `/admin/bulk-messages/:id`;
 - `POST /:id/audience-preview`, gövde `{ channel?, audience? }`: `{ audience, eligible, excluded: { no_consent, suppressed, iys_pending, recent, invalid_recipient, over_quota }, quota: { limit, left, today, later }, sms: { parts, max_parts } | null }`;
-- `POST /:id/test-send` `{}`, `POST /:id/schedule` `{ scheduled_at }`, `POST /:id/send` `{}`; son ikisi yeniden doğrulama ister (428);
+- `POST /:id/test-send` `{}`, `POST /:id/schedule` `{ scheduled_at }`, `POST /:id/send` `{}`; son ikisi yeniden doğrulama ister (428) ve kitle kimseye ulaşmıyorsa 400 `campaigns.audience_empty` döner;
+- `GET /:id/preview?channel=email|sms`: e-postada `{ subject, preheader, html }`, SMS'te `{ text, parts }`;
 - `POST /:id/{pause,resume,cancel}` `{}`, `POST /:id/copy` `{ name? }`;
 - `GET /:id/report`: `counts` (`audience`, `targeted`, `pending`, `sent`, `failed`, `skipped` nedenleriyle, `bounces`, `complaints`, `unsubscribed`) ve `traffic` (`carts`, `orders`, `revenue`).
 
@@ -205,6 +206,22 @@ Kitle bir kaynak dizisidir: `[{ kind: "segment" | "group", id }, { kind: "all_co
 - Tablo ve alıntı düz paragraf olur.
 - Şikâyet ve geri dönüş, Resend kancasının bastırma listesine yazdıklarından kampanyanın alıcılarıyla özet üzerinden eşleştirilir. Personel sürdürünce oranlar o andan sonraki gönderimlerle yeniden ölçülür.
 - Başarısız gönderim `failed` kalır; kendiliğinden yeniden denenmez.
+
+**Panelin bulduğu boşluklar (2026-11-03, ikinci tur):**
+
+- **Kanal süzgeci.** Liste `channel` (`email | sms`) ile de süzülür; `status` ile birlikte kullanılabilir.
+- **Boş kitle.** "Gönder" ve "Zamanla", kitle şu an kimseye ulaşmıyorsa 400 `campaigns.audience_empty` döner.
+  - Sayım canlı sayıyla aynı işlevden gelir (`resolveAudience`, `audience-preview`'ın kullandığı); ikinci bir kural yok.
+  - Maliyet: istek bütün müşteri ve izinleri bir kez okur, canlı sayı kadar. Daha ucuz bir sayım yolu yok; canlı sayı da aynı okumayı yapıyor. Büyük mağazada bu yavaşlarsa erken çıkan bir "en az bir alıcı var mı" sorgusu ayrı iş olur.
+  - Liste yine işin ilk turunda dondurulur. Arada kitle boşalırsa kampanya kimseye gitmeden `sent` olur.
+  - SMS saatleri değişmedi: gönderim kabul edilir, iş `paused/quiet_hours` ile bekler.
+- **Önizleme** (`GET /:id/preview`; kanal verilmezse kampanyanınki):
+  - Örnek alıcı isteyen personelin kendisidir: `{ad}` yerine kendi adı, adı yoksa "Değerli müşterimiz". Hiçbir müşteri kaydı okunmaz; hiçbir şey gönderilmez ya da kotaya sayılmaz.
+  - İşleyici gönderimle aynıdır: `prepareCampaign → personalise → renderCampaign`. `renderCampaign`, deliver()'ın her gönderimde yaptığı şablon çağrısıdır; deneme gönderimi de artık onu kullanır. Mağaza belirteçleri, ürün fiyatları, yollar ve utm gönderimdeki gibi okunur; alt bilgi ve çıkış satırı yerindedir. `[Deneme]` öneki yoktur.
+  - Çıkış bağlantısı ölüdür: belirteci `preview`. İmzalı belirteç biçiminde olmadığı için çıkış sayfası ve tek tık çıkış onu reddeder.
+  - SMS'te `parts`, arka ucun sayacıyla (`smsLength`) gösterilen metnin parça sayısıdır.
+  - `Cache-Control: no-store`. Kampanyayı okuyan her rol görebilir (`operations` dahil). Hız sınırı deneme gönderimi gibi personel başına sayılır; bir şey göndermediği için daha geniştir: 10 dakikada 60.
+- **Teslim sayısı yok.** Resend kancası yalnız kalıcı geri dönüşü ve şikâyeti bastırma listesine yazar. `email.delivered` olayı alınıp bırakılır, ileti başına kaydedilmez. Bu yüzden raporda `delivered` yoktur. Eklemek için kancanın teslim olayını iletiyle eşleştirip yazması gerekir (Resend'in ileti kimliği ↔ Medusa bildirimi); ayrı iş.
 
 **Panelin yapacakları** (Büyüme > "Toplu ileti", bayrak açıkken):
 
@@ -232,4 +249,5 @@ Kitle bir kaynak dizisidir: `[{ kind: "segment" | "group", id }, { kind: "all_co
 - Resend'in saniyede 2 isteklik sınırı canlı hesapta doğrulanacak.
 - adr/0038 M11'e amaç genişlemesi notu eklenecek. KVKK envanterine eklendi.
 - Alt bilgi ve ret metni danışman onayı bekliyor.
+- SMS parça sayacı (`smsPartsOf`: kayıttaki 3 parça denetimi ve `audience-preview`'daki `sms.parts`) mağaza bağlantılarına eklenen utm'yi saymıyor, `{ad}` için de 18 harflik selamlamayı kullanıyor (müşteri adı 40 harfe kadar olabilir). Bağlantılı bir metin 3 parçada kabul edilip 4 parça gidebilir. Önizlemedeki `parts` gidecek metni sayar; ikisi bağlantılı metinde ayrışabilir. Öneri: sayaç da `prepareCampaign` üzerinden saysın.
 

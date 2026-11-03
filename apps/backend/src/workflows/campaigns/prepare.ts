@@ -6,7 +6,8 @@ import { campaignLink } from "../../lib/campaigns/utm"
 import { MAX_PRODUCT_CARDS, emailBlocksOf, mapBlockTexts } from "../../lib/campaigns/email-doc"
 import { docStats } from "../../lib/content"
 import type { ContentDoc } from "../../lib/content"
-import type { CampaignVars } from "../../lib/messaging/templates"
+import { MESSAGE_TEMPLATES } from "../../lib/messaging/templates"
+import type { Brand, CampaignVars, EmailContent } from "../../lib/messaging/templates"
 import type { EmailBlock, EmailProductCard } from "../../lib/messaging/templates/layout"
 import { messageText } from "../../lib/messaging/texts"
 import { fillShopText } from "../../lib/shop/tokens"
@@ -202,4 +203,31 @@ export function personalise(
     sms: fillOne(prepared.sms),
     test,
   }
+}
+
+/** What a message carries: an e-mail's subject, HTML and text, or a text alone. */
+export type RenderedCampaign =
+  { channel: "email"; email: EmailContent } | { channel: "sms"; text: string }
+
+/**
+ * The message for one recipient as `marketing.campaign` makes it, the
+ * same call deliver() makes for every send of the dispatch (its `render`):
+ * the test send and the preview go through it, so neither can differ from
+ * what goes out. An e-mail carries its way out at `unsubscribeUrl`; a
+ * text has its opt-out line written in (composeSms).
+ */
+export function renderCampaign(
+  channel: "email" | "sms",
+  vars: CampaignVars,
+  brand: Brand,
+  unsubscribeUrl: string | null
+): RenderedCampaign {
+  const template = MESSAGE_TEMPLATES["marketing.campaign"]
+  if (channel === "sms") {
+    return { channel, text: template.sms?.(vars, brand) ?? "" }
+  }
+  if (!template.email) {
+    throw new Error("campaigns: marketing.campaign has no e-mail form")
+  }
+  return { channel, email: template.email(vars, brand, { unsubscribeUrl }) }
 }

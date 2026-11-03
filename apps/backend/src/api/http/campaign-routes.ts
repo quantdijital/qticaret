@@ -11,6 +11,7 @@ import { MARKETING_CAMPAIGNS } from "../../modules/platform-settings/features"
 import {
   AdminCampaignAction,
   AdminCopyCampaign,
+  AdminGetCampaignPreview,
   AdminGetCampaigns,
   AdminPostCampaign,
   AdminPreviewCampaignAudience,
@@ -31,6 +32,16 @@ const staffOf = (req: MedusaRequest) =>
 const TEST_SEND: RateLimitProfile = {
   name: "campaign_test_send",
   perIdentityAnyIp: { max: 10, windowMs: 60 * 60 * 1000 },
+}
+
+/**
+ * The rendered preview, counted per staff member like the test send; it
+ * sends nothing, so a budget for looking while writing: sixty in ten
+ * minutes. Each one reads the cards' products and paths.
+ */
+const PREVIEW: RateLimitProfile = {
+  name: "campaign_preview",
+  perIdentityAnyIp: { max: 60, windowMs: 10 * 60 * 1000 },
 }
 
 // Counting an audience reads every customer and consent: a small budget per staff member
@@ -77,6 +88,12 @@ export const CAMPAIGN_ROUTES = [
     matcher: "/admin/bulk-messages/:id/report",
     methods: ["GET" as const],
     middlewares: guarded(),
+  },
+  // A read: every role that reads the campaign may see it rendered
+  {
+    matcher: "/admin/bulk-messages/:id/preview",
+    methods: ["GET" as const],
+    middlewares: guarded(perStaff(PREVIEW), validateAndTransformQuery(AdminGetCampaignPreview, {})),
   },
   action(
     "audience-preview",

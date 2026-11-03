@@ -21,7 +21,7 @@ import { withinQuota } from "../messaging/quota"
 import { senderAddress } from "../messaging/sender-domain"
 import { assertComplete } from "./content"
 import { channelBlocker } from "./lifecycle"
-import { personalise, prepareCampaign } from "./prepare"
+import { personalise, prepareCampaign, renderCampaign } from "./prepare"
 import { campaignOf } from "./save"
 
 const template = MESSAGE_TEMPLATES["marketing.campaign"]
@@ -66,12 +66,13 @@ const testSendStep = createStep(
       prepareCampaign(container, campaign),
     ])
     const vars = personalise(prepared, user?.first_name ?? null, true)
-    const content =
-      channel === "email"
-        ? template.email?.(vars, brand, {
-            unsubscribeUrl: unsubscribePageUrl(recipient.hash, brand.storefrontUrl),
-          })
-        : { text: template.sms?.(vars, brand) ?? "" }
+    const rendered = renderCampaign(
+      channel,
+      vars,
+      brand,
+      unsubscribePageUrl(recipient.hash, brand.storefrontUrl)
+    )
+    const content = rendered.channel === "email" ? rendered.email : { text: rendered.text }
     const leave = channel === "email" ? unsubscribeUrl(recipient.hash) : null
     await container.resolve(Modules.NOTIFICATION).createNotifications([
       {
@@ -79,7 +80,7 @@ const testSendStep = createStep(
         channel,
         template: template.name,
         data: { resource_type: "campaign", resource_id: campaign.id },
-        ...(content ? { content } : {}),
+        content,
         provider_data:
           channel === "email"
             ? {
