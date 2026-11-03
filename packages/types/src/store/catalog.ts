@@ -93,6 +93,15 @@ export interface StoreProduct {
   product_extension?: { is_gift_card?: boolean | null } | null
 }
 
+/**
+ * `GET /store/products/:id/description` (adr/0055): the product's long
+ * description as the backend renders its content document (adr/0019's
+ * allow-listed HTML); null while the product has only its plain text.
+ */
+export interface StoreProductDescription {
+  html: string | null
+}
+
 export interface StoreCategory {
   id: string
   name: string

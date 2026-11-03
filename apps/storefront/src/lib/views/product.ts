@@ -89,6 +89,8 @@ interface ProductPageInput {
   trustBadges: TrustBadgeView[]
   /** The shop's colour names: matching option values show as swatches. */
   swatchOf?: (value: string) => string | null
+  /** The backend's HTML of the product's content document (adr/0055); null or left out: none. */
+  descriptionHtml?: string | null
 }
 
 /** What the product itself says; the page adds its reviews, questions and neighbours. */
@@ -106,6 +108,7 @@ export function productPage({
   t,
   trustBadges,
   swatchOf,
+  descriptionHtml = null,
 }: ProductPageInput): ProductPageBase {
   const variants = product.variants ?? []
   const options = (product.options ?? []).map((option) => {
@@ -151,6 +154,7 @@ export function productPage({
     title: product.title,
     subtitle: product.subtitle,
     description: paragraphsOf(product.description),
+    descriptionHtml,
     brand: product.brand && brandPath ? { label: product.brand.name, path: brandPath } : null,
     breadcrumbs: breadcrumbsOf(seo, t("home.label"), product.title),
     images: productImages(product),

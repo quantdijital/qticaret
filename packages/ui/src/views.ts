@@ -200,8 +200,18 @@ export interface ProductPageView {
   id: string
   title: string
   subtitle: string | null
-  /** Plain text paragraphs; a theme never prints the description as HTML. */
+  /**
+   * The plain text description in paragraphs: what the page shows while
+   * the product has no content document (`descriptionHtml` null). A theme
+   * never prints this as HTML.
+   */
   description: string[]
+  /**
+   * The product's content document (adr/0055) as the backend's own HTML
+   * from its allow-listed schema (adr/0019: headings, paragraphs, lists,
+   * quotes, tables): safe to print as it is. Null: show `description`.
+   */
+  descriptionHtml: string | null
   brand: LinkView | null
   breadcrumbs: BreadcrumbView[]
   images: ImageView[]

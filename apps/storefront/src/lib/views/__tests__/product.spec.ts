@@ -92,10 +92,29 @@ describe("productPage", () => {
     expect(view.variants[0]?.price?.before).toBeNull()
     expect(view.variants[0]?.available).toBe(false)
     expect(view.description).toEqual(["Yıkanmış keten.", "Rahat kesim & yazlık."])
+    // No content document: the paragraphs are the description (adr/0055)
+    expect(view.descriptionHtml).toBeNull()
     expect(view.breadcrumbs).toEqual([
       { label: "Ana sayfa", path: "/" },
       { label: "Keten Gömlek", path: null },
     ])
+  })
+
+  it("carries the backend's HTML of the product's content document beside its plain text", () => {
+    const html = "<h2>Bakım</h2><ul><li><p>Elde yıkayın.</p></li></ul>"
+    const view = productPage({
+      product,
+      seo: null,
+      displays: {},
+      brandPath: null,
+      requestedVariant: null,
+      t,
+      trustBadges: [],
+      descriptionHtml: html,
+    })
+    expect(view.descriptionHtml).toBe(html)
+    // The plain text stays: the derived description a theme falls back to
+    expect(view.description).toEqual(["Yıkanmış keten.", "Rahat kesim & yazlık."])
   })
 })
 

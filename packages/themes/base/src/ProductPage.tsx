@@ -179,7 +179,12 @@ export function ProductPage({
             <TrustStrip badges={view.trustBadges} label={t("footer.trust")} compact />
           </div>
         </div>
-        <ProductDetails description={view.description} specs={view.specs} t={t} />
+        <ProductDetails
+          description={view.description}
+          descriptionHtml={view.descriptionHtml}
+          specs={view.specs}
+          t={t}
+        />
         <ProductCommunity
           productId={view.id}
           reviews={view.reviews}

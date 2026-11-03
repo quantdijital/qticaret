@@ -1,33 +1,44 @@
 import type { SpecView, Translate } from "@qticaret/ui"
+import { RichText } from "./RichText"
 
 /**
  * The product's description and its attributes, side by side on wide
- * screens: plain text and a definition list, all in the first HTML.
+ * screens, all in the first HTML: the description's content document as
+ * the backend renders it (adr/0055), else its plain text paragraphs; the
+ * attributes a definition list.
  */
 export function ProductDetails({
   description,
+  descriptionHtml,
   specs,
   t,
 }: {
   description: string[]
+  descriptionHtml: string | null
   specs: SpecView[]
   t: Translate
 }) {
-  if (description.length === 0 && specs.length === 0) {
+  const described = descriptionHtml !== null || description.length > 0
+  if (!described && specs.length === 0) {
     return null
   }
   return (
     <div className="grid gap-10 border-t pt-12 lg:grid-cols-2 lg:gap-16">
-      {description.length > 0 && (
-        <section aria-labelledby="urun-aciklamasi" className="flex flex-col gap-4">
+      {described && (
+        // `min-w-0`: a wide table wraps in its column instead of widening the grid
+        <section aria-labelledby="urun-aciklamasi" className="flex min-w-0 flex-col gap-4">
           <h2 id="urun-aciklamasi" className="text-3xl leading-tight">
             {t("product.description")}
           </h2>
-          <div className="flex flex-col gap-3 text-[17px] leading-[1.75] text-foreground/85">
-            {description.map((paragraph, index) => (
-              <p key={String(index)}>{paragraph}</p>
-            ))}
-          </div>
+          {descriptionHtml !== null ? (
+            <RichText html={descriptionHtml} />
+          ) : (
+            <div className="flex flex-col gap-3 text-[17px] leading-[1.75] text-foreground/85">
+              {description.map((paragraph, index) => (
+                <p key={String(index)}>{paragraph}</p>
+              ))}
+            </div>
+          )}
         </section>
       )}
       {specs.length > 0 && (
