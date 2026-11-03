@@ -25,6 +25,13 @@ const token = (kind: string) => `${kind}-${randomBytes(16).toString("hex")}`
 
 const refused = (error: string): Reply => ({ status: 401, body: { error } })
 
+/** The live tokens and codes, as a local Paraşüt keeps them between runs. */
+export interface OauthState {
+  access: [string, number][]
+  refresh: string[]
+  codes: string[]
+}
+
 export function createOauth(
   client: FakeParasutClient,
   user: FakeParasutUser,
@@ -87,7 +94,8 @@ export function createOauth(
     grant,
     /** A code as Paraşüt's authorize page shows it after the user allows the platform. */
     issueCode: (): string => {
-      const code = token("kod")
+      // As Paraşüt's authorize page shows one: 43 URL-safe characters
+      const code = randomBytes(32).toString("base64url")
       codes.add(code)
       return code
     },
@@ -104,6 +112,16 @@ export function createOauth(
     revokeAll: () => {
       access.clear()
       refresh.clear()
+    },
+    snapshot: (): OauthState => ({
+      access: [...access.entries()],
+      refresh: [...refresh],
+      codes: [...codes],
+    }),
+    restore: (state: OauthState) => {
+      state.access.forEach(([key, dies]) => access.set(key, dies))
+      state.refresh.forEach((key) => refresh.add(key))
+      state.codes.forEach((code) => codes.add(code))
     },
   }
 }

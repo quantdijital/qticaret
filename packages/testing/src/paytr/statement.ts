@@ -1,3 +1,4 @@
+import { cardOfPayment, maskedPan } from "./cards"
 import type { FakePayment, FakeRefundEntry, Fields, Reply } from "./handlers"
 import { paytrSign } from "./signing"
 import type { PaytrAccount } from "./signing"
@@ -64,21 +65,24 @@ export function fakeStatement(
       return error("002", "start_date veya end_date gecersiz")
     }
     const within = (at: number | undefined) => at !== undefined && at >= from && at <= to
-    const row = (kind: "S" | "I", payment: FakePayment, amount: number, at: number) => ({
-      islem_tipi: kind,
-      net_tutar: dotLira(amount),
-      kesinti_tutari: "0.00",
-      kesinti_orani: "0",
-      islem_tutari: dotLira(amount),
-      odeme_tutari: dotLira(kind === "S" ? payment.totalAmount : amount),
-      islem_tarihi: dottedDay(at),
-      para_birimi: payment.currency,
-      taksit: String(payment.installments),
-      kart_marka: "BONUS",
-      kart_no: "455359AAA6747",
-      siparis_no: payment.merchantOid,
-      odeme_tipi: "KART",
-    })
+    const row = (kind: "S" | "I", payment: FakePayment, amount: number, at: number) => {
+      const card = cardOfPayment(payment)
+      return {
+        islem_tipi: kind,
+        net_tutar: dotLira(amount),
+        kesinti_tutari: "0.00",
+        kesinti_orani: "0",
+        islem_tutari: dotLira(amount),
+        odeme_tutari: dotLira(kind === "S" ? payment.totalAmount : amount),
+        islem_tarihi: dottedDay(at),
+        para_birimi: payment.currency,
+        taksit: String(payment.installments),
+        kart_marka: card.brand,
+        kart_no: maskedPan(card),
+        siparis_no: payment.merchantOid,
+        odeme_tipi: "KART",
+      }
+    }
     const sales = [...payments.values()]
       .filter((payment) => payment.status === "success" && within(payment.paidAt))
       .map((payment) => row("S", payment, payment.paymentAmount, payment.paidAt ?? 0))

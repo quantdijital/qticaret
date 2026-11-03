@@ -19,6 +19,8 @@ export interface FakeEDocument {
   invoice_id: string
   attributes: Record<string, unknown>
   pdf_asks: number
+  /** When it was issued (ms), for the printed invoice's time. */
+  issued_at?: number
 }
 
 export interface FakeJob {

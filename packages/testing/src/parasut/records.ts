@@ -2,7 +2,9 @@ import { randomUUID } from "node:crypto"
 import type { Handler } from "../geliver/routes"
 import { createDocuments } from "./documents"
 import { dataOf, jsonApiError, linesOf, resource, totalsOf } from "./jsonapi"
-import type { FakeSalesInvoice } from "./jsonapi"
+import type { FakeEDocument, FakeJob, FakeSalesInvoice } from "./jsonapi"
+import { printoutOf } from "./printout"
+import type { FakeParasutCompany } from "./printout"
 
 /**
  * Paraşüt's records as API v4 serves them (JSON:API): contacts, sales
@@ -10,15 +12,48 @@ import type { FakeSalesInvoice } from "./jsonapi"
  * the invoices (`documents.ts`).
  */
 
+export interface RecordSettings {
+  /** The shop's invoice series (`ABC` in `ABC2026000000001`). */
+  series: string
+  /** The seller printed on every invoice. */
+  company: FakeParasutCompany
+  /** The e-Fatura address (alias) of a tax id with an inbox. */
+  inboxAlias: (vkn: string) => string
+}
+
+/** What a local Paraşüt keeps between runs (`dev/state-file.ts`). */
+export interface RecordsState {
+  contacts: [string, ReturnType<typeof resource>][]
+  invoices: [string, FakeSalesInvoice][]
+  documents: [string, FakeEDocument][]
+  jobs: [string, FakeJob][]
+  inboxes: string[]
+  sequence: number
+}
+
 export type { FakeEDocument, FakeJob, FakeSalesInvoice } from "./jsonapi"
 export { jsonApiError } from "./jsonapi"
 
-export function createRecords(origin: () => string, now: () => number) {
+export function createRecords(origin: () => string, now: () => number, settings: RecordSettings) {
   const contacts = new Map<string, ReturnType<typeof resource>>()
   const invoices = new Map<string, FakeSalesInvoice>()
   /** VKNs (or TCKNs) with an e-Fatura inbox. */
   const inboxes = new Set<string>()
-  const documents = createDocuments(invoices, origin, now)
+  const printout = (document: FakeEDocument): Buffer => {
+    const invoice = invoices.get(document.invoice_id)
+    const job = [...documents.jobs.values()].find(
+      (each) =>
+        each.invoice_id === document.invoice_id &&
+        each.type === document.type &&
+        each.status === "done"
+    )
+    if (!invoice) {
+      throw new Error(`no invoice ${document.invoice_id}`)
+    }
+    const contact = invoice.contact_id ? contacts.get(invoice.contact_id)?.attributes : undefined
+    return printoutOf({ company: settings.company, document, invoice, contact, job })
+  }
+  const documents = createDocuments(invoices, origin, now, { series: settings.series, printout })
 
   const invoiceView = (invoice: FakeSalesInvoice) =>
     resource(
@@ -127,15 +162,35 @@ export function createRecords(origin: () => string, now: () => number) {
       const vkn = query.get("filter[vkn]") ?? ""
       const inbox = resource("e_invoice_inboxes", randomUUID(), {
         vkn,
-        e_invoice_address: `urn:mail:${vkn}@sahte.parasut`,
+        e_invoice_address: settings.inboxAlias(vkn),
         inbox_type: "PK",
       })
       return { body: { data: inboxes.has(vkn) ? [inbox] : [] } }
     },
   }
 
+  const snapshot = (): RecordsState => ({
+    contacts: [...contacts.entries()],
+    invoices: [...invoices.entries()],
+    documents: [...documents.documents.entries()],
+    jobs: [...documents.jobs.entries()],
+    inboxes: [...inboxes],
+    sequence: documents.counter.sequence,
+  })
+
+  const restore = (state: RecordsState) => {
+    state.contacts.forEach(([id, contact]) => contacts.set(id, contact))
+    state.invoices.forEach(([id, invoice]) => invoices.set(id, invoice))
+    state.documents.forEach(([id, document]) => documents.documents.set(id, document))
+    state.jobs.forEach(([id, job]) => documents.jobs.set(id, job))
+    state.inboxes.forEach((vkn) => inboxes.add(vkn))
+    documents.counter.sequence = state.sequence
+  }
+
   return {
     routes,
+    snapshot,
+    restore,
     invoices,
     inboxes,
     documents: documents.documents,

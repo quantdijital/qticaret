@@ -1,6 +1,7 @@
 import { randomBytes, randomUUID } from "node:crypto"
 import { createServer } from "node:http"
 import type { AddressInfo, Socket } from "node:net"
+import { loadState, saveState } from "../dev/state-file"
 
 /**
  * A stand-in for Netgsm's SMS service (adr/0036), as its SDK calls it: the
@@ -10,6 +11,15 @@ import type { AddressInfo, Socket } from "node:net"
  * M11), as Netgsm's own İYS package calls it: `POST /iys/add` and
  * `/iys/search`, the login and brand code in the body's `header`.
  */
+
+export interface FakeNetgsmOptions {
+  /** A free port by default; a fixed one for a dev backend's NETGSM_BASE_URL. */
+  port?: number
+  /** Told of each message taken, as a phone would receive it (`pnpm dev:netgsm` prints it). */
+  onMessage?: (message: FakeNetgsmMessage) => void
+  /** A file to keep messages and İYS consents in between runs (`dev/state-file.ts`); none in tests. */
+  stateFile?: string
+}
 
 export interface FakeNetgsmAccount {
   usercode: string
@@ -89,10 +99,17 @@ const field = (body: string, name: string): string => {
 
 export async function startFakeNetgsm(
   account: FakeNetgsmAccount = fakeNetgsmAccount(),
-  options: { port?: number } = {}
+  options: FakeNetgsmOptions = {}
 ): Promise<FakeNetgsm> {
-  const messages: FakeNetgsmMessage[] = []
-  const iys: FakeIysRecord[] = []
+  const saved = loadState(options.stateFile) as {
+    messages: FakeNetgsmMessage[]
+    iys: FakeIysRecord[]
+  } | null
+  const messages: FakeNetgsmMessage[] = saved?.messages ?? []
+  const iys: FakeIysRecord[] = saved?.iys ?? []
+  const save = () => {
+    saveState(options.stateFile, { messages, iys })
+  }
   const queued: string[] = []
   const queuedIys: string[] = []
   const sockets = new Set<Socket>()
@@ -180,6 +197,7 @@ export async function startFakeNetgsm(
           })
         }
         json({ code: "0", error: false, uid: randomUUID() })
+        save()
         return
       }
       if (req.method === "POST" && req.url === "/sms/send/xml") {
@@ -201,14 +219,17 @@ export async function startFakeNetgsm(
           return
         }
         const jobId = String(1_000_000_000 + messages.length)
-        messages.push({
+        const message = {
           jobId,
           to: field(body, "no"),
           text: field(body, "msg"),
           header,
           filter: field(body, "filter"),
-        })
+        }
+        messages.push(message)
         plain(`00 ${jobId}`)
+        save()
+        options.onMessage?.(message)
         return
       }
       res.writeHead(404).end()
@@ -233,6 +254,7 @@ export async function startFakeNetgsm(
       queuedIys.push(code)
     },
     close: async () => {
+      save()
       for (const socket of sockets) {
         socket.destroy()
       }

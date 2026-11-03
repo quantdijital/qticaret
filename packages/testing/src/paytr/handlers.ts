@@ -1,7 +1,13 @@
 import { randomBytes } from "node:crypto"
+import { cardOfPayment, maskedPan } from "./cards"
+import type { CardOutcome, FakeCard } from "./cards"
+import { TEST_RATES } from "./rates"
+import type { InstallmentRates } from "./rates"
 import { paytrSign } from "./signing"
 import { fakeStatement } from "./statement"
 import type { PaytrAccount } from "./signing"
+
+export { FAKE_INSTALLMENT_RATES } from "./rates"
 
 /**
  * The fake PayTR's answers per API (dev.paytr.com, 2026-10-27): the
@@ -29,15 +35,29 @@ export interface FakePayment {
   failUrl: string
   /** The most installments the shop allows for this payment (`max_installment`, 0 = PayTR's). */
   maxInstallment: number
+  /** The card it was paid with; a World card when a test paid it without the form. */
+  card?: FakeCard
+  /** The shopper's phone from the token request, masked on the 3-D Secure page. */
+  phone?: string
+  /** A card waiting at its bank's 3-D Secure step. */
+  secure?: SecureStep
 }
 
-/** PayTR's surcharge percentages per installment count (one card family is enough here). */
-export const FAKE_INSTALLMENT_RATES: Readonly<Record<string, string>> = {
-  taksit_2: "3.49",
-  taksit_3: "4.69",
-  taksit_6: "8.29",
-  taksit_12: "15.9",
+/** What the card form leaves for the 3-D Secure page to finish. */
+export interface SecureStep {
+  card: FakeCard
+  outcome: CardOutcome
+  installments: number
+  totalAmount: number
+  /** The hidden test flag: paid, but the notification never reaches the shop. */
+  lost: boolean
 }
+
+const TURKEY_MS = 3 * 60 * 60 * 1000
+
+/** "2026-10-27 12:00:00" in Turkish time, as the status query dates a refund. */
+const turkishMoment = (at: number): string =>
+  new Date(at + TURKEY_MS).toISOString().slice(0, 19).replace("T", " ")
 
 export type Fields = Record<string, string>
 export interface Reply {
@@ -73,7 +93,8 @@ export interface FakeRefundEntry {
 export function createFakePaytrHandlers(
   account: PaytrAccount,
   payments: Map<string, FakePayment>,
-  refundLog: FakeRefundEntry[]
+  refundLog: FakeRefundEntry[],
+  rates: InstallmentRates = TEST_RATES
 ) {
   const signed = (fields: Fields, parts: readonly string[]) =>
     fields["paytr_token"] === paytrSign(account, parts)
@@ -132,6 +153,7 @@ export function createFakePaytrHandlers(
       okUrl: fields["merchant_ok_url"] ?? "",
       failUrl: fields["merchant_fail_url"] ?? "",
       maxInstallment: fields["no_installment"] === "1" ? 1 : Number(fields["max_installment"] ?? 0),
+      phone: fields["user_phone"] ?? "",
     })
     return { body: { status: "success", token: formToken } }
   }
@@ -149,6 +171,9 @@ export function createFakePaytrHandlers(
       return error("004", "merchant_oid ile basarili odeme bulunamadi")
     }
     const refunded = payment.refunds.reduce((sum, entry) => sum + entry.amount, 0)
+    const card = cardOfPayment(payment)
+    // When each refund was made: the statement's log keeps the times, in order
+    const times = refundLog.filter((entry) => entry.merchantOid === oid).map((entry) => entry.at)
     return {
       body: {
         status: "success",
@@ -156,8 +181,8 @@ export function createFakePaytrHandlers(
         payment_total: commaLira(payment.totalAmount),
         currency: payment.currency,
         taksit: String(payment.installments > 1 ? payment.installments : 0),
-        kart_marka: "WORLD",
-        masked_pan: "455359******6747",
+        kart_marka: card.brand,
+        masked_pan: maskedPan(card),
         odeme_tipi: "KART",
         test_mode: payment.testMode ? "1" : "0",
         net_tutar: dotLira(payment.totalAmount - refunded),
@@ -165,9 +190,9 @@ export function createFakePaytrHandlers(
         ...(payment.refunds.length === 0
           ? {}
           : {
-              returns: payment.refunds.map((entry) => ({
+              returns: payment.refunds.map((entry, index) => ({
                 return_amount: dotLira(entry.amount),
-                return_date: "2026-10-27 12:00:00",
+                return_date: turkishMoment(times[index] ?? payment.paidAt ?? Date.now()),
                 ...(entry.referenceNo ? { reference_no: entry.referenceNo } : {}),
               })),
             }),
@@ -221,13 +246,12 @@ export function createFakePaytrHandlers(
     if (!signed(fields, [account.merchantId, fields["request_id"] ?? ""])) {
       return error("004", "paytr_token gonderilmedi veya gecersiz")
     }
-    const rates = FAKE_INSTALLMENT_RATES
     return {
       body: {
         status: "success",
         request_id: fields["request_id"],
         max_inst_non_bus: "12",
-        oranlar: { world: rates, bonus: rates, axess: { taksit_2: "3.59" } },
+        oranlar: rates,
       },
     }
   }

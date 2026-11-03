@@ -1,5 +1,4 @@
 import { randomUUID } from "node:crypto"
-import { tinyPdf } from "../pdf"
 import type { FakeRequest, Handler, Reply } from "../geliver/routes"
 import { dataOf, jsonApiError, resource } from "./jsonapi"
 import type { FakeEDocument, FakeJob, FakeSalesInvoice } from "./jsonapi"
@@ -7,22 +6,34 @@ import type { FakeEDocument, FakeJob, FakeSalesInvoice } from "./jsonapi"
 /**
  * The e-Fatura or e-Arşiv a job makes of a sales invoice (API v4): the
  * job moves one step each time it is read (pending, running, done) and,
- * done, leaves the e-document on the invoice. A PDF is 204 on the first
- * ask, a link valid for an hour after.
+ * done, leaves the e-document on the invoice, numbered in the shop's
+ * series as GİB numbers them (`ABC2026000000001`). A PDF is 204 on the
+ * first ask, a link valid for an hour after; the file is the invoice
+ * laid out as GİB's view (`printout.ts`).
  */
 
 const PAYMENT_TYPES = ["KREDIKARTI/BANKAKARTI", "EFT/HAVALE", "KAPIDAODEME", "ODEMEARACISI"]
 const DAY_MS = 86_400_000
+// An e-Arşiv can be cancelled for eight days after it reaches the buyer (docs/entegrasyonlar/e-fatura.md)
+const CANCEL_DAYS = 8
+
+export interface DocumentSettings {
+  /** The shop's three-character invoice series. */
+  series: string
+  /** The PDF of an issued e-document. */
+  printout: (document: FakeEDocument) => Buffer
+}
 
 export function createDocuments(
   invoices: Map<string, FakeSalesInvoice>,
   origin: () => string,
-  now: () => number
+  now: () => number,
+  settings: DocumentSettings
 ) {
   const documents = new Map<string, FakeEDocument>()
   const jobs = new Map<string, FakeJob>()
   const failures: string[][] = []
-  let sequence = 0
+  const counter = { sequence: 0 }
 
   const view = (document: FakeEDocument) =>
     resource(document.type, document.id, document.attributes)
@@ -77,20 +88,22 @@ export function createDocuments(
       job.status = "error"
       return
     }
-    sequence += 1
+    counter.sequence += 1
+    const year = String(new Date(now()).getUTCFullYear())
     const document: FakeEDocument = {
       id: randomUUID(),
       type: job.type,
       invoice_id: invoice.id,
       attributes: {
         uuid: randomUUID(),
-        invoice_number: `SHT${String(new Date(now()).getUTCFullYear())}${String(sequence).padStart(9, "0")}`,
+        invoice_number: `${settings.series}${year}${String(counter.sequence).padStart(9, "0")}`,
         status: job.type === "e_archives" ? "sent" : "successful",
         ...(job.type === "e_archives"
-          ? { cancellable_until: new Date(now() + 7 * DAY_MS).toISOString() }
+          ? { cancellable_until: new Date(now() + CANCEL_DAYS * DAY_MS).toISOString() }
           : {}),
       },
       pdf_asks: 0,
+      issued_at: now(),
     }
     documents.set(document.id, document)
     invoice.active = { id: document.id, type: job.type }
@@ -149,15 +162,18 @@ export function createDocuments(
     routes,
     documents,
     jobs,
+    counter,
     view,
     /** The next job started ends in an error with these messages. */
     failNextJob: (errors: string[]) => {
       failures.push(errors)
     },
     /** The PDF behind a link the API gave. */
-    file: (id: string): Reply =>
-      documents.has(id)
-        ? { body: null, bytes: { type: "application/pdf", data: tinyPdf(`SAHTE FATURA ${id}`) } }
-        : jsonApiError(404, "Not Found"),
+    file: (id: string): Reply => {
+      const document = documents.get(id)
+      return document
+        ? { body: null, bytes: { type: "application/pdf", data: settings.printout(document) } }
+        : jsonApiError(404, "Not Found")
+    },
   }
 }
