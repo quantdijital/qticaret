@@ -563,6 +563,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "legal.unknown": "Böyle bir yasal metin türü yok.",
   "legal.not_published": "Bu metin henüz yayımlanmadı.",
   "legal.draft_missing": "Bu metnin taslağı yok.",
+  "legal.draft_note_present":
+    "Metnin başındaki taslak notu duruyor. Metni avukatınıza kontrol ettirip notu sildikten sonra yayımlayın.",
   "legal.token_invalid":
     "Metinde tanınmayan ya da yarım kalmış bir belirteç var; belirteçler {mağaza_unvanı} biçiminde ve listedeki adlarla yazılır.",
   "legal.cookie_consent_missing": "Önce çerez tercihinizi seçin.",

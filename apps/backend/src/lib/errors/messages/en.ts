@@ -561,6 +561,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "legal.unknown": "There is no such kind of legal text.",
   "legal.not_published": "This text is not published yet.",
   "legal.draft_missing": "This text has no draft.",
+  "legal.draft_note_present":
+    "The draft note at the top of the text is still there. Have your lawyer check the text, delete the note, then publish.",
   "legal.token_invalid":
     "The text has an unknown or broken token; tokens are written like {mağaza_unvanı}, with the names in the list.",
   "legal.cookie_consent_missing": "Choose your cookie preferences first.",

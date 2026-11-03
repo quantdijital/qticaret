@@ -24,13 +24,43 @@ const list = (items: readonly string[]): Block => ({
   })),
 })
 
+// The note's own words, which no shop's text has: a draft that still holds them is not published
+const NOTE_MARK = "bir başlangıç iskeletidir"
+
 const NOTE: Block = {
   type: "blockquote",
   content: [
     p(
-      "TASLAK: Bu metin bir başlangıç iskeletidir, hukuki görüş değildir. Yayımlamadan önce avukatınıza kontrol ettirin ve bu notu silin."
+      `TASLAK: Bu metin ${NOTE_MARK}, hukuki görüş değildir. Yayımlamadan önce avukatınıza kontrol ettirin ve bu notu silin.`
     ),
   ],
+}
+
+// Each paragraph's or heading's words as a reader reads them: its text pieces
+// joined (a bold word splits the text) and its spaces as one
+function blockTexts(node: unknown): string[] {
+  const { type, content } = (node ?? {}) as { type?: unknown; content?: unknown }
+  if (!Array.isArray(content)) {
+    return []
+  }
+  if (type === "paragraph" || type === "heading") {
+    const words = content
+      .map((inline) => {
+        const { text: value } = (inline ?? {}) as { text?: unknown }
+        return typeof value === "string" ? value : " "
+      })
+      .join("")
+    return [words.replace(/\s+/g, " ").toLocaleLowerCase("tr")]
+  }
+  return content.flatMap(blockTexts)
+}
+
+/**
+ * Whether a text still holds its starter's draft note (F13.7), anywhere,
+ * edited or not: such a text is not published (`legal.draft_note_present`).
+ */
+export function hasStarterNote(doc: ContentDoc): boolean {
+  return blockTexts(doc).some((text) => text.includes(NOTE_MARK))
 }
 
 const SELLER = list([

@@ -104,6 +104,38 @@ medusaIntegrationTestRunner({
       expect(unknownKind.status).toBe(404)
     })
 
+    it("keeps a draft with the starter's note a draft, and publishes it once the note is deleted", async () => {
+      const owner = await createAdminUser(http, getContainer())
+      const post = <T>(url: string, body: unknown = {}) =>
+        settle(http.post<T & { message?: string }>(url, body, { headers: owner.headers }))
+      const base = "/admin/legal-documents/privacy_notice"
+      const starter = await settle(
+        http.get<{ starter: { title: string; body: Doc } }>(`${base}/starter`, {
+          headers: owner.headers,
+        })
+      )
+      const { title, body } = starter.data.starter
+
+      const saved = await post(`${base}/draft`, { title, body })
+      const refused = await post(`${base}/publish`)
+      const still = await settle(
+        http.get<{ document: { draft: { version: number } | null; published: unknown } }>(base, {
+          headers: owner.headers,
+        })
+      )
+      // The owner deletes the note (the starter's first block) once a lawyer has read it
+      await post(`${base}/draft`, { title, body: { ...body, content: body.content.slice(1) } })
+      const published = await post<{ published: { version: number } }>(`${base}/publish`)
+
+      expect(saved.status).toBe(200)
+      expect(refused.status).toBe(400)
+      expect(refused.data.message).toBe("legal.draft_note_present")
+      expect(still.data.document.published).toBeNull()
+      expect(still.data.document.draft?.version).toBe(1)
+      expect(published.status).toBe(200)
+      expect(published.data.published.version).toBe(1)
+    })
+
     it("previews a contract with a made-up order, and leaves editing to the owner and admin", async () => {
       const container = getContainer()
       const owner = await createAdminUser(http, container)

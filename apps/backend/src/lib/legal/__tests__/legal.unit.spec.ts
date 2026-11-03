@@ -4,6 +4,7 @@ import {
   LEGAL_KINDS,
   checkLegalDoc,
   fillLegalDoc,
+  hasStarterNote,
   identityGaps,
   orderLegalValues,
   starterOf,
@@ -69,6 +70,37 @@ describe("legal texts (adr/0041 §1)", () => {
 
     expect(filled.content[0]).toEqual(p("Alıcı: Ayşeİ Yılmaz"))
     expect(filled.content[1]).toEqual(p("—"))
+  })
+})
+
+describe("the starter's draft note (F13.7)", () => {
+  it.each(LEGAL_KINDS)("is found in the %s starter as it comes", (kind) => {
+    expect(hasStarterNote(starterOf(kind).body)).toBe(true)
+  })
+
+  it("is found once edited, split by formatting or moved, and gone once deleted", () => {
+    const { body } = starterOf("return_policy")
+    const [note, ...rest] = body.content
+    const split: Block = {
+      type: "blockquote",
+      content: [
+        {
+          type: "paragraph",
+          content: [
+            { type: "text", text: "Bu metin bir " },
+            { type: "text", text: "başlangıç", marks: [{ type: "bold" }] },
+            { type: "text", text: "  iskeletidir." },
+          ],
+        },
+      ],
+    }
+
+    expect(note?.type).toBe("blockquote")
+    expect(hasStarterNote(doc(...rest))).toBe(false)
+    expect(hasStarterNote(doc(...rest, split))).toBe(true)
+    expect(hasStarterNote(doc(p("Taslak: BU METİN BİR BAŞLANGIÇ İSKELETİDİR")))).toBe(true)
+    // The shop's own words about drafts are its own
+    expect(hasStarterNote(doc(p("Bu metin taslak değildir.")))).toBe(false)
   })
 })
 

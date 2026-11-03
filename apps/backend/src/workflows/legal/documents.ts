@@ -11,7 +11,7 @@ import {
 import { acquireLockStep, releaseLockStep } from "@medusajs/medusa/core-flows"
 import type { ContentDoc } from "../../lib/content"
 import { ValidationError } from "../../lib/errors"
-import { checkLegalDoc } from "../../lib/legal"
+import { checkLegalDoc, hasStarterNote } from "../../lib/legal"
 import type { LegalKind } from "../../lib/legal"
 import { LEGAL_MODULE } from "../../modules/legal"
 import type LegalModuleService from "../../modules/legal/service"
@@ -92,7 +92,9 @@ const saveDraftStep = createStep(
 
 /**
  * The draft published (adr/0041 §1): checked again, fixed by its hash, and
- * the version published before it retired. Undone, both go back.
+ * the version published before it retired. Undone, both go back. A draft
+ * still carrying its starter's note (have a lawyer check it, then delete
+ * this) is kept a draft: a shopper never reads the platform's note.
  */
 const publishDraftStep = createStep(
   "legal-publish-draft",
@@ -102,7 +104,11 @@ const publishDraftStep = createStep(
     if (!draft) {
       throw new MedusaError(MedusaError.Types.NOT_FOUND, "legal.draft_missing")
     }
-    assertTokens(input.kind, draft.body as unknown as ContentDoc)
+    const body = draft.body as unknown as ContentDoc
+    assertTokens(input.kind, body)
+    if (hasStarterNote(body)) {
+      throw new ValidationError("legal.draft_note_present", { field: "body" })
+    }
     const previous = await service.versionOf(input.kind, "published")
     const published = await service.publishDraft({
       draft_id: draft.id,
