@@ -8,6 +8,7 @@ import { fakeOrigin, fetchOwnersFile } from "../../lib/migration/fetch"
 import { bundleSource } from "../../lib/migration/sources/bundle"
 import { customerSheetSource } from "../../lib/migration/sources/customer-sheet"
 import { MAX_FEED_BYTES, feedSource } from "../../lib/migration/sources/merchant-feed"
+import { wordpressSource, wxrText } from "../../lib/migration/sources/wordpress"
 import type { MigrationSource } from "../../lib/migration/types"
 import { INTEGRATION_CREDENTIALS_MODULE } from "../../modules/integration-credentials"
 import type IntegrationCredentialsModuleService from "../../modules/integration-credentials/service"
@@ -19,10 +20,11 @@ export type SourceInput =
   | { source: "shopify" }
   | { source: "feed"; feed_url: string }
   | { source: "customers"; source_file_id: string }
+  | { source: "wordpress"; source_file_id: string; category_base?: string | null }
 
 /**
- * The run's source, opened (adr/0042 §1, §9): an uploaded bundle read
- * whole (its digest for the audit log), the old site's product feed at
+ * The run's source, opened (adr/0042 §1, §9): an uploaded bundle or
+ * WordPress export read whole (its digest for the audit log), the old site's product feed at
  * the address the owner gave, or the shop's Shopify store through the
  * account the owner connected. `beat` keeps the job alive meanwhile.
  */
@@ -35,6 +37,15 @@ export async function openSource(
     const buffer = await container.resolve(Modules.FILE).getAsBuffer(input.source_file_id)
     return {
       source: input.source === "bundle" ? bundleSource(buffer) : await customerSheetSource(buffer),
+      digest: createHash("sha256").update(buffer).digest("hex"),
+    }
+  }
+  if (input.source === "wordpress") {
+    const buffer = await container.resolve(Modules.FILE).getAsBuffer(input.source_file_id)
+    const text = await wxrText(buffer)
+    await beat()
+    return {
+      source: wordpressSource(text, { categoryBase: input.category_base ?? null }),
       digest: createHash("sha256").update(buffer).digest("hex"),
     }
   }

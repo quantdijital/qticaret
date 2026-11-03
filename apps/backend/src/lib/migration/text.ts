@@ -22,7 +22,7 @@ const HIDDEN = [
  * pattern would go back over the rest for each one left open): one never
  * closed hides the rest, as a browser would.
  */
-function withoutHidden(html: string): string {
+export function withoutHidden(html: string): string {
   // ASCII letters only, so every index stays the original's ("İ" lowercases to two)
   const lower = html.replace(/[A-Z]/g, (letter) => letter.toLowerCase())
   const next = HIDDEN.map(([open]) => lower.indexOf(open))
@@ -63,6 +63,25 @@ const NAMED: Readonly<Record<string, string>> = {
   quot: '"',
   apos: "'",
   nbsp: " ",
+  // The typography a site's editor writes (WordPress turns quotes and dashes into these)
+  ndash: "–",
+  mdash: "—",
+  hellip: "…",
+  lsquo: "‘",
+  rsquo: "’",
+  ldquo: "“",
+  rdquo: "”",
+  laquo: "«",
+  raquo: "»",
+  bull: "•",
+  middot: "·",
+  deg: "°",
+  times: "×",
+  euro: "€",
+  copy: "©",
+  reg: "®",
+  trade: "™",
+  shy: "",
 }
 
 function entity(_whole: string, body: string): string {

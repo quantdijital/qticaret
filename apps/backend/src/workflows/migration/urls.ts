@@ -19,14 +19,19 @@ const ENTITY_OF: Readonly<Record<string, string>> = {
   product: CATALOG_ENTITY_TYPES.product,
   category: CATALOG_ENTITY_TYPES.category,
   brand: CATALOG_ENTITY_TYPES.brand,
+  page: CATALOG_ENTITY_TYPES.page,
+  post: CATALOG_ENTITY_TYPES.post,
+  post_category: CATALOG_ENTITY_TYPES.post_category,
+  post_tag: CATALOG_ENTITY_TYPES.post_tag,
 }
 
 const PAGE = 1000
 
 /**
  * The migrated records' old addresses into the inventory: a product's,
- * a category's, a brand's tied to what it became; an old page's on its
- * own, for the owner to decide. How many were read.
+ * a category's, a brand's, a post's, a page's and a blog archive's tied
+ * to what it became; an old page that became nothing on its own, for the
+ * owner to decide. How many were read.
  */
 export async function inventoryFromItems(container: Container, source: string): Promise<number> {
   const migration = container.resolve<MigrationModuleService>(MIGRATION_MODULE)

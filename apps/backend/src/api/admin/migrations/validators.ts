@@ -1,4 +1,5 @@
 import { z } from "@medusajs/framework/zod"
+import { CATEGORY_BASE } from "../../../workflows/async-job/types/migration-run"
 import { URL_FILTERS } from "../../../workflows/migration/urls-read"
 
 /**
@@ -16,6 +17,17 @@ export const AdminPostMigrationQuery = z
   })
   .strict()
 export type AdminPostMigrationQueryType = z.infer<typeof AdminPostMigrationQuery>
+
+/**
+ * `POST /admin/migrations`: the file is a migration bundle (the default)
+ * or a WordPress export (`source=wordpress`), whose product categories'
+ * address base (`category_base=/urun-kategori/`) the owner may name.
+ */
+export const AdminPostMigrationFileQuery = AdminPostMigrationQuery.extend({
+  source: z.enum(["bundle", "wordpress"]).default("bundle"),
+  category_base: z.string().trim().max(64).regex(CATEGORY_BASE).optional(),
+}).strict()
+export type AdminPostMigrationFileQueryType = z.infer<typeof AdminPostMigrationFileQuery>
 
 /** `POST /admin/migrations/shopify`: the connected store, checked or applied. */
 export const AdminPostShopifyMigration = z

@@ -10,11 +10,13 @@ import type { PackageDefaults } from "../../lib/migration/types"
 import { enqueueAsyncJobWorkflow } from "../async-job/enqueue-async-job"
 
 export interface StartMigrationInput {
-  source: "bundle" | "shopify" | "feed" | "customers"
-  /** A bundle: the uploaded file, stored private under the migration's prefix. */
+  source: "bundle" | "shopify" | "feed" | "customers" | "wordpress"
+  /** A bundle or WordPress export: the uploaded file, stored private under the migration's prefix. */
   source_file_id: string | null
   /** A feed: its address. */
   feed_url?: string | null
+  /** A WordPress export: its product categories' address base, when the owner names one. */
+  category_base?: string | null
   mode: "check" | "apply"
   defaults: PackageDefaults | null
   requested_by: string | null
@@ -47,6 +49,7 @@ export const startMigrationWorkflow = createWorkflow(
           source: input.source,
           ...(input.source_file_id ? { source_file_id: input.source_file_id } : {}),
           ...(input.feed_url ? { feed_url: input.feed_url } : {}),
+          ...(input.category_base ? { category_base: input.category_base } : {}),
           mode: input.mode,
           defaults: input.defaults,
         },

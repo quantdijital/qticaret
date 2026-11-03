@@ -45,7 +45,10 @@ const KIND_TEXT: Readonly<Record<keyof RunCounts, string>> = {
   consent: "Ticari ileti izinleri",
   order: "Geçmiş siparişler",
   review: "Yorumlar",
-  page: "Diğer sayfalar",
+  page: "Sayfalar",
+  post: "Blog yazıları",
+  post_category: "Blog kategorileri",
+  post_tag: "Blog etiketleri",
 }
 
 export interface ReportProblem extends StepProblem {

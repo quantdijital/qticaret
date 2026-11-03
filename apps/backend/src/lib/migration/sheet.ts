@@ -106,6 +106,7 @@ function productCells(
     brand: product.brand ? refs.brandHandle(product.brand) : null,
     seo_title: product.seo_title,
     seo_description: product.seo_description,
+    focus_keyword: product.focus_keyword ?? null,
     weight: weightIn(pack.weight, refs.units.weight),
     length: inUnit(pack.length),
     width: inUnit(pack.width),

@@ -11,6 +11,7 @@ import type PlatformSettingsModuleService from "../../modules/platform-settings/
 import type { ImportHooks } from "../catalog/import/run"
 import { migrateBrands } from "./brands"
 import { migrateCategories } from "./categories"
+import { migrateContent } from "./content"
 import { migrateCustomers, migrateOrders } from "./customers"
 import { migrateImages } from "./images"
 import { migrateProducts } from "./products"
@@ -34,9 +35,10 @@ const SPAN = {
   brand: [4, 8],
   product: [8, 50],
   image: [50, 70],
-  customer: [70, 85],
-  order: [85, 92],
-  review: [92, 99],
+  customer: [70, 82],
+  order: [82, 88],
+  review: [88, 93],
+  content: [93, 99],
 } as const
 
 // Rows a catalog import takes at once, well within its limit (5,000)
@@ -83,8 +85,9 @@ const counted = (values: Partial<KindCounts>): KindCounts => ({ ...emptyCounts()
 /**
  * A shop's old platform moved here (F14, adr/0042): categories and brands
  * first (the products name them), the products through the catalog import
- * in groups and their pictures, then customers, their old orders and the reviews; the other
- * pages are kept for their addresses (F14.7). A live product without its
+ * in groups and their pictures, then customers, their old orders and the reviews, then
+ * blog posts and content pages (those without their own text kept for
+ * their addresses, F14.7). A live product without its
  * measurements takes the owner's `defaults`, else comes as a draft; each
  * is named in the report. A dry run writes nothing and
  * counts what a run would do. Every record is kept against its source key,
@@ -224,21 +227,19 @@ export async function runMigration(
   problems.push(...reviews.problems.map((problem) => ({ ...problem, kind: "review" as const })))
   await keep("review", reviews.counts)
 
-  // Pages match nothing here: kept for their old addresses, decided with the redirects (F14.7)
-  const pages = await listOf(source.pages(), beat("review"))
-  if (apply) {
-    await migration.remember(
-      source.id,
-      "page",
-      pages.map((page) => ({
-        source_key: page.source_key,
-        target_id: null,
-        status: "skipped" as const,
-        old_url: page.old_url,
-      }))
-    )
+  // Posts and pages with their own text are written; the rest keep their old addresses (F14.7)
+  const content = await migrateContent(
+    container,
+    source.id,
+    source.posts ? await listOf(source.posts(), beat("content")) : [],
+    await listOf(source.pages(), beat("content")),
+    apply,
+    spanOf(hooks, SPAN.content)
+  )
+  problems.push(...content.problems)
+  for (const kind of ["post_category", "post_tag", "post", "page"] as const) {
+    await keep(kind, content.counts[kind])
   }
-  await keep("page", { read: pages.length, skipped: pages.length })
   if (apply) {
     // Every old address the records had, for the 301s (F14.7)
     await inventoryFromItems(container, source.id)

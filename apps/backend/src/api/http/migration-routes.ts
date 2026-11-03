@@ -5,6 +5,7 @@ import {
   AdminGetMigrationUrls,
   AdminGetMigrations,
   AdminPostFeedMigration,
+  AdminPostMigrationFileQuery,
   AdminPostMigrationQuery,
   AdminPostMigrationSitemap,
   AdminPostMigrationUrlDecision,
@@ -26,8 +27,8 @@ const applyingStore = (req: MedusaRequest) =>
 /**
  * F14 (adr/0042 §9): a shop's data moved in, by a person: the owner, who
  * proves themselves again to apply one (the proof comes in headers). A
- * bundle's upload is its bytes, read by the route itself (no body
- * parser); a Shopify store's is the connected one, named by nothing sent.
+ * bundle's or WordPress export's upload is its bytes, read by the route
+ * itself (no body parser); a Shopify store's is the connected one, named by nothing sent.
  */
 export const MIGRATION_ROUTES = [
   {
@@ -36,7 +37,7 @@ export const MIGRATION_ROUTES = [
     bodyParser: false as const,
     middlewares: [
       requireUserActor,
-      validateAndTransformQuery(AdminPostMigrationQuery, {}),
+      validateAndTransformQuery(AdminPostMigrationFileQuery, {}),
       requireReauth(applying),
     ],
   },

@@ -1,3 +1,5 @@
+import type { ContentDoc } from "../content/doc"
+
 /**
  * A shop's data as a migration source gives it (F14, adr/0042 §1): every
  * source (Shopify, a Turkish platform's export, a sheet) turns its own
@@ -51,8 +53,12 @@ export interface SourceProduct {
   brand: string | null
   seo_title: string | null
   seo_description: string | null
+  /** The search phrase the page was written for, when the source kept one. */
+  focus_keyword?: string | null | undefined
   /** The product's pictures as the old site served them, the first the main one. */
   images: string[]
+  /** A picture's alt text as the old site gave it, by its address; the rest take the product's name. */
+  image_alts?: Readonly<Record<string, string>> | undefined
   /** Up to three options, in order, with their values. */
   options: { name: string; values: string[] }[]
   variants: SourceVariant[]
@@ -131,11 +137,60 @@ export interface SourceReview {
   created_at: Date
 }
 
+/**
+ * A content page's or blog post's own text, as a source that has it gives
+ * it (a WordPress export): made a page or post here, its old address sent
+ * on to it.
+ */
+export interface SourceContent {
+  /** The handle wanted: the old slug, so the address stays alike. */
+  handle: string
+  /** A checked document (lib/content): pictures left out, they must be the shop's own uploads. */
+  body: ContentDoc
+  excerpt: string | null
+  author: string | null
+  status: "published" | "draft"
+  /** When it went live there: kept as its publishing date. */
+  published_at: Date | null
+  /** Its cover picture as the old site served it. */
+  cover: { url: string; alt: string | null } | null
+  seo_title: string | null
+  seo_description: string | null
+  focus_keyword: string | null
+  /** The old site kept it out of search results. */
+  robots: "noindex_follow" | "noindex_nofollow" | null
+}
+
 /** An old page that maps to no product, category or brand: a content page, a campaign. */
 export interface SourcePage {
   source_key: string
   title: string
   old_url: OldPath
+  /** Its text, when the source has it: then it is made a content page here, else only its address moves. */
+  content?: SourceContent | null | undefined
+}
+
+/** A blog post's category or tag (adr/0019 ek 2026-11-03). */
+export interface SourcePostTerm {
+  source_key: string
+  name: string
+  /** The old slug, so the archive's address stays alike. */
+  handle: string
+  /** Plain text, one line. */
+  description: string | null
+  seo_title: string | null
+  seo_description: string | null
+  old_url: OldPath | null
+}
+
+/** A blog post (F3.16): written here with its category and tags. */
+export interface SourcePost {
+  source_key: string
+  title: string
+  content: SourceContent
+  category: SourcePostTerm | null
+  tags: SourcePostTerm[]
+  old_url: OldPath | null
 }
 
 export const MIGRATION_KINDS = [
@@ -147,6 +202,9 @@ export const MIGRATION_KINDS = [
   "order",
   "review",
   "page",
+  "post",
+  "post_category",
+  "post_tag",
 ] as const
 export type MigrationKind = (typeof MIGRATION_KINDS)[number]
 
@@ -163,6 +221,8 @@ export interface MigrationSource {
   orders(): AsyncIterable<SourceOrder>
   reviews(): AsyncIterable<SourceReview>
   pages(): AsyncIterable<SourcePage>
+  /** Blog posts with their categories and tags; a source without a blog leaves it out. */
+  posts?(): AsyncIterable<SourcePost>
   /** Records the source left out as it read them, and why: the report's notes. */
   notes?(): readonly (StepProblem & { kind: MigrationKind })[]
 }

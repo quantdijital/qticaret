@@ -34,7 +34,8 @@ export interface ImageCounts {
 /** A picture's key: the product's and its address (one picture may serve two products). */
 const keyOf = (product: SourceProduct, url: string) => `${product.source_key} ${url}`
 
-class ImageRefused extends Error {
+/** A picture not taken, and why (an error key for the report). */
+export class ImageRefused extends Error {
   constructor(readonly key: string) {
     super(key)
   }
@@ -100,7 +101,11 @@ async function download(address: string, fake: string | undefined): Promise<Buff
  * JPEG, PNG, WebP or AVIF within the limits), stored cleaned (upright, no
  * EXIF or GPS), and registered with the media pipeline (F3.3). Its id.
  */
-async function storeImage(container: Container, address: string, fake: string | undefined) {
+export async function storeImage(
+  container: Container,
+  address: string,
+  fake: string | undefined = fakeOrigin()
+) {
   const bytes = await download(address, fake)
   const last = new URL(address).pathname.split("/").pop() ?? ""
   let name = "gorsel"
@@ -163,7 +168,7 @@ async function inTurns<T, R>(items: readonly T[], work: (item: T) => Promise<R>)
  * The moved products' pictures here (F14.4, adr/0042 §7): each fetched
  * once (a run again fetches only the ones it had not), added after the
  * product's own in the source's order, the first its thumbnail when it
- * had none, each with an alt text from the product's name. A picture
+ * had none, each with the old site's alt text or one from the product's name. A picture
  * refused or out of reach is named in the report; its product stays. A
  * dry run counts the pictures it would fetch.
  */
@@ -238,7 +243,11 @@ export async function migrateImages(
       await setProductAltsWorkflow(container as MedusaContainer).run({
         input: {
           product_id: productId,
-          alts: stored.map(({ asset }, place) => ({ id: asset.id, alt: alts[place] ?? null })),
+          // The old site's own alt text where it gave one
+          alts: stored.map(({ asset, url }, place) => ({
+            id: asset.id,
+            alt: product.image_alts?.[url] ?? alts[place] ?? null,
+          })),
         },
       })
     }

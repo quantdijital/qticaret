@@ -9,11 +9,12 @@
 | Eski platform                       | Panelde seçilen kaynak    | Taşınanlar                                                                                   |
 | ----------------------------------- | ------------------------- | -------------------------------------------------------------------------------------------- |
 | Shopify                             | Shopify                   | Ürünler ve varyantlar, koleksiyonlar (kategori), satıcılar (marka), görseller, müşteriler, geçmiş siparişler, sayfalar ve blog yazılarının adresleri |
+| WordPress + WooCommerce            | WordPress                 | Dışa aktarma dosyası (WXR): kategoriler, markalar, ürünler ve varyasyonlar, görseller, yorumlar, blog yazıları (kategori ve etiketleriyle), içerik sayfaları, hepsinin eski adresleri |
 | Ticimax, ikas, IdeaSoft, T-Soft vb. | Ürün akışı                | Google Merchant XML akışındaki ürünler, varyantlar, kategori yolları, markalar, görseller, eski ürün adresleri |
 | Aynı platformlar (müşteriler)       | Müşteri listesi           | Platformun müşteri dışa aktarması (xlsx/CSV): ad, e-posta, telefon, adres, tarihli izinler  |
 | Başka her şey (yorumlar, siparişler) | Geçiş paketi              | Ekibin hazırladığı JSON (ortak kayıtlar; `apps/backend/src/lib/migration/sources/bundle.ts`) |
 
-Shopify için ayrıntı: `docs/entegrasyonlar/shopify.md`. Paket biçimi ve eşleme kuralları: ADR-0042 uygulama notları.
+Shopify için ayrıntı: `docs/entegrasyonlar/shopify.md`; WordPress için `docs/entegrasyonlar/wordpress.md`. Paket biçimi ve eşleme kuralları: ADR-0042 uygulama notları.
 
 ## Bilinmesi gerekenler
 
@@ -25,6 +26,15 @@ Shopify için ayrıntı: `docs/entegrasyonlar/shopify.md`. Paket biçimi ve eşl
 - **Tekrarsızlık.** Her çalıştırma kaynak kayıtlarını kimlikleriyle hatırlar; yeniden çalıştırmak hiçbir şeyi iki kez yazmaz. Yarıda kalan bir çalıştırma aynen yeniden başlatılır.
 - **Taşınmış ürün yeniden yazılmaz.** Yeniden çalıştırma yalnızca yeni ürünleri ekler; bir kez taşınmış ürünün fiyatı, stoku ve durumu buradaki hâliyle kalır. Bu yüzden ana uygulamadan sonra ürün değişiklikleri eski platformda değil, burada yapılır.
 - **Tanıtıcı çakışması.** Sitede aynı tanıtıcılı başka bir ürün varsa (elle eklenmiş) kaynaktaki ürün taşınmaz, raporun Notlar sayfasında yazar; üzerine asla yazılmaz.
+
+## WordPress'ten gelen mağaza
+
+1. Sahip WordPress'te **Araçlar > Dışa aktar > Tüm içerik** dosyasını indirir ve Taşıma'da **WordPress** kaynağına yükler (50 MB'a kadar; büyükse zip). Dosya sohbete, e-postaya ya da depoya konmaz: yazarların ve yorumcuların e-postası içindedir. Taşıma işi dosyayı bitince siler.
+2. Müşteriler ve geçmiş siparişler dosyada yoktur: WooCommerce > Müşteriler'in CSV dışa aktarması **Müşteri listesi** kaynağıyla ayrıca yüklenir.
+3. WooCommerce ürünlerinde ağırlık ve ölçü çoğu zaman girilmemiştir: kuru çalıştırmada "ölçüsüz, taslak gelecek" notları çoksa varsayılan paket verilir.
+4. Kuru çalıştırmanın Notlar sayfasında beklenenler: yasal metinler ve sepet/ödeme/hesap sayfaları "yalnızca eski adres" (Eski adresler'de `/yasal/...`'a ya da ilgili sayfaya 301), menüler ve kuponlar "taşınmadı" (Vitrin > Menüler, Kampanyalar'dan elle), ürün etiketleri ve açıklayıcı özellikler "taşınmadı" (özellik şablonu kurulunca), yazı içindeki görseller (içerik düzenleyicide eklenir).
+5. Kategori eski adresleri raporda yanlış tabanla görünürse (ör. `/product-category/...` ama site `/urun-kategori/...` kullanıyorsa) kategori adres tabanı elle verilip kuru çalıştırma tekrarlanır.
+6. Geliştirme ortamında bir dosyanın kuru çalıştırması: `NODE_ENV=development pnpm --filter @qticaret/backend medusa exec ./src/scripts/wordpress-check.ts <dosya.xml>` (yalnızca kuru çalıştırma; özet kişi verisi içermez).
 
 ## Kesimden 2 hafta önce
 

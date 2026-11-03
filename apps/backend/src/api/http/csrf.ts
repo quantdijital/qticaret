@@ -15,7 +15,8 @@ import { routePath } from "./request-path"
  * - `/admin/*` bodies must be JSON (a form cannot send that cross-site),
  *   except multipart file uploads, which rely on
  *   the origin check alone, and the product sheet upload, whose xlsx or
- *   CSV body types no form can send either (they are not CORS-simple).
+ *   CSV body types no form can send either (they are not CORS-simple);
+ *   the same holds for a migration's XML or zip upload.
  * - Any other path (none sets the cookie today) needs an origin from any of
  *   the three lists: a path the areas miss must not miss the check.
  *
@@ -38,6 +39,16 @@ const SHEET_TYPES = [
 
 // A migration's customer list (F14.3): a sheet as the product import takes one
 const CUSTOMER_SHEET_PATH = /^\/admin\/migrations\/customers$/
+
+// A WordPress export for a migration (adr/0042 Ek 2026-11-03): XML, or a zip holding it;
+// a migration bundle on the same path is JSON
+const MIGRATION_FILE_PATH = /^\/admin\/migrations$/
+const MIGRATION_FILE_TYPES = [
+  "application/xml",
+  "text/xml",
+  "application/zip",
+  "application/octet-stream",
+]
 
 // Search Console's export of the old site's top pages (F14.7): a zip or its pages CSV
 const SEARCH_CONSOLE_PATH = /^\/admin\/migrations\/urls\/search-console$/
@@ -100,6 +111,8 @@ function isAllowedAdminBody(req: MedusaRequest): boolean {
       (SHEET_PATH.test(routePath(req)) || CUSTOMER_SHEET_PATH.test(routePath(req)))) ||
     (SEARCH_CONSOLE_TYPES.some((file) => type.startsWith(file)) &&
       SEARCH_CONSOLE_PATH.test(routePath(req))) ||
+    (MIGRATION_FILE_TYPES.some((file) => type.startsWith(file)) &&
+      MIGRATION_FILE_PATH.test(routePath(req))) ||
     (type.startsWith("application/pdf") && INVOICE_PDF_PATH.test(routePath(req)))
   )
 }

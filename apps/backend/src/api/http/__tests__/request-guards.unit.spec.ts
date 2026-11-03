@@ -176,6 +176,13 @@ describe("csrfProtection", () => {
     expect(run(csrfProtection, admin("/admin/invoices/inv_1/issued", pdf)).status()).toBe(403)
     expect(run(csrfProtection, admin("/admin/catalog/imports", pdf)).status()).toBe(403)
     expect(run(csrfProtection, admin("/admin/products", xlsx)).status()).toBe(403)
+    // A WordPress export for a migration (adr/0042 Ek 2026-11-03): XML or zip, on its own path only
+    expect(run(csrfProtection, admin("/admin/migrations", "text/xml")).next).toHaveBeenCalled()
+    expect(
+      run(csrfProtection, admin("/admin/migrations", "application/xml; charset=utf-8")).next
+    ).toHaveBeenCalled()
+    expect(run(csrfProtection, admin("/admin/migrations", "text/plain")).status()).toBe(403)
+    expect(run(csrfProtection, admin("/admin/migrations/feed", "text/xml")).status()).toBe(403)
   })
 
   it("lets an admin DELETE without a body through", () => {

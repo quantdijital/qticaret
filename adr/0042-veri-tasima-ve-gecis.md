@@ -194,3 +194,50 @@ Elimizde olanlar:
 - ~~Rolü düşürülen sahip 7 gün boyunca kendi raporunu indirebilir.~~ F15.1'de kapandı: taşıma işleri (`ownerOnly`) yalnızca o anki sahibe görünür, isteyen de ancak sahipken.
 - İş ile dosya yüklemesi arasında süreç ölürse yükleme 3 günden sonra temizlenmiyor (genel arka plan işi davranışı).
 - Taşınan ve yayında görünen yorumlar onay kuyruğundan geçmez (eski sitede yayındaydılar). Bağlantı içeren yorum F15.1'den beri onay bekler, yeni yazılan bir yorum gibi.
+
+## Ek (2026-11-03): WordPress (WXR) kaynağı
+
+**Bağlam.** Kullanıcı (2026-11-03): WordPress + WooCommerce sitesi "tek tıkla aktar"ılsın. İlk müşterinin sahibi sitenin dışa aktarmasını verdi (Araçlar > Dışa aktar > Tüm içerik; WXR 1.2, 13,8 MB). WXR WordPress'in kendi biçimidir; her WordPress sitesi eklentisiz verir. Ayrıntılı eşleme: `docs/entegrasyonlar/wordpress.md`.
+
+1. **Kaynak ve yükleme.**
+   - `lib/migration/sources/wordpress/`, kimliği `wordpress:<sitenin alan adı>` (www'süz): aynı siteden ikinci dosya ilk çalıştırmanın kayıtlarını bulur.
+   - Paketle aynı kapı: `POST /admin/migrations?source=wordpress&mode=` (gövde dosyanın kendisi; XML ya da onu tutan zip, 50 MB). CSRF istisnası yalnızca bu yolda `application/xml`, `text/xml`, `application/zip`, `application/octet-stream` için (form gönderemez). Dosya iş nasıl biterse bitsin silinir: yazarların ve yorumcuların e-postası içindedir.
+   - İsteğe bağlı `category_base` (ör. `/urun-kategori/`): ürün kategorilerinin eski adres tabanı (madde 6).
+2. **Okuma.**
+   - Güvenli XML okuyucu (DTD ve varlık reddi, boyut ve derinlik sınırı) bu kaynak için 50 MB'la. CDATA bölümleri okuyucudan önce tahmin edilemez bir işaretle ayrılır, sonra geri konur: içlerindeki HTML XML değildir (kapanmayan `<img>`, `<br>` derinlik sayılırdı; ilk müşterinin dosyası 367 seviye görünürdü). CDATA içindeki `<!DOCTYPE` de bu yüzden ret sebebi değildir; dosyanın kendi DTD'si yine reddedilir.
+   - Akışlı değil: dosya bir kez, bütün okunur (13,8 MB yarım saniye). Kayıtlar tür tür verilir.
+   - Yazarların ve yorumcuların e-postası ve IP adresi hiç okunmaz; yazar görünen adıyla, yorumcu adıyla gelir.
+   - Serileştirilmiş PHP (`_product_attributes`, `cat_meta`, robots) yalnızca veri olarak okunur: dize, sayı, mantık, dizi. Nesne ve referans asla kurulmaz; bayt sayısı bozulmuş dize kapanış tırnağına kadar okunur. Hiçbir şey çalıştırılmaz.
+3. **Ürün etiketleri taşınmaz.** Vitrinde ürün etiketi sayfası yok, eski etiket sayfaları noindex'ti. İlk müşteride 640 etiket, ürün başına ortalama 4,7; çöpte olmayan ürünlerin kullandığı 610 etiketin 465'i tek üründe (gürültü). Raporda tek satır, dağılımıyla. Blog etiketleri taşınır (madde 5).
+4. **Ürün özellikleri.**
+   - Varyasyon için kullanılan özellikler seçenek olur (en çok 3, mağazanın sırasıyla). "Herhangi" değerli varyasyon her değer için bir varyant olur.
+   - Diğer özellikler (ilk müşteride `pa_urun-turu` 201 ürün, `pa_celik` 183 ürün) taşınmaz: ortak kayıtta özellik alanı yok, katalog içe aktarması değerleri bir özellik şablonuyla (`Özellik şablonu` + `Özellik: <anahtar>` sütunları) ister. Raporda özellik başına ürün ve değer sayısı yazar.
+   - Şablonun ihtiyacı: anahtar (`urun-turu`, `celik`), tür (çoğu tek seçim; bir üründe birden çok değer varsa çoklu seçim), seçenekler (WordPress terim adları). Sonraki adım: Taşıma ekranında şablon seçilince bu sütunlar yazılır.
+   - WXR genel özelliğin etiketini taşımaz (`wp_woocommerce_attribute_taxonomies` dışa aktarılmaz): seçenek adı kısa adından üretilir ("Sap rengi", "Celik"). Ürünün kendi özelliği gerçek adıyla gelir.
+5. **Blog.**
+   - Yazı içerik iş akışıyla (`saveContentWorkflow`) yazılır. Kategorisi SEO eklentisinin birincil kategorisi (Rank Math, Yoast), yoksa ilki; diğerleri raporda (adr/0019 Ek'in eşleme notu). Etiketler (en çok 50) ve kategoriler önce terim iş akışıyla (`saveTermWorkflow`) açılır; aynı kısa adlı terim varsa o kullanılır.
+   - Gövde içerik belgesine çevrilir: başlıklar, paragraflar, listeler, alıntılar, tablolar, kalın, eğik ve güvenli bağlantılar. Eski sitenin kendi bağlantıları yola çevrilir (301 onları karşılar). Soru-cevap kısa kodları (`[sss_item soru=…]`, `[accordion-item title=…]`) başlık olur; düzen kısa kodları içeriklerini bırakıp kalkar; ürün vitrini, galeri, blok ve gömülü video kalkar. Gövdedeki görseller taşınmaz (görsel mağazanın kendi yüklemesi olmalı); yazı başına raporda yazar.
+   - Kapak görseli ürün görselleri gibi indirilir (G4). İlk yayın tarihi korunur (iş akışı ilk yayını bugünle tarihler; ardından kaynağın tarihi yazılır). SEO başlığı, açıklaması ve odak kelimesi SEO iş akışıyla.
+   - SEO eklentisinin değişkenleri (`%title%`, `%sep%`, `%sitename%`, Yoast'ın `%%…%%`'ı) bilinenler doldurularak; yalnızca değişkenden oluşan ya da bilinmeyen değişken içeren başlık boş bırakılır (mağazanın şablonu yazar).
+6. **Sayfalar ve yasal metinler.**
+   - Kendi metni olan sayfa içerik sayfası olur. Aşağıdakiler olmaz; eski adresleri sahibin kararı için envantere girer:
+     - yasal metin gibi okunan (panelin kelime listesi: sözleşme, KVKK, aydınlatma, çerez, gizlilik, iade, ön bilgilendirme…; adr/0048: yasal metinler Ayarlar > Yasal'dan yayınlanır, eski adresleri `/yasal/...`'a 301),
+     - mağaza sistem sayfası (sepet, ödeme, hesap, istek listesi kısa kodu),
+     - ön sayfa, yalnızca tema bileşeninden oluşan sayfa, vitrinin ayrılmış yolundaki sayfa (`/blog`, `/magaza`, `/yorumlar`).
+   - Eski sitede noindex olan sayfa ve yazı taslak gelir, robots ayarı taşınır.
+   - Aynı tanıtıcılı sayfa ya da yazı sitede varsa (ör. profil betiğinin açtığı Hakkımızda) bulunmuş sayılır, üzerine yazılmaz; eski adresi ona bağlanır.
+7. **Eski adresler.**
+   - Ürün, yazı ve sayfanın eski adresi öğenin `<link>`'idir (`/urun/{slug}/`, `/{slug}/`). Sorgu dizeli bağlantı (taslak: `?p=12`) adres sayılmaz.
+   - Arşivlerin tabanı WXR'de yok. Sitenin kendi içeriğindeki iç bağlantılardan okunur; iki türün paylaştığı kısa adlar ve yazı/sayfa bağlantıları sayılmaz. Bağlantı yoksa WordPress varsayılanı: `/product-category/`, `/brand/`, `/category/`, `/tag/`. İlk müşteride okunan: ürün kategorisi kökte (`/{ust}/{alt}/`, Rank Math tabanı kaldırmış), marka `/marka/`, blog `/category/` ve `/tag/` (envanterle aynı). Ürün kategorisi tabanı `category_base` ile verilebilir.
+   - Kaydına bağlanan eski adres envantere kayıt türüyle girer: yazı, sayfa, blog kategorisi ve etiketi de (G5a'nın ayrılmış yolu).
+8. **Görseller.** Ek dosyaların adresleri G4 hattıyla indirilir (safeFetch: iç ağ reddi, 10 MB, tür ve piksel denetimi). Ayrıca alan adı kısıtı yok: ortam kütüphanesini CDN'e taşımış sitelerde de gelsin; `fetch.ts`/`old-site.ts`'teki gibi bir "izinli alan adı" kaydı görsel hattında hiç olmadı. Alt metin WordPress'in alt metni, yoksa ürün adından (G4 §3). Ana görsel, galeri ve varyasyonların görselleri sırayla; ortam kütüphanesinde olmayan görsel raporda.
+9. **Fiyat, stok, ölçü.** Satış fiyatı (tarihleri geçerliyse) fiyattır; normal fiyat üstü çizili taşınmaz (G1 §4). Stok yalnızca "stok yönetimi" açıksa sayı, "stokta yok" 0, diğerlerinde bilinmez. Ağırlık kg → g, ölçüler cm (WooCommerce varsayılanı; WXR mağazanın birim ayarını taşımaz). Gizli (katalogdan ve aramadan çıkarılmış), taslak, özel ve parolalı ürün taslak; çöp kutusu, gruplanmış ve dış bağlantılı ürün taşınmaz.
+10. **Yorumlar.** Ürünün puanlı yorumları (1–5): onaylı yayında, bekleyen beklemede; spam ve çöp taşınmaz. Fotoğraflar taşınmaz (raporda). Blog yorumları taşınmaz (vitrinde yok; raporda sayısı).
+11. **Yalnızca raporda: menüler ve kuponlar.**
+    - Menüler profil betiğiyle kuruldu. Bir menü içe aktarmasının ihtiyacı: `nav_menu` terimi (menü adı), her öğenin `_menu_item_type` (taxonomy, post_type, custom), `_menu_item_object` ve `_menu_item_object_id` (hedef kayıt; taşıma kaydıyla buradaki kayda çevrilir), özel bağlantıda `_menu_item_url`, `_menu_item_menu_item_parent` (iç içe) ve `menu_order`. Tema konumu WXR'de yok (`theme_mods` dışa aktarılmaz): menü başına konum sahibe sorulur, sonra `saveStorefrontMenuWorkflow`.
+    - Kuponlar (ilk müşteride 1 yayında): kod, tür ve tutar postmeta'da; kullanım geçmişi ve kullananlar yok. Elle Kampanyalar'dan açılır.
+12. **WXR'de olmayanlar:** müşteriler, siparişler, kupon kullanımları, mağaza ayarları (birim, para birimi, vergi), özellik etiketleri, menü konumları. Bunlar için ileride WooCommerce REST API "Bağlan" yolu (salt okunur anahtar; `docs/gecis/mylarte/esleme.md` §4).
+
+**İlk müşterinin kuru çalıştırması (2026-11-03, geliştirme veritabanı, uygulanmadı).** Dosya yarım saniyede okundu. Kategori 49 (48'i profil paketinden var, 1 boş kategori eklenecek), marka 13 (hepsi var), ürün 201 (32 değişken, 260 varyant; katalog içe aktarması 201'ini de "Eklenecek" gördü), görsel 947, yorum 28 (10'unun fotoğrafı taşınmaz), blog yazısı 54 (53'ü kapaklı), blog kategorisi 12, blog etiketi 217, sayfa 22 (4'ü profilden var, 2 noindex demo sayfası taslak, 16'sı yalnızca eski adres: 8 yasal metin, 4 sistem sayfası, `/magaza` `/blog` `/yorumlar`, 1 boş). Okunan tabanlar envanterle aynı. Hiçbir ürünün ağırlığı ve ölçüsü yok: varsayılan paket verilmezse 201 ürün taslak gelir. Taşınmayan açıklayıcı özellikler: `pa_urun-turu` (201 ürün, 24 değer), `pa_celik` (183 ürün, 22 değer), 7 küçük özellik (1–2 ürün). Çöpte 2 ürün ve 8 yazı.
+
+**Ortak kayıtlara eklenenler (`types.ts`).** `SourcePost`, `SourcePostTerm`, `SourceContent` (sayfa ve yazının gövdesi, özeti, yazarı, tarihi, kapağı, SEO alanları, robots); `SourcePage.content` (varsa sayfa içerik sayfası olur); `SourceProduct.focus_keyword` ve `image_alts`; `MigrationSource.posts()` (isteğe bağlı); tür listesine `post`, `post_category`, `post_tag`. Paket ve diğer kaynaklar değişmedi.

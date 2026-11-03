@@ -16,6 +16,10 @@ import type { JobType } from "./types"
 export const MIGRATION_FILE_PREFIX = "migration-bundle-"
 /** The name an uploaded customer sheet is stored under (F14.3). */
 export const CUSTOMER_FILE_PREFIX = "migration-customers-"
+/** The name an uploaded WordPress export is stored under (adr/0042 Ek 2026-11-03). */
+export const WORDPRESS_FILE_PREFIX = "migration-wordpress-"
+/** A product category address base the owner names (`/urun-kategori/`): a path of one segment or none. */
+export const CATEGORY_BASE = /^\/?(?:[a-z0-9-]{1,60}\/?)?$/
 
 const shared = {
   mode: z.enum(["check", "apply"]),
@@ -58,6 +62,19 @@ const input = z.discriminatedUnion("source", [
       ...shared,
     })
     .strict(),
+  // A WordPress site's export (WXR): its catalogue, blog and pages, the authors' and commenters' names
+  z
+    .object({
+      source: z.literal("wordpress"),
+      source_file_id: z
+        .string()
+        .min(1)
+        .max(512)
+        .refine((id) => id.includes(WORDPRESS_FILE_PREFIX)),
+      category_base: z.string().max(64).regex(CATEGORY_BASE).nullable().default(null),
+      ...shared,
+    })
+    .strict(),
   // The old site's product feed (F14.3), fetched under the SSRF rules
   z
     .object({
@@ -70,7 +87,7 @@ const input = z.discriminatedUnion("source", [
 
 /**
  * A shop's old platform moved here, or a dry run of it (F14, adr/0042 §9):
- * queued by `POST /admin/migrations` (a bundle it stored) or
+ * queued by `POST /admin/migrations` (a bundle or a WordPress export it stored) or
  * `POST /admin/migrations/shopify`, never through the generic jobs route.
  * It writes products, so it runs apart from an import or a bulk edit. A
  * bundle holds the shop's customers: it is deleted however the run ends,
@@ -148,7 +165,11 @@ export const migrationRun: JobType<z.infer<typeof input>> = {
       throw error
     } finally {
       // A file holds the shop's customers: gone however the run ended
-      if (values.source === "bundle" || values.source === "customers") {
+      if (
+        values.source === "bundle" ||
+        values.source === "customers" ||
+        values.source === "wordpress"
+      ) {
         await container
           .resolve(Modules.FILE)
           .deleteFiles(values.source_file_id)
