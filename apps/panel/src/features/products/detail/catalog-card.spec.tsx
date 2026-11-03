@@ -24,6 +24,7 @@ const CATALOG: ProductCatalog = {
   restriction: null,
   is_gift_card: false,
   addons: [],
+  description_doc: null,
   successor: null,
   categories: [],
   variants: [],

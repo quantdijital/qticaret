@@ -60,6 +60,8 @@ export function RunCard({ className }: { className?: string }) {
   const [jobId, setJobId] = useState<string | null>(null)
   // A run to apply, waiting for the owner's word
   const [applying, setApplying] = useState<StartMigration | null>(null)
+  // Kept while the dialog closes, so its words do not change on the way out
+  const [refreshAsked, setRefreshAsked] = useState(false)
   const job = useQuery(migrationJobQuery(jobId))
   const running = job.data?.status === "queued" || job.data?.status === "running"
   const busy = running || start.isPending
@@ -80,6 +82,7 @@ export function RunCard({ className }: { className?: string }) {
   }
   const request = (input: StartMigration) => {
     if (input.mode === "apply") {
+      setRefreshAsked(input.refresh === true)
       setApplying(input)
     } else {
       go(input)
@@ -196,8 +199,8 @@ export function RunCard({ className }: { className?: string }) {
             setApplying(null)
           }
         }}
-        title={t(`${R}.confirmTitle`)}
-        description={t(`${R}.confirmText`)}
+        title={t(refreshAsked ? `${R}.refreshConfirmTitle` : `${R}.confirmTitle`)}
+        description={t(refreshAsked ? `${R}.refreshConfirmText` : `${R}.confirmText`)}
         confirmLabel={t(`${R}.apply`)}
         onConfirm={() => {
           setApplying(null)

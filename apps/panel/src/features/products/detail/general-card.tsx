@@ -1,15 +1,13 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm, useWatch } from "react-hook-form"
+import { useForm } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { z } from "zod"
 import { Field } from "@/components/patterns/form-section"
 import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { useUpdateProduct } from "@/features/products/api/products"
 import type { ProductDetail } from "@/features/products/api/products"
 import { useProductPathPrefix } from "@/features/products/use-product-path"
-import { SUGGESTED_WORDS, wordCount } from "@/features/products/wizard/readiness"
 import { errorText } from "@/lib/errors"
 import { FULL_RESET } from "@/lib/forms"
 import { isValidSlug } from "@/lib/slug"
@@ -18,17 +16,18 @@ import { CardForm } from "@/components/patterns/card-form"
 const schema = z.object({
   title: z.string().trim().min(2, { message: "products.errors.title" }).max(200),
   handle: z.string().trim().refine(isValidSlug, { message: "products.errors.handle" }),
-  description: z.string().max(20_000),
 })
 type Values = z.infer<typeof schema>
 
-const valuesOf = (product: Pick<ProductDetail, "title" | "handle" | "description">): Values => ({
+const valuesOf = (product: Pick<ProductDetail, "title" | "handle">): Values => ({
   title: product.title,
   handle: product.handle,
-  description: product.description ?? "",
 })
 
-/** Name, address and story; the address change keeps the old one reserved (F3.1). */
+/**
+ * Name and address; the address change keeps the old one reserved (F3.1).
+ * The description is a card of its own, in the content editor (ADR-0055).
+ */
 export function GeneralCard({
   product,
   className,
@@ -46,17 +45,12 @@ export function GeneralCard({
     // A save elsewhere on the page reloads the product; edits here stay
     resetOptions: { keepDirtyValues: true },
   })
-  const description = useWatch({ control: form.control, name: "description" })
   const { errors, isDirty } = form.formState
   const message = (key: string | undefined) => (key ? t(key) : undefined)
 
   const submit = form.handleSubmit((values) => {
     update.mutate(
-      {
-        title: values.title.trim(),
-        handle: values.handle.trim(),
-        description: values.description.trim(),
-      },
+      { title: values.title.trim(), handle: values.handle.trim() },
       {
         onSuccess: (result) => {
           form.reset(valuesOf(result.product), FULL_RESET)
@@ -103,16 +97,6 @@ export function GeneralCard({
             {...form.register("handle")}
           />
         </div>
-      </Field>
-      <Field
-        label={t("products.wizard.descriptionLabel")}
-        htmlFor="detail-description"
-        hint={t("products.wizard.words", {
-          count: wordCount(description),
-          suggested: SUGGESTED_WORDS,
-        })}
-      >
-        <Textarea id="detail-description" className="min-h-56" {...form.register("description")} />
       </Field>
     </CardForm>
   )

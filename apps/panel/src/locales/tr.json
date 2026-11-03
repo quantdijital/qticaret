@@ -2405,6 +2405,24 @@
           "plannedCreated": "Eklenecek",
           "found": "Var olan",
           "skipped": "Atlanan"
+        },
+        "refreshConfirmTitle": "Açıklamalar yenilensin mi?",
+        "refreshConfirmText": "Bu dosyanın daha önce taşıdığı ürünlerin açıklaması dosyadakiyle değiştirilir; panelde sonradan yaptığınız açıklama değişiklikleri de yerini dosyadakine bırakır. Başka hiçbir alan değişmez.",
+        "descriptions": {
+          "applied": "Açıklamalar yenilendi.",
+          "planned": "Kuru çalıştırma bitti: yenilenecek açıklamalar aşağıda.",
+          "refreshed": "Yenilenen açıklamalar",
+          "plannedRefreshed": "Yenilenecek açıklamalar",
+          "same": "Zaten aynı olanlar",
+          "notMoved": "Önceki bir çalıştırmada taşınmamış ürünler",
+          "notMovedHint": "Bunlar için önce kutuyu işaretlemeden bir taşıma uygulayın.",
+          "failed": "Yenilenemeyenler",
+          "withDocument": "Biçimli açıklamaya sahip olanlar",
+          "documents_one": "{{formatted}} ürünün açıklaması biçimiyle taşındı",
+          "documents_other": "{{formatted}} ürünün açıklaması biçimiyle taşındı",
+          "plannedDocuments_one": "{{formatted}} ürünün açıklaması biçimiyle taşınacak",
+          "plannedDocuments_other": "{{formatted}} ürünün açıklaması biçimiyle taşınacak",
+          "documentsHint": "Başlıkları, paragrafları, listeleri ve tablolarıyla; ürün sayfasındaki Açıklama kartında düzenlenir."
         }
       },
       "shopify": {
@@ -2460,7 +2478,9 @@
             "product_tags": "Vitrinde ürün etiketi sayfası yok.",
             "blog_comments": "Vitrinde blog yorumu yok."
           }
-        }
+        },
+        "refresh": "Yalnız açıklamaları yenile",
+        "refreshHint": "Önceki bir çalıştırmanın taşıdığı ürünlerin açıklaması bu dosyadan başlık, liste ve tablolarıyla yeniden yazılır. Fiyat, stok, durum ve SEO alanlarına dokunulmaz, yeni kayıt eklenmez. Yalnızca uygulanır."
       },
       "runs": {
         "title": "Geçmiş çalıştırmalar",
@@ -2865,7 +2885,9 @@
       },
       "backorder": "Stoksuz satış",
       "cost": "Maliyet",
-      "costHint": "KDV hariç birim maliyet; yalnızca raporlarda kullanılır, müşteri görmez."
+      "costHint": "KDV hariç birim maliyet; yalnızca raporlarda kullanılır, müşteri görmez.",
+      "description": "Açıklama",
+      "descriptionHint": "Başlık, liste, alıntı ve tabloyla yazın. Arama motorları için en az {{suggested}} kelime önerilir."
     },
     "catalog": {
       "card": "Katalog bilgileri",

@@ -1,4 +1,5 @@
 import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
+import { z } from "zod"
 import type { AsyncJob } from "@/features/settings/api/activity"
 import { wordpressUploadPath, wxrContentType } from "@/features/settings/api/migration-wordpress"
 import { withReauth } from "@/lib/reauth"
@@ -21,7 +22,16 @@ export interface Parcel {
 export type KindCounts = Record<
   "read" | "created" | "found" | "updated" | "skipped" | "failed",
   number
->
+> & {
+  /** Products: those whose description moved (would move) as a formatted document (ADR-0055). */
+  documents?: number
+}
+
+const documentCount = z.number().int().min(0)
+
+/** Products whose description moved (would move) as a formatted document, when the run counted them. */
+export const documentsOf = (counts: Partial<Record<string, KindCounts>>): number | null =>
+  documentCount.safeParse(counts["product"]?.documents).data ?? null
 
 export interface MigrationRun {
   id: string
@@ -107,6 +117,8 @@ export interface StartMigration {
   url?: string
   /** A WordPress export's product category address base; empty, the server reads it. */
   categoryBase?: string
+  /** A WordPress export: only refresh the descriptions of products moved before (ADR-0055). */
+  refresh?: boolean
 }
 
 /** Starts a check or a run from the chosen source; applying asks the owner to prove it again. */
@@ -118,7 +130,12 @@ export function useStartMigration() {
         if (input.kind === "wordpress") {
           const file = input.file ?? new File([], "bos.xml")
           return sendFile(
-            wordpressUploadPath(input.mode, input.parcel, input.categoryBase ?? ""),
+            wordpressUploadPath(
+              input.mode,
+              input.parcel,
+              input.categoryBase ?? "",
+              input.refresh === true
+            ),
             file,
             extra.headers,
             wxrContentType(file)

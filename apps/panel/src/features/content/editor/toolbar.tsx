@@ -55,6 +55,8 @@ interface ToolbarProps {
   onLink: () => void
   onImage: () => void
   onCard: (kind: CardKind) => void
+  /** Pictures and cards: off for a text that takes neither (a product's description, ADR-0055). */
+  media?: boolean
   /** The shop's details menu (adr/0048): only texts the server fills them in. */
   tokens?: boolean
   /** Tokens the menu offers besides the shop's details. */
@@ -67,6 +69,7 @@ export function Toolbar({
   onLink,
   onImage,
   onCard,
+  media = true,
   tokens = false,
   extraTokens,
 }: ToolbarProps) {
@@ -152,26 +155,30 @@ export function Toolbar({
         active={state.table}
         onClick={run((c) => c.insertTable({ rows: 3, cols: 3, withHeaderRow: true }))}
       />
-      <ToolButton
-        icon={ImagePlus}
-        label={label(state.image ? "imageAlt" : "image")}
-        active={state.image}
-        onClick={onImage}
-      />
-      <ToolButton
-        icon={Package}
-        label={label("productCard")}
-        onClick={() => {
-          onCard("product")
-        }}
-      />
-      <ToolButton
-        icon={FolderTree}
-        label={label("categoryCard")}
-        onClick={() => {
-          onCard("category")
-        }}
-      />
+      {media ? (
+        <>
+          <ToolButton
+            icon={ImagePlus}
+            label={label(state.image ? "imageAlt" : "image")}
+            active={state.image}
+            onClick={onImage}
+          />
+          <ToolButton
+            icon={Package}
+            label={label("productCard")}
+            onClick={() => {
+              onCard("product")
+            }}
+          />
+          <ToolButton
+            icon={FolderTree}
+            label={label("categoryCard")}
+            onClick={() => {
+              onCard("category")
+            }}
+          />
+        </>
+      ) : null}
       {tokens ? (
         <>
           <Separator orientation="vertical" className="mx-1 h-5" />

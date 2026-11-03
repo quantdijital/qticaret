@@ -2405,6 +2405,24 @@
           "plannedCreated": "To add",
           "found": "Already here",
           "skipped": "Left out"
+        },
+        "refreshConfirmTitle": "Refresh the descriptions?",
+        "refreshConfirmText": "The descriptions of the products this file moved before are replaced with the file's; description edits made in the panel since give way too. No other field changes.",
+        "descriptions": {
+          "applied": "Descriptions refreshed.",
+          "planned": "Dry run finished: the descriptions to refresh are below.",
+          "refreshed": "Descriptions refreshed",
+          "plannedRefreshed": "Descriptions to refresh",
+          "same": "Already the same",
+          "notMoved": "Products no earlier run moved",
+          "notMovedHint": "Apply a migration without the box ticked to move these first.",
+          "failed": "Not refreshed",
+          "withDocument": "With a formatted description",
+          "documents_one": "{{formatted}} product's description moved with its formatting",
+          "documents_other": "{{formatted}} products' descriptions moved with their formatting",
+          "plannedDocuments_one": "{{formatted}} product's description will move with its formatting",
+          "plannedDocuments_other": "{{formatted}} products' descriptions will move with their formatting",
+          "documentsHint": "Headings, paragraphs, lists and tables kept; edited in the Description card on the product's page."
         }
       },
       "shopify": {
@@ -2460,7 +2478,9 @@
             "product_tags": "The storefront has no product tag pages.",
             "blog_comments": "The storefront shows no blog comments."
           }
-        }
+        },
+        "refresh": "Refresh descriptions only",
+        "refreshHint": "Products an earlier run moved get their description rewritten from this file, with its headings, lists and tables. Prices, stock, status and SEO fields stay as they are, and nothing new is added. Applied only."
       },
       "runs": {
         "title": "Past runs",
@@ -2865,7 +2885,9 @@
       },
       "backorder": "Sell past stock",
       "cost": "Cost",
-      "costHint": "Unit cost, VAT excluded; used in reports only, never shown to customers."
+      "costHint": "Unit cost, VAT excluded; used in reports only, never shown to customers.",
+      "description": "Description",
+      "descriptionHint": "Write with headings, lists, quotes and tables. Search engines favour at least {{suggested}} words."
     },
     "catalog": {
       "card": "Catalog details",

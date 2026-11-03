@@ -55,6 +55,9 @@ export function ContentDraftsCard({ productId }: { productId: string }) {
   const query = useQuery(draftsQuery(productId))
   const refresh = async () => {
     await client.invalidateQueries({ queryKey: ["products", productId] })
+    // An approved description is the product's text now and drops its document (ADR-0055)
+    await client.invalidateQueries({ queryKey: ["products", "detail", productId] })
+    await client.invalidateQueries({ queryKey: ["products", "catalog", productId] })
     await client.invalidateQueries({ queryKey: ["seo"] })
   }
   const failed = (failure: unknown) => toast.error(errorText(t, failure))

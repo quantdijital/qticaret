@@ -18,13 +18,25 @@ interface DocumentCardProps {
    * caller puts the saved record in its cache), rejects with the failure.
    */
   save: (doc: JSONContent) => Promise<void>
+  /** Pictures and cards in the editor; off for a product's description (ADR-0055). */
+  media?: boolean
+  /** The shop's details menu; only for a text the server fills them in (pages, posts, filter pages). */
+  shopTokens?: boolean
 }
 
 /**
  * A text in the editor, saved as a whole (adr/0019). What was typed while
  * a save ran stays a change to save; an untouched text is never "changed".
  */
-export function DocumentCard({ title, description, stored, saving, save }: DocumentCardProps) {
+export function DocumentCard({
+  title,
+  description,
+  stored,
+  saving,
+  save,
+  media = true,
+  shopTokens = true,
+}: DocumentCardProps) {
   const { t } = useTranslation()
   const [draft, setDraft] = useState<JSONContent | null>(null)
   const dirty = draft !== null && !sameDoc(draft, stored)
@@ -54,8 +66,13 @@ export function DocumentCard({ title, description, stored, saving, save }: Docum
       }}
     >
       <div className="-mx-5 -my-1">
-        {/* Pages, posts and filter pages show the shop's details in place of their tokens */}
-        <RichEditor value={draft ?? stored} onChange={setDraft} label={title} shopTokens />
+        <RichEditor
+          value={draft ?? stored}
+          onChange={setDraft}
+          label={title}
+          media={media}
+          shopTokens={shopTokens}
+        />
       </div>
     </CardForm>
   )

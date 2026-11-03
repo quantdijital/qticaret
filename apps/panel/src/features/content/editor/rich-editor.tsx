@@ -32,12 +32,15 @@ export function RichEditor({
   value,
   onChange,
   label,
+  media = true,
   shopTokens = false,
   extraTokens,
 }: {
   value: JSONContent
   onChange: (doc: JSONContent) => void
   label: string
+  /** Pictures and cards; off for a product's description (ADR-0055), whose server takes neither. */
+  media?: boolean
   /** Offer the shop's details (`{telefon}`), for a text the server fills them in (adr/0048). */
   shopTokens?: boolean
   /** Tokens besides the shop's details, with `shopTokens` (a campaign's `{ad}`). */
@@ -50,7 +53,7 @@ export function RichEditor({
   // The last document the editor itself gave or was given: only another one (a reset, a save) is put in
   const seen = useRef(value)
   const editor = useEditor({
-    extensions: contentExtensions(t("content.editor.placeholder")),
+    extensions: contentExtensions(t("content.editor.placeholder"), { media }),
     content: value,
     editorProps: {
       attributes: { class: "qt-prose min-h-80 px-5 py-4 focus:outline-none", "aria-label": label },
@@ -88,6 +91,7 @@ export function RichEditor({
           setImaging(true)
         }}
         onCard={setCarding}
+        media={media}
         tokens={shopTokens}
         extraTokens={extraTokens}
       />
@@ -97,14 +101,18 @@ export function RichEditor({
         {t("content.editor.words", { count: words, words: formatCount(words) })}
       </div>
       <LinkDialog editor={editor} open={linking} onOpenChange={setLinking} />
-      <ImageDialog editor={editor} open={imaging} onOpenChange={setImaging} />
-      <CardDialog
-        editor={editor}
-        kind={carding}
-        onClose={() => {
-          setCarding(null)
-        }}
-      />
+      {media ? (
+        <>
+          <ImageDialog editor={editor} open={imaging} onOpenChange={setImaging} />
+          <CardDialog
+            editor={editor}
+            kind={carding}
+            onClose={() => {
+              setCarding(null)
+            }}
+          />
+        </>
+      ) : null}
     </div>
   )
 }

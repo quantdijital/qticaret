@@ -11,9 +11,10 @@ import { isSafeHref } from "./href"
  * The editor's schema, held to the server's allowlist (adr/0019): headings
  * h2–h4, bold, italic, links, lists, quotes, tables, images and cards; no
  * code, strike, underline or rule. Quotes and list items hold paragraphs and
- * lists only, table cells paragraphs, as the server checks.
+ * lists only, table cells paragraphs, as the server checks. Without `media`
+ * (a product's description, ADR-0055) there are no pictures and no cards.
  */
-export function contentExtensions(placeholder: string) {
+export function contentExtensions(placeholder: string, { media = true } = {}) {
   return [
     StarterKit.configure({
       heading: { levels: [2, 3, 4] },
@@ -39,9 +40,9 @@ export function contentExtensions(placeholder: string) {
     TableRow,
     TableHeader.extend({ content: "paragraph+" }),
     TableCell.extend({ content: "paragraph+" }),
-    Image.configure({ inline: false, allowBase64: false }),
-    ProductCard,
-    CategoryCard,
+    ...(media
+      ? [Image.configure({ inline: false, allowBase64: false }), ProductCard, CategoryCard]
+      : []),
     Placeholder.configure({ placeholder }),
   ]
 }

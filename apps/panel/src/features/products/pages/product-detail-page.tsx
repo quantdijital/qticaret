@@ -12,6 +12,7 @@ import { ProductStatusBadge } from "@/features/products/components/product-statu
 import { AddonsCard } from "@/features/products/detail/addons-card"
 import { CatalogCard } from "@/features/products/detail/catalog-card"
 import { ContentDraftsCard } from "@/features/products/detail/content-drafts-card"
+import { ProductDescriptionCard } from "@/features/products/detail/description-card"
 import { GeneralCard } from "@/features/products/detail/general-card"
 import { MediaCard } from "@/features/products/detail/media-card"
 import { OrganizeCard } from "@/features/products/detail/organize-card"
@@ -30,7 +31,7 @@ const ADVISOR_TARGETS = {
   edit_title: "product-seo",
   edit_description: "product-seo",
   edit_robots: "product-seo",
-  edit_body: "product-general",
+  edit_body: "product-description",
   edit_handle: "product-general",
   add_images: "product-media",
   add_alt_text: "product-media",
@@ -97,6 +98,9 @@ export function ProductDetailPage() {
         <PageColumn span={8}>
           <div id="product-general" className="scroll-mt-20">
             <GeneralCard product={product} />
+          </div>
+          <div id="product-description" className="scroll-mt-20">
+            <ProductDescriptionCard product={product} />
           </div>
           <div id="product-media" className="scroll-mt-20">
             <MediaCard product={product} />

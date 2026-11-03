@@ -150,4 +150,52 @@ describe("Settings > Migration: the WordPress source", () => {
     expect(init.headers).toEqual({ "content-type": "application/zip" })
     expect(init.body).toBe(file)
   })
+
+  // ADR-0055: the descriptions of products moved before, rewritten and nothing else
+  it("refreshes only the descriptions: applied alone, without the base or the parcel", async () => {
+    await chooseWordpress()
+    const file = exportFile("site.xml")
+    await userEvent.upload(screen.getByLabelText("Dışa aktarma dosyası"), file)
+    // Typed before the box is ticked: a refresh neither reads nor checks them
+    await userEvent.type(screen.getByLabelText("Kategori adres öneki"), "/urun/kategori/alt")
+    await userEvent.type(screen.getByLabelText("Ağırlık (g)"), "500")
+    const refresh = screen.getByRole("checkbox", { name: "Yalnız açıklamaları yenile" })
+    await userEvent.click(refresh)
+
+    expect(refresh).toBeChecked()
+    expect(screen.getByRole("button", { name: "Kuru çalıştır" })).toBeDisabled()
+    expect(screen.getByLabelText("Kategori adres öneki")).toBeDisabled()
+    expect(screen.getByLabelText("Ağırlık (g)")).toBeDisabled()
+    expect(screen.getByText(/Fiyat, stok, durum ve SEO alanlarına dokunulmaz/)).toBeVisible()
+
+    await userEvent.click(screen.getByRole("button", { name: "Uygula" }))
+    const confirm = await screen.findByRole("alertdialog")
+    expect(within(confirm).getByText("Açıklamalar yenilensin mi?")).toBeVisible()
+    await userEvent.click(within(confirm).getByRole("button", { name: "Uygula" }))
+
+    await waitFor(() => {
+      expect(uploads).toHaveBeenCalledTimes(1)
+    })
+    const [path, init] = uploads.mock.calls[0] as [string, RequestInit]
+    expect(path).toBe("/admin/migrations?source=wordpress&mode=apply&refresh=descriptions")
+    expect(init.body).toBe(file)
+    expect(screen.queryByText(/Tek bölümlük bir yol girin/)).toBeNull()
+  })
+
+  it("runs in full again once the box is cleared, the dry run back", async () => {
+    const onRun = vi.fn()
+    render(<WordpressSource disabled={false} pending={null} onRun={onRun} />)
+    await userEvent.upload(screen.getByLabelText("Dışa aktarma dosyası"), exportFile("site.xml"))
+    const refresh = screen.getByRole("checkbox", { name: "Yalnız açıklamaları yenile" })
+    await userEvent.click(refresh)
+    await userEvent.click(refresh)
+    await userEvent.click(screen.getByRole("button", { name: "Kuru çalıştır" }))
+
+    await waitFor(() => {
+      expect(onRun).toHaveBeenCalledWith(
+        "check",
+        expect.objectContaining({ refresh: false, categoryBase: "", parcel: null })
+      )
+    })
+  })
 })

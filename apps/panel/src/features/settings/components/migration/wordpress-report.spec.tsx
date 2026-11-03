@@ -115,5 +115,44 @@ describe("Settings > Migration: a WordPress run's report", () => {
 
     expect(screen.queryByRole("tab")).toBeNull()
     expect(screen.getByRole("table")).toBeVisible()
+    expect(screen.queryByText(/biçimiyle/)).toBeNull()
+  })
+
+  // ADR-0055: descriptions moved as documents, counted under the products
+  it("says how many products' descriptions keep their formatting, any source", () => {
+    const documented = { ...counts, product: { ...counted({ read: 4, created: 4 }), documents: 3 } }
+    const { unmount } = render(
+      <RunResult job={job({ counts: documented, wordpress })} source="wordpress" />
+    )
+    expect(screen.getByText("3 ürünün açıklaması biçimiyle taşınacak")).toBeVisible()
+    unmount()
+
+    render(<RunResult job={job({ mode: "apply", counts: documented })} source="shopify" />)
+    expect(screen.getByText("3 ürünün açıklaması biçimiyle taşındı")).toBeVisible()
+  })
+
+  it("shows a description refresh as what it rewrote, not as a migration", () => {
+    const refreshed = {
+      product: { ...counted({ read: 6, updated: 4, found: 1, skipped: 1 }), documents: 4 },
+    }
+    render(
+      <RunResult
+        job={job({ mode: "apply", refresh: ["descriptions"], counts: refreshed })}
+        source="wordpress"
+      />
+    )
+
+    expect(screen.getByText("Açıklamalar yenilendi.")).toBeVisible()
+    expect(screen.queryByRole("tab")).toBeNull()
+    const line = (label: string) => screen.getByText(label).closest("li") as HTMLElement
+    expect(line("Yenilenen açıklamalar")).toHaveTextContent("4")
+    expect(line("Zaten aynı olanlar")).toHaveTextContent("1")
+    expect(line("Önceki bir çalıştırmada taşınmamış ürünler")).toHaveTextContent(
+      /1.*kutuyu işaretlemeden/
+    )
+    expect(line("Biçimli açıklamaya sahip olanlar")).toHaveTextContent("4")
+    // Nothing refused: no line for it
+    expect(screen.queryByText("Yenilenemeyenler")).toBeNull()
+    expect(screen.getByRole("button", { name: "Raporu indir" })).toBeVisible()
   })
 })

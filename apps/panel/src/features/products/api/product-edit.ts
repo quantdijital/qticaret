@@ -1,4 +1,5 @@
 import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
+import type { JSONContent } from "@tiptap/react"
 import type { Restriction } from "@/features/categories/api/restrictions"
 import type { AddonInput, ProductAddon } from "@/features/products/api/addons"
 import { sdk } from "@/lib/sdk"
@@ -25,6 +26,11 @@ export interface ProductCatalog {
   is_gift_card: boolean
   /** Paid or free add-ons a shopper picks beside the variant (adr/0052), in the shop's order. */
   addons: ProductAddon[]
+  /**
+   * The long description as a document (ADR-0055): headings, lists, quotes,
+   * tables; null while the product has only its plain text.
+   */
+  description_doc: JSONContent | null
   successor: { id: string; title: string; handle: string } | null
   categories: { id: string; name: string }[]
   variants: {
@@ -58,10 +64,13 @@ export function useSaveCatalog(id: string) {
       is_gift_card?: boolean
       /** The whole list, ids kept; null clears it. */
       addons?: AddonInput[] | null
+      /** The description as a document; the server writes its plain text too (ADR-0055). */
+      description_doc?: JSONContent | null
     }) => sdk.client.fetch<ProductCatalog>(catalogUrl(id), { method: "POST", body }),
     onSuccess: async (catalog) => {
       client.setQueryData(["products", "catalog", id], catalog)
-      // A kind change moves the product's shipping set-up and what its page asks for
+      // A kind change moves the product's shipping set-up and what its page asks for; a
+      // description saved as a document rewrites the product's plain text
       await client.invalidateQueries({ queryKey: ["products", "detail", id] })
     },
   })

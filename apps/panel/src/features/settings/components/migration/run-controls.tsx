@@ -55,6 +55,8 @@ export function ParcelFields({ inputProps, note, error }: ParcelFieldsProps) {
 
 interface RunButtonsProps {
   disabled: boolean
+  /** A run that is only ever applied (a WordPress description refresh): no dry run. */
+  checkDisabled?: boolean
   /** The mode a start under way was asked in: its button turns. */
   pending: MigrationMode | null
   onCheck: () => void
@@ -62,11 +64,17 @@ interface RunButtonsProps {
 }
 
 /** A dry run first, then applying (confirmed, and proved again), side by side. */
-export function RunButtons({ disabled, pending, onCheck, onApply }: RunButtonsProps) {
+export function RunButtons({
+  disabled,
+  checkDisabled = false,
+  pending,
+  onCheck,
+  onApply,
+}: RunButtonsProps) {
   const { t } = useTranslation()
   return (
     <div className="grid gap-2 sm:grid-cols-2">
-      <Button variant="outline" disabled={disabled} onClick={onCheck}>
+      <Button variant="outline" disabled={disabled || checkDisabled} onClick={onCheck}>
         {pending === "check" ? <Loader2 className="animate-spin" /> : <FlaskConical />}
         {t(`${R}.check`)}
       </Button>

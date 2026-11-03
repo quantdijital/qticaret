@@ -7,8 +7,11 @@ import type { ProductDetail } from "@/features/products/api/products"
 import { GeneralCard } from "./general-card"
 
 const fetchMock = vi.hoisted(() => vi.fn())
+const updateMock = vi.hoisted(() => vi.fn())
 
-vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
+vi.mock("@/lib/sdk", () => ({
+  sdk: { client: { fetch: fetchMock }, admin: { product: { update: updateMock } } },
+}))
 vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
 
 const PRODUCT = {
@@ -33,14 +36,35 @@ describe("GeneralCard", () => {
       </QueryClientProvider>
     )
     const title = screen.getByRole("textbox", { name: /Ürün adı/ })
-    const description = screen.getByRole("textbox", { name: "Açıklama" })
+    const handle = screen.getByRole("textbox", { name: /Ürün adresi/ })
 
     await userEvent.type(title, " Beyaz")
-    await userEvent.clear(description)
-    await userEvent.type(description, "Yeni metin")
+    await userEvent.clear(handle)
+    await userEvent.type(handle, "beyaz-gomlek")
     await userEvent.click(screen.getByRole("button", { name: "Geri al" }))
 
     expect(title).toHaveValue("Keten Gömlek")
-    expect(description).toHaveValue("Yazlık keten gömlek.")
+    expect(handle).toHaveValue("keten-gomlek")
+  })
+
+  // ADR-0055: the description is its own card, in the content editor
+  it("leaves the description out, saving the name and address only", async () => {
+    updateMock.mockResolvedValue({ product: { ...PRODUCT, title: "Keten Gömlek Beyaz" } })
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <GeneralCard product={PRODUCT} />
+      </QueryClientProvider>
+    )
+    expect(screen.queryByRole("textbox", { name: "Açıklama" })).toBeNull()
+
+    await userEvent.type(screen.getByRole("textbox", { name: /Ürün adı/ }), " Beyaz")
+    await userEvent.click(screen.getByRole("button", { name: "Kaydet" }))
+
+    await vi.waitFor(() => {
+      expect(updateMock).toHaveBeenCalledWith("prod_1", {
+        title: "Keten Gömlek Beyaz",
+        handle: "keten-gomlek",
+      })
+    })
   })
 })
