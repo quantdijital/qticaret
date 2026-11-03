@@ -43,6 +43,8 @@ export function OrderReturns({
     submit: t("order.return_submit"),
     sending: t("checkout.saving"),
     sent: t(gift ? "order.return_gift_sent" : "order.return_sent"),
+    // A gift card's withdrawal sends nothing back
+    shipping: gift ? null : (view.returnShippingNote ?? null),
     errors: Object.fromEntries(ERRORS.map((key) => [key, t(key)])),
     fallback: t("order.return_failed"),
   })

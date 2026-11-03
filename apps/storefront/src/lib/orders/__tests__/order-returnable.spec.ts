@@ -109,6 +109,7 @@ describe("orderReturnable (adr/0025, 2026-11-03)", () => {
         title: "Hediye kartı",
         quantity: 0,
         excluded: "gift_card_used",
+        warning: null,
         gift: true,
         note: "Kart kullanıldığı için cayma hakkı yok.",
       },

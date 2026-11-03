@@ -52,6 +52,7 @@ describe("a gift card line on the return form", () => {
         title: "Hediye kartı",
         quantity: 2,
         excluded: null,
+        warning: null,
         gift: true,
         note: "Kartlar iptal edilir ve ödediğiniz tutar iade edilir; bir şey göndermeniz gerekmez.",
       },

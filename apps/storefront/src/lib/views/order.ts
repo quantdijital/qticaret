@@ -18,8 +18,10 @@ import {
   giftCardUsed,
   giftLinesOf,
   giftReasonsOf,
+  refusedOf,
   requestWordsOf,
   returnReasonsOf,
+  returnShippingNoteOf,
   returnableOf,
 } from "./order-returns"
 
@@ -137,6 +139,7 @@ export function orderView(
       : null
   const discount = kurus(order.original_item_total) - kurus(order.item_total)
   const gifts = giftLinesOf(order, extras.returnable)
+  const titles = new Map(order.items.map((line) => [line.id, line.title]))
   return {
     displayId: String(order.display_id),
     placedAt: WHEN.format(new Date(order.created_at)),
@@ -207,9 +210,11 @@ export function orderView(
     returnReasons: returnReasonsOf(t),
     defectReasons: DEFECT_REASONS,
     giftReasons: giftReasonsOf(t),
+    returnShippingNote: returnShippingNoteOf(t),
     returns: extras.returns.map((request) => ({
       ...requestWordsOf(request, gifts, t),
       date: WHEN.format(new Date(request.created_at)),
+      refused: refusedOf(request, titles, t),
     })),
     shipments: extras.shipments.map((parcel) => shipmentOf(parcel, t)),
     notice: extras.note && NOTES[extras.note] ? t(NOTES[extras.note] ?? "") : null,

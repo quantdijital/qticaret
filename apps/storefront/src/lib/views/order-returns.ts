@@ -1,4 +1,10 @@
-import type { OptionView, ReturnableLineView, Translate, WithdrawalExclusion } from "@qticaret/ui"
+import type {
+  OptionView,
+  ReturnableLineView,
+  Translate,
+  WithdrawalExclusion,
+  WithdrawalWarning,
+} from "@qticaret/ui"
 import type {
   ReturnRequestRow,
   ReturnableLineRow,
@@ -13,7 +19,9 @@ import { orderGiftOf } from "./order-gift"
  * why a line is out are the backend's (`GET /store/orders/:id/returnable`,
  * adr/0025 2026-11-03): a gift card line is never shipped; once its cards
  * went out it may be withdrawn from within the period, on its own and as
- * money back, its cards voided. The backend decides again every time.
+ * money back, its cards voided. A sealed good is chosen like any other
+ * line, warned that an opened one is refused at receipt (adr/0032 Ek
+ * 2026-11-03). The backend decides again every time.
  */
 
 const REASONS = ["damaged", "wrong_item", "not_as_described", "changed_mind", "size_issue", "other"]
@@ -25,8 +33,18 @@ const EXCLUSIONS: readonly string[] = [
   "personal_addon",
   "gift_card_used",
 ] satisfies WithdrawalExclusion[]
+// What a line inside the right warns of (backend `WITHDRAWAL_WARNINGS`)
+const WARNINGS: readonly string[] = ["sealed_goods"] satisfies WithdrawalWarning[]
 // The most units a request takes per line (the Server Action's own bound)
 const MAX_UNITS = 999
+
+/**
+ * Who pays to send goods back: the shop, always (backend
+ * `returns.return_shipping`, adr/0032 Ek 2026-11-03; MSY md. 12/5, md. 13/3
+ * repealed). Said once, on the shipped lines' form; a gift card's
+ * withdrawal sends nothing.
+ */
+export const returnShippingNoteOf = (t: Translate): string => t("order.return_shipping_free")
 
 export const returnReasonsOf = (t: Translate): OptionView[] =>
   REASONS.map((reason) => ({ value: reason, label: t(`order.reason_${reason}`) }))
@@ -67,15 +85,26 @@ const exclusionOf = (line: ReturnableLineRow): WithdrawalExclusion | null =>
       ? "product"
       : null
 
+const isWarning = (value: string): value is WithdrawalWarning => WARNINGS.includes(value)
+
+/**
+ * A line's warning as the backend gives it; one this storefront does not
+ * know reads as a sealed good's, the only condition the right carries.
+ */
+const warningOf = ({ withdrawal_warning: value }: ReturnableLineRow): WithdrawalWarning | null =>
+  value ? (isWarning(value) ? value : "sealed_goods") : null
+
 /**
  * Under a line on the return form, in words: why it is outside the right
- * of withdrawal (the backend's `withdrawal_excluded_reason`), or what a
- * gift line's withdrawal does. Null for a plain line.
+ * of withdrawal (the backend's `withdrawal_excluded_reason`), what its
+ * warning means (`withdrawal_warning`), or what a gift line's withdrawal
+ * does. Null for a plain line.
  */
 export function returnNoteOf(
   excluded: WithdrawalExclusion | null,
   gift: boolean,
-  t: Translate
+  t: Translate,
+  warning: WithdrawalWarning | null = null
 ): string | null {
   switch (excluded) {
     case "gift_card_used":
@@ -84,15 +113,20 @@ export function returnNoteOf(
     case "personal_addon":
       return t("order.return_non_withdrawable")
     case null:
-      return gift ? t("order.return_gift_note") : null
+      return gift
+        ? t("order.return_gift_note")
+        : warning === "sealed_goods"
+          ? t("order.return_sealed_goods")
+          : null
   }
 }
 
 /**
  * The lines the order page offers to send back, as the backend counts them
  * (`found`); null when none may be, the window is shut (once cancelled
- * too) or the backend did not say. A line with units left is offered; a
- * gift line whose cards were spent stays, with nothing to choose, saying why.
+ * too) or the backend did not say. A line with units left is offered, a
+ * sealed good's with its warning; a gift line whose cards were spent
+ * stays, with nothing to choose, saying why.
  */
 export function returnableOf(
   found: ReturnableRow | null,
@@ -105,6 +139,8 @@ export function returnableOf(
   const titles = new Map(order.items.map((line) => [line.id, line.title]))
   const lines = found.lines.flatMap((line): ReturnableLineView[] => {
     const excluded = exclusionOf(line)
+    // Outside the right, a line has no condition to warn of
+    const warning = excluded === null && !line.gift_card ? warningOf(line) : null
     const spent = line.gift_card && excluded === "gift_card_used"
     const units = Math.min(Math.trunc(line.returnable), MAX_UNITS)
     if (!spent && !(units > 0)) {
@@ -116,8 +152,9 @@ export function returnableOf(
         title: line.title ?? titles.get(line.line_item_id) ?? "",
         quantity: spent ? 0 : units,
         excluded,
+        warning,
         gift: line.gift_card,
-        note: returnNoteOf(excluded, line.gift_card, t),
+        note: returnNoteOf(excluded, line.gift_card, t, warning),
       },
     ]
   })
@@ -138,7 +175,9 @@ function wordOf(t: Translate, keys: string[], value: string): string {
 /**
  * A request's kind and state in words. A gift card withdrawal sends no
  * parcel: once the shop accepts it its cards are voided and the money goes
- * back (`received` while the refund is being made, then `refunded`).
+ * back (`received` while the refund is being made, then `refunded`). A
+ * refund that gave the order's shipping back says so, when the backend
+ * tells (`refund_shipping`, MSY md. 12/1; the store route does not yet).
  */
 export function requestWordsOf(
   request: ReturnRequestRow,
@@ -158,9 +197,37 @@ export function requestWordsOf(
       code: null,
     }
   }
+  const status = `order.return_status_${request.status}`
   return {
     kind: wordOf(t, [`order.return_kind_${request.kind}`], request.kind),
-    status: wordOf(t, [`order.return_status_${request.status}`], request.status),
+    status: wordOf(
+      t,
+      request.refund_shipping === true ? [`${status}_shipping`, status] : [status],
+      request.status
+    ),
     code: request.return_code,
   }
+}
+
+/**
+ * The units refused at receipt, a line each in words (adr/0032 Ek
+ * 2026-11-03): a sealed good opened was not refunded. Named by the order's
+ * own line; a reason this storefront does not know says only that it was
+ * not taken back.
+ */
+export function refusedOf(
+  request: ReturnRequestRow,
+  titles: ReadonlyMap<string, string>,
+  t: Translate
+): string[] {
+  return (request.refused_items ?? []).flatMap((line) =>
+    line.quantity > 0
+      ? [
+          t(line.reason === "unsealed" ? "order.return_refused_unsealed" : "order.return_refused", {
+            title: titles.get(line.line_item_id) ?? t("order.line_unnamed"),
+            quantity: line.quantity,
+          }),
+        ]
+      : []
+  )
 }

@@ -172,6 +172,13 @@ export interface OrderGiftView {
 /** Why a line is outside the right of withdrawal, as the backend names it (adr/0025, adr/0052 §8). */
 export type WithdrawalExclusion = "product" | "personal_addon" | "gift_card_used"
 
+/**
+ * What a line inside the right of withdrawal warns of (adr/0032 Ek
+ * 2026-11-03): `sealed_goods`, a hygiene good back only with its seal
+ * unopened (MSY md. 15/1-ç); refused at receipt if opened.
+ */
+export type WithdrawalWarning = "sealed_goods"
+
 export interface ReturnableLineView {
   id: string
   title: string
@@ -186,9 +193,17 @@ export interface ReturnableLineView {
    * line whose cards were spent (`gift_card_used`) not at all. Null inside it.
    */
   excluded?: WithdrawalExclusion | null
+  /**
+   * Inside the right of withdrawal with a condition (`sealed_goods`): the
+   * line may be chosen like any other, its `note` says the condition.
+   */
+  warning?: WithdrawalWarning | null
   /** A gift card line: asked on its own and as money back, its cards voided, nothing sent. */
   gift?: boolean
-  /** Under the line, in words: why it has no right of withdrawal, or what a gift line's does. */
+  /**
+   * Under the line, in words: why it has no right of withdrawal, what its
+   * warning means, or what a gift line's withdrawal does.
+   */
   note?: string | null
 }
 
@@ -245,8 +260,16 @@ export interface OrderPageView {
   defectReasons?: string[]
   /** The reasons a gift card line is withdrawn for: the right of withdrawal only. */
   giftReasons?: OptionView[]
-  /** Return requests already made, in words. */
-  returns: { kind: string; status: string; date: string; code: string | null }[]
+  /**
+   * On the shipped lines' form, in words: what sending them back costs
+   * (nothing with the shop's carrier, MSY md. 12/5); null or left out: no line.
+   */
+  returnShippingNote?: string | null
+  /**
+   * Return requests already made, in words; `refused`: the units refused at
+   * receipt and why, a line each ("… 1 adet ambalajı açılmış…").
+   */
+  returns: { kind: string; status: string; date: string; code: string | null; refused?: string[] }[]
   /** The parcels that left, in words: carrier, tracking and where they are. */
   shipments: {
     carrier: string | null

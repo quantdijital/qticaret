@@ -103,6 +103,16 @@ export interface ReturnRequestRow {
   created_at: string
   /** The lines asked for: a gift card line's withdrawal reads apart, and counts its cards. */
   items?: { line_item_id: string; quantity: number }[] | null
+  /**
+   * Units sent back but refused at receipt, never refunded (adr/0032 Ek
+   * 2026-11-03): a sealed good opened (`reason: "unsealed"`, MSY md. 15/1-ç).
+   */
+  refused_items?: { line_item_id: string; quantity: number; reason?: string | null }[] | null
+  /**
+   * The refund gave the order's shipping back too (MSY md. 12/1). The
+   * store route does not answer it today (admin only); read once it does.
+   */
+  refund_shipping?: boolean | null
 }
 
 /** The shopper's return requests on the order (F7.9); none when the backend will not say. */
@@ -133,6 +143,11 @@ export interface ReturnableLineRow {
   withdrawal_excluded: boolean
   /** `product`, `personal_addon` or `gift_card_used`; null inside the right. */
   withdrawal_excluded_reason: string | null
+  /**
+   * Inside the right with a condition: `sealed_goods`, back only with its
+   * seal unopened (MSY md. 15/1-ç; adr/0032 Ek 2026-11-03); null otherwise.
+   */
+  withdrawal_warning?: string | null
   /** A gift card line: withdrawn on its own, its cards voided, nothing sent back. */
   gift_card: boolean
   /** The product's other variants, to exchange the line for. */

@@ -89,8 +89,17 @@ export interface StoreProduct {
   brand?: StoreBrand | null
   media_assets?: StoreMediaAsset[] | null
   attribute_values?: StoreAttributeValue[] | null
-  /** The catalog's own row; only its gift card mark may be asked (adr/0025 Ek 2026-11-03). */
-  product_extension?: { is_gift_card?: boolean | null } | null
+  /**
+   * The catalog's own row; the Store API answers only its gift card mark
+   * (adr/0025 Ek 2026-11-03). `withdrawal_excluded` and `kind` (a physical
+   * product's sealed hygiene mark, adr/0052 Ek 2026-11-03) are read once
+   * the backend lets them be asked; today it refuses them.
+   */
+  product_extension?: {
+    is_gift_card?: boolean | null
+    withdrawal_excluded?: boolean | null
+    kind?: string | null
+  } | null
 }
 
 /**

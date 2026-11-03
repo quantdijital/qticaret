@@ -144,6 +144,13 @@ export function OrderPage({
                   <li key={String(index)}>
                     {request.kind} · {request.status} · {request.date}
                     {request.code && ` · ${t("order.return_code", { code: request.code })}`}
+                    {request.refused && request.refused.length > 0 && (
+                      <ul className="mt-1 text-xs text-muted-foreground">
+                        {request.refused.map((line, at) => (
+                          <li key={String(at)}>{line}</li>
+                        ))}
+                      </ul>
+                    )}
                   </li>
                 ))}
               </ul>

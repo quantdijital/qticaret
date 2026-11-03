@@ -148,6 +148,8 @@ export function ProductPage({
                 fallback: t("product.alert_failed"),
               }}
             />
+            {/* Before the purchase, beside the cart form (MSY md. 5/1-h, 6/2) */}
+            {view.withdrawalNote && <p className="text-sm font-medium">{view.withdrawalNote}</p>}
             <FavoriteButton
               productId={view.id}
               signedIn={view.signedIn}

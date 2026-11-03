@@ -237,6 +237,13 @@ export interface ProductPageView {
   loginPath: string
   /** The shop's free shipping line ("1.500,00 TL ve üzeri kargo ücretsiz"), in words; null without one. */
   shippingNote: string | null
+  /**
+   * A physical product the shop marked as a sealed hygiene good, in words
+   * near the cart form: its right of withdrawal ends once the seal is
+   * opened, told before the purchase (MSY md. 5/1-h, 6/2, 15/1-ç).
+   * Null or left out: no such mark.
+   */
+  withdrawalNote?: string | null
   /** The shop's sections below the product's own block (adr/0049), drawn as on the home page. */
   sections?: HomeSectionView[]
   /**

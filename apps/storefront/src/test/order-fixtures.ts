@@ -56,11 +56,15 @@ export const order = (
   shipping_address: null,
 })
 
-/** A line as the route gives it: `returnable` units left, a gift line, why it is out. */
+/** A line as the route gives it: `returnable` units left, a gift line, why it is out, its warning. */
 export const row = (
   id: string,
   returnable: number,
-  { gift_card = false, reason = null }: { gift_card?: boolean; reason?: string | null } = {}
+  {
+    gift_card = false,
+    reason = null,
+    warning = null,
+  }: { gift_card?: boolean; reason?: string | null; warning?: string | null } = {}
 ): ReturnableLineRow => ({
   line_item_id: id,
   title: id === GIFT ? "Hediye kartı" : "Çakı",
@@ -69,6 +73,7 @@ export const row = (
   returnable,
   withdrawal_excluded: reason !== null,
   withdrawal_excluded_reason: reason,
+  withdrawal_warning: warning,
   gift_card,
   variants: [],
 })

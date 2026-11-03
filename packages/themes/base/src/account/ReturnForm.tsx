@@ -12,6 +12,8 @@ export interface ReturnWords {
   submit: string
   sending: string
   sent: string
+  /** What sending the goods back costs, in words; null or left out on a form that sends nothing. */
+  shipping?: string | null
   errors: Record<string, string>
   fallback: string
 }
@@ -22,9 +24,11 @@ const FIELD = "rounded-lg border border-input bg-background px-3 py-2 text-sm"
  * Asks to send lines back (F7.9): a quantity per line, a reason, a note.
  * A line outside the right of withdrawal (adr/0052 §8) says so; once one of
  * its units is chosen, only the reasons that are the shop's fault are
- * offered and no exchange. `gift`: gift card lines alone (adr/0025), on the
- * right of withdrawal and as money back only; a line whose cards were spent
- * says why and offers nothing. The backend decides again.
+ * offered and no exchange. A sealed good (adr/0032 Ek 2026-11-03) is chosen
+ * like any other line, its warning under it. `gift`: gift card lines alone
+ * (adr/0025), on the right of withdrawal and as money back only; a line
+ * whose cards were spent says why and offers nothing. Below the note, what
+ * sending the goods back costs (`words.shipping`). The backend decides again.
  */
 export function ReturnForm({
   view,
@@ -80,7 +84,14 @@ export function ReturnForm({
           <li key={line.id} className="flex items-center justify-between gap-3">
             <span className="flex flex-col">
               {line.title}
-              {line.note && <span className="text-xs text-muted-foreground">{line.note}</span>}
+              {line.note && (
+                <span
+                  id={`note_${line.id}`}
+                  className={line.warning ? "text-xs font-medium" : "text-xs text-muted-foreground"}
+                >
+                  {line.note}
+                </span>
+              )}
             </span>
             {line.quantity > 0 && (
               <label className="flex items-center gap-2">
@@ -88,6 +99,7 @@ export function ReturnForm({
                 <select
                   name={`qty_${line.id}`}
                   defaultValue="0"
+                  aria-describedby={line.note ? `note_${line.id}` : undefined}
                   onChange={(event) => {
                     // A gift line offers the right of withdrawal alone, whatever its mark
                     if (line.excluded && !gift) {
@@ -166,6 +178,7 @@ export function ReturnForm({
         </select>
       </label>
       <textarea name="note" maxLength={1000} rows={3} placeholder={words.note} className={FIELD} />
+      {words.shipping && <p className="text-muted-foreground">{words.shipping}</p>}
       <p role="alert" className="text-sale empty:hidden">
         {state.error ? (words.errors[state.error] ?? words.fallback) : null}
       </p>
