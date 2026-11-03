@@ -9,7 +9,7 @@ import { orderLink } from "./order-link"
 import { orderPlaced } from "./order-placed"
 import { paymentFailed } from "./payment"
 import { paymentLinkSent } from "./payment-link"
-import { returnApproved, returnRefunded, returnRequested } from "./returns"
+import { returnApproved, returnRefunded, returnRefused, returnRequested } from "./returns"
 import { orderDelivered, orderShipped } from "./shipping"
 import { backInStock, stockAlertConfirm } from "./stock"
 import {
@@ -37,7 +37,7 @@ export type { LineAddonPick, MessageLineAddons } from "./line-addons"
 export type { OrderLinkVars } from "./order-link"
 export type { PaymentFailedVars } from "./payment"
 export type { PaymentLinkVars } from "./payment-link"
-export type { ReturnVars } from "./returns"
+export type { RefusedLineVars, ReturnVars } from "./returns"
 export type { InvoiceVars } from "./invoice"
 export type { ParcelVars } from "./shipping"
 export type { StockAlertVars } from "./stock"
@@ -63,6 +63,8 @@ export const MESSAGE_TEMPLATES = {
   "return.requested": returnRequested,
   "return.approved": returnApproved,
   "return.refunded": returnRefunded,
+  // adr/0032 Ek 2026-11-03: units refused at receipt, a sealed good opened
+  "return.refused": returnRefused,
   "account.password_reset": passwordReset,
   "account.verify_email": verifyEmail,
   // F14.5 (adr/0042 §6): a moved customer asked to open their account here

@@ -41,7 +41,13 @@ medusaIntegrationTestRunner({
       const preview = await get<Preview>(`${PATH}/order.placed/preview`)
 
       expect(list.status).toBe(200)
-      expect(list.data.templates).toHaveLength(28)
+      expect(list.data.templates).toHaveLength(29)
+      // Units refused at receipt, a sealed good opened (adr/0032 Ek 2026-11-03)
+      expect(list.data.templates).toContainEqual({
+        name: "return.refused",
+        kind: "transactional",
+        channels: ["email"],
+      })
       // A bulk e-mail or SMS to one consented recipient (adr/0050)
       expect(list.data.templates).toContainEqual({
         name: "marketing.campaign",

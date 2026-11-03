@@ -44,6 +44,7 @@ export const MESSAGE_LOADERS: { readonly [N in MessageTemplateName]: Loader<N> }
   "return.requested": (container, id) => loadReturnMessage(container, id),
   "return.approved": (container, id) => loadReturnMessage(container, id),
   "return.refunded": (container, id) => loadReturnMessage(container, id),
+  "return.refused": (container, id) => loadReturnMessage(container, id),
   "account.password_reset": loadPasswordReset,
   "account.verify_email": loadVerification,
   "account.migration_invite": (container, id) => loadMigrationInvite(container, id),

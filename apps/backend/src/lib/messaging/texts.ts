@@ -1,14 +1,17 @@
 import type { MessageLocale } from "../errors/messages"
+import { RETURN_TEXTS } from "./return-texts"
 
 /**
  * What messages say, by key (adr/0036; CLAUDE.md rule 9): templates take
  * their words from here, with `{{name}}` filled in as plain text. The
- * layout escapes everything. One language until F19.
+ * layout escapes everything. One language until F19. A return request's
+ * texts live in `return-texts.ts`.
  */
 
 export const MESSAGE_LOCALE: MessageLocale = "tr"
 
 const TR: Readonly<Record<string, string>> = {
+  ...RETURN_TEXTS,
   "footer.unsubscribe": "Bu iletileri almak istemiyorum",
   "footer.stock": "Bu e-postayı, {{shop}} mağazasında stok bildirimi istediğiniz için aldınız.",
   "footer.order": "Bu e-posta, {{shop}} mağazasındaki siparişiniz için gönderildi.",
@@ -173,40 +176,6 @@ const TR: Readonly<Record<string, string>> = {
   "order_delivered.intro": "#{{number}} numaralı siparişiniz teslim edildi. Güle güle kullanın.",
   "order_delivered.returns":
     "Bir sorun varsa teslimden sonraki 14 gün içinde hesabınızdaki sipariş sayfasından iade ya da değişim talebi açabilirsiniz.",
-  "returns.lines": "Talepteki ürünler",
-  "return_requested.subject.return": "İade talebiniz alındı (#{{number}})",
-  "return_requested.subject.exchange": "Değişim talebiniz alındı (#{{number}})",
-  "return_requested.preheader": "{{shop}} talebinizi inceleyecek.",
-  "return_requested.heading.return": "{{name}}, iade talebinizi aldık",
-  "return_requested.heading.exchange": "{{name}}, değişim talebinizi aldık",
-  "return_requested.intro.return":
-    "#{{number}} numaralı siparişiniz için iade talebinizi aldık. İnceleyip size haber vereceğiz.",
-  "return_requested.intro.exchange":
-    "#{{number}} numaralı siparişiniz için değişim talebinizi aldık. İnceleyip size haber vereceğiz.",
-  "return_approved.subject.return": "İade talebiniz onaylandı (#{{number}})",
-  "return_approved.subject.exchange": "Değişim talebiniz onaylandı (#{{number}})",
-  "return_approved.preheader": "{{shop}} talebinizi onayladı.",
-  "return_approved.heading.return": "{{name}}, iadeniz onaylandı",
-  "return_approved.heading.exchange": "{{name}}, değişiminiz onaylandı",
-  "return_approved.intro.return":
-    "#{{number}} numaralı siparişinizdeki ürünleri geri gönderebilirsiniz. Ürünler bize ulaşıp kontrol edildikten sonra ödemeniz iade edilir.",
-  "return_approved.intro.exchange":
-    "#{{number}} numaralı siparişinizdeki ürünleri geri gönderebilirsiniz. Ürünler bize ulaştığında yenileri yola çıkar.",
-  "return_approved.code_title": "Kargo kodu",
-  "return_approved.code": "Koliyi kargo şubesine teslim ederken bu kodu söyleyin: {{code}}",
-  "return_approved.no_code":
-    "Ürünleri nasıl göndereceğinizle ilgili mağaza sizinle iletişime geçecek.",
-  "return_refunded.subject.return": "İadeniz yapıldı (#{{number}})",
-  "return_refunded.subject.exchange": "Değişim farkınız iade edildi (#{{number}})",
-  "return_refunded.preheader": "{{shop}} ödemenizi iade etti.",
-  "return_refunded.heading.return": "{{name}}, iadeniz yapıldı",
-  "return_refunded.heading.exchange": "{{name}}, farkınız iade edildi",
-  "return_refunded.intro.return":
-    "#{{number}} numaralı siparişinizden iade ettiğiniz ürünlerin ödemesini geri gönderdik.",
-  "return_refunded.intro.exchange":
-    "#{{number}} numaralı siparişinizdeki değişimin farkını geri gönderdik.",
-  "return_refunded.amount": "İade tutarı",
-  "return_refunded.when": "Tutarın kartınıza yansıması bankanıza göre birkaç iş günü sürebilir.",
   "staff_reset.subject": "{{shop}} paneli şifrenizi yenileyin",
   "staff_reset.preheader": "{{shop}} yönetim paneli için şifre yenileme bağlantısı.",
   "staff_reset.heading": "Şifre yenileme isteği",

@@ -1,6 +1,8 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import type { ReturnVars } from "../../../lib/messaging/templates"
+import { cameBack } from "../../../lib/orders/returns"
+import type { RefusedLine } from "../../../lib/orders/withdrawal-rules"
 import { RETURN_REQUESTS_MODULE } from "../../../modules/return-requests"
 import type ReturnRequestsModuleService from "../../../modules/return-requests/service"
 import { messageAddonsOf } from "./line-addons"
@@ -57,22 +59,28 @@ export async function loadReturnMessage(
   }
   const lines = new Map(order.items.flatMap((item) => (item ? [[item.id, item]] : [])))
   const asked = request.items as unknown as { line_item_id: string; quantity: number }[]
+  const lineOf = (each: { line_item_id: string; quantity: number }) => {
+    const line = lines.get(each.line_item_id)
+    return {
+      title: firstText(line?.product_title, line?.title) ?? "",
+      detail: firstText(line?.variant_title),
+      quantity: each.quantity,
+      ...messageAddonsOf(line?.metadata),
+    }
+  }
+  // Units refused at receipt (adr/0032 Ek 2026-11-03); nothing until received
+  const refused = (request.refused_items ?? []) as unknown as RefusedLine[]
+  const received = request.received_items !== null || request.damaged_items !== null
   return {
     vars: {
       number: String(order.display_id),
       customerName: personName(order.shipping_address?.first_name) ?? GREETING,
       kind: request.kind,
-      items: asked.map((each) => {
-        const line = lines.get(each.line_item_id)
-        return {
-          title: firstText(line?.product_title, line?.title) ?? "",
-          detail: firstText(line?.variant_title),
-          quantity: each.quantity,
-          ...messageAddonsOf(line?.metadata),
-        }
-      }),
+      items: asked.map(lineOf),
       returnCode: request.return_code,
       amount: request.refund_amount === null ? null : liraOfKurus(request.refund_amount),
+      refused: refused.map((each) => ({ ...lineOf(each), reason: each.reason })),
+      taken: received && cameBack(request).length > 0,
     },
     // A request's messages go by e-mail: its lines and code read poorly in an SMS
     recipients: { email: order.email },

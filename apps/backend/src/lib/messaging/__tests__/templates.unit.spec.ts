@@ -99,3 +99,47 @@ describe("staff.contact_message", () => {
     expect(mail({ subject: "order" })?.text).not.toContain("30 gün")
   })
 })
+
+describe("return.refused (adr/0032 Ek 2026-11-03)", () => {
+  const template = MESSAGE_TEMPLATES["return.refused"]
+  const refusedOnly = {
+    ...template.sample,
+    items: [{ title: "Bakım yağı", detail: null, quantity: 2 }],
+    refused: [{ title: "Bakım yağı", detail: null, quantity: 2, reason: "unsealed" as const }],
+    taken: false,
+  }
+
+  it("names each refused unit and why, that it is not paid back, and where the goods go", () => {
+    const mail = template.email?.(refusedOnly, brand)
+
+    expect(template.channels).toEqual(["email"])
+    expect(mail?.subject).toBe("İadenizde kabul edilmeyen ürünler var (#1042)")
+    expect(mail?.text).toContain("2 × Bakım yağı")
+    expect(mail?.text).toContain("koruyucu ambalajı açılmış")
+    expect(mail?.text).toContain("bedeli iade edilmez")
+    expect(mail?.text).toContain("Ücreti mağazaya ait olmak üzere adresinize geri gönderilebilir")
+    expect(mail?.text).toContain("mağazadan teslim alabilirsiniz")
+    // Everything refused: no refund is coming, so none is promised
+    expect(mail?.text).not.toContain("ayrıca iade edilecek")
+  })
+
+  it("says the rest goes on when other units were taken back, by the request's kind", () => {
+    expect(template.email?.({ ...refusedOnly, taken: true }, brand).text).toContain(
+      "diğer ürünlerin ödemesi ayrıca iade edilecek"
+    )
+    const swap = template.email?.({ ...refusedOnly, kind: "exchange", taken: true }, brand)
+    expect(swap?.subject).toBe("Değişiminizde kabul edilmeyen ürünler var (#1042)")
+    expect(swap?.text).toContain("değişim sürüyor")
+  })
+
+  it("leaves the refused units out of the refund's message, saying so only when there were any", () => {
+    const refunded = MESSAGE_TEMPLATES["return.refunded"]
+    const note = "Kabul edilmeyen ürünler (koruyucu ambalajı açılmış) bu tutara dahil değildir."
+
+    expect(refunded.email?.(refunded.sample, brand).text).not.toContain(note)
+    expect(
+      refunded.email?.({ ...refunded.sample, refused: refusedOnly.refused, taken: true }, brand)
+        .text
+    ).toContain(note)
+  })
+})

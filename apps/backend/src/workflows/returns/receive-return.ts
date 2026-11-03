@@ -25,6 +25,7 @@ import { RETURN_REQUESTS_MODULE } from "../../modules/return-requests"
 import type ReturnRequestsModuleService from "../../modules/return-requests/service"
 import { refundOrderWorkflow } from "../orders/refund-order"
 import { returnsLockKey } from "../../lib/orders/locks"
+import { RETURN_REQUEST_REFUSED } from "./events"
 import { readReceiptRulesStep } from "./steps/receipt"
 import {
   readReturnRequestStep,
@@ -135,13 +136,17 @@ export const receiveReturnWorkflow = createWorkflow("returns-receive", (input: R
       },
     }))
   )
-  emitEventStep({
-    eventName: RETURN_RECEIVED,
-    data: transform({ received }, ({ received }) => ({
-      id: received.id,
-      order_id: received.order_id,
-      kind: received.kind,
-    })),
+  const announced = transform({ received }, ({ received }) => ({
+    id: received.id,
+    order_id: received.order_id,
+    kind: received.kind,
+  }))
+  emitEventStep({ eventName: RETURN_RECEIVED, data: announced })
+  // Units refused: the shopper is told which and why, the only word when nothing else came
+  when("returns-receive-refused", { input }, ({ input }) => input.refused.length > 0).then(() => {
+    emitEventStep({ eventName: RETURN_REQUEST_REFUSED, data: announced }).config({
+      name: "returns-emit-refused",
+    })
   })
   releaseLockStep({ key: lockKey })
   return new WorkflowResponse(received)
