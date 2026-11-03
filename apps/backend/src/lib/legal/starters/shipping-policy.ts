@@ -46,7 +46,7 @@ export const shippingPolicy: { title: string; content: Block[] } = {
       "Kargo ücreti ve varsa ücretsiz kargo koşulu, siparişinizi onaylamadan önce ödeme adımında gösterilir ve sipariş toplamına eklenir. Ödeme adımında gösterilmeyen bir kargo ücreti sizden istenmez (Yönetmelik md. 5/3, md. 19)."
     ),
     p(
-      "Cayma hakkını kullandığınızda siparişin kargo ücreti de iade edilir. İade kargosu ve iadede kargo ücretinin iadesine ilişkin kurallar İade ve Değişim Politikamızda yer alır."
+      "Cayma hakkını kullandığınızda siparişin kargo ücreti de iade edilir; siparişin yalnızca bir kısmını iade ettiğinizde de ilk iadenizle birlikte bir kez iade edilir. İade kodu ile anlaşmalı kargo firmamız aracılığıyla gönderdiğiniz iadelerde kargo ücreti sizden istenmez. Ayrıntılar İade ve Değişim Politikamızda yer alır."
     ),
     h2("6. Teslimat"),
     p(

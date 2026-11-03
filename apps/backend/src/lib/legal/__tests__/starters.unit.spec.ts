@@ -114,6 +114,36 @@ describe("the legal texts' starting drafts", () => {
     // No return cost with the seller's carrier, nor when none was named (md. 12)
     expect(html).toContain("iade masrafından sorumlu tutulamaz")
   })
+
+  it("says what the returns flow does since 1.1.2026 and leaves only the lawyer's questions in the notes", () => {
+    const parts = (kind: (typeof LEGAL_KINDS)[number]) => {
+      const [note, ...rest] = starterOf(kind).body.content
+      return { note: renderDoc(doc(note ? [note] : [])), text: renderDoc(doc(rest)) }
+    }
+    const notes = LEGAL_KINDS.map((kind) => parts(kind).note).join("\n")
+    const policy = parts("return_policy")
+    const contract = parts("distance_sales")
+
+    // adr/0032 Ek 2026-11-03: no customer-paid return option, the shipping
+    // refunded by law, the product mark read by the product's kind
+    expect(notes).not.toContain("İade kargosunu ödeyen")
+    expect(notes).not.toContain("kendiliğinden iade etmiyor")
+    expect(notes).not.toContain("henüz gösterilmiyor")
+    // A partial withdrawal's whole fee: what the platform does, still asked
+    expect(policy.text).toContain("ilk iadenizle birlikte bir kez iade edilir")
+    expect(contract.text).toContain("ilk iadeyle birlikte bir kez iade edilir")
+    expect(policy.note).toContain("Kısmi iadede gidiş kargo ücreti")
+    expect(contract.note).toContain("Kısmi iadede teslim masrafının tamamının iadesi")
+    // A sealed good opened is refused at receipt (md. 15/1-ç); digital and service are out
+    expect(policy.text).toContain(
+      "Koruyucu ambalajı açılmış olarak gelen hijyen ürünleri iade olarak kabul edilmez"
+    )
+    expect(contract.text).toContain("Koruyucu ambalajı açılmış olarak geri gönderilen bu ürünler")
+    expect(policy.text).toContain("(md. 15/1-ğ, h)")
+    // Who pays to send refused goods back, and the cash on delivery fee: open
+    expect(policy.note).toContain("Reddedilen ürünün müşteriye geri gönderim ücreti")
+    expect(policy.note).toContain("Kapıda ödeme bedeli")
+  })
 })
 
 describe("the shipping days' tokens", () => {

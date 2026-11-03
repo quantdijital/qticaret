@@ -10,7 +10,8 @@ import { BUYER, ORDER, SELLER, disputeRoutes } from "./shared"
  */
 const NOTE = draftNote([
   "İade için öngörülen taşıyıcının adı (7.5; Yönetmelik md. 5/1-g): mağaza ayarlarında yok, metne siz yazmalısınız.",
-  "Kısmi iadede gidiş kargo ücretinin iadesi (7.6) ve değer kaybı kesintisi (7.8, Yönetmelik md. 13/2).",
+  'Kısmi iadede teslim masrafının tamamının iadesi (7.6; platform ilk iadeyle bir kez iade ediyor ve metin bunu söylüyor), kapıda ödeme bedelinin "tahsil ettiği tüm ödemeler"e girip girmediği (7.6; platform bu bedeli iade tutarına kendiliğinden katmıyor) ve değer kaybı kesintisi (7.8, Yönetmelik md. 13/2; platformda yok).',
+  "Koruyucu ambalajı açılmış olarak geri gönderilen hijyen ürününün reddi (7.11; md. 15/1-ç): reddedilen ürünün Alıcıya geri gönderim ücretinin kime ait olduğu (platformun e-postası ücretin Satıcıya ait olduğunu söylüyor).",
   "Teslim edilemeyen ya da teslim alınmayan gönderinin (yanlış adres, adreste bulunmama, kapıda ödemeli gönderinin reddi) yeniden gönderim ücretinin kime ait olacağı (4.6).",
   "Fatura için vergi kimlik numarası veren tacir alıcılar: tüketici olmayan alıcılar için ayrı hükümler (cayma hakkı, yetkili mahkeme) gerekip gerekmediği.",
   "Delil maddesinin (13) tüketici aleyhine haksız şart sayılmaması için kapsamı (Kanun md. 5).",

@@ -5,15 +5,19 @@ import { WITHDRAWAL_EXCEPTIONS } from "./shared"
 /**
  * İade ve Değişim Politikası: how the shop runs withdrawal, returns and
  * exchanges (adr/0032, adr/0025, adr/0052), held to Yönetmelik md. 9–15
- * as in force since 1.1.2026. The return shipping rule is the law's
- * (md. 12), whatever the shop's `return_shipping` setting says.
+ * as in force since 1.1.2026 and to what the platform does (adr/0032 Ek
+ * 2026-11-03): the return parcel always at the shop's cost (md. 12/5), a
+ * withdrawal's outbound shipping refunded once, a part of the order too
+ * (md. 12/1), a physical product's mark a sealed good refused at receipt
+ * if opened (md. 15/1-ç), a digital or service one's an exclusion.
  */
 const NOTE = draftNote([
-  'Ayarlar > Kargo ve teslimat > İade\'deki "İade kargosunu ödeyen: Müşteri" seçeneği: Yönetmelik md. 12 uyarınca satıcının belirttiği taşıyıcıyla yapılan cayma iadelerinde alıcıdan masraf istenemez. Bu metin yasal kurala göre yazıldı ve bu seçenekten bağımsızdır; seçenek yalnızca yasal zorunluluk dışındaki iadeler için anlam taşır.',
-  "İade için öngörülen kargo firmasının adı (4. madde; md. 5/1-g): mağaza ayarlarında yok.",
-  'Siparişin bir kısmı iade edildiğinde gidiş kargo ücretinin iadesi (6. madde). Platformun iade akışı kargo ücretini kendiliğinden iade etmiyor; personel teslim almada "kargo ücretini de iade et"i seçmeli.',
-  "Değer kaybı kesintisi (5. madde; md. 13/2) yapılıp yapılmayacağı ve nasıl belgeleneceği.",
-  'Ürün düzeyinde "cayma hakkı dışında" işaretlediğiniz ürünler: hijyen istisnası yalnızca koruyucu ambalajı açılmış ürünlerde geçerlidir; platformdaki işaret ürünü ambalajı açılmamış olsa da iade dışı tutuyor ve vitrinde ürün sayfasında henüz gösterilmiyor.',
+  "İade için öngörülen kargo firmasının adı (4. madde; md. 5/1-g): mağaza ayarlarında yok. İade kargosu her zaman mağazanın hesabından açılır; platformda müşterinin ödediği bir iade kargosu seçeneği yoktur (md. 12/5).",
+  "Kısmi iadede gidiş kargo ücreti (6. madde): siparişin yalnızca bir kısmı iade edildiğinde de platform siparişin kargo ücretinin tamamını ilk iadeyle bir kez iade ediyor ve metin bunu söylüyor. Yönetmeliğin kısmi iadede ücretin tamamının iadesini gerektirip gerektirmediği; gerektirmiyorsa bu bir mağaza tercihi olur.",
+  'Kapıda ödeme bedeli (6. madde): metin, cayıldığında bu bedelin de iade edileceğini söylüyor; platform bugün bu bedeli iade tutarına kendiliğinden katmıyor, personelin ayrıca iade etmesi gerekiyor. Bedelin md. 12/1\'deki "tahsil ettiği tüm ödemeler"e girip girmediği.',
+  "Değer kaybı kesintisi (5. madde; md. 13/2) yapılıp yapılmayacağı ve nasıl belgeleneceği. Platformda kesinti yok.",
+  'Ürün düzeyinde "cayma hakkı dışında" işaretlediğiniz ürünler (2. ve 5. madde): fiziksel üründe işaret hijyen uyarısıdır. Talep kabul edilir, koruyucu ambalajı açılmış gelen ürün teslim almada reddedilir, bedeli iade edilmez ve müşteriye e-postayla bildirilir (md. 15/1-ç). Dijital ürün ve hizmette işaret cayma hakkını kaldırır (md. 15/1-ğ, h); hizmette ifaya cayma süresi içinde alıcının onayıyla başlanması gerekir. Bu işaretin ürün sayfasında siparişten önce gösterildiğini kontrol edin (md. 5/1-h, md. 6/2).',
+  "Reddedilen ürünün müşteriye geri gönderim ücreti (5. madde): platformun müşteriye giden e-postası ürünün ücreti mağazaya ait olmak üzere geri gönderilebileceğini ya da mağazadan teslim alınabileceğini söylüyor. Ücretin müşteriden istenip istenemeyeceği.",
   "Hediye kartlarında cayma kuralı (2. madde): kartlardan harcama yapılmadıkça cayma var. md. 15/1-ğ karşısında yeterliliği.",
   "Kapıda ödeme ve havale iadelerinde banka hesabı (IBAN) istenmesi ve hesabın alıcı adına olması şartı (6. madde).",
   "İade talebi formu cayma süresi dolunca kapanıyor; ayıplı ürün başvuruları bu süreden sonra e-posta veya telefonla alınıyor (8. madde).",
@@ -35,7 +39,8 @@ export const returnPolicy: { title: string; content: Block[] } = {
     WITHDRAWAL_EXCEPTIONS,
     bullets([
       "Kişiye özel ürünler: Ürün üzerine yazı gibi, ürün sayfasında kişiye özel olduğu belirtilen bir seçenekle hazırlanan ürünlerde cayma hakkı yoktur (md. 15/1-b). Bu ürünler yalnızca ayıplı veya yanlış gönderildiyse iade edilebilir; değişim yapılmaz.",
-      "Hijyen ürünleri: Koruyucu ambalajı açılmamış ürünlerde cayma hakkınız devam eder; ambalajı açıldıktan sonra iadesi sağlık ve hijyen açısından uygun olmayan ürünlerde cayma hakkı yoktur (md. 15/1-ç).",
+      "Hijyen ürünleri: Ürün sayfasında koruyucu ambalajı açıldığında iade alınmadığı belirtilen ürünlerde, ambalaj açılmadığı sürece cayma hakkınız devam eder. Koruyucu ambalajı açılmış olarak geri gönderilen bu ürünler, iadesi sağlık ve hijyen açısından uygun olmadığından kabul edilmez (md. 15/1-ç; 5. madde).",
+      "Dijital ürünler ve hizmetler: Ürün sayfasında cayma hakkı dışında olduğu belirtilen dijital içerik size teslim edildikten, hizmet ise cayma süresi içinde onayınızla ifasına başlandıktan sonra cayma hakkı kullanılamaz (md. 15/1-ğ, h).",
       "Hediye kartları: Kartlar alıcısına e-postayla gönderildiği günden itibaren {iade_süresi} gün içinde ve kartlardan hiç harcama yapılmamışsa cayma hakkınızı kullanabilirsiniz; bu durumda kartlar kapatılır ve ödediğiniz tutar iade edilir. Aynı ürün satırındaki kartlardan birinin bakiyesi kullanıldıktan sonra o ürün için cayma hakkı kullanılamaz. Hediye kartlarının son kullanma tarihi yoktur.",
     ]),
     h2("3. İade Talebi Nasıl Oluşturulur?"),
@@ -52,7 +57,7 @@ export const returnPolicy: { title: string; content: Block[] } = {
     ),
     h2("4. Ürünün Gönderilmesi"),
     p(
-      "Ürünü, taşıma sırasında zarar görmeyecek şekilde paketleyin; varsa aksesuarlarını, kullanım kılavuzunu ve birlikte gönderilen hediyeleri de ekleyin. İade gönderimi, iade kodu ile anlaşmalı kargo firmamız aracılığıyla yapılır. Bu yolla gönderdiğiniz iadelerde kargo ücreti sizden istenmez (Yönetmelik md. 12)."
+      "Ürünü, taşıma sırasında zarar görmeyecek şekilde paketleyin; varsa aksesuarlarını, kullanım kılavuzunu ve birlikte gönderilen hediyeleri de ekleyin. İade gönderimi, iade kodu ile anlaşmalı kargo firmamız aracılığıyla yapılır. Bu yolla gönderdiğiniz iade ve değişimlerde kargo ücreti sizden istenmez (Yönetmelik md. 12)."
     ),
     p(
       "Anlaşmalı kargo firmamızın bulunduğunuz yerde şubesi yoksa bize bildirin; ürün sizden ek ücret istenmeden alınır. Ürünü kendi seçtiğiniz başka bir kargo firmasıyla gönderirseniz gönderim ücreti size aittir."
@@ -61,9 +66,12 @@ export const returnPolicy: { title: string; content: Block[] } = {
     p(
       "İade edilen ürün bize ulaştığında kontrol edilir. Cayma süresi içinde ürünün işleyişine, teknik özelliklerine ve kullanım talimatlarına uygun kullanımından doğan değişiklik ve bozulmalardan sorumlu değilsiniz (md. 13/2). Ürünün kontrolü, para iadesinin yasal süresini durdurmaz."
     ),
+    p(
+      "Koruyucu ambalajı açılmış olarak gelen hijyen ürünleri iade olarak kabul edilmez ve bedelleri iade edilmez; iadenizdeki diğer ürünlerin işlemi devam eder. Kabul edilmeyen ürünler size e-postayla bildirilir. Bu ürünler size aittir: ücreti tarafımızca karşılanarak adresinize geri gönderilebilir ya da bizden teslim alabilirsiniz; tercihinizi bize bildirin."
+    ),
     h2("6. Para İadesi"),
     p(
-      "Cayma hakkınızı kullandığınızda, siparişin kargo ücreti ve varsa kapıda ödeme bedeli dahil olmak üzere ödediğiniz tüm tutar en geç 14 gün içinde iade edilir. Bu süre; ürün teslim edildikten sonra cayıldıysa ürünü iade kodu ile anlaşmalı kargo firmamıza teslim ettiğiniz tarihten, başka bir kargo firmasıyla gönderdiyseniz ürünün bize ulaştığı tarihten, ürün teslim edilmeden cayıldıysa bildiriminizin bize ulaştığı tarihten başlar (Yönetmelik md. 12)."
+      "Cayma hakkınızı kullandığınızda, iade ettiğiniz ürünlerin bedeli, siparişin kargo ücreti ve varsa kapıda ödeme bedeli dahil olmak üzere ödediğiniz tüm tutar en geç 14 gün içinde iade edilir. Siparişin yalnızca bir kısmını iade ettiğinizde de siparişin kargo ücreti ilk iadenizle birlikte bir kez iade edilir. Bu süre; ürün teslim edildikten sonra cayıldıysa ürünü iade kodu ile anlaşmalı kargo firmamıza teslim ettiğiniz tarihten, başka bir kargo firmasıyla gönderdiyseniz ürünün bize ulaştığı tarihten, ürün teslim edilmeden cayıldıysa bildiriminizin bize ulaştığı tarihten başlar (Yönetmelik md. 12)."
     ),
     bullets([
       "Kredi veya banka kartıyla yapılan ödemeler aynı karta iade edilir; tutar, kartı çıkaran kuruluşça kartınıza yansıtılır. Taksitli alışverişlerde iade tek seferde yapılır.",

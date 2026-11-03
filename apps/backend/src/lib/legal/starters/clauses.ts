@@ -41,7 +41,7 @@ export function withdrawalClause(n: string): Block[] {
       `${n}.5. İade gönderimi, iade talebi onaylandığında Alıcıya iletilen iade kodu ile Satıcının iade için anlaşmalı olduğu kargo firması aracılığıyla yapılır. Alıcı ürünü bu taşıyıcıyla gönderdiğinde iade masrafından sorumlu tutulamaz. Satıcı iade için bir taşıyıcı belirtmemişse Alıcıdan iade masrafı istenemez; belirtilen taşıyıcının Alıcının bulunduğu yerde şubesi yoksa Satıcı, ürünün Alıcıdan ek bir masraf istenmeksizin alınmasını sağlar (Yönetmelik md. 12).`
     ),
     p(
-      `${n}.6. Satıcı, teslim masrafları da dahil olmak üzere tahsil ettiği tüm ödemeleri en geç 14 gün içinde iade eder. Bu süre; ürün teslim edildikten sonra cayıldıysa ürünün Satıcının iade için belirlediği taşıyıcıya teslim edildiği tarihten, Alıcı ürünü başka bir taşıyıcıyla gönderdiyse ürünün Satıcıya ulaştığı tarihten, ürün teslim edilmeden cayıldıysa cayma bildiriminin Satıcıya ulaştığı tarihten başlar (Yönetmelik md. 12).`
+      `${n}.6. Satıcı, teslim masrafları da dahil olmak üzere tahsil ettiği tüm ödemeleri en geç 14 gün içinde iade eder. Bu süre; ürün teslim edildikten sonra cayıldıysa ürünün Satıcının iade için belirlediği taşıyıcıya teslim edildiği tarihten, Alıcı ürünü başka bir taşıyıcıyla gönderdiyse ürünün Satıcıya ulaştığı tarihten, ürün teslim edilmeden cayıldıysa cayma bildiriminin Satıcıya ulaştığı tarihten başlar (Yönetmelik md. 12). Siparişin yalnızca bir kısmı için cayıldığında da siparişin teslim masrafı ilk iadeyle birlikte bir kez iade edilir.`
     ),
     p(
       `${n}.7. İade, Alıcının ödemede kullandığı ödeme aracına uygun şekilde, tek seferde ve Alıcıya herhangi bir masraf veya yükümlülük getirilmeden yapılır. Kredi veya banka kartıyla yapılan ödemelerin iadesi kartı çıkaran kuruluşça karta yansıtılır. Hediye kartı veya mağaza kredisiyle ödenen kısım aynı karta ya da krediye geri yüklenir. Kapıda ödeme veya havale/EFT ile yapılan ödemeler, Alıcının bildireceği ve Alıcı adına kayıtlı banka hesabına havale/EFT ile iade edilir.`
@@ -58,7 +58,7 @@ export function withdrawalClause(n: string): Block[] {
     ),
     WITHDRAWAL_EXCEPTIONS,
     p(
-      `${n}.11. Bu istisnalara giren ürünler ürün sayfasında belirtilir. Koruyucu ambalajı açılmamış ürünlerde ${n}.10'daki sağlık ve hijyen istisnası uygulanmaz. Siparişte Alıcının isteğiyle kişiye özel hazırlanan ürünler veya hediye kartları bulunuyorsa, bunlar ve bunlarda cayma hakkının nasıl uygulanacağı bu maddenin sonunda ayrıca sayılır.`
+      `${n}.11. Bu istisnalara giren ürünler ürün sayfasında belirtilir. Koruyucu ambalajı açılmamış ürünlerde ${n}.10'daki sağlık ve hijyen istisnası uygulanmaz. Koruyucu ambalajı açılmış olarak geri gönderilen bu ürünler iade olarak kabul edilmez, bedelleri iade edilmez ve durum Alıcıya bildirilir; ürünler Alıcıya geri gönderilir ya da Alıcı tarafından teslim alınır. Siparişte Alıcının isteğiyle kişiye özel hazırlanan ürünler veya hediye kartları bulunuyorsa, bunlar ve bunlarda cayma hakkının nasıl uygulanacağı bu maddenin sonunda ayrıca sayılır.`
     ),
   ]
 }
