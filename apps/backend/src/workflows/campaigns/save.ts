@@ -45,7 +45,9 @@ export async function campaignOf(service: Service, id: string) {
 const createCampaignStep = createStep(
   "campaigns-create",
   async (input: CampaignDraft & { created_by: string | null }, { container }) => {
-    await checkContent(container, input)
+    // The code first: the text is counted with the utm its links will carry
+    const utmCampaign = utmCodeOf(input.name)
+    await checkContent(container, input, utmCampaign)
     const created = await serviceOf(container).createBulkMessages({
       name: input.name,
       channel: input.channel,
@@ -54,7 +56,7 @@ const createCampaignStep = createStep(
       preheader: input.preheader,
       body: input.body as unknown as Record<string, unknown> | null,
       sms_text: input.sms_text,
-      utm_campaign: utmCodeOf(input.name),
+      utm_campaign: utmCampaign,
       status: "draft",
       counts: emptyCounts() as unknown as Record<string, unknown>,
       created_by: input.created_by,
@@ -101,7 +103,7 @@ const updateCampaignStep = createStep(
           : (current.body as unknown as ContentDoc | null),
       sms_text: input.changes.sms_text !== undefined ? input.changes.sms_text : current.sms_text,
     }
-    await checkContent(container, merged)
+    await checkContent(container, merged, current.utm_campaign)
     const previous = Object.fromEntries(EDITABLE.map((field) => [field, current[field]]))
     await service.updateBulkMessages({
       id: input.id,

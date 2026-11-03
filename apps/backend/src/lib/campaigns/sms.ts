@@ -11,6 +11,22 @@
 /** At most this many parts a campaign's text may take. */
 export const SMS_MAX_PARTS = 3
 
+/**
+ * The longest first name a message greets anyone with: personName()
+ * (workflows/messaging/loaders/types.ts, adr/0036 Ek) gives a longer one
+ * the greeting instead.
+ */
+export const LONGEST_FIRST_NAME = 40
+
+/**
+ * What stands in for `{ad}` when a text is counted (adr/0050 §4): the
+ * longest name, every letter one the Turkish table sends in two septets,
+ * so no name takes more of the text in its alphabet. A name with a letter
+ * outside the table (â, î, û, …) sends the whole text as UCS-2; that the
+ * count does not foresee.
+ */
+export const LONGEST_NAME = "ş".repeat(LONGEST_FIRST_NAME)
+
 // GSM 03.38 default alphabet (the characters a phone shows), less the escape
 const GSM_BASIC = new Set(
   [

@@ -22,6 +22,7 @@ import { currentSenderDomain } from "../messaging/sender-domain"
 import { resolveAudience } from "./audience"
 import { assertComplete } from "./content"
 import { campaignOf } from "./save"
+import { assertSmsFits } from "./sms-length"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -61,14 +62,19 @@ const serviceOf = (container: Container) =>
   container.resolve<CampaignsModuleService>(CAMPAIGNS_MODULE)
 
 /**
- * Ready to go: its content complete, its channel able to carry it, and
+ * Ready to go: its content complete, a text within its parts as it would
+ * go now (a copy's utm code, the shop's name or opt-out line may have
+ * changed it since it was saved), its channel able to carry it, and
  * someone to receive it now, counted exactly as the live count counts
  * (`audience-preview`, resolveAudience). The job fixes the list again on
  * its first turn; a campaign that would reach nobody is refused here.
  */
-async function assertReady(container: Container, id: string) {
+async function assertReady(container: MedusaContainer, id: string) {
   const campaign = await campaignOf(serviceOf(container), id)
   assertComplete(campaign)
+  if (campaign.channel === "sms") {
+    await assertSmsFits(container, campaign)
+  }
   const blocker = await channelBlocker(container, campaign.channel)
   if (blocker) {
     throw new ValidationError(blocker)

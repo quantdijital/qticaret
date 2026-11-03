@@ -61,7 +61,7 @@ Rakiplerin hepsinde var, bizde yok: mağaza bir segmente kampanya e-postası ya 
      Metin danışman onayına işaretli kalır.
    - **Bağlantılar:** yalnız mağaza alan adındakilere `utm_source=magaza&utm_medium=email|sms&utm_campaign=<kod>` eklenir.
    - **SMS:**
-     - düz metin, en çok 3 parça;
+     - düz metin, en çok 3 parça. Parça gidecek metinle sayılır (`smsPartsOf`, ek 2026-11-03): mağaza bağlantılarının utm'si, mağaza adı ve ret metni dahil, `{ad}` yerine en uzun ad;
      - panel karakter ve parça sayar (Netgsm'in Türkçe kodlama kuralı görevin başında resmî belgeden doğrulanır);
      - sonuna mağaza adı ve ret metni kendiliğinden eklenir. Ret metni Ayarlar > SMS'te girilir; girilmemişse SMS gönderimi açılmaz.
    - **Şablon:** yeni `marketing.campaign` (ticari; e-posta ve SMS; `retry: true`). Yükleyicisi kampanyayı ve alıcıyı kimliklerden okur. Kullanılmayan `marketing.announcement` kalkar.
@@ -187,7 +187,7 @@ Kararlar önerildiği gibi uygulandı: bülten abonelerine gönderilir (şifreli
 - `GET /admin/bulk-messages?status&channel&limit&offset`, `POST /admin/bulk-messages`;
 - `GET`, `POST` (yalnız taslak) ve `DELETE` (yalnız taslak) `/admin/bulk-messages/:id`;
 - `POST /:id/audience-preview`, gövde `{ channel?, audience? }`: `{ audience, eligible, excluded: { no_consent, suppressed, iys_pending, recent, invalid_recipient, over_quota }, quota: { limit, left, today, later }, sms: { parts, max_parts } | null }`;
-- `POST /:id/test-send` `{}`, `POST /:id/schedule` `{ scheduled_at }`, `POST /:id/send` `{}`; son ikisi yeniden doğrulama ister (428) ve kitle kimseye ulaşmıyorsa 400 `campaigns.audience_empty` döner;
+- `POST /:id/test-send` `{}`, `POST /:id/schedule` `{ scheduled_at }`, `POST /:id/send` `{}`; son ikisi yeniden doğrulama ister (428), SMS metni şu an 3 parçayı aşıyorsa 400 `campaigns.sms_too_long`, kitle kimseye ulaşmıyorsa 400 `campaigns.audience_empty` döner;
 - `GET /:id/preview?channel=email|sms`: e-postada `{ subject, preheader, html }`, SMS'te `{ text, parts }`;
 - `POST /:id/{pause,resume,cancel}` `{}`, `POST /:id/copy` `{ name? }`;
 - `GET /:id/report`: `counts` (`audience`, `targeted`, `pending`, `sent`, `failed`, `skipped` nedenleriyle, `bounces`, `complaints`, `unsubscribed`) ve `traffic` (`carts`, `orders`, `revenue`).
@@ -219,7 +219,7 @@ Kitle bir kaynak dizisidir: `[{ kind: "segment" | "group", id }, { kind: "all_co
   - Örnek alıcı isteyen personelin kendisidir: `{ad}` yerine kendi adı, adı yoksa "Değerli müşterimiz". Hiçbir müşteri kaydı okunmaz; hiçbir şey gönderilmez ya da kotaya sayılmaz.
   - İşleyici gönderimle aynıdır: `prepareCampaign → personalise → renderCampaign`. `renderCampaign`, deliver()'ın her gönderimde yaptığı şablon çağrısıdır; deneme gönderimi de artık onu kullanır. Mağaza belirteçleri, ürün fiyatları, yollar ve utm gönderimdeki gibi okunur; alt bilgi ve çıkış satırı yerindedir. `[Deneme]` öneki yoktur.
   - Çıkış bağlantısı ölüdür: belirteci `preview`. İmzalı belirteç biçiminde olmadığı için çıkış sayfası ve tek tık çıkış onu reddeder.
-  - SMS'te `parts`, arka ucun sayacıyla (`smsLength`) gösterilen metnin parça sayısıdır.
+  - SMS'te `parts`, kayıttaki denetimin ve `audience-preview`'ın sayısıdır (`longestSms`, aşağıdaki kapanan madde): en uzun adla gidecek metin. Gösterilen metin personelin adını taşır; daha kısa olabilir.
   - `Cache-Control: no-store`. Kampanyayı okuyan her rol görebilir (`operations` dahil). Hız sınırı deneme gönderimi gibi personel başına sayılır; bir şey göndermediği için daha geniştir: 10 dakikada 60.
 - **Teslim sayısı yok.** Resend kancası yalnız kalıcı geri dönüşü ve şikâyeti bastırma listesine yazar. `email.delivered` olayı alınıp bırakılır, ileti başına kaydedilmez. Bu yüzden raporda `delivered` yoktur. Eklemek için kancanın teslim olayını iletiyle eşleştirip yazması gerekir (Resend'in ileti kimliği ↔ Medusa bildirimi); ayrı iş.
 
@@ -249,5 +249,11 @@ Kitle bir kaynak dizisidir: `[{ kind: "segment" | "group", id }, { kind: "all_co
 - Resend'in saniyede 2 isteklik sınırı canlı hesapta doğrulanacak.
 - adr/0038 M11'e amaç genişlemesi notu eklenecek. KVKK envanterine eklendi.
 - Alt bilgi ve ret metni danışman onayı bekliyor.
-- SMS parça sayacı (`smsPartsOf`: kayıttaki 3 parça denetimi ve `audience-preview`'daki `sms.parts`) mağaza bağlantılarına eklenen utm'yi saymıyor, `{ad}` için de 18 harflik selamlamayı kullanıyor (müşteri adı 40 harfe kadar olabilir). Bağlantılı bir metin 3 parçada kabul edilip 4 parça gidebilir. Önizlemedeki `parts` gidecek metni sayar; ikisi bağlantılı metinde ayrışabilir. Öneri: sayaç da `prepareCampaign` üzerinden saysın.
+- ~~SMS parça sayacı (`smsPartsOf`: kayıttaki 3 parça denetimi ve `audience-preview`'daki `sms.parts`) mağaza bağlantılarına eklenen utm'yi saymıyor, `{ad}` için de 18 harflik selamlamayı kullanıyor (müşteri adı 40 harfe kadar olabilir). Bağlantılı bir metin 3 parçada kabul edilip 4 parça gidebilir. Önizlemedeki `parts` gidecek metni sayar; ikisi bağlantılı metinde ayrışabilir.~~ Kapandı (2026-11-03):
+  - Tek sayaç var: `workflows/campaigns/sms-length.ts` `longestSms`. Metni gönderimdeki gibi kurar (`prepareCampaign → personalise → renderCampaign`): mağaza bağlantılarına kampanyanın utm'si eklenir, mağaza adı ve ret metni yazılır, sonra `smsLength` sayar.
+  - Kayıttaki denetim (`checkContent`), `audience-preview`'daki `sms.parts` ve önizlemenin `parts`'ı bu işlevi kullanır; üçü ayrışamaz. Kayıtta utm kodu önce üretilir, metin onunla sayılır; düzenlemede kayıttaki kod kullanılır. Eşik değişmedi: 3 parçayı aşan metin 400 `campaigns.sms_too_long`.
+  - `{ad}` yerine en uzun ad konur: 40 harf (`LONGEST_FIRST_NAME`). Bu sınır `personName()`'den gelir (`workflows/messaging/loaders/types.ts`, adr/0036 Ek): daha uzun ad iletiye girmez, yerine selamlama yazılır. Medusa'nın Store müşteri doğrulayıcısı ad uzunluğunu sınırlamıyor (`StoreCreateCustomer`: `first_name: z.string().nullish()`, Context7 ile bakıldı), bizim uçlarımız da sınırlamıyor; iletiye giren adın sınırı budur. Her harf Türkçe tablonun iki karakterlik harfidir (`ş`): 80 karakter. Böylece GSM metninde hiçbir ad sayılandan uzun metin çıkarmaz.
+  - Sayı en kötü durumdur. Adı kısa alıcıya giden metin daha kısa, belki daha az parçadır; alıcı başına sayılmaz, faturadaki parça sayısı alıcıya göre değişir.
+  - Gönder ve Zamanla da aynı denetimi yapar (`assertReady`). Kayıttan sonra metni uzatabilecek şeyler: kopyanın yeni ve daha uzun utm kodu, mağaza adı, ret metni ya da alan adı değişikliği. Zamanlanmış kampanya gönderim anında yeniden sayılmaz.
+  - Kalan: GSM-TR tablosunda olmayan harf taşıyan bir ad (â, î, û, yabancı harfler) bütün metni UCS-2'ye çevirir (parça başına 70/67). Sayaç bunu öngörmez; o alıcıya metin daha çok parça gidebilir. Netgsm'in `encoding=TR` ile bu harflere ne yaptığı doğrulanmadı (yukarıdaki madde).
 

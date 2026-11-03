@@ -1,12 +1,12 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
-import { smsLength } from "../../lib/campaigns/sms"
 import type { CampaignChannel } from "../../lib/campaigns/types"
 import { emailLinkUrl } from "../../lib/messaging/links"
 import { CAMPAIGNS_MODULE } from "../../modules/campaigns"
 import { brandOf } from "../messaging/brand"
 import { personalise, prepareCampaign, renderCampaign } from "./prepare"
 import { campaignOf } from "./save"
+import { longestSms } from "./sms-length"
 
 /**
  * The token a preview's way out carries: the link where it would be, in
@@ -51,8 +51,9 @@ export async function campaignPreview(
   const leave = emailLinkUrl("unsubscribe", PREVIEW_UNSUBSCRIBE_TOKEN, brand.storefrontUrl)
   const rendered = renderCampaign(channel, vars, brand, leave)
   if (rendered.channel === "sms") {
-    // The parts as the backend counts them, for the text as it would go
-    return { text: rendered.text, parts: smsLength(rendered.text).parts }
+    // The parts as the save check and audience-preview count them: at the
+    // longest name, so the shown text (the staff member's name) may be shorter
+    return { text: rendered.text, parts: longestSms(prepared, brand).parts }
   }
   return { subject: rendered.email.subject, preheader: vars.preheader, html: rendered.email.html }
 }

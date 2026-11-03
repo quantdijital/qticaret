@@ -3,9 +3,9 @@ import { SMS_MAX_PARTS } from "../../../../../lib/campaigns/sms"
 import type { CampaignSource } from "../../../../../lib/campaigns/types"
 import { CAMPAIGNS_MODULE } from "../../../../../modules/campaigns"
 import { resolveAudience } from "../../../../../workflows/campaigns/audience"
-import { smsPartsOf } from "../../../../../workflows/campaigns/content"
 import { quotaLeft } from "../../../../../workflows/campaigns/quota"
 import { campaignOf } from "../../../../../workflows/campaigns/save"
+import { smsPartsOf } from "../../../../../workflows/campaigns/sms-length"
 import type { AdminPreviewCampaignAudienceType } from "../../validators"
 
 /**
@@ -37,7 +37,7 @@ export async function POST(
     quota: { limit: quota.limit, left: quota.left, today, later: eligible - today },
     sms:
       channel === "sms" && campaign.sms_text
-        ? { parts: await smsPartsOf(req.scope, campaign.sms_text), max_parts: SMS_MAX_PARTS }
+        ? { parts: await smsPartsOf(req.scope, campaign), max_parts: SMS_MAX_PARTS }
         : null,
   })
 }
