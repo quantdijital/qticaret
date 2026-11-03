@@ -1,4 +1,4 @@
-import { CircleAlert, FlaskConical, Loader2, Play } from "lucide-react"
+import { FlaskConical, Info, Loader2, Play } from "lucide-react"
 import type { ComponentProps } from "react"
 import { useTranslation } from "react-i18next"
 import { Field } from "@/components/patterns/form-section"
@@ -13,22 +13,26 @@ const R = "settings.migration.run"
 interface ParcelFieldsProps {
   /** Each input's value and change, or a form's registration of it. */
   inputProps: (field: ParcelField) => ComponentProps<typeof Input>
-  /** In place of the hint: why this source's products are likely to need it. */
-  warning?: string | undefined
+  /** In place of the hint: what this source's products are likely to lack, and what happens then. */
+  note?: string | undefined
   /** An i18n'd sentence: the four values do not make a parcel. */
   error?: string | undefined
 }
 
-/** The owner's parcel for products without measurements: grams and cm, all four or none. */
-export function ParcelFields({ inputProps, warning, error }: ParcelFieldsProps) {
+/**
+ * The owner's optional parcel for products without measurements, written
+ * into their own fields: grams and cm, all four or none. Without it they
+ * come as the source has them and ship as the shop's default parcel (adr/0054).
+ */
+export function ParcelFields({ inputProps, note, error }: ParcelFieldsProps) {
   const { t } = useTranslation()
   return (
     <fieldset className="flex flex-col gap-2">
       <legend className="text-sm font-medium">{t(`${R}.parcel.title`)}</legend>
-      {warning ? (
-        <p className="flex items-start gap-2 rounded-md bg-warning-soft px-3 py-2 text-[13px] text-warning-text">
-          <CircleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-          {warning}
+      {note ? (
+        <p className="flex items-start gap-2 rounded-md bg-muted/60 px-3 py-2 text-[13px] text-muted-foreground">
+          <Info className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
+          {note}
         </p>
       ) : (
         <p className="text-[13px] text-muted-foreground">{t(`${R}.parcel.hint`)}</p>

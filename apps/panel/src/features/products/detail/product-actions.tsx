@@ -18,7 +18,8 @@ import { errorText } from "@/lib/errors"
 /**
  * Publish or take back, the page's one main action; deleting sits in the
  * menu behind a question (docs/06 §6). The server holds the publish rules
- * (F3.1 measures), so a refusal comes back as its sentence.
+ * (the SEO gate; measures are optional, adr/0054), so a refusal comes
+ * back as its sentence.
  */
 export function ProductActions({ product }: { product: ProductDetail }) {
   const { t } = useTranslation()

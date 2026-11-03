@@ -30,8 +30,13 @@ describe("readiness", () => {
     expect(canPublish(items)).toBe(true)
   })
 
-  it("blocks publishing without measures or a price, but not without advice", () => {
-    expect(canPublish(readiness({ ...complete(), height: "" }))).toBe(false)
+  it("blocks publishing without a price, but not without measures or advice (adr/0054)", () => {
+    const unmeasured = readiness({ ...complete(), height: "" })
+    expect(canPublish(unmeasured)).toBe(true)
+    expect(unmeasured.find((item) => item.key === "measures")).toMatchObject({
+      done: false,
+      required: false,
+    })
     expect(canPublish(readiness({ ...complete(), variants: [{ ...variant, price: "0" }] }))).toBe(
       false
     )

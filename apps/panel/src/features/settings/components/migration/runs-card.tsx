@@ -1,10 +1,14 @@
 import { useQuery } from "@tanstack/react-query"
+import { Loader2, RotateCcw } from "lucide-react"
 import { useTranslation } from "react-i18next"
+import { toast } from "sonner"
 import { StatusBadge } from "@/components/patterns/status-badge"
 import type { StatusTone } from "@/components/patterns/status-badge"
+import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
-import { migrationRunsQuery } from "@/features/settings/api/migration"
-import type { MigrationRun } from "@/features/settings/api/migration"
+import { migrationRunsQuery, useRestartMigration } from "@/features/settings/api/migration"
+import type { MigrationJob, MigrationRun } from "@/features/settings/api/migration"
+import { errorText } from "@/lib/errors"
 import { formatCount, formatDateTime } from "@/lib/format"
 
 const R = "settings.migration.runs"
@@ -18,13 +22,38 @@ const SOURCE_KINDS = ["shopify", "wordpress", "feed", "customers", "bundle"] as 
 const sourceOf = (source: string) =>
   SOURCE_KINDS.find((kind) => source === kind || source.startsWith(`${kind}:`)) ?? "bundle"
 
+// Its worker stopped half-way (a crash, a restart): started again from its file, or already
+const halfWay = (run: MigrationRun) =>
+  run.status === "failed" && (run.error_code === "interrupted" || run.error_code === "restarted")
+
 // The runs a glance takes in; older ones are on the jobs page
 const SHOWN = 5
 
-/** The latest runs, newest first: their source, mode, state and what moved. */
-export function RecentRuns() {
+interface RecentRunsProps {
+  /** A run started again: its job, for the card to follow. */
+  onStarted?: (job: MigrationJob) => void
+  /** Another run is under way: nothing starts beside it. */
+  busy?: boolean
+}
+
+/**
+ * The latest runs, newest first: their source, mode, state and what moved.
+ * One its worker left half-way says so and can be started again from its
+ * stored file (or, when that is gone, says to upload it again).
+ */
+export function RecentRuns({ onStarted, busy = false }: RecentRunsProps) {
   const { t } = useTranslation()
   const runs = useQuery(migrationRunsQuery())
+  const restart = useRestartMigration()
+  const again = (run: MigrationRun) => {
+    restart.mutate(run.id, {
+      onSuccess: (job) => {
+        toast.success(t(`${R}.restarted`))
+        onStarted?.(job)
+      },
+      onError: (failure) => toast.error(errorText(t, failure)),
+    })
+  }
   return (
     <section className="flex flex-col gap-2" aria-labelledby="migration-runs">
       <h3 id="migration-runs" className="text-sm font-medium">
@@ -54,9 +83,31 @@ export function RecentRuns() {
                     products: formatCount(run.counts["product"]?.read ?? 0),
                     customers: formatCount(run.counts["customer"]?.read ?? 0),
                   })}
+                  {run.error_code === "restarted" ? ` · ${t(`${R}.restartedNote`)}` : null}
                 </p>
               </div>
-              <StatusBadge tone={TONES[run.status]}>{t(`${R}.statuses.${run.status}`)}</StatusBadge>
+              <div className="flex shrink-0 items-center gap-2">
+                {run.error_code === "interrupted" ? (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={busy || restart.isPending}
+                    onClick={() => {
+                      again(run)
+                    }}
+                  >
+                    {restart.isPending && restart.variables === run.id ? (
+                      <Loader2 className="animate-spin" />
+                    ) : (
+                      <RotateCcw />
+                    )}
+                    {t(`${R}.restart`)}
+                  </Button>
+                ) : null}
+                <StatusBadge tone={halfWay(run) ? "warning" : TONES[run.status]}>
+                  {t(halfWay(run) ? `${R}.statuses.interrupted` : `${R}.statuses.${run.status}`)}
+                </StatusBadge>
+              </div>
             </li>
           ))}
         </ul>

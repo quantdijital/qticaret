@@ -10,6 +10,7 @@ import { providerAccountsQuery } from "@/features/settings/api/payments"
 import type { ProviderAccount } from "@/features/settings/api/payments"
 import { sectionQuery } from "@/features/settings/api/sections"
 import type { ShippingSettings } from "@/features/settings/api/sections"
+import { DefaultParcelCard } from "@/features/settings/components/default-parcel-card"
 import { ShippingOptionsCard } from "@/features/settings/components/shipping-options-card"
 import { DeliveryCard, RatesCard } from "@/features/settings/components/shipping-rules-cards"
 import { LabelSizeCard } from "@/features/settings/components/label-size-card"
@@ -70,7 +71,8 @@ function CarriersCard({ accounts }: { accounts: readonly ProviderAccount[] }) {
  * Settings > Shipping and delivery (F7, adr/0031; the owner, 2026-10-31:
  * one page for delivery, in tabs): the carriers and the size their labels
  * print at; the options shoppers choose from, the delivery days and price
- * table (F7.8); the return rules (F13.4); the warehouses stock ships from.
+ * table (F7.8) and the default parcel of a product without measures
+ * (adr/0054); the return rules (F13.4); the warehouses stock ships from.
  */
 export function ShippingPage() {
   const { t } = useTranslation()
@@ -118,10 +120,13 @@ export function ShippingPage() {
               <>
                 <ShippingOptionsCard />
                 {ruleCards((saved) => (
-                  <div className="grid gap-6 lg:grid-cols-2 lg:items-stretch">
-                    <DeliveryCard key={JSON.stringify(saved)} saved={saved} />
-                    <RatesCard key={`rates-${JSON.stringify(saved)}`} saved={saved} />
-                  </div>
+                  <>
+                    <div className="grid gap-6 lg:grid-cols-2 lg:items-stretch">
+                      <DeliveryCard key={JSON.stringify(saved)} saved={saved} />
+                      <RatesCard key={`rates-${JSON.stringify(saved)}`} saved={saved} />
+                    </div>
+                    <DefaultParcelCard key={`parcel-${JSON.stringify(saved)}`} saved={saved} />
+                  </>
                 ))}
               </>
             ),

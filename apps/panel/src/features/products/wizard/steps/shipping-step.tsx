@@ -1,4 +1,4 @@
-import { CircleCheck, TriangleAlert } from "lucide-react"
+import { CircleCheck, Info } from "lucide-react"
 import { useFormContext, useWatch } from "react-hook-form"
 import { useTranslation } from "react-i18next"
 import { Field } from "@/components/patterns/form-section"
@@ -87,8 +87,9 @@ export function ShippingStep() {
               {t("products.wizard.measuresReady")}
             </p>
           ) : (
-            <p className="flex items-start gap-2 text-sm text-warning-text">
-              <TriangleAlert className="mt-0.5 size-4 shrink-0" />
+            // Optional (adr/0054): advice, not a blocker
+            <p className="flex items-start gap-2 text-sm text-muted-foreground">
+              <Info className="mt-0.5 size-4 shrink-0" />
               {t("products.wizard.measuresMissing")}
             </p>
           )}

@@ -47,8 +47,8 @@ const valuesOf = (product: Pick<ProductDetail, Name>): Values => ({
 
 /**
  * The parcel's weight and size at product level; variants without their
- * own take these. A published product cannot lose them (F3.1): the
- * server refuses, and the message says why.
+ * own take these. Optional, published or not (adr/0054): without them
+ * shipping is priced by the shop's default parcel.
  */
 export function ShippingCard({ product }: { product: ProductDetail }) {
   const { t } = useTranslation()

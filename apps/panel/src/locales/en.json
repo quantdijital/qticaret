@@ -1217,6 +1217,17 @@
         "desiInvalid": "Enter the desi limit.",
         "priceInvalid": "Enter the amount with at most two decimals."
       },
+      "parcel": {
+        "title": "Default parcel",
+        "description": "For products without measures; the carrier measures the real parcel itself.",
+        "weight": "Weight",
+        "length": "Length",
+        "width": "Width",
+        "height": "Height",
+        "desi": "Shipping is priced as {{desi}} desi for this parcel.",
+        "platformDefault": "The platform's suggested parcel: 1 kg, 30 × 20 × 10 cm. Enter your own and save.",
+        "invalid": "Each of the four values must be a number above zero."
+      },
       "labels": {
         "title": "Shipping label",
         "description": "The paper parcels' labels print on. The panel draws Yurtiçi's label at this size; Aras's and Geliver's own labels are fitted to it.",
@@ -2357,7 +2368,7 @@
         "file": "File",
         "parcel": {
           "title": "Default parcel",
-          "hint": "Live products without a weight or measurements take this parcel; left empty, they come as drafts and their pages stay closed until you fill them.",
+          "hint": "Optional. Products without a weight or measurements get these values; left empty, they come as the source has them, without measurements, and shipping is priced by the shop's default parcel.",
           "weight": "Weight (g)",
           "length": "Length (cm)",
           "width": "Width (cm)",
@@ -2411,7 +2422,7 @@
         "fileHint": "The XML, or a zip holding it, up to 50 MB. Choose All content: products, variations and images exported apart cannot find each other.",
         "categoryBase": "Category address prefix",
         "categoryBaseHint": "The path in front of the old site's category addresses, e.g. /urun-kategori/; / when categories sit at the root. Left empty, it is read from the site's own links; fill it in when the report shows category addresses wrong.",
-        "parcelWarning": "Most WooCommerce shops enter no weight or size for their products. Without a default parcel, every product lacking a weight or size arrives as a draft and its page stays closed until the cutover.",
+        "parcelNote": "Most WooCommerce shops enter no weight or size for their products. They still arrive as the source has them; shipping is priced by the default parcel under Settings > Shipping. A parcel given here is written as their own measurements.",
         "errors": {
           "fileRequired": "Choose the export file.",
           "fileType": "This file is not a WordPress export. Choose a file ending in .xml or .zip.",
@@ -2461,9 +2472,13 @@
         "statuses": {
           "running": "Running",
           "done": "Done",
-          "failed": "Stopped"
+          "failed": "Stopped",
+          "interrupted": "Stopped half-way"
         },
-        "summary": "{{products}} products, {{customers}} customers"
+        "summary": "{{products}} products, {{customers}} customers",
+        "restart": "Start again",
+        "restarted": "The run started again from the same file.",
+        "restartedNote": "started again"
       },
       "addresses": {
         "title": "Old addresses",
@@ -2785,11 +2800,11 @@
         "width": "Width",
         "height": "Height"
       },
-      "measuresPackaged": "Carriers price shipping by these. A draft can leave them empty.",
+      "measuresPackaged": "Shipping is priced by these. Optional: left empty, it is priced by the default parcel; the carrier measures the real parcel itself.",
       "shippingSummary": "Shipping summary",
       "desi": "Desi",
-      "measuresReady": "Measurements complete. The product can be published.",
-      "measuresMissing": "Publishing needs the weight and all three dimensions.",
+      "measuresReady": "Measurements complete. Shipping is priced by the product's own parcel.",
+      "measuresMissing": "No measurements; shipping is priced by the default parcel. The product can still be published.",
       "summary": "Summary",
       "imageCount_one": "{{count}} image",
       "imageCount_other": "{{count}} images",
@@ -2832,7 +2847,7 @@
       "summary": "Summary",
       "available": "Sellable stock",
       "created": "Added",
-      "shippingHint": "These apply to variants without their own values.",
+      "shippingHint": "Optional. These apply to variants without their own values; with none, shipping is priced by the default parcel.",
       "publish": "Publish",
       "unpublish": "Unpublish",
       "published": "Product published.",
@@ -5023,9 +5038,9 @@
           "how": "Make the deepest category primary in one click, or pick one in the catalog card."
         },
         "DATA-05": {
-          "title": "Weight or dimensions are missing.",
-          "why": "Shipping costs and delivery details are worked out from them.",
-          "how": "Enter the weight and dimensions in the package card."
+          "title": "No weight or dimensions entered.",
+          "why": "Without them shipping is priced by the default parcel; the product's own make the price more accurate.",
+          "how": "If you like, enter the weight and dimensions in the package card; publishing does not need them."
         },
         "LINK-01": {
           "title": "The product is in no category.",

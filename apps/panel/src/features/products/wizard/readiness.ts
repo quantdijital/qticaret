@@ -18,8 +18,9 @@ export interface ReadinessItem {
 
 /**
  * What the review step lists before saving: the rules the server applies
- * to a published product (title, price, F3.1 measures) and the advisor's
- * first content checks (docs/14), done or not.
+ * to a published product (title, price) and the advice beside them:
+ * measures (optional, adr/0054: shipping uses the default parcel without
+ * them) and the advisor's first content checks (docs/14), done or not.
  */
 export function readiness(values: WizardValues): ReadinessItem[] {
   const priced = values.variants.every((variant) => (parseMoneyInput(variant.price) ?? 0) > 0)
@@ -28,7 +29,7 @@ export function readiness(values: WizardValues): ReadinessItem[] {
     { key: "price", done: priced, required: true },
     // F3.2: only a physical product has a parcel to measure
     ...(values.kind === "physical"
-      ? [{ key: "measures" as const, done: hasMeasures(values), required: true }]
+      ? [{ key: "measures" as const, done: hasMeasures(values), required: false }]
       : []),
     { key: "images", done: values.images.length > 0, required: false },
     { key: "description", done: wordCount(values.description) >= SUGGESTED_WORDS, required: false },

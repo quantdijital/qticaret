@@ -131,7 +131,7 @@ export function WordpressSource({ disabled, pending, onRun }: WordpressSourcePro
       </Field>
       <ParcelFields
         inputProps={(field) => form.register(`parcel.${field}`)}
-        warning={t(`${W}.parcelWarning`)}
+        note={t(`${W}.parcelNote`)}
         error={errorOf(errors.parcel?.message)}
       />
       <RunButtons

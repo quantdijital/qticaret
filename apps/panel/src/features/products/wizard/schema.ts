@@ -23,7 +23,7 @@ const stock = z
     message: "products.errors.stock",
   })
 
-// Weight and dimensions: empty for a draft, a positive number to publish (F3.1)
+// Weight and dimensions: optional, published or not (adr/0054); a positive number when given
 const measure = z
   .string()
   .trim()
@@ -140,7 +140,10 @@ export const WIZARD_STEPS = Object.keys(STEP_FIELDS) as WizardStepKey[]
 export const stepsFor = (kind: WizardValues["kind"]): WizardStepKey[] =>
   kind === "physical" ? WIZARD_STEPS : WIZARD_STEPS.filter((key) => key !== "shipping")
 
-/** Publishing needs weight and all three dimensions (the F3.1 rule the server applies). */
+/**
+ * Weight and all three dimensions given: carriers price by the product's
+ * own parcel. Optional (adr/0054): without them the shop's default parcel.
+ */
 export const hasMeasures = (values: WizardValues): boolean =>
   [values.weight, values.length, values.width, values.height].every(
     (text) => (parseMeasureInput(text) ?? 0) > 0

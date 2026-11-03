@@ -96,7 +96,15 @@ export interface ShippingSettings {
   label_format: LabelFormat
   /** The roll's size when `label_format` is `custom`. */
   label_custom: { width_mm: number; height_mm: number }
+  /**
+   * The parcel a product without measures ships as, in the shop's units
+   * (adr/0054); null: the platform's, `PLATFORM_PARCEL`.
+   */
+  default_parcel: { weight: number; length: number; width: number; height: number } | null
 }
+
+/** The platform's default parcel in grams and cm (the backend's `PLATFORM_PARCEL`, adr/0054). */
+export const PLATFORM_PARCEL = { weight_g: 1000, length_cm: 30, width_cm: 20, height_cm: 10 }
 
 /** Return rules (F13.4, adr/0041): the right of withdrawal's days and who pays the return. */
 export interface ReturnsSettings {

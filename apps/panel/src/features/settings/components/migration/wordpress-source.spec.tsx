@@ -100,8 +100,8 @@ describe("Settings > Migration: the WordPress source", () => {
     expect(await screen.findByText(/Tek bölümlük bir yol girin/)).toBeVisible()
     expect(screen.getByText(/dört değerini de sıfırdan büyük girin/)).toBeVisible()
     expect(onRun).not.toHaveBeenCalled()
-    // Products without measurements come as drafts: the form says why the parcel matters
-    expect(screen.getByText(/Varsayılan paket vermezseniz/)).toBeVisible()
+    // Products without measurements still come as the source has them (adr/0054): the form says so
+    expect(screen.getByText(/kaynaktaki durumlarıyla gelir/)).toBeVisible()
   })
 
   it("checks the export with source=wordpress, its address base and parcel, typed as XML", async () => {

@@ -1217,6 +1217,17 @@
         "desiInvalid": "Desi sınırını girin.",
         "priceInvalid": "Tutarı en çok iki ondalıkla girin."
       },
+      "parcel": {
+        "title": "Varsayılan paket",
+        "description": "Ölçüsü girilmemiş ürünler için; kargo firması gerçek paketi kendisi ölçer.",
+        "weight": "Ağırlık",
+        "length": "Uzunluk",
+        "width": "Genişlik",
+        "height": "Yükseklik",
+        "desi": "Kargo ücreti bu pakete göre {{desi}} desiden hesaplanır.",
+        "platformDefault": "Platformun önerdiği paket: 1 kg, 30 × 20 × 10 cm. Kendi ölçünüzü girip kaydedebilirsiniz.",
+        "invalid": "Dört değerin her biri sıfırdan büyük bir sayı olmalı."
+      },
       "labels": {
         "title": "Kargo etiketi",
         "description": "Kargo etiketlerinin basılacağı kâğıt. Yurtiçi etiketini panel bu boyutta çizer; Aras ve Geliver'in kendi etiketi bu boyuta orantılı sığdırılır.",
@@ -2357,7 +2368,7 @@
         "file": "Dosya",
         "parcel": {
           "title": "Varsayılan paket",
-          "hint": "Ağırlığı ya da ölçüsü olmayan yayındaki ürünler bu paketle gelir; boş bırakırsanız taslak gelir ve sayfaları kesime kadar açılmaz.",
+          "hint": "İsteğe bağlı. Ağırlığı ya da ölçüsü olmayan ürünlere bu değerler yazılır; boş bırakırsanız ürünler kaynaktaki durumlarıyla ölçüsüz gelir ve kargo ücreti mağazanın varsayılan paketine göre hesaplanır.",
           "weight": "Ağırlık (g)",
           "length": "Uzunluk (cm)",
           "width": "Genişlik (cm)",
@@ -2411,7 +2422,7 @@
         "fileHint": "XML ya da onu tutan zip, en çok 50 MB. Tüm içerik seçilmeli: ürünler, varyasyonlar ve görseller ayrı dışa aktarılırsa birbirini bulamaz.",
         "categoryBase": "Kategori adres öneki",
         "categoryBaseHint": "Eski sitede kategori adreslerinin başındaki yol, ör. /urun-kategori/; kategoriler kökteyse /. Boş bırakırsanız sitenin kendi bağlantılarından okunur; raporda kategori adresleri yanlış görünürse doldurun.",
-        "parcelWarning": "WooCommerce'te çoğu mağaza ürünlere ağırlık ve ölçü girmez. Varsayılan paket vermezseniz ağırlığı ya da ölçüsü olmayan her ürün taslak gelir ve sayfası kesime kadar açılmaz.",
+        "parcelNote": "WooCommerce'te çoğu mağaza ürünlere ağırlık ve ölçü girmez. Bu ürünler yine de kaynaktaki durumlarıyla gelir; kargo ücreti Ayarlar > Kargo'daki varsayılan pakete göre hesaplanır. Burada bir paket verirseniz ürünlerin kendi ölçüsü olarak yazılır.",
         "errors": {
           "fileRequired": "Dışa aktarma dosyasını seçin.",
           "fileType": "Bu dosya bir WordPress dışa aktarması değil. Uzantısı .xml ya da .zip olan dosyayı seçin.",
@@ -2461,9 +2472,13 @@
         "statuses": {
           "running": "Sürüyor",
           "done": "Bitti",
-          "failed": "Durdu"
+          "failed": "Durdu",
+          "interrupted": "Yarıda kaldı"
         },
-        "summary": "{{products}} ürün, {{customers}} müşteri"
+        "summary": "{{products}} ürün, {{customers}} müşteri",
+        "restart": "Yeniden başlat",
+        "restarted": "Aktarım aynı dosyadan yeniden başlatıldı.",
+        "restartedNote": "yeniden başlatıldı"
       },
       "addresses": {
         "title": "Eski adresler",
@@ -2785,11 +2800,11 @@
         "width": "Genişlik",
         "height": "Yükseklik"
       },
-      "measuresPackaged": "Kargo firmaları ücreti bu bilgilerle hesaplar. Taslak için boş bırakabilirsiniz.",
+      "measuresPackaged": "Kargo ücreti bu bilgilerle hesaplanır. İsteğe bağlı: boş bırakırsanız ücret varsayılan pakete göre hesaplanır; kargo firması gerçek paketi kendisi ölçer.",
       "shippingSummary": "Kargo özeti",
       "desi": "Desi",
-      "measuresReady": "Ölçüler tamam. Ürün yayınlanabilir.",
-      "measuresMissing": "Yayınlamak için ağırlık ve üç ölçünün hepsi gerekir.",
+      "measuresReady": "Ölçüler tamam. Kargo ücreti ürünün kendi paketiyle hesaplanır.",
+      "measuresMissing": "Ölçü girilmedi; kargo ücreti varsayılan pakete göre hesaplanır. Ürün yine de yayınlanabilir.",
       "summary": "Özet",
       "imageCount_one": "{{count}} görsel",
       "imageCount_other": "{{count}} görsel",
@@ -2832,7 +2847,7 @@
       "summary": "Özet",
       "available": "Satılabilir stok",
       "created": "Eklenme",
-      "shippingHint": "Varyantında ayrıca girilmemişse bu değerler geçerlidir.",
+      "shippingHint": "İsteğe bağlı. Varyantında ayrıca girilmemişse bu değerler geçerlidir; hiç girilmezse kargo ücreti varsayılan pakete göre hesaplanır.",
       "publish": "Yayınla",
       "unpublish": "Yayından kaldır",
       "published": "Ürün yayınlandı.",
@@ -5023,9 +5038,9 @@
           "how": "Tek tıkla en derin kategoriyi birincil yapın ya da katalog bilgilerinden seçin."
         },
         "DATA-05": {
-          "title": "Ağırlık ya da ölçüler eksik.",
-          "why": "Kargo ücreti ve teslimat bilgisi bu değerlerle hesaplanır.",
-          "how": "Paket ölçüleri kartında ağırlık ve ölçüleri girin."
+          "title": "Ağırlık ya da ölçüler girilmemiş.",
+          "why": "Ölçü girilmezse kargo ücreti varsayılan pakete göre hesaplanır; ürünün kendi ölçüleri ücreti daha doğru yapar.",
+          "how": "İsterseniz Paket ölçüleri kartında ağırlık ve ölçüleri girin; yayın için zorunlu değil."
         },
         "LINK-01": {
           "title": "Ürün hiçbir kategoride değil.",

@@ -28,6 +28,11 @@ export interface MigrationRun {
   source: string
   mode: MigrationMode
   status: "running" | "done" | "failed"
+  /**
+   * Why a failed run stopped: `interrupted` (its worker stopped half-way:
+   * it can start again), `restarted` (started again already), or the job's code.
+   */
+  error_code: string | null
   job_id: string | null
   counts: Partial<Record<string, KindCounts>>
   created_at: string
@@ -140,6 +145,28 @@ export function useStartMigration() {
           })
         ).async_job
       }),
+    onSuccess: () => client.invalidateQueries({ queryKey: MIGRATION_KEY }),
+  })
+}
+
+/**
+ * Starts a run that stopped half-way again, from the file it stored (the
+ * server answers `migration.source_file_gone` when it is no longer kept);
+ * an apply asks the owner to prove it again.
+ */
+export function useRestartMigration() {
+  const client = useQueryClient()
+  return useMutation({
+    mutationFn: (runId: string) =>
+      withReauth(
+        async (extra) =>
+          (
+            await sdk.client.fetch<{ async_job: MigrationJob }>(
+              `/admin/migrations/${encodeURIComponent(runId)}/restart`,
+              { method: "POST", body: {}, ...extra }
+            )
+          ).async_job
+      ),
     onSuccess: () => client.invalidateQueries({ queryKey: MIGRATION_KEY }),
   })
 }

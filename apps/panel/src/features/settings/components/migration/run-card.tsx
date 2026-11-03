@@ -181,7 +181,12 @@ export function RunCard({ className }: { className?: string }) {
         </div>
         <div className="flex min-w-0 flex-col gap-4 rounded-md border bg-muted/30 p-4">
           {job.data ? <RunResult job={job.data} source={kind} /> : null}
-          <RecentRuns />
+          <RecentRuns
+            busy={busy}
+            onStarted={(started) => {
+              setJobId(started.id)
+            }}
+          />
         </div>
       </div>
       <ConfirmDialog
