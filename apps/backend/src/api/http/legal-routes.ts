@@ -25,6 +25,9 @@ import { optionalCustomer, orderAccess } from "./order-access"
 
 const noQuery = validateAndTransformQuery(AdminGetDashboardNoQuery, {})
 
+/** A legal text's draft and preview bodies, as the content pages' (content-routes.ts). */
+export const LEGAL_BODY_LIMIT = "1mb"
+
 /**
  * F13.1 (adr/0041 §1): the shop's legal texts. People edit and publish
  * them (who may is the role table's: not operations, not read-only); the
@@ -43,9 +46,12 @@ export const LEGAL_ROUTES = [
     methods: ["GET" as const],
     middlewares: [requireUserActor, noQuery],
   })),
+  // A long legal text is past Express's 100 kB default (starters run 10–29 kB of
+  // text, more as JSON); the document's own bounds stay (lib/content)
   {
     matcher: "/admin/legal-documents/:kind/draft",
     methods: ["POST" as const],
+    bodyParser: { sizeLimit: LEGAL_BODY_LIMIT },
     middlewares: [requireUserActor, validateAndTransformBody(AdminPostLegalDraft)],
   },
   {
@@ -56,11 +62,13 @@ export const LEGAL_ROUTES = [
   {
     matcher: "/admin/legal-documents/:kind/publish",
     methods: ["POST" as const],
+    bodyParser: { sizeLimit: LEGAL_BODY_LIMIT },
     middlewares: [requireUserActor, validateAndTransformBody(AdminPostLegalPublish)],
   },
   {
     matcher: "/admin/legal-documents/:kind/preview",
     methods: ["POST" as const],
+    bodyParser: { sizeLimit: LEGAL_BODY_LIMIT },
     middlewares: [requireUserActor, validateAndTransformBody(AdminPostLegalPreview)],
   },
   {

@@ -218,5 +218,43 @@ medusaIntegrationTestRunner({
       expect(preview.data.html).not.toMatch(/\{[\p{L}\p{N}_]+\}/u)
       expect(saved.status).toBe(200)
     })
+
+    it("takes a long text past Express's 100 kB default as a draft, a preview and a publish", async () => {
+      const owner = await createAdminUser(http, getContainer())
+      const base = "/admin/legal-documents/membership"
+      // About 200 kB of JSON: a starter text (10–29 kB) with the shop's long additions
+      const long = doc(
+        ...Array.from({ length: 100 }, (_, index) => `${String(index)}. ${"Madde ".repeat(330)}`)
+      )
+      expect(JSON.stringify({ title: "Üyelik sözleşmesi", body: long }).length).toBeGreaterThan(
+        200_000
+      )
+
+      const saved = await settle(
+        http.post<{ draft: { version: number } }>(
+          `${base}/draft`,
+          { title: "Üyelik sözleşmesi", body: long },
+          { headers: owner.headers }
+        )
+      )
+      const preview = await settle(
+        http.post<{ html: string }>(`${base}/preview`, { body: long }, { headers: owner.headers })
+      )
+      const published = await settle(
+        http.post<{ published: { version: number } }>(
+          `${base}/publish`,
+          {},
+          {
+            headers: owner.headers,
+          }
+        )
+      )
+
+      expect(saved.status).toBe(200)
+      expect(saved.data.draft.version).toBe(1)
+      expect(preview.status).toBe(200)
+      expect(preview.data.html).toContain("99. Madde")
+      expect(published.status).toBe(200)
+    })
   },
 })
