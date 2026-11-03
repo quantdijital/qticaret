@@ -41,7 +41,11 @@ async function reservationsOn(
   }
 }
 
-/** The seed products still here (by the seed's mark), with the reservations on their stock. */
+/**
+ * The seed products still here, by the plain run's own rule (the seed's
+ * mark, or no metadata and the seed's title), with the reservations on
+ * their stock.
+ */
 export async function findOrderedDemoProducts(
   container: MedusaContainer
 ): Promise<OrderedDemoProduct[]> {

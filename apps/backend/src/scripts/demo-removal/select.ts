@@ -85,32 +85,31 @@ export interface OrderedDemoProduct {
 }
 
 /**
- * The seed products `products-with-orders` takes (local only): those the
- * seed marked (`metadata.demo`) under a demo handle, the mark required:
- * no handle or unchanged title alone is enough here, as the orders that
- * hold them may be the owner's own. Each with the reservations on its stock.
+ * The seed products `products-with-orders` takes (local only): the same
+ * ones the plain run plans (`isDemoProduct`): a demo handle with the
+ * seed's mark, or, seeded before the mark, no metadata and the seed's
+ * title as written. A database seeded before 2026-11-03 has only the
+ * latter, so the mark alone would take none of them. A handle alone is
+ * never enough. Each with the reservations on its stock.
  */
 export function orderedDemoProducts(
   products: readonly ProductStockRow[],
   reservations: readonly ReservationRow[]
 ): OrderedDemoProduct[] {
-  const handles = new Set(DEMO_PRODUCTS.map((demo) => demo.handle))
-  return products
-    .filter((product) => handles.has(product.handle) && hasDemoMark(product.metadata))
-    .map((product) => {
-      const items = new Set(
-        (product.variants ?? []).flatMap((variant) =>
-          (variant?.inventory_items ?? []).flatMap((link) => link?.inventory_item_id ?? [])
-        )
+  return products.filter(isDemoProduct).map((product) => {
+    const items = new Set(
+      (product.variants ?? []).flatMap((variant) =>
+        (variant?.inventory_items ?? []).flatMap((link) => link?.inventory_item_id ?? [])
       )
-      return {
-        id: product.id,
-        label: product.handle,
-        reservation_ids: reservations
-          .filter((reservation) => items.has(reservation.inventory_item_id))
-          .map((reservation) => reservation.id),
-      }
-    })
+    )
+    return {
+      id: product.id,
+      label: product.handle,
+      reservation_ids: reservations
+        .filter((reservation) => items.has(reservation.inventory_item_id))
+        .map((reservation) => reservation.id),
+    }
+  })
 }
 
 export interface ShippingOptionRow {

@@ -214,15 +214,41 @@ describe("demo:remove products-with-orders", () => {
     ])
   })
 
-  it("never takes one by its handle or title alone, nor a shop's own product", () => {
+  it("takes those seeded before the mark too, as the plain run does", () => {
+    // A database seeded before 2026-11-03: no metadata, the seed's title as written
     const found = orderedDemoProducts(
       [
-        // Made before the mark: the plain run may take it, this option does not
         stocked("prod_1", "pamuklu-tisort", null, ["iitem_1"]),
+        {
+          ...stocked("prod_2", "keten-masa-ortusu", null, ["iitem_2"]),
+          title: "Keten Masa Örtüsü",
+        },
+      ],
+      [
+        { id: "res_1", inventory_item_id: "iitem_1" },
+        { id: "res_2", inventory_item_id: "iitem_2" },
+      ]
+    )
+
+    expect(found).toEqual([
+      { id: "prod_1", label: "pamuklu-tisort", reservation_ids: ["res_1"] },
+      { id: "prod_2", label: "keten-masa-ortusu", reservation_ids: ["res_2"] },
+    ])
+  })
+
+  it("never takes one by its handle alone, nor a shop's own product", () => {
+    const found = orderedDemoProducts(
+      [
+        // No mark and a title the seed never wrote: the shop's own, or the seed's it renamed
+        { ...stocked("prod_1", "pamuklu-tisort", null, ["iitem_1"]), title: "Siyah Tişört" },
         stocked("prod_2", "yun-bere", { demo: "yes" }, ["iitem_2"]),
         stocked("prod_3", "kendi-urunum", { demo: true }, ["iitem_3"]),
+        stocked("prod_4", "pamuklu-tisort", { source: "import" }, ["iitem_4"]),
       ],
-      [{ id: "res_1", inventory_item_id: "iitem_1" }]
+      [
+        { id: "res_1", inventory_item_id: "iitem_1" },
+        { id: "res_4", inventory_item_id: "iitem_4" },
+      ]
     )
 
     expect(found).toEqual([])
