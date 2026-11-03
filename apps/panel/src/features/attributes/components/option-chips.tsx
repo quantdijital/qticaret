@@ -1,6 +1,6 @@
-import { X } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
+import { ChipInput } from "@/components/patterns/chip-input"
 import { optionValue } from "@/features/attributes/form"
 import type { AttributeOption } from "@/features/attributes/types"
 
@@ -26,45 +26,23 @@ export function OptionChips({
         next.push({ value: slug, label })
       }
     }
-    onChange(next)
+    if (next.length > value.length) {
+      onChange(next)
+    }
     setText("")
   }
   return (
-    <div className="flex min-h-9 flex-wrap items-center gap-1.5 rounded-md border bg-background px-2 py-1.5">
-      {value.map((option) => (
-        <span
-          key={option.value}
-          className="flex items-center gap-1 rounded-md bg-accent px-2 py-0.5 text-[13px]"
-        >
-          {option.label}
-          <button
-            type="button"
-            aria-label={t("attributes.removeOption", { option: option.label })}
-            onClick={() => {
-              onChange(value.filter((item) => item.value !== option.value))
-            }}
-            className="opacity-70 hover:opacity-100"
-          >
-            <X className="size-3" />
-          </button>
-        </span>
-      ))}
-      <input
-        value={text}
-        aria-label={t("attributes.options")}
-        placeholder={value.length ? "" : t("attributes.optionsPlaceholder")}
-        onChange={(event) => {
-          setText(event.target.value)
-        }}
-        onKeyDown={(event) => {
-          if (event.key === "Enter" || event.key === ",") {
-            event.preventDefault()
-            add()
-          }
-        }}
-        onBlur={add}
-        className="min-w-32 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-      />
-    </div>
+    <ChipInput
+      chips={value.map((option) => ({ key: option.value, label: option.label }))}
+      text={text}
+      onTextChange={setText}
+      onCommit={add}
+      onRemove={(index) => {
+        onChange(value.filter((_, at) => at !== index))
+      }}
+      removeLabel={(option) => t("attributes.removeOption", { option })}
+      aria-label={t("attributes.options")}
+      placeholder={t("attributes.optionsPlaceholder")}
+    />
   )
 }

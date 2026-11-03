@@ -4828,6 +4828,60 @@
       "missing": "Bulunamayan adres",
       "open": "Yönlendirmeleri yönet"
     },
+    "siteSearch": {
+      "title": "Site araması",
+      "description": "Eş anlamlı gruplar aramada birbirinin yerine geçer: “çakı” arayan “bıçak” ürünlerini de bulur. Değişiklik bir dakika içinde vitrine yansır.",
+      "add": "Grup ekle",
+      "search": "Terimlerde ara…",
+      "total_one": "{{shown}} / {{max}} grup",
+      "total_other": "{{shown}} / {{max}} grup",
+      "found_one": "{{shown}} grup bulundu",
+      "found_other": "{{shown}} grup bulundu",
+      "readOnly": "Eş anlamlı grupları mağaza sahibi ve yöneticiler değiştirebilir; siz görüntülüyorsunuz.",
+      "empty": "Henüz eş anlamlı grup yok. Alıcılarınızın farklı yazdığı terimleri bir grupta toplayın.",
+      "noMatch": "Aramanızla eşleşen grup yok.",
+      "columns": {
+        "terms": "Terimler",
+        "updated": "Son değişiklik"
+      },
+      "rowActions": "{{terms}} için işlemler",
+      "deleteTitle": "Eş anlamlı grup silinsin mi?",
+      "deleteText": "“{{terms}}” grubu silinir; bu terimler aramada artık birbirini bulmaz. Değişiklik bir dakika içinde vitrine yansır.",
+      "deleteConfirm": "Grubu sil",
+      "deleted": "Eş anlamlı grup silindi.",
+      "form": {
+        "title": "Eş anlamlı grup ekle",
+        "editTitle": "Eş anlamlı grubu düzenle",
+        "description": "Aramada aynı ürünleri bulması gereken 2–10 terim yazın.",
+        "terms": "Terimler",
+        "count": "{{shown}} / {{max}}",
+        "placeholder": "tişört, t shirt",
+        "hint": "Enter ya da virgülle ekleyin. Her terim en çok üç kelime; büyük-küçük harf ve Türkçe karakter farkı yok sayılır.",
+        "remove": "“{{term}}” terimini çıkar",
+        "add": "Grubu ekle",
+        "created": "Eş anlamlı grup eklendi; bir dakika içinde vitrine yansır.",
+        "updated": "Eş anlamlı grup kaydedildi; bir dakika içinde vitrine yansır."
+      },
+      "problems": {
+        "noWords": "Terim en az bir harf ya da rakam içermeli.",
+        "words": "Bir terim en çok {{words}} kelime olabilir; daha uzun ifadeyi kısaltın.",
+        "length": "Bir terim en çok {{length}} karakter olabilir.",
+        "duplicate": "“{{term}}” zaten grupta; büyük-küçük harf ve Türkçe karakter farkı aynı terim sayılır.",
+        "full": "Bir grupta en çok {{max}} terim olabilir; yeni terim için birini çıkarın.",
+        "tooFew": "Grup için en az {{min}} terim ekleyin.",
+        "groupsFull": "Mağazada en çok {{groups}} eş anlamlı grup olabilir; yenisini eklemek için kullanmadığınız bir grubu silin.",
+        "unknown": "Bu grup artık yok; başka biri silmiş olabilir. Liste yenilendi.",
+        "invalid": "Terimde kullanılamayan bir karakter var; terimi yeniden yazın."
+      }
+    },
+    "siteSearchCard": {
+      "title": "Site araması",
+      "hint": "Eş anlamlı gruplar vitrin aramasında birbirinin yerine geçer.",
+      "hintCount_one": "{{shown}} eş anlamlı grup; terimleri vitrin aramasında birbirinin yerine geçer.",
+      "hintCount_other": "{{shown}} eş anlamlı grup; terimleri vitrin aramasında birbirinin yerine geçer.",
+      "open": "Eş anlamlıları yönet",
+      "empty": "Henüz eş anlamlı grup yok; alıcılarınızın farklı yazdığı terimleri eşleyin."
+    },
     "redirects": {
       "title": "Yönlendirmeler",
       "description": "Eski adresleri yeni sayfalara gönderin, kırık bağlantıları onarın.",

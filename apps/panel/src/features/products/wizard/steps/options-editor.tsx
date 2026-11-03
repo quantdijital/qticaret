@@ -1,7 +1,7 @@
 import { Plus, X } from "lucide-react"
 import { useState } from "react"
-import type { KeyboardEvent } from "react"
 import { useTranslation } from "react-i18next"
+import { ChipInput } from "@/components/patterns/chip-input"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import type { WizardValues } from "../schema"
@@ -23,52 +23,27 @@ function ValueChips({
     const values = text
       .split(",")
       .map((value) => value.trim())
-      .filter((value) => value && !option.values.includes(value))
+      .filter(
+        (value, at, all) => value && !option.values.includes(value) && all.indexOf(value) === at
+      )
     if (values.length) {
       onChange([...option.values, ...values])
     }
     setText("")
   }
-  const onKey = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter" || event.key === ",") {
-      event.preventDefault()
-      add()
-    } else if (event.key === "Backspace" && text === "" && option.values.length) {
-      onChange(option.values.slice(0, -1))
-    }
-  }
   return (
-    <div className="flex min-h-9 flex-wrap items-center gap-1.5 rounded-md border bg-background px-2 py-1.5">
-      {option.values.map((value) => (
-        <span
-          key={value}
-          className="flex items-center gap-1 rounded-md bg-accent px-2 py-0.5 text-[13px] text-accent-foreground"
-        >
-          {value}
-          <button
-            type="button"
-            aria-label={t("products.wizard.options.removeValue", { value })}
-            onClick={() => {
-              onChange(option.values.filter((item) => item !== value))
-            }}
-            className="rounded-sm opacity-70 hover:opacity-100"
-          >
-            <X className="size-3" />
-          </button>
-        </span>
-      ))}
-      <input
-        value={text}
-        onChange={(event) => {
-          setText(event.target.value)
-        }}
-        onKeyDown={onKey}
-        onBlur={add}
-        placeholder={option.values.length ? "" : t("products.wizard.options.valuesPlaceholder")}
-        aria-label={t("products.wizard.options.values", { option: option.title })}
-        className="min-w-24 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
-      />
-    </div>
+    <ChipInput
+      chips={option.values.map((value) => ({ key: value, label: value }))}
+      text={text}
+      onTextChange={setText}
+      onCommit={add}
+      onRemove={(index) => {
+        onChange(option.values.filter((_, at) => at !== index))
+      }}
+      removeLabel={(value) => t("products.wizard.options.removeValue", { value })}
+      aria-label={t("products.wizard.options.values", { option: option.title })}
+      placeholder={t("products.wizard.options.valuesPlaceholder")}
+    />
   )
 }
 

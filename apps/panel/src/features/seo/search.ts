@@ -12,3 +12,10 @@ export const redirectsSearchSchema = z.object({
   page: z.coerce.number().int().min(1).max(10_000).optional().catch(undefined),
 })
 export type RedirectsSearch = z.infer<typeof redirectsSearchSchema>
+
+/** The site search screen's URL: `/seo/search?q=tisort&page=2` (1-based in the URL). */
+export const siteSearchSearchSchema = z.object({
+  q: z.string().max(200).optional().catch(undefined),
+  page: z.coerce.number().int().min(1).max(10_000).optional().catch(undefined),
+})
+export type SiteSearchSearch = z.infer<typeof siteSearchSearchSchema>

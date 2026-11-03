@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router"
 import { ArrowRight, CircleCheck, Globe, TriangleAlert } from "lucide-react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
-import { PageGrid } from "@/components/patterns/page-grid"
+import { PageColumn, PageGrid } from "@/components/patterns/page-grid"
 import { PageHeader } from "@/components/patterns/page-header"
 import { spanOf } from "@/components/patterns/page-spans"
 import { SectionCard } from "@/components/patterns/section-card"
@@ -16,6 +16,7 @@ import { AdvisorSummaryCard } from "@/features/seo/advisor/summary-card"
 import { AuditCard } from "@/features/seo/audit/audit-card"
 import { SearchConsoleCard } from "@/features/seo/components/search-console-card"
 import { SetupChecklistCard } from "@/features/seo/components/setup-checklist-card"
+import { SiteSearchCard } from "@/features/seo/components/site-search-card"
 import { SitemapCard } from "@/features/seo/components/sitemap-card"
 import { WebVitalsCard } from "@/features/seo/components/web-vitals-card"
 import { sectionQuery } from "@/features/settings/api/sections"
@@ -121,8 +122,8 @@ function RedirectsCard({ className }: { className?: string }) {
 
 /**
  * SEO (docs/13, docs/14): what setup still lacks, how the shop looks in
- * search today, what its catalog still lacks, its redirects and sitemap,
- * the advisor's score and the store-wide audit.
+ * search today, what its catalog still lacks, its redirects, site search's
+ * synonyms and sitemap, the advisor's score and the store-wide audit.
  */
 export function SeoOverviewPage() {
   const { t } = useTranslation()
@@ -168,7 +169,11 @@ export function SeoOverviewPage() {
           )}
         </SectionCard>
         <CatalogHealthCard className={spanOf(5)} />
-        <RedirectsCard className={spanOf(6)} />
+        {/* Site search's synonyms under the redirects: the two short cards stand level with the sitemap */}
+        <PageColumn span={6}>
+          <RedirectsCard />
+          <SiteSearchCard />
+        </PageColumn>
         <SitemapCard className={spanOf(6)} />
         <SearchConsoleCard className={spanOf(7)} />
         <WebVitalsCard className={spanOf(5)} />

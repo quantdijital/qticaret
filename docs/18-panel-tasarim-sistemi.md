@@ -177,6 +177,8 @@ Kurallar:
 
 ## 7. Desenler
 
+- `components/patterns/chip-input.tsx` (2026-11-04): etiket/terim girişi — Enter ya da virgül ekler, boş alanda Backspace sonuncuyu siler, yinelenen (Türkçe harf ve büyük/küçük duyarsız) reddedilir, `n / en çok` sayacı; eş anlamlı gruplar, özellik seçenekleri ve ürün sihirbazı seçenek değerleri bunu kullanır.
+
 | Desen | Ne zaman | Notlar |
 | --- | --- | --- |
 | PageGrid + PageColumn | Yan yana kartlar | 12 sütunlu ızgara; satırdaki hücreler eşit, sütunların son kartı uzar; yapışkan özet sütunu `sticky` (§2 Denge) |

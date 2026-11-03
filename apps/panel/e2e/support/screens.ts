@@ -42,6 +42,8 @@ export const SECTIONS = [
   "/reports/brands",
   "/reports/marketing",
   "/seo/redirects",
+  // Site search's synonym groups (adr/0056)
+  "/seo/search",
   "/products/new",
   "/promotions/new",
   "/promotions/price-lists/new",

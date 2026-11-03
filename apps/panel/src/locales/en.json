@@ -4828,6 +4828,60 @@
       "missing": "Missing addresses",
       "open": "Manage redirects"
     },
+    "siteSearch": {
+      "title": "Site search",
+      "description": "Synonym groups stand in for one another in search: someone searching “penknife” also finds the “knife” products. Changes reach the storefront within a minute.",
+      "add": "Add group",
+      "search": "Search terms…",
+      "total_one": "{{shown}} / {{max}} groups",
+      "total_other": "{{shown}} / {{max}} groups",
+      "found_one": "{{shown}} group found",
+      "found_other": "{{shown}} groups found",
+      "readOnly": "Synonym groups are changed by the shop owner and admins; you are viewing them.",
+      "empty": "No synonym groups yet. Group the terms your shoppers write differently.",
+      "noMatch": "No group matches your search.",
+      "columns": {
+        "terms": "Terms",
+        "updated": "Last changed"
+      },
+      "rowActions": "Actions for {{terms}}",
+      "deleteTitle": "Delete the synonym group?",
+      "deleteText": "The group “{{terms}}” is deleted; these terms no longer find one another in search. The change reaches the storefront within a minute.",
+      "deleteConfirm": "Delete group",
+      "deleted": "Synonym group deleted.",
+      "form": {
+        "title": "Add a synonym group",
+        "editTitle": "Edit the synonym group",
+        "description": "Write 2–10 terms that should find the same products in search.",
+        "terms": "Terms",
+        "count": "{{shown}} / {{max}}",
+        "placeholder": "t-shirt, tee",
+        "hint": "Add with Enter or a comma. Each term is at most three words; case and Turkish letters are ignored.",
+        "remove": "Remove “{{term}}”",
+        "add": "Add group",
+        "created": "Synonym group added; it reaches the storefront within a minute.",
+        "updated": "Synonym group saved; it reaches the storefront within a minute."
+      },
+      "problems": {
+        "noWords": "A term needs at least one letter or digit.",
+        "words": "A term can be at most {{words}} words; shorten the phrase.",
+        "length": "A term can be at most {{length}} characters.",
+        "duplicate": "“{{term}}” is already in the group; case and Turkish letters do not make a different term.",
+        "full": "A group holds at most {{max}} terms; remove one to add another.",
+        "tooFew": "Add at least {{min}} terms to the group.",
+        "groupsFull": "A shop keeps at most {{groups}} synonym groups; delete one you no longer use to add another.",
+        "unknown": "This group no longer exists; someone may have deleted it. The list was refreshed.",
+        "invalid": "The term holds a character that cannot be used; write it again."
+      }
+    },
+    "siteSearchCard": {
+      "title": "Site search",
+      "hint": "Synonym groups stand in for one another in storefront search.",
+      "hintCount_one": "{{shown}} synonym group; its terms stand in for one another in storefront search.",
+      "hintCount_other": "{{shown}} synonym groups; their terms stand in for one another in storefront search.",
+      "open": "Manage synonyms",
+      "empty": "No synonym groups yet; pair the terms your shoppers write differently."
+    },
     "redirects": {
       "title": "Redirects",
       "description": "Send old addresses to new pages and repair broken links.",

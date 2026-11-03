@@ -59,6 +59,7 @@ import { Route as AuthReviewsIndexRouteImport } from './routes/_auth/reviews/ind
 import { Route as AuthReviewsQuestionsRouteImport } from './routes/_auth/reviews/questions'
 import { Route as AuthSeoIndexRouteImport } from './routes/_auth/seo/index'
 import { Route as AuthSeoRedirectsRouteImport } from './routes/_auth/seo/redirects'
+import { Route as AuthSeoSearchRouteImport } from './routes/_auth/seo/search'
 import { Route as AuthSettingsIndexRouteImport } from './routes/_auth/settings/index'
 import { Route as AuthSettingsAccountingRouteImport } from './routes/_auth/settings/accounting'
 import { Route as AuthSettingsApiRouteImport } from './routes/_auth/settings/api'
@@ -344,6 +345,11 @@ const AuthSeoRedirectsRoute = AuthSeoRedirectsRouteImport.update({
   path: '/seo/redirects',
   getParentRoute: () => AuthRoute,
 } as any)
+const AuthSeoSearchRoute = AuthSeoSearchRouteImport.update({
+  id: '/seo/search',
+  path: '/seo/search',
+  getParentRoute: () => AuthRoute,
+} as any)
 const AuthSettingsIndexRoute = AuthSettingsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -571,6 +577,7 @@ export interface FileRoutesByFullPath {
   '/reports/stock': typeof AuthReportsStockRoute
   '/reviews/questions': typeof AuthReviewsQuestionsRoute
   '/seo/redirects': typeof AuthSeoRedirectsRoute
+  '/seo/search': typeof AuthSeoSearchRoute
   '/settings/accounting': typeof AuthSettingsAccountingRoute
   '/settings/api': typeof AuthSettingsApiRoute
   '/settings/appearance': typeof AuthSettingsAppearanceRoute
@@ -654,6 +661,7 @@ export interface FileRoutesByTo {
   '/reports/stock': typeof AuthReportsStockRoute
   '/reviews/questions': typeof AuthReviewsQuestionsRoute
   '/seo/redirects': typeof AuthSeoRedirectsRoute
+  '/seo/search': typeof AuthSeoSearchRoute
   '/settings/accounting': typeof AuthSettingsAccountingRoute
   '/settings/api': typeof AuthSettingsApiRoute
   '/settings/appearance': typeof AuthSettingsAppearanceRoute
@@ -742,6 +750,7 @@ export interface FileRoutesById {
   '/_auth/reports/stock': typeof AuthReportsStockRoute
   '/_auth/reviews/questions': typeof AuthReviewsQuestionsRoute
   '/_auth/seo/redirects': typeof AuthSeoRedirectsRoute
+  '/_auth/seo/search': typeof AuthSeoSearchRoute
   '/_auth/settings/accounting': typeof AuthSettingsAccountingRoute
   '/_auth/settings/api': typeof AuthSettingsApiRoute
   '/_auth/settings/appearance': typeof AuthSettingsAppearanceRoute
@@ -829,6 +838,7 @@ export interface FileRouteTypes {
     | '/reports/stock'
     | '/reviews/questions'
     | '/seo/redirects'
+    | '/seo/search'
     | '/settings/accounting'
     | '/settings/api'
     | '/settings/appearance'
@@ -912,6 +922,7 @@ export interface FileRouteTypes {
     | '/reports/stock'
     | '/reviews/questions'
     | '/seo/redirects'
+    | '/seo/search'
     | '/settings/accounting'
     | '/settings/api'
     | '/settings/appearance'
@@ -999,6 +1010,7 @@ export interface FileRouteTypes {
     | '/_auth/reports/stock'
     | '/_auth/reviews/questions'
     | '/_auth/seo/redirects'
+    | '/_auth/seo/search'
     | '/_auth/settings/accounting'
     | '/_auth/settings/api'
     | '/_auth/settings/appearance'
@@ -1408,6 +1420,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthSeoRedirectsRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/_auth/seo/search': {
+      id: '/_auth/seo/search'
+      path: '/seo/search'
+      fullPath: '/seo/search'
+      preLoaderRoute: typeof AuthSeoSearchRouteImport
+      parentRoute: typeof AuthRoute
+    }
     '/_auth/settings/': {
       id: '/_auth/settings/'
       path: '/'
@@ -1776,6 +1795,7 @@ interface AuthRouteChildren {
   AuthPromotionsNewRoute: typeof AuthPromotionsNewRoute
   AuthReviewsQuestionsRoute: typeof AuthReviewsQuestionsRoute
   AuthSeoRedirectsRoute: typeof AuthSeoRedirectsRoute
+  AuthSeoSearchRoute: typeof AuthSeoSearchRoute
   AuthStorefrontMenusRoute: typeof AuthStorefrontMenusRoute
   AuthStorefrontPreferencesRoute: typeof AuthStorefrontPreferencesRoute
   AuthBrandsIndexRoute: typeof AuthBrandsIndexRoute
@@ -1820,6 +1840,7 @@ const AuthRouteChildren: AuthRouteChildren = {
   AuthPromotionsNewRoute: AuthPromotionsNewRoute,
   AuthReviewsQuestionsRoute: AuthReviewsQuestionsRoute,
   AuthSeoRedirectsRoute: AuthSeoRedirectsRoute,
+  AuthSeoSearchRoute: AuthSeoSearchRoute,
   AuthStorefrontMenusRoute: AuthStorefrontMenusRoute,
   AuthStorefrontPreferencesRoute: AuthStorefrontPreferencesRoute,
   AuthBrandsIndexRoute: AuthBrandsIndexRoute,
