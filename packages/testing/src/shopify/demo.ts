@@ -2,9 +2,12 @@ import type { FakeShopifyData, FakeShopifyNode } from "./fake-server"
 
 /**
  * A small Shopify store in the shape the bulk files have (API 2026-10),
- * for the fake's development runs and the migration tests: two
- * collections, a product with variants and one without options, a
- * customer with dated consent and one abroad, orders, a page, a blog post.
+ * for the migration tests: two collections, a product with variants and
+ * one without options, a customer with dated consent and one abroad,
+ * orders, a page, a blog post. Its faults are on purpose (a picture on
+ * Shopify's CDN, a handle with capitals and Turkish letters, stock below
+ * zero, the brand spelt two ways, an address abroad); a developer's fake
+ * serves the tidy `cleanShopifyStore` instead (`./store`).
  */
 
 const gid = (type: string, n: number) => `gid://shopify/${type}/${String(n)}`

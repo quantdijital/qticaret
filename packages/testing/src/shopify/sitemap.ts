@@ -8,10 +8,16 @@ const urlset = (locs: readonly string[]) =>
 
 /**
  * The store's sitemap as Shopify serves one: an index naming a products
- * sitemap and a gzipped pages one (and another site's, to be left), each
- * listing the store's addresses (and one of another site).
+ * sitemap and a gzipped pages one, each listing the store's addresses;
+ * with `foreign`, another site's sitemap and address too, to be left.
  */
-export function sitemapFile(name: string, origin: string, data: FakeShopifyData): Buffer | null {
+export function sitemapFile(
+  name: string,
+  origin: string,
+  data: FakeShopifyData,
+  foreign = true
+): Buffer | null {
+  const elsewhere = (address: string) => (foreign ? [address] : [])
   const handles = (nodes: readonly FakeShopifyNode[]) =>
     nodes.map((node) => (typeof node["handle"] === "string" ? node["handle"] : "")).filter(Boolean)
   switch (name) {
@@ -20,7 +26,7 @@ export function sitemapFile(name: string, origin: string, data: FakeShopifyData)
         `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${[
           `${origin}/sitemap_products_1.xml`,
           `${origin}/sitemap_pages_1.xml.gz`,
-          "https://baska-site.example.com/sitemap.xml",
+          ...elsewhere("https://baska-site.example.com/sitemap.xml"),
         ]
           .map((loc) => `<sitemap><loc>${loc}</loc></sitemap>`)
           .join("")}</sitemapindex>`
@@ -32,7 +38,7 @@ export function sitemapFile(name: string, origin: string, data: FakeShopifyData)
             (handle) => `${origin}/products/${encodeURIComponent(handle)}`
           ),
           ...handles(data.collections).map((handle) => `${origin}/collections/${handle}`),
-          "https://baska-site.example.com/products/x",
+          ...elsewhere("https://baska-site.example.com/products/x"),
         ])
       )
     case "sitemap_pages_1.xml.gz":

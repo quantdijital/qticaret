@@ -1,7 +1,13 @@
 import { randomBytes } from "node:crypto"
 import { createServer } from "node:http"
 import type { AddressInfo, Socket } from "node:net"
+import { serveTracking } from "../carrier/page"
+import type { TrackingPlace } from "../carrier/page"
+import { stateFileFor, stateStore } from "../carrier/tracking"
+import type { AdvanceMode } from "../carrier/tracking"
 import { field, operation, parcelError } from "./rules"
+import { TRACKING_STEPS, moveShipment, shipmentOf, yurticiTracking } from "./shipments"
+import type { FakeYurticiShipment } from "./shipments"
 
 /**
  * A stand-in for Yurtiçi Kargo's shipping order service (adr/0035): the
@@ -9,10 +15,15 @@ import { field, operation, parcelError } from "./rules"
  * "Web Servis Giden Kargo Teknik Döküman V3" gives (docs/entegrasyonlar/
  * yurtici.md), its parcel rules in `./rules`. Parcels are kept by our cargo
  * key and by the login that opened them: the shop's account and its
- * separate door account each see only their own. A parcel's tracking moves
- * one step on each read until delivered. A wrong login is a SOAP fault
- * (HTTP 500), as JAX-WS answers it (the document does not say).
+ * separate door account each see only their own. A parcel moves on a step
+ * on each tracking read (`advance: "on-read"`, the tests' default) or only
+ * from the buttons of Yurtiçi's tracking page, served at `/takip/<docId>`
+ * (`"manual"`). A wrong login is a SOAP fault (HTTP 500), as JAX-WS
+ * answers it (the document does not say).
  */
+
+export { TRACKING_STEPS } from "./shipments"
+export type { FakeYurticiShipment } from "./shipments"
 
 export interface FakeYurticiLogin {
   username: string
@@ -25,37 +36,14 @@ export interface FakeYurticiAccounts {
   cod: FakeYurticiLogin
 }
 
-export interface FakeYurticiShipment {
-  cargoKey: string
-  /** Which login opened it. */
-  account: "main" | "cod"
-  receiverName: string
-  address: string
-  city: string
-  town: string
-  phone: string
-  desi: string
-  kg: string
-  /** `ttInvoiceAmount` as sent; empty when nothing is collected. */
-  codAmount: string
-  codDocumentId: string
-  /** `ttCollectionType`: 0 cash, 1 card; empty when nothing is collected. */
-  collectionType: string
-  docId: string
-  /** Steps of `TRACKING_STEPS` read so far; -1 before the first. */
-  step: number
-  canceled: boolean
-  /** Withdrawn after its document was issued: Yurtiçi brings it back instead. */
-  returnRequested: boolean
+export interface FakeYurticiOptions {
+  port?: number
+  advance?: AdvanceMode
+  /** Where the shop's parcels leave from, for the tracking page. */
+  origin?: TrackingPlace
+  /** Keeps the parcels in the OS temp folder between runs (a developer's fake). */
+  persist?: boolean
 }
-
-/** What Yurtiçi says of a parcel, read by read: its operation and the last event. */
-export const TRACKING_STEPS = [
-  { operation: "ISR", event: "Kargo kabul edildi" },
-  { operation: "IND", event: "Kargo İndirildi" },
-  { operation: "IND", event: "Dağıtıma çıkarıldı" },
-  { operation: "DLV", event: "Teslim edildi" },
-] as const
 
 export interface FakeYurtici {
   url: string
@@ -80,8 +68,8 @@ const login = (prefix: string): FakeYurticiLogin => ({
 
 /** Random logins each run: no fixed secret a scanner could take for a real one (docs/04). */
 export const fakeYurticiAccounts = (): FakeYurticiAccounts => ({
-  main: login("sahte"),
-  cod: login("sahte-tahsilat"),
+  main: login("yurtici"),
+  cod: login("yurtici-tahsilat"),
 })
 
 const NS = "http://yurticikargo.com.tr/ShippingOrderDispatcherServices"
@@ -105,13 +93,19 @@ const notFound = (user: string, cargoKey: string) =>
 
 export async function startFakeYurtici(
   accounts: FakeYurticiAccounts = fakeYurticiAccounts(),
-  options: { port?: number } = {}
+  options: FakeYurticiOptions = {}
 ): Promise<FakeYurtici> {
   const shipments = new Map<string, FakeYurticiShipment>()
   const requests: FakeYurtici["requests"] = []
   const held = new Set<string>()
   const queued = new Map<string, string[]>()
   const sockets = new Set<Socket>()
+  let store = stateStore<{ shipments: [string, FakeYurticiShipment][] }>(null)
+  const save = () => {
+    store.save({ shipments: [...shipments.entries()] })
+  }
+  const numbered = (docId: string) =>
+    [...shipments.values()].some((shipment) => shipment.docId === docId)
 
   const accountOf = (body: string): "main" | "cod" | null => {
     const user = field(body, "wsUserName")
@@ -131,24 +125,7 @@ export async function startFakeYurtici(
     const errCode =
       (lost ? undefined : forced) ?? (shipments.has(cargoKey) ? "60020" : parcelError(body))
     if (errCode === "0") {
-      shipments.set(cargoKey, {
-        cargoKey,
-        account,
-        receiverName: field(body, "receiverCustName"),
-        address: field(body, "receiverAddress"),
-        city: field(body, "cityName"),
-        town: field(body, "townName"),
-        phone: field(body, "receiverPhone1"),
-        desi: field(body, "desi"),
-        kg: field(body, "kg"),
-        codAmount: field(body, "ttInvoiceAmount"),
-        codDocumentId: field(body, "ttDocumentId"),
-        collectionType: field(body, "ttCollectionType"),
-        docId: String(100_000_000_000 + shipments.size),
-        step: -1,
-        canceled: false,
-        returnRequested: false,
-      })
+      shipments.set(cargoKey, shipmentOf(body, account, numbered))
     }
     if (lost) {
       return { status: 500, text: envelope("") }
@@ -174,8 +151,9 @@ export async function startFakeYurtici(
       if (shipment.canceled) {
         line = `${head}${operation("CNL")}`
       } else {
-        if (!held.has(cargoKey) && !shipment.returnRequested) {
-          shipment.step = Math.min(shipment.step + 1, TRACKING_STEPS.length - 1)
+        const onRead = (options.advance ?? "on-read") === "on-read"
+        if (onRead && !held.has(cargoKey) && !shipment.returnRequested) {
+          moveShipment(shipment, shipment.step + 1)
         }
         const step = TRACKING_STEPS[shipment.step]
         // The link comes with `onlyTracking` only (the document), and on http as it shows it
@@ -258,13 +236,18 @@ export async function startFakeYurtici(
     }
   }
 
+  const tracking = yurticiTracking(shipments, options.origin ?? null, save)
   const server = createServer((req, res) => {
     let body = ""
     req.on("data", (chunk: Buffer) => (body += chunk.toString()))
     req.on("end", () => {
+      if (serveTracking(req, res, body, tracking)) {
+        return
+      }
       const name = /<soap:Body>\s*<(?:\w+:)?(\w+)/.exec(body)?.[1] ?? ""
       requests.push({ operation: name, body })
       const { status, text } = reply(name, body)
+      save()
       res.writeHead(status, { "content-type": "text/xml; charset=utf-8" }).end(text)
     })
   })
@@ -274,6 +257,12 @@ export async function startFakeYurtici(
   })
   await new Promise<void>((resolve) => server.listen(options.port ?? 0, "127.0.0.1", resolve))
   const address = server.address() as AddressInfo
+  if (options.persist) {
+    store = stateStore(stateFileFor("yurtici", address.port))
+    for (const [key, shipment] of store.load()?.shipments ?? []) {
+      shipments.set(key, shipment)
+    }
+  }
 
   return {
     url: `http://127.0.0.1:${String(address.port)}`,

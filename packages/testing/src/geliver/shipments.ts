@@ -1,37 +1,31 @@
-import { tinyPdf } from "../pdf"
 import { randomUUID } from "node:crypto"
-import { FAKE_SERVICES, fakeDesi, fakePrice } from "./prices"
+import type { AdvanceMode } from "../carrier/tracking"
+import type { FakeAddress } from "./addresses"
+import {
+  TEST_STEPS,
+  acceptedOffer,
+  geliverLabel,
+  moveToStep,
+  numberFor,
+  trackingCodeOf,
+} from "./parcels"
+import type { FakeShipment } from "./parcels"
+import { fakeDesi, offersFor } from "./prices"
+import type { FakeService } from "./prices"
 import type { Handler, Reply } from "./routes"
 import { failed, ok } from "./routes"
 
 /**
  * Geliver's shipments as the fake keeps them (adr/0031): created with
- * offers that are complete on the first read, accepted (the label bought),
- * cancelled until the carrier has the parcel. A test shipment moves one
- * step on every read after its label is bought, as Geliver's do.
+ * offers that are complete on the first read, accepted (the label bought,
+ * the carrier's tracking number given), cancelled until the carrier has
+ * the parcel. After its label is bought a shipment, test or live, moves
+ * on a step on each read (`advance: "on-read"`, the tests' default) or
+ * only from the carrier's tracking page (`"manual"`, `./parcels`).
  */
 
-/** The steps a test shipment takes after its label is bought, one per read. */
-export const TEST_STEPS = [
-  { statusCode: "OFFER_ACCEPTED", tracking: null },
-  { statusCode: "TRACKING_CODE_CREATED", tracking: "PRE_TRANSIT" },
-  { statusCode: "LABEL_PRINTED", tracking: "PRE_TRANSIT" },
-  { statusCode: "SHIPPED", tracking: "TRANSIT" },
-  { statusCode: "DELIVERED", tracking: "DELIVERED" },
-] as const
-
-export interface FakeShipment {
-  id: string
-  request: Record<string, unknown>
-  test: boolean
-  statusCode: string
-  offers: Record<string, unknown>[]
-  offersRead: boolean
-  acceptedOfferID: string | null
-  step: number
-  trackingNumber: string | null
-  labelURL: string | null
-}
+export { TEST_STEPS } from "./parcels"
+export type { FakeShipment } from "./parcels"
 
 const CANCELLABLE = new Set([
   "CREATED",
@@ -41,17 +35,24 @@ const CANCELLABLE = new Set([
   "LABEL_PRINTED",
 ])
 
-export function createShipments(labelBase: () => string) {
+export interface ShipmentOptions {
+  origin: () => string
+  addresses: ReadonlyMap<string, FakeAddress>
+  services: readonly FakeService[]
+  advance: AdvanceMode
+}
+
+export function createShipments(options: ShipmentOptions) {
   const shipments = new Map<string, FakeShipment>()
   // Shipments whose reads do not move them on (a test pins one where it stands)
   const held = new Set<string>()
 
   const view = (shipment: FakeShipment) => {
-    const accepted = shipment.offers.find((offer) => offer["id"] === shipment.acceptedOfferID)
+    const accepted = acceptedOffer(shipment)
     const sorted = [...shipment.offers].sort(
       (a, b) => Number(a["totalAmount"]) - Number(b["totalAmount"])
     )
-    const step = TEST_STEPS[shipment.step]
+    const tracking = trackingCodeOf(shipment)
     return {
       id: shipment.id,
       test: shipment.test,
@@ -60,7 +61,7 @@ export function createShipments(labelBase: () => string) {
       providerServiceCode: accepted?.["providerServiceCode"] ?? null,
       trackingNumber: shipment.trackingNumber,
       trackingUrl: shipment.trackingNumber
-        ? `https://kargo.example.com/takip/${shipment.trackingNumber}`
+        ? `${options.origin()}/takip/${shipment.trackingNumber}`
         : null,
       barcode: shipment.trackingNumber,
       labelURL: shipment.labelURL,
@@ -70,20 +71,21 @@ export function createShipments(labelBase: () => string) {
         list: shipment.offersRead ? shipment.offers : [],
       },
       trackingStatus:
-        shipment.acceptedOfferID && step?.tracking
-          ? { trackingStatusCode: step.tracking, statusDate: new Date().toISOString() }
+        shipment.acceptedOfferID && tracking
+          ? {
+              trackingStatusCode: tracking,
+              statusDate: shipment.moves.at(-1)?.at ?? new Date().toISOString(),
+            }
           : null,
     }
   }
 
-  /** Moves a test shipment one step on, as a read does; also for tests that drive it. */
+  /** Moves a shipment one step on, as a read does; also for tests that drive it. */
   const advance = (shipment: FakeShipment) => {
     if (!shipment.acceptedOfferID || shipment.statusCode === "CANCELED") {
       return
     }
-    shipment.step = Math.min(shipment.step + 1, TEST_STEPS.length - 1)
-    shipment.statusCode = TEST_STEPS[shipment.step]?.statusCode ?? shipment.statusCode
-    shipment.trackingNumber ??= String(Math.floor(1e11 + Math.random() * 9e11))
+    moveToStep(shipment, shipment.step + 1)
   }
 
   const create: Handler = ({ body }) => {
@@ -101,23 +103,20 @@ export function createShipments(labelBase: () => string) {
     ) {
       return failed(400, "VALIDATION_ERROR", "sender, recipient phone and parcel required")
     }
-    const desi = fakeDesi(parcel)
     const shipment: FakeShipment = {
       id: randomUUID(),
       request: body,
       test: body["test"] === true,
       statusCode: "GOT_OFFERS",
-      offers: FAKE_SERVICES.map((service) => ({
+      offers: offersFor(options.services, fakeDesi(parcel)).map((offer) => ({
         id: randomUUID(),
-        providerCode: service.providerCode,
-        providerServiceCode: service.providerServiceCode,
-        totalAmount: fakePrice(service, desi),
-        currency: "TRY",
-        averageEstimatedTime: service.hours,
+        ...offer,
       })),
       offersRead: false,
       acceptedOfferID: null,
       step: 0,
+      stage: "created",
+      moves: [],
       trackingNumber: null,
       labelURL: null,
     }
@@ -132,10 +131,21 @@ export function createShipments(labelBase: () => string) {
     }
     if (!shipment.offersRead) {
       shipment.offersRead = true
-    } else if (shipment.test && !held.has(shipment.id)) {
+    } else if (options.advance === "on-read" && !held.has(shipment.id)) {
       advance(shipment)
     }
     return ok(view(shipment))
+  }
+
+  /** The label bought: the carrier's number given now, as its label carries it. */
+  const bought = (shipment: FakeShipment) => {
+    shipment.moves = [{ stage: "created", at: new Date().toISOString() }]
+    shipment.stage = "created"
+    shipment.trackingNumber = numberFor(shipment, shipments.values())
+    // By hand, the number given is where it waits; on read, each read takes a step
+    shipment.step = options.advance === "manual" ? 1 : 0
+    shipment.statusCode = TEST_STEPS[shipment.step]?.statusCode ?? "OFFER_ACCEPTED"
+    shipment.labelURL = `${options.origin()}/labels/${shipment.id}.pdf`
   }
 
   const accept: Handler = ({ body }) => {
@@ -149,8 +159,7 @@ export function createShipments(labelBase: () => string) {
       return failed(400, "ALREADY_ACCEPTED", "an offer was already accepted")
     }
     shipment.acceptedOfferID = String(body["offerID"])
-    shipment.statusCode = "OFFER_ACCEPTED"
-    shipment.labelURL = `${labelBase()}/labels/${shipment.id}.pdf`
+    bought(shipment)
     return ok({ id: randomUUID(), shipment: view(shipment) })
   }
 
@@ -166,17 +175,16 @@ export function createShipments(labelBase: () => string) {
     return ok(undefined)
   }
 
-  /** The label PDF: a real (tiny) PDF, served without a token like Geliver's link. */
-  const label = (id: string): Reply =>
-    shipments.get(id)?.labelURL
+  /** The label PDF, the carrier's own, served without a token like Geliver's link. */
+  const label = (id: string): Reply => {
+    const shipment = shipments.get(id)
+    return shipment?.labelURL
       ? {
           body: null,
-          bytes: {
-            type: "application/pdf",
-            data: tinyPdf(`etiket ${id}`),
-          },
+          bytes: { type: "application/pdf", data: geliverLabel(shipment, options.addresses) },
         }
       : failed(404, "NOT_FOUND", "label not found")
+  }
 
   /** `POST /shipments/:id { isReturn }`: a return of a delivered shipment, its label bought. */
   const createReturn: Handler = ({ params, body }) => {
@@ -191,14 +199,10 @@ export function createShipments(labelBase: () => string) {
       ...original,
       id: randomUUID(),
       request: { ...original.request, isReturn: true, returnOf: original.id },
-      statusCode: "OFFER_ACCEPTED",
       offersRead: true,
       acceptedOfferID: original.acceptedOfferID,
-      step: 0,
-      trackingNumber: String(Math.floor(1e11 + Math.random() * 9e11)),
-      labelURL: null,
     }
-    returned.labelURL = `${labelBase()}/labels/${returned.id}.pdf`
+    bought(returned)
     shipments.set(returned.id, returned)
     return ok({ id: randomUUID(), shipment: { ...view(returned), isReturn: true } })
   }

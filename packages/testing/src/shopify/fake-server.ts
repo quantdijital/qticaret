@@ -3,6 +3,7 @@ import { createServer } from "node:http"
 import type { IncomingMessage, ServerResponse } from "node:http"
 import type { AddressInfo, Socket } from "node:net"
 import { merchantFeed } from "./feed"
+import { FAKE_SHOPIFY_PNG, jsonlOf } from "./files"
 import { sitemapFile } from "./sitemap"
 
 /**
@@ -15,6 +16,8 @@ import { sitemapFile } from "./sitemap"
  * `__parentId`, as Shopify writes it.
  */
 
+export { FAKE_SHOPIFY_PNG, jsonlOf } from "./files"
+
 export interface FakeShopifyNode {
   id: string
   /** Child nodes, a line each after this one. */
@@ -24,6 +27,8 @@ export interface FakeShopifyNode {
 
 export interface FakeShopifyData {
   currencyCode: string
+  /** The store's name, as `{ shop { name } }` answers it. */
+  shopName?: string
   collections: FakeShopifyNode[]
   products: FakeShopifyNode[]
   customers: FakeShopifyNode[]
@@ -36,12 +41,6 @@ export interface FakeShopifyApp {
   clientId: string
   clientSecret: string
 }
-
-/** A real 64×48 PNG: what the fake serves at `/images/{name}` (a store's picture). */
-export const FAKE_SHOPIFY_PNG = Buffer.from(
-  "iVBORw0KGgoAAAANSUhEUgAAAEAAAAAwCAIAAAAuKetIAAAACXBIWXMAAAPoAAAD6AG1e1JrAAAAfUlEQVRoge2SAQkAURSDFsdMl9OAF2M8/sAAOhY/TpO6gQugvqK7EHdJ3cAFUF/RXYi7pG7gAqiv6C7EXVI3cAHUV3QX4i6pG7gA6iu6C3GX1A1cAPUV3YW4S+oGLoD6iu5C3CV1AxdAfUV3Ie6SuoELoL6iuxB3Sd3AxwN+3U6I0+Jnnj8AAAAASUVORK5CYII=",
-  "base64"
-)
 
 export interface FakeShopify {
   /** The origin the backend takes as `SHOPIFY_BASE_URL`. */
@@ -82,22 +81,6 @@ function json(res: ServerResponse, status: number, body: unknown) {
   res.end(JSON.stringify(body))
 }
 
-/** The file Shopify writes: a line per node, children after their parent. */
-export function jsonlOf(nodes: readonly FakeShopifyNode[]): string {
-  const lines: string[] = []
-  const write = (node: FakeShopifyNode, parent: string | null) => {
-    const { children, ...fields } = node
-    lines.push(JSON.stringify(parent ? { ...fields, __parentId: parent } : fields))
-    for (const child of children ?? []) {
-      write(child, node.id)
-    }
-  }
-  for (const node of nodes) {
-    write(node, null)
-  }
-  return lines.length > 0 ? `${lines.join("\n")}\n` : ""
-}
-
 const emptyData = (): FakeShopifyData => ({
   currencyCode: "TRY",
   collections: [],
@@ -109,11 +92,21 @@ const emptyData = (): FakeShopifyData => ({
 })
 
 /** Starts the fake on a local port: a free one, or `port` for a dev backend's SHOPIFY_BASE_URL. */
+export interface FakeShopifyOptions {
+  port?: number
+  /** The store's records, or a function of the fake's address (its pictures served here). */
+  data?: Partial<FakeShopifyData> | ((origin: string) => Partial<FakeShopifyData>)
+  /** The old site's feed at `/feeds/merchant.xml`; the tests' feed, faults included, unless given. */
+  feed?: (origin: string, data: FakeShopifyData) => string
+  /** Whether the sitemaps also name another site's addresses, to be left (default true: the tests). */
+  foreignSitemaps?: boolean
+}
+
 export async function startFakeShopify(
   app: FakeShopifyApp,
-  options: { port?: number; data?: Partial<FakeShopifyData> } = {}
+  options: FakeShopifyOptions = {}
 ): Promise<FakeShopify> {
-  const data: FakeShopifyData = { ...emptyData(), ...options.data }
+  const data: FakeShopifyData = emptyData()
   const tokens = new Set<string>()
   const operations = new Map<string, Operation>()
   const bulkRuns: string[] = []
@@ -192,7 +185,9 @@ export async function startFakeShopify(
       }
     }
     if (query.includes("shop")) {
-      return { data: { shop: { name: "Sahte Mağaza", currencyCode: data.currencyCode } } }
+      return {
+        data: { shop: { name: data.shopName ?? "Mağaza", currencyCode: data.currencyCode } },
+      }
     }
     return { errors: [{ message: "Unknown query", extensions: { code: "BAD_REQUEST" } }] }
   }
@@ -217,12 +212,12 @@ export async function startFakeShopify(
       }
       if (url.pathname === "/feeds/merchant.xml" && req.method === "GET") {
         res.writeHead(200, { "content-type": "application/rss+xml" })
-        res.end(merchantFeed(origin))
+        res.end(options.feed ? options.feed(origin, data) : merchantFeed(origin))
         return
       }
       const sitemap = /^\/(sitemap[a-z0-9_]*\.xml(?:\.gz)?)$/.exec(url.pathname)?.[1]
       if (sitemap && req.method === "GET") {
-        const body = sitemapFile(sitemap, origin, data)
+        const body = sitemapFile(sitemap, origin, data, options.foreignSitemaps ?? true)
         res.writeHead(body ? 200 : 404, {
           "content-type": sitemap.endsWith(".gz") ? "application/gzip" : "application/xml",
         })
@@ -264,6 +259,7 @@ export async function startFakeShopify(
   })
   await new Promise<void>((resolve) => server.listen(options.port ?? 0, "127.0.0.1", resolve))
   origin = `http://127.0.0.1:${String((server.address() as AddressInfo).port)}`
+  Object.assign(data, typeof options.data === "function" ? options.data(origin) : options.data)
 
   return {
     url: origin,

@@ -2,9 +2,14 @@ import { randomBytes } from "node:crypto"
 import { createServer } from "node:http"
 import type { IncomingMessage, ServerResponse } from "node:http"
 import type { AddressInfo, Socket } from "node:net"
+import { serveTracking } from "../carrier/page"
+import { stateFileFor, stateStore } from "../carrier/tracking"
+import type { AdvanceMode } from "../carrier/tracking"
 import { createAddresses } from "./addresses"
 import type { FakeAddress } from "./addresses"
-import { priceList } from "./prices"
+import { geliverTracking } from "./parcels"
+import { TEST_SERVICES, priceListOf } from "./prices"
+import type { FakeService } from "./prices"
 import { createShipments } from "./shipments"
 import type { FakeShipment } from "./shipments"
 import { failed, matchRoute } from "./routes"
@@ -15,11 +20,23 @@ import type { Handler, Reply } from "./routes"
  * provider; adr/0031). Served under `/api/v1` like Geliver itself, with a
  * Bearer token: another token is a 401. Answers in Geliver's envelope
  * (`{ result, data }`): addresses, the price list, shipments with their
- * offers, accepting one (the label), cancelling, and the label PDF.
+ * offers, accepting one (the label), cancelling, and the label PDF, the
+ * chosen carrier's own. Each carrier's tracking page is served at
+ * `/takip/<tracking number>`, the shipment's `trackingUrl`.
  */
 
 export type { FakeAddress } from "./addresses"
 export type { FakeShipment } from "./shipments"
+
+export interface FakeGeliverOptions {
+  port?: number
+  /** How shipments move on after their label: a step a read (default) or by hand. */
+  advance?: AdvanceMode
+  /** The services offered; the tests' two-service formula unless given. */
+  services?: readonly FakeService[]
+  /** Keeps addresses and shipments in the OS temp folder between runs (a developer's fake). */
+  persist?: boolean
+}
 
 /** An answer queued for the next request to a route: a reply, a stall, or a dropped connection. */
 export type FakeGeliverAnswer = Reply | { hang: true } | { drop: true }
@@ -31,9 +48,9 @@ export interface FakeGeliver {
   requests: { method: string; path: string; body: Record<string, unknown> }[]
   addresses: Map<string, FakeAddress>
   shipments: Map<string, FakeShipment>
-  /** Moves a test shipment one step on, as a read at Geliver does. */
+  /** Moves a shipment one step on, as a read does when shipments move on read. */
   advance: (shipmentId: string) => void
-  /** Pins a test shipment where it stands: reads no longer move it on. */
+  /** Pins a shipment where it stands: reads no longer move it on. */
   hold: (shipmentId: string) => void
   /** The shipment as Geliver answers it (a notification's body carries the same). */
   view: (shipmentId: string) => unknown
@@ -68,19 +85,36 @@ const send = (res: ServerResponse, reply: Reply) => {
 /** Starts the fake on a local port: a free one, or `port` for a dev backend's GELIVER_BASE_URL. */
 export async function startFakeGeliver(
   token: string = fakeGeliverToken(),
-  options: { port?: number } = {}
+  options: FakeGeliverOptions = {}
 ): Promise<FakeGeliver> {
   const requests: FakeGeliver["requests"] = []
   const queued = new Map<string, FakeGeliverAnswer[]>()
   const sockets = new Set<Socket>()
   const addresses = createAddresses()
+  const services = options.services ?? TEST_SERVICES
   let origin = ""
-  const shipments = createShipments(() => origin)
+  const shipments = createShipments({
+    origin: () => origin,
+    addresses: addresses.addresses,
+    services,
+    advance: options.advance ?? "on-read",
+  })
   const routes: Record<string, Handler> = {
     ...addresses.routes,
     ...shipments.routes,
-    "GET /priceList": priceList,
+    "GET /priceList": priceListOf(services),
   }
+  let store = stateStore<{
+    addresses: [string, FakeAddress][]
+    shipments: [string, FakeShipment][]
+  }>(null)
+  const save = () => {
+    store.save({
+      addresses: [...addresses.addresses.entries()],
+      shipments: [...shipments.shipments.entries()],
+    })
+  }
+  const tracking = geliverTracking(shipments.shipments, addresses.addresses, save)
 
   const answer = (req: IncomingMessage, path: string, query: URLSearchParams, text: string) => {
     if (req.headers.authorization !== `Bearer ${token}`) {
@@ -105,6 +139,10 @@ export async function startFakeGeliver(
       }
       const path = url.pathname.startsWith(BASE) ? url.pathname.slice(BASE.length) : url.pathname
       const text = await readText(req)
+      // The carriers' tracking pages sit outside the API too
+      if (serveTracking(req, res, text, tracking)) {
+        return
+      }
       requests.push({
         method: req.method ?? "GET",
         path,
@@ -119,6 +157,7 @@ export async function startFakeGeliver(
         return
       }
       send(res, next ?? answer(req, path, url.searchParams, text))
+      save()
     })().catch(() => {
       send(res, failed(500, "INTERNAL", "error"))
     })
@@ -130,6 +169,16 @@ export async function startFakeGeliver(
   await new Promise<void>((resolve) => server.listen(options.port ?? 0, "127.0.0.1", resolve))
   const address = server.address() as AddressInfo
   origin = `http://127.0.0.1:${String(address.port)}`
+  if (options.persist) {
+    store = stateStore(stateFileFor("geliver", address.port))
+    const saved = store.load()
+    for (const [id, each] of saved?.addresses ?? []) {
+      addresses.addresses.set(id, each)
+    }
+    for (const [id, each] of saved?.shipments ?? []) {
+      shipments.shipments.set(id, each)
+    }
+  }
 
   return {
     url: `${origin}${BASE}`,

@@ -1,37 +1,39 @@
 import { randomBytes } from "node:crypto"
-import { tinyPdf } from "../pdf"
 import { createServer } from "node:http"
 import type { AddressInfo, Socket } from "node:net"
+import { serveTracking } from "../carrier/page"
+import { stateFileFor, stateStore } from "../carrier/tracking"
+import type { AdvanceMode } from "../carrier/tracking"
+import type { LabelParty } from "../label-pdf"
+import { TRACKING_STEPS, arasLabel, moveOrder, orderOf, trackedOrder } from "./orders"
+import type { FakeArasOrder } from "./orders"
 
 /**
  * A stand-in for Aras Kargo's customer service (adr/0035): the SOAP
  * operations the platform calls, answered in the shapes the test service's
- * description (WSDL) gives. Orders are kept by our integration code; a
- * parcel's tracking moves one step on each read, like Geliver's test
- * shipments, until delivered. A wrong user name or password is a SOAP
- * fault, as a .NET service answers it.
+ * description (WSDL) gives, a label drawn as Aras prints one, and Aras's
+ * tracking page at `/takip/<tracking number>` (`carrier/page`). A parcel
+ * moves on a step on each tracking read (`advance: "on-read"`, the tests'
+ * default) or only from the page's buttons (`"manual"`). A wrong user name
+ * or password is a SOAP fault, as a .NET service answers it.
  */
+
+export { TRACKING_STEPS } from "./orders"
+export type { FakeArasOrder } from "./orders"
 
 export interface FakeArasAccount {
   username: string
   password: string
 }
 
-export interface FakeArasOrder {
-  integrationCode: string
-  receiverName: string
-  city: string
-  town: string
-  isCod: boolean
-  codAmount: string
-  trackingNumber: string
-  /** Steps of `TRACKING_STEPS` read so far; -1 before the first. */
-  step: number
-  canceled: boolean
+export interface FakeArasOptions {
+  port?: number
+  advance?: AdvanceMode
+  /** The contract's sender, as Aras prints it on the label; none leaves the block off. */
+  sender?: LabelParty
+  /** Keeps the orders in the OS temp folder between runs (a developer's fake). */
+  persist?: boolean
 }
-
-/** What Aras shows for a parcel, read by read. */
-export const TRACKING_STEPS = ["TESLİM ALINDI", "YOLDA", "DAĞITIMDA", "TESLİM EDİLDİ"] as const
 
 export interface FakeAras {
   url: string
@@ -47,7 +49,7 @@ export interface FakeAras {
 
 /** A random account each run: no fixed secret a scanner could take for a real one (docs/04). */
 export const fakeArasAccount = (): FakeArasAccount => ({
-  username: `sahte-${randomBytes(4).toString("hex")}`,
+  username: `aras-${randomBytes(4).toString("hex")}`,
   password: randomBytes(12).toString("hex"),
 })
 
@@ -61,18 +63,22 @@ const FAULT = envelope(
   "<soap:Fault><faultcode>soap:Server</faultcode><faultstring>Kullanıcı adı veya şifre hatalı</faultstring></soap:Fault>"
 )
 
-// A real one-page PDF, so a merged print counts it
-const PDF = tinyPdf("sahte-aras-etiketi").toString("base64")
-
 export async function startFakeAras(
   account: FakeArasAccount = fakeArasAccount(),
-  options: { port?: number } = {}
+  options: FakeArasOptions = {}
 ): Promise<FakeAras> {
   const orders = new Map<string, FakeArasOrder>()
   const requests: FakeAras["requests"] = []
   const held = new Set<string>()
   const queued = new Map<string, string[]>()
   const sockets = new Set<Socket>()
+  const sender = options.sender ?? null
+  let store = stateStore<{ orders: [string, FakeArasOrder][] }>(null)
+  const save = () => {
+    store.save({ orders: [...orders.entries()] })
+  }
+  const numbered = (number: string) =>
+    [...orders.values()].some((order) => order.trackingNumber === number)
 
   const answer = (operation: string, body: string): { status: number; text: string } => {
     const user = field(body, "userName") || field(body, "Username") || field(body, "username")
@@ -87,17 +93,7 @@ export async function startFakeAras(
       case "SetOrder": {
         const result = forced ?? (orders.has(code) || !field(body, "ReceiverName") ? "936" : "0")
         if (result === "0") {
-          orders.set(code, {
-            integrationCode: code,
-            receiverName: field(body, "ReceiverName"),
-            city: field(body, "ReceiverCityName"),
-            town: field(body, "ReceiverTownName"),
-            isCod: field(body, "IsCod") === "1",
-            codAmount: field(body, "CodAmount"),
-            trackingNumber: String(1_000_000_000 + orders.size),
-            step: -1,
-            canceled: false,
-          })
+          orders.set(code, orderOf(body, code, numbered))
         }
         return {
           status: 200,
@@ -108,7 +104,10 @@ export async function startFakeAras(
       }
       case "GetArasBarcode": {
         const result = forced ?? (order && !order.canceled ? "0" : "1")
-        const pdf = result === "0" ? `<ZebraPdf><string>${PDF}</string></ZebraPdf>` : ""
+        const pdf =
+          result === "0" && order
+            ? `<ZebraPdf><string>${arasLabel(order, sender).toString("base64")}</string></ZebraPdf>`
+            : ""
         return {
           status: 200,
           text: envelope(
@@ -132,8 +131,8 @@ export async function startFakeAras(
       case "GetCargoInfo": {
         let rows = ""
         if (order && !order.canceled) {
-          if (!held.has(code)) {
-            order.step = Math.min(order.step + 1, TRACKING_STEPS.length - 1)
+          if ((options.advance ?? "on-read") === "on-read" && !held.has(code)) {
+            moveOrder(order, order.step + 1)
           }
           const status = TRACKING_STEPS[order.step]
           rows = status
@@ -159,13 +158,31 @@ export async function startFakeAras(
     }
   }
 
+  const tracking = {
+    carrier: "Aras Kargo",
+    color: "#003a70",
+    words: {
+      picked_up: "Kargo teslim alındı",
+      in_transit: "Transfer merkezinden çıkış yaptı",
+      out_for_delivery: "Dağıtıma çıkarıldı",
+    },
+    find: (number: string) => {
+      const order = [...orders.values()].find((each) => each.trackingNumber === number)
+      return order ? trackedOrder(order, sender, save) : null
+    },
+  }
+
   const server = createServer((req, res) => {
     let body = ""
     req.on("data", (chunk: Buffer) => (body += chunk.toString()))
     req.on("end", () => {
+      if (serveTracking(req, res, body, tracking)) {
+        return
+      }
       const operation = /<soap:Body>\s*<(\w+)/.exec(body)?.[1] ?? ""
       requests.push({ operation, body })
       const reply = answer(operation, body)
+      save()
       res.writeHead(reply.status, { "content-type": "text/xml; charset=utf-8" }).end(reply.text)
     })
   })
@@ -175,6 +192,12 @@ export async function startFakeAras(
   })
   await new Promise<void>((resolve) => server.listen(options.port ?? 0, "127.0.0.1", resolve))
   const address = server.address() as AddressInfo
+  if (options.persist) {
+    store = stateStore(stateFileFor("aras", address.port))
+    for (const [code, order] of store.load()?.orders ?? []) {
+      orders.set(code, order)
+    }
+  }
 
   return {
     url: `http://127.0.0.1:${String(address.port)}`,
