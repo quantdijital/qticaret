@@ -9,7 +9,7 @@
     "build": "next build",
     "start": "next start --port 8000",
     "lint": "eslint .",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p e2e",
     "test": "vitest run",
     "test:unit": "vitest run",
     "test:watch": "vitest",
