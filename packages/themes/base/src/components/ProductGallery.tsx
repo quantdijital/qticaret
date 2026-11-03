@@ -6,6 +6,12 @@ import type { ImageView } from "@qticaret/ui"
  * The product's pictures without a script: on phones a row that snaps
  * picture by picture, on wide screens the first one large and the rest in
  * two columns. Only the first loads eagerly (LCP, docs/03 F18).
+ *
+ * The row holds nothing to focus, so where it scrolls (two pictures or
+ * more) the labelled row itself takes the focus and the arrow keys scroll
+ * it (WCAG 2.1.1, axe scrollable-region-focusable). The row is the scroll
+ * container and the list's flex parent, so its end padding stays after the
+ * last picture; a picture's width is the row's (`cqw`), not the list's.
  */
 export function ProductGallery({
   images,
@@ -36,15 +42,20 @@ export function ProductGallery({
     )
   }
   return (
-    <section aria-label={label}>
-      <ul className="-mx-4 flex snap-x snap-mandatory gap-2 overflow-x-auto px-4 sm:mx-0 sm:px-0 lg:grid lg:grid-cols-2 lg:gap-3 lg:overflow-visible">
+    <section
+      aria-label={label}
+      tabIndex={images.length > 1 ? 0 : undefined}
+      // On phones the row meets the screen's edges: the focus ring sits inside
+      className="@container -mx-4 flex snap-x snap-mandatory overflow-x-auto px-4 focus-visible:-outline-offset-2 sm:mx-0 sm:px-0 sm:focus-visible:outline-offset-2 lg:block lg:overflow-visible"
+    >
+      <ul className="flex flex-none gap-2 lg:grid lg:grid-cols-2 lg:gap-3">
         {images.map((image, index) => (
           <li
             key={image.src}
             className={
               index === 0
-                ? "w-[88%] shrink-0 snap-center sm:w-full lg:col-span-2"
-                : "w-[88%] shrink-0 snap-center sm:w-full"
+                ? "w-[88cqw] shrink-0 snap-center sm:w-[100cqw] lg:col-span-2 lg:w-auto"
+                : "w-[88cqw] shrink-0 snap-center sm:w-[100cqw] lg:w-auto"
             }
           >
             <div className="aspect-square overflow-hidden rounded-3xl border bg-card">

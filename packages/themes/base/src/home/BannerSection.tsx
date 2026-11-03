@@ -6,11 +6,19 @@ type Banner = Extract<HomeSectionView, { type: "banner" }>
 /**
  * Pictures with a line and a link, side by side; on a phone they scroll
  * sideways (no script: a row that snaps). A slide's link wraps it whole.
+ * A row that scrolls with no link in it takes the focus itself, so the
+ * arrow keys scroll it (WCAG 2.1.1, axe scrollable-region-focusable); with
+ * a link the link is the stop, never both.
  */
 export function BannerSection({ section, label }: { section: Banner; label: string }) {
+  const focusable = section.slides.length > 1 && section.slides.every((slide) => !slide.link)
   return (
-    <section aria-label={label}>
-      <ul className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2 lg:grid lg:grid-flow-col lg:auto-cols-fr lg:overflow-visible">
+    <section
+      aria-label={label}
+      tabIndex={focusable ? 0 : undefined}
+      className="snap-x snap-mandatory overflow-x-auto pb-2 lg:overflow-visible"
+    >
+      <ul className="flex gap-4 lg:grid lg:grid-flow-col lg:auto-cols-fr">
         {section.slides.map((slide, index) => {
           const body = (
             <figure className="relative flex h-full flex-col overflow-hidden rounded-3xl border bg-card">

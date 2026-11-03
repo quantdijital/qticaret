@@ -102,9 +102,13 @@ export function AuthPage({
                 <summary className="cursor-pointer list-none px-4 py-3 text-sm font-medium marker:hidden">
                   {view.terms.title}
                 </summary>
-                {/* adr/0019: the backend's own rendering of a checked document */}
+                {/* adr/0019: the backend's own rendering of a checked document;
+                    the box scrolls and takes the focus (WCAG 2.1.1) */}
                 <div
-                  className="max-h-56 overflow-y-auto border-t px-4 py-3 text-xs leading-relaxed text-muted-foreground"
+                  role="region"
+                  aria-label={view.terms.title}
+                  tabIndex={0}
+                  className="max-h-56 overflow-y-auto border-t px-4 py-3 text-xs leading-relaxed text-muted-foreground focus-visible:-outline-offset-2"
                   dangerouslySetInnerHTML={{ __html: view.terms.html }}
                 />
               </details>

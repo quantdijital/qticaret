@@ -120,6 +120,10 @@ shadcn bileşeni eklemek: `cd packages/ui && pnpm exec shadcn add <ad>`. CLI'nin
 9. **Dosya ≤ ~300 satır;** büyüyen sayfa `components/` ya da `layout/` altına bölünür.
 10. **Satır içi `style` yok:** üretimdeki CSP (`style-src 'self' 'nonce-…'`) HTML'deki `style` niteliğini reddeder. Değişken genişlik gibi değerler sabit sınıf adlarıyla verilir (ör. sepet kargo çubuğu 5'lik adımlar).
 
+### 6.9 Kaydırılabilir kutular (2026-11-03)
+
+İçinde odaklanılabilir öğe olmayan ama kaydırılabilen her kutu (ürün görsel şeridi, bağlantısız afiş satırı, sözleşme metni kutusu) tek bir sekme durağı olur: `tabIndex={0}` + `role="region"` (ya da etiketli `section`) + `aria-label`; odak halkası yalnız klavye modunda, ekran kenarına dayanan şeritte içeri çizilir. İçinde zaten bağlantı/düğme olan şerit ikinci durak almaz (axe `scrollable-region-focusable`).
+
 ## 7. Sayfa envanteri
 
 Durum: ✅ var · 🟡 temel hâli var · ⬜ yok. Görev kodları PROGRESS "F18 görev planı".

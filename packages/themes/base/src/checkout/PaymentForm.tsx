@@ -131,9 +131,14 @@ export function PaymentForm({
               <summary className="cursor-pointer list-none px-4 py-3 text-sm font-medium marker:hidden">
                 {contract.title}
               </summary>
-              {/* adr/0019: the backend's own rendering of a checked document */}
+              {/* adr/0019: the backend's own rendering of a checked document; it
+                  scrolls with nothing in it to focus, so the box takes the focus
+                  and the arrow keys scroll it (WCAG 2.1.1) */}
               <div
-                className="max-h-56 overflow-y-auto border-t px-4 py-3 text-xs leading-relaxed text-muted-foreground [&_h2]:mt-3 [&_h2]:text-sm [&_h2]:font-semibold [&_h2]:text-foreground [&_h3]:mt-2 [&_h3]:font-semibold [&_p]:mt-2 [&_table]:w-full [&_td]:border [&_td]:p-1 [&_th]:border [&_th]:p-1"
+                role="region"
+                aria-label={contract.title}
+                tabIndex={0}
+                className="max-h-56 overflow-y-auto border-t px-4 py-3 text-xs leading-relaxed text-muted-foreground focus-visible:-outline-offset-2 [&_h2]:mt-3 [&_h2]:text-sm [&_h2]:font-semibold [&_h2]:text-foreground [&_h3]:mt-2 [&_h3]:font-semibold [&_p]:mt-2 [&_table]:w-full [&_td]:border [&_td]:p-1 [&_th]:border [&_th]:p-1"
                 dangerouslySetInnerHTML={{ __html: contract.html }}
               />
               <input
