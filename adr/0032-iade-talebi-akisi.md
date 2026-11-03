@@ -80,3 +80,49 @@ Medusa v2'nin iade modeli (Kaynak: core-flows v2.21.2) şöyle çalışıyor:
 
 - İade faturası (F8), muhasebe kaydı (F11) ve müşteri bildirimleri (F9) `return.refunded` ve durum değişikliklerine bağlanır.
 - Cayma süresi, iade edilemeyen ürün türleri (hijyen, kişiye özel) ve iade kargo ücretini kimin ödediği F13'te mağaza ayarı olur.
+
+## Ek (2026-11-03): Mesafeli Sözleşmeler Yönetmeliği 2026 uyumu
+
+**Dayanak:** Mesafeli Sözleşmeler Yönetmeliği ("MSY"; RG 27.11.2014/29188). 23.8.2022/31932 ve 24.5.2025/32909 değişiklikleriyle 1.1.2026'dan beri yürürlükte. Maddeler mevzuat.gov.tr'deki işlenmiş metinden (MevzuatNo 20237) 2026-11-03'te kontrol edildi:
+
+- md. 12/1: satıcı, malın iade için ön bilgilendirmede belirtilen taşıyıcıya teslim edildiği tarihten itibaren 14 gün içinde, teslim masrafları dahil tahsil ettiği bütün ödemeleri iade eder. Mal başka taşıyıcıyla gönderildiyse süre malın satıcıya ulaştığı tarihten başlar.
+- md. 12/5 (32909 ile, 1.1.2026): satıcının belirttiği taşıyıcıyla yapılan iadede tüketiciden iade masrafı istenemez. Taşıyıcı belirtilmediyse de istenemez. Taşıyıcının tüketicinin bulunduğu yerde şubesi yoksa satıcı malı ek masraf istemeden alır.
+- md. 13/3 (tüketicinin iade masrafını üstlenmesi) 32909 ile yürürlükten kalktı.
+- md. 15/1-b kişiye özel hazırlanan mal; 15/1-ç koruyucu ambalajı açılmış, iadesi sağlık ve hijyen açısından uygun olmayan mal; 15/1-ğ elektronik ortamda anında ifa edilen hizmet ve anında teslim edilen gayrimaddi mal; 15/1-h tüketicinin onayıyla süre bitmeden ifasına başlanan hizmet.
+
+**Karar:**
+
+1. **Gidiş kargo ücreti (md. 12/1).** §5'teki "kargo ücreti varsayılan olarak iade edilmez" kuralı kalktı.
+   - Cayma hakkı içindeki bir kalemi kapsayan her iadede (`kind: "return"`) siparişin kargo ücreti para iadesine girer. Personelin "kargo ücretini de iade et" kutusu bu iadelerde dikkate alınmaz.
+   - Müşterinin seçtiği neden fark etmez: caymada gerekçe gerekmez, "hasarlı geldi" demek cayma hakkını daraltmaz.
+   - **Kısmi iade:** siparişin bir kısmı dönse de kargo ücretinin tamamı ilk iadeyle verilir. Yasal varsayılan budur; avukat aksini söylerse mağaza ayarı olur (docs/12). Mağaza ayarı yoktu, eklenmedi.
+   - Kargo ücreti bir kez verilir. `refund_shipping` yalnız onu veren talepte `true` olur; sonraki talepte `false`. İade belgesi (gider pusulası) de buna göre kargoyu bir kez yazar.
+   - Yalnız cayma dışı satırları kapsayan, kusurlu, yanlış ya da açıklamaya uymayan diye gelen iadede kargo ücreti personelin kararıdır (TKHK md. 11; panel işaretli önerir).
+   - Değişim (§6) ve hediye kartı caymasında (adr/0025) kargo iadesi yok; değişmedi.
+   - Kod: `lib/orders/withdrawal-rules.ts` (`shippingRefundDue`), `workflows/returns/steps/receipt.ts`, `receive-return.ts`.
+2. **İade kargo ücreti (md. 12/5, md. 13/3 mülga).** Ayarlardaki "İade kargosunu ödeyen: Müşteri" seçeneği kaldırıldı.
+   - Cayma iadesinde müşteriden masraf istenemez. Ayıplı malda masraf zaten satıcınındır (TKHK md. 11). Değişim yasal bir hak değildir ve iade kodu yine mağazanın hesabından açılır. Seçeneğin yasal kalacağı bir iade türü yok; "yalnız cayma dışı iadeler için" diye daraltmak da işlevsiz bir ayar bırakırdı.
+   - `returns.return_shipping` yalnız `"shop"` alır; `"customer"` 400 `platform_settings.return_shipping_shop_only` döner.
+   - Kayıtlı `"customer"` değeri `migration-scripts/returns-shipping-shop.ts` ile `"shop"` olur. Değişiklik denetim kaydına sistem olarak düşer.
+   - Alan, panel denetimi kaldırana kadar durur. JSON-LD `returnFees` hep `FreeReturn`.
+3. **Para iadesinin süresi (md. 12/1).** Para depoya varışta iade edilmeye devam eder; süre izlenir.
+   - Talebe `handed_over_at` eklendi. Kargo takip işi (`shipment-tracking`, 30 dakikada bir) onaylanmış ve iade gönderisi olan talebin gönderisini Geliver'e sorar. Taşıyıcı aldığında (`picked_up`…`delivered` ya da `returned`) ilk görüldüğü an yazılır.
+   - Bir okuma kaçarsa tarih gerçek alımdan biraz sonra olabilir; 10. gündeki uyarı 4 günlük pay bırakır.
+   - Bugün yalnız Geliver iade gönderisi açıyor (§4). Mağaza kendi gönderdiyse ya da tarih bilinmiyorsa süre depoya varıştan (`received_at`) sayılır; bu, md. 12/1'in "başka taşıyıcı" kuralıdır.
+   - Yönetici yanıtında `handed_over_at` ve `refund_due_at` (teslim ya da varış + 14 gün) var.
+   - `return-refund-deadlines` işi saatte bir çalışır. 10. gün geçmiş ve parası verilmemiş her iade için personelin ziline bir kez `returns.refund_deadline_near` düşer (`refund_alerted_at`). Kargo yolda olsa da düşer: süre teslimden işler.
+   - Geliver'in bildirimi iade gönderisini henüz tetiklemez; iş yakalar.
+4. **Hijyen istisnası (md. 15/1-ç) ve ürün işareti** (adr/0052 Ek ile):
+   - Fiziksel ürünün ürün düzeyindeki işareti talebi artık engellemez. Satır cayma hakkı içinde kalır ve mağaza ile panelde `withdrawal_warning: "sealed_goods"` taşır. Vitrin formu bu satırda "koruyucu ambalajı açılmış ürün iade alınmaz" uyarısını göstermeli (vitrin işi).
+   - Teslim almada personel ambalajı açılmış birimleri `refused` listesine yazar. Yalnız `sealed_goods` satırı reddedilebilir; başka satır `returns.refusal_not_sealed` alır.
+   - Reddedilen birim Medusa'nın teslim alma akışına girmez, stoğa dönmez, para iadesine girmez ve yeniden istenemez. Talepte `refused_items` (`reason: "unsealed"`) olarak kalır; müşteri kendi talebinde görür. Ürün müşteriye geri gönderilir.
+   - Yalnız reddedilen birim geldiyse talep "received" kalır, para iadesi yapılmaz, zil çalmaz.
+   - Dijital ve hizmet ürünündeki işaret kesin istisnadır (md. 15/1-ğ, h): `withdrawal_excluded_reason: "product"`.
+
+**Açık (avukata, docs/12):**
+
+- kısmi iadede kargo ücreti;
+- kapıda ödeme ücretinin "tahsil edilen tüm ödemeler"e girip girmediği (md. 12/1). Bugün iade edilmiyor;
+- reddedilen ürünün müşteriye geri gönderim ücreti;
+- değer kaybı kesintisi (md. 13/2). Platformda yok;
+- iade için öngörülen taşıyıcının adı (md. 5/1-g). Ayarlarda yok.

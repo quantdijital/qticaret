@@ -218,3 +218,20 @@ Cevaplar (2026-11-03): dört soruda da öneri kabul edildi. Yazı satırın her 
 - **Sipariş sayfası ve kargoya hazır listesi:** satırın ekleri `metadata.qt_addons`'tan okunur; değer üretim için tam gösterilir.
 - **İade talepleri:** cayma dışı satırda "cayma dışı" rozeti. Kural sunucuda: `returnable-lines` yanıtında `withdrawal_excluded: true` olur; yalnız kusurlu ya da yanlış gelen ürün kabul edilir.
 - **Ayarlar > Özellikler:** `catalog.addons` bayrağının metni (`qticaret.features.catalog_addons.label`/`.description`).
+
+## Ek (2026-11-03): madde atfı ve ürün düzeyindeki işaret
+
+**Dayanak:** Mesafeli Sözleşmeler Yönetmeliği md. 15/1, mevzuat.gov.tr işlenmiş metni (MevzuatNo 20237), 2026-11-03'te kontrol edildi. Ayrıntı adr/0032 Ek 2026-11-03'te.
+
+1. **Kişiye özel ürünün dayanağı md. 15/1-b'dir:** "tüketicinin istekleri veya kişisel ihtiyaçları doğrultusunda hazırlanan mallara ilişkin sözleşmeler".
+   - md. 15/1-ç, koruyucu ambalajı açılmış ve iadesi sağlık ve hijyen açısından uygun olmayan maldır.
+   - Bu ADR'deki "15/1-ç" atıfları (§8 ve "Uygulama notları > Sözleşmeler") 15/1-b okunur.
+   - `lib/catalog/addons/schema.ts` yorumu düzeltildi. Sözleşme bloğunun cümlesi (`lib/legal/withdrawal.ts`) yasal metin dalında düzeltildi. Panelin `nonWithdrawableHint` metni panel işidir.
+   - `returns.withdrawal_excluded` hata metni artık "hijyen" demiyor: kişiye özel ürün, teslim edilen dijital içerik ya da ifa edilen hizmet.
+2. **Ürün düzeyindeki `withdrawal_excluded` işareti** ürünün türüne göre okunur (`lib/orders/withdrawal-rules.ts` `productMarkOf`):
+   - **Fiziksel ürün:** hijyen ürünüdür (15/1-ç). Ambalajı açılmadıkça cayma hakkı sürer. Talep kabul edilir; satır `withdrawal_excluded: false` ve `withdrawal_warning: "sealed_goods"` taşır (mağaza ve panel).
+   - Personel teslim almada ambalajı açılmış birimi reddeder (`refused`, adr/0032 Ek §4).
+   - JSON-LD bu üründe artık `MerchantReturnNotPermitted` demez; mağazanın iade süresini yazar.
+   - **Dijital ya da hizmet ürünü:** teslim ya da ifa edilince kesin istisnadır (15/1-ğ, h): `withdrawal_excluded_reason: "product"`.
+   - Kişiye özel ek (§8) değişmedi: satır cayma dışıdır, yalnız kusurla döner.
+3. **Açık:** Bütünü kişiye özel üretilen ama eki olmayan bir fiziksel ürünü işaretleyecek ayrı bir alan yok. Böyle üründe ücretsiz, zorunlu ve "kişiye özel" işaretli bir ek kullanılır (§2: ücretsiz ek zorunlu olabilir). Ürün düzeyinde ikinci bir işaret gerekirse ayrı karar.
