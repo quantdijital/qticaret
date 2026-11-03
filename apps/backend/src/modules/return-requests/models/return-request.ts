@@ -4,7 +4,8 @@ import { RETURN_KINDS, RETURN_REASONS, RETURN_STATUSES } from "../states"
 /**
  * A shopper's request to send an order back (F7.9, adr/0032), from the
  * request to the refund: which lines, why, the shop's decision, the
- * carrier's return code, what came back and what was refunded. No address
+ * carrier's return code and its handover, what came back (or was refused)
+ * and what was refunded. No address
  * or name: the order holds those. Amounts in kuruş.
  */
 export const ReturnRequest = model
@@ -41,9 +42,27 @@ export const ReturnRequest = model
     received_items: model.json().nullable(),
     /** The lines that came back broken, refunded but never restocked. */
     damaged_items: model.json().nullable(),
-    /** Staff decided on receipt that the shipping comes back too (adr/0032 §5). */
+    /**
+     * The refund gives the order's outbound shipping back: a withdrawal's
+     * by law (MSY md. 12/1), a faulty item's by the staff's call (adr/0032
+     * §5, Ek 2026-11-03). Set on receipt, on the one request that gives it.
+     */
     refund_shipping: model.boolean().default(false),
+    /**
+     * Units sent back but refused at receipt, never refunded nor asked
+     * again: a hygiene good opened (MSY md. 15/1-ç),
+     * `[{ line_item_id, quantity, reason: "unsealed" }]`.
+     */
+    refused_items: model.json().nullable(),
+    /**
+     * When the return carrier took the parcel, from its tracking: the law's
+     * 14 days to refund run from here (MSY md. 12/1). Null until seen, or
+     * when it went another way (the days then run from `received_at`).
+     */
+    handed_over_at: model.dateTime().nullable(),
     received_at: model.dateTime().nullable(),
+    /** When staff were told the refund's deadline nears (`returns.refund_deadline_near`), once. */
+    refund_alerted_at: model.dateTime().nullable(),
     refund_amount: model.number().nullable(),
     refund_reference: model.text().nullable(),
   })

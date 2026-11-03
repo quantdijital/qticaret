@@ -8,7 +8,9 @@ import { orderAccessOf } from "../../../../http/order-access"
 
 /**
  * What a shopper sees of their request: its state and the carrier's code,
- * an exchange's variants and cost (exact lira), never staff notes' authors.
+ * an exchange's variants and cost (exact lira), the units refused at
+ * receipt and why (a sealed good opened, MSY md. 15/1-ç), never staff
+ * notes' authors.
  */
 const view = (request: Record<string, unknown>) => ({
   id: request["id"],
@@ -16,6 +18,7 @@ const view = (request: Record<string, unknown>) => ({
   status: request["status"],
   reason: request["reason"],
   items: request["items"],
+  refused_items: request["refused_items"] ?? null,
   exchange_items: request["exchange_items"],
   difference: typeof request["difference"] === "number" ? liraOf(request["difference"]) : null,
   return_code: request["return_code"],

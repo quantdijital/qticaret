@@ -4,7 +4,7 @@ import { ValidationError } from "../../lib/errors"
 import { returnsLockKey } from "../../lib/orders/locks"
 import {
   RETURN_ORDER_FIELDS,
-  cameBack,
+  counted,
   linesProblem,
   returnable,
   windowOpen,
@@ -79,7 +79,7 @@ export async function requestReturn(
       const service = container.resolve<ReturnRequestsModuleService>(RETURN_REQUESTS_MODULE)
       const earlier = await service.listReturnRequests(
         { order_id: input.order_id, status: [...COUNTED_RETURN_STATUSES] },
-        { select: ["status", "items", "received_items", "damaged_items"] }
+        { select: ["status", "items", "received_items", "damaged_items", "refused_items"] }
       )
       if (
         earlier.some((request) =>
@@ -88,8 +88,8 @@ export async function requestReturn(
       ) {
         throw new ValidationError("returns.already_open")
       }
-      // A request that came back counts what came back; one still open, what it asked
-      const asked = earlier.flatMap(cameBack)
+      // Received: what came back and what was refused; still open: what it asked
+      const asked = earlier.flatMap(counted)
       const kept = await container
         .resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE)
         .keptUnits(input.order_id)

@@ -35,6 +35,7 @@ const LINE_FIELDS = [
   "variants",
   "withdrawal_excluded",
   "withdrawal_excluded_reason",
+  "withdrawal_warning",
 ]
 
 /**

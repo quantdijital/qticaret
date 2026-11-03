@@ -17,7 +17,9 @@ import { returnRequestDetail } from "../../view"
  * warehouse goes back in stock (the damaged part does not), then its money
  * is given back. A refund that fails leaves the request received, with
  * the reason: "refund" tries it again. An exchange (adr/0032 §6) gives
- * back only what the shop owes on the swap, and no shipping.
+ * back only what the shop owes on the swap, and no shipping. A sealed
+ * good opened is refused (Ek 2026-11-03): when nothing else came, no
+ * money is due.
  */
 export async function POST(
   req: AuthenticatedMedusaRequest<AdminPostReturnReceiveType>,
@@ -30,11 +32,12 @@ export async function POST(
   if (!request) {
     throw new MedusaError(MedusaError.Types.NOT_FOUND, "returns.unknown")
   }
-  const { items, damaged, refund_shipping } = req.validatedBody
+  const { items, damaged, refused, refund_shipping } = req.validatedBody
   const problem = receivedProblem(
     request.items as unknown as { line_item_id: string; quantity: number }[],
     items,
-    damaged
+    damaged,
+    refused
   )
   if (problem) {
     throw new ValidationError(problem, { field: "items" })
@@ -45,15 +48,10 @@ export async function POST(
   }
   const exchange = request.kind === "exchange"
   const { result: received } = await receiveReturnWorkflow(req.scope).run({
-    input: {
-      id,
-      staff_id: req.auth_context.actor_id,
-      items,
-      damaged,
-      refund_shipping: refund_shipping && !exchange,
-    },
+    input: { id, staff_id: req.auth_context.actor_id, items, damaged, refused, refund_shipping },
   })
-  if (exchange && (request.difference ?? 0) >= 0) {
+  const nothingTaken = items.length === 0 && damaged.length === 0
+  if ((exchange && (request.difference ?? 0) >= 0) || nothingTaken) {
     res.json({ return_request: await returnRequestDetail(req.scope, received), refund_error: null })
     return
   }

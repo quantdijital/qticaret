@@ -1,6 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys, MedusaError } from "@medusajs/framework/utils"
-import { RETURN_ORDER_FIELDS, cameBack, returnable, windowOpen } from "../../lib/orders/returns"
+import { RETURN_ORDER_FIELDS, counted, returnable, windowOpen } from "../../lib/orders/returns"
 import type { ReturnOrderFacts } from "../../lib/orders/returns"
 import { giftReturnable, giftWindowOpen } from "../../lib/orders/gift-returns"
 import { ORDER_REFUNDS_MODULE } from "../../modules/order-refunds"
@@ -9,7 +9,7 @@ import { RETURN_REQUESTS_MODULE } from "../../modules/return-requests"
 import type ReturnRequestsModuleService from "../../modules/return-requests/service"
 import { COUNTED_RETURN_STATUSES, OPEN_RETURN_STATUSES } from "../../modules/return-requests/states"
 import { giftLinesOf } from "./gift-lines"
-import { exclusionsOf, returnPolicy } from "./policy"
+import { returnPolicy, withdrawalFactsOf } from "./policy"
 
 interface LineFacts {
   id: string
@@ -24,7 +24,8 @@ interface LineFacts {
  * to return, by the same rules a shopper's request meets (`requestReturn`),
  * the product's variants to exchange it for, whether the window is open
  * and whether a request is already open, and why a line is outside the
- * right of withdrawal. A gift card line's units are its cards, while none
+ * right of withdrawal or what it warns of (a sealed good, adr/0032 Ek
+ * 2026-11-03). A gift card line's units are its cards, while none
  * was spent and within the period from the day they were sent (adr/0025,
  * 2026-11-03). Titles only, nothing personal.
  */
@@ -55,17 +56,17 @@ export async function returnableLines(
     .resolve<ReturnRequestsModuleService>(RETURN_REQUESTS_MODULE)
     .listReturnRequests(
       { order_id: orderId, status: [...COUNTED_RETURN_STATUSES] },
-      { select: ["status", "items", "received_items", "damaged_items"] }
+      { select: ["status", "items", "received_items", "damaged_items", "refused_items"] }
     )
   const kept = await container
     .resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE)
     .keptUnits(orderId)
-  const asked = earlier.flatMap(cameBack)
+  const asked = earlier.flatMap(counted)
   const left = returnable(order, asked, kept)
   const gifts = await giftLinesOf(container, order.items ?? [])
-  const [policy, excluded] = await Promise.all([
+  const [policy, { excluded, warnings }] = await Promise.all([
     returnPolicy(container),
-    exclusionsOf(container, order.items ?? [], gifts),
+    withdrawalFactsOf(container, order.items ?? [], gifts),
   ])
   const giftOpen = [...gifts.values()].filter((gift) =>
     giftWindowOpen(gift, now, policy.withdrawal_days)
@@ -119,6 +120,8 @@ export async function returnableLines(
       withdrawal_excluded: excluded.has(item.id),
       /** `product`, `personal_addon` or `gift_card_used`; null inside the right. */
       withdrawal_excluded_reason: excluded.get(item.id) ?? null,
+      /** Inside the right with a condition: `sealed_goods`, back only unopened (md. 15/1-ç). */
+      withdrawal_warning: warnings.get(item.id) ?? null,
       /** A gift card line: withdrawn on its own, its cards voided, nothing sent back. */
       gift_card: gifts.has(item.id),
       // An exchange goes for another variant of the same product (adr/0032 §6)

@@ -1,7 +1,8 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import type { WithdrawalExclusion } from "../../lib/orders/returns"
-import { exclusionsOf } from "./policy"
+import type { WithdrawalWarning } from "../../lib/orders/withdrawal-rules"
+import { withdrawalFactsOf } from "./policy"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -14,6 +15,8 @@ export type MarkedRequestLine = RequestLine & {
   withdrawal_excluded: boolean
   /** Why it is outside the right of withdrawal; null when it is not. */
   withdrawal_excluded_reason: WithdrawalExclusion | null
+  /** Inside the right with a condition: a sealed good, refused at receipt if opened. */
+  withdrawal_warning: WithdrawalWarning | null
 }
 
 type OrderLine = { id: string; product_id?: string | null; metadata?: unknown } | null
@@ -24,9 +27,10 @@ const linesOf = (items: unknown): RequestLine[] =>
 /**
  * Requests with each asked-for line marked when it is outside the right of
  * withdrawal, and why, by the rule the returnable lines use
- * (`exclusionsOf`: the product's mark, F13.6, a line's add-on, adr/0052
- * §8, or a gift card spent, adr/0025): staff see the line that may come
- * back only as faulty or wrong, or not at all.
+ * (`withdrawalFactsOf`: a digital or service product's mark, F13.6, a
+ * line's add-on, adr/0052 §8, or a gift card spent, adr/0025): staff see
+ * the line that may come back only as faulty or wrong, or not at all, and
+ * the sealed good to check at receipt (`withdrawal_warning`).
  */
 export async function withWithdrawalMarks<T extends { order_id: string; items: unknown }>(
   container: Container,
@@ -40,7 +44,7 @@ export async function withWithdrawalMarks<T extends { order_id: string; items: u
         filters: { id: orderIds },
       })
     : { data: [] }
-  const excluded = await exclusionsOf(
+  const { excluded, warnings } = await withdrawalFactsOf(
     container,
     (data as { items?: OrderLine[] | null }[]).flatMap((order) => order.items ?? [])
   )
@@ -50,6 +54,7 @@ export async function withWithdrawalMarks<T extends { order_id: string; items: u
       ...line,
       withdrawal_excluded: excluded.has(line.line_item_id),
       withdrawal_excluded_reason: excluded.get(line.line_item_id) ?? null,
+      withdrawal_warning: warnings.get(line.line_item_id) ?? null,
     })),
   }))
 }

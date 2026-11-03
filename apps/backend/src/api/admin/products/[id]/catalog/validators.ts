@@ -47,7 +47,7 @@ export const AdminPostProductCatalog = z
     kind: z.enum(PRODUCT_KINDS).optional(),
     primary_category_id: id.nullable().optional(),
     successor_product_id: id.nullable().optional(),
-    // F13.6: hygiene, made to order; a faulty item still comes back
+    // F13.6: a sealed hygiene good, or digital/service delivered (`productMarkOf`)
     withdrawal_excluded: z.boolean().optional(),
     // F13.4: adults only, and why; needs the catalog.restricted flag (checked in the workflow)
     restriction: z.enum(RESTRICTIONS).nullable().optional(),

@@ -2,6 +2,7 @@ import { ADULT_CONSIDERATIONS, restrictionOf, variantGtin } from "../../lib/cata
 import type { Restriction } from "../../lib/catalog"
 import { toMedusaAmount } from "../../lib/money"
 import type { Kurus } from "../../lib/money"
+import { productMarkOf } from "../../lib/orders/withdrawal-rules"
 import type { PriceDisplay } from "../../lib/pricing"
 import { VARIES_BY_PROPERTIES } from "../../lib/seo/jsonld"
 import type { Availability, Condition, ProductFacts, VariesBy } from "../../lib/seo/jsonld"
@@ -257,12 +258,17 @@ export function productFacts(
           transit: [shipping.settings.transit_days_min, shipping.settings.transit_days_max],
         }
       : null,
-    // F13.6: the shop's return policy, this product's exclusion
+    // F13.6: the shop's return policy, this product's exclusion. A physical
+    // product's mark is a sealed good, returnable unopened (adr/0052 Ek
+    // 2026-11-03); a withdrawal's return costs the shopper nothing (MSY md. 12/5)
     returnPolicy: returns
       ? {
           days: returns.withdrawal_days,
-          freeReturn: returns.return_shipping === "shop",
-          excluded: row.product_extension?.withdrawal_excluded === true,
+          freeReturn: true,
+          excluded: productMarkOf(
+            row.product_extension?.withdrawal_excluded,
+            row.product_extension?.kind
+          ).excluded,
         }
       : null,
     adultConsideration: adultConsiderationOf(row, restricted),

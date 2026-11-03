@@ -15,8 +15,11 @@ export const PRODUCT_KINDS = ["physical", "digital", "service"] as const
  *   is still one of the product's categories;
  * - `successor_product_id`: where the product's URL points once it is no
  *   longer sold (a 301, docs/13 §2.4);
- * - `withdrawal_excluded`: outside the right of withdrawal (hygiene, made to
- *   order; F13.6, adr/0041 §3). A faulty or wrong item still comes back;
+ * - `withdrawal_excluded`: the product's own withdrawal mark (F13.6, adr/0041
+ *   §3), read by its kind (adr/0052 Ek 2026-11-03, `productMarkOf`): a
+ *   physical product is a sealed hygiene good, returnable while unopened
+ *   (MSY md. 15/1-ç); a digital or service one is out once delivered or
+ *   performed (md. 15/1-ğ, h). A faulty or wrong item still comes back;
  * - `restriction`: sold to adults only, and why (F13.4, adr/0041 §4); a
  *   category's mark reaches the product too;
  * - `is_gift_card`: its variants are gift card amounts; a paid unit issues

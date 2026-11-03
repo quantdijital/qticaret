@@ -68,14 +68,18 @@ export const AdminPostReturnReject = z.object({ note: z.string().trim().min(1).m
 export type AdminPostReturnRejectType = z.infer<typeof AdminPostReturnReject>
 
 /**
- * What reached the warehouse: sound (back in stock) and damaged (not),
- * together at most what was asked, line by line; and whether the shipping
- * comes back too, the staff's call (adr/0032 §5).
+ * What reached the warehouse: sound (back in stock), damaged (not) and
+ * refused (a sealed good opened, MSY md. 15/1-ç: not refunded, sent back),
+ * together at most what was asked, line by line; and, for lines outside
+ * the right of withdrawal only, whether the shipping comes back too, the
+ * staff's call (adr/0032 §5; a withdrawal gives it back by law, Ek
+ * 2026-11-03).
  */
 export const AdminPostReturnReceive = z
   .object({
     items: z.array(line).max(200).default([]),
     damaged: z.array(line).max(200).default([]),
+    refused: z.array(line).max(200).default([]),
     refund_shipping: z.boolean().default(false),
   })
   .strict()

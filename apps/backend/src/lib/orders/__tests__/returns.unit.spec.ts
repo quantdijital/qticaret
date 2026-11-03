@@ -1,4 +1,11 @@
-import { cameBack, linesProblem, returnable, windowOpen, withdrawalProblem } from "../returns"
+import {
+  cameBack,
+  counted,
+  linesProblem,
+  returnable,
+  windowOpen,
+  withdrawalProblem,
+} from "../returns"
 
 const DAY = 24 * 60 * 60 * 1000
 const now = new Date("2026-10-28T12:00:00.000Z")
@@ -120,5 +127,25 @@ describe("returns (adr/0032)", () => {
         { line_item_id: "line_a", quantity: 1 },
       ])
     ).toBe("returns.items_invalid")
+  })
+
+  it("counts units refused at receipt against what can still be asked, never as come back", () => {
+    const received = {
+      items: [{ line_item_id: "line_a", quantity: 3 }],
+      received_items: [{ line_item_id: "line_a", quantity: 1 }],
+      damaged_items: [],
+      refused_items: [{ line_item_id: "line_a", quantity: 2, reason: "unsealed" }],
+    }
+    // Refunded and invoiced: only what came back
+    expect(cameBack(received)).toEqual([{ line_item_id: "line_a", quantity: 1 }])
+    expect(counted(received)).toEqual([
+      { line_item_id: "line_a", quantity: 1 },
+      { line_item_id: "line_a", quantity: 2 },
+    ])
+    expect(returnable(order, counted(received)).size).toBe(0)
+    // Still open: what it asked
+    expect(counted({ items: [{ line_item_id: "line_a", quantity: 1 }] })).toEqual([
+      { line_item_id: "line_a", quantity: 1 },
+    ])
   })
 })

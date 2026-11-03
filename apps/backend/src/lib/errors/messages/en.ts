@@ -304,7 +304,9 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "returns.items_invalid":
     "The chosen items do not match what can be returned: at most what was shipped and not yet returned of each.",
   "returns.withdrawal_excluded":
-    "This product has no right of withdrawal (hygiene or made to order); it can come back only as damaged, wrong or not as described.",
+    "This product has no right of withdrawal (made to order, digital content delivered or a service performed); it can come back only as damaged, wrong or not as described.",
+  "returns.refusal_not_sealed":
+    "Only goods that cannot be returned for health or hygiene reasons once their protective seal is opened can be refused for coming back opened.",
   "returns.window_closed": "The return period for this order is over, or it has not shipped yet.",
   "returns.gift_card_used":
     "A card of this gift card line has been spent, so its right of withdrawal is gone.",
@@ -626,6 +628,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "platform_settings.etbis_invalid": "An ETBİS registration number is letters, digits and dashes.",
   "platform_settings.withdrawal_days_invalid":
     "The withdrawal period must be a whole number of days between 14 and 365; the law asks for at least 14.",
+  "platform_settings.return_shipping_shop_only":
+    "A withdrawal's return shipping cannot be charged to the customer (Distance Contracts Regulation art. 12); the shop pays it.",
   "platform_settings.hours_invalid":
     "The opening hours are not valid: each range must close after it opens and not overlap another on the same day.",
   "platform_settings.phone_invalid": "Enter a valid Turkish phone number.",

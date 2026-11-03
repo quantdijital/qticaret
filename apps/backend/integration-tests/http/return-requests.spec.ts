@@ -188,7 +188,7 @@ medusaIntegrationTestRunner({
       expect(early.data.message).toBe("returns.window_closed")
     })
 
-    it("takes a product outside the right of withdrawal back only as faulty, and keeps the shop's own period (F13.6)", async () => {
+    it("takes a marked physical product back as a sealed good, warned, and keeps the shop's own period (F13.6, adr/0052 Ek 2026-11-03)", async () => {
       const { orderId, lineId } = await deliveredOrder()
       const { data } = await query().graph({
         entity: "product_variant",
@@ -198,59 +198,58 @@ medusaIntegrationTestRunner({
       const productId = (data[0] as { product_id: string }).product_id
       await staff(`/admin/products/${productId}/catalog`, { withdrawal_excluded: true })
 
+      // MSY md. 15/1-ç: an unopened hygiene good is inside the right of withdrawal
       const changedMind = await ask(orderId, {
         items: [{ line_item_id: lineId, quantity: 1 }],
         reason: "changed_mind",
       })
       const shortPeriod = await staff("/admin/platform-settings/returns", { withdrawal_days: 7 })
-      const faulty = await ask(orderId, {
-        items: [{ line_item_id: lineId, quantity: 1 }],
-        reason: "damaged",
-      })
       // Staff see the line marked as `/admin/orders/:id/returnable` marks it
       const listed = await requestsOf(orderId)
       const returnable = await settle(
-        http.get<{ lines: { line_item_id: string; withdrawal_excluded: boolean }[] }>(
-          `/admin/orders/${orderId}/returnable`,
-          { headers: setup.admin.headers }
-        )
+        http.get<{ lines: Record<string, unknown>[] }>(`/admin/orders/${orderId}/returnable`, {
+          headers: setup.admin.headers,
+        })
       )
-      const rejected = await staff<{ return_request: { items: unknown[] } }>(
-        `/admin/return-requests/${faulty.data.return_request.id}/reject`,
-        { note: "Kusur bulunamadı." }
+      const shopper = await settle(
+        http.get<{ lines: Record<string, unknown>[] }>(`/store/orders/${orderId}/returnable`, {
+          headers: customer.headers,
+        })
       )
       await staff(`/admin/products/${productId}/catalog`, { withdrawal_excluded: false })
       const unmarked = await requestsOf(orderId)
 
-      expect(changedMind.status).toBe(400)
-      expect(changedMind.data.message).toBe("returns.withdrawal_excluded")
+      expect(changedMind.status).toBe(200)
       // Never fewer than the law's 14 days
       expect(shortPeriod.status).toBe(400)
-      expect(faulty.status).toBe(200)
-      const marked = [
+      expect(listed.data.return_requests[0]?.items).toEqual([
         {
           line_item_id: lineId,
           quantity: 1,
-          withdrawal_excluded: true,
-          withdrawal_excluded_reason: "product",
+          withdrawal_excluded: false,
+          withdrawal_excluded_reason: null,
+          withdrawal_warning: "sealed_goods",
         },
-      ]
-      expect(listed.data.return_requests[0]?.items).toEqual(marked)
-      expect(returnable.data.lines).toEqual([
-        expect.objectContaining({ line_item_id: lineId, withdrawal_excluded: true }),
       ])
-      expect(rejected.data.return_request.items).toEqual(marked)
+      const sealed = { withdrawal_excluded: false, withdrawal_warning: "sealed_goods" }
+      expect(returnable.data.lines).toEqual([
+        expect.objectContaining({ line_item_id: lineId, ...sealed }),
+      ])
+      expect(shopper.data.lines).toEqual([
+        expect.objectContaining({ line_item_id: lineId, ...sealed }),
+      ])
       expect(unmarked.data.return_requests[0]?.items).toEqual([
         {
           line_item_id: lineId,
           quantity: 1,
           withdrawal_excluded: false,
           withdrawal_excluded_reason: null,
+          withdrawal_warning: null,
         },
       ])
     })
 
-    it("refunds a damaged unit without restocking it, and the shipping only when staff say so", async () => {
+    it("refunds a damaged unit without restocking it, and the shipping by law though staff did not tick it", async () => {
       const { orderId, lineId } = await deliveredOrder(true, 2)
       const before = await stocked()
       const asked = await ask(orderId, {
@@ -275,10 +274,12 @@ medusaIntegrationTestRunner({
 
       expect(tooMany.data.message).toBe("returns.items_invalid")
       expect(received.data.refund_error).toBeNull()
-      // Two units of 120 TL back, the shipping kept: staff did not tick it
+      // Two units of 120 TL back and the 60 TL shipping: the line is inside the
+      // right of withdrawal, so the shipping comes back by law (MSY md. 12/1)
       expect(again.data.return_request).toMatchObject({
         status: "refunded",
-        refund_amount: "240.00",
+        refund_amount: "300.00",
+        refund_shipping: true,
       })
       // Only the sound unit is sellable again
       expect(await stocked()).toBe((before ?? 0) + 1)

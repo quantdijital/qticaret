@@ -81,7 +81,7 @@ const common = {
   help: help.nullable().optional(),
   required: z.boolean().optional(),
   max_quantity: maxQuantity.optional(),
-  // Made to the buyer's wish: outside the right of withdrawal (MSY md. 15/1-ç)
+  // Made to the buyer's wish: outside the right of withdrawal (MSY md. 15/1-b)
   non_withdrawable: z.boolean().optional(),
 }
 

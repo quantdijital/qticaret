@@ -312,7 +312,9 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "returns.items_invalid":
     "Seçilen ürünler iade edilebilecek olanlarla uyuşmuyor: her üründen en çok gönderilen ve henüz iade edilmemiş adet kadar.",
   "returns.withdrawal_excluded":
-    "Bu üründe cayma hakkı yok (hijyen ya da kişiye özel ürün); yalnızca hasarlı, yanlış ya da açıklamasına uymayan ürün olarak iade edilebilir.",
+    "Bu üründe cayma hakkı yok (kişiye özel hazırlanan ürün, teslim edilen dijital içerik ya da ifa edilen hizmet); yalnızca hasarlı, yanlış ya da açıklamasına uymayan ürün olarak iade edilebilir.",
+  "returns.refusal_not_sealed":
+    "Yalnızca koruyucu ambalajı açıldığında iadesi sağlık ve hijyen açısından uygun olmayan ürünler, ambalajı açılmış geldiği için reddedilebilir.",
   "returns.window_closed":
     "Bu sipariş için iade süresi doldu ya da sipariş henüz kargoya verilmedi.",
   "returns.gift_card_used":
@@ -628,6 +630,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
   "platform_settings.etbis_invalid": "ETBİS kayıt numarası harf, rakam ve tireden oluşur.",
   "platform_settings.withdrawal_days_invalid":
     "Cayma süresi 14 ile 365 gün arasında bir tam sayı olmalı; yasa en az 14 gün istiyor.",
+  "platform_settings.return_shipping_shop_only":
+    "Cayma iadesinde iade kargo ücreti müşteriden istenemez (Mesafeli Sözleşmeler Yönetmeliği md. 12); iade kargosunu mağaza öder.",
   "platform_settings.hours_invalid":
     "Çalışma saatleri geçerli değil: her aralık açılıştan sonra kapanmalı ve aynı gün içinde çakışmamalı.",
   "platform_settings.phone_invalid": "Geçerli bir Türkiye telefon numarası girin.",

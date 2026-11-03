@@ -104,6 +104,12 @@ export const NOTIFICATION_MESSAGES: Readonly<
       description:
         "Kendi programınızda kestiyseniz orada iptal edin (e-Arşiv: alıcıya iletildiği günden itibaren 8 gün). Süre geçtiyse ya da e-Fatura ise kaydı uygun belgeyle düzeltin.",
     },
+    // adr/0032 Ek 2026-11-03: MSY md. 12/1
+    "returns.refund_deadline_near": {
+      title: "#{{order}} siparişinin iadesi için son gün {{due}}",
+      description:
+        "Ürün iade kargosuna verildikten (bilinmiyorsa depoya ulaştıktan) sonra para 14 gün içinde iade edilmeli. İade talepleri listesinden teslim alıp iade edin.",
+    },
     "payments.statement_mismatch": {
       title: "{{provider}} dökümü {{day}} günü tutmuyor",
       description: "{{count}} fark var; Raporlar > Finans'ta listelendi.",
@@ -209,6 +215,11 @@ export const NOTIFICATION_MESSAGES: Readonly<
       title: "Canceled order #{{order}}'s invoice stands",
       description:
         "If your own program issued it, cancel it there (an e-Arşiv within 8 days of reaching the buyer). Past that, or for an e-Fatura, correct the books with the proper document.",
+    },
+    "returns.refund_deadline_near": {
+      title: "Order #{{order}}'s return must be refunded by {{due}}",
+      description:
+        "The money is due within 14 days of the parcel's handover to the return carrier (or, if unknown, its arrival). Receive and refund it from the return requests list.",
     },
     "payments.statement_mismatch": {
       title: "The {{provider}} statement of {{day}} does not agree",

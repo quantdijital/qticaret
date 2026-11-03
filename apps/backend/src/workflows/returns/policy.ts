@@ -4,6 +4,8 @@ import { isNonWithdrawableLine } from "../../lib/catalog/addons"
 import { giftLineUsed } from "../../lib/orders/gift-returns"
 import type { GiftLineFacts } from "../../lib/orders/gift-returns"
 import type { WithdrawalExclusion } from "../../lib/orders/returns"
+import { productMarkOf } from "../../lib/orders/withdrawal-rules"
+import type { WithdrawalWarning } from "../../lib/orders/withdrawal-rules"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import type { ReturnsSettings } from "../../modules/platform-settings/sections"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
@@ -20,51 +22,88 @@ export async function returnPolicy(container: Container): Promise<ReturnsSetting
 
 type ItemRow = { id: string; product_id?: string | null; metadata?: unknown } | null
 
+/** What the order's lines owe to the right of withdrawal, by line id. */
+export interface WithdrawalFacts {
+  /** Outside the right, and why (`WithdrawalExclusion`). */
+  excluded: Map<string, WithdrawalExclusion>
+  /** Inside it, with a warning: a hygiene good returnable while sealed (md. 15/1-ç). */
+  warnings: Map<string, WithdrawalWarning>
+}
+
 /**
- * The order's lines outside the right of withdrawal, by line id, and why
- * (`WithdrawalExclusion`): their product's mark (F13.6), an add-on made to
- * the buyer's wish that the line records (adr/0052 §8; the record as sold,
- * not the product now), or a gift card line whose cards were spent
- * (adr/0025, 2026-11-03). `gifts`: the order's gift lines, when read already.
+ * The order's lines outside the right of withdrawal, and why, and those
+ * inside it with a warning (adr/0032 Ek 2026-11-03): a product's own mark
+ * (F13.6) by the product's kind (`productMarkOf`: a digital or service one
+ * is out, a physical one is a sealed good), an add-on made to the buyer's
+ * wish that the line records (adr/0052 §8; the record as sold, not the
+ * product now), or a gift card line whose cards were spent (adr/0025,
+ * 2026-11-03). `gifts`: the order's gift lines, when read already.
  */
-export async function exclusionsOf(
+export async function withdrawalFactsOf(
   container: Container,
   items: readonly ItemRow[],
   gifts?: ReadonlyMap<string, GiftLineFacts>
-): Promise<Map<string, WithdrawalExclusion>> {
-  const reasons = new Map<string, WithdrawalExclusion>()
+): Promise<WithdrawalFacts> {
+  const excluded = new Map<string, WithdrawalExclusion>()
+  const warnings = new Map<string, WithdrawalWarning>()
   const productIds = [
     ...new Set(items.flatMap((item) => (item?.product_id ? [item.product_id] : []))),
   ]
   const { data } = productIds.length
     ? await container.resolve(ContainerRegistrationKeys.QUERY).graph({
         entity: "product",
-        fields: ["id", "product_extension.withdrawal_excluded"],
+        fields: ["id", "product_extension.withdrawal_excluded", "product_extension.kind"],
         filters: { id: productIds },
       })
     : { data: [] }
-  const excluded = new Set(
-    (data as { id: string; product_extension?: { withdrawal_excluded?: boolean } | null }[])
-      .filter((product) => product.product_extension?.withdrawal_excluded)
-      .map((product) => product.id)
+  const marks = new Map(
+    (
+      data as {
+        id: string
+        product_extension?: { withdrawal_excluded?: boolean | null; kind?: string | null } | null
+      }[]
+    ).map((product) => [
+      product.id,
+      productMarkOf(
+        product.product_extension?.withdrawal_excluded,
+        product.product_extension?.kind
+      ),
+    ])
   )
   for (const item of items) {
-    if (item?.product_id && excluded.has(item.product_id)) {
-      reasons.set(item.id, "product")
+    const mark = item?.product_id ? marks.get(item.product_id) : undefined
+    if (item && mark?.excluded) {
+      excluded.set(item.id, "product")
+    }
+    if (item && mark?.warning) {
+      warnings.set(item.id, mark.warning)
     }
     if (item && isNonWithdrawableLine(item.metadata)) {
-      reasons.set(item.id, "personal_addon")
+      excluded.set(item.id, "personal_addon")
     }
   }
   for (const line of (gifts ?? (await giftLinesOf(container, items))).values()) {
     if (giftLineUsed(line)) {
-      reasons.set(line.line_id, "gift_card_used")
+      excluded.set(line.line_id, "gift_card_used")
     }
   }
-  return reasons
+  // Out is out: a line outside the right needs no seal warning
+  for (const id of excluded.keys()) {
+    warnings.delete(id)
+  }
+  return { excluded, warnings }
 }
 
-/** The order's lines outside the right of withdrawal, by line id (`exclusionsOf`). */
+/** The order's lines outside the right of withdrawal, by line id, and why (`withdrawalFactsOf`). */
+export async function exclusionsOf(
+  container: Container,
+  items: readonly ItemRow[],
+  gifts?: ReadonlyMap<string, GiftLineFacts>
+): Promise<Map<string, WithdrawalExclusion>> {
+  return (await withdrawalFactsOf(container, items, gifts)).excluded
+}
+
+/** The order's lines outside the right of withdrawal, by line id (`withdrawalFactsOf`). */
 export async function excludedLines(
   container: Container,
   items: readonly ItemRow[],

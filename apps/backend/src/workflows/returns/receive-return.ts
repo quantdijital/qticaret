@@ -19,10 +19,13 @@ import { ValidationError } from "../../lib/errors"
 import { kurus } from "../../lib/money"
 import { cameBack } from "../../lib/orders/returns"
 import type { ReturnLine } from "../../lib/orders/returns"
+import { shippingRefundDue } from "../../lib/orders/withdrawal-rules"
+import type { RefusedLine } from "../../lib/orders/withdrawal-rules"
 import { RETURN_REQUESTS_MODULE } from "../../modules/return-requests"
 import type ReturnRequestsModuleService from "../../modules/return-requests/service"
 import { refundOrderWorkflow } from "../orders/refund-order"
 import { returnsLockKey } from "../../lib/orders/locks"
+import { readReceiptRulesStep } from "./steps/receipt"
 import {
   readReturnRequestStep,
   returnRequestOrderStep,
@@ -42,7 +45,17 @@ export interface ReceiveInput {
   items: ReturnLine[]
   /** Came back broken: counted and refunded, never restocked (Medusa's dismissal). */
   damaged: ReturnLine[]
-  /** The staff's call (adr/0032 §5): the parcel's shipping comes back too. */
+  /**
+   * Came back but refused: a sealed good opened (MSY md. 15/1-ç). Left out
+   * of Medusa's receiving and never refunded; the parcel goes back to the
+   * shopper (adr/0032 Ek 2026-11-03).
+   */
+  refused: ReturnLine[]
+  /**
+   * The staff's call (adr/0032 §5) on the order's shipping, heard only for
+   * lines outside the right of withdrawal: a withdrawal gives it back by
+   * law (`shippingRefundDue`).
+   */
   refund_shipping: boolean
 }
 
@@ -53,15 +66,24 @@ const asMedusaLines = (lines: readonly ReturnLine[]) =>
  * The parcel reached the warehouse (adr/0032): the lines that came back
  * received through Medusa's own receiving, which puts the sound ones back
  * in stock and leaves the damaged ones out, and the request marked
- * received. Its refund follows on its own (`refundReturn`), so a refund
- * that fails leaves the stock counted. Read under the order's returns
- * lock: a second receive finds it received already.
+ * received, with what was refused and whether the order's shipping comes
+ * back (Ek 2026-11-03: a withdrawal's always, MSY md. 12/1). Its refund
+ * follows on its own (`refundReturn`), so a refund that fails leaves the
+ * stock counted. Read under the order's returns lock: a second receive
+ * finds it received already.
  */
 export const receiveReturnWorkflow = createWorkflow("returns-receive", (input: ReceiveInput) => {
   const orderId = returnRequestOrderStep({ id: input.id })
   const lockKey = transform({ orderId }, ({ orderId }) => returnsLockKey(orderId))
   acquireLockStep({ key: lockKey, timeout: 10, ttl: 120 })
   const request = readReturnRequestStep({ id: input.id, status: "approved" })
+  const rules = readReceiptRulesStep(
+    transform({ input, request }, ({ input, request }) => ({
+      id: input.id,
+      order_id: request.order_id,
+      refused: input.refused,
+    }))
+  )
   const returnId = transform({ request }, ({ request }) => request.return_id ?? "")
   beginReceiveReturnWorkflow.runAsStep({
     input: transform({ returnId, input }, ({ returnId, input }) => ({
@@ -92,14 +114,23 @@ export const receiveReturnWorkflow = createWorkflow("returns-receive", (input: R
     })),
   })
   const received = updateReturnRequestStep(
-    transform({ input }, ({ input }) => ({
+    transform({ input, request, rules }, ({ input, request, rules }) => ({
       id: input.id,
       from: "approved" as const,
       changes: {
         status: "received",
         received_items: input.items,
         damaged_items: input.damaged,
-        refund_shipping: input.refund_shipping,
+        refused_items: input.refused.length
+          ? input.refused.map((line): RefusedLine => ({ ...line, reason: "unsealed" }))
+          : null,
+        refund_shipping: shippingRefundDue({
+          kind: request.kind,
+          accepted: [...input.items, ...input.damaged],
+          excluded: new Set(rules.excluded),
+          staff_choice: input.refund_shipping,
+          refunded_before: rules.shipping_refunded_before,
+        }),
         received_at: new Date(),
       },
     }))
@@ -118,24 +149,28 @@ export const receiveReturnWorkflow = createWorkflow("returns-receive", (input: R
 
 /**
  * What came back may only be what was asked: each line once in each list,
- * sound and damaged together no more than asked of it, something at all.
+ * sound, damaged and refused together no more than asked of it, something
+ * at all.
  */
 export function receivedProblem(
   asked: readonly ReturnLine[],
   sound: readonly ReturnLine[],
-  damaged: readonly ReturnLine[]
+  damaged: readonly ReturnLine[],
+  refused: readonly ReturnLine[] = []
 ): string | null {
   const limit = new Map(asked.map((line) => [line.line_item_id, line.quantity]))
   const unique = (lines: readonly ReturnLine[]) =>
     new Set(lines.map((line) => line.line_item_id)).size === lines.length
+  const every = [...sound, ...damaged, ...refused]
   const total = new Map<string, number>()
-  for (const line of [...sound, ...damaged]) {
+  for (const line of every) {
     total.set(line.line_item_id, (total.get(line.line_item_id) ?? 0) + line.quantity)
   }
   return total.size === 0 ||
     !unique(sound) ||
     !unique(damaged) ||
-    [...sound, ...damaged].some((line) => line.quantity < 1) ||
+    !unique(refused) ||
+    every.some((line) => line.quantity < 1) ||
     [...total].some(([id, quantity]) => quantity > (limit.get(id) ?? 0))
     ? "returns.items_invalid"
     : null

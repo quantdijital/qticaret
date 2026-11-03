@@ -4,7 +4,7 @@
  * own returns hold, whichever is more); and for how long: the shop's
  * withdrawal period (14 days at least, F13.6) after the last parcel
  * arrived. A parcel still on its way can be asked about already; one never
- * marked delivered counts as arrived 30 days after it left. A product
+ * marked delivered counts as arrived 30 days after it left. A line
  * outside the right of withdrawal comes back only as faulty or wrong.
  * Pure, so tested on its own.
  */
@@ -23,9 +23,11 @@ export const DEFECT_REASONS: ReadonlySet<string> = new Set([
 ])
 
 /**
- * Why a line is outside the right of withdrawal: its product's mark
- * (F13.6), an add-on made to the buyer's wish (adr/0052 §8), or a gift
- * card line whose cards were spent (adr/0025, 2026-11-03).
+ * Why a line is outside the right of withdrawal: a digital or service
+ * product marked so (F13.6; MSY md. 15/1-ğ, h: delivered or performed), an
+ * add-on made to the buyer's wish (adr/0052 §8; md. 15/1-b), or a gift
+ * card line whose cards were spent (adr/0025, 2026-11-03). A physical
+ * product's mark is a warning, not an exclusion (`productMarkOf`).
  */
 export const WITHDRAWAL_EXCLUSIONS = ["product", "personal_addon", "gift_card_used"] as const
 export type WithdrawalExclusion = (typeof WITHDRAWAL_EXCLUSIONS)[number]
@@ -98,6 +100,23 @@ export function cameBack(request: {
     total.set(line.line_item_id, (total.get(line.line_item_id) ?? 0) + line.quantity)
   }
   return [...total].map(([line_item_id, quantity]) => ({ line_item_id, quantity }))
+}
+
+/**
+ * A request's lines as they count against what can still be asked: what
+ * came back (`cameBack`), and what was refused at receipt (a hygiene good
+ * opened, MSY md. 15/1-ç; never refunded, never asked again).
+ */
+export function counted(request: {
+  items: unknown
+  received_items?: unknown
+  damaged_items?: unknown
+  refused_items?: unknown
+}): ReturnLine[] {
+  const refused = ((request.refused_items ?? []) as ReturnLine[]).map(
+    ({ line_item_id, quantity }) => ({ line_item_id, quantity })
+  )
+  return [...cameBack(request), ...refused]
 }
 
 /**

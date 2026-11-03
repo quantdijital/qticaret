@@ -2,6 +2,7 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { errorSummary, logger } from "../lib/logging"
 import { SHIPMENT_TRACKING_MODULE } from "../modules/shipment-tracking"
 import type ShipmentTrackingModuleService from "../modules/shipment-tracking/service"
+import { pollReturnHandovers } from "../workflows/returns/handover"
 import { refreshShipmentWorkflow } from "../workflows/shipping/refresh-shipment"
 
 // Asked again at most this often by the job; a notification can ask sooner
@@ -59,6 +60,8 @@ export async function pollShipments(container: MedusaContainer, now = new Date()
 
 export default async function shipmentTracking(container: MedusaContainer) {
   await pollShipments(container)
+  // Return parcels too: their handover starts the law's 14 days to refund (adr/0032 Ek 2026-11-03)
+  await pollReturnHandovers(container)
 }
 
 export const config = {

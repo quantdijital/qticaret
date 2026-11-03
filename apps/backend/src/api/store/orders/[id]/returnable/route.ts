@@ -20,6 +20,7 @@ const view = (found: ReturnableLines) => ({
     returnable: line.returnable,
     withdrawal_excluded: line.withdrawal_excluded,
     withdrawal_excluded_reason: line.withdrawal_excluded_reason,
+    withdrawal_warning: line.withdrawal_warning,
     gift_card: line.gift_card,
     variants: line.variants.map((variant) => ({ id: variant.id, title: variant.title })),
   })),
@@ -30,7 +31,9 @@ const view = (found: ReturnableLines) => ({
  * order page may ask back before the shopper sends the form, by the rules
  * the request meets (`returnableLines`, the staff view's): units left per
  * line, `withdrawal_excluded` and its reason (`product`, `personal_addon`,
- * `gift_card_used`), `gift_card`, whether the window is open. The
+ * `gift_card_used`), `withdrawal_warning` (`sealed_goods`: returnable only
+ * with its seal unopened, MSY md. 15/1-ç; the form says so before it is
+ * sent), `gift_card`, whether the window is open. The
  * shopper's own order, signed in or with its key (`orderAccess`).
  */
 export async function GET(req: MedusaRequest, res: MedusaResponse): Promise<void> {
