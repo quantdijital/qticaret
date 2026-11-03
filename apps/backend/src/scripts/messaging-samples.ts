@@ -3,12 +3,13 @@ import { logger } from "../lib/logging"
 import { emailTransport } from "../lib/messaging/email"
 import { MESSAGE_TEMPLATES } from "../lib/messaging/templates"
 import type { MessageTemplate } from "../lib/messaging/templates"
-import { brandOf } from "../workflows/messaging/brand"
+import { messagePreview } from "../workflows/messaging/preview"
 import { senderAddress } from "../workflows/messaging/sender-domain"
 
 /**
- * Sends every e-mail template with its sample values, in the shop's own
- * brand, to Mailpit to look at (F9 KK1, adr/0036): http://localhost:58025.
+ * Sends every e-mail template as the panel previews it (its sample, the
+ * shop's own details and links, its brand) to Mailpit to look at (F9 KK1,
+ * adr/0036): http://localhost:58025.
  * Refused unless e-mail goes to Mailpit, so no sample reaches a real inbox.
  *
  * Usage: pnpm --filter @qticaret/backend messaging:samples
@@ -22,14 +23,11 @@ export default async function run({ container }: ExecArgs): Promise<void> {
   if (!from) {
     throw new Error("messaging samples: EMAIL_FROM is not set")
   }
-  const brand = await brandOf(container)
   const batch = String(Date.now())
   let sent = 0
   for (const template of Object.values(MESSAGE_TEMPLATES) as MessageTemplate<unknown>[]) {
-    const mail = template.email?.(template.sample, brand, {
-      unsubscribeUrl:
-        template.kind === "commercial" ? "https://magaza.example/abonelik/cik?t=ornek" : null,
-    })
+    // As the panel's preview shows it: the shop's own details and links in place
+    const { brand, email: mail } = await messagePreview(container, template)
     if (!mail) {
       continue
     }

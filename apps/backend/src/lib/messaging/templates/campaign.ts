@@ -1,7 +1,35 @@
+import { composeSms } from "../../campaigns/sms"
 import { messageText } from "../texts"
 import { renderEmail } from "./layout"
 import type { EmailBlock } from "./layout"
 import type { MessageTemplate } from "./types"
+
+/** The shop's legal identity as a bulk message's footer names it. */
+export interface CampaignLegal {
+  company_title: string | null
+  mersis: string | null
+}
+
+/** The shop's title and MERSİS for the footer (adr/0050 §4); null while neither is set. */
+export function campaignLegalLine(legal: CampaignLegal): string | null {
+  const parts = [
+    legal.company_title,
+    legal.mersis ? messageText("campaign.mersis", { mersis: legal.mersis }) : null,
+  ].filter((part): part is string => Boolean(part))
+  return parts.length > 0 ? parts.join(" · ") : null
+}
+
+/**
+ * The preview's made-up stand-ins (F9.3) for what a shop has not filled in
+ * yet: its legal identity, its way to refuse a text. What the shop has set
+ * takes their place (`previewVars`).
+ */
+export const CAMPAIGN_SAMPLE = {
+  text: "Hafta sonuna özel %20 indirim!",
+  shopName: "Örnek Mağaza",
+  optOut: "Ret için ORNEK yazıp 0000'e gönderin.",
+  legal: { company_title: "Örnek Ticaret Ltd. Şti.", mersis: "0123456789000015" },
+} as const
 
 /**
  * A bulk message as one recipient gets it (adr/0050 §4), made by the
@@ -80,8 +108,8 @@ export const campaignMessage: MessageTemplate<CampaignVars> = {
         ],
       },
     ],
-    legal: "Örnek Ticaret Ltd. Şti. · MERSİS 0123456789000015",
-    sms: "Hafta sonuna özel %20 indirim! Örnek Mağaza. Ret için ORNEK yazıp 0000'e gönderin.",
+    legal: campaignLegalLine(CAMPAIGN_SAMPLE.legal),
+    sms: composeSms(CAMPAIGN_SAMPLE.text, CAMPAIGN_SAMPLE.shopName, CAMPAIGN_SAMPLE.optOut),
     test: false,
   },
 }

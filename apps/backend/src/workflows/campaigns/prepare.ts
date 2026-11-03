@@ -8,8 +8,8 @@ import { docStats } from "../../lib/content"
 import type { ContentDoc } from "../../lib/content"
 import { MESSAGE_TEMPLATES } from "../../lib/messaging/templates"
 import type { Brand, CampaignVars, EmailContent } from "../../lib/messaging/templates"
+import { campaignLegalLine } from "../../lib/messaging/templates/campaign"
 import type { EmailBlock, EmailProductCard } from "../../lib/messaging/templates/layout"
-import { messageText } from "../../lib/messaging/texts"
 import { fillShopText } from "../../lib/shop/tokens"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import type { LegalSettings, MarketingSettings } from "../../modules/platform-settings/sections"
@@ -131,15 +131,6 @@ async function categoryLinks(
   )
 }
 
-/** The shop's title and MERSİS for the footer (adr/0050 §4); null while neither is set. */
-export function legalLine(legal: Pick<LegalSettings, "company_title" | "mersis">): string | null {
-  const parts = [
-    legal.company_title,
-    legal.mersis ? messageText("campaign.mersis", { mersis: legal.mersis }) : null,
-  ].filter((part): part is string => Boolean(part))
-  return parts.length > 0 ? parts.join(" · ") : null
-}
-
 // Addresses written in a text, for their utm (adr/0050 §4)
 const URL_IN_TEXT = /https?:\/\/[^\s<>"]+/gi
 
@@ -178,7 +169,7 @@ export async function prepareCampaign(
     subject: fill(campaign.subject ?? ""),
     preheader: fill(campaign.preheader ?? ""),
     blocks: emailBlocksOf(doc, { link, fill, products, categories }),
-    legal: legalLine(legal),
+    legal: campaignLegalLine(legal),
     sms: "",
   }
 }

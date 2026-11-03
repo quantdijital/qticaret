@@ -1,5 +1,7 @@
 import { medusaIntegrationTestRunner } from "@medusajs/test-utils"
 import { Modules } from "@medusajs/framework/utils"
+import { PLATFORM_SETTINGS_MODULE } from "../../src/modules/platform-settings"
+import type PlatformSettingsModuleService from "../../src/modules/platform-settings/service"
 import { createAdminUser } from "../helpers/admin"
 import type { HttpClient } from "../helpers/http"
 import { settle } from "../helpers/http"
@@ -88,6 +90,51 @@ medusaIntegrationTestRunner({
       expect(preview.data.email?.html).toContain("Örnek &lt;b&gt;Mağaza&lt;/b&gt;")
       expect(preview.data.email?.html).not.toContain("<b>Mağaza</b>")
       expect(preview.data.sms).toContain("#1042")
+    })
+
+    it("previews with the shop's own address, legal identity, bank account and way to refuse", async () => {
+      const settings =
+        getContainer().resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
+      const blank = await get<Preview>(`${PATH}/marketing.campaign/preview`)
+      await settings.saveSection("seo", { canonical_host: "atolye.com.tr" }, null)
+      await settings.saveSection(
+        "legal",
+        { company_title: "Atölye Ticaret A.Ş.", mersis: "0987654321000017" },
+        null
+      )
+      await settings.saveSection(
+        "marketing",
+        { sms_opt_out_text: "Ret için RET yazıp 4600'e gönderin." },
+        null
+      )
+      await settings.saveSection(
+        "bank_transfer",
+        {
+          enabled: true,
+          account_holder: "Atölye Ticaret A.Ş.",
+          bank_name: "Ziraat Bankası",
+          iban: "TR33 0006 1005 1978 6457 8413 26",
+        },
+        null
+      )
+
+      const campaign = await get<Preview>(`${PATH}/marketing.campaign/preview`)
+      const order = await get<Preview>(`${PATH}/order.placed/preview`)
+      const reminder = await get<Preview>(`${PATH}/cart.reminder/preview`)
+
+      // Nothing filled yet: the made-up identity stands in, marked as such nowhere
+      expect(blank.data.email?.html).toContain("MERSİS 0123456789000015")
+      expect(campaign.data.email?.html).toContain("Atölye Ticaret A.Ş. · MERSİS 0987654321000017")
+      expect(campaign.data.email?.html).toContain("https://atolye.com.tr/abonelik/cik?t=preview")
+      expect(campaign.data.sms).toContain("Ret için RET yazıp 4600'e gönderin.")
+      expect(campaign.data.sms).not.toContain("ORNEK")
+      expect(order.data.email?.text).toContain("TR33 0006 1005 1978 6457 8413 26")
+      expect(order.data.email?.text).toContain("Ziraat Bankası")
+      expect(order.data.email?.text).not.toContain("Örnek Bank")
+      expect(reminder.data.email?.html).toContain("https://atolye.com.tr/sepet")
+      for (const preview of [campaign, order, reminder]) {
+        expect(JSON.stringify(preview.data)).not.toContain("magaza.example")
+      }
     })
 
     it("answers an unknown template, or an object's own key, with not found", async () => {

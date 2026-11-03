@@ -9,12 +9,19 @@ import type LegalModuleService from "../../modules/legal/service"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import type { SeoSettings } from "../../modules/platform-settings/sections"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
+import { storefrontUrlOf } from "../messaging/brand"
 import { returnPolicy } from "../returns/policy"
 import { legalIdentity } from "./identity"
 
 type Container = Pick<MedusaContainer, "resolve">
 
 const DATE = new Intl.DateTimeFormat("tr-TR", { timeZone: "Europe/Istanbul", dateStyle: "short" })
+
+/** The shop's domain as its texts name it; the dev storefront's on a developer's machine. */
+const domainOf = (canonicalHost: string | null): string | null => {
+  const url = storefrontUrlOf(canonicalHost)
+  return url ? new URL(url).host : null
+}
 
 /** The shop's values for its texts' tokens (adr/0041 §1): its legal identity and contact details. */
 export async function shopLegalValues(
@@ -40,7 +47,7 @@ export async function shopLegalValues(
     etbis: identity.etbis,
     e_posta: identity.contact_email,
     telefon: identity.contact_phone,
-    alan_adı: seo.canonical_host,
+    alan_adı: domainOf(seo.canonical_host),
     iade_süresi: String(policy.withdrawal_days),
     bugün: DATE.format(new Date()),
   }
