@@ -50,6 +50,9 @@ export const SHOP_TOKENS = [
   "telefon",
   "alan_adı",
   "iade_süresi",
+  // Working days to get an order out of the door, and the carrier's to the door (F7.8 settings)
+  "hazırlama_süresi",
+  "kargo_süresi",
   "bugün",
 ] as const
 

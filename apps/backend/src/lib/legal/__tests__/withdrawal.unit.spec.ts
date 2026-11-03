@@ -77,8 +77,15 @@ const rendered = (doc: ContentDoc, facts: OrderContractFacts): string => {
   return renderDoc(fillLegalDoc(withPersonalLines(doc, values.blocks), values))
 }
 
+// Goods made to the buyer's wish are MSY md. 15/1-(b); (ç) is the hygiene exception
 const SENTENCE =
-  "Mesafeli Sözleşmeler Yönetmeliği md. 15/1-ç uyarınca bu ürünlerde cayma hakkı kullanılamaz"
+  "Mesafeli Sözleşmeler Yönetmeliği md. 15/1-b uyarınca bu ürünlerde cayma hakkı kullanılamaz"
+
+/** The withdrawal clause as rendered: from the first heading naming "Cayma" to the next of its level. */
+const clauseOf = (html: string): string =>
+  /<h2>[^<]*Cayma[^<]*<\/h2>([\s\S]*?)(?=<h2>|$)/.exec(html)?.[1] ?? ""
+
+const count = (html: string, text: string): number => html.split(text).length - 1
 
 /** adr/0052 §8: an order's contracts name the lines made to the buyer's wish. */
 describe("personal lines in an order's contracts", () => {
@@ -86,13 +93,15 @@ describe("personal lines in an order's contracts", () => {
     "names each in the %s's withdrawal clause, with the pick that makes it so",
     (kind) => {
       const html = rendered(starterOf(kind).body, personal)
-      const clause = html.slice(html.indexOf("5. Cayma hakkı"), html.indexOf("6. "))
+      const clause = clauseOf(html)
 
       expect(clause).toContain(SENTENCE)
       expect(clause).toContain("Çakı · Standart (Ürün üzerine yazı: Ada Yılmaz)")
       expect(clause).not.toContain("Bıçak")
       expect(clause).not.toContain("Kılıf")
-      expect(html.match(/15\/1-ç/g)).toHaveLength(1)
+      expect(count(html, SENTENCE)).toBe(1)
+      // After the exceptions the clause lists, at the end of the clause
+      expect(clause.indexOf("md. 15/1-h")).toBeLessThan(clause.indexOf(SENTENCE))
       // The draft's lawyer note stays as the starter has it
       expect(html).toContain("TASLAK")
     }
@@ -104,7 +113,7 @@ describe("personal lines in an order's contracts", () => {
 
     expect(orderLegalValues(plain).blocks[PERSONAL_LINES_TOKEN]).toEqual([])
     expect(withPersonalLines(body, orderLegalValues(plain).blocks)).toBe(body)
-    expect(rendered(body, plain)).not.toContain("15/1-ç")
+    expect(rendered(body, plain)).not.toContain(SENTENCE)
   })
 
   it("puts it at the end of a text that has no withdrawal heading", () => {
@@ -148,7 +157,7 @@ describe("personal lines in an order's contracts", () => {
         { product_title: "Tişört", variant_title: "M", quantity: 1, total: 200 },
       ])
       const html = rendered(starterOf(kind).body, facts)
-      const clause = html.slice(html.indexOf("5. Cayma hakkı"), html.indexOf("6. "))
+      const clause = clauseOf(html)
 
       expect(clause).toContain(
         "hediye kartlarında cayma hakkı, yalnızca kartlardan hiç harcama yapılmamışken kullanılabilir"
@@ -157,7 +166,7 @@ describe("personal lines in an order's contracts", () => {
       expect(clause).toContain("Eski kart · 250 TL")
       expect(clause).not.toContain("Tişört")
       // Not a personal line: the add-on sentence stays out
-      expect(clause).not.toContain("15/1-ç")
+      expect(clause).not.toContain(SENTENCE)
     }
   )
 

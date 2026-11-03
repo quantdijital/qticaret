@@ -178,5 +178,45 @@ medusaIntegrationTestRunner({
       expect(dropped.status).toBe(200)
       expect(again.data.draft.version).toBe(1)
     })
+
+    it("fills the shipping policy starter's days from the shipping settings and saves it whole", async () => {
+      const container = getContainer()
+      await container
+        .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
+        .saveSection("shipping", { handling_days_min: 1, handling_days_max: 3 }, null)
+      const owner = await createAdminUser(http, container)
+      const base = "/admin/legal-documents/shipping_policy"
+      const starter = await settle(
+        http.get<{ starter: { title: string; body: Doc }; tokens: string[] }>(`${base}/starter`, {
+          headers: owner.headers,
+        })
+      )
+
+      const preview = await settle(
+        http.post<{ html: string }>(
+          `${base}/preview`,
+          { body: starter.data.starter.body },
+          { headers: owner.headers }
+        )
+      )
+      // The whole starter is a draft the editor saves as it comes (the route's 100 kB body)
+      const saved = await settle(
+        http.post(
+          `${base}/draft`,
+          { title: starter.data.starter.title, body: starter.data.starter.body },
+          { headers: owner.headers }
+        )
+      )
+
+      expect(starter.data.tokens).toEqual(
+        expect.arrayContaining(["hazırlama_süresi", "kargo_süresi"])
+      )
+      expect(preview.status).toBe(200)
+      expect(preview.data.html).toContain("1–3 iş günü içinde hazırlanarak kargoya verilir")
+      // The platform's default transit days, 1–3
+      expect(preview.data.html).toContain("genellikle 1–3 iş günü içinde teslim edilir")
+      expect(preview.data.html).not.toMatch(/\{[\p{L}\p{N}_]+\}/u)
+      expect(saved.status).toBe(200)
+    })
   },
 })

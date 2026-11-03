@@ -15,9 +15,11 @@ import { PERSONAL_LINES_TOKEN } from "./tokens"
 /**
  * TASLAK, avukat onayı bekler (docs/12, adr/0041 §1): the one sentence the
  * platform adds to the shop's contracts, as the starters' drafts are.
+ * Goods made to the buyer's wish are md. 15/1-(b); (ç) is the hygiene
+ * exception (checked on mevzuat.gov.tr, 2026-11-03).
  */
 const PERSONAL_LINES_SENTENCE =
-  "Aşağıdaki ürünler alıcının istekleri doğrultusunda kişiye özel hazırlandığından, Mesafeli Sözleşmeler Yönetmeliği md. 15/1-ç uyarınca bu ürünlerde cayma hakkı kullanılamaz:"
+  "Aşağıdaki ürünler alıcının istekleri doğrultusunda kişiye özel hazırlandığından, Mesafeli Sözleşmeler Yönetmeliği md. 15/1-b uyarınca bu ürünlerde cayma hakkı kullanılamaz:"
 
 /**
  * TASLAK, avukat onayı bekler (docs/12, adr/0025 2026-11-03): the owner's

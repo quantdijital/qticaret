@@ -2194,6 +2194,8 @@
           "telefon": "Mağazanın iletişim telefonu",
           "alan_adı": "Mağazanın alan adı",
           "iade_süresi": "Cayma süresi (gün)",
+          "hazırlama_süresi": "Kargoya verme süresi (iş günü, Ayarlar > Kargo ve teslimat)",
+          "kargo_süresi": "Kargo taşıma süresi (iş günü, Ayarlar > Kargo ve teslimat)",
           "bugün": "Bugünün tarihi",
           "alıcı_adı": "Alıcının adı soyadı",
           "alıcı_e_posta": "Alıcının e-postası",

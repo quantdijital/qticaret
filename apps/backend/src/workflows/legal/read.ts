@@ -2,12 +2,12 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import type { Block, ContentDoc } from "../../lib/content"
 import { renderDoc } from "../../lib/content"
-import { LEGAL_KINDS, fillLegalDoc, linesTable } from "../../lib/legal"
+import { LEGAL_KINDS, fillLegalDoc, linesTable, workingDaysText } from "../../lib/legal"
 import type { LegalKind, OrderToken, ShopToken } from "../../lib/legal"
 import { LEGAL_MODULE } from "../../modules/legal"
 import type LegalModuleService from "../../modules/legal/service"
 import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
-import type { SeoSettings } from "../../modules/platform-settings/sections"
+import type { SeoSettings, ShippingSettings } from "../../modules/platform-settings/sections"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
 import { storefrontUrlOf } from "../messaging/brand"
 import { returnPolicy } from "../returns/policy"
@@ -23,15 +23,19 @@ const domainOf = (canonicalHost: string | null): string | null => {
   return url ? new URL(url).host : null
 }
 
-/** The shop's values for its texts' tokens (adr/0041 §1): its legal identity and contact details. */
+/**
+ * The shop's values for its texts' tokens (adr/0041 §1): its legal identity
+ * and contact details, its withdrawal period and its shipping days.
+ */
 export async function shopLegalValues(
   container: Container
 ): Promise<Record<ShopToken, string | null>> {
   const settings = container.resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
-  const [identity, policy, seo, { data: stores }] = await Promise.all([
+  const [identity, policy, seo, shipping, { data: stores }] = await Promise.all([
     legalIdentity(container),
     returnPolicy(container),
     settings.getSection("seo") as Promise<unknown> as Promise<SeoSettings>,
+    settings.getSection("shipping") as Promise<unknown> as Promise<ShippingSettings>,
     container
       .resolve(ContainerRegistrationKeys.QUERY)
       .graph({ entity: "store", fields: ["name"], pagination: { take: 1 } }),
@@ -49,6 +53,8 @@ export async function shopLegalValues(
     telefon: identity.contact_phone,
     alan_adı: domainOf(seo.canonical_host),
     iade_süresi: String(policy.withdrawal_days),
+    hazırlama_süresi: workingDaysText(shipping.handling_days_min, shipping.handling_days_max),
+    kargo_süresi: workingDaysText(shipping.transit_days_min, shipping.transit_days_max),
     bugün: DATE.format(new Date()),
   }
 }

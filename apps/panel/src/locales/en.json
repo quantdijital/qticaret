@@ -2194,6 +2194,8 @@
           "telefon": "Shop's contact phone",
           "alan_adı": "Shop's domain",
           "iade_süresi": "Withdrawal period (days)",
+          "hazırlama_süresi": "Handling time (working days, Settings > Shipping and delivery)",
+          "kargo_süresi": "Transit time (working days, Settings > Shipping and delivery)",
           "bugün": "Today's date",
           "alıcı_adı": "Buyer's full name",
           "alıcı_e_posta": "Buyer's e-mail",

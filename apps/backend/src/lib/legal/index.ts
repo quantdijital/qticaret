@@ -4,7 +4,8 @@ export type { IdentityFacts, IdentityField } from "./identity"
 export type { LegalValues } from "./fill"
 export { CONTRACT_PAYMENTS, linesTable, orderLegalValues } from "./order-values"
 export type { ContractPayment, OrderContractFacts, OrderLegalValues } from "./order-values"
-export { hasStarterNote, starterOf } from "./starters"
+export { workingDaysText } from "./shipping-days"
+export { ARBITRATION_LIMIT, hasStarterNote, starterOf } from "./starters"
 export { personalLinesBlocks, withPersonalLines } from "./withdrawal"
 export {
   BLOCK_TOKENS,
