@@ -1,6 +1,6 @@
 # WordPress + WooCommerce (WXR geçiş kaynağı)
 
-> Karar: ADR-0042 "Ek (2026-11-03): WordPress (WXR) kaynağı". Kod: `apps/backend/src/lib/migration/sources/wordpress/`. Yazma tarafı: `apps/backend/src/workflows/migration/categories.ts` (kategori SEO alanları), `products.ts` + `attributes.ts` + `attribute-report.ts` (açıklayıcı özellikler), `content.ts`, `post-terms.ts`. Testler: `src/lib/migration/sources/wordpress/__tests__/`, `integration-tests/http/migration-wordpress.spec.ts`.
+> Karar: ADR-0042 "Ek (2026-11-03): WordPress (WXR) kaynağı"; ürün açıklaması içerik belgesi olarak ve açıklama yenileme: ADR-0055. Kod: `apps/backend/src/lib/migration/sources/wordpress/`. Yazma tarafı: `apps/backend/src/workflows/migration/categories.ts` (kategori SEO alanları), `products.ts` + `attributes.ts` + `attribute-report.ts` (açıklayıcı özellikler), `content.ts`, `post-terms.ts`. Testler: `src/lib/migration/sources/wordpress/__tests__/`, `integration-tests/http/migration-wordpress.spec.ts`, `migration-wordpress-descriptions.spec.ts` (belge ve yenileme).
 
 WordPress sitesinin kendi dışa aktarma dosyası (WXR) bir kez okunur: ürün kategorileri, markalar, ürünler ve varyasyonları, görseller, yorumlar, blog yazıları (kategori ve etiketleriyle), içerik sayfaları ve hepsinin eski adresleri. Eklenti, API anahtarı ya da sitede değişiklik gerekmez.
 
@@ -24,7 +24,7 @@ WordPress sitesinin kendi dışa aktarma dosyası (WXR) bir kez okunur: ürün k
 | `product_brand` (WooCommerce Brands), `pwb-brand`, `yith_product_brand` | Marka, eski adres `{taban}{slug}/` |
 | `product` (yayında) | Yayında ürün; gizli (katalog ve aramadan çıkarılmış), taslak, özel, parolalı → taslak. Çöp, gruplanmış ve dış bağlantılı ürün taşınmaz |
 | `wp:post_name` | Tanıtıcı (platformun slug kuralıyla); eski adres öğenin `<link>`'i (`/urun/{slug}/`) |
-| Ürün içeriği (HTML, Flatsome kısa kodları) | Açıklama, düz paragraflar: başlık satırı, liste maddesi `•`, tablo satırı `Ad: Değer`. Betik, stil, görsel, ürün vitrini kalkar. 20.000 karakter (paragrafta kesilir). İçerik boşsa kısa açıklama |
+| Ürün içeriği (HTML, Flatsome kısa kodları) | Açıklama **içerik belgesi** olarak (ADR-0055, `product_extension.description_doc`): başlık (h1–h2 → h2, h5–h6 → h4), paragraf, liste (üç düzeye kadar), alıntı, tablo; kalın, italik, güvenli bağlantı (sitenin kendi adresi yol olur). Betik, stil, görsel, ürün vitrini kalkar. `description` belgenin düz metnidir (ADR-0055 kuralı, en çok 20.000 karakter, blok sınırında kesilir). Belgenin sınırını (180.000 karakter, 4.000 blok) aşan gövde bölüm sınırında kesilir, raporda yazar. İçerik boşsa kısa açıklama; ikisi de boşsa belge yok. Raporun Özet sayfasında "Biçimli açıklamayla gelen ürünler" sayısı |
 | `product_cat` sırası | `rank_math_primary_product_cat` (ya da Yoast'ınki) birinci, sonra dosyadaki sıra |
 | `rank_math_title`, `rank_math_description`, `rank_math_focus_keyword` (ve Yoast karşılıkları) | SEO başlığı, açıklaması, odak kelimesi (listenin ilki). Değişkenler: bkz. ADR Ek madde 5 |
 | `_thumbnail_id`, `_product_image_gallery`, varyasyon görselleri | Ürün görselleri, bu sırayla; alt metin `_wp_attachment_image_alt` |
@@ -49,6 +49,15 @@ WordPress sitesinin kendi dışa aktarma dosyası (WXR) bir kez okunur: ürün k
 - **Tekrarsızlık:** bir kez taşınan ürün, yazı ve sayfa yeniden çalıştırmada yazılmaz; aynı tanıtıcılı sayfa ya da yazı sitede zaten varsa (profil betiğinin açtığı Hakkımızda gibi) bulunmuş sayılır, eski adresi ona bağlanır.
 - **SEO eklentisi:** terim SEO alanlarını Rank Math terimin kendi meta'sında tutar, dosyada gelir. Yoast terimlerinkini bir seçenekte (`wpseo_taxonomy_meta`) tutar, dışa aktarmaya girmez: Yoast'lı sitede kategoriler mağazanın şablonlarını alır. Terimin robots ayarı taşınmaz (listeleme sayfalarının robots kuralı platformundur).
 - **Görseller:** sitenin ortam kütüphanesinden (`/wp-content/uploads/...`) güvenli indirmeyle (iç ağ reddi, 10 MB, tür ve piksel denetimi). Alan adı kısıtı yok, CDN'deki kütüphane de gelir. Yazı gövdesindeki görseller taşınmaz; raporda yazı yazı listelenir.
+
+## Açıklamaları yenileme (ADR-0055)
+
+Önceki bir çalıştırmanın taşıdığı ürünlerin açıklaması (ör. düz metin döneminde taşınmış ürünler) aynı siteden yeni bir dışa aktarmayla yeniden yazılır; başka hiçbir şey taşınmaz.
+
+- **Panel:** Ayarlar > Taşıma > WordPress, **Yalnız açıklamaları yenile** kutusu. Yalnızca uygulama: kutu işaretliyken kuru çalıştırma kapalı, kategori tabanı ve paket alanları devre dışı.
+- **İstek:** `POST /admin/migrations?source=wordpress&mode=apply&refresh=descriptions` (API kuru çalıştırmayı da kabul eder: `mode=check` yalnızca sayar). İşin girdisinde `refresh: ["descriptions"]`; yarıda kalan iş yeniden başlatılırsa seçenek korunur. Başka kaynakla `migration.refresh_wordpress_only`.
+- **Ne yazılır:** kaynak kimliğiyle (`wordpress:<alan adı>`) daha önce taşınmış (`done`) her ürüne dışa aktarmadaki gövdeden belge ve onun düz metni, panelin açıklama kaydıyla aynı yoldan (`setProductCatalogWorkflow`). Fiyat, stok, durum, başlık, SEO alanları, kategoriler, görseller ve özellikler olduğu gibi kalır. Mağazanın panelde sonradan yazdığı açıklamanın üzerine yazılır: kutunun anlamı budur.
+- **Sayılar** (`counts.product`): `updated` yenilenen, `found` zaten aynı (belge ve düz metin), `skipped` daha önce taşınmamış ya da dışa aktarmada gövdesi boş (boşsa ürünün açıklamasına dokunulmaz, Notlar'da `migration.description_refresh_empty`), `failed` reddedilen ya da artık olmayan ürün (`migration.product_gone`), `documents` belgeyle yenilenen. Diğer türlerin sayıları sıfırdır. İşin özeti `refresh: ["descriptions"]` taşır, `wordpress` bloğunu taşımaz.
 
 ## Açıklayıcı özellikler
 

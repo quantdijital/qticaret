@@ -76,6 +76,7 @@ Tenant kurulumda bir desen seti seçer; desen tokenlarla tanımlıdır ve sonrad
   - Kategori: `{kategori} Modelleri ve Fiyatları | {mağaza}`
   - Marka: `{marka} Ürünleri | {mağaza}`
   - Meta description ürün: `{kısa_açıklama}. {fiyat_cümlesi} {kargo_cümlesi}` (ör. "1.250 TL'den başlayan fiyatlarla, ücretsiz kargo")
+  - `{kısa_açıklama}`, JSON-LD `description`, akışlar, arama ve advisor ürünün düz metin `description`'ını okur. Açıklaması içerik belgesi olan üründe (ADR-0055) bu metni sunucu belgeden türetir ve belge her kaydedildiğinde yeniden yazar (başlık ve paragraflar boş satırla, liste maddeleri satır satır, tablo satırı "hücre · hücre"; en çok 20.000 karakter). Belgeyi okuyan tek yer vitrinin açıklama gövdesidir (`/store/products/{id}/description`).
 - Şablonlar ve tenant metinleri sayfaya basılırken kaçışlanır (F18): HTML'de entity, JSON-LD içinde `<` → `\u003c` (`</script>` kapanışı olmasın). robots.txt `text/plain` + nosniff ile servis edilir. `canonical_host` alan adı doğrulaması gelene kadar yalnızca bağlantı üretiminde kullanılır; sunucu tarafı istek ve yönlendirme hedefi olmadan önce doğrulanmış alan adlarıyla sınırlanır (F16/F18).
 - Uzunluk hedefleri (lint): başlık 30–60 karakter (piksel genişliği tahmini ile), açıklama 70–155. Türkçe karakterler geniş; piksel tahmini font metrik tablosundan.
 - Mağaza genelinde başlık/açıklama **benzersizliği** denetlenir (hash + normalize karşılaştırma).
