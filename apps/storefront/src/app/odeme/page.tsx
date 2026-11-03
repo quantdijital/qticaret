@@ -4,7 +4,6 @@ import { currentCustomer, customerAddresses } from "@/lib/account/auth"
 import { checkoutEvents } from "@/lib/analytics/payloads"
 import { TrackEvents } from "@/lib/analytics/TrackEvents"
 import { shopperGiftLines } from "@/lib/cart/gift"
-import { isPaymentLinkCart } from "@/lib/cart/payment-link"
 import { checkoutCart } from "@/lib/checkout/cart"
 import { t } from "@/lib/i18n"
 import { robotsOnly } from "@/lib/seo/metadata"
@@ -54,17 +53,13 @@ export default async function CheckoutPage({
     customer ? { ...customer, address: saved ?? null } : null,
     billing
   )
-  // A gift line is never paid with credit; a payment link's order never on delivery (adr/0051)
-  const linked = isPaymentLinkCart(cart.metadata)
+  // A gift line is never paid with credit. Cash on delivery is the backend's to offer: for a
+  // payment link's cart only when the shop allows it (adr/0051), absent from the methods otherwise
   const shown =
-    gifts.length > 0 || linked
+    gifts.length > 0
       ? {
           ...view,
-          paymentMethods: view.paymentMethods.filter(
-            (method) =>
-              !(gifts.length > 0 && method.kind === "credit") &&
-              !(linked && method.kind === "cash_on_delivery")
-          ),
+          paymentMethods: view.paymentMethods.filter((method) => method.kind !== "credit"),
         }
       : view
   const measured = checkoutEvents(cart)

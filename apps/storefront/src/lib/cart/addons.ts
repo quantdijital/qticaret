@@ -2,6 +2,7 @@ import "server-only"
 import { randomUUID } from "node:crypto"
 import type { StoreAddonSelection, StoreProductAddon } from "@qticaret/types"
 import { isStoreApiError } from "../store-api/errors"
+import { storefrontSettings } from "../store-api/requests"
 import { storeDelete, storeGet, storePost, storePublicFind } from "../store-api/server"
 import { addLine } from "./cart"
 import { cartIdFromCookie } from "./cookie"
@@ -13,11 +14,25 @@ import { cartIdFromCookie } from "./cookie"
  */
 
 /**
- * A product's add-ons; null while the shop offers none: the route answers
- * 404 with the shop's add-ons off, as for a product that is not this
- * shop's. Shop-wide, kept a minute like the backend's own cache header.
+ * Whether the shop offers product add-ons now (`/store/storefront`
+ * `features`): the frame's answer every page already has, no call of its own.
+ */
+export async function addonsOn(): Promise<boolean> {
+  const { features } = await storefrontSettings()
+  return features?.product_addons === true
+}
+
+/**
+ * A product's add-ons; null while the shop offers none. With the shop's
+ * add-ons off the route is not asked at all; it would answer 404 (as for
+ * a product that is not this shop's), which also reads as none, should
+ * the flag above be up to a minute old. Shop-wide, kept a minute like the
+ * backend's own cache header.
  */
 export async function productAddons(productId: string): Promise<StoreProductAddon[] | null> {
+  if (!(await addonsOn())) {
+    return null
+  }
   const answer = await storePublicFind<{ addons: StoreProductAddon[] }>(
     `/store/products/${encodeURIComponent(productId)}/addons`
   )
@@ -36,10 +51,13 @@ export async function productAddonsOrNone(productId: string): Promise<StoreProdu
   }
 }
 
-/** Each product's add-ons, for the cart's lines; a product without any is left out. */
+/** Each product's add-ons, for the cart's lines; a product without any is left out (all, while off). */
 export async function addonsOfProducts(
   productIds: readonly string[]
 ): Promise<Map<string, StoreProductAddon[]>> {
+  if (productIds.length === 0 || !(await addonsOn())) {
+    return new Map()
+  }
   const unique = [...new Set(productIds)]
   const found = await Promise.all(
     unique.map(async (id) => [id, await productAddonsOrNone(id)] as const)

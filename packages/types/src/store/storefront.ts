@@ -99,8 +99,11 @@ export interface StorefrontAnswer {
   theme?: StoreThemeSettings
   /** Lira, KDV in, after discounts (`item_total`); null: no free shipping. */
   free_shipping_threshold: number | null
-  /** What the storefront offers only while the shop has it on. */
-  features?: { gift_cards: boolean }
+  /**
+   * What the storefront offers only while the shop has it on: gift card
+   * codes (F4.8) and product add-ons (adr/0052); their routes answer 404 while off.
+   */
+  features?: { gift_cards: boolean; product_addons: boolean }
 }
 
 /** The shop's legal identity and how it is reached (F13.9, adr/0048); what is missing is null. */

@@ -7,7 +7,6 @@ import type { ActionResult, OptionView, PlaceOrderResult } from "@qticaret/ui"
 import { rememberAddress } from "@/lib/account/auth"
 import { sessionToken } from "@/lib/account/session"
 import { forgetCart } from "@/lib/cart/cookie"
-import { isPaymentLinkCart } from "@/lib/cart/payment-link"
 import { districtOptions, neighborhoodOptions } from "@/lib/checkout/address"
 import { addressFromForm, addressPayload } from "@/lib/checkout/address-form"
 import { checkoutCart } from "@/lib/checkout/cart"
@@ -116,8 +115,8 @@ export async function placeOrder(
         : [
             cardProviderOf(methods),
             methods.bank_transfer?.provider_id,
-            // A payment link's order is not paid on delivery (adr/0051)
-            isPaymentLinkCart(cart.metadata) ? undefined : methods.cash_on_delivery?.provider_id,
+            // Judged for this cart by the backend: a payment link's only when the shop allows it (adr/0051)
+            methods.cash_on_delivery?.provider_id,
           ]
     if (!offered.includes(input.provider_id)) {
       return { ok: false, error: "checkout.payment_required", challenge: NO_CHALLENGE }

@@ -3,9 +3,9 @@ import { collectErrors, DEMO_PRODUCT, dismissCookies } from "./support"
 
 /**
  * Product add-ons (adr/0052): the dev shop has the `catalog.addons` flag
- * off and its demo product has none, so the add-ons route answers 404 and
- * the page reads that as "no add-ons": no picks form, and the cart form
- * adds as always. The picks, their prices, the cart's edit form and the
+ * off (`/store/storefront` `features.product_addons` false) and its demo
+ * product has none, so the storefront does not ask the add-ons route and
+ * reads that as "no add-ons": no picks form, and the cart form adds as always. The picks, their prices, the cart's edit form and the
  * checkout's refusals are the unit tests' (the flow cannot be seen here
  * without add-ons in the dev database).
  */

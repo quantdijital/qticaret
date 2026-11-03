@@ -6,6 +6,7 @@ import {
   createWorkflow,
 } from "@medusajs/framework/workflows-sdk"
 import { countsOf } from "../../lib/campaigns/types"
+import type { CampaignSource } from "../../lib/campaigns/types"
 import { ConflictError, ValidationError } from "../../lib/errors"
 import { emailTransport } from "../../lib/messaging/email"
 import { netgsmAccountOf } from "../../lib/messaging/sms/netgsm"
@@ -18,6 +19,7 @@ import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import type { MarketingSettings } from "../../modules/platform-settings/sections"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
 import { currentSenderDomain } from "../messaging/sender-domain"
+import { resolveAudience } from "./audience"
 import { assertComplete } from "./content"
 import { campaignOf } from "./save"
 
@@ -58,12 +60,26 @@ export async function channelBlocker(
 const serviceOf = (container: Container) =>
   container.resolve<CampaignsModuleService>(CAMPAIGNS_MODULE)
 
+/**
+ * Ready to go: its content complete, its channel able to carry it, and
+ * someone to receive it now, counted exactly as the live count counts
+ * (`audience-preview`, resolveAudience). The job fixes the list again on
+ * its first turn; a campaign that would reach nobody is refused here.
+ */
 async function assertReady(container: Container, id: string) {
   const campaign = await campaignOf(serviceOf(container), id)
   assertComplete(campaign)
   const blocker = await channelBlocker(container, campaign.channel)
   if (blocker) {
     throw new ValidationError(blocker)
+  }
+  const { eligible } = await resolveAudience(container, {
+    channel: campaign.channel,
+    sources: campaign.audience as unknown as CampaignSource[],
+    campaign_id: campaign.id,
+  })
+  if (eligible.length === 0) {
+    throw new ValidationError("campaigns.audience_empty", { field: "audience" })
   }
   return campaign
 }

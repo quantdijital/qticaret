@@ -7,7 +7,8 @@ const PAYMENT_LINK_CART_KEY = "qt_payment_link"
  * A cart opened from a payment link (adr/0051): the backend marks it with
  * the link's id (never its token) and locks its lines, quantities and
  * code. Address, shipping, gift recipients and the way to pay stay the
- * shopper's; cash on delivery is not taken for it.
+ * shopper's; cash on delivery only when the shop allows it, which the
+ * backend's payment methods for the cart already say (`allow_cod`).
  */
 export function isPaymentLinkCart(metadata: unknown): boolean {
   if (!metadata || typeof metadata !== "object") {

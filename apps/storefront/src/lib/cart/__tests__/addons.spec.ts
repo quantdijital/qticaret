@@ -9,17 +9,21 @@ const api = vi.hoisted(() => ({
   storePublicFind: vi.fn(),
 }))
 vi.mock("../../store-api/server", () => api)
+// The frame's answer, with the shop's add-ons flag as each test sets it
+const frame = vi.hoisted(() => ({ features: { gift_cards: false, product_addons: true } }))
+vi.mock("../../store-api/requests", () => ({ storefrontSettings: () => Promise.resolve(frame) }))
 const cart = vi.hoisted(() => ({ addLine: vi.fn() }))
 vi.mock("../cart", () => cart)
 vi.mock("../cookie", () => ({ cartIdFromCookie: () => Promise.resolve("cart_1") }))
 
-const { addAddonLine, productAddons, saveAddonLine } = await import("../addons")
+const { addAddonLine, addonsOfProducts, productAddons, saveAddonLine } = await import("../addons")
 
 const PICKS = [{ addon_id: "ad_yazi", value: "Ahmet" }]
 
 describe("addAddonLine (adr/0052)", () => {
   beforeEach(() => {
     Object.values(api).forEach((fn) => fn.mockReset())
+    frame.features.product_addons = true
     cart.addLine.mockReset()
     cart.addLine.mockResolvedValue("cart_1")
     // The cart after the add: an older plain line of the same variant, and the new one with its mark
@@ -70,5 +74,21 @@ describe("addAddonLine (adr/0052)", () => {
     api.storePublicFind.mockResolvedValueOnce({ addons: [{ id: "ad_yazi" }] })
     await expect(productAddons("prod_1")).resolves.toEqual([{ id: "ad_yazi" }])
     expect(api.storePublicFind).toHaveBeenCalledWith("/store/products/prod_1/addons")
+  })
+
+  it("asks a product's add-ons once per product while the shop offers them", async () => {
+    api.storePublicFind.mockImplementation((path: string) =>
+      Promise.resolve(path.includes("prod_1") ? { addons: [{ id: "ad_yazi" }] } : { addons: [] })
+    )
+    const found = await addonsOfProducts(["prod_1", "prod_2", "prod_1"])
+    expect([...found.keys()]).toEqual(["prod_1"])
+    expect(api.storePublicFind).toHaveBeenCalledTimes(2)
+  })
+
+  it("asks nothing while the shop has add-ons off (`features.product_addons`)", async () => {
+    frame.features.product_addons = false
+    await expect(productAddons("prod_1")).resolves.toBeNull()
+    await expect(addonsOfProducts(["prod_1", "prod_2"])).resolves.toEqual(new Map())
+    expect(api.storePublicFind).not.toHaveBeenCalled()
   })
 })

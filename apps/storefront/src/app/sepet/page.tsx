@@ -58,7 +58,7 @@ export default async function CartPage({
   const locked = lockedNoteOf(cart, t)
   const [gifts, addons] = await Promise.all([
     shopperGiftLines(cart?.id),
-    // Each product's add-ons, for its lines' picks form (none while the shop has them off)
+    // Each product's add-ons, for its lines' picks form (none, and not asked, while the shop has them off)
     locked
       ? new Map<string, StoreProductAddon[]>()
       : addonsOfProducts((cart?.items ?? []).flatMap((line) => line.product_id ?? [])),

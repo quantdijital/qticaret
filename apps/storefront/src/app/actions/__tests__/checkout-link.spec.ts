@@ -18,15 +18,21 @@ vi.mock("@/lib/checkout/cart", () => ({
 }))
 const BANK = "pp_bank-transfer_bank-transfer"
 const COD = "pp_cod_cod"
+// The backend judges cash on delivery for the cart: a link's only with the shop's `allow_cod` on
+const shop = vi.hoisted(() => ({ allowCod: false }))
 vi.mock("@/lib/checkout/options", () => ({
   CONTRACT_KINDS: ["pre_information", "distance_sales"],
   ageCheck: () => Promise.resolve({ required: false, declared: false }),
   paymentMethods: () =>
     Promise.resolve({
       bank_transfer: { provider_id: "pp_bank-transfer_bank-transfer" },
-      cash_on_delivery: { provider_id: "pp_cod_cod", fee: "20.00" },
+      cash_on_delivery:
+        checkout.metadata?.["qt_payment_link"] && !shop.allowCod
+          ? null
+          : { provider_id: "pp_cod_cod", fee: "20.00" },
     }),
 }))
+vi.mock("@/lib/cart/cookie", () => ({ forgetCart: () => Promise.resolve() }))
 vi.mock("@/lib/checkout/tracking", () => ({ recordTracking: () => Promise.resolve() }))
 vi.mock("@/lib/views/checkout", () => ({ cardProviderOf: () => "pp_paytr_paytr" }))
 const pay = vi.hoisted(() => ({
@@ -56,11 +62,38 @@ describe("placeOrder for a payment link's cart", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     checkout.metadata = { qt_payment_link: "plink_1" }
+    shop.allowCod = false
   })
 
-  it("takes no cash on delivery: the way is not offered, the backend is not asked", async () => {
+  it("takes no cash on delivery while the backend's methods leave it out: the payment is not started", async () => {
     await expect(submit(COD)).resolves.toMatchObject({ error: "checkout.payment_required" })
     expect(pay.startPayment).not.toHaveBeenCalled()
+  })
+
+  it("takes cash on delivery for a link's cart once the backend offers it (the shop allows it)", async () => {
+    shop.allowCod = true
+    pay.startPayment.mockResolvedValue({
+      id: "ps_1",
+      provider_id: COD,
+      status: "pending",
+      data: { method: "cash_on_delivery" },
+    })
+    pay.completeCart.mockResolvedValue("order_1")
+    pay.orderAccess.mockResolvedValue({ id: "order_1", token: "tok" })
+    await expect(submit(COD)).rejects.toThrow("redirect:/siparis/order_1?token=tok&yeni=1")
+    expect(pay.startPayment).toHaveBeenCalledWith("cart_1", COD, null)
+  })
+
+  it("says the backend's refusal of cash on delivery at placement in its own words", async () => {
+    // Offered when the page was drawn, turned off before the payment started
+    shop.allowCod = true
+    pay.startPayment.mockRejectedValue(new StoreApiError(400, "cart.payment_link_no_cod", null))
+    await expect(submit(COD)).resolves.toEqual({
+      ok: false,
+      error: "cart.payment_link_no_cod",
+      challenge: null,
+    })
+    expect(pay.completeCart).not.toHaveBeenCalled()
   })
 
   it("still takes cash on delivery for any other cart", async () => {

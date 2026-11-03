@@ -63,7 +63,7 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
         categoryIds: (product.categories ?? []).map((category) => category.id),
       },
     }),
-    // A gift card takes no add-ons; none while the shop has them off (the route answers 404)
+    // A gift card takes no add-ons; none while the shop has them off (`features`: not asked then)
     product.product_extension?.is_gift_card ? Promise.resolve([]) : productAddonsOrNone(product.id),
   ])
   // The shop's WhatsApp number comes with its contact details (adr/0048)
