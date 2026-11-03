@@ -6410,8 +6410,9 @@
       },
       "device": {
         "label": "Önizleme genişliği",
-        "desktop": "Masaüstü",
-        "mobile": "Mobil"
+        "mobile": "Telefon",
+        "tablet": "Tablet",
+        "desktop": "Masaüstü"
       },
       "status": {
         "label": "Taslağın durumu",
@@ -6444,13 +6445,15 @@
         "done": "Taslak, yayındaki tasarıma döndü."
       },
       "preview": {
-        "open": "Önizle",
+        "open": "Yeni sekmede aç",
         "frameTitle": "Vitrin önizlemesi",
         "loading": "Önizleme yükleniyor",
         "refreshing": "Önizleme yenileniyor",
         "failed": "Önizleme açılamadı.",
         "noHost": "Önizleme için mağazanızın adresi gerekli; SEO ayarlarında alan adınızı girin.",
-        "noHostLink": "SEO ayarlarına git"
+        "noHostLink": "SEO ayarlarına git",
+        "scale": "Ölçek",
+        "scaleHint": "Vitrin seçilen cihazın genişliğinde çizilir ve buraya sığacak kadar küçültülür."
       },
       "publish": {
         "open": "Yayınla",
@@ -6590,7 +6593,9 @@
         "endsAt": "Bitiş",
         "duplicate": "Çoğalt",
         "remove": "Bölümü kaldır",
-        "placement": "Yeri"
+        "placement": "Yeri",
+        "sections": "Bölümler",
+        "content": "İçerik"
       },
       "defaults": {
         "heading": "Mağazanızın adı",
@@ -6839,6 +6844,15 @@
           "product": "Önizleme için yayında bir ürün gerekli; bir ürünü yayınlayınca ürün sayfası burada görünür.",
           "category": "Önizleme için vitrinde görünen bir kategori gerekli; bir kategoriyi etkinleştirince sayfası burada görünür."
         }
+      },
+      "view": {
+        "label": "Düzenleme ya da önizleme",
+        "edit": "Düzenle",
+        "preview": "Önizle"
+      },
+      "drawer": {
+        "title": "Sayfanın bölümleri",
+        "description": "Ayarlarını açmak için bir bölüm seçin."
       }
     },
     "preferences": {

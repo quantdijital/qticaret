@@ -112,7 +112,7 @@ export function CountField({
         max={max}
         step={1}
         value={value}
-        className="w-28"
+        className="w-40"
         onChange={(event) => {
           const next = Math.trunc(Number(event.target.value))
           if (Number.isFinite(next) && event.target.value !== "") {

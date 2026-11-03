@@ -19,8 +19,8 @@ export function ThemeEditorPage() {
     return <ThemeEditor layout={query.data} />
   }
   return (
-    <div className="flex min-h-dvh flex-col bg-background">
-      <header className="flex h-12 shrink-0 items-center gap-2 border-b bg-card px-3">
+    <div className="flex h-dvh flex-col overflow-hidden bg-background">
+      <header className="flex h-14 shrink-0 items-center gap-2 border-b bg-card px-3 lg:gap-3 lg:px-4">
         <Button asChild variant="ghost" size="sm">
           <Link to="/storefront/menus">
             <ArrowLeft />
@@ -29,24 +29,28 @@ export function ThemeEditorPage() {
         </Button>
         <h1 className="text-sm font-semibold">{t(`${E}.title`)}</h1>
       </header>
-      <main className="flex flex-1 flex-col lg:flex-row">
+      <main className="flex min-h-0 flex-1">
         {query.isError ? (
           <div className="p-6">
             <ErrorState text={errorText(t, query.error)} onRetry={() => void query.refetch()} />
           </div>
         ) : (
           <>
+            {/* The page's parts as the editor will draw them; the preview's room beside */}
             <div
               aria-busy="true"
               aria-label={t("common.loading")}
-              className="flex flex-col gap-2 border-b bg-card p-3 lg:w-[340px] lg:border-r lg:border-b-0"
+              className="flex w-full flex-col gap-2 bg-card px-3 py-4 lg:w-[clamp(22rem,36vw,26rem)] lg:border-r xl:w-[clamp(17rem,20vw,20rem)]"
             >
               {Array.from({ length: 8 }, (_, index) => (
-                <Skeleton key={index} className="h-8 w-full" />
+                <Skeleton key={index} className="h-9 w-full" />
               ))}
             </div>
-            <div className="flex-1 bg-muted p-4">
-              <Skeleton className="h-full min-h-96 w-full rounded-md" />
+            <div className="hidden flex-1 flex-col bg-muted lg:flex">
+              <div className="h-12 shrink-0 border-b bg-card" />
+              <div className="flex-1 p-4">
+                <Skeleton className="h-full w-full rounded-md" />
+              </div>
             </div>
           </>
         )}

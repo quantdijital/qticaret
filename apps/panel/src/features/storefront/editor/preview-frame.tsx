@@ -1,18 +1,23 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query"
 import { Link } from "@tanstack/react-router"
-import { Loader2, MonitorX } from "lucide-react"
-import { useState } from "react"
+import { Loader2, Monitor, MonitorX, Smartphone, Tablet } from "lucide-react"
+import { useRef, useState } from "react"
 import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { LAYOUT_KEY, fetchLayoutPreview } from "@/features/storefront/api/layout"
 import { previewAddress } from "@/features/storefront/layout/preview-url"
 import { errorText } from "@/lib/errors"
-import { cn } from "@/lib/utils"
+import { DEVICES, fitPreview, useRoom } from "./preview-fit"
+import type { Device } from "./preview-fit"
 
 const V = "storefront.editor.preview"
+const D = "storefront.editor.device"
 
-export type Device = "desktop" | "mobile"
+const DEVICE_ICONS = { mobile: Smartphone, tablet: Tablet, desktop: Monitor } as const
+
+const PERCENT = new Intl.NumberFormat("tr-TR", { style: "percent", maximumFractionDigits: 0 })
 
 interface PreviewFrameProps {
   /** Grows with each saved draft (and each change made elsewhere): a new link is asked for. */
@@ -20,6 +25,9 @@ interface PreviewFrameProps {
   /** The draft has been saved at least once: there is something to show. */
   ready: boolean
   device: Device
+  onDevice: (device: Device) => void
+  /** Which product's or category's page shows the draft (their pages only). */
+  sample: ReactNode
   /** The page shown with the draft: a product's or category's path; null: the home page. */
   page: string | null
   /** Why the chosen page cannot be shown (no live product yet); shown in place of the frame. */
@@ -39,12 +47,78 @@ function PreviewMessage({ text, action }: { text: string; action?: ReactNode }) 
   )
 }
 
+/** The preview's own bar: the sample page, the device's width, and the scale it is shown at. */
+function PreviewBar({
+  sample,
+  device,
+  onDevice,
+  scale,
+}: {
+  sample: ReactNode
+  device: Device
+  onDevice: (device: Device) => void
+  scale: number
+}) {
+  const { t } = useTranslation()
+  const percent = PERCENT.format(scale)
+  return (
+    <div className="@container flex h-12 shrink-0 items-center gap-2 border-b bg-card px-3">
+      <div className="flex min-w-0 flex-1 items-center">{sample}</div>
+      <ToggleGroup
+        type="single"
+        variant="outline"
+        size="sm"
+        aria-label={t(`${D}.label`)}
+        value={device}
+        onValueChange={(next) => {
+          if (next) {
+            onDevice(next as Device)
+          }
+        }}
+      >
+        {DEVICES.map((each) => {
+          const Icon = DEVICE_ICONS[each]
+          return (
+            <ToggleGroupItem
+              key={each}
+              value={each}
+              aria-label={t(`${D}.${each}`)}
+              title={t(`${D}.${each}`)}
+            >
+              <Icon />
+              <span className="hidden @min-[34rem]:inline">{t(`${D}.${each}`)}</span>
+            </ToggleGroupItem>
+          )
+        })}
+      </ToggleGroup>
+      <span
+        className="tabular w-11 shrink-0 text-right text-xs text-muted-foreground"
+        title={t(`${V}.scaleHint`)}
+      >
+        <span className="sr-only">{t(`${V}.scale`)} </span>
+        {percent}
+      </span>
+    </div>
+  )
+}
+
 /**
  * The storefront itself, showing the draft (adr/0049): a signed link asked
  * for after each save, in a frame the storefront allows only the panel to
- * open. The last page stays on show while the next one loads.
+ * open. It is drawn at the chosen device's width and scaled down as a
+ * whole to the room it has, never cut off. The last page stays on show
+ * while the next one loads.
  */
-export function PreviewFrame({ round, ready, device, page, missing, finding }: PreviewFrameProps) {
+export function PreviewFrame({
+  round,
+  ready,
+  device,
+  onDevice,
+  sample,
+  page,
+  missing,
+  finding,
+}: PreviewFrameProps) {
   const { t } = useTranslation()
   const preview = useQuery({
     queryKey: [...LAYOUT_KEY, "preview", round],
@@ -53,6 +127,8 @@ export function PreviewFrame({ round, ready, device, page, missing, finding }: P
     staleTime: Infinity,
     placeholderData: keepPreviousData,
   })
+  const stage = useRef<HTMLDivElement>(null)
+  const fit = fitPreview(device, useRoom(stage))
   const address =
     preview.data && !missing && !finding ? previewAddress(preview.data, undefined, page) : null
   const [loaded, setLoaded] = useState<string | null>(null)
@@ -88,38 +164,45 @@ export function PreviewFrame({ round, ready, device, page, missing, finding }: P
     )
   } else if (address) {
     content = (
-      <iframe
-        data-storefront-preview=""
-        title={t(`${V}.frameTitle`)}
-        src={address}
-        // Its own scripts and storage; no forms sent, no taking over the panel's tab
-        sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
-        className={cn(
-          "h-full min-h-0 max-w-full flex-1 border-0 bg-background",
-          device === "mobile"
-            ? "w-[390px] flex-none rounded-lg border shadow-card"
-            : "w-full lg:rounded-md lg:border lg:shadow-card"
-        )}
-        onLoad={() => {
-          setLoaded(address)
-        }}
-      />
+      <div
+        className="shrink-0 overflow-hidden rounded-md bg-background shadow-card ring-1 ring-border"
+        style={{ width: fit.width * fit.scale, height: fit.height * fit.scale }}
+      >
+        <iframe
+          data-storefront-preview=""
+          data-device={device}
+          title={t(`${V}.frameTitle`)}
+          src={address}
+          // Its own scripts and storage; no forms sent, no taking over the panel's tab
+          sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox"
+          className="block origin-top-left border-0 bg-background"
+          style={{ width: fit.width, height: fit.height, transform: `scale(${String(fit.scale)})` }}
+          onLoad={() => {
+            setLoaded(address)
+          }}
+        />
+      </div>
     )
   } else {
     content = null
   }
   return (
-    <div className="relative flex min-h-[36rem] min-w-0 flex-1 bg-muted lg:min-h-0 lg:p-4">
-      <div className="flex min-w-0 flex-1 justify-center">{content}</div>
-      {waiting ? (
-        <div
-          role="status"
-          className="pointer-events-none absolute top-4 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full border bg-card px-3 py-1.5 text-xs text-muted-foreground shadow-card"
-        >
-          <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
-          {t(address ? `${V}.refreshing` : `${V}.loading`)}
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col bg-muted">
+      <PreviewBar sample={sample} device={device} onDevice={onDevice} scale={fit.scale} />
+      <div className="relative flex min-h-0 min-w-0 flex-1 p-3 lg:p-4">
+        <div ref={stage} className="flex min-h-0 min-w-0 flex-1 justify-center">
+          {content}
         </div>
-      ) : null}
+        {waiting ? (
+          <div
+            role="status"
+            className="pointer-events-none absolute top-6 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full border bg-card px-3 py-1.5 text-xs text-muted-foreground shadow-card"
+          >
+            <Loader2 className="size-3.5 animate-spin" aria-hidden="true" />
+            {t(address ? `${V}.refreshing` : `${V}.loading`)}
+          </div>
+        ) : null}
+      </div>
     </div>
   )
 }

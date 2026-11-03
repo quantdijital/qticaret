@@ -13,15 +13,10 @@ interface PublishControlsProps {
   changed: boolean
 }
 
-/** Throw the draft's changes away, open it in a tab, or put it live: each asks first where it cannot be undone. */
-export function PublishControls({ actions, changed }: PublishControlsProps) {
+/** Throw the draft's changes away (asked first: it cannot be undone), or open it in a tab. */
+export function DraftTools({ actions, changed }: PublishControlsProps) {
   const { t } = useTranslation()
-  const [asking, setAsking] = useState<"publish" | "discard" | null>(null)
-  const close = (open: boolean) => {
-    if (!open) {
-      setAsking(null)
-    }
-  }
+  const [asking, setAsking] = useState(false)
   return (
     <>
       {changed ? (
@@ -31,7 +26,7 @@ export function PublishControls({ actions, changed }: PublishControlsProps) {
           label={t(`${E}.discard.open`)}
           disabled={actions.busy}
           onClick={() => {
-            setAsking("discard")
+            setAsking(true)
           }}
         />
       ) : null}
@@ -42,36 +37,46 @@ export function PublishControls({ actions, changed }: PublishControlsProps) {
         disabled={actions.previewing}
         onClick={() => void actions.openPreview()}
       />
+      <ConfirmDialog
+        open={asking}
+        onOpenChange={setAsking}
+        title={t(`${E}.discard.title`)}
+        description={t(`${E}.discard.text`)}
+        confirmLabel={t(`${E}.discard.confirm`)}
+        destructive
+        onConfirm={() => {
+          setAsking(false)
+          actions.discard()
+        }}
+      />
+    </>
+  )
+}
+
+/** Put the draft live, once asked. */
+export function PublishButton({ actions, changed }: PublishControlsProps) {
+  const { t } = useTranslation()
+  const [asking, setAsking] = useState(false)
+  return (
+    <>
       <BarButton
         wideOnly={false}
         icon={actions.publishing ? <Loader2 className="animate-spin" /> : <Rocket />}
         label={t(`${E}.publish.open`)}
         disabled={!changed || actions.busy}
         onClick={() => {
-          setAsking("publish")
+          setAsking(true)
         }}
       />
       <ConfirmDialog
-        open={asking === "publish"}
-        onOpenChange={close}
+        open={asking}
+        onOpenChange={setAsking}
         title={t(`${E}.publish.title`)}
         description={t(`${E}.publish.text`)}
         confirmLabel={t(`${E}.publish.confirm`)}
         onConfirm={() => {
-          setAsking(null)
+          setAsking(false)
           void actions.publish()
-        }}
-      />
-      <ConfirmDialog
-        open={asking === "discard"}
-        onOpenChange={close}
-        title={t(`${E}.discard.title`)}
-        description={t(`${E}.discard.text`)}
-        confirmLabel={t(`${E}.discard.confirm`)}
-        destructive
-        onConfirm={() => {
-          setAsking(null)
-          actions.discard()
         }}
       />
     </>

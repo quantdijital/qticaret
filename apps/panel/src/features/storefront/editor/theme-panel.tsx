@@ -1,12 +1,12 @@
 import { useQuery } from "@tanstack/react-query"
-import { ArrowLeft } from "lucide-react"
+import { Palette } from "lucide-react"
 import { useTranslation } from "react-i18next"
 import { ErrorState, LoadingRows } from "@/components/patterns/states"
-import { Button } from "@/components/ui/button"
 import { sectionQuery } from "@/features/settings/api/sections"
 import type { StorefrontSettings } from "@/features/settings/api/sections"
 import { themeQuery } from "@/features/storefront/api/theme"
 import { errorText } from "@/lib/errors"
+import { Panel } from "./panel-header"
 import { ThemeForm } from "./theme-form"
 
 const C = "storefront.editor.theme"
@@ -32,7 +32,7 @@ export function ThemePanel({ announcement, onBack, onSaved }: ThemePanelProps) {
   let body
   if (failed) {
     body = (
-      <div className="p-4">
+      <div className="p-5">
         <ErrorState text={errorText(t, failed.error)} onRetry={() => void failed.refetch()} />
       </div>
     )
@@ -47,26 +47,14 @@ export function ThemePanel({ announcement, onBack, onSaved }: ThemePanelProps) {
     )
   } else {
     body = (
-      <div className="p-4">
+      <div className="p-5">
         <LoadingRows rows={6} />
       </div>
     )
   }
   return (
-    <div className="flex flex-col">
-      <div className="sticky top-0 z-10 flex items-center gap-2 border-b bg-card px-2 py-2">
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-sm"
-          aria-label={t("storefront.editor.panel.back")}
-          onClick={onBack}
-        >
-          <ArrowLeft />
-        </Button>
-        <h2 className="min-w-0 flex-1 truncate text-sm font-semibold">{t(`${C}.title`)}</h2>
-      </div>
+    <Panel icon={Palette} title={t(`${C}.title`)} onBack={onBack}>
       {body}
-    </div>
+    </Panel>
   )
 }

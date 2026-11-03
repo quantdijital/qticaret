@@ -54,7 +54,7 @@ export function ColorInput({ id, label, hint, value, onChange, fallback, error }
           autoComplete="off"
           spellCheck={false}
           aria-invalid={Boolean(error)}
-          className="w-32 font-mono"
+          className="min-w-40 flex-1 font-mono"
           onChange={(event) => {
             onChange(event.target.value.trim().toLowerCase())
           }}
@@ -91,10 +91,11 @@ export function BackgroundField({
       <span id="theme-background-label" className="text-sm font-medium">
         {t(`${C}.background`)}
       </span>
+      {/* Three across once each gets 160 px; one under another below that */}
       <RadioGroup
         aria-labelledby="theme-background-label"
         value={value}
-        className="grid grid-cols-3 gap-2"
+        className="grid gap-2 @min-[31rem]:grid-cols-3"
         onValueChange={(next) => {
           onChange(next as StorefrontBackground)
         }}
@@ -102,17 +103,15 @@ export function BackgroundField({
         {BACKGROUNDS.map((option) => (
           <label
             key={option}
-            className="flex cursor-pointer flex-col gap-2 rounded-md border p-2 text-[13px] has-[[data-state=checked]]:border-primary"
+            className="flex h-[var(--control-height)] cursor-pointer items-center gap-3 rounded-md border px-3 text-sm has-[[data-state=checked]]:border-primary"
           >
+            <RadioGroupItem value={option} aria-label={t(`${C}.backgrounds.${option}`)} />
+            <span className="min-w-0 flex-1 truncate">{t(`${C}.backgrounds.${option}`)}</span>
             <span
               aria-hidden="true"
-              className="h-6 w-full rounded-sm border"
+              className="size-5 shrink-0 rounded-sm border"
               style={{ backgroundColor: STOREFRONT_BACKGROUNDS[option] }}
             />
-            <span className="flex min-w-0 items-center gap-2">
-              <RadioGroupItem value={option} aria-label={t(`${C}.backgrounds.${option}`)} />
-              <span className="truncate">{t(`${C}.backgrounds.${option}`)}</span>
-            </span>
           </label>
         ))}
       </RadioGroup>

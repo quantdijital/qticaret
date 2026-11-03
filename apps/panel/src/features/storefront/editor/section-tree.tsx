@@ -148,7 +148,7 @@ export function SectionTree({
   const [bar] = doc.header
   const [newsletter] = doc.footer
   return (
-    <nav aria-label={t(`${T}.label`)} className="flex flex-col gap-5 p-3">
+    <nav aria-label={t(`${T}.label`)} className="flex flex-col gap-6 px-3 py-4">
       <TreeGroup title={t(`${T}.header`)}>
         <ul className="flex flex-col gap-0.5">
           {bar ? (

@@ -14,17 +14,20 @@ import {
 import type { BodyFont, HeadingFont } from "@/features/storefront/api/theme"
 import type { ThemeParsed, ThemeValues } from "@/features/storefront/theme-settings"
 import { cn } from "@/lib/utils"
-import { FieldGroup } from "./forms/fields"
+import { PanelGroup } from "./panel-header"
 import { ChoiceSelect, SwitchRow } from "./theme-fields"
 
 const C = "storefront.editor.theme"
 
 /**
- * Two choices side by side: short ones always (the panel is 340 px beside
- * the preview), long ones (the fonts' names) once the panel is wider.
+ * Two choices side by side once each gets 160 px or more (the group's
+ * width: the settings column, or the whole screen on a phone), long ones
+ * (the fonts' names) 200 px; one under the other below that.
  */
 const Pair = ({ long = false, children }: { long?: boolean; children: ReactNode }) => (
-  <div className={cn("grid gap-3", long ? "@sm:grid-cols-2" : "grid-cols-2")}>{children}</div>
+  <div className={cn("grid gap-4", long ? "@min-[26rem]:grid-cols-2" : "@min-[21rem]:grid-cols-2")}>
+    {children}
+  </div>
 )
 
 /** A face by its name, and whether it is a serif: the panel does not load the storefront's fonts. */
@@ -45,7 +48,7 @@ export function ThemeChoices({ control }: { control: Control<ThemeValues, unknow
   const { t } = useTranslation()
   return (
     <>
-      <FieldGroup title={t(`${C}.fontsTitle`)} hint={t(`${C}.fontsHint`)}>
+      <PanelGroup title={t(`${C}.fontsTitle`)} hint={t(`${C}.fontsHint`)}>
         <Pair long>
           <Controller
             control={control}
@@ -76,8 +79,8 @@ export function ThemeChoices({ control }: { control: Control<ThemeValues, unknow
             )}
           />
         </Pair>
-      </FieldGroup>
-      <FieldGroup title={t(`${C}.shapes`)}>
+      </PanelGroup>
+      <PanelGroup title={t(`${C}.shapes`)}>
         <Pair>
           <Controller
             control={control}
@@ -108,8 +111,8 @@ export function ThemeChoices({ control }: { control: Control<ThemeValues, unknow
             )}
           />
         </Pair>
-      </FieldGroup>
-      <FieldGroup title={t(`${C}.card`)}>
+      </PanelGroup>
+      <PanelGroup title={t(`${C}.card`)}>
         <Pair>
           <Controller
             control={control}
@@ -169,7 +172,7 @@ export function ThemeChoices({ control }: { control: Control<ThemeValues, unknow
             />
           )}
         />
-      </FieldGroup>
+      </PanelGroup>
     </>
   )
 }

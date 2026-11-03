@@ -53,7 +53,7 @@ export function SamplePicker({
           role="combobox"
           aria-expanded={open}
           aria-label={t(`${S}.label.${page}`)}
-          className="max-w-56 justify-between font-normal"
+          className="max-w-56 min-w-40 justify-between font-normal"
         >
           <span className="truncate">
             {t(`${S}.shown`, { name: sample?.name ?? t(`${S}.none`) })}

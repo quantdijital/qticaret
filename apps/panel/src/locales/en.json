@@ -6410,8 +6410,9 @@
       },
       "device": {
         "label": "Preview width",
-        "desktop": "Desktop",
-        "mobile": "Mobile"
+        "mobile": "Phone",
+        "tablet": "Tablet",
+        "desktop": "Desktop"
       },
       "status": {
         "label": "Draft status",
@@ -6444,13 +6445,15 @@
         "done": "The draft is back to the live design."
       },
       "preview": {
-        "open": "Preview",
+        "open": "Open in a new tab",
         "frameTitle": "Storefront preview",
         "loading": "Loading the preview",
         "refreshing": "Refreshing the preview",
         "failed": "The preview could not open.",
         "noHost": "The preview needs your shop's address; enter your domain in the SEO settings.",
-        "noHostLink": "Go to SEO settings"
+        "noHostLink": "Go to SEO settings",
+        "scale": "Scale",
+        "scaleHint": "The storefront is drawn at the chosen device's width and scaled down to fit here."
       },
       "publish": {
         "open": "Publish",
@@ -6590,7 +6593,9 @@
         "endsAt": "Ends",
         "duplicate": "Duplicate",
         "remove": "Remove section",
-        "placement": "Position"
+        "placement": "Position",
+        "sections": "Sections",
+        "content": "Content"
       },
       "defaults": {
         "heading": "Your shop's name",
@@ -6839,6 +6844,15 @@
           "product": "The preview needs a live product; publish one and the product page shows here.",
           "category": "The preview needs a category shown on the storefront; activate one and its page shows here."
         }
+      },
+      "view": {
+        "label": "Edit or preview",
+        "edit": "Edit",
+        "preview": "Preview"
+      },
+      "drawer": {
+        "title": "The page's sections",
+        "description": "Pick a section to open its settings."
       }
     },
     "preferences": {

@@ -13,6 +13,7 @@ import {
   Settings2,
   Trash2,
 } from "lucide-react"
+import { useContext } from "react"
 import type { DragEvent } from "react"
 import { useTranslation } from "react-i18next"
 import { Button } from "@/components/ui/button"
@@ -25,6 +26,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import type { LucideIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { OpenedSectionContext } from "./editor-layout"
 
 const R = "storefront.editor.row"
 
@@ -90,11 +92,14 @@ export function SectionRow({
   onPlace,
 }: SectionRowProps) {
   const { t } = useTranslation()
+  // Its settings open beside the list: the row stays marked
+  const current = useContext(OpenedSectionContext) === id
   return (
     <li
       data-section={id}
       className={cn(
-        "group/row relative flex items-center gap-0.5 rounded-md pr-1 hover:bg-muted/60 focus-within:bg-muted/60",
+        "group/row relative flex items-center gap-0.5 rounded-md py-0.5 pr-1 hover:bg-muted/60 focus-within:bg-muted/60",
+        current && "bg-muted",
         drag?.dragging && "opacity-50"
       )}
       onDragOver={(event) => {
@@ -145,8 +150,10 @@ export function SectionRow({
       <button
         type="button"
         title={detail ?? undefined}
+        aria-current={current ? "true" : undefined}
         className={cn(
           "flex h-8 min-w-0 flex-1 items-center gap-2 rounded-md px-1 text-left text-sm",
+          current && "font-medium",
           !visible && "text-muted-foreground"
         )}
         onClick={onOpen}

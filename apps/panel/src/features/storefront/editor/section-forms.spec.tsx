@@ -33,11 +33,11 @@ const SAVED = { timeout: 4000 }
 
 let user: UserEvent
 
-/** Opens a section's settings from its row in the tree. */
+/** Opens a section's settings from its row in the tree: the panel's title. */
 async function open(name: string) {
   const tree = await opened()
   await user.click(within(tree).getByRole("button", { name }))
-  return screen.findByRole("heading", { level: 2 })
+  return within(await screen.findByRole("region")).getByRole("heading", { level: 2 })
 }
 
 /** The draft once the autosave has sent it with `check` holding; its pause is not waited out. */

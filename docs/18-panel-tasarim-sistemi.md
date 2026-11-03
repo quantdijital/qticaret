@@ -49,6 +49,7 @@ Sürümler `apps/panel/package.json`'da exact ve ≥14 gün kuralıyla (docs/04)
   - Kartın içindeki iki parça (özet + liste gibi) birbirine yakın boyda tutulur: uzun liste iki sütuna bölünür ya da kısaltılır.
   - Hiçbir kartın yanında ya da altında anlamsız boşluk kalmaz; uzun içerik kendi sekmesine taşınır (Raporlar).
   - `e2e/layout.e2e.ts` her sayfayı masaüstü genişlikte ölçer; ihlal testi kırar.
+- `e2e/shell.e2e.ts` (2026-11-03): her sayfa üç ekran boyunda sonuna kaydırılır; içeriğin bittiği yerle ekranın altı arasında sayfa arka planı dışında bir alan, yüzey–kanvas farkı ya da yatay kaydırma olamaz; listelerin ilk kaydı da açılır, kayıt yoksa atlanır. Ayarlar menüsü lg+'da yapışkan ve kendi içinde kayar (sayfa yalnız kendi içeriği kadar uzundur).
 
 ---
 

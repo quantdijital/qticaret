@@ -1,6 +1,6 @@
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router"
 import { ChevronDown } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import {
   Select,
@@ -12,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useCapabilities } from "@/features/auth/api/staff"
+import { revealIn } from "@/features/settings/reveal-in"
 import { inSection, visibleGroups } from "@/features/settings/sections"
 import { cn } from "@/lib/utils"
 
@@ -118,13 +119,35 @@ function GroupedPicker({ pathname }: { pathname: string }) {
   )
 }
 
-/** Settings: the sections in groups on the left, the section on the right. */
+/**
+ * Settings: the sections in groups on the left, the section on the right.
+ * On a wide screen the menu stays in view beside the page and scrolls on
+ * its own, so the page is as tall as its own content: a menu longer than a
+ * short page once made it scroll on into an empty band (the owner,
+ * 2026-11-03: "ekranın alt kısmında siyah boşluk").
+ */
 export function SettingsLayout() {
   const { t } = useTranslation()
   const pathname = useRouterState({ select: (state) => state.location.pathname })
+  const menu = useRef<HTMLElement>(null)
+  // A page opened from elsewhere (the command menu) has its link in view in the menu
+  useEffect(() => {
+    const current = menu.current?.querySelector<HTMLElement>("[aria-current=page]")
+    if (menu.current && current) {
+      revealIn(menu.current, current)
+    }
+  }, [pathname])
   return (
     <div className="flex flex-col gap-6 lg:flex-row lg:gap-10">
-      <nav aria-label={t("settings.title")} className="lg:w-60 lg:shrink-0">
+      <nav
+        ref={menu}
+        aria-label={t("settings.title")}
+        // A ring of room inside its edge, so a keyboard focus outline is not cut off
+        className={cn(
+          "lg:sticky lg:top-[calc(var(--layout-topbar-height)+var(--page-padding-wide)-0.25rem)] lg:-m-1 lg:w-[calc(15rem+0.5rem)] lg:shrink-0 lg:self-start lg:p-1",
+          "lg:max-h-[calc(100svh-var(--layout-topbar-height)-2*var(--page-padding-wide)+0.5rem)] lg:overflow-y-auto lg:overscroll-contain lg:[scrollbar-width:thin]"
+        )}
+      >
         <div className="lg:hidden">
           <GroupedPicker pathname={pathname} />
         </div>

@@ -5,7 +5,6 @@ import { Switch } from "@/components/ui/switch"
 import type { AnySection } from "@/features/storefront/api/layout"
 import type { Problem } from "@/features/storefront/layout/problems"
 import { fromLocalInput, toLocalInput } from "@/features/storefront/layout/schedule"
-import { FieldGroup } from "./fields"
 import { useProblemText } from "./problem-text"
 
 const P = "storefront.editor.panel"
@@ -19,13 +18,14 @@ interface ScheduleFieldsProps {
 /**
  * Whether the section shows, and from when until when (a campaign's
  * banner): in the browser's own time, kept by the server as a moment.
+ * The two moments side by side where both fit whole.
  */
 export function ScheduleFields({ section, problem, onChange }: ScheduleFieldsProps) {
   const { t } = useTranslation()
   const text = useProblemText()
   const id = `${section.id}-schedule`
   return (
-    <FieldGroup title={t(`${P}.visibility`)}>
+    <>
       <div className="flex items-start justify-between gap-4">
         <label htmlFor={`${id}-visible`} className="flex flex-col gap-0.5 text-sm">
           {t(`${P}.visible`)}
@@ -40,7 +40,7 @@ export function ScheduleFields({ section, problem, onChange }: ScheduleFieldsPro
         />
       </div>
       <p className="text-xs text-muted-foreground">{t(`${P}.scheduleHint`)}</p>
-      <div className="grid gap-3">
+      <div className="grid gap-4 @min-[28rem]:grid-cols-2">
         <Field label={t(`${P}.startsAt`)} htmlFor={`${id}-starts`}>
           <Input
             id={`${id}-starts`}
@@ -63,6 +63,6 @@ export function ScheduleFields({ section, problem, onChange }: ScheduleFieldsPro
           />
         </Field>
       </div>
-    </FieldGroup>
+    </>
   )
 }

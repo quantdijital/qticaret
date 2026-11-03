@@ -1,6 +1,7 @@
 import { useIsMutating, useQuery } from "@tanstack/react-query"
 import { useCanGoBack, useNavigate, useRouter } from "@tanstack/react-router"
 import { useEffect, useMemo, useReducer, useRef, useState } from "react"
+import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { LeaveGuard } from "@/components/patterns/leave-guard"
@@ -24,10 +25,13 @@ import {
 } from "@/features/storefront/layout/sections"
 import { useAutosave } from "@/features/storefront/layout/use-autosave"
 import { AddSectionDialog } from "./add-section-dialog"
+import { OpenedSectionContext, editorLayoutNow, useEditorLayout } from "./editor-layout"
+import type { EditorView } from "./editor-layout"
+import { EditorShell } from "./editor-shell"
 import { EditorTopBar } from "./editor-top-bar"
+import type { Device } from "./preview-fit"
 import { PreviewFrame } from "./preview-frame"
-import type { Device } from "./preview-frame"
-import { PublishControls } from "./publish-controls"
+import { DraftTools, PublishButton } from "./publish-controls"
 import { RevisionsSheet } from "./revisions-sheet"
 import { SamplePicker } from "./sample-picker"
 import { SaveStatus } from "./save-status"
@@ -44,10 +48,11 @@ const E = "storefront.editor"
 type Opened = { kind: "section"; id: string } | { kind: "theme" } | null
 
 /**
- * The theme editor (adr/0049): full screen, the page's parts on the left,
- * the storefront itself in the middle. Every change is kept here with its
- * history and saved to the draft once typing pauses; the preview reloads
- * after each save; "Yayınla" puts the draft live.
+ * The theme editor (adr/0049): full screen, the page's parts, the open
+ * part's settings and the storefront itself, laid out as the window allows
+ * (`EditorShell`). Every change is kept here with its history and saved to
+ * the draft once typing pauses; the preview reloads after each save;
+ * "Yayınla" puts the draft live.
  */
 export function ThemeEditor({ layout }: { layout: AdminLayout }) {
   const { t } = useTranslation()
@@ -70,7 +75,12 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
   const [page, setPage] = useState<BodyGroup>("home")
   // The chooser is open for this side of a category page's products (the others have one)
   const [adding, setAdding] = useState<Placement | null>(null)
-  const [device, setDevice] = useState<Device>("desktop")
+  const shape = useEditorLayout()
+  const [view, setView] = useState<EditorView>("edit")
+  // A phone's preview starts as a phone; a wider screen's as a desktop
+  const [device, setDevice] = useState<Device>(() =>
+    editorLayoutNow() === "narrow" ? "mobile" : "desktop"
+  )
   const target = usePreviewTarget(page)
   // A theme setting saved elsewhere than the draft reloads the preview too
   const [refreshed, setRefreshed] = useState(0)
@@ -119,9 +129,9 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
   const found = opened?.kind === "section" ? findSection(doc, opened.id) : null
   const changed = live.has_changes || autosave.dirty
 
-  let panel
+  let form: ReactNode = null
   if (found) {
-    panel = (
+    form = (
       <SectionPanel
         section={found.section}
         group={found.group}
@@ -145,7 +155,7 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
       />
     )
   } else if (opened?.kind === "theme") {
-    panel = (
+    form = (
       <ThemePanel
         announcement={doc.header[0]?.lines.find((line) => line.trim() !== "") ?? null}
         onBack={() => {
@@ -156,43 +166,51 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
         }}
       />
     )
-  } else {
-    panel = (
-      <SectionTree
-        page={page}
-        doc={doc}
-        problems={new Set(problems.keys())}
-        dispatch={dispatch}
-        onOpen={(id) => {
-          setOpened({ kind: "section", id })
-        }}
-        onRemove={remove}
-        onAddSection={(placement) => {
-          setAdding(placement ?? "bottom")
-        }}
-        onTheme={() => {
-          setOpened({ kind: "theme" })
-        }}
-      />
-    )
   }
+  const formKey = found ? found.section.id : opened?.kind === "theme" ? "theme" : null
+  const tree = (
+    <SectionTree
+      page={page}
+      doc={doc}
+      problems={new Set(problems.keys())}
+      dispatch={dispatch}
+      onOpen={(id) => {
+        setOpened({ kind: "section", id })
+      }}
+      onRemove={remove}
+      onAddSection={(placement) => {
+        setAdding(placement ?? "bottom")
+      }}
+      onTheme={() => {
+        setOpened({ kind: "theme" })
+      }}
+    />
+  )
+  const tools = (
+    <>
+      <RevisionsSheet
+        revisions={live.revisions}
+        live={live.revision}
+        ask={changed}
+        busy={actions.busy}
+        onRestore={actions.restore}
+      />
+      <DraftTools actions={actions} changed={changed} />
+    </>
+  )
 
   return (
-    <div className="flex min-h-dvh flex-col bg-background lg:h-dvh">
+    <div className="flex h-dvh flex-col overflow-hidden bg-background">
       <EditorTopBar
+        layout={shape}
         onExit={() => void exit()}
         page={page}
         onPage={(next) => {
           setPage(next)
           setOpened(null)
         }}
-        sample={
-          page === "home" ? null : (
-            <SamplePicker page={page} sample={target.sample} onChange={target.choose} />
-          )
-        }
-        device={device}
-        onDevice={setDevice}
+        view={view}
+        onView={setView}
         canUndo={state.past.length > 0}
         canRedo={state.future.length > 0}
         onUndo={undo}
@@ -205,35 +223,34 @@ export function ThemeEditor({ layout }: { layout: AdminLayout }) {
             onRetry={autosave.retry}
           />
         }
-        actions={
-          <>
-            <RevisionsSheet
-              revisions={live.revisions}
-              live={live.revision}
-              ask={changed}
-              busy={actions.busy}
-              onRestore={actions.restore}
-            />
-            <PublishControls actions={actions} changed={changed} />
-          </>
-        }
+        tools={tools}
+        publish={<PublishButton actions={actions} changed={changed} />}
       />
-      <main className="flex min-h-0 flex-1 flex-col lg:flex-row">
-        <div
-          key={found ? found.section.id : (opened?.kind ?? "tree")}
-          className="flex flex-col border-b bg-card lg:w-[340px] lg:shrink-0 lg:overflow-y-auto lg:border-r lg:border-b-0"
-        >
-          {panel}
-        </div>
-        <PreviewFrame
-          round={autosave.round + refreshed}
-          ready={!layout.is_default || autosave.round > 0}
-          device={device}
-          page={target.path}
-          missing={target.missing}
-          finding={target.finding}
+      <OpenedSectionContext.Provider value={found ? found.section.id : null}>
+        <EditorShell
+          layout={shape}
+          view={view}
+          tree={tree}
+          form={form}
+          formKey={formKey}
+          preview={
+            <PreviewFrame
+              round={autosave.round + refreshed}
+              ready={!layout.is_default || autosave.round > 0}
+              device={device}
+              onDevice={setDevice}
+              sample={
+                page === "home" ? null : (
+                  <SamplePicker page={page} sample={target.sample} onChange={target.choose} />
+                )
+              }
+              page={target.path}
+              missing={target.missing}
+              finding={target.finding}
+            />
+          }
         />
-      </main>
+      </OpenedSectionContext.Provider>
       <AddSectionDialog
         open={adding !== null}
         page={page}
