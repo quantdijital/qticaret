@@ -488,6 +488,7 @@
   "product.saving": "{amount} tasarruf",
   "product.free_shipping_from": "{amount} ve üzeri siparişlerde kargo ücretsiz.",
   "product.sealed_goods": "Hijyenik/mühürlü ürün: ambalajı açıldıktan sonra cayma hakkı kullanılamaz.",
+  "product.withdrawal_excluded": "Bu ürün için cayma hakkı bulunmaz (dijital içerik / hizmet).",
   "product.installments": "Taksit seçenekleri",
   "product.installments_loading": "Taksitler yükleniyor…",
   "product.installments_none": "Bu ürün için taksit seçeneği şu an gösterilemiyor; ödeme adımında kartınıza göre listelenir.",

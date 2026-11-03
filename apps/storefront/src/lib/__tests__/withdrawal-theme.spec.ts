@@ -6,6 +6,7 @@ import type { OrderActions, ProductPageView, ThemeActions } from "@qticaret/ui"
 import { t } from "@/lib/i18n"
 import type { ReturnRequestRow, ReturnableRow, StoreOrder } from "@/lib/orders/order"
 import { orderView } from "@/lib/views/order"
+import { withdrawalNoteOf } from "@/lib/views/product"
 import { GIFT, KNIFE, found, giftLine, knifeLine, order, row } from "@/test/order-fixtures"
 
 /**
@@ -13,7 +14,8 @@ import { GIFT, KNIFE, found, giftLine, knifeLine, order, row } from "@/test/orde
  * 2026-11-03) as the base theme prints it: a sealed good chosen like any
  * line with its warning, the free return shipping on the shipped lines'
  * form only, the units refused at receipt under their request, and a
- * physical product's seal mark beside the cart form.
+ * product's withdrawal mark beside the cart form: a physical product's
+ * seal, a digital or service product's missing right.
  */
 
 const SEALED =
@@ -154,14 +156,44 @@ describe("the base theme's product page with a seal mark", () => {
   const render = (page: ProductPageView) =>
     renderToStaticMarkup(createElement(baseTheme.ProductPage, { t, view: page, actions }))
 
+  const EXCLUDED = "Bu ürün için cayma hakkı bulunmaz (dijital içerik / hizmet)."
+  const noteFor = (kind: string, marked = true) =>
+    withdrawalNoteOf(
+      {
+        id: "prod_1",
+        title: "Ürün",
+        handle: "urun",
+        subtitle: null,
+        description: null,
+        thumbnail: null,
+        product_extension: { withdrawal_excluded: marked, kind },
+      },
+      t
+    )
+
   it("says it beside the cart form, before the favourite button", () => {
     const html = render(view(NOTE))
     expect(html).toContain(`<p class="text-sm font-medium">${NOTE}</p>`)
     expect(html.indexOf(NOTE)).toBeLessThan(html.indexOf(t("product.favorite_add")))
   })
 
+  it("prints a marked physical product's seal, and a digital or service one's missing right, in the same place", () => {
+    expect(render(view(noteFor("physical")))).toContain(
+      `<p class="text-sm font-medium">${NOTE}</p>`
+    )
+    for (const kind of ["digital", "service"]) {
+      const html = render(view(noteFor(kind)))
+      expect(html).toContain(`<p class="text-sm font-medium">${EXCLUDED}</p>`)
+      expect(html).not.toContain("mühürlü")
+      expect(html.indexOf(EXCLUDED)).toBeLessThan(html.indexOf(t("product.favorite_add")))
+    }
+  })
+
   it("says nothing without one", () => {
     expect(render(view(null))).not.toContain("cayma hakkı")
     expect(render(view())).not.toContain("cayma hakkı")
+    for (const kind of ["physical", "digital", "service"]) {
+      expect(render(view(noteFor(kind, false)))).not.toContain("cayma hakkı")
+    }
   })
 })

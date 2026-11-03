@@ -1539,7 +1539,8 @@
           "return": {
             "requested": "Return requested",
             "approved": "Return approved",
-            "refunded": "Return refunded"
+            "refunded": "Return refunded",
+            "refused": "Refused return items"
           },
           "account": {
             "password_reset": "Password reset",

@@ -12,7 +12,7 @@ import { GIFT, KNIFE, found, knifeLine, order, row } from "@/test/order-fixtures
  * 1.1.2026 (adr/0032, adr/0052 Ek 2026-11-03), in the storefront's words: a
  * sealed good is asked back like any line, warned; units refused at
  * receipt are named on the request; sending goods back costs nothing; a
- * physical product's seal mark is said before the purchase.
+ * product's withdrawal mark is said before the purchase, by its kind.
  */
 
 const SEALED =
@@ -163,11 +163,9 @@ describe("a product's seal mark before the purchase", () => {
     product_extension: extension,
   })
   const NOTE = "Hijyenik/mühürlü ürün: ambalajı açıldıktan sonra cayma hakkı kullanılamaz."
-
-  it("says it on a marked physical product's page", () => {
-    const marked = product({ withdrawal_excluded: true, kind: "physical" })
-    expect(withdrawalNoteOf(marked, t)).toBe(NOTE)
-    const page = productPage({
+  const EXCLUDED = "Bu ürün için cayma hakkı bulunmaz (dijital içerik / hizmet)."
+  const pageOf = (marked: StoreProduct) =>
+    productPage({
       product: marked,
       seo: null,
       displays: {},
@@ -176,16 +174,35 @@ describe("a product's seal mark before the purchase", () => {
       t,
       trustBadges: [],
     })
-    expect(page.withdrawalNote).toBe(NOTE)
+
+  it("says it on a marked physical product's page", () => {
+    const marked = product({ withdrawal_excluded: true, kind: "physical" })
+    expect(withdrawalNoteOf(marked, t)).toBe(NOTE)
+    expect(pageOf(marked).withdrawalNote).toBe(NOTE)
   })
 
-  it("says nothing for a digital or service product's mark, an unmarked one, or one the backend did not answer", () => {
-    expect(withdrawalNoteOf(product({ withdrawal_excluded: true, kind: "digital" }), t)).toBeNull()
-    expect(withdrawalNoteOf(product({ withdrawal_excluded: true, kind: "service" }), t)).toBeNull()
-    expect(withdrawalNoteOf(product({ withdrawal_excluded: true }), t)).toBeNull()
+  it("says a marked digital or service product has no right of withdrawal, without the seal", () => {
+    for (const kind of ["digital", "service"]) {
+      const marked = product({ withdrawal_excluded: true, kind })
+      expect(withdrawalNoteOf(marked, t)).toBe(EXCLUDED)
+      expect(pageOf(marked).withdrawalNote).toBe(EXCLUDED)
+    }
+  })
+
+  it("says nothing for an unmarked product of any kind", () => {
+    for (const kind of ["physical", "digital", "service"]) {
+      expect(withdrawalNoteOf(product({ withdrawal_excluded: false, kind }), t)).toBeNull()
+      expect(withdrawalNoteOf(product({ withdrawal_excluded: null, kind }), t)).toBeNull()
+    }
     expect(
-      withdrawalNoteOf(product({ withdrawal_excluded: false, kind: "physical" }), t)
+      pageOf(product({ withdrawal_excluded: false, kind: "digital" })).withdrawalNote
     ).toBeNull()
+  })
+
+  it("says nothing when the answer left the mark or the kind out, or names a kind it does not know", () => {
+    expect(withdrawalNoteOf(product({ withdrawal_excluded: true }), t)).toBeNull()
+    expect(withdrawalNoteOf(product({ withdrawal_excluded: true, kind: null }), t)).toBeNull()
+    expect(withdrawalNoteOf(product({ withdrawal_excluded: true, kind: "later" }), t)).toBeNull()
     expect(withdrawalNoteOf(product({ is_gift_card: false }), t)).toBeNull()
     expect(withdrawalNoteOf(product(null), t)).toBeNull()
   })

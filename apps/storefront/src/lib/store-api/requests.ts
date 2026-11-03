@@ -166,8 +166,11 @@ const PAGE_FIELDS = [
   "attribute_values.definition.rank",
   "attribute_values.definition.options",
   "attribute_values.definition.is_seo_highlight",
-  // A gift card the shop sells (adr/0025 Ek 2026-11-03): the extension's only column the Store API answers
+  // A gift card the shop sells (adr/0025 Ek 2026-11-03)
   "product_extension.is_gift_card",
+  // Its withdrawal mark, read by its kind (adr/0052 Ek 2026-11-03): on the product's own answer only
+  "product_extension.withdrawal_excluded",
+  "product_extension.kind",
 ]
 
 export interface ProductQuery {

@@ -168,17 +168,23 @@ export function productPage({
 }
 
 /**
- * A physical product's own withdrawal mark, in words for the page (MSY md.
- * 5/1-h, 6/2): a sealed hygiene good, returnable while unopened (md.
- * 15/1-ç; backend `productMarkOf`). A digital or service product's mark
- * means something else, so only `kind: "physical"` says it. Null today:
- * the Store API refuses `product_extension.withdrawal_excluded` and `kind`.
+ * A product's own withdrawal mark in words, said before the purchase (MSY
+ * md. 5/1-h, 6/2), read by its kind as the backend's `productMarkOf` does
+ * (adr/0052 Ek 2026-11-03): on a physical product a sealed hygiene good,
+ * returnable while unopened (md. 15/1-ç); on a digital or service one no
+ * right of withdrawal (md. 15/1-ğ, h). Null unmarked, or when the answer
+ * left the mark or the kind out.
  */
 export function withdrawalNoteOf(product: StoreProduct, t: Translate): string | null {
   const extension = product.product_extension
-  return extension?.withdrawal_excluded === true && extension.kind === "physical"
-    ? t("product.sealed_goods")
-    : null
+  if (extension?.withdrawal_excluded !== true) {
+    return null
+  }
+  const kind = extension.kind
+  if (kind === "physical") {
+    return t("product.sealed_goods")
+  }
+  return kind === "digital" || kind === "service" ? t("product.withdrawal_excluded") : null
 }
 
 /** Every variant id of the products, for one price display call. */

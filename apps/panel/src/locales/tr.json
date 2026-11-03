@@ -1539,7 +1539,8 @@
           "return": {
             "requested": "İade talebi alındı",
             "approved": "İade talebi onaylandı",
-            "refunded": "İade ödendi"
+            "refunded": "İade ödendi",
+            "refused": "Kabul edilmeyen iade ürünleri"
           },
           "account": {
             "password_reset": "Şifre sıfırlama",
