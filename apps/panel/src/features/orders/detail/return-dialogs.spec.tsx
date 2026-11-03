@@ -24,7 +24,7 @@ const request: ReturnRequest = {
   status: "approved",
   reason: "damaged",
   note: null,
-  items: [{ line_item_id: "ordli_1", quantity: 2 }],
+  items: [{ line_item_id: "ordli_1", quantity: 2, withdrawal_excluded: false }],
   decision_note: null,
   return_code: "123456789012",
   return_label_file_id: null,
@@ -95,24 +95,27 @@ describe("ReceiveReturnDialog (adr/0032)", () => {
     })
   })
 
-  it("marks a line outside the right of withdrawal as the server flags it", async () => {
-    fetchMock.mockImplementation((url: string) =>
-      Promise.resolve(
-        url.endsWith("/returnable")
-          ? {
-              window_open: true,
-              open_request: true,
-              lines: [
-                { line_item_id: "ordli_1", withdrawal_excluded: true },
-                { line_item_id: "ordli_2", withdrawal_excluded: false },
-              ],
-            }
-          : { refund_error: null }
-      )
-    )
-    open(request)
+  it("marks a line outside the right of withdrawal as the request carries it, asking nothing more", async () => {
+    retrieveMock.mockResolvedValue({
+      order: {
+        items: [
+          { id: "ordli_1", title: "Şef bıçağı" },
+          { id: "ordli_2", title: "Kişiye özel kılıf" },
+        ],
+      },
+    })
+    open({
+      ...request,
+      items: [
+        { line_item_id: "ordli_1", quantity: 2, withdrawal_excluded: false },
+        { line_item_id: "ordli_2", quantity: 1, withdrawal_excluded: true },
+      ],
+    })
 
-    expect(await screen.findByText("Cayma dışı")).toBeInTheDocument()
-    expect(fetchMock).toHaveBeenCalledWith("/admin/orders/order_1/returnable")
+    const marked = (await screen.findByText("Kişiye özel kılıf")).closest("li")
+    expect(marked).toHaveTextContent("Cayma dışı")
+    expect(screen.getByText("Şef bıçağı").closest("li")).not.toHaveTextContent("Cayma dışı")
+    expect(screen.getAllByText("Cayma dışı")).toHaveLength(1)
+    expect(fetchMock).not.toHaveBeenCalled()
   })
 })

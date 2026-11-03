@@ -10,8 +10,10 @@ import type {
   BulkMessageList,
   BulkReport,
   BulkStatus,
+  RenderedPreview,
   TestSendResult,
 } from "./types"
+import { saveDraft } from "./save-draft"
 
 export const BULK_PAGE_SIZE = 50
 
@@ -20,14 +22,23 @@ const BASE = "/admin/bulk-messages"
 const path = (id: string, action?: string) =>
   `${BASE}/${encodeURIComponent(id)}${action ? `/${action}` : ""}`
 
-/** The list, newest first; the status filtered by the server. */
-export const bulkMessagesQuery = ({ status, page }: { status: BulkStatus | null; page: number }) =>
+/** The list, newest first; the status and the channel filtered by the server. */
+export const bulkMessagesQuery = ({
+  status,
+  channel,
+  page,
+}: {
+  status: BulkStatus | null
+  channel: BulkChannel | null
+  page: number
+}) =>
   queryOptions({
-    queryKey: [KEY, "list", { status, page }],
+    queryKey: [KEY, "list", { status, channel, page }],
     queryFn: () =>
       sdk.client.fetch<BulkMessageList>(BASE, {
         query: {
           ...(status ? { status } : {}),
+          ...(channel ? { channel } : {}),
           limit: BULK_PAGE_SIZE,
           offset: page * BULK_PAGE_SIZE,
         },
@@ -71,6 +82,22 @@ export const audiencePreviewQuery = (
     enabled: input.audience.length > 0,
   })
 
+/**
+ * The stored campaign as a send would make it (adr/0050 §10), for the
+ * staff member asking. `content` names what is stored, so a save that
+ * changes it asks again; sixty a ten minutes per person on the server, so
+ * one ask per stored content. The last one stays on screen while the next
+ * comes, for the same channel only (an e-mail is no text's stand-in).
+ */
+export const renderedPreviewQuery = (id: string, channel: BulkChannel, content: string) =>
+  queryOptions({
+    queryKey: [KEY, "rendered", id, channel, content],
+    queryFn: () => sdk.client.fetch<RenderedPreview>(path(id, "preview"), { query: { channel } }),
+    staleTime: 60_000,
+    placeholderData: (previous, previousQuery) =>
+      previousQuery?.queryKey[3] === channel ? previous : undefined,
+  })
+
 /** Lists, the campaign and its report read again; never the audience counts (rate-limited). */
 function useChanged() {
   const client = useQueryClient()
@@ -95,17 +122,15 @@ export function useCreateBulkMessage() {
   })
 }
 
-/** A draft saved whole (`AdminUpdateCampaign`); the server refuses one past its draft. */
+/**
+ * A draft saved whole (`AdminUpdateCampaign`); the server refuses one past
+ * its draft. A refusal keeps the backend's key (`refusalKey`) so the editor
+ * can put it under its field.
+ */
 export function useUpdateBulkMessage(id: string) {
   const changed = useChanged()
   return useMutation({
-    mutationFn: async (input: BulkMessageInput) =>
-      (
-        await sdk.client.fetch<{ campaign: BulkMessage }>(path(id), {
-          method: "POST",
-          body: input,
-        })
-      ).campaign,
+    mutationFn: (input: BulkMessageInput) => saveDraft(path(id), input),
     onSuccess: changed,
   })
 }

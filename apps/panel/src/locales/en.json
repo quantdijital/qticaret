@@ -6945,7 +6945,7 @@
         "body": "e-mail text",
         "sms_text": "SMS text"
       },
-      "emptyAudience": "Nobody in the audience can get the message now; check the sources and consents."
+      "emptyAudience": "No one in this audience can receive the message (consent, suppression list or the 24-hour cap). Change the audience."
     },
     "audience": {
       "title": "Who it goes to",
@@ -6994,7 +6994,8 @@
       "title": "SMS",
       "description": "Plain text; at most 3 SMS long with the shop's name and the opt-out line.",
       "text": "SMS text",
-      "count": "{{chars}} characters · {{parts}}/{{max}} SMS ({{perPart}} characters per SMS)",
+      "count": "About {{chars}} characters · {{parts}}/{{max}} SMS ({{perPart}} characters per SMS); the exact count comes with the save.",
+      "countStored": "The saved text is at most {{parts}}/{{max}} parts, counted with the longest first name and the links' campaign code.",
       "ucs2": "There is a character outside the Turkish alphabet (an emoji, say); only 70 characters fit in an SMS.",
       "footer": "Added to the end of every SMS",
       "optOutMissing": "No opt-out line yet; no bulk SMS can be sent.",
@@ -7003,10 +7004,19 @@
     },
     "preview": {
       "title": "Preview",
-      "emailHint": "How it shows in the inbox; see the whole e-mail with a test send.",
-      "smsHint": "How it shows on a phone; the longest greeting stands in for the recipient's name.",
-      "inbox": "Inbox preview",
+      "emailHint": "The saved content as it will go, footer and unsubscribe link included, with your name for the recipient's. Links do not open here.",
+      "smsHint": "The saved text as it will go, the shop's name and the opt-out line included, with your name for the recipient's.",
+      "unsaved": "Unsaved changes are previewed once saved.",
+      "device": {
+        "label": "View",
+        "desktop": "Desktop",
+        "phone": "Phone"
+      },
+      "inbox": "Inbox line",
+      "frame": "E-mail preview",
       "sms": "SMS preview",
+      "parts_one": "At most {{count}} part (counted with the longest first name)",
+      "parts_other": "At most {{count}} parts (counted with the longest first name)",
       "noSubject": "(no subject)",
       "noPreheader": "(no preview line)"
     },
@@ -7124,7 +7134,8 @@
       "audienceRequired": "Choose at least one source.",
       "audienceTooMany": "At most {{limit}} sources can be chosen.",
       "tooManyProducts": "An e-mail can hold at most {{max}} product cards.",
-      "smsTooLong": "With the shop's name and the opt-out line the text is longer than {{parts}} SMS; shorten it."
+      "smsTooLong": "With the shop's name and the opt-out line the text is longer than {{parts}} SMS; shorten it.",
+      "smsTooLongStored": "With the longest first name and the links' campaign code the text is longer than {{parts}} parts; shorten it."
     }
   },
   "paymentLinks": {
@@ -7307,6 +7318,7 @@
       "copyFailed": "Could not copy; select the text and copy it.",
       "whatsapp": "Open in WhatsApp",
       "closed": "The link is no longer open; there is nothing to share.",
+      "expired": "The link has expired; the customer can no longer pay with it. You can make a new one at today's prices.",
       "emailSent": "E-mail sent",
       "emailNotSent": "E-mail not sent",
       "smsSent": "SMS sent",

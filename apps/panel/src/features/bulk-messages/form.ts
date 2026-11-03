@@ -127,15 +127,30 @@ export const valuesOf = (campaign: BulkMessage): EditorValues => ({
 
 const orNull = (text: string): string | null => (text.trim() === "" ? null : text.trim())
 
-/** The body `POST /admin/bulk-messages/:id` takes: every field, an empty one as null. */
-export const requestOf = (values: EditorValues): BulkMessageInput => ({
-  name: values.name.trim(),
+export type ContentFields = Pick<
+  EditorValues,
+  "channel" | "subject" | "preheader" | "body" | "sms_text"
+>
+
+/** What a send is made from (its channel and texts) as the server stores them. */
+export const contentOf = (
+  values: ContentFields
+): Pick<BulkMessageInput, "channel" | "subject" | "preheader" | "body" | "sms_text"> => ({
   channel: values.channel,
-  audience: values.audience,
   subject: orNull(values.subject),
   preheader: orNull(values.preheader),
   body: isEmptyDoc(values.body) ? null : values.body,
   sms_text: orNull(values.sms_text),
+})
+
+/** One text for the stored content: equal for the same content, typed or saved. */
+export const contentKey = (values: ContentFields): string => JSON.stringify(contentOf(values))
+
+/** The body `POST /admin/bulk-messages/:id` takes: every field, an empty one as null. */
+export const requestOf = (values: EditorValues): BulkMessageInput => ({
+  name: values.name.trim(),
+  audience: values.audience,
+  ...contentOf(values),
 })
 
 /** What the channel needs before a test or a send (the backend's `assertComplete`). */

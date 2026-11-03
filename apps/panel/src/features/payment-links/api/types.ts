@@ -37,6 +37,8 @@ export interface PaymentLinkSummary {
   currency_code: string
   /** The staff member's user id. */
   created_by: string
+  /** Their name, when the backend sends it (any role reads it there; the team list is the owner's). */
+  created_by_name?: string | null
   created_at: string
   expires_at: string
   opened_count: number
@@ -89,6 +91,8 @@ export interface PaymentLink extends PaymentLinkSummary {
   last_sent_at: string | null
   paid_at: string | null
   canceled_by: string | null
+  /** Who cancelled it, by name, when the backend sends it. */
+  canceled_by_name?: string | null
   closed_at: string | null
 }
 

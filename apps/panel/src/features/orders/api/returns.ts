@@ -1,4 +1,4 @@
-import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
 import { sdk } from "@/lib/sdk"
 
 /** A shopper's return request (F7.9, adr/0032); the refund as exact lira. */
@@ -10,6 +10,16 @@ export type ReturnReason =
 export interface ReturnLine {
   line_item_id: string
   quantity: number
+}
+
+/**
+ * A line a request asks back, marked when it is outside the right of
+ * withdrawal as `/admin/orders/:id/returnable` marks it, read when the
+ * request is (the product's mark, F13.6, or an add-on made to the buyer's
+ * wish, adr/0052 §8): back only as faulty or wrong.
+ */
+export interface ReturnRequestLine extends ReturnLine {
+  withdrawal_excluded: boolean
 }
 
 /** A line asked back for another variant (adr/0032 §6), named for staff. */
@@ -30,7 +40,7 @@ export interface ReturnRequest {
   status: ReturnStatus
   reason: ReturnReason
   note: string | null
-  items: ReturnLine[]
+  items: ReturnRequestLine[]
   decision_note: string | null
   return_code: string | null
   return_label_file_id: string | null
@@ -182,17 +192,9 @@ export const returnableQuery = (orderId: string) =>
       sdk.client.fetch<Returnable>(`/admin/orders/${encodeURIComponent(orderId)}/returnable`),
   })
 
-/**
- * The order's lines outside the right of withdrawal, by id: the server's
- * flag (F13.6), the product's mark or an add-on made to the buyer's wish
- * (adr/0052 §8). Empty until it loads.
- */
-export function useExcludedLines(orderId: string): ReadonlySet<string> {
-  const { data } = useQuery(returnableQuery(orderId))
-  return new Set(
-    (data?.lines ?? []).filter((line) => line.withdrawal_excluded).map((line) => line.line_item_id)
-  )
-}
+/** The request's lines outside the right of withdrawal, by id, as the request carries them. */
+export const excludedLinesOf = (request: Pick<ReturnRequest, "items">): ReadonlySet<string> =>
+  new Set(request.items.filter((item) => item.withdrawal_excluded).map((item) => item.line_item_id))
 
 export interface OpenRequest {
   kind: "return" | "exchange"

@@ -147,6 +147,30 @@ describe("SendCard (adr/0050 §6–7)", () => {
     )
   })
 
+  it("says an audience that reaches no one in the backend's words, for a send and a schedule", async () => {
+    const user = userEvent.setup()
+    const EMPTY =
+      "Bu kitlede iletiyi alabilecek kimse yok (izin, bastırma listesi ya da 24 saat sınırı). Kitleyi değiştirin."
+    fetchMock.mockRejectedValue(refused(400, EMPTY))
+    renderCard()
+
+    await user.click(screen.getByRole("button", { name: "Şimdi gönder" }))
+    await user.click(await screen.findByRole("button", { name: "Şimdi gönder" }))
+    expect(await screen.findByRole("alert")).toHaveTextContent(EMPTY)
+
+    fireEvent.change(screen.getByLabelText("Gönderim zamanı"), { target: { value: inDays(1) } })
+    await user.click(screen.getByRole("button", { name: "Zamanla" }))
+    await user.click(await screen.findByRole("button", { name: "Zamanla" }))
+    await waitFor(() => {
+      expect(fetchMock).toHaveBeenLastCalledWith(
+        "/admin/bulk-messages/bm_1/schedule",
+        expect.objectContaining({ method: "POST" })
+      )
+    })
+    expect(await screen.findByRole("alert")).toHaveTextContent(EMPTY)
+    expect(toast.success).not.toHaveBeenCalled()
+  })
+
   it("says nothing went wrong when the person closes the proof dialog", async () => {
     const user = userEvent.setup()
     setReauthAsker((ask) => {

@@ -3,6 +3,7 @@ import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { SectionCard } from "@/components/patterns/section-card"
 import type { PaymentLink } from "@/features/payment-links/api/types"
+import { shownStatus } from "@/features/payment-links/components/link-state"
 import { useCreatorName } from "@/features/payment-links/components/use-creator-name"
 import { formatCount, formatDateTime } from "@/lib/format"
 
@@ -25,13 +26,13 @@ function Fact({ label, children }: { label: string; children: ReactNode }) {
 export function FactsCard({ link }: { link: PaymentLink }) {
   const { t } = useTranslation()
   const creator = useCreatorName()
-  const open = link.status === "open"
+  const open = shownStatus(link) === "open"
   return (
     <SectionCard title={t(`${F}.title`)}>
       <dl className="flex flex-col gap-3">
         <Fact label={t(`${F}.created`)}>
           {t(`${F}.createdBy`, {
-            who: creator(link.created_by),
+            who: creator(link.created_by, link.created_by_name),
             date: formatDateTime(link.created_at),
           })}
         </Fact>
@@ -76,9 +77,9 @@ export function FactsCard({ link }: { link: PaymentLink }) {
         ) : null}
         {link.status === "canceled" && link.closed_at ? (
           <Fact label={t(`${F}.canceled`)}>
-            {link.canceled_by
+            {link.canceled_by || link.canceled_by_name
               ? t(`${F}.canceledBy`, {
-                  who: creator(link.canceled_by),
+                  who: creator(link.canceled_by ?? "", link.canceled_by_name),
                   date: formatDateTime(link.closed_at),
                 })
               : formatDateTime(link.closed_at)}

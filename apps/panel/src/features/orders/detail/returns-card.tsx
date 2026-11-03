@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next"
 import { SectionCard } from "@/components/patterns/section-card"
 import { StatusBadge } from "@/components/patterns/status-badge"
 import type { StatusTone } from "@/components/patterns/status-badge"
-import { returnRequestsQuery, useExcludedLines } from "@/features/orders/api/returns"
+import { returnRequestsQuery } from "@/features/orders/api/returns"
 import type { ReturnStatus } from "@/features/orders/api/returns"
 import { NonWithdrawableBadge } from "@/features/orders/components/non-withdrawable-badge"
 import { ReturnActions } from "@/features/orders/components/return-actions"
@@ -34,8 +34,6 @@ export function ReturnsCard({ orderId }: { orderId: string }) {
   const { t } = useTranslation()
   const requests = useQuery(returnRequestsQuery({ order_id: orderId }))
   const [open, setOpen] = useState<Open>(null)
-  // A request for such a line is taken only as faulty or wrong: said before it is decided
-  const excluded = useExcludedLines(orderId)
   const rows = requests.data?.return_requests ?? []
   if (rows.length === 0) {
     return null
@@ -55,7 +53,8 @@ export function ReturnsCard({ orderId }: { orderId: string }) {
               <span className="flex flex-wrap items-center gap-2 font-medium">
                 {t(row.kind === "exchange" ? `${R}.open.exchange` : `${R}.open.return`)}
                 <StatusBadge tone={TONE[row.status]}>{t(`${R}.status.${row.status}`)}</StatusBadge>
-                {row.items.some((item) => excluded.has(item.line_item_id)) ? (
+                {/* Such a line is taken back only as faulty or wrong: said before it is decided */}
+                {row.items.some((item) => item.withdrawal_excluded) ? (
                   <NonWithdrawableBadge />
                 ) : null}
               </span>

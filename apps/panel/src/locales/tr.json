@@ -6945,7 +6945,7 @@
         "body": "e-posta metni",
         "sms_text": "SMS metni"
       },
-      "emptyAudience": "Kitlede şu an iletiyi alabilecek kimse yok; kaynakları ve izinleri kontrol edin."
+      "emptyAudience": "Bu kitlede iletiyi alabilecek kimse yok (izin, bastırma listesi ya da 24 saat sınırı). Kitleyi değiştirin."
     },
     "audience": {
       "title": "Kimlere gidecek",
@@ -6994,7 +6994,8 @@
       "title": "SMS",
       "description": "Düz metin; mağaza adı ve ret metniyle birlikte en çok 3 SMS boyunda.",
       "text": "SMS metni",
-      "count": "{{chars}} karakter · {{parts}}/{{max}} SMS (SMS başına {{perPart}} karakter)",
+      "count": "Yaklaşık {{chars}} karakter · {{parts}}/{{max}} SMS (SMS başına {{perPart}} karakter); kesin sayı kaydedince hesaplanır.",
+      "countStored": "Kayıtlı metin en çok {{parts}}/{{max}} parça; en uzun alıcı adı ve bağlantıların kampanya koduyla sayıldı.",
       "ucs2": "Türkçe alfabe dışında bir karakter (ör. emoji) var; SMS başına yalnız 70 karakter sığar.",
       "footer": "Her SMS'in sonuna kendiliğinden eklenir",
       "optOutMissing": "Ret metni girilmemiş; toplu SMS gönderilemez.",
@@ -7003,10 +7004,19 @@
     },
     "preview": {
       "title": "Önizleme",
-      "emailHint": "Gelen kutusunda böyle görünür; e-postanın tamamını deneme gönderimiyle görün.",
-      "smsHint": "Telefonda böyle görünür; alıcının adı yerine en uzun selamlama gösterilir.",
-      "inbox": "Gelen kutusu önizlemesi",
+      "emailHint": "Kayıtlı içerik, gönderileceği gibi: alt bilgi ve çıkış bağlantısı dahil, alıcının adı yerine sizin adınızla. Bağlantılar burada açılmaz.",
+      "smsHint": "Kayıtlı metin, gönderileceği gibi: mağaza adı ve ret metni dahil, alıcının adı yerine sizin adınızla.",
+      "unsaved": "Kaydedilmemiş değişiklikler kaydedince önizlenir.",
+      "device": {
+        "label": "Görünüm",
+        "desktop": "Masaüstü",
+        "phone": "Telefon"
+      },
+      "inbox": "Gelen kutusu satırı",
+      "frame": "E-posta önizlemesi",
       "sms": "SMS önizlemesi",
+      "parts_one": "En çok {{count}} parça (en uzun alıcı adıyla sayıldı)",
+      "parts_other": "En çok {{count}} parça (en uzun alıcı adıyla sayıldı)",
       "noSubject": "(konu yok)",
       "noPreheader": "(önizleme satırı yok)"
     },
@@ -7124,7 +7134,8 @@
       "audienceRequired": "En az bir kaynak seçin.",
       "audienceTooMany": "En çok {{limit}} kaynak seçilebilir.",
       "tooManyProducts": "Bir e-postada en çok {{max}} ürün kartı olabilir.",
-      "smsTooLong": "Metin, mağaza adı ve ret metniyle birlikte {{parts}} SMS boyunu geçiyor; kısaltın."
+      "smsTooLong": "Metin, mağaza adı ve ret metniyle birlikte {{parts}} SMS boyunu geçiyor; kısaltın.",
+      "smsTooLongStored": "Metin, en uzun alıcı adı ve bağlantıların kampanya koduyla {{parts}} parçayı geçiyor; kısaltın."
     }
   },
   "paymentLinks": {
@@ -7307,6 +7318,7 @@
       "copyFailed": "Kopyalanamadı; metni seçip kopyalayın.",
       "whatsapp": "WhatsApp'ta aç",
       "closed": "Bağlantı artık açık değil; paylaşılacak bir şey yok.",
+      "expired": "Bağlantının süresi doldu; müşteri bununla artık ödeme yapamaz. Bugünün fiyatlarıyla yeni bir bağlantı oluşturabilirsiniz.",
       "emailSent": "E-posta gönderildi",
       "emailNotSent": "E-posta gönderilmedi",
       "smsSent": "SMS gönderildi",

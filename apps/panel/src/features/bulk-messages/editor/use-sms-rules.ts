@@ -11,6 +11,8 @@ export interface SmsRules {
   /** The shop's details and the marketing settings are in. */
   ready: boolean
   values: ShopTokenValues
+  /** The shop's name as a text is signed ("Mağaza" without one). */
+  shopName: string
   /** The fixed end every bulk text gets: the shop's name and the opt-out line. */
   footer: string
   /** Ayarlar > SMS's opt-out line; none: no SMS campaign starts. */
@@ -22,9 +24,11 @@ export interface SmsRules {
 }
 
 /**
- * What the backend adds to a bulk text and counts it with (adr/0050 §4):
- * the shop's name (the store's, "Mağaza" without one) and the opt-out
- * line, the shop's details filled in, `{ad}` as the longest greeting.
+ * What the backend adds to a bulk text (adr/0050 §4): the shop's name (the
+ * store's, "Mağaza" without one) and the opt-out line, the shop's details
+ * filled in, `{ad}` as the greeting. A guide while typing: the backend
+ * counts at the longest name with the shop links' utm, so its count after
+ * a save may be higher, and that one decides.
  */
 export function useSmsRules(enabled = true): SmsRules {
   const { t } = useTranslation()
@@ -38,6 +42,7 @@ export function useSmsRules(enabled = true): SmsRules {
   return {
     ready,
     values: values ?? {},
+    shopName,
     footer: smsFooter(shopName, optOut ?? ""),
     optOut,
     hours: settings

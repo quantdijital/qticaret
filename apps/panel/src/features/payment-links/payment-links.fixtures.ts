@@ -9,6 +9,11 @@ import type { LinkPreview, LinkShare, PaymentLink, PaymentLinkSummary } from "./
 
 /** The payment links' screens' test data, shaped as the backend's views give it. */
 
+const DAY_MS = 24 * 60 * 60 * 1000
+
+/** A moment `days` from now: an open link's end stays ahead whenever the tests run. */
+export const inDays = (days: number): string => new Date(Date.now() + days * DAY_MS).toISOString()
+
 export const VARIANT_A = "variant_01JA0000000000000000000AAA"
 export const VARIANT_B = "variant_01JB0000000000000000000BBB"
 
@@ -86,7 +91,7 @@ export const summary = (more: Partial<PaymentLinkSummary> = {}): PaymentLinkSumm
   currency_code: "try",
   created_by: "user_2",
   created_at: "2026-11-03T09:00:00Z",
-  expires_at: "2026-11-06T09:00:00Z",
+  expires_at: inDays(3),
   opened_count: 0,
   sent_count: 0,
   order_id: null,
@@ -116,7 +121,7 @@ export const link = (more: Partial<PaymentLink> = {}): PaymentLink => ({
   ],
   shipping_option_id: null,
   note: "Instagram'dan yazdı",
-  token_ends_at: "2026-11-10T09:00:00Z",
+  token_ends_at: inDays(7),
   cart_id: null,
   last_opened_at: null,
   last_sent_at: null,

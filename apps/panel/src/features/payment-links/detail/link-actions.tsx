@@ -7,6 +7,7 @@ import { ConfirmDialog } from "@/components/patterns/confirm-dialog"
 import { Button } from "@/components/ui/button"
 import { useCancelPaymentLink } from "@/features/payment-links/api/payment-links"
 import type { PaymentLink } from "@/features/payment-links/api/types"
+import { shownStatus } from "@/features/payment-links/components/link-state"
 import { errorText } from "@/lib/errors"
 import { ExtendDialog } from "./extend-dialog"
 
@@ -16,14 +17,14 @@ const A = "paymentLinks.actions"
  * What a link allows where it stands (adr/0051 §8, §12): an open one is
  * extended (owner and admin), an open or repriced one cancelled (owner and
  * admin, asked once more), and one that no longer opens is made again at
- * today's prices.
+ * today's prices. One past its end counts as expired (`shownStatus`).
  */
 export function LinkActions({ link, canManage }: { link: PaymentLink; canManage: boolean }) {
   const { t } = useTranslation()
   const cancel = useCancelPaymentLink(link.id)
   const [extending, setExtending] = useState(false)
   const [asking, setAsking] = useState(false)
-  const { status } = link
+  const status = shownStatus(link)
   const again = status === "draft" || status === "expired" || status === "canceled"
   return (
     <>

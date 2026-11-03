@@ -10,6 +10,7 @@ import { PageColumn, PageGrid } from "@/components/patterns/page-grid"
 import { PageHeader } from "@/components/patterns/page-header"
 import { Button } from "@/components/ui/button"
 import { useUpdateBulkMessage } from "@/features/bulk-messages/api/bulk-messages"
+import { refusalKey } from "@/features/bulk-messages/api/save-draft"
 import type { BulkMessage } from "@/features/bulk-messages/api/types"
 import { BulkActions } from "@/features/bulk-messages/components/bulk-actions"
 import { BulkStatusBadge } from "@/features/bulk-messages/components/bulk-status"
@@ -27,6 +28,7 @@ import { SendCard } from "./send-card"
 import { SmsContent } from "./sms-content"
 import { TestSendCard } from "./test-send-card"
 import { useAudiencePreview } from "./use-audience-preview"
+import { storedSmsParts, useRenderedPreview } from "./use-rendered-preview"
 import { useSmsRules } from "./use-sms-rules"
 
 const E = "bulkMessages.editor"
@@ -40,6 +42,12 @@ const tabOf = (errors: FieldErrors<EditorValues>): Tab | null =>
     : errors.subject || errors.preheader || errors.body || errors.sms_text
       ? "content"
       : null
+
+/** The backend's refusals the panel cannot foresee, by the field they belong to. */
+const FIELD_REFUSALS: Record<string, { field: "sms_text"; message: string }> = {
+  // Counted at the longest name with the links' utm: the typing count is only a guide
+  "campaigns.sms_too_long": { field: "sms_text", message: "bulkMessages.errors.smsTooLongStored" },
+}
 
 /**
  * A draft (adr/0050 §10): its name and channel above, then its audience,
@@ -57,6 +65,7 @@ export function BulkEditor({ campaign }: { campaign: BulkMessage }) {
     defaultValues: valuesOf(campaign),
   })
   const preview = useAudiencePreview(campaign.id, form)
+  const rendered = useRenderedPreview(campaign)
   const [channel, subject, body, smsText] = useWatch({
     control: form.control,
     name: ["channel", "subject", "body", "sms_text"],
@@ -81,7 +90,15 @@ export function BulkEditor({ campaign }: { campaign: BulkMessage }) {
           form.reset(valuesOf(saved), FULL_RESET)
           toast.success(t(`${E}.saved`))
         },
-        onError: (failure) => toast.error(errorText(t, failure)),
+        onError: (failure) => {
+          const refusal = FIELD_REFUSALS[refusalKey(failure) ?? ""]
+          if (refusal) {
+            setTab("content")
+            form.setError(refusal.field, { message: refusal.message })
+            return
+          }
+          toast.error(errorText(t, failure))
+        },
       })
     },
     (errors) => {
@@ -138,7 +155,11 @@ export function BulkEditor({ campaign }: { campaign: BulkMessage }) {
                 label: t(`${E}.tabs.content`),
                 content:
                   channel === "sms" ? (
-                    <SmsContent form={form} rules={rules} />
+                    <SmsContent
+                      form={form}
+                      rules={rules}
+                      stored={{ text: campaign.sms_text, parts: storedSmsParts(rendered) }}
+                    />
                   ) : (
                     <EmailContent form={form} />
                   ),
@@ -164,7 +185,12 @@ export function BulkEditor({ campaign }: { campaign: BulkMessage }) {
         </PageColumn>
         <PageColumn span={4} sticky>
           <AudienceSummary state={preview} />
-          <PreviewCard form={form} rules={rules} />
+          <PreviewCard
+            campaign={campaign}
+            form={form}
+            sender={rules.shopName}
+            rendered={rendered}
+          />
         </PageColumn>
       </PageGrid>
     </div>

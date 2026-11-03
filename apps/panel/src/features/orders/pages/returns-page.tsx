@@ -12,6 +12,7 @@ import { StatusBadge } from "@/components/patterns/status-badge"
 import type { StatusTone } from "@/components/patterns/status-badge"
 import { RETURN_PAGE_SIZE, returnRequestsQuery } from "@/features/orders/api/returns"
 import type { ReturnRequest, ReturnStatus } from "@/features/orders/api/returns"
+import { NonWithdrawableBadge } from "@/features/orders/components/non-withdrawable-badge"
 import { ReturnActions } from "@/features/orders/components/return-actions"
 import type { Open } from "@/features/orders/components/return-actions"
 import { ApproveExchangeDialog } from "@/features/orders/detail/exchange-dialog"
@@ -97,8 +98,12 @@ export function ReturnsPage() {
     {
       key: "status",
       header: t(`${R}.columns.status`),
+      // A line outside the right of withdrawal comes back only faulty or wrong: said in the queue
       cell: (row) => (
-        <StatusBadge tone={TONE[row.status]}>{t(`${R}.status.${row.status}`)}</StatusBadge>
+        <span className="flex flex-wrap items-center gap-1.5">
+          <StatusBadge tone={TONE[row.status]}>{t(`${R}.status.${row.status}`)}</StatusBadge>
+          {row.items.some((item) => item.withdrawal_excluded) ? <NonWithdrawableBadge /> : null}
+        </span>
       ),
     },
     {

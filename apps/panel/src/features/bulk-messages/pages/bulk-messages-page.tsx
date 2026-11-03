@@ -32,11 +32,7 @@ const route = getRouteApi("/_auth/bulk-messages/")
 type StatusView = BulkStatus | "all"
 type ChannelView = BulkChannel | "all"
 
-/**
- * The campaigns, newest first: the state filtered by the server, the
- * channel on the page shown (the list route takes no channel; a shop
- * sends a few a week, so one page holds a long while).
- */
+/** The campaigns, newest first: the state and the channel filtered by the server. */
 function BulkList({ onNew }: { onNew: () => void }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -44,7 +40,13 @@ function BulkList({ onNew }: { onNew: () => void }) {
   const status: StatusView = search.status ?? "all"
   const channel: ChannelView = search.channel ?? "all"
   const page = (search.page ?? 1) - 1
-  const list = useQuery(bulkMessagesQuery({ status: status === "all" ? null : status, page }))
+  const list = useQuery(
+    bulkMessagesQuery({
+      status: status === "all" ? null : status,
+      channel: channel === "all" ? null : channel,
+      page,
+    })
+  )
   const columns = useBulkColumns()
   const setSearch = (next: { status?: StatusView; channel?: ChannelView; page?: number }) => {
     const nextStatus = next.status ?? status
@@ -56,7 +58,6 @@ function BulkList({ onNew }: { onNew: () => void }) {
     }
     void navigate({ to: "/bulk-messages", search: query, replace: true })
   }
-  const rows = list.data?.campaigns.filter((row) => channel === "all" || row.channel === channel)
   const filtered = status !== "all" || channel !== "all"
   return (
     <section className="overflow-hidden rounded-lg border bg-card shadow-card">
@@ -102,7 +103,7 @@ function BulkList({ onNew }: { onNew: () => void }) {
         <>
           <DataTable
             columns={columns}
-            rows={rows}
+            rows={list.data?.campaigns}
             rowKey={(row) => row.id}
             loading={list.isPending}
             stale={list.isPlaceholderData}

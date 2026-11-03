@@ -103,20 +103,40 @@ describe("BulkMessagesPage", () => {
     })
   })
 
-  it("filters by state on the server and by channel on the page", async () => {
+  it("filters by state and by channel on the server", async () => {
     search.current = { status: "paused", channel: "sms" }
+    serve(ROWS.filter((row) => row.channel === "sms" && row.status === "paused"))
     renderPage()
 
     expect(await screen.findByText("Hafta sonu SMS")).toBeInTheDocument()
     expect(screen.queryByText("Kış indirimi")).toBeNull()
     expect(fetchMock).toHaveBeenCalledWith("/admin/bulk-messages", {
-      query: { status: "paused", limit: 50, offset: 0 },
+      query: { status: "paused", channel: "sms", limit: 50, offset: 0 },
     })
 
     await userEvent.click(screen.getByRole("tab", { name: "Gönderildi" }))
     expect(navigate).toHaveBeenLastCalledWith({
       to: "/bulk-messages",
       search: { status: "sent", channel: "sms", page: undefined },
+      replace: true,
+    })
+  })
+
+  it("asks for the other channel's page when the channel changes, back to its first page", async () => {
+    const user = userEvent.setup()
+    search.current = { channel: "email", page: 3 }
+    renderPage()
+
+    expect(await screen.findByText("Kış indirimi")).toBeInTheDocument()
+    expect(fetchMock).toHaveBeenCalledWith("/admin/bulk-messages", {
+      query: { channel: "email", limit: 50, offset: 100 },
+    })
+
+    await user.click(screen.getByRole("combobox", { name: "Kanal" }))
+    await user.click(await screen.findByRole("option", { name: "SMS" }))
+    expect(navigate).toHaveBeenLastCalledWith({
+      to: "/bulk-messages",
+      search: { status: undefined, channel: "sms", page: undefined },
       replace: true,
     })
   })

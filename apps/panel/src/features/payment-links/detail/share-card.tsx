@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query"
-import { Loader2, Mail, MessageCircle, Smartphone } from "lucide-react"
+import { Link } from "@tanstack/react-router"
+import { Loader2, Mail, MessageCircle, RefreshCw, Smartphone } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
@@ -8,7 +9,13 @@ import { ErrorState, LoadingRows } from "@/components/patterns/states"
 import { StatusBadge } from "@/components/patterns/status-badge"
 import { Button } from "@/components/ui/button"
 import { linkShareQuery, useResendPaymentLink } from "@/features/payment-links/api/payment-links"
-import type { ResendChannel, ResendOutcomes } from "@/features/payment-links/api/types"
+import type {
+  LinkShare,
+  PaymentLink,
+  ResendChannel,
+  ResendOutcomes,
+} from "@/features/payment-links/api/types"
+import { shownStatus } from "@/features/payment-links/components/link-state"
 import { errorText } from "@/lib/errors"
 import { CopyField } from "./copy-field"
 
@@ -34,16 +41,36 @@ function Outcomes({ outcomes }: { outcomes: ResendOutcomes }) {
   )
 }
 
+/** Nothing to share: why, and for one past its end a new link at today's prices. */
+function Closed({ link }: { link: PaymentLink }) {
+  const { t } = useTranslation()
+  if (shownStatus(link) !== "expired") {
+    return <p className="text-sm text-muted-foreground">{t(`${S}.closed`)}</p>
+  }
+  return (
+    <div className="flex flex-col items-start gap-3">
+      <p className="text-sm text-muted-foreground">{t(`${S}.expired`)}</p>
+      <Button asChild variant="outline">
+        <Link to="/payment-links/new" search={{ from: link.id }}>
+          <RefreshCw />
+          {t("paymentLinks.actions.again")}
+        </Link>
+      </Button>
+    </div>
+  )
+}
+
 /**
  * Paylaş (adr/0051 §7): the link and the message to copy, WhatsApp opened
  * in the staff member's own app with the text filled in, and the link sent
  * by e-mail or SMS from the shop (once in ten minutes). Nothing once the
- * link no longer opens.
+ * link no longer opens: what the backend says, and one past its end even
+ * before it says so (a share read earlier still holds its address).
  */
-export function ShareCard({ linkId, created }: { linkId: string; created: boolean }) {
+export function ShareCard({ link, created }: { link: PaymentLink; created: boolean }) {
   const { t } = useTranslation()
-  const share = useQuery(linkShareQuery(linkId))
-  const resend = useResendPaymentLink(linkId)
+  const share = useQuery(linkShareQuery(link.id))
+  const resend = useResendPaymentLink(link.id)
   const [outcomes, setOutcomes] = useState<ResendOutcomes | null>(null)
   const send = (channel: ResendChannel) => {
     setOutcomes(null)
@@ -57,7 +84,11 @@ export function ShareCard({ linkId, created }: { linkId: string; created: boolea
       onError: (failure) => toast.error(errorText(t, failure)),
     })
   }
-  const data = share.data
+  const open = shownStatus(link) === "open"
+  const data: LinkShare | undefined =
+    share.data && !open
+      ? { ...share.data, url: null, sms_text: null, whatsapp_url: null }
+      : share.data
   return (
     <SectionCard
       title={t(`${S}.title`)}
@@ -90,7 +121,7 @@ export function ShareCard({ linkId, created }: { linkId: string; created: boolea
               ) : null}
             </>
           ) : (
-            <p className="text-sm text-muted-foreground">{t(`${S}.closed`)}</p>
+            <Closed link={link} />
           )}
           <div className="flex flex-col gap-2 border-t pt-4">
             <div className="flex flex-wrap gap-2">

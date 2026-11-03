@@ -124,6 +124,16 @@ export interface AudiencePreview {
   sms: { parts: number; max_parts: number } | null
 }
 
+/**
+ * `GET /admin/bulk-messages/:id/preview?channel=`: the stored campaign made
+ * as a send makes it, the asking staff member its sample recipient (their
+ * own name for `{ad}`, a dead way out). A text's `parts` is counted at its
+ * longest (the longest first name, the shop links' utm), as the save check
+ * counts it: the text shown may be shorter.
+ */
+export type RenderedPreview =
+  { subject: string; preheader: string; html: string } | { text: string; parts: number }
+
 /** `GET /admin/bulk-messages/:id/report`. */
 export interface BulkReport {
   id: string

@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button"
 import { paymentLinkQuery } from "@/features/payment-links/api/payment-links"
 import type { PaymentLink } from "@/features/payment-links/api/types"
 import { LinkGate } from "@/features/payment-links/components/link-gate"
+import { useExpiryRedraw, shownStatus } from "@/features/payment-links/components/link-state"
 import { LinkLines, LinkTotals } from "@/features/payment-links/components/link-lines"
 import { LinkStatusBadge } from "@/features/payment-links/components/link-status"
 import { useLinkAccess } from "@/features/payment-links/components/use-link-access"
@@ -46,16 +47,18 @@ function PricesChanged({ link }: { link: PaymentLink }) {
 function LinkView({ link, created }: { link: PaymentLink; created: boolean }) {
   const { t } = useTranslation()
   const gate = useLinkAccess()
+  // Past its end it is expired here at once: the badge, the share card and the actions together
+  useExpiryRedraw(link)
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
         back={{ to: "/payment-links", label: t(`${P}.title`) }}
         title={link.number}
         description={t(`${P}.detail.made`, { date: formatLongDate(link.created_at) })}
-        badge={<LinkStatusBadge status={link.status} />}
+        badge={<LinkStatusBadge link={link} />}
         action={<LinkActions link={link} canManage={gate.canManage} />}
       />
-      {link.status === "draft" ? <PricesChanged link={link} /> : null}
+      {shownStatus(link) === "draft" ? <PricesChanged link={link} /> : null}
       <PageGrid>
         <PageColumn span={8}>
           <PeopleCards link={link} />
@@ -75,7 +78,7 @@ function LinkView({ link, created }: { link: PaymentLink; created: boolean }) {
           </SectionCard>
         </PageColumn>
         <PageColumn span={4}>
-          <ShareCard linkId={link.id} created={created} />
+          <ShareCard link={link} created={created} />
           <FactsCard link={link} />
         </PageColumn>
       </PageGrid>

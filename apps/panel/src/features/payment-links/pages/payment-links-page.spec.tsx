@@ -6,7 +6,7 @@ import type { MouseEventHandler, ReactNode } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
 import type { PaymentLinkSummary } from "@/features/payment-links/api/types"
-import { clientWith, summary } from "@/features/payment-links/payment-links.fixtures"
+import { clientWith, inDays, summary } from "@/features/payment-links/payment-links.fixtures"
 import { PaymentLinksPage } from "./payment-links-page"
 
 const fetchMock = vi.hoisted(() => vi.fn())
@@ -166,5 +166,28 @@ describe("PaymentLinksPage (adr/0051 §13)", () => {
     expect(
       within(screen.getByText("PL-1042").closest("tr") as HTMLElement).getByText("Ekip üyesi")
     ).toBeInTheDocument()
+  })
+
+  it("names the maker as the backend sends it, for a role that cannot read the team", async () => {
+    serve([summary({ created_by: "user_2", created_by_name: "Ece Demir" })])
+    renderPage(clientWith({ role: "operations" }))
+
+    const row = within((await screen.findByText("PL-1042")).closest("tr") as HTMLElement)
+    expect(row.getByText("Ece Demir")).toBeInTheDocument()
+    expect(row.queryByText("Ekip üyesi")).toBeNull()
+  })
+
+  it("shows an open link past its end as expired, an open one within it as open", async () => {
+    serve([
+      summary({ id: "plink_1", number: "PL-1042", expires_at: inDays(-1) }),
+      summary({ id: "plink_2", number: "PL-1041", expires_at: inDays(1) }),
+    ])
+    renderPage()
+
+    const ended = within((await screen.findByText("PL-1042")).closest("tr") as HTMLElement)
+    expect(ended.getByText("Süresi doldu")).toBeInTheDocument()
+    expect(ended.queryByText("Açık")).toBeNull()
+    const live = within(screen.getByText("PL-1041").closest("tr") as HTMLElement)
+    expect(live.getByText("Açık")).toBeInTheDocument()
   })
 })

@@ -16,8 +16,8 @@ import {
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import {
+  excludedLinesOf,
   returnLinesQuery,
-  useExcludedLines,
   useReceiveReturn,
   useRejectReturn,
 } from "@/features/orders/api/returns"
@@ -119,7 +119,7 @@ export function ReceiveReturnDialog({
   const { t } = useTranslation()
   const receive = useReceiveReturn()
   const lines = useQuery(returnLinesQuery(request.order_id))
-  const excluded = useExcludedLines(request.order_id)
+  const excluded = excludedLinesOf(request)
   const [counts, setCounts] = useState<Counts>(() =>
     Object.fromEntries(
       request.items.map((item) => [item.line_item_id, { sound: item.quantity, damaged: 0 }])

@@ -32,6 +32,7 @@ const PX_CORNER = /\brounded(?:-[a-z]+)?-\[\d+px\]/g
 const ALLOWED: Record<string, string> = {
   // A sent e-mail is drawn on white, as a mail program shows it
   "features/settings/components/template-preview-card.tsx bg-white": "e-mail preview",
+  "features/bulk-messages/editor/email-frame.tsx bg-white": "e-mail preview",
   // Cameras read dark modules on white, whatever the theme
   "features/security/components/authenticator-link.tsx bg-white": "QR code",
   // A photo's own colours under the buttons: a dark veil reads on any

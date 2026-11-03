@@ -68,13 +68,17 @@ export function useLinkColumns(): Column<PaymentLinkSummary>[] {
     {
       key: "status",
       header: t(`${P}.status`),
-      cell: (row) => <LinkStatusBadge status={row.status} />,
+      cell: (row) => <LinkStatusBadge link={row} />,
     },
     {
       key: "createdBy",
       header: t(`${P}.createdBy`),
       className: "hidden md:table-cell",
-      cell: (row) => <span className="text-muted-foreground">{creator(row.created_by)}</span>,
+      cell: (row) => (
+        <span className="text-muted-foreground">
+          {creator(row.created_by, row.created_by_name)}
+        </span>
+      ),
     },
     {
       key: "expires",

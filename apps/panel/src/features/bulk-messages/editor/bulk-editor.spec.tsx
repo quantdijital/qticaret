@@ -1,18 +1,17 @@
-import { QueryClientProvider } from "@tanstack/react-query"
-import { render, screen, waitFor, within } from "@testing-library/react"
+import { screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import type { JSONContent } from "@tiptap/react"
 import type { ReactNode } from "react"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
-import type { BulkMessage } from "@/features/bulk-messages/api/types"
-import { campaign, clientWith, preview } from "@/features/bulk-messages/bulk-messages.fixtures"
-import { BulkEditor } from "./bulk-editor"
-
+import { renderEditor, savesOf } from "./bulk-editor.fixtures"
 const fetchMock = vi.hoisted(() => vi.fn())
+// A save goes past the SDK, to keep the refusal's key
+const saveMock = vi.hoisted(() => vi.fn())
+const toast = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn() }))
 
 vi.mock("@/lib/sdk", () => ({ sdk: { client: { fetch: fetchMock } } }))
-vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn() } }))
+vi.mock("sonner", () => ({ toast }))
 vi.mock("@tanstack/react-router", () => ({
   Link: ({ children }: { children: ReactNode }) => <a href="/">{children}</a>,
   useNavigate: () => vi.fn(),
@@ -42,88 +41,22 @@ vi.mock("@/features/content/editor/rich-editor", () => ({
   ),
 }))
 
-const MARKETING = {
-  abandoned_cart_enabled: false,
-  abandoned_cart_delay_minutes: 60,
-  feed_exclusions: { google: [], meta: [], cimri: [], akakce: [] },
-  feed_same_day_cutoff_hour: null,
-  campaign_frequency_cap: true,
-  campaign_sms_start_hour: 9,
-  campaign_sms_end_hour: 20,
-  sms_opt_out_text: "Ret için RET yazıp 4609'a gönderin",
-}
-
-function serve(stored: BulkMessage) {
-  fetchMock.mockImplementation((url: string, init?: { method?: string; body?: unknown }) => {
-    switch (url) {
-      case "/admin/customer-segments":
-        return Promise.resolve({
-          segments: [
-            {
-              id: "cseg_1",
-              name: "Sadık müşteriler",
-              rules: {},
-              customer_group_id: "cusgroup_seg",
-              member_count: 120,
-              refreshed_at: null,
-            },
-          ],
-        })
-      case "/admin/customer-groups":
-        return Promise.resolve({
-          customer_groups: [
-            { id: "cusgroup_1", name: "Toptancılar", metadata: null, customers: [{ id: "c1" }] },
-            {
-              id: "cusgroup_seg",
-              name: "Sadık müşteriler",
-              metadata: { managed_by: "segment" },
-              customers: [],
-            },
-          ],
-        })
-      case "/admin/shop-tokens":
-        return Promise.resolve({
-          tokens: [
-            { name: "mağaza_adı", value: "Bıçakçı" },
-            { name: "telefon", value: "0532 000 00 00" },
-          ],
-        })
-      case "/admin/platform-settings/marketing":
-        return Promise.resolve({ section: "marketing", values: MARKETING, version: 1 })
-      case "/admin/bulk-messages/bm_1/audience-preview":
-        return Promise.resolve(preview())
-      case "/admin/bulk-messages/bm_1":
-        return Promise.resolve({
-          campaign: { ...stored, ...(init?.body as Partial<BulkMessage>) },
-        })
-      default:
-        return Promise.reject(new Error(`unexpected ${url}`))
-    }
-  })
-}
-
-function renderEditor(stored: BulkMessage = campaign()) {
-  serve(stored)
-  return render(
-    <QueryClientProvider client={clientWith()}>
-      <BulkEditor campaign={stored} />
-    </QueryClientProvider>
-  )
-}
-
-const saves = () =>
-  fetchMock.mock.calls.filter(
-    ([url, init]) => url === "/admin/bulk-messages/bm_1" && (init as { method?: string }).method
-  )
+const mocks = { fetch: fetchMock, save: saveMock }
 
 describe("BulkEditor (adr/0050 §10)", () => {
   beforeEach(() => {
     fetchMock.mockReset()
+    saveMock.mockReset()
+    toast.error.mockReset()
+    vi.stubGlobal("fetch", saveMock)
+  })
+  afterEach(() => {
+    vi.unstubAllGlobals()
   })
 
   it("counts the audience on screen, and again once the sources change", async () => {
     const user = userEvent.setup()
-    renderEditor()
+    renderEditor(mocks)
 
     expect(await screen.findByText("1.240 kişi")).toBeInTheDocument()
     expect(screen.getByText("İzni İYS'ye henüz bildirilmedi")).toBeInTheDocument()
@@ -148,7 +81,7 @@ describe("BulkEditor (adr/0050 §10)", () => {
   })
 
   it("offers the shop's segments and its own groups, a segment's group once", async () => {
-    renderEditor()
+    renderEditor(mocks)
 
     expect(await screen.findByLabelText(/Sadık müşteriler/)).toBeInTheDocument()
     expect(screen.getByLabelText(/Toptancılar/)).toBeInTheDocument()
@@ -157,18 +90,18 @@ describe("BulkEditor (adr/0050 §10)", () => {
 
   it("saves nothing without a name and says why", async () => {
     const user = userEvent.setup()
-    renderEditor()
+    renderEditor(mocks)
 
     await user.clear(screen.getByLabelText(/İletinin adı/))
     await user.click(screen.getByRole("button", { name: "Kaydet" }))
 
     expect(await screen.findByText("İletiye bir ad verin.")).toBeInTheDocument()
-    expect(saves()).toHaveLength(0)
+    expect(savesOf(saveMock)).toHaveLength(0)
   })
 
   it("saves the whole draft in the backend's shape", async () => {
     const user = userEvent.setup()
-    renderEditor()
+    renderEditor(mocks)
 
     await user.click(await screen.findByLabelText(/Toptancılar/))
     await user.click(screen.getByRole("tab", { name: "İçerik" }))
@@ -178,9 +111,9 @@ describe("BulkEditor (adr/0050 §10)", () => {
     await user.click(screen.getByRole("button", { name: "Kaydet" }))
 
     await waitFor(() => {
-      expect(saves()).toHaveLength(1)
+      expect(savesOf(saveMock)).toHaveLength(1)
     })
-    expect(saves()[0]?.[1]).toEqual({
+    expect(savesOf(saveMock)[0]).toEqual({
       method: "POST",
       body: {
         name: "Kış indirimi",
@@ -199,7 +132,7 @@ describe("BulkEditor (adr/0050 §10)", () => {
 
   it("refuses an unknown token before the server does", async () => {
     const user = userEvent.setup()
-    renderEditor()
+    renderEditor(mocks)
 
     await user.click(screen.getByRole("tab", { name: "İçerik" }))
     const subject = screen.getByLabelText(/^Konu/)
@@ -208,12 +141,12 @@ describe("BulkEditor (adr/0050 §10)", () => {
     await user.click(screen.getByRole("button", { name: "Kaydet" }))
 
     expect(await screen.findByText(/Tanınmayan bir belirteç var/)).toBeInTheDocument()
-    expect(saves()).toHaveLength(0)
+    expect(savesOf(saveMock)).toHaveLength(0)
   })
 
   it("holds the test and the send while changes are unsaved", async () => {
     const user = userEvent.setup()
-    renderEditor()
+    renderEditor(mocks)
 
     await user.type(screen.getByLabelText(/İletinin adı/), " 2")
     await user.click(screen.getByRole("tab", { name: "Deneme ve gönderim" }))
@@ -221,19 +154,5 @@ describe("BulkEditor (adr/0050 §10)", () => {
     expect(screen.getByRole("button", { name: "Bana gönder" })).toBeDisabled()
     expect(screen.getByRole("button", { name: "Şimdi gönder" })).toBeDisabled()
     expect(screen.getAllByText(/Kaydedilmemiş değişiklikler var/)).toHaveLength(2)
-  })
-
-  it("counts a text with its fixed end and shows it as it goes", async () => {
-    const user = userEvent.setup()
-    renderEditor(campaign({ channel: "sms", sms_text: "{ad}, kış indirimi başladı" }))
-
-    await user.click(screen.getByRole("tab", { name: "İçerik" }))
-
-    expect(await screen.findByText(/karakter · 1\/3 SMS/)).toBeInTheDocument()
-    expect(screen.getByText("Bıçakçı. Ret için RET yazıp 4609'a gönderin")).toBeInTheDocument()
-    const bubble = screen.getByLabelText("SMS önizlemesi")
-    expect(
-      within(bubble).getByText(/^Değerli müşterimiz, kış indirimi başladı\. Bıçakçı\./)
-    ).toBeInTheDocument()
   })
 })

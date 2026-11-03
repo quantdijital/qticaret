@@ -12,8 +12,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { returnLinesQuery, useApproveReturn } from "@/features/orders/api/returns"
+import { excludedLinesOf, returnLinesQuery, useApproveReturn } from "@/features/orders/api/returns"
 import type { ReturnRequest } from "@/features/orders/api/returns"
+import { NonWithdrawableBadge } from "@/features/orders/components/non-withdrawable-badge"
 import { differenceText } from "@/features/orders/exchange-text"
 import { errorText } from "@/lib/errors"
 
@@ -36,6 +37,8 @@ export function ApproveExchangeDialog({
   const lines = useQuery(returnLinesQuery(request.order_id))
   const [collected, setCollected] = useState(false)
   const byId = new Map((lines.data ?? []).map((line) => [line.id, line]))
+  // Marked when the request is read: a product marked since it was asked
+  const excluded = excludedLinesOf(request)
   const owes = Number(request.difference ?? 0) > 0
   return (
     <Dialog
@@ -58,8 +61,11 @@ export function ApproveExchangeDialog({
             const line = byId.get(item.line_item_id)
             return (
               <li key={item.line_item_id} className="flex flex-col gap-0.5 px-3 py-2.5 text-sm">
-                <span className="font-medium">
-                  {line?.title ?? "—"} × {item.quantity}
+                <span className="flex min-w-0 items-center gap-2">
+                  <span className="truncate font-medium">
+                    {line?.title ?? "—"} × {item.quantity}
+                  </span>
+                  {excluded.has(item.line_item_id) ? <NonWithdrawableBadge /> : null}
                 </span>
                 <span className="text-muted-foreground">
                   {t(`${R}.exchange.swap`, {
