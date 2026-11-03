@@ -24,7 +24,14 @@ const request: ReturnRequest = {
   status: "requested",
   reason: "size_issue",
   note: null,
-  items: [{ line_item_id: "ordli_1", quantity: 1, withdrawal_excluded: false }],
+  items: [
+    {
+      line_item_id: "ordli_1",
+      quantity: 1,
+      withdrawal_excluded: false,
+      withdrawal_excluded_reason: null,
+    },
+  ],
   decision_note: null,
   return_code: null,
   return_label_file_id: null,
@@ -90,7 +97,14 @@ describe("ApproveExchangeDialog (adr/0032 §6)", () => {
   it("marks a line the request carries as outside the right of withdrawal", async () => {
     open({
       ...request,
-      items: [{ line_item_id: "ordli_1", quantity: 1, withdrawal_excluded: true }],
+      items: [
+        {
+          line_item_id: "ordli_1",
+          quantity: 1,
+          withdrawal_excluded: true,
+          withdrawal_excluded_reason: null,
+        },
+      ],
     })
 
     expect(await screen.findByText("M yerine XL")).toBeInTheDocument()

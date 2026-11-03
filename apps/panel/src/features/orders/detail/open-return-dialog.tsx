@@ -2,6 +2,7 @@ import { CircleAlert, Loader2 } from "lucide-react"
 import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
+import { StatusBadge } from "@/components/patterns/status-badge"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -22,9 +23,11 @@ import {
 } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
-import { DEFECT_REASONS, RETURN_REASONS, useOpenReturnRequest } from "@/features/orders/api/returns"
+import { RETURN_REASONS, useOpenReturnRequest } from "@/features/orders/api/returns"
 import type { OpenRequest, ReturnReason, Returnable } from "@/features/orders/api/returns"
 import { NonWithdrawableBadge } from "@/features/orders/components/non-withdrawable-badge"
+import { GiftReturnNote } from "@/features/orders/detail/gift-return-dialog"
+import { requestProblem } from "@/features/orders/return-rules"
 import { errorText } from "@/lib/errors"
 
 const O = "orders.returns.open"
@@ -39,8 +42,9 @@ interface Pick {
 /**
  * A request opened for the shopper who called (F12.3): a return or an
  * exchange, the lines and how many (no more than is left), each exchanged
- * line's new variant, the reason. The server checks it all again by the
- * shopper's own rules; the shopper gets the same e-mail as for their own.
+ * line's new variant, the reason. A gift card line goes on its own, as
+ * money back (adr/0025 Ek 2026-11-03). The server checks it all again by
+ * the shopper's own rules; the shopper gets the same e-mail as for theirs.
  */
 export function OpenReturnDialog({
   orderId,
@@ -59,14 +63,13 @@ export function OpenReturnDialog({
   const [picks, setPicks] = useState<Record<string, Pick>>({})
   const lines = returnable.lines.filter((line) => line.returnable > 0)
   const chosen = lines.filter((line) => (picks[line.line_item_id]?.quantity ?? 0) > 0)
-  // The server's rule (lib/orders/returns.ts): such a product comes back only as faulty
-  const excludedPicked = chosen.some((line) => line.withdrawal_excluded)
-  const withdrawalBlocked =
-    excludedPicked && (kind === "exchange" || (reason !== "" && !DEFECT_REASONS.includes(reason)))
+  // The server's rules (lib/orders/returns.ts, gift-returns.ts), said before it refuses
+  const problem = requestProblem(chosen, kind, reason)
+  const giftOnly = problem === null && chosen.length > 0 && chosen.every((line) => line.gift_card)
   const ready =
     chosen.length > 0 &&
     reason !== "" &&
-    !withdrawalBlocked &&
+    problem === null &&
     (kind === "return" || chosen.every((line) => picks[line.line_item_id]?.variant))
 
   const pick = (lineId: string, next: Partial<Pick>) => {
@@ -153,10 +156,20 @@ export function OpenReturnDialog({
                         <label htmlFor={inputId} className="truncate text-sm font-medium">
                           {line.title ?? "—"}
                         </label>
-                        {line.withdrawal_excluded ? <NonWithdrawableBadge /> : null}
+                        {line.gift_card ? (
+                          <StatusBadge tone="info">{t(`${O}.giftBadge`)}</StatusBadge>
+                        ) : null}
+                        {line.withdrawal_excluded ? (
+                          <NonWithdrawableBadge reason={line.withdrawal_excluded_reason} />
+                        ) : null}
                       </span>
                       <span className="text-xs text-muted-foreground">
-                        {[line.variant_title, t(`${O}.left`, { count: line.returnable })]
+                        {[
+                          line.variant_title,
+                          t(line.gift_card ? `${O}.leftCards` : `${O}.left`, {
+                            count: line.returnable,
+                          }),
+                        ]
                           .filter(Boolean)
                           .join(" · ")}
                       </span>
@@ -179,7 +192,7 @@ export function OpenReturnDialog({
                       }}
                     />
                   </div>
-                  {kind === "exchange" && (current?.quantity ?? 0) > 0 ? (
+                  {kind === "exchange" && !line.gift_card && (current?.quantity ?? 0) > 0 ? (
                     line.variants.length > 0 ? (
                       <Select
                         value={current?.variant ?? ""}
@@ -226,15 +239,16 @@ export function OpenReturnDialog({
               </SelectContent>
             </Select>
           </div>
-          {withdrawalBlocked ? (
+          {problem ? (
             <p
               role="status"
               className="flex items-start gap-2 rounded-md bg-warning-soft px-3 py-2 text-[13px] text-warning-text"
             >
               <CircleAlert className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-              {t(kind === "exchange" ? `${O}.excludedExchange` : `${O}.excludedReason`)}
+              {t(`${O}.${problem}`)}
             </p>
           ) : null}
+          {giftOnly ? <GiftReturnNote /> : null}
           <div className="flex flex-col gap-2">
             <Label htmlFor="return-note">{t(`${O}.note`)}</Label>
             <Textarea

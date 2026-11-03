@@ -23,11 +23,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useCan } from "@/features/auth/api/staff"
-import { useCancelOrder, useMarkDelivered, useShipOrder } from "@/features/orders/api/orders"
+import { useMarkDelivered, useShipOrder } from "@/features/orders/api/orders"
 import { useCapturePayment } from "@/features/orders/api/payments"
 import { returnableQuery } from "@/features/orders/api/returns"
 import type { OrderDetail, OrderMoney, OrderState } from "@/features/orders/api/orders"
 import { errorText } from "@/lib/errors"
+import { CancelOrderDialog } from "./cancel-order-dialog"
 import { ChargebackDialog } from "./chargeback-dialog"
 import { EditOrderDialog } from "./edit-dialog"
 import { OpenReturnDialog } from "./open-return-dialog"
@@ -58,7 +59,6 @@ export function OrderActions({
   const [dialog, setDialog] = useState<Dialog>(null)
   const ship = useShipOrder(order.id)
   const deliver = useMarkDelivered(order.id)
-  const cancel = useCancelOrder(order.id)
   const capture = useCapturePayment()
   // F12.3: a request opened for the shopper who called, by the shopper's own rules
   const returnable = useQuery(returnableQuery(order.id))
@@ -257,17 +257,7 @@ export function OrderActions({
       {dialog === "refund" && money ? (
         <RefundDialog order={order} money={money} open onOpenChange={close} />
       ) : null}
-      <ConfirmDialog
-        open={dialog === "cancel"}
-        onOpenChange={close}
-        title={t("orders.cancel.title", { number: order.display_id })}
-        description={t("orders.cancel.description")}
-        confirmLabel={t("orders.actions.cancel")}
-        destructive
-        onConfirm={() => {
-          cancel.mutate(undefined, { onSuccess: done("orders.cancel.done"), onError: failed })
-        }}
-      />
+      <CancelOrderDialog order={order} open={dialog === "cancel"} onOpenChange={close} />
     </>
   )
 }

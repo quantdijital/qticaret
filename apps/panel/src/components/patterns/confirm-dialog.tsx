@@ -8,6 +8,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 import { cn } from "@/lib/utils"
 
@@ -20,6 +21,8 @@ interface ConfirmDialogProps {
   confirmLabel: string
   destructive?: boolean
   onConfirm: () => void
+  /** What else to know before deciding, under the description. */
+  children?: ReactNode
 }
 
 /** Asks before an action that cannot be taken back. */
@@ -31,6 +34,7 @@ export function ConfirmDialog({
   confirmLabel,
   destructive = false,
   onConfirm,
+  children,
 }: ConfirmDialogProps) {
   const { t } = useTranslation()
   return (
@@ -40,6 +44,7 @@ export function ConfirmDialog({
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
+        {children}
         <AlertDialogFooter>
           <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
           <AlertDialogAction

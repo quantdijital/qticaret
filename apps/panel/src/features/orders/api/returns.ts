@@ -13,13 +13,22 @@ export interface ReturnLine {
 }
 
 /**
+ * Why a line is outside the right of withdrawal: the product's mark
+ * (F13.6), an add-on made to the buyer's wish (adr/0052 §8), or a gift
+ * card line one of whose cards was spent (adr/0025 Ek 2026-11-03).
+ */
+export type WithdrawalExclusion = "product" | "personal_addon" | "gift_card_used"
+
+/**
  * A line a request asks back, marked when it is outside the right of
  * withdrawal as `/admin/orders/:id/returnable` marks it, read when the
- * request is (the product's mark, F13.6, or an add-on made to the buyer's
- * wish, adr/0052 §8): back only as faulty or wrong.
+ * request is: back only as faulty or wrong; a spent gift card not at all.
  */
 export interface ReturnRequestLine extends ReturnLine {
   withdrawal_excluded: boolean
+  withdrawal_excluded_reason: WithdrawalExclusion | null
+  /** A gift card line; the queue's list does not say it yet, the order's lines do. */
+  gift_card?: boolean
 }
 
 /** A line asked back for another variant (adr/0032 §6), named for staff. */
@@ -84,14 +93,14 @@ export const returnRequestsQuery = (filters: {
       ),
   })
 
-/** The order's lines by id, to name what is asked back. */
+/** The order's lines by id, to name what is asked back; the metadata tells a gift card line. */
 export const returnLinesQuery = (orderId: string) =>
   queryOptions({
     queryKey: [...KEY, "lines", orderId],
     queryFn: async () =>
       (
         await sdk.admin.order.retrieve(orderId, {
-          fields: "items.id,items.title,items.variant_title",
+          fields: "items.id,items.title,items.variant_title,items.metadata",
         })
       ).order.items,
   })
@@ -103,6 +112,8 @@ function useReturnMutation<T, R = unknown>(run: (input: T) => Promise<R>) {
     onSettled: async () => {
       await client.invalidateQueries({ queryKey: KEY })
       await client.invalidateQueries({ queryKey: ["orders"] })
+      // A gift card withdrawal voids cards (adr/0025 Ek 2026-11-03)
+      await client.invalidateQueries({ queryKey: ["gift-cards"] })
     },
   })
 }
@@ -110,13 +121,20 @@ function useReturnMutation<T, R = unknown>(run: (input: T) => Promise<R>) {
 const url = (id: string, action: string) =>
   `/admin/return-requests/${encodeURIComponent(id)}/${action}`
 
-/** Approves a request; for an exchange the shopper owes on, staff say they collected it. */
+/**
+ * Approves a request; for an exchange the shopper owes on, staff say they
+ * collected it. A gift card withdrawal is received and refunded at once: a
+ * refund that failed comes back as its reason ("refund" tries it again).
+ */
 export const useApproveReturn = () =>
   useReturnMutation(({ id, collected }: { id: string; collected?: boolean }) =>
-    sdk.client.fetch(url(id, "approve"), {
-      method: "POST",
-      body: collected === undefined ? {} : { difference_collected: collected },
-    })
+    sdk.client.fetch<{ return_request: ReturnRequest; refund_error?: string | null }>(
+      url(id, "approve"),
+      {
+        method: "POST",
+        body: collected === undefined ? {} : { difference_collected: collected },
+      }
+    )
   )
 
 export const useRejectReturn = () =>
@@ -177,9 +195,13 @@ export interface Returnable {
     title: string | null
     variant_title: string | null
     variant_id: string | null
+    /** Units left; a gift card line's are its cards, none once one was spent. */
     returnable: number
     /** Outside the right of withdrawal (F13.4): back only as faulty, never exchanged. */
     withdrawal_excluded: boolean
+    withdrawal_excluded_reason: WithdrawalExclusion | null
+    /** A gift card line: asked on its own, as money back; its cards voided, nothing sent back. */
+    gift_card: boolean
     /** The product's other variants, for an exchange. */
     variants: { id: string; title: string | null }[]
   }[]
@@ -192,9 +214,23 @@ export const returnableQuery = (orderId: string) =>
       sdk.client.fetch<Returnable>(`/admin/orders/${encodeURIComponent(orderId)}/returnable`),
   })
 
-/** The request's lines outside the right of withdrawal, by id, as the request carries them. */
-export const excludedLinesOf = (request: Pick<ReturnRequest, "items">): ReadonlySet<string> =>
-  new Set(request.items.filter((item) => item.withdrawal_excluded).map((item) => item.line_item_id))
+/** The request's lines outside the right of withdrawal, by id and why, as the request carries them. */
+export const excludedLinesOf = (
+  request: Pick<ReturnRequest, "items">
+): ReadonlyMap<string, WithdrawalExclusion | null> =>
+  new Map(
+    request.items
+      .filter((item) => item.withdrawal_excluded)
+      .map((item) => [item.line_item_id, item.withdrawal_excluded_reason])
+  )
+
+/** Why the request's first line outside the right of withdrawal is; undefined when none is. */
+export const exclusionOf = (
+  request: Pick<ReturnRequest, "items">
+): WithdrawalExclusion | null | undefined => {
+  const line = request.items.find((item) => item.withdrawal_excluded)
+  return line ? line.withdrawal_excluded_reason : undefined
+}
 
 export interface OpenRequest {
   kind: "return" | "exchange"

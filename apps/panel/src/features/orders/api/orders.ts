@@ -1,5 +1,6 @@
 import { keepPreviousData, queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
 import type { Lifecycle } from "@/features/dashboard/api/overview"
+import { cancelOrder } from "@/features/orders/api/cancel"
 import { sdk } from "@/lib/sdk"
 
 export const ORDER_STAGES = [
@@ -288,7 +289,7 @@ export const useMarkDelivered = (id: string) =>
     }
   })
 
-export const useCancelOrder = (id: string) => useOrderMutation(() => sdk.admin.order.cancel(id))
+export const useCancelOrder = (id: string) => useOrderMutation(() => cancelOrder(id))
 
 /** A money refund: units of lines (and the shipping), or a free amount in lira. */
 export interface RefundRequest {

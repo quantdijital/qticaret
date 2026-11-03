@@ -23,6 +23,8 @@ import {
 } from "@/features/orders/api/returns"
 import type { ReturnReason, ReturnRequest } from "@/features/orders/api/returns"
 import { NonWithdrawableBadge } from "@/features/orders/components/non-withdrawable-badge"
+import { GiftReturnNote } from "@/features/orders/detail/gift-return-dialog"
+import { giftLineIds } from "@/features/orders/return-rules"
 import { errorText } from "@/lib/errors"
 
 const R = "orders.returns"
@@ -129,6 +131,8 @@ export function ReceiveReturnDialog({
     request.kind === "return" && SHOP_FAULT.includes(request.reason)
   )
   const byId = new Map((lines.data ?? []).map((line) => [line.id, line]))
+  // A gift card withdrawal is received when approved; one shown here is said so all the same
+  const gifts = giftLineIds(lines.data)
   const sound = linesOf(counts, "sound")
   const damaged = linesOf(counts, "damaged")
   // Sound and damaged together never more than asked: the other gives way
@@ -174,7 +178,9 @@ export function ReceiveReturnDialog({
                   <span className="flex min-w-0 flex-1 flex-col">
                     <span className="flex min-w-0 items-center gap-2">
                       <span className="truncate text-sm font-medium">{line?.title ?? "—"}</span>
-                      {excluded.has(item.line_item_id) ? <NonWithdrawableBadge /> : null}
+                      {excluded.has(item.line_item_id) ? (
+                        <NonWithdrawableBadge reason={excluded.get(item.line_item_id)} />
+                      ) : null}
                     </span>
                     {line?.variant_title ? (
                       <span className="truncate text-xs text-muted-foreground">
@@ -205,6 +211,7 @@ export function ReceiveReturnDialog({
             })}
           </ul>
         </div>
+        {request.items.some((item) => gifts.has(item.line_item_id)) ? <GiftReturnNote /> : null}
         {/* A swap gives no money back for the parcel: the new one goes free */}
         {request.kind === "return" ? (
           <label className="flex items-start gap-3 text-sm">
@@ -233,7 +240,7 @@ export function ReceiveReturnDialog({
                 {
                   onSuccess: (answer) => {
                     if (answer.refund_error) {
-                      toast.warning(answer.refund_error)
+                      toast.warning(t(`${R}.refundFailed`, { reason: answer.refund_error }))
                     } else {
                       toast.success(t(`${R}.refunded`))
                     }

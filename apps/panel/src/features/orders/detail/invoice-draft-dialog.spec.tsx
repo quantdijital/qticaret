@@ -89,6 +89,21 @@ describe("InvoiceDraftDialog", () => {
     expect(screen.getByText("₺305,90")).toBeInTheDocument()
   })
 
+  it("names a sale the gift cards paid in full as the gift card intermediary (ODEMEARACISI)", async () => {
+    renderDialog({
+      draft: { ...draft, internet_sale: { ...draft.internet_sale, payment: "gift_card" } },
+      problems: [],
+    })
+
+    const payment = (await screen.findByText("Ödeme şekli")).closest("div")
+    const platform = screen.getByText("Ödeme aracısı").closest("div")
+    if (!payment || !platform) {
+      throw new Error("the sale's rows are not shown")
+    }
+    expect(within(payment).getByText("Hediye kartı")).toBeInTheDocument()
+    expect(within(platform).getByText("Hediye kartı")).toBeInTheDocument()
+  })
+
   it("says what is missing when the draft cannot be made", async () => {
     renderDialog({ draft: null, problems: ["einvoice.address_missing"] })
 

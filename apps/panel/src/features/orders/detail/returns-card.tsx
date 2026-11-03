@@ -4,13 +4,12 @@ import { useTranslation } from "react-i18next"
 import { SectionCard } from "@/components/patterns/section-card"
 import { StatusBadge } from "@/components/patterns/status-badge"
 import type { StatusTone } from "@/components/patterns/status-badge"
-import { returnRequestsQuery } from "@/features/orders/api/returns"
+import { exclusionOf, returnRequestsQuery } from "@/features/orders/api/returns"
 import type { ReturnStatus } from "@/features/orders/api/returns"
 import { NonWithdrawableBadge } from "@/features/orders/components/non-withdrawable-badge"
 import { ReturnActions } from "@/features/orders/components/return-actions"
 import type { Open } from "@/features/orders/components/return-actions"
-import { ApproveExchangeDialog } from "@/features/orders/detail/exchange-dialog"
-import { ReceiveReturnDialog, RejectReturnDialog } from "@/features/orders/detail/return-dialogs"
+import { ReturnDialogHost } from "@/features/orders/components/return-dialog-host"
 import { differenceText } from "@/features/orders/exchange-text"
 import { formatDateTime, formatMoney } from "@/lib/format"
 
@@ -54,8 +53,8 @@ export function ReturnsCard({ orderId }: { orderId: string }) {
                 {t(row.kind === "exchange" ? `${R}.open.exchange` : `${R}.open.return`)}
                 <StatusBadge tone={TONE[row.status]}>{t(`${R}.status.${row.status}`)}</StatusBadge>
                 {/* Such a line is taken back only as faulty or wrong: said before it is decided */}
-                {row.items.some((item) => item.withdrawal_excluded) ? (
-                  <NonWithdrawableBadge />
+                {exclusionOf(row) !== undefined ? (
+                  <NonWithdrawableBadge reason={exclusionOf(row)} />
                 ) : null}
               </span>
               <span className="text-xs text-muted-foreground">
@@ -75,15 +74,7 @@ export function ReturnsCard({ orderId }: { orderId: string }) {
           </li>
         ))}
       </ul>
-      {open?.kind === "reject" ? (
-        <RejectReturnDialog request={open.request} onClose={close} />
-      ) : null}
-      {open?.kind === "exchange" ? (
-        <ApproveExchangeDialog request={open.request} onClose={close} />
-      ) : null}
-      {open?.kind === "receive" ? (
-        <ReceiveReturnDialog request={open.request} onClose={close} />
-      ) : null}
+      <ReturnDialogHost open={open} onClose={close} />
     </SectionCard>
   )
 }

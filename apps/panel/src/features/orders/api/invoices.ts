@@ -22,10 +22,18 @@ export interface InvoiceRecord {
   last_error: string | null
   has_pdf: boolean
   total: string
+  /**
+   * A sale's gift card lines, kept off the invoice: money taken in advance
+   * (avans, adr/0025 Ek 2026-11-03), exact lira; null when it sold none.
+   */
+  advance?: string | null
   program_difference: number | null
   created_at: string
-  /** A return that needed no document: which of the accountant's exceptions. */
-  waived_reason?: WaiverReason | null
+  /**
+   * No document needed: a return's exception (the accountant's), or a sale
+   * of gift cards alone (`advance_only`: no invoice, its money an advance).
+   */
+  waived_reason?: WaiverReason | typeof ADVANCE_ONLY | null
   /** In a list: the order's number. */
   order_display_id?: number | null
 }
@@ -45,8 +53,15 @@ export const INVOICE_STATUSES = [
   "cancelled",
   "waived",
 ] as const
+/** The exceptions staff may pick for a return's document. */
 export const WAIVER_REASONS = ["payment_institution", "signed_return_section"] as const
 export type WaiverReason = (typeof WAIVER_REASONS)[number]
+/** A sale of gift cards alone: no invoice, its money an advance (adr/0025 Ek 2026-11-03). */
+export const ADVANCE_ONLY = "advance_only"
+
+/** The advance a sale kept off its invoice, when there is one (more than zero). */
+export const advanceOf = (invoice: Pick<InvoiceRecord, "advance">): string | null =>
+  invoice.advance && Number(invoice.advance) > 0 ? invoice.advance : null
 export const INVOICE_PAGE_SIZE = 20
 export type InvoiceStatus = (typeof INVOICE_STATUSES)[number]
 

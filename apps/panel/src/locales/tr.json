@@ -1859,10 +1859,11 @@
         "title": "Aylık muhasebe paketi",
         "hint": "Seçilen ayın kayıtları tek zip dosyasında: bir Excel dosyası ve aynı tablolar CSV olarak.",
         "contents": {
-          "sales": "Satışlar: sipariş başına, KDV oranına göre matrah ve KDV",
+          "sales": "Satışlar: sipariş başına, KDV oranına göre matrah ve KDV (hediye kartı satışları hariç)",
           "returns": "İadeler: yapılan iadeler, ödeme yöntemiyle",
           "collections": "Tahsilatlar: alınan ödemeler, ödeme yöntemiyle",
-          "vat": "KDV özeti: oran başına matrah ve KDV"
+          "vat": "KDV özeti: oran başına matrah ve KDV",
+          "giftCards": "Hediye kartları: sipariş başına satılan kart (avans) ve kullanılan kart, ay toplamıyla"
         },
         "privacy": "Bireysel müşterilerin adı pakette yer almaz; kurumsal müşterilerin unvanı ve VKN'si yer alır. Her paket denetim kaydına düşer.",
         "month": "Ay",
@@ -3273,7 +3274,12 @@
     "cancel": {
       "title": "#{{number}} iptal edilsin mi?",
       "description": "Sipariş iptal edilir ve ayrılan stok geri döner. Bu işlem geri alınamaz.",
-      "done": "Sipariş iptal edildi."
+      "done": "Sipariş iptal edildi.",
+      "gift": {
+        "issued": "Bu siparişte hediye kartı var. Kartların hiçbiri kullanılmadıysa iptal kartları kapatır (bakiyeleri sıfırlanır) ve parasını iade eder. Kartlardan biri harcandıysa ya da kapatıldıysa sipariş iptal edilemez.",
+        "pending": "Bu siparişte hediye kartı var; kartlar henüz üretilmedi. Sipariş iptal edilirse kart üretilmez."
+      },
+      "giftUsed": "Sipariş iptal edilemedi: hediye kartlarından biri harcandı ya da kapatıldı; kartlar alıcıya ait. Diğer ürünler için para iadesi ya da iade talebi kullanın."
     },
     "detail": {
       "title": "Sipariş",
@@ -3526,7 +3532,23 @@
         "submit": "Talebi aç",
         "done": "Talep açıldı; müşteriye e-posta gönderildi.",
         "excludedReason": "Seçtiğiniz ürünlerden biri cayma hakkı dışında; yalnızca hasarlı, yanlış ya da açıklamasına uymayan ürün nedeniyle iade alınabilir.",
-        "excludedExchange": "Seçtiğiniz ürünlerden biri cayma hakkı dışında; değişim yapılamaz. Kusurluysa iade olarak açın."
+        "excludedExchange": "Seçtiğiniz ürünlerden biri cayma hakkı dışında; değişim yapılamaz. Kusurluysa iade olarak açın.",
+        "giftBadge": "Hediye kartı",
+        "leftCards_one": "{{count}} kart iade edilebilir",
+        "leftCards_other": "{{count}} kart iade edilebilir",
+        "giftSeparate": "Hediye kartı kalemleri ayrı bir talepte ve yalnızca para iadesi olarak istenebilir.",
+        "giftUsed": "Bu hediye kartı kaleminin kartlarından harcama yapıldığı için cayma hakkı kullanılamaz."
+      },
+      "refundFailed": "Para iadesi yapılamadı: {{reason}} İşlemler menüsündeki \"Para iadesini tekrar dene\" ile yeniden deneyin.",
+      "gift": {
+        "note": "Hediye kartı iadesi: kartlar iptal edilir, para iadesi hemen yapılır; kargo beklenmez.",
+        "title": "#{{number}} hediye kartı iadesi onaylansın mı?",
+        "description": "Onaylanınca istenen adet kadar kullanılmamış kart kapatılır (bakiyesi sıfırlanır), talep teslim alındı sayılır ve para iade edilir. Bu işlem geri alınamaz.",
+        "cards_one": "{{count}} kart",
+        "cards_other": "{{count}} kart",
+        "confirm": "Kartları iptal et ve parayı iade et",
+        "done": "Kartlar iptal edildi, para iade edildi.",
+        "refundFailed": "Kartlar iptal edildi ama para iadesi yapılamadı: {{reason}} İşlemler menüsündeki \"Para iadesini tekrar dene\" ile yeniden deneyin."
       }
     },
     "edit": {
@@ -3707,7 +3729,7 @@
           "card": "Kredi kartı / banka kartı",
           "bank_transfer": "EFT / havale",
           "cash_on_delivery": "Kapıda ödeme",
-          "gift_card": "Ödeme aracısı (hediye kartı, mağaza kredisi)",
+          "gift_card": "Hediye kartı",
           "other": "Diğer"
         },
         "line": "Açıklama",
@@ -3779,7 +3801,11 @@
       "exchanges": {
         "title": "Değişim faturaları",
         "hint": "Değişimde gönderilen ürün kendi satış faturasıyla kesilir; geri gelen ürünün belgesi aşağıdaki iade belgelerindedir."
-      }
+      },
+      "advance": "Avans (hediye kartı)",
+      "advanceAmount": "Avans (hediye kartı) {{amount}}",
+      "advanceOnly": "Yalnız hediye kartı: fatura yok, avans",
+      "advanceHint": "Hediye kartı satırları faturaya girmez; tutarları avanstır, KDV'si kart harcanınca o alışverişin faturasında doğar."
     },
     "fraud": {
       "queue": "İnceleme",
@@ -3812,6 +3838,19 @@
         "phone_many_emails": "Aynı telefonla çok e-posta",
         "disposable_email": "Geçici e-posta",
         "failed_payments": "Başarısız ödeme denemeleri"
+      }
+    },
+    "nonWithdrawableReasons": {
+      "product": {
+        "text": "Bu üründe cayma hakkı yok (hijyen ya da kişiye özel ürün); yalnızca hasarlı, yanlış ya da açıklamasına uymayan ürün olarak iade alınır."
+      },
+      "personal_addon": {
+        "short": "kişiye özel",
+        "text": "Alıcının isteğine göre hazırlanan bir eki var (kişiye özel); yalnızca hasarlı, yanlış ya da açıklamasına uymayan ürün olarak iade alınır."
+      },
+      "gift_card_used": {
+        "short": "kart kullanıldı",
+        "text": "Hediye kartlarından birinden harcama yapıldı; bu kalemde cayma hakkı kullanılamaz."
       }
     }
   },

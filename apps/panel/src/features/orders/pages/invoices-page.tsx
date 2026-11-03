@@ -9,7 +9,13 @@ import { Pagination } from "@/components/patterns/pagination"
 import { ErrorState } from "@/components/patterns/states"
 import { StatusBadge } from "@/components/patterns/status-badge"
 import type { StatusTone } from "@/components/patterns/status-badge"
-import { INVOICE_PAGE_SIZE, INVOICE_STATUSES, invoicesQuery } from "@/features/orders/api/invoices"
+import {
+  ADVANCE_ONLY,
+  INVOICE_PAGE_SIZE,
+  INVOICE_STATUSES,
+  advanceOf,
+  invoicesQuery,
+} from "@/features/orders/api/invoices"
 import type { InvoiceRecord, InvoiceStatus } from "@/features/orders/api/invoices"
 import { errorText } from "@/lib/errors"
 import { formatDateTime, formatMoney } from "@/lib/format"
@@ -74,7 +80,13 @@ export function InvoicesPage() {
       key: "status",
       header: t(`${V}.columns.status`),
       cell: (row) => (
-        <StatusBadge tone={TONE[row.status]}>{t(`${V}.status.${row.status}`)}</StatusBadge>
+        <span className="flex flex-col items-start gap-1">
+          <StatusBadge tone={TONE[row.status]}>{t(`${V}.status.${row.status}`)}</StatusBadge>
+          {/* Gift cards alone: no invoice, an advance (adr/0025 Ek 2026-11-03) */}
+          {row.status === "waived" && row.waived_reason === ADVANCE_ONLY ? (
+            <span className="text-xs text-muted-foreground">{t(`${V}.advanceOnly`)}</span>
+          ) : null}
+        </span>
       ),
     },
     {
@@ -108,7 +120,19 @@ export function InvoicesPage() {
       key: "total",
       header: t(`${V}.columns.total`),
       align: "right",
-      cell: (row) => formatMoney(row.total, "try"),
+      cell: (row) => {
+        const advance = advanceOf(row)
+        return (
+          <span className="flex flex-col items-end gap-0.5">
+            {formatMoney(row.total, "try")}
+            {advance ? (
+              <span className="text-xs text-muted-foreground">
+                {t(`${V}.advanceAmount`, { amount: formatMoney(advance, "try") })}
+              </span>
+            ) : null}
+          </span>
+        )
+      },
     },
   ]
   return (

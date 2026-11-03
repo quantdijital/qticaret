@@ -12,7 +12,9 @@ const retrieveMock = vi.hoisted(() => vi.fn())
 vi.mock("@/lib/sdk", () => ({
   sdk: { client: { fetch: fetchMock }, admin: { order: { retrieve: retrieveMock } } },
 }))
-vi.mock("sonner", () => ({ toast: { success: vi.fn(), error: vi.fn(), warning: vi.fn() } }))
+const toast = vi.hoisted(() => ({ success: vi.fn(), error: vi.fn(), warning: vi.fn() }))
+
+vi.mock("sonner", () => ({ toast }))
 
 const request: ReturnRequest = {
   id: "rreq_1",
@@ -24,7 +26,14 @@ const request: ReturnRequest = {
   status: "approved",
   reason: "damaged",
   note: null,
-  items: [{ line_item_id: "ordli_1", quantity: 2, withdrawal_excluded: false }],
+  items: [
+    {
+      line_item_id: "ordli_1",
+      quantity: 2,
+      withdrawal_excluded: false,
+      withdrawal_excluded_reason: null,
+    },
+  ],
   decision_note: null,
   return_code: "123456789012",
   return_label_file_id: null,
@@ -107,8 +116,18 @@ describe("ReceiveReturnDialog (adr/0032)", () => {
     open({
       ...request,
       items: [
-        { line_item_id: "ordli_1", quantity: 2, withdrawal_excluded: false },
-        { line_item_id: "ordli_2", quantity: 1, withdrawal_excluded: true },
+        {
+          line_item_id: "ordli_1",
+          quantity: 2,
+          withdrawal_excluded: false,
+          withdrawal_excluded_reason: null,
+        },
+        {
+          line_item_id: "ordli_2",
+          quantity: 1,
+          withdrawal_excluded: true,
+          withdrawal_excluded_reason: null,
+        },
       ],
     })
 
@@ -117,5 +136,50 @@ describe("ReceiveReturnDialog (adr/0032)", () => {
     expect(screen.getByText("Şef bıçağı").closest("li")).not.toHaveTextContent("Cayma dışı")
     expect(screen.getAllByText("Cayma dışı")).toHaveLength(1)
     expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it("says a refund that failed in words, with how to try again", async () => {
+    fetchMock.mockResolvedValue({ refund_error: "Ödeme sağlayıcısı iadeyi kabul etmedi." })
+    open(request)
+
+    await screen.findByLabelText("Şef bıçağı için sağlam gelen adet")
+    await userEvent.click(screen.getByRole("button", { name: "Teslim al" }))
+
+    await waitFor(() => {
+      expect(toast.warning).toHaveBeenCalledWith(
+        'Para iadesi yapılamadı: Ödeme sağlayıcısı iadeyi kabul etmedi. İşlemler menüsündeki "Para iadesini tekrar dene" ile yeniden deneyin.'
+      )
+    })
+  })
+
+  it("says a gift card line is not waited for and names why a line is outside withdrawal", async () => {
+    retrieveMock.mockResolvedValue({
+      order: {
+        items: [
+          { id: "ordli_1", title: "Şef bıçağı", metadata: null },
+          { id: "ordli_2", title: "Hediye kartı", metadata: { qt_gift_cards: [] } },
+        ],
+      },
+    })
+    open({
+      ...request,
+      items: [
+        {
+          line_item_id: "ordli_1",
+          quantity: 1,
+          withdrawal_excluded: true,
+          withdrawal_excluded_reason: "personal_addon",
+        },
+        {
+          line_item_id: "ordli_2",
+          quantity: 1,
+          withdrawal_excluded: false,
+          withdrawal_excluded_reason: null,
+        },
+      ],
+    })
+
+    expect(await screen.findByText(/kargo beklenmez/)).toBeInTheDocument()
+    expect(screen.getByText("Cayma dışı · kişiye özel")).toBeInTheDocument()
   })
 })

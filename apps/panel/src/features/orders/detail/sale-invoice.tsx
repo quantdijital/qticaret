@@ -5,12 +5,17 @@ import { toast } from "sonner"
 import type { StatusTone } from "@/components/patterns/status-badge"
 import { StatusBadge } from "@/components/patterns/status-badge"
 import { Button } from "@/components/ui/button"
-import { invoicePdfUrl, useRetryInvoice } from "@/features/orders/api/invoices"
+import {
+  ADVANCE_ONLY,
+  advanceOf,
+  invoicePdfUrl,
+  useRetryInvoice,
+} from "@/features/orders/api/invoices"
 import type { InvoiceRecord } from "@/features/orders/api/invoices"
 import { InvoiceDraftDialog } from "@/features/orders/detail/invoice-draft-dialog"
 import { InvoiceEntryDialog } from "@/features/orders/detail/invoice-entry-dialog"
 import { errorText } from "@/lib/errors"
-import { formatDateTime } from "@/lib/format"
+import { formatDateTime, formatMoney } from "@/lib/format"
 
 const V = "orders.invoice"
 
@@ -72,6 +77,9 @@ export function SaleInvoice({
     }
   }
   const external = invoice.provider === "external"
+  // Gift card lines stay off the invoice: their money is an advance (adr/0025 Ek 2026-11-03)
+  const advance = advanceOf(invoice)
+  const advanceOnly = invoice.status === "waived" && invoice.waived_reason === ADVANCE_ONLY
   return (
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center gap-2">
@@ -88,7 +96,13 @@ export function SaleInvoice({
         {invoice.issued_at ? (
           <Row label={t(`${V}.issuedAt`)} value={formatDateTime(invoice.issued_at)} />
         ) : null}
+        {advance ? <Row label={t(`${V}.advance`)} value={formatMoney(advance, "try")} /> : null}
       </dl>
+      {advanceOnly || advance ? (
+        <p className="text-[13px] text-muted-foreground">
+          {t(advanceOnly ? `${V}.advanceOnly` : `${V}.advanceHint`)}
+        </p>
+      ) : null}
       {invoice.status === "failed" ? (
         <p className="text-[13px] text-destructive-text">
           {t(`${V}.reasons.${(invoice.last_error ?? "").replace(/\./g, "_")}`, {

@@ -1859,10 +1859,11 @@
         "title": "Monthly accounting package",
         "hint": "The chosen month's records in one zip: an Excel file and the same tables as CSV.",
         "contents": {
-          "sales": "Sales: per order, base and VAT by VAT rate",
+          "sales": "Sales: per order, base and VAT by VAT rate (gift card sales left out)",
           "returns": "Refunds: money given back, by payment method",
           "collections": "Collections: payments taken, by payment method",
-          "vat": "VAT summary: base and VAT per rate"
+          "vat": "VAT summary: base and VAT per rate",
+          "giftCards": "Gift cards: per order, cards sold (advance) and cards spent, with the month's totals"
         },
         "privacy": "Individual customers' names are not in it; corporate customers' registered names and tax ids are. Each package is recorded in the audit log.",
         "month": "Month",
@@ -3273,7 +3274,12 @@
     "cancel": {
       "title": "Cancel #{{number}}?",
       "description": "The order is canceled and its reserved stock returns. This cannot be undone.",
-      "done": "Order canceled."
+      "done": "Order canceled.",
+      "gift": {
+        "issued": "This order has gift cards. If none was used, canceling voids them (their balance set to zero) and refunds their money. Once one was spent or closed, the order cannot be canceled.",
+        "pending": "This order has gift cards that are not issued yet; if it is canceled, none will be."
+      },
+      "giftUsed": "The order could not be canceled: a gift card from it was spent or closed, and the cards belong to their recipient. Use a refund or a return request for the other items."
     },
     "detail": {
       "title": "Order",
@@ -3526,7 +3532,23 @@
         "submit": "Open the request",
         "done": "Request opened; the shopper was e-mailed.",
         "excludedReason": "One of the chosen products is outside the right of withdrawal; it comes back only as damaged, wrong or not as described.",
-        "excludedExchange": "One of the chosen products is outside the right of withdrawal and cannot be exchanged. If it is faulty, open a return."
+        "excludedExchange": "One of the chosen products is outside the right of withdrawal and cannot be exchanged. If it is faulty, open a return.",
+        "giftBadge": "Gift card",
+        "leftCards_one": "{{count}} card can be returned",
+        "leftCards_other": "{{count}} cards can be returned",
+        "giftSeparate": "Gift card lines are asked for in a request of their own, and only as money back.",
+        "giftUsed": "A card of this gift card line has been spent, so its right of withdrawal is gone."
+      },
+      "refundFailed": "The refund failed: {{reason}} Try again with \"Try the refund again\" in the actions menu.",
+      "gift": {
+        "note": "Gift card return: the cards are voided and the money is refunded at once; no parcel is waited for.",
+        "title": "Approve the gift card return of #{{number}}?",
+        "description": "Once approved, as many unused cards as asked are closed (their balance set to zero), the request counts as received and the money is refunded. This cannot be undone.",
+        "cards_one": "{{count}} card",
+        "cards_other": "{{count}} cards",
+        "confirm": "Void the cards and refund",
+        "done": "Cards voided, money refunded.",
+        "refundFailed": "The cards were voided but the refund failed: {{reason}} Try again with \"Try the refund again\" in the actions menu."
       }
     },
     "edit": {
@@ -3707,7 +3729,7 @@
           "card": "Credit / debit card",
           "bank_transfer": "EFT / bank transfer",
           "cash_on_delivery": "Cash on delivery",
-          "gift_card": "Payment intermediary (gift card, store credit)",
+          "gift_card": "Gift card",
           "other": "Other"
         },
         "line": "Description",
@@ -3779,7 +3801,11 @@
       "exchanges": {
         "title": "Exchange invoices",
         "hint": "The item sent in an exchange is invoiced as a sale of its own; the document for what came back is under return documents below."
-      }
+      },
+      "advance": "Advance (gift card)",
+      "advanceAmount": "Advance (gift card) {{amount}}",
+      "advanceOnly": "Gift cards only: no invoice, an advance",
+      "advanceHint": "Gift card lines stay off the invoice; their money is an advance, its VAT due on the invoice of what the card buys."
     },
     "fraud": {
       "queue": "Review",
@@ -3812,6 +3838,19 @@
         "phone_many_emails": "Many e-mails with one phone",
         "disposable_email": "Throwaway e-mail",
         "failed_payments": "Failed payment attempts"
+      }
+    },
+    "nonWithdrawableReasons": {
+      "product": {
+        "text": "This product has no right of withdrawal (hygiene or made to order); it comes back only as damaged, wrong or not as described."
+      },
+      "personal_addon": {
+        "short": "made to order",
+        "text": "It has an add-on made to the buyer's wish; it comes back only as damaged, wrong or not as described."
+      },
+      "gift_card_used": {
+        "short": "card used",
+        "text": "A card of this gift card line has been spent; its right of withdrawal is gone."
       }
     }
   },

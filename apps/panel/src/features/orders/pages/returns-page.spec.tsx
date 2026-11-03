@@ -26,7 +26,14 @@ const request = (more: Partial<ReturnRequest>): ReturnRequest => ({
   status: "requested",
   reason: "damaged",
   note: null,
-  items: [{ line_item_id: "ordli_1", quantity: 1, withdrawal_excluded: false }],
+  items: [
+    {
+      line_item_id: "ordli_1",
+      quantity: 1,
+      withdrawal_excluded: false,
+      withdrawal_excluded_reason: null,
+    },
+  ],
   decision_note: null,
   return_code: null,
   return_label_file_id: null,
@@ -64,8 +71,18 @@ describe("ReturnsPage (F7.9, adr/0032)", () => {
           id: "rreq_1",
           order_display_id: 1042,
           items: [
-            { line_item_id: "ordli_1", quantity: 1, withdrawal_excluded: false },
-            { line_item_id: "ordli_2", quantity: 1, withdrawal_excluded: true },
+            {
+              line_item_id: "ordli_1",
+              quantity: 1,
+              withdrawal_excluded: false,
+              withdrawal_excluded_reason: null,
+            },
+            {
+              line_item_id: "ordli_2",
+              quantity: 1,
+              withdrawal_excluded: true,
+              withdrawal_excluded_reason: null,
+            },
           ],
         }),
         request({ id: "rreq_2", order_id: "order_2", order_display_id: 1043 }),
@@ -85,5 +102,41 @@ describe("ReturnsPage (F7.9, adr/0032)", () => {
     expect(fetchMock).toHaveBeenCalledWith("/admin/return-requests", {
       query: { status: "requested", limit: 50, offset: 0 },
     })
+  })
+
+  it("says why a request's line is outside the right of withdrawal", async () => {
+    fetchMock.mockResolvedValue({
+      return_requests: [
+        request({
+          items: [
+            {
+              line_item_id: "ordli_3",
+              quantity: 1,
+              withdrawal_excluded: true,
+              withdrawal_excluded_reason: "gift_card_used",
+            },
+          ],
+        }),
+        request({
+          id: "rreq_2",
+          order_id: "order_2",
+          order_display_id: 1043,
+          items: [
+            {
+              line_item_id: "ordli_4",
+              quantity: 1,
+              withdrawal_excluded: true,
+              withdrawal_excluded_reason: "personal_addon",
+            },
+          ],
+        }),
+      ],
+      count: 2,
+    })
+    renderPage()
+
+    expect(await screen.findByText("#1042")).toBeInTheDocument()
+    expect(rowOf(1042).getByText("Cayma dışı · kart kullanıldı")).toBeInTheDocument()
+    expect(rowOf(1043).getByText("Cayma dışı · kişiye özel")).toBeInTheDocument()
   })
 })

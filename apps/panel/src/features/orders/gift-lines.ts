@@ -60,3 +60,29 @@ export function giftLineOf(metadata: unknown): GiftLine | null {
   const cards = cardsOf(metadata["qt_gift_cards"])
   return recipient || cards.length > 0 ? { recipient, cards } : null
 }
+
+/**
+ * Whether the line was sold as a gift card, as the server tells it
+ * (`soldAsGiftCard`): its recipient or its cards recorded, even once an
+ * erasure left only `{ erased: true }` of the recipient.
+ */
+export const soldAsGiftCard = (metadata: unknown): boolean =>
+  isRow(metadata) && ("qt_gift" in metadata || "qt_gift_cards" in metadata)
+
+/**
+ * What an order's cancel does to its gift cards (adr/0025 Ek 2026-11-03):
+ * `issued`, cards were made (voided when all are untouched, the cancel
+ * refused once one was spent); `pending`, none yet (none will be); null,
+ * no gift card line.
+ */
+export function orderGiftCards(
+  items: readonly ({ metadata?: unknown } | null | undefined)[] | null | undefined
+): "issued" | "pending" | null {
+  const gifts = (items ?? []).filter((item) => item && soldAsGiftCard(item.metadata))
+  if (gifts.length === 0) {
+    return null
+  }
+  return gifts.some((item) => (giftLineOf(item?.metadata)?.cards.length ?? 0) > 0)
+    ? "issued"
+    : "pending"
+}

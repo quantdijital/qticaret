@@ -10,14 +10,13 @@ import { Pagination } from "@/components/patterns/pagination"
 import { ErrorState } from "@/components/patterns/states"
 import { StatusBadge } from "@/components/patterns/status-badge"
 import type { StatusTone } from "@/components/patterns/status-badge"
-import { RETURN_PAGE_SIZE, returnRequestsQuery } from "@/features/orders/api/returns"
+import { RETURN_PAGE_SIZE, exclusionOf, returnRequestsQuery } from "@/features/orders/api/returns"
 import type { ReturnRequest, ReturnStatus } from "@/features/orders/api/returns"
 import { NonWithdrawableBadge } from "@/features/orders/components/non-withdrawable-badge"
 import { ReturnActions } from "@/features/orders/components/return-actions"
 import type { Open } from "@/features/orders/components/return-actions"
-import { ApproveExchangeDialog } from "@/features/orders/detail/exchange-dialog"
+import { ReturnDialogHost } from "@/features/orders/components/return-dialog-host"
 import { differenceText } from "@/features/orders/exchange-text"
-import { ReceiveReturnDialog, RejectReturnDialog } from "@/features/orders/detail/return-dialogs"
 import { errorText } from "@/lib/errors"
 import { formatDateTime, formatMoney } from "@/lib/format"
 
@@ -99,12 +98,15 @@ export function ReturnsPage() {
       key: "status",
       header: t(`${R}.columns.status`),
       // A line outside the right of withdrawal comes back only faulty or wrong: said in the queue
-      cell: (row) => (
-        <span className="flex flex-wrap items-center gap-1.5">
-          <StatusBadge tone={TONE[row.status]}>{t(`${R}.status.${row.status}`)}</StatusBadge>
-          {row.items.some((item) => item.withdrawal_excluded) ? <NonWithdrawableBadge /> : null}
-        </span>
-      ),
+      cell: (row) => {
+        const exclusion = exclusionOf(row)
+        return (
+          <span className="flex flex-wrap items-center gap-1.5">
+            <StatusBadge tone={TONE[row.status]}>{t(`${R}.status.${row.status}`)}</StatusBadge>
+            {exclusion !== undefined ? <NonWithdrawableBadge reason={exclusion} /> : null}
+          </span>
+        )
+      },
     },
     {
       key: "code",
@@ -177,30 +179,12 @@ export function ReturnsPage() {
           </>
         )}
       </section>
-      {open?.kind === "reject" ? (
-        <RejectReturnDialog
-          request={open.request}
-          onClose={() => {
-            setOpen(null)
-          }}
-        />
-      ) : null}
-      {open?.kind === "exchange" ? (
-        <ApproveExchangeDialog
-          request={open.request}
-          onClose={() => {
-            setOpen(null)
-          }}
-        />
-      ) : null}
-      {open?.kind === "receive" ? (
-        <ReceiveReturnDialog
-          request={open.request}
-          onClose={() => {
-            setOpen(null)
-          }}
-        />
-      ) : null}
+      <ReturnDialogHost
+        open={open}
+        onClose={() => {
+          setOpen(null)
+        }}
+      />
     </div>
   )
 }

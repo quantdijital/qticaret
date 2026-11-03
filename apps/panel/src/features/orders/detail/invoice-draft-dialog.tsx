@@ -103,6 +103,7 @@ function ReturnOfPanel({ draft }: { draft: InvoiceDraft }) {
 function DraftView({ draft }: { draft: InvoiceDraft }) {
   const { t } = useTranslation()
   const { buyer, internet_sale: sale, shipment } = draft
+  const gift = sale.payment === "gift_card"
   const place = [buyer.district, buyer.city, buyer.postal_code].filter(Boolean).join(" / ")
   return (
     <div className="flex min-w-0 flex-col gap-4">
@@ -132,7 +133,8 @@ function DraftView({ draft }: { draft: InvoiceDraft }) {
             rows={[
               [t(`${V}.url`), sale.url],
               [t(`${V}.payment`), t(`${V}.payments.${sale.payment}`)],
-              [t(`${V}.platform`), sale.platform ?? "—"],
+              // A card paying in full: e-Arşiv's ODEMEARACISI, the intermediary named as Paraşüt names it
+              [t(`${V}.platform`), sale.platform ?? (gift ? t(`${V}.payments.gift_card`) : "—")],
               [t(`${V}.paidOn`), formatDate(sale.paid_on)],
               [
                 t(`${V}.carrier`),

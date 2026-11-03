@@ -33,8 +33,9 @@ function recentMonths(now: Date = new Date()) {
 
 /**
  * The month's package for the accountant (F11.5, adr/0039 §5): sales by
- * VAT rate, refunds, collections and the VAT summary, as one zip (an
- * Excel file and the same tables as CSV), made on the server.
+ * VAT rate, refunds, collections, the VAT summary and gift cards sold and
+ * spent (adr/0025 Ek 2026-11-03), as one zip (an Excel file and the same
+ * tables as CSV), made on the server.
  */
 export function AccountingPackageCard({ className }: { className?: string }) {
   const { t } = useTranslation()
@@ -70,7 +71,7 @@ export function AccountingPackageCard({ className }: { className?: string }) {
     >
       <div className="flex h-full flex-col gap-3">
         <ul className="flex list-disc flex-col gap-1 pl-5 text-[13px] text-muted-foreground">
-          {(["sales", "returns", "collections", "vat"] as const).map((key) => (
+          {(["sales", "returns", "collections", "vat", "giftCards"] as const).map((key) => (
             <li key={key}>{t(`${A}.contents.${key}`)}</li>
           ))}
         </ul>

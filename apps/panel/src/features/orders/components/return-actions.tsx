@@ -1,4 +1,6 @@
+import { useQueryClient } from "@tanstack/react-query"
 import { EllipsisVertical } from "lucide-react"
+import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
@@ -8,14 +10,23 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useApproveReturn, useRetryRefund, useReturnLabel } from "@/features/orders/api/returns"
+import {
+  returnLinesQuery,
+  useApproveReturn,
+  useRetryRefund,
+  useReturnLabel,
+} from "@/features/orders/api/returns"
 import type { ReturnRequest } from "@/features/orders/api/returns"
+import { giftLineIds, isGiftRequest } from "@/features/orders/return-rules"
 import { errorText } from "@/lib/errors"
 
 const R = "orders.returns"
 
-/** The dialog a request's action opens. */
-export type Open = { kind: "reject" | "receive" | "exchange"; request: ReturnRequest } | null
+/** The dialog a request's action opens; `gift`: a gift card withdrawal's approval. */
+export type Open = {
+  kind: "reject" | "receive" | "exchange" | "gift"
+  request: ReturnRequest
+} | null
 
 /** A request's actions by where it stands (adr/0032): decide, receive, refund again, label. */
 export function ReturnActions({
@@ -29,7 +40,29 @@ export function ReturnActions({
   const approve = useApproveReturn()
   const retry = useRetryRefund()
   const label = useReturnLabel()
+  const client = useQueryClient()
+  const [checking, setChecking] = useState(false)
   const failed = (failure: unknown) => toast.error(errorText(t, failure))
+  // A gift card withdrawal voids the cards and refunds at once: asked first (adr/0025 Ek 2026-11-03)
+  const giftRequest = async (): Promise<boolean | null> => {
+    if (isGiftRequest(request)) {
+      return true
+    }
+    setChecking(true)
+    try {
+      // Whether a line is a gift card never changes: a cached read will do
+      const lines = await client.query({
+        ...returnLinesQuery(request.order_id),
+        staleTime: "static",
+      })
+      return isGiftRequest(request, giftLineIds(lines))
+    } catch (failure) {
+      failed(failure)
+      return null
+    } finally {
+      setChecking(false)
+    }
+  }
   const items: { key: string; label: string; run: () => void }[] = []
   if (request.status === "requested") {
     items.push(
@@ -42,10 +75,16 @@ export function ReturnActions({
             onOpen({ kind: "exchange", request })
             return
           }
-          approve.mutate(
-            { id: request.id },
-            { onSuccess: () => toast.success(t(`${R}.approved`)), onError: failed }
-          )
+          void giftRequest().then((gift) => {
+            if (gift) {
+              onOpen({ kind: "gift", request })
+            } else if (gift === false) {
+              approve.mutate(
+                { id: request.id },
+                { onSuccess: () => toast.success(t(`${R}.approved`)), onError: failed }
+              )
+            }
+          })
         },
       },
       {
@@ -116,7 +155,7 @@ export function ReturnActions({
             size="icon-sm"
             variant="outline"
             aria-label={t(`${R}.actions`)}
-            disabled={approve.isPending || retry.isPending}
+            disabled={approve.isPending || retry.isPending || checking}
           >
             <EllipsisVertical />
           </Button>

@@ -129,6 +129,36 @@ describe("InvoiceCard", () => {
     })
   })
 
+  it("shows the gift cards' advance kept off the invoice (adr/0025 Ek 2026-11-03)", async () => {
+    renderCard(
+      invoice({
+        status: "issued",
+        number: "SHT2026000000042",
+        document_type: "e_archive",
+        advance: "500.00",
+      })
+    )
+
+    const row = (await screen.findByText("Avans (hediye kartı)")).closest("div")
+    expect(row).toHaveTextContent("₺500,00")
+    expect(screen.getByText(/Hediye kartı satırları faturaya girmez/)).toBeInTheDocument()
+  })
+
+  it("says an order of gift cards alone gets no invoice, only an advance", async () => {
+    renderCard(invoice({ status: "waived", waived_reason: "advance_only", advance: "250.00" }))
+
+    expect(await screen.findByText("Gerekmedi")).toBeInTheDocument()
+    expect(screen.getByText("Yalnız hediye kartı: fatura yok, avans")).toBeInTheDocument()
+    expect(screen.getByText("Avans (hediye kartı)").closest("div")).toHaveTextContent("₺250,00")
+  })
+
+  it("shows no advance row when the order sold no gift card", async () => {
+    renderCard(invoice({ status: "issued", number: "SHT2026000000042", advance: null }))
+
+    expect(await screen.findByText("SHT2026000000042")).toBeInTheDocument()
+    expect(screen.queryByText("Avans (hediye kartı)")).toBeNull()
+  })
+
   it("says none was opened yet", async () => {
     renderCard(null)
     expect(await screen.findByText(/Henüz fatura yok/)).toBeInTheDocument()
