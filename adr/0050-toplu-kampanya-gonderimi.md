@@ -146,7 +146,7 @@ Rakiplerin hepsinde var, bizde yok: mağaza bir segmente kampanya e-postası ya 
   - SMS saat penceresi ve şikâyet eşiği durdurur.
 
   Birim testleri: e-posta işleyicisinde kaçış, SMS parça sayacı, utm yalnız mağaza alan adına.
-- **Belgeler:** KVKK envanteri (`campaign_recipient`, abone adresinin amacı); adr/0038 M11'e not; mali/hukuki: alt bilgi ve ret metni danışman onayı bekler.
+- **Belgeler:** KVKK envanteri (`campaign_recipient`, abone adresinin amacı); adr/0038 M11'e not; mali/hukuki: alt bilgi ve ret metni **kullanıcı onayladı (2026-11-03: "onaylıyorum")**; danışman yokken bu onayla yayında, danışman gelince yeniden bakılır.
 
 ## Boyut ve bağımlılıklar
 
@@ -248,7 +248,7 @@ Kitle bir kaynak dizisidir: `[{ kind: "segment" | "group", id }, { kind: "all_co
 - Netgsm'in Türkçe kodlama kuralı (155/149 karakter, ş ğ ı İ Ş Ğ ç iki karakter) resmî belgeden doğrulanmadı: belge sayfası çevrim dışıydı.
 - Resend'in saniyede 2 isteklik sınırı canlı hesapta doğrulanacak.
 - adr/0038 M11'e amaç genişlemesi notu eklenecek. KVKK envanterine eklendi.
-- Alt bilgi ve ret metni danışman onayı bekliyor.
+- ~~Alt bilgi ve ret metni danışman onayı bekliyor.~~ Kullanıcı onayladı (2026-11-03).
 - ~~SMS parça sayacı (`smsPartsOf`: kayıttaki 3 parça denetimi ve `audience-preview`'daki `sms.parts`) mağaza bağlantılarına eklenen utm'yi saymıyor, `{ad}` için de 18 harflik selamlamayı kullanıyor (müşteri adı 40 harfe kadar olabilir). Bağlantılı bir metin 3 parçada kabul edilip 4 parça gidebilir. Önizlemedeki `parts` gidecek metni sayar; ikisi bağlantılı metinde ayrışabilir.~~ Kapandı (2026-11-03):
   - Tek sayaç var: `workflows/campaigns/sms-length.ts` `longestSms`. Metni gönderimdeki gibi kurar (`prepareCampaign → personalise → renderCampaign`): mağaza bağlantılarına kampanyanın utm'si eklenir, mağaza adı ve ret metni yazılır, sonra `smsLength` sayar.
   - Kayıttaki denetim (`checkContent`), `audience-preview`'daki `sms.parts` ve önizlemenin `parts`'ı bu işlevi kullanır; üçü ayrışamaz. Kayıtta utm kodu önce üretilir, metin onunla sayılır; düzenlemede kayıttaki kod kullanılır. Eşik değişmedi: 3 parçayı aşan metin 400 `campaigns.sms_too_long`.

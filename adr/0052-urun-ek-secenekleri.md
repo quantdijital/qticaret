@@ -145,7 +145,7 @@ Bizde hazır olanlar: vitrin `qt_` ile başlayan metadata'yı yazamaz (`refuseRe
 
 - **Boyut: M, yaklaşık 4 gün** (testler dahil): backend 2, panel 1, vitrin 0,5–1.
 - **Bağımlılıklar:** `catalog-extension` ve iade kuralı (F13.6); ödeme başlatma ve tamamlama kancaları (adr/0026, adr/0029); e-fatura satırları (adr/0034); sipariş e-postası (adr/0036); KVKK silmesi (L9); vitrin ürün sayfası (D5).
-- **Kod dışı:** KDV sorusu mali müşavire; cayma uyarısı ve ön bilgilendirme metni danışmana (danışman yok; taslak işaretli kalır).
+- **Kod dışı:** KDV sorusu mali müşavire; cayma uyarısı ve ön bilgilendirme metni danışmana (danışman yok; taslak işaretli kalır). **Kullanıcı (2026-11-03): "kişiye özel cayma hakkı yoktur doğru"** — cümle ve kapsam onaylandı; TASLAK işareti avukat gelene kadar kalır.
 
 ## Kullanıcıya sorular
 

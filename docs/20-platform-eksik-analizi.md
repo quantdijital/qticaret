@@ -61,7 +61,7 @@ S = Shopify, I = ikas, TR = Ticimax / IdeaSoft / T-Soft.
 | Aras, Yurtiçi doğrudan | 🟡 | ✅ | ✅ | ✅ | |
 | MNG, Sürat, PTT, HepsiJet | 🟡 | ✅ | ✅ | 🟡 | Geliver üzerinden |
 | Etiket, takip, kargoya hazır listesi | ✅ | ✅ | ✅ | ✅ | |
-| İade/değişim akışı | ✅ | ✅ | ✅ | ✅ | iade faturası mali müşaviri bekliyor |
+| İade/değişim akışı | ✅ | ✅ | ✅ | ✅ | iade belgesi ve değişim faturası mali müşavirin 5.4 cevabıyla bitti (E6b, 2026-10-31) |
 | Sipariş düzenleme, iç not | ✅ | ✅ | ✅ | ✅ | |
 | Dolandırıcılık kontrolü | ✅ | ❌ | 🟡 | ✅ | |
 | e-Fatura / e-Arşiv | 🟡 | ✅ | ✅ | 🟡 | Paraşüt; ikinci entegratör yok |
@@ -127,7 +127,7 @@ S = Shopify, I = ikas, TR = Ticimax / IdeaSoft / T-Soft.
 | Vitrin dönüşüm olayları (GA4, Meta; çerez iznine bağlı) | S | ücretsiz hesaplar | reklam veren her mağaza ilk gün ister | gece |
 | Mobil alt gezinme | S | — | trafik %75+ mobil | gece |
 | CWV / Lighthouse kapanışı (D12) | S–M | — | SEO vaadinin kanıtı | gece sonu |
-| Arama kalitesi | M | Meilisearch: yeni servis (kullanıcı kararı) | "bulamıyorum" terk sebebi | ara çözüm: Postgres trigram (servis yok), gece |
+| Arama kalitesi | M | Meilisearch: yeni servis (kullanıcı kararı) | "bulamıyorum" terk sebebi | ara çözüm: Postgres trigram (servis yok), gece. **Karar (2026-11-03, kullanıcı: "önerin ne ise uygula"):** Meilisearch ertelendi — mevcut yazım toleranslı arama yeterli; 3000+ ürün ya da "bulamıyorum" şikâyeti görülürse yeniden |
 | Toplu e-posta/SMS kampanyası (segment → şablon → gönder, İYS süzgeci, kota) | M | Resend/Netgsm kullanım ücreti | TR esnafının haftalık rutini | gece sonu ya da sabah planı (ADR) |
 | Panelden sipariş + ödeme bağlantısı | M | — | Instagram/WhatsApp satışı ana kanal | sabah planı (ADR) |
 | Hediye kartı satışı ve bakiye | S–M | mali müşavir: KDV anı | altyapı hazır, yarım görünüyor | gece sonu; KDV notu açık |
