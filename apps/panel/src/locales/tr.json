@@ -1301,17 +1301,14 @@
       },
       "returns": {
         "title": "İade koşulları",
-        "description": "Müşterinin cayma hakkını kullanabileceği süre ve iade kargosunu kimin ödediği. İade politikası metni ve ürünlerin arama motorlarına verilen bilgisi bunları gösterir.",
+        "description": "Müşterinin cayma hakkını kullanabileceği süre. İade politikası metni ve ürünlerin arama motorlarına verilen bilgisi bunu gösterir.",
         "days": "Cayma süresi (gün)",
         "daysHint": "Teslimattan sonra; yasa en az {{min}} gün ister. Daha uzun süre verebilirsiniz.",
         "daysInvalid": "14 ile 365 arasında bir tam sayı girin.",
-        "payer": "İade kargosunu ödeyen",
-        "payerHint": "Ücretsiz iade arama sonuçlarında öne çıkar.",
-        "payers": {
-          "shop": "Mağaza (ücretsiz iade)",
-          "customer": "Müşteri"
-        },
-        "excludedHint": "Hijyen gereği açılınca iade edilemeyen ya da kişiye özel hazırlanan ürünleri ürün sayfasında \"Cayma hakkı dışında\" olarak işaretleyin; bunlar yalnızca kusurlu çıkarsa geri alınır."
+        "payer": "İade kargosu",
+        "payerRule": "Cayma iadelerinde iade kargosu mağazaya aittir (Mesafeli Sözleşmeler Yönetmeliği md. 12).",
+        "payerHint": "Müşteriden iade masrafı istenemez; ürünlerin arama motorlarına verilen bilgisi ücretsiz iade der.",
+        "excludedHint": "Ambalajı açılınca hijyen gereği iade alınamayan fiziksel ürünü ürün sayfasında \"Cayma hakkı dışında\" olarak işaretleyin: talep alınır, ambalajı açılmış gelen teslim almada reddedilir. Dijital ürün ve hizmette bu işaret cayma hakkını tümden kaldırır. Kişiye özel hazırlanan ürün için ek seçeneği \"Cayma dışı\" yapın."
       },
       "tabs": {
         "carriers": "Kargo firmaları",
@@ -2912,7 +2909,7 @@
         "service": "Hizmet"
       },
       "withdrawalExcluded": "Cayma hakkı dışında",
-      "withdrawalExcludedHint": "Hijyen ürünü ya da kişiye özel hazırlanıyor; yalnızca kusurlu çıkarsa geri alınır.",
+      "withdrawalExcludedHint": "Fiziksel üründe mühürlü ürün uyarısıdır (MSY md. 15/1-ç): iade talebi alınır, koruyucu ambalajı açılmış gelen teslim almada reddedilir. Dijital ürün ve hizmet ise cayma hakkı dışında kalır (md. 15/1-ğ, h). Kişiye özel hazırlanan ürün (md. 15/1-b) için ek seçeneği \"Cayma dışı\" işaretleyin.",
       "giftCard": "Hediye kartı",
       "giftCardHint": "Varyantlar kartın tutarlarıdır. Ödeme alınınca her adet için bir kart üretilir ve alıcıya e-postayla gider. Ürün dijital olur, kargo gerekmez; varyantlarda stok takibini kapatmanız önerilir.",
       "giftCardFeatures": "Özelliklere git",
@@ -2970,7 +2967,7 @@
       "required": "Zorunlu",
       "requiredHint": "Yalnız ücretsiz ek seçenek zorunlu olabilir: ürünün sayfada, feed'lerde ve arama sonuçlarında görünen fiyatı ek seçeneksiz fiyattır.",
       "nonWithdrawable": "Cayma dışı",
-      "nonWithdrawableHint": "Kişiye özel hazırlanır: bu seçenekle alınan ürün cayma hakkı dışındadır (MSY md. 15/1-ç); yalnız kusurlu ya da yanlış gelirse geri alınır.",
+      "nonWithdrawableHint": "Kişiye özel hazırlanır: bu seçenekle alınan ürün cayma hakkı dışındadır (MSY md. 15/1-b); yalnız kusurlu ya da yanlış gelirse geri alınır.",
       "free": "Ücretsiz",
       "requiredShort": "Zorunlu",
       "rules": {
@@ -3221,6 +3218,10 @@
   },
   "orders": {
     "nonWithdrawable": "Cayma dışı",
+    "sealedGoods": {
+      "badge": "Mühürlü ürün: açıldıysa iade edilmez",
+      "text": "Koruyucu ambalajı açılmadıysa cayma hakkıyla iade edilir; açılmış gelirse teslim almada reddedin, parası iade edilmez (MSY md. 15/1-ç)."
+    },
     "description": "Gelen siparişler; önce hazırlanacak olanlar",
     "views": "Sipariş görünümleri",
     "search": "Sipariş no, ad ya da e-posta ile ara",
@@ -3515,11 +3516,33 @@
       "lineColumn": "Ürün",
       "soundColumn": "Sağlam",
       "damagedColumn": "Hasarlı",
+      "refusedColumn": "Açılmış",
       "soundOf": "{{name}} için sağlam gelen adet",
       "damagedOf": "{{name}} için hasarlı gelen adet",
+      "refusedOf": "{{name}} için ambalajı açılmış gelen adet",
+      "refusedHint": "Mühürlü üründe koruyucu ambalajı açılmış gelen adetleri \"Açılmış\" sütununa yazın: stoğa dönmez, parası iade edilmez ve müşteriye geri gönderilir (MSY md. 15/1-ç).",
       "refundShipping": "Kargo ücretini de iade et",
-      "refundShippingHint": "Hasarlı, yanlış ya da tarif edildiği gibi olmayan üründe önerilir; karar sizin.",
+      "refundShippingHints": {
+        "law": "Cayma hakkı içindeki ürünün iadesinde siparişin kargo ücreti yasa gereği iade edilir (Mesafeli Sözleşmeler Yönetmeliği md. 12/1); sipariş başına bir kez.",
+        "choice": "Yalnız cayma hakkı dışındaki ürünler döndü; karar sizin. Hasarlı, yanlış ya da tarif edildiği gibi olmayan üründe önerilir.",
+        "none": "Kabul edilen ürün yok; para iadesi yapılmaz."
+      },
       "refunded": "Ürünler teslim alındı, para iade edildi.",
+      "refusedOnly": "Teslim alındı: ambalajı açılmış ürünler reddedildi, para iadesi yapılmadı. Ürünü müşteriye geri gönderin.",
+      "refusalReasons": {
+        "unsealed": "ambalajı açılmış"
+      },
+      "facts": {
+        "handedOver": "Kargoya teslim: {{date}}",
+        "due": "Yasal son gün: {{date}}",
+        "dueNear_one": "Yasal son gün: {{date}} ({{count}} gün kaldı)",
+        "dueNear_other": "Yasal son gün: {{date}} ({{count}} gün kaldı)",
+        "dueLate": "Yasal son gün geçti: {{date}}",
+        "refused": "Reddedildi ({{reason}}): {{what}}",
+        "units_one": "{{count}} adet",
+        "units_other": "{{count}} adet",
+        "line": "{{name}} × {{count}}"
+      },
       "retryRefund": "Para iadesini tekrar dene",
       "label": "İade etiketini indir",
       "empty": "Bu durumda iade talebi yok.",
@@ -3866,7 +3889,7 @@
     },
     "nonWithdrawableReasons": {
       "product": {
-        "text": "Bu üründe cayma hakkı yok (hijyen ya da kişiye özel ürün); yalnızca hasarlı, yanlış ya da açıklamasına uymayan ürün olarak iade alınır."
+        "text": "Bu üründe cayma hakkı yok (teslim edilen dijital içerik ya da ifa edilen hizmet); yalnızca hasarlı, yanlış ya da açıklamasına uymayan ürün olarak iade alınır."
       },
       "personal_addon": {
         "short": "kişiye özel",
@@ -5621,6 +5644,10 @@
     "fraudReview": {
       "title": "#{{number}} incelemede (puan {{score}})",
       "description": "Kargoya vermeden önce Siparişler > İnceleme'den onaylayın ya da reddedin."
+    },
+    "returnRefundDeadline": {
+      "title": "Sipariş #{{order}} iadesinde yasal geri ödeme süresi {{date}} tarihinde doluyor",
+      "description": "Para, ürün iade kargosuna verildikten (bilinmiyorsa depoya ulaştıktan) sonra 14 gün içinde iade edilmeli (MSY md. 12/1). Siparişin iade kartından teslim alıp iade edin."
     },
     "einvoiceReturnDocument": {
       "expenseVoucher": {

@@ -18,6 +18,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { isContactSubject } from "@/features/customers/api/contact-messages"
 import { markSeen, notificationsQuery, seenAt } from "@/features/notifications/api"
 import type { AdminNotification } from "@/features/notifications/api"
+import { returnRefundAlert } from "@/features/notifications/return-alert"
 import { paymentLinkAlert } from "@/features/payment-links/components/link-alert"
 import { isConnectable } from "@/features/settings/payment-methods"
 import { formatDate, formatRelative } from "@/lib/format"
@@ -29,9 +30,9 @@ const amount = (value: unknown): number => (typeof value === "number" ? value : 
 /** What an alert says and where it leads, worded here from its data (adr/0020). */
 function useAlertText(data: Record<string, unknown>) {
   const { t } = useTranslation()
-  const paymentLink = paymentLinkAlert(t, data)
-  if (paymentLink) {
-    return paymentLink
+  const alert = paymentLinkAlert(t, data) ?? returnRefundAlert(t, data)
+  if (alert) {
+    return alert
   }
   if (data["kind"] === "low_stock") {
     return {

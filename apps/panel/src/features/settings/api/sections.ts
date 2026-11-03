@@ -110,7 +110,12 @@ export const PLATFORM_PARCEL = { weight_g: 1000, length_cm: 30, width_cm: 20, he
 export interface ReturnsSettings {
   /** The law's 14 days or longer; the return policy's {iade_süresi} reads it. */
   withdrawal_days: number
-  return_shipping: "shop" | "customer"
+  /**
+   * Always the shop since 1.1.2026 (adr/0032 Ek 2026-11-03: MSY md. 12/5,
+   * md. 13/3 repealed): "customer" is refused with 400
+   * `platform_settings.return_shipping_shop_only`. Read, never sent.
+   */
+  return_shipping: "shop"
 }
 
 export const MIN_WITHDRAWAL_DAYS = 14

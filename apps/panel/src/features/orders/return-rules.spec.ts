@@ -12,6 +12,7 @@ const line = (more: Partial<Line>): Line => ({
   returnable: 1,
   withdrawal_excluded: false,
   withdrawal_excluded_reason: null,
+  withdrawal_warning: null,
   gift_card: false,
   variants: [],
   ...more,
@@ -24,11 +25,13 @@ const spentGift = line({
   gift_card: true,
   withdrawal_excluded: true,
   withdrawal_excluded_reason: "gift_card_used",
+  withdrawal_warning: null,
 })
 const engraved = line({
   line_item_id: "item_4",
   withdrawal_excluded: true,
   withdrawal_excluded_reason: "personal_addon",
+  withdrawal_warning: null,
 })
 
 describe("requestProblem: the server's rules said before it refuses", () => {

@@ -15,7 +15,9 @@ import {
 import { excludedLinesOf, returnLinesQuery, useApproveReturn } from "@/features/orders/api/returns"
 import type { ReturnRequest } from "@/features/orders/api/returns"
 import { NonWithdrawableBadge } from "@/features/orders/components/non-withdrawable-badge"
+import { SealedGoodsBadge } from "@/features/orders/components/return-facts"
 import { differenceText } from "@/features/orders/exchange-text"
+import { sealedLinesOf } from "@/features/orders/return-facts"
 import { errorText } from "@/lib/errors"
 
 const R = "orders.returns"
@@ -39,6 +41,8 @@ export function ApproveExchangeDialog({
   const byId = new Map((lines.data ?? []).map((line) => [line.id, line]))
   // Marked when the request is read: a product marked since it was asked
   const excluded = excludedLinesOf(request)
+  // A sealed good swapped comes back unopened too, or is refused at receipt
+  const sealed = sealedLinesOf(request)
   const owes = Number(request.difference ?? 0) > 0
   return (
     <Dialog
@@ -61,11 +65,12 @@ export function ApproveExchangeDialog({
             const line = byId.get(item.line_item_id)
             return (
               <li key={item.line_item_id} className="flex flex-col gap-0.5 px-3 py-2.5 text-sm">
-                <span className="flex min-w-0 items-center gap-2">
+                <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
                   <span className="truncate font-medium">
                     {line?.title ?? "—"} × {item.quantity}
                   </span>
                   {excluded.has(item.line_item_id) ? <NonWithdrawableBadge /> : null}
+                  {sealed.has(item.line_item_id) ? <SealedGoodsBadge /> : null}
                 </span>
                 <span className="text-muted-foreground">
                   {t(`${R}.exchange.swap`, {

@@ -4,10 +4,10 @@ import { useTranslation } from "react-i18next"
 import { SectionCard } from "@/components/patterns/section-card"
 import { StatusBadge } from "@/components/patterns/status-badge"
 import type { StatusTone } from "@/components/patterns/status-badge"
-import { exclusionOf, returnRequestsQuery } from "@/features/orders/api/returns"
+import { returnLinesQuery, returnRequestsQuery } from "@/features/orders/api/returns"
 import type { ReturnStatus } from "@/features/orders/api/returns"
-import { NonWithdrawableBadge } from "@/features/orders/components/non-withdrawable-badge"
 import { ReturnActions } from "@/features/orders/components/return-actions"
+import { ReturnFacts, RequestWithdrawalBadges } from "@/features/orders/components/return-facts"
 import type { Open } from "@/features/orders/components/return-actions"
 import { ReturnDialogHost } from "@/features/orders/components/return-dialog-host"
 import { differenceText } from "@/features/orders/exchange-text"
@@ -34,6 +34,12 @@ export function ReturnsCard({ orderId }: { orderId: string }) {
   const requests = useQuery(returnRequestsQuery({ order_id: orderId }))
   const [open, setOpen] = useState<Open>(null)
   const rows = requests.data?.return_requests ?? []
+  // Refused units are named: the order's lines are read only then
+  const lines = useQuery({
+    ...returnLinesQuery(orderId),
+    enabled: rows.some((row) => (row.refused_items ?? []).length > 0),
+  })
+  const titles = new Map((lines.data ?? []).map((line) => [line.id, line.title]))
   if (rows.length === 0) {
     return null
   }
@@ -52,16 +58,15 @@ export function ReturnsCard({ orderId }: { orderId: string }) {
               <span className="flex flex-wrap items-center gap-2 font-medium">
                 {t(row.kind === "exchange" ? `${R}.open.exchange` : `${R}.open.return`)}
                 <StatusBadge tone={TONE[row.status]}>{t(`${R}.status.${row.status}`)}</StatusBadge>
-                {/* Such a line is taken back only as faulty or wrong: said before it is decided */}
-                {exclusionOf(row) !== undefined ? (
-                  <NonWithdrawableBadge reason={exclusionOf(row)} />
-                ) : null}
+                {/* Back only faulty, or refused if opened: said before it is decided */}
+                <RequestWithdrawalBadges request={row} />
               </span>
               <span className="text-xs text-muted-foreground">
                 {[t(`${R}.reasons.${row.reason}`), formatDateTime(row.created_at), row.return_code]
                   .filter(Boolean)
                   .join(" · ")}
               </span>
+              <ReturnFacts request={row} titles={titles} />
             </div>
             <span className="tabular text-sm">
               {row.refund_amount

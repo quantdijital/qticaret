@@ -32,6 +32,7 @@ const request = (more: Partial<ReturnRequest>): ReturnRequest => ({
       quantity: 1,
       withdrawal_excluded: false,
       withdrawal_excluded_reason: null,
+      withdrawal_warning: null,
     },
   ],
   decision_note: null,
@@ -41,6 +42,10 @@ const request = (more: Partial<ReturnRequest>): ReturnRequest => ({
   damaged_items: null,
   refund_shipping: false,
   refund_amount: null,
+  refused_items: null,
+  handed_over_at: null,
+  received_at: null,
+  refund_due_at: null,
   created_at: "2026-11-02T09:00:00Z",
   ...more,
 })
@@ -76,12 +81,14 @@ describe("ReturnsPage (F7.9, adr/0032)", () => {
               quantity: 1,
               withdrawal_excluded: false,
               withdrawal_excluded_reason: null,
+              withdrawal_warning: null,
             },
             {
               line_item_id: "ordli_2",
               quantity: 1,
               withdrawal_excluded: true,
               withdrawal_excluded_reason: null,
+              withdrawal_warning: null,
             },
           ],
         }),
@@ -114,6 +121,7 @@ describe("ReturnsPage (F7.9, adr/0032)", () => {
               quantity: 1,
               withdrawal_excluded: true,
               withdrawal_excluded_reason: "gift_card_used",
+              withdrawal_warning: null,
             },
           ],
         }),
@@ -127,6 +135,7 @@ describe("ReturnsPage (F7.9, adr/0032)", () => {
               quantity: 1,
               withdrawal_excluded: true,
               withdrawal_excluded_reason: "personal_addon",
+              withdrawal_warning: null,
             },
           ],
         }),
@@ -138,5 +147,85 @@ describe("ReturnsPage (F7.9, adr/0032)", () => {
     expect(await screen.findByText("#1042")).toBeInTheDocument()
     expect(rowOf(1042).getByText("Cayma dışı · kart kullanıldı")).toBeInTheDocument()
     expect(rowOf(1043).getByText("Cayma dışı · kişiye özel")).toBeInTheDocument()
+  })
+
+  it("says the law's clock, refused units and sealed goods, offering no refund when all was refused", async () => {
+    const DAY = 24 * 60 * 60 * 1000
+    const inDays = (days: number) =>
+      new Date(Date.now() + days * DAY - 60 * 60 * 1000).toISOString()
+    const refused = [{ line_item_id: "ordli_1", quantity: 1, reason: "unsealed" as const }]
+    fetchMock.mockResolvedValue({
+      return_requests: [
+        // On its way, handed over: the last day far off
+        request({
+          status: "approved",
+          handed_over_at: "2026-11-01T09:00:00Z",
+          refund_due_at: inDays(10),
+          items: [
+            {
+              line_item_id: "ordli_1",
+              quantity: 1,
+              withdrawal_excluded: false,
+              withdrawal_excluded_reason: null,
+              withdrawal_warning: "sealed_goods",
+            },
+          ],
+        }),
+        // Received and not yet refunded: two days left
+        request({
+          id: "rreq_2",
+          order_display_id: 1043,
+          status: "received",
+          received_items: [{ line_item_id: "ordli_1", quantity: 1 }],
+          refund_due_at: inDays(2),
+        }),
+        // Past the last day
+        request({
+          id: "rreq_3",
+          order_display_id: 1044,
+          status: "approved",
+          refund_due_at: inDays(-1),
+        }),
+        // Refunded: the day no longer matters
+        request({
+          id: "rreq_4",
+          order_display_id: 1045,
+          status: "refunded",
+          refund_due_at: inDays(-3),
+        }),
+        // Every unit refused at receipt: nothing to refund
+        request({
+          id: "rreq_5",
+          order_display_id: 1046,
+          status: "received",
+          received_items: [],
+          damaged_items: [],
+          refused_items: refused,
+          refund_due_at: inDays(5),
+        }),
+      ],
+      count: 5,
+    })
+    renderPage()
+
+    expect(await screen.findByText("#1042")).toBeInTheDocument()
+    expect(rowOf(1042).getByText("Kargoya teslim: 1 Kas 2026")).toBeInTheDocument()
+    expect(rowOf(1042).getByText("Mühürlü ürün: açıldıysa iade edilmez")).toBeInTheDocument()
+    const far = rowOf(1042).getByText(/^Yasal son gün: /)
+    expect(far).toHaveAttribute("data-state", "open")
+    expect(far).not.toHaveClass("text-destructive-text")
+
+    const near = rowOf(1043).getByText(/^Yasal son gün: .+ \(2 gün kaldı\)$/)
+    expect(near).toHaveClass("text-destructive-text")
+    expect(rowOf(1043).queryByText("Mühürlü ürün: açıldıysa iade edilmez")).toBeNull()
+    const late = rowOf(1044).getByText(/^Yasal son gün geçti: /)
+    expect(late).toHaveClass("text-destructive-text")
+    expect(rowOf(1045).queryByText(/Yasal son gün/)).toBeNull()
+
+    expect(rowOf(1046).getByText("Reddedildi (ambalajı açılmış): 1 adet")).toBeInTheDocument()
+    expect(rowOf(1046).queryByText(/Yasal son gün/)).toBeNull()
+    // Received with something taken back still offers the refund again; all refused, nothing
+    expect(rowOf(1043).getByRole("button", { name: "İade talebi işlemleri" })).toBeInTheDocument()
+    expect(rowOf(1046).queryByRole("button", { name: "İade talebi işlemleri" })).toBeNull()
   })
 })

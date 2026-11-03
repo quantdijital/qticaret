@@ -77,3 +77,36 @@ describe("NotificationBell: contact messages (adr/0047)", () => {
     expect(screen.getByText(/Son gün: 1 Ara 2026/)).toBeInTheDocument()
   })
 })
+
+describe("NotificationBell: a return's refund deadline (adr/0032 Ek 2026-11-03)", () => {
+  beforeEach(() => {
+    fetchMock.mockReset()
+    localStorage.clear()
+  })
+
+  it("words the law's last day from its data and leads to the order's returns", async () => {
+    fetchMock.mockResolvedValue({
+      notifications: [
+        alert("noti_4", {
+          kind: "return_refund_deadline",
+          return_request_id: "rreq_1",
+          order_id: "order_1",
+          display_id: "1042",
+          due_at: "2026-11-15T09:00:00.000Z",
+          // The server's own Turkish wording is not shown: the panel words it
+          title: "#1042 siparişinin iadesi için son gün 15 Kasım 2026",
+        }),
+      ],
+    })
+    renderBell()
+
+    await userEvent.click(await screen.findByRole("button", { name: "Bildirimler, 1 yeni" }))
+
+    const title = await screen.findByText(
+      "Sipariş #1042 iadesinde yasal geri ödeme süresi 15 Kas 2026 tarihinde doluyor"
+    )
+    expect(title.closest("a")).toHaveAttribute("href", "/orders/$id")
+    expect(screen.getByText(/14 gün içinde iade edilmeli/)).toBeInTheDocument()
+    expect(screen.queryByText(/son gün 15 Kasım 2026/)).toBeNull()
+  })
+})

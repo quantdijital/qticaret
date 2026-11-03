@@ -1301,17 +1301,14 @@
       },
       "returns": {
         "title": "Return terms",
-        "description": "How long a shopper may withdraw and who pays the return shipping. The return policy text and the products' details for search engines show them.",
+        "description": "How long a shopper may withdraw. The return policy text and the products' details for search engines show it.",
         "days": "Withdrawal period (days)",
         "daysHint": "After delivery; the law asks for at least {{min}} days. You may give more.",
         "daysInvalid": "Enter a whole number from 14 to 365.",
-        "payer": "Return shipping paid by",
-        "payerHint": "Free returns stand out in search results.",
-        "payers": {
-          "shop": "The shop (free returns)",
-          "customer": "The shopper"
-        },
-        "excludedHint": "Mark products that cannot be returned once opened for hygiene, or that are made to order, as \"Outside the right of withdrawal\" on their page; they come back only when faulty."
+        "payer": "Return shipping",
+        "payerRule": "On a withdrawal the return shipping is the shop's (Distance Contracts Regulation art. 12).",
+        "payerHint": "The shopper may not be charged for the return; the products' details for search engines say free returns.",
+        "excludedHint": "Mark a physical product that cannot come back once opened for hygiene as \"Outside the right of withdrawal\" on its page: the request is taken, and one that arrives opened is refused at receipt. On a digital product or a service the mark removes the right outright. For a made-to-order good, mark its add-on \"Outside the right of withdrawal\"."
       },
       "tabs": {
         "carriers": "Carriers",
@@ -2912,7 +2909,7 @@
         "service": "Service"
       },
       "withdrawalExcluded": "Outside the right of withdrawal",
-      "withdrawalExcludedHint": "A hygiene product or made to order; it comes back only when faulty.",
+      "withdrawalExcludedHint": "On a physical product it is the sealed-goods warning (MSY art. 15/1-ç): the return can be requested, and one that arrives with its protective seal opened is refused at receipt. A digital product or a service stays outside the right outright (art. 15/1-ğ, h). For a made-to-order good (art. 15/1-b), mark its add-on \"Outside the right of withdrawal\".",
       "giftCard": "Gift card",
       "giftCardHint": "Its variants are the card's amounts. Once paid, a card is issued for each unit and e-mailed to the recipient. The product becomes digital, with no shipping; turning off stock tracking on its variants is recommended.",
       "giftCardFeatures": "Go to features",
@@ -2970,7 +2967,7 @@
       "required": "Required",
       "requiredHint": "Only a free add-on can be required: the price shown on the page, in feeds and in search results is the price without add-ons.",
       "nonWithdrawable": "Outside the right of withdrawal",
-      "nonWithdrawableHint": "Made to the buyer's wish: a product bought with it is outside the right of withdrawal (MSY art. 15/1-ç) and comes back only if faulty or wrong.",
+      "nonWithdrawableHint": "Made to the buyer's wish: a product bought with it is outside the right of withdrawal (MSY art. 15/1-b) and comes back only if faulty or wrong.",
       "free": "Free",
       "requiredShort": "Required",
       "rules": {
@@ -3221,6 +3218,10 @@
   },
   "orders": {
     "nonWithdrawable": "Non-withdrawable",
+    "sealedGoods": {
+      "badge": "Sealed good: not returnable once opened",
+      "text": "Returnable under the right of withdrawal while its protective seal is unopened; if it arrives opened, refuse it at receipt and it is not refunded (MSY art. 15/1-ç)."
+    },
     "description": "Incoming orders; the ones to pack first",
     "views": "Order views",
     "search": "Order number, name or e-mail",
@@ -3515,11 +3516,33 @@
       "lineColumn": "Product",
       "soundColumn": "Sound",
       "damagedColumn": "Damaged",
+      "refusedColumn": "Opened",
       "soundOf": "Sound units back for {{name}}",
       "damagedOf": "Damaged units back for {{name}}",
+      "refusedOf": "Opened units back for {{name}}",
+      "refusedHint": "For a sealed good, enter the units that arrived with their protective seal opened under \"Opened\": they do not go back in stock, are not refunded and are sent back to the shopper (MSY art. 15/1-ç).",
       "refundShipping": "Refund the shipping too",
-      "refundShippingHint": "Suggested when the item was damaged, wrong or not as described; your call.",
+      "refundShippingHints": {
+        "law": "Returning a product inside the right of withdrawal gives the order's shipping back by law (Distance Contracts Regulation art. 12/1); once per order.",
+        "choice": "Only products outside the right of withdrawal came back; your call. Suggested when damaged, wrong or not as described.",
+        "none": "Nothing is taken back; no money is refunded."
+      },
       "refunded": "Items received, money refunded.",
+      "refusedOnly": "Received: the opened items were refused and nothing was refunded. Send them back to the shopper.",
+      "refusalReasons": {
+        "unsealed": "seal opened"
+      },
+      "facts": {
+        "handedOver": "Handed to the carrier: {{date}}",
+        "due": "Legal deadline: {{date}}",
+        "dueNear_one": "Legal deadline: {{date}} ({{count}} day left)",
+        "dueNear_other": "Legal deadline: {{date}} ({{count}} days left)",
+        "dueLate": "Legal deadline passed: {{date}}",
+        "refused": "Refused ({{reason}}): {{what}}",
+        "units_one": "{{count}} unit",
+        "units_other": "{{count}} units",
+        "line": "{{name}} × {{count}}"
+      },
       "retryRefund": "Try the refund again",
       "label": "Download return label",
       "empty": "No return requests in this state.",
@@ -3866,7 +3889,7 @@
     },
     "nonWithdrawableReasons": {
       "product": {
-        "text": "This product has no right of withdrawal (hygiene or made to order); it comes back only as damaged, wrong or not as described."
+        "text": "This product has no right of withdrawal (digital content delivered or a service performed); it comes back only as damaged, wrong or not as described."
       },
       "personal_addon": {
         "short": "made to order",
@@ -5621,6 +5644,10 @@
     "fraudReview": {
       "title": "#{{number}} held for review (score {{score}})",
       "description": "Approve or turn it down in Orders > Review before it ships."
+    },
+    "returnRefundDeadline": {
+      "title": "Order #{{order}}'s return must be paid back by {{date}}",
+      "description": "The money is due within 14 days of the parcel's handover to the return carrier (or, if unknown, its arrival; MSY art. 12/1). Receive and refund it from the order's returns card."
     },
     "einvoiceReturnDocument": {
       "expenseVoucher": {

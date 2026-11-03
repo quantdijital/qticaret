@@ -32,6 +32,7 @@ const request: ReturnRequest = {
       quantity: 2,
       withdrawal_excluded: false,
       withdrawal_excluded_reason: null,
+      withdrawal_warning: null,
     },
   ],
   decision_note: null,
@@ -41,6 +42,10 @@ const request: ReturnRequest = {
   damaged_items: null,
   refund_shipping: false,
   refund_amount: null,
+  refused_items: null,
+  handed_over_at: null,
+  received_at: null,
+  refund_due_at: null,
   created_at: "2026-10-28T09:00:00Z",
 }
 
@@ -60,7 +65,7 @@ describe("ReceiveReturnDialog (adr/0032)", () => {
     )
   }
 
-  it("receives one sound and one damaged, the shipping offered back for a damaged item", async () => {
+  it("receives one sound and one damaged, with no refused column for a plain line", async () => {
     open(request)
 
     const sound = await screen.findByLabelText("Şef bıçağı için sağlam gelen adet")
@@ -68,6 +73,8 @@ describe("ReceiveReturnDialog (adr/0032)", () => {
     fireEvent.change(screen.getByLabelText("Şef bıçağı için hasarlı gelen adet"), {
       target: { value: "1" },
     })
+    // Only a sealed good is refused for being opened
+    expect(screen.queryByText("Açılmış")).toBeNull()
     await userEvent.click(screen.getByRole("button", { name: "Teslim al" }))
 
     await waitFor(() => {
@@ -76,13 +83,14 @@ describe("ReceiveReturnDialog (adr/0032)", () => {
         body: {
           items: [{ line_item_id: "ordli_1", quantity: 1 }],
           damaged: [{ line_item_id: "ordli_1", quantity: 1 }],
+          refused: [],
           refund_shipping: true,
         },
       })
     })
   })
 
-  it("never counts more than was asked, and leaves the shipping to staff on a change of mind", async () => {
+  it("never counts more than was asked, and gives a change of mind's shipping back by law", async () => {
     open({ ...request, reason: "changed_mind" })
 
     const damaged = await screen.findByLabelText("Şef bıçağı için hasarlı gelen adet")
@@ -90,7 +98,11 @@ describe("ReceiveReturnDialog (adr/0032)", () => {
 
     // Two damaged of two asked: none left sound
     expect(screen.getByLabelText("Şef bıçağı için sağlam gelen adet")).toHaveValue(0)
-    expect(screen.getByRole("checkbox", { name: /Kargo ücretini de iade et/ })).not.toBeChecked()
+    // A line inside the right of withdrawal: the shipping is the law's, not a choice (MSY md. 12/1)
+    const shipping = screen.getByRole("checkbox", { name: /Kargo ücretini de iade et/ })
+    expect(shipping).toBeChecked()
+    expect(shipping).toBeDisabled()
+    expect(screen.getByText(/kargo ücreti yasa gereği iade edilir/)).toBeInTheDocument()
     await userEvent.click(screen.getByRole("button", { name: "Teslim al" }))
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith("/admin/return-requests/rreq_1/receive", {
@@ -98,7 +110,8 @@ describe("ReceiveReturnDialog (adr/0032)", () => {
         body: {
           items: [],
           damaged: [{ line_item_id: "ordli_1", quantity: 2 }],
-          refund_shipping: false,
+          refused: [],
+          refund_shipping: true,
         },
       })
     })
@@ -121,12 +134,14 @@ describe("ReceiveReturnDialog (adr/0032)", () => {
           quantity: 2,
           withdrawal_excluded: false,
           withdrawal_excluded_reason: null,
+          withdrawal_warning: null,
         },
         {
           line_item_id: "ordli_2",
           quantity: 1,
           withdrawal_excluded: true,
           withdrawal_excluded_reason: null,
+          withdrawal_warning: null,
         },
       ],
     })
@@ -169,12 +184,14 @@ describe("ReceiveReturnDialog (adr/0032)", () => {
           quantity: 1,
           withdrawal_excluded: true,
           withdrawal_excluded_reason: "personal_addon",
+          withdrawal_warning: null,
         },
         {
           line_item_id: "ordli_2",
           quantity: 1,
           withdrawal_excluded: false,
           withdrawal_excluded_reason: null,
+          withdrawal_warning: null,
         },
       ],
     })

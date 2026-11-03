@@ -17,6 +17,7 @@ import {
   useReturnLabel,
 } from "@/features/orders/api/returns"
 import type { ReturnRequest } from "@/features/orders/api/returns"
+import { allRefused } from "@/features/orders/return-facts"
 import { giftLineIds, isGiftRequest } from "@/features/orders/return-rules"
 import { errorText } from "@/lib/errors"
 
@@ -105,9 +106,10 @@ export function ReturnActions({
       },
     })
   }
-  // A swap the shop owes nothing on is done once received
+  // A swap the shop owes nothing on is done once received; so is a return whose units were all refused
   if (
     request.status === "received" &&
+    !allRefused(request) &&
     (request.kind === "return" || Number(request.difference ?? 0) < 0)
   ) {
     items.push({

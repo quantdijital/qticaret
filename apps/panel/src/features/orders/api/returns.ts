@@ -13,20 +13,38 @@ export interface ReturnLine {
 }
 
 /**
- * Why a line is outside the right of withdrawal: the product's mark
- * (F13.6), an add-on made to the buyer's wish (adr/0052 §8), or a gift
- * card line one of whose cards was spent (adr/0025 Ek 2026-11-03).
+ * Why a line is outside the right of withdrawal: a digital or service
+ * product marked so (F13.6; MSY md. 15/1-ğ, h), an add-on made to the
+ * buyer's wish (adr/0052 §8; md. 15/1-b), or a gift card line one of whose
+ * cards was spent (adr/0025 Ek 2026-11-03).
  */
 export type WithdrawalExclusion = "product" | "personal_addon" | "gift_card_used"
+
+/**
+ * A line inside the right of withdrawal with a condition (adr/0032 Ek
+ * 2026-11-03): a physical product marked by the shop is a sealed good,
+ * back only with its protective seal unopened (MSY md. 15/1-ç).
+ */
+export type WithdrawalWarning = "sealed_goods"
+
+/** Why units sent back were refused at receipt: a sealed good opened (MSY md. 15/1-ç). */
+export type RefusalReason = "unsealed"
+
+/** Units refused at receipt: never refunded nor asked again, sent back to the shopper. */
+export interface RefusedLine extends ReturnLine {
+  reason: RefusalReason
+}
 
 /**
  * A line a request asks back, marked when it is outside the right of
  * withdrawal as `/admin/orders/:id/returnable` marks it, read when the
  * request is: back only as faulty or wrong; a spent gift card not at all.
+ * A sealed good carries its warning: refused at receipt if opened.
  */
 export interface ReturnRequestLine extends ReturnLine {
   withdrawal_excluded: boolean
   withdrawal_excluded_reason: WithdrawalExclusion | null
+  withdrawal_warning: WithdrawalWarning | null
   /** A gift card line; the queue's list does not say it yet, the order's lines do. */
   gift_card?: boolean
 }
@@ -55,8 +73,20 @@ export interface ReturnRequest {
   return_label_file_id: string | null
   received_items: ReturnLine[] | null
   damaged_items: ReturnLine[] | null
+  /** Sealed goods that came back opened: not refunded, sent back (adr/0032 Ek 2026-11-03). */
+  refused_items: RefusedLine[] | null
+  /** The order's shipping is given back with this request (a withdrawal's by law, MSY md. 12/1). */
   refund_shipping: boolean
   refund_amount: string | null
+  /** When the return carrier took the parcel, from its tracking; null until seen. */
+  handed_over_at: string | null
+  received_at: string | null
+  /**
+   * The law's last day to pay a return back (MSY md. 12/1): 14 days from
+   * the handover, else from arrival; null for an exchange or before either.
+   * The server keeps it after the refund too.
+   */
+  refund_due_at: string | null
   created_at: string
 }
 
@@ -148,6 +178,9 @@ export interface ReceiveInput {
   items: ReturnLine[]
   /** Broken: refunded, not restocked. */
   damaged: ReturnLine[]
+  /** A sealed good's units that came back opened: not refunded (`withdrawal_warning` lines only). */
+  refused: ReturnLine[]
+  /** Heard only when every unit taken back is outside the right of withdrawal (MSY md. 12/1). */
   refund_shipping: boolean
 }
 
@@ -200,6 +233,8 @@ export interface Returnable {
     /** Outside the right of withdrawal (F13.4): back only as faulty, never exchanged. */
     withdrawal_excluded: boolean
     withdrawal_excluded_reason: WithdrawalExclusion | null
+    /** A sealed good: asked back, refused at receipt if opened (MSY md. 15/1-ç). */
+    withdrawal_warning: WithdrawalWarning | null
     /** A gift card line: asked on its own, as money back; its cards voided, nothing sent back. */
     gift_card: boolean
     /** The product's other variants, for an exchange. */

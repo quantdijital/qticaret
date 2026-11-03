@@ -3,7 +3,7 @@ import { render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import type { ReactNode } from "react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import "@/lib/i18n"
+import { i18next } from "@/lib/i18n"
 import type { ProductCatalog } from "@/features/products/api/product-edit"
 import { CatalogCard } from "./catalog-card"
 
@@ -56,6 +56,35 @@ describe("CatalogCard", () => {
         body: { withdrawal_excluded: true },
       })
     })
+  })
+
+  it("explains the mark: a sealed good when physical, out outright when digital or a service", async () => {
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <CatalogCard productId="prod_1" />
+      </QueryClientProvider>
+    )
+    const toggle = await screen.findByRole("switch", { name: "Cayma hakkı dışında" })
+
+    expect(toggle).toHaveAccessibleDescription(
+      /mühürlü ürün uyarısıdır \(MSY md\. 15\/1-ç\): iade talebi alınır, koruyucu ambalajı açılmış gelen teslim almada reddedilir/
+    )
+    expect(toggle).toHaveAccessibleDescription(
+      /Dijital ürün ve hizmet ise cayma hakkı dışında kalır/
+    )
+    expect(toggle).toHaveAccessibleDescription(/Kişiye özel hazırlanan ürün \(md\. 15\/1-b\)/)
+    expect(toggle).not.toHaveAccessibleDescription(/Hijyen ürünü ya da kişiye özel/)
+  })
+
+  it("cites 15/1-b for made-to-order goods in both languages, never 15/1-ç", () => {
+    for (const lng of ["tr", "en"]) {
+      const addon = i18next.t("products.addons.nonWithdrawableHint", { lng })
+      const mark = i18next.t("products.catalog.withdrawalExcludedHint", { lng })
+      expect(addon).toContain("15/1-b")
+      expect(addon).not.toContain("15/1-ç")
+      expect(mark).toContain("15/1-b")
+      expect(mark).toContain("15/1-ç")
+    }
   })
 
   it("offers the age limit once the shop sells to adults only, sending the reason", async () => {

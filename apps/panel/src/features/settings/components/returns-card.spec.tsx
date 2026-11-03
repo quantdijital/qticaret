@@ -28,7 +28,7 @@ describe("ReturnsCard", () => {
     )
   })
 
-  it("refuses fewer days than the law's 14, and saves a longer period the shopper pays back", async () => {
+  it("refuses fewer days than the law's 14, and saves a longer period", async () => {
     renderCard()
     const days = await screen.findByRole("textbox", { name: "Cayma süresi (gün)" })
     expect(days).toHaveValue("14")
@@ -40,16 +40,28 @@ describe("ReturnsCard", () => {
 
     await userEvent.clear(days)
     await userEvent.type(days, "30")
-    await userEvent.click(screen.getByRole("combobox", { name: "İade kargosunu ödeyen" }))
-    await userEvent.click(await screen.findByRole("option", { name: "Müşteri" }))
     await userEvent.click(screen.getByRole("button", { name: "Kaydet" }))
 
+    // Who pays the return is never sent: the server takes only "shop"
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith("/admin/platform-settings/returns", {
         method: "POST",
-        body: { withdrawal_days: 30, return_shipping: "customer" },
+        body: { withdrawal_days: 30 },
       })
     })
+  })
+
+  it("says the return's shipping is the shop's by law, with no control to choose", async () => {
+    renderCard()
+    await screen.findByRole("textbox", { name: "Cayma süresi (gün)" })
+
+    expect(
+      screen.getByText(
+        "Cayma iadelerinde iade kargosu mağazaya aittir (Mesafeli Sözleşmeler Yönetmeliği md. 12)."
+      )
+    ).toBeInTheDocument()
+    expect(screen.queryByRole("combobox")).toBeNull()
+    expect(screen.queryByText("Müşteri")).toBeNull()
   })
 
   // The form keeps dirty values on a background refetch; undo must not

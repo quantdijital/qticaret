@@ -26,6 +26,7 @@ import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { RETURN_REASONS, useOpenReturnRequest } from "@/features/orders/api/returns"
 import type { OpenRequest, ReturnReason, Returnable } from "@/features/orders/api/returns"
 import { NonWithdrawableBadge } from "@/features/orders/components/non-withdrawable-badge"
+import { SealedGoodsBadge } from "@/features/orders/components/return-facts"
 import { GiftReturnNote } from "@/features/orders/detail/gift-return-dialog"
 import { requestProblem } from "@/features/orders/return-rules"
 import { errorText } from "@/lib/errors"
@@ -152,7 +153,7 @@ export function OpenReturnDialog({
                 <li key={line.line_item_id} className="flex flex-col gap-2 px-3 py-2.5">
                   <div className="flex items-center gap-3">
                     <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-                      <span className="flex min-w-0 items-center gap-2">
+                      <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
                         <label htmlFor={inputId} className="truncate text-sm font-medium">
                           {line.title ?? "—"}
                         </label>
@@ -162,6 +163,7 @@ export function OpenReturnDialog({
                         {line.withdrawal_excluded ? (
                           <NonWithdrawableBadge reason={line.withdrawal_excluded_reason} />
                         ) : null}
+                        {line.withdrawal_warning === "sealed_goods" ? <SealedGoodsBadge /> : null}
                       </span>
                       <span className="text-xs text-muted-foreground">
                         {[

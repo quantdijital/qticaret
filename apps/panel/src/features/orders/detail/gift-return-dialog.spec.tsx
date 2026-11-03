@@ -33,6 +33,7 @@ const request: ReturnRequest = {
       quantity: 2,
       withdrawal_excluded: false,
       withdrawal_excluded_reason: null,
+      withdrawal_warning: null,
     },
   ],
   decision_note: null,
@@ -42,6 +43,10 @@ const request: ReturnRequest = {
   damaged_items: null,
   refund_shipping: false,
   refund_amount: null,
+  refused_items: null,
+  handed_over_at: null,
+  received_at: null,
+  refund_due_at: null,
   created_at: "2026-11-03T09:00:00Z",
 }
 
@@ -153,6 +158,7 @@ describe("ReturnActions: approving a gift card withdrawal asks first", () => {
           quantity: 1,
           withdrawal_excluded: false,
           withdrawal_excluded_reason: null,
+          withdrawal_warning: null,
         },
       ],
     }

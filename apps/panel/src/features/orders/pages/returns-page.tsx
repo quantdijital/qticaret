@@ -10,10 +10,10 @@ import { Pagination } from "@/components/patterns/pagination"
 import { ErrorState } from "@/components/patterns/states"
 import { StatusBadge } from "@/components/patterns/status-badge"
 import type { StatusTone } from "@/components/patterns/status-badge"
-import { RETURN_PAGE_SIZE, exclusionOf, returnRequestsQuery } from "@/features/orders/api/returns"
+import { RETURN_PAGE_SIZE, returnRequestsQuery } from "@/features/orders/api/returns"
 import type { ReturnRequest, ReturnStatus } from "@/features/orders/api/returns"
-import { NonWithdrawableBadge } from "@/features/orders/components/non-withdrawable-badge"
 import { ReturnActions } from "@/features/orders/components/return-actions"
+import { ReturnFacts, RequestWithdrawalBadges } from "@/features/orders/components/return-facts"
 import type { Open } from "@/features/orders/components/return-actions"
 import { ReturnDialogHost } from "@/features/orders/components/return-dialog-host"
 import { differenceText } from "@/features/orders/exchange-text"
@@ -97,16 +97,16 @@ export function ReturnsPage() {
     {
       key: "status",
       header: t(`${R}.columns.status`),
-      // A line outside the right of withdrawal comes back only faulty or wrong: said in the queue
-      cell: (row) => {
-        const exclusion = exclusionOf(row)
-        return (
+      // What the law asks of it in the queue: a line back only faulty, a sealed good, the last day
+      cell: (row) => (
+        <span className="flex flex-col gap-1">
           <span className="flex flex-wrap items-center gap-1.5">
             <StatusBadge tone={TONE[row.status]}>{t(`${R}.status.${row.status}`)}</StatusBadge>
-            {exclusion !== undefined ? <NonWithdrawableBadge reason={exclusion} /> : null}
+            <RequestWithdrawalBadges request={row} />
           </span>
-        )
-      },
+          <ReturnFacts request={row} />
+        </span>
+      ),
     },
     {
       key: "code",
