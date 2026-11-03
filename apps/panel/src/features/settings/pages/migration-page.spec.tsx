@@ -3,7 +3,7 @@ import { render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import "@/lib/i18n"
-import type { OldAddress } from "@/features/settings/api/migration"
+import type { OldAddress } from "@/features/settings/api/migration-addresses"
 import { AddressesCard } from "@/features/settings/components/migration/addresses-card"
 import { RunCard } from "@/features/settings/components/migration/run-card"
 

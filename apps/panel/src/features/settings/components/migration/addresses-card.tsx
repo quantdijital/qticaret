@@ -17,8 +17,8 @@ import {
   addressSummaryQuery,
   addressesQuery,
   useAddressJob,
-} from "@/features/settings/api/migration"
-import type { AddressSummary, UrlFilter } from "@/features/settings/api/migration"
+} from "@/features/settings/api/migration-addresses"
+import type { AddressSummary, UrlFilter } from "@/features/settings/api/migration-addresses"
 import { AddressRow } from "@/features/settings/components/migration/address-row"
 import { errorText } from "@/lib/errors"
 import { formatCount } from "@/lib/format"

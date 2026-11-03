@@ -13,8 +13,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { useDecideAddress } from "@/features/settings/api/migration"
-import type { OldAddress } from "@/features/settings/api/migration"
+import { useDecideAddress } from "@/features/settings/api/migration-addresses"
+import type { OldAddress } from "@/features/settings/api/migration-addresses"
 import { errorText } from "@/lib/errors"
 import { formatCount } from "@/lib/format"
 

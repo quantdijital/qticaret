@@ -14,7 +14,7 @@ const TONES: Readonly<Record<MigrationRun["status"], StatusTone>> = {
   failed: "danger",
 }
 // "shopify:magaza.myshopify.com" as the panel names its source
-const SOURCE_KINDS = ["shopify", "feed", "customers", "bundle"] as const
+const SOURCE_KINDS = ["shopify", "wordpress", "feed", "customers", "bundle"] as const
 const sourceOf = (source: string) =>
   SOURCE_KINDS.find((kind) => source === kind || source.startsWith(`${kind}:`)) ?? "bundle"
 

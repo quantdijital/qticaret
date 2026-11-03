@@ -2299,12 +2299,14 @@
         "source": "Source",
         "sources": {
           "shopify": "Shopify",
+          "wordpress": "WordPress / WooCommerce",
           "feed": "Product feed (Ticimax, ikas, IdeaSoft, T-Soft)",
           "customers": "Customer list (xlsx/CSV)",
           "bundle": "Migration bundle (JSON)"
         },
         "hints": {
           "shopify": "Your shop is on Shopify: products, collections, customers, orders and pages are read through your app.",
+          "wordpress": "The file you download in the WordPress admin under Tools > Export > All content. No plugin or API key is needed.",
           "feed": "The old site's Google Merchant XML product feed address; your platform's panel calls it the \"Google product feed\".",
           "customers": "The old platform's customer export, as it is; an e-mail column is enough.",
           "bundle": "The migration file our team prepared for you."
@@ -2337,6 +2339,9 @@
           "consent": "Message consents",
           "order": "Past orders",
           "review": "Reviews",
+          "post_category": "Blog categories",
+          "post_tag": "Blog tags",
+          "post": "Blog posts",
           "page": "Other pages"
         },
         "columns": {
@@ -2358,6 +2363,50 @@
         "connect": "Connect",
         "reconnect": "Connect again",
         "saved": "The Shopify store is connected."
+      },
+      "wordpress": {
+        "file": "Export file",
+        "fileHint": "The XML, or a zip holding it, up to 50 MB. Choose All content: products, variations and images exported apart cannot find each other.",
+        "categoryBase": "Category address prefix",
+        "categoryBaseHint": "The path in front of the old site's category addresses, e.g. /urun-kategori/; / when categories sit at the root. Left empty, it is read from the site's own links; fill it in when the report shows category addresses wrong.",
+        "parcelWarning": "Most WooCommerce shops enter no weight or size for their products. Without a default parcel, every product lacking a weight or size arrives as a draft and its page stays closed until the cutover.",
+        "errors": {
+          "fileRequired": "Choose the export file.",
+          "fileType": "This file is not a WordPress export. Choose a file ending in .xml or .zip.",
+          "fileTooLarge": "The file is larger than 50 MB. Split the export by content type in WordPress and upload each part on its own.",
+          "categoryBase": "Enter a path of one segment: lowercase letters, digits and hyphens, e.g. /urun-kategori/.",
+          "parcel": "Enter all four parcel values above zero, or leave all four empty."
+        },
+        "report": {
+          "tabs": {
+            "counts": "Counts",
+            "attributes": "Attributes",
+            "notMoved": "Not moved"
+          },
+          "attributesNote": "Attributes not used for variations (e.g. steel type) are not moved; they can be written once an attribute template is set up.",
+          "attributesInFile": "Products and values per attribute are on the report's Notlar (notes) sheet.",
+          "noAttributes": "No attributes left behind.",
+          "columns": {
+            "attribute": "Attribute",
+            "products": "Products",
+            "values": "Values"
+          },
+          "addressOnly": "Pages kept only for their old addresses",
+          "addressOnlyHint": "Legal texts, system pages such as cart and account, and the front page do not become content pages. After applying, decide where their old addresses go in the Old addresses card, e.g. /satis-sozlesmesi/ → /yasal/mesafeli-satis-sozlesmesi.",
+          "notMoved": "In the report, not moved",
+          "kinds": {
+            "coupons": "Coupons",
+            "menu_items": "Menu items",
+            "product_tags": "Product tags",
+            "blog_comments": "Blog comments"
+          },
+          "why": {
+            "coupons": "Create them again under Promotions.",
+            "menu_items": "Menus are set up under Storefront > Menus.",
+            "product_tags": "The storefront has no product tag pages.",
+            "blog_comments": "The storefront shows no blog comments."
+          }
+        }
       },
       "runs": {
         "title": "Past runs",

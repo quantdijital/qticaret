@@ -2299,12 +2299,14 @@
         "source": "Kaynak",
         "sources": {
           "shopify": "Shopify",
+          "wordpress": "WordPress / WooCommerce",
           "feed": "Ürün akışı (Ticimax, ikas, IdeaSoft, T-Soft)",
           "customers": "Müşteri listesi (xlsx/CSV)",
           "bundle": "Geçiş paketi (JSON)"
         },
         "hints": {
           "shopify": "Mağazanız Shopify'da: bağlı uygulamanızla ürünler, koleksiyonlar, müşteriler, siparişler ve sayfalar okunur.",
+          "wordpress": "WordPress yönetim panelinde Araçlar > Dışa aktar > Tüm içerik ile indirdiğiniz dosya. Eklenti ya da API anahtarı gerekmez.",
           "feed": "Eski sitenin Google Merchant XML ürün akışının adresi; platform panelinizde \"Google ürün akışı\" olarak bulunur.",
           "customers": "Eski platformun müşteri dışa aktarması, olduğu gibi; e-posta sütunu yeterli.",
           "bundle": "Ekibimizin sizin için hazırladığı geçiş dosyası."
@@ -2337,6 +2339,9 @@
           "consent": "İleti izinleri",
           "order": "Geçmiş siparişler",
           "review": "Yorumlar",
+          "post_category": "Blog kategorileri",
+          "post_tag": "Blog etiketleri",
+          "post": "Blog yazıları",
           "page": "Diğer sayfalar"
         },
         "columns": {
@@ -2358,6 +2363,50 @@
         "connect": "Bağla",
         "reconnect": "Yeniden bağla",
         "saved": "Shopify mağazası bağlandı."
+      },
+      "wordpress": {
+        "file": "Dışa aktarma dosyası",
+        "fileHint": "XML ya da onu tutan zip, en çok 50 MB. Tüm içerik seçilmeli: ürünler, varyasyonlar ve görseller ayrı dışa aktarılırsa birbirini bulamaz.",
+        "categoryBase": "Kategori adres öneki",
+        "categoryBaseHint": "Eski sitede kategori adreslerinin başındaki yol, ör. /urun-kategori/; kategoriler kökteyse /. Boş bırakırsanız sitenin kendi bağlantılarından okunur; raporda kategori adresleri yanlış görünürse doldurun.",
+        "parcelWarning": "WooCommerce'te çoğu mağaza ürünlere ağırlık ve ölçü girmez. Varsayılan paket vermezseniz ağırlığı ya da ölçüsü olmayan her ürün taslak gelir ve sayfası kesime kadar açılmaz.",
+        "errors": {
+          "fileRequired": "Dışa aktarma dosyasını seçin.",
+          "fileType": "Bu dosya bir WordPress dışa aktarması değil. Uzantısı .xml ya da .zip olan dosyayı seçin.",
+          "fileTooLarge": "Dosya 50 MB'tan büyük. Dışa aktarmayı WordPress'te içerik türüne göre parçalara bölüp her parçayı ayrı yükleyin.",
+          "categoryBase": "Tek bölümlük bir yol girin: küçük harf, rakam ve tire, ör. /urun-kategori/.",
+          "parcel": "Paketin dört değerini de sıfırdan büyük girin ya da dördünü de boş bırakın."
+        },
+        "report": {
+          "tabs": {
+            "counts": "Sayılar",
+            "attributes": "Özellikler",
+            "notMoved": "Taşınmayanlar"
+          },
+          "attributesNote": "Varyasyonda kullanılmayan özellikler (ör. çelik türü) taşınmaz; özellik şablonu kurulunca yazılabilir.",
+          "attributesInFile": "Özellik başına ürün ve değer sayısı raporun Notlar sayfasında.",
+          "noAttributes": "Taşınmayan özellik yok.",
+          "columns": {
+            "attribute": "Özellik",
+            "products": "Ürün",
+            "values": "Değer"
+          },
+          "addressOnly": "Yalnızca eski adresi tutulan sayfalar",
+          "addressOnlyHint": "Yasal metinler, sepet ve hesap gibi sistem sayfaları ve ön sayfa içerik sayfası olmaz. Uygulamadan sonra eski adreslerine Eski adresler kartında karar verin, ör. /satis-sozlesmesi/ → /yasal/mesafeli-satis-sozlesmesi.",
+          "notMoved": "Raporda, taşınmadı",
+          "kinds": {
+            "coupons": "Kuponlar",
+            "menu_items": "Menü öğeleri",
+            "product_tags": "Ürün etiketleri",
+            "blog_comments": "Blog yorumları"
+          },
+          "why": {
+            "coupons": "Kampanyalar'dan elle açılır.",
+            "menu_items": "Menüler, Vitrin > Menüler'den kurulur.",
+            "product_tags": "Vitrinde ürün etiketi sayfası yok.",
+            "blog_comments": "Vitrinde blog yorumu yok."
+          }
+        }
       },
       "runs": {
         "title": "Geçmiş çalıştırmalar",
