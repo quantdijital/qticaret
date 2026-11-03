@@ -41,7 +41,7 @@ S = Shopify, I = ikas, TR = Ticimax / IdeaSoft / T-Soft.
 | Çoklu depo | ✅ | ✅ | ✅ | ✅ | |
 | Ön sipariş, düşük stok uyarısı, stok hareketi | ✅ | ✅ | ✅ | ✅ | |
 | Dijital ürün | ✅ | ✅ | ✅ | ✅ | |
-| Site içi arama (yazım toleransı, öneri) | ✅ | ✅ | ✅ | 🟡 | Medusa anahtar kelime araması |
+| Site içi arama (yazım toleransı, öneri) | ✅ | ✅ | ✅ | ✅ | PostgreSQL tam metin (adr/0056): Türkçe kök, yazım toleransı, eş anlamlılar, "bunu mu demek istediniz", SQL'de facet |
 | Tedarikçi XML | 🟡 | 🟡 | ✅ | ❌ | dropshipping segmenti; sonra |
 
 ### Ödeme
@@ -127,7 +127,7 @@ S = Shopify, I = ikas, TR = Ticimax / IdeaSoft / T-Soft.
 | Vitrin dönüşüm olayları (GA4, Meta; çerez iznine bağlı) | S | ücretsiz hesaplar | reklam veren her mağaza ilk gün ister | gece |
 | Mobil alt gezinme | S | — | trafik %75+ mobil | gece |
 | CWV / Lighthouse kapanışı (D12) | S–M | — | SEO vaadinin kanıtı | gece sonu |
-| Arama kalitesi | M | Meilisearch: yeni servis (kullanıcı kararı) | "bulamıyorum" terk sebebi | ara çözüm: Postgres trigram (servis yok), gece. **Karar (2026-11-03, kullanıcı: "önerin ne ise uygula"):** Meilisearch ertelendi — mevcut yazım toleranslı arama yeterli; 3000+ ürün ya da "bulamıyorum" şikâyeti görülürse yeniden |
+| Arama kalitesi | M | yok (PostgreSQL `unaccent`, `pg_trgm`) | "bulamıyorum" terk sebebi | **Karar (2026-11-03, kullanıcı: "postgresql tam metin ile ilerle gerek yok diğerlerine. kaliteli sağlam ilerleyelim."):** arama ve tüm listeler PostgreSQL tam metin indeksinde (adr/0056); Meilisearch ve dış arama servisi kalıcı olarak yok. Türkçe kök + işaretsiz kelime, yazım toleransı (trigram sözlüğü), eş anlamlı grupları (panel), facet ve sayfalama SQL'de: 3000 ürün sınırı kalktı. 10.000 üründe facet'li arama medyanı 19 ms |
 | Toplu e-posta/SMS kampanyası (segment → şablon → gönder, İYS süzgeci, kota) | M | Resend/Netgsm kullanım ücreti | TR esnafının haftalık rutini | gece sonu ya da sabah planı (ADR) |
 | Panelden sipariş + ödeme bağlantısı | M | — | Instagram/WhatsApp satışı ana kanal | sabah planı (ADR) |
 | Hediye kartı satışı ve bakiye | S–M | mali müşavir: KDV anı | altyapı hazır, yarım görünüyor | gece sonu; KDV notu açık |

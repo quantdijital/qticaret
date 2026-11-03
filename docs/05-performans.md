@@ -11,6 +11,7 @@
 | SEO advisor tekil değerlendirme (kaydetme anında) | < 50 ms p95 |
 | Sitemap tam üretimi (10.000 ürün) | < 2 dk (worker) |
 | `GET /store/seo/resolve` (cache'li) | < 20 ms |
+| Site araması / liste, facet'li (10.000 ürün, `GET /store/listings/products`) | < 150 ms medyan (ölçülen 17–34 ms, adr/0056) |
 
 ## İlkeler
 1. **Ölç, sonra optimize et.** OpenTelemetry trace + yavaş sorgu logu olmadan optimizasyon yapılmaz.
@@ -23,6 +24,14 @@
 8. **Görseller.** Obje depolama + CDN; yüklemede boyut sınırı; varyant üretimi (storefront aşamasında genişletilir).
 9. **Redis modülleri.** Event bus, workflow engine, cache, locking için Redis modülleri (prod).
 10. **Bağlantı havuzu.** Postgres pool boyutu süreç sayısına göre ayarlı; tenant başına üst sınır.
+
+## Arama ve listeler (adr/0056)
+- Arama, filtre, facet sayımı ve sayfalama tek SQL ifadesinde (`search_document`, GIN). Listeler bellekte toplanmaz; ürün sayısı sınırı yok.
+- `document` sütunu `STORAGE MAIN`: satır içinde kalır, her sıralama okumasında TOAST parçası getirilmez.
+- Birim skoru `ts_rank` ile (PostgreSQL 16'da `ts_rank_cd` on kat yavaş ölçüldü). Her birim ürün başına bir kez hesaplanır (`LATERAL ... OFFSET 0`).
+- Yazım hatası komşuları kelime başına ayrı alt sorguyla aranır: değer planlamada bilinir, trigram indeksi kullanılır.
+- İndeks yazımı katalog yazımının yolunda değil: olay → `search_pending` → işçi süreçte 200'lük partiler.
+- Ölçüm testi: `integration-tests/http/search-performance.spec.ts` (10.000 sentetik ürün, bütçe 150 ms).
 
 ## Yük testi (F15)
 - Araç: k6. Senaryolar: ürün gezinme, sepete ekleme, checkout (mock sağlayıcı), webhook patlaması (1000 istek/dk).
