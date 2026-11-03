@@ -1,6 +1,6 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
-import { GIFT_WITHDRAWAL_REFERENCE } from "../../lib/orders/gift-returns"
+import { GIFT_VOID_REFERENCES } from "../../lib/orders/gift-returns"
 import type { GiftCardFacts, GiftLineFacts } from "../../lib/orders/gift-returns"
 import { giftLineIdsOf } from "../gift-cards/gift-marks"
 
@@ -23,9 +23,9 @@ interface CardRow {
 /**
  * An order's gift card lines (`giftLineIdsOf`) with the cards each issued:
  * their value, what is left on them, and whether a debit other than a
- * withdrawal's touched them (spent at checkout, closed by staff). Every
- * gift line is in it, with no cards before its payment came. Codes are
- * never read.
+ * void's (a withdrawal's, the order's cancel) touched them (spent at
+ * checkout, closed by staff). Every gift line is in it, with no cards
+ * before its payment came. Codes are never read.
  */
 export async function giftLinesOf(
   container: Container,
@@ -65,8 +65,8 @@ export async function giftLinesOf(
       account_id: card.store_credit_account?.id ?? null,
       value: Number(card.value ?? 0),
       balance: Number(card.store_credit_account?.balance ?? 0),
-      spent: debits.some((move) => move?.reference !== GIFT_WITHDRAWAL_REFERENCE),
-      withdrawn: debits.some((move) => move?.reference === GIFT_WITHDRAWAL_REFERENCE),
+      spent: debits.some((move) => !GIFT_VOID_REFERENCES.includes(move?.reference ?? "")),
+      withdrawn: debits.some((move) => GIFT_VOID_REFERENCES.includes(move?.reference ?? "")),
       created_at: new Date(card.created_at ?? 0),
     }
     line.cards.push(facts)

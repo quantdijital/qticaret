@@ -1,10 +1,12 @@
 import {
   cardsToVoid,
+  cardsVoidedByCancel,
   giftLineUsed,
   giftReturnProblem,
   giftReturnable,
   giftWindowOpen,
   untouchedCard,
+  voidingDebits,
 } from "../gift-returns"
 import type { GiftCardFacts, GiftLineFacts } from "../gift-returns"
 
@@ -89,5 +91,41 @@ describe("withdrawing from a gift card", () => {
     expect(cardsToVoid(asked(3), gifts(cards))).toBeNull()
     expect(cardsToVoid(asked(1), gifts([card("a"), card("b", { spent: true })]))).toBeNull()
     expect(cardsToVoid([{ line_item_id: "line_pan", quantity: 1 }], gifts(cards))).toBeNull()
+  })
+})
+
+/** adr/0025, 2026-11-03: an order whose cards went out is cancelled only while every card is untouched. */
+describe("cancelling an order of gift cards", () => {
+  it("voids every untouched card, none before they were issued, none withdrawn already", () => {
+    const first = line([card("a"), card("b", { withdrawn: true, balance: 0 })])
+    const second: GiftLineFacts = {
+      line_id: "line_gift_2",
+      cards: [card("c", { value: 250, balance: 250 })],
+    }
+
+    expect(cardsVoidedByCancel([first, second])?.map((each) => each.id)).toEqual(["a", "c"])
+    expect(cardsVoidedByCancel([line([])])).toEqual([])
+    expect(cardsVoidedByCancel([])).toEqual([])
+  })
+
+  it("is refused once any card was spent, or closed by staff", () => {
+    const spent = line([card("a"), card("b", { spent: true, balance: 400 })])
+    const closed = line([card("a", { spent: true, balance: 0 })])
+
+    expect(cardsVoidedByCancel([line([card("x")]), spent])).toBeNull()
+    expect(cardsVoidedByCancel([closed])).toBeNull()
+  })
+
+  it("debits each card's whole balance under the void's reference", () => {
+    const by = {
+      reference: "order_cancel",
+      reference_id: "order_1",
+      note: "order order_1 canceled",
+    }
+
+    expect(voidingDebits([card("a"), card("c", { balance: 250 })], by)).toEqual([
+      { account_id: "sc_acc_a", amount: 500, ...by },
+      { account_id: "sc_acc_c", amount: 250, ...by },
+    ])
   })
 })

@@ -29,6 +29,12 @@ export const RETURN_ROUTES = [
     methods: ["GET" as const],
     middlewares: [optionalCustomer, orderAccess],
   },
+  // F18: what the order page may ask back, before the form is sent (adr/0025 2026-11-03)
+  {
+    matcher: "/store/orders/:id/returnable",
+    methods: ["GET" as const],
+    middlewares: [optionalCustomer, orderAccess],
+  },
   {
     matcher: "/store/orders/:id/returns",
     methods: ["POST" as const],

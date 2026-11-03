@@ -31,6 +31,8 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Paketlenmiş ya da kargoya verilmiş sipariş iptal edilemez; ürün elinize ulaşınca iade talebi oluşturun.",
   "orders.cancel_contact_shop":
     "Havale/EFT ile ödenmiş sipariş buradan iptal edilemez; iptal ve ücret iadesi için mağazayla iletişime geçin.",
+  "orders.gift_card_used":
+    "Hediye kartı kullanıldığı için sipariş iptal edilemez; iade için mağazayla iletişime geçin.",
   "orders.ship_canceled_refund":
     "Bu siparişin iptali için ücret iadesi yapılmış; kargoya verilemez. Siparişi iptal edin.",
   "orders.edit_nothing": "Düzenlenecek bir şey seçilmedi.",

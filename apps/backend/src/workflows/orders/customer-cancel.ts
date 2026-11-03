@@ -4,8 +4,8 @@ import { cancelOrderWorkflow } from "@medusajs/medusa/core-flows"
 import { ValidationError } from "../../lib/errors"
 import { cancelLockKeys, cancelRefundReference } from "../../lib/orders/locks"
 import { isOfflineProvider } from "../../lib/payments/checkout"
+import { cancelGiftCardsWorkflow } from "./cancel-gift-cards"
 import { readOrderMoney } from "./order-money"
-import { refundOrderWorkflow } from "./refund-order"
 
 interface OrderRow {
   customer_id?: string | null
@@ -29,6 +29,10 @@ interface OrderRow {
  * Money taken outside a card (a bank transfer the shop confirmed) goes
  * back by hand: the refund would only be written down, so the shopper
  * asks the shop (security review 2026-10-28).
+ *
+ * Gift cards the order bought and sent are voided before the money goes
+ * back, and only while none was used (`cancelGiftCardsWorkflow`, adr/0025
+ * 2026-11-03); one spent refuses the cancel (`orders.gift_card_used`).
  */
 export async function cancelOrderForCustomer(
   container: MedusaContainer,
@@ -72,17 +76,23 @@ export async function cancelOrderForCustomer(
         throw new ValidationError("orders.cancel_contact_shop")
       }
       const { refundable } = await readOrderMoney(container, input.order_id)
-      if (refundable > 0) {
-        await refundOrderWorkflow(container).run({
-          input: {
-            order_id: input.order_id,
-            reference: cancelRefundReference(input.order_id),
-            request: { amount: refundable },
-            note: "canceled by the customer",
-            created_by: null,
-          },
-        })
-      }
+      await cancelGiftCardsWorkflow(container).run({
+        input: {
+          order_id: input.order_id,
+          refunds:
+            refundable > 0
+              ? [
+                  {
+                    order_id: input.order_id,
+                    reference: cancelRefundReference(input.order_id),
+                    request: { amount: refundable },
+                    note: "canceled by the customer",
+                    created_by: null,
+                  },
+                ]
+              : [],
+        },
+      })
       await cancelOrderWorkflow(container).run({
         input: { order_id: input.order_id, canceled_by: input.customer_id },
       })

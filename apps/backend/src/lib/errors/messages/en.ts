@@ -28,6 +28,8 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
     "An order packed or shipped cannot be cancelled; once it arrives, ask for a return.",
   "orders.cancel_contact_shop":
     "An order paid by bank transfer cannot be cancelled here; contact the shop to cancel it and get the money back.",
+  "orders.gift_card_used":
+    "A gift card from this order has been used, so the order cannot be cancelled; contact the shop about a refund.",
   "orders.ship_canceled_refund":
     "This order's cancellation has already been refunded; it cannot be shipped. Cancel the order.",
   "orders.edit_nothing": "Nothing was chosen to change.",

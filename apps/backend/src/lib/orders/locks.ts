@@ -17,6 +17,9 @@ export const cancelLockKeys = (orderId: string): string[] => [
 /** An order's returns lock: its requests are opened, decided, received and refunded one at a time. */
 export const returnsLockKey = (orderId: string): string => `returns:${orderId}`
 
+/** The lock an order's gift cards are issued under (adr/0025): a cancel holds it too. */
+export const giftIssueLockKey = (orderId: string): string => `gift-cards:${orderId}`
+
 /**
  * The reference a cancel's refund is made under: tried again, refunded
  * once (F5 V5). A cancel refunding several payments (an edit's collected

@@ -9,7 +9,12 @@ import {
 import { acquireLockStep, releaseLockStep } from "@medusajs/medusa/core-flows"
 import { debitAccountsWorkflow } from "@medusajs/loyalty-plugin/workflows"
 import { ValidationError } from "../../lib/errors"
-import { GIFT_WITHDRAWAL_REFERENCE, cardsToVoid } from "../../lib/orders/gift-returns"
+import {
+  GIFT_WITHDRAWAL_REFERENCE,
+  cardsToVoid,
+  voidingDebits,
+} from "../../lib/orders/gift-returns"
+import type { CardDebit } from "../../lib/orders/gift-returns"
 import { returnsLockKey } from "../../lib/orders/locks"
 import { giftLinesOf } from "./gift-lines"
 import {
@@ -18,14 +23,6 @@ import {
   updateReturnRequestStep,
 } from "./steps/return-request"
 import type { RequestFacts } from "./steps/return-request"
-
-interface CardDebit {
-  account_id: string
-  amount: number
-  reference: string
-  reference_id: string
-  note: string
-}
 
 /**
  * The cards the request withdraws, read under the order's returns lock:
@@ -56,13 +53,11 @@ const planGiftWithdrawalStep = createStep(
       throw new ValidationError("returns.gift_card_used", { field: "items" })
     }
     return new StepResponse<CardDebit[]>(
-      cards.map((card) => ({
-        account_id: card.account_id ?? "",
-        amount: card.balance,
+      voidingDebits(cards, {
         reference: GIFT_WITHDRAWAL_REFERENCE,
         reference_id: request.id,
         note: `return ${request.id}`,
-      }))
+      })
     )
   }
 )

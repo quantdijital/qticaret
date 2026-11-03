@@ -16,6 +16,15 @@ import type { ReturnLine } from "./returns"
 /** A withdrawal's debit on a card's account names the request by this reference. */
 export const GIFT_WITHDRAWAL_REFERENCE = "return_request"
 
+/** A cancel's debit on a card's account names the order by this reference. */
+export const GIFT_CANCEL_REFERENCE = "order_cancel"
+
+/** The debits that void a card rather than spend it: a withdrawal's and the order's cancel. */
+export const GIFT_VOID_REFERENCES: readonly string[] = [
+  GIFT_WITHDRAWAL_REFERENCE,
+  GIFT_CANCEL_REFERENCE,
+]
+
 const DAY = 24 * 60 * 60 * 1000
 
 export interface GiftCardFacts {
@@ -24,11 +33,20 @@ export interface GiftCardFacts {
   /** In lira, as the loyalty plugin keeps it. */
   value: number
   balance: number
-  /** A debit other than a withdrawal's: spent at checkout, or closed by staff. */
+  /** A debit other than a void's: spent at checkout, or closed by staff. */
   spent: boolean
-  /** Voided by a withdrawal already. */
+  /** Voided already, by a withdrawal or the order's cancel. */
   withdrawn: boolean
   created_at: Date
+}
+
+/** A void's debit, as the loyalty plugin's `debitAccountsWorkflow` takes it. */
+export interface CardDebit {
+  account_id: string
+  amount: number
+  reference: string
+  reference_id: string
+  note: string
 }
 
 export interface GiftLineFacts {
@@ -121,3 +139,25 @@ export function cardsToVoid(
   }
   return cards
 }
+
+/**
+ * The cards an order's cancel voids (adr/0025, 2026-11-03): every card its
+ * gift lines issued that is still untouched (none before payment came; a
+ * card withdrawn before is void already). Null once one was spent or
+ * closed by staff: the cards are the recipient's, the order is not
+ * cancelled (`orders.gift_card_used`).
+ */
+export function cardsVoidedByCancel(lines: Iterable<GiftLineFacts>): GiftCardFacts[] | null {
+  const all = [...lines]
+  if (all.some(giftLineUsed)) {
+    return null
+  }
+  return all.flatMap((line) => line.cards.filter(untouchedCard))
+}
+
+/** The debits voiding `cards`: each one's whole balance, under the void's reference. */
+export const voidingDebits = (
+  cards: readonly GiftCardFacts[],
+  by: { reference: string; reference_id: string; note: string }
+): CardDebit[] =>
+  cards.map((card) => ({ account_id: card.account_id ?? "", amount: card.balance, ...by }))

@@ -11,9 +11,10 @@ import { kurus } from "../../lib/money"
 import { cancelRefundReference } from "../../lib/orders/locks"
 import { isCheckoutProvider } from "../../lib/payments/checkout"
 import { RATE_LIMIT_PROFILES } from "../../lib/security/rate-limit"
+import { cancelGiftCardsWorkflow } from "../../workflows/orders/cancel-gift-cards"
 import { readOrderMoney } from "../../workflows/orders/order-money"
-import { refundOrderWorkflow } from "../../workflows/orders/refund-order"
 import { paymentRemainders } from "../../workflows/orders/steps/order-refund"
+import type { RefundOrderInput } from "../../workflows/orders/steps/order-refund"
 import {
   AdminPostOrderRefund,
   AdminPostOrderRefundPreview,
@@ -51,7 +52,9 @@ async function refuseHostedPaymentRefund(
  * refund fails, leaving the order cancelled and the money kept. An order
  * Medusa would cancel is refunded through ours first, under a reference of
  * its own (tried again, refunded once); a refund that fails stops the
- * cancel with the provider's reason.
+ * cancel with the provider's reason. Gift cards the order sent are voided
+ * first, and a card used refuses the cancel (`cancelGiftCardsWorkflow`,
+ * adr/0025 2026-11-03), as for the shopper's own cancel.
  */
 async function refundBeforeCancel(
   req: MedusaRequest,
@@ -81,31 +84,37 @@ async function refundBeforeCancel(
       next()
       return
     }
-    // One refund per payment: an edit's collected difference is a payment of its own
-    let left = (await readOrderMoney(req.scope, orderId)).refundable
-    const payments = (await paymentRemainders(req.scope, orderId)).filter(
-      (payment) => payment.remaining > 0
-    )
-    for (const [part, payment] of payments.entries()) {
-      const amount = Math.min(left, payment.remaining)
-      if (amount <= 0) {
-        break
-      }
-      await refundOrderWorkflow(req.scope).run({
-        input: {
-          order_id: orderId,
-          reference: cancelRefundReference(orderId, part),
-          request: { amount: kurus(amount) },
-          note: "order canceled",
-          created_by: (req as Partial<AuthenticatedMedusaRequest>).auth_context?.actor_id ?? null,
-        },
-      })
-      left = kurus(left - amount)
-    }
+    await cancelGiftCardsWorkflow(req.scope).run({
+      input: { order_id: orderId, refunds: await cancelRefunds(req, orderId) },
+    })
     next()
   } catch (error) {
     next(error)
   }
+}
+
+/** One refund per payment: an edit's collected difference is a payment of its own. */
+async function cancelRefunds(req: MedusaRequest, orderId: string): Promise<RefundOrderInput[]> {
+  let left = (await readOrderMoney(req.scope, orderId)).refundable
+  const payments = (await paymentRemainders(req.scope, orderId)).filter(
+    (payment) => payment.remaining > 0
+  )
+  const refunds: RefundOrderInput[] = []
+  for (const [part, payment] of payments.entries()) {
+    const amount = Math.min(left, payment.remaining)
+    if (amount <= 0) {
+      break
+    }
+    refunds.push({
+      order_id: orderId,
+      reference: cancelRefundReference(orderId, part),
+      request: { amount: kurus(amount) },
+      note: "order canceled",
+      created_by: (req as Partial<AuthenticatedMedusaRequest>).auth_context?.actor_id ?? null,
+    })
+    left = kurus(left - amount)
+  }
+  return refunds
 }
 
 // Each refund asks the provider: a budget per address and per staff member
