@@ -7,6 +7,7 @@ import {
   BANK_TRANSFER_PAYMENT_PROVIDER_ID,
   COD_PAYMENT_PROVIDER_ID,
 } from "../../lib/payments/checkout"
+import { giftProductsAmong } from "../gift-cards/gift-marks"
 import { renderLegal } from "./read"
 
 type Container = Pick<MedusaContainer, "resolve">
@@ -37,6 +38,8 @@ const CONTRACT_FIELDS = [
   "items.total",
   // A line's add-on record: a pick made to the buyer's wish (adr/0052 §8)
   "items.metadata",
+  // A gift card's product: withdrawn only while its cards are unused (adr/0025)
+  "items.product_id",
   ...ADDRESS.map((field) => `shipping_address.${field}`),
   ...ADDRESS.map((field) => `billing_address.${field}`),
 ]
@@ -60,7 +63,24 @@ function paymentOf(sessions: SessionRow[]): ContractPayment | null {
   return providers.includes(COD_PAYMENT_PROVIDER_ID) ? "cash_on_delivery" : "card"
 }
 
-type Row = Omit<OrderContractFacts, "display_id" | "created_at" | "payment"> & {
+type ItemRow = NonNullable<OrderContractFacts["items"][number]> & { product_id?: string | null }
+
+/** The lines, each gift card's marked (its product's mark, adr/0025). */
+async function markedItems(
+  container: Container,
+  items: readonly (ItemRow | null)[]
+): Promise<OrderContractFacts["items"]> {
+  const gifts = await giftProductsAmong(
+    container,
+    items.map((item) => item?.product_id)
+  )
+  return items.map((item) =>
+    item ? { ...item, gift_card: Boolean(item.product_id && gifts.has(item.product_id)) } : item
+  )
+}
+
+type Row = Omit<OrderContractFacts, "display_id" | "created_at" | "payment" | "items"> & {
+  items: (ItemRow | null)[]
   id: string
   display_id?: number
   created_at?: string | Date
@@ -93,6 +113,7 @@ export async function orderContract(container: Container, orderId: string) {
     cart_id: row.cart?.id ?? null,
     facts: {
       ...row,
+      items: await markedItems(container, row.items),
       display_id: row.display_id ?? null,
       created_at: row.created_at ?? null,
       payment: paymentOf(sessions),
@@ -123,13 +144,20 @@ export async function cartContract(
   return {
     completed: Boolean(row.completed_at),
     sales_channel_id: row.sales_channel_id ?? null,
-    facts: { ...row, display_id: null, created_at: null, payment } satisfies OrderContractFacts,
+    facts: {
+      ...row,
+      items: await markedItems(container, row.items),
+      display_id: null,
+      created_at: null,
+      payment,
+    } satisfies OrderContractFacts,
   }
 }
 
 /**
  * A contract's text filled with the shop's details and the order's (or the
- * cart's); its withdrawal clause names the lines made to the buyer's wish.
+ * cart's); its withdrawal clause names the lines made to the buyer's wish
+ * and the gift cards.
  */
 export async function renderContract(
   container: Container,

@@ -1,5 +1,7 @@
 export { PACKAGE_SHEETS, PACKAGE_TABLES, packageTables } from "./package"
 export type { PackageMove, PackageOrder, PackageTable, Party } from "./package"
+export { GIFT_CARD_MOVES, giftCardSplit, giftCardTotals } from "./gift-cards"
+export type { GiftCardMove, GiftCardMoveKind, GiftCardOrder } from "./gift-cards"
 export { ACCOUNTING_ADAPTERS, accountingAdapterOf, fakeAccountingAllowed } from "./adapters"
 export type { AccountingAdapterId } from "./adapters"
 export type {

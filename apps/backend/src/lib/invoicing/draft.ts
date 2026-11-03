@@ -2,6 +2,8 @@ import { MathBN } from "@medusajs/framework/utils"
 import { turkishDay } from "../dashboard/period"
 import type { MedusaAmount } from "../money"
 import { methodOf } from "../reports/finance"
+import { giftCardSpent } from "./advance"
+import type { CreditLineRow } from "./advance"
 import { invoiceLines, invoiceTotals } from "./lines"
 import type { InvoiceItem, InvoiceShippingMethod } from "./lines"
 import { ANONYMOUS_TCKN } from "./types"
@@ -41,6 +43,9 @@ export interface InvoiceOrder {
   billing_address?: InvoiceAddress | null
   shipping_address?: InvoiceAddress | null
   payment_collections?: Rows<{ payments?: Rows<InvoicePaymentRow> }>
+  /** Gift cards and store credit spent on it (the loyalty plugin's credit lines). */
+  credit_lines?: Rows<CreditLineRow>
+  version?: number | null
 }
 
 /** The customer's invoice identity (adr/0009), its tax id opened for this invoice only. */
@@ -78,14 +83,26 @@ const METHODS: Readonly<Record<string, InvoicePayment>> = {
 /**
  * How the order was paid: by its largest payment other than a gift card
  * (a card paying the rest is what the buyer paid with); a gift card when
- * that was all.
+ * that was all, its credit lines included: an order the cards paid in full
+ * took no payment, and its invoice (for the full amount) says
+ * `ODEMEARACISI` (docs/mali-musavir-sorulari.md 3.2). The e-Arşiv carries
+ * one payment type, so a card paying part keeps the rest's.
  */
-export function invoicePaymentOf(order: Pick<InvoiceOrder, "payment_collections" | "created_at">) {
+export function invoicePaymentOf(
+  order: Pick<InvoiceOrder, "payment_collections" | "created_at" | "credit_lines" | "version">
+) {
   const payments = present(order.payment_collections)
     .flatMap((collection) => present(collection.payments))
     .sort((a, b) => (MathBN.gt(b.amount ?? 0, a.amount ?? 0) ? 1 : -1))
   const main =
     payments.find((payment) => methodOf(payment.provider_id) !== "gift-card") ?? payments[0]
+  if (!main && giftCardSpent(order) > 0) {
+    return {
+      payment: "gift_card" as const,
+      platform: null,
+      paid_on: turkishDay(new Date(order.created_at)),
+    }
+  }
   const method = methodOf(main?.provider_id)
   return {
     payment: METHODS[method] ?? ("other" as const),

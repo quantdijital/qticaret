@@ -9,6 +9,7 @@ import {
   issuedCardsOf,
   last4,
   plainGiftText,
+  soldAsGiftCard,
   withoutRecipient,
 } from "../gift-sale"
 import type { GiftCartFacts, GiftOrderFacts } from "../gift-sale"
@@ -191,5 +192,17 @@ describe("what a line keeps of its cards", () => {
     })
     expect(withoutRecipient({ other: 1 })).toBeNull()
     expect(giftRecipientOf(withoutRecipient(metadata))).toBeNull()
+  })
+})
+
+describe("a line sold as a gift card (docs/mali-musavir-sorulari.md 3.2)", () => {
+  it("is known by its recipient, kept even when erased, or by its cards", () => {
+    expect(soldAsGiftCard({ [GIFT_RECIPIENT_KEY]: { recipient_email: "a@example.com" } })).toBe(
+      true
+    )
+    expect(soldAsGiftCard({ [GIFT_RECIPIENT_KEY]: { erased: true } })).toBe(true)
+    expect(soldAsGiftCard({ [GIFT_CARDS_KEY]: [{ id: "gcard_1", last4: "ABCD" }] })).toBe(true)
+    expect(soldAsGiftCard({ qt_addons: {} })).toBe(false)
+    expect(soldAsGiftCard(null)).toBe(false)
   })
 })

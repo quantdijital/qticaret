@@ -13,12 +13,21 @@ export const DOCUMENT_TYPES = [
   "expense_voucher",
   "return_invoice",
 ] as const
-/** Why a return needed no document of its own (the accountant's two exceptions). */
-export const WAIVER_REASONS = ["payment_institution", "signed_return_section"] as const
+/**
+ * Why a record needs no document of its own: a return's (the accountant's
+ * two exceptions), or a sale made only of gift cards, an advance that no
+ * invoice is cut for (`advance_only`, docs/mali-musavir-sorulari.md 3.2).
+ */
+export const WAIVER_REASONS = [
+  "payment_institution",
+  "signed_return_section",
+  "advance_only",
+] as const
 /**
  * `pending`: to be started, or (external) to be written back; `issuing`:
  * started at the program, its outcome awaited; `failed`: stopped after
- * the last try, staff told; `waived`: a return that needed no document.
+ * the last try, staff told; `waived`: a return that needed no document,
+ * or a sale of gift cards alone (its advance kept, no invoice).
  */
 export const INVOICE_STATUSES = [
   "pending",
@@ -72,6 +81,12 @@ export const Invoice = model
     net_total: model.bigNumber(),
     vat_total: model.bigNumber(),
     gross_total: model.bigNumber(),
+    /**
+     * A sale's gift card lines, left off its invoice: money taken in
+     * advance (avans), its KDV due when the cards are spent (the
+     * accountant, 2026-11-03). Null when the order sold none.
+     */
+    advance_total: model.bigNumber().nullable(),
     /** The program's total less ours, in kuruş, when they differ (a rounding). */
     program_difference: model.number().nullable(),
     /**
@@ -82,7 +97,7 @@ export const Invoice = model
     cancel_requested_at: model.dateTime().nullable(),
     /** A return's invoice: the sale's it returns. */
     original_invoice_id: model.text().nullable(),
-    /** A return's document waived: which of the accountant's exceptions applied. */
+    /** Waived: which of the accountant's exceptions applied, or an advance alone. */
     waived_reason: model.enum([...WAIVER_REASONS]).nullable(),
   })
   .indexes([

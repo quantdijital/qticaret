@@ -120,6 +120,7 @@ medusaIntegrationTestRunner({
       expect(job.result_summary).toMatchObject({ month: month(), orders: 2, corporate: 1 })
       expect(entries.map((entry) => entry.name).sort()).toEqual(
         [
+          `hediye-kartlari-${month()}.csv`,
           `iadeler-${month()}.csv`,
           `kdv-ozeti-${month()}.csv`,
           `muhasebe-paketi-${month()}.xlsx`,
@@ -130,8 +131,17 @@ medusaIntegrationTestRunner({
       expect(sales).toContain(`#${String(buyer.display_id)};`)
       expect(sales).toContain(`Kurumsal;${CORPORATE.legal_name};Kadıköy;${VKN}`)
       expect(sales).toContain("Bireysel;;;")
+      // Gift cards sold (an advance) and spent, the month's amounts always written (adr/0025)
+      expect(text("hediye-kartlari-")).toContain("Satılan hediye kartı (avans);Ay toplamı;;0")
+      expect(text("hediye-kartlari-")).toContain("Kullanılan hediye kartı;Ay toplamı;;0")
       // Nothing of the individual: no name, no address, no email
-      for (const name of ["satislar-", "iadeler-", "tahsilatlar-", "kdv-ozeti-"]) {
+      for (const name of [
+        "satislar-",
+        "iadeler-",
+        "tahsilatlar-",
+        "kdv-ozeti-",
+        "hediye-kartlari-",
+      ]) {
         expect(text(name)).not.toMatch(/Ayşe|Yılmaz|example\.com/)
       }
       expect(sales).not.toContain(`#${String((await customerOf(canceled)).display_id)};`)

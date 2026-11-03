@@ -15,6 +15,7 @@ export function invoiceView(row: {
   last_error: string | null
   pdf_file_id: string | null
   gross_total: unknown
+  advance_total?: number | string | null
   program_difference: number | null
   created_at: Date | string
   waived_reason?: string | null
@@ -36,9 +37,17 @@ export function invoiceView(row: {
     last_error: row.last_error,
     has_pdf: row.pdf_file_id !== null,
     total: String(row.gross_total),
+    /**
+     * The sale's gift card lines, left off the invoice: money taken in
+     * advance (avans, docs/mali-musavir-sorulari.md 3.2); null for none.
+     */
+    advance:
+      row.advance_total === null || row.advance_total === undefined
+        ? null
+        : String(row.advance_total),
     program_difference: row.program_difference,
     created_at: row.created_at,
-    /** A return that needed no document: the accountant's exception that applied. */
+    /** No document needed: the accountant's exception that applied, or `advance_only`. */
     waived_reason: row.waived_reason ?? null,
   }
 }

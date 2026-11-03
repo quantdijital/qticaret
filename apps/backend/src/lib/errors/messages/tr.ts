@@ -312,6 +312,10 @@ export const SERVER_ERROR_MESSAGES_TR: Readonly<Record<string, string>> = {
     "Bu üründe cayma hakkı yok (hijyen ya da kişiye özel ürün); yalnızca hasarlı, yanlış ya da açıklamasına uymayan ürün olarak iade edilebilir.",
   "returns.window_closed":
     "Bu sipariş için iade süresi doldu ya da sipariş henüz kargoya verilmedi.",
+  "returns.gift_card_used":
+    "Bu hediye kartı kaleminin kartlarından harcama yapıldığı için cayma hakkı kullanılamaz.",
+  "returns.gift_card_separate":
+    "Hediye kartı kalemleri ayrı bir talepte ve yalnızca para iadesi olarak istenebilir.",
   "returns.already_open": "Bu sipariş için açık bir iade talebi zaten var.",
   "returns.exchange_variant_invalid":
     "Değişim için aynı ürünün satıştaki başka bir seçeneği seçilmeli.",

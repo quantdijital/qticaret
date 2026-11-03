@@ -10,6 +10,7 @@ import type { FinanceOrder } from "../../lib/reports/finance"
 import { ACCOUNTING_MODULE } from "../../modules/accounting"
 import type AccountingModuleService from "../../modules/accounting/service"
 import type { SyncSource } from "../../modules/accounting/service"
+import { giftLineIdsOf } from "../gift-cards/gift-marks"
 
 /**
  * A corporate buyer as a sale names it. Its tax id is not here: it is read
@@ -38,6 +39,16 @@ export type Source =
   | { kind: "skip"; code: string }
 
 interface OrderRow extends FinanceOrder {
+  items?:
+    | (
+        | (NonNullable<NonNullable<FinanceOrder["items"]>[number]> & {
+            id: string
+            product_id?: string | null
+            metadata?: unknown
+          })
+        | null
+      )[]
+    | null
   display_id: number
   status: string
   currency_code: string
@@ -71,7 +82,9 @@ const orderOf = async (container: MedusaContainer, orderId: string, fields: stri
 /**
  * A sale as the order stands now. A canceled order is no sale (the monthly
  * package leaves it out too), nor is one in another currency: the books
- * are kept in lira.
+ * are kept in lira. Its gift card lines are no sale either: money taken
+ * in advance (docs/mali-musavir-sorulari.md 3.2), whose payment the
+ * program still gets; an order of nothing else sends no sale.
  */
 async function saleOf(container: MedusaContainer, orderId: string): Promise<Source> {
   const order = await orderOf(container, orderId, [
@@ -83,6 +96,9 @@ async function saleOf(container: MedusaContainer, orderId: string): Promise<Sour
     "canceled_at",
     "customer_id",
     "total",
+    "items.id",
+    "items.product_id",
+    "items.metadata",
     "items.total",
     "items.tax_total",
     "items.tax_lines.rate",
@@ -101,7 +117,12 @@ async function saleOf(container: MedusaContainer, orderId: string): Promise<Sour
   if (order.currency_code.toLowerCase() !== "try") {
     return { kind: "skip", code: "accounting.currency_unsupported" }
   }
-  const lines = vatBreakdown([order])
+  const gifts = await giftLineIdsOf(container, order.items ?? [])
+  const items = (order.items ?? []).filter((item) => item && !gifts.has(item.id))
+  if (gifts.size > 0 && items.length === 0) {
+    return { kind: "skip", code: "accounting.advance_only" }
+  }
+  const lines = vatBreakdown([{ ...order, items }])
   const profile = order.customer?.billing_profile
   const party: SaleParty =
     profile?.type === "corporate" && profile.tax_id_kind === "vkn" && order.customer_id

@@ -1,6 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
-import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
+import { ContainerRegistrationKeys, MathBN } from "@medusajs/framework/utils"
 import { fakeInvoicingAllowed } from "../../lib/invoicing"
+import type { MedusaAmount } from "../../lib/money"
 import { errorSummary, logger } from "../../lib/logging"
 import { COD_PAYMENT_PROVIDER_ID } from "../../lib/payments/checkout"
 import { paidInTestMode } from "../../lib/payments/test-mode"
@@ -37,6 +38,10 @@ export interface OrderRow {
           | null
       } | null)[]
     | null
+  /** Medusa's, the gift cards and store credit that paid it taken off. */
+  total?: MedusaAmount | null
+  version?: number | null
+  credit_lines?: ({ raw_amount?: MedusaAmount | null; version?: number | null } | null)[] | null
 }
 
 export async function invoicingOf(container: Container): Promise<InvoicingSettings> {
@@ -49,9 +54,27 @@ export async function invoicingOf(container: Container): Promise<InvoicingSettin
 const paymentsOf = (order: OrderRow) =>
   (order.payment_collections ?? []).flatMap((collection) => collection?.payments ?? [])
 
-/** Its money taken: a card's capture, a transfer confirmed, cash collected at the door. */
+/**
+ * Gift cards or store credit paid all of it (adr/0025): no payment was
+ * taken, nothing is left to pay, and it is as paid as it will be.
+ */
+const coveredByCredit = (order: OrderRow): boolean =>
+  (order.credit_lines ?? []).some(
+    (line) =>
+      line !== null &&
+      (order.version === undefined || line.version === order.version) &&
+      MathBN.gt(line.raw_amount ?? 0, 0)
+  ) &&
+  order.total !== undefined &&
+  order.total !== null &&
+  MathBN.lte(order.total, 0)
+
+/**
+ * Its money taken: a card's capture, a transfer confirmed, cash collected
+ * at the door; or nothing to take, gift cards or store credit having paid it.
+ */
 const paid = (order: OrderRow): boolean =>
-  paymentsOf(order).some((payment) => Boolean(payment?.captured_at))
+  paymentsOf(order).some((payment) => Boolean(payment?.captured_at)) || coveredByCredit(order)
 
 const cashOnDelivery = (order: OrderRow): boolean =>
   paymentsOf(order).some((payment) => payment?.provider_id === COD_PAYMENT_PROVIDER_ID)
@@ -82,7 +105,11 @@ export function invoiceDue(
 /**
  * Queues an order's sale invoice once it is due (`due`). A canceled order,
  * one paid in a provider's test mode, or one in another currency, is never
- * queued. Queuing twice is one invoice (KK3).
+ * queued. Queuing twice is one invoice (KK3). Its gift card lines are left
+ * off and kept on the record as its advance; an order of gift cards alone
+ * gets no invoice, only that record (`waived`, `advance_only`), once paid
+ * whatever the setting: it has no parcel to wait for
+ * (docs/mali-musavir-sorulari.md 3.2, the owner 2026-11-03).
  */
 export async function queueSaleInvoice(
   container: Container,
@@ -101,6 +128,10 @@ export async function queueSaleInvoice(
       "payment_collections.payments.provider_id",
       "payment_collections.payments.captured_at",
       "payment_collections.payments.data",
+      "total",
+      "version",
+      "credit_lines.raw_amount",
+      "credit_lines.version",
     ],
     filters: { id: orderId },
   })
@@ -109,11 +140,16 @@ export async function queueSaleInvoice(
   if (!order || order.status === "canceled" || order.canceled_at || paidInTestMode(order)) {
     return "not_due"
   }
-  if (!invoiceDue(order, moment, settings)) {
+  const due = invoiceDue(order, moment, settings)
+  if (!due && !paid(order)) {
     return "not_due"
   }
   const lines = await invoiceTotalsOf(container, orderId)
   if (lines?.currency.toLowerCase() !== "try") {
+    return "not_due"
+  }
+  const advanceOnly = lines.lines === 0 && MathBN.gt(lines.advance, 0)
+  if (!due && !advanceOnly) {
     return "not_due"
   }
   const { id, created } = await container.resolve<EinvoiceModuleService>(EINVOICE_MODULE).enqueue({
@@ -122,8 +158,10 @@ export async function queueSaleInvoice(
     source_id: orderId,
     provider: settings.provider,
     totals: lines.totals,
+    advance: lines.advance,
+    advance_only: advanceOnly,
   })
-  if (created && settings.provider === "external") {
+  if (created && settings.provider === "external" && !advanceOnly) {
     await announceInvoice(container, id, orderId, lines.totals.gross)
   }
   return created ? "queued" : "already"

@@ -7,6 +7,8 @@ export type {
   InvoiceProfile,
 } from "./draft"
 export { invoiceLines, invoiceTotals } from "./lines"
+export { GIFT_CARD_CREDIT, giftCardSpent, splitAdvance } from "./advance"
+export type { CreditLineRow } from "./advance"
 export { pdfFilename } from "./filename"
 export { returnedOrder } from "./returns"
 export {

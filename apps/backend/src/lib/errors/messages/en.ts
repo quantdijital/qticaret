@@ -303,6 +303,10 @@ export const SERVER_ERROR_MESSAGES_EN: Readonly<Record<string, string>> = {
   "returns.withdrawal_excluded":
     "This product has no right of withdrawal (hygiene or made to order); it can come back only as damaged, wrong or not as described.",
   "returns.window_closed": "The return period for this order is over, or it has not shipped yet.",
+  "returns.gift_card_used":
+    "A card of this gift card line has been spent, so its right of withdrawal is gone.",
+  "returns.gift_card_separate":
+    "Gift card lines are asked for in a request of their own, and only as money back.",
   "returns.already_open": "This order already has an open return request.",
   "returns.exchange_variant_invalid":
     "An exchange needs another option of the same product that is for sale.",

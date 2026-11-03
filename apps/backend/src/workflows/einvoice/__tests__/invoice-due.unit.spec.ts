@@ -32,4 +32,25 @@ describe("when an order's invoice is due (adr/0034 §8, the accountant 2026-10-3
       expect(dueAt(cashCollected, trigger)).toEqual(["paid", "delivered"])
     }
   })
+
+  it("is due once placed when gift cards or store credit paid it all: no payment to wait for", () => {
+    const paidByCards: OrderRow = {
+      version: 1,
+      total: 0,
+      payment_collections: [],
+      credit_lines: [{ raw_amount: "180", version: 1 }],
+    }
+    const partly: OrderRow = {
+      ...paidByCards,
+      total: 80,
+      credit_lines: [{ raw_amount: "100", version: 1 }],
+    }
+    // A credit line of an earlier version of the order is no payment now
+    const stale: OrderRow = { ...paidByCards, credit_lines: [{ raw_amount: "180", version: 0 }] }
+
+    expect(dueAt(paidByCards, "placed")).toEqual(["placed", "paid"])
+    expect(dueAt(partly, "placed")).toEqual([])
+    expect(dueAt(stale, "placed")).toEqual([])
+    expect(dueAt(paidByCards, "shipped")).toEqual(["shipped", "delivered"])
+  })
 })

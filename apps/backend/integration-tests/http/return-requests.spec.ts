@@ -227,14 +227,26 @@ medusaIntegrationTestRunner({
       // Never fewer than the law's 14 days
       expect(shortPeriod.status).toBe(400)
       expect(faulty.status).toBe(200)
-      const marked = [{ line_item_id: lineId, quantity: 1, withdrawal_excluded: true }]
+      const marked = [
+        {
+          line_item_id: lineId,
+          quantity: 1,
+          withdrawal_excluded: true,
+          withdrawal_excluded_reason: "product",
+        },
+      ]
       expect(listed.data.return_requests[0]?.items).toEqual(marked)
       expect(returnable.data.lines).toEqual([
         expect.objectContaining({ line_item_id: lineId, withdrawal_excluded: true }),
       ])
       expect(rejected.data.return_request.items).toEqual(marked)
       expect(unmarked.data.return_requests[0]?.items).toEqual([
-        { line_item_id: lineId, quantity: 1, withdrawal_excluded: false },
+        {
+          line_item_id: lineId,
+          quantity: 1,
+          withdrawal_excluded: false,
+          withdrawal_excluded_reason: null,
+        },
       ])
     })
 

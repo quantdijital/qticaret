@@ -1,13 +1,15 @@
 import { lineAddonsOf } from "../catalog/addons"
 import type { Block, ContentDoc } from "../content"
+import { soldAsGiftCard } from "../promotions/gift-sale"
 import { PERSONAL_LINES_TOKEN } from "./tokens"
 
 /*
  * Lines made to the buyer's wish in an order's contracts (adr/0052 §8): the
  * pre-information form and the distance sales contract name each line an
- * add-on put outside the right of withdrawal, in their withdrawal clause.
- * The server places the block there, whether or not the shop's text was
- * written before add-ons.
+ * add-on put outside the right of withdrawal, in their withdrawal clause;
+ * and each gift card line, withdrawn only while its cards are unused
+ * (adr/0025, 2026-11-03). The server places the block there, whether or
+ * not the shop's text was written before add-ons.
  */
 
 /**
@@ -16,6 +18,13 @@ import { PERSONAL_LINES_TOKEN } from "./tokens"
  */
 const PERSONAL_LINES_SENTENCE =
   "Aşağıdaki ürünler alıcının istekleri doğrultusunda kişiye özel hazırlandığından, Mesafeli Sözleşmeler Yönetmeliği md. 15/1-ç uyarınca bu ürünlerde cayma hakkı kullanılamaz:"
+
+/**
+ * TASLAK, avukat onayı bekler (docs/12, adr/0025 2026-11-03): the owner's
+ * rule for gift cards, as the add-on sentence above is marked.
+ */
+const GIFT_CARD_SENTENCE =
+  "Aşağıdaki hediye kartlarında cayma hakkı, yalnızca kartlardan hiç harcama yapılmamışken kullanılabilir; kartlardan birinin bakiyesi kullanıldıktan sonra o üründe cayma hakkı kullanılamaz:"
 
 const paragraph = (text: string) => ({
   type: "paragraph" as const,
@@ -26,12 +35,20 @@ const paragraph = (text: string) => ({
 export interface PersonalLineFacts {
   title: string
   metadata?: unknown
+  /** Its product is a gift card; a line that recorded a recipient is one too. */
+  gift_card?: boolean
 }
+
+const bullets = (texts: readonly string[]): Block => ({
+  type: "bulletList",
+  content: texts.map((text) => ({ type: "listItem", content: [paragraph(text)] })),
+})
 
 /**
  * The clause's blocks for the order's personal lines: the sentence, then
  * each line with its picks ("Çakı · Standart (Ürün üzerine yazı: Ada)");
- * none for an order without any.
+ * then its gift card lines under their own sentence; none for an order
+ * without either.
  */
 export function personalLinesBlocks(lines: readonly PersonalLineFacts[]): Block[] {
   const named = lines.flatMap((line) => {
@@ -47,15 +64,12 @@ export function personalLinesBlocks(lines: readonly PersonalLineFacts[]): Block[
       )
     return [picks.length ? `${line.title} (${picks.join("; ")})` : line.title]
   })
-  if (named.length === 0) {
-    return []
-  }
+  const gifts = lines
+    .filter((line) => line.gift_card === true || soldAsGiftCard(line.metadata))
+    .map((line) => line.title)
   return [
-    paragraph(PERSONAL_LINES_SENTENCE),
-    {
-      type: "bulletList",
-      content: named.map((text) => ({ type: "listItem", content: [paragraph(text)] })),
-    },
+    ...(named.length ? [paragraph(PERSONAL_LINES_SENTENCE), bullets(named)] : []),
+    ...(gifts.length ? [paragraph(GIFT_CARD_SENTENCE), bullets(gifts)] : []),
   ]
 }
 

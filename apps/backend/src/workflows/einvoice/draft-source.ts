@@ -10,10 +10,12 @@ import {
   invoiceLines,
   invoiceTotals,
   returnedOrder,
+  splitAdvance,
 } from "../../lib/invoicing"
 import type { DraftResult, ExchangedOrder, ReturnedLine } from "../../lib/invoicing"
 import { RETURN_REQUESTS_MODULE } from "../../modules/return-requests"
 import type ReturnRequestsModuleService from "../../modules/return-requests/service"
+import { giftLineIdsOf } from "../gift-cards/gift-marks"
 import { exchangesOf, profileOf, settingsOf, shipmentOf } from "./draft-parts"
 import type { OrderRow } from "./draft-parts"
 import { returnDraft } from "./return-source"
@@ -45,6 +47,8 @@ const LINE_FIELDS = [
     "product_title",
     "variant_title",
     "variant_id",
+    // A gift card line's product: its money is an advance, not the invoice's
+    "product_id",
     "is_custom_price",
     "metadata",
     "quantity",
@@ -73,7 +77,18 @@ function partOf<T extends ExchangedOrder>(order: T, part?: OrderPart): T {
     : returnedOrder(order, part.lines, part.shipping)
 }
 
-/** What an invoice comes to, for its record when it is queued (no buyer read). */
+/** The order's gift card lines (`giftLineIdsOf`): an advance, never on an invoice. */
+const giftLinesIn = (container: Container, order: ExchangedOrder) =>
+  giftLineIdsOf(
+    container,
+    (order.items ?? []) as ({ id: string; product_id?: string | null; metadata?: unknown } | null)[]
+  )
+
+/**
+ * What an invoice comes to, for its record when it is queued (no buyer
+ * read): its lines without the gift card lines, how many there are, and
+ * what those came to (the advance, docs/mali-musavir-sorulari.md 3.2).
+ */
 export async function invoiceTotalsOf(container: Container, orderId: string, part?: OrderPart) {
   const { data } = await query(container).graph({
     entity: "order",
@@ -84,8 +99,15 @@ export async function invoiceTotalsOf(container: Container, orderId: string, par
   if (!found) {
     return null
   }
-  const order = partOf({ ...asSold(found), exchanges: await exchangesOf(container, orderId) }, part)
-  return { currency: order.currency_code ?? "", totals: invoiceTotals(invoiceLines(order)) }
+  const sold = partOf({ ...asSold(found), exchanges: await exchangesOf(container, orderId) }, part)
+  const { order, advance } = splitAdvance(sold, await giftLinesIn(container, found))
+  const lines = invoiceLines(order)
+  return {
+    currency: order.currency_code ?? "",
+    totals: invoiceTotals(lines),
+    lines: lines.length,
+    advance,
+  }
 }
 
 /**
@@ -124,6 +146,10 @@ export async function invoiceDraftFor(
       "fulfillments.canceled_at",
       "fulfillments.items.line_item_id",
       "shipping_methods.shipping_option_id",
+      // A gift card that paid for it: the invoice says so (docs/mali-musavir-sorulari.md 3.2)
+      "credit_lines.reference",
+      "credit_lines.raw_amount",
+      "credit_lines.version",
       "customer.billing_profile.id",
       "customer.billing_profile.type",
       "customer.billing_profile.legal_name",
@@ -135,7 +161,11 @@ export async function invoiceDraftFor(
   if (!row) {
     return { problems: ["einvoice.no_lines"] }
   }
-  const order = { ...asSold(row), exchanges: await exchangesOf(container, invoice.order_id) }
+  // Its gift card lines are an advance: on no invoice, nor on a return's document
+  const { order } = splitAdvance(
+    { ...asSold(row), exchanges: await exchangesOf(container, invoice.order_id) },
+    await giftLinesIn(container, row)
+  )
   const settings = await settingsOf(container)
   const profile = await profileOf(container, order, invoice.id)
   if (invoice.kind === "return") {

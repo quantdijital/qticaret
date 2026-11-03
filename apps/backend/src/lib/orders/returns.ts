@@ -22,6 +22,14 @@ export const DEFECT_REASONS: ReadonlySet<string> = new Set([
   "not_as_described",
 ])
 
+/**
+ * Why a line is outside the right of withdrawal: its product's mark
+ * (F13.6), an add-on made to the buyer's wish (adr/0052 §8), or a gift
+ * card line whose cards were spent (adr/0025, 2026-11-03).
+ */
+export const WITHDRAWAL_EXCLUSIONS = ["product", "personal_addon", "gift_card_used"] as const
+export type WithdrawalExclusion = (typeof WITHDRAWAL_EXCLUSIONS)[number]
+
 /** A parcel nobody marked delivered is taken as arrived this long after it left. */
 export const UNMARKED_ARRIVAL_DAYS = 30
 

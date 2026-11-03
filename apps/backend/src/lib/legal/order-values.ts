@@ -26,6 +26,8 @@ export interface OrderContractFacts {
     total: MedusaAmount
     /** Its add-on record (adr/0052): a pick can make it the buyer's own. */
     metadata?: unknown
+    /** Its product is a gift card (adr/0025): withdrawn only while its cards are unused. */
+    gift_card?: boolean
   } | null)[]
   shipping_address: AddressFacts | null
   billing_address: AddressFacts | null
@@ -123,7 +125,8 @@ export function linesTable(
  * The order's values for its contracts' tokens (adr/0041 §2), as the
  * order holds them when placed: the buyer, the addresses (the billing
  * one is the delivery one when none was given), the lines and totals,
- * the way it is paid, and the lines made to the buyer's wish (adr/0052 §8).
+ * the way it is paid, and the lines made to the buyer's wish (adr/0052 §8)
+ * or sold as gift cards (adr/0025).
  */
 export function orderLegalValues(order: OrderContractFacts): OrderLegalValues {
   const delivery = addressText(order.shipping_address)
@@ -137,6 +140,7 @@ export function orderLegalValues(order: OrderContractFacts): OrderLegalValues {
             quantity: Number(item.quantity),
             total: lira(item.total),
             metadata: item.metadata,
+            gift_card: item.gift_card === true,
           },
         ]
       : []

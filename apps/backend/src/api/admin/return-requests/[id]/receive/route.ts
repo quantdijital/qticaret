@@ -1,17 +1,14 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { MedusaError } from "@medusajs/framework/utils"
 import { ValidationError } from "../../../../../lib/errors"
-import { I18N_KEY } from "../../../../../lib/errors/http"
-import { serverErrorMessage } from "../../../../../lib/errors/messages"
-import { errorSummary, logger } from "../../../../../lib/logging"
 import { RETURN_REQUESTS_MODULE } from "../../../../../modules/return-requests"
 import type ReturnRequestsModuleService from "../../../../../modules/return-requests/service"
 import {
   receiveReturnWorkflow,
   receivedProblem,
   receivedWhole,
-  refundReturn,
 } from "../../../../../workflows/returns/receive-return"
+import { refundAnswer } from "../../refund-answer"
 import type { AdminPostReturnReceiveType } from "../../validators"
 import { returnRequestDetail } from "../../view"
 
@@ -60,18 +57,11 @@ export async function POST(
     res.json({ return_request: await returnRequestDetail(req.scope, received), refund_error: null })
     return
   }
-  try {
-    const refunded = await refundReturn(req.scope, { id, staff_id: req.auth_context.actor_id })
-    res.json({ return_request: await returnRequestDetail(req.scope, refunded), refund_error: null })
-  } catch (error) {
-    logger.warn({ event: "returns.refund_failed", returnRequestId: id, err: errorSummary(error) })
-    const key = (error as { safeMessage?: unknown }).safeMessage
-    res.json({
-      return_request: await returnRequestDetail(req.scope, { ...request, status: "received" }),
-      refund_error:
-        typeof key === "string" && I18N_KEY.test(key)
-          ? serverErrorMessage(key, "tr")
-          : serverErrorMessage("returns.refund_failed", "tr"),
-    })
-  }
+  res.json(
+    await refundAnswer(
+      req.scope,
+      { id, staff_id: req.auth_context.actor_id },
+      { ...request, status: "received" }
+    )
+  )
 }

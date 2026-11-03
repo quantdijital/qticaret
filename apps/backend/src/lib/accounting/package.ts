@@ -1,18 +1,20 @@
-import { fromMedusaAmount } from "../money"
+import { fromMedusaAmount, toMedusaAmount } from "../money"
 import type { MedusaAmount } from "../money"
 import { methodOf, vatBreakdown } from "../reports/finance"
 import type { FinanceOrder } from "../reports/finance"
 import type { SheetCell } from "../sheets"
+import { GIFT_CARD_MOVES, giftCardTotals } from "./gift-cards"
+import type { GiftCardMove } from "./gift-cards"
 
 /**
  * The month's standard package for the accountant (F11.5, adr/0039 §5):
- * sales by order and VAT rate, refunds, collections and the VAT summary,
- * as sheets. Personal data kept to the least: an individual's name is not
+ * sales by order and VAT rate, refunds, collections, the VAT summary and
+ * gift cards sold (an advance, out of the sales) and spent, as sheets. Personal data kept to the least: an individual's name is not
  * in it; a corporate customer's registered name, tax office and tax id
  * (VKN) are, as the accountant keeps them for the invoice anyway. Pure.
  */
 
-export const PACKAGE_TABLES = ["sales", "returns", "collections", "vat"] as const
+export const PACKAGE_TABLES = ["sales", "returns", "collections", "vat", "gift_cards"] as const
 export type PackageTable = (typeof PACKAGE_TABLES)[number]
 
 export interface PackageOrder extends FinanceOrder {
@@ -54,13 +56,20 @@ const methodName = (providerId: string) => {
 
 const orderNo = (display: number | null) => (display === null ? "" : `#${String(display)}`)
 
+/**
+ * The package's tables. `orders` come without their gift card lines, whose
+ * money is in `giftCards` (`giftCardSplit`): no sale, no KDV of the month.
+ */
 export function packageTables(input: {
   orders: readonly PackageOrder[]
   parties: ReadonlyMap<string, Party>
   captures: readonly PackageMove[]
   refunds: readonly PackageMove[]
+  giftCards?: readonly GiftCardMove[]
   dayOf: (at: string | Date) => string
 }): Record<PackageTable, SheetCell[][]> {
+  const giftCards = input.giftCards ?? []
+  const giftTotals = giftCardTotals(giftCards)
   const partyOf = (order: PackageOrder): Party =>
     (order.customer_id ? input.parties.get(order.customer_id) : undefined) ?? {
       kind: "individual",
@@ -120,6 +129,20 @@ export function packageTables(input: {
         lira(row.gross),
       ]),
     ],
+    gift_cards: [
+      ["Hareket", "Sipariş", "Tarih", "Tutar (TL)"],
+      ...[...giftCards]
+        .sort((a, b) => a.day.localeCompare(b.day) || a.kind.localeCompare(b.kind))
+        .map((move) => [
+          GIFT_CARD_MOVES[move.kind],
+          orderNo(move.order_display_id),
+          move.day,
+          lira(toMedusaAmount(move.amount)),
+        ]),
+      // The month's amounts, each always written
+      [GIFT_CARD_MOVES.sold, "Ay toplamı", "", lira(toMedusaAmount(giftTotals.sold))],
+      [GIFT_CARD_MOVES.spent, "Ay toplamı", "", lira(toMedusaAmount(giftTotals.spent))],
+    ],
   }
 }
 
@@ -131,4 +154,5 @@ export const PACKAGE_SHEETS: Record<
   returns: { name: "İadeler", file: "iadeler", widths: [12, 12, 18, 14] },
   collections: { name: "Tahsilatlar", file: "tahsilatlar", widths: [12, 12, 18, 14, 14] },
   vat: { name: "KDV özeti", file: "kdv-ozeti", widths: [14, 16, 14, 16] },
+  gift_cards: { name: "Hediye kartları", file: "hediye-kartlari", widths: [30, 12, 12, 14] },
 }

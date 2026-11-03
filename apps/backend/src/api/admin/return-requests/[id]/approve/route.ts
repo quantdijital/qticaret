@@ -5,6 +5,9 @@ import type ReturnRequestsModuleService from "../../../../../modules/return-requ
 import { approveExchangeWorkflow } from "../../../../../workflows/returns/approve-exchange"
 import { approveReturnWorkflow } from "../../../../../workflows/returns/approve-return"
 import { requoteExchange } from "../../../../../workflows/returns/exchange-quote"
+import { isGiftReturn } from "../../../../../workflows/returns/gift-lines"
+import { withdrawGiftCardsWorkflow } from "../../../../../workflows/returns/withdraw-gift-cards"
+import { refundAnswer } from "../../refund-answer"
 import type { AdminPostReturnApproveType } from "../../validators"
 import { returnRequestDetail } from "../../view"
 
@@ -12,7 +15,9 @@ import { returnRequestDetail } from "../../view"
  * POST /admin/return-requests/:id/approve: Medusa's return and the
  * carrier's return code (adr/0032); for an exchange (§6) Medusa's
  * exchange, at the difference staff were shown: one that changed since is
- * quoted again and refused, for staff to look again.
+ * quoted again and refused, for staff to look again. A withdrawal from gift
+ * cards (adr/0025, 2026-11-03) has nothing to send back: its cards are
+ * voided, the request is received at once and its money given back.
  */
 export async function POST(
   req: AuthenticatedMedusaRequest<AdminPostReturnApproveType>,
@@ -36,6 +41,11 @@ export async function POST(
       input: { ...input, collected: req.validatedBody.difference_collected },
     })
     res.json({ return_request: await returnRequestDetail(req.scope, result) })
+    return
+  }
+  if (await isGiftReturn(req.scope, request)) {
+    const { result } = await withdrawGiftCardsWorkflow(req.scope).run({ input })
+    res.json(await refundAnswer(req.scope, { id, staff_id: input.staff_id }, result))
     return
   }
   const { result } = await approveReturnWorkflow(req.scope).run({ input })

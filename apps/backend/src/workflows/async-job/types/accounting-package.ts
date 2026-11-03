@@ -3,8 +3,13 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { ContainerRegistrationKeys } from "@medusajs/framework/utils"
 import { z } from "@medusajs/framework/zod"
 import yazl from "yazl"
-import { PACKAGE_SHEETS, PACKAGE_TABLES, packageTables } from "../../../lib/accounting"
-import type { PackageMove, PackageOrder, Party } from "../../../lib/accounting"
+import {
+  PACKAGE_SHEETS,
+  PACKAGE_TABLES,
+  giftCardSplit,
+  packageTables,
+} from "../../../lib/accounting"
+import type { GiftCardOrder, PackageMove, PackageOrder, Party } from "../../../lib/accounting"
 import { turkishDay, turkishDayStart } from "../../../lib/dashboard"
 import { paidInTestMode } from "../../../lib/payments/test-mode"
 import { CSV_BOM, toCsv } from "../../../lib/security"
@@ -16,6 +21,7 @@ import { AUDIT_LOG_MODULE } from "../../../modules/audit-log"
 import type AuditLogModuleService from "../../../modules/audit-log/service"
 import { BILLING_PROFILE_MODULE } from "../../../modules/billing-profile"
 import type BillingProfileModuleService from "../../../modules/billing-profile/service"
+import { giftLineIdsOf } from "../../gift-cards/gift-marks"
 import { paymentsMovedBetween } from "../../payments/moved-payments"
 import type { MovedAmount, MovedPayment } from "../../payments/moved-payments"
 import type { JobType } from "./types"
@@ -50,6 +56,14 @@ const ORDER_FIELDS = [
   "status",
   "currency_code",
   "total",
+  "version",
+  // Gift cards sold (an advance, out of the sales) and spent (adr/0025, 2026-11-03)
+  "items.id",
+  "items.product_id",
+  "items.metadata",
+  "credit_lines.reference",
+  "credit_lines.raw_amount",
+  "credit_lines.version",
   "items.total",
   "items.tax_total",
   "items.tax_lines.rate",
@@ -135,7 +149,8 @@ const csvOf = (rows: SheetCell[][]) =>
  * The month's standard accounting package (F11.5, adr/0039 §5): one zip
  * with an xlsx (a sheet per table) and the same tables as CSV, of the
  * month's sold orders (canceled and test ones left out), its refunds and
- * collections and the VAT summary. Corporate customers' tax ids are read
+ * collections, the VAT summary, and the gift cards sold (an advance,
+ * taken out of the sales) and spent. Corporate customers' tax ids are read
  * for it, so making one is recorded and downloading it is a personal data
  * read (adr/0011).
  */
@@ -151,13 +166,9 @@ export const accountingPackage: JobType<z.infer<typeof input>> = {
     if (!from || !to) {
       throw new Error("accounting.month_invalid")
     }
-    const page = await ordersBetween<PackageOrder & { status: string; currency_code: string }>(
-      container,
-      ORDER_FIELDS,
-      from,
-      to,
-      MAX_REPORT_ORDERS
-    )
+    const page = await ordersBetween<
+      PackageOrder & GiftCardOrder & { status: string; currency_code: string }
+    >(container, ORDER_FIELDS, from, to, MAX_REPORT_ORDERS)
     const orders = page.rows.filter(
       (order) =>
         order.status !== "canceled" &&
@@ -170,12 +181,19 @@ export const accountingPackage: JobType<z.infer<typeof input>> = {
       ...new Set(orders.flatMap((order) => (order.customer_id ? [order.customer_id] : []))),
     ])
     const { captures, refunds } = movesOf(await paymentsMovedBetween(container, from, to), from, to)
+    const dayOf = (at: string | Date) => turkishDay(new Date(at))
+    const gifts = await giftLineIdsOf(
+      container,
+      orders.flatMap((order) => order.items ?? []) as { id: string }[]
+    )
+    const split = orders.map((order) => giftCardSplit(order, gifts, dayOf))
     const tables = packageTables({
-      orders,
+      orders: split.map((each) => each.order),
       parties,
       captures,
       refunds,
-      dayOf: (at) => turkishDay(new Date(at)),
+      giftCards: split.flatMap((each) => each.moves),
+      dayOf,
     })
     await progress(70)
 

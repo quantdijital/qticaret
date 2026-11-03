@@ -24,6 +24,10 @@ export interface QueuedInvoice {
   original_invoice_id?: string | null
   /** Known when it is queued: a return's document (a sale's is the program's to choose). */
   document_type?: DocumentType | null
+  /** A sale's gift card lines, left off the invoice: money taken in advance (lira text). */
+  advance?: string | null
+  /** A sale of gift cards alone: kept as its advance, no invoice to issue. */
+  advance_only?: boolean
 }
 
 export interface ClaimedInvoice {
@@ -129,6 +133,10 @@ export class InvoiceQueueService extends MedusaService({ Invoice, ParasutConnect
         gross_total: Number(record.totals.gross),
         original_invoice_id: record.original_invoice_id ?? null,
         document_type: record.document_type ?? null,
+        advance_total: record.advance && Number(record.advance) > 0 ? Number(record.advance) : null,
+        ...(record.advance_only
+          ? { status: "waived" as const, waived_reason: "advance_only" as const }
+          : {}),
       })
       return { id: created.id, created: true }
     } catch (error) {

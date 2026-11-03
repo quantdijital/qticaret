@@ -11,6 +11,7 @@ import {
   withdrawalProblem,
 } from "../../lib/orders/returns"
 import type { ExchangeLine } from "../../lib/orders/exchanges"
+import { giftReturnProblem, giftReturnable } from "../../lib/orders/gift-returns"
 import type { ReturnLine, ReturnOrderFacts } from "../../lib/orders/returns"
 import { ORDER_REFUNDS_MODULE } from "../../modules/order-refunds"
 import type OrderRefundsModuleService from "../../modules/order-refunds/service"
@@ -21,6 +22,7 @@ import type { ReturnKind, ReturnReason } from "../../modules/return-requests/sta
 import { RETURN_REQUEST_CREATED } from "./events"
 import type { ReturnRequestEvent } from "./events"
 import { quoteExchange } from "./exchange-quote"
+import { giftLinesOf } from "./gift-lines"
 import { excludedLines, returnPolicy } from "./policy"
 
 /**
@@ -28,7 +30,10 @@ import { excludedLines, returnPolicy } from "./policy"
  * shipped lines, within the window, no more than is left after earlier
  * requests, one request at a time. An exchange (§6) names another variant
  * of the same product for each line, in stock; what it costs is quoted
- * on the server and kept. Under the order's returns lock.
+ * on the server and kept. Gift card lines (adr/0025, 2026-11-03) come
+ * back on their own, as money back, within the period from the day their
+ * cards were sent and while none was spent (`giftReturnProblem`). Under
+ * the order's returns lock.
  */
 export async function requestReturn(
   container: MedusaContainer,
@@ -57,8 +62,19 @@ export async function requestReturn(
         throw new MedusaError(MedusaError.Types.NOT_FOUND, "orders.unknown")
       }
       const policy = await returnPolicy(container)
-      if (order.status === "canceled" || !windowOpen(order, now, policy.withdrawal_days)) {
+      const lines = input.items.map(({ line_item_id, quantity }) => ({ line_item_id, quantity }))
+      const gifts = await giftLinesOf(container, order.items ?? [])
+      const giftProblem = giftReturnProblem(lines, gifts, input, now, policy.withdrawal_days)
+      const giftRequest = lines.some((line) => gifts.has(line.line_item_id))
+      if (
+        order.status === "canceled" ||
+        giftProblem === "returns.window_closed" ||
+        (!giftRequest && !windowOpen(order, now, policy.withdrawal_days))
+      ) {
         throw new ValidationError("returns.window_closed")
+      }
+      if (giftProblem) {
+        throw new ValidationError(giftProblem, { field: "items" })
       }
       const service = container.resolve<ReturnRequestsModuleService>(RETURN_REQUESTS_MODULE)
       const earlier = await service.listReturnRequests(
@@ -74,13 +90,20 @@ export async function requestReturn(
       }
       // A request that came back counts what came back; one still open, what it asked
       const asked = earlier.flatMap(cameBack)
-      const lines = input.items.map(({ line_item_id, quantity }) => ({ line_item_id, quantity }))
       const kept = await container
         .resolve<OrderRefundsModuleService>(ORDER_REFUNDS_MODULE)
         .keptUnits(input.order_id)
+      const left = returnable(order, asked, kept)
+      // A gift card line is never shipped: what is left of it is its cards
+      for (const gift of gifts.values()) {
+        const taken = asked
+          .filter((line) => line.line_item_id === gift.line_id)
+          .reduce((sum, line) => sum + line.quantity, 0)
+        left.set(gift.line_id, giftReturnable(gift, taken, kept.get(gift.line_id) ?? 0))
+      }
       const problem =
-        linesProblem(returnable(order, asked, kept), lines) ??
-        withdrawalProblem(lines, await excludedLines(container, order.items ?? []), input)
+        linesProblem(left, lines) ??
+        withdrawalProblem(lines, await excludedLines(container, order.items ?? [], gifts), input)
       if (problem) {
         throw new ValidationError(problem, { field: "items" })
       }

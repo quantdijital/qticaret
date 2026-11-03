@@ -91,6 +91,14 @@ export function issuedCardsOf(metadata: unknown): IssuedCard[] {
 /** What a line records of a card: enough for staff to find it, never enough to spend it. */
 export const last4 = (code: string): string => code.slice(-4)
 
+/**
+ * Whether an order line was sold as a gift card by what it records: its
+ * recipient (kept as `{ erased: true }` after a KVKK erasure) or its
+ * issued cards. Holds after the product's mark is taken off.
+ */
+export const soldAsGiftCard = (metadata: unknown): boolean =>
+  isRow(metadata) && (GIFT_RECIPIENT_KEY in metadata || GIFT_CARDS_KEY in metadata)
+
 export interface GiftCartLine {
   id: string
   product_id: string | null

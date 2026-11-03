@@ -125,4 +125,55 @@ describe("personal lines in an order's contracts", () => {
 
     expect(checkLegalDoc(doc, "distance_sales").unknownTokens).toEqual([PERSONAL_LINES_TOKEN])
   })
+
+  it.each(["pre_information", "distance_sales"] as const)(
+    "names the gift cards in the %s's clause: withdrawn only while unused (adr/0025, TASLAK)",
+    (kind) => {
+      const facts = order([
+        {
+          product_title: "Hediye kartı",
+          variant_title: "500 TL",
+          quantity: 1,
+          total: 500,
+          gift_card: true,
+        },
+        // A line that recorded a recipient was sold as one, the product's mark taken off since
+        {
+          product_title: "Eski kart",
+          variant_title: "250 TL",
+          quantity: 1,
+          total: 250,
+          metadata: { qt_gift: { erased: true } },
+        },
+        { product_title: "Tişört", variant_title: "M", quantity: 1, total: 200 },
+      ])
+      const html = rendered(starterOf(kind).body, facts)
+      const clause = html.slice(html.indexOf("5. Cayma hakkı"), html.indexOf("6. "))
+
+      expect(clause).toContain(
+        "hediye kartlarında cayma hakkı, yalnızca kartlardan hiç harcama yapılmamışken kullanılabilir"
+      )
+      expect(clause).toContain("Hediye kartı · 500 TL")
+      expect(clause).toContain("Eski kart · 250 TL")
+      expect(clause).not.toContain("Tişört")
+      // Not a personal line: the add-on sentence stays out
+      expect(clause).not.toContain("15/1-ç")
+    }
+  )
+
+  it("puts the personal lines and the gift cards in the one block, each under its sentence", () => {
+    const blocks = orderLegalValues(
+      order([
+        ...personal.items,
+        { product_title: "Hediye kartı", quantity: 1, total: 500, gift_card: true },
+      ])
+    ).blocks[PERSONAL_LINES_TOKEN]
+
+    expect(blocks?.map((block) => block.type)).toEqual([
+      "paragraph",
+      "bulletList",
+      "paragraph",
+      "bulletList",
+    ])
+  })
 })
