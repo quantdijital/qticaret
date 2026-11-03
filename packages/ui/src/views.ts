@@ -1,4 +1,5 @@
 import type { TrustIcon } from "@qticaret/types"
+import type { AddonFieldView, AddonFormView, LineAddonView } from "./addon-views"
 import type { BottomNavView, ThemeView } from "./frame-views"
 
 /**
@@ -179,6 +180,8 @@ export interface VariantView {
   /** Option id → chosen value. */
   options: Record<string, string>
   price: PriceView | null
+  /** The price in kuruş, only for the add-ons' running total (adr/0052); null without a price. */
+  kurus?: number | null
   available: boolean
   sku: string | null
 }
@@ -229,6 +232,11 @@ export interface ProductPageView {
    * variant, and the cart form asks who the card is for.
    */
   giftCard?: boolean
+  /**
+   * The product's add-ons (adr/0052), asked in the cart form above "add
+   * to cart"; none while the shop has them off or the product has none.
+   */
+  addons?: AddonFieldView[]
 }
 
 export interface ReviewView {
@@ -506,6 +514,14 @@ export interface CartLineView {
   image: ImageView | null
   /** A gift card line's recipient (adr/0025 Ek 2026-11-03); absent on any other line. */
   gift?: GiftLineView | null
+  /** The line's add-on picks (adr/0052), one under another; none on a plain line. */
+  addons: LineAddonView[]
+  /** A pick made to the buyer's wish puts the line outside the right of withdrawal. */
+  nonWithdrawable: boolean
+  /** The most units the line may hold with its picks; null or absent: the cart's own limit. */
+  maxQuantity?: number | null
+  /** The picks' form, for a line of a product with add-ons while the shop offers them. */
+  addonForm?: AddonFormView | null
 }
 
 /** A gift card line: who it goes to, as typed (the edit form shows it again). */

@@ -80,8 +80,16 @@ export async function changeCartLine(form: FormData): Promise<void> {
   try {
     await changeLine(parsed.data.line_id, parsed.data.quantity)
   } catch (error) {
+    // An add-on line holds no more units than its picks allow (adr/0052)
+    const key = isStoreApiError(error) ? error.messageKey : null
     redirect(
-      `/sepet?hata=${messageFor(error) === "errors.too_many_requests" ? "errors.too_many_requests" : "cart.update_failed"}`
+      `/sepet?hata=${
+        key === "addons.max_quantity"
+          ? key
+          : messageFor(error) === "errors.too_many_requests"
+            ? "errors.too_many_requests"
+            : "cart.update_failed"
+      }`
     )
   }
   revalidatePath("/", "layout")

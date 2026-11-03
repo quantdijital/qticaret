@@ -97,7 +97,22 @@ const KNOWN = new Set([
   "gift_card.recipient_required",
   "gift_card.sale_disabled",
   "gift_card.not_payable_with_credit",
+  // A line's add-on picks not ready to pay (adr/0052): fixed in the cart
+  "addons.unavailable",
+  "addons.required",
+  "addons.max_quantity",
+  "catalog.addons_disabled",
+  "cart.prices_changed",
 ])
+
+/**
+ * An add-on line's price moved since it was put in the cart (adr/0052 §5):
+ * the backend set it at its price now and stopped the payment. The page is
+ * drawn again with the new totals and the shopper starts the payment
+ * again; never retried by itself (the price shown before paying is the one paid).
+ */
+export const pricesChanged = (error: unknown): boolean =>
+  isStoreApiError(error) && error.status === 409 && error.messageKey === "cart.prices_changed"
 
 export function checkoutError(error: unknown, fallback: string): string {
   if (!isStoreApiError(error)) {

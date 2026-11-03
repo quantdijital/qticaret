@@ -11,6 +11,7 @@ export type {
   Translate,
 } from "./theme"
 export type * from "./account-views"
+export type * from "./addon-views"
 export type * from "./checkout-views"
 export type * from "./frame-views"
 export type * from "./views"

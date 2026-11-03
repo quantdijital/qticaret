@@ -29,6 +29,7 @@ import {
   shippingOptions,
 } from "@/lib/checkout/options"
 import type { PaymentMethods } from "@/lib/checkout/options"
+import { lineAddonsOf } from "./addons"
 import { displayPhone } from "./frame"
 
 /** The text version of the marketing consent the checkout offers (F10). */
@@ -79,6 +80,7 @@ export function summaryOf(cart: CheckoutCart, t: Translate): CheckoutSummaryView
             sources: { avif: null, webp: null },
           }
         : null,
+      addons: lineAddonsOf(line.metadata).addons,
     })),
     items: formatLira(cart.original_item_total),
     discount: discount > 0 ? formatLira(discount / 100) : null,

@@ -13,6 +13,7 @@ import {
   SheetTitle,
 } from "@qticaret/ui/components/sheet"
 import { FreeShippingBar } from "../cart/FreeShippingBar"
+import { LineAddons } from "../components/LineAddons"
 
 /** Sent by the purchase form when a line went in: the drawer opens to show it. */
 export const CART_ADDED_EVENT = "qt:cart-added"
@@ -114,6 +115,7 @@ export function CartDrawer({
                           .filter(Boolean)
                           .join(" · ")}
                       </span>
+                      <LineAddons addons={line.addons} className="mt-0.5" />
                     </div>
                     <span className="tabular text-sm font-semibold">{line.total}</span>
                   </li>

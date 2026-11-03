@@ -9,6 +9,14 @@ import { PageContainer } from "./components/Container"
 
 const ORDER: CheckoutStep[] = ["address", "shipping", "payment"]
 
+/** Refusals fixed in the cart, not here (adr/0052): the message links there. */
+const CART_FIX_ERRORS = [
+  "addons.unavailable",
+  "addons.required",
+  "addons.max_quantity",
+  "catalog.addons_disabled",
+]
+
 /** The messages a checkout step can show, by key. */
 const ERRORS = [
   "checkout.address_invalid",
@@ -45,6 +53,9 @@ const ERRORS = [
   "gift_card.recipient_required",
   "gift_card.sale_disabled",
   "gift_card.not_payable_with_credit",
+  // A line's add-on picks (adr/0052): a price that moved, a pick to fix in the cart
+  "cart.prices_changed",
+  ...CART_FIX_ERRORS,
 ]
 
 /**
@@ -195,6 +206,7 @@ export function CheckoutPage({
                   secure: t("checkout.secure_payment"),
                   errors,
                   fallback: t("checkout.failed"),
+                  cartFix: { errors: CART_FIX_ERRORS, label: t("checkout.fix_in_cart") },
                 }}
               />
             )}

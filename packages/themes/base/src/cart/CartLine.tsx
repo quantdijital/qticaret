@@ -1,6 +1,8 @@
 import { Minus, Plus, X } from "lucide-react"
 import { ResponsiveImage } from "@qticaret/ui"
 import type { CartLineView, ThemeActions, Translate } from "@qticaret/ui"
+import { LineAddons } from "../components/LineAddons"
+import { AddonEditor } from "./AddonEditor"
 import { GiftRecipient } from "./GiftRecipient"
 
 const MAX_QUANTITY = 99
@@ -21,6 +23,8 @@ export function CartLine({
   t: Translate
   actions: ThemeActions
 }) {
+  // A line with add-on picks holds no more units than they allow (adr/0052)
+  const most = Math.min(MAX_QUANTITY, line.maxQuantity ?? MAX_QUANTITY)
   return (
     <li className="flex gap-4 py-6 first:pt-0 sm:gap-5">
       <div className="size-24 shrink-0 overflow-hidden rounded-2xl border bg-card sm:size-28">
@@ -49,6 +53,10 @@ export function CartLine({
             <div className="flex flex-col gap-1">
               <p className="leading-snug font-medium">{line.title}</p>
               {line.detail && <p className="text-sm text-muted-foreground">{line.detail}</p>}
+              <LineAddons
+                addons={line.addons}
+                note={line.nonWithdrawable ? t("addons.line_non_withdrawable") : null}
+              />
             </div>
             <button
               type="submit"
@@ -82,7 +90,7 @@ export function CartLine({
                 type="submit"
                 name="quantity"
                 value={line.quantity + 1}
-                disabled={line.quantity >= MAX_QUANTITY}
+                disabled={line.quantity >= most}
                 aria-label={t("product.increase")}
                 className={STEP}
               >
@@ -100,6 +108,14 @@ export function CartLine({
             </p>
           </div>
         </form>
+        {typeof line.maxQuantity === "number" && (
+          <p className="text-xs text-muted-foreground">
+            {t("addons.max_quantity_hint", { max: line.maxQuantity })}
+          </p>
+        )}
+        {line.addonForm && actions.saveLineAddons && (
+          <AddonEditor line={line} form={line.addonForm} save={actions.saveLineAddons} t={t} />
+        )}
         {line.gift && actions.saveGiftRecipient && (
           <GiftRecipient line={line} gift={line.gift} save={actions.saveGiftRecipient} t={t} />
         )}

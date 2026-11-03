@@ -11,6 +11,10 @@ import { cardPrice, isAvailable, variantPrice } from "./price"
 import { specsOf } from "./specs"
 import { paragraphsOf, pathOf } from "./text"
 
+/** A price in kuruş, for the add-ons' running total only (adr/0052); null without one. */
+const kurusOf = (amount: number | null | undefined): number | null =>
+  typeof amount === "number" && Number.isFinite(amount) ? Math.round(amount * 100) : null
+
 /** What the shop shows on its cards (adr/0053 §B, `product_card`). */
 export interface CardOptions {
   showBrand: boolean
@@ -136,6 +140,7 @@ export function productPage({
       })
     ),
     price: variantPrice(variant, displays),
+    kurus: kurusOf(variant.calculated_price?.calculated_amount),
     available: isAvailable(variant),
     sku: variant.sku,
   }))

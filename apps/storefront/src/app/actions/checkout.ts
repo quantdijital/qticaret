@@ -14,7 +14,7 @@ import { paymentMethods } from "@/lib/checkout/options"
 import { rememberPaymentFrame } from "@/lib/checkout/payment-cookie"
 import { recordTracking } from "@/lib/checkout/tracking"
 import { paymentRedirectOrigins, storefrontEnv } from "@/lib/env"
-import { acceptTerms, checkoutError, PlaceOrder } from "@/lib/checkout/place-order"
+import { acceptTerms, checkoutError, PlaceOrder, pricesChanged } from "@/lib/checkout/place-order"
 import {
   challengeOf,
   completeCart,
@@ -132,6 +132,10 @@ export async function placeOrder(
     const challenge = challengeOf(error)
     if (challenge) {
       return { ok: false, error: null, challenge }
+    }
+    if (pricesChanged(error)) {
+      // The page comes back in this answer with the new totals; the shopper pays again, never this action
+      revalidatePath("/", "layout")
     }
     return { ok: false, error: checkoutError(error, "checkout.failed"), challenge: NO_CHALLENGE }
   }

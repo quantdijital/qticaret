@@ -4,6 +4,7 @@ import type { BankTransferView, OrderGiftView, OrderPageView, Translate } from "
 import type { PaymentMethods } from "@/lib/checkout/options"
 import type { InvoiceRow, ReturnRequestRow, ShipmentRow, StoreOrder } from "@/lib/orders/order"
 import { providersOf } from "@/lib/orders/order"
+import { lineAddonsOf } from "./addons"
 import { addressSummaryOf } from "./checkout"
 
 const WHEN = new Intl.DateTimeFormat("tr-TR", {
@@ -39,6 +40,8 @@ export interface OrderExtras {
 }
 
 const REASONS = ["damaged", "wrong_item", "not_as_described", "changed_mind", "size_issue", "other"]
+// The shop's fault: what a line outside the right of withdrawal comes back for (backend `DEFECT_REASONS`)
+const DEFECT_REASONS = ["damaged", "wrong_item", "not_as_described"]
 const SHIPPED = new Set(["shipped", "partially_shipped", "delivered", "partially_delivered"])
 const NOTES: Record<string, string> = {
   iptal: "order.notice_canceled",
@@ -100,6 +103,12 @@ export function orderGiftOf(metadata: unknown): OrderGiftView | null {
   }
 }
 
+/** A line's add-on picks and whether they take it outside the right of withdrawal (adr/0052 §8). */
+const picksOf = (metadata: unknown) => {
+  const { addons, nonWithdrawable } = lineAddonsOf(metadata)
+  return { addons, nonWithdrawable }
+}
+
 /** An order page's own address, with its key when it was opened with one. */
 export const orderHref = (id: string, token: string | null, rest = "") =>
   `/siparis/${encodeURIComponent(id)}${rest}${token ? `?token=${encodeURIComponent(token)}` : ""}`
@@ -156,6 +165,8 @@ export function orderView(
           }
         : null,
       gift: orderGiftOf(line.metadata),
+      // The picks as sold: the line's own copy, whatever the product's add-ons are now
+      ...picksOf(line.metadata),
     })),
     items: formatLira(order.original_item_total),
     discount: discount > 0 ? formatLira(discount / 100) : null,
@@ -193,9 +204,15 @@ export function orderView(
     cancellable: order.status === "pending" && order.fulfillment_status === "not_fulfilled",
     returnable:
       order.status !== "canceled" && SHIPPED.has(order.fulfillment_status)
-        ? order.items.map((line) => ({ id: line.id, title: line.title, quantity: line.quantity }))
+        ? order.items.map((line) => ({
+            id: line.id,
+            title: line.title,
+            quantity: line.quantity,
+            nonWithdrawable: picksOf(line.metadata).nonWithdrawable,
+          }))
         : null,
     returnReasons: REASONS.map((reason) => ({ value: reason, label: t(`order.reason_${reason}`) })),
+    defectReasons: DEFECT_REASONS,
     returns: extras.returns.map((request) => ({
       kind: said(t, "order.return_kind_", request.kind),
       status: said(t, "order.return_status_", request.status),

@@ -1,3 +1,4 @@
+import type { LineAddonView } from "./addon-views"
 import type { BreadcrumbView, ImageView, LinkView } from "./views"
 
 /**
@@ -75,6 +76,8 @@ export interface CheckoutLineView {
   quantity: number
   total: string
   image: ImageView | null
+  /** The line's add-on picks (adr/0052). */
+  addons?: LineAddonView[]
 }
 
 export interface CheckoutSummaryView {
@@ -153,6 +156,10 @@ export interface OrderLineView {
   image: ImageView | null
   /** A gift card line (adr/0025 Ek 2026-11-03): its cards' last four and the recipient's address. */
   gift?: OrderGiftView | null
+  /** The line's add-on picks as sold (adr/0052). */
+  addons: LineAddonView[]
+  /** A pick made to the buyer's wish: no withdrawal, only a faulty or wrong item comes back. */
+  nonWithdrawable: boolean
 }
 
 export interface OrderGiftView {
@@ -196,9 +203,14 @@ export interface OrderPageView {
   orderId: string
   /** Not packed yet: the shopper may cancel (the backend decides again). */
   cancellable: boolean
-  /** Shipped or delivered: the lines that may be asked back; null when none may. */
-  returnable: { id: string; title: string; quantity: number }[] | null
+  /**
+   * Shipped or delivered: the lines that may be asked back; null when none
+   * may. A non-withdrawable line comes back only for a reason in `defectReasons`.
+   */
+  returnable: { id: string; title: string; quantity: number; nonWithdrawable?: boolean }[] | null
   returnReasons: OptionView[]
+  /** The reasons that are the shop's fault (faulty, wrong, not as described): `returnReasons` values. */
+  defectReasons?: string[]
   /** Return requests already made, in words. */
   returns: { kind: string; status: string; date: string; code: string | null }[]
   /** The parcels that left, in words: carrier, tracking and where they are. */

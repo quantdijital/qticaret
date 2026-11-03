@@ -2,6 +2,7 @@ import { ChevronDown, ShoppingBag } from "lucide-react"
 import { ResponsiveImage } from "@qticaret/ui"
 import type { CheckoutSummaryView, Translate } from "@qticaret/ui"
 import { cn } from "@qticaret/ui/lib/utils"
+import { LineAddons } from "../components/LineAddons"
 
 /** The basket beside the checkout: lines with their pictures and counts, then the totals. */
 export function OrderSummary({
@@ -52,6 +53,7 @@ export function OrderSummary({
               {line.detail && (
                 <span className="truncate text-xs text-muted-foreground">{line.detail}</span>
               )}
+              <LineAddons addons={line.addons ?? []} className="mt-0.5" />
             </div>
             <span className="tabular shrink-0 font-medium">{line.total}</span>
           </li>

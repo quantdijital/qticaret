@@ -1,6 +1,7 @@
 import type { ProductPageView, ThemeActions, Translate } from "@qticaret/ui"
 import { MessageCircle } from "lucide-react"
 import { Breadcrumbs } from "./components/Breadcrumbs"
+import { ADDON_ERRORS, addonWords } from "./components/addon-words"
 import { GIFT_ERRORS, giftWords } from "./components/gift-words"
 import { PageContainer } from "./components/Container"
 import { FavoriteButton } from "./components/FavoriteButton"
@@ -19,6 +20,8 @@ const ACTION_ERRORS = [
   "errors.too_many_requests",
   // A gift card's recipient (adr/0025 Ek 2026-11-03)
   ...GIFT_ERRORS,
+  // A line's add-on picks (adr/0052)
+  ...ADDON_ERRORS,
 ]
 
 /**
@@ -108,6 +111,21 @@ export function ProductPage({
               gift={
                 view.giftCard && actions.addGiftToCart
                   ? { action: actions.addGiftToCart, words: giftWords(t) }
+                  : null
+              }
+              addons={
+                view.addons && view.addons.length > 0 && actions.addAddonsToCart && !view.giftCard
+                  ? {
+                      action: actions.addAddonsToCart,
+                      productId: view.id,
+                      fields: view.addons,
+                      words: {
+                        ...addonWords(t),
+                        total: t("addons.total"),
+                        totalCount: t("addons.total_count"),
+                        limit: t("addons.max_quantity_hint"),
+                      },
+                    }
                   : null
               }
               alertWords={{

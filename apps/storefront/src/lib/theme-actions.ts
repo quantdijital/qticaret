@@ -19,6 +19,7 @@ import { saveConsents, saveProfile } from "@/app/actions/account-profile"
 import { addFavorite, removeFavorite, saveBilling } from "@/app/actions/favorites"
 import { installmentsFor } from "@/app/actions/installments"
 import { addAddress, removeAddress } from "@/app/actions/addresses"
+import { addAddonsToCart, saveLineAddons } from "@/app/actions/addons"
 import { addGiftToCart, checkGiftCardBalance, saveGiftRecipient } from "@/app/actions/gift-cards"
 import { cancelOrder, requestReturn } from "@/app/actions/order"
 import { requestPrivacy } from "@/app/actions/privacy"
@@ -54,6 +55,8 @@ export const themeActions: ThemeActions = {
   installments: installmentsFor,
   addGiftToCart,
   saveGiftRecipient,
+  addAddonsToCart,
+  saveLineAddons,
 }
 
 /** `/hediye-karti/bakiye`'s form (adr/0025 Ek 2026-11-03). */

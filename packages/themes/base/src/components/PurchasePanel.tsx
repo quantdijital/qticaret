@@ -2,8 +2,10 @@
 
 import { Check } from "lucide-react"
 import { useActionState, useEffect, useMemo, useRef, useState } from "react"
+import { formatLira } from "@qticaret/ui"
 import type {
   ActionResult,
+  AddonFieldView,
   FormAction,
   InstallmentFamilyView,
   PlaceOrderResult,
@@ -15,14 +17,17 @@ import { Button } from "@qticaret/ui/components/button"
 import { emitShopEvent } from "@qticaret/ui/lib/shop-events"
 import { cn } from "@qticaret/ui/lib/utils"
 import { CART_ADDED_EVENT } from "../layout/CartDrawer"
+import { AddonFields } from "./AddonFields"
+import type { AddonWords } from "./AddonFields"
+import { picksKurus, picksLimit, picksOf } from "./addon-picks"
 import { GiftFields } from "./GiftFields"
 import type { GiftWords } from "./GiftFields"
 import { InstallmentTable } from "./InstallmentTable"
 import type { InstallmentWords } from "./InstallmentTable"
 import { QuantityField } from "./QuantityField"
+import { OptionPicker } from "./OptionPicker"
 import { StockAlertForm } from "./StockAlertForm"
 import type { StockAlertWords } from "./StockAlertForm"
-import { Swatch } from "./Swatch"
 
 export interface PurchaseLabels {
   quantity: string
@@ -59,6 +64,18 @@ interface PurchasePanelProps {
   installmentWords: InstallmentWords
   /** A gift card (adr/0025 Ek 2026-11-03): the form asks its recipient and sends it to this action instead. */
   gift?: { action: FormAction; words: GiftWords } | null
+  /**
+   * The product's add-ons (adr/0052): the form asks them above the button
+   * and sends them to this action instead; `total` and `totalCount`
+   * ("{count} adet") word the running total, `limit` ("{max}") the units
+   * the picks allow on one line.
+   */
+  addons?: {
+    action: FormAction
+    productId: string
+    fields: AddonFieldView[]
+    words: AddonWords & { total: string; totalCount: string; limit: string }
+  } | null
 }
 
 const INITIAL: ActionResult = { ok: false, error: null }
@@ -89,11 +106,18 @@ export function PurchasePanel({
   installments,
   installmentWords,
   gift = null,
+  addons = null,
 }: PurchasePanelProps) {
   const initial =
     variants.find((variant) => variant.id === selectedVariantId) ?? variants[0] ?? null
   const [chosen, setChosen] = useState<Record<string, string>>(initial?.options ?? {})
-  const [state, submit, pending] = useActionState(gift?.action ?? addToCart, INITIAL)
+  const [state, submit, pending] = useActionState(
+    gift?.action ?? addons?.action ?? addToCart,
+    INITIAL
+  )
+  // The add-on picks as typed and the quantity, for the running total and the units allowed
+  const [picks, setPicks] = useState<Record<string, string>>({})
+  const [quantity, setQuantity] = useState(1)
   // What was sent, for the storefront's "added to cart" (it decides whether anything is measured)
   const sent = useRef<{ variantId: string; quantity: number } | null>(null)
   // A new choice makes the last answer stale: it was about the previous variant
@@ -124,6 +148,13 @@ export function PurchasePanel({
 
   const available = variant?.available ?? false
   const price = variant?.price ?? null
+  const fields = addons?.fields ?? []
+  const limit = picksLimit(fields, picks)
+  const units = Math.min(quantity, limit ?? 99)
+  const extra = picksKurus(fields, picks)
+  // Shown only: the line's price is the server's once it is added (CLAUDE.md rule 5)
+  const total =
+    typeof variant?.kurus === "number" && extra > 0 ? (variant.kurus + extra) * units : null
   return (
     <>
       <form
@@ -135,6 +166,12 @@ export function PurchasePanel({
             quantity: Number(form.get("quantity") ?? 1) || 1,
           }
           submit(form)
+        }}
+        onChange={(event) => {
+          const target = event.target as { name?: unknown }
+          if (typeof target.name === "string" && target.name.startsWith("addon_")) {
+            setPicks(picksOf(event.currentTarget))
+          }
         }}
         className="flex flex-col gap-6"
       >
@@ -173,62 +210,38 @@ export function PurchasePanel({
           />
           {variant ? (available ? labels.inStock : labels.outOfStock) : labels.chooseOptions}
         </p>
-        {options.map((option) => (
-          <fieldset key={option.id} className="flex flex-col gap-2.5">
-            <legend className="mb-1 text-sm font-medium">
-              {option.title}
-              {chosen[option.id] && (
-                <span className="font-normal text-muted-foreground">: {chosen[option.id]}</span>
-              )}
-            </legend>
-            <div className="flex flex-wrap gap-2">
-              {option.values.map((value) => {
-                const id = `option-${option.id}-${value}`
-                const swatch = option.swatches?.[value]
-                return (
-                  <label
-                    key={value}
-                    htmlFor={id}
-                    title={swatch ? value : undefined}
-                    className={
-                      swatch
-                        ? "inline-flex size-11 cursor-pointer items-center justify-center rounded-full border-2 border-transparent p-0.5 transition-colors hover:border-foreground/40 has-[:checked]:border-foreground has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ring"
-                        : "inline-flex h-11 min-w-12 cursor-pointer items-center justify-center rounded-button border bg-card px-5 text-sm font-medium transition-colors hover:border-foreground has-[:checked]:border-foreground has-[:checked]:bg-foreground has-[:checked]:text-background has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-ring"
-                    }
-                  >
-                    <input
-                      id={id}
-                      type="radio"
-                      name={`option_${option.id}`}
-                      value={value}
-                      checked={chosen[option.id] === value}
-                      onChange={() => {
-                        choose(option.id, value)
-                      }}
-                      className="sr-only"
-                    />
-                    {swatch ? (
-                      <>
-                        <Swatch hex={swatch} className="size-full" />
-                        <span className="sr-only">{value}</span>
-                      </>
-                    ) : (
-                      value
-                    )}
-                  </label>
-                )
-              })}
-            </div>
-          </fieldset>
-        ))}
+        <OptionPicker options={options} chosen={chosen} choose={choose} />
         <input type="hidden" name="variant_id" value={variant?.id ?? ""} />
         {gift && <GiftFields id="hediye" words={gift.words} />}
+        {addons && !gift && (
+          <>
+            <input type="hidden" name="product_id" value={addons.productId} />
+            {/* The picks as typed are the fields' defaults: a refused add keeps them */}
+            <AddonFields id="ek" fields={fields} values={picks} words={addons.words} />
+            {limit !== null && (
+              <p className="-mt-3 text-xs text-muted-foreground">
+                {addons.words.limit.replace("{max}", String(limit))}
+              </p>
+            )}
+            {total !== null && (
+              <p aria-live="polite" className="-mt-2 flex items-baseline justify-between text-sm">
+                <span className="text-muted-foreground">
+                  {addons.words.total}
+                  {units > 1 && ` (${addons.words.totalCount.replace("{count}", String(units))})`}
+                </span>
+                <span className="tabular text-lg font-semibold">{formatLira(total / 100)}</span>
+              </p>
+            )}
+          </>
+        )}
         <div className="flex gap-3">
           <QuantityField
             name="quantity"
             label={labels.quantity}
             decrease={labels.decrease}
             increase={labels.increase}
+            max={limit ?? 99}
+            onValueChange={setQuantity}
           />
           <Button
             type="submit"

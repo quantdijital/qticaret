@@ -75,6 +75,18 @@ export interface ThemeActions {
    * to the cart with its message key.
    */
   saveGiftRecipient?: (form: FormData) => Promise<void>
+  /**
+   * A product with its add-on picks into the cart (adr/0052). Fields:
+   * `product_id`, `variant_id`, `quantity`, `addon_<id>` (the text typed or
+   * the choice's id; empty is none). Never a price.
+   */
+  addAddonsToCart?: FormAction
+  /**
+   * A plain form: a cart line's picks written again. Fields: `line_id`,
+   * `product_id`, `addon_<id>` as above, or `clear=1` to take them all
+   * off; a refusal comes back to the cart with its message key.
+   */
+  saveLineAddons?: (form: FormData) => Promise<void>
 }
 
 /** `/hediye-karti/bakiye`'s form. */

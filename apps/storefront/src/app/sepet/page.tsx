@@ -1,12 +1,20 @@
 import type { Metadata } from "next"
 import { formatLira } from "@qticaret/ui"
 import { themeActions } from "@/lib/theme-actions"
+import { ADDON_ERROR_KEYS } from "@/lib/addons/errors"
+import { addonsOfProducts } from "@/lib/cart/addons"
 import { codesOf, currentCart } from "@/lib/cart/cart"
 import { shopperGiftLines } from "@/lib/cart/gift"
 import { t } from "@/lib/i18n"
 import { robotsOnly } from "@/lib/seo/metadata"
 import { storefrontSettings } from "@/lib/store-api/requests"
-import { cartLinesOf, differs, freeShippingOf, withGiftLines } from "@/lib/views/cart"
+import {
+  cartLinesOf,
+  differs,
+  freeShippingOf,
+  withAddonForms,
+  withGiftLines,
+} from "@/lib/views/cart"
 import { theme } from "@/theme"
 
 // docs/13 §7: the cart is noindex,nofollow (backend `system_pages`)
@@ -25,6 +33,8 @@ const CART_ERRORS = new Set([
   "gift_card.sale_disabled",
   "gift_card.not_gift_line",
   "messaging.email_domain_refuses",
+  // A line's add-on picks or its quantity, refused (adr/0052)
+  ...ADDON_ERROR_KEYS,
 ])
 
 export default async function CartPage({
@@ -39,9 +49,23 @@ export default async function CartPage({
   ])
   const error =
     typeof query["hata"] === "string" && CART_ERRORS.has(query["hata"]) ? t(query["hata"]) : null
+  const [gifts, addons] = await Promise.all([
+    shopperGiftLines(cart?.id),
+    // Each product's add-ons, for its lines' picks form (none while the shop has them off)
+    addonsOfProducts((cart?.items ?? []).flatMap((line) => line.product_id ?? [])),
+  ])
+  // A gift card line takes no add-ons (its product page offers none)
+  const giftLines = new Set(gifts.map((gift) => gift.line_id))
+  const lines = withGiftLines(
+    withAddonForms(
+      cartLinesOf(cart),
+      cart ? { ...cart, items: cart.items.filter((line) => !giftLines.has(line.id)) } : null,
+      addons,
+      t
+    ),
+    gifts
+  )
   // A gift card is bought with money only: no card or credit field while one is in the cart
-  const gifts = await shopperGiftLines(cart?.id)
-  const lines = withGiftLines(cartLinesOf(cart), gifts)
   const codes = (cart?.gift_cards ?? []).map((card) => card.code)
   const paidByCard = codes.length > 0 || Boolean(cart?.credit_line_total)
   const items = cart?.original_item_total ?? 0

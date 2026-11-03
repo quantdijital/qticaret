@@ -77,9 +77,9 @@ export async function storeRequest<T>(
     signal: AbortSignal.timeout(request.timeoutMs ?? 8000),
   })
   const text = await response.text()
-  const data: unknown = text === "" ? null : JSON.parse(text)
   if (!response.ok) {
-    const body = (data ?? {}) as { message?: unknown; request_id?: unknown }
+    // The backend's JSON, or a page: a feature that is off answers as a route that does not exist (adr/0012)
+    const body = (jsonOrNull(text) ?? {}) as { message?: unknown; request_id?: unknown }
     throw new StoreApiError(
       response.status,
       typeof body.message === "string" ? body.message : null,
@@ -87,5 +87,15 @@ export async function storeRequest<T>(
       body
     )
   }
+  const data: unknown = text === "" ? null : JSON.parse(text)
   return { status: response.status, data: data as T, headers: response.headers }
+}
+
+/** An error answer's body as JSON; null when it is none (an HTML page, nothing). */
+function jsonOrNull(text: string): unknown {
+  try {
+    return text === "" ? null : (JSON.parse(text) as unknown)
+  } catch {
+    return null
+  }
 }

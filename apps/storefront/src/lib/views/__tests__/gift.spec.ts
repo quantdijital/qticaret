@@ -11,6 +11,8 @@ const line = (id: string): CartLineView => ({
   total: "500,00 TL",
   original: null,
   image: null,
+  addons: [],
+  nonWithdrawable: false,
 })
 
 describe("gift card lines (adr/0025 Ek 2026-11-03)", () => {

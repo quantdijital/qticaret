@@ -15,9 +15,11 @@ import {
   storefrontSettings,
 } from "@/lib/store-api/requests"
 import { currentCustomer } from "@/lib/account/auth"
+import { productAddonsOrNone } from "@/lib/cart/addons"
 import { storefrontEnv } from "@/lib/env"
 import { whatsappHref } from "@/lib/views/frame"
 import { currentLayout } from "@/lib/views/layout"
+import { addonFieldsOf } from "@/lib/views/addons"
 import { productPage, variantIdsOf } from "@/lib/views/product"
 import { questionsView, relatedOf, reviewsView } from "@/lib/views/product-extras"
 import { swatchLookup } from "@/lib/views/color"
@@ -44,6 +46,7 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
     related,
     customer,
     sections,
+    addons,
   ] = await Promise.all([
     priceDisplays(variantIdsOf([product])),
     product.brand
@@ -60,6 +63,8 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
         categoryIds: (product.categories ?? []).map((category) => category.id),
       },
     }),
+    // A gift card takes no add-ons; none while the shop has them off (the route answers 404)
+    product.product_extension?.is_gift_card ? Promise.resolve([]) : productAddonsOrNone(product.id),
   ])
   // The shop's WhatsApp number comes with its contact details (adr/0048)
   const { whatsapp } = await legalIdentity()
@@ -87,6 +92,8 @@ export async function ProductScreen({ page, url }: { page: Entity; url: URL }) {
     sections,
     // The amount is the variant; the cart form asks who the card is for (adr/0025 Ek 2026-11-03)
     giftCard: features?.gift_cards === true && product.product_extension?.is_gift_card === true,
+    // Picked above "add to cart"; the server prices them on the line (adr/0052)
+    addons: addonFieldsOf(addons, t),
     signedIn: customer !== null,
     shippingNote:
       free_shipping_threshold && free_shipping_threshold > 0

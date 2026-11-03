@@ -18,6 +18,9 @@ export interface CartLine {
   total: number
   /** Before discounts, KDV included. */
   original_total: number
+  product_id?: string | null
+  /** The server's records on the line: its add-on picks (`qt_addons`, adr/0052) among them. */
+  metadata?: Record<string, unknown> | null
 }
 
 export interface Cart {
@@ -53,6 +56,8 @@ const CART_FIELDS = [
   "items.unit_price",
   "items.total",
   "items.original_total",
+  "items.product_id",
+  "items.metadata",
   "promotions.code",
   "promotions.is_automatic",
   "credit_line_total",
@@ -129,10 +134,15 @@ async function newCart(): Promise<string> {
 /**
  * Puts a variant in the shopper's cart, opening a cart when there is none
  * or the remembered one is gone or ordered. Prices come from the backend
- * (CLAUDE.md rule 5): only the variant and the quantity are sent. Answers
- * the cart's id.
+ * (CLAUDE.md rule 5): only the variant, the quantity and, for a line of
+ * its own, a mark of ours (never `qt_`) are sent. Answers the cart's id.
  */
-export async function addLine(variantId: string, quantity: number): Promise<string> {
+export async function addLine(
+  variantId: string,
+  quantity: number,
+  metadata?: Record<string, string>
+): Promise<string> {
+  const line = { variant_id: variantId, quantity, ...(metadata ? { metadata } : {}) }
   const existing = await currentCart().catch((error: unknown) => {
     if (isStoreApiError(error)) {
       return null
@@ -141,7 +151,7 @@ export async function addLine(variantId: string, quantity: number): Promise<stri
   })
   const cartId = existing?.id ?? (await newCart())
   try {
-    await storePost(`/store/carts/${cartId}/line-items`, { variant_id: variantId, quantity })
+    await storePost(`/store/carts/${cartId}/line-items`, line)
     return cartId
   } catch (error) {
     if (!existing || !isNotFound(error)) {
@@ -149,7 +159,7 @@ export async function addLine(variantId: string, quantity: number): Promise<stri
     }
     await forgetCart()
     const fresh = await newCart()
-    await storePost(`/store/carts/${fresh}/line-items`, { variant_id: variantId, quantity })
+    await storePost(`/store/carts/${fresh}/line-items`, line)
     return fresh
   }
 }

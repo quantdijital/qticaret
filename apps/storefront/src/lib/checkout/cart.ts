@@ -27,6 +27,8 @@ export interface CheckoutCartLine {
   thumbnail: string | null
   quantity: number
   total: number
+  /** The server's records on the line: its add-on picks (`qt_addons`, adr/0052). */
+  metadata?: Record<string, unknown> | null
 }
 
 export interface CheckoutCart {
@@ -75,6 +77,7 @@ const FIELDS = [
   "items.thumbnail",
   "items.quantity",
   "items.total",
+  "items.metadata",
   "original_item_total",
   "item_total",
   "shipping_total",

@@ -19,6 +19,7 @@ export function QuantityField({
   max = 99,
   defaultValue = 1,
   className,
+  onValueChange,
 }: {
   name: string
   label: string
@@ -28,10 +29,19 @@ export function QuantityField({
   max?: number
   defaultValue?: number
   className?: string
+  /** Hears each new value (a running total beside the field). */
+  onValueChange?: (value: number) => void
 }) {
-  const [value, setValue] = useState(defaultValue)
+  const [typed, setTyped] = useState(defaultValue)
+  // A lower `max` (an add-on's limit, adr/0052) takes the shown value down with it
+  const value = clamp(typed, min, max)
+  const set = (next: number) => {
+    const kept = clamp(next, min, max)
+    setTyped(kept)
+    onValueChange?.(kept)
+  }
   const step = (by: number) => {
-    setValue((current) => clamp(current + by, min, max))
+    set(value + by)
   }
   return (
     <div
@@ -60,7 +70,7 @@ export function QuantityField({
         inputMode="numeric"
         onChange={(event) => {
           const next = Number.parseInt(event.target.value, 10)
-          setValue(Number.isNaN(next) ? min : clamp(next, min, max))
+          set(Number.isNaN(next) ? min : next)
         }}
         className="tabular w-10 appearance-none bg-transparent text-center text-sm font-medium outline-none [&::-webkit-inner-spin-button]:appearance-none"
       />

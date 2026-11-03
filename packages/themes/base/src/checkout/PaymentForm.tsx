@@ -40,6 +40,8 @@ export interface PaymentWords {
   secure: string
   errors: Record<string, string>
   fallback: string
+  /** Refusals fixed in the cart (adr/0052): their message links to it. */
+  cartFix?: { errors: string[]; label: string }
 }
 
 const CHECKBOX = "mt-0.5 size-4.5 shrink-0 accent-foreground"
@@ -177,6 +179,14 @@ export function PaymentForm({
       <div className="flex flex-col gap-3">
         <p role="alert" className="text-sm font-medium text-sale empty:hidden">
           {error ? (words.errors[error] ?? words.fallback) : null}
+          {error && words.cartFix?.errors.includes(error) && (
+            <>
+              {" "}
+              <a href="/sepet" className="text-foreground underline underline-offset-4">
+                {words.cartFix.label}
+              </a>
+            </>
+          )}
         </p>
         <Button
           type="submit"

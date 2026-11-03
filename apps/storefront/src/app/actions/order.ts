@@ -97,7 +97,13 @@ export async function requestReturn(
     }
     return {
       ok: false,
-      error: error.status === 429 ? "errors.too_many_requests" : "order.return_failed",
+      error:
+        error.status === 429
+          ? "errors.too_many_requests"
+          : // A line made to the buyer's wish comes back only as faulty or wrong (adr/0052 §8)
+            error.messageKey === "returns.withdrawal_excluded"
+            ? "returns.withdrawal_excluded"
+            : "order.return_failed",
     }
   }
   revalidatePath(`/siparis/${order_id}`)
