@@ -15,6 +15,20 @@ const CART_FIX_ERRORS = [
   "addons.required",
   "addons.max_quantity",
   "catalog.addons_disabled",
+  // A payment link's code on another cart (adr/0051): taken off in the cart
+  "cart.payment_link_code_misused",
+]
+
+/**
+ * A payment link's cart that can no longer be paid (adr/0051): the shop
+ * is told, the link opens again from its message; the way out is home
+ * (the storefront does not know the link's token here).
+ */
+const LINK_ERRORS = [
+  "cart.payment_link_closed",
+  "cart.payment_link_superseded",
+  "cart.payment_link_changed",
+  "cart.payment_link_prices_changed",
 ]
 
 /** The messages a checkout step can show, by key. */
@@ -56,6 +70,8 @@ const ERRORS = [
   // A line's add-on picks (adr/0052): a price that moved, a pick to fix in the cart
   "cart.prices_changed",
   ...CART_FIX_ERRORS,
+  ...LINK_ERRORS,
+  "cart.payment_link_no_cod",
 ]
 
 /**
@@ -206,7 +222,10 @@ export function CheckoutPage({
                   secure: t("checkout.secure_payment"),
                   errors,
                   fallback: t("checkout.failed"),
-                  cartFix: { errors: CART_FIX_ERRORS, label: t("checkout.fix_in_cart") },
+                  fixes: [
+                    { errors: CART_FIX_ERRORS, label: t("checkout.fix_in_cart"), path: "/sepet" },
+                    { errors: LINK_ERRORS, label: t("not_found.home"), path: "/" },
+                  ],
                 }}
               />
             )}

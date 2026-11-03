@@ -190,7 +190,11 @@ export function metaEvent(event: AnalyticsEvent): MetaCall | null {
  * and paths that hold one: never told to a tag.
  */
 const SECRET_PARAMS = new Set(["token", "t", "code", "davet"])
-const SECRET_PATHS: [RegExp, string][] = [[/^\/onizleme\/.+$/, "/onizleme"]]
+const SECRET_PATHS: [RegExp, string][] = [
+  [/^\/onizleme\/.+$/, "/onizleme"],
+  // A payment link (adr/0051): its token is the key to someone's order
+  [/^\/ode\/.+$/, "/ode"],
+]
 
 /** The address as a tag may hear it: its keys and tokens taken out, everything else as it is. */
 export function safeLocation(href: string): string {

@@ -44,6 +44,8 @@ export interface CheckoutCart {
   /** What gift cards and store credit take off (F4.8); `total` is after it. */
   credit_line_total?: number | null
   total: number
+  /** The server's records on the cart: a payment link's mark (`qt_payment_link`, adr/0051). */
+  metadata?: Record<string, unknown> | null
 }
 
 const ADDRESS = [
@@ -62,6 +64,7 @@ const FIELDS = [
   "id",
   "email",
   "completed_at",
+  "metadata",
   ...ADDRESS.map((field) => `shipping_address.${field}`),
   "shipping_methods.id",
   "shipping_methods.shipping_option_id",

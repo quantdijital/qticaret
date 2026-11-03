@@ -4,6 +4,7 @@ import { currentCustomer, customerAddresses } from "@/lib/account/auth"
 import { checkoutEvents } from "@/lib/analytics/payloads"
 import { TrackEvents } from "@/lib/analytics/TrackEvents"
 import { shopperGiftLines } from "@/lib/cart/gift"
+import { isPaymentLinkCart } from "@/lib/cart/payment-link"
 import { checkoutCart } from "@/lib/checkout/cart"
 import { t } from "@/lib/i18n"
 import { robotsOnly } from "@/lib/seo/metadata"
@@ -53,11 +54,17 @@ export default async function CheckoutPage({
     customer ? { ...customer, address: saved ?? null } : null,
     billing
   )
+  // A gift line is never paid with credit; a payment link's order never on delivery (adr/0051)
+  const linked = isPaymentLinkCart(cart.metadata)
   const shown =
-    gifts.length > 0
+    gifts.length > 0 || linked
       ? {
           ...view,
-          paymentMethods: view.paymentMethods.filter((method) => method.kind !== "credit"),
+          paymentMethods: view.paymentMethods.filter(
+            (method) =>
+              !(gifts.length > 0 && method.kind === "credit") &&
+              !(linked && method.kind === "cash_on_delivery")
+          ),
         }
       : view
   const measured = checkoutEvents(cart)

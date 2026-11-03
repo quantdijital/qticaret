@@ -17,6 +17,7 @@ import { ListingPage } from "./ListingPage"
 import { NotFoundPage } from "./NotFoundPage"
 import { OrderPage } from "./OrderPage"
 import { PaymentFramePage } from "./PaymentFramePage"
+import { PaymentLinkPage } from "./PaymentLinkPage"
 import { ProductPage } from "./ProductPage"
 import { ReviewsPage } from "./ReviewsPage"
 
@@ -43,4 +44,5 @@ export const baseTheme: StorefrontTheme = {
   CookiePreferencesPage,
   ReviewsPage,
   GiftCardBalancePage,
+  PaymentLinkPage,
 }

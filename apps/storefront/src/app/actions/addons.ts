@@ -5,6 +5,7 @@ import { redirect } from "next/navigation"
 import { z } from "zod"
 import type { ActionResult } from "@qticaret/ui"
 import { addonError } from "@/lib/addons/errors"
+import { linkCartRefusal } from "@/lib/cart/payment-link"
 import { fieldOf, hasPicks, pickedLimit, selectionsOf } from "@/lib/addons/selections"
 import { addAddonLine, productAddons, saveAddonLine } from "@/lib/cart/addons"
 import { addLine } from "@/lib/cart/cart"
@@ -24,7 +25,7 @@ function addFailure(error: unknown): string {
     isStoreApiError(error) && (error.status === 400 || error.status === 404)
       ? "cart.variant_unavailable"
       : "cart.add_failed"
-  return addonError(error, core)
+  return linkCartRefusal(error) ?? addonError(error, core)
 }
 
 /**
@@ -108,7 +109,7 @@ export async function saveLineAddons(form: FormData): Promise<void> {
       await saveAddonLine(parsed.data.line_id, picked.selections)
     }
   } catch (error) {
-    failed = addonError(error, "cart.update_failed")
+    failed = linkCartRefusal(error) ?? addonError(error, "cart.update_failed")
   }
   revalidatePath("/", "layout")
   redirect(failed ? `/sepet?hata=${failed}` : "/sepet")

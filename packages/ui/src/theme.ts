@@ -10,6 +10,7 @@ import type {
   PaymentFramePageView,
   PlaceOrderResult,
 } from "./checkout-views"
+import type { PaymentLinkPageView } from "./payment-link-views"
 import type {
   BlogIndexPageView,
   BrandsPageView,
@@ -87,6 +88,11 @@ export interface ThemeActions {
    * off; a refusal comes back to the cart with its message key.
    */
   saveLineAddons?: (form: FormData) => Promise<void>
+  /**
+   * A plain form: a payment link's cart (adr/0051) let go, so the shopper
+   * can shop anew; the link itself still opens from its message.
+   */
+  leaveLinkCart?: (form: FormData) => Promise<void>
 }
 
 /** `/hediye-karti/bakiye`'s form. */
@@ -200,4 +206,11 @@ export interface StorefrontTheme {
   >
   /** A gift card's balance by its code (adr/0025 Ek 2026-11-03). */
   GiftCardBalancePage: ComponentType<Page<GiftCardBalancePageView> & { actions: GiftCardActions }>
+  /**
+   * `/ode/<token>` (adr/0051): the order staff prepared, and "Ödemeye geç",
+   * a plain form (field `token`) that opens it as the cart at checkout.
+   */
+  PaymentLinkPage: ComponentType<
+    Page<PaymentLinkPageView> & { action: (form: FormData) => Promise<void> }
+  >
 }

@@ -122,6 +122,12 @@ export function CartDrawer({
                 ))}
               </ul>
               <div className="flex flex-col gap-4 border-t bg-card px-6 py-5">
+                {/* A payment link's cart (adr/0051): its lines are fixed */}
+                {cart.locked && (
+                  <p role="note" className="rounded-xl border p-3 text-sm">
+                    {cart.locked}
+                  </p>
+                )}
                 {cart.freeShipping && <FreeShippingBar view={cart.freeShipping} />}
                 <p className="flex items-baseline justify-between">
                   <span className="text-sm font-medium">{words.subtotal}</span>

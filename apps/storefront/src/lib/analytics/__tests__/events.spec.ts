@@ -122,6 +122,10 @@ describe("the address a tag hears", () => {
     expect(safeLocation("https://shop.test/onizleme/sfl_abc.123.xyz")).toBe(
       "https://shop.test/onizleme"
     )
+    // A payment link (adr/0051): the token is the path, the outcome word stays
+    expect(safeLocation("https://shop.test/ode/pl_abcDEF.mhx2k1.sig?durum=fiyat")).toBe(
+      "https://shop.test/ode?durum=fiyat"
+    )
     expect(safeLocation("https://shop.test/arama?q=g%C3%B6mlek&sayfa=2")).toBe(
       "https://shop.test/arama?q=g%C3%B6mlek&sayfa=2"
     )
@@ -131,6 +135,8 @@ describe("the address a tag hears", () => {
   it("knows an address holding a key (Meta's pixel hears nothing there)", () => {
     expect(carriesSecret("https://shop.test/siparis/order_1?token=abc&yeni=1")).toBe(true)
     expect(carriesSecret("https://shop.test/onizleme/sfl_x")).toBe(true)
+    expect(carriesSecret("https://shop.test/ode/pl_x.y.z")).toBe(true)
+    expect(carriesSecret("https://shop.test/odeme")).toBe(false)
     expect(carriesSecret("https://shop.test/urun/gomlek?variant=variant_1")).toBe(false)
     expect(carriesSecret("")).toBe(false)
   })

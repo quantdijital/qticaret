@@ -22,6 +22,8 @@ export const SYSTEM_ROOTS = [
   "bakim",
   // A gift card's balance (adr/0025 Ek 2026-11-03): the backend must reserve it too
   "hediye-karti",
+  // A payment link's page, `/ode/<token>` (adr/0051): its token's case matters
+  "ode",
 ] as const
 
 /**

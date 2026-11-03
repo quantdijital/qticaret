@@ -57,13 +57,15 @@ const config: NextConfig = {
           { key: "Referrer-Policy", value: "no-referrer" },
         ],
       },
-      // A message's token link (adr/0038 Ek 2026-11-02) and the maintenance
-      // bypass link (adr/0053): no page it loads learns the token from the
-      // Referer (this rule comes after the first)
-      ...["/abonelik/:path*", "/stok-bildirimi/:path*", "/bakim/:path*"].map((source) => ({
-        source,
-        headers: [{ key: "Referrer-Policy", value: "no-referrer" }],
-      })),
+      // A message's token link (adr/0038 Ek 2026-11-02), the maintenance
+      // bypass link (adr/0053) and a payment link (adr/0051): no page it
+      // loads learns the token from the Referer (this rule comes after the first)
+      ...["/abonelik/:path*", "/stok-bildirimi/:path*", "/bakim/:path*", "/ode/:path*"].map(
+        (source) => ({
+          source,
+          headers: [{ key: "Referrer-Policy", value: "no-referrer" }],
+        })
+      ),
       // A card provider may load its return address inside its form, framed
       // on our checkout (D7): those pages may be framed by our own pages
       {

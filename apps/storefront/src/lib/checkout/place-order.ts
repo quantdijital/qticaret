@@ -103,6 +103,14 @@ const KNOWN = new Set([
   "addons.max_quantity",
   "catalog.addons_disabled",
   "cart.prices_changed",
+  // A payment link's cart (adr/0051): the link closed, a newer cart, lines or prices moved;
+  // its code on another cart; cash on delivery
+  "cart.payment_link_closed",
+  "cart.payment_link_superseded",
+  "cart.payment_link_changed",
+  "cart.payment_link_prices_changed",
+  "cart.payment_link_code_misused",
+  "cart.payment_link_no_cod",
 ])
 
 /**

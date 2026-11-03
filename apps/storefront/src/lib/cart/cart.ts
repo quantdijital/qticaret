@@ -38,6 +38,8 @@ export interface Cart {
   credit_line_total?: number | null
   /** The gift cards on the cart; asked only while the shop has them on. */
   gift_cards?: { code: string }[] | null
+  /** The server's records on the cart: a payment link's mark (`qt_payment_link`, adr/0051). */
+  metadata?: Record<string, unknown> | null
 }
 
 const CART_FIELDS = [
@@ -47,6 +49,7 @@ const CART_FIELDS = [
   "item_total",
   "total",
   "completed_at",
+  "metadata",
   "items.id",
   "items.title",
   "items.subtitle",

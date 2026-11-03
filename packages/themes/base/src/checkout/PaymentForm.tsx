@@ -40,8 +40,11 @@ export interface PaymentWords {
   secure: string
   errors: Record<string, string>
   fallback: string
-  /** Refusals fixed in the cart (adr/0052): their message links to it. */
-  cartFix?: { errors: string[]; label: string }
+  /**
+   * Refusals fixed elsewhere: their message links there (the cart for an
+   * add-on, adr/0052; home for a payment link's closed cart, adr/0051).
+   */
+  fixes?: { errors: string[]; label: string; path: string }[]
 }
 
 const CHECKBOX = "mt-0.5 size-4.5 shrink-0 accent-foreground"
@@ -71,6 +74,7 @@ export function PaymentForm({
   const { error, checking, pending, onSubmit } = useChallengeForm(placeOrder)
   const kind = methods.find((each) => each.id === method)?.kind ?? "card"
   const shown = contracts[kind] ?? []
+  const fix = error ? words.fixes?.find((each) => each.errors.includes(error)) : undefined
 
   return (
     <form
@@ -179,11 +183,11 @@ export function PaymentForm({
       <div className="flex flex-col gap-3">
         <p role="alert" className="text-sm font-medium text-sale empty:hidden">
           {error ? (words.errors[error] ?? words.fallback) : null}
-          {error && words.cartFix?.errors.includes(error) && (
+          {fix && (
             <>
               {" "}
-              <a href="/sepet" className="text-foreground underline underline-offset-4">
-                {words.cartFix.label}
+              <a href={fix.path} className="text-foreground underline underline-offset-4">
+                {fix.label}
               </a>
             </>
           )}

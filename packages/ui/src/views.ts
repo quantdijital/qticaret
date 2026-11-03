@@ -85,6 +85,8 @@ export interface MiniCartView {
   lines: CartLineView[]
   subtotal: string
   freeShipping: FreeShippingView | null
+  /** A payment link's cart (adr/0051): its lines are fixed; the note, in words. */
+  locked?: string | null
 }
 
 /** Everything the frame around every page shows (D3, docs/19 §4). */
@@ -555,6 +557,11 @@ export interface CartPageView {
   freeShipping: FreeShippingView | null
   /** A message for the shopper after a failed change, already in words. */
   error: string | null
+  /**
+   * A payment link's cart (adr/0051), in words: its lines, quantities and
+   * discount are fixed, so no quantity, remove, code or add-on controls.
+   */
+  locked?: string | null
 }
 
 export interface FreeShippingView {

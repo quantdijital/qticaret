@@ -18,6 +18,8 @@ const ACTION_ERRORS = [
   "cart.variant_unavailable",
   "cart.quantity_invalid",
   "errors.too_many_requests",
+  // The cart is a payment link's (adr/0051): nothing goes in until it is let go
+  "cart.payment_link_locked",
   // A gift card's recipient (adr/0025 Ek 2026-11-03)
   ...GIFT_ERRORS,
   // A line's add-on picks (adr/0052)

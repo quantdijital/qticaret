@@ -7,7 +7,11 @@ import { FreeShippingBar } from "./cart/FreeShippingBar"
 import { PromotionForm } from "./cart/PromotionForm"
 import { PageContainer } from "./components/Container"
 
-const PROMOTION_ERRORS = ["cart.promotion_invalid", "errors.too_many_requests"]
+const PROMOTION_ERRORS = [
+  "cart.promotion_invalid",
+  "cart.payment_link_locked",
+  "errors.too_many_requests",
+]
 const GIFT_CARD_ERRORS = ["cart.gift_card_invalid", "errors.too_many_requests"]
 
 function EmptyCart({ t }: { t: Translate }) {
@@ -30,7 +34,43 @@ function EmptyCart({ t }: { t: Translate }) {
   )
 }
 
-/** The cart: its lines, the coupon field, the totals and the way to checkout. */
+/**
+ * A payment link's cart (adr/0051): the note, and a way out for a shopper
+ * who wants to shop anew (the link still opens from its message).
+ */
+function LockedNote({
+  note,
+  leave,
+  t,
+}: {
+  note: string
+  leave: ThemeActions["leaveLinkCart"]
+  t: Translate
+}) {
+  return (
+    <Alert>
+      <AlertDescription className="flex flex-col gap-3">
+        <span>{note}</span>
+        {leave && (
+          <form action={leave}>
+            <button
+              type="submit"
+              className="font-medium text-foreground underline underline-offset-4"
+            >
+              {t("cart.payment_link_leave")}
+            </button>
+          </form>
+        )}
+      </AlertDescription>
+    </Alert>
+  )
+}
+
+/**
+ * The cart: its lines, the coupon field, the totals and the way to
+ * checkout. A payment link's cart shows its lines as they are, without a
+ * coupon field.
+ */
 export function CartPage({
   view,
   t,
@@ -60,10 +100,17 @@ export function CartPage({
           <AlertDescription>{view.giftNotice}</AlertDescription>
         </Alert>
       )}
+      {view.locked && <LockedNote note={view.locked} leave={actions.leaveLinkCart} t={t} />}
       <div className="grid gap-10 lg:grid-cols-[minmax(0,1fr)_24rem] lg:gap-14">
         <ul className="divide-y self-start">
           {view.lines.map((line) => (
-            <CartLine key={line.id} line={line} t={t} actions={actions} />
+            <CartLine
+              key={line.id}
+              line={line}
+              t={t}
+              actions={actions}
+              locked={Boolean(view.locked)}
+            />
           ))}
         </ul>
         <aside
@@ -74,21 +121,23 @@ export function CartPage({
             {t("cart.summary")}
           </h2>
           {view.freeShipping && <FreeShippingBar view={view.freeShipping} />}
-          <PromotionForm
-            codes={view.promotions}
-            apply={actions.applyPromotion}
-            remove={actions.removePromotion}
-            words={{
-              label: t("cart.promotion_label"),
-              placeholder: t("cart.promotion_placeholder"),
-              apply: t("cart.promotion_apply"),
-              applying: t("cart.promotion_applying"),
-              remove: t("cart.promotion_remove"),
-              applied: t("cart.promotion_applied"),
-              errors: Object.fromEntries(PROMOTION_ERRORS.map((key) => [key, t(key)])),
-              fallback: t("cart.promotion_invalid"),
-            }}
-          />
+          {!view.locked && (
+            <PromotionForm
+              codes={view.promotions}
+              apply={actions.applyPromotion}
+              remove={actions.removePromotion}
+              words={{
+                label: t("cart.promotion_label"),
+                placeholder: t("cart.promotion_placeholder"),
+                apply: t("cart.promotion_apply"),
+                applying: t("cart.promotion_applying"),
+                remove: t("cart.promotion_remove"),
+                applied: t("cart.promotion_applied"),
+                errors: Object.fromEntries(PROMOTION_ERRORS.map((key) => [key, t(key)])),
+                fallback: t("cart.promotion_invalid"),
+              }}
+            />
+          )}
           {view.giftCards && actions.applyGiftCard && actions.removeGiftCard && (
             <PromotionForm
               codes={view.giftCards}

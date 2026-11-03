@@ -12,6 +12,7 @@ import {
   removeGiftCard,
   removePromotion,
 } from "@/lib/cart/cart"
+import { linkCartRefusal } from "@/lib/cart/payment-link"
 import { isStoreApiError } from "@/lib/store-api/errors"
 
 const AddToCart = z.object({
@@ -26,6 +27,11 @@ function messageFor(error: unknown): string {
   }
   if (error.status === 429) {
     return "errors.too_many_requests"
+  }
+  // The cart is a payment link's (adr/0051): nothing goes in while it is
+  const locked = linkCartRefusal(error)
+  if (locked) {
+    return locked
   }
   return error.status === 400 || error.status === 404
     ? "cart.variant_unavailable"
@@ -80,17 +86,17 @@ export async function changeCartLine(form: FormData): Promise<void> {
   try {
     await changeLine(parsed.data.line_id, parsed.data.quantity)
   } catch (error) {
-    // An add-on line holds no more units than its picks allow (adr/0052)
+    // An add-on line holds no more units than its picks allow (adr/0052); a
+    // payment link's cart keeps its lines as they are (adr/0051)
     const key = isStoreApiError(error) ? error.messageKey : null
-    redirect(
-      `/sepet?hata=${
-        key === "addons.max_quantity"
-          ? key
-          : messageFor(error) === "errors.too_many_requests"
+    const shown =
+      key === "addons.max_quantity"
+        ? key
+        : (linkCartRefusal(error) ??
+          (messageFor(error) === "errors.too_many_requests"
             ? "errors.too_many_requests"
-            : "cart.update_failed"
-      }`
-    )
+            : "cart.update_failed"))
+    redirect(`/sepet?hata=${shown}`)
   }
   revalidatePath("/", "layout")
 }
@@ -119,9 +125,10 @@ export async function applyPromotion(_state: ActionResult, form: FormData): Prom
     return {
       ok: false,
       error:
-        isStoreApiError(error) && error.status === 429
+        linkCartRefusal(error) ??
+        (isStoreApiError(error) && error.status === 429
           ? "errors.too_many_requests"
-          : "cart.promotion_invalid",
+          : "cart.promotion_invalid"),
     }
   }
   revalidatePath("/", "layout")
@@ -138,7 +145,7 @@ export async function removeCartPromotion(form: FormData): Promise<void> {
       if (!isStoreApiError(error)) {
         throw error
       }
-      redirect("/sepet?hata=cart.update_failed")
+      redirect(`/sepet?hata=${linkCartRefusal(error) ?? "cart.update_failed"}`)
     }
   }
   revalidatePath("/", "layout")

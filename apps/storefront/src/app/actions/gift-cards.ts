@@ -74,7 +74,12 @@ function giftError(error: unknown, fallback: string): string {
     return "errors.too_many_requests"
   }
   const key = error.messageKey ?? ""
-  return key.startsWith("gift_card.") || key === "messaging.email_domain_refuses" ? key : fallback
+  return key.startsWith("gift_card.") ||
+    key === "messaging.email_domain_refuses" ||
+    // A payment link's cart takes no other line (adr/0051)
+    key === "cart.payment_link_locked"
+    ? key
+    : fallback
 }
 
 const Line = z.object({

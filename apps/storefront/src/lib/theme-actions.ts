@@ -22,6 +22,7 @@ import { addAddress, removeAddress } from "@/app/actions/addresses"
 import { addAddonsToCart, saveLineAddons } from "@/app/actions/addons"
 import { addGiftToCart, checkGiftCardBalance, saveGiftRecipient } from "@/app/actions/gift-cards"
 import { cancelOrder, requestReturn } from "@/app/actions/order"
+import { leaveLinkCart } from "@/app/actions/payment-link"
 import { requestPrivacy } from "@/app/actions/privacy"
 import { askQuestion, stockAlert, writeReview } from "@/app/actions/product"
 import {
@@ -57,6 +58,7 @@ export const themeActions: ThemeActions = {
   saveGiftRecipient,
   addAddonsToCart,
   saveLineAddons,
+  leaveLinkCart,
 }
 
 /** `/hediye-karti/bakiye`'s form (adr/0025 Ek 2026-11-03). */

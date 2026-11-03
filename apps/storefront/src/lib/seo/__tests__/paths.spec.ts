@@ -47,6 +47,15 @@ describe("isSystemPath and backendFile", () => {
     expect(isSystemPath("/abonelikler-hakkinda")).toBe(false)
   })
 
+  it("keeps a payment link's page as its own (adr/0051), its token's case untouched", () => {
+    const path = "/ode/pl_AbCdEfGhIjKlMnOpQrStUv.mhx2k1.Zz_-AbCdEfGhIjKlMnOpQrStUvWxYz0123456789AbC"
+    expect(isSystemPath(path)).toBe(true)
+    expect(normalizedPath(path)).toBeNull()
+    expect(isSystemPath("/odeme")).toBe(true)
+    expect(isSystemPath("/odemeler-hakkinda")).toBe(false)
+    expect(isSystemPath("/odeon")).toBe(false)
+  })
+
   it("keeps the maintenance bypass page as its own (adr/0053), never resolved", () => {
     expect(isSystemPath("/bakim/gir")).toBe(true)
     expect(normalizedPath("/bakim/gir")).toBeNull()

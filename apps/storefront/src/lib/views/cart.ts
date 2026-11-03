@@ -3,6 +3,7 @@ import type { CartLineView, FreeShippingView, MiniCartView, Translate } from "@q
 import type { StoreProductAddon } from "@qticaret/types"
 import type { Cart } from "@/lib/cart/cart"
 import type { GiftLine } from "@/lib/cart/gift"
+import { isPaymentLinkCart } from "@/lib/cart/payment-link"
 import { addonFormOf, lineAddonsOf } from "./addons"
 
 /** Kuruş, so float noise never says "0,00 TL more". */
@@ -70,8 +71,13 @@ export function miniCartOf(
     lines: cartLinesOf(cart),
     subtotal: formatLira(cart.item_total),
     freeShipping: freeShippingOf(cart.item_total, threshold, t),
+    locked: lockedNoteOf(cart, t),
   }
 }
+
+/** A payment link's cart (adr/0051): the note that its lines are fixed; null for any other cart. */
+export const lockedNoteOf = (cart: Cart | null, t: Translate): string | null =>
+  cart && isPaymentLinkCart(cart.metadata) ? t("cart.payment_link_note") : null
 
 /** The cart's gift card lines with their recipients (adr/0025 Ek 2026-11-03), as typed. */
 export function withGiftLines(lines: CartLineView[], gifts: readonly GiftLine[]): CartLineView[] {
