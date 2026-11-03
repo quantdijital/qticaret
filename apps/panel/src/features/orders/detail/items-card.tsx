@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next"
 import { SectionCard } from "@/components/patterns/section-card"
 import type { OrderDetail, OrderMoney, OrderMoneyLine } from "@/features/orders/api/orders"
 import { ProductThumb } from "@/features/products/components/product-thumb"
+import { AddonLineDetails } from "./addon-line"
 import { GiftLineDetails } from "./gift-line"
 import { formatCount, formatMoney } from "@/lib/format"
 import { cn } from "@/lib/utils"
@@ -36,10 +37,12 @@ type Item = OrderDetail["items"][number]
 function ItemRow({
   item,
   line,
+  currency,
   money,
 }: {
   item: Item
   line: OrderMoneyLine | undefined
+  currency: string
   money: (amount: string | number | null | undefined) => string
 }) {
   const { t } = useTranslation()
@@ -62,6 +65,7 @@ function ItemRow({
           {[item.subtitle, item.variant_sku].filter(Boolean).join(" · ")}
         </span>
         <GiftLineDetails metadata={item.metadata} />
+        <AddonLineDetails metadata={item.metadata} currency={currency} />
       </div>
       <span className="hidden text-sm text-muted-foreground tabular-nums sm:inline">
         {formatCount(item.quantity)} × {money(item.unit_price)}
@@ -104,6 +108,7 @@ export function ItemsCard({ order, money: shares }: { order: OrderDetail; money?
             key={item.id}
             item={item}
             line={shares?.lines.find((line) => line.id === item.id)}
+            currency={order.currency_code}
             money={money}
           />
         ))}

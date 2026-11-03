@@ -23,6 +23,7 @@ const CATALOG: ProductCatalog = {
   withdrawal_excluded: false,
   restriction: null,
   is_gift_card: false,
+  addons: [],
   successor: null,
   categories: [],
   variants: [],

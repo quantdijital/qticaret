@@ -1,4 +1,4 @@
-import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
+import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { sdk } from "@/lib/sdk"
 
 /** A shopper's return request (F7.9, adr/0032); the refund as exact lira. */
@@ -181,6 +181,18 @@ export const returnableQuery = (orderId: string) =>
     queryFn: () =>
       sdk.client.fetch<Returnable>(`/admin/orders/${encodeURIComponent(orderId)}/returnable`),
   })
+
+/**
+ * The order's lines outside the right of withdrawal, by id: the server's
+ * flag (F13.6), the product's mark or an add-on made to the buyer's wish
+ * (adr/0052 §8). Empty until it loads.
+ */
+export function useExcludedLines(orderId: string): ReadonlySet<string> {
+  const { data } = useQuery(returnableQuery(orderId))
+  return new Set(
+    (data?.lines ?? []).filter((line) => line.withdrawal_excluded).map((line) => line.line_item_id)
+  )
+}
 
 export interface OpenRequest {
   kind: "return" | "exchange"

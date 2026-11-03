@@ -15,8 +15,14 @@ import {
 } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { returnLinesQuery, useReceiveReturn, useRejectReturn } from "@/features/orders/api/returns"
+import {
+  returnLinesQuery,
+  useExcludedLines,
+  useReceiveReturn,
+  useRejectReturn,
+} from "@/features/orders/api/returns"
 import type { ReturnReason, ReturnRequest } from "@/features/orders/api/returns"
+import { NonWithdrawableBadge } from "@/features/orders/components/non-withdrawable-badge"
 import { errorText } from "@/lib/errors"
 
 const R = "orders.returns"
@@ -113,6 +119,7 @@ export function ReceiveReturnDialog({
   const { t } = useTranslation()
   const receive = useReceiveReturn()
   const lines = useQuery(returnLinesQuery(request.order_id))
+  const excluded = useExcludedLines(request.order_id)
   const [counts, setCounts] = useState<Counts>(() =>
     Object.fromEntries(
       request.items.map((item) => [item.line_item_id, { sound: item.quantity, damaged: 0 }])
@@ -165,7 +172,10 @@ export function ReceiveReturnDialog({
               return (
                 <li key={item.line_item_id} className="flex items-center gap-3 px-3 py-2.5">
                   <span className="flex min-w-0 flex-1 flex-col">
-                    <span className="truncate text-sm font-medium">{line?.title ?? "—"}</span>
+                    <span className="flex min-w-0 items-center gap-2">
+                      <span className="truncate text-sm font-medium">{line?.title ?? "—"}</span>
+                      {excluded.has(item.line_item_id) ? <NonWithdrawableBadge /> : null}
+                    </span>
                     {line?.variant_title ? (
                       <span className="truncate text-xs text-muted-foreground">
                         {line.variant_title}

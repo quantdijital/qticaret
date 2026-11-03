@@ -9,6 +9,7 @@ import { productQuery } from "@/features/products/api/products"
 import { AttributesCard } from "@/features/attributes/components/attributes-card"
 import { ProductSeoCard } from "@/features/products/detail/product-seo-card"
 import { ProductStatusBadge } from "@/features/products/components/product-status-badge"
+import { AddonsCard } from "@/features/products/detail/addons-card"
 import { CatalogCard } from "@/features/products/detail/catalog-card"
 import { ContentDraftsCard } from "@/features/products/detail/content-drafts-card"
 import { GeneralCard } from "@/features/products/detail/general-card"
@@ -102,6 +103,10 @@ export function ProductDetailPage() {
           </div>
           <div id="product-variants" className="scroll-mt-20">
             <VariantsCard product={product} />
+          </div>
+          {/* adr/0052: under the prices; empty while the shop's add-ons are off */}
+          <div id="product-addons" className="scroll-mt-20 empty:hidden">
+            <AddonsCard productId={product.id} />
           </div>
           <div id="product-price-history" className="scroll-mt-20">
             <PriceHistoryCard productId={product.id} />

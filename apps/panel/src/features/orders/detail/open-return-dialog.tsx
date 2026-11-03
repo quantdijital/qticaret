@@ -24,6 +24,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group"
 import { DEFECT_REASONS, RETURN_REASONS, useOpenReturnRequest } from "@/features/orders/api/returns"
 import type { OpenRequest, ReturnReason, Returnable } from "@/features/orders/api/returns"
+import { NonWithdrawableBadge } from "@/features/orders/components/non-withdrawable-badge"
 import { errorText } from "@/lib/errors"
 
 const O = "orders.returns.open"
@@ -147,16 +148,15 @@ export function OpenReturnDialog({
               return (
                 <li key={line.line_item_id} className="flex flex-col gap-2 px-3 py-2.5">
                   <div className="flex items-center gap-3">
-                    <div className="flex min-w-0 flex-1 flex-col">
-                      <label htmlFor={inputId} className="truncate text-sm font-medium">
-                        {line.title ?? "—"}
-                      </label>
+                    <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+                      <span className="flex min-w-0 items-center gap-2">
+                        <label htmlFor={inputId} className="truncate text-sm font-medium">
+                          {line.title ?? "—"}
+                        </label>
+                        {line.withdrawal_excluded ? <NonWithdrawableBadge /> : null}
+                      </span>
                       <span className="text-xs text-muted-foreground">
-                        {[
-                          line.variant_title,
-                          t(`${O}.left`, { count: line.returnable }),
-                          line.withdrawal_excluded ? t(`${O}.excluded`) : null,
-                        ]
+                        {[line.variant_title, t(`${O}.left`, { count: line.returnable })]
                           .filter(Boolean)
                           .join(" · ")}
                       </span>

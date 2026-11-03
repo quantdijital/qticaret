@@ -128,7 +128,8 @@ describe("OpenReturnDialog", () => {
     const dialog = screen.getByRole("dialog")
     const submit = within(dialog).getByRole("button", { name: "Talebi aç" })
 
-    expect(within(dialog).getByText(/cayma hakkı dışında/)).toBeInTheDocument()
+    // The server's flag, as the badge beside the line
+    expect(within(dialog).getAllByText("Cayma dışı")).toHaveLength(1)
     await user.type(within(dialog).getByLabelText("İsme Özel Kolye"), "1")
     await chooseReason(user, "Fikrim değişti")
     expect(within(dialog).getByRole("status")).toHaveTextContent("yalnızca hasarlı")

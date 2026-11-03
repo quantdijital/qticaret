@@ -644,6 +644,16 @@
           "restricted": {
             "label": "Kısıtlı ürünler",
             "description": "Ürün ve kategoriler yaş sınırlı (silah ve kesici alet, alkol, tütün, yetişkin içeriği) işaretlenebilir. İşaretli ürünler arama motorlarına yetişkinlere yönelik olarak bildirilir ve ürün feed'lerine girmez."
+          },
+          "addons": {
+            "label": "Ürün ek seçenekleri",
+            "description": "Ürünler ücretli ya da ücretsiz ek seçenek sunabilir: müşterinin yazdığı bir metin ya da birkaç seçenekten biri. Ek seçeneğin ücreti sunucuda hesaplanır ve satır fiyatına eklenir; ayarları ürün sayfasındaki Ek seçenekler kartında."
+          }
+        },
+        "marketing": {
+          "campaigns": {
+            "label": "Toplu e-posta ve SMS",
+            "description": "İzin vermiş müşterilere panelden toplu e-posta ve SMS kampanyası gönderilebilir."
           }
         },
         "seo": {
@@ -2777,6 +2787,87 @@
       "giftCardFeatures": "Özelliklere git",
       "kindGiftCard": "Hediye kartı dijital üründür; türü değiştirilemez."
     },
+    "addons": {
+      "title": "Ek seçenekler",
+      "description": "Müşterinin varyantla birlikte seçtiği yazı ya da seçenek. Ücreti sunucuda hesaplanır ve ürünün birim fiyatına eklenir.",
+      "example": "Örnek: Ürün üzerine yazı, +35 TL, en çok 10 adet, 50 karakter, cayma dışı.",
+      "discountNote": "Kampanya indirimleri ek seçenek ücretine de uygulanır.",
+      "empty": "Bu üründe ek seçenek yok.",
+      "add": "Ek seçenek ekle",
+      "limit": "Bir üründe en çok {{max}} ek seçenek olabilir.",
+      "flagOff": "Ek seçenekler kapalı: vitrinde gösterilmiyor ve buradan değiştirilemiyor.",
+      "features": "Özelliklere git",
+      "removedNote": "Kaldırılan ek seçeneği sepetine eklemiş müşteriler, ödemeden önce seçimlerini değiştirmek zorunda kalır.",
+      "new": "Yeni ek seçenek",
+      "sheetHint": "Müşteri bu alanı ürün sayfasında görür; ücret sepete eklerken sunucuda hesaplanır.",
+      "savesAll": "Kaydedince ürünün bütün ek seçenekleri birlikte kaydedilir.",
+      "kind": "Tür",
+      "kinds": {
+        "text": "Yazı",
+        "choice": "Seçim"
+      },
+      "kindHints": {
+        "text": "Müşteri bir yazı girer; ör. ürün üzerine işlenecek isim.",
+        "choice": "Müşteri seçeneklerden birini seçer; zorunlu değilse hiçbirini seçmeyebilir."
+      },
+      "kindLocked": "Kaydedilmiş ek seçeneğin türü değişmez; başka bir tür için yeni ek seçenek ekleyin.",
+      "label": "Ad",
+      "labelHint": "Ürün sayfasında, sepette ve siparişte görünür; en çok {{max}} karakter.",
+      "help": "Açıklama",
+      "helpHint": "Alanın altında görünür; en çok {{max}} karakter.",
+      "price": "Fiyat (TL)",
+      "priceHint": "Adet başına, KDV dahil. Boş ya da 0 ise ücretsiz.",
+      "maxLength": "En çok karakter",
+      "maxLengthHint": "1 ile {{max}} arası.",
+      "maxQuantity": "Satırda en çok adet",
+      "maxQuantityHint": "Bu ekle bir satırda alınabilecek adet; boşsa sınırsız.",
+      "unlimited": "Sınırsız",
+      "charset": "İzin verilen karakterler",
+      "charsetHint": "Serbest metin; harf, rakam ve boşluğa ek olarak . , ' - & karakterlerini de kabul eder. Bağlantı ve e-posta adresi hiçbir zaman kabul edilmez.",
+      "charsets": {
+        "letters_digits": "Harf ve rakam",
+        "text": "Serbest metin"
+      },
+      "choices": "Seçenekler",
+      "choiceLabel": "Seçenek adı",
+      "choicePrice": "Fiyat (TL)",
+      "choiceLabelOf": "{{number}}. seçeneğin adı",
+      "choicePriceOf": "{{number}}. seçeneğin fiyatı",
+      "choiceItem": "{{number}}. seçenek",
+      "addChoice": "Seçenek ekle",
+      "choicesHint": "{{min}} ile {{max}} seçenek. \"İstemiyorum\" diye seçenek eklemeyin; hiçbirinin seçilmemesi bunu anlatır.",
+      "required": "Zorunlu",
+      "requiredHint": "Yalnız ücretsiz ek seçenek zorunlu olabilir: ürünün sayfada, feed'lerde ve arama sonuçlarında görünen fiyatı ek seçeneksiz fiyattır.",
+      "nonWithdrawable": "Cayma dışı",
+      "nonWithdrawableHint": "Kişiye özel hazırlanır: bu seçenekle alınan ürün cayma hakkı dışındadır (MSY md. 15/1-ç); yalnız kusurlu ya da yanlış gelirse geri alınır.",
+      "free": "Ücretsiz",
+      "requiredShort": "Zorunlu",
+      "rules": {
+        "letters_digits": "En çok {{count}} karakter, harf ve rakam",
+        "text": "En çok {{count}} karakter, serbest metin"
+      },
+      "choiceCount_one": "{{count}} seçenek",
+      "choiceCount_other": "{{count}} seçenek",
+      "limitShort_one": "Satırda en çok {{count}} adet",
+      "limitShort_other": "Satırda en çok {{count}} adet",
+      "moveUp": "{{item}}: yukarı taşı",
+      "moveDown": "{{item}}: aşağı taşı",
+      "edit": "{{item}}: düzenle",
+      "remove": "{{item}}: kaldır",
+      "errors": {
+        "disabled": "Ek seçenekler kapalı. Açmak için Ayarlar > Özellikler'e gidin.",
+        "requiredFree": "Ücretli ek seçenek zorunlu olamaz. Fiyatı 0 yapın ya da zorunluluğu kaldırın.",
+        "tooMany": "Bir üründe en çok 5 ek seçenek olabilir.",
+        "label": "Ad 1-60 karakter olmalı ve görünmez karakter içermemeli.",
+        "help": "Açıklama en çok 160 karakter olabilir ve görünmez karakter içermemeli.",
+        "price": "Fiyat 0 ile 10.000 TL arasında, en çok iki ondalıkla girilmeli.",
+        "maxQuantity": "Satırdaki adet sınırı 1 ile 99 arasında bir tam sayı olmalı ya da boş kalmalı.",
+        "maxLength": "Karakter sınırı 1 ile 200 arasında bir tam sayı olmalı.",
+        "choices": "Seçim türündeki ek seçenekte 2-10 seçenek olmalı.",
+        "choiceLabel": "Seçeneğin adı 1-60 karakter olmalı.",
+        "idDuplicate": "Aynı ek seçenek iki kez gönderildi. Sayfayı yenileyip yeniden deneyin."
+      }
+    },
     "variantImages": {
       "title": "Varyant görselleri",
       "hint": "Her görselin hangi varyantları gösterdiğini seçin. Hiçbir varyanta bağlı olmayan görsel tüm varyantlarda görünür; mağazada varyant seçilince kendi görselleri öne çıkar.",
@@ -2998,6 +3089,7 @@
     "giftCardBadge": "Hediye kartı"
   },
   "orders": {
+    "nonWithdrawable": "Cayma dışı",
     "description": "Gelen siparişler; önce hazırlanacak olanlar",
     "views": "Sipariş görünümleri",
     "search": "Sipariş no, ad ya da e-posta ile ara",
@@ -3101,6 +3193,7 @@
       "refunded": "İade edilen",
       "provider": "Ödeme yöntemi",
       "lineDiscount": "{{amount}} indirim",
+      "addonPrice": "(+{{amount}})",
       "refundable": "İade edilebilir",
       "moneyFailed": "İade edilebilir tutar okunamadı.",
       "returnedUnits_one": "{{count}} adet iade edildi",
@@ -3326,7 +3419,6 @@
         "note": "Not (isteğe bağlı)",
         "submit": "Talebi aç",
         "done": "Talep açıldı; müşteriye e-posta gönderildi.",
-        "excluded": "cayma hakkı dışında",
         "excludedReason": "Seçtiğiniz ürünlerden biri cayma hakkı dışında; yalnızca hasarlı, yanlış ya da açıklamasına uymayan ürün nedeniyle iade alınabilir.",
         "excludedExchange": "Seçtiğiniz ürünlerden biri cayma hakkı dışında; değişim yapılamaz. Kusurluysa iade olarak açın."
       }

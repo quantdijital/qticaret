@@ -94,4 +94,25 @@ describe("ReceiveReturnDialog (adr/0032)", () => {
       })
     })
   })
+
+  it("marks a line outside the right of withdrawal as the server flags it", async () => {
+    fetchMock.mockImplementation((url: string) =>
+      Promise.resolve(
+        url.endsWith("/returnable")
+          ? {
+              window_open: true,
+              open_request: true,
+              lines: [
+                { line_item_id: "ordli_1", withdrawal_excluded: true },
+                { line_item_id: "ordli_2", withdrawal_excluded: false },
+              ],
+            }
+          : { refund_error: null }
+      )
+    )
+    open(request)
+
+    expect(await screen.findByText("Cayma dışı")).toBeInTheDocument()
+    expect(fetchMock).toHaveBeenCalledWith("/admin/orders/order_1/returnable")
+  })
 })

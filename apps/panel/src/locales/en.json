@@ -644,6 +644,16 @@
           "restricted": {
             "label": "Restricted products",
             "description": "Products and categories can be marked adults only (weapons and blades, alcohol, tobacco, adult content). Marked products are told to search engines as adult-oriented and stay out of the product feeds."
+          },
+          "addons": {
+            "label": "Product add-ons",
+            "description": "Products may offer paid add-ons: a typed text or a choice, priced on the server and added to the line's price. They are set on the product page's Add-ons card."
+          }
+        },
+        "marketing": {
+          "campaigns": {
+            "label": "Bulk e-mail and SMS",
+            "description": "Bulk e-mail and SMS campaigns to consented customers from the panel."
           }
         },
         "seo": {
@@ -2777,6 +2787,87 @@
       "giftCardFeatures": "Go to features",
       "kindGiftCard": "A gift card is a digital product; its kind cannot change."
     },
+    "addons": {
+      "title": "Add-ons",
+      "description": "A text or a choice the shopper picks with the variant. Its price is worked out on the server and added to the product's unit price.",
+      "example": "Example: Text on the product, +35 TL, up to 10 units, 50 characters, outside the right of withdrawal.",
+      "discountNote": "Campaign discounts apply to the add-on's price too.",
+      "empty": "This product has no add-ons.",
+      "add": "Add an add-on",
+      "limit": "A product can have up to {{max}} add-ons.",
+      "flagOff": "Add-ons are off: they are not shown in the store and cannot be changed here.",
+      "features": "Go to features",
+      "removedNote": "Shoppers who put a removed add-on in their cart will have to change their pick before paying.",
+      "new": "New add-on",
+      "sheetHint": "The shopper sees this field on the product page; its price is worked out on the server when it goes in the cart.",
+      "savesAll": "Saving saves all of the product's add-ons together.",
+      "kind": "Kind",
+      "kinds": {
+        "text": "Text",
+        "choice": "Choice"
+      },
+      "kindHints": {
+        "text": "The shopper types a text, such as a name to put on the product.",
+        "choice": "The shopper picks one of the options; unless it is required, they may pick none."
+      },
+      "kindLocked": "A saved add-on keeps its kind; add a new one for another kind.",
+      "label": "Name",
+      "labelHint": "Shown on the product page, in the cart and on the order; up to {{max}} characters.",
+      "help": "Description",
+      "helpHint": "Shown under the field; up to {{max}} characters.",
+      "price": "Price (TL)",
+      "priceHint": "Per unit, VAT included. Empty or 0 is free.",
+      "maxLength": "Most characters",
+      "maxLengthHint": "Between 1 and {{max}}.",
+      "maxQuantity": "Most units per line",
+      "maxQuantityHint": "How many units a line can hold with this add-on; empty for no limit.",
+      "unlimited": "No limit",
+      "charset": "Characters allowed",
+      "charsetHint": "Free text takes . , ' - & besides letters, digits and spaces. Links and e-mail addresses are never accepted.",
+      "charsets": {
+        "letters_digits": "Letters and digits",
+        "text": "Free text"
+      },
+      "choices": "Options",
+      "choiceLabel": "Option name",
+      "choicePrice": "Price (TL)",
+      "choiceLabelOf": "Name of option {{number}}",
+      "choicePriceOf": "Price of option {{number}}",
+      "choiceItem": "Option {{number}}",
+      "addChoice": "Add an option",
+      "choicesHint": "{{min}} to {{max}} options. Do not add a \"none\" option; picking nothing says that.",
+      "required": "Required",
+      "requiredHint": "Only a free add-on can be required: the price shown on the page, in feeds and in search results is the price without add-ons.",
+      "nonWithdrawable": "Outside the right of withdrawal",
+      "nonWithdrawableHint": "Made to the buyer's wish: a product bought with it is outside the right of withdrawal (MSY art. 15/1-ç) and comes back only if faulty or wrong.",
+      "free": "Free",
+      "requiredShort": "Required",
+      "rules": {
+        "letters_digits": "Up to {{count}} characters, letters and digits",
+        "text": "Up to {{count}} characters, free text"
+      },
+      "choiceCount_one": "{{count}} option",
+      "choiceCount_other": "{{count}} options",
+      "limitShort_one": "Up to {{count}} unit per line",
+      "limitShort_other": "Up to {{count}} units per line",
+      "moveUp": "{{item}}: move up",
+      "moveDown": "{{item}}: move down",
+      "edit": "{{item}}: edit",
+      "remove": "{{item}}: remove",
+      "errors": {
+        "disabled": "Add-ons are off. Turn them on in Settings > Features.",
+        "requiredFree": "A paid add-on cannot be required. Set its price to 0 or make it optional.",
+        "tooMany": "A product can have up to 5 add-ons.",
+        "label": "A name is 1-60 characters, without invisible characters.",
+        "help": "A description is up to 160 characters, without invisible characters.",
+        "price": "A price is between 0 and 10,000 TL, with at most two decimals.",
+        "maxQuantity": "The limit per line is a whole number between 1 and 99, or empty.",
+        "maxLength": "The character limit is a whole number between 1 and 200.",
+        "choices": "A choice add-on has 2-10 options.",
+        "choiceLabel": "An option's name is 1-60 characters.",
+        "idDuplicate": "The same add-on was sent twice. Reload the page and try again."
+      }
+    },
     "variantImages": {
       "title": "Variant images",
       "hint": "Choose which variants each picture shows. A picture tied to no variant shows with all of them; the storefront brings a variant's pictures forward when it is chosen.",
@@ -2998,6 +3089,7 @@
     "giftCardBadge": "Gift card"
   },
   "orders": {
+    "nonWithdrawable": "Non-withdrawable",
     "description": "Incoming orders; the ones to pack first",
     "views": "Order views",
     "search": "Order number, name or e-mail",
@@ -3101,6 +3193,7 @@
       "refunded": "Refunded",
       "provider": "Payment method",
       "lineDiscount": "{{amount}} off",
+      "addonPrice": "(+{{amount}})",
       "returnedUnits_one": "{{count}} returned",
       "returnedUnits_other": "{{count}} returned",
       "refundable": "Refundable",
@@ -3326,7 +3419,6 @@
         "note": "Note (optional)",
         "submit": "Open the request",
         "done": "Request opened; the shopper was e-mailed.",
-        "excluded": "outside the right of withdrawal",
         "excludedReason": "One of the chosen products is outside the right of withdrawal; it comes back only as damaged, wrong or not as described.",
         "excludedExchange": "One of the chosen products is outside the right of withdrawal and cannot be exchanged. If it is faulty, open a return."
       }

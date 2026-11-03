@@ -1,5 +1,6 @@
 import { queryOptions, useMutation, useQueryClient } from "@tanstack/react-query"
 import type { Restriction } from "@/features/categories/api/restrictions"
+import type { AddonInput, ProductAddon } from "@/features/products/api/addons"
 import { sdk } from "@/lib/sdk"
 
 /** Saving what the product page edits beyond the product's own fields. */
@@ -22,6 +23,8 @@ export interface ProductCatalog {
   restriction: Restriction | null
   /** Its variants are gift card amounts (adr/0025 Ek 2026-11-03); marked, it is digital. */
   is_gift_card: boolean
+  /** Paid or free add-ons a shopper picks beside the variant (adr/0052), in the shop's order. */
+  addons: ProductAddon[]
   successor: { id: string; title: string; handle: string } | null
   categories: { id: string; name: string }[]
   variants: {
@@ -53,6 +56,8 @@ export function useSaveCatalog(id: string) {
       withdrawal_excluded?: boolean
       restriction?: Restriction | null
       is_gift_card?: boolean
+      /** The whole list, ids kept; null clears it. */
+      addons?: AddonInput[] | null
     }) => sdk.client.fetch<ProductCatalog>(catalogUrl(id), { method: "POST", body }),
     onSuccess: async (catalog) => {
       client.setQueryData(["products", "catalog", id], catalog)
