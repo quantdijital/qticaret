@@ -9,7 +9,7 @@ import {
 } from "@medusajs/framework/workflows-sdk"
 import { acquireLockStep, releaseLockStep } from "@medusajs/medusa/core-flows"
 import { ConflictError, ValidationError } from "../../lib/errors"
-import { extendedEnd } from "../../lib/payment-links/snapshot"
+import { extendedEnd, isOpen } from "../../lib/payment-links/snapshot"
 import { PAYMENT_LINKS_MODULE } from "../../modules/payment-links"
 import type PaymentLinksModuleService from "../../modules/payment-links/service"
 import { closeLinkPromotion, reopenLinkPromotion } from "./promotion"
@@ -83,13 +83,15 @@ export const cancelPaymentLinkWorkflow = createWorkflow(
 
 /**
  * Moves an open link's end later: `hours` from now, never past seven days
- * from its making (its token's own end). Undone, the old end comes back.
+ * from its making (its token's own end). A link past its end is expired
+ * for staff already (`shownStatus`), whether or not the hourly job has
+ * written it: it is not brought back. Undone, the old end comes back.
  */
 const extendLinkStep = createStep(
   "payment-links-extend",
   async (input: { id: string; hours: number }, { container }) => {
     const link = await linkById(container, input.id)
-    if (link.status !== "open") {
+    if (!isOpen(link)) {
       throw new ConflictError("payment_link.not_open")
     }
     const end = extendedEnd(link, input.hours)

@@ -79,7 +79,10 @@ const planFields = {
     .nullish(),
 }
 
-export const AdminPreviewPaymentLink = z.object(planFields).strict()
+/** The form as it stands; the address only lets the preset option's shipping be priced. */
+export const AdminPreviewPaymentLink = z
+  .object({ ...planFields, address: address.nullish() })
+  .strict()
 export type AdminPreviewPaymentLinkType = z.infer<typeof AdminPreviewPaymentLink>
 
 export const AdminPostPaymentLink = z

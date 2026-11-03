@@ -1,6 +1,6 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
 import { extendPaymentLinkWorkflow, linkById } from "../../../../../workflows/payment-links/manage"
-import { linkSummary } from "../../../../../workflows/payment-links/views"
+import { linkSummaries } from "../../../../../workflows/payment-links/views"
 import type { AdminExtendPaymentLinkType } from "../../validators"
 
 /**
@@ -17,6 +17,6 @@ export async function POST(
     input: { id, hours: req.validatedBody.hours },
   })
   res.json({
-    payment_link: linkSummary(req.scope, await linkById(req.scope, id)),
+    payment_link: (await linkSummaries(req.scope, [await linkById(req.scope, id)]))[0],
   })
 }

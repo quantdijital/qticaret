@@ -1,17 +1,18 @@
 import type { AuthenticatedMedusaRequest, MedusaResponse } from "@medusajs/framework/http"
+import { shownStatusFilter } from "../../../lib/payment-links/snapshot"
 import { PAYMENT_LINKS_MODULE } from "../../../modules/payment-links"
 import type PaymentLinksModuleService from "../../../modules/payment-links/service"
 import { createPaymentLinkWorkflow } from "../../../workflows/payment-links/create"
 import { linkById } from "../../../workflows/payment-links/manage"
 import { linkShare } from "../../../workflows/payment-links/share"
-import { linkDetail, linkSummary } from "../../../workflows/payment-links/views"
-import type { LinkRow } from "../../../workflows/payment-links/views"
+import { linkDetailView, linkSummaries } from "../../../workflows/payment-links/views"
 import type { AdminGetPaymentLinksType, AdminPostPaymentLinkType } from "./validators"
 
 /**
  * GET /admin/payment-links (adr/0051 §13): Siparişler > "Ödeme
- * bağlantıları", newest first, the customer masked; by status, by who made
- * it, or only those with a discount (§10). A recorded read.
+ * bağlantıları", newest first, the customer masked, who made it by name;
+ * by status (as shown: an open link past its end is `expired`), by who
+ * made it, or only those with a discount (§10). A recorded read.
  */
 export async function GET(
   req: AuthenticatedMedusaRequest<unknown, AdminGetPaymentLinksType>,
@@ -23,7 +24,7 @@ export async function GET(
     .resolve<PaymentLinksModuleService>(PAYMENT_LINKS_MODULE)
     .listAndCountPaymentLinks(
       {
-        ...(status ? { status } : {}),
+        ...(status ? shownStatusFilter(status) : {}),
         ...(created_by ? { created_by } : {}),
         ...(discounted === "true" ? { discount_total: { $gt: 0 } } : {}),
         ...(discounted === "false" ? { discount_total: 0 } : {}),
@@ -31,7 +32,7 @@ export async function GET(
       { take: limit, skip: offset, order: { created_at: "DESC" } }
     )
   res.json({
-    payment_links: links.map((link) => linkSummary(req.scope, link as unknown as LinkRow)),
+    payment_links: await linkSummaries(req.scope, links),
     count,
     limit,
     offset,
@@ -77,7 +78,7 @@ export async function POST(
   })
   const link = await linkById(req.scope, result.id)
   res.status(201).json({
-    payment_link: linkDetail(req.scope, link),
+    payment_link: await linkDetailView(req.scope, link),
     share: await linkShare(req.scope, link),
   })
 }

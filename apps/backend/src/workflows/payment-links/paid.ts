@@ -20,6 +20,8 @@ interface OrderRow {
 
 /** Who made the link, on the order, for its page ("Ödeme bağlantısından", adr/0051 §13). */
 export const ORDER_LINK_BY_KEY = "qt_payment_link_by"
+/** The link's number (1042 for `PL-1042`), so the order's page names it without reading the link. */
+export const ORDER_LINK_NUMBER_KEY = "qt_payment_link_number"
 
 /**
  * An order placed from a link's cart (adr/0051 §5): the link is paid and
@@ -61,6 +63,7 @@ const markLinkPaidStep = createStep(
       metadata: {
         ...(order.metadata ?? {}),
         [CART_LINK_KEY]: link.id,
+        [ORDER_LINK_NUMBER_KEY]: link.number,
         [ORDER_LINK_BY_KEY]: link.created_by,
       },
     })

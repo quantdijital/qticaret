@@ -154,8 +154,11 @@ medusaIntegrationTestRunner({
       expect(paid).toMatchObject({ status: "paid", order_id: order.order_id, cart_id: secondId })
       expect((orders[0] as { metadata: Record<string, unknown> }).metadata).toMatchObject({
         qt_payment_link: id,
+        // The number itself (PL-n), for the order's page without the link's recorded read
+        qt_payment_link_number: paid.number,
         qt_payment_link_by: owner.userId,
       })
+      expect(made.data.payment_link?.number).toBe(`PL-${String(paid.number)}`)
       expect(bells).toHaveLength(1)
       expect(reopened.status).toBe(404)
     })

@@ -166,7 +166,7 @@ Cevaplar (2026-11-03): dört soruda da öneri kabul edildi. `operations` yalnız
 - **İndirim:** yüzde ya da tutar; kargo bedava v1'de yok. Promosyon `PL-XXXXXXXXXXXX` kodlu, `limit: 1`, KDV dahil, `qt-payment-links` kampanyasında. Promosyon listesi (`/admin/promotion-board`) bu kampanyayı göstermez. Kod başka bir sepette kullanılırsa ödeme başlatma ve tamamlama reddeder (`cart.payment_link_code_misused`).
 - **Kurumsal fatura bilgisi (VKN, unvan) v1'de yok.** Yalnız teslimat adresi önceden girilebilir; fatura adresi de aynı adres olur.
 - **Süre sonu işi saatlik** (`payment-links-expiry`, :17). Ödeme başlatma bağlantının bitişine kadar açıktır; başlamış bir ödeme bitişten sonra 1 saat daha siparişe dönebilir. İş bağlantıyı bu saatten sonra `expired` yapar ve kodunu kapatır.
-- **Sipariş işareti:** `qt_source` yerine `order.metadata.qt_payment_link` (bağlantı kimliği) ve `qt_payment_link_by` (oluşturan personel).
+- **Sipariş işareti:** `qt_source` yerine `order.metadata.qt_payment_link` (bağlantı kimliği), `qt_payment_link_number` (numara, tam sayı: `PL-1042` için `1042`) ve `qt_payment_link_by` (oluşturan personel).
 - **Ek seçenekli satırlar (adr/0052)** v1'de yok. Bağlantı sepetinde `/line-items/:id/addons` kilitli.
 - **Hız sınırları:** vitrin `pay_link` (IP başına 15 dakikada 30); personel başına oluşturma ve gönderim birlikte saatte 60; önizleme saatte 600.
 - **Taslak siparişler:** `/admin/draft-orders*` yazmaları bayraktan bağımsız olarak herkese `orders.use_payment_link` (400) ile kapalı.
@@ -187,18 +187,33 @@ Cevaplar (2026-11-03): dört soruda da öneri kabul edildi. `operations` yalnız
 **Sözleşme (panel, Siparişler > "Ödeme bağlantıları" ve "Yeni sipariş"):**
 
 - `capabilities.paymentLinks`: oluşturma ve gönderme (owner, admin, operations). `capabilities.paymentLinksManage`: indirim, iptal ve uzatma (owner, admin).
-- `POST /admin/payment-links/preview` gövde `{ customer_id?, lines: [{ variant_id, quantity }], discount?, shipping_option_id? }` → `{ preview: { lines, items_total, discount, total, short_variant_ids, currency_code } }`. Formun özeti budur; fiyat gönderilirse 400 döner.
+- `POST /admin/payment-links/preview` gövde `{ customer_id?, lines: [{ variant_id, quantity }], discount?, shipping_option_id?, address? }` → `{ preview: { lines, items_total, discount, shipping_total, shipping_estimate, total, short_variant_ids, currency_code } }`. Formun özeti budur; fiyat ya da kargo tutarı gönderilirse 400 döner.
+  - `shipping_estimate: "priced"`: `shipping_total` seçilen kargonun bu sepete fiyatıdır (kuruş, KDV dahil) ve `total`'a eklenir.
+  - `shipping_estimate: "at_checkout"`: `shipping_total: null`; kargo ödemede hesaplanır. Kargo seçeneği ya da adres yoksa, seçenek kargo firmasınca fiyatlanıyorsa (`calculated`) ya da TRY fiyatı yoksa böyledir.
 - `POST /admin/payment-links` yeniden doğrulamayla (`X-Reauth-*`; 428 → kod penceresi).
   - Gövde: `{ customer_id | guest: { first_name, last_name, email, phone? }, lines, discount?: { type: "percentage" (1–99) | "fixed" (kuruş), value, reason }, address?: { first_name, last_name, phone?, address_1, address_2?, city (ilçe), province (il), postal_code? }, shipping_option_id? (adresle), note?, expires_in_hours? (1–168, varsayılan 72) }`.
   - Yanıt 201 `{ payment_link, share }`.
   - Hatalar: 403 `payment_link.discount_not_allowed` / `discount_over_limit`; 400 `payment_link.discount_invalid`, `no_storefront`, `variant_unpriced`, `customer_required`, `customer_no_email`, `address_required`; 404 `variant_unknown`, `customer_unknown`, `shipping_option_unknown`.
-- `GET /admin/payment-links?status&discounted=true|false&created_by&limit&offset` → `{ payment_links, count, limit, offset }`. Satır: `id, number ("PL-1042"), status, customer { id, name ("Ayşe Y."), email (maskeli) }, items_total, discount_total, total, discount, created_by, created_at, expires_at, opened_count, sent_count, order_id`. Denetim kaydına düşen okuma.
-- `GET /admin/payment-links/:id` → `{ payment_link }`: listedeki alanlar ve `contact, address, lines, shipping_option_id, note, token_ends_at, cart_id, last_opened_at, last_sent_at, paid_at, canceled_by, closed_at`. Denetlenen okuma.
-- `GET /admin/payment-links/:id/share` → `{ share: { url, sms_text, whatsapp_url, email_sent, sms_sent } }`. Bağlantı açık değilse metinler `null` olur. SMS metni kişi adı taşımaz. WhatsApp adresi müşterinin cep telefonuyla açılır, telefon yoksa numarasız.
+- `GET /admin/payment-links?status&discounted=true|false&created_by&limit&offset` → `{ payment_links, count, limit, offset }`. Satır: `id, number ("PL-1042"), status, customer { id, name ("Ayşe Y."), email (maskeli) }, items_total, discount_total, total, discount, created_by, created_by_name, created_at, expires_at, opened_count, sent_count, order_id`. Denetim kaydına düşen okuma.
+  - `status` gösterilen durumdur: bitişi geçmiş `open` ya da `draft` bağlantı, saatlik iş yazmadan önce de `expired` okunur. `?status=open` bitişi geçmişleri dışarıda bırakır, `?status=expired` onları da getirir.
+  - `created_by_name`: personelin adı ve soyadı (sipariş notlarındaki gibi), e-posta asla. Ekipten ayrılmış ya da adı girilmemiş personelde `null`.
+- `GET /admin/payment-links/:id` → `{ payment_link }`: listedeki alanlar ve `contact, address, lines, shipping_option_id, note, token_ends_at, cart_id, last_opened_at, last_sent_at, paid_at, canceled_by, canceled_by_name, closed_at`. Denetlenen okuma.
+- `GET /admin/payment-links/:id/share` → `{ share: { url, sms_text, whatsapp_url, email_sent, sms_sent } }`. Bağlantı açık değilse ya da bitişi geçmişse metinler `null` olur. SMS metni kişi adı taşımaz. WhatsApp adresi müşterinin cep telefonuyla açılır, telefon yoksa numarasız.
 - `POST /:id/resend { channels: ["email","sms"] }` → `{ outcomes }` (`sent`, `channel_off`, `invalid_recipient`, `over_quota`…). 10 dakika dolmadan 409 `payment_link.sent_recently`.
-- `POST /:id/cancel {}`, `POST /:id/extend { hours }`: 409 `payment_link.not_open`; 400 `payment_link.extend_limit`.
+- `POST /:id/cancel {}`, `POST /:id/extend { hours }`: 409 `payment_link.not_open`; 400 `payment_link.extend_limit`. Bitişi geçmiş bağlantı uzatılmaz (409), iş henüz `expired` yazmamış olsa da.
 - **Zil:** `payment_link_paid` (`order_id` ile), `payment_link_prices_changed`, `payment_link_out_of_stock`; `data.payment_link_id` ve `number` taşır.
-- **Sipariş sayfası:** `order.metadata.qt_payment_link` varsa "Ödeme bağlantısından (PL-…, oluşturan …)" yazar; numara `GET /admin/payment-links/:id`'den okunur.
+- **Sipariş sayfası:** `order.metadata.qt_payment_link` varsa "Ödeme bağlantısından (PL-…, oluşturan …)" yazar; numara `order.metadata.qt_payment_link_number`'dan okunur, bağlantının denetlenen okuması gerekmez.
+
+**Panel boşlukları (2026-11-03, panel ekranlarından sonra):**
+
+- **Sipariş çipi:** Ödendi aboneliği siparişe `qt_payment_link_number` da yazar. Panel numara için kişisel veri okuması (`GET /admin/payment-links/:id`) yapmaz. Numara KVKK silmesinde de kalır. Bu ekten önce ödenmiş siparişlerde alan yoktur; panel o zaman numarayı ayrıntıdan okur.
+- **Personel adları:** Liste ve ayrıntı `created_by_name`, ayrıntı `canceled_by_name` döner. Ad, sipariş notlarındaki yazar adıyla aynı kuralla kurulur: kullanıcı modülünden ad ve soyad, e-posta asla. `operations` `/admin/staff`'ı okuyamasa da adları görür. Ad sayfa başına tek okumayla çözülür (`views.ts` `staffNames`).
+- **Önizlemede kargo:** Context7 (2026-11-03): Medusa 2.21 kargo fiyatını yalnız sepet için hesaplar. `calculateShippingOptionsPricesWorkflow` ve `/store/shipping-options/:id/calculate` `cart_id` ister; sağlayıcının `calculatePrice`'ı sepetin satırlarını ve adresini alır. Bu yüzden:
+  - **Sabit fiyatlı seçenek** (`flat`) sepetsiz fiyatlanır. Fiyat, sepetin fiyat bağlamıyla Medusa'nın fiyat modülünden okunur: `shipping_option.calculated_price`, TRY, lira bölgesi ve `item_total` (indirimden sonra, KDV dahil). Sepet tutarından bedava kargo kuralı (F4.5) da böylece uygulanır.
+  - **Kargo firmasınca fiyatlanan seçenek** (`calculated`) `shipping_total: null`, `shipping_estimate: "at_checkout"` döner.
+  - Fiyat yalnız gövdede adres ve seçenek birlikteyse verilir. Adres iş akışına girmez, yalnız varlığı girer. Seçeneğin o adrese hizmet verip vermediği burada denetlenmez; oluşturma da denetlemiyor, sepet kargoyu "olursa" kurar.
+  - Önizlemenin `total`'ı kargoyu içerir. Listedeki `total`, vitrin sayfası ve paylaşım metni kargosuzdur (satırlar eksi indirim).
+- **Bitişi geçmiş ama açık:** Liste ve ayrıntı durumu okuma anında türetir (`shownStatus`): bitişi geçmiş `open` ya da `draft`, `expired` görünür. Satır iş çalışana kadar değişmez. Liste süzgeci aynı kuralla çalışır (`shownStatusFilter`). Paylaşım ucu zaten bitişe bakıyordu (`isOpen`), metinler `null` döner. Yeniden gönderim 409 verir. Uzatma da artık bitişi geçmiş bağlantıyı reddeder: iş öncesi ve sonrası aynı cevap. İptal değişmedi; ödeme payı saatinde başlamış bir ödemeyi durdurmak için açık kalır.
 
 **KVKK:** `payment_link.sealed` alanında iletişim ve adres tutulur (Ş, `PII_ENCRYPTION_KEY`), e-posta ayrıca özetlenir (Ö). Kapanıştan 30 gün sonra kişisel alanlar silinir. Silme talebinde açık bağlantı iptal edilir; veri dökümüne `ödeme_bağlantıları` olarak girer (docs/kvkk-envanter.md).
 

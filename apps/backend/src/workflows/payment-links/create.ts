@@ -8,6 +8,7 @@ import {
   transform,
 } from "@medusajs/framework/workflows-sdk"
 import { ValidationError } from "../../lib/errors"
+import { addKurus, kurus } from "../../lib/money"
 import { orderAccessKey } from "../../lib/orders/access-token"
 import { linkEnd } from "../../lib/payment-links/snapshot"
 import { newPaymentLinkToken, paymentLinkTokenHash } from "../../lib/payment-links/token"
@@ -17,6 +18,8 @@ import type { PaymentLinkAddress, PaymentLinkContact } from "../../modules/payme
 import { planPaymentLink } from "./plan"
 import type { LinkPlan, PlanInput } from "./plan"
 import { createLinkPromotion } from "./promotion"
+import { quoteShipping } from "./shipping-quote"
+import type { ShippingQuoteInput } from "./shipping-quote"
 
 type Container = Pick<MedusaContainer, "resolve">
 
@@ -163,8 +166,48 @@ export const createPaymentLinkWorkflow = createWorkflow(
   }
 )
 
-/** "Önizle": the totals the backend works out, nothing written (adr/0051 §2). */
+export interface PreviewPaymentLinkInput extends PlanInput {
+  /** Whether the form carries a delivery address (the address itself stays out of the run). */
+  with_address: boolean
+}
+
+const quoteShippingStep = createStep(
+  "payment-links-quote-shipping",
+  async (input: ShippingQuoteInput, { container }) =>
+    new StepResponse(await quoteShipping(container, input))
+)
+
+/**
+ * "Önizle": the totals the backend works out, nothing written (adr/0051
+ * §2): the lines, the discount, the preset option's shipping for the
+ * address when Medusa can price it without a cart, and the total with it.
+ */
 export const previewPaymentLinkWorkflow = createWorkflow(
   "payment-links-preview",
-  (input: PlanInput) => new WorkflowResponse(planStep(input))
+  (input: PreviewPaymentLinkInput) => {
+    const plan = planStep(
+      transform({ input }, ({ input }) => ({
+        actor_id: input.actor_id,
+        customer_id: input.customer_id,
+        lines: input.lines,
+        discount: input.discount,
+        shipping_option_id: input.shipping_option_id,
+      }))
+    )
+    const shipping = quoteShippingStep(
+      transform({ input, plan }, ({ input, plan }) => ({
+        shipping_option_id: input.shipping_option_id,
+        with_address: input.with_address,
+        region_id: plan.region_id,
+        item_total: plan.total,
+      }))
+    )
+    return new WorkflowResponse(
+      transform({ plan, shipping }, ({ plan, shipping }) => ({
+        ...plan,
+        ...shipping,
+        total: addKurus(kurus(plan.total), kurus(shipping.shipping_total ?? 0)),
+      }))
+    )
+  }
 )

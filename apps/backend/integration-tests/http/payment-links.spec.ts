@@ -309,6 +309,8 @@ medusaIntegrationTestRunner({
       expect(before.sealed).not.toBeNull()
       expect(erased).toBe(1)
       expect(after).toMatchObject({
+        // The number stays: an order made from the link names it (qt_payment_link_number)
+        number: before.number,
         status: "canceled",
         sealed: null,
         email_hash: null,

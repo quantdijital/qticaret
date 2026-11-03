@@ -140,6 +140,34 @@ interface Lifetime {
 export const isOpen = (link: Lifetime, now = new Date()): boolean =>
   link.status === "open" && new Date(link.expires_at).getTime() > now.getTime()
 
+/**
+ * A link's status as staff see it: one still `open` (or `draft`) past its
+ * end reads `expired` before the hourly job writes it (adr/0051 §12), so
+ * the panel never shows an open link with an end gone by. Derived at read
+ * time; the row keeps its own until the job.
+ */
+export const shownStatus = (link: Lifetime, now = new Date()): string =>
+  (link.status === "open" || link.status === "draft") &&
+  new Date(link.expires_at).getTime() <= now.getTime()
+    ? "expired"
+    : link.status
+
+/** The list filter for a status as `shownStatus` reports it. */
+export function shownStatusFilter(
+  status: PaymentLinkStatus,
+  now = new Date()
+): Record<string, unknown> {
+  if (status === "open" || status === "draft") {
+    return { status, expires_at: { $gt: now } }
+  }
+  if (status === "expired") {
+    return {
+      $or: [{ status: "expired" }, { status: ["open", "draft"], expires_at: { $lte: now } }],
+    }
+  }
+  return { status }
+}
+
 /** Whether a payment started from the link may still become its order. */
 export const completesNow = (link: Lifetime, now = new Date()): boolean =>
   link.status === "open" &&

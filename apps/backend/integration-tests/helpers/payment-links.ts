@@ -1,8 +1,11 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
+import { ContainerRegistrationKeys, Modules } from "@medusajs/framework/utils"
+import { createShippingOptionsWorkflow } from "@medusajs/medusa/core-flows"
 import { PAYMENT_LINKS_MODULE } from "../../src/modules/payment-links"
 import type PaymentLinksModuleService from "../../src/modules/payment-links/service"
 import { PLATFORM_SETTINGS_MODULE } from "../../src/modules/platform-settings"
 import type PlatformSettingsModuleService from "../../src/modules/platform-settings/service"
+import { ensureLocationCarriers } from "../../src/scripts/bootstrap/location-carriers"
 import type { HttpClient } from "./http"
 import { settle } from "./http"
 import { PAYTR_ADDRESS } from "./paytr"
@@ -98,4 +101,43 @@ export async function linkRow(container: MedusaContainer, id: string) {
     throw new Error(`no payment link ${id}`)
   }
   return row
+}
+
+/** Gives a staff member a name, as their profile would. */
+export const nameStaff = (
+  container: MedusaContainer,
+  id: string,
+  firstName: string,
+  lastName: string
+) => container.resolve(Modules.USER).updateUsers({ id, first_name: firstName, last_name: lastName })
+
+/**
+ * A carrier-priced (`calculated`) option in the seed's zone, as the
+ * Geliver shop helper makes one: its price comes from the carrier for a cart.
+ */
+export async function carrierOption(container: MedusaContainer, shop: StockShop): Promise<string> {
+  await ensureLocationCarriers(container)
+  const { data } = await container.resolve(ContainerRegistrationKeys.QUERY).graph({
+    entity: "shipping_option",
+    fields: ["service_zone_id"],
+    filters: { id: shop.shippingOptionId },
+  })
+  const { result } = await createShippingOptionsWorkflow(container).run({
+    input: [
+      {
+        name: "Geliver",
+        price_type: "calculated",
+        provider_id: "geliver_geliver",
+        service_zone_id: (data[0] as { service_zone_id: string }).service_zone_id,
+        shipping_profile_id: shop.shippingProfileId,
+        data: { id: "geliver-cheapest" },
+        type: { label: "Geliver", description: "Geliver", code: "geliver" },
+        rules: [
+          { attribute: "enabled_in_store", operator: "eq", value: "true" },
+          { attribute: "is_return", operator: "eq", value: "false" },
+        ],
+      },
+    ],
+  })
+  return result[0]?.id ?? ""
 }

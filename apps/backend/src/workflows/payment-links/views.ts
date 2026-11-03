@@ -1,6 +1,7 @@
 import type { MedusaContainer } from "@medusajs/framework/types"
+import { Modules } from "@medusajs/framework/utils"
 import { maskRecipient, normalizeRecipient } from "../../lib/messaging/recipients"
-import { isOpen, linkNumber } from "../../lib/payment-links/snapshot"
+import { isOpen, linkNumber, shownStatus } from "../../lib/payment-links/snapshot"
 import type { PaymentLinkDiscount, PaymentLinkLine } from "../../lib/payment-links/snapshot"
 import { PAYMENT_LINKS_MODULE } from "../../modules/payment-links"
 import type PaymentLinksModuleService from "../../modules/payment-links/service"
@@ -45,15 +46,51 @@ export const discountOf = (link: { discount: unknown }): PaymentLinkDiscount | n
 const service = (container: Container) =>
   container.resolve<PaymentLinksModuleService>(PAYMENT_LINKS_MODULE)
 
-/** A list row (adr/0051 §13): the customer masked, what was offered, where it stands. */
-export function linkSummary(container: Container, link: LinkRow) {
+/** Staff members' names by user id. */
+export type StaffNames = ReadonlyMap<string, string>
+
+/**
+ * Who made or canceled links, by name, as an order's notes name their
+ * authors: first and last name, never the e-mail. Someone no longer on
+ * the team, or without a name, is left out (the panel shows a dash).
+ */
+export async function staffNames(
+  container: Container,
+  ids: readonly (string | null)[]
+): Promise<StaffNames> {
+  const wanted = [...new Set(ids.filter((id): id is string => Boolean(id)))]
+  if (wanted.length === 0) {
+    return new Map()
+  }
+  const users = await container
+    .resolve(Modules.USER)
+    .listUsers({ id: wanted }, { select: ["id", "first_name", "last_name"], take: wanted.length })
+  return new Map(
+    users.flatMap((user) => {
+      const name = [user.first_name, user.last_name].filter(Boolean).join(" ").trim()
+      return name ? [[user.id, name] as const] : []
+    })
+  )
+}
+
+/**
+ * A list row (adr/0051 §13): the customer masked, what was offered, where
+ * it stands (past its end it reads `expired`, whatever the row says until
+ * the hourly job), who made it.
+ */
+export function linkSummary(
+  container: Container,
+  link: LinkRow,
+  names: StaffNames,
+  now = new Date()
+) {
   const contact = service(container).openPrivate(link.sealed)?.contact
   const email = contact?.email ? normalizeRecipient("email", contact.email) : null
   const discount = discountOf(link)
   return {
     id: link.id,
     number: linkNumber(link.number),
-    status: link.status,
+    status: shownStatus(link, now),
     customer: {
       id: link.customer_id,
       name: contact
@@ -74,6 +111,7 @@ export function linkSummary(container: Container, link: LinkRow) {
       : null,
     currency_code: link.currency_code,
     created_by: link.created_by,
+    created_by_name: names.get(link.created_by) ?? null,
     created_at: link.created_at,
     expires_at: link.expires_at,
     opened_count: link.opened_count,
@@ -83,10 +121,10 @@ export function linkSummary(container: Container, link: LinkRow) {
 }
 
 /** The link's page in the panel: its customer in full (a recorded read), its lines and note. */
-export function linkDetail(container: Container, link: LinkRow) {
+export function linkDetail(container: Container, link: LinkRow, names: StaffNames) {
   const sealed = service(container).openPrivate(link.sealed)
   return {
-    ...linkSummary(container, link),
+    ...linkSummary(container, link, names),
     contact: sealed?.contact ?? null,
     address: sealed?.address ?? null,
     lines: linesOf(link).map((line) => ({ ...line, total: line.unit_price * line.quantity })),
@@ -98,8 +136,28 @@ export function linkDetail(container: Container, link: LinkRow) {
     last_sent_at: link.last_sent_at,
     paid_at: link.paid_at,
     canceled_by: link.canceled_by,
+    canceled_by_name: link.canceled_by ? (names.get(link.canceled_by) ?? null) : null,
     closed_at: link.closed_at,
   }
+}
+
+/** List rows with the names of who made them, one read of the team for the page. */
+export async function linkSummaries(container: Container, links: readonly LinkRow[]) {
+  const names = await staffNames(
+    container,
+    links.map((link) => link.created_by)
+  )
+  const now = new Date()
+  return links.map((link) => linkSummary(container, link, names, now))
+}
+
+/** The link's page with the names of who made and who canceled it. */
+export async function linkDetailView(container: Container, link: LinkRow) {
+  return linkDetail(
+    container,
+    link,
+    await staffNames(container, [link.created_by, link.canceled_by])
+  )
 }
 
 /**

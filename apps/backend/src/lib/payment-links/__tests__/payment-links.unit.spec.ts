@@ -11,6 +11,8 @@ import {
   linesTotal,
   linkEnd,
   movedPrices,
+  shownStatus,
+  shownStatusFilter,
 } from "../snapshot"
 import type { PaymentLinkLine } from "../snapshot"
 import {
@@ -184,6 +186,29 @@ describe("payment link lifetime (adr/0051 §3, §12)", () => {
     expect(extendedEnd(link, 168, now)?.getTime()).toBe(link.token_ends_at.getTime())
     expect(extendedEnd(link, 24, now)).toBeNull()
     expect(extendedEnd({ ...link, expires_at: link.token_ends_at }, 168, now)).toBeNull()
+  })
+
+  it("reads expired to staff once an open or draft link's end has passed, before the job writes it", () => {
+    const ahead = new Date(now.getTime() + HOUR)
+    const past = new Date(now.getTime() - HOUR)
+    expect(shownStatus({ status: "open", expires_at: ahead }, now)).toBe("open")
+    expect(shownStatus({ status: "draft", expires_at: ahead }, now)).toBe("draft")
+    expect(shownStatus({ status: "open", expires_at: past }, now)).toBe("expired")
+    expect(shownStatus({ status: "open", expires_at: now }, now)).toBe("expired")
+    expect(shownStatus({ status: "draft", expires_at: past }, now)).toBe("expired")
+    // A closed link keeps what closed it, whatever its end
+    expect(shownStatus({ status: "paid", expires_at: past }, now)).toBe("paid")
+    expect(shownStatus({ status: "canceled", expires_at: past }, now)).toBe("canceled")
+  })
+
+  it("filters the list by the status staff see", () => {
+    expect(shownStatusFilter("open", now)).toEqual({ status: "open", expires_at: { $gt: now } })
+    expect(shownStatusFilter("draft", now)).toEqual({ status: "draft", expires_at: { $gt: now } })
+    expect(shownStatusFilter("expired", now)).toEqual({
+      $or: [{ status: "expired" }, { status: ["open", "draft"], expires_at: { $lte: now } }],
+    })
+    expect(shownStatusFilter("paid", now)).toEqual({ status: "paid" })
+    expect(shownStatusFilter("canceled", now)).toEqual({ status: "canceled" })
   })
 })
 
