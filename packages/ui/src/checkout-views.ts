@@ -169,6 +169,25 @@ export interface OrderGiftView {
   recipient: string | null
 }
 
+/** Why a line is outside the right of withdrawal, as the backend names it (adr/0025, adr/0052 §8). */
+export type WithdrawalExclusion = "product" | "personal_addon" | "gift_card_used"
+
+export interface ReturnableLineView {
+  id: string
+  title: string
+  /** Units that may be asked back: a gift line's cards not asked for yet. */
+  quantity: number
+  /**
+   * Outside the right of withdrawal: back only as faulty or wrong; a gift
+   * line whose cards were spent (`gift_card_used`) not at all. Null inside it.
+   */
+  excluded?: WithdrawalExclusion | null
+  /** A gift card line: asked on its own and as money back, its cards voided, nothing sent. */
+  gift?: boolean
+  /** Under the line, in words: why it has no right of withdrawal, or what a gift line's does. */
+  note?: string | null
+}
+
 export interface BankTransferView {
   accountHolder: string
   bankName: string
@@ -204,13 +223,17 @@ export interface OrderPageView {
   /** Not packed yet: the shopper may cancel (the backend decides again). */
   cancellable: boolean
   /**
-   * Shipped or delivered: the lines that may be asked back; null when none
-   * may. A non-withdrawable line comes back only for a reason in `defectReasons`.
+   * The lines that may be asked back; null when none may: a shipped
+   * order's lines, and a gift card line whose cards went out, whatever
+   * the parcels. A line outside the right of withdrawal comes back only
+   * for a reason in `defectReasons`; a gift line on its own (`giftReasons`).
    */
-  returnable: { id: string; title: string; quantity: number; nonWithdrawable?: boolean }[] | null
+  returnable: ReturnableLineView[] | null
   returnReasons: OptionView[]
   /** The reasons that are the shop's fault (faulty, wrong, not as described): `returnReasons` values. */
   defectReasons?: string[]
+  /** The reasons a gift card line is withdrawn for: the right of withdrawal only. */
+  giftReasons?: OptionView[]
   /** Return requests already made, in words. */
   returns: { kind: string; status: string; date: string; code: string | null }[]
   /** The parcels that left, in words: carrier, tracking and where they are. */

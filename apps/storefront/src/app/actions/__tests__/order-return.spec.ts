@@ -1,0 +1,89 @@
+import { beforeEach, describe, expect, it, vi } from "vitest"
+import { StoreApiError } from "@/lib/store-api/errors"
+
+const next = vi.hoisted(() => ({
+  revalidatePath: vi.fn(),
+  redirect: vi.fn((path: string) => {
+    throw new Error(`redirect:${path}`)
+  }),
+}))
+vi.mock("next/cache", () => ({ revalidatePath: next.revalidatePath }))
+vi.mock("next/navigation", () => ({ redirect: next.redirect }))
+const api = vi.hoisted(() => ({ storeCall: vi.fn() }))
+vi.mock("@/lib/store-api/server", () => api)
+
+const { requestReturn } = await import("../order")
+
+const ORDER = "order_01K0000000000000000000ORDER"
+const GIFT = "ordli_01K0000000000000000000GIFT"
+const KNIFE = "ordli_01K000000000000000000KNIFE"
+const TOKEN = `abc123.${"x".repeat(43)}`
+
+/** The gift card form as the base theme posts it: its line alone, `kind=return`, the right of withdrawal. */
+const giftForm = (extra: Record<string, string> = {}) => {
+  const data = new FormData()
+  Object.entries({
+    order_id: ORDER,
+    token: TOKEN,
+    kind: "return",
+    reason: "changed_mind",
+    note: "",
+    [`qty_${GIFT}`]: "1",
+    ...extra,
+  }).forEach(([name, value]) => {
+    data.set(name, value)
+  })
+  return data
+}
+
+const ask = (form: FormData) => requestReturn({ ok: false, error: null }, form)
+
+describe("requestReturn for a gift card line (adr/0025, 2026-11-03)", () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    api.storeCall.mockResolvedValue({ return_request: { id: "rr_1", status: "requested" } })
+  })
+
+  it("asks for the gift line alone, as money back on the right of withdrawal, with the order's key", async () => {
+    await expect(ask(giftForm())).resolves.toEqual({ ok: true, error: null })
+    expect(api.storeCall).toHaveBeenCalledWith(`/store/orders/${ORDER}/returns`, {
+      method: "POST",
+      body: {
+        kind: "return",
+        items: [{ line_item_id: GIFT, quantity: 1 }],
+        reason: "changed_mind",
+      },
+      headers: { "x-order-token": TOKEN },
+    })
+    expect(next.revalidatePath).toHaveBeenCalledWith(`/siparis/${ORDER}`)
+  })
+
+  it.each([
+    ["returns.gift_card_separate", { [`qty_${KNIFE}`]: "1" }],
+    ["returns.gift_card_used", { reason: "damaged" }],
+    ["returns.already_open", {}],
+    ["returns.withdrawal_excluded", {}],
+  ])("says the backend's %s in its own words", async (key, extra) => {
+    api.storeCall.mockRejectedValue(new StoreApiError(400, key, null))
+    await expect(ask(giftForm(extra))).resolves.toEqual({ ok: false, error: key })
+    expect(next.revalidatePath).not.toHaveBeenCalled()
+  })
+
+  it("falls back to the general refusal for anything else, and to the budget's words on 429", async () => {
+    api.storeCall.mockRejectedValue(new StoreApiError(400, "returns.window_closed", null))
+    await expect(ask(giftForm())).resolves.toEqual({ ok: false, error: "order.return_failed" })
+    api.storeCall.mockRejectedValue(new StoreApiError(429, "returns.gift_card_used", null))
+    await expect(ask(giftForm())).resolves.toEqual({
+      ok: false,
+      error: "errors.too_many_requests",
+    })
+  })
+
+  it("sends nothing without a unit chosen", async () => {
+    await expect(ask(giftForm({ [`qty_${GIFT}`]: "0" }))).resolves.toEqual({
+      ok: false,
+      error: "order.return_items_required",
+    })
+    expect(api.storeCall).not.toHaveBeenCalled()
+  })
+})

@@ -1,11 +1,23 @@
 import "server-only"
 import { formatLira } from "@qticaret/ui"
-import type { BankTransferView, OrderGiftView, OrderPageView, Translate } from "@qticaret/ui"
+import type { BankTransferView, OrderPageView, Translate } from "@qticaret/ui"
 import type { PaymentMethods } from "@/lib/checkout/options"
 import type { InvoiceRow, ReturnRequestRow, ShipmentRow, StoreOrder } from "@/lib/orders/order"
 import { providersOf } from "@/lib/orders/order"
 import { lineAddonsOf } from "./addons"
 import { addressSummaryOf } from "./checkout"
+import { orderGiftOf } from "./order-gift"
+import {
+  DEFECT_REASONS,
+  giftCardsSent,
+  giftLinesOf,
+  giftReasonsOf,
+  requestWordsOf,
+  returnReasonsOf,
+  returnableOf,
+} from "./order-returns"
+
+export { orderGiftOf } from "./order-gift"
 
 const WHEN = new Intl.DateTimeFormat("tr-TR", {
   day: "numeric",
@@ -39,10 +51,6 @@ export interface OrderExtras {
   note: string | null
 }
 
-const REASONS = ["damaged", "wrong_item", "not_as_described", "changed_mind", "size_issue", "other"]
-// The shop's fault: what a line outside the right of withdrawal comes back for (backend `DEFECT_REASONS`)
-const DEFECT_REASONS = ["damaged", "wrong_item", "not_as_described"]
-const SHIPPED = new Set(["shipped", "partially_shipped", "delivered", "partially_delivered"])
 const NOTES: Record<string, string> = {
   iptal: "order.notice_canceled",
   "iptal-olmadi": "order.notice_cancel_refused",
@@ -75,31 +83,6 @@ export function shipmentOf(parcel: ShipmentRow, t: Translate): OrderPageView["sh
       .filter(Boolean)
       .join(" · "),
     items: parcel.items.map((item) => `${item.title} × ${String(item.quantity)}`).join(", "),
-  }
-}
-
-const LAST4 = /^[0-9A-Za-z]{4}$/
-
-/**
- * A gift card line's cards and recipient (adr/0025 Ek 2026-11-03): the
- * last four of each card issued (`qt_gift_cards`; never the code) and the
- * address in `qt_gift` (gone once erased). Null on any other line.
- */
-export function orderGiftOf(metadata: unknown): OrderGiftView | null {
-  if (typeof metadata !== "object" || metadata === null) {
-    return null
-  }
-  const { qt_gift: gift, qt_gift_cards: cards } = metadata as Record<string, unknown>
-  if (gift === undefined && cards === undefined) {
-    return null
-  }
-  const email = (gift as { recipient_email?: unknown } | null)?.recipient_email
-  return {
-    cards: (Array.isArray(cards) ? cards : []).flatMap((card: unknown) => {
-      const last4 = (card as { last4?: unknown } | null)?.last4
-      return typeof last4 === "string" && LAST4.test(last4) ? [last4] : []
-    }),
-    recipient: typeof email === "string" && email.includes("@") ? email : null,
   }
 }
 
@@ -141,6 +124,7 @@ export function orderView(
         }
       : null
   const discount = kurus(order.original_item_total) - kurus(order.item_total)
+  const gifts = giftLinesOf(order)
   return {
     displayId: String(order.display_id),
     placedAt: WHEN.format(new Date(order.created_at)),
@@ -201,23 +185,18 @@ export function orderView(
     ],
     token: extras.token,
     orderId: order.id,
-    cancellable: order.status === "pending" && order.fulfillment_status === "not_fulfilled",
-    returnable:
-      order.status !== "canceled" && SHIPPED.has(order.fulfillment_status)
-        ? order.items.map((line) => ({
-            id: line.id,
-            title: line.title,
-            quantity: line.quantity,
-            nonWithdrawable: picksOf(line.metadata).nonWithdrawable,
-          }))
-        : null,
-    returnReasons: REASONS.map((reason) => ({ value: reason, label: t(`order.reason_${reason}`) })),
+    // Gift cards already sent are withdrawn from, line by line, never cancelled with the order
+    cancellable:
+      order.status === "pending" &&
+      order.fulfillment_status === "not_fulfilled" &&
+      !giftCardsSent(order),
+    returnable: returnableOf(order, extras.returns, t),
+    returnReasons: returnReasonsOf(t),
     defectReasons: DEFECT_REASONS,
+    giftReasons: giftReasonsOf(t),
     returns: extras.returns.map((request) => ({
-      kind: said(t, "order.return_kind_", request.kind),
-      status: said(t, "order.return_status_", request.status),
+      ...requestWordsOf(request, gifts, t),
       date: WHEN.format(new Date(request.created_at)),
-      code: request.return_code,
     })),
     shipments: extras.shipments.map((parcel) => shipmentOf(parcel, t)),
     notice: extras.note && NOTES[extras.note] ? t(NOTES[extras.note] ?? "") : null,

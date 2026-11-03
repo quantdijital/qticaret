@@ -101,6 +101,8 @@ export interface ReturnRequestRow {
   status: string
   return_code: string | null
   created_at: string
+  /** The lines asked for: a gift card line's withdrawal reads apart, and counts its cards. */
+  items?: { line_item_id: string; quantity: number }[] | null
 }
 
 /** The shopper's return requests on the order (F7.9); none when the backend will not say. */

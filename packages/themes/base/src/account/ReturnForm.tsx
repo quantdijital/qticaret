@@ -1,10 +1,9 @@
 "use client"
 
 import { useActionState, useState } from "react"
-import type { OrderActions, OrderPageView } from "@qticaret/ui"
+import type { OrderActions, OrderPageView, ReturnableLineView } from "@qticaret/ui"
 
 export interface ReturnWords {
-  title: string
   quantity: string
   reason: string
   note: string
@@ -13,8 +12,6 @@ export interface ReturnWords {
   submit: string
   sending: string
   sent: string
-  /** Under a line made to the buyer's wish (adr/0052 §8): no withdrawal, faulty or wrong only. */
-  nonWithdrawable: string
   errors: Record<string, string>
   fallback: string
 }
@@ -23,30 +20,36 @@ const FIELD = "rounded-lg border border-input bg-background px-3 py-2 text-sm"
 
 /**
  * Asks to send lines back (F7.9): a quantity per line, a reason, a note.
- * A line made to the buyer's wish (adr/0052 §8) says it has no right of
- * withdrawal; once one of its units is chosen, only the reasons that are
- * the shop's fault are offered and no exchange. The backend decides again.
+ * A line outside the right of withdrawal (adr/0052 §8) says so; once one of
+ * its units is chosen, only the reasons that are the shop's fault are
+ * offered and no exchange. `gift`: gift card lines alone (adr/0025), on the
+ * right of withdrawal and as money back only; a line whose cards were spent
+ * says why and offers nothing. The backend decides again.
  */
 export function ReturnForm({
   view,
+  lines,
+  gift = false,
   action,
   words,
 }: {
   view: OrderPageView
+  lines: ReturnableLineView[]
+  gift?: boolean
   action: OrderActions["requestReturn"]
   words: ReturnWords
 }) {
   const [state, submit, pending] = useActionState(action, { ok: false, error: null })
-  // The non-withdrawable lines with a unit chosen, the kind and the reason as picked
+  // The lines outside the right of withdrawal with a unit chosen, the kind and the reason as picked
   const [excluded, setExcluded] = useState<ReadonlySet<string>>(new Set())
   const [kind, setKind] = useState("return")
   const [reason, setReason] = useState("")
   const defectOnly = excluded.size > 0
   const defects = new Set(view.defectReasons ?? [])
-  const reasons = defectOnly
-    ? view.returnReasons.filter((each) => defects.has(each.value))
-    : view.returnReasons
-  const chosenReason = reasons.some((each) => each.value === reason) ? reason : ""
+  const offered = gift ? (view.giftReasons ?? []) : view.returnReasons
+  const reasons = defectOnly ? offered.filter((each) => defects.has(each.value)) : offered
+  const only = reasons.length === 1 ? (reasons[0]?.value ?? "") : ""
+  const chosenReason = reasons.some((each) => each.value === reason) ? reason : only
   const chosenKind = defectOnly ? "return" : kind
   if (state.ok) {
     return (
@@ -55,74 +58,92 @@ export function ReturnForm({
       </p>
     )
   }
+  // Nothing to choose (a gift line whose cards were spent): only why
+  if (lines.every((line) => line.quantity === 0)) {
+    return (
+      <ul className="flex flex-col gap-2 text-sm">
+        {lines.map((line) => (
+          <li key={line.id} className="flex flex-col">
+            {line.title}
+            {line.note && <span className="text-xs text-muted-foreground">{line.note}</span>}
+          </li>
+        ))}
+      </ul>
+    )
+  }
   return (
     <form action={submit} className="flex flex-col gap-3 text-sm">
       <input type="hidden" name="order_id" value={view.orderId} />
       <input type="hidden" name="token" value={view.token ?? ""} />
       <ul className="flex flex-col gap-2">
-        {(view.returnable ?? []).map((line) => (
+        {lines.map((line) => (
           <li key={line.id} className="flex items-center justify-between gap-3">
             <span className="flex flex-col">
               {line.title}
-              {line.nonWithdrawable && (
-                <span className="text-xs text-muted-foreground">{words.nonWithdrawable}</span>
-              )}
+              {line.note && <span className="text-xs text-muted-foreground">{line.note}</span>}
             </span>
-            <label className="flex items-center gap-2">
-              <span className="text-muted-foreground">{words.quantity}</span>
-              <select
-                name={`qty_${line.id}`}
-                defaultValue="0"
-                onChange={(event) => {
-                  if (line.nonWithdrawable) {
-                    const next = new Set(excluded)
-                    if (event.target.value === "0") {
-                      next.delete(line.id)
-                    } else {
-                      next.add(line.id)
+            {line.quantity > 0 && (
+              <label className="flex items-center gap-2">
+                <span className="text-muted-foreground">{words.quantity}</span>
+                <select
+                  name={`qty_${line.id}`}
+                  defaultValue="0"
+                  onChange={(event) => {
+                    // A gift line offers the right of withdrawal alone, whatever its mark
+                    if (line.excluded && !gift) {
+                      const next = new Set(excluded)
+                      if (event.target.value === "0") {
+                        next.delete(line.id)
+                      } else {
+                        next.add(line.id)
+                      }
+                      setExcluded(next)
                     }
-                    setExcluded(next)
-                  }
-                }}
-                className={FIELD}
-              >
-                {Array.from({ length: line.quantity + 1 }, (_, index) => (
-                  <option key={index} value={index}>
-                    {index}
-                  </option>
-                ))}
-              </select>
-            </label>
+                  }}
+                  className={FIELD}
+                >
+                  {Array.from({ length: line.quantity + 1 }, (_, index) => (
+                    <option key={index} value={index}>
+                      {index}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
           </li>
         ))}
       </ul>
-      <div className="flex gap-4">
-        <label className="flex items-center gap-2">
-          <input
-            type="radio"
-            name="kind"
-            value="return"
-            checked={chosenKind === "return"}
-            onChange={() => {
-              setKind("return")
-            }}
-          />{" "}
-          {words.kindReturn}
-        </label>
-        <label className="flex items-center gap-2 has-[:disabled]:opacity-50">
-          <input
-            type="radio"
-            name="kind"
-            value="exchange"
-            disabled={defectOnly}
-            checked={chosenKind === "exchange"}
-            onChange={() => {
-              setKind("exchange")
-            }}
-          />{" "}
-          {words.kindExchange}
-        </label>
-      </div>
+      {gift ? (
+        <input type="hidden" name="kind" value="return" />
+      ) : (
+        <div className="flex gap-4">
+          <label className="flex items-center gap-2">
+            <input
+              type="radio"
+              name="kind"
+              value="return"
+              checked={chosenKind === "return"}
+              onChange={() => {
+                setKind("return")
+              }}
+            />{" "}
+            {words.kindReturn}
+          </label>
+          <label className="flex items-center gap-2 has-[:disabled]:opacity-50">
+            <input
+              type="radio"
+              name="kind"
+              value="exchange"
+              disabled={defectOnly}
+              checked={chosenKind === "exchange"}
+              onChange={() => {
+                setKind("exchange")
+              }}
+            />{" "}
+            {words.kindExchange}
+          </label>
+        </div>
+      )}
       <label className="flex flex-col gap-1">
         {words.reason}
         <select

@@ -221,7 +221,7 @@ describe("the order's lines", () => {
       "Desenli Siyah",
     ])
     expect(view.lines[0]?.nonWithdrawable).toBe(true)
-    expect(view.returnable?.[0]).toMatchObject({ id: "ordli_1", nonWithdrawable: true })
+    expect(view.returnable?.[0]).toMatchObject({ id: "ordli_1", excluded: "personal_addon" })
     expect(view.defectReasons).toEqual(["damaged", "wrong_item", "not_as_described"])
     // Every defect reason is one the form offers
     const offered = view.returnReasons.map((reason) => reason.value)

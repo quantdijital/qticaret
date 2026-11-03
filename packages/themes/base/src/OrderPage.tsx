@@ -1,7 +1,7 @@
 import { CircleCheck, FileText, HandCoins } from "lucide-react"
 import { ResponsiveImage } from "@qticaret/ui"
 import type { OrderActions, OrderPageView, Translate } from "@qticaret/ui"
-import { ReturnForm } from "./account/ReturnForm"
+import { OrderReturns } from "./account/OrderReturns"
 import { BankTransfer } from "./checkout/BankTransfer"
 import { OrderGift } from "./checkout/OrderGift"
 import { Breadcrumbs } from "./components/Breadcrumbs"
@@ -149,41 +149,7 @@ export function OrderPage({
               </ul>
             </section>
           )}
-          {view.returnable && (
-            <details className="rounded-3xl border bg-card p-6 sm:p-7">
-              <summary className="cursor-pointer text-lg font-semibold">
-                {t("order.return_title")}
-              </summary>
-              <div className="mt-4">
-                <ReturnForm
-                  view={view}
-                  action={actions.requestReturn}
-                  words={{
-                    title: t("order.return_title"),
-                    quantity: t("cart.quantity"),
-                    reason: t("order.return_reason"),
-                    note: t("order.return_note"),
-                    kindReturn: t("order.return_kind_return"),
-                    kindExchange: t("order.return_kind_exchange"),
-                    submit: t("order.return_submit"),
-                    sending: t("checkout.saving"),
-                    sent: t("order.return_sent"),
-                    nonWithdrawable: t("order.return_non_withdrawable"),
-                    errors: Object.fromEntries(
-                      [
-                        "order.return_reason_required",
-                        "order.return_items_required",
-                        "order.return_failed",
-                        "returns.withdrawal_excluded",
-                        "errors.too_many_requests",
-                      ].map((key) => [key, t(key)])
-                    ),
-                    fallback: t("order.return_failed"),
-                  }}
-                />
-              </div>
-            </details>
-          )}
+          <OrderReturns view={view} t={t} action={actions.requestReturn} />
           {view.cancellable && (
             <form
               action={actions.cancelOrder}

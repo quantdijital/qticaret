@@ -55,8 +55,22 @@ const REASONS = [
 ] as const
 
 /**
+ * The backend's refusals the form says in its own words: a line made to the
+ * buyer's wish back only as faulty or wrong (adr/0052 §8); a gift card line
+ * whose cards were spent, or asked with other lines or as an exchange
+ * (adr/0025, 2026-11-03); a request still open.
+ */
+const SAID = new Set([
+  "returns.withdrawal_excluded",
+  "returns.gift_card_used",
+  "returns.gift_card_separate",
+  "returns.already_open",
+])
+
+/**
  * Asks to send lines back (F7.9): each line with the quantity chosen, a
  * reason and a note; the shop decides. Signed in or with the order's key.
+ * A gift card line's form asks for it alone, as money back (`kind=return`).
  */
 export async function requestReturn(
   _state: { ok: boolean; error: string | null },
@@ -100,9 +114,8 @@ export async function requestReturn(
       error:
         error.status === 429
           ? "errors.too_many_requests"
-          : // A line made to the buyer's wish comes back only as faulty or wrong (adr/0052 §8)
-            error.messageKey === "returns.withdrawal_excluded"
-            ? "returns.withdrawal_excluded"
+          : error.messageKey && SAID.has(error.messageKey)
+            ? error.messageKey
             : "order.return_failed",
     }
   }
