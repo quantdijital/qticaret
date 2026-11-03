@@ -1,5 +1,7 @@
 import { toSlug } from "../../../seo/slug"
-import type { SourceProduct, SourceVariant } from "../../types"
+import type { SourceVariant } from "../../types"
+import type { WordpressProduct } from "./attributes"
+import { descriptiveAttributes } from "./attributes"
 import type { WordpressContext } from "./context"
 import { measureOf, note } from "./context"
 import { bodyBlocks, plainText } from "./html"
@@ -15,7 +17,8 @@ import { attributesOf, simpleVariant, variantsOf } from "./variations"
  * not hidden from the shop, else drafts; the trash is left out. Its
  * categories (the SEO plugin's primary one first), brand, SEO fields,
  * pictures (the main one, the gallery, the variations' own, with their
- * alt texts), options and variants, measures and old address. Grouped
+ * alt texts), options and variants, descriptive attributes (for the
+ * shop's attribute template), measures and old address. Grouped
  * and external products sell nothing of their own: left out, named.
  */
 
@@ -101,7 +104,7 @@ export function productOf(
   context: WordpressContext,
   item: WxrItem,
   uses: Map<string, AttributeUse>
-): SourceProduct | null {
+): WordpressProduct | null {
   const key = keyOf(item)
   const type = item.terms.find((term) => term.domain === "product_type")?.slug ?? "simple"
   if (type === "grouped" || type === "external") {
@@ -171,6 +174,7 @@ export function productOf(
     image_alts: alts,
     options: plan.options,
     variants: plan.variants,
+    attributes: descriptiveAttributes(attributes ?? []),
     dimensions: dimensionsOf([item, ...variations]),
     old_url: oldPathOf(item.link, context.wxr.site),
   }

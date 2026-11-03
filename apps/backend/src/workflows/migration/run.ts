@@ -9,6 +9,9 @@ import { PLATFORM_SETTINGS_MODULE } from "../../modules/platform-settings"
 import type { StoreSettings } from "../../modules/platform-settings/sections"
 import type PlatformSettingsModuleService from "../../modules/platform-settings/service"
 import type { ImportHooks } from "../catalog/import/run"
+import { attributeOutcome } from "./attribute-report"
+import { planProductAttributes } from "./attributes"
+import type { AttributedProduct } from "./attributes"
 import { migrateBrands } from "./brands"
 import { migrateCategories } from "./categories"
 import { migrateContent } from "./content"
@@ -85,7 +88,8 @@ const counted = (values: Partial<KindCounts>): KindCounts => ({ ...emptyCounts()
 /**
  * A shop's old platform moved here (F14, adr/0042): categories and brands
  * first (the products name them), the products through the catalog import
- * in groups and their pictures, then customers, their old orders and the reviews, then
+ * in groups, with the descriptive attributes the shop's templates take
+ * (attributes.ts), and their pictures, then customers, their old orders and the reviews, then
  * blog posts and content pages (those without their own text kept for
  * their addresses, F14.7). A live product without its
  * measurements takes the owner's `defaults`, else comes as a draft; each
@@ -122,6 +126,7 @@ export async function runMigration(
     apply,
     spanOf(hooks, SPAN.category)
   )
+  problems.push(...tree.problems.map((problem) => ({ ...problem, kind: "category" as const })))
   await keep("category", tree.counts)
 
   const brands = await migrateBrands(
@@ -133,7 +138,8 @@ export async function runMigration(
   )
   await keep("brand", brands.counts)
 
-  const products = await listOf(source.products(), beat("product"))
+  const products: AttributedProduct[] = await listOf(source.products(), beat("product"))
+  const attributePlans = await planProductAttributes(container, products)
   const settings = (await container
     .resolve<PlatformSettingsModuleService>(PLATFORM_SETTINGS_MODULE)
     .getSection("store")) as unknown as StoreSettings
@@ -156,28 +162,39 @@ export async function runMigration(
   }
   const productRows: SheetCell[][] = []
   const productCounts = counted({ read: products.length })
+  const made = new Set<string>()
+  const moved = new Set<string>()
   const batches = batchesOf(products)
   const productSpan = spanOf(hooks, SPAN.product)
   for (const [index, batch] of batches.entries()) {
-    const {
-      summary,
-      rows,
-      moved,
-      problems: left,
-    } = await migrateProducts(container, source.id, batch, refs, mode, {
-      origin: hooks.origin,
-      audit: (action, changes) => hooks.audit(`products_${action}`, changes),
-      progress: (percent) => productSpan(index + percent / 100, batches.length),
-    })
+    const outcome = await migrateProducts(
+      container,
+      source.id,
+      batch,
+      refs,
+      mode,
+      {
+        origin: hooks.origin,
+        audit: (action, changes) => hooks.audit(`products_${action}`, changes),
+        progress: (percent) => productSpan(index + percent / 100, batches.length),
+      },
+      attributePlans
+    )
+    const { summary, rows, problems: left } = outcome
+    outcome.keys.made.forEach((key) => made.add(key))
+    outcome.keys.moved.forEach((key) => moved.add(key))
     productCounts.created += summary?.create ?? 0
     productCounts.updated += summary?.update ?? 0
-    productCounts.found += (summary?.unchanged ?? 0) + moved
+    productCounts.found += (summary?.unchanged ?? 0) + outcome.moved
     productCounts.skipped += (summary?.problems ?? 0) + left.length
     productCounts.failed += summary?.failed ?? 0
     productRows.push(...rows)
     problems.push(...left.map((problem) => ({ ...problem, kind: "product" as const })))
   }
   await keep("product", productCounts)
+  const attributes = attributeOutcome(products, attributePlans, made, moved)
+  problems.push(...attributes.problems)
+  await keep("attribute", attributes.counts)
 
   const images = await migrateImages(
     container,

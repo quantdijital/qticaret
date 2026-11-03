@@ -16,7 +16,7 @@ import { HEAD_BYTES, MAX_WXR_BYTES, NAMESPACE } from "./file"
  */
 
 export interface WxrTermRef {
-  /** The taxonomy: `product_cat`, `pa_celik`, `post_tag`. */
+  /** The taxonomy: `product_cat`, `pa_renk`, `post_tag`. */
   domain: string
   slug: string
   name: string

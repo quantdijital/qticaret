@@ -1,12 +1,11 @@
 import type {
   MigrationSource,
   SourceBrand,
-  SourceCategory,
   SourcePage,
   SourcePost,
-  SourceProduct,
   SourceReview,
 } from "../../types"
+import type { WordpressProduct } from "./attributes"
 import { pageOf, postOf } from "./content"
 import type { Note, WordpressContext } from "./context"
 import { note } from "./context"
@@ -15,20 +14,28 @@ import { productOf } from "./products"
 import type { WxrItem } from "./reader"
 import { readWxr } from "./reader"
 import { reviewsOf } from "./reviews"
-import type { Bases } from "./terms"
+import type { WordpressSummary } from "./summary"
+import { LEFT_OUT, notMovedOf, wordpressSummary } from "./summary"
+import type { Bases, WordpressCategory } from "./terms"
 import { BRAND_TAXONOMIES, Taxonomies, brandsOf, categoriesOf } from "./terms"
 import { detectBase, linkedPaths, normalBase, oldPathOf } from "./urls"
 
+export type { ProductAttribute, WordpressProduct } from "./attributes"
 export { MAX_WXR_BYTES, looksLikeWxr, wxrText } from "./file"
+export type { NotMoved, WordpressSummary } from "./summary"
+export type { WordpressCategory } from "./terms"
 
 /**
  * A WordPress + WooCommerce site's export (WXR) as a migration source
- * (F14, adr/0042 Ek 2026-11-03): product categories, brands, products with
- * their variations and pictures, reviews, blog posts with their categories
- * and tags, content pages, and every old address for its 301. Menus and
- * coupons, product tags and descriptive attributes do not move: they are
- * named in the report. The file is read once and whole, then given out
- * kind by kind; its customers and orders are not in an export.
+ * (F14, adr/0042 Ek 2026-11-03): product categories with their SEO fields,
+ * brands, products with their variations, pictures and descriptive
+ * attributes, reviews, blog posts with their categories and tags, content
+ * pages, and every old address for its 301. Menus and coupons and product
+ * tags do not move: they are named in the report. A descriptive attribute
+ * moves where the shop's attribute template has a field for it, else the
+ * run names it with its values (workflows/migration/attributes.ts). The
+ * file is read once and whole, then given out kind by kind; its customers
+ * and orders are not in an export.
  */
 
 export interface WordpressOptions {
@@ -39,19 +46,20 @@ export interface WordpressOptions {
 export interface WordpressRecords {
   id: string
   bases: Bases
-  categories: SourceCategory[]
+  categories: WordpressCategory[]
   brands: SourceBrand[]
-  products: SourceProduct[]
+  products: WordpressProduct[]
   reviews: SourceReview[]
   posts: SourcePost[]
   pages: SourcePage[]
   /** Descriptive attributes by their key, for the attribute template the shop sets up. */
   attributes: ReadonlyMap<string, AttributeUse>
+  /** The job summary's block: attributes by slug, what does not move. */
+  summary: WordpressSummary
   notes: Note[]
 }
 
 const bareHost = (host: string) => host.toLowerCase().replace(/^www\./, "")
-const LEFT_OUT = new Set(["trash", "auto-draft", "inherit"])
 
 function groupVariations(items: readonly WxrItem[]): Map<string, WxrItem[]> {
   const byParent = new Map<string, WxrItem[]>()
@@ -130,52 +138,6 @@ function unique<T>(
   })
 }
 
-/** What is not moved, counted for the report: menus, coupons, blog comments, tags, attributes. */
-function reportOnly(context: WordpressContext, uses: ReadonlyMap<string, AttributeUse>) {
-  const { items } = context.wxr
-  const count = (type: string) =>
-    items.filter((item) => item.type === type && !LEFT_OUT.has(item.status)).length
-  const menus = count("nav_menu_item")
-  if (menus > 0) {
-    note(context, "page", `nav_menu_item: ${String(menus)} öğe`, "migration.wordpress_menus")
-  }
-  const coupons = count("shop_coupon")
-  if (coupons > 0) {
-    note(context, "product", `shop_coupon: ${String(coupons)} kupon`, "migration.wordpress_coupons")
-  }
-  const comments = items
-    .filter((item) => item.type === "post" || item.type === "page")
-    .flatMap((item) => item.comments.filter((comment) => comment.approved === "1")).length
-  if (comments > 0) {
-    note(context, "post", `comment: ${String(comments)} yorum`, "migration.wordpress_blog_comments")
-  }
-  const tags = new Map<string, number>()
-  for (const item of items.filter(
-    (each) => each.type === "product" && !LEFT_OUT.has(each.status)
-  )) {
-    for (const term of item.terms.filter((each) => each.domain === "product_tag")) {
-      tags.set(term.slug, (tags.get(term.slug) ?? 0) + 1)
-    }
-  }
-  if (tags.size > 0) {
-    const once = [...tags.values()].filter((uses) => uses === 1).length
-    note(
-      context,
-      "product",
-      `product_tag: ${String(tags.size)} etiket, ${String(once)} tanesi tek üründe`,
-      "migration.wordpress_product_tags"
-    )
-  }
-  for (const [key, use] of uses) {
-    note(
-      context,
-      "product",
-      `${key} "${use.name}": ${String(use.products)} ürün, ${String(use.values.size)} değer`,
-      "migration.wordpress_attribute_not_moved"
-    )
-  }
-}
-
 /** The export's records, every kind, and the notes of what was left out. */
 export function wordpressRecords(text: string, options: WordpressOptions = {}): WordpressRecords {
   const wxr = readWxr(text)
@@ -226,7 +188,7 @@ export function wordpressRecords(text: string, options: WordpressOptions = {}): 
     "page",
     (page) => page.source_key
   )
-  reportOnly(context, uses)
+  const notMoved = notMovedOf(context)
   const used = new Set(
     productItems.flatMap((item) =>
       item.terms.filter((term) => term.domain === "product_cat").map((term) => term.slug)
@@ -242,6 +204,7 @@ export function wordpressRecords(text: string, options: WordpressOptions = {}): 
     posts,
     pages,
     attributes: uses,
+    summary: wordpressSummary(products, notMoved),
     notes: context.notes,
   }
 }
@@ -258,7 +221,11 @@ const listOf =
 
 /** The export as a migration source: its id is the old site's host, so a run again finds what it made. */
 export function wordpressSource(text: string, options: WordpressOptions = {}): MigrationSource {
-  const records = wordpressRecords(text, options)
+  return recordsSource(wordpressRecords(text, options))
+}
+
+/** Records already read as a migration source. */
+export function recordsSource(records: WordpressRecords): MigrationSource {
   return {
     id: records.id,
     categories: listOf(records.categories),

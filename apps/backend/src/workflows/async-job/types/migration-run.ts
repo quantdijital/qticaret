@@ -121,7 +121,9 @@ export const migrationRun: JobType<z.infer<typeof input>> = {
       return progress(percent)
     }
     try {
-      const { source, digest } = await openSource(container, values, () => progress(last))
+      const { source, digest, wordpress } = await openSource(container, values, () =>
+        progress(last)
+      )
       const record = async (action: string, changes: Record<string, unknown>) => {
         await audit.record({
           kind: "system",
@@ -157,7 +159,8 @@ export const migrationRun: JobType<z.infer<typeof input>> = {
         await file.write(chunk as Buffer)
       }
       await migration.updateMigrationRuns({ id: run.id, status: "done", finished_at: new Date() })
-      return { summary: { run_id: run.id, mode, counts } }
+      // A WordPress run's block: its descriptive attributes and what does not move (the panel's)
+      return { summary: { run_id: run.id, mode, counts, ...(wordpress ? { wordpress } : {}) } }
     } catch (error) {
       await migration
         .updateMigrationRuns({ id: run.id, status: "failed", finished_at: new Date() })

@@ -5,7 +5,8 @@ import { REPORT_HEADER, REPORT_WIDTHS } from "../catalog/import/report"
 
 /**
  * A migration's report file (F14, adr/0042 §9): what each kind came to,
- * the products as the catalog import saw them, and every record left out
+ * where the new categories' SEO titles and descriptions come from, the
+ * products as the catalog import saw them, and every record left out
  * with why. A dry run's says what a run would do; the words are the
  * server's Turkish, as the catalog import's.
  */
@@ -23,6 +24,10 @@ export interface KindCounts {
   skipped: number
   /** A write refused. */
   failed: number
+  /** Categories: new ones with the source's own SEO title or description. */
+  seo_own?: number
+  /** Categories: new ones on the shop's templates, as one made in the panel. */
+  seo_default?: number
 }
 
 export const emptyCounts = (): KindCounts => ({
@@ -34,12 +39,17 @@ export const emptyCounts = (): KindCounts => ({
   failed: 0,
 })
 
-export type RunCounts = Record<MigrationKind, KindCounts> & { consent: KindCounts }
+/** `attribute`: the products' descriptive attributes, one per product and attribute (attributes.ts). */
+export type RunCounts = Record<MigrationKind, KindCounts> & {
+  consent: KindCounts
+  attribute: KindCounts
+}
 
 const KIND_TEXT: Readonly<Record<keyof RunCounts, string>> = {
   category: "Kategoriler",
   brand: "Markalar",
   product: "Ürünler",
+  attribute: "Ürün özellikleri",
   image: "Görseller",
   customer: "Müşteriler",
   consent: "Ticari ileti izinleri",
@@ -49,6 +59,27 @@ const KIND_TEXT: Readonly<Record<keyof RunCounts, string>> = {
   post: "Blog yazıları",
   post_category: "Blog kategorileri",
   post_tag: "Blog etiketleri",
+}
+
+// Categories and blog categories made here, by where their SEO title and description come from
+function seoRows(mode: "check" | "apply", counts: RunCounts): SheetCell[][] {
+  const row = (text: string, own: KindCounts | undefined) => [
+    text,
+    own?.seo_own ?? 0,
+    own?.seo_default ?? 0,
+  ]
+  return [
+    [],
+    [
+      mode === "check"
+        ? "Eklenecek kategorilerin SEO alanları"
+        : "Eklenen kategorilerin SEO alanları",
+      "Kaynaktaki başlık ya da açıklamayla",
+      "Mağazanın şablonlarıyla (varsayılan)",
+    ],
+    row(KIND_TEXT.category, counts.category),
+    row(KIND_TEXT.post_category, counts.post_category),
+  ]
 }
 
 export interface ReportProblem extends StepProblem {
@@ -85,7 +116,11 @@ export function reportSheets(
   problems: readonly ReportProblem[]
 ): SheetSpec[] {
   return [
-    { name: "Özet", widths: [24, 12, 12, 12, 14, 12, 10], rows: summaryRows(mode, counts) },
+    {
+      name: "Özet",
+      widths: [24, 12, 12, 12, 14, 12, 10],
+      rows: [...summaryRows(mode, counts), ...seoRows(mode, counts)],
+    },
     {
       name: "Ürünler",
       widths: REPORT_WIDTHS.slice(1),

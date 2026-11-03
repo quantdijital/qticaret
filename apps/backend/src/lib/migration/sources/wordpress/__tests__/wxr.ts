@@ -119,10 +119,18 @@ const attributes = serialize({
     is_variation: 1,
     is_taxonomy: 1,
   },
-  pa_celik: {
-    name: "pa_celik",
+  pa_desen: {
+    name: "pa_desen",
     value: "",
     position: 2,
+    is_visible: 1,
+    is_variation: 0,
+    is_taxonomy: 1,
+  },
+  pa_malzeme: {
+    name: "pa_malzeme",
+    value: "",
+    position: 3,
     is_visible: 1,
     is_variation: 0,
     is_taxonomy: 1,
@@ -182,7 +190,8 @@ export function wxrFixture(site = "https://eski.example.com"): string {
         ["pa_renk", "mavi", "Mavi"],
         ["pa_boyut", "24-cm", "24 cm"],
         ["pa_boyut", "28-cm", "28 cm"],
-        ["pa_celik", "n690", "N690"],
+        ["pa_desen", "cizgili", "Çizgili"],
+        ["pa_malzeme", "dokum-demir", "Döküm Demir"],
         ["product_tag", "hediye", "hediye"],
         ["product_type", "variable", "variable"],
       ],
@@ -293,9 +302,9 @@ export function wxrFixture(site = "https://eski.example.com"): string {
     {
       id: 30,
       type: "product",
-      title: "Gizli Bıçak",
-      slug: "gizli-bicak",
-      link: `${site}/urun/gizli-bicak/`,
+      title: "Gizli Ürün",
+      slug: "gizli-urun",
+      link: `${site}/urun/gizli-urun/`,
       terms: [
         ["product_visibility", "exclude-from-catalog", "exclude-from-catalog"],
         ["product_visibility", "exclude-from-search", "exclude-from-search"],
@@ -305,8 +314,8 @@ export function wxrFixture(site = "https://eski.example.com"): string {
     {
       id: 31,
       type: "product",
-      title: "Taslak Bıçak",
-      slug: "taslak-bicak",
+      title: "Taslak Ürün",
+      slug: "taslak-urun",
       status: "draft",
       link: `${site}/?post_type=product&amp;p=31`,
       meta: { _regular_price: "100" },
@@ -337,7 +346,7 @@ export function wxrFixture(site = "https://eski.example.com"): string {
       terms: [
         ["category", "genel", "Genel"],
         ["category", "rehberler", "Rehberler"],
-        ["post_tag", "celik", "çelik"],
+        ["post_tag", "dokum", "döküm"],
         ["post_tag", "bakim", "bakım"],
         ["post_tag", "sss-item-x", '[sss_item soru="x"] x'],
       ],
@@ -405,23 +414,24 @@ export function wxrFixture(site = "https://eski.example.com"): string {
 	xmlns:wp="http://wordpress.org/export/1.2/"
 >
 <channel>
-<title>Örnek Bıçak &amp; Tava</title>
+<title>Örnek Ev &amp; Mutfak</title>
 <link>${site}</link>
 <wp:wxr_version>1.2</wp:wxr_version>
 <wp:base_site_url>${site}</wp:base_site_url>
 <wp:author><wp:author_id>1</wp:author_id><wp:author_login>${cdata("yazar")}</wp:author_login><wp:author_email>${cdata("yazar@example.com")}</wp:author_email><wp:author_display_name>${cdata("Örnek Yazar")}</wp:author_display_name></wp:author>
 <wp:category><wp:term_id>5</wp:term_id><wp:category_nicename>${cdata("rehberler")}</wp:category_nicename><wp:category_parent>${cdata("")}</wp:category_parent><wp:cat_name>${cdata("Rehberler")}</wp:cat_name><wp:category_description>${cdata("Bakım ve kullanım rehberleri.")}</wp:category_description>${meta({ rank_math_title: "Rehberler %sep% %sitename%" }, "wp:termmeta")}</wp:category>
 <wp:category><wp:term_id>6</wp:term_id><wp:category_nicename>${cdata("genel")}</wp:category_nicename><wp:category_parent>${cdata("")}</wp:category_parent><wp:cat_name>${cdata("Genel")}</wp:cat_name></wp:category>
-<wp:tag><wp:term_id>7</wp:term_id><wp:tag_slug>${cdata("celik")}</wp:tag_slug><wp:tag_name>${cdata("çelik")}</wp:tag_name></wp:tag>
+<wp:tag><wp:term_id>7</wp:term_id><wp:tag_slug>${cdata("dokum")}</wp:tag_slug><wp:tag_name>${cdata("döküm")}</wp:tag_name></wp:tag>
 <wp:tag><wp:term_id>8</wp:term_id><wp:tag_slug>${cdata("bakim")}</wp:tag_slug><wp:tag_name>${cdata("bakım")}</wp:tag_name></wp:tag>
-${term(20, "product_cat", "mutfak", "Mutfak &amp; Şef", `<wp:term_parent>${cdata("")}</wp:term_parent>${meta({ cat_meta: serialize({ cat_header: "", cat_footer: '[block id="mutfak-blok"]' }) }, "wp:termmeta")}`)}
-${term(21, "product_cat", "tavalar", "Tavalar", `<wp:term_parent>${cdata("mutfak")}</wp:term_parent><wp:term_description>${cdata("<p>Döküm tavalar.</p>")}</wp:term_description>`)}
+${term(20, "product_cat", "mutfak", "Mutfak &amp; Şef", `<wp:term_parent>${cdata("")}</wp:term_parent>${meta({ cat_meta: serialize({ cat_header: "", cat_footer: '[block id="mutfak-blok"]' }), rank_math_title: "%term% %sep% %sitename%" }, "wp:termmeta")}`)}
+${term(21, "product_cat", "tavalar", "Tavalar", `<wp:term_parent>${cdata("mutfak")}</wp:term_parent><wp:term_description>${cdata("<p>Döküm tavalar.</p>")}</wp:term_description>${meta({ rank_math_title: "%term% Modelleri %sep% %sitename%", rank_math_description: "Her ocağa uygun döküm tavalar.", rank_math_focus_keyword: "döküm tava,tava" }, "wp:termmeta")}`)}
 ${term(22, "product_brand", "demirci", "Demirci")}
 ${term(23, "pa_renk", "kirmizi", "Kırmızı")}
 ${term(24, "pa_renk", "mavi", "Mavi")}
 ${term(25, "pa_boyut", "24-cm", "24 cm")}
 ${term(26, "pa_boyut", "28-cm", "28 cm")}
-${term(27, "pa_celik", "n690", "N690")}
+${term(27, "pa_desen", "cizgili", "Çizgili")}
+${term(29, "pa_malzeme", "dokum-demir", "Döküm Demir")}
 ${term(28, "product_tag", "hediye", "hediye")}
 ${items.map((each) => item(site, each)).join("\n")}
 </channel>

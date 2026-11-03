@@ -9,14 +9,23 @@ import { MIGRATION_MODULE } from "../../modules/migration"
 import type MigrationModuleService from "../../modules/migration/service"
 import { runImport } from "../catalog/import/run"
 import type { ImportHooks, ImportSummary } from "../catalog/import/run"
+import { attributeColumns, attributeHeaders, withAttributeCells } from "./attributes"
+import type { AttributePlan } from "./attributes"
 
 type Container = Pick<MedusaContainer, "resolve">
 
-/** The source's products as one sheet file, as the catalog import reads one. */
-async function sheetOf(products: readonly SourceProduct[], refs: SheetRefs): Promise<Buffer> {
+/** The source's products as one sheet file, as the catalog import reads one: their attributes too. */
+async function sheetOf(
+  products: readonly SourceProduct[],
+  refs: SheetRefs,
+  plans: ReadonlyMap<string, AttributePlan>
+): Promise<Buffer> {
+  const columns = attributeColumns(products.map((product) => plans.get(product.source_key)))
   const rows: SheetCell[][] = [
-    migrationSheetHeader(refs.units),
-    ...products.flatMap((product) => migrationRows(product, refs)),
+    [...migrationSheetHeader(refs.units), ...attributeHeaders(columns)],
+    ...products.flatMap((product) =>
+      withAttributeCells(migrationRows(product, refs), plans.get(product.source_key), columns)
+    ),
   ]
   const chunks: Buffer[] = []
   for await (const chunk of writeXlsx([{ name: "Ürünler", rows }])) {
@@ -32,7 +41,11 @@ async function sheetOf(products: readonly SourceProduct[], refs: SheetRefs): Pro
  * as the shop keeps it now (its price, stock and state are the shop's
  * since), and one whose handle another product here holds is left out
  * and named, never written over (closing review). What each new one
- * became is kept by the source's key, its old address for a 301.
+ * became is kept by the source's key, its old address for a 301. A new
+ * one's descriptive attributes go in its rows where `plans` give them a
+ * template (attributes.ts). The keys of the ones made (would be, in a dry
+ * run) and of the ones a run made before come back for the attributes'
+ * counts.
  */
 export async function migrateProducts(
   container: Container,
@@ -40,12 +53,14 @@ export async function migrateProducts(
   products: readonly SourceProduct[],
   refs: SheetRefs,
   mode: "check" | "apply",
-  hooks: ImportHooks
+  hooks: ImportHooks,
+  plans: ReadonlyMap<string, AttributePlan> = new Map()
 ): Promise<{
   summary: ImportSummary | null
   rows: SheetCell[][]
   moved: number
   problems: StepProblem[]
+  keys: { made: string[]; moved: string[] }
 }> {
   const migration = container.resolve<MigrationModuleService>(MIGRATION_MODULE)
   const catalog = container.resolve(Modules.PRODUCT)
@@ -64,25 +79,28 @@ export async function migrateProducts(
   )
   const fresh: SourceProduct[] = []
   const problems: StepProblem[] = []
-  let moved = 0
+  const movedKeys: string[] = []
   for (const product of products) {
     if (before.get(product.source_key)?.status === "done") {
-      moved += 1
+      movedKeys.push(product.source_key)
     } else if (held.has(product.handle)) {
       problems.push({ source_key: product.source_key, key: "migration.product_handle_taken" })
     } else {
       fresh.push(product)
     }
   }
+  const moved = movedKeys.length
   if (fresh.length === 0) {
-    return { summary: null, rows: [], moved, problems }
+    return { summary: null, rows: [], moved, problems, keys: { made: [], moved: movedKeys } }
   }
   const result = await runImport(
     container as MedusaContainer,
-    await sheetOf(fresh, refs),
+    await sheetOf(fresh, refs, plans),
     mode,
     hooks
   )
+  // A dry run's: every new one, as the import would make it (its own rows name a refusal)
+  let made = fresh.map((product) => product.source_key)
   if (mode === "apply") {
     // Every handle was free before the import: one held now is the product it made
     const found = await catalog.listProducts(
@@ -90,6 +108,7 @@ export async function migrateProducts(
       { select: ["id", "handle"], take: null }
     )
     const ids = new Map(found.map((product) => [product.handle, product.id]))
+    made = fresh.filter((product) => ids.has(product.handle)).map((product) => product.source_key)
     await migration.remember(
       source,
       "product",
@@ -105,5 +124,5 @@ export async function migrateProducts(
       })
     )
   }
-  return { ...result, moved, problems }
+  return { ...result, moved, problems, keys: { made, moved: movedKeys } }
 }

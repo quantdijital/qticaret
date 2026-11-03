@@ -2,17 +2,35 @@ import type { MedusaContainer } from "@medusajs/framework/types"
 import { Modules } from "@medusajs/framework/utils"
 import { createProductCategoriesWorkflow } from "@medusajs/medusa/core-flows"
 import { categoryKey } from "../../lib/migration/sheet"
-import type { SourceCategory, StepProgress } from "../../lib/migration/types"
+import type { SourceCategory, StepProblem, StepProgress } from "../../lib/migration/types"
 import { toSlug } from "../../lib/seo/slug"
 import { MIGRATION_MODULE } from "../../modules/migration"
 import type MigrationModuleService from "../../modules/migration/service"
+import { writeSeo } from "./post-terms"
 
 type Container = Pick<MedusaContainer, "resolve">
+
+/**
+ * A category's own SEO fields, where the source keeps them (a WordPress
+ * SEO plugin's term meta; WordpressCategory); a source without them
+ * leaves them out.
+ */
+export interface CategorySeo {
+  seo_title?: string | null | undefined
+  seo_description?: string | null | undefined
+  focus_keyword?: string | null | undefined
+}
 
 export interface CategoryTree {
   /** A path ("Mutfak > Tavalar") to its handle here; null for one not made (a dry run). */
   handleOf: (path: readonly string[]) => string | null
-  counts: { read: number; created: number; found: number }
+  /**
+   * `seo_own`: new ones with the source's own SEO title or description;
+   * `seo_default`: new ones without, which take the shop's templates.
+   */
+  counts: { read: number; created: number; found: number; seo_own: number; seo_default: number }
+  /** An SEO field the SEO workflow refused (the category is made, on the templates). */
+  problems: StepProblem[]
 }
 
 interface Known {
@@ -35,13 +53,18 @@ function freeHandle(name: string, taken: ReadonlySet<string>): string {
 /**
  * The source's categories as a tree here (F14, adr/0042 §2): every path's
  * parents first; a category met before (by the migration's record of it,
- * else by its name under the same parent) kept, the rest made. A dry run
- * makes none and names the ones that exist. Categories are few: read whole.
+ * else by its name under the same parent) kept, the rest made. A new one
+ * gets the source's own SEO title, description and focus keyword through
+ * the SEO workflow (adr/0015); one the source has none for gets nothing
+ * written, so the shop's templates give it its title and description as
+ * they do a category made in the panel. One here already is never written
+ * over. A dry run makes none and names the ones that exist. Categories are
+ * few: read whole.
  */
 export async function migrateCategories(
   container: Container,
   source: string,
-  categories: readonly SourceCategory[],
+  categories: readonly (SourceCategory & CategorySeo)[],
   apply: boolean,
   progress: StepProgress
 ): Promise<CategoryTree> {
@@ -63,7 +86,15 @@ export async function migrateCategories(
   )
   const handles = new Map<string, string>()
   const ids = new Map<string, string>()
-  const counts = { read: categories.length, created: 0, found: 0 }
+  const counts = { read: categories.length, created: 0, found: 0, seo_own: 0, seo_default: 0 }
+  const problems: StepProblem[] = []
+  const tally = (own: CategorySeo | undefined, written: boolean) => {
+    if (written && (own?.seo_title || own?.seo_description)) {
+      counts.seo_own += 1
+    } else {
+      counts.seo_default += 1
+    }
+  }
   const remembered: { source_key: string; target_id: string; old_url: string | null }[] = []
   const byPath = new Map(categories.map((category) => [categoryKey(category.path), category]))
 
@@ -113,9 +144,21 @@ export async function migrateCategories(
         handles.set(key, made.handle)
         ids.set(key, made.id)
         counts.created += 1
+        const refused = own
+          ? await writeSeo(container, "category", made.id, {
+              seo_title: own.seo_title,
+              seo_description: own.seo_description,
+              focus_keyword: own.focus_keyword,
+            })
+          : null
+        if (own && refused) {
+          problems.push({ source_key: own.source_key, key: refused })
+        }
+        tally(own, refused === null)
       }
     } else if (!apply) {
       counts.created += 1
+      tally(own, true)
     }
     const id = ids.get(key)
     if (own && id) {
@@ -130,5 +173,5 @@ export async function migrateCategories(
       remembered.map((item) => ({ ...item, status: "done" as const }))
     )
   }
-  return { handleOf: (path) => handles.get(categoryKey(path)) ?? null, counts }
+  return { handleOf: (path) => handles.get(categoryKey(path)) ?? null, counts, problems }
 }

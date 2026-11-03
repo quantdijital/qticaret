@@ -11,6 +11,10 @@ import { seoFieldsOf } from "./seo"
  * popular brand plugins), attribute terms by slug, blog categories and
  * tags. A category's text is its own description, else the block a
  * Flatsome theme shows under its products (`cat_meta`), as plain text.
+ * A category's or a blog term's SEO title and description are the SEO
+ * plugin's term meta (Rank Math's; Yoast keeps a term's in an option the
+ * export does not carry); one without them takes the shop's templates,
+ * as a category made in the panel does.
  */
 
 export const BRAND_TAXONOMIES = ["product_brand", "pwb-brand", "yith_product_brand"] as const
@@ -19,6 +23,13 @@ const DEFAULT_CATEGORIES = new Set(["uncategorized", "kategorilenmemis"])
 const MAX_DEPTH = 10
 const MAX_CATEGORY_TEXT = 20_000
 const MAX_TERM_TEXT = 1_000
+
+/** A product category with the SEO fields its SEO plugin kept on the term. */
+export interface WordpressCategory extends SourceCategory {
+  seo_title: string | null
+  seo_description: string | null
+  focus_keyword: string | null
+}
 
 export interface Bases {
   category: string
@@ -104,16 +115,20 @@ export function categoriesOf(
   taxonomies: Taxonomies,
   base: string,
   used: ReadonlySet<string>
-): SourceCategory[] {
+): WordpressCategory[] {
   return taxonomies
     .of("product_cat")
     .filter((term) => !DEFAULT_CATEGORIES.has(term.slug) || used.has(term.slug))
     .map((term) => {
       const slugs = taxonomies.slugPath("product_cat", term.slug)
+      const seo = seoFieldsOf(term.meta, { title: term.name, site: taxonomies.wxr.siteName })
       return {
         source_key: `product_cat:${term.slug}`,
         path: taxonomies.categoryPath(term.slug).map((name) => name.slice(0, 255)),
         description: taxonomies.textOf(term, MAX_CATEGORY_TEXT),
+        seo_title: seo.seo_title,
+        seo_description: seo.seo_description,
+        focus_keyword: seo.focus_keyword,
         old_url: `${base}${slugs.join("/")}/`,
       }
     })

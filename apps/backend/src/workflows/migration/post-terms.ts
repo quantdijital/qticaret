@@ -58,13 +58,19 @@ export interface TermCounts {
   created: number
   found: number
   skipped: number
+  /** New ones with the source's own SEO title or description. */
+  seo_own?: number
+  /** New ones without, on the shop's templates (as one made in the panel). */
+  seo_default?: number
 }
 
 /**
  * The posts' blog categories or tags here (adr/0019 ek 2026-11-03): one a
  * run made before, or one of the same handle, kept; the rest made through
- * the term workflow (its archive path claimed) with their SEO fields. A
- * dry run makes none. Each one's id by its source key (null in a dry run).
+ * the term workflow (its archive path claimed) with their SEO fields; one
+ * the source has none for gets nothing written, so the shop's templates
+ * title and describe it. A dry run makes none. Each one's id by its
+ * source key (null in a dry run).
  */
 export async function migratePostTerms(
   container: Container,
@@ -97,7 +103,21 @@ export async function migratePostTerms(
   const byId = new Map(made.map((term) => [term.id, term.id]))
   const byHandle = new Map(named.map((term) => [term.handle, term.id]))
   const ids = new Map<string, string | null>()
-  const counts: TermCounts = { read: terms.length, created: 0, found: 0, skipped: 0 }
+  const counts = {
+    read: terms.length,
+    created: 0,
+    found: 0,
+    skipped: 0,
+    seo_own: 0,
+    seo_default: 0,
+  }
+  const tally = (term: SourcePostTerm, written: boolean) => {
+    if (written && (term.seo_title || term.seo_description)) {
+      counts.seo_own += 1
+    } else {
+      counts.seo_default += 1
+    }
+  }
   const problems: StepProblem[] = []
   const remembered: RememberedItem[] = []
   for (const term of terms) {
@@ -116,6 +136,7 @@ export async function migratePostTerms(
     }
     if (!apply) {
       counts.created += 1
+      tally(term, true)
       ids.set(term.source_key, null)
       continue
     }
@@ -142,6 +163,7 @@ export async function migratePostTerms(
       if (seo) {
         problems.push({ source_key: term.source_key, key: seo })
       }
+      tally(term, seo === null)
     } catch (error) {
       const key = refusalOf(error)
       counts.skipped += 1

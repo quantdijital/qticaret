@@ -89,18 +89,51 @@ medusaIntegrationTestRunner({
     })
 
     it("checks, applies and applies again without making anything twice (KK2)", async () => {
+      // The shop's template has a field for one of the export's attributes (a product's own `malzeme`)
+      const template = await http.post<{ attribute_template: { id: string } }>(
+        "/admin/attribute-templates",
+        {
+          name: "Ev eşyası",
+          handle: "ev-esyasi",
+          definitions: [
+            {
+              key: "malzeme",
+              label: "Malzeme",
+              type: "multi_select",
+              options: [
+                { value: "kayin", label: "Kayın" },
+                { value: "ceviz", label: "Ceviz" },
+              ],
+            },
+          ],
+        },
+        { headers: owner.headers }
+      )
+      expect(template.status).toBe(200)
+
       const checked = await run("check")
       expect(checked.counts).toMatchObject({
-        category: { read: 2, created: 2 },
+        // One with its SEO plugin's own title and description, one on the shop's templates
+        category: { read: 2, created: 2, seo_own: 1, seo_default: 1 },
         brand: { read: 1, created: 1 },
         product: { read: 4, created: 4, skipped: 0, failed: 0 },
+        // `malzeme` written; `pa_desen` has no field, `pa_malzeme`'s value is no choice of it
+        attribute: { read: 3, created: 1, skipped: 2 },
         image: { read: 3, created: 3 },
         review: { read: 2, created: 2 },
-        post_category: { read: 1, created: 1 },
+        post_category: { read: 1, created: 1, seo_own: 1, seo_default: 0 },
         post_tag: { read: 2, created: 2 },
         post: { read: 1, created: 1 },
         // Two with their own text; the legal and the cart pages keep their addresses only
         page: { read: 4, created: 2, skipped: 2 },
+      })
+      // The panel's block: the descriptive attributes by slug, what the export holds that does not move
+      expect((checked.job.result_summary as { wordpress?: unknown }).wordpress).toEqual({
+        attributes: [
+          { key: "malzeme", name: "Malzeme", products: 2, values: 3 },
+          { key: "desen", name: "Desen", products: 1, values: 1 },
+        ],
+        not_moved: { coupons: 1, menu_items: 1, product_tags: 1, blog_comments: 0 },
       })
       // The report names what stayed behind, in the shop's words
       const entries = await readZipSafely(await fileBytes(checked.job))
@@ -110,11 +143,15 @@ medusaIntegrationTestRunner({
         ["migration.wordpress_page_legal", "page:51"],
         ["migration.wordpress_trashed", "product:32"],
         ["migration.wordpress_image_missing", "product:10 #999"],
-        ["migration.wordpress_attribute_not_moved", "pa_celik"],
+        // With its values and their products, for a template made later
+        ["migration.wordpress_attribute_not_moved", "Çizgili (1)"],
+        ["catalog_import.attribute_invalid", "Döküm Demir (1)"],
       ] as const) {
         expect(text).toContain(record)
         expect(text).toContain(serverErrorMessage(key, "tr").slice(0, 30))
       }
+      const summary = entries.find((entry) => entry.name === "xl/worksheets/sheet1.xml")
+      expect(summary?.data.toString("utf8")).toContain("Mağazanın şablonlarıyla (varsayılan)")
       const nothing = await query().graph({
         entity: "product",
         fields: ["id"],
@@ -124,9 +161,10 @@ medusaIntegrationTestRunner({
 
       const applied = await run("apply")
       expect(applied.counts).toMatchObject({
-        category: { created: 2 },
+        category: { created: 2, seo_own: 1, seo_default: 1 },
         brand: { created: 1 },
         product: { created: 4, failed: 0 },
+        attribute: { read: 3, created: 1, skipped: 2 },
         image: { read: 3, created: 3 },
         review: { created: 2 },
         post_category: { created: 1 },
@@ -148,8 +186,11 @@ medusaIntegrationTestRunner({
           "options.title",
           "seo_meta.seo_description",
           "seo_meta.focus_keyword",
+          "attribute_template.handle",
+          "attribute_values.value_options",
+          "attribute_values.definition.key",
         ],
-        filters: { handle: ["dokum-tava", "ahsap-kasik", "gizli-bicak", "taslak-bicak"] },
+        filters: { handle: ["dokum-tava", "ahsap-kasik", "gizli-urun", "taslak-urun"] },
       })
       const byHandle = new Map(
         (
@@ -163,6 +204,9 @@ medusaIntegrationTestRunner({
             variants: { sku: string | null }[]
             options: { title: string }[]
             seo_meta: { seo_description: string | null; focus_keyword: string | null } | null
+            attribute_template: { handle: string } | null
+            attribute_values:
+              { value_options: string[] | null; definition: { key: string } | null }[] | null
           }[]
         ).map((product) => [product.handle, product])
       )
@@ -188,8 +232,41 @@ medusaIntegrationTestRunner({
       expect(main?.alt).toBe("Döküm tava önden")
       // No parcel in the source and none given: live there, a draft here; hidden and drafts stay drafts
       expect(
-        ["ahsap-kasik", "gizli-bicak", "taslak-bicak"].map((h) => byHandle.get(h)?.status)
+        ["ahsap-kasik", "gizli-urun", "taslak-urun"].map((h) => byHandle.get(h)?.status)
       ).toEqual(["draft", "draft", "draft"])
+      // The descriptive attribute the template has a field for, through the catalog import
+      const spoon = byHandle.get("ahsap-kasik")
+      expect(spoon?.attribute_template?.handle).toBe("ev-esyasi")
+      expect(
+        spoon?.attribute_values?.map((value) => [value.definition?.key, value.value_options])
+      ).toEqual([["malzeme", ["kayin", "ceviz"]]])
+      expect(pan?.attribute_template ?? null).toBeNull()
+
+      // A category's own SEO fields from its term meta; one without them on the shop's templates
+      const { data: categories } = await query().graph({
+        entity: "product_category",
+        fields: [
+          "handle",
+          "seo_meta.seo_title",
+          "seo_meta.seo_description",
+          "seo_meta.focus_keyword",
+        ],
+        filters: { handle: ["mutfak-sef", "tavalar"] },
+      })
+      const categorySeo = new Map(
+        (
+          categories as {
+            handle: string
+            seo_meta?: { seo_title: string | null } | null
+          }[]
+        ).map((category) => [category.handle, category.seo_meta ?? null])
+      )
+      expect(categorySeo.get("tavalar")).toMatchObject({
+        seo_title: "Tavalar Modelleri - Örnek Ev & Mutfak",
+        seo_description: "Her ocağa uygun döküm tavalar.",
+        focus_keyword: "döküm tava",
+      })
+      expect(categorySeo.get("mutfak-sef")).toBeNull()
 
       const content = getContainer().resolve<ContentModuleService>(CONTENT_MODULE)
       const [post] = await content.listContentEntries({ kind: "post", handle: "tava-bakimi" })
@@ -207,7 +284,7 @@ medusaIntegrationTestRunner({
       expect(terms.map((term) => `${term.kind}:${term.handle}`).sort()).toEqual([
         "category:rehberler",
         "tag:bakim",
-        "tag:celik",
+        "tag:dokum",
       ])
       const { data: postSeo } = await query().graph({
         entity: "content_entry",
@@ -215,7 +292,7 @@ medusaIntegrationTestRunner({
         filters: { id: post?.id ?? "" },
       })
       expect(postSeo).toMatchObject([
-        { seo_meta: { seo_title: "Tava Bakımı Rehberi - Örnek Bıçak & Tava" } },
+        { seo_meta: { seo_title: "Tava Bakımı Rehberi - Örnek Ev & Mutfak" } },
       ])
       const pages = await content.listContentEntries(
         { kind: "page", handle: ["hakkimizda", "eski-kampanya", "satis-sozlesmesi"] },
@@ -254,6 +331,8 @@ medusaIntegrationTestRunner({
         category: { created: 0, found: 2 },
         brand: { created: 0, found: 1 },
         product: { created: 0, found: 4 },
+        // Left as the shop keeps them now
+        attribute: { read: 3, created: 0, found: 3 },
         image: { created: 0, found: 3 },
         review: { created: 0, found: 2 },
         post_category: { created: 0, found: 1 },

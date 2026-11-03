@@ -17,7 +17,7 @@ import { attributeLabel } from "./terms"
  */
 
 export interface Attribute {
-  /** The meta key's part: `pa_celik`, or a product's own `renk`. */
+  /** The meta key's part: `pa_malzeme`, or a product's own `renk`. */
   key: string
   name: string
   global: boolean

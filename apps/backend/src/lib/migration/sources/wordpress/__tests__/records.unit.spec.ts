@@ -1,6 +1,7 @@
 import { CONTENT_LIMITS } from "../../../../../workflows/content/rules"
 import { contentDoc } from "../../../../content/doc"
 import { wordpressRecords, wordpressSource } from ".."
+import { attributeSlug } from "../attributes"
 import { wxrFixture } from "./wxr"
 
 describe("a WordPress export as the common records (adr/0042 Ek 2026-11-03)", () => {
@@ -24,19 +25,27 @@ describe("a WordPress export as the common records (adr/0042 Ek 2026-11-03)", ()
     })
   })
 
-  it("gives categories as paths from the top, their text, and brands", () => {
+  it("gives categories as paths from the top, their text, SEO fields, and brands", () => {
     expect(records.categories).toEqual([
       // A theme's block under the products stands for a category without a description
       {
         source_key: "product_cat:mutfak",
         path: ["Mutfak & Şef"],
         description: "Mutfak için her şey.",
+        // A title of the plugin's variables only: the shop's templates give it one, as the panel's
+        seo_title: null,
+        seo_description: null,
+        focus_keyword: null,
         old_url: "/mutfak/",
       },
       {
         source_key: "product_cat:tavalar",
         path: ["Mutfak & Şef", "Tavalar"],
         description: "Döküm tavalar.",
+        // The SEO plugin's own, its variables filled in
+        seo_title: "Tavalar Modelleri - Örnek Ev & Mutfak",
+        seo_description: "Her ocağa uygun döküm tavalar.",
+        focus_keyword: "döküm tava",
         old_url: "/mutfak/tavalar/",
       },
     ])
@@ -114,22 +123,37 @@ describe("a WordPress export as the common records (adr/0042 Ek 2026-11-03)", ()
     expect(byKey.has("product:33")).toBe(false)
   })
 
-  it("names what it left out and what an attribute template would need", () => {
+  it("gives each product's descriptive attributes, matched by their slug", () => {
+    const byKey = new Map(records.products.map((product) => [product.source_key, product]))
+    // The variation attributes are options; the others the template's
+    expect(byKey.get("product:10")?.attributes).toEqual([
+      { key: "pa_desen", slug: "desen", name: "Desen", values: ["Çizgili"] },
+      { key: "pa_malzeme", slug: "malzeme", name: "Malzeme", values: ["Döküm Demir"] },
+    ])
+    expect(byKey.get("product:20")?.attributes).toEqual([
+      { key: "malzeme", slug: "malzeme", name: "Malzeme", values: ["Kayın", "Ceviz"] },
+    ])
+    expect(byKey.get("product:30")?.attributes).toEqual([])
+    // A product's own attribute is keyed by its name as WordPress slugs it, percent-encoded
+    expect(attributeSlug("%c3%bcretim-yeri")).toBe("uretim-yeri")
+    expect(attributeSlug("pa_sap-rengi")).toBe("sap-rengi")
+    expect(attributeSlug("pa_%")).toBe("")
+  })
+
+  it("names what it left out", () => {
     expect(notesOf("migration.wordpress_trashed")).toEqual(["product:32"])
     expect(notesOf("migration.wordpress_product_type")).toEqual(["product:33"])
     expect(notesOf("migration.wordpress_variation_disabled")).toEqual(["variation:13"])
     expect(notesOf("migration.wordpress_variation_orphan")).toEqual(["variation:14"])
     expect(notesOf("migration.wordpress_image_missing")).toEqual(["product:10 #999"])
-    expect(notesOf("migration.wordpress_attribute_not_moved")).toEqual([
-      'pa_celik "Celik": 1 ürün, 1 değer',
-      'malzeme "Malzeme": 1 ürün, 2 değer',
-    ])
+    // Whether an attribute moves is the run's to say: it knows the shop's templates
+    expect(notesOf("migration.wordpress_attribute_not_moved")).toEqual([])
     expect(notesOf("migration.wordpress_product_tags")).toEqual([
       "product_tag: 1 etiket, 1 tanesi tek üründe",
     ])
     expect(notesOf("migration.wordpress_menus")).toEqual(["nav_menu_item: 1 öğe"])
     expect(notesOf("migration.wordpress_coupons")).toEqual(["shop_coupon: 1 kupon"])
-    expect([...records.attributes.keys()]).toEqual(["pa_celik", "malzeme"])
+    expect([...records.attributes.keys()]).toEqual(["pa_desen", "pa_malzeme", "malzeme"])
   })
 
   it("moves rated reviews only, a waiting one waiting, without the writer's e-mail", () => {
@@ -161,7 +185,7 @@ describe("a WordPress export as the common records (adr/0042 Ek 2026-11-03)", ()
         name: "Rehberler",
         handle: "rehberler",
         description: "Bakım ve kullanım rehberleri.",
-        seo_title: "Rehberler - Örnek Bıçak & Tava",
+        seo_title: "Rehberler - Örnek Ev & Mutfak",
         old_url: "/category/rehberler/",
       },
       content: {
@@ -174,13 +198,13 @@ describe("a WordPress export as the common records (adr/0042 Ek 2026-11-03)", ()
           url: "https://eski.example.com/wp-content/uploads/2026/01/kapak.png",
           alt: "Tava bakımı kapak",
         },
-        seo_title: "Tava Bakımı Rehberi - Örnek Bıçak & Tava",
+        seo_title: "Tava Bakımı Rehberi - Örnek Ev & Mutfak",
         seo_description: "Döküm tava nasıl temizlenir?",
       },
     })
     // A shortcode's debris is no tag
     expect(post?.tags.map((tag) => [tag.name, tag.handle, tag.old_url])).toEqual([
-      ["çelik", "celik", "/tag/celik/"],
+      ["döküm", "dokum", "/tag/dokum/"],
       ["bakım", "bakim", "/tag/bakim/"],
     ])
     expect(notesOf("migration.wordpress_term_unread")).toEqual(["post_tag:sss-item-x"])
